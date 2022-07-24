@@ -41,7 +41,7 @@ const Client = IgeEventingClass.extend({
 		this.igeEngineStarted = $.Deferred();
 		this.physicsConfigLoaded = $.Deferred();
 		this.mapLoaded = $.Deferred();
-		this.phaserLoaded = $.Deferred();
+		this.rendererLoaded = $.Deferred();
 
 		this.mapRenderEnabled = true; // check where we use this
 		this.unitRenderEnabled = true; // check where we use this
@@ -168,9 +168,9 @@ const Client = IgeEventingClass.extend({
 
 		promise.then((game) => {
 			ige.game.data = game.data;
-			ige.addComponent(IgeInitPixi);
+			ige.addComponent(IgeInputComponent);
 			ige.entitiesToRender = new EntitiesToRender();
-			ige.phaser = new PhaserRenderer(); // TODO rename to renderer
+			ige.phaser = new PhaserRenderer();
 
 			if(!window.isStandalone){
 				this.servers = this.getServersArray();
@@ -197,7 +197,7 @@ const Client = IgeEventingClass.extend({
 
 		// these were under separate conditionals before. idk why.
 		if (mode == 'play') {
-			$('#igeFrontBuffer').click(() => {
+			$('#game-div canvas').click(() => {
 				$('#more-games').removeClass('slideup-menu-animation').addClass('slidedown-menu-animation');
 			});
 
@@ -279,7 +279,6 @@ const Client = IgeEventingClass.extend({
 		ige.menuUi.clipImageForShop();
 		ige.scaleMap(ige.game.data.map);
 
-		// IgePixi contains ige.client.mapLoaded.resolve();
 		ige.map.load(ige.game.data.map);
 	},
 
@@ -329,7 +328,7 @@ const Client = IgeEventingClass.extend({
 
 			// added important configuration details for sandbox
 			if (mode == 'sandbox') {
-				$.when(this.mapLoaded, this.phaserLoaded)
+				$.when(this.mapLoaded, this.rendererLoaded)
 					.done(() => {
 						ige.mapEditor.scanMapLayers();
 						ige.mapEditor.drawTile();
@@ -374,7 +373,7 @@ const Client = IgeEventingClass.extend({
 		// doing these with this.igeEngineStarted.done()
 		// we can move the Deferred for mapLoaded to before engine start
 		//
-		$.when(this.igeEngineStarted, this.mapLoaded, this.phaserLoaded).done(() => {
+		$.when(this.igeEngineStarted, this.mapLoaded, this.rendererLoaded).done(() => {
 			// old comment => 'center camera while loading'
 			const tileWidth = ige.scaleMapDetails.tileWidth;
 			const tileHeight = ige.scaleMapDetails.tileHeight;
@@ -1001,14 +1000,9 @@ const Client = IgeEventingClass.extend({
 
 	//
 	positionCamera: function(x, y) {
-		//
 		if (x != undefined && y != undefined) {
-			//
-			ige.pixi.viewport.removePlugin('follow');
-			//
-			console.log(ige.pixi.viewport); // ok i understand this one...
-
-			ige.pixi.viewport.moveCenter(x, y);
+			this.emit('stop-follow');
+			this.emit('position-camera', [x, y]);
 		}
 	}
 });

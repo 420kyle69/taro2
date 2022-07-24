@@ -36,7 +36,8 @@ var MenuUiComponent = IgeEntity.extend({
 
 			$('#resolution-low').on('click', function () {
 				// setting 640x480 resolution as low resolution
-				if ($('#igeFrontBuffer').attr('width') != 640 && $('#igeFrontBuffer').attr('height') != 480) {
+				var canvas = $('#game-div canvas');
+				if (canvas.attr('width') != 640 && canvas.attr('height') != 480) {
 					localStorage.setItem('resolution', 'low');
 					self.setResolution();
 					if (typeof incrLowResolution === 'function') {
@@ -142,7 +143,7 @@ var MenuUiComponent = IgeEntity.extend({
 			$('#server-list').on('change', function () {
 				var gameSlug = $(this).attr('game-slug');
 				ige.client.gameSlug = gameSlug;
-				const serverListOptions = document.querySelector("#server-list > option")
+				const serverListOptions = document.querySelector('#server-list > option');
 				if (serverListOptions.length !== ige.client.servers.length) {
 					// server options have been added/removed dynamically
 					// refresh the server list

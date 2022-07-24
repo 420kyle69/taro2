@@ -8,6 +8,8 @@ var PhaserEntity = /** @class */ (function () {
             scale: entity.on('scale', this.scale, this),
             hide: entity.on('hide', this.hide, this),
             show: entity.on('show', this.show, this),
+            'set-layer': entity.on('set-layer', this.setLayer, this),
+            'set-depth': entity.on('set-depth', this.setDepth, this),
             destroy: entity.on('destroy', this.destroy, this)
         });
     }
@@ -20,6 +22,14 @@ var PhaserEntity = /** @class */ (function () {
     PhaserEntity.prototype.show = function () {
         this.gameObject.setActive(true)
             .setVisible(true);
+    };
+    PhaserEntity.prototype.setLayer = function (layer) {
+        // TODO implement setLayer
+        console.info('TODO implement setLayer', this.entity, layer);
+    };
+    PhaserEntity.prototype.setDepth = function (depth) {
+        // TODO implement setDepth
+        console.info('TODO implement setDepth', this.entity, depth);
     };
     PhaserEntity.prototype.destroy = function () {
         var _this = this;

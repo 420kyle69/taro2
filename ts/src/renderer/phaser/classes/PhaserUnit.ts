@@ -24,7 +24,6 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		Object.assign(this.evtListeners, {
 			flip: entity.on('flip', this.flip, this),
 			follow: entity.on('follow', this.follow, this),
-			'stop-follow': entity.on('stop-follow', this.stopFollow, this),
 			'update-label': entity.on('update-label', this.updateLabel, this),
 			'show-label': entity.on('show-label', this.showLabel, this),
 			'hide-label': entity.on('hide-label', this.hideLabel, this),
@@ -87,11 +86,6 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			return;
 		}
 		camera.startFollow(this.gameObject, false, 0.05, 0.05);
-	}
-
-	private stopFollow (): void {
-		console.log('PhaserUnit stop-follow', this.entity.id()); // TODO remove
-		this.scene.cameras.main.stopFollow();
 	}
 
 	private getLabel (): Phaser.GameObjects.Text {

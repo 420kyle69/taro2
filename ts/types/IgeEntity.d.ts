@@ -12,8 +12,6 @@ declare class IgeEntity extends IgeObject {
 	_depth: number;
 	_layer: number;
 
-	_pixiText: any; // PIXI.Text
-
 	angleToTarget: number;
 	tween: TweenComponent;
 

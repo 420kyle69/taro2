@@ -121,7 +121,6 @@ class EntitiesToRender {
 		ige.engineStep();
 		ige.input.processInputOnEveryFps();
 
-		this.timeStamp = Date.now();
 		ige._renderFrames++;
 
 		this.updateAllEntities();

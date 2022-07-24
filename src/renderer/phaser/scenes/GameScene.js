@@ -22,13 +22,6 @@ var GameScene = /** @class */ (function (_super) {
     }
     GameScene.prototype.init = function () {
         var _this = this;
-        // TODO move to css once pixi is gone
-        // phaser canvas adjustments
-        var canvas = this.game.canvas;
-        canvas.style.position = 'fixed';
-        canvas.style.opacity = '1';
-        canvas.style.backgroundColor = 'transparent';
-        //canvas.style.pointerEvents = 'none'; // TODO remove after pixi is gone
         if (ige.isMobile) {
             this.scene.launch('MobileControls');
         }
@@ -70,6 +63,14 @@ var GameScene = /** @class */ (function (_super) {
         ige.client.on('floating-text', function (data) {
             console.log('create-floating-text', data); // TODO remove
             new PhaserFloatingText(_this, data);
+        });
+        ige.client.on('stop-follow', function () {
+            console.log('stop-follow'); // TODO remove
+            camera.stopFollow();
+        });
+        ige.client.on('position-camera', function (x, y) {
+            console.log('position-camera', x, y); // TODO remove
+            camera.setPosition(x, y);
         });
     };
     GameScene.prototype.preload = function () {
@@ -137,7 +138,7 @@ var GameScene = /** @class */ (function (_super) {
     };
     GameScene.prototype.create = function () {
         var _this = this;
-        ige.client.phaserLoaded.resolve();
+        ige.client.rendererLoaded.resolve();
         var map = this.make.tilemap({ key: 'map' });
         var data = ige.game.data;
         var scaleFactor = ige.scaleMapDetails.scaleFactor;
@@ -168,6 +169,9 @@ var GameScene = /** @class */ (function (_super) {
         this.children.moveAbove(debrisLayer, wallsLayer);
         var camera = this.cameras.main;
         camera.centerOn(map.width * map.tileWidth / 2 * scaleFactor.x, map.height * map.tileHeight / 2 * scaleFactor.y);
+        this.events.on('update', function () {
+            ige.client.emit('tick');
+        });
     };
     GameScene.prototype.setZoomSize = function (height) {
         // backward compatible game scaling on average 16:9 screen

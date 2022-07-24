@@ -889,11 +889,6 @@ var IgeObject = IgeEventingClass.extend({
 				return this;
 			}
 
-			if (ige.isClient) {
-				ige.client.emit('mount', { entity: this, parent: obj });
-				// we will return this later if we chose a valid obj to mount on
-			}
-
 			if (obj._children) {
 				// Check that the engine will allow us to register this object
 				this.id(); // Generates a new id if none is currently set, and registers it on the object register!
@@ -973,12 +968,6 @@ var IgeObject = IgeEventingClass.extend({
 	 * @return {*} Returns this on success or false on failure.
 	 */
 	unMount: function () {
-		if (ige.isClient) {
-			ige.client.emit('unMount', this);
-
-			//
-		}
-
 		if (this._parent) {
 			var childArr = this._parent._children;
 			var index = childArr.indexOf(this);
@@ -1207,7 +1196,9 @@ var IgeObject = IgeEventingClass.extend({
 		if (val !== undefined) {
 			this._layer = val;
 
-			if (ige.isClient) ige.client.emit('setLayer', { entity: this, layer: val });
+			if (ige.isClient) {
+				this.emit('set-layer', [ val ]);
+			}
 
 			return this;
 		}
@@ -1261,7 +1252,9 @@ var IgeObject = IgeEventingClass.extend({
 		if (val !== undefined) {
 			this._depth = val;
 
-			if (ige.isClient) ige.client.emit('setDepth', { entity: this, depth: val });
+			if (ige.isClient) {
+				this.emit('set-depth', [ val ]);
+			}
 			return this;
 		}
 

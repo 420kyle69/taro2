@@ -4,7 +4,7 @@ declare class Client extends IgeEventingClass {
 	selectedUnit: IgeEntity;
 	entityUpdateQueue: Record<string, UpdateData[]>;
 
-	phaserLoaded: JQueryDeferred<void>;
+	rendererLoaded: JQueryDeferred<void>;
 
 	isZooming: boolean;
 

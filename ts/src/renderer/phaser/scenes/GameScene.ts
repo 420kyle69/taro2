@@ -9,13 +9,6 @@ class GameScene extends PhaserScene {
 	}
 
 	init (): void {
-		// TODO move to css once pixi is gone
-		// phaser canvas adjustments
-		const canvas = this.game.canvas;
-		canvas.style.position = 'fixed';
-		canvas.style.opacity = '1';
-		canvas.style.backgroundColor = 'transparent';
-		//canvas.style.pointerEvents = 'none'; // TODO remove after pixi is gone
 
 		if (ige.isMobile) {
 			this.scene.launch('MobileControls');
@@ -86,6 +79,16 @@ class GameScene extends PhaserScene {
 		}) => {
 			console.log('create-floating-text', data); // TODO remove
 			new PhaserFloatingText(this, data);
+		});
+
+		ige.client.on('stop-follow', () => {
+			console.log('stop-follow'); // TODO remove
+			camera.stopFollow();
+		});
+
+		ige.client.on('position-camera', (x: number, y: number) => {
+			console.log('position-camera', x, y); // TODO remove
+			camera.setPosition(x, y);
 		});
 	}
 
@@ -174,7 +177,7 @@ class GameScene extends PhaserScene {
 	}
 
 	create (): void {
-		ige.client.phaserLoaded.resolve();
+		ige.client.rendererLoaded.resolve();
 
 		const map = this.make.tilemap({ key: 'map' });
 		const data = ige.game.data;
@@ -218,6 +221,10 @@ class GameScene extends PhaserScene {
 			map.width * map.tileWidth / 2 * scaleFactor.x,
 			map.height * map.tileHeight / 2 * scaleFactor.y
 		);
+
+		this.events.on('update', () => {
+			ige.client.emit('tick');
+		});
 	}
 
 	private setZoomSize (height: number): void {

@@ -1380,6 +1380,7 @@ var IgeEngine = IgeEntity.extend({
 			}
 		} else {
 			if (ige._canvas) {
+				const canvas = $('#game-div canvas');
 				if (ige.isClient && ige.client.scaleMode > 0) {
 					if (ige.client.scaleMode == 1 || ige.client.scaleMode == 3) {
 						// stretch
@@ -1389,7 +1390,7 @@ var IgeEngine = IgeEntity.extend({
 						// fit
 						if (ige.client.scaleMode == 1) {
 							var aspectWindow = window.innerWidth / window.innerHeight;
-							var aspectResolution = $('#igeFrontBuffer').attr('width') / $('#igeFrontBuffer').attr('height');
+							var aspectResolution = canvas.attr('width') / canvas.attr('height');
 
 							if (aspectWindow >= aspectResolution) {
 								newWidth = newHeight * aspectResolution;
@@ -1427,8 +1428,8 @@ var IgeEngine = IgeEntity.extend({
 						// }
 					}
 				} else {
-					var w = $('#igeFrontBuffer').attr('width');
-					var h = $('#igeFrontBuffer').attr('height');
+					var w = canvas.attr('width');
+					var h = canvas.attr('height');
 					ige._canvas.style.width = `${w}px`;
 					ige._canvas.style.height = `${h}px`;
 				}

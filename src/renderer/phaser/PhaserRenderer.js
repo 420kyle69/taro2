@@ -1,3 +1,4 @@
+/// <reference types="@types/google.analytics" />
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
@@ -22,8 +23,8 @@ var PhaserRenderer = /** @class */ (function (_super) {
             type: forceCanvas[gameId] ?
                 Phaser.CANVAS : Phaser.AUTO,
             scale: {
-                width: ige.pixi.initialWindowWidth,
-                height: ige.pixi.initialWindowHeight,
+                width: 600,
+                height: 400,
                 parent: 'game-div',
                 mode: Phaser.Scale.ScaleModes.RESIZE,
                 autoRound: true,
@@ -31,8 +32,7 @@ var PhaserRenderer = /** @class */ (function (_super) {
             },
             render: {
                 pixelArt: false,
-                transparent: !false,
-                mipmapFilter: 'NEAREST'
+                transparent: false
             },
             scene: [
                 GameScene,
@@ -51,6 +51,13 @@ var PhaserRenderer = /** @class */ (function (_super) {
         }) || this;
         // Ask the input component to setup any listeners it has
         ige.input.setupListeners(_this.canvas);
+        if (typeof ga != 'undefined' && ige.env != 'local') {
+            ga('send', {
+                hitType: 'event',
+                eventCategory: 'Rendering Engine',
+                eventAction: _this.renderer.type
+            });
+        }
         return _this;
     }
     return PhaserRenderer;
