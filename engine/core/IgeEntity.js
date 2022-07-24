@@ -236,9 +236,6 @@ var IgeEntity = IgeObject.extend({
 		}
 		self.layer(body['z-index'].layer) // above "floor 2 layer", but under "trees layer"
 			.depth(body['z-index'].depth);
-		
-		// tell the renderer to update layer
-		this.emit('layer');
 	},
 
 	applyAnimationById: function (animationId) {
