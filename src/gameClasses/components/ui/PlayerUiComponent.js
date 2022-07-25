@@ -207,7 +207,7 @@ var PlayerUiComponent = IgeEntity.extend({
 				});
 			}
 		}
-		var isExternal = !(new URL(config.url)).hostname.includes("modd.io"); 
+		var isExternal = !(new URL(config.url)).hostname.includes('modd.io'); 
 		if(isExternal){
 			swal({
 				html: `You are being redirected to ${config.url}.<br>Are you sure you want to visit this external site?`,
@@ -247,7 +247,6 @@ var PlayerUiComponent = IgeEntity.extend({
 
 	openDialogueModal: function (dialogueId, extraData) {
 		let dialogueTemplate = extraData.dialogueTemplate || window.defaultUI.defaultDialogueTemplate
-		
 		window.handleOptionClick = function (e, index){
 			e.preventDefault();
 			e.stopPropagation();
@@ -295,7 +294,7 @@ var PlayerUiComponent = IgeEntity.extend({
 			dialogue.hasOptions = function () {
 				return Object.keys(dialogue.options).length > 0;
 			};
-			
+
 			dialogue.areOptionsRendered = false;
 
 			return dialogue;
@@ -306,7 +305,7 @@ var PlayerUiComponent = IgeEntity.extend({
 				dialogue: {
 					...dialogue,
 					message: '',
-					options: []		
+					options: []
 				}
 			}, dialogueTemplate);
 
@@ -327,7 +326,7 @@ var PlayerUiComponent = IgeEntity.extend({
 					...dialogue,
 					message: self.dialogue.message
 				},
-			}, dialogueTemplate)
+			}, dialogueTemplate);
 		}
 
 		function showNextMessage () {
@@ -340,11 +339,11 @@ var PlayerUiComponent = IgeEntity.extend({
 			} else {
 				self.dialogue.message = dialogue.getNextMessage();
 				self.dialogue.message = self.dialogue.message.replace(/%nl%/g, '<br/>');
-				
-				let options = []
+
+				let options = [];
 				if (dialogue.areAllMessagesPrinted() && dialogue.hasOptions() && !dialogue.areOptionsRendered) {
 					dialogue.areOptionsRendered = true;
-					options = dialogue.options
+					options = dialogue.options;
 				}
 
 				renderDialogueTemplate({
@@ -353,7 +352,7 @@ var PlayerUiComponent = IgeEntity.extend({
 						message: self.dialogue.message,
 						options: options
 					}
-				}, dialogueTemplate)
+				}, dialogueTemplate);
 			}
 		}
 
@@ -362,7 +361,7 @@ var PlayerUiComponent = IgeEntity.extend({
 				showNextMessage();
 			}
 		}
-		
+
 		function keyboardListener (e) {
 			if (e.keyCode === 13 || e.keyCode === 32) {
 				e.stopPropagation();
@@ -382,7 +381,7 @@ var PlayerUiComponent = IgeEntity.extend({
 	},
 	closeDialogueModal: function () {
 		window.closeDialogue && window.closeDialogue();
-		$("#modd-dialogue-container").html('');
+		$('#modd-dialogue-container').html('');
 		this.clearListeners();
 	},
 
