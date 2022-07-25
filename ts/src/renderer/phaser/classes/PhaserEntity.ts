@@ -49,7 +49,14 @@ class PhaserEntity {
 
 		// use index - 1 because taro layers are indexed at 1
 		const scene = this.gameObject.scene as GameScene;
-		scene.entityLayers[value - 1].add(this.gameObject);
+
+		// default layer if we don't have a phaser layer for the passed value
+		try {
+			scene.entityLayers[value - 1].add(this.gameObject);
+		} catch (e: unknown) {
+			console.warn(`invalid layer: ${value - 1}\nusing default layer: 'walls'`);
+			scene.entityLayers[EntityLayer.WALLS].add(this.gameObject);
+		}
 	}
 
 	protected depth (value: number): void {
