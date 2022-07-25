@@ -27,14 +27,7 @@ var PhaserEntity = /** @class */ (function () {
         console.log("".concat(this.entity._category, " ").concat(this.entity.id(), " layer: ").concat(this.entity._layer)); // TODO: Remove
         // use index - 1 because taro layers are indexed at 1
         var scene = this.gameObject.scene;
-        // default layer if we don't have a phaser layer for the passed value
-        try {
-            scene.entityLayers[value - 1].add(this.gameObject);
-        }
-        catch (e) {
-            console.warn("invalid layer: ".concat(value - 1, "\nusing default layer: 'walls'"));
-            scene.entityLayers[EntityLayer.WALLS].add(this.gameObject);
-        }
+        scene.entityLayers[value - 1].add(this.gameObject);
     };
     PhaserEntity.prototype.depth = function (value) {
         console.log("".concat(this.entity._category, " ").concat(this.entity.id(), " depth: ").concat(this.entity._depth)); // TODO: Remove
