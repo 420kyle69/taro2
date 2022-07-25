@@ -46,15 +46,15 @@ class PhaserAnimatedEntity extends PhaserEntity {
 		this.sprite.setDisplaySize(data.width, data.height);
 	}
 
-	protected layer (): void {
+	protected layer (value: number): void {
 		console.log(`key: ${this.key} layer: ${this.entity._layer}`); // TODO: Remove
 		// use index - 1 because taro layers are indexed at 1
-		this.scene.entityLayers[this.entity._layer - 1].add(this.gameObject);
+		this.scene.entityLayers[value - 1].add(this.gameObject);
 	}
 
-	protected depth (): void {
+	protected depth (value: number): void {
 		console.log(`key: ${this.key} depth: ${this.entity._depth}`); // TODO: Remove
-		this.gameObject.setDepth(this.entity._depth);
+		this.gameObject.setDepth(value);
 	}
 
 	protected scale (data: {

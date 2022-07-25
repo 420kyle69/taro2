@@ -1208,8 +1208,8 @@ var IgeObject = IgeEventingClass.extend({
 			this._layer = val;
 
 			if (ige.isClient) {
-				this.emit('layer');
-			};
+				this.emit('layer', val);
+			}
 
 			return this;
 		}
@@ -1264,8 +1264,9 @@ var IgeObject = IgeEventingClass.extend({
 			this._depth = val;
 
 			if (ige.isClient) {
-				this.emit('depth');
+				this.emit('depth', val);
 			}
+
 			return this;
 		}
 

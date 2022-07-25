@@ -42,14 +42,14 @@ var PhaserAnimatedEntity = /** @class */ (function (_super) {
     PhaserAnimatedEntity.prototype.size = function (data) {
         this.sprite.setDisplaySize(data.width, data.height);
     };
-    PhaserAnimatedEntity.prototype.layer = function () {
+    PhaserAnimatedEntity.prototype.layer = function (value) {
         console.log("key: ".concat(this.key, " layer: ").concat(this.entity._layer)); // TODO: Remove
         // use index - 1 because taro layers are indexed at 1
-        this.scene.entityLayers[this.entity._layer - 1].add(this.gameObject);
+        this.scene.entityLayers[value - 1].add(this.gameObject);
     };
-    PhaserAnimatedEntity.prototype.depth = function () {
+    PhaserAnimatedEntity.prototype.depth = function (value) {
         console.log("key: ".concat(this.key, " depth: ").concat(this.entity._depth)); // TODO: Remove
-        this.gameObject.setDepth(this.entity._depth);
+        this.gameObject.setDepth(value);
     };
     PhaserAnimatedEntity.prototype.scale = function (data) {
         this.sprite.setScale(data.x, data.y);
