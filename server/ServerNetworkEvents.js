@@ -107,11 +107,31 @@ var ServerNetworkEvents = {
 		if (data._id) {
 			logInfo._id = data._id;
 		}
-
+		
+		// if the token has been used already, close the connection.
+		if (socket._token && socket._token.token) {
+			const token = socket._token.token;
+			const isUsedToken = ige.server.usedTokens[token];
+			
+			if (isUsedToken) {
+				console.log("Token has been used already", token)
+				socket.close('Unauthorized request');
+				return;
+			}
+			
+			// store token for current client
+			ige.server.usedTokens[token] = socket._token.tokenCreatedAt;
+			
+			// remove expired tokens
+			ige.server.usedTokens = Object.fromEntries(Object.entries(ige.server.usedTokens)
+				.filter(([token, tokenCreatedAt]) => (Date.now() - tokenCreatedAt) < ige.server.TOKEN_EXPIRES_IN));
+		}
+		
 		// check joining user is same as token user.
 		if (data._id && socket._token && socket._token.userId !== data._id) {
 			console.log("Unauthenticated user joining the game (ServerNetworkEvent.js)")
 			socket.close('Unauthenticated user joining the game');
+			return;
 		}
 
 		if (client) {
@@ -181,6 +201,10 @@ var ServerNetworkEvents = {
 			else {
 				if (client) {
 					client._id = data._id
+					
+					if (data.sessionId) {
+						client.sessionId = data.sessionId
+					}
 				}
 
 				console.log("request-user-data for " + clientId + ' (user._id:' + data._id + ")");
