@@ -73,7 +73,7 @@
             $('#modd-dialogue-modal').modal('hide');
         }
 
-        var message = {{{ json dialogue.message }}}
+        var message = {{{ json dialogue.message }}};
 
         if({{dialogue.letterPrintSpeed}}){
             $('#modd-dialogue-message').html('');
@@ -96,7 +96,8 @@
   });
 
   Handlebars.registerHelper('json', function(data) {
-      return data ? JSON.stringify(data): '';
+    console.log("Data is: ", data.length);
+      return data ? JSON.stringify(data): '""';
   });
 
   var renderDialogueTemplate = function (data, dialogueTemplate) {
