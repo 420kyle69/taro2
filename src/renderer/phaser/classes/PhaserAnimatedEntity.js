@@ -26,7 +26,6 @@ var PhaserAnimatedEntity = /** @class */ (function (_super) {
         Object.assign(_this.evtListeners, {
             'play-animation': entity.on('play-animation', _this.playAnimation, _this),
             size: entity.on('size', _this.size, _this),
-            layer: entity.on('layer', _this.layer, _this),
             scale: entity.on('scale', _this.scale, _this)
         });
         return _this;
@@ -40,12 +39,6 @@ var PhaserAnimatedEntity = /** @class */ (function (_super) {
     };
     PhaserAnimatedEntity.prototype.size = function (data) {
         this.sprite.setDisplaySize(data.width, data.height);
-    };
-    PhaserAnimatedEntity.prototype.layer = function () {
-        console.log("key: ".concat(this.key, " layer: ").concat(this.entity._layer, ", depth: ").concat(this.entity._depth)); // TODO: Remove
-        // use index - 1 because taro layers are indexed at 1
-        this.scene.entityLayers[this.entity._layer - 1].add(this.gameObject);
-        this.gameObject.setDepth(this.entity._depth);
     };
     PhaserAnimatedEntity.prototype.scale = function (data) {
         this.sprite.setScale(data.x, data.y);

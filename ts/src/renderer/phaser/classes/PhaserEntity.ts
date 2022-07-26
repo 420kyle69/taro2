@@ -17,6 +17,8 @@ class PhaserEntity {
 			scale: entity.on('scale', this.scale, this),
 			hide: entity.on('hide', this.hide, this),
 			show: entity.on('show', this.show, this),
+			layer: entity.on('layer', this.layer, this),
+			depth: entity.on('depth', this.depth, this),
 			destroy: entity.on('destroy', this.destroy, this)
 		});
 	}
@@ -40,6 +42,21 @@ class PhaserEntity {
 	protected show (): void {
 		this.gameObject.setActive(true)
 			.setVisible(true);
+	}
+
+	protected layer (value: number): void {
+		console.log(`${this.entity._category} ${this.entity.id()} layer: ${this.entity._layer}`); // TODO: Remove
+
+		// use index - 1 because taro layers are indexed at 1
+		const scene = this.gameObject.scene as GameScene;
+
+		scene.entityLayers[value - 1].add(this.gameObject);
+	}
+
+	protected depth (value: number): void {
+		console.log(`${this.entity._category} ${this.entity.id()} depth: ${this.entity._depth}`); // TODO: Remove
+
+		this.gameObject.setDepth(value);
 	}
 
 	protected destroy (): void {

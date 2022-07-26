@@ -18,7 +18,6 @@ class PhaserAnimatedEntity extends PhaserEntity {
 		Object.assign(this.evtListeners, {
 			'play-animation': entity.on('play-animation', this.playAnimation, this),
 			size: entity.on('size', this.size, this),
-			layer: entity.on('layer', this.layer, this),
 			scale: entity.on('scale', this.scale, this)
 		});
 	}
@@ -43,13 +42,6 @@ class PhaserAnimatedEntity extends PhaserEntity {
 		}
 	): void {
 		this.sprite.setDisplaySize(data.width, data.height);
-	}
-
-	protected layer (): void {
-		console.log(`key: ${this.key} layer: ${this.entity._layer}, depth: ${this.entity._depth}`); // TODO: Remove
-		// use index - 1 because taro layers are indexed at 1
-		this.scene.entityLayers[this.entity._layer - 1].add(this.gameObject);
-		this.gameObject.setDepth(this.entity._depth);
 	}
 
 	protected scale (data: {

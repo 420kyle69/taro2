@@ -8,6 +8,8 @@ var PhaserEntity = /** @class */ (function () {
             scale: entity.on('scale', this.scale, this),
             hide: entity.on('hide', this.hide, this),
             show: entity.on('show', this.show, this),
+            layer: entity.on('layer', this.layer, this),
+            depth: entity.on('depth', this.depth, this),
             destroy: entity.on('destroy', this.destroy, this)
         });
     }
@@ -20,6 +22,16 @@ var PhaserEntity = /** @class */ (function () {
     PhaserEntity.prototype.show = function () {
         this.gameObject.setActive(true)
             .setVisible(true);
+    };
+    PhaserEntity.prototype.layer = function (value) {
+        console.log("".concat(this.entity._category, " ").concat(this.entity.id(), " layer: ").concat(this.entity._layer)); // TODO: Remove
+        // use index - 1 because taro layers are indexed at 1
+        var scene = this.gameObject.scene;
+        scene.entityLayers[value - 1].add(this.gameObject);
+    };
+    PhaserEntity.prototype.depth = function (value) {
+        console.log("".concat(this.entity._category, " ").concat(this.entity.id(), " depth: ").concat(this.entity._depth)); // TODO: Remove
+        this.gameObject.setDepth(value);
     };
     PhaserEntity.prototype.destroy = function () {
         var _this = this;

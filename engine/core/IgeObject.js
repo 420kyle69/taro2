@@ -1207,7 +1207,9 @@ var IgeObject = IgeEventingClass.extend({
 		if (val !== undefined) {
 			this._layer = val;
 
-			if (ige.isClient) ige.client.emit('setLayer', { entity: this, layer: val });
+			if (ige.isClient) {
+				this.emit('layer', [ val ]);
+			}
 
 			return this;
 		}
@@ -1261,7 +1263,10 @@ var IgeObject = IgeEventingClass.extend({
 		if (val !== undefined) {
 			this._depth = val;
 
-			if (ige.isClient) ige.client.emit('setDepth', { entity: this, depth: val });
+			if (ige.isClient) {
+				this.emit('depth', [ val ]);
+			}
+
 			return this;
 		}
 
