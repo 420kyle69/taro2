@@ -357,7 +357,7 @@ var PlayerUiComponent = IgeEntity.extend({
 		}
 
 		function skipText () {
-			if(! (dialogue.hasOptions() && dialogue.areOptionsRendered)){
+			if(!(dialogue.hasOptions() && dialogue.areOptionsRendered)){
 				showNextMessage();
 			}
 		}

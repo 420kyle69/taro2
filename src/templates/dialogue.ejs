@@ -1,94 +1,119 @@
- <!-- custom modal -->
- <div class="modal fade align-items-center" id="custom-modal" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-      <div class="modal-content">
-
-        <div class="modal-header text-center">
-          <h4 class="modal-title"></h4>
-          <button id='custom-modal-dismiss-button' type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-
-        <div class="modal-body">
-          <div class="content"></div>
-        </div>
-
-        <div class="modal-footer">
-          <div class="row">
-            <div class="col-sm-12">
-              <div id="custom-modal-cancel-container">
-                <button type="button" data-dismiss="modal" id="custom-modal-cancel" class="btn pull-right">Close</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- dialogue modal -->
-  <div class="modal" id="modd-dialogue-modal" tabindex="-1" style='z-index:9050' data-backdrop='static' data-keyboard='false'>
-    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-      <div class="modal-content">
-        <div class="modal-body">
-          <div class="row row-eq-height">
-            <div class="col-4 d-none" id="modd-dialogue-image-container">
-              <img
-                id="modd-dialogue-image" 
-                class="loading w-100 rounded"
-                src=""
-                alt="image"
-                onload="this.style.background = 'none';"
-              >
-            </div>
-
-            <div class="col-12" id="modd-dialogue-message-container">
-              <div class="d-flex flex-column h-100">
-                <div class="flex-shrink-0 flex-grow-1 wrap-text">
-                  <p id="modd-dialogue-message"></p>
-
-                  <p class="position-absolute mb-0 text-muted d-none" id="modd-dialogue-skip-hint" style="bottom: 0; right: 15px;">
-                    press enter/click to continue.
-                  </p>
+<!-- Handlebar -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.7/handlebars.min.js" integrity="sha512-RNLkV3d+aLtfcpEyFG8jRbnWHxUqVZozacROI4J2F1sTaDqo1dPQYs01OMi1t1w9Y2FdbSCDSQ2ZVdAC8bzgAg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+	const defaultDialogueTemplate = `
+    <div class="modal" id="modd-dialogue-modal" tabindex="-1" style='z-index:9050' data-backdrop='static'
+        data-keyboard='false'>
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+              {{#if dialogue.dialogueTitle}}
+                <div class="modal-header">
+                    <h5 class="modal-title">{{dialogue.dialogueTitle}}</h5>
                 </div>
+              {{/if}}
+              
+                <div class="modal-body">
+                    <div class="row row-eq-height">
+                        <div class="{{ternary dialogue.image 'col-4' 'd-none'}}" id="modd-dialogue-image-container">
+                            <!-- if an image was added to the dialogue, it is displayed here
+                            a ternary condition in #modd-dialogue-message-container changes css based on whether an image was added -->
+                            <img id="modd-dialogue-image" class="loading w-100 rounded" src="{{dialogue.image}}" alt="image"
+                                onload="this.style.background = 'none';">
+                        </div>
 
-                <div id="modd-dialogue-options-container">
-                  <div id="modd-dialogue-options" class="w-100"></div>
+                        <div class="{{ternary dialogue.image 'col-8 pl-md-0' 'col-12'}}" id="modd-dialogue-message-container">
+                            <div class="d-flex flex-column h-100">
+                                <div class="flex-shrink-0 flex-grow-1 wrap-text">
+                                    <!-- modd-dialogue-message id needs to be kept for typing effect-->
+                                    <p id="modd-dialogue-message">
+                                        <!-- adds the content of HTMLmessage here
+                                        HTML syntax included in the message should render as expected
+                                        <style> tags included in the message are applied as well -->
+                                        {{dialogue.message}}
+                                    </p>
+                                    <p class="position-absolute mb-0 text-muted {{ternary dialogue.areOptionsRendered 'd-none' ''}}" id="modd-dialogue-skip-hint" style="bottom: 0; right: 15px;">
+                                        <!-- customize the prompt for continuing to the next message -->
+                                        {{#if isMobile}}
+                                          tap to continue.
+                                        {{else}}
+                                          press enter/click to continue.
+                                        {{/if}}
+                                    </p>
+                                </div>
+
+                                <div id="modd-dialogue-options-container" class="{{ternary dialogue.areOptionsRendered '' 'd-none'}}">
+                                    <div id="modd-dialogue-options" class="w-100">
+                                        <!-- if options were added to the dialogue, they display here
+                                        #each iterates through the options, you can use if conditions and options.length to change rendering logic based on amount of options-->
+                                        {{#each dialogue.options}}
+                                            <!-- dialogue-option class needs to be kept -->
+                                            <button class="w-100 btn btn-light border btn-block text-left dialogue-option">
+                                                <i class="d-none fa fa-check mr-2 option-check"></i>
+                                                <span>{{name}}<span>
+                                            </button>  
+                                        {{/each}}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
             </div>
-
-          </div>
         </div>
-      </div>
     </div>
-  </div>
+  `;
 
-  <!-- player input modal -->
-  <div class="modal fade align-items-center" id="player-input-modal" tabindex="-1">
-    <div class="modal-dialog modal-lg" role="document">
-      <div class="modal-content">
+  const defaultUIScript = `
+    <start-script>
+        var showDialogue = function () {
+            $('#modd-dialogue-modal').modal('show');
+        }
 
-        <div class="modal-body">
-          <div class="form-group">
-            <label id="player-input-field-label">Email address</label>
-            <input id="player-input-field" class="form-control">
-          </div>
+        var closeDialogue = function () {
+            $('#modd-dialogue-modal').modal('hide');
+        }
 
-          <div class="row">
-            <div class="col-sm-12 d-flex justify-content-end">
-              <div id="player-input-cancel-container">
-                <button type="button" id="player-input-cancel" class="btn pull-right">Cancel</button>
-              </div>
-              <div id="player-input-submit-container">
-                <button type="button" id="player-input-submit" class="btn pull-right btn-primary ml-2">Submit</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+        var message = {{{ json dialogue.message }}}
 
-  
+        if({{dialogue.letterPrintSpeed}}){
+            $('#modd-dialogue-message').html('');
+            $('#modd-dialogue-message').length && $('#modd-dialogue-message').writeText(message, {{dialogue.letterPrintSpeed}}, ()=>{});
+        }
+
+        $('.dialogue-option').click(function (e){
+            window.handleOptionClick && window.handleOptionClick(e, $(this).index());
+        })
+    <close-script>
+  `;
+
+  var defaultUI = {
+    defaultDialogueTemplate,
+    defaultUIScript,
+  };
+
+  Handlebars.registerHelper('ternary', function(test, yes, no) {
+      return test ? yes : no;
+  });
+
+  Handlebars.registerHelper('json', function(data) {
+      return data ? JSON.stringify(data): '';
+  });
+
+  var renderDialogueTemplate = function (data, dialogueTemplate) {
+    dialogueTemplate += defaultUI.defaultUIScript;
+    let value = dialogueTemplate.replaceAll("<start-script>", "<script>").replaceAll("<close-script>", "<\/script>")
+    window.closeDialogue && window.closeDialogue();
+    const template = Handlebars.compile(value, {noEscape: true});
+    $('#modd-dialogue-container').html(template({...data}));
+
+    if(value){
+      window.showDialogue && window.showDialogue();
+    }else{
+      window.closeDialogue && window.closeDialogue();
+    }
+  }
+</script>
+
+<!-- custom modal -->
+<div id="modd-dialogue-container">
+</div>
