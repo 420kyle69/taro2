@@ -688,7 +688,25 @@ NetIo.Server = NetIo.EventingClass.extend({
 				console.log('Unauthorized request', e.message, token);
 				return;
 			}
+			
+			// if the token has been used already, close the connection.
+			const isUsedToken = ige.server.usedTokens[token];
+			console.log('isUsedToken', isUsedToken, ige.server.usedTokens)
+			if (isUsedToken) {
+				console.log("Token has been used already", token)
+				socket.close('Unauthorized request');
+				return;
+			}
+			
+			// store token for current client
+			ige.server.usedTokens[token] = socket._token.tokenCreatedAt;
+			
+			// remove expired tokens
+			ige.server.usedTokens = Object.fromEntries(Object.entries(ige.server.usedTokens)
+				.filter(([token, tokenCreatedAt]) => (Date.now() - tokenCreatedAt) < ige.server.TOKEN_EXPIRES_IN));
+			
 		}
+		
 		// Give the socket a unique ID
 		socket.id = self.newIdHex();
 		// Add the socket to the internal lookups
