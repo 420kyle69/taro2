@@ -96,8 +96,7 @@
   });
 
   Handlebars.registerHelper('json', function(data) {
-    console.log("Data is: ", data.length);
-      return data ? JSON.stringify(data): '""';
+      return JSON.stringify(data);
   });
 
   var renderDialogueTemplate = function (data, dialogueTemplate) {
