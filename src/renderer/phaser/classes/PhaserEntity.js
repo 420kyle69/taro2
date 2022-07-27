@@ -8,8 +8,8 @@ var PhaserEntity = /** @class */ (function () {
             scale: entity.on('scale', this.scale, this),
             hide: entity.on('hide', this.hide, this),
             show: entity.on('show', this.show, this),
-            'set-layer': entity.on('set-layer', this.setLayer, this),
-            'set-depth': entity.on('set-depth', this.setDepth, this),
+            layer: entity.on('layer', this.layer, this),
+            depth: entity.on('depth', this.depth, this),
             destroy: entity.on('destroy', this.destroy, this)
         });
     }
@@ -23,13 +23,15 @@ var PhaserEntity = /** @class */ (function () {
         this.gameObject.setActive(true)
             .setVisible(true);
     };
-    PhaserEntity.prototype.setLayer = function (layer) {
-        // TODO implement setLayer
-        console.info('TODO implement setLayer', this.entity, layer);
+    PhaserEntity.prototype.layer = function (value) {
+        console.log("".concat(this.entity._category, " ").concat(this.entity.id(), " layer: ").concat(this.entity._layer)); // TODO: Remove
+        // use index - 1 because taro layers are indexed at 1
+        var scene = this.gameObject.scene;
+        scene.entityLayers[value - 1].add(this.gameObject);
     };
-    PhaserEntity.prototype.setDepth = function (depth) {
-        // TODO implement setDepth
-        console.info('TODO implement setDepth', this.entity, depth);
+    PhaserEntity.prototype.depth = function (value) {
+        console.log("".concat(this.entity._category, " ").concat(this.entity.id(), " depth: ").concat(this.entity._depth)); // TODO: Remove
+        this.gameObject.setDepth(value);
     };
     PhaserEntity.prototype.destroy = function () {
         var _this = this;
