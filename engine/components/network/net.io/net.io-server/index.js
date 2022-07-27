@@ -691,7 +691,6 @@ NetIo.Server = NetIo.EventingClass.extend({
 			
 			// if the token has been used already, close the connection.
 			const isUsedToken = ige.server.usedTokens[token];
-			console.log('isUsedToken', isUsedToken, ige.server.usedTokens)
 			if (isUsedToken) {
 				console.log("Token has been used already", token)
 				socket.close('Unauthorized request');
