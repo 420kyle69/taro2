@@ -750,7 +750,7 @@ var ServerNetworkEvents = {
 						type: selectedOption.followUpDialogue,
 						extraData: {
 							playerName: player._stats.name,
-							dialogueTemplate: _.get(ige, "game.data.ui.dialogueview.htmlData", "")
+							dialogueTemplate: _.get(ige, 'game.data.ui.dialogueview.htmlData', '')
 						}
 					}, player._stats.clientId);
 				}

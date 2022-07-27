@@ -17,8 +17,7 @@
                         <div class="{{ternary dialogue.image 'col-4' 'd-none'}}" id="modd-dialogue-image-container">
                             <!-- if an image was added to the dialogue, it is displayed here
                             a ternary condition in #modd-dialogue-message-container changes css based on whether an image was added -->
-                            <img id="modd-dialogue-image" class="loading w-100 rounded" src="{{dialogue.image}}" alt="image"
-                                onload="this.style.background = 'none';">
+                            <img id="modd-dialogue-image" class="loading w-100 rounded" style="background: none;" src="{{dialogue.image}}" alt="image">
                         </div>
 
                         <div class="{{ternary dialogue.image 'col-8 pl-md-0' 'col-12'}}" id="modd-dialogue-message-container">
@@ -100,8 +99,7 @@
   });
 
   var renderDialogueTemplate = function (data, dialogueTemplate) {
-    dialogueTemplate += defaultUI.defaultUIScript;
-    let value = dialogueTemplate.replaceAll("<start-script>", "<script>").replaceAll("<close-script>", "<\/script>")
+    let value = dialogueTemplate.replace(/<\s*script.*?>/g, '<script type="html/x-handlebars">') + defaultUI.defaultUIScript.replaceAll("<start-script>", "<script>").replaceAll("<close-script>", "<\/script>");
     window.closeDialogue && window.closeDialogue();
     const template = Handlebars.compile(value, {noEscape: true});
     $('#modd-dialogue-container').html(template({...data}));
