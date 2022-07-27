@@ -702,8 +702,14 @@ NetIo.Server = NetIo.EventingClass.extend({
 			ige.server.usedTokens[token] = socket._token.tokenCreatedAt;
 			
 			// remove expired tokens
-			ige.server.usedTokens = Object.fromEntries(Object.entries(ige.server.usedTokens)
-				.filter(([token, tokenCreatedAt]) => (Date.now() - tokenCreatedAt) < ige.server.TOKEN_EXPIRES_IN));
+			const filteredUsedTokens = {};
+			const usedTokenEntries = Object.entries(ige.server.usedTokens).filter(([token, tokenCreatedAt]) => (Date.now() - tokenCreatedAt) < ige.server.TOKEN_EXPIRES_IN);
+			for (const [key, value] of usedTokenEntries) {
+				if (typeof value === 'number') {
+					filteredUsedTokens[key] = value;
+				}
+			}
+			ige.server.usedTokens = filteredUsedTokens;
 			
 		}
 		
