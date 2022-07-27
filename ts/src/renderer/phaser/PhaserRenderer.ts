@@ -50,4 +50,8 @@ class PhaserRenderer extends Phaser.Game {
 			});
 		}
 	}
+
+	getViewportBounds (): Phaser.Geom.Rectangle {
+		return this.scene.getScene('Game').cameras.main.getBounds();
+	}
 }

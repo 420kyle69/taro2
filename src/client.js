@@ -170,7 +170,7 @@ const Client = IgeEventingClass.extend({
 			ige.game.data = game.data;
 			ige.addComponent(IgeInputComponent);
 			ige.entitiesToRender = new EntitiesToRender();
-			ige.phaser = new PhaserRenderer();
+			ige.renderer = new PhaserRenderer();
 
 			if(!window.isStandalone){
 				this.servers = this.getServersArray();

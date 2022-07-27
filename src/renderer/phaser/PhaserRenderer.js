@@ -60,6 +60,9 @@ var PhaserRenderer = /** @class */ (function (_super) {
         }
         return _this;
     }
+    PhaserRenderer.prototype.getViewportBounds = function () {
+        return this.scene.getScene('Game').cameras.main.getBounds();
+    };
     return PhaserRenderer;
 }(Phaser.Game));
 //# sourceMappingURL=PhaserRenderer.js.map

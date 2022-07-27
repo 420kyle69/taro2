@@ -27,7 +27,7 @@ declare class IgeEngine extends IgeClass {
 
 	game: GameComponent;
 
-	phaser: PhaserRenderer;
+	renderer: PhaserRenderer;
 
 	scaleMapDetails: {
 		scaleFactor: {
