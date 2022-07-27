@@ -1028,6 +1028,7 @@ const Client = IgeEventingClass.extend({
 		if (typeof (userId) != 'undefined' && typeof (sessionId) != 'undefined') {
 			//
 			data._id = userId;
+			data.sessionId = sessionId;
 		}
 
 		if (!ige.isMobile) {
