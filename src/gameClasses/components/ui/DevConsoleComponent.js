@@ -206,12 +206,6 @@ var DevConsoleComponent = IgeEntity.extend({
 
 			var controllerViewportClippingEnabled = f1.add(ige.client, 'viewportClippingEnabled');
 
-			var controllerCtxAlphaEnabled = f1.add(ige.client, 'ctxAlphaEnabled');
-			controllerCtxAlphaEnabled.onChange(function (value) {
-				// console.log('ctxAlphaEnabled:',value);
-				ige.getCtx();
-			});
-
 			tuningDiv.append(gui.domElement);
 
 			devDiv.append(tuningDiv);

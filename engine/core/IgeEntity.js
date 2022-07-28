@@ -1812,7 +1812,7 @@ var IgeEntity = IgeObject.extend({
 
 				if (!isForOrphans && ige.gameLoopTickHasExecuted) {
 					// Process any behaviours assigned to the entity
-					this._processUpdateBehaviours(ctx, tickDelta);
+					this._processUpdateBehaviours();
 				}
 
 				// Update this object's current frame alternator value
@@ -1871,7 +1871,7 @@ var IgeEntity = IgeObject.extend({
 			ige.tickCount++;
 
 			// Process any behaviours assigned to the entity
-			this._processTickBehaviours(ctx);
+			this._processTickBehaviours();
 
 			// Process any mouse events we need to do
 

@@ -1557,22 +1557,6 @@ var IgeObject = IgeEventingClass.extend({
 			if (arr) {
 				arrCount = arr.length;
 
-				// Depth sort all child objects
-				// if (arrCount && !ige._headless) {
-				// 	if (igeConfig.debug._timing) {
-				// 		if (!ige._timeSpentLastTick[this.id()]) {
-				// 			ige._timeSpentLastTick[this.id()] = {};
-				// 		}
-
-				// 		ts = new Date().getTime();
-				// 		this.depthSortChildren();
-				// 		td = new Date().getTime() - ts;
-				// 		ige._timeSpentLastTick[this.id()].depthSortChildren = td;
-				// 	} else {
-				// 		this.depthSortChildren();
-				// 	}
-				// }
-
 				// Loop our children and call their update methods
 				if (igeConfig.debug._timing) {
 					while (arrCount--) {
@@ -1758,7 +1742,7 @@ var IgeObject = IgeEventingClass.extend({
 	 * Calls each behaviour method for the object.
 	 * @private
 	 */
-	_processUpdateBehaviours: function (ctx, tickDelta) {
+	_processUpdateBehaviours: function () {
 		var arr = this._updateBehaviours;
 		var arrCount;
 
@@ -1774,7 +1758,7 @@ var IgeObject = IgeEventingClass.extend({
 	 * Calls each behaviour method for the object.
 	 * @private
 	 */
-	_processTickBehaviours: function (ctx) {
+	_processTickBehaviours: function () {
 		var arr = this._tickBehaviours;
 		var arrCount;
 

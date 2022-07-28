@@ -108,7 +108,6 @@ var IgeEngine = IgeEntity.extend({
 		this._loadingPreText = undefined; // The text to put in front of the loading percent on the loading progress screen
 		this._enableUpdates = true;
 		this._enableRenders = true;
-		this._showSgTree = false;
 		this._debugEvents = {}; // Holds debug event booleans for named events
 		this._renderContext = ige.isServer ? '2d' : 'webgl2'; // The rendering context, default is 2d
 		this._renderMode = this._renderModes[this._renderContext]; // Integer representation of the render context
@@ -166,7 +165,6 @@ var IgeEngine = IgeEntity.extend({
 		// with in case we are in "headless" mode and
 		// a replacement context never gets assigned
 		this._ctx = IgeDummyContext;
-		this._headless = true;
 		this.dependencyTimeout(30000); // Wait 30 seconds to load all dependencies then timeout
 
 		// Start a timer to record every second of execution
@@ -913,15 +911,6 @@ var IgeEngine = IgeEntity.extend({
 	},
 
 	/**
-	 * Checks to ensure that a canvas has been assigned to the engine or that the
-	 * engine is in server mode.
-	 * @return {Boolean}
-	 */
-	canvasReady: function () {
-		return (ige._canvas !== undefined || ige.isServer);
-	},
-
-	/**
 	 * Generates a new unique ID
 	 * @return {String}
 	 */
@@ -1090,61 +1079,6 @@ var IgeEngine = IgeEntity.extend({
 		}
 
 		return this._renderContext;
-	},
-
-	/**
-	 * Sets the canvas element that will be used as the front-buffer.
-	 * @param elem The canvas element.
-	 * @param autoSize If set to true, the engine will automatically size
-	 * the canvas to the width and height of the window upon window resize.
-	 */
-
-	getCtx: function () {
-		var alpha = true;
-		if (ige.isClient && ige.client) {
-			alpha = ige.client.ctxAlphaEnabled;
-		}
-		var contex = this._canvas.getContext('webgl2', { alpha: alpha }) || this._canvas.getContext('webgl', { alpha: alpha }) || this._canvas.getContext('2d', { alpha: alpha });
-		this._ctx = contex.canvas;
-	},
-
-	/**
-	 * Clears the entire canvas.
-	 */
-	clearCanvas: function () {
-		if (this._ctx) {
-			// Clear the whole canvas
-			this._ctx.clearRect(
-				0,
-				0,
-				this._canvas.width,
-				this._canvas.height
-			);
-		}
-	},
-
-	/**
-	 * Removes the engine's canvas from the DOM.
-	 */
-	removeCanvas: function () {
-		// Stop listening for input events
-		if (this.input) {
-			this.input.destroyListeners();
-		}
-
-		// Remove event listener
-		window.removeEventListener('resize', this._resizeEvent);
-
-		if (this._createdFrontBuffer) {
-			// Remove the canvas from the DOM
-			document.body.removeChild(this._canvas);
-		}
-
-		// Clear internal references
-		delete this._canvas;
-		delete this._ctx;
-		this._ctx = IgeDummyContext;
-		this._headless = true;
 	},
 
 	/**
@@ -1325,130 +1259,17 @@ var IgeEngine = IgeEntity.extend({
 	 * @private
 	 */
 	_resizeEvent: function (event) {
-		var canvasBoundingRect;
 		if (ige.isClient) return;
 		if (ige._autoSize) {
-			var newWidth = window.innerWidth;
-			var newHeight = window.innerHeight;
 			var arr = ige._children;
 			var arrCount = arr.length;
-
-			// Only update canvas dimensions if it exists
-			if (ige._canvas) {
-				// Check if we can get the position of the canvas
-				canvasBoundingRect = ige._canvasPosition();
-
-				// Adjust the newWidth and newHeight by the canvas offset
-				newWidth -= parseInt(canvasBoundingRect.left);
-				newHeight -= parseInt(canvasBoundingRect.top);
-
-				// Make sure we can divide the new width and height by 2...
-				// otherwise minus 1 so we get an even number so that we
-				// negate the blur effect of sub-pixel rendering
-				if (newWidth % 2) {
-					newWidth--;
-				}
-				if (newHeight % 2) {
-					newHeight--;
-				}
-
-				if (ige.client && ige.client.resolutionQuality === 'low') {
-					ige._canvas.width = newWidth * ige._deviceFinalDrawRatio / 2;
-					ige._canvas.height = newHeight * ige._deviceFinalDrawRatio / 2;
-					ige._bounds2d = new IgePoint3d(newWidth / 2, newHeight / 2, 0);
-				} else {
-					ige._canvas.width = newWidth * ige._deviceFinalDrawRatio;
-					ige._canvas.height = newHeight * ige._deviceFinalDrawRatio;
-					ige._bounds2d = new IgePoint3d(newWidth, newHeight, 0);
-				}
-
-				if (ige._deviceFinalDrawRatio !== 1 || (ige.client && ige.client.resolutionQuality === 'low')) {
-					ige._canvas.style.width = `${newWidth}px`;
-					ige._canvas.style.height = `${newHeight}px`;
-
-					// Scale the canvas context to account for the change
-					ige._ctx.scale(ige._deviceFinalDrawRatio, ige._deviceFinalDrawRatio);
-				}
-			}
-
-			// ige._bounds2d = new IgePoint3d(newWidth, newHeight, 0);
 
 			// Loop any mounted children and check if
 			// they should also get resized
 			while (arrCount--) {
 				arr[arrCount]._resizeEvent(event);
 			}
-		} else {
-			if (ige._canvas) {
-				const canvas = $('#game-div canvas');
-				if (ige.isClient && ige.client.scaleMode > 0) {
-					if (ige.client.scaleMode == 1 || ige.client.scaleMode == 3) {
-						// stretch
-						var newWidth = window.innerWidth;
-						var newHeight = window.innerHeight;
-
-						// fit
-						if (ige.client.scaleMode == 1) {
-							var aspectWindow = window.innerWidth / window.innerHeight;
-							var aspectResolution = canvas.attr('width') / canvas.attr('height');
-
-							if (aspectWindow >= aspectResolution) {
-								newWidth = newHeight * aspectResolution;
-							} else {
-								newHeight = newWidth / aspectResolution;
-							}
-						}
-
-						// Check if we can get the position of the canvas
-						canvasBoundingRect = ige._canvasPosition();
-
-						// Adjust the newWidth and newHeight by the canvas offset
-						newWidth -= parseInt(canvasBoundingRect.left);
-						newHeight -= parseInt(canvasBoundingRect.top);
-
-						// Make sure we can divide the new width and height by 2...
-						// otherwise minus 1 so we get an even number so that we
-						// negate the blur effect of sub-pixel rendering
-						if (newWidth % 2) {
-							newWidth--;
-						}
-						if (newHeight % 2) {
-							newHeight--;
-						}
-
-						// ige._canvas.width = newWidth * ige._deviceFinalDrawRatio;
-						// ige._canvas.height = newHeight * ige._deviceFinalDrawRatio;
-
-						// if (ige._deviceFinalDrawRatio !== 1) {
-						ige._canvas.style.width = `${newWidth}px`;
-						ige._canvas.style.height = `${newHeight}px`;
-
-						// Scale the canvas context to account for the change
-						ige._ctx.scale(ige._deviceFinalDrawRatio, ige._deviceFinalDrawRatio);
-						// }
-					}
-				} else {
-					var w = canvas.attr('width');
-					var h = canvas.attr('height');
-					ige._canvas.style.width = `${w}px`;
-					ige._canvas.style.height = `${h}px`;
-				}
-
-				ige._bounds2d = new IgePoint3d(ige._canvas.width, ige._canvas.height, 0);
-			}
 		}
-
-		if (ige._showSgTree) {
-			var sgTreeElem = document.getElementById('igeSgTree');
-
-			canvasBoundingRect = ige._canvasPosition();
-
-			sgTreeElem.style.top = `${parseInt(canvasBoundingRect.top) + 5}px`;
-			sgTreeElem.style.left = `${parseInt(canvasBoundingRect.left) + 5}px`;
-			sgTreeElem.style.height = `${ige._bounds2d.y - 30}px`;
-		}
-
-		ige._resized = true;
 	},
 	scaleMap: function (map) {
 		// return map;
@@ -1490,38 +1311,6 @@ var IgeEngine = IgeEntity.extend({
 			}
 		}
 		return gameMap;
-	},
-	/**
-	 * Gets the bounding rectangle for the HTML canvas element being
-	 * used as the front buffer for the engine. Uses DOM methods.
-	 * @returns {ClientRect}
-	 * @private
-	 */
-	_canvasPosition: function () {
-		try {
-			return ige._canvas.getBoundingClientRect();
-		} catch (e) {
-			return {
-				top: ige._canvas.offsetTop,
-				left: ige._canvas.offsetLeft
-			};
-		}
-	},
-
-	/**
-	 * Toggles full-screen output of the main ige canvas. Only works
-	 * if called from within a user-generated HTML event listener.
-	 */
-	toggleFullScreen: function () {
-		var elem = this._canvas;
-
-		if (elem.requestFullscreen) {
-			elem.requestFullscreen();
-		} else if (elem.mozRequestFullScreen) {
-			elem.mozRequestFullScreen();
-		} else if (elem.webkitRequestFullscreen) {
-			elem.webkitRequestFullscreen();
-		}
 	},
 
 	/**
@@ -1854,10 +1643,8 @@ var IgeEngine = IgeEntity.extend({
 			then process updates and ticks. This will also allow a layered rendering system that can render the
 			first x number of entities then stop, allowing a step through of the renderer in realtime.
 		 */
-		var st;
 		var et;
 		var updateStart;
-		var renderStart;
 		var self = ige;
 		var unbornQueue;
 		var unbornCount;
@@ -2104,7 +1891,6 @@ var IgeEngine = IgeEntity.extend({
 
 		ige.gameLoopTickHasExecuted = false;
 		ige.physicsTickHasExecuted = false;
-		self._resized = false;
 
 		et = new Date().getTime();
 		ige._tickTime = et - ige.now;
@@ -2149,7 +1935,7 @@ var IgeEngine = IgeEntity.extend({
 		var tickDelta = ige._tickDelta;
 
 		// Process any behaviours assigned to the engine
-		this._processUpdateBehaviours(ctx, tickDelta);
+		this._processUpdateBehaviours();
 
 		if (arr) {
 			arrCount = arr.length;
@@ -2505,9 +2291,11 @@ var IgeEngine = IgeEntity.extend({
 		// Stop the engine and kill any timers
 		this.stop();
 
-		// Remove the front buffer (canvas) if we created it
 		if (this.isClient) {
-			this.removeCanvas();
+			// Stop listening for input events
+			if (this.input) {
+				this.input.destroyListeners();
+			}
 		}
 
 		// Call class destroy() super method

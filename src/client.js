@@ -50,7 +50,6 @@ const Client = IgeEventingClass.extend({
 
 		this.clearEveryFrame = true;
 		this.cameraEnabled = true;
-		this.ctxAlphaEnabled = true;
 		this.viewportClippingEnabled = true;
 
 		this.extrapolation = false; //old comment => 'disabling due to item bug'
