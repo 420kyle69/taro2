@@ -62,11 +62,13 @@ var Player = IgeEntity.extend({
 	// move to UI
 	joinGame: function () {
 		var self = this;
-		if (self._stats.userId) {
-			ige.clusterClient.userJoined(self._stats.userId);
-		}
-
+		
 		if (self._stats.playerJoined != true) {
+			// notify GS manager that a user has joined, do not notify if player joins again after pausing the game
+			if (self._stats.userId) {
+				ige.clusterClient.userJoined(self._stats.userId);
+			}
+			
 			if (self._stats.controlledBy == 'human' && ige.script) // do not send trigger for neutral player
 			{
 				ige.trigger.fire('playerJoinsGame', { playerId: self.id() });
