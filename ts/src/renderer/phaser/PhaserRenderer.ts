@@ -39,8 +39,13 @@ class PhaserRenderer extends Phaser.Game {
 			}
 		});
 
-		// Ask the input component to setup any listeners it has
-		ige.input.setupListeners(this.canvas);
+		if (this.isBooted) {
+			this.setupInputListeners();
+		} else {
+			this.events.once(Phaser.Core.Events.BOOT,
+				this.setupInputListeners, this
+			);
+		}
 
 		if (typeof ga != 'undefined' && ige.env != 'local') {
 			ga('send', {
@@ -49,6 +54,11 @@ class PhaserRenderer extends Phaser.Game {
 				eventAction: this.renderer.type
 			});
 		}
+	}
+
+	private setupInputListeners(): void {
+		// Ask the input component to setup any listeners it has
+		ige.input.setupListeners(this.canvas);
 	}
 
 	getViewportBounds (): Phaser.Geom.Rectangle {
