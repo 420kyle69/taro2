@@ -64,7 +64,6 @@ const Client = IgeEventingClass.extend({
 		this.inactiveTabEntityStream = [];
 		this.eventLog = [];
 
-		this.fontTexture = new IgeFontSheet('/assets/fonts/verdana_12pt.png');
 		this.servers = [
 			{
 				ip: '127.0.0.1',
