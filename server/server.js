@@ -158,7 +158,6 @@ var Server = IgeClass.extend({
 		console.log('cluster.isMaster', cluster.isMaster);
 		if (cluster.isMaster) {
 			if (process.env.ENV === 'standalone') {
-				self.gameId = process.env.npm_config_game;
 				self.ip = '127.0.0.1';
 				self.startWebServer();
 				self.start();
@@ -307,7 +306,7 @@ var Server = IgeClass.extend({
 			const options = {
 				isAuthenticated: false,
 				env: process.env.ENV,
-				gameId: process.env.npm_config_game,
+				gameId: game._id,
 				user: {},
 				isOpenedFromIframe: false,
 				gameSlug: game.gameSlug,
@@ -406,12 +405,13 @@ var Server = IgeClass.extend({
 
 			if (gameJson) {
 				promise = Promise.resolve(gameJson);
-			} else if (ige.server.gameId) {
+			} else if (ige.server.gameId && ige.env !== 'standalone') {
 				var gameUrl = `${domain}/api/game-client/${ige.server.gameId}`;
 				console.log('gameUrl', gameUrl);
 				promise = self.loadGameJSON(gameUrl);
 			} else {
 				promise = new Promise(function (resolve, reject) {
+					console.log('gameUrl', `${__dirname}/../src/game.json`);
 					var game = fs.readFileSync(`${__dirname}/../src/game.json`);
 					game = JSON.parse(game);
 					game.defaultData = game;
@@ -421,6 +421,9 @@ var Server = IgeClass.extend({
 					}
 					for (let [key, value] of Object.entries(game.data)) {
 						data.data[key] = value;
+					}
+					if (game && game.data && game.data.defaultData && game.data.defaultData._id) {
+						self.gameId = game.data.defaultData._id;
 					}
 					resolve(data);
 				});
