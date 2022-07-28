@@ -653,43 +653,72 @@ NetIo.Server = NetIo.EventingClass.extend({
 	socketConnection: function (ws, request) {
 		var self = this;
 		var jwt = require('jsonwebtoken');
-		var PING_SERVICE_HEADER = 'x-ping-service';
+		const PING_SERVICE_HEADER = 'x-ping-service';
 		console.log('Client connecting...');
 		var socket = new NetIo.Socket(ws);
 		// Give the socket encode/decode methods
 		socket._encode = self._encode;
 		socket._decode = self._decode;
 		socket._remoteAddress = ws._socket.remoteAddress;
-		// socket._fromPingService = request.headers[PING_SERVICE_HEADER];
+		socket._fromPingService = request.headers[PING_SERVICE_HEADER] && request.headers[PING_SERVICE_HEADER] === process.env.PING_SERVICE_HEADER_SECRET;
 		
 		// extracting user from token and adding it in _token.
-		// if token doesnot exist in request close the socket.
+		// if token does not exist in request close the socket.
 
-		// if (!socket._fromPingService) {
-		// 	if (request.url.indexOf('/?token=') === -1) {
-		// 		socket.close('Unauthorized request');
-		// 		return;
-		// 	}
+		if (!socket._fromPingService) {
+			if (request.url.indexOf('/?token=') === -1) {
+				socket.close('Unauthorized request');
+				console.log('Unauthorized request', request.url);
+				return;
+			}
 
-		// 	var token = request.url && request.url.replace('/?token=', '');
-		// 	try {
-		// 		var decodedToken = jwt.verify(token, 'k=9PE%C&Ammu}<K');
-		// 		socket._token = {
-		// 			userId: decodedToken.userId
-		// 		};
-		// 	} catch (e) {
-		// 		socket._token = {
-		// 			userId: ''
-		// 		};
-		// 	}
-		// }
+			const token = request.url && request.url.replace('/?token=', '');
+			try {
+				const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
+				
+				socket._token = {
+					userId: decodedToken.userId,
+					token,
+					tokenCreatedAt: decodedToken.createdAt
+				};
+				
+			} catch (e) {
+				// A token is required to connect with socket server
+				socket.close('Unauthorized request');
+				console.log('Unauthorized request', e.message, token);
+				return;
+			}
+			
+			// if the token has been used already, close the connection.
+			const isUsedToken = ige.server.usedTokens[token];
+			if (isUsedToken) {
+				console.log("Token has been used already", token)
+				socket.close('Unauthorized request');
+				return;
+			}
+			
+			// store token for current client
+			ige.server.usedTokens[token] = socket._token.tokenCreatedAt;
+			
+			// remove expired tokens
+			const filteredUsedTokens = {};
+			const usedTokenEntries = Object.entries(ige.server.usedTokens).filter(([token, tokenCreatedAt]) => (Date.now() - tokenCreatedAt) < ige.server.TOKEN_EXPIRES_IN);
+			for (const [key, value] of usedTokenEntries) {
+				if (typeof value === 'number') {
+					filteredUsedTokens[key] = value;
+				}
+			}
+			ige.server.usedTokens = filteredUsedTokens;
+			
+		}
+		
 		// Give the socket a unique ID
 		socket.id = self.newIdHex();
 		// Add the socket to the internal lookups
 		self._sockets.push(socket);
 		self._socketsById[socket.id] = socket;
 
-		console.log("1. Client", socket.id,"connected (net.io-server index.js)")
+		console.log("1. Client", socket.id,"connected (net.io-server index.js)");
 
 		// Register a listener so that if the socket disconnects,
 		// we can remove it from the active socket lookups
