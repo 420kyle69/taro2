@@ -128,7 +128,7 @@ const Client = IgeEventingClass.extend({
 			// if the gameJson is available as a global object, use it instead of sending another ajax request
 			if (window.gameJson) {
 				resolve(window.gameJson);
-			} else if (gameId) {
+			} else if (gameId && !window.isStandalone) {
 				$.ajax({
 					url: `${this.host}/api/game-client/${gameId}`,
 					dataType: 'json',
