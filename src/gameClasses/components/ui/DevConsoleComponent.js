@@ -171,12 +171,6 @@ var DevConsoleComponent = IgeEntity.extend({
 				} else {
 					ige._autoSize = false;
 				}
-				if (value > 0) {
-					$('#igeFrontBuffer').attr('width', value);
-					var height = value / 4 * 3;
-					if (value == 1280 || value == 1920) height = value / 16 * 9;
-					$('#igeFrontBuffer').attr('height', height);
-				}
 				ige._resizeEvent();
 			});
 			var controllerScaleMode = gui.add(ige.client, 'scaleMode', { None: 0, Fit: 1, Stretch: 3 });
@@ -211,12 +205,6 @@ var DevConsoleComponent = IgeEntity.extend({
 			var controllerClearEveryFrame = f1.add(ige.client, 'clearEveryFrame');
 
 			var controllerViewportClippingEnabled = f1.add(ige.client, 'viewportClippingEnabled');
-
-			var controllerCtxAlphaEnabled = f1.add(ige.client, 'ctxAlphaEnabled');
-			controllerCtxAlphaEnabled.onChange(function (value) {
-				// console.log('ctxAlphaEnabled:',value);
-				ige.getCtx();
-			});
 
 			tuningDiv.append(gui.domElement);
 

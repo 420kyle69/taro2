@@ -6,7 +6,7 @@ var UnitAttributeBar = IgeEntity.extend({
 
 		IgeEntity.prototype.init.call(self);
 		self.id();
-		self.category('pixiBar');
+		self.category('unitBar');
 
 		config = config || {};
 

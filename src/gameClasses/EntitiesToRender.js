@@ -95,7 +95,6 @@ var EntitiesToRender = /** @class */ (function () {
     EntitiesToRender.prototype.frameTick = function () {
         ige.engineStep();
         ige.input.processInputOnEveryFps();
-        this.timeStamp = Date.now();
         ige._renderFrames++;
         this.updateAllEntities();
     };

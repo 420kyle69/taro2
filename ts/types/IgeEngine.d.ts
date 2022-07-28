@@ -7,6 +7,8 @@ declare class IgeEngine extends IgeClass {
 	_currentTime: number;
 	_cullCounter: number;
 
+	env: string;
+
 	isClient: boolean;
 	isServer: boolean;
 
@@ -25,8 +27,7 @@ declare class IgeEngine extends IgeClass {
 
 	game: GameComponent;
 
-	pixi: IgeInitPixi;
-	phaser: PhaserRenderer;
+	renderer: PhaserRenderer;
 
 	scaleMapDetails: {
 		scaleFactor: {

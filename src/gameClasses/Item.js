@@ -153,9 +153,6 @@ var Item = IgeEntityPhysics.extend({
 				if (ige.isClient) {
 					// avoid transforming box2d body by calling prototype
 
-					// Leaving this commented line until pixi is fully removed
-					// IgeEntity.prototype.mount.call(this, obj);
-
 					var unitAnchorX = body.unitAnchor.x;
 					var unitAnchorY = body.unitAnchor.y;
 					IgeEntity.prototype.translateTo.call(this, unitAnchorX, (-1 * unitAnchorY), 0);
@@ -959,17 +956,6 @@ var Item = IgeEntityPhysics.extend({
 						}
 						break;
 					case 'slotIndex':
-						var owner = self.getOwnerUnit();
-						// Leaving this until pixi is full removed
-
-						// if (ige.isClient && owner) {
-						// 	// unmount item when item is in backpack
-						// 	if (newValue >= owner._stats.inventorySize) {
-						// 		self.unMount();
-						// 	} else {
-						// 		self.mount(ige.pixi.world);
-						// 	}
-						// }
 						break;
 				}
 			}

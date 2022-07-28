@@ -108,7 +108,7 @@ var IgeEntity = IgeObject.extend({
 			// this.disableInterpolation(false)
 			// add a little bit of delay before showing the item, so we don't see item translating from old location to new location
 			this._hidden = false;
-			ige.client.emit('show', this);
+			this.emit('show');
 		}
 
 		return this;
@@ -166,7 +166,7 @@ var IgeEntity = IgeObject.extend({
 			// this.disableInterpolation(true)
 
 			this._hidden = true;
-			ige.client.emit('hide', this);
+			this.emit('hide');
 			this.texture('');
 		}
 		return this;
@@ -825,7 +825,6 @@ var IgeEntity = IgeObject.extend({
 			this._bounds2d.x2 = px / 2;
 
 			if (ige.isClient) {
-				ige.client.emit('width', {entity: this, px: px});
 				this.emit(
 					'size',
 					{
@@ -861,7 +860,6 @@ var IgeEntity = IgeObject.extend({
 			this._bounds2d.y2 = px / 2;
 
 			if (ige.isClient) {
-				ige.client.emit('height', {entity: this, px: px});
 				this.emit(
 					'size',
 					{
@@ -1814,7 +1812,7 @@ var IgeEntity = IgeObject.extend({
 
 				if (!isForOrphans && ige.gameLoopTickHasExecuted) {
 					// Process any behaviours assigned to the entity
-					this._processUpdateBehaviours(ctx, tickDelta);
+					this._processUpdateBehaviours();
 				}
 
 				// Update this object's current frame alternator value
@@ -1873,7 +1871,7 @@ var IgeEntity = IgeObject.extend({
 			ige.tickCount++;
 
 			// Process any behaviours assigned to the entity
-			this._processTickBehaviours(ctx);
+			this._processTickBehaviours();
 
 			// Process any mouse events we need to do
 
@@ -2478,7 +2476,7 @@ var IgeEntity = IgeObject.extend({
 					ige.client.myPlayer &&
 					ige.client.myPlayer.currentFollowUnit == this.id()
 				) {
-					this.emit('stop-follow');
+					ige.client.emit('stop-follow');
 				}
 
 				delete ige.entitiesToRender.trackEntityById[entityId];
@@ -3155,26 +3153,6 @@ var IgeEntity = IgeObject.extend({
 		}
 	},
 
-	isInVP: function (rect2) {
-		var vp = ige.pixi.viewport.getVisibleBounds();
-		var rect1 = {
-			x1: vp.x,
-			y1: vp.y,
-			x2: vp.x + vp.width,
-			y2: vp.y + vp.height
-		};
-		if (rect1.x1 >= rect2.x2 || rect2.x1 >= rect1.x2) {
-			return false;
-		}
-
-		// If one rectangle is above other
-		if (rect1.y1 >= rect2.y2 || rect2.y1 >= rect1.y2) {
-			return false;
-		}
-
-		return true;
-	},
-
 	/**
 	 * Translates the entity to the passed point.
 	 * @param {IgePoint3d} point The point with co-ordinates.
@@ -3454,11 +3432,6 @@ var IgeEntity = IgeObject.extend({
 	 */
 	scaleTo: function (x, y, z) {
 		if (ige.isClient) {
-			ige.client.emit('scale', {
-				entity: this,
-				x: x,
-				y: y
-			});
 			this.emit('scale', {
 				x: x,
 				y: y
@@ -4026,7 +3999,7 @@ var IgeEntity = IgeObject.extend({
 			}
 		}
 	},
-	//mouseEvents for sandbox mode only, but sandbox not use pixi
+	//mouseEvents for sandbox mode only
 	mouseEvents: function (defaultData) {
 		var self = this;
 		if (typeof mode === 'string' && mode === 'sandbox') {
@@ -5002,7 +4975,7 @@ var IgeEntity = IgeObject.extend({
 	 */
 	_processTransform: function () {
 		if (
-			// prevent igePixi calling this function multiple times for a same entity
+			// prevent calling this function multiple times for a same entity
 			this._lastTransformAt == ige._currentTime ||
 			// entity has no body
 			this._translate == undefined ||
