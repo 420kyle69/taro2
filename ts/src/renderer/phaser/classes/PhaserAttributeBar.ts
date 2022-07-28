@@ -36,7 +36,7 @@ class PhaserAttributeBar extends Phaser.GameObjects.Container {
 	}
 
 	private readonly bar: Phaser.GameObjects.Graphics;
-	private readonly text: Phaser.GameObjects.Text;
+	private readonly text: Phaser.GameObjects.BitmapText;
 
 	private fadeTimerEvent: Phaser.Time.TimerEvent;
 	private fadeTween: Phaser.Tweens.Tween;
@@ -50,15 +50,14 @@ class PhaserAttributeBar extends Phaser.GameObjects.Container {
 		const bar = this.bar = scene.add.graphics();
 		this.add(bar);
 
-		const text = this.text = scene.add.text(0, 0, '', {
-			fontFamily: 'Arial',
-			color: '#000000',
-			align: 'center'
-		});
-		text.setFontStyle('bold');
-		text.setFontSize(14);
+		const text = this.text = scene.add.bitmapText(0, 0,
+			'Arial_24px_bold_black'
+		);
+		text.setCenterAlign();
+		text.setFontSize(16);
 		text.setOrigin(0.5);
 		this.add(text);
+
 		unit.attributesContainer.add(this);
 	}
 
@@ -67,7 +66,6 @@ class PhaserAttributeBar extends Phaser.GameObjects.Container {
 		this.name = data.type || data.key;
 
 		const bar = this.bar;
-		const text = this.text;
 
 		const w = 94;
 		const h = 16;
@@ -97,7 +95,7 @@ class PhaserAttributeBar extends Phaser.GameObjects.Container {
 			borderRadius
 		);
 
-		text.setText(data.displayValue ?
+		this.text.setText(data.displayValue ?
 			(typeof data.value === 'number' ?
 				data.value.toFixed(0) : '0') : '');
 
