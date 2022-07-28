@@ -49,8 +49,12 @@ var PhaserRenderer = /** @class */ (function (_super) {
                     }]
             }
         }) || this;
-        // Ask the input component to setup any listeners it has
-        ige.input.setupListeners(_this.canvas);
+        if (_this.isBooted) {
+            _this.setupInputListeners();
+        }
+        else {
+            _this.events.once(Phaser.Core.Events.BOOT, _this.setupInputListeners, _this);
+        }
         if (typeof ga != 'undefined' && ige.env != 'local') {
             ga('send', {
                 hitType: 'event',
@@ -60,6 +64,10 @@ var PhaserRenderer = /** @class */ (function (_super) {
         }
         return _this;
     }
+    PhaserRenderer.prototype.setupInputListeners = function () {
+        // Ask the input component to setup any listeners it has
+        ige.input.setupListeners(this.canvas);
+    };
     PhaserRenderer.prototype.getViewportBounds = function () {
         return this.scene.getScene('Game').cameras.main.getBounds();
     };
