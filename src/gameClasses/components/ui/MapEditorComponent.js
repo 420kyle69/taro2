@@ -57,7 +57,7 @@ var MapEditorComponent = IgeEntity.extend({
 
 		$('#entity-delete').on('click', function (e) {
 			e.preventDefault();
-			var index = $('[name=entity-index').val();
+			var index = $('[name=entity-index]').val();
 			self.upsertMapEntities({}, parseInt(index), 'delete');
 		});
 		$('#entities-form').on('submit', function (e) {
@@ -419,7 +419,10 @@ var MapEditorComponent = IgeEntity.extend({
 						self.positionCurTextureBox(event);
 						drawMouse = true;
 					} else {
-						if (event.which === 1 && !self.mouseDownOnMiniMap && event.target.id == 'igeFrontBuffer') {
+						var target = event.target;
+						if (event.which === 1 && !self.mouseDownOnMiniMap &&
+							target.tagName.toLowerCase() == 'canvas' &&
+							target.parentElement.id == 'game-div') {
 							self.drawingRegion = true;
 							self.drawNewRegion(event);
 						}
@@ -478,7 +481,7 @@ var MapEditorComponent = IgeEntity.extend({
 			mouseIsDown = true;
 			if (($('#mapEditor').hasClass('active')) && mouseIsDown) {
 				if (addNewRegion) {
-					if (!self.checkIfClickedMiniMap(event.pageX, event.pageY) && event.target.id == 'igeFrontBuffer') {
+					if (!self.checkIfClickedMiniMap(event.pageX, event.pageY) && event.target.parentElement.id == 'game-div') {
 						self.drawNewRegion(event);
 					}
 				} else {

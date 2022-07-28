@@ -1,3 +1,5 @@
+/// <reference types="@types/google.analytics" />
+
 class PhaserRenderer extends Phaser.Game {
 
 	constructor () {
@@ -10,8 +12,8 @@ class PhaserRenderer extends Phaser.Game {
 			type: forceCanvas[gameId] ?
 				Phaser.CANVAS : Phaser.AUTO,
 			scale: {
-				width: ige.pixi.initialWindowWidth,
-				height: ige.pixi.initialWindowHeight,
+				width: 600,
+				height: 400,
 				parent: 'game-div',
 				mode: Phaser.Scale.ScaleModes.RESIZE,
 				autoRound: true,
@@ -19,8 +21,7 @@ class PhaserRenderer extends Phaser.Game {
 			},
 			render: {
 				pixelArt: false,
-				transparent: !false,
-				mipmapFilter: 'NEAREST'
+				transparent: false
 			},
 			scene: [
 				GameScene,
@@ -40,5 +41,17 @@ class PhaserRenderer extends Phaser.Game {
 
 		// Ask the input component to setup any listeners it has
 		ige.input.setupListeners(this.canvas);
+
+		if (typeof ga != 'undefined' && ige.env != 'local') {
+			ga('send', {
+				hitType: 'event',
+				eventCategory: 'Rendering Engine',
+				eventAction: this.renderer.type
+			});
+		}
+	}
+
+	getViewportBounds (): Phaser.Geom.Rectangle {
+		return this.scene.getScene('Game').cameras.main.getBounds();
 	}
 }

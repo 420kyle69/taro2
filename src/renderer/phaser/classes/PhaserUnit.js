@@ -23,7 +23,6 @@ var PhaserUnit = /** @class */ (function (_super) {
         Object.assign(_this.evtListeners, {
             flip: entity.on('flip', _this.flip, _this),
             follow: entity.on('follow', _this.follow, _this),
-            'stop-follow': entity.on('stop-follow', _this.stopFollow, _this),
             'update-label': entity.on('update-label', _this.updateLabel, _this),
             'show-label': entity.on('show-label', _this.showLabel, _this),
             'hide-label': entity.on('hide-label', _this.hideLabel, _this),
@@ -69,10 +68,6 @@ var PhaserUnit = /** @class */ (function (_super) {
             return;
         }
         camera.startFollow(this.gameObject, false, 0.05, 0.05);
-    };
-    PhaserUnit.prototype.stopFollow = function () {
-        console.log('PhaserUnit stop-follow', this.entity.id()); // TODO remove
-        this.scene.cameras.main.stopFollow();
     };
     PhaserUnit.prototype.getLabel = function () {
         if (!this.label) {

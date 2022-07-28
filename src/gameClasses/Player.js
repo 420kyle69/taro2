@@ -150,8 +150,6 @@ var Player = IgeEntity.extend({
 
 		if (ige.isServer && self._stats.clientId) {
 			ige.network.send('makePlayerSelectUnit', { unitId: unitId }, self._stats.clientId);
-
-			var unit = ige.$(unitId);
 		}
 
 		if (ige.isClient) {
@@ -173,24 +171,6 @@ var Player = IgeEntity.extend({
 				unit.renderMobileControl();
 				ige.client.selectedUnit = unit;
 				ige.client.eventLog.push([ige._currentTime, `my unit selected ${unitId}`]);
-
-				if (ige.env == 'local') {
-					var graphics = new PIXI.Graphics();
-					graphics.lineStyle(2, 0x0000FF, 0.5);
-					graphics.beginFill(0xFF700B, 0.3);
-					graphics.drawRect(0, 0, unit.width(), unit.height());
-					graphics = ige.pixi.app.renderer.generateTexture(graphics);
-					graphics = new PIXI.Sprite(graphics);
-					graphics.rotation = unit._rotate.z;
-					graphics.pivot.set(unit.width / 2, unit.height / 2);
-					var container = new PIXI.Container();
-					container.addChild(graphics);
-					container.position.set(unit._translate.x, unit._translate.y);
-					container.pivot.set(unit.width / 2, unit.height / 2);
-					container.zIndex = 10;
-					unit._debugEntity = container;
-					ige.pixi.box2dDebug.addChild(container);
-				}
 			}
 		}
 	},
@@ -212,7 +192,6 @@ var Player = IgeEntity.extend({
 				&& unit._category == 'unit'
 			) {
 				ige.client.myPlayer.currentFollowUnit = unit._id;
-				ige.client.emit('followUnit', unit);
 
 				unit.emit('follow');
 			}

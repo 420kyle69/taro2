@@ -889,11 +889,6 @@ var IgeObject = IgeEventingClass.extend({
 				return this;
 			}
 
-			if (ige.isClient) {
-				ige.client.emit('mount', { entity: this, parent: obj });
-				// we will return this later if we chose a valid obj to mount on
-			}
-
 			if (obj._children) {
 				// Check that the engine will allow us to register this object
 				this.id(); // Generates a new id if none is currently set, and registers it on the object register!
@@ -973,12 +968,6 @@ var IgeObject = IgeEventingClass.extend({
 	 * @return {*} Returns this on success or false on failure.
 	 */
 	unMount: function () {
-		if (ige.isClient) {
-			ige.client.emit('unMount', this);
-
-			//
-		}
-
 		if (this._parent) {
 			var childArr = this._parent._children;
 			var index = childArr.indexOf(this);
@@ -1568,22 +1557,6 @@ var IgeObject = IgeEventingClass.extend({
 			if (arr) {
 				arrCount = arr.length;
 
-				// Depth sort all child objects
-				// if (arrCount && !ige._headless) {
-				// 	if (igeConfig.debug._timing) {
-				// 		if (!ige._timeSpentLastTick[this.id()]) {
-				// 			ige._timeSpentLastTick[this.id()] = {};
-				// 		}
-
-				// 		ts = new Date().getTime();
-				// 		this.depthSortChildren();
-				// 		td = new Date().getTime() - ts;
-				// 		ige._timeSpentLastTick[this.id()].depthSortChildren = td;
-				// 	} else {
-				// 		this.depthSortChildren();
-				// 	}
-				// }
-
 				// Loop our children and call their update methods
 				if (igeConfig.debug._timing) {
 					while (arrCount--) {
@@ -1769,7 +1742,7 @@ var IgeObject = IgeEventingClass.extend({
 	 * Calls each behaviour method for the object.
 	 * @private
 	 */
-	_processUpdateBehaviours: function (ctx, tickDelta) {
+	_processUpdateBehaviours: function () {
 		var arr = this._updateBehaviours;
 		var arrCount;
 
@@ -1785,7 +1758,7 @@ var IgeObject = IgeEventingClass.extend({
 	 * Calls each behaviour method for the object.
 	 * @private
 	 */
-	_processTickBehaviours: function (ctx) {
+	_processTickBehaviours: function () {
 		var arr = this._tickBehaviours;
 		var arrCount;
 

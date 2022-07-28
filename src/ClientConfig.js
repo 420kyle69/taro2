@@ -54,11 +54,6 @@ var igeClientConfig = {
 
 		'/gameClasses/EntitiesToRender.js',
 
-		/* PIXI */
-		'pixi/pixi-viewport.js',
-		'pixi/pixi-cull.js',
-		'pixi/IgePixi.js',
-
 		/* Phaser */
 		'../node_modules/phaser/dist/phaser-arcade-physics.min.js',
 		'../node_modules/phaser3-rex-plugins/dist/rexvirtualjoystickplugin.min.js',
