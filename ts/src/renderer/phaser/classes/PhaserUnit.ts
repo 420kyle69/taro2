@@ -8,6 +8,8 @@ class PhaserUnit extends PhaserAnimatedEntity {
 	attributes: PhaserAttributeBar[] = [];
 	attributesContainer: Phaser.GameObjects.Container;
 
+	private zoomEvtListener:  EvtListener;
+
 	constructor (
 		scene: GameScene,
 		entity: Unit
@@ -33,9 +35,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			'render-chat-bubble': entity.on('render-chat-bubble', this.renderChat, this),
 		});
 
-		ige.client.on('zoom', (height: number) => {
-			this.scaleElements(height);
-		});
+		this.zoomEvtListener = ige.client.on('zoom', this.scaleElements, this);
 	}
 
 	protected transform (data: {
@@ -220,6 +220,10 @@ class PhaserUnit extends PhaserAnimatedEntity {
 	}
 
 	protected destroy (): void {
+
+		ige.client.off('zoom', this.zoomEvtListener);
+		this.zoomEvtListener = null;
+
 		if (this.chat) {
 			this.chat.destroy();
 			this.chat = null;
