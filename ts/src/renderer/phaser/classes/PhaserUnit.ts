@@ -45,7 +45,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 	}): void {
 		super.transform(data);
 		if (this.chat) {
-			this.chat.updatePosition(this.gameObject.x, this.gameObject.y);
+			this.chat.updatePosition();
 		}
 		this.flip(this.entity._stats.flip);
 	}
