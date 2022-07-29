@@ -2,11 +2,14 @@ class PhaserUnit extends PhaserAnimatedEntity {
 
 	sprite: Phaser.GameObjects.Sprite;
 	label: Phaser.GameObjects.Text;
-	chat: PhaserChatBubble;
+	private chat: PhaserChatBubble;
 
 	gameObject: Phaser.GameObjects.Container;
 	attributes: PhaserAttributeBar[] = [];
 	attributesContainer: Phaser.GameObjects.Container;
+
+	private zoomEvtListener: EvtListener;
+	private scaleTween: Phaser.Tweens.Tween;
 
 	constructor (
 		scene: GameScene,
@@ -33,9 +36,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			'render-chat-bubble': entity.on('render-chat-bubble', this.renderChat, this),
 		});
 
-		ige.client.on('zoom', (height: number) => {
-			this.scaleElements(height);
-		});
+		this.zoomEvtListener = ige.client.on('zoom', this.scaleElements, this);
 	}
 
 	protected transform (data: {
@@ -50,12 +51,10 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		this.flip(this.entity._stats.flip);
 	}
 
-	protected size (
-		data: {
-			width: number,
-			height: number
-		}
-	): void {
+	protected size (data: {
+		width: number,
+		height: number
+	}): void {
 		super.size(data);
 		if (this.label) {
 			this.updateLabelOffset();
@@ -199,7 +198,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		a.render(data.attr);
 	}
 
-	private renderChat (text): void {
+	private renderChat (text: string): void {
 		console.log('create-chat', text); // TODO remove
 		if (this.chat) {
 			this.chat.showMessage(text);
@@ -208,18 +207,30 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		}
 	}
 
-	private scaleElements (height): void {
+	private scaleElements (height: number): void {
 		const defaultZoom = ige.game.data.settings.camera?.zoom?.default || 1000;
 		const targetScale = height / defaultZoom;
-		this.scene.tweens.add({
+		this.scaleTween = this.scene.tweens.add({
 			targets: [this.label, this.attributesContainer, this.chat],
 			duration: 1000,
 			ease: Phaser.Math.Easing.Quadratic.Out,
 			scale: targetScale,
+			onComplete: () => {
+				this.scaleTween = null;
+			}
 		});
 	}
 
 	protected destroy (): void {
+
+		ige.client.off('zoom', this.zoomEvtListener);
+		this.zoomEvtListener = null;
+
+		if (this.scaleTween) {
+			this.scaleTween.stop();
+			this.scaleTween = null;
+		}
+
 		if (this.chat) {
 			this.chat.destroy();
 			this.chat = null;

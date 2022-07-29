@@ -31,9 +31,7 @@ var PhaserUnit = /** @class */ (function (_super) {
             'update-attribute': entity.on('update-attribute', _this.updateAttribute, _this),
             'render-chat-bubble': entity.on('render-chat-bubble', _this.renderChat, _this),
         });
-        ige.client.on('zoom', function (height) {
-            _this.scaleElements(height);
-        });
+        _this.zoomEvtListener = ige.client.on('zoom', _this.scaleElements, _this);
         return _this;
     }
     PhaserUnit.prototype.transform = function (data) {
@@ -169,17 +167,27 @@ var PhaserUnit = /** @class */ (function (_super) {
         }
     };
     PhaserUnit.prototype.scaleElements = function (height) {
+        var _this = this;
         var _a, _b;
         var defaultZoom = ((_b = (_a = ige.game.data.settings.camera) === null || _a === void 0 ? void 0 : _a.zoom) === null || _b === void 0 ? void 0 : _b.default) || 1000;
         var targetScale = height / defaultZoom;
-        this.scene.tweens.add({
+        this.scaleTween = this.scene.tweens.add({
             targets: [this.label, this.attributesContainer, this.chat],
             duration: 1000,
             ease: Phaser.Math.Easing.Quadratic.Out,
             scale: targetScale,
+            onComplete: function () {
+                _this.scaleTween = null;
+            }
         });
     };
     PhaserUnit.prototype.destroy = function () {
+        ige.client.off('zoom', this.zoomEvtListener);
+        this.zoomEvtListener = null;
+        if (this.scaleTween) {
+            this.scaleTween.stop();
+            this.scaleTween = null;
+        }
         if (this.chat) {
             this.chat.destroy();
             this.chat = null;

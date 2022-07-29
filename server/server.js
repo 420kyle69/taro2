@@ -78,6 +78,7 @@ var Server = IgeClass.extend({
 		self.retryCount = 0;
 		self.maxRetryCount = 3;
 		self.postReqTimestamps = [];
+		self.saveDataTimestamps = [];
 		self.started_at = new Date();
 		self.lastSnapshot = [];
 		self.TOKEN_EXPIRES_IN = 10 * 60 * 1000; // token expires in 10 minutes
@@ -287,13 +288,13 @@ var Server = IgeClass.extend({
 		}
 
 		app.get('/', (req, res) => {
-			
+
 			const jwt = require("jsonwebtoken");
-			
+
 			const token = jwt.sign({ userId: '', createdAt: Date.now() }, process.env.JWT_SECRET_KEY, {
 				expiresIn: ige.server.TOKEN_EXPIRES_IN.toString(),
 			});
-			
+
 			const videoChatEnabled = ige.game.data && ige.game.data.defaultData && ige.game.data.defaultData.enableVideoChat ? ige.game.data.defaultData.enableVideoChat : false;
 			const game = {
 				_id: global.standaloneGame.defaultData._id,
