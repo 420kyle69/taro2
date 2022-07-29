@@ -129,6 +129,11 @@ class GameScene extends PhaserScene {
 			'/assets/fonts/Arial_24px_bold_black_0.png',
 			'/assets/fonts/Arial_24px_bold_black.fnt'
 		);
+
+		this.load.bitmapFont('Arial_24px_bold_white',
+			'/assets/fonts/Arial_24px_bold_white_0.png',
+			'/assets/fonts/Arial_24px_bold_white.fnt'
+		);
 	}
 
 	loadEntity (key: string, data: EntityData): void {

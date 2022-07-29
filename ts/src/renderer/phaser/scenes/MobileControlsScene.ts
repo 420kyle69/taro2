@@ -62,15 +62,13 @@ class MobileControlsScene extends PhaserScene {
 						icon.setScale(0.5);
 						controls.add(icon);
 					} else {
-						const label = this.add.text(
+						const label = this.add.bitmapText(
 							x + w/2, y + h/2,
-							text,
-							{
-								fontFamily: 'Arial',
-								color: '#ffffff',
-								align: 'center'
-							});
-						label.setFontSize(24);
+							'Arial_24px_bold_white',
+							text
+						);
+						label.setCenterAlign();
+						label.setFontSize(26);
 						label.setOrigin(0.5);
 						controls.add(label);
 					}
