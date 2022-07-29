@@ -8,7 +8,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 	attributes: PhaserAttributeBar[] = [];
 	attributesContainer: Phaser.GameObjects.Container;
 
-	private zoomEvtListener:  EvtListener;
+	private zoomEvtListener: EvtListener;
 	private scaleTween: Phaser.Tweens.Tween;
 
 	constructor (
