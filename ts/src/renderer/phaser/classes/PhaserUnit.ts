@@ -51,12 +51,10 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		this.flip(this.entity._stats.flip);
 	}
 
-	protected size (
-		data: {
-			width: number,
-			height: number
-		}
-	): void {
+	protected size (data: {
+		width: number,
+		height: number
+	}): void {
 		super.size(data);
 		if (this.label) {
 			this.updateLabelOffset();
@@ -200,7 +198,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		a.render(data.attr);
 	}
 
-	private renderChat (text): void {
+	private renderChat (text: string): void {
 		console.log('create-chat', text); // TODO remove
 		if (this.chat) {
 			this.chat.showMessage(text);
@@ -209,7 +207,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		}
 	}
 
-	private scaleElements (height): void {
+	private scaleElements (height: number): void {
 		const defaultZoom = ige.game.data.settings.camera?.zoom?.default || 1000;
 		const targetScale = height / defaultZoom;
 		this.scaleTween = this.scene.tweens.add({
