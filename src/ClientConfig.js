@@ -55,7 +55,7 @@ var igeClientConfig = {
 		'/gameClasses/EntitiesToRender.js',
 
 		/* Phaser */
-		'../node_modules/phaser/dist/phaser-arcade-physics.min.js',
+		'renderer/phaser/phaser-taro.min.js',
 		'../node_modules/phaser3-rex-plugins/dist/rexvirtualjoystickplugin.min.js',
 		'renderer/phaser/enums/FlipMode.js',
 		'renderer/phaser/enums/TileLayer.js',
