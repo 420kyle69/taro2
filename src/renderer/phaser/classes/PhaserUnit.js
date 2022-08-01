@@ -37,7 +37,7 @@ var PhaserUnit = /** @class */ (function (_super) {
     PhaserUnit.prototype.transform = function (data) {
         _super.prototype.transform.call(this, data);
         if (this.chat) {
-            this.chat.updatePosition(this.gameObject.x, this.gameObject.y);
+            this.chat.updatePosition();
         }
         this.flip(this.entity._stats.flip);
     };

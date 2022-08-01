@@ -22,13 +22,9 @@ var PhaserAttributeBar = /** @class */ (function (_super) {
         _this.unit = unit;
         var bar = _this.bar = scene.add.graphics();
         _this.add(bar);
-        var text = _this.text = scene.add.text(0, 0, '', {
-            fontFamily: 'Arial',
-            color: '#000000',
-            align: 'center'
-        });
-        text.setFontStyle('bold');
-        text.setFontSize(14);
+        var text = _this.text = scene.add.bitmapText(0, 0, 'Arial_24px_bold_black');
+        text.setCenterAlign();
+        text.setFontSize(16);
         text.setOrigin(0.5);
         _this.add(text);
         unit.attributesContainer.add(_this);
@@ -60,7 +56,6 @@ var PhaserAttributeBar = /** @class */ (function (_super) {
     PhaserAttributeBar.prototype.render = function (data) {
         this.name = data.type || data.key;
         var bar = this.bar;
-        var text = this.text;
         var w = 94;
         var h = 16;
         var borderRadius = h / 2 - 1;
@@ -73,7 +68,7 @@ var PhaserAttributeBar = /** @class */ (function (_super) {
         }
         bar.lineStyle(2, 0x000000, 1);
         bar.strokeRoundedRect(-w / 2, -h / 2, w, h, borderRadius);
-        text.setText(data.displayValue ?
+        this.text.setText(data.displayValue ?
             (typeof data.value === 'number' ?
                 data.value.toFixed(0) : '0') : '');
         this.y = (data.index - 1) * h * 1.1;

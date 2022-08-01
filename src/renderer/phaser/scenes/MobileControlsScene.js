@@ -49,12 +49,9 @@ var MobileControlsScene = /** @class */ (function (_super) {
                         controls.add(icon);
                     }
                     else {
-                        var label = _this.add.text(x + w / 2, y + h / 2, text, {
-                            fontFamily: 'Arial',
-                            color: '#ffffff',
-                            align: 'center'
-                        });
-                        label.setFontSize(24);
+                        var label = _this.add.bitmapText(x + w / 2, y + h / 2, 'Arial_24px_bold_white', text);
+                        label.setCenterAlign();
+                        label.setFontSize(26);
                         label.setOrigin(0.5);
                         controls.add(label);
                     }

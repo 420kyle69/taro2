@@ -124,6 +124,16 @@ class GameScene extends PhaserScene {
 		});
 
 		this.load.tilemapTiledJSON('map', this.patchMapData(data.map));
+
+		this.load.bitmapFont('Arial_24px_bold_black',
+			'/assets/fonts/Arial_24px_bold_black_0.png',
+			'/assets/fonts/Arial_24px_bold_black.fnt'
+		);
+
+		this.load.bitmapFont('Arial_24px_bold_white',
+			'/assets/fonts/Arial_24px_bold_white_0.png',
+			'/assets/fonts/Arial_24px_bold_white.fnt'
+		);
 	}
 
 	loadEntity (key: string, data: EntityData): void {
