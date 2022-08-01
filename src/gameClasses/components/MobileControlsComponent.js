@@ -8,9 +8,6 @@ var MobileControlsComponent = IgeEntity.extend({
 
 	init: function (entity) {
 		IgeEntity.prototype.init.call(this);
-		var self = this;
-
-		this.isSingleGame = this.isSingleGameMode();
 
 		// Store the entity that this component has been added to
 		this._entity = entity;
@@ -19,11 +16,6 @@ var MobileControlsComponent = IgeEntity.extend({
 
 		this.controls = {};
 
-		var canvas = document.querySelector('#game-div canvas');
-		this.canvas = {
-			height: (canvas.style.height && parseInt(canvas.style.height.replace('px', ''))) || canvas.height,
-			width: (canvas.style.width && parseInt(canvas.style.width.replace('px', ''))) || canvas.width
-		};
 		$(window).on('orientationchange load resize', function () {
 			if (ige.mobileControls) {
 				// and this unit is our player
@@ -42,54 +34,7 @@ var MobileControlsComponent = IgeEntity.extend({
 
 		this.id();
 		ige.entitiesToRender.trackEntityById[this.id()] = this;
-		self.addBehaviour('mobileControl', self._behaviour);
-	},
-
-	getParameterByName: function (name, url) {
-		// https://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
-		if (!url) url = window.location.href;
-		name = name.replace(/[\[\]]/g, '\\$&');
-		var regex = new RegExp(`[?&]${name}(=([^&#]*)|&|#|$)`);
-		var results = regex.exec(url);
-		if (!results) return null;
-		if (!results[2]) return '';
-		return decodeURIComponent(results[2].replace(/\+/g, ' '));
-	},
-
-	isSingleGameMode: function () {
-		var s = this.getParameterByName('s');
-		if (parseInt(s) == 1) return true;
-		return false;
-	},
-
-	// called from client after textures loaded
-	attach: function (mountScene) {
-		// don't add if not on mobile
-		if (!ige.isMobile) return;
-
-		// DOM UI Modifications for mobile
-		noAds = true;
-
-		// moved plain jquery based UI changes to template.js adjustUIForMobile function as
-		// this component gets added very late causing a flash of ugly ui on smaller screens
-
-		if (this.isSingleGame) {
-			$('#back-to-game-selection-button').hide();
-		} else {
-			$('#back-to-game-selection-button').show();
-		}
-
-		if (this.isPortrait()) {
-			$('#chat-input-field-div').css({
-				width: '80%'
-			});
-		} else {
-			$('#chat-input-field-div').css({
-				width: '60%'
-			});
-		}
-
-		return this;
+		this.addBehaviour('mobileControl', this._behaviour);
 	},
 
 	clearControls: function () {
@@ -408,18 +353,7 @@ var MobileControlsComponent = IgeEntity.extend({
 			key, x, y, w, h, settings
 		]);
 	},
-	isIframe () {
-		try {
-			return window.self !== window.top;
-		} catch (e) {
-			return true;
-		}
-	},
-	isPortrait: function () {
-		// return ige._bounds2d.x < ige._bounds2d.y;
-		// return window.orientation === 0 || window.orientation == undefined;
-		return this.canvas.width < this.canvas.height;
-	},
+
 	setVisible: function (value) {
 		this.emit('visible', value);
 	}
