@@ -555,6 +555,46 @@ NetIo.Server = NetIo.EventingClass.extend({
 			console.log('***');
 		}
 		
+		// http - local, standalone, standalone-remote env
+		
+		this._httpServer = this._http.createServer(function (request, response) {
+			response.writeHead(404);
+			response.end();
+		});
+		this._socketServerHttp = new this._websocket.Server({
+			server: this._httpServer
+		});
+		// this._socketServerHttp = new this._websocket.WebSocketServer({
+		// 	server: this._httpServer
+		// });
+		// Setup listener
+		this._socketServerHttp.on('connection', function (ws, request) {
+			self.socketConnection(ws, request);
+		});
+		
+		this._httpServer.on('error', function (err) {
+			switch (err.code) {
+				// TODO: Add all the error codes and human readable error here!
+				case 'EADDRINUSE':
+					self.log(`Cannot start server on port ${self._port} because the port is already in use by another application!`, 'error');
+					break;
+				default:
+					self.log(`Cannot start server, error code: ${err.code}`);
+					break;
+			}
+			
+			console.log('websocket error', err);
+		});
+		
+		this._httpServer.listen(this._port, function (err) {
+			self.log(`Server is listening on port ${self._port}`);
+			if (!secure) {
+				if (typeof (callback) === 'function') {
+					callback();
+				}
+			}
+		});
+		
 		if (secure) {
 			// https - production/staging env
 			
@@ -610,49 +650,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 				}
 			});
 			
-		} else {
-			
-			// http - local, standalone, standalone-remote env
-
-			this._httpServer = this._http.createServer(function (request, response) {
-				response.writeHead(404);
-				response.end();
-			});
-			this._socketServerHttp = new this._websocket.Server({
-				server: this._httpServer
-			});
-			// this._socketServerHttp = new this._websocket.WebSocketServer({
-			// 	server: this._httpServer
-			// });
-			// Setup listener
-			this._socketServerHttp.on('connection', function (ws, request) {
-				self.socketConnection(ws, request);
-			});
-			
-			this._httpServer.on('error', function (err) {
-				switch (err.code) {
-					// TODO: Add all the error codes and human readable error here!
-					case 'EADDRINUSE':
-						self.log(`Cannot start server on port ${self._port} because the port is already in use by another application!`, 'error');
-						break;
-					default:
-						self.log(`Cannot start server, error code: ${err.code}`);
-						break;
-				}
-				
-				console.log('websocket error', err);
-			});
-			
-			this._httpServer.listen(this._port, function (err) {
-				self.log(`Server is listening on port ${self._port}`);
-				if (!secure) {
-					if (typeof (callback) === 'function') {
-						callback();
-					}
-				}
-			});
-			
-		}
+		} 
 	},
 
 	socketConnection: function (ws, request) {
