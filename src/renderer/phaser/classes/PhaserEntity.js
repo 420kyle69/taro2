@@ -24,13 +24,11 @@ var PhaserEntity = /** @class */ (function () {
             .setVisible(true);
     };
     PhaserEntity.prototype.layer = function (value) {
-        console.log("".concat(this.entity._category, " ").concat(this.entity.id(), " layer: ").concat(this.entity._layer)); // TODO: Remove
         // use index - 1 because taro layers are indexed at 1
         var scene = this.gameObject.scene;
         scene.entityLayers[value - 1].add(this.gameObject);
     };
     PhaserEntity.prototype.depth = function (value) {
-        console.log("".concat(this.entity._category, " ").concat(this.entity.id(), " depth: ").concat(this.entity._depth)); // TODO: Remove
         this.gameObject.setDepth(value);
     };
     PhaserEntity.prototype.destroy = function () {

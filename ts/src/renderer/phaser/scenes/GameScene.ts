@@ -16,24 +16,13 @@ class GameScene extends PhaserScene {
 
 		const camera = this.cameras.main;
 
-		this.scale.on(Phaser.Scale.Events.RESIZE, (
-			gameSize: Phaser.Structs.Size,
-			baseSize: Phaser.Structs.Size,
-			displaySize: Phaser.Structs.Size,
-			previousWidth: number,
-			previousHeight: number
-		) => {
-			console.log(Phaser.Scale.Events.RESIZE, // TODO remove
-				gameSize, baseSize, displaySize, previousWidth, previousHeight);
-
+		this.scale.on(Phaser.Scale.Events.RESIZE, () => {
 			if (this.zoomSize) {
 				camera.zoom = this.calculateZoom();
 			}
 		});
 
 		ige.client.on('zoom', (height: number) => {
-			console.log('GameScene zoom event', height); // TODO remove
-
 			this.setZoomSize(height);
 
 			camera.zoomTo(
@@ -52,22 +41,18 @@ class GameScene extends PhaserScene {
 		});
 
 		ige.client.on('create-unit', (unit: Unit) => {
-			console.log('create-unit', unit); // TODO remove
 			new PhaserUnit(this, unit);
 		});
 
 		ige.client.on('create-item', (item: Item) => {
-			console.log('create-item', item); // TODO remove
 			new PhaserItem(this, item);
 		});
 
 		ige.client.on('create-projectile', (projectile: Projectile) => {
-			console.log('create-projectile', projectile); // TODO remove
 			new PhaserProjectile(this, projectile);
 		});
 
 		ige.client.on('create-region', (region: Region) => {
-			console.log('create-region', region); // TODO remove
 			new PhaserRegion(this, region);
 		});
 
@@ -77,17 +62,14 @@ class GameScene extends PhaserScene {
 			y: number,
 			color: string
 		}) => {
-			console.log('create-floating-text', data); // TODO remove
 			new PhaserFloatingText(this, data);
 		});
 
 		ige.client.on('stop-follow', () => {
-			console.log('stop-follow'); // TODO remove
 			camera.stopFollow();
 		});
 
 		ige.client.on('position-camera', (x: number, y: number) => {
-			console.log('position-camera', x, y); // TODO remove
 			camera.setPosition(x, y);
 		});
 	}
