@@ -672,7 +672,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 
 		if (!socket._fromPingService) {
 			if (request.url.indexOf('/?token=') === -1) {
-				socket.close('Unauthorized request');
+				socket.close('Security token could not be validated, please refresh the page.');
 				console.log('Unauthorized request', request.url);
 				return;
 			}
@@ -692,7 +692,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 				
 			} catch (e) {
 				// A token is required to connect with socket server
-				socket.close('Unauthorized request');
+				socket.close('Security token could not be validated, please refresh the page.');
 				console.log('Unauthorized request', e.message, token);
 				return;
 			}
@@ -701,7 +701,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 			const isUsedToken = ige.server.usedTokens[token];
 			if (isUsedToken) {
 				console.log("Token has been used already", token)
-				socket.close('Unauthorized request');
+				socket.close('Security token could not be validated, please refresh the page.');
 				return;
 			}
 			
