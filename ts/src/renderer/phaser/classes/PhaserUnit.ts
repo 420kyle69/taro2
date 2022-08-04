@@ -77,7 +77,6 @@ class PhaserUnit extends PhaserAnimatedEntity {
 	}
 
 	private follow (): void {
-		console.log('PhaserUnit follow', this.entity.id()); // TODO remove
 		const camera = this.scene.cameras.main as Phaser.Cameras.Scene2D.Camera & {
 			_follow: Phaser.GameObjects.GameObject
 		};
@@ -101,7 +100,6 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		bold?: boolean;
 		color?: string;
 	}): void {
-		console.log('PhaserUnit update-label', this.entity.id()); // TODO remove
 		const label = this.getLabel();
 		label.visible = true;
 
@@ -118,12 +116,10 @@ class PhaserUnit extends PhaserAnimatedEntity {
 	}
 
 	private showLabel (): void {
-		console.log('PhaserUnit show-label', this.entity.id()); // TODO remove
 		this.getLabel().visible = true;
 	}
 
 	private hideLabel (): void {
-		console.log('PhaserUnit hide-label', this.entity.id()); // TODO remove
 		this.getLabel().visible = false;
 	}
 
@@ -131,7 +127,6 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		text: string;
 		color?: string;
 	}): void {
-		console.log('PhaserUnit fading-text', this.entity.id()); // TODO remove
 		new PhaserFloatingText(this.scene, {
 			text: data.text || '',
 			x: 0,
@@ -152,7 +147,6 @@ class PhaserUnit extends PhaserAnimatedEntity {
 	private renderAttributes (data: {
 		attrs: AttributeData[]
 	}): void {
-		console.log('PhaserUnit render-attributes', data); // TODO remove
 		// creating attributeContainer on the fly,
 		// only for units that have attribute bars
 		this.getAttributesContainer();
@@ -174,7 +168,6 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		attr: AttributeData;
 		shouldRender: boolean;
 	}): void {
-		console.log('PhaserUnit update-attribute', data); // TODO remove
 		const attributes = this.attributes;
 		let a: PhaserAttributeBar;
 		let i = 0;
@@ -199,7 +192,6 @@ class PhaserUnit extends PhaserAnimatedEntity {
 	}
 
 	private renderChat (text: string): void {
-		console.log('create-chat', text); // TODO remove
 		if (this.chat) {
 			this.chat.showMessage(text);
 		} else {

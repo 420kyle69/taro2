@@ -26,15 +26,12 @@ var GameScene = /** @class */ (function (_super) {
             this.scene.launch('MobileControls');
         }
         var camera = this.cameras.main;
-        this.scale.on(Phaser.Scale.Events.RESIZE, function (gameSize, baseSize, displaySize, previousWidth, previousHeight) {
-            console.log(Phaser.Scale.Events.RESIZE, // TODO remove
-            gameSize, baseSize, displaySize, previousWidth, previousHeight);
+        this.scale.on(Phaser.Scale.Events.RESIZE, function () {
             if (_this.zoomSize) {
                 camera.zoom = _this.calculateZoom();
             }
         });
         ige.client.on('zoom', function (height) {
-            console.log('GameScene zoom event', height); // TODO remove
             _this.setZoomSize(height);
             camera.zoomTo(_this.calculateZoom(), 1000, Phaser.Math.Easing.Quadratic.Out, true);
         });
@@ -45,31 +42,24 @@ var GameScene = /** @class */ (function (_super) {
                 }]);
         });
         ige.client.on('create-unit', function (unit) {
-            console.log('create-unit', unit); // TODO remove
             new PhaserUnit(_this, unit);
         });
         ige.client.on('create-item', function (item) {
-            console.log('create-item', item); // TODO remove
             new PhaserItem(_this, item);
         });
         ige.client.on('create-projectile', function (projectile) {
-            console.log('create-projectile', projectile); // TODO remove
             new PhaserProjectile(_this, projectile);
         });
         ige.client.on('create-region', function (region) {
-            console.log('create-region', region); // TODO remove
             new PhaserRegion(_this, region);
         });
         ige.client.on('floating-text', function (data) {
-            console.log('create-floating-text', data); // TODO remove
             new PhaserFloatingText(_this, data);
         });
         ige.client.on('stop-follow', function () {
-            console.log('stop-follow'); // TODO remove
             camera.stopFollow();
         });
         ige.client.on('position-camera', function (x, y) {
-            console.log('position-camera', x, y); // TODO remove
             camera.setPosition(x, y);
         });
     };

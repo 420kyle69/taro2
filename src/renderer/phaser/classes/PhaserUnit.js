@@ -60,7 +60,6 @@ var PhaserUnit = /** @class */ (function (_super) {
         this.sprite.setFlip(flip % 2 === 1, flip > 1);
     };
     PhaserUnit.prototype.follow = function () {
-        console.log('PhaserUnit follow', this.entity.id()); // TODO remove
         var camera = this.scene.cameras.main;
         if (camera._follow === this.gameObject) {
             return;
@@ -76,7 +75,6 @@ var PhaserUnit = /** @class */ (function (_super) {
         return this.label;
     };
     PhaserUnit.prototype.updateLabel = function (data) {
-        console.log('PhaserUnit update-label', this.entity.id()); // TODO remove
         var label = this.getLabel();
         label.visible = true;
         label.setFontFamily('Verdana');
@@ -90,15 +88,12 @@ var PhaserUnit = /** @class */ (function (_super) {
         this.updateLabelOffset();
     };
     PhaserUnit.prototype.showLabel = function () {
-        console.log('PhaserUnit show-label', this.entity.id()); // TODO remove
         this.getLabel().visible = true;
     };
     PhaserUnit.prototype.hideLabel = function () {
-        console.log('PhaserUnit hide-label', this.entity.id()); // TODO remove
         this.getLabel().visible = false;
     };
     PhaserUnit.prototype.fadingText = function (data) {
-        console.log('PhaserUnit fading-text', this.entity.id()); // TODO remove
         new PhaserFloatingText(this.scene, {
             text: data.text || '',
             x: 0,
@@ -116,7 +111,6 @@ var PhaserUnit = /** @class */ (function (_super) {
     };
     PhaserUnit.prototype.renderAttributes = function (data) {
         var _this = this;
-        console.log('PhaserUnit render-attributes', data); // TODO remove
         // creating attributeContainer on the fly,
         // only for units that have attribute bars
         this.getAttributesContainer();
@@ -134,7 +128,6 @@ var PhaserUnit = /** @class */ (function (_super) {
         });
     };
     PhaserUnit.prototype.updateAttribute = function (data) {
-        console.log('PhaserUnit update-attribute', data); // TODO remove
         var attributes = this.attributes;
         var a;
         var i = 0;
@@ -158,7 +151,6 @@ var PhaserUnit = /** @class */ (function (_super) {
         a.render(data.attr);
     };
     PhaserUnit.prototype.renderChat = function (text) {
-        console.log('create-chat', text); // TODO remove
         if (this.chat) {
             this.chat.showMessage(text);
         }
