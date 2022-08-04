@@ -454,7 +454,7 @@ var IgeNode = IgeClass.extend({
 			comments: false,
 			// presets: [ '@babel/preset-env' ],
 			plugins: [
-				process.env.ENV == 'production' ? ['transform-remove-console', { 'exclude': ['error', 'warn'] }] : []
+				['transform-remove-console', { 'exclude': ['error', 'warn'] }]
 			]
 		}).code.toString();
 	},
