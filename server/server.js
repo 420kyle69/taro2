@@ -169,7 +169,7 @@ var Server = IgeClass.extend({
 			}
 			// Include ProxyComponent to master cluster
 			if (typeof ProxyComponent !== 'undefined') {
-				// ige.addComponent(ProxyComponent);
+				ige.addComponent(ProxyComponent);
 			}
 		} else {
 			if (typeof ClusterClientComponent != 'undefined') {
