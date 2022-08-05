@@ -63,8 +63,8 @@ var Unit = IgeEntityPhysics.extend({
 
 		if (ige.isClient) {
 			this.addToRenderer(defaultAnimation && (defaultAnimation.frames[0] - 1));
-			this.transformTexture(this._translate.x, this._translate.y, 0);
 			ige.client.emit('create-unit', this);
+			this.transformTexture(this._translate.x, this._translate.y, 0);
 		}
 
 		// initialize body & texture of the unit
@@ -761,6 +761,7 @@ var Unit = IgeEntityPhysics.extend({
 
 		if (ige.isClient) {
 			self.updateTexture();
+			this.emit('update-texture');
 			self._scaleTexture();
 		}
 

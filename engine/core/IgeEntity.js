@@ -289,7 +289,6 @@ var IgeEntity = IgeObject.extend({
 		if (stateId) {
 			this.applyAnimationForState(stateId);
 		}
-		this.emit('update-texture');
 	},
 
 	getDefaultStateId: function () {
