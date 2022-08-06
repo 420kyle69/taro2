@@ -979,7 +979,7 @@ var IgeEntity = IgeObject.extend({
      * chaining or the current value if no arguments are specified.
      */
 	lifeSpan: function (milliseconds, deathCallback) {
-		if (milliseconds != undefined) {
+		if (milliseconds != undefined) {			
 			this.deathTime(ige._currentTime + milliseconds, deathCallback);
 			return this;
 		}
@@ -1803,6 +1803,10 @@ var IgeEntity = IgeObject.extend({
 		// }
 
 		if (this._deathTime !== undefined && this._deathTime <= ige._tickStart) {
+			if (this._category == 'item')
+			{
+				console.log("yoo", this._deathTime, ige._tickStart)
+			}
 			// Check if the deathCallBack was set
 			if (this._deathCallBack) {
 				this._deathCallBack.apply(this);
@@ -2459,6 +2463,12 @@ var IgeEntity = IgeObject.extend({
      *     entity.destroy();
      */
 	destroy: function (destroyOrphan) {
+		if (this._category == 'item') {
+			console.log('destroying item wtf')
+			console.trace();
+		}
+			
+
 		IgeEntity.prototype.log(`igeEntity: destroy ${this._category} ${this.id()}`);
 
 		this._alive = false;
