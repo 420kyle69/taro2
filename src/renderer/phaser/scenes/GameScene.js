@@ -246,6 +246,14 @@ var GameScene = /** @class */ (function (_super) {
         }
         return canvas;
     };
+    GameScene.prototype.update = function (time, delta) {
+        this.renderedEntities.forEach(function (element) {
+            element.visible = false;
+        });
+        this.cameras.main.cull(this.renderedEntities).forEach(function (element) {
+            element.visible = true;
+        });
+    };
     return GameScene;
 }(PhaserScene));
 //# sourceMappingURL=GameScene.js.map

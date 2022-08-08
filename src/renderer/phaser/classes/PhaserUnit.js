@@ -110,27 +110,26 @@ var PhaserUnit = /** @class */ (function (_super) {
         return this.attributesContainer;
     };
     PhaserUnit.prototype.renderAttributes = function (data) {
-        var _this = this;
         // creating attributeContainer on the fly,
         // only for units that have attribute bars
-        this.getAttributesContainer();
-        var attributes = this.attributes;
+        /*this.getAttributesContainer();
+        const attributes = this.attributes;
         // release all existing attribute bars
-        attributes.forEach(function (a) {
+        attributes.forEach((a) => {
             PhaserAttributeBar.release(a);
         });
         attributes.length = 0;
         // add attribute bars based on passed data
-        data.attrs.forEach(function (ad) {
-            var a = PhaserAttributeBar.get(_this);
+        data.attrs.forEach((ad) => {
+            const a = PhaserAttributeBar.get(this);
             a.render(ad);
             attributes.push(a);
-        });
+        });*/
     };
     PhaserUnit.prototype.updateAttribute = function (data) {
-        var attributes = this.attributes;
-        var a;
-        var i = 0;
+        /*const attributes = this.attributes;
+        let a: PhaserAttributeBar;
+        let i = 0;
         for (; i < attributes.length; i++) {
             if (attributes[i].name === data.attr.type) {
                 a = attributes[i];
@@ -148,7 +147,7 @@ var PhaserUnit = /** @class */ (function (_super) {
             a = PhaserAttributeBar.get(this);
             attributes.push(a);
         }
-        a.render(data.attr);
+        a.render(data.attr);*/
     };
     PhaserUnit.prototype.renderChat = function (text) {
         if (this.chat) {

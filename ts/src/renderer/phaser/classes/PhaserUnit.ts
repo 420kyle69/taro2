@@ -149,7 +149,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 	}): void {
 		// creating attributeContainer on the fly,
 		// only for units that have attribute bars
-		this.getAttributesContainer();
+		/*this.getAttributesContainer();
 		const attributes = this.attributes;
 		// release all existing attribute bars
 		attributes.forEach((a) => {
@@ -161,14 +161,14 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			const a = PhaserAttributeBar.get(this);
 			a.render(ad);
 			attributes.push(a);
-		});
+		});*/
 	}
 
 	private updateAttribute (data: {
 		attr: AttributeData;
 		shouldRender: boolean;
 	}): void {
-		const attributes = this.attributes;
+		/*const attributes = this.attributes;
 		let a: PhaserAttributeBar;
 		let i = 0;
 		for (; i < attributes.length; i++) {
@@ -188,7 +188,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			a = PhaserAttributeBar.get(this);
 			attributes.push(a);
 		}
-		a.render(data.attr);
+		a.render(data.attr);*/
 	}
 
 	private renderChat (text: string): void {
