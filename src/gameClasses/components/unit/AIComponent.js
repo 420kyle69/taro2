@@ -201,8 +201,9 @@ var AIComponent = IgeEntity.extend({
 	moveToTargetPosition: function (x, y) {
 		this.setTargetPosition(x, y);
 		this.currentAction = 'move';
+		this._entity.startMoving();
 		this.targetUnitId = undefined;
-		this._entity.isMoving = true;
+		
 	},
 
 	setTargetUnit: function (unit) {

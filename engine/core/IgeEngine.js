@@ -145,7 +145,7 @@ var IgeEngine = IgeEntity.extend({
 		this._mousePos = new IgePoint3d(0, 0, 0);
 		this._currentViewport = null; // Set in IgeViewport.js tick(), holds the current rendering viewport
 		this._currentCamera = null; // Set in IgeViewport.js tick(), holds the current rendering viewport's camera
-		this._currentTime = 0; // The current engine time
+		this._currentTime = Date.now(); // The current engine time
 		this._globalSmoothing = false; // Determines the default smoothing setting for new textures
 		this._register = {
 			ige: this
