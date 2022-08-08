@@ -53,15 +53,6 @@ var IgeEngine = IgeEntity.extend({
 		// Assign ourselves to the global variable
 		ige = this;
 
-		// Output our header
-		/*
-		IgeEngine.prototype.log('------------------------------------------------------------------------------');
-		IgeEngine.prototype.log('* Powered by the Isogenic Game Engine ' + igeVersion + '                  *');
-		IgeEngine.prototype.log('* (C)opyright ' + new Date().getFullYear() + ' Irrelon Software Limited                                  *');
-		IgeEngine.prototype.log('* http://www.isogenicengine.com                                              *');
-		IgeEngine.prototype.log('------------------------------------------------------------------------------');
-		*/
-
 		IgeEntity.prototype.init.call(this);
 
 		// Check if we are running client-side
