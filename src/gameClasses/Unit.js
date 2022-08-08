@@ -88,7 +88,7 @@ var Unit = IgeEntityPhysics.extend({
 			self._stats.scale = parseFloat(self._stats.scaleBody);
 		} else {
 			if (!self._stats.scale) {
-				self._stats.scale = self._stats.currentBody.spriteScale > 0 ? self._stats.currentBody.spriteScale : 1;
+				self._stats.scale = self._stats.currentBody && self._stats.currentBody.spriteScale > 0 ? self._stats.currentBody.spriteScale : 1;
 			}
 		}
 		self._stats.fadingTextQueue = [];
