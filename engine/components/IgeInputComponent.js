@@ -546,10 +546,15 @@ var IgeInputComponent = IgeEventingClass.extend({
 				// if (ige.client.myPlayer && ige.client.myPlayer._stats.email) {
 				var gameData = ige.game && ige.game.data && ige.game.data.defaultData;
 				var player = ige.client.myPlayer;
-				if(gameData.allowVerifiedUserToChat && !player._stats.isUserVerified){
+
+				if (gameData.allowVerifiedUserToChat && !player._stats.isUserVerified) {
 					$('#message').attr('disabled', true);
-					$('#message').attr('placeholder', 'Please log in to chat');
+					$('#message').attr(
+						'placeholder',
+						!player._stats.isUserLoggedIn ? 'Please log in to chat' : 'Chat available after 1 day'
+					)
 				}
+
 				$('#chat-message-input').show();
 
 				
