@@ -671,8 +671,11 @@ NetIo.Server = NetIo.EventingClass.extend({
 				console.log('Unauthorized request', request.url);
 				return;
 			}
-
-			const token = request.url && request.url.replace('/?token=', '');
+			
+			const reqUrl = new URL('https://www.modd.io' + request.url);
+			const searchParams = reqUrl.searchParams;
+			const token = searchParams.get('token');
+			
 			try {
 				const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
 				

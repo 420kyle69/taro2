@@ -53,15 +53,6 @@ var IgeEngine = IgeEntity.extend({
 		// Assign ourselves to the global variable
 		ige = this;
 
-		// Output our header
-		/*
-		IgeEngine.prototype.log('------------------------------------------------------------------------------');
-		IgeEngine.prototype.log('* Powered by the Isogenic Game Engine ' + igeVersion + '                  *');
-		IgeEngine.prototype.log('* (C)opyright ' + new Date().getFullYear() + ' Irrelon Software Limited                                  *');
-		IgeEngine.prototype.log('* http://www.isogenicengine.com                                              *');
-		IgeEngine.prototype.log('------------------------------------------------------------------------------');
-		*/
-
 		IgeEntity.prototype.init.call(this);
 
 		// Check if we are running client-side
@@ -144,7 +135,7 @@ var IgeEngine = IgeEntity.extend({
 		this._mousePos = new IgePoint3d(0, 0, 0);
 		this._currentViewport = null; // Set in IgeViewport.js tick(), holds the current rendering viewport
 		this._currentCamera = null; // Set in IgeViewport.js tick(), holds the current rendering viewport's camera
-		this._currentTime = 0; // The current engine time
+		this._currentTime = Date.now(); // The current engine time
 		this._globalSmoothing = false; // Determines the default smoothing setting for new textures
 		this._register = {
 			ige: this
