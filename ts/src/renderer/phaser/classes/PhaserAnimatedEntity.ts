@@ -14,6 +14,8 @@ class PhaserAnimatedEntity extends PhaserEntity {
 
 		sprite.setDisplaySize(bounds.x, bounds.y);
 		sprite.rotation = entity._rotate.z;
+		sprite.visible = false;
+		this.scene.renderedEntities.push(sprite);
 
 		Object.assign(this.evtListeners, {
 			'update-texture': entity.on('update-texture', this.updateTexture, this),

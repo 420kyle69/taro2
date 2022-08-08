@@ -3,6 +3,7 @@ class GameScene extends PhaserScene {
 	private zoomSize: number;
 
 	entityLayers: Phaser.GameObjects.Layer[] = [];
+	renderedEntities: Phaser.GameObjects.GameObject[] = [];
 
 	constructor() {
 		super({ key: 'Game' });

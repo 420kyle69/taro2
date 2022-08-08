@@ -18,6 +18,7 @@ var GameScene = /** @class */ (function (_super) {
     function GameScene() {
         var _this = _super.call(this, { key: 'Game' }) || this;
         _this.entityLayers = [];
+        _this.renderedEntities = [];
         return _this;
     }
     GameScene.prototype.init = function () {
