@@ -88,7 +88,7 @@ var Unit = IgeEntityPhysics.extend({
 			self._stats.scale = parseFloat(self._stats.scaleBody);
 		} else {
 			if (!self._stats.scale) {
-				self._stats.scale = self._stats.currentBody.spriteScale > 0 ? self._stats.currentBody.spriteScale : 1;
+				self._stats.scale = (self._stats.currentBody && self._stats.currentBody.spriteScale > 0) ? self._stats.currentBody.spriteScale : 1;
 			}
 		}
 		self._stats.fadingTextQueue = [];
@@ -1768,7 +1768,7 @@ var Unit = IgeEntityPhysics.extend({
 
 				if (self._stats.isStunned == undefined || self._stats.isStunned != true) {
 					// translate unit
-					var speed = this._stats.attributes.speed && this._stats.attributes.speed.value || 0;
+					var speed = (this._stats.attributes && this._stats.attributes.speed && this._stats.attributes.speed.value) || 0;
 					var vector = undefined;
 					if (
 						( // either unit is AI unit that is currently moving
