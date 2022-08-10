@@ -1,10 +1,10 @@
 class PhaserUnit extends PhaserAnimatedEntity {
 
-	sprite: Phaser.GameObjects.Sprite;
+	sprite: Phaser.GameObjects.Sprite & Hidden;
 	label: Phaser.GameObjects.Text;
 	private chat: PhaserChatBubble;
 
-	gameObject: Phaser.GameObjects.Container;
+	gameObject: Phaser.GameObjects.Container & Hidden;
 	attributes: PhaserAttributeBar[] = [];
 	attributesContainer: Phaser.GameObjects.Container;
 
@@ -18,11 +18,14 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		super(scene, entity, `unit/${entity._stats.type}`);
 
 		const translate = entity._translate;
-		this.gameObject = scene.add.container(
+		const gameObject = scene.add.container(
 			translate.x,
 			translate.y,
 			[ this.sprite ]
 		);
+		this.gameObject = gameObject as Phaser.GameObjects.Container & Hidden;
+		gameObject.setSize(this.sprite.width, this.sprite.height);
+		this.scene.renderedEntities.push(this.gameObject);
 
 		Object.assign(this.evtListeners, {
 			flip: entity.on('flip', this.flip, this),
@@ -215,6 +218,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 
 	protected destroy (): void {
 
+		this.scene.renderedEntities = this.scene.renderedEntities.filter(item => item !== this.gameObject);
 		ige.client.off('zoom', this.zoomEvtListener);
 		this.zoomEvtListener = null;
 

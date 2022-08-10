@@ -5,7 +5,8 @@ class PhaserEntity {
 		Phaser.GameObjects.GameObject &
 		Phaser.GameObjects.Components.Transform &
 		Phaser.GameObjects.Components.Visible &
-		Phaser.GameObjects.Components.Depth;
+		Phaser.GameObjects.Components.Depth &
+		Hidden;
 
 	protected evtListeners: Record<string, EvtListener> = {};
 
@@ -35,13 +36,11 @@ class PhaserEntity {
 	}): void { }
 
 	protected hide (): void {
-		this.gameObject.setActive(false)
-			.setVisible(false);
+		this.gameObject.hidden = true;
 	}
 
 	protected show (): void {
-		this.gameObject.setActive(true)
-			.setVisible(true);
+		this.gameObject.hidden = false;
 	}
 
 	protected layer (value: number): void {
@@ -67,3 +66,7 @@ class PhaserEntity {
 		this.entity = null;
 	}
 }
+
+interface Hidden {
+	hidden: boolean;
+  }

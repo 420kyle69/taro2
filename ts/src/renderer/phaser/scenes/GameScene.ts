@@ -3,6 +3,7 @@ class GameScene extends PhaserScene {
 	private zoomSize: number;
 
 	entityLayers: Phaser.GameObjects.Layer[] = [];
+	renderedEntities: (Phaser.GameObjects.GameObject & Phaser.GameObjects.Components.Visible & Hidden)[] = [];
 
 	constructor() {
 		super({ key: 'Game' });
@@ -393,5 +394,14 @@ class GameScene extends PhaserScene {
 		}
 
 		return canvas;
+	}
+
+	update (): void {
+		this.renderedEntities.forEach(element => {
+			element.setVisible(false).setActive(false);
+		});
+		this.cameras.main.cull(this.renderedEntities).forEach(element => {
+			if (!element.hidden) element.setActive(true).setVisible(true);
+		});
 	}
 }

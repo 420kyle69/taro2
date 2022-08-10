@@ -1,16 +1,19 @@
 class PhaserRegion extends PhaserEntity {
 
-	protected gameObject: Phaser.GameObjects.Graphics;
+	protected gameObject: Phaser.GameObjects.Graphics & Hidden;
 	protected entity: Region;
 
 	constructor (
-		scene: GameScene,
+		private scene: GameScene,
 		entity: Region
 	) {
 		super(entity);
 
-		this.gameObject = scene.add.graphics();
+		const gameObject = scene.add.graphics();
 
+		this.gameObject = gameObject as Phaser.GameObjects.Graphics & Hidden;
+		this.gameObject.visible = false;
+		scene.renderedEntities.push(this.gameObject);
 		// we don't get depth/layer info from taro,
 		// so it can go in 'debris' layer for now
 		scene.entityLayers[EntityLayer.DEBRIS].add(this.gameObject);
@@ -35,5 +38,10 @@ class PhaserRegion extends PhaserEntity {
 			stats.width,
 			stats.height
 		);
+	}
+
+	protected destroy (): void {
+		this.scene.renderedEntities = this.scene.renderedEntities.filter(item => item !== this.gameObject);
+		super.destroy();
 	}
 }

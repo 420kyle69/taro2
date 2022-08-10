@@ -18,6 +18,7 @@ var GameScene = /** @class */ (function (_super) {
     function GameScene() {
         var _this = _super.call(this, { key: 'Game' }) || this;
         _this.entityLayers = [];
+        _this.renderedEntities = [];
         return _this;
     }
     GameScene.prototype.init = function () {
@@ -244,6 +245,15 @@ var GameScene = /** @class */ (function (_super) {
             }
         }
         return canvas;
+    };
+    GameScene.prototype.update = function () {
+        this.renderedEntities.forEach(function (element) {
+            element.setVisible(false).setActive(false);
+        });
+        this.cameras.main.cull(this.renderedEntities).forEach(function (element) {
+            if (!element.hidden)
+                element.setActive(true).setVisible(true);
+        });
     };
     return GameScene;
 }(PhaserScene));
