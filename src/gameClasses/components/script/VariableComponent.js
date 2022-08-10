@@ -108,7 +108,7 @@ var VariableComponent = IgeEntity.extend({
 			returnValue = undefined;
 		}
 
-		if (typeof text === 'object') {
+		if (text && typeof text === 'object') {
 			var entity = self.getValue(text.entity, vars);
 
 			switch (text.function) {
