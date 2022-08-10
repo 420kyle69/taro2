@@ -1,6 +1,6 @@
 class PhaserRegion extends PhaserEntity {
 
-	protected gameObject: Phaser.GameObjects.Graphics;
+	protected gameObject: Phaser.GameObjects.Graphics & Hidden;
 	protected entity: Region;
 
 	constructor (
@@ -9,7 +9,9 @@ class PhaserRegion extends PhaserEntity {
 	) {
 		super(entity);
 
-		this.gameObject = scene.add.graphics();
+		const gameObject = scene.add.graphics();
+
+		this.gameObject = gameObject as Phaser.GameObjects.Graphics & Hidden;
 
 		// we don't get depth/layer info from taro,
 		// so it can go in 'debris' layer for now

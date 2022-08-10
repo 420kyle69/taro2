@@ -16,12 +16,14 @@ var PhaserEntity = /** @class */ (function () {
     PhaserEntity.prototype.transform = function (data) { };
     PhaserEntity.prototype.scale = function (data) { };
     PhaserEntity.prototype.hide = function () {
-        this.gameObject.setActive(false)
-            .setVisible(false);
+        this.gameObject.hidden = true;
+        /*this.gameObject.setActive(false)
+            .setVisible(false);*/
     };
     PhaserEntity.prototype.show = function () {
-        this.gameObject.setActive(true)
-            .setVisible(true);
+        this.gameObject.hidden = false;
+        /*this.gameObject.setActive(true)
+            .setVisible(true);*/
     };
     PhaserEntity.prototype.layer = function (value) {
         // use index - 1 because taro layers are indexed at 1

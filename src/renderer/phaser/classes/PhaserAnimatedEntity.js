@@ -20,11 +20,10 @@ var PhaserAnimatedEntity = /** @class */ (function (_super) {
         _this.scene = scene;
         _this.key = key;
         var bounds = entity._bounds2d;
-        var sprite = _this.sprite = scene.add.sprite(0, 0, key);
+        var sprite = scene.add.sprite(0, 0, key);
+        _this.sprite = sprite;
         sprite.setDisplaySize(bounds.x, bounds.y);
         sprite.rotation = entity._rotate.z;
-        //sprite.visible = false;
-        //this.scene.renderedEntities.push(sprite);
         Object.assign(_this.evtListeners, {
             'update-texture': entity.on('update-texture', _this.updateTexture, _this),
             'play-animation': entity.on('play-animation', _this.playAnimation, _this),

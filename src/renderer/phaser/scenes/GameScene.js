@@ -251,7 +251,8 @@ var GameScene = /** @class */ (function (_super) {
             element.setVisible(false);
         });
         this.cameras.main.cull(this.renderedEntities).forEach(function (element) {
-            element.setVisible(true);
+            if (!element.hidden)
+                element.setVisible(true);
         });
         //ige.renderer.scene.scenes[0].cameras.main.cull(ige.renderer.scene.scenes[0].renderedEntities)
     };

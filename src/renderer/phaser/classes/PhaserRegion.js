@@ -17,7 +17,8 @@ var PhaserRegion = /** @class */ (function (_super) {
     __extends(PhaserRegion, _super);
     function PhaserRegion(scene, entity) {
         var _this = _super.call(this, entity) || this;
-        _this.gameObject = scene.add.graphics();
+        var gameObject = scene.add.graphics();
+        _this.gameObject = gameObject;
         // we don't get depth/layer info from taro,
         // so it can go in 'debris' layer for now
         scene.entityLayers[EntityLayer.DEBRIS].add(_this.gameObject);
