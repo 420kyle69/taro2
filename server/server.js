@@ -167,6 +167,10 @@ var Server = IgeClass.extend({
 			} else if (typeof ClusterServerComponent != 'undefined') {
 				ige.addComponent(ClusterServerComponent);
 			}
+			// Include ProxyComponent to master cluster
+			if (typeof ProxyComponent !== 'undefined') {
+				ige.addComponent(ProxyComponent);
+			}
 		} else {
 			if (typeof ClusterClientComponent != 'undefined') {
 				ige.addComponent(ClusterClientComponent); // backend component will retrieve "start" command from BE

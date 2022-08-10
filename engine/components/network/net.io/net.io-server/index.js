@@ -547,7 +547,11 @@ NetIo.Server = NetIo.EventingClass.extend({
 	start: function (port, callback) {
 		var self = this;
 		this._port = port;
-		var secure = true; // to turn on/off https
+
+		// Cloudflare SSL flexible mode only encrypt traffic between browser and cloudflare. All the https/wss traffic is diverted to http/ws from Clouflare to server hence https proxy server is not needed.
+		// Https/wss server is not being used currently on production
+		var secure = false; // to turn on/off https
+
 		if (process.env.ENV == 'local' || process.env.ENV == 'standalone' || process.env.ENV == 'standalone-remote') {
 			secure = false;
 			console.log('***');
@@ -555,13 +559,14 @@ NetIo.Server = NetIo.EventingClass.extend({
 			console.log('***');
 		}
 
-		// http
+		// http - local, standalone, standalone-remote env
+
 		this._httpServer = this._http.createServer(function (request, response) {
 			response.writeHead(404);
 			response.end();
 		});
 		this._socketServerHttp = new this._websocket.Server({
-		    server: this._httpServer
+			server: this._httpServer
 		});
 		// this._socketServerHttp = new this._websocket.WebSocketServer({
 		// 	server: this._httpServer
@@ -594,8 +599,9 @@ NetIo.Server = NetIo.EventingClass.extend({
 			}
 		});
 
-		// https
 		if (secure) {
+			// https - production/staging env
+
 			console.log(`https port ${ige.server.httpsPort}`);
 			self._portSecure = ige.server.httpsPort;
 			var privateKey = this._fs.readFileSync('../sslcert/modd_ssl.key', 'utf8');
@@ -647,6 +653,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 					callback();
 				}
 			});
+
 		}
 	},
 
@@ -661,48 +668,48 @@ NetIo.Server = NetIo.EventingClass.extend({
 		socket._decode = self._decode;
 		socket._remoteAddress = ws._socket.remoteAddress;
 		socket._fromPingService = request.headers[PING_SERVICE_HEADER] && request.headers[PING_SERVICE_HEADER] === process.env.PING_SERVICE_HEADER_SECRET;
-		
+
 		// extracting user from token and adding it in _token.
 		// if token does not exist in request close the socket.
 
 		if (!socket._fromPingService) {
 			if (request.url.indexOf('/?token=') === -1) {
-				socket.close('Unauthorized request');
+				socket.close('Security token could not be validated, please refresh the page.');
 				console.log('Unauthorized request', request.url);
 				return;
 			}
-			
-			const reqUrl = new URL('https://www.modd.io' + request.url);
+
+			const reqUrl = new URL(`https://www.modd.io${request.url}`);
 			const searchParams = reqUrl.searchParams;
 			const token = searchParams.get('token');
-			
+
 			try {
 				const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
-				
+
 				socket._token = {
 					userId: decodedToken.userId,
 					token,
 					tokenCreatedAt: decodedToken.createdAt
 				};
-				
+
 			} catch (e) {
 				// A token is required to connect with socket server
-				socket.close('Unauthorized request');
+				socket.close('Security token could not be validated, please refresh the page.');
 				console.log('Unauthorized request', e.message, token);
 				return;
 			}
-			
+
 			// if the token has been used already, close the connection.
 			const isUsedToken = ige.server.usedTokens[token];
 			if (isUsedToken) {
-				console.log("Token has been used already", token)
-				socket.close('Unauthorized request');
+				console.log('Token has been used already', token);
+				socket.close('Security token could not be validated, please refresh the page.');
 				return;
 			}
-			
+
 			// store token for current client
 			ige.server.usedTokens[token] = socket._token.tokenCreatedAt;
-			
+
 			// remove expired tokens
 			const filteredUsedTokens = {};
 			const usedTokenEntries = Object.entries(ige.server.usedTokens).filter(([token, tokenCreatedAt]) => (Date.now() - tokenCreatedAt) < ige.server.TOKEN_EXPIRES_IN);
@@ -712,16 +719,16 @@ NetIo.Server = NetIo.EventingClass.extend({
 				}
 			}
 			ige.server.usedTokens = filteredUsedTokens;
-			
+
 		}
-		
+
 		// Give the socket a unique ID
 		socket.id = self.newIdHex();
 		// Add the socket to the internal lookups
 		self._sockets.push(socket);
 		self._socketsById[socket.id] = socket;
 
-		console.log("1. Client", socket.id,"connected (net.io-server index.js)");
+		console.log('1. Client ', socket.id,' connected (net.io-server index.js)');
 
 		// Register a listener so that if the socket disconnects,
 		// we can remove it from the active socket lookups
