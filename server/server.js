@@ -32,10 +32,10 @@ global.rollbar = {
 		// do nothing in non prod env
 	},
 	error: function () {
-
+		// do nothing in non prod env
 	},
 	configure: function () {
-		
+		// do nothing in non prod env
 	},
 };
 
@@ -43,14 +43,13 @@ if (process.env.ENV == 'production') {
 	var Rollbar = require('rollbar');
 	global.rollbar = new Rollbar({
 		accessToken: '326308ea71e041dc87e30fce4eb48d99',
+		environment: process.env.ENV,
 		captureUncaught: true,
-		captureUnhandledRejections: true
-	});
-
-	process.on('uncaughtException', function (err) {
-		global.rollbar.log(err);
-		console.log(`server.js uncaughtException: ${err.stack}`);
-		process.exit(0);
+		captureUnhandledRejections: true,
+		exitOnUncaughtException: true,
+		onSendCallback: (isUncaught, args, payload) => {
+			console.error(`server.js error: ${payload.uuid}\ntimestamp: ${payload.timestamp}\nisUncaught: ${isUncaught}\nstack: ${payload.notifier.diagnostic['raw_error'].stack}`);
+		}
 	});
 }
 
