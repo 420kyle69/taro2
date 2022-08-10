@@ -217,6 +217,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 
 	protected destroy (): void {
 
+		this.scene.renderedEntities = this.scene.renderedEntities.filter(item => item !== this.gameObject);
 		ige.client.off('zoom', this.zoomEvtListener);
 		this.zoomEvtListener = null;
 

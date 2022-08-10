@@ -17,11 +17,18 @@ var PhaserItem = /** @class */ (function (_super) {
     __extends(PhaserItem, _super);
     function PhaserItem(scene, entity) {
         var _this = _super.call(this, scene, entity, "item/".concat(entity._stats.itemTypeId)) || this;
+        _this.sprite.visible = false;
+        _this.scene.renderedEntities.push(_this.sprite);
         _this.gameObject = _this.sprite;
         var _a = entity._translate, x = _a.x, y = _a.y;
         _this.gameObject.setPosition(x, y);
         return _this;
     }
+    PhaserItem.prototype.destroy = function () {
+        var _this = this;
+        this.scene.renderedEntities = this.scene.renderedEntities.filter(function (item) { return item !== _this.sprite; });
+        _super.prototype.destroy.call(this);
+    };
     return PhaserItem;
 }(PhaserAnimatedEntity));
 //# sourceMappingURL=PhaserItem.js.map

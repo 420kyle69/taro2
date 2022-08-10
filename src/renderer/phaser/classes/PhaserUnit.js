@@ -176,6 +176,8 @@ var PhaserUnit = /** @class */ (function (_super) {
         });
     };
     PhaserUnit.prototype.destroy = function () {
+        var _this = this;
+        this.scene.renderedEntities = this.scene.renderedEntities.filter(function (item) { return item !== _this.gameObject; });
         ige.client.off('zoom', this.zoomEvtListener);
         this.zoomEvtListener = null;
         if (this.scaleTween) {
