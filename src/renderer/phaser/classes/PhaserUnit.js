@@ -78,7 +78,7 @@ var PhaserUnit = /** @class */ (function (_super) {
     };
     PhaserUnit.prototype.updateLabel = function (data) {
         var label = this.getLabel();
-        //label.visible = true;
+        label.visible = true;
         label.setFontFamily('Verdana');
         label.setFontSize(16);
         label.setFontStyle(data.bold ? 'bold' : 'normal');

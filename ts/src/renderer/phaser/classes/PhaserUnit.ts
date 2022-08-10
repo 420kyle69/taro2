@@ -103,7 +103,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		color?: string;
 	}): void {
 		const label = this.getLabel();
-		//label.visible = true;
+		label.visible = true;
 
 		label.setFontFamily('Verdana');
 		label.setFontSize(16);
