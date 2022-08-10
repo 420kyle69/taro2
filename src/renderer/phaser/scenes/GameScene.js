@@ -246,7 +246,7 @@ var GameScene = /** @class */ (function (_super) {
         }
         return canvas;
     };
-    GameScene.prototype.update = function (time, delta) {
+    GameScene.prototype.update = function () {
         this.renderedEntities.forEach(function (element) {
             element.setVisible(false).setActive(false);
         });
@@ -254,7 +254,6 @@ var GameScene = /** @class */ (function (_super) {
             if (!element.hidden)
                 element.setActive(true).setVisible(true);
         });
-        //ige.renderer.scene.scenes[0].cameras.main.cull(ige.renderer.scene.scenes[0].renderedEntities)
     };
     return GameScene;
 }(PhaserScene));
