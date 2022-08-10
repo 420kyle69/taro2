@@ -37,14 +37,11 @@ class PhaserEntity {
 
 	protected hide (): void {
 		this.gameObject.hidden = true;
-		/*this.gameObject.setActive(false)
-			.setVisible(false);*/
+
 	}
 
 	protected show (): void {
 		this.gameObject.hidden = false;
-		/*this.gameObject.setActive(true)
-			.setVisible(true);*/
 	}
 
 	protected layer (value: number): void {

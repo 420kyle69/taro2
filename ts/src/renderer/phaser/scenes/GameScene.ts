@@ -398,10 +398,10 @@ class GameScene extends PhaserScene {
 
 	update (time: number, delta: number): void {
 		this.renderedEntities.forEach(element => {
-			element.setVisible(false);
+			element.setVisible(false).setActive(false);
 		});
 		this.cameras.main.cull(this.renderedEntities).forEach(element => {
-			if (!element.hidden) element.setVisible(true);
+			if (!element.hidden) element.setActive(true).setVisible(true);
 		});
 
 		//ige.renderer.scene.scenes[0].cameras.main.cull(ige.renderer.scene.scenes[0].renderedEntities)
