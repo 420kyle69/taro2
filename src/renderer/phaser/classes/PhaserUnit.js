@@ -19,7 +19,9 @@ var PhaserUnit = /** @class */ (function (_super) {
         var _this = _super.call(this, scene, entity, "unit/".concat(entity._stats.type)) || this;
         _this.attributes = [];
         var translate = entity._translate;
-        _this.gameObject = scene.add.container(translate.x, translate.y, [_this.sprite]);
+        var gameObject = _this.gameObject = scene.add.container(translate.x, translate.y, [_this.sprite]);
+        gameObject.setSize(_this.sprite.width, _this.sprite.height);
+        _this.scene.renderedEntities.push(gameObject);
         Object.assign(_this.evtListeners, {
             flip: entity.on('flip', _this.flip, _this),
             follow: entity.on('follow', _this.follow, _this),
@@ -76,7 +78,7 @@ var PhaserUnit = /** @class */ (function (_super) {
     };
     PhaserUnit.prototype.updateLabel = function (data) {
         var label = this.getLabel();
-        label.visible = true;
+        //label.visible = true;
         label.setFontFamily('Verdana');
         label.setFontSize(16);
         label.setFontStyle(data.bold ? 'bold' : 'normal');
@@ -110,26 +112,27 @@ var PhaserUnit = /** @class */ (function (_super) {
         return this.attributesContainer;
     };
     PhaserUnit.prototype.renderAttributes = function (data) {
+        var _this = this;
         // creating attributeContainer on the fly,
         // only for units that have attribute bars
-        /*this.getAttributesContainer();
-        const attributes = this.attributes;
+        this.getAttributesContainer();
+        var attributes = this.attributes;
         // release all existing attribute bars
-        attributes.forEach((a) => {
+        attributes.forEach(function (a) {
             PhaserAttributeBar.release(a);
         });
         attributes.length = 0;
         // add attribute bars based on passed data
-        data.attrs.forEach((ad) => {
-            const a = PhaserAttributeBar.get(this);
+        data.attrs.forEach(function (ad) {
+            var a = PhaserAttributeBar.get(_this);
             a.render(ad);
             attributes.push(a);
-        });*/
+        });
     };
     PhaserUnit.prototype.updateAttribute = function (data) {
-        /*const attributes = this.attributes;
-        let a: PhaserAttributeBar;
-        let i = 0;
+        var attributes = this.attributes;
+        var a;
+        var i = 0;
         for (; i < attributes.length; i++) {
             if (attributes[i].name === data.attr.type) {
                 a = attributes[i];
@@ -147,7 +150,7 @@ var PhaserUnit = /** @class */ (function (_super) {
             a = PhaserAttributeBar.get(this);
             attributes.push(a);
         }
-        a.render(data.attr);*/
+        a.render(data.attr);
     };
     PhaserUnit.prototype.renderChat = function (text) {
         if (this.chat) {

@@ -18,11 +18,13 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		super(scene, entity, `unit/${entity._stats.type}`);
 
 		const translate = entity._translate;
-		this.gameObject = scene.add.container(
+		const gameObject = this.gameObject = scene.add.container(
 			translate.x,
 			translate.y,
 			[ this.sprite ]
 		);
+		gameObject.setSize(this.sprite.width, this.sprite.height);
+		this.scene.renderedEntities.push(gameObject);
 
 		Object.assign(this.evtListeners, {
 			flip: entity.on('flip', this.flip, this),
@@ -101,7 +103,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		color?: string;
 	}): void {
 		const label = this.getLabel();
-		label.visible = true;
+		//label.visible = true;
 
 		label.setFontFamily('Verdana');
 		label.setFontSize(16);
@@ -149,7 +151,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 	}): void {
 		// creating attributeContainer on the fly,
 		// only for units that have attribute bars
-		/*this.getAttributesContainer();
+		this.getAttributesContainer();
 		const attributes = this.attributes;
 		// release all existing attribute bars
 		attributes.forEach((a) => {
@@ -161,14 +163,14 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			const a = PhaserAttributeBar.get(this);
 			a.render(ad);
 			attributes.push(a);
-		});*/
+		});
 	}
 
 	private updateAttribute (data: {
 		attr: AttributeData;
 		shouldRender: boolean;
 	}): void {
-		/*const attributes = this.attributes;
+		const attributes = this.attributes;
 		let a: PhaserAttributeBar;
 		let i = 0;
 		for (; i < attributes.length; i++) {
@@ -188,7 +190,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			a = PhaserAttributeBar.get(this);
 			attributes.push(a);
 		}
-		a.render(data.attr);*/
+		a.render(data.attr);
 	}
 
 	private renderChat (text: string): void {

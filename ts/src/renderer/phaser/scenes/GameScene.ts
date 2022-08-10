@@ -3,7 +3,7 @@ class GameScene extends PhaserScene {
 	private zoomSize: number;
 
 	entityLayers: Phaser.GameObjects.Layer[] = [];
-	renderedEntities: Phaser.GameObjects.Sprite[] = [];
+	renderedEntities: (Phaser.GameObjects.GameObject & Phaser.GameObjects.Components.Visible)[] = [];
 
 	constructor() {
 		super({ key: 'Game' });
@@ -398,10 +398,12 @@ class GameScene extends PhaserScene {
 
 	update (time: number, delta: number): void {
 		this.renderedEntities.forEach(element => {
-			element.visible = false;
+			element.setVisible(false);
 		});
 		this.cameras.main.cull(this.renderedEntities).forEach(element => {
-			element.visible = true;
+			element.setVisible(true);
 		});
+
+		//ige.renderer.scene.scenes[0].cameras.main.cull(ige.renderer.scene.scenes[0].renderedEntities)
 	}
 }

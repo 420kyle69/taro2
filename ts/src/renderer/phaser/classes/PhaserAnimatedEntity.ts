@@ -61,6 +61,7 @@ class PhaserAnimatedEntity extends PhaserEntity {
 
 	protected destroy (): void {
 
+		//this.scene.renderedEntities = this.scene.renderedEntities.filter(item => item !== this.sprite);
 		this.sprite = null;
 
 		super.destroy();

@@ -51,6 +51,7 @@ var PhaserAnimatedEntity = /** @class */ (function (_super) {
         this.sprite.setScale(data.x, data.y);
     };
     PhaserAnimatedEntity.prototype.destroy = function () {
+        //this.scene.renderedEntities = this.scene.renderedEntities.filter(item => item !== this.sprite);
         this.sprite = null;
         _super.prototype.destroy.call(this);
     };
