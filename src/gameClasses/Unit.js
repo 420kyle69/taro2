@@ -828,7 +828,7 @@ var Unit = IgeEntityPhysics.extend({
 
 			if (zIndex && ige.network.id() == self._stats.clientId) {
 				// depth of this player's units should have +1 depth to avoid flickering on overlap
-				zIndex.depth++;
+				// zIndex.depth++;
 			}
 
 			self.updateLayer();

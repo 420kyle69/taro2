@@ -13,6 +13,9 @@ var PhaserEntity = /** @class */ (function () {
             destroy: entity.on('destroy', this.destroy, this)
         });
     }
+    PhaserEntity.prototype.getGameObject = function () {
+        return this.gameObject;
+    };
     PhaserEntity.prototype.transform = function (data) { };
     PhaserEntity.prototype.scale = function (data) { };
     PhaserEntity.prototype.hide = function () {

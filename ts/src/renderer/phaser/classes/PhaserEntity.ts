@@ -24,6 +24,17 @@ class PhaserEntity {
 		});
 	}
 
+	public getGameObject():
+		Phaser.GameObjects.GameObject &
+		Phaser.GameObjects.Components.Transform &
+		Phaser.GameObjects.Components.Visible &
+		Phaser.GameObjects.Components.Depth &
+		Hidden
+	{
+		return this.gameObject;
+	}
+	
+
 	protected transform (data: {
 		x: number,
 		y: number,

@@ -162,6 +162,7 @@ var GameScene = /** @class */ (function (_super) {
         this.children.moveAbove(debrisLayer, wallsLayer);
         var camera = this.cameras.main;
         camera.centerOn(map.width * map.tileWidth / 2 * scaleFactor.x, map.height * map.tileHeight / 2 * scaleFactor.y);
+        this.depthRenderer = new DepthRenderComponent(this);
         this.events.on('update', function () {
             ige.client.emit('tick');
         });
@@ -247,12 +248,16 @@ var GameScene = /** @class */ (function (_super) {
         return canvas;
     };
     GameScene.prototype.update = function () {
+        var _this = this;
         this.renderedEntities.forEach(function (element) {
             element.setVisible(false).setActive(false);
         });
-        this.cameras.main.cull(this.renderedEntities).forEach(function (element) {
-            if (!element.hidden)
+        var culledList = this.cameras.main.cull(this.renderedEntities);
+        culledList.forEach(function (element) {
+            if (!element.hidden) {
                 element.setActive(true).setVisible(true);
+                _this.depthRenderer.adjustDepth(element);
+            }
         });
     };
     return GameScene;

@@ -3,7 +3,14 @@ class GameScene extends PhaserScene {
 	private zoomSize: number;
 
 	entityLayers: Phaser.GameObjects.Layer[] = [];
-	renderedEntities: (Phaser.GameObjects.GameObject & Phaser.GameObjects.Components.Visible & Hidden)[] = [];
+	renderedEntities: (
+		Phaser.GameObjects.GameObject &
+		Phaser.GameObjects.Components.Transform &
+		Phaser.GameObjects.Components.Visible &
+		Phaser.GameObjects.Components.Depth &
+		Hidden
+	)[] = [];
+	depthRenderer: DepthRenderComponent;
 
 	constructor() {
 		super({ key: 'Game' });
@@ -215,6 +222,8 @@ class GameScene extends PhaserScene {
 			map.height * map.tileHeight / 2 * scaleFactor.y
 		);
 
+		this.depthRenderer = new DepthRenderComponent(this);
+
 		this.events.on('update', () => {
 			ige.client.emit('tick');
 		});
@@ -400,8 +409,14 @@ class GameScene extends PhaserScene {
 		this.renderedEntities.forEach(element => {
 			element.setVisible(false).setActive(false);
 		});
-		this.cameras.main.cull(this.renderedEntities).forEach(element => {
-			if (!element.hidden) element.setActive(true).setVisible(true);
+
+		const culledList = this.cameras.main.cull(this.renderedEntities);
+
+		culledList.forEach(element => {
+			if (!element.hidden) {
+				element.setActive(true).setVisible(true);
+				this.depthRenderer.adjustDepth(element);
+			}
 		});
 	}
 }
