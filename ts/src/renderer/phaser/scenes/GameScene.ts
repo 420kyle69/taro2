@@ -3,13 +3,7 @@ class GameScene extends PhaserScene {
 	private zoomSize: number;
 
 	entityLayers: Phaser.GameObjects.Layer[] = [];
-	renderedEntities: (
-		Phaser.GameObjects.GameObject &
-		Phaser.GameObjects.Components.Transform &
-		Phaser.GameObjects.Components.Visible &
-		Phaser.GameObjects.Components.Depth &
-		IRenderProps
-	)[] = [];
+	renderedEntities: TGameObject[] = [];
 	depthRenderer: DepthRenderComponent;
 
 	constructor() {

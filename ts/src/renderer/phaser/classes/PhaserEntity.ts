@@ -1,13 +1,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function,@typescript-eslint/no-unused-vars */
 class PhaserEntity {
 
-	protected gameObject:
-		Phaser.GameObjects.GameObject &
-		Phaser.GameObjects.Components.Transform &
-		Phaser.GameObjects.Components.Visible &
-		Phaser.GameObjects.Components.Depth &
-		IRenderProps;
-
+	protected gameObject: TGameObject;
 	protected evtListeners: Record<string, EvtListener> = {};
 
 	protected constructor (
@@ -71,4 +65,11 @@ class PhaserEntity {
 interface IRenderProps {
 	hidden: boolean;
 	taroDepth: number;
-  }
+}
+
+type TGameObject =
+	Phaser.GameObjects.GameObject &
+	Phaser.GameObjects.Components.Transform &
+	Phaser.GameObjects.Components.Visible &
+	Phaser.GameObjects.Components.Depth &
+	IRenderProps
