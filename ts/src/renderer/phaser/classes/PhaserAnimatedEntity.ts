@@ -1,6 +1,6 @@
 class PhaserAnimatedEntity extends PhaserEntity {
 
-	protected sprite: Phaser.GameObjects.Sprite & Hidden;
+	protected sprite: Phaser.GameObjects.Sprite & IRenderProps;
 
 	protected constructor (
 		public scene: GameScene,
@@ -11,7 +11,7 @@ class PhaserAnimatedEntity extends PhaserEntity {
 
 		const bounds = entity._bounds2d;
 		const sprite = scene.add.sprite(0, 0, key);
-		this.sprite = sprite as Phaser.GameObjects.Sprite & Hidden;
+		this.sprite = sprite as Phaser.GameObjects.Sprite & IRenderProps;
 
 		sprite.setDisplaySize(bounds.x, bounds.y);
 		sprite.rotation = entity._rotate.z;

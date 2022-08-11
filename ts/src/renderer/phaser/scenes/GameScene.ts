@@ -8,7 +8,7 @@ class GameScene extends PhaserScene {
 		Phaser.GameObjects.Components.Transform &
 		Phaser.GameObjects.Components.Visible &
 		Phaser.GameObjects.Components.Depth &
-		Hidden
+		IRenderProps
 	)[] = [];
 	depthRenderer: DepthRenderComponent;
 

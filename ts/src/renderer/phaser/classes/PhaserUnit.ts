@@ -1,10 +1,10 @@
 class PhaserUnit extends PhaserAnimatedEntity {
 
-	sprite: Phaser.GameObjects.Sprite & Hidden;
+	sprite: Phaser.GameObjects.Sprite & IRenderProps;
 	label: Phaser.GameObjects.Text;
 	private chat: PhaserChatBubble;
 
-	gameObject: Phaser.GameObjects.Container & Hidden;
+	gameObject: Phaser.GameObjects.Container & IRenderProps;
 	attributes: PhaserAttributeBar[] = [];
 	attributesContainer: Phaser.GameObjects.Container;
 
@@ -23,7 +23,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			translate.y,
 			[ this.sprite ]
 		);
-		this.gameObject = gameObject as Phaser.GameObjects.Container & Hidden;
+		this.gameObject = gameObject as Phaser.GameObjects.Container & IRenderProps;
 		gameObject.setSize(this.sprite.width, this.sprite.height);
 		this.scene.renderedEntities.push(this.gameObject);
 

@@ -13,9 +13,6 @@ var PhaserEntity = /** @class */ (function () {
             destroy: entity.on('destroy', this.destroy, this)
         });
     }
-    PhaserEntity.prototype.getGameObject = function () {
-        return this.gameObject;
-    };
     PhaserEntity.prototype.transform = function (data) { };
     PhaserEntity.prototype.scale = function (data) { };
     PhaserEntity.prototype.hide = function () {
@@ -31,6 +28,7 @@ var PhaserEntity = /** @class */ (function () {
     };
     PhaserEntity.prototype.depth = function (value) {
         this.gameObject.setDepth(value);
+        this.gameObject.taroDepth = value;
     };
     PhaserEntity.prototype.destroy = function () {
         var _this = this;

@@ -9,9 +9,8 @@ class DepthRenderComponent {
                 Phaser.GameObjects.Components.Transform &
                 Phaser.GameObjects.Components.Visible &
                 Phaser.GameObjects.Components.Depth &
-                Hidden
+                IRenderProps
     ): void {
-        const storeDepth = gameObject.depth;
-        gameObject.setDepth(Math.floor(gameObject.depth) + gameObject.y / 1000); // 1000 temp numerator
+        gameObject.setDepth(gameObject.taroDepth + gameObject.y / 1000); // 1000 temp numerator
     }
 }

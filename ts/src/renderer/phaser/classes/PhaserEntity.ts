@@ -6,7 +6,7 @@ class PhaserEntity {
 		Phaser.GameObjects.Components.Transform &
 		Phaser.GameObjects.Components.Visible &
 		Phaser.GameObjects.Components.Depth &
-		Hidden;
+		IRenderProps;
 
 	protected evtListeners: Record<string, EvtListener> = {};
 
@@ -23,17 +23,6 @@ class PhaserEntity {
 			destroy: entity.on('destroy', this.destroy, this)
 		});
 	}
-
-	public getGameObject():
-		Phaser.GameObjects.GameObject &
-		Phaser.GameObjects.Components.Transform &
-		Phaser.GameObjects.Components.Visible &
-		Phaser.GameObjects.Components.Depth &
-		Hidden
-	{
-		return this.gameObject;
-	}
-	
 
 	protected transform (data: {
 		x: number,
@@ -62,6 +51,7 @@ class PhaserEntity {
 
 	protected depth (value: number): void {
 		this.gameObject.setDepth(value);
+		this.gameObject.taroDepth = value;
 	}
 
 	protected destroy (): void {
@@ -78,6 +68,7 @@ class PhaserEntity {
 	}
 }
 
-interface Hidden {
+interface IRenderProps {
 	hidden: boolean;
+	taroDepth: number;
   }
