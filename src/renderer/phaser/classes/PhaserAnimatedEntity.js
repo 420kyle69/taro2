@@ -25,17 +25,12 @@ var PhaserAnimatedEntity = /** @class */ (function (_super) {
         sprite.setDisplaySize(bounds.x, bounds.y);
         sprite.rotation = entity._rotate.z;
         Object.assign(_this.evtListeners, {
-            'update-texture': entity.on('update-texture', _this.updateTexture, _this),
             'play-animation': entity.on('play-animation', _this.playAnimation, _this),
             size: entity.on('size', _this.size, _this),
             scale: entity.on('scale', _this.scale, _this)
         });
         return _this;
     }
-    PhaserAnimatedEntity.prototype.updateTexture = function () {
-        this.key = "unit/".concat(this.entity._stats.type);
-        this.sprite.setTexture("unit/".concat(this.entity._stats.type));
-    };
     PhaserAnimatedEntity.prototype.playAnimation = function (animationId) {
         this.sprite.play("".concat(this.key, "/").concat(animationId));
     };

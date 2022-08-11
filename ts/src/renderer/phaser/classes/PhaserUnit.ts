@@ -30,6 +30,8 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		Object.assign(this.evtListeners, {
 			flip: entity.on('flip', this.flip, this),
 			follow: entity.on('follow', this.follow, this),
+			'update-texture': entity.on('update-texture', this.updateTexture, this),
+			'update-cellsheet': entity.on('update-cellsheet', this.updateCellSheet, this),
 			'update-label': entity.on('update-label', this.updateLabel, this),
 			'show-label': entity.on('show-label', this.showLabel, this),
 			'hide-label': entity.on('hide-label', this.hideLabel, this),
@@ -40,6 +42,18 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		});
 
 		this.zoomEvtListener = ige.client.on('zoom', this.scaleElements, this);
+	}
+
+	protected updateTexture () {
+		this.key = `unit/${this.entity._stats.type}`;
+		this.sprite.setTexture(`unit/${this.entity._stats.type}`);
+	}
+
+	protected updateCellSheet () {
+		console.log('Updating unit cellsheet', this.entity);
+		this.scene.loadEntity(`unit/${this.entity._stats.cellSheet.url}`, this.entity._stats);
+		this.key = `unit/${this.entity._stats.cellSheet.url}`;
+		this.sprite.setTexture(`unit/${this.entity._stats.cellSheet.url}`);
 	}
 
 	protected transform (data: {

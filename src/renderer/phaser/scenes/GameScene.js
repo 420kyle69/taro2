@@ -94,6 +94,7 @@ var GameScene = /** @class */ (function (_super) {
     };
     GameScene.prototype.loadEntity = function (key, data) {
         var _this = this;
+        console.log('load entity', key, data);
         var cellSheet = data.cellSheet;
         if (!cellSheet) { // skip if no cell sheet data
             return;

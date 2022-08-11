@@ -121,6 +121,7 @@ class GameScene extends PhaserScene {
 
 	loadEntity (key: string, data: EntityData): void {
 
+		console.log('load entity', key, data);
 		const cellSheet = data.cellSheet;
 
 		if (!cellSheet) { // skip if no cell sheet data

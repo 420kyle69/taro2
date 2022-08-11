@@ -1533,6 +1533,7 @@ var Unit = IgeEntityPhysics.extend({
 						} else {
 							if (purchasable.image && purchasable.image.indexOf('cdn.discordapp.com') === -1) {
 								self._stats.cellSheet.url = purchasable.image;
+								this.emit('update-cellsheet');
 							}
 						}
 					}

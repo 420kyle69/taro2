@@ -7,6 +7,8 @@ declare interface EntityStats {
 		height: number;
 	}
 	cellSheet: {
+		columnCount: number;
+		rowCount: number;
 		url: string;
 	}
 	stateId: string;
@@ -14,7 +16,10 @@ declare interface EntityStats {
 		animation: string;
 	}>;
 	animations: Record<string, {
-		frames: number[]
+		frames: number[];
+		framesPerSecond: number;
+		loopCount: number;
+		name: string;
 	}>;
 	default?: {
 		x: number,
