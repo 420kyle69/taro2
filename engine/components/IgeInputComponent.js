@@ -551,13 +551,12 @@ var IgeInputComponent = IgeEventingClass.extend({
 					$('#message').attr('disabled', true);
 					$('#message').attr(
 						'placeholder',
-						!player._stats.isUserLoggedIn ? 'Please log in to chat' : 'Chat available after 1 day'
-					)
+						!player._stats.userId ? 'Please log in to chat' : 'Chat available after 1 day'
+					);
 				}
 
 				$('#chat-message-input').show();
 
-				
 				setTimeout(function () {
 					$('#message').focus();
 				}, 0);
