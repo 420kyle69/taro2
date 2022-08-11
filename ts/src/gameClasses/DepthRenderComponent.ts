@@ -4,12 +4,7 @@ class DepthRenderComponent {
     }
 
     adjustDepth (
-            gameObject:
-                Phaser.GameObjects.GameObject &
-                Phaser.GameObjects.Components.Transform &
-                Phaser.GameObjects.Components.Visible &
-                Phaser.GameObjects.Components.Depth &
-                IRenderProps
+            gameObject: TGameObject
     ): void {
         gameObject.setDepth(gameObject.taroDepth + gameObject.y / 1000); // 1000 temp numerator
     }
