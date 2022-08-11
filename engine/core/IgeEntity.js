@@ -5075,7 +5075,7 @@ var IgeEntity = IgeObject.extend({
 		// interpolate using snapshots streamed from the server.
 		if (prevTransform != undefined && nextTransform != undefined &&
             prevKeyFrame[0] != nextKeyFrame[0] &&
-            prevKeyFrame[0] < ige.renderTime && ige.renderTime < nextKeyFrame[0]
+            prevKeyFrame[0] - 100 < ige.renderTime && ige.renderTime < nextKeyFrame[0] + 100
 		) {
 			targetX = this.interpolateValue(prevTransform[0], nextTransform[0], prevKeyFrame[0], ige.renderTime, nextKeyFrame[0]);
 			targetY = this.interpolateValue(prevTransform[1], nextTransform[1], prevKeyFrame[0], ige.renderTime, nextKeyFrame[0]);

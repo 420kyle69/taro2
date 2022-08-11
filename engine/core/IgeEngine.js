@@ -103,10 +103,12 @@ var IgeEngine = IgeEntity.extend({
 		this._debugEvents = {}; // Holds debug event booleans for named events
 		this._renderContext = ige.isServer ? '2d' : 'webgl2'; // The rendering context, default is 2d
 		this._renderMode = this._renderModes[this._renderContext]; // Integer representation of the render context
+		this._renderLatency = 0;
 		this._tickTime = 'NA'; // The time the tick took to process
 		this._updateTime = 'NA'; // The time the tick update section took to process
-		this._renderTime = 'NA'; // The time the tick render section took to process
+
 		this._tickDelta = 0; // The time between the last tick and the current one
+		this._lastTimeStamp = new Date().getTime();
 
 		this._fpsRate = 60; // Sets the frames per second to execute engine tick's at
 		this._physicsTickRate = 20; // phyiscs tick rate
@@ -136,7 +138,7 @@ var IgeEngine = IgeEntity.extend({
 		this._mousePos = new IgePoint3d(0, 0, 0);
 		this._currentViewport = null; // Set in IgeViewport.js tick(), holds the current rendering viewport
 		this._currentCamera = null; // Set in IgeViewport.js tick(), holds the current rendering viewport's camera
-		this._currentTime = Date.now(); // The current engine time
+		this._currentTime = 0; // The current engine time
 		this._globalSmoothing = false; // Determines the default smoothing setting for new textures
 		this._register = {
 			ige: this
@@ -1789,27 +1791,21 @@ var IgeEngine = IgeEntity.extend({
 	},
 
 	/**
-	 * Increments the engine's internal time by the passed number of milliseconds.
+	 * Increments the engine's interal time by the passed number of milliseconds.
 	 * @param {Number} val The number of milliseconds to increment time by.
 	 * @param {Number=} lastVal The last internal time value, used to calculate
 	 * delta internally in the method.
 	 * @returns {Number}
 	 */
-	incrementTime: function () {
-		var now = Date.now();
+	 incrementTime: function () {
+		var now = new Date().getTime();
 
-		// console.log("increment time", this._currentTime, now, this._timeScaleLastTimestamp, (now - this._timeScaleLastTimestamp))
-		this._currentTime = (now + this.timeDiscrepancy) * this._timeScale;
-		this.renderTime = this._currentTime - 100;
+		if (!this._pause) {
+			this._currentTime += ((now - this._lastTimeStamp) * this._timeScale);
+			this.renderTime = this._currentTime;
+		}
 
-		// this.incrementCount++;
-		// if (now - this._aSecondAgo > 1000) {
-		// 	console.log((this._currentTime - this.lastIncrementAt), this.incrementCount, (this._currentTime - this.lastIncrementAt) / this.incrementCount)
-		// 	this._aSecondAgo = Date.now();
-		// 	this.incrementCount = 0
-		// 	this.lastIncrementAt = this._currentTime
-		// }
-
+		this._lastTimeStamp = now;
 		return this._currentTime;
 	},
 
@@ -1945,8 +1941,7 @@ var IgeEngine = IgeEntity.extend({
 		var unbornIndex;
 		var unbornEntity;
 
-		ige.incrementTime();
-
+		self.incrementTime();
 		timeStamp = Math.floor(self._currentTime);
 
 		if (self._state) {
@@ -2011,28 +2006,20 @@ var IgeEngine = IgeEntity.extend({
 				if (ige.gameLoopTickHasExecuted)
 					ige.trigger.fire('frameTick');
 			} else if (ige.isClient) {
-				// churn out all the old snapshots
-				var snapshot = ige.snapshots[0];
-				while (snapshot &&
-					(
-						ige.renderTime > snapshot[0] ||
-						(ige.nextSnapshot && ige.renderTime > ige.nextSnapshot[0])
-					)
-				) {
-					snapshot = ige.snapshots.shift();
-					ige.prevSnapshot = ige.nextSnapshot;
-					ige.nextSnapshot = snapshot;
-					// console.log(ige.snapshots.length)
-				}
-
-				// if (ige.nextSnapshot && ige.renderTime > ige.nextSnapshot[0]) {
-				// 	ige.nextSnapshot = undefined;
-				// }
-
 				if (ige.client.myPlayer) {
 					ige.client.myPlayer.control._behaviour();
 				}
 
+				var oldestSnapshot = ige.snapshots[0];
+				
+				while (ige.snapshots.length > 1) {
+					oldestSnapshot = ige.snapshots.shift();
+					ige.prevSnapshot = ige.nextSnapshot;
+					ige.nextSnapshot = ige.snapshots[0];	
+
+					ige._currentTime = Math.max(ige._currentTime, oldestSnapshot[0]);
+				}
+				
 				return;
 			}
 

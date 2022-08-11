@@ -520,29 +520,8 @@ var IgeNetIoClient = {
 				}
 
 				if (Object.keys(obj).length) {
-					// sync server's timestamp with client's
-
-					if (ige._currentTime > newSnapshotTimeStamp + 100 || ige._currentTime < newSnapshotTimeStamp - 100) {
-						ige.timeDiscrepancy = newSnapshotTimeStamp - Date.now();
-					} else {
-						ige.timeDiscrepancy += ((newSnapshotTimeStamp - Date.now()) - ige.timeDiscrepancy) / 5; // rubberband
-					}
-
-					// add the new snapshot into empty array
-					if (ige.snapshots.length == 0) {
-						ige.snapshots.push([newSnapshotTimeStamp, obj]);
-					} // if not empty, add it as ascending order based on timestamp
-					else {
-						var i = 0;
-						while (ige.snapshots[i] && ige.snapshots[i][0] < newSnapshotTimeStamp) {
-							i++;
-							var spliceIndex = i;
-						}
-
-						if (spliceIndex != undefined) {
-							ige.snapshots.splice(spliceIndex, 0, [newSnapshotTimeStamp, obj]);
-						}
-					}
+					var newSnapshot = [newSnapshotTimeStamp, obj];
+					ige.snapshots.push(newSnapshot);
 				}
 			}
 		} else {

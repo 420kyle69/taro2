@@ -124,7 +124,7 @@ var DevConsoleComponent = IgeEntity.extend({
 				statsPanels.igefps._igefpsPanel.update(ige._renderFPS, 60);
 				statsPanels.igedpf._igedpfPanel.update(ige._dpf, 1000);
 				statsPanels.igeut._igeutPanel.update(ige._updateTime, 100);
-				statsPanels.igert._igertPanel.update(ige._renderTime, 100);
+				statsPanels.igert._igertPanel.update(ige.renderTime, 100);
 				statsPanels.igett._igettPanel.update(ige._tickTime, 100);
 
 				ige.physicsTickCount = 0;
