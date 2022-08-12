@@ -2018,6 +2018,7 @@ var IgeEngine = IgeEntity.extend({
 					ige.nextSnapshot = ige.snapshots[0];	
 
 					ige._currentTime = Math.max(ige._currentTime, oldestSnapshot[0]);
+					ige._currentTime = ige._currentTime + (ige.prevSnapshot[0] - ige._currentTime) / 10;
 				}
 				
 				return;
