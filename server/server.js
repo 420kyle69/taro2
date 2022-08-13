@@ -495,7 +495,6 @@ var Server = IgeClass.extend({
 
 						// Add the network stream component
 						ige.network.addComponent(IgeStreamComponent)
-							.stream.sendInterval(1000 / ige._gameLoopTickRate)
 							.stream.start(); // Start the stream
 
 						// Accept incoming network connections
@@ -575,8 +574,6 @@ var Server = IgeClass.extend({
 		console.log('server.js: defineNetworkEvents');
 		ige.network.define('joinGame', self._onJoinGameWrapper);
 		ige.network.define('gameOver', self._onGameOver);
-
-		ige.network.define('setStreamSendInterval', self._onSetStreamSendInterval);
 
 		ige.network.define('makePlayerSelectUnit', self._onPlayerSelectUnit);
 		ige.network.define('playerUnitMoved', self._onPlayerUnitMoved);

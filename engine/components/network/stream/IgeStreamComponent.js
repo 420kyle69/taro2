@@ -70,23 +70,6 @@ var IgeStreamComponent = IgeEventingClass.extend({
 		return ige._renderLatency;
 	},
 
-	/* CEXCLUDE */
-	/**
-	 * Gets / sets the interval by which updates to the game world are packaged
-	 * and transmitted to connected clients. The greater the value, the less
-	 * updates are sent per second.
-	 * @param {Number=} ms The number of milliseconds between stream messages.
-	 */
-	sendInterval: function (ms) {
-		if (ms !== undefined) {
-			console.log('stream interval set to ', ms);
-			IgeStreamComponent.prototype.log(`Setting delta stream interval to ${ms / ige._timeScale}ms`);
-			this._streamInterval = ms / ige._timeScale;
-			return this._entity;
-		}
-
-		return this._streamInterval;
-	},
 
 	/**
 	 * Starts the stream of world updates to connected clients.
