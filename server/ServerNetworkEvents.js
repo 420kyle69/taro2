@@ -773,7 +773,7 @@ var ServerNetworkEvents = {
 		}
 	},
 
-		_onPlayerSelectUnit: function (data, clientId) {
+	_onPlayerSelectUnit: function (data, clientId) {
 		var unit = ige.$(data.unitId);
 		var player = ige.game.getPlayerByClientId(clientId);
 		if (player && unit) {
