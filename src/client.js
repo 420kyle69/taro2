@@ -777,8 +777,7 @@ const Client = IgeEventingClass.extend({
 
 			// old comment => 'check for all of the existing entities in the game
 			ige.network.addComponent(IgeStreamComponent);
-			// old comment => 'render the simulation renderLatency ms in the past'
-			ige.network.stream.renderLatency(0);
+
 			// old comment => 'create a listener that will fire whenever an entity is created because of the incoming stream data'
 			ige.network.stream.on('entityCreated', (entity) => {
 				//

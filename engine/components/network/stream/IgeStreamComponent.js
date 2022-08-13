@@ -46,30 +46,6 @@ var IgeStreamComponent = IgeEventingClass.extend({
 		}
 	},
 
-	/**
-	 * Gets /Sets the amount of milliseconds in the past that the renderer will
-	 * show updates from the stream. This allows us to interpolate from a previous
-	 * position to the next position in the stream update. Updates come in and
-	 * are already in the past when they are received so we need to set this
-	 * latency value to something greater than the highest level of acceptable
-	 * network latency. Usually this is a value between 100 and 200ms. If your
-	 * game requires much tighter latency you will have to reduce the number of
-	 * players / network updates / data size in order to compensate. A value of
-	 * 100 in this call is the standard that most triple-A FPS games accept as
-	 * normal render latency and should be OK for your game.
-	 *
-	 * @param latency
-	 */
-	renderLatency: function (latency) {
-		if (latency !== undefined) {
-			// this._renderLatency = latency;
-			ige._renderLatency = latency;
-			return this._entity;
-		}
-
-		return ige._renderLatency;
-	},
-
 
 	/**
 	 * Starts the stream of world updates to connected clients.

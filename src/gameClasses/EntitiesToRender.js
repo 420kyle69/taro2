@@ -68,7 +68,7 @@ var EntitiesToRender = /** @class */ (function () {
                     }
                 }
                 // update transformation using incoming network stream
-                if (ige.network.stream && ige._renderLatency != undefined) {
+                if (ige.network.stream) {
                     entity._processTransform();
                 }
                 if (entity._translate && !entity.isHidden()) {
