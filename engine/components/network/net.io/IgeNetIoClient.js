@@ -522,6 +522,7 @@ var IgeNetIoClient = {
 				if (Object.keys(obj).length) {
 					var newSnapshot = [newSnapshotTimeStamp, obj];
 					ige.snapshots.push(newSnapshot);
+					ige._currentTime = Math.max(ige._currentTime, newSnapshotTimeStamp - 60);
 				}
 			}
 		} else {

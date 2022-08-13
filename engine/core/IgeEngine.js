@@ -2011,16 +2011,15 @@ var IgeEngine = IgeEntity.extend({
 				}
 
 				var oldestSnapshot = ige.snapshots[0];
-				
-				while (ige.snapshots.length > 1) {
-					oldestSnapshot = ige.snapshots.shift();
-					ige.prevSnapshot = ige.nextSnapshot;
-					ige.nextSnapshot = ige.snapshots[0];	
+				while (ige.snapshots.length >= 2 && oldestSnapshot != undefined && ige._currentTime > oldestSnapshot[0]) {	
+					ige.prevSnapshot = ige.nextSnapshot
+					ige.nextSnapshot = ige.snapshots[ige.snapshots.length-1];
 
-					ige._currentTime = Math.max(ige._currentTime, oldestSnapshot[0]);
-					ige._currentTime = ige._currentTime + (ige.prevSnapshot[0] - ige._currentTime) / 10;
+					// rubberband currentTime to the latest time received from server - 40ms
+					ige._currentTime = ige._currentTime + (ige.nextSnapshot[0] - 40 - ige._currentTime) / 10;
+					oldestSnapshot = ige.snapshots.shift();
 				}
-				
+
 				return;
 			}
 

@@ -446,12 +446,9 @@ var Server = IgeClass.extend({
 				// tilesize ratio is ratio of base tile size over tilesize of current map
 				var tilesizeRatio = baseTilesize / game.data.map.tilewidth;
 
-				var engineTickFrameRate = 15;
 				if (game.data.defaultData && !isNaN(game.data.defaultData.frameRate)) {
-					engineTickFrameRate = Math.max(15, Math.min(parseInt(game.data.defaultData.frameRate), 60)); // keep fps range between 15 and 60
+					ige._physicsTickRate = Math.max(15, Math.min(parseInt(game.data.defaultData.frameRate), 60)); // keep fps range between 15 and 60
 				}
-
-				ige._physicsTickRate = engineTickFrameRate;
 
 				// /*
 				//  * Significant changes below
@@ -498,7 +495,7 @@ var Server = IgeClass.extend({
 
 						// Add the network stream component
 						ige.network.addComponent(IgeStreamComponent)
-							.stream.sendInterval(1000 / engineTickFrameRate)
+							.stream.sendInterval(1000 / ige._gameLoopTickRate)
 							.stream.start(); // Start the stream
 
 						// Accept incoming network connections
