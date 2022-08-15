@@ -44,10 +44,12 @@ var PhaserUnit = /** @class */ (function (_super) {
         this.sprite.setTexture("unit/".concat(this.entity._stats.type));
     };
     PhaserUnit.prototype.updateCellSheet = function () {
-        console.log('Updating unit cellsheet', this.entity);
         this.scene.loadEntity("unit/".concat(this.entity._stats.cellSheet.url), this.entity._stats);
-        this.key = "unit/".concat(this.entity._stats.cellSheet.url);
-        this.sprite.setTexture("unit/".concat(this.entity._stats.cellSheet.url));
+        this.scene.load.on('filecomplete', function cnsl() {
+            this.key = "unit/".concat(this.entity._stats.cellSheet.url);
+            this.sprite.setTexture("unit/".concat(this.entity._stats.cellSheet.url));
+        }, this);
+        this.scene.load.start();
     };
     PhaserUnit.prototype.transform = function (data) {
         _super.prototype.transform.call(this, data);
@@ -187,6 +189,11 @@ var PhaserUnit = /** @class */ (function (_super) {
                 _this.scaleTween = null;
             }
         });
+        //for testing updateCellSheet - changing unit cellSheet.url and calling this.updateCellSheet()
+        if (ige.client.myPlayer.currentFollowUnit === this.entity.id()) {
+            this.entity._stats.cellSheet.url = 'https://cache.modd.io/asset/spriteImage/1589645036846_brown_bear.png';
+            this.updateCellSheet();
+        }
     };
     PhaserUnit.prototype.destroy = function () {
         var _this = this;

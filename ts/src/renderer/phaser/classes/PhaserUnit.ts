@@ -50,10 +50,12 @@ class PhaserUnit extends PhaserAnimatedEntity {
 	}
 
 	protected updateCellSheet () {
-		console.log('Updating unit cellsheet', this.entity);
 		this.scene.loadEntity(`unit/${this.entity._stats.cellSheet.url}`, this.entity._stats);
-		this.key = `unit/${this.entity._stats.cellSheet.url}`;
-		this.sprite.setTexture(`unit/${this.entity._stats.cellSheet.url}`);
+		this.scene.load.on('filecomplete', function cnsl() {
+			this.key = `unit/${this.entity._stats.cellSheet.url}`;
+			this.sprite.setTexture(`unit/${this.entity._stats.cellSheet.url}`);
+		}, this);
+		this.scene.load.start();
 	}
 
 	protected transform (data: {
@@ -228,6 +230,12 @@ class PhaserUnit extends PhaserAnimatedEntity {
 				this.scaleTween = null;
 			}
 		});
+
+		//for testing updateCellSheet - changing unit cellSheet.url and calling this.updateCellSheet()
+		if (ige.client.myPlayer.currentFollowUnit  === this.entity.id()) {
+			this.entity._stats.cellSheet.url = 'https://cache.modd.io/asset/spriteImage/1589645036846_brown_bear.png';
+			this.updateCellSheet();
+		}
 	}
 
 	protected destroy (): void {

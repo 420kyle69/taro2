@@ -1581,6 +1581,7 @@ var Unit = IgeEntityPhysics.extend({
 		} else if (ige.isClient) {
 			if (cellSheetUrl === self._stats.cellSheet.url || forceFullyUnequip) {
 				self._stats.cellSheet.url = defaultUnit.cellSheet.url;
+				this.emit('update-cellsheet');
 			}
 			self.updateTexture();
 		}

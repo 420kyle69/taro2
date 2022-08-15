@@ -32,7 +32,7 @@ var PhaserAnimatedEntity = /** @class */ (function (_super) {
         return _this;
     }
     PhaserAnimatedEntity.prototype.playAnimation = function (animationId) {
-        this.sprite.play("".concat(this.key, "/").concat(animationId));
+        //this.sprite.play(`${this.key}/${animationId}`);
     };
     PhaserAnimatedEntity.prototype.transform = function (data) {
         this.gameObject.setPosition(data.x, data.y);
