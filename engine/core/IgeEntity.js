@@ -148,11 +148,7 @@ var IgeEntity = IgeObject.extend({
 
 			// code for height-based-zindex
 			if (this._category === 'unit') {
-				if (this._stats.currentBody.type === 'dynamic') {
-					this.emit('dynamic', true);
-				} else {
-					this.emit('dynamic', false);
-				}
+				this.emit('dynamic', this._stats.currentBody.type === 'dynamic');
 			}
 		}
 
