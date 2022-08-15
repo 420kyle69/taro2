@@ -44,8 +44,14 @@ class PhaserEntity {
 	}
 
 	protected depth (value: number): void {
-		this.gameObject.setDepth(value);
+		const scene = this.gameObject.scene as GameScene;
 		this.gameObject.taroDepth = value;
+
+		if (scene.depthRenderer) {
+			this.gameObject.setDepth(value + this.gameObject.y / 1000);
+		} else {
+			this.gameObject.setDepth(value);
+		}
 	}
 
 	protected destroy (): void {
@@ -65,6 +71,7 @@ class PhaserEntity {
 interface IRenderProps {
 	hidden: boolean;
 	taroDepth: number;
+	dynamic?: boolean;
 }
 
 type TGameObject =

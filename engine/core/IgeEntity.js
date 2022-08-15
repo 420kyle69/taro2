@@ -145,6 +145,15 @@ var IgeEntity = IgeObject.extend({
 					ige.sound.playSound(sound, this._translate, soundId);
 				}
 			}
+
+			// code for height-based-zindex
+			if (this._category === 'unit') {
+				if (this._stats.currentBody.type === 'dynamic') {
+					this.emit('dynamic', true);
+				} else {
+					this.emit('dynamic', false);
+				}
+			}
 		}
 
 		self.previousState = newState;

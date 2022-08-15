@@ -27,8 +27,14 @@ var PhaserEntity = /** @class */ (function () {
         scene.entityLayers[value - 1].add(this.gameObject);
     };
     PhaserEntity.prototype.depth = function (value) {
-        this.gameObject.setDepth(value);
+        var scene = this.gameObject.scene;
         this.gameObject.taroDepth = value;
+        if (scene.depthRenderer) {
+            this.gameObject.setDepth(value + this.gameObject.y / 1000);
+        }
+        else {
+            this.gameObject.setDepth(value);
+        }
     };
     PhaserEntity.prototype.destroy = function () {
         var _this = this;

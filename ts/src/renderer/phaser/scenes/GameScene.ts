@@ -409,7 +409,10 @@ class GameScene extends PhaserScene {
 		culledList.forEach(element => {
 			if (!element.hidden) {
 				element.setActive(true).setVisible(true);
-				this.depthRenderer.adjustDepth(element);
+
+				if (element.dynamic) {
+					this.depthRenderer.adjustDepth(element);
+				}
 			}
 		});
 	}

@@ -256,7 +256,9 @@ var GameScene = /** @class */ (function (_super) {
         culledList.forEach(function (element) {
             if (!element.hidden) {
                 element.setActive(true).setVisible(true);
-                _this.depthRenderer.adjustDepth(element);
+                if (element.dynamic) {
+                    _this.depthRenderer.adjustDepth(element);
+                }
             }
         });
     };
