@@ -491,7 +491,7 @@ var IgeNetIoClient = {
 
 		if (commandName === '_snapshot') {
 			var snapshot = _.cloneDeep(data)[1];
-			var newSnapshotTimeStamp = snapshot[snapshot.length - 1][1];
+			var newSnapshotTimestamp = snapshot[snapshot.length - 1][1];
 
 			// see how far apart the newly received snapshot is from currentTime
 			if (snapshot.length) {
@@ -520,9 +520,14 @@ var IgeNetIoClient = {
 				}
 
 				if (Object.keys(obj).length) {
-					var newSnapshot = [newSnapshotTimeStamp, obj];
+					var newSnapshot = [newSnapshotTimestamp, obj];
 					ige.snapshots.push(newSnapshot);
-					ige._currentTime = Math.max(ige._currentTime, newSnapshotTimeStamp - 60);
+
+					if (ige._currentTime > newSnapshotTimestamp + 100 || ige._currentTime < newSnapshotTimestamp - 100) {
+						ige.timeDiscrepancy = newSnapshotTimestamp - Date.now();
+					} else {
+						ige.timeDiscrepancy += ((newSnapshotTimestamp - Date.now()) - ige.timeDiscrepancy) / 5; // rubberband
+					}
 				}
 			}
 		} else {

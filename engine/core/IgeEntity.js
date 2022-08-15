@@ -5017,11 +5017,11 @@ var IgeEntity = IgeObject.extend({
 		}
 
 		// interpolate projectiles using data provided by physicsComponent. as snapshot data isn't streamed from server.
-		var x = this._translate.x;
-		var y = this._translate.y;
-		var rotate = this._rotate.z;
-		var prevKeyFrame = null;
-		var nextKeyFrame = null;
+		let x = this._translate.x;
+		let y = this._translate.y;
+		let rotate = this._rotate.z;
+		let prevKeyFrame = null;
+		let nextKeyFrame = null;
 
 		// interpolate using client side's physics frames. (this doesn't use snapshot streamed from the server)
 		// this is necessary, because physics don't run at 60 fps on clientside
@@ -5108,8 +5108,17 @@ var IgeEntity = IgeObject.extend({
 				this.lastServerStreamedPosition = [targetX, targetY, targetRotate];
 			}
 
-			x = targetX;
-			y = targetY;
+			// // apply rubberbanding to all non-player entities when csp is enabled
+			// if (ige.physics && ige.game.cspEnabled && this != ige.client.selectedUnit) {
+			// 	xDiff = targetX - x;
+			// 	yDiff = targetY - y;
+			// 	x += xDiff / 2;
+			// 	y += yDiff / 2;
+			// } else if (!ige.physics || !ige.game.cspEnabled || this != ige.client.selectedUnit) {
+			// 	// if physics isn't set, or csp is disabled, use server-streamed data to move entities
+				x = targetX;
+				y = targetY;
+			// }
 			rotate = targetRotate;
 
 			if (this._debugEntity) {

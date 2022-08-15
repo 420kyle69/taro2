@@ -1797,13 +1797,15 @@ var IgeEngine = IgeEntity.extend({
 	 * @returns {Number}
 	 */
 	 incrementTime: function () {
-		var now = new Date().getTime();
-
+		let now = new Date().getTime();
+		let timePassed = ((now - this._lastTimeStamp) * this._timeScale);
+		
 		if (!this._pause) {
-			this._currentTime += ((now - this._lastTimeStamp) * this._timeScale);
+
+			this._currentTime = (now + this.timeDiscrepancy) * this._timeScale;
 			this.renderTime = this._currentTime;
 		}
-
+		
 		this._lastTimeStamp = now;
 		return this._currentTime;
 	},
@@ -1988,7 +1990,7 @@ var IgeEngine = IgeEntity.extend({
 			}
 
 			var timeElapsed = ige.now - ige._lastPhysicsTickAt;
-
+			
 			if (// physics update should execute as soon as gameloop has executed in order to stream the accurate, latest translation data computed from physics update
 				ige.physics && (
 					ige.gameLoopTickHasExecuted || // don't ask. - Jaeyun
@@ -2015,7 +2017,6 @@ var IgeEngine = IgeEntity.extend({
 					ige.nextSnapshot = ige.snapshots[ige.snapshots.length-1];
 
 					// rubberband currentTime to the latest time received from server - 40ms
-					ige._currentTime = ige._currentTime + (ige.nextSnapshot[0] - 40 - ige._currentTime) / 10;
 					oldestSnapshot = ige.snapshots.shift();
 				}
 

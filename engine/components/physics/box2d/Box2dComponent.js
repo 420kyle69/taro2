@@ -544,7 +544,13 @@ var PhysicsComponent = IgeEventingClass.extend({
 				self._world.step(timeElapsedSinceLastStep);
 			} else {
 				self._world.step(timeElapsedSinceLastStep / 1000, 8, 3); // Call the world step; frame-rate, velocity iterations, position iterations
-
+				
+				// console.log(ige._currentTime, (1000 / ige._physicsTickRate))
+				// console.log(nextFrameTime)
+				let lastSnapshot = ige.snapshots[ige.snapshots.length-1];
+				let lastSnapshotTime = lastSnapshot && ige.snapshots[ige.snapshots.length-1][0];
+				let nextFrameTime = ige._currentTime + (1000 / ige._physicsTickRate) - 10;
+				
 				var tempBod = self._world.getBodyList();
 
 				// iterate through every physics body
@@ -621,8 +627,7 @@ var PhysicsComponent = IgeEventingClass.extend({
 								entity.translateTo(x, y, 0);
 								entity.rotateTo(0, 0, angle);
 							} else if (ige.isClient) {
-								let nextFrameTime = ige._currentTime + (1000 / ige._physicsTickRate);
-
+								
 								// if CSP is enabled, for my own unit, immediately move it while ignoring the server stream
 								// ige.physics must be enabled on client-side in order to simulate physics locally
 								if (ige.physics && ige.game.cspEnabled && ige.client.selectedUnit == entity) {
