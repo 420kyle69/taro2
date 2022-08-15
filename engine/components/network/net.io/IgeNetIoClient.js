@@ -524,9 +524,9 @@ var IgeNetIoClient = {
 					ige.snapshots.push(newSnapshot);
 
 					if (ige._currentTime > newSnapshotTimestamp + 100 || ige._currentTime < newSnapshotTimestamp - 100) {
-						ige.timeDiscrepancy = newSnapshotTimestamp - Date.now();
+						ige.timeDiscrepancy = newSnapshotTimestamp - Date.now() - 50;
 					} else {
-						ige.timeDiscrepancy += ((newSnapshotTimestamp - Date.now()) - ige.timeDiscrepancy) / 5; // rubberband
+						ige.timeDiscrepancy += ((newSnapshotTimestamp - Date.now() - 50) - ige.timeDiscrepancy) / 5; // rubberband
 					}
 				}
 			}
