@@ -152,7 +152,7 @@ var IgeEditorComponent = IgeEventingClass.extend({
 							$('#editorDps').html(`${ige._dps} dps`);
 							$('#editorDpf').html(`${ige._dpf} dpf`);
 							$('#editorUd').html(`${ige._updateTime} ud/ms`);
-							$('#editorRd').html(`${ige._renderTime} rd/ms`);
+							$('#editorRd').html(`${ige.renderTime} rd/ms`);
 							$('#editorTd').html(`${ige._tickTime} td/ms`);
 						}, 1000);
 
@@ -431,7 +431,7 @@ var IgeEditorComponent = IgeEventingClass.extend({
 						}
 						html += '<br />';
 					} */
-					/* html += '<div class="sgButton" title="Show / Hide SceneGraph Tree" onmouseup="ige.toggleShowEditor();">Scene</div> <span class="met" title="Frames Per Second">' + self._fps + ' fps</span> <span class="met" title="Draws Per Second">' + self._dps + ' dps</span> <span class="met" title="Draws Per Frame">' + self._dpf + ' dpt</span> <span class="met" title="Update Delta (How Long the Last Update Took)">' + self._updateTime + ' ms\/ud</span> <span class="met" title="Render Delta (How Long the Last Render Took)">' + self._renderTime + ' ms\/rd</span> <span class="met" title="Tick Delta (How Long the Last Tick Took)">' + self._tickTime + ' ms\/pt</span>';
+					/* html += '<div class="sgButton" title="Show / Hide SceneGraph Tree" onmouseup="ige.toggleShowEditor();">Scene</div> <span class="met" title="Frames Per Second">' + self._fps + ' fps</span> <span class="met" title="Draws Per Second">' + self._dps + ' dps</span> <span class="met" title="Draws Per Frame">' + self._dpf + ' dpt</span> <span class="met" title="Update Delta (How Long the Last Update Took)">' + self._updateTime + ' ms\/ud</span> <span class="met" title="Render Delta (How Long the Last Render Took)">' + self.renderTime + ' ms\/rd</span> <span class="met" title="Tick Delta (How Long the Last Tick Took)">' + self._tickTime + ' ms\/pt</span>';
 
 					if (self.network) {
 						// Add the network latency too

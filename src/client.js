@@ -340,13 +340,11 @@ const Client = IgeEventingClass.extend({
 			this.loadMap();
 
 			// still doing things only after physics load
-			let engineTickFrameRate = 15;
-
 			if (gameData.defaultData && !isNaN(gameData.defaultData.frameRate)) {
 				//
-				engineTickFrameRate = Math.max(
+				ige._physicsTickRate = Math.max(
 					// old comment => 'keep fps range between 15 and 60'
-					15,
+					20,
 					Math.min(
 						//
 						parseInt(gameData.defaultData.frameRate),
@@ -354,8 +352,6 @@ const Client = IgeEventingClass.extend({
 					)
 				);
 			}
-
-			ige._physicsTickRate = engineTickFrameRate;
 
 			if (ige.physics) {
 				// old comment => 'always enable CSP'
@@ -779,13 +775,9 @@ const Client = IgeEventingClass.extend({
 				ige.chat.postMessage(msgData);
 			});
 
-			const sendInterval = ige.game.data.settings.latency || (ige._fpsRate > 0) ? 1000 / ige._fpsRate : 70;
-
 			// old comment => 'check for all of the existing entities in the game
 			ige.network.addComponent(IgeStreamComponent);
-			// old comment => 'render the simulation renderLatency ms in the past'
-			ige.network.stream.renderLatency(50);
-			ige.network.stream._streamInterval = sendInterval;
+
 			// old comment => 'create a listener that will fire whenever an entity is created because of the incoming stream data'
 			ige.network.stream.on('entityCreated', (entity) => {
 				//

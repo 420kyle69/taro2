@@ -491,7 +491,7 @@ var IgeNetIoClient = {
 
 		if (commandName === '_snapshot') {
 			var snapshot = _.cloneDeep(data)[1];
-			var newSnapshotTimeStamp = snapshot[snapshot.length - 1][1];
+			var newSnapshotTimestamp = snapshot[snapshot.length - 1][1];
 
 			// see how far apart the newly received snapshot is from currentTime
 			if (snapshot.length) {
@@ -520,28 +520,16 @@ var IgeNetIoClient = {
 				}
 
 				if (Object.keys(obj).length) {
-					// sync server's timestamp with client's
+					var newSnapshot = [newSnapshotTimestamp, obj];
+					ige.snapshots.push(newSnapshot);
 
-					if (ige._currentTime > newSnapshotTimeStamp + 100 || ige._currentTime < newSnapshotTimeStamp - 100) {
-						ige.timeDiscrepancy = newSnapshotTimeStamp - Date.now();
+					if (ige._currentTime > newSnapshotTimestamp + 100 || ige._currentTime < newSnapshotTimestamp - 100) {
+						// currentTime will be 3 frames behind the nextSnapshot's timestamp, so the entities have time to interpolate 
+						// 1 frame = 1000/60 = 16ms. 3 frames = 50ms
+						ige.timeDiscrepancy = newSnapshotTimestamp - Date.now() - 50;						
 					} else {
-						ige.timeDiscrepancy += ((newSnapshotTimeStamp - Date.now()) - ige.timeDiscrepancy) / 5; // rubberband
-					}
-
-					// add the new snapshot into empty array
-					if (ige.snapshots.length == 0) {
-						ige.snapshots.push([newSnapshotTimeStamp, obj]);
-					} // if not empty, add it as ascending order based on timestamp
-					else {
-						var i = 0;
-						while (ige.snapshots[i] && ige.snapshots[i][0] < newSnapshotTimeStamp) {
-							i++;
-							var spliceIndex = i;
-						}
-
-						if (spliceIndex != undefined) {
-							ige.snapshots.splice(spliceIndex, 0, [newSnapshotTimeStamp, obj]);
-						}
+						// rubberband currentTime to be nextSnapshot's timestamp - 50ms
+						ige.timeDiscrepancy += ((newSnapshotTimestamp - Date.now() - 50) - ige.timeDiscrepancy) / 5; 
 					}
 				}
 			}

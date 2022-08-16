@@ -72,23 +72,6 @@ var IgeTimeSyncExtension = {
 	timeSync: function (serverTime) {
 
 		var latency = Math.floor(Date.now() - this.lastTimeSyncSentAt); // ping (round trip)
-		// this.latency = latency;
-		// this.latencyHistory.push(this.latency)
-		// if (this.latencyHistory.length > 20) {
-		// 	this.latencyHistory.shift();
-		// }
-		// this.bestLatency = this.getMedian(this.latencyHistory)
-
-		// // console.log(this.bestLatency)
-		// if (!ige.renderTime) {
-		// 	ige.renderTime = serverTime - 50;
-		// }
-		// else {
-		// 	var diff = (serverTime - 50) - ige.renderTime
-		// 	ige.renderTime += diff/5
-		// 	ige.renderTime = Math.max(ige.renderTime, serverTime - 70);
-		// 	ige.renderTime = Math.min(ige.renderTime, serverTime - 20);
-		// }
 
 		if (statsPanels.latency) {
 			statsPanels.latency._latencyPanel.update(latency, 1000);

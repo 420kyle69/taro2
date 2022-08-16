@@ -105,8 +105,9 @@ var IgeEngine = IgeEntity.extend({
 		this._renderMode = this._renderModes[this._renderContext]; // Integer representation of the render context
 		this._tickTime = 'NA'; // The time the tick took to process
 		this._updateTime = 'NA'; // The time the tick update section took to process
-		this._renderTime = 'NA'; // The time the tick render section took to process
+
 		this._tickDelta = 0; // The time between the last tick and the current one
+		this._lastTimeStamp = new Date().getTime();
 
 		this._fpsRate = 60; // Sets the frames per second to execute engine tick's at
 		this._physicsTickRate = 20; // phyiscs tick rate
@@ -173,7 +174,7 @@ var IgeEngine = IgeEntity.extend({
 		this.tempSnapshot = [0, {}];
 		this.nextSnapshot = [0, {}];
 		this.renderTime = 0;
-		this.timeDiscrepancy = 0;
+		this.timeDiscrepancy = 0; // engine timestamp discrepancy between client-side & sever-side
 
 		this.remainderFromLastStep = 0;
 
@@ -1795,21 +1796,16 @@ var IgeEngine = IgeEntity.extend({
 	 * delta internally in the method.
 	 * @returns {Number}
 	 */
-	incrementTime: function () {
-		var now = Date.now();
+	 incrementTime: function () {
+		const now = new Date().getTime();
+		
+		if (!this._pause) {
 
-		// console.log("increment time", this._currentTime, now, this._timeScaleLastTimestamp, (now - this._timeScaleLastTimestamp))
-		this._currentTime = (now + this.timeDiscrepancy) * this._timeScale;
-		this.renderTime = this._currentTime - 100;
-
-		// this.incrementCount++;
-		// if (now - this._aSecondAgo > 1000) {
-		// 	console.log((this._currentTime - this.lastIncrementAt), this.incrementCount, (this._currentTime - this.lastIncrementAt) / this.incrementCount)
-		// 	this._aSecondAgo = Date.now();
-		// 	this.incrementCount = 0
-		// 	this.lastIncrementAt = this._currentTime
-		// }
-
+			this._currentTime = (now + this.timeDiscrepancy) * this._timeScale;
+			this.renderTime = this._currentTime;
+		}
+		
+		this._lastTimeStamp = now;
 		return this._currentTime;
 	},
 
@@ -1945,8 +1941,7 @@ var IgeEngine = IgeEntity.extend({
 		var unbornIndex;
 		var unbornEntity;
 
-		ige.incrementTime();
-
+		self.incrementTime();
 		timeStamp = Math.floor(self._currentTime);
 
 		if (self._state) {
@@ -1993,8 +1988,7 @@ var IgeEngine = IgeEntity.extend({
 				ige.gameLoopTickHasExecuted = true;
 			}
 
-			var timeElapsed = ige.now - ige._lastPhysicsTickAt;
-
+			var timeElapsed = ige.now - ige._lastPhysicsTickAt;			
 			if (// physics update should execute as soon as gameloop has executed in order to stream the accurate, latest translation data computed from physics update
 				ige.physics && (
 					ige.gameLoopTickHasExecuted || // don't ask. - Jaeyun
@@ -2011,26 +2005,17 @@ var IgeEngine = IgeEntity.extend({
 				if (ige.gameLoopTickHasExecuted)
 					ige.trigger.fire('frameTick');
 			} else if (ige.isClient) {
-				// churn out all the old snapshots
-				var snapshot = ige.snapshots[0];
-				while (snapshot &&
-					(
-						ige.renderTime > snapshot[0] ||
-						(ige.nextSnapshot && ige.renderTime > ige.nextSnapshot[0])
-					)
-				) {
-					snapshot = ige.snapshots.shift();
-					ige.prevSnapshot = ige.nextSnapshot;
-					ige.nextSnapshot = snapshot;
-					// console.log(ige.snapshots.length)
-				}
-
-				// if (ige.nextSnapshot && ige.renderTime > ige.nextSnapshot[0]) {
-				// 	ige.nextSnapshot = undefined;
-				// }
-
 				if (ige.client.myPlayer) {
 					ige.client.myPlayer.control._behaviour();
+				}
+
+				let oldestSnapshot = ige.snapshots[0];
+				while (ige.snapshots.length >= 2 && oldestSnapshot != undefined && ige._currentTime > oldestSnapshot[0]) {	
+					ige.prevSnapshot = ige.nextSnapshot
+					ige.nextSnapshot = ige.snapshots[ige.snapshots.length-1];
+
+					// rubberband currentTime to the latest time received from server - 40ms
+					oldestSnapshot = ige.snapshots.shift();
 				}
 
 				return;

@@ -2,7 +2,6 @@ declare class IgeEngine extends IgeClass {
 
 	_renderFrames: number;
 	_tickStart: number;
-	_renderLatency: number;
 
 	isClient: boolean;
 	isServer: boolean;
@@ -36,7 +35,6 @@ declare class IgeEngine extends IgeClass {
 	entitiesToRender: EntitiesToRender;
 
 	_currentTime: number;
-
 	_cullCounter: number;
 
 	network: any; //IgeNetIoComponent?

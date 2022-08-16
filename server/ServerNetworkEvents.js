@@ -773,14 +773,6 @@ var ServerNetworkEvents = {
 		}
 	},
 
-	_onSetStreamSendInterval: function (data, clientId) {
-		var interval = data.interval;
-		console.log('setStreamSendInteral:', interval);
-		ige.network.stream.sendInterval(interval);
-		ige.network.stream.stop();
-		ige.network.stream.start();
-	},
-
 	_onPlayerSelectUnit: function (data, clientId) {
 		var unit = ige.$(data.unitId);
 		var player = ige.game.getPlayerByClientId(clientId);
