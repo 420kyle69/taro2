@@ -190,10 +190,10 @@ var PhaserUnit = /** @class */ (function (_super) {
             }
         });
         //for testing updateCellSheet - changing unit cellSheet.url and calling this.updateCellSheet()
-        if (ige.client.myPlayer.currentFollowUnit === this.entity.id()) {
+        /*if (ige.client.myPlayer.currentFollowUnit  === this.entity.id()) {
             this.entity._stats.cellSheet.url = 'https://cache.modd.io/asset/spriteImage/1589645036846_brown_bear.png';
             this.updateCellSheet();
-        }
+        }*/
     };
     PhaserUnit.prototype.destroy = function () {
         var _this = this;

@@ -232,10 +232,10 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		});
 
 		//for testing updateCellSheet - changing unit cellSheet.url and calling this.updateCellSheet()
-		if (ige.client.myPlayer.currentFollowUnit  === this.entity.id()) {
+		/*if (ige.client.myPlayer.currentFollowUnit  === this.entity.id()) {
 			this.entity._stats.cellSheet.url = 'https://cache.modd.io/asset/spriteImage/1589645036846_brown_bear.png';
 			this.updateCellSheet();
-		}
+		}*/
 	}
 
 	protected destroy (): void {
