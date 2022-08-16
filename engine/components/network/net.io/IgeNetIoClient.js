@@ -530,7 +530,7 @@ var IgeNetIoClient = {
 
 					// if client's timestamp more than 100ms behind the server's timestamp, immediately update it to be 50ms behind the server's
 					// otherwise, apply rubberbanding
-					if (ige._currentTime > newSnapshotTimestamp + 100 || ige._currentTime < newSnapshotTimestamp - 100) {
+					if (ige._currentTime > newSnapshotTimestamp || ige._currentTime < newSnapshotTimestamp - 100) {
 						// currentTime will be 3 frames behind the nextSnapshot's timestamp, so the entities have time to interpolate 
 						// 1 frame = 1000/60 = 16ms. 3 frames = 50ms
 						ige.timeDiscrepancy = newSnapshotTimestamp - Date.now() - 50;						
