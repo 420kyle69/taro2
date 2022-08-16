@@ -174,7 +174,7 @@ var IgeEngine = IgeEntity.extend({
 		this.tempSnapshot = [0, {}];
 		this.nextSnapshot = [0, {}];
 		this.renderTime = 0;
-		this.timeDiscrepancy = 0;
+		this.timeDiscrepancy = 0; // engine timestamp discrepancy between client-side & sever-side
 
 		this.remainderFromLastStep = 0;
 

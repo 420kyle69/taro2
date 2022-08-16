@@ -524,9 +524,12 @@ var IgeNetIoClient = {
 					ige.snapshots.push(newSnapshot);
 
 					if (ige._currentTime > newSnapshotTimestamp + 100 || ige._currentTime < newSnapshotTimestamp - 100) {
-						ige.timeDiscrepancy = newSnapshotTimestamp - Date.now() - 50;
+						// currentTime will be 3 frames behind the nextSnapshot's timestamp, so the entities have time to interpolate 
+						// 1 frame = 1000/60 = 16ms. 3 frames = 50ms
+						ige.timeDiscrepancy = newSnapshotTimestamp - Date.now() - 50;						
 					} else {
-						ige.timeDiscrepancy += ((newSnapshotTimestamp - Date.now() - 50) - ige.timeDiscrepancy) / 5; // rubberband
+						// rubberband currentTime to be nextSnapshot's timestamp - 50ms
+						ige.timeDiscrepancy += ((newSnapshotTimestamp - Date.now() - 50) - ige.timeDiscrepancy) / 5; 
 					}
 				}
 			}
