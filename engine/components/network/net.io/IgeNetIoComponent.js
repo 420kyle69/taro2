@@ -45,6 +45,17 @@ var IgeNetIoComponent = IgeEventingClass.extend([
 			this.implement(IgeNetIoClient);
 		}
 
+		if(ige.isServer){
+			// Block of code to initialize mixpanel.
+			var Mixpanel = require('mixpanel');
+			let MIXPANEL_TOKEN = '57293c6dbbd23cdde6762edb12eb3355';
+			if (process.env.ENV === 'local' || process.env.ENV === 'dev' || process.env.ENV === 'staging') {
+				MIXPANEL_TOKEN = 'ccf36b7ca718f0c8110257d3a3f5498d';
+			}
+			// create an instance of the mixpanel client
+			this.mixpanel = Mixpanel.init(MIXPANEL_TOKEN);
+		}
+
 		this.log(`Network component initiated with Net.IO version: ${this._netio.version}`);
 	},
 

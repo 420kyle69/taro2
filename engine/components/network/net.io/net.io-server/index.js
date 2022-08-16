@@ -689,7 +689,8 @@ NetIo.Server = NetIo.EventingClass.extend({
 				socket._token = {
 					userId: decodedToken.userId,
 					token,
-					tokenCreatedAt: decodedToken.createdAt
+					tokenCreatedAt: decodedToken.createdAt,
+					gameSlug: decodedToken.gameSlug
 				};
 
 			} catch (e) {
