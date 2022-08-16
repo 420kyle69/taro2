@@ -137,7 +137,7 @@ var IgeEngine = IgeEntity.extend({
 		this._mousePos = new IgePoint3d(0, 0, 0);
 		this._currentViewport = null; // Set in IgeViewport.js tick(), holds the current rendering viewport
 		this._currentCamera = null; // Set in IgeViewport.js tick(), holds the current rendering viewport's camera
-		this._currentTime = 0; // The current engine time
+		this._currentTime = Date.now(); // The current engine time
 		this._globalSmoothing = false; // Determines the default smoothing setting for new textures
 		this._register = {
 			ige: this
@@ -1790,15 +1790,14 @@ var IgeEngine = IgeEntity.extend({
 	},
 
 	/**
-	 * Increments the engine's interal time by the passed number of milliseconds.
+	 * Increments the engine's internal time by the passed number of milliseconds.
 	 * @param {Number} val The number of milliseconds to increment time by.
 	 * @param {Number=} lastVal The last internal time value, used to calculate
 	 * delta internally in the method.
 	 * @returns {Number}
 	 */
 	 incrementTime: function () {
-		let now = new Date().getTime();
-		let timePassed = ((now - this._lastTimeStamp) * this._timeScale);
+		const now = new Date().getTime();
 		
 		if (!this._pause) {
 
@@ -1989,8 +1988,7 @@ var IgeEngine = IgeEntity.extend({
 				ige.gameLoopTickHasExecuted = true;
 			}
 
-			var timeElapsed = ige.now - ige._lastPhysicsTickAt;
-			
+			var timeElapsed = ige.now - ige._lastPhysicsTickAt;			
 			if (// physics update should execute as soon as gameloop has executed in order to stream the accurate, latest translation data computed from physics update
 				ige.physics && (
 					ige.gameLoopTickHasExecuted || // don't ask. - Jaeyun
@@ -2011,7 +2009,7 @@ var IgeEngine = IgeEntity.extend({
 					ige.client.myPlayer.control._behaviour();
 				}
 
-				var oldestSnapshot = ige.snapshots[0];
+				let oldestSnapshot = ige.snapshots[0];
 				while (ige.snapshots.length >= 2 && oldestSnapshot != undefined && ige._currentTime > oldestSnapshot[0]) {	
 					ige.prevSnapshot = ige.nextSnapshot
 					ige.nextSnapshot = ige.snapshots[ige.snapshots.length-1];

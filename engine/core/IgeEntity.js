@@ -4999,9 +4999,7 @@ var IgeEntity = IgeObject.extend({
 	},
 
 	/**
-     * Processes the time stream for the entity.
-     * @param {Number} _currentTime The time that the time stream is
-     * targeting to render the entity at.
+     * Update the position of the entities using the interpolation. This results smooth motion of the entities.
      */
 	_processTransform: function () {
 		if (
@@ -5081,7 +5079,7 @@ var IgeEntity = IgeObject.extend({
 		// interpolate using snapshots streamed from the server.
 		if (prevTransform != undefined && nextTransform != undefined &&
             prevKeyFrame[0] != nextKeyFrame[0] &&
-            prevKeyFrame[0] - 50 < ige._currentTime && ige._currentTime < nextKeyFrame[0] + 50
+            prevKeyFrame[0] - 50 < ige._currentTime && ige._currentTime < nextKeyFrame[0] + 50 // allow extrapolation of entity motion up to 50ms (outside of prevKeyFrame & nextKeyFrame range)
 		) {
 			targetX = this.interpolateValue(prevTransform[0], nextTransform[0], prevKeyFrame[0], ige._currentTime, nextKeyFrame[0]);
 			targetY = this.interpolateValue(prevTransform[1], nextTransform[1], prevKeyFrame[0], ige._currentTime, nextKeyFrame[0]);
