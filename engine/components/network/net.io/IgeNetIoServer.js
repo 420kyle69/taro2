@@ -524,11 +524,11 @@ var IgeNetIoServer = {
 							ige.server.socketConnectionCount.immediatelyDisconnected++;
 						}
 						 /** additional part to send some info for marketing purposes */
-						global.mixpanel.track("Game Play", {
-							"distinct_id": self._socketById[socket.id]._token.userId,
-							"$ip": socket._remoteAddress,
-							"gameSlug": ige.game && ige.game.data && ige.game.data.defaultData && ige.game.data.defaultData.gameSlug,
-							"playTime": end - self._socketById[socket.id].start,
+						global.mixpanel.track('Game Play', {
+							'distinct_id': self._socketById[socket.id]._token.userId ? self._socketById[socket.id]._token.userId : self._socketById[socket.id]._token.guestId,
+							'$ip': socket._remoteAddress,
+							'gameSlug': ige.game && ige.game.data && ige.game.data.defaultData && ige.game.data.defaultData.gameSlug,
+							'playTime': end - self._socketById[socket.id].start,
 						});
 					}
 

@@ -688,6 +688,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 
 				socket._token = {
 					userId: decodedToken.userId,
+					guestId: decodedToken.guestId || '', // will be undefined if userId is present
 					token,
 					tokenCreatedAt: decodedToken.createdAt
 				};
