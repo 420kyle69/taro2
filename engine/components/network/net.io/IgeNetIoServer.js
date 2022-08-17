@@ -523,13 +523,16 @@ var IgeNetIoServer = {
 						if (end - self._socketById[socket.id].start < 3000) {
 							ige.server.socketConnectionCount.immediatelyDisconnected++;
 						}
-						 /** additional part to send some info for marketing purposes */
-						global.mixpanel.track('Game Play', {
-							'distinct_id': self._socketById[socket.id]._token ? self._socketById[socket.id]._token.userId || self._socketById[socket.id]._token.guestId : '',
-							'$ip': socket._remoteAddress,
-							'gameSlug': ige.game && ige.game.data && ige.game.data.defaultData && ige.game.data.defaultData.gameSlug,
-							'playTime': end - self._socketById[socket.id].start,
-						});
+						
+						if (self._socketById[socket.id]._token && (self._socketById[socket.id]._token.userId || self._socketById[socket.id]._token.guestId)) {
+							/** additional part to send some info for marketing purposes */
+							global.mixpanel.track('Game Play', {
+								'distinct_id': self._socketById[socket.id]._token.userId || self._socketById[socket.id]._token.guestId,
+								'$ip': socket._remoteAddress,
+								'gameSlug': ige.game && ige.game.data && ige.game.data.defaultData && ige.game.data.defaultData.gameSlug,
+								'playTime': end - self._socketById[socket.id].start,
+							});
+						}
 					}
 
 					self._onClientDisconnect.apply(self, [data, socket]);
