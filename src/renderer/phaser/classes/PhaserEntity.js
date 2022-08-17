@@ -10,6 +10,7 @@ var PhaserEntity = /** @class */ (function () {
             show: entity.on('show', this.show, this),
             layer: entity.on('layer', this.layer, this),
             depth: entity.on('depth', this.depth, this),
+            dynamic: entity.on('dynamic', this.setDynamic, this),
             destroy: entity.on('destroy', this.destroy, this)
         });
     }
@@ -35,6 +36,10 @@ var PhaserEntity = /** @class */ (function () {
         else {
             this.gameObject.setDepth(value);
         }
+    };
+    //height-based renderer
+    PhaserEntity.prototype.setDynamic = function (isDynamic) {
+        this.gameObject.dynamic = isDynamic;
     };
     PhaserEntity.prototype.destroy = function () {
         var _this = this;

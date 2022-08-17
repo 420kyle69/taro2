@@ -37,7 +37,6 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			'render-attributes': entity.on('render-attributes', this.renderAttributes, this),
 			'update-attribute': entity.on('update-attribute', this.updateAttribute, this),
 			'render-chat-bubble': entity.on('render-chat-bubble', this.renderChat, this),
-			'dynamic': entity.on('dynamic', this.setDynamic, this)
 		});
 
 		this.zoomEvtListener = ige.client.on('zoom', this.scaleElements, this);
@@ -215,10 +214,6 @@ class PhaserUnit extends PhaserAnimatedEntity {
 				this.scaleTween = null;
 			}
 		});
-	}
-
-	private setDynamic (isDynamic: boolean): void {
-		this.gameObject.dynamic = isDynamic;
 	}
 
 	protected destroy (): void {

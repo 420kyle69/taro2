@@ -33,7 +33,6 @@ var PhaserUnit = /** @class */ (function (_super) {
             'render-attributes': entity.on('render-attributes', _this.renderAttributes, _this),
             'update-attribute': entity.on('update-attribute', _this.updateAttribute, _this),
             'render-chat-bubble': entity.on('render-chat-bubble', _this.renderChat, _this),
-            'dynamic': entity.on('dynamic', _this.setDynamic, _this)
         });
         _this.zoomEvtListener = ige.client.on('zoom', _this.scaleElements, _this);
         return _this;
@@ -176,9 +175,6 @@ var PhaserUnit = /** @class */ (function (_super) {
                 _this.scaleTween = null;
             }
         });
-    };
-    PhaserUnit.prototype.setDynamic = function (isDynamic) {
-        this.gameObject.dynamic = isDynamic;
     };
     PhaserUnit.prototype.destroy = function () {
         var _this = this;

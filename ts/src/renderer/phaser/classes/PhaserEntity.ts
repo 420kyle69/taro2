@@ -14,6 +14,7 @@ class PhaserEntity {
 			show: entity.on('show', this.show, this),
 			layer: entity.on('layer', this.layer, this),
 			depth: entity.on('depth', this.depth, this),
+			dynamic: entity.on('dynamic', this.setDynamic, this),
 			destroy: entity.on('destroy', this.destroy, this)
 		});
 	}
@@ -52,6 +53,11 @@ class PhaserEntity {
 		} else {
 			this.gameObject.setDepth(value);
 		}
+	}
+
+	//height-based renderer
+	private setDynamic (isDynamic: boolean): void {
+		this.gameObject.dynamic = isDynamic;
 	}
 
 	protected destroy (): void {
