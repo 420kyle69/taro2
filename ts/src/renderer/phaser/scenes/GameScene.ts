@@ -216,11 +216,14 @@ class GameScene extends PhaserScene {
 			map.height * map.tileHeight / 2 * scaleFactor.y
 		);
 
-		this.heightRenderer = new HeightRenderComponent(this);
-
 		this.events.on('update', () => {
 			ige.client.emit('tick');
 		});
+
+		console.log(data);
+		if (data.heightBasedZIndex) {
+			this.heightRenderer = new HeightRenderComponent(this);
+		}
 	}
 
 	private setZoomSize (height: number): void {

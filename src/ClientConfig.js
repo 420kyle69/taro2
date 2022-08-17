@@ -52,7 +52,7 @@ var igeClientConfig = {
 		'/gameClasses/Cursor.js',
 
 		'/gameClasses/EntitiesToRender.js',
-		'/gameClasses/DepthRenderComponent.js',
+		'/gameClasses/HeightRenderComponent.js',
 
 		/* Phaser */
 		'renderer/phaser/phaser-taro.min.js',

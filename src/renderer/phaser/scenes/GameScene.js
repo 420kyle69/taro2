@@ -162,10 +162,13 @@ var GameScene = /** @class */ (function (_super) {
         this.children.moveAbove(debrisLayer, wallsLayer);
         var camera = this.cameras.main;
         camera.centerOn(map.width * map.tileWidth / 2 * scaleFactor.x, map.height * map.tileHeight / 2 * scaleFactor.y);
-        this.heightRenderer = new HeightRenderComponent(this);
         this.events.on('update', function () {
             ige.client.emit('tick');
         });
+        console.log(data);
+        if (data.heightBasedZIndex) {
+            this.heightRenderer = new HeightRenderComponent(this);
+        }
     };
     GameScene.prototype.setZoomSize = function (height) {
         // backward compatible game scaling on average 16:9 screen

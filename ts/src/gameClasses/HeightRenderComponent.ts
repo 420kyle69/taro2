@@ -1,6 +1,7 @@
 class HeightRenderComponent {
 	constructor (public scene: GameScene) {
 		this.scene.heightRenderer = this;
+		console.log('Height Render Component');
 	}
 
 	adjustDepth (
