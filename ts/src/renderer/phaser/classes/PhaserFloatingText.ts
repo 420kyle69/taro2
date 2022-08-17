@@ -8,7 +8,6 @@ class PhaserFloatingText extends Phaser.GameObjects.Text {
 			y: number,
 			color: string
 		},
-		unit?: PhaserUnit
 	) {
 		super(scene, data.x, data.y, data.text, { fontFamily: 'Verdana' });
 
@@ -21,15 +20,7 @@ class PhaserFloatingText extends Phaser.GameObjects.Text {
 			.addStrokeToNameAndAttributes !== false ? 4 : 0;
 		this.setStroke('#000', strokeThickness);
 
-		if (unit) {
-			unit.gameObject.add(this);
-			this.y = -25 -
-					Math.max(unit.sprite.displayHeight, unit.sprite.displayWidth) / 2;
-		} else {
-			scene.add.existing(this);
-		}
-
-
+		scene.add.existing(this);
 		scene.tweens.add({
 			targets: this,
 			alpha: 0.5,
