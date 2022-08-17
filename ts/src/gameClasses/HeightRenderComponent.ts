@@ -1,6 +1,6 @@
-class DepthRenderComponent {
+class HeightRenderComponent {
 	constructor (public scene: GameScene) {
-		this.scene.depthRenderer = this;
+		this.scene.heightRenderer = this;
 	}
 
 	adjustDepth (

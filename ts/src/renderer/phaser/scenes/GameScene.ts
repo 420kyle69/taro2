@@ -4,7 +4,7 @@ class GameScene extends PhaserScene {
 
 	entityLayers: Phaser.GameObjects.Layer[] = [];
 	renderedEntities: TGameObject[] = [];
-	depthRenderer: DepthRenderComponent;
+	heightRenderer: HeightRenderComponent;
 
 	constructor() {
 		super({ key: 'Game' });
@@ -216,7 +216,7 @@ class GameScene extends PhaserScene {
 			map.height * map.tileHeight / 2 * scaleFactor.y
 		);
 
-		this.depthRenderer = new DepthRenderComponent(this);
+		this.heightRenderer = new HeightRenderComponent(this);
 
 		this.events.on('update', () => {
 			ige.client.emit('tick');
@@ -411,7 +411,7 @@ class GameScene extends PhaserScene {
 				element.setActive(true).setVisible(true);
 
 				if (element.dynamic) {
-					this.depthRenderer.adjustDepth(element);
+					this.heightRenderer.adjustDepth(element);
 				}
 			}
 		});
