@@ -53,6 +53,11 @@ if (process.env.ENV == 'production') {
 	});
 }
 
+// Block of code to initialize mixpanel.
+var Mixpanel = require('mixpanel');
+// create an instance of the mixpanel client
+global.mixpanel = Mixpanel.init(process.env.MIXPANEL_TOKEN);
+
 process.on('exit', function () {
 	console.log('process exit called.');
 	console.trace();
@@ -293,7 +298,7 @@ var Server = IgeClass.extend({
 			
 			const jwt = require("jsonwebtoken");
 			
-			const token = jwt.sign({ userId: '', createdAt: Date.now() }, process.env.JWT_SECRET_KEY, {
+			const token = jwt.sign({ userId: '', createdAt: Date.now(), gameSlug: global.standaloneGame.defaultData.gameSlug }, process.env.JWT_SECRET_KEY, {
 				expiresIn: ige.server.TOKEN_EXPIRES_IN.toString(),
 			});
 			
