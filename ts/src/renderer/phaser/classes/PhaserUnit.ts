@@ -130,12 +130,13 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		text: string;
 		color?: string;
 	}): void {
+		const offset = -25 - Math.max(this.sprite.displayHeight, this.sprite.displayWidth) / 2;
 		new PhaserFloatingText(this.scene, {
 			text: data.text || '',
-			x: 0,
-			y: 0,
+			x: this.gameObject.x,
+			y: this.gameObject.y + offset,
 			color: data.color || '#fff'
-		}, this);
+		});
 	}
 
 	private getAttributesContainer (): Phaser.GameObjects.Container {
