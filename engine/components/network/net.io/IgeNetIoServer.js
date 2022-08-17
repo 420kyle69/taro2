@@ -513,7 +513,6 @@ var IgeNetIoServer = {
 					self._onClientMessage.apply(self, [data, socket.id]);
 				});
 
-				const _this = this;
 				socket.on('disconnect', function (data) {
 					var isClient = self.clientIds.includes(socket.id);
 
@@ -525,10 +524,10 @@ var IgeNetIoServer = {
 							ige.server.socketConnectionCount.immediatelyDisconnected++;
 						}
 						 /** additional part to send some info for marketing purposes */
-						_this.mixpanel.track("Game Play", {
+						global.mixpanel.track("Game Play", {
 							"distinct_id": self._socketById[socket.id]._token.userId,
 							"$ip": socket._remoteAddress,
-							"gameSlug": self._socketById[socket.id]._token.gameSlug,
+							"gameSlug": ige.game && ige.game.data && ige.game.data.defaultData && ige.game.data.defaultData.gameSlug,
 							"playTime": end - self._socketById[socket.id].start,
 						});
 					}
