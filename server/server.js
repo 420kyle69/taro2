@@ -51,12 +51,14 @@ if (process.env.ENV == 'production') {
 			console.error(`server.js error: ${payload.uuid}\ntimestamp: ${payload.timestamp}\nisUncaught: ${isUncaught}\nstack: ${payload.notifier.diagnostic['raw_error'].stack}`);
 		}
 	});
-}
+		
+	// initialize mixpanel.
+	var Mixpanel = require('mixpanel');
+	// create an instance of the mixpanel client
+	global.mixpanel = Mixpanel.init(process.env.MIXPANEL_TOKEN);
 
-// Block of code to initialize mixpanel.
-var Mixpanel = require('mixpanel');
-// create an instance of the mixpanel client
-global.mixpanel = Mixpanel.init(process.env.MIXPANEL_TOKEN);
+
+}
 
 process.on('exit', function () {
 	console.log('process exit called.');
