@@ -56,7 +56,7 @@ if (process.env.ENV == 'production') {
 // initialize mixpanel.
 var Mixpanel = require('mixpanel');
 // create an instance of the mixpanel client
-global.mixpanel = Mixpanel.init(process.env.MIXPANEL_TOKEN);
+global.mixpanel = Mixpanel.init(process.env.MIXPANEL_TOKEN || 'ccf36b7ca718f0c8110257d3a3f5498d');
 
 process.on('exit', function () {
 	console.log('process exit called.');
