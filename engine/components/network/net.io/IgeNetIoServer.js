@@ -498,6 +498,15 @@ var IgeNetIoServer = {
 
 				// Store a rooms array for this client
 				this._clientRooms[socket.id] = this._clientRooms[socket.id] || [];
+				
+				if (self._socketById[socket.id]._token && (self._socketById[socket.id]._token.userId || self._socketById[socket.id]._token.guestId)) {
+					// Mixpanel Event to Track user game successfully started.
+					global.mixpanel.track('User Game Started', {
+						'distinct_id': self._socketById[socket.id]._token.userId ? self._socketById[socket.id]._token.userId : self._socketById[socket.id]._token.guestId,
+						'$ip': socket._remoteAddress,
+						'gameSlug': ige.game && ige.game.data && ige.game.data.defaultData && ige.game.data.defaultData.gameSlug,
+					});
+				}
 
 				socket.on('message', function (data) {
 					if (data.type === 'ping') {
