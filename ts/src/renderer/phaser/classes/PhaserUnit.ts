@@ -31,7 +31,8 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			flip: entity.on('flip', this.flip, this),
 			follow: entity.on('follow', this.follow, this),
 			'update-texture': entity.on('update-texture', this.updateTexture, this),
-			'update-cellsheet': entity.on('update-cellsheet', this.updateCellSheet, this),
+			//'update-cellsheet': entity.on('update-cellsheet', this.updateCellSheet, this),
+			'use-skin': entity.on('use-skin', this.useSkin, this),
 			'update-label': entity.on('update-label', this.updateLabel, this),
 			'show-label': entity.on('show-label', this.showLabel, this),
 			'hide-label': entity.on('hide-label', this.hideLabel, this),
@@ -49,13 +50,27 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		this.sprite.setTexture(`unit/${this.entity._stats.type}`);
 	}
 
-	protected updateCellSheet () {
+	/*protected updateCellSheet () {
 		this.scene.loadEntity(`unit/${this.entity._stats.cellSheet.url}`, this.entity._stats);
 		this.scene.load.on('filecomplete', function cnsl() {
 			this.key = `unit/${this.entity._stats.cellSheet.url}`;
 			this.sprite.setTexture(`unit/${this.entity._stats.cellSheet.url}`);
 		}, this);
 		this.scene.load.start();
+	}*/
+
+	protected useSkin (purchasable = null) {
+		if (purchasable) {
+			this.scene.loadEntity(`unit/${purchasable.name}`, purchasable.image);
+			this.scene.load.on('filecomplete', function cnsl() {
+				this.key = `unit/${purchasable.name}`;
+				this.sprite.setTexture(`unit/${purchasable.name}`);
+			}, this);
+			this.scene.load.start();
+		}
+		else {
+			this.updateTexture();
+		}
 	}
 
 	protected transform (data: {
