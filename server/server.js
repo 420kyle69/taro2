@@ -39,6 +39,12 @@ global.rollbar = {
 	},
 };
 
+global.mixpanel = {
+	track: function () {
+		// do nothing
+	},
+};
+
 if (process.env.ENV == 'production') {
 	var Rollbar = require('rollbar');
 	global.rollbar = new Rollbar({
@@ -56,7 +62,9 @@ if (process.env.ENV == 'production') {
 // initialize mixpanel.
 var Mixpanel = require('mixpanel');
 // create an instance of the mixpanel client
-global.mixpanel = Mixpanel.init(process.env.MIXPANEL_TOKEN);
+if(process.env.MIXPANEL_TOKEN) {
+	global.mixpanel = Mixpanel.init(process.env.MIXPANEL_TOKEN);
+}
 
 process.on('exit', function () {
 	console.log('process exit called.');
