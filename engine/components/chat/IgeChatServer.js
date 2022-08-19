@@ -61,49 +61,53 @@ var IgeChatServer = {
 		ige.devLog(`chat - sendToRoom: ${message}`);
 
 		var self = ige.chat;
-		var player = ige.game.getPlayerByClientId(from);
+		var sender = ige.game.getPlayerByClientId(from);
 		var gameData = ige.game.data && ige.game.data.defaultData;
-		if (from && player && player._stats) {
-			// don't send message if player is ban from sending message or unverified
-			if (!global.isDev && (player._stats.banChat || (gameData && gameData.allowVerifiedUserToChat && !player._stats.isUserVerified))) {
+		var msg = {
+			roomId: roomId,
+			text: message,
+			from: from,
+			to: to
+		};
+
+		// send the system message (from the action 'sendChatMessage')
+		if (sender == undefined) {
+			ige.network.send('igeChatMsg', msg);
+			return;
+		} 
+		else if (sender && sender._stats) {
+			
+			// prevent sending messages from banned/unverified users
+			if (!global.isDev && (sender._stats.banChat || (gameData && gameData.allowVerifiedUserToChat && !sender._stats.isUserVerified))) {
 				return;
-			} else if (this.isSpamming(from, message)) {
-				// permanently mute player from this game;
-				player._stats.banChat = true;
-				var msg = {
-					roomId: roomId,
-					text: 'You have been muted for spamming.',
-					to: from
-				};
-				ige.network.send('igeChatMsg', msg, from);
+			} 
+			else if (this.isSpamming(from, message)) { // mute spammers
+				sender._stats.banChat = true;
+				msg.text = 'You have been muted for spamming.',
+				ige.network.send('igeChatMsg', msg);
 				ige.clusterClient.banChat({
 					gameId: gameData._id,
-					userId: player._stats.userId
+					userId: sender._stats.userId
 				});
 				return;
 			}
 
 			ige.game.lastChatMessageSentByPlayer = message;
 			ige.trigger.fire('playerSendsChatMessage', {
-				playerId: player.id()
+				playerId: sender.id()
 			});
 		}
 		
-		if (message != undefined && message[0] == '/') {// do not show command messages that start with '/'. e.g. /ban user
+		// do not show command messages that start with '/'. e.g. /ban user
+		if (message != undefined && message[0] == '/') {
 			return;	
 		}
 
 		if (self._rooms[roomId]) {
 			var room = self._rooms[roomId];
-			var msg; var i;
 
 			if (message !== undefined) {
-				msg = {
-					roomId: roomId,
-					text: message,
-					from: from,
-					to: to
-				};
+				
 
 				if (msg.text && msg.text.length > 80) {
 					msg.text = msg.text.substr(0, 80);

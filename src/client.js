@@ -771,9 +771,6 @@ const Client = IgeEventingClass.extend({
 
 			ige.addComponent(IgeChatComponent);
 			ige.addComponent(VideoChatComponent); // shall we talk about the elephant in the room?
-			ige.chat.on('messageFromServer', (msgData) => {
-				ige.chat.postMessage(msgData);
-			});
 
 			// old comment => 'check for all of the existing entities in the game
 			ige.network.addComponent(IgeStreamComponent);
