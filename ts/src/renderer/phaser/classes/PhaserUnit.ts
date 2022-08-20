@@ -61,10 +61,10 @@ class PhaserUnit extends PhaserAnimatedEntity {
 
 	protected useSkin (purchasable = null) {
 		if (purchasable) {
-			this.scene.loadEntity(`unit/${purchasable.name}`, purchasable.image);
+			this.scene.loadEntity(`unit/${purchasable.image}`, purchasable.image);
 			this.scene.load.on('filecomplete', function cnsl() {
-				this.key = `unit/${purchasable.name}`;
-				this.sprite.setTexture(`unit/${purchasable.name}`);
+				this.key = `unit/${purchasable.image}`;
+				this.sprite.setTexture(`unit/${purchasable.image}`);
 			}, this);
 			this.scene.load.start();
 		}

@@ -27,8 +27,8 @@ var PhaserUnit = /** @class */ (function (_super) {
             flip: entity.on('flip', _this.flip, _this),
             follow: entity.on('follow', _this.follow, _this),
             'update-texture': entity.on('update-texture', _this.updateTexture, _this),
-            'update-cellsheet': entity.on('update-cellsheet', _this.updateCellSheet, _this),
-            'load-skin': entity.on('load-skin', _this.loadSkin, _this),
+            //'update-cellsheet': entity.on('update-cellsheet', this.updateCellSheet, this),
+            'use-skin': entity.on('use-skin', _this.useSkin, _this),
             'update-label': entity.on('update-label', _this.updateLabel, _this),
             'show-label': entity.on('show-label', _this.showLabel, _this),
             'hide-label': entity.on('hide-label', _this.hideLabel, _this),
@@ -44,21 +44,27 @@ var PhaserUnit = /** @class */ (function (_super) {
         this.key = "unit/".concat(this.entity._stats.type);
         this.sprite.setTexture("unit/".concat(this.entity._stats.type));
     };
-    PhaserUnit.prototype.updateCellSheet = function () {
-        this.scene.loadEntity("unit/".concat(this.entity._stats.cellSheet.url), this.entity._stats);
+    /*protected updateCellSheet () {
+        this.scene.loadEntity(`unit/${this.entity._stats.cellSheet.url}`, this.entity._stats);
         this.scene.load.on('filecomplete', function cnsl() {
-            this.key = "unit/".concat(this.entity._stats.cellSheet.url);
-            this.sprite.setTexture("unit/".concat(this.entity._stats.cellSheet.url));
+            this.key = `unit/${this.entity._stats.cellSheet.url}`;
+            this.sprite.setTexture(`unit/${this.entity._stats.cellSheet.url}`);
         }, this);
         this.scene.load.start();
-    };
-    PhaserUnit.prototype.loadSkin = function (purchasable) {
-        this.scene.loadEntity("unit/".concat(purchasable.name), purchasable.image);
-        this.scene.load.on('filecomplete', function cnsl() {
-            this.key = "unit/".concat(purchasable.name);
-            this.sprite.setTexture("unit/".concat(purchasable.name));
-        }, this);
-        this.scene.load.start();
+    }*/
+    PhaserUnit.prototype.useSkin = function (purchasable) {
+        if (purchasable === void 0) { purchasable = null; }
+        if (purchasable) {
+            this.scene.loadEntity("unit/".concat(purchasable.image), purchasable.image);
+            this.scene.load.on('filecomplete', function cnsl() {
+                this.key = "unit/".concat(purchasable.image);
+                this.sprite.setTexture("unit/".concat(purchasable.image));
+            }, this);
+            this.scene.load.start();
+        }
+        else {
+            this.updateTexture();
+        }
     };
     PhaserUnit.prototype.transform = function (data) {
         _super.prototype.transform.call(this, data);

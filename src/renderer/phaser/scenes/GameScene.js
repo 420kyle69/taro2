@@ -70,7 +70,7 @@ var GameScene = /** @class */ (function (_super) {
         players.forEach(function (player) {
             var purchasables = player._stats.purchasables;
             purchasables.forEach(function (purchasable) {
-                _this.loadEntity("unit/".concat(purchasable.name), purchasable.image);
+                _this.loadEntity("unit/".concat(purchasable.image), purchasable.image);
             });
         });
         var data = ige.game.data;

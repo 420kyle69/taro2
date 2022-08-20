@@ -82,7 +82,7 @@ class GameScene extends PhaserScene {
 		players.forEach(player => {
 			const purchasables = player._stats.purchasables;
 			purchasables.forEach(purchasable => {
-				this.loadEntity(`unit/${purchasable.name}`, purchasable.image);
+				this.loadEntity(`unit/${purchasable.image}`, purchasable.image);
 			});
 		});
 
