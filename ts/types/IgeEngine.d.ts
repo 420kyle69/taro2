@@ -1,7 +1,5 @@
 declare class IgeEngine extends IgeClass {
 
-	$$: any;
-
 	_renderFrames: number;
 	_tickStart: number;
 	_renderLatency: number;

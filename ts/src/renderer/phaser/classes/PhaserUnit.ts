@@ -31,7 +31,6 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			flip: entity.on('flip', this.flip, this),
 			follow: entity.on('follow', this.follow, this),
 			'update-texture': entity.on('update-texture', this.updateTexture, this),
-			//'update-cellsheet': entity.on('update-cellsheet', this.updateCellSheet, this),
 			'use-skin': entity.on('use-skin', this.useSkin, this),
 			'update-label': entity.on('update-label', this.updateLabel, this),
 			'show-label': entity.on('show-label', this.showLabel, this),
@@ -49,15 +48,6 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		this.key = `unit/${this.entity._stats.type}`;
 		this.sprite.setTexture(`unit/${this.entity._stats.type}`);
 	}
-
-	/*protected updateCellSheet () {
-		this.scene.loadEntity(`unit/${this.entity._stats.cellSheet.url}`, this.entity._stats);
-		this.scene.load.on('filecomplete', function cnsl() {
-			this.key = `unit/${this.entity._stats.cellSheet.url}`;
-			this.sprite.setTexture(`unit/${this.entity._stats.cellSheet.url}`);
-		}, this);
-		this.scene.load.start();
-	}*/
 
 	protected useSkin (purchasable = null) {
 		if (purchasable) {
@@ -251,12 +241,6 @@ class PhaserUnit extends PhaserAnimatedEntity {
 				this.scaleTween = null;
 			}
 		});
-
-		//for testing updateCellSheet - changing unit cellSheet.url and calling this.updateCellSheet()
-		/*if (ige.client.myPlayer.currentFollowUnit  === this.entity.id()) {
-			this.entity._stats.cellSheet.url = 'https://cache.modd.io/asset/spriteImage/1589645036846_brown_bear.png';
-			this.updateCellSheet();
-		}*/
 	}
 
 	protected destroy (): void {

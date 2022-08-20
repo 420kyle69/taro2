@@ -27,7 +27,6 @@ var PhaserUnit = /** @class */ (function (_super) {
             flip: entity.on('flip', _this.flip, _this),
             follow: entity.on('follow', _this.follow, _this),
             'update-texture': entity.on('update-texture', _this.updateTexture, _this),
-            //'update-cellsheet': entity.on('update-cellsheet', this.updateCellSheet, this),
             'use-skin': entity.on('use-skin', _this.useSkin, _this),
             'update-label': entity.on('update-label', _this.updateLabel, _this),
             'show-label': entity.on('show-label', _this.showLabel, _this),
@@ -44,14 +43,6 @@ var PhaserUnit = /** @class */ (function (_super) {
         this.key = "unit/".concat(this.entity._stats.type);
         this.sprite.setTexture("unit/".concat(this.entity._stats.type));
     };
-    /*protected updateCellSheet () {
-        this.scene.loadEntity(`unit/${this.entity._stats.cellSheet.url}`, this.entity._stats);
-        this.scene.load.on('filecomplete', function cnsl() {
-            this.key = `unit/${this.entity._stats.cellSheet.url}`;
-            this.sprite.setTexture(`unit/${this.entity._stats.cellSheet.url}`);
-        }, this);
-        this.scene.load.start();
-    }*/
     PhaserUnit.prototype.useSkin = function (purchasable) {
         if (purchasable === void 0) { purchasable = null; }
         if (purchasable) {
@@ -210,11 +201,6 @@ var PhaserUnit = /** @class */ (function (_super) {
                 _this.scaleTween = null;
             }
         });
-        //for testing updateCellSheet - changing unit cellSheet.url and calling this.updateCellSheet()
-        /*if (ige.client.myPlayer.currentFollowUnit  === this.entity.id()) {
-            this.entity._stats.cellSheet.url = 'https://cache.modd.io/asset/spriteImage/1589645036846_brown_bear.png';
-            this.updateCellSheet();
-        }*/
     };
     PhaserUnit.prototype.destroy = function () {
         var _this = this;

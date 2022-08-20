@@ -1,7 +1,5 @@
 declare class IgeEntity extends IgeObject {
 
-	currentFollowUnit: any;
-
 	_alive: boolean;
 	_destroyed: boolean;
 	_deathTime: number;
