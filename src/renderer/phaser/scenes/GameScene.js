@@ -66,13 +66,6 @@ var GameScene = /** @class */ (function (_super) {
     };
     GameScene.prototype.preload = function () {
         var _this = this;
-        var players = ige.$$('player');
-        players.forEach(function (player) {
-            var purchasables = player._stats.purchasables;
-            purchasables.forEach(function (purchasable) {
-                _this.loadEntity("unit/".concat(purchasable.image), purchasable.image);
-            });
-        });
         var data = ige.game.data;
         for (var type in data.unitTypes) {
             this.loadEntity("unit/".concat(type), data.unitTypes[type]);

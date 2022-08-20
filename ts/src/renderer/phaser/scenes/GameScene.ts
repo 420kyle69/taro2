@@ -77,15 +77,6 @@ class GameScene extends PhaserScene {
 
 	preload (): void {
 
-		const players = ige.$$('player');
-
-		players.forEach(player => {
-			const purchasables = player._stats.purchasables;
-			purchasables.forEach(purchasable => {
-				this.loadEntity(`unit/${purchasable.image}`, purchasable.image);
-			});
-		});
-
 		const data = ige.game.data;
 
 		for (let type in data.unitTypes) {

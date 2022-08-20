@@ -55,12 +55,18 @@ var PhaserUnit = /** @class */ (function (_super) {
     PhaserUnit.prototype.useSkin = function (purchasable) {
         if (purchasable === void 0) { purchasable = null; }
         if (purchasable) {
-            this.scene.loadEntity("unit/".concat(purchasable.image), purchasable.image);
-            this.scene.load.on('filecomplete', function cnsl() {
+            if (!this.scene.textures.exists("unit/".concat(purchasable.image))) {
+                this.scene.load.image("unit/".concat(purchasable.image), this.scene.patchAssetUrl(purchasable.image));
+                this.scene.load.on('filecomplete', function cnsl() {
+                    this.key = "unit/".concat(purchasable.image);
+                    this.sprite.setTexture("unit/".concat(purchasable.image));
+                }, this);
+                this.scene.load.start();
+            }
+            else {
                 this.key = "unit/".concat(purchasable.image);
                 this.sprite.setTexture("unit/".concat(purchasable.image));
-            }, this);
-            this.scene.load.start();
+            }
         }
         else {
             this.updateTexture();
