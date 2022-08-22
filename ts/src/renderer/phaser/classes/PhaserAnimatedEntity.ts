@@ -17,20 +17,16 @@ class PhaserAnimatedEntity extends PhaserEntity {
 		sprite.rotation = entity._rotate.z;
 
 		Object.assign(this.evtListeners, {
-			'update-texture': entity.on('update-texture', this.updateTexture, this),
 			'play-animation': entity.on('play-animation', this.playAnimation, this),
 			size: entity.on('size', this.size, this),
 			scale: entity.on('scale', this.scale, this)
 		});
 	}
 
-	protected updateTexture () {
-		this.key = `unit/${this.entity._stats.type}`;
-		this.sprite.setTexture(`unit/${this.entity._stats.type}`);
-	}
-
 	protected playAnimation (animationId: string): void {
-		this.sprite.play(`${this.key}/${animationId}`);
+		if (!this.scene.anims.exists(`${this.key}/${animationId}`)) {
+			this.sprite.play(`${this.key}/${animationId}`);
+		}
 	}
 
 	protected transform (data: {

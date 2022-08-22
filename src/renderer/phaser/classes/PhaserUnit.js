@@ -26,6 +26,8 @@ var PhaserUnit = /** @class */ (function (_super) {
         Object.assign(_this.evtListeners, {
             flip: entity.on('flip', _this.flip, _this),
             follow: entity.on('follow', _this.follow, _this),
+            'update-texture': entity.on('update-texture', _this.updateTexture, _this),
+            'use-skin': entity.on('use-skin', _this.useSkin, _this),
             'update-label': entity.on('update-label', _this.updateLabel, _this),
             'show-label': entity.on('show-label', _this.showLabel, _this),
             'hide-label': entity.on('hide-label', _this.hideLabel, _this),
@@ -37,6 +39,30 @@ var PhaserUnit = /** @class */ (function (_super) {
         _this.zoomEvtListener = ige.client.on('zoom', _this.scaleElements, _this);
         return _this;
     }
+    PhaserUnit.prototype.updateTexture = function () {
+        this.key = "unit/".concat(this.entity._stats.type);
+        this.sprite.setTexture("unit/".concat(this.entity._stats.type));
+    };
+    PhaserUnit.prototype.useSkin = function (purchasable) {
+        if (purchasable === void 0) { purchasable = null; }
+        if (purchasable) {
+            if (!this.scene.textures.exists("unit/".concat(purchasable.image))) {
+                this.scene.load.image("unit/".concat(purchasable.image), this.scene.patchAssetUrl(purchasable.image));
+                this.scene.load.on('filecomplete', function cnsl() {
+                    this.key = "unit/".concat(purchasable.image);
+                    this.sprite.setTexture("unit/".concat(purchasable.image));
+                }, this);
+                this.scene.load.start();
+            }
+            else {
+                this.key = "unit/".concat(purchasable.image);
+                this.sprite.setTexture("unit/".concat(purchasable.image));
+            }
+        }
+        else {
+            this.updateTexture();
+        }
+    };
     PhaserUnit.prototype.transform = function (data) {
         _super.prototype.transform.call(this, data);
         if (this.chat) {

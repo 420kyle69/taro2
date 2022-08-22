@@ -1533,6 +1533,7 @@ var Unit = IgeEntityPhysics.extend({
 						} else {
 							if (purchasable.image && purchasable.image.indexOf('cdn.discordapp.com') === -1) {
 								self._stats.cellSheet.url = purchasable.image;
+								self.emit('use-skin', purchasable);
 							}
 						}
 					}
@@ -1580,6 +1581,7 @@ var Unit = IgeEntityPhysics.extend({
 		} else if (ige.isClient) {
 			if (cellSheetUrl === self._stats.cellSheet.url || forceFullyUnequip) {
 				self._stats.cellSheet.url = defaultUnit.cellSheet.url;
+				self.emit('use-skin');
 			}
 			self.updateTexture();
 		}
