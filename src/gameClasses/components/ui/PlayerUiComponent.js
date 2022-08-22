@@ -338,13 +338,6 @@ var PlayerUiComponent = IgeEntity.extend({
 					self.closeDialogueModal();
 				}
 			} else {
-				if (window.dialogueMessagePrinter) {
-					clearInterval(window.dialogueMessagePrinter);
-					$('#modd-dialogue-message').html(self.dialogue.message);
-					window.dialogueMessagePrinter = null;
-					return;
-				}
-
 				self.dialogue.message = dialogue.getNextMessage();
 				self.dialogue.message = self.dialogue.message.replace(/%nl%/g, '<br/>');
 
@@ -365,6 +358,12 @@ var PlayerUiComponent = IgeEntity.extend({
 		}
 
 		function skipText () {
+			if (window.dialogueMessagePrinter) {
+				clearInterval(window.dialogueMessagePrinter);
+				$('#modd-dialogue-message').html(self.dialogue.message);
+				window.dialogueMessagePrinter = null;
+				return;
+			}
 			if(!(dialogue.hasOptions() && dialogue.areOptionsRendered)){
 				showNextMessage();
 			}
