@@ -123,12 +123,13 @@ var PhaserUnit = /** @class */ (function (_super) {
         this.getLabel().visible = false;
     };
     PhaserUnit.prototype.fadingText = function (data) {
+        var offset = -25 - Math.max(this.sprite.displayHeight, this.sprite.displayWidth) / 2;
         new PhaserFloatingText(this.scene, {
             text: data.text || '',
-            x: 0,
-            y: 0,
+            x: this.gameObject.x,
+            y: this.gameObject.y + offset,
             color: data.color || '#fff'
-        }, this);
+        });
     };
     PhaserUnit.prototype.getAttributesContainer = function () {
         if (!this.attributesContainer) {
