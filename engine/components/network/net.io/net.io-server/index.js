@@ -666,7 +666,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 		// Give the socket encode/decode methods
 		socket._encode = self._encode;
 		socket._decode = self._decode;
-		socket._remoteAddress = ws._socket.remoteAddress;
+		socket._remoteAddress = (request.headers['x-forwarded-for'] && request.headers['x-forwarded-for'].split(',').shift()) || ws._socket.remoteAddress;
 		socket._fromPingService = request.headers[PING_SERVICE_HEADER] && request.headers[PING_SERVICE_HEADER] === process.env.PING_SERVICE_HEADER_SECRET;
 
 		// extracting user from token and adding it in _token.
