@@ -26,24 +26,31 @@ var IgeChatClient = {
 
 	_onMessageFromServer: function (data) {
 		var self = ige.chat;
-		var player = ige.game.getPlayerByClientId(data.from);
 
-		var isPlayerMuted = ige.client.myPlayer &&
-			ige.client.myPlayer._stats &&
-			ige.client.myPlayer._stats.mutedUsers &&
-			ige.client.myPlayer._stats.mutedUsers.indexOf(player._stats.userId) > -1;
+		
+		// message from a player
+		if (data && data.from) { 
+			var player = ige.game.getPlayerByClientId(data.from);
 
-		if (!player || isPlayerMuted) {
-			return;
+			var isPlayerMuted = ige.client.myPlayer &&
+				ige.client.myPlayer._stats &&
+				ige.client.myPlayer._stats.mutedUsers &&
+				ige.client.myPlayer._stats.mutedUsers.indexOf(player._stats.userId) > -1;
+			
+			// ignore messages from players I muted
+			if (player && isPlayerMuted) {
+				return;
+			}
 		}
 
 		var isChatHidden = $('#chat-box').hasClass('d-none');
+				
+		// display message if it's either system message, or if chat is visible
+		if (player == undefined || !isChatHidden) {
 
-		// Emit the event and if it wasn't cancelled (by returning true) then
-		// process this ourselves
-		if (!self.emit('messageFromServer', [data])) {
-			// commented out by Jaeyun
-			if (!isChatHidden) {
+			ige.chat.postMessage(data);
+			
+			if (player) {
 				var selectedUnit = player.getSelectedUnit();
 
 				if (selectedUnit && selectedUnit.gluedEntities) {
@@ -59,12 +66,6 @@ var IgeChatClient = {
 						}
 					}
 
-					// create a new chat bubble
-					// var bubbleText = data.text.substring(0, 40);
-
-					// if (data.text.length > bubbleText.length) {
-					// 	bubbleText += '...';
-					// }
 					if (openChatBubble[selectedUnit.id()] && selectedUnit._category === 'unit') {
 						openChatBubble[selectedUnit.id()].destroy();
 						delete openChatBubble[selectedUnit.id()];
@@ -73,10 +74,11 @@ var IgeChatClient = {
 						parentUnit: selectedUnit.id()
 					})
 						.fade(3000);
-				}
-				// console.log("chatMsg from " + player._stats.name + ': ', data.text);
+				}	
 			}
+						
 		}
+		
 	},
 
 	_onJoinedRoom: function (data) {
