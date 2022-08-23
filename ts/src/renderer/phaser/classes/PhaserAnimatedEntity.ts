@@ -24,7 +24,9 @@ class PhaserAnimatedEntity extends PhaserEntity {
 	}
 
 	protected playAnimation (animationId: string): void {
-		this.sprite.play(`${this.key}/${animationId}`);
+		if (!this.scene.anims.exists(`${this.key}/${animationId}`)) {
+			this.sprite.play(`${this.key}/${animationId}`);
+		}
 	}
 
 	protected transform (data: {
