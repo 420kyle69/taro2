@@ -100,12 +100,10 @@ var GameScene = /** @class */ (function (_super) {
             return;
         }
         if (skin) {
-            console.log('loading skin');
             cellSheet.columnCount = 1;
             cellSheet.rowCount = 1;
         }
         this.load.once("filecomplete-image-".concat(key), function () {
-            console.log('loading complete', key);
             // create spritesheet,
             // even if it has only one sprite
             var texture = _this.textures.get(key);

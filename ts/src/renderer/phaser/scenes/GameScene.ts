@@ -128,14 +128,11 @@ class GameScene extends PhaserScene {
 		}
 
 		if (skin) {
-			console.log ('loading skin');
 			cellSheet.columnCount = 1;
 			cellSheet.rowCount = 1;
 		}
 
 		this.load.once(`filecomplete-image-${key}`, () => {
-
-			console.log('loading complete', key)
 			// create spritesheet,
 			// even if it has only one sprite
 			const texture = this.textures.get(key);
