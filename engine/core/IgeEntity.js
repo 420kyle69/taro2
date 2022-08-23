@@ -2447,6 +2447,7 @@ var IgeEntity = IgeObject.extend({
 	destroy: function (destroyOrphan) {
 
 		IgeEntity.prototype.log(`igeEntity: destroy ${this._category} ${this.id()}`);
+
 		this._alive = false;
 		/* CEXCLUDE */
 		// Check if the entity is streaming
