@@ -32,8 +32,11 @@ var PhaserAnimatedEntity = /** @class */ (function (_super) {
         return _this;
     }
     PhaserAnimatedEntity.prototype.playAnimation = function (animationId) {
-        if (!this.scene.anims.exists("".concat(this.key, "/").concat(animationId))) {
+        if (this.scene.anims.exists("".concat(this.key, "/").concat(animationId))) {
             this.sprite.play("".concat(this.key, "/").concat(animationId));
+        }
+        else {
+            this.sprite.anims.stop();
         }
     };
     PhaserAnimatedEntity.prototype.transform = function (data) {

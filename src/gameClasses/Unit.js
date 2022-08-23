@@ -761,7 +761,6 @@ var Unit = IgeEntityPhysics.extend({
 
 		if (ige.isClient) {
 			self.updateTexture();
-			this.emit('update-texture');
 			self._scaleTexture();
 		}
 
@@ -1505,6 +1504,8 @@ var Unit = IgeEntityPhysics.extend({
 	// apply texture based on state
 	updateTexture: function () {
 		var self = this;
+		var defaultUnit = ige.game.getAsset('unitTypes', self._stats.type);
+		self.emit('update-texture', self._stats.cellSheet.url !== defaultUnit.cellSheet.url);
 
 		var ownerPlayer = self.getOwner();
 		var isInvisible = self.shouldBeInvisible(ownerPlayer, ige.client.myPlayer);
@@ -1533,7 +1534,6 @@ var Unit = IgeEntityPhysics.extend({
 						} else {
 							if (purchasable.image && purchasable.image.indexOf('cdn.discordapp.com') === -1) {
 								self._stats.cellSheet.url = purchasable.image;
-								self.emit('use-skin', purchasable);
 							}
 						}
 					}
@@ -1581,7 +1581,6 @@ var Unit = IgeEntityPhysics.extend({
 		} else if (ige.isClient) {
 			if (cellSheetUrl === self._stats.cellSheet.url || forceFullyUnequip) {
 				self._stats.cellSheet.url = defaultUnit.cellSheet.url;
-				self.emit('use-skin');
 			}
 			self.updateTexture();
 		}

@@ -31,7 +31,6 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			flip: entity.on('flip', this.flip, this),
 			follow: entity.on('follow', this.follow, this),
 			'update-texture': entity.on('update-texture', this.updateTexture, this),
-			'use-skin': entity.on('use-skin', this.useSkin, this),
 			'update-label': entity.on('update-label', this.updateLabel, this),
 			'show-label': entity.on('show-label', this.showLabel, this),
 			'hide-label': entity.on('hide-label', this.hideLabel, this),
@@ -44,19 +43,15 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		this.zoomEvtListener = ige.client.on('zoom', this.scaleElements, this);
 	}
 
-	protected updateTexture () {
-		this.key = `unit/${this.entity._stats.type}`;
-		this.sprite.setTexture(`unit/${this.entity._stats.type}`);
-	}
-
-	protected useSkin (purchasable = null) {
-		if (purchasable) {
-			if (!this.scene.textures.exists(`unit/${purchasable.image}`)) {
-				this.scene.load.image(`unit/${purchasable.image}`, this.scene.patchAssetUrl(purchasable.image));
+	protected updateTexture (usingSkin) {
+		if (usingSkin) {
+			this.sprite.anims.stop();
+			this.key = `unit/${this.entity._stats.cellSheet.url}`;
+			if (!this.scene.textures.exists(`unit/${this.entity._stats.cellSheet.url}`)) {
+				this.scene.loadEntity(`unit/${this.entity._stats.cellSheet.url}`, this.entity._stats, true);
 				this.scene.load.on('filecomplete', function cnsl() {
-					if (this) {
-						this.key = `unit/${purchasable.image}`;
-						this.sprite.setTexture(`unit/${purchasable.image}`);
+					if (this && this.sprite) {
+						this.sprite.setTexture(`unit/${this.entity._stats.cellSheet.url}`, 0);
 						const bounds = this.entity._bounds2d;
 						this.sprite.setDisplaySize(bounds.x, bounds.y);
 					}
@@ -64,12 +59,16 @@ class PhaserUnit extends PhaserAnimatedEntity {
 				this.scene.load.start();
 			}
 			else {
-				this.key = `unit/${purchasable.image}`;
-				this.sprite.setTexture(`unit/${purchasable.image}`);
+				this.sprite.setTexture(`unit/${this.entity._stats.cellSheet.url}`);
+				const bounds = this.entity._bounds2d;
+				this.sprite.setDisplaySize(bounds.x, bounds.y);
 			}
 		}
 		else {
-			this.updateTexture();
+			this.key = `unit/${this.entity._stats.type}`;
+			this.sprite.setTexture(`unit/${this.entity._stats.type}`);
+			const bounds = this.entity._bounds2d;
+			this.sprite.setDisplaySize(bounds.x, bounds.y);
 		}
 	}
 
