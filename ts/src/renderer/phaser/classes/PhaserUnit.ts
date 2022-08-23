@@ -49,7 +49,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			this.key = `unit/${this.entity._stats.cellSheet.url}`;
 			if (!this.scene.textures.exists(`unit/${this.entity._stats.cellSheet.url}`)) {
 				this.scene.loadEntity(`unit/${this.entity._stats.cellSheet.url}`, this.entity._stats, true);
-				this.scene.load.on('filecomplete', function cnsl() {
+				this.scene.load.on(`filecomplete-image-${this.key}`, function cnsl() {
 					if (this && this.sprite) {
 						this.sprite.setTexture(`unit/${this.entity._stats.cellSheet.url}`);
 						const bounds = this.entity._bounds2d;

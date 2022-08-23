@@ -44,7 +44,7 @@ var PhaserUnit = /** @class */ (function (_super) {
             this.key = "unit/".concat(this.entity._stats.cellSheet.url);
             if (!this.scene.textures.exists("unit/".concat(this.entity._stats.cellSheet.url))) {
                 this.scene.loadEntity("unit/".concat(this.entity._stats.cellSheet.url), this.entity._stats, true);
-                this.scene.load.on('filecomplete', function cnsl() {
+                this.scene.load.on("filecomplete-image-".concat(this.key), function cnsl() {
                     if (this && this.sprite) {
                         this.sprite.setTexture("unit/".concat(this.entity._stats.cellSheet.url));
                         var bounds = this.entity._bounds2d;
