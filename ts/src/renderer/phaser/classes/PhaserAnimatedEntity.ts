@@ -8,7 +8,6 @@ class PhaserAnimatedEntity extends PhaserEntity {
 		protected key: string
 	) {
 		super(entity);
-
 		const bounds = entity._bounds2d;
 		const sprite = scene.add.sprite(0, 0, key);
 		this.sprite = sprite as Phaser.GameObjects.Sprite & Hidden;
@@ -24,8 +23,11 @@ class PhaserAnimatedEntity extends PhaserEntity {
 	}
 
 	protected playAnimation (animationId: string): void {
-		if (!this.scene.anims.exists(`${this.key}/${animationId}`)) {
+		if (this.scene.anims.exists(`${this.key}/${animationId}`)) {
 			this.sprite.play(`${this.key}/${animationId}`);
+		}
+		else {
+			this.sprite.anims.stop();
 		}
 	}
 

@@ -119,7 +119,7 @@ class GameScene extends PhaserScene {
 		);
 	}
 
-	loadEntity (key: string, data: EntityData): void {
+	loadEntity (key: string, data: EntityData, skin = false): void {
 
 		const cellSheet = data.cellSheet;
 
@@ -127,8 +127,12 @@ class GameScene extends PhaserScene {
 			return;
 		}
 
-		this.load.once(`filecomplete-image-${key}`, () => {
+		if (skin) {
+			cellSheet.columnCount = 1;
+			cellSheet.rowCount = 1;
+		}
 
+		this.load.once(`filecomplete-image-${key}`, () => {
 			// create spritesheet,
 			// even if it has only one sprite
 			const texture = this.textures.get(key);
