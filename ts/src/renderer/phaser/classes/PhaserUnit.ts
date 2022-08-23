@@ -54,7 +54,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			if (!this.scene.textures.exists(`unit/${purchasable.image}`)) {
 				this.scene.load.image(`unit/${purchasable.image}`, this.scene.patchAssetUrl(purchasable.image));
 				this.scene.load.on('filecomplete', function cnsl() {
-					if (this) {
+					if (this.sprite) {
 						this.key = `unit/${purchasable.image}`;
 						this.sprite.setTexture(`unit/${purchasable.image}`);
 						const bounds = this.entity._bounds2d;

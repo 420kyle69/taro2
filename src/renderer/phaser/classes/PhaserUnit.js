@@ -49,7 +49,7 @@ var PhaserUnit = /** @class */ (function (_super) {
             if (!this.scene.textures.exists("unit/".concat(purchasable.image))) {
                 this.scene.load.image("unit/".concat(purchasable.image), this.scene.patchAssetUrl(purchasable.image));
                 this.scene.load.on('filecomplete', function cnsl() {
-                    if (this) {
+                    if (this.sprite) {
                         this.key = "unit/".concat(purchasable.image);
                         this.sprite.setTexture("unit/".concat(purchasable.image));
                         var bounds = this.entity._bounds2d;
