@@ -39,6 +39,7 @@
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.21",
     "lz-string": "^1.4.4",
+    "mixpanel": "^0.17.0",
     "msgpack-lite": "^0.1.26",
     "phaser": "^3.55.2",
     "phaser3-rex-plugins": "1.1.70",

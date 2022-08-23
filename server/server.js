@@ -32,10 +32,16 @@ global.rollbar = {
 		// do nothing in non prod env
 	},
 	error: function () {
-
+		// do nothing in non prod env
 	},
 	configure: function () {
+		// do nothing in non prod env
+	},
+};
 
+global.mixpanel = {
+	track: function () {
+		// do nothing
 	},
 };
 
@@ -43,15 +49,21 @@ if (process.env.ENV == 'production') {
 	var Rollbar = require('rollbar');
 	global.rollbar = new Rollbar({
 		accessToken: '326308ea71e041dc87e30fce4eb48d99',
+		environment: process.env.ENV,
 		captureUncaught: true,
-		captureUnhandledRejections: true
+		captureUnhandledRejections: true,
+		exitOnUncaughtException: true,
+		onSendCallback: (isUncaught, args, payload) => {
+			console.error(`server.js error: ${payload.uuid}\ntimestamp: ${payload.timestamp}\nisUncaught: ${isUncaught}\nstack: ${payload.notifier.diagnostic['raw_error'].stack}`);
+		}
 	});
+}
 
-	process.on('uncaughtException', function (err) {
-		global.rollbar.log(err);
-		console.log(`server.js uncaughtException: ${err.stack}`);
-		process.exit(0);
-	});
+// initialize mixpanel.
+var Mixpanel = require('mixpanel');
+// create an instance of the mixpanel client
+if(process.env.MIXPANEL_TOKEN) {
+	global.mixpanel = Mixpanel.init(process.env.MIXPANEL_TOKEN);
 }
 
 process.on('exit', function () {
@@ -165,6 +177,10 @@ var Server = IgeClass.extend({
 				self.startGame();
 			} else if (typeof ClusterServerComponent != 'undefined') {
 				ige.addComponent(ClusterServerComponent);
+			}
+			// Include ProxyComponent to master cluster
+			if (typeof ProxyComponent !== 'undefined') {
+				ige.addComponent(ProxyComponent);
 			}
 		} else {
 			if (typeof ClusterClientComponent != 'undefined') {
@@ -288,10 +304,10 @@ var Server = IgeClass.extend({
 		}
 
 		app.get('/', (req, res) => {
-
+			
 			const jwt = require("jsonwebtoken");
-
-			const token = jwt.sign({ userId: '', createdAt: Date.now() }, process.env.JWT_SECRET_KEY, {
+			
+			const token = jwt.sign({ userId: '', createdAt: Date.now(), gameSlug: global.standaloneGame.defaultData.gameSlug }, process.env.JWT_SECRET_KEY, {
 				expiresIn: ige.server.TOKEN_EXPIRES_IN.toString(),
 			});
 
@@ -444,12 +460,9 @@ var Server = IgeClass.extend({
 				// tilesize ratio is ratio of base tile size over tilesize of current map
 				var tilesizeRatio = baseTilesize / game.data.map.tilewidth;
 
-				var engineTickFrameRate = 15;
 				if (game.data.defaultData && !isNaN(game.data.defaultData.frameRate)) {
-					engineTickFrameRate = Math.max(15, Math.min(parseInt(game.data.defaultData.frameRate), 60)); // keep fps range between 15 and 60
+					ige._physicsTickRate = Math.max(15, Math.min(parseInt(game.data.defaultData.frameRate), 60)); // keep fps range between 15 and 60
 				}
-
-				ige._physicsTickRate = engineTickFrameRate;
 
 				// /*
 				//  * Significant changes below
@@ -496,7 +509,6 @@ var Server = IgeClass.extend({
 
 						// Add the network stream component
 						ige.network.addComponent(IgeStreamComponent)
-							.stream.sendInterval(1000 / engineTickFrameRate)
 							.stream.start(); // Start the stream
 
 						// Accept incoming network connections
@@ -576,8 +588,6 @@ var Server = IgeClass.extend({
 		console.log('server.js: defineNetworkEvents');
 		ige.network.define('joinGame', self._onJoinGameWrapper);
 		ige.network.define('gameOver', self._onGameOver);
-
-		ige.network.define('setStreamSendInterval', self._onSetStreamSendInterval);
 
 		ige.network.define('makePlayerSelectUnit', self._onPlayerSelectUnit);
 		ige.network.define('playerUnitMoved', self._onPlayerUnitMoved);

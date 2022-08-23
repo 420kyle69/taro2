@@ -305,7 +305,8 @@ var PlayerUiComponent = IgeEntity.extend({
 				dialogue: {
 					...dialogue,
 					message: '',
-					options: []
+					options: [],
+					letterPrintSpeed: 0
 				}
 			}, dialogueTemplate);
 
@@ -357,6 +358,12 @@ var PlayerUiComponent = IgeEntity.extend({
 		}
 
 		function skipText () {
+			if (window.dialogueMessagePrinter) {
+				clearInterval(window.dialogueMessagePrinter);
+				$('#modd-dialogue-message').html(self.dialogue.message);
+				window.dialogueMessagePrinter = null;
+				return;
+			}
 			if(!(dialogue.hasOptions() && dialogue.areOptionsRendered)){
 				showNextMessage();
 			}
