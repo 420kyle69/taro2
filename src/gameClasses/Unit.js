@@ -1433,24 +1433,6 @@ var Unit = IgeEntityPhysics.extend({
 						}
 						break;
 
-					case 'anim':
-						if (ige.isClient) {
-							var animationId = newValue;
-							this.applyAnimationById(animationId);
-						}
-						break;
-
-					case 'stateId':
-						var stateId = newValue;
-						if (ige.isClient) {
-							this.setState(stateId);
-							this.updateLayer();
-							this.applyAnimationForState(newValue);
-							this._scaleTexture();
-							this.scaleDimensions(this._stats.width, this._stats.height);
-						}
-						break;
-
 					case 'scale':
 						if (ige.isClient) {
 							self._scaleTexture();
