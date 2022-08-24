@@ -324,7 +324,7 @@ var PhysicsComponent = IgeEventingClass.extend({
 					angularDamping: 0,
 					allowSleep: true,
 					fixtures: [{
-						friction: 0.5,
+						friction: 0,
 						restitution: 0,
 						shape: {
 							type: 'rectangle'
