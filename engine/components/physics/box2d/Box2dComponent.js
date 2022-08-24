@@ -543,7 +543,7 @@ var PhysicsComponent = IgeEventingClass.extend({
 			if (self.engine == 'crash') { // crash's engine step happens in dist.js
 				self._world.step(timeElapsedSinceLastStep);
 			} else {
-				self._world.step(timeElapsedSinceLastStep / 1000, 8, timeElapsedSinceLastStep / 1000); // Call the world step; frame-rate, velocity iterations, position iterations
+				self._world.step(timeElapsedSinceLastStep / 1000, 8, 3); // Call the world step; frame-rate, velocity iterations, position iterations
 				let nextFrameTime = ige._currentTime + (1000 / ige._physicsTickRate) - 10; // 10ms is to give extra buffer to prepare for the next frame
 				
 				var tempBod = self._world.getBodyList();
