@@ -30,6 +30,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		Object.assign(this.evtListeners, {
 			flip: entity.on('flip', this.flip, this),
 			follow: entity.on('follow', this.follow, this),
+			'update-texture': entity.on('update-texture', this.updateTexture, this),
 			'update-label': entity.on('update-label', this.updateLabel, this),
 			'show-label': entity.on('show-label', this.showLabel, this),
 			'hide-label': entity.on('hide-label', this.hideLabel, this),
@@ -40,6 +41,35 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		});
 
 		this.zoomEvtListener = ige.client.on('zoom', this.scaleElements, this);
+	}
+
+	protected updateTexture (usingSkin) {
+		if (usingSkin) {
+			this.sprite.anims.stop();
+			this.key = `unit/${this.entity._stats.cellSheet.url}`;
+			if (!this.scene.textures.exists(`unit/${this.entity._stats.cellSheet.url}`)) {
+				this.scene.loadEntity(`unit/${this.entity._stats.cellSheet.url}`, this.entity._stats, true);
+				this.scene.load.on(`filecomplete-image-${this.key}`, function cnsl() {
+					if (this && this.sprite) {
+						this.sprite.setTexture(`unit/${this.entity._stats.cellSheet.url}`);
+						const bounds = this.entity._bounds2d;
+						this.sprite.setDisplaySize(bounds.x, bounds.y);
+					}
+				}, this);
+				this.scene.load.start();
+			}
+			else {
+				this.sprite.setTexture(`unit/${this.entity._stats.cellSheet.url}`);
+				const bounds = this.entity._bounds2d;
+				this.sprite.setDisplaySize(bounds.x, bounds.y);
+			}
+		}
+		else {
+			this.key = `unit/${this.entity._stats.type}`;
+			this.sprite.setTexture(`unit/${this.entity._stats.type}`);
+			const bounds = this.entity._bounds2d;
+			this.sprite.setDisplaySize(bounds.x, bounds.y);
+		}
 	}
 
 	protected transform (data: {
@@ -130,12 +160,13 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		text: string;
 		color?: string;
 	}): void {
+		const offset = -25 - Math.max(this.sprite.displayHeight, this.sprite.displayWidth) / 2;
 		new PhaserFloatingText(this.scene, {
 			text: data.text || '',
-			x: 0,
-			y: 0,
+			x: this.gameObject.x,
+			y: this.gameObject.y + offset,
 			color: data.color || '#fff'
-		}, this);
+		});
 	}
 
 	private getAttributesContainer (): Phaser.GameObjects.Container {

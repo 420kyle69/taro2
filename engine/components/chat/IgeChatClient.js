@@ -25,30 +25,40 @@ var IgeChatClient = {
 
 	_onMessageFromServer: function (data) {
 		var self = ige.chat;
-		var player = ige.game.getPlayerByClientId(data.from);
 
-		var isPlayerMuted = ige.client.myPlayer &&
-			ige.client.myPlayer._stats &&
-			ige.client.myPlayer._stats.mutedUsers &&
-			ige.client.myPlayer._stats.mutedUsers.indexOf(player._stats.userId) > -1;
+		
+		// message from a player
+		if (data && data.from) { 
+			var player = ige.game.getPlayerByClientId(data.from);
 
-		if (!player || isPlayerMuted) {
-			return;
+			var isPlayerMuted = ige.client.myPlayer &&
+				ige.client.myPlayer._stats &&
+				ige.client.myPlayer._stats.mutedUsers &&
+				ige.client.myPlayer._stats.mutedUsers.indexOf(player._stats.userId) > -1;
+			
+			// ignore messages from players I muted
+			if (player && isPlayerMuted) {
+				return;
+			}
 		}
 
 		var isChatHidden = $('#chat-box').hasClass('d-none');
+				
+		// display message if it's either system message, or if chat is visible
+		if (player == undefined || !isChatHidden) {
 
-		// Emit the event and if it wasn't cancelled (by returning true) then
-		// process this ourselves
-		if (!self.emit('messageFromServer', [data])) {
-			if (!isChatHidden) {
+			ige.chat.postMessage(data);
+			
+			if (player) {
 				var selectedUnit = player.getSelectedUnit();
 
 				if (selectedUnit) {
 					selectedUnit.emit('render-chat-bubble', data.text);
 				}
 			}
+						
 		}
+		
 	},
 
 	_onJoinedRoom: function (data) {

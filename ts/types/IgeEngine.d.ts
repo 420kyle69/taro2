@@ -2,7 +2,6 @@ declare class IgeEngine extends IgeClass {
 
 	_renderFrames: number;
 	_tickStart: number;
-	_renderLatency: number;
 
 	_currentTime: number;
 	_cullCounter: number;

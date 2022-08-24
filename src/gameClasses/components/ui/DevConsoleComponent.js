@@ -124,7 +124,7 @@ var DevConsoleComponent = IgeEntity.extend({
 				statsPanels.igefps._igefpsPanel.update(ige._renderFPS, 60);
 				statsPanels.igedpf._igedpfPanel.update(ige._dpf, 1000);
 				statsPanels.igeut._igeutPanel.update(ige._updateTime, 100);
-				statsPanels.igert._igertPanel.update(ige._renderTime, 100);
+				statsPanels.igert._igertPanel.update(ige.renderTime, 100);
 				statsPanels.igett._igettPanel.update(ige._tickTime, 100);
 
 				ige.physicsTickCount = 0;
@@ -141,8 +141,6 @@ var DevConsoleComponent = IgeEntity.extend({
 			// Tuning Div
 			var tuningDiv = $('<div id="tuning-div" class="col-sm-12 mb-4"></div>');
 
-			ige.client.renderLatencyMs = ige.game.data.settings.renderlatency || 50;
-
 			ige.client.inputDelay = 0;
 			// ige.client.streamSendInterval = 15;
 			var gui = new dat.GUI({ autoPlace: false, width: 400 });
@@ -153,15 +151,6 @@ var DevConsoleComponent = IgeEntity.extend({
 			//     //console.log(value, ' ms');
 			//     ige.network.send("setStreamSendInterval", { "interval": value });
 			// });
-
-			ige.client.controllerRenderLatency = gui.add(ige.client, 'renderLatencyMs', 0, 1000);
-			ige.client.controllerRenderLatency.onChange(function (value) {
-				// Fires on every change, drag, keypress, etc.
-				value = parseInt(value);
-				// console.log(value, ' ms');
-				ige.network.stream.renderLatency(value);
-				ige.client.renderLatencyMs = value;
-			});
 
 			var controllerExtrapolation = gui.add(ige.client, 'extrapolation');
 			var controllerResolution = gui.add(ige.client, 'resolution', { Auto: 0, '320x240': 320, '640x480': 640, '800x600': 800, '1024x768': 1024, '1280x720': 1280, '1920x1080': 1920 });

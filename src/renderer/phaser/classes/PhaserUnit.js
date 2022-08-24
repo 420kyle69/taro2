@@ -26,6 +26,7 @@ var PhaserUnit = /** @class */ (function (_super) {
         Object.assign(_this.evtListeners, {
             flip: entity.on('flip', _this.flip, _this),
             follow: entity.on('follow', _this.follow, _this),
+            'update-texture': entity.on('update-texture', _this.updateTexture, _this),
             'update-label': entity.on('update-label', _this.updateLabel, _this),
             'show-label': entity.on('show-label', _this.showLabel, _this),
             'hide-label': entity.on('hide-label', _this.hideLabel, _this),
@@ -37,6 +38,34 @@ var PhaserUnit = /** @class */ (function (_super) {
         _this.zoomEvtListener = ige.client.on('zoom', _this.scaleElements, _this);
         return _this;
     }
+    PhaserUnit.prototype.updateTexture = function (usingSkin) {
+        if (usingSkin) {
+            this.sprite.anims.stop();
+            this.key = "unit/".concat(this.entity._stats.cellSheet.url);
+            if (!this.scene.textures.exists("unit/".concat(this.entity._stats.cellSheet.url))) {
+                this.scene.loadEntity("unit/".concat(this.entity._stats.cellSheet.url), this.entity._stats, true);
+                this.scene.load.on("filecomplete-image-".concat(this.key), function cnsl() {
+                    if (this && this.sprite) {
+                        this.sprite.setTexture("unit/".concat(this.entity._stats.cellSheet.url));
+                        var bounds = this.entity._bounds2d;
+                        this.sprite.setDisplaySize(bounds.x, bounds.y);
+                    }
+                }, this);
+                this.scene.load.start();
+            }
+            else {
+                this.sprite.setTexture("unit/".concat(this.entity._stats.cellSheet.url));
+                var bounds = this.entity._bounds2d;
+                this.sprite.setDisplaySize(bounds.x, bounds.y);
+            }
+        }
+        else {
+            this.key = "unit/".concat(this.entity._stats.type);
+            this.sprite.setTexture("unit/".concat(this.entity._stats.type));
+            var bounds = this.entity._bounds2d;
+            this.sprite.setDisplaySize(bounds.x, bounds.y);
+        }
+    };
     PhaserUnit.prototype.transform = function (data) {
         _super.prototype.transform.call(this, data);
         if (this.chat) {
@@ -97,12 +126,13 @@ var PhaserUnit = /** @class */ (function (_super) {
         this.getLabel().visible = false;
     };
     PhaserUnit.prototype.fadingText = function (data) {
+        var offset = -25 - Math.max(this.sprite.displayHeight, this.sprite.displayWidth) / 2;
         new PhaserFloatingText(this.scene, {
             text: data.text || '',
-            x: 0,
-            y: 0,
+            x: this.gameObject.x,
+            y: this.gameObject.y + offset,
             color: data.color || '#fff'
-        }, this);
+        });
     };
     PhaserUnit.prototype.getAttributesContainer = function () {
         if (!this.attributesContainer) {

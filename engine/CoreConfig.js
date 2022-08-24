@@ -102,7 +102,6 @@ var igeCoreConfig = {
 		['csap', 'IgeUiLabel', 'ui/IgeUiLabel.js'],
 		['csap', 'IgeUiTooltip', 'ui/IgeUiTooltip.js'],
 		['csap', 'IgeUiMenu', 'ui/IgeUiMenu.js'],
-		['csap', 'IgeUiTimeStream', 'ui/IgeUiTimeStream.js'],
 		/* Image Filters */
 		['cap', 'IgeFilters', 'core/IgeFilters.js'],
 		['cap', 'IgeFilters._convolute', 'filters/convolute.js'],

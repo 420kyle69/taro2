@@ -5,6 +5,7 @@ var moddioConfig =
 			{ name: 'ClusterClientComponent', path: '../../ClusterClientComponent' },
 			{ name: 'ClusterServerComponent', path: '../../ClusterServerComponent' },
 			{ name: 'HttpComponent', path: '../../HttpComponent' },
+			{ name: 'ProxyComponent', path: '../../ProxyComponent' },
 			{ name: 'betterFilter', path: '../../moderation/betterFilter' }
 		];
 var defaultConfig = [

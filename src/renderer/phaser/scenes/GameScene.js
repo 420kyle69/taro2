@@ -92,11 +92,16 @@ var GameScene = /** @class */ (function (_super) {
         this.load.bitmapFont('Arial_24px_bold_black', '/assets/fonts/Arial_24px_bold_black_0.png', '/assets/fonts/Arial_24px_bold_black.fnt');
         this.load.bitmapFont('Arial_24px_bold_white', '/assets/fonts/Arial_24px_bold_white_0.png', '/assets/fonts/Arial_24px_bold_white.fnt');
     };
-    GameScene.prototype.loadEntity = function (key, data) {
+    GameScene.prototype.loadEntity = function (key, data, skin) {
         var _this = this;
+        if (skin === void 0) { skin = false; }
         var cellSheet = data.cellSheet;
         if (!cellSheet) { // skip if no cell sheet data
             return;
+        }
+        if (skin) {
+            cellSheet.columnCount = 1;
+            cellSheet.rowCount = 1;
         }
         this.load.once("filecomplete-image-".concat(key), function () {
             // create spritesheet,

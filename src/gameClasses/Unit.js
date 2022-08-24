@@ -83,7 +83,7 @@ var Unit = IgeEntityPhysics.extend({
 			self._stats.scale = parseFloat(self._stats.scaleBody);
 		} else {
 			if (!self._stats.scale) {
-				self._stats.scale = self._stats.currentBody && self._stats.currentBody.spriteScale > 0 ? self._stats.currentBody.spriteScale : 1;
+				self._stats.scale = (self._stats.currentBody && self._stats.currentBody.spriteScale > 0) ? self._stats.currentBody.spriteScale : 1;
 			}
 		}
 		self._stats.fadingTextQueue = [];
@@ -761,7 +761,6 @@ var Unit = IgeEntityPhysics.extend({
 
 		if (ige.isClient) {
 			self.updateTexture();
-			this.emit('update-texture');
 			self._scaleTexture();
 		}
 
@@ -1505,6 +1504,8 @@ var Unit = IgeEntityPhysics.extend({
 	// apply texture based on state
 	updateTexture: function () {
 		var self = this;
+		var defaultUnit = ige.game.getAsset('unitTypes', self._stats.type);
+		self.emit('update-texture', self._stats.cellSheet.url !== defaultUnit.cellSheet.url);
 
 		var ownerPlayer = self.getOwner();
 		var isInvisible = self.shouldBeInvisible(ownerPlayer, ige.client.myPlayer);
@@ -1706,7 +1707,7 @@ var Unit = IgeEntityPhysics.extend({
 
 				if (self._stats.isStunned == undefined || self._stats.isStunned != true) {
 					// translate unit
-					var speed = this._stats.attributes.speed && this._stats.attributes.speed.value || 0;
+					var speed = (this._stats.attributes && this._stats.attributes.speed && this._stats.attributes.speed.value) || 0;
 					var vector = undefined;
 					if (
 						( // either unit is AI unit that is currently moving
