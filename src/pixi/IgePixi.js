@@ -276,6 +276,8 @@ var IgeInitPixi = IgeEventingClass.extend({
 			animationId
 		} = info;
 
+		console.log(info)
+
 		var url = cellSheet.url;
 		var rows = cellSheet.rowCount;
 		var columns = cellSheet.columnCount;
