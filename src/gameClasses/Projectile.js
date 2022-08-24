@@ -131,12 +131,6 @@ var Projectile = IgeEntityPhysics.extend({
 				var newValue = data[attrName];
 
 				switch (attrName) {
-					case 'anim':
-						if (ige.isClient) {
-							var animationId = newValue;
-							this.applyAnimationById(animationId);
-						}
-						break;
 
 					case 'scaleBody':
 						if (ige.isServer) {
@@ -154,15 +148,6 @@ var Projectile = IgeEntityPhysics.extend({
 						} else if (ige.isClient) {
 							this._stats.scale = newValue;
 							this._scaleTexture();
-						}
-						break;
-
-					case 'stateId':
-						var stateId = newValue;
-						if (ige.isClient) {
-							this.setState(stateId);
-							this.updateLayer();
-							this.applyAnimationForState(newValue);
 						}
 						break;
 				}
