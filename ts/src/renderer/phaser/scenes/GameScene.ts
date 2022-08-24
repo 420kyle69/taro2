@@ -5,6 +5,7 @@ class GameScene extends PhaserScene {
 	entityLayers: Phaser.GameObjects.Layer[] = [];
 	renderedEntities: TGameObject[] = [];
 	heightRenderer: HeightRenderComponent;
+	itemsList: PhaserItem[] = [];
 
 	constructor() {
 		super({ key: 'Game' });
@@ -404,6 +405,10 @@ class GameScene extends PhaserScene {
 		}
 
 		return canvas;
+	}
+
+	findItem (itemId: string): PhaserItem {
+		return this.itemsList.find(item => item.entity._id === itemId);
 	}
 
 	update (): void {

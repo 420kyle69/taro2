@@ -23,6 +23,7 @@ var PhaserUnit = /** @class */ (function (_super) {
         _this.gameObject = gameObject;
         gameObject.setSize(_this.sprite.width, _this.sprite.height);
         _this.scene.renderedEntities.push(_this.gameObject);
+        _this.equippedItem = null;
         Object.assign(_this.evtListeners, {
             flip: entity.on('flip', _this.flip, _this),
             follow: entity.on('follow', _this.follow, _this),
@@ -34,6 +35,7 @@ var PhaserUnit = /** @class */ (function (_super) {
             'render-attributes': entity.on('render-attributes', _this.renderAttributes, _this),
             'update-attribute': entity.on('update-attribute', _this.updateAttribute, _this),
             'render-chat-bubble': entity.on('render-chat-bubble', _this.renderChat, _this),
+            'equip-item': entity.on('equip-item', _this.equipItem, _this)
         });
         _this.zoomEvtListener = ige.client.on('zoom', _this.scaleElements, _this);
         return _this;
@@ -206,11 +208,22 @@ var PhaserUnit = /** @class */ (function (_super) {
             }
         });
     };
+    PhaserUnit.prototype.equipItem = function (item) {
+        if (item) {
+            var itemId = item._id;
+            this.equippedItem = this.scene.findItem(itemId);
+        }
+        if (item === null) {
+            this.equippedItem = null;
+        }
+        console.log('equipped Item: ', this.equippedItem);
+    };
     PhaserUnit.prototype.destroy = function () {
         var _this = this;
         this.scene.renderedEntities = this.scene.renderedEntities.filter(function (item) { return item !== _this.gameObject; });
         ige.client.off('zoom', this.zoomEvtListener);
         this.zoomEvtListener = null;
+        this.equippedItem = null;
         if (this.scaleTween) {
             this.scaleTween.stop();
             this.scaleTween = null;

@@ -11,6 +11,8 @@ class PhaserUnit extends PhaserAnimatedEntity {
 	private zoomEvtListener: EvtListener;
 	private scaleTween: Phaser.Tweens.Tween;
 
+	private equippedItem: PhaserItem;
+
 	constructor (
 		scene: GameScene,
 		entity: Unit
@@ -27,6 +29,8 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		gameObject.setSize(this.sprite.width, this.sprite.height);
 		this.scene.renderedEntities.push(this.gameObject);
 
+		this.equippedItem = null;
+
 		Object.assign(this.evtListeners, {
 			flip: entity.on('flip', this.flip, this),
 			follow: entity.on('follow', this.follow, this),
@@ -38,6 +42,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			'render-attributes': entity.on('render-attributes', this.renderAttributes, this),
 			'update-attribute': entity.on('update-attribute', this.updateAttribute, this),
 			'render-chat-bubble': entity.on('render-chat-bubble', this.renderChat, this),
+			'equip-item': entity.on('equip-item', this.equipItem, this)
 		});
 
 		this.zoomEvtListener = ige.client.on('zoom', this.scaleElements, this);
@@ -247,11 +252,26 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		});
 	}
 
+	private equipItem (item: Item): void {
+		if (item) {
+			const itemId = item._id;
+			this.equippedItem = this.scene.findItem(itemId);
+		}
+
+		if (item === null) {
+			this.equippedItem = null;
+		}
+
+		console.log('equipped Item: ', this.equippedItem);
+	}
+
 	protected destroy (): void {
 
 		this.scene.renderedEntities = this.scene.renderedEntities.filter(item => item !== this.gameObject);
 		ige.client.off('zoom', this.zoomEvtListener);
 		this.zoomEvtListener = null;
+
+		this.equippedItem = null;
 
 		if (this.scaleTween) {
 			this.scaleTween.stop();
@@ -275,4 +295,3 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		super.destroy();
 	}
 }
-

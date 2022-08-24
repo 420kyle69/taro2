@@ -11,6 +11,7 @@ declare class IgeEntity extends IgeObject {
 	_bounds2d: IgePoint2d;
 	_depth: number;
 	_layer: number;
+	_id: string;
 
 	angleToTarget: number;
 	tween: TweenComponent;

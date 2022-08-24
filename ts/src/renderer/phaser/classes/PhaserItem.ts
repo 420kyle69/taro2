@@ -1,7 +1,7 @@
 class PhaserItem extends PhaserAnimatedEntity {
 
 	protected gameObject: Phaser.GameObjects.Sprite & IRenderProps;
-	protected entity: Item;
+	public entity: Item;
 
 	constructor (
 		scene: GameScene,
@@ -15,10 +15,13 @@ class PhaserItem extends PhaserAnimatedEntity {
 
 		const { x, y } = entity._translate;
 		this.gameObject.setPosition(x, y);
+
+		this.scene.itemsList.push(this);
 	}
 
 	protected destroy (): void {
 		this.scene.renderedEntities = this.scene.renderedEntities.filter(item => item !== this.sprite);
+		this.scene.itemsList = this.scene.itemsList.filter(item => item.entity.id() !== this.entity.id());
 		super.destroy();
 	}
 }

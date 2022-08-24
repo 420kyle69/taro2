@@ -19,6 +19,7 @@ var GameScene = /** @class */ (function (_super) {
         var _this = _super.call(this, { key: 'Game' }) || this;
         _this.entityLayers = [];
         _this.renderedEntities = [];
+        _this.itemsList = [];
         return _this;
     }
     GameScene.prototype.init = function () {
@@ -254,6 +255,9 @@ var GameScene = /** @class */ (function (_super) {
             }
         }
         return canvas;
+    };
+    GameScene.prototype.findItem = function (itemId) {
+        return this.itemsList.find(function (item) { return item.entity._id === itemId; });
     };
     GameScene.prototype.update = function () {
         var _this = this;
