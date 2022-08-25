@@ -64,6 +64,8 @@ class GameScene extends PhaserScene {
 		});
 
 		ige.client.on('position-camera', (x: number, y: number) => {
+			x -= camera.width / 2;
+			y -= camera.height / 2;
 			camera.setScroll(x, y);
 		});
 	}
