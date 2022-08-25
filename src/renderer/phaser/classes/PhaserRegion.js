@@ -33,7 +33,9 @@ var PhaserRegion = /** @class */ (function (_super) {
         var stats = this.entity._stats.default;
         graphics.setPosition(stats.x, stats.y);
         graphics.clear();
-        graphics.fillStyle(Number("0x".concat(stats.inside.substring(1))), (stats.alpha || 40) / 100);
+        graphics.fillStyle(Number("0x".concat(stats.inside.substring(1))), 
+        // between 0 and 1 or we default
+        (stats.alpha && stats.alpha >= 0 && stats.alpha <= 1) ? stats.alpha : 0.4);
         graphics.fillRect(0, 0, stats.width, stats.height);
     };
     PhaserRegion.prototype.destroy = function () {
