@@ -158,13 +158,20 @@ var GameScene = /** @class */ (function (_super) {
             }
             entityLayers.push(_this.add.layer());
         });
-        // taro expects 'debris' entity layer to be in front of 'walls'
-        // entity layer, so we need to swap them for backwards compatibility
-        var debrisLayer = entityLayers[TileLayer.DEBRIS];
-        var wallsLayer = entityLayers[TileLayer.WALLS];
-        entityLayers[EntityLayer.DEBRIS] = debrisLayer;
-        entityLayers[EntityLayer.WALLS] = wallsLayer;
-        this.children.moveAbove(debrisLayer, wallsLayer);
+        if (data.map.layers.find(function (layer) { return layer.name === 'debris'; })) {
+            // taro expects 'debris' entity layer to be in front of 'walls'
+            // entity layer, so we need to swap them for backwards compatibility
+            var debrisLayer = entityLayers[TileLayer.DEBRIS];
+            var wallsLayer = entityLayers[TileLayer.WALLS];
+            entityLayers[EntityLayer.DEBRIS] = debrisLayer;
+            entityLayers[EntityLayer.WALLS] = wallsLayer;
+            this.children.moveAbove(debrisLayer, wallsLayer);
+        }
+        else {
+            // this condition exists to insert the debris layer if it has been
+            // excluded from the map json
+            entityLayers.splice(EntityLayer.DEBRIS, 0, this.add.layer());
+        }
         var camera = this.cameras.main;
         camera.centerOn(map.width * map.tileWidth / 2 * scaleFactor.x, map.height * map.tileHeight / 2 * scaleFactor.y);
         this.events.on('update', function () {
