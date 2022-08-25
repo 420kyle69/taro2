@@ -89,6 +89,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		height: number
 	}): void {
 		super.size(data);
+		this.gameObject.setSize(data.width, data.height);
 		if (this.label) {
 			this.updateLabelOffset();
 		}

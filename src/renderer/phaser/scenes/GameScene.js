@@ -36,12 +36,6 @@ var GameScene = /** @class */ (function (_super) {
             _this.setZoomSize(height);
             camera.zoomTo(_this.calculateZoom(), 1000, Phaser.Math.Easing.Quadratic.Out, true);
         });
-        this.input.on('pointermove', function (pointer) {
-            ige.input.emit('pointermove', [{
-                    x: pointer.worldX,
-                    y: pointer.worldY
-                }]);
-        });
         ige.client.on('create-unit', function (unit) {
             new PhaserUnit(_this, unit);
         });
@@ -259,6 +253,11 @@ var GameScene = /** @class */ (function (_super) {
         return canvas;
     };
     GameScene.prototype.update = function () {
+        var worldPoint = this.cameras.main.getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
+        ige.input.emit('pointermove', [{
+                x: worldPoint.x,
+                y: worldPoint.y,
+            }]);
         this.renderedEntities.forEach(function (element) {
             element.setVisible(false).setActive(false);
         });

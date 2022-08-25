@@ -34,13 +34,6 @@ class GameScene extends PhaserScene {
 			);
 		});
 
-		this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
-			ige.input.emit('pointermove', [{
-				x: pointer.worldX,
-				y: pointer.worldY
-			}]);
-		});
-
 		ige.client.on('create-unit', (unit: Unit) => {
 			new PhaserUnit(this, unit);
 		});
@@ -412,6 +405,11 @@ class GameScene extends PhaserScene {
 	}
 
 	update (): void {
+		const worldPoint = this.cameras.main.getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
+		ige.input.emit('pointermove', [{
+			x: worldPoint.x,
+			y: worldPoint.y,
+		}]);
 		this.renderedEntities.forEach(element => {
 			element.setVisible(false).setActive(false);
 		});
