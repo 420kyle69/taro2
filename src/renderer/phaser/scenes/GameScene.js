@@ -55,7 +55,7 @@ var GameScene = /** @class */ (function (_super) {
             camera.stopFollow();
         });
         ige.client.on('position-camera', function (x, y) {
-            camera.setPosition(x, y);
+            camera.setScroll(x, y);
         });
     };
     GameScene.prototype.preload = function () {
