@@ -501,7 +501,7 @@ var IgeNetIoServer = {
 				
 				if (self._socketById[socket.id]._token && (self._socketById[socket.id]._token.userId || self._socketById[socket.id]._token.guestId)) {
 					// Mixpanel Event to Track user game successfully started.
-					global.mixpanel.track('User Game Started', {
+					global.mixpanel.track('User Connected to Game Server', {
 						'distinct_id': self._socketById[socket.id]._token.userId ? self._socketById[socket.id]._token.userId : self._socketById[socket.id]._token.guestId,
 						'$ip': socket._remoteAddress,
 						'gameSlug': ige.game && ige.game.data && ige.game.data.defaultData && ige.game.data.defaultData.gameSlug,
@@ -535,7 +535,7 @@ var IgeNetIoServer = {
 						
 						if (self._socketById[socket.id]._token && (self._socketById[socket.id]._token.userId || self._socketById[socket.id]._token.guestId)) {
 							/** additional part to send some info for marketing purposes */
-							global.mixpanel.track('Game Play', {
+							global.mixpanel.track('Game Session Duration', {
 								'distinct_id': self._socketById[socket.id]._token.userId || self._socketById[socket.id]._token.guestId,
 								'$ip': socket._remoteAddress,
 								'gameSlug': ige.game && ige.game.data && ige.game.data.defaultData && ige.game.data.defaultData.gameSlug,
