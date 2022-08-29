@@ -24,7 +24,8 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			[ this.sprite ]
 		);
 		this.gameObject = gameObject as Phaser.GameObjects.Container & Hidden;
-		gameObject.setSize(this.sprite.width, this.sprite.height);
+		const containerSize = Math.max(this.sprite.displayHeight, this.sprite.displayWidth);
+		gameObject.setSize(containerSize, containerSize);
 		this.scene.renderedEntities.push(this.gameObject);
 
 		Object.assign(this.evtListeners, {
@@ -89,7 +90,8 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		height: number
 	}): void {
 		super.size(data);
-		this.gameObject.setSize(data.width, data.height);
+		const containerSize = Math.max(this.sprite.displayHeight, this.sprite.displayWidth);
+		this.gameObject.setSize(containerSize, containerSize);
 		if (this.label) {
 			this.updateLabelOffset();
 		}
