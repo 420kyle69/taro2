@@ -362,6 +362,7 @@ var PlayerUiComponent = IgeEntity.extend({
 				clearInterval(window.dialogueMessagePrinter);
 				$('#modd-dialogue-message').html(self.dialogue.message);
 				window.dialogueMessagePrinter = null;
+				$('.dialogue-option') && $('.dialogue-option').removeClass('d-none');
 				return;
 			}
 			if(!(dialogue.hasOptions() && dialogue.areOptionsRendered)){
