@@ -228,6 +228,10 @@ class GameScene extends PhaserScene {
 		this.events.on('update', () => {
 			ige.client.emit('tick');
 		});
+
+		Object.values(this.textures.list).forEach(val => {
+			val.setFilter(Phaser.Textures.FilterMode.NEAREST);
+		  });
 	}
 
 	private setZoomSize (height: number): void {
