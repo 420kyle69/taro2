@@ -78,6 +78,7 @@ interface IRenderProps {
 	hidden: boolean;
 	taroDepth: number;
 	dynamic?: boolean;
+	owner?: PhaserUnit;
 }
 
 type TGameObject =

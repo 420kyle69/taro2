@@ -210,14 +210,18 @@ var PhaserUnit = /** @class */ (function (_super) {
         });
     };
     PhaserUnit.prototype.equipItem = function (item) {
+        if (this.equippedItem) {
+            this.equippedItem.gameObject.owner = null;
+        }
         if (item) {
             var itemId = item._id;
             this.equippedItem = this.scene.findItem(itemId);
+            this.equippedItem.gameObject.owner = this;
         }
         if (item === null) {
             this.equippedItem = null;
         }
-        console.log('equipped Item: ', this.equippedItem);
+        console.log('equipped Item: ', item);
     };
     PhaserUnit.prototype.destroy = function () {
         var _this = this;

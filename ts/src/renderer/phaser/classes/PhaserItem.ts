@@ -1,6 +1,6 @@
 class PhaserItem extends PhaserAnimatedEntity {
 
-	protected gameObject: Phaser.GameObjects.Sprite & IRenderProps;
+	public gameObject: Phaser.GameObjects.Sprite & IRenderProps;
 	public entity: Item;
 
 	constructor (
