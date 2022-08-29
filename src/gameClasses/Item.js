@@ -221,6 +221,7 @@ var Item = IgeEntityPhysics.extend({
 
 			this.oldOwnerId = this._stats.ownerUnitId;
 			this._stats.ownerUnitId = newOwner.id();
+
 		} else { // item is being dropped.
 			this._stats.ownerUnitId = undefined;
 
@@ -835,6 +836,7 @@ var Item = IgeEntityPhysics.extend({
 						if (ige.isClient) {
 							var newOwner = ige.$(newValue);
 							self.setOwnerUnit(newOwner);
+
 						}
 						break;
 					case 'scale':

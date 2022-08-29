@@ -1398,6 +1398,7 @@ var Unit = IgeEntityPhysics.extend({
 							var currentItem = this.inventory.getItemBySlotNumber(this._stats.currentItemIndex + 1);
 							if (currentItem) {
 								self._stats.currentItemId = currentItem.id();
+								self.emit('equip-item', self._stats.currentItemId);
 							}
 						}
 						break;

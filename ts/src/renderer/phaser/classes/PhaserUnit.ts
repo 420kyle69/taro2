@@ -263,7 +263,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			const itemId = item._id;
 			this.equippedItem = this.scene.findItem(itemId);
 
-			this.equippedItem.gameObject.owner = this;
+			this.equippedItem.gameObject.owner = this; // this loses the race against the item creation (not created yet);
 		}
 
 		if (item === null) {
