@@ -21,7 +21,8 @@ var PhaserUnit = /** @class */ (function (_super) {
         var translate = entity._translate;
         var gameObject = scene.add.container(translate.x, translate.y, [_this.sprite]);
         _this.gameObject = gameObject;
-        gameObject.setSize(_this.sprite.width, _this.sprite.height);
+        var containerSize = Math.max(_this.sprite.displayHeight, _this.sprite.displayWidth);
+        gameObject.setSize(containerSize, containerSize);
         _this.scene.renderedEntities.push(_this.gameObject);
         Object.assign(_this.evtListeners, {
             flip: entity.on('flip', _this.flip, _this),
@@ -75,7 +76,8 @@ var PhaserUnit = /** @class */ (function (_super) {
     };
     PhaserUnit.prototype.size = function (data) {
         _super.prototype.size.call(this, data);
-        this.gameObject.setSize(data.width, data.height);
+        var containerSize = Math.max(this.sprite.displayHeight, this.sprite.displayWidth);
+        this.gameObject.setSize(containerSize, containerSize);
         if (this.label) {
             this.updateLabelOffset();
         }
