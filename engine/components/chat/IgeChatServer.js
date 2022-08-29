@@ -72,7 +72,7 @@ var IgeChatServer = {
 
 		// send the system message (from the action 'sendChatMessage')
 		if (sender == undefined) {
-			ige.network.send('igeChatMsg', msg);
+			ige.network.send('igeChatMsg', msg, to);
 			return;
 		} 
 		else if (sender && sender._stats) {
@@ -117,12 +117,13 @@ var IgeChatServer = {
 					// Send message to individual user
 					if (room.users.indexOf(to) > -1) {
 						ige.network.send('igeChatMsg', msg, to);
+						// console.log('Sending to one user...', msg, to);
 					} else {
 						self.log(`Cannot send to user because specified user is not in room: ${to}`);
 					}
 				} else {
 					// Send this message to all users in the room
-					// self.log('Sending to all users...');
+					// console.log('Sending to all users...', msg);
 					ige.network.send('igeChatMsg', msg);
 				}
 			} else {
