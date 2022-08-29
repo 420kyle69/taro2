@@ -52,7 +52,6 @@ var igeClientConfig = {
 		'/gameClasses/Cursor.js',
 
 		'/gameClasses/EntitiesToRender.js',
-		'/gameClasses/HeightRenderComponent.js',
 
 		/* Phaser */
 		'renderer/phaser/phaser-taro.min.js',

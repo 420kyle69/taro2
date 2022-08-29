@@ -225,9 +225,9 @@ class GameScene extends PhaserScene {
 			ige.client.emit('tick');
 		});
 
-		console.log(data);
+		console.log(data.map);
 		if (data.heightBasedZIndex) {
-			this.heightRenderer = new HeightRenderComponent(this);
+			this.heightRenderer = new HeightRenderComponent(this, 3);
 		}
 	}
 

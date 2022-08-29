@@ -1,5 +1,8 @@
 class HeightRenderComponent {
-	constructor (public scene: GameScene) {
+	constructor (
+			public scene: GameScene,
+			private mapHeight: number
+	) {
 		this.scene.heightRenderer = this;
 		console.log('Height Render Component');
 	}
@@ -7,6 +10,6 @@ class HeightRenderComponent {
 	adjustDepth (
 		gameObject: TGameObject
 	): void {
-		gameObject.setDepth(gameObject.taroDepth + gameObject.y / 1000); // 1000 temp numerator
+		gameObject.setDepth(gameObject.taroDepth + gameObject.y / this.mapHeight);
 	}
 }

@@ -1,11 +1,12 @@
 var HeightRenderComponent = /** @class */ (function () {
-    function HeightRenderComponent(scene) {
+    function HeightRenderComponent(scene, mapHeight) {
         this.scene = scene;
+        this.mapHeight = mapHeight;
         this.scene.heightRenderer = this;
         console.log('Height Render Component');
     }
     HeightRenderComponent.prototype.adjustDepth = function (gameObject) {
-        gameObject.setDepth(gameObject.taroDepth + gameObject.y / 1000); // 1000 temp numerator
+        gameObject.setDepth(gameObject.taroDepth + gameObject.y / this.mapHeight);
     };
     return HeightRenderComponent;
 }());
