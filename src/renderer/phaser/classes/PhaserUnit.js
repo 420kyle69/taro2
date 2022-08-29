@@ -77,6 +77,7 @@ var PhaserUnit = /** @class */ (function (_super) {
     };
     PhaserUnit.prototype.size = function (data) {
         _super.prototype.size.call(this, data);
+        this.gameObject.setSize(data.width, data.height);
         if (this.label) {
             this.updateLabelOffset();
         }

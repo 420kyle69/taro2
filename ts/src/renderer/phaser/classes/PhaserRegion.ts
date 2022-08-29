@@ -30,7 +30,8 @@ class PhaserRegion extends PhaserEntity {
 		graphics.clear();
 		graphics.fillStyle(
 			Number(`0x${stats.inside.substring(1)}`),
-			(stats.alpha || 40 ) / 100
+			// between 0 and 1 or we default
+			(stats.alpha && stats.alpha >= 0 && stats.alpha <= 1) ? stats.alpha : 0.4
 		);
 		graphics.fillRect(
 			0,

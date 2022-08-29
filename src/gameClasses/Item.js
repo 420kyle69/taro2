@@ -837,52 +837,6 @@ var Item = IgeEntityPhysics.extend({
 							self.setOwnerUnit(newOwner);
 						}
 						break;
-
-					case 'anim':
-						if (ige.isClient) {
-							var animationId = newValue;
-							self.applyAnimationById(animationId);
-						}
-						break;
-					case 'stateId':
-						if (ige.isClient) {
-							var stateId = newValue;
-							var owner = this.getOwnerUnit();
-							// update state only iff it's not my unit's item
-							self.setState(stateId);
-
-							if (owner == ige.client.selectedUnit) {
-								// don't repeat whip-out tween for my own unit as it has already been executed from unit.changeItem()
-							} else if (stateId == 'selected') {
-								//emit size event
-								this.emit('size', {
-									width: this._stats.currentBody.width,
-									height: this._stats.currentBody.height
-								});
-
-								self.applyAnimationForState(stateId);
-
-								// whip-out the new item using tween
-								let customTween = {
-									type: 'swing',
-									keyFrames: [[0, [0, 0, -1.57]], [100, [0, 0, 0]]]
-								};
-								self.tween.start(null, self._rotate.z, customTween);
-							}
-							// unmount item when item is in backpack
-							if (owner && self._stats.slotIndex >= owner._stats.inventorySize) {
-								self.unMount();
-							}
-
-							if (stateId !== 'unselected') {
-
-								this.emit('size', {
-									width: this._stats.currentBody.width,
-									height: this._stats.currentBody.height
-								});
-							}
-						}
-						break;
 					case 'scale':
 					case 'scaleBody':
 						if (ige.isClient) {

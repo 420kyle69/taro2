@@ -36,13 +36,6 @@ class GameScene extends PhaserScene {
 			);
 		});
 
-		this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
-			ige.input.emit('pointermove', [{
-				x: pointer.worldX,
-				y: pointer.worldY
-			}]);
-		});
-
 		ige.client.on('create-unit', (unit: Unit) => {
 			new PhaserUnit(this, unit);
 		});
@@ -73,7 +66,9 @@ class GameScene extends PhaserScene {
 		});
 
 		ige.client.on('position-camera', (x: number, y: number) => {
-			camera.setPosition(x, y);
+			x -= camera.width / 2;
+			y -= camera.height / 2;
+			camera.setScroll(x, y);
 		});
 	}
 
@@ -207,13 +202,24 @@ class GameScene extends PhaserScene {
 			entityLayers.push(this.add.layer());
 		});
 
-		// taro expects 'debris' entity layer to be in front of 'walls'
-		// entity layer, so we need to swap them for backwards compatibility
-		const debrisLayer = entityLayers[TileLayer.DEBRIS];
-		const wallsLayer = entityLayers[TileLayer.WALLS];
-		entityLayers[EntityLayer.DEBRIS] = debrisLayer;
-		entityLayers[EntityLayer.WALLS] = wallsLayer;
-		this.children.moveAbove(<any>debrisLayer, <any>wallsLayer);
+		if (data.map.layers.find(layer => layer.name === 'debris')) {
+			// taro expects 'debris' entity layer to be in front of 'walls'
+			// entity layer, so we need to swap them for backwards compatibility
+			const debrisLayer = entityLayers[TileLayer.DEBRIS];
+			const wallsLayer = entityLayers[TileLayer.WALLS];
+			entityLayers[EntityLayer.DEBRIS] = debrisLayer;
+			entityLayers[EntityLayer.WALLS] = wallsLayer;
+			this.children.moveAbove(<any>debrisLayer, <any>wallsLayer);
+
+		} else {
+			// this condition exists to insert the debris layer if it has been
+			// excluded from the map json
+			entityLayers.splice(
+				EntityLayer.DEBRIS,
+				0,
+				this.add.layer()
+			);
+		}
 
 		const camera = this.cameras.main;
 		camera.centerOn(
@@ -412,6 +418,11 @@ class GameScene extends PhaserScene {
 	}
 
 	update (): void {
+		const worldPoint = this.cameras.main.getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
+		ige.input.emit('pointermove', [{
+			x: worldPoint.x,
+			y: worldPoint.y,
+		}]);
 		this.renderedEntities.forEach(element => {
 			element.setVisible(false).setActive(false);
 		});
