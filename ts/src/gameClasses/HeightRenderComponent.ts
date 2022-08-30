@@ -13,7 +13,7 @@ class HeightRenderComponent {
 		const castGameObject = !gameObject.owner ? gameObject : gameObject.owner.gameObject;
 
 		const yPos = castGameObject.y;
-		const halfHeight = castGameObject.height / 2;
+		const halfHeight = castGameObject.displayHeight / 2;
 
 		let depth = gameObject.taroDepth + (yPos + halfHeight) / this.mapHeight;
 
