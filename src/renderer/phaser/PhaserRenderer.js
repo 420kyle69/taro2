@@ -69,7 +69,7 @@ var PhaserRenderer = /** @class */ (function (_super) {
         ige.input.setupListeners(this.canvas);
     };
     PhaserRenderer.prototype.getViewportBounds = function () {
-        return this.scene.getScene('Game').cameras.main.getBounds();
+        return this.scene.getScene('Game').cameras.main.worldView;
     };
     return PhaserRenderer;
 }(Phaser.Game));
