@@ -53,6 +53,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 				this.scene.load.on(`filecomplete-image-${this.key}`, function cnsl() {
 					if (this && this.sprite) {
 						this.sprite.setTexture(`unit/${this.entity._stats.cellSheet.url}`);
+						this.sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
 						const bounds = this.entity._bounds2d;
 						this.sprite.setDisplaySize(bounds.x, bounds.y);
 					}
@@ -143,6 +144,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		label.setFontSize(16);
 		label.setFontStyle(data.bold ? 'bold' : 'normal');
 		label.setFill(data.color || '#fff');
+		label.setResolution(4);
 
 		const strokeThickness = ige.game.data.settings
 			.addStrokeToNameAndAttributes !== false ? 4 : 0;

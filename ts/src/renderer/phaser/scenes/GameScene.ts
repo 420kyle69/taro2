@@ -228,6 +228,11 @@ class GameScene extends PhaserScene {
 		this.events.on('update', () => {
 			ige.client.emit('tick');
 		});
+
+		//temporary making each loaded texture not smoothed (later planned to add option for smoothing some of them)
+		Object.values(this.textures.list).forEach(val => {
+			val.setFilter(Phaser.Textures.FilterMode.NEAREST);
+		  });
 	}
 
 	private setZoomSize (height: number): void {
