@@ -174,10 +174,8 @@ var GameScene = /** @class */ (function (_super) {
         this.events.on('update', function () {
             ige.client.emit('tick');
         });
-        console.log(data.map);
         if (data.heightBasedZIndex) {
             this.heightRenderer = new HeightRenderComponent(this, map.height * map.tileHeight);
-            console.log(map.height * map.tileHeight);
         }
     };
     GameScene.prototype.setZoomSize = function (height) {
