@@ -20,6 +20,7 @@ var PhaserItem = /** @class */ (function (_super) {
         _this.sprite.visible = false;
         _this.scene.renderedEntities.push(_this.sprite);
         _this.gameObject = _this.sprite;
+        _this.gameObject.owner = null;
         var _a = entity._translate, x = _a.x, y = _a.y;
         _this.gameObject.setPosition(x, y);
         _this.scene.itemsList.push(_this);

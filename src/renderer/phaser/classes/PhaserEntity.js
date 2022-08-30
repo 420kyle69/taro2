@@ -31,7 +31,7 @@ var PhaserEntity = /** @class */ (function () {
         var scene = this.gameObject.scene;
         this.gameObject.taroDepth = value;
         if (scene.heightRenderer) {
-            this.gameObject.setDepth(value + this.gameObject.y / 1000);
+            this.gameObject.setDepth(value + Number((this.gameObject.y / scene.heightRenderer.mapHeight).toFixed(3)));
         }
         else {
             this.gameObject.setDepth(value);

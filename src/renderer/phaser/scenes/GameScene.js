@@ -176,7 +176,8 @@ var GameScene = /** @class */ (function (_super) {
         });
         console.log(data.map);
         if (data.heightBasedZIndex) {
-            this.heightRenderer = new HeightRenderComponent(this, 3);
+            this.heightRenderer = new HeightRenderComponent(this, map.height * map.tileHeight);
+            console.log(map.height * map.tileHeight);
         }
     };
     GameScene.prototype.setZoomSize = function (height) {

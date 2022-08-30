@@ -233,7 +233,8 @@ class GameScene extends PhaserScene {
 
 		console.log(data.map);
 		if (data.heightBasedZIndex) {
-			this.heightRenderer = new HeightRenderComponent(this, 3);
+			this.heightRenderer = new HeightRenderComponent(this, map.height * map.tileHeight);
+			console.log(map.height  * map.tileHeight);
 		}
 	}
 

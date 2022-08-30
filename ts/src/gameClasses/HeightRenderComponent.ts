@@ -1,7 +1,7 @@
 class HeightRenderComponent {
 	constructor (
 			public scene: GameScene,
-			private mapHeight: number
+			public mapHeight: number
 	) {
 		this.scene.heightRenderer = this;
 		console.log('Height Render Component');

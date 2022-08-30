@@ -42,6 +42,7 @@ const Client = IgeEventingClass.extend({
 		this.physicsConfigLoaded = $.Deferred();
 		this.mapLoaded = $.Deferred();
 		this.rendererLoaded = $.Deferred();
+		this.playerJoined = $.Deferred();
 
 		this.mapRenderEnabled = true; // check where we use this
 		this.unitRenderEnabled = true; // check where we use this

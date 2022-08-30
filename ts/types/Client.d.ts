@@ -5,6 +5,7 @@ declare class Client extends IgeEventingClass {
 	entityUpdateQueue: Record<string, UpdateData[]>;
 
 	rendererLoaded: JQueryDeferred<void>;
+	playerJoined: JQueryDeferred<void>;
 
 	isZooming: boolean;
 

@@ -209,19 +209,21 @@ var PhaserUnit = /** @class */ (function (_super) {
             }
         });
     };
-    PhaserUnit.prototype.equipItem = function (item) {
-        if (this.equippedItem) {
-            this.equippedItem.gameObject.owner = null;
-        }
-        if (item) {
-            var itemId = item._id;
-            this.equippedItem = this.scene.findItem(itemId);
-            this.equippedItem.gameObject.owner = this; // this loses the race against the item creation (not created yet);
-        }
-        if (item === null) {
-            this.equippedItem = null;
-        }
-        console.log('equipped Item: ', item);
+    PhaserUnit.prototype.equipItem = function (itemId) {
+        var _this = this;
+        $.when(ige.client.playerJoined).done(function () {
+            if (_this.equippedItem) {
+                _this.equippedItem.gameObject.owner = null;
+            }
+            if (itemId) {
+                // we need to do this after the player joins;
+                _this.equippedItem = _this.scene.findItem(itemId);
+                _this.equippedItem.gameObject.owner = _this; // this loses the race against the item creation (not created yet);
+            }
+            if (itemId === null) {
+                _this.equippedItem = null;
+            }
+        });
     };
     PhaserUnit.prototype.destroy = function () {
         var _this = this;

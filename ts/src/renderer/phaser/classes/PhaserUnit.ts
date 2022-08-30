@@ -253,23 +253,23 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		});
 	}
 
-	private equipItem (item: Item): void {
+	private equipItem (itemId: string): void {
+		$.when(ige.client.playerJoined).done(() => {
+			if (this.equippedItem) {
+				this.equippedItem.gameObject.owner = null;
+			}
 
-		if (this.equippedItem) {
-			this.equippedItem.gameObject.owner = null;
-		}
+			if (itemId) {
+				// we need to do this after the player joins;
+				this.equippedItem = this.scene.findItem(itemId);
 
-		if (item) {
-			const itemId = item._id;
-			this.equippedItem = this.scene.findItem(itemId);
+				this.equippedItem.gameObject.owner = this; // this loses the race against the item creation (not created yet);
+			}
 
-			this.equippedItem.gameObject.owner = this; // this loses the race against the item creation (not created yet);
-		}
-
-		if (item === null) {
-			this.equippedItem = null;
-		}
-		console.log('equipped Item: ', item);
+			if (itemId === null) {
+				this.equippedItem = null;
+			}
+		});
 	}
 
 	protected destroy (): void {
