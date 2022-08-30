@@ -212,6 +212,7 @@ var PhaserUnit = /** @class */ (function (_super) {
     PhaserUnit.prototype.equipItem = function (itemId) {
         var _this = this;
         $.when(ige.client.playerJoined).done(function () {
+            //
             if (_this.equippedItem) {
                 _this.equippedItem.gameObject.owner = null;
             }

@@ -255,6 +255,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 
 	private equipItem (itemId: string): void {
 		$.when(ige.client.playerJoined).done(() => {
+			//
 			if (this.equippedItem) {
 				this.equippedItem.gameObject.owner = null;
 			}
