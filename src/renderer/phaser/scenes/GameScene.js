@@ -173,6 +173,10 @@ var GameScene = /** @class */ (function (_super) {
         this.events.on('update', function () {
             ige.client.emit('tick');
         });
+        //temporary making each loaded texture not smoothed (later planned to add option for smoothing some of them)
+        Object.values(this.textures.list).forEach(function (val) {
+            val.setFilter(Phaser.Textures.FilterMode.NEAREST);
+        });
     };
     GameScene.prototype.setZoomSize = function (height) {
         // backward compatible game scaling on average 16:9 screen
