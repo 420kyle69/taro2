@@ -229,6 +229,7 @@ class GameScene extends PhaserScene {
 			ige.client.emit('tick');
 		});
 
+		//temporary making each loaded texture not smoothed (later planned to add option for smoothing some of them)
 		Object.values(this.textures.list).forEach(val => {
 			val.setFilter(Phaser.Textures.FilterMode.NEAREST);
 		  });

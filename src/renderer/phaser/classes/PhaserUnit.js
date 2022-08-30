@@ -48,6 +48,7 @@ var PhaserUnit = /** @class */ (function (_super) {
                 this.scene.load.on("filecomplete-image-".concat(this.key), function cnsl() {
                     if (this && this.sprite) {
                         this.sprite.setTexture("unit/".concat(this.entity._stats.cellSheet.url));
+                        this.sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
                         var bounds = this.entity._bounds2d;
                         this.sprite.setDisplaySize(bounds.x, bounds.y);
                     }
@@ -116,6 +117,7 @@ var PhaserUnit = /** @class */ (function (_super) {
         label.setFontSize(16);
         label.setFontStyle(data.bold ? 'bold' : 'normal');
         label.setFill(data.color || '#fff');
+        label.setResolution(4);
         var strokeThickness = ige.game.data.settings
             .addStrokeToNameAndAttributes !== false ? 4 : 0;
         label.setStroke('#000', strokeThickness);
