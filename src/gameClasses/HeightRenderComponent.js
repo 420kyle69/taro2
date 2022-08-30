@@ -6,10 +6,10 @@ var HeightRenderComponent = /** @class */ (function () {
         console.log('Height Render Component');
     }
     HeightRenderComponent.prototype.adjustDepth = function (gameObject) {
-        var yPos = !gameObject.owner ?
-            gameObject.y :
-            gameObject.owner.gameObject.y;
-        var depth = gameObject.taroDepth + yPos / this.mapHeight;
+        var castGameObject = !gameObject.owner ? gameObject : gameObject.owner.gameObject;
+        var yPos = castGameObject.y;
+        var halfHeight = castGameObject.height / 2;
+        var depth = gameObject.taroDepth + (yPos + halfHeight) / this.mapHeight;
         depth = Number(depth.toFixed(3));
         gameObject.setDepth(depth);
     };

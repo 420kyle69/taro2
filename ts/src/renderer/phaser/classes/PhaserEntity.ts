@@ -49,7 +49,7 @@ class PhaserEntity {
 		this.gameObject.taroDepth = value;
 
 		if (scene.heightRenderer) {
-			this.gameObject.setDepth(value + Number((this.gameObject.y / scene.heightRenderer.mapHeight).toFixed(3)));
+			scene.heightRenderer.adjustDepth(this.gameObject as TGameObject & Phaser.GameObjects.Components.Size);
 		} else {
 			this.gameObject.setDepth(value);
 		}

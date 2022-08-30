@@ -433,7 +433,7 @@ class GameScene extends PhaserScene {
 				element.setActive(true).setVisible(true);
 
 				if (element.dynamic) {
-					this.heightRenderer.adjustDepth(element);
+					this.heightRenderer.adjustDepth(element as TGameObject & Phaser.GameObjects.Components.Size);
 				}
 			}
 		});
