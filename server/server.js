@@ -235,7 +235,14 @@ var Server = IgeClass.extend({
 					return reject(new Error('Could not load game'));
 				}
 
-				this.request(`${gameUrl}?num=${self.retryCount}`, (error, response, body) => {
+				this.request({
+					uri: `${gameUrl}?num=${self.retryCount}`,
+					method: 'GET',
+					headers: {
+						gs_authorization: process.env.BE_AUTH_SECRET
+					},
+					json: true
+				}, (error, response, body) => {
 					if (error) {
 						console.log('LOADING GAME-JSON ERROR', gameUrl);
 						console.log('retry #', self.retryCount);
@@ -246,7 +253,7 @@ var Server = IgeClass.extend({
 					}
 
 					if (response.statusCode == 200) {
-						return resolve(JSON.parse(body));
+						return resolve(body);
 					} else {
 						console.log('LOADING GAME-JSON ERROR', gameUrl);
 						console.log('retry #', self.retryCount);
