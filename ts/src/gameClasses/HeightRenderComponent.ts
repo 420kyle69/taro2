@@ -4,7 +4,6 @@ class HeightRenderComponent {
 			public mapHeight: number
 	) {
 		this.scene.heightRenderer = this;
-		console.log('Height Render Component');
 	}
 
 	adjustDepth (
