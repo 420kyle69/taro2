@@ -4214,7 +4214,7 @@ var IgeEntity = IgeObject.extend({
 						switch (attrName) {
 							case 'anim':
 								var animationId = newValue;
-								this.applyAnimationById(animationId);								
+								this.applyAnimationById(animationId);
 								break;
 
 							case 'stateId':
@@ -4224,30 +4224,43 @@ var IgeEntity = IgeObject.extend({
 
 								if (this._category == 'item') {
 									var owner = this.getOwnerUnit();
-									// update state only iff it's not my unit's item								
+									// update state only iff it's not my unit's item
 									if (owner == ige.client.selectedUnit) {
 										// don't repeat whip-out tween for my own unit as it has already been executed from unit.changeItem()
 									} else if (stateId == 'selected') {
 										this.applyAnimationForState(stateId);
-		
+
 										// whip-out the new item using tween
 										let customTween = {
 											type: 'swing',
 											keyFrames: [[0, [0, 0, -1.57]], [100, [0, 0, 0]]]
 										};
 										this.tween.start(null, this._rotate.z, customTween);
+
+									}
+
+									// make sure item always has proper size defined by state
+									if (this._stats.states[stateId].body !== 'none') {
+										this.emit(
+											'size',
+											{
+												width: this._stats.currentBody.width,
+												height: this._stats.currentBody.height
+											}
+										);
 									}
 									// unmount item when item is in backpack
 									if (owner && this._stats.slotIndex >= owner._stats.inventorySize) {
 										this.unMount();
 									}
+
 								} else {
 									this.updateLayer();
 									this.applyAnimationForState(newValue);
 									this._scaleTexture();
 									this.scaleDimensions(this._stats.width, this._stats.height);
 								}
-								
+
 								break;
 							case 'effect':
 								// don't use streamed effect call for my own unit or its items
@@ -4275,7 +4288,7 @@ var IgeEntity = IgeObject.extend({
 							case 'showNameLabel':
 								this.emit('show-label');
 								break;
-							
+
 						}
 					}
 				}
