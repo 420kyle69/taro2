@@ -3438,7 +3438,6 @@ var IgeEntity = IgeObject.extend({
 				x: x,
 				y: y
 			});
-			console.log('scale', this._id);
 		}
 
 		if (this._scale && x !== undefined && y !== undefined && z !== undefined) {
