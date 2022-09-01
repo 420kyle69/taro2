@@ -54,6 +54,7 @@ class PhaserJoystick {
 			}) as PhaserJoystick['virtualJoystick'];
 
 		this.updateTransform();
+		this.hide();
 
 		virtualJoystick.on('update', () => {
 			if (virtualJoystick.pointer) {

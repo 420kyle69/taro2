@@ -26,6 +26,7 @@ var PhaserJoystick = /** @class */ (function () {
                 thumb: thumb
             });
         this.updateTransform();
+        this.hide();
         virtualJoystick.on('update', function () {
             if (virtualJoystick.pointer) {
                 settings.onChange && settings.onChange({
