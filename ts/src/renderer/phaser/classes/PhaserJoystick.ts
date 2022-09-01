@@ -93,8 +93,8 @@ class PhaserJoystick {
 		const scene = virtualJoystick.scene;
 		const controls = scene.controls;
 
-		const x = (this.x + 32) * controls.scaleX + controls.x;
-		const y = (this.y + 12) * controls.scaleY + controls.y;
+		const x = this.x; //(this.x + 32) * controls.scaleX + controls.x;
+		const y = this.y; //(this.y + 12) * controls.scaleY + controls.y;
 
 		const base = virtualJoystick.base;
 		base.setScale(controls.scaleX, controls.scaleY);
