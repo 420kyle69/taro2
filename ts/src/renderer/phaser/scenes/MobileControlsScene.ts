@@ -117,7 +117,38 @@ class MobileControlsScene extends PhaserScene {
 			this.scene.setVisible(value);
 		});
 
-		if (scale.fullscreen.available) {
+		this.joysticks.forEach((j) => {
+			j.hide();
+		});
+
+		this.input.on('pointerdown', function(pointer){
+			var touchX = pointer.x;
+			var touchY = pointer.y;
+			if (touchX < this.cameras.main.displayWidth / 2) {
+				console.log('left part of screen');
+				const leftJoystick = this.joysticks[0];
+				leftJoystick.show();
+				leftJoystick.x = touchX;
+				leftJoystick.y = touchY;
+				leftJoystick.updateTransform();
+			}
+			else {
+				console.log('right part of screen');
+				const rightJoystick = this.joysticks[1];
+				rightJoystick.show();
+				rightJoystick.x = touchX;
+				rightJoystick.y = touchY;
+				rightJoystick.updateTransform();
+			}
+		}, this);
+
+		this.input.on('pointerup', function(pointer){
+			this.joysticks.forEach((j) => {
+				j.hide();
+			});
+		}, this);
+
+		/*if (scale.fullscreen.available) {
 			scale.fullscreenTarget =
 				document.getElementById('game-div');
 			document.body.addEventListener('touchstart', () => {
@@ -126,7 +157,7 @@ class MobileControlsScene extends PhaserScene {
 			document.body.addEventListener('touchend', () => {
 				this.enterFullscreen();
 			}, true);
-		}
+		}*/
 	}
 
 	preload (): void {

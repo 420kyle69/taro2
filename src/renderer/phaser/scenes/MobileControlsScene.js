@@ -88,16 +88,44 @@ var MobileControlsScene = /** @class */ (function (_super) {
         ige.mobileControls.on('visible', function (value) {
             _this.scene.setVisible(value);
         });
-        if (scale.fullscreen.available) {
+        this.joysticks.forEach(function (j) {
+            j.hide();
+        });
+        this.input.on('pointerdown', function (pointer) {
+            var touchX = pointer.x;
+            var touchY = pointer.y;
+            if (touchX < this.cameras.main.displayWidth / 2) {
+                console.log('left part of screen');
+                var leftJoystick = this.joysticks[0];
+                leftJoystick.show();
+                leftJoystick.x = touchX;
+                leftJoystick.y = touchY;
+                leftJoystick.updateTransform();
+            }
+            else {
+                console.log('right part of screen');
+                var rightJoystick = this.joysticks[1];
+                rightJoystick.show();
+                rightJoystick.x = touchX;
+                rightJoystick.y = touchY;
+                rightJoystick.updateTransform();
+            }
+        }, this);
+        this.input.on('pointerup', function (pointer) {
+            this.joysticks.forEach(function (j) {
+                j.hide();
+            });
+        }, this);
+        /*if (scale.fullscreen.available) {
             scale.fullscreenTarget =
                 document.getElementById('game-div');
-            document.body.addEventListener('touchstart', function () {
-                _this.enterFullscreen();
+            document.body.addEventListener('touchstart', () => {
+                this.enterFullscreen();
             }, true);
-            document.body.addEventListener('touchend', function () {
-                _this.enterFullscreen();
+            document.body.addEventListener('touchend', () => {
+                this.enterFullscreen();
             }, true);
-        }
+        }*/
     };
     MobileControlsScene.prototype.preload = function () {
         this.load.image('mobile-button-up', this.patchAssetUrl('https://cache.modd.io/asset/spriteImage/1549614640644_button1.png'));

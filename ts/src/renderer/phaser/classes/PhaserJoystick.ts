@@ -17,6 +17,7 @@ class PhaserJoystick {
 		pointer: Phaser.Input.Pointer;
 		angle: number;
 		force: number;
+		setVisible(boolean): void;
 		destroy (): void;
 	} & Phaser.Events.EventEmitter;
 
@@ -66,6 +67,14 @@ class PhaserJoystick {
 		});
 
 		scene.joysticks.push(this);
+	}
+
+	show (): void {
+		this.virtualJoystick.setVisible(true);
+	}
+
+	hide (): void {
+		this.virtualJoystick.setVisible(false);
 	}
 
 	destroy (): void {

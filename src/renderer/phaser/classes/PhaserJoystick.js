@@ -39,6 +39,12 @@ var PhaserJoystick = /** @class */ (function () {
         });
         scene.joysticks.push(this);
     }
+    PhaserJoystick.prototype.show = function () {
+        this.virtualJoystick.setVisible(true);
+    };
+    PhaserJoystick.prototype.hide = function () {
+        this.virtualJoystick.setVisible(false);
+    };
     PhaserJoystick.prototype.destroy = function () {
         this.virtualJoystick.destroy();
     };
