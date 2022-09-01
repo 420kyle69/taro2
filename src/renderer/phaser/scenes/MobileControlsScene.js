@@ -95,7 +95,6 @@ var MobileControlsScene = /** @class */ (function (_super) {
             var touchX = pointer.x;
             var touchY = pointer.y;
             if (touchX < this.cameras.main.displayWidth / 2) {
-                console.log('left part of screen');
                 var leftJoystick = this.joysticks[0];
                 leftJoystick.show();
                 leftJoystick.x = touchX;
@@ -103,18 +102,12 @@ var MobileControlsScene = /** @class */ (function (_super) {
                 leftJoystick.updateTransform();
             }
             else {
-                console.log('right part of screen');
                 var rightJoystick = this.joysticks[1];
                 rightJoystick.show();
                 rightJoystick.x = touchX;
                 rightJoystick.y = touchY;
                 rightJoystick.updateTransform();
             }
-        }, this);
-        this.input.on('pointerup', function (pointer) {
-            this.joysticks.forEach(function (j) {
-                j.hide();
-            });
         }, this);
         /*if (scale.fullscreen.available) {
             scale.fullscreenTarget =

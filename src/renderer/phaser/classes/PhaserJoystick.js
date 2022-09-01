@@ -1,5 +1,6 @@
 var PhaserJoystick = /** @class */ (function () {
     function PhaserJoystick(scene, x, y, settings) {
+        var _this = this;
         this.x = x;
         this.y = y;
         var radius = 72;
@@ -36,6 +37,7 @@ var PhaserJoystick = /** @class */ (function () {
             }
             else {
                 settings.onEnd && settings.onEnd();
+                _this.hide();
             }
         });
         scene.joysticks.push(this);

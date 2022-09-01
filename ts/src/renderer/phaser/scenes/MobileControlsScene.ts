@@ -125,7 +125,6 @@ class MobileControlsScene extends PhaserScene {
 			var touchX = pointer.x;
 			var touchY = pointer.y;
 			if (touchX < this.cameras.main.displayWidth / 2) {
-				console.log('left part of screen');
 				const leftJoystick = this.joysticks[0];
 				leftJoystick.show();
 				leftJoystick.x = touchX;
@@ -133,19 +132,12 @@ class MobileControlsScene extends PhaserScene {
 				leftJoystick.updateTransform();
 			}
 			else {
-				console.log('right part of screen');
 				const rightJoystick = this.joysticks[1];
 				rightJoystick.show();
 				rightJoystick.x = touchX;
 				rightJoystick.y = touchY;
 				rightJoystick.updateTransform();
 			}
-		}, this);
-
-		this.input.on('pointerup', function(pointer){
-			this.joysticks.forEach((j) => {
-				j.hide();
-			});
 		}, this);
 
 		/*if (scale.fullscreen.available) {
