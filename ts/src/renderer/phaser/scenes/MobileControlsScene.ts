@@ -157,7 +157,7 @@ class MobileControlsScene extends PhaserScene {
 			}
 		}, this);
 
-		/*if (scale.fullscreen.available) {
+		if (scale.fullscreen.available) {
 			scale.fullscreenTarget =
 				document.getElementById('game-div');
 			document.body.addEventListener('touchstart', () => {
@@ -166,7 +166,7 @@ class MobileControlsScene extends PhaserScene {
 			document.body.addEventListener('touchend', () => {
 				this.enterFullscreen();
 			}, true);
-		}*/
+		}
 	}
 
 	preload (): void {
