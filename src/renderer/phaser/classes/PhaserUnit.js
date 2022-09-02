@@ -22,7 +22,6 @@ var PhaserUnit = /** @class */ (function (_super) {
         var gameObject = scene.add.container(translate.x, translate.y, [_this.sprite]);
         _this.gameObject = gameObject;
         gameObject.setSize(_this.sprite.width, _this.sprite.height);
-        _this.scene.renderedEntities.push(_this.gameObject);
         _this.equippedItem = null;
         Object.assign(_this.evtListeners, {
             flip: entity.on('flip', _this.flip, _this),
@@ -38,6 +37,7 @@ var PhaserUnit = /** @class */ (function (_super) {
             'equip-item': entity.on('equip-item', _this.equipItem, _this)
         });
         _this.zoomEvtListener = ige.client.on('zoom', _this.scaleElements, _this);
+        _this.scene.renderedEntities.push(_this.gameObject);
         return _this;
     }
     PhaserUnit.prototype.updateTexture = function (usingSkin) {
@@ -220,9 +220,11 @@ var PhaserUnit = /** @class */ (function (_super) {
                 _this.equippedItem.gameObject.owner = null;
             }
             if (itemId) {
+                //
+                itemId = "".concat(itemId);
                 // we need to do this after the player joins;
                 _this.equippedItem = _this.scene.findItem(itemId);
-                _this.equippedItem.gameObject.owner = _this; // this loses the race against the item creation (not created yet);
+                _this.equippedItem.gameObject.owner = _this;
             }
             if (itemId === null) {
                 _this.equippedItem = null;

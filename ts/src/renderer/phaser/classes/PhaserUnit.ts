@@ -27,7 +27,6 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		);
 		this.gameObject = gameObject as Phaser.GameObjects.Container & IRenderProps;
 		gameObject.setSize(this.sprite.width, this.sprite.height);
-		this.scene.renderedEntities.push(this.gameObject);
 
 		this.equippedItem = null;
 
@@ -46,6 +45,8 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		});
 
 		this.zoomEvtListener = ige.client.on('zoom', this.scaleElements, this);
+
+		this.scene.renderedEntities.push(this.gameObject);
 	}
 
 	protected updateTexture (usingSkin) {
@@ -264,10 +265,12 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			}
 
 			if (itemId) {
+				//
+				itemId = `${itemId}`;
 				// we need to do this after the player joins;
 				this.equippedItem = this.scene.findItem(itemId);
 
-				this.equippedItem.gameObject.owner = this; // this loses the race against the item creation (not created yet);
+				this.equippedItem.gameObject.owner = this;
 			}
 
 			if (itemId === null) {
