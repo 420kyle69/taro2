@@ -131,11 +131,10 @@ var PlayerUiComponent = IgeEntity.extend({
 	// open a modal to ask for input
 	showInputModal: function (config) {
 		var self = this;
-
 		config.isDismissible = config.isDismissible === undefined ? true : !!(config.isDismissible);
 		self.isDismissibleInputModalShown = config.isDismissible;
-
 		$('#player-input-field-label').html(config.fieldLabel || 'Field');
+
 		$('#player-input-field').val('');
 		$('#player-input-modal').addClass('d-flex');
 		$('#player-input-modal').modal({
@@ -246,7 +245,7 @@ var PlayerUiComponent = IgeEntity.extend({
 	},
 
 	openDialogueModal: function (dialogueId, extraData) {
-		let dialogueTemplate = extraData.dialogueTemplate || window.defaultUI.defaultDialogueTemplate
+		let dialogueTemplate = extraData.dialogueTemplate || window.defaultUI.dialogueview;
 		window.handleOptionClick = function (e, index){
 			e.preventDefault();
 			e.stopPropagation();
@@ -256,7 +255,6 @@ var PlayerUiComponent = IgeEntity.extend({
 			ige.playerUi.submitDialogueModal(dialogueId, optionId);
 		}
 
-		const renderDialogueTemplate = window.renderDialogueTemplate;
 		var self = this;
 
 		function getDialogueInstance (dialogue) {
@@ -301,7 +299,7 @@ var PlayerUiComponent = IgeEntity.extend({
 		}
 
 		function initModal () {
-			renderDialogueTemplate({
+			window.renderHBSTemplate({
 				dialogue: {
 					...dialogue,
 					message: '',
@@ -322,7 +320,7 @@ var PlayerUiComponent = IgeEntity.extend({
 
 			dialogue.areOptionsRendered = true;
 
-			renderDialogueTemplate({
+			window.renderHBSTemplate({
 				dialogue: {
 					...dialogue,
 					message: self.dialogue.message
@@ -347,7 +345,7 @@ var PlayerUiComponent = IgeEntity.extend({
 					options = dialogue.options;
 				}
 
-				renderDialogueTemplate({
+				window.renderHBSTemplate({
 					dialogue: {
 						...dialogue,
 						message: self.dialogue.message,
@@ -362,6 +360,7 @@ var PlayerUiComponent = IgeEntity.extend({
 				clearInterval(window.dialogueMessagePrinter);
 				$('#modd-dialogue-message').html(self.dialogue.message);
 				window.dialogueMessagePrinter = null;
+				$('.dialogue-option') && $('.dialogue-option').removeClass('d-none');
 				return;
 			}
 			if(!(dialogue.hasOptions() && dialogue.areOptionsRendered)){
