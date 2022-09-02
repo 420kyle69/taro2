@@ -78,6 +78,8 @@ class MobileControlsScene extends PhaserScene {
 					let clicked = false;
 
 					button.on('pointerdown', () => {
+						this.input.removeListener('pointerdown');
+
 						if (clicked) return;
 						clicked = true;
 
@@ -86,6 +88,25 @@ class MobileControlsScene extends PhaserScene {
 						settings.onStart && settings.onStart();
 					});
 					const onPointerEnd = () => {
+						this.input.addListener('pointerdown', function(pointer){
+
+							var touchX = pointer.x;
+							var touchY = pointer.y;
+							if (touchX < this.cameras.main.displayWidth / 2) {
+								const leftJoystick = this.joysticks[0];
+								leftJoystick.show();
+								leftJoystick.x = touchX;
+								leftJoystick.y = touchY;
+								leftJoystick.updateTransform();
+							}
+							else {
+								const rightJoystick = this.joysticks[1];
+								rightJoystick.show();
+								rightJoystick.x = touchX;
+								rightJoystick.y = touchY;
+								rightJoystick.updateTransform();
+							}
+						}, this);
 						if (!clicked) return;
 						clicked = false;
 
@@ -115,10 +136,6 @@ class MobileControlsScene extends PhaserScene {
 
 		ige.mobileControls.on('visible', (value: boolean) => {
 			this.scene.setVisible(value);
-		});
-
-		this.joysticks.forEach((j) => {
-			j.hide();
 		});
 
 		this.input.on('pointerdown', function(pointer){

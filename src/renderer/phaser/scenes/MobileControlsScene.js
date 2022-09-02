@@ -58,6 +58,7 @@ var MobileControlsScene = /** @class */ (function (_super) {
                     button_1.setInteractive();
                     var clicked_1 = false;
                     button_1.on('pointerdown', function () {
+                        _this.input.removeListener('pointerdown');
                         if (clicked_1)
                             return;
                         clicked_1 = true;
@@ -65,6 +66,24 @@ var MobileControlsScene = /** @class */ (function (_super) {
                         settings.onStart && settings.onStart();
                     });
                     var onPointerEnd = function () {
+                        _this.input.addListener('pointerdown', function (pointer) {
+                            var touchX = pointer.x;
+                            var touchY = pointer.y;
+                            if (touchX < this.cameras.main.displayWidth / 2) {
+                                var leftJoystick = this.joysticks[0];
+                                leftJoystick.show();
+                                leftJoystick.x = touchX;
+                                leftJoystick.y = touchY;
+                                leftJoystick.updateTransform();
+                            }
+                            else {
+                                var rightJoystick = this.joysticks[1];
+                                rightJoystick.show();
+                                rightJoystick.x = touchX;
+                                rightJoystick.y = touchY;
+                                rightJoystick.updateTransform();
+                            }
+                        }, _this);
                         if (!clicked_1)
                             return;
                         clicked_1 = false;
@@ -87,9 +106,6 @@ var MobileControlsScene = /** @class */ (function (_super) {
         });
         ige.mobileControls.on('visible', function (value) {
             _this.scene.setVisible(value);
-        });
-        this.joysticks.forEach(function (j) {
-            j.hide();
         });
         this.input.on('pointerdown', function (pointer) {
             var touchX = pointer.x;
