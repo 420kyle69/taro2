@@ -266,7 +266,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 
 			if (itemId) {
 				//
-				itemId = `${itemId}`;
+				itemId = itemId.toString();
 				// we need to do this after the player joins;
 				this.equippedItem = this.scene.findItem(itemId);
 

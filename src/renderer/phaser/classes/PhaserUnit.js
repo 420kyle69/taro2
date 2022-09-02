@@ -221,7 +221,7 @@ var PhaserUnit = /** @class */ (function (_super) {
             }
             if (itemId) {
                 //
-                itemId = "".concat(itemId);
+                itemId = itemId.toString();
                 // we need to do this after the player joins;
                 _this.equippedItem = _this.scene.findItem(itemId);
                 _this.equippedItem.gameObject.owner = _this;
