@@ -275,7 +275,7 @@ var Item = IgeEntityPhysics.extend({
 				}
 
 				self._stats.lastUsed = ige.now;
-				ige.trigger && ige.trigger.fire('unitUsesItem', {
+				ige.trigger && ige.script.trigger('unitUsesItem', {
 					unitId: (owner) ? owner.id() : undefined,
 					itemId: self.id()
 				});
@@ -425,7 +425,7 @@ var Item = IgeEntityPhysics.extend({
 									// if (!self._stats.penetration) {
 									ige.game.entitiesCollidingWithLastRaycast = _.orderBy(self.raycastTargets, ['raycastFraction'], ['asc']);
 									// }
-									ige.trigger && ige.trigger.fire('raycastItemFired', {
+									ige.trigger && ige.script.trigger('raycastItemFired', {
 										itemId: self.id()
 									});
 								}
@@ -680,7 +680,7 @@ var Item = IgeEntityPhysics.extend({
 		}
 
 		if (owner && ige.trigger) {
-			ige.trigger && ige.trigger.fire('unitStartsUsingAnItem', {
+			ige.trigger && ige.script.trigger('unitStartsUsingAnItem', {
 				unitId: owner.id(),
 				itemId: this.id()
 			});
@@ -694,7 +694,7 @@ var Item = IgeEntityPhysics.extend({
 			var owner = self.getOwnerUnit();
 
 			if (owner && ige.trigger) {
-				ige.trigger && ige.trigger.fire('unitStopsUsingAnItem', {
+				ige.trigger && ige.script.trigger('unitStopsUsingAnItem', {
 					unitId: owner.id(),
 					itemId: self.id()
 				});

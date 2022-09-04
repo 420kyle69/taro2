@@ -520,7 +520,6 @@ var Server = IgeClass.extend({
 						ige.addComponent(IgeChatComponent);
 						ige.addComponent(ItemComponent);
 						ige.addComponent(TimerComponent);
-						ige.addComponent(TriggerComponent);
 						ige.addComponent(VariableComponent);
 						ige.addComponent(GameTextComponent);
 						ige.addComponent(ScriptComponent);
@@ -536,10 +535,7 @@ var Server = IgeClass.extend({
 
 						let map = ige.scaleMap(_.cloneDeep(ige.game.data.map));
 						ige.map.load(map);
-
-						// if (ige.physics.engine === 'CRASH') {
-						// 	ige.physics.addBorders();
-						// }
+						ige.script.load(ige.game.data.scripts)
 
 						ige.game.start();
 

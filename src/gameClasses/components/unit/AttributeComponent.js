@@ -222,11 +222,11 @@ var AttributeComponent = IgeEntity.extend({
 							if (self._entity._category == 'unit' && attributeTypeId == 'health') {
 								self._entity.ai.announceDeath();
 							}
-							ige.trigger.fire(`${this._entity._category}AttributeBecomesZero`, triggeredBy);
+							ige.script.trigger(`${this._entity._category}AttributeBecomesZero`, triggeredBy);
 						} else if (newValue >= attribute.max) // when attribute becomes full, trigger attributeBecomesFull event
 						{
 							// console.log("update attr fire!")
-							ige.trigger.fire(`${this._entity._category}AttributeBecomesFull`, triggeredBy);
+							ige.script.trigger(`${this._entity._category}AttributeBecomesFull`, triggeredBy);
 						}
 
 						// check if user breaks his highscore then assign it to new highscore

@@ -60,8 +60,11 @@ var Unit = IgeEntityPhysics.extend({
 		self.parseEntityObject(self._stats);
 		self.addComponent(InventoryComponent)
 			.addComponent(AbilityComponent)
-			.addComponent(AttributeComponent); // every units gets one
+			.addComponent(AttributeComponent) // every units gets one
+			.addComponent(ScriptComponent); // entity-scripting
 
+		self.script.load(data.scripts)
+						
 		Unit.prototype.log(`initializing new unit ${this.id()}`);
 
 		// initialize body & texture of the unit
@@ -608,7 +611,7 @@ var Unit = IgeEntityPhysics.extend({
 						// }])
 
 						ige.game.lastPurchasedUniTypetId = unitData.unitTypeId;
-						ige.trigger && ige.trigger.fire('playerPurchasesUnit', {
+						ige.trigger && ige.script.trigger('playerPurchasesUnit', {
 							unitId: self.id(),
 							playerId: ownerPlayer.id()
 						});
@@ -660,7 +663,7 @@ var Unit = IgeEntityPhysics.extend({
 				itemId: newItem.id(),
 				unitId: this.id()
 			};
-			ige.trigger && ige.trigger.fire('unitSelectsItem', triggeredBy);
+			ige.trigger && ige.script.trigger('unitSelectsItem', triggeredBy);
 
 			// whip-out the new item using tween
 			if (ige.isClient) {
@@ -1254,7 +1257,7 @@ var Unit = IgeEntityPhysics.extend({
 
 				self.detachEntity(item.id());
 
-				ige.trigger && ige.trigger.fire('unitDroppedAnItem', {
+				ige.trigger && ige.script.trigger('unitDroppedAnItem', {
 					itemId: item.id(),
 					unitId: self.id()
 				});
@@ -1310,7 +1313,7 @@ var Unit = IgeEntityPhysics.extend({
 					unitId: ige.game.lastAttackingUnitId,
 					itemId: ige.game.lastAttackingItemId
 				};
-				ige.trigger && ige.trigger.fire('unitAttacksUnit', triggeredBy);
+				ige.trigger && ige.script.trigger('unitAttacksUnit', triggeredBy);
 
 				var armor = this._stats.attributes.armor && this._stats.attributes.armor.value || 0;
 				var damageReduction = (0.05 * armor) / (1.5 + 0.04 * armor);

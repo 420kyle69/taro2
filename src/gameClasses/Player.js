@@ -66,7 +66,7 @@ var Player = IgeEntity.extend({
 			
 			if (self._stats.controlledBy == 'human' && ige.script) // do not send trigger for neutral player
 			{
-				ige.trigger.fire('playerJoinsGame', { playerId: self.id() });
+				ige.script.trigger('playerJoinsGame', { playerId: self.id() });
 			}
 
 			var clientId = self._stats.clientId;
@@ -356,7 +356,7 @@ var Player = IgeEntity.extend({
 	remove: function () {
 		if (this._stats.controlledBy == 'human' && ige.script) // do not send trigger for neutral player
 		{
-			ige.trigger.fire('playerLeavesGame', { playerId: this.id() });
+			ige.script.trigger('playerLeavesGame', { playerId: this.id() });
 		}
 
 		// session is in second

@@ -12,7 +12,6 @@ var defaultConfig = [
 	{ name: 'ServerNetworkEvents', path: '../server/ServerNetworkEvents' },
 
 	{ name: 'ScriptComponent', path: '../src/gameClasses/components/script/ScriptComponent' },
-	{ name: 'TriggerComponent', path: '../src/gameClasses/components/script/TriggerComponent' },
 
 	{ name: 'ConditionComponent', path: '../src/gameClasses/components/script/ConditionComponent' },
 	{ name: 'ActionComponent', path: '../src/gameClasses/components/script/ActionComponent' },

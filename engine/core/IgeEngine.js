@@ -2003,7 +2003,7 @@ var IgeEngine = IgeEntity.extend({
 
 			if (ige.isServer) {
 				if (ige.gameLoopTickHasExecuted)
-					ige.trigger.fire('frameTick');
+					ige.script.trigger('frameTick');
 			} else if (ige.isClient) {
 				if (ige.client.myPlayer) {
 					ige.client.myPlayer.control._behaviour();

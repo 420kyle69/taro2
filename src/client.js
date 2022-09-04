@@ -904,12 +904,10 @@ const Client = IgeEventingClass.extend({
 		ige.physics.createWorld();
 		ige.physics.start();
 
-		ige.addComponent(TriggerComponent);
-		// ige.addComponent(VariableComponent); // this appears twice
 		ige.addComponent(ScriptComponent);
 		ige.addComponent(ConditionComponent);
 		ige.addComponent(ActionComponent);
-
+		ige.script.load(ige.game.data.scripts);
 		if (typeof mode == 'string' && mode == 'sandbox') {
 			ige.script.runScript('initialize', {}); // loading entities to display in the sandbox
 		}

@@ -6,6 +6,7 @@ var ScriptComponent = IgeEntity.extend({
 		var self = this;
 
 		// self.logStr = "";
+		self.scripts = undefined;
 		self.entryCount = 0;
 		self.showLog = false;
 		self.errorLogs = {};
@@ -19,15 +20,37 @@ var ScriptComponent = IgeEntity.extend({
 		ScriptComponent.prototype.log('initializing Script Component');
 	},
 
-	runScript: function (scriptId, localVariables) {
+	load: function(scripts) {
+		this.scripts = scripts;
+
+		// map trigger events, so we don't have to iterate through all scripts to find corresponding scripts
+		this.triggeredScripts = {};
+		for (var scriptId in this.scripts) {
+			var script = this.scripts[scriptId];
+
+			// look for matching trigger within the script's triggers
+			if (script && script.triggers) {
+				for (j = 0; j < script.triggers.length; j++) {
+					var trigger = script.triggers[j];
+					if (this.triggeredScripts[trigger.type] == undefined) {
+						this.triggeredScripts[trigger.type] = [scriptId]
+					} else {
+						this.triggeredScripts[trigger.type].push(scriptId)
+					}
+				}
+			}
+		}
+	},
+
+	runScript: function (scriptId, params) {
 		var self = this;
 
 		self.currentScriptId = scriptId;
-		if (ige.game.data.scripts[scriptId]) {
-			// var actions = JSON.parse(JSON.stringify(ige.game.data.scripts[scriptId].actions));
+		if (this.scripts[scriptId]) {
+			// var actions = JSON.parse(JSON.stringify(this.scripts[scriptId].actions));
 			var actions = self.getScriptActions(scriptId);
 			if (actions) {
-				var cmd = ige.action.run(actions, localVariables);
+				var cmd = ige.action.run(actions, params);
 				if (cmd == 'return') {
 					ige.log('script return called');
 					return;
@@ -43,7 +66,7 @@ var ScriptComponent = IgeEntity.extend({
 		if (self.scriptCache[scriptId] && (typeof mode === 'undefined' || (typeof mode === 'string' && mode != 'sandbox'))) {
 			return self.scriptCache[scriptId];
 		} else {
-			var script = ige.game.data.scripts[scriptId];
+			var script = this.scripts[scriptId];
 			if (!script.actions) return null;
 			if (script) {
 				self.scriptCache[scriptId] = JSON.parse(JSON.stringify(script.actions));
@@ -51,6 +74,53 @@ var ScriptComponent = IgeEntity.extend({
 			}
 		}
 		return null;
+	},
+	
+	/* trigger and run all of the corresponding script(s) */
+	trigger: function (triggerName, triggeredBy) {
+		let scriptIds = this.triggeredScripts[triggerName]
+		for (i in scriptIds) {
+			let scriptId = scriptIds[i]
+			this.scriptLog(`\ntrigger: ${triggerName}`);
+
+			var localVariables = {
+				triggeredBy: triggeredBy
+			};
+			this.runScript(scriptId, localVariables);
+		}
+
+		if (triggeredBy && triggeredBy.projectileId) {
+			var projectile = ige.$(triggeredBy.projectileId);
+			if (projectile) {
+				switch (triggerName) {
+					case 'unitTouchesProjectile':
+						var attackedUnit = ige.$(ige.game.lastTouchingUnitId);
+						if (attackedUnit) {
+							var damageHasBeenInflicted = attackedUnit.inflictDamage(projectile._stats.damageData);
+
+							if (projectile._stats.destroyOnContactWith && projectile._stats.destroyOnContactWith.units && damageHasBeenInflicted) {
+								projectile.destroy();
+							}
+						}
+						break;
+					case 'projectileTouchesDebris':
+						if (projectile._stats.destroyOnContactWith && projectile._stats.destroyOnContactWith.debris) {
+							projectile.destroy();
+						}
+						break;
+					case 'projectileTouchesItem':
+						if (projectile._stats.destroyOnContactWith && projectile._stats.destroyOnContactWith.items) {
+							projectile.destroy();
+						}
+						break;
+					case 'projectileTouchesWall':
+						if (projectile._stats.destroyOnContactWith && projectile._stats.destroyOnContactWith.walls) {
+							projectile.destroy();
+						}
+						break;
+				}
+			}
+		}
 	},
 
 	scriptLog: function (str, tabCount) {
@@ -94,8 +164,8 @@ var ScriptComponent = IgeEntity.extend({
 		}
 
 		var scriptName = '[scriptName undefined]';
-		if (ige.game.data.scripts[this.currentScriptId]) {
-			scriptName = ige.game.data.scripts[this.currentScriptId].name;
+		if (this.scripts[this.currentScriptId]) {
+			scriptName = this.scripts[this.currentScriptId].name;
 		}
 
 		var record = `script '${scriptName}' in Action '${action}'`;
@@ -103,7 +173,7 @@ var ScriptComponent = IgeEntity.extend({
 	},
 	
 	errorLog: function (message) {
-		var script = ige.game.data.scripts[this.currentScriptId];
+		var script = this.scripts[this.currentScriptId];
 		var log = `Script error '${(script) ? script.name : ''}' in Action '${this.currentActionName}' : ${message}`;
 		this.errorLogs[this.currentActionName] = log;
 		ige.devLog('script errorLog', log, message);
