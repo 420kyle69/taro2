@@ -20,15 +20,12 @@ var ScriptComponent = IgeEntity.extend({
 	},
 
 	runScript: function (scriptId, localVariables) {
-		// console.log("running script", scriptId)
-		var timings = false;
-		if (timings) var started = new Date();
 		var self = this;
 
 		self.currentScriptId = scriptId;
 		if (ige.game.data.scripts[scriptId]) {
 			// var actions = JSON.parse(JSON.stringify(ige.game.data.scripts[scriptId].actions));
-			var actions = self.getScriptActions(scriptId, timings);
+			var actions = self.getScriptActions(scriptId);
 			if (actions) {
 				var cmd = ige.action.run(actions, localVariables);
 				if (cmd == 'return') {
@@ -38,23 +35,10 @@ var ScriptComponent = IgeEntity.extend({
 			}
 		}
 
-		if (timings) {
-			var now = new Date();
-			var elapsed = now - started;
-			self.scriptRuns[scriptId] = self.scriptRuns[scriptId] || 0;
-			self.scriptRuns[scriptId]++;
-			self.scriptTime[scriptId] = self.scriptTime[scriptId] || 0;
-			if (self.scriptRuns[scriptId] > 1) {
-				self.scriptTime[scriptId] += elapsed;
-				var avg = self.scriptTime[scriptId] / (self.scriptRuns[scriptId] - 1);
-				if (self.scriptRuns[scriptId] % 100 == 0) {
-					console.log(`runScript: ${scriptId} ${ige.game.data.scripts[scriptId].name} [${avg} ms avg in ${self.scriptRuns[scriptId]}x]`);
-				}
-			}
-		}
+		
 	},
 
-	getScriptActions: function (scriptId, timings) {
+	getScriptActions: function (scriptId) {
 		var self = this;
 		if (self.scriptCache[scriptId] && (typeof mode === 'undefined' || (typeof mode === 'string' && mode != 'sandbox'))) {
 			return self.scriptCache[scriptId];
@@ -62,19 +46,7 @@ var ScriptComponent = IgeEntity.extend({
 			var script = ige.game.data.scripts[scriptId];
 			if (!script.actions) return null;
 			if (script) {
-				if (timings) {
-					var started = new Date();
-					for (var i = 0; i < 1000; i++) {
-						self.scriptCache[scriptId] = JSON.parse(JSON.stringify(script.actions));
-					}
-					var now = new Date();
-					var elapsed = (now - started) / 1000;
-					console.log(`parse time: ${elapsed} ms ${script.name}`);
-					console.log('*************************************');
-					console.log(script.actions);
-				} else {
-					self.scriptCache[scriptId] = JSON.parse(JSON.stringify(script.actions));
-				}
+				self.scriptCache[scriptId] = JSON.parse(JSON.stringify(script.actions));
 				return self.scriptCache[scriptId];
 			}
 		}
@@ -113,6 +85,7 @@ var ScriptComponent = IgeEntity.extend({
 		// 	// this.entryCount = 0
 		// }
 	},
+
 	recordLast50Action: function (action) {
 		var self = this;
 
@@ -128,6 +101,7 @@ var ScriptComponent = IgeEntity.extend({
 		var record = `script '${scriptName}' in Action '${action}'`;
 		self.last50Actions.push(record);
 	},
+	
 	errorLog: function (message) {
 		var script = ige.game.data.scripts[this.currentScriptId];
 		var log = `Script error '${(script) ? script.name : ''}' in Action '${this.currentActionName}' : ${message}`;

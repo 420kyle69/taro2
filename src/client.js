@@ -911,8 +911,7 @@ const Client = IgeEventingClass.extend({
 		ige.addComponent(ActionComponent);
 
 		if (typeof mode == 'string' && mode == 'sandbox') {
-			//
-			ige.script.runScript('initialize', {}); // why are we doing this?
+			ige.script.runScript('initialize', {}); // loading entities to display in the sandbox
 		}
 	},
 
