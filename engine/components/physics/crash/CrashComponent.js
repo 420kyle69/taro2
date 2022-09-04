@@ -42,18 +42,20 @@ const PhysicsComponent = IgeEventingClass.extend({
 
 		// we should consider moving all of our collision listeners outside of the Component
 		const contactDetails = function (a, b, res, cancel) {
-			ige.trigger._beginContactCallback({
-				m_fixtureA: {
-					m_body: {
-						_entity: a.data.entity,
-					}
-				},
-				m_fixtureB: {
-					m_body: {
-						_entity: b.data.entity,
-					}
-				}
-			});
+
+			// since I removed triggerComponent, you'll have to move contact callback function inside crashComponent.
+			// ige.trigger._beginContactCallback({
+			// 	m_fixtureA: {
+			// 		m_body: {
+			// 			_entity: a.data.entity,
+			// 		}
+			// 	},
+			// 	m_fixtureB: {
+			// 		m_body: {
+			// 			_entity: b.data.entity,
+			// 		}
+			// 	}
+			// });
 		};
 
 		this.crash.onCollision(CollisionController);

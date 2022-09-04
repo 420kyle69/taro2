@@ -59,6 +59,8 @@ var Item = IgeEntityPhysics.extend({
 		// convert numbers stored as string in database to int
 		self.parseEntityObject(self._stats);
 		self.addComponent(AttributeComponent); // every item gets one
+		self.addComponent(ScriptComponent); // entity-scripting
+		self.script.load(data.scripts)
 
 		ige.game.lastCreatedItemId = entityIdFromServer || this.id();
 
@@ -275,7 +277,7 @@ var Item = IgeEntityPhysics.extend({
 				}
 
 				self._stats.lastUsed = ige.now;
-				ige.trigger && ige.script.trigger('unitUsesItem', {
+				ige.script.trigger('unitUsesItem', {
 					unitId: (owner) ? owner.id() : undefined,
 					itemId: self.id()
 				});
@@ -425,7 +427,7 @@ var Item = IgeEntityPhysics.extend({
 									// if (!self._stats.penetration) {
 									ige.game.entitiesCollidingWithLastRaycast = _.orderBy(self.raycastTargets, ['raycastFraction'], ['asc']);
 									// }
-									ige.trigger && ige.script.trigger('raycastItemFired', {
+									ige.script.trigger('raycastItemFired', {
 										itemId: self.id()
 									});
 								}
@@ -680,7 +682,7 @@ var Item = IgeEntityPhysics.extend({
 		}
 
 		if (owner && ige.trigger) {
-			ige.trigger && ige.script.trigger('unitStartsUsingAnItem', {
+			ige.script.trigger('unitStartsUsingAnItem', {
 				unitId: owner.id(),
 				itemId: this.id()
 			});
@@ -694,7 +696,7 @@ var Item = IgeEntityPhysics.extend({
 			var owner = self.getOwnerUnit();
 
 			if (owner && ige.trigger) {
-				ige.trigger && ige.script.trigger('unitStopsUsingAnItem', {
+				ige.script.trigger('unitStopsUsingAnItem', {
 					unitId: owner.id(),
 					itemId: self.id()
 				});

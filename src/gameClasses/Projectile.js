@@ -60,6 +60,9 @@ var Projectile = IgeEntityPhysics.extend({
 		}
 
 		self.addComponent(AttributeComponent); // every projectile gets one
+		self.addComponent(ScriptComponent); // entity-scripting
+		self.script.load(data.scripts)
+
 		// convert number variables into Int
 		self.parseEntityObject(self._stats);
 

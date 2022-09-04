@@ -286,7 +286,7 @@ var InventoryComponent = IgeEntity.extend({
 				}
 			}
 
-			ige.trigger && ige.script.trigger('unitPickedAnItem', {
+			ige.script.trigger('unitPickedAnItem', {
 				unitId: unit.id(),
 				itemId: item.id()
 			});

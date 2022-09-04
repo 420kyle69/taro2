@@ -2,9 +2,10 @@ var ScriptComponent = IgeEntity.extend({
 	classId: 'ScriptComponent',
 	componentId: 'script',
 
-	init: function () {
+	init: function (entity) {
 		var self = this;
-
+		
+		self._entity = entity
 		// self.logStr = "";
 		self.scripts = undefined;
 		self.entryCount = 0;
@@ -79,7 +80,7 @@ var ScriptComponent = IgeEntity.extend({
 	/* trigger and run all of the corresponding script(s) */
 	trigger: function (triggerName, triggeredBy) {
 		let scriptIds = this.triggeredScripts[triggerName]
-		for (i in scriptIds) {
+		for (var i in scriptIds) {
 			let scriptId = scriptIds[i]
 			this.scriptLog(`\ntrigger: ${triggerName}`);
 
@@ -87,6 +88,19 @@ var ScriptComponent = IgeEntity.extend({
 				triggeredBy: triggeredBy
 			};
 			this.runScript(scriptId, localVariables);
+			
+			// if the trigger is called from a global game logic, trigger relevant entity-scripts as well
+			if (this._entity == ige) {
+				// console.log("global script", triggerName, varType, entityId);
+				for (varType in triggeredBy) {
+					if (varType === 'unitId' || varType === 'itemId' || varType === 'projectileId') {
+						var entityId = triggeredBy[varType];
+						// console.log("entity script", triggerName, varType, entityId);
+						ige.$(entityId).script.trigger(triggerName, triggeredBy); // calling entity-script
+					}
+					
+				}
+			}
 		}
 
 		if (triggeredBy && triggeredBy.projectileId) {
