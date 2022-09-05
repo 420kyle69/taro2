@@ -110,14 +110,14 @@ var MobileControlsScene = /** @class */ (function (_super) {
         this.input.on('pointerdown', function (pointer) {
             var touchX = pointer.x;
             var touchY = pointer.y;
-            if (touchX < this.cameras.main.displayWidth / 2) {
+            if (touchX < this.cameras.main.displayWidth / 2.4) {
                 var leftJoystick = this.joysticks[0];
                 leftJoystick.show();
                 leftJoystick.x = touchX;
                 leftJoystick.y = touchY;
                 leftJoystick.updateTransform();
             }
-            else {
+            else if (touchX > this.cameras.main.displayWidth - (this.cameras.main.displayWidth / 2.4)) {
                 var rightJoystick = this.joysticks[1];
                 rightJoystick.show();
                 rightJoystick.x = touchX;

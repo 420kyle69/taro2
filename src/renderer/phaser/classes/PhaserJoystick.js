@@ -7,19 +7,19 @@ var PhaserJoystick = /** @class */ (function () {
         var base = scene.add.graphics();
         if (settings.redFireZone) {
             base.lineStyle(10, 0xff0000);
-            base.fillStyle(0x000000, 0.5);
+            base.fillStyle(0x18181B, 0.9);
             base.fillCircle(0, 0, radius);
             base.strokeCircle(0, 0, radius);
         }
         else {
-            base.fillStyle(0x000000, 0.5);
+            base.fillStyle(0x18181B, 0.9);
             base.fillCircle(0, 0, radius);
             base.alpha = 0.5;
         }
         var thumb = scene.add.graphics();
-        thumb.fillStyle(0x000000);
+        thumb.fillStyle(0x3f3f46);
         thumb.fillCircle(0, 0, 35 / 2);
-        thumb.alpha = 0.5;
+        thumb.alpha = 0.9;
         var virtualJoystick = this.virtualJoystick =
             scene.plugins.get('virtual-joystick').add(scene, {
                 radius: radius,
