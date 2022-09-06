@@ -9,6 +9,9 @@ class MobileControlsScene extends PhaserScene {
 	controls: Phaser.GameObjects.Container;
 	joysticks: PhaserJoystick[] = [];
 
+	enablePointerNextUpdate: boolean;
+	disablePointerEvents: boolean;
+
 	constructor() {
 		super({ key: 'MobileControls' });
 	}
@@ -78,38 +81,19 @@ class MobileControlsScene extends PhaserScene {
 					let clicked = false;
 
 					button.on('pointerdown', () => {
-						this.input.removeListener('pointerdown');
+						this.disablePointerEvents = true;
 
 						if (clicked) return;
 						clicked = true;
-
 						button.setTexture('mobile-button-down');
 
 						settings.onStart && settings.onStart();
 					});
 					const onPointerEnd = () => {
-						this.input.addListener('pointerdown', function(pointer){
+						this.enablePointerNextUpdate = true;
 
-							var touchX = pointer.x;
-							var touchY = pointer.y;
-							if (touchX < this.cameras.main.displayWidth / 2) {
-								const leftJoystick = this.joysticks[0];
-								leftJoystick.show();
-								leftJoystick.x = touchX;
-								leftJoystick.y = touchY;
-								leftJoystick.updateTransform();
-							}
-							else {
-								const rightJoystick = this.joysticks[1];
-								rightJoystick.show();
-								rightJoystick.x = touchX;
-								rightJoystick.y = touchY;
-								rightJoystick.updateTransform();
-							}
-						}, this);
 						if (!clicked) return;
 						clicked = false;
-
 						button.setTexture('mobile-button-up');
 
 						settings.onEnd && settings.onEnd();
@@ -139,20 +123,35 @@ class MobileControlsScene extends PhaserScene {
 		});
 
 		this.input.on('pointerdown', function(pointer){
-			var touchX = pointer.x;
-			var touchY = pointer.y;
-			if (touchX < this.cameras.main.displayWidth / 2.4) {
-				const leftJoystick = this.joysticks[0];
-				leftJoystick.show();
-				leftJoystick.x = touchX;
-				leftJoystick.y = touchY;
-				leftJoystick.updateTransform();
-			} else if (touchX > this.cameras.main.displayWidth - (this.cameras.main.displayWidth / 2.4)) {
-				const rightJoystick = this.joysticks[1];
-				rightJoystick.show();
-				rightJoystick.x = touchX;
-				rightJoystick.y = touchY;
-				rightJoystick.updateTransform();
+			if (!this.disablePointerEvents) {
+				var touchX = pointer.x;
+				var touchY = pointer.y;
+				if (touchX < this.cameras.main.displayWidth / 2.4) {
+					const leftJoystick = this.joysticks[0];
+					leftJoystick.show();
+					leftJoystick.x = touchX;
+					leftJoystick.y = touchY;
+					leftJoystick.updateTransform();
+				} else if (touchX > this.cameras.main.displayWidth - (this.cameras.main.displayWidth / 2.4)) {
+					const rightJoystick = this.joysticks[1];
+					rightJoystick.show();
+					rightJoystick.x = touchX;
+					rightJoystick.y = touchY;
+					rightJoystick.updateTransform();
+				}
+			}
+		}, this);
+
+		this.input.on('pointerup', function(pointer){
+			if (!this.disablePointerEvents) {
+				var touchX = pointer.x;
+				if (touchX < this.cameras.main.displayWidth / 2.4) {
+					const leftJoystick = this.joysticks[0];
+					leftJoystick.hide();
+				} else if (touchX > this.cameras.main.displayWidth - (this.cameras.main.displayWidth / 2.4)) {
+					const rightJoystick = this.joysticks[1];
+					rightJoystick.hide();
+				}
 			}
 		}, this);
 
@@ -180,6 +179,13 @@ class MobileControlsScene extends PhaserScene {
 		this.load.image('mobile-button-icon', this.patchAssetUrl(
 			'https://cache.modd.io/asset/spriteImage/1610494864771_fightFist_circle.png'
 		));
+	}
+
+	update () {
+		if (this.enablePointerNextUpdate) {
+			this.enablePointerNextUpdate = false;
+			this.disablePointerEvents = false;
+		}
 	}
 
 	private enterFullscreen() {

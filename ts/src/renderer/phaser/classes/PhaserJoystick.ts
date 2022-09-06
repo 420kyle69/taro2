@@ -64,7 +64,6 @@ class PhaserJoystick {
 				});
 			} else {
 				settings.onEnd && settings.onEnd();
-				this.hide();
 			}
 		});
 

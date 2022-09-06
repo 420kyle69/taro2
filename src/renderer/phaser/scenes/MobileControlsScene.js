@@ -58,7 +58,7 @@ var MobileControlsScene = /** @class */ (function (_super) {
                     button_1.setInteractive();
                     var clicked_1 = false;
                     button_1.on('pointerdown', function () {
-                        _this.input.removeListener('pointerdown');
+                        _this.disablePointerEvents = true;
                         if (clicked_1)
                             return;
                         clicked_1 = true;
@@ -66,24 +66,7 @@ var MobileControlsScene = /** @class */ (function (_super) {
                         settings.onStart && settings.onStart();
                     });
                     var onPointerEnd = function () {
-                        _this.input.addListener('pointerdown', function (pointer) {
-                            var touchX = pointer.x;
-                            var touchY = pointer.y;
-                            if (touchX < this.cameras.main.displayWidth / 2) {
-                                var leftJoystick = this.joysticks[0];
-                                leftJoystick.show();
-                                leftJoystick.x = touchX;
-                                leftJoystick.y = touchY;
-                                leftJoystick.updateTransform();
-                            }
-                            else {
-                                var rightJoystick = this.joysticks[1];
-                                rightJoystick.show();
-                                rightJoystick.x = touchX;
-                                rightJoystick.y = touchY;
-                                rightJoystick.updateTransform();
-                            }
-                        }, _this);
+                        _this.enablePointerNextUpdate = true;
                         if (!clicked_1)
                             return;
                         clicked_1 = false;
@@ -108,21 +91,36 @@ var MobileControlsScene = /** @class */ (function (_super) {
             _this.scene.setVisible(value);
         });
         this.input.on('pointerdown', function (pointer) {
-            var touchX = pointer.x;
-            var touchY = pointer.y;
-            if (touchX < this.cameras.main.displayWidth / 2.4) {
-                var leftJoystick = this.joysticks[0];
-                leftJoystick.show();
-                leftJoystick.x = touchX;
-                leftJoystick.y = touchY;
-                leftJoystick.updateTransform();
+            if (!this.disablePointerEvents) {
+                var touchX = pointer.x;
+                var touchY = pointer.y;
+                if (touchX < this.cameras.main.displayWidth / 2.4) {
+                    var leftJoystick = this.joysticks[0];
+                    leftJoystick.show();
+                    leftJoystick.x = touchX;
+                    leftJoystick.y = touchY;
+                    leftJoystick.updateTransform();
+                }
+                else if (touchX > this.cameras.main.displayWidth - (this.cameras.main.displayWidth / 2.4)) {
+                    var rightJoystick = this.joysticks[1];
+                    rightJoystick.show();
+                    rightJoystick.x = touchX;
+                    rightJoystick.y = touchY;
+                    rightJoystick.updateTransform();
+                }
             }
-            else if (touchX > this.cameras.main.displayWidth - (this.cameras.main.displayWidth / 2.4)) {
-                var rightJoystick = this.joysticks[1];
-                rightJoystick.show();
-                rightJoystick.x = touchX;
-                rightJoystick.y = touchY;
-                rightJoystick.updateTransform();
+        }, this);
+        this.input.on('pointerup', function (pointer) {
+            if (!this.disablePointerEvents) {
+                var touchX = pointer.x;
+                if (touchX < this.cameras.main.displayWidth / 2.4) {
+                    var leftJoystick = this.joysticks[0];
+                    leftJoystick.hide();
+                }
+                else if (touchX > this.cameras.main.displayWidth - (this.cameras.main.displayWidth / 2.4)) {
+                    var rightJoystick = this.joysticks[1];
+                    rightJoystick.hide();
+                }
             }
         }, this);
         if (scale.fullscreen.available) {
@@ -140,6 +138,12 @@ var MobileControlsScene = /** @class */ (function (_super) {
         this.load.image('mobile-button-up', this.patchAssetUrl('https://cache.modd.io/asset/spriteImage/1549614640644_button1.png'));
         this.load.image('mobile-button-down', this.patchAssetUrl('https://cache.modd.io/asset/spriteImage/1549614658007_button2.png'));
         this.load.image('mobile-button-icon', this.patchAssetUrl('https://cache.modd.io/asset/spriteImage/1610494864771_fightFist_circle.png'));
+    };
+    MobileControlsScene.prototype.update = function () {
+        if (this.enablePointerNextUpdate) {
+            this.enablePointerNextUpdate = false;
+            this.disablePointerEvents = false;
+        }
     };
     MobileControlsScene.prototype.enterFullscreen = function () {
         if (!this.scale.isFullscreen) {
