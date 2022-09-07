@@ -34,12 +34,18 @@ var ClientNetworkEvents = {
 
 				// merging data
 				if (ige.client.inactiveTabEntityStream[entityId] === undefined) {
-					ige.client.inactiveTabEntityStream[entityId] = [];
+					ige.client.inactiveTabEntityStream[entityId] = [{}];
 				}
 
-				const objectsArr = data[entityId];
-				const packet = Object.assign({}, ...objectsArr);
-				ige.client.inactiveTabEntityStream[entityId].push(packet);
+				const objectsArr = data[entityId]; //Array of single prop objects for THIS tick
+
+				const packet = Object.assign({}, ...objectsArr); //condense to ONE object
+
+				ige.client.inactiveTabEntityStream[entityId][0] = // idk
+					{
+						...ige.client.inactiveTabEntityStream[entityId][0],
+						...packet
+					};
 			}
 		}
 	},
