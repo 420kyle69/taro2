@@ -36,7 +36,10 @@ var ClientNetworkEvents = {
 				if (ige.client.inactiveTabEntityStream[entityId] === undefined) {
 					ige.client.inactiveTabEntityStream[entityId] = [];
 				}
-				ige.client.inactiveTabEntityStream[entityId] = _.merge(ige.client.inactiveTabEntityStream[entityId], data[entityId]);
+
+				const objectsArr = data[entityId];
+				const packet = Object.assign({}, ...objectsArr);
+				ige.client.inactiveTabEntityStream[entityId].push(packet);
 			}
 		}
 	},
