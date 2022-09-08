@@ -59,8 +59,9 @@ var PhaserJoystick = /** @class */ (function () {
         var virtualJoystick = this.virtualJoystick;
         var scene = virtualJoystick.scene;
         var controls = scene.controls;
-        var x = this.x; //(this.x + 32) * controls.scaleX + controls.x;
-        var y = this.y; //(this.y + 12) * controls.scaleY + controls.y;
+        var x = this.x;
+        var y = this.y;
+        virtualJoystick.radius = 72 * controls.scaleX;
         var base = virtualJoystick.base;
         base.setScale(controls.scaleX, controls.scaleY);
         base.setPosition(x, y);

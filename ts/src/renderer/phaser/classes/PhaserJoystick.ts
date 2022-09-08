@@ -12,6 +12,7 @@ class PhaserJoystick {
 
 	private readonly virtualJoystick: {
 		scene: MobileControlsScene,
+		radius: number;
 		base: Phaser.GameObjects.Graphics;
 		thumb: Phaser.GameObjects.Graphics;
 		pointer: Phaser.Input.Pointer;
@@ -93,8 +94,10 @@ class PhaserJoystick {
 		const scene = virtualJoystick.scene;
 		const controls = scene.controls;
 
-		const x = this.x; //(this.x + 32) * controls.scaleX + controls.x;
-		const y = this.y; //(this.y + 12) * controls.scaleY + controls.y;
+		const x = this.x;
+		const y = this.y;
+
+		virtualJoystick.radius = 72 * controls.scaleX;
 
 		const base = virtualJoystick.base;
 		base.setScale(controls.scaleX, controls.scaleY);

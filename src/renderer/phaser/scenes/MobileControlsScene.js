@@ -96,17 +96,21 @@ var MobileControlsScene = /** @class */ (function (_super) {
                 var touchY = pointer.y;
                 if (touchX < this.cameras.main.displayWidth / 2.4) {
                     var leftJoystick = this.joysticks[0];
-                    leftJoystick.show();
-                    leftJoystick.x = touchX;
-                    leftJoystick.y = touchY;
-                    leftJoystick.updateTransform();
+                    if (leftJoystick) {
+                        leftJoystick.show();
+                        leftJoystick.x = touchX;
+                        leftJoystick.y = touchY;
+                        leftJoystick.updateTransform();
+                    }
                 }
                 else if (touchX > this.cameras.main.displayWidth - (this.cameras.main.displayWidth / 2.4)) {
                     var rightJoystick = this.joysticks[1];
-                    rightJoystick.show();
-                    rightJoystick.x = touchX;
-                    rightJoystick.y = touchY;
-                    rightJoystick.updateTransform();
+                    if (rightJoystick) {
+                        rightJoystick.show();
+                        rightJoystick.x = touchX;
+                        rightJoystick.y = touchY;
+                        rightJoystick.updateTransform();
+                    }
                 }
             }
         }, this);
@@ -155,11 +159,8 @@ var MobileControlsScene = /** @class */ (function (_super) {
         // fit the width and be anchored to the bottom
         var controls = this.controls;
         var scale = this.scale;
-        controls.y = scale.height - 540;
         controls.setScale(scale.width / 960);
-        this.joysticks.forEach(function (j) {
-            j.updateTransform();
-        });
+        controls.y = scale.height - 540 * controls.scale;
     };
     return MobileControlsScene;
 }(PhaserScene));
