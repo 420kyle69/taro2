@@ -371,7 +371,8 @@ const Client = IgeEventingClass.extend({
 			// old comment => 'center camera while loading'
 			const tileWidth = ige.scaleMapDetails.tileWidth;
 			const tileHeight = ige.scaleMapDetails.tileHeight;
-
+			const params = this.getUrlVars();
+			
 			ige.client.vp1.camera.translateTo(
 				(ige.map.data.width * tileWidth) / 2,
 				(ige.map.data.height * tileHeight) /2,
