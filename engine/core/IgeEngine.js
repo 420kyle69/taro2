@@ -174,6 +174,8 @@ var IgeEngine = IgeEntity.extend({
 
 		this.lagOccurenceCount = 0;
 		this.lastLagOccurenceAt = 0;
+
+		this.triggersQueued = [];
 	},
 
 	getLifeSpan: function () {
@@ -1615,6 +1617,10 @@ var IgeEngine = IgeEntity.extend({
 		ige.network.send('_igeStreamCreateSnapshot', ige.entityCreateSnapshot, clientId);
 	},
 
+	queueTrigger: function(triggerName) {
+		this.triggersQueued.push(triggerName)
+	},
+
 	/**
 	 * Called each frame to traverse and render the scenegraph.
 	 */
@@ -1698,10 +1704,12 @@ var IgeEngine = IgeEntity.extend({
 				ige.physicsTickHasExecuted = true;
 			}
 
-			if (ige.isServer) {
-				if (ige.gameLoopTickHasExecuted)
-					ige.script.trigger('frameTick');
-			} else if (ige.isClient) {
+			if (ige.gameLoopTickHasExecuted) {
+				ige.script.trigger('frameTick');
+				ige.triggersQueued = [];
+			}
+
+			if (ige.isClient) {
 				if (ige.client.myPlayer) {
 					ige.client.myPlayer.control._behaviour();
 				}

@@ -30,7 +30,7 @@ var Unit = IgeEntityPhysics.extend({
 			data.equipmentAllowed = 9;
 		}
 		unitData = ige.game.getAsset('unitTypes', data.type);
-
+		
 		if (ige.isClient) {
 			unitData = _.pick(unitData, ige.client.keysToAddBeforeRender);
 		}
@@ -61,7 +61,7 @@ var Unit = IgeEntityPhysics.extend({
 			.addComponent(ScriptComponent); // entity-scripting
 
 		self.script.load(data.scripts)
-						
+
 		Unit.prototype.log(`initializing new unit ${this.id()}`);
 
 		if (ige.isClient) {
@@ -1655,6 +1655,10 @@ var Unit = IgeEntityPhysics.extend({
 	 */
 	_behaviour: function (ctx) {
 		var self = this;
+
+		_.forEach(ige.triggersQueued, function (triggerName) {
+			self.script.trigger(triggerName);
+		});
 
 		if (ige.isServer || (ige.isClient && ige.client.selectedUnit == this)) {
 			var ownerPlayer = ige.$(this._stats.ownerId);
