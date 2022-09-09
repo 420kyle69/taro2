@@ -133,7 +133,7 @@ var GameScene = /** @class */ (function (_super) {
     GameScene.prototype.create = function () {
         var _this = this;
         ige.client.rendererLoaded.resolve();
-        var map = this.make.tilemap({ key: 'map' });
+        var map = this.tilemap = this.make.tilemap({ key: 'map' });
         var data = ige.game.data;
         var scaleFactor = ige.scaleMapDetails.scaleFactor;
         data.map.tilesets.forEach(function (tileset) {
@@ -177,6 +177,12 @@ var GameScene = /** @class */ (function (_super) {
         Object.values(this.textures.list).forEach(function (val) {
             val.setFilter(Phaser.Textures.FilterMode.NEAREST);
         });
+        this.tilemap.currentLayerIndex = 0;
+        this.selectedTile = map.getTileAt(2, 3);
+        this.marker = this.add.graphics();
+        this.marker.lineStyle(2, 0x000000, 1);
+        this.marker.strokeRect(0, 0, map.tileWidth, map.tileHeight);
+        this.marker.setVisible(false);
     };
     GameScene.prototype.setZoomSize = function (height) {
         // backward compatible game scaling on average 16:9 screen
@@ -271,6 +277,21 @@ var GameScene = /** @class */ (function (_super) {
             if (!element.hidden)
                 element.setActive(true).setVisible(true);
         });
+        if (ige.developerMode.active) {
+            this.marker.setVisible(true);
+            // Rounds down to nearest tile
+            var pointerTileX = this.tilemap.worldToTileX(worldPoint.x);
+            var pointerTileY = this.tilemap.worldToTileY(worldPoint.y);
+            // Snap to tile coordinates, but in world space
+            this.marker.x = this.tilemap.tileToWorldX(pointerTileX);
+            this.marker.y = this.tilemap.tileToWorldY(pointerTileY);
+            if (this.input.manager.activePointer.rightButtonDown()) {
+                this.selectedTile = this.tilemap.getTileAt(pointerTileX, pointerTileY);
+            }
+            if (this.input.manager.activePointer.isDown) {
+                this.tilemap.putTileAt(this.selectedTile, pointerTileX, pointerTileY);
+            }
+        }
     };
     return GameScene;
 }(PhaserScene));

@@ -28,6 +28,8 @@ declare class IgeEngine extends IgeClass {
 
 	renderer: PhaserRenderer;
 
+	developerMode: DeveloperMode;
+
 	scaleMapDetails: {
 		scaleFactor: {
 			x: number;

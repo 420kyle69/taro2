@@ -50,7 +50,7 @@ var igeClientConfig = {
 
 		/* Standard game scripts */
 		'/gameClasses/Cursor.js',
-
+		'/gameClasses/DeveloperMode.js',
 		'/gameClasses/EntitiesToRender.js',
 
 		/* Phaser */

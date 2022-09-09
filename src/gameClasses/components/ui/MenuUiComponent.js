@@ -118,6 +118,14 @@ var MenuUiComponent = IgeEntity.extend({
 				}
 			});
 
+			$('#toggle-dev-panels').on('click', function () {
+				if ($('#dev-console').is(':visible')) {
+					ige.developerMode.enter();
+				} else {
+					ige.developerMode.leave();
+				}
+			});
+
 			$('.open-menu-button').on('click', function () {
 				self.toggleMenu();
 				$('.open-menu-button').hide();

@@ -169,6 +169,7 @@ const Client = IgeEventingClass.extend({
 			ige.addComponent(IgeInputComponent);
 			ige.entitiesToRender = new EntitiesToRender();
 			ige.renderer = new PhaserRenderer();
+			ige.developerMode = new DeveloperMode();
 
 			if(!window.isStandalone){
 				this.servers = this.getServersArray();
