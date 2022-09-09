@@ -4248,7 +4248,7 @@ var IgeEntity = IgeObject.extend({
 
 									// make sure item always has proper size defined by state
 									if (this._stats.states[stateId].body !== 'none') {
-										console.log('are we emitting size');
+										//
 										this.emit(
 											'size',
 											{
