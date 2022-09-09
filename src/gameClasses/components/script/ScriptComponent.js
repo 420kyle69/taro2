@@ -88,19 +88,6 @@ var ScriptComponent = IgeEntity.extend({
 				triggeredBy: triggeredBy
 			};
 			this.runScript(scriptId, localVariables);
-			
-			// if the trigger is called from a global game logic, trigger relevant entity-scripts as well
-			if (this._entity == ige) {
-				// console.log("global script", triggerName, varType, entityId);
-				for (varType in triggeredBy) {
-					if (varType === 'unitId' || varType === 'itemId' || varType === 'projectileId') {
-						var entityId = triggeredBy[varType];
-						// console.log("entity script", triggerName, varType, entityId);
-						ige.$(entityId).script.trigger(triggerName, triggeredBy); // calling entity-script
-					}
-					
-				}
-			}
 		}
 
 		if (triggeredBy && triggeredBy.projectileId) {

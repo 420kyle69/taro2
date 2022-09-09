@@ -12,8 +12,6 @@ class EntitiesToRender {
 
 		if (!ige.lastTickTime) ige.lastTickTime = currentTime;
 
-		var tickDelta = currentTime - ige.lastTickTime;
-
 		for (var entityId in this.trackEntityById) {
 			var entity = ige.$(entityId);
 
@@ -109,7 +107,6 @@ class EntitiesToRender {
 				}
 			}
 		}
-
 		ige.lastTickTime = currentTime;
 
 		if (ige.gameLoopTickHasExecuted) {

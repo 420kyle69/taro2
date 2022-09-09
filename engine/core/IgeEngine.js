@@ -159,9 +159,7 @@ var IgeEngine = IgeEntity.extend({
 		this._ctx = IgeDummyContext;
 		this.dependencyTimeout(30000); // Wait 30 seconds to load all dependencies then timeout
 
-		// Start a timer to record every second of execution
-		setInterval(this._secondTick, 1000);
-
+		this.lastSecond = 0;
 		this.snapshots = [];
 		this.entityCreateSnapshot = {};
 		this.prevSnapshot = undefined;
@@ -1647,6 +1645,12 @@ var IgeEngine = IgeEntity.extend({
 		self.incrementTime();
 		timeStamp = Math.floor(self._currentTime);
 
+		if (timeStamp - self.lastSecond >= 1000) {
+			self._secondTick();
+			ige.queueTrigger('secondTick');
+			self.lastSecond = timeStamp;
+		}
+
 		if (self._state) {
 			// Call the input system tick to reset any flags etc
 			self.input.tick();
@@ -1705,10 +1709,40 @@ var IgeEngine = IgeEntity.extend({
 			}
 
 			if (ige.gameLoopTickHasExecuted) {
-				ige.script.trigger('frameTick');
-				ige.triggersQueued = [];
+				ige.queueTrigger('frameTick');
 			}
 
+			_.forEach(ige.triggersQueued, function (triggerName) {
+				// console.log("running global trigger", triggerName)
+				self.script.trigger(triggerName);
+			});
+
+			ige.updateCount = 0;
+			ige.tickCount = 0;
+			ige.updateTransform = 0;
+			ige.inViewCount = 0;
+			ige.totalChildren = 0;
+			ige.totalOrphans = 0;
+			
+			// Update the scenegraph
+			if (self._enableUpdates) {
+				// ige.updateCount = {}
+				// ige.tickCount = {}
+
+				if (igeConfig.debug._timing) {
+					updateStart = Date.now();
+					self.updateSceneGraph(ctx);
+					ige._updateTime = Date.now() - updateStart;
+				} else {
+					self.updateSceneGraph(ctx);
+				}
+			}
+			
+			if (!ige.gameLoopTickHasExecuted) {
+				return;
+			}
+
+			
 			if (ige.isClient) {
 				if (ige.client.myPlayer) {
 					ige.client.myPlayer.control._behaviour();
@@ -1726,31 +1760,7 @@ var IgeEngine = IgeEntity.extend({
 				return;
 			}
 
-			ige.updateCount = 0;
-			ige.tickCount = 0;
-			ige.updateTransform = 0;
-			ige.inViewCount = 0;
-			ige.totalChildren = 0;
-			ige.totalOrphans = 0;
-
-			// Update the scenegraph
-			if (self._enableUpdates) {
-				// ige.updateCount = {}
-				// ige.tickCount = {}
-
-				if (igeConfig.debug._timing) {
-					updateStart = Date.now();
-					self.updateSceneGraph(ctx);
-					ige._updateTime = Date.now() - updateStart;
-				} else {
-					self.updateSceneGraph(ctx);
-				}
-			}
-
-			if (!ige.gameLoopTickHasExecuted) {
-				return;
-			}
-
+			
 			// Check for unborn entities that should be born now
 			unbornQueue = ige._spawnQueue;
 			unbornCount = unbornQueue.length;
@@ -1786,6 +1796,8 @@ var IgeEngine = IgeEntity.extend({
 				}
 			}
 
+			ige.triggersQueued = [];
+			
 			// console.log(ige.updateCount, ige.tickCount, ige.updateTransform,"inView", ige.inViewCount);
 			// Record the lastTick value so we can
 			// calculate delta on the next tick
@@ -1872,7 +1884,7 @@ var IgeEngine = IgeEntity.extend({
 			ige.lastSent = ige.now;
 			ige.count++;
 		}
-
+		
 		ige.gameLoopTickHasExecuted = false;
 		ige.physicsTickHasExecuted = false;
 

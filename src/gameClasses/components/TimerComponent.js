@@ -78,14 +78,12 @@ var TimerComponent = IgeEntity.extend({
 
 		var everySecond = setInterval(function () {
 			self.now = Date.now();
+
 			if (ige.isServer) {
 				self.lastTick = self.now;
 				// var shouldLog = ige.server.logTriggers && ige.server.logTriggers.timerLogs;
 
-				ige.queueTrigger('secondTick')
-
-				// ige.script.trigger('secondTick');
-
+				
 				// kill tier 1 servers that has been empty for over 15 minutes
 				// var playerCount = ige.$$('player').filter(function (player) { return player._stats.controlledBy == 'human' }).length;
 

@@ -1657,6 +1657,7 @@ var Unit = IgeEntityPhysics.extend({
 		var self = this;
 
 		_.forEach(ige.triggersQueued, function (triggerName) {
+			// console.log("running entityTrigger", triggerName)
 			self.script.trigger(triggerName);
 		});
 
