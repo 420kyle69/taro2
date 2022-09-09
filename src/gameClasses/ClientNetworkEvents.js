@@ -41,7 +41,7 @@ var ClientNetworkEvents = {
 
 				const packet = Object.assign({}, ...objectsArr); //condense to ONE object
 
-				ige.client.inactiveTabEntityStream[entityId][0] = // idk
+				ige.client.inactiveTabEntityStream[entityId][0] = // merge each packet into the first, overwriting older values
 					{
 						...ige.client.inactiveTabEntityStream[entityId][0],
 						...packet
