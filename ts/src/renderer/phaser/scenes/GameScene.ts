@@ -454,5 +454,7 @@ class GameScene extends PhaserScene {
 				this.tilemap.putTileAt(this.selectedTile, pointerTileX, pointerTileY);
 			}
 		}
+
+		else this.marker.setVisible(false);
 	}
 }

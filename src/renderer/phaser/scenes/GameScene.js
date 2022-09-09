@@ -292,6 +292,8 @@ var GameScene = /** @class */ (function (_super) {
                 this.tilemap.putTileAt(this.selectedTile, pointerTileX, pointerTileY);
             }
         }
+        else
+            this.marker.setVisible(false);
     };
     return GameScene;
 }(PhaserScene));
