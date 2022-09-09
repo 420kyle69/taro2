@@ -259,7 +259,6 @@ var GameScene = /** @class */ (function (_super) {
         return canvas;
     };
     GameScene.prototype.update = function () {
-        //
         var worldPoint = this.cameras.main.getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
         ige.input.emit('pointermove', [{
                 x: worldPoint.x,

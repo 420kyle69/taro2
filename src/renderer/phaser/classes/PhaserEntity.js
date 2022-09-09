@@ -3,7 +3,6 @@ var PhaserEntity = /** @class */ (function () {
     function PhaserEntity(entity) {
         this.entity = entity;
         this.evtListeners = {};
-        //
         Object.assign(this.evtListeners, {
             transform: entity.on('transform', this.transform, this),
             scale: entity.on('scale', this.scale, this),

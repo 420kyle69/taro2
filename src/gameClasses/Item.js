@@ -208,7 +208,7 @@ var Item = IgeEntityPhysics.extend({
 		if (newOwner == oldOwner)
 			return;
 		if (newOwner) {
-			//
+
 			if (newOwner._stats.currentItemIndex !== this._stats.slotIndex) {
 				this.setState('unselected');
 			}
