@@ -4195,8 +4195,11 @@ var IgeEntity = IgeObject.extend({
 							// for tracking selected index of other units
 							if (ige.isClient) {
 								this._stats.currentItemIndex = newValue;
+								// need this if item data is processed before unit data
+								ige.$(this._stats.itemIds[newValue]).setState('selected');
 							}
 							break;
+
 						default:
 							// setting oldownerId b4 owner change
 							if (attrName === 'ownerId') {
