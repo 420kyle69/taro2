@@ -167,7 +167,7 @@ var IgeEntity = IgeObject.extend({
 
 			this._hidden = true;
 			this.emit('hide');
-			console.trace('hide | IgeEntity.js:169');
+
 			this.texture('');
 		}
 		return this;

@@ -46,8 +46,6 @@ var ClientNetworkEvents = {
 						...ige.client.inactiveTabEntityStream[entityId][0],
 						...packet
 					};
-
-				console.log(entityId, ige.client.inactiveTabEntityStream[entityId][0]);
 			}
 		}
 	},

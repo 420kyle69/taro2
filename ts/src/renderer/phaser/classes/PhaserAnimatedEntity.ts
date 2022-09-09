@@ -47,7 +47,6 @@ class PhaserAnimatedEntity extends PhaserEntity {
 		}
 	): void {
 		this.sprite.setDisplaySize(data.width, data.height);
-		console.log(this);
 	}
 
 	protected scale (data: {

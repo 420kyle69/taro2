@@ -982,7 +982,6 @@ const Client = IgeEventingClass.extend({
 			if (entity && entityData) {
 				//
 				entity.streamUpdateData(entityData);
-				console.log(entityData);
 			}
 		}
 	},

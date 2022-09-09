@@ -38,13 +38,10 @@ class PhaserEntity {
 
 	protected hide (): void {
 		this.gameObject.hidden = true;
-		console.log('hide event');
 	}
 
 	protected show (): void {
 		this.gameObject.hidden = false;
-		console.log('show event');
-
 	}
 
 	protected layer (value: number): void {
