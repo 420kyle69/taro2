@@ -167,6 +167,7 @@ var IgeEntity = IgeObject.extend({
 
 			this._hidden = true;
 			this.emit('hide');
+			console.trace('hide | IgeEntity.js:169');
 			this.texture('');
 		}
 		return this;
@@ -4190,6 +4191,12 @@ var IgeEntity = IgeObject.extend({
 							}
 							break;
 
+						case 'currentItemIndex':
+							// for tracking selected index of other units
+							if (ige.isClient) {
+								this._stats.currentItemIndex = newValue;
+							}
+							break;
 						default:
 							// setting oldownerId b4 owner change
 							if (attrName === 'ownerId') {
@@ -4241,6 +4248,7 @@ var IgeEntity = IgeObject.extend({
 
 									// make sure item always has proper size defined by state
 									if (this._stats.states[stateId].body !== 'none') {
+										console.log('are we emitting size');
 										this.emit(
 											'size',
 											{

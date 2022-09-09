@@ -76,6 +76,7 @@ var Item = IgeEntityPhysics.extend({
 			if (self._stats.currentBody == undefined || self._stats.currentBody.type == 'none' || self._hidden) {
 				self.hide();
 				this.emit('hide');
+				console.log('hide | Item.js:78');
 			} else {
 				self.show();
 				this.emit('show');
@@ -120,15 +121,12 @@ var Item = IgeEntityPhysics.extend({
 
 			self.show();
 			if (ige.isClient) {
-				this.emit('show');
 				self.updateTexture();
 			}
 		} else {
 			ige.devLog('hide & destroyBody.');
 			self.hide();
-			if (ige.isClient) {
-				this.emit('hide');
-			}
+
 			self.destroyBody();
 			if (ige.isServer) {
 				this.streamMode(2);
@@ -187,6 +185,7 @@ var Item = IgeEntityPhysics.extend({
 			if (isInvisible || !hasBody) {
 				self.hide();
 				this.emit('hide');
+				console.log('hide | Item.js:187');
 				return;
 			}
 		}
@@ -208,8 +207,8 @@ var Item = IgeEntityPhysics.extend({
 
 		if (newOwner == oldOwner)
 			return;
-
 		if (newOwner) {
+			//
 			if (newOwner._stats.currentItemIndex !== this._stats.slotIndex) {
 				this.setState('unselected');
 			}
@@ -222,6 +221,8 @@ var Item = IgeEntityPhysics.extend({
 			this.oldOwnerId = this._stats.ownerUnitId;
 			this._stats.ownerUnitId = newOwner.id();
 		} else { // item is being dropped.
+			console.log(newOwner._stats.currentItemIndex, this._stats.slotIndex);
+			console.log('so is this the issue');
 			this._stats.ownerUnitId = undefined;
 
 			// get transform of its last owner
@@ -868,6 +869,7 @@ var Item = IgeEntityPhysics.extend({
 							if (newValue) {
 								self.hide();
 								this.emit('hide');
+								console.log('hide | Item.js:869');
 							} else {
 								self.show();
 								this.emit('show');

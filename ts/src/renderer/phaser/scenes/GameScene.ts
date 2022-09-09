@@ -418,10 +418,13 @@ class GameScene extends PhaserScene {
 			y: worldPoint.y,
 		}]);
 		this.renderedEntities.forEach(element => {
-			element.setVisible(false).setActive(false);
+			element.setVisible(false);
 		});
 		this.cameras.main.cull(this.renderedEntities).forEach(element => {
-			if (!element.hidden) element.setActive(true).setVisible(true);
+			if (!element.hidden) {
+				element.setVisible(true);
+			}
+
 		});
 	}
 }

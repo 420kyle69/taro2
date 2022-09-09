@@ -13,6 +13,7 @@ class PhaserEntity {
 	protected constructor (
 		protected entity: IgeEntity
 	) {
+		//
 		Object.assign(this.evtListeners, {
 			transform: entity.on('transform', this.transform, this),
 			scale: entity.on('scale', this.scale, this),
@@ -37,10 +38,13 @@ class PhaserEntity {
 
 	protected hide (): void {
 		this.gameObject.hidden = true;
+		console.log('hide event');
 	}
 
 	protected show (): void {
 		this.gameObject.hidden = false;
+		console.log('show event');
+
 	}
 
 	protected layer (value: number): void {

@@ -3,6 +3,7 @@ var PhaserEntity = /** @class */ (function () {
     function PhaserEntity(entity) {
         this.entity = entity;
         this.evtListeners = {};
+        //
         Object.assign(this.evtListeners, {
             transform: entity.on('transform', this.transform, this),
             scale: entity.on('scale', this.scale, this),
@@ -17,9 +18,11 @@ var PhaserEntity = /** @class */ (function () {
     PhaserEntity.prototype.scale = function (data) { };
     PhaserEntity.prototype.hide = function () {
         this.gameObject.hidden = true;
+        console.log('hide event');
     };
     PhaserEntity.prototype.show = function () {
         this.gameObject.hidden = false;
+        console.log('show event');
     };
     PhaserEntity.prototype.layer = function (value) {
         // use index - 1 because taro layers are indexed at 1
