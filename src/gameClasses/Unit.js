@@ -692,6 +692,7 @@ var Unit = IgeEntityPhysics.extend({
 		}
 
 		self._stats.currentItemIndex = itemIndex;
+		this.streamUpdateData([{ currentItemIndex: itemIndex }]);
 
 		if (ige.isClient && this == ige.client.selectedUnit) {
 			this.inventory.highlightSlot(itemIndex + 1);
@@ -1046,8 +1047,8 @@ var Unit = IgeEntityPhysics.extend({
 					}
 
 					if (slotIndex == self._stats.currentItemIndex) {
-						item.setState('selected');
 						self._stats.currentItemId = item.id();
+						item.setState('selected');
 					} else {
 						item.setState('unselected');
 					}

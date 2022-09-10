@@ -167,6 +167,7 @@ var IgeEntity = IgeObject.extend({
 
 			this._hidden = true;
 			this.emit('hide');
+
 			this.texture('');
 		}
 		return this;
@@ -4190,6 +4191,23 @@ var IgeEntity = IgeObject.extend({
 							}
 							break;
 
+						case 'currentItemIndex':
+							// for tracking selected index of other units
+							if (ige.isClient) {
+								this._stats.currentItemIndex = newValue;
+
+								// need this if item data is processed before unit data
+								let selectedItem = this._stats.itemIds[newValue];
+
+								if (selectedItem) {
+									// in case of pure number ID
+									selectedItem = selectedItem.toString();
+									// tell client this item is selected
+									ige.$(selectedItem).setState('selected');
+								}
+							}
+							break;
+
 						default:
 							// setting oldownerId b4 owner change
 							if (attrName === 'ownerId') {
@@ -4239,8 +4257,17 @@ var IgeEntity = IgeObject.extend({
 
 									}
 
+									const bodyId = this._stats.states[stateId].body;
 									// make sure item always has proper size defined by state
-									if (this._stats.states[stateId].body !== 'none') {
+									if (
+										// accommodate legacy 'unSelected'
+										this._stats.states[stateId] &&
+										bodyId &&
+										this._stats.bodies[bodyId] &&
+										// old single condition
+										bodyId !== 'none'
+									) {
+
 										this.emit(
 											'size',
 											{
