@@ -4259,7 +4259,14 @@ var IgeEntity = IgeObject.extend({
 
 									const bodyId = this._stats.states[stateId].body;
 									// make sure item always has proper size defined by state
-									if (this._stats.bodies[bodyId] && bodyId !== 'none') { // first part is for legacy 'unSelected'
+									if (
+										// accommodate legacy 'unSelected'
+										this._stats.states[stateId] &&
+										bodyId &&
+										this._stats.bodies[bodyId] &&
+										// old single condition
+										bodyId !== 'none'
+									) {
 
 										this.emit(
 											'size',
