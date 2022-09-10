@@ -2240,7 +2240,6 @@ var ActionComponent = IgeEntity.extend({
 						break;
 					case 'destroyEntity':
 						var entity = ige.variable.getValue(action.entity, vars);
-
 						if (entity && self.entityCategories.indexOf(entity._category) > -1) {
 							entity.remove();
 						} else {

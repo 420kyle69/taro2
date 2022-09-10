@@ -1615,8 +1615,8 @@ var IgeEngine = IgeEntity.extend({
 		ige.network.send('_igeStreamCreateSnapshot', ige.entityCreateSnapshot, clientId);
 	},
 
-	queueTrigger: function(triggerName) {
-		this.triggersQueued.push(triggerName)
+	queueTrigger: function(triggerName, parameters) {
+		this.triggersQueued.push({name: triggerName, params: parameters})
 	},
 
 	/**
@@ -1712,9 +1712,8 @@ var IgeEngine = IgeEntity.extend({
 				ige.queueTrigger('frameTick');
 			}
 
-			_.forEach(ige.triggersQueued, function (triggerName) {
-				// console.log("running global trigger", triggerName)
-				self.script.trigger(triggerName);
+			_.forEach(ige.triggersQueued, function (trigger) {
+				self.script.trigger(trigger.name, trigger.params);
 			});
 
 			ige.updateCount = 0;
@@ -1724,7 +1723,7 @@ var IgeEngine = IgeEntity.extend({
 			ige.totalChildren = 0;
 			ige.totalOrphans = 0;
 			
-			// Update the scenegraph
+			// Update the scenegraph - this is where entity _behaviour() is called
 			if (self._enableUpdates) {
 				// ige.updateCount = {}
 				// ige.tickCount = {}
@@ -1737,11 +1736,12 @@ var IgeEngine = IgeEntity.extend({
 					self.updateSceneGraph(ctx);
 				}
 			}
+
+			ige.triggersQueued = [];
 			
 			if (!ige.gameLoopTickHasExecuted) {
 				return;
 			}
-
 			
 			if (ige.isClient) {
 				if (ige.client.myPlayer) {
@@ -1796,7 +1796,6 @@ var IgeEngine = IgeEntity.extend({
 				}
 			}
 
-			ige.triggersQueued = [];
 			
 			// console.log(ige.updateCount, ige.tickCount, ige.updateTransform,"inView", ige.inViewCount);
 			// Record the lastTick value so we can
@@ -1922,10 +1921,7 @@ var IgeEngine = IgeEntity.extend({
 	},
 
 	updateSceneGraph: function (ctx) {
-		// ige cancel
-		// if (ige.isClient) {
-		// 	return;
-		// }
+
 		var arr = this._children;
 		var arrCount; var us; var ud;
 		var tickDelta = ige._tickDelta;
@@ -1935,7 +1931,7 @@ var IgeEngine = IgeEntity.extend({
 
 		if (arr) {
 			arrCount = arr.length;
-
+ 
 			// Loop our viewports and call their update methods
 			if (igeConfig.debug._timing) {
 				while (arrCount--) {

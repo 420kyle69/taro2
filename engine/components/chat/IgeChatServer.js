@@ -93,7 +93,7 @@ var IgeChatServer = {
 			}
 
 			ige.game.lastChatMessageSentByPlayer = message;
-			ige.script.trigger('playerSendsChatMessage', {
+			ige.queueTrigger('playerSendsChatMessage', {
 				playerId: sender.id()
 			});
 		}
@@ -214,7 +214,7 @@ var IgeChatServer = {
 				ige.devLog(`Message from client: (${playerName}): ${msg.text}`);
 
 				player.lastMessageSent = msg.text;
-				ige.script.trigger('playerSendsMessage', {
+				ige.queueTrigger('playerSendsMessage', {
 					playerId: player.id()
 				});
 			}

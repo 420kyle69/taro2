@@ -37,10 +37,10 @@ var GameComponent = IgeEntity.extend({
 
 				// GameComponent.prototype.log("computerPlayer created " + this['computer' + i].id())
 				// if (global.isDev) {
-				// 	ige.script.trigger("playerJoinsGame", { playerId: this['computer'+i].id() })
+				// 	ige.queueTrigger("playerJoinsGame", { playerId: this['computer'+i].id() })
 				// }
 			}
-			ige.script.trigger('gameStart');
+			ige.queueTrigger('gameStart');
 		} else if (ige.isClient) {
 			// determine which attribute will be used for scoreboard
 			var attr = 'points';

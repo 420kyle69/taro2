@@ -1810,7 +1810,7 @@ var IgeEntity = IgeObject.extend({
 				// Remove the stream data cache
 				delete this._streamDataCache;
 
-				if (!isForOrphans && ige.gameLoopTickHasExecuted) {
+				if (!isForOrphans) {
 					// Process any behaviours assigned to the entity
 					this._processUpdateBehaviours();
 				}

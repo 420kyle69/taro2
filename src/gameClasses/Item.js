@@ -288,7 +288,7 @@ var Item = IgeEntityPhysics.extend({
 				}
 
 				self._stats.lastUsed = ige.now;
-				ige.script.trigger('unitUsesItem', {
+				ige.queueTrigger('unitUsesItem', {
 					unitId: (owner) ? owner.id() : undefined,
 					itemId: self.id()
 				});
@@ -438,7 +438,7 @@ var Item = IgeEntityPhysics.extend({
 									// if (!self._stats.penetration) {
 									ige.game.entitiesCollidingWithLastRaycast = _.orderBy(self.raycastTargets, ['raycastFraction'], ['asc']);
 									// }
-									ige.script.trigger('raycastItemFired', {
+									ige.queueTrigger('raycastItemFired', {
 										itemId: self.id()
 									});
 								}
@@ -693,7 +693,7 @@ var Item = IgeEntityPhysics.extend({
 		}
 
 		if (owner && ige.trigger) {
-			ige.script.trigger('unitStartsUsingAnItem', {
+			ige.queueTrigger('unitStartsUsingAnItem', {
 				unitId: owner.id(),
 				itemId: this.id()
 			});
@@ -707,7 +707,7 @@ var Item = IgeEntityPhysics.extend({
 			var owner = self.getOwnerUnit();
 
 			if (owner && ige.trigger) {
-				ige.script.trigger('unitStopsUsingAnItem', {
+				ige.queueTrigger('unitStopsUsingAnItem', {
 					unitId: owner.id(),
 					itemId: self.id()
 				});
@@ -925,6 +925,14 @@ var Item = IgeEntityPhysics.extend({
 	 */
 	_behaviour: function (ctx) {
 		var self = this;
+
+		ige.triggeringEntity = this;
+		_.forEach(ige.triggersQueued, function (trigger) {
+			// console.log("running entityTrigger", triggerName)
+			self.script.trigger(trigger.name, trigger.params);
+		});
+		ige.triggeringEntity = undefined;
+
 		var ownerUnit = this.getOwnerUnit();
 		if (ownerUnit && this._stats.stateId != 'dropped') {
 			rotate = ownerUnit.angleToTarget;

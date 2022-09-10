@@ -110,6 +110,15 @@ var Projectile = IgeEntityPhysics.extend({
 	},
 
 	_behaviour: function (ctx) {
+		var self = this;
+
+		ige.triggeringEntity = this;
+		_.forEach(ige.triggersQueued, function (trigger) {
+			// console.log("running entityTrigger", triggerName)
+			self.script.trigger(trigger.name, trigger.params);
+		});
+		ige.triggeringEntity = undefined;
+
 		// if entity (unit/item/player/projectile) has attribute, run regenerate
 		if (ige.isServer) {
 			if (this.attribute) {
@@ -163,6 +172,12 @@ var Projectile = IgeEntityPhysics.extend({
 
 		return self._stats && self._stats.sourceItemId && ige.$(self._stats.sourceItemId);
 	},
+
+	remove: function() {
+		console.log("removing");
+		IgeEntityPhysics.prototype.remove.call(this);
+	},
+
 	destroy: function () {
 		this.playEffect('destroy');
 		IgeEntityPhysics.prototype.destroy.call(this);

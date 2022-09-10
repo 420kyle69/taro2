@@ -389,6 +389,27 @@ var VariableComponent = IgeEntity.extend({
 					}
 					break;
 
+				case 'thisUnit':
+					var triggeringEntity = ige.triggeringEntity;
+					if (triggeringEntity && triggeringEntity._category == 'unit') {
+						returnValue = triggeringEntity;
+					}
+					break;
+				
+				case 'thisItem':
+					var triggeringEntity = ige.triggeringEntity;
+					if (triggeringEntity && triggeringEntity._category == 'item') {
+						returnValue = triggeringEntity;
+					}
+					break;
+			
+				case 'thisProjectile':
+					var triggeringEntity = ige.triggeringEntity;
+					if (triggeringEntity && triggeringEntity._category == 'projectile') {
+						returnValue = triggeringEntity;
+					}
+					break;					
+
 				case 'getPlayerFromId':
 					var id = self.getValue(text.string, vars);
 					if (id) {

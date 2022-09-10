@@ -710,7 +710,7 @@ var ServerNetworkEvents = {
 		var player = ige.game.getPlayerByClientId(clientId);
 		if (player && data && data.status === 'submitted') {
 			player.lastCustomInput = data.inputText;
-			ige.script.trigger('playerCustomInput', { playerId: player.id() });
+			ige.queueTrigger('playerCustomInput', { playerId: player.id() });
 		}
 	},
 	_onPlayerAbsoluteAngle: function (data, clientId) {
