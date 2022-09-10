@@ -2,8 +2,10 @@ var ConditionComponent = IgeEntity.extend({
 	classId: 'ConditionComponent',
 	componentId: 'condition',
 
-	init: function (entity, options) {
+	init: function (scriptComponent, entity) {
 		var self = this;
+		self._script = scriptComponent;
+		self._entity = entity;
 	},
 
 	run: function (items, vars) {

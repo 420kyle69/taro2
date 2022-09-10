@@ -58,8 +58,8 @@ var Unit = IgeEntityPhysics.extend({
 		self.addComponent(InventoryComponent)
 			.addComponent(AbilityComponent)
 			.addComponent(AttributeComponent) // every units gets one
-			.addComponent(ScriptComponent); // entity-scripting
-
+			
+		self.addComponent(ScriptComponent); // entity-requireScriptLoading
 		self.script.load(data.scripts)
 
 		Unit.prototype.log(`initializing new unit ${this.id()}`);
@@ -1656,12 +1656,10 @@ var Unit = IgeEntityPhysics.extend({
 	_behaviour: function (ctx) {
 		var self = this;
 		
-		ige.triggeringEntity = this;
 		_.forEach(ige.triggersQueued, function (trigger) {
-			// console.log("running entityTrigger", triggerName)
+			trigger.params['thisEntityId'] = self.id();
 			self.script.trigger(trigger.name, trigger.params);
 		});
-		ige.triggeringEntity = undefined;
 
 		if (ige.isServer || (ige.isClient && ige.client.selectedUnit == this)) {
 			var ownerPlayer = ige.$(this._stats.ownerId);

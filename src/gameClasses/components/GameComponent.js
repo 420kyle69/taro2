@@ -46,13 +46,16 @@ var GameComponent = IgeEntity.extend({
 			var attr = 'points';
 			if (
 				ige.game.data.settings &&
-        ige.game.data.settings.constants &&
-        ige.game.data.settings.constants.currency != undefined
+				ige.game.data.settings.constants &&
+				ige.game.data.settings.constants.currency != undefined
 			) {
 				attr = ige.game.data.settings.constants.currency;
 			}
 			$('.game-currency').html(attr);
 		}
+
+		ige.addComponent(ScriptComponent);
+		ige.script.load(ige.game.data.scripts);			
 
 		self.isGameStarted = true;
 		ige.timer.startGameClock();

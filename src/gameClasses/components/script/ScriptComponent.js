@@ -18,6 +18,10 @@ var ScriptComponent = IgeEntity.extend({
 		self.scriptRuns = {};
 		self.last50Actions = [];
 
+		self.addComponent(VariableComponent, entity);
+		self.addComponent(ActionComponent, entity);
+		self.addComponent(ConditionComponent, entity);
+
 		ScriptComponent.prototype.log('initializing Script Component');
 	},
 
@@ -43,7 +47,7 @@ var ScriptComponent = IgeEntity.extend({
 		}
 	},
 
-	runScript: function (scriptId, params) {
+	runScript: function (scriptId, params = {}) {
 		var self = this;
 
 		self.currentScriptId = scriptId;
@@ -51,7 +55,7 @@ var ScriptComponent = IgeEntity.extend({
 			// var actions = JSON.parse(JSON.stringify(this.scripts[scriptId].actions));
 			var actions = self.getScriptActions(scriptId);
 			if (actions) {
-				var cmd = ige.action.run(actions, params);
+				var cmd = self.action.run(actions, params);
 				if (cmd == 'return') {
 					ige.log('script return called');
 					return;
@@ -94,38 +98,40 @@ var ScriptComponent = IgeEntity.extend({
 			this.runScript(scriptId, localVariables);
 		}
 
-		if (triggeredBy && triggeredBy.projectileId) {
-			var projectile = ige.$(triggeredBy.projectileId);
-			if (projectile) {
-				switch (triggerName) {
-					case 'unitTouchesProjectile':
-						var attackedUnit = ige.$(ige.game.lastTouchingUnitId);
-						if (attackedUnit) {
-							var damageHasBeenInflicted = attackedUnit.inflictDamage(projectile._stats.damageData);
+		// comment-out built-in damaging system
 
-							if (projectile._stats.destroyOnContactWith && projectile._stats.destroyOnContactWith.units && damageHasBeenInflicted) {
-								projectile.destroy();
-							}
-						}
-						break;
-					case 'projectileTouchesDebris':
-						if (projectile._stats.destroyOnContactWith && projectile._stats.destroyOnContactWith.debris) {
-							projectile.destroy();
-						}
-						break;
-					case 'projectileTouchesItem':
-						if (projectile._stats.destroyOnContactWith && projectile._stats.destroyOnContactWith.items) {
-							projectile.destroy();
-						}
-						break;
-					case 'projectileTouchesWall':
-						if (projectile._stats.destroyOnContactWith && projectile._stats.destroyOnContactWith.walls) {
-							projectile.destroy();
-						}
-						break;
-				}
-			}
-		}
+		// if (triggeredBy && triggeredBy.projectileId) {
+		// 	var projectile = ige.$(triggeredBy.projectileId);
+		// 	if (projectile) {
+		// 		switch (triggerName) {
+		// 			case 'unitTouchesProjectile':
+		// 				var attackedUnit = ige.$(ige.game.lastTouchingUnitId);
+		// 				if (attackedUnit) {
+		// 					var damageHasBeenInflicted = attackedUnit.inflictDamage(projectile._stats.damageData);
+
+		// 					if (projectile._stats.destroyOnContactWith && projectile._stats.destroyOnContactWith.units && damageHasBeenInflicted) {
+		// 						projectile.destroy();
+		// 					}
+		// 				}
+		// 				break;
+		// 			case 'projectileTouchesDebris':
+		// 				if (projectile._stats.destroyOnContactWith && projectile._stats.destroyOnContactWith.debris) {
+		// 					projectile.destroy();
+		// 				}
+		// 				break;
+		// 			case 'projectileTouchesItem':
+		// 				if (projectile._stats.destroyOnContactWith && projectile._stats.destroyOnContactWith.items) {
+		// 					projectile.destroy();
+		// 				}
+		// 				break;
+		// 			case 'projectileTouchesWall':
+		// 				if (projectile._stats.destroyOnContactWith && projectile._stats.destroyOnContactWith.walls) {
+		// 					projectile.destroy();
+		// 				}
+		// 				break;
+		// 		}
+		// 	}
+		// }
 	},
 
 	scriptLog: function (str, tabCount) {

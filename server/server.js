@@ -527,12 +527,9 @@ var Server = IgeClass.extend({
 						ige.addComponent(ShopComponent);
 						ige.addComponent(IgeChatComponent);
 						ige.addComponent(ItemComponent);
-						ige.addComponent(TimerComponent);
-						ige.addComponent(VariableComponent);
+						ige.addComponent(TimerComponent);						
 						ige.addComponent(GameTextComponent);
-						ige.addComponent(ScriptComponent);
-						ige.addComponent(ConditionComponent);
-						ige.addComponent(ActionComponent);
+
 						ige.addComponent(AdComponent);
 						ige.addComponent(SoundComponent);
 						ige.addComponent(RegionManager);
@@ -543,7 +540,7 @@ var Server = IgeClass.extend({
 
 						let map = ige.scaleMap(_.cloneDeep(ige.game.data.map));
 						ige.map.load(map);
-						ige.script.load(ige.game.data.scripts)
+						
 
 						ige.game.start();
 
@@ -553,8 +550,8 @@ var Server = IgeClass.extend({
 						var logInterval = setInterval(function () {
 							// send only if developer client is connect
 							if (ige.isServer && ((self.developerClientId && ige.server.clients[self.developerClientId]) || process.env.ENV == 'standalone')) {
-								ige.variable.devLogs.status = ige.server.getStatus();
-								ige.network.send('devLogs', ige.variable.devLogs, self.developerClientId);
+								ige.script.variable.devLogs.status = ige.server.getStatus();
+								ige.network.send('devLogs', ige.script.variable.devLogs, self.developerClientId);
 
 								if (ige.script.errorLogs != {}) {
 									ige.network.send('errorLogs', ige.script.errorLogs, self.developerClientId);

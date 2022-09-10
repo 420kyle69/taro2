@@ -2,9 +2,11 @@ var VariableComponent = IgeEntity.extend({
 	classId: 'VariableComponent',
 	componentId: 'variable',
 
-	init: function (entity, options) {
+	init: function (scriptComponent, entity) {
 		var self = this;
 
+		self._script = scriptComponent;
+		self._entity = entity;
 		self.devLogs = {};
 		self.secondCount = 0;
 		self.updateStatusSecond = 5;
@@ -389,26 +391,9 @@ var VariableComponent = IgeEntity.extend({
 					}
 					break;
 
-				case 'thisUnit':
-					var triggeringEntity = ige.triggeringEntity;
-					if (triggeringEntity && triggeringEntity._category == 'unit') {
-						returnValue = triggeringEntity;
-					}
+				case 'thisEntity':
+					returnValue = self._entity;
 					break;
-				
-				case 'thisItem':
-					var triggeringEntity = ige.triggeringEntity;
-					if (triggeringEntity && triggeringEntity._category == 'item') {
-						returnValue = triggeringEntity;
-					}
-					break;
-			
-				case 'thisProjectile':
-					var triggeringEntity = ige.triggeringEntity;
-					if (triggeringEntity && triggeringEntity._category == 'projectile') {
-						returnValue = triggeringEntity;
-					}
-					break;					
 
 				case 'getPlayerFromId':
 					var id = self.getValue(text.string, vars);
@@ -1244,10 +1229,10 @@ var VariableComponent = IgeEntity.extend({
 					}
 					break;
 
-				case 'getItemName':
-					var item = self.getValue(text.item, vars);
-					if (item) {
-						returnValue = item._stats.name;
+				case 'entityName':
+					var entity = self.getValue(text.entity, vars);			
+					if (entity) {
+						returnValue = entity._stats.name;
 					}
           			break;
 

@@ -402,7 +402,7 @@ var ClientNetworkEvents = {
 	// },
 
 	_onDevLogs: function (data) {
-		ige.variable.updateDevConsole(data);
+		ige.script.variable.updateDevConsole(data);
 	},
 
 	_onTrade: function (msg, clientId) {

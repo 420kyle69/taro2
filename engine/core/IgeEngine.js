@@ -1615,7 +1615,7 @@ var IgeEngine = IgeEntity.extend({
 		ige.network.send('_igeStreamCreateSnapshot', ige.entityCreateSnapshot, clientId);
 	},
 
-	queueTrigger: function(triggerName, parameters) {
+	queueTrigger: function(triggerName, parameters = {}) {
 		this.triggersQueued.push({name: triggerName, params: parameters})
 	},
 
@@ -1712,9 +1712,11 @@ var IgeEngine = IgeEntity.extend({
 				ige.queueTrigger('frameTick');
 			}
 
-			_.forEach(ige.triggersQueued, function (trigger) {
-				self.script.trigger(trigger.name, trigger.params);
-			});
+			if (ige.isServer) {
+				_.forEach(ige.triggersQueued, function (trigger) {
+					ige.script.trigger(trigger.name, trigger.params);
+				});
+			}
 
 			ige.updateCount = 0;
 			ige.tickCount = 0;
@@ -1737,7 +1739,6 @@ var IgeEngine = IgeEntity.extend({
 				}
 			}
 
-			ige.triggersQueued = [];
 			
 			if (!ige.gameLoopTickHasExecuted) {
 				return;
@@ -1760,6 +1761,7 @@ var IgeEngine = IgeEntity.extend({
 				return;
 			}
 
+			ige.triggersQueued = []; // only empties on server-side as client-side never reaches here
 			
 			// Check for unborn entities that should be born now
 			unbornQueue = ige._spawnQueue;

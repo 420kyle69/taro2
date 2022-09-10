@@ -57,6 +57,7 @@ var Item = IgeEntityPhysics.extend({
 		// convert numbers stored as string in database to int
 		self.parseEntityObject(self._stats);
 		self.addComponent(AttributeComponent); // every item gets one
+		
 		self.addComponent(ScriptComponent); // entity-scripting
 		self.script.load(data.scripts)
 
@@ -357,6 +358,7 @@ var Item = IgeEntityPhysics.extend({
 										});
 
 									var projectile = new Projectile(data);
+									projectile.script.trigger("entityCreated");		
 									ige.game.lastCreatedProjectileId = projectile.id();
 								}
 								if (this._stats.bulletType == 'raycast') {
@@ -926,12 +928,10 @@ var Item = IgeEntityPhysics.extend({
 	_behaviour: function (ctx) {
 		var self = this;
 
-		ige.triggeringEntity = this;
 		_.forEach(ige.triggersQueued, function (trigger) {
-			// console.log("running entityTrigger", triggerName)
+			trigger.params['thisEntityId'] = self.id();
 			self.script.trigger(trigger.name, trigger.params);
 		});
-		ige.triggeringEntity = undefined;
 
 		var ownerUnit = this.getOwnerUnit();
 		if (ownerUnit && this._stats.stateId != 'dropped') {

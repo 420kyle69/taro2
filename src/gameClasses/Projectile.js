@@ -6,6 +6,7 @@ var Projectile = IgeEntityPhysics.extend({
 		this.id(entityIdFromServer);
 		var self = this;
 		self.category('projectile');
+
 		var projectileData = {};
 		if (ige.isClient) {
 			projectileData = ige.game.getAsset('projectileTypes', data.type);
@@ -61,7 +62,8 @@ var Projectile = IgeEntityPhysics.extend({
 		}
 
 		self.addComponent(AttributeComponent); // every projectile gets one
-		self.addComponent(ScriptComponent); // entity-scripting
+		
+		self.addComponent(ScriptComponent); // entity-scripting		
 		self.script.load(data.scripts)
 
 		// convert number variables into Int
@@ -111,13 +113,10 @@ var Projectile = IgeEntityPhysics.extend({
 
 	_behaviour: function (ctx) {
 		var self = this;
-
-		ige.triggeringEntity = this;
 		_.forEach(ige.triggersQueued, function (trigger) {
-			// console.log("running entityTrigger", triggerName)
+			trigger.params['thisEntityId'] = self.id();
 			self.script.trigger(trigger.name, trigger.params);
 		});
-		ige.triggeringEntity = undefined;
 
 		// if entity (unit/item/player/projectile) has attribute, run regenerate
 		if (ige.isServer) {
@@ -171,11 +170,6 @@ var Projectile = IgeEntityPhysics.extend({
 		var self = this;
 
 		return self._stats && self._stats.sourceItemId && ige.$(self._stats.sourceItemId);
-	},
-
-	remove: function() {
-		console.log("removing");
-		IgeEntityPhysics.prototype.remove.call(this);
 	},
 
 	destroy: function () {

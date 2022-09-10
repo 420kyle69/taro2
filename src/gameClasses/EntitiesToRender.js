@@ -86,6 +86,7 @@ var EntitiesToRender = /** @class */ (function () {
                 }
             }
         }
+        ige.triggersQueued = [];
         ige.lastTickTime = currentTime;
         if (ige.gameLoopTickHasExecuted) {
             ige.gameLoopTickHasExecuted = false;

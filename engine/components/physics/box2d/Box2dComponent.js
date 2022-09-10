@@ -761,7 +761,7 @@ var PhysicsComponent = IgeEventingClass.extend({
 
 			switch (entityA._category) {
 				case 'region':
-					var region = ige.variable.getValue({
+					var region = ige.script.variable.getValue({
 						function: 'getVariable',
 						variableName: entityA._stats.id
 					});
