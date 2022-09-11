@@ -84,8 +84,7 @@ var ScriptComponent = IgeEntity.extend({
 	/* trigger and run all of the corresponding script(s) */
 	trigger: function (triggerName, triggeredBy) {
 		let scriptIds = this.triggeredScripts[triggerName]
-		// console.log(this._entity._category, triggerName)
-
+		
 		for (var i in scriptIds) {
 			let scriptId = scriptIds[i]
 			this.scriptLog(`\ntrigger: ${triggerName}`);
@@ -94,7 +93,7 @@ var ScriptComponent = IgeEntity.extend({
 				triggeredBy: triggeredBy
 			};
 
-			// console.log(this._entity._category, triggerName)
+			// console.log(this._entity._category, triggerName, scriptId)
 			this.runScript(scriptId, localVariables);
 		}
 

@@ -22,6 +22,7 @@ var ActionComponent = IgeEntity.extend({
 			if (!action || action.disabled == true || (ige.isClient && ige.physics && !action.runOnClient)) {
 				continue;
 			}
+			
 			var params = {};
 			var entity = self._script.variable.getValue(action.entity, vars);
 			self._script.currentActionName = action.type;
@@ -107,7 +108,7 @@ var ActionComponent = IgeEntity.extend({
 						break;
 
 					case 'condition':
-						if (ige.condition.run(action.conditions, vars)) {
+						if (self._script.condition.run(action.conditions, vars)) {
 							var brk = self.run(action.then, vars);
 						} else {
 							var brk = self.run(action.else, vars);
@@ -891,7 +892,7 @@ var ActionComponent = IgeEntity.extend({
 					case 'while':
 						var loopCounter = 0;
 
-						while (ige.condition.run(action.conditions, vars)) {
+						while (self._script.condition.run(action.conditions, vars)) {
 							var brk = self.run(action.actions, vars);
 							if (brk == 'break' || vars.break) {
 								// we dont have to return a value in case of break otherwise
