@@ -85,6 +85,10 @@ var ScriptComponent = IgeEntity.extend({
 	trigger: function (triggerName, triggeredBy) {
 		let scriptIds = this.triggeredScripts[triggerName]
 		
+		// if (triggerName == 'playerJoinsGame') {
+		// 	console.trace()
+		// }
+
 		for (var i in scriptIds) {
 			let scriptId = scriptIds[i]
 			this.scriptLog(`\ntrigger: ${triggerName}`);

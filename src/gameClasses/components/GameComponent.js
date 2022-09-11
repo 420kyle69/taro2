@@ -34,11 +34,6 @@ var GameComponent = IgeEntity.extend({
 					controlledBy: 'computer',
 					unitIds: [] // all units owned by player
 				});
-
-				// GameComponent.prototype.log("computerPlayer created " + this['computer' + i].id())
-				// if (global.isDev) {
-				// 	ige.queueTrigger("playerJoinsGame", { playerId: this['computer'+i].id() })
-				// }
 			}
 			ige.queueTrigger('gameStart');
 		} else if (ige.isClient) {

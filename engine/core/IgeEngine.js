@@ -1712,12 +1712,6 @@ var IgeEngine = IgeEntity.extend({
 				ige.queueTrigger('frameTick');
 			}
 
-			if (ige.isServer) {
-				_.forEach(ige.triggersQueued, function (trigger) {
-					ige.script.trigger(trigger.name, trigger.params);
-				});
-			}
-
 			ige.updateCount = 0;
 			ige.tickCount = 0;
 			ige.updateTransform = 0;
@@ -1759,6 +1753,10 @@ var IgeEngine = IgeEntity.extend({
 				}
 
 				return;
+			} else if (ige.isServer) { // execute triggersQueued. client-side is done inside EntitiesToRender.ts
+				_.forEach(ige.triggersQueued, function (trigger) {
+					ige.script.trigger(trigger.name, trigger.params);
+				});
 			}
 
 			ige.triggersQueued = []; // only empties on server-side as client-side never reaches here
