@@ -101,40 +101,16 @@ var ScriptComponent = IgeEntity.extend({
 			this.runScript(scriptId, localVariables);
 		}
 
-		// comment-out built-in damaging system
-
-		// if (triggeredBy && triggeredBy.projectileId) {
-		// 	var projectile = ige.$(triggeredBy.projectileId);
-		// 	if (projectile) {
-		// 		switch (triggerName) {
-		// 			case 'unitTouchesProjectile':
-		// 				var attackedUnit = ige.$(ige.game.lastTouchingUnitId);
-		// 				if (attackedUnit) {
-		// 					var damageHasBeenInflicted = attackedUnit.inflictDamage(projectile._stats.damageData);
-
-		// 					if (projectile._stats.destroyOnContactWith && projectile._stats.destroyOnContactWith.units && damageHasBeenInflicted) {
-		// 						projectile.destroy();
-		// 					}
-		// 				}
-		// 				break;
-		// 			case 'projectileTouchesDebris':
-		// 				if (projectile._stats.destroyOnContactWith && projectile._stats.destroyOnContactWith.debris) {
-		// 					projectile.destroy();
-		// 				}
-		// 				break;
-		// 			case 'projectileTouchesItem':
-		// 				if (projectile._stats.destroyOnContactWith && projectile._stats.destroyOnContactWith.items) {
-		// 					projectile.destroy();
-		// 				}
-		// 				break;
-		// 			case 'projectileTouchesWall':
-		// 				if (projectile._stats.destroyOnContactWith && projectile._stats.destroyOnContactWith.walls) {
-		// 					projectile.destroy();
-		// 				}
-		// 				break;
-		// 		}
-		// 	}
-		// }
+		// built-in damaging system
+		if (triggeredBy && triggeredBy.projectileId) {
+			var projectile = ige.$(triggeredBy.projectileId);
+			if (projectile && triggerName == 'unitTouchesProjectile') {
+					var attackedUnit = ige.$(ige.game.lastTouchingUnitId);
+					if (attackedUnit) {
+						var damageHasBeenInflicted = attackedUnit.inflictDamage(projectile._stats.damageData);
+					}
+			}
+		}
 	},
 
 	scriptLog: function (str, tabCount) {
