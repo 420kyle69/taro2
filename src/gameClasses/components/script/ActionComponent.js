@@ -20,7 +20,7 @@ var ActionComponent = IgeEntity.extend({
 
 			// if action is disabled
 			if (!action || action.disabled == true || 
-				(ige.isServer && !action.runOnServer) || // don't run on server-side if runOnServer is disabled
+				// (ige.isServer && !action.runOnServer) || // don't run on server-side if runOnServer is disabled
 				(ige.isClient && !action.runOnClient) // don't run on client-side if runOnClient is diabled
 			) {
 				continue;
