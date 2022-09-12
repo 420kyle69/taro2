@@ -107,7 +107,7 @@ var ScriptComponent = IgeEntity.extend({
 			if (projectile && triggerName == 'unitTouchesProjectile') {
 					var attackedUnit = ige.$(ige.game.lastTouchingUnitId);
 					if (attackedUnit) {
-						var damageHasBeenInflicted = attackedUnit.inflictDamage(projectile._stats.damageData);
+						attackedUnit.inflictDamage(projectile._stats.damageData);
 					}
 			}
 		}
