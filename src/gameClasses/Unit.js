@@ -610,7 +610,7 @@ var Unit = IgeEntityPhysics.extend({
 						// }])
 
 						ige.game.lastPurchasedUniTypetId = unitData.unitTypeId;
-						ige.queueTrigger('playerPurchasesUnit', {
+						ige.script.trigger('playerPurchasesUnit', {
 							unitId: self.id(),
 							playerId: ownerPlayer.id()
 						});
@@ -967,6 +967,7 @@ var Unit = IgeEntityPhysics.extend({
 			if (itemData.isUsedOnPickup && self.canUseItem(itemData)) {
 				if (!isItemInstance) {
 					item = new Item(itemData);
+					item.script.trigger("entityCreated");
 				}
 				ige.devLog('using item immediately');
 				item.setOwnerUnit(self);
@@ -1028,6 +1029,8 @@ var Unit = IgeEntityPhysics.extend({
 					if (!isItemInstance) {
 						// itemData.stateId = (availableSlot-1 == this._stats.currentItemIndex) ? 'selected' : 'unselected';
 						item = new Item(itemData);
+						ige.game.lastCreatedItemId = item._id;
+						item.script.trigger("entityCreated");
 					}
 					self.inventory.insertItem(item, availableSlot - 1);
 					self.streamUpdateData([{ itemIds: self._stats.itemIds }]);
@@ -1284,7 +1287,6 @@ var Unit = IgeEntityPhysics.extend({
 			}
 
 			if (isVulnerable) {
-				// console.log("inflicting damage!", damage)
 				ige.game.lastAttackingUnitId = damageData.sourceUnitId;
 				ige.game.lastAttackedUnitId = this.id();
 				ige.game.lastAttackingItemId = damageData.sourceItemId;
@@ -1300,7 +1302,8 @@ var Unit = IgeEntityPhysics.extend({
 					itemId: ige.game.lastAttackingItemId
 				};
 
-				ige.queueTrigger('unitAttacksUnit', triggeredBy);
+				ige.script.trigger('unitAttacksUnit', triggeredBy);
+				this.script.trigger('unitAttacksUnit', triggeredBy);
 
 				var armor = this._stats.attributes.armor && this._stats.attributes.armor.value || 0;
 				var damageReduction = (0.05 * armor) / (1.5 + 0.04 * armor);

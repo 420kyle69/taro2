@@ -113,6 +113,8 @@ var Player = IgeEntity.extend({
 			var unit = new Unit(data);
 			unit.setOwnerPlayer(self.id());
 
+			unit.script.trigger("entityCreated");
+
 			// setOwner will add unitId to unitIds
 			// self._stats.unitIds.push(unit.id())
 

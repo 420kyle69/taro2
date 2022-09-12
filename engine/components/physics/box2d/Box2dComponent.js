@@ -596,11 +596,11 @@ var PhysicsComponent = IgeEventingClass.extend({
 
 									if (entity._category == 'unit') {
 										// console.log("unitTouchesWall", entity.id());
-										ige.queueTrigger('unitTouchesWall', { unitId: entity.id() });										
+										ige.script.trigger('unitTouchesWall', { unitId: entity.id() });										
 									} else if (entity._category == 'item') {
-										ige.queueTrigger('itemTouchesWall', { itemId: entity.id() });
+										ige.script.trigger('itemTouchesWall', { itemId: entity.id() });
 									} else if (entity._category == 'projectile') {
-										ige.queueTrigger('projectileTouchesWall', { projectileId: entity.id() });
+										ige.script.trigger('projectileTouchesWall', { projectileId: entity.id() });
 									}
 
 									entity.isOutOfBounds = true;
@@ -731,7 +731,7 @@ var PhysicsComponent = IgeEventingClass.extend({
 							ownerUnit.ai.registerSensorDetection(entityB);
 						}
 					} else if (entityB._category == 'item') {
-						ige.queueTrigger('whenItemEntersSensor', {
+						ige.script.trigger('whenItemEntersSensor', {
 							unitId: ownerUnit.id(),
 							sensorId: entityA.id(),
 							itemId: entityB.id()
@@ -772,27 +772,27 @@ var PhysicsComponent = IgeEventingClass.extend({
 
 					switch (entityB._category) {
 						case 'unit':
-							ige.queueTrigger('unitEntersRegion', {
+							ige.script.trigger('unitEntersRegion', {
 								unitId: entityB.id(),
 								region: region
 							});
-							entityA.script.trigger("entityEntersRegion");
+							entityB.script.trigger("entityEntersRegion");
 							break;
 
 						case 'item':
-							ige.queueTrigger('itemEntersRegion', {
+							ige.script.trigger('itemEntersRegion', {
 								itemId: entityB.id(),
 								region: region
 							});
-							entityA.script.trigger("entityEntersRegion");
+							entityB.script.trigger("entityEntersRegion");
 							break;
 
 						case 'debris':
-							ige.queueTrigger('debrisEntersRegion', {
+							ige.script.trigger('debrisEntersRegion', {
 								debrisId: entityB.id(),
 								region: region
 							});
-							entityA.script.trigger("entityEntersRegion");
+							entityB.script.trigger("entityEntersRegion");
 							break;
 					}
 					break;
@@ -806,11 +806,11 @@ var PhysicsComponent = IgeEventingClass.extend({
 
 					switch (entityB._category) {
 						case 'unit':
-							ige.queueTrigger('unitTouchesUnit', triggeredBy); // handle unitA touching unitB
+							ige.script.trigger('unitTouchesUnit', triggeredBy); // handle unitA touching unitB
 							triggeredBy.unitId = entityB.id();
 							ige.game.lastTouchingUnitId = entityB.id();
 							ige.game.lastTouchedUnitId = entityA.id();
-							ige.queueTrigger('unitTouchesUnit', triggeredBy); // handle unitB touching unitA
+							ige.script.trigger('unitTouchesUnit', triggeredBy); // handle unitB touching unitA
 							entityA.script.trigger("entityTouchesUnit");
 							entityB.script.trigger("entityTouchesUnit");
 							break;
@@ -822,7 +822,7 @@ var PhysicsComponent = IgeEventingClass.extend({
 							if (entityB._stats.ownerUnitId == entityA.id())
 								return;
 
-							ige.queueTrigger('unitTouchesItem', triggeredBy);
+							ige.script.trigger('unitTouchesItem', triggeredBy);
 							entityA.script.trigger("entityTouchesItem");		
 							entityB.script.trigger("entityTouchesUnit");					
 							break;
@@ -835,7 +835,7 @@ var PhysicsComponent = IgeEventingClass.extend({
 							triggeredBy.projectileId = entityB.id();
 							ige.game.lastAttackingUnitId = entityB._stats.sourceUnitId;
 							ige.game.lastAttackedUnitId = entityA.id();
-							ige.queueTrigger('unitTouchesProjectile', triggeredBy);
+							ige.script.trigger('unitTouchesProjectile', triggeredBy);
 							entityA.script.trigger("entityTouchesProjectile");
 							entityB.script.trigger("entityTouchesUnit");
 							break;
@@ -844,7 +844,7 @@ var PhysicsComponent = IgeEventingClass.extend({
 						case 'wall':
 							ige.game.lastTouchingUnitId = entityA.id();
 							var triggeredBy = { unitId: entityA.id() };
-							ige.queueTrigger('unitTouchesWall', triggeredBy);
+							ige.script.trigger('unitTouchesWall', triggeredBy);
 							entityA.script.trigger("entityTouchesWall");
 							break;
 					}
@@ -858,7 +858,7 @@ var PhysicsComponent = IgeEventingClass.extend({
 								itemId: entityA.id(),
 								collidingEntity: entityA.id()
 							};
-							ige.queueTrigger('projectileTouchesItem', triggeredBy);
+							ige.script.trigger('projectileTouchesItem', triggeredBy);
 							entityA.script.trigger("entityTouchesProjectile");
 							break;
 					}
@@ -871,7 +871,7 @@ var PhysicsComponent = IgeEventingClass.extend({
 								projectileId: entityA.id(),
 								collidingEntity: entityB.id()
 							};
-							ige.queueTrigger('projectileTouchesWall', triggeredBy);
+							ige.script.trigger('projectileTouchesWall', triggeredBy);
 							entityA.script.trigger("entityTouchesWall");
 							break;
 					}
@@ -884,13 +884,13 @@ var PhysicsComponent = IgeEventingClass.extend({
 								projectileId: entityB.id(),
 								collidingEntity: entityA.id()
 							};
-							ige.queueTrigger('projectileTouchesWall', triggeredBy);
+							ige.script.trigger('projectileTouchesWall', triggeredBy);
 							entityB.script.trigger("entityTouchesWall");
 							break;
 
 						case 'item':
 							var triggeredBy = { itemId: entityB.id() };
-							ige.queueTrigger('itemTouchesWall', triggeredBy);
+							ige.script.trigger('itemTouchesWall', triggeredBy);
 							entityB.script.trigger("entityTouchesWall");
 							break;
 					}

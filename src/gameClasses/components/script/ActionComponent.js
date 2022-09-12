@@ -1628,6 +1628,8 @@ var ActionComponent = IgeEntity.extend({
 								facingAngle: Math.random(0, 700) / 100
 							};
 							var item = new Item(itemData);
+							ige.game.lastCreatedItemId = item._id;
+							item.script.trigger("entityCreated");
 						} else {
 							self._script.errorLog('invalid item type data');
 						}
@@ -1654,6 +1656,8 @@ var ActionComponent = IgeEntity.extend({
 								rotate: Math.random(0, 700) / 100
 							};
 							var item = new Item(itemData);
+							ige.game.lastCreatedItemId = item._id;
+							item.script.trigger("entityCreated");
 						} else {
 							self._script.errorLog('invalid item type data');
 						}
@@ -1673,6 +1677,8 @@ var ActionComponent = IgeEntity.extend({
 								rotate: Math.random(0, 700) / 100
 							};
 							var item = new Item(itemData);
+							ige.game.lastCreatedItemId = item._id;
+							item.script.trigger("entityCreated");
 						} else {
 							self._script.errorLog('invalid item type data');
 						}
@@ -2046,8 +2052,9 @@ var ActionComponent = IgeEntity.extend({
 								data.scaleDimensions = true;
 
 								createdEntity = new Item(_.cloneDeep(data));
-
 								ige.game.lastCreatedItemId = createdEntity._id;
+
+								item.script.trigger("entityCreated");
 							} else if (entityType === 'projectileTypes') {
 								data = Object.assign(data, {
 									type: entityToCreate,

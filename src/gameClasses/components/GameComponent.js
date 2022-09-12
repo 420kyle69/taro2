@@ -35,7 +35,6 @@ var GameComponent = IgeEntity.extend({
 					unitIds: [] // all units owned by player
 				});
 			}
-			ige.queueTrigger('gameStart');
 		} else if (ige.isClient) {
 			// determine which attribute will be used for scoreboard
 			var attr = 'points';
@@ -52,6 +51,7 @@ var GameComponent = IgeEntity.extend({
 		ige.addComponent(ScriptComponent);
 		ige.script.load(ige.game.data.scripts);			
 
+		ige.script.trigger('gameStart');
 		self.isGameStarted = true;
 		ige.timer.startGameClock();
 	},

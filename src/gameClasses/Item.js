@@ -262,6 +262,7 @@ var Item = IgeEntityPhysics.extend({
 		var self = this;
 		var now = ige.now;
 		var owner = self.getOwnerUnit();
+		var ownerId = (owner) ? owner.id() : undefined;
 		var player = owner && owner.getOwner();
 		var isUsed = false;
 
@@ -290,7 +291,7 @@ var Item = IgeEntityPhysics.extend({
 
 				self._stats.lastUsed = ige.now;
 				ige.queueTrigger('unitUsesItem', {
-					unitId: (owner) ? owner.id() : undefined,
+					unitId: ownerId,
 					itemId: self.id()
 				});
 
@@ -345,11 +346,11 @@ var Item = IgeEntityPhysics.extend({
 										{
 											type: self._stats.projectileType,
 											sourceItemId: self.id(),
-											sourceUnitId: (owner) ? owner.id() : undefined,
+											sourceUnitId: ownerId,
 											defaultData: defaultData,
 											damageData: {
 												targetsAffected: this._stats.damage.targetsAffected,
-												sourceUnitId: owner.id(),
+												sourceUnitId: ownerId,
 												sourceItemId: self.id(),
 												sourcePlayerId: owner.getOwner().id(),
 												unitAttributes: this._stats.damage.unitAttributes,
@@ -441,7 +442,8 @@ var Item = IgeEntityPhysics.extend({
 									ige.game.entitiesCollidingWithLastRaycast = _.orderBy(self.raycastTargets, ['raycastFraction'], ['asc']);
 									// }
 									ige.queueTrigger('raycastItemFired', {
-										itemId: self.id()
+										itemId: self.id(),
+										unitId: ownerId
 									});
 								}
 								self.raycastTargets = [];
@@ -476,7 +478,7 @@ var Item = IgeEntityPhysics.extend({
 
 							var damageData = {
 								targetsAffected: this._stats.damage.targetsAffected,
-								sourceUnitId: owner.id(),
+								sourceUnitId: ownerId,
 								sourceItemId: self.id(),
 								sourcePlayerId: owner.getOwner().id(),
 								unitAttributes: this._stats.damage.unitAttributes,
