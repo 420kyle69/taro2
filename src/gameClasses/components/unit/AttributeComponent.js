@@ -223,12 +223,19 @@ var AttributeComponent = IgeEntity.extend({
 								self._entity.ai.announceDeath();
 							}
 							ige.script.trigger(`${this._entity._category}AttributeBecomesZero`, triggeredBy);
-							self._entity.script.trigger(`entityAttributeBecomesZero`, triggeredBy);
+
+							// necessary as self._entity can be 'player' and it doesn't have scriptComponent
+							if (self._entity._category == 'unit' || self._entity._category == 'item' || self._entity._category == 'projectile') {
+								self._entity.script.trigger(`entityAttributeBecomesZero`, triggeredBy);	
+							}
 						} else if (newValue >= attribute.max) // when attribute becomes full, trigger attributeBecomesFull event
 						{
-							// console.log("update attr fire!")
 							ige.script.trigger(`${this._entity._category}AttributeBecomesFull`, triggeredBy);
-							self._entity.script.trigger(`entityAttributeBecomesFull`, triggeredBy);
+							
+							// necessary as self._entity can be 'player' and it doesn't have scriptComponent
+							if (self._entity._category == 'unit' || self._entity._category == 'item' || self._entity._category == 'projectile') {
+								self._entity.script.trigger(`entityAttributeBecomesFull`, triggeredBy);
+							}
 						}
 
 						// check if user breaks his highscore then assign it to new highscore
