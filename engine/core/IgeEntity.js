@@ -4203,7 +4203,10 @@ var IgeEntity = IgeObject.extend({
 									// in case of pure number ID
 									selectedItem = selectedItem.toString();
 									// tell client this item is selected
-									ige.$(selectedItem).setState('selected');
+									var item = ige.$(selectedItem);
+									if (item) {
+										item.setState('selected');
+									}
 								}
 							}
 							break;

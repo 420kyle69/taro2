@@ -1719,12 +1719,6 @@ var IgeEngine = IgeEntity.extend({
 			ige.totalChildren = 0;
 			ige.totalOrphans = 0;
 			
-			if (ige.isServer) { // execute triggersQueued. client-side is done inside EntitiesToRender.ts
-				_.forEach(ige.triggersQueued, function (trigger) {
-					ige.script.trigger(trigger.name, trigger.params);
-				});
-			}
-
 			// Update the scenegraph - this is where entity _behaviour() is called
 			if (self._enableUpdates) {
 				// ige.updateCount = {}
@@ -1739,6 +1733,14 @@ var IgeEngine = IgeEntity.extend({
 				}
 			}
 
+			if (ige.isServer) { // execute triggersQueued. client-side is done inside EntitiesToRender.ts
+				_.forEach(ige.triggersQueued, function (trigger) {
+					// console.log("run", trigger);						
+					ige.script.trigger(trigger.name, trigger.params);
+				});
+			}
+
+			// console.log("empty queue")
 			ige.triggersQueued = []; // only empties on server-side as client-side never reaches here
 			
 			if (!ige.gameLoopTickHasExecuted) {
