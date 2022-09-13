@@ -296,10 +296,11 @@ var Item = IgeEntityPhysics.extend({
 				}
 
 				self._stats.lastUsed = ige.now;
-				ige.queueTrigger('unitUsesItem', {
-					unitId: ownerId,
-					itemId: self.id()
-				});
+
+				let triggerParams = {unitId: ownerId, itemId: self.id()};
+
+				ige.queueTrigger('unitUsesItem', triggerParams);
+				self.script.trigger('itemIsUsed', triggerParams);
 
 				if (ige.physics && self._stats.type == 'weapon') {
 					if (self._stats.isGun) {
