@@ -1799,11 +1799,10 @@ var IgeEngine = IgeEntity.extend({
 							self.serverEmptySince = self.now;
 						}
 
-						const serverTier = ige.server.tier;
 						const gameTier = ige.game && ige.game.data && ige.game.data.defaultData && ige.game.data.defaultData.tier;
 						// gameTier and serverTier could be different in some cases since Tier 4 games are now being hosted on Tier 2 servers.
-						// Kill T1 and T2 servers if it's been empty for 10+ mins. Also, do not kill T2 servers if they are hosting a T4 game
-						if ((serverTier === '1' || serverTier === '2') && gameTier !== '4' && self.now - self.serverEmptySince > self.emptyTimeLimit) {
+						// Kill T1 T2, T5 or any other server if it's been empty for 10+ mins. Also, do not kill T2 servers if they are hosting a T4 game
+						if (gameTier !== '4' && self.now - self.serverEmptySince > self.emptyTimeLimit) {
 							ige.server.kill('game\'s been empty for too long (10 min)');
 						}
 					} else {
