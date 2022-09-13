@@ -418,7 +418,7 @@ var VariableComponent = IgeEntity.extend({
 				case 'getEntityAttribute':
 					var attributeTypeId = self.getValue(text.attribute, vars);
 
-					if (entity && ige.action.entityCategories.indexOf(entity._category) !== -1 && attributeTypeId) {
+					if (entity && self._entity.script.action.entityCategories.indexOf(entity._category) !== -1 && attributeTypeId) {
 						var attributeType = entity._stats.attributes && entity._stats.attributes[attributeTypeId];
 						if (attributeType) {
 							var value = parseFloat(attributeType.value);
@@ -432,7 +432,7 @@ var VariableComponent = IgeEntity.extend({
 
 				case 'entityAttributeMax':
 					var attributeTypeId = self.getValue(text.attribute, vars);
-					if (entity && entity._stats.attributes && ige.action.entityCategories.indexOf(entity._category) > -1 && attributeTypeId) {
+					if (entity && entity._stats.attributes && self._entity.script.action.entityCategories.indexOf(entity._category) > -1 && attributeTypeId) {
 						var attributeType = entity._stats.attributes[attributeTypeId];
 						if (attributeType) {
 							returnValue = attributeType.max;
@@ -442,7 +442,7 @@ var VariableComponent = IgeEntity.extend({
 
 				case 'entityAttributeMin':
 					var attributeTypeId = self.getValue(text.attribute, vars);
-					if (entity && entity._stats.attributes && ige.action.entityCategories.indexOf(entity._category) > -1 && attributeTypeId) {
+					if (entity && entity._stats.attributes && self._entity.script.action.entityCategories.indexOf(entity._category) > -1 && attributeTypeId) {
 						var attributeType = entity._stats.attributes[attributeTypeId];
 						if (attributeType) {
 							returnValue = attributeType.min;
@@ -505,7 +505,7 @@ var VariableComponent = IgeEntity.extend({
 					break;
 
 				case 'entityBounds':
-					if (entity && ige.action.entityCategories.indexOf(entity._category) > -1) {
+					if (entity && self._entity.script.action.entityCategories.indexOf(entity._category) > -1) {
 						// for sprite-only items that are carried by units
 						returnValue = entity.getBounds();
 					}
@@ -968,7 +968,7 @@ var VariableComponent = IgeEntity.extend({
 					break;
 
 				case 'entityWidth':
-					if (entity && ige.action.entityCategories.indexOf(entity._category) > -1) {
+					if (entity && self._entity.script.action.entityCategories.indexOf(entity._category) > -1) {
 						// returnValue = entity._aabb.width;
 						returnValue = entity.width();
 						// console.log("entityWidth", returnValue);
@@ -977,7 +977,7 @@ var VariableComponent = IgeEntity.extend({
 					break;
 
 				case 'entityHeight':
-					if (entity && ige.action.entityCategories.indexOf(entity._category) > -1) {
+					if (entity && self._entity.script.action.entityCategories.indexOf(entity._category) > -1) {
 						// returnValue = entity._aabb.height;
 						returnValue = entity.height();
 					}
@@ -1428,11 +1428,11 @@ var VariableComponent = IgeEntity.extend({
 
 				case 'getEntityState':
 					entity = self.getValue(text.entity, vars);
-					var entity = (entity && ige.action.entityCategories.indexOf(entity._category) > -1)
+					var entity = (entity && self._entity.script.action.entityCategories.indexOf(entity._category) > -1)
 						? entity
 						: vars.selectedEntity;
 
-					if (entity && ige.action.entityCategories.indexOf(entity._category) > -1) {
+					if (entity && self._entity.script.action.entityCategories.indexOf(entity._category) > -1) {
 						returnValue = entity._stats.stateId;
 					} else {
 						VariableComponent.prototype.log('getEntityState: entity not defined');
@@ -1721,7 +1721,7 @@ var VariableComponent = IgeEntity.extend({
 					var igeRegister = ige.register();
 					returnValue = _.values(igeRegister)
 						.filter(({ _category }) => {
-							return ige.action.entityCategories.includes(_category) || !_category;
+							return self._entity.script.action.entityCategories.includes(_category) || !_category;
 						});
 					break;
 
@@ -1733,7 +1733,7 @@ var VariableComponent = IgeEntity.extend({
 
 					if (
 						entity != undefined &&
-						ige.action.entityCategories.indexOf(entity._category) > -1 &&
+						self._entity.script.action.entityCategories.indexOf(entity._category) > -1 &&
 						height != undefined &&
 						width != undefined &&
 						distance != undefined
@@ -1752,7 +1752,7 @@ var VariableComponent = IgeEntity.extend({
 
 						if (region.x && !isNaN(region.x) && region.y && !isNaN(region.y) && region.width && !isNaN(region.width) && region.height && !isNaN(region.height)) {
 							returnValue = ige.physics.getBodiesInRegion(region).filter(({ _category }) => {
-								return ige.action.entityCategories.includes(_category) || !_category;
+								return self._entity.script.action.entityCategories.includes(_category) || !_category;
 							});
 						} else {
 							ige.script.errorLog(`region ${JSON.stringify(region)} is not a valid region`);
@@ -1772,12 +1772,12 @@ var VariableComponent = IgeEntity.extend({
 						if (region._stats) {
 							returnValue = ige.physics.getBodiesInRegion(region._stats.default)
 								.filter(({ _category }) => {
-									return ige.action.entityCategories.includes(_category) || !_category;
+									return self._entity.script.action.entityCategories.includes(_category) || !_category;
 								});
 						} else {
 							returnValue = ige.physics.getBodiesInRegion(region)
 								.filter(({ _category }) => {
-									return ige.action.entityCategories.includes(_category) || !_category;
+									return self._entity.script.action.entityCategories.includes(_category) || !_category;
 								});
 						}
 					} else {
