@@ -23,6 +23,8 @@ var ActionComponent = IgeEntity.extend({
 			if (ige.isServer) {
 				if (action.runOnClient) {
 					ige.network.pause();
+				} else {
+					ige.network.resume();
 				}
 			}
 			
