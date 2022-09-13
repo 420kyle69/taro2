@@ -1878,6 +1878,7 @@ var IgeEngine = IgeEntity.extend({
 			// }
 
 			ige.network.stream._sendQueue(timeStamp);
+			ige.network.resume();
 			ige.network.stream.updateEntityAttributes();
 			if (ige.count == undefined || ige.now - ige.lastSent < 30) {
 				// console.log(ige.count, ige.now - ige.lastSent)

@@ -101,7 +101,12 @@ var Unit = IgeEntityPhysics.extend({
 			self._stats.minimapUnitVisibleToClients = {};
 
 			self.mount(ige.$('baseScene'));
-			self.streamMode(1);
+
+			if (ige.network.isPaused) {
+				this.streamMode(0);
+			} else {
+				this.streamMode(1);				
+			}
 
 			ige.server.totalUnitsCreated++;
 			self.addComponent(AIComponent);

@@ -83,15 +83,18 @@ var Projectile = IgeEntityPhysics.extend({
 			!sourceItem || // projectile does not have source item (created via script) OR
 			(sourceItem && sourceItem._stats.projectileStreamMode) // item is set to stream its projectiles from server
 		) {
-			this.streamMode(1);
+			if (ige.isServer && ige.network.isPaused) {
+				this.streamMode(0);
+			} else {
+				this.streamMode(1);				
+			}
 		} else {
 			this.streamMode(0);
 		}
-
+		
 		if (ige.isServer) {
 			ige.server.totalProjectilesCreated++;
 		} else if (ige.isClient) {
-
 			if (currentState) {
 				var defaultAnimation = this._stats.animations[currentState.animation];
 				this.addToRenderer(defaultAnimation && defaultAnimation.frames[0] - 1, data.defaultData);

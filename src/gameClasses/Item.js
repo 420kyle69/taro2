@@ -71,8 +71,14 @@ var Item = IgeEntityPhysics.extend({
 
 		self.scaleRatio = ige.physics && ige.physics.scaleRatio();
 		if (ige.isServer) {
-			this.streamMode(1);
-			self.streamCreate();
+
+			if (ige.isServer && ige.network.isPaused) {
+				self.streamMode(0);
+			} else {
+				self.streamMode(1);				
+				self.streamCreate();			
+			}
+
 			ige.server.totalItemsCreated++;
 		} else if (ige.isClient) {
 			self._hidden = self._stats.isHidden;

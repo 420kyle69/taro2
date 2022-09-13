@@ -18,10 +18,16 @@ var ActionComponent = IgeEntity.extend({
 		for (var i = 0; i < actionList.length; i++) {
 			var action = actionList[i];
 
-			// if action is disabled
-			if (!action || action.disabled == true || 
-				(ige.isServer && action.runOnClient) || // don't run on server-side if runOnClient is enabled
-				(ige.isClient && !action.runOnClient) // don't run on client-side if runOnClient is diabled
+			// if CSP is enabled, then server will pause streaming
+			// the server side is still running (e.g. creating entities), but it won't be streamed to the client			
+			if (ige.isServer) {
+				if (action.runOnClient) {
+					ige.network.pause();
+				}
+			}
+			
+			if (!action || action.disabled == true || // if action is disabled or
+				(ige.isClient && !action.runOnClient) // CSP isn't enabled, don't run on client side
 			) {
 				continue;
 			}
