@@ -430,7 +430,7 @@ var ActionComponent = IgeEntity.extend({
 								}
 							}
 						} else {
-							if (!player.persistentDataLoaded) {
+							if (player && !player.persistentDataLoaded) {
 								ige.devLog('Fail saving unit data bcz persisted data not set correctly');
 							} else {
 								ige.devLog('Fail saving player data');
