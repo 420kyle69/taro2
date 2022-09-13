@@ -499,10 +499,10 @@ var IgeNetIoServer = {
 				// Store a rooms array for this client
 				this._clientRooms[socket.id] = this._clientRooms[socket.id] || [];
 				
-				if (self._socketById[socket.id]._token && (self._socketById[socket.id]._token.userId || self._socketById[socket.id]._token.guestId)) {
+				if (self._socketById[socket.id]._token && self._socketById[socket.id]._token.distinctId) {
 					// Mixpanel Event to Track user game successfully started.
 					global.mixpanel.track('User Connected to Game Server', {
-						'distinct_id': self._socketById[socket.id]._token.userId ? self._socketById[socket.id]._token.userId : self._socketById[socket.id]._token.guestId,
+						'distinct_id': self._socketById[socket.id]._token.distinctId,
 						'$ip': socket._remoteAddress,
 						'gameSlug': ige.game && ige.game.data && ige.game.data.defaultData && ige.game.data.defaultData.gameSlug,
 					});
@@ -533,10 +533,10 @@ var IgeNetIoServer = {
 							ige.server.socketConnectionCount.immediatelyDisconnected++;
 						}
 						
-						if (self._socketById[socket.id]._token && (self._socketById[socket.id]._token.userId || self._socketById[socket.id]._token.guestId)) {
+						if (self._socketById[socket.id]._token && self._socketById[socket.id]._token.distinctId) {
 							/** additional part to send some info for marketing purposes */
 							global.mixpanel.track('Game Session Duration', {
-								'distinct_id': self._socketById[socket.id]._token.userId || self._socketById[socket.id]._token.guestId,
+								'distinct_id': self._socketById[socket.id]._token.distinctId,
 								'$ip': socket._remoteAddress,
 								'gameSlug': ige.game && ige.game.data && ige.game.data.defaultData && ige.game.data.defaultData.gameSlug,
 								'playTime': end - self._socketById[socket.id].start,

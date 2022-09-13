@@ -101,9 +101,9 @@ NetIo.Client = NetIo.EventingClass.extend({
 				url = url.replace('http://', 'ws://');
 		}
 		*/
-
+		
 		// Create new websocket to the url
-		this._socket = new WebSocket(`${url}?token=${gsAuthToken}&sid=${ige.client.server.id}`, 'netio1');
+		this._socket = new WebSocket(`${url}?token=${gsAuthToken}&sid=${ige.client.server.id}&distinctId=${distinctId}`, 'netio1');
 
 		// Setup event listeners
 		this._socket.onopen = function () { self._onOpen.apply(self, arguments); };
