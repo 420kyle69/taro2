@@ -6,6 +6,7 @@ var Projectile = IgeEntityPhysics.extend({
 		this.id(entityIdFromServer);
 		var self = this;
 		self.category('projectile');
+
 		var projectileData = {};
 		if (ige.isClient) {
 			projectileData = ige.game.getAsset('projectileTypes', data.type);
@@ -61,6 +62,10 @@ var Projectile = IgeEntityPhysics.extend({
 		}
 
 		self.addComponent(AttributeComponent); // every projectile gets one
+		
+		self.addComponent(ScriptComponent); // entity-scripting		
+		self.script.load(data.scripts)
+
 		// convert number variables into Int
 		self.parseEntityObject(self._stats);
 
@@ -78,15 +83,18 @@ var Projectile = IgeEntityPhysics.extend({
 			!sourceItem || // projectile does not have source item (created via script) OR
 			(sourceItem && sourceItem._stats.projectileStreamMode) // item is set to stream its projectiles from server
 		) {
-			this.streamMode(1);
+			if (ige.isServer && ige.network.isPaused) {
+				this.streamMode(0);
+			} else {
+				this.streamMode(1);				
+			}
 		} else {
 			this.streamMode(0);
 		}
-
+		
 		if (ige.isServer) {
 			ige.server.totalProjectilesCreated++;
 		} else if (ige.isClient) {
-
 			if (currentState) {
 				var defaultAnimation = this._stats.animations[currentState.animation];
 				this.addToRenderer(defaultAnimation && defaultAnimation.frames[0] - 1, data.defaultData);
@@ -107,6 +115,12 @@ var Projectile = IgeEntityPhysics.extend({
 	},
 
 	_behaviour: function (ctx) {
+		var self = this;
+		_.forEach(ige.triggersQueued, function (trigger) {
+			trigger.params['thisEntityId'] = self.id();
+			self.script.trigger(trigger.name, trigger.params);
+		});
+
 		// if entity (unit/item/player/projectile) has attribute, run regenerate
 		if (ige.isServer) {
 			if (this.attribute) {
@@ -160,6 +174,7 @@ var Projectile = IgeEntityPhysics.extend({
 
 		return self._stats && self._stats.sourceItemId && ige.$(self._stats.sourceItemId);
 	},
+
 	destroy: function () {
 		this.playEffect('destroy');
 		IgeEntityPhysics.prototype.destroy.call(this);

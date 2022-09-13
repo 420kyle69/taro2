@@ -2,9 +2,11 @@ var VariableComponent = IgeEntity.extend({
 	classId: 'VariableComponent',
 	componentId: 'variable',
 
-	init: function (entity, options) {
+	init: function (scriptComponent, entity) {
 		var self = this;
 
+		self._script = scriptComponent;
+		self._entity = entity;
 		self.devLogs = {};
 		self.secondCount = 0;
 		self.updateStatusSecond = 5;
@@ -387,6 +389,10 @@ var VariableComponent = IgeEntity.extend({
 					if (vars && vars.triggeredBy && vars.triggeredBy.attribute) {
 						return vars.triggeredBy.attribute;
 					}
+					break;
+
+				case 'thisEntity':
+					returnValue = self._entity;
 					break;
 
 				case 'getPlayerFromId':
@@ -1223,10 +1229,10 @@ var VariableComponent = IgeEntity.extend({
 					}
 					break;
 
-				case 'getItemName':
-					var item = self.getValue(text.item, vars);
-					if (item) {
-						returnValue = item._stats.name;
+				case 'entityName':
+					var entity = self.getValue(text.entity, vars);			
+					if (entity) {
+						returnValue = entity._stats.name;
 					}
           			break;
 

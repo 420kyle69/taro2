@@ -34,26 +34,24 @@ var GameComponent = IgeEntity.extend({
 					controlledBy: 'computer',
 					unitIds: [] // all units owned by player
 				});
-
-				// GameComponent.prototype.log("computerPlayer created " + this['computer' + i].id())
-				// if (global.isDev) {
-				// 	ige.trigger.fire("playerJoinsGame", { playerId: this['computer'+i].id() })
-				// }
 			}
-			ige.trigger.fire('gameStart');
 		} else if (ige.isClient) {
 			// determine which attribute will be used for scoreboard
 			var attr = 'points';
 			if (
 				ige.game.data.settings &&
-        ige.game.data.settings.constants &&
-        ige.game.data.settings.constants.currency != undefined
+				ige.game.data.settings.constants &&
+				ige.game.data.settings.constants.currency != undefined
 			) {
 				attr = ige.game.data.settings.constants.currency;
 			}
 			$('.game-currency').html(attr);
 		}
 
+		ige.addComponent(ScriptComponent);
+		ige.script.load(ige.game.data.scripts);			
+
+		ige.script.trigger('gameStart');
 		self.isGameStarted = true;
 		ige.timer.startGameClock();
 	},

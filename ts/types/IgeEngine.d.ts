@@ -43,6 +43,7 @@ declare class IgeEngine extends IgeClass {
 	lastTickTime: number;
 
 	entitiesToRender: EntitiesToRender;
+	triggersQueued: any[];
 
 	constructor(options: object);
 

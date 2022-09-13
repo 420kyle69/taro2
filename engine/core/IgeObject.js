@@ -1578,8 +1578,7 @@ var IgeObject = IgeEventingClass.extend({
 					}
 				} else {
 					while (arrCount--) {
-						if (arr[arrCount]) // added by Jaeyun, because something causes arr[arrCount] to be undefined
-							arr[arrCount].update(ctx, tickDelta);
+						arr[arrCount].update(ctx, tickDelta);
 					}
 				}
 			}

@@ -1811,7 +1811,7 @@ var IgeEntity = IgeObject.extend({
 				// Remove the stream data cache
 				delete this._streamDataCache;
 
-				if (!isForOrphans && ige.gameLoopTickHasExecuted) {
+				if (!isForOrphans) {
 					// Process any behaviours assigned to the entity
 					this._processUpdateBehaviours();
 				}
@@ -4203,7 +4203,10 @@ var IgeEntity = IgeObject.extend({
 									// in case of pure number ID
 									selectedItem = selectedItem.toString();
 									// tell client this item is selected
-									ige.$(selectedItem).setState('selected');
+									var item = ige.$(selectedItem);
+									if (item) {
+										item.setState('selected');
+									}
 								}
 							}
 							break;

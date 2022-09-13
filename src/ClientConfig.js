@@ -42,7 +42,6 @@ var igeClientConfig = {
 
 		'/gameClasses/components/script/ScriptComponent.js',
 		'/gameClasses/components/script/VariableComponent.js',
-		'/gameClasses/components/script/TriggerComponent.js',
 		'/gameClasses/components/script/ActionComponent.js',
 		'/gameClasses/components/script/ConditionComponent.js',
 		'/gameClasses/components/unit/AbilityComponent.js',

@@ -167,6 +167,7 @@ const Client = IgeEventingClass.extend({
 		promise.then((game) => {
 			ige.game.data = game.data;
 			ige.addComponent(IgeInputComponent);
+			
 			ige.entitiesToRender = new EntitiesToRender();
 			ige.renderer = new PhaserRenderer();
 
@@ -342,8 +343,6 @@ const Client = IgeEventingClass.extend({
 			}
 
 			// don't really know if this needs to be inside this
-			ige.addComponent(VariableComponent);
-
 			if(gameData.isDeveloper) {
 
 				ige.addComponent(DevConsoleComponent);
@@ -747,15 +746,8 @@ const Client = IgeEventingClass.extend({
 		ige.physics.createWorld();
 		ige.physics.start();
 
-		ige.addComponent(TriggerComponent);
-		// ige.addComponent(VariableComponent); // this appears twice
-		ige.addComponent(ScriptComponent);
-		ige.addComponent(ConditionComponent);
-		ige.addComponent(ActionComponent);
-
 		if (typeof mode == 'string' && mode == 'sandbox') {
-
-			ige.script.runScript('initialize', {}); // why are we doing this?
+			ige.script.runScript('initialize', {}); // loading entities to display in the sandbox
 		}
 	},
 

@@ -71,7 +71,7 @@ var Player = IgeEntity.extend({
 			
 			if (self._stats.controlledBy == 'human' && ige.script) // do not send trigger for neutral player
 			{
-				ige.trigger.fire('playerJoinsGame', { playerId: self.id() });
+				ige.script.trigger('playerJoinsGame', { playerId: self.id() });
 			}
 
 			var clientId = self._stats.clientId;
@@ -112,6 +112,8 @@ var Player = IgeEntity.extend({
 
 			var unit = new Unit(data);
 			unit.setOwnerPlayer(self.id());
+
+			unit.script.trigger("entityCreated");
 
 			// setOwner will add unitId to unitIds
 			// self._stats.unitIds.push(unit.id())
@@ -342,7 +344,7 @@ var Player = IgeEntity.extend({
 	remove: function () {
 		if (this._stats.controlledBy == 'human' && ige.script) // do not send trigger for neutral player
 		{
-			ige.trigger.fire('playerLeavesGame', { playerId: this.id() });
+			ige.script.trigger('playerLeavesGame', { playerId: this.id() });
 		}
 
 		// session is in second

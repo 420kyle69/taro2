@@ -30,7 +30,7 @@ var Unit = IgeEntityPhysics.extend({
 			data.equipmentAllowed = 9;
 		}
 		unitData = ige.game.getAsset('unitTypes', data.type);
-
+		
 		if (ige.isClient) {
 			unitData = _.pick(unitData, ige.client.keysToAddBeforeRender);
 		}
@@ -57,7 +57,10 @@ var Unit = IgeEntityPhysics.extend({
 		self.parseEntityObject(self._stats);
 		self.addComponent(InventoryComponent)
 			.addComponent(AbilityComponent)
-			.addComponent(AttributeComponent); // every units gets one
+			.addComponent(AttributeComponent) // every units gets one
+			
+		self.addComponent(ScriptComponent); // entity-requireScriptLoading
+		self.script.load(data.scripts)
 
 		Unit.prototype.log(`initializing new unit ${this.id()}`);
 
@@ -98,7 +101,12 @@ var Unit = IgeEntityPhysics.extend({
 			self._stats.minimapUnitVisibleToClients = {};
 
 			self.mount(ige.$('baseScene'));
-			self.streamMode(1);
+
+			if (ige.network.isPaused) {
+				this.streamMode(0);
+			} else {
+				this.streamMode(1);				
+			}
 
 			ige.server.totalUnitsCreated++;
 			self.addComponent(AIComponent);
@@ -607,7 +615,7 @@ var Unit = IgeEntityPhysics.extend({
 						// }])
 
 						ige.game.lastPurchasedUniTypetId = unitData.unitTypeId;
-						ige.trigger && ige.trigger.fire('playerPurchasesUnit', {
+						ige.script.trigger('playerPurchasesUnit', {
 							unitId: self.id(),
 							playerId: ownerPlayer.id()
 						});
@@ -659,7 +667,7 @@ var Unit = IgeEntityPhysics.extend({
 				itemId: newItem.id(),
 				unitId: this.id()
 			};
-			ige.trigger && ige.trigger.fire('unitSelectsItem', triggeredBy);
+			ige.queueTrigger('unitSelectsItem', triggeredBy);
 
 			// whip-out the new item using tween
 			if (ige.isClient) {
@@ -964,6 +972,7 @@ var Unit = IgeEntityPhysics.extend({
 			if (itemData.isUsedOnPickup && self.canUseItem(itemData)) {
 				if (!isItemInstance) {
 					item = new Item(itemData);
+					item.script.trigger("entityCreated");
 				}
 				ige.devLog('using item immediately');
 				item.setOwnerUnit(self);
@@ -1025,6 +1034,8 @@ var Unit = IgeEntityPhysics.extend({
 					if (!isItemInstance) {
 						// itemData.stateId = (availableSlot-1 == this._stats.currentItemIndex) ? 'selected' : 'unselected';
 						item = new Item(itemData);
+						ige.game.lastCreatedItemId = item._id;
+						item.script.trigger("entityCreated");
 					}
 					self.inventory.insertItem(item, availableSlot - 1);
 					self.streamUpdateData([{ itemIds: self._stats.itemIds }]);
@@ -1240,7 +1251,7 @@ var Unit = IgeEntityPhysics.extend({
 
 				self.detachEntity(item.id());
 
-				ige.trigger && ige.trigger.fire('unitDroppedAnItem', {
+				ige.queueTrigger('unitDroppedAnItem', {
 					itemId: item.id(),
 					unitId: self.id()
 				});
@@ -1281,7 +1292,6 @@ var Unit = IgeEntityPhysics.extend({
 			}
 
 			if (isVulnerable) {
-				// console.log("inflicting damage!", damage)
 				ige.game.lastAttackingUnitId = damageData.sourceUnitId;
 				ige.game.lastAttackedUnitId = this.id();
 				ige.game.lastAttackingItemId = damageData.sourceItemId;
@@ -1296,7 +1306,9 @@ var Unit = IgeEntityPhysics.extend({
 					unitId: ige.game.lastAttackingUnitId,
 					itemId: ige.game.lastAttackingItemId
 				};
-				ige.trigger && ige.trigger.fire('unitAttacksUnit', triggeredBy);
+
+				ige.script.trigger('unitAttacksUnit', triggeredBy);
+				this.script.trigger('unitAttacksUnit', triggeredBy);
 
 				var armor = this._stats.attributes.armor && this._stats.attributes.armor.value || 0;
 				var damageReduction = (0.05 * armor) / (1.5 + 0.04 * armor);
@@ -1652,6 +1664,11 @@ var Unit = IgeEntityPhysics.extend({
 	 */
 	_behaviour: function (ctx) {
 		var self = this;
+		
+		_.forEach(ige.triggersQueued, function (trigger) {
+			trigger.params['thisEntityId'] = self.id();
+			self.script.trigger(trigger.name, trigger.params);
+		});
 
 		if (ige.isServer || (ige.isClient && ige.client.selectedUnit == this)) {
 			var ownerPlayer = ige.$(this._stats.ownerId);
