@@ -56,7 +56,7 @@ var IgeNetIoServer = {
 			for (ip in self.uploadPerSecond) {
 				let ups = self.uploadPerSecond[ip];
 				
-				if (ups > 4500) {
+				if (ups > 6000) {
 					var player = ige.game.getPlayerByIp(ip);
 					var socket = self._socketByIp[ip]
 					
