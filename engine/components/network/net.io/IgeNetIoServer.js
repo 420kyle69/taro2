@@ -63,9 +63,9 @@ var IgeNetIoServer = {
 					ige.server.bannedIps.push(remoteAddress);
 					socket.close();
 					
-					global.rollbar.log(`user banned for command spamming : ${player._stats.name} ${remoteAddress} ${ige.game.data.defaultData.title})`, {
+					global.rollbar.log(`user banned for sending more than 200 commands per second: ${player._stats.name} ${remoteAddress} ${ige.game.data.defaultData.title})`, {
 						masterServer: global.myIp,
-						query: 'tooManySaveRequests'
+						query: 'banUser'
 					});
 					
 					console.log("banning user", player._stats.name, "(ip: ", remoteAddress,"for spamming network commands (over 200 sends per second)")
