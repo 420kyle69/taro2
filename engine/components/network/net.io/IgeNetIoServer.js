@@ -77,7 +77,7 @@ var IgeNetIoServer = {
 					console.log("banning user", playerName, "(ip: ", ip,"for spamming network commands (sending ", ups, " bytes per second)")
 				}
 				
-				console.log(self.uploadPerSecond[ip]);
+				// console.log(self.uploadPerSecond[ip]);
 				self.uploadPerSecond[ip] = 0;
 			}			
 		}, 1000)
