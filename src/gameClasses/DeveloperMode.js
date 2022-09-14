@@ -5,12 +5,12 @@ var DeveloperMode = /** @class */ (function () {
     DeveloperMode.prototype.enter = function () {
         console.log('enter developer mode');
         this.active = true;
-        //ige.renderer.scene.scenes[0].marker.setVisible(true);
+        ige.client.emit('enterDevMode');
     };
     DeveloperMode.prototype.leave = function () {
         console.log('leave developer mode');
         this.active = false;
-        //ige.renderer.scene.scenes[0].marker.setVisible(false);
+        ige.client.emit('leaveDevMode');
     };
     return DeveloperMode;
 }());

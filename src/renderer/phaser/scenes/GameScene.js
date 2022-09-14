@@ -23,6 +23,7 @@ var GameScene = /** @class */ (function (_super) {
     }
     GameScene.prototype.init = function () {
         var _this = this;
+        //this.scene.launch('Palette', this.tileset);
         if (ige.isMobile) {
             this.scene.launch('MobileControls');
         }
@@ -58,6 +59,30 @@ var GameScene = /** @class */ (function (_super) {
             x -= camera.width / 2;
             y -= camera.height / 2;
             camera.setScroll(x, y);
+        });
+        ige.client.on('enterDevMode', function () {
+            if (_this.devPalette) {
+                _this.devPalette.setVisible(true);
+                _this.devPalette.texturesLayer.setVisible(true);
+            }
+            else {
+                _this.devPalette = new PhaserPalette(_this, _this.tileset);
+                var map = _this.devPalette.map;
+                _this.selectedTile = map.getTileAt(2, 3);
+                _this.marker2 = _this.add.graphics();
+                _this.marker2.lineStyle(2, 0x000000, 1);
+                _this.marker2.strokeRect(0, 0, map.tileWidth, map.tileHeight);
+                _this.marker2.setVisible(false);
+            }
+        });
+        ige.client.on('leaveDevMode', function () {
+            _this.devPalette.setVisible(false);
+            _this.devPalette.texturesLayer.setVisible(false);
+        });
+        this.input.on('wheel', function (pointer, gameObjects, deltaX, deltaY, deltaZ) {
+            if (_this.devPalette && _this.devPalette.visible) {
+                _this.devPalette.scroll(deltaY);
+            }
         });
     };
     GameScene.prototype.preload = function () {
@@ -140,10 +165,11 @@ var GameScene = /** @class */ (function (_super) {
             var key = "tiles/".concat(tileset.name);
             var extrudedKey = "extruded-".concat(key);
             if (_this.textures.exists(extrudedKey)) {
-                map.addTilesetImage(tileset.name, extrudedKey, tileset.tilewidth, tileset.tileheight, (tileset.margin || 0) + 1, (tileset.spacing || 0) + 2);
+                console.log(tileset.name, key, tileset.tilewidth, tileset.tileheight, (tileset.margin || 0) + 1, (tileset.spacing || 0) + 2);
+                _this.tileset = map.addTilesetImage(tileset.name, extrudedKey, tileset.tilewidth, tileset.tileheight, (tileset.margin || 0) + 1, (tileset.spacing || 0) + 2);
             }
             else {
-                map.addTilesetImage(tileset.name, key);
+                _this.tileset = map.addTilesetImage(tileset.name, key);
             }
         });
         var entityLayers = this.entityLayers;
@@ -290,6 +316,24 @@ var GameScene = /** @class */ (function (_super) {
             }
             if (this.input.manager.activePointer.isDown) {
                 this.tilemap.putTileAt(this.selectedTile, pointerTileX, pointerTileY);
+            }
+            this.marker2.clear();
+            this.marker2.strokeRect(0, 0, this.devPalette.map.tileWidth * this.devPalette.texturesLayer.scaleX, this.devPalette.map.tileHeight * this.devPalette.texturesLayer.scaleY);
+            this.marker2.setVisible(true);
+            // Rounds down to nearest tile
+            var pointerTileX2 = this.devPalette.map.worldToTileX(worldPoint.x);
+            var pointerTileY2 = this.devPalette.map.worldToTileY(worldPoint.y);
+            if (0 <= pointerTileX2 && pointerTileX2 < 27 && 0 <= pointerTileY2 && pointerTileY2 < 20) {
+                this.marker.setVisible(false);
+                // Snap to tile coordinates, but in world space
+                this.marker2.x = this.devPalette.map.tileToWorldX(pointerTileX2);
+                this.marker2.y = this.devPalette.map.tileToWorldY(pointerTileY2);
+                if (this.input.manager.activePointer.rightButtonDown()) {
+                    this.selectedTile = this.devPalette.map.getTileAt(pointerTileX2, pointerTileY2);
+                }
+            }
+            else {
+                this.marker2.setVisible(false);
             }
         }
         else

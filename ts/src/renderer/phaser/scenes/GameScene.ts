@@ -8,6 +8,9 @@ class GameScene extends PhaserScene {
 	private tilemap: Phaser.Tilemaps.Tilemap;
 	selectedTile: Phaser.Tilemaps.Tile;
 	marker: Phaser.GameObjects.Graphics;
+	devPalette: PhaserPalette;
+	tileset: Phaser.Tilemaps.Tileset;
+	marker2: Phaser.GameObjects.Graphics;
 
 	constructor() {
 		super({ key: 'Game' });
@@ -15,6 +18,7 @@ class GameScene extends PhaserScene {
 
 	init (): void {
 
+		//this.scene.launch('Palette', this.tileset);
 		if (ige.isMobile) {
 			this.scene.launch('MobileControls');
 		}
@@ -71,6 +75,32 @@ class GameScene extends PhaserScene {
 			x -= camera.width / 2;
 			y -= camera.height / 2;
 			camera.setScroll(x, y);
+		});
+
+		ige.client.on('enterDevMode', () => {
+			if (this.devPalette) {
+				this.devPalette.setVisible(true);
+				this.devPalette.texturesLayer.setVisible(true);
+			} else {
+				this.devPalette = new PhaserPalette(this, this.tileset);
+				const map = this.devPalette.map;
+				this.selectedTile = map.getTileAt(2, 3);
+		 		this.marker2 = this.add.graphics();
+				this.marker2.lineStyle(2, 0x000000, 1);
+				this.marker2.strokeRect(0, 0, map.tileWidth, map.tileHeight);
+				this.marker2.setVisible(false);
+			}
+		});
+
+		ige.client.on('leaveDevMode', () => {
+			this.devPalette.setVisible(false);
+			this.devPalette.texturesLayer.setVisible(false);
+		});
+
+		this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
+			if (this.devPalette && this.devPalette.visible) {
+				this.devPalette.scroll(deltaY);
+			}
 		});
 	}
 
@@ -183,13 +213,17 @@ class GameScene extends PhaserScene {
 			const key = `tiles/${tileset.name}`;
 			const extrudedKey = `extruded-${key}`;
 			if (this.textures.exists(extrudedKey)) {
-				map.addTilesetImage(tileset.name, extrudedKey,
+				console.log(tileset.name, key,
+					tileset.tilewidth, tileset.tileheight,
+					(tileset.margin || 0) + 1,
+					(tileset.spacing || 0) + 2);
+				this.tileset = map.addTilesetImage(tileset.name, extrudedKey,
 					tileset.tilewidth, tileset.tileheight,
 					(tileset.margin || 0) + 1,
 					(tileset.spacing || 0) + 2
 				);
 			} else {
-				map.addTilesetImage(tileset.name, key);
+				this.tileset = map.addTilesetImage(tileset.name, key);
 			}
 		});
 
@@ -437,10 +471,11 @@ class GameScene extends PhaserScene {
 		});
 
 		if(ige.developerMode.active) {
+
 			this.marker.setVisible(true);
 			// Rounds down to nearest tile
-			var pointerTileX = this.tilemap.worldToTileX(worldPoint.x);
-			var pointerTileY = this.tilemap.worldToTileY(worldPoint.y);
+			const pointerTileX = this.tilemap.worldToTileX(worldPoint.x);
+			const pointerTileY = this.tilemap.worldToTileY(worldPoint.y);
 
 			// Snap to tile coordinates, but in world space
 			this.marker.x = this.tilemap.tileToWorldX(pointerTileX);
@@ -453,6 +488,28 @@ class GameScene extends PhaserScene {
 			if (this.input.manager.activePointer.isDown) {
 				this.tilemap.putTileAt(this.selectedTile, pointerTileX, pointerTileY);
 			}
+
+			this.marker2.clear();
+			this.marker2.strokeRect(0, 0, this.devPalette.map.tileWidth * this.devPalette.texturesLayer.scaleX, this.devPalette.map.tileHeight * this.devPalette.texturesLayer.scaleY);
+			this.marker2.setVisible(true);
+			// Rounds down to nearest tile
+			const pointerTileX2 = this.devPalette.map.worldToTileX(worldPoint.x);
+			const pointerTileY2 = this.devPalette.map.worldToTileY(worldPoint.y);
+
+			if (0 <= pointerTileX2 && pointerTileX2 < 27 && 0 <= pointerTileY2 && pointerTileY2 < 20) {
+				this.marker.setVisible(false);
+				// Snap to tile coordinates, but in world space
+				this.marker2.x = this.devPalette.map.tileToWorldX(pointerTileX2);
+				this.marker2.y = this.devPalette.map.tileToWorldY(pointerTileY2);
+
+				if (this.input.manager.activePointer.rightButtonDown()) {
+					this.selectedTile = this.devPalette.map.getTileAt(pointerTileX2, pointerTileY2);
+				}
+			} else {
+				this.marker2.setVisible(false);
+			}
+
+
 		}
 
 		else this.marker.setVisible(false);

@@ -25,6 +25,7 @@ class PhaserRenderer extends Phaser.Game {
 			},
 			scene: [
 				GameScene,
+				PaletteScene,
 				MobileControlsScene
 			],
 			loader: {
