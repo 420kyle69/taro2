@@ -17,6 +17,7 @@ var IgeNetIoServer = {
 		this._socketById = {};
 		this._socketsByRoomId = {};
 		this.clientIds = [];
+		this.messagesPerSecond = [];
 		this.snapshot = [];
 		this.sendQueue = {};
 		if (typeof data !== 'undefined') {
@@ -49,6 +50,31 @@ var IgeNetIoServer = {
 
 		// Start network sync
 		// this.timeSyncStart();
+
+		var mpsDetector = setInterval(function() {
+			for (clientId in self.messagesPerSecond) {
+				let mps = self.messagesPerSecond[clientId];
+				
+				if (mps > 200) {
+					var socket = self._socketById[clientId];
+					var remoteAddress = socket._remoteAddress;
+					var player = ige.game.getPlayerByClientId(clientId)
+			
+					ige.server.bannedIps.push(remoteAddress);
+					socket.close();
+					
+					global.rollbar.log(`user banned for command spamming : ${player._stats.name} ${remoteAddress} ${ige.game.data.defaultData.title})`, {
+						masterServer: global.myIp,
+						query: 'tooManySaveRequests'
+					});
+					
+					console.log("banning user", player._stats.name, "(ip: ", remoteAddress,"for spamming network commands (over 200 sends per second)")
+				}
+				
+				// console.log(self.messagesPerSecond[clientId]);
+				self.messagesPerSecond[clientId] = 0;
+			}			
+		}, 1000)
 
 		return this._entity;
 	},
@@ -459,8 +485,8 @@ var IgeNetIoServer = {
 		var bannedIps = ige.server.bannedIps;
 		// ip is banned
 		var playerIsBanned = false;
-		for (index in bannedIps) {
-			if (bannedIps[remoteAddress] != undefined) {
+		for (i in bannedIps) {
+			if (bannedIps[i] == remoteAddress) {
 				console.log(`banned player detected! IP ${remoteAddress}`);
 				playerIsBanned = true;
 				reason += ' player is banned.';
@@ -492,6 +518,8 @@ var IgeNetIoServer = {
 						remoteAddress}`
 				);
 				this._socketById[socket.id] = socket;
+				self.messagesPerSecond[socket.id] = 0;
+
 				this.clientIds.push(socket.id);
 				self._socketById[socket.id].start = Date.now();
 				ige.server.socketConnectionCount.connected++;
@@ -519,6 +547,8 @@ var IgeNetIoServer = {
 						return;
 					}
 
+					self.messagesPerSecond[socket.id]++;
+					
 					self._onClientMessage.apply(self, [data, socket.id]);
 				});
 
@@ -622,7 +652,7 @@ var IgeNetIoServer = {
 		req = this._requests[id];
 
 		if (this.debug()) {
-			console.log('onResponse', data);
+			// console.log('onResponse', data);
 			this._debugCounter++;
 		}
 
@@ -651,6 +681,7 @@ var IgeNetIoServer = {
 		this.clientLeaveAllRooms(socket.id);
 
 		delete ige.server.clients[socket.id];
+		delete this.messagesPerSecond[clientId]
 		delete this._socketById[socket.id];
 		let indexToRemove = this.clientIds.findIndex(function (id) {
 			if (id === socket.id) return true;
