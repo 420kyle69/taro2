@@ -1313,6 +1313,8 @@ var Unit = IgeEntityPhysics.extend({
 				var armor = this._stats.attributes.armor && this._stats.attributes.armor.value || 0;
 				var damageReduction = (0.05 * armor) / (1.5 + 0.04 * armor);
 				var ownerUnitBaseDamage = (sourceUnit != undefined) ? sourceUnit.getBaseDamage() : 0;
+
+				// update target unit's attributes (e.g. lower the target unit's hp)
 				if (damageData.unitAttributes) {
 					_.forEach(damageData.unitAttributes, function (damageValue, damageAttrKey) {
 						var attribute = self._stats.attributes[damageAttrKey];
@@ -1327,6 +1329,7 @@ var Unit = IgeEntityPhysics.extend({
 					});
 				}
 
+				// update target unit's owner's attributes (e.g. lower the owner player's score)
 				if (damageData.playerAttributes && targetPlayer && targetPlayer._stats.attributes) {
 					_.forEach(damageData.playerAttributes, function (damageValue, damageAttrKey) {
 						var attribute = targetPlayer._stats.attributes[damageAttrKey];
