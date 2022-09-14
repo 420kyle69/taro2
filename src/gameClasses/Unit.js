@@ -1274,7 +1274,7 @@ var Unit = IgeEntityPhysics.extend({
 			var targetPlayer = this.getOwner();
 			var sourcePlayer = ige.$(damageData.sourcePlayerId);
 			var sourceUnit = ige.$(damageData.sourceUnitId);
-			var isVulnerable = false;
+			var inflictDamage = false;
 
 			var targetsAffected = damageData.targetsAffected;
 			if (
@@ -1288,10 +1288,10 @@ var Unit = IgeEntityPhysics.extend({
 					(targetsAffected.includes('neutral') && sourcePlayer.isNeutralTo(targetPlayer))
 				)
 			) {
-				isVulnerable = true;
+				inflictDamage = true;
 			}
 
-			if (isVulnerable) {
+			if (inflictDamage) {
 				ige.game.lastAttackingUnitId = damageData.sourceUnitId;
 				ige.game.lastAttackedUnitId = this.id();
 				ige.game.lastAttackingItemId = damageData.sourceItemId;
