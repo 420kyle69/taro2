@@ -56,7 +56,7 @@ var IgeNetIoServer = {
 			for (ip in self.uploadPerSecond) {
 				let ups = self.uploadPerSecond[ip];
 				
-				if (ups > 600) {
+				if (ups > 4500) {
 					var player = ige.game.getPlayerByIp(ip);
 					var socket = self._socketByIp[ip]
 					
@@ -77,7 +77,7 @@ var IgeNetIoServer = {
 					console.log("banning user", playerName, "(ip: ", ip,"for spamming network commands (sending ", ups, " bytes per second)")
 				}
 				
-				// console.log(self.uploadPerSecond[ip]);
+				console.log(self.uploadPerSecond[ip]);
 				self.uploadPerSecond[ip] = 0;
 			}			
 		}, 1000)
@@ -529,7 +529,7 @@ var IgeNetIoServer = {
 				if (self.uploadPerSecond[socket._remoteAddress] == undefined)
 					self.uploadPerSecond[socket._remoteAddress] = 0;
 				else 
-					self.uploadPerSecond[socket._remoteAddress] += 100;
+					self.uploadPerSecond[socket._remoteAddress] += 1500;
 
 				this.clientIds.push(socket.id);
 				self._socketById[socket.id].start = Date.now();
@@ -559,8 +559,7 @@ var IgeNetIoServer = {
 						return;
 					}
 
-					self.uploadPerSecond[socket._remoteAddress] += data.length;
-					
+					self.uploadPerSecond[socket._remoteAddress] += JSON.stringify(data).length;					
 					self._onClientMessage.apply(self, [data, socket.id]);
 				});
 
