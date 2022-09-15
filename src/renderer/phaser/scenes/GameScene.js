@@ -306,19 +306,6 @@ var GameScene = /** @class */ (function (_super) {
                 element.setActive(true).setVisible(true);
         });
         if (ige.developerMode.active) {
-            this.marker.setVisible(true);
-            // Rounds down to nearest tile
-            var pointerTileX = this.tilemap.worldToTileX(worldPoint.x);
-            var pointerTileY = this.tilemap.worldToTileY(worldPoint.y);
-            // Snap to tile coordinates, but in world space
-            this.marker.x = this.tilemap.tileToWorldX(pointerTileX);
-            this.marker.y = this.tilemap.tileToWorldY(pointerTileY);
-            if (this.input.manager.activePointer.rightButtonDown()) {
-                this.selectedTile = this.tilemap.getTileAt(pointerTileX, pointerTileY);
-            }
-            if (this.input.manager.activePointer.isDown) {
-                this.tilemap.putTileAt(this.selectedTile, pointerTileX, pointerTileY);
-            }
             var worldPoint2 = this.cameras.getCamera('palette').getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
             this.marker2.clear();
             this.marker2.strokeRect(0, 0, this.devPalette.map.tileWidth * this.devPalette.texturesLayer.scaleX, this.devPalette.map.tileHeight * this.devPalette.texturesLayer.scaleY);
@@ -337,6 +324,19 @@ var GameScene = /** @class */ (function (_super) {
             }
             else {
                 this.marker2.setVisible(false);
+                this.marker.setVisible(true);
+                // Rounds down to nearest tile
+                var pointerTileX = this.tilemap.worldToTileX(worldPoint.x);
+                var pointerTileY = this.tilemap.worldToTileY(worldPoint.y);
+                // Snap to tile coordinates, but in world space
+                this.marker.x = this.tilemap.tileToWorldX(pointerTileX);
+                this.marker.y = this.tilemap.tileToWorldY(pointerTileY);
+                if (this.input.manager.activePointer.rightButtonDown()) {
+                    this.selectedTile = this.tilemap.getTileAt(pointerTileX, pointerTileY);
+                }
+                if (this.input.manager.activePointer.isDown) {
+                    this.tilemap.putTileAt(this.selectedTile, pointerTileX, pointerTileY);
+                }
             }
         }
         else
