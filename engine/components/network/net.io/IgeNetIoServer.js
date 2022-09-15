@@ -19,6 +19,8 @@ var IgeNetIoServer = {
 		this._socketsByRoomId = {};
 		this.clientIds = [];
 		this.uploadPerSecond = [];
+		this.lastUploads = [];
+
 		this.snapshot = [];
 		this.sendQueue = {};
 		if (typeof data !== 'undefined') {
@@ -71,6 +73,7 @@ var IgeNetIoServer = {
 
 					global.rollbar.log(`user banned for sending ${ups} bytes per second: ${playerName} ${ip} ${ige.game.data.defaultData.title})`, {
 						masterServer: global.myIp,
+						data: self.lastUploads[ip],
 						query: 'banUser'
 					});
 					
@@ -79,6 +82,7 @@ var IgeNetIoServer = {
 				
 				// console.log(self.uploadPerSecond[ip]);
 				self.uploadPerSecond[ip] = 0;
+				self.lastUploads[ip] = [];
 			}			
 		}, 1000)
 
@@ -526,10 +530,12 @@ var IgeNetIoServer = {
 				this._socketById[socket.id] = socket;
 				this._socketByIp[socket._remoteAddress] = socket;
 				
-				if (self.uploadPerSecond[socket._remoteAddress] == undefined)
+				if (self.uploadPerSecond[socket._remoteAddress] == undefined) {
 					self.uploadPerSecond[socket._remoteAddress] = 0;
-				else 
-					self.uploadPerSecond[socket._remoteAddress] += 1500;
+					self.lastUploads[socket._remoteAddress] = [];
+				} else {
+					self.uploadPerSecond[socket._remoteAddress] += 1500; // add 1500 bytes as connection cost
+				}
 
 				this.clientIds.push(socket.id);
 				self._socketById[socket.id].start = Date.now();
@@ -559,7 +565,8 @@ var IgeNetIoServer = {
 						return;
 					}
 
-					self.uploadPerSecond[socket._remoteAddress] += JSON.stringify(data).length;					
+					self.uploadPerSecond[socket._remoteAddress] += JSON.stringify(data).length;
+					self.lastUploads[socket._remoteAddress].push(data);
 					self._onClientMessage.apply(self, [data, socket.id]);
 				});
 
@@ -693,6 +700,7 @@ var IgeNetIoServer = {
 
 		delete ige.server.clients[socket.id];
 		delete this.uploadPerSecond[socket._remoteAddress]
+		delete this.lastUploads[socket._remoteAddress]
 		delete this._socketById[socket.id];
 		delete this._socketByIp[socket._remoteAddress];
 
