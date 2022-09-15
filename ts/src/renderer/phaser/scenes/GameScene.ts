@@ -81,6 +81,7 @@ class GameScene extends PhaserScene {
 			if (this.devPalette) {
 				this.devPalette.setVisible(true);
 				this.devPalette.texturesLayer.setVisible(true);
+				this.devPalette.camera.setVisible(true);
 			} else {
 				this.devPalette = new PhaserPalette(this, this.tileset);
 				const map = this.devPalette.map;
@@ -95,6 +96,7 @@ class GameScene extends PhaserScene {
 		ige.client.on('leaveDevMode', () => {
 			this.devPalette.setVisible(false);
 			this.devPalette.texturesLayer.setVisible(false);
+			this.devPalette.camera.setVisible(false);
 		});
 
 		this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
@@ -489,12 +491,13 @@ class GameScene extends PhaserScene {
 				this.tilemap.putTileAt(this.selectedTile, pointerTileX, pointerTileY);
 			}
 
+			const worldPoint2 = this.cameras.getCamera('palette').getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
 			this.marker2.clear();
 			this.marker2.strokeRect(0, 0, this.devPalette.map.tileWidth * this.devPalette.texturesLayer.scaleX, this.devPalette.map.tileHeight * this.devPalette.texturesLayer.scaleY);
 			this.marker2.setVisible(true);
 			// Rounds down to nearest tile
-			const pointerTileX2 = this.devPalette.map.worldToTileX(worldPoint.x);
-			const pointerTileY2 = this.devPalette.map.worldToTileY(worldPoint.y);
+			const pointerTileX2 = this.devPalette.map.worldToTileX(worldPoint2.x);
+			const pointerTileY2 = this.devPalette.map.worldToTileY(worldPoint2.y);
 
 			if (0 <= pointerTileX2 && pointerTileX2 < 27 && 0 <= pointerTileY2 && pointerTileY2 < 20) {
 				this.marker.setVisible(false);

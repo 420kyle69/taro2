@@ -64,6 +64,7 @@ var GameScene = /** @class */ (function (_super) {
             if (_this.devPalette) {
                 _this.devPalette.setVisible(true);
                 _this.devPalette.texturesLayer.setVisible(true);
+                _this.devPalette.camera.setVisible(true);
             }
             else {
                 _this.devPalette = new PhaserPalette(_this, _this.tileset);
@@ -78,6 +79,7 @@ var GameScene = /** @class */ (function (_super) {
         ige.client.on('leaveDevMode', function () {
             _this.devPalette.setVisible(false);
             _this.devPalette.texturesLayer.setVisible(false);
+            _this.devPalette.camera.setVisible(false);
         });
         this.input.on('wheel', function (pointer, gameObjects, deltaX, deltaY, deltaZ) {
             if (_this.devPalette && _this.devPalette.visible) {
@@ -317,12 +319,13 @@ var GameScene = /** @class */ (function (_super) {
             if (this.input.manager.activePointer.isDown) {
                 this.tilemap.putTileAt(this.selectedTile, pointerTileX, pointerTileY);
             }
+            var worldPoint2 = this.cameras.getCamera('palette').getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
             this.marker2.clear();
             this.marker2.strokeRect(0, 0, this.devPalette.map.tileWidth * this.devPalette.texturesLayer.scaleX, this.devPalette.map.tileHeight * this.devPalette.texturesLayer.scaleY);
             this.marker2.setVisible(true);
             // Rounds down to nearest tile
-            var pointerTileX2 = this.devPalette.map.worldToTileX(worldPoint.x);
-            var pointerTileY2 = this.devPalette.map.worldToTileY(worldPoint.y);
+            var pointerTileX2 = this.devPalette.map.worldToTileX(worldPoint2.x);
+            var pointerTileY2 = this.devPalette.map.worldToTileY(worldPoint2.y);
             if (0 <= pointerTileX2 && pointerTileX2 < 27 && 0 <= pointerTileY2 && pointerTileY2 < 20) {
                 this.marker.setVisible(false);
                 // Snap to tile coordinates, but in world space
