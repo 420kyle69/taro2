@@ -256,7 +256,7 @@ var Unit = IgeEntityPhysics.extend({
 			var shouldRender = self.shouldRenderAttribute(attr);
 
 			if (unitBar) {
-				// canvas
+
 				if (shouldRender) {
 					unitBar.updateBar(attr);
 				} else {
@@ -267,7 +267,7 @@ var Unit = IgeEntityPhysics.extend({
 					unitBar.destroy();
 				}
 			} else {
-				// html
+
 				if (shouldRender) {
 					attr.index = self.attributeBars.length + 1;
 

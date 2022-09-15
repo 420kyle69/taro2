@@ -65,9 +65,17 @@ var UnitAttributeBar = IgeEntity.extend({
 	 */
 	updateBar: function (attributeData) {
 		var self = this;
+		// pick out all the variables that we want to use
+		const { value, max, decimalPlaces } = attributeData;
 		var progressValueInPercent = (attributeData.value / attributeData.max) * 100;
 
-		var newValue = attributeData.value.toFixed ? attributeData.value.toFixed(0) : 0;
+		// not sure we even want to do rounding here
+		// let newValue = decimalPlaces ?
+		// 	value.toPrecision(decimalPlaces) :
+		// 	value.toPrecision(0);
+
+		newValue = value;
+		console.log(newValue, attributeData);
 
 		if (self.lastValue.value && self.lastValue.value === newValue) {
 			return;
@@ -78,7 +86,7 @@ var UnitAttributeBar = IgeEntity.extend({
 
 		self.lastValue = {
 			value: newValue,
-			max: attributeData.max,
+			max: max,
 			progressValueInPercent: progressValueInPercent
 		};
 	},

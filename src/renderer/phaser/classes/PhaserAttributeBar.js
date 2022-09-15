@@ -54,6 +54,7 @@ var PhaserAttributeBar = /** @class */ (function (_super) {
         bar.setActive(false);
     };
     PhaserAttributeBar.prototype.render = function (data) {
+        var color = data.color, value = data.value, max = data.max, displayValue = data.displayValue, index = data.index, showWhen = data.showWhen, decimalPlaces = data.decimalPlaces;
         this.name = data.type || data.key;
         var bar = this.bar;
         var w = 94;
@@ -61,21 +62,23 @@ var PhaserAttributeBar = /** @class */ (function (_super) {
         var borderRadius = h / 2 - 1;
         bar.clear();
         bar.fillStyle(Phaser.Display.Color
-            .HexStringToColor(data.color)
+            .HexStringToColor(color)
             .color);
-        if (data.value !== 0) {
-            bar.fillRoundedRect(-w / 2, -h / 2, Math.max(w * data.value / data.max, borderRadius * 1.5), h, borderRadius);
+        if (value !== 0) {
+            bar.fillRoundedRect(-w / 2, -h / 2, Math.max(w * value / max, borderRadius * 1.5), h, borderRadius);
         }
         bar.lineStyle(2, 0x000000, 1);
         bar.strokeRoundedRect(-w / 2, -h / 2, w, h, borderRadius);
-        this.text.setText(data.displayValue ?
-            (typeof data.value === 'number' ?
-                data.value.toFixed(0) : '0') : '');
-        this.y = (data.index - 1) * h * 1.1;
+        var valueText = value.toFixed(decimalPlaces);
+        this.text.setText(displayValue ?
+            valueText :
+            '' // no text
+        );
+        this.y = (index - 1) * h * 1.1;
         this.resetFadeOut();
-        if ((data.showWhen instanceof Array &&
-            data.showWhen.indexOf('valueChanges') > -1) ||
-            data.showWhen === 'valueChanges') {
+        if ((showWhen instanceof Array &&
+            showWhen.indexOf('valueChanges') > -1) ||
+            showWhen === 'valueChanges') {
             this.fadeOut();
         }
     };
