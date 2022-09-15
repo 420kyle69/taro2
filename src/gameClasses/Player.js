@@ -41,8 +41,8 @@ var Player = IgeEntity.extend({
 				ige.input.on('pointermove', function (point) {
 					if (ige.client.myPlayer) {
 						self.control.newMousePosition = [
-							point.x,
-							point.y
+							point.x.toFixed(0),
+							point.y.toFixed(0)
 						];
 					}
 				});
