@@ -14,10 +14,7 @@ var Item = IgeEntityPhysics.extend({
 			itemData = _.pick(itemData, ige.client.keysToAddBeforeRender);
 		}
 
-		self._stats = Object.assign(
-			data,
-			itemData
-		);
+		self._stats = {...itemData, ...data};
 
 		if (self._stats.projectileType) {
 			self.projectileData = ige.game.getAsset('projectileTypes', self._stats.projectileType);

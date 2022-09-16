@@ -4716,37 +4716,67 @@ var IgeEntity = IgeObject.extend({
 	 */
 	streamCreateData: function (clientId) {
 		if (ige.isServer) {
-			// remove _stats which are static and can be added from client as well. which will save our bandwidth
-			var keys = ige.server.keysToRemoveBeforeSend.slice();
 			var data = {};
-			
-			if (this._category === 'unit') {
+			var keys = [];
+			switch(this._category) {
 
-				data = {
-					type: this._stats.type,
-					stateId: this._stats.stateId,
-					ownerId: this._stats.ownerId,
-					currentItemIndex: this._stats.currentItemIndex,
-					currentItemId: this._stats.currentItemId,
-					flip: this._stats.flip,
-					attributes: {}
-				}
+				case 'unit': 
+					keys = ["type", "stateId", "ownerId", "ownerPlayerId", "currentItemIndex", "currentItemId", "flip"]
+					data = { attributes: {}, variables: {} };
+					break;
 
-				for (key in this._stats.attributes) {
-					data.attributes[key] = {value: this._stats.attributes[key].value};
-				}
-			} else {
-				if (this._category === 'region') {
-					keys = keys.concat('value');
-				}
-	
-				for (key in this._stats) {
-					if (!keys.includes(key)) {
-						data[key] = this._stats[key];
+				case 'item':
+					keys = ["itemTypeId", "stateId", "ownerUnitId", "quantity", "currentBody", "flip"]
+					data = { attributes: {}, variables: {} };
+					// data = this._stats;
+					break;
+
+				case 'projectile':
+					keys = ["type", "stateId", "flip"]
+					data = { attributes: {}, variables: {} };					
+					break;
+
+				case 'player':
+					keys = ["name", "clientId", "playerTypeId", "controlledBy", "playerJoined", "unitIds", "selectedUnitId", "userId", "banChat"]
+					data = { attributes: {}, variables: {} };					
+
+					// send sensitive information to actual players only
+					if (this._stats.clientId == clientId) {
+						data.coins = this._stats.coins;
+						data.mutedUsers = this._stats.mutedUsers;
+						data.banChat = this._stats.banChat;
+						data.purchasables = this._stats.purchasables;
+  						data.allPurchasables = this._stats.allPurchasables;
 					}
-				}	
+					break;
+
+				case 'region': 
+					keys = ["id", "default"];
+					data = { currentBody: {
+									height: this._stats.currentBody.height, 
+									width: this._stats.currentBody.width,
+						}
+					};
+					break;
+			}
+			
+			for (i in keys) {
+				var key = keys[i];
+				data[key] = this._stats[key];
 			}
 
+			if (data.attributes != undefined) {
+				for (key in this._stats.attributes) {
+					data.attributes[key] = {value: this._stats.attributes[key].value};
+				}	
+			}
+			
+			if (data.variables != undefined) {
+				for (key in this.variables) {
+					data.variables[key] = {value: this.variables[key].value};
+				}
+			}
+			
 			return data;			
 		}
 	},
