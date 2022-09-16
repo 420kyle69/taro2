@@ -551,18 +551,16 @@ var Server = IgeClass.extend({
 							// send only if developer client is connect
 							if (ige.isServer && self.developerClientIds.length) {
 
-								ige.variable.devLogs.status = ige.server.getStatus();
+								ige.game.devLogs.status = ige.server.getStatus();
 								const sendErrors = Object.keys(ige.script.errorLogs).length;
-
 								self.developerClientIds.forEach(
 									id => {
-										ige.network.send('devLogs', ige.variable.devLogs, id);
+										ige.network.send('devLogs', ige.game.devLogs, id);
 
 										if (sendErrors) {
 											ige.network.send('errorLogs', ige.script.errorLogs, id);
 										}
 
-										console.log(`VariableComponent: sending devLogs to ${id}`);
 									});
 
 								if (sendErrors) {
@@ -669,8 +667,6 @@ var Server = IgeClass.extend({
 		ige.network.define('ban-user', self._onBanUser);
 		ige.network.define('ban-ip', self._onBanIp);
 		ige.network.define('ban-chat', self._onBanChat);
-
-		ige.network.define('setOwner', self._setOwner);
 
 		ige.network.define('trade', self._onTrade);
 	},

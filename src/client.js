@@ -797,7 +797,6 @@ const Client = IgeEventingClass.extend({
 		ige.network.define('openDialogue', this._onOpenDialogue);
 		ige.network.define('closeDialogue', this._onCloseDialogue);
 
-		ige.network.define('setOwner', this._setOwner);
 		ige.network.define('userJoinedGame', this._onUserJoinedGame);
 
 		ige.network.define('trade', this._onTrade);

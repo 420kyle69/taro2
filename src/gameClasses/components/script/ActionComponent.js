@@ -111,7 +111,7 @@ var ActionComponent = IgeEntity.extend({
 						// not sure if we want to be doing this on the client
 						// causing issues so disabled on client for now
 						if (ige.isServer) {
-							self._script.variable.updateDevConsole({ type: 'setVariable', params: params });
+							ige.game.updateDevConsole({ type: 'setVariable', params: params });
 						} else {
 							// console.log('setVariable:', action.variableName, newValue);
 						}
