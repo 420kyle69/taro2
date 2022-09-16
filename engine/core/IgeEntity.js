@@ -4905,7 +4905,9 @@ var IgeEntity = IgeObject.extend({
 			var streamCreateData = this.streamCreateData(clientId);
 			this.streamSectionData('transform'); // prepare this._streamSectionData
 			ige.network.send('_igeStreamCreate', [this.classId(), thisId, this._parent.id(), this._streamSectionData, streamCreateData], clientId);
-			ige.server.bandwidthUsage[this._category] += JSON.stringify(streamCreateData).length;
+
+			// commented out for causing circular reference
+			// ige.server.bandwidthUsage[this._category] += JSON.stringify(streamCreateData).length;
 			ige.network.stream._streamClientCreated[thisId] = ige.network.stream._streamClientCreated[thisId] || {};
 
 			if (clientId) {
