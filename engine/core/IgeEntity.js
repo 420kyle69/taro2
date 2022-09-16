@@ -4759,8 +4759,8 @@ var IgeEntity = IgeObject.extend({
 						data.banChat = this._stats.banChat;
 						data.purchasables = this._stats.purchasables;
   						data.allPurchasables = this._stats.allPurchasables;
-						data.isEmailVerified = this._stats.isEmailVerified;
-						data.isUserVerified = this._stats.isUserVerified;
+						// data.isEmailVerified = this._stats.isEmailVerified;
+						// data.isUserVerified = this._stats.isUserVerified;
 						data.isUserAdmin = this._stats.isUserAdmin;
 						data.isUserMod = this._stats.isUserMod;
 					}
