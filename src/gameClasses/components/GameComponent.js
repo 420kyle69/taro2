@@ -49,7 +49,7 @@ var GameComponent = IgeEntity.extend({
 		}
 
 		ige.addComponent(ScriptComponent);
-		ige.script.load(ige.game.data.scripts);			
+		ige.script.load(ige.game.data.scripts);
 
 		ige.script.trigger('gameStart');
 		self.isGameStarted = true;
@@ -118,9 +118,7 @@ var GameComponent = IgeEntity.extend({
 			var isOwner = ige.server.owner == data._id;
 			var isInvitedUser = false;
 			if (ige.game.data.defaultData && ige.game.data.defaultData.invitedUsers) {
-				isInvitedUser = ige.game.data.defaultData.invitedUsers.includes(
-					data._id
-				);
+				isInvitedUser = ige.game.data.defaultData.invitedUsers.some(e => e._id === data._id);
 			}
 			var isUserAdmin = false;
 			var isUserMod = false;
@@ -130,10 +128,11 @@ var GameComponent = IgeEntity.extend({
 			}
 			player._stats.isUserAdmin = isUserAdmin;
 			player._stats.isUserMod = isUserMod;
+
 			// if User/Admin has access to game then show developer logs
 			if (isOwner || isInvitedUser || isUserAdmin) {
-				GameComponent.prototype.log(`owner connected. _id: ${data._id}`);
-				ige.server.developerClientId = data.clientId;
+				GameComponent.prototype.log(`owner/admin/mod connected. _id: ${data._id}`);
+				ige.server.developerClientIds.push(data.clientId);
 			}
 		}
 
