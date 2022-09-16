@@ -26,6 +26,45 @@ var ActionComponent = IgeEntity.extend({
 				} else {
 					ige.network.resume();
 				}
+
+				var now = Date.now();		
+				var lastActionRunTime = now - ige.lastActionRanAt;
+				var engineTickDelta = now - ige.now;
+
+				// prevent recursive/infinite action calls consuming CPU
+				if (engineTickDelta > 1000 && !ige.engineLagReported) {
+					var rollbarData = {
+						query: 'engineFreeze',
+						engineTickDelta: engineTickDelta,
+						masterServer: global.myIp,
+						gameTitle: ige.game.data.defaultData.title,
+						clientCommands: ige.network.commandCount,
+						actionProfiler: ige.actionProfiler,
+						lastAction: action.type,
+						triggerProfiler: ige.triggerProfiler
+					};
+
+					global.rollbar.log("engineStep is taking longer than 1000ms", rollbarData);
+
+					var errorMsg = ige.script.errorLog("engineTick is taking longer than 1000ms (took"+engineTickDelta+"ms)");
+					console.log(errorMsg, rollbarData);
+					ige.engineLagReported = true;
+					// ige.server.unpublish(errorMsg); // not publishing yet cuz TwoHouses will get unpub. loggin instead.
+				}
+
+				if (ige.lastAction) {
+					if (ige.actionProfiler[ige.lastAction]) {
+						var count = ige.actionProfiler[ige.lastAction].count;					
+						ige.actionProfiler[ige.lastAction].count++;					
+						ige.actionProfiler[ige.lastAction].avgTime = ((ige.actionProfiler[ige.lastAction].avgTime * count) + lastActionRunTime ) / (count + 1)
+						ige.actionProfiler[ige.lastAction].totalTime += lastActionRunTime					 
+					} else {
+						ige.actionProfiler[ige.lastAction] = {count: 1, avgTime: lastActionRunTime, totalTime: lastActionRunTime}
+					}
+				}
+
+				ige.lastAction = action.type;
+				ige.lastActionRanAt = now;	
 			}
 			
 			if (!action || action.disabled == true || // if action is disabled or
@@ -216,7 +255,7 @@ var ActionComponent = IgeEntity.extend({
 									ige.game.data.variables[varName].value = newValue;
 								}
 							} catch (err) {
-								console.error(err)
+								console.error('sendPostRequest', ige.game.data.defaultData.title, url, err);
 								if (ige.game.data.variables.hasOwnProperty(varName)) {
 									ige.game.data.variables[varName].value = 'error';
 								}

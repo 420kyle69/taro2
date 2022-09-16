@@ -75,7 +75,8 @@ var GameComponent = IgeEntity.extend({
 			coins: data.coins,
 			points: data.points || 0,
 			clientId: data.clientId,
-			purchasables: purchases,
+			purchasables: purchases, // purchasables are currently equipped purchasables of the player for current game
+			allPurchasables: data.allPurchasables, // allPurchasables includes equipped and purchased items of the player for current game			
 			attributes: data.attributes,
 			highscore: data.highscore,
 			lastPlayed: data.lastPlayed,

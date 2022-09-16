@@ -116,7 +116,7 @@ NetIo.Client = NetIo.EventingClass.extend({
 
 	disconnect: function (reason) {
 		this._socket.close(1000, reason);
-		this.emit('_igeStreamDestroy');
+		// this.emit('_igeStreamDestroy');
 	},
 
 	send: function (data) {

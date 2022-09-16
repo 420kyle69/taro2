@@ -1536,6 +1536,14 @@ var Unit = IgeEntityPhysics.extend({
 			}
 			self.updateTexture();
 		} else if (ige.isServer) {
+			const requestedPurchasable = owner._stats.allPurchasables ? owner._stats.allPurchasables.find((purchasable) => equipPurchasable._id === purchasable._id) : null;
+			if (!requestedPurchasable || !requestedPurchasable.image) {
+				// requested purchasable does not exist or player does not have access to it.
+				return;
+			}
+			// overwrite purchasable image sent via client to avoid skin exploits
+			equipPurchasable.image = requestedPurchasable.image;
+
 			self._stats.cellSheet.url = equipPurchasable.image;
 			if (!owner._stats.purchasables || !(owner._stats.purchasables instanceof Array)) owner._stats.purchasables = [];
 			var index = owner._stats.purchasables.findIndex(function (purchasable) {
