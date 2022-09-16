@@ -4722,23 +4722,35 @@ var IgeEntity = IgeObject.extend({
 
 				case 'unit': 
 					keys = ["type", "stateId", "ownerId", "ownerPlayerId", "currentItemIndex", "currentItemId", "flip"]
-					data = { attributes: {}, variables: {} };
+					data = { 
+						attributes: {}, 
+						// variables: {} 
+					};
 					break;
 
 				case 'item':
+					// TODO: we shouldn't have to send currentBody. for some reason, all items have 'dropped' stateId
 					keys = ["itemTypeId", "stateId", "ownerUnitId", "quantity", "currentBody", "flip"]
-					data = { attributes: {}, variables: {} };
-					// data = this._stats;
+					data = { 
+						attributes: {}, 
+						// variables: {} 
+					};
 					break;
 
 				case 'projectile':
 					keys = ["type", "stateId", "flip"]
-					data = { attributes: {}, variables: {} };					
+					data = { 
+						attributes: {}, 
+						// variables: {} 
+					};
 					break;
 
 				case 'player':
 					keys = ["name", "clientId", "playerTypeId", "controlledBy", "playerJoined", "unitIds", "selectedUnitId", "userId", "banChat"]
-					data = { attributes: {}, variables: {} };					
+					data = { 
+						attributes: {}, 
+						// variables: {} 
+					};				
 
 					// send sensitive information to actual players only
 					if (this._stats.clientId == clientId) {
@@ -4771,6 +4783,8 @@ var IgeEntity = IgeObject.extend({
 				}	
 			}
 			
+			// commented out variables as it's causing circular JSON error
+			// when a unit variable is set as a unit. we need to use unitId going fwd. not the actual unit.
 			if (data.variables != undefined) {
 				for (key in this.variables) {
 					data.variables[key] = {value: this.variables[key].value};
@@ -4906,8 +4920,7 @@ var IgeEntity = IgeObject.extend({
 			this.streamSectionData('transform'); // prepare this._streamSectionData
 			ige.network.send('_igeStreamCreate', [this.classId(), thisId, this._parent.id(), this._streamSectionData, streamCreateData], clientId);
 
-			// commented out for causing circular reference
-			// ige.server.bandwidthUsage[this._category] += JSON.stringify(streamCreateData).length;
+			ige.server.bandwidthUsage[this._category] += JSON.stringify(streamCreateData).length;
 			ige.network.stream._streamClientCreated[thisId] = ige.network.stream._streamClientCreated[thisId] || {};
 
 			if (clientId) {
