@@ -342,6 +342,11 @@ var Player = IgeEntity.extend({
 	},
 
 	remove: function () {
+		if (ige.isServer) {
+			const i = ige.server.developerClientIds.indexOf(this._stats.clientId);
+			if (i != -1) ige.server.developerClientIds.splice(i, 1);
+		}
+
 		if (this._stats.controlledBy == 'human' && ige.script) // do not send trigger for neutral player
 		{
 			ige.script.trigger('playerLeavesGame', { playerId: this.id() });

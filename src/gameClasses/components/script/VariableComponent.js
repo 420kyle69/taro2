@@ -1230,7 +1230,7 @@ var VariableComponent = IgeEntity.extend({
 					break;
 
 				case 'entityName':
-					var entity = self.getValue(text.entity, vars);			
+					var entity = self.getValue(text.entity, vars);
 					if (entity) {
 						returnValue = entity._stats.name;
 					}
@@ -1965,7 +1965,7 @@ var VariableComponent = IgeEntity.extend({
 			params.newValue = newValue;
 			this.updateDevConsole({ type: 'setVariable', params: params });
 		} else if (ige.isClient) {
-
+			// empty
 		}
 	},
 
@@ -1973,12 +1973,16 @@ var VariableComponent = IgeEntity.extend({
 	updateDevConsole: function (data) {
 		var self = this;
 		// if a developer is connected, send
-		if (ige.isServer && (ige.server.developerClientId || process.env.ENV === 'standalone' || process.env.ENV == 'standalone-remote')) {
+		if (ige.isServer && (ige.server.developerClientIds.length || process.env.ENV === 'standalone' || process.env.ENV == 'standalone-remote')) {
 			// only show 'object' string if env variable is object
 			if (typeof data.params.newValue == 'object') {
-				self.devLogs[data.params.variableName] = `object ${(data.params.newValue._stats) ? `(${data.params.newValue._category}): ${data.params.newValue._stats.name}` : ''}`;
-			} else // otherwise, show the actual value
-			{
+				if (data.params.newValue._stats) {
+					self.devLogs[data.params.variableName] = `object (${data.params.newValue._category}): ${data.params.newValue._stats.name}`;
+				} else {
+					self.devLogs[data.params.variableName] = 'object';
+				}
+			} else { // otherwise, show the actual value
+
 				self.devLogs[data.params.variableName] = data.params.newValue;
 			}
 		} else if (ige.isClient) {
@@ -2026,8 +2030,8 @@ var VariableComponent = IgeEntity.extend({
 				}
 			}
 
-			if (data.status != {} && ige.physics && ige.physics.engine != 'CRASH') {
-				// if streaming entity cound > 150 warn user
+			if (data.status != {} /*&& ige.physics && ige.physics.engine != 'CRASH'*/) {
+				// if streaming entity count > 150 warn user
 				if (data.status && data.status.entityCount && data.status.entityCount.streaming > 150 && !self.streamingWarningShown) {
 					$('#streaming-entity-warning').show();
 					self.streamingWarningShown = true;
@@ -2082,25 +2086,25 @@ var VariableComponent = IgeEntity.extend({
 					'<tr>' +
 					'<th colspan= >Physics</th>' +
 					`<th>${data.status.physics.engine}</th>` +
-					`<th>${ige.physics.engine}</th>` +
+					`<th>${(ige.physics) ? ige.physics.engine : 'NONE'}</th>` +
 					'<td></td>' +
 					'</tr>' +
 					'<tr>' +
 					'<td>Bodies</td>' +
 					`<td>${data.status.physics.bodyCount}</td>` +
-					`<td>${(ige.physics._world) ? ige.physics._world.m_bodyCount : ''}</td>` +
+					`<td>${(ige.physics && ige.physics._world) ? ige.physics._world.m_bodyCount : ''}</td>` +
 					'<td></td>' +
 					'</tr>' +
 					'<tr>' +
 					'<td>Joints</td>' +
 					`<td>${data.status.physics.jointCount}</td>` +
-					`<td>${(ige.physics._world) ? ige.physics._world.m_jointCount : ''}</td>` +
+					`<td>${(ige.physics && ige.physics._world) ? ige.physics._world.m_jointCount : ''}</td>` +
 					'<td></td>' +
 					'</tr>' +
 					'<tr>' +
 					'<td>Contacts</td>' +
 					`<td>${data.status.physics.contactCount}</td>` +
-					`<td>${(ige.physics._world) ? ige.physics._world.m_contactCount : ''}</td>` +
+					`<td>${(ige.physics && ige.physics._world) ? ige.physics._world.m_contactCount : ''}</td>` +
 					'<td></td>' +
 					'</tr>' +
 					'<tr>' +
@@ -2112,13 +2116,13 @@ var VariableComponent = IgeEntity.extend({
 					'<tr>' +
 					'<td>Avg Step Duration(ms)</td>' +
 					`<td>${data.status.physics.stepDuration}</td>` +
-					`<td>${(ige.physics._world) ? ige.physics.avgPhysicsTickDuration.toFixed(2) : ''}</td>` +
+					`<td>${(ige.physics && ige.physics._world) ? ige.physics.avgPhysicsTickDuration.toFixed(2) : ''}</td>` +
 					'<td></td>' +
 					'</tr>' +
 					'<tr>' +
 					'<td>Physics FPS</td>' +
 					`<td>${data.status.physics.stepsPerSecond}</td>` +
-					`<td>${ige._physicsFPS}</td>` +
+					`<td>${(ige.physics) ? ige._physicsFPS : ''}</td>` +
 					'<td></td>' +
 					'</tr>' +
 					'<tr>' +
@@ -2170,7 +2174,7 @@ var VariableComponent = IgeEntity.extend({
 					'<tr>' +
 					'<td>Total Bodies Created</td>' +
 					`<td>${data.status.physics.totalBodiesCreated}</td>` +
-					`<td>${(ige.physics._world) ? ige.physics.totalBodiesCreated : ''}</td>` +
+					`<td>${(ige.physics && ige.physics._world) ? ige.physics.totalBodiesCreated : ''}</td>` +
 					'<td></td>' +
 					'</tr>' +
 
