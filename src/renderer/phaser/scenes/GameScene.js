@@ -65,9 +65,10 @@ var GameScene = /** @class */ (function (_super) {
                 _this.devPalette.setVisible(true);
                 _this.devPalette.texturesLayer.setVisible(true);
                 _this.devPalette.camera.setVisible(true);
+                _this.devPalette.scrollBarContainer.setVisible(true);
             }
             else {
-                _this.devPalette = new PhaserPalette(_this, _this.tileset);
+                _this.devPalette = new PhaserPalette(_this, _this.tileset, _this.rexUI);
                 var map = _this.devPalette.map;
                 _this.selectedTile = map.getTileAt(2, 3);
                 _this.marker2 = _this.add.graphics();
@@ -80,10 +81,11 @@ var GameScene = /** @class */ (function (_super) {
             _this.devPalette.setVisible(false);
             _this.devPalette.texturesLayer.setVisible(false);
             _this.devPalette.camera.setVisible(false);
+            _this.devPalette.scrollBarContainer.setVisible(false);
         });
         this.input.on('wheel', function (pointer, gameObjects, deltaX, deltaY, deltaZ) {
             if (_this.devPalette && _this.devPalette.visible) {
-                _this.devPalette.scroll(deltaY);
+                _this.devPalette.zoom(pointer, deltaY);
             }
         });
     };
@@ -114,6 +116,9 @@ var GameScene = /** @class */ (function (_super) {
         this.load.tilemapTiledJSON('map', this.patchMapData(data.map));
         this.load.bitmapFont('Arial_24px_bold_black', '/assets/fonts/Arial_24px_bold_black_0.png', '/assets/fonts/Arial_24px_bold_black.fnt');
         this.load.bitmapFont('Arial_24px_bold_white', '/assets/fonts/Arial_24px_bold_white_0.png', '/assets/fonts/Arial_24px_bold_white.fnt');
+        this.load.scenePlugin('rexuiplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js', 
+        //'src/renderer/phaser/rexuiplugin.min.js',
+        'rexUI', 'rexUI');
     };
     GameScene.prototype.loadEntity = function (key, data, skin) {
         var _this = this;
@@ -313,7 +318,14 @@ var GameScene = /** @class */ (function (_super) {
             // Rounds down to nearest tile
             var pointerTileX2 = this.devPalette.map.worldToTileX(worldPoint2.x);
             var pointerTileY2 = this.devPalette.map.worldToTileY(worldPoint2.y);
-            if (0 <= pointerTileX2 && pointerTileX2 < 27 && 0 <= pointerTileY2 && pointerTileY2 < 20) {
+            if (0 <= pointerTileX2
+                && pointerTileX2 < 27
+                && 0 <= pointerTileY2
+                && pointerTileY2 < 20
+                && this.input.activePointer.x > this.devPalette.scrollBarContainer.x
+                && this.input.activePointer.x < this.devPalette.scrollBarContainer.x + this.devPalette.scrollBarContainer.width
+                && this.input.activePointer.y > this.devPalette.scrollBarContainer.y
+                && this.input.activePointer.y < this.devPalette.scrollBarContainer.y + this.devPalette.scrollBarContainer.height) {
                 this.marker.setVisible(false);
                 // Snap to tile coordinates, but in world space
                 this.marker2.x = this.devPalette.map.tileToWorldX(pointerTileX2);
@@ -322,7 +334,10 @@ var GameScene = /** @class */ (function (_super) {
                     this.selectedTile = this.devPalette.map.getTileAt(pointerTileX2, pointerTileY2);
                 }
             }
-            else {
+            else if (!(this.input.activePointer.x > this.devPalette.scrollBarContainer.x
+                && this.input.activePointer.x < this.devPalette.scrollBarContainer.x + this.devPalette.scrollBarContainer.width
+                && this.input.activePointer.y > this.devPalette.scrollBarContainer.y
+                && this.input.activePointer.y < this.devPalette.scrollBarContainer.y + this.devPalette.scrollBarContainer.height)) {
                 this.marker2.setVisible(false);
                 this.marker.setVisible(true);
                 // Rounds down to nearest tile

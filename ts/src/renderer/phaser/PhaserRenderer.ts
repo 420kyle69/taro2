@@ -32,6 +32,11 @@ class PhaserRenderer extends Phaser.Game {
 				crossOrigin: 'anonymous'
 			},
 			plugins: {
+				/*scene: [{
+					  key: 'rexUI',
+					  plugin: UIPlugin,
+					  mapping: 'rexUI',
+				}],*/
 				global: [{
 					key: 'virtual-joystick',
 					plugin: rexvirtualjoystickplugin,

@@ -19,25 +19,24 @@ var PaletteScene = /** @class */ (function (_super) {
         return _super.call(this, { key: 'Palette' }) || this;
     }
     PaletteScene.prototype.init = function (tileset) {
-        var _this = this;
         console.log('palette scene init');
-        ige.client.on('enterDevMode', function () {
-            if (_this.devPalette) {
-                _this.devPalette.setVisible(true);
-            }
-            else {
-                _this.devPalette = new PhaserPalette(_this, tileset);
-                var map = _this.devPalette.map;
-                _this.selectedTile = map.getTileAt(2, 3);
-                _this.marker2 = _this.add.graphics();
-                _this.marker2.lineStyle(2, 0x000000, 1);
-                _this.marker2.strokeRect(0, 0, map.tileWidth, map.tileHeight);
-                _this.marker2.setVisible(false);
+        /*ige.client.on('enterDevMode', () => {
+            if (this.devPalette) {
+                this.devPalette.setVisible(true);
+            } else {
+                this.devPalette = new PhaserPalette(this, tileset);
+                const map = this.devPalette.map;
+                this.selectedTile = map.getTileAt(2, 3);
+                this.marker2 = this.add.graphics();
+                this.marker2.lineStyle(2, 0x000000, 1);
+                this.marker2.strokeRect(0, 0, map.tileWidth, map.tileHeight);
+                this.marker2.setVisible(false);
             }
         });
-        ige.client.on('leaveDevMode', function () {
-            _this.devPalette.setVisible(false);
-        });
+
+        ige.client.on('leaveDevMode', () => {
+            this.devPalette.setVisible(false);
+        });*/
         /*if (this.devPalette) {
             this.devPalette.setVisible(true);
         } else {

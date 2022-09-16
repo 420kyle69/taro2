@@ -15,16 +15,14 @@ var __extends = (this && this.__extends) || (function () {
 })();
 var PhaserPalette = /** @class */ (function (_super) {
     __extends(PhaserPalette, _super);
-    function PhaserPalette(scene, tileset) {
+    function PhaserPalette(scene, tileset, rexUI) {
         var _this = _super.call(this, scene) || this;
         console.log('create palette', _this);
         _this.tileset = tileset;
+        _this.rexUI = rexUI;
         //this.setScrollFactor(0,0);
-        _this.x = -750;
+        _this.x = -10750;
         _this.y = 50;
-        //  The miniCam is 400px wide, so can display the whole world at a zoom of 0.2
-        var camera = _this.camera = _this.scene.cameras.add(700, 100, 550, 400).setScroll(_this.x, _this.y).setZoom(1).setName('palette');
-        camera.setBackgroundColor(0x002244);
         // Load a map from a 2D array of tile indices
         var paletteMap = [];
         for (var i = 0; i < tileset.rows; i++) {
@@ -36,18 +34,18 @@ var PhaserPalette = /** @class */ (function (_super) {
         console.log('map', paletteMap);
         // When loading from an array, make sure to specify the tileWidth and tileHeight
         var map = _this.map = _this.scene.make.tilemap({ key: 'palette', data: paletteMap, tileWidth: 16, tileHeight: 16 });
-        //const tiles = map.addTilesetImage('mario-tiles');
         var texturesLayer = _this.texturesLayer = map.createLayer(0, tileset, 0, 0).setOrigin(0, 0).setInteractive() /*.setScrollFactor(0,0)*/.setPosition(_this.x, _this.y);
         //this.add(texturesLayer);
         scene.add.existing(texturesLayer);
         /*texturesLayer.on('pointerover', () => {
             this.pointerOver;
         });*/
-        console.log(texturesLayer);
-        var background = _this.background = scene.add.graphics();
-        _this.add(background);
-        scene.add.existing(_this);
-        return _this;
+        //  The miniCam is 400px wide, so can display the whole world at a zoom of 0.2
+        var camera = _this.camera = _this.scene.cameras.add(900, 100, texturesLayer.width, texturesLayer.height).setScroll(_this.x, _this.y).setZoom(1).setName('palette');
+        camera.setBackgroundColor(0x002244);
+        /*const background = this.background = scene.add.graphics();
+        this.add(background);
+        scene.add.existing(this);*/
         //this.drawBackground();
         /*this.scene.input.setDraggable(texturesLayer);
         this.scene.input.on('drag', (pointer, gameObject, dragX, dragY) => {
@@ -55,19 +53,110 @@ var PhaserPalette = /** @class */ (function (_super) {
             this.camera.scrollX = dragX;
             this.camera.scrollY = dragY;
         });*/
+        var COLOR_PRIMARY = 0x4e342e;
+        var COLOR_LIGHT = 0x7b5e57;
+        var COLOR_DARK = 0x260e04;
+        var scrollBarContainer = _this.scrollBarContainer = new Phaser.GameObjects.Container(scene);
+        scene.add.existing(scrollBarContainer);
+        scrollBarContainer.x = 900;
+        scrollBarContainer.y = 100;
+        var scrollBarBottom = _this.scrollBarBottom = _this.rexUI.add.scrollBar({
+            width: _this.camera.width,
+            orientation: 'x',
+            background: _this.rexUI.add.roundRectangle(0, 0, 0, 0, 0, COLOR_DARK),
+            buttons: {
+                left: _this.rexUI.add.roundRectangle(0, 0, 20, 20, 0, COLOR_PRIMARY),
+                right: _this.rexUI.add.roundRectangle(0, 0, 20, 20, 0, COLOR_PRIMARY),
+            },
+            slider: {
+                thumb: _this.rexUI.add.roundRectangle(0, 0, (_this.camera.width - 60) / 2, 20, 10, COLOR_LIGHT),
+            },
+            space: {
+                left: 10, right: 10, top: 10, bottom: 10
+            }
+        });
+        scrollBarBottom.value = 0.5;
+        _this.scrollBarContainer.add(scrollBarBottom);
+        scrollBarBottom.setPosition(0, _this.camera.height).setOrigin(0, 0).setScrollFactor(0, 0).layout();
+        var scrollBarRight = _this.scrollBarRight = _this.rexUI.add.scrollBar({
+            height: _this.camera.height,
+            orientation: 'y',
+            background: _this.rexUI.add.roundRectangle(0, 0, 0, 0, 0, COLOR_DARK),
+            buttons: {
+                left: _this.rexUI.add.roundRectangle(0, 0, 20, 20, 0, COLOR_PRIMARY),
+                right: _this.rexUI.add.roundRectangle(0, 0, 20, 20, 0, COLOR_PRIMARY),
+            },
+            slider: {
+                thumb: _this.rexUI.add.roundRectangle(0, 0, 20, (_this.camera.height - 60) / 2, 10, COLOR_LIGHT),
+            },
+            space: {
+                left: 10, right: 10, top: 10, bottom: 10
+            }
+        });
+        scrollBarRight.value = 0.5;
+        _this.scrollBarContainer.add(scrollBarRight);
+        scrollBarRight.setPosition(_this.camera.width, 0).setOrigin(0, 0).setScrollFactor(0, 0).layout();
+        scrollBarContainer.width = camera.width + scrollBarRight.width + 60;
+        scrollBarContainer.height = camera.height + scrollBarBottom.height + 60;
+        console.log('scrollBarContainer', camera.width, scrollBarRight);
+        scrollBarBottom.on('valuechange', function (newValue, oldValue, scrollBar) {
+            if (!isNaN(newValue)) {
+                newValue -= 0.5;
+                camera.scrollX = this.x + (camera.width * newValue);
+            }
+            //console.log('value', newValue);
+            //newValue -= 0.5;
+            //const targetValue = newValue * (camera.zoom - 1);
+            //scrollBar.value = 0.5 + targetValue;
+            //camera.scrollX = this.x /*- (camera.width / 2)*/ + (camera.width * newValue);
+        }, _this);
+        scrollBarRight.on('valuechange', function (newValue, oldValue, scrollBar) {
+            if (!isNaN(newValue)) {
+                newValue -= 0.5;
+                camera.scrollY = this.y + (camera.height * newValue);
+            }
+            //console.log('value', newValue);
+            //newValue -= 0.5;
+            //const targetValue = newValue * (camera.zoom - 1);
+            //scrollBar.value = 0.5 + targetValue;
+            //console.log('targetValue', targetValue);
+            //camera.scrollY = this.y /*- (camera.height / 2)*/ + (camera.height * newValue);
+        }, _this);
+        return _this;
     }
-    PhaserPalette.prototype.drawBackground = function () {
-        var background = this.background;
-        var width = 570;
-        var height = 420;
+    /*private drawBackground (): void {
+        const background = this.background;
+
+        const width = 570;
+        const height = 420;
         background.fillStyle(0x000000, 0.2);
-        background.fillRect(-10, -10, width, height);
-    };
-    PhaserPalette.prototype.scroll = function (deltaY) {
-        var targetZoom = this.camera.zoom - (deltaY / 5000);
+        background.fillRect(
+            -10,
+            -10,
+            width,
+            height
+        );
+    }*/
+    PhaserPalette.prototype.zoom = function (pointer, deltaY) {
+        var targetZoom;
+        if (deltaY < 0)
+            targetZoom = this.camera.zoom * (-deltaY / 250);
+        else
+            targetZoom = this.camera.zoom / (deltaY / 250);
         if (targetZoom < 1)
             targetZoom = 1;
+        else if (targetZoom > 20)
+            targetZoom = 20;
         this.camera.setZoom(targetZoom);
+        /*const targetPosition = this.camera.getWorldPoint(pointer.x, pointer.y);
+        this.camera.setScroll(targetPosition.x, targetPosition.y);*/
+        this.scrollBarBottom.getElement('slider.thumb').width = (this.camera.width - 60) / (targetZoom * 2);
+        //if (targetZoom === 1) this.scrollBarBottom.value = 0.5;
+        //if (deltaY > 0) this.scrollBarBottom.value = 0.5 * ((this.scrollBarBottom.value - 0.5) * (targetZoom - 1));
+        this.scrollBarBottom.layout();
+        this.scrollBarRight.getElement('slider.thumb').height = (this.camera.height - 60) / (targetZoom * 2);
+        //if (targetZoom === 1) this.scrollBarRight.value = 0.5;
+        this.scrollBarRight.layout();
     };
     return PhaserPalette;
 }(Phaser.GameObjects.Container));

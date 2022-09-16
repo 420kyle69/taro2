@@ -11,6 +11,7 @@ class GameScene extends PhaserScene {
 	devPalette: PhaserPalette;
 	tileset: Phaser.Tilemaps.Tileset;
 	marker2: Phaser.GameObjects.Graphics;
+	rexUI: any;
 
 	constructor() {
 		super({ key: 'Game' });
@@ -82,8 +83,9 @@ class GameScene extends PhaserScene {
 				this.devPalette.setVisible(true);
 				this.devPalette.texturesLayer.setVisible(true);
 				this.devPalette.camera.setVisible(true);
+				this.devPalette.scrollBarContainer.setVisible(true);
 			} else {
-				this.devPalette = new PhaserPalette(this, this.tileset);
+				this.devPalette = new PhaserPalette(this, this.tileset, this.rexUI);
 				const map = this.devPalette.map;
 				this.selectedTile = map.getTileAt(2, 3);
 		 		this.marker2 = this.add.graphics();
@@ -97,11 +99,12 @@ class GameScene extends PhaserScene {
 			this.devPalette.setVisible(false);
 			this.devPalette.texturesLayer.setVisible(false);
 			this.devPalette.camera.setVisible(false);
+			this.devPalette.scrollBarContainer.setVisible(false);
 		});
 
 		this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
 			if (this.devPalette && this.devPalette.visible) {
-				this.devPalette.scroll(deltaY);
+				this.devPalette.zoom(pointer, deltaY);
 			}
 		});
 	}
@@ -148,6 +151,14 @@ class GameScene extends PhaserScene {
 			'/assets/fonts/Arial_24px_bold_white_0.png',
 			'/assets/fonts/Arial_24px_bold_white.fnt'
 		);
+
+		this.load.scenePlugin(
+			'rexuiplugin',
+			'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js',
+			//'src/renderer/phaser/rexuiplugin.min.js',
+			'rexUI',
+			'rexUI'
+		  );
 	}
 
 	loadEntity (key: string, data: EntityData, skin = false): void {
@@ -281,6 +292,7 @@ class GameScene extends PhaserScene {
 		  this.marker.lineStyle(2, 0x000000, 1);
 		  this.marker.strokeRect(0, 0, map.tileWidth, map.tileHeight);
 		  this.marker.setVisible(false);
+
 	}
 
 	private setZoomSize (height: number): void {
@@ -482,7 +494,14 @@ class GameScene extends PhaserScene {
 			const pointerTileX2 = this.devPalette.map.worldToTileX(worldPoint2.x);
 			const pointerTileY2 = this.devPalette.map.worldToTileY(worldPoint2.y);
 
-			if (0 <= pointerTileX2 && pointerTileX2 < 27 && 0 <= pointerTileY2 && pointerTileY2 < 20) {
+			if (0 <= pointerTileX2
+				&& pointerTileX2 < 27
+				&& 0 <= pointerTileY2
+				&& pointerTileY2 < 20
+				&& this.input.activePointer.x > this.devPalette.scrollBarContainer.x
+				&& this.input.activePointer.x < this.devPalette.scrollBarContainer.x + this.devPalette.scrollBarContainer.width
+				&& this.input.activePointer.y > this.devPalette.scrollBarContainer.y
+				&& this.input.activePointer.y < this.devPalette.scrollBarContainer.y + this.devPalette.scrollBarContainer.height) {
 				this.marker.setVisible(false);
 				// Snap to tile coordinates, but in world space
 				this.marker2.x = this.devPalette.map.tileToWorldX(pointerTileX2);
@@ -491,7 +510,10 @@ class GameScene extends PhaserScene {
 				if (this.input.manager.activePointer.rightButtonDown()) {
 					this.selectedTile = this.devPalette.map.getTileAt(pointerTileX2, pointerTileY2);
 				}
-			} else {
+			} else if (!(this.input.activePointer.x > this.devPalette.scrollBarContainer.x
+				&& this.input.activePointer.x < this.devPalette.scrollBarContainer.x + this.devPalette.scrollBarContainer.width
+				&& this.input.activePointer.y > this.devPalette.scrollBarContainer.y
+				&& this.input.activePointer.y < this.devPalette.scrollBarContainer.y + this.devPalette.scrollBarContainer.height)) {
 				this.marker2.setVisible(false);
 				this.marker.setVisible(true);
 				// Rounds down to nearest tile

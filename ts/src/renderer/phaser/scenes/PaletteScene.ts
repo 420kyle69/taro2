@@ -12,7 +12,7 @@ class PaletteScene extends PhaserScene {
 	init (tileset): void {
 		console.log('palette scene init');
 
-		ige.client.on('enterDevMode', () => {
+		/*ige.client.on('enterDevMode', () => {
 			if (this.devPalette) {
 				this.devPalette.setVisible(true);
 			} else {
@@ -28,7 +28,7 @@ class PaletteScene extends PhaserScene {
 
 		ige.client.on('leaveDevMode', () => {
 			this.devPalette.setVisible(false);
-		});
+		});*/
 
 		/*if (this.devPalette) {
 			this.devPalette.setVisible(true);
