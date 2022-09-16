@@ -56,9 +56,8 @@ var GameComponent = IgeEntity.extend({
 		ige.timer.startGameClock();
 	},
 
+	// this applies to logged in players only
 	createPlayer: function (data, persistedData) {
-		var self = this;
-
 		/* removing unnecessary purchases keys */
 		var purchases = [];
 		if (data.purchasables) {

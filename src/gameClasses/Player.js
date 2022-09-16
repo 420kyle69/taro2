@@ -7,8 +7,11 @@ var Player = IgeEntity.extend({
 		this.id(entityIdFromServer);
 		var self = this;
 
-		this._stats = data;
+		
+		var playerData = ige.game.getAsset('playerTypes', data.playerTypeId);		
+		this._stats = _.merge(playerData, data);
 
+		// console.log(this._stats.attributes)
 		// dont save variables in _stats as _stats is stringified and synced
 		// and some variables of type unit, item, projectile may contain circular json objects
 		if (self._stats.variables) {
@@ -16,7 +19,6 @@ var Player = IgeEntity.extend({
 			delete self._stats.variables;
 		}
 
-		self.previousAttributes = {};
 		self.lastCustomInput = '';
 
 		Player.prototype.log(`player created ${this.id()}`);
@@ -25,12 +27,12 @@ var Player = IgeEntity.extend({
 		this.mount(ige.$('baseScene'));
 
 		self.addComponent(AttributeComponent);
-
+		
 		if (ige.isServer) {
 			this.streamMode(2);
 			// self._stats.unitId = self.getCurrentUnit().id()
-			self.addComponent(ControlComponent);
-
+			self.addComponent(ControlComponent);			
+		
 			ige.server.totalPlayersCreated++;
 		} else if (ige.isClient) {
 			// if this player is "me"

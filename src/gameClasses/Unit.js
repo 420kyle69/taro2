@@ -36,7 +36,7 @@ var Unit = IgeEntityPhysics.extend({
 			unitData = _.pick(unitData, ige.client.keysToAddBeforeRender);
 		}
 
-		self._stats = {...unitData, ...data}; // data should overwrite unitData
+		self._stats = _.merge(unitData, data);
 		self.entityId = entityIdFromServer;
 
 		// dont save variables in _stats as _stats is stringified and synced

@@ -4759,6 +4759,10 @@ var IgeEntity = IgeObject.extend({
 						data.banChat = this._stats.banChat;
 						data.purchasables = this._stats.purchasables;
   						data.allPurchasables = this._stats.allPurchasables;
+						data.isEmailVerified = this._stats.isEmailVerified;
+						data.isUserVerified = this._stats.isUserVerified;
+						data.isUserAdmin = this._stats.isUserAdmin;
+						data.isUserMod = this._stats.isUserMod;
 					}
 					break;
 
@@ -4785,12 +4789,13 @@ var IgeEntity = IgeObject.extend({
 			
 			// commented out variables as it's causing circular JSON error
 			// when a unit variable is set as a unit. we need to use unitId going fwd. not the actual unit.
-			if (data.variables != undefined) {
-				for (key in this.variables) {
-					data.variables[key] = {value: this.variables[key].value};
-				}
-			}
+			// if (data.variables != undefined) {
+			// 	for (key in this.variables) {
+			// 		data.variables[key] = {value: this.variables[key].value};
+			// 	}
+			// }
 			
+
 			return data;			
 		}
 	},
@@ -4918,6 +4923,7 @@ var IgeEntity = IgeObject.extend({
 			// Send the client an entity create command first
 			var streamCreateData = this.streamCreateData(clientId);
 			this.streamSectionData('transform'); // prepare this._streamSectionData
+
 			ige.network.send('_igeStreamCreate', [this.classId(), thisId, this._parent.id(), this._streamSectionData, streamCreateData], clientId);
 
 			ige.server.bandwidthUsage[this._category] += JSON.stringify(streamCreateData).length;
