@@ -105,6 +105,7 @@ var ControlComponent = IgeEntity.extend({
 		}
 
 		var unit = player.getSelectedUnit();
+		
 		if (unit && unit._category == 'unit') {
 			if (ige.isServer || (ige.isClient && !this.isChatOpen)) {
 				var unitAbility = null;

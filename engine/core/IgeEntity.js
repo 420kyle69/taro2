@@ -4718,21 +4718,36 @@ var IgeEntity = IgeObject.extend({
 		if (ige.isServer) {
 			// remove _stats which are static and can be added from client as well. which will save our bandwidth
 			var keys = ige.server.keysToRemoveBeforeSend.slice();
+			var data = {};
+			
+			if (this._category === 'unit') {
 
-			if (this._category === 'region') {
-				keys = keys.concat('value');
+				data = {
+					type: this._stats.type,
+					stateId: this._stats.stateId,
+					ownerId: this._stats.ownerId,
+					currentItemIndex: this._stats.currentItemIndex,
+					currentItemId: this._stats.currentItemId,
+					flip: this._stats.flip,
+					attributes: {}
+				}
+
+				for (key in this._stats.attributes) {
+					data.attributes[key] = {value: this._stats.attributes[key].value};
+				}
+			} else {
+				if (this._category === 'region') {
+					keys = keys.concat('value');
+				}
+	
+				for (key in this._stats) {
+					if (!keys.includes(key)) {
+						data[key] = this._stats[key];
+					}
+				}	
 			}
 
-			const statKeys = Object.keys(this._stats);
-			const data = {};
-
-			statKeys.forEach(key => {
-				if (!keys.includes(key)) {
-					data[key] = this._stats[key];
-				}
-			});
-
-			return data;
+			return data;			
 		}
 	},
 

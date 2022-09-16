@@ -1031,6 +1031,7 @@ var ActionComponent = IgeEntity.extend({
 
 						var unitTypeId = self._script.variable.getValue(action.unitType, vars);
 						var unitTypeData = ige.game.getAsset('unitTypes', unitTypeId);
+
 						var spawnPosition = self._script.variable.getValue(action.position, vars);
 						var facingAngle = self._script.variable.getValue(action.angle, vars) || 0;
 						if (player && spawnPosition && unitTypeId && unitTypeData) {
@@ -1044,7 +1045,9 @@ var ActionComponent = IgeEntity.extend({
 									}
 								}
 							);
-
+							
+							
+		
 							var unit = player.createUnit(data);
 							ige.game.lastCreatedUnitId = unit.id();
 						} else {

@@ -782,6 +782,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 
 		// Pre-encode the data and then use _send to send raw
 		// instead of encoding for every socket
+
 		encodedData = this._encode(data);
 		// console.log(clientId, data, JSON.stringify(data).length)
 		// if client is specified, use _send(). otherwise, broadcast stream

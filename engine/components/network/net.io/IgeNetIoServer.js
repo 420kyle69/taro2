@@ -319,7 +319,6 @@ var IgeNetIoServer = {
 
 			if (!clientId)
 				clientId = 'undefined';
-
 			self.sendQueue[clientId].push([ciEncoded, data]);
 		} else {
 			this.log(

@@ -2,6 +2,7 @@ var Unit = IgeEntityPhysics.extend({
 	classId: 'Unit',
 
 	init: function (data, entityIdFromServer) {
+		
 		IgeEntityPhysics.prototype.init.call(this, data.defaultData);
 
 		this.id(entityIdFromServer);
@@ -35,15 +36,7 @@ var Unit = IgeEntityPhysics.extend({
 			unitData = _.pick(unitData, ige.client.keysToAddBeforeRender);
 		}
 
-		self._stats = Object.assign(
-			data,
-			unitData,
-			{
-				// skin: unitType.skin,
-				bonusSpeed: 0,
-				flip: data.flip == undefined ? 0 : data.flip
-			}
-		);
+		self._stats = {...unitData, ...data}; // data should overwrite unitData
 		self.entityId = entityIdFromServer;
 
 		// dont save variables in _stats as _stats is stringified and synced
@@ -65,6 +58,7 @@ var Unit = IgeEntityPhysics.extend({
 		Unit.prototype.log(`initializing new unit ${this.id()}`);
 
 		if (ige.isClient) {
+
 			this.addToRenderer(defaultAnimation && (defaultAnimation.frames[0] - 1));
 			ige.client.emit('create-unit', this);
 			this.transformTexture(this._translate.x, this._translate.y, 0);
