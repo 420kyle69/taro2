@@ -10,7 +10,6 @@ var Player = IgeEntity.extend({
 		
 		var playerData = ige.game.getAsset('playerTypes', data.playerTypeId);		
 		this._stats = _.merge(playerData, data);
-		// this._stats = data;
 
 		// console.log(this._stats.attributes)
 		// dont save variables in _stats as _stats is stringified and synced
