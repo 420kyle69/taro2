@@ -91,7 +91,7 @@ var GameComponent = IgeEntity.extend({
 			isEmailVerified: data.isEmailVerified,
 			banChat: data.banChat,
 			mutedUsers: data.mutedUsers,
-			isUserVerified: data.isUserVerified
+			isUserVerified: true
 		};
 
 		var player = new Player(playerData);

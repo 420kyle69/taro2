@@ -4721,7 +4721,7 @@ var IgeEntity = IgeObject.extend({
 			switch(this._category) {
 
 				case 'unit': 
-					keys = ["type", "stateId", "ownerId", "ownerPlayerId", "currentItemIndex", "currentItemId", "flip"]
+					keys = ["name", "type", "stateId", "ownerId", "ownerPlayerId", "currentItemIndex", "currentItemId", "flip"]
 					data = { 
 						attributes: {}, 
 						// variables: {} 
