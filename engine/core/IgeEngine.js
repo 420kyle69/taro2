@@ -1752,9 +1752,6 @@ var IgeEngine = IgeEntity.extend({
 			ige.triggerProfiler = {}
 			ige.triggersQueued = []; // only empties on server-side as client-side never reaches here
 			
-			if (!ige.gameLoopTickHasExecuted) {
-				return;
-			}
 			
 			if (ige.isClient) {
 				if (ige.client.myPlayer) {
@@ -1770,6 +1767,10 @@ var IgeEngine = IgeEntity.extend({
 					oldestSnapshot = ige.snapshots.shift();
 				}
 
+				return;
+			}
+
+			if (!ige.gameLoopTickHasExecuted) {
 				return;
 			}
 			
