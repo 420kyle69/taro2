@@ -4010,16 +4010,16 @@ var IgeEntity = IgeObject.extend({
 			self.mount(ige.client.rootScene);
 			self.drawMouse(true)
 				.drawBoundsData(false)
-				.mouseDown(function (event, evc) {
-					if (event.which === 1 && ige.mapEditor.selectEntities) {
-						this.onMouseDown = true;
-						this.onMouseMove = false;
-					}
-				})
 				.mouseMove(function (event) {
 					if (this.onMouseDown && ige.mapEditor.selectEntities) {
 						this.onMouseMove = true;
 						this.translateTo(ige.mapEditor.mouseCoordinatesWRTVp.x, ige.mapEditor.mouseCoordinatesWRTVp.y, 0);
+					}
+				})
+				.mouseDown(function (event, evc) {
+					if (event.which === 1 && ige.mapEditor.selectEntities) {
+						this.onMouseDown = true;
+						this.onMouseMove = false;
 					}
 				})
 				.mouseUp(function (event) {
