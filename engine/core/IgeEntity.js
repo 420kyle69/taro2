@@ -4721,7 +4721,7 @@ var IgeEntity = IgeObject.extend({
 			switch(this._category) {
 
 				case 'unit': 
-					keys = ["name", "type", "stateId", "ownerId", "ownerPlayerId", "currentItemIndex", "currentItemId", "flip"]
+					keys = ["name", "type", "stateId", "ownerId", "ownerPlayerId", "currentItemIndex", "currentItemId", "flip", "skin"]
 					data = { 
 						attributes: {}, 
 						// variables: {} 
@@ -4752,7 +4752,7 @@ var IgeEntity = IgeObject.extend({
 						// variables: {} 
 					};				
 
-					// send sensitive information to actual players only
+					// send sensitive information to the target clients only
 					if (this._stats.clientId == clientId) {
 						data.coins = this._stats.coins;
 						data.mutedUsers = this._stats.mutedUsers;
