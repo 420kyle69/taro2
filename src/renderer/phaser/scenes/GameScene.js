@@ -15,6 +15,8 @@ var __extends = (this && this.__extends) || (function () {
 })();
 var GameScene = /** @class */ (function (_super) {
     __extends(GameScene, _super);
+    //marker2: Phaser.GameObjects.Graphics;
+    //rexUI: any;
     function GameScene() {
         var _this = _super.call(this, { key: 'Game' }) || this;
         _this.entityLayers = [];
@@ -23,7 +25,6 @@ var GameScene = /** @class */ (function (_super) {
     }
     GameScene.prototype.init = function () {
         var _this = this;
-        //this.scene.launch('Palette', this.tileset);
         if (ige.isMobile) {
             this.scene.launch('MobileControls');
         }
@@ -60,34 +61,34 @@ var GameScene = /** @class */ (function (_super) {
             y -= camera.height / 2;
             camera.setScroll(x, y);
         });
-        ige.client.on('enterDevMode', function () {
-            if (_this.devPalette) {
-                _this.devPalette.setVisible(true);
-                _this.devPalette.texturesLayer.setVisible(true);
-                _this.devPalette.camera.setVisible(true);
-                _this.devPalette.scrollBarContainer.setVisible(true);
+        /*ige.client.on('enterDevMode', () => {
+            if (this.devPalette) {
+                this.devPalette.setVisible(true);
+                this.devPalette.texturesLayer.setVisible(true);
+                this.devPalette.camera.setVisible(true);
+                this.devPalette.scrollBarContainer.setVisible(true);
+            } else {
+                this.devPalette = new PhaserPalette(this, this.tileset, this.rexUI);
+                const map = this.devPalette.map;
+                this.selectedTile = map.getTileAt(2, 3);
+                this.marker2 = this.add.graphics();
+                this.marker2.lineStyle(2, 0x000000, 1);
+                this.marker2.strokeRect(0, 0, map.tileWidth, map.tileHeight);
+                this.marker2.setVisible(false);
             }
-            else {
-                _this.devPalette = new PhaserPalette(_this, _this.tileset, _this.rexUI);
-                var map = _this.devPalette.map;
-                _this.selectedTile = map.getTileAt(2, 3);
-                _this.marker2 = _this.add.graphics();
-                _this.marker2.lineStyle(2, 0x000000, 1);
-                _this.marker2.strokeRect(0, 0, map.tileWidth, map.tileHeight);
-                _this.marker2.setVisible(false);
+        });*/
+        /*ige.client.on('leaveDevMode', () => {
+            this.devPalette.setVisible(false);
+            this.devPalette.texturesLayer.setVisible(false);
+            this.devPalette.camera.setVisible(false);
+            this.devPalette.scrollBarContainer.setVisible(false);
+        });
+
+        this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
+            if (this.devPalette && this.devPalette.visible) {
+                this.devPalette.zoom(pointer, deltaY);
             }
-        });
-        ige.client.on('leaveDevMode', function () {
-            _this.devPalette.setVisible(false);
-            _this.devPalette.texturesLayer.setVisible(false);
-            _this.devPalette.camera.setVisible(false);
-            _this.devPalette.scrollBarContainer.setVisible(false);
-        });
-        this.input.on('wheel', function (pointer, gameObjects, deltaX, deltaY, deltaZ) {
-            if (_this.devPalette && _this.devPalette.visible) {
-                _this.devPalette.zoom(pointer, deltaY);
-            }
-        });
+        });*/
     };
     GameScene.prototype.preload = function () {
         var _this = this;
@@ -116,9 +117,6 @@ var GameScene = /** @class */ (function (_super) {
         this.load.tilemapTiledJSON('map', this.patchMapData(data.map));
         this.load.bitmapFont('Arial_24px_bold_black', '/assets/fonts/Arial_24px_bold_black_0.png', '/assets/fonts/Arial_24px_bold_black.fnt');
         this.load.bitmapFont('Arial_24px_bold_white', '/assets/fonts/Arial_24px_bold_white_0.png', '/assets/fonts/Arial_24px_bold_white.fnt');
-        this.load.scenePlugin('rexuiplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js', 
-        //'src/renderer/phaser/rexuiplugin.min.js',
-        'rexUI', 'rexUI');
     };
     GameScene.prototype.loadEntity = function (key, data, skin) {
         var _this = this;
@@ -164,6 +162,7 @@ var GameScene = /** @class */ (function (_super) {
     };
     GameScene.prototype.create = function () {
         var _this = this;
+        this.scene.launch('Palette');
         ige.client.rendererLoaded.resolve();
         var map = this.tilemap = this.make.tilemap({ key: 'map' });
         var data = ige.game.data;
@@ -172,7 +171,6 @@ var GameScene = /** @class */ (function (_super) {
             var key = "tiles/".concat(tileset.name);
             var extrudedKey = "extruded-".concat(key);
             if (_this.textures.exists(extrudedKey)) {
-                console.log(tileset.name, key, tileset.tilewidth, tileset.tileheight, (tileset.margin || 0) + 1, (tileset.spacing || 0) + 2);
                 _this.tileset = map.addTilesetImage(tileset.name, extrudedKey, tileset.tilewidth, tileset.tileheight, (tileset.margin || 0) + 1, (tileset.spacing || 0) + 2);
             }
             else {
@@ -311,10 +309,10 @@ var GameScene = /** @class */ (function (_super) {
                 element.setActive(true).setVisible(true);
         });
         if (ige.developerMode.active) {
-            var worldPoint2 = this.cameras.getCamera('palette').getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
-            this.marker2.clear();
+            var worldPoint2 = ige.renderer.scene.getScene('Palette').cameras.getCamera('palette').getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
+            /*this.marker2.clear();
             this.marker2.strokeRect(0, 0, this.devPalette.map.tileWidth * this.devPalette.texturesLayer.scaleX, this.devPalette.map.tileHeight * this.devPalette.texturesLayer.scaleY);
-            this.marker2.setVisible(true);
+            this.marker2.setVisible(true);*/
             // Rounds down to nearest tile
             var pointerTileX2 = this.devPalette.map.worldToTileX(worldPoint2.x);
             var pointerTileY2 = this.devPalette.map.worldToTileY(worldPoint2.y);
@@ -328,17 +326,18 @@ var GameScene = /** @class */ (function (_super) {
                 && this.input.activePointer.y < this.devPalette.scrollBarContainer.y + this.devPalette.scrollBarContainer.height) {
                 this.marker.setVisible(false);
                 // Snap to tile coordinates, but in world space
-                this.marker2.x = this.devPalette.map.tileToWorldX(pointerTileX2);
+                /*this.marker2.x = this.devPalette.map.tileToWorldX(pointerTileX2);
                 this.marker2.y = this.devPalette.map.tileToWorldY(pointerTileY2);
+
                 if (this.input.manager.activePointer.rightButtonDown()) {
                     this.selectedTile = this.devPalette.map.getTileAt(pointerTileX2, pointerTileY2);
-                }
+                }*/
             }
             else if (!(this.input.activePointer.x > this.devPalette.scrollBarContainer.x
                 && this.input.activePointer.x < this.devPalette.scrollBarContainer.x + this.devPalette.scrollBarContainer.width
                 && this.input.activePointer.y > this.devPalette.scrollBarContainer.y
                 && this.input.activePointer.y < this.devPalette.scrollBarContainer.y + this.devPalette.scrollBarContainer.height)) {
-                this.marker2.setVisible(false);
+                //this.marker2.setVisible(false);
                 this.marker.setVisible(true);
                 // Rounds down to nearest tile
                 var pointerTileX = this.tilemap.worldToTileX(worldPoint.x);

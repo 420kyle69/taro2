@@ -22,8 +22,8 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 		this.tileset = tileset;
 		this.rexUI = rexUI;
 		//this.setScrollFactor(0,0);
-		this.x = -10750;
-		this.y = 50;
+		this.x = -1000;
+		this.y = 0;
 
 		// Load a map from a 2D array of tile indices
 		const paletteMap = [];
@@ -48,7 +48,7 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 
 
 		//  The miniCam is 400px wide, so can display the whole world at a zoom of 0.2
-		const camera = this.camera = this.scene.cameras.add(900, 100, texturesLayer.width, texturesLayer.height).setScroll(this.x, this.y).setZoom(1).setName('palette');
+		const camera = this.camera = this.scene.cameras.add(1200, 100, texturesLayer.width, texturesLayer.height).setScroll(this.x, this.y).setZoom(1).setName('palette');
 		camera.setBackgroundColor(0x002244);
 
 		/*const background = this.background = scene.add.graphics();
@@ -69,8 +69,8 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 
 		const scrollBarContainer = this.scrollBarContainer = new Phaser.GameObjects.Container(scene);
 		scene.add.existing(scrollBarContainer);
-		scrollBarContainer.x = 900;
-		scrollBarContainer.y = 100;
+		scrollBarContainer.x = this.camera.x;
+		scrollBarContainer.y = this.camera.y;
 
 		const scrollBarBottom = this.scrollBarBottom = this.rexUI.add.scrollBar({
 			width: this.camera.width,

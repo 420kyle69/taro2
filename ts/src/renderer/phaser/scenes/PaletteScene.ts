@@ -4,21 +4,30 @@ class PaletteScene extends PhaserScene {
 	tilemap: Phaser.Tilemaps.Tilemap;
 	selectedTile: Phaser.Tilemaps.Tile;
 	marker2: any;
+	rexUI: any;
+	gameScene: any;
+	tileset: Phaser.Tilemaps.Tileset;
 
 	constructor() {
 		super({ key: 'Palette' });
 	}
 
-	init (tileset): void {
+	init (): void {
 		console.log('palette scene init');
+		this.gameScene = ige.renderer.scene.getScene('Game') as any;
 
-		/*ige.client.on('enterDevMode', () => {
+		ige.client.on('enterDevMode', () => {
 			if (this.devPalette) {
 				this.devPalette.setVisible(true);
+				this.devPalette.texturesLayer.setVisible(true);
+				this.devPalette.camera.setVisible(true);
+				this.devPalette.scrollBarContainer.setVisible(true);
 			} else {
-				this.devPalette = new PhaserPalette(this, tileset);
+				console.log(this.tileset);
+				this.devPalette = new PhaserPalette(this, this.tileset, this.rexUI);
+				this.gameScene.devPalette = this.devPalette;
 				const map = this.devPalette.map;
-				this.selectedTile = map.getTileAt(2, 3);
+				this.gameScene.selectedTile = map.getTileAt(2, 3);
 		 		this.marker2 = this.add.graphics();
 				this.marker2.lineStyle(2, 0x000000, 1);
 				this.marker2.strokeRect(0, 0, map.tileWidth, map.tileHeight);
@@ -28,49 +37,103 @@ class PaletteScene extends PhaserScene {
 
 		ige.client.on('leaveDevMode', () => {
 			this.devPalette.setVisible(false);
-		});*/
+			this.devPalette.texturesLayer.setVisible(false);
+			this.devPalette.camera.setVisible(false);
+			this.devPalette.scrollBarContainer.setVisible(false);
+		});
 
-		/*if (this.devPalette) {
-			this.devPalette.setVisible(true);
-		} else {
-			this.devPalette = new PhaserPalette(this, tileset);
-		}*/
+		this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
+			if (this.devPalette && this.devPalette.visible) {
+				this.devPalette.zoom(pointer, deltaY);
+			}
+		})
 	}
 
-	/*preload (): void {
+	preload (): void {
+		/*const data = ige.game.data;
 
+		data.map.tilesets.forEach((tileset) => {
+			const key = `tiles/${tileset.name}`;
+			this.load.once(`filecomplete-image-${key}`, () => {
+				const texture = this.textures.get(key);
+				const canvas = this.mainScene.extrude(tileset,
+					texture.getSourceImage() as HTMLImageElement
+				);
+				if (canvas) {
+					this.textures.remove(texture);
+					this.textures.addCanvas(`extruded-${key}`, canvas);
+				}
+			});
+			this.load.image(key, this.patchAssetUrl(tileset.image));
+		});*/
 
-	}*/
+		this.load.scenePlugin(
+			'rexuiplugin',
+			'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js',
+			//'src/renderer/phaser/rexuiplugin.min.js',
+			'rexUI',
+			'rexUI'
+		  );
+	}
+
+	create(): void {
+		const data = ige.game.data;
+		const map = this.tilemap = this.make.tilemap({ key: 'map' });
+		
+		data.map.tilesets.forEach((tileset) => {
+			const key = `tiles/${tileset.name}`;
+			const extrudedKey = `extruded-${key}`;
+			//if (this.textures.exists(extrudedKey)) {
+				this.tileset = map.addTilesetImage(tileset.name, extrudedKey,
+					tileset.tilewidth, tileset.tileheight,
+					(tileset.margin || 0) + 1,
+					(tileset.spacing || 0) + 2
+				);
+				console.log(this.tileset);
+			/*} else {
+				this.tileset = map.addTilesetImage(tileset.name, key);
+			}*/
+		});
+	}
 
 	update (): void {
 
 		if(ige.developerMode.active) {
 
-			const worldPoint = this.cameras.main.getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
-			/*this.marker2.clear();
-			this.marker2.strokeRect(0, 0, this.devPalette.map.tileWidth, this.devPalette.map.tileHeight);*/
+			const worldPoint2 = this.cameras.getCamera('palette').getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
+			this.marker2.clear();
+			this.marker2.strokeRect(0, 0, this.devPalette.map.tileWidth * this.devPalette.texturesLayer.scaleX, this.devPalette.map.tileHeight * this.devPalette.texturesLayer.scaleY);
 			this.marker2.setVisible(true);
 			// Rounds down to nearest tile
-			const pointerTileX = this.devPalette.map.worldToTileX(worldPoint.x);
-			const pointerTileY = this.devPalette.map.worldToTileY(worldPoint.y);
+			const pointerTileX2 = this.devPalette.map.worldToTileX(worldPoint2.x);
+			const pointerTileY2 = this.devPalette.map.worldToTileY(worldPoint2.y);
 
-			console.log(pointerTileX, pointerTileY);
-
-			if (0 < pointerTileX && pointerTileX < 27 && 0 < pointerTileY && pointerTileY < 20) {
-				console.log('true', pointerTileX, pointerTileY);
+			if (0 <= pointerTileX2
+				&& pointerTileX2 < 27
+				&& 0 <= pointerTileY2
+				&& pointerTileY2 < 20
+				&& this.input.activePointer.x > this.devPalette.scrollBarContainer.x
+				&& this.input.activePointer.x < this.devPalette.scrollBarContainer.x + this.devPalette.scrollBarContainer.width
+				&& this.input.activePointer.y > this.devPalette.scrollBarContainer.y
+				&& this.input.activePointer.y < this.devPalette.scrollBarContainer.y + this.devPalette.scrollBarContainer.height) {
+				//this.marker.setVisible(false);
 				// Snap to tile coordinates, but in world space
-				this.marker2.x = this.devPalette.map.tileToWorldX(pointerTileX);
-				this.marker2.y = this.devPalette.map.tileToWorldY(pointerTileY);
+				this.marker2.x = this.devPalette.map.tileToWorldX(pointerTileX2);
+				this.marker2.y = this.devPalette.map.tileToWorldY(pointerTileY2);
 
 				if (this.input.manager.activePointer.rightButtonDown()) {
-					this.selectedTile = this.devPalette.map.getTileAt(pointerTileX, pointerTileY);
+					this.gameScene.selectedTile = this.devPalette.map.getTileAt(pointerTileX2, pointerTileY2);
 				}
-			} else {
+			} else if (!(this.input.activePointer.x > this.devPalette.scrollBarContainer.x
+				&& this.input.activePointer.x < this.devPalette.scrollBarContainer.x + this.devPalette.scrollBarContainer.width
+				&& this.input.activePointer.y > this.devPalette.scrollBarContainer.y
+				&& this.input.activePointer.y < this.devPalette.scrollBarContainer.y + this.devPalette.scrollBarContainer.height)) {
 				this.marker2.setVisible(false);
+
 			}
 
-
 		}
+
 
 	}
 
