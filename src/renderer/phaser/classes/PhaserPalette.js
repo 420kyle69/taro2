@@ -140,9 +140,9 @@ var PhaserPalette = /** @class */ (function (_super) {
     PhaserPalette.prototype.zoom = function (pointer, deltaY) {
         var targetZoom;
         if (deltaY < 0)
-            targetZoom = this.camera.zoom * (-deltaY / 250);
+            targetZoom = this.camera.zoom * 1.2;
         else
-            targetZoom = this.camera.zoom / (deltaY / 250);
+            targetZoom = this.camera.zoom / 1.2;
         if (targetZoom < 1)
             targetZoom = 1;
         else if (targetZoom > 20)

@@ -163,8 +163,8 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 
 	zoom (pointer: any, deltaY: number): void {
 		let targetZoom;
-		if (deltaY < 0) targetZoom = this.camera.zoom * (-deltaY/250);
-		else targetZoom = this.camera.zoom / (deltaY/250);
+		if (deltaY < 0) targetZoom = this.camera.zoom * 1.2;
+		else targetZoom = this.camera.zoom / 1.2;
 		if (targetZoom < 1) targetZoom = 1;
 		else if (targetZoom > 20) targetZoom = 20;
 		this.camera.setZoom(targetZoom);
