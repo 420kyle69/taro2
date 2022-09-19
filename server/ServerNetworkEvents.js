@@ -435,8 +435,10 @@ var ServerNetworkEvents = {
 	},
 
 	_onEditTile: function(data, clientId) {
-		console.log(data)
-		ige.network.send("editTile", data)
+		// only allow developers to modify the tiles
+		if (ige.server.developerClientIds.includes(clientId)) {
+			ige.network.send("editTile", data)	
+		}
 	},
 
 	_onBuyItem: function (id, clientId) {

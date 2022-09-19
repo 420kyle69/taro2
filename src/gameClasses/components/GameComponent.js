@@ -116,7 +116,9 @@ var GameComponent = IgeEntity.extend({
 		}
 
 		if (ige.isServer) {
-			ige.gameText.sendLatestText(data.clientId); // send latest ui information to the client
+			console.log(player._stats.permissions)
+			// send latest ui information to the client
+			ige.gameText.sendLatestText(data.clientId); 
 			// ige.shopkeeper.updateShopInventory(ige.shopkeeper.inventory, data.clientId) // send latest ui information to the client
 
 			var isOwner = ige.server.owner == data._id && data.controlledBy == 'human';
