@@ -98,6 +98,7 @@ var Server = IgeClass.extend({
 		self.logTriggers = {
 
 		};
+		self.developerClientIds = [];
 
 		ige.env = process.env.ENV || 'production';
 		self.config = config[ige.env];
@@ -311,9 +312,9 @@ var Server = IgeClass.extend({
 		}
 
 		app.get('/', (req, res) => {
-			
-			const jwt = require("jsonwebtoken");
-			
+
+			const jwt = require('jsonwebtoken');
+
 			const token = jwt.sign({ userId: '', createdAt: Date.now(), gameSlug: global.standaloneGame.defaultData.gameSlug }, process.env.JWT_SECRET_KEY, {
 				expiresIn: ige.server.TOKEN_EXPIRES_IN.toString(),
 			});
@@ -528,12 +529,8 @@ var Server = IgeClass.extend({
 						ige.addComponent(IgeChatComponent);
 						ige.addComponent(ItemComponent);
 						ige.addComponent(TimerComponent);
-						ige.addComponent(TriggerComponent);
-						ige.addComponent(VariableComponent);
 						ige.addComponent(GameTextComponent);
-						ige.addComponent(ScriptComponent);
-						ige.addComponent(ConditionComponent);
-						ige.addComponent(ActionComponent);
+
 						ige.addComponent(AdComponent);
 						ige.addComponent(SoundComponent);
 						ige.addComponent(RegionManager);
@@ -545,10 +542,6 @@ var Server = IgeClass.extend({
 						let map = ige.scaleMap(_.cloneDeep(ige.game.data.map));
 						ige.map.load(map);
 
-						// if (ige.physics.engine === 'CRASH') {
-						// 	ige.physics.addBorders();
-						// }
-
 						ige.game.start();
 
 						self.gameLoaded = true;
@@ -556,12 +549,21 @@ var Server = IgeClass.extend({
 						// send dev logs to developer every second
 						var logInterval = setInterval(function () {
 							// send only if developer client is connect
-							if (ige.isServer && ((self.developerClientId && ige.server.clients[self.developerClientId]) || process.env.ENV == 'standalone')) {
-								ige.variable.devLogs.status = ige.server.getStatus();
-								ige.network.send('devLogs', ige.variable.devLogs, self.developerClientId);
+							if (ige.isServer && self.developerClientIds.length) {
 
-								if (ige.script.errorLogs != {}) {
-									ige.network.send('errorLogs', ige.script.errorLogs, self.developerClientId);
+								ige.game.devLogs.status = ige.server.getStatus();
+								const sendErrors = Object.keys(ige.script.errorLogs).length;
+								self.developerClientIds.forEach(
+									id => {
+										ige.network.send('devLogs', ige.game.devLogs, id);
+
+										if (sendErrors) {
+											ige.network.send('errorLogs', ige.script.errorLogs, id);
+										}
+
+									});
+
+								if (sendErrors) {
 									ige.script.errorLogs = {};
 								}
 							}
@@ -665,8 +667,6 @@ var Server = IgeClass.extend({
 		ige.network.define('ban-user', self._onBanUser);
 		ige.network.define('ban-ip', self._onBanIp);
 		ige.network.define('ban-chat', self._onBanChat);
-
-		ige.network.define('setOwner', self._setOwner);
 
 		ige.network.define('trade', self._onTrade);
 	},

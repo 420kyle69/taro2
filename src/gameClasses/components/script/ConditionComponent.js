@@ -2,11 +2,15 @@ var ConditionComponent = IgeEntity.extend({
 	classId: 'ConditionComponent',
 	componentId: 'condition',
 
-	init: function (entity, options) {
+	init: function (scriptComponent, entity) {
 		var self = this;
+		self._script = scriptComponent;
+		self._entity = entity;
 	},
 
 	run: function (items, vars) {
+		var self = this;
+		
 		if (items == undefined || items.length <= 0) {
 			return true;
 		}
@@ -15,8 +19,8 @@ var ConditionComponent = IgeEntity.extend({
 
 		var op = opObj.operator;
 
-		var leftVar = ige.variable.getValue(left, vars);
-		var rightVar = ige.variable.getValue(right, vars);
+		var leftVar = self._script.variable.getValue(left, vars);
+		var rightVar = self._script.variable.getValue(right, vars);
 
 		// if the operands are igeEntities, then compare their id's
 		if (leftVar && leftVar._id != undefined && rightVar && rightVar._id != undefined) {

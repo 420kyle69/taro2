@@ -32,6 +32,8 @@ var IgeNetIoComponent = IgeEventingClass.extend([
 		this.totalClientTimeElapsed = [];
 		this.totalServerTimeElapsed = [];
 
+		this.isPaused = false;
+
 		/* CEXCLUDE */
 		if (ige.isServer) {
 			this.implement(IgeNetIoServer);
@@ -46,6 +48,14 @@ var IgeNetIoComponent = IgeEventingClass.extend([
 		}
 
 		this.log(`Network component initiated with Net.IO version: ${this._netio.version}`);
+	},
+
+	pause: function() {
+		this.isPaused = true;
+	},
+	
+	resume: function() {
+		this.isPaused = false;
 	},
 
 	/**

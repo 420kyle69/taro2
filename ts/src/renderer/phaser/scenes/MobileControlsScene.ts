@@ -9,6 +9,9 @@ class MobileControlsScene extends PhaserScene {
 	controls: Phaser.GameObjects.Container;
 	joysticks: PhaserJoystick[] = [];
 
+	enablePointerNextUpdate: boolean;
+	disablePointerEvents: boolean;
+
 	constructor() {
 		super({ key: 'MobileControls' });
 	}
@@ -78,17 +81,19 @@ class MobileControlsScene extends PhaserScene {
 					let clicked = false;
 
 					button.on('pointerdown', () => {
+						this.disablePointerEvents = true;
+
 						if (clicked) return;
 						clicked = true;
-
 						button.setTexture('mobile-button-down');
 
 						settings.onStart && settings.onStart();
 					});
 					const onPointerEnd = () => {
+						this.enablePointerNextUpdate = true;
+
 						if (!clicked) return;
 						clicked = false;
-
 						button.setTexture('mobile-button-up');
 
 						settings.onEnd && settings.onEnd();
@@ -117,7 +122,44 @@ class MobileControlsScene extends PhaserScene {
 			this.scene.setVisible(value);
 		});
 
-		if (scale.fullscreen.available) {
+		this.input.on('pointerdown', function(pointer){
+			if (!this.disablePointerEvents) {
+				var touchX = pointer.x;
+				var touchY = pointer.y;
+				if (touchX < this.cameras.main.displayWidth / 2.4) {
+					const leftJoystick = this.joysticks[0];
+					if (leftJoystick) {
+						leftJoystick.show();
+						leftJoystick.x = touchX;
+						leftJoystick.y = touchY;
+						leftJoystick.updateTransform();
+					}
+				} else if (touchX > this.cameras.main.displayWidth - (this.cameras.main.displayWidth / 2.4)) {
+					const rightJoystick = this.joysticks[1];
+					if (rightJoystick) {
+						rightJoystick.show();
+						rightJoystick.x = touchX;
+						rightJoystick.y = touchY;
+						rightJoystick.updateTransform();
+					}
+				}
+			}
+		}, this);
+
+		this.input.on('pointerup', function(pointer){
+			if (!this.disablePointerEvents) {
+				var touchX = pointer.x;
+				if (touchX < this.cameras.main.displayWidth / 2.4) {
+					const leftJoystick = this.joysticks[0];
+					leftJoystick.hide();
+				} else if (touchX > this.cameras.main.displayWidth - (this.cameras.main.displayWidth / 2.4)) {
+					const rightJoystick = this.joysticks[1];
+					rightJoystick.hide();
+				}
+			}
+		}, this);
+
+		/*if (scale.fullscreen.available) {
 			scale.fullscreenTarget =
 				document.getElementById('game-div');
 			document.body.addEventListener('touchstart', () => {
@@ -126,7 +168,7 @@ class MobileControlsScene extends PhaserScene {
 			document.body.addEventListener('touchend', () => {
 				this.enterFullscreen();
 			}, true);
-		}
+		}*/
 	}
 
 	preload (): void {
@@ -143,6 +185,13 @@ class MobileControlsScene extends PhaserScene {
 		));
 	}
 
+	update () {
+		if (this.enablePointerNextUpdate) {
+			this.enablePointerNextUpdate = false;
+			this.disablePointerEvents = false;
+		}
+	}
+
 	private enterFullscreen() {
 		if (!this.scale.isFullscreen) {
 			this.scale.startFullscreen();
@@ -154,11 +203,8 @@ class MobileControlsScene extends PhaserScene {
 		// fit the width and be anchored to the bottom
 		const controls = this.controls;
 		const scale = this.scale;
-		controls.y = scale.height - 540;
-		controls.setScale(scale.width / 960);
 
-		this.joysticks.forEach((j) => {
-			j.updateTransform();
-		});
+		controls.setScale(scale.width / 960);
+		controls.y = scale.height - 540 * controls.scale;
 	}
 }

@@ -14,11 +14,8 @@ var Item = IgeEntityPhysics.extend({
 			itemData = _.pick(itemData, ige.client.keysToAddBeforeRender);
 		}
 
-		self._stats = Object.assign(
-			data,
-			itemData
-		);
-
+		self._stats = _.merge(itemData, data);
+		
 		if (self._stats.projectileType) {
 			self.projectileData = ige.game.getAsset('projectileTypes', self._stats.projectileType);
 		}
@@ -57,6 +54,9 @@ var Item = IgeEntityPhysics.extend({
 		// convert numbers stored as string in database to int
 		self.parseEntityObject(self._stats);
 		self.addComponent(AttributeComponent); // every item gets one
+		
+		self.addComponent(ScriptComponent); // entity-scripting
+		self.script.load(data.scripts)
 
 		ige.game.lastCreatedItemId = entityIdFromServer || this.id();
 
@@ -68,14 +68,21 @@ var Item = IgeEntityPhysics.extend({
 
 		self.scaleRatio = ige.physics && ige.physics.scaleRatio();
 		if (ige.isServer) {
-			this.streamMode(1);
-			self.streamCreate();
+
+			if (ige.isServer && ige.network.isPaused) {
+				self.streamMode(0);
+			} else {
+				self.streamMode(1);				
+				self.streamCreate();			
+			}
+
 			ige.server.totalItemsCreated++;
 		} else if (ige.isClient) {
 			self._hidden = self._stats.isHidden;
 			if (self._stats.currentBody == undefined || self._stats.currentBody.type == 'none' || self._hidden) {
 				self.hide();
 				this.emit('hide');
+
 			} else {
 				self.show();
 				this.emit('show');
@@ -120,15 +127,12 @@ var Item = IgeEntityPhysics.extend({
 
 			self.show();
 			if (ige.isClient) {
-				this.emit('show');
 				self.updateTexture();
 			}
 		} else {
 			ige.devLog('hide & destroyBody.');
 			self.hide();
-			if (ige.isClient) {
-				this.emit('hide');
-			}
+
 			self.destroyBody();
 			if (ige.isServer) {
 				this.streamMode(2);
@@ -187,6 +191,7 @@ var Item = IgeEntityPhysics.extend({
 			if (isInvisible || !hasBody) {
 				self.hide();
 				this.emit('hide');
+
 				return;
 			}
 		}
@@ -208,8 +213,8 @@ var Item = IgeEntityPhysics.extend({
 
 		if (newOwner == oldOwner)
 			return;
-
 		if (newOwner) {
+
 			if (newOwner._stats.currentItemIndex !== this._stats.slotIndex) {
 				this.setState('unselected');
 			}
@@ -221,7 +226,8 @@ var Item = IgeEntityPhysics.extend({
 
 			this.oldOwnerId = this._stats.ownerUnitId;
 			this._stats.ownerUnitId = newOwner.id();
-		} else { // item is being dropped.
+		} else {
+			// item is being dropped.
 			this._stats.ownerUnitId = undefined;
 
 			// get transform of its last owner
@@ -259,6 +265,7 @@ var Item = IgeEntityPhysics.extend({
 		var self = this;
 		var now = ige.now;
 		var owner = self.getOwnerUnit();
+		var ownerId = (owner) ? owner.id() : undefined;
 		var player = owner && owner.getOwner();
 		var isUsed = false;
 
@@ -286,10 +293,11 @@ var Item = IgeEntityPhysics.extend({
 				}
 
 				self._stats.lastUsed = ige.now;
-				ige.trigger && ige.trigger.fire('unitUsesItem', {
-					unitId: (owner) ? owner.id() : undefined,
-					itemId: self.id()
-				});
+
+				let triggerParams = {unitId: ownerId, itemId: self.id()};
+
+				ige.queueTrigger('unitUsesItem', triggerParams);
+				self.script.trigger('itemIsUsed', triggerParams);
 
 				if (ige.physics && self._stats.type == 'weapon') {
 					if (self._stats.isGun) {
@@ -342,11 +350,11 @@ var Item = IgeEntityPhysics.extend({
 										{
 											type: self._stats.projectileType,
 											sourceItemId: self.id(),
-											sourceUnitId: (owner) ? owner.id() : undefined,
+											sourceUnitId: ownerId,
 											defaultData: defaultData,
 											damageData: {
 												targetsAffected: this._stats.damage.targetsAffected,
-												sourceUnitId: owner.id(),
+												sourceUnitId: ownerId,
 												sourceItemId: self.id(),
 												sourcePlayerId: owner.getOwner().id(),
 												unitAttributes: this._stats.damage.unitAttributes,
@@ -355,6 +363,7 @@ var Item = IgeEntityPhysics.extend({
 										});
 
 									var projectile = new Projectile(data);
+									projectile.script.trigger("entityCreated");		
 									ige.game.lastCreatedProjectileId = projectile.id();
 								}
 								if (this._stats.bulletType == 'raycast') {
@@ -436,8 +445,9 @@ var Item = IgeEntityPhysics.extend({
 									// if (!self._stats.penetration) {
 									ige.game.entitiesCollidingWithLastRaycast = _.orderBy(self.raycastTargets, ['raycastFraction'], ['asc']);
 									// }
-									ige.trigger && ige.trigger.fire('raycastItemFired', {
-										itemId: self.id()
+									ige.queueTrigger('raycastItemFired', {
+										itemId: self.id(),
+										unitId: ownerId
 									});
 								}
 								self.raycastTargets = [];
@@ -472,7 +482,7 @@ var Item = IgeEntityPhysics.extend({
 
 							var damageData = {
 								targetsAffected: this._stats.damage.targetsAffected,
-								sourceUnitId: owner.id(),
+								sourceUnitId: ownerId,
 								sourceItemId: self.id(),
 								sourcePlayerId: owner.getOwner().id(),
 								unitAttributes: this._stats.damage.unitAttributes,
@@ -691,7 +701,7 @@ var Item = IgeEntityPhysics.extend({
 		}
 
 		if (owner && ige.trigger) {
-			ige.trigger && ige.trigger.fire('unitStartsUsingAnItem', {
+			ige.queueTrigger('unitStartsUsingAnItem', {
 				unitId: owner.id(),
 				itemId: this.id()
 			});
@@ -705,7 +715,7 @@ var Item = IgeEntityPhysics.extend({
 			var owner = self.getOwnerUnit();
 
 			if (owner && ige.trigger) {
-				ige.trigger && ige.trigger.fire('unitStopsUsingAnItem', {
+				ige.queueTrigger('unitStopsUsingAnItem', {
 					unitId: owner.id(),
 					itemId: self.id()
 				});
@@ -868,6 +878,7 @@ var Item = IgeEntityPhysics.extend({
 							if (newValue) {
 								self.hide();
 								this.emit('hide');
+
 							} else {
 								self.show();
 								this.emit('show');
@@ -923,6 +934,12 @@ var Item = IgeEntityPhysics.extend({
 	 */
 	_behaviour: function (ctx) {
 		var self = this;
+
+		_.forEach(ige.triggersQueued, function (trigger) {
+			trigger.params['thisEntityId'] = self.id();
+			self.script.trigger(trigger.name, trigger.params);
+		});
+
 		var ownerUnit = this.getOwnerUnit();
 		if (ownerUnit && this._stats.stateId != 'dropped') {
 			rotate = ownerUnit.angleToTarget;

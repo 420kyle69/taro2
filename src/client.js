@@ -17,7 +17,7 @@ const Client = IgeEventingClass.extend({
 	classId: 'Client',
 
 	init: function() {
-		//
+
 		this.data = [];
 		this.host = window.isStandalone ? 'https://www.modd.io' : '';
 
@@ -133,7 +133,7 @@ const Client = IgeEventingClass.extend({
 					dataType: 'json',
 					type: 'GET',
 					success: (game) => {
-						//
+
 						resolve(game);
 					}
 				});
@@ -143,18 +143,18 @@ const Client = IgeEventingClass.extend({
 					dataType: 'json',
 					type: 'GET',
 					success: (game) => {
-						//
+
 						const data = { data: {} };
 
 						game.defaultData = game;
 
 						for (let [key, value] of Object.entries(game)) {
-							//
+
 							data['data'][key] = value;
 						}
 
 						for (let [key, value] of Object.entries(game.data)) {
-							//
+
 							data['data'][key] = value;
 						}
 
@@ -167,6 +167,7 @@ const Client = IgeEventingClass.extend({
 		promise.then((game) => {
 			ige.game.data = game.data;
 			ige.addComponent(IgeInputComponent);
+			
 			ige.entitiesToRender = new EntitiesToRender();
 			ige.renderer = new PhaserRenderer();
 			ige.developerMode = new DeveloperMode();
@@ -210,12 +211,12 @@ const Client = IgeEventingClass.extend({
 			// if our url vars contained a serverId we are adding it to params
 			// ADDING check for engine start resolved
 			$.when(this.igeEngineStarted).done(() => {
-				//
+
 				const params = this.getUrlVars();
 				this.serverFound = false;
 
 				if (!window.isStandalone) {
-					//
+
 					this.servers = this.getServersArray();
 				}
 				// undefined if our params did not have a serverId
@@ -224,10 +225,10 @@ const Client = IgeEventingClass.extend({
 				if (this.preSelectedServerId) {
 					//
 					for (let serverObj of this.servers) {
-						//
+
 						// old comment => 'preselected server found! (via direct url)'
 						if (serverObj.id == this.preSelectedServerId) {
-							//
+
 							console.log('pre-selected server found. connecting...'); // prod console log
 
 							this.serverFound = true;
@@ -238,12 +239,12 @@ const Client = IgeEventingClass.extend({
 				}
 
 				if (!this.server) {
-					//
+
 					// if we didn't provide server, we search for the best one
 					const bestServer = this.getBestServer();
 
 					if (bestServer) {
-						//
+
 						this.server = bestServer;
 						this.serverFound = true;
 					}
@@ -261,7 +262,7 @@ const Client = IgeEventingClass.extend({
 		const serverPhysicsEngine = ige.game.data.defaultData.physicsEngine;
 
 		if (clientPhysicsEngine) {
-			//
+
 			ige.addComponent(PhysicsComponent)
 				.physics.sleep(true);
 		}
@@ -270,7 +271,6 @@ const Client = IgeEventingClass.extend({
 	},
 
 	loadMap: function() {
-		//
 		//we need the contents of physicsConfig to progress
 		ige.addComponent(MapComponent);
 		ige.addComponent(RegionManager);
@@ -281,16 +281,14 @@ const Client = IgeEventingClass.extend({
 		ige.map.load(ige.game.data.map);
 	},
 
-	//
 	// new language for old 'initEngine' method
 	//
 	configureEngine: function() {
-		//
 		// let's make it easier by assigning the game data to a variable
 		const gameData = ige.game.data;
 
 		if (!gameData.isDeveloper) { // .isDeveloper property seems to be outdated
-			//
+
 			gameData.isDeveloper = window.isStandalone;
 		}
 
@@ -304,12 +302,12 @@ const Client = IgeEventingClass.extend({
 
 			// still doing things only after physics load
 			if (gameData.defaultData && !isNaN(gameData.defaultData.frameRate)) {
-				//
+
 				ige._physicsTickRate = Math.max(
 					// old comment => 'keep fps range between 15 and 60'
 					20,
 					Math.min(
-						//
+
 						parseInt(gameData.defaultData.frameRate),
 						60
 					)
@@ -346,17 +344,15 @@ const Client = IgeEventingClass.extend({
 			}
 
 			// don't really know if this needs to be inside this
-			ige.addComponent(VariableComponent);
-
 			if(gameData.isDeveloper) {
-				//
+
 				ige.addComponent(DevConsoleComponent);
 			}
 		});
 
 		//this doesn't depend on physics config
 		if (gameData.isDeveloper) {
-			//
+
 			$('#mod-this-game-menu-item').removeClass('d-none');
 		}
 
@@ -367,7 +363,7 @@ const Client = IgeEventingClass.extend({
 		// this is viewport stuff
 		// doing these with this.igeEngineStarted.done()
 		// we can move the Deferred for mapLoaded to before engine start
-		//
+
 		$.when(this.igeEngineStarted, this.mapLoaded, this.rendererLoaded).done(() => {
 			// old comment => 'center camera while loading'
 			const tileWidth = ige.scaleMapDetails.tileWidth;
@@ -416,17 +412,15 @@ const Client = IgeEventingClass.extend({
 			$('.modal-videochat-backdrop, .modal-videochat').removeClass('d-none'); // hmmm
 			$('.modal-videochat').show(); // no...yes?
 
-			//
 			$('.modal-step-link[data-step=2]').click(); // ok this is going to have to be explained
 
-			if ( // big if
-				//
+			if (
 				this.preSelectedServerId &&
 				this.serverFound &&
 				params.joinGame == 'true' &&
 				userId
 			) {
-				//
+
 				this.connectToServer();
 			}
 		});
@@ -434,11 +428,11 @@ const Client = IgeEventingClass.extend({
 	},
 
 	startIgeEngine: function() {
-		//
+
 		ige.start((success) => {
-			//
+
 			if (success) {
-				//
+
 				this.rootScene = new IgeScene2d()
 					.id('rootScene')
 					.drawBounds(false);
@@ -471,10 +465,10 @@ const Client = IgeEventingClass.extend({
 
 				// sandbox check for minimap
 				if (mode == 'sandbox') {
-					//
+
 					ige.addComponent(MapEditorComponent)
 						.mapEditor.createMiniMap();
-					//
+
 					// sandbox also gets a second viewport
 					// moved the code under a duplicate conditional
 					this.vp2 = new IgeViewport()
@@ -498,13 +492,11 @@ const Client = IgeEventingClass.extend({
 						.mapPan.enabled(true);
 
 					ige.client.vp1.drawBounds(true);
-					//
-				} else if (mode == 'play') {
-					//
 
-					//
+				} else if (mode == 'play') {
+
 				} else {
-					//
+
 					console.error('mode was not == to "sandbox" or "play"');
 				}
 
@@ -516,7 +508,6 @@ const Client = IgeEventingClass.extend({
 		});
 	},
 
-	//
 	getServersArray: function() {
 		const serversList = [];
 		let serverOptions = $('#server-list > option').toArray(); // could this be const? idk jQ
@@ -568,35 +559,33 @@ const Client = IgeEventingClass.extend({
 		return firstChoice || secondChoice;
 	},
 
-	//
 	setZoom: function(zoom) {
 		this.emit('zoom', zoom);
 	},
 
-	//
 	connectToServer: function() {
 		// if typeof args[1] == 'function', callback(args[0])
 		ige.network.start(ige.client.server, (clientServer) => { // changed param from 'data' to clientServer
-			//
+
 			for (let serverObj of ige.client.servers) {
-				//
+
 				if (serverObj.url == clientServer.url) {
-					//
+
 					ige.client.server = serverObj;
 					break;
 				}
 			}
 
 			if (ige.client.server) {
-				//
+
 				const serverIP = ige.client.server.url.split('://')[1];
 
 				if (serverIP) {
-					//
+
 					const serverName = serverIP.split('.')[0];
 
 					if (serverName) {
-						//
+
 						$('#server-text').text(`to ${serverName}`);
 					}
 				}
@@ -618,7 +607,7 @@ const Client = IgeEventingClass.extend({
 
 			// old comment => 'create a listener that will fire whenever an entity is created because of the incoming stream data'
 			ige.network.stream.on('entityCreated', (entity) => {
-				//
+
 				if (entity._category == 'unit') {
 					// old comment => 'unit detected. add it to units array'
 					const unit = entity;
@@ -629,7 +618,7 @@ const Client = IgeEventingClass.extend({
 						const ownerPlayer = ige.$(unit._stats.ownerId);
 
 						if (ownerPlayer) {
-							//
+
 							unit.setOwnerPlayer(
 								unit._stats.ownerId,
 								{ dontUpdateName: true }
@@ -646,7 +635,7 @@ const Client = IgeEventingClass.extend({
 					if (player._stats.controlledBy == 'human') {
 						// old comment => 'if the player is me'
 						if (player._stats.clientId == ige.network.id()) {
-							//
+
 							ige.client.eventLog.push([
 								ige._currentTime - ige.client.eventLogStartTime,
 								'My player created'
@@ -666,7 +655,7 @@ const Client = IgeEventingClass.extend({
 						const unitsObject = ige.game.getUnitsByClientId(player._stats.clientId);
 
 						for (let unitId in unitsObject) {
-							//
+
 							unitsObject[unitId].setOwnerPlayer(
 								player.id(),
 								{ dontUpdateName: true }
@@ -674,11 +663,11 @@ const Client = IgeEventingClass.extend({
 						}
 
 						if (player._stats && player._stats.selectedUnitId) {
-							//
+
 							const unit = ige.$(player._stats.selectedUnitId);
 
 							if (unit) {
-								//
+
 								unit.equipSkin();
 							}
 						}
@@ -687,7 +676,7 @@ const Client = IgeEventingClass.extend({
 							(ige.client.myPlayer &&
 								ige.client.myPlayer._stats.isUserMod)
 						) {
-							//
+
 							ige.menuUi.kickPlayerFromGame(); // we should rename this method
 						}
 					}
@@ -695,17 +684,22 @@ const Client = IgeEventingClass.extend({
 			});
 
 			ige.network.stream.on('entityDestroyed', (entityBeingDestroyed) => { // renamed param from 'unitBeingDestroyed' to 'entityBeingDestroyed'
-				//
+
 				if (entityBeingDestroyed._category == 'unit') {
-					//
+
 					entityBeingDestroyed.remove();
-					//
-				} else if ((ige.game.data.isDeveloper || // yeah idk why i did this
-						(ige.client.myPlayer &&
-							ige.client.myPlayer._stats.isUserMod)) &&
+
+				} else if (
+					(
+						ige.game.data.isDeveloper ||
+						(
+							ige.client.myPlayer &&
+							ige.client.myPlayer._stats.isUserMod
+						)
+					) &&
 					entityBeingDestroyed._category == 'player'
 				) {
-					//
+
 					ige.menuUi.kickPlayerFromGame(entityBeingDestroyed.id()); // this is inside the 'Moderate' menu
 				} else {
 					try {
@@ -729,7 +723,7 @@ const Client = IgeEventingClass.extend({
 			}
 
 			if (window.isStandalone) {
-				//
+
 				$('#toggle-dev-panels').show();
 			}
 		});
@@ -738,12 +732,12 @@ const Client = IgeEventingClass.extend({
 	//This method should be looked at...
 	//
 	loadCSP: function() {
-		//
+
 		ige.game.cspEnabled = !!ige.game.data.defaultData.clientSidePredictionEnabled;
 		const gravity = ige.game.data.settings.gravity;
 
 		if (gravity) {
-			//
+
 			console.log('setting gravity: ', gravity); // not in prod please
 			ige.physics.gravity(gravity.x, gravity.y);
 		}
@@ -753,15 +747,8 @@ const Client = IgeEventingClass.extend({
 		ige.physics.createWorld();
 		ige.physics.start();
 
-		ige.addComponent(TriggerComponent);
-		// ige.addComponent(VariableComponent); // this appears twice
-		ige.addComponent(ScriptComponent);
-		ige.addComponent(ConditionComponent);
-		ige.addComponent(ActionComponent);
-
 		if (typeof mode == 'string' && mode == 'sandbox') {
-			//
-			ige.script.runScript('initialize', {}); // why are we doing this?
+			ige.script.runScript('initialize', {}); // loading entities to display in the sandbox
 		}
 	},
 
@@ -811,17 +798,13 @@ const Client = IgeEventingClass.extend({
 		ige.network.define('openDialogue', this._onOpenDialogue);
 		ige.network.define('closeDialogue', this._onCloseDialogue);
 
-		ige.network.define('setOwner', this._setOwner);
 		ige.network.define('userJoinedGame', this._onUserJoinedGame);
 
 		ige.network.define('trade', this._onTrade);
 	},
 
-	//
-	//i'm not going to change the login.
-	//
 	login: function() {
-		//
+
 		console.log('attempting to login'); // no console logs in production.
 
 		$.ajax({
@@ -834,13 +817,13 @@ const Client = IgeEventingClass.extend({
 			jsonpCallback: 'callback',
 			type: 'POST',
 			success: (data) => {
-				//
+
 				if (data.response == 'success') {
-					//
+
 					this.joinGame();
-					//
+
 				} else {
-					//
+
 					$('#login-error-message').html(data.message).show().fadeOut(7000)
 				}
 			}
@@ -851,7 +834,7 @@ const Client = IgeEventingClass.extend({
 	//i'm not going to change the join game function
 	//
 	joinGame: function() {
-		//
+
 		let isAdBlockEnabled = true;
 		const data = {
 			number: (Math.floor(Math.random() * 999) + 100) // yeah ok cool, why?
@@ -863,28 +846,28 @@ const Client = IgeEventingClass.extend({
 		$('#dev-console').hide();
 
 		if (typeof (userId) != 'undefined' && typeof (sessionId) != 'undefined') {
-			//
+
 			data._id = userId;
 			data.sessionId = sessionId;
 		}
 
 		if (!ige.isMobile) {
-			//
+
 			$('.game-ui').show();
 		}
 
 		// old comment => 'try loading an ad to find out whether adblocker is active or not
 		if (window.isStandalone) {
-			//
+
 			isAdBlockEnabled = false;
-			//
+
 			if (typeof adBlockStatus == 'function') {
-				//
+
 				adBlockStatus(false);
 			}
-			//
+
 		} else {
-			//
+
 			$.ajax(
 				'/showads.js',
 				{
@@ -900,20 +883,20 @@ const Client = IgeEventingClass.extend({
 			);
 			//notify for ad block
 			if (window.isAdBlockEnabled) {
-				//
+
 				notifyAboutAdBlocker();
 			}
 		}
 
 		// old comment => 'show popover on settings icon for low fram rate'
 		if (!ige.isMobile) {
-			//
+
 			setTimeout(() => {
-				//
+
 				this.lowFPSInterval = setInterval(() => {
-					//
+
 					if (this.resolutionQuality != 'low' && ige._renderFPS < 40) { // do we still use this?
-						//
+
 						$('#setting').popover('show');
 						clearInterval(this.lowFPSInterval);
 					}
@@ -936,19 +919,16 @@ const Client = IgeEventingClass.extend({
 
 		// old comment => 'if game was paused'
 		if (!window.playerJoined) {
-			//
+
 			ige.client.eventLog.push([
 				0,
 				`joinGame sent. userId: ${userId}`
 			]);
 			ige.client.eventLogStartTime = ige._currentTime;
-			//
+
 		}
 	},
 
-	//
-	// not going to touch that regex.
-	//
 	getUrlVars: function() {
 		// old comment => 'edited for play/:gameId'
 		const tempGameId = window.location.pathname.split('/')[2];
@@ -960,7 +940,7 @@ const Client = IgeEventingClass.extend({
 		window.location.href.replace(
 			/[?&]+([^=&]+)=([^&]*)/gi,
 			(m, key, value) => { // not sure about this after looking up .replace()
-				//
+
 				vars[key] = value;
 			}
 		);
@@ -969,28 +949,22 @@ const Client = IgeEventingClass.extend({
 
 	},
 
-	//
-	// again not really touching this one
-	//
 	applyInactiveTabEntityStream: function() {
-		//
 		for (let entityId in this.inactiveTabEntityStream) {
-			//
 			const entityData = _.cloneDeep(this.inactiveTabEntityStream[entityId]);
 			this.inactiveTabEntityStream[entityId] = [];
 
 			const entity = ige.$(entityId);
 
 			if (entity && entityData) {
-				//
 				entity.streamUpdateData(entityData);
 			}
 		}
 	},
 
-	//
 	positionCamera: function(x, y) {
 		if (x != undefined && y != undefined) {
+
 			this.emit('stop-follow');
 			this.emit('position-camera', [x, y]);
 		}

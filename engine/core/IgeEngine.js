@@ -159,9 +159,7 @@ var IgeEngine = IgeEntity.extend({
 		this._ctx = IgeDummyContext;
 		this.dependencyTimeout(30000); // Wait 30 seconds to load all dependencies then timeout
 
-		// Start a timer to record every second of execution
-		setInterval(this._secondTick, 1000);
-
+		this.lastSecond = 0;
 		this.snapshots = [];
 		this.entityCreateSnapshot = {};
 		this.prevSnapshot = undefined;
@@ -174,6 +172,15 @@ var IgeEngine = IgeEntity.extend({
 
 		this.lagOccurenceCount = 0;
 		this.lastLagOccurenceAt = 0;
+
+		this.triggersQueued = [];
+
+		this.lastTrigger = undefined;
+		this.triggerProfiler = {}
+		this.actionProfiler = {}
+		this.lastAction = undefined;
+		this.lastActionRanAt = 0;
+		this.lastTriggerRanAt = 0;
 	},
 
 	getLifeSpan: function () {
@@ -1615,6 +1622,10 @@ var IgeEngine = IgeEntity.extend({
 		ige.network.send('_igeStreamCreateSnapshot', ige.entityCreateSnapshot, clientId);
 	},
 
+	queueTrigger: function(triggerName, parameters = {}) {
+		this.triggersQueued.push({name: triggerName, params: parameters})
+	},
+
 	/**
 	 * Called each frame to traverse and render the scenegraph.
 	 */
@@ -1640,6 +1651,12 @@ var IgeEngine = IgeEntity.extend({
 
 		self.incrementTime();
 		timeStamp = Math.floor(self._currentTime);
+
+		if (timeStamp - self.lastSecond >= 1000) {
+			self._secondTick();
+			ige.queueTrigger('secondTick');
+			self.lastSecond = timeStamp;
+		}
 
 		if (self._state) {
 			// Call the input system tick to reset any flags etc
@@ -1698,10 +1715,45 @@ var IgeEngine = IgeEntity.extend({
 				ige.physicsTickHasExecuted = true;
 			}
 
-			if (ige.isServer) {
-				if (ige.gameLoopTickHasExecuted)
-					ige.trigger.fire('frameTick');
-			} else if (ige.isClient) {
+			if (ige.gameLoopTickHasExecuted) {
+				ige.queueTrigger('frameTick');
+			}
+
+			ige.updateCount = 0;
+			ige.tickCount = 0;
+			ige.updateTransform = 0;
+			ige.inViewCount = 0;
+			ige.totalChildren = 0;
+			ige.totalOrphans = 0;
+			
+			// Update the scenegraph - this is where entity _behaviour() is called
+			if (self._enableUpdates) {
+				// ige.updateCount = {}
+				// ige.tickCount = {}
+
+				if (igeConfig.debug._timing) {
+					updateStart = Date.now();
+					self.updateSceneGraph(ctx);
+					ige._updateTime = Date.now() - updateStart;
+				} else {
+					self.updateSceneGraph(ctx);
+				}
+			}
+
+			if (ige.isServer) { // execute triggersQueued. client-side is done inside EntitiesToRender.ts
+				_.forEach(ige.triggersQueued, function (trigger) {
+					// console.log("run", trigger);						
+					ige.script.trigger(trigger.name, trigger.params);
+				});
+			}
+
+			ige.engineLagReported = false;
+			ige.actionProfiler = {}
+			ige.triggerProfiler = {}
+			ige.triggersQueued = []; // only empties on server-side as client-side never reaches here
+			
+			
+			if (ige.isClient) {
 				if (ige.client.myPlayer) {
 					ige.client.myPlayer.control._behaviour();
 				}
@@ -1718,31 +1770,10 @@ var IgeEngine = IgeEntity.extend({
 				return;
 			}
 
-			ige.updateCount = 0;
-			ige.tickCount = 0;
-			ige.updateTransform = 0;
-			ige.inViewCount = 0;
-			ige.totalChildren = 0;
-			ige.totalOrphans = 0;
-
-			// Update the scenegraph
-			if (self._enableUpdates) {
-				// ige.updateCount = {}
-				// ige.tickCount = {}
-
-				if (igeConfig.debug._timing) {
-					updateStart = Date.now();
-					self.updateSceneGraph(ctx);
-					ige._updateTime = Date.now() - updateStart;
-				} else {
-					self.updateSceneGraph(ctx);
-				}
-			}
-
 			if (!ige.gameLoopTickHasExecuted) {
 				return;
 			}
-
+			
 			// Check for unborn entities that should be born now
 			unbornQueue = ige._spawnQueue;
 			unbornCount = unbornQueue.length;
@@ -1778,6 +1809,7 @@ var IgeEngine = IgeEntity.extend({
 				}
 			}
 
+			
 			// console.log(ige.updateCount, ige.tickCount, ige.updateTransform,"inView", ige.inViewCount);
 			// Record the lastTick value so we can
 			// calculate delta on the next tick
@@ -1786,8 +1818,8 @@ var IgeEngine = IgeEntity.extend({
 			self._drawCount = 0;
 
 			if (ige.isServer) {
-				if (self.now - self.lastCheckedAt > 1000) {
-					self.lastCheckedAt = self.now;
+				if (ige.now - self.lastCheckedAt > 1000) {
+					self.lastCheckedAt = ige.now;
 
 					// kill tier 1 servers that has been empty for over 15 minutes
 					var playerCount = ige.$$('player').filter(function (player) {
@@ -1796,14 +1828,13 @@ var IgeEngine = IgeEntity.extend({
 
 					if (playerCount <= 0) {
 						if (!self.serverEmptySince) {
-							self.serverEmptySince = self.now;
+							self.serverEmptySince = ige.now;
 						}
 
-						const serverTier = ige.server.tier;
 						const gameTier = ige.game && ige.game.data && ige.game.data.defaultData && ige.game.data.defaultData.tier;
 						// gameTier and serverTier could be different in some cases since Tier 4 games are now being hosted on Tier 2 servers.
-						// Kill T1 and T2 servers if it's been empty for 10+ mins. Also, do not kill T2 servers if they are hosting a T4 game
-						if ((serverTier === '1' || serverTier === '2') && gameTier !== '4' && self.now - self.serverEmptySince > self.emptyTimeLimit) {
+						// Kill T1 T2, T5 or any other server if it's been empty for 10+ mins. Also, do not kill T2 servers if they are hosting a T4 game
+						if (gameTier !== '4' && ige.now - self.serverEmptySince > self.emptyTimeLimit) {
 							ige.server.kill('game\'s been empty for too long (10 min)');
 						}
 					} else {
@@ -1813,17 +1844,17 @@ var IgeEngine = IgeEntity.extend({
 					var lifeSpan = self.getLifeSpan();
 
 					// if server's lifeSpan is over, kill it (e.g. kill server after 5 hours)
-					var age = self.now - ige.server.gameStartedAt;
+					var age = ige.now - ige.server.gameStartedAt;
 
 					var shouldLog = ige.server.logTriggers && ige.server.logTriggers.timerLogs;
 					if (shouldLog) {
-						console.log(self.now, ige.server.gameStartedAt, age, lifeSpan, age > lifeSpan);
+						console.log(ige.now, ige.server.gameStartedAt, age, lifeSpan, age > lifeSpan);
 					}
 					if (age > lifeSpan) {
 						console.log({
 							lifeSpan,
 							age,
-							now: self.now,
+							now: ige.now,
 							startedAt: ige.server.gameStartedAt
 						});
 						ige.server.kill(`server lifespan expired ${lifeSpan}`);
@@ -1856,15 +1887,11 @@ var IgeEngine = IgeEntity.extend({
 			// }
 
 			ige.network.stream._sendQueue(timeStamp);
+			ige.network.resume();
 			ige.network.stream.updateEntityAttributes();
-			if (ige.count == undefined || ige.now - ige.lastSent < 30) {
-				// console.log(ige.count, ige.now - ige.lastSent)
-				ige.count = 0;
-			}
-			ige.lastSent = ige.now;
-			ige.count++;
+			
 		}
-
+		
 		ige.gameLoopTickHasExecuted = false;
 		ige.physicsTickHasExecuted = false;
 
@@ -1902,10 +1929,7 @@ var IgeEngine = IgeEntity.extend({
 	},
 
 	updateSceneGraph: function (ctx) {
-		// ige cancel
-		// if (ige.isClient) {
-		// 	return;
-		// }
+
 		var arr = this._children;
 		var arrCount; var us; var ud;
 		var tickDelta = ige._tickDelta;
@@ -1915,7 +1939,7 @@ var IgeEngine = IgeEntity.extend({
 
 		if (arr) {
 			arrCount = arr.length;
-
+ 
 			// Loop our viewports and call their update methods
 			if (igeConfig.debug._timing) {
 				while (arrCount--) {

@@ -14,6 +14,8 @@ var GameComponent = IgeEntity.extend({
 		this.createdEntities = [];
 		this.gameOverModalIsShowing = false;
 		this.isGameStarted = false;
+		this.devLogs = {};
+
 	},
 
 	start: function () {
@@ -34,33 +36,30 @@ var GameComponent = IgeEntity.extend({
 					controlledBy: 'computer',
 					unitIds: [] // all units owned by player
 				});
-
-				// GameComponent.prototype.log("computerPlayer created " + this['computer' + i].id())
-				// if (global.isDev) {
-				// 	ige.trigger.fire("playerJoinsGame", { playerId: this['computer'+i].id() })
-				// }
 			}
-			ige.trigger.fire('gameStart');
 		} else if (ige.isClient) {
 			// determine which attribute will be used for scoreboard
 			var attr = 'points';
 			if (
 				ige.game.data.settings &&
-        ige.game.data.settings.constants &&
-        ige.game.data.settings.constants.currency != undefined
+				ige.game.data.settings.constants &&
+				ige.game.data.settings.constants.currency != undefined
 			) {
 				attr = ige.game.data.settings.constants.currency;
 			}
 			$('.game-currency').html(attr);
 		}
 
+		ige.addComponent(ScriptComponent);
+		ige.script.load(ige.game.data.scripts);
+
+		ige.script.trigger('gameStart');
 		self.isGameStarted = true;
 		ige.timer.startGameClock();
 	},
 
+	// this applies to logged in players only
 	createPlayer: function (data, persistedData) {
-		var self = this;
-
 		/* removing unnecessary purchases keys */
 		var purchases = [];
 		if (data.purchasables) {
@@ -77,7 +76,8 @@ var GameComponent = IgeEntity.extend({
 			coins: data.coins,
 			points: data.points || 0,
 			clientId: data.clientId,
-			purchasables: purchases,
+			purchasables: purchases, // purchasables are currently equipped purchasables of the player for current game
+			allPurchasables: data.allPurchasables, // allPurchasables includes equipped and purchased items of the player for current game			
 			attributes: data.attributes,
 			highscore: data.highscore,
 			lastPlayed: data.lastPlayed,
@@ -88,10 +88,12 @@ var GameComponent = IgeEntity.extend({
 			totalTime: data.totalTime,
 			// ipAddress: data.ipAddress,
 			email: data.email,
-			isEmailVerified: data.isEmailVerified,
 			banChat: data.banChat,
 			mutedUsers: data.mutedUsers,
-			isUserVerified: data.isUserVerified
+			isEmailVerified: true,
+			isUserVerified: true
+			// isEmailVerified: data.isEmailVerified,
+			// isUserVerified: data.isUserVerified
 		};
 
 		var player = new Player(playerData);
@@ -117,12 +119,10 @@ var GameComponent = IgeEntity.extend({
 			ige.gameText.sendLatestText(data.clientId); // send latest ui information to the client
 			// ige.shopkeeper.updateShopInventory(ige.shopkeeper.inventory, data.clientId) // send latest ui information to the client
 
-			var isOwner = ige.server.owner == data._id;
+			var isOwner = ige.server.owner == data._id && data.controlledBy == 'human';
 			var isInvitedUser = false;
 			if (ige.game.data.defaultData && ige.game.data.defaultData.invitedUsers) {
-				isInvitedUser = ige.game.data.defaultData.invitedUsers.includes(
-					data._id
-				);
+				isInvitedUser = ige.game.data.defaultData.invitedUsers.some(e => e._id === data._id);
 			}
 			var isUserAdmin = false;
 			var isUserMod = false;
@@ -132,10 +132,11 @@ var GameComponent = IgeEntity.extend({
 			}
 			player._stats.isUserAdmin = isUserAdmin;
 			player._stats.isUserMod = isUserMod;
+			
 			// if User/Admin has access to game then show developer logs
 			if (isOwner || isInvitedUser || isUserAdmin) {
-				GameComponent.prototype.log(`owner connected. _id: ${data._id}`);
-				ige.server.developerClientId = data.clientId;
+				GameComponent.prototype.log(`owner/admin/mod connected. _id: ${data._id}`);
+				ige.server.developerClientIds.push(data.clientId);
 			}
 		}
 
@@ -215,6 +216,240 @@ var GameComponent = IgeEntity.extend({
 		var mDisplay = m > 0 ? `${m}m ` : '';
 		var sDisplay = s > 0 ? `${s}s` : '';
 		return hDisplay + mDisplay + sDisplay;
+	},
+
+	// update dev console table w/ latest setValue data
+	updateDevConsole: function (data) {
+		var self = this;
+		// if a developer is connected, send devLog of global variables only
+		if (ige.isServer && (ige.server.developerClientIds.length || process.env.ENV === 'standalone' || process.env.ENV == 'standalone-remote')) {
+			// only show 'object' string if env variable is object
+			if (typeof data.params.newValue == 'object') {
+				if (data.params.newValue._stats) {
+					ige.game.devLogs[data.params.variableName] = `object (${data.params.newValue._category}): ${data.params.newValue._stats.name}`;
+				} else {
+					ige.game.devLogs[data.params.variableName] = 'object';
+				}
+			} else { // otherwise, show the actual value
+
+				ige.game.devLogs[data.params.variableName] = data.params.newValue;
+			}
+		} else if (ige.isClient) {
+			// update GS CPU graphs if data present
+			if (data.status && data.status.cpu) {
+				// cpu time spent in user code (ms) since last dev console update - may end up being greater than actual elapsed time if multiple CPU cores are performing work for this process
+				if (data.status.cpu.user) {
+					statsPanels.serverCpuUser._serverCpuUserPanel.update(data.status.cpu.user * 0.001, 1000);
+				}
+				// cpu time spent in system code (ms) since last dev console update
+				if (data.status.cpu.system) {
+					statsPanels.serverCpuSystem._serverCpuSystemPanel.update(data.status.cpu.system * 0.001, 1000);
+				}
+			}
+
+			var totalAttrsCount = 0;
+			for (variableName in data) {
+				if (variableName !== 'status') {
+					var div = $(`#variables-div div.col-sm-12[name='${variableName}']`);
+					var newValue = data[variableName];
+					if (div.length) {
+						div.find('.setVariable-value').html(newValue);
+					} else {
+						$('#variables-div').append(
+							$('<div/>', {
+								name: variableName,
+								class: 'col-sm-12',
+								style: 'font-size: 12px'
+							}).append(
+								$('<td/>', {
+									html: variableName,
+									style: 'color:yellow; padding-left: 10px'
+								})
+							).append(
+								$('<td/>', {
+									class: 'setVariable-value text-left',
+									html: newValue,
+									style: 'padding: 0px 10px 0px 10px'
+								})
+							)
+						);
+					}
+
+					totalAttrsCount++;
+				}
+			}
+
+			if (data.status != {} /*&& ige.physics && ige.physics.engine != 'CRASH'*/) {
+				// if streaming entity count > 150 warn user
+				if (data.status && data.status.entityCount && data.status.entityCount.streaming > 150 && !self.streamingWarningShown) {
+					$('#streaming-entity-warning').show();
+					self.streamingWarningShown = true;
+				}
+
+				var innerHtml = '';
+
+				innerHtml = `${'' +
+					'<table class="table table-hover text-center" style="border:1px solid #eceeef">' +
+					'<tr>' +
+					'<th>Entity Count</th>' +
+					'<th class="text-center">Server</th>' +
+					'<th class="text-center">Client</th>' +
+					'<th class="text-center">Server Bandwidth</th>' +
+					'</tr>' +
+					'<tr>' +
+					'<td>Unit</td>' +
+					'<td>'}${data.status.entityCount.unit}</td>` +
+					`<td>${ige.$$('unit').length}</td>` +
+					`<td>${data.status.bandwidth.unit}</td>` +
+					'</tr>' +
+					'<tr>' +
+					'<td>Item</td>' +
+					`<td>${data.status.entityCount.item}</td>` +
+					`<td>${ige.$$('item').length}</td>` +
+					`<td>${data.status.bandwidth.item}</td>` +
+					'</tr>' +
+					'<tr>' +
+					'<td>Player</td>' +
+					`<td>${data.status.entityCount.player}</td>` +
+					`<td>${ige.$$('player').length}</td>` +
+					`<td>${data.status.bandwidth.player}</td>` +
+					'</tr>' +
+					'<tr>' +
+					'<td>Projectile</td>' +
+					`<td>${data.status.entityCount.projectile}</td>` +
+					`<td>${ige.$$('projectile').length}</td>` +
+					`<td>${data.status.bandwidth.projectile}</td>` +
+					'</tr>' +
+					'<tr>' +
+					'<td>Region</td>' +
+					`<td>${data.status.entityCount.region}</td>` +
+					`<td>${ige.$$('region').length}</td>` +
+					`<td>${data.status.bandwidth.region}</td>` +
+					'</tr>' +
+					'<tr>' +
+					'<td>Sensor</td>' +
+					`<td>${data.status.entityCount.sensor}</td>` +
+					`<td>${ige.$$('sensor').length}</td>` +
+					`<td>${data.status.bandwidth.sensor}</td>` +
+					'</tr>' +
+					'<tr>' +
+					'<th colspan= >Physics</th>' +
+					`<th>${data.status.physics.engine}</th>` +
+					`<th>${(ige.physics) ? ige.physics.engine : 'NONE'}</th>` +
+					'<td></td>' +
+					'</tr>' +
+					'<tr>' +
+					'<td>Bodies</td>' +
+					`<td>${data.status.physics.bodyCount}</td>` +
+					`<td>${(ige.physics && ige.physics._world) ? ige.physics._world.m_bodyCount : ''}</td>` +
+					'<td></td>' +
+					'</tr>' +
+					'<tr>' +
+					'<td>Joints</td>' +
+					`<td>${data.status.physics.jointCount}</td>` +
+					`<td>${(ige.physics && ige.physics._world) ? ige.physics._world.m_jointCount : ''}</td>` +
+					'<td></td>' +
+					'</tr>' +
+					'<tr>' +
+					'<td>Contacts</td>' +
+					`<td>${data.status.physics.contactCount}</td>` +
+					`<td>${(ige.physics && ige.physics._world) ? ige.physics._world.m_contactCount : ''}</td>` +
+					'<td></td>' +
+					'</tr>' +
+					'<tr>' +
+					'<td>Heap used</td>' +
+					`<td>${data.status.heapUsed.toFixed(2)}</td>` +
+					`<td>${(window.performance.memory.usedJSHeapSize / 1000000).toFixed(2)}</td>` +
+					'<td></td>' +
+					'</tr>' +
+					'<tr>' +
+					'<td>Avg Step Duration(ms)</td>' +
+					`<td>${data.status.physics.stepDuration}</td>` +
+					`<td>${(ige.physics && ige.physics._world) ? ige.physics.avgPhysicsTickDuration.toFixed(2) : ''}</td>` +
+					'<td></td>' +
+					'</tr>' +
+					'<tr>' +
+					'<td>Physics FPS</td>' +
+					`<td>${data.status.physics.stepsPerSecond}</td>` +
+					`<td>${(ige.physics) ? ige._physicsFPS : ''}</td>` +
+					'<td></td>' +
+					'</tr>' +
+					'<tr>' +
+					'<th colspan=3>Etc</th><th>Time Scale</th>' +
+					'</tr>' +
+					'<tr>' +
+					'<td>Current Time</td>' +
+					// + '<td>' + data.status.currentTime + '(' + (data.status.currentTime - this.prevServerTime) + ')' + '</td>'
+					// + '<td>' + Math.floor(ige._currentTime) + '(' + (Math.floor(ige._currentTime) - this.prevClientTime) + ')' + '</td>'
+					`<td>${data.status.currentTime}</td>` +
+					`<td>${Math.floor(ige._currentTime)}(${Math.floor(ige._currentTime) - data.status.currentTime})</td>` +
+					`<td>${ige.timeScale()}</td>` +
+					'</tr>' +
+
+					'<tr>' +
+					'<td>Client Count</td>' +
+					`<td>${data.status.clientCount}</td>` +
+					'<td></td>' +
+					'<td></td>' +
+					'</tr>' +
+
+					'<tr>' +
+					'<td>entityUpdateQueue size</td>' +
+					'<td></td>' +
+					`<td>${Object.keys(ige.client.entityUpdateQueue).length}</td>` +
+					'<td></td>' +
+					'</tr>' +
+					'<tr>' +
+					'<td>Total players created</td>' +
+					`<td>${data.status.etc.totalPlayersCreated}</td>` +
+					'<td></td>' +
+					'<td></td>' +
+					'</tr>' +
+
+					'<tr>' +
+					'<td>Total units created</td>' +
+					`<td>${data.status.etc.totalUnitsCreated}</td>` +
+					'<td></td>' +
+					'<td></td>' +
+					'</tr>' +
+
+					'<tr>' +
+					'<td>Total items created</td>' +
+					`<td>${data.status.etc.totalItemsCreated}</td>` +
+					'<td></td>' +
+					'<td></td>' +
+					'</tr>' +
+
+					'<tr>' +
+					'<td>Total Bodies Created</td>' +
+					`<td>${data.status.physics.totalBodiesCreated}</td>` +
+					`<td>${(ige.physics && ige.physics._world) ? ige.physics.totalBodiesCreated : ''}</td>` +
+					'<td></td>' +
+					'</tr>' +
+
+					'<tr>' +
+					'<td>CPU Usage</td>' +
+					`<td>${data.status.cpuDelta}</td>` +
+					'<td></td>' +
+					'<td></td>' +
+					'</tr>' +
+
+					'<tr>' +
+					'<td>Last Snapshot Length</td>' +
+					`<td>${data.status.lastSnapshotLength}</td>` +
+					'<td></td>' +
+					'<td></td>' +
+					'</tr>' +
+
+					'</table>';
+
+				ige.script.variable.prevServerTime = data.status.currentTime;
+				ige.script.variable.prevClientTime = Math.floor(ige._currentTime);
+
+				$('#dev-status-content').html(innerHtml);
+				self.secondCount++;
+			}
+		}
 	}
 });
 
