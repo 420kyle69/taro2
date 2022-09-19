@@ -468,7 +468,7 @@ var ClientNetworkEvents = {
 	},
 
 	_onUpdateTile: function (data, clientId) {
-		phaser.emit("updateTile" , {gid: data.gid, x: data.x, y: data.y})
+		ige.client.emit('updateTile', {gid: data.gid, x: data.x, y: data.y});
 	},
 
 	_onErrorLogs: function (logs) {
