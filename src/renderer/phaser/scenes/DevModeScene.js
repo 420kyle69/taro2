@@ -96,6 +96,8 @@ var DevModeScene = /** @class */ (function (_super) {
         this.marker.strokeRect(0, 0, gameMap.tileWidth, gameMap.tileHeight);
         this.marker.setVisible(false);
     };
+    DevModeScene.prototype.updateTile = function (gid, x, y) {
+    };
     DevModeScene.prototype.update = function () {
         if (ige.developerMode.active) {
             var worldPoint = this.gameScene.cameras.main.getWorldPoint(this.gameScene.input.activePointer.x, this.gameScene.input.activePointer.y);
@@ -140,6 +142,7 @@ var DevModeScene = /** @class */ (function (_super) {
                 }
                 if (this.input.manager.activePointer.isDown) {
                     this.gameScene.tilemap.putTileAt(this.selectedTile, pointerTileX, pointerTileY);
+                    ige.network.send("editTile", { gid: this.selectedTile.index, pointerTileX: pointerTileX, pointerTileY: pointerTileY });
                 }
             }
         }

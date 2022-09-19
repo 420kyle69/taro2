@@ -105,6 +105,10 @@ class DevModeScene extends PhaserScene {
 		this.marker.setVisible(false);
 	}
 
+	updateTile (gid:integer, x:integer, y:integer): void {
+		
+	}
+
 	update (): void {
 		if(ige.developerMode.active) {
 			const worldPoint = this.gameScene.cameras.main.getWorldPoint(this.gameScene.input.activePointer.x, this.gameScene.input.activePointer.y);
@@ -152,6 +156,7 @@ class DevModeScene extends PhaserScene {
 
 				if (this.input.manager.activePointer.isDown) {
 					this.gameScene.tilemap.putTileAt(this.selectedTile, pointerTileX, pointerTileY);
+					ige.network.send("editTile", {gid: this.selectedTile.index, pointerTileX, pointerTileY})
 				}
 
 			}

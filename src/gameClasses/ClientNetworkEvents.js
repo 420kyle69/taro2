@@ -467,6 +467,10 @@ var ClientNetworkEvents = {
 		}
 	},
 
+	_onUpdateTile: function (data, clientId) {
+		phaser.emit("updateTile" , {gid: data.gid, x: data.x, y: data.y})
+	},
+
 	_onErrorLogs: function (logs) {
 		var element = document.getElementById('error-log-content');
 		for (actionName in logs) {
