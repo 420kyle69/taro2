@@ -62,34 +62,6 @@ var GameScene = /** @class */ (function (_super) {
             y -= camera.height / 2;
             camera.setScroll(x, y);
         });
-        /*ige.client.on('enterDevMode', () => {
-            if (this.devPalette) {
-                this.devPalette.setVisible(true);
-                this.devPalette.texturesLayer.setVisible(true);
-                this.devPalette.camera.setVisible(true);
-                this.devPalette.scrollBarContainer.setVisible(true);
-            } else {
-                this.devPalette = new PhaserPalette(this, this.tileset, this.rexUI);
-                const map = this.devPalette.map;
-                this.selectedTile = map.getTileAt(2, 3);
-                this.marker2 = this.add.graphics();
-                this.marker2.lineStyle(2, 0x000000, 1);
-                this.marker2.strokeRect(0, 0, map.tileWidth, map.tileHeight);
-                this.marker2.setVisible(false);
-            }
-        });*/
-        /*ige.client.on('leaveDevMode', () => {
-            this.devPalette.setVisible(false);
-            this.devPalette.texturesLayer.setVisible(false);
-            this.devPalette.camera.setVisible(false);
-            this.devPalette.scrollBarContainer.setVisible(false);
-        });
-
-        this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
-            if (this.devPalette && this.devPalette.visible) {
-                this.devPalette.zoom(pointer, deltaY);
-            }
-        });*/
     };
     GameScene.prototype.preload = function () {
         var _this = this;
