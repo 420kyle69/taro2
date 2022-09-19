@@ -6,9 +6,6 @@ class GameScene extends PhaserScene {
 	renderedEntities: (Phaser.GameObjects.GameObject & Phaser.GameObjects.Components.Visible & Hidden)[] = [];
 
 	private tilemap: Phaser.Tilemaps.Tilemap;
-	selectedTile: Phaser.Tilemaps.Tile;
-	marker: Phaser.GameObjects.Graphics;
-	devPalette: PhaserPalette;
 	tileset: Phaser.Tilemaps.Tileset;
 
 	constructor() {

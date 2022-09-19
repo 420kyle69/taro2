@@ -28,7 +28,7 @@ class DevModeScene extends PhaserScene {
 				this.devPalette = new PhaserPalette(this, this.tileset, this.rexUI);
 				this.gameScene.devPalette = this.devPalette;
 				const map = this.devPalette.map;
-				this.gameScene.selectedTile = map.getTileAt(2, 3);
+				this.selectedTile = map.getTileAt(2, 3);
 		 		this.paletteMarker = this.add.graphics();
 				this.paletteMarker.lineStyle(2, 0x000000, 1);
 				this.paletteMarker.strokeRect(0, 0, map.tileWidth, map.tileHeight);

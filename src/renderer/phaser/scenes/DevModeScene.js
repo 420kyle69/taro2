@@ -34,7 +34,7 @@ var DevModeScene = /** @class */ (function (_super) {
                 _this.devPalette = new PhaserPalette(_this, _this.tileset, _this.rexUI);
                 _this.gameScene.devPalette = _this.devPalette;
                 var map = _this.devPalette.map;
-                _this.gameScene.selectedTile = map.getTileAt(2, 3);
+                _this.selectedTile = map.getTileAt(2, 3);
                 _this.paletteMarker = _this.add.graphics();
                 _this.paletteMarker.lineStyle(2, 0x000000, 1);
                 _this.paletteMarker.strokeRect(0, 0, map.tileWidth, map.tileHeight);
