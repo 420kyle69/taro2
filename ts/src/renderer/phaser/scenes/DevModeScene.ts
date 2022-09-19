@@ -43,12 +43,11 @@ class DevModeScene extends PhaserScene {
 			this.devPalette.scrollBarContainer.setVisible(false);
 		});
 
-		ige.client.on('updateTile', (data: {
+		ige.client.on('editTile', (data: {
 			gid: number,
 			x: number,
 			y: number
 		}) => {
-			console.log('updateTile', data);
 			this.gameScene.tilemap.putTileAt(data.gid, data.x, data.y);
 		});
 
@@ -95,7 +94,7 @@ class DevModeScene extends PhaserScene {
 
 					if (pointer.leftButtonDown()) {
 						this.gameScene.tilemap.putTileAt(this.selectedTile, pointerTileX, pointerTileY);
-						ige.network.send("editTile", {gid: this.selectedTile.index, pointerTileX, pointerTileY})
+						ige.network.send("editTile", {gid: this.selectedTile.index, x: pointerTileX, y: pointerTileY})
 					}
 				}
 			}

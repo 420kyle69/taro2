@@ -434,6 +434,11 @@ var ServerNetworkEvents = {
 		}
 	},
 
+	_onEditTile: function(data, clientId) {
+		console.log(data)
+		ige.network.send("editTile", data)
+	},
+
 	_onBuyItem: function (id, clientId) {
 		ige.devLog('player ' + clientId + ' wants to purchase item' + id);
 

@@ -467,8 +467,9 @@ var ClientNetworkEvents = {
 		}
 	},
 
-	_onUpdateTile: function (data, clientId) {
-		ige.client.emit('updateTile', {gid: data.gid, x: data.x, y: data.y});
+	// when other players' update tiles, apply the change to my local
+	_onEditTile: function (data) {
+		ige.client.emit('editTile', {gid: data.gid, x: data.x, y: data.y});
 	},
 
 	_onErrorLogs: function (logs) {

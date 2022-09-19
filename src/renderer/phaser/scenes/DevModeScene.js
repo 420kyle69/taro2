@@ -47,8 +47,7 @@ var DevModeScene = /** @class */ (function (_super) {
             _this.devPalette.camera.setVisible(false);
             _this.devPalette.scrollBarContainer.setVisible(false);
         });
-        ige.client.on('updateTile', function (data) {
-            console.log('updateTile', data);
+        ige.client.on('editTile', function (data) {
             _this.gameScene.tilemap.putTileAt(data.gid, data.x, data.y);
         });
         this.input.on('pointerdown', function (pointer) {
@@ -91,7 +90,7 @@ var DevModeScene = /** @class */ (function (_super) {
                     }
                     if (pointer.leftButtonDown()) {
                         this.gameScene.tilemap.putTileAt(this.selectedTile, pointerTileX, pointerTileY);
-                        ige.network.send("editTile", { gid: this.selectedTile.index, pointerTileX: pointerTileX, pointerTileY: pointerTileY });
+                        ige.network.send("editTile", { gid: this.selectedTile.index, x: pointerTileX, y: pointerTileY });
                     }
                 }
             }
