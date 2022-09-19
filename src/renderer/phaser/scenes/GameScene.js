@@ -15,8 +15,6 @@ var __extends = (this && this.__extends) || (function () {
 })();
 var GameScene = /** @class */ (function (_super) {
     __extends(GameScene, _super);
-    //marker2: Phaser.GameObjects.Graphics;
-    //rexUI: any;
     function GameScene() {
         var _this = _super.call(this, { key: 'Game' }) || this;
         _this.entityLayers = [];
@@ -208,12 +206,6 @@ var GameScene = /** @class */ (function (_super) {
         Object.values(this.textures.list).forEach(function (val) {
             val.setFilter(Phaser.Textures.FilterMode.NEAREST);
         });
-        this.tilemap.currentLayerIndex = 0;
-        this.selectedTile = map.getTileAt(2, 3);
-        this.marker = this.add.graphics();
-        this.marker.lineStyle(2, 0x000000, 1);
-        this.marker.strokeRect(0, 0, map.tileWidth, map.tileHeight);
-        this.marker.setVisible(false);
     };
     GameScene.prototype.setZoomSize = function (height) {
         // backward compatible game scaling on average 16:9 screen
@@ -308,53 +300,6 @@ var GameScene = /** @class */ (function (_super) {
             if (!element.hidden)
                 element.setActive(true).setVisible(true);
         });
-        if (ige.developerMode.active) {
-            var worldPoint2 = ige.renderer.scene.getScene('Palette').cameras.getCamera('palette').getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
-            /*this.marker2.clear();
-            this.marker2.strokeRect(0, 0, this.devPalette.map.tileWidth * this.devPalette.texturesLayer.scaleX, this.devPalette.map.tileHeight * this.devPalette.texturesLayer.scaleY);
-            this.marker2.setVisible(true);*/
-            // Rounds down to nearest tile
-            var pointerTileX2 = this.devPalette.map.worldToTileX(worldPoint2.x);
-            var pointerTileY2 = this.devPalette.map.worldToTileY(worldPoint2.y);
-            if (0 <= pointerTileX2
-                && pointerTileX2 < 27
-                && 0 <= pointerTileY2
-                && pointerTileY2 < 20
-                && this.input.activePointer.x > this.devPalette.scrollBarContainer.x
-                && this.input.activePointer.x < this.devPalette.scrollBarContainer.x + this.devPalette.scrollBarContainer.width
-                && this.input.activePointer.y > this.devPalette.scrollBarContainer.y
-                && this.input.activePointer.y < this.devPalette.scrollBarContainer.y + this.devPalette.scrollBarContainer.height) {
-                this.marker.setVisible(false);
-                // Snap to tile coordinates, but in world space
-                /*this.marker2.x = this.devPalette.map.tileToWorldX(pointerTileX2);
-                this.marker2.y = this.devPalette.map.tileToWorldY(pointerTileY2);
-
-                if (this.input.manager.activePointer.rightButtonDown()) {
-                    this.selectedTile = this.devPalette.map.getTileAt(pointerTileX2, pointerTileY2);
-                }*/
-            }
-            else if (!(this.input.activePointer.x > this.devPalette.scrollBarContainer.x
-                && this.input.activePointer.x < this.devPalette.scrollBarContainer.x + this.devPalette.scrollBarContainer.width
-                && this.input.activePointer.y > this.devPalette.scrollBarContainer.y
-                && this.input.activePointer.y < this.devPalette.scrollBarContainer.y + this.devPalette.scrollBarContainer.height)) {
-                //this.marker2.setVisible(false);
-                this.marker.setVisible(true);
-                // Rounds down to nearest tile
-                var pointerTileX = this.tilemap.worldToTileX(worldPoint.x);
-                var pointerTileY = this.tilemap.worldToTileY(worldPoint.y);
-                // Snap to tile coordinates, but in world space
-                this.marker.x = this.tilemap.tileToWorldX(pointerTileX);
-                this.marker.y = this.tilemap.tileToWorldY(pointerTileY);
-                if (this.input.manager.activePointer.rightButtonDown()) {
-                    this.selectedTile = this.tilemap.getTileAt(pointerTileX, pointerTileY);
-                }
-                if (this.input.manager.activePointer.isDown) {
-                    this.tilemap.putTileAt(this.selectedTile, pointerTileX, pointerTileY);
-                }
-            }
-        }
-        else
-            this.marker.setVisible(false);
     };
     return GameScene;
 }(PhaserScene));

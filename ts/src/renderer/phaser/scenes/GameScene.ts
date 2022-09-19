@@ -10,8 +10,6 @@ class GameScene extends PhaserScene {
 	marker: Phaser.GameObjects.Graphics;
 	devPalette: PhaserPalette;
 	tileset: Phaser.Tilemaps.Tileset;
-	//marker2: Phaser.GameObjects.Graphics;
-	//rexUI: any;
 
 	constructor() {
 		super({ key: 'Game' });
@@ -272,15 +270,6 @@ class GameScene extends PhaserScene {
 		Object.values(this.textures.list).forEach(val => {
 			val.setFilter(Phaser.Textures.FilterMode.NEAREST);
 		  });
-
-		  this.tilemap.currentLayerIndex = 0;
-
-		  this.selectedTile = map.getTileAt(2, 3);
-		  this.marker = this.add.graphics();
-		  this.marker.lineStyle(2, 0x000000, 1);
-		  this.marker.strokeRect(0, 0, map.tileWidth, map.tileHeight);
-		  this.marker.setVisible(false);
-
 	}
 
 	private setZoomSize (height: number): void {
@@ -461,6 +450,7 @@ class GameScene extends PhaserScene {
 
 	update (): void {
 		const worldPoint = this.cameras.main.getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
+
 		ige.input.emit('pointermove', [{
 			x: worldPoint.x,
 			y: worldPoint.y,
@@ -471,60 +461,5 @@ class GameScene extends PhaserScene {
 		this.cameras.main.cull(this.renderedEntities).forEach(element => {
 			if (!element.hidden) element.setActive(true).setVisible(true);
 		});
-
-		if(ige.developerMode.active) {
-
-			const worldPoint2 = ige.renderer.scene.getScene('Palette').cameras.getCamera('palette').getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
-			/*this.marker2.clear();
-			this.marker2.strokeRect(0, 0, this.devPalette.map.tileWidth * this.devPalette.texturesLayer.scaleX, this.devPalette.map.tileHeight * this.devPalette.texturesLayer.scaleY);
-			this.marker2.setVisible(true);*/
-			// Rounds down to nearest tile
-			const pointerTileX2 = this.devPalette.map.worldToTileX(worldPoint2.x);
-			const pointerTileY2 = this.devPalette.map.worldToTileY(worldPoint2.y);
-
-			if (0 <= pointerTileX2
-				&& pointerTileX2 < 27
-				&& 0 <= pointerTileY2
-				&& pointerTileY2 < 20
-				&& this.input.activePointer.x > this.devPalette.scrollBarContainer.x
-				&& this.input.activePointer.x < this.devPalette.scrollBarContainer.x + this.devPalette.scrollBarContainer.width
-				&& this.input.activePointer.y > this.devPalette.scrollBarContainer.y
-				&& this.input.activePointer.y < this.devPalette.scrollBarContainer.y + this.devPalette.scrollBarContainer.height) {
-				this.marker.setVisible(false);
-				// Snap to tile coordinates, but in world space
-				/*this.marker2.x = this.devPalette.map.tileToWorldX(pointerTileX2);
-				this.marker2.y = this.devPalette.map.tileToWorldY(pointerTileY2);
-
-				if (this.input.manager.activePointer.rightButtonDown()) {
-					this.selectedTile = this.devPalette.map.getTileAt(pointerTileX2, pointerTileY2);
-				}*/
-			} else if (!(this.input.activePointer.x > this.devPalette.scrollBarContainer.x
-				&& this.input.activePointer.x < this.devPalette.scrollBarContainer.x + this.devPalette.scrollBarContainer.width
-				&& this.input.activePointer.y > this.devPalette.scrollBarContainer.y
-				&& this.input.activePointer.y < this.devPalette.scrollBarContainer.y + this.devPalette.scrollBarContainer.height)) {
-				//this.marker2.setVisible(false);
-				this.marker.setVisible(true);
-				// Rounds down to nearest tile
-				const pointerTileX = this.tilemap.worldToTileX(worldPoint.x);
-				const pointerTileY = this.tilemap.worldToTileY(worldPoint.y);
-
-				// Snap to tile coordinates, but in world space
-				this.marker.x = this.tilemap.tileToWorldX(pointerTileX);
-				this.marker.y = this.tilemap.tileToWorldY(pointerTileY);
-
-				if (this.input.manager.activePointer.rightButtonDown()) {
-					this.selectedTile = this.tilemap.getTileAt(pointerTileX, pointerTileY);
-				}
-
-				if (this.input.manager.activePointer.isDown) {
-					this.tilemap.putTileAt(this.selectedTile, pointerTileX, pointerTileY);
-				}
-
-			}
-
-
-		}
-
-		else this.marker.setVisible(false);
 	}
 }
