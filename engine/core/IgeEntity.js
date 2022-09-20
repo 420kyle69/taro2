@@ -177,6 +177,7 @@ var IgeEntity = IgeObject.extend({
 
 			this._hidden = true;
 			this.emit('hide');
+
 			this.texture('');
 		}
 		return this;
@@ -1820,7 +1821,7 @@ var IgeEntity = IgeObject.extend({
 				// Remove the stream data cache
 				delete this._streamDataCache;
 
-				if (!isForOrphans && ige.gameLoopTickHasExecuted) {
+				if (!isForOrphans) {
 					// Process any behaviours assigned to the entity
 					this._processUpdateBehaviours();
 				}
@@ -4019,16 +4020,16 @@ var IgeEntity = IgeObject.extend({
 			self.mount(ige.client.rootScene);
 			self.drawMouse(true)
 				.drawBoundsData(false)
-				.mouseDown(function (event, evc) {
-					if (event.which === 1 && ige.mapEditor.selectEntities) {
-						this.onMouseDown = true;
-						this.onMouseMove = false;
-					}
-				})
 				.mouseMove(function (event) {
 					if (this.onMouseDown && ige.mapEditor.selectEntities) {
 						this.onMouseMove = true;
 						this.translateTo(ige.mapEditor.mouseCoordinatesWRTVp.x, ige.mapEditor.mouseCoordinatesWRTVp.y, 0);
+					}
+				})
+				.mouseDown(function (event, evc) {
+					if (event.which === 1 && ige.mapEditor.selectEntities) {
+						this.onMouseDown = true;
+						this.onMouseMove = false;
 					}
 				})
 				.mouseUp(function (event) {
@@ -4200,6 +4201,22 @@ var IgeEntity = IgeObject.extend({
 							}
 							break;
 
+						case 'currentItemIndex':
+							// for tracking selected index of other units
+							if (ige.isClient) {
+								this._stats.currentItemIndex = newValue;
+
+								// need this if item data is processed before unit data
+								const selectedItemId = this._stats.itemIds[newValue];
+
+								// selectedItemId can be undefined
+								if (selectedItemId && ige.$(selectedItemId)) {
+									// in case of pure number ID
+									ige.$(selectedItemId).setState('selected');
+								}
+							}
+							break;
+
 						default:
 							// setting oldownerId b4 owner change
 							if (attrName === 'ownerId') {
@@ -4224,7 +4241,7 @@ var IgeEntity = IgeObject.extend({
 						switch (attrName) {
 							case 'anim':
 								var animationId = newValue;
-								this.applyAnimationById(animationId);								
+								this.applyAnimationById(animationId);
 								break;
 
 							case 'stateId':
@@ -4234,30 +4251,52 @@ var IgeEntity = IgeObject.extend({
 
 								if (this._category == 'item') {
 									var owner = this.getOwnerUnit();
-									// update state only iff it's not my unit's item								
+									// update state only iff it's not my unit's item
 									if (owner == ige.client.selectedUnit) {
 										// don't repeat whip-out tween for my own unit as it has already been executed from unit.changeItem()
 									} else if (stateId == 'selected') {
 										this.applyAnimationForState(stateId);
-		
+
 										// whip-out the new item using tween
 										let customTween = {
 											type: 'swing',
 											keyFrames: [[0, [0, 0, -1.57]], [100, [0, 0, 0]]]
 										};
 										this.tween.start(null, this._rotate.z, customTween);
+
+									}
+
+									const bodyId = this._stats.states[stateId].body;
+									// make sure item always has proper size defined by state
+									if (
+										// accommodate legacy 'unSelected'
+										this._stats.states[stateId] &&
+										bodyId &&
+										this._stats.bodies[bodyId] &&
+										// old single condition
+										bodyId !== 'none'
+									) {
+
+										this.emit(
+											'size',
+											{
+												width: this._stats.currentBody.width,
+												height: this._stats.currentBody.height
+											}
+										);
 									}
 									// unmount item when item is in backpack
 									if (owner && this._stats.slotIndex >= owner._stats.inventorySize) {
 										this.unMount();
 									}
+
 								} else {
 									this.updateLayer();
 									this.applyAnimationForState(newValue);
 									this._scaleTexture();
 									this.scaleDimensions(this._stats.width, this._stats.height);
 								}
-								
+
 								break;
 							case 'effect':
 								// don't use streamed effect call for my own unit or its items
@@ -4285,7 +4324,7 @@ var IgeEntity = IgeObject.extend({
 							case 'showNameLabel':
 								this.emit('show-label');
 								break;
-							
+
 						}
 					}
 				}
@@ -4687,23 +4726,87 @@ var IgeEntity = IgeObject.extend({
 	 */
 	streamCreateData: function (clientId) {
 		if (ige.isServer) {
-			// remove _stats which are static and can be added from client as well. which will save our bandwidth
-			var keys = ige.server.keysToRemoveBeforeSend.slice();
+			var data = {};
+			var keys = [];
+			switch(this._category) {
 
-			if (this._category === 'region') {
-				keys = keys.concat('value');
+				case 'unit': 
+					keys = ["name", "type", "stateId", "ownerId", "ownerPlayerId", "currentItemIndex", "currentItemId", "flip", "skin"]
+					data = { 
+						attributes: {}, 
+						// variables: {} 
+					};
+					break;
+
+				case 'item':
+					// TODO: we shouldn't have to send currentBody. for some reason, all items have 'dropped' stateId
+					keys = ["itemTypeId", "stateId", "ownerUnitId", "quantity", "currentBody", "flip"]
+					data = { 
+						attributes: {}, 
+						// variables: {} 
+					};
+					break;
+
+				case 'projectile':
+					keys = ["type", "stateId", "flip"]
+					data = { 
+						attributes: {}, 
+						// variables: {} 
+					};
+					break;
+
+				case 'player':
+					keys = ["name", "clientId", "playerTypeId", "controlledBy", "playerJoined", "unitIds", "selectedUnitId", "userId", "banChat"]
+					data = { 
+						attributes: {}, 
+						// variables: {} 
+					};				
+
+					// send sensitive information to the target clients only
+					if (this._stats.clientId == clientId) {
+						data.coins = this._stats.coins;
+						data.mutedUsers = this._stats.mutedUsers;
+						data.banChat = this._stats.banChat;
+						data.purchasables = this._stats.purchasables;
+  						data.allPurchasables = this._stats.allPurchasables;
+						data.isEmailVerified = this._stats.isEmailVerified;
+						data.isUserVerified = this._stats.isUserVerified;
+						data.isUserAdmin = this._stats.isUserAdmin;
+						data.isUserMod = this._stats.isUserMod;
+					}
+					break;
+
+				case 'region': 
+					keys = ["id", "default"];
+					data = { currentBody: {
+									height: this._stats.currentBody.height, 
+									width: this._stats.currentBody.width,
+						}
+					};
+					break;
+			}
+			
+			for (i in keys) {
+				var key = keys[i];
+				data[key] = this._stats[key];
 			}
 
-			const statKeys = Object.keys(this._stats);
-			const data = {};
+			if (data.attributes != undefined) {
+				for (key in this._stats.attributes) {
+					data.attributes[key] = {value: this._stats.attributes[key].value};
+				}	
+			}
+			
+			// commented out variables as it's causing circular JSON error
+			// when a unit variable is set as a unit. we need to use unitId going fwd. not the actual unit.
+			// if (data.variables != undefined) {
+			// 	for (key in this.variables) {
+			// 		data.variables[key] = {value: this.variables[key].value};
+			// 	}
+			// }
+			
 
-			statKeys.forEach(key => {
-				if (!keys.includes(key)) {
-					data[key] = this._stats[key];
-				}
-			});
-
-			return data;
+			return data;			
 		}
 	},
 
@@ -4830,7 +4933,9 @@ var IgeEntity = IgeObject.extend({
 			// Send the client an entity create command first
 			var streamCreateData = this.streamCreateData(clientId);
 			this.streamSectionData('transform'); // prepare this._streamSectionData
+
 			ige.network.send('_igeStreamCreate', [this.classId(), thisId, this._parent.id(), this._streamSectionData, streamCreateData], clientId);
+
 			ige.server.bandwidthUsage[this._category] += JSON.stringify(streamCreateData).length;
 			ige.network.stream._streamClientCreated[thisId] = ige.network.stream._streamClientCreated[thisId] || {};
 

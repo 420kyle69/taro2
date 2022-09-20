@@ -169,6 +169,7 @@ var IgeStreamComponent = IgeEventingClass.extend({
 		var ntransdata;
 		var entity;
 
+		
 		// ige.devLog("onStreamCreate", entityId, classId, createData);
 		if (transformData) {
 			var ntransdata = [
@@ -192,7 +193,7 @@ var IgeStreamComponent = IgeEventingClass.extend({
 						},
 						rotate: ntransdata[2]
 					};
-
+					
 					entity = new classConstructor(createData, entityId);
 
 					// don't send 'create' stream for spriteonly/weldjoint items

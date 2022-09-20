@@ -12,11 +12,13 @@ class PhaserJoystick {
 
 	private readonly virtualJoystick: {
 		scene: MobileControlsScene,
+		radius: number;
 		base: Phaser.GameObjects.Graphics;
 		thumb: Phaser.GameObjects.Graphics;
 		pointer: Phaser.Input.Pointer;
 		angle: number;
 		force: number;
+		setVisible(boolean): void;
 		destroy (): void;
 	} & Phaser.Events.EventEmitter;
 
@@ -31,19 +33,19 @@ class PhaserJoystick {
 		const base = scene.add.graphics();
 		if (settings.redFireZone) {
 			base.lineStyle(10, 0xff0000);
-			base.fillStyle(0x000000, 0.5);
+			base.fillStyle(0x18181B, 0.9);
 			base.fillCircle(0, 0, radius);
 			base.strokeCircle(0, 0, radius);
 		} else {
-			base.fillStyle(0x000000, 0.5);
+			base.fillStyle(0x18181B, 0.9);
 			base.fillCircle(0, 0, radius);
 			base.alpha = 0.5;
 		}
 
 		const thumb = scene.add.graphics();
-		thumb.fillStyle(0x000000);
+		thumb.fillStyle(0x3f3f46);
 		thumb.fillCircle(0, 0, 35/2);
-		thumb.alpha = 0.5;
+		thumb.alpha = 0.9;
 
 		const virtualJoystick = this.virtualJoystick =
 			(<any>scene.plugins.get('virtual-joystick')).add(scene, {
@@ -53,6 +55,7 @@ class PhaserJoystick {
 			}) as PhaserJoystick['virtualJoystick'];
 
 		this.updateTransform();
+		this.hide();
 
 		virtualJoystick.on('update', () => {
 			if (virtualJoystick.pointer) {
@@ -66,6 +69,14 @@ class PhaserJoystick {
 		});
 
 		scene.joysticks.push(this);
+	}
+
+	show (): void {
+		this.virtualJoystick.setVisible(true);
+	}
+
+	hide (): void {
+		this.virtualJoystick.setVisible(false);
 	}
 
 	destroy (): void {
@@ -83,8 +94,10 @@ class PhaserJoystick {
 		const scene = virtualJoystick.scene;
 		const controls = scene.controls;
 
-		const x = (this.x + 32) * controls.scaleX + controls.x;
-		const y = (this.y + 12) * controls.scaleY + controls.y;
+		const x = this.x;
+		const y = this.y;
+
+		virtualJoystick.radius = 72 * controls.scaleX;
 
 		const base = virtualJoystick.base;
 		base.setScale(controls.scaleX, controls.scaleY);

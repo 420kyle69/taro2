@@ -478,6 +478,10 @@ var PhysicsComponent = IgeEventingClass.extend({
 				}
 			}
 		}
+
+		if (ige.isServer || (ige.isClient && ige.physics)) {
+			self._enableContactListener();
+		}
 	},
 
 	stop: function () {
@@ -586,13 +590,17 @@ var PhysicsComponent = IgeEventingClass.extend({
 							) {
 								// fire 'touchesWall' trigger when unit goes out of bounds for the first time
 								if (!entity.isOutOfBounds) {
+									if (entity._category == 'unit' || entity._category == 'item' || entity._category == 'projectile') {
+										entity.script.trigger("entityTouchesWall");
+									}
+
 									if (entity._category == 'unit') {
 										// console.log("unitTouchesWall", entity.id());
-										ige.trigger.fire('unitTouchesWall', { unitId: entity.id() });
+										ige.script.trigger('unitTouchesWall', { unitId: entity.id() });										
 									} else if (entity._category == 'item') {
-										ige.trigger.fire('itemTouchesWall', { itemId: entity.id() });
+										ige.script.trigger('itemTouchesWall', { itemId: entity.id() });
 									} else if (entity._category == 'projectile') {
-										ige.trigger.fire('projectileTouchesWall', { projectileId: entity.id() });
+										ige.script.trigger('projectileTouchesWall', { projectileId: entity.id() });
 									}
 
 									entity.isOutOfBounds = true;
@@ -698,6 +706,207 @@ var PhysicsComponent = IgeEventingClass.extend({
 			clearInterval(this._intervalTimer);
 		}
 		// Destroy all box2d world bodies
+	},
+
+	// Listen for when contact's begin
+	_beginContactCallback: function (contact) {
+		var entityA = contact.m_fixtureA.m_body._entity;
+		var entityB = contact.m_fixtureB.m_body._entity;
+		if (!entityA || !entityB)
+			return;
+
+		if (entityA._stats && entityB._stats) {
+			// a unit's sensor detected another unit
+
+			if (entityB._category == 'sensor') {
+				var tempEntity = entityA;
+				entityA = entityB;
+				entityB = tempEntity;
+			}
+			if (entityA._category == 'sensor') {
+				var ownerUnit = entityA.getOwnerUnit();
+				if (ownerUnit) {
+					if (entityB._category == 'unit') {
+						if (ownerUnit && ownerUnit != entityB) {
+							ownerUnit.ai.registerSensorDetection(entityB);
+						}
+					} else if (entityB._category == 'item') {
+						ige.script.trigger('whenItemEntersSensor', {
+							unitId: ownerUnit.id(),
+							sensorId: entityA.id(),
+							itemId: entityB.id()
+						});
+					}
+				}
+				return;
+			}
+
+			// ensure entityA is prioritized by this order: region, unit, item, projectile, wall
+			// this is to ensure that contact event is fired once when two entities touch each other. instead of this event being called twice.
+			if (
+				entityB._category == 'region' || (
+					entityA._category != 'region' && (
+						entityB._category == 'unit' || (
+							entityA._category != 'unit' && (
+								entityB._category == 'item' || (
+									entityA._category != 'item' && (
+										entityB._category == 'projectile' ||
+										entityB._category == undefined
+									)
+								)
+							)
+						)
+					)
+				)
+			) {
+				var entityA = contact.m_fixtureB.m_body._entity;
+				var entityB = contact.m_fixtureA.m_body._entity;
+			}
+
+			switch (entityA._category) {
+				case 'region':
+					var region = ige.script.variable.getValue({
+						function: 'getVariable',
+						variableName: entityA._stats.id
+					});
+
+					switch (entityB._category) {
+						case 'unit':
+							ige.script.trigger('unitEntersRegion', {
+								unitId: entityB.id(),
+								region: region
+							});
+							entityB.script.trigger("entityEntersRegion");
+							break;
+
+						case 'item':
+							ige.script.trigger('itemEntersRegion', {
+								itemId: entityB.id(),
+								region: region
+							});
+							entityB.script.trigger("entityEntersRegion");
+							break;
+
+						case 'debris':
+							ige.script.trigger('debrisEntersRegion', {
+								debrisId: entityB.id(),
+								region: region
+							});
+							entityB.script.trigger("entityEntersRegion");
+							break;
+					}
+					break;
+
+				case 'unit':
+					var triggeredBy = {
+						unitId: entityA.id()
+					};
+					ige.game.lastTouchingUnitId = entityA.id();
+					ige.game.lastTouchedUnitId = entityB.id();
+
+					switch (entityB._category) {
+						case 'unit':
+							ige.script.trigger('unitTouchesUnit', triggeredBy); // handle unitA touching unitB
+							triggeredBy.unitId = entityB.id();
+							ige.game.lastTouchingUnitId = entityB.id();
+							ige.game.lastTouchedUnitId = entityA.id();
+							ige.script.trigger('unitTouchesUnit', triggeredBy); // handle unitB touching unitA
+							entityA.script.trigger("entityTouchesUnit");
+							entityB.script.trigger("entityTouchesUnit");
+							break;
+
+						case 'item':
+							triggeredBy.itemId = entityB.id();
+							ige.game.lastTouchedItemId = entityB.id();
+							// don't trigger if item is owned by the unit
+							if (entityB._stats.ownerUnitId == entityA.id())
+								return;
+
+							ige.script.trigger('unitTouchesItem', triggeredBy);
+							entityA.script.trigger("entityTouchesItem");		
+							entityB.script.trigger("entityTouchesUnit");					
+							break;
+
+						case 'projectile':
+							// console.log(entityA._category, entityA._stats.name, entityA.id())
+							triggeredBy.projectileId = entityB.id();
+							triggeredBy.collidingEntity = entityA.id();
+							ige.game.lastTouchedProjectileId = entityB.id();
+							triggeredBy.projectileId = entityB.id();
+							ige.game.lastAttackingUnitId = entityB._stats.sourceUnitId;
+							ige.game.lastAttackedUnitId = entityA.id();
+							ige.script.trigger('unitTouchesProjectile', triggeredBy);
+							entityA.script.trigger("entityTouchesProjectile");
+							entityB.script.trigger("entityTouchesUnit");
+							break;
+
+						case undefined:
+						case 'wall':
+							ige.game.lastTouchingUnitId = entityA.id();
+							var triggeredBy = { unitId: entityA.id() };
+							ige.script.trigger('unitTouchesWall', triggeredBy);
+							entityA.script.trigger("entityTouchesWall");
+							break;
+					}
+					break;
+
+				case 'item':
+					switch (entityB._category) {
+						case 'projectile':
+							var triggeredBy = {
+								projectileId: entityB.id(),
+								itemId: entityA.id(),
+								collidingEntity: entityA.id()
+							};
+							ige.script.trigger('projectileTouchesItem', triggeredBy);
+							entityA.script.trigger("entityTouchesProjectile");
+							break;
+					}
+					break;
+
+				case 'projectile':					
+					switch (entityB._category) {
+						case 'wall':
+							var triggeredBy = {
+								projectileId: entityA.id(),
+								collidingEntity: entityB.id()
+							};
+							ige.script.trigger('projectileTouchesWall', triggeredBy);
+							entityA.script.trigger("entityTouchesWall");
+							break;
+					}
+					break;
+				case undefined: // something touched wall
+				case 'wall':
+					switch (entityB._category) {
+						case 'projectile':
+							var triggeredBy = {
+								projectileId: entityB.id(),
+								collidingEntity: entityA.id()
+							};
+							ige.script.trigger('projectileTouchesWall', triggeredBy);
+							entityB.script.trigger("entityTouchesWall");
+							break;
+
+						case 'item':
+							var triggeredBy = { itemId: entityB.id() };
+							ige.script.trigger('itemTouchesWall', triggeredBy);
+							entityB.script.trigger("entityTouchesWall");
+							break;
+					}
+					break;
+			}
+		}
+	},
+
+	_endContactCallback: function (contact) {
+
+	},
+
+	_enableContactListener: function () {
+		// Set the contact listener methods to detect when
+		// contacts (collisions) begin and end
+		ige.physics.contactListener(this._beginContactCallback, this.endContactCallback);
 	}
 });
 

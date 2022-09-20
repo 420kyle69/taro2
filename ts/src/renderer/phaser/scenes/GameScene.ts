@@ -22,18 +22,26 @@ class GameScene extends PhaserScene {
 		this.scale.on(Phaser.Scale.Events.RESIZE, () => {
 			if (this.zoomSize) {
 				camera.zoom = this.calculateZoom();
+				ige.client.emit('scale', { ratio: camera.zoom });
 			}
 		});
 
 		ige.client.on('zoom', (height: number) => {
+			if (this.zoomSize === height * 2.15) {
+				return;
+			}
+
 			this.setZoomSize(height);
+			const ratio = this.calculateZoom();
 
 			camera.zoomTo(
-				this.calculateZoom(),
+				ratio,
 				1000,
 				Phaser.Math.Easing.Quadratic.Out,
 				true
 			);
+
+			ige.client.emit('scale', { ratio: ratio });
 		});
 
 		ige.client.on('create-unit', (unit: Unit) => {
@@ -422,20 +430,23 @@ class GameScene extends PhaserScene {
 	}
 
 	update (): void {
+
 		const worldPoint = this.cameras.main.getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
+
 		ige.input.emit('pointermove', [{
 			x: worldPoint.x,
 			y: worldPoint.y,
 		}]);
+
 		this.renderedEntities.forEach(element => {
-			element.setVisible(false).setActive(false);
+			element.setVisible(false);
 		});
 
 		const culledList = this.cameras.main.cull(this.renderedEntities);
 
 		culledList.forEach(element => {
 			if (!element.hidden) {
-				element.setActive(true).setVisible(true);
+				element.setVisible(true);
 
 				if (element.dynamic) {
 					this.heightRenderer.adjustDepth(element as TGameObject & Phaser.GameObjects.Components.Size);

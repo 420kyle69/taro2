@@ -31,11 +31,17 @@ var GameScene = /** @class */ (function (_super) {
         this.scale.on(Phaser.Scale.Events.RESIZE, function () {
             if (_this.zoomSize) {
                 camera.zoom = _this.calculateZoom();
+                ige.client.emit('scale', { ratio: camera.zoom });
             }
         });
         ige.client.on('zoom', function (height) {
+            if (_this.zoomSize === height * 2.15) {
+                return;
+            }
             _this.setZoomSize(height);
-            camera.zoomTo(_this.calculateZoom(), 1000, Phaser.Math.Easing.Quadratic.Out, true);
+            var ratio = _this.calculateZoom();
+            camera.zoomTo(ratio, 1000, Phaser.Math.Easing.Quadratic.Out, true);
+            ige.client.emit('scale', { ratio: ratio });
         });
         ige.client.on('create-unit', function (unit) {
             new PhaserUnit(_this, unit);
@@ -273,12 +279,12 @@ var GameScene = /** @class */ (function (_super) {
                 y: worldPoint.y,
             }]);
         this.renderedEntities.forEach(function (element) {
-            element.setVisible(false).setActive(false);
+            element.setVisible(false);
         });
         var culledList = this.cameras.main.cull(this.renderedEntities);
         culledList.forEach(function (element) {
             if (!element.hidden) {
-                element.setActive(true).setVisible(true);
+                element.setVisible(true);
                 if (element.dynamic) {
                     _this.heightRenderer.adjustDepth(element);
                 }

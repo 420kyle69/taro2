@@ -44,9 +44,8 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			'equip-item': entity.on('equip-item', this.equipItem, this)
 		});
 
-		this.zoomEvtListener = ige.client.on('zoom', this.scaleElements, this);
-
 		this.scene.renderedEntities.push(this.gameObject);
+		this.zoomEvtListener = ige.client.on('scale', this.scaleElements, this);
 	}
 
 	protected updateTexture (usingSkin) {
@@ -243,11 +242,34 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		}
 	}
 
-	private scaleElements (height: number): void {
-		const defaultZoom = ige.game.data.settings.camera?.zoom?.default || 1000;
-		const targetScale = height / defaultZoom;
+	private scaleElements (data: {
+		ratio: number;
+	}): void {
+
+		if (this.scaleTween) {
+			this.scaleTween.stop();
+			this.scaleTween = null;
+		}
+
+		const { ratio } = data;
+		const targetScale = 1 / ratio;
+
+		let targets: Phaser.GameObjects.GameObject[] = [];
+
+		if (this.chat) {
+			targets.push(this.chat);
+		}
+
+		if (this.attributesContainer) {
+			targets.push(this.attributesContainer);
+		}
+
+		if (this.label) {
+			targets.push(this.label);
+		}
+
 		this.scaleTween = this.scene.tweens.add({
-			targets: [this.label, this.attributesContainer, this.chat],
+			targets: targets,
 			duration: 1000,
 			ease: Phaser.Math.Easing.Quadratic.Out,
 			scale: targetScale,
@@ -282,7 +304,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 	protected destroy (): void {
 
 		this.scene.renderedEntities = this.scene.renderedEntities.filter(item => item !== this.gameObject);
-		ige.client.off('zoom', this.zoomEvtListener);
+		ige.client.off('scale', this.zoomEvtListener);
 		this.zoomEvtListener = null;
 
 		this.equippedItem = null;

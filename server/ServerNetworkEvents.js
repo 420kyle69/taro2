@@ -200,6 +200,7 @@ var ServerNetworkEvents = {
 							clientId: client._id,
 							purchasables: {}
 						};
+						// console.log("createPlayer (logged-in user)")		
 						var player = ige.game.createPlayer();
 						for (key in userData) {
 							var obj = {};
@@ -230,6 +231,7 @@ var ServerNetworkEvents = {
 						data.number = ' lol';
 					}
 
+					// console.log("createPlayer (guest user)")				
 					var player = ige.game.createPlayer({
 						controlledBy: 'human',
 						name: 'user' + data.number,
@@ -710,7 +712,7 @@ var ServerNetworkEvents = {
 		var player = ige.game.getPlayerByClientId(clientId);
 		if (player && data && data.status === 'submitted') {
 			player.lastCustomInput = data.inputText;
-			ige.trigger.fire('playerCustomInput', { playerId: player.id() });
+			ige.script.trigger('playerCustomInput', { playerId: player.id() });
 		}
 	},
 	_onPlayerAbsoluteAngle: function (data, clientId) {

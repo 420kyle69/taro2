@@ -7,7 +7,6 @@ var EntitiesToRender = /** @class */ (function () {
         var currentTime = Date.now();
         if (!ige.lastTickTime)
             ige.lastTickTime = currentTime;
-        var tickDelta = currentTime - ige.lastTickTime;
         for (var entityId in this.trackEntityById) {
             var entity = ige.$(entityId);
             if (entity) {
@@ -87,6 +86,7 @@ var EntitiesToRender = /** @class */ (function () {
                 }
             }
         }
+        ige.triggersQueued = [];
         ige.lastTickTime = currentTime;
         if (ige.gameLoopTickHasExecuted) {
             ige.gameLoopTickHasExecuted = false;

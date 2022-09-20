@@ -15,8 +15,15 @@ var IgeNetIoServer = {
 		this.lagVariance = 0;
 
 		this._socketById = {};
+		this._socketByIp = {};
 		this._socketsByRoomId = {};
 		this.clientIds = [];
+		this.uploadPerSecond = [];
+		this.clientCommandCount = {};
+		this.totalCommandCount = {
+			connection: 0
+		};
+
 		this.snapshot = [];
 		this.sendQueue = {};
 		if (typeof data !== 'undefined') {
@@ -49,6 +56,47 @@ var IgeNetIoServer = {
 
 		// Start network sync
 		// this.timeSyncStart();
+
+		var upsDetector = setInterval(function() {
+			for (ip in self.uploadPerSecond) {
+				let ups = self.uploadPerSecond[ip];
+				var socket = self._socketByIp[ip]
+				
+				if (socket && ups > 75000) {
+					var player = ige.game.getPlayerByIp(ip);
+					
+					ige.server.bannedIps.push(ip);
+					socket.close();
+					
+					let playerName = 'guest user'
+					var player = ige.game.getPlayerByClientId(socket.id)
+					if (player) {
+						playerName = player._stats.name
+					}
+
+					var logData = {
+						query: 'banUser',
+						masterServer: global.myIp,
+						gameTitle: ige.game.data.defaultData.title,
+						playerName: playerName,
+						ip: ip,
+						uploadPerSecond: ups,
+						clientCommandCount: self.clientCommandCount[socket._remoteAddress]						
+					};
+
+					global.rollbar.log("user banned for sending over 75 kBps", logData);
+					
+					console.log("banning user", playerName, "(ip: ", ip,"for spamming network commands (sending ", ups, " bytes over 5 seconds)", logData)
+				}
+				
+				// console.log(self.uploadPerSecond[ip]);
+				self.uploadPerSecond[ip] = 0;
+
+				if (socket) {
+					self.clientCommandCount[socket._remoteAddress] = {};
+				}
+			}
+		}, 5000)
 
 		return this._entity;
 	},
@@ -271,7 +319,6 @@ var IgeNetIoServer = {
 
 			if (!clientId)
 				clientId = 'undefined';
-
 			self.sendQueue[clientId].push([ciEncoded, data]);
 		} else {
 			this.log(
@@ -449,8 +496,15 @@ var IgeNetIoServer = {
    * @param {Object} socket The client socket object.
    * @private
    */
-	 _onClientConnect: function (socket) {
+	 _onClientConnect: function (socket) {		
 		var self = this;
+
+		if (self.uploadPerSecond[socket._remoteAddress] == undefined) {
+			self.uploadPerSecond[socket._remoteAddress] = 0;			
+		}
+
+		self.uploadPerSecond[socket._remoteAddress] += 1500; // add 1500 bytes as connection cost
+		self.logCommandCount(socket._remoteAddress, "connection");
 
 		var remoteAddress = socket._remoteAddress;
 		console.log('client is attempting to connect', remoteAddress);
@@ -459,8 +513,8 @@ var IgeNetIoServer = {
 		var bannedIps = ige.server.bannedIps;
 		// ip is banned
 		var playerIsBanned = false;
-		for (index in bannedIps) {
-			if (bannedIps[remoteAddress] != undefined) {
+		for (i in bannedIps) {
+			if (bannedIps[i] == remoteAddress) {
 				console.log(`banned player detected! IP ${remoteAddress}`);
 				playerIsBanned = true;
 				reason += ' player is banned.';
@@ -492,23 +546,40 @@ var IgeNetIoServer = {
 						remoteAddress}`
 				);
 				this._socketById[socket.id] = socket;
+				this._socketByIp[socket._remoteAddress] = socket;
+
 				this.clientIds.push(socket.id);
 				self._socketById[socket.id].start = Date.now();
+				
 				ige.server.socketConnectionCount.connected++;
 
 				// Store a rooms array for this client
 				this._clientRooms[socket.id] = this._clientRooms[socket.id] || [];
 				
-				if (self._socketById[socket.id]._token && (self._socketById[socket.id]._token.userId || self._socketById[socket.id]._token.guestId)) {
+				if (self._socketById[socket.id]._token && self._socketById[socket.id]._token.distinctId) {
 					// Mixpanel Event to Track user game successfully started.
 					global.mixpanel.track('User Connected to Game Server', {
-						'distinct_id': self._socketById[socket.id]._token.userId ? self._socketById[socket.id]._token.userId : self._socketById[socket.id]._token.guestId,
+						'distinct_id': self._socketById[socket.id]._token.distinctId,
 						'$ip': socket._remoteAddress,
 						'gameSlug': ige.game && ige.game.data && ige.game.data.defaultData && ige.game.data.defaultData.gameSlug,
 					});
 				}
 
 				socket.on('message', function (data) {
+					
+					// track all commands being sent from client
+					var commandName = 'unknown'
+					if (typeof data[0] === 'string') {		
+						var code = data[0];
+						if (code.charCodeAt(0) != undefined) {
+							commandName = ige.network._networkCommandsIndex[code.charCodeAt(0)]
+						}
+					}
+
+					self.logCommandCount(socket._remoteAddress, commandName, data)
+
+					self.uploadPerSecond[socket._remoteAddress] += JSON.stringify(data).length;
+					
 					if (data.type === 'ping') {
 						socket.send({
 							type: 'pong',
@@ -518,7 +589,7 @@ var IgeNetIoServer = {
 						});
 						return;
 					}
-
+					
 					self._onClientMessage.apply(self, [data, socket.id]);
 				});
 
@@ -533,10 +604,10 @@ var IgeNetIoServer = {
 							ige.server.socketConnectionCount.immediatelyDisconnected++;
 						}
 						
-						if (self._socketById[socket.id]._token && (self._socketById[socket.id]._token.userId || self._socketById[socket.id]._token.guestId)) {
+						if (self._socketById[socket.id]._token && self._socketById[socket.id]._token.distinctId) {
 							/** additional part to send some info for marketing purposes */
 							global.mixpanel.track('Game Session Duration', {
-								'distinct_id': self._socketById[socket.id]._token.userId || self._socketById[socket.id]._token.guestId,
+								'distinct_id': self._socketById[socket.id]._token.distinctId,
 								'$ip': socket._remoteAddress,
 								'gameSlug': ige.game && ige.game.data && ige.game.data.defaultData && ige.game.data.defaultData.gameSlug,
 								'playTime': end - self._socketById[socket.id].start,
@@ -571,6 +642,39 @@ var IgeNetIoServer = {
 		}
 	},
 
+	logCommandCount: function (ip, commandName, data) {
+		let self = this;
+
+		if (self.clientCommandCount[ip] == undefined) {
+			self.clientCommandCount[ip] = {}
+		}
+
+		if (commandName == 'playerKeyDown') {
+			if (self.clientCommandCount[ip][commandName] == undefined) {
+				self.clientCommandCount[ip][commandName] = {};
+			}
+
+			if (self.clientCommandCount[ip][commandName][data[1].device+"-"+data[1].key] == undefined) {
+				self.clientCommandCount[ip][commandName][data[1].device+"-"+data[1].key] = 0;
+			}
+
+			self.clientCommandCount[ip][commandName][data[1].device+"-"+data[1].key]++;
+			
+		} else {
+			if (self.clientCommandCount[ip][commandName] == undefined) {
+				self.clientCommandCount[ip][commandName] = 0;
+			}
+
+			self.clientCommandCount[ip][commandName]++;
+		}		
+
+		if (self.totalCommandCount[commandName] == undefined) {
+			self.totalCommandCount[commandName] = 0;
+		}
+		
+		self.totalCommandCount[commandName]++;
+	},
+
 	/**
    * Called when the server receives a network message from a client.
    * @param {Object} data The data sent by the client.
@@ -578,11 +682,13 @@ var IgeNetIoServer = {
    * @private
    */
 	_onClientMessage: function (data, clientId) {
-		// added by Jaeyun to prevent error
+		var self = this;
+		
 		if (typeof data[0] === 'string') {
 			if (data[0].charCodeAt(0) != undefined) {
 				var ciDecoded = data[0].charCodeAt(0);
 				var commandName = this._networkCommandsIndex[ciDecoded];
+
 				if (this._networkCommands[commandName]) {
 					this._networkCommands[commandName](data[1], clientId);
 				}
@@ -622,7 +728,7 @@ var IgeNetIoServer = {
 		req = this._requests[id];
 
 		if (this.debug()) {
-			console.log('onResponse', data);
+			// console.log('onResponse', data);
 			this._debugCounter++;
 		}
 
@@ -651,7 +757,11 @@ var IgeNetIoServer = {
 		this.clientLeaveAllRooms(socket.id);
 
 		delete ige.server.clients[socket.id];
+		delete this.uploadPerSecond[socket._remoteAddress]
+		delete this.clientCommandCount[socket._remoteAddress]
 		delete this._socketById[socket.id];
+		delete this._socketByIp[socket._remoteAddress];
+
 		let indexToRemove = this.clientIds.findIndex(function (id) {
 			if (id === socket.id) return true;
 		});

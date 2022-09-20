@@ -36,8 +36,8 @@ var PhaserUnit = /** @class */ (function (_super) {
             'render-chat-bubble': entity.on('render-chat-bubble', _this.renderChat, _this),
             'equip-item': entity.on('equip-item', _this.equipItem, _this)
         });
-        _this.zoomEvtListener = ige.client.on('zoom', _this.scaleElements, _this);
         _this.scene.renderedEntities.push(_this.gameObject);
+        _this.zoomEvtListener = ige.client.on('scale', _this.scaleElements, _this);
         return _this;
     }
     PhaserUnit.prototype.updateTexture = function (usingSkin) {
@@ -197,13 +197,26 @@ var PhaserUnit = /** @class */ (function (_super) {
             this.chat = new PhaserChatBubble(this.scene, text, this);
         }
     };
-    PhaserUnit.prototype.scaleElements = function (height) {
+    PhaserUnit.prototype.scaleElements = function (data) {
         var _this = this;
-        var _a, _b;
-        var defaultZoom = ((_b = (_a = ige.game.data.settings.camera) === null || _a === void 0 ? void 0 : _a.zoom) === null || _b === void 0 ? void 0 : _b.default) || 1000;
-        var targetScale = height / defaultZoom;
+        if (this.scaleTween) {
+            this.scaleTween.stop();
+            this.scaleTween = null;
+        }
+        var ratio = data.ratio;
+        var targetScale = 1 / ratio;
+        var targets = [];
+        if (this.chat) {
+            targets.push(this.chat);
+        }
+        if (this.attributesContainer) {
+            targets.push(this.attributesContainer);
+        }
+        if (this.label) {
+            targets.push(this.label);
+        }
         this.scaleTween = this.scene.tweens.add({
-            targets: [this.label, this.attributesContainer, this.chat],
+            targets: targets,
             duration: 1000,
             ease: Phaser.Math.Easing.Quadratic.Out,
             scale: targetScale,
@@ -234,7 +247,7 @@ var PhaserUnit = /** @class */ (function (_super) {
     PhaserUnit.prototype.destroy = function () {
         var _this = this;
         this.scene.renderedEntities = this.scene.renderedEntities.filter(function (item) { return item !== _this.gameObject; });
-        ige.client.off('zoom', this.zoomEvtListener);
+        ige.client.off('scale', this.zoomEvtListener);
         this.zoomEvtListener = null;
         this.equippedItem = null;
         if (this.scaleTween) {

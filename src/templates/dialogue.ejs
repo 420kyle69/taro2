@@ -98,7 +98,7 @@
       return JSON.stringify(data);
   });
 
-  var renderDialogueTemplate = function (data, dialogueTemplate) {
+  var renderHBSTemplate = function (data, dialogueTemplate) {
     let value = dialogueTemplate.replace(/<\s*script.*?>/g, '<script type="html/x-handlebars">') + defaultUI.defaultUIScript.replaceAll("<start-script>", "<script>").replaceAll("<close-script>", "<\/script>");
     window.closeDialogue && window.closeDialogue();
     const template = Handlebars.compile(value, {noEscape: true});
