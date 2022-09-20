@@ -241,6 +241,12 @@ class PhaserUnit extends PhaserAnimatedEntity {
 	private scaleElements (data: {
 		ratio: number;
 	}): void {
+
+		if (this.scaleTween) {
+			this.scaleTween.stop();
+			this.scaleTween = null;
+		}
+
 		const { ratio } = data;
 		const targetScale = 1 / ratio;
 
@@ -267,6 +273,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 				this.scaleTween = null;
 			}
 		});
+		console.log(this.scene.tweens.getAllTweens());
 	}
 
 	protected destroy (): void {

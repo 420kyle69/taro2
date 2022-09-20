@@ -28,6 +28,7 @@ class GameScene extends PhaserScene {
 			if (this.zoomSize === height * 2.15) {
 				return;
 			}
+
 			this.setZoomSize(height);
 			const ratio = this.calculateZoom();
 
