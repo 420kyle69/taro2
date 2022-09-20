@@ -273,7 +273,6 @@ class PhaserUnit extends PhaserAnimatedEntity {
 				this.scaleTween = null;
 			}
 		});
-		console.log(this.scene.tweens.getAllTweens());
 	}
 
 	protected destroy (): void {

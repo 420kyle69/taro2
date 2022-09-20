@@ -223,7 +223,6 @@ var PhaserUnit = /** @class */ (function (_super) {
                 _this.scaleTween = null;
             }
         });
-        console.log(this.scene.tweens.getAllTweens());
     };
     PhaserUnit.prototype.destroy = function () {
         var _this = this;
