@@ -241,6 +241,12 @@ class PhaserUnit extends PhaserAnimatedEntity {
 	private scaleElements (data: {
 		ratio: number;
 	}): void {
+
+		if (this.scaleTween) {
+			this.scaleTween.stop();
+			this.scaleTween = null;
+		}
+
 		const { ratio } = data;
 		const targetScale = 1 / ratio;
 

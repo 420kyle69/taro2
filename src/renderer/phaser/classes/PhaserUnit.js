@@ -198,6 +198,10 @@ var PhaserUnit = /** @class */ (function (_super) {
     };
     PhaserUnit.prototype.scaleElements = function (data) {
         var _this = this;
+        if (this.scaleTween) {
+            this.scaleTween.stop();
+            this.scaleTween = null;
+        }
         var ratio = data.ratio;
         var targetScale = 1 / ratio;
         var targets = [];
