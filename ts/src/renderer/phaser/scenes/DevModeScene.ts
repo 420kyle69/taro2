@@ -49,6 +49,7 @@ class DevModeScene extends PhaserScene {
 			y: number
 		}) => {
 			this.gameScene.tilemap.putTileAt(data.gid, data.x, data.y);
+			ige.developerMode.changedTiles.push(data);
 		});
 
 		this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
@@ -172,11 +173,12 @@ class DevModeScene extends PhaserScene {
 					this.gameScene.tilemap.putTileAt(this.selectedTile, pointerTileX, pointerTileY);
 					if (this.selectedTile === null) {
 						console.log('edit tile')
-						ige.network.send('editTile', {gid: -1, x: pointerTileX, y: pointerTileY});
+						this.gameScene.tilemap.currentLayerIndex
+						ige.network.send('editTile', {gid: -1, layer: this.gameScene.tilemap.currentLayerIndex, x: pointerTileX, y: pointerTileY});
 					}
 					else {
 						console.log('edit tile')
-						ige.network.send('editTile', {gid: this.selectedTile.index, x: pointerTileX, y: pointerTileY});
+						ige.network.send('editTile', {gid: this.selectedTile.index, layer: this.gameScene.tilemap.currentLayerIndex, x: pointerTileX, y: pointerTileY});
 					}
 				}
 			}

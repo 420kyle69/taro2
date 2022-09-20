@@ -37,10 +37,6 @@ var PhaserPalette = /** @class */ (function (_super) {
         var texturesLayer = _this.texturesLayer = map.createLayer(0, tileset, 0, 0).setOrigin(0, 0).setInteractive() /*.setScrollFactor(0,0)*/.setPosition(_this.x, _this.y);
         //this.add(texturesLayer);
         scene.add.existing(texturesLayer);
-        /*texturesLayer.on('pointerover', () => {
-            this.pointerOver;
-        });*/
-        //  The miniCam is 400px wide, so can display the whole world at a zoom of 0.2
         var camera = _this.camera = _this.scene.cameras.add(_this.scene.sys.game.canvas.width - texturesLayer.width - 40, 70, texturesLayer.width, texturesLayer.height).setScroll(_this.x, _this.y).setZoom(1).setName('palette');
         camera.setBackgroundColor(0x002244);
         var COLOR_PRIMARY = 0x4e342e;
@@ -89,6 +85,16 @@ var PhaserPalette = /** @class */ (function (_super) {
         scrollBarContainer.width = camera.width + scrollBarRight.width + 60;
         scrollBarContainer.height = camera.height + scrollBarBottom.height + 60;
         console.log('scrollBarContainer', camera.width, scrollBarRight);
+        /*this.scene.input.setDraggable(texturesLayer);
+        this.scene.input.on('drag', (pointer, gameObject, dragX, dragY) => {
+            console.log('drag', dragX - this.x, dragY);
+            scrollBarBottom.value = Math.sign(dragX - this.x) / 20;
+            //this.camera.scrollX = dragX - 1000;
+            //this.camera.scrollY = dragY;
+        });*/
+        /*texturesLayer.on('pointerover', () => {
+            this.pointerOver;
+        });*/
         scrollBarBottom.on('valuechange', function (newValue, oldValue, scrollBar) {
             if (!isNaN(newValue)) {
                 newValue -= 0.5;

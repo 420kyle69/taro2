@@ -43,12 +43,6 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 		//this.add(texturesLayer);
 		scene.add.existing(texturesLayer);
 
-		/*texturesLayer.on('pointerover', () => {
-			this.pointerOver;
-		});*/
-
-
-		//  The miniCam is 400px wide, so can display the whole world at a zoom of 0.2
 		const camera = this.camera = this.scene.cameras.add(this.scene.sys.game.canvas.width - texturesLayer.width - 40, 70, texturesLayer.width, texturesLayer.height).setScroll(this.x, this.y).setZoom(1).setName('palette');
 		camera.setBackgroundColor(0x002244);
 
@@ -103,6 +97,17 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 		scrollBarContainer.height = camera.height + scrollBarBottom.height +60;
 
 		console.log('scrollBarContainer', camera.width, scrollBarRight)
+		
+		/*this.scene.input.setDraggable(texturesLayer);
+        this.scene.input.on('drag', (pointer, gameObject, dragX, dragY) => {
+            console.log('drag', dragX - this.x, dragY);
+			scrollBarBottom.value = Math.sign(dragX - this.x) / 20;
+            //this.camera.scrollX = dragX - 1000;
+            //this.camera.scrollY = dragY;
+        });*/
+		/*texturesLayer.on('pointerover', () => {
+			this.pointerOver;
+		});*/
 
 		scrollBarBottom.on('valuechange',
 			function (newValue, oldValue, scrollBar) {

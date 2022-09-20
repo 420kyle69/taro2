@@ -1,6 +1,7 @@
 var DeveloperMode = /** @class */ (function () {
     function DeveloperMode() {
         this.active = false;
+        this.changedTiles = [];
     }
     DeveloperMode.prototype.enter = function () {
         console.log('enter developer mode');

@@ -1,8 +1,10 @@
 class DeveloperMode {
 	active: boolean;
+	changedTiles: {gid: number, x: number, y: number}[];
 
 	constructor() {
 		this.active = false;
+		this.changedTiles = [];
 	}
 
 	enter() {
