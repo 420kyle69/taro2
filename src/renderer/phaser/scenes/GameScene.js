@@ -34,6 +34,9 @@ var GameScene = /** @class */ (function (_super) {
             }
         });
         ige.client.on('zoom', function (height) {
+            if (_this.zoomSize === height * 2.15) {
+                return;
+            }
             _this.setZoomSize(height);
             var ratio = _this.calculateZoom();
             camera.zoomTo(ratio, 1000, Phaser.Math.Easing.Quadratic.Out, true);

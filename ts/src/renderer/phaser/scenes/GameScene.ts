@@ -25,6 +25,9 @@ class GameScene extends PhaserScene {
 		});
 
 		ige.client.on('zoom', (height: number) => {
+			if (this.zoomSize === height * 2.15) {
+				return;
+			}
 			this.setZoomSize(height);
 			const ratio = this.calculateZoom();
 
