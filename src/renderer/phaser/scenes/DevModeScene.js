@@ -52,7 +52,7 @@ var DevModeScene = /** @class */ (function (_super) {
         });
         this.input.on('wheel', function (pointer, gameObjects, deltaX, deltaY, deltaZ) {
             if (_this.devPalette && _this.devPalette.visible) {
-                _this.devPalette.zoom(pointer, deltaY);
+                _this.devPalette.zoom(/*pointer,*/ deltaY);
             }
         });
     };
@@ -115,7 +115,7 @@ var DevModeScene = /** @class */ (function (_super) {
                 && palettePointerTileY < 20
                 && this.input.activePointer.x > this.devPalette.scrollBarContainer.x
                 && this.input.activePointer.x < this.devPalette.scrollBarContainer.x + this.devPalette.scrollBarContainer.width
-                && this.input.activePointer.y > this.devPalette.scrollBarContainer.y
+                && this.input.activePointer.y > this.devPalette.scrollBarContainer.y - 30
                 && this.input.activePointer.y < this.devPalette.scrollBarContainer.y + this.devPalette.scrollBarContainer.height) {
                 this.marker.setVisible(false);
                 // Snap to tile coordinates, but in world space
@@ -127,7 +127,7 @@ var DevModeScene = /** @class */ (function (_super) {
             }
             else if (!(this.input.activePointer.x > this.devPalette.scrollBarContainer.x
                 && this.input.activePointer.x < this.devPalette.scrollBarContainer.x + this.devPalette.scrollBarContainer.width
-                && this.input.activePointer.y > this.devPalette.scrollBarContainer.y
+                && this.input.activePointer.y > this.devPalette.scrollBarContainer.y - 30
                 && this.input.activePointer.y < this.devPalette.scrollBarContainer.y + this.devPalette.scrollBarContainer.height)) {
                 this.paletteMarker.setVisible(false);
                 this.marker.setVisible(true);
@@ -141,12 +141,25 @@ var DevModeScene = /** @class */ (function (_super) {
                     this.selectedTile = this.gameScene.tilemap.getTileAt(pointerTileX, pointerTileY);
                 }
                 if (this.input.manager.activePointer.leftButtonDown()
-                    && this.selectedTile
-                    && this.gameScene.tilemap.getTileAt(pointerTileX, pointerTileY)
-                    && this.selectedTile.index !== this.gameScene.tilemap.getTileAt(pointerTileX, pointerTileY).index) {
-                    console.log('edit tile');
+                    && (pointerTileX >= 0 && pointerTileY >= 0
+                        && pointerTileX < this.gameScene.tilemap.width
+                        && pointerTileY < this.gameScene.tilemap.height)
+                    && ((this.selectedTile
+                        && this.gameScene.tilemap.getTileAt(pointerTileX, pointerTileY)
+                        && this.selectedTile.index !== this.gameScene.tilemap.getTileAt(pointerTileX, pointerTileY).index)
+                        || (this.selectedTile === null
+                            && this.gameScene.tilemap.getTileAt(pointerTileX, pointerTileY))
+                        || (this.selectedTile
+                            && this.gameScene.tilemap.getTileAt(pointerTileX, pointerTileY) === null))) {
                     this.gameScene.tilemap.putTileAt(this.selectedTile, pointerTileX, pointerTileY);
-                    ige.network.send('editTile', { gid: this.selectedTile.index, x: pointerTileX, y: pointerTileY });
+                    if (this.selectedTile === null) {
+                        console.log('edit tile');
+                        ige.network.send('editTile', { gid: -1, x: pointerTileX, y: pointerTileY });
+                    }
+                    else {
+                        console.log('edit tile');
+                        ige.network.send('editTile', { gid: this.selectedTile.index, x: pointerTileX, y: pointerTileY });
+                    }
                 }
             }
         }

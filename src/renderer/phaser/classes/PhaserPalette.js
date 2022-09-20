@@ -41,21 +41,11 @@ var PhaserPalette = /** @class */ (function (_super) {
             this.pointerOver;
         });*/
         //  The miniCam is 400px wide, so can display the whole world at a zoom of 0.2
-        var camera = _this.camera = _this.scene.cameras.add(1200, 100, texturesLayer.width, texturesLayer.height).setScroll(_this.x, _this.y).setZoom(1).setName('palette');
+        var camera = _this.camera = _this.scene.cameras.add(_this.scene.sys.game.canvas.width - texturesLayer.width - 40, 70, texturesLayer.width, texturesLayer.height).setScroll(_this.x, _this.y).setZoom(1).setName('palette');
         camera.setBackgroundColor(0x002244);
-        /*const background = this.background = scene.add.graphics();
-        this.add(background);
-        scene.add.existing(this);*/
-        //this.drawBackground();
-        /*this.scene.input.setDraggable(texturesLayer);
-        this.scene.input.on('drag', (pointer, gameObject, dragX, dragY) => {
-            console.log('drag', dragX, dragY);
-            this.camera.scrollX = dragX;
-            this.camera.scrollY = dragY;
-        });*/
         var COLOR_PRIMARY = 0x4e342e;
         var COLOR_LIGHT = 0x7b5e57;
-        var COLOR_DARK = 0x260e04;
+        var COLOR_DARK = _this.COLOR_DARK = 0x260e04;
         var scrollBarContainer = _this.scrollBarContainer = new Phaser.GameObjects.Container(scene);
         scene.add.existing(scrollBarContainer);
         scrollBarContainer.x = _this.camera.x;
@@ -122,22 +112,43 @@ var PhaserPalette = /** @class */ (function (_super) {
             //console.log('targetValue', targetValue);
             //camera.scrollY = this.y /*- (camera.height / 2)*/ + (camera.height * newValue);
         }, _this);
+        _this.scene.scale.on(Phaser.Scale.Events.RESIZE, function () {
+            camera.x = _this.scene.sys.game.canvas.width - texturesLayer.width - 40;
+            scrollBarContainer.x = _this.camera.x;
+        });
+        _this.addButton('+', 0, _this.zoom.bind(_this), -1);
+        _this.addButton('-', 31, _this.zoom.bind(_this), 1);
+        _this.addButton('1', texturesLayer.width - 124, _this.switchLayer.bind(_this), 0);
+        _this.addButton('2', texturesLayer.width - 93, _this.switchLayer.bind(_this), 1);
+        _this.addButton('3', texturesLayer.width - 62, _this.switchLayer.bind(_this), 2);
+        _this.addButton('4', texturesLayer.width - 31, _this.switchLayer.bind(_this), 3);
         return _this;
     }
-    /*private drawBackground (): void {
-        const background = this.background;
-
-        const width = 570;
-        const height = 420;
-        background.fillStyle(0x000000, 0.2);
-        background.fillRect(
-            -10,
-            -10,
-            width,
-            height
-        );
-    }*/
-    PhaserPalette.prototype.zoom = function (pointer, deltaY) {
+    PhaserPalette.prototype.addButton = function (text, x, func, value) {
+        //const text = '+';
+        var w = 30;
+        var h = 30;
+        //const x = 0;
+        var y = -h;
+        var button = this.scene.add.rectangle(x + w / 2, y + h / 2, w, h, this.COLOR_DARK);
+        button.setInteractive();
+        this.scrollBarContainer.add(button);
+        var label = this.scene.add.text(x + w / 2, y + h / 2, text);
+        label.setFontFamily('Verdana');
+        label.setFontSize(26);
+        label.setOrigin(0.5);
+        label.setResolution(4);
+        this.scrollBarContainer.add(label);
+        button.on('pointerdown', function () {
+            func(value);
+        });
+    };
+    PhaserPalette.prototype.switchLayer = function (value) {
+        var scene = this.scene;
+        var gameMap = scene.gameScene.tilemap;
+        gameMap.currentLayerIndex = value;
+    };
+    PhaserPalette.prototype.zoom = function (/*pointer: any,*/ deltaY) {
         var targetZoom;
         if (deltaY < 0)
             targetZoom = this.camera.zoom * 1.2;

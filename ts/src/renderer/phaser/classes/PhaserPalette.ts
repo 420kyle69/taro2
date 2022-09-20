@@ -10,6 +10,7 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 	scrollBarContainer: Phaser.GameObjects.Container;
 	scrollBarBottom: any;
 	scrollBarRight: any;
+	COLOR_DARK: number;
 
 	constructor(
 		scene: Phaser.Scene,
@@ -48,24 +49,12 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 
 
 		//  The miniCam is 400px wide, so can display the whole world at a zoom of 0.2
-		const camera = this.camera = this.scene.cameras.add(1200, 100, texturesLayer.width, texturesLayer.height).setScroll(this.x, this.y).setZoom(1).setName('palette');
+		const camera = this.camera = this.scene.cameras.add(this.scene.sys.game.canvas.width - texturesLayer.width - 40, 70, texturesLayer.width, texturesLayer.height).setScroll(this.x, this.y).setZoom(1).setName('palette');
 		camera.setBackgroundColor(0x002244);
-
-		/*const background = this.background = scene.add.graphics();
-		this.add(background);
-		scene.add.existing(this);*/
-
-		//this.drawBackground();
-		/*this.scene.input.setDraggable(texturesLayer);
-		this.scene.input.on('drag', (pointer, gameObject, dragX, dragY) => {
-			console.log('drag', dragX, dragY);
-			this.camera.scrollX = dragX;
-			this.camera.scrollY = dragY;
-		});*/
 
 		const COLOR_PRIMARY = 0x4e342e;
 		const COLOR_LIGHT = 0x7b5e57;
-		const COLOR_DARK = 0x260e04;
+		const COLOR_DARK = this.COLOR_DARK = 0x260e04;
 
 		const scrollBarContainer = this.scrollBarContainer = new Phaser.GameObjects.Container(scene);
 		scene.add.existing(scrollBarContainer);
@@ -145,23 +134,50 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 			},
 			this
 		);
+
+		this.scene.scale.on(Phaser.Scale.Events.RESIZE, () => {
+			camera.x = this.scene.sys.game.canvas.width - texturesLayer.width - 40;
+			scrollBarContainer.x = this.camera.x;
+		});
+
+		this.addButton('+', 0, this.zoom.bind(this), -1);
+		this.addButton('-', 31, this.zoom.bind(this), 1);
+
+		this.addButton('1', texturesLayer.width - 124, this.switchLayer.bind(this), 0);
+		this.addButton('2', texturesLayer.width - 93, this.switchLayer.bind(this), 1);
+		this.addButton('3', texturesLayer.width - 62, this.switchLayer.bind(this), 2);
+		this.addButton('4', texturesLayer.width - 31, this.switchLayer.bind(this), 3);
 	}
 
-	/*private drawBackground (): void {
-		const background = this.background;
-
-		const width = 570;
-		const height = 420;
-		background.fillStyle(0x000000, 0.2);
-		background.fillRect(
-			-10,
-			-10,
-			width,
-			height
+	addButton (text, x, func, value) {
+		//const text = '+';
+		const w = 30;
+		const h = 30;
+		//const x = 0;
+		const y = -h;
+		const button = this.scene.add.rectangle(x + w/2, y + h/2, w, h, this.COLOR_DARK);
+		button.setInteractive();
+		this.scrollBarContainer.add(button);
+		const label = this.scene.add.text(
+			x + w/2, y + h/2, text
 		);
-	}*/
+		label.setFontFamily('Verdana');
+		label.setFontSize(26);
+		label.setOrigin(0.5);
+		label.setResolution(4);
+		this.scrollBarContainer.add(label);
+		button.on('pointerdown', () => {
+			func(value);
+		});
+	}
 
-	zoom (pointer: any, deltaY: number): void {
+	switchLayer(value) {
+		const scene = this.scene as any;
+		const gameMap = scene.gameScene.tilemap;
+		gameMap.currentLayerIndex = value;
+	}
+
+	zoom (/*pointer: any,*/ deltaY: number): void {
 		let targetZoom;
 		if (deltaY < 0) targetZoom = this.camera.zoom * 1.2;
 		else targetZoom = this.camera.zoom / 1.2;
