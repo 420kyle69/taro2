@@ -48,7 +48,7 @@ var DevModeScene = /** @class */ (function (_super) {
             _this.devPalette.scrollBarContainer.setVisible(false);
         });
         ige.client.on('editTile', function (data) {
-            _this.gameScene.tilemap.putTileAt(data.gid, data.x, data.y);
+            map.putTileAt(data.gid, data.x, data.y);
             ige.developerMode.changedTiles.push(data);
         });
         this.input.on('wheel', function (pointer, gameObjects, deltaX, deltaY, deltaZ) {
@@ -102,6 +102,7 @@ var DevModeScene = /** @class */ (function (_super) {
     };
     DevModeScene.prototype.update = function () {
         if (ige.developerMode.active) {
+            var map = this.gameScene.tilemap;
             var worldPoint = this.gameScene.cameras.main.getWorldPoint(this.gameScene.input.activePointer.x, this.gameScene.input.activePointer.y);
             var palettePoint = this.cameras.getCamera('palette').getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
             this.paletteMarker.clear();
@@ -123,7 +124,7 @@ var DevModeScene = /** @class */ (function (_super) {
                 this.paletteMarker.x = this.devPalette.map.tileToWorldX(palettePointerTileX);
                 this.paletteMarker.y = this.devPalette.map.tileToWorldY(palettePointerTileY);
                 if (this.input.manager.activePointer.isDown) {
-                    this.selectedTile = this.devPalette.map.getTileAt(palettePointerTileX, palettePointerTileY);
+                    this.selectedTile = this.devPalette.map.getTileAt(palettePointerTileX, palettePointerTileY, true);
                 }
             }
             else if (!(this.input.activePointer.x > this.devPalette.scrollBarContainer.x
@@ -133,35 +134,24 @@ var DevModeScene = /** @class */ (function (_super) {
                 this.paletteMarker.setVisible(false);
                 this.marker.setVisible(true);
                 // Rounds down to nearest tile
-                var pointerTileX = this.gameScene.tilemap.worldToTileX(worldPoint.x);
-                var pointerTileY = this.gameScene.tilemap.worldToTileY(worldPoint.y);
+                var pointerTileX = map.worldToTileX(worldPoint.x);
+                var pointerTileY = map.worldToTileY(worldPoint.y);
                 // Snap to tile coordinates, but in world space
-                this.marker.x = this.gameScene.tilemap.tileToWorldX(pointerTileX);
-                this.marker.y = this.gameScene.tilemap.tileToWorldY(pointerTileY);
+                this.marker.x = map.tileToWorldX(pointerTileX);
+                this.marker.y = map.tileToWorldY(pointerTileY);
                 if (this.input.manager.activePointer.rightButtonDown()) {
-                    this.selectedTile = this.gameScene.tilemap.getTileAt(pointerTileX, pointerTileY);
+                    if (map.getTileAt(pointerTileX, pointerTileY, true) !== null) {
+                        this.selectedTile = map.getTileAt(pointerTileX, pointerTileY, true);
+                    }
                 }
                 if (this.input.manager.activePointer.leftButtonDown()
                     && (pointerTileX >= 0 && pointerTileY >= 0
-                        && pointerTileX < this.gameScene.tilemap.width
-                        && pointerTileY < this.gameScene.tilemap.height)
-                    && ((this.selectedTile
-                        && this.gameScene.tilemap.getTileAt(pointerTileX, pointerTileY)
-                        && this.selectedTile.index !== this.gameScene.tilemap.getTileAt(pointerTileX, pointerTileY).index)
-                        || (this.selectedTile === null
-                            && this.gameScene.tilemap.getTileAt(pointerTileX, pointerTileY))
-                        || (this.selectedTile
-                            && this.gameScene.tilemap.getTileAt(pointerTileX, pointerTileY) === null))) {
-                    this.gameScene.tilemap.putTileAt(this.selectedTile, pointerTileX, pointerTileY);
-                    if (this.selectedTile === null) {
-                        console.log('edit tile');
-                        this.gameScene.tilemap.currentLayerIndex;
-                        ige.network.send('editTile', { gid: -1, layer: this.gameScene.tilemap.currentLayerIndex, x: pointerTileX, y: pointerTileY });
-                    }
-                    else {
-                        console.log('edit tile');
-                        ige.network.send('editTile', { gid: this.selectedTile.index, layer: this.gameScene.tilemap.currentLayerIndex, x: pointerTileX, y: pointerTileY });
-                    }
+                        && pointerTileX < map.width
+                        && pointerTileY < map.height)
+                    && this.selectedTile.index !== (map.getTileAt(pointerTileX, pointerTileY, true)).index) {
+                    map.putTileAt(this.selectedTile, pointerTileX, pointerTileY);
+                    console.log('place tile', this.selectedTile.index);
+                    ige.network.send('editTile', { gid: this.selectedTile.index, layer: map.currentLayerIndex, x: pointerTileX, y: pointerTileY });
                 }
             }
         }

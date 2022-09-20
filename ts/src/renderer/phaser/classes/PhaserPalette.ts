@@ -1,6 +1,5 @@
 class PhaserPalette extends Phaser.GameObjects.Container {
 
-	//private readonly background: Phaser.GameObjects.Graphics;
 	private readonly textures: Phaser.GameObjects.Image;
 	private readonly tileset: Phaser.Tilemaps.Tileset;
 	texturesLayer: any;
@@ -22,7 +21,7 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 		console.log('create palette', this);
 		this.tileset = tileset;
 		this.rexUI = rexUI;
-		//this.setScrollFactor(0,0);
+
 		this.x = -1000;
 		this.y = 0;
 
@@ -42,6 +41,18 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 		const texturesLayer = this.texturesLayer = map.createLayer(0, tileset, 0, 0).setOrigin(0, 0).setInteractive()/*.setScrollFactor(0,0)*/.setPosition(this.x, this.y);
 		//this.add(texturesLayer);
 		scene.add.existing(texturesLayer);
+
+		texturesLayer.on("pointermove", function (p) {
+			if (!p.isDown) return;
+			const scrollX = (p.x - p.prevPosition.x) / camera.zoom
+			const scrollY = (p.y - p.prevPosition.y) / camera.zoom;
+			if (camera.scrollX - scrollX > -(camera.width/2) + this.x && camera.scrollX - scrollX < (camera.width/2) + this.x) {
+				camera.scrollX -= scrollX;
+			}
+			if (camera.scrollY - scrollY > -(camera.height/2) + this.y && camera.scrollY - scrollY < (camera.height/2) + this.y) {
+				camera.scrollY -= scrollY;
+			}
+		  });
 
 		const camera = this.camera = this.scene.cameras.add(this.scene.sys.game.canvas.width - texturesLayer.width - 40, 70, texturesLayer.width, texturesLayer.height).setScroll(this.x, this.y).setZoom(1).setName('palette');
 		camera.setBackgroundColor(0x002244);
@@ -97,17 +108,6 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 		scrollBarContainer.height = camera.height + scrollBarBottom.height +60;
 
 		console.log('scrollBarContainer', camera.width, scrollBarRight)
-		
-		/*this.scene.input.setDraggable(texturesLayer);
-        this.scene.input.on('drag', (pointer, gameObject, dragX, dragY) => {
-            console.log('drag', dragX - this.x, dragY);
-			scrollBarBottom.value = Math.sign(dragX - this.x) / 20;
-            //this.camera.scrollX = dragX - 1000;
-            //this.camera.scrollY = dragY;
-        });*/
-		/*texturesLayer.on('pointerover', () => {
-			this.pointerOver;
-		});*/
 
 		scrollBarBottom.on('valuechange',
 			function (newValue, oldValue, scrollBar) {
@@ -115,11 +115,6 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 					newValue -= 0.5;
 					camera.scrollX = this.x + (camera.width * newValue);
 				}
-				//console.log('value', newValue);
-				//newValue -= 0.5;
-				//const targetValue = newValue * (camera.zoom - 1);
-				//scrollBar.value = 0.5 + targetValue;
-				//camera.scrollX = this.x /*- (camera.width / 2)*/ + (camera.width * newValue);
 			},
 			this
 		);
@@ -130,12 +125,6 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 					newValue -= 0.5;
 					camera.scrollY = this.y + (camera.height * newValue);
 				}
-				//console.log('value', newValue);
-				//newValue -= 0.5;
-				//const targetValue = newValue * (camera.zoom - 1);
-				//scrollBar.value = 0.5 + targetValue;
-				//console.log('targetValue', targetValue);
-				//camera.scrollY = this.y /*- (camera.height / 2)*/ + (camera.height * newValue);
 			},
 			this
 		);
