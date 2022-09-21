@@ -198,10 +198,24 @@ var PhaserUnit = /** @class */ (function (_super) {
     };
     PhaserUnit.prototype.scaleElements = function (data) {
         var _this = this;
+        if (this.scaleTween) {
+            this.scaleTween.stop();
+            this.scaleTween = null;
+        }
         var ratio = data.ratio;
         var targetScale = 1 / ratio;
+        var targets = [];
+        if (this.chat) {
+            targets.push(this.chat);
+        }
+        if (this.attributesContainer) {
+            targets.push(this.attributesContainer);
+        }
+        if (this.label) {
+            targets.push(this.label);
+        }
         this.scaleTween = this.scene.tweens.add({
-            targets: [this.label, this.attributesContainer, this.chat],
+            targets: targets,
             duration: 1000,
             ease: Phaser.Math.Easing.Quadratic.Out,
             scale: targetScale,
