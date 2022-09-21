@@ -86,14 +86,14 @@ var GameComponent = IgeEntity.extend({
 			unitIds: [], // all units owned by player,
 			jointsOn: Date.now(), // use for calculating session,
 			totalTime: data.totalTime,
-			// ipAddress: data.ipAddress,
+			ipAddress: data.ipAddress,
 			email: data.email,
 			banChat: data.banChat,
 			mutedUsers: data.mutedUsers,
-			isEmailVerified: true,
-			isUserVerified: true
-			// isEmailVerified: data.isEmailVerified,
-			// isUserVerified: data.isUserVerified
+			// isEmailVerified: true,
+			// isUserVerified: true,
+			isEmailVerified: data.isEmailVerified,
+			isUserVerified: data.isUserVerified
 		};
 
 		var player = new Player(playerData);

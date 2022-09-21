@@ -1549,11 +1549,12 @@ var Unit = IgeEntityPhysics.extend({
 			var purchasables = _.cloneDeep(owner._stats.purchasables);
 			purchasables.push(equipPurchasable);
 			owner.streamUpdateData([
-				{ purchasables: purchasables },
-				{ equiped: true }
-			]);
+								{ purchasables: purchasables },
+								{ equiped: true }
+							]);
 		}
 	},
+	
 	unEquipSkin: function (unEquipedId, forceFullyUnequip, cellSheetUrl) {
 		var self = this;
 		var defaultUnit = ige.game.getAsset('unitTypes', self._stats.type);

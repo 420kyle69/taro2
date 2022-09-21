@@ -39,6 +39,33 @@
     <!-- Sweet Alert -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.4.0/sweetalert2.min.js"></script>
 
+    <!-- Game Editor -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+      axios.get('http://localhost:3000/client') // will say no the guest users, but only devs can load it
+        .then(function (res) {
+          const { styles, scripts } = res.data;
+  
+          styles.forEach((style) => {
+            const linkEl = document.createElement('link');
+            linkEl.rel = 'stylesheet';
+            linkEl.href = `http://localhost:3000/static/css/${style}`;
+  
+            document.head.appendChild(linkEl);
+          });
+  
+          scripts.forEach((script) => {
+            const scriptEl = document.createElement('script');
+            scriptEl.src = `http://localhost:3000/static/js/${script}`;
+  
+            document.head.appendChild(scriptEl);
+          });
+        })
+        .catch(function (err) {
+          console.log(err);
+        });
+    </script>
+
     <!-- Game Variables -->
     <script>
         var gsAuthToken = '<%= token %>';

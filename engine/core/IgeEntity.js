@@ -4721,12 +4721,13 @@ var IgeEntity = IgeObject.extend({
 			switch(this._category) {
 
 				case 'unit': 
-					keys = ["name", "type", "stateId", "ownerId", "ownerPlayerId", "currentItemIndex", "currentItemId", "flip", "skin"]
+					// cellsheet is used for purchasable-skins
+					keys = ["name", "type", "stateId", "ownerId", "ownerPlayerId", "currentItemIndex", "currentItemId", "flip", "skin", "cellSheet"]
 					data = { 
 						attributes: {}, 
 						// variables: {} 
 					};
-					break;
+				break;
 
 				case 'item':
 					// TODO: we shouldn't have to send currentBody. for some reason, all items have 'dropped' stateId
@@ -4746,7 +4747,8 @@ var IgeEntity = IgeObject.extend({
 					break;
 
 				case 'player':
-					keys = ["name", "clientId", "playerTypeId", "controlledBy", "playerJoined", "unitIds", "selectedUnitId", "userId", "banChat"]
+					// purchasables is required for rendering this player's owned skin to the other players
+					keys = ["name", "clientId", "playerTypeId", "controlledBy", "playerJoined", "unitIds", "selectedUnitId", "userId", "banChat", "purchasables"]
 					data = { 
 						attributes: {}, 
 						// variables: {} 
@@ -4757,13 +4759,13 @@ var IgeEntity = IgeObject.extend({
 						data.coins = this._stats.coins;
 						data.mutedUsers = this._stats.mutedUsers;
 						data.banChat = this._stats.banChat;
-						data.purchasables = this._stats.purchasables;
-  						data.allPurchasables = this._stats.allPurchasables;
 						data.isEmailVerified = this._stats.isEmailVerified;
+						data.allPurchasables = this._stats.allPurchasables;
 						data.isUserVerified = this._stats.isUserVerified;
 						data.isUserAdmin = this._stats.isUserAdmin;
 						data.isUserMod = this._stats.isUserMod;
 					}
+
 					break;
 
 				case 'region': 
@@ -4795,7 +4797,6 @@ var IgeEntity = IgeObject.extend({
 			// 	}
 			// }
 			
-
 			return data;			
 		}
 	},
