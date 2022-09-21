@@ -343,14 +343,15 @@ var Player = IgeEntity.extend({
 	},
 
 	remove: function () {
-		if (ige.isServer) {
-			const i = ige.server.developerClientIds.indexOf(this._stats.clientId);
-			if (i != -1) ige.server.developerClientIds.splice(i, 1);
-		}
-
 		// AI players cannot be removed
 		if (this._stats.controlledBy == 'human') // do not send trigger for neutral player
 		{
+
+			if (ige.isServer) {
+				const i = ige.server.developerClientIds.indexOf(this._stats.clientId);
+				if (i != -1) ige.server.developerClientIds.splice(i, 1);
+			}
+
 			ige.script.trigger('playerLeavesGame', { playerId: this.id() });
 			// session is in second
 			ige.clusterClient && ige.clusterClient.emit('log-session-duration', (Date.now() - this._stats.jointsOn) / 1000);
