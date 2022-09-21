@@ -126,7 +126,11 @@ class PhaserUnit extends PhaserAnimatedEntity {
 	private getLabel (): Phaser.GameObjects.Text {
 		if (!this.label) {
 			const label = this.label = this.scene.add.text(0, 0, 'cccccc');
+
+			// needs to be created with the correct scale of the client
+			this.label.setScale(1 / this.scene.cameras.main.zoom);
 			label.setOrigin(0.5);
+
 			this.gameObject.add(label);
 		}
 		return this.label;
@@ -177,7 +181,11 @@ class PhaserUnit extends PhaserAnimatedEntity {
 	private getAttributesContainer (): Phaser.GameObjects.Container {
 		if (!this.attributesContainer) {
 			this.attributesContainer = this.scene.add.container(0,	0);
+
+			// needs to be created with the correct scale of the client
+			this.attributesContainer.setScale(1 / this.scene.cameras.main.zoom);
 			this.updateAttributesOffset();
+
 			this.gameObject.add(this.attributesContainer);
 		}
 		return this.attributesContainer;
