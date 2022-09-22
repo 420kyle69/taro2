@@ -22,8 +22,10 @@ var ActionComponent = IgeEntity.extend({
 			// the server side is still running (e.g. creating entities), but it won't be streamed to the client			
 			if (ige.isServer) {
 				if (action.runOnClient) {
+					// console.log("network pause")
 					ige.network.pause();
 				} else {
+					// console.log("network resume")
 					ige.network.resume();
 				}
 
@@ -1590,7 +1592,6 @@ var ActionComponent = IgeEntity.extend({
 							if (projectileData != undefined && position != undefined && position.x != undefined && position.y != undefined && force != undefined && angle != undefined) {
 								var facingAngleInRadians = angle + facingAngleDelta;
 								angle = angle - delta;
-								var streamMode = 1;
 								var unitId = (unit) ? unit.id() : undefined;
 								var data = Object.assign(
 									projectileData,
@@ -1606,8 +1607,7 @@ var ActionComponent = IgeEntity.extend({
 												x: Math.cos(angle) * force,
 												y: Math.sin(angle) * force
 											}
-										},
-										streamMode: streamMode
+										}
 									}
 								);
 

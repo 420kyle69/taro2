@@ -564,14 +564,14 @@ var PhysicsComponent = IgeEventingClass.extend({
 							var y = mxfp.y * ige.physics._scaleRatio;
 
 							// make projectile auto-rotate toward its path. ideal for arrows or rockets that should point toward its direction
-							if (entity._category == 'projectile' &&
-								entity._stats.currentBody && !entity._stats.currentBody.fixedRotation &&
-								tempBod.m_linearVelocity.y != 0 && tempBod.m_linearVelocity.x != 0
-							) {
-								var angle = Math.atan2(tempBod.m_linearVelocity.y, tempBod.m_linearVelocity.x) + Math.PI / 2;
-							} else {
-								var angle = tempBod.getAngle();
-							}
+							// if (entity._category == 'projectile' &&
+							// 	entity._stats.currentBody && !entity._stats.currentBody.fixedRotation &&
+							// 	tempBod.m_linearVelocity.y != 0 && tempBod.m_linearVelocity.x != 0
+							// ) {
+							// 	var angle = Math.atan2(tempBod.m_linearVelocity.y, tempBod.m_linearVelocity.x) + Math.PI / 2;
+							// } else {
+							var angle = tempBod.getAngle();
+							// }
 
 							var tileWidth = ige.scaleMapDetails.tileWidth;
 							var tileHeight = ige.scaleMapDetails.tileHeight;
@@ -631,20 +631,15 @@ var PhysicsComponent = IgeEventingClass.extend({
 								entity.rotateTo(0, 0, angle);
 							} else if (ige.isClient) {
 								
-								// if CSP is enabled, for my own unit, immediately move it while ignoring the server stream
-								// ige.physics must be enabled on client-side in order to simulate physics locally
-								if (ige.physics && ige.game.cspEnabled && ige.client.selectedUnit == entity) {
-									if (entity.isOutOfBounds) {
-										entity.body.setPosition({ x: x / entity._b2dRef._scaleRatio, y: y / entity._b2dRef._scaleRatio });
-										entity.body.setAngle(angle);
-									}
-
-									if (entity.nextPhysicsFrame == undefined || ige._currentTime > entity.nextPhysicsFrame[0]) {
-										entity.prevPhysicsFrame = entity.nextPhysicsFrame;
-										entity.nextPhysicsFrame = [nextFrameTime, [x, y, angle]];
-									}
-								} else if (entity._category == 'projectile' && entity._stats.sourceItemId != undefined) {
-									if (entity._streamMode == 0) {
+								
+								if (ige.physics && ige.game.cspEnabled) {
+									if ( // if CSP is enabled
+										(  // move my own unit immediately while ignoring the server stream
+											ige.client.selectedUnit == entity && 
+											(entity.nextPhysicsFrame == undefined || ige._currentTime > entity.nextPhysicsFrame[0])
+										) ||
+										entity._category == 'projectile' // 
+									) {
 										entity.prevPhysicsFrame = entity.nextPhysicsFrame;
 										entity.nextPhysicsFrame = [nextFrameTime, [x, y, angle]];
 									}

@@ -31,10 +31,7 @@ var Unit = IgeEntityPhysics.extend({
 			data.equipmentAllowed = 9;
 		}
 		unitData = ige.game.getAsset('unitTypes', data.type);
-		if (ige.isClient) {
-			unitData = _.pick(unitData, ige.client.keysToAddBeforeRender);
-		}
-
+		
 		self._stats = _.merge(unitData, data);
 
 		self.entityId = entityIdFromServer;
