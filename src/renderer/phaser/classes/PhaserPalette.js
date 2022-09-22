@@ -111,6 +111,7 @@ var PhaserPalette = /** @class */ (function (_super) {
         _this.scene.scale.on(Phaser.Scale.Events.RESIZE, function () {
             camera.x = _this.scene.sys.game.canvas.width - texturesLayer.width - 40;
             scrollBarContainer.x = _this.camera.x;
+            layerButtonsContainer.x = _this.camera.x + texturesLayer.width - 124;
         });
         _this.addButton('+', 0, scrollBarContainer, _this.zoom.bind(_this), -1);
         _this.addButton('-', 31, scrollBarContainer, _this.zoom.bind(_this), 1);
