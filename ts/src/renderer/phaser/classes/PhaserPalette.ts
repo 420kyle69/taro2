@@ -143,6 +143,20 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 		this.addButton('4', texturesLayer.width - 31, this.switchLayer.bind(this), 3);
 	}
 
+	hide () {
+		this.setVisible(false);
+		this.texturesLayer.setVisible(false);
+		this.camera.setVisible(false);
+		this.scrollBarContainer.setVisible(false);
+	}
+
+	show () {
+		this.setVisible(true);
+		this.texturesLayer.setVisible(true);
+		this.camera.setVisible(true);
+		this.scrollBarContainer.setVisible(true);
+	}
+
 	addButton (text, x, func, value) {
 		//const text = '+';
 		const w = 30;

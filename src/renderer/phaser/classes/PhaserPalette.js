@@ -120,6 +120,18 @@ var PhaserPalette = /** @class */ (function (_super) {
         _this.addButton('4', texturesLayer.width - 31, _this.switchLayer.bind(_this), 3);
         return _this;
     }
+    PhaserPalette.prototype.hide = function () {
+        this.setVisible(false);
+        this.texturesLayer.setVisible(false);
+        this.camera.setVisible(false);
+        this.scrollBarContainer.setVisible(false);
+    };
+    PhaserPalette.prototype.show = function () {
+        this.setVisible(true);
+        this.texturesLayer.setVisible(true);
+        this.camera.setVisible(true);
+        this.scrollBarContainer.setVisible(true);
+    };
     PhaserPalette.prototype.addButton = function (text, x, func, value) {
         //const text = '+';
         var w = 30;

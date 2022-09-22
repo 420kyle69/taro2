@@ -26,26 +26,28 @@ var DevModeScene = /** @class */ (function (_super) {
         var map = this.gameScene.tilemap;
         this.selectedTile = map.getTileAt(2, 3);
         ige.client.on('enterDevMode', function () {
-            if (_this.devPalette) {
-                _this.devPalette.setVisible(true);
-                _this.devPalette.texturesLayer.setVisible(true);
-                _this.devPalette.camera.setVisible(true);
-                _this.devPalette.scrollBarContainer.setVisible(true);
-            }
-            else {
-                console.log(_this.tileset);
+            if (!_this.devPalette) {
                 _this.devPalette = new PhaserPalette(_this, _this.tileset, _this.rexUI);
                 _this.paletteMarker = _this.add.graphics();
                 _this.paletteMarker.lineStyle(2, 0x000000, 1);
                 _this.paletteMarker.strokeRect(0, 0, map.tileWidth, map.tileHeight);
                 _this.paletteMarker.setVisible(false);
+                _this.devPalette.hide();
             }
         });
         ige.client.on('leaveDevMode', function () {
-            _this.devPalette.setVisible(false);
-            _this.devPalette.texturesLayer.setVisible(false);
-            _this.devPalette.camera.setVisible(false);
-            _this.devPalette.scrollBarContainer.setVisible(false);
+            _this.devPalette.hide();
+        });
+        var tabKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, true);
+        tabKey.on('down', function () {
+            if (ige.developerMode.active) {
+                if (_this.devPalette.visible) {
+                    _this.devPalette.hide();
+                }
+                else {
+                    _this.devPalette.show();
+                }
+            }
         });
         ige.client.on('editTile', function (data) {
             map.putTileAt(data.gid, data.x, data.y);
@@ -53,7 +55,7 @@ var DevModeScene = /** @class */ (function (_super) {
         });
         this.input.on('wheel', function (pointer, gameObjects, deltaX, deltaY, deltaZ) {
             if (_this.devPalette && _this.devPalette.visible) {
-                _this.devPalette.zoom(/*pointer,*/ deltaY);
+                _this.devPalette.zoom(deltaY);
             }
         });
     };
@@ -124,7 +126,9 @@ var DevModeScene = /** @class */ (function (_super) {
                 this.paletteMarker.x = this.devPalette.map.tileToWorldX(palettePointerTileX);
                 this.paletteMarker.y = this.devPalette.map.tileToWorldY(palettePointerTileY);
                 if (this.input.manager.activePointer.isDown) {
+                    this.selectedTile.tint = 0xffffff;
                     this.selectedTile = this.devPalette.map.getTileAt(palettePointerTileX, palettePointerTileY, true);
+                    this.selectedTile.tint = 0x87cfff;
                 }
             }
             else if (!(this.input.activePointer.x > this.devPalette.scrollBarContainer.x
@@ -141,6 +145,7 @@ var DevModeScene = /** @class */ (function (_super) {
                 this.marker.y = map.tileToWorldY(pointerTileY);
                 if (this.input.manager.activePointer.rightButtonDown()) {
                     if (map.getTileAt(pointerTileX, pointerTileY, true) !== null) {
+                        this.selectedTile.tint = 0xffffff;
                         this.selectedTile = map.getTileAt(pointerTileX, pointerTileY, true);
                     }
                 }
@@ -150,6 +155,7 @@ var DevModeScene = /** @class */ (function (_super) {
                         && pointerTileY < map.height)
                     && this.selectedTile.index !== (map.getTileAt(pointerTileX, pointerTileY, true)).index) {
                     map.putTileAt(this.selectedTile, pointerTileX, pointerTileY);
+                    map.getTileAt(pointerTileX, pointerTileY, true).tint = 0xffffff;
                     console.log('place tile', this.selectedTile.index);
                     ige.network.send('editTile', { gid: this.selectedTile.index, layer: map.currentLayerIndex, x: pointerTileX, y: pointerTileY });
                 }

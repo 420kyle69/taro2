@@ -21,26 +21,30 @@ class DevModeScene extends PhaserScene {
 		this.selectedTile = map.getTileAt(2, 3);
 
 		ige.client.on('enterDevMode', () => {
-			if (this.devPalette) {
-				this.devPalette.setVisible(true);
-				this.devPalette.texturesLayer.setVisible(true);
-				this.devPalette.camera.setVisible(true);
-				this.devPalette.scrollBarContainer.setVisible(true);
-			} else {
-				console.log(this.tileset);
+			if (!this.devPalette) {
 				this.devPalette = new PhaserPalette(this, this.tileset, this.rexUI);
 		 		this.paletteMarker = this.add.graphics();
 				this.paletteMarker.lineStyle(2, 0x000000, 1);
 				this.paletteMarker.strokeRect(0, 0, map.tileWidth, map.tileHeight);
 				this.paletteMarker.setVisible(false);
+				this.devPalette.hide();
 			}
 		});
 
 		ige.client.on('leaveDevMode', () => {
-			this.devPalette.setVisible(false);
-			this.devPalette.texturesLayer.setVisible(false);
-			this.devPalette.camera.setVisible(false);
-			this.devPalette.scrollBarContainer.setVisible(false);
+			this.devPalette.hide();
+		});
+
+		const tabKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, true);
+		tabKey.on('down', () => {
+			if(ige.developerMode.active) {
+				if (this.devPalette.visible) {
+					this.devPalette.hide();
+				}
+				else {
+					this.devPalette.show()
+				}
+			}
 		});
 
 		ige.client.on('editTile', (data: {
@@ -54,7 +58,7 @@ class DevModeScene extends PhaserScene {
 
 		this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
 			if (this.devPalette && this.devPalette.visible) {
-				this.devPalette.zoom(/*pointer,*/ deltaY);
+				this.devPalette.zoom(deltaY);
 			}
 		})
 	}
@@ -140,7 +144,9 @@ class DevModeScene extends PhaserScene {
 				this.paletteMarker.y = this.devPalette.map.tileToWorldY(palettePointerTileY);
 
 				if (this.input.manager.activePointer.isDown) {
+					this.selectedTile.tint = 0xffffff;
 					this.selectedTile = this.devPalette.map.getTileAt(palettePointerTileX, palettePointerTileY, true);
+					this.selectedTile.tint = 0x87cfff;
 				}
 			} else if (!(this.input.activePointer.x > this.devPalette.scrollBarContainer.x
 				&& this.input.activePointer.x < this.devPalette.scrollBarContainer.x + this.devPalette.scrollBarContainer.width
@@ -158,6 +164,7 @@ class DevModeScene extends PhaserScene {
 
 				if (this.input.manager.activePointer.rightButtonDown()) {
 					if (map.getTileAt(pointerTileX, pointerTileY, true) !== null) {
+						this.selectedTile.tint = 0xffffff;
 						this.selectedTile = map.getTileAt(pointerTileX, pointerTileY, true);
 					}
 				}
@@ -168,6 +175,7 @@ class DevModeScene extends PhaserScene {
 				&& pointerTileY < map.height)
 				&& this.selectedTile.index !== (map.getTileAt(pointerTileX, pointerTileY, true)).index) {
 					map.putTileAt(this.selectedTile, pointerTileX, pointerTileY);
+					map.getTileAt(pointerTileX, pointerTileY, true).tint = 0xffffff;
 					console.log('place tile', this.selectedTile.index)
 					ige.network.send('editTile', {gid: this.selectedTile.index, layer: map.currentLayerIndex, x: pointerTileX, y: pointerTileY});
 				}
