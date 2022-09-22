@@ -9,9 +9,9 @@ var Item = IgeEntityPhysics.extend({
 		self._stats = {};
 		self.anchorOffset = { x: 0, y: 0, rotate: 0 };
 		var itemData = {};
+		
 		if (ige.isClient) {
 			itemData = ige.game.getAsset('itemTypes', data.itemTypeId);
-			itemData = _.pick(itemData, ige.client.keysToAddBeforeRender);
 		}
 
 		self._stats = _.merge(itemData, data);
@@ -68,12 +68,11 @@ var Item = IgeEntityPhysics.extend({
 
 		self.scaleRatio = ige.physics && ige.physics.scaleRatio();
 		if (ige.isServer) {
-
-			if (ige.isServer && ige.network.isPaused) {
+			if (ige.network.isPaused) {
 				self.streamMode(0);
 			} else {
 				self.streamMode(1);				
-				self.streamCreate();			
+				self.streamCreate(); // do we need this?			
 			}
 
 			ige.server.totalItemsCreated++;
@@ -337,7 +336,9 @@ var Item = IgeEntityPhysics.extend({
 									translate: bulletStartPosition
 								};
 
-								if (self.projectileData && (ige.isServer || (ige.isClient && !self._stats.projectileStreamMode))) {
+								// projectileStreamMode: 0 is clientside predicted
+								// projectileStreamMode: 1 is serverside streamed
+								if (self.projectileData && (ige.isServer || (ige.isClient && self._stats.projectileStreamMode != 1))) {
 									defaultData.velocity = {
 										deployMethod: self._stats.deployMethod,
 										x: Math.cos(rotate + Math.radians(-90)) * self._stats.bulletForce,
@@ -696,8 +697,6 @@ var Item = IgeEntityPhysics.extend({
 		if (ige.isServer) {
 			this.quantityAtStartusing = this._stats.quantity;
 			this.streamUpdateData([{ isBeingUsed: true }]);
-		} else if (ige.isClient && owner == ige.client.selectedUnit) {
-			this._stats.isBeingUsed = true;
 		}
 
 		if (owner && ige.trigger) {

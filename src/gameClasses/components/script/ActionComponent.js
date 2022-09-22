@@ -21,11 +21,13 @@ var ActionComponent = IgeEntity.extend({
 			// if CSP is enabled, then server will pause streaming
 			// the server side is still running (e.g. creating entities), but it won't be streamed to the client			
 			if (ige.isServer) {
-				if (action.runOnClient) {
-					ige.network.pause();
-				} else {
-					ige.network.resume();
-				}
+				if (ige.game.cspEnabled) {
+					if(action.runOnClient) {
+						ige.network.pause();
+					} else {
+						ige.network.resume();
+					}
+				} 
 
 				var now = Date.now();		
 				var lastActionRunTime = now - ige.lastActionRanAt;
@@ -1200,7 +1202,6 @@ var ActionComponent = IgeEntity.extend({
 					case 'startUsingItem':
 						if (entity && entity._category == 'item') {
 							entity.startUsing();
-							entity.streamUpdateData([{ isBeingUsedFromScript: true }]);
 						}
 						break;
 
@@ -1214,8 +1215,7 @@ var ActionComponent = IgeEntity.extend({
 					case 'stopUsingItem':
 						if (entity && entity._category == 'item') {
 							entity.stopUsing();
-							entity.streamUpdateData([{ isBeingUsedFromScript: false }]);
-							entity.streamUpdateData([{ stopUsing: false }]);
+							entity.streamUpdateData([{ isBeingUsed: false }]);
 						}
 
 						break;
@@ -1290,10 +1290,10 @@ var ActionComponent = IgeEntity.extend({
 									ownerUnit.dropItem(itemIndex, position);
 								}
 							} else {
-								throw new Error(`unit cannot drop an undroppable item ${item._stats.name}`);
+								// throw new Error(`unit cannot drop an undroppable item ${item._stats.name}`);
 							}
 						} else {
-							throw new Error('invalid item');
+							// throw new Error('invalid item');
 						}
 						break;
 
@@ -1592,7 +1592,6 @@ var ActionComponent = IgeEntity.extend({
 							if (projectileData != undefined && position != undefined && position.x != undefined && position.y != undefined && force != undefined && angle != undefined) {
 								var facingAngleInRadians = angle + facingAngleDelta;
 								angle = angle - delta;
-								var streamMode = 1;
 								var unitId = (unit) ? unit.id() : undefined;
 								var data = Object.assign(
 									projectileData,
@@ -1608,8 +1607,7 @@ var ActionComponent = IgeEntity.extend({
 												x: Math.cos(angle) * force,
 												y: Math.sin(angle) * force
 											}
-										},
-										streamMode: streamMode
+										}
 									}
 								);
 
