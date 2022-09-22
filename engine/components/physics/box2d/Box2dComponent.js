@@ -570,7 +570,7 @@ var PhysicsComponent = IgeEventingClass.extend({
 							// ) {
 							// 	var angle = Math.atan2(tempBod.m_linearVelocity.y, tempBod.m_linearVelocity.x) + Math.PI / 2;
 							// } else {
-							var angle = tempBod.getAngle();
+								var angle = tempBod.getAngle();
 							// }
 
 							var tileWidth = ige.scaleMapDetails.tileWidth;
@@ -640,6 +640,7 @@ var PhysicsComponent = IgeEventingClass.extend({
 										) ||
 										entity._category == 'projectile' // 
 									) {
+
 										entity.prevPhysicsFrame = entity.nextPhysicsFrame;
 										entity.nextPhysicsFrame = [nextFrameTime, [x, y, angle]];
 									}
@@ -649,9 +650,11 @@ var PhysicsComponent = IgeEventingClass.extend({
 									y = entity._translate.y;
 									angle = entity._rotate.z;
 									entity.nextPhysicsFrame = undefined;
-									entity.body.setPosition({ x: x / entity._b2dRef._scaleRatio, y: y / entity._b2dRef._scaleRatio });
-									entity.body.setAngle(angle);
+									
 								}
+
+								entity.body.setPosition({ x: x / entity._b2dRef._scaleRatio, y: y / entity._b2dRef._scaleRatio });
+								entity.body.setAngle(angle);
 							}
 
 							if (tempBod.asleep) {
