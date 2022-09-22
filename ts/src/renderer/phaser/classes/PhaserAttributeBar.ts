@@ -62,6 +62,15 @@ class PhaserAttributeBar extends Phaser.GameObjects.Container {
 	}
 
 	render (data: AttributeData): void {
+		const {
+			color,
+			value,
+			max,
+			displayValue,
+			index,
+			showWhen,
+			decimalPlaces
+		} = data;
 
 		this.name = data.type || data.key;
 
@@ -74,13 +83,14 @@ class PhaserAttributeBar extends Phaser.GameObjects.Container {
 		bar.clear();
 
 		bar.fillStyle(Phaser.Display.Color
-			.HexStringToColor(data.color)
+			.HexStringToColor(color)
 			.color);
-		if (data.value !== 0) {
+
+		if (value !== 0) {
 			bar.fillRoundedRect(
 				-w / 2,
 				-h / 2,
-				Math.max(w * data.value / data.max, borderRadius * 1.5),
+				Math.max(w * value / max, borderRadius * 1.5),
 				h,
 				borderRadius
 			);
@@ -95,17 +105,21 @@ class PhaserAttributeBar extends Phaser.GameObjects.Container {
 			borderRadius
 		);
 
-		this.text.setText(data.displayValue ?
-			(typeof data.value === 'number' ?
-				data.value.toFixed(0) : '0') : '');
+		const valueText = value.toFixed(decimalPlaces);
 
-		this.y = (data.index - 1) * h*1.1;
+		this.text.setText(
+			displayValue ?
+				valueText :
+				'' // no text
+		);
+
+		this.y = (index - 1) * h*1.1;
 
 		this.resetFadeOut();
 
-		if ((data.showWhen instanceof Array &&
-			data.showWhen.indexOf('valueChanges') > -1) ||
-			data.showWhen === 'valueChanges') {
+		if ((showWhen instanceof Array &&
+			showWhen.indexOf('valueChanges') > -1) ||
+			showWhen === 'valueChanges') {
 
 			this.fadeOut();
 		}
