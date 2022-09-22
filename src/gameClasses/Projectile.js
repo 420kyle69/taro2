@@ -75,17 +75,16 @@ var Projectile = IgeEntityPhysics.extend({
 		var sourceItem = this.getSourceItem();
 
 		if (ige.isServer) {
+
 			// stream projectile data if
 			if (!ige.network.isPaused && (
 					!ige.game.data.defaultData.clientPhysicsEngine || // client side isn't running physics (csp requires physics) OR
 					!sourceItem || // projectile does not have source item (created via script) OR
-					(sourceItem && sourceItem._stats.projectileStreamMode) // item is set to stream its projectiles from server
+					(sourceItem && sourceItem._stats.projectileStreamMode == 1) // item is set to stream its projectiles from server
 				)
 			) {
-				console.log("streaming")
 				this.streamMode(1);
 			} else {
-				console.log("not streaming")
 				this.streamMode(0);
 			}
 			ige.server.totalProjectilesCreated++;

@@ -72,7 +72,7 @@ var Item = IgeEntityPhysics.extend({
 				self.streamMode(0);
 			} else {
 				self.streamMode(1);				
-				self.streamCreate();			
+				self.streamCreate(); // do we need this?			
 			}
 
 			ige.server.totalItemsCreated++;

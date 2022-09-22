@@ -21,13 +21,13 @@ var ActionComponent = IgeEntity.extend({
 			// if CSP is enabled, then server will pause streaming
 			// the server side is still running (e.g. creating entities), but it won't be streamed to the client			
 			if (ige.isServer) {
-				if (action.runOnClient) {
-					// console.log("network pause")
-					ige.network.pause();
-				} else {
-					// console.log("network resume")
-					ige.network.resume();
-				}
+				if (ige.game.cspEnabled) {
+					if(action.runOnClient) {
+						ige.network.pause();
+					} else {
+						ige.network.resume();
+					}
+				} 
 
 				var now = Date.now();		
 				var lastActionRunTime = now - ige.lastActionRanAt;
