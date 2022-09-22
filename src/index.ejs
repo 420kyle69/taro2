@@ -73,11 +73,49 @@
             document.body.appendChild(jsElm);
         }
     </script>
+    
+    <!-- Game Editor -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        let once = false;
+
+        function loadEditor() {
+            if (once) {
+                return;
+            }
+
+            axios.get('https://editor.modd.io/client')
+                .then((res) => {
+                    const { styles, scripts } = res.data;
+
+                    styles.forEach((style) => {
+                        const linkEl = document.createElement('link');
+                        linkEl.rel = 'stylesheet';
+                        linkEl.href = `https://editor.modd.io/static/css/${style}`;
+
+                        document.head.appendChild(linkEl);
+                    });
+
+                    scripts.forEach((script) => {
+                        const scriptEl = document.createElement('script');
+                        scriptEl.src = `https://editor.modd.io/static/js/${script}`;
+
+                        document.body.appendChild(scriptEl);
+                    });
+
+                    once = true;
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+        }
+    </script>
 </head>
 
 <body>
 <div id="game-div" style="overflow: hidden">
     <%- include('templates/dev-console'); -%>
+    <%- include('templates/game-editor'); -%>
     <%- include('templates/menu'); -%>
     <%- include('templates/shop'); -%>
     <%- include('templates/gui'); -%>
