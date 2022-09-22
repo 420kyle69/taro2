@@ -51,7 +51,7 @@ var ScriptComponent = IgeEntity.extend({
 		var self = this;
 
 		self.currentScriptId = scriptId;
-		if (this.scripts[scriptId]) {
+		if (this.scripts && this.scripts[scriptId]) {
 			// var actions = JSON.parse(JSON.stringify(this.scripts[scriptId].actions));
 			var actions = self.getScriptActions(scriptId);
 			if (actions) {
