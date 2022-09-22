@@ -75,7 +75,6 @@ var UnitAttributeBar = IgeEntity.extend({
 		// 	value.toPrecision(0);
 
 		newValue = value;
-		console.log(newValue, attributeData);
 
 		if (self.lastValue.value && self.lastValue.value === newValue) {
 			return;
