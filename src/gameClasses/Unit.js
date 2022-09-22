@@ -31,12 +31,12 @@ var Unit = IgeEntityPhysics.extend({
 			data.equipmentAllowed = 9;
 		}
 		unitData = ige.game.getAsset('unitTypes', data.type);
-		
 		if (ige.isClient) {
 			unitData = _.pick(unitData, ige.client.keysToAddBeforeRender);
 		}
 
 		self._stats = _.merge(unitData, data);
+
 		self.entityId = entityIdFromServer;
 
 		// dont save variables in _stats as _stats is stringified and synced
@@ -53,7 +53,7 @@ var Unit = IgeEntityPhysics.extend({
 			.addComponent(AttributeComponent) // every units gets one
 			
 		self.addComponent(ScriptComponent); // entity-requireScriptLoading
-		self.script.load(data.scripts)
+		self.script.load(unitData.scripts)
 
 		Unit.prototype.log(`initializing new unit ${this.id()}`);
 

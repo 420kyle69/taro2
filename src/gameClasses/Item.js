@@ -696,8 +696,6 @@ var Item = IgeEntityPhysics.extend({
 		if (ige.isServer) {
 			this.quantityAtStartusing = this._stats.quantity;
 			this.streamUpdateData([{ isBeingUsed: true }]);
-		} else if (ige.isClient && owner == ige.client.selectedUnit) {
-			this._stats.isBeingUsed = true;
 		}
 
 		if (owner && ige.trigger) {

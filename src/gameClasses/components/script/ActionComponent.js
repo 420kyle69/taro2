@@ -1200,7 +1200,6 @@ var ActionComponent = IgeEntity.extend({
 					case 'startUsingItem':
 						if (entity && entity._category == 'item') {
 							entity.startUsing();
-							entity.streamUpdateData([{ isBeingUsedFromScript: true }]);
 						}
 						break;
 
@@ -1214,8 +1213,7 @@ var ActionComponent = IgeEntity.extend({
 					case 'stopUsingItem':
 						if (entity && entity._category == 'item') {
 							entity.stopUsing();
-							entity.streamUpdateData([{ isBeingUsedFromScript: false }]);
-							entity.streamUpdateData([{ stopUsing: false }]);
+							entity.streamUpdateData([{ isBeingUsed: false }]);
 						}
 
 						break;
@@ -1290,10 +1288,10 @@ var ActionComponent = IgeEntity.extend({
 									ownerUnit.dropItem(itemIndex, position);
 								}
 							} else {
-								throw new Error(`unit cannot drop an undroppable item ${item._stats.name}`);
+								// throw new Error(`unit cannot drop an undroppable item ${item._stats.name}`);
 							}
 						} else {
-							throw new Error('invalid item');
+							// throw new Error('invalid item');
 						}
 						break;
 
