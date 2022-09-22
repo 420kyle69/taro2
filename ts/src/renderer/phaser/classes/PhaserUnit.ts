@@ -41,7 +41,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			'render-chat-bubble': entity.on('render-chat-bubble', this.renderChat, this),
 		});
 
-		this.zoomEvtListener = ige.client.on('zoom', this.scaleElements, this);
+		this.zoomEvtListener = ige.client.on('scale', this.scaleElements, this);
 	}
 
 	protected updateTexture (usingSkin) {
@@ -126,7 +126,11 @@ class PhaserUnit extends PhaserAnimatedEntity {
 	private getLabel (): Phaser.GameObjects.Text {
 		if (!this.label) {
 			const label = this.label = this.scene.add.text(0, 0, 'cccccc');
+
+			// needs to be created with the correct scale of the client
+			this.label.setScale(1 / this.scene.cameras.main.zoom);
 			label.setOrigin(0.5);
+
 			this.gameObject.add(label);
 		}
 		return this.label;
@@ -177,7 +181,11 @@ class PhaserUnit extends PhaserAnimatedEntity {
 	private getAttributesContainer (): Phaser.GameObjects.Container {
 		if (!this.attributesContainer) {
 			this.attributesContainer = this.scene.add.container(0,	0);
+
+			// needs to be created with the correct scale of the client
+			this.attributesContainer.setScale(1 / this.scene.cameras.main.zoom);
 			this.updateAttributesOffset();
+
 			this.gameObject.add(this.attributesContainer);
 		}
 		return this.attributesContainer;
@@ -238,11 +246,34 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		}
 	}
 
-	private scaleElements (height: number): void {
-		const defaultZoom = ige.game.data.settings.camera?.zoom?.default || 1000;
-		const targetScale = height / defaultZoom;
+	private scaleElements (data: {
+		ratio: number;
+	}): void {
+
+		if (this.scaleTween) {
+			this.scaleTween.stop();
+			this.scaleTween = null;
+		}
+
+		const { ratio } = data;
+		const targetScale = 1 / ratio;
+
+		let targets: Phaser.GameObjects.GameObject[] = [];
+
+		if (this.chat) {
+			targets.push(this.chat);
+		}
+
+		if (this.attributesContainer) {
+			targets.push(this.attributesContainer);
+		}
+
+		if (this.label) {
+			targets.push(this.label);
+		}
+
 		this.scaleTween = this.scene.tweens.add({
-			targets: [this.label, this.attributesContainer, this.chat],
+			targets: targets,
 			duration: 1000,
 			ease: Phaser.Math.Easing.Quadratic.Out,
 			scale: targetScale,
@@ -255,7 +286,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 	protected destroy (): void {
 
 		this.scene.renderedEntities = this.scene.renderedEntities.filter(item => item !== this.gameObject);
-		ige.client.off('zoom', this.zoomEvtListener);
+		ige.client.off('scale', this.zoomEvtListener);
 		this.zoomEvtListener = null;
 
 		if (this.scaleTween) {

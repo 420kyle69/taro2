@@ -7,7 +7,9 @@ var Player = IgeEntity.extend({
 		this.id(entityIdFromServer);
 		var self = this;
 
-		this._stats = data;
+		
+		var playerData = ige.game.getAsset('playerTypes', data.playerTypeId);		
+		this._stats = _.merge(playerData, data);
 
 		// dont save variables in _stats as _stats is stringified and synced
 		// and some variables of type unit, item, projectile may contain circular json objects
@@ -16,7 +18,6 @@ var Player = IgeEntity.extend({
 			delete self._stats.variables;
 		}
 
-		self.previousAttributes = {};
 		self.lastCustomInput = '';
 
 		Player.prototype.log(`player created ${this.id()}`);
@@ -25,12 +26,12 @@ var Player = IgeEntity.extend({
 		this.mount(ige.$('baseScene'));
 
 		self.addComponent(AttributeComponent);
-
+		
 		if (ige.isServer) {
 			this.streamMode(2);
 			// self._stats.unitId = self.getCurrentUnit().id()
-			self.addComponent(ControlComponent);
-
+			self.addComponent(ControlComponent);			
+		
 			ige.server.totalPlayersCreated++;
 		} else if (ige.isClient) {
 			// if this player is "me"
@@ -41,8 +42,8 @@ var Player = IgeEntity.extend({
 				ige.input.on('pointermove', function (point) {
 					if (ige.client.myPlayer) {
 						self.control.newMousePosition = [
-							point.x,
-							point.y
+							point.x.toFixed(0),
+							point.y.toFixed(0)
 						];
 					}
 				});
@@ -342,18 +343,24 @@ var Player = IgeEntity.extend({
 	},
 
 	remove: function () {
-		if (this._stats.controlledBy == 'human' && ige.script) // do not send trigger for neutral player
+		// AI players cannot be removed
+		if (this._stats.controlledBy == 'human') // do not send trigger for neutral player
 		{
-			ige.script.trigger('playerLeavesGame', { playerId: this.id() });
-		}
 
-		// session is in second
-		ige.clusterClient && ige.clusterClient.emit('log-session-duration', (Date.now() - this._stats.jointsOn) / 1000);
-		if (this.variables && this.variables.progression != undefined && this.variables.progression.value != undefined) {
-			ige.clusterClient && ige.clusterClient.emit('log-progression', this.variables.progression.value);
+			if (ige.isServer) {
+				const i = ige.server.developerClientIds.indexOf(this._stats.clientId);
+				if (i != -1) ige.server.developerClientIds.splice(i, 1);
+			}
+
+			ige.script.trigger('playerLeavesGame', { playerId: this.id() });
+			// session is in second
+			ige.clusterClient && ige.clusterClient.emit('log-session-duration', (Date.now() - this._stats.jointsOn) / 1000);
+			if (this.variables && this.variables.progression != undefined && this.variables.progression.value != undefined) {
+				ige.clusterClient && ige.clusterClient.emit('log-progression', this.variables.progression.value);
+			}
+			this.streamDestroy();
+			this.destroy();
 		}
-		this.streamDestroy();
-		this.destroy();
 	},
 
 	updateVisibility: function (playerId) {

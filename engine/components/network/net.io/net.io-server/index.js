@@ -566,7 +566,8 @@ NetIo.Server = NetIo.EventingClass.extend({
 			response.end();
 		});
 		this._socketServerHttp = new this._websocket.Server({
-			server: this._httpServer
+			server: this._httpServer,
+			maxPayload: 10 * 1024, // 10 KB - The maximum allowed message size
 		});
 		// this._socketServerHttp = new this._websocket.WebSocketServer({
 		// 	server: this._httpServer
@@ -781,6 +782,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 
 		// Pre-encode the data and then use _send to send raw
 		// instead of encoding for every socket
+
 		encodedData = this._encode(data);
 		// console.log(clientId, data, JSON.stringify(data).length)
 		// if client is specified, use _send(). otherwise, broadcast stream

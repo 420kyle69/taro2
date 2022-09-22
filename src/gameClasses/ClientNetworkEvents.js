@@ -411,7 +411,7 @@ var ClientNetworkEvents = {
 	// },
 
 	_onDevLogs: function (data) {
-		ige.script.variable.updateDevConsole(data);
+		ige.game.updateDevConsole(data);
 	},
 
 	_onTrade: function (msg, clientId) {

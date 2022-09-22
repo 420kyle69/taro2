@@ -20,18 +20,26 @@ class GameScene extends PhaserScene {
 		this.scale.on(Phaser.Scale.Events.RESIZE, () => {
 			if (this.zoomSize) {
 				camera.zoom = this.calculateZoom();
+				ige.client.emit('scale', { ratio: camera.zoom });
 			}
 		});
 
 		ige.client.on('zoom', (height: number) => {
+			if (this.zoomSize === height * 2.15) {
+				return;
+			}
+
 			this.setZoomSize(height);
+			const ratio = this.calculateZoom();
 
 			camera.zoomTo(
-				this.calculateZoom(),
+				ratio,
 				1000,
 				Phaser.Math.Easing.Quadratic.Out,
 				true
 			);
+
+			ige.client.emit('scale', { ratio: ratio });
 		});
 
 		ige.client.on('create-unit', (unit: Unit) => {

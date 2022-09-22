@@ -2,6 +2,7 @@ var Unit = IgeEntityPhysics.extend({
 	classId: 'Unit',
 
 	init: function (data, entityIdFromServer) {
+		
 		IgeEntityPhysics.prototype.init.call(this, data.defaultData);
 
 		this.id(entityIdFromServer);
@@ -35,15 +36,7 @@ var Unit = IgeEntityPhysics.extend({
 			unitData = _.pick(unitData, ige.client.keysToAddBeforeRender);
 		}
 
-		self._stats = Object.assign(
-			data,
-			unitData,
-			{
-				// skin: unitType.skin,
-				bonusSpeed: 0,
-				flip: data.flip == undefined ? 0 : data.flip
-			}
-		);
+		self._stats = _.merge(unitData, data);
 		self.entityId = entityIdFromServer;
 
 		// dont save variables in _stats as _stats is stringified and synced
@@ -65,6 +58,7 @@ var Unit = IgeEntityPhysics.extend({
 		Unit.prototype.log(`initializing new unit ${this.id()}`);
 
 		if (ige.isClient) {
+
 			this.addToRenderer(defaultAnimation && (defaultAnimation.frames[0] - 1));
 			ige.client.emit('create-unit', this);
 			this.transformTexture(this._translate.x, this._translate.y, 0);
@@ -698,6 +692,7 @@ var Unit = IgeEntityPhysics.extend({
 
 		self._stats.currentItemIndex = itemIndex;
 		this.streamUpdateData([{ currentItemIndex: itemIndex }]);
+		this.script.trigger("unitSelectsInventorySlot")
 
 		if (ige.isClient && this == ige.client.selectedUnit) {
 			this.inventory.highlightSlot(itemIndex + 1);
@@ -1539,6 +1534,14 @@ var Unit = IgeEntityPhysics.extend({
 			}
 			self.updateTexture();
 		} else if (ige.isServer) {
+			const requestedPurchasable = owner._stats.allPurchasables ? owner._stats.allPurchasables.find((purchasable) => equipPurchasable._id === purchasable._id) : null;
+			if (!requestedPurchasable || !requestedPurchasable.image) {
+				// requested purchasable does not exist or player does not have access to it.
+				return;
+			}
+			// overwrite purchasable image sent via client to avoid skin exploits
+			equipPurchasable.image = requestedPurchasable.image;
+
 			self._stats.cellSheet.url = equipPurchasable.image;
 			if (!owner._stats.purchasables || !(owner._stats.purchasables instanceof Array)) owner._stats.purchasables = [];
 			var index = owner._stats.purchasables.findIndex(function (purchasable) {
@@ -1550,11 +1553,12 @@ var Unit = IgeEntityPhysics.extend({
 			var purchasables = _.cloneDeep(owner._stats.purchasables);
 			purchasables.push(equipPurchasable);
 			owner.streamUpdateData([
-				{ purchasables: purchasables },
-				{ equiped: true }
-			]);
+								{ purchasables: purchasables },
+								{ equiped: true }
+							]);
 		}
 	},
+	
 	unEquipSkin: function (unEquipedId, forceFullyUnequip, cellSheetUrl) {
 		var self = this;
 		var defaultUnit = ige.game.getAsset('unitTypes', self._stats.type);

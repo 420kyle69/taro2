@@ -83,12 +83,29 @@ var ScriptComponent = IgeEntity.extend({
 	
 	/* trigger and run all of the corresponding script(s) */
 	trigger: function (triggerName, triggeredBy) {
+		
+		
+		if (ige.isServer) {
+			var now = Date.now();		
+			var lastTriggerRunTime = now - ige.lastTriggerRanAt;
+
+			if (ige.lastTrigger) {
+				if (ige.triggerProfiler[ige.lastTrigger]) {
+					var count = ige.triggerProfiler[ige.lastTrigger].count;					
+					ige.triggerProfiler[ige.lastTrigger].count++;					
+					ige.triggerProfiler[ige.lastTrigger].avgTime = ((ige.triggerProfiler[ige.lastTrigger].avgTime * count) + lastTriggerRunTime ) / (count + 1)
+					ige.triggerProfiler[ige.lastTrigger].totalTime += lastTriggerRunTime					 
+				} else {
+					ige.triggerProfiler[ige.lastTrigger] = {count: 1, avgTime: lastTriggerRunTime, totalTime: lastTriggerRunTime}
+				}
+			}
+
+			ige.lastTrigger = triggerName;
+			ige.lastTriggerRanAt = now;
+		}
+
 		let scriptIds = this.triggeredScripts[triggerName]
 		
-		// if (triggerName == 'playerJoinsGame') {
-		// 	console.trace()
-		// }
-
 		for (var i in scriptIds) {
 			let scriptId = scriptIds[i]
 			this.scriptLog(`\ntrigger: ${triggerName}`);
