@@ -784,6 +784,13 @@ var VariableComponent = IgeEntity.extend({
 					}
 
 					break;
+
+				case 'selectedInventorySlot':
+					var unit = self.getValue(text.unit, vars);
+					if (unit && unit._category == 'unit') {
+						returnValue = unit._stats.currentItemIndex + 1;
+					}
+					break;
 				case 'getItemBody':
 					var item = self.getValue(text.item, vars);
 					if (item && item._category == 'item') {

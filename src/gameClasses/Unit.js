@@ -692,6 +692,7 @@ var Unit = IgeEntityPhysics.extend({
 
 		self._stats.currentItemIndex = itemIndex;
 		this.streamUpdateData([{ currentItemIndex: itemIndex }]);
+		this.script.trigger("unitSelectsInventorySlot")
 
 		if (ige.isClient && this == ige.client.selectedUnit) {
 			this.inventory.highlightSlot(itemIndex + 1);
