@@ -36,7 +36,7 @@ var PhaserPalette = /** @class */ (function (_super) {
         var texturesLayer = _this.texturesLayer = map.createLayer(0, tileset, 0, 0).setOrigin(0, 0).setInteractive() /*.setScrollFactor(0,0)*/.setPosition(_this.x, _this.y);
         //this.add(texturesLayer);
         scene.add.existing(texturesLayer);
-        texturesLayer.on("pointermove", function (p) {
+        texturesLayer.on('pointermove', function (p) {
             if (!p.isDown)
                 return;
             var scrollX = (p.x - p.prevPosition.x) / camera.zoom;
@@ -55,8 +55,8 @@ var PhaserPalette = /** @class */ (function (_super) {
         var COLOR_DARK = _this.COLOR_DARK = 0x260e04;
         var scrollBarContainer = _this.scrollBarContainer = new Phaser.GameObjects.Container(scene);
         scene.add.existing(scrollBarContainer);
-        scrollBarContainer.x = _this.camera.x;
-        scrollBarContainer.y = _this.camera.y;
+        scrollBarContainer.x = camera.x;
+        scrollBarContainer.y = camera.y;
         var scrollBarBottom = _this.scrollBarBottom = _this.rexUI.add.scrollBar({
             width: _this.camera.width,
             orientation: 'x',
@@ -112,14 +112,39 @@ var PhaserPalette = /** @class */ (function (_super) {
             camera.x = _this.scene.sys.game.canvas.width - texturesLayer.width - 40;
             scrollBarContainer.x = _this.camera.x;
         });
-        _this.addButton('+', 0, _this.zoom.bind(_this), -1);
-        _this.addButton('-', 31, _this.zoom.bind(_this), 1);
-        _this.addButton('1', texturesLayer.width - 124, _this.switchLayer.bind(_this), 0);
-        _this.addButton('2', texturesLayer.width - 93, _this.switchLayer.bind(_this), 1);
-        _this.addButton('3', texturesLayer.width - 62, _this.switchLayer.bind(_this), 2);
-        _this.addButton('4', texturesLayer.width - 31, _this.switchLayer.bind(_this), 3);
+        _this.addButton('+', 0, scrollBarContainer, _this.zoom.bind(_this), -1);
+        _this.addButton('-', 31, scrollBarContainer, _this.zoom.bind(_this), 1);
+        var layerButtonsContainer = _this.layerButtonsContainer = new Phaser.GameObjects.Container(scene);
+        scene.add.existing(layerButtonsContainer);
+        //this.scrollBarContainer.add(layerButtonsContainer);
+        layerButtonsContainer.x = _this.camera.x + texturesLayer.width - 124;
+        layerButtonsContainer.y = _this.camera.y;
+        _this.addButton('1', 0, layerButtonsContainer, _this.switchLayer.bind(_this), 0);
+        _this.addButton('2', 31, layerButtonsContainer, _this.switchLayer.bind(_this), 1);
+        _this.addButton('3', 62, layerButtonsContainer, _this.switchLayer.bind(_this), 2);
+        _this.addButton('4', 93, layerButtonsContainer, _this.switchLayer.bind(_this), 3);
+        _this.addButton('_', 124, layerButtonsContainer, _this.toggle.bind(_this));
         return _this;
+        //this.width = 500;
+        //this.height = 500;
+        /*this.setInteractive(new Phaser.Geom.Rectangle(scrollBarContainer.x - this.x,scrollBarContainer.y,500,500), Phaser.Geom.Rectangle.Contains);
+        console.log(this);
+        this.on('pointerover', () => {
+            this.pointerover = true;
+            console.log('pointerover');
+        });
+
+        this.on('pointerout', () => {
+            this.pointerover = false;
+            console.log('pointerout');
+        });*/
     }
+    PhaserPalette.prototype.toggle = function () {
+        if (this.visible)
+            this.hide();
+        else
+            this.show();
+    };
     PhaserPalette.prototype.hide = function () {
         this.setVisible(false);
         this.texturesLayer.setVisible(false);
@@ -132,23 +157,26 @@ var PhaserPalette = /** @class */ (function (_super) {
         this.camera.setVisible(true);
         this.scrollBarContainer.setVisible(true);
     };
-    PhaserPalette.prototype.addButton = function (text, x, func, value) {
+    PhaserPalette.prototype.addButton = function (text, x, container, func, value) {
         //const text = '+';
         var w = 30;
         var h = 30;
         //const x = 0;
-        var y = -h;
+        var y = -h - 1;
         var button = this.scene.add.rectangle(x + w / 2, y + h / 2, w, h, this.COLOR_DARK);
         button.setInteractive();
-        this.scrollBarContainer.add(button);
+        container.add(button);
         var label = this.scene.add.text(x + w / 2, y + h / 2, text);
         label.setFontFamily('Verdana');
         label.setFontSize(26);
         label.setOrigin(0.5);
         label.setResolution(4);
-        this.scrollBarContainer.add(label);
+        container.add(label);
         button.on('pointerdown', function () {
-            func(value);
+            if (value)
+                func(value);
+            else
+                func();
         });
     };
     PhaserPalette.prototype.switchLayer = function (value) {
@@ -156,7 +184,7 @@ var PhaserPalette = /** @class */ (function (_super) {
         var gameMap = scene.gameScene.tilemap;
         gameMap.currentLayerIndex = value;
     };
-    PhaserPalette.prototype.zoom = function (/*pointer: any,*/ deltaY) {
+    PhaserPalette.prototype.zoom = function (deltaY) {
         var targetZoom;
         if (deltaY < 0)
             targetZoom = this.camera.zoom * 1.2;

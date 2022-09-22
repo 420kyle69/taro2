@@ -28,11 +28,14 @@ class DevModeScene extends PhaserScene {
 				this.paletteMarker.strokeRect(0, 0, map.tileWidth, map.tileHeight);
 				this.paletteMarker.setVisible(false);
 				this.devPalette.hide();
+				this.devPalette.layerButtonsContainer.setVisible(true);
 			}
+			else this.devPalette.layerButtonsContainer.setVisible(true);
 		});
 
 		ige.client.on('leaveDevMode', () => {
 			this.devPalette.hide();
+			this.devPalette.layerButtonsContainer.setVisible(false);
 		});
 
 		const tabKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, true);
@@ -130,7 +133,8 @@ class DevModeScene extends PhaserScene {
 			const palettePointerTileX = this.devPalette.map.worldToTileX(palettePoint.x);
 			const palettePointerTileY = this.devPalette.map.worldToTileY(palettePoint.y);
 
-			if (0 <= palettePointerTileX
+			if (this.devPalette.visible
+				&& 0 <= palettePointerTileX
 				&& palettePointerTileX < 27
 				&& 0 <= palettePointerTileY
 				&& palettePointerTileY < 20
@@ -151,7 +155,8 @@ class DevModeScene extends PhaserScene {
 			} else if (!(this.input.activePointer.x > this.devPalette.scrollBarContainer.x
 				&& this.input.activePointer.x < this.devPalette.scrollBarContainer.x + this.devPalette.scrollBarContainer.width
 				&& this.input.activePointer.y > this.devPalette.scrollBarContainer.y - 30
-				&& this.input.activePointer.y < this.devPalette.scrollBarContainer.y + this.devPalette.scrollBarContainer.height)) {
+				&& this.input.activePointer.y < this.devPalette.scrollBarContainer.y + this.devPalette.scrollBarContainer.height)
+				|| !this.devPalette.visible) {
 				this.paletteMarker.setVisible(false);
 				this.marker.setVisible(true);
 				// Rounds down to nearest tile
