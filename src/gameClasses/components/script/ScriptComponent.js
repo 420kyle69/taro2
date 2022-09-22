@@ -27,7 +27,6 @@ var ScriptComponent = IgeEntity.extend({
 
 	load: function(scripts) {
 		this.scripts = scripts;
-
 		// map trigger events, so we don't have to iterate through all scripts to find corresponding scripts
 		this.triggeredScripts = {};
 		for (var scriptId in this.scripts) {
@@ -51,6 +50,7 @@ var ScriptComponent = IgeEntity.extend({
 		var self = this;
 
 		self.currentScriptId = scriptId;
+
 		if (this.scripts[scriptId]) {
 			// var actions = JSON.parse(JSON.stringify(this.scripts[scriptId].actions));
 			var actions = self.getScriptActions(scriptId);

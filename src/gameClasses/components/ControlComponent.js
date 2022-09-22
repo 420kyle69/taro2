@@ -148,26 +148,7 @@ var ControlComponent = IgeEntity.extend({
 							}
 						}
 					}
-
-					switch (key) {
-						case 'e':
-							unit.ability.pickupItem();
-							break;
-
-						case 'g':
-							unit.ability.dropItem();
-							break;
-
-						case 'i':
-							if (ige.isClient && $('#open-inventory-button').css('display') !== 'none') {
-								$('#open-inventory-button').click();
-							}
-							break;
-
-						case 'button1':
-							unit.ability.startUsingItem();
-							break;
-					}
+					
 				}
 
 				if (!unitAbility && unit._stats.controls && unit._stats.controls.abilities) {
