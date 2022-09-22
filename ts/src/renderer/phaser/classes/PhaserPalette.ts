@@ -134,6 +134,7 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 		this.scene.scale.on(Phaser.Scale.Events.RESIZE, () => {
 			camera.x = this.scene.sys.game.canvas.width - texturesLayer.width - 40;
 			scrollBarContainer.x = this.camera.x;
+			layerButtonsContainer.x = this.camera.x + texturesLayer.width - 124;
 		});
 
 		this.addButton('+', 0, scrollBarContainer, this.zoom.bind(this), -1);
