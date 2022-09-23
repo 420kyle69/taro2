@@ -154,9 +154,17 @@ var ActionComponent = IgeEntity.extend({
 					}
 
 					case 'runScript':
-						var previousScriptId = self._script.currentScriptId;
-						self._script.runScript(action.scriptName, vars);
-						self._script.currentScriptId = previousScriptId;
+						let previousScriptId = self._script.currentScriptId;
+						let scriptComponent = undefined;
+						
+						if (action.isEntityScript) {
+							scriptComponent = self._script; // entity script
+						} else {
+							scriptComponent = ige.script; // global script
+						}
+
+						scriptComponent.runScript(action.scriptName, vars);
+						scriptComponent.currentScriptId = previousScriptId;
 						break;
 
 					case 'condition':
