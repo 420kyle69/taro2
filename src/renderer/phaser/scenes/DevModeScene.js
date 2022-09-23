@@ -26,6 +26,7 @@ var DevModeScene = /** @class */ (function (_super) {
         var map = this.gameScene.tilemap;
         this.selectedTile = map.getTileAt(2, 3);
         ige.client.on('enterDevMode', function () {
+            _this.defaultZoom = (_this.gameScene.zoomSize / 2.15);
             if (!_this.devPalette) {
                 _this.devPalette = new PhaserPalette(_this, _this.tileset, _this.rexUI);
                 _this.paletteMarker = _this.add.graphics();
@@ -41,6 +42,7 @@ var DevModeScene = /** @class */ (function (_super) {
         ige.client.on('leaveDevMode', function () {
             _this.devPalette.hide();
             _this.devPalette.layerButtonsContainer.setVisible(false);
+            ige.client.emit('zoom', _this.defaultZoom);
         });
         var tabKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, true);
         tabKey.on('down', function () {
@@ -51,6 +53,20 @@ var DevModeScene = /** @class */ (function (_super) {
                 else {
                     _this.devPalette.show();
                 }
+            }
+        });
+        var plusKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.PLUS, true);
+        plusKey.on('down', function () {
+            if (ige.developerMode.active) {
+                var zoom = (_this.gameScene.zoomSize / 2.15) / 1.1;
+                ige.client.emit('zoom', zoom);
+            }
+        });
+        var minusKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.MINUS, true);
+        minusKey.on('down', function () {
+            if (ige.developerMode.active) {
+                var zoom = (_this.gameScene.zoomSize / 2.15) * 1.1;
+                ige.client.emit('zoom', zoom);
             }
         });
         ige.client.on('editTile', function (data) {

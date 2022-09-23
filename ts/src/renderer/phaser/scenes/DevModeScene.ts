@@ -8,6 +8,7 @@ class DevModeScene extends PhaserScene {
 	gameScene: any;
 	tileset: Phaser.Tilemaps.Tileset;
 	marker: Phaser.GameObjects.Graphics;
+	defaultZoom: number;
 
 	constructor() {
 		super({ key: 'Palette' });
@@ -21,6 +22,7 @@ class DevModeScene extends PhaserScene {
 		this.selectedTile = map.getTileAt(2, 3);
 
 		ige.client.on('enterDevMode', () => {
+			this.defaultZoom = (this.gameScene.zoomSize / 2.15)
 			if (!this.devPalette) {
 				this.devPalette = new PhaserPalette(this, this.tileset, this.rexUI);
 		 		this.paletteMarker = this.add.graphics();
@@ -36,6 +38,7 @@ class DevModeScene extends PhaserScene {
 		ige.client.on('leaveDevMode', () => {
 			this.devPalette.hide();
 			this.devPalette.layerButtonsContainer.setVisible(false);
+			ige.client.emit('zoom', this.defaultZoom);
 		});
 
 		const tabKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, true);
@@ -47,6 +50,20 @@ class DevModeScene extends PhaserScene {
 				else {
 					this.devPalette.show()
 				}
+			}
+		});
+		const plusKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.PLUS, true);
+		plusKey.on('down', () => {
+			if(ige.developerMode.active) {
+				const zoom = (this.gameScene.zoomSize / 2.15) / 1.1;
+				ige.client.emit('zoom', zoom);
+			}
+		});
+		const minusKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.MINUS, true);
+		minusKey.on('down', () => {
+			if(ige.developerMode.active) {
+				const zoom =(this.gameScene.zoomSize / 2.15) * 1.1;
+				ige.client.emit('zoom', zoom);
 			}
 		});
 

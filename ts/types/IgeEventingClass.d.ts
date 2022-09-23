@@ -18,7 +18,7 @@ declare class IgeEventingClass extends IgeClass {
 
 	emit (
 		eventName: string,
-		args?: Array<any> | object
+		args?: Array<any> | object | number
 	): number;
 
 }
