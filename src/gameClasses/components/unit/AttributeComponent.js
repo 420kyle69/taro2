@@ -175,6 +175,7 @@ var AttributeComponent = IgeEntity.extend({
 	},
 	// change attribute's value manually
 	update: function (attributeTypeId, newValue, forceUpdate) {
+
 		var self = this;
 
 		if (!self._entity._stats || !self._entity._stats.attributes) {
@@ -259,7 +260,7 @@ var AttributeComponent = IgeEntity.extend({
 
 								// console.log(attribute, attribute.value);
 								if (ige.client.myPlayer._stats.selectedUnitId == unit.id()) {
-									self._entity.unitUi.updateAttributeBar(attribute);
+									self._entity.unitUi.updateAttributeBar({...attribute, ...{value: parseFloat(newValue)}});
 								}
 
 								// this is the only way to convert to number i guess??
