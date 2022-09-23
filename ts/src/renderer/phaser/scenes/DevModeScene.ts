@@ -16,6 +16,7 @@ class DevModeScene extends PhaserScene {
 
 	init (): void {
 		console.log('palette scene init');
+		this.input.setTopOnly(true);
 		this.gameScene = ige.renderer.scene.getScene('Game');
 		//const map = this.devPalette.map;
 		const map = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;

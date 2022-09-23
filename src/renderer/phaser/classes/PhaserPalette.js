@@ -48,7 +48,7 @@ var PhaserPalette = /** @class */ (function (_super) {
                 camera.scrollY -= scrollY;
             }
         });
-        var camera = _this.camera = _this.scene.cameras.add(_this.scene.sys.game.canvas.width - texturesLayer.width - 40, 70, texturesLayer.width, texturesLayer.height).setScroll(_this.x, _this.y).setZoom(1).setName('palette');
+        var camera = _this.camera = _this.scene.cameras.add(_this.scene.sys.game.canvas.width - texturesLayer.width - 40, 180, texturesLayer.width, texturesLayer.height).setScroll(_this.x, _this.y).setZoom(1).setName('palette');
         camera.setBackgroundColor(0x002244);
         var COLOR_PRIMARY = 0x4e342e;
         var COLOR_LIGHT = 0x7b5e57;
@@ -113,18 +113,18 @@ var PhaserPalette = /** @class */ (function (_super) {
             scrollBarContainer.x = _this.camera.x;
             layerButtonsContainer.x = _this.camera.x + texturesLayer.width - 124;
         });
-        _this.addButton('+', 0, scrollBarContainer, _this.zoom.bind(_this), -1);
-        _this.addButton('-', 31, scrollBarContainer, _this.zoom.bind(_this), 1);
+        _this.addButton('+', 0, -31, 30, scrollBarContainer, _this.zoom.bind(_this), -1);
+        _this.addButton('-', 31, -31, 30, scrollBarContainer, _this.zoom.bind(_this), 1);
         var layerButtonsContainer = _this.layerButtonsContainer = new Phaser.GameObjects.Container(scene);
         scene.add.existing(layerButtonsContainer);
         //this.scrollBarContainer.add(layerButtonsContainer);
-        layerButtonsContainer.x = _this.camera.x + texturesLayer.width - 124;
+        layerButtonsContainer.x = _this.camera.x + texturesLayer.width - 93;
         layerButtonsContainer.y = _this.camera.y;
-        _this.addButton('1', 0, layerButtonsContainer, _this.switchLayer.bind(_this), 0);
-        _this.addButton('2', 31, layerButtonsContainer, _this.switchLayer.bind(_this), 1);
-        _this.addButton('3', 62, layerButtonsContainer, _this.switchLayer.bind(_this), 2);
-        _this.addButton('4', 93, layerButtonsContainer, _this.switchLayer.bind(_this), 3);
-        _this.addButton('_', 124, layerButtonsContainer, _this.toggle.bind(_this));
+        _this.addButton('floor', 0, -155, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 0);
+        _this.addButton('floor2', 0, -124, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 1);
+        _this.addButton('walls', 0, -93, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 2);
+        _this.addButton('trees', 0, -62, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 3);
+        _this.addButton('tiles', 0, -31, 120, layerButtonsContainer, _this.toggle.bind(_this));
         return _this;
         //this.width = 500;
         //this.height = 500;
@@ -158,12 +158,12 @@ var PhaserPalette = /** @class */ (function (_super) {
         this.camera.setVisible(true);
         this.scrollBarContainer.setVisible(true);
     };
-    PhaserPalette.prototype.addButton = function (text, x, container, func, value) {
+    PhaserPalette.prototype.addButton = function (text, x, y, w, container, func, value) {
         //const text = '+';
-        var w = 30;
+        //const w = 30;
         var h = 30;
         //const x = 0;
-        var y = -h - 1;
+        //const y = -h -1;
         var button = this.scene.add.rectangle(x + w / 2, y + h / 2, w, h, this.COLOR_DARK);
         button.setInteractive();
         container.add(button);

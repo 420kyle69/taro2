@@ -21,6 +21,7 @@ var DevModeScene = /** @class */ (function (_super) {
     DevModeScene.prototype.init = function () {
         var _this = this;
         console.log('palette scene init');
+        this.input.setTopOnly(true);
         this.gameScene = ige.renderer.scene.getScene('Game');
         //const map = this.devPalette.map;
         var map = this.gameScene.tilemap;
