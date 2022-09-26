@@ -2109,8 +2109,6 @@ var ActionComponent = IgeEntity.extend({
 
 								createdEntity = new Item(_.cloneDeep(data));
 								ige.game.lastCreatedItemId = createdEntity._id;
-
-								item.script.trigger("entityCreated");
 							} else if (entityType === 'projectileTypes') {
 								data = Object.assign(data, {
 									type: entityToCreate,

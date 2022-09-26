@@ -732,19 +732,19 @@ var PhysicsComponent = IgeEventingClass.extend({
 			case 'unit':
 				ige.game.lastTouchingUnitId = entityA.id();
 				ige.game.lastTouchedUnitId = entityB.id();
-				triggeredBy.unitId = (triggeredBy.unitId) || entityB.id();
+				triggeredBy.unitId = triggeredBy.unitId || entityB.id();
 				ige.script.trigger(entityA._category+'TouchesUnit', triggeredBy); // handle unitA touching unitB
 				console.log("wtf", triggeredBy)
 				entityA.script.trigger("entityTouchesUnit", triggeredBy);
 				break;
 
 			case 'item':
-				triggeredBy.itemId = (triggeredBy.itemId) || entityB.id();
+				triggeredBy.itemId = triggeredBy.itemId || entityB.id();
 				ige.script.trigger(entityA._category+'TouchesItem', triggeredBy);
 				entityA.script.trigger("entityTouchesItem", triggeredBy);
 				break;
 			case 'projectile':
-				triggeredBy.projectileId = (triggeredBy.projectileId) || entityB.id();
+				triggeredBy.projectileId = triggeredBy.projectileId || entityB.id();
 				triggeredBy.collidingEntity = entityA.id();
 				ige.script.trigger(entityA._category+'TouchesProjectile', triggeredBy);
 				entityA.script.trigger("entityTouchesProjectile", triggeredBy);
