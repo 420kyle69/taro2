@@ -16,7 +16,7 @@ var IgeEntityPhysics = IgeEntity.extend({
 		}
 
 		// Check if box2d is enabled in the engine
-		if (ige.isServer && ige.physics) {
+		if (ige.physics) {
 			if (!this._b2dRef._networkDebugMode) {
 				// Store the existing transform methods
 				this._translateToProto = this.translateTo;
@@ -536,17 +536,9 @@ var IgeEntityPhysics = IgeEntity.extend({
 		}
 		this._translateToProto(x, y);
 
-		if (ige.isServer) {
-			if (this.body) {
-				if ((ige.physics._world && !ige.physics._world.isLocked())) {
-					this.translateToLT(x, y);
-				} else {
-					this.queueAction({
-						type: 'translateTo',
-						x: x,
-						y: y
-					});
-				}
+		if (this.body) {
+			if ((ige.physics._world && !ige.physics._world.isLocked())) {
+				this.translateToLT(x, y);
 			} else {
 				this.queueAction({
 					type: 'translateTo',
@@ -554,6 +546,12 @@ var IgeEntityPhysics = IgeEntity.extend({
 					y: y
 				});
 			}
+		} else {
+			this.queueAction({
+				type: 'translateTo',
+				x: x,
+				y: y
+			});
 		}
 
 		return this;
@@ -610,7 +608,7 @@ var IgeEntityPhysics = IgeEntity.extend({
 		this._rotateToProto(x, y, z);
 
 		body = this._stats.currentBody;
-		if (ige.isServer && body && body.type !== 'none' && body.type !== 'spriteOnly') {
+		if (body && body.type !== 'none' && body.type !== 'spriteOnly') {
 			// Check if the entity has a box2d body attached
 			// and if so, is it updating or not
 			if ((ige.physics._world && ige.physics._world.isLocked()) || this.body == undefined) {
