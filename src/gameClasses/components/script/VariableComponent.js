@@ -1101,6 +1101,14 @@ var VariableComponent = IgeEntity.extend({
 						return Math.floor(value);
 					break;
 
+				case 'log10':
+					var value = self.getValue(text.value, vars);
+					if (!isNaN(value)) {
+						return Math.log10(value);
+					}
+					break;
+	
+
 				case 'getEntireMapRegion':
 					var region = {
 						x: ige.map.data.tilewidth * 2,
