@@ -103,7 +103,8 @@ NetIo.Client = NetIo.EventingClass.extend({
 		*/
 		
 		// Create new websocket to the url
-		var distinctId = window.distinctId || '';
+
+		var distinctId = window.distinctId || ''		
 		
 		this._socket = new WebSocket(`${url}?token=${gsAuthToken}&sid=${ige.client.server.id}&distinctId=${distinctId}`, 'netio1');
 
