@@ -133,7 +133,7 @@ var PlayerUiComponent = IgeEntity.extend({
 		var self = this;
 		config.isDismissible = config.isDismissible === undefined ? true : !!(config.isDismissible);
 		self.isDismissibleInputModalShown = config.isDismissible;
-		$('#player-input-field-label').html(config.fieldLabel || 'Field');
+		$('#player-input-field-label').html(window.DOMPurify.sanitize(config.fieldLabel || 'Field'));
 
 		$('#player-input-field').val('');
 		$('#player-input-modal').addClass('d-flex');
@@ -161,10 +161,10 @@ var PlayerUiComponent = IgeEntity.extend({
 
 		config.isDismissible = config.isDismissible === undefined ? true : !!(config.isDismissible);
 
-		$('#custom-modal .content').html(config.content || '');
+		$('#custom-modal .content').html(window.DOMPurify.sanitize(config.content || ''));
 
 		if (config.title) {
-			$('#custom-modal .modal-title').html(config.title);
+			$('#custom-modal .modal-title').html(window.DOMPurify.sanitize(config.title));
 			$('#custom-modal .modal-header').show();
 		} else {
 			$('#custom-modal .modal-header').hide();
