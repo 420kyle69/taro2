@@ -358,7 +358,7 @@ var PlayerUiComponent = IgeEntity.extend({
 		function skipText () {
 			if (window.dialogueMessagePrinter) {
 				clearInterval(window.dialogueMessagePrinter);
-				$('#modd-dialogue-message').html(self.dialogue.message);
+				$('#modd-dialogue-message').html(window.DOMPurify.sanitize(self.dialogue.message, {FORCE_BODY: true}));
 				window.dialogueMessagePrinter = null;
 				$('.dialogue-option') && $('.dialogue-option').removeClass('d-none');
 				return;
