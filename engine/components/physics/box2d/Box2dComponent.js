@@ -652,8 +652,6 @@ var PhysicsComponent = IgeEventingClass.extend({
 									
 								}
 
-								if (entity._stats.type == 'EpFst0PEUR') console.log(x,y)
-
 								entity.body.setPosition({ x: x / entity._b2dRef._scaleRatio, y: y / entity._b2dRef._scaleRatio });
 								entity.body.setAngle(angle);
 							}
@@ -734,7 +732,6 @@ var PhysicsComponent = IgeEventingClass.extend({
 				ige.game.lastTouchedUnitId = entityB.id();
 				triggeredBy.unitId = triggeredBy.unitId || entityB.id();
 				ige.script.trigger(entityA._category+'TouchesUnit', triggeredBy); // handle unitA touching unitB
-				console.log("wtf", triggeredBy)
 				entityA.script.trigger("entityTouchesUnit", triggeredBy);
 				break;
 
@@ -781,9 +778,6 @@ var PhysicsComponent = IgeEventingClass.extend({
 
 	// Listen for when contact's begin
 	_beginContactCallback: function (contact) {
-
-		console.log("contact")
-
 
 		var entityA = contact.m_fixtureA.m_body._entity;
 		var entityB = contact.m_fixtureB.m_body._entity;
