@@ -1345,7 +1345,6 @@ var Unit = IgeEntityPhysics.extend({
 
 	remove: function () {
 		var self = this;
-
 		clearInterval(self.contactLoop);
 
 		var ownerPlayer = self.getOwner();
@@ -1365,18 +1364,18 @@ var Unit = IgeEntityPhysics.extend({
 				self.minimapUnit.destroy();
 				delete self.minimapUnit;
 			}
-		} else if (ige.isServer) {
-			// destroy all items in inventory
-			for (var i = 0; i < self._stats.itemIds.length; i++) {
-				var currentItem = this.inventory.getItemBySlotNumber(i + 1);
-				if (currentItem) {
-					currentItem.remove();
-				}
-			}
-
-			IgeEntityPhysics.prototype.remove.call(this);
-			// this.destroy()
 		}
+
+		// destroy all items in inventory
+		for (var i = 0; i < self._stats.itemIds.length; i++) {
+			var currentItem = this.inventory.getItemBySlotNumber(i + 1);
+			if (currentItem) {
+				currentItem.remove();
+			}
+		}
+
+		IgeEntityPhysics.prototype.remove.call(this);
+		
 	},
 
 	// update unit's stats in the server side first, then update client side as well.

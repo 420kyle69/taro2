@@ -21,11 +21,10 @@ var ActionComponent = IgeEntity.extend({
 			// if CSP is enabled, then server will pause streaming
 			// the server side is still running (e.g. creating entities), but it won't be streamed to the client			
 			if (ige.isServer) {
+
 				if (ige.game.cspEnabled) {
 					if(action.runOnClient) {
 						ige.network.pause();
-					} else {
-						ige.network.resume();
 					}
 				} 
 
@@ -2109,8 +2108,6 @@ var ActionComponent = IgeEntity.extend({
 
 								createdEntity = new Item(_.cloneDeep(data));
 								ige.game.lastCreatedItemId = createdEntity._id;
-
-								item.script.trigger("entityCreated");
 							} else if (entityType === 'projectileTypes') {
 								data = Object.assign(data, {
 									type: entityToCreate,
@@ -2649,6 +2646,9 @@ var ActionComponent = IgeEntity.extend({
 						// console.log('trying to run', action);
 						break;
 				}
+				
+				ige.network.resume();	
+
 			} catch (e) {
 				console.log(e);
 				self._script.errorLog(e); // send error msg to client

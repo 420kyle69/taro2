@@ -2446,13 +2446,12 @@ var IgeEntity = IgeObject.extend({
      *     entity.destroy();
      */
 	destroy: function (destroyOrphan) {
-
 		IgeEntity.prototype.log(`igeEntity: destroy ${this._category} ${this.id()}`);
 
 		this._alive = false;
 		/* CEXCLUDE */
 		// Check if the entity is streaming
-		if (ige.isServer) {
+		if (ige.isServer && !ige.network.isPaused) {
 			if (this._streamMode === 1 || this._streamMode === 2) {
 				delete this._streamDataCache;
 				this.streamDestroy();
@@ -2487,11 +2486,6 @@ var IgeEntity = IgeObject.extend({
 			this.emit('destroy');
 		}
 
-		/**
-		 * Fires when the entity has been destroyed.
-		 * @event IgeEntity#destroyed
-		 * @param {IgeEntity} The entity that has been destroyed.
-		 */
 		for (var region in ige.regionManager.entitiesInRegion) {
 			delete ige.regionManager.entitiesInRegion[region][this.id()];
 		}
@@ -4966,7 +4960,7 @@ var IgeEntity = IgeObject.extend({
 
 		// Send clients the stream destroy command for this entity
 		ige.network.send('_igeStreamDestroy', [ige._currentTime, thisId], clientId);
-
+		
 		if (!ige.network.stream) return true;
 
 		ige.network.stream._streamClientCreated[thisId] = ige.network.stream._streamClientCreated[thisId] || {};
@@ -5263,8 +5257,8 @@ var IgeEntity = IgeObject.extend({
 		if (this._stats.isStunned == undefined || this._stats.isStunned != true) {
 			this.rotateTo(0, 0, rotate);
 		}
+		
 		this.translateTo(x, y, 0);
-
 		this._lastTransformAt = ige._currentTime;
 	},
 
