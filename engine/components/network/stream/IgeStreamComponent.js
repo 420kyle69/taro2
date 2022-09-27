@@ -158,6 +158,7 @@ var IgeStreamComponent = IgeEventingClass.extend({
 	_onStreamCreateSnapshot: function (data) {
 		console.log(data);
 	},
+
 	_onStreamCreate: function (data) {
 		var classId = data[0];
 		var entityId = data[1];
@@ -170,7 +171,6 @@ var IgeStreamComponent = IgeEventingClass.extend({
 		var entity;
 
 		
-		// ige.devLog("onStreamCreate", entityId, classId, createData);
 		if (transformData) {
 			var ntransdata = [
 				parseInt(transformData[0], 16),

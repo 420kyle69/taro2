@@ -10,13 +10,12 @@ var Projectile = IgeEntityPhysics.extend({
 		var projectileData = {};
 		if (ige.isClient) {
 			projectileData = ige.game.getAsset('projectileTypes', data.type);
-			projectileData = _.pick(projectileData, ige.client.keysToAddBeforeRender);
 		}
 
 		self.entityId = this._id;
 
 		self._stats = {...projectileData, ...data};
-
+		
 		// dont save variables in _stats as _stats is stringified and synced
 		// and some variables of type unit, item, projectile may contain circular json objects
 		if (self._stats.variables) {
@@ -72,24 +71,22 @@ var Projectile = IgeEntityPhysics.extend({
 		}
 
 		this.updateBody(data.defaultData);
-		// console.log("previousFrame", this.previousFrame)
-
-		var sourceItem = this.getSourceItem();
-		if ( // stream projectile data if
-			!ige.game.data.defaultData.clientPhysicsEngine || // client side isn't running physics (csp requires physics) OR
-			!sourceItem || // projectile does not have source item (created via script) OR
-			(sourceItem && sourceItem._stats.projectileStreamMode) // item is set to stream its projectiles from server
-		) {
-			if (ige.isServer && ige.network.isPaused) {
-				this.streamMode(0);
-			} else {
-				this.streamMode(1);				
-			}
-		} else {
-			this.streamMode(0);
-		}
 		
+		var sourceItem = this.getSourceItem();
+
 		if (ige.isServer) {
+
+			// stream projectile data if
+			if (!ige.network.isPaused && (
+					!ige.game.data.defaultData.clientPhysicsEngine || // client side isn't running physics (csp requires physics) OR
+					!sourceItem || // projectile does not have source item (created via script) OR
+					(sourceItem && sourceItem._stats.projectileStreamMode == 1) // item is set to stream its projectiles from server
+				)
+			) {
+				this.streamMode(1);
+			} else {
+				this.streamMode(0);
+			}
 			ige.server.totalProjectilesCreated++;
 		} else if (ige.isClient) {
 			if (currentState) {

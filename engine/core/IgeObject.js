@@ -1808,6 +1808,8 @@ var IgeObject = IgeEventingClass.extend({
 	 * scenegraph and from memory.
 	 */
 	destroy: function () {
+		// if (this._stats) // EpFst0PEUR
+		// 	console.log("destroy!", this._stats.type)
 		// Remove ourselves from any parent
 		this.unMount();
 

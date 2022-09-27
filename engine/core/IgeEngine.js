@@ -1887,7 +1887,6 @@ var IgeEngine = IgeEntity.extend({
 			// }
 
 			ige.network.stream._sendQueue(timeStamp);
-			ige.network.resume();
 			ige.network.stream.updateEntityAttributes();
 			
 		}

@@ -184,6 +184,7 @@ var AbilityComponent = IgeEntity.extend({
 				}
 
 				if (ige.isServer || ige.isClient && ige.physics) {
+
 					if (ability.scriptName && ability.scriptName != '') {
 						if (ige.game.data.scripts[ability.scriptName]) {
 							AbilityComponent.prototype.log(`ability cast: running script ${ige.game.data.scripts[ability.scriptName].name} ${ability.scriptName}`);
@@ -201,11 +202,14 @@ var AbilityComponent = IgeEntity.extend({
 						}
 
 						ige.game.lastCastingUnitId = self._entity.id();
-						ige.script.runScript(ability.scriptName, {
-							triggeredBy: {
-								unitId: self._entity.id()
-							}
-						});
+						
+						if (ability.isEntityScript) {
+							self._entity.script.runScript(ability.scriptName, { triggeredBy: { unitId: self._entity.id()} }); // global script
+						} else {
+							ige.script.runScript(ability.scriptName, { triggeredBy: { unitId: self._entity.id()} }); // global script
+						}
+						
+
 					}
 				}
 			} else {
