@@ -97,7 +97,10 @@ var AIComponent = IgeEntity.extend({
 	},
 
 	getTargetUnit: function () {
-		return ige.$(this.targetUnitId);
+		if (this.targetUnitId)
+			return ige.$(this.targetUnitId);
+
+		return undefined
 	},
 
 	getAngleToTarget: function () {
@@ -160,10 +163,7 @@ var AIComponent = IgeEntity.extend({
 
 	goIdle: function () {
 		var unit = this._entity;
-		var currentItem = unit.getCurrentItem();
-		if (currentItem) {
-			currentItem.stopUsing();
-		}
+		unit.ability.stopUsingItem();
 		unit.stopMoving();
 		this.targetUnitId = undefined;
 		this.targetPosition = undefined;
@@ -202,7 +202,12 @@ var AIComponent = IgeEntity.extend({
 	},
 
 	setTargetUnit: function (unit) {
+		// can't target self!
+		if (unit == this._entity)
+			return;
+
 		var previousTargetUnit = this.getTargetUnit();
+		
 		// remove this unit from currently targeted unit's unitsTargetingMe array.
 		if (previousTargetUnit && unit != previousTargetUnit) {
 			for (var i = 0; i < previousTargetUnit.ai.unitsTargetingMe.length; i++) {

@@ -692,6 +692,9 @@ var Item = IgeEntityPhysics.extend({
 	startUsing: function () {
 		var self = this;
 
+		if (self._stats.isBeingUsed)
+			return;
+
 		self._stats.isBeingUsed = true;
 		var owner = this.getOwnerUnit();
 		if (ige.isServer) {
@@ -709,17 +712,20 @@ var Item = IgeEntityPhysics.extend({
 
 	stopUsing: function () {
 		var self = this;
-		if (self._stats.isBeingUsed) {
-			self._stats.isBeingUsed = false;
-			var owner = self.getOwnerUnit();
 
-			if (owner && ige.trigger) {
-				ige.queueTrigger('unitStopsUsingAnItem', {
-					unitId: owner.id(),
-					itemId: self.id()
-				});
-			}
+		if (!self._stats.isBeingUsed)
+			return;
+
+		self._stats.isBeingUsed = false;
+		var owner = self.getOwnerUnit();
+
+		if (owner && ige.trigger) {
+			ige.queueTrigger('unitStopsUsingAnItem', {
+				unitId: owner.id(),
+				itemId: self.id()
+			});
 		}
+
 		if (ige.isClient) {
 			this.playEffect('none');
 		} else if (ige.isServer) {
@@ -833,7 +839,6 @@ var Item = IgeEntityPhysics.extend({
 		IgeEntity.prototype.streamUpdateData.call(this, queuedData);
 
 		// ige.devLog("Item streamUpdateData ", data)
-		// console.log(data, this._streamMode, this.id());
 		for (var i = 0; i < queuedData.length; i++) {
 			var data = queuedData[i];
 			for (attrName in data) {
