@@ -61,11 +61,6 @@ var AIComponent = IgeEntity.extend({
 		// only response to hostile/neutral units
 		var ownerPlayer = self._entity.getOwner();
 		if (unit) {
-			ige.script.trigger('whenUnitEntersSensor', {
-				unitId: unit.id(),
-				sensorId: self._entity.sensor.id()
-			});
-
 			var ownerPlayerOfTargetUnit = ige.$(unit._stats.ownerId);
 			if (ownerPlayer && ownerPlayer.isHostileTo(ownerPlayerOfTargetUnit) && unit._stats.isUnTargetable != true) {
 				// if I already have a target, re-target if new target unit is closer
