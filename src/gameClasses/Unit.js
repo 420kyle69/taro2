@@ -703,11 +703,14 @@ var Unit = IgeEntityPhysics.extend({
 		self.previousState = null;
 
 		var data = ige.game.getAsset('unitTypes', type);
+
 		// console.log("change unit type", type)
 		if (data == undefined) {
 			ige.script.errorLog('changeUnitType: invalid data');
 			return;
 		}
+
+		self.script.load(data.scripts)
 
 		self._stats.type = type;
 
