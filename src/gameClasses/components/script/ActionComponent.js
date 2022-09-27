@@ -2311,7 +2311,7 @@ var ActionComponent = IgeEntity.extend({
 					case 'destroyEntity':
 						var entity = self._script.variable.getValue(action.entity, vars);
 						if (entity && self.entityCategories.indexOf(entity._category) > -1) {
-							entity.remove();
+							entity.remove(action.runOnClient);
 						} else {
 							self._script.errorLog('invalid unit');
 						}

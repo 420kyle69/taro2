@@ -796,7 +796,7 @@ var IgeEntityPhysics = IgeEntity.extend({
 		}
 	},
 
-	remove: function () {
+	remove: function (runOnClient) {
 		// if (this.body) {
 		//     this.queueAction({ type: "destroy" });
 		// }
@@ -810,7 +810,7 @@ var IgeEntityPhysics = IgeEntity.extend({
 			// destroy items which are spriteOnly or with none body immediately
 			this.destroy();
 		} else {
-			this.queueAction({ type: 'destroy', streamToClient: false });
+			this.queueAction({ type: 'destroy', streamToClient: !runOnClient });
 		}
 		if (ige.isClient) {
 			this.clearAllPointers();
