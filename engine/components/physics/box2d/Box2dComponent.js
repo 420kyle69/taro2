@@ -706,7 +706,6 @@ var PhysicsComponent = IgeEventingClass.extend({
 	},
 
 	_triggerContactEvent: function (entityA, entityB) {
-		console.log(entityA.id(), entityB.id());
 		var triggeredBy = {}
 
 
@@ -780,7 +779,6 @@ var PhysicsComponent = IgeEventingClass.extend({
 				entityA.script.trigger("entityTouchesWall");
 				break;
 		}
-		console.log(triggeredBy);
 	},
 
 	// Listen for when contact's begin
