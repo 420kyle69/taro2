@@ -728,7 +728,7 @@ var PhysicsComponent = IgeEventingClass.extend({
 
 		switch (entityB._category) {
 			case 'unit':
-				ige.game.lastTouchingUnitId = entityA.id();
+				// ige.game.lastTouchingUnitId = entityA.id();
 				ige.game.lastTouchedUnitId = entityB.id();
 
 				ige.script.trigger(entityA._category+'TouchesUnit', triggeredBy); // handle unitA touching unitB
