@@ -759,10 +759,15 @@ var PhysicsComponent = IgeEventingClass.extend({
 
 			case 'sensor':
 				triggeredBy.sensorId = entityB.id();
-				var unit = entityB.getOwnerUnit();
-				if (unit && unit.script) {
-					unit.script.trigger(entityA._category+'EntersSensor', triggeredBy);				
+				var sensoringUnit = entityB.getOwnerUnit();
+				if (sensoringUnit && sensoringUnit.script) {
+					sensoringUnit.script.trigger(entityA._category+'EntersSensor', triggeredBy);
+
+					if (entityA._category == 'unit') {
+						sensoringUnit.ai.registerSensorDetection(entityA);
+					}
 				}
+
 				break;
 
 			case undefined:

@@ -1222,7 +1222,6 @@ var ActionComponent = IgeEntity.extend({
 					case 'stopUsingItem':
 						if (entity && entity._category == 'item') {
 							entity.stopUsing();
-							entity.streamUpdateData([{ isBeingUsed: false }]);
 						}
 
 						break;
