@@ -708,7 +708,7 @@ var PhysicsComponent = IgeEventingClass.extend({
 	_triggerContactEvent: function (entityA, entityB) {
 		var triggeredBy = {}
 
-		
+
 		if (!['unit', 'projectile', 'item'].includes(entityA._category)) {
 			return;
 		}
@@ -728,10 +728,11 @@ var PhysicsComponent = IgeEventingClass.extend({
 
 		switch (entityB._category) {
 			case 'unit':
-				ige.game.lastTouchingUnitId = entityA.id();
+				// ige.game.lastTouchingUnitId = entityA.id();
 				ige.game.lastTouchedUnitId = entityB.id();
-				triggeredBy.unitId = triggeredBy.unitId || entityB.id();
+
 				ige.script.trigger(entityA._category+'TouchesUnit', triggeredBy); // handle unitA touching unitB
+				triggeredBy.unitId = entityB.id();
 				entityA.script.trigger("entityTouchesUnit", triggeredBy);
 				break;
 
@@ -754,7 +755,7 @@ var PhysicsComponent = IgeEventingClass.extend({
 				});
 				triggeredBy.region = region;
 				entityA.script.trigger("entityEntersRegion", triggeredBy);
-				ige.script.trigger(entityA._category+'EntersRegion', triggeredBy);				
+				ige.script.trigger(entityA._category+'EntersRegion', triggeredBy);
 				break;
 
 			case 'sensor':
