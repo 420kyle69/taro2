@@ -295,8 +295,8 @@ var Item = IgeEntityPhysics.extend({
 
 				let triggerParams = {unitId: ownerId, itemId: self.id()};
 
-				ige.queueTrigger('unitUsesItem', triggerParams);
 				self.script.trigger('itemIsUsed', triggerParams);
+				ige.script.trigger('unitUsesItem', triggerParams);
 
 				if (ige.physics && self._stats.type == 'weapon') {
 					if (self._stats.isGun) {
@@ -836,8 +836,11 @@ var Item = IgeEntityPhysics.extend({
 
 	streamUpdateData: function (queuedData) {
 		var self = this;
-		IgeEntity.prototype.streamUpdateData.call(this, queuedData);
 
+		if (ige.isServer && ige.network.isPaused) 
+			return;
+
+		IgeEntity.prototype.streamUpdateData.call(this, queuedData);		
 		// ige.devLog("Item streamUpdateData ", data)
 		for (var i = 0; i < queuedData.length; i++) {
 			var data = queuedData[i];

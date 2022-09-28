@@ -128,6 +128,10 @@ var Projectile = IgeEntityPhysics.extend({
 	},
 
 	streamUpdateData: function (queuedData) {
+
+		if (ige.isServer && ige.network.isPaused) 
+			return;
+			
 		IgeEntity.prototype.streamUpdateData.call(this, data);
 		for (var i = 0; i < queuedData.length; i++) {
 			var data = queuedData[i];
