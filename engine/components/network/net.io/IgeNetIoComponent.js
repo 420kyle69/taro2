@@ -51,10 +51,12 @@ var IgeNetIoComponent = IgeEventingClass.extend([
 	},
 
 	pause: function() {
+		// console.log("network pause")
 		this.isPaused = true;
 	},
 	
 	resume: function() {
+		// console.log("network resume")
 		this.isPaused = false;
 	},
 

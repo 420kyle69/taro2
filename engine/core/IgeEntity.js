@@ -2456,13 +2456,12 @@ var IgeEntity = IgeObject.extend({
      *     entity.destroy();
      */
 	destroy: function (destroyOrphan) {
-
 		IgeEntity.prototype.log(`igeEntity: destroy ${this._category} ${this.id()}`);
 
 		this._alive = false;
 		/* CEXCLUDE */
 		// Check if the entity is streaming
-		if (ige.isServer) {
+		if (ige.isServer && !ige.network.isPaused) {
 			if (this._streamMode === 1 || this._streamMode === 2) {
 				delete this._streamDataCache;
 				this.streamDestroy();
@@ -2497,11 +2496,6 @@ var IgeEntity = IgeObject.extend({
 			this.emit('destroy');
 		}
 
-		/**
-		 * Fires when the entity has been destroyed.
-		 * @event IgeEntity#destroyed
-		 * @param {IgeEntity} The entity that has been destroyed.
-		 */
 		for (var region in ige.regionManager.entitiesInRegion) {
 			delete ige.regionManager.entitiesInRegion[region][this.id()];
 		}
@@ -4179,15 +4173,8 @@ var IgeEntity = IgeObject.extend({
 							break;
 
 						case 'isBeingUsed':
-							// this case is in igeEntity.js instead of item.js, because if it's in item.js,
-							// we cannot prevent updating my own unit's isBeingUsed, and item._stats.isBeingUsed will be updated regardless.
-							if (ige.isClient) {
-								if (this.getOwnerUnit() != ige.client.selectedUnit) {
-									this._stats.isBeingUsed = newValue;
-									if (newValue == false) {
-										this.playEffect('none');
-									}
-								}
+							if (ige.isClient) {								
+								this._stats.isBeingUsed = newValue;
 							}
 							break;
 
@@ -4731,12 +4718,13 @@ var IgeEntity = IgeObject.extend({
 			switch(this._category) {
 
 				case 'unit': 
-					keys = ["name", "type", "stateId", "ownerId", "ownerPlayerId", "currentItemIndex", "currentItemId", "flip", "skin"]
+					// cellsheet is used for purchasable-skins
+					keys = ["name", "type", "stateId", "ownerId", "ownerPlayerId", "currentItemIndex", "currentItemId", "flip", "skin", "cellSheet"]
 					data = { 
 						attributes: {}, 
 						// variables: {} 
 					};
-					break;
+				break;
 
 				case 'item':
 					// TODO: we shouldn't have to send currentBody. for some reason, all items have 'dropped' stateId
@@ -4756,7 +4744,8 @@ var IgeEntity = IgeObject.extend({
 					break;
 
 				case 'player':
-					keys = ["name", "clientId", "playerTypeId", "controlledBy", "playerJoined", "unitIds", "selectedUnitId", "userId", "banChat"]
+					// purchasables is required for rendering this player's owned skin to the other players
+					keys = ["name", "clientId", "playerTypeId", "controlledBy", "playerJoined", "unitIds", "selectedUnitId", "userId", "banChat", "purchasables"]
 					data = { 
 						attributes: {}, 
 						// variables: {} 
@@ -4767,13 +4756,13 @@ var IgeEntity = IgeObject.extend({
 						data.coins = this._stats.coins;
 						data.mutedUsers = this._stats.mutedUsers;
 						data.banChat = this._stats.banChat;
-						data.purchasables = this._stats.purchasables;
-  						data.allPurchasables = this._stats.allPurchasables;
 						data.isEmailVerified = this._stats.isEmailVerified;
+						data.allPurchasables = this._stats.allPurchasables;
 						data.isUserVerified = this._stats.isUserVerified;
 						data.isUserAdmin = this._stats.isUserAdmin;
 						data.isUserMod = this._stats.isUserMod;
 					}
+
 					break;
 
 				case 'region': 
@@ -4805,7 +4794,6 @@ var IgeEntity = IgeObject.extend({
 			// 	}
 			// }
 			
-
 			return data;			
 		}
 	},
@@ -4982,7 +4970,7 @@ var IgeEntity = IgeObject.extend({
 
 		// Send clients the stream destroy command for this entity
 		ige.network.send('_igeStreamDestroy', [ige._currentTime, thisId], clientId);
-
+		
 		if (!ige.network.stream) return true;
 
 		ige.network.stream._streamClientCreated[thisId] = ige.network.stream._streamClientCreated[thisId] || {};
@@ -5279,8 +5267,8 @@ var IgeEntity = IgeObject.extend({
 		if (this._stats.isStunned == undefined || this._stats.isStunned != true) {
 			this.rotateTo(0, 0, rotate);
 		}
+		
 		this.translateTo(x, y, 0);
-
 		this._lastTransformAt = ige._currentTime;
 	},
 

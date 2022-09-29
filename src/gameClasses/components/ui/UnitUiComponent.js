@@ -92,7 +92,7 @@ var UnitUiComponent = IgeEntity.extend({
 
 		var name = attributeTypes[attr.type] ? attributeTypes[attr.type].name : attr.name;
 
-		self._entity.updateAttributeBar(attr);
+		// self._entity.updateAttributeBar(attr); // updating UnitBars from HTML Bar???
 
 		if (
 			attr.isVisible && (

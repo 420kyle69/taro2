@@ -24,7 +24,6 @@ var PhaserUnit = /** @class */ (function (_super) {
         gameObject.setSize(_this.sprite.width, _this.sprite.height);
         _this.equippedItem = null;
         Object.assign(_this.evtListeners, {
-            flip: entity.on('flip', _this.flip, _this),
             follow: entity.on('follow', _this.follow, _this),
             'update-texture': entity.on('update-texture', _this.updateTexture, _this),
             'update-label': entity.on('update-label', _this.updateLabel, _this),
@@ -74,7 +73,6 @@ var PhaserUnit = /** @class */ (function (_super) {
         if (this.chat) {
             this.chat.updatePosition();
         }
-        this.flip(this.entity._stats.flip);
     };
     PhaserUnit.prototype.size = function (data) {
         _super.prototype.size.call(this, data);
@@ -93,9 +91,6 @@ var PhaserUnit = /** @class */ (function (_super) {
     PhaserUnit.prototype.updateAttributesOffset = function () {
         this.attributesContainer.y = 25 + (this.sprite.displayHeight + this.sprite.displayWidth) / 4;
     };
-    PhaserUnit.prototype.flip = function (flip) {
-        this.sprite.setFlip(flip % 2 === 1, flip > 1);
-    };
     PhaserUnit.prototype.follow = function () {
         var camera = this.scene.cameras.main;
         if (camera._follow === this.gameObject) {
@@ -106,6 +101,8 @@ var PhaserUnit = /** @class */ (function (_super) {
     PhaserUnit.prototype.getLabel = function () {
         if (!this.label) {
             var label = this.label = this.scene.add.text(0, 0, 'cccccc');
+            // needs to be created with the correct scale of the client
+            this.label.setScale(1 / this.scene.cameras.main.zoom);
             label.setOrigin(0.5);
             this.gameObject.add(label);
         }
@@ -143,6 +140,8 @@ var PhaserUnit = /** @class */ (function (_super) {
     PhaserUnit.prototype.getAttributesContainer = function () {
         if (!this.attributesContainer) {
             this.attributesContainer = this.scene.add.container(0, 0);
+            // needs to be created with the correct scale of the client
+            this.attributesContainer.setScale(1 / this.scene.cameras.main.zoom);
             this.updateAttributesOffset();
             this.gameObject.add(this.attributesContainer);
         }

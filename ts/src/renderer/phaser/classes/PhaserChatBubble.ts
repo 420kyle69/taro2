@@ -22,9 +22,14 @@ class PhaserChatBubble extends Phaser.GameObjects.Container {
 			0, 0,
 			'Arial_24px_bold_white'
 		);
+
+		// needs to be created with the correct scale of the client
+		this.setScale(1 / this.scene.cameras.main.zoom);
+
 		text.setFontSize(14);
 		text.setCenterAlign();
 		text.setOrigin(0.5);
+
 		this.add(text);
 
 		scene.add.existing(this);

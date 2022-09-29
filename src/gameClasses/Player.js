@@ -11,7 +11,6 @@ var Player = IgeEntity.extend({
 		var playerData = ige.game.getAsset('playerTypes', data.playerTypeId);		
 		this._stats = _.merge(playerData, data);
 
-		// console.log(this._stats.attributes)
 		// dont save variables in _stats as _stats is stringified and synced
 		// and some variables of type unit, item, projectile may contain circular json objects
 		if (self._stats.variables) {
@@ -344,23 +343,24 @@ var Player = IgeEntity.extend({
 	},
 
 	remove: function () {
-		if (ige.isServer) {
-			const i = ige.server.developerClientIds.indexOf(this._stats.clientId);
-			if (i != -1) ige.server.developerClientIds.splice(i, 1);
-		}
-
-		if (this._stats.controlledBy == 'human' && ige.script) // do not send trigger for neutral player
+		// AI players cannot be removed
+		if (this._stats.controlledBy == 'human') // do not send trigger for neutral player
 		{
-			ige.script.trigger('playerLeavesGame', { playerId: this.id() });
-		}
 
-		// session is in second
-		ige.clusterClient && ige.clusterClient.emit('log-session-duration', (Date.now() - this._stats.jointsOn) / 1000);
-		if (this.variables && this.variables.progression != undefined && this.variables.progression.value != undefined) {
-			ige.clusterClient && ige.clusterClient.emit('log-progression', this.variables.progression.value);
+			if (ige.isServer) {
+				const i = ige.server.developerClientIds.indexOf(this._stats.clientId);
+				if (i != -1) ige.server.developerClientIds.splice(i, 1);
+			}
+
+			ige.script.trigger('playerLeavesGame', { playerId: this.id() });
+			// session is in second
+			ige.clusterClient && ige.clusterClient.emit('log-session-duration', (Date.now() - this._stats.jointsOn) / 1000);
+			if (this.variables && this.variables.progression != undefined && this.variables.progression.value != undefined) {
+				ige.clusterClient && ige.clusterClient.emit('log-progression', this.variables.progression.value);
+			}
+			this.streamDestroy();
+			this.destroy();
 		}
-		this.streamDestroy();
-		this.destroy();
 	},
 
 	updateVisibility: function (playerId) {

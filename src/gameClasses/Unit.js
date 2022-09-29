@@ -32,11 +32,8 @@ var Unit = IgeEntityPhysics.extend({
 		}
 		unitData = ige.game.getAsset('unitTypes', data.type);
 		
-		if (ige.isClient) {
-			unitData = _.pick(unitData, ige.client.keysToAddBeforeRender);
-		}
-
 		self._stats = _.merge(unitData, data);
+
 		self.entityId = entityIdFromServer;
 
 		// dont save variables in _stats as _stats is stringified and synced
@@ -53,7 +50,7 @@ var Unit = IgeEntityPhysics.extend({
 			.addComponent(AttributeComponent) // every units gets one
 			
 		self.addComponent(ScriptComponent); // entity-requireScriptLoading
-		self.script.load(data.scripts)
+		self.script.load(unitData.scripts)
 
 		Unit.prototype.log(`initializing new unit ${this.id()}`);
 
@@ -250,7 +247,7 @@ var Unit = IgeEntityPhysics.extend({
 			var shouldRender = self.shouldRenderAttribute(attr);
 
 			if (unitBar) {
-				// canvas
+
 				if (shouldRender) {
 					unitBar.updateBar(attr);
 				} else {
@@ -261,7 +258,7 @@ var Unit = IgeEntityPhysics.extend({
 					unitBar.destroy();
 				}
 			} else {
-				// html
+
 				if (shouldRender) {
 					attr.index = self.attributeBars.length + 1;
 
@@ -694,6 +691,7 @@ var Unit = IgeEntityPhysics.extend({
 
 		self._stats.currentItemIndex = itemIndex;
 		this.streamUpdateData([{ currentItemIndex: itemIndex }]);
+		this.script.trigger("unitSelectsInventorySlot")
 
 		if (ige.isClient && this == ige.client.selectedUnit) {
 			this.inventory.highlightSlot(itemIndex + 1);
@@ -707,11 +705,14 @@ var Unit = IgeEntityPhysics.extend({
 		self.previousState = null;
 
 		var data = ige.game.getAsset('unitTypes', type);
+
 		// console.log("change unit type", type)
 		if (data == undefined) {
 			ige.script.errorLog('changeUnitType: invalid data');
 			return;
 		}
+
+		self.script.load(data.scripts)
 
 		self._stats.type = type;
 
@@ -1272,7 +1273,7 @@ var Unit = IgeEntityPhysics.extend({
 			var targetPlayer = this.getOwner();
 			var sourcePlayer = ige.$(damageData.sourcePlayerId);
 			var sourceUnit = ige.$(damageData.sourceUnitId);
-			var isVulnerable = false;
+			var inflictDamage = false;
 
 			var targetsAffected = damageData.targetsAffected;
 			if (
@@ -1286,10 +1287,10 @@ var Unit = IgeEntityPhysics.extend({
 					(targetsAffected.includes('neutral') && sourcePlayer.isNeutralTo(targetPlayer))
 				)
 			) {
-				isVulnerable = true;
+				inflictDamage = true;
 			}
 
-			if (isVulnerable) {
+			if (inflictDamage) {
 				ige.game.lastAttackingUnitId = damageData.sourceUnitId;
 				ige.game.lastAttackedUnitId = this.id();
 				ige.game.lastAttackingItemId = damageData.sourceItemId;
@@ -1311,6 +1312,8 @@ var Unit = IgeEntityPhysics.extend({
 				var armor = this._stats.attributes.armor && this._stats.attributes.armor.value || 0;
 				var damageReduction = (0.05 * armor) / (1.5 + 0.04 * armor);
 				var ownerUnitBaseDamage = (sourceUnit != undefined) ? sourceUnit.getBaseDamage() : 0;
+
+				// update target unit's attributes (e.g. lower the target unit's hp)
 				if (damageData.unitAttributes) {
 					_.forEach(damageData.unitAttributes, function (damageValue, damageAttrKey) {
 						var attribute = self._stats.attributes[damageAttrKey];
@@ -1325,6 +1328,7 @@ var Unit = IgeEntityPhysics.extend({
 					});
 				}
 
+				// update target unit's owner's attributes (e.g. lower the owner player's score)
 				if (damageData.playerAttributes && targetPlayer && targetPlayer._stats.attributes) {
 					_.forEach(damageData.playerAttributes, function (damageValue, damageAttrKey) {
 						var attribute = targetPlayer._stats.attributes[damageAttrKey];
@@ -1348,7 +1352,6 @@ var Unit = IgeEntityPhysics.extend({
 
 	remove: function () {
 		var self = this;
-
 		clearInterval(self.contactLoop);
 
 		var ownerPlayer = self.getOwner();
@@ -1368,24 +1371,28 @@ var Unit = IgeEntityPhysics.extend({
 				self.minimapUnit.destroy();
 				delete self.minimapUnit;
 			}
-		} else if (ige.isServer) {
-			// destroy all items in inventory
-			for (var i = 0; i < self._stats.itemIds.length; i++) {
-				var currentItem = this.inventory.getItemBySlotNumber(i + 1);
-				if (currentItem) {
-					currentItem.remove();
-				}
-			}
-
-			IgeEntityPhysics.prototype.remove.call(this);
-			// this.destroy()
 		}
+
+		// destroy all items in inventory
+		for (var i = 0; i < self._stats.itemIds.length; i++) {
+			var currentItem = this.inventory.getItemBySlotNumber(i + 1);
+			if (currentItem) {
+				currentItem.remove();
+			}
+		}
+
+		IgeEntityPhysics.prototype.remove.call(this);
+		
 	},
 
 	// update unit's stats in the server side first, then update client side as well.
 	streamUpdateData: function (queuedData) {
 		var self = this;
 		// Unit.prototype.log("unit streamUpdateData", data)
+		
+		if (ige.isServer && ige.network.isPaused) 
+			return;
+
 		IgeEntity.prototype.streamUpdateData.call(this, queuedData);
 
 		for (var i = 0; i < queuedData.length; i++) {
@@ -1553,11 +1560,12 @@ var Unit = IgeEntityPhysics.extend({
 			var purchasables = _.cloneDeep(owner._stats.purchasables);
 			purchasables.push(equipPurchasable);
 			owner.streamUpdateData([
-				{ purchasables: purchasables },
-				{ equiped: true }
-			]);
+								{ purchasables: purchasables },
+								{ equiped: true }
+							]);
 		}
 	},
+	
 	unEquipSkin: function (unEquipedId, forceFullyUnequip, cellSheetUrl) {
 		var self = this;
 		var defaultUnit = ige.game.getAsset('unitTypes', self._stats.type);

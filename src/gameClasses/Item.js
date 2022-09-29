@@ -9,9 +9,9 @@ var Item = IgeEntityPhysics.extend({
 		self._stats = {};
 		self.anchorOffset = { x: 0, y: 0, rotate: 0 };
 		var itemData = {};
+		
 		if (ige.isClient) {
 			itemData = ige.game.getAsset('itemTypes', data.itemTypeId);
-			itemData = _.pick(itemData, ige.client.keysToAddBeforeRender);
 		}
 
 		self._stats = _.merge(itemData, data);
@@ -68,12 +68,11 @@ var Item = IgeEntityPhysics.extend({
 
 		self.scaleRatio = ige.physics && ige.physics.scaleRatio();
 		if (ige.isServer) {
-
-			if (ige.isServer && ige.network.isPaused) {
+			if (ige.network.isPaused) {
 				self.streamMode(0);
 			} else {
-				self.streamMode(1);
-				self.streamCreate();
+				self.streamMode(1);				
+				self.streamCreate(); // do we need this?			
 			}
 
 			ige.server.totalItemsCreated++;
@@ -296,8 +295,8 @@ var Item = IgeEntityPhysics.extend({
 
 				let triggerParams = {unitId: ownerId, itemId: self.id()};
 
-				ige.queueTrigger('unitUsesItem', triggerParams);
 				self.script.trigger('itemIsUsed', triggerParams);
+				ige.script.trigger('unitUsesItem', triggerParams);
 
 				if (ige.physics && self._stats.type == 'weapon') {
 					if (self._stats.isGun) {
@@ -337,7 +336,9 @@ var Item = IgeEntityPhysics.extend({
 									translate: bulletStartPosition
 								};
 
-								if (self.projectileData && (ige.isServer || (ige.isClient && !self._stats.projectileStreamMode))) {
+								// projectileStreamMode: 0 is clientside predicted
+								// projectileStreamMode: 1 is serverside streamed
+								if (self.projectileData && (ige.isServer || (ige.isClient && self._stats.projectileStreamMode != 1))) {
 									defaultData.velocity = {
 										deployMethod: self._stats.deployMethod,
 										x: Math.cos(rotate + Math.radians(-90)) * self._stats.bulletForce,
@@ -691,13 +692,14 @@ var Item = IgeEntityPhysics.extend({
 	startUsing: function () {
 		var self = this;
 
+		if (self._stats.isBeingUsed)
+			return;
+
 		self._stats.isBeingUsed = true;
 		var owner = this.getOwnerUnit();
 		if (ige.isServer) {
 			this.quantityAtStartusing = this._stats.quantity;
 			this.streamUpdateData([{ isBeingUsed: true }]);
-		} else if (ige.isClient && owner == ige.client.selectedUnit) {
-			this._stats.isBeingUsed = true;
 		}
 
 		if (owner && ige.trigger) {
@@ -710,17 +712,20 @@ var Item = IgeEntityPhysics.extend({
 
 	stopUsing: function () {
 		var self = this;
-		if (self._stats.isBeingUsed) {
-			self._stats.isBeingUsed = false;
-			var owner = self.getOwnerUnit();
 
-			if (owner && ige.trigger) {
-				ige.queueTrigger('unitStopsUsingAnItem', {
-					unitId: owner.id(),
-					itemId: self.id()
-				});
-			}
+		if (!self._stats.isBeingUsed)
+			return;
+
+		self._stats.isBeingUsed = false;
+		var owner = self.getOwnerUnit();
+
+		if (owner && ige.trigger) {
+			ige.queueTrigger('unitStopsUsingAnItem', {
+				unitId: owner.id(),
+				itemId: self.id()
+			});
 		}
+
 		if (ige.isClient) {
 			this.playEffect('none');
 		} else if (ige.isServer) {
@@ -831,10 +836,12 @@ var Item = IgeEntityPhysics.extend({
 
 	streamUpdateData: function (queuedData) {
 		var self = this;
-		IgeEntity.prototype.streamUpdateData.call(this, queuedData);
 
+		if (ige.isServer && ige.network.isPaused) 
+			return;
+
+		IgeEntity.prototype.streamUpdateData.call(this, queuedData);		
 		// ige.devLog("Item streamUpdateData ", data)
-		// console.log(data, this._streamMode, this.id());
 		for (var i = 0; i < queuedData.length; i++) {
 			var data = queuedData[i];
 			for (attrName in data) {
