@@ -1680,6 +1680,23 @@ var Unit = IgeEntityPhysics.extend({
 		if (ige.isServer || (ige.isClient && ige.client.selectedUnit == this)) {
 			var ownerPlayer = ige.$(this._stats.ownerId);
 			if (ownerPlayer) {
+				if ( // if this unit's not under a command and controlled by human, rotate to mouse
+					ownerPlayer._stats.controlledBy == 'human' &&
+					self.ai.targetPosition == undefined && self.ai.targetUnitId == undefined
+				) {
+					if (ownerPlayer.getSelectedUnit() == this) {
+						var mouse = ownerPlayer.control.input.mouse;
+						if (mouse) {
+							self.angleToTarget = Math.atan2(mouse.y - self._translate.y, mouse.x - self._translate.x) + Math.radians(90);
+							var a = self._translate.x - mouse.x;
+							var b = self._translate.y - mouse.y;
+							self.distanceToTarget = Math.sqrt(a * a + b * b);
+						}
+					} else {
+						self.angleToTarget = undefined;
+					}
+				}
+				
 				if (self._stats.ai && self._stats.ai.enabled) { // AI unit
 					self.distanceToTarget = self.ai.getDistanceToTarget();
 					self.ai.update();
@@ -1690,7 +1707,7 @@ var Unit = IgeEntityPhysics.extend({
 					if (self.angleToTarget != undefined && !isNaN(self.angleToTarget) &&
 						this._stats.controls && this._stats.controls.mouseBehaviour.rotateToFaceMouseCursor &&
 						this._stats.currentBody && !this._stats.currentBody.fixedRotation
-					) {
+					) {	
 						if (this._stats.controls.absoluteRotation) {
 							self.rotateTo(0, 0, ownerPlayer.absoluteAngle);
 						} else {
@@ -1707,6 +1724,7 @@ var Unit = IgeEntityPhysics.extend({
 				if (self.direction.x != 0 || self.direction.y != 0) {
 					// disengage ai movement if a directional movement key's pressed
 					self.ai.targetPosition = undefined
+					self.ai.targetUnitId = undefined
 
 					// moving diagonally should reduce speed
 					if (self.direction.x != 0 && self.direction.y != 0) {
