@@ -7,7 +7,7 @@ var HeightRenderComponent = /** @class */ (function () {
     HeightRenderComponent.prototype.adjustDepth = function (gameObject) {
         var castGameObject = !gameObject.owner ? gameObject : gameObject.owner.gameObject;
         var yPos = castGameObject.y;
-        var halfHeight = castGameObject.displayHeight / 2;
+        var halfHeight = castGameObject.spriteHeight2;
         var depth = gameObject.taroDepth + (yPos + halfHeight) / this.mapHeight;
         depth = Number(depth.toFixed(3));
         gameObject.setDepth(depth);

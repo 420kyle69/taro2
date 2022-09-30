@@ -27,6 +27,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		);
 		this.gameObject = gameObject as Phaser.GameObjects.Container & IRenderProps;
 		gameObject.setSize(this.sprite.width, this.sprite.height);
+		this.gameObject.spriteHeight2 = this.sprite.displayHeight / 2;
 
 		this.equippedItem = null;
 

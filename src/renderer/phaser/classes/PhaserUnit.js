@@ -22,6 +22,7 @@ var PhaserUnit = /** @class */ (function (_super) {
         var gameObject = scene.add.container(translate.x, translate.y, [_this.sprite]);
         _this.gameObject = gameObject;
         gameObject.setSize(_this.sprite.width, _this.sprite.height);
+        _this.gameObject.spriteHeight2 = _this.sprite.displayHeight / 2;
         _this.equippedItem = null;
         Object.assign(_this.evtListeners, {
             follow: entity.on('follow', _this.follow, _this),

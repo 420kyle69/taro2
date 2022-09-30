@@ -18,12 +18,13 @@ var PhaserItem = /** @class */ (function (_super) {
     function PhaserItem(scene, entity) {
         var _this = _super.call(this, scene, entity, "item/".concat(entity._stats.itemTypeId)) || this;
         _this.sprite.visible = false;
-        _this.scene.renderedEntities.push(_this.sprite);
         _this.gameObject = _this.sprite;
         _this.gameObject.owner = null;
         var _a = entity._translate, x = _a.x, y = _a.y;
         _this.gameObject.setPosition(x, y);
+        _this.gameObject.spriteHeight2 = _this.sprite.displayHeight / 2;
         _this.scene.itemsList.push(_this);
+        _this.scene.renderedEntities.push(_this.sprite);
         return _this;
     }
     PhaserItem.prototype.destroy = function () {

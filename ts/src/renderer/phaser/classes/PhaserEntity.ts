@@ -50,7 +50,7 @@ class PhaserEntity {
 		this.gameObject.taroDepth = value;
 
 		if (scene.heightRenderer) {
-			scene.heightRenderer.adjustDepth(this.gameObject as TGameObject & Phaser.GameObjects.Components.Size);
+			scene.heightRenderer.adjustDepth(this.gameObject);
 		} else {
 			this.gameObject.setDepth(value);
 		}
@@ -80,6 +80,7 @@ interface IRenderProps {
 	taroDepth: number;
 	dynamic?: boolean;
 	owner?: PhaserUnit;
+	spriteHeight2?: number;
 }
 
 type TGameObject =

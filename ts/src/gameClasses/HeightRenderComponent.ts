@@ -7,12 +7,12 @@ class HeightRenderComponent {
 	}
 
 	adjustDepth (
-		gameObject: TGameObject & Phaser.GameObjects.Components.Size
+		gameObject: TGameObject
 	): void {
 		const castGameObject = !gameObject.owner ? gameObject : gameObject.owner.gameObject;
 
 		const yPos = castGameObject.y;
-		const halfHeight = castGameObject.displayHeight / 2;
+		const halfHeight = castGameObject.spriteHeight2;
 
 		let depth = gameObject.taroDepth + (yPos + halfHeight) / this.mapHeight;
 
