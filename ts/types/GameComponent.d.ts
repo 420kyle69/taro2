@@ -40,8 +40,9 @@ declare class GameComponent extends IgeEntity {
 				zoom : {
 					default:number;
 				}
-			}
+			};
 		}
+		heightBasedZIndex: boolean;
 	};
 
 }

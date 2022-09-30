@@ -673,6 +673,8 @@ var Unit = IgeEntityPhysics.extend({
 					keyFrames: [[0, [0, 0, -1.57]], [100, [0, 0, 0]]]
 				};
 				newItem.tween.start(null, this._rotate.z, customTween);
+				// height-based-z
+				self.emit('equip-item', self._stats.currentItemId);
 			}
 		} else {
 			self._stats.currentItemId = undefined; // unit is selecting empty slot
@@ -829,7 +831,7 @@ var Unit = IgeEntityPhysics.extend({
 		} else if (ige.isClient) {
 			var zIndex = self._stats.currentBody && self._stats.currentBody['z-index'] || { layer: 3, depth: 3 };
 
-			if (zIndex && ige.network.id() == self._stats.clientId) {
+			if (zIndex && ige.network.id() == self._stats.clientId && !ige.game.data.heightBasedZIndex) {
 				// depth of this player's units should have +1 depth to avoid flickering on overlap
 				zIndex.depth++;
 			}
@@ -860,6 +862,8 @@ var Unit = IgeEntityPhysics.extend({
 				self.unitUi.updateAllAttributeBars();
 			}
 			self.inventory.update();
+			const ciID = self._stats.currentItemId;
+			self.emit('equip-item', ciID);
 		}
 	},
 

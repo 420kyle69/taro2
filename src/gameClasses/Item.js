@@ -15,7 +15,7 @@ var Item = IgeEntityPhysics.extend({
 		}
 
 		self._stats = _.merge(itemData, data);
-		
+
 		if (self._stats.projectileType) {
 			self.projectileData = ige.game.getAsset('projectileTypes', self._stats.projectileType);
 		}
@@ -54,9 +54,9 @@ var Item = IgeEntityPhysics.extend({
 		// convert numbers stored as string in database to int
 		self.parseEntityObject(self._stats);
 		self.addComponent(AttributeComponent); // every item gets one
-		
+
 		self.addComponent(ScriptComponent); // entity-scripting
-		self.script.load(data.scripts)
+		self.script.load(data.scripts);
 
 		ige.game.lastCreatedItemId = entityIdFromServer || this.id();
 
@@ -364,7 +364,7 @@ var Item = IgeEntityPhysics.extend({
 										});
 
 									var projectile = new Projectile(data);
-									projectile.script.trigger("entityCreated");		
+									projectile.script.trigger("entityCreated");
 									ige.game.lastCreatedProjectileId = projectile.id();
 								}
 								if (this._stats.bulletType == 'raycast') {
@@ -852,6 +852,7 @@ var Item = IgeEntityPhysics.extend({
 						if (ige.isClient) {
 							var newOwner = ige.$(newValue);
 							self.setOwnerUnit(newOwner);
+
 						}
 						break;
 					case 'scale':

@@ -147,6 +147,16 @@ var IgeEntity = IgeObject.extend({
 			}
 		}
 
+		if (ige.game.data.heightBasedZIndex) {
+			// code for height-based-zindex
+			if (this._category === 'unit') {
+				this.emit('dynamic', this._stats.currentBody.type === 'dynamic');
+
+			} else if (this._category === 'item') {
+				this.emit('dynamic', true);
+			}
+		}
+
 		self.previousState = newState;
 		self.updateBody(defaultData);
 	},

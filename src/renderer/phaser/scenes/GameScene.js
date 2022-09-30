@@ -19,6 +19,7 @@ var GameScene = /** @class */ (function (_super) {
         var _this = _super.call(this, { key: 'Game' }) || this;
         _this.entityLayers = [];
         _this.renderedEntities = [];
+        _this.itemsList = [];
         return _this;
     }
     GameScene.prototype.init = function () {
@@ -187,6 +188,9 @@ var GameScene = /** @class */ (function (_super) {
         Object.values(this.textures.list).forEach(function (val) {
             val.setFilter(Phaser.Textures.FilterMode.NEAREST);
         });
+        if (data.heightBasedZIndex) {
+            this.heightRenderer = new HeightRenderComponent(this, map.height * map.tileHeight);
+        }
     };
     GameScene.prototype.setZoomSize = function (height) {
         // backward compatible game scaling on average 16:9 screen
@@ -268,7 +272,11 @@ var GameScene = /** @class */ (function (_super) {
         }
         return canvas;
     };
+    GameScene.prototype.findItem = function (itemId) {
+        return this.itemsList.find(function (item) { return item.entity._id === itemId; });
+    };
     GameScene.prototype.update = function () {
+        var _this = this;
         var worldPoint = this.cameras.main.getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
         ige.input.emit('pointermove', [{
                 x: worldPoint.x,
@@ -277,9 +285,13 @@ var GameScene = /** @class */ (function (_super) {
         this.renderedEntities.forEach(function (element) {
             element.setVisible(false);
         });
-        this.cameras.main.cull(this.renderedEntities).forEach(function (element) {
+        var culledList = this.cameras.main.cull(this.renderedEntities);
+        culledList.forEach(function (element) {
             if (!element.hidden) {
                 element.setVisible(true);
+                if (element.dynamic) {
+                    _this.heightRenderer.adjustDepth(element);
+                }
             }
         });
     };
