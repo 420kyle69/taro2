@@ -1,17 +1,15 @@
 class PhaserUnit extends PhaserAnimatedEntity {
 
-	sprite: Phaser.GameObjects.Sprite & IRenderProps;
+	sprite: Phaser.GameObjects.Sprite & Hidden;
 	label: Phaser.GameObjects.Text;
 	private chat: PhaserChatBubble;
 
-	gameObject: Phaser.GameObjects.Container & IRenderProps;
+	gameObject: Phaser.GameObjects.Container & Hidden;
 	attributes: PhaserAttributeBar[] = [];
 	attributesContainer: Phaser.GameObjects.Container;
 
 	private zoomEvtListener: EvtListener;
 	private scaleTween: Phaser.Tweens.Tween;
-
-	private equippedItem: PhaserItem;
 
 	constructor (
 		scene: GameScene,
@@ -25,11 +23,10 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			translate.y,
 			[ this.sprite ]
 		);
-		this.gameObject = gameObject as Phaser.GameObjects.Container & IRenderProps;
-		gameObject.setSize(this.sprite.width, this.sprite.height);
-		this.gameObject.spriteHeight2 = this.sprite.displayHeight / 2;
-
-		this.equippedItem = null;
+		this.gameObject = gameObject as Phaser.GameObjects.Container & Hidden;
+		const containerSize = Math.max(this.sprite.displayHeight, this.sprite.displayWidth);
+		gameObject.setSize(containerSize, containerSize);
+		this.scene.renderedEntities.push(this.gameObject);
 
 		Object.assign(this.evtListeners, {
 			follow: entity.on('follow', this.follow, this),
@@ -41,10 +38,8 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			'render-attributes': entity.on('render-attributes', this.renderAttributes, this),
 			'update-attribute': entity.on('update-attribute', this.updateAttribute, this),
 			'render-chat-bubble': entity.on('render-chat-bubble', this.renderChat, this),
-			'equip-item': entity.on('equip-item', this.equipItem, this)
 		});
 
-		this.scene.renderedEntities.push(this.gameObject);
 		this.zoomEvtListener = ige.client.on('scale', this.scaleElements, this);
 	}
 
@@ -282,35 +277,11 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		});
 	}
 
-	private equipItem (itemId: string): void {
-		$.when(ige.client.playerJoined).done(() => {
-			//
-			if (this.equippedItem) {
-				this.equippedItem.gameObject.owner = null;
-			}
-
-			if (itemId) {
-				//
-				itemId = itemId.toString();
-				// we need to do this after the player joins;
-				this.equippedItem = this.scene.findItem(itemId);
-
-				this.equippedItem.gameObject.owner = this;
-			}
-
-			if (itemId === null) {
-				this.equippedItem = null;
-			}
-		});
-	}
-
 	protected destroy (): void {
 
 		this.scene.renderedEntities = this.scene.renderedEntities.filter(item => item !== this.gameObject);
 		ige.client.off('scale', this.zoomEvtListener);
 		this.zoomEvtListener = null;
-
-		this.equippedItem = null;
 
 		if (this.scaleTween) {
 			this.scaleTween.stop();
@@ -334,3 +305,4 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		super.destroy();
 	}
 }
+

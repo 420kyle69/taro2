@@ -45,7 +45,7 @@ var IgeStreamComponent = IgeEventingClass.extend({
 			this._entity.define('_igeStreamCreateSnapshot', function () { self._onStreamCreateSnapshot.apply(self, arguments); });
 		}
 	},
-
+	
 	/* CEXCLUDE */
 	/**
 	 * Starts the stream of world updates to connected clients.

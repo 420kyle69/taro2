@@ -10,7 +10,6 @@ var PhaserEntity = /** @class */ (function () {
             show: entity.on('show', this.show, this),
             layer: entity.on('layer', this.layer, this),
             depth: entity.on('depth', this.depth, this),
-            dynamic: entity.on('dynamic', this.setDynamic, this),
             destroy: entity.on('destroy', this.destroy, this)
         });
     }
@@ -28,18 +27,7 @@ var PhaserEntity = /** @class */ (function () {
         scene.entityLayers[value - 1].add(this.gameObject);
     };
     PhaserEntity.prototype.depth = function (value) {
-        var scene = this.gameObject.scene;
-        this.gameObject.taroDepth = value;
-        if (scene.heightRenderer) {
-            scene.heightRenderer.adjustDepth(this.gameObject);
-        }
-        else {
-            this.gameObject.setDepth(value);
-        }
-    };
-    //height-based renderer
-    PhaserEntity.prototype.setDynamic = function (isDynamic) {
-        this.gameObject.dynamic = isDynamic;
+        this.gameObject.setDepth(value);
     };
     PhaserEntity.prototype.destroy = function () {
         var _this = this;
