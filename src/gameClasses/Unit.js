@@ -52,6 +52,8 @@ var Unit = IgeEntityPhysics.extend({
 		self.addComponent(ScriptComponent); // entity-requireScriptLoading
 		self.script.load(unitData.scripts)
 
+		self.addComponent(AIComponent);
+
 		Unit.prototype.log(`initializing new unit ${this.id()}`);
 
 		if (ige.isClient) {
@@ -90,7 +92,6 @@ var Unit = IgeEntityPhysics.extend({
 			// and their respective color because sometimes it may happen that unit is not yet created on client
 			// hence while making its minimap unit we will get null as unit
 			self._stats.minimapUnitVisibleToClients = {};
-
 			self.mount(ige.$('baseScene'));
 
 			if (ige.network.isPaused) {
@@ -100,7 +101,7 @@ var Unit = IgeEntityPhysics.extend({
 			}
 
 			ige.server.totalUnitsCreated++;
-			self.addComponent(AIComponent);
+			
 		} else if (ige.isClient) {
 			var networkId = ige.network.id();
 			self.addComponent(UnitUiComponent);
@@ -132,7 +133,6 @@ var Unit = IgeEntityPhysics.extend({
 		self.playEffect('create');
 		self.addBehaviour('unitBehaviour', self._behaviour);
 		self.scaleDimensions(self._stats.width, self._stats.height);
-		self._stats.isStunned = false;
 	},
 
 	shouldRenderAttribute: function (attribute) {
@@ -1484,9 +1484,6 @@ var Unit = IgeEntityPhysics.extend({
 							self._stats.ownerId = newValue;
 						}
 						break;
-					case 'isStunned':
-						self._stats.isStunned = newValue;
-						break;
 				}
 			}
 		}
@@ -1683,19 +1680,7 @@ var Unit = IgeEntityPhysics.extend({
 		if (ige.isServer || (ige.isClient && ige.client.selectedUnit == this)) {
 			var ownerPlayer = ige.$(this._stats.ownerId);
 			if (ownerPlayer) {
-				if (ownerPlayer._stats.controlledBy == 'human') {
-					if (ownerPlayer.getSelectedUnit() == this) {
-						var mouse = ownerPlayer.control.input.mouse;
-						if (mouse) {
-							self.angleToTarget = Math.atan2(mouse.y - self._translate.y, mouse.x - self._translate.x) + Math.radians(90);
-							var a = self._translate.x - mouse.x;
-							var b = self._translate.y - mouse.y;
-							self.distanceToTarget = Math.sqrt(a * a + b * b);
-						}
-					} else {
-						self.angleToTarget = undefined;
-					}
-				} else if (self._stats.ai && self._stats.ai.enabled) { // AI unit
+				if (self._stats.ai && self._stats.ai.enabled) { // AI unit
 					self.distanceToTarget = self.ai.getDistanceToTarget();
 					self.ai.update();
 				}
@@ -1704,8 +1689,7 @@ var Unit = IgeEntityPhysics.extend({
 					// rotate unit
 					if (self.angleToTarget != undefined && !isNaN(self.angleToTarget) &&
 						this._stats.controls && this._stats.controls.mouseBehaviour.rotateToFaceMouseCursor &&
-						this._stats.currentBody && !this._stats.currentBody.fixedRotation &&
-						(this._stats.isStunned == undefined || this._stats.isStunned != true)
+						this._stats.currentBody && !this._stats.currentBody.fixedRotation
 					) {
 						if (this._stats.controls.absoluteRotation) {
 							self.rotateTo(0, 0, ownerPlayer.absoluteAngle);
@@ -1715,53 +1699,39 @@ var Unit = IgeEntityPhysics.extend({
 					}
 				}
 
-				if (self._stats.isStunned == undefined || self._stats.isStunned != true) {
-					// translate unit
-					var speed = (this._stats.attributes && this._stats.attributes.speed && this._stats.attributes.speed.value) || 0;
-					var vector = undefined;
-					if (
-						( // either unit is AI unit that is currently moving
-							ownerPlayer._stats.controlledBy != 'human' && self.isMoving
-						) ||
-						( // or human player's unit that's "following cursor"
-							ownerPlayer._stats.controlledBy == 'human' && self._stats.controls &&
-							self._stats.controls.movementControlScheme == 'followCursor' && self.distanceToTarget > this.width()
-						)
-					) {
-						if (self.angleToTarget != undefined && !isNaN(self.angleToTarget)) {
-							vector = {
-								x: (speed * Math.sin(self.angleToTarget)),
-								y: -(speed * Math.cos(self.angleToTarget))
-							};
-						}
-					} else if (ownerPlayer._stats.controlledBy == 'human') { // WASD or AD movement
-						// moving diagonally should reduce speed
-						if (self.direction.x != 0 && self.direction.y != 0) {
-							speed = speed / 1.41421356237;
-						}
+				// translate unit
+				var speed = (this._stats.attributes && this._stats.attributes.speed && this._stats.attributes.speed.value) || 0;
+				var vector = undefined;
+				
+				// direction keys are currently pressed
+				if (self.direction.x != 0 || self.direction.y != 0) {
+					// disengage ai movement if a directional movement key's pressed
+					self.ai.targetPosition = undefined
 
-						vector = {
-							x: self.direction.x * speed,
-							y: self.direction.y * speed
-						};
-						// console.log('unit movement 1', vector)
+					// moving diagonally should reduce speed
+					if (self.direction.x != 0 && self.direction.y != 0) {
+						speed = speed / 1.41421356237;
 					}
+
+					vector = {
+						x: self.direction.x * speed,
+						y: self.direction.y * speed
+					};
+					// console.log('unit movement 1', vector)
+				} else if (self.angleToTarget != undefined && self.isMoving) {
+					// this unit is currently moving under command. 
+					vector = {
+						x: (speed * Math.sin(self.angleToTarget)),
+						y: -(speed * Math.cos(self.angleToTarget))
+					};
 				}
 
-				if (!self._stats.ai || !self._stats.ai.enabled || (ownerPlayer && ownerPlayer._stats.controlledBy == 'human')) {
-					if (self._stats.controls && self._stats.controls.movementControlScheme == 'followCursor') {
-						if (!this.isMoving && self.distanceToTarget > this.width()) {
-							this.startMoving();
-						} else if (this.isMoving && self.distanceToTarget <= this.width()) {
-							this.stopMoving();
-						}
-					} else { // WASD or AD movement
-						// toggle effects when unit starts/stops moving
-						if (!this.isMoving && (self.direction.x != 0 || self.direction.y != 0)) {
-							this.startMoving();
-						} else if (this.isMoving && (self.direction.x == 0 && self.direction.y == 0)) {
-							this.stopMoving();
-						}
+				if (ownerPlayer && ownerPlayer._stats.controlledBy == 'human') {
+					// toggle effects when unit starts/stops moving
+					if (!this.isMoving && (self.direction.x != 0 || self.direction.y != 0)) {
+						this.playEffect('move');
+					} else if (this.isMoving && (self.direction.x == 0 && self.direction.y == 0)) {
+						this.playEffect('idle');
 					}
 				}
 

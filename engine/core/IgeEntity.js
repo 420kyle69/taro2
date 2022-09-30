@@ -5254,10 +5254,7 @@ var IgeEntity = IgeObject.extend({
 			}
 		}
 
-		if (this._stats.isStunned == undefined || this._stats.isStunned != true) {
-			this.rotateTo(0, 0, rotate);
-		}
-		
+		this.rotateTo(0, 0, rotate);		
 		this.translateTo(x, y, 0);
 		this._lastTransformAt = ige._currentTime;
 	},

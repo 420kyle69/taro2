@@ -170,7 +170,7 @@ var ScriptComponent = IgeEntity.extend({
 		}
 
 		var scriptName = '[scriptName undefined]';
-		if (this.scripts[this.currentScriptId]) {
+		if (this.scripts && this.scripts[this.currentScriptId]) {
 			scriptName = this.scripts[this.currentScriptId].name;
 		}
 
@@ -179,12 +179,14 @@ var ScriptComponent = IgeEntity.extend({
 	},
 	
 	errorLog: function (message) {
-		var script = this.scripts[this.currentScriptId];
-		var log = `Script error '${(script) ? script.name : ''}' in Action '${this.currentActionName}' : ${message}`;
-		this.errorLogs[this.currentActionName] = log;
-		ige.devLog('script errorLog', log, message);
-		ScriptComponent.prototype.log(log);
-		return log;
+		if (this.scripts) {
+			var script = this.scripts[this.currentScriptId];
+			var log = `Script error '${(script) ? script.name : ''}' in Action '${this.currentActionName}' : ${message}`;
+			this.errorLogs[this.currentActionName] = log;
+			ige.devLog('script errorLog', log, message);
+			ScriptComponent.prototype.log(log);
+			return log;
+		}		
 	}
 
 });

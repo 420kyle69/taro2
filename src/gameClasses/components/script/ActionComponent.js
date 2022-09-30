@@ -1104,25 +1104,6 @@ var ActionComponent = IgeEntity.extend({
 						}
 						break;
 
-					case 'stunUnit':
-						var unit = self._script.variable.getValue(action.unit, vars);
-						if (unit && unit._stats) {
-							unit.ability.stopUsingItem();
-							unit.streamUpdateData([{ isStunned: true }]);
-							var item = unit.getCurrentItem();
-							if (item) {
-								item.streamUpdateData([{ stopUsing: false }]);
-							}
-						}
-						break;
-
-					case 'removeStunFromUnit':
-						var unit = self._script.variable.getValue(action.unit, vars);
-						if (unit && unit._stats) {
-							unit.streamUpdateData([{ isStunned: false }]);
-						}
-						break;
-
 					case 'setEntityVelocityAtAngle':
 
 						var entity = self._script.variable.getValue(action.entity, vars);

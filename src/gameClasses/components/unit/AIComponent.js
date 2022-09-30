@@ -281,7 +281,7 @@ var AIComponent = IgeEntity.extend({
 						self.goIdle();
 					} else {
 						// stop moving, start attacking if my attack can reach the target
-						if (self.maxAttackRange > this.getDistanceToTarget() && unit._stats.isStunned != true) {
+						if (self.maxAttackRange > this.getDistanceToTarget()) {
 							unit.isMoving = false;
 							unit.ability.startUsingItem();
 						} else if (!unit.isMoving) {

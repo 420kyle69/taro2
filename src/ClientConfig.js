@@ -6,6 +6,7 @@ var igeClientConfig = {
 
 		'/gameClasses/Player.js',
 		'/gameClasses/Unit.js',
+		'/gameClasses/Sensor.js',
 		'/gameClasses/Region.js',
 
 		'/gameClasses/Item.js',
@@ -44,6 +45,8 @@ var igeClientConfig = {
 		'/gameClasses/components/script/VariableComponent.js',
 		'/gameClasses/components/script/ActionComponent.js',
 		'/gameClasses/components/script/ConditionComponent.js',
+		
+		'/gameClasses/components/unit/AIComponent.js',		
 		'/gameClasses/components/unit/AbilityComponent.js',
 		'/gameClasses/components/unit/AttributeComponent.js',
 
