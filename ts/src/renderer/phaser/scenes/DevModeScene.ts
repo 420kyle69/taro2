@@ -70,10 +70,11 @@ class DevModeScene extends PhaserScene {
 
 		ige.client.on('editTile', (data: {
 			gid: number,
+			layer: number,
 			x: number,
 			y: number
 		}) => {
-			map.putTileAt(data.gid, data.x, data.y);
+			map.putTileAt(data.gid, data.x, data.y, false, data.layer);
 			ige.developerMode.changedTiles.push(data);
 		});
 

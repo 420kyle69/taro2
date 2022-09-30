@@ -204,7 +204,7 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 		label.setResolution(4);
 		container.add(label);
 		button.on('pointerdown', () => {
-			if (value) func(value);
+			if (value || value === 0) func(value);
 			else func();
 		});
 	}
@@ -212,6 +212,7 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 	switchLayer(value) {
 		const scene = this.scene as any;
 		const gameMap = scene.gameScene.tilemap;
+		//console.log('switch layer from', gameMap.currentLayerIndex, 'to', value);
 		gameMap.currentLayerIndex = value;
 	}
 

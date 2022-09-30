@@ -140,6 +140,7 @@ var GameScene = /** @class */ (function (_super) {
         var map = this.tilemap = this.make.tilemap({ key: 'map' });
         var data = ige.game.data;
         var scaleFactor = ige.scaleMapDetails.scaleFactor;
+        console.log('map data', data.map);
         data.map.tilesets.forEach(function (tileset) {
             var key = "tiles/".concat(tileset.name);
             var extrudedKey = "extruded-".concat(key);

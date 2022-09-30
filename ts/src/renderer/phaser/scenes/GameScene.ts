@@ -183,6 +183,8 @@ class GameScene extends PhaserScene {
 		const data = ige.game.data;
 		const scaleFactor = ige.scaleMapDetails.scaleFactor;
 
+		console.log('map data', data.map)
+
 		data.map.tilesets.forEach((tileset) => {
 			const key = `tiles/${tileset.name}`;
 			const extrudedKey = `extruded-${key}`;

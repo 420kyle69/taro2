@@ -71,7 +71,7 @@ var DevModeScene = /** @class */ (function (_super) {
             }
         });
         ige.client.on('editTile', function (data) {
-            map.putTileAt(data.gid, data.x, data.y);
+            map.putTileAt(data.gid, data.x, data.y, false, data.layer);
             ige.developerMode.changedTiles.push(data);
         });
         this.input.on('wheel', function (pointer, gameObjects, deltaX, deltaY, deltaZ) {

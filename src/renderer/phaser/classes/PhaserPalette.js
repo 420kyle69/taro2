@@ -174,7 +174,7 @@ var PhaserPalette = /** @class */ (function (_super) {
         label.setResolution(4);
         container.add(label);
         button.on('pointerdown', function () {
-            if (value)
+            if (value || value === 0)
                 func(value);
             else
                 func();
@@ -183,6 +183,7 @@ var PhaserPalette = /** @class */ (function (_super) {
     PhaserPalette.prototype.switchLayer = function (value) {
         var scene = this.scene;
         var gameMap = scene.gameScene.tilemap;
+        //console.log('switch layer from', gameMap.currentLayerIndex, 'to', value);
         gameMap.currentLayerIndex = value;
     };
     PhaserPalette.prototype.zoom = function (deltaY) {
