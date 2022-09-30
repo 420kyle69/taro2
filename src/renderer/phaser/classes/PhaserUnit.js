@@ -21,9 +21,9 @@ var PhaserUnit = /** @class */ (function (_super) {
         var translate = entity._translate;
         var gameObject = scene.add.container(translate.x, translate.y, [_this.sprite]);
         _this.gameObject = gameObject;
-        gameObject.setSize(_this.sprite.width, _this.sprite.height);
-        _this.gameObject.spriteHeight2 = _this.sprite.displayHeight / 2;
-        _this.equippedItem = null;
+        var containerSize = Math.max(_this.sprite.displayHeight, _this.sprite.displayWidth);
+        gameObject.setSize(containerSize, containerSize);
+        _this.scene.renderedEntities.push(_this.gameObject);
         Object.assign(_this.evtListeners, {
             follow: entity.on('follow', _this.follow, _this),
             'update-texture': entity.on('update-texture', _this.updateTexture, _this),
@@ -34,9 +34,7 @@ var PhaserUnit = /** @class */ (function (_super) {
             'render-attributes': entity.on('render-attributes', _this.renderAttributes, _this),
             'update-attribute': entity.on('update-attribute', _this.updateAttribute, _this),
             'render-chat-bubble': entity.on('render-chat-bubble', _this.renderChat, _this),
-            'equip-item': entity.on('equip-item', _this.equipItem, _this)
         });
-        _this.scene.renderedEntities.push(_this.gameObject);
         _this.zoomEvtListener = ige.client.on('scale', _this.scaleElements, _this);
         return _this;
     }
@@ -225,31 +223,11 @@ var PhaserUnit = /** @class */ (function (_super) {
             }
         });
     };
-    PhaserUnit.prototype.equipItem = function (itemId) {
-        var _this = this;
-        $.when(ige.client.playerJoined).done(function () {
-            //
-            if (_this.equippedItem) {
-                _this.equippedItem.gameObject.owner = null;
-            }
-            if (itemId) {
-                //
-                itemId = itemId.toString();
-                // we need to do this after the player joins;
-                _this.equippedItem = _this.scene.findItem(itemId);
-                _this.equippedItem.gameObject.owner = _this;
-            }
-            if (itemId === null) {
-                _this.equippedItem = null;
-            }
-        });
-    };
     PhaserUnit.prototype.destroy = function () {
         var _this = this;
         this.scene.renderedEntities = this.scene.renderedEntities.filter(function (item) { return item !== _this.gameObject; });
         ige.client.off('scale', this.zoomEvtListener);
         this.zoomEvtListener = null;
-        this.equippedItem = null;
         if (this.scaleTween) {
             this.scaleTween.stop();
             this.scaleTween = null;

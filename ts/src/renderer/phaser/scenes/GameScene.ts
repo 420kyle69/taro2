@@ -3,9 +3,7 @@ class GameScene extends PhaserScene {
 	private zoomSize: number;
 
 	entityLayers: Phaser.GameObjects.Layer[] = [];
-	renderedEntities: TGameObject[] = [];
-	heightRenderer: HeightRenderComponent;
-	itemsList: PhaserItem[] = [];
+	renderedEntities: (Phaser.GameObjects.GameObject & Phaser.GameObjects.Components.Visible & Hidden)[] = [];
 
 	constructor() {
 		super({ key: 'Game' });
@@ -248,10 +246,6 @@ class GameScene extends PhaserScene {
 		Object.values(this.textures.list).forEach(val => {
 			val.setFilter(Phaser.Textures.FilterMode.NEAREST);
 		  });
-
-		if (data.heightBasedZIndex) {
-			this.heightRenderer = new HeightRenderComponent(this, map.height * map.tileHeight);
-		}
 	}
 
 	private setZoomSize (height: number): void {
@@ -430,10 +424,6 @@ class GameScene extends PhaserScene {
 		return canvas;
 	}
 
-	findItem (itemId: string): PhaserItem {
-		return this.itemsList.find(item => item.entity._id === itemId);
-	}
-
 	update (): void {
 
 		const worldPoint = this.cameras.main.getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
@@ -442,21 +432,14 @@ class GameScene extends PhaserScene {
 			x: worldPoint.x,
 			y: worldPoint.y,
 		}]);
-
 		this.renderedEntities.forEach(element => {
 			element.setVisible(false);
 		});
-
-		const culledList = this.cameras.main.cull(this.renderedEntities);
-
-		culledList.forEach(element => {
+		this.cameras.main.cull(this.renderedEntities).forEach(element => {
 			if (!element.hidden) {
 				element.setVisible(true);
-
-				if (element.dynamic) {
-					this.heightRenderer.adjustDepth(element as TGameObject & Phaser.GameObjects.Components.Size);
-				}
 			}
+
 		});
 	}
 }
