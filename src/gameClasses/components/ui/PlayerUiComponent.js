@@ -161,7 +161,9 @@ var PlayerUiComponent = IgeEntity.extend({
 
 		config.isDismissible = config.isDismissible === undefined ? true : !!(config.isDismissible);
 
-		$('#custom-modal .content').html(window.DOMPurify.sanitize(config.content || ''));
+		if (window.DOMPurify) {
+			$('#custom-modal .content').html(window.DOMPurify.sanitize(config.content || ''));
+		}
 
 		if (config.title) {
 			$('#custom-modal .modal-title').html(window.DOMPurify.sanitize(config.title));
