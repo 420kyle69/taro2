@@ -1680,63 +1680,67 @@ var Unit = IgeEntityPhysics.extend({
 		if (ige.isServer || (ige.isClient && ige.client.selectedUnit == this)) {
 			var ownerPlayer = ige.$(this._stats.ownerId);
 			if (ownerPlayer) {
-				if ( // if this unit's not under a command and controlled by human, rotate to mouse
-					ownerPlayer._stats.controlledBy == 'human' &&
-					self.ai.targetPosition == undefined && self.ai.targetUnitId == undefined
-				) {
-					if (ownerPlayer.getSelectedUnit() == this) {
+				
+				// translate unit
+				var speed = (this._stats.attributes && this._stats.attributes.speed && this._stats.attributes.speed.value) || 0;
+				var vector = undefined;
+				
+				// unit rotation for human player
+				if (ownerPlayer._stats.controlledBy == 'human' && ownerPlayer.getSelectedUnit() == this) {
+
+					// mobile control: rotate to rotation provided by the client
+					if (this._stats.controls.absoluteRotation) {
+						self.angleToTarget = ownerPlayer.absoluteAngle;
+						
+					// desktop control: if this unit's not under a command, rotate to mouse xy coordinate
+					} else if (self.ai.targetPosition == undefined && self.ai.targetUnitId == undefined) {
 						var mouse = ownerPlayer.control.input.mouse;
 						if (mouse) {
-							self.angleToTarget = Math.atan2(mouse.y - self._translate.y, mouse.x - self._translate.x) + Math.radians(90);
 							var a = self._translate.x - mouse.x;
 							var b = self._translate.y - mouse.y;
 							self.distanceToTarget = Math.sqrt(a * a + b * b);
+							self.angleToTarget = Math.atan2(mouse.y - self._translate.y, mouse.x - self._translate.x) + Math.radians(90);
 						}
+						
 					} else {
 						self.angleToTarget = undefined;
 					}
+					
+					// direction keys are currently pressed
+					if (self.direction.x != 0 || self.direction.y != 0) {
+						// disengage ai movement if a directional movement key's pressed
+						self.ai.targetPosition = undefined
+						self.ai.targetUnitId = undefined
+
+						// moving diagonally should reduce speed
+						if (self.direction.x != 0 && self.direction.y != 0) {
+							speed = speed / 1.41421356237;
+						}
+
+						vector = {
+							x: self.direction.x * speed,
+							y: self.direction.y * speed
+						};
+					}
 				}
 				
-				if (self._stats.ai && self._stats.ai.enabled) { // AI unit
+				// update AI
+				if (self._stats.ai && self._stats.ai.enabled) {
 					self.distanceToTarget = self.ai.getDistanceToTarget();
 					self.ai.update();
 				}
 
 				if (ige.isServer) {
-					// rotate unit
+					// rotate unit if angleToTarget is set
 					if (self.angleToTarget != undefined && !isNaN(self.angleToTarget) &&
 						this._stats.controls && this._stats.controls.mouseBehaviour.rotateToFaceMouseCursor &&
 						this._stats.currentBody && !this._stats.currentBody.fixedRotation
 					) {	
-						if (this._stats.controls.absoluteRotation) {
-							self.rotateTo(0, 0, ownerPlayer.absoluteAngle);
-						} else {
-							self.rotateTo(0, 0, self.angleToTarget);
-						}
+						self.rotateTo(0, 0, self.angleToTarget);
 					}
 				}
-
-				// translate unit
-				var speed = (this._stats.attributes && this._stats.attributes.speed && this._stats.attributes.speed.value) || 0;
-				var vector = undefined;
 				
-				// direction keys are currently pressed
-				if (self.direction.x != 0 || self.direction.y != 0) {
-					// disengage ai movement if a directional movement key's pressed
-					self.ai.targetPosition = undefined
-					self.ai.targetUnitId = undefined
-
-					// moving diagonally should reduce speed
-					if (self.direction.x != 0 && self.direction.y != 0) {
-						speed = speed / 1.41421356237;
-					}
-
-					vector = {
-						x: self.direction.x * speed,
-						y: self.direction.y * speed
-					};
-					// console.log('unit movement 1', vector)
-				} else if (self.angleToTarget != undefined && self.isMoving) {
+				if (self.angleToTarget != undefined && self.isMoving) {
 					// this unit is currently moving under command. 
 					vector = {
 						x: (speed * Math.sin(self.angleToTarget)),
