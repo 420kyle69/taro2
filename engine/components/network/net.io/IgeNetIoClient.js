@@ -72,7 +72,7 @@ var IgeNetIoClient = {
 						window.connectedServer = server;
 
 						if (typeof (WebSocket) !== 'undefined') {
-							self.connectToGS(url)
+							self.connectToGS(url, server.id)
 								.done(function () {
 									window.activatePlayGame = true;
 									// if (gameId && typeof analyticsUrl != 'undefined' && analyticsUrl) {
@@ -155,8 +155,9 @@ var IgeNetIoClient = {
 
 	/**
 	 * @param {string} url the game server URL
+	 * @param {string} id the game server ID
 	 */
-	connectToGS: function (url) {
+	connectToGS: function (url, id) {
 		var self = this;
 		var defer = $.Deferred();
 
@@ -231,7 +232,7 @@ var IgeNetIoClient = {
 
 					// Now fire the start() callback
 					if (typeof (self._startCallback) === 'function') {
-						self._startCallback({ url: url });
+						self._startCallback({ url, id });
 						delete self._startCallback;
 					}
 

@@ -551,9 +551,7 @@ const Client = IgeEventingClass.extend({
 		ige.network.start(ige.client.server, (clientServer) => { // changed param from 'data' to clientServer
 
 			for (let serverObj of ige.client.servers) {
-
-				if (serverObj.url == clientServer.url) {
-
+				if (serverObj.id == clientServer.id) {
 					ige.client.server = serverObj;
 					break;
 				}
