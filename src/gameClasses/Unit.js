@@ -961,6 +961,9 @@ var Unit = IgeEntityPhysics.extend({
         @return {boolean} return true if unit was able to pickup/use item. return false otherwise.
 	 */
 	pickUpItem: function (item) {
+		if (ige.isClient) {
+			console.log('running pickUpItem on Client');
+		}
 		var self = this;
 
 		// if item is suppose to be consumed immediately
@@ -1419,6 +1422,7 @@ var Unit = IgeEntityPhysics.extend({
 							var currentItem = this.inventory.getItemBySlotNumber(this._stats.currentItemIndex + 1);
 							if (currentItem) {
 								self._stats.currentItemId = currentItem.id();
+								this.emit('equip-item', self._stats.currentItemId);
 							}
 						}
 						break;
