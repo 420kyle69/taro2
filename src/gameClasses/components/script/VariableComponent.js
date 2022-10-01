@@ -1717,6 +1717,11 @@ var VariableComponent = IgeEntity.extend({
 					returnValue = ige.$$('player').filter(function (player) { return player._stats.controlledBy != 'human'; });
 					break;
 
+				case 'humanPlayers':
+					returnValue = ige.$$('player').filter(function (player) { return player._stats.controlledBy == 'bot'; });
+					break;
+
+
 				case 'allItems':
 					returnValue = ige.$$('item');
 					break;

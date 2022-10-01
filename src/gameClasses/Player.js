@@ -70,30 +70,33 @@ var Player = IgeEntity.extend({
 				ige.clusterClient.userJoined(self._stats.userId);
 			}
 			
-			if (self._stats.controlledBy == 'human' && ige.script) // do not send trigger for neutral player
+			if (ige.script) // do not send trigger for neutral player
 			{
 				ige.script.trigger('playerJoinsGame', { playerId: self.id() });
 			}
 
-			var clientId = self._stats.clientId;
-			var client = ige.server.clients[clientId];
-			var receivedJoinGame = client.receivedJoinGame;
-			var processedJoinGame = Date.now() - receivedJoinGame;
-			var dataLoadTime = self._stats.totalTime;
-			client.lastEventAt = Date.now();
+			if (self._stats.controlledBy == 'human') {
+				var clientId = self._stats.clientId;
+				var client = ige.server.clients[clientId];
+				var receivedJoinGame = client.receivedJoinGame;
+				var processedJoinGame = Date.now() - receivedJoinGame;
+				var dataLoadTime = self._stats.totalTime;
+				client.lastEventAt = Date.now();
 
-			var playerJoinStreamData = [
-				{ streamedOn: Date.now() },
-				{ playerJoined: true },
-				{ dataLoadTime: dataLoadTime },
-				{ processedJoinGame: processedJoinGame },
-				{ receivedJoinGame: receivedJoinGame }
-			];
+				var playerJoinStreamData = [
+					{ streamedOn: Date.now() },
+					{ playerJoined: true },
+					{ dataLoadTime: dataLoadTime },
+					{ processedJoinGame: processedJoinGame },
+					{ receivedJoinGame: receivedJoinGame }
+				];
 
-			console.log(`Player.joinGame(): sending ACK to client ${self._stats.clientId} ${self._stats.name} (time elapsed: ${Date.now() - client.lastEventAt})`, playerJoinStreamData);
+				console.log(`Player.joinGame(): sending ACK to client ${self._stats.clientId} ${self._stats.name} (time elapsed: ${Date.now() - client.lastEventAt})`, playerJoinStreamData);
 
-			self.streamUpdateData(playerJoinStreamData);
-			ige.clusterClient && ige.clusterClient.playerJoined(self._stats.userId);
+				self.streamUpdateData(playerJoinStreamData);
+				ige.clusterClient && ige.clusterClient.playerJoined(self._stats.userId);
+			}
+			
 		} else {
 			console.log(`player joined again (menu closed?) ${self._stats.clientId} (${self._stats.name})`);
 			self.streamUpdateData([{ playerJoinedAgain: true }]);

@@ -2451,6 +2451,15 @@ var ActionComponent = IgeEntity.extend({
 
 						/* AI */
 
+					case 'addComputerPlayer': // deprecated
+						var name = self._script.variable.getValue(action.name, vars) || "";
+						var player = ige.game.createPlayer({
+							controlledBy: "bot",
+							name: name
+						});
+						player.joinGame();
+						break;
+
 					case 'setUnitTargetPosition': // deprecated
 						var unit = self._script.variable.getValue(action.unit, vars);
 						var position = self._script.variable.getValue(action.position, vars);
