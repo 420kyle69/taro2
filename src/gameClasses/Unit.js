@@ -1254,7 +1254,7 @@ var Unit = IgeEntityPhysics.extend({
 					self.updateStats(item.id(), true);
 				}
 
-				self.detachEntity(item.id());
+				self.detachEntity(item.id()); // igeEntityPhysics comment: not working right now
 
 				ige.queueTrigger('unitDroppedAnItem', {
 					itemId: item.id(),
@@ -1420,9 +1420,15 @@ var Unit = IgeEntityPhysics.extend({
 
 							// since server doesn't stream currentItem automatically
 							var currentItem = this.inventory.getItemBySlotNumber(this._stats.currentItemIndex + 1);
+
+							// currently every time itemIds is updated these events are emitted
 							if (currentItem) {
 								self._stats.currentItemId = currentItem.id();
+								// tell renderer about our current item
 								this.emit('equip-item', self._stats.currentItemId);
+							} else {
+								// tell renderer we currently have no item selected
+								this.emit('equip-item', null);
 							}
 						}
 						break;
