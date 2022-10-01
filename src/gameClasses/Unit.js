@@ -678,6 +678,9 @@ var Unit = IgeEntityPhysics.extend({
 			}
 		} else {
 			self._stats.currentItemId = undefined; // unit is selecting empty slot
+			if (ige.isClient) {
+				self.emit('equip-item', null);
+			}
 		}
 
 		// console.log("changing item to itemIndex", itemIndex, oldItem != undefined, self._stats.itemIds != undefined,  self._stats.itemIds[self._stats.currentItemIndex], " !== ", (oldItem)?oldItem.id():'')

@@ -14,6 +14,14 @@ var PlayerUiComponent = IgeEntity.extend({
 			message: null,
 			messagePrinter: null
 		};
+
+		if (window.isStandalone) {
+			window.DOMPurify = {
+				sanitize: (content) => {
+					return content;
+				}
+			}
+		}
 	},
 
 	setupListeners: function () {

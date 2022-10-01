@@ -285,6 +285,13 @@ class PhaserUnit extends PhaserAnimatedEntity {
 	private equipItem (itemId: string): void {
 		$.when(ige.client.playerJoined).done(() => {
 			//
+			console.log(
+				'equip-item\n',
+				`itemId: ${itemId}\n`,
+				'taroUnit: ', this.entity, '\n',
+				'phaserUnit: ', this, '\n',
+				'before this.equippedItem: ', this.equippedItem, '\n',
+			);
 			if (this.equippedItem) {
 				this.equippedItem.gameObject.owner = null;
 			}
@@ -301,6 +308,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			if (itemId === null) {
 				this.equippedItem = null;
 			}
+			console.log('after this.equippedItem: ', this.equippedItem, '\n');
 		});
 	}
 

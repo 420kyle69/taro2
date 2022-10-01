@@ -229,6 +229,7 @@ var PhaserUnit = /** @class */ (function (_super) {
         var _this = this;
         $.when(ige.client.playerJoined).done(function () {
             //
+            console.log('equip-item\n', "itemId: ".concat(itemId, "\n"), 'taroUnit: ', _this.entity, '\n', 'phaserUnit: ', _this, '\n', 'before this.equippedItem: ', _this.equippedItem, '\n');
             if (_this.equippedItem) {
                 _this.equippedItem.gameObject.owner = null;
             }
@@ -242,6 +243,7 @@ var PhaserUnit = /** @class */ (function (_super) {
             if (itemId === null) {
                 _this.equippedItem = null;
             }
+            console.log('after this.equippedItem: ', _this.equippedItem, '\n');
         });
     };
     PhaserUnit.prototype.destroy = function () {
