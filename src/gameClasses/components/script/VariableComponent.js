@@ -890,6 +890,12 @@ var VariableComponent = IgeEntity.extend({
 					}
 					break;
 
+				case 'isAIEnabled':
+					var unit = self.getValue(text.unit, vars);
+					if (unit && unit._category == 'unit') {
+						returnValue = unit._stats.aiEnabled;
+					}
+					break;
 					// case 'getUnitInFrontOfUnit':
 					// 	if (entity && entity._category == 'unit') {
 					// 		var entities = ige.physics.getBodiesInRegion({
@@ -1717,7 +1723,7 @@ var VariableComponent = IgeEntity.extend({
 					returnValue = ige.$$('player').filter(function (player) { return player._stats.controlledBy != 'human'; });
 					break;
 
-				case 'humanPlayers':
+				case 'botPlayers':
 					returnValue = ige.$$('player').filter(function (player) { return player._stats.controlledBy == 'bot'; });
 					break;
 

@@ -1336,7 +1336,7 @@ var Unit = IgeEntityPhysics.extend({
 					});
 				}
 
-				if (self._stats.ai && self._stats.ai.enabled) {
+				if (self._stats.ai && self._stats.aiEnabled) {
 					self.ai.registerAttack(sourceUnit);
 				}
 
@@ -1367,6 +1367,10 @@ var Unit = IgeEntityPhysics.extend({
 				self.minimapUnit.destroy();
 				delete self.minimapUnit;
 			}
+		}
+
+		if (this.sensor) {
+			this.sensor.remove();
 		}
 
 		// destroy all items in inventory
@@ -1400,6 +1404,17 @@ var Unit = IgeEntityPhysics.extend({
 					case 'type':
 						this.changeUnitType(newValue);
 						break;
+
+					case 'aiEnabled':
+						if (ige.isClient) {
+							if (newValue == true) {
+								self.ai.enable()
+							} else {
+								self.ai.disable()
+							}
+						}
+						break;				
+							
 					case 'itemIds':
 						// update shop as player points are changed and when shop modal is open
 						if (ige.isClient) {
@@ -1472,6 +1487,7 @@ var Unit = IgeEntityPhysics.extend({
 							}
 						}
 						break;
+
 					case 'setFadingText':
 						if (ige.isClient) {
 							newValue = newValue.split('|-|');
@@ -1686,7 +1702,7 @@ var Unit = IgeEntityPhysics.extend({
 				var vector = undefined;
 				
 				// unit rotation for human player
-				if (ownerPlayer._stats.controlledBy == 'human' && ownerPlayer.getSelectedUnit() == this) {
+				if (!self._stats.aiEnabled && ownerPlayer._stats.controlledBy == 'human' && ownerPlayer.getSelectedUnit() == this) {
 
 					// mobile control: rotate to rotation provided by the client
 					if (this._stats.controls.absoluteRotation) {
@@ -1705,27 +1721,41 @@ var Unit = IgeEntityPhysics.extend({
 					} else {
 						self.angleToTarget = undefined;
 					}
+				}
 					
-					// direction keys are currently pressed
-					if (self.direction.x != 0 || self.direction.y != 0) {
-						// disengage ai movement if a directional movement key's pressed
-						self.ai.targetPosition = undefined
-						self.ai.targetUnitId = undefined
-
-						// moving diagonally should reduce speed
-						if (self.direction.x != 0 && self.direction.y != 0) {
-							speed = speed / 1.41421356237;
-						}
-
+				if (
+					( // either unit is AI unit that is currently moving
+						self._stats.aiEnabled && self.isMoving
+					) ||
+					( // or human player's unit that's "following cursor"
+						!self._stats.aiEnabled && self._stats.controls &&
+						self._stats.controls.movementControlScheme == 'followCursor' && self.distanceToTarget > this.width()
+					)
+				) {
+					if (self.angleToTarget != undefined && !isNaN(self.angleToTarget)) {
 						vector = {
-							x: self.direction.x * speed,
-							y: self.direction.y * speed
+							x: (speed * Math.sin(self.angleToTarget)),
+							y: -(speed * Math.cos(self.angleToTarget))
 						};
 					}
+				} else if (self.direction.x != 0 || self.direction.y != 0) {
+					// disengage ai movement if a directional movement key's pressed
+					self.ai.targetPosition = undefined
+					self.ai.targetUnitId = undefined
+
+					// moving diagonally should reduce speed
+					if (self.direction.x != 0 && self.direction.y != 0) {
+						speed = speed / 1.41421356237;
+					}
+
+					vector = {
+						x: self.direction.x * speed,
+						y: self.direction.y * speed
+					};
 				}
 				
 				// update AI
-				if (self._stats.ai && self._stats.ai.enabled) {
+				if (self._stats.aiEnabled) {
 					self.distanceToTarget = self.ai.getDistanceToTarget();
 					self.ai.update();
 				}
@@ -1740,7 +1770,7 @@ var Unit = IgeEntityPhysics.extend({
 					}
 				}
 				
-				if (self.angleToTarget != undefined && self.isMoving) {
+				if (self._stats.aiEnabled && self.angleToTarget != undefined && self.isMoving) {
 					// this unit is currently moving under command. 
 					vector = {
 						x: (speed * Math.sin(self.angleToTarget)),

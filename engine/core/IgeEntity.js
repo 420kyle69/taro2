@@ -5107,9 +5107,12 @@ var IgeEntity = IgeObject.extend({
 			this._lastTransformAt == ige._currentTime ||
 			// entity has no body
 			this._translate == undefined ||
-			this._stats.currentBody == undefined ||
-			// ignore server stream of my own unit's sprite-only item
-			(this._stats.currentBody && this._stats.currentBody.type == 'spriteOnly' && (this.getOwnerUnit && this.getOwnerUnit()) == ige.client.selectedUnit)
+			this._stats.currentBody == undefined ||			
+			(
+				// ignore server stream of my own unit's sprite-only item
+				this._stats.currentBody && this._stats.currentBody.type == 'spriteOnly' && 
+				(this.getOwnerUnit && this.getOwnerUnit() == ige.client.selectedUnit) 
+			)
 		) {
 			return;
 		}
@@ -5125,8 +5128,8 @@ var IgeEntity = IgeObject.extend({
 		// this is necessary, because physics don't run at 60 fps on clientside
 		if (
 			ige.physics && (
-			// 1. we're using cspMovement (experimental) for my own unit OR
-				(ige.game.cspEnabled && ige.client.selectedUnit == this) ||
+				// 1. we're using cspMovement (experimental) for my own unit OR
+				(ige.game.cspEnabled && ige.client.selectedUnit == this && !this._stats.aiEnabled) ||
                 // 2. item-fired projectiles
                 (this._category == 'projectile' && this._stats.sourceItemId != undefined && !this._streamMode)
 			)
@@ -5193,7 +5196,16 @@ var IgeEntity = IgeObject.extend({
 				else startValue -= Math.PI * 2;
 			}
 
-			if (this == ige.client.selectedUnit && this.angleToTarget != undefined && !isNaN(this.angleToTarget) && this._stats.controls && this._stats.controls.mouseBehaviour.rotateToFaceMouseCursor && this._stats.currentBody && !this._stats.currentBody.fixedRotation) {
+			if (
+				this == ige.client.selectedUnit && 
+				!this._stats.aiEnabled &&
+				this.angleToTarget != undefined && 
+				!isNaN(this.angleToTarget) && 
+				this._stats.controls && 
+				this._stats.controls.mouseBehaviour.rotateToFaceMouseCursor && 
+				this._stats.currentBody && 
+				!this._stats.currentBody.fixedRotation
+			) {
 				targetRotate = this.angleToTarget;
 			} else {
 				targetRotate = this.interpolateValue(startValue, endValue, prevKeyFrame[0], ige._currentTime, nextKeyFrame[0]);
@@ -5241,7 +5253,7 @@ var IgeEntity = IgeObject.extend({
 		}
 
 		// instantly rotate unit to mouse cursor
-		if (this == ige.client.selectedUnit) {
+		if (this == ige.client.selectedUnit && !this._stats.aiEnabled) {
 			var ownerPlayer = ige.$(this._stats.ownerId);
 			if (ownerPlayer && ownerPlayer.control && ownerPlayer.control.input) {
 				var mouse = ownerPlayer.control.input.mouse;

@@ -99,7 +99,7 @@ var ControlComponent = IgeEntity.extend({
 			}
 		}
 
-		var player = ige.game.getPlayerByClientId(this._entity._stats.clientId);
+		var player = this._entity;
 		if (!player) {
 			return;
 		}
@@ -109,7 +109,8 @@ var ControlComponent = IgeEntity.extend({
 		if (unit && unit._category == 'unit') {
 			if (ige.isServer || (ige.isClient && !this.isChatOpen)) {
 				var unitAbility = null;
-				if (unit._stats.controls) {
+				// execute movement command is AI is disabled
+				if (unit._stats.controls && !unit._stats.aiEnabled){
 					if (unit._stats.controls.movementControlScheme == 'ad') {
 						switch (key) {
 							case 'a':
@@ -122,7 +123,8 @@ var ControlComponent = IgeEntity.extend({
 								unit.ability.moveRight();
 								break;
 						}
-					} else { // WASD movement is default
+					// WASD movement is default
+					} else { 
 						switch (key) {
 							case 'w':
 							case 'up':
@@ -195,8 +197,9 @@ var ControlComponent = IgeEntity.extend({
 	keyUp: function (device, key) {
 		this.lastActionAt = Date.now();
 
-		var player = ige.game.getPlayerByClientId(this._entity._stats.clientId);
+		var player = this._entity;		
 		if (!player) return;
+		
 		var unit = player.getSelectedUnit();
 		// for (i in units) {
 		// 	var unit = units[i]
@@ -275,8 +278,11 @@ var ControlComponent = IgeEntity.extend({
 	 */
 	_behaviour: function (ctx) {
 		var self = this;
-
-		if (ige.isClient) {
+		var player = this._entity;		
+		if (!player) return;		
+		var unit = player.getSelectedUnit();
+		
+		if (unit && ige.isClient) {
 			for (device in self.input) {
 				for (key in self.input[device]) {
 					if (ige.input.actionState(key)) {
@@ -339,14 +345,12 @@ var ControlComponent = IgeEntity.extend({
 			}
 
 			// unit move
-			var unit = ige.client.selectedUnit;
-			if (ige.physics && ige.game.cspEnabled && unit) {
+			if (ige.physics && ige.game.cspEnabled && !unit._stats.aiEnabled) {
 				var x = unit._translate.x.toFixed(0);
 				var y = unit._translate.y.toFixed(0);
 				if (self.sendPlayerInput && (self.lastPositionSent == undefined || self.lastPositionSent[0] != x || self.lastPositionSent[1] != y)) {
 					var pos = [x, y];
 					ige.network.send('playerUnitMoved', pos);
-					// console.log(x, y)
 					self.lastPositionSent = pos;
 				}
 			}

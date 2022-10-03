@@ -2291,7 +2291,8 @@ var ActionComponent = IgeEntity.extend({
 					case 'destroyEntity':
 						var entity = self._script.variable.getValue(action.entity, vars);
 						if (entity && self.entityCategories.indexOf(entity._category) > -1) {
-							entity.remove(action.runOnClient);
+							let isStreaming = !action.runOnClient; // don't stream to client is runOnClient is enabled
+							entity.remove(isStreaming);
 						} else {
 							self._script.errorLog('invalid unit');
 						}
@@ -2451,13 +2452,29 @@ var ActionComponent = IgeEntity.extend({
 
 						/* AI */
 
-					case 'addComputerPlayer': // deprecated
+					case 'addBotPlayer':
 						var name = self._script.variable.getValue(action.name, vars) || "";
 						var player = ige.game.createPlayer({
 							controlledBy: "bot",
 							name: name
 						});
 						player.joinGame();
+						break;
+
+					
+
+					case 'enableAI':
+						var unit = self._script.variable.getValue(action.unit, vars);
+						if (unit && unit.ai) {
+							unit.ai.enable();
+						}
+						break;
+					
+					case 'disableAI':
+						var unit = self._script.variable.getValue(action.unit, vars);
+						if (unit && unit.ai) {
+							unit.ai.disable();
+						}
 						break;
 
 					case 'setUnitTargetPosition': // deprecated

@@ -618,7 +618,7 @@ var PhysicsComponent = IgeEventingClass.extend({
 								/* server-side reconciliation */
 								// hard-correct client entity's position (teleport) if the distance between server & client is greater than 100px
 								// continuously for 10 frames in a row
-								if (ige.game.cspEnabled && entity.clientStreamedPosition) {
+								if (ige.game.cspEnabled && !entity._stats.aiEnabled && entity.clientStreamedPosition) {
 									var targetX = entity.clientStreamedPosition[0];
 									var targetY = entity.clientStreamedPosition[1];
 									var xDiff = targetX - x;
@@ -632,25 +632,28 @@ var PhysicsComponent = IgeEventingClass.extend({
 							} else if (ige.isClient) {
 								
 								
-								if (ige.physics && ige.game.cspEnabled) {
-									if ( // if CSP is enabled
-										(  // move my own unit immediately while ignoring the server stream
-											ige.client.selectedUnit == entity && 
+							if (ige.physics && ige.game.cspEnabled && 
+									(
+										( // move my own unit immediately while ignoring the server stream
+											ige.client.selectedUnit == entity && !entity._stats.aiEnabled &&
 											(entity.nextPhysicsFrame == undefined || ige._currentTime > entity.nextPhysicsFrame[0])
 										) ||
-										entity._category == 'projectile' // 
-									) {
-										entity.prevPhysicsFrame = entity.nextPhysicsFrame;
-										entity.nextPhysicsFrame = [nextFrameTime, [x, y, angle]];
-									}
-								} else {
-									// all streamed entities are rigidly positioned
-									x = entity._translate.x;
-									y = entity._translate.y;
-									angle = entity._rotate.z;
-									entity.nextPhysicsFrame = undefined;
-									
-								}
+										(
+											entity._category == 'projectile'
+											// we probably need a condition to check if this projectile's parent item was streaming it or not?
+										)
+									)
+							) {
+								entity.prevPhysicsFrame = entity.nextPhysicsFrame;
+								entity.nextPhysicsFrame = [nextFrameTime, [x, y, angle]];
+							} else {
+								// all streamed entities are rigidly positioned
+								x = entity._translate.x;
+								y = entity._translate.y;
+								angle = entity._rotate.z;
+								entity.nextPhysicsFrame = undefined;
+								
+							}
 
 								entity.body.setPosition({ x: x / entity._b2dRef._scaleRatio, y: y / entity._b2dRef._scaleRatio });
 								entity.body.setAngle(angle);

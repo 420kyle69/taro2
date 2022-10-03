@@ -4,7 +4,6 @@ var AIComponent = IgeEntity.extend({
 
 	init: function (unit) {
 		var self = this;
-
 		self._entity = unit;
 		self.targetUnitId = undefined;
 		self.targetPosition = undefined;
@@ -13,24 +12,52 @@ var AIComponent = IgeEntity.extend({
 		// AI settings
 
 		if (unit._stats.ai) {
-			if (unit._stats.ai.enabled) {
-				self.pathFindingMethod = unit._stats.ai.pathFindingMethod; // options: simple/a* (coming soon)
-				self.idleBehaviour = unit._stats.ai.idleBehaviour; // options: wander/stay
-				self.sensorResponse = unit._stats.ai.sensorResponse; // options: none/flee/none (default)
-				self.attackResponse = unit._stats.ai.attackResponse; // options: fight/flee/none (default)
-				self.maxTravelDistance = unit._stats.ai.maxTravelDistance; // how far unit's willing to flee/chase target until returning to its spawn position - options: undefined value for infinite distance
-				self.letGoDistance = unit._stats.ai.letGoDistance; // options: undefined value for infinite distance
-				self.maxAttackRange = unit._stats.ai.maxAttackRange;
-				self.previousPosition = { x: unit._translate.x, y: unit._translate.y }; // last position recorded before fleeing
-				self.nextMoveAt = ige._currentTime;
-				self.currentAction = 'idle'; // options: idle/move/flee/fight
-				self.isAttacking = false;
-			}
-
-			if (unit._stats.ai.sensorRadius > 0) {
-				unit.sensor = new Sensor(unit, unit._stats.ai.sensorRadius);
+			unit._stats.aiEnabled = unit._stats.ai.enabled;
+		
+			if (unit._stats.aiEnabled) {
+				self.enable();
 			}
 		}
+	},
+
+	enable: function() {
+		var self = this;
+		var unit = self._entity;
+		unit._stats.aiEnabled = true;
+		if (ige.isServer) {
+			unit.streamUpdateData([{aiEnabled: true }]);		
+		}
+		
+		self.pathFindingMethod = unit._stats.ai.pathFindingMethod; // options: simple/a* (coming soon)
+		self.idleBehaviour = unit._stats.ai.idleBehaviour; // options: wander/stay
+		self.sensorResponse = unit._stats.ai.sensorResponse; // options: none/flee/none (default)
+		self.attackResponse = unit._stats.ai.attackResponse; // options: fight/flee/none (default)
+		self.maxTravelDistance = unit._stats.ai.maxTravelDistance; // how far unit's willing to flee/chase target until returning to its spawn position - options: undefined value for infinite distance
+		self.letGoDistance = unit._stats.ai.letGoDistance; // options: undefined value for infinite distance
+		self.maxAttackRange = unit._stats.ai.maxAttackRange;
+		self.previousPosition = { x: unit._translate.x, y: unit._translate.y }; // last position recorded before fleeing
+		self.nextMoveAt = ige._currentTime;
+		self.goIdle();
+
+		if (unit._stats.ai.sensorRadius > 0 && unit.sensor == undefined) {
+			unit.sensor = new Sensor(unit, unit._stats.ai.sensorRadius);
+		}
+	},
+
+	disable: function() {
+		var unit = this._entity;
+		unit._stats.aiEnabled = false;
+		
+		if (ige.isServer) {
+			unit.streamUpdateData([{aiEnabled: false }]);
+		}
+		unit.sensor.remove();
+		unit.ability.stopUsingItem();
+		unit.stopMoving();
+		this.targetUnitId = undefined;
+		this.targetPosition = undefined;
+		this.currentAction = undefined;
+		this.nextMoveAt = undefined;
 	},
 
 	registerAttack: function (unit) {
@@ -86,7 +113,7 @@ var AIComponent = IgeEntity.extend({
 		var unitIds = this.unitsTargetingMe;
 		for (var i = 0; i < unitIds.length; i++) {
 			var attackingUnit = ige.$(unitIds[i]);
-			if (attackingUnit && attackingUnit.ai.getTargetUnit() == this._entity && attackingUnit.sensor && attackingUnit._stats.ai && attackingUnit._stats.ai.enabled) {
+			if (attackingUnit && attackingUnit.ai.getTargetUnit() == this._entity && attackingUnit.sensor && attackingUnit._stats.ai && attackingUnit._stats.aiEnabled) {
 				attackingUnit.ai.goIdle();
 				attackingUnit.sensor.updateBody(); // re-detect nearby units
 			}
@@ -231,9 +258,15 @@ var AIComponent = IgeEntity.extend({
 	},
 
 	update: function () {
+		
 		var self = this;
 		var unit = self._entity;
+		
+		if (!unit._stats.aiEnabled)
+			return;
+		
 		var targetUnit = this.getTargetUnit();
+
 		// update unit's directino toward its target
 		var targetPosition = self.getTargetPosition();
 		// wandering units should move in straight direction. no need to re-assign angleToTarget
