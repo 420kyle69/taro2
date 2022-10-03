@@ -1709,7 +1709,7 @@ var Unit = IgeEntityPhysics.extend({
 						self.angleToTarget = ownerPlayer.absoluteAngle;
 						
 					// desktop control: if this unit's not under a command, rotate to mouse xy coordinate
-					} else if (self.ai.targetPosition == undefined && self.ai.targetUnitId == undefined) {
+					} else {
 						var mouse = ownerPlayer.control.input.mouse;
 						if (mouse) {
 							var a = self._translate.x - mouse.x;
@@ -1717,19 +1717,18 @@ var Unit = IgeEntityPhysics.extend({
 							self.distanceToTarget = Math.sqrt(a * a + b * b);
 							self.angleToTarget = Math.atan2(mouse.y - self._translate.y, mouse.x - self._translate.x) + Math.radians(90);
 						}
-						
-					} else {
-						self.angleToTarget = undefined;
 					}
 				}
-					
+				
+				
 				if (
 					( // either unit is AI unit that is currently moving
 						self._stats.aiEnabled && self.isMoving
 					) ||
 					( // or human player's unit that's "following cursor"
-						!self._stats.aiEnabled && self._stats.controls &&
-						self._stats.controls.movementControlScheme == 'followCursor' && self.distanceToTarget > this.width()
+						!self._stats.aiEnabled && 
+						self._stats.controls && self._stats.controls.movementControlScheme == 'followCursor' && 
+						self.distanceToTarget > this.width() // if mouse cursor is close to the unit, then don't move
 					)
 				) {
 					if (self.angleToTarget != undefined && !isNaN(self.angleToTarget)) {
@@ -1753,7 +1752,7 @@ var Unit = IgeEntityPhysics.extend({
 						y: self.direction.y * speed
 					};
 				}
-				
+
 				// update AI
 				if (self._stats.aiEnabled) {
 					self.distanceToTarget = self.ai.getDistanceToTarget();
@@ -1768,14 +1767,6 @@ var Unit = IgeEntityPhysics.extend({
 					) {	
 						self.rotateTo(0, 0, self.angleToTarget);
 					}
-				}
-				
-				if (self._stats.aiEnabled && self.angleToTarget != undefined && self.isMoving) {
-					// this unit is currently moving under command. 
-					vector = {
-						x: (speed * Math.sin(self.angleToTarget)),
-						y: -(speed * Math.cos(self.angleToTarget))
-					};
 				}
 
 				if (ownerPlayer && ownerPlayer._stats.controlledBy == 'human') {
