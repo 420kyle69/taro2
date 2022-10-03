@@ -1720,7 +1720,7 @@ var VariableComponent = IgeEntity.extend({
 					break;
 
 				case 'computerPlayers':
-					returnValue = ige.$$('player').filter(function (player) { return player._stats.controlledBy != 'human'; });
+					returnValue = ige.$$('player').filter(function (player) { return player._stats.controlledBy == 'computer'; });
 					break;
 
 				case 'botPlayers':
