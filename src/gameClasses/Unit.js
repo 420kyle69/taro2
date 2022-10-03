@@ -1771,8 +1771,8 @@ var Unit = IgeEntityPhysics.extend({
 				if (ownerPlayer && ownerPlayer._stats.controlledBy == 'human') {
 					// toggle effects when unit starts/stops moving
 					if (!this.isMoving && (self.direction.x != 0 || self.direction.y != 0)) {
-						this.startMoving();;
-					} else if (this.isMoving && !self.direction) {
+						this.startMoving();
+					} else if (this.isMoving && self.direction.x === 0 && self.direction.y ===0) {
 						this.stopMoving();
 					}
 				}
