@@ -51,7 +51,11 @@ var AIComponent = IgeEntity.extend({
 		if (ige.isServer) {
 			unit.streamUpdateData([{aiEnabled: false }]);
 		}
-		unit.sensor.remove();
+
+		if (unit.sensor) {
+			unit.sensor.remove();
+		}
+				
 		unit.ability.stopUsingItem();
 		unit.stopMoving();
 		this.targetUnitId = undefined;
