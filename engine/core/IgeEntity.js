@@ -1955,7 +1955,10 @@ var IgeEntity = IgeObject.extend({
 				}
 
 			} else if (ige.isClient) {
-				if (!this.isRendering()) return;
+
+				if (!this.isRendering()) {
+					return;
+				}
 
 				var position = this._translate;
 
@@ -4163,7 +4166,7 @@ var IgeEntity = IgeObject.extend({
 							break;
 
 						case 'isBeingUsed':
-							if (ige.isClient) {								
+							if (ige.isClient) {
 								this._stats.isBeingUsed = newValue;
 							}
 							break;

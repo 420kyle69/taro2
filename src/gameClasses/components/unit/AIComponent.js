@@ -11,6 +11,10 @@ var AIComponent = IgeEntity.extend({
 		self.debugEnabled = true;
 		// AI settings
 
+		// sensor needs to be enabled regardless of AI to process sensor collision triggers
+		// for example, in cell-eater, items are consumed via sensors
+		unit.sensor = new Sensor(unit, unit._stats.ai.sensorRadius);
+
 		if (unit._stats.ai) {
 			unit._stats.aiEnabled = unit._stats.ai.enabled;
 		
@@ -39,9 +43,9 @@ var AIComponent = IgeEntity.extend({
 		self.nextMoveAt = ige._currentTime;
 		self.goIdle();
 
-		if (unit._stats.ai.sensorRadius > 0 && unit.sensor == undefined) {
-			unit.sensor = new Sensor(unit, unit._stats.ai.sensorRadius);
-		}
+		// if (unit._stats.ai.sensorRadius > 0 && unit.sensor == undefined) {
+		// 	unit.sensor = new Sensor(unit, unit._stats.ai.sensorRadius);
+		// }
 	},
 
 	disable: function() {
@@ -53,9 +57,8 @@ var AIComponent = IgeEntity.extend({
 		}
 
 		if (unit.sensor) {
-			unit.sensor.remove();
+			// unit.sensor.remove();
 		}
-				
 		unit.ability.stopUsingItem();
 		unit.stopMoving();
 		this.targetUnitId = undefined;
