@@ -232,6 +232,18 @@ var VariableComponent = IgeEntity.extend({
 					var player = self.getValue(text.player, vars);
 					returnValue = player && player._stats.controlledBy == 'human';
 					break;
+				
+					
+				case 'isComputerPlayer':
+					var player = self.getValue(text.player, vars);
+					returnValue = player && player._stats.controlledBy == 'computer';
+					break;
+				
+				case 'isBotPlayer':
+					var player = self.getValue(text.player, vars);
+					returnValue = player && player._stats.controlledBy == 'bot';
+					break;
+	
 
 				case 'isPlayerLoggedIn':
 					var player = self.getValue(text.player, vars);
