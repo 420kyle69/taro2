@@ -39,6 +39,9 @@ var GameScene = /** @class */ (function (_super) {
             camera.zoomTo(ratio, 1000, Phaser.Math.Easing.Quadratic.Out, true);
             ige.client.emit('scale', { ratio: ratio });
         });
+        ige.client.on('updateMap', function () {
+            _this.updateMap();
+        });
         ige.client.on('create-unit', function (unit) {
             new PhaserUnit(_this, unit);
         });
@@ -151,6 +154,7 @@ var GameScene = /** @class */ (function (_super) {
                 _this.tileset = map.addTilesetImage(tileset.name, key);
             }
         });
+        //this.loadMap();
         var entityLayers = this.entityLayers;
         data.map.layers.forEach(function (layer) {
             if (layer.type === 'tilelayer') {
@@ -190,6 +194,19 @@ var GameScene = /** @class */ (function (_super) {
     GameScene.prototype.calculateZoom = function () {
         var _a = this.scale, width = _a.width, height = _a.height;
         return Math.max(width, height) / this.zoomSize;
+    };
+    GameScene.prototype.updateMap = function () {
+        var map = this.tilemap;
+        var data = ige.game.data;
+        data.map.layers.forEach(function (layer) {
+            if (layer.data) {
+                layer.data.forEach(function (tile, index) {
+                    var x = index % layer.width;
+                    var y = Math.floor(index / layer.width);
+                    map.putTileAt(tile, x, y, false, layer.id - 1);
+                });
+            }
+        });
     };
     GameScene.prototype.patchMapData = function (map) {
         /**

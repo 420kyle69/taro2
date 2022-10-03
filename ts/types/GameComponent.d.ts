@@ -16,6 +16,8 @@ declare class GameComponent extends IgeEntity {
 
 	data: {
 		map: {
+			width: number,
+			height: number,
 			tilesets: {
 				image: string;
 				margin: number;
@@ -28,6 +30,9 @@ declare class GameComponent extends IgeEntity {
 			layers: {
 				data: number[];
 				name: string;
+				width: number,
+				height: number,
+				id: number,
 				type: 'tilelayer' | 'objectgroup';
 			}[];
 		};

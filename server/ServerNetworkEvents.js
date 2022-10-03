@@ -438,11 +438,11 @@ var ServerNetworkEvents = {
 		// only allow developers to modify the tiles
 		if (ige.server.developerClientIds.includes(clientId)) {
 			ige.network.send("editTile", data);
+			//ige.developerMode.saveTileChange(data);
 			const width = ige.game.data.map.width;
 			if (data.layer >=2) data.layer ++;
-			console.log('saving edited tile', data);
 			//save tile change to ige.game.map.data
-			ige.game.data.map.layers[data.layer].data[data.y*width + data.y] = data.gid;
+			ige.game.data.map.layers[data.layer].data[data.y*width + data.x] = data.gid;
 		}
 	},
 

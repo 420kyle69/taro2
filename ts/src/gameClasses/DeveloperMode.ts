@@ -1,6 +1,6 @@
 class DeveloperMode {
 	active: boolean;
-	changedTiles: {gid: number, x: number, y: number}[];
+	changedTiles: {gid: number, layer: number, x: number, y: number}[];
 
 	constructor() {
 		this.active = false;
@@ -17,5 +17,21 @@ class DeveloperMode {
 		console.log('leave developer mode');
 		this.active = false;
 		ige.client.emit('leaveDevMode');
+	}
+
+	/*saveTileChange (data) {
+		//ige.developerMode.changedTiles.push(data);
+		const width = ige.game.data.map.width;
+		if (data.layer >=2) data.layer ++;
+		console.log('saving edited tile', data, data.y*width + data.x);
+		//save tile change to ige.game.map.data
+		ige.game.data.map.layers[data.layer].data[data.y*width + data.x] = data.gid;
+		console.log(ige.game.data.map);
+	}*/
+
+	updateClientMap (data) {
+		ige.game.data.map = data.mapData;
+		ige.client.emit('updateMap');
+		//ige.renderer.scene.getScene('Game').updateMap();
 	}
 }

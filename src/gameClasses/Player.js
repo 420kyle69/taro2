@@ -88,7 +88,8 @@ var Player = IgeEntity.extend({
 				{ playerJoined: true },
 				{ dataLoadTime: dataLoadTime },
 				{ processedJoinGame: processedJoinGame },
-				{ receivedJoinGame: receivedJoinGame }
+				{ receivedJoinGame: receivedJoinGame },
+				{ mapData: ige.game.data.map }
 			];
 
 			console.log(`Player.joinGame(): sending ACK to client ${self._stats.clientId} ${self._stats.name} (time elapsed: ${Date.now() - client.lastEventAt})`, playerJoinStreamData);
@@ -454,6 +455,9 @@ var Player = IgeEntity.extend({
 					}
 
 					if (self._stats.clientId == ige.network.id()) {
+						if (attrName === 'mapData') {
+							ige.developerMode.updateClientMap(data);
+						}
 						if (attrName === 'attributes') {
 							ige.playerUi.updatePlayerAttributesDiv(self._stats.attributes);
 						}

@@ -146,10 +146,10 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 		layerButtonsContainer.x = this.camera.x + texturesLayer.width - 93;
 		layerButtonsContainer.y = this.camera.y;
 
-		this.addButton('floor', 0, -155, 120, layerButtonsContainer, this.switchLayer.bind(this), 0);
-		this.addButton('floor2', 0, -124, 120, layerButtonsContainer, this.switchLayer.bind(this), 1);
-		this.addButton('walls', 0, -93, 120, layerButtonsContainer, this.switchLayer.bind(this), 2);
-		this.addButton('trees', 0, -62, 120, layerButtonsContainer, this.switchLayer.bind(this), 3);
+		this.addButton('floor', 0,-62, 120, layerButtonsContainer, this.switchLayer.bind(this), 0);
+		this.addButton('floor2', 0,-93, 120, layerButtonsContainer, this.switchLayer.bind(this), 1);
+		this.addButton('walls', 0,-124, 120, layerButtonsContainer, this.switchLayer.bind(this), 2);
+		this.addButton('trees', 0,-155, 120, layerButtonsContainer, this.switchLayer.bind(this), 3);
 		this.addButton('tiles', 0, -31, 120, layerButtonsContainer, this.toggle.bind(this));
 
 		//this.width = 500;

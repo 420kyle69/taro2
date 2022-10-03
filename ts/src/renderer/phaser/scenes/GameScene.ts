@@ -41,6 +41,10 @@ class GameScene extends PhaserScene {
 			ige.client.emit('scale', { ratio: ratio });
 		});
 
+		ige.client.on('updateMap', () => {
+			this.updateMap();
+		});
+
 		ige.client.on('create-unit', (unit: Unit) => {
 			new PhaserUnit(this, unit);
 		});
@@ -180,6 +184,7 @@ class GameScene extends PhaserScene {
 		ige.client.rendererLoaded.resolve();
 
 		const map = this.tilemap = this.make.tilemap({ key: 'map' });
+
 		const data = ige.game.data;
 		const scaleFactor = ige.scaleMapDetails.scaleFactor;
 
@@ -198,6 +203,8 @@ class GameScene extends PhaserScene {
 				this.tileset = map.addTilesetImage(tileset.name, key);
 			}
 		});
+
+		//this.loadMap();
 
 		const entityLayers = this.entityLayers;
 		data.map.layers.forEach((layer) => {
@@ -253,6 +260,21 @@ class GameScene extends PhaserScene {
 	private calculateZoom(): number {
 		const { width, height } = this.scale;
 		return Math.max(width, height) / this.zoomSize;
+	}
+
+	private updateMap(): void {
+		const map = this.tilemap;
+		const data = ige.game.data;
+
+		data.map.layers.forEach((layer) => {
+			if (layer.data) {
+				layer.data.forEach((tile, index) => {
+					const x = index % layer.width;
+					const y = Math.floor(index/layer.width);
+					map.putTileAt(tile, x, y, false, layer.id - 1);
+			});
+			}
+		});
 	}
 
 	private patchMapData (map: GameComponent['data']['map']): typeof map {

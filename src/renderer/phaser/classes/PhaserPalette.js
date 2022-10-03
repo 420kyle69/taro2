@@ -120,10 +120,10 @@ var PhaserPalette = /** @class */ (function (_super) {
         //this.scrollBarContainer.add(layerButtonsContainer);
         layerButtonsContainer.x = _this.camera.x + texturesLayer.width - 93;
         layerButtonsContainer.y = _this.camera.y;
-        _this.addButton('floor', 0, -155, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 0);
-        _this.addButton('floor2', 0, -124, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 1);
-        _this.addButton('walls', 0, -93, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 2);
-        _this.addButton('trees', 0, -62, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 3);
+        _this.addButton('floor', 0, -62, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 0);
+        _this.addButton('floor2', 0, -93, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 1);
+        _this.addButton('walls', 0, -124, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 2);
+        _this.addButton('trees', 0, -155, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 3);
         _this.addButton('tiles', 0, -31, 120, layerButtonsContainer, _this.toggle.bind(_this));
         return _this;
         //this.width = 500;
