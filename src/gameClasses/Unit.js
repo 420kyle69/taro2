@@ -1768,19 +1768,18 @@ var Unit = IgeEntityPhysics.extend({
 					}
 				}
 
-				// if (ownerPlayer && ownerPlayer._stats.controlledBy == 'human') {
-				// 	// toggle effects when unit starts/stops moving
-				// 	if (!this.isMoving && (self.direction.x != 0 || self.direction.y != 0)) {
-				// 		this.playEffect('move');
-				// 	} else if (this.isMoving && (self.direction.x == 0 && self.direction.y == 0)) {
-				// 		this.playEffect('idle');
-				// 	}
-				// }
+				if (ownerPlayer && ownerPlayer._stats.controlledBy == 'human') {
+					// toggle effects when unit starts/stops moving
+					if (!this.isMoving && (self.direction.x != 0 || self.direction.y != 0)) {
+						this.startMoving();;
+					} else if (this.isMoving && !self.direction) {
+						this.stopMoving();
+					}
+				}
 
 				ige.unitBehaviourCount++; // for debugging
 				// apply movement if it's either human-controlled unit, or ai unit that's currently moving
 				if (self.body && vector && (vector.x != 0 || vector.y != 0)) {
-					this.startMoving();
 					// console.log('unit movement 2', vector);
 					if (self._stats.controls) {
 						switch (self._stats.controls.movementMethod) { // velocity-based movement
@@ -1795,8 +1794,6 @@ var Unit = IgeEntityPhysics.extend({
 								break;
 						}
 					}
-				} else {
-					this.stopMoving();
 				}
 			}
 
