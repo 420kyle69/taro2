@@ -1666,12 +1666,12 @@ var Unit = IgeEntityPhysics.extend({
 		if (!this.isMoving) {
 			this.playEffect('move');
 			this.isMoving = true;
+
 		}
 	},
 
 	stopMoving: function () {
 		if (this.isMoving) {
-			// console.log("GOING IDLE")
 			this.playEffect('idle');
 			this.isMoving = false;
 		}
@@ -1687,7 +1687,7 @@ var Unit = IgeEntityPhysics.extend({
 	 */
 	_behaviour: function (ctx) {
 		var self = this;
-		
+
 		_.forEach(ige.triggersQueued, function (trigger) {
 			trigger.params['thisEntityId'] = self.id();
 			self.script.trigger(trigger.name, trigger.params);
@@ -1696,18 +1696,18 @@ var Unit = IgeEntityPhysics.extend({
 		if (ige.isServer || (ige.isClient && ige.client.selectedUnit == this)) {
 			var ownerPlayer = ige.$(this._stats.ownerId);
 			if (ownerPlayer) {
-				
+
 				// translate unit
 				var speed = (this._stats.attributes && this._stats.attributes.speed && this._stats.attributes.speed.value) || 0;
 				var vector = undefined;
-				
+
 				// unit rotation for human player
 				if (!self._stats.aiEnabled && ownerPlayer._stats.controlledBy == 'human' && ownerPlayer.getSelectedUnit() == this) {
 
 					// mobile control: rotate to rotation provided by the client
 					if (this._stats.controls.absoluteRotation) {
 						self.angleToTarget = ownerPlayer.absoluteAngle;
-						
+
 					// desktop control: if this unit's not under a command, rotate to mouse xy coordinate
 					} else {
 						var mouse = ownerPlayer.control.input.mouse;
@@ -1719,15 +1719,14 @@ var Unit = IgeEntityPhysics.extend({
 						}
 					}
 				}
-				
-				
+
 				if (
 					( // either unit is AI unit that is currently moving
 						self._stats.aiEnabled && self.isMoving
 					) ||
 					( // or human player's unit that's "following cursor"
-						!self._stats.aiEnabled && 
-						self._stats.controls && self._stats.controls.movementControlScheme == 'followCursor' && 
+						!self._stats.aiEnabled &&
+						self._stats.controls && self._stats.controls.movementControlScheme == 'followCursor' &&
 						self.distanceToTarget > this.width() // if mouse cursor is close to the unit, then don't move
 					)
 				) {
@@ -1739,8 +1738,8 @@ var Unit = IgeEntityPhysics.extend({
 					}
 				} else if (self.direction.x != 0 || self.direction.y != 0) {
 					// disengage ai movement if a directional movement key's pressed
-					self.ai.targetPosition = undefined
-					self.ai.targetUnitId = undefined
+					self.ai.targetPosition = undefined;
+					self.ai.targetUnitId = undefined;
 
 					// moving diagonally should reduce speed
 					if (self.direction.x != 0 && self.direction.y != 0) {
@@ -1764,7 +1763,7 @@ var Unit = IgeEntityPhysics.extend({
 					if (self.angleToTarget != undefined && !isNaN(self.angleToTarget) &&
 						this._stats.controls && this._stats.controls.mouseBehaviour.rotateToFaceMouseCursor &&
 						this._stats.currentBody && !this._stats.currentBody.fixedRotation
-					) {	
+					) {
 						self.rotateTo(0, 0, self.angleToTarget);
 					}
 				}
@@ -1772,9 +1771,9 @@ var Unit = IgeEntityPhysics.extend({
 				if (ownerPlayer && ownerPlayer._stats.controlledBy == 'human') {
 					// toggle effects when unit starts/stops moving
 					if (!this.isMoving && (self.direction.x != 0 || self.direction.y != 0)) {
-						this.playEffect('move');
-					} else if (this.isMoving && (self.direction.x == 0 && self.direction.y == 0)) {
-						this.playEffect('idle');
+						this.startMoving();;
+					} else if (this.isMoving && !self.direction) {
+						this.stopMoving();
 					}
 				}
 
@@ -1782,7 +1781,7 @@ var Unit = IgeEntityPhysics.extend({
 				// apply movement if it's either human-controlled unit, or ai unit that's currently moving
 				if (self.body && vector && (vector.x != 0 || vector.y != 0)) {
 					// console.log('unit movement 2', vector);
-					if (self._stats.controls)
+					if (self._stats.controls) {
 						switch (self._stats.controls.movementMethod) { // velocity-based movement
 							case 'velocity':
 								self.setLinearVelocity(vector.x, vector.y);
@@ -1794,6 +1793,7 @@ var Unit = IgeEntityPhysics.extend({
 								self.applyImpulse(vector.x, vector.y);
 								break;
 						}
+					}
 				}
 			}
 
