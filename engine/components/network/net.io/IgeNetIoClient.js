@@ -488,7 +488,7 @@ var IgeNetIoClient = {
 	_onMessageFromServer: function (data) {
 		var ciDecoded = data[0].charCodeAt(0);
 		var commandName = this._networkCommandsIndex[ciDecoded];
-		// console.log("name = " + commandName);
+		// console.log("name = " + commandName, data);
 
 		if (commandName === '_snapshot') {
 			var snapshot = _.cloneDeep(data)[1];

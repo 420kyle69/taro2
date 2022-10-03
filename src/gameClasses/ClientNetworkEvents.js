@@ -10,7 +10,7 @@ var ClientNetworkEvents = {
 	},
 
 	_onUpdateAllEntities: function (data) {
-		console.log(data);
+
 		for (entityId in data) {
 			var entity = ige.$(entityId);
 			if (ige.client.entityUpdateQueue[entityId] == undefined) {
