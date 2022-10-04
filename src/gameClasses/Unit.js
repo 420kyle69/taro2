@@ -1429,14 +1429,16 @@ var Unit = IgeEntityPhysics.extend({
 
 					case 'itemIds':
 						// update shop as player points are changed and when shop modal is open
-						if (ige.isClient && this !== ige.client.selectedUnit) {
+						if (ige.isClient) {
 							console.log('Unit.streamUpdateData(\'itemIds\') on the client');
 							this.inventory.update();
 							if ($('#modd-item-shop-modal').hasClass('show')) {
 								ige.shop.openItemShop();
 							}
-							// WARNING: need to replace the old logic for updating currentItemId when itemIds changes
-							this.setCurrentItem();
+							if (this !== ige.client.selectedUnit) {
+								// WARNING: need to replace the old logic for updating currentItemId when itemIds changes
+								this.setCurrentItem();
+							}
 						}
 						break;
 

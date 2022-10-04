@@ -54,9 +54,9 @@ var Item = IgeEntityPhysics.extend({
 		// convert numbers stored as string in database to int
 		self.parseEntityObject(self._stats);
 		self.addComponent(AttributeComponent); // every item gets one
-		
+
 		self.addComponent(ScriptComponent); // entity-scripting
-		self.script.load(data.scripts)
+		self.script.load(data.scripts);
 
 		ige.game.lastCreatedItemId = entityIdFromServer || this.id();
 
@@ -71,8 +71,8 @@ var Item = IgeEntityPhysics.extend({
 			if (ige.network.isPaused) {
 				self.streamMode(0);
 			} else {
-				self.streamMode(1);				
-				self.streamCreate(); // do we need this?			
+				self.streamMode(1);
+				self.streamCreate(); // do we need this?
 			}
 
 			ige.server.totalItemsCreated++;
@@ -364,7 +364,7 @@ var Item = IgeEntityPhysics.extend({
 										});
 
 									var projectile = new Projectile(data);
-									projectile.script.trigger("entityCreated");		
+									projectile.script.trigger("entityCreated");
 									ige.game.lastCreatedProjectileId = projectile.id();
 								}
 								if (this._stats.bulletType == 'raycast') {
@@ -837,10 +837,10 @@ var Item = IgeEntityPhysics.extend({
 	streamUpdateData: function (queuedData) {
 		var self = this;
 
-		if (ige.isServer && ige.network.isPaused) 
+		if (ige.isServer && ige.network.isPaused) {
 			return;
-
-		IgeEntity.prototype.streamUpdateData.call(this, queuedData);		
+		}
+		IgeEntity.prototype.streamUpdateData.call(this, queuedData);
 		// ige.devLog("Item streamUpdateData ", data)
 		for (var i = 0; i < queuedData.length; i++) {
 			var data = queuedData[i];
