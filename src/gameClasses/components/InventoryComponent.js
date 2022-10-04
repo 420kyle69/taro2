@@ -45,7 +45,7 @@ var InventoryComponent = IgeEntity.extend({
 			}
 
 			this.createBackpack();
-			this.createTradingSlots();
+			// this.createTradingSlots();
 		}
 		this.update();
 	},
@@ -376,7 +376,7 @@ var InventoryComponent = IgeEntity.extend({
 				// 5 for trading items
 
 				var totalInventorySize = this.getTotalInventorySize();
-				for (var slotIndex = 0; slotIndex < totalInventorySize + 5; slotIndex++) {
+				for (var slotIndex = 0; slotIndex < totalInventorySize + 5; slotIndex++) { // +5 for trade slots?
 					var itemId = this._entity._stats.itemIds[slotIndex];
 					var item = ige.$(itemId);
 					// if (item) {
