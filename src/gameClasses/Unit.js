@@ -636,6 +636,8 @@ var Unit = IgeEntityPhysics.extend({
 	// hold an item given in the inventory slot. hide the last item
 	// @currentItemIndex refers to last pickup item
 	changeItem: function (itemIndex) {
+
+		// WARNING: Verify that isClient can be any unit or just mine
 		var self = this;
 
 		if (itemIndex == undefined) {
@@ -660,14 +662,20 @@ var Unit = IgeEntityPhysics.extend({
 			return;
 		}
 
+		// update index and id in the same place
+		this.setCurrentItem(itemIndex);
+
 		if (oldItem) {
 			oldItem.stopUsing();
+			oldItem.setState('unselected');
+			if (ige.isClient) {
+				oldItem.applyAnimationForState('unselected');
+			}
 		}
 
 		// show the item that's in the selected slot
 		if (newItem) {
 			newItem.setState('selected');
-			self._stats.currentItemId = newItem.id();
 
 			var triggeredBy = { // WARNING: Should this be outside if (newItem) so we can send trigger for unit swapping item even if empty slot?
 				itemId: newItem.id(),
@@ -689,18 +697,7 @@ var Unit = IgeEntityPhysics.extend({
 				};
 				newItem.tween.start(null, this._rotate.z, customTween);
 			}
-		} else {
-			self._stats.currentItemId = undefined; // unit is selecting empty slot
 		}
-
-		if (oldItem) {
-			oldItem.setState('unselected');
-			if (ige.isClient) {
-				oldItem.applyAnimationForState('unselected');
-			}
-		}
-
-		self._stats.currentItemIndex = itemIndex;
 
 		if (ige.isServer) {
 			this.streamUpdateData([{ currentItemIndex: itemIndex }]);
