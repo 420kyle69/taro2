@@ -438,11 +438,23 @@ var ServerNetworkEvents = {
 		// only allow developers to modify the tiles
 		if (ige.server.developerClientIds.includes(clientId)) {
 			ige.network.send("editTile", data);
-			//ige.developerMode.saveTileChange(data);
+
+			/* NEED TO MOVE THIS LOGIC FOR MAP SAVING */
+			
 			const width = ige.game.data.map.width;
-			if (data.layer >=2) data.layer ++;
+			if (data.layer >= 2) data.layer ++;
+
 			//save tile change to ige.game.map.data
 			ige.game.data.map.layers[data.layer].data[data.y*width + data.x] = data.gid;
+			if (data.layer === 3) {
+				
+				//if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
+				ige.physics.destroyWalls();
+				let map = ige.scaleMap(_.cloneDeep(ige.game.data.map));
+				ige.tiled.loadJson(map, function (layerArray, layersById) {
+					ige.physics.staticsFromMap(layersById.walls);
+				})
+			}
 		}
 	},
 

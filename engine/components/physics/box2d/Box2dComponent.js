@@ -27,6 +27,8 @@ var PhysicsComponent = IgeEventingClass.extend({
 		this.exponent = 2;
 		this.divisor = 80;
 
+		this.walls = [];
+
 		if (ige.isServer) {
 			this.engine = dists.defaultEngine;
 
@@ -316,6 +318,8 @@ var PhysicsComponent = IgeEventingClass.extend({
 					.drawBounds(false)
 					.drawBoundsData(false)
 					.category('wall');
+				
+				this.walls.push(wall);
 
 				// walls must be created immediately, because there isn't actionQueue for walls
 				ige.physics.createBody(wall, {
@@ -343,6 +347,12 @@ var PhysicsComponent = IgeEventingClass.extend({
 		} else {
 			PhysicsComponent.prototype.log('Cannot extract box2d static bodies from map data because passed map does not have a .map property!', 'error');
 		}
+	},
+
+	destroyWalls : function () {
+		this.walls.forEach(wall => {
+			this.destroyBody(wall);
+		});
 	},
 
 	/**

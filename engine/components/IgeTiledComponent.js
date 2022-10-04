@@ -75,9 +75,9 @@ var IgeTiledComponent = IgeClass.extend({
 		var i; var k; var x; var y; var z;
 		var ent;
 
-		if (ige.isClient) {
+		//if (ige.isClient) {
 			ige.layersById = layersById;
-		}
+		//}
 
 		// Define the function to call when all textures have finished loading
 		allTexturesLoadedFunc = function () {
