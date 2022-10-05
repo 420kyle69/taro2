@@ -634,14 +634,14 @@ var PhysicsComponent = IgeEventingClass.extend({
 								
 							if (ige.physics && ige.game.cspEnabled && 
 									(
-										( // move my own unit immediately while ignoring the server stream
-											ige.client.selectedUnit == entity && !entity._stats.aiEnabled &&
-											(entity.nextPhysicsFrame == undefined || ige._currentTime > entity.nextPhysicsFrame[0])
-										) ||
 										(
-											entity._category == 'projectile'
-											// we probably need a condition to check if this projectile's parent item was streaming it or not?
+											entity._category == 'projectile' // we probably need a condition to check if this projectile's parent item was streaming it or not?
+										) || 											
+										( // move my own unit immediately while ignoring the server stream
+											!entity._stats.aiEnabled && ige.client.selectedUnit == entity && !entity._stats.aiEnabled &&
+											(entity.nextPhysicsFrame == undefined || ige._currentTime > entity.nextPhysicsFrame[0])
 										)
+										
 									)
 							) {
 								entity.prevPhysicsFrame = entity.nextPhysicsFrame;
@@ -654,7 +654,6 @@ var PhysicsComponent = IgeEventingClass.extend({
 								entity.nextPhysicsFrame = undefined;
 								
 							}
-
 								entity.body.setPosition({ x: x / entity._b2dRef._scaleRatio, y: y / entity._b2dRef._scaleRatio });
 								entity.body.setAngle(angle);
 							}
