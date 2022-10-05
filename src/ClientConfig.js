@@ -70,6 +70,7 @@ var igeClientConfig = {
 		'renderer/phaser/classes/PhaserFloatingText.js',
 		'renderer/phaser/classes/PhaserChatBubble.js',
 		'renderer/phaser/classes/PhaserRegion.js',
+		'renderer/phaser/classes/PhaserRay.js',
 		'renderer/phaser/scenes/PhaserScene.js',
 		'renderer/phaser/scenes/GameScene.js',
 		'renderer/phaser/classes/PhaserJoystick.js',

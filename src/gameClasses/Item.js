@@ -398,8 +398,10 @@ var Item = IgeEntityPhysics.extend({
 
 										def.ReportFixture = function (fixture, point, normal, fraction) {
 											var fixtureList = fixture.m_body.m_fixtureList;
+											console.log(fixtureList)
 											var entity = fixtureList && fixtureList.igeId && ige.$(fixtureList.igeId);
 											if (entity) {
+
 												entity.lastRaycastCollisionPosition = {
 													x: point.x * self.scaleRatio,
 													y: point.y * self.scaleRatio
@@ -429,10 +431,22 @@ var Item = IgeEntityPhysics.extend({
 									};
 
 									var callback = raycastMultipleCallback();
+									console.log(ige.physics.world().rayCast);
+									if (ige.isClient) {
+										ige.client.emit('create-ray', {
+											start: {
+												x: raycastStartPosition.x / 2,
+												y: raycastStartPosition.y / 2
+											},
+											end: {
+												x: endPosition.x / 2,
+												y: endPosition.y / 2
+											}
+										});
+									}
 
 									// ige.physics.world().rayCast(, callback.ReportFixture);
 									ige.physics.world().rayCast(
-										callback.ReportFixture,
 										{
 											x: raycastStartPosition.x / self.scaleRatio,
 											y: raycastStartPosition.y / self.scaleRatio
@@ -440,12 +454,17 @@ var Item = IgeEntityPhysics.extend({
 										{
 											x: endPosition.x / self.scaleRatio,
 											y: endPosition.y / self.scaleRatio
-										}
+										},
+										callback.ReportFixture
 									);
 
 									// if (!self._stats.penetration) {
 									ige.game.entitiesCollidingWithLastRaycast = _.orderBy(self.raycastTargets, ['raycastFraction'], ['asc']);
 									// }
+									console.log(callback);
+									ige.game.entitiesCollidingWithLastRaycast.forEach((x) => {
+										console.log(x);
+									});
 									ige.queueTrigger('raycastItemFired', {
 										itemId: self.id(),
 										unitId: ownerId
