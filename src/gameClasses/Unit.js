@@ -634,10 +634,9 @@ var Unit = IgeEntityPhysics.extend({
 	},
 
 	// hold an item given in the inventory slot. hide the last item
-	// @currentItemIndex refers to last pickup item
+	// @currentItemIndex refers to the selected item slot
 	changeItem: function (itemIndex) {
 
-		// WARNING: Verify that isClient can be any unit or just mine
 		var self = this;
 
 		if (itemIndex == undefined) {
@@ -649,13 +648,6 @@ var Unit = IgeEntityPhysics.extend({
 
 		console.log(
 			`running Unit.changeItem(${itemIndex}) on ${ige.isClient ? 'Client' : 'Server'}`,
-			newItem ?
-				newItem.id() :
-				null,
-			oldItem ?
-				oldItem.id() :
-				null,
-			this._stats.itemIds
 		);
 
 		if (newItem && newItem.id() == self._stats.currentItemId) {
@@ -690,11 +682,14 @@ var Unit = IgeEntityPhysics.extend({
 					width: newItem._stats.currentBody.width, // this could be causing item size issues by using currentBody dimensions
 					height: newItem._stats.currentBody.height
 				});
+
 				newItem.applyAnimationForState('selected');
+
 				let customTween = {
 					type: 'swing',
 					keyFrames: [[0, [0, 0, -1.57]], [100, [0, 0, 0]]]
 				};
+
 				newItem.tween.start(null, this._rotate.z, customTween);
 			}
 		}
@@ -834,7 +829,7 @@ var Unit = IgeEntityPhysics.extend({
 				}
 			}
 
-			self.changeItem(self._stats.currentItemIndex);
+			self.changeItem(self._stats.currentItemIndex); // this will call change item on client for not just "my" units
 		} else if (ige.isClient) {
 			var zIndex = self._stats.currentBody && self._stats.currentBody['z-index'] || { layer: 3, depth: 3 };
 
@@ -965,6 +960,9 @@ var Unit = IgeEntityPhysics.extend({
 	pickUpItem: function (item) {
 		var self = this;
 
+		console.log(
+			`running Unit.pickUpItem() on ${ige.isClient ? 'Client' : 'Server'}`,
+		);
 		// if item is suppose to be consumed immediately
 		// this ensures that item is picked up only once, and is only picked up by units that can pick up this item
 		var itemData = item._stats || item;
@@ -976,7 +974,7 @@ var Unit = IgeEntityPhysics.extend({
 			if (itemData.isUsedOnPickup && self.canUseItem(itemData)) {
 				if (!isItemInstance) {
 					item = new Item(itemData);
-					item.script.trigger("entityCreated");
+					item.script.trigger('entityCreated');
 				}
 				ige.devLog('using item immediately');
 				item.setOwnerUnit(self);
@@ -986,7 +984,9 @@ var Unit = IgeEntityPhysics.extend({
 			} else {
 				// if designated item slot is already occupied, unit cannot get this item
 				var availableSlot = self.inventory.getFirstAvailableSlotForItem(itemData);
-				if (itemData.controls == undefined || (itemData.controls.canMerge || itemData.controls.canMerge == undefined || itemData.controls.canMerge == null)) { // Check if the item can merge
+
+				// Check if the item can merge
+				if (itemData.controls == undefined || (itemData.controls.canMerge || itemData.controls.canMerge == undefined || itemData.controls.canMerge == null)) {
 					// insert/merge itemData's quantity into matching items in the inventory
 					var totalInventorySize = this.inventory.getTotalInventorySize();
 					for (var i = 0; i < totalInventorySize; i++) {
@@ -1039,12 +1039,14 @@ var Unit = IgeEntityPhysics.extend({
 						// itemData.stateId = (availableSlot-1 == this._stats.currentItemIndex) ? 'selected' : 'unselected';
 						item = new Item(itemData);
 						ige.game.lastCreatedItemId = item._id;
-						item.script.trigger("entityCreated");
+						item.script.trigger('entityCreated');
 					}
 					self.inventory.insertItem(item, availableSlot - 1);
-					self.streamUpdateData([{ itemIds: self._stats.itemIds }]);
+
+					self.streamUpdateData([{ itemIds: self._stats.itemIds }]); // Server only?
 					var slotIndex = availableSlot - 1;
-					item.streamUpdateData([
+
+					item.streamUpdateData([ // Server only?
 						{ ownerUnitId: self.id() },
 						{ quantity: itemData.quantity },
 						{ slotIndex: slotIndex }
@@ -1058,8 +1060,9 @@ var Unit = IgeEntityPhysics.extend({
 						self.updateStats(item.id());
 					}
 
+					this.setCurrentItem(); // this MUST come after item.streamUpdateData
+
 					if (slotIndex == self._stats.currentItemIndex) {
-						self._stats.currentItemId = item.id();
 						item.setState('selected');
 					} else {
 						item.setState('unselected');
@@ -1202,6 +1205,9 @@ var Unit = IgeEntityPhysics.extend({
 
 	dropItem: function (itemIndex) {
 		// Unit.prototype.log("dropItem " + itemIndex)
+		console.log(
+			`running Unit.dropItem(${itemIndex}) on ${ige.isClient ? 'Client' : 'Server'}`,
+		);
 		var self = this;
 		var item = self.inventory.getItemBySlotNumber(itemIndex + 1);
 		if (item) {
@@ -1237,13 +1243,14 @@ var Unit = IgeEntityPhysics.extend({
 
 				item.setState('dropped', defaultData);
 				item.setOwnerUnit(undefined);
-				self._stats.currentItemId = null;
 
 				if (item._stats.hidden) {
 					item.streamUpdateData([{ hidden: false }]);
 				}
 
 				self.inventory.removeItem(itemIndex, item.id());
+
+				this.setCurrentItem();
 
 				if (item._stats.bonus && item._stats.bonus.passive) {
 					if (item._stats.slotIndex < this._stats.inventorySize || item._stats.bonus.passive.isDisabledInBackpack != true) {
@@ -1427,12 +1434,12 @@ var Unit = IgeEntityPhysics.extend({
 					case 'itemIds':
 						// update shop as player points are changed and when shop modal is open
 						if (ige.isClient) {
-							console.log('Unit.streamUpdateData(\'itemIds\') on the client');
 							this.inventory.update();
 							if ($('#modd-item-shop-modal').hasClass('show')) {
 								ige.shop.openItemShop();
 							}
 							if (this !== ige.client.selectedUnit) {
+								console.log('Unit.streamUpdateData(\'itemIds\') on the client', newValue);
 								// WARNING: need to replace the old logic for updating currentItemId when itemIds changes
 								this.setCurrentItem();
 							}
@@ -1442,7 +1449,7 @@ var Unit = IgeEntityPhysics.extend({
 					case 'currentItemIndex':
 						// for tracking selected index of other units
 						if (ige.isClient && this !== ige.client.selectedUnit) {
-							console.log('Unit.streamUpdateData(\'currentItemIndex\') on the client');
+							console.log('Unit.streamUpdateData(\'currentItemIndex\') on the client', newValue);
 							this.setCurrentItem(newValue);
 						}
 						break;
@@ -1679,19 +1686,36 @@ var Unit = IgeEntityPhysics.extend({
 		self.persistentDataLoaded = true;
 	},
 
+	/*
+	 * called from:
+	 * Unit.streamUpdateData on Client: 'itemIds', 'currentItemIndex' for units not 'mine'
+	 * Unit.changeItem on Server, Client
+	 * Unit.pickupItem on Server, Client - appears to only run on server for keypressed abilities
+	 * Unit.dropItem on Server - no client logic
+	 * Inventory.removeItem calls streamUpdateData(itemIds) from server
+	*/
 	setCurrentItem: function (itemIndex) {
 		// if param itemIndex is provided, use it to set index
 		if (itemIndex !== undefined) {
-			// set the tracking properties when currentItemIndex changes
+			// set the _stats property for index when currentItemIndex changes
 			this._stats.currentItemIndex = itemIndex;
 		}
 		const currentItemIndex = this._stats.currentItemIndex;
+		// independent of currentItemIndex change, set currentItem. null is empty slot
+		// use currentItem to set the _stats property for currentItemId
+		// important for item drop/pickup/remove
 		const currentItem = ige.$(this._stats.itemIds[currentItemIndex]) || null;
-
 		this._stats.currentItemId = currentItem ? currentItem.id() : null;
 		if (currentItem) {
 			currentItem.setState('selected'); //should we really be handling state change for item here?
+			// set state is handled within pickupItem for those cases
 		}
+
+		console.log(
+			`running Unit.setCurrentItem(${itemIndex ? itemIndex : ''}) on ${ige.isClient ? 'Client' : 'Server'}`,
+			`this._stats.currentItemIndex: ${this._stats.currentItemIndex}`,
+			`this._stats.currentItemId: ${this._stats.currentItemId}`
+		);
 
 		// tell phaser to respond to change in item
 	},
