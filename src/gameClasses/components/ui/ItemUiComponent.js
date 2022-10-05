@@ -80,7 +80,7 @@ var ItemUiComponent = IgeEntity.extend({
 		// }
 	},
 	updateItemQuantity: function (item) {
-		console.log('calling itemUi.updateItemQuantity on ', item.id());
+
 		var itemSlot = $(`#slotindex-${item._stats.slotIndex}`);
 		quantitySpan = itemSlot.find('small');
 		if (quantitySpan) {

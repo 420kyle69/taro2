@@ -646,16 +646,11 @@ var Unit = IgeEntityPhysics.extend({
 		var newItem = ige.$(self._stats.itemIds[itemIndex]) || null;
 		var oldItem = ige.$(self._stats.currentItemId) || null;
 
-		console.log(
-			`running Unit.changeItem(${itemIndex}) on ${ige.isClient ? 'Client' : 'Server'}`,
-		);
+		// console.log(`running Unit.changeItem(${itemIndex}) on ${ige.isClient ? 'Client' : 'Server'}`);
 
 		if (newItem && newItem.id() == self._stats.currentItemId) {
 			return;
 		}
-
-		// update index and id in the same place
-		this.setCurrentItem(itemIndex);
 
 		if (oldItem) {
 			oldItem.stopUsing();
@@ -705,6 +700,9 @@ var Unit = IgeEntityPhysics.extend({
 			var item = this.inventory.getItemBySlotNumber(itemIndex + 1);
 			ige.itemUi.updateItemInfo(item);
 		}
+
+		// update index and id in the same place
+		this.setCurrentItem(itemIndex);
 	},
 
 	changeUnitType: function (type, defaultData) {
@@ -829,7 +827,7 @@ var Unit = IgeEntityPhysics.extend({
 				}
 			}
 
-			self.changeItem(self._stats.currentItemIndex); // this will call change item on client for not just "my" units
+			self.changeItem(self._stats.currentItemIndex); // this will call change item on client for all units
 		} else if (ige.isClient) {
 			var zIndex = self._stats.currentBody && self._stats.currentBody['z-index'] || { layer: 3, depth: 3 };
 
@@ -959,10 +957,8 @@ var Unit = IgeEntityPhysics.extend({
 	 */
 	pickUpItem: function (item) {
 		var self = this;
-
-		console.log(
-			`running Unit.pickUpItem() on ${ige.isClient ? 'Client' : 'Server'}`,
-		);
+		// all Server only
+		// console.log(`running Unit.pickUpItem() on ${ige.isClient ? 'Client' : 'Server'}`);
 		// if item is suppose to be consumed immediately
 		// this ensures that item is picked up only once, and is only picked up by units that can pick up this item
 		var itemData = item._stats || item;
@@ -1041,16 +1037,26 @@ var Unit = IgeEntityPhysics.extend({
 						ige.game.lastCreatedItemId = item._id;
 						item.script.trigger('entityCreated');
 					}
-					self.inventory.insertItem(item, availableSlot - 1);
 
-					self.streamUpdateData([{ itemIds: self._stats.itemIds }]); // Server only?
 					var slotIndex = availableSlot - 1;
 
-					item.streamUpdateData([ // Server only?
+					// Item
+					item.streamUpdateData([
 						{ ownerUnitId: self.id() },
 						{ quantity: itemData.quantity },
 						{ slotIndex: slotIndex }
 					]);
+
+					self.inventory.insertItem(item, availableSlot - 1);
+
+					if (slotIndex == self._stats.currentItemIndex) {
+						item.setState('selected');
+					} else {
+						item.setState('unselected');
+					}
+
+					// Unit
+					self.streamUpdateData([{ itemIds: self._stats.itemIds }]);
 
 					if (item._stats.bonus && item._stats.bonus.passive) {
 						if (item._stats.slotIndex < self._stats.inventorySize || item._stats.bonus.passive.isDisabledInBackpack != true) {
@@ -1061,12 +1067,6 @@ var Unit = IgeEntityPhysics.extend({
 					}
 
 					this.setCurrentItem(); // this MUST come after item.streamUpdateData
-
-					if (slotIndex == self._stats.currentItemIndex) {
-						item.setState('selected');
-					} else {
-						item.setState('unselected');
-					}
 
 					ige.game.lastCreatedItemId = item.id(); // this is necessary in case item isn't a new instance, but an existing item getting quantity updated
 
@@ -1205,9 +1205,7 @@ var Unit = IgeEntityPhysics.extend({
 
 	dropItem: function (itemIndex) {
 		// Unit.prototype.log("dropItem " + itemIndex)
-		console.log(
-			`running Unit.dropItem(${itemIndex}) on ${ige.isClient ? 'Client' : 'Server'}`,
-		);
+		// console.log(`running Unit.dropItem(${itemIndex}) on ${ige.isClient ? 'Client' : 'Server'}`);
 		var self = this;
 		var item = self.inventory.getItemBySlotNumber(itemIndex + 1);
 		if (item) {
@@ -1435,21 +1433,20 @@ var Unit = IgeEntityPhysics.extend({
 						// update shop as player points are changed and when shop modal is open
 						if (ige.isClient) {
 							this.inventory.update();
+
 							if ($('#modd-item-shop-modal').hasClass('show')) {
 								ige.shop.openItemShop();
 							}
-							if (this !== ige.client.selectedUnit) {
-								console.log('Unit.streamUpdateData(\'itemIds\') on the client', newValue);
-								// WARNING: need to replace the old logic for updating currentItemId when itemIds changes
-								this.setCurrentItem();
-							}
+
+							// console.log('Unit.streamUpdateData(\'itemIds\') on the client', newValue);
+							this.setCurrentItem();
 						}
 						break;
 
 					case 'currentItemIndex':
 						// for tracking selected index of other units
 						if (ige.isClient && this !== ige.client.selectedUnit) {
-							console.log('Unit.streamUpdateData(\'currentItemIndex\') on the client', newValue);
+							// console.log('Unit.streamUpdateData(\'currentItemIndex\') on the client', newValue);
 							this.setCurrentItem(newValue);
 						}
 						break;
@@ -1706,15 +1703,24 @@ var Unit = IgeEntityPhysics.extend({
 		// important for item drop/pickup/remove
 		const currentItem = ige.$(this._stats.itemIds[currentItemIndex]) || null;
 		this._stats.currentItemId = currentItem ? currentItem.id() : null;
-		if (currentItem) {
-			currentItem.setState('selected'); //should we really be handling state change for item here?
-			// set state is handled within pickupItem for those cases
-		}
 
+		// client log of item state after pickup will still show 'dropped'. Currently state has not finished updating. It IS 'selected'/'unselected'
+		const debugMap = this._stats.itemIds.map((x) => {
+			const item = ige.$(x) || null;
+			const state = item ? item._stats.stateId : null;
+			return {
+				id: x,
+				item: item,
+				state: state,
+			};
+		});
 		console.log(
-			`running Unit.setCurrentItem(${itemIndex ? itemIndex : ''}) on ${ige.isClient ? 'Client' : 'Server'}`,
-			`this._stats.currentItemIndex: ${this._stats.currentItemIndex}`,
-			`this._stats.currentItemId: ${this._stats.currentItemId}`
+			`running Unit.setCurrentItem(${itemIndex ? itemIndex : ''}) on ${ige.isClient ? 'Client' : 'Server'}\n`,
+			`this._stats.currentItemIndex: ${this._stats.currentItemIndex}\n`,
+			`this._stats.currentItemId: ${this._stats.currentItemId}\n`,
+			this.id(),
+			'\n',
+			debugMap
 		);
 
 		// tell phaser to respond to change in item
