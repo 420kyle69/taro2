@@ -2,7 +2,16 @@ class PhaserPaletteButton {
     button: Phaser.GameObjects.Rectangle;
     palette: PhaserPalette;
 
-    constructor (palette: PhaserPalette, text, x, y, w, container, func, value?) {
+    constructor (
+        palette: PhaserPalette,
+        text: string,
+        x: number, 
+        y: number, 
+        w: number, 
+        container: Phaser.GameObjects.Container, 
+        func: (...args: any[]) => void, 
+        value?: number
+        ) {
         //const text = '+';
 		//const w = 30;
 		const h = 30;
