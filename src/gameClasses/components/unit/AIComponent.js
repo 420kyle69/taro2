@@ -13,8 +13,10 @@ var AIComponent = IgeEntity.extend({
 
 		// sensor needs to be enabled regardless of AI to process sensor collision triggers
 		// for example, in cell-eater, items are consumed via sensors
-		unit.sensor = new Sensor(unit, unit._stats.ai.sensorRadius);
-
+		if (unit._stats.ai.sensorRadius > 0 && unit.sensor == undefined) {
+		 	unit.sensor = new Sensor(unit, unit._stats.ai.sensorRadius);
+		}
+		
 		if (unit._stats.ai) {
 			unit._stats.aiEnabled = unit._stats.ai.enabled;
 		
