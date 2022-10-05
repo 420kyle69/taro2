@@ -12,6 +12,8 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 	COLOR_DARK: number;
 	layerButtonsContainer: Phaser.GameObjects.Container;
 	pointerover: any;
+	layerButtons: PhaserPaletteButton[];
+	COLOR_LIGHT: number;
 
 	constructor(
 		scene: Phaser.Scene,
@@ -40,8 +42,8 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 
 		// When loading from an array, make sure to specify the tileWidth and tileHeight
 		const map = this.map = this.scene.make.tilemap({ key: 'palette', data: paletteMap, tileWidth: 16, tileHeight: 16 });
-		const texturesLayer = this.texturesLayer = map.createLayer(0, tileset, 0, 0).setOrigin(0, 0).setInteractive()/*.setScrollFactor(0,0)*/.setPosition(this.x, this.y);
-		//this.add(texturesLayer);
+		const texturesLayer = this.texturesLayer = map.createLayer(0, tileset, 0, 0).setOrigin(0, 0).setInteractive().setPosition(this.x, this.y);
+		
 		scene.add.existing(texturesLayer);
 
 		texturesLayer.on('pointermove', function (p) {
@@ -56,11 +58,11 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 			}
 		  });
 
-		const camera = this.camera = this.scene.cameras.add(this.scene.sys.game.canvas.width - texturesLayer.width - 40, 180, texturesLayer.width, texturesLayer.height).setScroll(this.x, this.y).setZoom(1).setName('palette');
+		const camera = this.camera = this.scene.cameras.add(this.scene.sys.game.canvas.width - texturesLayer.width - 40, this.scene.sys.game.canvas.height - texturesLayer.height - 40, texturesLayer.width, texturesLayer.height).setScroll(this.x, this.y).setZoom(1).setName('palette');
 		camera.setBackgroundColor(0x002244);
 
 		const COLOR_PRIMARY = 0x4e342e;
-		const COLOR_LIGHT = 0x7b5e57;
+		const COLOR_LIGHT = this.COLOR_LIGHT = 0x7b5e57;
 		const COLOR_DARK = this.COLOR_DARK = 0x260e04;
 
 		const scrollBarContainer = this.scrollBarContainer = new Phaser.GameObjects.Container(scene);
@@ -134,23 +136,34 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 		this.scene.scale.on(Phaser.Scale.Events.RESIZE, () => {
 			camera.x = this.scene.sys.game.canvas.width - texturesLayer.width - 40;
 			scrollBarContainer.x = this.camera.x;
-			layerButtonsContainer.x = this.camera.x + texturesLayer.width - 124;
+			layerButtonsContainer.x = this.camera.x + texturesLayer.width - 93;
 		});
 
-		this.addButton('+', 0, -31, 30, scrollBarContainer, this.zoom.bind(this), -1);
-		this.addButton('-', 31, -31, 30, scrollBarContainer, this.zoom.bind(this), 1);
+		new PhaserPaletteButton (this, '+', 0, -31, 30, scrollBarContainer, this.zoom.bind(this), -1);
+		new PhaserPaletteButton (this, '-', 31, -31, 30, scrollBarContainer, this.zoom.bind(this), 1);
 
 		const layerButtonsContainer = this.layerButtonsContainer = new Phaser.GameObjects.Container(scene);
 		scene.add.existing(layerButtonsContainer);
 		//this.scrollBarContainer.add(layerButtonsContainer);
 		layerButtonsContainer.x = this.camera.x + texturesLayer.width - 93;
 		layerButtonsContainer.y = this.camera.y;
+		layerButtonsContainer.width = 120;
+		layerButtonsContainer.height = 160;
 
-		this.addButton('floor', 0,-62, 120, layerButtonsContainer, this.switchLayer.bind(this), 0);
-		this.addButton('floor2', 0,-93, 120, layerButtonsContainer, this.switchLayer.bind(this), 1);
-		this.addButton('walls', 0,-124, 120, layerButtonsContainer, this.switchLayer.bind(this), 2);
-		this.addButton('trees', 0,-155, 120, layerButtonsContainer, this.switchLayer.bind(this), 3);
-		this.addButton('tiles', 0, -31, 120, layerButtonsContainer, this.toggle.bind(this));
+		this.layerButtons = [];
+		this.layerButtons.push (
+			new PhaserPaletteButton (this, 'floor', 0,-62, 120, layerButtonsContainer, this.switchLayer.bind(this), 0),
+			new PhaserPaletteButton (this, 'floor2', 0,-93, 120, layerButtonsContainer, this.switchLayer.bind(this), 1),
+			new PhaserPaletteButton (this, 'walls', 0,-124, 120, layerButtonsContainer, this.switchLayer.bind(this), 2),
+			new PhaserPaletteButton (this, 'trees', 0,-155, 120, layerButtonsContainer, this.switchLayer.bind(this), 3)
+		)
+		this.layerButtons[0].highlight(true);
+
+		/*new PhaserPaletteButton (this, 'floor', 0,-62, 120, layerButtonsContainer, this.switchLayer.bind(this), 0);
+		new PhaserPaletteButton (this, 'floor2', 0,-93, 120, layerButtonsContainer, this.switchLayer.bind(this), 1);
+		new PhaserPaletteButton (this, 'walls', 0,-124, 120, layerButtonsContainer, this.switchLayer.bind(this), 2);
+		new PhaserPaletteButton (this, 'trees', 0,-155, 120, layerButtonsContainer, this.switchLayer.bind(this), 3);*/
+		new PhaserPaletteButton (this, 'tiles', 0, -31, 120, layerButtonsContainer, this.toggle.bind(this));
 
 		//this.width = 500;
 		//this.height = 500;
@@ -186,34 +199,15 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 		this.scrollBarContainer.setVisible(true);
 	}
 
-	addButton (text, x, y, w, container, func, value?) {
-		//const text = '+';
-		//const w = 30;
-		const h = 30;
-		//const x = 0;
-		//const y = -h -1;
-		const button = this.scene.add.rectangle(x + w/2, y + h/2, w, h, this.COLOR_DARK);
-		button.setInteractive();
-		container.add(button);
-		const label = this.scene.add.text(
-			x + w/2, y + h/2, text
-		);
-		label.setFontFamily('Verdana');
-		label.setFontSize(26);
-		label.setOrigin(0.5);
-		label.setResolution(4);
-		container.add(label);
-		button.on('pointerdown', () => {
-			if (value || value === 0) func(value);
-			else func();
-		});
-	}
-
 	switchLayer(value) {
 		const scene = this.scene as any;
 		const gameMap = scene.gameScene.tilemap;
-		//console.log('switch layer from', gameMap.currentLayerIndex, 'to', value);
 		gameMap.currentLayerIndex = value;
+		this.layerButtons.forEach(button => {
+			button.highlight(false);
+		});
+		this.layerButtons[value].highlight(true);
+		
 	}
 
 	zoom (deltaY: number): void {

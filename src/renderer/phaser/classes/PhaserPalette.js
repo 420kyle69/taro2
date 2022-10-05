@@ -33,8 +33,7 @@ var PhaserPalette = /** @class */ (function (_super) {
         console.log('map', paletteMap);
         // When loading from an array, make sure to specify the tileWidth and tileHeight
         var map = _this.map = _this.scene.make.tilemap({ key: 'palette', data: paletteMap, tileWidth: 16, tileHeight: 16 });
-        var texturesLayer = _this.texturesLayer = map.createLayer(0, tileset, 0, 0).setOrigin(0, 0).setInteractive() /*.setScrollFactor(0,0)*/.setPosition(_this.x, _this.y);
-        //this.add(texturesLayer);
+        var texturesLayer = _this.texturesLayer = map.createLayer(0, tileset, 0, 0).setOrigin(0, 0).setInteractive().setPosition(_this.x, _this.y);
         scene.add.existing(texturesLayer);
         texturesLayer.on('pointermove', function (p) {
             if (!p.isDown)
@@ -48,10 +47,10 @@ var PhaserPalette = /** @class */ (function (_super) {
                 camera.scrollY -= scrollY;
             }
         });
-        var camera = _this.camera = _this.scene.cameras.add(_this.scene.sys.game.canvas.width - texturesLayer.width - 40, 180, texturesLayer.width, texturesLayer.height).setScroll(_this.x, _this.y).setZoom(1).setName('palette');
+        var camera = _this.camera = _this.scene.cameras.add(_this.scene.sys.game.canvas.width - texturesLayer.width - 40, _this.scene.sys.game.canvas.height - texturesLayer.height - 40, texturesLayer.width, texturesLayer.height).setScroll(_this.x, _this.y).setZoom(1).setName('palette');
         camera.setBackgroundColor(0x002244);
         var COLOR_PRIMARY = 0x4e342e;
-        var COLOR_LIGHT = 0x7b5e57;
+        var COLOR_LIGHT = _this.COLOR_LIGHT = 0x7b5e57;
         var COLOR_DARK = _this.COLOR_DARK = 0x260e04;
         var scrollBarContainer = _this.scrollBarContainer = new Phaser.GameObjects.Container(scene);
         scene.add.existing(scrollBarContainer);
@@ -111,20 +110,25 @@ var PhaserPalette = /** @class */ (function (_super) {
         _this.scene.scale.on(Phaser.Scale.Events.RESIZE, function () {
             camera.x = _this.scene.sys.game.canvas.width - texturesLayer.width - 40;
             scrollBarContainer.x = _this.camera.x;
-            layerButtonsContainer.x = _this.camera.x + texturesLayer.width - 124;
+            layerButtonsContainer.x = _this.camera.x + texturesLayer.width - 93;
         });
-        _this.addButton('+', 0, -31, 30, scrollBarContainer, _this.zoom.bind(_this), -1);
-        _this.addButton('-', 31, -31, 30, scrollBarContainer, _this.zoom.bind(_this), 1);
+        new PhaserPaletteButton(_this, '+', 0, -31, 30, scrollBarContainer, _this.zoom.bind(_this), -1);
+        new PhaserPaletteButton(_this, '-', 31, -31, 30, scrollBarContainer, _this.zoom.bind(_this), 1);
         var layerButtonsContainer = _this.layerButtonsContainer = new Phaser.GameObjects.Container(scene);
         scene.add.existing(layerButtonsContainer);
         //this.scrollBarContainer.add(layerButtonsContainer);
         layerButtonsContainer.x = _this.camera.x + texturesLayer.width - 93;
         layerButtonsContainer.y = _this.camera.y;
-        _this.addButton('floor', 0, -62, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 0);
-        _this.addButton('floor2', 0, -93, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 1);
-        _this.addButton('walls', 0, -124, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 2);
-        _this.addButton('trees', 0, -155, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 3);
-        _this.addButton('tiles', 0, -31, 120, layerButtonsContainer, _this.toggle.bind(_this));
+        layerButtonsContainer.width = 120;
+        layerButtonsContainer.height = 160;
+        _this.layerButtons = [];
+        _this.layerButtons.push(new PhaserPaletteButton(_this, 'floor', 0, -62, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 0), new PhaserPaletteButton(_this, 'floor2', 0, -93, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 1), new PhaserPaletteButton(_this, 'walls', 0, -124, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 2), new PhaserPaletteButton(_this, 'trees', 0, -155, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 3));
+        _this.layerButtons[0].highlight(true);
+        /*new PhaserPaletteButton (this, 'floor', 0,-62, 120, layerButtonsContainer, this.switchLayer.bind(this), 0);
+        new PhaserPaletteButton (this, 'floor2', 0,-93, 120, layerButtonsContainer, this.switchLayer.bind(this), 1);
+        new PhaserPaletteButton (this, 'walls', 0,-124, 120, layerButtonsContainer, this.switchLayer.bind(this), 2);
+        new PhaserPaletteButton (this, 'trees', 0,-155, 120, layerButtonsContainer, this.switchLayer.bind(this), 3);*/
+        new PhaserPaletteButton(_this, 'tiles', 0, -31, 120, layerButtonsContainer, _this.toggle.bind(_this));
         return _this;
         //this.width = 500;
         //this.height = 500;
@@ -158,33 +162,14 @@ var PhaserPalette = /** @class */ (function (_super) {
         this.camera.setVisible(true);
         this.scrollBarContainer.setVisible(true);
     };
-    PhaserPalette.prototype.addButton = function (text, x, y, w, container, func, value) {
-        //const text = '+';
-        //const w = 30;
-        var h = 30;
-        //const x = 0;
-        //const y = -h -1;
-        var button = this.scene.add.rectangle(x + w / 2, y + h / 2, w, h, this.COLOR_DARK);
-        button.setInteractive();
-        container.add(button);
-        var label = this.scene.add.text(x + w / 2, y + h / 2, text);
-        label.setFontFamily('Verdana');
-        label.setFontSize(26);
-        label.setOrigin(0.5);
-        label.setResolution(4);
-        container.add(label);
-        button.on('pointerdown', function () {
-            if (value || value === 0)
-                func(value);
-            else
-                func();
-        });
-    };
     PhaserPalette.prototype.switchLayer = function (value) {
         var scene = this.scene;
         var gameMap = scene.gameScene.tilemap;
-        //console.log('switch layer from', gameMap.currentLayerIndex, 'to', value);
         gameMap.currentLayerIndex = value;
+        this.layerButtons.forEach(function (button) {
+            button.highlight(false);
+        });
+        this.layerButtons[value].highlight(true);
     };
     PhaserPalette.prototype.zoom = function (deltaY) {
         var targetZoom;

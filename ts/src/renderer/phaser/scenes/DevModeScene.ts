@@ -171,11 +171,15 @@ class DevModeScene extends PhaserScene {
 					this.selectedTile = this.devPalette.map.getTileAt(palettePointerTileX, palettePointerTileY, true);
 					this.selectedTile.tint = 0x87cfff;
 				}
-			} else if (!(this.input.activePointer.x > this.devPalette.scrollBarContainer.x
+			} else if ((!(this.input.activePointer.x > this.devPalette.scrollBarContainer.x
 				&& this.input.activePointer.x < this.devPalette.scrollBarContainer.x + this.devPalette.scrollBarContainer.width
 				&& this.input.activePointer.y > this.devPalette.scrollBarContainer.y - 30
 				&& this.input.activePointer.y < this.devPalette.scrollBarContainer.y + this.devPalette.scrollBarContainer.height)
-				|| !this.devPalette.visible) {
+				|| !this.devPalette.visible) &&
+				!(this.input.activePointer.x > this.devPalette.layerButtonsContainer.x
+				&& this.input.activePointer.x < this.devPalette.layerButtonsContainer.x + this.devPalette.layerButtonsContainer.width
+				&& this.input.activePointer.y > this.devPalette.layerButtonsContainer.y - this.devPalette.layerButtonsContainer.height
+				&& this.input.activePointer.y < this.devPalette.layerButtonsContainer.y)) {
 				this.paletteMarker.setVisible(false);
 				this.marker.setVisible(true);
 				// Rounds down to nearest tile

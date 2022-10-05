@@ -75,6 +75,7 @@ var igeClientConfig = {
 		'renderer/phaser/scenes/MobileControlsScene.js',
 		'renderer/phaser/scenes/DevModeScene.js',
 		'renderer/phaser/classes/PhaserPalette.js',
+		'renderer/phaser/classes/PhaserPaletteButton.js',
 		'renderer/phaser/PhaserRenderer.js',
 
 		'/client.js',
