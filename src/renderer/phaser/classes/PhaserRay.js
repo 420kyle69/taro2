@@ -13,14 +13,16 @@ var PhaserRay = /** @class */ (function () {
         this.sprite = scene.add.sprite(start.x, start.y, "projectile/".concat(type));
         scene.tweens.add({
             targets: this.sprite,
-            duration: 125,
+            duration: 2000,
             props: {
                 x: end.x,
                 y: end.y
             },
             onComplete: function () {
-                _this.sprite.destroy();
-                _this.sprite = null;
+                setTimeout(function () {
+                    _this.sprite.destroy();
+                    _this.sprite = null;
+                }, 100);
             }
         });
         // this.line.setOrigin(0,0);

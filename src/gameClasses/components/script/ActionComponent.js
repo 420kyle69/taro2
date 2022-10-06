@@ -2140,7 +2140,7 @@ var ActionComponent = IgeEntity.extend({
 								width: width
 							};
 
-							createdEntity.script.trigger("entityCreated", {thisEntityId: createdEntity.id()});		
+							createdEntity.script.trigger("entityCreated", {thisEntityId: createdEntity.id()});
 
 							if (isSandbox) {
 								if (!ige.game.createdEntities) ige.game.createdEntities = [];

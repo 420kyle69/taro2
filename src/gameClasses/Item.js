@@ -400,7 +400,7 @@ var Item = IgeEntityPhysics.extend({
 
 									// 	def.ReportFixture = function (fixture, point, normal, fraction) {
 									// 		var fixtureList = fixture.m_body.m_fixtureList;
-									// 		console.log(fixtureList)
+
 									// 		var entity = fixtureList && fixtureList.igeId && ige.$(fixtureList.igeId);
 									// 		if (entity) {
 
@@ -412,15 +412,15 @@ var Item = IgeEntityPhysics.extend({
 									// 			self.raycastTargets.push(entity);
 									// 		}
 
-									// 		// var body = fixture.getBody();
-									// 		// var userData = body.getUserData();
-									// 		// if (userData) {
-									// 		// 	if (userData == 0) {
-									// 		// 		// By returning -1, we instruct the calling code to ignore this fixture
-									// 		// 		// and continue the ray-cast to the next fixture.
-									// 		// 		return -1.0;
-									// 		// 	}
-									// 		// }
+											// var body = fixture.getBody();
+											// var userData = body.getUserData();
+											// if (userData) {
+											// 	if (userData == 0) {
+											// 		// By returning -1, we instruct the calling code to ignore this fixture
+											// 		// and continue the ray-cast to the next fixture.
+											// 		return -1.0;
+											// 	}
+											// }
 
 									// 		def.m_points.push(point);
 									// 		def.m_normals.push(normal);

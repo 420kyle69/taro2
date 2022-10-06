@@ -31,14 +31,17 @@ class PhaserRay {
 
 		scene.tweens.add({
 			targets: this.sprite,
-			duration: 125, // this should be a function of the magnitude of distance between start and end
+			duration: 2000, // this should be a function of the magnitude of distance between start and end
 			props: {
 				x: end.x,
 				y: end.y
 			},
 			onComplete: () => {
-				this.sprite.destroy();
-				this.sprite = null;
+				setTimeout(() => {
+
+					this.sprite.destroy();
+					this.sprite = null;
+				}, 100);
 			}
 		});
 

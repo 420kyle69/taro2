@@ -1190,6 +1190,28 @@ var VariableComponent = IgeEntity.extend({
 					returnValue = ige.game.entitiesCollidingWithLastRaycast;
 					break;
 				}
+				case 'entitiesBetweenTwoPositions': {
+					var positionA = self.getValue(text.positionA, vars);
+					var positionB = self.getValue(text.positionB, vars);
+					console.log('A', positionA, '\nB', positionB);
+					positionA = {
+						x: positionA.x / ige.physics._scaleRatio,
+						y: positionA.y / ige.physics._scaleRatio
+					};
+					positionB = {
+						x: positionB.x / ige.physics._scaleRatio,
+						y: positionB.y / ige.physics._scaleRatio
+					};
+					ige.raycaster.raycast(
+						positionA,
+						positionB,
+						'multiple'
+					);
+					console.log(ige.raycaster.data);
+
+					returnValue = ige.raycaster.data.entities;
+					break;
+				}
 				case 'entityLastRaycastCollisionPosition':
 					var entity = self.getValue(text.entity, vars);
 					if (entity) {
