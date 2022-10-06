@@ -25,7 +25,9 @@ var DevModeScene = /** @class */ (function (_super) {
         this.gameScene = ige.renderer.scene.getScene('Game');
         //const map = this.devPalette.map;
         var map = this.gameScene.tilemap;
-        this.selectedTile = map.getTileAt(2, 3);
+        this.selectedTile = map.getTileAt(2, 3, true);
+        this.selectedTileArea = [[map.getTileAt(2, 3, true), map.getTileAt(2, 4, true)], [map.getTileAt(3, 3, true), map.getTileAt(3, 4, true)]];
+        console.log('tile', this.selectedTile, 'area', this.selectedTileArea);
         ige.client.on('enterDevMode', function () {
             _this.defaultZoom = (_this.gameScene.zoomSize / 2.15);
             if (!_this.devPalette) {
@@ -148,9 +150,20 @@ var DevModeScene = /** @class */ (function (_super) {
                 this.paletteMarker.x = this.devPalette.map.tileToWorldX(palettePointerTileX);
                 this.paletteMarker.y = this.devPalette.map.tileToWorldY(palettePointerTileY);
                 if (this.input.manager.activePointer.isDown) {
-                    this.selectedTile.tint = 0xffffff;
-                    this.selectedTile = this.devPalette.map.getTileAt(palettePointerTileX, palettePointerTileY, true);
-                    this.selectedTile.tint = 0x87cfff;
+                    if (this.devPalette.area.x > 1 || this.devPalette.area.y > 1) {
+                        for (var i = 0; i < this.devPalette.area.x; i++) {
+                            for (var j = 0; j < this.devPalette.area.y; j++) {
+                                this.selectedTileArea[i][j].tint = 0xffffff;
+                                this.selectedTileArea[i][j] = this.devPalette.map.getTileAt(palettePointerTileX + i, palettePointerTileY + j, true);
+                                this.selectedTileArea[i][j].tint = 0x87cfff;
+                            }
+                        }
+                    }
+                    else {
+                        this.selectedTile.tint = 0xffffff;
+                        this.selectedTile = this.devPalette.map.getTileAt(palettePointerTileX, palettePointerTileY, true);
+                        this.selectedTile.tint = 0x87cfff;
+                    }
                 }
             }
             else if ((!(this.input.activePointer.x > this.devPalette.scrollBarContainer.x
@@ -171,7 +184,15 @@ var DevModeScene = /** @class */ (function (_super) {
                 this.marker.x = map.tileToWorldX(pointerTileX);
                 this.marker.y = map.tileToWorldY(pointerTileY);
                 if (this.input.manager.activePointer.rightButtonDown()) {
-                    if (map.getTileAt(pointerTileX, pointerTileY, true) !== null) {
+                    if (this.devPalette.area.x > 1 || this.devPalette.area.y > 1) {
+                        for (var i = 0; i < this.devPalette.area.x; i++) {
+                            for (var j = 0; j < this.devPalette.area.y; j++) {
+                                this.selectedTileArea[i][j].tint = 0xffffff;
+                                this.selectedTileArea[i][j] = map.getTileAt(pointerTileX + i, pointerTileY + j, true);
+                            }
+                        }
+                    }
+                    else {
                         this.selectedTile.tint = 0xffffff;
                         this.selectedTile = map.getTileAt(pointerTileX, pointerTileY, true);
                     }
@@ -179,12 +200,25 @@ var DevModeScene = /** @class */ (function (_super) {
                 if (this.input.manager.activePointer.leftButtonDown()
                     && (pointerTileX >= 0 && pointerTileY >= 0
                         && pointerTileX < map.width
-                        && pointerTileY < map.height)
-                    && this.selectedTile.index !== (map.getTileAt(pointerTileX, pointerTileY, true)).index) {
-                    map.putTileAt(this.selectedTile, pointerTileX, pointerTileY);
-                    map.getTileAt(pointerTileX, pointerTileY, true).tint = 0xffffff;
-                    console.log('place tile', this.selectedTile.index);
-                    ige.network.send('editTile', { gid: this.selectedTile.index, layer: map.currentLayerIndex, x: pointerTileX, y: pointerTileY });
+                        && pointerTileY < map.height)) {
+                    if (this.devPalette.area.x > 1 || this.devPalette.area.y > 1) {
+                        for (var i = 0; i < this.devPalette.area.x; i++) {
+                            for (var j = 0; j < this.devPalette.area.y; j++) {
+                                if (this.selectedTileArea[i][j].index !== (map.getTileAt(pointerTileX + i, pointerTileY + j, true)).index) {
+                                    map.putTileAt(this.selectedTileArea[i][j], pointerTileX + i, pointerTileY + j);
+                                    map.getTileAt(pointerTileX + i, pointerTileY + j, true).tint = 0xffffff;
+                                    console.log('place tile', this.selectedTileArea[i][j].index);
+                                    ige.network.send('editTile', { gid: this.selectedTileArea[i][j].index, layer: map.currentLayerIndex, x: pointerTileX + i, y: pointerTileY + j });
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        if (this.selectedTile.index !== (map.getTileAt(pointerTileX, pointerTileY, true)).index)
+                            map.putTileAt(this.selectedTile, pointerTileX, pointerTileY);
+                        console.log('place tile', this.selectedTile.index);
+                        ige.network.send('editTile', { gid: this.selectedTile.index, layer: map.currentLayerIndex, x: pointerTileX, y: pointerTileY });
+                    }
                 }
             }
         }

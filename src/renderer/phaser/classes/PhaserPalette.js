@@ -13,6 +13,17 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var PhaserPalette = /** @class */ (function (_super) {
     __extends(PhaserPalette, _super);
     function PhaserPalette(scene, tileset, rexUI) {
@@ -20,6 +31,7 @@ var PhaserPalette = /** @class */ (function (_super) {
         console.log('create palette', _this);
         _this.tileset = tileset;
         _this.rexUI = rexUI;
+        _this.scene = scene;
         _this.x = -1000;
         _this.y = 0;
         // Load a map from a 2D array of tile indices
@@ -114,6 +126,9 @@ var PhaserPalette = /** @class */ (function (_super) {
         });
         new PhaserPaletteButton(_this, '+', 0, -31, 30, scrollBarContainer, _this.zoom.bind(_this), -1);
         new PhaserPaletteButton(_this, '-', 31, -31, 30, scrollBarContainer, _this.zoom.bind(_this), 1);
+        new PhaserPaletteButton(_this, '_', 93, -31, 30, scrollBarContainer, _this.emptyTile.bind(_this));
+        new PhaserPaletteButton(_this, '.', 124, -31, 30, scrollBarContainer, _this.selectSingle.bind(_this));
+        new PhaserPaletteButton(_this, '[]', 155, -31, 30, scrollBarContainer, _this.selectArea.bind(_this));
         var layerButtonsContainer = _this.layerButtonsContainer = new Phaser.GameObjects.Container(scene);
         scene.add.existing(layerButtonsContainer);
         //this.scrollBarContainer.add(layerButtonsContainer);
@@ -121,14 +136,11 @@ var PhaserPalette = /** @class */ (function (_super) {
         layerButtonsContainer.y = _this.camera.y;
         layerButtonsContainer.width = 120;
         layerButtonsContainer.height = 160;
+        new PhaserPaletteButton(_this, 'tiles', 0, -31, 120, layerButtonsContainer, _this.toggle.bind(_this));
         _this.layerButtons = [];
         _this.layerButtons.push(new PhaserPaletteButton(_this, 'floor', 0, -62, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 0), new PhaserPaletteButton(_this, 'floor2', 0, -93, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 1), new PhaserPaletteButton(_this, 'walls', 0, -124, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 2), new PhaserPaletteButton(_this, 'trees', 0, -155, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 3));
         _this.layerButtons[0].highlight(true);
-        /*new PhaserPaletteButton (this, 'floor', 0,-62, 120, layerButtonsContainer, this.switchLayer.bind(this), 0);
-        new PhaserPaletteButton (this, 'floor2', 0,-93, 120, layerButtonsContainer, this.switchLayer.bind(this), 1);
-        new PhaserPaletteButton (this, 'walls', 0,-124, 120, layerButtonsContainer, this.switchLayer.bind(this), 2);
-        new PhaserPaletteButton (this, 'trees', 0,-155, 120, layerButtonsContainer, this.switchLayer.bind(this), 3);*/
-        new PhaserPaletteButton(_this, 'tiles', 0, -31, 120, layerButtonsContainer, _this.toggle.bind(_this));
+        _this.area = { x: 1, y: 1 };
         return _this;
         //this.width = 500;
         //this.height = 500;
@@ -144,6 +156,22 @@ var PhaserPalette = /** @class */ (function (_super) {
             console.log('pointerout');
         });*/
     }
+    PhaserPalette.prototype.emptyTile = function () {
+        var copy = __assign({}, this.scene.selectedTile);
+        copy.index = -1;
+        this.scene.selectedTile = copy;
+        this.scene.selectedTileArea = [[copy, copy], [copy, copy]];
+    };
+    PhaserPalette.prototype.selectSingle = function () {
+        this.area = { x: 1, y: 1 };
+        this.scene.marker.scale = 1;
+        this.scene.paletteMarker.scale = 1;
+    };
+    PhaserPalette.prototype.selectArea = function () {
+        this.area = { x: 2, y: 2 };
+        this.scene.marker.scale = 2;
+        this.scene.paletteMarker.scale = 2;
+    };
     PhaserPalette.prototype.toggle = function () {
         if (this.visible)
             this.hide();
