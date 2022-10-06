@@ -13,10 +13,14 @@ class PhaserRay {
         },
         color: any
     ) {
+        const v1 = new Phaser.Math.Vector2(start.x, start.y);
+        const v2 = new Phaser.Math.Vector2(end.x, end.y);
+
+        const realEnd = v2.subtract(v1);
         this.gameObject = scene.add.line(
             start.x, start.y,
             start.x, start.y,
-            end.x, end.y,
+            realEnd.x, realEnd.y,
             color,
         );
 

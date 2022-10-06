@@ -364,7 +364,7 @@ var Item = IgeEntityPhysics.extend({
 										});
 
 									var projectile = new Projectile(data);
-									projectile.script.trigger("entityCreated");		
+									projectile.script.trigger("entityCreated");
 									ige.game.lastCreatedProjectileId = projectile.id();
 								}
 								if (this._stats.bulletType == 'raycast') {
@@ -447,34 +447,38 @@ var Item = IgeEntityPhysics.extend({
 									);
 
 									if (ige.isClient) {
-										
+
 										ige.client.emit('create-ray', {
 											start: {
-												x: raycastStartPosition.x / 2,
-												y: raycastStartPosition.y / 2
+												x: raycastStartPosition.x /2,
+												y: raycastStartPosition.y /2
 											},
 											end: {
-												x: endPosition.x / 2,
-												y: endPosition.y / 2
+												x: endPosition.x,
+												y: endPosition.y
 											},
 											color: 0xffffff
 										});
 										if (ige.raycaster.raycastClosest.point) {
 											ige.client.emit('create-ray', {
 												start: {
-													x: raycastStartPosition.x / 2,
-													y: raycastStartPosition.y / 2
+													x: raycastStartPosition.x/2,
+													y: raycastStartPosition.y/2
 												},
 												end: {
-													x: ige.raycaster.raycastClosest.point.x  * self.scaleRatio / 2,
-													y: ige.raycaster.raycastClosest.point.y  * self.scaleRatio / 2
+													x: ige.raycaster.raycastClosest.point.x  * self.scaleRatio,
+													y: ige.raycaster.raycastClosest.point.y  * self.scaleRatio
 												},
 												color: 0xff0000
 											});
 										}
 									}
 
-									console.log(ige.raycaster.raycastClosest.point, {x: ige.raycaster.raycastClosest.point.x/2*self.scaleRatio, y: ige.raycaster.raycastClosest.point.y/2*self.scaleRatio});
+									console.log(
+										ige.raycaster.raycastClosest.point,
+										{x: raycastStartPosition.x/2, y: raycastStartPosition.y/2},
+										{x: ige.raycaster.raycastClosest.point.x*self.scaleRatio/2, y: ige.raycaster.raycastClosest.point.y*self.scaleRatio/2}
+									);
 
 									// if (!self._stats.penetration) {
 									ige.game.entitiesCollidingWithLastRaycast = _.orderBy(self.raycastTargets, ['raycastFraction'], ['asc']);
