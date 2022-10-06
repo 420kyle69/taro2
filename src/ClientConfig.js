@@ -54,6 +54,7 @@ var igeClientConfig = {
 		'/gameClasses/Cursor.js',
 
 		'/gameClasses/EntitiesToRender.js',
+		'/gameClasses/Raycaster.js',
 
 		/* Phaser */
 		'renderer/phaser/phaser-taro.min.js',

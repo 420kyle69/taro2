@@ -10,13 +10,14 @@ class PhaserRay {
         end: {
             x: number,
             y: number
-        }
+        },
+        color: any
     ) {
         this.gameObject = scene.add.line(
             start.x, start.y,
             start.x, start.y,
             end.x, end.y,
-            0xffffff,
+            color,
         );
 
         this.gameObject.setOrigin(0,0);

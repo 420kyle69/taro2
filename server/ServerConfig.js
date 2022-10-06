@@ -39,10 +39,14 @@ var defaultConfig = [
 	{ name: 'AttributeComponent', path: '../src/gameClasses/components/unit/AttributeComponent' },
 	{ name: 'AIComponent', path: '../src/gameClasses/components/unit/AIComponent' },
 
+	// Raycasting
+	{ name: 'Raycaster', path: '../src/gameClasses/Raycaster' },
 	{ name: 'Item', path: '../src/gameClasses/Item' },
 	{ name: 'Projectile', path: '../src/gameClasses/Projectile' },
 	{ name: 'Region', path: '../src/gameClasses/Region' },
-	{ name: 'RegionManager', path: '../src/gameClasses/components/RegionManager' }
+	{ name: 'RegionManager', path: '../src/gameClasses/components/RegionManager' },
+
+
 ];
 
 var config = {

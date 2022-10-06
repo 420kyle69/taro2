@@ -128,7 +128,7 @@ var igeCoreConfig = {
 		['csap', 'planck', './components/physics/box2d/dists/planck/planck.js'],
 		['csap', 'box2dweb', './components/physics/box2d/dists/box2dweb/lib_box2d.js', 'box2dweb'],
 		['csap', 'box2dninja', './components/physics/box2d/dists/box2dweb/box2d_ninja.js', 'box2dninja'],
-		['csap', 'box2dts', './components/physics/box2d/dists/flyoverbox2dts/bundle.js']
+		['csap', 'box2dts', './components/physics/box2d/dists/flyoverbox2dts/bundle.js'],
 		// No crash for now
 	]
 };
