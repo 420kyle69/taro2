@@ -727,6 +727,7 @@ const Client = IgeEventingClass.extend({
 		}
 		ige.physics.createWorld();
 		ige.physics.start();
+		ige.raycaster = new Raycaster();
 
 		if (typeof mode == 'string' && mode == 'sandbox') {
 			ige.script.runScript('initialize', {}); // loading entities to display in the sandbox

@@ -55,7 +55,7 @@ var GameScene = /** @class */ (function (_super) {
             new PhaserRegion(_this, region);
         });
         ige.client.on('create-ray', function (points) {
-            new PhaserRay(_this, points.start, points.end, points.color);
+            new PhaserRay(_this, points.start, points.end, points.color, points.type);
         });
         ige.client.on('floating-text', function (data) {
             new PhaserFloatingText(_this, data);

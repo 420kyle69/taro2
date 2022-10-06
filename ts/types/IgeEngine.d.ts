@@ -50,5 +50,9 @@ declare class IgeEngine extends IgeClass {
 	createFrontBuffer (autoSize: boolean, dontScale?: boolean): void
 	engineStep (): void;
 
+	physics: {
+		world(): any
+	};
+
 	$ (item: number | string | object): any;
 }

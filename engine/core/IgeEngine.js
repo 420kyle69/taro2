@@ -182,7 +182,6 @@ var IgeEngine = IgeEntity.extend({
 		this.lastActionRanAt = 0;
 		this.lastTriggerRanAt = 0;
 
-		this.raycaster = new Raycaster();
 	},
 
 	getLifeSpan: function () {
