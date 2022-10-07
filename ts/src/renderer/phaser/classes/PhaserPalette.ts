@@ -88,10 +88,10 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 				right: this.rexUI.add.roundRectangle(0, 0, 20, 20, 0, COLOR_PRIMARY),
 			},
 			slider: {
-				thumb: this.rexUI.add.roundRectangle(0, 0, (this.camera.width - 60) / 2, 20, 10, COLOR_LIGHT),
+				thumb: this.rexUI.add.roundRectangle(0, 0, (this.camera.width - 60) / 2, 20, 1, COLOR_LIGHT),
 			},
 			space: {
-				left: 10, right: 10, top: 10, bottom: 10
+				left: 1, right: 1, top: 1, bottom: 1
 			}
 		});
 		scrollBarBottom.value = 0.5;
@@ -107,10 +107,10 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 				right: this.rexUI.add.roundRectangle(0, 0, 20, 20, 0, COLOR_PRIMARY),
 			},
 			slider: {
-				thumb: this.rexUI.add.roundRectangle(0, 0, 20, (this.camera.height - 60) / 2, 10, COLOR_LIGHT),
+				thumb: this.rexUI.add.roundRectangle(0, 0, 20, (this.camera.height - 60) / 2, 1, COLOR_LIGHT),
 			},
 			space: {
-				left: 10, right: 10, top: 10, bottom: 10
+				left: 1, right: 1, top: 1, bottom: 1
 			}
 		});
 		scrollBarRight.value = 0.5;
@@ -145,7 +145,7 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 		this.scene.scale.on(Phaser.Scale.Events.RESIZE, () => {
 			camera.x = this.scene.sys.game.canvas.width - texturesLayer.width - 40;
 			scrollBarContainer.x = this.camera.x;
-			layerButtonsContainer.x = this.camera.x + texturesLayer.width - 93;
+			layerButtonsContainer.x = this.camera.x + texturesLayer.width - 98;
 		});
 
 		new PhaserPaletteButton (this, '+', 0, -31, 30, scrollBarContainer, this.zoom.bind(this), -1);
@@ -163,7 +163,7 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 		const layerButtonsContainer = this.layerButtonsContainer = new Phaser.GameObjects.Container(scene);
 		scene.add.existing(layerButtonsContainer);
 		//this.scrollBarContainer.add(layerButtonsContainer);
-		layerButtonsContainer.x = this.camera.x + texturesLayer.width - 93;
+		layerButtonsContainer.x = this.camera.x + texturesLayer.width - 98;
 		layerButtonsContainer.y = this.camera.y;
 		layerButtonsContainer.width = 120;
 		layerButtonsContainer.height = 160;
@@ -172,10 +172,10 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 
 		this.layerButtons = [];
 		this.layerButtons.push (
-			new PhaserPaletteButton (this, 'floor', 0,-62, 120, layerButtonsContainer, this.switchLayer.bind(this), 0),
-			new PhaserPaletteButton (this, 'floor2', 0,-93, 120, layerButtonsContainer, this.switchLayer.bind(this), 1),
-			new PhaserPaletteButton (this, 'walls', 0,-124, 120, layerButtonsContainer, this.switchLayer.bind(this), 2),
-			new PhaserPaletteButton (this, 'trees', 0,-155, 120, layerButtonsContainer, this.switchLayer.bind(this), 3)
+			new PhaserPaletteButton (this, 'floor', 0,-67, 120, layerButtonsContainer, this.switchLayer.bind(this), 0),
+			new PhaserPaletteButton (this, 'floor2', 0,-98, 120, layerButtonsContainer, this.switchLayer.bind(this), 1),
+			new PhaserPaletteButton (this, 'walls', 0,-129, 120, layerButtonsContainer, this.switchLayer.bind(this), 2),
+			new PhaserPaletteButton (this, 'trees', 0,-160, 120, layerButtonsContainer, this.switchLayer.bind(this), 3)
 		)
 		this.layerButtons[0].highlight(true);
 

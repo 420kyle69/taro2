@@ -77,10 +77,10 @@ var PhaserPalette = /** @class */ (function (_super) {
                 right: _this.rexUI.add.roundRectangle(0, 0, 20, 20, 0, COLOR_PRIMARY),
             },
             slider: {
-                thumb: _this.rexUI.add.roundRectangle(0, 0, (_this.camera.width - 60) / 2, 20, 10, COLOR_LIGHT),
+                thumb: _this.rexUI.add.roundRectangle(0, 0, (_this.camera.width - 60) / 2, 20, 1, COLOR_LIGHT),
             },
             space: {
-                left: 10, right: 10, top: 10, bottom: 10
+                left: 1, right: 1, top: 1, bottom: 1
             }
         });
         scrollBarBottom.value = 0.5;
@@ -95,10 +95,10 @@ var PhaserPalette = /** @class */ (function (_super) {
                 right: _this.rexUI.add.roundRectangle(0, 0, 20, 20, 0, COLOR_PRIMARY),
             },
             slider: {
-                thumb: _this.rexUI.add.roundRectangle(0, 0, 20, (_this.camera.height - 60) / 2, 10, COLOR_LIGHT),
+                thumb: _this.rexUI.add.roundRectangle(0, 0, 20, (_this.camera.height - 60) / 2, 1, COLOR_LIGHT),
             },
             space: {
-                left: 10, right: 10, top: 10, bottom: 10
+                left: 1, right: 1, top: 1, bottom: 1
             }
         });
         scrollBarRight.value = 0.5;
@@ -122,7 +122,7 @@ var PhaserPalette = /** @class */ (function (_super) {
         _this.scene.scale.on(Phaser.Scale.Events.RESIZE, function () {
             camera.x = _this.scene.sys.game.canvas.width - texturesLayer.width - 40;
             scrollBarContainer.x = _this.camera.x;
-            layerButtonsContainer.x = _this.camera.x + texturesLayer.width - 93;
+            layerButtonsContainer.x = _this.camera.x + texturesLayer.width - 98;
         });
         new PhaserPaletteButton(_this, '+', 0, -31, 30, scrollBarContainer, _this.zoom.bind(_this), -1);
         new PhaserPaletteButton(_this, '-', 31, -31, 30, scrollBarContainer, _this.zoom.bind(_this), 1);
@@ -133,13 +133,13 @@ var PhaserPalette = /** @class */ (function (_super) {
         var layerButtonsContainer = _this.layerButtonsContainer = new Phaser.GameObjects.Container(scene);
         scene.add.existing(layerButtonsContainer);
         //this.scrollBarContainer.add(layerButtonsContainer);
-        layerButtonsContainer.x = _this.camera.x + texturesLayer.width - 93;
+        layerButtonsContainer.x = _this.camera.x + texturesLayer.width - 98;
         layerButtonsContainer.y = _this.camera.y;
         layerButtonsContainer.width = 120;
         layerButtonsContainer.height = 160;
         new PhaserPaletteButton(_this, 'tiles', 0, -31, 120, layerButtonsContainer, _this.toggle.bind(_this));
         _this.layerButtons = [];
-        _this.layerButtons.push(new PhaserPaletteButton(_this, 'floor', 0, -62, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 0), new PhaserPaletteButton(_this, 'floor2', 0, -93, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 1), new PhaserPaletteButton(_this, 'walls', 0, -124, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 2), new PhaserPaletteButton(_this, 'trees', 0, -155, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 3));
+        _this.layerButtons.push(new PhaserPaletteButton(_this, 'floor', 0, -67, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 0), new PhaserPaletteButton(_this, 'floor2', 0, -98, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 1), new PhaserPaletteButton(_this, 'walls', 0, -129, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 2), new PhaserPaletteButton(_this, 'trees', 0, -160, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 3));
         _this.layerButtons[0].highlight(true);
         _this.area = { x: 1, y: 1 };
         return _this;
