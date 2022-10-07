@@ -15,13 +15,14 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 
 	layerButtonsContainer: Phaser.GameObjects.Container;
 	layerButtons: PhaserPaletteButton[];
+	toolButtons: PhaserPaletteButton[];
 
 	pointerover: any;
 
 	COLOR_DARK: number;
 	COLOR_LIGHT: number;
 	area: { x: number, y: number };
-
+	
 	constructor(
 		scene: DevModeScene,
 		tileset: Phaser.Tilemaps.Tileset,
@@ -151,8 +152,13 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 		new PhaserPaletteButton (this, '-', 31, -31, 30, scrollBarContainer, this.zoom.bind(this), 1);
 
 		new PhaserPaletteButton (this, '_', 93, -31, 30, scrollBarContainer, this.emptyTile.bind(this));
-		new PhaserPaletteButton (this, '.', 124, -31, 30, scrollBarContainer, this.selectSingle.bind(this));
-		new PhaserPaletteButton (this, '[]', 155, -31, 30, scrollBarContainer, this.selectArea.bind(this));
+
+		this.toolButtons = [];
+		this.toolButtons.push (
+			new PhaserPaletteButton (this, '.', 124, -31, 30, scrollBarContainer, this.selectSingle.bind(this)),
+			new PhaserPaletteButton (this, '[]', 155, -31, 30, scrollBarContainer, this.selectArea.bind(this))
+		)
+		this.toolButtons[0].highlight(true);
 
 		const layerButtonsContainer = this.layerButtonsContainer = new Phaser.GameObjects.Container(scene);
 		scene.add.existing(layerButtonsContainer);
@@ -198,15 +204,25 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 	}
 
 	selectSingle() {
+		for (let i = 0; i < this.area.x; i++) {
+			for (let j = 0; j < this.area.y; j++) {
+				this.scene.selectedTileArea[i][j].tint = 0xffffff;
+			}
+		}
 		this.area = {x: 1, y: 1};
 		this.scene.marker.scale = 1;
 		this.scene.paletteMarker.scale = 1;
+		this.toolButtons[0].highlight(true);
+		this.toolButtons[1].highlight(false);
 	}
 
 	selectArea() {
+		this.scene.selectedTile.tint = 0xffffff;
 		this.area = {x: 2, y: 2};
 		this.scene.marker.scale = 2;
 		this.scene.paletteMarker.scale = 2;
+		this.toolButtons[1].highlight(true);
+		this.toolButtons[0].highlight(false);
 	}
 
 	toggle() {

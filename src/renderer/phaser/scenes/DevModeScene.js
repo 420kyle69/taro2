@@ -197,14 +197,14 @@ var DevModeScene = /** @class */ (function (_super) {
                         this.selectedTile = map.getTileAt(pointerTileX, pointerTileY, true);
                     }
                 }
-                if (this.input.manager.activePointer.leftButtonDown()
-                    && (pointerTileX >= 0 && pointerTileY >= 0
-                        && pointerTileX < map.width
-                        && pointerTileY < map.height)) {
+                if (this.input.manager.activePointer.leftButtonDown()) {
                     if (this.devPalette.area.x > 1 || this.devPalette.area.y > 1) {
                         for (var i = 0; i < this.devPalette.area.x; i++) {
                             for (var j = 0; j < this.devPalette.area.y; j++) {
-                                if (this.selectedTileArea[i][j].index !== (map.getTileAt(pointerTileX + i, pointerTileY + j, true)).index) {
+                                if ((pointerTileX + i >= 0 && pointerTileY + j >= 0
+                                    && pointerTileX + i < map.width
+                                    && pointerTileY + j < map.height)
+                                    && this.selectedTileArea[i][j].index !== (map.getTileAt(pointerTileX + i, pointerTileY + j, true)).index) {
                                     map.putTileAt(this.selectedTileArea[i][j], pointerTileX + i, pointerTileY + j);
                                     map.getTileAt(pointerTileX + i, pointerTileY + j, true).tint = 0xffffff;
                                     console.log('place tile', this.selectedTileArea[i][j].index);
@@ -214,10 +214,15 @@ var DevModeScene = /** @class */ (function (_super) {
                         }
                     }
                     else {
-                        if (this.selectedTile.index !== (map.getTileAt(pointerTileX, pointerTileY, true)).index)
+                        if ((pointerTileX >= 0 && pointerTileY >= 0
+                            && pointerTileX < map.width
+                            && pointerTileY < map.height)
+                            && this.selectedTile.index !== (map.getTileAt(pointerTileX, pointerTileY, true)).index) {
                             map.putTileAt(this.selectedTile, pointerTileX, pointerTileY);
-                        console.log('place tile', this.selectedTile.index);
-                        ige.network.send('editTile', { gid: this.selectedTile.index, layer: map.currentLayerIndex, x: pointerTileX, y: pointerTileY });
+                            map.getTileAt(pointerTileX, pointerTileY, true).tint = 0xffffff;
+                            console.log('place tile', this.selectedTile.index);
+                            ige.network.send('editTile', { gid: this.selectedTile.index, layer: map.currentLayerIndex, x: pointerTileX, y: pointerTileY });
+                        }
                     }
                 }
             }
