@@ -391,47 +391,6 @@ var Item = IgeEntityPhysics.extend({
 										};
 									}
 
-									// var raycastMultipleCallback = function () {
-									// 	var def = {};
-									// 	// var e_maxCount = 3;
-									// 	var raycastCollidesWith = self._stats.raycastCollidesWith;
-									// 	def.m_points = [];
-									// 	def.m_normals = [];
-
-									// 	def.ReportFixture = function (fixture, point, normal, fraction) {
-									// 		var fixtureList = fixture.m_body.m_fixtureList;
-
-									// 		var entity = fixtureList && fixtureList.igeId && ige.$(fixtureList.igeId);
-									// 		if (entity) {
-
-									// 			entity.lastRaycastCollisionPosition = {
-									// 				x: point.x * self.scaleRatio,
-									// 				y: point.y * self.scaleRatio
-									// 			};
-									// 			entity.raycastFraction = fraction;
-									// 			self.raycastTargets.push(entity);
-									// 		}
-
-											// var body = fixture.getBody();
-											// var userData = body.getUserData();
-											// if (userData) {
-											// 	if (userData == 0) {
-											// 		// By returning -1, we instruct the calling code to ignore this fixture
-											// 		// and continue the ray-cast to the next fixture.
-											// 		return -1.0;
-											// 	}
-											// }
-
-									// 		def.m_points.push(point);
-									// 		def.m_normals.push(normal);
-									// 		// By returning 1, we instruct the caller to continue without clipping the
-									// 		// ray.
-									// 		return 1.0;
-									// 	};
-
-									// 	return def;
-									// };
-
 									// var callback = raycastMultipleCallback();
 									// console.log(ige.physics.world().rayCast);
 
@@ -445,29 +404,31 @@ var Item = IgeEntityPhysics.extend({
 											x: endPosition.x / self.scaleRatio,
 											y: endPosition.y / self.scaleRatio
 										},
-										'closest'
+										{
+											method: 'closest',
+											projType: data.type
+										}
 									);
 
-									if (ige.isClient) {
-										let end = !ige.raycaster.raycastClosest.point ?
-											{
-												x: endPosition.x,
-												y: endPosition.y
-											} :
-											{
-												x: ige.raycaster.raycastClosest.point.x  * self.scaleRatio,
-												y: ige.raycaster.raycastClosest.point.y  * self.scaleRatio
-											};
+									// if (ige.isClient) {
+									// 	let end = !ige.raycaster.raycastClosest.point ?
+									// 		{
+									// 			x: endPosition.x,
+									// 			y: endPosition.y
+									// 		} :
+									// 		{
+									// 			x: ige.raycaster.raycastClosest.point.x  * self.scaleRatio,
+									// 			y: ige.raycaster.raycastClosest.point.y  * self.scaleRatio
+									// 		};
 
-										ige.client.emit('create-ray', {
-											start: {
-												x: raycastStartPosition.x,
-												y: raycastStartPosition.y
-											},
-											end,
-											color: 0xffffff,
-											type: data.type
-										});
+									// 	ige.client.emit('create-ray', {
+									// 		start: {
+									// 			x: raycastStartPosition.x,
+									// 			y: raycastStartPosition.y
+									// 		},
+									// 		end,
+									// 		projType: data.type
+									// 	});
 										// if (ige.raycaster.raycastClosest.point) {
 										// 	ige.client.emit('create-ray', {
 										// 		start: {
@@ -481,7 +442,7 @@ var Item = IgeEntityPhysics.extend({
 										// 		color: 0xff0000
 										// 	});
 										// }
-									}
+									// }
 
 									// if (!self._stats.penetration) {
 									ige.game.entitiesCollidingWithLastRaycast = _.orderBy(self.raycastTargets, ['raycastFraction'], ['asc']);

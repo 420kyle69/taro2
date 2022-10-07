@@ -12,40 +12,58 @@ class PhaserRay {
 			x: number,
 			y: number
 		},
-		color: any,
-		type: any,
+		config: {
+			method: string,
+			projType: string
+		},
 	) {
+		/* Debug draw ray */
+		const v1 = new Phaser.Math.Vector2(start.x, start.y);
+		const v2 = new Phaser.Math.Vector2(end.x, end.y);
+		const realStart = v1.multiply(new Phaser.Math.Vector2(0.5, 0.5));
+		const realEnd = v2.subtract(v1);
+		this.line = scene.add.line(
+			realStart.x, realStart.y,
+			realStart.x, realStart.y,
+			realEnd.x, realEnd.y,
+			0xffffff,
+		);
 
-		// const v1 = new Phaser.Math.Vector2(start.x, start.y);
-		// const v2 = new Phaser.Math.Vector2(end.x, end.y);
-
-		// const realEnd = v2.subtract(v1);
-		// this.line = scene.add.line(
-		// 	start.x, start.y,
-		// 	start.x, start.y,
-		// 	realEnd.x, realEnd.y,
-		// 	color,
-		// );
-
-		this.sprite = scene.add.sprite(start.x, start.y, `projectile/${type}`);
+		this.line.setOrigin(0,0);
+		this.line.setAlpha(0.85);
 
 		scene.tweens.add({
-			targets: this.sprite,
-			duration: 2000, // this should be a function of the magnitude of distance between start and end
+			targets: this.line,
+			duration: 400,
 			props: {
-				x: end.x,
-				y: end.y
+				alpha: 0
 			},
 			onComplete: () => {
-				setTimeout(() => {
-
-					this.sprite.destroy();
-					this.sprite = null;
-				}, 100);
+				this.line.destroy();
+				this.line = null;
 			}
 		});
 
-		// this.line.setOrigin(0,0);
-		// console.log(this.line);
+		console.log(this.line);
+
+		if (config.projType) {
+			this.sprite = scene.add.sprite(start.x, start.y, `projectile/${config.projType}`);
+
+			scene.tweens.add({
+				targets: this.sprite,
+				duration: 250, // this should be a function of the magnitude of distance between start and end
+				props: {
+					x: end.x,
+					y: end.y
+				},
+				onComplete: () => {
+					setTimeout(() => {
+
+						this.sprite.destroy();
+						this.sprite = null;
+					}, 50);
+				}
+			});
+		}
 	}
 }

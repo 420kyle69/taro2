@@ -1,29 +1,52 @@
 var Raycaster = /** @class */ (function () {
     function Raycaster() {
         this.world = ige.physics.world();
+        this.scaleRatio = ige.physics._scaleRatio;
         this.data = {};
-        this.raycastClosest = RayCastClosest;
-        this.raycastMultiple = RayCastMultiple;
+        this.closest = RayCastClosest;
+        this.multiple = RayCastMultiple;
         // CONFIG
     }
-    Raycaster.prototype.raycast = function (start, end, method) {
+    Raycaster.prototype.raycast = function (start, end, config) {
         var callback, reset;
         this.data = {};
-        switch (method) {
+        switch (config.method) {
             case 'closest':
-                this.data = this.raycastClosest;
-                reset = this.raycastClosest.reset;
-                callback = this.raycastClosest.callback;
+                this.data = this[config.method];
+                reset = this.data.reset;
+                callback = this.data.callback;
                 break;
             case 'multiple':
-                this.data = this.raycastMultiple;
-                reset = this.raycastMultiple.reset;
-                callback = this.raycastMultiple.callback;
+                this.data = this[config.method];
+                reset = this.data.reset;
+                callback = this.data.callback;
                 break;
         }
         reset();
         this.world.rayCast(start, end, callback);
+        if (ige.isClient) {
+            end = (config.method === 'closest' && this.data.point) ?
+                {
+                    x: this.data.point.x * this.scaleRatio,
+                    y: this.data.point.y * this.scaleRatio
+                } :
+                {
+                    x: end.x * this.scaleRatio,
+                    y: end.y * this.scaleRatio
+                };
+            this.drawRay(start, end, config);
+        }
         console.log(this.data);
+    };
+    Raycaster.prototype.drawRay = function (start, end, config) {
+        ige.client.emit('create-ray', {
+            start: {
+                x: start.x * this.scaleRatio,
+                y: start.y * this.scaleRatio
+            },
+            end: end,
+            config: config
+        });
     };
     return Raycaster;
 }());

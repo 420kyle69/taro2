@@ -51,7 +51,8 @@ declare class IgeEngine extends IgeClass {
 	engineStep (): void;
 
 	physics: {
-		world(): any
+		world(): any;
+		_scaleRatio: number
 	};
 
 	$ (item: number | string | object): any;

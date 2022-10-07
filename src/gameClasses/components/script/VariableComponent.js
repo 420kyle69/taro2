@@ -1205,7 +1205,10 @@ var VariableComponent = IgeEntity.extend({
 					ige.raycaster.raycast(
 						positionA,
 						positionB,
-						'multiple'
+						{
+							method: 'multiple',
+							projType: null
+						}
 					);
 					console.log(ige.raycaster.data);
 

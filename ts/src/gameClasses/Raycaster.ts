@@ -1,8 +1,9 @@
 class Raycaster {
 	world = ige.physics.world();
+	scaleRatio = ige.physics._scaleRatio;
 	data: any = {};
-	raycastClosest = RayCastClosest;
-	raycastMultiple = RayCastMultiple;
+	closest = RayCastClosest;
+	multiple = RayCastMultiple;
 	constructor () {
 		// CONFIG
 	}
@@ -16,23 +17,26 @@ class Raycaster {
 			x: number,
 			y: number
 		},
-		method: string
+		config: {
+			method: string,
+			projType: string
+		}
 	): void {
 
 		let callback, reset;
 
 		this.data = {};
 
-		switch(method) {
+		switch(config.method) {
 			case 'closest':
-				this.data = this.raycastClosest;
-				reset = this.raycastClosest.reset;
-				callback = this.raycastClosest.callback;
+				this.data = this[config.method];
+				reset = this.data.reset;
+				callback = this.data.callback;
 				break;
 			case 'multiple':
-				this.data = this.raycastMultiple;
-				reset = this.raycastMultiple.reset;
-				callback = this.raycastMultiple.callback;
+				this.data = this[config.method];
+				reset = this.data.reset;
+				callback = this.data.callback;
 				break;
 
 		}
@@ -43,7 +47,37 @@ class Raycaster {
 			end,
 			callback
 		);
+
+		if (ige.isClient) {
+			end = (config.method === 'closest' && this.data.point) ?
+				{
+					x: this.data.point.x * this.scaleRatio,
+					y: this.data.point.y * this.scaleRatio
+				} :
+				{
+					x: end.x * this.scaleRatio,
+					y: end.y * this.scaleRatio
+				};
+
+			this.drawRay(start, end, config);
+		}
 		console.log(this.data);
+	}
+
+	drawRay (
+		start: {x: number, y: number},
+		end: {x: number, y: number},
+		config: {method: string, projType: string}
+
+	): void {
+		ige.client.emit('create-ray', {
+			start: {
+				x: start.x * this.scaleRatio,
+				y: start.y * this.scaleRatio
+			},
+			end,
+			config
+		});
 	}
 }
 
