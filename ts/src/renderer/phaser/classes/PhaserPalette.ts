@@ -70,9 +70,9 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 		const camera = this.camera = this.scene.cameras.add(this.scene.sys.game.canvas.width - texturesLayer.width - 40, this.scene.sys.game.canvas.height - texturesLayer.height - 40, texturesLayer.width, texturesLayer.height).setScroll(this.x, this.y).setZoom(1).setName('palette');
 		camera.setBackgroundColor(0x002244);
 
-		const COLOR_PRIMARY = 0x4e342e;
-		const COLOR_LIGHT = this.COLOR_LIGHT = 0x7b5e57;
-		const COLOR_DARK = this.COLOR_DARK = 0x260e04;
+		const COLOR_PRIMARY = 0x0036cc;
+		const COLOR_LIGHT = this.COLOR_LIGHT = 0x6690ff;
+		const COLOR_DARK = this.COLOR_DARK = 0xffffff;
 
 		const scrollBarContainer = this.scrollBarContainer = new Phaser.GameObjects.Container(scene);
 		scene.add.existing(scrollBarContainer);

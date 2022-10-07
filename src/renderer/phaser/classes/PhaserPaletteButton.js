@@ -11,6 +11,7 @@ var PhaserPaletteButton = /** @class */ (function () {
         container.add(button);
         var label = palette.scene.add.text(x + w / 2, y + h / 2, text);
         label.setFontFamily('Verdana');
+        label.setColor('#000000');
         label.setFontSize(26);
         label.setOrigin(0.5);
         label.setResolution(4);
@@ -23,10 +24,12 @@ var PhaserPaletteButton = /** @class */ (function () {
         });
     }
     PhaserPaletteButton.prototype.highlight = function (boolean) {
-        if (boolean)
+        if (boolean) {
             this.button.setFillStyle(this.palette.COLOR_LIGHT, 1);
-        else
+        }
+        else {
             this.button.setFillStyle(this.palette.COLOR_DARK, 1);
+        }
     };
     return PhaserPaletteButton;
 }());

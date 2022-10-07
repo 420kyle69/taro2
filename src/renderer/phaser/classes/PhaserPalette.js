@@ -61,9 +61,9 @@ var PhaserPalette = /** @class */ (function (_super) {
         });
         var camera = _this.camera = _this.scene.cameras.add(_this.scene.sys.game.canvas.width - texturesLayer.width - 40, _this.scene.sys.game.canvas.height - texturesLayer.height - 40, texturesLayer.width, texturesLayer.height).setScroll(_this.x, _this.y).setZoom(1).setName('palette');
         camera.setBackgroundColor(0x002244);
-        var COLOR_PRIMARY = 0x4e342e;
-        var COLOR_LIGHT = _this.COLOR_LIGHT = 0x7b5e57;
-        var COLOR_DARK = _this.COLOR_DARK = 0x260e04;
+        var COLOR_PRIMARY = 0x0036cc;
+        var COLOR_LIGHT = _this.COLOR_LIGHT = 0x6690ff;
+        var COLOR_DARK = _this.COLOR_DARK = 0xffffff;
         var scrollBarContainer = _this.scrollBarContainer = new Phaser.GameObjects.Container(scene);
         scene.add.existing(scrollBarContainer);
         scrollBarContainer.x = camera.x;

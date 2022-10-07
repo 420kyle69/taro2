@@ -18,13 +18,14 @@ class PhaserPaletteButton {
 		//const x = 0;
 		//const y = -h -1;
         this.palette = palette;
-		const button = this.button = palette.scene.add.rectangle(x + w/2, y + h/2, w, h, palette.COLOR_DARK);
+        const button = this.button = palette.scene.add.rectangle(x + w/2, y + h/2, w, h, palette.COLOR_DARK);
 		button.setInteractive();
 		container.add(button);
 		const label = palette.scene.add.text(
 			x + w/2, y + h/2, text
 		);
 		label.setFontFamily('Verdana');
+        label.setColor('#000000')
 		label.setFontSize(26);
 		label.setOrigin(0.5);
 		label.setResolution(4);
@@ -36,7 +37,11 @@ class PhaserPaletteButton {
     }
 
     highlight (boolean) {
-        if (boolean) this.button.setFillStyle(this.palette.COLOR_LIGHT, 1)
-        else this.button.setFillStyle(this.palette.COLOR_DARK, 1);
+        if (boolean) {
+            this.button.setFillStyle(this.palette.COLOR_LIGHT, 1);
+        }
+        else {
+            this.button.setFillStyle(this.palette.COLOR_DARK, 1);
+        }
     }
 }
