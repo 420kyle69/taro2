@@ -157,9 +157,9 @@ class DevModeScene extends PhaserScene {
 
 			if (this.devPalette.visible
 				&& 0 <= palettePointerTileX
-				&& palettePointerTileX < 27
+				&& palettePointerTileX < this.devPalette.map.width
 				&& 0 <= palettePointerTileY
-				&& palettePointerTileY < 20
+				&& palettePointerTileY < this.devPalette.map.height
 				&& this.input.activePointer.x > this.devPalette.scrollBarContainer.x
 				&& this.input.activePointer.x < this.devPalette.scrollBarContainer.x + this.devPalette.scrollBarContainer.width
 				&& this.input.activePointer.y > this.devPalette.scrollBarContainer.y - 30
@@ -173,9 +173,9 @@ class DevModeScene extends PhaserScene {
 					if (this.devPalette.area.x > 1 || this.devPalette.area.y > 1) {
 						for (let i = 0; i < this.devPalette.area.x; i++) {
 							for (let j = 0; j < this.devPalette.area.y; j++) {
-								this.selectedTileArea[i][j].tint = 0xffffff;
+								if (this.selectedTileArea[i][j]) this.selectedTileArea[i][j].tint = 0xffffff;
 								this.selectedTileArea[i][j] = this.devPalette.map.getTileAt(palettePointerTileX + i, palettePointerTileY + j, true);
-								this.selectedTileArea[i][j].tint = 0x87cfff;
+								if (this.selectedTileArea[i][j]) this.selectedTileArea[i][j].tint = 0x87cfff;
 							}
 						}
 					} else {

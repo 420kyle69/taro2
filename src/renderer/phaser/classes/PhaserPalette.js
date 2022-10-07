@@ -166,7 +166,8 @@ var PhaserPalette = /** @class */ (function (_super) {
     PhaserPalette.prototype.selectSingle = function () {
         for (var i = 0; i < this.area.x; i++) {
             for (var j = 0; j < this.area.y; j++) {
-                this.scene.selectedTileArea[i][j].tint = 0xffffff;
+                if (this.scene.selectedTileArea[i][j])
+                    this.scene.selectedTileArea[i][j].tint = 0xffffff;
             }
         }
         this.area = { x: 1, y: 1 };
