@@ -33,8 +33,8 @@ var DevModeScene = /** @class */ (function (_super) {
             if (!_this.devPalette) {
                 _this.devPalette = new PhaserPalette(_this, _this.tileset, _this.rexUI);
                 _this.paletteMarker = _this.add.graphics();
-                _this.paletteMarker.lineStyle(2, 0x000000, 1);
-                _this.paletteMarker.strokeRect(0, 0, map.tileWidth, map.tileHeight);
+                _this.paletteMarker.lineStyle(1, 0x000000, 1);
+                _this.paletteMarker.strokeRect(0, 0, _this.devPalette.map.tileWidth, _this.devPalette.map.tileHeight);
                 _this.paletteMarker.setVisible(false);
                 _this.devPalette.hide();
                 _this.devPalette.layerButtonsContainer.setVisible(true);

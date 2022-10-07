@@ -30,8 +30,8 @@ class DevModeScene extends PhaserScene {
 			if (!this.devPalette) {
 				this.devPalette = new PhaserPalette(this, this.tileset, this.rexUI);
 		 		this.paletteMarker = this.add.graphics();
-				this.paletteMarker.lineStyle(2, 0x000000, 1);
-				this.paletteMarker.strokeRect(0, 0, map.tileWidth, map.tileHeight);
+				this.paletteMarker.lineStyle(1, 0x000000, 1);
+				this.paletteMarker.strokeRect(0, 0, this.devPalette.map.tileWidth, this.devPalette.map.tileHeight);
 				this.paletteMarker.setVisible(false);
 				this.devPalette.hide();
 				this.devPalette.layerButtonsContainer.setVisible(true);
