@@ -391,10 +391,6 @@ var Item = IgeEntityPhysics.extend({
 										};
 									}
 
-									// var callback = raycastMultipleCallback();
-									// console.log(ige.physics.world().rayCast);
-
-									// ige.physics.world().rayCast(, callback.ReportFixture);
 									ige.raycaster.raycast(
 										{
 											x: raycastStartPosition.x / self.scaleRatio,
@@ -410,39 +406,7 @@ var Item = IgeEntityPhysics.extend({
 										}
 									);
 
-									// if (ige.isClient) {
-									// 	let end = !ige.raycaster.raycastClosest.point ?
-									// 		{
-									// 			x: endPosition.x,
-									// 			y: endPosition.y
-									// 		} :
-									// 		{
-									// 			x: ige.raycaster.raycastClosest.point.x  * self.scaleRatio,
-									// 			y: ige.raycaster.raycastClosest.point.y  * self.scaleRatio
-									// 		};
-
-									// 	ige.client.emit('create-ray', {
-									// 		start: {
-									// 			x: raycastStartPosition.x,
-									// 			y: raycastStartPosition.y
-									// 		},
-									// 		end,
-									// 		projType: data.type
-									// 	});
-										// if (ige.raycaster.raycastClosest.point) {
-										// 	ige.client.emit('create-ray', {
-										// 		start: {
-										// 			x: raycastStartPosition.x/2,
-										// 			y: raycastStartPosition.y/2
-										// 		},
-										// 		end: {
-										// 			x: ige.raycaster.raycastClosest.point.x  * self.scaleRatio,
-										// 			y: ige.raycaster.raycastClosest.point.y  * self.scaleRatio
-										// 		},
-										// 		color: 0xff0000
-										// 	});
-										// }
-									// }
+									// not used. need to figure out how we want to store this data
 
 									// if (!self._stats.penetration) {
 									ige.game.entitiesCollidingWithLastRaycast = _.orderBy(self.raycastTargets, ['raycastFraction'], ['asc']);
