@@ -1081,6 +1081,7 @@ var VariableComponent = IgeEntity.extend({
 					var region = self.getValue(text.region, vars);
 
 					if (region) {
+						console.log(region._stats);
 						returnValue = {
 							x: region._stats.default.x + (region._stats.default.width / 2),
 							y: region._stats.default.y + (region._stats.default.height / 2)
@@ -1125,14 +1126,19 @@ var VariableComponent = IgeEntity.extend({
 						return Math.log10(value);
 					}
 					break;
-	
 
 				case 'getEntireMapRegion':
+					// var region = {
+					// 	x: ige.map.data.tilewidth * 2,
+					// 	y: ige.map.data.tileheight * 2,
+					// 	width: (ige.map.data.width * ige.map.data.tilewidth) - (ige.map.data.tilewidth * 2),
+					// 	height: (ige.map.data.height * ige.map.data.tileheight) - (ige.map.data.tileheight * 2)
+					// };
 					var region = {
-						x: ige.map.data.tilewidth * 2,
-						y: ige.map.data.tileheight * 2,
-						width: (ige.map.data.width * ige.map.data.tilewidth) - (ige.map.data.tilewidth * 2),
-						height: (ige.map.data.height * ige.map.data.tileheight) - (ige.map.data.tileheight * 2)
+						x: 0,
+						y: 0,
+						width: ige.map.data.width * ige.map.data.tilewidth,
+						height: ige.map.data.height * ige.map.data.tileheight
 					};
 
 					returnValue = { _stats: { default: region } };

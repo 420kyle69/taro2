@@ -4,9 +4,9 @@ var PhaserRay = /** @class */ (function () {
         /* Debug draw ray */
         var v1 = new Phaser.Math.Vector2(start.x, start.y);
         var v2 = new Phaser.Math.Vector2(end.x, end.y);
-        var realStart = v1.multiply(new Phaser.Math.Vector2(0.5, 0.5));
-        var realEnd = v2.subtract(v1);
-        this.line = scene.add.line(realStart.x, realStart.y, realStart.x, realStart.y, realEnd.x, realEnd.y, 0xffffff);
+        var lineStart = v1.multiply(new Phaser.Math.Vector2(0.5, 0.5));
+        var lineEnd = v2.subtract(v1);
+        this.line = scene.add.line(lineStart.x, lineStart.y, lineStart.x, lineStart.y, lineEnd.x, lineEnd.y, 0xffffff);
         this.line.setOrigin(0, 0);
         this.line.setAlpha(0.85);
         scene.tweens.add({
@@ -21,6 +21,7 @@ var PhaserRay = /** @class */ (function () {
             }
         });
         console.log(this.line);
+        /* End of Debug draw ray */
         if (config.projType) {
             this.sprite = scene.add.sprite(start.x, start.y, "projectile/".concat(config.projType));
             scene.tweens.add({

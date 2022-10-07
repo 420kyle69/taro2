@@ -20,12 +20,12 @@ class PhaserRay {
 		/* Debug draw ray */
 		const v1 = new Phaser.Math.Vector2(start.x, start.y);
 		const v2 = new Phaser.Math.Vector2(end.x, end.y);
-		const realStart = v1.multiply(new Phaser.Math.Vector2(0.5, 0.5));
-		const realEnd = v2.subtract(v1);
+		const lineStart = v1.multiply(new Phaser.Math.Vector2(0.5, 0.5));
+		const lineEnd = v2.subtract(v1);
 		this.line = scene.add.line(
-			realStart.x, realStart.y,
-			realStart.x, realStart.y,
-			realEnd.x, realEnd.y,
+			lineStart.x, lineStart.y,
+			lineStart.x, lineStart.y,
+			lineEnd.x, lineEnd.y,
 			0xffffff,
 		);
 
@@ -45,6 +45,8 @@ class PhaserRay {
 		});
 
 		console.log(this.line);
+		/* End of Debug draw ray */
+
 
 		if (config.projType) {
 			this.sprite = scene.add.sprite(start.x, start.y, `projectile/${config.projType}`);

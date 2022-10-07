@@ -5,7 +5,7 @@ var Raycaster = /** @class */ (function () {
         this.data = {};
         this.closest = RayCastClosest;
         this.multiple = RayCastMultiple;
-        // CONFIG
+        // CONFIG: info about which physics engine we are using
     }
     Raycaster.prototype.raycast = function (start, end, config) {
         var callback, reset;
@@ -69,6 +69,13 @@ var RayCastClosest = (function () {
                 return -1.0;
             }
         }
+        console.log(fixture);
+        // var fixtureList = fixture.m_body.m_fixtureList;
+        // var entity = fixtureList && fixtureList.igeId && ige.$(fixtureList.igeId);
+        // if (entity) {
+        // 	entity.raycastFraction = fraction;
+        // 	def.entities.push(entity);
+        // }
         def.hit = true;
         def.point = point;
         def.normal = normal;

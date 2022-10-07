@@ -5,7 +5,7 @@ class Raycaster {
 	closest = RayCastClosest;
 	multiple = RayCastMultiple;
 	constructor () {
-		// CONFIG
+		// CONFIG: info about which physics engine we are using
 	}
 
 	raycast(
@@ -102,6 +102,15 @@ const RayCastClosest = (function() {
 				return -1.0;
 			}
 		}
+
+		console.log(fixture);
+		// var fixtureList = fixture.m_body.m_fixtureList;
+		// var entity = fixtureList && fixtureList.igeId && ige.$(fixtureList.igeId);
+		// if (entity) {
+
+		// 	entity.raycastFraction = fraction;
+		// 	def.entities.push(entity);
+		// }
 
 		def.hit = true;
 		def.point = point;
