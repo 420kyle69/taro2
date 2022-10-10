@@ -392,6 +392,7 @@ var Item = IgeEntityPhysics.extend({
 										offset = this.getAnchoredOffset(pos.rotation);
 									}
 
+									// factor in bullet start position
 									if (this._stats.bulletStartPosition) {
 
 										let bulletOffset = {
@@ -408,28 +409,10 @@ var Item = IgeEntityPhysics.extend({
 
 									const raycastStart = {x, y} = pos;
 									const raycastEnd ={
-										x: (owner._translate.x) + (this._stats.bulletDistance * Math.cos(owner._rotate.z + Math.radians(-90))),
-										y: (owner._translate.y) + (this._stats.bulletDistance * Math.sin(owner._rotate.z + Math.radians(-90)))
+										x: pos.x + (this._stats.bulletDistance * Math.cos(owner._rotate.z + Math.radians(-90))),
+										y: pos.y + (this._stats.bulletDistance * Math.sin(owner._rotate.z + Math.radians(-90)))
 									};
-										// 	var raycastStartPosition = {
-									// 		x: (owner._translate.x + unitAnchorX) + (Math.cos(this._rotate.z + Math.radians(-90))) + (Math.cos(this._rotate.z)),
-									// 		y: (owner._translate.y + unitAnchorY - this._stats.bulletStartPosition.y) + (Math.sin(this._rotate.z + Math.radians(-90))) + (Math.sin(this._rotate.z))
-									// 	};
 
-									// 	var endPosition = {
-									// 		x: (owner._translate.x + unitAnchorX) + (this._stats.bulletDistance * Math.cos(owner._rotate.z + Math.radians(-90))),
-									// 		y: (owner._translate.y + unitAnchorY - this._stats.bulletStartPosition.y) + (this._stats.bulletDistance * Math.sin(owner._rotate.z + Math.radians(-90)))
-									// 	};
-									// } else {
-									// 	var raycastStartPosition = {
-									// 		x: (self._translate.x) + (Math.cos(this._rotate.z + Math.radians(-90))) + (Math.cos(this._rotate.z)),
-									// 		y: (self._translate.y - this._stats.bulletStartPosition.y) + (Math.sin(this._rotate.z + Math.radians(-90))) + (Math.sin(this._rotate.z))
-									// 	};
-									// 	var endPosition = {
-									// 		x: (self._translate.x) + (this._stats.bulletDistance * Math.cos(self._rotate.z + Math.radians(-90))),
-									// 		y: (self._translate.y - this._stats.bulletStartPosition.y) + (this._stats.bulletDistance * Math.sin(self._rotate.z + Math.radians(-90)))
-									// 	};
-									// }
 									console.log(raycastStart, raycastEnd);
 									ige.raycaster.raycast(
 										{
