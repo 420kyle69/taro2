@@ -28,6 +28,7 @@ class DevModeScene extends PhaserScene {
 		ige.client.on('enterDevMode', () => {
 			this.defaultZoom = (this.gameScene.zoomSize / 2.15)
 			if (!this.devPalette) {
+				console.log('creating...', this, this.tileset, this.rexUI)
 				this.devPalette = new PhaserPalette(this, this.tileset, this.rexUI);
 		 		this.paletteMarker = this.add.graphics();
 				this.paletteMarker.lineStyle(1, 0x000000, 1);
@@ -135,108 +136,127 @@ class DevModeScene extends PhaserScene {
 		});
 
 		const gameMap = this.gameScene.tilemap;
+		console.log('game map', gameMap)
 		gameMap.currentLayerIndex = 0;
 		this.selectedTile = gameMap.getTileAt(2, 3);
 		this.marker = this.gameScene.add.graphics();
 		this.marker.lineStyle(2, 0x000000, 1);
-		this.marker.strokeRect(0, 0, gameMap.tileWidth, gameMap.tileHeight);
+		if (ige.game.data.defaultData.dontResize) {
+			this.marker.strokeRect(0, 0, gameMap.tileWidth, gameMap.tileHeight);
+		} else {
+			this.marker.strokeRect(0, 0, 64, 64);
+		}
 		this.marker.setVisible(false);
+	}
+
+	pointerInsideMap(pointerX: number, pointerY: number, map: Phaser.Tilemaps.Tilemap): boolean {
+		return (0 <= pointerX && pointerX < map.width
+			&& 0 <= pointerY && pointerY < map.height);
+	}
+
+	pointerInsidePalette(): boolean {
+		return (this.input.activePointer.x > this.devPalette.scrollBarContainer.x
+			&& this.input.activePointer.x < this.devPalette.scrollBarContainer.x + this.devPalette.scrollBarContainer.width
+			&& this.input.activePointer.y > this.devPalette.scrollBarContainer.y - 30
+			&& this.input.activePointer.y < this.devPalette.scrollBarContainer.y + this.devPalette.scrollBarContainer.height)
+	}
+
+	pointerInsideButtons(): boolean {
+		return (this.input.activePointer.x > this.devPalette.layerButtonsContainer.x
+			&& this.input.activePointer.x < this.devPalette.layerButtonsContainer.x + this.devPalette.layerButtonsContainer.width
+			&& this.input.activePointer.y > this.devPalette.layerButtonsContainer.y - this.devPalette.layerButtonsContainer.height
+			&& this.input.activePointer.y < this.devPalette.layerButtonsContainer.y)
 	}
 
 	update (): void {
 		if(ige.developerMode.active) {
+			const palette = this.devPalette;
 			const map = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
+			const paletteMap = palette.map;
 			const worldPoint = this.gameScene.cameras.main.getWorldPoint(this.gameScene.input.activePointer.x, this.gameScene.input.activePointer.y);
 			const palettePoint = this.cameras.getCamera('palette').getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
-			this.paletteMarker.clear();
-			this.paletteMarker.strokeRect(0, 0, this.devPalette.map.tileWidth * this.devPalette.texturesLayer.scaleX, this.devPalette.map.tileHeight * this.devPalette.texturesLayer.scaleY);
-			this.paletteMarker.setVisible(true);
-			// Rounds down to nearest tile
-			const palettePointerTileX = this.devPalette.map.worldToTileX(palettePoint.x);
-			const palettePointerTileY = this.devPalette.map.worldToTileY(palettePoint.y);
+			const marker = this.marker;
+			const paletteMarker = this.paletteMarker;
 
-			if (this.devPalette.visible
-				&& 0 <= palettePointerTileX
-				&& palettePointerTileX < this.devPalette.map.width
-				&& 0 <= palettePointerTileY
-				&& palettePointerTileY < this.devPalette.map.height
-				&& this.input.activePointer.x > this.devPalette.scrollBarContainer.x
-				&& this.input.activePointer.x < this.devPalette.scrollBarContainer.x + this.devPalette.scrollBarContainer.width
-				&& this.input.activePointer.y > this.devPalette.scrollBarContainer.y - 30
-				&& this.input.activePointer.y < this.devPalette.scrollBarContainer.y + this.devPalette.scrollBarContainer.height) {
-				this.marker.setVisible(false);
+			paletteMarker.clear();
+			paletteMarker.strokeRect(0, 0, paletteMap.tileWidth * palette.texturesLayer.scaleX, paletteMap.tileHeight * palette.texturesLayer.scaleY);
+			paletteMarker.setVisible(true);
+
+			// Rounds down to nearest tile
+			const palettePointerTileX = paletteMap.worldToTileX(palettePoint.x);
+			const palettePointerTileY = paletteMap.worldToTileY(palettePoint.y);
+
+			if (palette.visible	&& this.pointerInsidePalette()) {
+				marker.setVisible(false);
 				// Snap to tile coordinates, but in world space
-				this.paletteMarker.x = this.devPalette.map.tileToWorldX(palettePointerTileX);
-				this.paletteMarker.y = this.devPalette.map.tileToWorldY(palettePointerTileY);
+				paletteMarker.x = paletteMap.tileToWorldX(palettePointerTileX);
+				paletteMarker.y = paletteMap.tileToWorldY(palettePointerTileY);
 
 				if (this.input.manager.activePointer.isDown) {
-					if (this.devPalette.area.x > 1 || this.devPalette.area.y > 1) {
-						for (let i = 0; i < this.devPalette.area.x; i++) {
-							for (let j = 0; j < this.devPalette.area.y; j++) {
-								if (this.selectedTileArea[i][j]) this.selectedTileArea[i][j].tint = 0xffffff;
-								this.selectedTileArea[i][j] = this.devPalette.map.getTileAt(palettePointerTileX + i, palettePointerTileY + j, true);
-								if (this.selectedTileArea[i][j]) this.selectedTileArea[i][j].tint = 0x87cfff;
+					if (palette.area.x > 1 || palette.area.y > 1) {
+						for (let i = 0; i < palette.area.x; i++) {
+							for (let j = 0; j < palette.area.y; j++) {
+								if (this.pointerInsideMap(palettePointerTileX + i, palettePointerTileY + j, paletteMap)) {
+									this.selectedTileArea[i][j].tint = 0xffffff;
+									this.selectedTileArea[i][j] = paletteMap.getTileAt(palettePointerTileX + i, palettePointerTileY + j, true);
+									this.selectedTileArea[i][j].tint = 0x87cfff;
+								}
 							}
 						}
 					} else {
-						this.selectedTile.tint = 0xffffff;
-						this.selectedTile = this.devPalette.map.getTileAt(palettePointerTileX, palettePointerTileY, true);
-						this.selectedTile.tint = 0x87cfff;
+						if (this.pointerInsideMap(palettePointerTileX, palettePointerTileY, paletteMap)) {
+							this.selectedTile.tint = 0xffffff;
+							this.selectedTile = paletteMap.getTileAt(palettePointerTileX, palettePointerTileY, true);
+							this.selectedTile.tint = 0x87cfff;
+						}
 					}
 				}
-			} else if ((!(this.input.activePointer.x > this.devPalette.scrollBarContainer.x
-				&& this.input.activePointer.x < this.devPalette.scrollBarContainer.x + this.devPalette.scrollBarContainer.width
-				&& this.input.activePointer.y > this.devPalette.scrollBarContainer.y - 30
-				&& this.input.activePointer.y < this.devPalette.scrollBarContainer.y + this.devPalette.scrollBarContainer.height)
-				|| !this.devPalette.visible) &&
-				!(this.input.activePointer.x > this.devPalette.layerButtonsContainer.x
-				&& this.input.activePointer.x < this.devPalette.layerButtonsContainer.x + this.devPalette.layerButtonsContainer.width
-				&& this.input.activePointer.y > this.devPalette.layerButtonsContainer.y - this.devPalette.layerButtonsContainer.height
-				&& this.input.activePointer.y < this.devPalette.layerButtonsContainer.y)) {
-				this.paletteMarker.setVisible(false);
-				this.marker.setVisible(true);
+			} else if ((!this.pointerInsidePalette() || !palette.visible) &&
+				!this.pointerInsideButtons()) {
+				paletteMarker.setVisible(false);
+				marker.setVisible(true);
 				// Rounds down to nearest tile
 				const pointerTileX = map.worldToTileX(worldPoint.x);
 				const pointerTileY = map.worldToTileY(worldPoint.y);
 
 				// Snap to tile coordinates, but in world space
-				this.marker.x = map.tileToWorldX(pointerTileX);
-				this.marker.y = map.tileToWorldY(pointerTileY);
+				marker.x = map.tileToWorldX(pointerTileX);
+				marker.y = map.tileToWorldY(pointerTileY);
 
 				if (this.input.manager.activePointer.rightButtonDown()) {
-					if (this.devPalette.area.x > 1 || this.devPalette.area.y > 1) {
-						for (let i = 0; i < this.devPalette.area.x; i++) {
-							for (let j = 0; j < this.devPalette.area.y; j++) {
-								this.selectedTileArea[i][j].tint = 0xffffff;
-								this.selectedTileArea[i][j] = map.getTileAt(pointerTileX + i, pointerTileY + j, true);
+					if (palette.area.x > 1 || palette.area.y > 1) {
+						for (let i = 0; i < palette.area.x; i++) {
+							for (let j = 0; j < palette.area.y; j++) {
+								if (this.pointerInsideMap(pointerTileX + i, pointerTileY + j, map)) {
+									this.selectedTileArea[i][j].tint = 0xffffff;
+									this.selectedTileArea[i][j] = map.getTileAt(pointerTileX + i, pointerTileY + j, true);
+								} 
 							}
 						}
 					} else {
-						this.selectedTile.tint = 0xffffff;
-						this.selectedTile = map.getTileAt(pointerTileX, pointerTileY, true);
+						if (this.pointerInsideMap(pointerTileX, pointerTileY, map)) {
+							this.selectedTile.tint = 0xffffff;
+							this.selectedTile = map.getTileAt(pointerTileX, pointerTileY, true);
+						} 
 					}
 				}
 
 				if (this.input.manager.activePointer.leftButtonDown()) {
-					if (this.devPalette.area.x > 1 || this.devPalette.area.y > 1) {
-						for (let i = 0; i < this.devPalette.area.x; i++) {
-							for (let j = 0; j < this.devPalette.area.y; j++) {
-								if ((pointerTileX + i >= 0 && pointerTileY + j >= 0
-									&& pointerTileX + i < map.width
-									&& pointerTileY + j < map.height)
+					if (palette.area.x > 1 || palette.area.y > 1) {
+						for (let i = 0; i < palette.area.x; i++) {
+							for (let j = 0; j < palette.area.y; j++) {
+								if (this.pointerInsideMap(pointerTileX + i, pointerTileY + j, map)
 									&& this.selectedTileArea[i][j].index !== (map.getTileAt(pointerTileX + i, pointerTileY + j, true)).index) {
-									map.putTileAt(this.selectedTileArea[i][j], pointerTileX + i, pointerTileY + j);
-									map.getTileAt(pointerTileX + i, pointerTileY + j, true).tint = 0xffffff;
-									console.log('place tile', this.selectedTileArea[i][j].index)
-									ige.network.send('editTile', {gid: this.selectedTileArea[i][j].index, layer: map.currentLayerIndex, x: pointerTileX + i, y: pointerTileY + j});
-								}
+										map.putTileAt(this.selectedTileArea[i][j], pointerTileX + i, pointerTileY + j);
+										map.getTileAt(pointerTileX + i, pointerTileY + j, true).tint = 0xffffff;
+										console.log('place tile', this.selectedTileArea[i][j].index)
+										ige.network.send('editTile', {gid: this.selectedTileArea[i][j].index, layer: map.currentLayerIndex, x: pointerTileX + i, y: pointerTileY + j});
+									}
 							}
 						}
 					}
 					else {
-						if ((pointerTileX >= 0 && pointerTileY >= 0
-							&& pointerTileX < map.width
-							&& pointerTileY < map.height)
+						if (this.pointerInsideMap(pointerTileX, pointerTileY, map)
 							&& this.selectedTile.index !== (map.getTileAt(pointerTileX, pointerTileY, true)).index) {
 								map.putTileAt(this.selectedTile, pointerTileX, pointerTileY);
 								map.getTileAt(pointerTileX, pointerTileY, true).tint = 0xffffff;

@@ -15,6 +15,7 @@ interface EntityData {
 declare class GameComponent extends IgeEntity {
 
 	data: {
+		defaultData: any;
 		map: {
 			width: number,
 			height: number,
