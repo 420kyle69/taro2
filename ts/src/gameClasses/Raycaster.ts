@@ -19,7 +19,7 @@ class Raycaster {
 		},
 		config: {
 			method: string,
-			projType: string
+			projType: string,
 		}
 	): void {
 
@@ -47,6 +47,9 @@ class Raycaster {
 			end,
 			callback
 		);
+		if (config.method === 'multiple') {
+			this.sortHits();
+		}
 
 		if (ige.isClient) {
 			end = (config.method === 'closest' && this.data.point) ?
@@ -59,15 +62,18 @@ class Raycaster {
 					y: end.y * this.scaleRatio
 				};
 
-			this.drawRay(start, end, config);
+			this.drawRay(start, end, { ...config, fraction: this.data.fraction });
 		}
-		console.log(this.data);
+	}
+
+	sortHits (): void {
+		this.data.entities = _.orderBy(this.data.entities, ['raycastFraction'], ['asc']);
 	}
 
 	drawRay (
 		start: {x: number, y: number},
 		end: {x: number, y: number},
-		config: {method: string, projType: string}
+		config: {method: string, projType: string, fraction: number}
 
 	): void {
 		ige.client.emit('create-ray', {
@@ -93,15 +99,16 @@ const RayCastClosest = (function() {
 	};
 
 	def.callback = function(fixture, point, normal, fraction) {
-		const body = fixture.getBody();
-		const userData = body.getUserData();
-		if (userData) {
-			if (userData === 0) {
-			// By returning -1, we instruct the calling code to ignore this fixture and
-			// continue the ray-cast to the next fixture.
-				return -1.0;
-			}
-		}
+		// const body = fixture.getBody();
+		// const userData = body.getUserData();
+
+		// if (userData) {
+		// 	if (userData === 0) {
+		// 	// By returning -1, we instruct the calling code to ignore this fixture and
+		// 	// continue the ray-cast to the next fixture.
+		// 		return -1.0;
+		// 	}
+		// }
 
 		console.log(fixture);
 		// var fixtureList = fixture.m_body.m_fixtureList;
@@ -142,18 +149,17 @@ const RayCastMultiple = (function() {
 	};
 
 	def.callback = function (fixture, point, normal, fraction) {
-		const body = fixture.getBody();
-		const userData = body.getUserData();
+		// const body = fixture.getBody();
+		// const userData = body.getUserData();
 
-		if (userData) {
-			if (userData == 0) {
-				// By returning -1, we instruct the calling code to ignore this fixture
-				// and continue the ray-cast to the next fixture.
-				return -1.0;
-			}
-		}
+		// if (userData) {
+		// 	if (userData == 0) {
+		// 		// By returning -1, we instruct the calling code to ignore this fixture
+		// 		// and continue the ray-cast to the next fixture.
+		// 		return -1.0;
+		// 	}
+		// }
 
-		console.log(fixture);
 		var fixtureList = fixture.m_body.m_fixtureList;
 		var entity = fixtureList && fixtureList.igeId && ige.$(fixtureList.igeId);
 		if (entity) {

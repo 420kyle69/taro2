@@ -4,7 +4,7 @@ var ActionComponent = IgeEntity.extend({
 
 	init: function (scriptComponent, entity) {
 		this._entity = entity;
-		this._script = scriptComponent
+		this._script = scriptComponent;
 		this.entityCategories = ['unit', 'item', 'projectile', 'region', 'wall'];
 	},
 
@@ -19,16 +19,16 @@ var ActionComponent = IgeEntity.extend({
 			var action = actionList[i];
 
 			// if CSP is enabled, then server will pause streaming
-			// the server side is still running (e.g. creating entities), but it won't be streamed to the client			
+			// the server side is still running (e.g. creating entities), but it won't be streamed to the client
 			if (ige.isServer) {
 
 				if (ige.game.cspEnabled) {
 					if(action.runOnClient) {
 						ige.network.pause();
 					}
-				} 
+				}
 
-				var now = Date.now();		
+				var now = Date.now();
 				var lastActionRunTime = now - ige.lastActionRanAt;
 				var engineTickDelta = now - ige.now;
 
@@ -55,25 +55,25 @@ var ActionComponent = IgeEntity.extend({
 
 				if (ige.lastAction) {
 					if (ige.actionProfiler[ige.lastAction]) {
-						var count = ige.actionProfiler[ige.lastAction].count;					
-						ige.actionProfiler[ige.lastAction].count++;					
+						var count = ige.actionProfiler[ige.lastAction].count;
+						ige.actionProfiler[ige.lastAction].count++;
 						ige.actionProfiler[ige.lastAction].avgTime = ((ige.actionProfiler[ige.lastAction].avgTime * count) + lastActionRunTime ) / (count + 1)
-						ige.actionProfiler[ige.lastAction].totalTime += lastActionRunTime					 
+						ige.actionProfiler[ige.lastAction].totalTime += lastActionRunTime;
 					} else {
-						ige.actionProfiler[ige.lastAction] = {count: 1, avgTime: lastActionRunTime, totalTime: lastActionRunTime}
+						ige.actionProfiler[ige.lastAction] = { count: 1, avgTime: lastActionRunTime, totalTime: lastActionRunTime };
 					}
 				}
 
 				ige.lastAction = action.type;
-				ige.lastActionRanAt = now;	
+				ige.lastActionRanAt = now;
 			}
-			
+
 			if (!action || action.disabled == true || // if action is disabled or
 				(ige.isClient && !action.runOnClient) // CSP isn't enabled, don't run on client side
 			) {
 				continue;
 			}
-			
+
 			var params = {};
 			var entity = self._script.variable.getValue(action.entity, vars);
 			self._script.currentActionName = action.type;
@@ -155,7 +155,7 @@ var ActionComponent = IgeEntity.extend({
 					case 'runScript':
 						let previousScriptId = self._script.currentScriptId;
 						let scriptComponent = undefined;
-						
+
 						if (action.isEntityScript) {
 							scriptComponent = self._script; // entity script
 						} else {

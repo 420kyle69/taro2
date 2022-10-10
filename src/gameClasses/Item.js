@@ -368,56 +368,90 @@ var Item = IgeEntityPhysics.extend({
 										projectile.script.trigger('entityCreated');
 										ige.game.lastCreatedProjectileId = projectile.id();
 									}
+									console.log(this);
 								}
 								if (this._stats.bulletType == 'raycast') {
 									// starting from unit center position
-									var raycastStartPosition = {
-										x: owner._translate.x + (Math.cos(this._rotate.z + Math.radians(-90))) + (Math.cos(this._rotate.z)),
-										y: owner._translate.y + (Math.sin(this._rotate.z + Math.radians(-90))) + (Math.sin(this._rotate.z))
-									};
+									let offset = { x: 0, y: 0 };
+									const useOwnerBody = self._stats.currentBody && (self._stats.currentBody.type == 'spriteOnly' || self._stats.currentBody.type == 'none');
 
-									if (self._stats.currentBody && (self._stats.currentBody.type == 'spriteOnly' || self._stats.currentBody.type == 'none')) {
-										var unitAnchorX = (self._stats.currentBody.unitAnchor != undefined) ? self._stats.currentBody.unitAnchor.x : 0;
-										var unitAnchorY = (self._stats.currentBody.unitAnchor != undefined) ? self._stats.currentBody.unitAnchor.y : 0;
+									const pos = useOwnerBody ?
+										{
+											x: owner._translate.x,
+											y: owner._translate.y,
+											rotation: owner._rotate.z,
+										} :
+										{
+											x: this._translate.x,
+											y: this._translate.y,
+											rotation: this._rotate.z
+										};
 
-										var endPosition = {
-											x: (owner._translate.x + unitAnchorX) + (this._stats.bulletDistance * Math.cos(owner._rotate.z + Math.radians(-90))),
-											y: (owner._translate.y + unitAnchorY) + (this._stats.bulletDistance * Math.sin(owner._rotate.z + Math.radians(-90)))
-										};
-									} else {
-										var endPosition = {
-											x: (self._translate.x) + (this._stats.bulletDistance * Math.cos(self._rotate.z + Math.radians(-90))),
-											y: (self._translate.y) + (this._stats.bulletDistance * Math.sin(self._rotate.z + Math.radians(-90)))
-										};
+									// factor in unit anchor
+									if (useOwnerBody) {
+										offset = this.getAnchoredOffset(pos.rotation);
 									}
 
+									if (this._stats.bulletStartPosition) {
+
+										let bulletOffset = {
+											x: this._stats.bulletStartPosition.x,
+											y: this._stats.bulletStartPosition.y
+										};
+
+										offset.x += bulletOffset.x * Math.cos(pos.rotation) + bulletOffset.y * Math.sin(pos.rotation);
+										offset.y += bulletOffset.x * Math.sin(pos.rotation) - bulletOffset.y * Math.cos(pos.rotation);
+									}
+
+									pos.x += offset.x;
+									pos.y += offset.y;
+
+									const raycastStart = {x, y} = pos;
+									const raycastEnd ={
+										x: (owner._translate.x) + (this._stats.bulletDistance * Math.cos(owner._rotate.z + Math.radians(-90))),
+										y: (owner._translate.y) + (this._stats.bulletDistance * Math.sin(owner._rotate.z + Math.radians(-90)))
+									};
+										// 	var raycastStartPosition = {
+									// 		x: (owner._translate.x + unitAnchorX) + (Math.cos(this._rotate.z + Math.radians(-90))) + (Math.cos(this._rotate.z)),
+									// 		y: (owner._translate.y + unitAnchorY - this._stats.bulletStartPosition.y) + (Math.sin(this._rotate.z + Math.radians(-90))) + (Math.sin(this._rotate.z))
+									// 	};
+
+									// 	var endPosition = {
+									// 		x: (owner._translate.x + unitAnchorX) + (this._stats.bulletDistance * Math.cos(owner._rotate.z + Math.radians(-90))),
+									// 		y: (owner._translate.y + unitAnchorY - this._stats.bulletStartPosition.y) + (this._stats.bulletDistance * Math.sin(owner._rotate.z + Math.radians(-90)))
+									// 	};
+									// } else {
+									// 	var raycastStartPosition = {
+									// 		x: (self._translate.x) + (Math.cos(this._rotate.z + Math.radians(-90))) + (Math.cos(this._rotate.z)),
+									// 		y: (self._translate.y - this._stats.bulletStartPosition.y) + (Math.sin(this._rotate.z + Math.radians(-90))) + (Math.sin(this._rotate.z))
+									// 	};
+									// 	var endPosition = {
+									// 		x: (self._translate.x) + (this._stats.bulletDistance * Math.cos(self._rotate.z + Math.radians(-90))),
+									// 		y: (self._translate.y - this._stats.bulletStartPosition.y) + (this._stats.bulletDistance * Math.sin(self._rotate.z + Math.radians(-90)))
+									// 	};
+									// }
+									console.log(raycastStart, raycastEnd);
 									ige.raycaster.raycast(
 										{
-											x: raycastStartPosition.x / self.scaleRatio,
-											y: raycastStartPosition.y / self.scaleRatio
+											x: raycastStart.x / self.scaleRatio,
+											y: raycastStart.y / self.scaleRatio
 										},
 										{
-											x: endPosition.x / self.scaleRatio,
-											y: endPosition.y / self.scaleRatio
+											x: raycastEnd.x / self.scaleRatio,
+											y: raycastEnd.y / self.scaleRatio
 										},
 										{
 											method: 'closest',
-											projType: data.type
+											projType: data.type,
+											bulletDistance: this._stats.bulletDistance
 										}
 									);
-
-									// not used. need to figure out how we want to store this data
-
-									// if (!self._stats.penetration) {
-									ige.game.entitiesCollidingWithLastRaycast = _.orderBy(self.raycastTargets, ['raycastFraction'], ['asc']);
-									// }
 
 									ige.queueTrigger('raycastItemFired', {
 										itemId: self.id(),
 										unitId: ownerId
 									});
 								}
-								self.raycastTargets = [];
 
 								if (self._stats.recoilForce) {
 									// apply recoil on its owner if item itself doesn't have physical body

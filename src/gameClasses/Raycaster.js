@@ -1,3 +1,14 @@
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var Raycaster = /** @class */ (function () {
     function Raycaster() {
         this.world = ige.physics.world();
@@ -24,6 +35,9 @@ var Raycaster = /** @class */ (function () {
         }
         reset();
         this.world.rayCast(start, end, callback);
+        if (config.method === 'multiple') {
+            this.sortHits();
+        }
         if (ige.isClient) {
             end = (config.method === 'closest' && this.data.point) ?
                 {
@@ -34,9 +48,11 @@ var Raycaster = /** @class */ (function () {
                     x: end.x * this.scaleRatio,
                     y: end.y * this.scaleRatio
                 };
-            this.drawRay(start, end, config);
+            this.drawRay(start, end, __assign(__assign({}, config), { fraction: this.data.fraction }));
         }
-        console.log(this.data);
+    };
+    Raycaster.prototype.sortHits = function () {
+        this.data.entities = _.orderBy(this.data.entities, ['raycastFraction'], ['asc']);
     };
     Raycaster.prototype.drawRay = function (start, end, config) {
         ige.client.emit('create-ray', {
@@ -60,15 +76,15 @@ var RayCastClosest = (function () {
         def.fraction = 1;
     };
     def.callback = function (fixture, point, normal, fraction) {
-        var body = fixture.getBody();
-        var userData = body.getUserData();
-        if (userData) {
-            if (userData === 0) {
-                // By returning -1, we instruct the calling code to ignore this fixture and
-                // continue the ray-cast to the next fixture.
-                return -1.0;
-            }
-        }
+        // const body = fixture.getBody();
+        // const userData = body.getUserData();
+        // if (userData) {
+        // 	if (userData === 0) {
+        // 	// By returning -1, we instruct the calling code to ignore this fixture and
+        // 	// continue the ray-cast to the next fixture.
+        // 		return -1.0;
+        // 	}
+        // }
         console.log(fixture);
         // var fixtureList = fixture.m_body.m_fixtureList;
         // var entity = fixtureList && fixtureList.igeId && ige.$(fixtureList.igeId);
@@ -100,16 +116,15 @@ var RayCastMultiple = (function () {
         def.entities = [];
     };
     def.callback = function (fixture, point, normal, fraction) {
-        var body = fixture.getBody();
-        var userData = body.getUserData();
-        if (userData) {
-            if (userData == 0) {
-                // By returning -1, we instruct the calling code to ignore this fixture
-                // and continue the ray-cast to the next fixture.
-                return -1.0;
-            }
-        }
-        console.log(fixture);
+        // const body = fixture.getBody();
+        // const userData = body.getUserData();
+        // if (userData) {
+        // 	if (userData == 0) {
+        // 		// By returning -1, we instruct the calling code to ignore this fixture
+        // 		// and continue the ray-cast to the next fixture.
+        // 		return -1.0;
+        // 	}
+        // }
         var fixtureList = fixture.m_body.m_fixtureList;
         var entity = fixtureList && fixtureList.igeId && ige.$(fixtureList.igeId);
         if (entity) {

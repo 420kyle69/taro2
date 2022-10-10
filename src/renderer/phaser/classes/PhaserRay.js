@@ -24,20 +24,20 @@ var PhaserRay = /** @class */ (function () {
         /* End of Debug draw ray */
         if (config.projType) {
             this.sprite = scene.add.sprite(start.x, start.y, "projectile/".concat(config.projType));
-            scene.tweens.add({
-                targets: this.sprite,
-                duration: 250,
-                props: {
-                    x: end.x,
-                    y: end.y
-                },
-                onComplete: function () {
-                    setTimeout(function () {
-                        _this.sprite.destroy();
-                        _this.sprite = null;
-                    }, 50);
-                }
-            });
+            // scene.tweens.add({
+            // 	targets: this.sprite,
+            // 	duration: 250 * config.fraction,
+            // 	props: {
+            // 		x: end.x,
+            // 		y: end.y
+            // 	},
+            // 	onComplete: () => {
+            // 		setTimeout(() => {
+            // 			this.sprite.destroy();
+            // 			this.sprite = null;
+            // 		}, 50);
+            // 	}
+            // });
         }
     }
     return PhaserRay;

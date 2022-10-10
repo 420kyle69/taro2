@@ -1081,7 +1081,6 @@ var VariableComponent = IgeEntity.extend({
 					var region = self.getValue(text.region, vars);
 
 					if (region) {
-						console.log(region._stats);
 						returnValue = {
 							x: region._stats.default.x + (region._stats.default.width / 2),
 							y: region._stats.default.y + (region._stats.default.height / 2)
@@ -1216,7 +1215,6 @@ var VariableComponent = IgeEntity.extend({
 							projType: null
 						}
 					);
-					console.log(ige.raycaster.data);
 
 					returnValue = ige.raycaster.data.entities;
 					break;
