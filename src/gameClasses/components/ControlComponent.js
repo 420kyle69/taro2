@@ -111,20 +111,7 @@ var ControlComponent = IgeEntity.extend({
 				var unitAbility = null;
 				// execute movement command is AI is disabled
 				if (unit._stats.controls && !unit._stats.aiEnabled){
-					if (unit._stats.controls.movementControlScheme == 'ad') {
-						switch (key) {
-							case 'a':
-							case 'left':
-								unit.ability.moveLeft();
-								break;
-
-							case 'd':
-							case 'right':
-								unit.ability.moveRight();
-								break;
-						}
-					// WASD movement is default
-					} else { 
+					if (unit._stats.controls.movementControlScheme == 'wasd') {
 						switch (key) {
 							case 'w':
 							case 'up':
@@ -140,6 +127,18 @@ var ControlComponent = IgeEntity.extend({
 							case 's':
 							case 'down':
 								unit.ability.moveDown();
+								break;
+
+							case 'd':
+							case 'right':
+								unit.ability.moveRight();
+								break;
+						}
+					} else if (unit._stats.controls.movementControlScheme == 'ad') {
+						switch (key) {
+							case 'a':
+							case 'left':
+								unit.ability.moveLeft();
 								break;
 
 							case 'd':
@@ -344,7 +343,7 @@ var ControlComponent = IgeEntity.extend({
 				self.lastMousePosition = self.newMousePosition;
 			}
 
-			// unit move
+			// send unit position to server (client-authoritative movement)
 			if (ige.physics && ige.game.cspEnabled && !unit._stats.aiEnabled) {
 				var x = unit._translate.x.toFixed(0);
 				var y = unit._translate.y.toFixed(0);
