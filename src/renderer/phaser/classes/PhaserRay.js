@@ -2,6 +2,7 @@ var PhaserRay = /** @class */ (function () {
     function PhaserRay(scene, start, end, config) {
         var _this = this;
         /* Debug draw ray */
+        // small vector math tweaks to get the line positions right
         var v1 = new Phaser.Math.Vector2(start.x, start.y);
         var v2 = new Phaser.Math.Vector2(end.x, end.y);
         var lineStart = v1.multiply(new Phaser.Math.Vector2(0.5, 0.5));

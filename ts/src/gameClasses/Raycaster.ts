@@ -95,29 +95,22 @@ const RayCastClosest = (function() {
 		def.hit = false;
 		def.point = null;
 		def.normal = null;
+		def.entity = null;
 		def.fraction = 1;
 	};
 
 	def.callback = function(fixture, point, normal, fraction) {
-		// const body = fixture.getBody();
-		// const userData = body.getUserData();
 
-		// if (userData) {
-		// 	if (userData === 0) {
-		// 	// By returning -1, we instruct the calling code to ignore this fixture and
-		// 	// continue the ray-cast to the next fixture.
-		// 		return -1.0;
-		// 	}
-		// }
-
-		console.log(fixture);
-		// var fixtureList = fixture.m_body.m_fixtureList;
-		// var entity = fixtureList && fixtureList.igeId && ige.$(fixtureList.igeId);
-		// if (entity) {
-
-		// 	entity.raycastFraction = fraction;
-		// 	def.entities.push(entity);
-		// }
+		var fixtureList = fixture.m_body.m_fixtureList;
+		var entity = fixtureList && fixtureList.igeId && ige.$(fixtureList.igeId);
+		if (entity) {
+			entity.lastRaycastCollisionPosition = {
+				x: point.x * ige.physics._scaleRatio,
+				y: point.y * ige.physics._scaleRatio
+			};
+			entity.raycastFraction = fraction;
+			def.entity = entity;
+		}
 
 		def.hit = true;
 		def.point = point;
@@ -149,26 +142,19 @@ const RayCastMultiple = (function() {
 	};
 
 	def.callback = function (fixture, point, normal, fraction) {
-		// const body = fixture.getBody();
-		// const userData = body.getUserData();
-
-		// if (userData) {
-		// 	if (userData == 0) {
-		// 		// By returning -1, we instruct the calling code to ignore this fixture
-		// 		// and continue the ray-cast to the next fixture.
-		// 		return -1.0;
-		// 	}
-		// }
 
 		var fixtureList = fixture.m_body.m_fixtureList;
 		var entity = fixtureList && fixtureList.igeId && ige.$(fixtureList.igeId);
 		if (entity) {
 
+			entity.lastRaycastCollisionPosition = {
+				x: point.x * ige.physics._scaleRatio,
+				y: point.y * ige.physics._scaleRatio
+			};
+
 			entity.raycastFraction = fraction;
 			def.entities.push(entity);
 		}
-
-
 
 		def.points.push(point);
 		def.normals.push(normal);

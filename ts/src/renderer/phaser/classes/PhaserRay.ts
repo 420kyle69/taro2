@@ -19,6 +19,7 @@ class PhaserRay {
 		},
 	) {
 		/* Debug draw ray */
+		// small vector math tweaks to get the line positions right
 		const v1 = new Phaser.Math.Vector2(start.x, start.y);
 		const v2 = new Phaser.Math.Vector2(end.x, end.y);
 		const lineStart = v1.multiply(new Phaser.Math.Vector2(0.5, 0.5));
