@@ -1374,10 +1374,12 @@ var Unit = IgeEntityPhysics.extend({
 		}
 
 		// destroy all items in inventory
-		for (var i = 0; i < self._stats.itemIds.length; i++) {
-			var currentItem = this.inventory.getItemBySlotNumber(i + 1);
-			if (currentItem) {
-				currentItem.remove();
+		if (self._stats.itemIds) {
+			for (var i = 0; i < self._stats.itemIds.length; i++) {
+				var currentItem = this.inventory.getItemBySlotNumber(i + 1);
+				if (currentItem) {
+					currentItem.remove();
+				}
 			}
 		}
 

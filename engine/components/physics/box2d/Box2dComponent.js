@@ -631,29 +631,28 @@ var PhysicsComponent = IgeEventingClass.extend({
 								entity.rotateTo(0, 0, angle);
 							} else if (ige.isClient) {
 								
-								
-							if (ige.physics && ige.game.cspEnabled && 
-									(
+								if (ige.physics && ige.game.cspEnabled && 
 										(
-											entity._category == 'projectile' // we probably need a condition to check if this projectile's parent item was streaming it or not?
-										) || 											
-										( // move my own unit immediately while ignoring the server stream
-											!entity._stats.aiEnabled && ige.client.selectedUnit == entity && !entity._stats.aiEnabled &&
-											(entity.nextPhysicsFrame == undefined || ige._currentTime > entity.nextPhysicsFrame[0])
+											(
+												entity._category == 'projectile' // we probably need a condition to check if this projectile's parent item was streaming it or not?
+											) || 											
+											( // move my own unit immediately while ignoring the server stream
+												!entity._stats.aiEnabled && ige.client.selectedUnit == entity && !entity._stats.aiEnabled &&
+												(entity.nextPhysicsFrame == undefined || ige._currentTime > entity.nextPhysicsFrame[0])
+											)
+											
 										)
-										
-									)
-							) {
-								entity.prevPhysicsFrame = entity.nextPhysicsFrame;
-								entity.nextPhysicsFrame = [nextFrameTime, [x, y, angle]];
-							} else {
-								// all streamed entities are rigidly positioned
-								x = entity._translate.x;
-								y = entity._translate.y;
-								angle = entity._rotate.z;
-								entity.nextPhysicsFrame = undefined;
-								
-							}
+								) {
+									entity.prevPhysicsFrame = entity.nextPhysicsFrame;
+									entity.nextPhysicsFrame = [nextFrameTime, [x, y, angle]];
+								} else {
+									// all streamed entities are rigidly positioned
+									x = entity._translate.x;
+									y = entity._translate.y;
+									angle = entity._rotate.z;
+									entity.nextPhysicsFrame = undefined;
+									
+								}
 								entity.body.setPosition({ x: x / entity._b2dRef._scaleRatio, y: y / entity._b2dRef._scaleRatio });
 								entity.body.setAngle(angle);
 							}
