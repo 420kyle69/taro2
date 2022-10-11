@@ -52,6 +52,7 @@ declare class IgeEngine extends IgeClass {
 
 	physics: {
 		world(): any;
+		engine: string;
 		_scaleRatio: number
 	};
 

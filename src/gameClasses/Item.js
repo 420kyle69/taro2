@@ -9,13 +9,13 @@ var Item = IgeEntityPhysics.extend({
 		self._stats = {};
 		self.anchorOffset = { x: 0, y: 0, rotate: 0 };
 		var itemData = {};
-		
+
 		if (ige.isClient) {
 			itemData = ige.game.getAsset('itemTypes', data.itemTypeId);
 		}
 
 		self._stats = _.merge(itemData, data);
-		
+
 		if (self._stats.projectileType) {
 			self.projectileData = ige.game.getAsset('projectileTypes', self._stats.projectileType);
 		}
@@ -368,11 +368,11 @@ var Item = IgeEntityPhysics.extend({
 										projectile.script.trigger('entityCreated');
 										ige.game.lastCreatedProjectileId = projectile.id();
 									}
-									console.log(this);
 								}
 								if (this._stats.bulletType == 'raycast') {
 									// starting from unit center position
 									let offset = { x: 0, y: 0 };
+
 									const useOwnerBody = self._stats.currentBody && (self._stats.currentBody.type == 'spriteOnly' || self._stats.currentBody.type == 'none');
 
 									const pos = useOwnerBody ?
@@ -400,6 +400,10 @@ var Item = IgeEntityPhysics.extend({
 											y: this._stats.bulletStartPosition.y
 										};
 
+										if (owner._stats.flip === 1) {
+											bulletOffset.y *= -1;
+										}
+
 										offset.x += bulletOffset.x * Math.cos(pos.rotation) + bulletOffset.y * Math.sin(pos.rotation);
 										offset.y += bulletOffset.x * Math.sin(pos.rotation) - bulletOffset.y * Math.cos(pos.rotation);
 									}
@@ -414,7 +418,6 @@ var Item = IgeEntityPhysics.extend({
 									};
 
 									// end pos calcs; fire raycast
-									console.log(raycastStart, raycastEnd);
 									ige.raycaster.raycast(
 										{
 											x: raycastStart.x / self.scaleRatio,
@@ -430,13 +433,25 @@ var Item = IgeEntityPhysics.extend({
 										}
 									);
 
+									if (ige.game.entitiesCollidingWithLastRaycast.length > 0) {
+
+										this.raycastTargets = _.filter(
+											ige.game.entitiesCollidingWithLastRaycast,
+											// _.matchesProperty
+											['_category', 'unit']
+										);
+									}
+
 									ige.queueTrigger('raycastItemFired', {
 										itemId: self.id(),
 										unitId: ownerId
 									});
 
-									// damage and cost
-									console.log(data.damageData);
+									// damage
+									this.raycastTargets.forEach((unit) => {
+										unit.inflictDamage(data.damageData);
+									});
+									this.raycastTargets = [];
 								}
 
 								if (self._stats.recoilForce) {

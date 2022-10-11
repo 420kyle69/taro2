@@ -1,11 +1,17 @@
 class Raycaster {
+	engine = ige.physics.engine;
 	world = ige.physics.world();
 	scaleRatio = ige.physics._scaleRatio;
+
 	data: any = {};
 	closest = RayCastClosest;
 	multiple = RayCastMultiple;
-	constructor () {
-		// CONFIG: info about which physics engine we are using
+
+	constructor (
+
+	) {
+		// BOX2DWEB (callback, start, end)
+		// PLANCK (start, end, callback)
 	}
 
 	raycast(
@@ -38,7 +44,6 @@ class Raycaster {
 				reset = this.data.reset;
 				callback = this.data.callback;
 				break;
-
 		}
 
 		reset();
@@ -55,8 +60,6 @@ class Raycaster {
 		} else if (config.method === 'closest') {
 			ige.game.entitiesCollidingWithLastRaycast = [this.data.entity]
 		}
-
-		console.log(ige.game.entitiesCollidingWithLastRaycast);
 
 		if (ige.isClient) {
 			end = (config.method === 'closest' && this.data.point) ?
