@@ -35,9 +35,15 @@ var Raycaster = /** @class */ (function () {
         }
         reset();
         this.world.rayCast(start, end, callback);
+        // leaning towards having this list exist on the item or both
         if (config.method === 'multiple') {
             this.sortHits();
+            ige.game.entitiesCollidingWithLastRaycast = this.data.entities;
         }
+        else if (config.method === 'closest') {
+            ige.game.entitiesCollidingWithLastRaycast = [this.data.entity];
+        }
+        console.log(ige.game.entitiesCollidingWithLastRaycast);
         if (ige.isClient) {
             end = (config.method === 'closest' && this.data.point) ?
                 {

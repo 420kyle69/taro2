@@ -379,7 +379,7 @@ var Item = IgeEntityPhysics.extend({
 										{
 											x: owner._translate.x,
 											y: owner._translate.y,
-											rotation: owner._rotate.z,
+											rotation: owner._rotate.z
 										} :
 										{
 											x: this._translate.x,
@@ -408,11 +408,12 @@ var Item = IgeEntityPhysics.extend({
 									pos.y += offset.y;
 
 									const raycastStart = {x, y} = pos;
-									const raycastEnd ={
+									const raycastEnd = {
 										x: pos.x + (this._stats.bulletDistance * Math.cos(owner._rotate.z + Math.radians(-90))),
 										y: pos.y + (this._stats.bulletDistance * Math.sin(owner._rotate.z + Math.radians(-90)))
 									};
 
+									// end pos calcs; fire raycast
 									console.log(raycastStart, raycastEnd);
 									ige.raycaster.raycast(
 										{
@@ -425,8 +426,7 @@ var Item = IgeEntityPhysics.extend({
 										},
 										{
 											method: 'closest',
-											projType: data.type,
-											bulletDistance: this._stats.bulletDistance
+											projType: data.type
 										}
 									);
 
@@ -434,6 +434,9 @@ var Item = IgeEntityPhysics.extend({
 										itemId: self.id(),
 										unitId: ownerId
 									});
+
+									// damage and cost
+									console.log(data.damageData);
 								}
 
 								if (self._stats.recoilForce) {
