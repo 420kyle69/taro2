@@ -34,6 +34,9 @@ var GameScene = /** @class */ (function (_super) {
             }
         });
         ige.client.on('zoom', function (height) {
+            if (_this.zoomSize === height * 2.15) {
+                return;
+            }
             _this.setZoomSize(height);
             var ratio = _this.calculateZoom();
             camera.zoomTo(ratio, 1000, Phaser.Math.Easing.Quadratic.Out, true);
@@ -123,6 +126,10 @@ var GameScene = /** @class */ (function (_super) {
                 for (var i = 0; i < frames_1.length; i++) {
                     // correction for 0-based indexing
                     animationFrames.push(frames_1[i] - 1);
+                }
+                if (animationFrames.length === 0) {
+                    // avoid crash by giving it frame 0 if no frame data provided
+                    animationFrames.push(0);
                 }
                 _this.anims.create({
                     key: "".concat(key, "/").concat(animationsKey),

@@ -18,7 +18,8 @@ class PhaserAnimatedEntity extends PhaserEntity {
 		Object.assign(this.evtListeners, {
 			'play-animation': entity.on('play-animation', this.playAnimation, this),
 			size: entity.on('size', this.size, this),
-			scale: entity.on('scale', this.scale, this)
+			scale: entity.on('scale', this.scale, this),
+			flip: entity.on('flip', this.flip, this),
 		});
 	}
 
@@ -38,6 +39,7 @@ class PhaserAnimatedEntity extends PhaserEntity {
 	}): void {
 		this.gameObject.setPosition(data.x, data.y);
 		this.sprite.rotation = data.rotation;
+		this.flip(this.entity._stats.flip);
 	}
 
 	protected size (
@@ -54,6 +56,10 @@ class PhaserAnimatedEntity extends PhaserEntity {
 		y: number
 	}): void {
 		this.sprite.setScale(data.x, data.y);
+	}
+
+	protected flip (flip: FlipMode): void {
+		this.sprite.setFlip(flip % 2 === 1, flip > 1);
 	}
 
 	protected destroy (): void {

@@ -457,6 +457,9 @@ var MenuUiComponent = IgeEntity.extend({
 							$('#server-list').hide();
 						}
 					}
+					if (typeof window.rerenderServerList === 'function') {
+						window.rerenderServerList(servers);
+					}
 					$('#menu-wrapper').removeClass('d-none').addClass('d-flex');
 				}
 			});

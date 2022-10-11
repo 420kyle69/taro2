@@ -43,6 +43,9 @@ var EntitiesToRender = /** @class */ (function () {
                         }
                         if (processedUpdates.length > 0) {
                             entity.streamUpdateData(processedUpdates);
+                            // processedUpdates.forEach((value) => {
+                            // 	console.log(value);
+                            // });
                         }
                     }
                 }

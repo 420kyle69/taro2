@@ -28,6 +28,10 @@ class GameScene extends PhaserScene {
 		});
 
 		ige.client.on('zoom', (height: number) => {
+			if (this.zoomSize === height * 2.15) {
+				return;
+			}
+
 			this.setZoomSize(height);
 			const ratio = this.calculateZoom();
 
@@ -163,6 +167,11 @@ class GameScene extends PhaserScene {
 				for (let i = 0; i < frames.length; i++) {
 					// correction for 0-based indexing
 					animationFrames.push(frames[i] - 1);
+				}
+
+				if (animationFrames.length === 0) {
+					// avoid crash by giving it frame 0 if no frame data provided
+					animationFrames.push(0);
 				}
 
 				this.anims.create({

@@ -11,7 +11,6 @@ var Player = IgeEntity.extend({
 		var playerData = ige.game.getAsset('playerTypes', data.playerTypeId);		
 		this._stats = _.merge(playerData, data);
 
-		// console.log(this._stats.attributes)
 		// dont save variables in _stats as _stats is stringified and synced
 		// and some variables of type unit, item, projectile may contain circular json objects
 		if (self._stats.variables) {
@@ -71,17 +70,18 @@ var Player = IgeEntity.extend({
 				ige.clusterClient.userJoined(self._stats.userId);
 			}
 			
-			if (self._stats.controlledBy == 'human' && ige.script) // do not send trigger for neutral player
+			if (ige.script) // do not send trigger for neutral player
 			{
 				ige.script.trigger('playerJoinsGame', { playerId: self.id() });
 			}
 
-			var clientId = self._stats.clientId;
-			var client = ige.server.clients[clientId];
-			var receivedJoinGame = client.receivedJoinGame;
-			var processedJoinGame = Date.now() - receivedJoinGame;
-			var dataLoadTime = self._stats.totalTime;
-			client.lastEventAt = Date.now();
+			if (self._stats.controlledBy == 'human') {
+				var clientId = self._stats.clientId;
+				var client = ige.server.clients[clientId];
+				var receivedJoinGame = client.receivedJoinGame;
+				var processedJoinGame = Date.now() - receivedJoinGame;
+				var dataLoadTime = self._stats.totalTime;
+				client.lastEventAt = Date.now();
 
 			var playerJoinStreamData = [
 				{ streamedOn: Date.now() },
@@ -92,10 +92,12 @@ var Player = IgeEntity.extend({
 				{ mapData: ige.game.data.map }
 			];
 
-			console.log(`Player.joinGame(): sending ACK to client ${self._stats.clientId} ${self._stats.name} (time elapsed: ${Date.now() - client.lastEventAt})`, playerJoinStreamData);
+				console.log(`Player.joinGame(): sending ACK to client ${self._stats.clientId} ${self._stats.name} (time elapsed: ${Date.now() - client.lastEventAt})`, playerJoinStreamData);
 
-			self.streamUpdateData(playerJoinStreamData);
-			ige.clusterClient && ige.clusterClient.playerJoined(self._stats.userId);
+				self.streamUpdateData(playerJoinStreamData);
+				ige.clusterClient && ige.clusterClient.playerJoined(self._stats.userId);
+			}
+			
 		} else {
 			console.log(`player joined again (menu closed?) ${self._stats.clientId} (${self._stats.name})`);
 			self.streamUpdateData([{ playerJoinedAgain: true }]);
@@ -345,23 +347,24 @@ var Player = IgeEntity.extend({
 	},
 
 	remove: function () {
-		if (ige.isServer) {
-			const i = ige.server.developerClientIds.indexOf(this._stats.clientId);
-			if (i != -1) ige.server.developerClientIds.splice(i, 1);
-		}
-
-		if (this._stats.controlledBy == 'human' && ige.script) // do not send trigger for neutral player
+		// AI players cannot be removed
+		if (this._stats.controlledBy == 'human') // do not send trigger for neutral player
 		{
-			ige.script.trigger('playerLeavesGame', { playerId: this.id() });
-		}
 
-		// session is in second
-		ige.clusterClient && ige.clusterClient.emit('log-session-duration', (Date.now() - this._stats.jointsOn) / 1000);
-		if (this.variables && this.variables.progression != undefined && this.variables.progression.value != undefined) {
-			ige.clusterClient && ige.clusterClient.emit('log-progression', this.variables.progression.value);
+			if (ige.isServer) {
+				const i = ige.server.developerClientIds.indexOf(this._stats.clientId);
+				if (i != -1) ige.server.developerClientIds.splice(i, 1);
+			}
+
+			ige.script.trigger('playerLeavesGame', { playerId: this.id() });
+			// session is in second
+			ige.clusterClient && ige.clusterClient.emit('log-session-duration', (Date.now() - this._stats.jointsOn) / 1000);
+			if (this.variables && this.variables.progression != undefined && this.variables.progression.value != undefined) {
+				ige.clusterClient && ige.clusterClient.emit('log-progression', this.variables.progression.value);
+			}
+			this.streamDestroy();
+			this.destroy();
 		}
-		this.streamDestroy();
-		this.destroy();
 	},
 
 	updateVisibility: function (playerId) {

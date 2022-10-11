@@ -29,7 +29,6 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		this.scene.renderedEntities.push(this.gameObject);
 
 		Object.assign(this.evtListeners, {
-			flip: entity.on('flip', this.flip, this),
 			follow: entity.on('follow', this.follow, this),
 			'update-texture': entity.on('update-texture', this.updateTexture, this),
 			'update-label': entity.on('update-label', this.updateLabel, this),
@@ -83,7 +82,6 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		if (this.chat) {
 			this.chat.updatePosition();
 		}
-		this.flip(this.entity._stats.flip);
 	}
 
 	protected size (data: {
@@ -109,10 +107,6 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		this.attributesContainer.y = 25 + (this.sprite.displayHeight + this.sprite.displayWidth) / 4;
 	}
 
-	protected flip (flip: FlipMode): void {
-		this.sprite.setFlip(flip % 2 === 1, flip > 1);
-	}
-
 	private follow (): void {
 		const camera = this.scene.cameras.main as Phaser.Cameras.Scene2D.Camera & {
 			_follow: Phaser.GameObjects.GameObject
@@ -126,7 +120,11 @@ class PhaserUnit extends PhaserAnimatedEntity {
 	private getLabel (): Phaser.GameObjects.Text {
 		if (!this.label) {
 			const label = this.label = this.scene.add.text(0, 0, 'cccccc');
+
+			// needs to be created with the correct scale of the client
+			this.label.setScale(1 / this.scene.cameras.main.zoom);
 			label.setOrigin(0.5);
+
 			this.gameObject.add(label);
 		}
 		return this.label;
@@ -177,7 +175,11 @@ class PhaserUnit extends PhaserAnimatedEntity {
 	private getAttributesContainer (): Phaser.GameObjects.Container {
 		if (!this.attributesContainer) {
 			this.attributesContainer = this.scene.add.container(0,	0);
+
+			// needs to be created with the correct scale of the client
+			this.attributesContainer.setScale(1 / this.scene.cameras.main.zoom);
 			this.updateAttributesOffset();
+
 			this.gameObject.add(this.attributesContainer);
 		}
 		return this.attributesContainer;
@@ -241,11 +243,31 @@ class PhaserUnit extends PhaserAnimatedEntity {
 	private scaleElements (data: {
 		ratio: number;
 	}): void {
+
+		if (this.scaleTween) {
+			this.scaleTween.stop();
+			this.scaleTween = null;
+		}
+
 		const { ratio } = data;
 		const targetScale = 1 / ratio;
 
+		let targets: Phaser.GameObjects.GameObject[] = [];
+
+		if (this.chat) {
+			targets.push(this.chat);
+		}
+
+		if (this.attributesContainer) {
+			targets.push(this.attributesContainer);
+		}
+
+		if (this.label) {
+			targets.push(this.label);
+		}
+
 		this.scaleTween = this.scene.tweens.add({
-			targets: [this.label, this.attributesContainer, this.chat],
+			targets: targets,
 			duration: 1000,
 			ease: Phaser.Math.Easing.Quadratic.Out,
 			scale: targetScale,

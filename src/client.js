@@ -75,22 +75,6 @@ const Client = IgeEventingClass.extend({
 			}
 		];
 
-		this.keysToAddBeforeRender = [
-			'abilities', 'animations', 'bodies', 'bonus',
-			'cellSheet', 'sound', 'states',
-			'inventorySize', 'particles', 'price',
-			'skin', 'variables', 'canBuyItem',
-			'canBePurchasedBy', 'inventoryImage', 'isPurchasable',
-			'bulletStartPosition', 'canBePurchasedBy', 'carriedBy',
-			'damage', 'description', 'handle', 'hits',
-			'inventoryImage', 'isGun', 'isStackable', 'deployMethod',
-			'maxQuantity', 'texture', 'raycastCollidesWith', 'effects',
-			'penetration', 'bulletDistance', 'bulletType', 'ammoSize', 'ammo', 'ammoTotal',
-			'reloadRate', 'recoilForce', 'fireRate', 'knockbackForce', 'canBeUsedBy', 'spawnChance',
-			'consumeBonus', 'isConsumedImmediately', 'type', 'lifeSpan', 'removeWhenEmpty', 'spawnPosition',
-			'baseSpeed', 'bonusSpeed', 'controls'
-		];
-
 		// can we just comment this out
 		this.tradeOffers = [undefined, undefined, undefined, undefined, undefined];
 
@@ -568,9 +552,7 @@ const Client = IgeEventingClass.extend({
 		ige.network.start(ige.client.server, (clientServer) => { // changed param from 'data' to clientServer
 
 			for (let serverObj of ige.client.servers) {
-
-				if (serverObj.url == clientServer.url) {
-
+				if (serverObj.id == clientServer.id) {
 					ige.client.server = serverObj;
 					break;
 				}

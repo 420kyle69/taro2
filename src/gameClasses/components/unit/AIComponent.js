@@ -4,7 +4,6 @@ var AIComponent = IgeEntity.extend({
 
 	init: function (unit) {
 		var self = this;
-
 		self._entity = unit;
 		self.targetUnitId = undefined;
 		self.targetPosition = undefined;
@@ -12,25 +11,62 @@ var AIComponent = IgeEntity.extend({
 		self.debugEnabled = true;
 		// AI settings
 
+		// sensor needs to be enabled regardless of AI to process sensor collision triggers
+		// for example, in cell-eater, items are consumed via sensors
 		if (unit._stats.ai) {
-			if (unit._stats.ai.enabled) {
-				self.pathFindingMethod = unit._stats.ai.pathFindingMethod; // options: simple/a* (coming soon)
-				self.idleBehaviour = unit._stats.ai.idleBehaviour; // options: wander/stay
-				self.sensorResponse = unit._stats.ai.sensorResponse; // options: none/flee/none (default)
-				self.attackResponse = unit._stats.ai.attackResponse; // options: fight/flee/none (default)
-				self.maxTravelDistance = unit._stats.ai.maxTravelDistance; // how far unit's willing to flee/chase target until returning to its spawn position - options: undefined value for infinite distance
-				self.letGoDistance = unit._stats.ai.letGoDistance; // options: undefined value for infinite distance
-				self.maxAttackRange = unit._stats.ai.maxAttackRange;
-				self.previousPosition = { x: unit._translate.x, y: unit._translate.y }; // last position recorded before fleeing
-				self.nextMoveAt = ige._currentTime;
-				self.currentAction = 'idle'; // options: idle/move/flee/fight
-				self.isAttacking = false;
-			}
 
-			if (unit._stats.ai.sensorRadius > 0) {
+			if (unit._stats.ai.sensorRadius > 0 && unit.sensor == undefined) {
 				unit.sensor = new Sensor(unit, unit._stats.ai.sensorRadius);
+		   }
+		
+			unit._stats.aiEnabled = unit._stats.ai.enabled;		
+			if (unit._stats.aiEnabled) {
+				self.enable();
 			}
 		}
+	},
+
+	enable: function() {
+		var self = this;
+		var unit = self._entity;
+		unit._stats.aiEnabled = true;
+		if (ige.isServer) {
+			unit.streamUpdateData([{aiEnabled: true }]);		
+		}
+		
+		self.pathFindingMethod = unit._stats.ai.pathFindingMethod; // options: simple/a* (coming soon)
+		self.idleBehaviour = unit._stats.ai.idleBehaviour; // options: wander/stay
+		self.sensorResponse = unit._stats.ai.sensorResponse; // options: none/flee/none (default)
+		self.attackResponse = unit._stats.ai.attackResponse; // options: fight/flee/none (default)
+		self.maxTravelDistance = unit._stats.ai.maxTravelDistance; // how far unit's willing to flee/chase target until returning to its spawn position - options: undefined value for infinite distance
+		self.letGoDistance = unit._stats.ai.letGoDistance; // options: undefined value for infinite distance
+		self.maxAttackRange = unit._stats.ai.maxAttackRange;
+		self.previousPosition = { x: unit._translate.x, y: unit._translate.y }; // last position recorded before fleeing
+		self.nextMoveAt = ige._currentTime;
+		self.goIdle();
+
+		// if (unit._stats.ai.sensorRadius > 0 && unit.sensor == undefined) {
+		// 	unit.sensor = new Sensor(unit, unit._stats.ai.sensorRadius);
+		// }
+	},
+
+	disable: function() {
+		var unit = this._entity;
+		unit._stats.aiEnabled = false;
+		
+		if (ige.isServer) {
+			unit.streamUpdateData([{aiEnabled: false }]);
+		}
+
+		if (unit.sensor) {
+			// unit.sensor.remove();
+		}
+		unit.ability.stopUsingItem();
+		unit.stopMoving();
+		this.targetUnitId = undefined;
+		this.targetPosition = undefined;
+		this.currentAction = undefined;
+		this.nextMoveAt = undefined;
 	},
 
 	registerAttack: function (unit) {
@@ -61,11 +97,6 @@ var AIComponent = IgeEntity.extend({
 		// only response to hostile/neutral units
 		var ownerPlayer = self._entity.getOwner();
 		if (unit) {
-			ige.script.trigger('whenUnitEntersSensor', {
-				unitId: unit.id(),
-				sensorId: self._entity.sensor.id()
-			});
-
 			var ownerPlayerOfTargetUnit = ige.$(unit._stats.ownerId);
 			if (ownerPlayer && ownerPlayer.isHostileTo(ownerPlayerOfTargetUnit) && unit._stats.isUnTargetable != true) {
 				// if I already have a target, re-target if new target unit is closer
@@ -91,7 +122,7 @@ var AIComponent = IgeEntity.extend({
 		var unitIds = this.unitsTargetingMe;
 		for (var i = 0; i < unitIds.length; i++) {
 			var attackingUnit = ige.$(unitIds[i]);
-			if (attackingUnit && attackingUnit.ai.getTargetUnit() == this._entity && attackingUnit.sensor && attackingUnit._stats.ai && attackingUnit._stats.ai.enabled) {
+			if (attackingUnit && attackingUnit.ai.getTargetUnit() == this._entity && attackingUnit.sensor && attackingUnit._stats.ai && attackingUnit._stats.aiEnabled) {
 				attackingUnit.ai.goIdle();
 				attackingUnit.sensor.updateBody(); // re-detect nearby units
 			}
@@ -102,7 +133,10 @@ var AIComponent = IgeEntity.extend({
 	},
 
 	getTargetUnit: function () {
-		return ige.$(this.targetUnitId);
+		if (this.targetUnitId)
+			return ige.$(this.targetUnitId);
+
+		return undefined
 	},
 
 	getAngleToTarget: function () {
@@ -165,10 +199,7 @@ var AIComponent = IgeEntity.extend({
 
 	goIdle: function () {
 		var unit = this._entity;
-		var currentItem = unit.getCurrentItem();
-		if (currentItem) {
-			currentItem.stopUsing();
-		}
+		unit.ability.stopUsingItem();
 		unit.stopMoving();
 		this.targetUnitId = undefined;
 		this.targetPosition = undefined;
@@ -207,7 +238,12 @@ var AIComponent = IgeEntity.extend({
 	},
 
 	setTargetUnit: function (unit) {
+		// can't target self!
+		if (unit == this._entity)
+			return;
+
 		var previousTargetUnit = this.getTargetUnit();
+		
 		// remove this unit from currently targeted unit's unitsTargetingMe array.
 		if (previousTargetUnit && unit != previousTargetUnit) {
 			for (var i = 0; i < previousTargetUnit.ai.unitsTargetingMe.length; i++) {
@@ -231,9 +267,15 @@ var AIComponent = IgeEntity.extend({
 	},
 
 	update: function () {
+		
 		var self = this;
 		var unit = self._entity;
+		
+		if (!unit._stats.aiEnabled)
+			return;
+		
 		var targetUnit = this.getTargetUnit();
+
 		// update unit's directino toward its target
 		var targetPosition = self.getTargetPosition();
 		// wandering units should move in straight direction. no need to re-assign angleToTarget
@@ -281,7 +323,7 @@ var AIComponent = IgeEntity.extend({
 						self.goIdle();
 					} else {
 						// stop moving, start attacking if my attack can reach the target
-						if (self.maxAttackRange > this.getDistanceToTarget() && unit._stats.isStunned != true) {
+						if (self.maxAttackRange > this.getDistanceToTarget()) {
 							unit.isMoving = false;
 							unit.ability.startUsingItem();
 						} else if (!unit.isMoving) {

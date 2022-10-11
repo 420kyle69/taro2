@@ -27,7 +27,8 @@ var PhaserAnimatedEntity = /** @class */ (function (_super) {
         Object.assign(_this.evtListeners, {
             'play-animation': entity.on('play-animation', _this.playAnimation, _this),
             size: entity.on('size', _this.size, _this),
-            scale: entity.on('scale', _this.scale, _this)
+            scale: entity.on('scale', _this.scale, _this),
+            flip: entity.on('flip', _this.flip, _this),
         });
         return _this;
     }
@@ -42,12 +43,16 @@ var PhaserAnimatedEntity = /** @class */ (function (_super) {
     PhaserAnimatedEntity.prototype.transform = function (data) {
         this.gameObject.setPosition(data.x, data.y);
         this.sprite.rotation = data.rotation;
+        this.flip(this.entity._stats.flip);
     };
     PhaserAnimatedEntity.prototype.size = function (data) {
         this.sprite.setDisplaySize(data.width, data.height);
     };
     PhaserAnimatedEntity.prototype.scale = function (data) {
         this.sprite.setScale(data.x, data.y);
+    };
+    PhaserAnimatedEntity.prototype.flip = function (flip) {
+        this.sprite.setFlip(flip % 2 === 1, flip > 1);
     };
     PhaserAnimatedEntity.prototype.destroy = function () {
         this.sprite = null;

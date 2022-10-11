@@ -67,7 +67,7 @@ var IgeEntity = IgeObject.extend({
 		this._keyFrames = [];
 		this.prevKeyFrame = [ige.now, [this._translate.x, this._translate.y, this._rotate.z]];
 		this._lastTransformAt = null;
-		this.lastServerStreamedPosition = null;
+		// this.lastServerStreamedPosition = null;
 		this.lastTeleportedAt = 0;
 
 		if (ige.isClient) {
@@ -1955,7 +1955,10 @@ var IgeEntity = IgeObject.extend({
 				}
 
 			} else if (ige.isClient) {
-				if (!this.isRendering()) return;
+
+				if (!this.isRendering()) {
+					return;
+				}
 
 				var position = this._translate;
 
@@ -2446,13 +2449,12 @@ var IgeEntity = IgeObject.extend({
      *     entity.destroy();
      */
 	destroy: function (destroyOrphan) {
-
 		IgeEntity.prototype.log(`igeEntity: destroy ${this._category} ${this.id()}`);
 
 		this._alive = false;
 		/* CEXCLUDE */
 		// Check if the entity is streaming
-		if (ige.isServer) {
+		if (ige.isServer && !ige.network.isPaused) {
 			if (this._streamMode === 1 || this._streamMode === 2) {
 				delete this._streamDataCache;
 				this.streamDestroy();
@@ -2487,11 +2489,6 @@ var IgeEntity = IgeObject.extend({
 			this.emit('destroy');
 		}
 
-		/**
-		 * Fires when the entity has been destroyed.
-		 * @event IgeEntity#destroyed
-		 * @param {IgeEntity} The entity that has been destroyed.
-		 */
 		for (var region in ige.regionManager.entitiesInRegion) {
 			delete ige.regionManager.entitiesInRegion[region][this.id()];
 		}
@@ -3131,7 +3128,7 @@ var IgeEntity = IgeObject.extend({
 			}
 			///////////////////////////////////////////
 		} else if (ige.isClient) {
-			this.lastServerStreamedPosition = undefined;
+			// this.lastServerStreamedPosition = undefined;
 			if (this.body) {
 				this.body.setPosition({ x: x / this._b2dRef._scaleRatio, y: y / this._b2dRef._scaleRatio });
 				if (rotate != undefined) {
@@ -4169,15 +4166,8 @@ var IgeEntity = IgeObject.extend({
 							break;
 
 						case 'isBeingUsed':
-							// this case is in igeEntity.js instead of item.js, because if it's in item.js,
-							// we cannot prevent updating my own unit's isBeingUsed, and item._stats.isBeingUsed will be updated regardless.
 							if (ige.isClient) {
-								if (this.getOwnerUnit() != ige.client.selectedUnit) {
-									this._stats.isBeingUsed = newValue;
-									if (newValue == false) {
-										this.playEffect('none');
-									}
-								}
+								this._stats.isBeingUsed = newValue;
 							}
 							break;
 
@@ -4721,12 +4711,13 @@ var IgeEntity = IgeObject.extend({
 			switch(this._category) {
 
 				case 'unit': 
-					keys = ["name", "type", "stateId", "ownerId", "ownerPlayerId", "currentItemIndex", "currentItemId", "flip", "skin"]
+					// cellsheet is used for purchasable-skins
+					keys = ["name", "type", "stateId", "ownerId", "ownerPlayerId", "currentItemIndex", "currentItemId", "flip", "skin", "cellSheet"]
 					data = { 
 						attributes: {}, 
 						// variables: {} 
 					};
-					break;
+				break;
 
 				case 'item':
 					// TODO: we shouldn't have to send currentBody. for some reason, all items have 'dropped' stateId
@@ -4746,7 +4737,8 @@ var IgeEntity = IgeObject.extend({
 					break;
 
 				case 'player':
-					keys = ["name", "clientId", "playerTypeId", "controlledBy", "playerJoined", "unitIds", "selectedUnitId", "userId", "banChat"]
+					// purchasables is required for rendering this player's owned skin to the other players
+					keys = ["name", "clientId", "playerTypeId", "controlledBy", "playerJoined", "unitIds", "selectedUnitId", "userId", "banChat", "purchasables"]
 					data = { 
 						attributes: {}, 
 						// variables: {} 
@@ -4757,13 +4749,13 @@ var IgeEntity = IgeObject.extend({
 						data.coins = this._stats.coins;
 						data.mutedUsers = this._stats.mutedUsers;
 						data.banChat = this._stats.banChat;
-						data.purchasables = this._stats.purchasables;
-  						data.allPurchasables = this._stats.allPurchasables;
 						data.isEmailVerified = this._stats.isEmailVerified;
+						data.allPurchasables = this._stats.allPurchasables;
 						data.isUserVerified = this._stats.isUserVerified;
 						data.isUserAdmin = this._stats.isUserAdmin;
 						data.isUserMod = this._stats.isUserMod;
 					}
+
 					break;
 
 				case 'region': 
@@ -4795,7 +4787,6 @@ var IgeEntity = IgeObject.extend({
 			// 	}
 			// }
 			
-
 			return data;			
 		}
 	},
@@ -4972,7 +4963,7 @@ var IgeEntity = IgeObject.extend({
 
 		// Send clients the stream destroy command for this entity
 		ige.network.send('_igeStreamDestroy', [ige._currentTime, thisId], clientId);
-
+		
 		if (!ige.network.stream) return true;
 
 		ige.network.stream._streamClientCreated[thisId] = ige.network.stream._streamClientCreated[thisId] || {};
@@ -5119,123 +5110,130 @@ var IgeEntity = IgeObject.extend({
 			this._lastTransformAt == ige._currentTime ||
 			// entity has no body
 			this._translate == undefined ||
-			this._stats.currentBody == undefined ||
-			// ignore server stream of my own unit's sprite-only item
-			(this._stats.currentBody && this._stats.currentBody.type == 'spriteOnly' && (this.getOwnerUnit && this.getOwnerUnit()) == ige.client.selectedUnit)
+			this._stats.currentBody == undefined ||			
+			(
+				// ignore server stream of my own unit's sprite-only item
+				this._stats.currentBody && this._stats.currentBody.type == 'spriteOnly' && 
+				(this.getOwnerUnit && this.getOwnerUnit() == ige.client.selectedUnit) 
+			)
 		) {
 			return;
 		}
 
 		// interpolate projectiles using data provided by physicsComponent. as snapshot data isn't streamed from server.
+		let xStart = null;
+		let yStart = null;
+		let xEnd = null;
+		let yEnd = null;
+		let rotateStart = null;
+		let rotateEnd = null;
+		
 		let x = this._translate.x;
 		let y = this._translate.y;
 		let rotate = this._rotate.z;
 		let prevKeyFrame = null;
 		let nextKeyFrame = null;
 
+		// streamed keyFrames
+		if (ige.nextSnapshot) {
+			var snapshotTimeEnd = ige.nextSnapshot[0];
+			var nextTransform = ige.nextSnapshot[1][this.id()];
+			if (nextTransform) {
+				nextKeyFrame = [snapshotTimeEnd, nextTransform];
+
+				xEnd = nextTransform[0]
+				yEnd = nextTransform[1]
+				rotateEnd = nextTransform[2]
+			}
+			
+			// don't set lastServerStreamedPosition unless more than 500ms has passed since last teleport.
+			// this prevents teleported position data getting overwritten by latest streamed snapshot
+			// console.log("this.lastReconciledAt != prevKeyFrame[0]", this.lastReconciledAt, prevKeyFrame[0])
+			// if (this == ige.client.selectedUnit && this.lastReconciledAt != prevKeyFrame[0]) {
+			// 	this.lastServerStreamedPosition = [x, y, streamedAngle];
+			// }
+		}
+		// by default, prevTransform is where this unit currently is	
+		if (ige.prevSnapshot) {
+			// Set variables up to store the previous and next data
+			var snapshotTimeStart = ige.prevSnapshot[0]
+			var prevTransform = ige.prevSnapshot[1][this.id()];			
+			
+			if (prevTransform) {
+				prevKeyFrame = [snapshotTimeStart, prevTransform];
+				xStart = prevTransform[0]
+				yStart = prevTransform[1]
+				rotateStart = prevTransform[2]									
+			}			
+		}
+
 		// interpolate using client side's physics frames. (this doesn't use snapshot streamed from the server)
 		// this is necessary, because physics don't run at 60 fps on clientside
-		if (
-			ige.physics && (
-			// 1. we're using cspMovement (experimental) for my own unit OR
-				(ige.game.cspEnabled && ige.client.selectedUnit == this) ||
-                // 2. item-fired projectiles
-                (this._category == 'projectile' && this._stats.sourceItemId != undefined && !this._streamMode)
+		if (ige.physics && ige.game.cspEnabled && (
+				// 1. we're using cspMovement (experimental) for my own unit OR
+				(ige.client.selectedUnit == this && !this._stats.aiEnabled) ||
+				// 2. item-fired projectiles
+				(this._category == 'projectile' && this._stats.sourceItemId != undefined && !this._streamMode)
 			)
 		) {
 			prevKeyFrame = this.prevPhysicsFrame;
 			nextKeyFrame = this.nextPhysicsFrame;
-
+			
 			var prevTransform = (this.prevPhysicsFrame) ? this.prevPhysicsFrame[1] : undefined;
 			var nextTransform = (this.nextPhysicsFrame) ? this.nextPhysicsFrame[1] : undefined;
-			// if (this.nextPhysicsFrame) {
-			// 	if (this.prevPhysicsFrame) {
-			// 		// interpolate using prev/next physics key frames provided by physicsComponent
-			// 		x = this.interpolateValue(this.prevPhysicsFrame[1][0], this.nextPhysicsFrame[1][0], this.prevPhysicsFrame[0], ige._currentTime, this.nextPhysicsFrame[0]);
-			// 		y = this.interpolateValue(this.prevPhysicsFrame[1][1], this.nextPhysicsFrame[1][1], this.prevPhysicsFrame[0], ige._currentTime, this.nextPhysicsFrame[0]);
 
-			// 		if (this == ige.client.selectedUnit) {
-			// 			rotate = this.interpolateValue(this.prevPhysicsFrame[1][2], this.nextPhysicsFrame[1][2], this.prevPhysicsFrame[0], ige._currentTime, this.nextPhysicsFrame[0]);
-			// 		}
+			if (prevTransform && nextTransform) {
+				xStart = prevTransform[0]
+				yStart = prevTransform[1]
+				xEnd = nextTransform[0]
+				yEnd = nextTransform[1]
 
-			// 	} else {
-			// 		// unit is teleporting
-			// 		x = this.nextPhysicsFrame[1][0];
-			// 		y = this.nextPhysicsFrame[1][1];
-			// 		rotate = this.nextPhysicsFrame[1][2];
-			// 		// console.log("teleport")
-			// 	}
+				if (this._category == 'projectile' && this._stats.sourceItemId != undefined && !this._streamMode) {
+					rotateStart = prevTransform[2]	
+					rotateEnd = nextTransform[2]
+				}
+			}
+				
+				
+				// if (this.nextPhysicsFrame) {
+				// 	if (this.prevPhysicsFrame) {
+				// 		// interpolate using prev/next physics key frames provided by physicsComponent
+				// 		x = this.interpolateValue(this.prevPhysicsFrame[1][0], this.nextPhysicsFrame[1][0], this.prevPhysicsFrame[0], ige._currentTime, this.nextPhysicsFrame[0]);
+				// 		y = this.interpolateValue(this.prevPhysicsFrame[1][1], this.nextPhysicsFrame[1][1], this.prevPhysicsFrame[0], ige._currentTime, this.nextPhysicsFrame[0]);
 
-			// 	// for debugging my unit's x-movement interpolation
+				// 		if (this == ige.client.selectedUnit) {
+				// 			rotate = this.interpolateValue(this.prevPhysicsFrame[1][2], this.nextPhysicsFrame[1][2], this.prevPhysicsFrame[0], ige._currentTime, this.nextPhysicsFrame[0]);
+				// 		}
+
+				// 	} else {
+				// 		// unit is teleporting
+				// 		x = this.nextPhysicsFrame[1][0];
+				// 		y = this.nextPhysicsFrame[1][1];
+				// 		rotate = this.nextPhysicsFrame[1][2];
+				// 		// console.log("teleport")
+				// 	}
+
+				// 	// for debugging my unit's x-movement interpolation
+				// }
 			// }
-		} else {
-			if (ige.nextSnapshot) {
-				var nextTransform = ige.nextSnapshot[1][this.id()];			
-				if (nextTransform) {
-					nextKeyFrame = [ige.nextSnapshot[0], nextTransform];
-				}
-			}
-	
-			// by default, prevTransform is where this unit currently is
-	
-			if (ige.prevSnapshot) {
-				// Set variables up to store the previous and next data
-				var prevTransform = ige.prevSnapshot[1][this.id()];			
-				if (prevTransform) {
-					prevKeyFrame = [ige.prevSnapshot[0], prevTransform];
-				}
-			}
-		}
-
-
-		// interpolate using snapshots streamed from the server.
-		if (prevTransform != undefined && nextTransform != undefined &&
-            prevKeyFrame[0] != nextKeyFrame[0] &&
-            prevKeyFrame[0] - 50 < ige._currentTime && ige._currentTime < nextKeyFrame[0] + 50 // allow extrapolation of entity motion up to 50ms (outside of prevKeyFrame & nextKeyFrame range)
-		) {
-			targetX = this.interpolateValue(prevTransform[0], nextTransform[0], prevKeyFrame[0], ige._currentTime, nextKeyFrame[0]);
-			targetY = this.interpolateValue(prevTransform[1], nextTransform[1], prevKeyFrame[0], ige._currentTime, nextKeyFrame[0]);
-
-			// a hack to prevent rotational interpolation suddnely jumping by 2 PI (e.g. 0.01 to -6.27)
-			var startValue = prevKeyFrame[1][2];
-			var endValue = nextKeyFrame[1][2];
-
-			if (Math.abs(endValue - startValue) > Math.PI) {
-				if (endValue > startValue) startValue += Math.PI * 2;
-				else startValue -= Math.PI * 2;
-			}
-
-			if (this == ige.client.selectedUnit && this.angleToTarget != undefined && !isNaN(this.angleToTarget) && this._stats.controls && this._stats.controls.mouseBehaviour.rotateToFaceMouseCursor && this._stats.currentBody && !this._stats.currentBody.fixedRotation) {
-				targetRotate = this.angleToTarget;
-			} else {
-				targetRotate = this.interpolateValue(startValue, endValue, prevKeyFrame[0], ige._currentTime, nextKeyFrame[0]);
-			}
-
-			// don't set lastServerStreamedPosition unless more than 500ms has passed since last teleport.
-			// this prevents teleported position data getting overwritten by latest streamed snapshot
-			// console.log("this.lastReconciledAt != prevKeyFrame[0]", this.lastReconciledAt, prevKeyFrame[0])
-			if (this == ige.client.selectedUnit && this.lastReconciledAt != prevKeyFrame[0]) {
-				this.lastServerStreamedPosition = [targetX, targetY, targetRotate];
-			}
 
 			// // apply rubberbanding to all non-player entities when csp is enabled
 			// if (ige.physics && ige.game.cspEnabled && this != ige.client.selectedUnit) {
-			// 	xDiff = targetX - x;
-			// 	yDiff = targetY - y;
+			// 	xDiff = streamedX - x;
+			// 	yDiff = streamedY - y;
 			// 	x += xDiff / 2;
 			// 	y += yDiff / 2;
 			// } else if (!ige.physics || !ige.game.cspEnabled || this != ige.client.selectedUnit) {
 			// 	// if physics isn't set, or csp is disabled, use server-streamed data to move entities
-				x = targetX;
-				y = targetY;
+				// x = streamedX;
+				// y = streamedY;
 			// }
-			rotate = targetRotate;
 
-			if (this._debugEntity) {
-				this._debugEntity.position.set(targetX, targetY);
-				this._debugEntity.rotation = targetRotate;
-				this._debugEntity.pivot.set(this._debugEntity.width / 2, this._debugEntity.height / 2);
-			}
+			// if (this._debugEntity) {
+			// 	this._debugEntity.position.set(streamedX, streamedY);
+			// 	this._debugEntity.rotation = streamedAngle;
+			// 	this._debugEntity.pivot.set(this._debugEntity.width / 2, this._debugEntity.height / 2);
+			// }
 
 			// // for debugging my unit's x-movement interpolation
 			// if (this == ige.client.selectedUnit) {
@@ -5252,25 +5250,51 @@ var IgeEntity = IgeObject.extend({
 			// }
 		}
 
-		// instantly rotate unit to mouse cursor
-		if (this == ige.client.selectedUnit) {
-			var ownerPlayer = ige.$(this._stats.ownerId);
-			if (ownerPlayer && ownerPlayer.control && ownerPlayer.control.input) {
-				var mouse = ownerPlayer.control.input.mouse;
-				if (mouse) {
-					this.angleToTarget = Math.atan2(mouse.y - this._translate.y, mouse.x - this._translate.x) + Math.radians(90);
-					if (this.angleToTarget != undefined && !isNaN(this.angleToTarget) && this._stats.controls && this._stats.controls.mouseBehaviour.rotateToFaceMouseCursor && this._stats.currentBody && !this._stats.currentBody.fixedRotation) {
-						rotate = this.angleToTarget;
-					}
+		// interpolate using snapshots streamed from the server.
+		if (prevTransform != undefined && nextTransform != undefined &&
+            prevKeyFrame[0] != nextKeyFrame[0] &&
+            prevKeyFrame[0] - 50 < ige._currentTime && ige._currentTime < nextKeyFrame[0] + 50 // allow extrapolation of entity motion up to 50ms (outside of prevKeyFrame & nextKeyFrame range)
+		) {
+			x = this.interpolateValue(xStart, xEnd, prevKeyFrame[0], ige._currentTime, nextKeyFrame[0]);
+			y = this.interpolateValue(yStart, yEnd, prevKeyFrame[0], ige._currentTime, nextKeyFrame[0]);
+
+			// ignore streamed angle if this unit control is set to face mouse cursor instantly.
+			if (this == ige.client.selectedUnit &&
+				this.angleToTarget != undefined && !isNaN(this.angleToTarget) && 
+				this._stats.controls && this._stats.controls.mouseBehaviour.rotateToFaceMouseCursor && 
+				this._stats.currentBody && !this._stats.currentBody.fixedRotation
+			) {
+				rotate = this.angleToTarget;
+			} else {
+				// a hack to prevent rotational interpolation suddnely jumping by 2 PI (e.g. 0.01 to -6.27)
+				if (Math.abs(rotateEnd - rotateStart) > Math.PI) {
+					if (rotateEnd > rotateStart) rotateStart += Math.PI * 2;
+					else rotateStart -= Math.PI * 2;
 				}
+
+				rotate = this.interpolateValue(rotateStart, rotateEnd, snapshotTimeStart, ige._currentTime, snapshotTimeEnd);
 			}
 		}
 
-		if (this._stats.isStunned == undefined || this._stats.isStunned != true) {
-			this.rotateTo(0, 0, rotate);
-		}
-		this.translateTo(x, y, 0);
+		
+		
+		// instantly rotate unit to mouse cursor
+		// if (this == ige.client.selectedUnit && !this._stats.aiEnabled) {
+		// 	var ownerPlayer = ige.$(this._stats.ownerId);
+		// 	if (ownerPlayer && ownerPlayer.control && ownerPlayer.control.input) {
+		// 		var mouse = ownerPlayer.control.input.mouse;
+		// 		if (mouse) {
+		// 			this.angleToTarget = Math.atan2(mouse.y - this._translate.y, mouse.x - this._translate.x) + Math.radians(90);
+		// 			if (this.angleToTarget != undefined && !isNaN(this.angleToTarget) && this._stats.controls && this._stats.controls.mouseBehaviour.rotateToFaceMouseCursor && this._stats.currentBody && !this._stats.currentBody.fixedRotation) {
+		// 				rotate = this.angleToTarget;
+		// 			}
+		// 		}
+		// 	}
+		// }
 
+
+		this.rotateTo(0, 0, rotate);		
+		this.translateTo(x, y, 0);
 		this._lastTransformAt = ige._currentTime;
 	},
 

@@ -232,6 +232,18 @@ var VariableComponent = IgeEntity.extend({
 					var player = self.getValue(text.player, vars);
 					returnValue = player && player._stats.controlledBy == 'human';
 					break;
+				
+					
+				case 'isComputerPlayer':
+					var player = self.getValue(text.player, vars);
+					returnValue = player && player._stats.controlledBy == 'computer';
+					break;
+				
+				case 'isBotPlayer':
+					var player = self.getValue(text.player, vars);
+					returnValue = player && player._stats.controlledBy == 'bot';
+					break;
+	
 
 				case 'isPlayerLoggedIn':
 					var player = self.getValue(text.player, vars);
@@ -784,6 +796,13 @@ var VariableComponent = IgeEntity.extend({
 					}
 
 					break;
+
+				case 'selectedInventorySlot':
+					var unit = self.getValue(text.unit, vars);
+					if (unit && unit._category == 'unit') {
+						returnValue = unit._stats.currentItemIndex + 1;
+					}
+					break;
 				case 'getItemBody':
 					var item = self.getValue(text.item, vars);
 					if (item && item._category == 'item') {
@@ -883,6 +902,12 @@ var VariableComponent = IgeEntity.extend({
 					}
 					break;
 
+				case 'isAIEnabled':
+					var unit = self.getValue(text.unit, vars);
+					if (unit && unit._category == 'unit') {
+						returnValue = unit._stats.aiEnabled;
+					}
+					break;
 					// case 'getUnitInFrontOfUnit':
 					// 	if (entity && entity._category == 'unit') {
 					// 		var entities = ige.physics.getBodiesInRegion({
@@ -1093,6 +1118,14 @@ var VariableComponent = IgeEntity.extend({
 					if (!isNaN(value))
 						return Math.floor(value);
 					break;
+
+				case 'log10':
+					var value = self.getValue(text.value, vars);
+					if (!isNaN(value)) {
+						return Math.log10(value);
+					}
+					break;
+	
 
 				case 'getEntireMapRegion':
 					var region = {
@@ -1699,8 +1732,13 @@ var VariableComponent = IgeEntity.extend({
 					break;
 
 				case 'computerPlayers':
-					returnValue = ige.$$('player').filter(function (player) { return player._stats.controlledBy != 'human'; });
+					returnValue = ige.$$('player').filter(function (player) { return player._stats.controlledBy == 'computer'; });
 					break;
+
+				case 'botPlayers':
+					returnValue = ige.$$('player').filter(function (player) { return player._stats.controlledBy == 'bot'; });
+					break;
+
 
 				case 'allItems':
 					returnValue = ige.$$('item');

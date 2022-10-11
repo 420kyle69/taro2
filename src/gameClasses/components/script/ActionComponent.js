@@ -21,11 +21,12 @@ var ActionComponent = IgeEntity.extend({
 			// if CSP is enabled, then server will pause streaming
 			// the server side is still running (e.g. creating entities), but it won't be streamed to the client			
 			if (ige.isServer) {
-				if (action.runOnClient) {
-					ige.network.pause();
-				} else {
-					ige.network.resume();
-				}
+
+				if (ige.game.cspEnabled) {
+					if(action.runOnClient) {
+						ige.network.pause();
+					}
+				} 
 
 				var now = Date.now();		
 				var lastActionRunTime = now - ige.lastActionRanAt;
@@ -152,9 +153,17 @@ var ActionComponent = IgeEntity.extend({
 					}
 
 					case 'runScript':
-						var previousScriptId = self._script.currentScriptId;
-						self._script.runScript(action.scriptName, vars);
-						self._script.currentScriptId = previousScriptId;
+						let previousScriptId = self._script.currentScriptId;
+						let scriptComponent = undefined;
+						
+						if (action.isEntityScript) {
+							scriptComponent = self._script; // entity script
+						} else {
+							scriptComponent = ige.script; // global script
+						}
+
+						scriptComponent.runScript(action.scriptName, vars);
+						scriptComponent.currentScriptId = previousScriptId;
 						break;
 
 					case 'condition':
@@ -1095,25 +1104,6 @@ var ActionComponent = IgeEntity.extend({
 						}
 						break;
 
-					case 'stunUnit':
-						var unit = self._script.variable.getValue(action.unit, vars);
-						if (unit && unit._stats) {
-							unit.ability.stopUsingItem();
-							unit.streamUpdateData([{ isStunned: true }]);
-							var item = unit.getCurrentItem();
-							if (item) {
-								item.streamUpdateData([{ stopUsing: false }]);
-							}
-						}
-						break;
-
-					case 'removeStunFromUnit':
-						var unit = self._script.variable.getValue(action.unit, vars);
-						if (unit && unit._stats) {
-							unit.streamUpdateData([{ isStunned: false }]);
-						}
-						break;
-
 					case 'setEntityVelocityAtAngle':
 
 						var entity = self._script.variable.getValue(action.entity, vars);
@@ -1200,7 +1190,6 @@ var ActionComponent = IgeEntity.extend({
 					case 'startUsingItem':
 						if (entity && entity._category == 'item') {
 							entity.startUsing();
-							entity.streamUpdateData([{ isBeingUsedFromScript: true }]);
 						}
 						break;
 
@@ -1214,8 +1203,6 @@ var ActionComponent = IgeEntity.extend({
 					case 'stopUsingItem':
 						if (entity && entity._category == 'item') {
 							entity.stopUsing();
-							entity.streamUpdateData([{ isBeingUsedFromScript: false }]);
-							entity.streamUpdateData([{ stopUsing: false }]);
 						}
 
 						break;
@@ -1290,10 +1277,10 @@ var ActionComponent = IgeEntity.extend({
 									ownerUnit.dropItem(itemIndex, position);
 								}
 							} else {
-								throw new Error(`unit cannot drop an undroppable item ${item._stats.name}`);
+								// throw new Error(`unit cannot drop an undroppable item ${item._stats.name}`);
 							}
 						} else {
-							throw new Error('invalid item');
+							// throw new Error('invalid item');
 						}
 						break;
 
@@ -1592,7 +1579,6 @@ var ActionComponent = IgeEntity.extend({
 							if (projectileData != undefined && position != undefined && position.x != undefined && position.y != undefined && force != undefined && angle != undefined) {
 								var facingAngleInRadians = angle + facingAngleDelta;
 								angle = angle - delta;
-								var streamMode = 1;
 								var unitId = (unit) ? unit.id() : undefined;
 								var data = Object.assign(
 									projectileData,
@@ -1608,8 +1594,7 @@ var ActionComponent = IgeEntity.extend({
 												x: Math.cos(angle) * force,
 												y: Math.sin(angle) * force
 											}
-										},
-										streamMode: streamMode
+										}
 									}
 								);
 
@@ -2103,8 +2088,6 @@ var ActionComponent = IgeEntity.extend({
 
 								createdEntity = new Item(_.cloneDeep(data));
 								ige.game.lastCreatedItemId = createdEntity._id;
-
-								item.script.trigger("entityCreated");
 							} else if (entityType === 'projectileTypes') {
 								data = Object.assign(data, {
 									type: entityToCreate,
@@ -2308,7 +2291,8 @@ var ActionComponent = IgeEntity.extend({
 					case 'destroyEntity':
 						var entity = self._script.variable.getValue(action.entity, vars);
 						if (entity && self.entityCategories.indexOf(entity._category) > -1) {
-							entity.remove();
+							let isStreaming = !action.runOnClient; // don't stream to client is runOnClient is enabled
+							entity.remove(isStreaming);
 						} else {
 							self._script.errorLog('invalid unit');
 						}
@@ -2467,6 +2451,31 @@ var ActionComponent = IgeEntity.extend({
 						break;
 
 						/* AI */
+
+					case 'addBotPlayer':
+						var name = self._script.variable.getValue(action.name, vars) || "";
+						var player = ige.game.createPlayer({
+							controlledBy: "bot",
+							name: name
+						});
+						player.joinGame();
+						break;
+
+					
+
+					case 'enableAI':
+						var unit = self._script.variable.getValue(action.unit, vars);
+						if (unit && unit.ai) {
+							unit.ai.enable();
+						}
+						break;
+					
+					case 'disableAI':
+						var unit = self._script.variable.getValue(action.unit, vars);
+						if (unit && unit.ai) {
+							unit.ai.disable();
+						}
+						break;
 
 					case 'setUnitTargetPosition': // deprecated
 						var unit = self._script.variable.getValue(action.unit, vars);
@@ -2643,6 +2652,9 @@ var ActionComponent = IgeEntity.extend({
 						// console.log('trying to run', action);
 						break;
 				}
+				
+				ige.network.resume();	
+
 			} catch (e) {
 				console.log(e);
 				self._script.errorLog(e); // send error msg to client

@@ -24,6 +24,12 @@ var ScoreboardComponent = IgeEntity.extend({
 				.removeClass('d-none');
 		}
 
+		// due to rendering order, on standalone, leaderboard is rendered behind
+		// the game div content. setting z-index 1 is enough to pull it forward
+		if (window.isStandalone) {
+			$('#leaderboard').css('z-index', 1);
+		}
+
 		$(function () {
 			$.contextMenu({
 				selector: '.scoreboard-user-entry',

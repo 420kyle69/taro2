@@ -27,7 +27,6 @@ var ScriptComponent = IgeEntity.extend({
 
 	load: function(scripts) {
 		this.scripts = scripts;
-
 		// map trigger events, so we don't have to iterate through all scripts to find corresponding scripts
 		this.triggeredScripts = {};
 		for (var scriptId in this.scripts) {
@@ -51,7 +50,7 @@ var ScriptComponent = IgeEntity.extend({
 		var self = this;
 
 		self.currentScriptId = scriptId;
-		if (this.scripts[scriptId]) {
+		if (this.scripts && this.scripts[scriptId]) {
 			// var actions = JSON.parse(JSON.stringify(this.scripts[scriptId].actions));
 			var actions = self.getScriptActions(scriptId);
 			if (actions) {
@@ -171,7 +170,7 @@ var ScriptComponent = IgeEntity.extend({
 		}
 
 		var scriptName = '[scriptName undefined]';
-		if (this.scripts[this.currentScriptId]) {
+		if (this.scripts && this.scripts[this.currentScriptId]) {
 			scriptName = this.scripts[this.currentScriptId].name;
 		}
 
@@ -180,12 +179,14 @@ var ScriptComponent = IgeEntity.extend({
 	},
 	
 	errorLog: function (message) {
-		var script = this.scripts[this.currentScriptId];
-		var log = `Script error '${(script) ? script.name : ''}' in Action '${this.currentActionName}' : ${message}`;
-		this.errorLogs[this.currentActionName] = log;
-		ige.devLog('script errorLog', log, message);
-		ScriptComponent.prototype.log(log);
-		return log;
+		if (this.scripts) {
+			var script = this.scripts[this.currentScriptId];
+			var log = `Script error '${(script) ? script.name : ''}' in Action '${this.currentActionName}' : ${message}`;
+			this.errorLogs[this.currentActionName] = log;
+			ige.devLog('script errorLog', log, message);
+			ScriptComponent.prototype.log(log);
+			return log;
+		}		
 	}
 
 });

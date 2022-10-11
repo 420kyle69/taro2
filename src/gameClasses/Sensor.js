@@ -61,6 +61,18 @@ var Sensor = IgeEntityPhysics.extend({
 		}
 	},
 
+	remove: function() {
+		var ownerUnit = this.getOwnerUnit();
+		if (ownerUnit) {
+			ownerUnit.sensor = undefined;
+		}
+		IgeEntityPhysics.prototype.remove.call(this);
+	},
+
+	destroy: function () {
+		IgeEntityPhysics.prototype.destroy.call(this);
+	},
+
 	_behaviour: function (ctx) {
 		var ownerUnit = this.getOwnerUnit();
 		if (ownerUnit) {

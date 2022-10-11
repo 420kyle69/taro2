@@ -32,11 +32,8 @@ var Unit = IgeEntityPhysics.extend({
 		}
 		unitData = ige.game.getAsset('unitTypes', data.type);
 		
-		if (ige.isClient) {
-			unitData = _.pick(unitData, ige.client.keysToAddBeforeRender);
-		}
-
 		self._stats = _.merge(unitData, data);
+
 		self.entityId = entityIdFromServer;
 
 		// dont save variables in _stats as _stats is stringified and synced
@@ -53,7 +50,9 @@ var Unit = IgeEntityPhysics.extend({
 			.addComponent(AttributeComponent) // every units gets one
 			
 		self.addComponent(ScriptComponent); // entity-requireScriptLoading
-		self.script.load(data.scripts)
+		self.script.load(unitData.scripts)
+
+		self.addComponent(AIComponent);
 
 		Unit.prototype.log(`initializing new unit ${this.id()}`);
 
@@ -93,7 +92,6 @@ var Unit = IgeEntityPhysics.extend({
 			// and their respective color because sometimes it may happen that unit is not yet created on client
 			// hence while making its minimap unit we will get null as unit
 			self._stats.minimapUnitVisibleToClients = {};
-
 			self.mount(ige.$('baseScene'));
 
 			if (ige.network.isPaused) {
@@ -103,7 +101,7 @@ var Unit = IgeEntityPhysics.extend({
 			}
 
 			ige.server.totalUnitsCreated++;
-			self.addComponent(AIComponent);
+			
 		} else if (ige.isClient) {
 			var networkId = ige.network.id();
 			self.addComponent(UnitUiComponent);
@@ -135,7 +133,6 @@ var Unit = IgeEntityPhysics.extend({
 		self.playEffect('create');
 		self.addBehaviour('unitBehaviour', self._behaviour);
 		self.scaleDimensions(self._stats.width, self._stats.height);
-		self._stats.isStunned = false;
 	},
 
 	shouldRenderAttribute: function (attribute) {
@@ -250,7 +247,7 @@ var Unit = IgeEntityPhysics.extend({
 			var shouldRender = self.shouldRenderAttribute(attr);
 
 			if (unitBar) {
-				// canvas
+
 				if (shouldRender) {
 					unitBar.updateBar(attr);
 				} else {
@@ -261,7 +258,7 @@ var Unit = IgeEntityPhysics.extend({
 					unitBar.destroy();
 				}
 			} else {
-				// html
+
 				if (shouldRender) {
 					attr.index = self.attributeBars.length + 1;
 
@@ -692,6 +689,7 @@ var Unit = IgeEntityPhysics.extend({
 
 		self._stats.currentItemIndex = itemIndex;
 		this.streamUpdateData([{ currentItemIndex: itemIndex }]);
+		this.script.trigger("unitSelectsInventorySlot")
 
 		if (ige.isClient && this == ige.client.selectedUnit) {
 			this.inventory.highlightSlot(itemIndex + 1);
@@ -705,11 +703,14 @@ var Unit = IgeEntityPhysics.extend({
 		self.previousState = null;
 
 		var data = ige.game.getAsset('unitTypes', type);
+
 		// console.log("change unit type", type)
 		if (data == undefined) {
 			ige.script.errorLog('changeUnitType: invalid data');
 			return;
 		}
+
+		self.script.load(data.scripts)
 
 		self._stats.type = type;
 
@@ -1268,7 +1269,7 @@ var Unit = IgeEntityPhysics.extend({
 			var targetPlayer = this.getOwner();
 			var sourcePlayer = ige.$(damageData.sourcePlayerId);
 			var sourceUnit = ige.$(damageData.sourceUnitId);
-			var isVulnerable = false;
+			var inflictDamage = false;
 
 			var targetsAffected = damageData.targetsAffected;
 			if (
@@ -1282,10 +1283,10 @@ var Unit = IgeEntityPhysics.extend({
 					(targetsAffected.includes('neutral') && sourcePlayer.isNeutralTo(targetPlayer))
 				)
 			) {
-				isVulnerable = true;
+				inflictDamage = true;
 			}
 
-			if (isVulnerable) {
+			if (inflictDamage) {
 				ige.game.lastAttackingUnitId = damageData.sourceUnitId;
 				ige.game.lastAttackedUnitId = this.id();
 				ige.game.lastAttackingItemId = damageData.sourceItemId;
@@ -1307,6 +1308,8 @@ var Unit = IgeEntityPhysics.extend({
 				var armor = this._stats.attributes.armor && this._stats.attributes.armor.value || 0;
 				var damageReduction = (0.05 * armor) / (1.5 + 0.04 * armor);
 				var ownerUnitBaseDamage = (sourceUnit != undefined) ? sourceUnit.getBaseDamage() : 0;
+
+				// update target unit's attributes (e.g. lower the target unit's hp)
 				if (damageData.unitAttributes) {
 					_.forEach(damageData.unitAttributes, function (damageValue, damageAttrKey) {
 						var attribute = self._stats.attributes[damageAttrKey];
@@ -1321,6 +1324,7 @@ var Unit = IgeEntityPhysics.extend({
 					});
 				}
 
+				// update target unit's owner's attributes (e.g. lower the owner player's score)
 				if (damageData.playerAttributes && targetPlayer && targetPlayer._stats.attributes) {
 					_.forEach(damageData.playerAttributes, function (damageValue, damageAttrKey) {
 						var attribute = targetPlayer._stats.attributes[damageAttrKey];
@@ -1332,7 +1336,7 @@ var Unit = IgeEntityPhysics.extend({
 					});
 				}
 
-				if (self._stats.ai && self._stats.ai.enabled) {
+				if (self._stats.ai && self._stats.aiEnabled) {
 					self.ai.registerAttack(sourceUnit);
 				}
 
@@ -1344,7 +1348,6 @@ var Unit = IgeEntityPhysics.extend({
 
 	remove: function () {
 		var self = this;
-
 		clearInterval(self.contactLoop);
 
 		var ownerPlayer = self.getOwner();
@@ -1364,24 +1367,34 @@ var Unit = IgeEntityPhysics.extend({
 				self.minimapUnit.destroy();
 				delete self.minimapUnit;
 			}
-		} else if (ige.isServer) {
-			// destroy all items in inventory
+		}
+
+		if (this.sensor) {
+			this.sensor.remove();
+		}
+
+		// destroy all items in inventory
+		if (self._stats.itemIds) {
 			for (var i = 0; i < self._stats.itemIds.length; i++) {
 				var currentItem = this.inventory.getItemBySlotNumber(i + 1);
 				if (currentItem) {
 					currentItem.remove();
 				}
 			}
-
-			IgeEntityPhysics.prototype.remove.call(this);
-			// this.destroy()
 		}
+
+		IgeEntityPhysics.prototype.remove.call(this);
+		
 	},
 
 	// update unit's stats in the server side first, then update client side as well.
 	streamUpdateData: function (queuedData) {
 		var self = this;
 		// Unit.prototype.log("unit streamUpdateData", data)
+		
+		if (ige.isServer && ige.network.isPaused) 
+			return;
+
 		IgeEntity.prototype.streamUpdateData.call(this, queuedData);
 
 		for (var i = 0; i < queuedData.length; i++) {
@@ -1393,6 +1406,17 @@ var Unit = IgeEntityPhysics.extend({
 					case 'type':
 						this.changeUnitType(newValue);
 						break;
+
+					case 'aiEnabled':
+						if (ige.isClient) {
+							if (newValue == true) {
+								self.ai.enable()
+							} else {
+								self.ai.disable()
+							}
+						}
+						break;				
+							
 					case 'itemIds':
 						// update shop as player points are changed and when shop modal is open
 						if (ige.isClient) {
@@ -1465,6 +1489,7 @@ var Unit = IgeEntityPhysics.extend({
 							}
 						}
 						break;
+
 					case 'setFadingText':
 						if (ige.isClient) {
 							newValue = newValue.split('|-|');
@@ -1476,9 +1501,6 @@ var Unit = IgeEntityPhysics.extend({
 							self.setOwnerPlayer(newValue);
 							self._stats.ownerId = newValue;
 						}
-						break;
-					case 'isStunned':
-						self._stats.isStunned = newValue;
 						break;
 				}
 			}
@@ -1549,11 +1571,12 @@ var Unit = IgeEntityPhysics.extend({
 			var purchasables = _.cloneDeep(owner._stats.purchasables);
 			purchasables.push(equipPurchasable);
 			owner.streamUpdateData([
-				{ purchasables: purchasables },
-				{ equiped: true }
-			]);
+								{ purchasables: purchasables },
+								{ equiped: true }
+							]);
 		}
 	},
+	
 	unEquipSkin: function (unEquipedId, forceFullyUnequip, cellSheetUrl) {
 		var self = this;
 		var defaultUnit = ige.game.getAsset('unitTypes', self._stats.type);
@@ -1645,12 +1668,12 @@ var Unit = IgeEntityPhysics.extend({
 		if (!this.isMoving) {
 			this.playEffect('move');
 			this.isMoving = true;
+
 		}
 	},
 
 	stopMoving: function () {
 		if (this.isMoving) {
-			// console.log("GOING IDLE")
 			this.playEffect('idle');
 			this.isMoving = false;
 		}
@@ -1666,7 +1689,7 @@ var Unit = IgeEntityPhysics.extend({
 	 */
 	_behaviour: function (ctx) {
 		var self = this;
-		
+
 		_.forEach(ige.triggersQueued, function (trigger) {
 			trigger.params['thisEntityId'] = self.id();
 			self.script.trigger(trigger.name, trigger.params);
@@ -1675,85 +1698,84 @@ var Unit = IgeEntityPhysics.extend({
 		if (ige.isServer || (ige.isClient && ige.client.selectedUnit == this)) {
 			var ownerPlayer = ige.$(this._stats.ownerId);
 			if (ownerPlayer) {
-				if (ownerPlayer._stats.controlledBy == 'human') {
-					if (ownerPlayer.getSelectedUnit() == this) {
+
+				// translate unit
+				var speed = (this._stats.attributes && this._stats.attributes.speed && this._stats.attributes.speed.value) || 0;
+				var vector = undefined;
+
+				// unit rotation for human player
+				if (!self._stats.aiEnabled && ownerPlayer._stats.controlledBy == 'human' && ownerPlayer.getSelectedUnit() == this) {
+
+					// mobile control: rotate to rotation provided by the client
+					if (this._stats.controls.absoluteRotation) {
+						self.angleToTarget = ownerPlayer.absoluteAngle;
+
+					// desktop control: if this unit's not under a command, rotate to mouse xy coordinate
+					} else {
 						var mouse = ownerPlayer.control.input.mouse;
 						if (mouse) {
-							self.angleToTarget = Math.atan2(mouse.y - self._translate.y, mouse.x - self._translate.x) + Math.radians(90);
 							var a = self._translate.x - mouse.x;
 							var b = self._translate.y - mouse.y;
 							self.distanceToTarget = Math.sqrt(a * a + b * b);
+							self.angleToTarget = Math.atan2(mouse.y - self._translate.y, mouse.x - self._translate.x) + Math.radians(90);
 						}
-					} else {
-						self.angleToTarget = undefined;
 					}
-				} else if (self._stats.ai && self._stats.ai.enabled) { // AI unit
+				}
+
+				if (
+					( // either unit is AI unit that is currently moving
+						self._stats.aiEnabled && self.isMoving
+					) ||
+					( // or human player's unit that's "following cursor"
+						!self._stats.aiEnabled &&
+						self._stats.controls && self._stats.controls.movementControlScheme == 'followCursor' &&
+						self.distanceToTarget > this.width() // if mouse cursor is close to the unit, then don't move
+					)
+				) {
+					if (self.angleToTarget != undefined && !isNaN(self.angleToTarget)) {
+						vector = {
+							x: (speed * Math.sin(self.angleToTarget)),
+							y: -(speed * Math.cos(self.angleToTarget))
+						};
+					}
+				} else if (self.direction.x != 0 || self.direction.y != 0) {
+					// disengage ai movement if a directional movement key's pressed
+					self.ai.targetPosition = undefined;
+					self.ai.targetUnitId = undefined;
+
+					// moving diagonally should reduce speed
+					if (self.direction.x != 0 && self.direction.y != 0) {
+						speed = speed / 1.41421356237;
+					}
+
+					vector = {
+						x: self.direction.x * speed,
+						y: self.direction.y * speed
+					};
+				}
+
+				// update AI
+				if (self._stats.aiEnabled) {
 					self.distanceToTarget = self.ai.getDistanceToTarget();
 					self.ai.update();
 				}
 
 				if (ige.isServer) {
-					// rotate unit
+					// rotate unit if angleToTarget is set
 					if (self.angleToTarget != undefined && !isNaN(self.angleToTarget) &&
 						this._stats.controls && this._stats.controls.mouseBehaviour.rotateToFaceMouseCursor &&
-						this._stats.currentBody && !this._stats.currentBody.fixedRotation &&
-						(this._stats.isStunned == undefined || this._stats.isStunned != true)
+						this._stats.currentBody && !this._stats.currentBody.fixedRotation
 					) {
-						if (this._stats.controls.absoluteRotation) {
-							self.rotateTo(0, 0, ownerPlayer.absoluteAngle);
-						} else {
-							self.rotateTo(0, 0, self.angleToTarget);
-						}
+						self.rotateTo(0, 0, self.angleToTarget);
 					}
 				}
 
-				if (self._stats.isStunned == undefined || self._stats.isStunned != true) {
-					// translate unit
-					var speed = (this._stats.attributes && this._stats.attributes.speed && this._stats.attributes.speed.value) || 0;
-					var vector = undefined;
-					if (
-						( // either unit is AI unit that is currently moving
-							ownerPlayer._stats.controlledBy != 'human' && self.isMoving
-						) ||
-						( // or human player's unit that's "following cursor"
-							ownerPlayer._stats.controlledBy == 'human' && self._stats.controls &&
-							self._stats.controls.movementControlScheme == 'followCursor' && self.distanceToTarget > this.width()
-						)
-					) {
-						if (self.angleToTarget != undefined && !isNaN(self.angleToTarget)) {
-							vector = {
-								x: (speed * Math.sin(self.angleToTarget)),
-								y: -(speed * Math.cos(self.angleToTarget))
-							};
-						}
-					} else if (ownerPlayer._stats.controlledBy == 'human') { // WASD or AD movement
-						// moving diagonally should reduce speed
-						if (self.direction.x != 0 && self.direction.y != 0) {
-							speed = speed / 1.41421356237;
-						}
-
-						vector = {
-							x: self.direction.x * speed,
-							y: self.direction.y * speed
-						};
-						// console.log('unit movement 1', vector)
-					}
-				}
-
-				if (!self._stats.ai || !self._stats.ai.enabled || (ownerPlayer && ownerPlayer._stats.controlledBy == 'human')) {
-					if (self._stats.controls && self._stats.controls.movementControlScheme == 'followCursor') {
-						if (!this.isMoving && self.distanceToTarget > this.width()) {
-							this.startMoving();
-						} else if (this.isMoving && self.distanceToTarget <= this.width()) {
-							this.stopMoving();
-						}
-					} else { // WASD or AD movement
-						// toggle effects when unit starts/stops moving
-						if (!this.isMoving && (self.direction.x != 0 || self.direction.y != 0)) {
-							this.startMoving();
-						} else if (this.isMoving && (self.direction.x == 0 && self.direction.y == 0)) {
-							this.stopMoving();
-						}
+				if (ownerPlayer && ownerPlayer._stats.controlledBy == 'human' && !this._stats.aiEnabled) {
+					// toggle effects when unit starts/stops moving
+					if (!this.isMoving && (self.direction.x != 0 || self.direction.y != 0)) {
+						this.startMoving();
+					} else if (this.isMoving && self.direction.x === 0 && self.direction.y ===0) {
+						this.stopMoving();
 					}
 				}
 
@@ -1761,7 +1783,7 @@ var Unit = IgeEntityPhysics.extend({
 				// apply movement if it's either human-controlled unit, or ai unit that's currently moving
 				if (self.body && vector && (vector.x != 0 || vector.y != 0)) {
 					// console.log('unit movement 2', vector);
-					if (self._stats.controls)
+					if (self._stats.controls) {
 						switch (self._stats.controls.movementMethod) { // velocity-based movement
 							case 'velocity':
 								self.setLinearVelocity(vector.x, vector.y);
@@ -1773,6 +1795,7 @@ var Unit = IgeEntityPhysics.extend({
 								self.applyImpulse(vector.x, vector.y);
 								break;
 						}
+					}
 				}
 			}
 

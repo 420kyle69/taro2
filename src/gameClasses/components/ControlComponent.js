@@ -99,7 +99,7 @@ var ControlComponent = IgeEntity.extend({
 			}
 		}
 
-		var player = ige.game.getPlayerByClientId(this._entity._stats.clientId);
+		var player = this._entity;
 		if (!player) {
 			return;
 		}
@@ -109,64 +109,43 @@ var ControlComponent = IgeEntity.extend({
 		if (unit && unit._category == 'unit') {
 			if (ige.isServer || (ige.isClient && !this.isChatOpen)) {
 				var unitAbility = null;
-				if (unit._stats.isStunned == undefined || unit._stats.isStunned != true) {
-					if (unit._stats.controls) {
-						if (unit._stats.controls.movementControlScheme == 'ad') {
-							switch (key) {
-								case 'a':
-								case 'left':
-									unit.ability.moveLeft();
-									break;
+				// execute movement command is AI is disabled
+				if (unit._stats.controls && !unit._stats.aiEnabled){
+					if (unit._stats.controls.movementControlScheme == 'wasd') {
+						switch (key) {
+							case 'w':
+							case 'up':
+								unit.ability.moveUp();
+								// ige.inputReceived = Date.now();
+								break;
 
-								case 'd':
-								case 'right':
-									unit.ability.moveRight();
-									break;
-							}
-						} else if (unit._stats.controls.movementControlScheme != 'followCursor') { // WASD movement is default
-							switch (key) {
-								case 'w':
-								case 'up':
-									unit.ability.moveUp();
-									// ige.inputReceived = Date.now();
-									break;
+							case 'a':
+							case 'left':
+								unit.ability.moveLeft();
+								break;
 
-								case 'a':
-								case 'left':
-									unit.ability.moveLeft();
-									break;
+							case 's':
+							case 'down':
+								unit.ability.moveDown();
+								break;
 
-								case 's':
-								case 'down':
-									unit.ability.moveDown();
-									break;
-
-								case 'd':
-								case 'right':
-									unit.ability.moveRight();
-									break;
-							}
+							case 'd':
+							case 'right':
+								unit.ability.moveRight();
+								break;
 						}
-					}
+					} else if (unit._stats.controls.movementControlScheme == 'ad') {
+						switch (key) {
+							case 'a':
+							case 'left':
+								unit.ability.moveLeft();
+								break;
 
-					switch (key) {
-						case 'e':
-							unit.ability.pickupItem();
-							break;
-
-						case 'g':
-							unit.ability.dropItem();
-							break;
-
-						case 'i':
-							if (ige.isClient && $('#open-inventory-button').css('display') !== 'none') {
-								$('#open-inventory-button').click();
-							}
-							break;
-
-						case 'button1':
-							unit.ability.startUsingItem();
-							break;
+							case 'd':
+							case 'right':
+								unit.ability.moveRight();
+								break;
+						}
 					}
 				}
 
@@ -217,8 +196,9 @@ var ControlComponent = IgeEntity.extend({
 	keyUp: function (device, key) {
 		this.lastActionAt = Date.now();
 
-		var player = ige.game.getPlayerByClientId(this._entity._stats.clientId);
+		var player = this._entity;		
 		if (!player) return;
+		
 		var unit = player.getSelectedUnit();
 		// for (i in units) {
 		// 	var unit = units[i]
@@ -297,8 +277,11 @@ var ControlComponent = IgeEntity.extend({
 	 */
 	_behaviour: function (ctx) {
 		var self = this;
-
-		if (ige.isClient) {
+		var player = this._entity;		
+		if (!player) return;		
+		var unit = player.getSelectedUnit();
+		
+		if (unit && ige.isClient) {
 			for (device in self.input) {
 				for (key in self.input[device]) {
 					if (ige.input.actionState(key)) {
@@ -360,15 +343,13 @@ var ControlComponent = IgeEntity.extend({
 				self.lastMousePosition = self.newMousePosition;
 			}
 
-			// unit move
-			var unit = ige.client.selectedUnit;
-			if (ige.physics && ige.game.cspEnabled && unit) {
+			// send unit position to server (client-authoritative movement)
+			if (ige.physics && ige.game.cspEnabled && !unit._stats.aiEnabled) {
 				var x = unit._translate.x.toFixed(0);
 				var y = unit._translate.y.toFixed(0);
 				if (self.sendPlayerInput && (self.lastPositionSent == undefined || self.lastPositionSent[0] != x || self.lastPositionSent[1] != y)) {
 					var pos = [x, y];
 					ige.network.send('playerUnitMoved', pos);
-					// console.log(x, y)
 					self.lastPositionSent = pos;
 				}
 			}

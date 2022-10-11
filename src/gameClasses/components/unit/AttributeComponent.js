@@ -175,6 +175,7 @@ var AttributeComponent = IgeEntity.extend({
 	},
 	// change attribute's value manually
 	update: function (attributeTypeId, newValue, forceUpdate) {
+
 		var self = this;
 
 		if (!self._entity._stats || !self._entity._stats.attributes) {
@@ -193,7 +194,7 @@ var AttributeComponent = IgeEntity.extend({
 				var oldValue = parseFloat(attribute.value);
 				var newValue = Math.max(min, Math.min(max, parseFloat(newValue)));
 
-				self._entity._stats.attributes[attributeTypeId].value = newValue;
+				self._entity._stats.attributes[attributeTypeId].value = parseFloat(newValue);
 
 				if (ige.isServer) {
 					if (newValue != oldValue) {
@@ -222,20 +223,21 @@ var AttributeComponent = IgeEntity.extend({
 							if (self._entity._category == 'unit' && attributeTypeId == 'health') {
 								self._entity.ai.announceDeath();
 							}
-							ige.queueTrigger(`${this._entity._category}AttributeBecomesZero`, triggeredBy);
-							
+
 							// necessary as self._entity can be 'player' and it doesn't have scriptComponent
 							if (self._entity._category == 'unit' || self._entity._category == 'item' || self._entity._category == 'projectile') {
-								self._entity.script.trigger(`entityAttributeBecomesZero`, triggeredBy);	
+								self._entity.script.trigger('entityAttributeBecomesZero', triggeredBy);
 							}
+
+							ige.queueTrigger(`${this._entity._category}AttributeBecomesZero`, triggeredBy);							
 						} else if (newValue >= attribute.max) // when attribute becomes full, trigger attributeBecomesFull event
 						{
-							ige.queueTrigger(`${this._entity._category}AttributeBecomesFull`, triggeredBy);
-							
 							// necessary as self._entity can be 'player' and it doesn't have scriptComponent
 							if (self._entity._category == 'unit' || self._entity._category == 'item' || self._entity._category == 'projectile') {
-								self._entity.script.trigger(`entityAttributeBecomesFull`, triggeredBy);
+								self._entity.script.trigger('entityAttributeBecomesFull', triggeredBy);
 							}
+
+							ige.queueTrigger(`${this._entity._category}AttributeBecomesFull`, triggeredBy);
 						}
 
 						// check if user breaks his highscore then assign it to new highscore
@@ -255,12 +257,17 @@ var AttributeComponent = IgeEntity.extend({
 						switch (self._entity._category) {
 							case 'unit': {
 								unit = self._entity;
-								attribute.value = newValue;
+
+								// console.log(attribute, attribute.value);
 								if (ige.client.myPlayer._stats.selectedUnitId == unit.id()) {
-									self._entity.unitUi.updateAttributeBar(attribute);
+									self._entity.unitUi.updateAttributeBar({...attribute, ...{value: parseFloat(newValue)}});
 								}
 
-								self._entity.updateAttributeBar(attribute);
+								// this is the only way to convert to number i guess??
+								// all of the old implementations pass a value as a string here
+								// even if we call attribute.value = parseFloat(attribute.value)
+								// or other variations of this
+								self._entity.updateAttributeBar({...attribute, ...{value: parseFloat(newValue)}});
 								break;
 							}
 							case 'item': {
