@@ -107,7 +107,7 @@ var Server = IgeClass.extend({
 			self.config = config.default;
 		}
 
-		self.tier = (cluster.isMaster ? process.env.TIER : process.env.WORKER_TIER) || 2;
+		self.tier = (cluster.isMaster ? process.env.TIER : (process.env.WORKER_TIER || process.env.TIER)) || 2;
 		
 		self.region = process.env.REGION || 'apocalypse';
 		self.isScriptLogOn = process.env.SCRIPTLOG == 'on';
