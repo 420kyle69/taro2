@@ -1697,7 +1697,10 @@ var IgeEngine = IgeEntity.extend({
 				ige._lastGameLoopTickAt = ige.now;
 				ige._gameLoopTickRemainder = Math.min(timeElapsed - ((1000 / ige._gameLoopTickRate) - ige._gameLoopTickRemainder), (1000 / ige._gameLoopTickRate));
 				ige.gameLoopTickHasExecuted = true;
-				ige.physics.update(timeElapsed);
+				if (ige.physics) {
+					ige.physics.update(timeElapsed);
+				}
+					
 				ige.queueTrigger('frameTick');
 			}
 			
