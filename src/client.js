@@ -283,20 +283,6 @@ const Client = IgeEventingClass.extend({
 
 			this.loadMap();
 
-			// still doing things only after physics load
-			if (gameData.defaultData && !isNaN(gameData.defaultData.frameRate)) {
-
-				ige._physicsTickRate = Math.max(
-					// old comment => 'keep fps range between 15 and 60'
-					20,
-					Math.min(
-
-						parseInt(gameData.defaultData.frameRate),
-						60
-					)
-				);
-			}
-
 			if (ige.physics) {
 				// old comment => 'always enable CSP'
 				this.loadCSP();

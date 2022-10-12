@@ -281,81 +281,105 @@ var ControlComponent = IgeEntity.extend({
 		if (!player) return;		
 		var unit = player.getSelectedUnit();
 		
-		if (unit && ige.isClient) {
-			for (device in self.input) {
-				for (key in self.input[device]) {
-					if (ige.input.actionState(key)) {
-						if (self.input[device][key] == false) {
-							if (ige.isMobile && device == 'mouse') {
-								// block
-							} else {
-								self.keyDown(device, key);
+		if (unit) {
+			if (ige.isClient) {
+				for (device in self.input) {
+					for (key in self.input[device]) {
+						if (ige.input.actionState(key)) {
+							if (self.input[device][key] == false) {
+								if (ige.isMobile && device == 'mouse') {
+									// block
+								} else {
+									self.keyDown(device, key);
+								}
+							}
+						} else {
+							if (self.input[device][key] == true) {
+								if (ige.isMobile && device == 'mouse') {
+									// block
+								} else {
+									self.keyUp(device, key);
+								}
 							}
 						}
-					} else {
-						if (self.input[device][key] == true) {
-							if (ige.isMobile && device == 'mouse') {
-								// block
-							} else {
-								self.keyUp(device, key);
+					}
+				}
+	
+				// check if sending player input is due (every 100ms)
+				if (ige._currentTime - self.lastInputSent > 100) {
+					self.sendPlayerInput = true;
+					self.lastInputSent = ige._currentTime;
+				}
+	
+				if (self.newMousePosition && (self.newMousePosition[0] != self.lastMousePosition[0] || self.newMousePosition[1] != self.lastMousePosition[1])) {
+					// if we are using mobile controls don't send mouse moves to server here as we will do so from a look touch stick
+					if (!ige.isMobile) {
+						// absolute mouse position wrt window
+						if (ige._mouseAbsoluteTranslation && ige._mouseAbsoluteTranslation[0] && ige._mouseAbsoluteTranslation[1]) {
+							var centerOfScreen = {};
+							centerOfScreen.innerWidth = window.innerWidth / 2;
+							centerOfScreen.innerHeight = window.innerHeight / 2;
+							var angle = 0;
+							if (centerOfScreen && ige._mouseAbsoluteTranslation[0] != centerOfScreen.innerWidth && centerOfScreen.innerHeight != ige._mouseAbsoluteTranslation[1]) {
+								angle = Math.atan2(ige._mouseAbsoluteTranslation[0] - centerOfScreen.innerWidth, centerOfScreen.innerHeight - ige._mouseAbsoluteTranslation[1]);
 							}
+							// angle = angle % Math.PI;
+							angle = parseFloat(angle.toPrecision(5));
+							if (self.sendPlayerInput)
+								ige.network.send('playerAbsoluteAngle', angle);
+	
+							if (ige.client.myPlayer) {
+								ige.client.myPlayer.absoluteAngle = angle;
+							}
+							self.absoluteAngle = angle;
 						}
+						if (ige.client && ige.client.myPlayer) {
+							ige.client.myPlayer.control.input.mouse.x = self.newMousePosition[0];
+							ige.client.myPlayer.control.input.mouse.y = self.newMousePosition[1];
+						}
+						if (self.sendPlayerInput) {
+							ige.network.send('playerMouseMoved', self.newMousePosition);
+						}
+					}
+					self.lastMousePosition = self.newMousePosition;
+				}
+	
+				// send unit position to server (client-authoritative movement)
+				if (ige.physics && ige.game.cspEnabled && !unit._stats.aiEnabled) {
+					var x = unit._translate.x.toFixed(0);
+					var y = unit._translate.y.toFixed(0);
+					if (self.sendPlayerInput && (self.lastPositionSent == undefined || self.lastPositionSent[0] != x || self.lastPositionSent[1] != y)) {
+						var pos = [x, y];
+						ige.network.send('playerUnitMoved', pos);
+						self.lastPositionSent = pos;
+					}
+				}
+	
+				self.sendPlayerInput = false;
+			}
+			
+			// unit rotation for human player. this runs for both server & client
+			if (!unit._stats.aiEnabled) {
+
+				// mobile control: rotate to rotation provided by the client
+				if (unit._stats.controls.absoluteRotation) {
+					unit.angleToTarget = player.absoluteAngle;
+
+				// desktop control: if this unit's not under a command, rotate to mouse xy coordinate
+				} else {
+					var mouse = player.control.input.mouse;
+					if (mouse) {
+						var a = unit._translate.x - mouse.x;
+						var b = unit._translate.y - mouse.y;
+						unit.distanceToTarget = Math.sqrt(a * a + b * b);
+						unit.angleToTarget = Math.atan2(mouse.y - unit._translate.y, mouse.x - unit._translate.x) + Math.radians(90);
 					}
 				}
 			}
-
-			// check if sending player input is due (every 100ms)
-			if (ige._currentTime - self.lastInputSent > 100) {
-				self.sendPlayerInput = true;
-				self.lastInputSent = ige._currentTime;
-			}
-
-			if (self.newMousePosition && (self.newMousePosition[0] != self.lastMousePosition[0] || self.newMousePosition[1] != self.lastMousePosition[1])) {
-				// if we are using mobile controls don't send mouse moves to server here as we will do so from a look touch stick
-				if (!ige.isMobile) {
-					// absolute mouse position wrt window
-					if (ige._mouseAbsoluteTranslation && ige._mouseAbsoluteTranslation[0] && ige._mouseAbsoluteTranslation[1]) {
-						var centerOfScreen = {};
-						centerOfScreen.innerWidth = window.innerWidth / 2;
-						centerOfScreen.innerHeight = window.innerHeight / 2;
-						var angle = 0;
-						if (centerOfScreen && ige._mouseAbsoluteTranslation[0] != centerOfScreen.innerWidth && centerOfScreen.innerHeight != ige._mouseAbsoluteTranslation[1]) {
-							angle = Math.atan2(ige._mouseAbsoluteTranslation[0] - centerOfScreen.innerWidth, centerOfScreen.innerHeight - ige._mouseAbsoluteTranslation[1]);
-						}
-						// angle = angle % Math.PI;
-						angle = parseFloat(angle.toPrecision(5));
-						if (self.sendPlayerInput)
-							ige.network.send('playerAbsoluteAngle', angle);
-
-						if (ige.client.myPlayer) {
-							ige.client.myPlayer.absoluteAngle = angle;
-						}
-						self.absoluteAngle = angle;
-					}
-					if (ige.client && ige.client.myPlayer) {
-						ige.client.myPlayer.control.input.mouse.x = self.newMousePosition[0];
-						ige.client.myPlayer.control.input.mouse.y = self.newMousePosition[1];
-					}
-					if (self.sendPlayerInput) {
-						ige.network.send('playerMouseMoved', self.newMousePosition);
-					}
-				}
-				self.lastMousePosition = self.newMousePosition;
-			}
-
-			// send unit position to server (client-authoritative movement)
-			if (ige.physics && ige.game.cspEnabled && !unit._stats.aiEnabled) {
-				var x = unit._translate.x.toFixed(0);
-				var y = unit._translate.y.toFixed(0);
-				if (self.sendPlayerInput && (self.lastPositionSent == undefined || self.lastPositionSent[0] != x || self.lastPositionSent[1] != y)) {
-					var pos = [x, y];
-					ige.network.send('playerUnitMoved', pos);
-					self.lastPositionSent = pos;
-				}
-			}
-
-			self.sendPlayerInput = false;
 		}
+
+		
+			
 	}
 
 });

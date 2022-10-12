@@ -109,16 +109,12 @@ var IgeEngine = IgeEntity.extend({
 		this._lastTimeStamp = new Date().getTime();
 
 		this._fpsRate = 60; // Sets the frames per second to execute engine tick's at
-		this._physicsTickRate = 20; // phyiscs tick rate
 		this._gameLoopTickRate = 20; // "frameTick", input, and streaming
 
-		this._lastPhysicsTickAt = 0;
 		this._lastGameLoopTickAt = 0;
-		this._physicsTickRemainder = 0;
 		this._gameLoopTickRemainder = 0;
 		this.gameLoopTickHasExecuted = true;
-		this.physicsTickHasExecuted = true;
-
+		
 		this._aSecondAgo = 0;
 
 		this._state = 0; // Currently stopped
@@ -1700,25 +1696,10 @@ var IgeEngine = IgeEntity.extend({
 				ige._lastGameLoopTickAt = ige.now;
 				ige._gameLoopTickRemainder = Math.min(timeElapsed - ((1000 / ige._gameLoopTickRate) - ige._gameLoopTickRemainder), (1000 / ige._gameLoopTickRate));
 				ige.gameLoopTickHasExecuted = true;
-			}
-
-			var timeElapsed = ige.now - ige._lastPhysicsTickAt;			
-			if (// physics update should execute as soon as gameloop has executed in order to stream the accurate, latest translation data computed from physics update
-				ige.physics && (
-					ige.gameLoopTickHasExecuted || // don't ask. - Jaeyun
-					timeElapsed >= (1000 / ige._physicsTickRate) - ige._physicsTickRemainder
-				)
-			) {
-				ige._lastPhysicsTickAt = ige.now;
-				ige._physicsTickRemainder = Math.min(timeElapsed - ((1000 / ige._physicsTickRate) - ige._physicsTickRemainder), (1000 / ige._physicsTickRate));
 				ige.physics.update(timeElapsed);
-				ige.physicsTickHasExecuted = true;
-			}
-
-			if (ige.gameLoopTickHasExecuted) {
 				ige.queueTrigger('frameTick');
 			}
-
+			
 			ige.updateCount = 0;
 			ige.tickCount = 0;
 			ige.updateTransform = 0;
@@ -1892,8 +1873,7 @@ var IgeEngine = IgeEntity.extend({
 		}
 		
 		ige.gameLoopTickHasExecuted = false;
-		ige.physicsTickHasExecuted = false;
-
+		
 		et = new Date().getTime();
 		ige._tickTime = et - ige.now;
 		// console.log(ige._tickTime, ige._tickTime, 1000/self._fpsRate)

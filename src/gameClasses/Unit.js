@@ -8,14 +8,7 @@ var Unit = IgeEntityPhysics.extend({
 		this.id(entityIdFromServer);
 		var self = this;
 		self.dob = Date.now();
-		// used for 2 reasons
-		// 1. to categorize as unit when detecting entity created in ClientNetworkEvents.
-		// 2. necessary for box2d contact listener (it only cares about 'unit' categories touching)
-		self.force = {
-			x: 0,
-			y: 0
-		};
-
+		
 		self.direction = {
 			x: 0,
 			y: 0
@@ -1697,104 +1690,83 @@ var Unit = IgeEntityPhysics.extend({
 
 		if (ige.isServer || (ige.isClient && ige.client.selectedUnit == this)) {
 			var ownerPlayer = ige.$(this._stats.ownerId);
-			if (ownerPlayer) {
-
-				// translate unit
-				var speed = (this._stats.attributes && this._stats.attributes.speed && this._stats.attributes.speed.value) || 0;
-				var vector = undefined;
-
-				// unit rotation for human player
-				if (!self._stats.aiEnabled && ownerPlayer._stats.controlledBy == 'human' && ownerPlayer.getSelectedUnit() == this) {
-
-					// mobile control: rotate to rotation provided by the client
-					if (this._stats.controls.absoluteRotation) {
-						self.angleToTarget = ownerPlayer.absoluteAngle;
-
-					// desktop control: if this unit's not under a command, rotate to mouse xy coordinate
-					} else {
-						var mouse = ownerPlayer.control.input.mouse;
-						if (mouse) {
-							var a = self._translate.x - mouse.x;
-							var b = self._translate.y - mouse.y;
-							self.distanceToTarget = Math.sqrt(a * a + b * b);
-							self.angleToTarget = Math.atan2(mouse.y - self._translate.y, mouse.x - self._translate.x) + Math.radians(90);
-						}
-					}
-				}
-
-				if (
-					( // either unit is AI unit that is currently moving
-						self._stats.aiEnabled && self.isMoving
-					) ||
-					( // or human player's unit that's "following cursor"
-						!self._stats.aiEnabled &&
-						self._stats.controls && self._stats.controls.movementControlScheme == 'followCursor' &&
-						self.distanceToTarget > this.width() // if mouse cursor is close to the unit, then don't move
-					)
-				) {
-					if (self.angleToTarget != undefined && !isNaN(self.angleToTarget)) {
-						vector = {
-							x: (speed * Math.sin(self.angleToTarget)),
-							y: -(speed * Math.cos(self.angleToTarget))
-						};
-					}
-				} else if (self.direction.x != 0 || self.direction.y != 0) {
-					// disengage ai movement if a directional movement key's pressed
-					self.ai.targetPosition = undefined;
-					self.ai.targetUnitId = undefined;
-
-					// moving diagonally should reduce speed
-					if (self.direction.x != 0 && self.direction.y != 0) {
-						speed = speed / 1.41421356237;
-					}
-
+			
+			// translate unit
+			var speed = (this._stats.attributes && this._stats.attributes.speed && this._stats.attributes.speed.value) || 0;
+			var vector = undefined;
+			
+			if (
+				( // either unit is AI unit that is currently moving
+					self._stats.aiEnabled && self.isMoving
+				) ||
+				( // or human player's unit that's "following cursor"
+					!self._stats.aiEnabled &&
+					self._stats.controls && self._stats.controls.movementControlScheme == 'followCursor' &&
+					self.distanceToTarget > this.width() // if mouse cursor is close to the unit, then don't move
+				)
+			) {
+				if (self.angleToTarget != undefined && !isNaN(self.angleToTarget)) {
 					vector = {
-						x: self.direction.x * speed,
-						y: self.direction.y * speed
+						x: (speed * Math.sin(self.angleToTarget)),
+						y: -(speed * Math.cos(self.angleToTarget))
 					};
 				}
+			} else if (self.direction.x != 0 || self.direction.y != 0) {
+				// disengage ai movement if a directional movement key's pressed
+				self.ai.targetPosition = undefined;
+				self.ai.targetUnitId = undefined;
 
-				// update AI
-				if (self._stats.aiEnabled) {
-					self.distanceToTarget = self.ai.getDistanceToTarget();
-					self.ai.update();
+				// moving diagonally should reduce speed
+				if (self.direction.x != 0 && self.direction.y != 0) {
+					speed = speed / 1.41421356237;
 				}
 
-				if (ige.isServer) {
-					// rotate unit if angleToTarget is set
-					if (self.angleToTarget != undefined && !isNaN(self.angleToTarget) &&
-						this._stats.controls && this._stats.controls.mouseBehaviour.rotateToFaceMouseCursor &&
-						this._stats.currentBody && !this._stats.currentBody.fixedRotation
-					) {
-						self.rotateTo(0, 0, self.angleToTarget);
-					}
-				}
+				vector = {
+					x: self.direction.x * speed,
+					y: self.direction.y * speed
+				};
+			}
 
-				if (ownerPlayer && ownerPlayer._stats.controlledBy == 'human' && !this._stats.aiEnabled) {
-					// toggle effects when unit starts/stops moving
-					if (!this.isMoving && (self.direction.x != 0 || self.direction.y != 0)) {
-						this.startMoving();
-					} else if (this.isMoving && self.direction.x === 0 && self.direction.y ===0) {
-						this.stopMoving();
-					}
-				}
+			// update AI
+			if (self._stats.aiEnabled) {
+				self.distanceToTarget = self.ai.getDistanceToTarget();
+				self.ai.update();
+			}
 
-				ige.unitBehaviourCount++; // for debugging
-				// apply movement if it's either human-controlled unit, or ai unit that's currently moving
-				if (self.body && vector && (vector.x != 0 || vector.y != 0)) {
-					// console.log('unit movement 2', vector);
-					if (self._stats.controls) {
-						switch (self._stats.controls.movementMethod) { // velocity-based movement
-							case 'velocity':
-								self.setLinearVelocity(vector.x, vector.y);
-								break;
-							case 'force':
-								self.applyForce(vector.x, vector.y);
-								break;
-							case 'impulse':
-								self.applyImpulse(vector.x, vector.y);
-								break;
-						}
+			if (ige.isServer) {
+				// rotate unit if angleToTarget is set
+				if (self.angleToTarget != undefined && !isNaN(self.angleToTarget) &&
+					this._stats.controls && this._stats.controls.mouseBehaviour.rotateToFaceMouseCursor &&
+					this._stats.currentBody && !this._stats.currentBody.fixedRotation
+				) {
+					self.rotateTo(0, 0, self.angleToTarget);
+				}
+			}
+
+			if (ownerPlayer && ownerPlayer._stats.controlledBy == 'human' && !this._stats.aiEnabled) {
+				// toggle effects when unit starts/stops moving
+				if (!this.isMoving && (self.direction.x != 0 || self.direction.y != 0)) {
+					this.startMoving();
+				} else if (this.isMoving && self.direction.x === 0 && self.direction.y ===0) {
+					this.stopMoving();
+				}
+			}
+
+			ige.unitBehaviourCount++; // for debugging
+			// apply movement if it's either human-controlled unit, or ai unit that's currently moving
+			if (self.body && vector && (vector.x != 0 || vector.y != 0)) {
+				// console.log('unit movement 2', vector);
+				if (self._stats.controls) {
+					switch (self._stats.controls.movementMethod) { // velocity-based movement
+						case 'velocity':
+							self.setLinearVelocity(vector.x, vector.y);
+							break;
+						case 'force':
+							self.applyForce(vector.x, vector.y);
+							break;
+						case 'impulse':
+							self.applyImpulse(vector.x, vector.y);
+							break;
 					}
 				}
 			}

@@ -469,10 +469,6 @@ var Server = IgeClass.extend({
 				// tilesize ratio is ratio of base tile size over tilesize of current map
 				var tilesizeRatio = baseTilesize / game.data.map.tilewidth;
 
-				if (game.data.defaultData && !isNaN(game.data.defaultData.frameRate)) {
-					ige._physicsTickRate = Math.max(15, Math.min(parseInt(game.data.defaultData.frameRate), 60)); // keep fps range between 15 and 60
-				}
-
 				// /*
 				//  * Significant changes below
 				//  * Let's test loading PhysicsConfig here
