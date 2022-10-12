@@ -67,7 +67,9 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 			}
 		  });
 
-		const camera = this.camera = this.scene.cameras.add(this.scene.sys.game.canvas.width - texturesLayer.width - 40, this.scene.sys.game.canvas.height - texturesLayer.height - 40, texturesLayer.width, texturesLayer.height).setScroll(this.x, this.y).setZoom(1).setName('palette');
+		const paletteWidth = this.scene.sys.game.canvas.width * 0.25;
+		const paletteHeight = this.scene.sys.game.canvas.height * 0.25;
+		const camera = this.camera = this.scene.cameras.add(this.scene.sys.game.canvas.width - paletteWidth - 40, this.scene.sys.game.canvas.height - paletteHeight - 40, paletteWidth, paletteHeight).setScroll(this.x, this.y).setZoom(1).setName('palette');
 		camera.setBackgroundColor(0x002244);
 
 		const COLOR_PRIMARY = 0x0036cc;
@@ -143,9 +145,9 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 		);
 
 		this.scene.scale.on(Phaser.Scale.Events.RESIZE, () => {
-			camera.x = this.scene.sys.game.canvas.width - texturesLayer.width - 40;
+			camera.x = this.scene.sys.game.canvas.width - paletteWidth - 40;
 			scrollBarContainer.x = this.camera.x;
-			layerButtonsContainer.x = this.camera.x + texturesLayer.width - 98;
+			layerButtonsContainer.x = this.camera.x + paletteWidth - 98;
 		});
 
 		new PhaserPaletteButton (this, '+', 0, -31, 30, scrollBarContainer, this.zoom.bind(this), -1);
@@ -163,7 +165,7 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 		const layerButtonsContainer = this.layerButtonsContainer = new Phaser.GameObjects.Container(scene);
 		scene.add.existing(layerButtonsContainer);
 		//this.scrollBarContainer.add(layerButtonsContainer);
-		layerButtonsContainer.x = this.camera.x + texturesLayer.width - 98;
+		layerButtonsContainer.x = this.camera.x + paletteWidth - 98;
 		layerButtonsContainer.y = this.camera.y;
 		layerButtonsContainer.width = 120;
 		layerButtonsContainer.height = 160;
@@ -259,20 +261,14 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 		let targetZoom;
 		if (deltaY < 0) targetZoom = this.camera.zoom * 1.2;
 		else targetZoom = this.camera.zoom / 1.2;
-		if (targetZoom < 1) targetZoom = 1;
+		if (targetZoom < 0.5) targetZoom = 0.5;
 		else if (targetZoom > 20) targetZoom = 20;
 		this.camera.setZoom(targetZoom);
-		/*const targetPosition = this.camera.getWorldPoint(pointer.x, pointer.y);
-		this.camera.setScroll(targetPosition.x, targetPosition.y);*/
-
 
 		this.scrollBarBottom.getElement('slider.thumb').width = (this.camera.width - 60) / (targetZoom * 2);
-		//if (targetZoom === 1) this.scrollBarBottom.value = 0.5;
-		//if (deltaY > 0) this.scrollBarBottom.value = 0.5 * ((this.scrollBarBottom.value - 0.5) * (targetZoom - 1));
 		this.scrollBarBottom.layout();
 
 		this.scrollBarRight.getElement('slider.thumb').height = (this.camera.height - 60) / (targetZoom * 2);
-		//if (targetZoom === 1) this.scrollBarRight.value = 0.5;
 		this.scrollBarRight.layout();
 	}
 }
