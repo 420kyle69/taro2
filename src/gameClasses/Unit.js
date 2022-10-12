@@ -99,8 +99,6 @@ var Unit = IgeEntityPhysics.extend({
 				// if the owner player entity is received on the client side already
 				const ownerPlayer = ige.$(this._stats.ownerId);
 				if (ownerPlayer) {
-					console.log("ownerPlayer found", ownerPlayer._stats.name)
-			
 					this.setOwnerPlayer(this._stats.ownerId);
 					this.equipSkin();
 				}
@@ -128,8 +126,6 @@ var Unit = IgeEntityPhysics.extend({
 
 			var polygon = new IgePoly2d();
 			self.triggerPolygon(polygon);
-
-			self.redrawAttributeBars();
 			self.flip(self._stats.flip);
 			self.mouseEvents();
 		}
@@ -302,7 +298,6 @@ var Unit = IgeEntityPhysics.extend({
 		
 		// add this unit to the new owner
 		var newOwnerPlayer = newOwnerPlayerId ? ige.$(newOwnerPlayerId) : undefined;
-
 		if (newOwnerPlayer && newOwnerPlayer._stats) {
 			self._stats.ownerId = newOwnerPlayerId;
 			self.ownerPlayer = newOwnerPlayer;

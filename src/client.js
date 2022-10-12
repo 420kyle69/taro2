@@ -578,6 +578,13 @@ const Client = IgeEventingClass.extend({
 				if (entity._category == 'player') {
 					// old comment => 'apply skin to all units owned by this player'
 					const player = entity;
+				
+					// assign those units' owner as this player
+					const units = player.getUnits();
+					for (let unitId in units) {
+						units[unitId].setOwnerPlayer(player.id());
+					}
+					
 					if (player._stats.controlledBy == 'human') {
 						// old comment => 'if the player is me'
 						if (player._stats.clientId == ige.network.id()) {
@@ -597,11 +604,6 @@ const Client = IgeEventingClass.extend({
 							player.redrawUnits(['nameLabel']);
 						}
 						
-						// assign those units' owner as this player
-						const units = player.getUnits();
-						for (let unitId in units) {
-							units[unitId].setOwnerPlayer(player.id());
-						}
 
 						if (player._stats && player._stats.selectedUnitId) {
 							const unit = ige.$(player._stats.selectedUnitId);
