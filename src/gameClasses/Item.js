@@ -653,7 +653,7 @@ var Item = IgeEntityPhysics.extend({
 			}
 			return canAffordCost;
 		} else {
-			ItemComponent.prototype.log('can\'t afford cost');
+			// ige.server.itemComponent.prototype.log('can\'t afford cost');
 			return false;
 		}
 	},

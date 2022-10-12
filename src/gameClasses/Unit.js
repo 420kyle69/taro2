@@ -49,13 +49,6 @@ var Unit = IgeEntityPhysics.extend({
 
 		Unit.prototype.log(`initializing new unit ${this.id()}`);
 
-		if (ige.isClient) {
-
-			this.addToRenderer(defaultAnimation && (defaultAnimation.frames[0] - 1));
-			ige.client.emit('create-unit', this);
-			this.transformTexture(this._translate.x, this._translate.y, 0);
-		}
-
 		// initialize body & texture of the unit
 		self.changeUnitType(data.type, data.defaultData);
 
@@ -96,6 +89,23 @@ var Unit = IgeEntityPhysics.extend({
 			ige.server.totalUnitsCreated++;
 			
 		} else if (ige.isClient) {
+			this.addToRenderer(defaultAnimation && (defaultAnimation.frames[0] - 1));
+			ige.client.emit('create-unit', this);
+			this.transformTexture(this._translate.x, this._translate.y, 0);			
+			
+			// if player already exists on the client side, then set owner player and update its name label
+			// otherwise, client.js will wait for player entity and run this on client.js
+			if (this._stats.ownerId) {
+				// if the owner player entity is received on the client side already
+				const ownerPlayer = ige.$(this._stats.ownerId);
+				if (ownerPlayer) {
+					console.log("ownerPlayer found", ownerPlayer._stats.name)
+			
+					this.setOwnerPlayer(this._stats.ownerId);
+					this.equipSkin();
+				}
+			}
+
 			var networkId = ige.network.id();
 			self.addComponent(UnitUiComponent);
 
@@ -289,15 +299,16 @@ var Unit = IgeEntityPhysics.extend({
 		if (previousOwnerPlayer && previousOwnerPlayer.id() !== newOwnerPlayerId) {
 			previousOwnerPlayer.disownUnit(self);
 		}
-
+		
 		// add this unit to the new owner
 		var newOwnerPlayer = newOwnerPlayerId ? ige.$(newOwnerPlayerId) : undefined;
+
 		if (newOwnerPlayer && newOwnerPlayer._stats) {
 			self._stats.ownerId = newOwnerPlayerId;
 			self.ownerPlayer = newOwnerPlayer;
-			self._stats.name = (config && config.dontUpdateName)
-				? (self._stats.name || newOwnerPlayer._stats.name) // if unit already has name dont update it
-				: newOwnerPlayer._stats.name;
+			self._stats.name = (config && config.dontUpdateName) // if unit already has name dont update it
+														? (self._stats.name || newOwnerPlayer._stats.name)
+														: newOwnerPlayer._stats.name;
 			self._stats.clientId = newOwnerPlayer && newOwnerPlayer._stats ? newOwnerPlayer._stats.clientId : undefined;
 			if (ige.isServer) {
 				self.streamUpdateData([{ ownerPlayerId: newOwnerPlayerId }]);
@@ -1110,9 +1121,9 @@ var Unit = IgeEntityPhysics.extend({
 		if (ownerPlayer) {
 			color = playerTypeData && playerTypeData.color;
 		}
-		// if (isMyUnit) {
-		//     color = '#99FF00';
-		// }
+		if (isMyUnit) {
+		    color = '#99FF00';
+		}
 
 		this.emit('update-label', {
 			text: self._stats.name,
@@ -1488,7 +1499,6 @@ var Unit = IgeEntityPhysics.extend({
 					case 'ownerPlayerId':
 						if (ige.isClient) {
 							self.setOwnerPlayer(newValue);
-							self._stats.ownerId = newValue;
 						}
 						break;
 				}
