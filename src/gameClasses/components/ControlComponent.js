@@ -358,28 +358,11 @@ var ControlComponent = IgeEntity.extend({
 				self.sendPlayerInput = false;
 			}
 			
-			// unit rotation for human player. this runs for both server & client
+			// unit rotation for human player. this runs on client-side only
 			if (!unit._stats.aiEnabled) {
-
-				// mobile control: rotate to rotation provided by the client
-				if (unit._stats.controls.absoluteRotation) {
-					unit.angleToTarget = player.absoluteAngle;
-
-				// desktop control: if this unit's not under a command, rotate to mouse xy coordinate
-				} else {
-					var mouse = player.control.input.mouse;
-					if (mouse) {
-						var a = unit._translate.x - mouse.x;
-						var b = unit._translate.y - mouse.y;
-						unit.distanceToTarget = Math.sqrt(a * a + b * b);
-						unit.angleToTarget = Math.atan2(mouse.y - unit._translate.y, mouse.x - unit._translate.x) + Math.radians(90);
-					}
-				}
+				unit.updateAngleToTarget();			
 			}
-		}
-
-		
-			
+		}	
 	}
 
 });
