@@ -79,7 +79,13 @@ class DevModeScene extends PhaserScene {
 			y: number
 		}) => {
 			map.putTileAt(data.gid, data.x, data.y, false, data.layer);
-			ige.developerMode.changedTiles.push(data);
+			//ige.developerMode.changedTiles.push(data);
+
+			/* TODO: SAVE MAP DATA FROM SERVER SIDE */
+			const width = ige.game.data.map.width;
+			if (data.layer >= 2) data.layer ++;
+			//save tile change to ige.game.map.data
+			ige.game.data.map.layers[data.layer].data[data.y*width + data.x] = data.gid;
 		});
 
 		this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
