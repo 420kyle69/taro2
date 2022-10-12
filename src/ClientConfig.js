@@ -54,6 +54,7 @@ var igeClientConfig = {
 		'/gameClasses/Cursor.js',
 
 		'/gameClasses/EntitiesToRender.js',
+		'/gameClasses/Raycaster.js',
 
 		/* Phaser */
 		'renderer/phaser/phaser-taro.min.js',
@@ -70,6 +71,7 @@ var igeClientConfig = {
 		'renderer/phaser/classes/PhaserFloatingText.js',
 		'renderer/phaser/classes/PhaserChatBubble.js',
 		'renderer/phaser/classes/PhaserRegion.js',
+		'renderer/phaser/classes/PhaserRay.js',
 		'renderer/phaser/scenes/PhaserScene.js',
 		'renderer/phaser/scenes/GameScene.js',
 		'renderer/phaser/classes/PhaserJoystick.js',
