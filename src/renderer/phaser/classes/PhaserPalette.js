@@ -161,7 +161,7 @@ var PhaserPalette = /** @class */ (function (_super) {
     }
     PhaserPalette.prototype.emptyTile = function () {
         var copy = __assign({}, this.scene.selectedTile);
-        copy.index = -1;
+        copy.index = 0;
         this.scene.selectedTile = copy;
         this.scene.selectedTileArea = [[copy, copy], [copy, copy]];
     };

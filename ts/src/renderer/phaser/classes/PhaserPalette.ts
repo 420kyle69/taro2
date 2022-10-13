@@ -200,7 +200,7 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 
 	emptyTile() {
 		var copy = { ...this.scene.selectedTile };
-		copy.index = -1;
+		copy.index = 0;
 		this.scene.selectedTile = copy as any;
 		this.scene.selectedTileArea = [[copy, copy],[copy, copy]] as any;
 	}
