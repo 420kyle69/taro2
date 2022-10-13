@@ -119,7 +119,7 @@ var MenuUiComponent = IgeEntity.extend({
 			});
 
 			$('#toggle-dev-panels').on('click', function () {
-				if ($('#dev-console').is(':visible')) {
+				if (!ige.developerMode.active) {
 					ige.developerMode.enter();
 				} else {
 					ige.developerMode.leave();
