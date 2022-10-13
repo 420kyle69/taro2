@@ -207,11 +207,11 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 	}
 
 	selectSingle() {
-		for (let i = 0; i < this.area.x; i++) {
+		/*for (let i = 0; i < this.area.x; i++) {
 			for (let j = 0; j < this.area.y; j++) {
 				if (this.scene.selectedTileArea[i][j]) this.scene.selectedTileArea[i][j].tint = 0xffffff;
 			}
-		}
+		}*/
 		this.area = {x: 1, y: 1};
 		this.scene.marker.scale = 1;
 		this.scene.paletteMarker.scale = 1;
@@ -220,7 +220,7 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 	}
 
 	selectArea() {
-		this.scene.selectedTile.tint = 0xffffff;
+		//this.scene.selectedTile.tint = 0xffffff;
 		this.area = {x: 2, y: 2};
 		this.scene.marker.scale = 2;
 		this.scene.paletteMarker.scale = 2;

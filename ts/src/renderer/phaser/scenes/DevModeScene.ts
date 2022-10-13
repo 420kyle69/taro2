@@ -203,17 +203,17 @@ class DevModeScene extends PhaserScene {
 						for (let i = 0; i < palette.area.x; i++) {
 							for (let j = 0; j < palette.area.y; j++) {
 								if (this.pointerInsideMap(palettePointerTileX + i, palettePointerTileY + j, paletteMap)) {
-									this.selectedTileArea[i][j].tint = 0xffffff;
+									//this.selectedTileArea[i][j].tint = 0xffffff;
 									this.selectedTileArea[i][j] = paletteMap.getTileAt(palettePointerTileX + i, palettePointerTileY + j, true);
-									this.selectedTileArea[i][j].tint = 0x87cfff;
+									//this.selectedTileArea[i][j].tint = 0x87cfff;
 								}
 							}
 						}
 					} else {
 						if (this.pointerInsideMap(palettePointerTileX, palettePointerTileY, paletteMap)) {
-							this.selectedTile.tint = 0xffffff;
+							//this.selectedTile.tint = 0xffffff;
 							this.selectedTile = paletteMap.getTileAt(palettePointerTileX, palettePointerTileY, true);
-							this.selectedTile.tint = 0x87cfff;
+							//this.selectedTile.tint = 0x87cfff;
 						}
 					}
 				}
@@ -234,14 +234,14 @@ class DevModeScene extends PhaserScene {
 						for (let i = 0; i < palette.area.x; i++) {
 							for (let j = 0; j < palette.area.y; j++) {
 								if (this.pointerInsideMap(pointerTileX + i, pointerTileY + j, map)) {
-									this.selectedTileArea[i][j].tint = 0xffffff;
+									//this.selectedTileArea[i][j].tint = 0xffffff;
 									this.selectedTileArea[i][j] = map.getTileAt(pointerTileX + i, pointerTileY + j, true);
 								} 
 							}
 						}
 					} else {
 						if (this.pointerInsideMap(pointerTileX, pointerTileY, map)) {
-							this.selectedTile.tint = 0xffffff;
+							//this.selectedTile.tint = 0xffffff;
 							this.selectedTile = map.getTileAt(pointerTileX, pointerTileY, true);
 						} 
 					}
@@ -254,7 +254,7 @@ class DevModeScene extends PhaserScene {
 								if (this.pointerInsideMap(pointerTileX + i, pointerTileY + j, map)
 									&& this.selectedTileArea[i][j].index !== (map.getTileAt(pointerTileX + i, pointerTileY + j, true)).index) {
 										map.putTileAt(this.selectedTileArea[i][j], pointerTileX + i, pointerTileY + j);
-										map.getTileAt(pointerTileX + i, pointerTileY + j, true).tint = 0xffffff;
+										//map.getTileAt(pointerTileX + i, pointerTileY + j, true).tint = 0xffffff;
 										console.log('place tile', this.selectedTileArea[i][j].index)
 										ige.network.send('editTile', {gid: this.selectedTileArea[i][j].index, layer: map.currentLayerIndex, x: pointerTileX + i, y: pointerTileY + j});
 									}
@@ -265,7 +265,7 @@ class DevModeScene extends PhaserScene {
 						if (this.pointerInsideMap(pointerTileX, pointerTileY, map)
 							&& this.selectedTile.index !== (map.getTileAt(pointerTileX, pointerTileY, true)).index) {
 								map.putTileAt(this.selectedTile, pointerTileX, pointerTileY);
-								map.getTileAt(pointerTileX, pointerTileY, true).tint = 0xffffff;
+								//map.getTileAt(pointerTileX, pointerTileY, true).tint = 0xffffff;
 								console.log('place tile', this.selectedTile.index)
 								ige.network.send('editTile', {gid: this.selectedTile.index, layer: map.currentLayerIndex, x: pointerTileX, y: pointerTileY});
 						}
