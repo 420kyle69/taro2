@@ -239,6 +239,8 @@ var DevModeScene = /** @class */ (function (_super) {
                     else {
                         if (this.pointerInsideMap(pointerTileX, pointerTileY, map) && map.getTileAt(pointerTileX, pointerTileY, true)
                             && this.selectedTile.index !== (map.getTileAt(pointerTileX, pointerTileY, true)).index) {
+                            if (this.selectedTile.index === -1)
+                                this.selectedTile.index = 0;
                             map.putTileAt(this.selectedTile, pointerTileX, pointerTileY);
                             //map.getTileAt(pointerTileX, pointerTileY, true).tint = 0xffffff;
                             console.log('place tile', this.selectedTile.index);
