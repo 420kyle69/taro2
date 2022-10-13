@@ -254,6 +254,7 @@ class DevModeScene extends PhaserScene {
 							for (let j = 0; j < palette.area.y; j++) {
 								if (this.pointerInsideMap(pointerTileX + i, pointerTileY + j, map) /*&& map.getTileAt(pointerTileX + i, pointerTileY + j)*/
 									&& this.selectedTileArea[i][j].index !== (map.getTileAt(pointerTileX + i, pointerTileY + j, true)).index) {
+										if (this.selectedTileArea[i][j].index === -1) this.selectedTile.index = 0;
 										map.putTileAt(this.selectedTileArea[i][j], pointerTileX + i, pointerTileY + j);
 										//map.getTileAt(pointerTileX + i, pointerTileY + j, true).tint = 0xffffff;
 										console.log('place tile', this.selectedTileArea[i][j].index)
@@ -264,11 +265,13 @@ class DevModeScene extends PhaserScene {
 					}
 					else {
 						if (this.pointerInsideMap(pointerTileX, pointerTileY, map) /*&& map.getTileAt(pointerTileX, pointerTileY)*/
-							&& this.selectedTile.index !== (map.getTileAt(pointerTileX, pointerTileY, true)).index) {
+							&& (!map.getTileAt(pointerTileX, pointerTileY) || this.selectedTile.index !== (map.getTileAt(pointerTileX, pointerTileY, true)).index)) {
 								if (this.selectedTile.index === -1) this.selectedTile.index = 0;
+								//const prevTile = map.getTileAt(pointerTileX, pointerTileY, true).index;
+								//console.log('prev tile', prevTile)
 								map.putTileAt(this.selectedTile, pointerTileX, pointerTileY);
 								//map.getTileAt(pointerTileX, pointerTileY, true).tint = 0xffffff;
-								console.log('place tile', this.selectedTile.index)
+								console.log('place tile', this.selectedTile.index/*, 'instead of', prevTile*/)
 								ige.network.send('editTile', {gid: this.selectedTile.index, layer: map.currentLayerIndex, x: pointerTileX, y: pointerTileY});
 						}
 					}
