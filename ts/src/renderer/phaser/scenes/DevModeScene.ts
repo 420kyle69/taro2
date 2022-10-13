@@ -85,6 +85,7 @@ class DevModeScene extends PhaserScene {
 			/* TODO: SAVE MAP DATA FROM SERVER SIDE */
 			const width = ige.game.data.map.width;
 			//save tile change to ige.game.map.data
+			if (data.layer >= 2) data.layer ++;
 			ige.game.data.map.layers[data.layer].data[data.y*width + data.x] = data.gid;
 		});
 
@@ -251,7 +252,7 @@ class DevModeScene extends PhaserScene {
 					if (palette.area.x > 1 || palette.area.y > 1) {
 						for (let i = 0; i < palette.area.x; i++) {
 							for (let j = 0; j < palette.area.y; j++) {
-								if (this.pointerInsideMap(pointerTileX + i, pointerTileY + j, map) && map.getTileAt(pointerTileX + i, pointerTileY + j)
+								if (this.pointerInsideMap(pointerTileX + i, pointerTileY + j, map) /*&& map.getTileAt(pointerTileX + i, pointerTileY + j)*/
 									&& this.selectedTileArea[i][j].index !== (map.getTileAt(pointerTileX + i, pointerTileY + j, true)).index) {
 										map.putTileAt(this.selectedTileArea[i][j], pointerTileX + i, pointerTileY + j);
 										//map.getTileAt(pointerTileX + i, pointerTileY + j, true).tint = 0xffffff;
@@ -262,7 +263,7 @@ class DevModeScene extends PhaserScene {
 						}
 					}
 					else {
-						if (this.pointerInsideMap(pointerTileX, pointerTileY, map) && map.getTileAt(pointerTileX, pointerTileY)
+						if (this.pointerInsideMap(pointerTileX, pointerTileY, map) /*&& map.getTileAt(pointerTileX, pointerTileY)*/
 							&& this.selectedTile.index !== (map.getTileAt(pointerTileX, pointerTileY, true)).index) {
 								if (this.selectedTile.index === -1) this.selectedTile.index = 0;
 								map.putTileAt(this.selectedTile, pointerTileX, pointerTileY);

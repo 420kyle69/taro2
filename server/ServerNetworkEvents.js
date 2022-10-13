@@ -441,13 +441,13 @@ var ServerNetworkEvents = {
 			ige.network.send("editTile", data);
 
 			/* NEED TO MOVE THIS LOGIC FOR MAP SAVING */
-			
+			const serverData = _.clone(data);
 			const width = ige.game.data.map.width;
-			if (data.layer >= 2) data.layer ++;
+			if (serverData.layer >= 2) serverData.layer ++;
 
 			//save tile change to ige.game.map.data
-			ige.game.data.map.layers[data.layer].data[data.y*width + data.x] = data.gid;
-			if (data.layer === 3) {
+			ige.game.data.map.layers[serverData.layer].data[serverData.y*width + serverData.x] = serverData.gid;
+			if (serverData.layer === 3) {
 				
 				//if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
 				ige.physics.destroyWalls();

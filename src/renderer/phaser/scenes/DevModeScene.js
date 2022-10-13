@@ -80,6 +80,8 @@ var DevModeScene = /** @class */ (function (_super) {
             /* TODO: SAVE MAP DATA FROM SERVER SIDE */
             var width = ige.game.data.map.width;
             //save tile change to ige.game.map.data
+            if (data.layer >= 2)
+                data.layer++;
             ige.game.data.map.layers[data.layer].data[data.y * width + data.x] = data.gid;
         });
         this.input.on('wheel', function (pointer, gameObjects, deltaX, deltaY, deltaZ) {
@@ -226,7 +228,7 @@ var DevModeScene = /** @class */ (function (_super) {
                     if (palette.area.x > 1 || palette.area.y > 1) {
                         for (var i = 0; i < palette.area.x; i++) {
                             for (var j = 0; j < palette.area.y; j++) {
-                                if (this.pointerInsideMap(pointerTileX + i, pointerTileY + j, map) && map.getTileAt(pointerTileX + i, pointerTileY + j)
+                                if (this.pointerInsideMap(pointerTileX + i, pointerTileY + j, map) /*&& map.getTileAt(pointerTileX + i, pointerTileY + j)*/
                                     && this.selectedTileArea[i][j].index !== (map.getTileAt(pointerTileX + i, pointerTileY + j, true)).index) {
                                     map.putTileAt(this.selectedTileArea[i][j], pointerTileX + i, pointerTileY + j);
                                     //map.getTileAt(pointerTileX + i, pointerTileY + j, true).tint = 0xffffff;
@@ -237,7 +239,7 @@ var DevModeScene = /** @class */ (function (_super) {
                         }
                     }
                     else {
-                        if (this.pointerInsideMap(pointerTileX, pointerTileY, map) && map.getTileAt(pointerTileX, pointerTileY)
+                        if (this.pointerInsideMap(pointerTileX, pointerTileY, map) /*&& map.getTileAt(pointerTileX, pointerTileY)*/
                             && this.selectedTile.index !== (map.getTileAt(pointerTileX, pointerTileY, true)).index) {
                             if (this.selectedTile.index === -1)
                                 this.selectedTile.index = 0;
