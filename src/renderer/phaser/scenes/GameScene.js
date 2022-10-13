@@ -209,11 +209,16 @@ var GameScene = /** @class */ (function (_super) {
         var map = this.tilemap;
         var data = ige.game.data;
         data.map.layers.forEach(function (layer) {
-            if (layer.data) {
+            if (layer.type === 'tilelayer') {
+                var layerId_1;
+                if (layer.id - 1 >= 2)
+                    layerId_1 = layer.id - 2;
+                else
+                    layerId_1 = layer.id - 1;
                 layer.data.forEach(function (tile, index) {
                     var x = index % layer.width;
                     var y = Math.floor(index / layer.width);
-                    map.putTileAt(tile, x, y, false, layer.id - 1);
+                    map.putTileAt(tile, x, y, false, layerId_1);
                 });
             }
         });

@@ -280,11 +280,14 @@ class GameScene extends PhaserScene {
 		const data = ige.game.data;
 
 		data.map.layers.forEach((layer) => {
-			if (layer.data) {
+			if (layer.type === 'tilelayer') {
+				let layerId;
+				if (layer.id - 1 >= 2) layerId = layer.id - 2
+				else layerId = layer.id - 1
 				layer.data.forEach((tile, index) => {
 					const x = index % layer.width;
 					const y = Math.floor(index/layer.width);
-					map.putTileAt(tile, x, y, false, layer.id - 1);
+					map.putTileAt(tile, x, y, false, layerId);
 			});
 			}
 		});

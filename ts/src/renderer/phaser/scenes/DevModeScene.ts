@@ -265,7 +265,7 @@ class DevModeScene extends PhaserScene {
 					}
 					else {
 						if (this.pointerInsideMap(pointerTileX, pointerTileY, map) /*&& map.getTileAt(pointerTileX, pointerTileY)*/
-							&& (!map.getTileAt(pointerTileX, pointerTileY) || this.selectedTile.index !== (map.getTileAt(pointerTileX, pointerTileY, true)).index)) {
+							&& this.selectedTile.index !== (map.getTileAt(pointerTileX, pointerTileY, true)).index) {
 								if (this.selectedTile.index === -1) this.selectedTile.index = 0;
 								//const prevTile = map.getTileAt(pointerTileX, pointerTileY, true).index;
 								//console.log('prev tile', prevTile)

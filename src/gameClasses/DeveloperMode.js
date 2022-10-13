@@ -23,6 +23,7 @@ var DeveloperMode = /** @class */ (function () {
         console.log(ige.game.data.map);
     }*/
     DeveloperMode.prototype.updateClientMap = function (data) {
+        console.log('updated data', data);
         ige.game.data.map = data.mapData;
         ige.client.emit('updateMap');
         //ige.renderer.scene.getScene('Game').updateMap();
