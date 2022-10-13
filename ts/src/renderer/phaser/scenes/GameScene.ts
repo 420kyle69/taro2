@@ -65,6 +65,10 @@ class GameScene extends PhaserScene {
 			new PhaserRegion(this, region);
 		});
 
+		ige.client.on('create-ray', (data: any) => {
+			new PhaserRay(this, data.start, data.end, data.config);
+		});
+
 		ige.client.on('floating-text', (data: {
 			text: string,
 			x: number,

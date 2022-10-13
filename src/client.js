@@ -284,20 +284,6 @@ const Client = IgeEventingClass.extend({
 
 			this.loadMap();
 
-			// still doing things only after physics load
-			if (gameData.defaultData && !isNaN(gameData.defaultData.frameRate)) {
-
-				ige._physicsTickRate = Math.max(
-					// old comment => 'keep fps range between 15 and 60'
-					20,
-					Math.min(
-
-						parseInt(gameData.defaultData.frameRate),
-						60
-					)
-				);
-			}
-
 			if (ige.physics) {
 				// old comment => 'always enable CSP'
 				this.loadCSP();
@@ -590,30 +576,16 @@ const Client = IgeEventingClass.extend({
 			// old comment => 'create a listener that will fire whenever an entity is created because of the incoming stream data'
 			ige.network.stream.on('entityCreated', (entity) => {
 
-				if (entity._category == 'unit') {
-					// old comment => 'unit detected. add it to units array'
-					const unit = entity;
-					unit.equipSkin();
-
-					if (unit._stats.ownerId) {
-						// this one can probably be refactored, but i'm not sure what it may break
-						const ownerPlayer = ige.$(unit._stats.ownerId);
-
-						if (ownerPlayer) {
-
-							unit.setOwnerPlayer(
-								unit._stats.ownerId,
-								{ dontUpdateName: true }
-							);
-						}
-					}
-
-					unit.renderMobileControl();
-					// old comment => 'avoid race condition for item mounting'
-				} else if (entity._category == 'player') {
+				if (entity._category == 'player') {
 					// old comment => 'apply skin to all units owned by this player'
 					const player = entity;
-
+				
+					// assign those units' owner as this player
+					const units = player.getUnits();
+					for (let unitId in units) {
+						units[unitId].setOwnerPlayer(player.id());
+					}
+					
 					if (player._stats.controlledBy == 'human') {
 						// old comment => 'if the player is me'
 						if (player._stats.clientId == ige.network.id()) {
@@ -632,24 +604,11 @@ const Client = IgeEventingClass.extend({
 
 							player.redrawUnits(['nameLabel']);
 						}
-						// old comment => 'if there are pre-existing units that belong to the newly detected player,
-						// assign those units' owner as this player
-						const unitsObject = ige.game.getUnitsByClientId(player._stats.clientId);
-
-						for (let unitId in unitsObject) {
-
-							unitsObject[unitId].setOwnerPlayer(
-								player.id(),
-								{ dontUpdateName: true }
-							);
-						}
+						
 
 						if (player._stats && player._stats.selectedUnitId) {
-
 							const unit = ige.$(player._stats.selectedUnitId);
-
 							if (unit) {
-
 								unit.equipSkin();
 							}
 						}
@@ -658,7 +617,6 @@ const Client = IgeEventingClass.extend({
 							(ige.client.myPlayer &&
 								ige.client.myPlayer._stats.isUserMod)
 						) {
-
 							ige.menuUi.kickPlayerFromGame(); // we should rename this method
 						}
 					}
@@ -728,6 +686,7 @@ const Client = IgeEventingClass.extend({
 		}
 		ige.physics.createWorld();
 		ige.physics.start();
+		ige.raycaster = new Raycaster();
 
 		if (typeof mode == 'string' && mode == 'sandbox') {
 			ige.script.runScript('initialize', {}); // loading entities to display in the sandbox

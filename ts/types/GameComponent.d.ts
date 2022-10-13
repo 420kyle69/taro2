@@ -50,4 +50,6 @@ declare class GameComponent extends IgeEntity {
 		}
 	};
 
+	entitiesCollidingWithLastRaycast: IgeEntity[];
+
 }

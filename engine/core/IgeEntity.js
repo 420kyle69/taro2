@@ -4712,7 +4712,7 @@ var IgeEntity = IgeObject.extend({
 
 				case 'unit': 
 					// cellsheet is used for purchasable-skins
-					keys = ["name", "type", "stateId", "ownerId", "ownerPlayerId", "currentItemIndex", "currentItemId", "flip", "skin", "cellSheet"]
+					keys = ["name", "type", "stateId", "ownerId", "currentItemIndex", "currentItemId", "flip", "skin", "cellSheet"]
 					data = { 
 						attributes: {}, 
 						// variables: {} 
@@ -5136,10 +5136,9 @@ var IgeEntity = IgeObject.extend({
 
 		// streamed keyFrames
 		if (ige.nextSnapshot) {
-			var snapshotTimeEnd = ige.nextSnapshot[0];
 			var nextTransform = ige.nextSnapshot[1][this.id()];
 			if (nextTransform) {
-				nextKeyFrame = [snapshotTimeEnd, nextTransform];
+				nextKeyFrame = [ige.nextSnapshot[0], nextTransform];
 
 				xEnd = nextTransform[0]
 				yEnd = nextTransform[1]
@@ -5156,11 +5155,10 @@ var IgeEntity = IgeObject.extend({
 		// by default, prevTransform is where this unit currently is	
 		if (ige.prevSnapshot) {
 			// Set variables up to store the previous and next data
-			var snapshotTimeStart = ige.prevSnapshot[0]
 			var prevTransform = ige.prevSnapshot[1][this.id()];			
 			
 			if (prevTransform) {
-				prevKeyFrame = [snapshotTimeStart, prevTransform];
+				prevKeyFrame = [ige.prevSnapshot[0], prevTransform];
 				xStart = prevTransform[0]
 				yStart = prevTransform[1]
 				rotateStart = prevTransform[2]									
@@ -5258,22 +5256,23 @@ var IgeEntity = IgeObject.extend({
 			x = this.interpolateValue(xStart, xEnd, prevKeyFrame[0], ige._currentTime, nextKeyFrame[0]);
 			y = this.interpolateValue(yStart, yEnd, prevKeyFrame[0], ige._currentTime, nextKeyFrame[0]);
 
-			// ignore streamed angle if this unit control is set to face mouse cursor instantly.
-			if (this == ige.client.selectedUnit &&
-				this.angleToTarget != undefined && !isNaN(this.angleToTarget) && 
-				this._stats.controls && this._stats.controls.mouseBehaviour.rotateToFaceMouseCursor && 
-				this._stats.currentBody && !this._stats.currentBody.fixedRotation
-			) {
-				rotate = this.angleToTarget;
-			} else {
-				// a hack to prevent rotational interpolation suddnely jumping by 2 PI (e.g. 0.01 to -6.27)
-				if (Math.abs(rotateEnd - rotateStart) > Math.PI) {
-					if (rotateEnd > rotateStart) rotateStart += Math.PI * 2;
-					else rotateStart -= Math.PI * 2;
-				}
-
-				rotate = this.interpolateValue(rotateStart, rotateEnd, snapshotTimeStart, ige._currentTime, snapshotTimeEnd);
+			
+			// a hack to prevent rotational interpolation suddnely jumping by 2 PI (e.g. 0.01 to -6.27)
+			if (Math.abs(rotateEnd - rotateStart) > Math.PI) {
+				if (rotateEnd > rotateStart) rotateStart += Math.PI * 2;
+				else rotateStart -= Math.PI * 2;
 			}
+
+			rotate = this.interpolateValue(rotateStart, rotateEnd, prevKeyFrame[0], ige._currentTime, nextKeyFrame[0]);
+		}
+
+		// ignore streamed angle if this unit control is set to face mouse cursor instantly.
+		if (this == ige.client.selectedUnit &&
+			this.angleToTarget != undefined && !isNaN(this.angleToTarget) && 
+			this._stats.controls && this._stats.controls.mouseBehaviour.rotateToFaceMouseCursor && 
+			this._stats.currentBody && !this._stats.currentBody.fixedRotation
+		) {
+			rotate = this.angleToTarget;
 		}
 
 		

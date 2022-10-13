@@ -9,13 +9,13 @@ var Item = IgeEntityPhysics.extend({
 		self._stats = {};
 		self.anchorOffset = { x: 0, y: 0, rotate: 0 };
 		var itemData = {};
-		
+
 		if (ige.isClient) {
 			itemData = ige.game.getAsset('itemTypes', data.itemTypeId);
 		}
 
 		self._stats = _.merge(itemData, data);
-		
+
 		if (self._stats.projectileType) {
 			self.projectileData = ige.game.getAsset('projectileTypes', self._stats.projectileType);
 		}
@@ -363,95 +363,96 @@ var Item = IgeEntityPhysics.extend({
 											}
 										});
 
-									var projectile = new Projectile(data);
-									projectile.script.trigger("entityCreated");		
-									ige.game.lastCreatedProjectileId = projectile.id();
+									if (this._stats.bulletType !== 'raycast') { // we don't create a Projectile entity for raycasts
+										var projectile = new Projectile(data);
+										projectile.script.trigger('entityCreated');
+										ige.game.lastCreatedProjectileId = projectile.id();
+									}
 								}
 								if (this._stats.bulletType == 'raycast') {
 									// starting from unit center position
-									var raycastStartPosition = {
-										x: owner._translate.x + (Math.cos(this._rotate.z + Math.radians(-90))) + (Math.cos(this._rotate.z)),
-										y: owner._translate.y + (Math.sin(this._rotate.z + Math.radians(-90))) + (Math.sin(this._rotate.z))
-									};
+									let offset = { x: 0, y: 0 };
 
-									if (self._stats.currentBody && (self._stats.currentBody.type == 'spriteOnly' || self._stats.currentBody.type == 'none')) {
-										var unitAnchorX = (self._stats.currentBody.unitAnchor != undefined) ? self._stats.currentBody.unitAnchor.x : 0;
-										var unitAnchorY = (self._stats.currentBody.unitAnchor != undefined) ? self._stats.currentBody.unitAnchor.y : 0;
+									const useOwnerBody = self._stats.currentBody && (self._stats.currentBody.type == 'spriteOnly' || self._stats.currentBody.type == 'none');
 
-										var endPosition = {
-											x: (owner._translate.x + unitAnchorX) + (this._stats.bulletDistance * Math.cos(owner._rotate.z + Math.radians(-90))),
-											y: (owner._translate.y + unitAnchorY) + (this._stats.bulletDistance * Math.sin(owner._rotate.z + Math.radians(-90)))
+									const pos = useOwnerBody ?
+										{
+											x: owner._translate.x,
+											y: owner._translate.y,
+											rotation: owner._rotate.z
+										} :
+										{
+											x: this._translate.x,
+											y: this._translate.y,
+											rotation: this._rotate.z
 										};
-									} else {
-										var endPosition = {
-											x: (self._translate.x) + (this._stats.bulletDistance * Math.cos(self._rotate.z + Math.radians(-90))),
-											y: (self._translate.y) + (this._stats.bulletDistance * Math.sin(self._rotate.z + Math.radians(-90)))
-										};
+
+									// factor in unit anchor
+									if (useOwnerBody) {
+										offset = this.getAnchoredOffset(pos.rotation);
 									}
 
-									var raycastMultipleCallback = function () {
-										var def = {};
-										// var e_maxCount = 3;
-										var raycastCollidesWith = self._stats.raycastCollidesWith;
-										def.m_points = [];
-										def.m_normals = [];
+									// factor in bullet start position
+									if (this._stats.bulletStartPosition) {
 
-										def.ReportFixture = function (fixture, point, normal, fraction) {
-											var fixtureList = fixture.m_body.m_fixtureList;
-											var entity = fixtureList && fixtureList.igeId && ige.$(fixtureList.igeId);
-											if (entity) {
-												entity.lastRaycastCollisionPosition = {
-													x: point.x * self.scaleRatio,
-													y: point.y * self.scaleRatio
-												};
-												entity.raycastFraction = fraction;
-												self.raycastTargets.push(entity);
-											}
-
-											// var body = fixture.getBody();
-											// var userData = body.getUserData();
-											// if (userData) {
-											// 	if (userData == 0) {
-											// 		// By returning -1, we instruct the calling code to ignore this fixture
-											// 		// and continue the ray-cast to the next fixture.
-											// 		return -1.0;
-											// 	}
-											// }
-
-											def.m_points.push(point);
-											def.m_normals.push(normal);
-											// By returning 1, we instruct the caller to continue without clipping the
-											// ray.
-											return 1.0;
+										let bulletOffset = {
+											x: this._stats.bulletStartPosition.x,
+											y: this._stats.bulletStartPosition.y
 										};
 
-										return def;
+										if (owner._stats.flip === 1) {
+											bulletOffset.y *= -1;
+										}
+
+										offset.x += bulletOffset.x * Math.cos(pos.rotation) + bulletOffset.y * Math.sin(pos.rotation);
+										offset.y += bulletOffset.x * Math.sin(pos.rotation) - bulletOffset.y * Math.cos(pos.rotation);
+									}
+
+									pos.x += offset.x;
+									pos.y += offset.y;
+
+									const raycastStart = {x, y} = pos;
+									const raycastEnd = {
+										x: pos.x + (this._stats.bulletDistance * Math.cos(owner._rotate.z + Math.radians(-90))),
+										y: pos.y + (this._stats.bulletDistance * Math.sin(owner._rotate.z + Math.radians(-90)))
 									};
 
-									var callback = raycastMultipleCallback();
-
-									// ige.physics.world().rayCast(, callback.ReportFixture);
-									ige.physics.world().rayCast(
-										callback.ReportFixture,
+									// end pos calcs; fire raycast
+									ige.raycaster.raycast(
 										{
-											x: raycastStartPosition.x / self.scaleRatio,
-											y: raycastStartPosition.y / self.scaleRatio
+											x: raycastStart.x / self.scaleRatio,
+											y: raycastStart.y / self.scaleRatio
 										},
 										{
-											x: endPosition.x / self.scaleRatio,
-											y: endPosition.y / self.scaleRatio
+											x: raycastEnd.x / self.scaleRatio,
+											y: raycastEnd.y / self.scaleRatio
+										},
+										{
+											method: 'closest',
+											projType: data.type
 										}
 									);
 
-									// if (!self._stats.penetration) {
-									ige.game.entitiesCollidingWithLastRaycast = _.orderBy(self.raycastTargets, ['raycastFraction'], ['asc']);
-									// }
+									if (ige.game.entitiesCollidingWithLastRaycast.length > 0) {
+
+										this.raycastTargets = _.filter(
+											ige.game.entitiesCollidingWithLastRaycast,
+											// _.matchesProperty
+											['_category', 'unit']
+										);
+									}
+
 									ige.queueTrigger('raycastItemFired', {
 										itemId: self.id(),
 										unitId: ownerId
 									});
+
+									// damage
+									this.raycastTargets.forEach((unit) => {
+										unit.inflictDamage(data.damageData);
+									});
+									this.raycastTargets = [];
 								}
-								self.raycastTargets = [];
 
 								if (self._stats.recoilForce) {
 									// apply recoil on its owner if item itself doesn't have physical body
@@ -652,7 +653,7 @@ var Item = IgeEntityPhysics.extend({
 			}
 			return canAffordCost;
 		} else {
-			ItemComponent.prototype.log('can\'t afford cost');
+			// ige.server.itemComponent.prototype.log('can\'t afford cost');
 			return false;
 		}
 	},
@@ -837,10 +838,10 @@ var Item = IgeEntityPhysics.extend({
 	streamUpdateData: function (queuedData) {
 		var self = this;
 
-		if (ige.isServer && ige.network.isPaused) 
+		if (ige.isServer && ige.network.isPaused) {
 			return;
-
-		IgeEntity.prototype.streamUpdateData.call(this, queuedData);		
+		}
+		IgeEntity.prototype.streamUpdateData.call(this, queuedData);
 		// ige.devLog("Item streamUpdateData ", data)
 		for (var i = 0; i < queuedData.length; i++) {
 			var data = queuedData[i];
