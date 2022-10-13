@@ -74,12 +74,11 @@ var DevModeScene = /** @class */ (function (_super) {
             }
         });
         ige.client.on('editTile', function (data) {
+            console.log('editTile', data);
             map.putTileAt(data.gid, data.x, data.y, false, data.layer);
             //ige.developerMode.changedTiles.push(data);
             /* TODO: SAVE MAP DATA FROM SERVER SIDE */
             var width = ige.game.data.map.width;
-            if (data.layer >= 2)
-                data.layer++;
             //save tile change to ige.game.map.data
             ige.game.data.map.layers[data.layer].data[data.y * width + data.x] = data.gid;
         });
