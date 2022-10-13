@@ -55,22 +55,23 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 		
 		scene.add.existing(texturesLayer);
 
+		const paletteWidth = this.scene.sys.game.canvas.width * 0.25;
+		const paletteHeight = this.scene.sys.game.canvas.height * 0.25;
+		const camera = this.camera = this.scene.cameras.add(this.scene.sys.game.canvas.width - paletteWidth - 40,
+			this.scene.sys.game.canvas.height - paletteHeight - 40,	paletteWidth, paletteHeight)
+			.setBounds(texturesLayer.x - (texturesLayer.width/2), texturesLayer.y - (texturesLayer.height/2),
+			texturesLayer.width * 2, texturesLayer.height * 2, true)
+			.setZoom(1).setName('palette');
+
+		camera.setBackgroundColor(0xFFFFFF);
+
 		texturesLayer.on('pointermove', function (p) {
 			if (!p.isDown) return;
 			const scrollX = (p.x - p.prevPosition.x) / camera.zoom
 			const scrollY = (p.y - p.prevPosition.y) / camera.zoom;
-			if (camera.scrollX - scrollX > -(camera.width/2) + this.x && camera.scrollX - scrollX < (camera.width/2) + this.x) {
-				camera.scrollX -= scrollX;
-			}
-			if (camera.scrollY - scrollY > -(camera.height/2) + this.y && camera.scrollY - scrollY < (camera.height/2) + this.y) {
-				camera.scrollY -= scrollY;
-			}
+			camera.scrollX -= scrollX;
+			camera.scrollY -= scrollY;
 		  });
-
-		const paletteWidth = this.scene.sys.game.canvas.width * 0.25;
-		const paletteHeight = this.scene.sys.game.canvas.height * 0.25;
-		const camera = this.camera = this.scene.cameras.add(this.scene.sys.game.canvas.width - paletteWidth - 40, this.scene.sys.game.canvas.height - paletteHeight - 40, paletteWidth, paletteHeight).setScroll(this.x, this.y).setZoom(1).setName('palette');
-		camera.setBackgroundColor(0x002244);
 
 		const COLOR_PRIMARY = 0x0036cc;
 		const COLOR_LIGHT = this.COLOR_LIGHT = 0x6690ff;

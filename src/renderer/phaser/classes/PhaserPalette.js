@@ -47,22 +47,20 @@ var PhaserPalette = /** @class */ (function (_super) {
         var map = _this.map = _this.scene.make.tilemap({ key: 'palette', data: paletteMap, tileWidth: 16, tileHeight: 16 });
         var texturesLayer = _this.texturesLayer = map.createLayer(0, tileset, 0, 0).setOrigin(0, 0).setInteractive().setPosition(_this.x, _this.y);
         scene.add.existing(texturesLayer);
+        var paletteWidth = _this.scene.sys.game.canvas.width * 0.25;
+        var paletteHeight = _this.scene.sys.game.canvas.height * 0.25;
+        var camera = _this.camera = _this.scene.cameras.add(_this.scene.sys.game.canvas.width - paletteWidth - 40, _this.scene.sys.game.canvas.height - paletteHeight - 40, paletteWidth, paletteHeight)
+            .setBounds(texturesLayer.x - (texturesLayer.width / 2), texturesLayer.y - (texturesLayer.height / 2), texturesLayer.width * 2, texturesLayer.height * 2, true)
+            .setZoom(1).setName('palette');
+        camera.setBackgroundColor(0xFFFFFF);
         texturesLayer.on('pointermove', function (p) {
             if (!p.isDown)
                 return;
             var scrollX = (p.x - p.prevPosition.x) / camera.zoom;
             var scrollY = (p.y - p.prevPosition.y) / camera.zoom;
-            if (camera.scrollX - scrollX > -(camera.width / 2) + this.x && camera.scrollX - scrollX < (camera.width / 2) + this.x) {
-                camera.scrollX -= scrollX;
-            }
-            if (camera.scrollY - scrollY > -(camera.height / 2) + this.y && camera.scrollY - scrollY < (camera.height / 2) + this.y) {
-                camera.scrollY -= scrollY;
-            }
+            camera.scrollX -= scrollX;
+            camera.scrollY -= scrollY;
         });
-        var paletteWidth = _this.scene.sys.game.canvas.width * 0.25;
-        var paletteHeight = _this.scene.sys.game.canvas.height * 0.25;
-        var camera = _this.camera = _this.scene.cameras.add(_this.scene.sys.game.canvas.width - paletteWidth - 40, _this.scene.sys.game.canvas.height - paletteHeight - 40, paletteWidth, paletteHeight).setScroll(_this.x, _this.y).setZoom(1).setName('palette');
-        camera.setBackgroundColor(0x002244);
         var COLOR_PRIMARY = 0x0036cc;
         var COLOR_LIGHT = _this.COLOR_LIGHT = 0x6690ff;
         var COLOR_DARK = _this.COLOR_DARK = 0xffffff;
