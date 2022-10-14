@@ -49,7 +49,7 @@ class Raycaster {
 				reset = this.data.reset;
 				callback = this.data.callback;
 				break;
-			case 'any':
+			case 'any': // used here for reverse checks
 				this.data = this[config.method];
 				reset = this.data.reset;
 				callback = this.data.callback;
@@ -100,7 +100,7 @@ class Raycaster {
 
 			if (ige.isClient && (this.forwardHit !== this.reverseHit)) {
 
-				this.drawRay(start, end, { ...config, color: 0xffffff, fraction: this.data.fraction });
+				this.drawRay(start, point, { ...config, color: 0xffffff, fraction: data.fraction });
 			}
 
 			this.forwardHit = false;

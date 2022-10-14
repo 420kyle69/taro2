@@ -267,7 +267,7 @@ var Item = IgeEntityPhysics.extend({
 		var ownerId = (owner) ? owner.id() : undefined;
 		var player = owner && owner.getOwner();
 		var isUsed = false;
-		console.log(`calling Item.use by ${ownerId}`);
+		// console.log(`calling Item.use by ${ownerId}`);
 
 		// if item has no owner, or item is unusable type, or it cannot be used by its current owner, then return
 		if (!owner ||
@@ -443,10 +443,10 @@ var Item = IgeEntityPhysics.extend({
 											['_category', 'unit']
 										);
 										// damage
-										console.log(ige.game.entitiesCollidingWithLastRaycast);
-										console.log(this.raycastTargets);
+										// console.log(ige.game.entitiesCollidingWithLastRaycast);
+										// console.log(this.raycastTargets);
 										this.raycastTargets.forEach((unit) => {
-											console.log(`damaging ${unit.id()}`);
+											// console.log(`damaging ${unit.id()}`);
 											unit.inflictDamage(data.damageData);
 										});
 									}
