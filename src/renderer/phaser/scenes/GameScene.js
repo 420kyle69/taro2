@@ -219,6 +219,8 @@ var GameScene = /** @class */ (function (_super) {
                     var x = index % layer.width;
                     var y = Math.floor(index / layer.width);
                     map.putTileAt(tile, x, y, false, layerId_1);
+                    /*if (!map.hasTileAt(x, y, layerId)) map.putTileAt(0, x, y, false, layerId);
+                    if (!map.hasTileAt(x, y, layerId)) console.log('-1 tile');*/
                 });
             }
         });

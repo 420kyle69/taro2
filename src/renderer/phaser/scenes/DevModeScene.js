@@ -242,7 +242,7 @@ var DevModeScene = /** @class */ (function (_super) {
                     }
                     else {
                         if (this.pointerInsideMap(pointerTileX, pointerTileY, map) /*&& map.getTileAt(pointerTileX, pointerTileY)*/
-                            && this.selectedTile.index !== (map.getTileAt(pointerTileX, pointerTileY, true)).index) {
+                            && (!map.hasTileAt(pointerTileX, pointerTileY) || this.selectedTile.index !== (map.getTileAt(pointerTileX, pointerTileY, true)).index)) {
                             if (this.selectedTile.index === -1)
                                 this.selectedTile.index = 0;
                             //const prevTile = map.getTileAt(pointerTileX, pointerTileY, true).index;
