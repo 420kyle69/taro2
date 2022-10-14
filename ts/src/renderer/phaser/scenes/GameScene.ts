@@ -288,8 +288,6 @@ class GameScene extends PhaserScene {
 					const x = index % layer.width;
 					const y = Math.floor(index/layer.width);
 					map.putTileAt(tile, x, y, false, layerId);
-					/*if (!map.hasTileAt(x, y, layerId)) map.putTileAt(0, x, y, false, layerId);
-					if (!map.hasTileAt(x, y, layerId)) console.log('-1 tile');*/
 			});
 			}
 		});

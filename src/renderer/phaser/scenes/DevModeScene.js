@@ -20,7 +20,6 @@ var DevModeScene = /** @class */ (function (_super) {
     }
     DevModeScene.prototype.init = function () {
         var _this = this;
-        console.log('palette scene init');
         this.input.setTopOnly(true);
         this.gameScene = ige.renderer.scene.getScene('Game');
         //const map = this.devPalette.map;
@@ -31,7 +30,6 @@ var DevModeScene = /** @class */ (function (_super) {
         ige.client.on('enterDevMode', function () {
             _this.defaultZoom = (_this.gameScene.zoomSize / 2.15);
             if (!_this.devPalette) {
-                console.log('creating...', _this, _this.tileset, _this.rexUI);
                 _this.devPalette = new PhaserPalette(_this, _this.tileset, _this.rexUI);
                 _this.paletteMarker = _this.add.graphics();
                 _this.paletteMarker.lineStyle(1, 0x000000, 1);
@@ -120,7 +118,6 @@ var DevModeScene = /** @class */ (function (_super) {
             var extrudedKey = "extruded-".concat(key);
             //if (this.textures.exists(extrudedKey)) {
             _this.tileset = map.addTilesetImage(tileset.name, extrudedKey, tileset.tilewidth, tileset.tileheight, (tileset.margin || 0) + 1, (tileset.spacing || 0) + 2);
-            console.log(_this.tileset);
             /*} else {
                 this.tileset = map.addTilesetImage(tileset.name, key);
             }*/
@@ -228,7 +225,7 @@ var DevModeScene = /** @class */ (function (_super) {
                     if (palette.area.x > 1 || palette.area.y > 1) {
                         for (var i = 0; i < palette.area.x; i++) {
                             for (var j = 0; j < palette.area.y; j++) {
-                                if (this.pointerInsideMap(pointerTileX + i, pointerTileY + j, map) /*&& map.getTileAt(pointerTileX + i, pointerTileY + j)*/
+                                if (this.pointerInsideMap(pointerTileX + i, pointerTileY + j, map)
                                     && this.selectedTileArea[i][j].index !== (map.getTileAt(pointerTileX + i, pointerTileY + j, true)).index) {
                                     if (this.selectedTileArea[i][j].index === -1)
                                         this.selectedTile.index = 0;
@@ -241,15 +238,13 @@ var DevModeScene = /** @class */ (function (_super) {
                         }
                     }
                     else {
-                        if (this.pointerInsideMap(pointerTileX, pointerTileY, map) /*&& map.getTileAt(pointerTileX, pointerTileY)*/
-                            && (!map.hasTileAt(pointerTileX, pointerTileY) || this.selectedTile.index !== (map.getTileAt(pointerTileX, pointerTileY, true)).index)) {
+                        if (this.pointerInsideMap(pointerTileX, pointerTileY, map)
+                            && this.selectedTile.index !== (map.getTileAt(pointerTileX, pointerTileY, true)).index) {
                             if (this.selectedTile.index === -1)
                                 this.selectedTile.index = 0;
-                            //const prevTile = map.getTileAt(pointerTileX, pointerTileY, true).index;
-                            //console.log('prev tile', prevTile)
                             map.putTileAt(this.selectedTile, pointerTileX, pointerTileY);
                             //map.getTileAt(pointerTileX, pointerTileY, true).tint = 0xffffff;
-                            console.log('place tile', this.selectedTile.index /*, 'instead of', prevTile*/);
+                            console.log('place tile', this.selectedTile.index);
                             ige.network.send('editTile', { gid: this.selectedTile.index, layer: map.currentLayerIndex, x: pointerTileX, y: pointerTileY });
                         }
                     }

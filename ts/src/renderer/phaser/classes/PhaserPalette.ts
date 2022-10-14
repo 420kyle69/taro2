@@ -47,8 +47,6 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 			paletteMap[Math.floor(i/tileset.columns)].push(i);
 		}
 
-		console.log('map', paletteMap);
-
 		// When loading from an array, make sure to specify the tileWidth and tileHeight
 		const map = this.map = this.scene.make.tilemap({ key: 'palette', data: paletteMap, tileWidth: 16, tileHeight: 16 });
 		const texturesLayer = this.texturesLayer = map.createLayer(0, tileset, 0, 0).setOrigin(0, 0).setInteractive().setPosition(this.x, this.y);

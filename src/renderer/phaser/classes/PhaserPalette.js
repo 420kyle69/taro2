@@ -42,7 +42,6 @@ var PhaserPalette = /** @class */ (function (_super) {
         for (var i = 0; i < tileset.total; i++) {
             paletteMap[Math.floor(i / tileset.columns)].push(i);
         }
-        console.log('map', paletteMap);
         // When loading from an array, make sure to specify the tileWidth and tileHeight
         var map = _this.map = _this.scene.make.tilemap({ key: 'palette', data: paletteMap, tileWidth: 16, tileHeight: 16 });
         var texturesLayer = _this.texturesLayer = map.createLayer(0, tileset, 0, 0).setOrigin(0, 0).setInteractive().setPosition(_this.x, _this.y);

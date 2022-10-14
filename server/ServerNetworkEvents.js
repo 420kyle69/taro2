@@ -437,7 +437,6 @@ var ServerNetworkEvents = {
 	_onEditTile: function(data, clientId) {
 		// only allow developers to modify the tiles
 		if (ige.server.developerClientIds.includes(clientId)) {
-			console.log('edit tile', data);
 			ige.network.send("editTile", data);
 
 			/* NEED TO MOVE THIS LOGIC FOR MAP SAVING */
@@ -453,7 +452,6 @@ var ServerNetworkEvents = {
 				ige.physics.destroyWalls();
 				let map = ige.scaleMap(_.cloneDeep(ige.game.data.map));
 				ige.tiled.loadJson(map, function (layerArray, layersById) {
-					console.log('recalculating walls physics');
 					ige.physics.staticsFromMap(layersById.walls);
 				})
 			}

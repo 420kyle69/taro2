@@ -16,7 +16,6 @@ class DevModeScene extends PhaserScene {
 	}
 
 	init (): void {
-		console.log('palette scene init');
 		this.input.setTopOnly(true);
 		this.gameScene = ige.renderer.scene.getScene('Game');
 		//const map = this.devPalette.map;
@@ -28,7 +27,6 @@ class DevModeScene extends PhaserScene {
 		ige.client.on('enterDevMode', () => {
 			this.defaultZoom = (this.gameScene.zoomSize / 2.15)
 			if (!this.devPalette) {
-				console.log('creating...', this, this.tileset, this.rexUI)
 				this.devPalette = new PhaserPalette(this, this.tileset, this.rexUI);
 		 		this.paletteMarker = this.add.graphics();
 				this.paletteMarker.lineStyle(1, 0x000000, 1);
@@ -136,7 +134,6 @@ class DevModeScene extends PhaserScene {
 					(tileset.margin || 0) + 1,
 					(tileset.spacing || 0) + 2
 				);
-				console.log(this.tileset);
 			/*} else {
 				this.tileset = map.addTilesetImage(tileset.name, key);
 			}*/
@@ -252,7 +249,7 @@ class DevModeScene extends PhaserScene {
 					if (palette.area.x > 1 || palette.area.y > 1) {
 						for (let i = 0; i < palette.area.x; i++) {
 							for (let j = 0; j < palette.area.y; j++) {
-								if (this.pointerInsideMap(pointerTileX + i, pointerTileY + j, map) /*&& map.getTileAt(pointerTileX + i, pointerTileY + j)*/
+								if (this.pointerInsideMap(pointerTileX + i, pointerTileY + j, map)
 									&& this.selectedTileArea[i][j].index !== (map.getTileAt(pointerTileX + i, pointerTileY + j, true)).index) {
 										if (this.selectedTileArea[i][j].index === -1) this.selectedTile.index = 0;
 										map.putTileAt(this.selectedTileArea[i][j], pointerTileX + i, pointerTileY + j);
@@ -264,14 +261,12 @@ class DevModeScene extends PhaserScene {
 						}
 					}
 					else {
-						if (this.pointerInsideMap(pointerTileX, pointerTileY, map) /*&& map.getTileAt(pointerTileX, pointerTileY)*/
-							&& (!map.hasTileAt(pointerTileX, pointerTileY) || this.selectedTile.index !== (map.getTileAt(pointerTileX, pointerTileY, true)).index)) {
+						if (this.pointerInsideMap(pointerTileX, pointerTileY, map)
+							&& this.selectedTile.index !== (map.getTileAt(pointerTileX, pointerTileY, true)).index) {
 								if (this.selectedTile.index === -1) this.selectedTile.index = 0;
-								//const prevTile = map.getTileAt(pointerTileX, pointerTileY, true).index;
-								//console.log('prev tile', prevTile)
 								map.putTileAt(this.selectedTile, pointerTileX, pointerTileY);
 								//map.getTileAt(pointerTileX, pointerTileY, true).tint = 0xffffff;
-								console.log('place tile', this.selectedTile.index/*, 'instead of', prevTile*/)
+								console.log('place tile', this.selectedTile.index)
 								ige.network.send('editTile', {gid: this.selectedTile.index, layer: map.currentLayerIndex, x: pointerTileX, y: pointerTileY});
 						}
 					}
