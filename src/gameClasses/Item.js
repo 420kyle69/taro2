@@ -419,7 +419,7 @@ var Item = IgeEntityPhysics.extend({
 									};
 
 									// end pos calcs; fire raycast
-									ige.raycaster.raycast(
+									ige.raycaster.raycastBullet(
 										{
 											x: raycastStart.x / self.scaleRatio,
 											y: raycastStart.y / self.scaleRatio

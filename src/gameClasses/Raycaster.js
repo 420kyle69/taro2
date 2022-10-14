@@ -23,69 +23,113 @@ var Raycaster = /** @class */ (function () {
         // BOX2DWEB (callback, start, end)
         // PLANCK (start, end, callback)
     }
-    Raycaster.prototype.raycast = function (start, end, config) {
-        var callback, reset;
-        this.data = {};
-        switch (config.method) {
-            case 'closest':
-                this.data = this[config.method];
-                reset = this.data.reset;
-                callback = this.data.callback;
-                break;
-            case 'multiple':
-                this.data = this[config.method];
-                reset = this.data.reset;
-                callback = this.data.callback;
-                break;
-            case 'any': // used here for reverse checks
-                this.data = this[config.method];
-                reset = this.data.reset;
-                callback = this.data.callback;
+    // raycast(
+    // 	start: {
+    // 		x: number,
+    // 		y: number,
+    // 	},
+    // 	end: {
+    // 		x: number,
+    // 		y: number
+    // 	},
+    // 	config: {
+    // 		method: string,
+    // 		projType: string,
+    // 		rotation: number
+    // 	}
+    // ): void {
+    // 	let callback, reset;
+    // 	this.data = {};
+    // 	switch(config.method) {
+    // 		case 'closest':
+    // 			this.data = this[config.method];
+    // 			reset = this.data.reset;
+    // 			callback = this.data.callback;
+    // 			break;
+    // 		case 'multiple':
+    // 			this.data = this[config.method];
+    // 			reset = this.data.reset;
+    // 			callback = this.data.callback;
+    // 			break;
+    // 		case 'any': // used here for reverse checks
+    // 			this.data = this[config.method];
+    // 			reset = this.data.reset;
+    // 			callback = this.data.callback;
+    // 	}
+    // 	reset();
+    // 	this.world.rayCast(
+    // 		start,
+    // 		end,
+    // 		callback
+    // 	);
+    // 	// leaning towards having this list exist on the item or both
+    // 	if (config.method === 'multiple') {
+    // 		this.sortHits();
+    // 		ige.game.entitiesCollidingWithLastRaycast = this.data.entities;
+    // 	} else if (config.method === 'closest') {
+    // 		ige.game.entitiesCollidingWithLastRaycast = [this.data.entity];
+    // 		this.forwardHit = true;
+    // 		if (ige.isClient) {
+    // 			end = (config.method === 'closest' && this.data.point) ?
+    // 				{
+    // 					x: this.data.point.x,
+    // 					y: this.data.point.y
+    // 				} :
+    // 				{
+    // 					x: end.x,
+    // 					y: end.y
+    // 				};
+    // 		}
+    // 		// testing reverse ray
+    // 		// cache forward raycast results
+    // 		const data = this.data;
+    // 		const point = this.data.point ? this.data.point : end;
+    // 		this.raycast(
+    // 			point,
+    // 			start,
+    // 			{
+    // 				method: 'any',
+    // 				projType: null,
+    // 				rotation: null
+    // 			}
+    // 		);
+    // 		if (ige.isClient && (this.forwardHit !== this.reverseHit)) {
+    // 			this.drawRay(start, point, { ...config, color: 0xffffff, fraction: data.fraction });
+    // 		}
+    // 		this.forwardHit = false;
+    // 		this.reverseHit = false;
+    // 	} else if (config.method === 'any') {
+    // 		if (this.data.hit) {
+    // 			this.reverseHit = true;
+    // 			ige.game.entitiesCollidingWithLastRaycast = [];
+    // 		}
+    // 	}
+    // 	// cleanup
+    // 	this.data = {};
+    // }
+    Raycaster.prototype.raycastBullet = function (start, end, config) {
+        // forward
+        var forwardRaycast = this[config.method];
+        forwardRaycast.reset();
+        this.world.rayCast(start, end, forwardRaycast.callback // though it is currently hard-coded for 'Closest'
+        );
+        ige.game.entitiesCollidingWithLastRaycast = forwardRaycast.entity ? [forwardRaycast.entity] : [];
+        this.forwardHit = true;
+        var point = forwardRaycast.point ? forwardRaycast.point : end;
+        // reverse
+        var reverseRaycast = this.any;
+        reverseRaycast.reset();
+        this.world.rayCast(point, start, reverseRaycast.callback);
+        if (reverseRaycast.hit) {
+            // we were obstructed when shooting
+            this.reverseHit = true;
+            ige.game.entitiesCollidingWithLastRaycast = [];
         }
-        reset();
-        this.world.rayCast(start, end, callback);
-        // leaning towards having this list exist on the item or both
-        if (config.method === 'multiple') {
-            this.sortHits();
-            ige.game.entitiesCollidingWithLastRaycast = this.data.entities;
+        if (ige.isClient && !this.reverseHit) {
+            this.drawRay(start, point, __assign(__assign({}, config), { color: 0xffffff, fraction: forwardRaycast.fraction }));
         }
-        else if (config.method === 'closest') {
-            ige.game.entitiesCollidingWithLastRaycast = [this.data.entity];
-            this.forwardHit = true;
-            if (ige.isClient) {
-                end = (config.method === 'closest' && this.data.point) ?
-                    {
-                        x: this.data.point.x,
-                        y: this.data.point.y
-                    } :
-                    {
-                        x: end.x,
-                        y: end.y
-                    };
-            }
-            // testing reverse ray
-            // cache forward raycast results
-            var data = this.data;
-            var point = this.data.point ? this.data.point : end;
-            this.raycast(point, start, {
-                method: 'any',
-                projType: null,
-                rotation: null
-            });
-            if (ige.isClient && (this.forwardHit !== this.reverseHit)) {
-                this.drawRay(start, point, __assign(__assign({}, config), { color: 0xffffff, fraction: data.fraction }));
-            }
-            this.forwardHit = false;
-            this.reverseHit = false;
-        }
-        else if (config.method === 'any') {
-            if (this.data.hit) {
-                this.reverseHit = true;
-                ige.game.entitiesCollidingWithLastRaycast = [];
-            }
-        }
-        // cleanup
-        this.data = {};
+        this.forwardHit = false;
+        this.reverseHit = false;
     };
     Raycaster.prototype.sortHits = function () {
         this.data.entities = _.orderBy(this.data.entities, ['raycastFraction'], ['asc']);
