@@ -1207,14 +1207,9 @@ var VariableComponent = IgeEntity.extend({
 						x: positionB.x / ige.physics._scaleRatio,
 						y: positionB.y / ige.physics._scaleRatio
 					};
-					ige.raycaster.raycast(
+					ige.raycaster.raycastLine(
 						positionA,
 						positionB,
-						{
-							method: 'multiple',
-							projType: null,
-							rotation: null,
-						}
 					);
 
 					returnValue = ige.game.entitiesCollidingWithLastRaycast;
