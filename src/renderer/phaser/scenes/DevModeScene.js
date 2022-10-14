@@ -81,6 +81,14 @@ var DevModeScene = /** @class */ (function (_super) {
             if (data.layer >= 2)
                 data.layer++;
             ige.game.data.map.layers[data.layer].data[data.y * width + data.x] = data.gid;
+            if (ige.physics && data.layer === 3) {
+                //if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
+                ige.physics.destroyWalls();
+                var map_1 = ige.scaleMap(_.cloneDeep(ige.game.data.map));
+                ige.tiled.loadJson(map_1, function (layerArray, IgeLayersById) {
+                    ige.physics.staticsFromMap(IgeLayersById.walls);
+                });
+            }
         });
         this.input.on('wheel', function (pointer, gameObjects, deltaX, deltaY, deltaZ) {
             if (_this.devPalette && _this.devPalette.visible) {
