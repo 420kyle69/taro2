@@ -32,6 +32,14 @@ class DeveloperMode {
 	updateClientMap (data) {
 		console.log('updated data', data)
 		ige.game.data.map = data.mapData;
+		if (ige.physics) {
+			//if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
+			ige.physics.destroyWalls();
+			let map = ige.scaleMap(_.cloneDeep(ige.game.data.map));
+			ige.tiled.loadJson(map, function (layerArray, IgeLayersById) {
+				ige.physics.staticsFromMap(IgeLayersById.walls);
+			})
+		}
 		ige.client.emit('updateMap');
 		//ige.renderer.scene.getScene('Game').updateMap();
 	}
