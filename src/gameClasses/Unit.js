@@ -1116,9 +1116,9 @@ var Unit = IgeEntityPhysics.extend({
 		if (ownerPlayer) {
 			color = playerTypeData && playerTypeData.color;
 		}
-		if (isMyUnit) {
-		    color = '#99FF00';
-		}
+		// if (isMyUnit) {
+		//     color = '#99FF00';
+		// }
 
 		this.emit('update-label', {
 			text: self._stats.name,
