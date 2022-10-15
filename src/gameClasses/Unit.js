@@ -40,15 +40,21 @@ var Unit = IgeEntityPhysics.extend({
 		self.parseEntityObject(self._stats);
 		self.addComponent(InventoryComponent)
 			.addComponent(AbilityComponent)
-			.addComponent(AttributeComponent) // every units gets one
-			
+			.addComponent(AttributeComponent); // every units gets one
+
 		self.addComponent(ScriptComponent); // entity-requireScriptLoading
-		self.script.load(unitData.scripts)
+		self.script.load(unitData.scripts);
 
 		self.addComponent(AIComponent);
 
 		Unit.prototype.log(`initializing new unit ${this.id()}`);
 
+
+		if (ige.isClient) {
+			this.addToRenderer(defaultAnimation && (defaultAnimation.frames[0] - 1));
+			ige.client.emit('create-unit', this);
+			this.transformTexture(this._translate.x, this._translate.y, 0);
+		}
 		// initialize body & texture of the unit
 		self.changeUnitType(data.type, data.defaultData);
 
@@ -83,16 +89,12 @@ var Unit = IgeEntityPhysics.extend({
 			if (ige.network.isPaused) {
 				this.streamMode(0);
 			} else {
-				this.streamMode(1);				
+				this.streamMode(1);
 			}
 
 			ige.server.totalUnitsCreated++;
-			
+
 		} else if (ige.isClient) {
-			this.addToRenderer(defaultAnimation && (defaultAnimation.frames[0] - 1));
-			ige.client.emit('create-unit', this);
-			this.transformTexture(this._translate.x, this._translate.y, 0);			
-			
 			// if player already exists on the client side, then set owner player and update its name label
 			// otherwise, client.js will wait for player entity and run this on client.js
 			if (this._stats.ownerId) {
