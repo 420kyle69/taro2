@@ -54,9 +54,9 @@ var Item = IgeEntityPhysics.extend({
 		// convert numbers stored as string in database to int
 		self.parseEntityObject(self._stats);
 		self.addComponent(AttributeComponent); // every item gets one
-		
+
 		self.addComponent(ScriptComponent); // entity-scripting
-		self.script.load(data.scripts)
+		self.script.load(data.scripts);
 
 		ige.game.lastCreatedItemId = entityIdFromServer || this.id();
 
@@ -71,8 +71,8 @@ var Item = IgeEntityPhysics.extend({
 			if (ige.network.isPaused) {
 				self.streamMode(0);
 			} else {
-				self.streamMode(1);				
-				self.streamCreate(); // do we need this?			
+				self.streamMode(1);
+				self.streamCreate(); // do we need this?
 			}
 
 			ige.server.totalItemsCreated++;
