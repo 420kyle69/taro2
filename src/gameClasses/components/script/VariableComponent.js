@@ -1009,9 +1009,9 @@ var VariableComponent = IgeEntity.extend({
 					break;
 				
 				case 'unitSensorRadius':
-					if (entity && entity._stats && entity._stats.ai) {
-						// returnValue = entity._aabb.height;
-						returnValue = entity._stats.ai.sensorRadius
+					var unit = self.getValue(text.unit, vars);
+					if (unit && unit._stats && unit._stats.ai) {
+						returnValue = unit._stats.ai.sensorRadius
 					}
 				
 					break;
