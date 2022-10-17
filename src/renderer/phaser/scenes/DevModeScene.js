@@ -35,7 +35,7 @@ var DevModeScene = /** @class */ (function (_super) {
                 _this.paletteMarker.lineStyle(1, 0x000000, 1);
                 _this.paletteMarker.strokeRect(0, 0, _this.devPalette.map.tileWidth, _this.devPalette.map.tileHeight);
                 _this.paletteMarker.setVisible(false);
-                _this.devPalette.hide();
+                _this.devPalette.show();
                 _this.devPalette.layerButtonsContainer.setVisible(true);
             }
             else

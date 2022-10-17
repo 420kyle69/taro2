@@ -127,7 +127,7 @@ var PhaserPalette = /** @class */ (function (_super) {
         new PhaserPaletteButton(_this, '-', 31, -31, 30, scrollBarContainer, _this.zoom.bind(_this), 1);
         new PhaserPaletteButton(_this, '_', 93, -31, 30, scrollBarContainer, _this.emptyTile.bind(_this));
         _this.toolButtons = [];
-        _this.toolButtons.push(new PhaserPaletteButton(_this, '.', 124, -31, 30, scrollBarContainer, _this.selectSingle.bind(_this)), new PhaserPaletteButton(_this, '[]', 155, -31, 30, scrollBarContainer, _this.selectArea.bind(_this)));
+        _this.toolButtons.push(new PhaserPaletteButton(_this, '.', 155, -31, 30, scrollBarContainer, _this.selectSingle.bind(_this)), new PhaserPaletteButton(_this, '[]', 186, -31, 30, scrollBarContainer, _this.selectArea.bind(_this)));
         _this.toolButtons[0].highlight(true);
         var layerButtonsContainer = _this.layerButtonsContainer = new Phaser.GameObjects.Container(scene);
         scene.add.existing(layerButtonsContainer);
@@ -138,7 +138,7 @@ var PhaserPalette = /** @class */ (function (_super) {
         layerButtonsContainer.height = 160;
         new PhaserPaletteButton(_this, 'tiles', 0, -31, 120, layerButtonsContainer, _this.toggle.bind(_this));
         _this.layerButtons = [];
-        _this.layerButtons.push(new PhaserPaletteButton(_this, 'floor', 0, -67, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 0), new PhaserPaletteButton(_this, 'floor2', 0, -98, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 1), new PhaserPaletteButton(_this, 'walls', 0, -129, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 2), new PhaserPaletteButton(_this, 'trees', 0, -160, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 3));
+        _this.layerButtons.push(new PhaserPaletteButton(_this, 'floor', 0, -93, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 0), new PhaserPaletteButton(_this, 'floor2', 0, -124, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 1), new PhaserPaletteButton(_this, 'walls', 0, -155, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 2), new PhaserPaletteButton(_this, 'trees', 0, -186, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 3));
         _this.layerButtons[0].highlight(true);
         _this.area = { x: 1, y: 1 };
         return _this;

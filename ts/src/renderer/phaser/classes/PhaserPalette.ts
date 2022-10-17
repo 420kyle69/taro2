@@ -156,8 +156,8 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 
 		this.toolButtons = [];
 		this.toolButtons.push (
-			new PhaserPaletteButton (this, '.', 124, -31, 30, scrollBarContainer, this.selectSingle.bind(this)),
-			new PhaserPaletteButton (this, '[]', 155, -31, 30, scrollBarContainer, this.selectArea.bind(this))
+			new PhaserPaletteButton (this, '.', 155, -31, 30, scrollBarContainer, this.selectSingle.bind(this)),
+			new PhaserPaletteButton (this, '[]', 186, -31, 30, scrollBarContainer, this.selectArea.bind(this))
 		)
 		this.toolButtons[0].highlight(true);
 
@@ -173,10 +173,10 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 
 		this.layerButtons = [];
 		this.layerButtons.push (
-			new PhaserPaletteButton (this, 'floor', 0,-67, 120, layerButtonsContainer, this.switchLayer.bind(this), 0),
-			new PhaserPaletteButton (this, 'floor2', 0,-98, 120, layerButtonsContainer, this.switchLayer.bind(this), 1),
-			new PhaserPaletteButton (this, 'walls', 0,-129, 120, layerButtonsContainer, this.switchLayer.bind(this), 2),
-			new PhaserPaletteButton (this, 'trees', 0,-160, 120, layerButtonsContainer, this.switchLayer.bind(this), 3)
+			new PhaserPaletteButton (this, 'floor', 0, -93, 120, layerButtonsContainer, this.switchLayer.bind(this), 0),
+			new PhaserPaletteButton (this, 'floor2', 0, -124, 120, layerButtonsContainer, this.switchLayer.bind(this), 1),
+			new PhaserPaletteButton (this, 'walls', 0, -155, 120, layerButtonsContainer, this.switchLayer.bind(this), 2),
+			new PhaserPaletteButton (this, 'trees', 0, -186, 120, layerButtonsContainer, this.switchLayer.bind(this), 3)
 		)
 		this.layerButtons[0].highlight(true);
 

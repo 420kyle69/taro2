@@ -32,7 +32,7 @@ class DevModeScene extends PhaserScene {
 				this.paletteMarker.lineStyle(1, 0x000000, 1);
 				this.paletteMarker.strokeRect(0, 0, this.devPalette.map.tileWidth, this.devPalette.map.tileHeight);
 				this.paletteMarker.setVisible(false);
-				this.devPalette.hide();
+				this.devPalette.show();
 				this.devPalette.layerButtonsContainer.setVisible(true);
 			}
 			else this.devPalette.layerButtonsContainer.setVisible(true);
