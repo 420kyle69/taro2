@@ -15,7 +15,7 @@ class PhaserFloatingText extends Phaser.GameObjects.Text {
 		this.setFontSize(16);
 		this.setFontStyle('bold');
 		this.setFill(data.color || '#fff');
-		this.setResolution(4);
+		//this.setResolution(4);
 
 		const strokeThickness = ige.game.data.settings
 			.addStrokeToNameAndAttributes !== false ? 4 : 0;
