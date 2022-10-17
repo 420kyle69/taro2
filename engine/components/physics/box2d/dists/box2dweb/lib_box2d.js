@@ -6227,7 +6227,8 @@ box2dweb.postDefs = [];
 		aabb.upperBound.Set(p.x + b2Settings.b2_linearSlop, p.y + b2Settings.b2_linearSlop);
 		broadPhase.Query(WorldQueryWrapper, aabb);
 	};
-	b2World.prototype.RayCast = function (callback, point1, point2) {
+	// moving callback from args0 to args2
+	b2World.prototype.RayCast = function (point1, point2, callback) {
 		var __this = this;
 		var broadPhase = __this.m_contactManager.m_broadPhase;
 		var output = new b2RayCastOutput();

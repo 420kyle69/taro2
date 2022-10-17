@@ -107,7 +107,8 @@ var Server = IgeClass.extend({
 			self.config = config.default;
 		}
 
-		self.tier = process.env.TIER || 2;
+		self.tier = (cluster.isMaster ? process.env.TIER : (process.env.WORKER_TIER || process.env.TIER)) || 2;
+		
 		self.region = process.env.REGION || 'apocalypse';
 		self.isScriptLogOn = process.env.SCRIPTLOG == 'on';
 		self.gameLoaded = false;
@@ -468,10 +469,6 @@ var Server = IgeClass.extend({
 				// tilesize ratio is ratio of base tile size over tilesize of current map
 				var tilesizeRatio = baseTilesize / game.data.map.tilewidth;
 
-				if (game.data.defaultData && !isNaN(game.data.defaultData.frameRate)) {
-					ige._physicsTickRate = Math.max(15, Math.min(parseInt(game.data.defaultData.frameRate), 60)); // keep fps range between 15 and 60
-				}
-
 				// /*
 				//  * Significant changes below
 				//  * Let's test loading PhysicsConfig here
@@ -498,6 +495,7 @@ var Server = IgeClass.extend({
 
 				ige.physics.createWorld();
 				ige.physics.start();
+				ige.raycaster = new Raycaster();
 
 				// console.log("game data", game)
 				// mapComponent needs to be inside IgeStreamComponent, because debris' are created and streaming is enabled which requires IgeStreamComponent

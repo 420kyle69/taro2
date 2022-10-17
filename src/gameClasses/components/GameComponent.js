@@ -171,19 +171,6 @@ var GameComponent = IgeEntity.extend({
 		}
 	},
 
-	// not in use;
-	getUnitsByClientId: function (clientId) {
-		return ige
-			.$$('unit')
-			.filter(function (unit) {
-				return unit._stats && unit._stats.clientId == clientId;
-			})
-			.reduce(function (partialUnits, unit) {
-				partialUnits[unit._id] = unit;
-				return partialUnits;
-			}, {});
-	},
-
 	getPlayerByUserId: function (userId) {
 		return ige.$$('player').find(function (player) {
 			return player._stats && player._stats.userId == userId;

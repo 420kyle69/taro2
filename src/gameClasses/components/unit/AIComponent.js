@@ -13,11 +13,13 @@ var AIComponent = IgeEntity.extend({
 
 		// sensor needs to be enabled regardless of AI to process sensor collision triggers
 		// for example, in cell-eater, items are consumed via sensors
-		unit.sensor = new Sensor(unit, unit._stats.ai.sensorRadius);
-
 		if (unit._stats.ai) {
-			unit._stats.aiEnabled = unit._stats.ai.enabled;
+
+			if (unit._stats.ai.sensorRadius > 0 && unit.sensor == undefined) {
+				unit.sensor = new Sensor(unit, unit._stats.ai.sensorRadius);
+		   }
 		
+			unit._stats.aiEnabled = unit._stats.ai.enabled;		
 			if (unit._stats.aiEnabled) {
 				self.enable();
 			}
@@ -72,7 +74,7 @@ var AIComponent = IgeEntity.extend({
 		// only response to hostile/neutral units
 		var ownerPlayer = self._entity.getOwner();
 		if (unit) {
-			var ownerPlayerOfTargetUnit = ige.$(unit._stats.ownerId);
+			var ownerPlayerOfTargetUnit = unit.getOwner();
 			if (ownerPlayer && ownerPlayer.isHostileTo(ownerPlayerOfTargetUnit)) {
 				// if I already have a target, re-target if new target unit is closer
 				var targetUnit = this.getTargetUnit();

@@ -47,8 +47,14 @@ var Player = IgeEntity.extend({
 						];
 					}
 				});
-
-				this.setChatMute(this._stats.banChat);
+			}
+			
+			// apply skin to the selected unit if the unit already exists on the client side
+			if (this._stats && this._stats.selectedUnitId) {
+				const unit = ige.$(this._stats.selectedUnitId);
+				if (unit) {
+					unit.equipSkin();
+				}
 			}
 
 			// redraw name labels and textures of all units owned by this player
@@ -225,8 +231,20 @@ var Player = IgeEntity.extend({
 	},
 
 	getSelectedUnit: function () {
-
 		return ige.$(this._stats.selectedUnitId);
+	},
+
+	getUnits: function (clientId) {
+		var self = this;
+		return ige
+			.$$('unit')
+			.filter(function (unit) {
+				return unit._stats && unit._stats.ownerId == self.id();
+			})
+			.reduce(function (partialUnits, unit) {
+				partialUnits[unit._id] = unit;
+				return partialUnits;
+			}, {});
 	},
 
 	castAbility: function (command) {
@@ -470,7 +488,7 @@ var Player = IgeEntity.extend({
 							self.setChatMute(newValue);
 						}
 						if (attrName === 'playerJoined') {
-							console.log('received player.playerJoined');
+							// console.log('received player.playerJoined');
 							ige.client.eventLog.push([ige._currentTime, 'playerJoined received']);
 							// render name labels of all other units
 							self.redrawUnits(['nameLabel']);
