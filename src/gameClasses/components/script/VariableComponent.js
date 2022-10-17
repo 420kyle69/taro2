@@ -1005,8 +1005,17 @@ var VariableComponent = IgeEntity.extend({
 						// returnValue = entity._aabb.height;
 						returnValue = entity.height();
 					}
-
+				
 					break;
+				
+				case 'unitSensorRadius':
+					if (entity && entity._stats && entity._stats.ai) {
+						// returnValue = entity._aabb.height;
+						returnValue = entity._stats.ai.sensorRadius
+					}
+				
+					break;
+					
 				case 'defaultQuantityOfItemType':
 					var itemTypeId = self.getValue(text.itemType, vars);
 					var itemType = ige.game.getAsset('itemTypes', itemTypeId);
