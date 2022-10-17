@@ -1701,23 +1701,23 @@ var Unit = IgeEntityPhysics.extend({
 		this._stats.currentItemId = currentItem ? currentItem.id() : null;
 
 		// client log of item state after pickup will still show 'dropped'. Currently state has not finished updating. It IS 'selected'/'unselected'
-		const debugMap = this._stats.itemIds.map((x) => {
-			const item = ige.$(x) || null;
-			const state = item ? item._stats.stateId : null;
-			return {
-				id: x,
-				item: item,
-				state: state,
-			};
-		});
-		console.log(
-			`running Unit.setCurrentItem(${itemIndex ? itemIndex : ''}) on ${ige.isClient ? 'Client' : 'Server'}\n`,
-			`this._stats.currentItemIndex: ${this._stats.currentItemIndex}\n`,
-			`this._stats.currentItemId: ${this._stats.currentItemId}\n`,
-			this.id(),
-			'\n',
-			debugMap
-		);
+		// const debugMap = this._stats.itemIds.map((x) => {
+		// 	const item = ige.$(x) || null;
+		// 	const state = item ? item._stats.stateId : null;
+		// 	return {
+		// 		id: x,
+		// 		item: item,
+		// 		state: state,
+		// 	};
+		// });
+		// console.log(
+		// 	`running Unit.setCurrentItem(${itemIndex ? itemIndex : ''}) on ${ige.isClient ? 'Client' : 'Server'}\n`,
+		// 	`this._stats.currentItemIndex: ${this._stats.currentItemIndex}\n`,
+		// 	`this._stats.currentItemId: ${this._stats.currentItemId}\n`,
+		// 	this.id(),
+		// 	'\n',
+		// 	debugMap
+		// );
 
 		// tell phaser to respond to change in item
 	},
@@ -1744,7 +1744,7 @@ var Unit = IgeEntityPhysics.extend({
 
 		var ownerPlayer = this.getOwner();
 		if (ownerPlayer) {
-				
+
 			// mobile control: rotate to rotation provided by the client
 			if (this._stats.controls.absoluteRotation) {
 				this.angleToTarget = ownerPlayer.absoluteAngle;
@@ -1791,7 +1791,7 @@ var Unit = IgeEntityPhysics.extend({
 					if (!self._stats.aiEnabled && ownerPlayer._stats.controlledBy == 'human' && ownerPlayer.getSelectedUnit() == this) {
 						self.updateAngleToTarget();
 					}
-					
+
 					// rotate unit if angleToTarget is set
 					if (self.angleToTarget != undefined && !isNaN(self.angleToTarget) &&
 						this._stats.controls && this._stats.controls.mouseBehaviour.rotateToFaceMouseCursor &&
@@ -1799,7 +1799,7 @@ var Unit = IgeEntityPhysics.extend({
 					) {
 						self.rotateTo(0, 0, self.angleToTarget);
 					}
-				}	
+				}
 
 				if (
 					( // either unit is AI unit that is currently moving
