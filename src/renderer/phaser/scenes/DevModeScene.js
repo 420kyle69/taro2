@@ -194,7 +194,8 @@ var DevModeScene = /** @class */ (function (_super) {
                     }
                     else {
                         if (this.pointerInsideMap(palettePointerTileX, palettePointerTileY, paletteMap)) {
-                            this.selectedTile.tint = 0xffffff;
+                            if (this.selectedTile)
+                                this.selectedTile.tint = 0xffffff;
                             this.selectedTile = paletteMap.getTileAt(palettePointerTileX, palettePointerTileY, true);
                             this.selectedTile.tint = 0x87cfff;
                         }
