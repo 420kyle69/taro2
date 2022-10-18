@@ -1788,11 +1788,6 @@ var IgeEntity = IgeObject.extend({
 	 * @param {CanvasRenderingContext2D} ctx The canvas context to render to.
 	 */
 	update: function (ctx, tickDelta, isForOrphans) {
-		// var category = this._category || 'etc';
-		// if (ige.updateCount[category] == undefined)
-		// 	ige.updateCount[category] = 0;
-		// ige.updateCount[category]++;
-
 		// if (ige.physics.engine === 'CRASH' && this.body) {
 		// 	this._behaviourCrash();
 		// }
@@ -3112,8 +3107,6 @@ var IgeEntity = IgeObject.extend({
 	},
 
 	teleportTo: function (x, y, rotate) {
-		console.log("teleporting to ", x, y);
-
 		this.translateTo(x, y);
 		if (rotate != undefined) {
 			this.rotateTo(0, 0, rotate);

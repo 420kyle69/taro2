@@ -55,6 +55,7 @@ var EntitiesToRender = /** @class */ (function () {
                 if (ige.network.stream) {
                     entity._processTransform();
                 }
+                
                 if (entity._translate && !entity.isHidden()) {
                     var x = entity._translate.x;
                     var y = entity._translate.y;
