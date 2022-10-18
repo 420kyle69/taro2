@@ -48,7 +48,7 @@ var IgeTiledComponent = IgeClass.extend({
 			IgeTiledComponent.prototype.log('layer doesn\'t exist. unpublishing...');
 			ige.server.unpublish('IgeTiledComponent#51');
 		}
-
+		var self = this;
 		var mapClass = ige.isServer === true ? IgeTileMap2d : IgeTextureMap;
 		var mapWidth = data.width;
 		var mapHeight = data.height;
@@ -75,9 +75,9 @@ var IgeTiledComponent = IgeClass.extend({
 		var i; var k; var x; var y; var z;
 		var ent;
 
-		if (ige.isClient) {
+		//if (ige.isClient) {
 			ige.layersById = layersById;
-		}
+		//}
 
 		// Define the function to call when all textures have finished loading
 		allTexturesLoadedFunc = function () {
@@ -115,7 +115,7 @@ var IgeTiledComponent = IgeClass.extend({
 					layersById[layer.name] = maps[i];
 					tileSetCount = tileSetArray.length;
 
-					if (ige.isClient) {
+					if (ige.isClient && !self.cs) {
 						for (k = 0; k < tileSetCount; k++) {
 							maps[i].addTexture(textures[k]);
 						}
@@ -144,7 +144,7 @@ var IgeTiledComponent = IgeClass.extend({
 			callback(maps, layersById);
 		};
 
-		if (ige.isClient) {
+		if (ige.isClient && !self.cs) {
 			onLoadFunc = function (textures, tileSetCount, tileSetItem) {
 				return function () {
 					var i, cc;
@@ -157,7 +157,8 @@ var IgeTiledComponent = IgeClass.extend({
 						tileSetItem.tileheight = ige.scaleMapDetails.originalTileHeight;
 					}
 
-					var cs = new IgeCellSheet(imageUrl, this.width * scaleFactor.x / tileSetItem.tilewidth, this.height * scaleFactor.y / tileSetItem.tileheight, ige.scaleMapDetails.shouldScaleTilesheet)
+					if (!self.cs) {
+						self.cs = new IgeCellSheet(imageUrl, this.width * scaleFactor.x / tileSetItem.tilewidth, this.height * scaleFactor.y / tileSetItem.tileheight, ige.scaleMapDetails.shouldScaleTilesheet)
 						.id(tileSetItem.name)
 						.on('loaded', function () {
 							if (ige.scaleMapDetails.shouldScaleTilesheet && (imageUrl.includes('tilesheet') || tileSetCount === 0)) {
@@ -180,6 +181,7 @@ var IgeTiledComponent = IgeClass.extend({
 								allTexturesLoadedFunc();
 							}
 						});
+					}
 				};
 			};
 

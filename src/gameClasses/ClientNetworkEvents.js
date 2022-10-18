@@ -10,7 +10,6 @@ var ClientNetworkEvents = {
 	},
 
 	_onUpdateAllEntities: function (data) {
-
 		for (entityId in data) {
 			var entity = ige.$(entityId);
 			if (ige.client.entityUpdateQueue[entityId] == undefined) {
@@ -466,6 +465,11 @@ var ClientNetworkEvents = {
 				break;
 			}
 		}
+	},
+
+	// when other players' update tiles, apply the change to my local
+	_onEditTile: function (data) {
+		ige.client.emit('editTile', {gid: data.gid, layer: data.layer, x: data.x, y: data.y});
 	},
 
 	_onErrorLogs: function (logs) {

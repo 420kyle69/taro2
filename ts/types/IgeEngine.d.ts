@@ -1,4 +1,6 @@
 declare class IgeEngine extends IgeClass {
+	tiled: any;
+	scaleMap(data: any): void;
 
 	_renderFrames: number;
 	_tickStart: number;
@@ -28,6 +30,8 @@ declare class IgeEngine extends IgeClass {
 
 	renderer: PhaserRenderer;
 
+	developerMode: DeveloperMode;
+
 	scaleMapDetails: {
 		scaleFactor: {
 			x: number;
@@ -51,6 +55,8 @@ declare class IgeEngine extends IgeClass {
 	engineStep (): void;
 
 	physics: {
+		staticsFromMap(walls: any): unknown;
+		destroyWalls(): unknown;
 		world(): any;
 		engine: string;
 		_scaleRatio: number

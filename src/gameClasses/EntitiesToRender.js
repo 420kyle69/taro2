@@ -32,9 +32,11 @@ var EntitiesToRender = /** @class */ (function () {
                             if (
                             // Don't run if we're updating item's state/owner unit, but its owner doesn't exist yet
                             entity._category == 'item' &&
-                                ((nextUpdate.ownerUnitId && ige.$(nextUpdate.ownerUnitId) == undefined) || // updating item's owner unit, but the owner hasn't been created yet
-                                    ((nextUpdate.stateId == 'selected' || nextUpdate.stateId == 'unselected') && entity.getOwnerUnit() == undefined)) // changing item's state to selected/unselected, but owner doesn't exist yet
-                            ) {
+                                ( // updating item's owner unit, but the owner hasn't been created yet
+                                (nextUpdate.ownerUnitId && ige.$(nextUpdate.ownerUnitId) == undefined) ||
+                                    ( // changing item's state to selected/unselected, but owner doesn't exist yet
+                                    (nextUpdate.stateId == 'selected' || nextUpdate.stateId == 'unselected') &&
+                                        entity.getOwnerUnit() == undefined))) {
                                 break;
                             }
                             else {
