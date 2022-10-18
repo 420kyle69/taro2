@@ -1799,7 +1799,7 @@ var ActionComponent = IgeEntity.extend({
 						if (projectile && unit) {
 							projectile.setSourceUnit(unit);
 						}
-						
+
 						break;
 
 						/* Ads */
