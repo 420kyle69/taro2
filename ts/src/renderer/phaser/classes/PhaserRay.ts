@@ -18,6 +18,10 @@ class PhaserRay {
 			projType: string,
 			fraction: number,
 			rotation: number
+			dimensions: {
+				width: number,
+				height: number
+			}
 		},
 	) {
 		/* Debug draw ray */
@@ -55,6 +59,7 @@ class PhaserRay {
 		if (config.projType) {
 			this.sprite = scene.add.sprite(start.x, start.y, `projectile/${config.projType}`);
 			this.sprite.setAngle(config.rotation * 180 / Math.PI);
+			this.sprite.setDisplaySize(config.dimensions.width, config.dimensions.height);
 
 			scene.tweens.add({
 				targets: this.sprite,
