@@ -6,6 +6,10 @@ class Raycaster {
 	data: any = {};
 	closest = RayCastClosest;
 	multiple = RayCastMultiple;
+	any = RaycastAny;
+
+	forwardHit = false;
+	reverseHit = false;
 
 	constructor (
 
@@ -14,7 +18,154 @@ class Raycaster {
 		// PLANCK (start, end, callback)
 	}
 
-	raycast(
+	// raycast(
+	// 	start: {
+	// 		x: number,
+	// 		y: number,
+	// 	},
+	// 	end: {
+	// 		x: number,
+	// 		y: number
+	// 	},
+	// 	config: {
+	// 		method: string,
+	// 		projType: string,
+	// 		rotation: number
+	// 	}
+	// ): void {
+
+	// 	let callback, reset;
+
+	// 	this.data = {};
+
+	// 	switch(config.method) {
+	// 		case 'closest':
+	// 			this.data = this[config.method];
+	// 			reset = this.data.reset;
+	// 			callback = this.data.callback;
+	// 			break;
+	// 		case 'multiple':
+	// 			this.data = this[config.method];
+	// 			reset = this.data.reset;
+	// 			callback = this.data.callback;
+	// 			break;
+	// 		case 'any': // used here for reverse checks
+	// 			this.data = this[config.method];
+	// 			reset = this.data.reset;
+	// 			callback = this.data.callback;
+	// 	}
+
+	// 	reset();
+	// 	this.world.rayCast(
+	// 		start,
+	// 		end,
+	// 		callback
+	// 	);
+
+	// 	// leaning towards having this list exist on the item or both
+	// 	if (config.method === 'multiple') {
+	// 		this.sortHits();
+	// 		ige.game.entitiesCollidingWithLastRaycast = this.data.entities;
+	// 	} else if (config.method === 'closest') {
+	// 		ige.game.entitiesCollidingWithLastRaycast = [this.data.entity];
+	// 		this.forwardHit = true;
+
+	// 		if (ige.isClient) {
+	// 			end = (config.method === 'closest' && this.data.point) ?
+	// 				{
+	// 					x: this.data.point.x,
+	// 					y: this.data.point.y
+	// 				} :
+	// 				{
+	// 					x: end.x,
+	// 					y: end.y
+	// 				};
+	// 		}
+	// 		// testing reverse ray
+
+	// 		// cache forward raycast results
+	// 		const data = this.data;
+
+	// 		const point = this.data.point ? this.data.point : end;
+
+	// 		this.raycast(
+	// 			point,
+	// 			start,
+	// 			{
+	// 				method: 'any',
+	// 				projType: null,
+	// 				rotation: null
+	// 			}
+	// 		);
+
+	// 		if (ige.isClient && (this.forwardHit !== this.reverseHit)) {
+
+	// 			this.drawRay(start, point, { ...config, color: 0xffffff, fraction: data.fraction });
+	// 		}
+
+	// 		this.forwardHit = false;
+	// 		this.reverseHit = false;
+
+	// 	} else if (config.method === 'any') {
+	// 		if (this.data.hit) {
+	// 			this.reverseHit = true;
+	// 			ige.game.entitiesCollidingWithLastRaycast = [];
+	// 		}
+	// 	}
+
+	// 	// cleanup
+	// 	this.data = {};
+	// }
+
+	raycastLine (
+		start: {
+			x: number,
+			y: number,
+		},
+		end: {
+			x: number,
+			y: number
+		},
+	):void {
+		// reverse
+		const raycast = this.multiple;
+
+		raycast.reset();
+		this.world.rayCast(
+			end,
+			start,
+			raycast.callback
+		);
+
+		ige.game.entitiesCollidingWithLastRaycast = _.clone(raycast.entities);
+		if (ige.isClient) {
+			this.drawRay(start, end, {color: 0xff0000, method: null, projType: null, fraction: null, rotation: null});
+		}
+
+		// forward
+		raycast.reset();
+		this.world.rayCast(
+			start,
+			end,
+			raycast.callback
+		);
+
+		const missedEntities = _.difference(ige.game.entitiesCollidingWithLastRaycast, raycast.entities);
+		missedEntities.forEach(x => x.raycastFraction = 1 - x.raycastFraction);
+
+		ige.game.entitiesCollidingWithLastRaycast = [...raycast.entities, ...missedEntities];
+
+		ige.game.entitiesCollidingWithLastRaycast = this.sortHits(ige.game.entitiesCollidingWithLastRaycast);
+
+		//debug
+		// console.log(ige.game.entitiesCollidingWithLastRaycast.map(x=> `${x.id()} ${x._category} ${x.raycastFraction}`));
+
+		if (ige.isClient) {
+			this.drawRay(end, start, {color: 0x0000ff, method: null, projType: null, fraction: null, rotation: null});
+		}
+	}
+
+	raycastBullet (
 		start: {
 			x: number,
 			y: number,
@@ -26,64 +177,59 @@ class Raycaster {
 		config: {
 			method: string,
 			projType: string,
+			rotation: number
 		}
 	): void {
+		// forward
+		const forwardRaycast = this[config.method];
 
-		let callback, reset;
+		forwardRaycast.reset();
 
-		this.data = {};
-
-		switch(config.method) {
-			case 'closest':
-				this.data = this[config.method];
-				reset = this.data.reset;
-				callback = this.data.callback;
-				break;
-			case 'multiple':
-				this.data = this[config.method];
-				reset = this.data.reset;
-				callback = this.data.callback;
-				break;
-		}
-
-		reset();
 		this.world.rayCast(
 			start,
 			end,
-			callback
+			forwardRaycast.callback // though it is currently hard-coded for 'Closest'
 		);
 
-		// leaning towards having this list exist on the item or both
-		if (config.method === 'multiple') {
-			this.sortHits();
-			ige.game.entitiesCollidingWithLastRaycast = this.data.entities;
-		} else if (config.method === 'closest') {
-			ige.game.entitiesCollidingWithLastRaycast = [this.data.entity]
+		ige.game.entitiesCollidingWithLastRaycast = forwardRaycast.entity ? [forwardRaycast.entity] : [];
+		this.forwardHit = true;
+
+		const point = forwardRaycast.point ? forwardRaycast.point : end;
+
+		// reverse
+		const reverseRaycast = this.any;
+
+		reverseRaycast.reset();
+
+		this.world.rayCast(
+			point,
+			start,
+			reverseRaycast.callback
+		);
+
+		if (reverseRaycast.hit) {
+			// we were obstructed when shooting
+			this.reverseHit = true;
+			ige.game.entitiesCollidingWithLastRaycast = [];
 		}
 
-		if (ige.isClient) {
-			end = (config.method === 'closest' && this.data.point) ?
-				{
-					x: this.data.point.x * this.scaleRatio,
-					y: this.data.point.y * this.scaleRatio
-				} :
-				{
-					x: end.x * this.scaleRatio,
-					y: end.y * this.scaleRatio
-				};
+		if (ige.isClient && this.forwardHit !== this.reverseHit) {
 
-			this.drawRay(start, end, { ...config, fraction: this.data.fraction });
+			this.drawRay(start, point, { ...config, color: 0xffffff, fraction: forwardRaycast.fraction });
 		}
+
+		this.forwardHit = false;
+		this.reverseHit = false;
 	}
 
-	sortHits (): void {
-		this.data.entities = _.orderBy(this.data.entities, ['raycastFraction'], ['asc']);
+	sortHits (array: IgeEntity[]): IgeEntity[] {
+		return array = _.orderBy(array, ['raycastFraction'], ['asc']);
 	}
 
 	drawRay (
 		start: {x: number, y: number},
 		end: {x: number, y: number},
-		config: {method: string, projType: string, fraction: number}
+		config: {color: number, method: string, projType: string, fraction: number, rotation: number}
 
 	): void {
 		ige.client.emit('create-ray', {
@@ -91,7 +237,10 @@ class Raycaster {
 				x: start.x * this.scaleRatio,
 				y: start.y * this.scaleRatio
 			},
-			end,
+			end: {
+				x: end.x * this.scaleRatio,
+				y: end.y * this.scaleRatio
+			},
 			config
 		});
 	}
@@ -113,24 +262,38 @@ const RayCastClosest = (function() {
 
 		var fixtureList = fixture.m_body.m_fixtureList;
 		var entity = fixtureList && fixtureList.igeId && ige.$(fixtureList.igeId);
-		if (entity) {
+		if (
+			entity &&
+				(
+					entity._category === 'unit' ||
+			 	 	entity._category === 'wall'
+				)
+		) {
 			entity.lastRaycastCollisionPosition = {
 				x: point.x * ige.physics._scaleRatio,
 				y: point.y * ige.physics._scaleRatio
 			};
+
 			entity.raycastFraction = fraction;
 			def.entity = entity;
+
+			def.hit = true;
+			def.point = point;
+			def.normal = normal;
+			def.fraction = fraction;
+
+			return fraction;
+
+		} else if (entity) {
+			return -1.0;
 		}
 
-		def.hit = true;
-		def.point = point;
-		def.normal = normal;
-		def.fraction = fraction;
+		return fraction;
 
 		// By returning the current fraction, we instruct the calling code to clip the ray and
 		// continue the ray-cast to the next fixture. WARNING: do not assume that fixtures
 		// are reported in order. However, by clipping, we can always get the closest fixture.
-		return fraction;
+
 	};
 
 	return def;
@@ -155,8 +318,13 @@ const RayCastMultiple = (function() {
 
 		var fixtureList = fixture.m_body.m_fixtureList;
 		var entity = fixtureList && fixtureList.igeId && ige.$(fixtureList.igeId);
-		if (entity) {
-
+		if (
+			entity &&
+				(
+					entity._category === 'unit' ||
+					entity._category === 'wall'
+				)
+		) {
 			entity.lastRaycastCollisionPosition = {
 				x: point.x * ige.physics._scaleRatio,
 				y: point.y * ige.physics._scaleRatio
@@ -171,6 +339,43 @@ const RayCastMultiple = (function() {
 		// By returning 1, we instruct the caller to continue without clipping the
 		// ray.
 		return 1.0;
+	};
+
+	return def;
+})();
+
+const RaycastAny = (function() {
+	let def: any;
+	def = {};
+
+	def.reset = function() {
+		def.hit = false;
+		def.point = null;
+		def.normal = null;
+	};
+
+	def.callback = function(fixture, point, normal, fraction) {
+
+		var fixtureList = fixture.m_body.m_fixtureList;
+		var entity = fixtureList && fixtureList.igeId && ige.$(fixtureList.igeId);
+		if (
+			entity &&
+				(
+					entity._category === 'unit' ||
+			 	 	entity._category === 'wall'
+				)
+		) {
+
+			def.hit = true;
+			def.point = point;
+			def.normal = normal;
+
+			return 0.0;
+
+		} else if (entity) {
+			return -1.0;
+		}
+
 	};
 
 	return def;

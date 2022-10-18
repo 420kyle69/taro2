@@ -54,9 +54,9 @@ var Item = IgeEntityPhysics.extend({
 		// convert numbers stored as string in database to int
 		self.parseEntityObject(self._stats);
 		self.addComponent(AttributeComponent); // every item gets one
-		
+
 		self.addComponent(ScriptComponent); // entity-scripting
-		self.script.load(data.scripts)
+		self.script.load(data.scripts);
 
 		ige.game.lastCreatedItemId = entityIdFromServer || this.id();
 
@@ -71,8 +71,8 @@ var Item = IgeEntityPhysics.extend({
 			if (ige.network.isPaused) {
 				self.streamMode(0);
 			} else {
-				self.streamMode(1);				
-				self.streamCreate(); // do we need this?			
+				self.streamMode(1);
+				self.streamCreate(); // do we need this?
 			}
 
 			ige.server.totalItemsCreated++;
@@ -267,6 +267,7 @@ var Item = IgeEntityPhysics.extend({
 		var ownerId = (owner) ? owner.id() : undefined;
 		var player = owner && owner.getOwner();
 		var isUsed = false;
+		// console.log(`calling Item.use by ${ownerId}`);
 
 		// if item has no owner, or item is unusable type, or it cannot be used by its current owner, then return
 		if (!owner ||
@@ -418,7 +419,7 @@ var Item = IgeEntityPhysics.extend({
 									};
 
 									// end pos calcs; fire raycast
-									ige.raycaster.raycast(
+									ige.raycaster.raycastBullet(
 										{
 											x: raycastStart.x / self.scaleRatio,
 											y: raycastStart.y / self.scaleRatio
@@ -429,7 +430,8 @@ var Item = IgeEntityPhysics.extend({
 										},
 										{
 											method: 'closest',
-											projType: data.type
+											projType: data.type,
+											rotation: pos.rotation
 										}
 									);
 
@@ -440,6 +442,13 @@ var Item = IgeEntityPhysics.extend({
 											// _.matchesProperty
 											['_category', 'unit']
 										);
+										// damage
+										// console.log(ige.game.entitiesCollidingWithLastRaycast);
+										// console.log(this.raycastTargets);
+										this.raycastTargets.forEach((unit) => {
+											// console.log(`damaging ${unit.id()}`);
+											unit.inflictDamage(data.damageData);
+										});
 									}
 
 									ige.queueTrigger('raycastItemFired', {
@@ -447,10 +456,7 @@ var Item = IgeEntityPhysics.extend({
 										unitId: ownerId
 									});
 
-									// damage
-									this.raycastTargets.forEach((unit) => {
-										unit.inflictDamage(data.damageData);
-									});
+
 									this.raycastTargets = [];
 								}
 
