@@ -167,6 +167,13 @@ var Projectile = IgeEntityPhysics.extend({
 		IgeEntity.prototype.tick.call(this, ctx);
 	},
 
+	setSourceUnit: function (unit) {
+		if (unit) {
+			this._stats.sourceUnitId = unit.id();
+			this.streamUpdateData([{sourceUnitId: unit.id()}]) // stream update to the clients			
+		}
+	},
+
 	getSourceItem: function () {
 		var self = this;
 
@@ -179,7 +186,31 @@ var Projectile = IgeEntityPhysics.extend({
 		if (ige.physics && ige.physics.engine == 'CRASH') {
 			this.destroyBody();
 		}
+	}, 
+
+	// update this projectile's stats in the client side
+	streamUpdateData: function (queuedData) {
+		var self = this;
+		if (ige.isServer && ige.network.isPaused) {
+			return;
+		}
+
+		IgeEntity.prototype.streamUpdateData.call(this, queuedData);
+
+		for (var i = 0; i < queuedData.length; i++) {
+			var data = queuedData[i];
+			for (attrName in data) {
+				var newValue = data[attrName];
+
+				switch (attrName) {
+					case 'sourceUnitId':
+						this._stats.sourceUnitId = newValue;
+						break;
+				}
+			}
+		}
 	}
+
 });
 
 if (typeof (module) !== 'undefined' && typeof (module.exports) !== 'undefined') {
