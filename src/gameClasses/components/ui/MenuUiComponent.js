@@ -119,10 +119,15 @@ var MenuUiComponent = IgeEntity.extend({
 			});
 
 			$('#toggle-dev-panels').on('click', function () {
-				if (!ige.developerMode.active) {
-					ige.developerMode.enter();
+				if(['1', '5'].includes(window.gameDetails.tier)) {
+					if (!ige.developerMode.active) {
+						ige.developerMode.enter();
+					} else {
+						ige.developerMode.leave();
+					}
 				} else {
-					ige.developerMode.leave();
+					const devConsoleEl = document.getElementById('dev-console').style.display;
+					document.getElementById('dev-console').style.display = devConsoleEl === 'none' ? 'block' : 'none';
 				}
 			});
 
