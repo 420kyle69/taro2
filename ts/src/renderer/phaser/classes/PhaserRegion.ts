@@ -1,7 +1,7 @@
 class PhaserRegion extends PhaserEntity {
 
 	protected gameObject: Phaser.GameObjects.Graphics & Hidden;
-	protected entity: Region;
+	public entity: Region;
 
 	constructor (
 		private scene: GameScene,
@@ -12,6 +12,7 @@ class PhaserRegion extends PhaserEntity {
 		const gameObject = scene.add.graphics();
 
 		this.gameObject = gameObject as Phaser.GameObjects.Graphics & Hidden;
+		this.gameObject.phaserEntity = this;
 		this.gameObject.visible = false;
 		scene.renderedEntities.push(this.gameObject);
 		// we don't get depth/layer info from taro,

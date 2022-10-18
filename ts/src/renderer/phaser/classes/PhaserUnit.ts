@@ -24,6 +24,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			[ this.sprite ]
 		);
 		this.gameObject = gameObject as Phaser.GameObjects.Container & Hidden;
+		this.gameObject.phaserEntity = this;
 		const containerSize = Math.max(this.sprite.displayHeight, this.sprite.displayWidth);
 		gameObject.setSize(containerSize, containerSize);
 		this.scene.renderedEntities.push(this.gameObject);

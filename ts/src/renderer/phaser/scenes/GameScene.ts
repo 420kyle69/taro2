@@ -469,12 +469,17 @@ class GameScene extends PhaserScene {
 		}]);
 		this.renderedEntities.forEach(element => {
 			element.setVisible(false);
+			if (element.phaserEntity && element.phaserEntity.entity) {
+				element.phaserEntity.entity.shouldRunProcess = false;
+			}
 		});
 		this.cameras.main.cull(this.renderedEntities).forEach(element => {
 			if (!element.hidden) {
 				element.setVisible(true);
+				if (element.phaserEntity && element.phaserEntity.entity) {
+					element.phaserEntity.entity.shouldRunProcess = true;
+				}
 			}
-
 		});
 	}
 }
