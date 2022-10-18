@@ -303,10 +303,16 @@ var GameScene = /** @class */ (function (_super) {
             }]);
         this.renderedEntities.forEach(function (element) {
             element.setVisible(false);
+            if (element.phaserEntity && element.phaserEntity.entity) {
+                element.phaserEntity.entity.shouldRunProcess = false;
+            }
         });
         this.cameras.main.cull(this.renderedEntities).forEach(function (element) {
             if (!element.hidden) {
                 element.setVisible(true);
+                if (element.phaserEntity && element.phaserEntity.entity) {
+                    element.phaserEntity.entity.shouldRunProcess = true;
+                }
             }
         });
     };
