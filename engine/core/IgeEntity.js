@@ -3112,7 +3112,7 @@ var IgeEntity = IgeObject.extend({
 	},
 
 	teleportTo: function (x, y, rotate) {
-		// console.log("teleporting to ", x, y);
+		console.log("teleporting to ", x, y);
 
 		this.translateTo(x, y);
 		if (rotate != undefined) {
@@ -3120,14 +3120,22 @@ var IgeEntity = IgeObject.extend({
 		}
 
 		if (ige.isServer) {
+
+
 			ige.network.send('teleport', { entityId: this.id(), position: [x, y] });
 			this.clientStreamedPosition = undefined;
-			//////////////////////////////////////////
 			if (ige.physics && ige.physics.engine == 'CRASH') {
 				this.translateColliderTo(x, y);
 			}
-			///////////////////////////////////////////
 		} else if (ige.isClient) {
+
+			if (ige.physics) {
+				let prevFrameTime = this.prevPhysicsFrame[0]
+				let nextFrameTime = this.nextPhysicsFrame[0]
+				this.prevPhysicsFrame = [prevFrameTime, [x, y, rotate]];
+				this.nextPhysicsFrame = [nextFrameTime, [x, y, rotate]];
+			}			
+
 			// this.lastServerStreamedPosition = undefined;
 			if (this.body) {
 				this.body.setPosition({ x: x / this._b2dRef._scaleRatio, y: y / this._b2dRef._scaleRatio });
@@ -3141,7 +3149,8 @@ var IgeEntity = IgeObject.extend({
 		this.lastTeleportedAt = ige._currentTime;
 
 		if (this._category == 'unit') {
-			// teleport unit's attached items
+			// teleport unit's attached items as well. otherwise, the attached bodies (using joint) can cause a drag and
+			// teleport the unit to a location that's between the origin and the destination
 			for (entityId in this.jointsAttached) {
 				if ((attachedEntity = ige.$(entityId))) {
 					if (attachedEntity._category == 'item') {
@@ -5275,9 +5284,12 @@ var IgeEntity = IgeObject.extend({
 		// 	}
 		// }
 
-
-		this.rotateTo(0, 0, rotate);		
-		this.translateTo(x, y, 0);
+		
+		this._translate.x = x;
+		this._translate.y = y;
+		this._rotate.z = rotate;
+		// this.rotateTo(0, 0, rotate);		
+		// this.translateTo(x, y, 0);
 		this._lastTransformAt = ige._currentTime;
 	},
 

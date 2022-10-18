@@ -844,9 +844,6 @@ var Item = IgeEntityPhysics.extend({
 	streamUpdateData: function (queuedData) {
 		var self = this;
 
-		if (ige.isServer && ige.network.isPaused) {
-			return;
-		}
 		IgeEntity.prototype.streamUpdateData.call(this, queuedData);
 		// ige.devLog("Item streamUpdateData ", data)
 		for (var i = 0; i < queuedData.length; i++) {

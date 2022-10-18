@@ -1697,6 +1697,7 @@ var ActionComponent = IgeEntity.extend({
 							self._script.errorLog('invalid item type data');
 						}
 						break;
+
 					case 'spawnItem':
 
 						var itemTypeId = self._script.variable.getValue(action.itemType, vars);
@@ -1718,6 +1719,7 @@ var ActionComponent = IgeEntity.extend({
 							self._script.errorLog('invalid item type data');
 						}
 						break;
+
 					case 'giveNewItemToUnit':
 						var itemTypeId = self._script.variable.getValue(action.itemType, vars);
 						var itemData = ige.game.getAsset('itemTypes', itemTypeId);
@@ -1787,6 +1789,15 @@ var ActionComponent = IgeEntity.extend({
 						{
 							if (unit == undefined || unit._category != 'unit')
 								self._script.errorLog('unit doesn\'t exist');
+						}
+
+						break;
+
+					case 'setOwnerUnitOfProjectile':
+						var unit = self._script.variable.getValue(action.unit, vars);
+						var projectile = self._script.variable.getValue(action.projectile, vars);
+						if (projectile && unit) {
+							projectile.setSourceUnit(unit);
 						}
 
 						break;
