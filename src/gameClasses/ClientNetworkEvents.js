@@ -467,6 +467,11 @@ var ClientNetworkEvents = {
 		}
 	},
 
+	// when other players' update tiles, apply the change to my local
+	_onEditTile: function (data) {
+		ige.client.emit('editTile', {gid: data.gid, layer: data.layer, x: data.x, y: data.y});
+	},
+
 	_onErrorLogs: function (logs) {
 		var element = document.getElementById('error-log-content');
 		for (actionName in logs) {

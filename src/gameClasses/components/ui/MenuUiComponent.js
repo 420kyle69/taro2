@@ -118,6 +118,19 @@ var MenuUiComponent = IgeEntity.extend({
 				}
 			});
 
+			$('#toggle-dev-panels').on('click', function () {
+				if(['1', '5'].includes(window.gameDetails.tier)) {
+					if (!ige.developerMode.active) {
+						ige.developerMode.enter();
+					} else {
+						ige.developerMode.leave();
+					}
+				} else {
+					const devConsoleEl = document.getElementById('dev-console').style.display;
+					document.getElementById('dev-console').style.display = devConsoleEl === 'none' ? 'block' : 'none';
+				}
+			});
+
 			$('.open-menu-button').on('click', function () {
 				self.toggleMenu();
 				$('.open-menu-button').hide();

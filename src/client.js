@@ -154,6 +154,7 @@ const Client = IgeEventingClass.extend({
 			
 			ige.entitiesToRender = new EntitiesToRender();
 			ige.renderer = new PhaserRenderer();
+			ige.developerMode = new DeveloperMode();
 
 			if(!window.isStandalone){
 				this.servers = this.getServersArray();
@@ -741,6 +742,7 @@ const Client = IgeEventingClass.extend({
 		ige.network.define('userJoinedGame', this._onUserJoinedGame);
 
 		ige.network.define('trade', this._onTrade);
+		ige.network.define('editTile', this._onEditTile);
 	},
 
 	login: function() {
