@@ -191,12 +191,8 @@ var Projectile = IgeEntityPhysics.extend({
 	// update this projectile's stats in the client side
 	streamUpdateData: function (queuedData) {
 		var self = this;
-		if (ige.isServer && ige.network.isPaused) {
-			return;
-		}
-
 		IgeEntity.prototype.streamUpdateData.call(this, queuedData);
-
+		
 		for (var i = 0; i < queuedData.length; i++) {
 			var data = queuedData[i];
 			for (attrName in data) {
