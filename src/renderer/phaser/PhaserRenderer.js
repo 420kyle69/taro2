@@ -21,7 +21,7 @@ var PhaserRenderer = /** @class */ (function (_super) {
         var forceCanvas = JSON.parse(localStorage.getItem('forceCanvas')) || {};
         _this = _super.call(this, {
             type: forceCanvas[gameId] ?
-                Phaser.CANVAS : Phaser.AUTO,
+                Phaser.CANVAS : Phaser.CANVAS,
             scale: {
                 width: 600,
                 height: 400,

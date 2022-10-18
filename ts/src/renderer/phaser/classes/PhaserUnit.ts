@@ -142,7 +142,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		label.setFontSize(16);
 		label.setFontStyle(data.bold ? 'bold' : 'normal');
 		label.setFill(data.color || '#fff');
-		label.setResolution(4);
+		//label.setResolution(4);
 
 		const strokeThickness = ige.game.data.settings
 			.addStrokeToNameAndAttributes !== false ? 4 : 0;
