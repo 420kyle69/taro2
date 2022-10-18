@@ -31,6 +31,7 @@ var PhaserRay = /** @class */ (function () {
         if (config.projType) {
             this.sprite = scene.add.sprite(start.x, start.y, "projectile/".concat(config.projType));
             this.sprite.setAngle(config.rotation * 180 / Math.PI);
+            this.sprite.setDisplaySize(config.dimensions.width, config.dimensions.height);
             scene.tweens.add({
                 targets: this.sprite,
                 duration: 50 * config.fraction,

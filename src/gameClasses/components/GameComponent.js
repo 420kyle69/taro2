@@ -116,9 +116,9 @@ var GameComponent = IgeEntity.extend({
 		}
 
 		if (ige.isServer) {
-			console.log(player._stats.permissions)
+
 			// send latest ui information to the client
-			ige.gameText.sendLatestText(data.clientId); 
+			ige.gameText.sendLatestText(data.clientId);
 			// ige.shopkeeper.updateShopInventory(ige.shopkeeper.inventory, data.clientId) // send latest ui information to the client
 
 			var isOwner = ige.server.owner == data._id && data.controlledBy == 'human';
@@ -134,7 +134,7 @@ var GameComponent = IgeEntity.extend({
 			}
 			player._stats.isUserAdmin = isUserAdmin;
 			player._stats.isUserMod = isUserMod;
-			
+
 			// if User/Admin has access to game then show developer logs
 			if (isOwner || isInvitedUser || isUserAdmin) {
 				GameComponent.prototype.log(`owner/admin/mod connected. _id: ${data._id}`);
