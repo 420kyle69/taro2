@@ -38,6 +38,7 @@ var PhaserPaletteButton = /** @class */ (function () {
         });
     }
     PhaserPaletteButton.prototype.highlight = function (boolean) {
+        this.active = boolean;
         if (boolean) {
             this.button.setFillStyle(this.palette.COLOR_LIGHT, 1);
         }

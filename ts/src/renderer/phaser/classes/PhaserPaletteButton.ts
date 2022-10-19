@@ -1,6 +1,7 @@
 class PhaserPaletteButton {
     button: Phaser.GameObjects.Rectangle;
     palette: PhaserPalette;
+    active: boolean;
 
     constructor (
         palette: PhaserPalette,
@@ -52,7 +53,8 @@ class PhaserPaletteButton {
 		});
     }
 
-    highlight (boolean) {
+    highlight (boolean: boolean) {
+        this.active = boolean;
         if (boolean) {
             this.button.setFillStyle(this.palette.COLOR_LIGHT, 1);
         }

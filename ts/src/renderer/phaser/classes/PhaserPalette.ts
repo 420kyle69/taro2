@@ -23,6 +23,7 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 	COLOR_DARK: number;
 	COLOR_LIGHT: number;
 	area: { x: number, y: number };
+	cursorButton: PhaserPaletteButton;
 	
 	constructor(
 		scene: DevModeScene,
@@ -149,8 +150,8 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 			scrollBarContainer.x = this.camera.x;
 			layerButtonsContainer.x = this.camera.x + paletteWidth - 98;
 			layerButtonsContainer.y = this.camera.y - 170;
-			toolButtonsContainer.x = this.camera.x;
-			toolButtonsContainer.y = this.camera.y - 62;
+			toolButtonsContainer.x = this.camera.x + paletteWidth - 98;
+			toolButtonsContainer.y = this.camera.y - layerButtonsContainer.height - 136;
 		});
 
 		new PhaserPaletteButton (this, '+', null, 0, -34, 30, scrollBarContainer, this.zoom.bind(this), -1);
@@ -183,7 +184,7 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 		toolButtonsContainer.width = 120;
 		toolButtonsContainer.height = 64;
 
-		new PhaserPaletteButton (this, '.', 'cursor', 0, 0, 58, toolButtonsContainer, this.emptyTile.bind(this));
+		this.cursorButton = new PhaserPaletteButton (this, '.', 'cursor', 0, 0, 58, toolButtonsContainer, this.disableMarker.bind(this));
 		new PhaserPaletteButton (this, '_', 'eraser', 62, 0, 58, toolButtonsContainer, this.emptyTile.bind(this));
 
 		this.toolButtons = [];
@@ -208,6 +209,14 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 			this.pointerover = false;
 			console.log('pointerout');
 		});*/
+	}
+
+	disableMarker() {
+		if (!this.cursorButton.active) {
+			this.cursorButton.highlight(true);
+		} else {
+			this.cursorButton.highlight(false);
+		}
 	}
 
 	emptyTile() {

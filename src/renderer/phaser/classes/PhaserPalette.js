@@ -123,8 +123,8 @@ var PhaserPalette = /** @class */ (function (_super) {
             scrollBarContainer.x = _this.camera.x;
             layerButtonsContainer.x = _this.camera.x + paletteWidth - 98;
             layerButtonsContainer.y = _this.camera.y - 170;
-            toolButtonsContainer.x = _this.camera.x;
-            toolButtonsContainer.y = _this.camera.y - 62;
+            toolButtonsContainer.x = _this.camera.x + paletteWidth - 98;
+            toolButtonsContainer.y = _this.camera.y - layerButtonsContainer.height - 136;
         });
         new PhaserPaletteButton(_this, '+', null, 0, -34, 30, scrollBarContainer, _this.zoom.bind(_this), -1);
         new PhaserPaletteButton(_this, '-', null, 34, -34, 30, scrollBarContainer, _this.zoom.bind(_this), 1);
@@ -146,7 +146,7 @@ var PhaserPalette = /** @class */ (function (_super) {
         toolButtonsContainer.y = _this.camera.y - layerButtonsContainer.height - 136;
         toolButtonsContainer.width = 120;
         toolButtonsContainer.height = 64;
-        new PhaserPaletteButton(_this, '.', 'cursor', 0, 0, 58, toolButtonsContainer, _this.emptyTile.bind(_this));
+        _this.cursorButton = new PhaserPaletteButton(_this, '.', 'cursor', 0, 0, 58, toolButtonsContainer, _this.disableMarker.bind(_this));
         new PhaserPaletteButton(_this, '_', 'eraser', 62, 0, 58, toolButtonsContainer, _this.emptyTile.bind(_this));
         _this.toolButtons = [];
         _this.toolButtons.push(new PhaserPaletteButton(_this, '1x1', null, 0, 34, 58, toolButtonsContainer, _this.selectSingle.bind(_this)), new PhaserPaletteButton(_this, '2x2', null, 62, 34, 58, toolButtonsContainer, _this.selectArea.bind(_this)));
@@ -167,6 +167,14 @@ var PhaserPalette = /** @class */ (function (_super) {
             console.log('pointerout');
         });*/
     }
+    PhaserPalette.prototype.disableMarker = function () {
+        if (!this.cursorButton.active) {
+            this.cursorButton.highlight(true);
+        }
+        else {
+            this.cursorButton.highlight(false);
+        }
+    };
     PhaserPalette.prototype.emptyTile = function () {
         var copy = __assign({}, this.scene.selectedTile);
         copy.index = 0;

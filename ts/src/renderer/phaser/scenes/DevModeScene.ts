@@ -249,14 +249,14 @@ class DevModeScene extends PhaserScene {
 								if (this.pointerInsideMap(pointerTileX + i, pointerTileY + j, map)) {
 									this.selectedTileArea[i][j].tint = 0xffffff;
 									this.selectedTileArea[i][j] = map.getTileAt(pointerTileX + i, pointerTileY + j, true);
-								} 
+								}
 							}
 						}
 					} else {
 						if (this.pointerInsideMap(pointerTileX, pointerTileY, map)) {
 							this.selectedTile.tint = 0xffffff;
 							this.selectedTile = map.getTileAt(pointerTileX, pointerTileY, true);
-						} 
+						}
 					}
 				}
 
