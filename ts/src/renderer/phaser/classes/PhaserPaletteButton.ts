@@ -5,6 +5,7 @@ class PhaserPaletteButton {
     constructor (
         palette: PhaserPalette,
         text: string,
+        texture: string | null,
         x: number, 
         y: number, 
         w: number, 
@@ -12,6 +13,7 @@ class PhaserPaletteButton {
         func: (...args: any[]) => void, 
         value?: number
         ) {
+        
         //const text = '+';
 		//const w = 30;
 		const h = 30;
@@ -21,15 +23,29 @@ class PhaserPaletteButton {
         const button = this.button = palette.scene.add.rectangle(x + w/2, y + h/2, w, h, palette.COLOR_DARK);
 		button.setInteractive();
 		container.add(button);
-		const label = palette.scene.add.text(
-			x + w/2, y + h/2, text
-		);
-		label.setFontFamily('Verdana');
+		
+        if (texture) {
+            const image = palette.scene.add.image(x, y, texture)
+						.setDisplaySize(w, h)
+						.setOrigin(0)
+            container.add(image);
+        } else {
+            const label = palette.scene.add.text(
+                x + w/2, y + h/2, text
+            );
+            label.setFontFamily('Verdana');
+            label.setColor('#000000')
+		    label.setFontSize(26);
+		    label.setOrigin(0.5);
+		    label.setResolution(4);
+		    container.add(label);
+        }
+		/*label.setFontFamily('Verdana');
         label.setColor('#000000')
 		label.setFontSize(26);
 		label.setOrigin(0.5);
 		label.setResolution(4);
-		container.add(label);
+		container.add(label);*/
 		button.on('pointerdown', () => {
 			if (value || value === 0) func(value);
 			else func();

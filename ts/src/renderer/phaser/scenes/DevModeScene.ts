@@ -120,6 +120,9 @@ class DevModeScene extends PhaserScene {
 			this.load.image(key, this.patchAssetUrl(tileset.image));
 		});*/
 
+		this.load.image('cursor', 'assets/images/cursor.png');
+		this.load.image('eraser', 'assets/images/erasergap.png');
+
 		this.load.scenePlugin(
 			'rexuiplugin',
 			'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js',
@@ -169,7 +172,7 @@ class DevModeScene extends PhaserScene {
 	pointerInsidePalette(): boolean {
 		return (this.input.activePointer.x > this.devPalette.scrollBarContainer.x
 			&& this.input.activePointer.x < this.devPalette.scrollBarContainer.x + this.devPalette.scrollBarContainer.width
-			&& this.input.activePointer.y > this.devPalette.scrollBarContainer.y - 30
+			&& this.input.activePointer.y > this.devPalette.scrollBarContainer.y /*- 30*/
 			&& this.input.activePointer.y < this.devPalette.scrollBarContainer.y + this.devPalette.scrollBarContainer.height)
 	}
 
@@ -177,7 +180,11 @@ class DevModeScene extends PhaserScene {
 		return (this.input.activePointer.x > this.devPalette.layerButtonsContainer.x
 			&& this.input.activePointer.x < this.devPalette.layerButtonsContainer.x + this.devPalette.layerButtonsContainer.width
 			&& this.input.activePointer.y > this.devPalette.layerButtonsContainer.y - this.devPalette.layerButtonsContainer.height
-			&& this.input.activePointer.y < this.devPalette.layerButtonsContainer.y)
+			&& this.input.activePointer.y < this.devPalette.layerButtonsContainer.y
+			&& this.input.activePointer.x > this.devPalette.toolButtonsContainer.x
+			&& this.input.activePointer.x < this.devPalette.toolButtonsContainer.x + this.devPalette.toolButtonsContainer.width
+			&& this.input.activePointer.y > this.devPalette.toolButtonsContainer.y 
+			&& this.input.activePointer.y < this.devPalette.toolButtonsContainer.y + this.devPalette.toolButtonsContainer.height)
 	}
 
 	update (): void {

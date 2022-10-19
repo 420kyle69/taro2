@@ -15,6 +15,7 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 
 	layerButtonsContainer: Phaser.GameObjects.Container;
 	layerButtons: PhaserPaletteButton[];
+	toolButtonsContainer: Phaser.GameObjects.Container;
 	toolButtons: PhaserPaletteButton[];
 
 	pointerover: any;
@@ -147,19 +148,11 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 			camera.x = this.scene.sys.game.canvas.width - paletteWidth - 40;
 			scrollBarContainer.x = this.camera.x;
 			layerButtonsContainer.x = this.camera.x + paletteWidth - 98;
+			toolButtonsContainer.x = this.camera.x + 93;
 		});
 
-		new PhaserPaletteButton (this, '+', 0, -31, 30, scrollBarContainer, this.zoom.bind(this), -1);
-		new PhaserPaletteButton (this, '-', 31, -31, 30, scrollBarContainer, this.zoom.bind(this), 1);
-
-		new PhaserPaletteButton (this, '_', 93, -31, 30, scrollBarContainer, this.emptyTile.bind(this));
-
-		this.toolButtons = [];
-		this.toolButtons.push (
-			new PhaserPaletteButton (this, '.', 155, -31, 30, scrollBarContainer, this.selectSingle.bind(this)),
-			new PhaserPaletteButton (this, '[]', 186, -31, 30, scrollBarContainer, this.selectArea.bind(this))
-		)
-		this.toolButtons[0].highlight(true);
+		new PhaserPaletteButton (this, '+', null, 0, -31, 30, scrollBarContainer, this.zoom.bind(this), -1);
+		new PhaserPaletteButton (this, '-', null, 31, -31, 30, scrollBarContainer, this.zoom.bind(this), 1);
 
 		const layerButtonsContainer = this.layerButtonsContainer = new Phaser.GameObjects.Container(scene);
 		scene.add.existing(layerButtonsContainer);
@@ -169,16 +162,33 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 		layerButtonsContainer.width = 120;
 		layerButtonsContainer.height = 160;
 
-		new PhaserPaletteButton (this, 'tiles', 0, -31, 120, layerButtonsContainer, this.toggle.bind(this));
+		new PhaserPaletteButton (this, 'tiles', null, 0, -31, 120, layerButtonsContainer, this.toggle.bind(this));
 
 		this.layerButtons = [];
 		this.layerButtons.push (
-			new PhaserPaletteButton (this, 'floor', 0, -93, 120, layerButtonsContainer, this.switchLayer.bind(this), 0),
-			new PhaserPaletteButton (this, 'floor2', 0, -124, 120, layerButtonsContainer, this.switchLayer.bind(this), 1),
-			new PhaserPaletteButton (this, 'walls', 0, -155, 120, layerButtonsContainer, this.switchLayer.bind(this), 2),
-			new PhaserPaletteButton (this, 'trees', 0, -186, 120, layerButtonsContainer, this.switchLayer.bind(this), 3)
+			new PhaserPaletteButton (this, 'floor', null, 0, -93, 120, layerButtonsContainer, this.switchLayer.bind(this), 0),
+			new PhaserPaletteButton (this, 'floor2', null, 0, -124, 120, layerButtonsContainer, this.switchLayer.bind(this), 1),
+			new PhaserPaletteButton (this, 'walls', null, 0, -155, 120, layerButtonsContainer, this.switchLayer.bind(this), 2),
+			new PhaserPaletteButton (this, 'trees', null, 0, -186, 120, layerButtonsContainer, this.switchLayer.bind(this), 3)
 		)
 		this.layerButtons[0].highlight(true);
+
+		const toolButtonsContainer = this.toolButtonsContainer = new Phaser.GameObjects.Container(scene);
+		scene.add.existing(toolButtonsContainer);
+		//this.scrollBarContainer.add(toolButtonsContainer);
+		toolButtonsContainer.x = this.camera.x + 93;
+		toolButtonsContainer.y = this.camera.y;
+		toolButtonsContainer.width = 310;
+		toolButtonsContainer.height = 50;
+
+		new PhaserPaletteButton (this, '_', 'eraser', 0, -31, 30, toolButtonsContainer, this.emptyTile.bind(this));
+
+		this.toolButtons = [];
+		this.toolButtons.push (
+			new PhaserPaletteButton (this, '.', null, 62, -31, 30, toolButtonsContainer, this.selectSingle.bind(this)),
+			new PhaserPaletteButton (this, '[]', null, 93, -31, 30, toolButtonsContainer, this.selectArea.bind(this))
+		)
+		this.toolButtons[0].highlight(true);
 
 		this.area = {x: 1, y: 1};
 

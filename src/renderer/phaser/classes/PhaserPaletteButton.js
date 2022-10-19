@@ -1,5 +1,5 @@
 var PhaserPaletteButton = /** @class */ (function () {
-    function PhaserPaletteButton(palette, text, x, y, w, container, func, value) {
+    function PhaserPaletteButton(palette, text, texture, x, y, w, container, func, value) {
         //const text = '+';
         //const w = 30;
         var h = 30;
@@ -9,13 +9,27 @@ var PhaserPaletteButton = /** @class */ (function () {
         var button = this.button = palette.scene.add.rectangle(x + w / 2, y + h / 2, w, h, palette.COLOR_DARK);
         button.setInteractive();
         container.add(button);
-        var label = palette.scene.add.text(x + w / 2, y + h / 2, text);
-        label.setFontFamily('Verdana');
-        label.setColor('#000000');
+        if (texture) {
+            var image = palette.scene.add.image(x, y, texture)
+                .setDisplaySize(w, h)
+                .setOrigin(0);
+            container.add(image);
+        }
+        else {
+            var label = palette.scene.add.text(x + w / 2, y + h / 2, text);
+            label.setFontFamily('Verdana');
+            label.setColor('#000000');
+            label.setFontSize(26);
+            label.setOrigin(0.5);
+            label.setResolution(4);
+            container.add(label);
+        }
+        /*label.setFontFamily('Verdana');
+        label.setColor('#000000')
         label.setFontSize(26);
         label.setOrigin(0.5);
         label.setResolution(4);
-        container.add(label);
+        container.add(label);*/
         button.on('pointerdown', function () {
             if (value || value === 0)
                 func(value);
