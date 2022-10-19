@@ -437,6 +437,7 @@ var ServerNetworkEvents = {
 	_onEditTile: function(data, clientId) {
 		// only allow developers to modify the tiles
 		if (ige.server.developerClientIds.includes(clientId)) {
+			ige.game.data.map.wasEdited = true;
 			ige.network.send("editTile", data);
 
 			/* NEED TO MOVE THIS LOGIC FOR MAP SAVING */

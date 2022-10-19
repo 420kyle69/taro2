@@ -1704,7 +1704,6 @@ var IgeEngine = IgeEntity.extend({
 				ige.queueTrigger('frameTick');
 			}
 			
-			ige.updateCount = 0;
 			ige.tickCount = 0;
 			ige.updateTransform = 0;
 			ige.inViewCount = 0;

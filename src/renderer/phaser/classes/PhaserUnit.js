@@ -21,6 +21,7 @@ var PhaserUnit = /** @class */ (function (_super) {
         var translate = entity._translate;
         var gameObject = scene.add.container(translate.x, translate.y, [_this.sprite]);
         _this.gameObject = gameObject;
+        _this.gameObject.phaserEntity = _this;
         var containerSize = Math.max(_this.sprite.displayHeight, _this.sprite.displayWidth);
         gameObject.setSize(containerSize, containerSize);
         _this.scene.renderedEntities.push(_this.gameObject);
@@ -114,7 +115,7 @@ var PhaserUnit = /** @class */ (function (_super) {
         label.setFontSize(16);
         label.setFontStyle(data.bold ? 'bold' : 'normal');
         label.setFill(data.color || '#fff');
-        label.setResolution(4);
+        //label.setResolution(4);
         var strokeThickness = ige.game.data.settings
             .addStrokeToNameAndAttributes !== false ? 4 : 0;
         label.setStroke('#000', strokeThickness);

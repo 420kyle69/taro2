@@ -1,7 +1,7 @@
 class PhaserItem extends PhaserAnimatedEntity {
 
 	protected gameObject: Phaser.GameObjects.Sprite & Hidden;
-	protected entity: Item;
+	public entity: Item;
 
 	constructor (
 		scene: GameScene,

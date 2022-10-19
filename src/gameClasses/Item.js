@@ -431,7 +431,11 @@ var Item = IgeEntityPhysics.extend({
 										{
 											method: 'closest',
 											projType: data.type,
-											rotation: pos.rotation
+											rotation: pos.rotation,
+											dimensions: {
+												width: data.bodies.default.width,
+												height: data.bodies.default.height
+											}
 										}
 									);
 

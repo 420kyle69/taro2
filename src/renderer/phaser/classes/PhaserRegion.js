@@ -20,6 +20,7 @@ var PhaserRegion = /** @class */ (function (_super) {
         _this.scene = scene;
         var gameObject = scene.add.graphics();
         _this.gameObject = gameObject;
+        _this.gameObject.phaserEntity = _this;
         _this.gameObject.visible = false;
         scene.renderedEntities.push(_this.gameObject);
         // we don't get depth/layer info from taro,

@@ -24,6 +24,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			[ this.sprite ]
 		);
 		this.gameObject = gameObject as Phaser.GameObjects.Container & Hidden;
+		this.gameObject.phaserEntity = this;
 		const containerSize = Math.max(this.sprite.displayHeight, this.sprite.displayWidth);
 		gameObject.setSize(containerSize, containerSize);
 		this.scene.renderedEntities.push(this.gameObject);
@@ -142,7 +143,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		label.setFontSize(16);
 		label.setFontStyle(data.bold ? 'bold' : 'normal');
 		label.setFill(data.color || '#fff');
-		label.setResolution(4);
+		//label.setResolution(4);
 
 		const strokeThickness = ige.game.data.settings
 			.addStrokeToNameAndAttributes !== false ? 4 : 0;

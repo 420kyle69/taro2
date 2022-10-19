@@ -17,6 +17,7 @@ declare class IgeEntity extends IgeObject {
 
 	_deathCallBack?: () => void;
 	_behaviour?: () => void;
+	shouldRunProcess: boolean;
 
 	_processTransform (): void
 

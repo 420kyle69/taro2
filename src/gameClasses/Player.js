@@ -98,7 +98,7 @@ var Player = IgeEntity.extend({
 				{ mapData: ige.game.data.map }
 			];
 
-				console.log(`Player.joinGame(): sending ACK to client ${self._stats.clientId} ${self._stats.name} (time elapsed: ${Date.now() - client.lastEventAt})`, playerJoinStreamData);
+				// console.log(`Player.joinGame(): sending ACK to client ${self._stats.clientId} ${self._stats.name} (time elapsed: ${Date.now() - client.lastEventAt})`, playerJoinStreamData);
 
 				self.streamUpdateData(playerJoinStreamData);
 				ige.clusterClient && ige.clusterClient.playerJoined(self._stats.userId);

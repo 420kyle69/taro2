@@ -23,18 +23,19 @@ var DeveloperMode = /** @class */ (function () {
         console.log(ige.game.data.map);
     }*/
     DeveloperMode.prototype.updateClientMap = function (data) {
-        console.log('updated data', data);
-        ige.game.data.map = data.mapData;
-        if (ige.physics) {
-            //if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
-            ige.physics.destroyWalls();
-            var map = ige.scaleMap(_.cloneDeep(ige.game.data.map));
-            ige.tiled.loadJson(map, function (layerArray, IgeLayersById) {
-                ige.physics.staticsFromMap(IgeLayersById.walls);
-            });
+        if (data.mapData.wasEdited) {
+            console.log('updated data', data);
+            ige.game.data.map = data.mapData;
+            if (ige.physics) {
+                //if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
+                ige.physics.destroyWalls();
+                var map = ige.scaleMap(_.cloneDeep(ige.game.data.map));
+                ige.tiled.loadJson(map, function (layerArray, IgeLayersById) {
+                    ige.physics.staticsFromMap(IgeLayersById.walls);
+                });
+            }
+            ige.client.emit('updateMap');
         }
-        ige.client.emit('updateMap');
-        //ige.renderer.scene.getScene('Game').updateMap();
     };
     return DeveloperMode;
 }());
