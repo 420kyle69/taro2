@@ -32,9 +32,11 @@ var EntitiesToRender = /** @class */ (function () {
                             if (
                             // Don't run if we're updating item's state/owner unit, but its owner doesn't exist yet
                             entity._category == 'item' &&
-                                ((nextUpdate.ownerUnitId && ige.$(nextUpdate.ownerUnitId) == undefined) || // updating item's owner unit, but the owner hasn't been created yet
-                                    ((nextUpdate.stateId == 'selected' || nextUpdate.stateId == 'unselected') && entity.getOwnerUnit() == undefined)) // changing item's state to selected/unselected, but owner doesn't exist yet
-                            ) {
+                                ( // updating item's owner unit, but the owner hasn't been created yet
+                                (nextUpdate.ownerUnitId && ige.$(nextUpdate.ownerUnitId) == undefined) ||
+                                    ( // changing item's state to selected/unselected, but owner doesn't exist yet
+                                    (nextUpdate.stateId == 'selected' || nextUpdate.stateId == 'unselected') &&
+                                        entity.getOwnerUnit() == undefined))) {
                                 break;
                             }
                             else {
@@ -49,43 +51,45 @@ var EntitiesToRender = /** @class */ (function () {
                         }
                     }
                 }
-                // update transformation using incoming network stream
-                if (ige.network.stream) {
-                    entity._processTransform();
-                }
-                if (entity._translate && !entity.isHidden()) {
-                    var x = entity._translate.x;
-                    var y = entity._translate.y;
-                    var rotate = entity._rotate.z;
-                    if (entity._category == 'item') {
-                        var ownerUnit = entity.getOwnerUnit();
-                        if (ownerUnit) {
-                            // if ownerUnit's transformation hasn't been processed yet, then it'll cause item to drag behind. so we're running it now
-                            ownerUnit._processTransform();
-                            // immediately rotate items for my own unit
-                            if (ownerUnit == ige.client.selectedUnit) {
-                                if (entity._stats.currentBody && entity._stats.currentBody.jointType == 'weldJoint') {
-                                    rotate = ownerUnit._rotate.z;
+                if (entity.shouldRunProcess) {
+                    // update transformation using incoming network stream
+                    if (ige.network.stream) {
+                        entity._processTransform();
+                    }
+                    if (entity._translate && !entity.isHidden()) {
+                        var x = entity._translate.x;
+                        var y = entity._translate.y;
+                        var rotate = entity._rotate.z;
+                        if (entity._category == 'item') {
+                            var ownerUnit = entity.getOwnerUnit();
+                            if (ownerUnit) {
+                                // if ownerUnit's transformation hasn't been processed yet, then it'll cause item to drag behind. so we're running it now
+                                ownerUnit._processTransform();
+                                // immediately rotate items for my own unit
+                                if (ownerUnit == ige.client.selectedUnit) {
+                                    if (entity._stats.currentBody && entity._stats.currentBody.jointType == 'weldJoint') {
+                                        rotate = ownerUnit._rotate.z;
+                                    }
+                                    else if (ownerUnit == ige.client.selectedUnit) {
+                                        rotate = ownerUnit.angleToTarget; // angleToTarget is updated at 60fps
+                                    }
                                 }
-                                else if (ownerUnit == ige.client.selectedUnit) {
-                                    rotate = ownerUnit.angleToTarget; // angleToTarget is updated at 60fps
+                                entity.anchoredOffset = entity.getAnchoredOffset(rotate);
+                                if (entity.anchoredOffset) {
+                                    x = ownerUnit._translate.x + entity.anchoredOffset.x;
+                                    y = ownerUnit._translate.y + entity.anchoredOffset.y;
+                                    rotate = entity.anchoredOffset.rotate;
                                 }
-                            }
-                            entity.anchoredOffset = entity.getAnchoredOffset(rotate);
-                            if (entity.anchoredOffset) {
-                                x = ownerUnit._translate.x + entity.anchoredOffset.x;
-                                y = ownerUnit._translate.y + entity.anchoredOffset.y;
-                                rotate = entity.anchoredOffset.rotate;
                             }
                         }
+                        if (entity.tween && entity.tween.isTweening) {
+                            entity.tween.update();
+                            x += entity.tween.offset.x;
+                            y += entity.tween.offset.y;
+                            rotate += entity.tween.offset.rotate;
+                        }
+                        entity.transformTexture(x, y, rotate);
                     }
-                    if (entity.tween && entity.tween.isTweening) {
-                        entity.tween.update();
-                        x += entity.tween.offset.x;
-                        y += entity.tween.offset.y;
-                        rotate += entity.tween.offset.rotate;
-                    }
-                    entity.transformTexture(x, y, rotate);
                 }
             }
         }

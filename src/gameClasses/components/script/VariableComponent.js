@@ -1005,8 +1005,17 @@ var VariableComponent = IgeEntity.extend({
 						// returnValue = entity._aabb.height;
 						returnValue = entity.height();
 					}
-
+				
 					break;
+				
+				case 'unitSensorRadius':
+					var unit = self.getValue(text.unit, vars);
+					if (unit && unit._stats && unit._stats.ai) {
+						returnValue = unit._stats.ai.sensorRadius
+					}
+				
+					break;
+					
 				case 'defaultQuantityOfItemType':
 					var itemTypeId = self.getValue(text.itemType, vars);
 					var itemType = ige.game.getAsset('itemTypes', itemTypeId);
@@ -1125,14 +1134,19 @@ var VariableComponent = IgeEntity.extend({
 						return Math.log10(value);
 					}
 					break;
-	
 
 				case 'getEntireMapRegion':
+					// var region = {
+					// 	x: ige.map.data.tilewidth * 2,
+					// 	y: ige.map.data.tileheight * 2,
+					// 	width: (ige.map.data.width * ige.map.data.tilewidth) - (ige.map.data.tilewidth * 2),
+					// 	height: (ige.map.data.height * ige.map.data.tileheight) - (ige.map.data.tileheight * 2)
+					// };
 					var region = {
-						x: ige.map.data.tilewidth * 2,
-						y: ige.map.data.tileheight * 2,
-						width: (ige.map.data.width * ige.map.data.tilewidth) - (ige.map.data.tilewidth * 2),
-						height: (ige.map.data.height * ige.map.data.tileheight) - (ige.map.data.tileheight * 2)
+						x: 0,
+						y: 0,
+						width: ige.map.data.width * ige.map.data.tilewidth,
+						height: ige.map.data.height * ige.map.data.tileheight
 					};
 
 					returnValue = { _stats: { default: region } };
@@ -1187,6 +1201,26 @@ var VariableComponent = IgeEntity.extend({
 					}
 					break;
 				case 'entitiesCollidingWithLastRaycast': {
+					returnValue = ige.game.entitiesCollidingWithLastRaycast;
+					break;
+				}
+				case 'entitiesBetweenTwoPositions': {
+					var positionA = self.getValue(text.positionA, vars);
+					var positionB = self.getValue(text.positionB, vars);
+
+					positionA = {
+						x: positionA.x / ige.physics._scaleRatio,
+						y: positionA.y / ige.physics._scaleRatio
+					};
+					positionB = {
+						x: positionB.x / ige.physics._scaleRatio,
+						y: positionB.y / ige.physics._scaleRatio
+					};
+					ige.raycaster.raycastLine(
+						positionA,
+						positionB,
+					);
+
 					returnValue = ige.game.entitiesCollidingWithLastRaycast;
 					break;
 				}

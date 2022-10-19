@@ -116,13 +116,15 @@ var GameComponent = IgeEntity.extend({
 		}
 
 		if (ige.isServer) {
-			ige.gameText.sendLatestText(data.clientId); // send latest ui information to the client
+
+			// send latest ui information to the client
+			ige.gameText.sendLatestText(data.clientId);
 			// ige.shopkeeper.updateShopInventory(ige.shopkeeper.inventory, data.clientId) // send latest ui information to the client
 
 			var isOwner = ige.server.owner == data._id && data.controlledBy == 'human';
 			var isInvitedUser = false;
 			if (ige.game.data.defaultData && ige.game.data.defaultData.invitedUsers) {
-				isInvitedUser = ige.game.data.defaultData.invitedUsers.some(e => e._id === data._id);
+				isInvitedUser = ige.game.data.defaultData.invitedUsers.some(e => e.user === data._id);
 			}
 			var isUserAdmin = false;
 			var isUserMod = false;
@@ -132,7 +134,7 @@ var GameComponent = IgeEntity.extend({
 			}
 			player._stats.isUserAdmin = isUserAdmin;
 			player._stats.isUserMod = isUserMod;
-			
+
 			// if User/Admin has access to game then show developer logs
 			if (isOwner || isInvitedUser || isUserAdmin) {
 				GameComponent.prototype.log(`owner/admin/mod connected. _id: ${data._id}`);
@@ -169,19 +171,6 @@ var GameComponent = IgeEntity.extend({
 				);
 			});
 		}
-	},
-
-	// not in use;
-	getUnitsByClientId: function (clientId) {
-		return ige
-			.$$('unit')
-			.filter(function (unit) {
-				return unit._stats && unit._stats.clientId == clientId;
-			})
-			.reduce(function (partialUnits, unit) {
-				partialUnits[unit._id] = unit;
-				return partialUnits;
-			}, {});
 	},
 
 	getPlayerByUserId: function (userId) {

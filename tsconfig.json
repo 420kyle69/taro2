@@ -16,6 +16,10 @@
 			"Phaser"
 		]
 	},
+	"include": [
+        "**/*",
+        "node_modules/phaser3-rex-plugins-types"
+    ],
 	"exclude": [
 		"node_modules"
 	]

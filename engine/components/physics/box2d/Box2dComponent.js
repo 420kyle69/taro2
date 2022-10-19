@@ -27,6 +27,8 @@ var PhysicsComponent = IgeEventingClass.extend({
 		this.exponent = 2;
 		this.divisor = 80;
 
+		this.walls = [];
+
 		if (ige.isServer) {
 			this.engine = dists.defaultEngine;
 
@@ -316,6 +318,8 @@ var PhysicsComponent = IgeEventingClass.extend({
 					.drawBounds(false)
 					.drawBoundsData(false)
 					.category('wall');
+				
+				this.walls.push(wall);
 
 				// walls must be created immediately, because there isn't actionQueue for walls
 				ige.physics.createBody(wall, {
@@ -343,6 +347,12 @@ var PhysicsComponent = IgeEventingClass.extend({
 		} else {
 			PhysicsComponent.prototype.log('Cannot extract box2d static bodies from map data because passed map does not have a .map property!', 'error');
 		}
+	},
+
+	destroyWalls : function () {
+		this.walls.forEach(wall => {
+			this.destroyBody(wall);
+		});
 	},
 
 	/**
@@ -548,7 +558,7 @@ var PhysicsComponent = IgeEventingClass.extend({
 				self._world.step(timeElapsedSinceLastStep);
 			} else {
 				self._world.step(timeElapsedSinceLastStep / 1000, 8, 3); // Call the world step; frame-rate, velocity iterations, position iterations
-				let nextFrameTime = ige._currentTime + (1000 / ige._physicsTickRate) - 10; // 10ms is to give extra buffer to prepare for the next frame
+				let nextFrameTime = ige._currentTime + (1000 / ige._gameLoopTickRate) - 10; // 10ms is to give extra buffer to prepare for the next frame
 				
 				var tempBod = self._world.getBodyList();
 
@@ -615,6 +625,7 @@ var PhysicsComponent = IgeEventingClass.extend({
 							}
 
 							if (ige.isServer) {
+								
 								/* server-side reconciliation */
 								// hard-correct client entity's position (teleport) if the distance between server & client is greater than 100px
 								// continuously for 10 frames in a row
@@ -631,14 +642,15 @@ var PhysicsComponent = IgeEventingClass.extend({
 								entity.rotateTo(0, 0, angle);
 							} else if (ige.isClient) {
 								
+								// ignore server-stream for the position updates for my unit and for projectiles fired from items
 								if (ige.physics && ige.game.cspEnabled && 
-										(
-											(
-												entity._category == 'projectile' // we probably need a condition to check if this projectile's parent item was streaming it or not?
-											) || 											
+										(	
 											( // move my own unit immediately while ignoring the server stream
 												!entity._stats.aiEnabled && ige.client.selectedUnit == entity && !entity._stats.aiEnabled &&
 												(entity.nextPhysicsFrame == undefined || ige._currentTime > entity.nextPhysicsFrame[0])
+											) ||
+											( // fired-from-item projectiles
+												entity._category == 'projectile' && entity._stats.sourceItemId != undefined && !entity._streamMode
 											)
 											
 										)
@@ -651,7 +663,6 @@ var PhysicsComponent = IgeEventingClass.extend({
 									y = entity._translate.y;
 									angle = entity._rotate.z;
 									entity.nextPhysicsFrame = undefined;
-									
 								}
 								entity.body.setPosition({ x: x / entity._b2dRef._scaleRatio, y: y / entity._b2dRef._scaleRatio });
 								entity.body.setAngle(angle);

@@ -5,6 +5,9 @@ class GameScene extends PhaserScene {
 	entityLayers: Phaser.GameObjects.Layer[] = [];
 	renderedEntities: (Phaser.GameObjects.GameObject & Phaser.GameObjects.Components.Visible & Hidden)[] = [];
 
+	public tilemap: Phaser.Tilemaps.Tilemap;
+	tileset: Phaser.Tilemaps.Tileset;
+
 	constructor() {
 		super({ key: 'Game' });
 	}
@@ -42,6 +45,10 @@ class GameScene extends PhaserScene {
 			ige.client.emit('scale', { ratio: ratio });
 		});
 
+		ige.client.on('updateMap', () => {
+			this.updateMap();
+		});
+
 		ige.client.on('create-unit', (unit: Unit) => {
 			new PhaserUnit(this, unit);
 		});
@@ -56,6 +63,10 @@ class GameScene extends PhaserScene {
 
 		ige.client.on('create-region', (region: Region) => {
 			new PhaserRegion(this, region);
+		});
+
+		ige.client.on('create-ray', (data: any) => {
+			new PhaserRay(this, data.start, data.end, data.config);
 		});
 
 		ige.client.on('floating-text', (data: {
@@ -182,25 +193,31 @@ class GameScene extends PhaserScene {
 	}
 
 	create (): void {
+		this.scene.launch('Palette');
 		ige.client.rendererLoaded.resolve();
 
-		const map = this.make.tilemap({ key: 'map' });
+		const map = this.tilemap = this.make.tilemap({ key: 'map' });
+
 		const data = ige.game.data;
 		const scaleFactor = ige.scaleMapDetails.scaleFactor;
+
+		console.log('map data', data.map)
 
 		data.map.tilesets.forEach((tileset) => {
 			const key = `tiles/${tileset.name}`;
 			const extrudedKey = `extruded-${key}`;
 			if (this.textures.exists(extrudedKey)) {
-				map.addTilesetImage(tileset.name, extrudedKey,
+				this.tileset = map.addTilesetImage(tileset.name, extrudedKey,
 					tileset.tilewidth, tileset.tileheight,
 					(tileset.margin || 0) + 1,
 					(tileset.spacing || 0) + 2
 				);
 			} else {
-				map.addTilesetImage(tileset.name, key);
+				this.tileset = map.addTilesetImage(tileset.name, key);
 			}
 		});
+
+		//this.loadMap();
 
 		const entityLayers = this.entityLayers;
 		data.map.layers.forEach((layer) => {
@@ -256,6 +273,24 @@ class GameScene extends PhaserScene {
 	private calculateZoom(): number {
 		const { width, height } = this.scale;
 		return Math.max(width, height) / this.zoomSize;
+	}
+
+	private updateMap(): void {
+		const map = this.tilemap;
+		const data = ige.game.data;
+
+		data.map.layers.forEach((layer) => {
+			if (layer.type === 'tilelayer') {
+				let layerId;
+				if (layer.id - 1 >= 2) layerId = layer.id - 2
+				else layerId = layer.id - 1
+				layer.data.forEach((tile, index) => {
+					const x = index % layer.width;
+					const y = Math.floor(index/layer.width);
+					map.putTileAt(tile, x, y, false, layerId);
+			});
+			}
+		});
 	}
 
 	private patchMapData (map: GameComponent['data']['map']): typeof map {
@@ -434,12 +469,17 @@ class GameScene extends PhaserScene {
 		}]);
 		this.renderedEntities.forEach(element => {
 			element.setVisible(false);
+			if (element.phaserEntity && element.phaserEntity.entity) {
+				element.phaserEntity.entity.shouldRunProcess = false;
+			}
 		});
 		this.cameras.main.cull(this.renderedEntities).forEach(element => {
 			if (!element.hidden) {
 				element.setVisible(true);
+				if (element.phaserEntity && element.phaserEntity.entity) {
+					element.phaserEntity.entity.shouldRunProcess = true;
+				}
 			}
-
 		});
 	}
 }

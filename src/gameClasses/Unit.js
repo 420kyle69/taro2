@@ -2,20 +2,13 @@ var Unit = IgeEntityPhysics.extend({
 	classId: 'Unit',
 
 	init: function (data, entityIdFromServer) {
-		
+
 		IgeEntityPhysics.prototype.init.call(this, data.defaultData);
 
 		this.id(entityIdFromServer);
 		var self = this;
 		self.dob = Date.now();
-		// used for 2 reasons
-		// 1. to categorize as unit when detecting entity created in ClientNetworkEvents.
-		// 2. necessary for box2d contact listener (it only cares about 'unit' categories touching)
-		self.force = {
-			x: 0,
-			y: 0
-		};
-
+		
 		self.direction = {
 			x: 0,
 			y: 0
@@ -31,7 +24,7 @@ var Unit = IgeEntityPhysics.extend({
 			data.equipmentAllowed = 9;
 		}
 		unitData = ige.game.getAsset('unitTypes', data.type);
-		
+
 		self._stats = _.merge(unitData, data);
 
 		self.entityId = entityIdFromServer;
@@ -47,22 +40,23 @@ var Unit = IgeEntityPhysics.extend({
 		self.parseEntityObject(self._stats);
 		self.addComponent(InventoryComponent)
 			.addComponent(AbilityComponent)
-			.addComponent(AttributeComponent) // every units gets one
-			
+			.addComponent(AttributeComponent); // every units gets one
+
 		self.addComponent(ScriptComponent); // entity-requireScriptLoading
-		self.script.load(unitData.scripts)
+		self.script.load(unitData.scripts);
 
 		self.addComponent(AIComponent);
 
+		this._stats.itemIds = new Array(self._stats.inventorySize).fill(null);
+
 		Unit.prototype.log(`initializing new unit ${this.id()}`);
 
-		if (ige.isClient) {
 
+		if (ige.isClient) {
 			this.addToRenderer(defaultAnimation && (defaultAnimation.frames[0] - 1));
 			ige.client.emit('create-unit', this);
 			this.transformTexture(this._translate.x, this._translate.y, 0);
 		}
-
 		// initialize body & texture of the unit
 		self.changeUnitType(data.type, data.defaultData);
 
@@ -97,12 +91,23 @@ var Unit = IgeEntityPhysics.extend({
 			if (ige.network.isPaused) {
 				this.streamMode(0);
 			} else {
-				this.streamMode(1);				
+				this.streamMode(1);
 			}
 
 			ige.server.totalUnitsCreated++;
-			
+
 		} else if (ige.isClient) {
+			// if player already exists on the client side, then set owner player and update its name label
+			// otherwise, client.js will wait for player entity and run this on client.js
+			if (this._stats.ownerId) {
+				// if the owner player entity is received on the client side already
+				const ownerPlayer = ige.$(this._stats.ownerId);
+				if (ownerPlayer) {
+					this.setOwnerPlayer(this._stats.ownerId);
+					this.equipSkin();
+				}
+			}
+
 			var networkId = ige.network.id();
 			self.addComponent(UnitUiComponent);
 
@@ -125,8 +130,6 @@ var Unit = IgeEntityPhysics.extend({
 
 			var polygon = new IgePoly2d();
 			self.triggerPolygon(polygon);
-
-			self.redrawAttributeBars();
 			self.flip(self._stats.flip);
 			self.mouseEvents();
 		}
@@ -281,13 +284,7 @@ var Unit = IgeEntityPhysics.extend({
 
 	// returns player that owns this unit
 	getOwner: function () {
-		if (this._stats.ownerId) {
-			var ownerPlayer = ige.$(this._stats.ownerId);
-			if (ownerPlayer && ownerPlayer._category == 'player') {
-				return ownerPlayer;
-			}
-		}
-		return undefined;
+		return this.ownerPlayer;
 	},
 
 	// set this unit's owner, and insert this unit's id into its owner's ._stats.unitIds array
@@ -298,17 +295,19 @@ var Unit = IgeEntityPhysics.extend({
 
 		// remove this unit from previous owner
 		var previousOwnerPlayer = self.getOwner();
+		self.ownerPlayer = undefined;
 		if (previousOwnerPlayer && previousOwnerPlayer.id() !== newOwnerPlayerId) {
 			previousOwnerPlayer.disownUnit(self);
 		}
-
+		
 		// add this unit to the new owner
 		var newOwnerPlayer = newOwnerPlayerId ? ige.$(newOwnerPlayerId) : undefined;
 		if (newOwnerPlayer && newOwnerPlayer._stats) {
 			self._stats.ownerId = newOwnerPlayerId;
-			self._stats.name = (config && config.dontUpdateName)
-				? (self._stats.name || newOwnerPlayer._stats.name) // if unit already has name dont update it
-				: newOwnerPlayer._stats.name;
+			self.ownerPlayer = newOwnerPlayer;
+			self._stats.name = (config && config.dontUpdateName) // if unit already has name dont update it
+														? (self._stats.name || newOwnerPlayer._stats.name)
+														: newOwnerPlayer._stats.name;
 			self._stats.clientId = newOwnerPlayer && newOwnerPlayer._stats ? newOwnerPlayer._stats.clientId : undefined;
 			if (ige.isServer) {
 				self.streamUpdateData([{ ownerPlayerId: newOwnerPlayerId }]);
@@ -632,29 +631,37 @@ var Unit = IgeEntityPhysics.extend({
 	},
 
 	// hold an item given in the inventory slot. hide the last item
-	// @currentItemIndex refers to last pickup item
+	// @currentItemIndex refers to the selected item slot
 	changeItem: function (itemIndex) {
+
 		var self = this;
+
 		if (itemIndex == undefined) {
 			itemIndex = self._stats.currentItemIndex;
 		}
 
-		var newItem = self.inventory.getItemBySlotNumber(itemIndex + 1);
-		var oldItem = ige.$(self._stats.currentItemId);
+		var newItem = ige.$(self._stats.itemIds[itemIndex]) || null;
+		var oldItem = ige.$(self._stats.currentItemId) || null;
+
+		// console.log(`running Unit.changeItem(${itemIndex}) on ${ige.isClient ? 'Client' : 'Server'}`);
+
 		if (newItem && newItem.id() == self._stats.currentItemId) {
 			return;
 		}
 
 		if (oldItem) {
 			oldItem.stopUsing();
+			oldItem.setState('unselected');
+			if (ige.isClient) {
+				oldItem.applyAnimationForState('unselected');
+			}
 		}
 
 		// show the item that's in the selected slot
 		if (newItem) {
 			newItem.setState('selected');
-			self._stats.currentItemId = newItem.id();
 
-			var triggeredBy = {
+			var triggeredBy = { // WARNING: Should this be outside if (newItem) so we can send trigger for unit swapping item even if empty slot?
 				itemId: newItem.id(),
 				unitId: this.id()
 			};
@@ -664,38 +671,35 @@ var Unit = IgeEntityPhysics.extend({
 			if (ige.isClient) {
 				//emit size event
 				newItem.emit('size', {
-					width: newItem._stats.currentBody.width,
+					width: newItem._stats.currentBody.width, // this could be causing item size issues by using currentBody dimensions
 					height: newItem._stats.currentBody.height
 				});
+
 				newItem.applyAnimationForState('selected');
+
 				let customTween = {
 					type: 'swing',
 					keyFrames: [[0, [0, 0, -1.57]], [100, [0, 0, 0]]]
 				};
+
 				newItem.tween.start(null, this._rotate.z, customTween);
 			}
-		} else {
-			self._stats.currentItemId = undefined; // unit is selecting empty slot
 		}
 
-		// console.log("changing item to itemIndex", itemIndex, oldItem != undefined, self._stats.itemIds != undefined,  self._stats.itemIds[self._stats.currentItemIndex], " !== ", (oldItem)?oldItem.id():'')
-		// if (oldItem && self._stats.itemIds && self._stats.itemIds[self._stats.currentItemIndex + 1] !== oldItem.id()) {
-		if (oldItem) {
-			oldItem.setState('unselected');
-			if (ige.isClient) {
-				oldItem.applyAnimationForState('selected');
-			}
+		if (ige.isServer) {
+			this.streamUpdateData([{ currentItemIndex: itemIndex }]);
 		}
 
-		self._stats.currentItemIndex = itemIndex;
-		this.streamUpdateData([{ currentItemIndex: itemIndex }]);
-		this.script.trigger("unitSelectsInventorySlot")
+		this.script.trigger('unitSelectsInventorySlot');
 
 		if (ige.isClient && this == ige.client.selectedUnit) {
 			this.inventory.highlightSlot(itemIndex + 1);
 			var item = this.inventory.getItemBySlotNumber(itemIndex + 1);
 			ige.itemUi.updateItemInfo(item);
 		}
+
+		// update index and id in the same place
+		this.setCurrentItem(itemIndex);
 	},
 
 	changeUnitType: function (type, defaultData) {
@@ -710,7 +714,7 @@ var Unit = IgeEntityPhysics.extend({
 			return;
 		}
 
-		self.script.load(data.scripts)
+		self.script.load(data.scripts);
 
 		self._stats.type = type;
 
@@ -721,11 +725,6 @@ var Unit = IgeEntityPhysics.extend({
 			}
 
 			self._stats[i] = data[i];
-		}
-
-		// creating items empty array
-		if (!this._stats.itemIds) {
-			this._stats.itemIds = new Array(self._stats.inventorySize);
 		}
 
 		// if the new unit type has the same entity variables as the old unit type, then pass the values
@@ -825,7 +824,7 @@ var Unit = IgeEntityPhysics.extend({
 				}
 			}
 
-			self.changeItem(self._stats.currentItemIndex);
+			self.changeItem(self._stats.currentItemIndex); // this will call change item on client for all units
 		} else if (ige.isClient) {
 			var zIndex = self._stats.currentBody && self._stats.currentBody['z-index'] || { layer: 3, depth: 3 };
 
@@ -955,7 +954,8 @@ var Unit = IgeEntityPhysics.extend({
 	 */
 	pickUpItem: function (item) {
 		var self = this;
-
+		// all Server only
+		// console.log(`running Unit.pickUpItem() on ${ige.isClient ? 'Client' : 'Server'}`);
 		// if item is suppose to be consumed immediately
 		// this ensures that item is picked up only once, and is only picked up by units that can pick up this item
 		var itemData = item._stats || item;
@@ -967,7 +967,7 @@ var Unit = IgeEntityPhysics.extend({
 			if (itemData.isUsedOnPickup && self.canUseItem(itemData)) {
 				if (!isItemInstance) {
 					item = new Item(itemData);
-					item.script.trigger("entityCreated");
+					item.script.trigger('entityCreated');
 				}
 				ige.devLog('using item immediately');
 				item.setOwnerUnit(self);
@@ -977,7 +977,9 @@ var Unit = IgeEntityPhysics.extend({
 			} else {
 				// if designated item slot is already occupied, unit cannot get this item
 				var availableSlot = self.inventory.getFirstAvailableSlotForItem(itemData);
-				if (itemData.controls == undefined || (itemData.controls.canMerge || itemData.controls.canMerge == undefined || itemData.controls.canMerge == null)) { // Check if the item can merge
+
+				// Check if the item can merge
+				if (itemData.controls == undefined || (itemData.controls.canMerge || itemData.controls.canMerge == undefined || itemData.controls.canMerge == null)) {
 					// insert/merge itemData's quantity into matching items in the inventory
 					var totalInventorySize = this.inventory.getTotalInventorySize();
 					for (var i = 0; i < totalInventorySize; i++) {
@@ -1030,16 +1032,28 @@ var Unit = IgeEntityPhysics.extend({
 						// itemData.stateId = (availableSlot-1 == this._stats.currentItemIndex) ? 'selected' : 'unselected';
 						item = new Item(itemData);
 						ige.game.lastCreatedItemId = item._id;
-						item.script.trigger("entityCreated");
+						item.script.trigger('entityCreated');
 					}
-					self.inventory.insertItem(item, availableSlot - 1);
-					self.streamUpdateData([{ itemIds: self._stats.itemIds }]);
+
 					var slotIndex = availableSlot - 1;
+
+					// Item
 					item.streamUpdateData([
 						{ ownerUnitId: self.id() },
 						{ quantity: itemData.quantity },
 						{ slotIndex: slotIndex }
 					]);
+
+					self.inventory.insertItem(item, availableSlot - 1);
+
+					if (slotIndex == self._stats.currentItemIndex) {
+						item.setState('selected');
+					} else {
+						item.setState('unselected');
+					}
+
+					// Unit
+					self.streamUpdateData([{ itemIds: self._stats.itemIds }]);
 
 					if (item._stats.bonus && item._stats.bonus.passive) {
 						if (item._stats.slotIndex < self._stats.inventorySize || item._stats.bonus.passive.isDisabledInBackpack != true) {
@@ -1049,12 +1063,7 @@ var Unit = IgeEntityPhysics.extend({
 						self.updateStats(item.id());
 					}
 
-					if (slotIndex == self._stats.currentItemIndex) {
-						self._stats.currentItemId = item.id();
-						item.setState('selected');
-					} else {
-						item.setState('unselected');
-					}
+					this.setCurrentItem(); // this MUST come after item.streamUpdateData
 
 					ige.game.lastCreatedItemId = item.id(); // this is necessary in case item isn't a new instance, but an existing item getting quantity updated
 
@@ -1193,6 +1202,7 @@ var Unit = IgeEntityPhysics.extend({
 
 	dropItem: function (itemIndex) {
 		// Unit.prototype.log("dropItem " + itemIndex)
+		// console.log(`running Unit.dropItem(${itemIndex}) on ${ige.isClient ? 'Client' : 'Server'}`);
 		var self = this;
 		var item = self.inventory.getItemBySlotNumber(itemIndex + 1);
 		if (item) {
@@ -1228,13 +1238,14 @@ var Unit = IgeEntityPhysics.extend({
 
 				item.setState('dropped', defaultData);
 				item.setOwnerUnit(undefined);
-				self._stats.currentItemId = null;
 
 				if (item._stats.hidden) {
 					item.streamUpdateData([{ hidden: false }]);
 				}
 
 				self.inventory.removeItem(itemIndex, item.id());
+
+				this.setCurrentItem();
 
 				if (item._stats.bonus && item._stats.bonus.passive) {
 					if (item._stats.slotIndex < this._stats.inventorySize || item._stats.bonus.passive.isDisabledInBackpack != true) {
@@ -1384,16 +1395,12 @@ var Unit = IgeEntityPhysics.extend({
 		}
 
 		IgeEntityPhysics.prototype.remove.call(this);
-		
 	},
 
 	// update unit's stats in the server side first, then update client side as well.
 	streamUpdateData: function (queuedData) {
 		var self = this;
 		// Unit.prototype.log("unit streamUpdateData", data)
-		
-		if (ige.isServer && ige.network.isPaused) 
-			return;
 
 		IgeEntity.prototype.streamUpdateData.call(this, queuedData);
 
@@ -1410,28 +1417,35 @@ var Unit = IgeEntityPhysics.extend({
 					case 'aiEnabled':
 						if (ige.isClient) {
 							if (newValue == true) {
-								self.ai.enable()
+								self.ai.enable();
 							} else {
-								self.ai.disable()
+								self.ai.disable();
 							}
 						}
-						break;				
-							
+						break;
+
 					case 'itemIds':
 						// update shop as player points are changed and when shop modal is open
 						if (ige.isClient) {
 							this.inventory.update();
+
 							if ($('#modd-item-shop-modal').hasClass('show')) {
 								ige.shop.openItemShop();
 							}
 
-							// since server doesn't stream currentItem automatically
-							var currentItem = this.inventory.getItemBySlotNumber(this._stats.currentItemIndex + 1);
-							if (currentItem) {
-								self._stats.currentItemId = currentItem.id();
-							}
+							// console.log('Unit.streamUpdateData(\'itemIds\') on the client', newValue);
+							this.setCurrentItem();
 						}
 						break;
+
+					case 'currentItemIndex':
+						// for tracking selected index of other units
+						if (ige.isClient && this !== ige.client.selectedUnit) {
+							// console.log('Unit.streamUpdateData(\'currentItemIndex\') on the client', newValue);
+							this.setCurrentItem(newValue);
+						}
+						break;
+
 					case 'skin':
 					case 'isInvisible':
 					case 'isInvisibleToFriendly':
@@ -1499,7 +1513,6 @@ var Unit = IgeEntityPhysics.extend({
 					case 'ownerPlayerId':
 						if (ige.isClient) {
 							self.setOwnerPlayer(newValue);
-							self._stats.ownerId = newValue;
 						}
 						break;
 				}
@@ -1571,12 +1584,12 @@ var Unit = IgeEntityPhysics.extend({
 			var purchasables = _.cloneDeep(owner._stats.purchasables);
 			purchasables.push(equipPurchasable);
 			owner.streamUpdateData([
-								{ purchasables: purchasables },
-								{ equiped: true }
-							]);
+				{ purchasables: purchasables },
+				{ equiped: true }
+			]);
 		}
 	},
-	
+
 	unEquipSkin: function (unEquipedId, forceFullyUnequip, cellSheetUrl) {
 		var self = this;
 		var defaultUnit = ige.game.getAsset('unitTypes', self._stats.type);
@@ -1664,6 +1677,49 @@ var Unit = IgeEntityPhysics.extend({
 		self.persistentDataLoaded = true;
 	},
 
+	/*
+	 * called from:
+	 * Unit.streamUpdateData on Client: 'itemIds', 'currentItemIndex' for units not 'mine'
+	 * Unit.changeItem on Server, Client
+	 * Unit.pickupItem on Server, Client - appears to only run on server for keypressed abilities
+	 * Unit.dropItem on Server - no client logic
+	 * Inventory.removeItem calls streamUpdateData(itemIds) from server
+	*/
+	setCurrentItem: function (itemIndex) {
+		// if param itemIndex is provided, use it to set index
+		if (itemIndex !== undefined) {
+			// set the _stats property for index when currentItemIndex changes
+			this._stats.currentItemIndex = itemIndex;
+		}
+		const currentItemIndex = this._stats.currentItemIndex;
+		// independent of currentItemIndex change, set currentItem. null is empty slot
+		// use currentItem to set the _stats property for currentItemId
+		// important for item drop/pickup/remove
+		const currentItem = ige.$(this._stats.itemIds[currentItemIndex]) || null;
+		this._stats.currentItemId = currentItem ? currentItem.id() : null;
+
+		// client log of item state after pickup will still show 'dropped'. Currently state has not finished updating. It IS 'selected'/'unselected'
+		// const debugMap = this._stats.itemIds.map((x) => {
+		// 	const item = ige.$(x) || null;
+		// 	const state = item ? item._stats.stateId : null;
+		// 	return {
+		// 		id: x,
+		// 		item: item,
+		// 		state: state,
+		// 	};
+		// });
+		// console.log(
+		// 	`running Unit.setCurrentItem(${itemIndex ? itemIndex : ''}) on ${ige.isClient ? 'Client' : 'Server'}\n`,
+		// 	`this._stats.currentItemIndex: ${this._stats.currentItemIndex}\n`,
+		// 	`this._stats.currentItemId: ${this._stats.currentItemId}\n`,
+		// 	this.id(),
+		// 	'\n',
+		// 	debugMap
+		// );
+
+		// tell phaser to respond to change in item
+	},
+
 	startMoving: function () {
 		if (!this.isMoving) {
 			this.playEffect('move');
@@ -1682,6 +1738,28 @@ var Unit = IgeEntityPhysics.extend({
 		// this.direction.y = 0;
 	},
 
+	updateAngleToTarget: function() {
+
+		var ownerPlayer = this.getOwner();
+		if (ownerPlayer) {
+
+			// mobile control: rotate to rotation provided by the client
+			if (this._stats.controls.absoluteRotation) {
+				this.angleToTarget = ownerPlayer.absoluteAngle;
+
+			// desktop control: if this unit's not under a command, rotate to mouse xy coordinate
+			} else {
+				var mouse = ownerPlayer.control.input.mouse;
+				if (mouse) {
+					var a = this._translate.x - mouse.x;
+					var b = this._translate.y - mouse.y;
+					this.distanceToTarget = Math.sqrt(a * a + b * b);
+					this.angleToTarget = Math.atan2(mouse.y - this._translate.y, mouse.x - this._translate.x) + Math.radians(90);
+				}
+			}
+		}
+	},
+
 	/**
 	 * Called every frame by the engine when this entity is mounted to the
 	 * scenegraph.
@@ -1696,29 +1774,28 @@ var Unit = IgeEntityPhysics.extend({
 		});
 
 		if (ige.isServer || (ige.isClient && ige.client.selectedUnit == this)) {
-			var ownerPlayer = ige.$(this._stats.ownerId);
+
+			// translate unit
+			var speed = (this._stats.attributes && this._stats.attributes.speed && this._stats.attributes.speed.value) || 0;
+			var vector = {x: 0, y: 0};
+
+			// update rotation on server
+			var ownerPlayer = self.getOwner();
 			if (ownerPlayer) {
 
-				// translate unit
-				var speed = (this._stats.attributes && this._stats.attributes.speed && this._stats.attributes.speed.value) || 0;
-				var vector = undefined;
+				// server-side unit rotation update
+				if (ige.isServer) {
 
-				// unit rotation for human player
-				if (!self._stats.aiEnabled && ownerPlayer._stats.controlledBy == 'human' && ownerPlayer.getSelectedUnit() == this) {
+					if (!self._stats.aiEnabled && ownerPlayer._stats.controlledBy == 'human' && ownerPlayer.getSelectedUnit() == this) {
+						self.updateAngleToTarget();
+					}
 
-					// mobile control: rotate to rotation provided by the client
-					if (this._stats.controls.absoluteRotation) {
-						self.angleToTarget = ownerPlayer.absoluteAngle;
-
-					// desktop control: if this unit's not under a command, rotate to mouse xy coordinate
-					} else {
-						var mouse = ownerPlayer.control.input.mouse;
-						if (mouse) {
-							var a = self._translate.x - mouse.x;
-							var b = self._translate.y - mouse.y;
-							self.distanceToTarget = Math.sqrt(a * a + b * b);
-							self.angleToTarget = Math.atan2(mouse.y - self._translate.y, mouse.x - self._translate.x) + Math.radians(90);
-						}
+					// rotate unit if angleToTarget is set
+					if (self.angleToTarget != undefined && !isNaN(self.angleToTarget) &&
+						this._stats.controls && this._stats.controls.mouseBehaviour.rotateToFaceMouseCursor &&
+						this._stats.currentBody && !this._stats.currentBody.fixedRotation
+					) {
+						self.rotateTo(0, 0, self.angleToTarget);
 					}
 				}
 
@@ -1760,17 +1837,7 @@ var Unit = IgeEntityPhysics.extend({
 					self.ai.update();
 				}
 
-				if (ige.isServer) {
-					// rotate unit if angleToTarget is set
-					if (self.angleToTarget != undefined && !isNaN(self.angleToTarget) &&
-						this._stats.controls && this._stats.controls.mouseBehaviour.rotateToFaceMouseCursor &&
-						this._stats.currentBody && !this._stats.currentBody.fixedRotation
-					) {
-						self.rotateTo(0, 0, self.angleToTarget);
-					}
-				}
-
-				if (ownerPlayer && ownerPlayer._stats.controlledBy == 'human' && !this._stats.aiEnabled) {
+				if (ownerPlayer._stats.controlledBy == 'human' && !this._stats.aiEnabled) {
 					// toggle effects when unit starts/stops moving
 					if (!this.isMoving && (self.direction.x != 0 || self.direction.y != 0)) {
 						this.startMoving();

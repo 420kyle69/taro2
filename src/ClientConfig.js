@@ -52,12 +52,15 @@ var igeClientConfig = {
 
 		/* Standard game scripts */
 		'/gameClasses/Cursor.js',
-
+		'/gameClasses/DeveloperMode.js',
 		'/gameClasses/EntitiesToRender.js',
+		'/gameClasses/Raycaster.js',
 
 		/* Phaser */
-		'renderer/phaser/phaser-taro.min.js',
+		'renderer/phaser/phaser.min.js',
+		'renderer/phaser/rexuiplugin.min.js',
 		'../node_modules/phaser3-rex-plugins/dist/rexvirtualjoystickplugin.min.js',
+		//'../node_modules/phaser3-rex-plugins/templates/ui/ui-components.js',
 		'renderer/phaser/enums/FlipMode.js',
 		'renderer/phaser/enums/TileLayer.js',
 		'renderer/phaser/enums/EntityLayer.js',
@@ -70,10 +73,14 @@ var igeClientConfig = {
 		'renderer/phaser/classes/PhaserFloatingText.js',
 		'renderer/phaser/classes/PhaserChatBubble.js',
 		'renderer/phaser/classes/PhaserRegion.js',
+		'renderer/phaser/classes/PhaserRay.js',
 		'renderer/phaser/scenes/PhaserScene.js',
 		'renderer/phaser/scenes/GameScene.js',
 		'renderer/phaser/classes/PhaserJoystick.js',
 		'renderer/phaser/scenes/MobileControlsScene.js',
+		'renderer/phaser/scenes/DevModeScene.js',
+		'renderer/phaser/classes/PhaserPalette.js',
+		'renderer/phaser/classes/PhaserPaletteButton.js',
 		'renderer/phaser/PhaserRenderer.js',
 
 		'/client.js',

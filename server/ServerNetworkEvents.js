@@ -434,6 +434,31 @@ var ServerNetworkEvents = {
 		}
 	},
 
+	_onEditTile: function(data, clientId) {
+		// only allow developers to modify the tiles
+		if (ige.server.developerClientIds.includes(clientId)) {
+			ige.game.data.map.wasEdited = true;
+			ige.network.send("editTile", data);
+
+			/* NEED TO MOVE THIS LOGIC FOR MAP SAVING */
+			const serverData = _.clone(data);
+			const width = ige.game.data.map.width;
+			if (serverData.layer >= 2) serverData.layer ++;
+
+			//save tile change to ige.game.map.data
+			ige.game.data.map.layers[serverData.layer].data[serverData.y*width + serverData.x] = serverData.gid;
+			if (serverData.layer === 3) {
+				
+				//if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
+				ige.physics.destroyWalls();
+				let map = ige.scaleMap(_.cloneDeep(ige.game.data.map));
+				ige.tiled.loadJson(map, function (layerArray, layersById) {
+					ige.physics.staticsFromMap(layersById.walls);
+				})
+			}
+		}
+	},
+
 	_onBuyItem: function (id, clientId) {
 		ige.devLog('player ' + clientId + ' wants to purchase item' + id);
 

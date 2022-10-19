@@ -1788,11 +1788,6 @@ var IgeEntity = IgeObject.extend({
 	 * @param {CanvasRenderingContext2D} ctx The canvas context to render to.
 	 */
 	update: function (ctx, tickDelta, isForOrphans) {
-		// var category = this._category || 'etc';
-		// if (ige.updateCount[category] == undefined)
-		// 	ige.updateCount[category] = 0;
-		// ige.updateCount[category]++;
-
 		// if (ige.physics.engine === 'CRASH' && this.body) {
 		// 	this._behaviourCrash();
 		// }
@@ -3112,22 +3107,28 @@ var IgeEntity = IgeObject.extend({
 	},
 
 	teleportTo: function (x, y, rotate) {
-		// console.log("teleporting to ", x, y);
-
 		this.translateTo(x, y);
 		if (rotate != undefined) {
 			this.rotateTo(0, 0, rotate);
 		}
 
 		if (ige.isServer) {
+
+
 			ige.network.send('teleport', { entityId: this.id(), position: [x, y] });
 			this.clientStreamedPosition = undefined;
-			//////////////////////////////////////////
 			if (ige.physics && ige.physics.engine == 'CRASH') {
 				this.translateColliderTo(x, y);
 			}
-			///////////////////////////////////////////
 		} else if (ige.isClient) {
+
+			if (ige.physics) {
+				let prevFrameTime = this.prevPhysicsFrame[0]
+				let nextFrameTime = this.nextPhysicsFrame[0]
+				this.prevPhysicsFrame = [prevFrameTime, [x, y, rotate]];
+				this.nextPhysicsFrame = [nextFrameTime, [x, y, rotate]];
+			}			
+
 			// this.lastServerStreamedPosition = undefined;
 			if (this.body) {
 				this.body.setPosition({ x: x / this._b2dRef._scaleRatio, y: y / this._b2dRef._scaleRatio });
@@ -3141,7 +3142,8 @@ var IgeEntity = IgeObject.extend({
 		this.lastTeleportedAt = ige._currentTime;
 
 		if (this._category == 'unit') {
-			// teleport unit's attached items
+			// teleport unit's attached items as well. otherwise, the attached bodies (using joint) can cause a drag and
+			// teleport the unit to a location that's between the origin and the destination
 			for (entityId in this.jointsAttached) {
 				if ((attachedEntity = ige.$(entityId))) {
 					if (attachedEntity._category == 'item') {
@@ -4181,22 +4183,6 @@ var IgeEntity = IgeObject.extend({
 							}
 							break;
 
-						case 'currentItemIndex':
-							// for tracking selected index of other units
-							if (ige.isClient) {
-								this._stats.currentItemIndex = newValue;
-
-								// need this if item data is processed before unit data
-								const selectedItemId = this._stats.itemIds[newValue];
-
-								// selectedItemId can be undefined
-								if (selectedItemId && ige.$(selectedItemId)) {
-									// in case of pure number ID
-									ige.$(selectedItemId).setState('selected');
-								}
-							}
-							break;
-
 						default:
 							// setting oldownerId b4 owner change
 							if (attrName === 'ownerId') {
@@ -4712,7 +4698,7 @@ var IgeEntity = IgeObject.extend({
 
 				case 'unit': 
 					// cellsheet is used for purchasable-skins
-					keys = ["name", "type", "stateId", "ownerId", "ownerPlayerId", "currentItemIndex", "currentItemId", "flip", "skin", "cellSheet"]
+					keys = ["name", "type", "stateId", "ownerId", "currentItemIndex", "currentItemId", "flip", "skin", "cellSheet"]
 					data = { 
 						attributes: {}, 
 						// variables: {} 
@@ -5136,10 +5122,9 @@ var IgeEntity = IgeObject.extend({
 
 		// streamed keyFrames
 		if (ige.nextSnapshot) {
-			var snapshotTimeEnd = ige.nextSnapshot[0];
 			var nextTransform = ige.nextSnapshot[1][this.id()];
 			if (nextTransform) {
-				nextKeyFrame = [snapshotTimeEnd, nextTransform];
+				nextKeyFrame = [ige.nextSnapshot[0], nextTransform];
 
 				xEnd = nextTransform[0]
 				yEnd = nextTransform[1]
@@ -5156,11 +5141,10 @@ var IgeEntity = IgeObject.extend({
 		// by default, prevTransform is where this unit currently is	
 		if (ige.prevSnapshot) {
 			// Set variables up to store the previous and next data
-			var snapshotTimeStart = ige.prevSnapshot[0]
 			var prevTransform = ige.prevSnapshot[1][this.id()];			
 			
 			if (prevTransform) {
-				prevKeyFrame = [snapshotTimeStart, prevTransform];
+				prevKeyFrame = [ige.prevSnapshot[0], prevTransform];
 				xStart = prevTransform[0]
 				yStart = prevTransform[1]
 				rotateStart = prevTransform[2]									
@@ -5258,22 +5242,23 @@ var IgeEntity = IgeObject.extend({
 			x = this.interpolateValue(xStart, xEnd, prevKeyFrame[0], ige._currentTime, nextKeyFrame[0]);
 			y = this.interpolateValue(yStart, yEnd, prevKeyFrame[0], ige._currentTime, nextKeyFrame[0]);
 
-			// ignore streamed angle if this unit control is set to face mouse cursor instantly.
-			if (this == ige.client.selectedUnit &&
-				this.angleToTarget != undefined && !isNaN(this.angleToTarget) && 
-				this._stats.controls && this._stats.controls.mouseBehaviour.rotateToFaceMouseCursor && 
-				this._stats.currentBody && !this._stats.currentBody.fixedRotation
-			) {
-				rotate = this.angleToTarget;
-			} else {
-				// a hack to prevent rotational interpolation suddnely jumping by 2 PI (e.g. 0.01 to -6.27)
-				if (Math.abs(rotateEnd - rotateStart) > Math.PI) {
-					if (rotateEnd > rotateStart) rotateStart += Math.PI * 2;
-					else rotateStart -= Math.PI * 2;
-				}
-
-				rotate = this.interpolateValue(rotateStart, rotateEnd, snapshotTimeStart, ige._currentTime, snapshotTimeEnd);
+			
+			// a hack to prevent rotational interpolation suddnely jumping by 2 PI (e.g. 0.01 to -6.27)
+			if (Math.abs(rotateEnd - rotateStart) > Math.PI) {
+				if (rotateEnd > rotateStart) rotateStart += Math.PI * 2;
+				else rotateStart -= Math.PI * 2;
 			}
+
+			rotate = this.interpolateValue(rotateStart, rotateEnd, prevKeyFrame[0], ige._currentTime, nextKeyFrame[0]);
+		}
+
+		// ignore streamed angle if this unit control is set to face mouse cursor instantly.
+		if (this == ige.client.selectedUnit &&
+			this.angleToTarget != undefined && !isNaN(this.angleToTarget) && 
+			this._stats.controls && this._stats.controls.mouseBehaviour.rotateToFaceMouseCursor && 
+			this._stats.currentBody && !this._stats.currentBody.fixedRotation
+		) {
+			rotate = this.angleToTarget;
 		}
 
 		
@@ -5292,9 +5277,12 @@ var IgeEntity = IgeObject.extend({
 		// 	}
 		// }
 
-
-		this.rotateTo(0, 0, rotate);		
-		this.translateTo(x, y, 0);
+		
+		this._translate.x = x;
+		this._translate.y = y;
+		this._rotate.z = rotate;
+		// this.rotateTo(0, 0, rotate);		
+		// this.translateTo(x, y, 0);
 		this._lastTransformAt = ige._currentTime;
 	},
 

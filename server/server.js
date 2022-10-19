@@ -469,10 +469,6 @@ var Server = IgeClass.extend({
 				// tilesize ratio is ratio of base tile size over tilesize of current map
 				var tilesizeRatio = baseTilesize / game.data.map.tilewidth;
 
-				if (game.data.defaultData && !isNaN(game.data.defaultData.frameRate)) {
-					ige._physicsTickRate = Math.max(15, Math.min(parseInt(game.data.defaultData.frameRate), 60)); // keep fps range between 15 and 60
-				}
-
 				// /*
 				//  * Significant changes below
 				//  * Let's test loading PhysicsConfig here
@@ -499,6 +495,7 @@ var Server = IgeClass.extend({
 
 				ige.physics.createWorld();
 				ige.physics.start();
+				ige.raycaster = new Raycaster();
 
 				// console.log("game data", game)
 				// mapComponent needs to be inside IgeStreamComponent, because debris' are created and streaming is enabled which requires IgeStreamComponent
@@ -663,13 +660,14 @@ var Server = IgeClass.extend({
 		ige.network.define('openDialogue', self._onSomeBullshit);
 		ige.network.define('closeDialogue', self._onSomeBullshit);
 		ige.network.define('userJoinedGame', self._onSomeBullshit);
-
+		
 		ige.network.define('kick', self._onKick);
 		ige.network.define('ban-user', self._onBanUser);
 		ige.network.define('ban-ip', self._onBanIp);
 		ige.network.define('ban-chat', self._onBanChat);
 
 		ige.network.define('trade', self._onTrade);
+		ige.network.define('editTile', self._onEditTile);
 	},
 
 	unpublish: function (msg) {

@@ -42,6 +42,9 @@ var GameScene = /** @class */ (function (_super) {
             camera.zoomTo(ratio, 1000, Phaser.Math.Easing.Quadratic.Out, true);
             ige.client.emit('scale', { ratio: ratio });
         });
+        ige.client.on('updateMap', function () {
+            _this.updateMap();
+        });
         ige.client.on('create-unit', function (unit) {
             new PhaserUnit(_this, unit);
         });
@@ -53,6 +56,9 @@ var GameScene = /** @class */ (function (_super) {
         });
         ige.client.on('create-region', function (region) {
             new PhaserRegion(_this, region);
+        });
+        ige.client.on('create-ray', function (data) {
+            new PhaserRay(_this, data.start, data.end, data.config);
         });
         ige.client.on('floating-text', function (data) {
             new PhaserFloatingText(_this, data);
@@ -142,20 +148,23 @@ var GameScene = /** @class */ (function (_super) {
     };
     GameScene.prototype.create = function () {
         var _this = this;
+        this.scene.launch('Palette');
         ige.client.rendererLoaded.resolve();
-        var map = this.make.tilemap({ key: 'map' });
+        var map = this.tilemap = this.make.tilemap({ key: 'map' });
         var data = ige.game.data;
         var scaleFactor = ige.scaleMapDetails.scaleFactor;
+        console.log('map data', data.map);
         data.map.tilesets.forEach(function (tileset) {
             var key = "tiles/".concat(tileset.name);
             var extrudedKey = "extruded-".concat(key);
             if (_this.textures.exists(extrudedKey)) {
-                map.addTilesetImage(tileset.name, extrudedKey, tileset.tilewidth, tileset.tileheight, (tileset.margin || 0) + 1, (tileset.spacing || 0) + 2);
+                _this.tileset = map.addTilesetImage(tileset.name, extrudedKey, tileset.tilewidth, tileset.tileheight, (tileset.margin || 0) + 1, (tileset.spacing || 0) + 2);
             }
             else {
-                map.addTilesetImage(tileset.name, key);
+                _this.tileset = map.addTilesetImage(tileset.name, key);
             }
         });
+        //this.loadMap();
         var entityLayers = this.entityLayers;
         data.map.layers.forEach(function (layer) {
             if (layer.type === 'tilelayer') {
@@ -195,6 +204,24 @@ var GameScene = /** @class */ (function (_super) {
     GameScene.prototype.calculateZoom = function () {
         var _a = this.scale, width = _a.width, height = _a.height;
         return Math.max(width, height) / this.zoomSize;
+    };
+    GameScene.prototype.updateMap = function () {
+        var map = this.tilemap;
+        var data = ige.game.data;
+        data.map.layers.forEach(function (layer) {
+            if (layer.type === 'tilelayer') {
+                var layerId_1;
+                if (layer.id - 1 >= 2)
+                    layerId_1 = layer.id - 2;
+                else
+                    layerId_1 = layer.id - 1;
+                layer.data.forEach(function (tile, index) {
+                    var x = index % layer.width;
+                    var y = Math.floor(index / layer.width);
+                    map.putTileAt(tile, x, y, false, layerId_1);
+                });
+            }
+        });
     };
     GameScene.prototype.patchMapData = function (map) {
         /**
@@ -276,10 +303,16 @@ var GameScene = /** @class */ (function (_super) {
             }]);
         this.renderedEntities.forEach(function (element) {
             element.setVisible(false);
+            if (element.phaserEntity && element.phaserEntity.entity) {
+                element.phaserEntity.entity.shouldRunProcess = false;
+            }
         });
         this.cameras.main.cull(this.renderedEntities).forEach(function (element) {
             if (!element.hidden) {
                 element.setVisible(true);
+                if (element.phaserEntity && element.phaserEntity.entity) {
+                    element.phaserEntity.entity.shouldRunProcess = true;
+                }
             }
         });
     };
