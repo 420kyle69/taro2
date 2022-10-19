@@ -172,19 +172,19 @@ class DevModeScene extends PhaserScene {
 	pointerInsidePalette(): boolean {
 		return (this.input.activePointer.x > this.devPalette.scrollBarContainer.x
 			&& this.input.activePointer.x < this.devPalette.scrollBarContainer.x + this.devPalette.scrollBarContainer.width
-			&& this.input.activePointer.y > this.devPalette.scrollBarContainer.y /*- 30*/
+			&& this.input.activePointer.y > this.devPalette.scrollBarContainer.y - 30
 			&& this.input.activePointer.y < this.devPalette.scrollBarContainer.y + this.devPalette.scrollBarContainer.height)
 	}
 
 	pointerInsideButtons(): boolean {
-		return (this.input.activePointer.x > this.devPalette.layerButtonsContainer.x
+		return ((this.input.activePointer.x > this.devPalette.layerButtonsContainer.x
 			&& this.input.activePointer.x < this.devPalette.layerButtonsContainer.x + this.devPalette.layerButtonsContainer.width
-			&& this.input.activePointer.y > this.devPalette.layerButtonsContainer.y - this.devPalette.layerButtonsContainer.height
-			&& this.input.activePointer.y < this.devPalette.layerButtonsContainer.y
-			&& this.input.activePointer.x > this.devPalette.toolButtonsContainer.x
+			&& this.input.activePointer.y > this.devPalette.layerButtonsContainer.y 
+			&& this.input.activePointer.y < this.devPalette.layerButtonsContainer.y + this.devPalette.layerButtonsContainer.height)
+			|| (this.input.activePointer.x > this.devPalette.toolButtonsContainer.x
 			&& this.input.activePointer.x < this.devPalette.toolButtonsContainer.x + this.devPalette.toolButtonsContainer.width
 			&& this.input.activePointer.y > this.devPalette.toolButtonsContainer.y 
-			&& this.input.activePointer.y < this.devPalette.toolButtonsContainer.y + this.devPalette.toolButtonsContainer.height)
+			&& this.input.activePointer.y < this.devPalette.toolButtonsContainer.y + this.devPalette.toolButtonsContainer.height))
 	}
 
 	update (): void {

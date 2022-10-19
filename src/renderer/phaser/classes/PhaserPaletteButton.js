@@ -10,14 +10,14 @@ var PhaserPaletteButton = /** @class */ (function () {
         button.setInteractive();
         container.add(button);
         if (texture) {
-            var image = palette.scene.add.image(x, y, texture)
-                .setDisplaySize(w, h)
+            var image = palette.scene.add.image(x + w / 4, y, texture)
+                .setDisplaySize(h, h)
                 .setOrigin(0);
             container.add(image);
         }
         else {
             var label = palette.scene.add.text(x + w / 2, y + h / 2, text);
-            label.setFontFamily('Verdana');
+            label.setFontFamily('Rubik');
             label.setColor('#000000');
             label.setFontSize(26);
             label.setOrigin(0.5);
