@@ -370,7 +370,8 @@ var Item = IgeEntityPhysics.extend({
 										ige.game.lastCreatedProjectileId = projectile.id();
 									}
 								}
-								if (this._stats.bulletType == 'raycast') {
+								// don't run raycast bullet without projectile data
+								if (this._stats.bulletType == 'raycast' && data) {
 									// starting from unit center position
 									let offset = { x: 0, y: 0 };
 
@@ -439,7 +440,7 @@ var Item = IgeEntityPhysics.extend({
 										}
 									);
 
-									if (ige.game.entitiesCollidingWithLastRaycast.length > 0) {
+									if (ige.game.entitiesCollidingWithLastRaycast.length > 0 && data.damageData) {
 
 										this.raycastTargets = _.filter(
 											ige.game.entitiesCollidingWithLastRaycast,
