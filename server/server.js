@@ -37,7 +37,12 @@ global.rollbar = {
 	configure: function () {
 		// do nothing in non prod env
 	},
+	lastError: function () {
+		// do nothing in non prod env
+	},
 };
+
+global.lastRollbarUuid = null;
 
 global.mixpanel = {
 	track: function () {
@@ -55,6 +60,7 @@ if (process.env.ENV == 'production') {
 		exitOnUncaughtException: true,
 		onSendCallback: (isUncaught, args, payload) => {
 			console.error(`server.js error: ${payload.uuid}\ntimestamp: ${payload.timestamp}\nisUncaught: ${isUncaught}\nstack: ${payload.notifier.diagnostic['raw_error'].stack}`);
+			global.lastRollbarUuid = payload.uuid;
 		}
 	});
 }
@@ -68,6 +74,7 @@ if(process.env.MIXPANEL_TOKEN) {
 
 process.on('exit', function () {
 	console.log('process exit called.');
+	ige.clusterClient && ige.clusterClient.sendRollbarCrashData(global.lastRollbarUuid);
 	console.trace();
 });
 

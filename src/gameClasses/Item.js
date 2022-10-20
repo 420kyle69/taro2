@@ -347,29 +347,31 @@ var Item = IgeEntityPhysics.extend({
 									};
 
 									// console.log(self._stats.currentBody.type, "unit: ", angleToTarget, "item's rotate.z: ", self._rotate.z, "facing angle", itemrotate)
-									var data = Object.assign(
-										JSON.parse(JSON.stringify(self.projectileData)),
-										{
-											type: self._stats.projectileType,
-											sourceItemId: self.id(),
-											sourceUnitId: ownerId,
-											defaultData: defaultData,
-											damageData: {
-												targetsAffected: this._stats.damage.targetsAffected,
-												sourceUnitId: ownerId,
+									if (this._stats.bulletType !== 'raycast') {
+										var projectileData = Object.assign(
+											JSON.parse(JSON.stringify(self.projectileData)),
+											{
+												type: self._stats.projectileType,
 												sourceItemId: self.id(),
-												sourcePlayerId: owner.getOwner().id(),
-												unitAttributes: this._stats.damage.unitAttributes,
-												playerAttributes: this._stats.damage.playerAttributes
-											}
-										});
+												sourceUnitId: ownerId,
+												defaultData: defaultData,
+												damageData: {
+													targetsAffected: this._stats.damage.targetsAffected,
+													sourceUnitId: ownerId,
+													sourceItemId: self.id(),
+													sourcePlayerId: owner.getOwner().id(),
+													unitAttributes: this._stats.damage.unitAttributes,
+													playerAttributes: this._stats.damage.playerAttributes
+												}
+											});
 
-									if (this._stats.bulletType !== 'raycast') { // we don't create a Projectile entity for raycasts
-										var projectile = new Projectile(data);
+									 // we don't create a Projectile entity for raycasts
+										var projectile = new Projectile(projectileData);
 										projectile.script.trigger('entityCreated');
 										ige.game.lastCreatedProjectileId = projectile.id();
 									}
 								}
+
 								if (this._stats.bulletType == 'raycast') {
 									// starting from unit center position
 									let offset = { x: 0, y: 0 };
@@ -419,7 +421,7 @@ var Item = IgeEntityPhysics.extend({
 									};
 
 									// end pos calcs; fire raycast
-									ige.raycaster.raycastBullet(
+									const bulletReturn = ige.raycaster.raycastBullet(
 										{
 											x: raycastStart.x / self.scaleRatio,
 											y: raycastStart.y / self.scaleRatio
@@ -428,18 +430,40 @@ var Item = IgeEntityPhysics.extend({
 											x: raycastEnd.x / self.scaleRatio,
 											y: raycastEnd.y / self.scaleRatio
 										},
-										{
-											method: 'closest',
-											projType: data.type,
-											rotation: pos.rotation,
-											dimensions: {
-												width: data.bodies.default.width,
-												height: data.bodies.default.height
-											}
-										}
 									);
 
+									// if the shot was not obstructed (shooting through a physics body)
+									// render the bullet according to its projectile data on Client
+									if (ige.isClient && !bulletReturn.obstructed) {
+										ige.raycaster.renderBullet(
+											bulletReturn.start,
+											bulletReturn.point,
+											{
+												color: 0xff0000,
+												projType: this._stats.projectileType ? this._stats.projectileType : null,
+												fraction: bulletReturn.fraction,
+												rotation: pos.rotation,
+												dimensions: {
+													// we are pulling display size of raycast bullet from its default body
+													width: this.projectileData && this.projectileData.bodies && this.projectileData.bodies.default ?
+														this.projectileData.bodies.default.width : null,
+													height: this.projectileData && this.projectileData.bodies && this.projectileData.bodies.default ?
+														this.projectileData.bodies.default.height : null,
+												}
+											}
+										);
+									}
+
 									if (ige.game.entitiesCollidingWithLastRaycast.length > 0) {
+
+										const damageData = {
+											targetsAffected: this._stats.damage.targetsAffected,
+											sourceUnitId: ownerId,
+											sourceItemId: self.id(),
+											sourcePlayerId: owner.getOwner().id(),
+											unitAttributes: this._stats.damage.unitAttributes,
+											playerAttributes: this._stats.damage.playerAttributes
+										};
 
 										this.raycastTargets = _.filter(
 											ige.game.entitiesCollidingWithLastRaycast,
@@ -451,7 +475,7 @@ var Item = IgeEntityPhysics.extend({
 										// console.log(this.raycastTargets);
 										this.raycastTargets.forEach((unit) => {
 											// console.log(`damaging ${unit.id()}`);
-											unit.inflictDamage(data.damageData);
+											unit.inflictDamage(damageData);
 										});
 									}
 

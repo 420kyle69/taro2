@@ -122,24 +122,35 @@ var PhaserPalette = /** @class */ (function (_super) {
             camera.x = _this.scene.sys.game.canvas.width - paletteWidth - 40;
             scrollBarContainer.x = _this.camera.x;
             layerButtonsContainer.x = _this.camera.x + paletteWidth - 98;
+            layerButtonsContainer.y = _this.camera.y - 170;
+            toolButtonsContainer.x = _this.camera.x + paletteWidth - 98;
+            toolButtonsContainer.y = _this.camera.y - layerButtonsContainer.height - 136;
         });
-        new PhaserPaletteButton(_this, '+', 0, -31, 30, scrollBarContainer, _this.zoom.bind(_this), -1);
-        new PhaserPaletteButton(_this, '-', 31, -31, 30, scrollBarContainer, _this.zoom.bind(_this), 1);
-        new PhaserPaletteButton(_this, '_', 93, -31, 30, scrollBarContainer, _this.emptyTile.bind(_this));
-        _this.toolButtons = [];
-        _this.toolButtons.push(new PhaserPaletteButton(_this, '.', 155, -31, 30, scrollBarContainer, _this.selectSingle.bind(_this)), new PhaserPaletteButton(_this, '[]', 186, -31, 30, scrollBarContainer, _this.selectArea.bind(_this)));
-        _this.toolButtons[0].highlight(true);
+        new PhaserPaletteButton(_this, '+', null, 0, -34, 30, scrollBarContainer, _this.zoom.bind(_this), -1);
+        new PhaserPaletteButton(_this, '-', null, 34, -34, 30, scrollBarContainer, _this.zoom.bind(_this), 1);
         var layerButtonsContainer = _this.layerButtonsContainer = new Phaser.GameObjects.Container(scene);
         scene.add.existing(layerButtonsContainer);
         //this.scrollBarContainer.add(layerButtonsContainer);
-        layerButtonsContainer.x = _this.camera.x + paletteWidth - 98;
-        layerButtonsContainer.y = _this.camera.y;
         layerButtonsContainer.width = 120;
         layerButtonsContainer.height = 160;
-        new PhaserPaletteButton(_this, 'tiles', 0, -31, 120, layerButtonsContainer, _this.toggle.bind(_this));
+        layerButtonsContainer.x = _this.camera.x + paletteWidth - 98;
+        layerButtonsContainer.y = _this.camera.y - 204;
+        new PhaserPaletteButton(_this, 'palette', null, 0, 170, 120, layerButtonsContainer, _this.toggle.bind(_this));
         _this.layerButtons = [];
-        _this.layerButtons.push(new PhaserPaletteButton(_this, 'floor', 0, -93, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 0), new PhaserPaletteButton(_this, 'floor2', 0, -124, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 1), new PhaserPaletteButton(_this, 'walls', 0, -155, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 2), new PhaserPaletteButton(_this, 'trees', 0, -186, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 3));
+        _this.layerButtons.push(new PhaserPaletteButton(_this, 'floor', null, 0, 102, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 0), new PhaserPaletteButton(_this, 'floor2', null, 0, 68, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 1), new PhaserPaletteButton(_this, 'walls', null, 0, 34, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 2), new PhaserPaletteButton(_this, 'trees', null, 0, 0, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 3));
         _this.layerButtons[0].highlight(true);
+        var toolButtonsContainer = _this.toolButtonsContainer = new Phaser.GameObjects.Container(scene);
+        scene.add.existing(toolButtonsContainer);
+        //this.scrollBarContainer.add(toolButtonsContainer);
+        toolButtonsContainer.x = _this.camera.x + paletteWidth - 98;
+        toolButtonsContainer.y = _this.camera.y - layerButtonsContainer.height - 136;
+        toolButtonsContainer.width = 120;
+        toolButtonsContainer.height = 64;
+        _this.cursorButton = new PhaserPaletteButton(_this, '', 'cursor', 0, 0, 58, toolButtonsContainer, _this.toggleMarker.bind(_this));
+        new PhaserPaletteButton(_this, '', 'eraser', 62, 0, 58, toolButtonsContainer, _this.emptyTile.bind(_this));
+        _this.toolButtons = [];
+        _this.toolButtons.push(new PhaserPaletteButton(_this, '1x1', null, 0, 34, 58, toolButtonsContainer, _this.selectSingle.bind(_this)), new PhaserPaletteButton(_this, '2x2', null, 62, 34, 58, toolButtonsContainer, _this.selectArea.bind(_this)));
+        _this.toolButtons[0].highlight(true);
         _this.area = { x: 1, y: 1 };
         return _this;
         //this.width = 500;
@@ -156,11 +167,25 @@ var PhaserPalette = /** @class */ (function (_super) {
             console.log('pointerout');
         });*/
     }
+    PhaserPalette.prototype.toggleMarker = function () {
+        if (!this.cursorButton.active) {
+            this.scene.marker.graphics.setVisible(false);
+            this.cursorButton.highlight(true);
+            this.scene.marker.active = false;
+        }
+        else {
+            this.cursorButton.highlight(false);
+            this.scene.marker.active = true;
+        }
+    };
     PhaserPalette.prototype.emptyTile = function () {
         var copy = __assign({}, this.scene.selectedTile);
         copy.index = 0;
         this.scene.selectedTile = copy;
         this.scene.selectedTileArea = [[copy, copy], [copy, copy]];
+        if (this.cursorButton.active) {
+            this.toggleMarker();
+        }
     };
     PhaserPalette.prototype.selectSingle = function () {
         for (var i = 0; i < this.area.x; i++) {
@@ -170,18 +195,24 @@ var PhaserPalette = /** @class */ (function (_super) {
             }
         }
         this.area = { x: 1, y: 1 };
-        this.scene.marker.scale = 1;
-        this.scene.paletteMarker.scale = 1;
+        this.scene.marker.graphics.scale = 1;
+        this.scene.paletteMarker.graphics.scale = 1;
         this.toolButtons[0].highlight(true);
         this.toolButtons[1].highlight(false);
+        if (this.cursorButton.active) {
+            this.toggleMarker();
+        }
     };
     PhaserPalette.prototype.selectArea = function () {
         this.scene.selectedTile.tint = 0xffffff;
         this.area = { x: 2, y: 2 };
-        this.scene.marker.scale = 2;
-        this.scene.paletteMarker.scale = 2;
+        this.scene.marker.graphics.scale = 2;
+        this.scene.paletteMarker.graphics.scale = 2;
         this.toolButtons[1].highlight(true);
         this.toolButtons[0].highlight(false);
+        if (this.cursorButton.active) {
+            this.toggleMarker();
+        }
     };
     PhaserPalette.prototype.toggle = function () {
         if (this.visible)
