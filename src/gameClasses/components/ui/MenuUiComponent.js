@@ -119,7 +119,7 @@ var MenuUiComponent = IgeEntity.extend({
 			});
 
 			$('#toggle-dev-panels').on('click', function () {
-				if(['1', '5'].includes(window.gameDetails.tier)) {
+				if(['1', '5'].includes(window.gameDetails.tier) || window.isStandalone) {
 					if (!ige.developerMode.active) {
 						ige.developerMode.enter();
 					} else {
