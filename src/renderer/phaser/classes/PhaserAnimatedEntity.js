@@ -22,7 +22,6 @@ var PhaserAnimatedEntity = /** @class */ (function (_super) {
         var bounds = entity._bounds2d;
         var sprite = scene.add.sprite(0, 0, key);
         _this.sprite = sprite;
-        _this.sprite.phaserEntity = _this;
         sprite.setDisplaySize(bounds.x, bounds.y);
         sprite.rotation = entity._rotate.z;
         Object.assign(_this.evtListeners, {
