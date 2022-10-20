@@ -1,7 +1,7 @@
 class PhaserProjectile extends PhaserAnimatedEntity {
 
 	protected gameObject: Phaser.GameObjects.Sprite & Hidden;
-	public entity: Projectile;
+	protected entity: Projectile;
 
 	constructor (
 		scene: GameScene,

@@ -11,8 +11,9 @@ class PhaserEntity {
 	protected evtListeners: Record<string, EvtListener> = {};
 
 	protected constructor (
-		public entity: IgeEntity
+		protected entity: IgeEntity
 	) {
+
 		Object.assign(this.evtListeners, {
 			transform: entity.on('transform', this.transform, this),
 			scale: entity.on('scale', this.scale, this),
@@ -68,6 +69,5 @@ class PhaserEntity {
 }
 
 interface Hidden {
-	phaserEntity: PhaserEntity;
 	hidden: boolean;
   }

@@ -84,9 +84,9 @@ class DevModeScene extends PhaserScene {
 			/* TODO: SAVE MAP DATA FROM SERVER SIDE */
 			const width = ige.game.data.map.width;
 			//save tile change to ige.game.map.data
-			if (data.layer >= 2) data.layer ++;
+			if (ige.game.data.map.layers.length > 4 && data.layer >= 2) data.layer ++;
 			ige.game.data.map.layers[data.layer].data[data.y*width + data.x] = data.gid;
-			if (ige.physics && data.layer === 3) {
+			if (ige.physics && ige.game.data.map.layers[data.layer].name === 'walls') {
 				//if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
 				ige.physics.destroyWalls();
 				let map = ige.scaleMap(_.cloneDeep(ige.game.data.map));

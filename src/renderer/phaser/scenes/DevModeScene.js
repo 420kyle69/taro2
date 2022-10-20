@@ -75,10 +75,10 @@ var DevModeScene = /** @class */ (function (_super) {
             /* TODO: SAVE MAP DATA FROM SERVER SIDE */
             var width = ige.game.data.map.width;
             //save tile change to ige.game.map.data
-            if (data.layer >= 2)
+            if (ige.game.data.map.layers.length > 4 && data.layer >= 2)
                 data.layer++;
             ige.game.data.map.layers[data.layer].data[data.y * width + data.x] = data.gid;
-            if (ige.physics && data.layer === 3) {
+            if (ige.physics && ige.game.data.map.layers[data.layer].name === 'walls') {
                 //if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
                 ige.physics.destroyWalls();
                 var map_1 = ige.scaleMap(_.cloneDeep(ige.game.data.map));
