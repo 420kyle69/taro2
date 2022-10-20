@@ -184,8 +184,8 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 		toolButtonsContainer.width = 120;
 		toolButtonsContainer.height = 64;
 
-		this.cursorButton = new PhaserPaletteButton (this, '.', 'cursor', 0, 0, 58, toolButtonsContainer, this.disableMarker.bind(this));
-		new PhaserPaletteButton (this, '_', 'eraser', 62, 0, 58, toolButtonsContainer, this.emptyTile.bind(this));
+		this.cursorButton = new PhaserPaletteButton (this, '', 'cursor', 0, 0, 58, toolButtonsContainer, this.toggleMarker.bind(this));
+		new PhaserPaletteButton (this, '', 'eraser', 62, 0, 58, toolButtonsContainer, this.emptyTile.bind(this));
 
 		this.toolButtons = [];
 		this.toolButtons.push (
@@ -211,8 +211,9 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 		});*/
 	}
 
-	disableMarker() {
+	toggleMarker() {
 		if (!this.cursorButton.active) {
+			this.scene.marker.graphics.setVisible(false);
 			this.cursorButton.highlight(true);
 			this.scene.marker.active = false;
 		} else {
@@ -226,6 +227,10 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 		copy.index = 0;
 		this.scene.selectedTile = copy as any;
 		this.scene.selectedTileArea = [[copy, copy],[copy, copy]] as any;
+
+		if (this.cursorButton.active) {
+			this.toggleMarker()
+		} 
 	}
 
 	selectSingle() {
@@ -239,6 +244,10 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 		this.scene.paletteMarker.graphics.scale = 1;
 		this.toolButtons[0].highlight(true);
 		this.toolButtons[1].highlight(false);
+
+		if (this.cursorButton.active) {
+			this.toggleMarker()
+		} 
 	}
 
 	selectArea() {
@@ -248,6 +257,10 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 		this.scene.paletteMarker.graphics.scale = 2;
 		this.toolButtons[1].highlight(true);
 		this.toolButtons[0].highlight(false);
+
+		if (this.cursorButton.active) {
+			this.toggleMarker()
+		} 
 	}
 
 	toggle() {

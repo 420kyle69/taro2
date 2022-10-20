@@ -213,6 +213,10 @@ class DevModeScene extends PhaserScene {
 									this.selectedTileArea[i][j].tint = 0xffffff;
 									this.selectedTileArea[i][j] = paletteMap.getTileAt(palettePointerTileX + i, palettePointerTileY + j, true);
 									this.selectedTileArea[i][j].tint = 0x87cfff;
+
+									if (this.devPalette.cursorButton.active) {
+										this.devPalette.toggleMarker()
+									} 
 								}
 							}
 						}
@@ -221,6 +225,10 @@ class DevModeScene extends PhaserScene {
 							if (this.selectedTile) this.selectedTile.tint = 0xffffff;
 							this.selectedTile = paletteMap.getTileAt(palettePointerTileX, palettePointerTileY, true);
 							this.selectedTile.tint = 0x87cfff;
+
+							if (this.devPalette.cursorButton.active) {
+								this.devPalette.toggleMarker()
+							} 
 						}
 					}
 				}

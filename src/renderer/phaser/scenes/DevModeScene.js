@@ -183,6 +183,9 @@ var DevModeScene = /** @class */ (function (_super) {
                                     this.selectedTileArea[i][j].tint = 0xffffff;
                                     this.selectedTileArea[i][j] = paletteMap.getTileAt(palettePointerTileX + i, palettePointerTileY + j, true);
                                     this.selectedTileArea[i][j].tint = 0x87cfff;
+                                    if (this.devPalette.cursorButton.active) {
+                                        this.devPalette.toggleMarker();
+                                    }
                                 }
                             }
                         }
@@ -193,6 +196,9 @@ var DevModeScene = /** @class */ (function (_super) {
                                 this.selectedTile.tint = 0xffffff;
                             this.selectedTile = paletteMap.getTileAt(palettePointerTileX, palettePointerTileY, true);
                             this.selectedTile.tint = 0x87cfff;
+                            if (this.devPalette.cursorButton.active) {
+                                this.devPalette.toggleMarker();
+                            }
                         }
                     }
                 }

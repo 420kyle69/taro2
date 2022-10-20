@@ -10,8 +10,8 @@ var PhaserPaletteButton = /** @class */ (function () {
         button.setInteractive();
         container.add(button);
         if (texture) {
-            var image = palette.scene.add.image(x + w / 4, y, texture)
-                .setDisplaySize(h, h)
+            var image = palette.scene.add.image(x + w / 4 + h * 0.1, y + h * 0.1, texture)
+                .setDisplaySize(h * 0.8, h * 0.8)
                 .setOrigin(0);
             container.add(image);
         }
