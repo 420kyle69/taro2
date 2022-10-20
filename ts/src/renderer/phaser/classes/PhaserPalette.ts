@@ -71,6 +71,21 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 			const scrollY = (p.y - p.prevPosition.y) / camera.zoom;
 			camera.scrollX -= scrollX;
 			camera.scrollY -= scrollY;
+
+			let bottomValue = (camera.scrollX - camera.getBounds().x) / (camera.getBounds().width - camera.width);
+			let rightValue = (camera.scrollY - camera.getBounds().y) / (camera.getBounds().height - camera.height);
+
+			if (bottomValue > 1) bottomValue = 1;
+			if (rightValue > 1) rightValue = 1;
+			if (bottomValue < 0) bottomValue = 0;
+			if (rightValue < 0) rightValue = 0;
+			
+			scrollBarBottom.blocked = true;
+			scrollBarRight.blocked = true;
+			scrollBarBottom.value = bottomValue;
+			scrollBarRight.value = rightValue;
+			scrollBarBottom.blocked = false;
+			scrollBarRight.blocked = false;
 		  });
 
 		const COLOR_PRIMARY = 0x0036cc;
@@ -127,7 +142,7 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 
 		scrollBarBottom.on('valuechange',
 			function (newValue, oldValue, scrollBar) {
-				if (!isNaN(newValue)) {
+				if (!isNaN(newValue) && !scrollBar.blocked) {
 					newValue -= 0.5;
 					camera.scrollX = this.x + (camera.width * newValue);
 				}
@@ -137,7 +152,7 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 
 		scrollBarRight.on('valuechange',
 			function (newValue, oldValue, scrollBar) {
-				if (!isNaN(newValue)) {
+				if (!isNaN(newValue) && !scrollBar.blocked) {
 					newValue -= 0.5;
 					camera.scrollY = this.y + (camera.height * newValue);
 				}
