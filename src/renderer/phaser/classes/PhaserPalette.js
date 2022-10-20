@@ -170,9 +170,11 @@ var PhaserPalette = /** @class */ (function (_super) {
     PhaserPalette.prototype.disableMarker = function () {
         if (!this.cursorButton.active) {
             this.cursorButton.highlight(true);
+            this.scene.marker.active = false;
         }
         else {
             this.cursorButton.highlight(false);
+            this.scene.marker.active = true;
         }
     };
     PhaserPalette.prototype.emptyTile = function () {
@@ -189,16 +191,16 @@ var PhaserPalette = /** @class */ (function (_super) {
             }
         }
         this.area = { x: 1, y: 1 };
-        this.scene.marker.scale = 1;
-        this.scene.paletteMarker.scale = 1;
+        this.scene.marker.graphics.scale = 1;
+        this.scene.paletteMarker.graphics.scale = 1;
         this.toolButtons[0].highlight(true);
         this.toolButtons[1].highlight(false);
     };
     PhaserPalette.prototype.selectArea = function () {
         this.scene.selectedTile.tint = 0xffffff;
         this.area = { x: 2, y: 2 };
-        this.scene.marker.scale = 2;
-        this.scene.paletteMarker.scale = 2;
+        this.scene.marker.graphics.scale = 2;
+        this.scene.paletteMarker.graphics.scale = 2;
         this.toolButtons[1].highlight(true);
         this.toolButtons[0].highlight(false);
     };

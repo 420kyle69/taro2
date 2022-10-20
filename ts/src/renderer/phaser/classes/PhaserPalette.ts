@@ -214,8 +214,10 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 	disableMarker() {
 		if (!this.cursorButton.active) {
 			this.cursorButton.highlight(true);
+			this.scene.marker.active = false;
 		} else {
 			this.cursorButton.highlight(false);
+			this.scene.marker.active = true;
 		}
 	}
 
@@ -233,8 +235,8 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 			}
 		}
 		this.area = {x: 1, y: 1};
-		this.scene.marker.scale = 1;
-		this.scene.paletteMarker.scale = 1;
+		this.scene.marker.graphics.scale = 1;
+		this.scene.paletteMarker.graphics.scale = 1;
 		this.toolButtons[0].highlight(true);
 		this.toolButtons[1].highlight(false);
 	}
@@ -242,8 +244,8 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 	selectArea() {
 		this.scene.selectedTile.tint = 0xffffff;
 		this.area = {x: 2, y: 2};
-		this.scene.marker.scale = 2;
-		this.scene.paletteMarker.scale = 2;
+		this.scene.marker.graphics.scale = 2;
+		this.scene.paletteMarker.graphics.scale = 2;
 		this.toolButtons[1].highlight(true);
 		this.toolButtons[0].highlight(false);
 	}

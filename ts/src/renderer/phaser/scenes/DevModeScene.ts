@@ -1,14 +1,18 @@
 class DevModeScene extends PhaserScene {
 
-	devPalette: PhaserPalette;
-	tilemap: Phaser.Tilemaps.Tilemap;
-	selectedTile: Phaser.Tilemaps.Tile;
-	selectedTileArea: Phaser.Tilemaps.Tile[][];
-	paletteMarker: Phaser.GameObjects.Graphics;
 	rexUI: any;
 	gameScene: any;
+
+	devPalette: PhaserPalette;
+	tilemap: Phaser.Tilemaps.Tilemap;
 	tileset: Phaser.Tilemaps.Tileset;
-	marker: Phaser.GameObjects.Graphics;
+
+	selectedTile: Phaser.Tilemaps.Tile;
+	selectedTileArea: Phaser.Tilemaps.Tile[][];
+
+	marker: TileMarker;
+	paletteMarker: TileMarker;
+
 	defaultZoom: number;
 
 	constructor() {
@@ -28,10 +32,7 @@ class DevModeScene extends PhaserScene {
 			this.defaultZoom = (this.gameScene.zoomSize / 2.15)
 			if (!this.devPalette) {
 				this.devPalette = new PhaserPalette(this, this.tileset, this.rexUI);
-		 		this.paletteMarker = this.add.graphics();
-				this.paletteMarker.lineStyle(1, 0x000000, 1);
-				this.paletteMarker.strokeRect(0, 0, this.devPalette.map.tileWidth, this.devPalette.map.tileHeight);
-				this.paletteMarker.setVisible(false);
+				this.paletteMarker = new TileMarker(this, this.devPalette.map, 1);
 				this.devPalette.show();
 				this.devPalette.layerButtonsContainer.setVisible(true);
 			}
@@ -154,14 +155,7 @@ class DevModeScene extends PhaserScene {
 		console.log('game map', gameMap)
 		gameMap.currentLayerIndex = 0;
 		this.selectedTile = gameMap.getTileAt(2, 3);
-		this.marker = this.gameScene.add.graphics();
-		this.marker.lineStyle(2, 0x000000, 1);
-		if (ige.game.data.defaultData.dontResize) {
-			this.marker.strokeRect(0, 0, gameMap.tileWidth, gameMap.tileHeight);
-		} else {
-			this.marker.strokeRect(0, 0, 64, 64);
-		}
-		this.marker.setVisible(false);
+		this.marker = new TileMarker (this.gameScene, gameMap, 2);
 	}
 
 	pointerInsideMap(pointerX: number, pointerY: number, map: Phaser.Tilemaps.Tilemap): boolean {
@@ -197,19 +191,19 @@ class DevModeScene extends PhaserScene {
 			const marker = this.marker;
 			const paletteMarker = this.paletteMarker;
 
-			paletteMarker.clear();
-			paletteMarker.strokeRect(0, 0, paletteMap.tileWidth * palette.texturesLayer.scaleX, paletteMap.tileHeight * palette.texturesLayer.scaleY);
-			paletteMarker.setVisible(true);
+			paletteMarker.graphics.clear();
+			paletteMarker.graphics.strokeRect(0, 0, paletteMap.tileWidth * palette.texturesLayer.scaleX, paletteMap.tileHeight * palette.texturesLayer.scaleY);
+			paletteMarker.graphics.setVisible(true);
 
 			// Rounds down to nearest tile
 			const palettePointerTileX = paletteMap.worldToTileX(palettePoint.x);
 			const palettePointerTileY = paletteMap.worldToTileY(palettePoint.y);
 
 			if (palette.visible	&& this.pointerInsidePalette()) {
-				marker.setVisible(false);
+				marker.graphics.setVisible(false);
 				// Snap to tile coordinates, but in world space
-				paletteMarker.x = paletteMap.tileToWorldX(palettePointerTileX);
-				paletteMarker.y = paletteMap.tileToWorldY(palettePointerTileY);
+				paletteMarker.graphics.x = paletteMap.tileToWorldX(palettePointerTileX);
+				paletteMarker.graphics.y = paletteMap.tileToWorldY(palettePointerTileY);
 
 				if (this.input.manager.activePointer.isDown) {
 					if (palette.area.x > 1 || palette.area.y > 1) {
@@ -231,16 +225,16 @@ class DevModeScene extends PhaserScene {
 					}
 				}
 			} else if ((!this.pointerInsidePalette() || !palette.visible) &&
-				!this.pointerInsideButtons()) {
-				paletteMarker.setVisible(false);
-				marker.setVisible(true);
+				!this.pointerInsideButtons() && marker.active) {
+				paletteMarker.graphics.setVisible(false);
+				marker.graphics.setVisible(true);
 				// Rounds down to nearest tile
 				const pointerTileX = map.worldToTileX(worldPoint.x);
 				const pointerTileY = map.worldToTileY(worldPoint.y);
 
 				// Snap to tile coordinates, but in world space
-				marker.x = map.tileToWorldX(pointerTileX);
-				marker.y = map.tileToWorldY(pointerTileY);
+				marker.graphics.x = map.tileToWorldX(pointerTileX);
+				marker.graphics.y = map.tileToWorldY(pointerTileY);
 
 				if (this.input.manager.activePointer.rightButtonDown()) {
 					if (palette.area.x > 1 || palette.area.y > 1) {
@@ -288,7 +282,7 @@ class DevModeScene extends PhaserScene {
 				}
 			}
 		}
-		else this.marker.setVisible(false);
+		else this.marker.graphics.setVisible(false);
 	}
 
 }
