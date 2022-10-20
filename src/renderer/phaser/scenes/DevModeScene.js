@@ -34,13 +34,17 @@ var DevModeScene = /** @class */ (function (_super) {
                 _this.paletteMarker = new TileMarker(_this, _this.devPalette.map, 1);
                 _this.devPalette.show();
                 _this.devPalette.layerButtonsContainer.setVisible(true);
+                _this.devPalette.toolButtonsContainer.setVisible(true);
             }
-            else
+            else {
                 _this.devPalette.layerButtonsContainer.setVisible(true);
+                _this.devPalette.toolButtonsContainer.setVisible(true);
+            }
         });
         ige.client.on('leaveDevMode', function () {
             _this.devPalette.hide();
             _this.devPalette.layerButtonsContainer.setVisible(false);
+            _this.devPalette.toolButtonsContainer.setVisible(false);
             ige.client.emit('zoom', _this.defaultZoom);
         });
         var tabKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, true);

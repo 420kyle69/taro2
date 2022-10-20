@@ -35,13 +35,18 @@ class DevModeScene extends PhaserScene {
 				this.paletteMarker = new TileMarker(this, this.devPalette.map, 1);
 				this.devPalette.show();
 				this.devPalette.layerButtonsContainer.setVisible(true);
+				this.devPalette.toolButtonsContainer.setVisible(true);
 			}
-			else this.devPalette.layerButtonsContainer.setVisible(true);
+			else {
+				this.devPalette.layerButtonsContainer.setVisible(true);
+				this.devPalette.toolButtonsContainer.setVisible(true);
+			}
 		});
 
 		ige.client.on('leaveDevMode', () => {
 			this.devPalette.hide();
 			this.devPalette.layerButtonsContainer.setVisible(false);
+			this.devPalette.toolButtonsContainer.setVisible(false);
 			ige.client.emit('zoom', this.defaultZoom);
 		});
 

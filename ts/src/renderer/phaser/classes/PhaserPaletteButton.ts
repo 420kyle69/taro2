@@ -34,19 +34,13 @@ class PhaserPaletteButton {
             const label = palette.scene.add.text(
                 x + w/2, y + h/2, text
             );
-            label.setFontFamily('Rubik');
+            label.setFontFamily('Verdana');
             label.setColor('#000000')
 		    label.setFontSize(26);
 		    label.setOrigin(0.5);
 		    label.setResolution(4);
 		    container.add(label);
         }
-		/*label.setFontFamily('Verdana');
-        label.setColor('#000000')
-		label.setFontSize(26);
-		label.setOrigin(0.5);
-		label.setResolution(4);
-		container.add(label);*/
 		button.on('pointerdown', () => {
 			if (value || value === 0) func(value);
 			else func();
