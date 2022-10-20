@@ -14,10 +14,9 @@ class PhaserRay {
 		},
 		config: {
 			color: number,
-			method: string,
 			projType: string,
 			fraction: number,
-			rotation: number
+			rotation: number,
 			dimensions: {
 				width: number,
 				height: number

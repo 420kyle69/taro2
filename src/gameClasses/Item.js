@@ -347,7 +347,7 @@ var Item = IgeEntityPhysics.extend({
 									};
 
 									// console.log(self._stats.currentBody.type, "unit: ", angleToTarget, "item's rotate.z: ", self._rotate.z, "facing angle", itemrotate)
-									var data = Object.assign(
+									var projectileData = Object.assign(
 										JSON.parse(JSON.stringify(self.projectileData)),
 										{
 											type: self._stats.projectileType,
@@ -365,13 +365,13 @@ var Item = IgeEntityPhysics.extend({
 										});
 
 									if (this._stats.bulletType !== 'raycast') { // we don't create a Projectile entity for raycasts
-										var projectile = new Projectile(data);
+										var projectile = new Projectile(projectileData);
 										projectile.script.trigger('entityCreated');
 										ige.game.lastCreatedProjectileId = projectile.id();
 									}
 								}
 								// don't run raycast bullet without projectile data
-								if (this._stats.bulletType == 'raycast' && data) {
+								if (this._stats.bulletType == 'raycast' && projectileData) {
 									// starting from unit center position
 									let offset = { x: 0, y: 0 };
 
@@ -420,7 +420,7 @@ var Item = IgeEntityPhysics.extend({
 									};
 
 									// end pos calcs; fire raycast
-									ige.raycaster.raycastBullet(
+									const bulletReturn = ige.raycaster.raycastBullet(
 										{
 											x: raycastStart.x / self.scaleRatio,
 											y: raycastStart.y / self.scaleRatio
@@ -429,18 +429,28 @@ var Item = IgeEntityPhysics.extend({
 											x: raycastEnd.x / self.scaleRatio,
 											y: raycastEnd.y / self.scaleRatio
 										},
-										{
-											method: 'closest',
-											projType: data.type,
-											rotation: pos.rotation,
-											dimensions: {
-												width: data.bodies.default.width,
-												height: data.bodies.default.height
-											}
-										}
 									);
 
-									if (ige.game.entitiesCollidingWithLastRaycast.length > 0 && data.damageData) {
+									// if the shot was not obstructed (shooting through a physics body)
+									// render the bullet according to its projectile data on Client
+									if (ige.isClient && !bulletReturn.obstructed) {
+										ige.raycaster.renderBullet(
+											bulletReturn.start,
+											bulletReturn.point,
+											{
+												color: 0xff0000,
+												projType: projectileData.type,
+												fraction: bulletReturn.fraction,
+												rotation: pos.rotation,
+												dimensions: {
+													width: projectileData.bodies.default.width,
+													height: projectileData.bodies.default.height
+												}
+											}
+										);
+									}
+
+									if (ige.game.entitiesCollidingWithLastRaycast.length > 0 && projectileData.damageData) {
 
 										this.raycastTargets = _.filter(
 											ige.game.entitiesCollidingWithLastRaycast,
@@ -452,7 +462,7 @@ var Item = IgeEntityPhysics.extend({
 										// console.log(this.raycastTargets);
 										this.raycastTargets.forEach((unit) => {
 											// console.log(`damaging ${unit.id()}`);
-											unit.inflictDamage(data.damageData);
+											unit.inflictDamage(projectileData.damageData);
 										});
 									}
 
