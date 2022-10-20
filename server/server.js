@@ -74,7 +74,6 @@ if(process.env.MIXPANEL_TOKEN) {
 
 process.on('exit', function () {
 	console.log('process exit called.');
-	console.log(global.rollbar.lastError());
 	ige.clusterClient && ige.clusterClient.sendRollbarCrashData(global.lastRollbarUuid);
 	console.trace();
 });
