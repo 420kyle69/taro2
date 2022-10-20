@@ -110,8 +110,8 @@ var DevModeScene = /** @class */ (function (_super) {
             });
             this.load.image(key, this.patchAssetUrl(tileset.image));
         });*/
-        this.load.image('cursor', 'assets/images/cursor.png');
-        this.load.image('eraser', 'assets/images/erasergap.png');
+        this.load.image('cursor', 'https://cache.modd.io/asset/spriteImage/1666276041347_cursor.png');
+        this.load.image('eraser', 'https://cache.modd.io/asset/spriteImage/1666276083246_erasergap.png');
         this.load.scenePlugin('rexuiplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js', 
         //'src/renderer/phaser/rexuiplugin.min.js',
         'rexUI', 'rexUI');

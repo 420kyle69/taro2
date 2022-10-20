@@ -121,8 +121,8 @@ class DevModeScene extends PhaserScene {
 			this.load.image(key, this.patchAssetUrl(tileset.image));
 		});*/
 
-		this.load.image('cursor', 'assets/images/cursor.png');
-		this.load.image('eraser', 'assets/images/erasergap.png');
+		this.load.image('cursor', 'https://cache.modd.io/asset/spriteImage/1666276041347_cursor.png');
+		this.load.image('eraser', 'https://cache.modd.io/asset/spriteImage/1666276083246_erasergap.png');
 
 		this.load.scenePlugin(
 			'rexuiplugin',
