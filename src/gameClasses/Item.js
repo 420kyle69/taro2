@@ -347,31 +347,32 @@ var Item = IgeEntityPhysics.extend({
 									};
 
 									// console.log(self._stats.currentBody.type, "unit: ", angleToTarget, "item's rotate.z: ", self._rotate.z, "facing angle", itemrotate)
-									var projectileData = Object.assign(
-										JSON.parse(JSON.stringify(self.projectileData)),
-										{
-											type: self._stats.projectileType,
-											sourceItemId: self.id(),
-											sourceUnitId: ownerId,
-											defaultData: defaultData,
-											damageData: {
-												targetsAffected: this._stats.damage.targetsAffected,
-												sourceUnitId: ownerId,
+									if (this._stats.bulletType !== 'raycast') {
+										var projectileData = Object.assign(
+											JSON.parse(JSON.stringify(self.projectileData)),
+											{
+												type: self._stats.projectileType,
 												sourceItemId: self.id(),
-												sourcePlayerId: owner.getOwner().id(),
-												unitAttributes: this._stats.damage.unitAttributes,
-												playerAttributes: this._stats.damage.playerAttributes
-											}
-										});
+												sourceUnitId: ownerId,
+												defaultData: defaultData,
+												damageData: {
+													targetsAffected: this._stats.damage.targetsAffected,
+													sourceUnitId: ownerId,
+													sourceItemId: self.id(),
+													sourcePlayerId: owner.getOwner().id(),
+													unitAttributes: this._stats.damage.unitAttributes,
+													playerAttributes: this._stats.damage.playerAttributes
+												}
+											});
 
-									if (this._stats.bulletType !== 'raycast') { // we don't create a Projectile entity for raycasts
+									 // we don't create a Projectile entity for raycasts
 										var projectile = new Projectile(projectileData);
 										projectile.script.trigger('entityCreated');
 										ige.game.lastCreatedProjectileId = projectile.id();
 									}
 								}
-								// don't run raycast bullet without projectile data
-								if (this._stats.bulletType == 'raycast' && projectileData) {
+
+								if (this._stats.bulletType == 'raycast') {
 									// starting from unit center position
 									let offset = { x: 0, y: 0 };
 
@@ -439,18 +440,30 @@ var Item = IgeEntityPhysics.extend({
 											bulletReturn.point,
 											{
 												color: 0xff0000,
-												projType: projectileData.type,
+												projType: this._stats.projectileType ? this._stats.projectileType : null,
 												fraction: bulletReturn.fraction,
 												rotation: pos.rotation,
 												dimensions: {
-													width: projectileData.bodies.default.width,
-													height: projectileData.bodies.default.height
+													// we are pulling display size of raycast bullet from its default body
+													width: this.projectileData && this.projectileData.bodies && this.projectileData.bodies.default ?
+														this.projectileData.bodies.default.width : null,
+													height: this.projectileData && this.projectileData.bodies && this.projectileData.bodies.default ?
+														this.projectileData.bodies.default.height : null,
 												}
 											}
 										);
 									}
 
-									if (ige.game.entitiesCollidingWithLastRaycast.length > 0 && projectileData.damageData) {
+									if (ige.game.entitiesCollidingWithLastRaycast.length > 0) {
+
+										const damageData = {
+											targetsAffected: this._stats.damage.targetsAffected,
+											sourceUnitId: ownerId,
+											sourceItemId: self.id(),
+											sourcePlayerId: owner.getOwner().id(),
+											unitAttributes: this._stats.damage.unitAttributes,
+											playerAttributes: this._stats.damage.playerAttributes
+										};
 
 										this.raycastTargets = _.filter(
 											ige.game.entitiesCollidingWithLastRaycast,
@@ -462,7 +475,7 @@ var Item = IgeEntityPhysics.extend({
 										// console.log(this.raycastTargets);
 										this.raycastTargets.forEach((unit) => {
 											// console.log(`damaging ${unit.id()}`);
-											unit.inflictDamage(projectileData.damageData);
+											unit.inflictDamage(damageData);
 										});
 									}
 
