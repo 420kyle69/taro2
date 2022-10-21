@@ -828,7 +828,7 @@ var Unit = IgeEntityPhysics.extend({
 		} else if (ige.isClient) {
 			var zIndex = self._stats.currentBody && self._stats.currentBody['z-index'] || { layer: 3, depth: 3 };
 
-			if (zIndex && ige.network.id() == self._stats.clientId) {
+			if (zIndex && ige.network.id() == self._stats.clientId && !ige.game.data.heightBasedZIndex) {
 				// depth of this player's units should have +1 depth to avoid flickering on overlap
 				zIndex.depth++;
 			}
@@ -1721,6 +1721,7 @@ var Unit = IgeEntityPhysics.extend({
 		// );
 
 		// tell phaser to respond to change in item
+		this.emit('itemIds', this._stats.itemIds);
 	},
 
 	startMoving: function () {

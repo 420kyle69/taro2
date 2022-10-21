@@ -1,9 +1,12 @@
 class GameScene extends PhaserScene {
 
 	private zoomSize: number;
+	heightRenderer: HeightRenderComponent;
 
 	entityLayers: Phaser.GameObjects.Layer[] = [];
-	renderedEntities: (Phaser.GameObjects.GameObject & Phaser.GameObjects.Components.Visible & Hidden)[] = [];
+	renderedEntities: TGameObject[] = [];
+	itemsList: PhaserItem[] = [];
+
 
 	public tilemap: Phaser.Tilemaps.Tilemap;
 	tileset: Phaser.Tilemaps.Tileset;
@@ -259,6 +262,10 @@ class GameScene extends PhaserScene {
 			ige.client.emit('tick');
 		});
 
+		if (data.heightBasedZIndex) {
+			this.heightRenderer = new HeightRenderComponent(this, map.height * map.tileHeight);
+		}
+
 		//temporary making each loaded texture not smoothed (later planned to add option for smoothing some of them)
 		Object.values(this.textures.list).forEach(val => {
 			val.setFilter(Phaser.Textures.FilterMode.NEAREST);
@@ -459,6 +466,10 @@ class GameScene extends PhaserScene {
 		return canvas;
 	}
 
+	findItem (itemId: string): PhaserItem {
+		return this.itemsList.find(item => item.entity.id() === itemId);
+	}
+
 	update (): void {
 
 		const worldPoint = this.cameras.main.getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
@@ -473,6 +484,10 @@ class GameScene extends PhaserScene {
 		this.cameras.main.cull(this.renderedEntities).forEach(element => {
 			if (!element.hidden) {
 				element.setVisible(true);
+
+				if (element.dynamic) {
+					this.heightRenderer.adjustDepth(element as TGameObject & Phaser.GameObjects.Components.Size);
+				}
 			}
 
 		});

@@ -1,10 +1,10 @@
 class PhaserUnit extends PhaserAnimatedEntity {
 
-	sprite: Phaser.GameObjects.Sprite & Hidden;
+	sprite: Phaser.GameObjects.Sprite & IRenderProps;
 	label: Phaser.GameObjects.Text;
 	private chat: PhaserChatBubble;
 
-	gameObject: Phaser.GameObjects.Container & Hidden;
+	gameObject: Phaser.GameObjects.Container & IRenderProps;
 	attributes: PhaserAttributeBar[] = [];
 	attributesContainer: Phaser.GameObjects.Container;
 
@@ -23,10 +23,10 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			translate.y,
 			[ this.sprite ]
 		);
-		this.gameObject = gameObject as Phaser.GameObjects.Container & Hidden;
+		this.gameObject = gameObject as Phaser.GameObjects.Container & IRenderProps;
 		const containerSize = Math.max(this.sprite.displayHeight, this.sprite.displayWidth);
 		gameObject.setSize(containerSize, containerSize);
-		this.scene.renderedEntities.push(this.gameObject);
+		this.gameObject.spriteHeight2 = this.sprite.displayHeight / 2;
 
 		Object.assign(this.evtListeners, {
 			follow: entity.on('follow', this.follow, this),
@@ -40,6 +40,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			'render-chat-bubble': entity.on('render-chat-bubble', this.renderChat, this),
 		});
 
+		this.scene.renderedEntities.push(this.gameObject);
 		this.zoomEvtListener = ige.client.on('scale', this.scaleElements, this);
 	}
 
@@ -274,36 +275,6 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			onComplete: () => {
 				this.scaleTween = null;
 			}
-		});
-	}
-
-	private equipItem (itemId: string): void {
-		$.when(ige.client.playerJoined).done(() => {
-			//
-			console.log(
-				'equip-item\n',
-				`itemId: ${itemId}\n`,
-				'taroUnit: ', this.entity, '\n',
-				'phaserUnit: ', this, '\n',
-				'before this.equippedItem: ', this.equippedItem, '\n',
-			);
-			if (this.equippedItem) {
-				this.equippedItem.gameObject.owner = null;
-			}
-
-			if (itemId) {
-				//
-				itemId = itemId.toString();
-				// we need to do this after the player joins;
-				this.equippedItem = this.scene.findItem(itemId);
-
-				this.equippedItem.gameObject.owner = this;
-			}
-
-			if (itemId === null) {
-				this.equippedItem = null;
-			}
-			console.log('after this.equippedItem: ', this.equippedItem, '\n');
 		});
 	}
 

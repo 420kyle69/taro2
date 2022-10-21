@@ -23,7 +23,7 @@ var PhaserUnit = /** @class */ (function (_super) {
         _this.gameObject = gameObject;
         var containerSize = Math.max(_this.sprite.displayHeight, _this.sprite.displayWidth);
         gameObject.setSize(containerSize, containerSize);
-        _this.scene.renderedEntities.push(_this.gameObject);
+        _this.gameObject.spriteHeight2 = _this.sprite.displayHeight / 2;
         Object.assign(_this.evtListeners, {
             follow: entity.on('follow', _this.follow, _this),
             'update-texture': entity.on('update-texture', _this.updateTexture, _this),
@@ -35,6 +35,7 @@ var PhaserUnit = /** @class */ (function (_super) {
             'update-attribute': entity.on('update-attribute', _this.updateAttribute, _this),
             'render-chat-bubble': entity.on('render-chat-bubble', _this.renderChat, _this),
         });
+        _this.scene.renderedEntities.push(_this.gameObject);
         _this.zoomEvtListener = ige.client.on('scale', _this.scaleElements, _this);
         return _this;
     }
@@ -221,27 +222,6 @@ var PhaserUnit = /** @class */ (function (_super) {
             onComplete: function () {
                 _this.scaleTween = null;
             }
-        });
-    };
-    PhaserUnit.prototype.equipItem = function (itemId) {
-        var _this = this;
-        $.when(ige.client.playerJoined).done(function () {
-            //
-            console.log('equip-item\n', "itemId: ".concat(itemId, "\n"), 'taroUnit: ', _this.entity, '\n', 'phaserUnit: ', _this, '\n', 'before this.equippedItem: ', _this.equippedItem, '\n');
-            if (_this.equippedItem) {
-                _this.equippedItem.gameObject.owner = null;
-            }
-            if (itemId) {
-                //
-                itemId = itemId.toString();
-                // we need to do this after the player joins;
-                _this.equippedItem = _this.scene.findItem(itemId);
-                _this.equippedItem.gameObject.owner = _this;
-            }
-            if (itemId === null) {
-                _this.equippedItem = null;
-            }
-            console.log('after this.equippedItem: ', _this.equippedItem, '\n');
         });
     };
     PhaserUnit.prototype.destroy = function () {
