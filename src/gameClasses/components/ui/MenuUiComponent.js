@@ -123,7 +123,7 @@ var MenuUiComponent = IgeEntity.extend({
 			});
 
 			$('#toggle-dev-panels').on('click', function () {
-				if(['1', '5'].includes(window.gameDetails?.tier) || window.isStandalone) {
+				if(['1', '4', '5'].includes(window.gameDetails?.tier) || window.isStandalone) {
 					loadEditor();
 
 					$('#game-editor').toggle();
