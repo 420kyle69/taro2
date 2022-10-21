@@ -723,6 +723,13 @@ var VariableComponent = IgeEntity.extend({
 					}
 					break;
 
+				case 'targetUnit':					
+					var unit = self.getValue(text.unit, vars);
+					if (unit && unit.ai) {
+						returnValue = unit.ai.getTargetUnit();
+					}
+					break;
+
 				case 'getLastTouchedItem':
 					var id = ige.game.lastTouchedItemId;
 					returnValue = ige.$(id);
