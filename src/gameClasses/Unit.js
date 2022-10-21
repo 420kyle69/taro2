@@ -513,13 +513,12 @@ var Unit = IgeEntityPhysics.extend({
 				if (shopData.price.coins && ownerPlayer._stats.coins >= shopData.price.coins) {
 					// disable coin consuming due to some bug wrt coins
 					// add coin consuming code
-					// if (ige.game.data.defaultData.tier == 3 || ige.game.data.defaultData.tier == 4) {
-					//     ige.server.consumeCoinFromUser(ownerPlayer, shopData.price.coins, itemTypeId);
-					//     ownerPlayer.streamUpdateData([{
-					//         coins: ownerPlayer._stats.coins - shopData.price.coins
-					//     }])
-					// }
-					return;
+					if (ige.game.data.defaultData.tier >= 2) {
+					    ige.server.consumeCoinFromUser(ownerPlayer, shopData.price.coins, itemTypeId);
+					    ownerPlayer.streamUpdateData([{
+					        coins: ownerPlayer._stats.coins - shopData.price.coins
+					    }])
+					}
 				}
 
 				// remove the first item matching targetSlots if replaceItemInTargetSlot is set as true

@@ -644,7 +644,6 @@ var ShopComponent = IgeEntity.extend({
 	},
 
 	updateSkinList: function (itemId) {
-		debugger;
 		var skinItemActionButton = $(`#skin-list-${itemId} .action-button-container`);
 		skinItemActionButton.html(
 			'<button class="btn btn-sm btn-primary disabled">' +
@@ -795,9 +794,9 @@ var ShopComponent = IgeEntity.extend({
 				shopItemsKeysUsingCoins.push(key);
 			}
 		}
-		shopItemsKeysUsingCoins.forEach((key) => {
-			delete shopItems[key];
-		});
+		// shopItemsKeysUsingCoins.forEach((key) => {
+		// 	delete shopItems[key];
+		// });
 
 		// display items tab iff there's item to be sold
 		if (shopItemsKeys.length > 0) {
