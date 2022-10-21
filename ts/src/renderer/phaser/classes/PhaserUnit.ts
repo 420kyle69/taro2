@@ -277,6 +277,36 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		});
 	}
 
+	private equipItem (itemId: string): void {
+		$.when(ige.client.playerJoined).done(() => {
+			//
+			console.log(
+				'equip-item\n',
+				`itemId: ${itemId}\n`,
+				'taroUnit: ', this.entity, '\n',
+				'phaserUnit: ', this, '\n',
+				'before this.equippedItem: ', this.equippedItem, '\n',
+			);
+			if (this.equippedItem) {
+				this.equippedItem.gameObject.owner = null;
+			}
+
+			if (itemId) {
+				//
+				itemId = itemId.toString();
+				// we need to do this after the player joins;
+				this.equippedItem = this.scene.findItem(itemId);
+
+				this.equippedItem.gameObject.owner = this;
+			}
+
+			if (itemId === null) {
+				this.equippedItem = null;
+			}
+			console.log('after this.equippedItem: ', this.equippedItem, '\n');
+		});
+	}
+
 	protected destroy (): void {
 
 		this.scene.renderedEntities = this.scene.renderedEntities.filter(item => item !== this.gameObject);

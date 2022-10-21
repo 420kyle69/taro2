@@ -223,6 +223,27 @@ var PhaserUnit = /** @class */ (function (_super) {
             }
         });
     };
+    PhaserUnit.prototype.equipItem = function (itemId) {
+        var _this = this;
+        $.when(ige.client.playerJoined).done(function () {
+            //
+            console.log('equip-item\n', "itemId: ".concat(itemId, "\n"), 'taroUnit: ', _this.entity, '\n', 'phaserUnit: ', _this, '\n', 'before this.equippedItem: ', _this.equippedItem, '\n');
+            if (_this.equippedItem) {
+                _this.equippedItem.gameObject.owner = null;
+            }
+            if (itemId) {
+                //
+                itemId = itemId.toString();
+                // we need to do this after the player joins;
+                _this.equippedItem = _this.scene.findItem(itemId);
+                _this.equippedItem.gameObject.owner = _this;
+            }
+            if (itemId === null) {
+                _this.equippedItem = null;
+            }
+            console.log('after this.equippedItem: ', _this.equippedItem, '\n');
+        });
+    };
     PhaserUnit.prototype.destroy = function () {
         var _this = this;
         this.scene.renderedEntities = this.scene.renderedEntities.filter(function (item) { return item !== _this.gameObject; });
