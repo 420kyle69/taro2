@@ -3,6 +3,8 @@ class PhaserItem extends PhaserAnimatedEntity {
 	public gameObject: Phaser.GameObjects.Sprite & IRenderProps;
 	public entity: IgeEntity;
 
+	ownerUnitId: string;
+
 	constructor (
 		scene: GameScene,
 		entity: Item
@@ -18,13 +20,24 @@ class PhaserItem extends PhaserAnimatedEntity {
 		this.gameObject.setPosition(x, y);
 		this.gameObject.spriteHeight2 = this.sprite.displayHeight / 2;
 
-		this.scene.itemsList.push(this);
+		Object.assign(this.evtListeners, {
+			setOwnerUnit: entity.on('setOwnerUnit', this.setOwnerUnit, this)
+		});
+
 		this.scene.renderedEntities.push(this.sprite);
+	}
+
+	protected setOwnerUnit (unitId: string): void {
+		this.ownerUnitId = unitId;
+
+		const phaserUnit = unitId ? this.scene.findUnit(unitId) : null;
+
+		this.gameObject.owner = phaserUnit ? phaserUnit : null;
 	}
 
 	protected destroy (): void {
 		this.scene.renderedEntities = this.scene.renderedEntities.filter(item => item !== this.sprite);
-		this.scene.itemsList = this.scene.itemsList.filter(item => item.entity.id() !== this.entity.id());
+		this.ownerUnitId = null;
 		super.destroy();
 	}
 }

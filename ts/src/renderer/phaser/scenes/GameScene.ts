@@ -5,7 +5,7 @@ class GameScene extends PhaserScene {
 
 	entityLayers: Phaser.GameObjects.Layer[] = [];
 	renderedEntities: TGameObject[] = [];
-	itemsList: PhaserItem[] = [];
+	unitsList: PhaserUnit[] = [];
 
 
 	public tilemap: Phaser.Tilemaps.Tilemap;
@@ -466,8 +466,12 @@ class GameScene extends PhaserScene {
 		return canvas;
 	}
 
-	findItem (itemId: string): PhaserItem {
-		return this.itemsList.find(item => item.entity.id() === itemId);
+	findUnit(unitId: string): PhaserUnit {
+		return this.unitsList.find(
+			(unit) => {
+				return unit.entity._id === unitId;
+			}
+		);
 	}
 
 	update (): void {

@@ -1,7 +1,6 @@
 class PhaserRegion extends PhaserEntity {
 
 	protected gameObject: Phaser.GameObjects.Graphics & IRenderProps;
-	protected entity: Region;
 
 	constructor (
 		private scene: GameScene,

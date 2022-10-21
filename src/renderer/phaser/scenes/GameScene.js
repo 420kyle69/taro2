@@ -19,7 +19,7 @@ var GameScene = /** @class */ (function (_super) {
         var _this = _super.call(this, { key: 'Game' }) || this;
         _this.entityLayers = [];
         _this.renderedEntities = [];
-        _this.itemsList = [];
+        _this.unitsList = [];
         return _this;
     }
     GameScene.prototype.init = function () {
@@ -299,8 +299,10 @@ var GameScene = /** @class */ (function (_super) {
         }
         return canvas;
     };
-    GameScene.prototype.findItem = function (itemId) {
-        return this.itemsList.find(function (item) { return item.entity.id() === itemId; });
+    GameScene.prototype.findUnit = function (unitId) {
+        return this.unitsList.find(function (unit) {
+            return unit.entity._id === unitId;
+        });
     };
     GameScene.prototype.update = function () {
         var _this = this;

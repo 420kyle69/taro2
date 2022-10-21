@@ -9,7 +9,7 @@ class HeightRenderComponent {
 	adjustDepth (
 		gameObject: TGameObject
 	): void {
-        console.log('height');
+
 		const castGameObject = !gameObject.owner ? gameObject : gameObject.owner.gameObject;
 
 		const yPos = castGameObject.y;
@@ -18,7 +18,7 @@ class HeightRenderComponent {
 		let depth = gameObject.taroDepth + (yPos + halfHeight) / this.mapHeight;
 
 		depth = Number(depth.toFixed(3));
-
+		console.log(gameObject, depth);
 		gameObject.setDepth(depth);
 	}
 }

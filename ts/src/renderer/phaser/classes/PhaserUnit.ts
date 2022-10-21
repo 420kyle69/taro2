@@ -40,6 +40,9 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			'render-chat-bubble': entity.on('render-chat-bubble', this.renderChat, this),
 		});
 
+		console.log(this.entity);
+		this.scene.unitsList.push(this);
+
 		this.scene.renderedEntities.push(this.gameObject);
 		this.zoomEvtListener = ige.client.on('scale', this.scaleElements, this);
 	}
@@ -281,6 +284,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 	protected destroy (): void {
 
 		this.scene.renderedEntities = this.scene.renderedEntities.filter(item => item !== this.gameObject);
+		this.scene.unitsList = this.scene.unitsList.filter(item => item.entity.id() !== this.entity.id());
 		ige.client.off('scale', this.zoomEvtListener);
 		this.zoomEvtListener = null;
 
