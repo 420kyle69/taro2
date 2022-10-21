@@ -1,3 +1,7 @@
+let restoreWindows = false;
+let restoreDevMode = false;
+let restoreDevConsole = false;
+
 var MenuUiComponent = IgeEntity.extend({
 	classId: 'MenuUiComponent',
 	componentId: 'menuUi',
@@ -119,15 +123,48 @@ var MenuUiComponent = IgeEntity.extend({
 			});
 
 			$('#toggle-dev-panels').on('click', function () {
-				if(['1', '5'].includes(window.gameDetails.tier) || window.isStandalone) {
-					if (!ige.developerMode.active) {
-						ige.developerMode.enter();
-					} else {
-						ige.developerMode.leave();
+				if(['1', '5'].includes(window.gameDetails?.tier) || window.isStandalone) {
+					loadEditor();
+
+					$('#game-editor').toggle();
+
+					if (restoreWindows) {
+						$('.winbox').show();
+						restoreWindows = false;
 					}
+
+					if (restoreDevMode) {
+						ige.developerMode.enter();
+						restoreDevMode = false;
+					}
+
+					if (restoreDevConsole) {
+						$('#dev-console').show();
+						restoreDevConsole = false;
+					}
+
+					const isEditorVisible = $('#game-editor').is(':visible');
+
+					if (!isEditorVisible) {
+						if ($('.winbox:first').is(':visible')) {
+							$('.winbox').hide();
+							restoreWindows = true;
+						}
+
+						if (ige.developerMode.active) {
+							ige.developerMode.leave();
+							restoreDevMode = true;
+						}
+
+						if ($('#dev-console').is(':visible')) {
+							$('#dev-console').hide();
+							restoreDevConsole = true;
+						}
+					}
+
+					$('#toggle-dev-panels').text(isEditorVisible ? 'Exit Dev Mode' : 'Enter Dev Mode');
 				} else {
-					const devConsoleEl = document.getElementById('dev-console').style.display;
-					document.getElementById('dev-console').style.display = devConsoleEl === 'none' ? 'block' : 'none';
+					$('#dev-console').toggle();
 				}
 			});
 
