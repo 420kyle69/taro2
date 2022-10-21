@@ -1215,20 +1215,22 @@ var VariableComponent = IgeEntity.extend({
 					var positionA = self.getValue(text.positionA, vars);
 					var positionB = self.getValue(text.positionB, vars);
 
-					positionA = {
-						x: positionA.x / ige.physics._scaleRatio,
-						y: positionA.y / ige.physics._scaleRatio
-					};
-					positionB = {
-						x: positionB.x / ige.physics._scaleRatio,
-						y: positionB.y / ige.physics._scaleRatio
-					};
-					ige.raycaster.raycastLine(
-						positionA,
-						positionB,
-					);
-
-					returnValue = ige.game.entitiesCollidingWithLastRaycast;
+					if (positionA && positionB) {
+						positionA = {
+							x: positionA.x / ige.physics._scaleRatio,
+							y: positionA.y / ige.physics._scaleRatio
+						};
+						positionB = {
+							x: positionB.x / ige.physics._scaleRatio,
+							y: positionB.y / ige.physics._scaleRatio
+						};
+						ige.raycaster.raycastLine(
+							positionA,
+							positionB,
+						);
+	
+						returnValue = ige.game.entitiesCollidingWithLastRaycast;
+					}					
 					break;
 				}
 				case 'entityLastRaycastCollisionPosition':
