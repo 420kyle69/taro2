@@ -1,14 +1,3 @@
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
         if (ar || !(i in from)) {
@@ -36,9 +25,6 @@ var Raycaster = /** @class */ (function () {
         raycast.reset();
         this.world.rayCast(end, start, raycast.callback);
         ige.game.entitiesCollidingWithLastRaycast = _.clone(raycast.entities);
-        if (ige.isClient) {
-            this.drawRay(start, end, { color: 0xff0000, method: null, projType: null, fraction: null, rotation: null });
-        }
         // forward
         raycast.reset();
         this.world.rayCast(start, end, raycast.callback);
@@ -48,19 +34,17 @@ var Raycaster = /** @class */ (function () {
         ige.game.entitiesCollidingWithLastRaycast = this.sortHits(ige.game.entitiesCollidingWithLastRaycast);
         //debug
         // console.log(ige.game.entitiesCollidingWithLastRaycast.map(x=> `${x.id()} ${x._category} ${x.raycastFraction}`));
-        if (ige.isClient) {
-            this.drawRay(end, start, { color: 0x0000ff, method: null, projType: null, fraction: null, rotation: null });
-        }
     };
-    Raycaster.prototype.raycastBullet = function (start, end, config) {
+    Raycaster.prototype.raycastBullet = function (start, end) {
         // forward
-        var forwardRaycast = this[config.method];
+        var forwardRaycast = this.closest;
         forwardRaycast.reset();
         this.world.rayCast(start, end, forwardRaycast.callback // though it is currently hard-coded for 'Closest'
         );
         ige.game.entitiesCollidingWithLastRaycast = forwardRaycast.entity ? [forwardRaycast.entity] : [];
         this.forwardHit = true;
         var point = forwardRaycast.point ? forwardRaycast.point : end;
+        var fraction = forwardRaycast.fraction;
         // reverse
         var reverseRaycast = this.any;
         reverseRaycast.reset();
@@ -70,16 +54,20 @@ var Raycaster = /** @class */ (function () {
             this.reverseHit = true;
             ige.game.entitiesCollidingWithLastRaycast = [];
         }
-        if (ige.isClient && this.forwardHit !== this.reverseHit) {
-            this.drawRay(start, point, __assign(__assign({}, config), { color: 0xffffff, fraction: forwardRaycast.fraction }));
-        }
+        var bulletReturn = {
+            start: start,
+            point: point,
+            fraction: fraction,
+            obstructed: this.forwardHit === this.reverseHit
+        };
         this.forwardHit = false;
         this.reverseHit = false;
+        return bulletReturn;
     };
     Raycaster.prototype.sortHits = function (array) {
         return array = _.orderBy(array, ['raycastFraction'], ['asc']);
     };
-    Raycaster.prototype.drawRay = function (start, end, config) {
+    Raycaster.prototype.renderBullet = function (start, end, config) {
         ige.client.emit('create-ray', {
             start: {
                 x: start.x * this.scaleRatio,
