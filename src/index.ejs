@@ -77,7 +77,13 @@
     <!-- Game Editor -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
+        let initEditor = false;
+
         function loadEditor() {
+            if (initEditor) {
+                return;
+            }
+
             axios.get('https://editor.modd.io/client')
                 .then((res) => {
                     const { styles, scripts } = res.data;
@@ -100,18 +106,8 @@
                 .catch((err) => {
                     console.log(err);
                 });
-        }
 
-        function toggleDevMode() {
-            let once = false;
-
-            if (!once) {
-                loadEditor();
-                once = true;
-            }
-
-            $('#game-editor').toggle();
-            $('#toggle-dev-panels').text($('#game-editor').is(':visible') ? 'Exit Dev Mode' : 'Enter Dev Mode');
+            initEditor = true;
         }
     </script>
 </head>

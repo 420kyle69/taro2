@@ -33,14 +33,13 @@ class DevModeScene extends PhaserScene {
 			if (!this.devPalette) {
 				this.devPalette = new PhaserPalette(this, this.tileset, this.rexUI);
 				this.paletteMarker = new TileMarker(this, this.devPalette.map, 1);
-				this.devPalette.show();
-				this.devPalette.layerButtonsContainer.setVisible(true);
-				this.devPalette.toolButtonsContainer.setVisible(true);
 			}
-			else {
-				this.devPalette.layerButtonsContainer.setVisible(true);
-				this.devPalette.toolButtonsContainer.setVisible(true);
-			}
+			this.devPalette.show();
+			this.devPalette.layerButtonsContainer.setVisible(true);
+			this.devPalette.toolButtonsContainer.setVisible(true);
+			if (!this.devPalette.cursorButton.active) {
+				this.devPalette.toggleMarker()
+			} 
 		});
 
 		ige.client.on('leaveDevMode', () => {
