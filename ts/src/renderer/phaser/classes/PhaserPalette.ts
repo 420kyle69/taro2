@@ -24,6 +24,7 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 	COLOR_LIGHT: number;
 	area: { x: number, y: number };
 	cursorButton: PhaserPaletteButton;
+	COLOR_PRIMARY: number;
 	
 	constructor(
 		scene: DevModeScene,
@@ -88,7 +89,7 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 			scrollBarRight.blocked = false;
 		  });
 
-		const COLOR_PRIMARY = 0x0036cc;
+		const COLOR_PRIMARY = this.COLOR_PRIMARY = 0x0036cc;
 		const COLOR_LIGHT = this.COLOR_LIGHT = 0x6690ff;
 		const COLOR_DARK = this.COLOR_DARK = 0xffffff;
 
@@ -97,68 +98,11 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 		scrollBarContainer.x = camera.x;
 		scrollBarContainer.y = camera.y;
 
-		const scrollBarBottom = this.scrollBarBottom = this.rexUI.add.scrollBar({
-			width: this.camera.width,
-			orientation: 'x',
-			background: this.rexUI.add.roundRectangle(0, 0, 0, 0, 0, COLOR_DARK),
-			buttons: {
-				left: this.rexUI.add.roundRectangle(0, 0, 20, 20, 0, COLOR_PRIMARY),
-				right: this.rexUI.add.roundRectangle(0, 0, 20, 20, 0, COLOR_PRIMARY),
-			},
-			slider: {
-				thumb: this.rexUI.add.roundRectangle(0, 0, (this.camera.width - 60) / 2, 20, 1, COLOR_LIGHT),
-			},
-			space: {
-				left: 1, right: 1, top: 1, bottom: 1
-			}
-		});
-		scrollBarBottom.value = 0.5;
-		this.scrollBarContainer.add(scrollBarBottom);
-		scrollBarBottom.setPosition(0, this.camera.height).setOrigin(0, 0).setScrollFactor(0,0).layout();
+		const scrollBarBottom = this.scrollBarBottom = this.addScrollBar('x');
+		const scrollBarRight = this.scrollBarRight = this.addScrollBar('y');
 
-		const scrollBarRight = this.scrollBarRight = this.rexUI.add.scrollBar({
-			height: this.camera.height,
-			orientation: 'y',
-			background: this.rexUI.add.roundRectangle(0, 0, 0, 0, 0, COLOR_DARK),
-			buttons: {
-				left: this.rexUI.add.roundRectangle(0, 0, 20, 20, 0, COLOR_PRIMARY),
-				right: this.rexUI.add.roundRectangle(0, 0, 20, 20, 0, COLOR_PRIMARY),
-			},
-			slider: {
-				thumb: this.rexUI.add.roundRectangle(0, 0, 20, (this.camera.height - 60) / 2, 1, COLOR_LIGHT),
-			},
-			space: {
-				left: 1, right: 1, top: 1, bottom: 1
-			}
-		});
-		scrollBarRight.value = 0.5;
-		this.scrollBarContainer.add(scrollBarRight);
-		scrollBarRight.setPosition(this.camera.width, 0).setOrigin(0, 0).setScrollFactor(0,0).layout();
-
-		scrollBarContainer.width = camera.width + scrollBarRight.width +60;
-		scrollBarContainer.height = camera.height + scrollBarBottom.height +60;
-
-		console.log('scrollBarContainer', camera.width, scrollBarRight)
-
-		scrollBarBottom.on('valuechange',
-			function (newValue, oldValue, scrollBar) {
-				if (!isNaN(newValue) && !scrollBar.blocked) {
-					newValue -= 0.5;
-					camera.scrollX = this.x + (camera.width * newValue);
-				}
-			},
-			this
-		);
-
-		scrollBarRight.on('valuechange',
-			function (newValue, oldValue, scrollBar) {
-				if (!isNaN(newValue) && !scrollBar.blocked) {
-					newValue -= 0.5;
-					camera.scrollY = this.y + (camera.height * newValue);
-				}
-			},
-			this
-		);
+		scrollBarContainer.width = camera.width + scrollBarRight.width + 60;
+		scrollBarContainer.height = camera.height + scrollBarBottom.height + 60;
 
 		this.scene.scale.on(Phaser.Scale.Events.RESIZE, () => {
 			camera.x = this.scene.sys.game.canvas.width - paletteWidth - 40;
@@ -321,5 +265,60 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 
 		this.scrollBarRight.getElement('slider.thumb').height = (this.camera.height - 60) / (targetZoom * 2);
 		this.scrollBarRight.layout();
+	}
+
+	addScrollBar(orient: string/*, length: number*/) {
+		let orientSize;
+		let length;
+		let thumbWidth;
+		let thumbHeight;
+		let posX = 0;
+		let posY = 0;
+
+		if (orient === 'x') {
+			orientSize = 'width';
+			length = this.camera.width;
+			thumbWidth = (length - 60) / 2;
+			thumbHeight = 20;
+			posY = this.camera.height;
+		}
+		else if (orient === 'y') {
+			orientSize = 'height';
+			length = this.camera.height;
+			thumbWidth = 20;
+			thumbHeight = (length - 60) / 2;
+			posX = this.camera.width;
+		}
+		const scrollBar = this.rexUI.add.scrollBar({
+			[orientSize]: length,
+			orientation: orient,
+			background: this.rexUI.add.roundRectangle(0, 0, 0, 0, 0, this.COLOR_DARK),
+			buttons: {
+				left: this.rexUI.add.roundRectangle(0, 0, 20, 20, 0, this.COLOR_PRIMARY),
+				right: this.rexUI.add.roundRectangle(0, 0, 20, 20, 0, this.COLOR_PRIMARY),
+			},
+			slider: {
+				thumb: this.rexUI.add.roundRectangle(0, 0, thumbWidth, thumbHeight, 1, this.COLOR_LIGHT),
+			},
+			space: {
+				left: 1, right: 1, top: 1, bottom: 1
+			}
+		});
+		scrollBar.value = 0.5;
+		this.scrollBarContainer.add(scrollBar);
+		scrollBar.setPosition(posX, posY).setOrigin(0, 0).setScrollFactor(0,0).layout();
+
+		scrollBar.on('valuechange',
+			function (newValue, oldValue, scrollBar) {
+				if (!isNaN(newValue) && !scrollBar.blocked) {
+					newValue -= 0.5;
+					if (orient === 'x') this.camera.scrollX = this.x + (this.camera.width * newValue);
+					else if (orient === 'y') this.camera.scrollY = this.y + (this.camera.height * newValue);
+				}
+			},
+			this
+		);
+
+		return scrollBar;
 	}
 }
