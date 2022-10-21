@@ -4167,22 +4167,6 @@ var IgeEntity = IgeObject.extend({
 							}
 							break;
 
-						case 'isBeingUsed':
-							if (ige.isClient) {
-								this._stats.isBeingUsed = newValue;
-							}
-							break;
-
-						case 'stopUsing':
-							// This will only be called when we stop the unit from using an item from the server side, to prevent issues.
-							if (ige.isClient) {
-								this._stats.isBeingUsed = newValue;
-								if (newValue == false) {
-									this.playEffect('none');
-								}
-							}
-							break;
-
 						default:
 							// setting oldownerId b4 owner change
 							if (attrName === 'ownerId') {

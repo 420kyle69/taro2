@@ -1402,6 +1402,9 @@ var Unit = IgeEntityPhysics.extend({
 		var self = this;
 		// Unit.prototype.log("unit streamUpdateData", data)
 
+		if (ige.isServer && ige.network.isPaused) 
+			return;
+
 		IgeEntity.prototype.streamUpdateData.call(this, queuedData);
 
 		for (var i = 0; i < queuedData.length; i++) {
