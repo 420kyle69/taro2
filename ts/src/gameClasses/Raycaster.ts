@@ -1,3 +1,18 @@
+type bulletReturn = {
+	start: {
+		x: number,
+		y: number
+	},
+
+	point: {
+		x: number,
+		y: number
+	},
+
+	fraction: number,
+	obstructed: boolean
+}
+
 class Raycaster {
 	engine = ige.physics.engine;
 	world = ige.physics.world();
@@ -32,9 +47,6 @@ class Raycaster {
 		);
 
 		ige.game.entitiesCollidingWithLastRaycast = _.clone(raycast.entities);
-		if (ige.isClient) {
-			this.drawRay(start, end, {color: 0xff0000, method: null, projType: null, fraction: null, rotation: null});
-		}
 
 		// forward
 		raycast.reset();
@@ -53,10 +65,6 @@ class Raycaster {
 
 		//debug
 		// console.log(ige.game.entitiesCollidingWithLastRaycast.map(x=> `${x.id()} ${x._category} ${x.raycastFraction}`));
-
-		if (ige.isClient) {
-			this.drawRay(end, start, {color: 0x0000ff, method: null, projType: null, fraction: null, rotation: null});
-		}
 	}
 
 	raycastBullet (
@@ -67,19 +75,10 @@ class Raycaster {
 		end: {
 			x: number,
 			y: number
-		},
-		config: {
-			method: string,
-			projType: string,
-			rotation: number,
-			dimensions: {
-				width: number,
-				height: number
-			}
 		}
-	): void {
+	): bulletReturn {
 		// forward
-		const forwardRaycast = this[config.method];
+		const forwardRaycast = this.closest;
 
 		forwardRaycast.reset();
 
@@ -93,6 +92,7 @@ class Raycaster {
 		this.forwardHit = true;
 
 		const point = forwardRaycast.point ? forwardRaycast.point : end;
+		const fraction = forwardRaycast.fraction;
 
 		// reverse
 		const reverseRaycast = this.any;
@@ -111,23 +111,27 @@ class Raycaster {
 			ige.game.entitiesCollidingWithLastRaycast = [];
 		}
 
-		if (ige.isClient && this.forwardHit !== this.reverseHit) {
-
-			this.drawRay(start, point, { ...config, color: 0xffffff, fraction: forwardRaycast.fraction });
-		}
+		const bulletReturn = {
+			start,
+			point,
+			fraction,
+			obstructed: this.forwardHit === this.reverseHit
+		};
 
 		this.forwardHit = false;
 		this.reverseHit = false;
+
+		return bulletReturn;
 	}
 
 	sortHits (array: IgeEntity[]): IgeEntity[] {
 		return array = _.orderBy(array, ['raycastFraction'], ['asc']);
 	}
 
-	drawRay (
+	renderBullet (
 		start: {x: number, y: number},
 		end: {x: number, y: number},
-		config: {color: number, method: string, projType: string, fraction: number, rotation: number}
+		config: {color: number, projType: string, fraction: number, rotation: number}
 
 	): void {
 		ige.client.emit('create-ray', {

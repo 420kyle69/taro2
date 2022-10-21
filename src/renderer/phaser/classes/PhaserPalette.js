@@ -59,87 +59,67 @@ var PhaserPalette = /** @class */ (function (_super) {
             var scrollY = (p.y - p.prevPosition.y) / camera.zoom;
             camera.scrollX -= scrollX;
             camera.scrollY -= scrollY;
+            var bottomValue = (camera.scrollX - camera.getBounds().x) / (camera.getBounds().width - camera.width);
+            var rightValue = (camera.scrollY - camera.getBounds().y) / (camera.getBounds().height - camera.height);
+            if (bottomValue > 1)
+                bottomValue = 1;
+            if (rightValue > 1)
+                rightValue = 1;
+            if (bottomValue < 0)
+                bottomValue = 0;
+            if (rightValue < 0)
+                rightValue = 0;
+            scrollBarBottom.blocked = true;
+            scrollBarRight.blocked = true;
+            scrollBarBottom.value = bottomValue;
+            scrollBarRight.value = rightValue;
+            scrollBarBottom.blocked = false;
+            scrollBarRight.blocked = false;
         });
-        var COLOR_PRIMARY = 0x0036cc;
+        var COLOR_PRIMARY = _this.COLOR_PRIMARY = 0x0036cc;
         var COLOR_LIGHT = _this.COLOR_LIGHT = 0x6690ff;
         var COLOR_DARK = _this.COLOR_DARK = 0xffffff;
         var scrollBarContainer = _this.scrollBarContainer = new Phaser.GameObjects.Container(scene);
         scene.add.existing(scrollBarContainer);
         scrollBarContainer.x = camera.x;
         scrollBarContainer.y = camera.y;
-        var scrollBarBottom = _this.scrollBarBottom = _this.rexUI.add.scrollBar({
-            width: _this.camera.width,
-            orientation: 'x',
-            background: _this.rexUI.add.roundRectangle(0, 0, 0, 0, 0, COLOR_DARK),
-            buttons: {
-                left: _this.rexUI.add.roundRectangle(0, 0, 20, 20, 0, COLOR_PRIMARY),
-                right: _this.rexUI.add.roundRectangle(0, 0, 20, 20, 0, COLOR_PRIMARY),
-            },
-            slider: {
-                thumb: _this.rexUI.add.roundRectangle(0, 0, (_this.camera.width - 60) / 2, 20, 1, COLOR_LIGHT),
-            },
-            space: {
-                left: 1, right: 1, top: 1, bottom: 1
-            }
-        });
-        scrollBarBottom.value = 0.5;
-        _this.scrollBarContainer.add(scrollBarBottom);
-        scrollBarBottom.setPosition(0, _this.camera.height).setOrigin(0, 0).setScrollFactor(0, 0).layout();
-        var scrollBarRight = _this.scrollBarRight = _this.rexUI.add.scrollBar({
-            height: _this.camera.height,
-            orientation: 'y',
-            background: _this.rexUI.add.roundRectangle(0, 0, 0, 0, 0, COLOR_DARK),
-            buttons: {
-                left: _this.rexUI.add.roundRectangle(0, 0, 20, 20, 0, COLOR_PRIMARY),
-                right: _this.rexUI.add.roundRectangle(0, 0, 20, 20, 0, COLOR_PRIMARY),
-            },
-            slider: {
-                thumb: _this.rexUI.add.roundRectangle(0, 0, 20, (_this.camera.height - 60) / 2, 1, COLOR_LIGHT),
-            },
-            space: {
-                left: 1, right: 1, top: 1, bottom: 1
-            }
-        });
-        scrollBarRight.value = 0.5;
-        _this.scrollBarContainer.add(scrollBarRight);
-        scrollBarRight.setPosition(_this.camera.width, 0).setOrigin(0, 0).setScrollFactor(0, 0).layout();
+        var scrollBarBottom = _this.scrollBarBottom = _this.addScrollBar('x');
+        var scrollBarRight = _this.scrollBarRight = _this.addScrollBar('y');
         scrollBarContainer.width = camera.width + scrollBarRight.width + 60;
         scrollBarContainer.height = camera.height + scrollBarBottom.height + 60;
-        console.log('scrollBarContainer', camera.width, scrollBarRight);
-        scrollBarBottom.on('valuechange', function (newValue, oldValue, scrollBar) {
-            if (!isNaN(newValue)) {
-                newValue -= 0.5;
-                camera.scrollX = this.x + (camera.width * newValue);
-            }
-        }, _this);
-        scrollBarRight.on('valuechange', function (newValue, oldValue, scrollBar) {
-            if (!isNaN(newValue)) {
-                newValue -= 0.5;
-                camera.scrollY = this.y + (camera.height * newValue);
-            }
-        }, _this);
         _this.scene.scale.on(Phaser.Scale.Events.RESIZE, function () {
             camera.x = _this.scene.sys.game.canvas.width - paletteWidth - 40;
             scrollBarContainer.x = _this.camera.x;
             layerButtonsContainer.x = _this.camera.x + paletteWidth - 98;
+            layerButtonsContainer.y = _this.camera.y - 170;
+            toolButtonsContainer.x = _this.camera.x + paletteWidth - 98;
+            toolButtonsContainer.y = _this.camera.y - layerButtonsContainer.height - 136;
         });
-        new PhaserPaletteButton(_this, '+', 0, -31, 30, scrollBarContainer, _this.zoom.bind(_this), -1);
-        new PhaserPaletteButton(_this, '-', 31, -31, 30, scrollBarContainer, _this.zoom.bind(_this), 1);
-        new PhaserPaletteButton(_this, '_', 93, -31, 30, scrollBarContainer, _this.emptyTile.bind(_this));
-        _this.toolButtons = [];
-        _this.toolButtons.push(new PhaserPaletteButton(_this, '.', 155, -31, 30, scrollBarContainer, _this.selectSingle.bind(_this)), new PhaserPaletteButton(_this, '[]', 186, -31, 30, scrollBarContainer, _this.selectArea.bind(_this)));
-        _this.toolButtons[0].highlight(true);
+        new PhaserPaletteButton(_this, '+', null, 0, -34, 30, scrollBarContainer, _this.zoom.bind(_this), -1);
+        new PhaserPaletteButton(_this, '-', null, 34, -34, 30, scrollBarContainer, _this.zoom.bind(_this), 1);
         var layerButtonsContainer = _this.layerButtonsContainer = new Phaser.GameObjects.Container(scene);
         scene.add.existing(layerButtonsContainer);
         //this.scrollBarContainer.add(layerButtonsContainer);
-        layerButtonsContainer.x = _this.camera.x + paletteWidth - 98;
-        layerButtonsContainer.y = _this.camera.y;
         layerButtonsContainer.width = 120;
         layerButtonsContainer.height = 160;
-        new PhaserPaletteButton(_this, 'tiles', 0, -31, 120, layerButtonsContainer, _this.toggle.bind(_this));
+        layerButtonsContainer.x = _this.camera.x + paletteWidth - 98;
+        layerButtonsContainer.y = _this.camera.y - 204;
+        new PhaserPaletteButton(_this, 'palette', null, 0, 170, 120, layerButtonsContainer, _this.toggle.bind(_this));
         _this.layerButtons = [];
-        _this.layerButtons.push(new PhaserPaletteButton(_this, 'floor', 0, -93, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 0), new PhaserPaletteButton(_this, 'floor2', 0, -124, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 1), new PhaserPaletteButton(_this, 'walls', 0, -155, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 2), new PhaserPaletteButton(_this, 'trees', 0, -186, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 3));
+        _this.layerButtons.push(new PhaserPaletteButton(_this, 'floor', null, 0, 102, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 0), new PhaserPaletteButton(_this, 'floor2', null, 0, 68, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 1), new PhaserPaletteButton(_this, 'walls', null, 0, 34, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 2), new PhaserPaletteButton(_this, 'trees', null, 0, 0, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 3));
         _this.layerButtons[0].highlight(true);
+        var toolButtonsContainer = _this.toolButtonsContainer = new Phaser.GameObjects.Container(scene);
+        scene.add.existing(toolButtonsContainer);
+        //this.scrollBarContainer.add(toolButtonsContainer);
+        toolButtonsContainer.x = _this.camera.x + paletteWidth - 98;
+        toolButtonsContainer.y = _this.camera.y - layerButtonsContainer.height - 136;
+        toolButtonsContainer.width = 120;
+        toolButtonsContainer.height = 64;
+        _this.cursorButton = new PhaserPaletteButton(_this, '', 'cursor', 0, 0, 58, toolButtonsContainer, _this.toggleMarker.bind(_this));
+        new PhaserPaletteButton(_this, '', 'eraser', 62, 0, 58, toolButtonsContainer, _this.emptyTile.bind(_this));
+        _this.toolButtons = [];
+        _this.toolButtons.push(new PhaserPaletteButton(_this, '1x1', null, 0, 34, 58, toolButtonsContainer, _this.selectSingle.bind(_this)), new PhaserPaletteButton(_this, '2x2', null, 62, 34, 58, toolButtonsContainer, _this.selectArea.bind(_this)));
+        _this.toolButtons[0].highlight(true);
         _this.area = { x: 1, y: 1 };
         return _this;
         //this.width = 500;
@@ -156,11 +136,25 @@ var PhaserPalette = /** @class */ (function (_super) {
             console.log('pointerout');
         });*/
     }
+    PhaserPalette.prototype.toggleMarker = function () {
+        if (!this.cursorButton.active) {
+            this.scene.marker.graphics.setVisible(false);
+            this.cursorButton.highlight(true);
+            this.scene.marker.active = false;
+        }
+        else {
+            this.cursorButton.highlight(false);
+            this.scene.marker.active = true;
+        }
+    };
     PhaserPalette.prototype.emptyTile = function () {
         var copy = __assign({}, this.scene.selectedTile);
         copy.index = 0;
         this.scene.selectedTile = copy;
         this.scene.selectedTileArea = [[copy, copy], [copy, copy]];
+        if (this.cursorButton.active) {
+            this.toggleMarker();
+        }
     };
     PhaserPalette.prototype.selectSingle = function () {
         for (var i = 0; i < this.area.x; i++) {
@@ -170,18 +164,24 @@ var PhaserPalette = /** @class */ (function (_super) {
             }
         }
         this.area = { x: 1, y: 1 };
-        this.scene.marker.scale = 1;
-        this.scene.paletteMarker.scale = 1;
+        this.scene.marker.graphics.scale = 1;
+        this.scene.paletteMarker.graphics.scale = 1;
         this.toolButtons[0].highlight(true);
         this.toolButtons[1].highlight(false);
+        if (this.cursorButton.active) {
+            this.toggleMarker();
+        }
     };
     PhaserPalette.prototype.selectArea = function () {
         this.scene.selectedTile.tint = 0xffffff;
         this.area = { x: 2, y: 2 };
-        this.scene.marker.scale = 2;
-        this.scene.paletteMarker.scale = 2;
+        this.scene.marker.graphics.scale = 2;
+        this.scene.paletteMarker.graphics.scale = 2;
         this.toolButtons[1].highlight(true);
         this.toolButtons[0].highlight(false);
+        if (this.cursorButton.active) {
+            this.toggleMarker();
+        }
     };
     PhaserPalette.prototype.toggle = function () {
         if (this.visible)
@@ -225,6 +225,57 @@ var PhaserPalette = /** @class */ (function (_super) {
         this.scrollBarBottom.layout();
         this.scrollBarRight.getElement('slider.thumb').height = (this.camera.height - 60) / (targetZoom * 2);
         this.scrollBarRight.layout();
+    };
+    PhaserPalette.prototype.addScrollBar = function (orient /*, length: number*/) {
+        var _a;
+        var orientSize;
+        var length;
+        var thumbWidth;
+        var thumbHeight;
+        var posX = 0;
+        var posY = 0;
+        if (orient === 'x') {
+            orientSize = 'width';
+            length = this.camera.width;
+            thumbWidth = (length - 60) / 2;
+            thumbHeight = 20;
+            posY = this.camera.height;
+        }
+        else if (orient === 'y') {
+            orientSize = 'height';
+            length = this.camera.height;
+            thumbWidth = 20;
+            thumbHeight = (length - 60) / 2;
+            posX = this.camera.width;
+        }
+        var scrollBar = this.rexUI.add.scrollBar((_a = {},
+            _a[orientSize] = length,
+            _a.orientation = orient,
+            _a.background = this.rexUI.add.roundRectangle(0, 0, 0, 0, 0, this.COLOR_DARK),
+            _a.buttons = {
+                left: this.rexUI.add.roundRectangle(0, 0, 20, 20, 0, this.COLOR_PRIMARY),
+                right: this.rexUI.add.roundRectangle(0, 0, 20, 20, 0, this.COLOR_PRIMARY),
+            },
+            _a.slider = {
+                thumb: this.rexUI.add.roundRectangle(0, 0, thumbWidth, thumbHeight, 1, this.COLOR_LIGHT),
+            },
+            _a.space = {
+                left: 1, right: 1, top: 1, bottom: 1
+            },
+            _a));
+        scrollBar.value = 0.5;
+        this.scrollBarContainer.add(scrollBar);
+        scrollBar.setPosition(posX, posY).setOrigin(0, 0).setScrollFactor(0, 0).layout();
+        scrollBar.on('valuechange', function (newValue, oldValue, scrollBar) {
+            if (!isNaN(newValue) && !scrollBar.blocked) {
+                newValue -= 0.5;
+                if (orient === 'x')
+                    this.camera.scrollX = this.x + (this.camera.width * newValue);
+                else if (orient === 'y')
+                    this.camera.scrollY = this.y + (this.camera.height * newValue);
+            }
+        }, this);
+        return scrollBar;
     };
     return PhaserPalette;
 }(Phaser.GameObjects.Container));
