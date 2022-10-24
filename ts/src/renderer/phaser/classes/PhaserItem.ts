@@ -40,12 +40,23 @@ class PhaserItem extends PhaserAnimatedEntity {
 	}
 
 	protected setOwnerUnit (unitId: string): void {
-		console.log('set owner unit', unitId);
-		this.ownerUnitId = unitId;
 
+		this.ownerUnitId = unitId;
 		const phaserUnit = unitId ? this.scene.findUnit(unitId) : null;
 
 		this.gameObject.owner = phaserUnit ? phaserUnit : null;
+	}
+
+	protected size (data: {
+		width: number,
+		height: number
+	}): void {
+		super.size(data);
+
+		if (data.height) {
+			this.sprite.spriteHeight2 = this.sprite.displayHeight / 2;
+		}
+		
 	}
 
 	protected destroy (): void {

@@ -95,6 +95,11 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		height: number
 	}): void {
 		super.size(data);
+
+		if (data.height) {
+			this.gameObject.spriteHeight2 = this.sprite.displayHeight / 2;
+		}
+
 		const containerSize = Math.max(this.sprite.displayHeight, this.sprite.displayWidth);
 		this.gameObject.setSize(containerSize, containerSize);
 		if (this.label) {

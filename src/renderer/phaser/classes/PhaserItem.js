@@ -38,10 +38,15 @@ var PhaserItem = /** @class */ (function (_super) {
         return _this;
     }
     PhaserItem.prototype.setOwnerUnit = function (unitId) {
-        console.log('set owner unit', unitId);
         this.ownerUnitId = unitId;
         var phaserUnit = unitId ? this.scene.findUnit(unitId) : null;
         this.gameObject.owner = phaserUnit ? phaserUnit : null;
+    };
+    PhaserItem.prototype.size = function (data) {
+        _super.prototype.size.call(this, data);
+        if (data.height) {
+            this.sprite.spriteHeight2 = this.sprite.displayHeight / 2;
+        }
     };
     PhaserItem.prototype.destroy = function () {
         var _this = this;
