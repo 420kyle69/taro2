@@ -44,7 +44,7 @@ var PhaserItem = /** @class */ (function (_super) {
     };
     PhaserItem.prototype.size = function (data) {
         _super.prototype.size.call(this, data);
-        if (data.height) {
+        if (data.height && this.scene.heightRenderer) {
             this.sprite.spriteHeight2 = this.sprite.displayHeight / 2;
         }
     };
