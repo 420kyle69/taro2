@@ -1,10 +1,10 @@
 class PhaserUnit extends PhaserAnimatedEntity {
 
-	sprite: Phaser.GameObjects.Sprite & IRenderProps;
+	sprite: Phaser.GameObjects.Sprite & Hidden;
 	label: Phaser.GameObjects.Text;
 	private chat: PhaserChatBubble;
 
-	gameObject: Phaser.GameObjects.Container & IRenderProps;
+	gameObject: Phaser.GameObjects.Container & Hidden;
 	attributes: PhaserAttributeBar[] = [];
 	attributesContainer: Phaser.GameObjects.Container;
 
@@ -23,13 +23,10 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			translate.y,
 			[ this.sprite ]
 		);
-
-		this.gameObject = gameObject as Phaser.GameObjects.Container & IRenderProps;
-
+		this.gameObject = gameObject as Phaser.GameObjects.Container & Hidden;
 		const containerSize = Math.max(this.sprite.displayHeight, this.sprite.displayWidth);
 		gameObject.setSize(containerSize, containerSize);
-		// this is hbz-index logic but could be useful for other container operations
-		this.gameObject.spriteHeight2 = this.sprite.displayHeight / 2;
+		this.scene.renderedEntities.push(this.gameObject);
 
 		Object.assign(this.evtListeners, {
 			follow: entity.on('follow', this.follow, this),
@@ -43,9 +40,6 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			'render-chat-bubble': entity.on('render-chat-bubble', this.renderChat, this),
 		});
 
-		this.scene.unitsList.push(this);
-
-		this.scene.renderedEntities.push(this.gameObject);
 		this.zoomEvtListener = ige.client.on('scale', this.scaleElements, this);
 	}
 
@@ -95,11 +89,6 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		height: number
 	}): void {
 		super.size(data);
-
-		if (data.height) {
-			this.gameObject.spriteHeight2 = this.sprite.displayHeight / 2;
-		}
-
 		const containerSize = Math.max(this.sprite.displayHeight, this.sprite.displayWidth);
 		this.gameObject.setSize(containerSize, containerSize);
 		if (this.label) {
@@ -291,7 +280,6 @@ class PhaserUnit extends PhaserAnimatedEntity {
 	protected destroy (): void {
 
 		this.scene.renderedEntities = this.scene.renderedEntities.filter(item => item !== this.gameObject);
-		this.scene.unitsList = this.scene.unitsList.filter(item => item.entity.id() !== this.entity.id());
 		ige.client.off('scale', this.zoomEvtListener);
 		this.zoomEvtListener = null;
 

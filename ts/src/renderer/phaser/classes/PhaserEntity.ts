@@ -1,12 +1,19 @@
 /* eslint-disable @typescript-eslint/no-empty-function,@typescript-eslint/no-unused-vars */
 class PhaserEntity {
 
-	protected gameObject: TGameObject;
+	protected gameObject:
+		Phaser.GameObjects.GameObject &
+		Phaser.GameObjects.Components.Transform &
+		Phaser.GameObjects.Components.Visible &
+		Phaser.GameObjects.Components.Depth &
+		Hidden;
+
 	protected evtListeners: Record<string, EvtListener> = {};
 
 	protected constructor (
-		public entity: IgeEntity
+		protected entity: IgeEntity
 	) {
+
 		Object.assign(this.evtListeners, {
 			transform: entity.on('transform', this.transform, this),
 			scale: entity.on('scale', this.scale, this),
@@ -14,7 +21,6 @@ class PhaserEntity {
 			show: entity.on('show', this.show, this),
 			layer: entity.on('layer', this.layer, this),
 			depth: entity.on('depth', this.depth, this),
-			dynamic: entity.on('dynamic', this.setDynamic, this),
 			destroy: entity.on('destroy', this.destroy, this)
 		});
 	}
@@ -45,19 +51,7 @@ class PhaserEntity {
 	}
 
 	protected depth (value: number): void {
-		const scene = this.gameObject.scene as GameScene;
-		this.gameObject.taroDepth = value;
-
-		if (scene.heightRenderer) {
-			scene.heightRenderer.adjustDepth(this.gameObject);
-		} else {
-			this.gameObject.setDepth(value);
-		}
-	}
-
-	//height-based renderer
-	private setDynamic (isDynamic: boolean): void {
-		this.gameObject.dynamic = isDynamic;
+		this.gameObject.setDepth(value);
 	}
 
 	protected destroy (): void {
@@ -74,17 +68,6 @@ class PhaserEntity {
 	}
 }
 
-interface IRenderProps {
+interface Hidden {
 	hidden: boolean;
-	taroDepth: number;
-	dynamic?: boolean;
-	owner?: PhaserUnit;
-	spriteHeight2?: number;
-}
-
-type TGameObject =
-	Phaser.GameObjects.GameObject &
-	Phaser.GameObjects.Components.Transform &
-	Phaser.GameObjects.Components.Visible &
-	Phaser.GameObjects.Components.Depth &
-	IRenderProps
+  }
