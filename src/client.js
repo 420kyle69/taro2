@@ -151,7 +151,7 @@ const Client = IgeEventingClass.extend({
 		promise.then((game) => {
 			ige.game.data = game.data;
 			ige.addComponent(IgeInputComponent);
-
+			
 			ige.entitiesToRender = new EntitiesToRender();
 			ige.renderer = new PhaserRenderer();
 			ige.developerMode = new DeveloperMode();
@@ -339,7 +339,7 @@ const Client = IgeEventingClass.extend({
 			const tileWidth = ige.scaleMapDetails.tileWidth;
 			const tileHeight = ige.scaleMapDetails.tileHeight;
 			const params = this.getUrlVars();
-
+			
 			ige.client.vp1.camera.translateTo(
 				(ige.map.data.width * tileWidth) / 2,
 				(ige.map.data.height * tileHeight) /2,

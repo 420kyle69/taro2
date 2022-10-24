@@ -7,8 +7,8 @@ var Player = IgeEntity.extend({
 		this.id(entityIdFromServer);
 		var self = this;
 
-
-		var playerData = ige.game.getAsset('playerTypes', data.playerTypeId);
+		
+		var playerData = ige.game.getAsset('playerTypes', data.playerTypeId);		
 		this._stats = _.merge(playerData, data);
 
 		// dont save variables in _stats as _stats is stringified and synced
@@ -26,11 +26,12 @@ var Player = IgeEntity.extend({
 		this.mount(ige.$('baseScene'));
 
 		self.addComponent(AttributeComponent);
-
+		
 		if (ige.isServer) {
 			this.streamMode(2);
 			// self._stats.unitId = self.getCurrentUnit().id()
-			self.addComponent(ControlComponent);
+			self.addComponent(ControlComponent);			
+		
 			ige.server.totalPlayersCreated++;
 		} else if (ige.isClient) {
 			// if this player is "me"
@@ -47,7 +48,7 @@ var Player = IgeEntity.extend({
 					}
 				});
 			}
-
+			
 			// apply skin to the selected unit if the unit already exists on the client side
 			if (this._stats && this._stats.selectedUnitId) {
 				const unit = ige.$(this._stats.selectedUnitId);
@@ -68,13 +69,13 @@ var Player = IgeEntity.extend({
 	// move to UI
 	joinGame: function () {
 		var self = this;
-
+		
 		if (self._stats.playerJoined != true) {
 			// notify GS manager that a user has joined, do not notify if player joins again after pausing the game
 			if (self._stats.userId) {
 				ige.clusterClient.userJoined(self._stats.userId);
 			}
-
+			
 			if (ige.script) // do not send trigger for neutral player
 			{
 				ige.script.trigger('playerJoinsGame', { playerId: self.id() });
@@ -88,21 +89,21 @@ var Player = IgeEntity.extend({
 				var dataLoadTime = self._stats.totalTime;
 				client.lastEventAt = Date.now();
 
-				var playerJoinStreamData = [
-					{ streamedOn: Date.now() },
-					{ playerJoined: true },
-					{ dataLoadTime: dataLoadTime },
-					{ processedJoinGame: processedJoinGame },
-					{ receivedJoinGame: receivedJoinGame },
-					{ mapData: ige.game.data.map }
-				];
+			var playerJoinStreamData = [
+				{ streamedOn: Date.now() },
+				{ playerJoined: true },
+				{ dataLoadTime: dataLoadTime },
+				{ processedJoinGame: processedJoinGame },
+				{ receivedJoinGame: receivedJoinGame },
+				{ mapData: ige.game.data.map }
+			];
 
 				// console.log(`Player.joinGame(): sending ACK to client ${self._stats.clientId} ${self._stats.name} (time elapsed: ${Date.now() - client.lastEventAt})`, playerJoinStreamData);
 
 				self.streamUpdateData(playerJoinStreamData);
 				ige.clusterClient && ige.clusterClient.playerJoined(self._stats.userId);
 			}
-
+			
 		} else {
 			console.log(`player joined again (menu closed?) ${self._stats.clientId} (${self._stats.name})`);
 			self.streamUpdateData([{ playerJoinedAgain: true }]);
@@ -123,7 +124,7 @@ var Player = IgeEntity.extend({
 			var unit = new Unit(data);
 			unit.setOwnerPlayer(self.id());
 
-			unit.script.trigger('entityCreated');
+			unit.script.trigger("entityCreated");
 
 			// setOwner will add unitId to unitIds
 			// self._stats.unitIds.push(unit.id())
