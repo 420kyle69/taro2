@@ -27,7 +27,12 @@ class PhaserItem extends PhaserAnimatedEntity {
 		if (ige.game.data.heightBasedZIndex) {
 			// don't waste cpu tracking owner of items on renderer
 			// unless we have to (hbz)
-			this.gameObject.owner = null;
+
+			// this won't work for *our* units
+			if (entity._stats.ownerUnitId !== undefined) {
+				this.setOwnerUnit(entity._stats.ownerUnitId);
+			}
+
 			this.gameObject.spriteHeight2 = this.sprite.displayHeight / 2;
 		}
 
@@ -35,6 +40,7 @@ class PhaserItem extends PhaserAnimatedEntity {
 	}
 
 	protected setOwnerUnit (unitId: string): void {
+		console.log('set owner unit', unitId);
 		this.ownerUnitId = unitId;
 
 		const phaserUnit = unitId ? this.scene.findUnit(unitId) : null;

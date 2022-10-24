@@ -36,4 +36,5 @@ declare interface EntityStats {
 	controls: {
 		abilities: Record<string, ControlAbility>
 	}
+	ownerUnitId: string;
 }

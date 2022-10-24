@@ -28,13 +28,17 @@ var PhaserItem = /** @class */ (function (_super) {
         if (ige.game.data.heightBasedZIndex) {
             // don't waste cpu tracking owner of items on renderer
             // unless we have to (hbz)
-            _this.gameObject.owner = null;
+            // this won't work for *our* units
+            if (entity._stats.ownerUnitId !== undefined) {
+                _this.setOwnerUnit(entity._stats.ownerUnitId);
+            }
             _this.gameObject.spriteHeight2 = _this.sprite.displayHeight / 2;
         }
         _this.scene.renderedEntities.push(_this.sprite);
         return _this;
     }
     PhaserItem.prototype.setOwnerUnit = function (unitId) {
+        console.log('set owner unit', unitId);
         this.ownerUnitId = unitId;
         var phaserUnit = unitId ? this.scene.findUnit(unitId) : null;
         this.gameObject.owner = phaserUnit ? phaserUnit : null;
