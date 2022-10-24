@@ -557,11 +557,13 @@ var IgeNetIoServer = {
 				this._clientRooms[socket.id] = this._clientRooms[socket.id] || [];
 				
 				if (self._socketById[socket.id]._token && self._socketById[socket.id]._token.distinctId) {
+					console.log("Think it Up: ", ige.game && ige.game.data && ige.game.data.defaultData && ige.game.data.defaultData._id);
 					// Mixpanel Event to Track user game successfully started.
 					global.mixpanel.track('User Connected to Game Server', {
 						'distinct_id': self._socketById[socket.id]._token.distinctId,
 						'$ip': socket._remoteAddress,
 						'gameSlug': ige.game && ige.game.data && ige.game.data.defaultData && ige.game.data.defaultData.gameSlug,
+						'gameId': ige.game && ige.game.data && ige.game.data.defaultData && ige.game.data.defaultData._id,
 					});
 				}
 
@@ -610,6 +612,7 @@ var IgeNetIoServer = {
 								'distinct_id': self._socketById[socket.id]._token.distinctId,
 								'$ip': socket._remoteAddress,
 								'gameSlug': ige.game && ige.game.data && ige.game.data.defaultData && ige.game.data.defaultData.gameSlug,
+								'gameId': ige.game && ige.game.data && ige.game.data.defaultData && ige.game.data.defaultData._id,
 								'playTime': end - self._socketById[socket.id].start,
 							});
 						}
