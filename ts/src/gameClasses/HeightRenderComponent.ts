@@ -17,12 +17,13 @@ class HeightRenderComponent {
 
 		let depth = gameObject.taroDepth + (yPos + halfHeight) / this.mapHeight;
 
-		depth = Number(depth.toFixed(3));
 
 		// hack to always paint items on top of units
 		if (castGameObject !== gameObject) {
 			depth += 0.001
 		}
+
+		depth = Number(depth.toFixed(3));
 
 		gameObject.setDepth(depth);
 	}
