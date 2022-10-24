@@ -208,7 +208,6 @@ var Item = IgeEntityPhysics.extend({
 	},
 
 	setOwnerUnit: function (newOwner) {
-		console.trace();
 		var oldOwner = ige.$(this.oldOwnerId);
 
 		if (newOwner == oldOwner)
@@ -249,7 +248,7 @@ var Item = IgeEntityPhysics.extend({
 			}
 		}
 
-		if (ige.isClient) {
+		if (ige.isClient && ige.game.data.heightBasedZIndex) {
 			this.emit('setOwnerUnit', this._stats.ownerUnitId);
 		}
 	},

@@ -23,6 +23,7 @@ var PhaserUnit = /** @class */ (function (_super) {
         _this.gameObject = gameObject;
         var containerSize = Math.max(_this.sprite.displayHeight, _this.sprite.displayWidth);
         gameObject.setSize(containerSize, containerSize);
+        // this is hbz-index logic but could be useful for other container operations
         _this.gameObject.spriteHeight2 = _this.sprite.displayHeight / 2;
         Object.assign(_this.evtListeners, {
             follow: entity.on('follow', _this.follow, _this),
@@ -35,7 +36,6 @@ var PhaserUnit = /** @class */ (function (_super) {
             'update-attribute': entity.on('update-attribute', _this.updateAttribute, _this),
             'render-chat-bubble': entity.on('render-chat-bubble', _this.renderChat, _this),
         });
-        console.log(_this.entity);
         _this.scene.unitsList.push(_this);
         _this.scene.renderedEntities.push(_this.gameObject);
         _this.zoomEvtListener = ige.client.on('scale', _this.scaleElements, _this);

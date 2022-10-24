@@ -23,9 +23,12 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			translate.y,
 			[ this.sprite ]
 		);
+
 		this.gameObject = gameObject as Phaser.GameObjects.Container & IRenderProps;
+
 		const containerSize = Math.max(this.sprite.displayHeight, this.sprite.displayWidth);
 		gameObject.setSize(containerSize, containerSize);
+		// this is hbz-index logic but could be useful for other container operations
 		this.gameObject.spriteHeight2 = this.sprite.displayHeight / 2;
 
 		Object.assign(this.evtListeners, {
@@ -40,7 +43,6 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			'render-chat-bubble': entity.on('render-chat-bubble', this.renderChat, this),
 		});
 
-		console.log(this.entity);
 		this.scene.unitsList.push(this);
 
 		this.scene.renderedEntities.push(this.gameObject);

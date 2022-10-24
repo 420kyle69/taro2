@@ -19,13 +19,18 @@ var PhaserItem = /** @class */ (function (_super) {
         var _this = _super.call(this, scene, entity, "item/".concat(entity._stats.itemTypeId)) || this;
         _this.sprite.visible = false;
         _this.gameObject = _this.sprite;
-        _this.gameObject.owner = null;
         var _a = entity._translate, x = _a.x, y = _a.y;
         _this.gameObject.setPosition(x, y);
-        _this.gameObject.spriteHeight2 = _this.sprite.displayHeight / 2;
         Object.assign(_this.evtListeners, {
+            // this event is only emitted by height-based-zindex games
             setOwnerUnit: entity.on('setOwnerUnit', _this.setOwnerUnit, _this)
         });
+        if (ige.game.data.heightBasedZIndex) {
+            // don't waste cpu tracking owner of items on renderer
+            // unless we have to (hbz)
+            _this.gameObject.owner = null;
+            _this.gameObject.spriteHeight2 = _this.sprite.displayHeight / 2;
+        }
         _this.scene.renderedEntities.push(_this.sprite);
         return _this;
     }

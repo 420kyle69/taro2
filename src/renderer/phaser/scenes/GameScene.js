@@ -318,6 +318,7 @@ var GameScene = /** @class */ (function (_super) {
             if (!element.hidden) {
                 element.setVisible(true);
                 if (element.dynamic) {
+                    // dynamic is only assigned through an hbz-index-only event
                     _this.heightRenderer.adjustDepth(element);
                 }
             }

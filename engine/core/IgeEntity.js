@@ -154,9 +154,6 @@ var IgeEntity = IgeObject.extend({
 				} else if (this._category === 'item') {
 					this.emit('dynamic', true);
 				}
-
-				self.previousState = newState;
-				self.updateBody(defaultData);
 			}
 		}
 

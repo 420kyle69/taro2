@@ -541,7 +541,6 @@ var Player = IgeEntity.extend({
 
 							self.hideMenu();
 							clearTimeout(window.errorLogTimer);
-							ige.client.playerJoined.resolve();
 						}
 					}
 

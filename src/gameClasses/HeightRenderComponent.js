@@ -10,7 +10,7 @@ var HeightRenderComponent = /** @class */ (function () {
         var halfHeight = castGameObject.spriteHeight2;
         var depth = gameObject.taroDepth + (yPos + halfHeight) / this.mapHeight;
         depth = Number(depth.toFixed(3));
-        console.log(gameObject, depth);
+        // console.log(gameObject, depth);
         gameObject.setDepth(depth);
     };
     return HeightRenderComponent;

@@ -490,6 +490,7 @@ class GameScene extends PhaserScene {
 				element.setVisible(true);
 
 				if (element.dynamic) {
+					// dynamic is only assigned through an hbz-index-only event
 					this.heightRenderer.adjustDepth(element as TGameObject & Phaser.GameObjects.Components.Size);
 				}
 			}

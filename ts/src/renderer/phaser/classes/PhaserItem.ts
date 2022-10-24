@@ -3,7 +3,7 @@ class PhaserItem extends PhaserAnimatedEntity {
 	public gameObject: Phaser.GameObjects.Sprite & IRenderProps;
 	public entity: IgeEntity;
 
-	ownerUnitId: string;
+	ownerUnitId?: string;
 
 	constructor (
 		scene: GameScene,
@@ -14,15 +14,22 @@ class PhaserItem extends PhaserAnimatedEntity {
 		this.sprite.visible = false;
 
 		this.gameObject = this.sprite;
-		this.gameObject.owner = null;
 
 		const { x, y } = entity._translate;
 		this.gameObject.setPosition(x, y);
-		this.gameObject.spriteHeight2 = this.sprite.displayHeight / 2;
+
 
 		Object.assign(this.evtListeners, {
+			// this event is only emitted by height-based-zindex games
 			setOwnerUnit: entity.on('setOwnerUnit', this.setOwnerUnit, this)
 		});
+
+		if (ige.game.data.heightBasedZIndex) {
+			// don't waste cpu tracking owner of items on renderer
+			// unless we have to (hbz)
+			this.gameObject.owner = null;
+			this.gameObject.spriteHeight2 = this.sprite.displayHeight / 2;
+		}
 
 		this.scene.renderedEntities.push(this.sprite);
 	}

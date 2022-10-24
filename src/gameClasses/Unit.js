@@ -953,9 +953,6 @@ var Unit = IgeEntityPhysics.extend({
         @return {boolean} return true if unit was able to pickup/use item. return false otherwise.
 	 */
 	pickUpItem: function (item) {
-		if (ige.isClient) {
-			console.log('running pickUpItem on Client');
-		}
 		var self = this;
 		// all Server only
 		// console.log(`running Unit.pickUpItem() on ${ige.isClient ? 'Client' : 'Server'}`);
