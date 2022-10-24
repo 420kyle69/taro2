@@ -135,6 +135,13 @@ var MenuUiComponent = IgeEntity.extend({
 
 					if (restoreDevMode) {
 						ige.developerMode.enter();
+
+						if ($('#open-inventory-button').is(':visible')) {
+							$('#backpack').hide();
+						}
+
+						$('#my-score-div').hide();
+
 						restoreDevMode = false;
 					}
 
@@ -153,6 +160,13 @@ var MenuUiComponent = IgeEntity.extend({
 
 						if (ige.developerMode.active) {
 							ige.developerMode.leave();
+
+							if ($('#open-inventory-button').is(':visible')) {
+								$('#backpack').show();
+							}
+
+							$('#my-score-div').show();
+
 							restoreDevMode = true;
 						}
 
