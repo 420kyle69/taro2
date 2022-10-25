@@ -871,6 +871,9 @@ var Item = IgeEntityPhysics.extend({
 
 	streamUpdateData: function (queuedData) {
 		var self = this;
+		
+		if (ige.isServer && ige.network.isPaused) 
+			return;
 
 		IgeEntity.prototype.streamUpdateData.call(this, queuedData);
 		// ige.devLog("Item streamUpdateData ", data)
@@ -961,6 +964,23 @@ var Item = IgeEntityPhysics.extend({
 						break;
 					case 'slotIndex':
 						break;
+					case 'isBeingUsed':
+						if (ige.isClient) {
+							this._stats.isBeingUsed = newValue;							
+						}
+						break;
+
+					case 'stopUsing':
+						// This will only be called when we stop the unit from using an item from the server side, to prevent issues.
+						if (ige.isClient) {
+							this._stats.isBeingUsed = newValue;
+
+							if (newValue == false) {
+								this.playEffect('none');
+							}
+						}
+						break;
+
 				}
 			}
 		}

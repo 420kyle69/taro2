@@ -32,13 +32,12 @@ var DevModeScene = /** @class */ (function (_super) {
             if (!_this.devPalette) {
                 _this.devPalette = new PhaserPalette(_this, _this.tileset, _this.rexUI);
                 _this.paletteMarker = new TileMarker(_this, _this.devPalette.map, 1);
-                _this.devPalette.show();
-                _this.devPalette.layerButtonsContainer.setVisible(true);
-                _this.devPalette.toolButtonsContainer.setVisible(true);
             }
-            else {
-                _this.devPalette.layerButtonsContainer.setVisible(true);
-                _this.devPalette.toolButtonsContainer.setVisible(true);
+            _this.devPalette.show();
+            _this.devPalette.layerButtonsContainer.setVisible(true);
+            _this.devPalette.toolButtonsContainer.setVisible(true);
+            if (!_this.devPalette.cursorButton.active) {
+                _this.devPalette.toggleMarker();
             }
         });
         ige.client.on('leaveDevMode', function () {
