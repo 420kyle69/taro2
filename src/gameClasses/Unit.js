@@ -828,7 +828,7 @@ var Unit = IgeEntityPhysics.extend({
 		} else if (ige.isClient) {
 			var zIndex = self._stats.currentBody && self._stats.currentBody['z-index'] || { layer: 3, depth: 3 };
 
-			if (zIndex && ige.network.id() == self._stats.clientId) {
+			if (zIndex && ige.network.id() == self._stats.clientId && !ige.game.data.heightBasedZIndex) {
 				// depth of this player's units should have +1 depth to avoid flickering on overlap
 				zIndex.depth++;
 			}
@@ -1255,7 +1255,7 @@ var Unit = IgeEntityPhysics.extend({
 					self.updateStats(item.id(), true);
 				}
 
-				self.detachEntity(item.id());
+				self.detachEntity(item.id()); // igeEntityPhysics comment: not working right now
 
 				ige.queueTrigger('unitDroppedAnItem', {
 					itemId: item.id(),
@@ -1702,6 +1702,7 @@ var Unit = IgeEntityPhysics.extend({
 		this._stats.currentItemId = currentItem ? currentItem.id() : null;
 
 		// client log of item state after pickup will still show 'dropped'. Currently state has not finished updating. It IS 'selected'/'unselected'
+
 		// const debugMap = this._stats.itemIds.map((x) => {
 		// 	const item = ige.$(x) || null;
 		// 	const state = item ? item._stats.stateId : null;
@@ -1719,8 +1720,6 @@ var Unit = IgeEntityPhysics.extend({
 		// 	'\n',
 		// 	debugMap
 		// );
-
-		// tell phaser to respond to change in item
 	},
 
 	startMoving: function () {

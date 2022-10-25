@@ -227,7 +227,7 @@ var Item = IgeEntityPhysics.extend({
 			this._stats.ownerUnitId = newOwner.id();
 		} else {
 			// item is being dropped.
-			this._stats.ownerUnitId = undefined;
+			this._stats.ownerUnitId = null;
 
 			// get transform of its last owner
 			if (oldOwner) {
@@ -246,6 +246,10 @@ var Item = IgeEntityPhysics.extend({
 				this.streamUpdateData([{ ownerUnitId: 0 }]);
 				this.streamMode(1);
 			}
+		}
+
+		if (ige.isClient && ige.game.data.heightBasedZIndex) {
+			this.emit('setOwnerUnit', this._stats.ownerUnitId);
 		}
 	},
 
