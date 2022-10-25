@@ -25,7 +25,7 @@ var PhaserItem = /** @class */ (function (_super) {
             // this event is only emitted by height-based-zindex games
             setOwnerUnit: entity.on('setOwnerUnit', _this.setOwnerUnit, _this)
         });
-        if (ige.game.data.heightBasedZIndex) {
+        if (scene.heightRenderer) {
             // don't waste cpu tracking owner of items on renderer
             // unless we have to (hbz)
             // this won't work for *our* units

@@ -248,7 +248,7 @@ var Item = IgeEntityPhysics.extend({
 			}
 		}
 
-		if (ige.isClient && ige.game.data.heightBasedZIndex) {
+		if (ige.isClient && ige.game.data.defaultData.heightBasedZIndex) {
 			this.emit('setOwnerUnit', this._stats.ownerUnitId);
 		}
 	},

@@ -146,7 +146,7 @@ var IgeEntity = IgeObject.extend({
 				}
 			}
 
-			if (ige.game.data.heightBasedZIndex) {
+			if (ige.game.data.defaultData.heightBasedZIndex) {
 				// code for height-based-zindex
 				if (this._category === 'unit') {
 					this.emit('dynamic', this._stats.currentBody.type === 'dynamic');
