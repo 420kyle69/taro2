@@ -262,7 +262,7 @@ class GameScene extends PhaserScene {
 			ige.client.emit('tick');
 		});
 
-		if (data.heightBasedZIndex) {
+		if (data.defaultData.heightBasedZIndex) {
 			this.heightRenderer = new HeightRenderComponent(this, map.height * map.tileHeight);
 		}
 

@@ -193,7 +193,7 @@ var GameScene = /** @class */ (function (_super) {
         this.events.on('update', function () {
             ige.client.emit('tick');
         });
-        if (data.heightBasedZIndex) {
+        if (data.defaultData.heightBasedZIndex) {
             this.heightRenderer = new HeightRenderComponent(this, map.height * map.tileHeight);
         }
         //temporary making each loaded texture not smoothed (later planned to add option for smoothing some of them)

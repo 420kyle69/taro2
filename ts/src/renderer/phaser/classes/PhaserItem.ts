@@ -24,7 +24,7 @@ class PhaserItem extends PhaserAnimatedEntity {
 			setOwnerUnit: entity.on('setOwnerUnit', this.setOwnerUnit, this)
 		});
 
-		if (ige.game.data.heightBasedZIndex) {
+		if (scene.heightRenderer) {
 			// don't waste cpu tracking owner of items on renderer
 			// unless we have to (hbz)
 
