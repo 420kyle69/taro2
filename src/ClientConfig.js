@@ -45,8 +45,8 @@ var igeClientConfig = {
 		'/gameClasses/components/script/VariableComponent.js',
 		'/gameClasses/components/script/ActionComponent.js',
 		'/gameClasses/components/script/ConditionComponent.js',
-		
-		'/gameClasses/components/unit/AIComponent.js',		
+
+		'/gameClasses/components/unit/AIComponent.js',
 		'/gameClasses/components/unit/AbilityComponent.js',
 		'/gameClasses/components/unit/AttributeComponent.js',
 
@@ -55,6 +55,7 @@ var igeClientConfig = {
 		'/gameClasses/DeveloperMode.js',
 		'/gameClasses/EntitiesToRender.js',
 		'/gameClasses/Raycaster.js',
+		'/gameClasses/HeightRenderComponent.js',
 
 		/* Phaser */
 		'renderer/phaser/phaser.min.js',
