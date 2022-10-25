@@ -5235,6 +5235,15 @@ var IgeEntity = IgeObject.extend({
 
 			rotate = this.interpolateValue(rotateStart, rotateEnd, prevKeyFrame[0], ige._currentTime, nextKeyFrame[0]);
 		}
+		// ensure that this entity is positioned at the last known position if no update is being streamed
+        // this prevents entities being in incorrect position if client is returning from a
+        // different browser tab
+        else if (this.finalKeyFrame && this.finalKeyFrame[0] < ige._currentTime) {
+            x = this.finalKeyFrame[1][0]
+            y = this.finalKeyFrame[1][1]
+            // if (this.getOwner()._stats.controlledBy != 'human')
+            //     console.log("final position", x, y)
+        }
 
 		// ignore streamed angle if this unit control is set to face mouse cursor instantly.
 		if (this == ige.client.selectedUnit &&

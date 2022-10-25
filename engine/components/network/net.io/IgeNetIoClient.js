@@ -530,6 +530,18 @@ var IgeNetIoClient = {
 						ige.snapshots.shift();
 					}
 
+					// update each entities' final position, so player knows where everything are when returning from a different browser tab
+					// we are not executing this in igeEngine or igeEntity, becuase they don't execute when browser tab is inactive
+					for (const entityId in newSnapshot[1]) {
+                        var entity = ige.$(entityId);
+                        var finalTransform = newSnapshot[1][entityId]
+                        if (entity) {
+							entity.finalKeyFrame = [newSnapshot[0], finalTransform]
+							// console.log (entity.finalKeyFrame)
+						}
+                            
+                    }
+
 					// if client's timestamp more than 100ms behind the server's timestamp, immediately update it to be 50ms behind the server's
 					// otherwise, apply rubberbanding
 					if (ige._currentTime > newSnapshotTimestamp || ige._currentTime < newSnapshotTimestamp - 100) {
