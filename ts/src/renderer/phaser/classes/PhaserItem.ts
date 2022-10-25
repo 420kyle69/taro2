@@ -56,7 +56,6 @@ class PhaserItem extends PhaserAnimatedEntity {
 		if (data.height && this.scene.heightRenderer) {
 			this.sprite.spriteHeight2 = this.sprite.displayHeight / 2;
 		}
-		
 	}
 
 	protected destroy (): void {
