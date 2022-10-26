@@ -24,8 +24,9 @@ var DevModeScene = /** @class */ (function (_super) {
         this.gameScene = ige.renderer.scene.getScene('Game');
         //const map = this.devPalette.map;
         var map = this.gameScene.tilemap;
-        this.selectedTile = map.getTileAt(2, 3, true);
-        this.selectedTileArea = [[map.getTileAt(2, 3, true), map.getTileAt(2, 4, true)], [map.getTileAt(3, 3, true), map.getTileAt(3, 4, true)]];
+        this.selectedTile = null; //map.getTileAt(2, 3, true);
+        this.selectedTileArea = [[null, null, null, null]];
+        //this.selectedTileArea = [[map.getTileAt(2, 3, true), map.getTileAt(2, 4, true)],[map.getTileAt(3, 3, true), map.getTileAt(3, 4, true)]];
         console.log('tile', this.selectedTile, 'area', this.selectedTileArea);
         ige.client.on('enterDevMode', function () {
             _this.defaultZoom = (_this.gameScene.zoomSize / 2.15);
@@ -114,6 +115,7 @@ var DevModeScene = /** @class */ (function (_super) {
             this.load.image(key, this.patchAssetUrl(tileset.image));
         });*/
         this.load.image('cursor', 'https://cache.modd.io/asset/spriteImage/1666276041347_cursor.png');
+        this.load.image('stamp', 'https://cache.modd.io/asset/spriteImage/1666724706664_stamp.png');
         this.load.image('eraser', 'https://cache.modd.io/asset/spriteImage/1666276083246_erasergap.png');
         this.load.scenePlugin('rexuiplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js', 
         //'src/renderer/phaser/rexuiplugin.min.js',
@@ -183,12 +185,19 @@ var DevModeScene = /** @class */ (function (_super) {
                         for (var i = 0; i < palette.area.x; i++) {
                             for (var j = 0; j < palette.area.y; j++) {
                                 if (this.pointerInsideMap(palettePointerTileX + i, palettePointerTileY + j, paletteMap)) {
-                                    this.selectedTileArea[i][j].tint = 0xffffff;
-                                    this.selectedTileArea[i][j] = paletteMap.getTileAt(palettePointerTileX + i, palettePointerTileY + j, true);
-                                    this.selectedTileArea[i][j].tint = 0x87cfff;
+                                    if (this.selectedTileArea[i][j])
+                                        this.selectedTileArea[i][j].tint = 0xffffff;
+                                    if (paletteMap.getTileAt(palettePointerTileX + i, palettePointerTileY + j).index !== 0) {
+                                        this.selectedTileArea[i][j] = paletteMap.getTileAt(palettePointerTileX + i, palettePointerTileY + j);
+                                        this.selectedTileArea[i][j].tint = 0x87cfff;
+                                    }
+                                    else {
+                                        this.selectedTileArea[i][j] = null;
+                                    }
                                     if (this.devPalette.cursorButton.active) {
                                         this.devPalette.toggleMarker();
                                     }
+                                    this.devPalette.modeButtons[1].highlight(true);
                                 }
                             }
                         }
@@ -197,11 +206,17 @@ var DevModeScene = /** @class */ (function (_super) {
                         if (this.pointerInsideMap(palettePointerTileX, palettePointerTileY, paletteMap)) {
                             if (this.selectedTile)
                                 this.selectedTile.tint = 0xffffff;
-                            this.selectedTile = paletteMap.getTileAt(palettePointerTileX, palettePointerTileY, true);
-                            this.selectedTile.tint = 0x87cfff;
+                            if (paletteMap.getTileAt(palettePointerTileX, palettePointerTileY).index !== 0) {
+                                this.selectedTile = paletteMap.getTileAt(palettePointerTileX, palettePointerTileY);
+                                this.selectedTile.tint = 0x87cfff;
+                            }
+                            else {
+                                this.selectedTile = null;
+                            }
                             if (this.devPalette.cursorButton.active) {
                                 this.devPalette.toggleMarker();
                             }
+                            this.devPalette.modeButtons[1].highlight(true);
                         }
                     }
                 }
@@ -221,27 +236,40 @@ var DevModeScene = /** @class */ (function (_super) {
                         for (var i = 0; i < palette.area.x; i++) {
                             for (var j = 0; j < palette.area.y; j++) {
                                 if (this.pointerInsideMap(pointerTileX + i, pointerTileY + j, map)) {
-                                    this.selectedTileArea[i][j].tint = 0xffffff;
-                                    this.selectedTileArea[i][j] = map.getTileAt(pointerTileX + i, pointerTileY + j, true);
+                                    if (this.selectedTileArea[i][j])
+                                        this.selectedTileArea[i][j].tint = 0xffffff;
+                                    if (map.getTileAt(pointerTileX + i, pointerTileY + j).index !== 0) {
+                                        this.selectedTileArea[i][j] = map.getTileAt(pointerTileX + i, pointerTileY + j);
+                                    }
+                                    else {
+                                        this.selectedTileArea[i][j] = null;
+                                    }
                                 }
                             }
                         }
                     }
                     else {
                         if (this.pointerInsideMap(pointerTileX, pointerTileY, map)) {
-                            this.selectedTile.tint = 0xffffff;
-                            this.selectedTile = map.getTileAt(pointerTileX, pointerTileY, true);
+                            if (this.selectedTile)
+                                this.selectedTile.tint = 0xffffff;
+                            if (map.getTileAt(pointerTileX, pointerTileY).index !== 0) {
+                                this.selectedTile = map.getTileAt(pointerTileX, pointerTileY);
+                            }
+                            else {
+                                this.selectedTile = null;
+                            }
                         }
                     }
                 }
                 if (this.input.manager.activePointer.leftButtonDown()) {
+                    console.log('left button down', this.selectedTile);
                     if (palette.area.x > 1 || palette.area.y > 1) {
                         for (var i = 0; i < palette.area.x; i++) {
                             for (var j = 0; j < palette.area.y; j++) {
-                                if (this.pointerInsideMap(pointerTileX + i, pointerTileY + j, map)
+                                if (this.pointerInsideMap(pointerTileX + i, pointerTileY + j, map) && this.selectedTileArea[i][j]
                                     && this.selectedTileArea[i][j].index !== (map.getTileAt(pointerTileX + i, pointerTileY + j, true)).index) {
                                     if (this.selectedTileArea[i][j].index === -1)
-                                        this.selectedTile.index = 0;
+                                        this.selectedTile[i][j].index = 0;
                                     map.putTileAt(this.selectedTileArea[i][j], pointerTileX + i, pointerTileY + j);
                                     map.getTileAt(pointerTileX + i, pointerTileY + j, true).tint = 0xffffff;
                                     console.log('place tile', this.selectedTileArea[i][j].index);
@@ -251,7 +279,7 @@ var DevModeScene = /** @class */ (function (_super) {
                         }
                     }
                     else {
-                        if (this.pointerInsideMap(pointerTileX, pointerTileY, map)
+                        if (this.pointerInsideMap(pointerTileX, pointerTileY, map) && this.selectedTile
                             && this.selectedTile.index !== (map.getTileAt(pointerTileX, pointerTileY, true)).index) {
                             if (this.selectedTile.index === -1)
                                 this.selectedTile.index = 0;
