@@ -30,6 +30,9 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		gameObject.setSize(containerSize, containerSize);
 		// this is hbz-index logic but could be useful for other container operations
 		this.gameObject.spriteHeight2 = this.sprite.displayHeight / 2;
+		if (!this.gameObject.spriteHeight2) {
+			console.log('we have an issue...', this.sprite);
+		}
 
 		Object.assign(this.evtListeners, {
 			follow: entity.on('follow', this.follow, this),
@@ -76,6 +79,17 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			this.sprite.setTexture(`unit/${this.entity._stats.type}`);
 			const bounds = this.entity._bounds2d;
 			this.sprite.setDisplaySize(bounds.x, bounds.y);
+		}
+	}
+
+	protected depth (value: number): void {
+		const scene = this.gameObject.scene as GameScene;
+		this.gameObject.taroDepth = value;
+
+		if (scene.heightRenderer) {
+			scene.heightRenderer.adjustDepth(this.gameObject);
+		} else {
+			this.gameObject.setDepth(value);
 		}
 	}
 

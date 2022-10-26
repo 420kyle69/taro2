@@ -25,6 +25,9 @@ var PhaserUnit = /** @class */ (function (_super) {
         gameObject.setSize(containerSize, containerSize);
         // this is hbz-index logic but could be useful for other container operations
         _this.gameObject.spriteHeight2 = _this.sprite.displayHeight / 2;
+        if (!_this.gameObject.spriteHeight2) {
+            console.log('we have an issue...', _this.sprite);
+        }
         Object.assign(_this.evtListeners, {
             follow: entity.on('follow', _this.follow, _this),
             'update-texture': entity.on('update-texture', _this.updateTexture, _this),
@@ -68,6 +71,16 @@ var PhaserUnit = /** @class */ (function (_super) {
             this.sprite.setTexture("unit/".concat(this.entity._stats.type));
             var bounds = this.entity._bounds2d;
             this.sprite.setDisplaySize(bounds.x, bounds.y);
+        }
+    };
+    PhaserUnit.prototype.depth = function (value) {
+        var scene = this.gameObject.scene;
+        this.gameObject.taroDepth = value;
+        if (scene.heightRenderer) {
+            scene.heightRenderer.adjustDepth(this.gameObject);
+        }
+        else {
+            this.gameObject.setDepth(value);
         }
     };
     PhaserUnit.prototype.transform = function (data) {

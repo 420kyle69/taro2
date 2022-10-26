@@ -17,6 +17,7 @@ class HeightRenderComponent {
 
 		if (!halfHeight) {
 			gameObject.setDepth(gameObject.taroDepth);
+
 			// console.log(gameObject, (gameObject.taroDepth + (yPos + halfHeight) / this.mapHeight), gameObject.taroDepth, yPos, halfHeight, this.mapHeight);
 			return;
 		}
