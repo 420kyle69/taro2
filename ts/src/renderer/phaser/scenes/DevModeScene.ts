@@ -284,7 +284,7 @@ class DevModeScene extends PhaserScene {
 					} else {
 						if (this.pointerInsideMap(pointerTileX, pointerTileY, map)) {
 							if (this.selectedTile) this.selectedTile.tint = 0xffffff;
-							if (map.getTileAt(pointerTileX, pointerTileY).index !== 0) {
+							if (map.getTileAt(pointerTileX, pointerTileY) && map.getTileAt(pointerTileX, pointerTileY).index !== 0) {
 								this.selectedTile = map.getTileAt(pointerTileX, pointerTileY);
 							} else {
 								this.selectedTile = null;
