@@ -21,6 +21,7 @@ class PhaserJoystick {
 		setVisible(boolean): void;
 		destroy (): void;
 	} & Phaser.Events.EventEmitter;
+	side: string;
 
 	constructor (
 		scene: MobileControlsScene,
@@ -69,6 +70,16 @@ class PhaserJoystick {
 		});
 
 		scene.joysticks.push(this);
+
+		if (scene.joysticks.length > 1) {
+			if (scene.joysticks[1].x > scene.joysticks[0].x) {
+				scene.joysticks[0].side = 'left';
+				scene.joysticks[1].side = 'right';
+			} else {
+				scene.joysticks[0].side = 'right';
+				scene.joysticks[1].side = 'left';
+			}
+		}
 	}
 
 	show (): void {

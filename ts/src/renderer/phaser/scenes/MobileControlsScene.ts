@@ -127,7 +127,7 @@ class MobileControlsScene extends PhaserScene {
 				var touchX = pointer.x;
 				var touchY = pointer.y;
 				if (touchX < this.cameras.main.displayWidth / 2.4) {
-					const leftJoystick = this.joysticks[0];
+					const leftJoystick = this.joysticks.find(({ side }) => side === "left");
 					if (leftJoystick) {
 						leftJoystick.show();
 						leftJoystick.x = touchX;
@@ -135,7 +135,7 @@ class MobileControlsScene extends PhaserScene {
 						leftJoystick.updateTransform();
 					}
 				} else if (touchX > this.cameras.main.displayWidth - (this.cameras.main.displayWidth / 2.4)) {
-					const rightJoystick = this.joysticks[1];
+					const rightJoystick = this.joysticks.find(({ side }) => side === "right");
 					if (rightJoystick) {
 						rightJoystick.show();
 						rightJoystick.x = touchX;
