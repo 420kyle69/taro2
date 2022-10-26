@@ -197,6 +197,7 @@ var DevModeScene = /** @class */ (function (_super) {
                                         this.devPalette.toggleMarker();
                                     }
                                     this.devPalette.modeButtons[1].highlight(true);
+                                    this.devPalette.modeButtons[2].highlight(false);
                                 }
                             }
                         }
@@ -216,6 +217,7 @@ var DevModeScene = /** @class */ (function (_super) {
                                 this.devPalette.toggleMarker();
                             }
                             this.devPalette.modeButtons[1].highlight(true);
+                            this.devPalette.modeButtons[2].highlight(false);
                         }
                     }
                 }
@@ -243,6 +245,11 @@ var DevModeScene = /** @class */ (function (_super) {
                                     else {
                                         this.selectedTileArea[i][j] = null;
                                     }
+                                    if (this.devPalette.cursorButton.active) {
+                                        this.devPalette.toggleMarker();
+                                    }
+                                    this.devPalette.modeButtons[1].highlight(true);
+                                    this.devPalette.modeButtons[2].highlight(false);
                                 }
                             }
                         }
@@ -257,6 +264,11 @@ var DevModeScene = /** @class */ (function (_super) {
                             else {
                                 this.selectedTile = null;
                             }
+                            if (this.devPalette.cursorButton.active) {
+                                this.devPalette.toggleMarker();
+                            }
+                            this.devPalette.modeButtons[1].highlight(true);
+                            this.devPalette.modeButtons[2].highlight(false);
                         }
                     }
                 }
