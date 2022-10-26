@@ -24,9 +24,8 @@ class DevModeScene extends PhaserScene {
 		this.gameScene = ige.renderer.scene.getScene('Game');
 		//const map = this.devPalette.map;
 		const map = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
-		this.selectedTile = null; //map.getTileAt(2, 3, true);
+		this.selectedTile = null;
 		this.selectedTileArea = [[null, null, null, null]];
-		//this.selectedTileArea = [[map.getTileAt(2, 3, true), map.getTileAt(2, 4, true)],[map.getTileAt(3, 3, true), map.getTileAt(3, 4, true)]];
 		console.log('tile', this.selectedTile, 'area', this.selectedTileArea);
 
 		ige.client.on('enterDevMode', () => {
@@ -290,7 +289,6 @@ class DevModeScene extends PhaserScene {
 				}
 
 				if (this.input.manager.activePointer.leftButtonDown()) {
-					console.log('left button down', this.selectedTile)
 					if (palette.area.x > 1 || palette.area.y > 1) {
 						for (let i = 0; i < palette.area.x; i++) {
 							for (let j = 0; j < palette.area.y; j++) {

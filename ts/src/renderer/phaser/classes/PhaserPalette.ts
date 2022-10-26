@@ -121,7 +121,7 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 		scene.add.existing(layerButtonsContainer);
 		//this.scrollBarContainer.add(layerButtonsContainer);
 		layerButtonsContainer.width = 120;
-		layerButtonsContainer.height = 160;
+		layerButtonsContainer.height = 204;
 		layerButtonsContainer.x = this.camera.x + paletteWidth - 98;
 		layerButtonsContainer.y = this.camera.y - 204;
 		
@@ -143,10 +143,6 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 		toolButtonsContainer.y = this.camera.y - layerButtonsContainer.height - 150;
 		toolButtonsContainer.width = 120;
 		toolButtonsContainer.height = 98;
-
-		/*this.cursorButton = new PhaserPaletteButton (this, '', 'cursor', 0, 0, 58, toolButtonsContainer, this.toggleMarker.bind(this));
-		new PhaserPaletteButton (this, '', 'stamp', 0, 34, 58, toolButtonsContainer, this.emptyTile.bind(this));
-		new PhaserPaletteButton (this, '', 'eraser', 62, 34, 58, toolButtonsContainer, this.emptyTile.bind(this));*/
 
 		this.modeButtons = [];
 		this.modeButtons.push (
@@ -295,7 +291,7 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 		this.scrollBarRight.layout();
 	}
 
-	addScrollBar(orient: string/*, length: number*/) {
+	addScrollBar(orient: string) {
 		let orientSize;
 		let length;
 		let thumbWidth;

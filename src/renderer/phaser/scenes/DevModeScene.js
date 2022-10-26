@@ -24,9 +24,8 @@ var DevModeScene = /** @class */ (function (_super) {
         this.gameScene = ige.renderer.scene.getScene('Game');
         //const map = this.devPalette.map;
         var map = this.gameScene.tilemap;
-        this.selectedTile = null; //map.getTileAt(2, 3, true);
+        this.selectedTile = null;
         this.selectedTileArea = [[null, null, null, null]];
-        //this.selectedTileArea = [[map.getTileAt(2, 3, true), map.getTileAt(2, 4, true)],[map.getTileAt(3, 3, true), map.getTileAt(3, 4, true)]];
         console.log('tile', this.selectedTile, 'area', this.selectedTileArea);
         ige.client.on('enterDevMode', function () {
             _this.defaultZoom = (_this.gameScene.zoomSize / 2.15);
@@ -262,7 +261,6 @@ var DevModeScene = /** @class */ (function (_super) {
                     }
                 }
                 if (this.input.manager.activePointer.leftButtonDown()) {
-                    console.log('left button down', this.selectedTile);
                     if (palette.area.x > 1 || palette.area.y > 1) {
                         for (var i = 0; i < palette.area.x; i++) {
                             for (var j = 0; j < palette.area.y; j++) {

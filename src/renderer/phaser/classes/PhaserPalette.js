@@ -101,7 +101,7 @@ var PhaserPalette = /** @class */ (function (_super) {
         scene.add.existing(layerButtonsContainer);
         //this.scrollBarContainer.add(layerButtonsContainer);
         layerButtonsContainer.width = 120;
-        layerButtonsContainer.height = 160;
+        layerButtonsContainer.height = 204;
         layerButtonsContainer.x = _this.camera.x + paletteWidth - 98;
         layerButtonsContainer.y = _this.camera.y - 204;
         new PhaserPaletteButton(_this, 'palette', null, 0, 170, 120, layerButtonsContainer, _this.toggle.bind(_this));
@@ -115,9 +115,6 @@ var PhaserPalette = /** @class */ (function (_super) {
         toolButtonsContainer.y = _this.camera.y - layerButtonsContainer.height - 150;
         toolButtonsContainer.width = 120;
         toolButtonsContainer.height = 98;
-        /*this.cursorButton = new PhaserPaletteButton (this, '', 'cursor', 0, 0, 58, toolButtonsContainer, this.toggleMarker.bind(this));
-        new PhaserPaletteButton (this, '', 'stamp', 0, 34, 58, toolButtonsContainer, this.emptyTile.bind(this));
-        new PhaserPaletteButton (this, '', 'eraser', 62, 34, 58, toolButtonsContainer, this.emptyTile.bind(this));*/
         _this.modeButtons = [];
         _this.modeButtons.push(new PhaserPaletteButton(_this, '', 'cursor', 0, 0, 58, toolButtonsContainer, _this.toggleMarker.bind(_this)), new PhaserPaletteButton(_this, '', 'stamp', 0, 34, 58, toolButtonsContainer, _this.brush.bind(_this)), new PhaserPaletteButton(_this, '', 'eraser', 62, 34, 58, toolButtonsContainer, _this.emptyTile.bind(_this)));
         _this.cursorButton = _this.modeButtons[0];
@@ -247,7 +244,7 @@ var PhaserPalette = /** @class */ (function (_super) {
         this.scrollBarRight.getElement('slider.thumb').height = (this.camera.height - 60) / (targetZoom * 2);
         this.scrollBarRight.layout();
     };
-    PhaserPalette.prototype.addScrollBar = function (orient /*, length: number*/) {
+    PhaserPalette.prototype.addScrollBar = function (orient) {
         var _a;
         var orientSize;
         var length;
