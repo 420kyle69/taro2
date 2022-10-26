@@ -30,9 +30,6 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		gameObject.setSize(containerSize, containerSize);
 		// this is hbz-index logic but could be useful for other container operations
 		this.gameObject.spriteHeight2 = this.sprite.displayHeight / 2;
-		if (!this.gameObject.spriteHeight2) {
-			console.log('we have an issue...', this.sprite);
-		}
 
 		Object.assign(this.evtListeners, {
 			follow: entity.on('follow', this.follow, this),
