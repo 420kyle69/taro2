@@ -37,6 +37,16 @@ var PhaserItem = /** @class */ (function (_super) {
         _this.scene.renderedEntities.push(_this.sprite);
         return _this;
     }
+    PhaserItem.prototype.depth = function (value) {
+        var scene = this.gameObject.scene;
+        this.gameObject.taroDepth = value;
+        if (scene.heightRenderer) {
+            scene.heightRenderer.adjustDepth(this.gameObject);
+        }
+        else {
+            this.gameObject.setDepth(value);
+        }
+    };
     PhaserItem.prototype.setOwnerUnit = function (unitId) {
         this.ownerUnitId = unitId;
         var phaserUnit = unitId ? this.scene.findUnit(unitId) : null;

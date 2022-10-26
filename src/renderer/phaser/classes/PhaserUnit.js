@@ -70,6 +70,16 @@ var PhaserUnit = /** @class */ (function (_super) {
             this.sprite.setDisplaySize(bounds.x, bounds.y);
         }
     };
+    PhaserUnit.prototype.depth = function (value) {
+        var scene = this.gameObject.scene;
+        this.gameObject.taroDepth = value;
+        if (scene.heightRenderer) {
+            scene.heightRenderer.adjustDepth(this.gameObject);
+        }
+        else {
+            this.gameObject.setDepth(value);
+        }
+    };
     PhaserUnit.prototype.transform = function (data) {
         _super.prototype.transform.call(this, data);
         if (this.chat) {

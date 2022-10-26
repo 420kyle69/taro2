@@ -79,6 +79,17 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		}
 	}
 
+	protected depth (value: number): void {
+		const scene = this.gameObject.scene as GameScene;
+		this.gameObject.taroDepth = value;
+
+		if (scene.heightRenderer) {
+			scene.heightRenderer.adjustDepth(this.gameObject);
+		} else {
+			this.gameObject.setDepth(value);
+		}
+	}
+
 	protected transform (data: {
 		x: number;
 		y: number;
