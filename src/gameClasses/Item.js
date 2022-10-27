@@ -1019,7 +1019,7 @@ var Item = IgeEntityPhysics.extend({
 
 			self.translateTo(x, y);
 
-			if (ige.isClient && ige.client.selectedUnit == ownerUnit) {
+			if (ige.isServer || (ige.isClient && ige.client.selectedUnit == ownerUnit)) {
 				if (self._stats.controls && self._stats.controls.mouseBehaviour) {
 					if (self._stats.controls.mouseBehaviour.flipSpriteHorizontallyWRTMouse) {
 						if (rotate > 0 && rotate < Math.PI) {

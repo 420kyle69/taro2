@@ -2143,16 +2143,18 @@ var IgeEntity = IgeObject.extend({
 	},
 
 	flip: function (flip) {
-		if (ige.isServer) {
-			if (flip !== this._stats.flip) {
-				this.streamUpdateData([{ flip: flip }]);
-			}
+		if (this._stats.flip !== flip) {
 
-		} else if (ige.isClient) {
-			if (this._stats.flip !== flip) {
+			if (ige.isServer) {
+
+				this.streamUpdateData([{ flip: flip }]);
+
+			} else if (ige.isClient) {
+				
 				this.emit('flip', [ flip ]);
 			}
 		}
+
 		this._stats.flip = flip;
 	},
 
