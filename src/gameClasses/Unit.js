@@ -353,7 +353,7 @@ var Unit = IgeEntityPhysics.extend({
 
 		// checking for atribute price
 		for (var attributeTypeId in shopData.price.playerAttributes) {
-			if (ownerPlayer._stats.attributes[attributeTypeId]) {
+			if (ownerPlayer._stats.attributes && ownerPlayer._stats.attributes[attributeTypeId]) {
 				var playerAttrValue = ownerPlayer._stats.attributes[attributeTypeId].value;
 				if (shopData.price.playerAttributes[attributeTypeId] > playerAttrValue) {
 					return false;
