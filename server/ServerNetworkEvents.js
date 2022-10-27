@@ -491,51 +491,91 @@ var ServerNetworkEvents = {
 
 	_onSwapInventory: function (data, clientId) {
 		var player = ige.game.getPlayerByClientId(clientId);
-		var unit = player.getSelectedUnit();
-		if (player && unit && unit._stats) {
-			var itemIds = _.cloneDeep(unit._stats.itemIds);
-			var fromItem = ige.$(itemIds[data.from]);
-			var toItem = ige.$(itemIds[data.to]);
+		if (player) {
+			var unit = player.getSelectedUnit();		
+			if (unit && unit._stats) {
+				var itemIds = _.cloneDeep(unit._stats.itemIds);
+				var fromItem = ige.$(itemIds[data.from]);
+				var toItem = ige.$(itemIds[data.to]);
 
-			// both FROM & TO slots have items
-			if (
-				(fromItem && fromItem._stats) &&
-				(toItem && toItem._stats)
-			) {
-				// merge
-				// if (fromItem._stats.itemTypeId == toItem._stats.itemTypeId) {
-				// 	var qtyToBeAdded = Math.min(toItem._stats.maxQuantity - toItem._stats.quantity, fromItem._stats.quantity)
-				// 	if (qtyToBeAdded > 0) {
-				// 		if (toItem)
-				// 			toItem.updateQuantity(toItem._stats.quantity + qtyToBeAdded);
-				// 		if (fromItem)
-				// 			fromItem.updateQuantity(fromItem._stats.quantity - qtyToBeAdded);
-				// 	}
-				// 	return;
-				// }
-
-				// swap
+				// both FROM & TO slots have items
 				if (
+					(fromItem && fromItem._stats) &&
+					(toItem && toItem._stats)
+				) {
+					// merge
+					// if (fromItem._stats.itemTypeId == toItem._stats.itemTypeId) {
+					// 	var qtyToBeAdded = Math.min(toItem._stats.maxQuantity - toItem._stats.quantity, fromItem._stats.quantity)
+					// 	if (qtyToBeAdded > 0) {
+					// 		if (toItem)
+					// 			toItem.updateQuantity(toItem._stats.quantity + qtyToBeAdded);
+					// 		if (fromItem)
+					// 			fromItem.updateQuantity(fromItem._stats.quantity - qtyToBeAdded);
+					// 	}
+					// 	return;
+					// }
+
+					// swap
+					if (
+						(
+							fromItem._stats.controls == undefined ||
+							fromItem._stats.controls.permittedInventorySlots == undefined ||
+							fromItem._stats.controls.permittedInventorySlots.length == 0 ||
+							fromItem._stats.controls.permittedInventorySlots.includes(data.to + 1) ||
+							(data.to + 1 > unit._stats.inventorySize && (fromItem._stats.controls.backpackAllowed == true || fromItem._stats.controls.backpackAllowed == undefined || fromItem._stats.controls.backpackAllowed == null)) // any item can be moved into backpack slots if the backpackAllowed property is true
+						) &&
+						(
+							toItem._stats.controls == undefined ||
+							toItem._stats.controls.permittedInventorySlots == undefined ||
+							toItem._stats.controls.permittedInventorySlots.length == 0 ||
+							toItem._stats.controls.permittedInventorySlots.includes(data.from + 1) ||
+							(data.from + 1 > unit._stats.inventorySize && (toItem._stats.controls.backpackAllowed == true || toItem._stats.controls.backpackAllowed == undefined || toItem._stats.controls.backpackAllowed == null)) // any item can be moved into backpack slots if the backpackAllowed property is true
+						)
+					) {
+						fromItem.streamUpdateData([{ slotIndex: parseInt(data.to) }]);
+						toItem.streamUpdateData([{ slotIndex: parseInt(data.from) }]);
+
+						if (fromItem._stats.bonus && fromItem._stats.bonus.passive && fromItem._stats.bonus.passive.isDisabledInBackpack == true) {
+							if (data.from + 1 <= unit._stats.inventorySize && data.to + 1 > unit._stats.inventorySize) {
+								unit.updateStats(fromItem.id(), true);
+							}
+							else if (data.to + 1 <= unit._stats.inventorySize && data.from + 1 > unit._stats.inventorySize) {
+								unit.updateStats(fromItem.id());
+							}
+						}
+
+						if (toItem._stats.bonus && toItem._stats.bonus.passive && toItem._stats.bonus.passive.isDisabledInBackpack == true) {
+							if (data.to + 1 <= unit._stats.inventorySize && data.from + 1 > unit._stats.inventorySize) {
+								unit.updateStats(toItem.id(), true);
+							}
+							else if (data.from + 1 <= unit._stats.inventorySize && data.to + 1 > unit._stats.inventorySize) {
+								unit.updateStats(toItem.id());
+							}
+						}
+
+						var temp = itemIds[data.from];
+						itemIds[data.from] = itemIds[data.to];
+						itemIds[data.to] = temp;
+					}
+				}
+
+				// TO slot doesn't have item
+				if (
+					fromItem != undefined &&
+					toItem == undefined &&
+					data.to < unit.inventory.getTotalInventorySize() &&
 					(
 						fromItem._stats.controls == undefined ||
 						fromItem._stats.controls.permittedInventorySlots == undefined ||
 						fromItem._stats.controls.permittedInventorySlots.length == 0 ||
 						fromItem._stats.controls.permittedInventorySlots.includes(data.to + 1) ||
 						(data.to + 1 > unit._stats.inventorySize && (fromItem._stats.controls.backpackAllowed == true || fromItem._stats.controls.backpackAllowed == undefined || fromItem._stats.controls.backpackAllowed == null)) // any item can be moved into backpack slots if the backpackAllowed property is true
-					) &&
-					(
-						toItem._stats.controls == undefined ||
-						toItem._stats.controls.permittedInventorySlots == undefined ||
-						toItem._stats.controls.permittedInventorySlots.length == 0 ||
-						toItem._stats.controls.permittedInventorySlots.includes(data.from + 1) ||
-						(data.from + 1 > unit._stats.inventorySize && (toItem._stats.controls.backpackAllowed == true || toItem._stats.controls.backpackAllowed == undefined || toItem._stats.controls.backpackAllowed == null)) // any item can be moved into backpack slots if the backpackAllowed property is true
 					)
 				) {
 					fromItem.streamUpdateData([{ slotIndex: parseInt(data.to) }]);
-					toItem.streamUpdateData([{ slotIndex: parseInt(data.from) }]);
 
 					if (fromItem._stats.bonus && fromItem._stats.bonus.passive && fromItem._stats.bonus.passive.isDisabledInBackpack == true) {
-						if (data.from + 1 <= unit._stats.inventorySize && data.to + 1 > unit._stats.inventorySize) {
+						if (data.from + 1 <= unit._stats.inventorySize && data.to + 1 > unit._stats.inventorySize){
 							unit.updateStats(fromItem.id(), true);
 						}
 						else if (data.to + 1 <= unit._stats.inventorySize && data.from + 1 > unit._stats.inventorySize) {
@@ -543,51 +583,13 @@ var ServerNetworkEvents = {
 						}
 					}
 
-					if (toItem._stats.bonus && toItem._stats.bonus.passive && toItem._stats.bonus.passive.isDisabledInBackpack == true) {
-						if (data.to + 1 <= unit._stats.inventorySize && data.from + 1 > unit._stats.inventorySize) {
-							unit.updateStats(toItem.id(), true);
-						}
-						else if (data.from + 1 <= unit._stats.inventorySize && data.to + 1 > unit._stats.inventorySize) {
-							unit.updateStats(toItem.id());
-						}
-					}
-
-					var temp = itemIds[data.from];
-					itemIds[data.from] = itemIds[data.to];
-					itemIds[data.to] = temp;
-				}
-			}
-
-			// TO slot doesn't have item
-			if (
-				fromItem != undefined &&
-				toItem == undefined &&
-				data.to < unit.inventory.getTotalInventorySize() &&
-				(
-					fromItem._stats.controls == undefined ||
-					fromItem._stats.controls.permittedInventorySlots == undefined ||
-					fromItem._stats.controls.permittedInventorySlots.length == 0 ||
-					fromItem._stats.controls.permittedInventorySlots.includes(data.to + 1) ||
-					(data.to + 1 > unit._stats.inventorySize && (fromItem._stats.controls.backpackAllowed == true || fromItem._stats.controls.backpackAllowed == undefined || fromItem._stats.controls.backpackAllowed == null)) // any item can be moved into backpack slots if the backpackAllowed property is true
-				)
-			) {
-				fromItem.streamUpdateData([{ slotIndex: parseInt(data.to) }]);
-
-				if (fromItem._stats.bonus && fromItem._stats.bonus.passive && fromItem._stats.bonus.passive.isDisabledInBackpack == true) {
-					if (data.from + 1 <= unit._stats.inventorySize && data.to + 1 > unit._stats.inventorySize){
-						unit.updateStats(fromItem.id(), true);
-					}
-					else if (data.to + 1 <= unit._stats.inventorySize && data.from + 1 > unit._stats.inventorySize) {
-						unit.updateStats(fromItem.id());
-					}
+					itemIds[data.to] = itemIds[data.from];
+					itemIds[data.from] = undefined;
 				}
 
-				itemIds[data.to] = itemIds[data.from];
-				itemIds[data.from] = undefined;
+				unit.streamUpdateData([{ itemIds: itemIds }]);
+				unit.changeItem(unit._stats.currentItemIndex);
 			}
-
-			unit.streamUpdateData([{ itemIds: itemIds }]);
-			unit.changeItem(unit._stats.currentItemIndex);
 		}
 	},
 

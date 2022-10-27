@@ -2518,6 +2518,14 @@ var ActionComponent = IgeEntity.extend({
 							unit.ai.attackUnit(targetUnit);
 						}
 						break;
+					
+					case 'aiGoIdle':
+						var unit = self._script.variable.getValue(action.unit, vars);
+						if (unit && unit.ai) {
+							unit.ai.goIdle();
+						}
+						break;
+						
 
 					case 'makePlayerTradeWithPlayer':
 						var playerA = self._script.variable.getValue(action.playerA, vars);

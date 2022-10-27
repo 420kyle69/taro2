@@ -23,7 +23,8 @@ var PhaserUnit = /** @class */ (function (_super) {
         _this.gameObject = gameObject;
         var containerSize = Math.max(_this.sprite.displayHeight, _this.sprite.displayWidth);
         gameObject.setSize(containerSize, containerSize);
-        _this.scene.renderedEntities.push(_this.gameObject);
+        // this is hbz-index logic but could be useful for other container operations
+        _this.gameObject.spriteHeight2 = _this.sprite.displayHeight / 2;
         Object.assign(_this.evtListeners, {
             follow: entity.on('follow', _this.follow, _this),
             'update-texture': entity.on('update-texture', _this.updateTexture, _this),
@@ -35,6 +36,8 @@ var PhaserUnit = /** @class */ (function (_super) {
             'update-attribute': entity.on('update-attribute', _this.updateAttribute, _this),
             'render-chat-bubble': entity.on('render-chat-bubble', _this.renderChat, _this),
         });
+        _this.scene.unitsList.push(_this);
+        _this.scene.renderedEntities.push(_this.gameObject);
         _this.zoomEvtListener = ige.client.on('scale', _this.scaleElements, _this);
         return _this;
     }
@@ -67,6 +70,16 @@ var PhaserUnit = /** @class */ (function (_super) {
             this.sprite.setDisplaySize(bounds.x, bounds.y);
         }
     };
+    PhaserUnit.prototype.depth = function (value) {
+        var scene = this.gameObject.scene;
+        this.gameObject.taroDepth = value;
+        if (scene.heightRenderer) {
+            scene.heightRenderer.adjustDepth(this.gameObject);
+        }
+        else {
+            this.gameObject.setDepth(value);
+        }
+    };
     PhaserUnit.prototype.transform = function (data) {
         _super.prototype.transform.call(this, data);
         if (this.chat) {
@@ -75,6 +88,9 @@ var PhaserUnit = /** @class */ (function (_super) {
     };
     PhaserUnit.prototype.size = function (data) {
         _super.prototype.size.call(this, data);
+        if (data.height) {
+            this.gameObject.spriteHeight2 = this.sprite.displayHeight / 2;
+        }
         var containerSize = Math.max(this.sprite.displayHeight, this.sprite.displayWidth);
         this.gameObject.setSize(containerSize, containerSize);
         if (this.label) {
@@ -226,6 +242,7 @@ var PhaserUnit = /** @class */ (function (_super) {
     PhaserUnit.prototype.destroy = function () {
         var _this = this;
         this.scene.renderedEntities = this.scene.renderedEntities.filter(function (item) { return item !== _this.gameObject; });
+        this.scene.unitsList = this.scene.unitsList.filter(function (item) { return item.entity.id() !== _this.entity.id(); });
         ige.client.off('scale', this.zoomEvtListener);
         this.zoomEvtListener = null;
         if (this.scaleTween) {
