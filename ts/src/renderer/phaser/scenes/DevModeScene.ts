@@ -226,8 +226,7 @@ class DevModeScene extends PhaserScene {
 									if (this.devPalette.cursorButton.active) {
 										this.devPalette.toggleMarker()
 									}
-									this.devPalette.modeButtons[1].highlight(true);
-									this.devPalette.modeButtons[2].highlight(false);
+									this.devPalette.highlightModeButton(2);
 								}
 							}
 						}
@@ -245,8 +244,7 @@ class DevModeScene extends PhaserScene {
 							if (this.devPalette.cursorButton.active) {
 								this.devPalette.toggleMarker()
 							}
-							this.devPalette.modeButtons[1].highlight(true);
-							this.devPalette.modeButtons[2].highlight(false);
+							this.devPalette.highlightModeButton(2);
 						}
 					}
 				}
@@ -276,8 +274,7 @@ class DevModeScene extends PhaserScene {
 									if (this.devPalette.cursorButton.active) {
 										this.devPalette.toggleMarker()
 									}
-									this.devPalette.modeButtons[1].highlight(true);
-									this.devPalette.modeButtons[2].highlight(false);
+									this.devPalette.highlightModeButton(2);
 								}
 							}
 						}
@@ -292,8 +289,7 @@ class DevModeScene extends PhaserScene {
 							if (this.devPalette.cursorButton.active) {
 								this.devPalette.toggleMarker()
 							}
-							this.devPalette.modeButtons[1].highlight(true);
-							this.devPalette.modeButtons[2].highlight(false);
+							this.devPalette.highlightModeButton(2);
 						}
 					}
 				}

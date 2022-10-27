@@ -196,8 +196,7 @@ var DevModeScene = /** @class */ (function (_super) {
                                     if (this.devPalette.cursorButton.active) {
                                         this.devPalette.toggleMarker();
                                     }
-                                    this.devPalette.modeButtons[1].highlight(true);
-                                    this.devPalette.modeButtons[2].highlight(false);
+                                    this.devPalette.highlightModeButton(2);
                                 }
                             }
                         }
@@ -216,8 +215,7 @@ var DevModeScene = /** @class */ (function (_super) {
                             if (this.devPalette.cursorButton.active) {
                                 this.devPalette.toggleMarker();
                             }
-                            this.devPalette.modeButtons[1].highlight(true);
-                            this.devPalette.modeButtons[2].highlight(false);
+                            this.devPalette.highlightModeButton(2);
                         }
                     }
                 }
@@ -248,8 +246,7 @@ var DevModeScene = /** @class */ (function (_super) {
                                     if (this.devPalette.cursorButton.active) {
                                         this.devPalette.toggleMarker();
                                     }
-                                    this.devPalette.modeButtons[1].highlight(true);
-                                    this.devPalette.modeButtons[2].highlight(false);
+                                    this.devPalette.highlightModeButton(2);
                                 }
                             }
                         }
@@ -267,8 +264,7 @@ var DevModeScene = /** @class */ (function (_super) {
                             if (this.devPalette.cursorButton.active) {
                                 this.devPalette.toggleMarker();
                             }
-                            this.devPalette.modeButtons[1].highlight(true);
-                            this.devPalette.modeButtons[2].highlight(false);
+                            this.devPalette.highlightModeButton(2);
                         }
                     }
                 }
