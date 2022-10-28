@@ -36,9 +36,8 @@ var DevModeScene = /** @class */ (function (_super) {
             _this.devPalette.show();
             _this.devPalette.layerButtonsContainer.setVisible(true);
             _this.devPalette.toolButtonsContainer.setVisible(true);
-            if (!_this.devPalette.cursorButton.active) {
-                _this.devPalette.toggleMarker();
-            }
+            _this.devPalette.highlightModeButton(0);
+            _this.activateMarker(false);
             _this.regions.forEach(function (region) {
                 region.show();
             });
@@ -182,6 +181,12 @@ var DevModeScene = /** @class */ (function (_super) {
             }
         }, this);
     };
+    DevModeScene.prototype.activateMarker = function (active) {
+        this.marker.active = active;
+        this.marker.graphics.setVisible(active);
+        if (active)
+            this.regionTool = false;
+    };
     DevModeScene.prototype.pointerInsideMap = function (pointerX, pointerY, map) {
         return (0 <= pointerX && pointerX < map.width
             && 0 <= pointerY && pointerY < map.height);
@@ -236,9 +241,7 @@ var DevModeScene = /** @class */ (function (_super) {
                                     else {
                                         this.selectedTileArea[i][j] = null;
                                     }
-                                    if (this.devPalette.cursorButton.active) {
-                                        this.devPalette.toggleMarker();
-                                    }
+                                    this.activateMarker(true);
                                     this.devPalette.highlightModeButton(2);
                                 }
                             }
@@ -255,9 +258,7 @@ var DevModeScene = /** @class */ (function (_super) {
                             else {
                                 this.selectedTile = null;
                             }
-                            if (this.devPalette.cursorButton.active) {
-                                this.devPalette.toggleMarker();
-                            }
+                            this.activateMarker(true);
                             this.devPalette.highlightModeButton(2);
                         }
                     }
@@ -286,9 +287,7 @@ var DevModeScene = /** @class */ (function (_super) {
                                     else {
                                         this.selectedTileArea[i][j] = null;
                                     }
-                                    if (this.devPalette.cursorButton.active) {
-                                        this.devPalette.toggleMarker();
-                                    }
+                                    this.activateMarker(true);
                                     this.devPalette.highlightModeButton(2);
                                 }
                             }
@@ -304,9 +303,7 @@ var DevModeScene = /** @class */ (function (_super) {
                             else {
                                 this.selectedTile = null;
                             }
-                            if (this.devPalette.cursorButton.active) {
-                                this.devPalette.toggleMarker();
-                            }
+                            this.activateMarker(true);
                             this.devPalette.highlightModeButton(2);
                         }
                     }

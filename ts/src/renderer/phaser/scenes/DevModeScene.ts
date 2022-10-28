@@ -40,9 +40,8 @@ class DevModeScene extends PhaserScene {
 			this.devPalette.show();
 			this.devPalette.layerButtonsContainer.setVisible(true);
 			this.devPalette.toolButtonsContainer.setVisible(true);
-			if (!this.devPalette.cursorButton.active) {
-				this.devPalette.toggleMarker()
-			} 
+			this.devPalette.highlightModeButton(0);
+			this.activateMarker(false);
 
 			this.regions.forEach(region => {
 				region.show();
@@ -214,6 +213,12 @@ class DevModeScene extends PhaserScene {
 		}, this);
 	}
 
+	activateMarker(active: boolean) {
+		this.marker.active = active;
+		this.marker.graphics.setVisible(active);
+		if (active) this.regionTool = false;
+	}
+
 	pointerInsideMap(pointerX: number, pointerY: number, map: Phaser.Tilemaps.Tilemap): boolean {
 		return (0 <= pointerX && pointerX < map.width
 			&& 0 <= pointerY && pointerY < map.height);
@@ -274,9 +279,7 @@ class DevModeScene extends PhaserScene {
 										this.selectedTileArea[i][j] = null;
 									}
 
-									if (this.devPalette.cursorButton.active) {
-										this.devPalette.toggleMarker()
-									}
+									this.activateMarker(true);
 									this.devPalette.highlightModeButton(2);
 								}
 							}
@@ -291,10 +294,7 @@ class DevModeScene extends PhaserScene {
 								this.selectedTile = null;
 							}
 							
-
-							if (this.devPalette.cursorButton.active) {
-								this.devPalette.toggleMarker()
-							}
+							this.activateMarker(true);
 							this.devPalette.highlightModeButton(2);
 						}
 					}
@@ -322,9 +322,8 @@ class DevModeScene extends PhaserScene {
 									} else {
 										this.selectedTileArea[i][j] = null;
 									}
-									if (this.devPalette.cursorButton.active) {
-										this.devPalette.toggleMarker()
-									}
+									
+									this.activateMarker(true);
 									this.devPalette.highlightModeButton(2);
 								}
 							}
@@ -337,9 +336,8 @@ class DevModeScene extends PhaserScene {
 							} else {
 								this.selectedTile = null;
 							}
-							if (this.devPalette.cursorButton.active) {
-								this.devPalette.toggleMarker()
-							}
+
+							this.activateMarker(true);
 							this.devPalette.highlightModeButton(2);
 						}
 					}
