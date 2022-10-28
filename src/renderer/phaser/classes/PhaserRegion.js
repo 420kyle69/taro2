@@ -25,6 +25,14 @@ var PhaserRegion = /** @class */ (function (_super) {
         // we don't get depth/layer info from taro,
         // so it can go in 'debris' layer for now
         scene.entityLayers[EntityLayer.DEBRIS].add(_this.gameObject);
+        var stats = _this.entity._stats.default;
+        if (!stats.inside) {
+            _this.devModeOnly = true;
+        }
+        console.log('creating region', entity);
+        var devModeScene = ige.renderer.scene.getScene('DevMode');
+        devModeScene.regions.push(_this);
+        _this.hide();
         _this.transform();
         return _this;
     }
@@ -33,10 +41,19 @@ var PhaserRegion = /** @class */ (function (_super) {
         var stats = this.entity._stats.default;
         graphics.setPosition(stats.x, stats.y);
         graphics.clear();
-        graphics.fillStyle(Number("0x".concat(stats.inside.substring(1))), 
-        // between 0 and 1 or we default
-        (stats.alpha && stats.alpha >= 0 && stats.alpha <= 1) ? stats.alpha : 0.4);
-        graphics.fillRect(0, 0, stats.width, stats.height);
+        if (this.devModeOnly) {
+            graphics.lineStyle(2, 0x11fa05, 
+            // between 0 and 1 or we default
+            (stats.alpha && stats.alpha >= 0 && stats.alpha <= 1) ? stats.alpha : 1);
+            graphics.strokeRect(0, 0, stats.width, stats.height);
+        }
+        else {
+            graphics.fillStyle(Number("0x".concat(stats.inside.substring(1))), 
+            // between 0 and 1 or we default
+            (stats.alpha && stats.alpha >= 0 && stats.alpha <= 1) ? stats.alpha : 0.4);
+            graphics.fillRect(0, 0, stats.width, stats.height);
+        }
+        ;
     };
     PhaserRegion.prototype.destroy = function () {
         var _this = this;

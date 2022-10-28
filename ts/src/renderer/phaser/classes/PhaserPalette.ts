@@ -147,7 +147,7 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 		this.modeButtons = [];
 		this.modeButtons.push (
 			new PhaserPaletteButton (this, '', 'cursor', 0, 0, 58, toolButtonsContainer, this.toggleMarker.bind(this)),
-			new PhaserPaletteButton (this, '[ ]', null, 62, 0, 58, toolButtonsContainer, this.drawRegion.bind(this)),
+			new PhaserPaletteButton (this, '', 'region', 62, 0, 58, toolButtonsContainer, this.drawRegion.bind(this)),
 			new PhaserPaletteButton (this, '', 'stamp', 0, 34, 58, toolButtonsContainer, this.brush.bind(this)),
 			new PhaserPaletteButton (this, '', 'eraser', 62, 34, 58, toolButtonsContainer, this.emptyTile.bind(this))
 		)
@@ -217,7 +217,6 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 	}
 
 	highlightModeButton(n: number) {
-		console.log('highlight', n)
 		this.modeButtons.forEach((button, index) => {
 			if (index === n) button.highlight(true);
 			else button.highlight(false);

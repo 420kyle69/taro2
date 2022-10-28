@@ -13,20 +13,22 @@ class DevModeScene extends PhaserScene {
 	marker: TileMarker;
 	paletteMarker: TileMarker;
 
+	regions: PhaserRegion[];
+
 	defaultZoom: number;
 
 	constructor() {
-		super({ key: 'Palette' });
+		super({ key: 'DevMode' });
 	}
 
 	init (): void {
 		this.input.setTopOnly(true);
 		this.gameScene = ige.renderer.scene.getScene('Game');
+		this.regions = [];
 		//const map = this.devPalette.map;
 		const map = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
 		this.selectedTile = null;
 		this.selectedTileArea = [[null, null, null, null]];
-		console.log('tile', this.selectedTile, 'area', this.selectedTileArea);
 
 		ige.client.on('enterDevMode', () => {
 			this.defaultZoom = (this.gameScene.zoomSize / 2.15)
@@ -40,6 +42,10 @@ class DevModeScene extends PhaserScene {
 			if (!this.devPalette.cursorButton.active) {
 				this.devPalette.toggleMarker()
 			} 
+
+			this.regions.forEach(region => {
+				region.show();
+			});
 		});
 
 		ige.client.on('leaveDevMode', () => {
@@ -47,6 +53,12 @@ class DevModeScene extends PhaserScene {
 			this.devPalette.layerButtonsContainer.setVisible(false);
 			this.devPalette.toolButtonsContainer.setVisible(false);
 			ige.client.emit('zoom', this.defaultZoom);
+
+			this.regions.forEach(region => {
+				if (region.devModeOnly) {
+					region.hide();
+				}
+			});
 		});
 
 		const tabKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, true);
@@ -126,6 +138,7 @@ class DevModeScene extends PhaserScene {
 		});*/
 
 		this.load.image('cursor', 'https://cache.modd.io/asset/spriteImage/1666276041347_cursor.png');
+		this.load.image('region', 'https://cache.modd.io/asset/spriteImage/1666882309997_region.png');
 		this.load.image('stamp', 'https://cache.modd.io/asset/spriteImage/1666724706664_stamp.png');
 		this.load.image('eraser', 'https://cache.modd.io/asset/spriteImage/1666276083246_erasergap.png');
 

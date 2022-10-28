@@ -116,7 +116,7 @@ var PhaserPalette = /** @class */ (function (_super) {
         toolButtonsContainer.width = 120;
         toolButtonsContainer.height = 98;
         _this.modeButtons = [];
-        _this.modeButtons.push(new PhaserPaletteButton(_this, '', 'cursor', 0, 0, 58, toolButtonsContainer, _this.toggleMarker.bind(_this)), new PhaserPaletteButton(_this, '[ ]', null, 62, 0, 58, toolButtonsContainer, _this.drawRegion.bind(_this)), new PhaserPaletteButton(_this, '', 'stamp', 0, 34, 58, toolButtonsContainer, _this.brush.bind(_this)), new PhaserPaletteButton(_this, '', 'eraser', 62, 34, 58, toolButtonsContainer, _this.emptyTile.bind(_this)));
+        _this.modeButtons.push(new PhaserPaletteButton(_this, '', 'cursor', 0, 0, 58, toolButtonsContainer, _this.toggleMarker.bind(_this)), new PhaserPaletteButton(_this, '', 'region', 62, 0, 58, toolButtonsContainer, _this.drawRegion.bind(_this)), new PhaserPaletteButton(_this, '', 'stamp', 0, 34, 58, toolButtonsContainer, _this.brush.bind(_this)), new PhaserPaletteButton(_this, '', 'eraser', 62, 34, 58, toolButtonsContainer, _this.emptyTile.bind(_this)));
         _this.cursorButton = _this.modeButtons[0];
         _this.highlightModeButton(0);
         _this.brushButtons = [];
@@ -173,7 +173,6 @@ var PhaserPalette = /** @class */ (function (_super) {
         this.highlightModeButton(3);
     };
     PhaserPalette.prototype.highlightModeButton = function (n) {
-        console.log('highlight', n);
         this.modeButtons.forEach(function (button, index) {
             if (index === n)
                 button.highlight(true);

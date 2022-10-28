@@ -30,11 +30,11 @@ class PhaserEntity {
 		y: number
 	}): void { }
 
-	protected hide (): void {
+	public hide (): void {
 		this.gameObject.hidden = true;
 	}
 
-	protected show (): void {
+	public show (): void {
 		this.gameObject.hidden = false;
 	}
 

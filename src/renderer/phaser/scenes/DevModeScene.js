@@ -16,17 +16,17 @@ var __extends = (this && this.__extends) || (function () {
 var DevModeScene = /** @class */ (function (_super) {
     __extends(DevModeScene, _super);
     function DevModeScene() {
-        return _super.call(this, { key: 'Palette' }) || this;
+        return _super.call(this, { key: 'DevMode' }) || this;
     }
     DevModeScene.prototype.init = function () {
         var _this = this;
         this.input.setTopOnly(true);
         this.gameScene = ige.renderer.scene.getScene('Game');
+        this.regions = [];
         //const map = this.devPalette.map;
         var map = this.gameScene.tilemap;
         this.selectedTile = null;
         this.selectedTileArea = [[null, null, null, null]];
-        console.log('tile', this.selectedTile, 'area', this.selectedTileArea);
         ige.client.on('enterDevMode', function () {
             _this.defaultZoom = (_this.gameScene.zoomSize / 2.15);
             if (!_this.devPalette) {
@@ -39,12 +39,20 @@ var DevModeScene = /** @class */ (function (_super) {
             if (!_this.devPalette.cursorButton.active) {
                 _this.devPalette.toggleMarker();
             }
+            _this.regions.forEach(function (region) {
+                region.show();
+            });
         });
         ige.client.on('leaveDevMode', function () {
             _this.devPalette.hide();
             _this.devPalette.layerButtonsContainer.setVisible(false);
             _this.devPalette.toolButtonsContainer.setVisible(false);
             ige.client.emit('zoom', _this.defaultZoom);
+            _this.regions.forEach(function (region) {
+                if (region.devModeOnly) {
+                    region.hide();
+                }
+            });
         });
         var tabKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, true);
         tabKey.on('down', function () {
@@ -114,6 +122,7 @@ var DevModeScene = /** @class */ (function (_super) {
             this.load.image(key, this.patchAssetUrl(tileset.image));
         });*/
         this.load.image('cursor', 'https://cache.modd.io/asset/spriteImage/1666276041347_cursor.png');
+        this.load.image('region', 'https://cache.modd.io/asset/spriteImage/1666882309997_region.png');
         this.load.image('stamp', 'https://cache.modd.io/asset/spriteImage/1666724706664_stamp.png');
         this.load.image('eraser', 'https://cache.modd.io/asset/spriteImage/1666276083246_erasergap.png');
         this.load.scenePlugin('rexuiplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js', 

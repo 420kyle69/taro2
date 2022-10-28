@@ -149,7 +149,7 @@ var GameScene = /** @class */ (function (_super) {
     };
     GameScene.prototype.create = function () {
         var _this = this;
-        this.scene.launch('Palette');
+        this.scene.launch('DevMode');
         ige.client.rendererLoaded.resolve();
         var map = this.tilemap = this.make.tilemap({ key: 'map' });
         var data = ige.game.data;

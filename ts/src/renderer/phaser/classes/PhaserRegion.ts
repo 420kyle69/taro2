@@ -1,6 +1,7 @@
 class PhaserRegion extends PhaserEntity {
 
-	protected gameObject: Phaser.GameObjects.Graphics & IRenderProps;
+	public gameObject: Phaser.GameObjects.Graphics & IRenderProps;
+	public devModeOnly: boolean;
 
 	constructor (
 		private scene: GameScene,
@@ -17,6 +18,19 @@ class PhaserRegion extends PhaserEntity {
 		// so it can go in 'debris' layer for now
 		scene.entityLayers[EntityLayer.DEBRIS].add(this.gameObject);
 
+		const stats = this.entity._stats.default;
+
+		if (!stats.inside) {
+			this.devModeOnly = true;
+		}
+
+		console.log('creating region', entity)
+
+		const devModeScene = ige.renderer.scene.getScene('DevMode') as DevModeScene;
+		devModeScene.regions.push(this);
+
+		this.hide();
+
 		this.transform();
 	}
 
@@ -27,17 +41,32 @@ class PhaserRegion extends PhaserEntity {
 		graphics.setPosition(stats.x, stats.y);
 
 		graphics.clear();
-		graphics.fillStyle(
-			Number(`0x${stats.inside.substring(1)}`),
-			// between 0 and 1 or we default
-			(stats.alpha && stats.alpha >= 0 && stats.alpha <= 1) ? stats.alpha : 0.4
-		);
-		graphics.fillRect(
+		
+		if (this.devModeOnly) {
+			graphics.lineStyle(
+				2,
+				0x11fa05,
+				// between 0 and 1 or we default
+				(stats.alpha && stats.alpha >= 0 && stats.alpha <= 1) ? stats.alpha : 1
+			);
+			graphics.strokeRect(
+				0,
+				0,
+				stats.width,
+				stats.height
+			);
+		} else {
+			graphics.fillStyle(
+				Number(`0x${stats.inside.substring(1)}`),
+				// between 0 and 1 or we default
+				(stats.alpha && stats.alpha >= 0 && stats.alpha <= 1) ? stats.alpha : 0.4
+			);
+			graphics.fillRect(
 			0,
 			0,
 			stats.width,
 			stats.height
-		);
+		)};
 	}
 
 	protected destroy (): void {
