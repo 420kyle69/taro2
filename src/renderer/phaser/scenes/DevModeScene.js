@@ -147,6 +147,40 @@ var DevModeScene = /** @class */ (function (_super) {
         gameMap.currentLayerIndex = 0;
         this.selectedTile = gameMap.getTileAt(2, 3);
         this.marker = new TileMarker(this.gameScene, gameMap, 2);
+        this.gameScene.input.on('pointerdown', function (pointer) {
+            if (this.regionTool) {
+                var worldPoint = this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
+                this.regionDrawStart = {
+                    x: worldPoint.x,
+                    y: worldPoint.y,
+                };
+            }
+        }, this);
+        var graphics = this.gameScene.add.graphics();
+        var width;
+        var height;
+        this.gameScene.input.on('pointermove', function (pointer) {
+            if (!pointer.isDown)
+                return;
+            else if (this.regionTool) {
+                var worldPoint = this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
+                width = worldPoint.x - this.regionDrawStart.x;
+                height = worldPoint.y - this.regionDrawStart.y;
+                graphics.clear();
+                graphics.lineStyle(2, 0x036ffc, 1);
+                graphics.strokeRect(this.regionDrawStart.x, this.regionDrawStart.y, width, height);
+            }
+        }, this);
+        this.gameScene.input.on('pointerup', function (pointer) {
+            var worldPoint = this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
+            if (this.regionTool && this.regionDrawStart.x !== worldPoint.x && this.regionDrawStart.y !== worldPoint.y) {
+                graphics.clear();
+                this.regionTool = false;
+                this.devPalette.highlightModeButton(0);
+                new PhaserRegion(this.gameScene, { _stats: { default: { x: this.regionDrawStart.x, y: this.regionDrawStart.y, width: width, height: height } }, on: function (eventName, call, context, oneShot, sendEventName) { } });
+                this.regionDrawStart = {};
+            }
+        }, this);
     };
     DevModeScene.prototype.pointerInsideMap = function (pointerX, pointerY, map) {
         return (0 <= pointerX && pointerX < map.width

@@ -29,7 +29,7 @@ class PhaserRegion extends PhaserEntity {
 		const devModeScene = ige.renderer.scene.getScene('DevMode') as DevModeScene;
 		devModeScene.regions.push(this);
 
-		this.hide();
+		if (this.devModeOnly && !ige.developerMode.active) this.hide();
 
 		this.transform();
 	}

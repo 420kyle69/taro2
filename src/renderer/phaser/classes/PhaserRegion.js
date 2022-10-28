@@ -32,7 +32,8 @@ var PhaserRegion = /** @class */ (function (_super) {
         console.log('creating region', entity);
         var devModeScene = ige.renderer.scene.getScene('DevMode');
         devModeScene.regions.push(_this);
-        _this.hide();
+        if (_this.devModeOnly && !ige.developerMode.active)
+            _this.hide();
         _this.transform();
         return _this;
     }

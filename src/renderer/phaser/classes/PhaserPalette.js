@@ -161,6 +161,7 @@ var PhaserPalette = /** @class */ (function (_super) {
     PhaserPalette.prototype.drawRegion = function () {
         console.log('draw region');
         this.highlightModeButton(1);
+        this.scene.regionTool = true;
     };
     PhaserPalette.prototype.emptyTile = function () {
         var copy = __assign({}, this.scene.selectedTile);

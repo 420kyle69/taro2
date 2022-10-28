@@ -14,9 +14,10 @@ class DevModeScene extends PhaserScene {
 	paletteMarker: TileMarker;
 
 	regions: PhaserRegion[];
+	regionTool: boolean;
 
 	defaultZoom: number;
-
+	
 	constructor() {
 		super({ key: 'DevMode' });
 	}
@@ -174,6 +175,43 @@ class DevModeScene extends PhaserScene {
 		gameMap.currentLayerIndex = 0;
 		this.selectedTile = gameMap.getTileAt(2, 3);
 		this.marker = new TileMarker (this.gameScene, gameMap, 2);
+
+		this.gameScene.input.on('pointerdown', function(pointer) {
+			if (this.regionTool) {
+				const worldPoint = this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
+				this.regionDrawStart = {
+					x: worldPoint.x,
+					y: worldPoint.y,
+				}
+			}
+		}, this);
+
+		const graphics = this.gameScene.add.graphics();
+		let width;
+		let height;
+
+		this.gameScene.input.on('pointermove', function (pointer) {
+			if (!pointer.isDown) return;
+			else if (this.regionTool) {
+				const worldPoint = this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
+				width = worldPoint.x - this.regionDrawStart.x;
+				height = worldPoint.y - this.regionDrawStart.y;
+				graphics.clear();
+				graphics.lineStyle(	2, 0x036ffc, 1);
+				graphics.strokeRect( this.regionDrawStart.x, this.regionDrawStart.y , width, height);
+				}
+			}, this);
+
+		this.gameScene.input.on('pointerup', function(pointer){
+			const worldPoint = this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
+			if (this.regionTool && this.regionDrawStart.x !== worldPoint.x && this.regionDrawStart.y !== worldPoint.y) {
+				graphics.clear();
+				this.regionTool = false;
+				this.devPalette.highlightModeButton(0);
+				new PhaserRegion(this.gameScene, {_stats: {default: {x: this.regionDrawStart.x, y: this.regionDrawStart.y, width: width, height: height}}, on: (eventName, call, context, oneShot, sendEventName) => {} } as Region)
+				this.regionDrawStart = {};
+			}
+		}, this);
 	}
 
 	pointerInsideMap(pointerX: number, pointerY: number, map: Phaser.Tilemaps.Tilemap): boolean {

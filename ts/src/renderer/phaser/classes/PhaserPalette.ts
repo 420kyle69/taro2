@@ -202,6 +202,7 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 	drawRegion() {
 		console.log('draw region');
 		this.highlightModeButton(1);
+		this.scene.regionTool = true;
 	}
 
 	emptyTile() {
