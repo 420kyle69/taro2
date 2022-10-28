@@ -176,6 +176,8 @@ var MenuUiComponent = IgeEntity.extend({
 						}
 					}
 
+					$('#kick-player').toggle();
+
 					$('#toggle-dev-panels').text(isEditorVisible ? 'Exit Dev Mode' : 'Enter Dev Mode');
 				} else {
 					$('#dev-console').toggle();
