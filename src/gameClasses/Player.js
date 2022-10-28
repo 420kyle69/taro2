@@ -664,7 +664,7 @@ var Player = IgeEntity.extend({
 			}
 
 			if (typeof (userId) !== 'undefined' && typeof (sessionId) !== 'undefined') {
-				if (ige.game.data.isGameDeveloper) {
+				if (ige.game.data.isGameDeveloper && ['1', '4', '5'].includes(ige.game.data.defaultData.tier)) {
 					// dont show dev menu by default
 					// if (!ige.isMobile) {
 					// 	$("#dev-console").show() // if user has access of this game, show dev console
