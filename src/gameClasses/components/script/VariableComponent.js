@@ -1067,7 +1067,7 @@ var VariableComponent = IgeEntity.extend({
 					break;
 
 				case 'currentTimeStamp':
-					returnValue = Date.now();
+					returnValue = Date.now() / 1000;
 					break;
 
 				case 'getRandomPositionInRegion':
