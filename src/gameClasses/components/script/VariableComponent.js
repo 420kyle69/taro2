@@ -1536,8 +1536,8 @@ var VariableComponent = IgeEntity.extend({
 					break;
 
 				case 'getPlayerData':
-					var player = ige.variable?.getValue(text.player, vars);
-					var data = player?.getPersistentData('player');
+					var player = ige.variable.getValue(text.player, vars);
+					var data = player.getPersistentData('player');
 					if (data) {
 						returnValue = JSON.stringify(data)
 					}

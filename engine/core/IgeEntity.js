@@ -3134,12 +3134,12 @@ var IgeEntity = IgeObject.extend({
 			}
 		} else if (ige.isClient) {
 
-			if (ige.physics) {
+			if (ige.physics && this.prevPhysicsFrame && this.nextPhysicsFrame) {
 				let prevFrameTime = this.prevPhysicsFrame[0]
 				let nextFrameTime = this.nextPhysicsFrame[0]
 				this.prevPhysicsFrame = [prevFrameTime, [x, y, rotate]];
 				this.nextPhysicsFrame = [nextFrameTime, [x, y, rotate]];
-			}			
+			}
 
 			// this.lastServerStreamedPosition = undefined;
 			if (this.body) {
