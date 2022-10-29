@@ -151,7 +151,7 @@ const Client = IgeEventingClass.extend({
 		promise.then((game) => {
 			ige.game.data = game.data;
 			ige.addComponent(IgeInputComponent);
-			
+
 			ige.entitiesToRender = new EntitiesToRender();
 			ige.renderer = new PhaserRenderer();
 			ige.developerMode = new DeveloperMode();
@@ -242,15 +242,9 @@ const Client = IgeEventingClass.extend({
 
 	loadPhysics: function() {
 		// this will be empty string in data if no client-side physics
-		const clientPhysicsEngine = ige.game.data.defaultData.clientPhysicsEngine;
-		const serverPhysicsEngine = ige.game.data.defaultData.physicsEngine;
-
-		if (clientPhysicsEngine) {
-
-			ige.addComponent(PhysicsComponent)
+		ige.addComponent(PhysicsComponent)
 				.physics.sleep(true);
-		}
-
+		
 		this.physicsConfigLoaded.resolve();
 	},
 
@@ -284,11 +278,9 @@ const Client = IgeEventingClass.extend({
 
 			this.loadMap();
 
-			if (ige.physics) {
-				// old comment => 'always enable CSP'
-				this.loadCSP();
-			}
-
+			// old comment => 'always enable CSP'
+			this.loadCSP();
+			
 			// added important configuration details for sandbox
 			if (mode == 'sandbox') {
 				$.when(this.mapLoaded, this.rendererLoaded)
@@ -339,7 +331,7 @@ const Client = IgeEventingClass.extend({
 			const tileWidth = ige.scaleMapDetails.tileWidth;
 			const tileHeight = ige.scaleMapDetails.tileHeight;
 			const params = this.getUrlVars();
-			
+
 			ige.client.vp1.camera.translateTo(
 				(ige.map.data.width * tileWidth) / 2,
 				(ige.map.data.height * tileHeight) /2,

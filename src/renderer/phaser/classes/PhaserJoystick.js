@@ -39,6 +39,16 @@ var PhaserJoystick = /** @class */ (function () {
             }
         });
         scene.joysticks.push(this);
+        if (scene.joysticks.length > 1) {
+            if (scene.joysticks[1].x > scene.joysticks[0].x) {
+                scene.joysticks[0].side = 'left';
+                scene.joysticks[1].side = 'right';
+            }
+            else {
+                scene.joysticks[0].side = 'right';
+                scene.joysticks[1].side = 'left';
+            }
+        }
     }
     PhaserJoystick.prototype.show = function () {
         this.virtualJoystick.setVisible(true);
