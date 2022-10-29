@@ -332,10 +332,7 @@ var Item = IgeEntityPhysics.extend({
 								y: (owner._translate.y + self.anchoredOffset.y) + (self._stats.bulletStartPosition.x * Math.sin(offsetAngle)) - (bulletY * Math.cos(offsetAngle))
 							};
 
-							if (
-								this._stats.isGun &&
-								(ige.isServer || (ige.isClient && ige.physics)) // render projectile on clientside if physics is enabled
-							) {
+							if (this._stats.isGun) {
 								var defaultData = {
 									rotate: rotate,
 									translate: bulletStartPosition
@@ -351,6 +348,7 @@ var Item = IgeEntityPhysics.extend({
 									};
 
 									// console.log(self._stats.currentBody.type, "unit: ", angleToTarget, "item's rotate.z: ", self._rotate.z, "facing angle", itemrotate)
+									// we don't create a Projectile entity for raycasts
 									if (this._stats.bulletType !== 'raycast') {
 										var projectileData = Object.assign(
 											JSON.parse(JSON.stringify(self.projectileData)),
@@ -369,8 +367,7 @@ var Item = IgeEntityPhysics.extend({
 												}
 											});
 
-									 // we don't create a Projectile entity for raycasts
-										var projectile = new Projectile(projectileData);
+									 	var projectile = new Projectile(projectileData);
 										projectile.script.trigger('entityCreated');
 										ige.game.lastCreatedProjectileId = projectile.id();
 									}

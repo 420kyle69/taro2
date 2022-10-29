@@ -22,12 +22,10 @@ var ActionComponent = IgeEntity.extend({
 			// the server side is still running (e.g. creating entities), but it won't be streamed to the client
 			if (ige.isServer) {
 
-				if (ige.game.cspEnabled) {
-					if(action.runOnClient) {
-						ige.network.pause();
-					}
+				if(action.runOnClient) {
+					ige.network.pause();
 				}
-
+				
 				var now = Date.now();
 				var lastActionRunTime = now - ige.lastActionRanAt;
 				var engineTickDelta = now - ige.now;

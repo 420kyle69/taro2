@@ -5149,9 +5149,9 @@ var IgeEntity = IgeObject.extend({
 
 		// interpolate using client side's physics frames. (this doesn't use snapshot streamed from the server)
 		// this is necessary, because physics don't run at 60 fps on clientside
-		if (ige.physics && ige.game.cspEnabled && (
+		if (ige.physics && (
 				// 1. we're using cspMovement (experimental) for my own unit OR
-				(ige.client.selectedUnit == this && !this._stats.aiEnabled) ||
+				(ige.game.cspEnabled && ige.client.selectedUnit == this && !this._stats.aiEnabled) ||
 				// 2. item-fired projectiles
 				(this._category == 'projectile' && this._stats.sourceItemId != undefined && !this._streamMode)
 			)

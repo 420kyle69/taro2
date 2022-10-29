@@ -29,17 +29,12 @@ var PhysicsComponent = IgeEventingClass.extend({
 
 		this.walls = [];
 
-		if (ige.isServer) {
-			this.engine = dists.defaultEngine;
+		this.engine = dists.defaultEngine;
 
-			if (ige.game && ige.game.data && ige.game.data.defaultData) {
-				this.engine = ige.game.data.defaultData.physicsEngine;
-			}
-		} else if (ige.isClient) {
-			if (ige.game && ige.game.data && ige.game.data.defaultData) {
-				this.engine = ige.game.data.defaultData.clientPhysicsEngine;
-			}
+		if (ige.game && ige.game.data && ige.game.data.defaultData) {
+			this.engine = ige.game.data.defaultData.physicsEngine;
 		}
+		
 		this.engine = this.engine.toUpperCase();
 
 		// this.engine = 'crash';
@@ -643,17 +638,16 @@ var PhysicsComponent = IgeEventingClass.extend({
 							} else if (ige.isClient) {
 								
 								// ignore server-stream for the position updates for my unit and for projectiles fired from items
-								if (ige.physics && ige.game.cspEnabled && 
-										(	
-											( // move my own unit immediately while ignoring the server stream
-												!entity._stats.aiEnabled && ige.client.selectedUnit == entity && !entity._stats.aiEnabled &&
-												(entity.nextPhysicsFrame == undefined || ige._currentTime > entity.nextPhysicsFrame[0])
-											) ||
-											( // fired-from-item projectiles
-												entity._category == 'projectile' && entity._stats.sourceItemId != undefined && !entity._streamMode
-											)
-											
+								if (ige.physics && (	
+										( // move my own unit immediately while ignoring the server stream
+											ige.game.cspEnabled && 
+											!entity._stats.aiEnabled && ige.client.selectedUnit == entity && !entity._stats.aiEnabled &&
+											(entity.nextPhysicsFrame == undefined || ige._currentTime > entity.nextPhysicsFrame[0])
+										) ||
+										( // fired-from-item projectiles
+											entity._category == 'projectile' && entity._stats.sourceItemId != undefined && !entity._streamMode
 										)
+									)
 								) {
 									entity.prevPhysicsFrame = entity.nextPhysicsFrame;
 									entity.nextPhysicsFrame = [nextFrameTime, [x, y, angle]];
