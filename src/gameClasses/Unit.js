@@ -51,20 +51,22 @@ var Unit = IgeEntityPhysics.extend({
 
 		Unit.prototype.log(`initializing new unit ${this.id()}`);
 
+		// initialize body & texture of the unit
+		self.changeUnitType(data.type, data.defaultData);
 
 		if (ige.isClient) {
 			this.addToRenderer(defaultAnimation && (defaultAnimation.frames[0] - 1));
 			ige.client.emit('create-unit', this);
 			this.transformTexture(this._translate.x, this._translate.y, 0);
-		}
-		// initialize body & texture of the unit
-		self.changeUnitType(data.type, data.defaultData);
 
-		if (this._stats.states) {
-			var currentState = this._stats.states[this._stats.stateId];
-			var defaultAnimation = this._stats.animations[currentState.animation];
+			if (this._stats.states) {
+				var currentState = this._stats.states[this._stats.stateId];
+				if (currentState) {
+					var defaultAnimation = this._stats.animations[currentState.animation];	
+				}
+			}
 		}
-
+		
 		// if unit's scale as already been changed by some script then use that scale
 		if (self._stats.scale) {
 
