@@ -151,17 +151,9 @@ var ActionComponent = IgeEntity.extend({
 					}
 
 					case 'runScript':
-						let previousScriptId = self._script.currentScriptId;
-						let scriptComponent = undefined;
-
-						if (action.isEntityScript) {
-							scriptComponent = self._script; // entity script
-						} else {
-							scriptComponent = ige.script; // global script
-						}
-
-						scriptComponent.runScript(action.scriptName, vars);
-						scriptComponent.currentScriptId = previousScriptId;
+						let previousScriptId = ige.currentScriptId;
+						self._script.runScript(action.scriptName, vars);
+						ige.currentScriptId = previousScriptId;
 						break;
 
 					case 'condition':
@@ -274,9 +266,11 @@ var ActionComponent = IgeEntity.extend({
 						/* Player */
 
 					case 'kickPlayer':
+						var script = self._script.scripts[ige.currentScriptId];
+						console.log(script.name, action)
 						var player = self._script.variable.getValue(action.entity, vars);
 						if (player && player._category == 'player') {
-							player.streamUpdateData([{ playerJoined: false }]);
+							ige.game.kickPlayer(player._stats.clientId);
 						}
 
 						break;
