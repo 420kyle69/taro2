@@ -48,8 +48,8 @@ var ScriptComponent = IgeEntity.extend({
 	runScript: function (scriptId, params = {}) {
 		var self = this;
 
+		self.currentScriptId = scriptId;
 		if (this.scripts && this.scripts[scriptId]) {
-			ige.currentScriptId = scriptId;		
 			// var actions = JSON.parse(JSON.stringify(this.scripts[scriptId].actions));
 			var actions = self.getScriptActions(scriptId);
 			if (actions) {
@@ -81,6 +81,7 @@ var ScriptComponent = IgeEntity.extend({
 	
 	/* trigger and run all of the corresponding script(s) */
 	trigger: function (triggerName, triggeredBy) {
+		
 		
 		if (ige.isServer) {
 			var now = Date.now();		
@@ -168,8 +169,8 @@ var ScriptComponent = IgeEntity.extend({
 		}
 
 		var scriptName = '[scriptName undefined]';
-		if (this.scripts && this.scripts[ige.currentScriptId]) {
-			scriptName = this.scripts[ige.currentScriptId].name;
+		if (this.scripts && this.scripts[this.currentScriptId]) {
+			scriptName = this.scripts[this.currentScriptId].name;
 		}
 
 		var record = `script '${scriptName}' in Action '${action}'`;
@@ -178,7 +179,7 @@ var ScriptComponent = IgeEntity.extend({
 	
 	errorLog: function (message) {
 		if (this.scripts) {
-			var script = this.scripts[ige.currentScriptId];
+			var script = this.scripts[this.currentScriptId];
 			var log = `Script error '${(script) ? script.name : ''}' in Action '${this.currentActionName}' : ${message}`;
 			this.errorLogs[this.currentActionName] = log;
 			ige.devLog('script errorLog', log, message);

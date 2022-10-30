@@ -122,9 +122,12 @@ var ActionComponent = IgeEntity.extend({
 						// const use for creating new instance of variable every time.
 						const setTimeOutActions = JSON.parse(JSON.stringify(action.actions));
 						// const setTimeoutVars = _.cloneDeep(vars);
-						setTimeout(function (actions) {
+						setTimeout(function (actions, currentScriptId) {
+							let previousScriptId = currentScriptId;
+							self._script.currentScriptId = currentScriptId;
 							self.run(actions, vars);
-						}, action.duration, setTimeOutActions);
+							self._script.currentScriptId = previousScriptId;
+						}, action.duration, setTimeOutActions, self._script.currentScriptId);
 						break;
 
 					case 'repeat':
@@ -151,9 +154,9 @@ var ActionComponent = IgeEntity.extend({
 					}
 
 					case 'runScript':
-						let previousScriptId = ige.currentScriptId;
+						let previousScriptId = self._script.currentScriptId;
 						self._script.runScript(action.scriptName, vars);
-						ige.currentScriptId = previousScriptId;
+						self._script.currentScriptId = previousScriptId;
 						break;
 
 					case 'condition':
@@ -266,8 +269,6 @@ var ActionComponent = IgeEntity.extend({
 						/* Player */
 
 					case 'kickPlayer':
-						var script = self._script.scripts[ige.currentScriptId];
-						console.log(script.name, action)
 						var player = self._script.variable.getValue(action.entity, vars);
 						if (player && player._category == 'player') {
 							ige.game.kickPlayer(player._stats.clientId);
