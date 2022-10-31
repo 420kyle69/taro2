@@ -176,7 +176,7 @@ var DevModeScene = /** @class */ (function (_super) {
                 graphics.clear();
                 this.regionTool = false;
                 this.devPalette.highlightModeButton(0);
-                //TODO: add modal whn user can add name of region/edit stats, new PhaserRegion - is temporary should be created after server response
+                //TODO: add modal where user can add name of region/edit stats, new PhaserRegion - is temporary should be created after server response
                 new PhaserRegion(this.gameScene, { _stats: { default: { x: this.regionDrawStart.x, y: this.regionDrawStart.y, width: width, height: height } }, on: function (eventName, call, context, oneShot, sendEventName) { } });
                 this.regionDrawStart = {};
             }

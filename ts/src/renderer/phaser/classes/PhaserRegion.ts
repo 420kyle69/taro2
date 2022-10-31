@@ -20,7 +20,7 @@ class PhaserRegion extends PhaserEntity {
 		this.graphics = graphics as Phaser.GameObjects.Graphics & IRenderProps;
 		gameObject.add(graphics);
 		gameObject.setSize(stats.width, stats.height);
-		gameObject.setPosition(stats.x, stats.y);
+		gameObject.setPosition(stats.x + stats.width/2, stats.y + stats.height/2);
 
 		this.gameObject = gameObject as Phaser.GameObjects.Container & IRenderProps;
 		scene.renderedEntities.push(this.gameObject);
@@ -74,7 +74,8 @@ class PhaserRegion extends PhaserEntity {
 		label.setStroke('#000', strokeThickness);
 		label.setText(this.name || '');
 
-		label.setPosition(label.width/1.5, label.height);
+		const stats = this.entity._stats.default;
+		label.setPosition(label.width/1.5 - stats.width/2, label.height - stats.height/2);
 		//this.updateLabelOffset();
 	}
 
@@ -82,7 +83,8 @@ class PhaserRegion extends PhaserEntity {
 		const graphics = this.graphics;
 		const stats = this.entity._stats.default;
 
-		this.gameObject.setPosition(stats.x, stats.y);
+		this.gameObject.setPosition(stats.x + stats.width/2, stats.y + stats.height/2);
+		graphics.setPosition(-stats.width/2, -stats.height/2);
 
 		graphics.clear();
 		

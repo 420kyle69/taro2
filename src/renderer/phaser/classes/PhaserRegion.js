@@ -24,7 +24,7 @@ var PhaserRegion = /** @class */ (function (_super) {
         _this.graphics = graphics;
         gameObject.add(graphics);
         gameObject.setSize(stats.width, stats.height);
-        gameObject.setPosition(stats.x, stats.y);
+        gameObject.setPosition(stats.x + stats.width / 2, stats.y + stats.height / 2);
         _this.gameObject = gameObject;
         scene.renderedEntities.push(_this.gameObject);
         // we don't get depth/layer info from taro,
@@ -65,13 +65,15 @@ var PhaserRegion = /** @class */ (function (_super) {
             .addStrokeToNameAndAttributes !== false ? 4 : 0;
         label.setStroke('#000', strokeThickness);
         label.setText(this.name || '');
-        label.setPosition(label.width / 1.5, label.height);
+        var stats = this.entity._stats.default;
+        label.setPosition(label.width / 1.5 - stats.width / 2, label.height - stats.height / 2);
         //this.updateLabelOffset();
     };
     PhaserRegion.prototype.transform = function () {
         var graphics = this.graphics;
         var stats = this.entity._stats.default;
-        this.gameObject.setPosition(stats.x, stats.y);
+        this.gameObject.setPosition(stats.x + stats.width / 2, stats.y + stats.height / 2);
+        graphics.setPosition(-stats.width / 2, -stats.height / 2);
         graphics.clear();
         if (this.devModeOnly) {
             graphics.lineStyle(2, 0x11fa05, 
