@@ -1,4 +1,5 @@
 declare interface EntityStats {
+	defaultData: any;
 
 	name: string;
 	currentBody: {

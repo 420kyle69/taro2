@@ -18,29 +18,60 @@ var PhaserRegion = /** @class */ (function (_super) {
     function PhaserRegion(scene, entity) {
         var _this = _super.call(this, entity) || this;
         _this.scene = scene;
-        var gameObject = scene.add.graphics();
+        var stats = _this.entity._stats.default;
+        var gameObject = scene.add.container();
+        var graphics = scene.add.graphics();
+        _this.graphics = graphics;
+        gameObject.add(graphics);
+        gameObject.setSize(stats.width, stats.height);
+        gameObject.setPosition(stats.x, stats.y);
         _this.gameObject = gameObject;
-        _this.gameObject.visible = false;
         scene.renderedEntities.push(_this.gameObject);
         // we don't get depth/layer info from taro,
         // so it can go in 'debris' layer for now
         scene.entityLayers[EntityLayer.DEBRIS].add(_this.gameObject);
-        var stats = _this.entity._stats.default;
+        _this.name = _this.entity._stats.id;
         if (!stats.inside) {
             _this.devModeOnly = true;
         }
-        console.log('creating region', entity);
+        console.log('creating region', _this.name, entity);
         var devModeScene = ige.renderer.scene.getScene('DevMode');
         devModeScene.regions.push(_this);
-        if (_this.devModeOnly && !ige.developerMode.active)
+        if (_this.devModeOnly && !ige.developerMode.active) {
             _this.hide();
+        }
+        _this.updateLabel();
         _this.transform();
         return _this;
     }
+    PhaserRegion.prototype.getLabel = function () {
+        if (!this.label) {
+            var label = this.label = this.scene.add.text(0, 0, 'cccccc');
+            // needs to be created with the correct scale of the client
+            this.label.setScale(1 / this.scene.cameras.main.zoom);
+            label.setOrigin(0.5);
+            this.gameObject.add(label);
+        }
+        return this.label;
+    };
+    PhaserRegion.prototype.updateLabel = function () {
+        var label = this.getLabel();
+        label.visible = true;
+        label.setFontFamily('Verdana');
+        label.setFontSize(16);
+        label.setFontStyle('normal');
+        label.setFill('#fff');
+        var strokeThickness = ige.game.data.settings
+            .addStrokeToNameAndAttributes !== false ? 4 : 0;
+        label.setStroke('#000', strokeThickness);
+        label.setText(this.name || '');
+        label.setPosition(label.width / 1.5, label.height);
+        //this.updateLabelOffset();
+    };
     PhaserRegion.prototype.transform = function () {
-        var graphics = this.gameObject;
+        var graphics = this.graphics;
         var stats = this.entity._stats.default;
-        graphics.setPosition(stats.x, stats.y);
+        this.gameObject.setPosition(stats.x, stats.y);
         graphics.clear();
         if (this.devModeOnly) {
             graphics.lineStyle(2, 0x11fa05, 

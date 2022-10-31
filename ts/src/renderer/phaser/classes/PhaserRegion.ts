@@ -1,6 +1,9 @@
 class PhaserRegion extends PhaserEntity {
 
-	public gameObject: Phaser.GameObjects.Graphics & IRenderProps;
+	private name: string;
+	private label: Phaser.GameObjects.Text;
+	private graphics: Phaser.GameObjects.Graphics
+	public gameObject: Phaser.GameObjects.Container & IRenderProps;
 	public devModeOnly: boolean;
 
 	constructor (
@@ -9,36 +12,77 @@ class PhaserRegion extends PhaserEntity {
 	) {
 		super(entity);
 
-		const gameObject = scene.add.graphics();
+		const stats = this.entity._stats.default;
 
-		this.gameObject = gameObject as Phaser.GameObjects.Graphics & IRenderProps;
-		this.gameObject.visible = false;
+		const gameObject = scene.add.container();
+
+		const graphics = scene.add.graphics();
+		this.graphics = graphics as Phaser.GameObjects.Graphics & IRenderProps;
+		gameObject.add(graphics);
+		gameObject.setSize(stats.width, stats.height);
+		gameObject.setPosition(stats.x, stats.y);
+
+		this.gameObject = gameObject as Phaser.GameObjects.Container & IRenderProps;
 		scene.renderedEntities.push(this.gameObject);
 		// we don't get depth/layer info from taro,
 		// so it can go in 'debris' layer for now
 		scene.entityLayers[EntityLayer.DEBRIS].add(this.gameObject);
 
-		const stats = this.entity._stats.default;
+		this.name = this.entity._stats.id
 
 		if (!stats.inside) {
 			this.devModeOnly = true;
 		}
 
-		console.log('creating region', entity)
+		console.log('creating region', this.name, entity)
 
 		const devModeScene = ige.renderer.scene.getScene('DevMode') as DevModeScene;
 		devModeScene.regions.push(this);
 
-		if (this.devModeOnly && !ige.developerMode.active) this.hide();
+		if (this.devModeOnly && !ige.developerMode.active) {
+			this.hide();
+		}
 
+		this.updateLabel();
 		this.transform();
 	}
 
+	private getLabel (): Phaser.GameObjects.Text {
+		if (!this.label) {
+			const label = this.label = this.scene.add.text(0, 0, 'cccccc');
+
+			// needs to be created with the correct scale of the client
+			this.label.setScale(1 / this.scene.cameras.main.zoom);
+			label.setOrigin(0.5);
+
+			this.gameObject.add(label);
+		}
+		return this.label;
+	}
+
+	private updateLabel (): void {
+		const label = this.getLabel();
+		label.visible = true;
+
+		label.setFontFamily('Verdana');
+		label.setFontSize(16);
+		label.setFontStyle('normal');
+		label.setFill('#fff');
+
+		const strokeThickness = ige.game.data.settings
+			.addStrokeToNameAndAttributes !== false ? 4 : 0;
+		label.setStroke('#000', strokeThickness);
+		label.setText(this.name || '');
+
+		label.setPosition(label.width/1.5, label.height);
+		//this.updateLabelOffset();
+	}
+
 	protected transform (): void {
-		const graphics = this.gameObject;
+		const graphics = this.graphics;
 		const stats = this.entity._stats.default;
 
-		graphics.setPosition(stats.x, stats.y);
+		this.gameObject.setPosition(stats.x, stats.y);
 
 		graphics.clear();
 		
