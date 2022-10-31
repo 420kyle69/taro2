@@ -460,7 +460,22 @@ var ServerNetworkEvents = {
 	_onEditRegion: function(data, clientId) {
 		console.log('region edited', data, clientId);
 		// only allow developers to modify regions
+
+		// create new region
+		if (data.name == undefined) {
+			// get the next region number to append on a new region name
+			var highestRegionNumber = 1;
+			ige.$$('region').forEach(function (region) {
+				console.log(region._stats.id)
+
+			});
+		} else { // modify existing region
+			
+		}
+
 		if (ige.server.developerClientIds.includes(clientId)) {
+
+			// broadcast region change to all clients
 			ige.network.send("editRegion", data);
 		}
 	},
