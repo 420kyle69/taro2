@@ -82,6 +82,9 @@ var ControlComponent = IgeEntity.extend({
 	},
 
 	keyDown: function (device, key) {
+		if(ige.isClient && ige.preventKeybindings) {
+			return;
+		}
 		// check for input modal is open
 		if (ige.isClient) {
 			this.isChatOpen = ($('#message').is(':focus') && !$('#player-input-field').is(':focus')) ||
@@ -194,6 +197,9 @@ var ControlComponent = IgeEntity.extend({
 	},
 
 	keyUp: function (device, key) {
+		if(ige.isClient && ige.preventKeybindings) {
+			return;
+		}
 		this.lastActionAt = Date.now();
 
 		var player = this._entity;		
