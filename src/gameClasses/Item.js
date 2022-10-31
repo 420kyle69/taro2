@@ -326,7 +326,7 @@ var Item = IgeEntityPhysics.extend({
 							} else {
 								var bulletY = self._stats.bulletStartPosition.y || 0;
 							}
-
+							
 							var bulletStartPosition = {
 								x: (owner._translate.x + self.anchoredOffset.x) + (self._stats.bulletStartPosition.x * Math.cos(offsetAngle)) + (bulletY * Math.sin(offsetAngle)),
 								y: (owner._translate.y + self.anchoredOffset.y) + (self._stats.bulletStartPosition.x * Math.sin(offsetAngle)) - (bulletY * Math.cos(offsetAngle))
@@ -347,7 +347,6 @@ var Item = IgeEntityPhysics.extend({
 										y: Math.sin(rotate + Math.radians(-90)) * self._stats.bulletForce
 									};
 
-									// console.log(self._stats.currentBody.type, "unit: ", angleToTarget, "item's rotate.z: ", self._rotate.z, "facing angle", itemrotate)
 									// we don't create a Projectile entity for raycasts
 									if (this._stats.bulletType !== 'raycast') {
 										var projectileData = Object.assign(
@@ -784,7 +783,7 @@ var Item = IgeEntityPhysics.extend({
 	 * get item's position based on its itemAnchor, unitAnchor, and current rotation value.
 	 * @param rotate item's rotation. used for tweening item that's not anchored at 0,0. e.g. swinging a sword.
 	 */
-	getAnchoredOffset: function (rotate) {
+	getAnchoredOffset: function (rotate = 0) {
 		var self = this;
 		var offset = { x: 0, y: 0, rotate: 0 };
 		var ownerUnit = this.getOwnerUnit();
@@ -819,6 +818,7 @@ var Item = IgeEntityPhysics.extend({
 						rotate += unitAnchorOffsetRotate;
 					}
 
+					
 					var unitAnchoredPosition = {
 						x: (unitAnchorOffsetX * Math.cos(unitRotate)) + (unitAnchorOffsetY * Math.sin(unitRotate)),
 						y: (unitAnchorOffsetX * Math.sin(unitRotate)) - (unitAnchorOffsetY * Math.cos(unitRotate))
@@ -873,8 +873,9 @@ var Item = IgeEntityPhysics.extend({
 	streamUpdateData: function (queuedData) {
 		var self = this;
 		
-		if (ige.isServer && ige.network.isPaused) 
-			return;
+		// this was preventing isBeingUsed from streaming hence preventing other players' projectiles from showing
+		// if (ige.isServer && ige.network.isPaused) 
+		// 	return;
 
 		IgeEntity.prototype.streamUpdateData.call(this, queuedData);
 		// ige.devLog("Item streamUpdateData ", data)
