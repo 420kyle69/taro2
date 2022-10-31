@@ -45,6 +45,7 @@ class DevModeScene extends PhaserScene {
 
 			this.regions.forEach(region => {
 				region.show();
+				region.label.visible = true;
 			});
 		});
 
@@ -58,6 +59,7 @@ class DevModeScene extends PhaserScene {
 				if (region.devModeOnly) {
 					region.hide();
 				}
+				region.label.visible = false;
 			});
 		});
 

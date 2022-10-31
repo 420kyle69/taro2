@@ -40,6 +40,7 @@ var DevModeScene = /** @class */ (function (_super) {
             _this.activateMarker(false);
             _this.regions.forEach(function (region) {
                 region.show();
+                region.label.visible = true;
             });
         });
         ige.client.on('leaveDevMode', function () {
@@ -51,6 +52,7 @@ var DevModeScene = /** @class */ (function (_super) {
                 if (region.devModeOnly) {
                     region.hide();
                 }
+                region.label.visible = false;
             });
         });
         var tabKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, true);

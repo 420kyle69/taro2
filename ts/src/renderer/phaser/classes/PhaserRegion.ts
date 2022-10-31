@@ -1,7 +1,7 @@
 class PhaserRegion extends PhaserEntity {
 
 	private name: string;
-	private label: Phaser.GameObjects.Text;
+	public label: Phaser.GameObjects.Text;
 	private graphics: Phaser.GameObjects.Graphics
 	public gameObject: Phaser.GameObjects.Container & IRenderProps;
 	public devModeOnly: boolean;
@@ -50,6 +50,7 @@ class PhaserRegion extends PhaserEntity {
 	private getLabel (): Phaser.GameObjects.Text {
 		if (!this.label) {
 			const label = this.label = this.scene.add.text(0, 0, 'cccccc');
+			label.visible = false;
 
 			// needs to be created with the correct scale of the client
 			this.label.setScale(1 / this.scene.cameras.main.zoom);

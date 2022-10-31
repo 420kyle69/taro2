@@ -47,6 +47,7 @@ var PhaserRegion = /** @class */ (function (_super) {
     PhaserRegion.prototype.getLabel = function () {
         if (!this.label) {
             var label = this.label = this.scene.add.text(0, 0, 'cccccc');
+            label.visible = false;
             // needs to be created with the correct scale of the client
             this.label.setScale(1 / this.scene.cameras.main.zoom);
             label.setOrigin(0.5);
