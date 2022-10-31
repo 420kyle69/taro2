@@ -27,8 +27,11 @@ var PhaserRegion = /** @class */ (function (_super) {
         gameObject.setPosition(stats.x + stats.width / 2, stats.y + stats.height / 2);
         gameObject.setInteractive();
         gameObject.on('pointerdown', function () {
-            //TODO: add modal where user can edit name of region and stats
-            console.log('clicked region name is', _this.name);
+            if (ige.developerMode.active) {
+                //TODO: add modal where user can edit name of region and stats
+                //stats.x, stats.y, stats.width, stats.height, this.entity._stats.id
+                console.log('clicked region name is', _this.name);
+            }
         });
         _this.gameObject = gameObject;
         scene.renderedEntities.push(_this.gameObject);

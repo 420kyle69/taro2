@@ -14,6 +14,8 @@ class DevModeScene extends PhaserScene {
 	paletteMarker: TileMarker;
 
 	regions: PhaserRegion[];
+	regionDrawGraphics: Phaser.GameObjects.Graphics;
+	regionDrawStart: {x: number, y: number};
 	regionTool: boolean;
 
 	defaultZoom: number;
@@ -177,7 +179,7 @@ class DevModeScene extends PhaserScene {
 		this.selectedTile = gameMap.getTileAt(2, 3);
 		this.marker = new TileMarker (this.gameScene, gameMap, 2);
 
-		this.gameScene.input.on('pointerdown', function(pointer) {
+		this.gameScene.input.on('pointerdown', (pointer) => {
 			if (this.regionTool) {
 				const worldPoint = this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
 				this.regionDrawStart = {
@@ -187,11 +189,11 @@ class DevModeScene extends PhaserScene {
 			}
 		}, this);
 
-		const graphics = this.gameScene.add.graphics();
+		const graphics = this.regionDrawGraphics = this.gameScene.add.graphics();
 		let width;
 		let height;
 
-		this.gameScene.input.on('pointermove', function (pointer) {
+		this.gameScene.input.on('pointermove', (pointer) => {
 			if (!pointer.isDown) return;
 			else if (this.regionTool) {
 				const worldPoint = this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
@@ -203,7 +205,7 @@ class DevModeScene extends PhaserScene {
 				}
 			}, this);
 
-		this.gameScene.input.on('pointerup', function(pointer){
+		this.gameScene.input.on('pointerup', (pointer) => {
 			const worldPoint = this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
 			if (this.regionTool && this.regionDrawStart.x !== worldPoint.x && this.regionDrawStart.y !== worldPoint.y) {
 				graphics.clear();
@@ -213,9 +215,18 @@ class DevModeScene extends PhaserScene {
 				//{x: this.regionDrawStart.x, y: this.regionDrawStart.y, width: width, height: height}
 
 				new PhaserRegion(this.gameScene, {_stats: {default: {x: this.regionDrawStart.x, y: this.regionDrawStart.y, width: width, height: height}}, on: (eventName, call, context, oneShot, sendEventName) => {} } as Region)
-				this.regionDrawStart = {};
+				this.regionDrawStart = null;
 			}
 		}, this);
+	}
+
+	cancelDrawRegion() {
+		if (this.regionTool) {
+			this.regionDrawGraphics.clear();
+			this.regionTool = false;
+			this.devPalette.highlightModeButton(0);
+			this.regionDrawStart = null;
+		}
 	}
 
 	activateMarker(active: boolean) {

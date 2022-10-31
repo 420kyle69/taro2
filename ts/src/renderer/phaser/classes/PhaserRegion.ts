@@ -23,9 +23,11 @@ class PhaserRegion extends PhaserEntity {
 		gameObject.setPosition(stats.x + stats.width/2, stats.y + stats.height/2);
 		gameObject.setInteractive();
 		gameObject.on('pointerdown', () => {
-			//TODO: add modal where user can edit name of region and stats
-			//stats.x, stats.y, stats.width, stats.height, this.entity._stats.id
-			console.log('clicked region name is', this.name);
+			if (ige.developerMode.active) {
+				//TODO: add modal where user can edit name of region and stats
+				//stats.x, stats.y, stats.width, stats.height, this.entity._stats.id
+				console.log('clicked region name is', this.name);
+			}
 		});
 
 		this.gameObject = gameObject as Phaser.GameObjects.Container & IRenderProps;

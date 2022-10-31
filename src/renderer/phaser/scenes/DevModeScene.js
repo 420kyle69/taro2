@@ -149,40 +149,49 @@ var DevModeScene = /** @class */ (function (_super) {
         this.selectedTile = gameMap.getTileAt(2, 3);
         this.marker = new TileMarker(this.gameScene, gameMap, 2);
         this.gameScene.input.on('pointerdown', function (pointer) {
-            if (this.regionTool) {
-                var worldPoint = this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
-                this.regionDrawStart = {
+            if (_this.regionTool) {
+                var worldPoint = _this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
+                _this.regionDrawStart = {
                     x: worldPoint.x,
                     y: worldPoint.y,
                 };
             }
         }, this);
-        var graphics = this.gameScene.add.graphics();
+        var graphics = this.regionDrawGraphics = this.gameScene.add.graphics();
         var width;
         var height;
         this.gameScene.input.on('pointermove', function (pointer) {
             if (!pointer.isDown)
                 return;
-            else if (this.regionTool) {
-                var worldPoint = this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
-                width = worldPoint.x - this.regionDrawStart.x;
-                height = worldPoint.y - this.regionDrawStart.y;
+            else if (_this.regionTool) {
+                var worldPoint = _this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
+                width = worldPoint.x - _this.regionDrawStart.x;
+                height = worldPoint.y - _this.regionDrawStart.y;
                 graphics.clear();
                 graphics.lineStyle(2, 0x036ffc, 1);
-                graphics.strokeRect(this.regionDrawStart.x, this.regionDrawStart.y, width, height);
+                graphics.strokeRect(_this.regionDrawStart.x, _this.regionDrawStart.y, width, height);
             }
         }, this);
         this.gameScene.input.on('pointerup', function (pointer) {
-            var worldPoint = this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
-            if (this.regionTool && this.regionDrawStart.x !== worldPoint.x && this.regionDrawStart.y !== worldPoint.y) {
+            var worldPoint = _this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
+            if (_this.regionTool && _this.regionDrawStart.x !== worldPoint.x && _this.regionDrawStart.y !== worldPoint.y) {
                 graphics.clear();
-                this.regionTool = false;
-                this.devPalette.highlightModeButton(0);
+                _this.regionTool = false;
+                _this.devPalette.highlightModeButton(0);
                 //TODO: add modal where user can add name of region/edit stats, new PhaserRegion - is temporary should be created after server response
-                new PhaserRegion(this.gameScene, { _stats: { default: { x: this.regionDrawStart.x, y: this.regionDrawStart.y, width: width, height: height } }, on: function (eventName, call, context, oneShot, sendEventName) { } });
-                this.regionDrawStart = {};
+                //{x: this.regionDrawStart.x, y: this.regionDrawStart.y, width: width, height: height}
+                new PhaserRegion(_this.gameScene, { _stats: { default: { x: _this.regionDrawStart.x, y: _this.regionDrawStart.y, width: width, height: height } }, on: function (eventName, call, context, oneShot, sendEventName) { } });
+                _this.regionDrawStart = null;
             }
         }, this);
+    };
+    DevModeScene.prototype.cancelDrawRegion = function () {
+        if (this.regionTool) {
+            this.regionDrawGraphics.clear();
+            this.regionTool = false;
+            this.devPalette.highlightModeButton(0);
+            this.regionDrawStart = null;
+        }
     };
     DevModeScene.prototype.activateMarker = function (active) {
         this.marker.active = active;

@@ -68,6 +68,8 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 		camera.setBackgroundColor(0xFFFFFF);
 
 		texturesLayer.on('pointermove', function (p) {
+			const devModeScene = ige.renderer.scene.getScene('DevMode') as DevModeScene;
+            devModeScene.cancelDrawRegion();
 			if (!p.isDown) return;
 			const scrollX = (p.x - p.prevPosition.x) / camera.zoom
 			const scrollY = (p.y - p.prevPosition.y) / camera.zoom;
