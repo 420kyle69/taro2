@@ -2143,16 +2143,18 @@ var IgeEntity = IgeObject.extend({
 	},
 
 	flip: function (flip) {
-		if (ige.isServer) {
-			if (flip !== this._stats.flip) {
-				this.streamUpdateData([{ flip: flip }]);
-			}
+		if (this._stats.flip !== flip) {
 
-		} else if (ige.isClient) {
-			if (this._stats.flip !== flip) {
+			if (ige.isServer) {
+
+				this.streamUpdateData([{ flip: flip }]);
+
+			} else if (ige.isClient) {
+				
 				this.emit('flip', [ flip ]);
 			}
 		}
+
 		this._stats.flip = flip;
 	},
 
@@ -3132,12 +3134,12 @@ var IgeEntity = IgeObject.extend({
 			}
 		} else if (ige.isClient) {
 
-			if (ige.physics) {
+			if (ige.physics && this.prevPhysicsFrame && this.nextPhysicsFrame) {
 				let prevFrameTime = this.prevPhysicsFrame[0]
 				let nextFrameTime = this.nextPhysicsFrame[0]
 				this.prevPhysicsFrame = [prevFrameTime, [x, y, rotate]];
 				this.nextPhysicsFrame = [nextFrameTime, [x, y, rotate]];
-			}			
+			}
 
 			// this.lastServerStreamedPosition = undefined;
 			if (this.body) {
@@ -5147,9 +5149,9 @@ var IgeEntity = IgeObject.extend({
 
 		// interpolate using client side's physics frames. (this doesn't use snapshot streamed from the server)
 		// this is necessary, because physics don't run at 60 fps on clientside
-		if (ige.physics && ige.game.cspEnabled && (
+		if (ige.physics && (
 				// 1. we're using cspMovement (experimental) for my own unit OR
-				(ige.client.selectedUnit == this && !this._stats.aiEnabled) ||
+				(ige.game.cspEnabled && ige.client.selectedUnit == this && !this._stats.aiEnabled) ||
 				// 2. item-fired projectiles
 				(this._category == 'projectile' && this._stats.sourceItemId != undefined && !this._streamMode)
 			)

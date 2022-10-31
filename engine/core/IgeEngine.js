@@ -1619,6 +1619,8 @@ var IgeEngine = IgeEntity.extend({
 		ige.network.send('_igeStreamCreateSnapshot', ige.entityCreateSnapshot, clientId);
 	},
 
+	// queues trigger events to affect ALL entities including the world.
+	// for example, "when attribute becomes zero" trigger fires it will run for all entities (unit/item/projecitle) first, then it'll run for the world
 	queueTrigger: function(triggerName, parameters = {}) {
 		this.triggersQueued.push({name: triggerName, params: parameters})
 	},
@@ -1724,7 +1726,8 @@ var IgeEngine = IgeEntity.extend({
 				}
 			}
 
-			if (ige.isServer) { // execute triggersQueued. client-side is done inside EntitiesToRender.ts
+			if (ige.isServer) { // triggersQueued runs on client-side inside EntitiesToRender.ts
+				// triggersQueued is executed in the entities first (entity-script) then it runs for the world
 				_.forEach(ige.triggersQueued, function (trigger) {
 					// console.log("run", trigger);						
 					ige.script.trigger(trigger.name, trigger.params);
