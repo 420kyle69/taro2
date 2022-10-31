@@ -967,14 +967,15 @@ var Item = IgeEntityPhysics.extend({
 					case 'slotIndex':
 						break;
 					case 'isBeingUsed':
-						if (ige.isClient) {
+						// ignore stream for my unit's item use
+						if (ige.isClient && owner != ige.client.selectedUnit) {
 							this._stats.isBeingUsed = newValue;							
 						}
 						break;
 
 					case 'stopUsing':
-						// This will only be called when we stop the unit from using an item from the server side, to prevent issues.
-						if (ige.isClient) {
+						// ignore stream for my unit's item use
+						if (ige.isClient && owner != ige.client.selectedUnit) {
 							this._stats.isBeingUsed = newValue;
 
 							if (newValue == false) {
