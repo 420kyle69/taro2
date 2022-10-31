@@ -463,17 +463,32 @@ var ServerNetworkEvents = {
 
 		// create new region
 		if (data.name == undefined) {
-			// get the next region number to append on a new region name
+			// create new region name (highest region number + 1)
 			var highestRegionNumber = 1;
 			ige.$$('region').forEach(function (region) {
-				console.log(region._stats.id)
-
+				var regionNameArray = region._stats.id.split(/\W+/);
+				if (regionNameArray.length == 2 && regionNameArray[0] == 'region') {
+					var regionNumber = regionNameArray[1];
+					if (!isNaN(regionNumber) && regionNumber > highestRegionNumber) {
+						highestRegionNumber = regionNumber;
+					}
+				}
 			});
+
+			var newRegionName = "region "+highestRegionNumber;
+			console.log(newRegionName)
+
+			// create new region in game.data
+			
+
+			// create new region entity
+			
+
 		} else { // modify existing region
 			
 		}
 
-		if (ige.server.developerClientIds.includes(clientId)) {
+		if (ige.server.developerClientIds.includes(clientId)) {  
 
 			// broadcast region change to all clients
 			ige.network.send("editRegion", data);
