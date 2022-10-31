@@ -25,6 +25,11 @@ var PhaserRegion = /** @class */ (function (_super) {
         gameObject.add(graphics);
         gameObject.setSize(stats.width, stats.height);
         gameObject.setPosition(stats.x + stats.width / 2, stats.y + stats.height / 2);
+        gameObject.setInteractive();
+        gameObject.on('pointerdown', function () {
+            //TODO: add modal where user can edit name of region and stats
+            console.log('clicked region name is', _this.name);
+        });
         _this.gameObject = gameObject;
         scene.renderedEntities.push(_this.gameObject);
         // we don't get depth/layer info from taro,

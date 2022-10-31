@@ -21,6 +21,11 @@ class PhaserRegion extends PhaserEntity {
 		gameObject.add(graphics);
 		gameObject.setSize(stats.width, stats.height);
 		gameObject.setPosition(stats.x + stats.width/2, stats.y + stats.height/2);
+		gameObject.setInteractive();
+		gameObject.on('pointerdown', () => {
+			//TODO: add modal where user can edit name of region and stats
+			console.log('clicked region name is', this.name);
+		});
 
 		this.gameObject = gameObject as Phaser.GameObjects.Container & IRenderProps;
 		scene.renderedEntities.push(this.gameObject);
