@@ -210,6 +210,7 @@ class DevModeScene extends PhaserScene {
 				this.regionTool = false;
 				this.devPalette.highlightModeButton(0);
 				//TODO: add modal where user can add name of region/edit stats, new PhaserRegion - is temporary should be created after server response
+				//{x: this.regionDrawStart.x, y: this.regionDrawStart.y, width: width, height: height}
 
 				new PhaserRegion(this.gameScene, {_stats: {default: {x: this.regionDrawStart.x, y: this.regionDrawStart.y, width: width, height: height}}, on: (eventName, call, context, oneShot, sendEventName) => {} } as Region)
 				this.regionDrawStart = {};
