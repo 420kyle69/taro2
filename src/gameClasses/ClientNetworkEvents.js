@@ -472,6 +472,12 @@ var ClientNetworkEvents = {
 		ige.client.emit('editTile', {gid: data.gid, layer: data.layer, x: data.x, y: data.y});
 	},
 
+	// when other players' update regions, apply the change to my local
+	_onEditRegion: function (data) {
+		console.log('region come from server',data)
+		ige.client.emit('editRegion', data);
+	},
+
 	_onErrorLogs: function (logs) {
 		var element = document.getElementById('error-log-content');
 		for (actionName in logs) {

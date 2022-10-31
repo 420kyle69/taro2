@@ -457,6 +457,14 @@ var ServerNetworkEvents = {
 		}
 	},
 
+	_onEditRegion: function(data, clientId) {
+		console.log('region edited', data, clientId);
+		// only allow developers to modify regions
+		if (ige.server.developerClientIds.includes(clientId)) {
+			ige.network.send("editRegion", data);
+		}
+	},
+
 	_onBuyItem: function (id, clientId) {
 		ige.devLog('player ' + clientId + ' wants to purchase item' + id);
 

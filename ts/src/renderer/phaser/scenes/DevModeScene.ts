@@ -116,6 +116,18 @@ class DevModeScene extends PhaserScene {
 			}
 		});
 
+		ige.client.on('editRegion', (data: {
+		name: string, 
+		x: number, 
+		y: number, 
+		width: number, 
+		height: number}) => {
+			console.log('editRegion', data);
+			new PhaserRegion(this.gameScene, {_stats: 
+				{default: {x: data.x, y: data.y, width: data.width, height: data.height}, id: data.name},
+				on: (eventName, call, context, oneShot, sendEventName) => {} } as Region)
+		});
+
 		this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
 			if (this.devPalette && this.devPalette.visible) {
 				this.devPalette.zoom(deltaY);
@@ -213,8 +225,8 @@ class DevModeScene extends PhaserScene {
 				this.devPalette.highlightModeButton(0);
 				//TODO: add modal where user can add name of region/edit stats, new PhaserRegion - is temporary should be created after server response
 				//{x: this.regionDrawStart.x, y: this.regionDrawStart.y, width: width, height: height}
-
-				new PhaserRegion(this.gameScene, {_stats: {default: {x: this.regionDrawStart.x, y: this.regionDrawStart.y, width: width, height: height}}, on: (eventName, call, context, oneShot, sendEventName) => {} } as Region)
+				ige.network.send('editRegion', {name: 'new region', x: this.regionDrawStart.x, y: this.regionDrawStart.y, width: width, height: height});
+				//new PhaserRegion(this.gameScene, {_stats: {default: {x: this.regionDrawStart.x, y: this.regionDrawStart.y, width: width, height: height}}, on: (eventName, call, context, oneShot, sendEventName) => {} } as Region)
 				this.regionDrawStart = null;
 			}
 		}, this);
