@@ -101,6 +101,8 @@ var DevModeScene = /** @class */ (function (_super) {
         });
         ige.client.on('editRegion', function (data) {
             console.log('editRegion', data);
+            //TODO: add modal where user can add name of region/edit stats, new PhaserRegion - is temporary should be created after server response
+            //{name: data.name, x: data.x, y: data.y, width: data.width, height: data.height}
             new PhaserRegion(_this.gameScene, { _stats: { default: { x: data.x, y: data.y, width: data.width, height: data.height }, id: data.name },
                 on: function (eventName, call, context, oneShot, sendEventName) { } });
         });
@@ -183,10 +185,7 @@ var DevModeScene = /** @class */ (function (_super) {
                 graphics.clear();
                 _this.regionTool = false;
                 _this.devPalette.highlightModeButton(0);
-                //TODO: add modal where user can add name of region/edit stats, new PhaserRegion - is temporary should be created after server response
-                //{x: this.regionDrawStart.x, y: this.regionDrawStart.y, width: width, height: height}
-                ige.network.send('editRegion', {x: _this.regionDrawStart.x, y: _this.regionDrawStart.y, width: width, height: height });
-                //new PhaserRegion(this.gameScene, {_stats: {default: {x: this.regionDrawStart.x, y: this.regionDrawStart.y, width: width, height: height}}, on: (eventName, call, context, oneShot, sendEventName) => {} } as Region)
+                ige.network.send('editRegion', { name: 'new region', x: _this.regionDrawStart.x, y: _this.regionDrawStart.y, width: width, height: height });
                 _this.regionDrawStart = null;
             }
         }, this);
