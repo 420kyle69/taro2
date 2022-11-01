@@ -100,7 +100,7 @@ var RegionManager = IgeClass.extend({
 				ige.map.createRegions();
 			}
 		}
-		window.updateReactGameState(JSON.parse(JSON.stringify(updatedRegion)));
+		if (ige.isClient) window.updateReactGameState(JSON.parse(JSON.stringify(updatedRegion)));
 		if (isRegionDeleted) {
 			var newRegion = JSON.parse(JSON.stringify(updatedRegion));
 			var regionKey = newRegion.key;
@@ -109,7 +109,7 @@ var RegionManager = IgeClass.extend({
 			ige.map.createRegions();
 		}
 
-		$('#region-modal-client').modal('hide');
+		if (ige.isClient) $('#region-modal-client').modal('hide');
 	},
 	openRegionModal: function (region, key, isAddNewRegion) {
 		if (isAddNewRegion) {

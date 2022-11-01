@@ -488,8 +488,6 @@ var ServerNetworkEvents = {
 				} while (ige.regionManager.getRegionById(newRegionName));
 
 				data.name = newRegionName;
-				// create new region in game.data
-
 
 				// changed to Region from RegionUi
 				var regionData = {
@@ -513,6 +511,9 @@ var ServerNetworkEvents = {
 				var region = new Region(regionData);
 				//regionData.entityIdFromServer = region.id();
 				console.log('region created on server side', region)
+
+				// create new region in game.data
+				ige.regionManager.updateRegionToDatabase(regionData);
 
 				// broadcast region change to all clients
 				ige.network.send("editRegion", data);
