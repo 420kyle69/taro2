@@ -468,6 +468,7 @@ var ServerNetworkEvents = {
 			}
 		}
 	},
+	
 	_onBuyUnit: function (id, clientId) {
 		ige.devLog('player ' + clientId + ' wants to purchase item' + id);
 		var player = ige.game.getPlayerByClientId(clientId);

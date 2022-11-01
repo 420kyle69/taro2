@@ -48,6 +48,8 @@ var Player = IgeEntity.extend({
 				});
 			}
 
+			this.setChatMute(this._stats.banChat);
+
 			// apply skin to the selected unit if the unit already exists on the client side
 			if (this._stats && this._stats.selectedUnitId) {
 				const unit = ige.$(this._stats.selectedUnitId);
