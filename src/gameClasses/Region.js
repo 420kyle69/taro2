@@ -5,7 +5,6 @@ var Region = IgeEntityPhysics.extend({
 	init: function (data, entityIdFromServer) {
 		IgeEntityPhysics.prototype.init.call(this);
 
-		console.log('region creation info', data, entityIdFromServer);
 		this.id(entityIdFromServer);
 
 		var self = this;

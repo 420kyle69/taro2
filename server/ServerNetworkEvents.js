@@ -509,8 +509,6 @@ var ServerNetworkEvents = {
 					}
 				}
 				var region = new Region(regionData);
-				//regionData.entityIdFromServer = region.id();
-				console.log('region created on server side', region)
 
 				// create new region in game.data
 				ige.regionManager.updateRegionToDatabase(regionData);
@@ -519,7 +517,22 @@ var ServerNetworkEvents = {
 				ige.network.send("editRegion", data);
 
 		} else { // modify existing region
-			
+			const region =  ige.regionManager.getRegionById(data.name);
+			if (data.delete) {
+				region.destroy();
+			}
+			else {
+				var data = [
+					{ x: data.x !== region._stats.default.x ? data.x : null },
+					{ y: data.y !== region._stats.default.y ? data.y : null },
+					{ width: data.width !== region._stats.default.width ? data.width : null },
+					{ height: data.height !== region._stats.default.height ? data.height : null }
+				];
+				// there's gotta be a better way to do this, i'm just blind right now
+				data = data.filter(obj => obj[Object.keys(obj)[0]] !== null);
+
+				region.streamUpdateData(data);
+			}
 		}
 		
 			// broadcast region change to all clients
