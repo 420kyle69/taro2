@@ -107,7 +107,7 @@ var DevModeScene = /** @class */ (function (_super) {
             /*new PhaserRegion(this.gameScene, {_stats:
                 {default: {x: data.x, y: data.y, width: data.width, height: data.height}, id: data.name},
                 on: (eventName, call, context, oneShot, sendEventName) => {} } as Region)*/
-            var regionData = {
+            /*var regionData = {
                 dataType: 'region',
                 default: {
                     x: data.x,
@@ -124,7 +124,7 @@ var DevModeScene = /** @class */ (function (_super) {
                     height: data.height,
                     key: data.name
                 }
-            };
+            }*/
             //var region = new Region(regionData, data.entityIdFromServer);
             //console.log('editRegion', region)
         });
