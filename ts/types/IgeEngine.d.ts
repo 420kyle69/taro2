@@ -1,5 +1,6 @@
 declare class IgeEngine extends IgeClass {
 	tiled: any;
+	regionManager: any;
 	scaleMap(data: any): void;
 
 	_renderFrames: number;

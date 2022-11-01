@@ -1,6 +1,6 @@
 class PhaserRegion extends PhaserEntity {
 
-	private name: string;
+	public name: string;
 	public label: Phaser.GameObjects.Text;
 	private graphics: Phaser.GameObjects.Graphics
 	public gameObject: Phaser.GameObjects.Container & IRenderProps;
@@ -67,7 +67,7 @@ class PhaserRegion extends PhaserEntity {
 		return this.label;
 	}
 
-	private updateLabel (): void {
+	public updateLabel (): void {
 		const label = this.getLabel();
 		label.visible = true;
 

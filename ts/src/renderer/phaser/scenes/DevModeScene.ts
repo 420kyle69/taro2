@@ -118,38 +118,26 @@ class DevModeScene extends PhaserScene {
 
 		ige.client.on('editRegion', (data: {
 		name: string, 
+		newName?: string,
 		x: number, 
 		y: number, 
 		width: number, 
 		height: number,
 		entityIdFromServer: string}) => {
 			console.log('editRegion', data);
-			//TODO: add modal where user can add name of region/edit stats, new PhaserRegion - is temporary should be created after server response
-			//{name: data.name, x: data.x, y: data.y, width: data.width, height: data.height}
-			ige.addNewRegion && ige.addNewRegion({name: data.name, x: data.x, y: data.y, width: data.width, height: data.height});
-			/*new PhaserRegion(this.gameScene, {_stats: 
-				{default: {x: data.x, y: data.y, width: data.width, height: data.height}, id: data.name},
-				on: (eventName, call, context, oneShot, sendEventName) => {} } as Region)*/
-			/*var regionData = {
-				dataType: 'region',
-				default: {
-					x: data.x,
-					y: data.y,
-					width: data.width,
-					height: data.height,
-					key: data.name
-				},
-				id: data.name,
-				value: {
-					x: data.x,
-					y: data.y,
-					width: data.width,
-					height: data.height,
-					key: data.name
-				}
-			}*/
-			//var region = new Region(regionData, data.entityIdFromServer);
-			//console.log('editRegion', region)
+			if (data.newName && data.name !== data.newName) {
+				const region = ige.regionManager.getRegionById(data.name);
+				region._stats.id = data.newName;
+				this.regions.forEach(region => {
+					if (region.name === data.name) {
+						region.name = data.newName;
+						region.updateLabel();
+					}
+				});
+			}
+			else {
+				ige.addNewRegion && ige.addNewRegion({name: data.name, x: data.x, y: data.y, width: data.width, height: data.height});
+			}
 		});
 
 		this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {

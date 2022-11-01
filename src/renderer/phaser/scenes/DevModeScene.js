@@ -101,32 +101,19 @@ var DevModeScene = /** @class */ (function (_super) {
         });
         ige.client.on('editRegion', function (data) {
             console.log('editRegion', data);
-            //TODO: add modal where user can add name of region/edit stats, new PhaserRegion - is temporary should be created after server response
-            //{name: data.name, x: data.x, y: data.y, width: data.width, height: data.height}
-            ige.addNewRegion && ige.addNewRegion({ name: data.name, x: data.x, y: data.y, width: data.width, height: data.height });
-            /*new PhaserRegion(this.gameScene, {_stats:
-                {default: {x: data.x, y: data.y, width: data.width, height: data.height}, id: data.name},
-                on: (eventName, call, context, oneShot, sendEventName) => {} } as Region)*/
-            /*var regionData = {
-                dataType: 'region',
-                default: {
-                    x: data.x,
-                    y: data.y,
-                    width: data.width,
-                    height: data.height,
-                    key: data.name
-                },
-                id: data.name,
-                value: {
-                    x: data.x,
-                    y: data.y,
-                    width: data.width,
-                    height: data.height,
-                    key: data.name
-                }
-            }*/
-            //var region = new Region(regionData, data.entityIdFromServer);
-            //console.log('editRegion', region)
+            if (data.newName && data.name !== data.newName) {
+                var region = ige.regionManager.getRegionById(data.name);
+                region._stats.id = data.newName;
+                _this.regions.forEach(function (region) {
+                    if (region.name === data.name) {
+                        region.name = data.newName;
+                        region.updateLabel();
+                    }
+                });
+            }
+            else {
+                ige.addNewRegion && ige.addNewRegion({ name: data.name, x: data.x, y: data.y, width: data.width, height: data.height });
+            }
         });
         this.input.on('wheel', function (pointer, gameObjects, deltaX, deltaY, deltaZ) {
             if (_this.devPalette && _this.devPalette.visible) {

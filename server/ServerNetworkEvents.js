@@ -517,11 +517,20 @@ var ServerNetworkEvents = {
 				ige.network.send("editRegion", data);
 
 		} else { // modify existing region
-			const region =  ige.regionManager.getRegionById(data.name);
+			const region = ige.regionManager.getRegionById(data.name);
 			if (data.delete) {
 				region.destroy();
 			}
 			else {
+				if (data.name !== data.newName) {
+					if (ige.regionManager.getRegionById(data.newName)) {
+						console.log('This name is unavailable');
+					} 
+					else {
+						region._stats.id = data.newName;
+						ige.network.send("editRegion", data);
+					}
+				}
 				var data = [
 					{ x: data.x !== region._stats.default.x ? data.x : null },
 					{ y: data.y !== region._stats.default.y ? data.y : null },
