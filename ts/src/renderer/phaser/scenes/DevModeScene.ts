@@ -125,6 +125,7 @@ class DevModeScene extends PhaserScene {
 			console.log('editRegion', data);
 			//TODO: add modal where user can add name of region/edit stats, new PhaserRegion - is temporary should be created after server response
 			//{name: data.name, x: data.x, y: data.y, width: data.width, height: data.height}
+			ige.addNewRegion && ige.addNewRegion({name: data.name, x: data.x, y: data.y, width: data.width, height: data.height});
 			new PhaserRegion(this.gameScene, {_stats: 
 				{default: {x: data.x, y: data.y, width: data.width, height: data.height}, id: data.name},
 				on: (eventName, call, context, oneShot, sendEventName) => {} } as Region)
@@ -225,7 +226,8 @@ class DevModeScene extends PhaserScene {
 				graphics.clear();
 				this.regionTool = false;
 				this.devPalette.highlightModeButton(0);
-				ige.network.send('editRegion', {name: 'new region', x: this.regionDrawStart.x, y: this.regionDrawStart.y, width: width, height: height});
+				const regionName = `Region${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+				ige.network.send('editRegion', {name: regionName, x: this.regionDrawStart.x, y: this.regionDrawStart.y, width: width, height: height});
 				this.regionDrawStart = null;
 			}
 		}, this);

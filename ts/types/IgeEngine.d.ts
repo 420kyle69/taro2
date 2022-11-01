@@ -63,4 +63,6 @@ declare class IgeEngine extends IgeClass {
 	};
 
 	$ (item: number | string | object): any;
+
+	addNewRegion : any
 }
