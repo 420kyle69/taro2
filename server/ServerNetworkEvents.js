@@ -487,6 +487,7 @@ var ServerNetworkEvents = {
 					newRegionName = 'region' + regionNameNumber;
 				} while (ige.regionManager.getRegionById(newRegionName));
 
+				data.name = newRegionName;
 				// create new region in game.data
 
 
