@@ -78,9 +78,11 @@ var PhaserRegion = /** @class */ (function (_super) {
     };
     PhaserRegion.prototype.transform = function () {
         var graphics = this.graphics;
+        var label = this.label;
         var stats = this.entity._stats.default;
         this.gameObject.setPosition(stats.x + stats.width / 2, stats.y + stats.height / 2);
         graphics.setPosition(-stats.width / 2, -stats.height / 2);
+        label.setPosition(label.width / 1.5 - stats.width / 2, label.height - stats.height / 2);
         graphics.clear();
         if (this.devModeOnly) {
             graphics.lineStyle(2, 0x11fa05, 
