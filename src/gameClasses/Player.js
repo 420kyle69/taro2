@@ -48,6 +48,8 @@ var Player = IgeEntity.extend({
 				});
 			}
 
+			this.setChatMute(this._stats.banChat);
+
 			// apply skin to the selected unit if the unit already exists on the client side
 			if (this._stats && this._stats.selectedUnitId) {
 				const unit = ige.$(this._stats.selectedUnitId);
@@ -664,7 +666,7 @@ var Player = IgeEntity.extend({
 			}
 
 			if (typeof (userId) !== 'undefined' && typeof (sessionId) !== 'undefined') {
-				if (ige.game.data.isGameDeveloper) {
+				if (ige.game.data.isGameDeveloper && ['1', '4', '5'].includes(ige.game.data.defaultData.tier)) {
 					// dont show dev menu by default
 					// if (!ige.isMobile) {
 					// 	$("#dev-console").show() // if user has access of this game, show dev console

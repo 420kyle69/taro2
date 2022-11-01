@@ -506,6 +506,7 @@ var ServerNetworkEvents = {
 			}
 		}
 	},
+	
 	_onBuyUnit: function (id, clientId) {
 		ige.devLog('player ' + clientId + ' wants to purchase item' + id);
 		var player = ige.game.getPlayerByClientId(clientId);
@@ -631,26 +632,23 @@ var ServerNetworkEvents = {
 		}
 	},
 
-	_onKick: function (kickuserId, clientId) {
-		var player = ige.game.getPlayerByClientId(clientId);
+	_onKick: function (kickedClientId, modClientId) {
+		var modPlayer = ige.game.getPlayerByClientId(modClientId);
 
-		if (!player) {
+		if (!modPlayer) {
 			return;
 		}
 
-		var isUserDeveloper = (player._stats.userId == ige.game.data.defaultData.owner) ||
-			ige.game.data.defaultData.invitedUsers.find(function (iu) { if (iu.user === player._stats.userId) { return true; } }) ||
-			player._stats.isUserAdmin ||
-			player._stats.isUserMod;
+		var isUserDeveloper = (modPlayer._stats.userId == ige.game.data.defaultData.owner) ||
+			ige.game.data.defaultData.invitedUsers.find(function (iu) { if (iu.user === modPlayer._stats.userId) { return true; } }) ||
+			modPlayer._stats.isUserAdmin ||
+			modPlayer._stats.isUserMod;
+			
 		if (isUserDeveloper) {
-			var kickedPlayer = ige.$$('player').find(function (player) {
-				if (player._stats && player._stats.clientId === kickuserId) return true;
-			});
-			if (kickedPlayer) {
-				kickedPlayer.streamUpdateData([{ playerJoined: false }]);
-			}
+			ige.game.kickPlayer(kickedClientId);
 		}
 	},
+	
 	_onBanUser: function ({ userId, kickuserId }, clientId) {
 		var player = ige.game.getPlayerByClientId(clientId);
 

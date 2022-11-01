@@ -145,6 +145,18 @@ var GameComponent = IgeEntity.extend({
 		return player;
 	},
 
+	kickPlayer: function(clientId) {
+		// var player = this.getPlayerByClientId(clientId);		
+		// if (player) {
+		// 	player.streamUpdateData([{ playerJoined: false }]);
+		// }
+
+		var client = ige.server.clients[clientId];		
+		if (client) {
+			client.socket.close()
+		}
+	},
+
 	// get client with ip
 	getPlayerByIp: function (ip, currentUserId, all = false) {
 		var clientIds = [];
