@@ -82,7 +82,7 @@ var ControlComponent = IgeEntity.extend({
 	},
 
 	keyDown: function (device, key) {
-		if(ige.isClient && ige.preventKeybindings) {
+		if(ige.isClient && ige.preventKeybindings && $('#game-editor').is(':visible')) {
 			return;
 		}
 		// check for input modal is open
@@ -197,7 +197,7 @@ var ControlComponent = IgeEntity.extend({
 	},
 
 	keyUp: function (device, key) {
-		if(ige.isClient && ige.preventKeybindings) {
+		if(ige.isClient && ige.preventKeybindings && $('#game-editor').is(':visible')) {
 			return;
 		}
 		this.lastActionAt = Date.now();
