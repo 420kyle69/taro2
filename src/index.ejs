@@ -84,21 +84,21 @@
                 return;
             }
 
-            axios.get('https://editor.modd.io/client')
+            axios.get('https://prod2.modd.io/client')
                 .then((res) => {
                     const { styles, scripts } = res.data;
 
                     styles.forEach((style) => {
                         const linkEl = document.createElement('link');
                         linkEl.rel = 'stylesheet';
-                        linkEl.href = `https://editor.modd.io/static/css/${style}`;
+                        linkEl.href = `https://prod2.modd.io/static/css/${style}`;
 
                         document.head.appendChild(linkEl);
                     });
 
                     scripts.forEach((script) => {
                         const scriptEl = document.createElement('script');
-                        scriptEl.src = `https://editor.modd.io/static/js/${script}`;
+                        scriptEl.src = `https://prod2.modd.io/static/js/${script}`;
 
                         document.body.appendChild(scriptEl);
                     });
