@@ -121,14 +121,35 @@ class DevModeScene extends PhaserScene {
 		x: number, 
 		y: number, 
 		width: number, 
-		height: number}) => {
+		height: number,
+		entityIdFromServer: string}) => {
 			console.log('editRegion', data);
 			//TODO: add modal where user can add name of region/edit stats, new PhaserRegion - is temporary should be created after server response
 			//{name: data.name, x: data.x, y: data.y, width: data.width, height: data.height}
 			ige.addNewRegion && ige.addNewRegion({name: data.name, x: data.x, y: data.y, width: data.width, height: data.height});
-			new PhaserRegion(this.gameScene, {_stats: 
+			/*new PhaserRegion(this.gameScene, {_stats: 
 				{default: {x: data.x, y: data.y, width: data.width, height: data.height}, id: data.name},
-				on: (eventName, call, context, oneShot, sendEventName) => {} } as Region)
+				on: (eventName, call, context, oneShot, sendEventName) => {} } as Region)*/
+			var regionData = {
+				dataType: 'region',
+				default: {
+					x: data.x,
+					y: data.y,
+					width: data.width,
+					height: data.height,
+					key: data.name
+				},
+				id: data.name,
+				value: {
+					x: data.x,
+					y: data.y,
+					width: data.width,
+					height: data.height,
+					key: data.name
+				}
+			}
+			//var region = new Region(regionData, data.entityIdFromServer);
+			//console.log('editRegion', region)
 		});
 
 		this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
@@ -226,8 +247,7 @@ class DevModeScene extends PhaserScene {
 				graphics.clear();
 				this.regionTool = false;
 				this.devPalette.highlightModeButton(0);
-				const regionName = `Region${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
-				ige.network.send('editRegion', {name: regionName, x: this.regionDrawStart.x, y: this.regionDrawStart.y, width: width, height: height});
+				ige.network.send('editRegion', {x: this.regionDrawStart.x, y: this.regionDrawStart.y, width: width, height: height});
 				this.regionDrawStart = null;
 			}
 		}, this);

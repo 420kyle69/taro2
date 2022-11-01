@@ -458,40 +458,70 @@ var ServerNetworkEvents = {
 	},
 
 	_onEditRegion: function(data, clientId) {
-		console.log('region edited', data, clientId);
 		// only allow developers to modify regions
 
-		// create new region
-		if (data.name == undefined) {
-			// create new region name (highest region number + 1)
-			var highestRegionNumber = 1;
-			ige.$$('region').forEach(function (region) {
-				var regionNameArray = region._stats.id.split(/\W+/);
-				if (regionNameArray.length == 2 && regionNameArray[0] == 'region') {
-					var regionNumber = regionNameArray[1];
-					if (!isNaN(regionNumber) && regionNumber > highestRegionNumber) {
-						highestRegionNumber = regionNumber;
+		if (ige.server.developerClientIds.includes(clientId)) {  
+			console.log('region edited', data, clientId);
+
+			// create new region
+			if (data.name == undefined) {
+				// create new region name (highest region number + 1)
+				/*var highestRegionNumber = 1;
+				ige.$$('region').forEach(function (region) {
+					var regionNameArray = region._stats.id.split(/\W+/);
+					if (regionNameArray.length == 2 && regionNameArray[0] == 'region') {
+						var regionNumber = regionNameArray[1];
+						if (!isNaN(regionNumber) && regionNumber > highestRegionNumber) {
+							highestRegionNumber = regionNumber;
+						}
+					}
+				});
+				var newRegionName = "region "+highestRegionNumber;
+				console.log(newRegionName)*/
+
+				// create new region name (smallest available number)
+				let regionNameNumber = 0;
+				let newRegionName = 'region' + regionNameNumber
+				do {
+					regionNameNumber ++;
+					newRegionName = 'region' + regionNameNumber;
+				} while (ige.regionManager.getRegionById(newRegionName));
+
+				// create new region in game.data
+
+
+				// changed to Region from RegionUi
+				var regionData = {
+					dataType: 'region',
+					default: {
+						x: data.x,
+						y: data.y,
+						width: data.width,
+						height: data.height,
+						key: newRegionName
+					},
+					id: newRegionName,
+					value: {
+						x: data.x,
+						y: data.y,
+						width: data.width,
+						height: data.height,
+						key: newRegionName
 					}
 				}
-			});
+				var region = new Region(regionData);
+				//regionData.entityIdFromServer = region.id();
+				console.log('region created on server side', region)
 
-			var newRegionName = "region "+highestRegionNumber;
-			console.log(newRegionName)
-
-			// create new region in game.data
-			
-
-			// create new region entity
-			
+				// broadcast region change to all clients
+				ige.network.send("editRegion", data);
 
 		} else { // modify existing region
 			
 		}
-
-		if (ige.server.developerClientIds.includes(clientId)) {  
-
+		
 			// broadcast region change to all clients
-			ige.network.send("editRegion", data);
+			//ige.network.send("editRegion", data);
 		}
 	},
 
