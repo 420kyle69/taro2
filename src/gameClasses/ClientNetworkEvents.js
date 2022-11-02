@@ -474,7 +474,6 @@ var ClientNetworkEvents = {
 
 	// when other players' update regions, apply the change to my local
 	_onEditRegion: function (data) {
-		console.log('region come from server',data)
 		ige.client.emit('editRegion', data);
 	},
 

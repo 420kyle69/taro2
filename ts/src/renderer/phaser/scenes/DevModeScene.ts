@@ -124,7 +124,6 @@ class DevModeScene extends PhaserScene {
 		width: number, 
 		height: number,
 		entityIdFromServer: string}) => {
-			console.log('editRegion', data);
 			if (data.newName && data.name !== data.newName) {
 				const region = ige.regionManager.getRegionById(data.name);
 				region._stats.id = data.newName;
@@ -245,7 +244,11 @@ class DevModeScene extends PhaserScene {
 					y = this.regionDrawStart.y + height;
 					height *= -1;
 				}
-				ige.network.send('editRegion', {x: x, y: y, width: width, height: height});
+				ige.network.send('editRegion', {x: Math.trunc(x), 
+					y: Math.trunc(y), 
+					width: Math.trunc(width), 
+					height: Math.trunc(height)});
+
 				this.regionDrawStart = null;
 			}
 		}, this);

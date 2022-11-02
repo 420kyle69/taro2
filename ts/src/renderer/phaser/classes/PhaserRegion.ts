@@ -40,8 +40,6 @@ class PhaserRegion extends PhaserEntity {
 			this.devModeOnly = true;
 		}
 
-		console.log('creating region', this.name, entity)
-
 		const devModeScene = ige.renderer.scene.getScene('DevMode') as DevModeScene;
 		devModeScene.regions.push(this);
 

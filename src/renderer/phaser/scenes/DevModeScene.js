@@ -100,7 +100,6 @@ var DevModeScene = /** @class */ (function (_super) {
             }
         });
         ige.client.on('editRegion', function (data) {
-            console.log('editRegion', data);
             if (data.newName && data.name !== data.newName) {
                 var region = ige.regionManager.getRegionById(data.name);
                 region._stats.id = data.newName;
@@ -204,7 +203,10 @@ var DevModeScene = /** @class */ (function (_super) {
                     y = _this.regionDrawStart.y + height;
                     height *= -1;
                 }
-                ige.network.send('editRegion', { x: x, y: y, width: width, height: height });
+                ige.network.send('editRegion', { x: Math.trunc(x),
+                    y: Math.trunc(y),
+                    width: Math.trunc(width),
+                    height: Math.trunc(height) });
                 _this.regionDrawStart = null;
             }
         }, this);
