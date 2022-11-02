@@ -235,7 +235,17 @@ class DevModeScene extends PhaserScene {
 				graphics.clear();
 				this.regionTool = false;
 				this.devPalette.highlightModeButton(0);
-				ige.network.send('editRegion', {x: this.regionDrawStart.x, y: this.regionDrawStart.y, width: width, height: height});
+				let x = this.regionDrawStart.x;
+				let y = this.regionDrawStart.y;
+				if (width < 0) {
+					x = this.regionDrawStart.x + width;
+					width *= -1;
+				}
+				if (height < 0) {
+					y = this.regionDrawStart.y + height;
+					height *= -1;
+				}
+				ige.network.send('editRegion', {x: x, y: y, width: width, height: height});
 				this.regionDrawStart = null;
 			}
 		}, this);

@@ -194,7 +194,17 @@ var DevModeScene = /** @class */ (function (_super) {
                 graphics.clear();
                 _this.regionTool = false;
                 _this.devPalette.highlightModeButton(0);
-                ige.network.send('editRegion', { x: _this.regionDrawStart.x, y: _this.regionDrawStart.y, width: width, height: height });
+                var x = _this.regionDrawStart.x;
+                var y = _this.regionDrawStart.y;
+                if (width < 0) {
+                    x = _this.regionDrawStart.x + width;
+                    width *= -1;
+                }
+                if (height < 0) {
+                    y = _this.regionDrawStart.y + height;
+                    height *= -1;
+                }
+                ige.network.send('editRegion', { x: x, y: y, width: width, height: height });
                 _this.regionDrawStart = null;
             }
         }, this);
