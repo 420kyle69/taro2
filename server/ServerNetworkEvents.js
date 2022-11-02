@@ -460,8 +460,7 @@ var ServerNetworkEvents = {
 	_onEditRegion: function(data, clientId) {
 		// only allow developers to modify regions
 
-		if (ige.server.developerClientIds.includes(clientId)) {  
-			console.log('region edited', data, clientId);
+		if (ige.server.developerClientIds.includes(clientId)/* && data.width !== 0 && data.height !== 0*/) {  
 
 			// create new region
 			if (data.name == undefined) {
