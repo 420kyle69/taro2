@@ -99,7 +99,6 @@ class DevModeScene extends PhaserScene {
 		}) => {
 			console.log('editTile', data);
 			map.putTileAt(data.gid, data.x, data.y, false, data.layer);
-			//ige.developerMode.changedTiles.push(data);
 
 			/* TODO: SAVE MAP DATA FROM SERVER SIDE */
 			const width = ige.game.data.map.width;
@@ -230,7 +229,7 @@ class DevModeScene extends PhaserScene {
 
 		this.gameScene.input.on('pointerup', (pointer) => {
 			const worldPoint = this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
-			if (this.regionTool && this.regionDrawStart.x !== worldPoint.x && this.regionDrawStart.y !== worldPoint.y) {
+			if (this.regionTool && this.regionDrawStart && this.regionDrawStart.x !== worldPoint.x && this.regionDrawStart.y !== worldPoint.y) {
 				graphics.clear();
 				this.regionTool = false;
 				this.devPalette.highlightModeButton(0);

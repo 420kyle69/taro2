@@ -517,29 +517,31 @@ var ServerNetworkEvents = {
 
 		} else { // modify existing region
 			const region = ige.regionManager.getRegionById(data.name);
-			if (data.delete) {
-				region.destroy();
-			}
-			else {
-				if (data.name !== data.newName) {
-					if (ige.regionManager.getRegionById(data.newName)) {
-						console.log('This name is unavailable');
-					} 
-					else {
-						region._stats.id = data.newName;
-						ige.network.send("editRegion", data);
-					}
+			if (region) {
+				if (data.delete) {
+					region.destroy();
 				}
-				var data = [
-					{ x: data.x !== region._stats.default.x ? data.x : null },
-					{ y: data.y !== region._stats.default.y ? data.y : null },
-					{ width: data.width !== region._stats.default.width ? data.width : null },
-					{ height: data.height !== region._stats.default.height ? data.height : null }
-				];
-				// there's gotta be a better way to do this, i'm just blind right now
-				data = data.filter(obj => obj[Object.keys(obj)[0]] !== null);
-
-				region.streamUpdateData(data);
+				else {
+					if (data.name !== data.newName) {
+						if (ige.regionManager.getRegionById(data.newName)) {
+							console.log('This name is unavailable');
+						} 
+						else {
+							region._stats.id = data.newName;
+							ige.network.send("editRegion", data);
+						}
+					}
+					var data = [
+						{ x: data.x !== region._stats.default.x ? data.x : null },
+						{ y: data.y !== region._stats.default.y ? data.y : null },
+						{ width: data.width !== region._stats.default.width ? data.width : null },
+						{ height: data.height !== region._stats.default.height ? data.height : null }
+					];
+					// there's gotta be a better way to do this, i'm just blind right now
+					data = data.filter(obj => obj[Object.keys(obj)[0]] !== null);
+	
+					region.streamUpdateData(data);
+				}
 			}
 		}
 		

@@ -5,6 +5,7 @@ class PhaserRegion extends PhaserEntity {
 	private graphics: Phaser.GameObjects.Graphics
 	public gameObject: Phaser.GameObjects.Container & IRenderProps;
 	public devModeOnly: boolean;
+	private devModeScene: DevModeScene;
 
 	constructor (
 		private scene: GameScene,
@@ -23,7 +24,7 @@ class PhaserRegion extends PhaserEntity {
 		gameObject.setPosition(stats.x + stats.width/2, stats.y + stats.height/2);
 		gameObject.setInteractive();
 		gameObject.on('pointerdown', () => {
-			if (ige.developerMode.active && this.scene.input.manager.activePointer.rightButtonDown()) {
+			if (ige.developerMode.active && this.devModeScene.regionTool && this.scene.input.manager.activePointer.rightButtonDown()) {
 				ige.addNewRegion && ige.addNewRegion({name: this.entity._stats.id, x: stats.x, y: stats.y, width: stats.width, height: stats.height});
 			}
 		});
@@ -40,7 +41,7 @@ class PhaserRegion extends PhaserEntity {
 			this.devModeOnly = true;
 		}
 
-		const devModeScene = ige.renderer.scene.getScene('DevMode') as DevModeScene;
+		const devModeScene = this.devModeScene = ige.renderer.scene.getScene('DevMode') as DevModeScene;
 		devModeScene.regions.push(this);
 
 		if (this.devModeOnly && !ige.developerMode.active) {
@@ -58,7 +59,7 @@ class PhaserRegion extends PhaserEntity {
 
 			// needs to be created with the correct scale of the client
 			this.label.setScale(1 / this.scene.cameras.main.zoom);
-			label.setOrigin(0.5);
+			label.setOrigin(0);
 
 			this.gameObject.add(label);
 		}
@@ -80,8 +81,7 @@ class PhaserRegion extends PhaserEntity {
 		label.setText(this.name || '');
 
 		const stats = this.entity._stats.default;
-		label.setPosition(label.width/1.5 - stats.width/2, label.height - stats.height/2);
-		//this.updateLabelOffset();
+		label.setPosition(5 - stats.width/2, 5 - stats.height/2);
 	}
 
 	protected transform (): void {
@@ -91,7 +91,7 @@ class PhaserRegion extends PhaserEntity {
 
 		this.gameObject.setPosition(stats.x + stats.width/2, stats.y + stats.height/2);
 		graphics.setPosition(-stats.width/2, -stats.height/2);
-		label.setPosition(label.width/1.5 - stats.width/2, label.height - stats.height/2);
+		label.setPosition(5 - stats.width/2, 5 - stats.height/2);
 
 		graphics.clear();
 		
@@ -123,6 +123,7 @@ class PhaserRegion extends PhaserEntity {
 	}
 
 	protected destroy (): void {
+		this.devModeScene.regions = this.devModeScene.regions.filter(item => item !== this);
 		this.scene.renderedEntities = this.scene.renderedEntities.filter(item => item !== this.gameObject);
 		super.destroy();
 	}

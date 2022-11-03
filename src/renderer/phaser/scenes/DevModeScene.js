@@ -83,7 +83,6 @@ var DevModeScene = /** @class */ (function (_super) {
         ige.client.on('editTile', function (data) {
             console.log('editTile', data);
             map.putTileAt(data.gid, data.x, data.y, false, data.layer);
-            //ige.developerMode.changedTiles.push(data);
             /* TODO: SAVE MAP DATA FROM SERVER SIDE */
             var width = ige.game.data.map.width;
             //save tile change to ige.game.map.data
@@ -189,7 +188,7 @@ var DevModeScene = /** @class */ (function (_super) {
         }, this);
         this.gameScene.input.on('pointerup', function (pointer) {
             var worldPoint = _this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
-            if (_this.regionTool && _this.regionDrawStart.x !== worldPoint.x && _this.regionDrawStart.y !== worldPoint.y) {
+            if (_this.regionTool && _this.regionDrawStart && _this.regionDrawStart.x !== worldPoint.x && _this.regionDrawStart.y !== worldPoint.y) {
                 graphics.clear();
                 _this.regionTool = false;
                 _this.devPalette.highlightModeButton(0);
