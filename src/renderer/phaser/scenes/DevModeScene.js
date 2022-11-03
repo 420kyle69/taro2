@@ -26,7 +26,7 @@ var DevModeScene = /** @class */ (function (_super) {
         //const map = this.devPalette.map;
         var map = this.gameScene.tilemap;
         this.selectedTile = null;
-        this.selectedTileArea = [[null, null, null, null]];
+        this.selectedTileArea = [[null, null], [null, null]];
         ige.client.on('enterDevMode', function () {
             _this.defaultZoom = (_this.gameScene.zoomSize / 2.15);
             if (!_this.devPalette) {

@@ -31,7 +31,7 @@ class DevModeScene extends PhaserScene {
 		//const map = this.devPalette.map;
 		const map = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
 		this.selectedTile = null;
-		this.selectedTileArea = [[null, null, null, null]];
+		this.selectedTileArea = [[null, null],[null, null]];
 
 		ige.client.on('enterDevMode', () => {
 			this.defaultZoom = (this.gameScene.zoomSize / 2.15)
