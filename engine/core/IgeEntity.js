@@ -4184,7 +4184,9 @@ var IgeEntity = IgeObject.extend({
 							if (attrName === 'ownerId') {
 								this.oldOwnerId = this._stats[attrName];
 							}
-							this._stats[attrName] = newValue;
+							if (!(attrName == 'isBeingUsed' && ige.isClient && ige.client.selectedUnit == this.getOwnerUnit()))
+								this._stats[attrName] = newValue;
+
 							break;
 					}
 
@@ -4694,7 +4696,7 @@ var IgeEntity = IgeObject.extend({
 
 				case 'unit': 
 					// cellsheet is used for purchasable-skins
-					keys = ["name", "type", "stateId", "ownerId", "currentItemIndex", "currentItemId", "flip", "skin", "cellSheet"]
+					keys = ["name", "type", "stateId", "ownerId", "currentItemIndex", "currentItemId", "flip", "skin", "scale", "cellSheet"]
 					data = { 
 						attributes: {}, 
 						// variables: {} 
