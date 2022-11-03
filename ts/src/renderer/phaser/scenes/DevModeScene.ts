@@ -136,7 +136,8 @@ class DevModeScene extends PhaserScene {
 		y: number, 
 		width: number, 
 		height: number,
-		entityIdFromServer: string}) => {
+		entityIdFromServer: string, 
+		userId: string}) => {
 			if (data.newName && data.name !== data.newName) {
 				const region = ige.regionManager.getRegionById(data.name);
 				region._stats.id = data.newName;
@@ -148,7 +149,7 @@ class DevModeScene extends PhaserScene {
 				});
 			}
 			else {
-				ige.addNewRegion && ige.addNewRegion({name: data.name, x: data.x, y: data.y, width: data.width, height: data.height});
+				ige.addNewRegion && ige.addNewRegion({name: data.name, x: data.x, y: data.y, width: data.width, height: data.height, userId: data.userId});
 			}
 
 			ige.updateRegionInReact && ige.updateRegionInReact();

@@ -487,7 +487,7 @@ var ServerNetworkEvents = {
 				} while (ige.regionManager.getRegionById(newRegionName));
 
 				data.name = newRegionName;
-
+				data.userId = ige.game.getPlayerByClientId(clientId)._stats.userId;
 				// changed to Region from RegionUi
 				var regionData = {
 					dataType: 'region',

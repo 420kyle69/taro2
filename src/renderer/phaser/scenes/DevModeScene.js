@@ -121,7 +121,7 @@ var DevModeScene = /** @class */ (function (_super) {
                 });
             }
             else {
-                ige.addNewRegion && ige.addNewRegion({ name: data.name, x: data.x, y: data.y, width: data.width, height: data.height });
+                ige.addNewRegion && ige.addNewRegion({ name: data.name, x: data.x, y: data.y, width: data.width, height: data.height, userId: data.userId });
             }
             ige.updateRegionInReact && ige.updateRegionInReact();
         });
