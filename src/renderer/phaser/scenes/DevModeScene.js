@@ -187,7 +187,7 @@ var DevModeScene = /** @class */ (function (_super) {
         var width;
         var height;
         this.gameScene.input.on('pointermove', function (pointer) {
-            if (!pointer.isDown)
+            if (!pointer.leftButtonDown())
                 return;
             else if (_this.regionTool) {
                 var worldPoint = _this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
@@ -199,6 +199,8 @@ var DevModeScene = /** @class */ (function (_super) {
             }
         }, this);
         this.gameScene.input.on('pointerup', function (pointer) {
+            if (!pointer.leftButtonReleased())
+                return;
             var worldPoint = _this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
             if (_this.regionTool && _this.regionDrawStart && _this.regionDrawStart.x !== worldPoint.x && _this.regionDrawStart.y !== worldPoint.y) {
                 graphics.clear();

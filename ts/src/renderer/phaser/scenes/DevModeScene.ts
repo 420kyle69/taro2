@@ -232,7 +232,7 @@ class DevModeScene extends PhaserScene {
 		let height;
 
 		this.gameScene.input.on('pointermove', (pointer) => {
-			if (!pointer.isDown) return;
+			if (!pointer.leftButtonDown()) return;
 			else if (this.regionTool) {
 				const worldPoint = this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
 				width = worldPoint.x - this.regionDrawStart.x;
@@ -244,6 +244,7 @@ class DevModeScene extends PhaserScene {
 			}, this);
 
 		this.gameScene.input.on('pointerup', (pointer) => {
+			if (!pointer.leftButtonReleased()) return;
 			const worldPoint = this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
 			if (this.regionTool && this.regionDrawStart && this.regionDrawStart.x !== worldPoint.x && this.regionDrawStart.y !== worldPoint.y) {
 				graphics.clear();
