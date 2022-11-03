@@ -123,6 +123,7 @@ var DevModeScene = /** @class */ (function (_super) {
             else {
                 ige.addNewRegion && ige.addNewRegion({ name: data.name, x: data.x, y: data.y, width: data.width, height: data.height });
             }
+            ige.updateRegionInReact && ige.updateRegionInReact();
         });
         this.input.on('wheel', function (pointer, gameObjects, deltaX, deltaY, deltaZ) {
             if (_this.devPalette && _this.devPalette.visible) {
