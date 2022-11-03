@@ -75,10 +75,12 @@ var PhaserRegion = /** @class */ (function (_super) {
         label.setPosition(5 - stats.width / 2, 5 - stats.height / 2);
     };
     PhaserRegion.prototype.transform = function () {
+        var gameObject = this.gameObject;
         var graphics = this.graphics;
         var label = this.label;
         var stats = this.entity._stats.default;
-        this.gameObject.setPosition(stats.x + stats.width / 2, stats.y + stats.height / 2);
+        gameObject.setSize(stats.width, stats.height);
+        gameObject.setPosition(stats.x + stats.width / 2, stats.y + stats.height / 2);
         graphics.setPosition(-stats.width / 2, -stats.height / 2);
         label.setPosition(5 - stats.width / 2, 5 - stats.height / 2);
         graphics.clear();

@@ -85,11 +85,13 @@ class PhaserRegion extends PhaserEntity {
 	}
 
 	protected transform (): void {
+		const gameObject =  this.gameObject;
 		const graphics = this.graphics;
 		const label = this.label;
 		const stats = this.entity._stats.default;
 
-		this.gameObject.setPosition(stats.x + stats.width/2, stats.y + stats.height/2);
+		gameObject.setSize(stats.width, stats.height);
+		gameObject.setPosition(stats.x + stats.width/2, stats.y + stats.height/2);
 		graphics.setPosition(-stats.width/2, -stats.height/2);
 		label.setPosition(5 - stats.width/2, 5 - stats.height/2);
 
