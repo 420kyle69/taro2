@@ -99,7 +99,6 @@ class DevModeScene extends PhaserScene {
 		}) => {
 			console.log('editTile', data);
 			map.putTileAt(data.gid, data.x, data.y, false, data.layer);
-			//ige.developerMode.changedTiles.push(data);
 
 			/* TODO: SAVE MAP DATA FROM SERVER SIDE */
 			const width = ige.game.data.map.width;
@@ -124,7 +123,6 @@ class DevModeScene extends PhaserScene {
 		width: number, 
 		height: number,
 		entityIdFromServer: string}) => {
-			console.log('editRegion', data);
 			if (data.newName && data.name !== data.newName) {
 				const region = ige.regionManager.getRegionById(data.name);
 				region._stats.id = data.newName;
@@ -231,11 +229,25 @@ class DevModeScene extends PhaserScene {
 
 		this.gameScene.input.on('pointerup', (pointer) => {
 			const worldPoint = this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
-			if (this.regionTool && this.regionDrawStart.x !== worldPoint.x && this.regionDrawStart.y !== worldPoint.y) {
+			if (this.regionTool && this.regionDrawStart && this.regionDrawStart.x !== worldPoint.x && this.regionDrawStart.y !== worldPoint.y) {
 				graphics.clear();
 				this.regionTool = false;
 				this.devPalette.highlightModeButton(0);
-				ige.network.send('editRegion', {x: this.regionDrawStart.x, y: this.regionDrawStart.y, width: width, height: height});
+				let x = this.regionDrawStart.x;
+				let y = this.regionDrawStart.y;
+				if (width < 0) {
+					x = this.regionDrawStart.x + width;
+					width *= -1;
+				}
+				if (height < 0) {
+					y = this.regionDrawStart.y + height;
+					height *= -1;
+				}
+				ige.network.send('editRegion', {x: Math.trunc(x), 
+					y: Math.trunc(y), 
+					width: Math.trunc(width), 
+					height: Math.trunc(height)});
+
 				this.regionDrawStart = null;
 			}
 		}, this);

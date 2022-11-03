@@ -141,13 +141,11 @@ var PhaserPalette = /** @class */ (function (_super) {
         });*/
     }
     PhaserPalette.prototype.cursor = function () {
-        console.log('cursor tool');
         this.highlightModeButton(0);
         this.scene.regionTool = false;
         this.scene.activateMarker(false);
     };
     PhaserPalette.prototype.drawRegion = function () {
-        console.log('draw region');
         this.scene.activateMarker(false);
         this.highlightModeButton(1);
         this.scene.regionTool = true;
@@ -155,7 +153,6 @@ var PhaserPalette = /** @class */ (function (_super) {
     PhaserPalette.prototype.brush = function () {
         this.scene.selectedTile = null;
         this.scene.selectedTileArea = [[null, null], [null, null]];
-        console.log('empty brush', this.scene.selectedTile);
         this.scene.activateMarker(true);
         this.scene.regionTool = false;
         this.highlightModeButton(2);

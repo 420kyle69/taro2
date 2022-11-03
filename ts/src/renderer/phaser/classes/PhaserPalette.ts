@@ -181,14 +181,12 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 	}
 
 	cursor() {
-		console.log('cursor tool');
 		this.highlightModeButton(0);
 		this.scene.regionTool = false;
 		this.scene.activateMarker(false);
 	}
 
 	drawRegion() {
-		console.log('draw region');
 		this.scene.activateMarker(false);
 		this.highlightModeButton(1);
 		this.scene.regionTool = true;
@@ -197,7 +195,6 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 	brush() {
 		this.scene.selectedTile = null;
 		this.scene.selectedTileArea = [[null, null],[null, null]] as any;
-		console.log('empty brush', this.scene.selectedTile)
 		this.scene.activateMarker(true);
 		this.scene.regionTool = false;
 		this.highlightModeButton(2);

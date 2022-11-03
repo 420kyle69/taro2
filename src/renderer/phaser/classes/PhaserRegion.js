@@ -27,7 +27,7 @@ var PhaserRegion = /** @class */ (function (_super) {
         gameObject.setPosition(stats.x + stats.width / 2, stats.y + stats.height / 2);
         gameObject.setInteractive();
         gameObject.on('pointerdown', function () {
-            if (ige.developerMode.active && _this.scene.input.manager.activePointer.rightButtonDown()) {
+            if (ige.developerMode.active && _this.devModeScene.regionTool && _this.scene.input.manager.activePointer.rightButtonDown()) {
                 ige.addNewRegion && ige.addNewRegion({ name: _this.entity._stats.id, x: stats.x, y: stats.y, width: stats.width, height: stats.height });
             }
         });
@@ -40,8 +40,7 @@ var PhaserRegion = /** @class */ (function (_super) {
         if (!stats.inside) {
             _this.devModeOnly = true;
         }
-        console.log('creating region', _this.name, entity);
-        var devModeScene = ige.renderer.scene.getScene('DevMode');
+        var devModeScene = _this.devModeScene = ige.renderer.scene.getScene('DevMode');
         devModeScene.regions.push(_this);
         if (_this.devModeOnly && !ige.developerMode.active) {
             _this.hide();
@@ -56,7 +55,7 @@ var PhaserRegion = /** @class */ (function (_super) {
             label.visible = false;
             // needs to be created with the correct scale of the client
             this.label.setScale(1 / this.scene.cameras.main.zoom);
-            label.setOrigin(0.5);
+            label.setOrigin(0);
             this.gameObject.add(label);
         }
         return this.label;
@@ -73,8 +72,7 @@ var PhaserRegion = /** @class */ (function (_super) {
         label.setStroke('#000', strokeThickness);
         label.setText(this.name || '');
         var stats = this.entity._stats.default;
-        label.setPosition(label.width / 1.5 - stats.width / 2, label.height - stats.height / 2);
-        //this.updateLabelOffset();
+        label.setPosition(5 - stats.width / 2, 5 - stats.height / 2);
     };
     PhaserRegion.prototype.transform = function () {
         var graphics = this.graphics;
@@ -82,7 +80,7 @@ var PhaserRegion = /** @class */ (function (_super) {
         var stats = this.entity._stats.default;
         this.gameObject.setPosition(stats.x + stats.width / 2, stats.y + stats.height / 2);
         graphics.setPosition(-stats.width / 2, -stats.height / 2);
-        label.setPosition(label.width / 1.5 - stats.width / 2, label.height - stats.height / 2);
+        label.setPosition(5 - stats.width / 2, 5 - stats.height / 2);
         graphics.clear();
         if (this.devModeOnly) {
             graphics.lineStyle(2, 0x11fa05, 
@@ -100,6 +98,7 @@ var PhaserRegion = /** @class */ (function (_super) {
     };
     PhaserRegion.prototype.destroy = function () {
         var _this = this;
+        this.devModeScene.regions = this.devModeScene.regions.filter(function (item) { return item !== _this; });
         this.scene.renderedEntities = this.scene.renderedEntities.filter(function (item) { return item !== _this.gameObject; });
         _super.prototype.destroy.call(this);
     };

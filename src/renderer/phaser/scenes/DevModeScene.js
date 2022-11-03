@@ -83,7 +83,6 @@ var DevModeScene = /** @class */ (function (_super) {
         ige.client.on('editTile', function (data) {
             console.log('editTile', data);
             map.putTileAt(data.gid, data.x, data.y, false, data.layer);
-            //ige.developerMode.changedTiles.push(data);
             /* TODO: SAVE MAP DATA FROM SERVER SIDE */
             var width = ige.game.data.map.width;
             //save tile change to ige.game.map.data
@@ -100,7 +99,6 @@ var DevModeScene = /** @class */ (function (_super) {
             }
         });
         ige.client.on('editRegion', function (data) {
-            console.log('editRegion', data);
             if (data.newName && data.name !== data.newName) {
                 var region = ige.regionManager.getRegionById(data.name);
                 region._stats.id = data.newName;
@@ -190,11 +188,24 @@ var DevModeScene = /** @class */ (function (_super) {
         }, this);
         this.gameScene.input.on('pointerup', function (pointer) {
             var worldPoint = _this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
-            if (_this.regionTool && _this.regionDrawStart.x !== worldPoint.x && _this.regionDrawStart.y !== worldPoint.y) {
+            if (_this.regionTool && _this.regionDrawStart && _this.regionDrawStart.x !== worldPoint.x && _this.regionDrawStart.y !== worldPoint.y) {
                 graphics.clear();
                 _this.regionTool = false;
                 _this.devPalette.highlightModeButton(0);
-                ige.network.send('editRegion', { x: _this.regionDrawStart.x, y: _this.regionDrawStart.y, width: width, height: height });
+                var x = _this.regionDrawStart.x;
+                var y = _this.regionDrawStart.y;
+                if (width < 0) {
+                    x = _this.regionDrawStart.x + width;
+                    width *= -1;
+                }
+                if (height < 0) {
+                    y = _this.regionDrawStart.y + height;
+                    height *= -1;
+                }
+                ige.network.send('editRegion', { x: Math.trunc(x),
+                    y: Math.trunc(y),
+                    width: Math.trunc(width),
+                    height: Math.trunc(height) });
                 _this.regionDrawStart = null;
             }
         }, this);
