@@ -76,16 +76,30 @@ class DevModeScene extends PhaserScene {
 				}
 			}
 		});
-		const plusKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.PLUS, true);
+
+		const shouldPreventKeybindings = function () {
+			if (!ige.isClient || !$('#game-editor').is(':visible')) {
+				return false;
+			}
+			let activeElement = document.activeElement;
+			let inputs = ['input', 'select', 'textarea'];
+	
+			if (activeElement && inputs.indexOf(activeElement.tagName.toLowerCase()) !== -1) {
+				return true;
+			}
+			return false;
+		}
+
+		const plusKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.PLUS, false);
 		plusKey.on('down', () => {
-			if(ige.developerMode.active) {
+			if(ige.developerMode.active && !shouldPreventKeybindings()) {
 				const zoom = (this.gameScene.zoomSize / 2.15) / 1.1;
 				ige.client.emit('zoom', zoom);
 			}
 		});
-		const minusKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.MINUS, true);
+		const minusKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.MINUS, false);
 		minusKey.on('down', () => {
-			if(ige.developerMode.active) {
+			if(ige.developerMode.active && !shouldPreventKeybindings()) {
 				const zoom =(this.gameScene.zoomSize / 2.15) * 1.1;
 				ige.client.emit('zoom', zoom);
 			}

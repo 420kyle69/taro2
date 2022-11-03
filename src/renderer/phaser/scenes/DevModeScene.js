@@ -66,16 +66,27 @@ var DevModeScene = /** @class */ (function (_super) {
                 }
             }
         });
-        var plusKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.PLUS, true);
+        var shouldPreventKeybindings = function () {
+            if (!ige.isClient || !$('#game-editor').is(':visible')) {
+                return false;
+            }
+            var activeElement = document.activeElement;
+            var inputs = ['input', 'select', 'textarea'];
+            if (activeElement && inputs.indexOf(activeElement.tagName.toLowerCase()) !== -1) {
+                return true;
+            }
+            return false;
+        };
+        var plusKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.PLUS, false);
         plusKey.on('down', function () {
-            if (ige.developerMode.active) {
+            if (ige.developerMode.active && !shouldPreventKeybindings()) {
                 var zoom = (_this.gameScene.zoomSize / 2.15) / 1.1;
                 ige.client.emit('zoom', zoom);
             }
         });
-        var minusKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.MINUS, true);
+        var minusKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.MINUS, false);
         minusKey.on('down', function () {
-            if (ige.developerMode.active) {
+            if (ige.developerMode.active && !shouldPreventKeybindings()) {
                 var zoom = (_this.gameScene.zoomSize / 2.15) * 1.1;
                 ige.client.emit('zoom', zoom);
             }
