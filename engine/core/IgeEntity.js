@@ -4184,7 +4184,9 @@ var IgeEntity = IgeObject.extend({
 							if (attrName === 'ownerId') {
 								this.oldOwnerId = this._stats[attrName];
 							}
-							this._stats[attrName] = newValue;
+							if (!(attrName == 'isBeingUsed' && ige.isClient && ige.client.selectedUnit == this.getOwnerUnit()))
+								this._stats[attrName] = newValue;
+
 							break;
 					}
 
