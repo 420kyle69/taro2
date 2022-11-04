@@ -52,6 +52,7 @@ class DevModeScene extends PhaserScene {
 		});
 
 		ige.client.on('leaveDevMode', () => {
+			this.cancelDrawRegion();
 			this.devPalette.hide();
 			this.devPalette.layerButtonsContainer.setVisible(false);
 			this.devPalette.toolButtonsContainer.setVisible(false);

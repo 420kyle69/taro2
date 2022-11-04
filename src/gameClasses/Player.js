@@ -90,14 +90,25 @@ var Player = IgeEntity.extend({
 				var dataLoadTime = self._stats.totalTime;
 				client.lastEventAt = Date.now();
 
-				var playerJoinStreamData = [
-					{ streamedOn: Date.now() },
-					{ playerJoined: true },
-					{ dataLoadTime: dataLoadTime },
-					{ processedJoinGame: processedJoinGame },
-					{ receivedJoinGame: receivedJoinGame },
-					{ mapData: ige.game.data.map }
-				];
+				if (ige.game.data.map.wasEdited) {
+					var playerJoinStreamData = [
+						{ streamedOn: Date.now() },
+						{ playerJoined: true },
+						{ dataLoadTime: dataLoadTime },
+						{ processedJoinGame: processedJoinGame },
+						{ receivedJoinGame: receivedJoinGame },
+						{ mapData: ige.game.data.map }
+					];
+				} else {
+					var playerJoinStreamData = [
+						{ streamedOn: Date.now() },
+						{ playerJoined: true },
+						{ dataLoadTime: dataLoadTime },
+						{ processedJoinGame: processedJoinGame },
+						{ receivedJoinGame: receivedJoinGame }
+					];
+				}
+				
 
 				// console.log(`Player.joinGame(): sending ACK to client ${self._stats.clientId} ${self._stats.name} (time elapsed: ${Date.now() - client.lastEventAt})`, playerJoinStreamData);
 
