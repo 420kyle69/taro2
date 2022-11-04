@@ -68,18 +68,23 @@ class DevModeScene extends PhaserScene {
 
 		const tabKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, true);
 		tabKey.on('down', () => {
-			if(ige.developerMode.active) {
-				if (this.devPalette.visible) {
-					this.devPalette.hide();
-				}
-				else {
-					this.devPalette.show()
+			if (shouldPreventKeybindings()) {
+				this.input.keyboard.disableGlobalCapture();
+			} else {
+				this.input.keyboard.enableGlobalCapture();
+				if(ige.developerMode.active) {
+					if (this.devPalette.visible) {
+						this.devPalette.hide();
+					}
+					else {
+						this.devPalette.show()
+					}
 				}
 			}
 		});
 
 		const shouldPreventKeybindings = function () {
-			if (!ige.isClient || !$('#game-editor').is(':visible')) {
+			if (!$('#game-editor').is(':visible')) {
 				return false;
 			}
 			let activeElement = document.activeElement;
@@ -131,17 +136,18 @@ class DevModeScene extends PhaserScene {
 		});
 
 		ige.client.on('editRegion', (data: {
+		userId: string,
 		name: string, 
 		newName?: string,
-		x: number, 
-		y: number, 
-		width: number, 
-		height: number,
-		entityIdFromServer: string, 
-		userId: string}) => {
+		x?: number, 
+		y?: number, 
+		width?: number, 
+		height?: number,
+		delete?: boolean,
+		showModal?: boolean}) => {
 			if (data.newName && data.name !== data.newName) {
 				const region = ige.regionManager.getRegionById(data.name);
-				region._stats.id = data.newName;
+				if (region) region._stats.id = data.newName;
 				this.regions.forEach(region => {
 					if (region.name === data.name) {
 						region.name = data.newName;
@@ -149,7 +155,7 @@ class DevModeScene extends PhaserScene {
 					}
 				});
 			}
-			else {
+			else if (data.showModal) {
 				ige.addNewRegion && ige.addNewRegion({name: data.name, x: data.x, y: data.y, width: data.width, height: data.height, userId: data.userId});
 			}
 

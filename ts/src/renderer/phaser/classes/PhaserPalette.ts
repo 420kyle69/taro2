@@ -48,7 +48,7 @@ class PhaserPalette extends Phaser.GameObjects.Container {
 			paletteMap.push([]);
 		}
 		for (let i = 0; i < tileset.total; i++) {
-			paletteMap[Math.floor(i/tileset.columns)].push(i);
+			paletteMap[Math.floor(i/tileset.columns)].push(i+1);
 		}
 
 		// When loading from an array, make sure to specify the tileWidth and tileHeight

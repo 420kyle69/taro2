@@ -58,17 +58,23 @@ var DevModeScene = /** @class */ (function (_super) {
         });
         var tabKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, true);
         tabKey.on('down', function () {
-            if (ige.developerMode.active) {
-                if (_this.devPalette.visible) {
-                    _this.devPalette.hide();
-                }
-                else {
-                    _this.devPalette.show();
+            if (shouldPreventKeybindings()) {
+                _this.input.keyboard.disableGlobalCapture();
+            }
+            else {
+                _this.input.keyboard.enableGlobalCapture();
+                if (ige.developerMode.active) {
+                    if (_this.devPalette.visible) {
+                        _this.devPalette.hide();
+                    }
+                    else {
+                        _this.devPalette.show();
+                    }
                 }
             }
         });
         var shouldPreventKeybindings = function () {
-            if (!ige.isClient || !$('#game-editor').is(':visible')) {
+            if (!$('#game-editor').is(':visible')) {
                 return false;
             }
             var activeElement = document.activeElement;
@@ -113,7 +119,8 @@ var DevModeScene = /** @class */ (function (_super) {
         ige.client.on('editRegion', function (data) {
             if (data.newName && data.name !== data.newName) {
                 var region = ige.regionManager.getRegionById(data.name);
-                region._stats.id = data.newName;
+                if (region)
+                    region._stats.id = data.newName;
                 _this.regions.forEach(function (region) {
                     if (region.name === data.name) {
                         region.name = data.newName;
@@ -121,7 +128,7 @@ var DevModeScene = /** @class */ (function (_super) {
                     }
                 });
             }
-            else {
+            else if (data.showModal) {
                 ige.addNewRegion && ige.addNewRegion({ name: data.name, x: data.x, y: data.y, width: data.width, height: data.height, userId: data.userId });
             }
             ige.updateRegionInReact && ige.updateRegionInReact();
