@@ -4184,13 +4184,12 @@ var IgeEntity = IgeObject.extend({
 							if (attrName === 'ownerId') {
 								this.oldOwnerId = this._stats[attrName];
 							}
-							if (!(attrName == 'isBeingUsed' && ige.isClient && ige.client.selectedUnit == this.getOwnerUnit()))
-								this._stats[attrName] = newValue;
+							this._stats[attrName] = newValue;
 
 							break;
 					}
 
-					if (ige.isServer) {
+					if (ige.isServer && !ige.network.isPaused) {
 						// keys that will stream even if its new value is same as the previous value
 						var forceStreamKeys = ['anim', 'coin', 'stateId', 'ownerId', 'name', 'slotIndex', 'newItemId', 'quantity', 'spriteOnly', 'setFadingText', 'playerJoinedAgain', 'use', 'hidden'];
 						if (typeof this.queueStreamData === 'function') {
