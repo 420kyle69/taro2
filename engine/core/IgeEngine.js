@@ -1729,12 +1729,9 @@ var IgeEngine = IgeEntity.extend({
 			if (ige.isServer) { // triggersQueued runs on client-side inside EntitiesToRender.ts
 				// triggersQueued is executed in the entities first (entity-script) then it runs for the world
 				while (ige.triggersQueued.length > 0) {
-					// console.log(ige.triggersQueued.length);
+
 					const trigger = ige.triggersQueued.shift();
-					// console.log(trigger, ige.triggersQueued.length);
-					// console.log("run", trigger);
 					ige.script.trigger(trigger.name, trigger.params);
-					// console.log(ige.triggersQueued.length);
 				}
 			}
 
