@@ -464,20 +464,6 @@ var ServerNetworkEvents = {
 			if (data.name === '' || data.width <= 0 || data.height <= 0) {
 				console.log ('empty name, negative or 0 size is not allowed');
 			} else if (data.name == undefined) { // create new region
-				// create new region name (highest region number + 1)
-				/*var highestRegionNumber = 1;
-				ige.$$('region').forEach(function (region) {
-					var regionNameArray = region._stats.id.split(/\W+/);
-					if (regionNameArray.length == 2 && regionNameArray[0] == 'region') {
-						var regionNumber = regionNameArray[1];
-						if (!isNaN(regionNumber) && regionNumber > highestRegionNumber) {
-							highestRegionNumber = regionNumber;
-						}
-					}
-				});
-				var newRegionName = "region "+highestRegionNumber;
-				console.log(newRegionName)*/
-
 				// create new region name (smallest available number)
 				let regionNameNumber = 0;
 				let newRegionName = 'region' + regionNameNumber
@@ -487,6 +473,7 @@ var ServerNetworkEvents = {
 				} while (ige.regionManager.getRegionById(newRegionName));
 
 				data.name = newRegionName;
+				data.showModal = true;
 				data.userId = ige.game.getPlayerByClientId(clientId)._stats.userId;
 				// changed to Region from RegionUi
 				var regionData = {
@@ -520,6 +507,7 @@ var ServerNetworkEvents = {
 			if (region) {
 				if (data.delete) {
 					region.destroy();
+					ige.network.send("editRegion", data);
 				}
 				else {
 					if (data.name !== data.newName) {
@@ -528,9 +516,9 @@ var ServerNetworkEvents = {
 						} 
 						else {
 							region._stats.id = data.newName;
-							ige.network.send("editRegion", data);
 						}
 					}
+					ige.network.send("editRegion", data);
 					var data = [
 						{ x: data.x !== region._stats.default.x ? data.x : null },
 						{ y: data.y !== region._stats.default.y ? data.y : null },

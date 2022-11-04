@@ -136,17 +136,18 @@ class DevModeScene extends PhaserScene {
 		});
 
 		ige.client.on('editRegion', (data: {
+		userId: string,
 		name: string, 
 		newName?: string,
-		x: number, 
-		y: number, 
-		width: number, 
-		height: number,
-		entityIdFromServer: string, 
-		userId: string}) => {
+		x?: number, 
+		y?: number, 
+		width?: number, 
+		height?: number,
+		delete?: boolean,
+		showModal?: boolean}) => {
 			if (data.newName && data.name !== data.newName) {
 				const region = ige.regionManager.getRegionById(data.name);
-				region._stats.id = data.newName;
+				if (region) region._stats.id = data.newName;
 				this.regions.forEach(region => {
 					if (region.name === data.name) {
 						region.name = data.newName;
@@ -154,7 +155,7 @@ class DevModeScene extends PhaserScene {
 					}
 				});
 			}
-			else {
+			else if (data.showModal) {
 				ige.addNewRegion && ige.addNewRegion({name: data.name, x: data.x, y: data.y, width: data.width, height: data.height, userId: data.userId});
 			}
 

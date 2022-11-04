@@ -119,7 +119,8 @@ var DevModeScene = /** @class */ (function (_super) {
         ige.client.on('editRegion', function (data) {
             if (data.newName && data.name !== data.newName) {
                 var region = ige.regionManager.getRegionById(data.name);
-                region._stats.id = data.newName;
+                if (region)
+                    region._stats.id = data.newName;
                 _this.regions.forEach(function (region) {
                     if (region.name === data.name) {
                         region.name = data.newName;
@@ -127,7 +128,7 @@ var DevModeScene = /** @class */ (function (_super) {
                     }
                 });
             }
-            else {
+            else if (data.showModal) {
                 ige.addNewRegion && ige.addNewRegion({ name: data.name, x: data.x, y: data.y, width: data.width, height: data.height, userId: data.userId });
             }
             ige.updateRegionInReact && ige.updateRegionInReact();
