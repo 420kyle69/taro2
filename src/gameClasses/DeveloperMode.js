@@ -13,8 +13,8 @@ var DeveloperMode = /** @class */ (function () {
         ige.client.emit('leaveDevMode');
     };
     DeveloperMode.prototype.updateClientMap = function (data) {
+        console.log('map data was edited', data.mapData.wasEdited);
         if (data.mapData.wasEdited) {
-            console.log('updated data', data);
             ige.game.data.map = data.mapData;
             if (ige.physics) {
                 //if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
