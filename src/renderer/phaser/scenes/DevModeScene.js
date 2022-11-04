@@ -16,17 +16,17 @@ var __extends = (this && this.__extends) || (function () {
 var DevModeScene = /** @class */ (function (_super) {
     __extends(DevModeScene, _super);
     function DevModeScene() {
-        return _super.call(this, { key: 'Palette' }) || this;
+        return _super.call(this, { key: 'DevMode' }) || this;
     }
     DevModeScene.prototype.init = function () {
         var _this = this;
         this.input.setTopOnly(true);
         this.gameScene = ige.renderer.scene.getScene('Game');
+        this.regions = [];
         //const map = this.devPalette.map;
         var map = this.gameScene.tilemap;
         this.selectedTile = null;
-        this.selectedTileArea = [[null, null, null, null]];
-        console.log('tile', this.selectedTile, 'area', this.selectedTileArea);
+        this.selectedTileArea = [[null, null], [null, null]];
         ige.client.on('enterDevMode', function () {
             _this.defaultZoom = (_this.gameScene.zoomSize / 2.15);
             if (!_this.devPalette) {
@@ -36,15 +36,24 @@ var DevModeScene = /** @class */ (function (_super) {
             _this.devPalette.show();
             _this.devPalette.layerButtonsContainer.setVisible(true);
             _this.devPalette.toolButtonsContainer.setVisible(true);
-            if (!_this.devPalette.cursorButton.active) {
-                _this.devPalette.toggleMarker();
-            }
+            _this.devPalette.highlightModeButton(0);
+            _this.activateMarker(false);
+            _this.regions.forEach(function (region) {
+                region.show();
+                region.label.visible = true;
+            });
         });
         ige.client.on('leaveDevMode', function () {
             _this.devPalette.hide();
             _this.devPalette.layerButtonsContainer.setVisible(false);
             _this.devPalette.toolButtonsContainer.setVisible(false);
             ige.client.emit('zoom', _this.defaultZoom);
+            _this.regions.forEach(function (region) {
+                if (region.devModeOnly) {
+                    region.hide();
+                }
+                region.label.visible = false;
+            });
         });
         var tabKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, true);
         tabKey.on('down', function () {
@@ -57,16 +66,27 @@ var DevModeScene = /** @class */ (function (_super) {
                 }
             }
         });
-        var plusKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.PLUS, true);
+        var shouldPreventKeybindings = function () {
+            if (!ige.isClient || !$('#game-editor').is(':visible')) {
+                return false;
+            }
+            var activeElement = document.activeElement;
+            var inputs = ['input', 'select', 'textarea'];
+            if (activeElement && inputs.indexOf(activeElement.tagName.toLowerCase()) !== -1) {
+                return true;
+            }
+            return false;
+        };
+        var plusKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.PLUS, false);
         plusKey.on('down', function () {
-            if (ige.developerMode.active) {
+            if (ige.developerMode.active && !shouldPreventKeybindings()) {
                 var zoom = (_this.gameScene.zoomSize / 2.15) / 1.1;
                 ige.client.emit('zoom', zoom);
             }
         });
-        var minusKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.MINUS, true);
+        var minusKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.MINUS, false);
         minusKey.on('down', function () {
-            if (ige.developerMode.active) {
+            if (ige.developerMode.active && !shouldPreventKeybindings()) {
                 var zoom = (_this.gameScene.zoomSize / 2.15) * 1.1;
                 ige.client.emit('zoom', zoom);
             }
@@ -74,7 +94,6 @@ var DevModeScene = /** @class */ (function (_super) {
         ige.client.on('editTile', function (data) {
             console.log('editTile', data);
             map.putTileAt(data.gid, data.x, data.y, false, data.layer);
-            //ige.developerMode.changedTiles.push(data);
             /* TODO: SAVE MAP DATA FROM SERVER SIDE */
             var width = ige.game.data.map.width;
             //save tile change to ige.game.map.data
@@ -89,6 +108,22 @@ var DevModeScene = /** @class */ (function (_super) {
                     ige.physics.staticsFromMap(IgeLayersById.walls);
                 });
             }
+        });
+        ige.client.on('editRegion', function (data) {
+            if (data.newName && data.name !== data.newName) {
+                var region = ige.regionManager.getRegionById(data.name);
+                region._stats.id = data.newName;
+                _this.regions.forEach(function (region) {
+                    if (region.name === data.name) {
+                        region.name = data.newName;
+                        region.updateLabel();
+                    }
+                });
+            }
+            else {
+                ige.addNewRegion && ige.addNewRegion({ name: data.name, x: data.x, y: data.y, width: data.width, height: data.height, userId: data.userId });
+            }
+            ige.updateRegionInReact && ige.updateRegionInReact();
         });
         this.input.on('wheel', function (pointer, gameObjects, deltaX, deltaY, deltaZ) {
             if (_this.devPalette && _this.devPalette.visible) {
@@ -114,6 +149,7 @@ var DevModeScene = /** @class */ (function (_super) {
             this.load.image(key, this.patchAssetUrl(tileset.image));
         });*/
         this.load.image('cursor', 'https://cache.modd.io/asset/spriteImage/1666276041347_cursor.png');
+        this.load.image('region', 'https://cache.modd.io/asset/spriteImage/1666882309997_region.png');
         this.load.image('stamp', 'https://cache.modd.io/asset/spriteImage/1666724706664_stamp.png');
         this.load.image('eraser', 'https://cache.modd.io/asset/spriteImage/1666276083246_erasergap.png');
         this.load.scenePlugin('rexuiplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js', 
@@ -138,6 +174,69 @@ var DevModeScene = /** @class */ (function (_super) {
         gameMap.currentLayerIndex = 0;
         this.selectedTile = gameMap.getTileAt(2, 3);
         this.marker = new TileMarker(this.gameScene, gameMap, 2);
+        this.gameScene.input.on('pointerdown', function (pointer) {
+            if (_this.regionTool) {
+                var worldPoint = _this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
+                _this.regionDrawStart = {
+                    x: worldPoint.x,
+                    y: worldPoint.y,
+                };
+            }
+        }, this);
+        var graphics = this.regionDrawGraphics = this.gameScene.add.graphics();
+        var width;
+        var height;
+        this.gameScene.input.on('pointermove', function (pointer) {
+            if (!pointer.leftButtonDown())
+                return;
+            else if (_this.regionTool) {
+                var worldPoint = _this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
+                width = worldPoint.x - _this.regionDrawStart.x;
+                height = worldPoint.y - _this.regionDrawStart.y;
+                graphics.clear();
+                graphics.lineStyle(2, 0x036ffc, 1);
+                graphics.strokeRect(_this.regionDrawStart.x, _this.regionDrawStart.y, width, height);
+            }
+        }, this);
+        this.gameScene.input.on('pointerup', function (pointer) {
+            if (!pointer.leftButtonReleased())
+                return;
+            var worldPoint = _this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
+            if (_this.regionTool && _this.regionDrawStart && _this.regionDrawStart.x !== worldPoint.x && _this.regionDrawStart.y !== worldPoint.y) {
+                graphics.clear();
+                _this.regionTool = false;
+                _this.devPalette.highlightModeButton(0);
+                var x = _this.regionDrawStart.x;
+                var y = _this.regionDrawStart.y;
+                if (width < 0) {
+                    x = _this.regionDrawStart.x + width;
+                    width *= -1;
+                }
+                if (height < 0) {
+                    y = _this.regionDrawStart.y + height;
+                    height *= -1;
+                }
+                ige.network.send('editRegion', { x: Math.trunc(x),
+                    y: Math.trunc(y),
+                    width: Math.trunc(width),
+                    height: Math.trunc(height) });
+                _this.regionDrawStart = null;
+            }
+        }, this);
+    };
+    DevModeScene.prototype.cancelDrawRegion = function () {
+        if (this.regionTool) {
+            this.regionDrawGraphics.clear();
+            this.regionTool = false;
+            this.devPalette.highlightModeButton(0);
+            this.regionDrawStart = null;
+        }
+    };
+    DevModeScene.prototype.activateMarker = function (active) {
+        this.marker.active = active;
+        this.marker.graphics.setVisible(active);
+        if (active)
+            this.regionTool = false;
     };
     DevModeScene.prototype.pointerInsideMap = function (pointerX, pointerY, map) {
         return (0 <= pointerX && pointerX < map.width
@@ -193,11 +292,8 @@ var DevModeScene = /** @class */ (function (_super) {
                                     else {
                                         this.selectedTileArea[i][j] = null;
                                     }
-                                    if (this.devPalette.cursorButton.active) {
-                                        this.devPalette.toggleMarker();
-                                    }
-                                    this.devPalette.modeButtons[1].highlight(true);
-                                    this.devPalette.modeButtons[2].highlight(false);
+                                    this.activateMarker(true);
+                                    this.devPalette.highlightModeButton(2);
                                 }
                             }
                         }
@@ -213,11 +309,8 @@ var DevModeScene = /** @class */ (function (_super) {
                             else {
                                 this.selectedTile = null;
                             }
-                            if (this.devPalette.cursorButton.active) {
-                                this.devPalette.toggleMarker();
-                            }
-                            this.devPalette.modeButtons[1].highlight(true);
-                            this.devPalette.modeButtons[2].highlight(false);
+                            this.activateMarker(true);
+                            this.devPalette.highlightModeButton(2);
                         }
                     }
                 }
@@ -245,11 +338,8 @@ var DevModeScene = /** @class */ (function (_super) {
                                     else {
                                         this.selectedTileArea[i][j] = null;
                                     }
-                                    if (this.devPalette.cursorButton.active) {
-                                        this.devPalette.toggleMarker();
-                                    }
-                                    this.devPalette.modeButtons[1].highlight(true);
-                                    this.devPalette.modeButtons[2].highlight(false);
+                                    this.activateMarker(true);
+                                    this.devPalette.highlightModeButton(2);
                                 }
                             }
                         }
@@ -264,11 +354,8 @@ var DevModeScene = /** @class */ (function (_super) {
                             else {
                                 this.selectedTile = null;
                             }
-                            if (this.devPalette.cursorButton.active) {
-                                this.devPalette.toggleMarker();
-                            }
-                            this.devPalette.modeButtons[1].highlight(true);
-                            this.devPalette.modeButtons[2].highlight(false);
+                            this.activateMarker(true);
+                            this.devPalette.highlightModeButton(2);
                         }
                     }
                 }

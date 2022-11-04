@@ -13,20 +13,25 @@ class DevModeScene extends PhaserScene {
 	marker: TileMarker;
 	paletteMarker: TileMarker;
 
-	defaultZoom: number;
+	regions: PhaserRegion[];
+	regionDrawGraphics: Phaser.GameObjects.Graphics;
+	regionDrawStart: {x: number, y: number};
+	regionTool: boolean;
 
+	defaultZoom: number;
+	
 	constructor() {
-		super({ key: 'Palette' });
+		super({ key: 'DevMode' });
 	}
 
 	init (): void {
 		this.input.setTopOnly(true);
 		this.gameScene = ige.renderer.scene.getScene('Game');
+		this.regions = [];
 		//const map = this.devPalette.map;
 		const map = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
 		this.selectedTile = null;
-		this.selectedTileArea = [[null, null, null, null]];
-		console.log('tile', this.selectedTile, 'area', this.selectedTileArea);
+		this.selectedTileArea = [[null, null],[null, null]];
 
 		ige.client.on('enterDevMode', () => {
 			this.defaultZoom = (this.gameScene.zoomSize / 2.15)
@@ -37,9 +42,13 @@ class DevModeScene extends PhaserScene {
 			this.devPalette.show();
 			this.devPalette.layerButtonsContainer.setVisible(true);
 			this.devPalette.toolButtonsContainer.setVisible(true);
-			if (!this.devPalette.cursorButton.active) {
-				this.devPalette.toggleMarker()
-			} 
+			this.devPalette.highlightModeButton(0);
+			this.activateMarker(false);
+
+			this.regions.forEach(region => {
+				region.show();
+				region.label.visible = true;
+			});
 		});
 
 		ige.client.on('leaveDevMode', () => {
@@ -47,6 +56,13 @@ class DevModeScene extends PhaserScene {
 			this.devPalette.layerButtonsContainer.setVisible(false);
 			this.devPalette.toolButtonsContainer.setVisible(false);
 			ige.client.emit('zoom', this.defaultZoom);
+
+			this.regions.forEach(region => {
+				if (region.devModeOnly) {
+					region.hide();
+				}
+				region.label.visible = false;
+			});
 		});
 
 		const tabKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, true);
@@ -60,16 +76,30 @@ class DevModeScene extends PhaserScene {
 				}
 			}
 		});
-		const plusKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.PLUS, true);
+
+		const shouldPreventKeybindings = function () {
+			if (!ige.isClient || !$('#game-editor').is(':visible')) {
+				return false;
+			}
+			let activeElement = document.activeElement;
+			let inputs = ['input', 'select', 'textarea'];
+	
+			if (activeElement && inputs.indexOf(activeElement.tagName.toLowerCase()) !== -1) {
+				return true;
+			}
+			return false;
+		}
+
+		const plusKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.PLUS, false);
 		plusKey.on('down', () => {
-			if(ige.developerMode.active) {
+			if(ige.developerMode.active && !shouldPreventKeybindings()) {
 				const zoom = (this.gameScene.zoomSize / 2.15) / 1.1;
 				ige.client.emit('zoom', zoom);
 			}
 		});
-		const minusKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.MINUS, true);
+		const minusKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.MINUS, false);
 		minusKey.on('down', () => {
-			if(ige.developerMode.active) {
+			if(ige.developerMode.active && !shouldPreventKeybindings()) {
 				const zoom =(this.gameScene.zoomSize / 2.15) * 1.1;
 				ige.client.emit('zoom', zoom);
 			}
@@ -83,7 +113,6 @@ class DevModeScene extends PhaserScene {
 		}) => {
 			console.log('editTile', data);
 			map.putTileAt(data.gid, data.x, data.y, false, data.layer);
-			//ige.developerMode.changedTiles.push(data);
 
 			/* TODO: SAVE MAP DATA FROM SERVER SIDE */
 			const width = ige.game.data.map.width;
@@ -98,6 +127,32 @@ class DevModeScene extends PhaserScene {
 					ige.physics.staticsFromMap(IgeLayersById.walls);
 				})
 			}
+		});
+
+		ige.client.on('editRegion', (data: {
+		name: string, 
+		newName?: string,
+		x: number, 
+		y: number, 
+		width: number, 
+		height: number,
+		entityIdFromServer: string, 
+		userId: string}) => {
+			if (data.newName && data.name !== data.newName) {
+				const region = ige.regionManager.getRegionById(data.name);
+				region._stats.id = data.newName;
+				this.regions.forEach(region => {
+					if (region.name === data.name) {
+						region.name = data.newName;
+						region.updateLabel();
+					}
+				});
+			}
+			else {
+				ige.addNewRegion && ige.addNewRegion({name: data.name, x: data.x, y: data.y, width: data.width, height: data.height, userId: data.userId});
+			}
+
+			ige.updateRegionInReact && ige.updateRegionInReact();
 		});
 
 		this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
@@ -126,6 +181,7 @@ class DevModeScene extends PhaserScene {
 		});*/
 
 		this.load.image('cursor', 'https://cache.modd.io/asset/spriteImage/1666276041347_cursor.png');
+		this.load.image('region', 'https://cache.modd.io/asset/spriteImage/1666882309997_region.png');
 		this.load.image('stamp', 'https://cache.modd.io/asset/spriteImage/1666724706664_stamp.png');
 		this.load.image('eraser', 'https://cache.modd.io/asset/spriteImage/1666276083246_erasergap.png');
 
@@ -161,6 +217,73 @@ class DevModeScene extends PhaserScene {
 		gameMap.currentLayerIndex = 0;
 		this.selectedTile = gameMap.getTileAt(2, 3);
 		this.marker = new TileMarker (this.gameScene, gameMap, 2);
+
+		this.gameScene.input.on('pointerdown', (pointer) => {
+			if (this.regionTool) {
+				const worldPoint = this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
+				this.regionDrawStart = {
+					x: worldPoint.x,
+					y: worldPoint.y,
+				}
+			}
+		}, this);
+
+		const graphics = this.regionDrawGraphics = this.gameScene.add.graphics();
+		let width;
+		let height;
+
+		this.gameScene.input.on('pointermove', (pointer) => {
+			if (!pointer.leftButtonDown()) return;
+			else if (this.regionTool) {
+				const worldPoint = this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
+				width = worldPoint.x - this.regionDrawStart.x;
+				height = worldPoint.y - this.regionDrawStart.y;
+				graphics.clear();
+				graphics.lineStyle(	2, 0x036ffc, 1);
+				graphics.strokeRect( this.regionDrawStart.x, this.regionDrawStart.y , width, height);
+				}
+			}, this);
+
+		this.gameScene.input.on('pointerup', (pointer) => {
+			if (!pointer.leftButtonReleased()) return;
+			const worldPoint = this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
+			if (this.regionTool && this.regionDrawStart && this.regionDrawStart.x !== worldPoint.x && this.regionDrawStart.y !== worldPoint.y) {
+				graphics.clear();
+				this.regionTool = false;
+				this.devPalette.highlightModeButton(0);
+				let x = this.regionDrawStart.x;
+				let y = this.regionDrawStart.y;
+				if (width < 0) {
+					x = this.regionDrawStart.x + width;
+					width *= -1;
+				}
+				if (height < 0) {
+					y = this.regionDrawStart.y + height;
+					height *= -1;
+				}
+				ige.network.send('editRegion', {x: Math.trunc(x), 
+					y: Math.trunc(y), 
+					width: Math.trunc(width), 
+					height: Math.trunc(height)});
+
+				this.regionDrawStart = null;
+			}
+		}, this);
+	}
+
+	cancelDrawRegion() {
+		if (this.regionTool) {
+			this.regionDrawGraphics.clear();
+			this.regionTool = false;
+			this.devPalette.highlightModeButton(0);
+			this.regionDrawStart = null;
+		}
+	}
+
+	activateMarker(active: boolean) {
+		this.marker.active = active;
+		this.marker.graphics.setVisible(active);
+		if (active) this.regionTool = false;
 	}
 
 	pointerInsideMap(pointerX: number, pointerY: number, map: Phaser.Tilemaps.Tilemap): boolean {
@@ -223,11 +346,8 @@ class DevModeScene extends PhaserScene {
 										this.selectedTileArea[i][j] = null;
 									}
 
-									if (this.devPalette.cursorButton.active) {
-										this.devPalette.toggleMarker()
-									}
-									this.devPalette.modeButtons[1].highlight(true);
-									this.devPalette.modeButtons[2].highlight(false);
+									this.activateMarker(true);
+									this.devPalette.highlightModeButton(2);
 								}
 							}
 						}
@@ -241,12 +361,8 @@ class DevModeScene extends PhaserScene {
 								this.selectedTile = null;
 							}
 							
-
-							if (this.devPalette.cursorButton.active) {
-								this.devPalette.toggleMarker()
-							}
-							this.devPalette.modeButtons[1].highlight(true);
-							this.devPalette.modeButtons[2].highlight(false);
+							this.activateMarker(true);
+							this.devPalette.highlightModeButton(2);
 						}
 					}
 				}
@@ -273,11 +389,9 @@ class DevModeScene extends PhaserScene {
 									} else {
 										this.selectedTileArea[i][j] = null;
 									}
-									if (this.devPalette.cursorButton.active) {
-										this.devPalette.toggleMarker()
-									}
-									this.devPalette.modeButtons[1].highlight(true);
-									this.devPalette.modeButtons[2].highlight(false);
+									
+									this.activateMarker(true);
+									this.devPalette.highlightModeButton(2);
 								}
 							}
 						}
@@ -289,11 +403,9 @@ class DevModeScene extends PhaserScene {
 							} else {
 								this.selectedTile = null;
 							}
-							if (this.devPalette.cursorButton.active) {
-								this.devPalette.toggleMarker()
-							}
-							this.devPalette.modeButtons[1].highlight(true);
-							this.devPalette.modeButtons[2].highlight(false);
+
+							this.activateMarker(true);
+							this.devPalette.highlightModeButton(2);
 						}
 					}
 				}

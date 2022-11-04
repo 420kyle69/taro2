@@ -17,6 +17,8 @@ declare class GameComponent extends IgeEntity {
 	data: {
 		defaultData: any;
 		map: {
+			tilewidth: number;
+			tileheight: number;
 			width: number,
 			height: number,
 			tilesets: {

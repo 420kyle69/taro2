@@ -675,6 +675,7 @@ var Server = IgeClass.extend({
 
 		ige.network.define('trade', self._onTrade);
 		ige.network.define('editTile', self._onEditTile);
+		ige.network.define('editRegion', self._onEditRegion);
 	},
 
 	unpublish: function (msg) {

@@ -196,7 +196,7 @@ class GameScene extends PhaserScene {
 	}
 
 	create (): void {
-		this.scene.launch('Palette');
+		this.scene.launch('DevMode');
 		ige.client.rendererLoaded.resolve();
 
 		const map = this.tilemap = this.make.tilemap({ key: 'map' });
