@@ -68,18 +68,23 @@ class DevModeScene extends PhaserScene {
 
 		const tabKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, true);
 		tabKey.on('down', () => {
-			if(ige.developerMode.active) {
-				if (this.devPalette.visible) {
-					this.devPalette.hide();
-				}
-				else {
-					this.devPalette.show()
+			if (shouldPreventKeybindings()) {
+				this.input.keyboard.disableGlobalCapture();
+			} else {
+				this.input.keyboard.enableGlobalCapture();
+				if(ige.developerMode.active) {
+					if (this.devPalette.visible) {
+						this.devPalette.hide();
+					}
+					else {
+						this.devPalette.show()
+					}
 				}
 			}
 		});
 
 		const shouldPreventKeybindings = function () {
-			if (!ige.isClient || !$('#game-editor').is(':visible')) {
+			if (!$('#game-editor').is(':visible')) {
 				return false;
 			}
 			let activeElement = document.activeElement;
