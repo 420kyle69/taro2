@@ -33,7 +33,7 @@ var IgeNetIoClient = {
 		} else {
 			this.artificialDelay = 0;
 			this.lagVariance = 0;
-
+			this._discrepancySamples = []
 			var self = this;
 
 			var gameId = ige.client.servers[0].gameId;
@@ -542,15 +542,23 @@ var IgeNetIoClient = {
                             
                     }
 
+                    let now = Date.now();
+
 					// if client's timestamp more than 100ms behind the server's timestamp, immediately update it to be 50ms behind the server's
 					// otherwise, apply rubberbanding
-					if (ige._currentTime > newSnapshotTimestamp || ige._currentTime < newSnapshotTimestamp - 100) {
-						// currentTime will be 3 frames behind the nextSnapshot's timestamp, so the entities have time to interpolate
-						// 1 frame = 1000/60 = 16ms. 3 frames = 50ms
-						ige.timeDiscrepancy = newSnapshotTimestamp - Date.now() - 50;
-					} else {
-						// rubberband currentTime to be nextSnapshot's timestamp - 50ms
-						ige.timeDiscrepancy += ((newSnapshotTimestamp - Date.now() - 50) - ige.timeDiscrepancy) / 5;
+					this._discrepancySamples.push(newSnapshotTimestamp - now)
+					if (this._discrepancySamples.length > 10) {
+						var medianDiscrepancy = this.getMedian(this._discrepancySamples) - 50;
+						this._discrepancySamples = [];
+
+						if (ige._currentTime > newSnapshotTimestamp - 10 || ige._currentTime < newSnapshotTimestamp - 100) {
+							// currentTime will be 3 frames behind the nextSnapshot's timestamp, so the entities have time to interpolate
+							// 1 frame = 1000/60 = 16ms. 3 frames = 50ms
+							ige.timeDiscrepancy = medianDiscrepancy - 50;
+						} else {
+							// rubberband currentTime to be nextSnapshot's timestamp - 50ms
+							ige.timeDiscrepancy += ((medianDiscrepancy - 50) - ige.timeDiscrepancy) / 10;
+						}
 					}
 				}
 			}
@@ -566,6 +574,21 @@ var IgeNetIoClient = {
 
 			this.emit(commandName, data[1]);
 		}
+	},
+
+	getMedian: function (values) {
+	  if(values.length ===0) throw new Error("No inputs");
+
+	  values.sort(function(a,b){
+	    return a-b;
+	  });
+
+	  var half = Math.floor(values.length / 2);
+	  
+	  if (values.length % 2)
+	    return values[half];
+	  
+	  return (values[half - 1] + values[half]) / 2.0;
 	},
 
 	/**
