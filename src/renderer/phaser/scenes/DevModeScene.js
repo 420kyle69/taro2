@@ -44,6 +44,7 @@ var DevModeScene = /** @class */ (function (_super) {
             });
         });
         ige.client.on('leaveDevMode', function () {
+            _this.cancelDrawRegion();
             _this.devPalette.hide();
             _this.devPalette.layerButtonsContainer.setVisible(false);
             _this.devPalette.toolButtonsContainer.setVisible(false);

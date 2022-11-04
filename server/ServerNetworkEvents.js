@@ -462,7 +462,7 @@ var ServerNetworkEvents = {
 
 		if (ige.server.developerClientIds.includes(clientId)/* && data.width !== 0 && data.height !== 0*/) {  
 			if (data.name === '' || data.width <= 0 || data.height <= 0) {
-				console.log ('negative or 0 size is not allowed');
+				console.log ('empty name, negative or 0 size is not allowed');
 			} else if (data.name == undefined) { // create new region
 				// create new region name (highest region number + 1)
 				/*var highestRegionNumber = 1;
