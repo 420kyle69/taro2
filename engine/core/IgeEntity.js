@@ -267,6 +267,10 @@ var IgeEntity = IgeObject.extend({
 		if (animation && cellSheet) {
 			this.emit('play-animation', animationId);
 		}
+
+		if (ige.isServer){
+			this.streamUpdateData([{ anim: animationId }]);
+		}
 	},
 
 	applyAnimationForState: function (stateId) {
@@ -4695,7 +4699,7 @@ var IgeEntity = IgeObject.extend({
 
 				case 'unit': 
 					// cellsheet is used for purchasable-skins
-					keys = ["name", "type", "stateId", "ownerId", "currentItemIndex", "currentItemId", "flip", "skin", "scale", "cellSheet"]
+					keys = ['name', 'type', 'stateId', 'ownerId', 'currentItemIndex', 'currentItemId', 'flip', 'skin', 'anim', 'scale', 'cellSheet']
 					data = { 
 						attributes: {}, 
 						// variables: {} 
@@ -4704,7 +4708,7 @@ var IgeEntity = IgeObject.extend({
 
 				case 'item':
 					// TODO: we shouldn't have to send currentBody. for some reason, all items have 'dropped' stateId
-					keys = ["itemTypeId", "stateId", "ownerUnitId", "quantity", "currentBody", "flip"]
+					keys = ['itemTypeId', 'anim', 'stateId', 'ownerUnitId', 'quantity', 'currentBody', 'flip']
 					data = { 
 						attributes: {}, 
 						// variables: {} 
@@ -4712,7 +4716,7 @@ var IgeEntity = IgeObject.extend({
 					break;
 
 				case 'projectile':
-					keys = ["type", "stateId", "flip"]
+					keys = ['type', 'anim', 'stateId', 'flip']
 					data = { 
 						attributes: {}, 
 						// variables: {} 
@@ -4721,7 +4725,7 @@ var IgeEntity = IgeObject.extend({
 
 				case 'player':
 					// purchasables is required for rendering this player's owned skin to the other players
-					keys = ["name", "clientId", "playerTypeId", "controlledBy", "playerJoined", "unitIds", "selectedUnitId", "userId", "banChat", "purchasables"]
+					keys = ['name', 'clientId', 'playerTypeId', 'controlledBy', 'playerJoined', 'unitIds', 'selectedUnitId', 'userId', 'banChat', 'purchasables']
 					data = { 
 						attributes: {}, 
 						// variables: {} 
@@ -4742,7 +4746,7 @@ var IgeEntity = IgeObject.extend({
 					break;
 
 				case 'region': 
-					keys = ["id", "default"];
+					keys = ['id', 'default'];
 					data = { currentBody: {
 									height: this._stats.currentBody.height, 
 									width: this._stats.currentBody.width,
@@ -5251,7 +5255,7 @@ var IgeEntity = IgeObject.extend({
 		// ensure that this entity is positioned at the last known position if no update is being streamed
         // this prevents entities being in incorrect position if client is returning from a
         // different browser tab
-        else if (this.finalKeyFrame && this.finalKeyFrame[0] < ige._currentTime) {
+        else if (this.finalKeyFrame && this.finalKeyFrame[0] + 100 < ige._currentTime) {
             x = this.finalKeyFrame[1][0]
             y = this.finalKeyFrame[1][1]
             // if (this.getOwner()._stats.controlledBy != 'human')
