@@ -233,6 +233,38 @@ var DevModeScene = /** @class */ (function (_super) {
             }
         }, this);
     };
+    DevModeScene.prototype.putTile = function (tileX, tileY, selectedTile) {
+        var map = this.gameScene.tilemap;
+        if (selectedTile && this.pointerInsideMap(tileX, tileY, map)) {
+            var index = selectedTile.index;
+            if (selectedTile.index === -1)
+                index = 0;
+            if (index !== (map.getTileAt(tileX, tileY, true)).index &&
+                !(index === 0 && map.getTileAt(tileX, tileY, true).index === -1)) {
+                map.putTileAt(index, tileX, tileY);
+                map.getTileAt(tileX, tileY, true).tint = 0xffffff;
+                console.log('place tile', index);
+                ige.network.send('editTile', { gid: index, layer: map.currentLayerIndex, x: tileX, y: tileY });
+            }
+        }
+    };
+    DevModeScene.prototype.getTile = function (tileX, tileY, selectedTile, map) {
+        if (this.pointerInsideMap(tileX, tileY, map)) {
+            if (selectedTile)
+                selectedTile.tint = 0xffffff;
+            if (map.getTileAt(tileX, tileY) && map.getTileAt(tileX, tileY).index !== 0) {
+                selectedTile = map.getTileAt(tileX, tileY);
+                if (map === this.devPalette.map)
+                    selectedTile.tint = 0x87cfff;
+            }
+            else {
+                selectedTile = null;
+            }
+            this.activateMarker(true);
+            this.devModeTools.highlightModeButton(2);
+            return selectedTile;
+        }
+    };
     DevModeScene.prototype.cancelDrawRegion = function () {
         if (this.regionTool) {
             this.regionDrawGraphics.clear();
@@ -291,36 +323,12 @@ var DevModeScene = /** @class */ (function (_super) {
                     if (palette.area.x > 1 || palette.area.y > 1) {
                         for (var i = 0; i < palette.area.x; i++) {
                             for (var j = 0; j < palette.area.y; j++) {
-                                if (this.pointerInsideMap(palettePointerTileX + i, palettePointerTileY + j, paletteMap)) {
-                                    if (this.selectedTileArea[i][j])
-                                        this.selectedTileArea[i][j].tint = 0xffffff;
-                                    if (paletteMap.getTileAt(palettePointerTileX + i, palettePointerTileY + j).index !== 0) {
-                                        this.selectedTileArea[i][j] = paletteMap.getTileAt(palettePointerTileX + i, palettePointerTileY + j);
-                                        this.selectedTileArea[i][j].tint = 0x87cfff;
-                                    }
-                                    else {
-                                        this.selectedTileArea[i][j] = null;
-                                    }
-                                    this.activateMarker(true);
-                                    this.devModeTools.highlightModeButton(2);
-                                }
+                                this.selectedTileArea[i][j] = this.getTile(palettePointerTileX + i, palettePointerTileY + j, this.selectedTileArea[i][j], paletteMap);
                             }
                         }
                     }
                     else {
-                        if (this.pointerInsideMap(palettePointerTileX, palettePointerTileY, paletteMap)) {
-                            if (this.selectedTile)
-                                this.selectedTile.tint = 0xffffff;
-                            if (paletteMap.getTileAt(palettePointerTileX, palettePointerTileY).index !== 0) {
-                                this.selectedTile = paletteMap.getTileAt(palettePointerTileX, palettePointerTileY);
-                                this.selectedTile.tint = 0x87cfff;
-                            }
-                            else {
-                                this.selectedTile = null;
-                            }
-                            this.activateMarker(true);
-                            this.devModeTools.highlightModeButton(2);
-                        }
+                        this.selectedTile = this.getTile(palettePointerTileX, palettePointerTileY, this.selectedTile, paletteMap);
                     }
                 }
             }
@@ -338,69 +346,24 @@ var DevModeScene = /** @class */ (function (_super) {
                     if (palette.area.x > 1 || palette.area.y > 1) {
                         for (var i = 0; i < palette.area.x; i++) {
                             for (var j = 0; j < palette.area.y; j++) {
-                                if (this.pointerInsideMap(pointerTileX + i, pointerTileY + j, map)) {
-                                    if (this.selectedTileArea[i][j])
-                                        this.selectedTileArea[i][j].tint = 0xffffff;
-                                    if (map.getTileAt(pointerTileX + i, pointerTileY + j).index !== 0) {
-                                        this.selectedTileArea[i][j] = map.getTileAt(pointerTileX + i, pointerTileY + j);
-                                    }
-                                    else {
-                                        this.selectedTileArea[i][j] = null;
-                                    }
-                                    this.activateMarker(true);
-                                    this.devModeTools.highlightModeButton(2);
-                                }
+                                this.selectedTileArea[i][j] = this.getTile(pointerTileX + i, pointerTileY + j, this.selectedTileArea[i][j], map);
                             }
                         }
                     }
                     else {
-                        if (this.pointerInsideMap(pointerTileX, pointerTileY, map)) {
-                            if (this.selectedTile)
-                                this.selectedTile.tint = 0xffffff;
-                            if (map.getTileAt(pointerTileX, pointerTileY) && map.getTileAt(pointerTileX, pointerTileY).index !== 0) {
-                                this.selectedTile = map.getTileAt(pointerTileX, pointerTileY);
-                            }
-                            else {
-                                this.selectedTile = null;
-                            }
-                            this.activateMarker(true);
-                            this.devModeTools.highlightModeButton(2);
-                        }
+                        this.selectedTile = this.getTile(pointerTileX, pointerTileY, this.selectedTile, map);
                     }
                 }
                 if (this.input.manager.activePointer.leftButtonDown()) {
                     if (palette.area.x > 1 || palette.area.y > 1) {
                         for (var i = 0; i < palette.area.x; i++) {
                             for (var j = 0; j < palette.area.y; j++) {
-                                if (this.pointerInsideMap(pointerTileX + i, pointerTileY + j, map) && this.selectedTileArea[i][j]) {
-                                    var index = this.selectedTileArea[i][j].index;
-                                    if (index === -1)
-                                        index = 0;
-                                    if (index !== (map.getTileAt(pointerTileX + i, pointerTileY + j, true)).index &&
-                                        !(index === 0 && map.getTileAt(pointerTileX + i, pointerTileY + j, true).index === -1)) {
-                                        console.log('put', index, 'at', map.getTileAt(pointerTileX + i, pointerTileY + j, true).index);
-                                        map.putTileAt(index, pointerTileX + i, pointerTileY + j);
-                                        map.getTileAt(pointerTileX + i, pointerTileY + j, true).tint = 0xffffff;
-                                        console.log('place tile', index);
-                                        ige.network.send('editTile', { gid: index, layer: map.currentLayerIndex, x: pointerTileX + i, y: pointerTileY + j });
-                                    }
-                                }
+                                this.putTile(pointerTileX + i, pointerTileY + j, this.selectedTileArea[i][j]);
                             }
                         }
                     }
                     else {
-                        if (this.pointerInsideMap(pointerTileX, pointerTileY, map) && this.selectedTile) {
-                            var index = this.selectedTile.index;
-                            if (this.selectedTile.index === -1)
-                                index = 0;
-                            if (index !== (map.getTileAt(pointerTileX, pointerTileY, true)).index &&
-                                !(index === 0 && map.getTileAt(pointerTileX, pointerTileY, true).index === -1)) {
-                                map.putTileAt(index, pointerTileX, pointerTileY);
-                                map.getTileAt(pointerTileX, pointerTileY, true).tint = 0xffffff;
-                                console.log('place tile', index);
-                                ige.network.send('editTile', { gid: index, layer: map.currentLayerIndex, x: pointerTileX, y: pointerTileY });
-                            }
-                        }
+                        this.putTile(pointerTileX, pointerTileY, this.selectedTile);
                     }
                 }
             }

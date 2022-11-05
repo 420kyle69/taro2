@@ -133,7 +133,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	}
 
 	selectArea() {
-		this.scene.selectedTile.tint = 0xffffff;
+		if (this.scene.selectedTile) this.scene.selectedTile.tint = 0xffffff;
 		this.palette.area = {x: 2, y: 2};
 		this.scene.marker.graphics.scale = 2;
 		this.scene.paletteMarker.graphics.scale = 2;
