@@ -3,7 +3,8 @@ class DevModeScene extends PhaserScene {
 	rexUI: any;
 	gameScene: any;
 
-	devPalette: PhaserPalette;
+	devPalette: TilePalette;
+	devModeTools: DevModeTools;
 	tilemap: Phaser.Tilemaps.Tilemap;
 	tileset: Phaser.Tilemaps.Tileset;
 
@@ -36,13 +37,14 @@ class DevModeScene extends PhaserScene {
 		ige.client.on('enterDevMode', () => {
 			this.defaultZoom = (this.gameScene.zoomSize / 2.15)
 			if (!this.devPalette) {
-				this.devPalette = new PhaserPalette(this, this.tileset, this.rexUI);
+				this.devPalette = new TilePalette(this, this.tileset, this.rexUI);
+				this.devModeTools = new DevModeTools(this, this.devPalette);
 				this.paletteMarker = new TileMarker(this, this.devPalette.map, 1);
 			}
 			this.devPalette.show();
-			this.devPalette.layerButtonsContainer.setVisible(true);
-			this.devPalette.toolButtonsContainer.setVisible(true);
-			this.devPalette.highlightModeButton(0);
+			this.devModeTools.layerButtonsContainer.setVisible(true);
+			this.devModeTools.toolButtonsContainer.setVisible(true);
+			this.devModeTools.highlightModeButton(0);
 			this.activateMarker(false);
 
 			this.regions.forEach(region => {
@@ -54,8 +56,8 @@ class DevModeScene extends PhaserScene {
 		ige.client.on('leaveDevMode', () => {
 			this.cancelDrawRegion();
 			this.devPalette.hide();
-			this.devPalette.layerButtonsContainer.setVisible(false);
-			this.devPalette.toolButtonsContainer.setVisible(false);
+			this.devModeTools.layerButtonsContainer.setVisible(false);
+			this.devModeTools.toolButtonsContainer.setVisible(false);
 			ige.client.emit('zoom', this.defaultZoom);
 
 			this.regions.forEach(region => {
@@ -111,12 +113,7 @@ class DevModeScene extends PhaserScene {
 			}
 		});
 
-		ige.client.on('editTile', (data: {
-			gid: number,
-			layer: number,
-			x: number,
-			y: number
-		}) => {
+		ige.client.on('editTile', (data: tileData) => {
 			console.log('editTile', data);
 			map.putTileAt(data.gid, data.x, data.y, false, data.layer);
 
@@ -135,16 +132,7 @@ class DevModeScene extends PhaserScene {
 			}
 		});
 
-		ige.client.on('editRegion', (data: {
-		userId: string,
-		name: string, 
-		newName?: string,
-		x?: number, 
-		y?: number, 
-		width?: number, 
-		height?: number,
-		delete?: boolean,
-		showModal?: boolean}) => {
+		ige.client.on('editRegion', (data: regionData) => {
 			if (data.newName && data.name !== data.newName) {
 				const region = ige.regionManager.getRegionById(data.name);
 				if (region) region._stats.id = data.newName;
@@ -257,7 +245,7 @@ class DevModeScene extends PhaserScene {
 			if (this.regionTool && this.regionDrawStart && this.regionDrawStart.x !== worldPoint.x && this.regionDrawStart.y !== worldPoint.y) {
 				graphics.clear();
 				this.regionTool = false;
-				this.devPalette.highlightModeButton(0);
+				this.devModeTools.highlightModeButton(0);
 				let x = this.regionDrawStart.x;
 				let y = this.regionDrawStart.y;
 				if (width < 0) {
@@ -282,7 +270,7 @@ class DevModeScene extends PhaserScene {
 		if (this.regionTool) {
 			this.regionDrawGraphics.clear();
 			this.regionTool = false;
-			this.devPalette.highlightModeButton(0);
+			this.devModeTools.highlightModeButton(0);
 			this.regionDrawStart = null;
 		}
 	}
@@ -306,14 +294,14 @@ class DevModeScene extends PhaserScene {
 	}
 
 	pointerInsideButtons(): boolean {
-		return ((this.input.activePointer.x > this.devPalette.layerButtonsContainer.x
-			&& this.input.activePointer.x < this.devPalette.layerButtonsContainer.x + this.devPalette.layerButtonsContainer.width
-			&& this.input.activePointer.y > this.devPalette.layerButtonsContainer.y 
-			&& this.input.activePointer.y < this.devPalette.layerButtonsContainer.y + this.devPalette.layerButtonsContainer.height)
-			|| (this.input.activePointer.x > this.devPalette.toolButtonsContainer.x
-			&& this.input.activePointer.x < this.devPalette.toolButtonsContainer.x + this.devPalette.toolButtonsContainer.width
-			&& this.input.activePointer.y > this.devPalette.toolButtonsContainer.y 
-			&& this.input.activePointer.y < this.devPalette.toolButtonsContainer.y + this.devPalette.toolButtonsContainer.height))
+		return ((this.input.activePointer.x > this.devModeTools.layerButtonsContainer.x
+			&& this.input.activePointer.x < this.devModeTools.layerButtonsContainer.x + this.devModeTools.layerButtonsContainer.width
+			&& this.input.activePointer.y > this.devModeTools.layerButtonsContainer.y 
+			&& this.input.activePointer.y < this.devModeTools.layerButtonsContainer.y + this.devModeTools.layerButtonsContainer.height)
+			|| (this.input.activePointer.x > this.devModeTools.toolButtonsContainer.x
+			&& this.input.activePointer.x < this.devModeTools.toolButtonsContainer.x + this.devModeTools.toolButtonsContainer.width
+			&& this.input.activePointer.y > this.devModeTools.toolButtonsContainer.y 
+			&& this.input.activePointer.y < this.devModeTools.toolButtonsContainer.y + this.devModeTools.toolButtonsContainer.height))
 	}
 
 	update (): void {
@@ -354,7 +342,7 @@ class DevModeScene extends PhaserScene {
 									}
 
 									this.activateMarker(true);
-									this.devPalette.highlightModeButton(2);
+									this.devModeTools.highlightModeButton(2);
 								}
 							}
 						}
@@ -369,7 +357,7 @@ class DevModeScene extends PhaserScene {
 							}
 							
 							this.activateMarker(true);
-							this.devPalette.highlightModeButton(2);
+							this.devModeTools.highlightModeButton(2);
 						}
 					}
 				}
@@ -398,7 +386,7 @@ class DevModeScene extends PhaserScene {
 									}
 									
 									this.activateMarker(true);
-									this.devPalette.highlightModeButton(2);
+									this.devModeTools.highlightModeButton(2);
 								}
 							}
 						}
@@ -412,7 +400,7 @@ class DevModeScene extends PhaserScene {
 							}
 
 							this.activateMarker(true);
-							this.devPalette.highlightModeButton(2);
+							this.devModeTools.highlightModeButton(2);
 						}
 					}
 				}

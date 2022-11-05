@@ -1,5 +1,5 @@
-var PhaserPaletteButton = /** @class */ (function () {
-    function PhaserPaletteButton(devModeTools, text, texture, x, y, w, container, func, value) {
+var DevToolButton = /** @class */ (function () {
+    function DevToolButton(devModeTools, text, texture, x, y, w, container, func, value) {
         //const text = '+';
         //const w = 30;
         var h = 30;
@@ -31,7 +31,7 @@ var PhaserPaletteButton = /** @class */ (function () {
                 func();
         });
     }
-    PhaserPaletteButton.prototype.highlight = function (boolean) {
+    DevToolButton.prototype.highlight = function (boolean) {
         this.active = boolean;
         if (boolean) {
             this.button.setFillStyle(this.devModeTools.COLOR_LIGHT, 1);
@@ -40,6 +40,6 @@ var PhaserPaletteButton = /** @class */ (function () {
             this.button.setFillStyle(this.devModeTools.COLOR_DARK, 1);
         }
     };
-    return PhaserPaletteButton;
+    return DevToolButton;
 }());
-//# sourceMappingURL=PhaserPaletteButton.js.map
+//# sourceMappingURL=DevToolButton.js.map

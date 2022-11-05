@@ -30,13 +30,14 @@ var DevModeScene = /** @class */ (function (_super) {
         ige.client.on('enterDevMode', function () {
             _this.defaultZoom = (_this.gameScene.zoomSize / 2.15);
             if (!_this.devPalette) {
-                _this.devPalette = new PhaserPalette(_this, _this.tileset, _this.rexUI);
+                _this.devPalette = new TilePalette(_this, _this.tileset, _this.rexUI);
+                _this.devModeTools = new DevModeTools(_this, _this.devPalette);
                 _this.paletteMarker = new TileMarker(_this, _this.devPalette.map, 1);
             }
             _this.devPalette.show();
-            _this.devPalette.layerButtonsContainer.setVisible(true);
-            _this.devPalette.toolButtonsContainer.setVisible(true);
-            _this.devPalette.highlightModeButton(0);
+            _this.devModeTools.layerButtonsContainer.setVisible(true);
+            _this.devModeTools.toolButtonsContainer.setVisible(true);
+            _this.devModeTools.highlightModeButton(0);
             _this.activateMarker(false);
             _this.regions.forEach(function (region) {
                 region.show();
@@ -46,8 +47,8 @@ var DevModeScene = /** @class */ (function (_super) {
         ige.client.on('leaveDevMode', function () {
             _this.cancelDrawRegion();
             _this.devPalette.hide();
-            _this.devPalette.layerButtonsContainer.setVisible(false);
-            _this.devPalette.toolButtonsContainer.setVisible(false);
+            _this.devModeTools.layerButtonsContainer.setVisible(false);
+            _this.devModeTools.toolButtonsContainer.setVisible(false);
             ige.client.emit('zoom', _this.defaultZoom);
             _this.regions.forEach(function (region) {
                 if (region.devModeOnly) {
@@ -213,7 +214,7 @@ var DevModeScene = /** @class */ (function (_super) {
             if (_this.regionTool && _this.regionDrawStart && _this.regionDrawStart.x !== worldPoint.x && _this.regionDrawStart.y !== worldPoint.y) {
                 graphics.clear();
                 _this.regionTool = false;
-                _this.devPalette.highlightModeButton(0);
+                _this.devModeTools.highlightModeButton(0);
                 var x = _this.regionDrawStart.x;
                 var y = _this.regionDrawStart.y;
                 if (width < 0) {
@@ -236,7 +237,7 @@ var DevModeScene = /** @class */ (function (_super) {
         if (this.regionTool) {
             this.regionDrawGraphics.clear();
             this.regionTool = false;
-            this.devPalette.highlightModeButton(0);
+            this.devModeTools.highlightModeButton(0);
             this.regionDrawStart = null;
         }
     };
@@ -257,14 +258,14 @@ var DevModeScene = /** @class */ (function (_super) {
             && this.input.activePointer.y < this.devPalette.scrollBarContainer.y + this.devPalette.scrollBarContainer.height);
     };
     DevModeScene.prototype.pointerInsideButtons = function () {
-        return ((this.input.activePointer.x > this.devPalette.layerButtonsContainer.x
-            && this.input.activePointer.x < this.devPalette.layerButtonsContainer.x + this.devPalette.layerButtonsContainer.width
-            && this.input.activePointer.y > this.devPalette.layerButtonsContainer.y
-            && this.input.activePointer.y < this.devPalette.layerButtonsContainer.y + this.devPalette.layerButtonsContainer.height)
-            || (this.input.activePointer.x > this.devPalette.toolButtonsContainer.x
-                && this.input.activePointer.x < this.devPalette.toolButtonsContainer.x + this.devPalette.toolButtonsContainer.width
-                && this.input.activePointer.y > this.devPalette.toolButtonsContainer.y
-                && this.input.activePointer.y < this.devPalette.toolButtonsContainer.y + this.devPalette.toolButtonsContainer.height));
+        return ((this.input.activePointer.x > this.devModeTools.layerButtonsContainer.x
+            && this.input.activePointer.x < this.devModeTools.layerButtonsContainer.x + this.devModeTools.layerButtonsContainer.width
+            && this.input.activePointer.y > this.devModeTools.layerButtonsContainer.y
+            && this.input.activePointer.y < this.devModeTools.layerButtonsContainer.y + this.devModeTools.layerButtonsContainer.height)
+            || (this.input.activePointer.x > this.devModeTools.toolButtonsContainer.x
+                && this.input.activePointer.x < this.devModeTools.toolButtonsContainer.x + this.devModeTools.toolButtonsContainer.width
+                && this.input.activePointer.y > this.devModeTools.toolButtonsContainer.y
+                && this.input.activePointer.y < this.devModeTools.toolButtonsContainer.y + this.devModeTools.toolButtonsContainer.height));
     };
     DevModeScene.prototype.update = function () {
         if (ige.developerMode.active) {
@@ -301,7 +302,7 @@ var DevModeScene = /** @class */ (function (_super) {
                                         this.selectedTileArea[i][j] = null;
                                     }
                                     this.activateMarker(true);
-                                    this.devPalette.highlightModeButton(2);
+                                    this.devModeTools.highlightModeButton(2);
                                 }
                             }
                         }
@@ -318,7 +319,7 @@ var DevModeScene = /** @class */ (function (_super) {
                                 this.selectedTile = null;
                             }
                             this.activateMarker(true);
-                            this.devPalette.highlightModeButton(2);
+                            this.devModeTools.highlightModeButton(2);
                         }
                     }
                 }
@@ -347,7 +348,7 @@ var DevModeScene = /** @class */ (function (_super) {
                                         this.selectedTileArea[i][j] = null;
                                     }
                                     this.activateMarker(true);
-                                    this.devPalette.highlightModeButton(2);
+                                    this.devModeTools.highlightModeButton(2);
                                 }
                             }
                         }
@@ -363,7 +364,7 @@ var DevModeScene = /** @class */ (function (_super) {
                                 this.selectedTile = null;
                             }
                             this.activateMarker(true);
-                            this.devPalette.highlightModeButton(2);
+                            this.devModeTools.highlightModeButton(2);
                         }
                     }
                 }
