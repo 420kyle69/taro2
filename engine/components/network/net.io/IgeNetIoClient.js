@@ -534,32 +534,37 @@ var IgeNetIoClient = {
 					// we are not executing this in igeEngine or igeEntity, becuase they don't execute when browser tab is inactive
 					for (const entityId in newSnapshot[1]) {
                         var entity = ige.$(entityId);
-                        var finalTransform = newSnapshot[1][entityId]
-                        if (entity) {
-							entity.finalKeyFrame = [newSnapshot[0], finalTransform]
-							// console.log (entity.finalKeyFrame)
+
+                        // if csp movement is enabled, don't use server-streamed position for my unit
+                        // instead, we'll use position updated by physics engine
+                        if (entity && (ige.game.cspEnabled && entity != ige.client.selectedUnit)) {
+							entity.finalTransform = newSnapshot[1][entityId]
 						}
-                            
                     }
 
                     let now = Date.now();
 
-					// if client's timestamp more than 100ms behind the server's timestamp, immediately update it to be 50ms behind the server's
-					// otherwise, apply rubberbanding
-					this._discrepancySamples.push(newSnapshotTimestamp - now)
-					if (this._discrepancySamples.length > 10) {
-						var medianDiscrepancy = this.getMedian(this._discrepancySamples) - 50;
-						this._discrepancySamples = [];
+                    // if cspEnabled, we ignore server-streamed timestamp as all entities rubber-banded towards 
+                    // their latest server-streamed position regardless of their timestamp
+                    if (!ige.game.cspEnabled) {
+                    	// if client's timestamp more than 100ms behind the server's timestamp, immediately update it to be 50ms behind the server's
+						// otherwise, apply rubberbanding
+						this._discrepancySamples.push(newSnapshotTimestamp - now)
+						if (this._discrepancySamples.length > 10) {
+							var medianDiscrepancy = this.getMedian(this._discrepancySamples) - 50;
+							this._discrepancySamples = [];
 
-						if (ige._currentTime > newSnapshotTimestamp - 10 || ige._currentTime < newSnapshotTimestamp - 100) {
-							// currentTime will be 3 frames behind the nextSnapshot's timestamp, so the entities have time to interpolate
-							// 1 frame = 1000/60 = 16ms. 3 frames = 50ms
-							ige.timeDiscrepancy = medianDiscrepancy - 50;
-						} else {
-							// rubberband currentTime to be nextSnapshot's timestamp - 50ms
-							ige.timeDiscrepancy += ((medianDiscrepancy - 50) - ige.timeDiscrepancy) / 10;
-						}
-					}
+							if (ige._currentTime > newSnapshotTimestamp - 10 || ige._currentTime < newSnapshotTimestamp - 100) {
+								// currentTime will be 3 frames behind the nextSnapshot's timestamp, so the entities have time to interpolate
+								// 1 frame = 1000/60 = 16ms. 3 frames = 50ms
+								ige.timeDiscrepancy = medianDiscrepancy - 50;
+							} else {
+								// rubberband currentTime to be nextSnapshot's timestamp - 50ms
+								ige.timeDiscrepancy += ((medianDiscrepancy - 50) - ige.timeDiscrepancy) / 10;
+							}
+						}	
+                    }
+					
 				}
 			}
 		} else {
