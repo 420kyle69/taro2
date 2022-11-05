@@ -1,6 +1,5 @@
 class TilePalette extends Phaser.GameObjects.Container {
 
-	private readonly textures: Phaser.GameObjects.Image;
 	private readonly tileset: Phaser.Tilemaps.Tileset;
 
 	scene: DevModeScene;
@@ -87,9 +86,9 @@ class TilePalette extends Phaser.GameObjects.Container {
 			scrollBarRight.blocked = false;
 		  });
 
-		const COLOR_PRIMARY = this.COLOR_PRIMARY = 0x0036cc;
-		const COLOR_LIGHT = this.COLOR_LIGHT = 0x6690ff;
-		const COLOR_DARK = this.COLOR_DARK = 0xffffff;
+		this.COLOR_PRIMARY = 0x0036cc;
+		this.COLOR_LIGHT = 0x6690ff;
+		this.COLOR_DARK = 0xffffff;
 
 		const scrollBarContainer = this.scrollBarContainer = new Phaser.GameObjects.Container(scene);
 		scene.add.existing(scrollBarContainer);

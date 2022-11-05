@@ -67,9 +67,9 @@ var TilePalette = /** @class */ (function (_super) {
             scrollBarBottom.blocked = false;
             scrollBarRight.blocked = false;
         });
-        var COLOR_PRIMARY = _this.COLOR_PRIMARY = 0x0036cc;
-        var COLOR_LIGHT = _this.COLOR_LIGHT = 0x6690ff;
-        var COLOR_DARK = _this.COLOR_DARK = 0xffffff;
+        _this.COLOR_PRIMARY = 0x0036cc;
+        _this.COLOR_LIGHT = 0x6690ff;
+        _this.COLOR_DARK = 0xffffff;
         var scrollBarContainer = _this.scrollBarContainer = new Phaser.GameObjects.Container(scene);
         scene.add.existing(scrollBarContainer);
         scrollBarContainer.x = camera.x;

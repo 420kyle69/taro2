@@ -22,9 +22,9 @@ class DevModeTools extends Phaser.GameObjects.Container {
 
 		this.palette = palette;
 
-		const COLOR_PRIMARY = this.COLOR_PRIMARY = palette.COLOR_PRIMARY;
-		const COLOR_LIGHT = this.COLOR_LIGHT = palette.COLOR_LIGHT;
-		const COLOR_DARK = this.COLOR_DARK = palette.COLOR_DARK;
+		this.COLOR_PRIMARY = palette.COLOR_PRIMARY;
+		this.COLOR_LIGHT = palette.COLOR_LIGHT;
+		this.COLOR_DARK = palette.COLOR_DARK;
 
 		this.scene.scale.on(Phaser.Scale.Events.RESIZE, () => {
 			layerButtonsContainer.x = palette.camera.x + palette.paletteWidth - 98;
@@ -37,12 +37,11 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		new DevToolButton (this, '-', null, 34, -34, 30, palette.scrollBarContainer, palette.zoom.bind(this), 1);
 
 		const layerButtonsContainer = this.layerButtonsContainer = new Phaser.GameObjects.Container(scene);
-		scene.add.existing(layerButtonsContainer);
-		//this.scrollBarContainer.add(layerButtonsContainer);
 		layerButtonsContainer.width = 120;
 		layerButtonsContainer.height = 204;
 		layerButtonsContainer.x = palette.camera.x + palette.paletteWidth - 98;
 		layerButtonsContainer.y = palette.camera.y - 204;
+		scene.add.existing(layerButtonsContainer);
 		
 		new DevToolButton (this, 'palette', null, 0, 170, 120, layerButtonsContainer, palette.toggle.bind(this));
 
@@ -56,12 +55,11 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.layerButtons[0].highlight(true);
 
 		const toolButtonsContainer = this.toolButtonsContainer = new Phaser.GameObjects.Container(scene);
-		scene.add.existing(toolButtonsContainer);
-		//this.scrollBarContainer.add(toolButtonsContainer);
 		toolButtonsContainer.x = palette.camera.x + palette.paletteWidth - 98;
 		toolButtonsContainer.y = palette.camera.y - layerButtonsContainer.height - 184;
 		toolButtonsContainer.width = 120;
 		toolButtonsContainer.height = 98;
+		scene.add.existing(toolButtonsContainer);
 
 		this.modeButtons = [];
 		this.modeButtons.push (

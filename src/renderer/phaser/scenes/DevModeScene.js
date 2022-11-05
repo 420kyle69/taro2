@@ -23,7 +23,6 @@ var DevModeScene = /** @class */ (function (_super) {
         this.input.setTopOnly(true);
         this.gameScene = ige.renderer.scene.getScene('Game');
         this.regions = [];
-        //const map = this.devPalette.map;
         var map = this.gameScene.tilemap;
         this.selectedTile = null;
         this.selectedTileArea = [[null, null], [null, null]];

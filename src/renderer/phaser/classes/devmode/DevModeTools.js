@@ -29,9 +29,9 @@ var DevModeTools = /** @class */ (function (_super) {
     function DevModeTools(scene, palette) {
         var _this = _super.call(this, scene) || this;
         _this.palette = palette;
-        var COLOR_PRIMARY = _this.COLOR_PRIMARY = palette.COLOR_PRIMARY;
-        var COLOR_LIGHT = _this.COLOR_LIGHT = palette.COLOR_LIGHT;
-        var COLOR_DARK = _this.COLOR_DARK = palette.COLOR_DARK;
+        _this.COLOR_PRIMARY = palette.COLOR_PRIMARY;
+        _this.COLOR_LIGHT = palette.COLOR_LIGHT;
+        _this.COLOR_DARK = palette.COLOR_DARK;
         _this.scene.scale.on(Phaser.Scale.Events.RESIZE, function () {
             layerButtonsContainer.x = palette.camera.x + palette.paletteWidth - 98;
             layerButtonsContainer.y = palette.camera.y - 170;
@@ -41,23 +41,21 @@ var DevModeTools = /** @class */ (function (_super) {
         new DevToolButton(_this, '+', null, 0, -34, 30, palette.scrollBarContainer, palette.zoom.bind(_this), -1);
         new DevToolButton(_this, '-', null, 34, -34, 30, palette.scrollBarContainer, palette.zoom.bind(_this), 1);
         var layerButtonsContainer = _this.layerButtonsContainer = new Phaser.GameObjects.Container(scene);
-        scene.add.existing(layerButtonsContainer);
-        //this.scrollBarContainer.add(layerButtonsContainer);
         layerButtonsContainer.width = 120;
         layerButtonsContainer.height = 204;
         layerButtonsContainer.x = palette.camera.x + palette.paletteWidth - 98;
         layerButtonsContainer.y = palette.camera.y - 204;
+        scene.add.existing(layerButtonsContainer);
         new DevToolButton(_this, 'palette', null, 0, 170, 120, layerButtonsContainer, palette.toggle.bind(_this));
         _this.layerButtons = [];
         _this.layerButtons.push(new DevToolButton(_this, 'floor', null, 0, 102, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 0), new DevToolButton(_this, 'floor2', null, 0, 68, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 1), new DevToolButton(_this, 'walls', null, 0, 34, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 2), new DevToolButton(_this, 'trees', null, 0, 0, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 3));
         _this.layerButtons[0].highlight(true);
         var toolButtonsContainer = _this.toolButtonsContainer = new Phaser.GameObjects.Container(scene);
-        scene.add.existing(toolButtonsContainer);
-        //this.scrollBarContainer.add(toolButtonsContainer);
         toolButtonsContainer.x = palette.camera.x + palette.paletteWidth - 98;
         toolButtonsContainer.y = palette.camera.y - layerButtonsContainer.height - 184;
         toolButtonsContainer.width = 120;
         toolButtonsContainer.height = 98;
+        scene.add.existing(toolButtonsContainer);
         _this.modeButtons = [];
         _this.modeButtons.push(new DevToolButton(_this, '', 'cursor', 0, 0, 58, toolButtonsContainer, _this.cursor.bind(_this)), new DevToolButton(_this, '', 'region', 62, 0, 58, toolButtonsContainer, _this.drawRegion.bind(_this)), new DevToolButton(_this, '', 'stamp', 0, 34, 58, toolButtonsContainer, _this.brush.bind(_this)), new DevToolButton(_this, '', 'eraser', 62, 34, 58, toolButtonsContainer, _this.emptyTile.bind(_this)));
         _this.cursorButton = _this.modeButtons[0];
