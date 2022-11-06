@@ -103,12 +103,12 @@ var Item = IgeEntityPhysics.extend({
 	updateBody: function (initTransform) {
 		var self = this;
 		var body = self._stats.currentBody;
-
+		
 		if (ige.isServer) {
-			if (this._stats.stateId == 'dropped') {
+			if (this._stats.stateId == 'dropped') {			
 				this.lifeSpan(this._stats.lifeSpan);
 				self.mount(ige.$('baseScene'));
-				this.streamMode(1);
+				this.streamMode(1);			
 			} else {
 				this.deathTime(undefined); // remove lifespan, so the entity stays indefinitely
 				if (body) {
@@ -121,6 +121,8 @@ var Item = IgeEntityPhysics.extend({
 			}
 		}
 
+
+		
 		if (body && body.type != 'none') {
 			IgeEntityPhysics.prototype.updateBody.call(self, initTransform);
 
@@ -230,8 +232,6 @@ var Item = IgeEntityPhysics.extend({
 			this._stats.ownerUnitId = null;
 
 			if (oldOwner) {
-				this.updateBody();
-
 				if (ige.isClient) {
 					if (oldOwner._stats) {
 						oldOwner._stats.currentItemId = null;
@@ -1024,6 +1024,7 @@ var Item = IgeEntityPhysics.extend({
 			}
 
 			self.rotateTo(0, 0, rotate);
+			self.finalTransform = [x, y, ownerUnit._rotate.z] // prepare position for when this item's dropped. without this, item will appear at an incorrect position
 		}
 
 		if (this._stats.isBeingUsed) {

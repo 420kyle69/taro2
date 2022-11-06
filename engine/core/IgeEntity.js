@@ -118,6 +118,7 @@ var IgeEntity = IgeObject.extend({
 
 	// update item's body & texture based on stateId given
 	setState: function (stateId, defaultData) {
+		// console.log("setState", stateId, defaultData)
 		var self = this;
 
 		// if invalid stateId is given, set state to default state
@@ -5131,8 +5132,8 @@ var IgeEntity = IgeObject.extend({
 
 		// using cspMovement for my unit will cause it to rubberband to the latest known position
 		if (ige.game.cspEnabled && this.finalTransform && this.body &&
-			!(this._category == 'item' && this.getOwnerUnit() != undefined) &&
-			!(this._category == 'projectile' && this._stats.sourceItemId == undefined && this._streamMode)
+			!(this._category == 'item' && this.getOwnerUnit() != undefined) && // don't apply to item that's held by unit as that's calculated by anchor calculation
+			!(this._category == 'projectile' && this._stats.sourceItemId == undefined && this._streamMode) // don't apply to projectiles that are CSP'ed
 		) {
 			x += (this.finalTransform[0] - x)/4
         	y += (this.finalTransform[1] - y)/4

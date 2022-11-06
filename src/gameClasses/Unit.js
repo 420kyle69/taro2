@@ -1208,6 +1208,7 @@ var Unit = IgeEntityPhysics.extend({
 		var self = this;
 		var item = self.inventory.getItemBySlotNumber(itemIndex + 1);
 		if (item) {
+			
 			// check if item's undroppable
 			if (item._stats && item._stats.controls && item._stats.controls.undroppable) {
 				return;
