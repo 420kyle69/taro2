@@ -4080,7 +4080,7 @@ var IgeEntity = IgeObject.extend({
 				var data = queuedData[i];
 				for (attrName in data) {
 					var newValue = data[attrName];
-					console.log(this._category, this.id(), attrName, newValue)
+					// console.log(this._category, this.id(), attrName, newValue)
 					switch (attrName) {
 						case 'attributes':
 							// only on client side to prevent circular recursion
@@ -4097,7 +4097,6 @@ var IgeEntity = IgeObject.extend({
 											attributeData.hasChanged = newAttributeValue !== oldAttributeValue;
 											attributeData.value = newAttributeValue;
 											attributeData.type = attributeTypeId;
-											console.log(attributeTypeId, attributeData)
 											this.attribute.update(attributeTypeId, attributeData.value);
 
 											if (this._category === 'unit') {

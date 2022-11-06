@@ -71,10 +71,12 @@ var PlayerUiComponent = IgeEntity.extend({
 
 		for (var attrKey in attributes) {
 			var attr = attributes[attrKey];
+			
 			if (attr) {
 				if (!attr.isVisible) continue;
 
 				var attributeType = attributeTypes[attrKey];
+				
 				var name = attributeType ? attributeType.name : attr.name;
 
 				var attrName = $('<span/>', {

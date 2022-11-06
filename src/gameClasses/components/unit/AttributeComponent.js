@@ -177,7 +177,6 @@ var AttributeComponent = IgeEntity.extend({
 	update: function (attributeTypeId, newValue, forceUpdate) {
 
 		var self = this;
-		console.log(attributeTypeId, newValue, forceUpdate)
 		if (!self._entity._stats || !self._entity._stats.attributes) {
 			return;
 		}
