@@ -281,7 +281,7 @@ var ActionComponent = IgeEntity.extend({
 						// console.log('playing unit animation!', animationId);
 						var entity = self._script.variable.getValue(action.entity, vars);
 						if (entity) {
-							entity.streamUpdateData([{ anim: animationId }]);
+							entity.applyAnimationById(animationId);
 						}
 
 						break;

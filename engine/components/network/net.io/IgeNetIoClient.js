@@ -33,7 +33,8 @@ var IgeNetIoClient = {
 		} else {
 			this.artificialDelay = 0;
 			this.lagVariance = 0;
-
+			this._discrepancySamples = []
+			this.medianDiscrepancy = undefined;
 			var self = this;
 
 			var gameId = ige.client.servers[0].gameId;
@@ -522,9 +523,10 @@ var IgeNetIoClient = {
 				}
 
 				if (Object.keys(obj).length) {
+
 					var newSnapshot = [newSnapshotTimestamp, obj];
 					ige.snapshots.push(newSnapshot);
-
+					
 					// prevent memory leak that's caused when the client's browser tab isn't focused
 					if (ige.snapshots.length > 2) {
 						ige.snapshots.shift();
@@ -534,24 +536,46 @@ var IgeNetIoClient = {
 					// we are not executing this in igeEngine or igeEntity, becuase they don't execute when browser tab is inactive
 					for (const entityId in newSnapshot[1]) {
                         var entity = ige.$(entityId);
-                        var finalTransform = newSnapshot[1][entityId]
-                        if (entity) {
-							entity.finalKeyFrame = [newSnapshot[0], finalTransform]
-							// console.log (entity.finalKeyFrame)
+
+                        // if csp movement is enabled, don't use server-streamed position for my unit
+                        // instead, we'll use position updated by physics engine
+                        if (ige.game.cspEnabled && entity && 
+                        	entity.latestTimeStamp < newSnapshotTimestamp && 
+                        	entity != ige.client.selectedUnit
+                        ) {
+                        	entity.finalTransform = newSnapshot[1][entityId]
+                    		entity.latestTimeStamp = newSnapshotTimestamp
+                    		// console.log(entity.finalTransform) 
 						}
-                            
                     }
 
-					// if client's timestamp more than 100ms behind the server's timestamp, immediately update it to be 50ms behind the server's
-					// otherwise, apply rubberbanding
-					if (ige._currentTime > newSnapshotTimestamp || ige._currentTime < newSnapshotTimestamp - 100) {
-						// currentTime will be 3 frames behind the nextSnapshot's timestamp, so the entities have time to interpolate
-						// 1 frame = 1000/60 = 16ms. 3 frames = 50ms
-						ige.timeDiscrepancy = newSnapshotTimestamp - Date.now() - 50;
-					} else {
-						// rubberband currentTime to be nextSnapshot's timestamp - 50ms
-						ige.timeDiscrepancy += ((newSnapshotTimestamp - Date.now() - 50) - ige.timeDiscrepancy) / 5;
-					}
+                    let now = Date.now();
+
+                    // if cspEnabled, we ignore server-streamed timestamp as all entities rubber-banded towards 
+                    // their latest server-streamed position regardless of their timestamp
+                    if (!ige.game.cspEnabled) {
+                    	// if client's timestamp more than 100ms behind the server's timestamp, immediately update it to be 50ms behind the server's
+						// otherwise, apply rubberbanding
+						this._discrepancySamples.push(newSnapshotTimestamp - now)
+
+						if ((this.medianDiscrepancy == undefined && this._discrepancySamples.length > 2) ||
+							this._discrepancySamples.length > 20
+						) {
+							this.medianDiscrepancy = this.getMedian(this._discrepancySamples);
+							this._discrepancySamples = [];
+
+							if (ige._currentTime > newSnapshotTimestamp - 10 || ige._currentTime < newSnapshotTimestamp - 100) {
+								// currentTime will be 3 frames behind the nextSnapshot's timestamp, so the entities have time to interpolate
+								// 1 frame = 1000/60 = 16ms. 3 frames = 50ms
+								ige.timeDiscrepancy = this.medianDiscrepancy - 50;
+							} else {
+								// rubberband currentTime to be nextSnapshot's timestamp - 50ms
+								ige.timeDiscrepancy += ((this.medianDiscrepancy - 50) - ige.timeDiscrepancy) / 10;
+							}
+						}
+
+                    }
+					
 				}
 			}
 		} else {
@@ -566,6 +590,21 @@ var IgeNetIoClient = {
 
 			this.emit(commandName, data[1]);
 		}
+	},
+
+	getMedian: function (values) {
+	  if(values.length ===0) throw new Error("No inputs");
+
+	  values.sort(function(a,b){
+	    return a-b;
+	  });
+
+	  var half = Math.floor(values.length / 2);
+	  
+	  if (values.length % 2)
+	    return values[half];
+	  
+	  return (values[half - 1] + values[half]) / 2.0;
 	},
 
 	/**

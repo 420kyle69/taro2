@@ -137,6 +137,7 @@ var Projectile = IgeEntityPhysics.extend({
 				switch (attrName) {
 
 					case 'scaleBody':
+						this._stats[attrName] = newValue;
 						if (ige.isServer) {
 							// finding all attach entities before changing body dimensions
 							if (this.jointsAttached) {

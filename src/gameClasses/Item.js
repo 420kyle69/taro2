@@ -103,12 +103,12 @@ var Item = IgeEntityPhysics.extend({
 	updateBody: function (initTransform) {
 		var self = this;
 		var body = self._stats.currentBody;
-
+		
 		if (ige.isServer) {
-			if (this._stats.stateId == 'dropped') {
+			if (this._stats.stateId == 'dropped') {			
 				this.lifeSpan(this._stats.lifeSpan);
 				self.mount(ige.$('baseScene'));
-				this.streamMode(1);
+				this.streamMode(1);			
 			} else {
 				this.deathTime(undefined); // remove lifespan, so the entity stays indefinitely
 				if (body) {
@@ -121,6 +121,8 @@ var Item = IgeEntityPhysics.extend({
 			}
 		}
 
+
+		
 		if (body && body.type != 'none') {
 			IgeEntityPhysics.prototype.updateBody.call(self, initTransform);
 
@@ -229,10 +231,7 @@ var Item = IgeEntityPhysics.extend({
 			// item is being dropped.
 			this._stats.ownerUnitId = null;
 
-			// get transform of its last owner
 			if (oldOwner) {
-				this.updateBody();
-
 				if (ige.isClient) {
 					if (oldOwner._stats) {
 						oldOwner._stats.currentItemId = null;
@@ -886,6 +885,7 @@ var Item = IgeEntityPhysics.extend({
 
 				switch (attrName) {
 					case 'ownerUnitId':
+						this._stats[attrName] = newValue;
 						if (ige.isClient) {
 							var newOwner = ige.$(newValue);
 							self.setOwnerUnit(newOwner);
@@ -893,6 +893,7 @@ var Item = IgeEntityPhysics.extend({
 						break;
 					case 'scale':
 					case 'scaleBody':
+						this._stats[attrName] = newValue;
 						if (ige.isClient) {
 							self._stats.scale = newValue;
 							self._scaleTexture();
@@ -911,13 +912,9 @@ var Item = IgeEntityPhysics.extend({
 							self._scaleBox2dBody(newValue);
 						}
 						break;
-					// case 'use':
-					// 	// only run client-side use for other players' units, because my player's unit's use() will get executed via actionComponent.
-					// 	if (ige.isClient) {
-					// 		self.use();
-					// 	}
-					// 	break;
+					
 					case 'hidden':
+						this._stats[attrName] = newValue;
 						if (ige.isClient) {
 							if (newValue) {
 								self.hide();
@@ -931,6 +928,7 @@ var Item = IgeEntityPhysics.extend({
 						break;
 
 					case 'quantity':
+						this._stats[attrName] = newValue;
 						self.updateQuantity(newValue);
 						var owner = self.getOwnerUnit();
 						if (ige.isClient && ige.client.selectedUnit == owner) {
@@ -938,6 +936,7 @@ var Item = IgeEntityPhysics.extend({
 						}
 						break;
 					case 'description':
+						this._stats[attrName] = newValue;
 						var owner = self.getOwnerUnit();
 						if (ige.isClient && ige.client.selectedUnit == owner) {
 							ige.itemUi.updateItemDescription(this);
@@ -945,6 +944,7 @@ var Item = IgeEntityPhysics.extend({
 
 						break;
 					case 'name':
+						this._stats[attrName] = newValue;
 						var owner = self.getOwnerUnit();
 						if (ige.isClient && ige.client.selectedUnit == owner) {
 							ige.itemUi.updateItemInfo(this);
@@ -953,38 +953,30 @@ var Item = IgeEntityPhysics.extend({
 						break;
 
 					case 'inventoryImage':
+						this._stats[attrName] = newValue;
 						var owner = self.getOwnerUnit();
 						if (ige.isClient && ige.client.selectedUnit == owner) {
 							ige.itemUi.updateItemSlot(this, this._stats.slotIndex);
 						}
 						break;
 					case 'inventorySlotColor':
+						this._stats[attrName] = newValue;
 						var owner = self.getOwnerUnit();
 						if (ige.isClient && ige.client.selectedUnit == owner) {
 							owner.inventory.update();
 						}
 						break;
 					case 'slotIndex':
+						this._stats[attrName] = newValue;
 						break;
+					
 					case 'isBeingUsed':
-						// ignore stream for my unit's item use
 						var owner = self.getOwnerUnit();
-						if (ige.isClient && owner != ige.client.selectedUnit) {
-							this._stats.isBeingUsed = newValue;							
-						}
-						break;
-
-					case 'stopUsing':
-						// ignore stream for my unit's item use
+						// ignore stream for my unit's item use if projectileStreamMode is 0 (instant fire)
 						if (ige.isClient && owner != ige.client.selectedUnit) {
 							this._stats.isBeingUsed = newValue;
-
-							if (newValue == false) {
-								this.playEffect('none');
-							}
 						}
 						break;
-
 				}
 			}
 		}
@@ -1032,6 +1024,7 @@ var Item = IgeEntityPhysics.extend({
 			}
 
 			self.rotateTo(0, 0, rotate);
+			self.finalTransform = [x, y, ownerUnit._rotate.z] // prepare position for when this item's dropped. without this, item will appear at an incorrect position
 		}
 
 		if (this._stats.isBeingUsed) {
