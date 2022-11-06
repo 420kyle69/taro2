@@ -4080,7 +4080,7 @@ var IgeEntity = IgeObject.extend({
 				var data = queuedData[i];
 				for (attrName in data) {
 					var newValue = data[attrName];
-					// console.log(this._category, this.id(), attrName, newValue)
+					console.log(this._category, this.id(), attrName, newValue)
 					switch (attrName) {
 						case 'attributes':
 							// only on client side to prevent circular recursion
@@ -4097,7 +4097,7 @@ var IgeEntity = IgeObject.extend({
 											attributeData.hasChanged = newAttributeValue !== oldAttributeValue;
 											attributeData.value = newAttributeValue;
 											attributeData.type = attributeTypeId;
-
+											console.log(attributeTypeId, attributeData)
 											this.attribute.update(attributeTypeId, attributeData.value);
 
 											if (this._category === 'unit') {
@@ -4183,12 +4183,13 @@ var IgeEntity = IgeObject.extend({
 								this.flip(newValue);
 							}
 							break;
+						
+						case 'ownerId':
+							this._stats[attrName] = newValue;
+							this.oldOwnerId = this._stats[attrName];
+							break;
 
 						default:
-							// setting oldownerId b4 owner change
-							if (attrName === 'ownerId') {
-								this.oldOwnerId = this._stats[attrName];
-							}
 							if (ige.isServer) {
 								this._stats[attrName] = newValue;
 							}
@@ -5135,8 +5136,8 @@ var IgeEntity = IgeObject.extend({
 			!(this._category == 'item' && this.getOwnerUnit() != undefined) && // don't apply to item that's held by unit as that's calculated by anchor calculation
 			!(this._category == 'projectile' && this._stats.sourceItemId == undefined && this._streamMode) // don't apply to projectiles that are CSP'ed
 		) {
-			x += (this.finalTransform[0] - x)/4
-        	y += (this.finalTransform[1] - y)/4
+			x += (this.finalTransform[0] - x)/8
+        	y += (this.finalTransform[1] - y)/8
 
         	rotateStart = rotate;
         	rotateEnd = this.finalTransform[2]
