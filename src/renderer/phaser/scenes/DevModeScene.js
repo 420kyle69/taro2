@@ -35,11 +35,6 @@ var DevModeScene = /** @class */ (function (_super) {
         ige.client.on('editRegion', function (data) {
             _this.regionEditor.edit(data);
         });
-        this.input.on('wheel', function (pointer, gameObjects, deltaX, deltaY, deltaZ) {
-            if (_this.tilePalette && _this.tilePalette.visible) {
-                _this.tilePalette.zoom(deltaY);
-            }
-        });
     };
     DevModeScene.prototype.preload = function () {
         /*const data = ige.game.data;
@@ -80,7 +75,6 @@ var DevModeScene = /** @class */ (function (_super) {
             }*/
         });
         var gameMap = this.gameScene.tilemap;
-        console.log('game map', gameMap);
         gameMap.currentLayerIndex = 0;
     };
     DevModeScene.prototype.enterDevMode = function () {
@@ -92,21 +86,9 @@ var DevModeScene = /** @class */ (function (_super) {
             this.regionEditor = this.devModeTools.regionEditor;
         }
         this.devModeTools.enterDevMode();
-        /*this.devModeTools.layerButtonsContainer.setVisible(true);
-        this.devModeTools.toolButtonsContainer.setVisible(true);
-        this.devModeTools.highlightModeButton(0);
-        this.tileEditor.activateMarker(false);
-        this.tilePalette.show();
-        this.regionEditor.showRegions();*/
     };
     DevModeScene.prototype.leaveDevMode = function () {
         this.devModeTools.leaveDevMode();
-        /*this.regionEditor.cancelDrawRegion();
-        this.tilePalette.hide();
-        this.devModeTools.layerButtonsContainer.setVisible(false);
-        this.devModeTools.toolButtonsContainer.setVisible(false);
-        this.regionEditor.hideRegions();
-        ige.client.emit('zoom', this.defaultZoom);*/
     };
     DevModeScene.prototype.pointerInsideMap = function (pointerX, pointerY, map) {
         return (0 <= pointerX && pointerX < map.width

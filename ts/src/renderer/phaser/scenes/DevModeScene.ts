@@ -39,12 +39,6 @@ class DevModeScene extends PhaserScene {
 		ige.client.on('editRegion', (data: RegionData) => {
 			this.regionEditor.edit(data);
 		});
-
-		this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
-			if (this.tilePalette && this.tilePalette.visible) {
-				this.tilePalette.zoom(deltaY);
-			}
-		})
 	}
 
 	preload (): void {
@@ -98,7 +92,6 @@ class DevModeScene extends PhaserScene {
 		});
 
 		const gameMap = this.gameScene.tilemap;
-		console.log('game map', gameMap)
 		gameMap.currentLayerIndex = 0;
 	}
 
@@ -111,22 +104,10 @@ class DevModeScene extends PhaserScene {
 				this.regionEditor = this.devModeTools.regionEditor;
 			}
 			this.devModeTools.enterDevMode();
-			/*this.devModeTools.layerButtonsContainer.setVisible(true);
-			this.devModeTools.toolButtonsContainer.setVisible(true);
-			this.devModeTools.highlightModeButton(0);
-			this.tileEditor.activateMarker(false);
-			this.tilePalette.show();
-			this.regionEditor.showRegions();*/
 	}
 
 	leaveDevMode () {
 		this.devModeTools.leaveDevMode();
-		/*this.regionEditor.cancelDrawRegion();
-		this.tilePalette.hide();
-		this.devModeTools.layerButtonsContainer.setVisible(false);
-		this.devModeTools.toolButtonsContainer.setVisible(false);
-		this.regionEditor.hideRegions();
-		ige.client.emit('zoom', this.defaultZoom);*/
 	}
 
 	pointerInsideMap(pointerX: number, pointerY: number, map: Phaser.Tilemaps.Tilemap): boolean {

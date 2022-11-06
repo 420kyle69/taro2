@@ -103,6 +103,12 @@ class TilePalette extends Phaser.GameObjects.Container {
 			camera.x = this.scene.sys.game.canvas.width - paletteWidth - 40;
 			scrollBarContainer.x = this.camera.x;
 		});
+
+		this.scene.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
+			if (this.visible) {
+				this.zoom(deltaY);
+			}
+		})
 	}
 
 	toggle() {

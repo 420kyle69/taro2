@@ -4,8 +4,7 @@ var RegionEditor = /** @class */ (function () {
         this.gameScene = gameScene;
         this.devModeScene = devModeScene;
         this.devModeTools = devModeTools;
-        this.regions = [];
-        this.gameScene.input.on('pointerdown', function (pointer) {
+        gameScene.input.on('pointerdown', function (pointer) {
             if (_this.regionTool) {
                 var worldPoint = _this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
                 _this.regionDrawStart = {
@@ -14,14 +13,14 @@ var RegionEditor = /** @class */ (function () {
                 };
             }
         }, this);
-        var graphics = this.regionDrawGraphics = this.gameScene.add.graphics();
+        var graphics = this.regionDrawGraphics = gameScene.add.graphics();
         var width;
         var height;
-        this.gameScene.input.on('pointermove', function (pointer) {
+        gameScene.input.on('pointermove', function (pointer) {
             if (!pointer.leftButtonDown())
                 return;
             else if (_this.regionTool) {
-                var worldPoint = _this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
+                var worldPoint = gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
                 width = worldPoint.x - _this.regionDrawStart.x;
                 height = worldPoint.y - _this.regionDrawStart.y;
                 graphics.clear();
@@ -29,10 +28,10 @@ var RegionEditor = /** @class */ (function () {
                 graphics.strokeRect(_this.regionDrawStart.x, _this.regionDrawStart.y, width, height);
             }
         }, this);
-        this.gameScene.input.on('pointerup', function (pointer) {
+        gameScene.input.on('pointerup', function (pointer) {
             if (!pointer.leftButtonReleased())
                 return;
-            var worldPoint = _this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
+            var worldPoint = gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
             if (_this.regionTool && _this.regionDrawStart && _this.regionDrawStart.x !== worldPoint.x && _this.regionDrawStart.y !== worldPoint.y) {
                 graphics.clear();
                 _this.regionTool = false;

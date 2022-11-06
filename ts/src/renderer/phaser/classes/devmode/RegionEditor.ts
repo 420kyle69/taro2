@@ -4,7 +4,6 @@ class RegionEditor {
     devModeScene: DevModeScene;
     devModeTools: DevModeTools;
 
-    regions: PhaserRegion[];
 	regionDrawGraphics: Phaser.GameObjects.Graphics;
 	regionDrawStart: {x: number, y: number};
 	regionTool: boolean;
@@ -15,9 +14,8 @@ class RegionEditor {
         this.gameScene = gameScene;
         this.devModeScene = devModeScene;
         this.devModeTools = devModeTools;
-        this.regions = [];
 
-        this.gameScene.input.on('pointerdown', (pointer) => {
+        gameScene.input.on('pointerdown', (pointer) => {
 			if (this.regionTool) {
 				const worldPoint = this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
 				this.regionDrawStart = {
@@ -27,14 +25,14 @@ class RegionEditor {
 			}
 		}, this);
 
-		const graphics = this.regionDrawGraphics = this.gameScene.add.graphics();
+		const graphics = this.regionDrawGraphics = gameScene.add.graphics();
 		let width;
 		let height;
 
-		this.gameScene.input.on('pointermove', (pointer) => {
+		gameScene.input.on('pointermove', (pointer) => {
 			if (!pointer.leftButtonDown()) return;
 			else if (this.regionTool) {
-				const worldPoint = this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
+				const worldPoint = gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
 				width = worldPoint.x - this.regionDrawStart.x;
 				height = worldPoint.y - this.regionDrawStart.y;
 				graphics.clear();
@@ -43,9 +41,9 @@ class RegionEditor {
 				}
 			}, this);
 
-		this.gameScene.input.on('pointerup', (pointer) => {
+		gameScene.input.on('pointerup', (pointer) => {
 			if (!pointer.leftButtonReleased()) return;
-			const worldPoint = this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
+			const worldPoint = gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
 			if (this.regionTool && this.regionDrawStart && this.regionDrawStart.x !== worldPoint.x && this.regionDrawStart.y !== worldPoint.y) {
 				graphics.clear();
 				this.regionTool = false;
