@@ -26,9 +26,10 @@ var __assign = (this && this.__assign) || function () {
 };
 var DevModeTools = /** @class */ (function (_super) {
     __extends(DevModeTools, _super);
-    function DevModeTools(scene, palette) {
+    function DevModeTools(scene) {
         var _this = _super.call(this, scene) || this;
-        _this.palette = palette;
+        var palette = _this.palette = new TilePalette(_this.scene, _this.scene.tileset, _this.scene.rexUI);
+        _this.tileEditor = new TileEditor(_this.scene.gameScene, _this.scene, _this);
         _this.regionEditor = new RegionEditor(_this.scene.gameScene, _this.scene, _this);
         _this.COLOR_PRIMARY = palette.COLOR_PRIMARY;
         _this.COLOR_LIGHT = palette.COLOR_LIGHT;
@@ -39,15 +40,15 @@ var DevModeTools = /** @class */ (function (_super) {
             toolButtonsContainer.x = palette.camera.x + palette.paletteWidth - 98;
             toolButtonsContainer.y = palette.camera.y - layerButtonsContainer.height - 136;
         });
-        new DevToolButton(_this, '+', null, 0, -34, 30, palette.scrollBarContainer, palette.zoom.bind(_this), -1);
-        new DevToolButton(_this, '-', null, 34, -34, 30, palette.scrollBarContainer, palette.zoom.bind(_this), 1);
+        new DevToolButton(_this, '+', null, 0, -34, 30, palette.scrollBarContainer, palette.zoom.bind(palette), -1);
+        new DevToolButton(_this, '-', null, 34, -34, 30, palette.scrollBarContainer, palette.zoom.bind(palette), 1);
         var layerButtonsContainer = _this.layerButtonsContainer = new Phaser.GameObjects.Container(scene);
         layerButtonsContainer.width = 120;
         layerButtonsContainer.height = 204;
         layerButtonsContainer.x = palette.camera.x + palette.paletteWidth - 98;
         layerButtonsContainer.y = palette.camera.y - 204;
         scene.add.existing(layerButtonsContainer);
-        new DevToolButton(_this, 'palette', null, 0, 170, 120, layerButtonsContainer, palette.toggle.bind(_this));
+        new DevToolButton(_this, 'palette', null, 0, 170, 120, layerButtonsContainer, palette.toggle.bind(palette));
         _this.layerButtons = [];
         _this.layerButtons.push(new DevToolButton(_this, 'floor', null, 0, 102, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 0), new DevToolButton(_this, 'floor2', null, 0, 68, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 1), new DevToolButton(_this, 'walls', null, 0, 34, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 2), new DevToolButton(_this, 'trees', null, 0, 0, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 3));
         _this.layerButtons[0].highlight(true);
@@ -66,29 +67,45 @@ var DevModeTools = /** @class */ (function (_super) {
         _this.brushButtons[0].highlight(true);
         return _this;
     }
+    DevModeTools.prototype.enterDevMode = function () {
+        this.layerButtonsContainer.setVisible(true);
+        this.toolButtonsContainer.setVisible(true);
+        this.highlightModeButton(0);
+        this.tileEditor.activateMarker(false);
+        this.palette.show();
+        this.regionEditor.showRegions();
+    };
+    DevModeTools.prototype.leaveDevMode = function () {
+        this.regionEditor.cancelDrawRegion();
+        this.palette.hide();
+        this.layerButtonsContainer.setVisible(false);
+        this.toolButtonsContainer.setVisible(false);
+        this.regionEditor.hideRegions();
+        ige.client.emit('zoom', this.scene.defaultZoom);
+    };
     DevModeTools.prototype.cursor = function () {
         this.highlightModeButton(0);
         this.scene.regionEditor.regionTool = false;
-        this.scene.activateMarker(false);
+        this.tileEditor.activateMarker(false);
     };
     DevModeTools.prototype.drawRegion = function () {
-        this.scene.activateMarker(false);
+        this.tileEditor.activateMarker(false);
         this.highlightModeButton(1);
         this.scene.regionEditor.regionTool = true;
     };
     DevModeTools.prototype.brush = function () {
-        this.scene.selectedTile = null;
-        this.scene.selectedTileArea = [[null, null], [null, null]];
-        this.scene.activateMarker(true);
+        this.tileEditor.selectedTile = null;
+        this.tileEditor.selectedTileArea = [[null, null], [null, null]];
+        this.tileEditor.activateMarker(true);
         this.scene.regionEditor.regionTool = false;
         this.highlightModeButton(2);
     };
     DevModeTools.prototype.emptyTile = function () {
-        var copy = __assign({}, this.scene.selectedTile);
+        var copy = __assign({}, this.tileEditor.selectedTile);
         copy.index = 0;
-        this.scene.selectedTile = copy;
-        this.scene.selectedTileArea = [[copy, copy], [copy, copy]];
-        this.scene.activateMarker(true);
+        this.tileEditor.selectedTile = copy;
+        this.tileEditor.selectedTileArea = [[copy, copy], [copy, copy]];
+        this.tileEditor.activateMarker(true);
         this.scene.regionEditor.regionTool = false;
         this.highlightModeButton(3);
     };
@@ -101,28 +118,28 @@ var DevModeTools = /** @class */ (function (_super) {
         });
     };
     DevModeTools.prototype.selectSingle = function () {
-        for (var i = 0; i < this.palette.area.x; i++) {
-            for (var j = 0; j < this.palette.area.y; j++) {
-                if (this.scene.selectedTileArea[i][j])
-                    this.scene.selectedTileArea[i][j].tint = 0xffffff;
+        for (var i = 0; i < this.tileEditor.area.x; i++) {
+            for (var j = 0; j < this.tileEditor.area.y; j++) {
+                if (this.tileEditor.selectedTileArea[i][j])
+                    this.tileEditor.selectedTileArea[i][j].tint = 0xffffff;
             }
         }
-        this.palette.area = { x: 1, y: 1 };
-        this.scene.marker.graphics.scale = 1;
-        this.scene.paletteMarker.graphics.scale = 1;
+        this.tileEditor.area = { x: 1, y: 1 };
+        this.tileEditor.marker.graphics.scale = 1;
+        this.tileEditor.paletteMarker.graphics.scale = 1;
         this.brushButtons[0].highlight(true);
         this.brushButtons[1].highlight(false);
-        this.scene.activateMarker(true);
+        this.tileEditor.activateMarker(true);
     };
     DevModeTools.prototype.selectArea = function () {
-        if (this.scene.selectedTile)
-            this.scene.selectedTile.tint = 0xffffff;
-        this.palette.area = { x: 2, y: 2 };
-        this.scene.marker.graphics.scale = 2;
-        this.scene.paletteMarker.graphics.scale = 2;
+        if (this.tileEditor.selectedTile)
+            this.tileEditor.selectedTile.tint = 0xffffff;
+        this.tileEditor.area = { x: 2, y: 2 };
+        this.tileEditor.marker.graphics.scale = 2;
+        this.tileEditor.paletteMarker.graphics.scale = 2;
         this.brushButtons[1].highlight(true);
         this.brushButtons[0].highlight(false);
-        this.scene.activateMarker(true);
+        this.tileEditor.activateMarker(true);
     };
     DevModeTools.prototype.switchLayer = function (value) {
         var scene = this.scene;

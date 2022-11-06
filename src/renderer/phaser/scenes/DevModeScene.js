@@ -23,9 +23,7 @@ var DevModeScene = /** @class */ (function (_super) {
         this.input.setTopOnly(true);
         this.gameScene = ige.renderer.scene.getScene('Game');
         this.regions = [];
-        var map = this.gameScene.tilemap;
-        this.selectedTile = null;
-        this.selectedTileArea = [[null, null], [null, null]];
+        //const map = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
         ige.client.on('enterDevMode', function () {
             _this.enterDevMode();
         });
@@ -75,22 +73,7 @@ var DevModeScene = /** @class */ (function (_super) {
             }
         });
         ige.client.on('editTile', function (data) {
-            console.log('editTile', data);
-            map.putTileAt(data.gid, data.x, data.y, false, data.layer);
-            /* TODO: SAVE MAP DATA FROM SERVER SIDE */
-            var width = ige.game.data.map.width;
-            //save tile change to ige.game.map.data
-            if (ige.game.data.map.layers.length > 4 && data.layer >= 2)
-                data.layer++;
-            ige.game.data.map.layers[data.layer].data[data.y * width + data.x] = data.gid;
-            if (ige.physics && ige.game.data.map.layers[data.layer].name === 'walls') {
-                //if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
-                ige.physics.destroyWalls();
-                var map_1 = ige.scaleMap(_.cloneDeep(ige.game.data.map));
-                ige.tiled.loadJson(map_1, function (layerArray, IgeLayersById) {
-                    ige.physics.staticsFromMap(IgeLayersById.walls);
-                });
-            }
+            _this.tileEditor.edit(data);
         });
         ige.client.on('editRegion', function (data) {
             _this.regionEditor.edit(data);
@@ -142,69 +125,31 @@ var DevModeScene = /** @class */ (function (_super) {
         var gameMap = this.gameScene.tilemap;
         console.log('game map', gameMap);
         gameMap.currentLayerIndex = 0;
-        this.selectedTile = gameMap.getTileAt(2, 3);
-        this.marker = new TileMarker(this.gameScene, gameMap, 2);
     };
     DevModeScene.prototype.enterDevMode = function () {
         this.defaultZoom = (this.gameScene.zoomSize / 2.15);
         if (!this.tilePalette) {
-            this.tilePalette = new TilePalette(this, this.tileset, this.rexUI);
-            this.devModeTools = new DevModeTools(this, this.tilePalette);
+            this.devModeTools = new DevModeTools(this);
+            this.tileEditor = this.devModeTools.tileEditor;
+            this.tilePalette = this.devModeTools.palette;
             this.regionEditor = this.devModeTools.regionEditor;
-            this.paletteMarker = new TileMarker(this, this.tilePalette.map, 1);
         }
-        this.tilePalette.show();
-        this.devModeTools.layerButtonsContainer.setVisible(true);
+        this.devModeTools.enterDevMode();
+        /*this.devModeTools.layerButtonsContainer.setVisible(true);
         this.devModeTools.toolButtonsContainer.setVisible(true);
         this.devModeTools.highlightModeButton(0);
-        this.activateMarker(false);
-        this.regionEditor.showRegions();
+        this.tileEditor.activateMarker(false);
+        this.tilePalette.show();
+        this.regionEditor.showRegions();*/
     };
     DevModeScene.prototype.leaveDevMode = function () {
-        this.regionEditor.cancelDrawRegion();
+        this.devModeTools.leaveDevMode();
+        /*this.regionEditor.cancelDrawRegion();
         this.tilePalette.hide();
         this.devModeTools.layerButtonsContainer.setVisible(false);
         this.devModeTools.toolButtonsContainer.setVisible(false);
         this.regionEditor.hideRegions();
-        ige.client.emit('zoom', this.defaultZoom);
-    };
-    DevModeScene.prototype.putTile = function (tileX, tileY, selectedTile) {
-        var map = this.gameScene.tilemap;
-        if (selectedTile && this.pointerInsideMap(tileX, tileY, map)) {
-            var index = selectedTile.index;
-            if (selectedTile.index === -1)
-                index = 0;
-            if (index !== (map.getTileAt(tileX, tileY, true)).index &&
-                !(index === 0 && map.getTileAt(tileX, tileY, true).index === -1)) {
-                map.putTileAt(index, tileX, tileY);
-                map.getTileAt(tileX, tileY, true).tint = 0xffffff;
-                console.log('place tile', index);
-                ige.network.send('editTile', { gid: index, layer: map.currentLayerIndex, x: tileX, y: tileY });
-            }
-        }
-    };
-    DevModeScene.prototype.getTile = function (tileX, tileY, selectedTile, map) {
-        if (this.pointerInsideMap(tileX, tileY, map)) {
-            if (selectedTile)
-                selectedTile.tint = 0xffffff;
-            if (map.getTileAt(tileX, tileY) && map.getTileAt(tileX, tileY).index !== 0) {
-                selectedTile = map.getTileAt(tileX, tileY);
-                if (map === this.tilePalette.map)
-                    selectedTile.tint = 0x87cfff;
-            }
-            else {
-                selectedTile = null;
-            }
-            this.activateMarker(true);
-            this.devModeTools.highlightModeButton(2);
-            return selectedTile;
-        }
-    };
-    DevModeScene.prototype.activateMarker = function (active) {
-        this.marker.active = active;
-        this.marker.graphics.setVisible(active);
-        if (active)
-            this.regionEditor.regionTool = false;
+        ige.client.emit('zoom', this.defaultZoom);*/
     };
     DevModeScene.prototype.pointerInsideMap = function (pointerX, pointerY, map) {
         return (0 <= pointerX && pointerX < map.width
@@ -227,76 +172,8 @@ var DevModeScene = /** @class */ (function (_super) {
                 && this.input.activePointer.y < this.devModeTools.toolButtonsContainer.y + this.devModeTools.toolButtonsContainer.height));
     };
     DevModeScene.prototype.update = function () {
-        if (ige.developerMode.active) {
-            var palette = this.tilePalette;
-            var map = this.gameScene.tilemap;
-            var paletteMap = palette.map;
-            var worldPoint = this.gameScene.cameras.main.getWorldPoint(this.gameScene.input.activePointer.x, this.gameScene.input.activePointer.y);
-            var palettePoint = this.cameras.getCamera('palette').getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
-            var marker = this.marker;
-            var paletteMarker = this.paletteMarker;
-            paletteMarker.graphics.clear();
-            paletteMarker.graphics.strokeRect(0, 0, paletteMap.tileWidth * palette.texturesLayer.scaleX, paletteMap.tileHeight * palette.texturesLayer.scaleY);
-            paletteMarker.graphics.setVisible(true);
-            // Rounds down to nearest tile
-            var palettePointerTileX = paletteMap.worldToTileX(palettePoint.x);
-            var palettePointerTileY = paletteMap.worldToTileY(palettePoint.y);
-            if (palette.visible && this.pointerInsidePalette()) {
-                marker.graphics.setVisible(false);
-                // Snap to tile coordinates, but in world space
-                paletteMarker.graphics.x = paletteMap.tileToWorldX(palettePointerTileX);
-                paletteMarker.graphics.y = paletteMap.tileToWorldY(palettePointerTileY);
-                if (this.input.manager.activePointer.isDown) {
-                    if (palette.area.x > 1 || palette.area.y > 1) {
-                        for (var i = 0; i < palette.area.x; i++) {
-                            for (var j = 0; j < palette.area.y; j++) {
-                                this.selectedTileArea[i][j] = this.getTile(palettePointerTileX + i, palettePointerTileY + j, this.selectedTileArea[i][j], paletteMap);
-                            }
-                        }
-                    }
-                    else {
-                        this.selectedTile = this.getTile(palettePointerTileX, palettePointerTileY, this.selectedTile, paletteMap);
-                    }
-                }
-            }
-            else if ((!this.pointerInsidePalette() || !palette.visible) &&
-                !this.pointerInsideButtons() && marker.active) {
-                paletteMarker.graphics.setVisible(false);
-                marker.graphics.setVisible(true);
-                // Rounds down to nearest tile
-                var pointerTileX = map.worldToTileX(worldPoint.x);
-                var pointerTileY = map.worldToTileY(worldPoint.y);
-                // Snap to tile coordinates, but in world space
-                marker.graphics.x = map.tileToWorldX(pointerTileX);
-                marker.graphics.y = map.tileToWorldY(pointerTileY);
-                if (this.input.manager.activePointer.rightButtonDown()) {
-                    if (palette.area.x > 1 || palette.area.y > 1) {
-                        for (var i = 0; i < palette.area.x; i++) {
-                            for (var j = 0; j < palette.area.y; j++) {
-                                this.selectedTileArea[i][j] = this.getTile(pointerTileX + i, pointerTileY + j, this.selectedTileArea[i][j], map);
-                            }
-                        }
-                    }
-                    else {
-                        this.selectedTile = this.getTile(pointerTileX, pointerTileY, this.selectedTile, map);
-                    }
-                }
-                if (this.input.manager.activePointer.leftButtonDown()) {
-                    if (palette.area.x > 1 || palette.area.y > 1) {
-                        for (var i = 0; i < palette.area.x; i++) {
-                            for (var j = 0; j < palette.area.y; j++) {
-                                this.putTile(pointerTileX + i, pointerTileY + j, this.selectedTileArea[i][j]);
-                            }
-                        }
-                    }
-                    else {
-                        this.putTile(pointerTileX, pointerTileY, this.selectedTile);
-                    }
-                }
-            }
-        }
-        else
-            this.marker.graphics.setVisible(false);
+        if (this.tileEditor)
+            this.tileEditor.update();
     };
     return DevModeScene;
 }(PhaserScene));

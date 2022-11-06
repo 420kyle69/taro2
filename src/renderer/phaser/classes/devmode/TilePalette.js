@@ -82,7 +82,6 @@ var TilePalette = /** @class */ (function (_super) {
             camera.x = _this.scene.sys.game.canvas.width - paletteWidth - 40;
             scrollBarContainer.x = _this.camera.x;
         });
-        _this.area = { x: 1, y: 1 };
         return _this;
     }
     TilePalette.prototype.toggle = function () {

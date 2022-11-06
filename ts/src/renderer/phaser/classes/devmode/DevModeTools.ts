@@ -1,7 +1,8 @@
 class DevModeTools extends Phaser.GameObjects.Container {
 
 	public scene: DevModeScene;
-	private palette: TilePalette;
+	public palette: TilePalette;
+	public tileEditor: TileEditor;
 	public regionEditor: RegionEditor;
 
 	cursorButton: DevToolButton;
@@ -17,11 +18,11 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	
 	constructor(
 		scene: DevModeScene,
-		palette: TilePalette
 	) {
 		super(scene);
 
-		this.palette = palette;
+		const palette = this.palette = new TilePalette(this.scene, this.scene.tileset, this.scene.rexUI)
+		this.tileEditor = new TileEditor(this.scene.gameScene, this.scene, this);
 		this.regionEditor = new RegionEditor(this.scene.gameScene, this.scene, this);
 
 		this.COLOR_PRIMARY = palette.COLOR_PRIMARY;
@@ -35,8 +36,8 @@ class DevModeTools extends Phaser.GameObjects.Container {
 			toolButtonsContainer.y = palette.camera.y - layerButtonsContainer.height - 136;
 		});
 
-		new DevToolButton (this, '+', null, 0, -34, 30, palette.scrollBarContainer, palette.zoom.bind(this), -1);
-		new DevToolButton (this, '-', null, 34, -34, 30, palette.scrollBarContainer, palette.zoom.bind(this), 1);
+		new DevToolButton (this, '+', null, 0, -34, 30, palette.scrollBarContainer, palette.zoom.bind(palette), -1);
+		new DevToolButton (this, '-', null, 34, -34, 30, palette.scrollBarContainer, palette.zoom.bind(palette), 1);
 
 		const layerButtonsContainer = this.layerButtonsContainer = new Phaser.GameObjects.Container(scene);
 		layerButtonsContainer.width = 120;
@@ -45,7 +46,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		layerButtonsContainer.y = palette.camera.y - 204;
 		scene.add.existing(layerButtonsContainer);
 		
-		new DevToolButton (this, 'palette', null, 0, 170, 120, layerButtonsContainer, palette.toggle.bind(this));
+		new DevToolButton (this, 'palette', null, 0, 170, 120, layerButtonsContainer, palette.toggle.bind(palette));
 
 		this.layerButtons = [];
 		this.layerButtons.push (
@@ -81,32 +82,50 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.brushButtons[0].highlight(true);
 	}
 
+	enterDevMode() {
+		this.layerButtonsContainer.setVisible(true);
+		this.toolButtonsContainer.setVisible(true);
+		this.highlightModeButton(0);
+		this.tileEditor.activateMarker(false);
+		this.palette.show();
+		this.regionEditor.showRegions();
+	}
+
+	leaveDevMode() {
+		this.regionEditor.cancelDrawRegion();
+		this.palette.hide();
+		this.layerButtonsContainer.setVisible(false);
+		this.toolButtonsContainer.setVisible(false);
+		this.regionEditor.hideRegions();
+		ige.client.emit('zoom', this.scene.defaultZoom);
+	}
+
 	cursor() {
 		this.highlightModeButton(0);
 		this.scene.regionEditor.regionTool = false;
-		this.scene.activateMarker(false);
+		this.tileEditor.activateMarker(false);
 	}
 
 	drawRegion() {
-		this.scene.activateMarker(false);
+		this.tileEditor.activateMarker(false);
 		this.highlightModeButton(1);
 		this.scene.regionEditor.regionTool = true;
 	}
 
 	brush() {
-		this.scene.selectedTile = null;
-		this.scene.selectedTileArea = [[null, null],[null, null]] as any;
-		this.scene.activateMarker(true);
+		this.tileEditor.selectedTile = null;
+		this.tileEditor.selectedTileArea = [[null, null],[null, null]] as any;
+		this.tileEditor.activateMarker(true);
 		this.scene.regionEditor.regionTool = false;
 		this.highlightModeButton(2);
 	}
 
 	emptyTile() {
-		var copy = { ...this.scene.selectedTile };
+		var copy = { ...this.tileEditor.selectedTile };
 		copy.index = 0;
-		this.scene.selectedTile = copy as any;
-		this.scene.selectedTileArea = [[copy, copy],[copy, copy]] as any;
-		this.scene.activateMarker(true);
+		this.tileEditor.selectedTile = copy as any;
+		this.tileEditor.selectedTileArea = [[copy, copy],[copy, copy]] as any;
+		this.tileEditor.activateMarker(true);
 		this.scene.regionEditor.regionTool = false;
 		this.highlightModeButton(3);
 	}
@@ -119,27 +138,27 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	}
 
 	selectSingle() {
-		for (let i = 0; i < this.palette.area.x; i++) {
-			for (let j = 0; j < this.palette.area.y; j++) {
-				if (this.scene.selectedTileArea[i][j]) this.scene.selectedTileArea[i][j].tint = 0xffffff;
+		for (let i = 0; i < this.tileEditor.area.x; i++) {
+			for (let j = 0; j < this.tileEditor.area.y; j++) {
+				if (this.tileEditor.selectedTileArea[i][j]) this.tileEditor.selectedTileArea[i][j].tint = 0xffffff;
 			}
 		}
-		this.palette.area = {x: 1, y: 1};
-		this.scene.marker.graphics.scale = 1;
-		this.scene.paletteMarker.graphics.scale = 1;
+		this.tileEditor.area = {x: 1, y: 1};
+		this.tileEditor.marker.graphics.scale = 1;
+		this.tileEditor.paletteMarker.graphics.scale = 1;
 		this.brushButtons[0].highlight(true);
 		this.brushButtons[1].highlight(false);
-		this.scene.activateMarker(true);
+		this.tileEditor.activateMarker(true);
 	}
 
 	selectArea() {
-		if (this.scene.selectedTile) this.scene.selectedTile.tint = 0xffffff;
-		this.palette.area = {x: 2, y: 2};
-		this.scene.marker.graphics.scale = 2;
-		this.scene.paletteMarker.graphics.scale = 2;
+		if (this.tileEditor.selectedTile) this.tileEditor.selectedTile.tint = 0xffffff;
+		this.tileEditor.area = {x: 2, y: 2};
+		this.tileEditor.marker.graphics.scale = 2;
+		this.tileEditor.paletteMarker.graphics.scale = 2;
 		this.brushButtons[1].highlight(true);
 		this.brushButtons[0].highlight(false);
-		this.scene.activateMarker(true);
+		this.tileEditor.activateMarker(true);
 	}
 
 	switchLayer(value) {

@@ -16,8 +16,6 @@ class TilePalette extends Phaser.GameObjects.Container {
 	COLOR_LIGHT: number;
 	COLOR_PRIMARY: number;
 
-	area: { x: number, y: number };
-
 	paletteWidth: number;
 	paletteHeight: number;
 	
@@ -105,8 +103,6 @@ class TilePalette extends Phaser.GameObjects.Container {
 			camera.x = this.scene.sys.game.canvas.width - paletteWidth - 40;
 			scrollBarContainer.x = this.camera.x;
 		});
-
-		this.area = {x: 1, y: 1};
 	}
 
 	toggle() {
