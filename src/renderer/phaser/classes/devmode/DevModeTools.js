@@ -31,6 +31,7 @@ var DevModeTools = /** @class */ (function (_super) {
         var palette = _this.palette = new TilePalette(_this.scene, _this.scene.tileset, _this.scene.rexUI);
         _this.tileEditor = new TileEditor(_this.scene.gameScene, _this.scene, _this);
         _this.regionEditor = new RegionEditor(_this.scene.gameScene, _this.scene, _this);
+        _this.keyBindings();
         _this.COLOR_PRIMARY = palette.COLOR_PRIMARY;
         _this.COLOR_LIGHT = palette.COLOR_LIGHT;
         _this.COLOR_DARK = palette.COLOR_DARK;
@@ -82,6 +83,53 @@ var DevModeTools = /** @class */ (function (_super) {
         this.toolButtonsContainer.setVisible(false);
         this.regionEditor.hideRegions();
         ige.client.emit('zoom', this.scene.defaultZoom);
+    };
+    DevModeTools.prototype.keyBindings = function () {
+        var _this = this;
+        var gameScene = this.scene.gameScene;
+        var keyboard = this.scene.input.keyboard;
+        var shouldPreventKeybindings = function () {
+            if (!$('#game-editor').is(':visible')) {
+                return false;
+            }
+            var activeElement = document.activeElement;
+            var inputs = ['input', 'select', 'textarea'];
+            if (activeElement && inputs.indexOf(activeElement.tagName.toLowerCase()) !== -1) {
+                return true;
+            }
+            return false;
+        };
+        var tabKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, true);
+        tabKey.on('down', function () {
+            if (shouldPreventKeybindings()) {
+                keyboard.disableGlobalCapture();
+            }
+            else {
+                keyboard.enableGlobalCapture();
+                if (ige.developerMode.active) {
+                    if (_this.palette.visible) {
+                        _this.palette.hide();
+                    }
+                    else {
+                        _this.palette.show();
+                    }
+                }
+            }
+        });
+        var plusKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.PLUS, false);
+        plusKey.on('down', function () {
+            if (ige.developerMode.active && !shouldPreventKeybindings()) {
+                var zoom = (gameScene.zoomSize / 2.15) / 1.1;
+                ige.client.emit('zoom', zoom);
+            }
+        });
+        var minusKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.MINUS, false);
+        minusKey.on('down', function () {
+            if (ige.developerMode.active && !shouldPreventKeybindings()) {
+                var zoom = (gameScene.zoomSize / 2.15) * 1.1;
+                ige.client.emit('zoom', zoom);
+            }
+        });
     };
     DevModeTools.prototype.cursor = function () {
         this.highlightModeButton(0);

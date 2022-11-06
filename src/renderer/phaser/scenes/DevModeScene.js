@@ -23,54 +23,11 @@ var DevModeScene = /** @class */ (function (_super) {
         this.input.setTopOnly(true);
         this.gameScene = ige.renderer.scene.getScene('Game');
         this.regions = [];
-        //const map = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
         ige.client.on('enterDevMode', function () {
             _this.enterDevMode();
         });
         ige.client.on('leaveDevMode', function () {
             _this.leaveDevMode();
-        });
-        var tabKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, true);
-        tabKey.on('down', function () {
-            if (shouldPreventKeybindings()) {
-                _this.input.keyboard.disableGlobalCapture();
-            }
-            else {
-                _this.input.keyboard.enableGlobalCapture();
-                if (ige.developerMode.active) {
-                    if (_this.tilePalette.visible) {
-                        _this.tilePalette.hide();
-                    }
-                    else {
-                        _this.tilePalette.show();
-                    }
-                }
-            }
-        });
-        var shouldPreventKeybindings = function () {
-            if (!$('#game-editor').is(':visible')) {
-                return false;
-            }
-            var activeElement = document.activeElement;
-            var inputs = ['input', 'select', 'textarea'];
-            if (activeElement && inputs.indexOf(activeElement.tagName.toLowerCase()) !== -1) {
-                return true;
-            }
-            return false;
-        };
-        var plusKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.PLUS, false);
-        plusKey.on('down', function () {
-            if (ige.developerMode.active && !shouldPreventKeybindings()) {
-                var zoom = (_this.gameScene.zoomSize / 2.15) / 1.1;
-                ige.client.emit('zoom', zoom);
-            }
-        });
-        var minusKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.MINUS, false);
-        minusKey.on('down', function () {
-            if (ige.developerMode.active && !shouldPreventKeybindings()) {
-                var zoom = (_this.gameScene.zoomSize / 2.15) * 1.1;
-                ige.client.emit('zoom', zoom);
-            }
         });
         ige.client.on('editTile', function (data) {
             _this.tileEditor.edit(data);

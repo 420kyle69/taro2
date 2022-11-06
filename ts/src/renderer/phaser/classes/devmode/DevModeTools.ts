@@ -25,6 +25,8 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.tileEditor = new TileEditor(this.scene.gameScene, this.scene, this);
 		this.regionEditor = new RegionEditor(this.scene.gameScene, this.scene, this);
 
+		this.keyBindings();
+
 		this.COLOR_PRIMARY = palette.COLOR_PRIMARY;
 		this.COLOR_LIGHT = palette.COLOR_LIGHT;
 		this.COLOR_DARK = palette.COLOR_DARK;
@@ -98,6 +100,56 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.toolButtonsContainer.setVisible(false);
 		this.regionEditor.hideRegions();
 		ige.client.emit('zoom', this.scene.defaultZoom);
+	}
+
+	keyBindings() {
+		const gameScene = this.scene.gameScene;
+		const keyboard = this.scene.input.keyboard;
+
+		const shouldPreventKeybindings = function () {
+			if (!$('#game-editor').is(':visible')) {
+				return false;
+			}
+			let activeElement = document.activeElement;
+			let inputs = ['input', 'select', 'textarea'];
+	
+			if (activeElement && inputs.indexOf(activeElement.tagName.toLowerCase()) !== -1) {
+				return true;
+			}
+			return false;
+		}
+
+		const tabKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, true);
+		tabKey.on('down', () => {
+			if (shouldPreventKeybindings()) {
+				keyboard.disableGlobalCapture();
+			} else {
+				keyboard.enableGlobalCapture();
+				if(ige.developerMode.active) {
+					if (this.palette.visible) {
+						this.palette.hide();
+					}
+					else {
+						this.palette.show()
+					}
+				}
+			}
+		});
+
+		const plusKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.PLUS, false);
+		plusKey.on('down', () => {
+			if(ige.developerMode.active && !shouldPreventKeybindings()) {
+				const zoom = (gameScene.zoomSize / 2.15) / 1.1;
+				ige.client.emit('zoom', zoom);
+			}
+		});
+		const minusKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.MINUS, false);
+		minusKey.on('down', () => {
+			if(ige.developerMode.active && !shouldPreventKeybindings()) {
+				const zoom =(gameScene.zoomSize / 2.15) * 1.1;
+				ige.client.emit('zoom', zoom);
+			}
+		});
 	}
 
 	cursor() {
