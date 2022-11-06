@@ -34,6 +34,7 @@ var IgeNetIoClient = {
 			this.artificialDelay = 0;
 			this.lagVariance = 0;
 			this._discrepancySamples = []
+			this.medianDiscrepancy = undefined;
 			var self = this;
 
 			var gameId = ige.client.servers[0].gameId;
@@ -522,9 +523,17 @@ var IgeNetIoClient = {
 				}
 
 				if (Object.keys(obj).length) {
+
+					// new packet contains older information. don't use it.
+					if (ige.latestTimeStamp > newSnapshotTimestamp) {
+						return;
+					}
+	
 					var newSnapshot = [newSnapshotTimestamp, obj];
 					ige.snapshots.push(newSnapshot);
 
+					ige.latestTimeStamp = newSnapshotTimestamp
+					
 					// prevent memory leak that's caused when the client's browser tab isn't focused
 					if (ige.snapshots.length > 2) {
 						ige.snapshots.shift();
@@ -550,19 +559,23 @@ var IgeNetIoClient = {
                     	// if client's timestamp more than 100ms behind the server's timestamp, immediately update it to be 50ms behind the server's
 						// otherwise, apply rubberbanding
 						this._discrepancySamples.push(newSnapshotTimestamp - now)
-						if (this._discrepancySamples.length > 10) {
-							var medianDiscrepancy = this.getMedian(this._discrepancySamples) - 50;
+
+						if ((this.medianDiscrepancy == undefined && this._discrepancySamples.length > 2) ||
+							this._discrepancySamples.length > 20
+						) {
+							this.medianDiscrepancy = this.getMedian(this._discrepancySamples);
 							this._discrepancySamples = [];
 
 							if (ige._currentTime > newSnapshotTimestamp - 10 || ige._currentTime < newSnapshotTimestamp - 100) {
 								// currentTime will be 3 frames behind the nextSnapshot's timestamp, so the entities have time to interpolate
 								// 1 frame = 1000/60 = 16ms. 3 frames = 50ms
-								ige.timeDiscrepancy = medianDiscrepancy - 50;
+								ige.timeDiscrepancy = this.medianDiscrepancy - 50;
 							} else {
 								// rubberband currentTime to be nextSnapshot's timestamp - 50ms
-								ige.timeDiscrepancy += ((medianDiscrepancy - 50) - ige.timeDiscrepancy) / 10;
+								ige.timeDiscrepancy += ((this.medianDiscrepancy - 50) - ige.timeDiscrepancy) / 10;
 							}
-						}	
+						}
+
                     }
 					
 				}
