@@ -2,6 +2,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 
 	public scene: DevModeScene;
 	private palette: TilePalette;
+	public regionEditor: RegionEditor;
 
 	cursorButton: DevToolButton;
 	layerButtonsContainer: Phaser.GameObjects.Container;
@@ -21,6 +22,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		super(scene);
 
 		this.palette = palette;
+		this.regionEditor = new RegionEditor(this.scene.gameScene, this.scene, this);
 
 		this.COLOR_PRIMARY = palette.COLOR_PRIMARY;
 		this.COLOR_LIGHT = palette.COLOR_LIGHT;
@@ -81,21 +83,21 @@ class DevModeTools extends Phaser.GameObjects.Container {
 
 	cursor() {
 		this.highlightModeButton(0);
-		this.scene.regionTool = false;
+		this.scene.regionEditor.regionTool = false;
 		this.scene.activateMarker(false);
 	}
 
 	drawRegion() {
 		this.scene.activateMarker(false);
 		this.highlightModeButton(1);
-		this.scene.regionTool = true;
+		this.scene.regionEditor.regionTool = true;
 	}
 
 	brush() {
 		this.scene.selectedTile = null;
 		this.scene.selectedTileArea = [[null, null],[null, null]] as any;
 		this.scene.activateMarker(true);
-		this.scene.regionTool = false;
+		this.scene.regionEditor.regionTool = false;
 		this.highlightModeButton(2);
 	}
 
@@ -105,7 +107,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.scene.selectedTile = copy as any;
 		this.scene.selectedTileArea = [[copy, copy],[copy, copy]] as any;
 		this.scene.activateMarker(true);
-		this.scene.regionTool = false;
+		this.scene.regionEditor.regionTool = false;
 		this.highlightModeButton(3);
 	}
 

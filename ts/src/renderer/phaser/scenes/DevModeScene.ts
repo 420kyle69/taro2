@@ -3,8 +3,10 @@ class DevModeScene extends PhaserScene {
 	rexUI: any;
 	gameScene: any;
 
-	devPalette: TilePalette;
 	devModeTools: DevModeTools;
+	regionEditor: RegionEditor;
+
+	tilePalette: TilePalette;
 	tilemap: Phaser.Tilemaps.Tilemap;
 	tileset: Phaser.Tilemaps.Tileset;
 
@@ -15,9 +17,6 @@ class DevModeScene extends PhaserScene {
 	paletteMarker: TileMarker;
 
 	regions: PhaserRegion[];
-	regionDrawGraphics: Phaser.GameObjects.Graphics;
-	regionDrawStart: {x: number, y: number};
-	regionTool: boolean;
 
 	defaultZoom: number;
 	
@@ -34,37 +33,11 @@ class DevModeScene extends PhaserScene {
 		this.selectedTileArea = [[null, null],[null, null]];
 
 		ige.client.on('enterDevMode', () => {
-			this.defaultZoom = (this.gameScene.zoomSize / 2.15)
-			if (!this.devPalette) {
-				this.devPalette = new TilePalette(this, this.tileset, this.rexUI);
-				this.devModeTools = new DevModeTools(this, this.devPalette);
-				this.paletteMarker = new TileMarker(this, this.devPalette.map, 1);
-			}
-			this.devPalette.show();
-			this.devModeTools.layerButtonsContainer.setVisible(true);
-			this.devModeTools.toolButtonsContainer.setVisible(true);
-			this.devModeTools.highlightModeButton(0);
-			this.activateMarker(false);
-
-			this.regions.forEach(region => {
-				region.show();
-				region.label.visible = true;
-			});
+			this.enterDevMode();
 		});
 
 		ige.client.on('leaveDevMode', () => {
-			this.cancelDrawRegion();
-			this.devPalette.hide();
-			this.devModeTools.layerButtonsContainer.setVisible(false);
-			this.devModeTools.toolButtonsContainer.setVisible(false);
-			ige.client.emit('zoom', this.defaultZoom);
-
-			this.regions.forEach(region => {
-				if (region.devModeOnly) {
-					region.hide();
-				}
-				region.label.visible = false;
-			});
+			this.leaveDevMode();
 		});
 
 		const tabKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, true);
@@ -74,11 +47,11 @@ class DevModeScene extends PhaserScene {
 			} else {
 				this.input.keyboard.enableGlobalCapture();
 				if(ige.developerMode.active) {
-					if (this.devPalette.visible) {
-						this.devPalette.hide();
+					if (this.tilePalette.visible) {
+						this.tilePalette.hide();
 					}
 					else {
-						this.devPalette.show()
+						this.tilePalette.show()
 					}
 				}
 			}
@@ -112,7 +85,7 @@ class DevModeScene extends PhaserScene {
 			}
 		});
 
-		ige.client.on('editTile', (data: tileData) => {
+		ige.client.on('editTile', (data: TileData) => {
 			console.log('editTile', data);
 			map.putTileAt(data.gid, data.x, data.y, false, data.layer);
 
@@ -131,27 +104,13 @@ class DevModeScene extends PhaserScene {
 			}
 		});
 
-		ige.client.on('editRegion', (data: regionData) => {
-			if (data.newName && data.name !== data.newName) {
-				const region = ige.regionManager.getRegionById(data.name);
-				if (region) region._stats.id = data.newName;
-				this.regions.forEach(region => {
-					if (region.name === data.name) {
-						region.name = data.newName;
-						region.updateLabel();
-					}
-				});
-			}
-			else if (data.showModal) {
-				ige.addNewRegion && ige.addNewRegion({name: data.name, x: data.x, y: data.y, width: data.width, height: data.height, userId: data.userId});
-			}
-
-			ige.updateRegionInReact && ige.updateRegionInReact();
+		ige.client.on('editRegion', (data: RegionData) => {
+			this.regionEditor.edit(data);
 		});
 
 		this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
-			if (this.devPalette && this.devPalette.visible) {
-				this.devPalette.zoom(deltaY);
+			if (this.tilePalette && this.tilePalette.visible) {
+				this.tilePalette.zoom(deltaY);
 			}
 		})
 	}
@@ -211,58 +170,32 @@ class DevModeScene extends PhaserScene {
 		gameMap.currentLayerIndex = 0;
 		this.selectedTile = gameMap.getTileAt(2, 3);
 		this.marker = new TileMarker (this.gameScene, gameMap, 2);
+	}
 
-		this.gameScene.input.on('pointerdown', (pointer) => {
-			if (this.regionTool) {
-				const worldPoint = this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
-				this.regionDrawStart = {
-					x: worldPoint.x,
-					y: worldPoint.y,
-				}
+	enterDevMode () {
+		this.defaultZoom = (this.gameScene.zoomSize / 2.15)
+			if (!this.tilePalette) {
+				this.tilePalette = new TilePalette(this, this.tileset, this.rexUI);
+				this.devModeTools = new DevModeTools(this, this.tilePalette);
+				this.regionEditor = this.devModeTools.regionEditor;
+				this.paletteMarker = new TileMarker(this, this.tilePalette.map, 1);
 			}
-		}, this);
+			this.tilePalette.show();
+			this.devModeTools.layerButtonsContainer.setVisible(true);
+			this.devModeTools.toolButtonsContainer.setVisible(true);
+			this.devModeTools.highlightModeButton(0);
+			this.activateMarker(false);
+			this.regionEditor.showRegions();
 
-		const graphics = this.regionDrawGraphics = this.gameScene.add.graphics();
-		let width;
-		let height;
+	}
 
-		this.gameScene.input.on('pointermove', (pointer) => {
-			if (!pointer.leftButtonDown()) return;
-			else if (this.regionTool) {
-				const worldPoint = this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
-				width = worldPoint.x - this.regionDrawStart.x;
-				height = worldPoint.y - this.regionDrawStart.y;
-				graphics.clear();
-				graphics.lineStyle(	2, 0x036ffc, 1);
-				graphics.strokeRect( this.regionDrawStart.x, this.regionDrawStart.y , width, height);
-				}
-			}, this);
-
-		this.gameScene.input.on('pointerup', (pointer) => {
-			if (!pointer.leftButtonReleased()) return;
-			const worldPoint = this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
-			if (this.regionTool && this.regionDrawStart && this.regionDrawStart.x !== worldPoint.x && this.regionDrawStart.y !== worldPoint.y) {
-				graphics.clear();
-				this.regionTool = false;
-				this.devModeTools.highlightModeButton(0);
-				let x = this.regionDrawStart.x;
-				let y = this.regionDrawStart.y;
-				if (width < 0) {
-					x = this.regionDrawStart.x + width;
-					width *= -1;
-				}
-				if (height < 0) {
-					y = this.regionDrawStart.y + height;
-					height *= -1;
-				}
-				ige.network.send('editRegion', {x: Math.trunc(x), 
-					y: Math.trunc(y), 
-					width: Math.trunc(width), 
-					height: Math.trunc(height)});
-
-				this.regionDrawStart = null;
-			}
-		}, this);
+	leaveDevMode () {
+		this.regionEditor.cancelDrawRegion();
+		this.tilePalette.hide();
+		this.devModeTools.layerButtonsContainer.setVisible(false);
+		this.devModeTools.toolButtonsContainer.setVisible(false);
+		this.regionEditor.hideRegions();
+		ige.client.emit('zoom', this.defaultZoom);
 	}
 
 	putTile (tileX: number, tileY: number, selectedTile: Phaser.Tilemaps.Tile) {
@@ -285,7 +218,7 @@ class DevModeScene extends PhaserScene {
 			if (selectedTile) selectedTile.tint = 0xffffff;
 			if (map.getTileAt(tileX, tileY) && map.getTileAt(tileX, tileY).index !== 0) {
 				selectedTile = map.getTileAt(tileX, tileY);
-				if (map === this.devPalette.map) selectedTile.tint = 0x87cfff;
+				if (map === this.tilePalette.map) selectedTile.tint = 0x87cfff;
 			} else {
 				selectedTile = null;
 			}
@@ -295,19 +228,10 @@ class DevModeScene extends PhaserScene {
 		}
 	}
 
-	cancelDrawRegion() {
-		if (this.regionTool) {
-			this.regionDrawGraphics.clear();
-			this.regionTool = false;
-			this.devModeTools.highlightModeButton(0);
-			this.regionDrawStart = null;
-		}
-	}
-
 	activateMarker(active: boolean) {
 		this.marker.active = active;
 		this.marker.graphics.setVisible(active);
-		if (active) this.regionTool = false;
+		if (active) this.regionEditor.regionTool = false;
 	}
 
 	pointerInsideMap(pointerX: number, pointerY: number, map: Phaser.Tilemaps.Tilemap): boolean {
@@ -316,10 +240,10 @@ class DevModeScene extends PhaserScene {
 	}
 
 	pointerInsidePalette(): boolean {
-		return (this.input.activePointer.x > this.devPalette.scrollBarContainer.x
-			&& this.input.activePointer.x < this.devPalette.scrollBarContainer.x + this.devPalette.scrollBarContainer.width
-			&& this.input.activePointer.y > this.devPalette.scrollBarContainer.y - 30
-			&& this.input.activePointer.y < this.devPalette.scrollBarContainer.y + this.devPalette.scrollBarContainer.height)
+		return (this.input.activePointer.x > this.tilePalette.scrollBarContainer.x
+			&& this.input.activePointer.x < this.tilePalette.scrollBarContainer.x + this.tilePalette.scrollBarContainer.width
+			&& this.input.activePointer.y > this.tilePalette.scrollBarContainer.y - 30
+			&& this.input.activePointer.y < this.tilePalette.scrollBarContainer.y + this.tilePalette.scrollBarContainer.height)
 	}
 
 	pointerInsideButtons(): boolean {
@@ -335,7 +259,7 @@ class DevModeScene extends PhaserScene {
 
 	update (): void {
 		if(ige.developerMode.active) {
-			const palette = this.devPalette;
+			const palette = this.tilePalette;
 			const map = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
 			const paletteMap = palette.map;
 			const worldPoint = this.gameScene.cameras.main.getWorldPoint(this.gameScene.input.activePointer.x, this.gameScene.input.activePointer.y);

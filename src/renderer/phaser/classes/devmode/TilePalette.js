@@ -43,7 +43,7 @@ var TilePalette = /** @class */ (function (_super) {
         camera.setBackgroundColor(0xFFFFFF);
         texturesLayer.on('pointermove', function (p) {
             var devModeScene = ige.renderer.scene.getScene('DevMode');
-            devModeScene.cancelDrawRegion();
+            devModeScene.regionEditor.cancelDrawRegion();
             if (!p.isDown)
                 return;
             var scrollX = (p.x - p.prevPosition.x) / camera.zoom;

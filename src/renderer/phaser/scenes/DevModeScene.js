@@ -27,34 +27,10 @@ var DevModeScene = /** @class */ (function (_super) {
         this.selectedTile = null;
         this.selectedTileArea = [[null, null], [null, null]];
         ige.client.on('enterDevMode', function () {
-            _this.defaultZoom = (_this.gameScene.zoomSize / 2.15);
-            if (!_this.devPalette) {
-                _this.devPalette = new TilePalette(_this, _this.tileset, _this.rexUI);
-                _this.devModeTools = new DevModeTools(_this, _this.devPalette);
-                _this.paletteMarker = new TileMarker(_this, _this.devPalette.map, 1);
-            }
-            _this.devPalette.show();
-            _this.devModeTools.layerButtonsContainer.setVisible(true);
-            _this.devModeTools.toolButtonsContainer.setVisible(true);
-            _this.devModeTools.highlightModeButton(0);
-            _this.activateMarker(false);
-            _this.regions.forEach(function (region) {
-                region.show();
-                region.label.visible = true;
-            });
+            _this.enterDevMode();
         });
         ige.client.on('leaveDevMode', function () {
-            _this.cancelDrawRegion();
-            _this.devPalette.hide();
-            _this.devModeTools.layerButtonsContainer.setVisible(false);
-            _this.devModeTools.toolButtonsContainer.setVisible(false);
-            ige.client.emit('zoom', _this.defaultZoom);
-            _this.regions.forEach(function (region) {
-                if (region.devModeOnly) {
-                    region.hide();
-                }
-                region.label.visible = false;
-            });
+            _this.leaveDevMode();
         });
         var tabKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, true);
         tabKey.on('down', function () {
@@ -64,11 +40,11 @@ var DevModeScene = /** @class */ (function (_super) {
             else {
                 _this.input.keyboard.enableGlobalCapture();
                 if (ige.developerMode.active) {
-                    if (_this.devPalette.visible) {
-                        _this.devPalette.hide();
+                    if (_this.tilePalette.visible) {
+                        _this.tilePalette.hide();
                     }
                     else {
-                        _this.devPalette.show();
+                        _this.tilePalette.show();
                     }
                 }
             }
@@ -117,25 +93,11 @@ var DevModeScene = /** @class */ (function (_super) {
             }
         });
         ige.client.on('editRegion', function (data) {
-            if (data.newName && data.name !== data.newName) {
-                var region = ige.regionManager.getRegionById(data.name);
-                if (region)
-                    region._stats.id = data.newName;
-                _this.regions.forEach(function (region) {
-                    if (region.name === data.name) {
-                        region.name = data.newName;
-                        region.updateLabel();
-                    }
-                });
-            }
-            else if (data.showModal) {
-                ige.addNewRegion && ige.addNewRegion({ name: data.name, x: data.x, y: data.y, width: data.width, height: data.height, userId: data.userId });
-            }
-            ige.updateRegionInReact && ige.updateRegionInReact();
+            _this.regionEditor.edit(data);
         });
         this.input.on('wheel', function (pointer, gameObjects, deltaX, deltaY, deltaZ) {
-            if (_this.devPalette && _this.devPalette.visible) {
-                _this.devPalette.zoom(deltaY);
+            if (_this.tilePalette && _this.tilePalette.visible) {
+                _this.tilePalette.zoom(deltaY);
             }
         });
     };
@@ -182,55 +144,29 @@ var DevModeScene = /** @class */ (function (_super) {
         gameMap.currentLayerIndex = 0;
         this.selectedTile = gameMap.getTileAt(2, 3);
         this.marker = new TileMarker(this.gameScene, gameMap, 2);
-        this.gameScene.input.on('pointerdown', function (pointer) {
-            if (_this.regionTool) {
-                var worldPoint = _this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
-                _this.regionDrawStart = {
-                    x: worldPoint.x,
-                    y: worldPoint.y,
-                };
-            }
-        }, this);
-        var graphics = this.regionDrawGraphics = this.gameScene.add.graphics();
-        var width;
-        var height;
-        this.gameScene.input.on('pointermove', function (pointer) {
-            if (!pointer.leftButtonDown())
-                return;
-            else if (_this.regionTool) {
-                var worldPoint = _this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
-                width = worldPoint.x - _this.regionDrawStart.x;
-                height = worldPoint.y - _this.regionDrawStart.y;
-                graphics.clear();
-                graphics.lineStyle(2, 0x036ffc, 1);
-                graphics.strokeRect(_this.regionDrawStart.x, _this.regionDrawStart.y, width, height);
-            }
-        }, this);
-        this.gameScene.input.on('pointerup', function (pointer) {
-            if (!pointer.leftButtonReleased())
-                return;
-            var worldPoint = _this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
-            if (_this.regionTool && _this.regionDrawStart && _this.regionDrawStart.x !== worldPoint.x && _this.regionDrawStart.y !== worldPoint.y) {
-                graphics.clear();
-                _this.regionTool = false;
-                _this.devModeTools.highlightModeButton(0);
-                var x = _this.regionDrawStart.x;
-                var y = _this.regionDrawStart.y;
-                if (width < 0) {
-                    x = _this.regionDrawStart.x + width;
-                    width *= -1;
-                }
-                if (height < 0) {
-                    y = _this.regionDrawStart.y + height;
-                    height *= -1;
-                }
-                ige.network.send('editRegion', { x: Math.trunc(x),
-                    y: Math.trunc(y),
-                    width: Math.trunc(width),
-                    height: Math.trunc(height) });
-                _this.regionDrawStart = null;
-            }
-        }, this);
+    };
+    DevModeScene.prototype.enterDevMode = function () {
+        this.defaultZoom = (this.gameScene.zoomSize / 2.15);
+        if (!this.tilePalette) {
+            this.tilePalette = new TilePalette(this, this.tileset, this.rexUI);
+            this.devModeTools = new DevModeTools(this, this.tilePalette);
+            this.regionEditor = this.devModeTools.regionEditor;
+            this.paletteMarker = new TileMarker(this, this.tilePalette.map, 1);
+        }
+        this.tilePalette.show();
+        this.devModeTools.layerButtonsContainer.setVisible(true);
+        this.devModeTools.toolButtonsContainer.setVisible(true);
+        this.devModeTools.highlightModeButton(0);
+        this.activateMarker(false);
+        this.regionEditor.showRegions();
+    };
+    DevModeScene.prototype.leaveDevMode = function () {
+        this.regionEditor.cancelDrawRegion();
+        this.tilePalette.hide();
+        this.devModeTools.layerButtonsContainer.setVisible(false);
+        this.devModeTools.toolButtonsContainer.setVisible(false);
+        this.regionEditor.hideRegions();
+        ige.client.emit('zoom', this.defaultZoom);
     };
     DevModeScene.prototype.putTile = function (tileX, tileY, selectedTile) {
         var map = this.gameScene.tilemap;
@@ -253,7 +189,7 @@ var DevModeScene = /** @class */ (function (_super) {
                 selectedTile.tint = 0xffffff;
             if (map.getTileAt(tileX, tileY) && map.getTileAt(tileX, tileY).index !== 0) {
                 selectedTile = map.getTileAt(tileX, tileY);
-                if (map === this.devPalette.map)
+                if (map === this.tilePalette.map)
                     selectedTile.tint = 0x87cfff;
             }
             else {
@@ -264,29 +200,21 @@ var DevModeScene = /** @class */ (function (_super) {
             return selectedTile;
         }
     };
-    DevModeScene.prototype.cancelDrawRegion = function () {
-        if (this.regionTool) {
-            this.regionDrawGraphics.clear();
-            this.regionTool = false;
-            this.devModeTools.highlightModeButton(0);
-            this.regionDrawStart = null;
-        }
-    };
     DevModeScene.prototype.activateMarker = function (active) {
         this.marker.active = active;
         this.marker.graphics.setVisible(active);
         if (active)
-            this.regionTool = false;
+            this.regionEditor.regionTool = false;
     };
     DevModeScene.prototype.pointerInsideMap = function (pointerX, pointerY, map) {
         return (0 <= pointerX && pointerX < map.width
             && 0 <= pointerY && pointerY < map.height);
     };
     DevModeScene.prototype.pointerInsidePalette = function () {
-        return (this.input.activePointer.x > this.devPalette.scrollBarContainer.x
-            && this.input.activePointer.x < this.devPalette.scrollBarContainer.x + this.devPalette.scrollBarContainer.width
-            && this.input.activePointer.y > this.devPalette.scrollBarContainer.y - 30
-            && this.input.activePointer.y < this.devPalette.scrollBarContainer.y + this.devPalette.scrollBarContainer.height);
+        return (this.input.activePointer.x > this.tilePalette.scrollBarContainer.x
+            && this.input.activePointer.x < this.tilePalette.scrollBarContainer.x + this.tilePalette.scrollBarContainer.width
+            && this.input.activePointer.y > this.tilePalette.scrollBarContainer.y - 30
+            && this.input.activePointer.y < this.tilePalette.scrollBarContainer.y + this.tilePalette.scrollBarContainer.height);
     };
     DevModeScene.prototype.pointerInsideButtons = function () {
         return ((this.input.activePointer.x > this.devModeTools.layerButtonsContainer.x
@@ -300,7 +228,7 @@ var DevModeScene = /** @class */ (function (_super) {
     };
     DevModeScene.prototype.update = function () {
         if (ige.developerMode.active) {
-            var palette = this.devPalette;
+            var palette = this.tilePalette;
             var map = this.gameScene.tilemap;
             var paletteMap = palette.map;
             var worldPoint = this.gameScene.cameras.main.getWorldPoint(this.gameScene.input.activePointer.x, this.gameScene.input.activePointer.y);

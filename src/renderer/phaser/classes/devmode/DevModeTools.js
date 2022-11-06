@@ -29,6 +29,7 @@ var DevModeTools = /** @class */ (function (_super) {
     function DevModeTools(scene, palette) {
         var _this = _super.call(this, scene) || this;
         _this.palette = palette;
+        _this.regionEditor = new RegionEditor(_this.scene.gameScene, _this.scene, _this);
         _this.COLOR_PRIMARY = palette.COLOR_PRIMARY;
         _this.COLOR_LIGHT = palette.COLOR_LIGHT;
         _this.COLOR_DARK = palette.COLOR_DARK;
@@ -67,19 +68,19 @@ var DevModeTools = /** @class */ (function (_super) {
     }
     DevModeTools.prototype.cursor = function () {
         this.highlightModeButton(0);
-        this.scene.regionTool = false;
+        this.scene.regionEditor.regionTool = false;
         this.scene.activateMarker(false);
     };
     DevModeTools.prototype.drawRegion = function () {
         this.scene.activateMarker(false);
         this.highlightModeButton(1);
-        this.scene.regionTool = true;
+        this.scene.regionEditor.regionTool = true;
     };
     DevModeTools.prototype.brush = function () {
         this.scene.selectedTile = null;
         this.scene.selectedTileArea = [[null, null], [null, null]];
         this.scene.activateMarker(true);
-        this.scene.regionTool = false;
+        this.scene.regionEditor.regionTool = false;
         this.highlightModeButton(2);
     };
     DevModeTools.prototype.emptyTile = function () {
@@ -88,7 +89,7 @@ var DevModeTools = /** @class */ (function (_super) {
         this.scene.selectedTile = copy;
         this.scene.selectedTileArea = [[copy, copy], [copy, copy]];
         this.scene.activateMarker(true);
-        this.scene.regionTool = false;
+        this.scene.regionEditor.regionTool = false;
         this.highlightModeButton(3);
     };
     DevModeTools.prototype.highlightModeButton = function (n) {

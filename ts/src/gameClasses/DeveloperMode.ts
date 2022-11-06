@@ -18,7 +18,7 @@ class DeveloperMode {
 		ige.client.emit('leaveDevMode');
 	}
 
-	editTile (data: tileData, clientId: string) {
+	editTile (data: TileData, clientId: string) {
 		// only allow developers to modify the tiles
 		if (ige.server.developerClientIds.includes(clientId)) {
 			ige.game.data.map.wasEdited = true;
@@ -40,7 +40,7 @@ class DeveloperMode {
 		}
 	}
 
-	editRegion (data: regionData, clientId: string) {
+	editRegion (data: RegionData, clientId: string) {
 		// only allow developers to modify regions
 		if (ige.server.developerClientIds.includes(clientId)) {  
 			if (data.name === '' || data.width <= 0 || data.height <= 0) {
@@ -128,14 +128,14 @@ class DeveloperMode {
 	}
 }
 
-interface tileData {
+interface TileData {
 	gid: number,
 	layer: number,
 	x: number,
 	y: number
 }
 
-interface regionData {
+interface RegionData {
 	userId: string,
 	name: string, 
 	newName?: string,
