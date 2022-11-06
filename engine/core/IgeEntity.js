@@ -66,11 +66,11 @@ var IgeEntity = IgeObject.extend({
 
 		this._keyFrames = [];
 		this.finalTransform = [this._translate.x, this._translate.y, this._rotate.z];
+		this.latestTimeStamp = 0;
 		this.prevKeyFrame = [ige.now, this.finalTransform];
 		this._lastTransformAt = null;
 		this.lastTeleportedAt = 0;
 		this.teleportDestination = this.finalTransform;
-		
 
 		if (ige.isClient) {
 			this.anchorOffset = { x: 0, y: 0, rotate: 0 };
@@ -5125,8 +5125,15 @@ var IgeEntity = IgeObject.extend({
 		let prevKeyFrame = null;
 		let nextKeyFrame = null;
 
+		if (this._category == 'item') {
+			// console.log(this._translate)
+		}
+
 		// using cspMovement for my unit will cause it to rubberband to the latest known position
-		if (ige.game.cspEnabled && this.finalTransform) {
+		if (ige.game.cspEnabled && this.finalTransform && this.body &&
+			!(this._category == 'item' && this.getOwnerUnit() != undefined) &&
+			!(this._category == 'projectile' && this._stats.sourceItemId == undefined && this._streamMode)
+		) {
 			x += (this.finalTransform[0] - x)/4
         	y += (this.finalTransform[1] - y)/4
 

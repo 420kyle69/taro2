@@ -524,15 +524,8 @@ var IgeNetIoClient = {
 
 				if (Object.keys(obj).length) {
 
-					// new packet contains older information. don't use it.
-					if (ige.latestTimeStamp > newSnapshotTimestamp) {
-						return;
-					}
-	
 					var newSnapshot = [newSnapshotTimestamp, obj];
 					ige.snapshots.push(newSnapshot);
-
-					ige.latestTimeStamp = newSnapshotTimestamp
 					
 					// prevent memory leak that's caused when the client's browser tab isn't focused
 					if (ige.snapshots.length > 2) {
@@ -546,8 +539,14 @@ var IgeNetIoClient = {
 
                         // if csp movement is enabled, don't use server-streamed position for my unit
                         // instead, we'll use position updated by physics engine
-                        if (entity && (ige.game.cspEnabled && entity != ige.client.selectedUnit)) {
-							entity.finalTransform = newSnapshot[1][entityId]
+                        if (ige.game.cspEnabled && entity && 
+                        	entity.latestTimeStamp < newSnapshotTimestamp && 
+                        	entity != ige.client.selectedUnit
+                        ) {
+                        	entity.finalTransform = newSnapshot[1][entityId]
+                    		entity.latestTimeStamp = newSnapshotTimestamp
+                    		console.log(entity.finalTransform)
+                        	
 						}
                     }
 

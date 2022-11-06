@@ -229,7 +229,6 @@ var Item = IgeEntityPhysics.extend({
 			// item is being dropped.
 			this._stats.ownerUnitId = null;
 
-			// get transform of its last owner
 			if (oldOwner) {
 				this.updateBody();
 
