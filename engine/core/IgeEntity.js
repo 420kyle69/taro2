@@ -260,6 +260,7 @@ var IgeEntity = IgeObject.extend({
 			this._stats.states[this._stats.stateId] &&
 			this._stats.animations[animationId]
 		) {
+			this._stats.animationId = animationId;
 			animation = this._stats.animations[animationId];
 		}
 
@@ -4168,12 +4169,14 @@ var IgeEntity = IgeObject.extend({
 							break;
 
 						case 'depth':
+							this._stats[attrName] = newValue;
 							if (ige.isClient) {
 								this.depth(data.depth);
 							}
 							break;
 
 						case 'flip':
+							this._stats[attrName] = newValue;
 							// ignore flip command from server for my own unit, because it's already done locally
 							if (ige.isClient && this != ige.client.selectedUnit && !(this._category == 'item' && this.getOwnerUnit() == ige.client.selectedUnit)) {
 								this.flip(newValue);
@@ -4185,12 +4188,14 @@ var IgeEntity = IgeObject.extend({
 							if (attrName === 'ownerId') {
 								this.oldOwnerId = this._stats[attrName];
 							}
-							this._stats[attrName] = newValue;
+							if (ige.isServer) {
+								this._stats[attrName] = newValue;
+							}
 
 							break;
 					}
 
-					if (ige.isServer && !ige.network.isPaused) {
+					if (ige.isServer) {
 						// keys that will stream even if its new value is same as the previous value
 						var forceStreamKeys = ['anim', 'coin', 'stateId', 'ownerId', 'name', 'slotIndex', 'newItemId', 'quantity', 'spriteOnly', 'setFadingText', 'playerJoinedAgain', 'use', 'hidden'];
 						if (typeof this.queueStreamData === 'function') {
@@ -4209,7 +4214,6 @@ var IgeEntity = IgeObject.extend({
 								break;
 
 							case 'stateId':
-
 								var stateId = newValue;
 								this.setState(stateId);
 
@@ -4264,8 +4268,11 @@ var IgeEntity = IgeObject.extend({
 								break;
 							case 'effect':
 								// don't use streamed effect call for my own unit or its items
-								if (this == ige.client.selectedUnit || (this._category == 'item' && this.getOwnerUnit() == ige.client.selectedUnit))
+								if (this == ige.client.selectedUnit || 
+									(this._category == 'item' && this.getOwnerUnit() == ige.client.selectedUnit)
+								) {
 									return;
+								}
 								this.playEffect(newValue);
 								break;
 							case 'makePlayerSelectUnit':

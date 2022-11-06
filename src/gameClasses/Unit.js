@@ -1399,6 +1399,12 @@ var Unit = IgeEntityPhysics.extend({
 		IgeEntityPhysics.prototype.remove.call(this);
 	},
 
+	queueStreamData: function(streamData) {
+		if (ige.isServer) {
+			IgeEntity.prototype.queueStreamData.call(this, streamData);	
+		}
+	},
+
 	// update unit's stats in the server side first, then update client side as well.
 	streamUpdateData: function (queuedData) {
 		var self = this;
@@ -1416,10 +1422,12 @@ var Unit = IgeEntityPhysics.extend({
 
 				switch (attrName) {
 					case 'type':
+						self._stats[attrName] = newValue;
 						this.changeUnitType(newValue);
 						break;
 
 					case 'aiEnabled':
+						self._stats[attrName] = newValue;
 						if (ige.isClient) {
 							if (newValue == true) {
 								self.ai.enable();
@@ -1430,6 +1438,7 @@ var Unit = IgeEntityPhysics.extend({
 						break;
 
 					case 'itemIds':
+						self._stats[attrName] = newValue;
 						// update shop as player points are changed and when shop modal is open
 						if (ige.isClient) {
 							this.inventory.update();
@@ -1444,6 +1453,7 @@ var Unit = IgeEntityPhysics.extend({
 						break;
 
 					case 'currentItemIndex':
+						self._stats[attrName] = newValue;
 						// for tracking selected index of other units
 						if (ige.isClient && this !== ige.client.selectedUnit) {
 							// console.log('Unit.streamUpdateData(\'currentItemIndex\') on the client', newValue);
@@ -1455,18 +1465,21 @@ var Unit = IgeEntityPhysics.extend({
 					case 'isInvisible':
 					case 'isInvisibleToFriendly':
 					case 'isInvisibleToNeutral':
+						self._stats[attrName] = newValue;
 						if (ige.isClient) {
 							this.updateTexture();
 						}
 						break;
 
 					case 'scale':
+						self._stats[attrName] = newValue;
 						if (ige.isClient) {
 							self._scaleTexture();
 						}
 						break;
 
 					case 'scaleBody':
+						self._stats[attrName] = newValue;
 						if (ige.isServer) {
 							// finding all attach entities before changing body dimensions
 							if (self.jointsAttached) {
@@ -1491,15 +1504,14 @@ var Unit = IgeEntityPhysics.extend({
 					case 'isNameLabelHiddenToNeutral':
 					case 'isNameLabelHiddenToFriendly':
 					case 'name':
-						if (attrName === 'name') {
-							self._stats.name = newValue;
-						}
+						self._stats.name = newValue;
 						// updating stats bcz setOwner is replacing stats.
 						if (ige.isClient) {
 							self.updateNameLabel();
 						}
 						break;
 					case 'isHidden':
+						self._stats[attrName] = newValue;
 						if (ige.isClient) {
 							if (newValue == true) {
 								self.hide();
@@ -1510,17 +1522,21 @@ var Unit = IgeEntityPhysics.extend({
 						break;
 
 					case 'setFadingText':
+						self._stats[attrName] = newValue;
 						if (ige.isClient) {
 							newValue = newValue.split('|-|');
 							self.updateFadingText(newValue[0], newValue[1]);
 						}
 						break;
 					case 'ownerPlayerId':
+						self._stats[attrName] = newValue;
 						if (ige.isClient) {
 							self.setOwnerPlayer(newValue);
 						}
 						break;
 				}
+
+
 			}
 		}
 	},

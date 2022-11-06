@@ -456,6 +456,7 @@ var Player = IgeEntity.extend({
 					}
 				}
 
+				this._stats[attrName] = newValue;
 				if (ige.isServer) {
 					if (attrName === 'name' && oldStats.name !== newValue) {
 						// update all units
