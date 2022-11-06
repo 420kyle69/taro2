@@ -545,8 +545,7 @@ var IgeNetIoClient = {
                         ) {
                         	entity.finalTransform = newSnapshot[1][entityId]
                     		entity.latestTimeStamp = newSnapshotTimestamp
-                    		console.log(entity.finalTransform)
-                        	
+                    		// console.log(entity.finalTransform)
 						}
                     }
 
