@@ -1,6 +1,7 @@
 declare class IgeEngine extends IgeClass {
 	tiled: any;
 	regionManager: any;
+	showRegionList: any;
 	scaleMap(data: any): void;
 
 	_renderFrames: number;
@@ -67,5 +68,4 @@ declare class IgeEngine extends IgeClass {
 
 	addNewRegion : any
 	updateRegionInReact: any
-	showRegionList: any
 }

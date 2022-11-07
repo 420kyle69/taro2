@@ -9,6 +9,8 @@ var TileEditor = /** @class */ (function () {
         this.area = { x: 1, y: 1 };
         this.selectedTile = null;
         this.selectedTileArea = [[null, null], [null, null]];
+        //temporary for testing saving corrected map json
+        ige.network.send('editTile', { gid: 0, layer: 3, x: 0, y: 0 });
     }
     TileEditor.prototype.activateMarker = function (active) {
         this.marker.active = active;

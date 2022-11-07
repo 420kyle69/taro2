@@ -84,7 +84,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.brushButtons[0].highlight(true);
 	}
 
-	enterDevMode() {
+	enterDevMode(): void {
 		this.layerButtonsContainer.setVisible(true);
 		this.toolButtonsContainer.setVisible(true);
 		this.highlightModeButton(0);
@@ -93,7 +93,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.regionEditor.showRegions();
 	}
 
-	leaveDevMode() {
+	leaveDevMode(): void {
 		this.regionEditor.cancelDrawRegion();
 		this.palette.hide();
 		this.layerButtonsContainer.setVisible(false);
@@ -102,7 +102,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		ige.client.emit('zoom', this.scene.defaultZoom);
 	}
 
-	keyBindings() {
+	keyBindings(): void {
 		const gameScene = this.scene.gameScene;
 		const keyboard = this.scene.input.keyboard;
 
