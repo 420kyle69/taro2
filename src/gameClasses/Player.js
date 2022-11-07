@@ -82,7 +82,7 @@ var Player = IgeEntity.extend({
 				ige.script.trigger('playerJoinsGame', { playerId: self.id() });
 			}
 			
-			if (self._stats.controlledBy == 'human' && self._stats.isBot == false) {
+			if (self._stats.controlledBy == 'human' && !self._stats.isBot) {
 				var clientId = self._stats.clientId;
 				var client = ige.server.clients[clientId];
 				var receivedJoinGame = client.receivedJoinGame;
