@@ -972,8 +972,8 @@ var Item = IgeEntityPhysics.extend({
 					
 					case 'isBeingUsed':
 						var owner = self.getOwnerUnit();
-						// ignore stream for my unit's item use if projectileStreamMode is 0 (instant fire)
-						if (ige.isClient && owner != ige.client.selectedUnit) {
+						// ignore stream so my item use won't fire two bullets
+						if (ige.isClient && (owner != ige.client.selectedUnit || !this._stats.ignoreServerStream)) {
 							this._stats.isBeingUsed = newValue;
 						}
 						break;
