@@ -47,7 +47,7 @@ class DevToolButton {
 		});
     }
 
-    highlight (boolean: boolean) {
+    highlight (boolean: boolean): void {
         this.active = boolean;
         if (boolean) {
             this.button.setFillStyle(this.devModeTools.COLOR_LIGHT, 1);

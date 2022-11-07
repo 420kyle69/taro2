@@ -94,7 +94,7 @@ class DevModeScene extends PhaserScene {
 		gameMap.currentLayerIndex = 0;
 	}
 
-	enterDevMode () {
+	enterDevMode (): void {
 		this.defaultZoom = (this.gameScene.zoomSize / 2.15)
 			if (!this.tilePalette) {
 				this.devModeTools = new DevModeTools(this);
@@ -105,7 +105,7 @@ class DevModeScene extends PhaserScene {
 			this.devModeTools.enterDevMode();
 	}
 
-	leaveDevMode () {
+	leaveDevMode (): void {
 		this.devModeTools.leaveDevMode();
 	}
 

@@ -152,19 +152,19 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		});
 	}
 
-	cursor() {
+	cursor(): void {
 		this.highlightModeButton(0);
 		this.scene.regionEditor.regionTool = false;
 		this.tileEditor.activateMarker(false);
 	}
 
-	drawRegion() {
+	drawRegion(): void {
 		this.tileEditor.activateMarker(false);
 		this.highlightModeButton(1);
 		this.scene.regionEditor.regionTool = true;
 	}
 
-	brush() {
+	brush(): void {
 		this.tileEditor.selectedTile = null;
 		this.tileEditor.selectedTileArea = [[null, null],[null, null]] as any;
 		this.tileEditor.activateMarker(true);
@@ -172,7 +172,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.highlightModeButton(2);
 	}
 
-	emptyTile() {
+	emptyTile(): void {
 		var copy = { ...this.tileEditor.selectedTile };
 		copy.index = 0;
 		this.tileEditor.selectedTile = copy as any;
@@ -182,14 +182,14 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.highlightModeButton(3);
 	}
 
-	highlightModeButton(n: number) {
+	highlightModeButton(n: number): void {
 		this.modeButtons.forEach((button, index) => {
 			if (index === n) button.highlight(true);
 			else button.highlight(false);
 		});
 	}
 
-	selectSingle() {
+	selectSingle(): void {
 		for (let i = 0; i < this.tileEditor.area.x; i++) {
 			for (let j = 0; j < this.tileEditor.area.y; j++) {
 				if (this.tileEditor.selectedTileArea[i][j]) this.tileEditor.selectedTileArea[i][j].tint = 0xffffff;
@@ -203,7 +203,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.tileEditor.activateMarker(true);
 	}
 
-	selectArea() {
+	selectArea(): void {
 		if (this.tileEditor.selectedTile) this.tileEditor.selectedTile.tint = 0xffffff;
 		this.tileEditor.area = {x: 2, y: 2};
 		this.tileEditor.marker.graphics.scale = 2;
@@ -213,7 +213,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.tileEditor.activateMarker(true);
 	}
 
-	switchLayer(value) {
+	switchLayer(value: number): void {
 		const scene = this.scene as any;
 		const gameMap = scene.gameScene.tilemap;
 		gameMap.currentLayerIndex = value;

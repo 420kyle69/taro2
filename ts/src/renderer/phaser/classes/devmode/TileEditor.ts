@@ -31,13 +31,13 @@ class TileEditor {
 
     }
 
-    activateMarker(active: boolean) {
+    activateMarker(active: boolean): void {
 		this.marker.active = active;
 		this.marker.graphics.setVisible(active);
 		if (active) this.devModeTools.regionEditor.regionTool = false;
 	}
 
-    edit (data:TileData) {
+    edit (data:TileData): void {
         console.log('editTile', data);
         const map = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
 		map.putTileAt(data.gid, data.x, data.y, false, data.layer);
@@ -56,7 +56,7 @@ class TileEditor {
 		}
     }
 
-    putTile (tileX: number, tileY: number, selectedTile: Phaser.Tilemaps.Tile) {
+    putTile (tileX: number, tileY: number, selectedTile: Phaser.Tilemaps.Tile): void {
 		const map = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
 		if (selectedTile && this.devModeTools.scene.pointerInsideMap(tileX, tileY, map)) {
 			let index = selectedTile.index;
@@ -86,7 +86,7 @@ class TileEditor {
 		}
 	}
 
-    update () {
+    update (): void {
         if(ige.developerMode.active) {
             const devModeScene = this.devModeTools.scene;
 			const palette = this.tilePalette;

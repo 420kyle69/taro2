@@ -6,19 +6,19 @@ class DeveloperMode {
 		console.log('create deve mode', this)
 	}
 
-	enter() {
+	enter(): void {
 		console.log('client enter developer mode');
 		this.active = true;
 		ige.client.emit('enterDevMode');
 	}
 
-	leave () {
+	leave (): void {
 		console.log('client leave developer mode');
 		this.active = false;
 		ige.client.emit('leaveDevMode');
 	}
 
-	editTile (data: TileData, clientId: string) {
+	editTile (data: TileData, clientId: string): void {
 		// only allow developers to modify the tiles
 		if (ige.server.developerClientIds.includes(clientId)) {
 			ige.game.data.map.wasEdited = true;
@@ -40,7 +40,7 @@ class DeveloperMode {
 		}
 	}
 
-	editRegion (data: RegionData, clientId: string) {
+	editRegion (data: RegionData, clientId: string): void {
 		// only allow developers to modify regions
 		if (ige.server.developerClientIds.includes(clientId)) {  
 			if (data.name === '' || data.width <= 0 || data.height <= 0) {
@@ -111,7 +111,7 @@ class DeveloperMode {
 		}
 	}
  
-	updateClientMap (data: { mapData: MapData }) {
+	updateClientMap (data: { mapData: MapData }): void {
 		console.log ('map data was edited', data.mapData.wasEdited)
 		if (data.mapData.wasEdited) {
 			ige.game.data.map = data.mapData;
@@ -136,7 +136,7 @@ interface TileData {
 }
 
 interface RegionData {
-	userId: string,
+	userId?: string,
 	name: string, 
 	newName?: string,
 	x?: number, 

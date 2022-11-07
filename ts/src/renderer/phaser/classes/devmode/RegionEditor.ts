@@ -8,7 +8,7 @@ class RegionEditor {
 	regionDrawStart: {x: number, y: number};
 	regionTool: boolean;
 
-	clickedList: any[];
+	clickedList: RegionData[];
 
 	constructor (
         gameScene: GameScene, devModeScene: DevModeScene, devModeTools: DevModeTools
@@ -72,7 +72,7 @@ class RegionEditor {
 		this.clickedList = [];
 	}
 
-    edit (data: RegionData) {
+    edit (data: RegionData): void {
         if (data.newName && data.name !== data.newName) {
             const region = ige.regionManager.getRegionById(data.name);
             if (region) region._stats.id = data.newName;
@@ -90,7 +90,7 @@ class RegionEditor {
         ige.updateRegionInReact && ige.updateRegionInReact();
     }
 
-    cancelDrawRegion() {
+    cancelDrawRegion(): void {
 		if (this.regionTool) {
 			this.regionDrawGraphics.clear();
 			this.regionTool = false;
@@ -99,17 +99,11 @@ class RegionEditor {
 		}
 	}
 
-	addClickedList(regionData: {
-		name: string,
-		x: number,
-		y: number, 
-		width: number, 
-		height: number
-	}) {
+	addClickedList(regionData: RegionData): void {
 		this.clickedList.push(regionData);
 	}
 
-	showClickedList() {
+	showClickedList(): void {
 		console.log(this.clickedList.length);
 		if (this.clickedList.length === 1) {
 			ige.addNewRegion && ige.addNewRegion(this.clickedList[0]);
@@ -119,14 +113,14 @@ class RegionEditor {
 		this.clickedList = [];
 	}
 
-    showRegions() {
+    showRegions(): void {
         this.devModeScene.regions.forEach(region => {
             region.show();
             region.label.visible = true;
         });
     }
 
-    hideRegions() {
+    hideRegions(): void {
         this.devModeScene.regions.forEach(region => {
 			if (region.devModeOnly) {
 				region.hide();

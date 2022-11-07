@@ -111,19 +111,19 @@ class TilePalette extends Phaser.GameObjects.Container {
 		})
 	}
 
-	toggle() {
+	toggle(): void {
 		if (this.visible) this.hide();
 		else this.show()
 	}
 
-	hide () {
+	hide (): void {
 		this.setVisible(false);
 		this.texturesLayer.setVisible(false);
 		this.camera.setVisible(false);
 		this.scrollBarContainer.setVisible(false);
 	}
 
-	show () {
+	show (): void {
 		this.setVisible(true);
 		this.texturesLayer.setVisible(true);
 		this.camera.setVisible(true);
@@ -145,7 +145,7 @@ class TilePalette extends Phaser.GameObjects.Container {
 		this.scrollBarRight.layout();
 	}
 
-	addScrollBar(orient: string) {
+	addScrollBar(orient: string): any {
 		let orientSize;
 		let length;
 		let thumbWidth;
