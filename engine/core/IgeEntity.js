@@ -3137,7 +3137,7 @@ var IgeEntity = IgeObject.extend({
 		if (ige.isServer) {
 
 
-			ige.network.send('teleport', { entityId: this.id(), position: [x, y] });
+			ige.network.send('teleport', { entityId: this.id(), position: [x, y, rotate] });
 			this.clientStreamedPosition = undefined;
 			if (ige.physics && ige.physics.engine == 'CRASH') {
 				this.translateColliderTo(x, y);
@@ -5131,8 +5131,6 @@ var IgeEntity = IgeObject.extend({
 		}
 
 		var finalTransform = this.finalKeyFrame[1];
-		if (this == ige.client.selectedUnit)
-			console.log(this.finalKeyFrame[0], finalTransform)
 		// using cspMovement for my unit will cause it to rubberband to the latest known position
 		if (ige.game.cspEnabled && finalTransform && this.body &&
 			!(this._category == 'item' && this.getOwnerUnit() != undefined) && // don't apply to item that's held by unit as that's calculated by anchor calculation

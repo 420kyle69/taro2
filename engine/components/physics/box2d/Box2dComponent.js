@@ -647,7 +647,6 @@ var PhysicsComponent = IgeEventingClass.extend({
 									
 									// my unit's position is dictated by clientside physics
 									if (entity == ige.client.selectedUnit) {
-										console.log(entity.finalKeyFrame[0], x, y, angle)
 										entity.finalKeyFrame= [ige._currentTime, [x, y, angle]];
 									}
 									// projectiles don't use server-streamed position
