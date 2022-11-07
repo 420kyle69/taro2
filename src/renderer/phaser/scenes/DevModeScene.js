@@ -20,7 +20,6 @@ var DevModeScene = /** @class */ (function (_super) {
     }
     DevModeScene.prototype.init = function () {
         var _this = this;
-        this.input.setTopOnly(true);
         this.gameScene = ige.renderer.scene.getScene('Game');
         this.regions = [];
         ige.client.on('enterDevMode', function () {

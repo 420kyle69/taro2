@@ -20,7 +20,6 @@ class DevModeScene extends PhaserScene {
 	}
 
 	init (): void {
-		this.input.setTopOnly(true);
 		this.gameScene = ige.renderer.scene.getScene('Game');
 		this.regions = [];
 

@@ -8,6 +8,8 @@ class RegionEditor {
 	regionDrawStart: {x: number, y: number};
 	regionTool: boolean;
 
+	clickedList: any[];
+
 	constructor (
         gameScene: GameScene, devModeScene: DevModeScene, devModeTools: DevModeTools
 	) {
@@ -66,6 +68,8 @@ class RegionEditor {
 				this.regionDrawStart = null;
 			}
 		}, this);
+
+		this.clickedList = [];
 	}
 
     edit (data: RegionData) {
@@ -93,6 +97,26 @@ class RegionEditor {
 			this.devModeTools.highlightModeButton(0);
 			this.regionDrawStart = null;
 		}
+	}
+
+	addClickedList(regionData: {
+		name: string,
+		x: number,
+		y: number, 
+		width: number, 
+		height: number
+	}) {
+		this.clickedList.push(regionData);
+	}
+
+	showClickedList() {
+		console.log(this.clickedList.length);
+		if (this.clickedList.length === 1) {
+			ige.addNewRegion && ige.addNewRegion(this.clickedList[0]);
+		} else {
+			/* TODO show list of all regions in array this.clickedList and allow to choose one and call ige.addNewRegion && ige.addNewRegion(this.clickedList[number]); */
+		}
+		this.clickedList = [];
 	}
 
     showRegions() {
