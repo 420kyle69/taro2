@@ -65,12 +65,12 @@ var IgeEntity = IgeObject.extend({
 		// this ensures entity is spawning at a correct position initially. particularily useful for projectiles
 
 		this._keyFrames = [];
-		this.finalTransform = [this._translate.x, this._translate.y, this._rotate.z];
+		this.finalKeyFrame = [ige.now, [this._translate.x, this._translate.y, this._rotate.z]];
 		this.latestTimeStamp = 0;
-		this.prevKeyFrame = [ige.now, this.finalTransform];
+		this.prevKeyFrame = this.finalKeyFrame
 		this._lastTransformAt = null;
 		this.lastTeleportedAt = 0;
-		this.teleportDestination = this.finalTransform;
+		this.teleportDestination = this.finalKeyFrame[1];
 
 		if (ige.isClient) {
 			this.anchorOffset = { x: 0, y: 0, rotate: 0 };
@@ -5130,16 +5130,19 @@ var IgeEntity = IgeObject.extend({
 			// console.log(this._translate)
 		}
 
+		var finalTransform = this.finalKeyFrame[1];
+		if (this == ige.client.selectedUnit)
+			console.log(this.finalKeyFrame[0], finalTransform)
 		// using cspMovement for my unit will cause it to rubberband to the latest known position
-		if (ige.game.cspEnabled && this.finalTransform && this.body &&
+		if (ige.game.cspEnabled && finalTransform && this.body &&
 			!(this._category == 'item' && this.getOwnerUnit() != undefined) && // don't apply to item that's held by unit as that's calculated by anchor calculation
 			!(this._category == 'projectile' && this._stats.sourceItemId == undefined && this._streamMode) // don't apply to projectiles that are CSP'ed
 		) {
-			x += (this.finalTransform[0] - x)/8
-        	y += (this.finalTransform[1] - y)/8
+			x += (finalTransform[0] - x)/4
+        	y += (finalTransform[1] - y)/4
 
         	rotateStart = rotate;
-        	rotateEnd = this.finalTransform[2]
+        	rotateEnd = finalTransform[2]
         	// a hack to prevent rotational interpolation suddnely jumping by 2 PI (e.g. 0.01 to -6.27)
 			if (Math.abs(rotateEnd - rotateStart) > Math.PI) {
 				if (rotateEnd > rotateStart) rotateStart += Math.PI * 2;

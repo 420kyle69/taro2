@@ -540,12 +540,11 @@ var IgeNetIoClient = {
                         // if csp movement is enabled, don't use server-streamed position for my unit
                         // instead, we'll use position updated by physics engine
                         if (ige.game.cspEnabled && entity && 
-                        	entity.latestTimeStamp < newSnapshotTimestamp && 
+                        	entity.finalKeyFrame[0] < newSnapshotTimestamp && 
                         	entity != ige.client.selectedUnit
                         ) {
-                        	entity.finalTransform = newSnapshot[1][entityId]
-                    		entity.latestTimeStamp = newSnapshotTimestamp
-                    		// console.log(entity.finalTransform) 
+                        	entity.finalKeyFrame = [newSnapshotTimestamp, newSnapshot[1][entityId]]
+                    		// console.log(entity.finalTransform)
 						}
                     }
 

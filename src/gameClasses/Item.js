@@ -1024,7 +1024,7 @@ var Item = IgeEntityPhysics.extend({
 			}
 
 			self.rotateTo(0, 0, rotate);
-			self.finalTransform = [x, y, ownerUnit._rotate.z] // prepare position for when this item's dropped. without this, item will appear at an incorrect position
+			self.finalKeyFrame[1] = [x, y, ownerUnit._rotate.z] // prepare position for when this item's dropped. without this, item will appear at an incorrect position
 		}
 
 		if (this._stats.isBeingUsed) {
