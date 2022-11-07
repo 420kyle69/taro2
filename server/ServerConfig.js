@@ -46,6 +46,8 @@ var defaultConfig = [
 	{ name: 'Region', path: '../src/gameClasses/Region' },
 	{ name: 'RegionManager', path: '../src/gameClasses/components/RegionManager' },
 
+	{ name: 'DeveloperMode', path: '../src/gameClasses/DeveloperMode' },
+
 
 ];
 
