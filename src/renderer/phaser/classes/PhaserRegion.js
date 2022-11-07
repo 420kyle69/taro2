@@ -33,7 +33,7 @@ var PhaserRegion = /** @class */ (function (_super) {
             }
         });
         gameObject.on('pointerup', function () {
-            if (ige.developerMode.active && _this.devModeScene.regionEditor.regionTool && _this.scene.input.manager.activePointer.rightButtonReleased()) {
+            if (ige.developerMode.active && _this.devModeScene.regionEditor.regionTool) {
                 _this.scene.input.setTopOnly(false);
                 _this.devModeScene.regionEditor.showClickedList();
             }

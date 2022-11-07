@@ -87,7 +87,7 @@ class RegionEditor {
             ige.addNewRegion && ige.addNewRegion({name: data.name, x: data.x, y: data.y, width: data.width, height: data.height, userId: data.userId});
         }
 
-        ige.updateRegionInReact && ige.updateRegionInReact();
+        ige.updateRegionInReact && ige.updateRegionInReact(data);
     }
 
     cancelDrawRegion(): void {
@@ -104,11 +104,10 @@ class RegionEditor {
 	}
 
 	showClickedList(): void {
-		console.log(this.clickedList.length);
 		if (this.clickedList.length === 1) {
 			ige.addNewRegion && ige.addNewRegion(this.clickedList[0]);
-		} else {
-			/* TODO show list of all regions in array this.clickedList and allow to choose one and call ige.addNewRegion && ige.addNewRegion(this.clickedList[number]); */
+		} else if ( this.clickedList.length > 1 ) {
+			ige.showRegionList && ige.showRegionList(this.clickedList);
 		}
 		this.clickedList = [];
 	}

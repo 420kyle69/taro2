@@ -30,7 +30,7 @@ class PhaserRegion extends PhaserEntity {
 			}
 		});
 		gameObject.on('pointerup', () => {
-			if (ige.developerMode.active && this.devModeScene.regionEditor.regionTool && this.scene.input.manager.activePointer.rightButtonReleased()) {
+			if (ige.developerMode.active && this.devModeScene.regionEditor.regionTool) {
 				this.scene.input.setTopOnly(false);
 				this.devModeScene.regionEditor.showClickedList();
 			}
