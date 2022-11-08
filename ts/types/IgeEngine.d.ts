@@ -67,4 +67,5 @@ declare class IgeEngine extends IgeClass {
 
 	addNewRegion : any
 	updateRegionInReact: any
+	showRegionList: any
 }

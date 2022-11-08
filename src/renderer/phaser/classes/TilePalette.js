@@ -13,9 +13,9 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var PhaserPalette = /** @class */ (function (_super) {
-    __extends(PhaserPalette, _super);
-    function PhaserPalette(scene, tileset, rexUI) {
+var TilePalette = /** @class */ (function (_super) {
+    __extends(TilePalette, _super);
+    function TilePalette(scene, tileset, rexUI) {
         var _this = _super.call(this, scene) || this;
         console.log('create palette', _this);
         _this.tileset = tileset;
@@ -85,25 +85,25 @@ var PhaserPalette = /** @class */ (function (_super) {
         _this.area = { x: 1, y: 1 };
         return _this;
     }
-    PhaserPalette.prototype.toggle = function () {
+    TilePalette.prototype.toggle = function () {
         if (this.visible)
             this.hide();
         else
             this.show();
     };
-    PhaserPalette.prototype.hide = function () {
+    TilePalette.prototype.hide = function () {
         this.setVisible(false);
         this.texturesLayer.setVisible(false);
         this.camera.setVisible(false);
         this.scrollBarContainer.setVisible(false);
     };
-    PhaserPalette.prototype.show = function () {
+    TilePalette.prototype.show = function () {
         this.setVisible(true);
         this.texturesLayer.setVisible(true);
         this.camera.setVisible(true);
         this.scrollBarContainer.setVisible(true);
     };
-    PhaserPalette.prototype.zoom = function (deltaY) {
+    TilePalette.prototype.zoom = function (deltaY) {
         var targetZoom;
         if (deltaY < 0)
             targetZoom = this.camera.zoom * 1.2;
@@ -119,7 +119,7 @@ var PhaserPalette = /** @class */ (function (_super) {
         this.scrollBarRight.getElement('slider.thumb').height = (this.camera.height - 60) / (targetZoom * 2);
         this.scrollBarRight.layout();
     };
-    PhaserPalette.prototype.addScrollBar = function (orient) {
+    TilePalette.prototype.addScrollBar = function (orient) {
         var _a;
         var orientSize;
         var length;
@@ -170,6 +170,6 @@ var PhaserPalette = /** @class */ (function (_super) {
         }, this);
         return scrollBar;
     };
-    return PhaserPalette;
+    return TilePalette;
 }(Phaser.GameObjects.Container));
-//# sourceMappingURL=PhaserPalette.js.map
+//# sourceMappingURL=TilePalette.js.map

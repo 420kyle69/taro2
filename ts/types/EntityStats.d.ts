@@ -1,4 +1,5 @@
 declare interface EntityStats {
+	userId: string;
 	defaultData: any;
 
 	name: string;
