@@ -192,7 +192,6 @@ var Item = IgeEntityPhysics.extend({
 			if (isInvisible || !hasBody) {
 				self.hide();
 				this.emit('hide');
-
 				return;
 			}
 		}
@@ -972,8 +971,8 @@ var Item = IgeEntityPhysics.extend({
 					
 					case 'isBeingUsed':
 						var owner = self.getOwnerUnit();
-						// ignore stream for my unit's item use if projectileStreamMode is 0 (instant fire)
-						if (ige.isClient && owner != ige.client.selectedUnit) {
+						// ignore stream so my item use won't fire two bullets
+						if (ige.isClient && (owner != ige.client.selectedUnit || !this._stats.ignoreServerStream)) {
 							this._stats.isBeingUsed = newValue;
 						}
 						break;
@@ -1024,7 +1023,7 @@ var Item = IgeEntityPhysics.extend({
 			}
 
 			self.rotateTo(0, 0, rotate);
-			self.finalTransform = [x, y, ownerUnit._rotate.z] // prepare position for when this item's dropped. without this, item will appear at an incorrect position
+			self.finalKeyFrame[1] = [x, y, rotate] // prepare position for when this item's dropped. without this, item will appear at an incorrect position
 		}
 
 		if (this._stats.isBeingUsed) {

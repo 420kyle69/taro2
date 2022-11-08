@@ -46,9 +46,9 @@ var Player = IgeEntity.extend({
 						];
 					}
 				});
-			}
 
-			this.setChatMute(this._stats.banChat);
+				this.setChatMute(this._stats.banChat);
+			}
 
 			// apply skin to the selected unit if the unit already exists on the client side
 			if (this._stats && this._stats.selectedUnitId) {
@@ -81,8 +81,8 @@ var Player = IgeEntity.extend({
 			{
 				ige.script.trigger('playerJoinsGame', { playerId: self.id() });
 			}
-
-			if (self._stats.controlledBy == 'human') {
+			
+			if (self._stats.controlledBy == 'human' && !self._stats.isBot) {
 				var clientId = self._stats.clientId;
 				var client = ige.server.clients[clientId];
 				var receivedJoinGame = client.receivedJoinGame;

@@ -621,10 +621,10 @@ var PhysicsComponent = IgeEventingClass.extend({
 
 							// entity just has teleported
 							if (entity.teleportDestination != undefined) {
-								entity.finalTransform = entity.teleportDestination;
+								entity.finalKeyFrame[1] = entity.teleportDestination;
 								x = entity.teleportDestination[0]
 								y = entity.teleportDestination[1]
-								z = entity.teleportDestination[2]
+								angle = entity.teleportDestination[2]
 								entity.teleportDestination = undefined;
 							} else {
 								if (ige.isServer) {
@@ -633,12 +633,12 @@ var PhysicsComponent = IgeEventingClass.extend({
 									// hard-correct client entity's position (teleport) if the distance between server & client is greater than 100px
 									// continuously for 10 frames in a row
 									if (ige.game.cspEnabled && !entity._stats.aiEnabled && entity.clientStreamedPosition) {
-										var targetX = entity.clientStreamedPosition[0];
-										var targetY = entity.clientStreamedPosition[1];
+										var targetX = parseInt(entity.clientStreamedPosition[0]);
+										var targetY = parseInt(entity.clientStreamedPosition[1]);
 										var xDiff = targetX - x;
 										var yDiff = targetY - y;
-										x += xDiff/5
-										y += yDiff/5
+										x += xDiff/2
+										y += yDiff/2										
 									}
 
 									entity.translateTo(x, y, 0);
@@ -647,7 +647,7 @@ var PhysicsComponent = IgeEventingClass.extend({
 									
 									// my unit's position is dictated by clientside physics
 									if (entity == ige.client.selectedUnit) {
-										entity.finalTransform = [x, y, angle];
+										entity.finalKeyFrame= [ige._currentTime, [x, y, angle]];
 									}
 									// projectiles don't use server-streamed position
 									else if (entity._category == 'projectile' && 
@@ -656,9 +656,9 @@ var PhysicsComponent = IgeEventingClass.extend({
 										entity.prevPhysicsFrame = entity.nextPhysicsFrame;
 										entity.nextPhysicsFrame = [nextFrameTime, [x, y, angle]];
 									} else { // update server-streamed entities' body position
-										x = entity.finalTransform[0]
-										y = entity.finalTransform[1]
-										angle = entity.finalTransform[2]
+										x = entity.finalKeyFrame[1][0]
+										y = entity.finalKeyFrame[1][1]
+										angle = entity.finalKeyFrame[1][2]
 									}
 								}	
 							}

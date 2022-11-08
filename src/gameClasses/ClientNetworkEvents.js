@@ -54,7 +54,7 @@ var ClientNetworkEvents = {
 		var entity = ige.$(data.entityId);
 		if (entity && data.position) {
 			// console.log("teleporting",data.entityId , " to", data.position)
-			entity.teleportTo(data.position[0], data.position[1]);
+			entity.teleportTo(data.position[0], data.position[1], data.position[2]);
 		}
 	},
 

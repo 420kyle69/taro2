@@ -143,7 +143,7 @@ var ScoreboardComponent = IgeEntity.extend({
 			players.forEach(function (player) {
 				if (player._stats && (
 						 	// only display human players on scoreboard
-							player._stats.controlledBy == 'human' || player._stats.controlledBy == 'bot'
+							player._stats.controlledBy == 'human'
 						)
 				) {
 					var playerId = player.id();

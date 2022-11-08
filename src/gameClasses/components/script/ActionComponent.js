@@ -2458,11 +2458,14 @@ var ActionComponent = IgeEntity.extend({
 
 					case 'addBotPlayer':
 						var name = self._script.variable.getValue(action.name, vars) || "";
+						// bot players meant to be indistinguishable from 'human' players. hence we're not tempering with controlledBy variable
 						var player = ige.game.createPlayer({
-							controlledBy: "bot",
+							controlledBy: "human",
 							name: name
 						});
 						player.joinGame();
+						player._stats.isBot = true;
+						player._stats.playerJoined = true; // bot player should be counted for getPlayerCount
 						break;
 
 					
