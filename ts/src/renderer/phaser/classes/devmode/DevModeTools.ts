@@ -82,6 +82,11 @@ class DevModeTools extends Phaser.GameObjects.Container {
 			new DevToolButton (this, '2x2', null, 62, 102, 58, toolButtonsContainer, this.selectArea.bind(this))
 		)
 		this.brushButtons[0].highlight(true);
+
+		this.palette.hide();
+		this.layerButtonsContainer.setVisible(false);
+		this.toolButtonsContainer.setVisible(false);
+		this.regionEditor.hideRegions();
 	}
 
 	enterDevMode(): void {

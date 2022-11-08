@@ -66,6 +66,10 @@ var DevModeTools = /** @class */ (function (_super) {
         _this.brushButtons = [];
         _this.brushButtons.push(new DevToolButton(_this, '1x1', null, 0, 102, 58, toolButtonsContainer, _this.selectSingle.bind(_this)), new DevToolButton(_this, '2x2', null, 62, 102, 58, toolButtonsContainer, _this.selectArea.bind(_this)));
         _this.brushButtons[0].highlight(true);
+        _this.palette.hide();
+        _this.layerButtonsContainer.setVisible(false);
+        _this.toolButtonsContainer.setVisible(false);
+        _this.regionEditor.hideRegions();
         return _this;
     }
     DevModeTools.prototype.enterDevMode = function () {
