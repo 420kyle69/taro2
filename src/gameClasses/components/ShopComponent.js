@@ -88,6 +88,7 @@ var ShopComponent = IgeEntity.extend({
 				// else {
 				var isItemRequirementSetisfied = $(this).attr('requirementsSatisfied') == 'true';
 				var isItemAffordable = $(this).attr('isItemAffordable') == 'true';
+				var isCoinTxRequired = $(this).attr('isCoinTxRequired') == 'true';
 				var name = $(this).attr('name');
 				if (!isItemRequirementSetisfied) {
 					self.purchaseWarning('requirement', name);
@@ -97,9 +98,12 @@ var ShopComponent = IgeEntity.extend({
 					self.purchaseWarning('price', name);
 					return;
 				}
-				self.purchase($(this).attr('id'));
-				// }
-				// self.confirmPurchase($(this).attr("id"))
+				
+				if (isCoinTxRequired) {
+					self.verifyUserPinForPurchase($(this).attr('id'));
+				} else {
+					self.purchase($(this).attr('id'));
+				}
 			});
 
 			$(document).on('click', '.btn-purchase-unit', function () {
@@ -910,9 +914,10 @@ var ShopComponent = IgeEntity.extend({
 						class: 'col-sm-2-5 rounded align-bottom btn-purchase-item item-shop-button',
 						name: item.name,
 						requirementsSatisfied: !!requirementsSatisfied,
-						isItemAffordable: !!isItemAffordable
+						isItemAffordable: !!isItemAffordable,
+						isCoinTxRequired: !!shopItem.price.coins
 					});
-
+					
 					if (
 						((!isItemAffordable || !isPurchasableByCurrentPlayerType) && shopItem.hideIfUnaffordable) ||
 						(!requirementsSatisfied && shopItem.hideIfRequirementNotMet)
@@ -1305,13 +1310,23 @@ var ShopComponent = IgeEntity.extend({
 		}
 	},
 
-	purchase: function (id) {
-		ige.network.send('buyItem', id); // using attr name instead of skinName, otherwise, it'll send the last itemName in constants.itemTypes only
+	purchase: function (id, token = null) {
+		ige.network.send('buyItem', {id, token}); // using attr name instead of skinName, otherwise, it'll send the last itemName in constants.itemTypes only
 	},
 	purchaseUnit: function (id) {
 		ige.network.send('buyUnit', id);
 	},
+	
+	verifyUserPinForPurchase: function (id) {
+		const serverId = ige.client.server.id;
 
+		if (typeof window.validateUserPin === 'function') {
+			window.validateUserPin('ige.shop.purchase', id, serverId);
+		} else {
+			ige.network.send('buyItem', {id});
+		}
+	},
+	
 	enableStockCycle: function () {
 		var self = this;
 		var stockClock = setInterval(function () {

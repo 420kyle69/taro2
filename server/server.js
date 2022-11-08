@@ -100,8 +100,10 @@ var Server = IgeClass.extend({
 		self.saveDataTimestamps = [];
 		self.started_at = new Date();
 		self.lastSnapshot = [];
-		self.TOKEN_EXPIRES_IN = 10 * 60 * 1000; // token expires in 10 minutes
-		self.usedTokens = {}; // jwt tokens are stored in memory to prevent a token to be used multiple times
+		self.CONNECTION_JWT_EXPIRES_IN = 10 * 60 * 1000; // token expires in 10 minutes
+		self.usedConnectionJwts = {}; // these jwts used for gs connection verification, stored in memory to prevent a token being used multiple times
+		self.COIN_JWT_EXPIRES_IN = 15 * 1000; // token expires in 15 seconds
+		self.usedCoinJwts = {}; // these jwts used for coin transaction, stored in memory to prevent a token being used multiple times
 		self.logTriggers = {
 
 		};
@@ -317,7 +319,7 @@ var Server = IgeClass.extend({
 			const jwt = require('jsonwebtoken');
 
 			const token = jwt.sign({ userId: '', createdAt: Date.now(), gameSlug: global.standaloneGame.defaultData.gameSlug }, process.env.JWT_SECRET_KEY, {
-				expiresIn: ige.server.TOKEN_EXPIRES_IN.toString(),
+				expiresIn: ige.server.CONNECTION_JWT_EXPIRES_IN.toString(),
 			});
 
 			const videoChatEnabled = ige.game.data && ige.game.data.defaultData && ige.game.data.defaultData.enableVideoChat ? ige.game.data.defaultData.enableVideoChat : false;

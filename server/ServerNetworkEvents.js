@@ -457,14 +457,15 @@ var ServerNetworkEvents = {
 		}
 	},
 
-	_onBuyItem: function (id, clientId) {
+	_onBuyItem: function (data, clientId) {
+		const {id, token} = data;
 		ige.devLog('player ' + clientId + ' wants to purchase item' + id);
 
 		var player = ige.game.getPlayerByClientId(clientId);
 		if (player) {
 			var unit = player.getSelectedUnit();
 			if (unit) {
-				unit.buyItem(id);
+				unit.buyItem(id, token);
 			}
 		}
 	},
