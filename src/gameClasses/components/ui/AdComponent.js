@@ -35,7 +35,7 @@ var AdComponent = IgeEntity.extend({
 				sendMessageToReactNative(eventData);
 			} else {
 				// on desktop
-				if (isInIFrame) {
+				if (typeof isInIFrame !== 'undefined' && isInIFrame) {
 					ID.gameBreak(function () {
 						// Ad skipped or finished
 					});

@@ -1,4 +1,6 @@
 declare interface EntityStats {
+	userId: string;
+	defaultData: any;
 
 	name: string;
 	currentBody: {
@@ -36,4 +38,5 @@ declare interface EntityStats {
 	controls: {
 		abilities: Record<string, ControlAbility>
 	}
+	ownerUnitId: string;
 }

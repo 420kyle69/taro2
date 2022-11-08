@@ -54,7 +54,8 @@ var IgeEntityPhysics = IgeEntity.extend({
 	updateBody: function (defaultData, isLossTolerant) {
 		var self = this;
 
-		// console.log("updatebody", defaultData, this._stats.currentBody.type)
+		// console.log("updatebody", this._stats.name, defaultData, this._stats.currentBody.type)
+		// console.trace()
 
 		body = this._stats.currentBody;
 		if (!body) {
@@ -784,11 +785,7 @@ var IgeEntityPhysics = IgeEntity.extend({
 							break;
 
 						case 'destroy':
-							if (!action.streamToClient) {
-								ige.network.pause()
-							}
 							this.destroy();
-							ige.network.resume()
 							break;
 					}
 				}
@@ -798,13 +795,8 @@ var IgeEntityPhysics = IgeEntity.extend({
 
 	remove: function (isStreaming = true) {
 		this._isBeingRemoved = true;
-		
-		if (this._stats && !this.body) {
-			// destroy items which are spriteOnly or with none body immediately
-			this.destroy();
-		} else {
-			this.queueAction({ type: 'destroy', streamToClient: isStreaming });
-		}
+		this.destroy();
+
 		if (ige.isClient) {
 			this.clearAllPointers();
 		}

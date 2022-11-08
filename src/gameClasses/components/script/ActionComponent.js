@@ -22,12 +22,10 @@ var ActionComponent = IgeEntity.extend({
 			// the server side is still running (e.g. creating entities), but it won't be streamed to the client
 			if (ige.isServer) {
 
-				if (ige.game.cspEnabled) {
-					if(action.runOnClient) {
-						ige.network.pause();
-					}
+				if(action.runOnClient) {
+					ige.network.pause();
 				}
-
+				
 				var now = Date.now();
 				var lastActionRunTime = now - ige.lastActionRanAt;
 				var engineTickDelta = now - ige.now;
@@ -124,9 +122,12 @@ var ActionComponent = IgeEntity.extend({
 						// const use for creating new instance of variable every time.
 						const setTimeOutActions = JSON.parse(JSON.stringify(action.actions));
 						// const setTimeoutVars = _.cloneDeep(vars);
-						setTimeout(function (actions) {
+						setTimeout(function (actions, currentScriptId) {
+							let previousScriptId = currentScriptId;
+							self._script.currentScriptId = currentScriptId;
 							self.run(actions, vars);
-						}, action.duration, setTimeOutActions);
+							self._script.currentScriptId = previousScriptId;
+						}, action.duration, setTimeOutActions, self._script.currentScriptId);
 						break;
 
 					case 'repeat':
@@ -154,16 +155,8 @@ var ActionComponent = IgeEntity.extend({
 
 					case 'runScript':
 						let previousScriptId = self._script.currentScriptId;
-						let scriptComponent = undefined;
-
-						if (action.isEntityScript) {
-							scriptComponent = self._script; // entity script
-						} else {
-							scriptComponent = ige.script; // global script
-						}
-
-						scriptComponent.runScript(action.scriptName, vars);
-						scriptComponent.currentScriptId = previousScriptId;
+						self._script.runScript(action.scriptName, vars);
+						self._script.currentScriptId = previousScriptId;
 						break;
 
 					case 'condition':
@@ -278,7 +271,7 @@ var ActionComponent = IgeEntity.extend({
 					case 'kickPlayer':
 						var player = self._script.variable.getValue(action.entity, vars);
 						if (player && player._category == 'player') {
-							player.streamUpdateData([{ playerJoined: false }]);
+							ige.game.kickPlayer(player._stats.clientId);
 						}
 
 						break;
@@ -288,7 +281,7 @@ var ActionComponent = IgeEntity.extend({
 						// console.log('playing unit animation!', animationId);
 						var entity = self._script.variable.getValue(action.entity, vars);
 						if (entity) {
-							entity.streamUpdateData([{ anim: animationId }]);
+							entity.applyAnimationById(animationId);
 						}
 
 						break;
@@ -2465,11 +2458,14 @@ var ActionComponent = IgeEntity.extend({
 
 					case 'addBotPlayer':
 						var name = self._script.variable.getValue(action.name, vars) || "";
+						// bot players meant to be indistinguishable from 'human' players. hence we're not tempering with controlledBy variable
 						var player = ige.game.createPlayer({
-							controlledBy: "bot",
+							controlledBy: "human",
 							name: name
 						});
 						player.joinGame();
+						player._stats.isBot = true;
+						player._stats.playerJoined = true; // bot player should be counted for getPlayerCount
 						break;
 
 					
@@ -2518,6 +2514,14 @@ var ActionComponent = IgeEntity.extend({
 							unit.ai.attackUnit(targetUnit);
 						}
 						break;
+					
+					case 'aiGoIdle':
+						var unit = self._script.variable.getValue(action.unit, vars);
+						if (unit && unit.ai) {
+							unit.ai.goIdle();
+						}
+						break;
+						
 
 					case 'makePlayerTradeWithPlayer':
 						var playerA = self._script.variable.getValue(action.playerA, vars);

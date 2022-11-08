@@ -95,7 +95,10 @@ var MobileControlsScene = /** @class */ (function (_super) {
                 var touchX = pointer.x;
                 var touchY = pointer.y;
                 if (touchX < this.cameras.main.displayWidth / 2.4) {
-                    var leftJoystick = this.joysticks[0];
+                    var leftJoystick = this.joysticks.find(function (_a) {
+                        var side = _a.side;
+                        return side === "left";
+                    });
                     if (leftJoystick) {
                         leftJoystick.show();
                         leftJoystick.x = touchX;
@@ -104,7 +107,10 @@ var MobileControlsScene = /** @class */ (function (_super) {
                     }
                 }
                 else if (touchX > this.cameras.main.displayWidth - (this.cameras.main.displayWidth / 2.4)) {
-                    var rightJoystick = this.joysticks[1];
+                    var rightJoystick = this.joysticks.find(function (_a) {
+                        var side = _a.side;
+                        return side === "right";
+                    });
                     if (rightJoystick) {
                         rightJoystick.show();
                         rightJoystick.x = touchX;

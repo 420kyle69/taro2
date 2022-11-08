@@ -45,8 +45,8 @@ var igeClientConfig = {
 		'/gameClasses/components/script/VariableComponent.js',
 		'/gameClasses/components/script/ActionComponent.js',
 		'/gameClasses/components/script/ConditionComponent.js',
-		
-		'/gameClasses/components/unit/AIComponent.js',		
+
+		'/gameClasses/components/unit/AIComponent.js',
 		'/gameClasses/components/unit/AbilityComponent.js',
 		'/gameClasses/components/unit/AttributeComponent.js',
 
@@ -55,6 +55,7 @@ var igeClientConfig = {
 		'/gameClasses/DeveloperMode.js',
 		'/gameClasses/EntitiesToRender.js',
 		'/gameClasses/Raycaster.js',
+		'/gameClasses/HeightRenderComponent.js',
 
 		/* Phaser */
 		'renderer/phaser/phaser.min.js',
@@ -79,9 +80,12 @@ var igeClientConfig = {
 		'renderer/phaser/classes/PhaserJoystick.js',
 		'renderer/phaser/scenes/MobileControlsScene.js',
 		'renderer/phaser/scenes/DevModeScene.js',
-		'renderer/phaser/classes/PhaserPalette.js',
-		'renderer/phaser/classes/PhaserPaletteButton.js',
-		'renderer/phaser/classes/TileMarker.js',
+		'renderer/phaser/classes/devmode/DevModeTools.js',
+		'renderer/phaser/classes/devmode/DevToolButton.js',
+		'renderer/phaser/classes/devmode/RegionEditor.js',
+		'renderer/phaser/classes/devmode/TileEditor.js',
+		'renderer/phaser/classes/devmode/TilePalette.js',
+		'renderer/phaser/classes/devmode/TileMarker.js',
 		'renderer/phaser/PhaserRenderer.js',
 
 		'/client.js',

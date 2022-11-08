@@ -141,9 +141,12 @@ var ScoreboardComponent = IgeEntity.extend({
 			var topPlayersToShow = ige.isMobile ? 3 : 10;
 
 			players.forEach(function (player) {
-				if (player._stats && player._stats.clientId) // only display human players on scoreboard
-				{
-					var clientId = player._stats.clientId;
+				if (player._stats && (
+						 	// only display human players on scoreboard
+							player._stats.controlledBy == 'human'
+						)
+				) {
+					var playerId = player.id();
 					var score = 0;
 					if (self.scoreAttributeId && player._stats.attributes && player._stats.attributes[self.scoreAttributeId]) {
 						var playerAttribute = player._stats.attributes[self.scoreAttributeId];
@@ -153,7 +156,7 @@ var ScoreboardComponent = IgeEntity.extend({
 					}
 
 					sortedScores.push({
-						key: clientId,
+						key: playerId,
 						value: score
 					});
 				}
@@ -164,8 +167,8 @@ var ScoreboardComponent = IgeEntity.extend({
 			});
 
 			for (var i = sortedScores.length - 1; i >= 0; i--) {
-				var clientId = sortedScores[i].key;
-				var player = ige.game.getPlayerByClientId(clientId);
+				var playerId = sortedScores[i].key;
+				var player = ige.$(playerId);
 				var defaultFontWeight = 500;
 				if (player) {
 					var color = null; // color to indicate human, animal, or my player on scoreboard
@@ -175,7 +178,9 @@ var ScoreboardComponent = IgeEntity.extend({
 					if (playerType && playerType.color) {
 						color = playerType.color;
 					}
-					if (player._stats.clientId == ige.network.id()) {
+
+					// highlight myself (player) on leaderboard
+					if (player._stats.controlledBy == 'human' && player._stats.clientId == ige.network.id()) {
 						defaultFontWeight = 800;
 						color = '#99FF00';
 					}

@@ -29,17 +29,12 @@ var PhysicsComponent = IgeEventingClass.extend({
 
 		this.walls = [];
 
-		if (ige.isServer) {
-			this.engine = dists.defaultEngine;
+		this.engine = dists.defaultEngine;
 
-			if (ige.game && ige.game.data && ige.game.data.defaultData) {
-				this.engine = ige.game.data.defaultData.physicsEngine;
-			}
-		} else if (ige.isClient) {
-			if (ige.game && ige.game.data && ige.game.data.defaultData) {
-				this.engine = ige.game.data.defaultData.clientPhysicsEngine;
-			}
+		if (ige.game && ige.game.data && ige.game.data.defaultData) {
+			this.engine = ige.game.data.defaultData.physicsEngine;
 		}
+		
 		this.engine = this.engine.toUpperCase();
 
 		// this.engine = 'crash';
@@ -624,49 +619,53 @@ var PhysicsComponent = IgeEventingClass.extend({
 								}
 							}
 
-							if (ige.isServer) {
-								
-								/* server-side reconciliation */
-								// hard-correct client entity's position (teleport) if the distance between server & client is greater than 100px
-								// continuously for 10 frames in a row
-								if (ige.game.cspEnabled && !entity._stats.aiEnabled && entity.clientStreamedPosition) {
-									var targetX = entity.clientStreamedPosition[0];
-									var targetY = entity.clientStreamedPosition[1];
-									var xDiff = targetX - x;
-									var yDiff = targetY - y;
-									x += xDiff/5
-									y += yDiff/5
-								}
+							// entity just has teleported
+							if (entity.teleportDestination != undefined) {
+								entity.finalKeyFrame[1] = entity.teleportDestination;
+								x = entity.teleportDestination[0]
+								y = entity.teleportDestination[1]
+								angle = entity.teleportDestination[2]
+								entity.teleportDestination = undefined;
+							} else {
+								if (ige.isServer) {
+									
+									/* server-side reconciliation */
+									// hard-correct client entity's position (teleport) if the distance between server & client is greater than 100px
+									// continuously for 10 frames in a row
+									if (ige.game.cspEnabled && !entity._stats.aiEnabled && entity.clientStreamedPosition) {
+										var targetX = parseInt(entity.clientStreamedPosition[0]);
+										var targetY = parseInt(entity.clientStreamedPosition[1]);
+										var xDiff = targetX - x;
+										var yDiff = targetY - y;
+										x += xDiff/2
+										y += yDiff/2										
+									}
 
-								entity.translateTo(x, y, 0);
-								entity.rotateTo(0, 0, angle);
-							} else if (ige.isClient) {
-								
-								// ignore server-stream for the position updates for my unit and for projectiles fired from items
-								if (ige.physics && ige.game.cspEnabled && 
-										(	
-											( // move my own unit immediately while ignoring the server stream
-												!entity._stats.aiEnabled && ige.client.selectedUnit == entity && !entity._stats.aiEnabled &&
-												(entity.nextPhysicsFrame == undefined || ige._currentTime > entity.nextPhysicsFrame[0])
-											) ||
-											( // fired-from-item projectiles
-												entity._category == 'projectile' && entity._stats.sourceItemId != undefined && !entity._streamMode
-											)
-											
-										)
-								) {
-									entity.prevPhysicsFrame = entity.nextPhysicsFrame;
-									entity.nextPhysicsFrame = [nextFrameTime, [x, y, angle]];
-								} else {
-									// all streamed entities are rigidly positioned
-									x = entity._translate.x;
-									y = entity._translate.y;
-									angle = entity._rotate.z;
-									entity.nextPhysicsFrame = undefined;
-								}
-								entity.body.setPosition({ x: x / entity._b2dRef._scaleRatio, y: y / entity._b2dRef._scaleRatio });
-								entity.body.setAngle(angle);
+									entity.translateTo(x, y, 0);
+									entity.rotateTo(0, 0, angle);
+								} else if (ige.isClient) {
+									
+									// my unit's position is dictated by clientside physics
+									if (entity == ige.client.selectedUnit) {
+										entity.finalKeyFrame= [ige._currentTime, [x, y, angle]];
+									}
+									// projectiles don't use server-streamed position
+									else if (entity._category == 'projectile' && 
+										entity._stats.sourceItemId != undefined && !entity._streamMode
+									) {
+										entity.prevPhysicsFrame = entity.nextPhysicsFrame;
+										entity.nextPhysicsFrame = [nextFrameTime, [x, y, angle]];
+									} else { // update server-streamed entities' body position
+										x = entity.finalKeyFrame[1][0]
+										y = entity.finalKeyFrame[1][1]
+										angle = entity.finalKeyFrame[1][2]
+									}
+								}	
 							}
+
+							entity.body.setPosition({ x: x / entity._b2dRef._scaleRatio, y: y / entity._b2dRef._scaleRatio });
+							entity.body.setAngle(angle);
+							
 
 							if (tempBod.asleep) {
 								// The tempBod was asleep last frame, fire an awake event

@@ -114,7 +114,7 @@ var IgeEngine = IgeEntity.extend({
 		this._lastGameLoopTickAt = 0;
 		this._gameLoopTickRemainder = 0;
 		this.gameLoopTickHasExecuted = true;
-		
+
 		this._aSecondAgo = 0;
 
 		this._state = 0; // Currently stopped
@@ -172,8 +172,8 @@ var IgeEngine = IgeEntity.extend({
 		this.triggersQueued = [];
 
 		this.lastTrigger = undefined;
-		this.triggerProfiler = {}
-		this.actionProfiler = {}
+		this.triggerProfiler = {};
+		this.actionProfiler = {};
 		this.lastAction = undefined;
 		this.lastActionRanAt = 0;
 		this.lastTriggerRanAt = 0;
@@ -1501,13 +1501,13 @@ var IgeEngine = IgeEntity.extend({
 	 */
 	 incrementTime: function () {
 		const now = new Date().getTime();
-		
+
 		if (!this._pause) {
 
 			this._currentTime = (now + this.timeDiscrepancy) * this._timeScale;
 			this.renderTime = this._currentTime;
 		}
-		
+
 		this._lastTimeStamp = now;
 		return this._currentTime;
 	},
@@ -1619,8 +1619,10 @@ var IgeEngine = IgeEntity.extend({
 		ige.network.send('_igeStreamCreateSnapshot', ige.entityCreateSnapshot, clientId);
 	},
 
+	// queues trigger events to affect ALL entities including the world.
+	// for example, "when attribute becomes zero" trigger fires it will run for all entities (unit/item/projecitle) first, then it'll run for the world
 	queueTrigger: function(triggerName, parameters = {}) {
-		this.triggersQueued.push({name: triggerName, params: parameters})
+		this.triggersQueued.push({name: triggerName, params: parameters});
 	},
 
 	/**
@@ -1700,16 +1702,16 @@ var IgeEngine = IgeEntity.extend({
 				if (ige.physics) {
 					ige.physics.update(timeElapsed);
 				}
-					
+
 				ige.queueTrigger('frameTick');
 			}
-			
+
 			ige.tickCount = 0;
 			ige.updateTransform = 0;
 			ige.inViewCount = 0;
 			ige.totalChildren = 0;
 			ige.totalOrphans = 0;
-			
+
 			// Update the scenegraph - this is where entity _behaviour() is called
 			if (self._enableUpdates) {
 				// ige.updateCount = {}
@@ -1724,26 +1726,27 @@ var IgeEngine = IgeEntity.extend({
 				}
 			}
 
-			if (ige.isServer) { // execute triggersQueued. client-side is done inside EntitiesToRender.ts
-				_.forEach(ige.triggersQueued, function (trigger) {
-					// console.log("run", trigger);						
+			if (ige.isServer) { // triggersQueued runs on client-side inside EntitiesToRender.ts
+				// triggersQueued is executed in the entities first (entity-script) then it runs for the world
+				while (ige.triggersQueued.length > 0) {
+
+					const trigger = ige.triggersQueued.shift();
 					ige.script.trigger(trigger.name, trigger.params);
-				});
+				}
 			}
 
 			ige.engineLagReported = false;
-			ige.actionProfiler = {}
-			ige.triggerProfiler = {}
+			ige.actionProfiler = {};
+			ige.triggerProfiler = {};
 			ige.triggersQueued = []; // only empties on server-side as client-side never reaches here
-			
-			
+
 			if (ige.isClient) {
 				if (ige.client.myPlayer) {
 					ige.client.myPlayer.control._behaviour();
 				}
 
 				let oldestSnapshot = ige.snapshots[0];
-				while (ige.snapshots.length >= 2 && oldestSnapshot != undefined && ige._currentTime > oldestSnapshot[0]) {	
+				while (ige.snapshots.length >= 2 && oldestSnapshot != undefined && ige._currentTime > oldestSnapshot[0]) {
 					ige.prevSnapshot = ige.nextSnapshot
 					ige.nextSnapshot = ige.snapshots[ige.snapshots.length-1];
 
@@ -1757,7 +1760,7 @@ var IgeEngine = IgeEntity.extend({
 			if (!ige.gameLoopTickHasExecuted) {
 				return;
 			}
-			
+
 			// Check for unborn entities that should be born now
 			unbornQueue = ige._spawnQueue;
 			unbornCount = unbornQueue.length;
@@ -1793,7 +1796,6 @@ var IgeEngine = IgeEntity.extend({
 				}
 			}
 
-			
 			// console.log(ige.updateCount, ige.tickCount, ige.updateTransform,"inView", ige.inViewCount);
 			// Record the lastTick value so we can
 			// calculate delta on the next tick
@@ -1872,11 +1874,11 @@ var IgeEngine = IgeEntity.extend({
 
 			ige.network.stream._sendQueue(timeStamp);
 			ige.network.stream.updateEntityAttributes();
-			
+
 		}
-		
+
 		ige.gameLoopTickHasExecuted = false;
-		
+
 		et = new Date().getTime();
 		ige._tickTime = et - ige.now;
 		// console.log(ige._tickTime, ige._tickTime, 1000/self._fpsRate)
@@ -1921,7 +1923,7 @@ var IgeEngine = IgeEntity.extend({
 
 		if (arr) {
 			arrCount = arr.length;
- 
+
 			// Loop our viewports and call their update methods
 			if (igeConfig.debug._timing) {
 				while (arrCount--) {

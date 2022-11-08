@@ -11,7 +11,7 @@ var IgeNetIoServer = {
 	start: function (data, callback) {
 		var self = this;
 
-		this.artificialDelay = 0; // simulated lag (ms)
+		this.artificialDelay = 300; // simulated lag (ms)
 		this.lagVariance = 0;
 
 		this._socketById = {};
@@ -562,6 +562,7 @@ var IgeNetIoServer = {
 						'distinct_id': self._socketById[socket.id]._token.distinctId,
 						'$ip': socket._remoteAddress,
 						'gameSlug': ige.game && ige.game.data && ige.game.data.defaultData && ige.game.data.defaultData.gameSlug,
+						'gameId': ige.game && ige.game.data && ige.game.data.defaultData && ige.game.data.defaultData._id,
 					});
 				}
 
@@ -610,6 +611,7 @@ var IgeNetIoServer = {
 								'distinct_id': self._socketById[socket.id]._token.distinctId,
 								'$ip': socket._remoteAddress,
 								'gameSlug': ige.game && ige.game.data && ige.game.data.defaultData && ige.game.data.defaultData.gameSlug,
+								'gameId': ige.game && ige.game.data && ige.game.data.defaultData && ige.game.data.defaultData._id,
 								'playTime': end - self._socketById[socket.id].start,
 							});
 						}

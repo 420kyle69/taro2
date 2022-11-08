@@ -54,7 +54,7 @@ var ClientNetworkEvents = {
 		var entity = ige.$(data.entityId);
 		if (entity && data.position) {
 			// console.log("teleporting",data.entityId , " to", data.position)
-			entity.teleportTo(data.position[0], data.position[1]);
+			entity.teleportTo(data.position[0], data.position[1], data.position[2]);
 		}
 	},
 
@@ -470,6 +470,11 @@ var ClientNetworkEvents = {
 	// when other players' update tiles, apply the change to my local
 	_onEditTile: function (data) {
 		ige.client.emit('editTile', {gid: data.gid, layer: data.layer, x: data.x, y: data.y});
+	},
+
+	// when other players' update regions, apply the change to my local
+	_onEditRegion: function (data) {
+		ige.client.emit('editRegion', data);
 	},
 
 	_onErrorLogs: function (logs) {

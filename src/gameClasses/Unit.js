@@ -51,19 +51,21 @@ var Unit = IgeEntityPhysics.extend({
 
 		Unit.prototype.log(`initializing new unit ${this.id()}`);
 
-
 		if (ige.isClient) {
 			this.addToRenderer(defaultAnimation && (defaultAnimation.frames[0] - 1));
 			ige.client.emit('create-unit', this);
 			this.transformTexture(this._translate.x, this._translate.y, 0);
+
+			if (this._stats.states) {
+				var currentState = this._stats.states[this._stats.stateId];
+				if (currentState) {
+					var defaultAnimation = this._stats.animations[currentState.animation];	
+				}
+			}
 		}
+
 		// initialize body & texture of the unit
 		self.changeUnitType(data.type, data.defaultData);
-
-		if (this._stats.states) {
-			var currentState = this._stats.states[this._stats.stateId];
-			var defaultAnimation = this._stats.animations[currentState.animation];
-		}
 
 		// if unit's scale as already been changed by some script then use that scale
 		if (self._stats.scale) {
@@ -353,7 +355,7 @@ var Unit = IgeEntityPhysics.extend({
 
 		// checking for atribute price
 		for (var attributeTypeId in shopData.price.playerAttributes) {
-			if (ownerPlayer._stats.attributes[attributeTypeId]) {
+			if (ownerPlayer._stats.attributes && ownerPlayer._stats.attributes[attributeTypeId]) {
 				var playerAttrValue = ownerPlayer._stats.attributes[attributeTypeId].value;
 				if (shopData.price.playerAttributes[attributeTypeId] > playerAttrValue) {
 					return false;
@@ -866,7 +868,7 @@ var Unit = IgeEntityPhysics.extend({
 		} else if (ige.isClient) {
 			var zIndex = self._stats.currentBody && self._stats.currentBody['z-index'] || { layer: 3, depth: 3 };
 
-			if (zIndex && ige.network.id() == self._stats.clientId) {
+			if (zIndex && ige.network.id() == self._stats.clientId && !ige.game.data.heightBasedZIndex) {
 				// depth of this player's units should have +1 depth to avoid flickering on overlap
 				zIndex.depth++;
 			}
@@ -1244,6 +1246,7 @@ var Unit = IgeEntityPhysics.extend({
 		var self = this;
 		var item = self.inventory.getItemBySlotNumber(itemIndex + 1);
 		if (item) {
+			
 			// check if item's undroppable
 			if (item._stats && item._stats.controls && item._stats.controls.undroppable) {
 				return;
@@ -1274,8 +1277,8 @@ var Unit = IgeEntityPhysics.extend({
 					item._translateTo(defaultData.translate.x, defaultData.translate.y)*/
 				}
 
-				item.setState('dropped', defaultData);
 				item.setOwnerUnit(undefined);
+				item.setState('dropped', defaultData);				
 
 				if (item._stats.hidden) {
 					item.streamUpdateData([{ hidden: false }]);
@@ -1293,7 +1296,7 @@ var Unit = IgeEntityPhysics.extend({
 					self.updateStats(item.id(), true);
 				}
 
-				self.detachEntity(item.id());
+				self.detachEntity(item.id()); // igeEntityPhysics comment: not working right now
 
 				ige.queueTrigger('unitDroppedAnItem', {
 					itemId: item.id(),
@@ -1426,7 +1429,7 @@ var Unit = IgeEntityPhysics.extend({
 		if (self._stats.itemIds) {
 			for (var i = 0; i < self._stats.itemIds.length; i++) {
 				var currentItem = this.inventory.getItemBySlotNumber(i + 1);
-				if (currentItem) {
+				if (currentItem && currentItem.getOwnerUnit() == this) {
 					currentItem.remove();
 				}
 			}
@@ -1435,10 +1438,19 @@ var Unit = IgeEntityPhysics.extend({
 		IgeEntityPhysics.prototype.remove.call(this);
 	},
 
+	queueStreamData: function(streamData) {
+		if (ige.isServer) {
+			IgeEntity.prototype.queueStreamData.call(this, streamData);	
+		}
+	},
+
 	// update unit's stats in the server side first, then update client side as well.
 	streamUpdateData: function (queuedData) {
 		var self = this;
 		// Unit.prototype.log("unit streamUpdateData", data)
+
+		// if (ige.isServer && ige.network.isPaused) 
+		// 	return;
 
 		IgeEntity.prototype.streamUpdateData.call(this, queuedData);
 
@@ -1449,10 +1461,12 @@ var Unit = IgeEntityPhysics.extend({
 
 				switch (attrName) {
 					case 'type':
+						self._stats[attrName] = newValue;
 						this.changeUnitType(newValue);
 						break;
 
 					case 'aiEnabled':
+						self._stats[attrName] = newValue;
 						if (ige.isClient) {
 							if (newValue == true) {
 								self.ai.enable();
@@ -1463,6 +1477,7 @@ var Unit = IgeEntityPhysics.extend({
 						break;
 
 					case 'itemIds':
+						self._stats[attrName] = newValue;
 						// update shop as player points are changed and when shop modal is open
 						if (ige.isClient) {
 							this.inventory.update();
@@ -1477,6 +1492,7 @@ var Unit = IgeEntityPhysics.extend({
 						break;
 
 					case 'currentItemIndex':
+						self._stats[attrName] = newValue;
 						// for tracking selected index of other units
 						if (ige.isClient && this !== ige.client.selectedUnit) {
 							// console.log('Unit.streamUpdateData(\'currentItemIndex\') on the client', newValue);
@@ -1488,18 +1504,21 @@ var Unit = IgeEntityPhysics.extend({
 					case 'isInvisible':
 					case 'isInvisibleToFriendly':
 					case 'isInvisibleToNeutral':
+						self._stats[attrName] = newValue;
 						if (ige.isClient) {
 							this.updateTexture();
 						}
 						break;
 
 					case 'scale':
+						self._stats[attrName] = newValue;
 						if (ige.isClient) {
 							self._scaleTexture();
 						}
 						break;
 
 					case 'scaleBody':
+						self._stats[attrName] = newValue;
 						if (ige.isServer) {
 							// finding all attach entities before changing body dimensions
 							if (self.jointsAttached) {
@@ -1524,15 +1543,14 @@ var Unit = IgeEntityPhysics.extend({
 					case 'isNameLabelHiddenToNeutral':
 					case 'isNameLabelHiddenToFriendly':
 					case 'name':
-						if (attrName === 'name') {
-							self._stats.name = newValue;
-						}
+						self._stats.name = newValue;
 						// updating stats bcz setOwner is replacing stats.
 						if (ige.isClient) {
 							self.updateNameLabel();
 						}
 						break;
 					case 'isHidden':
+						self._stats[attrName] = newValue;
 						if (ige.isClient) {
 							if (newValue == true) {
 								self.hide();
@@ -1543,17 +1561,21 @@ var Unit = IgeEntityPhysics.extend({
 						break;
 
 					case 'setFadingText':
+						self._stats[attrName] = newValue;
 						if (ige.isClient) {
 							newValue = newValue.split('|-|');
 							self.updateFadingText(newValue[0], newValue[1]);
 						}
 						break;
 					case 'ownerPlayerId':
+						self._stats[attrName] = newValue;
 						if (ige.isClient) {
 							self.setOwnerPlayer(newValue);
 						}
 						break;
 				}
+
+
 			}
 		}
 	},
@@ -1737,6 +1759,7 @@ var Unit = IgeEntityPhysics.extend({
 		this._stats.currentItemId = currentItem ? currentItem.id() : null;
 
 		// client log of item state after pickup will still show 'dropped'. Currently state has not finished updating. It IS 'selected'/'unselected'
+
 		// const debugMap = this._stats.itemIds.map((x) => {
 		// 	const item = ige.$(x) || null;
 		// 	const state = item ? item._stats.stateId : null;
@@ -1754,8 +1777,6 @@ var Unit = IgeEntityPhysics.extend({
 		// 	'\n',
 		// 	debugMap
 		// );
-
-		// tell phaser to respond to change in item
 	},
 
 	startMoving: function () {

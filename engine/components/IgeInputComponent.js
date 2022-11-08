@@ -386,6 +386,9 @@ var IgeInputComponent = IgeEventingClass.extend({
 	 * @private
 	 */
 	_mouseDown: function (event) {
+		if (ige.developerMode.active) {
+			return;
+		}
 		if (this._debug) {
 			console.log('Mouse Down', event);
 		}

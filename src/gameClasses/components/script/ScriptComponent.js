@@ -11,7 +11,6 @@ var ScriptComponent = IgeEntity.extend({
 		self.entryCount = 0;
 		self.showLog = false;
 		self.errorLogs = {};
-		self.currentScript = undefined;
 		self.currentActionName = '';
 		self.scriptCache = {};
 		self.scriptTime = {};

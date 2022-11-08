@@ -103,12 +103,12 @@ var Item = IgeEntityPhysics.extend({
 	updateBody: function (initTransform) {
 		var self = this;
 		var body = self._stats.currentBody;
-
+		
 		if (ige.isServer) {
-			if (this._stats.stateId == 'dropped') {
+			if (this._stats.stateId == 'dropped') {			
 				this.lifeSpan(this._stats.lifeSpan);
 				self.mount(ige.$('baseScene'));
-				this.streamMode(1);
+				this.streamMode(1);			
 			} else {
 				this.deathTime(undefined); // remove lifespan, so the entity stays indefinitely
 				if (body) {
@@ -121,6 +121,8 @@ var Item = IgeEntityPhysics.extend({
 			}
 		}
 
+
+		
 		if (body && body.type != 'none') {
 			IgeEntityPhysics.prototype.updateBody.call(self, initTransform);
 
@@ -190,7 +192,6 @@ var Item = IgeEntityPhysics.extend({
 			if (isInvisible || !hasBody) {
 				self.hide();
 				this.emit('hide');
-
 				return;
 			}
 		}
@@ -227,12 +228,9 @@ var Item = IgeEntityPhysics.extend({
 			this._stats.ownerUnitId = newOwner.id();
 		} else {
 			// item is being dropped.
-			this._stats.ownerUnitId = undefined;
+			this._stats.ownerUnitId = null;
 
-			// get transform of its last owner
 			if (oldOwner) {
-				this.updateBody();
-
 				if (ige.isClient) {
 					if (oldOwner._stats) {
 						oldOwner._stats.currentItemId = null;
@@ -246,6 +244,10 @@ var Item = IgeEntityPhysics.extend({
 				this.streamUpdateData([{ ownerUnitId: 0 }]);
 				this.streamMode(1);
 			}
+		}
+
+		if (ige.isClient && ige.game.data.defaultData.heightBasedZIndex) {
+			this.emit('setOwnerUnit', this._stats.ownerUnitId);
 		}
 	},
 
@@ -322,16 +324,13 @@ var Item = IgeEntityPhysics.extend({
 							} else {
 								var bulletY = self._stats.bulletStartPosition.y || 0;
 							}
-
+							
 							var bulletStartPosition = {
 								x: (owner._translate.x + self.anchoredOffset.x) + (self._stats.bulletStartPosition.x * Math.cos(offsetAngle)) + (bulletY * Math.sin(offsetAngle)),
 								y: (owner._translate.y + self.anchoredOffset.y) + (self._stats.bulletStartPosition.x * Math.sin(offsetAngle)) - (bulletY * Math.cos(offsetAngle))
 							};
 
-							if (
-								this._stats.isGun &&
-								(ige.isServer || (ige.isClient && ige.physics)) // render projectile on clientside if physics is enabled
-							) {
+							if (this._stats.isGun) {
 								var defaultData = {
 									rotate: rotate,
 									translate: bulletStartPosition
@@ -346,7 +345,7 @@ var Item = IgeEntityPhysics.extend({
 										y: Math.sin(rotate + Math.radians(-90)) * self._stats.bulletForce
 									};
 
-									// console.log(self._stats.currentBody.type, "unit: ", angleToTarget, "item's rotate.z: ", self._rotate.z, "facing angle", itemrotate)
+									// we don't create a Projectile entity for raycasts
 									if (this._stats.bulletType !== 'raycast') {
 										var projectileData = Object.assign(
 											JSON.parse(JSON.stringify(self.projectileData)),
@@ -365,8 +364,7 @@ var Item = IgeEntityPhysics.extend({
 												}
 											});
 
-									 // we don't create a Projectile entity for raycasts
-										var projectile = new Projectile(projectileData);
+									 	var projectile = new Projectile(projectileData);
 										projectile.script.trigger('entityCreated');
 										ige.game.lastCreatedProjectileId = projectile.id();
 									}
@@ -783,7 +781,7 @@ var Item = IgeEntityPhysics.extend({
 	 * get item's position based on its itemAnchor, unitAnchor, and current rotation value.
 	 * @param rotate item's rotation. used for tweening item that's not anchored at 0,0. e.g. swinging a sword.
 	 */
-	getAnchoredOffset: function (rotate) {
+	getAnchoredOffset: function (rotate = 0) {
 		var self = this;
 		var offset = { x: 0, y: 0, rotate: 0 };
 		var ownerUnit = this.getOwnerUnit();
@@ -818,6 +816,7 @@ var Item = IgeEntityPhysics.extend({
 						rotate += unitAnchorOffsetRotate;
 					}
 
+					
 					var unitAnchoredPosition = {
 						x: (unitAnchorOffsetX * Math.cos(unitRotate)) + (unitAnchorOffsetY * Math.sin(unitRotate)),
 						y: (unitAnchorOffsetX * Math.sin(unitRotate)) - (unitAnchorOffsetY * Math.cos(unitRotate))
@@ -871,6 +870,10 @@ var Item = IgeEntityPhysics.extend({
 
 	streamUpdateData: function (queuedData) {
 		var self = this;
+		
+		// this was preventing isBeingUsed from streaming hence preventing other players' projectiles from showing
+		// if (ige.isServer && ige.network.isPaused) 
+		// 	return;
 
 		IgeEntity.prototype.streamUpdateData.call(this, queuedData);
 		// ige.devLog("Item streamUpdateData ", data)
@@ -881,6 +884,7 @@ var Item = IgeEntityPhysics.extend({
 
 				switch (attrName) {
 					case 'ownerUnitId':
+						this._stats[attrName] = newValue;
 						if (ige.isClient) {
 							var newOwner = ige.$(newValue);
 							self.setOwnerUnit(newOwner);
@@ -888,6 +892,7 @@ var Item = IgeEntityPhysics.extend({
 						break;
 					case 'scale':
 					case 'scaleBody':
+						this._stats[attrName] = newValue;
 						if (ige.isClient) {
 							self._stats.scale = newValue;
 							self._scaleTexture();
@@ -906,13 +911,9 @@ var Item = IgeEntityPhysics.extend({
 							self._scaleBox2dBody(newValue);
 						}
 						break;
-					// case 'use':
-					// 	// only run client-side use for other players' units, because my player's unit's use() will get executed via actionComponent.
-					// 	if (ige.isClient) {
-					// 		self.use();
-					// 	}
-					// 	break;
+					
 					case 'hidden':
+						this._stats[attrName] = newValue;
 						if (ige.isClient) {
 							if (newValue) {
 								self.hide();
@@ -926,6 +927,7 @@ var Item = IgeEntityPhysics.extend({
 						break;
 
 					case 'quantity':
+						this._stats[attrName] = newValue;
 						self.updateQuantity(newValue);
 						var owner = self.getOwnerUnit();
 						if (ige.isClient && ige.client.selectedUnit == owner) {
@@ -933,6 +935,7 @@ var Item = IgeEntityPhysics.extend({
 						}
 						break;
 					case 'description':
+						this._stats[attrName] = newValue;
 						var owner = self.getOwnerUnit();
 						if (ige.isClient && ige.client.selectedUnit == owner) {
 							ige.itemUi.updateItemDescription(this);
@@ -940,6 +943,7 @@ var Item = IgeEntityPhysics.extend({
 
 						break;
 					case 'name':
+						this._stats[attrName] = newValue;
 						var owner = self.getOwnerUnit();
 						if (ige.isClient && ige.client.selectedUnit == owner) {
 							ige.itemUi.updateItemInfo(this);
@@ -948,18 +952,29 @@ var Item = IgeEntityPhysics.extend({
 						break;
 
 					case 'inventoryImage':
+						this._stats[attrName] = newValue;
 						var owner = self.getOwnerUnit();
 						if (ige.isClient && ige.client.selectedUnit == owner) {
 							ige.itemUi.updateItemSlot(this, this._stats.slotIndex);
 						}
 						break;
 					case 'inventorySlotColor':
+						this._stats[attrName] = newValue;
 						var owner = self.getOwnerUnit();
 						if (ige.isClient && ige.client.selectedUnit == owner) {
 							owner.inventory.update();
 						}
 						break;
 					case 'slotIndex':
+						this._stats[attrName] = newValue;
+						break;
+					
+					case 'isBeingUsed':
+						var owner = self.getOwnerUnit();
+						// ignore stream so my item use won't fire two bullets
+						if (ige.isClient && (owner != ige.client.selectedUnit || !this._stats.ignoreServerStream)) {
+							this._stats.isBeingUsed = newValue;
+						}
 						break;
 				}
 			}
@@ -995,7 +1010,7 @@ var Item = IgeEntityPhysics.extend({
 
 			self.translateTo(x, y);
 
-			if (ige.isClient && ige.client.selectedUnit == ownerUnit) {
+			if (ige.isServer || (ige.isClient && ige.client.selectedUnit == ownerUnit)) {
 				if (self._stats.controls && self._stats.controls.mouseBehaviour) {
 					if (self._stats.controls.mouseBehaviour.flipSpriteHorizontallyWRTMouse) {
 						if (rotate > 0 && rotate < Math.PI) {
@@ -1008,6 +1023,7 @@ var Item = IgeEntityPhysics.extend({
 			}
 
 			self.rotateTo(0, 0, rotate);
+			self.finalKeyFrame[1] = [x, y, rotate] // prepare position for when this item's dropped. without this, item will appear at an incorrect position
 		}
 
 		if (this._stats.isBeingUsed) {

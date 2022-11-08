@@ -124,7 +124,7 @@ var GameComponent = IgeEntity.extend({
 			var isOwner = ige.server.owner == data._id && data.controlledBy == 'human';
 			var isInvitedUser = false;
 			if (ige.game.data.defaultData && ige.game.data.defaultData.invitedUsers) {
-				isInvitedUser = ige.game.data.defaultData.invitedUsers.some(e => e.user === data._id);
+				isInvitedUser = ige.game.data.defaultData.invitedUsers.some(e => e.user === data._id && e.role === 'contributor');
 			}
 			var isUserAdmin = false;
 			var isUserMod = false;
@@ -143,6 +143,18 @@ var GameComponent = IgeEntity.extend({
 		}
 
 		return player;
+	},
+
+	kickPlayer: function(clientId) {
+		// var player = this.getPlayerByClientId(clientId);		
+		// if (player) {
+		// 	player.streamUpdateData([{ playerJoined: false }]);
+		// }
+
+		var client = ige.server.clients[clientId];		
+		if (client) {
+			client.socket.close()
+		}
 	},
 
 	// get client with ip

@@ -77,22 +77,28 @@
     <!-- Game Editor -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
+        let initEditor = false;
+
         function loadEditor() {
-            axios.get('https://editor.modd.io/client')
+            if (initEditor) {
+                return;
+            }
+
+            axios.get('https://prod2.modd.io/client')
                 .then((res) => {
                     const { styles, scripts } = res.data;
 
                     styles.forEach((style) => {
                         const linkEl = document.createElement('link');
                         linkEl.rel = 'stylesheet';
-                        linkEl.href = `https://editor.modd.io/static/css/${style}`;
+                        linkEl.href = `https://prod2.modd.io/static/css/${style}`;
 
                         document.head.appendChild(linkEl);
                     });
 
                     scripts.forEach((script) => {
                         const scriptEl = document.createElement('script');
-                        scriptEl.src = `https://editor.modd.io/static/js/${script}`;
+                        scriptEl.src = `https://prod2.modd.io/static/js/${script}`;
 
                         document.body.appendChild(scriptEl);
                     });
@@ -100,18 +106,8 @@
                 .catch((err) => {
                     console.log(err);
                 });
-        }
 
-        function toggleDevMode() {
-            let once = false;
-
-            if (!once) {
-                loadEditor();
-                once = true;
-            }
-
-            $('#game-editor').toggle();
-            $('#toggle-dev-panels').text($('#game-editor').is(':visible') ? 'Exit Dev Mode' : 'Enter Dev Mode');
+            initEditor = true;
         }
     </script>
 </head>

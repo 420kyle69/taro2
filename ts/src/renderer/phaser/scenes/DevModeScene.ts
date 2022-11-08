@@ -3,109 +3,41 @@ class DevModeScene extends PhaserScene {
 	rexUI: any;
 	gameScene: any;
 
-	devPalette: PhaserPalette;
+	devModeTools: DevModeTools;
+	regionEditor: RegionEditor;
+	tileEditor: TileEditor;
+
+	tilePalette: TilePalette;
 	tilemap: Phaser.Tilemaps.Tilemap;
 	tileset: Phaser.Tilemaps.Tileset;
 
-	selectedTile: Phaser.Tilemaps.Tile;
-	selectedTileArea: Phaser.Tilemaps.Tile[][];
-
-	marker: TileMarker;
-	paletteMarker: TileMarker;
+	regions: PhaserRegion[];
 
 	defaultZoom: number;
-
+	
 	constructor() {
-		super({ key: 'Palette' });
+		super({ key: 'DevMode' });
 	}
 
 	init (): void {
-		this.input.setTopOnly(true);
 		this.gameScene = ige.renderer.scene.getScene('Game');
-		//const map = this.devPalette.map;
-		const map = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
-		this.selectedTile = map.getTileAt(2, 3, true);
-		this.selectedTileArea = [[map.getTileAt(2, 3, true), map.getTileAt(2, 4, true)],[map.getTileAt(3, 3, true), map.getTileAt(3, 4, true)]];
-		console.log('tile', this.selectedTile, 'area', this.selectedTileArea);
+		this.regions = [];
 
 		ige.client.on('enterDevMode', () => {
-			this.defaultZoom = (this.gameScene.zoomSize / 2.15)
-			if (!this.devPalette) {
-				this.devPalette = new PhaserPalette(this, this.tileset, this.rexUI);
-				this.paletteMarker = new TileMarker(this, this.devPalette.map, 1);
-				this.devPalette.show();
-				this.devPalette.layerButtonsContainer.setVisible(true);
-				this.devPalette.toolButtonsContainer.setVisible(true);
-			}
-			else {
-				this.devPalette.layerButtonsContainer.setVisible(true);
-				this.devPalette.toolButtonsContainer.setVisible(true);
-			}
+			this.enterDevMode();
 		});
 
 		ige.client.on('leaveDevMode', () => {
-			this.devPalette.hide();
-			this.devPalette.layerButtonsContainer.setVisible(false);
-			this.devPalette.toolButtonsContainer.setVisible(false);
-			ige.client.emit('zoom', this.defaultZoom);
+			this.leaveDevMode();
 		});
 
-		const tabKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, true);
-		tabKey.on('down', () => {
-			if(ige.developerMode.active) {
-				if (this.devPalette.visible) {
-					this.devPalette.hide();
-				}
-				else {
-					this.devPalette.show()
-				}
-			}
-		});
-		const plusKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.PLUS, true);
-		plusKey.on('down', () => {
-			if(ige.developerMode.active) {
-				const zoom = (this.gameScene.zoomSize / 2.15) / 1.1;
-				ige.client.emit('zoom', zoom);
-			}
-		});
-		const minusKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.MINUS, true);
-		minusKey.on('down', () => {
-			if(ige.developerMode.active) {
-				const zoom =(this.gameScene.zoomSize / 2.15) * 1.1;
-				ige.client.emit('zoom', zoom);
-			}
+		ige.client.on('editTile', (data: TileData) => {
+			this.tileEditor.edit(data);
 		});
 
-		ige.client.on('editTile', (data: {
-			gid: number,
-			layer: number,
-			x: number,
-			y: number
-		}) => {
-			console.log('editTile', data);
-			map.putTileAt(data.gid, data.x, data.y, false, data.layer);
-			//ige.developerMode.changedTiles.push(data);
-
-			/* TODO: SAVE MAP DATA FROM SERVER SIDE */
-			const width = ige.game.data.map.width;
-			//save tile change to ige.game.map.data
-			if (ige.game.data.map.layers.length > 4 && data.layer >= 2) data.layer ++;
-			ige.game.data.map.layers[data.layer].data[data.y*width + data.x] = data.gid;
-			if (ige.physics && ige.game.data.map.layers[data.layer].name === 'walls') {
-				//if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
-				ige.physics.destroyWalls();
-				let map = ige.scaleMap(_.cloneDeep(ige.game.data.map));
-				ige.tiled.loadJson(map, function (layerArray, IgeLayersById) {
-					ige.physics.staticsFromMap(IgeLayersById.walls);
-				})
-			}
+		ige.client.on('editRegion', (data: RegionData) => {
+			this.regionEditor.edit(data);
 		});
-
-		this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
-			if (this.devPalette && this.devPalette.visible) {
-				this.devPalette.zoom(deltaY);
-			}
-		})
 	}
 
 	preload (): void {
@@ -127,6 +59,8 @@ class DevModeScene extends PhaserScene {
 		});*/
 
 		this.load.image('cursor', 'https://cache.modd.io/asset/spriteImage/1666276041347_cursor.png');
+		this.load.image('region', 'https://cache.modd.io/asset/spriteImage/1666882309997_region.png');
+		this.load.image('stamp', 'https://cache.modd.io/asset/spriteImage/1666724706664_stamp.png');
 		this.load.image('eraser', 'https://cache.modd.io/asset/spriteImage/1666276083246_erasergap.png');
 
 		this.load.scenePlugin(
@@ -157,10 +91,22 @@ class DevModeScene extends PhaserScene {
 		});
 
 		const gameMap = this.gameScene.tilemap;
-		console.log('game map', gameMap)
 		gameMap.currentLayerIndex = 0;
-		this.selectedTile = gameMap.getTileAt(2, 3);
-		this.marker = new TileMarker (this.gameScene, gameMap, 2);
+	}
+
+	enterDevMode (): void {
+		this.defaultZoom = (this.gameScene.zoomSize / 2.15)
+			if (!this.tilePalette) {
+				this.devModeTools = new DevModeTools(this);
+				this.tileEditor = this.devModeTools.tileEditor;
+				this.tilePalette = this.devModeTools.palette;
+				this.regionEditor = this.devModeTools.regionEditor;
+			}
+			this.devModeTools.enterDevMode();
+	}
+
+	leaveDevMode (): void {
+		this.devModeTools.leaveDevMode();
 	}
 
 	pointerInsideMap(pointerX: number, pointerY: number, map: Phaser.Tilemaps.Tilemap): boolean {
@@ -169,133 +115,25 @@ class DevModeScene extends PhaserScene {
 	}
 
 	pointerInsidePalette(): boolean {
-		return (this.input.activePointer.x > this.devPalette.scrollBarContainer.x
-			&& this.input.activePointer.x < this.devPalette.scrollBarContainer.x + this.devPalette.scrollBarContainer.width
-			&& this.input.activePointer.y > this.devPalette.scrollBarContainer.y - 30
-			&& this.input.activePointer.y < this.devPalette.scrollBarContainer.y + this.devPalette.scrollBarContainer.height)
+		return (this.input.activePointer.x > this.tilePalette.scrollBarContainer.x
+			&& this.input.activePointer.x < this.tilePalette.scrollBarContainer.x + this.tilePalette.scrollBarContainer.width
+			&& this.input.activePointer.y > this.tilePalette.scrollBarContainer.y - 30
+			&& this.input.activePointer.y < this.tilePalette.scrollBarContainer.y + this.tilePalette.scrollBarContainer.height)
 	}
 
 	pointerInsideButtons(): boolean {
-		return ((this.input.activePointer.x > this.devPalette.layerButtonsContainer.x
-			&& this.input.activePointer.x < this.devPalette.layerButtonsContainer.x + this.devPalette.layerButtonsContainer.width
-			&& this.input.activePointer.y > this.devPalette.layerButtonsContainer.y 
-			&& this.input.activePointer.y < this.devPalette.layerButtonsContainer.y + this.devPalette.layerButtonsContainer.height)
-			|| (this.input.activePointer.x > this.devPalette.toolButtonsContainer.x
-			&& this.input.activePointer.x < this.devPalette.toolButtonsContainer.x + this.devPalette.toolButtonsContainer.width
-			&& this.input.activePointer.y > this.devPalette.toolButtonsContainer.y 
-			&& this.input.activePointer.y < this.devPalette.toolButtonsContainer.y + this.devPalette.toolButtonsContainer.height))
+		return ((this.input.activePointer.x > this.devModeTools.layerButtonsContainer.x
+			&& this.input.activePointer.x < this.devModeTools.layerButtonsContainer.x + this.devModeTools.layerButtonsContainer.width
+			&& this.input.activePointer.y > this.devModeTools.layerButtonsContainer.y 
+			&& this.input.activePointer.y < this.devModeTools.layerButtonsContainer.y + this.devModeTools.layerButtonsContainer.height)
+			|| (this.input.activePointer.x > this.devModeTools.toolButtonsContainer.x
+			&& this.input.activePointer.x < this.devModeTools.toolButtonsContainer.x + this.devModeTools.toolButtonsContainer.width
+			&& this.input.activePointer.y > this.devModeTools.toolButtonsContainer.y 
+			&& this.input.activePointer.y < this.devModeTools.toolButtonsContainer.y + this.devModeTools.toolButtonsContainer.height))
 	}
 
 	update (): void {
-		if(ige.developerMode.active) {
-			const palette = this.devPalette;
-			const map = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
-			const paletteMap = palette.map;
-			const worldPoint = this.gameScene.cameras.main.getWorldPoint(this.gameScene.input.activePointer.x, this.gameScene.input.activePointer.y);
-			const palettePoint = this.cameras.getCamera('palette').getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
-			const marker = this.marker;
-			const paletteMarker = this.paletteMarker;
-
-			paletteMarker.graphics.clear();
-			paletteMarker.graphics.strokeRect(0, 0, paletteMap.tileWidth * palette.texturesLayer.scaleX, paletteMap.tileHeight * palette.texturesLayer.scaleY);
-			paletteMarker.graphics.setVisible(true);
-
-			// Rounds down to nearest tile
-			const palettePointerTileX = paletteMap.worldToTileX(palettePoint.x);
-			const palettePointerTileY = paletteMap.worldToTileY(palettePoint.y);
-
-			if (palette.visible	&& this.pointerInsidePalette()) {
-				marker.graphics.setVisible(false);
-				// Snap to tile coordinates, but in world space
-				paletteMarker.graphics.x = paletteMap.tileToWorldX(palettePointerTileX);
-				paletteMarker.graphics.y = paletteMap.tileToWorldY(palettePointerTileY);
-
-				if (this.input.manager.activePointer.isDown) {
-					if (palette.area.x > 1 || palette.area.y > 1) {
-						for (let i = 0; i < palette.area.x; i++) {
-							for (let j = 0; j < palette.area.y; j++) {
-								if (this.pointerInsideMap(palettePointerTileX + i, palettePointerTileY + j, paletteMap)) {
-									this.selectedTileArea[i][j].tint = 0xffffff;
-									this.selectedTileArea[i][j] = paletteMap.getTileAt(palettePointerTileX + i, palettePointerTileY + j, true);
-									this.selectedTileArea[i][j].tint = 0x87cfff;
-
-									if (this.devPalette.cursorButton.active) {
-										this.devPalette.toggleMarker()
-									} 
-								}
-							}
-						}
-					} else {
-						if (this.pointerInsideMap(palettePointerTileX, palettePointerTileY, paletteMap)) {
-							if (this.selectedTile) this.selectedTile.tint = 0xffffff;
-							this.selectedTile = paletteMap.getTileAt(palettePointerTileX, palettePointerTileY, true);
-							this.selectedTile.tint = 0x87cfff;
-
-							if (this.devPalette.cursorButton.active) {
-								this.devPalette.toggleMarker()
-							} 
-						}
-					}
-				}
-			} else if ((!this.pointerInsidePalette() || !palette.visible) &&
-				!this.pointerInsideButtons() && marker.active) {
-				paletteMarker.graphics.setVisible(false);
-				marker.graphics.setVisible(true);
-				// Rounds down to nearest tile
-				const pointerTileX = map.worldToTileX(worldPoint.x);
-				const pointerTileY = map.worldToTileY(worldPoint.y);
-
-				// Snap to tile coordinates, but in world space
-				marker.graphics.x = map.tileToWorldX(pointerTileX);
-				marker.graphics.y = map.tileToWorldY(pointerTileY);
-
-				if (this.input.manager.activePointer.rightButtonDown()) {
-					if (palette.area.x > 1 || palette.area.y > 1) {
-						for (let i = 0; i < palette.area.x; i++) {
-							for (let j = 0; j < palette.area.y; j++) {
-								if (this.pointerInsideMap(pointerTileX + i, pointerTileY + j, map)) {
-									this.selectedTileArea[i][j].tint = 0xffffff;
-									this.selectedTileArea[i][j] = map.getTileAt(pointerTileX + i, pointerTileY + j, true);
-								}
-							}
-						}
-					} else {
-						if (this.pointerInsideMap(pointerTileX, pointerTileY, map)) {
-							this.selectedTile.tint = 0xffffff;
-							this.selectedTile = map.getTileAt(pointerTileX, pointerTileY, true);
-						}
-					}
-				}
-
-				if (this.input.manager.activePointer.leftButtonDown()) {
-					if (palette.area.x > 1 || palette.area.y > 1) {
-						for (let i = 0; i < palette.area.x; i++) {
-							for (let j = 0; j < palette.area.y; j++) {
-								if (this.pointerInsideMap(pointerTileX + i, pointerTileY + j, map)
-									&& this.selectedTileArea[i][j].index !== (map.getTileAt(pointerTileX + i, pointerTileY + j, true)).index) {
-										if (this.selectedTileArea[i][j].index === -1) this.selectedTile.index = 0;
-										map.putTileAt(this.selectedTileArea[i][j], pointerTileX + i, pointerTileY + j);
-										map.getTileAt(pointerTileX + i, pointerTileY + j, true).tint = 0xffffff;
-										console.log('place tile', this.selectedTileArea[i][j].index)
-										ige.network.send('editTile', {gid: this.selectedTileArea[i][j].index, layer: map.currentLayerIndex, x: pointerTileX + i, y: pointerTileY + j});
-									}
-							}
-						}
-					}
-					else {
-						if (this.pointerInsideMap(pointerTileX, pointerTileY, map)
-							&& this.selectedTile.index !== (map.getTileAt(pointerTileX, pointerTileY, true)).index) {
-								if (this.selectedTile.index === -1) this.selectedTile.index = 0;
-								map.putTileAt(this.selectedTile, pointerTileX, pointerTileY);
-								map.getTileAt(pointerTileX, pointerTileY, true).tint = 0xffffff;
-								console.log('place tile', this.selectedTile.index)
-								ige.network.send('editTile', {gid: this.selectedTile.index, layer: map.currentLayerIndex, x: pointerTileX, y: pointerTileY});
-						}
-					}
-				}
-			}
-		}
-		else this.marker.graphics.setVisible(false);
+		if (this.tileEditor) this.tileEditor.update();
 	}
 
 }

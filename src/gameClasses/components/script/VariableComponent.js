@@ -240,8 +240,9 @@ var VariableComponent = IgeEntity.extend({
 					break;
 				
 				case 'isBotPlayer':
+					// bot players meant to be indistinguishable from 'human' players. hence we're not tempering with controlledBy variable
 					var player = self.getValue(text.player, vars);
-					returnValue = player && player._stats.controlledBy == 'bot';
+					returnValue = player && player._stats.isBot
 					break;
 	
 
@@ -723,6 +724,13 @@ var VariableComponent = IgeEntity.extend({
 					}
 					break;
 
+				case 'targetUnit':					
+					var unit = self.getValue(text.unit, vars);
+					if (unit && unit.ai) {
+						returnValue = unit.ai.getTargetUnit();
+					}
+					break;
+
 				case 'getLastTouchedItem':
 					var id = ige.game.lastTouchedItemId;
 					returnValue = ige.$(id);
@@ -1060,7 +1068,7 @@ var VariableComponent = IgeEntity.extend({
 					break;
 
 				case 'currentTimeStamp':
-					returnValue = Date.now();
+					returnValue = Date.now() / 1000;
 					break;
 
 				case 'getRandomPositionInRegion':
@@ -1208,20 +1216,22 @@ var VariableComponent = IgeEntity.extend({
 					var positionA = self.getValue(text.positionA, vars);
 					var positionB = self.getValue(text.positionB, vars);
 
-					positionA = {
-						x: positionA.x / ige.physics._scaleRatio,
-						y: positionA.y / ige.physics._scaleRatio
-					};
-					positionB = {
-						x: positionB.x / ige.physics._scaleRatio,
-						y: positionB.y / ige.physics._scaleRatio
-					};
-					ige.raycaster.raycastLine(
-						positionA,
-						positionB,
-					);
-
-					returnValue = ige.game.entitiesCollidingWithLastRaycast;
+					if (positionA && positionB) {
+						positionA = {
+							x: positionA.x / ige.physics._scaleRatio,
+							y: positionA.y / ige.physics._scaleRatio
+						};
+						positionB = {
+							x: positionB.x / ige.physics._scaleRatio,
+							y: positionB.y / ige.physics._scaleRatio
+						};
+						ige.raycaster.raycastLine(
+							positionA,
+							positionB,
+						);
+	
+						returnValue = ige.game.entitiesCollidingWithLastRaycast;
+					}					
 					break;
 				}
 				case 'entityLastRaycastCollisionPosition':
@@ -1770,7 +1780,7 @@ var VariableComponent = IgeEntity.extend({
 					break;
 
 				case 'botPlayers':
-					returnValue = ige.$$('player').filter(function (player) { return player._stats.controlledBy == 'bot'; });
+					returnValue = ige.$$('player').filter(function (player) { return player._stats.isBot });
 					break;
 
 

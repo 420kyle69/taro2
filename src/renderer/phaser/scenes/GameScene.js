@@ -19,6 +19,7 @@ var GameScene = /** @class */ (function (_super) {
         var _this = _super.call(this, { key: 'Game' }) || this;
         _this.entityLayers = [];
         _this.renderedEntities = [];
+        _this.unitsList = [];
         return _this;
     }
     GameScene.prototype.init = function () {
@@ -148,7 +149,7 @@ var GameScene = /** @class */ (function (_super) {
     };
     GameScene.prototype.create = function () {
         var _this = this;
-        this.scene.launch('Palette');
+        this.scene.launch('DevMode');
         ige.client.rendererLoaded.resolve();
         var map = this.tilemap = this.make.tilemap({ key: 'map' });
         var data = ige.game.data;
@@ -192,6 +193,9 @@ var GameScene = /** @class */ (function (_super) {
         this.events.on('update', function () {
             ige.client.emit('tick');
         });
+        if (data.defaultData.heightBasedZIndex) {
+            this.heightRenderer = new HeightRenderComponent(this, map.height * map.tileHeight);
+        }
         //temporary making each loaded texture not smoothed (later planned to add option for smoothing some of them)
         Object.values(this.textures.list).forEach(function (val) {
             val.setFilter(Phaser.Textures.FilterMode.NEAREST);
@@ -295,7 +299,13 @@ var GameScene = /** @class */ (function (_super) {
         }
         return canvas;
     };
+    GameScene.prototype.findUnit = function (unitId) {
+        return this.unitsList.find(function (unit) {
+            return unit.entity._id === unitId;
+        });
+    };
     GameScene.prototype.update = function () {
+        var _this = this;
         var worldPoint = this.cameras.main.getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
         ige.input.emit('pointermove', [{
                 x: worldPoint.x,
@@ -307,6 +317,10 @@ var GameScene = /** @class */ (function (_super) {
         this.cameras.main.cull(this.renderedEntities).forEach(function (element) {
             if (!element.hidden) {
                 element.setVisible(true);
+                if (element.dynamic) {
+                    // dynamic is only assigned through an hbz-index-only event
+                    _this.heightRenderer.adjustDepth(element);
+                }
             }
         });
     };
