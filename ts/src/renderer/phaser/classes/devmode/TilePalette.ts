@@ -57,7 +57,7 @@ class TilePalette extends Phaser.GameObjects.Container {
 			texturesLayer.width * 2, texturesLayer.height * 2, true)
 			.setZoom(1).setName('palette');
 
-		camera.setBackgroundColor(0xFFFFFF);
+		camera.setBackgroundColor(0x000000);
 
 		texturesLayer.on('pointermove', function (p) {
 			const devModeScene = ige.renderer.scene.getScene('DevMode') as DevModeScene;
