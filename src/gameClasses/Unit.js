@@ -546,7 +546,6 @@ var Unit = IgeEntityPhysics.extend({
 								ige.server.usedCoinJwts = filteredUsedCoinJwts;
 								
 							} else {
-								console.log('invalid pinValidationToken', e.message, token);
 								return;
 							}
 						} catch (e) {

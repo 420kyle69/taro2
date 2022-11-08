@@ -339,12 +339,15 @@ var ShopComponent = IgeEntity.extend({
 			}, 800);
 		}
 	},
-	buySkin: function (itemId, sharedOn = '') {
+	buySkin: function (itemId, sharedOn = '', token = '') {
 		var self = this;
 		$.ajax({
 			url: `/api/user/purchase/${ige.game.data.defaultData.parentGame || ige.client.server.gameId}/${itemId}?sharedOn=${sharedOn}`,
 			dataType: 'html',
 			type: 'POST',
+			data: {
+				token,
+			},
 			success: function (data) {
 				var response = JSON.parse(data);
 
