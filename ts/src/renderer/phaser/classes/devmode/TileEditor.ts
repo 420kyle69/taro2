@@ -79,8 +79,8 @@ class TileEditor {
 			} else {
 				selectedTile = null;
 			}
-			this.activateMarker(true);
-			this.devModeTools.highlightModeButton(2);
+			//this.activateMarker(true);
+			//this.devModeTools.highlightModeButton(2);
 			return selectedTile;
 		}
 	}
