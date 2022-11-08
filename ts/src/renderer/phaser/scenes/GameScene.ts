@@ -123,6 +123,20 @@ class GameScene extends PhaserScene {
 			this.load.image(key, this.patchAssetUrl(tileset.image));
 		});
 
+		//to be sure every layer of map have correct number of tiles
+		const tilesPerLayer = data.map.height * data.map.width;
+		data.map.layers.forEach(layer => {
+			if (layer.name !== 'debris') {
+				const length = layer.data.length;
+				console.log(layer.name, length, tilesPerLayer)
+				if (length < tilesPerLayer) {
+					for (let i = length + 1; i < tilesPerLayer; i++) {
+						layer.data[i] = 0;
+					}
+				}
+			}
+		});
+
 		this.load.tilemapTiledJSON('map', this.patchMapData(data.map));
 
 		this.load.bitmapFont('Arial_24px_bold_black',

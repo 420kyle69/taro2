@@ -51,7 +51,7 @@ var TileEditor = /** @class */ (function () {
         }
     };
     TileEditor.prototype.getTile = function (tileX, tileY, selectedTile, map) {
-        if (this.devModeTools.scene.pointerInsideMap(tileX, tileY, map)) {
+        if (this.devModeTools.scene.pointerInsideMap(tileX, tileY, map) && this.devModeTools.modeButtons[2].active || this.devModeTools.modeButtons[3].active) {
             if (selectedTile)
                 selectedTile.tint = 0xffffff;
             if (map.getTileAt(tileX, tileY) && map.getTileAt(tileX, tileY).index !== 0) {

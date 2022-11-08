@@ -28,7 +28,6 @@ class TileEditor {
 
         this.selectedTile = null;
 		this.selectedTileArea = [[null, null],[null, null]];
-
     }
 
     activateMarker(active: boolean): void {
@@ -72,7 +71,7 @@ class TileEditor {
 	}
 
 	getTile (tileX: number, tileY: number, selectedTile: Phaser.Tilemaps.Tile, map: Phaser.Tilemaps.Tilemap): Phaser.Tilemaps.Tile {
-		if (this.devModeTools.scene.pointerInsideMap(tileX, tileY, map)) {
+		if (this.devModeTools.scene.pointerInsideMap(tileX, tileY, map) && this.devModeTools.modeButtons[2].active || this.devModeTools.modeButtons[3].active) {
 			if (selectedTile) selectedTile.tint = 0xffffff;
 			if (map.getTileAt(tileX, tileY) && map.getTileAt(tileX, tileY).index !== 0) {
 				selectedTile = map.getTileAt(tileX, tileY);

@@ -97,6 +97,19 @@ var GameScene = /** @class */ (function (_super) {
             });
             _this.load.image(key, _this.patchAssetUrl(tileset.image));
         });
+        //to be sure every layer of map have correct number of tiles
+        var tilesPerLayer = data.map.height * data.map.width;
+        data.map.layers.forEach(function (layer) {
+            if (layer.name !== 'debris') {
+                var length_1 = layer.data.length;
+                console.log(layer.name, length_1, tilesPerLayer);
+                if (length_1 < tilesPerLayer) {
+                    for (var i = length_1 + 1; i < tilesPerLayer; i++) {
+                        layer.data[i] = 0;
+                    }
+                }
+            }
+        });
         this.load.tilemapTiledJSON('map', this.patchMapData(data.map));
         this.load.bitmapFont('Arial_24px_bold_black', '/assets/fonts/Arial_24px_bold_black_0.png', '/assets/fonts/Arial_24px_bold_black.fnt');
         this.load.bitmapFont('Arial_24px_bold_white', '/assets/fonts/Arial_24px_bold_white_0.png', '/assets/fonts/Arial_24px_bold_white.fnt');
