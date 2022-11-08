@@ -24,13 +24,13 @@ class PhaserRegion extends PhaserEntity {
 		gameObject.setPosition(stats.x + stats.width/2, stats.y + stats.height/2);
 		gameObject.setInteractive();
 		gameObject.on('pointerdown', () => {
-			if (ige.developerMode.active && this.devModeScene.regionEditor.regionTool && this.scene.input.manager.activePointer.rightButtonDown()) {
+			if (ige.developerMode.active && this.devModeScene.devModeTools.cursorButton.active) {
 				this.scene.input.setTopOnly(true);
 				this.devModeScene.regionEditor.addClickedList({name: this.entity._stats.id, x: stats.x, y: stats.y, width: stats.width, height: stats.height});
 			}
 		});
 		gameObject.on('pointerup', () => {
-			if (ige.developerMode.active && this.devModeScene.regionEditor.regionTool) {
+			if (ige.developerMode.active && this.devModeScene.devModeTools.cursorButton.active) {
 				this.scene.input.setTopOnly(false);
 				this.devModeScene.regionEditor.showClickedList();
 			}

@@ -97,6 +97,7 @@ var GameScene = /** @class */ (function (_super) {
             });
             _this.load.image(key, _this.patchAssetUrl(tileset.image));
         });
+        //to be sure every layer of map have correct number of tiles
         var tilesPerLayer = data.map.height * data.map.width;
         data.map.layers.forEach(function (layer) {
             if (layer.name !== 'debris') {
