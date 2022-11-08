@@ -40,7 +40,7 @@ var TilePalette = /** @class */ (function (_super) {
         var camera = _this.camera = _this.scene.cameras.add(_this.scene.sys.game.canvas.width - paletteWidth - 40, _this.scene.sys.game.canvas.height - paletteHeight - 40, paletteWidth, paletteHeight)
             .setBounds(texturesLayer.x - (texturesLayer.width / 2), texturesLayer.y - (texturesLayer.height / 2), texturesLayer.width * 2, texturesLayer.height * 2, true)
             .setZoom(1).setName('palette');
-        camera.setBackgroundColor(0xFFFFFF);
+        camera.setBackgroundColor(0x000000);
         texturesLayer.on('pointermove', function (p) {
             var devModeScene = ige.renderer.scene.getScene('DevMode');
             devModeScene.regionEditor.cancelDrawRegion();
