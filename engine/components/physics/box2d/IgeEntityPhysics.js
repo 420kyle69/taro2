@@ -785,11 +785,7 @@ var IgeEntityPhysics = IgeEntity.extend({
 							break;
 
 						case 'destroy':
-							if (!action.streamToClient) {
-								ige.network.pause()
-							}
 							this.destroy();
-							ige.network.resume()
 							break;
 					}
 				}
@@ -799,13 +795,8 @@ var IgeEntityPhysics = IgeEntity.extend({
 
 	remove: function (isStreaming = true) {
 		this._isBeingRemoved = true;
-		
-		if (this._stats && !this.body) {
-			// destroy items which are spriteOnly or with none body immediately
-			this.destroy();
-		} else {
-			this.queueAction({ type: 'destroy', streamToClient: isStreaming });
-		}
+		this.destroy();
+
 		if (ige.isClient) {
 			this.clearAllPointers();
 		}
