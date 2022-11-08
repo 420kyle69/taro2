@@ -136,8 +136,8 @@ var IgeEntity = IgeObject.extend({
 			*/
 			self._stats.currentBody = self._stats.bodies[newState.body];
 		}
-
-		if (ige.isServer) {
+		
+		if (ige.isServer) {			
 			self.streamUpdateData([{ stateId: stateId }]);
 		} else if (ige.isClient) {
 			self._stats.stateId = stateId;

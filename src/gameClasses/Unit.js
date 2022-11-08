@@ -1239,8 +1239,8 @@ var Unit = IgeEntityPhysics.extend({
 					item._translateTo(defaultData.translate.x, defaultData.translate.y)*/
 				}
 
-				item.setState('dropped', defaultData);
 				item.setOwnerUnit(undefined);
+				item.setState('dropped', defaultData);				
 
 				if (item._stats.hidden) {
 					item.streamUpdateData([{ hidden: false }]);
@@ -1391,7 +1391,7 @@ var Unit = IgeEntityPhysics.extend({
 		if (self._stats.itemIds) {
 			for (var i = 0; i < self._stats.itemIds.length; i++) {
 				var currentItem = this.inventory.getItemBySlotNumber(i + 1);
-				if (currentItem) {
+				if (currentItem && currentItem.getOwnerUnit() == this) {
 					currentItem.remove();
 				}
 			}

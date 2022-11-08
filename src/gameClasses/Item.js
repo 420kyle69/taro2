@@ -192,7 +192,6 @@ var Item = IgeEntityPhysics.extend({
 			if (isInvisible || !hasBody) {
 				self.hide();
 				this.emit('hide');
-
 				return;
 			}
 		}
