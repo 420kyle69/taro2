@@ -13,7 +13,6 @@ var Projectile = IgeEntityPhysics.extend({
 		}
 
 		self.entityId = this._id;
-
 		self._stats = {...projectileData, ...data};
 		
 		// dont save variables in _stats as _stats is stringified and synced

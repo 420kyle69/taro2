@@ -752,6 +752,13 @@ var PhysicsComponent = IgeEventingClass.extend({
 			case 'projectile':
 				triggeredBy.projectileId = triggeredBy.projectileId || entityB.id();
 				triggeredBy.collidingEntity = entityA.id();
+
+				// built-in damaging system. it's important that this runs prior to trigger events
+				// this projectile may be destroyed before inflicting damage
+				if (entityA._category == 'unit') {					
+					entityA.inflictDamage(entityB._stats.damageData);
+				}
+				
 				ige.script.trigger(entityA._category+'TouchesProjectile', triggeredBy);
 				entityA.script.trigger("entityTouchesProjectile", triggeredBy);
 				break;

@@ -115,17 +115,6 @@ var ScriptComponent = IgeEntity.extend({
 			// console.log(this._entity._category, triggerName, scriptId)
 			this.runScript(scriptId, localVariables);
 		}
-
-		// built-in damaging system
-		if (triggeredBy && triggeredBy.projectileId) {
-			var projectile = ige.$(triggeredBy.projectileId);
-			if (projectile && triggerName == 'unitTouchesProjectile') {
-					var attackedUnit = ige.$(ige.game.lastTouchingUnitId);
-					if (attackedUnit) {
-						attackedUnit.inflictDamage(projectile._stats.damageData);
-					}
-			}
-		}
 	},
 
 	scriptLog: function (str, tabCount) {
