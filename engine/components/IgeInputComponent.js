@@ -547,7 +547,18 @@ var IgeInputComponent = IgeEventingClass.extend({
 			});
 		}
 	},
+	shouldPreventKeybindings: function () {
+		if (!ige.isClient || !$('#game-editor').is(':visible')) {
+			return false;
+		}
+		let activeElement = document.activeElement;
+		let inputs = ['input', 'select', 'textarea'];
 
+		if (activeElement && inputs.indexOf(activeElement.tagName.toLowerCase()) !== -1) {
+			return true;
+		}
+		return false;
+	},
 	/**
 	 * Emits the "keyDown" event.
 	 * @param event
@@ -556,7 +567,9 @@ var IgeInputComponent = IgeEventingClass.extend({
 	_keyDown: function (event) {
 		var self = this;
 		this._updateMouseData(event);
-		this._chatHandler(event);
+		if (!this.shouldPreventKeybindings()) {
+			this._chatHandler(event);
+		}
 
 		if (this._state[event.keyCode] == false) {
 			// reset streamed target position & existing force when key is pressed
