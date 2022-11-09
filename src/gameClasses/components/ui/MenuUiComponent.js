@@ -726,7 +726,7 @@ var MenuUiComponent = IgeEntity.extend({
 		ige.client.disconnected = true;
 
 		if (ige.developerMode.active) {
-			defaultContent = 'Re-Publish action triggered. Refreshing page ...';
+			defaultContent = 'Republish action triggered. Refreshing page...';
 			window.history.replaceState({}, '', `/play/${gameSlug}?enterDevMode=true`);
 		}
 
