@@ -146,13 +146,23 @@ var DevModeTools = /** @class */ (function (_super) {
         this.scene.regionEditor.regionTool = true;
     };
     DevModeTools.prototype.brush = function () {
-        this.tileEditor.selectedTile = null;
-        this.tileEditor.selectedTileArea = [[null, null], [null, null]];
+        if (this.modeButtons[3].active) {
+            this.tileEditor.selectedTile = null;
+            this.tileEditor.selectedTileArea = [[null, null], [null, null]];
+        }
         this.tileEditor.activateMarker(true);
         this.scene.regionEditor.regionTool = false;
         this.highlightModeButton(2);
     };
     DevModeTools.prototype.emptyTile = function () {
+        if (this.tileEditor.selectedTile)
+            this.tileEditor.selectedTile.tint = 0xffffff;
+        for (var i = 0; i < this.tileEditor.area.x; i++) {
+            for (var j = 0; j < this.tileEditor.area.y; j++) {
+                if (this.tileEditor.selectedTileArea[i][j])
+                    this.tileEditor.selectedTileArea[i][j].tint = 0xffffff;
+            }
+        }
         var copy = __assign({}, this.tileEditor.selectedTile);
         copy.index = 0;
         this.tileEditor.selectedTile = copy;

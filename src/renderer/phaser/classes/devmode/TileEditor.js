@@ -51,7 +51,7 @@ var TileEditor = /** @class */ (function () {
         }
     };
     TileEditor.prototype.getTile = function (tileX, tileY, selectedTile, map) {
-        if (this.devModeTools.scene.pointerInsideMap(tileX, tileY, map) && this.devModeTools.modeButtons[2].active || this.devModeTools.modeButtons[3].active) {
+        if (this.devModeTools.scene.pointerInsideMap(tileX, tileY, map)) {
             if (selectedTile)
                 selectedTile.tint = 0xffffff;
             if (map.getTileAt(tileX, tileY) && map.getTileAt(tileX, tileY).index !== 0) {
@@ -62,8 +62,10 @@ var TileEditor = /** @class */ (function () {
             else {
                 selectedTile = null;
             }
-            this.activateMarker(true);
-            this.devModeTools.highlightModeButton(2);
+            if (this.devModeTools.modeButtons[3].active) {
+                //this.activateMarker(true);
+                this.devModeTools.highlightModeButton(2);
+            }
             return selectedTile;
         }
     };

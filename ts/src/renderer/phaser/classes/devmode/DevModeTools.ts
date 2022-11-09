@@ -170,14 +170,22 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	}
 
 	brush(): void {
-		this.tileEditor.selectedTile = null;
-		this.tileEditor.selectedTileArea = [[null, null],[null, null]] as any;
+		if (this.modeButtons[3].active) {
+			this.tileEditor.selectedTile = null;
+			this.tileEditor.selectedTileArea = [[null, null],[null, null]] as any;
+		}
 		this.tileEditor.activateMarker(true);
 		this.scene.regionEditor.regionTool = false;
 		this.highlightModeButton(2);
 	}
 
 	emptyTile(): void {
+		if (this.tileEditor.selectedTile) this.tileEditor.selectedTile.tint = 0xffffff;
+		for (let i = 0; i < this.tileEditor.area.x; i++) {
+			for (let j = 0; j < this.tileEditor.area.y; j++) {
+				if (this.tileEditor.selectedTileArea[i][j]) this.tileEditor.selectedTileArea[i][j].tint = 0xffffff;
+			}
+		}
 		var copy = { ...this.tileEditor.selectedTile };
 		copy.index = 0;
 		this.tileEditor.selectedTile = copy as any;
