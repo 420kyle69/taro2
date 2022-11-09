@@ -127,6 +127,10 @@ var IgeEntityPhysics = IgeEntity.extend({
 		// if initialTranform variable's provided, then transform this entity immediately after body creation
 		if (defaultData) {
 			var rotate = defaultData.rotate;
+			
+			if (body.fixedRotation) {
+				rotate = 0;
+			}
 
 			// immediately apply rotate.z if facingAngle is assigned
 			if (!isNaN(rotate)) {
