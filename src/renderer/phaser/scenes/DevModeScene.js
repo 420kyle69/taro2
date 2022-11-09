@@ -75,15 +75,13 @@ var DevModeScene = /** @class */ (function (_super) {
         });
         var gameMap = this.gameScene.tilemap;
         gameMap.currentLayerIndex = 0;
+        this.devModeTools = new DevModeTools(this);
+        this.tileEditor = this.devModeTools.tileEditor;
+        this.tilePalette = this.devModeTools.palette;
+        this.regionEditor = this.devModeTools.regionEditor;
     };
     DevModeScene.prototype.enterDevMode = function () {
         this.defaultZoom = (this.gameScene.zoomSize / 2.15);
-        if (!this.tilePalette) {
-            this.devModeTools = new DevModeTools(this);
-            this.tileEditor = this.devModeTools.tileEditor;
-            this.tilePalette = this.devModeTools.palette;
-            this.regionEditor = this.devModeTools.regionEditor;
-        }
         this.devModeTools.enterDevMode();
     };
     DevModeScene.prototype.leaveDevMode = function () {

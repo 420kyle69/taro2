@@ -71,7 +71,7 @@ class TileEditor {
 	}
 
 	getTile (tileX: number, tileY: number, selectedTile: Phaser.Tilemaps.Tile, map: Phaser.Tilemaps.Tilemap): Phaser.Tilemaps.Tile {
-		if (this.devModeTools.scene.pointerInsideMap(tileX, tileY, map) && this.devModeTools.modeButtons[2].active || this.devModeTools.modeButtons[3].active) {
+		if (this.devModeTools.scene.pointerInsideMap(tileX, tileY, map)) {
 			if (selectedTile) selectedTile.tint = 0xffffff;
 			if (map.getTileAt(tileX, tileY) && map.getTileAt(tileX, tileY).index !== 0) {
 				selectedTile = map.getTileAt(tileX, tileY);
@@ -79,8 +79,10 @@ class TileEditor {
 			} else {
 				selectedTile = null;
 			}
-			this.activateMarker(true);
-			this.devModeTools.highlightModeButton(2);
+			if (this.devModeTools.modeButtons[3].active) {
+				//this.activateMarker(true);
+				this.devModeTools.highlightModeButton(2);
+			}
 			return selectedTile;
 		}
 	}
