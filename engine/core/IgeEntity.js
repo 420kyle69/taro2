@@ -5139,11 +5139,10 @@ var IgeEntity = IgeObject.extend({
 	        }
 
 	        if (
-	        	// don't rubberband weld-joint items
-	        	!(this._category == 'item' && this._stats.currentBody && this._stats.currentBody.jointType == 'weldJoint') &&
-				(this._stats.controls && this._stats.controls.mouseBehaviour.rotateToFaceMouseCursor) 
+	        	// interpolate item rotation
+	        	(this._stats.controls && this._stats.controls.mouseBehaviour.rotateToFaceMouseCursor) 
 			) {
-	        	rotateStart = rotate;
+				rotateStart = rotate;
 	        	rotateEnd = finalTransform[2]
 	        	// a hack to prevent rotational interpolation suddnely jumping by 2 PI (e.g. 0.01 to -6.27)
 				if (Math.abs(rotateEnd - rotateStart) > Math.PI) {
@@ -5219,6 +5218,7 @@ var IgeEntity = IgeObject.extend({
 			}
 
 			rotate = this.interpolateValue(rotateStart, rotateEnd, prevKeyFrame[0], ige._currentTime, nextKeyFrame[0]);
+			
 		}
 		
 

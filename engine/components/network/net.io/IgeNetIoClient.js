@@ -544,8 +544,6 @@ var IgeNetIoClient = {
                         	entity != ige.client.selectedUnit
                         ) {
                         	entity.finalKeyFrame = [newSnapshotTimestamp, newSnapshot[1][entityId]]
-                       //  	if (entity._category == 'item')
-                    			// console.log(entity.finalKeyFrame[1], entity.getOwnerUnit())
 						}
                     }
 
