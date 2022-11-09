@@ -92,17 +92,16 @@ class DevModeScene extends PhaserScene {
 
 		const gameMap = this.gameScene.tilemap;
 		gameMap.currentLayerIndex = 0;
+
+		this.devModeTools = new DevModeTools(this);
+		this.tileEditor = this.devModeTools.tileEditor;
+		this.tilePalette = this.devModeTools.palette;
+		this.regionEditor = this.devModeTools.regionEditor;
 	}
 
 	enterDevMode (): void {
 		this.defaultZoom = (this.gameScene.zoomSize / 2.15)
-			if (!this.tilePalette) {
-				this.devModeTools = new DevModeTools(this);
-				this.tileEditor = this.devModeTools.tileEditor;
-				this.tilePalette = this.devModeTools.palette;
-				this.regionEditor = this.devModeTools.regionEditor;
-			}
-			this.devModeTools.enterDevMode();
+		this.devModeTools.enterDevMode();
 	}
 
 	leaveDevMode (): void {
