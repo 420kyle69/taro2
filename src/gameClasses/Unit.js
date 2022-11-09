@@ -528,7 +528,7 @@ var Unit = IgeEntityPhysics.extend({
 							
 							const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
 							const {type, userId, purchasableId, createdAt} = decodedToken;
-							console.log('decodedToken', decodedToken);
+							
 							if (type === 'pinValidationToken' && userId && purchasableId && ownerPlayer._stats.userId === userId && purchasableId === itemTypeId) {
 								// allow coin transaction since token has been verified
 								
