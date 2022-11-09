@@ -66,6 +66,10 @@ var DevModeTools = /** @class */ (function (_super) {
         _this.brushButtons = [];
         _this.brushButtons.push(new DevToolButton(_this, '1x1', null, 0, 102, 58, toolButtonsContainer, _this.selectSingle.bind(_this)), new DevToolButton(_this, '2x2', null, 62, 102, 58, toolButtonsContainer, _this.selectArea.bind(_this)));
         _this.brushButtons[0].highlight(true);
+        _this.palette.hide();
+        _this.layerButtonsContainer.setVisible(false);
+        _this.toolButtonsContainer.setVisible(false);
+        _this.regionEditor.hideRegions();
         return _this;
     }
     DevModeTools.prototype.enterDevMode = function () {
@@ -142,13 +146,23 @@ var DevModeTools = /** @class */ (function (_super) {
         this.scene.regionEditor.regionTool = true;
     };
     DevModeTools.prototype.brush = function () {
-        this.tileEditor.selectedTile = null;
-        this.tileEditor.selectedTileArea = [[null, null], [null, null]];
+        if (this.modeButtons[3].active) {
+            this.tileEditor.selectedTile = null;
+            this.tileEditor.selectedTileArea = [[null, null], [null, null]];
+        }
         this.tileEditor.activateMarker(true);
         this.scene.regionEditor.regionTool = false;
         this.highlightModeButton(2);
     };
     DevModeTools.prototype.emptyTile = function () {
+        if (this.tileEditor.selectedTile)
+            this.tileEditor.selectedTile.tint = 0xffffff;
+        for (var i = 0; i < this.tileEditor.area.x; i++) {
+            for (var j = 0; j < this.tileEditor.area.y; j++) {
+                if (this.tileEditor.selectedTileArea[i][j])
+                    this.tileEditor.selectedTileArea[i][j].tint = 0xffffff;
+            }
+        }
         var copy = __assign({}, this.tileEditor.selectedTile);
         copy.index = 0;
         this.tileEditor.selectedTile = copy;
