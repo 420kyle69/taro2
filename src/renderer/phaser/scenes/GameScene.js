@@ -102,12 +102,13 @@ var GameScene = /** @class */ (function (_super) {
         data.map.layers.forEach(function (layer) {
             if (layer.name !== 'debris') {
                 var length_1 = layer.data.length;
-                console.log(layer.name, length_1, tilesPerLayer);
+                console.log('before', layer.name, length_1, tilesPerLayer);
                 if (length_1 < tilesPerLayer) {
                     for (var i = length_1 + 1; i < tilesPerLayer; i++) {
                         layer.data[i] = 0;
                     }
                 }
+                console.log('after', layer.name, layer.data.length, tilesPerLayer);
             }
         });
         this.load.tilemapTiledJSON('map', this.patchMapData(data.map));
