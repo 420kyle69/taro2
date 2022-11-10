@@ -1001,7 +1001,10 @@ var Item = IgeEntityPhysics.extend({
 		if (ownerUnit && this._stats.stateId != 'dropped') {
 			
 			// angleToTarget is only available in server
-			rotate = ownerUnit.angleToTarget;			
+			if (ige.isServer && ownerUnit.angleToTarget) {
+				rotate = ownerUnit.angleToTarget;			
+			}
+			
 			if (self._stats.currentBody && self._stats.currentBody.jointType == 'weldJoint') {
 				rotate = ownerUnit._rotate.z;
 			}
@@ -1028,8 +1031,10 @@ var Item = IgeEntityPhysics.extend({
 			self.translateTo(x, y);			
 			self.rotateTo(0, 0, rotate);
 
-			// if (ige.isServer) {
-				
+			// if (this.getOwnerUnit() != ige.client.selectedUnit)	 {
+			// 	console.log(x, y, rotate, ownerUnit.angleToTarget, this._rotate.z)
+			// }
+
 			if (ige.game.cspEnabled && ige.isClient) {
 				self.finalKeyFrame[1] = [x, y, rotate] // prepare position for when this item's dropped. without this, item will appear at an incorrect position
 			}
