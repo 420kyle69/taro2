@@ -127,7 +127,6 @@ var IgeEntityPhysics = IgeEntity.extend({
 		// if initialTranform variable's provided, then transform this entity immediately after body creation
 		if (defaultData) {
 			var rotate = defaultData.rotate;
-			
 			if (body.fixedRotation) {
 				rotate = 0;
 			}
@@ -150,6 +149,8 @@ var IgeEntityPhysics = IgeEntity.extend({
 					// if (isLossTolerant)
 					//     this.translateToLT(x, y, 0)
 					// else
+
+					this.finalKeyFrame = [ige.now, [x, y, rotate]]
 					this.translateTo(x, y, 0);
 				}
 			}

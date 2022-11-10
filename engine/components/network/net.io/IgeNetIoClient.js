@@ -517,6 +517,19 @@ var IgeNetIoClient = {
 
 						obj[entityId] = entityData;
 
+						// update each entities' final position, so player knows where everything are when returning from a different browser tab
+						// we are not executing this in igeEngine or igeEntity, becuase they don't execute when browser tab is inactive
+						var entity = ige.$(entityId);
+
+						// if csp movement is enabled, don't use server-streamed position for my unit
+						// instead, we'll use position updated by physics engine
+						if (ige.game.cspEnabled && entity && 
+							entity.finalKeyFrame[0] < newSnapshotTimestamp && 
+							entity != ige.client.selectedUnit
+						) {
+							entity.finalKeyFrame = [newSnapshotTimestamp, newSnapshot[1][entityId]]
+						}
+						
 					} else {
 						this._networkCommands[commandName](entityData);
 					}
@@ -532,21 +545,6 @@ var IgeNetIoClient = {
 						ige.snapshots.shift();
 					}
 
-					// update each entities' final position, so player knows where everything are when returning from a different browser tab
-					// we are not executing this in igeEngine or igeEntity, becuase they don't execute when browser tab is inactive
-					for (const entityId in newSnapshot[1]) {
-                        var entity = ige.$(entityId);
-
-                        // if csp movement is enabled, don't use server-streamed position for my unit
-                        // instead, we'll use position updated by physics engine
-                        if (ige.game.cspEnabled && entity && 
-                        	entity.finalKeyFrame[0] < newSnapshotTimestamp && 
-                        	entity != ige.client.selectedUnit
-                        ) {
-                        	entity.finalKeyFrame = [newSnapshotTimestamp, newSnapshot[1][entityId]]
-						}
-                    }
-
                     let now = Date.now();
 
                     // if cspEnabled, we ignore server-streamed timestamp as all entities rubber-banded towards 
@@ -557,7 +555,7 @@ var IgeNetIoClient = {
 						this._discrepancySamples.push(newSnapshotTimestamp - now)
 
 						if ((this.medianDiscrepancy == undefined && this._discrepancySamples.length > 2) ||
-							this._discrepancySamples.length > 20
+							this._discrepancySamples.length > 5
 						) {
 							this.medianDiscrepancy = this.getMedian(this._discrepancySamples);
 							this._discrepancySamples = [];

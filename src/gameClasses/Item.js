@@ -1001,18 +1001,15 @@ var Item = IgeEntityPhysics.extend({
 		if (ownerUnit && this._stats.stateId != 'dropped') {
 			
 			// angleToTarget is only available in server
-			if (ige.isServer) {
-				rotate = ownerUnit.angleToTarget;			
-				if (self._stats.currentBody && self._stats.currentBody.jointType == 'weldJoint') {
-					rotate = ownerUnit._rotate.z;
-				}
-
-				self.anchoredOffset = self.getAnchoredOffset(rotate);
-				var x = ownerUnit._translate.x + self.anchoredOffset.x;
-				var y = ownerUnit._translate.y + self.anchoredOffset.y;
-
-				self.translateTo(x, y);
+			rotate = ownerUnit.angleToTarget;			
+			if (self._stats.currentBody && self._stats.currentBody.jointType == 'weldJoint') {
+				rotate = ownerUnit._rotate.z;
 			}
+
+			self.anchoredOffset = self.getAnchoredOffset(rotate);
+			var x = ownerUnit._translate.x + self.anchoredOffset.x;
+			var y = ownerUnit._translate.y + self.anchoredOffset.y;
+
 			
 			if (ige.isServer || (ige.isClient && ige.client.selectedUnit == ownerUnit)) {
 				if (self._stats.controls && self._stats.controls.mouseBehaviour) {
@@ -1026,11 +1023,16 @@ var Item = IgeEntityPhysics.extend({
 				}
 			}
 
-			if (ige.isServer) {
-				self.rotateTo(0, 0, rotate);
-			} else if (ige.isClient) {
-				self.finalKeyFrame[1] = [x, y, rotate] // prepare position for when this item's dropped. without this, item will appear at an incorrect position
-			}
+			// run both server & client.
+			// it's important that this runs on client side, because it prepares this item's position when it's dropped
+			self.translateTo(x, y);			
+			self.rotateTo(0, 0, rotate);
+
+			// if (ige.isServer) {
+				
+			// } else if (ige.isClient) {
+			// 	// self.finalKeyFrame[1] = [x, y, rotate] // prepare position for when this item's dropped. without this, item will appear at an incorrect position
+			// }
 		}
 
 		if (this._stats.isBeingUsed) {
