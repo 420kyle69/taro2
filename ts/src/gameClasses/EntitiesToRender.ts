@@ -91,6 +91,7 @@ class EntitiesToRender {
 								} else if (ownerUnit == ige.client.selectedUnit) {
 									rotate = ownerUnit.angleToTarget; // angleToTarget is updated at 60fps
 								}
+								entity._rotate.z = rotate // update the item's rotation immediately for more accurate aiming (instead of 20fps)
 							}
 
 							entity.anchoredOffset = entity.getAnchoredOffset(rotate);

@@ -170,7 +170,6 @@ var IgeStreamComponent = IgeEventingClass.extend({
 		var ntransdata;
 		var entity;
 
-		
 		if (transformData) {
 			var ntransdata = [
 				parseInt(transformData[0], 16),
@@ -196,12 +195,8 @@ var IgeStreamComponent = IgeEventingClass.extend({
 					
 					entity = new classConstructor(createData, entityId);
 
-					// don't send 'create' stream for spriteonly/weldjoint items
-					var body = entity._stats.currentBody;
-					if (entity._category != 'item' || (body && body.jointType != 'weldJoint')) {
-						entity.bypassSmoothing = true;
-						entity.streamSectionData('transform', ntransdata);
-					}
+					entity.bypassSmoothing = true;
+					entity.streamSectionData('transform', ntransdata);
 
 					// Set the just created flag which will stop the renderer
 					// from handling this entity until after the first stream
