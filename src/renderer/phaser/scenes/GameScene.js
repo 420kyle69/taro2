@@ -102,12 +102,13 @@ var GameScene = /** @class */ (function (_super) {
         data.map.layers.forEach(function (layer) {
             if (layer.name !== 'debris') {
                 var length_1 = layer.data.length;
-                console.log(layer.name, length_1, tilesPerLayer);
+                console.log('before', layer.name, length_1, tilesPerLayer);
                 if (length_1 < tilesPerLayer) {
                     for (var i = length_1 + 1; i < tilesPerLayer; i++) {
                         layer.data[i] = 0;
                     }
                 }
+                console.log('after', layer.name, layer.data.length, tilesPerLayer);
             }
         });
         this.load.tilemapTiledJSON('map', this.patchMapData(data.map));
@@ -228,10 +229,20 @@ var GameScene = /** @class */ (function (_super) {
         data.map.layers.forEach(function (layer) {
             if (layer.type === 'tilelayer') {
                 var layerId_1;
-                if (layer.id - 1 >= 2)
-                    layerId_1 = layer.id - 2;
-                else
-                    layerId_1 = layer.id - 1;
+                switch (layer.name) {
+                    case 'floor':
+                        layerId_1 = TileLayer.FLOOR;
+                        break;
+                    case 'floor2':
+                        layerId_1 = TileLayer.FLOOR_2;
+                        break;
+                    case 'walls':
+                        layerId_1 = TileLayer.WALLS;
+                        break;
+                    case 'trees':
+                        layerId_1 = TileLayer.TREES;
+                        break;
+                }
                 layer.data.forEach(function (tile, index) {
                     var x = index % layer.width;
                     var y = Math.floor(index / layer.width);
