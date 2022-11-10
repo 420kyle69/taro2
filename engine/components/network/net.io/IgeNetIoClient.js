@@ -527,7 +527,7 @@ var IgeNetIoClient = {
 							entity.finalKeyFrame[0] < newSnapshotTimestamp && 
 							entity != ige.client.selectedUnit
 						) {
-							entity.finalKeyFrame = [newSnapshotTimestamp, newSnapshot[1][entityId]]
+							entity.finalKeyFrame = [newSnapshotTimestamp, obj[entityId]]
 						}
 						
 					} else {

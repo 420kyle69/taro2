@@ -1030,9 +1030,9 @@ var Item = IgeEntityPhysics.extend({
 
 			// if (ige.isServer) {
 				
-			// } else if (ige.isClient) {
-			// 	// self.finalKeyFrame[1] = [x, y, rotate] // prepare position for when this item's dropped. without this, item will appear at an incorrect position
-			// }
+			if (ige.game.cspEnabled && ige.isClient) {
+				self.finalKeyFrame[1] = [x, y, rotate] // prepare position for when this item's dropped. without this, item will appear at an incorrect position
+			}
 		}
 
 		if (this._stats.isBeingUsed) {
