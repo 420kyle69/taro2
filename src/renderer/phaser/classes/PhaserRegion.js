@@ -61,7 +61,7 @@ var PhaserRegion = /** @class */ (function (_super) {
             var label = this.label = this.scene.add.text(0, 0, 'cccccc');
             label.visible = false;
             // needs to be created with the correct scale of the client
-            this.label.setScale(1 / this.scene.cameras.main.zoom);
+            this.label.setScale(1.3);
             label.setOrigin(0);
             this.gameObject.add(label);
         }
