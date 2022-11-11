@@ -70,14 +70,16 @@ var DevModeTools = /** @class */ (function (_super) {
         _this.layerButtonsContainer.setVisible(false);
         _this.toolButtonsContainer.setVisible(false);
         _this.regionEditor.hideRegions();
+        var ctrlKey = _this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CTRL, false);
         _this.scene.input.on('pointermove', function (p) {
-            if (!p.isDown || p.leftButtonDown())
-                return;
-            var camera = this.scene.gameScene.cameras.main;
-            var scrollX = (p.x - p.prevPosition.x) / camera.zoom;
-            var scrollY = (p.y - p.prevPosition.y) / camera.zoom;
-            camera.scrollX -= scrollX;
-            camera.scrollY -= scrollY;
+            if (ige.developerMode.active && (p.rightButtonDown() || (p.isDown && ctrlKey.isDown))) {
+                var camera = this.scene.gameScene.cameras.main;
+                var scrollX_1 = (p.x - p.prevPosition.x) / camera.zoom;
+                var scrollY_1 = (p.y - p.prevPosition.y) / camera.zoom;
+                camera.scrollX -= scrollX_1;
+                camera.scrollY -= scrollY_1;
+            }
+            ;
         });
         return _this;
     }
