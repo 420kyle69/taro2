@@ -70,6 +70,15 @@ var DevModeTools = /** @class */ (function (_super) {
         _this.layerButtonsContainer.setVisible(false);
         _this.toolButtonsContainer.setVisible(false);
         _this.regionEditor.hideRegions();
+        _this.scene.input.on('pointermove', function (p) {
+            if (!p.rightButtonDown())
+                return;
+            var camera = this.scene.gameScene.cameras.main;
+            var scrollX = (p.x - p.prevPosition.x) / camera.zoom;
+            var scrollY = (p.y - p.prevPosition.y) / camera.zoom;
+            camera.scrollX -= scrollX;
+            camera.scrollY -= scrollY;
+        });
         return _this;
     }
     DevModeTools.prototype.enterDevMode = function () {
@@ -79,6 +88,7 @@ var DevModeTools = /** @class */ (function (_super) {
         this.tileEditor.activateMarker(false);
         this.palette.show();
         this.regionEditor.showRegions();
+        this.scene.gameScene.cameras.main.stopFollow();
     };
     DevModeTools.prototype.leaveDevMode = function () {
         this.regionEditor.cancelDrawRegion();
@@ -87,6 +97,8 @@ var DevModeTools = /** @class */ (function (_super) {
         this.toolButtonsContainer.setVisible(false);
         this.regionEditor.hideRegions();
         ige.client.emit('zoom', this.scene.defaultZoom);
+        var myUnit = ige.$(ige.client.myPlayer._stats.selectedUnitId);
+        myUnit.emit('follow');
     };
     DevModeTools.prototype.keyBindings = function () {
         var _this = this;
@@ -192,6 +204,9 @@ var DevModeTools = /** @class */ (function (_super) {
         this.brushButtons[0].highlight(true);
         this.brushButtons[1].highlight(false);
         this.tileEditor.activateMarker(true);
+        if (!this.modeButtons[3].active) {
+            this.brush();
+        }
     };
     DevModeTools.prototype.selectArea = function () {
         if (this.tileEditor.selectedTile)
@@ -202,6 +217,9 @@ var DevModeTools = /** @class */ (function (_super) {
         this.brushButtons[1].highlight(true);
         this.brushButtons[0].highlight(false);
         this.tileEditor.activateMarker(true);
+        if (!this.modeButtons[3].active) {
+            this.brush();
+        }
     };
     DevModeTools.prototype.switchLayer = function (value) {
         var scene = this.scene;

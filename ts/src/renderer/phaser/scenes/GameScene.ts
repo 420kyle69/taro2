@@ -128,12 +128,13 @@ class GameScene extends PhaserScene {
 		data.map.layers.forEach(layer => {
 			if (layer.name !== 'debris') {
 				const length = layer.data.length;
-				console.log(layer.name, length, tilesPerLayer)
+				console.log('before', layer.name, length, tilesPerLayer)
 				if (length < tilesPerLayer) {
 					for (let i = length + 1; i < tilesPerLayer; i++) {
 						layer.data[i] = 0;
 					}
 				}
+				console.log('after', layer.name, layer.data.length, tilesPerLayer)
 			}
 		});
 
@@ -303,8 +304,20 @@ class GameScene extends PhaserScene {
 		data.map.layers.forEach((layer) => {
 			if (layer.type === 'tilelayer') {
 				let layerId;
-				if (layer.id - 1 >= 2) layerId = layer.id - 2
-				else layerId = layer.id - 1
+				switch (layer.name) {
+					case 'floor':
+						layerId = TileLayer.FLOOR;
+						break;
+					case 'floor2':
+						layerId = TileLayer.FLOOR_2;
+						break;
+					case 'walls':
+						layerId = TileLayer.WALLS;
+						break;
+					case 'trees':
+						layerId = TileLayer.TREES;
+						break;
+				}
 				layer.data.forEach((tile, index) => {
 					const x = index % layer.width;
 					const y = Math.floor(index/layer.width);
