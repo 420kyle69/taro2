@@ -214,6 +214,9 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.brushButtons[0].highlight(true);
 		this.brushButtons[1].highlight(false);
 		this.tileEditor.activateMarker(true);
+		if (!this.modeButtons[3].active) {
+			this.brush();
+		}
 	}
 
 	selectArea(): void {
@@ -224,6 +227,9 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.brushButtons[1].highlight(true);
 		this.brushButtons[0].highlight(false);
 		this.tileEditor.activateMarker(true);
+		if (!this.modeButtons[3].active) {
+			this.brush();
+		}
 	}
 
 	switchLayer(value: number): void {
