@@ -89,7 +89,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.regionEditor.hideRegions();
 
 		this.scene.input.on('pointermove', function (p) {
-			if (!p.rightButtonDown()) return;
+			if (!p.isDown || p.leftButtonDown()) return;
 			const camera = this.scene.gameScene.cameras.main;
 
 			const scrollX = (p.x - p.prevPosition.x) / camera.zoom
