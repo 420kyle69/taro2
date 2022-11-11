@@ -71,7 +71,7 @@ var DevModeTools = /** @class */ (function (_super) {
         _this.toolButtonsContainer.setVisible(false);
         _this.regionEditor.hideRegions();
         _this.scene.input.on('pointermove', function (p) {
-            if (!p.rightButtonDown())
+            if (!p.isDown || p.leftButtonDown())
                 return;
             var camera = this.scene.gameScene.cameras.main;
             var scrollX = (p.x - p.prevPosition.x) / camera.zoom;
