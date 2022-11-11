@@ -82,7 +82,7 @@ class TilePalette extends Phaser.GameObjects.Container {
 			scrollBarRight.value = rightValue;
 			scrollBarBottom.blocked = false;
 			scrollBarRight.blocked = false;
-		  });
+		});
 
 		this.COLOR_PRIMARY = 0x0036cc;
 		this.COLOR_LIGHT = 0x6690ff;
@@ -104,9 +104,25 @@ class TilePalette extends Phaser.GameObjects.Container {
 			scrollBarContainer.x = this.camera.x;
 		});
 
+		let pointerover;
+		texturesLayer.on('pointerover', (p) => {
+			pointerover =  true;
+		});
+		texturesLayer.on('pointerout', (p) => {
+			pointerover =  false;
+		});
+
 		this.scene.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
-			if (this.visible) {
-				this.zoom(deltaY);
+			if (ige.developerMode.active) {
+				if (this.visible && pointerover) {
+					this.zoom(deltaY);
+				} else if (deltaY < 0) {
+					const zoom = (this.scene.gameScene.zoomSize / 2.15) / 1.1;
+					ige.client.emit('zoom', zoom);
+				} else if (deltaY > 0) {
+					const zoom = (this.scene.gameScene.zoomSize / 2.15) * 1.1;
+					ige.client.emit('zoom', zoom);
+				}
 			}
 		})
 	}
