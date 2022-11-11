@@ -192,6 +192,9 @@ var DevModeTools = /** @class */ (function (_super) {
         this.brushButtons[0].highlight(true);
         this.brushButtons[1].highlight(false);
         this.tileEditor.activateMarker(true);
+        if (!this.modeButtons[3].active) {
+            this.brush();
+        }
     };
     DevModeTools.prototype.selectArea = function () {
         if (this.tileEditor.selectedTile)
@@ -202,6 +205,9 @@ var DevModeTools = /** @class */ (function (_super) {
         this.brushButtons[1].highlight(true);
         this.brushButtons[0].highlight(false);
         this.tileEditor.activateMarker(true);
+        if (!this.modeButtons[3].active) {
+            this.brush();
+        }
     };
     DevModeTools.prototype.switchLayer = function (value) {
         var scene = this.scene;
