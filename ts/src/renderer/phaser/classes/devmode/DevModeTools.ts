@@ -88,14 +88,16 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.toolButtonsContainer.setVisible(false);
 		this.regionEditor.hideRegions();
 
-		this.scene.input.on('pointermove', function (p) {
-			if (!p.isDown || p.leftButtonDown()) return;
-			const camera = this.scene.gameScene.cameras.main;
+		const ctrlKey = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CTRL, false);
 
-			const scrollX = (p.x - p.prevPosition.x) / camera.zoom
-			const scrollY = (p.y - p.prevPosition.y) / camera.zoom;
-			camera.scrollX -= scrollX;
-			camera.scrollY -= scrollY;
+		this.scene.input.on('pointermove', function (p) {
+			if (ige.developerMode.active && (p.rightButtonDown() || (p.isDown && ctrlKey.isDown))) {
+				const camera = this.scene.gameScene.cameras.main;
+				const scrollX = (p.x - p.prevPosition.x) / camera.zoom
+				const scrollY = (p.y - p.prevPosition.y) / camera.zoom;
+				camera.scrollX -= scrollX;
+				camera.scrollY -= scrollY;
+			};
 		});
 	}
 
