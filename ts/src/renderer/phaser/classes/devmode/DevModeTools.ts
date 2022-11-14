@@ -185,8 +185,8 @@ class DevModeTools extends Phaser.GameObjects.Container {
 
 	brush(): void {
 		if (this.modeButtons[3].active) {
-			this.tileEditor.selectedTile = null;
-			this.tileEditor.selectedTileArea = [[null, null],[null, null]] as any;
+			this.tileEditor.selectedTile = this.tileEditor.lastSelectedTile;
+			this.tileEditor.selectedTileArea = this.tileEditor.lastSelectedTileArea;
 		}
 		this.tileEditor.activateMarker(true);
 		this.scene.regionEditor.regionTool = false;
@@ -194,19 +194,23 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	}
 
 	emptyTile(): void {
-		if (this.tileEditor.selectedTile) this.tileEditor.selectedTile.tint = 0xffffff;
+		/*if (this.tileEditor.selectedTile) this.tileEditor.selectedTile.tint = 0xffffff;
 		for (let i = 0; i < this.tileEditor.area.x; i++) {
 			for (let j = 0; j < this.tileEditor.area.y; j++) {
 				if (this.tileEditor.selectedTileArea[i][j]) this.tileEditor.selectedTileArea[i][j].tint = 0xffffff;
 			}
+		}*/
+		if (!this.modeButtons[3].active) {
+			this.tileEditor.lastSelectedTile = this.tileEditor.selectedTile;
+			this.tileEditor.lastSelectedTileArea = this.tileEditor.selectedTileArea
+			const copy = { ...this.tileEditor.selectedTile };
+			copy.index = 0;
+			this.tileEditor.selectedTile = copy as any;
+			this.tileEditor.selectedTileArea = [[copy, copy],[copy, copy]] as any;
+			this.tileEditor.activateMarker(true);
+			this.scene.regionEditor.regionTool = false;
+			this.highlightModeButton(3);
 		}
-		var copy = { ...this.tileEditor.selectedTile };
-		copy.index = 0;
-		this.tileEditor.selectedTile = copy as any;
-		this.tileEditor.selectedTileArea = [[copy, copy],[copy, copy]] as any;
-		this.tileEditor.activateMarker(true);
-		this.scene.regionEditor.regionTool = false;
-		this.highlightModeButton(3);
 	}
 
 	highlightModeButton(n: number): void {

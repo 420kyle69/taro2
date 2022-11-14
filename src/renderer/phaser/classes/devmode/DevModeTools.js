@@ -100,8 +100,6 @@ var DevModeTools = /** @class */ (function (_super) {
         this.regionEditor.hideRegions();
         ige.client.emit('zoom', this.scene.defaultZoom);
         this.scene.gameScene.cameras.main.startFollow(this.scene.gameScene.cameraTarget, false, 0.05, 0.05);
-        /*const myUnit = ige.$(ige.client.myPlayer._stats.selectedUnitId);
-        myUnit.emit('follow');*/
     };
     DevModeTools.prototype.keyBindings = function () {
         var _this = this;
@@ -162,29 +160,31 @@ var DevModeTools = /** @class */ (function (_super) {
     };
     DevModeTools.prototype.brush = function () {
         if (this.modeButtons[3].active) {
-            this.tileEditor.selectedTile = null;
-            this.tileEditor.selectedTileArea = [[null, null], [null, null]];
+            this.tileEditor.selectedTile = this.tileEditor.lastSelectedTile;
+            this.tileEditor.selectedTileArea = this.tileEditor.lastSelectedTileArea;
         }
         this.tileEditor.activateMarker(true);
         this.scene.regionEditor.regionTool = false;
         this.highlightModeButton(2);
     };
     DevModeTools.prototype.emptyTile = function () {
-        if (this.tileEditor.selectedTile)
-            this.tileEditor.selectedTile.tint = 0xffffff;
-        for (var i = 0; i < this.tileEditor.area.x; i++) {
-            for (var j = 0; j < this.tileEditor.area.y; j++) {
-                if (this.tileEditor.selectedTileArea[i][j])
-                    this.tileEditor.selectedTileArea[i][j].tint = 0xffffff;
+        /*if (this.tileEditor.selectedTile) this.tileEditor.selectedTile.tint = 0xffffff;
+        for (let i = 0; i < this.tileEditor.area.x; i++) {
+            for (let j = 0; j < this.tileEditor.area.y; j++) {
+                if (this.tileEditor.selectedTileArea[i][j]) this.tileEditor.selectedTileArea[i][j].tint = 0xffffff;
             }
+        }*/
+        if (!this.modeButtons[3].active) {
+            this.tileEditor.lastSelectedTile = this.tileEditor.selectedTile;
+            this.tileEditor.lastSelectedTileArea = this.tileEditor.selectedTileArea;
+            var copy = __assign({}, this.tileEditor.selectedTile);
+            copy.index = 0;
+            this.tileEditor.selectedTile = copy;
+            this.tileEditor.selectedTileArea = [[copy, copy], [copy, copy]];
+            this.tileEditor.activateMarker(true);
+            this.scene.regionEditor.regionTool = false;
+            this.highlightModeButton(3);
         }
-        var copy = __assign({}, this.tileEditor.selectedTile);
-        copy.index = 0;
-        this.tileEditor.selectedTile = copy;
-        this.tileEditor.selectedTileArea = [[copy, copy], [copy, copy]];
-        this.tileEditor.activateMarker(true);
-        this.scene.regionEditor.regionTool = false;
-        this.highlightModeButton(3);
     };
     DevModeTools.prototype.highlightModeButton = function (n) {
         this.modeButtons.forEach(function (button, index) {

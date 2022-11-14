@@ -7,10 +7,10 @@ class TileEditor {
 	paletteMarker: TileMarker;
 
     area: { x: number, y: number };
-
     selectedTile: Phaser.Tilemaps.Tile;
 	selectedTileArea: Phaser.Tilemaps.Tile[][];
-
+	lastSelectedTile: Phaser.Tilemaps.Tile;
+	lastSelectedTileArea: Phaser.Tilemaps.Tile[][];
 
 	constructor (
         gameScene: GameScene, devModeScene: DevModeScene, devModeTools: DevModeTools
