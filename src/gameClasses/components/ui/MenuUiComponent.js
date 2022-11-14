@@ -725,9 +725,13 @@ var MenuUiComponent = IgeEntity.extend({
 		var defaultContent = 'Lost connection to the game server. Please refresh this page or visit our homepage.';
 		ige.client.disconnected = true;
 
-		if (ige.developerMode.active) {
+		if (['1', '4', '5'].includes(window.gameDetails?.tier)) {
 			defaultContent = 'Republish action triggered. Refreshing page...';
-			window.history.replaceState({}, '', `/play/${gameSlug}?enterDevMode=true`);
+			if (ige.developerMode.active) {
+				window.history.replaceState({}, '', `/play/${gameSlug}?enterDevMode=true`);
+			} else {
+				window.history.replaceState({}, '', `/play/${gameSlug}?enterDevMode=false`);
+			}
 		}
 
 		$('#server-disconnect-modal .modal-body').html(message || defaultContent);
