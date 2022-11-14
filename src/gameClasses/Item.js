@@ -304,7 +304,6 @@ var Item = IgeEntityPhysics.extend({
 				if (ige.physics && self._stats.type == 'weapon') {
 					if (self._stats.isGun) {
 						if (self._stats.bulletStartPosition) {
-							console.log()
 							var rotate = this._rotate.z;
 							if (owner && self._stats.currentBody && self._stats.currentBody.jointType == 'weldJoint') {
 								rotate = owner._rotate.z;
