@@ -10,6 +10,7 @@ class GameScene extends PhaserScene {
 
 	public tilemap: Phaser.Tilemaps.Tilemap;
 	tileset: Phaser.Tilemaps.Tileset;
+	cameraTarget: Phaser.GameObjects.Container & IRenderProps;
 
 	constructor() {
 		super({ key: 'Game' });

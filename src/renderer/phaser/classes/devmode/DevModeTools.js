@@ -99,8 +99,9 @@ var DevModeTools = /** @class */ (function (_super) {
         this.toolButtonsContainer.setVisible(false);
         this.regionEditor.hideRegions();
         ige.client.emit('zoom', this.scene.defaultZoom);
-        var myUnit = ige.$(ige.client.myPlayer._stats.selectedUnitId);
-        myUnit.emit('follow');
+        this.scene.gameScene.cameras.main.startFollow(this.scene.gameScene.cameraTarget, false, 0.05, 0.05);
+        /*const myUnit = ige.$(ige.client.myPlayer._stats.selectedUnitId);
+        myUnit.emit('follow');*/
     };
     DevModeTools.prototype.keyBindings = function () {
         var _this = this;

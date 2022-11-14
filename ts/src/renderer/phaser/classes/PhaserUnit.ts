@@ -136,7 +136,10 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		if (camera._follow === this.gameObject) {
 			return;
 		}
-		camera.startFollow(this.gameObject, false, 0.05, 0.05);
+		this.scene.cameraTarget = this.gameObject;
+		if (!ige.developerMode.active) {
+			camera.startFollow(this.gameObject, false, 0.05, 0.05);
+		}
 	}
 
 	private getLabel (): Phaser.GameObjects.Text {
