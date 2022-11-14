@@ -242,9 +242,17 @@ const Client = IgeEventingClass.extend({
 
 	loadPhysics: function() {
 		// this will be empty string in data if no client-side physics
-		ige.addComponent(PhysicsComponent)
+
+		const clientPhysicsEngine = ige.game.data.defaultData.clientPhysicsEngine;
+		const serverPhysicsEngine = ige.game.data.defaultData.physicsEngine;
+
+		if (clientPhysicsEngine) {
+
+			ige.addComponent(PhysicsComponent)
 				.physics.sleep(true);
 		
+		}
+
 		this.physicsConfigLoaded.resolve();
 	},
 
@@ -278,8 +286,10 @@ const Client = IgeEventingClass.extend({
 
 			this.loadMap();
 
-			// old comment => 'always enable CSP'
-			this.loadCSP();
+			if (ige.physics) {
+				// old comment => 'always enable CSP'
+				this.loadCSP();
+			}
 			
 			// added important configuration details for sandbox
 			if (mode == 'sandbox') {

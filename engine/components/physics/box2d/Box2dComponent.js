@@ -32,9 +32,14 @@ var PhysicsComponent = IgeEventingClass.extend({
 		this.engine = dists.defaultEngine;
 
 		if (ige.game && ige.game.data && ige.game.data.defaultData) {
-			this.engine = ige.game.data.defaultData.physicsEngine;
+			if (ige.isServer) {
+				this.engine = ige.game.data.defaultData.physicsEngine;
+			} else if (ige.isClient) {
+				this.engine = ige.game.data.defaultData.clientPhysicsEngine;
+			}
+			
 		}
-		
+
 		this.engine = this.engine.toUpperCase();
 
 		// this.engine = 'crash';
@@ -44,7 +49,7 @@ var PhysicsComponent = IgeEventingClass.extend({
 			dists[this.engine].init(this);
 		} else {
 			if (ige.isClient) {
-				alert('no physics engine selected');
+				// alert('no physics engine selected');
 			}
 		}
 	},
