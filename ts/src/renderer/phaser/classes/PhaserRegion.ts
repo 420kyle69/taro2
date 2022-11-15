@@ -38,9 +38,7 @@ class PhaserRegion extends PhaserEntity {
 
 		this.gameObject = gameObject as Phaser.GameObjects.Container & IRenderProps;
 		scene.renderedEntities.push(this.gameObject);
-		// we don't get depth/layer info from taro,
-		// so it can go in 'debris' layer for now
-		scene.entityLayers[EntityLayer.DEBRIS].add(this.gameObject);
+		scene.entityLayers[EntityLayer.TREES].add(this.gameObject);
 
 		this.name = this.entity._stats.id
 
