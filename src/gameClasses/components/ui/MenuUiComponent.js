@@ -126,7 +126,7 @@ var MenuUiComponent = IgeEntity.extend({
 				if(['1', '4', '5'].includes(window.gameDetails?.tier) || window.isStandalone) {
 					loadEditor();
 
-					$('#game-editor').toggle();
+					$('#game-editor').show();
 
 					if (restoreWindows) {
 						$('.winbox').show();
