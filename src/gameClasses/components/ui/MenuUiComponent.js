@@ -722,21 +722,32 @@ var MenuUiComponent = IgeEntity.extend({
 
 		if (ige.isMobile) return;
 
-		var defaultContent = 'Lost connection to the game server. Please refresh this page or visit our homepage.';
 		ige.client.disconnected = true;
+		var defaultContent = 'Lost connection to the game server. Please refresh this page or visit our homepage.';
 
-		if (ige.developerMode.active) {
+		if (['1', '4', '5'].includes(window.gameDetails?.tier)) {
 			defaultContent = 'Republish action triggered. Refreshing page...';
-			window.history.replaceState({}, '', `/play/${gameSlug}?enterDevMode=true`);
-		}
+			if (ige.developerMode.active) {
+				window.history.replaceState({}, '', `/play/${gameSlug}?enterDevMode=true`);
+			} else {
+				window.history.replaceState({}, '', `/play/${gameSlug}?enterDevMode=false`);
+			}
 
-		$('#server-disconnect-modal .modal-body').html(message || defaultContent);
-		$('#server-disconnect-modal').modal('show');
-
-		if (ige.developerMode.active) {
+			window.swal.fire({
+				type: 'info',
+				title: 'About',
+				html: defaultContent,
+				showConfirmButton: false,
+				allowOutsideClick: false,
+				allowEscapeKey: false
+			});
+			
 			setTimeout(function () {
 				window.location.reload();
 			}, 200);
+		} else {
+			$('#server-disconnect-modal .modal-body').html(message || defaultContent);
+			$('#server-disconnect-modal').modal('show');
 		}
 
 		// refreshIn("connection-lost-refresh", 5);

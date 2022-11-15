@@ -111,7 +111,10 @@ var PhaserUnit = /** @class */ (function (_super) {
         if (camera._follow === this.gameObject) {
             return;
         }
-        camera.startFollow(this.gameObject, false, 0.05, 0.05);
+        this.scene.cameraTarget = this.gameObject;
+        if (!ige.developerMode.active) {
+            camera.startFollow(this.gameObject, false, 0.05, 0.05);
+        }
     };
     PhaserUnit.prototype.getLabel = function () {
         if (!this.label) {

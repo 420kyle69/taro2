@@ -40,9 +40,7 @@ var PhaserRegion = /** @class */ (function (_super) {
         });
         _this.gameObject = gameObject;
         scene.renderedEntities.push(_this.gameObject);
-        // we don't get depth/layer info from taro,
-        // so it can go in 'debris' layer for now
-        scene.entityLayers[EntityLayer.DEBRIS].add(_this.gameObject);
+        scene.entityLayers[EntityLayer.TREES].add(_this.gameObject);
         _this.name = _this.entity._stats.id;
         if (!stats.inside) {
             _this.devModeOnly = true;
