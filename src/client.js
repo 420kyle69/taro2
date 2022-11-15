@@ -744,6 +744,7 @@ const Client = IgeEventingClass.extend({
 		ige.network.define('userJoinedGame', this._onUserJoinedGame);
 
 		ige.network.define('trade', this._onTrade);
+
 		ige.network.define('editTile', this._onEditTile);
 		ige.network.define('editRegion', this._onEditRegion);
 	},

@@ -108,6 +108,16 @@ class DevModeScene extends PhaserScene {
 		this.devModeTools.leaveDevMode();
 	}
 
+	//TODO: call this with data example: {entityType: 'unit', typeId: 'bear', playerId: ige.network.id(), position: {x: 0, y: 0}, angle: 0}
+	editEntity (data: {entityType: string, 
+		typeId: string, 
+		playerId: string, 
+		position: {x: number, y: number}, 
+		angle: number
+	}): void {
+		ige.network.send('editEntity', data);
+	}
+
 	pointerInsideMap(pointerX: number, pointerY: number, map: Phaser.Tilemaps.Tilemap): boolean {
 		return (0 <= pointerX && pointerX < map.width
 			&& 0 <= pointerY && pointerY < map.height);

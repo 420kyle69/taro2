@@ -87,6 +87,10 @@ var DevModeScene = /** @class */ (function (_super) {
     DevModeScene.prototype.leaveDevMode = function () {
         this.devModeTools.leaveDevMode();
     };
+    //TODO: call this with data example: {entityType: 'unit', typeId: 'bear', playerId: ige.network.id(), position: {x: 0, y: 0}, angle: 0}
+    DevModeScene.prototype.editEntity = function (data) {
+        ige.network.send('editEntity', data);
+    };
     DevModeScene.prototype.pointerInsideMap = function (pointerX, pointerY, map) {
         return (0 <= pointerX && pointerX < map.width
             && 0 <= pointerY && pointerY < map.height);

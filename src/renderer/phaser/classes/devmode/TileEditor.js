@@ -47,6 +47,7 @@ var TileEditor = /** @class */ (function () {
                 map.getTileAt(tileX, tileY, true).tint = 0xffffff;
                 console.log('place tile', index);
                 ige.network.send('editTile', { gid: index, layer: map.currentLayerIndex, x: tileX, y: tileY });
+                this.devModeTools.scene.editEntity({ entityType: 'unit', typeId: 'bear', playerId: ige.network.id(), position: { x: 0, y: 0 }, angle: 0 });
             }
         }
     };

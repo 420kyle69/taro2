@@ -110,6 +110,31 @@ class DeveloperMode {
 			ige.network.send("editRegion", data);
 		}
 	}
+
+	editEntity (data, clientId) {
+		if (data.entityType === 'unit') {
+			const player = ige.game.getPlayerByClientId(data.playerId);
+			const unitTypeId = data.typeId;
+			const unitTypeData = ige.game.getAsset('unitTypes', unitTypeId);
+			const spawnPosition = data.position;
+			const facingAngle = data.angle;
+
+			if (player && spawnPosition && unitTypeId && unitTypeData) {
+				const unitData = Object.assign(
+					unitTypeData,
+					{
+						type: unitTypeId,
+						defaultData: {
+							translate: spawnPosition,
+							rotate: facingAngle
+						}
+					}
+				);
+				const unit = player.createUnit(unitData);
+				ige.game.lastCreatedUnitId = unit.id();
+			}
+		}
+	}
  
 	updateClientMap (data: { mapData: MapData }): void {
 		console.log ('map data was edited', data.mapData.wasEdited)

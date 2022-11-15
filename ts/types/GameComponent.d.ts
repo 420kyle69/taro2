@@ -38,6 +38,8 @@ interface MapData {
 }
 
 declare class GameComponent extends IgeEntity {
+	lastCreatedUnitId: string;
+	getAsset(arg0: string, unitTypeId: string): any;
 	getPlayerByClientId(clientId: string): Player;
 
 	data: {

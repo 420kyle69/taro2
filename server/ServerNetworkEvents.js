@@ -442,6 +442,10 @@ var ServerNetworkEvents = {
 		ige.developerMode.editRegion(data, clientId);
 	},
 
+	_onEditEntity: function(data, clientId) {
+		ige.developerMode.editEntity(data, clientId);
+	},
+
 	_onBuyItem: function (data, clientId) {
 		const {id, token} = data;
 		ige.devLog('player ' + clientId + ' wants to purchase item' + id);
