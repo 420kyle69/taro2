@@ -52,6 +52,8 @@ var AttributeComponent = IgeEntity.extend({
 		}
 	},
 
+	// update attributes upon equipping/unequipping items.
+	// the bonuses will only affect maxValue of the attributes. Not the current values of the attributes
 	updatePassiveAttributes: function (removeAttribute, currentItemId, unitTypeChange, persistedData) {
 		// reset unit attribute
 		var self = this;
