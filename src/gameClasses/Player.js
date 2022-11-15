@@ -696,7 +696,9 @@ var Player = IgeEntity.extend({
 					// }
 					// $('#game-suggestions-card').removeClass('d-xl-block');
 					// $("#invite-players-card").show();
-					$('#toggle-dev-panels').show();
+					// $('#toggle-dev-panels').show();
+					$('#toggle-dev-panels').click();
+					window.enterDirectlyInDevMode = true;
 				} 
 				if (ige.game.data.isDeveloper) {
 					$('#kick-player').show();
