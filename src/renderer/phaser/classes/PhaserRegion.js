@@ -26,14 +26,14 @@ var PhaserRegion = /** @class */ (function (_super) {
         gameObject.setSize(stats.width, stats.height);
         gameObject.setPosition(stats.x + stats.width / 2, stats.y + stats.height / 2);
         gameObject.setInteractive();
-        gameObject.on('pointerdown', function () {
-            if (ige.developerMode.active && _this.devModeScene.devModeTools.cursorButton.active) {
+        gameObject.on('pointerdown', function (p) {
+            if (ige.developerMode.active && _this.devModeScene.devModeTools.cursorButton.active && p.leftButtonDown()) {
                 _this.scene.input.setTopOnly(true);
                 _this.devModeScene.regionEditor.addClickedList({ name: _this.entity._stats.id, x: stats.x, y: stats.y, width: stats.width, height: stats.height });
             }
         });
-        gameObject.on('pointerup', function () {
-            if (ige.developerMode.active && _this.devModeScene.devModeTools.cursorButton.active) {
+        gameObject.on('pointerup', function (p) {
+            if (ige.developerMode.active && _this.devModeScene.devModeTools.cursorButton.active && p.leftButtonReleased()) {
                 _this.scene.input.setTopOnly(false);
                 _this.devModeScene.regionEditor.showClickedList();
             }
@@ -61,7 +61,7 @@ var PhaserRegion = /** @class */ (function (_super) {
             var label = this.label = this.scene.add.text(0, 0, 'cccccc');
             label.visible = false;
             // needs to be created with the correct scale of the client
-            this.label.setScale(1 / this.scene.cameras.main.zoom);
+            this.label.setScale(1.3);
             label.setOrigin(0);
             this.gameObject.add(label);
         }

@@ -82,9 +82,26 @@ var TilePalette = /** @class */ (function (_super) {
             camera.x = _this.scene.sys.game.canvas.width - paletteWidth - 40;
             scrollBarContainer.x = _this.camera.x;
         });
+        var pointerover;
+        texturesLayer.on('pointerover', function (p) {
+            pointerover = true;
+        });
+        texturesLayer.on('pointerout', function (p) {
+            pointerover = false;
+        });
         _this.scene.input.on('wheel', function (pointer, gameObjects, deltaX, deltaY, deltaZ) {
-            if (_this.visible) {
-                _this.zoom(deltaY);
+            if (ige.developerMode.active) {
+                if (_this.visible && pointerover) {
+                    _this.zoom(deltaY);
+                }
+                else if (deltaY < 0) {
+                    var zoom = (_this.scene.gameScene.zoomSize / 2.15) / 1.1;
+                    ige.client.emit('zoom', zoom);
+                }
+                else if (deltaY > 0) {
+                    var zoom = (_this.scene.gameScene.zoomSize / 2.15) * 1.1;
+                    ige.client.emit('zoom', zoom);
+                }
             }
         });
         return _this;

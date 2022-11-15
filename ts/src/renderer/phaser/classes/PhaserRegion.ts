@@ -23,14 +23,14 @@ class PhaserRegion extends PhaserEntity {
 		gameObject.setSize(stats.width, stats.height);
 		gameObject.setPosition(stats.x + stats.width/2, stats.y + stats.height/2);
 		gameObject.setInteractive();
-		gameObject.on('pointerdown', () => {
-			if (ige.developerMode.active && this.devModeScene.devModeTools.cursorButton.active) {
+		gameObject.on('pointerdown', (p) => {
+			if (ige.developerMode.active && this.devModeScene.devModeTools.cursorButton.active && p.leftButtonDown()) {
 				this.scene.input.setTopOnly(true);
 				this.devModeScene.regionEditor.addClickedList({name: this.entity._stats.id, x: stats.x, y: stats.y, width: stats.width, height: stats.height});
 			}
 		});
-		gameObject.on('pointerup', () => {
-			if (ige.developerMode.active && this.devModeScene.devModeTools.cursorButton.active) {
+		gameObject.on('pointerup', (p) => {
+			if (ige.developerMode.active && this.devModeScene.devModeTools.cursorButton.active && p.leftButtonReleased()) {
 				this.scene.input.setTopOnly(false);
 				this.devModeScene.regionEditor.showClickedList();
 			}
@@ -65,7 +65,7 @@ class PhaserRegion extends PhaserEntity {
 			label.visible = false;
 
 			// needs to be created with the correct scale of the client
-			this.label.setScale(1 / this.scene.cameras.main.zoom);
+			this.label.setScale(1.3);
 			label.setOrigin(0);
 
 			this.gameObject.add(label);

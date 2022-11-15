@@ -702,7 +702,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 			}
 
 			// if the token has been used already, close the connection.
-			const isUsedToken = ige.server.usedTokens[token];
+			const isUsedToken = ige.server.usedConnectionJwts[token];
 			if (isUsedToken) {
 				console.log('Token has been used already', token);
 				socket.close('Security token could not be validated, please refresh the page.');
@@ -710,17 +710,17 @@ NetIo.Server = NetIo.EventingClass.extend({
 			}
 
 			// store token for current client
-			ige.server.usedTokens[token] = socket._token.tokenCreatedAt;
+			ige.server.usedConnectionJwts[token] = socket._token.tokenCreatedAt;
 
 			// remove expired tokens
-			const filteredUsedTokens = {};
-			const usedTokenEntries = Object.entries(ige.server.usedTokens).filter(([token, tokenCreatedAt]) => (Date.now() - tokenCreatedAt) < ige.server.TOKEN_EXPIRES_IN);
+			const filteredUsedConnectionJwts = {};
+			const usedTokenEntries = Object.entries(ige.server.usedConnectionJwts).filter(([token, tokenCreatedAt]) => (Date.now() - tokenCreatedAt) < ige.server.CONNECTION_JWT_EXPIRES_IN);
 			for (const [key, value] of usedTokenEntries) {
 				if (typeof value === 'number') {
-					filteredUsedTokens[key] = value;
+					filteredUsedConnectionJwts[key] = value;
 				}
 			}
-			ige.server.usedTokens = filteredUsedTokens;
+			ige.server.usedConnectionJwts = filteredUsedConnectionJwts;
 
 		}
 

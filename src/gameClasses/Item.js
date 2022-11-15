@@ -330,7 +330,10 @@ var Item = IgeEntityPhysics.extend({
 								y: (owner._translate.y + self.anchoredOffset.y) + (self._stats.bulletStartPosition.x * Math.sin(offsetAngle)) - (bulletY * Math.cos(offsetAngle))
 							};
 
-							if (this._stats.isGun) {
+							if (
+								this._stats.isGun &&
+								(ige.isServer || (ige.isClient && ige.physics)) // render projectile on clientside if physics is enabled
+							) {
 								var defaultData = {
 									rotate: rotate,
 									translate: bulletStartPosition

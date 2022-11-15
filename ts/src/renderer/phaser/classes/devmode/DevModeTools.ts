@@ -87,6 +87,18 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.layerButtonsContainer.setVisible(false);
 		this.toolButtonsContainer.setVisible(false);
 		this.regionEditor.hideRegions();
+
+		const ctrlKey = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CTRL, false);
+
+		this.scene.input.on('pointermove', function (p) {
+			if (ige.developerMode.active && (p.rightButtonDown() || (p.isDown && ctrlKey.isDown))) {
+				const camera = this.scene.gameScene.cameras.main;
+				const scrollX = (p.x - p.prevPosition.x) / camera.zoom
+				const scrollY = (p.y - p.prevPosition.y) / camera.zoom;
+				camera.scrollX -= scrollX;
+				camera.scrollY -= scrollY;
+			};
+		});
 	}
 
 	enterDevMode(): void {
@@ -96,6 +108,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.tileEditor.activateMarker(false);
 		this.palette.show();
 		this.regionEditor.showRegions();
+		this.scene.gameScene.cameras.main.stopFollow();
 	}
 
 	leaveDevMode(): void {
@@ -105,6 +118,9 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.toolButtonsContainer.setVisible(false);
 		this.regionEditor.hideRegions();
 		ige.client.emit('zoom', this.scene.defaultZoom);
+
+		const myUnit = ige.$(ige.client.myPlayer._stats.selectedUnitId);
+		myUnit.emit('follow');
 	}
 
 	keyBindings(): void {
@@ -214,6 +230,9 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.brushButtons[0].highlight(true);
 		this.brushButtons[1].highlight(false);
 		this.tileEditor.activateMarker(true);
+		if (!this.modeButtons[3].active) {
+			this.brush();
+		}
 	}
 
 	selectArea(): void {
@@ -224,6 +243,9 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.brushButtons[1].highlight(true);
 		this.brushButtons[0].highlight(false);
 		this.tileEditor.activateMarker(true);
+		if (!this.modeButtons[3].active) {
+			this.brush();
+		}
 	}
 
 	switchLayer(value: number): void {
@@ -234,6 +256,5 @@ class DevModeTools extends Phaser.GameObjects.Container {
 			button.highlight(false);
 		});
 		this.layerButtons[value].highlight(true);
-		
 	}
 }
