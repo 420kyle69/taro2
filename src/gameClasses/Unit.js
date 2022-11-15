@@ -1354,7 +1354,7 @@ var Unit = IgeEntityPhysics.extend({
 				};
 
 				ige.script.trigger('unitAttacksUnit', triggeredBy);
-				this.script.trigger('unitAttacksUnit', triggeredBy);
+				this.script.trigger('entityGetsAttacked', triggeredBy);
 
 				var armor = this._stats.attributes.armor && this._stats.attributes.armor.value || 0;
 				var damageReduction = (0.05 * armor) / (1.5 + 0.04 * armor);
