@@ -111,6 +111,47 @@ class DeveloperMode {
 		}
 	}
 
+	// createUnit() {
+	// 	// 1. create unit
+	// }
+
+	// updateUnit() {
+	// 	// 1. broadcast update to all players
+	// 	// 2. force update its dimension/scale/layer/image
+	// }
+
+	// deleteUnit() {
+
+	// }
+
+	// createItem() {
+		
+	// }
+
+	// updateItem() {
+	// 	// 1. broadcast update to all players
+	// 	// 2. force update its dimension/scale/layer/image
+	// 	// 3. we may need to re-mount the item on unit
+	// }
+
+	// deleteItem() {
+
+	// }
+
+	// createProjectile() {
+
+	// }
+
+	// updateProjectile() {
+	// 	// 1. broadcast update to all players
+	// 	// 2. force update its dimension/scale/layer/image
+	// }
+
+	// deleteProjectile() {
+
+	// }
+	
+
 	editEntity (data, clientId) {
 		if (data.entityType === 'unit') {
 			//const player = ige.game.getPlayerByClientId(clientId);
