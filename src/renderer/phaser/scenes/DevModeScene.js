@@ -39,7 +39,7 @@ var DevModeScene = /** @class */ (function (_super) {
             // ige.unitBeingDragged = {typeId: 'unit id', playerId: 'xyz', angle: 0, entityType: 'unit'}
             if (draggedEntity) {
                 // find position and call editEntity function.
-                var worldPoint = _this.cameras.main.getWorldPoint(p.x, p.y);
+                var worldPoint = _this.gameScene.cameras.main.getWorldPoint(p.x, p.y);
                 var data = {
                     entityType: draggedEntity.entityType,
                     typeId: draggedEntity.typeId,
