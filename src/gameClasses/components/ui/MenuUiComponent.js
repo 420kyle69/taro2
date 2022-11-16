@@ -123,7 +123,10 @@ var MenuUiComponent = IgeEntity.extend({
 			});
 
 			$('#toggle-dev-panels').on('click', function () {
-				if(['1', '4', '5'].includes(window.gameDetails?.tier) || window.isStandalone) {
+				if (ige.game.data.isGameDeveloper) {
+					return;
+				}
+				if((['1', '4', '5'].includes(window.gameDetails?.tier)) || window.isStandalone) {
 					loadEditor();
 
 					$('#game-editor').show();
@@ -725,7 +728,7 @@ var MenuUiComponent = IgeEntity.extend({
 		ige.client.disconnected = true;
 		var defaultContent = 'Lost connection to the game server. Please refresh this page or visit our homepage.';
 
-		if (['1', '4', '5'].includes(window.gameDetails?.tier)) {
+		if (['1', '4', '5'].includes(window.gameDetails?.tier) && !src.includes('clientNetworkEvents') && !window.preventFurtherAutoJoin) {
 			defaultContent = 'Republish action triggered. Refreshing page...';
 			if (ige.developerMode.active) {
 				window.history.replaceState({}, '', `/play/${gameSlug}?enterDevMode=true`);
@@ -746,6 +749,7 @@ var MenuUiComponent = IgeEntity.extend({
 				window.location.reload();
 			}, 200);
 		} else {
+			window.preventFurtherAutoJoin = true;
 			$('#server-disconnect-modal .modal-body').html(message || defaultContent);
 			$('#server-disconnect-modal').modal('show');
 		}
