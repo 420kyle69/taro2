@@ -107,12 +107,17 @@ var DeveloperMode = /** @class */ (function () {
     };
     DeveloperMode.prototype.editEntity = function (data, clientId) {
         if (data.entityType === 'unit') {
-            var player = ige.game.getPlayerByClientId(data.playerId);
+            //const player = ige.game.getPlayerByClientId(clientId);
+            var player_1;
+            ige.$$('player').forEach(function (p) {
+                if (p.id() === data.playerId)
+                    player_1 = p;
+            });
             var unitTypeId = data.typeId;
             var unitTypeData = ige.game.getAsset('unitTypes', unitTypeId);
             var spawnPosition = data.position;
             var facingAngle = data.angle;
-            if (player && spawnPosition && unitTypeId && unitTypeData) {
+            if (player_1 && spawnPosition && unitTypeId && unitTypeData) {
                 var unitData = Object.assign(unitTypeData, {
                     type: unitTypeId,
                     defaultData: {
@@ -120,8 +125,32 @@ var DeveloperMode = /** @class */ (function () {
                         rotate: facingAngle
                     }
                 });
-                var unit = player.createUnit(unitData);
+                var unit = player_1.createUnit(unitData);
                 ige.game.lastCreatedUnitId = unit.id();
+            }
+        }
+        else if (data.entityType === 'item') {
+            var itemTypeId = data.typeId;
+            var itemData = ige.game.getAsset('itemTypes', itemTypeId);
+            var position = data.position;
+            var facingAngle = data.angle;
+            var quantity = itemData.maxQuantity;
+            if (quantity == -1) {
+                quantity = null;
+            }
+            if (itemData) {
+                itemData.itemTypeId = itemTypeId;
+                itemData.isHidden = false;
+                itemData.stateId = 'dropped';
+                itemData.spawnPosition = position;
+                itemData.quantity = quantity;
+                itemData.defaultData = {
+                    translate: position,
+                    rotate: facingAngle
+                };
+                var item = new Item(itemData);
+                ige.game.lastCreatedUnitId = item._id;
+                item.script.trigger("entityCreated");
             }
         }
     };

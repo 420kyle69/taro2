@@ -40,10 +40,11 @@ var DevModeScene = /** @class */ (function (_super) {
             if (draggedEntity) {
                 // find position and call editEntity function.
                 var worldPoint = _this.gameScene.cameras.main.getWorldPoint(p.x, p.y);
+                var playerId = ige.game.getPlayerByClientId(ige.network.id()).id();
                 var data = {
                     entityType: draggedEntity.entityType,
                     typeId: draggedEntity.typeId,
-                    playerId: draggedEntity.playerId,
+                    playerId: playerId,
                     position: {
                         x: worldPoint.x,
                         y: worldPoint.y

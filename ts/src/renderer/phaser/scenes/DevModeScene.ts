@@ -45,10 +45,11 @@ class DevModeScene extends PhaserScene {
 			if (draggedEntity) {
 			    // find position and call editEntity function.
 				const worldPoint = this.gameScene.cameras.main.getWorldPoint(p.x, p.y);
+				const playerId = ige.game.getPlayerByClientId(ige.network.id()).id();
 				const data = {
 					entityType: draggedEntity.entityType,
 					typeId: draggedEntity.typeId,
-					playerId: draggedEntity.playerId,
+					playerId: playerId,
 					position: {
 						x: worldPoint.x,
 						y: worldPoint.y

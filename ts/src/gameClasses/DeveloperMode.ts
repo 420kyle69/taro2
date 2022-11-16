@@ -113,7 +113,11 @@ class DeveloperMode {
 
 	editEntity (data, clientId) {
 		if (data.entityType === 'unit') {
-			const player = ige.game.getPlayerByClientId(data.playerId);
+			//const player = ige.game.getPlayerByClientId(clientId);
+			let player;
+			ige.$$('player').forEach(p => {
+				if (p.id() === data.playerId) player = p;
+			});
 			const unitTypeId = data.typeId;
 			const unitTypeData = ige.game.getAsset('unitTypes', unitTypeId);
 			const spawnPosition = data.position;
@@ -132,6 +136,31 @@ class DeveloperMode {
 				);
 				const unit = player.createUnit(unitData);
 				ige.game.lastCreatedUnitId = unit.id();
+			}
+		} else if (data.entityType === 'item') {
+			const itemTypeId = data.typeId;
+			const itemData = ige.game.getAsset('itemTypes', itemTypeId);
+			const position = data.position;
+			const facingAngle = data.angle;
+			let quantity = itemData.maxQuantity;
+
+			if (quantity == -1) {
+				quantity = null;
+			}
+
+			if (itemData) {
+				itemData.itemTypeId = itemTypeId;
+				itemData.isHidden = false;
+				itemData.stateId = 'dropped';
+				itemData.spawnPosition = position;
+				itemData.quantity = quantity;
+				itemData.defaultData = {
+					translate: position,
+					rotate: facingAngle
+				};
+				var item = new Item(itemData);
+				ige.game.lastCreatedUnitId = item._id;
+				item.script.trigger("entityCreated");
 			}
 		}
 	}
