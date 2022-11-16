@@ -67,12 +67,15 @@ class MobileControlsScene extends PhaserScene {
 					} else {
 						const label = this.add.bitmapText(
 							x + w/2, y + h/2,
-							'Arial_24px_bold_white',
+							BitmapFontManager.font(this,
+								'Arial', true, '#FFFFFF'
+							),
 							text
 						);
 						label.setCenterAlign();
-						label.setFontSize(26);
+						label.setFontSize(24);
 						label.setOrigin(0.5);
+						label.letterSpacing = -0.4;
 						controls.add(label);
 					}
 
@@ -127,7 +130,7 @@ class MobileControlsScene extends PhaserScene {
 				var touchX = pointer.x;
 				var touchY = pointer.y;
 				if (touchX < this.cameras.main.displayWidth / 2.4) {
-					const leftJoystick = this.joysticks.find(({ side }) => side === "left");
+					const leftJoystick = this.joysticks.find(({ side }) => side === 'left');
 					if (leftJoystick) {
 						leftJoystick.show();
 						leftJoystick.x = touchX;
@@ -135,7 +138,7 @@ class MobileControlsScene extends PhaserScene {
 						leftJoystick.updateTransform();
 					}
 				} else if (touchX > this.cameras.main.displayWidth - (this.cameras.main.displayWidth / 2.4)) {
-					const rightJoystick = this.joysticks.find(({ side }) => side === "right");
+					const rightJoystick = this.joysticks.find(({ side }) => side === 'right');
 					if (rightJoystick) {
 						rightJoystick.show();
 						rightJoystick.x = touchX;

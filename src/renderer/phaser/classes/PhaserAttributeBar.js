@@ -22,10 +22,11 @@ var PhaserAttributeBar = /** @class */ (function (_super) {
         _this.unit = unit;
         var bar = _this.bar = scene.add.graphics();
         _this.add(bar);
-        var text = _this.text = scene.add.bitmapText(0, 0, 'Arial_24px_bold_black');
+        var text = _this.text = scene.add.bitmapText(0, 0, BitmapFontManager.font(scene, 'Arial', true, '#000000'));
         text.setCenterAlign();
-        text.setFontSize(16);
+        text.setFontSize(14);
         text.setOrigin(0.5);
+        text.letterSpacing = -0.8;
         _this.add(text);
         unit.attributesContainer.add(_this);
         return _this;

@@ -20,15 +20,16 @@ class PhaserChatBubble extends Phaser.GameObjects.Container {
 
 		const text = this.textObject = scene.add.bitmapText(
 			0, 0,
-			'Arial_24px_bold_white'
+			BitmapFontManager.font(scene, 'Arial', true, '#FFFFFF')
 		);
 
 		// needs to be created with the correct scale of the client
 		this.setScale(1 / this.scene.cameras.main.zoom);
 
-		text.setFontSize(14);
+		text.setFontSize(12);
 		text.setCenterAlign();
 		text.setOrigin(0.5);
+		text.letterSpacing = -0.6;
 
 		this.add(text);
 
