@@ -123,7 +123,7 @@ var MenuUiComponent = IgeEntity.extend({
 			});
 
 			$('#toggle-dev-panels').on('click', function () {
-				if (ige.game.data.isGameDeveloper) {
+				if (!ige.game.data.isGameDeveloper) {
 					return;
 				}
 				if((['1', '4', '5'].includes(window.gameDetails?.tier)) || window.isStandalone) {
