@@ -10,6 +10,7 @@ class GameScene extends PhaserScene {
 
 	public tilemap: Phaser.Tilemaps.Tilemap;
 	tileset: Phaser.Tilemaps.Tileset;
+	cameraTarget: Phaser.GameObjects.Container & IRenderProps;
 
 	constructor() {
 		super({ key: 'Game' });
@@ -123,6 +124,21 @@ class GameScene extends PhaserScene {
 			this.load.image(key, this.patchAssetUrl(tileset.image));
 		});
 
+		//to be sure every layer of map have correct number of tiles
+		const tilesPerLayer = data.map.height * data.map.width;
+		data.map.layers.forEach(layer => {
+			if (layer.name !== 'debris') {
+				const length = layer.data.length;
+				console.log('before', layer.name, length, tilesPerLayer)
+				if (length < tilesPerLayer) {
+					for (let i = length + 1; i < tilesPerLayer; i++) {
+						layer.data[i] = 0;
+					}
+				}
+				console.log('after', layer.name, layer.data.length, tilesPerLayer)
+			}
+		});
+
 		this.load.tilemapTiledJSON('map', this.patchMapData(data.map));
 
 		this.load.bitmapFont('Arial_24px_bold_black',
@@ -196,7 +212,7 @@ class GameScene extends PhaserScene {
 	}
 
 	create (): void {
-		this.scene.launch('Palette');
+		this.scene.launch('DevMode');
 		ige.client.rendererLoaded.resolve();
 
 		const map = this.tilemap = this.make.tilemap({ key: 'map' });
@@ -289,8 +305,20 @@ class GameScene extends PhaserScene {
 		data.map.layers.forEach((layer) => {
 			if (layer.type === 'tilelayer') {
 				let layerId;
-				if (layer.id - 1 >= 2) layerId = layer.id - 2
-				else layerId = layer.id - 1
+				switch (layer.name) {
+					case 'floor':
+						layerId = TileLayer.FLOOR;
+						break;
+					case 'floor2':
+						layerId = TileLayer.FLOOR_2;
+						break;
+					case 'walls':
+						layerId = TileLayer.WALLS;
+						break;
+					case 'trees':
+						layerId = TileLayer.TREES;
+						break;
+				}
 				layer.data.forEach((tile, index) => {
 					const x = index % layer.width;
 					const y = Math.floor(index/layer.width);

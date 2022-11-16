@@ -12,31 +12,37 @@ interface EntityData {
 	}>
 }
 
+interface MapData {
+	wasEdited: boolean;
+	tilewidth: number;
+	tileheight: number;
+	width: number,
+	height: number,
+	tilesets: {
+		image: string;
+		margin: number;
+		name: string;
+		spacing: number;
+		tilecount: number;
+		tileheight: number;
+		tilewidth: number;
+	}[];
+	layers: {
+		data: number[];
+		name: string;
+		width: number,
+		height: number,
+		id: number,
+		type: 'tilelayer' | 'objectgroup';
+	}[];
+}
+
 declare class GameComponent extends IgeEntity {
+	getPlayerByClientId(clientId: string): Player;
 
 	data: {
 		defaultData: any;
-		map: {
-			width: number,
-			height: number,
-			tilesets: {
-				image: string;
-				margin: number;
-				name: string;
-				spacing: number;
-				tilecount: number;
-				tileheight: number;
-				tilewidth: number;
-			}[];
-			layers: {
-				data: number[];
-				name: string;
-				width: number,
-				height: number,
-				id: number,
-				type: 'tilelayer' | 'objectgroup';
-			}[];
-		};
+		map: MapData;
 		unitTypes: Record<string, EntityData>;
 		projectileTypes: Record<string, EntityData>;
 		itemTypes: Record<string, EntityData>;

@@ -97,6 +97,20 @@ var GameScene = /** @class */ (function (_super) {
             });
             _this.load.image(key, _this.patchAssetUrl(tileset.image));
         });
+        //to be sure every layer of map have correct number of tiles
+        var tilesPerLayer = data.map.height * data.map.width;
+        data.map.layers.forEach(function (layer) {
+            if (layer.name !== 'debris') {
+                var length_1 = layer.data.length;
+                console.log('before', layer.name, length_1, tilesPerLayer);
+                if (length_1 < tilesPerLayer) {
+                    for (var i = length_1 + 1; i < tilesPerLayer; i++) {
+                        layer.data[i] = 0;
+                    }
+                }
+                console.log('after', layer.name, layer.data.length, tilesPerLayer);
+            }
+        });
         this.load.tilemapTiledJSON('map', this.patchMapData(data.map));
         this.load.bitmapFont('Arial_24px_bold_black', '/assets/fonts/Arial_24px_bold_black_0.png', '/assets/fonts/Arial_24px_bold_black.fnt');
         this.load.bitmapFont('Arial_24px_bold_white', '/assets/fonts/Arial_24px_bold_white_0.png', '/assets/fonts/Arial_24px_bold_white.fnt');
@@ -149,7 +163,7 @@ var GameScene = /** @class */ (function (_super) {
     };
     GameScene.prototype.create = function () {
         var _this = this;
-        this.scene.launch('Palette');
+        this.scene.launch('DevMode');
         ige.client.rendererLoaded.resolve();
         var map = this.tilemap = this.make.tilemap({ key: 'map' });
         var data = ige.game.data;
@@ -215,10 +229,20 @@ var GameScene = /** @class */ (function (_super) {
         data.map.layers.forEach(function (layer) {
             if (layer.type === 'tilelayer') {
                 var layerId_1;
-                if (layer.id - 1 >= 2)
-                    layerId_1 = layer.id - 2;
-                else
-                    layerId_1 = layer.id - 1;
+                switch (layer.name) {
+                    case 'floor':
+                        layerId_1 = TileLayer.FLOOR;
+                        break;
+                    case 'floor2':
+                        layerId_1 = TileLayer.FLOOR_2;
+                        break;
+                    case 'walls':
+                        layerId_1 = TileLayer.WALLS;
+                        break;
+                    case 'trees':
+                        layerId_1 = TileLayer.TREES;
+                        break;
+                }
                 layer.data.forEach(function (tile, index) {
                     var x = index % layer.width;
                     var y = Math.floor(index / layer.width);

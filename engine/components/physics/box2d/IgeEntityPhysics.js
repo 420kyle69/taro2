@@ -54,7 +54,8 @@ var IgeEntityPhysics = IgeEntity.extend({
 	updateBody: function (defaultData, isLossTolerant) {
 		var self = this;
 
-		// console.log("updatebody", defaultData, this._stats.currentBody.type)
+		// console.log("updatebody", this._stats.name, defaultData, this._stats.currentBody.type)
+		// console.trace()
 
 		body = this._stats.currentBody;
 		if (!body) {
@@ -126,6 +127,9 @@ var IgeEntityPhysics = IgeEntity.extend({
 		// if initialTranform variable's provided, then transform this entity immediately after body creation
 		if (defaultData) {
 			var rotate = defaultData.rotate;
+			if (body.fixedRotation) {
+				rotate = 0;
+			}
 
 			// immediately apply rotate.z if facingAngle is assigned
 			if (!isNaN(rotate)) {
@@ -145,6 +149,8 @@ var IgeEntityPhysics = IgeEntity.extend({
 					// if (isLossTolerant)
 					//     this.translateToLT(x, y, 0)
 					// else
+
+					this.finalKeyFrame = [ige.now, [x, y, rotate]]
 					this.translateTo(x, y, 0);
 				}
 			}
@@ -784,11 +790,7 @@ var IgeEntityPhysics = IgeEntity.extend({
 							break;
 
 						case 'destroy':
-							if (!action.streamToClient) {
-								ige.network.pause()
-							}
 							this.destroy();
-							ige.network.resume()
 							break;
 					}
 				}
@@ -798,13 +800,8 @@ var IgeEntityPhysics = IgeEntity.extend({
 
 	remove: function (isStreaming = true) {
 		this._isBeingRemoved = true;
-		
-		if (this._stats && !this.body) {
-			// destroy items which are spriteOnly or with none body immediately
-			this.destroy();
-		} else {
-			this.queueAction({ type: 'destroy', streamToClient: isStreaming });
-		}
+		this.destroy();
+
 		if (ige.isClient) {
 			this.clearAllPointers();
 		}

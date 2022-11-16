@@ -51,9 +51,6 @@ var Unit = IgeEntityPhysics.extend({
 
 		Unit.prototype.log(`initializing new unit ${this.id()}`);
 
-		// initialize body & texture of the unit
-		self.changeUnitType(data.type, data.defaultData);
-
 		if (ige.isClient) {
 			this.addToRenderer(defaultAnimation && (defaultAnimation.frames[0] - 1));
 			ige.client.emit('create-unit', this);
@@ -66,7 +63,10 @@ var Unit = IgeEntityPhysics.extend({
 				}
 			}
 		}
-		
+
+		// initialize body & texture of the unit
+		self.changeUnitType(data.type, data.defaultData);
+
 		// if unit's scale as already been changed by some script then use that scale
 		if (self._stats.scale) {
 
@@ -382,7 +382,7 @@ var Unit = IgeEntityPhysics.extend({
 		return true;
 	},
 
-	buyItem: function (itemTypeId) {
+	buyItem: function (itemTypeId, token) {
 		var self = this;
 		var ownerPlayer = self.getOwner();
 		// buyItem only runs on server.
@@ -515,13 +515,50 @@ var Unit = IgeEntityPhysics.extend({
 				if (shopData.price.coins && ownerPlayer._stats.coins >= shopData.price.coins) {
 					// disable coin consuming due to some bug wrt coins
 					// add coin consuming code
-					// if (ige.game.data.defaultData.tier == 3 || ige.game.data.defaultData.tier == 4) {
-					//     ige.server.consumeCoinFromUser(ownerPlayer, shopData.price.coins, itemTypeId);
-					//     ownerPlayer.streamUpdateData([{
-					//         coins: ownerPlayer._stats.coins - shopData.price.coins
-					//     }])
-					// }
-					return;
+					if (ige.game.data.defaultData.tier >= 2) {
+						
+						try {
+							const jwt = require("jsonwebtoken");
+							
+							const isUsedToken = ige.server.usedCoinJwts[token];
+							if (isUsedToken) {
+								console.log('Token has been used already', token);
+								return;
+							}
+							
+							const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
+							const {type, userId, purchasableId, createdAt} = decodedToken;
+							
+							if (type === 'pinValidationToken' && userId && purchasableId && ownerPlayer._stats.userId === userId && purchasableId === itemTypeId) {
+								// allow coin transaction since token has been verified
+								
+								// store token for current client
+								ige.server.usedCoinJwts[token] = createdAt;
+								
+								// remove expired tokens
+								const filteredUsedCoinJwts = {};
+								const usedTokenEntries = Object.entries(ige.server.usedCoinJwts).filter(([token, tokenCreatedAt]) => (Date.now() - tokenCreatedAt) < ige.server.COIN_JWT_EXPIRES_IN);
+								for (const [key, value] of usedTokenEntries) {
+									if (typeof value === 'number') {
+										filteredUsedCoinJwts[key] = value;
+									}
+								}
+								ige.server.usedCoinJwts = filteredUsedCoinJwts;
+								
+							} else {
+								return;
+							}
+						} catch (e) {
+							console.log('invalid pinValidationToken', e.message, token);
+							return;
+						}
+						
+						ige.server.consumeCoinFromUser(ownerPlayer, shopData.price.coins, itemTypeId);
+														
+						ownerPlayer.streamUpdateData([{
+								coins: ownerPlayer._stats.coins - shopData.price.coins
+						}])
+					}
 				}
 
 				// remove the first item matching targetSlots if replaceItemInTargetSlot is set as true
@@ -1208,6 +1245,7 @@ var Unit = IgeEntityPhysics.extend({
 		var self = this;
 		var item = self.inventory.getItemBySlotNumber(itemIndex + 1);
 		if (item) {
+			
 			// check if item's undroppable
 			if (item._stats && item._stats.controls && item._stats.controls.undroppable) {
 				return;
@@ -1238,8 +1276,8 @@ var Unit = IgeEntityPhysics.extend({
 					item._translateTo(defaultData.translate.x, defaultData.translate.y)*/
 				}
 
-				item.setState('dropped', defaultData);
 				item.setOwnerUnit(undefined);
+				item.setState('dropped', defaultData);				
 
 				if (item._stats.hidden) {
 					item.streamUpdateData([{ hidden: false }]);
@@ -1316,7 +1354,7 @@ var Unit = IgeEntityPhysics.extend({
 				};
 
 				ige.script.trigger('unitAttacksUnit', triggeredBy);
-				this.script.trigger('unitAttacksUnit', triggeredBy);
+				this.script.trigger('entityGetsAttacked', triggeredBy);
 
 				var armor = this._stats.attributes.armor && this._stats.attributes.armor.value || 0;
 				var damageReduction = (0.05 * armor) / (1.5 + 0.04 * armor);
@@ -1390,13 +1428,19 @@ var Unit = IgeEntityPhysics.extend({
 		if (self._stats.itemIds) {
 			for (var i = 0; i < self._stats.itemIds.length; i++) {
 				var currentItem = this.inventory.getItemBySlotNumber(i + 1);
-				if (currentItem) {
+				if (currentItem && currentItem.getOwnerUnit() == this) {
 					currentItem.remove();
 				}
 			}
 		}
 
 		IgeEntityPhysics.prototype.remove.call(this);
+	},
+
+	queueStreamData: function(streamData) {
+		if (ige.isServer) {
+			IgeEntity.prototype.queueStreamData.call(this, streamData);	
+		}
 	},
 
 	// update unit's stats in the server side first, then update client side as well.
@@ -1416,10 +1460,12 @@ var Unit = IgeEntityPhysics.extend({
 
 				switch (attrName) {
 					case 'type':
+						self._stats[attrName] = newValue;
 						this.changeUnitType(newValue);
 						break;
 
 					case 'aiEnabled':
+						self._stats[attrName] = newValue;
 						if (ige.isClient) {
 							if (newValue == true) {
 								self.ai.enable();
@@ -1430,6 +1476,7 @@ var Unit = IgeEntityPhysics.extend({
 						break;
 
 					case 'itemIds':
+						self._stats[attrName] = newValue;
 						// update shop as player points are changed and when shop modal is open
 						if (ige.isClient) {
 							this.inventory.update();
@@ -1444,6 +1491,7 @@ var Unit = IgeEntityPhysics.extend({
 						break;
 
 					case 'currentItemIndex':
+						self._stats[attrName] = newValue;
 						// for tracking selected index of other units
 						if (ige.isClient && this !== ige.client.selectedUnit) {
 							// console.log('Unit.streamUpdateData(\'currentItemIndex\') on the client', newValue);
@@ -1455,18 +1503,21 @@ var Unit = IgeEntityPhysics.extend({
 					case 'isInvisible':
 					case 'isInvisibleToFriendly':
 					case 'isInvisibleToNeutral':
+						self._stats[attrName] = newValue;
 						if (ige.isClient) {
 							this.updateTexture();
 						}
 						break;
 
 					case 'scale':
+						self._stats[attrName] = newValue;
 						if (ige.isClient) {
 							self._scaleTexture();
 						}
 						break;
 
 					case 'scaleBody':
+						self._stats[attrName] = newValue;
 						if (ige.isServer) {
 							// finding all attach entities before changing body dimensions
 							if (self.jointsAttached) {
@@ -1491,15 +1542,14 @@ var Unit = IgeEntityPhysics.extend({
 					case 'isNameLabelHiddenToNeutral':
 					case 'isNameLabelHiddenToFriendly':
 					case 'name':
-						if (attrName === 'name') {
-							self._stats.name = newValue;
-						}
+						self._stats.name = newValue;
 						// updating stats bcz setOwner is replacing stats.
 						if (ige.isClient) {
 							self.updateNameLabel();
 						}
 						break;
 					case 'isHidden':
+						self._stats[attrName] = newValue;
 						if (ige.isClient) {
 							if (newValue == true) {
 								self.hide();
@@ -1510,17 +1560,21 @@ var Unit = IgeEntityPhysics.extend({
 						break;
 
 					case 'setFadingText':
+						self._stats[attrName] = newValue;
 						if (ige.isClient) {
 							newValue = newValue.split('|-|');
 							self.updateFadingText(newValue[0], newValue[1]);
 						}
 						break;
 					case 'ownerPlayerId':
+						self._stats[attrName] = newValue;
 						if (ige.isClient) {
 							self.setOwnerPlayer(newValue);
 						}
 						break;
 				}
+
+
 			}
 		}
 	},

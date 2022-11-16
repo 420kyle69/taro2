@@ -13,7 +13,6 @@ var Projectile = IgeEntityPhysics.extend({
 		}
 
 		self.entityId = this._id;
-
 		self._stats = {...projectileData, ...data};
 		
 		// dont save variables in _stats as _stats is stringified and synced
@@ -76,12 +75,16 @@ var Projectile = IgeEntityPhysics.extend({
 
 		if (ige.isServer) {
 
-			// don't stream projectile data if
-			// runOnClient is enabled OR item is set to not stream its projectiles from server
-			if (ige.network.isPaused || (sourceItem && sourceItem._stats.projectileStreamMode == 0)) {
-				this.streamMode(0);
-			} else {
+			// stream projectile data if
+			if (!ige.network.isPaused && (
+					!ige.game.data.defaultData.clientPhysicsEngine || // client side isn't running physics (csp requires physics) OR
+					!sourceItem || // projectile does not have source item (created via script) OR
+					(sourceItem && sourceItem._stats.projectileStreamMode == 1) // item is set to stream its projectiles from server
+				)
+			) {
 				this.streamMode(1);
+			} else {
+				this.streamMode(0);
 			}
 			ige.server.totalProjectilesCreated++;
 		} else if (ige.isClient) {
@@ -137,6 +140,7 @@ var Projectile = IgeEntityPhysics.extend({
 				switch (attrName) {
 
 					case 'scaleBody':
+						this._stats[attrName] = newValue;
 						if (ige.isServer) {
 							// finding all attach entities before changing body dimensions
 							if (this.jointsAttached) {

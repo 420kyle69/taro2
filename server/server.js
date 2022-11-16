@@ -100,8 +100,10 @@ var Server = IgeClass.extend({
 		self.saveDataTimestamps = [];
 		self.started_at = new Date();
 		self.lastSnapshot = [];
-		self.TOKEN_EXPIRES_IN = 10 * 60 * 1000; // token expires in 10 minutes
-		self.usedTokens = {}; // jwt tokens are stored in memory to prevent a token to be used multiple times
+		self.CONNECTION_JWT_EXPIRES_IN = 10 * 60 * 1000; // token expires in 10 minutes
+		self.usedConnectionJwts = {}; // these jwts used for gs connection verification, stored in memory to prevent a token being used multiple times
+		self.COIN_JWT_EXPIRES_IN = 15 * 1000; // token expires in 15 seconds
+		self.usedCoinJwts = {}; // these jwts used for coin transaction, stored in memory to prevent a token being used multiple times
 		self.logTriggers = {
 
 		};
@@ -209,13 +211,6 @@ var Server = IgeClass.extend({
 				self.start();
 			}
 		}
-
-		// periodicaly update user coins to db for inapp purchase
-		setInterval(function () {
-			if (Object.keys(self.coinUpdate || {}).length > 0) {
-				self.postConsumeCoinsForUsers();
-			}
-		}, 10000);
 	},
 
 	// start server
@@ -324,7 +319,7 @@ var Server = IgeClass.extend({
 			const jwt = require('jsonwebtoken');
 
 			const token = jwt.sign({ userId: '', createdAt: Date.now(), gameSlug: global.standaloneGame.defaultData.gameSlug }, process.env.JWT_SECRET_KEY, {
-				expiresIn: ige.server.TOKEN_EXPIRES_IN.toString(),
+				expiresIn: ige.server.CONNECTION_JWT_EXPIRES_IN.toString(),
 			});
 
 			const videoChatEnabled = ige.game.data && ige.game.data.defaultData && ige.game.data.defaultData.enableVideoChat ? ige.game.data.defaultData.enableVideoChat : false;
@@ -503,6 +498,7 @@ var Server = IgeClass.extend({
 				ige.physics.createWorld();
 				ige.physics.start();
 				ige.raycaster = new Raycaster();
+				ige.developerMode = new DeveloperMode();
 
 				// console.log("game data", game)
 				// mapComponent needs to be inside IgeStreamComponent, because debris' are created and streaming is enabled which requires IgeStreamComponent
@@ -675,6 +671,7 @@ var Server = IgeClass.extend({
 
 		ige.network.define('trade', self._onTrade);
 		ige.network.define('editTile', self._onEditTile);
+		ige.network.define('editRegion', self._onEditRegion);
 	},
 
 	unpublish: function (msg) {
@@ -727,13 +724,10 @@ var Server = IgeClass.extend({
 			});
 		}
 	},
-	postConsumeCoinsForUsers: function () {
-		var self = this;
-		ige.clusterClient && ige.clusterClient.postConsumeCoinsForUsers(self.coinUpdate);
-	},
+	
 	consumeCoinFromUser: function (player, coins, boughtItemId) {
 		var self = this;
-		if (player && coins && (ige.game.data.defaultData.tier == 3 || ige.game.data.defaultData.tier == 4)) {
+		if (player && coins && (ige.game.data.defaultData.tier >= 2)) {
 			if (ige.game.data.defaultData.owner != player._stats.userId) {
 				if (!self.coinUpdate[player._stats.clientId]) {
 					self.coinUpdate[player._stats.clientId] = {
@@ -753,9 +747,38 @@ var Server = IgeClass.extend({
 						userId: player._stats.userId
 					});
 				}
+			} else {
+				// console.log('You are the owner');
+			}
+		}
+		
+		if (Object.keys(self.coinUpdate || {}).length > 0) {
+			ige.clusterClient && ige.clusterClient.consumeCoinFromUser(self.coinUpdate);
+			self.coinUpdate = {};
+		}
+	},
+	
+	postConsumeCoinsForUsersCallback: function (body) {
+		var self = this;
+		if (body) {
+			if (body.status === 'success') {
+				if (body.message && body.message.length > 0) {
+					body.message.forEach(function (updatedCoinsValue) {
+						var foundPlayer = ige.$$('player').find(function (player) {
+							return player && player._stats && player._stats.clientId == updatedCoinsValue.clientId;
+						});
+						if (foundPlayer) {
+							foundPlayer.streamUpdateData([{ coins: updatedCoinsValue.coinsLeft }]);
+						}
+					});
+				}
+			}
+			if (body.status === 'error') {
+				console.log('error in buying item')
 			}
 		}
 	},
+	
 	getStatus: function () {
 		var self = this;
 

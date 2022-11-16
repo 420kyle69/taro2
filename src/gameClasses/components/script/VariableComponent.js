@@ -240,8 +240,9 @@ var VariableComponent = IgeEntity.extend({
 					break;
 				
 				case 'isBotPlayer':
+					// bot players meant to be indistinguishable from 'human' players. hence we're not tempering with controlledBy variable
 					var player = self.getValue(text.player, vars);
-					returnValue = player && player._stats.controlledBy == 'bot';
+					returnValue = player && player._stats.isBot
 					break;
 	
 
@@ -1779,7 +1780,7 @@ var VariableComponent = IgeEntity.extend({
 					break;
 
 				case 'botPlayers':
-					returnValue = ige.$$('player').filter(function (player) { return player._stats.controlledBy == 'bot'; });
+					returnValue = ige.$$('player').filter(function (player) { return player._stats.isBot });
 					break;
 
 

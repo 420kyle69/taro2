@@ -145,6 +145,15 @@ var GameComponent = IgeEntity.extend({
 		return player;
 	},
 
+	restart: function() {
+		// remove all players/units/items/projectiles
+		// remove world & map
+
+		// start buliding out world
+		// run scripts
+		// get existing players to re-join
+	},
+
 	kickPlayer: function(clientId) {
 		// var player = this.getPlayerByClientId(clientId);		
 		// if (player) {

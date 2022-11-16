@@ -7,6 +7,7 @@ declare class Client extends IgeEventingClass {
 	rendererLoaded: JQueryDeferred<void>;
 
 	isZooming: boolean;
+	developerClientIds: any;
 
 	constructor(options?: object);
 }
