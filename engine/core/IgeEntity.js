@@ -4713,7 +4713,7 @@ var IgeEntity = IgeObject.extend({
 
 				case 'item':
 					// TODO: we shouldn't have to send currentBody. for some reason, all items have 'dropped' stateId
-					keys = ['itemTypeId', 'anim', 'stateId', 'ownerUnitId', 'quantity', 'currentBody', 'flip']
+					keys = ['itemTypeId', 'anim', 'stateId', 'ownerUnitId', 'quantity', 'currentBody', 'flip', 'isBeingUsed']
 					data = { 
 						attributes: {}, 
 						// variables: {} 

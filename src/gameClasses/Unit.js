@@ -43,7 +43,9 @@ var Unit = IgeEntityPhysics.extend({
 			.addComponent(AttributeComponent); // every units gets one
 
 		self.addComponent(ScriptComponent); // entity-requireScriptLoading
-		self.script.load(unitData.scripts);
+		if (unitData && unitData) {
+			self.script.load(unitData.scripts);
+		}
 
 		self.addComponent(AIComponent);
 
