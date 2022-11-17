@@ -108,7 +108,6 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.tileEditor.activateMarker(false);
 		this.palette.show();
 		this.regionEditor.showRegions();
-		//this.scene.gameScene.cameras.main.stopFollow();
 	}
 
 	leaveMapTab(): void {
@@ -117,8 +116,6 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.layerButtonsContainer.setVisible(false);
 		this.toolButtonsContainer.setVisible(false);
 		this.regionEditor.hideRegions();
-		//ige.client.emit('zoom', this.scene.defaultZoom);
-		//if (this.scene.gameScene.cameraTarget) this.scene.gameScene.cameras.main.startFollow(this.scene.gameScene.cameraTarget, false, 0.05, 0.05);
 	}
 
 	keyBindings(): void {

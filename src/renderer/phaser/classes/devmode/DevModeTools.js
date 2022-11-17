@@ -90,7 +90,6 @@ var DevModeTools = /** @class */ (function (_super) {
         this.tileEditor.activateMarker(false);
         this.palette.show();
         this.regionEditor.showRegions();
-        //this.scene.gameScene.cameras.main.stopFollow();
     };
     DevModeTools.prototype.leaveMapTab = function () {
         this.regionEditor.cancelDrawRegion();
@@ -98,8 +97,6 @@ var DevModeTools = /** @class */ (function (_super) {
         this.layerButtonsContainer.setVisible(false);
         this.toolButtonsContainer.setVisible(false);
         this.regionEditor.hideRegions();
-        //ige.client.emit('zoom', this.scene.defaultZoom);
-        //if (this.scene.gameScene.cameraTarget) this.scene.gameScene.cameras.main.startFollow(this.scene.gameScene.cameraTarget, false, 0.05, 0.05);
     };
     DevModeTools.prototype.keyBindings = function () {
         var _this = this;
