@@ -4,12 +4,12 @@ class DeveloperMode {
 
 	constructor() {
 		if (ige.isClient) this.active = false;
-		console.log('create deve mode', this)
 	}
 
 	enter(): void {
 		console.log('client enter developer mode');
 		this.active = true;
+		this.changeTab('play');
 	}
 
 	leave (): void {

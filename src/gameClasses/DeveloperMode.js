@@ -2,11 +2,11 @@ var DeveloperMode = /** @class */ (function () {
     function DeveloperMode() {
         if (ige.isClient)
             this.active = false;
-        console.log('create deve mode', this);
     }
     DeveloperMode.prototype.enter = function () {
         console.log('client enter developer mode');
         this.active = true;
+        this.changeTab('play');
     };
     DeveloperMode.prototype.leave = function () {
         console.log('client leave developer mode');
