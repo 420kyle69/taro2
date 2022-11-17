@@ -99,7 +99,8 @@ var DevModeTools = /** @class */ (function (_super) {
         this.toolButtonsContainer.setVisible(false);
         this.regionEditor.hideRegions();
         ige.client.emit('zoom', this.scene.defaultZoom);
-        this.scene.gameScene.cameras.main.startFollow(this.scene.gameScene.cameraTarget, false, 0.05, 0.05);
+        if (this.scene.gameScene.cameraTarget)
+            this.scene.gameScene.cameras.main.startFollow(this.scene.gameScene.cameraTarget, false, 0.05, 0.05);
     };
     DevModeTools.prototype.keyBindings = function () {
         var _this = this;

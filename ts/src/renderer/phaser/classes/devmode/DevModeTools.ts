@@ -118,7 +118,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.toolButtonsContainer.setVisible(false);
 		this.regionEditor.hideRegions();
 		ige.client.emit('zoom', this.scene.defaultZoom);
-		this.scene.gameScene.cameras.main.startFollow(this.scene.gameScene.cameraTarget, false, 0.05, 0.05);
+		if (this.scene.gameScene.cameraTarget) this.scene.gameScene.cameras.main.startFollow(this.scene.gameScene.cameraTarget, false, 0.05, 0.05);
 	}
 
 	keyBindings(): void {
