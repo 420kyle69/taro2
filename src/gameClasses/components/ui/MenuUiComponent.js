@@ -128,33 +128,27 @@ var MenuUiComponent = IgeEntity.extend({
 				}
 				if((['1', '4', '5'].includes(window.gameDetails?.tier)) || window.isStandalone) {
 					loadEditor();
-
 					$('#game-editor').show();
+					$('#kick-player').hide();
 
-					if (restoreWindows) {
+					// commeting this code because we are handling changes in editor now.
+					/* if (restoreWindows) {
 						$('.winbox').show();
 						restoreWindows = false;
 					}
-
 					if (restoreDevMode) {
 						ige.developerMode.enter();
-
 						if ($('#open-inventory-button').is(':visible')) {
 							$('#backpack').hide();
 						}
-
 						$('#my-score-div').hide();
-
 						restoreDevMode = false;
 					}
-
 					if (restoreDevConsole) {
 						$('#dev-console').show();
 						restoreDevConsole = false;
 					}
-
 					const isEditorVisible = $('#game-editor').is(':visible');
-
 					if (!isEditorVisible) {
 						if ($('.winbox:first').is(':visible')) {
 							$('.winbox').hide();
@@ -177,11 +171,9 @@ var MenuUiComponent = IgeEntity.extend({
 							$('#dev-console').hide();
 							restoreDevConsole = true;
 						}
-					}
+					} 
+					$('#toggle-dev-panels').text(isEditorVisible ? 'Exit Dev Mode' : 'Enter Dev Mode'); */
 
-					$('#kick-player').toggle();
-
-					$('#toggle-dev-panels').text(isEditorVisible ? 'Exit Dev Mode' : 'Enter Dev Mode');
 				} else {
 					$('#dev-console').toggle();
 				}
