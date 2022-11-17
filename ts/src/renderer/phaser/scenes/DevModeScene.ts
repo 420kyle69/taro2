@@ -23,11 +23,15 @@ class DevModeScene extends PhaserScene {
 		this.gameScene = ige.renderer.scene.getScene('Game');
 		this.regions = [];
 
-		ige.client.on('enterDevMode', () => {
+		ige.client.on('leaveDevMode', () => {
+			this.leaveDevMode();
+		});
+
+		ige.client.on('enterMapTab', () => {
 			this.enterDevMode();
 		});
 
-		ige.client.on('leaveDevMode', () => {
+		ige.client.on('leaveMapTab', () => {
 			this.leaveDevMode();
 		});
 

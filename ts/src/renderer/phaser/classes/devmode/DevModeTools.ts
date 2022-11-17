@@ -125,22 +125,22 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		const gameScene = this.scene.gameScene;
 		const keyboard = this.scene.input.keyboard;
 
-		const shouldPreventKeybindings = function () {
+		/*const shouldPreventKeybindings = function () {
 			if (!$('#game-editor').is(':visible')) {
 				return false;
 			}
 			let activeElement = document.activeElement;
 			let inputs = ['input', 'select', 'textarea'];
 	
-			if (activeElement && inputs.indexOf(activeElement.tagName.toLowerCase()) !== -1) {
+			if (activeElement && inputs.indexOf(activeElement.tagName.toLowerCase()) !== -1 ) {
 				return true;
 			}
 			return false;
-		}
+		}*/
 
 		const tabKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, true);
 		tabKey.on('down', () => {
-			if (shouldPreventKeybindings()) {
+			if (ige.developerMode.shouldPreventKeybindings()) {
 				keyboard.disableGlobalCapture();
 			} else {
 				keyboard.enableGlobalCapture();
@@ -157,14 +157,14 @@ class DevModeTools extends Phaser.GameObjects.Container {
 
 		const plusKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.PLUS, false);
 		plusKey.on('down', () => {
-			if(ige.developerMode.active && !shouldPreventKeybindings()) {
+			if(ige.developerMode.active && !ige.developerMode.shouldPreventKeybindings()) {
 				const zoom = (gameScene.zoomSize / 2.15) / 1.1;
 				ige.client.emit('zoom', zoom);
 			}
 		});
 		const minusKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.MINUS, false);
 		minusKey.on('down', () => {
-			if(ige.developerMode.active && !shouldPreventKeybindings()) {
+			if(ige.developerMode.active && !ige.developerMode.shouldPreventKeybindings()) {
 				const zoom =(gameScene.zoomSize / 2.15) * 1.1;
 				ige.client.emit('zoom', zoom);
 			}

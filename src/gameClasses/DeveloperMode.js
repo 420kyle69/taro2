@@ -7,12 +7,25 @@ var DeveloperMode = /** @class */ (function () {
     DeveloperMode.prototype.enter = function () {
         console.log('client enter developer mode');
         this.active = true;
-        ige.client.emit('enterDevMode');
+        this.changeTab('map');
+        //ige.client.emit('enterDevMode');
     };
     DeveloperMode.prototype.leave = function () {
         console.log('client leave developer mode');
         this.active = false;
         ige.client.emit('leaveDevMode');
+    };
+    DeveloperMode.prototype.changeTab = function (tab) {
+        this.activeTab = tab;
+        if (tab === 'map') {
+            ige.client.emit('enterMapTab');
+        }
+        else {
+            ige.client.emit('leaveMapTab');
+        }
+    };
+    DeveloperMode.prototype.shouldPreventKeybindings = function () {
+        return this.activeTab !== 'play';
     };
     DeveloperMode.prototype.editTile = function (data, clientId) {
         // only allow developers to modify the tiles

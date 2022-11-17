@@ -22,10 +22,13 @@ var DevModeScene = /** @class */ (function (_super) {
         var _this = this;
         this.gameScene = ige.renderer.scene.getScene('Game');
         this.regions = [];
-        ige.client.on('enterDevMode', function () {
+        ige.client.on('leaveDevMode', function () {
+            _this.leaveDevMode();
+        });
+        ige.client.on('enterMapTab', function () {
             _this.enterDevMode();
         });
-        ige.client.on('leaveDevMode', function () {
+        ige.client.on('leaveMapTab', function () {
             _this.leaveDevMode();
         });
         ige.client.on('editTile', function (data) {
