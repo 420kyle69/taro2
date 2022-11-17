@@ -5,7 +5,25 @@ class BitmapFontManager {
 
 	static preload (scene: Phaser.Scene): void {
 
-		scene.load.bitmapFont('ArialBold#FFFFFF',
+		const load = scene.load;
+
+		load.bitmapFont('Verdana#FFFFFF',
+			'/assets/fonts/Verdana.png',
+			'/assets/fonts/Verdana.xml'
+		);
+		load.image('VerdanaStroke#FFFFFF',
+			'/assets/fonts/VerdanaStroke.png'
+		);
+
+		load.bitmapFont('VerdanaBold#FFFFFF',
+			'/assets/fonts/VerdanaBold.png',
+			'/assets/fonts/VerdanaBold.xml'
+		);
+		load.image('VerdanaBoldStroke#FFFFFF',
+			'/assets/fonts/VerdanaBoldStroke.png'
+		);
+
+		load.bitmapFont('ArialBold#FFFFFF',
 			'/assets/fonts/ArialBold.png',
 			'/assets/fonts/ArialBold.xml'
 		);
@@ -13,23 +31,39 @@ class BitmapFontManager {
 
 	static create (scene: Phaser.Scene): void {
 
-		this.add(scene, 'Arial', true, '#000000');
+		const bitmapCache = scene.cache.bitmapFont;
+
+		bitmapCache.add('VerdanaStroke#FFFFFF', {
+			data: bitmapCache.get('Verdana#FFFFFF').data,
+			frame: null,
+			texture: 'VerdanaStroke#FFFFFF'
+		});
+
+		bitmapCache.add('VerdanaBoldStroke#FFFFFF', {
+			data: bitmapCache.get('VerdanaBold#FFFFFF').data,
+			frame: null,
+			texture: 'VerdanaBoldStroke#FFFFFF'
+		});
+
+		this.add(scene, 'Arial', true, false, '#000000');
 	}
 
 	static font (
 		scene: Phaser.Scene,
 		font: Font,
 		bold: boolean,
+		stroke: boolean,
 		color: string
 	): string {
 
 		const key = font +
 			(bold ? 'Bold' : '') +
+			(stroke ? 'Stroke' : '') +
 			color.toUpperCase();
 
 		if (!scene.cache.bitmapFont.has(key)) {
 
-			this.add(scene, font, bold, color);
+			this.add(scene, font, bold, stroke, color);
 		}
 
 		return key;
@@ -39,11 +73,13 @@ class BitmapFontManager {
 		scene: Phaser.Scene,
 		font: Font,
 		bold: boolean,
+		stroke: boolean,
 		color: string
 	):  void {
 
 		const key = font +
 			(bold ? 'Bold' : '') +
+			(stroke ? 'Stroke' : '') +
 			color.toUpperCase();
 
 		const sourceFillKey = `${font +
@@ -71,6 +107,35 @@ class BitmapFontManager {
 		ctx.fillStyle = color;
 		ctx.fillRect(0, 0, w, h);
 		ctx.globalCompositeOperation = 'source-over'; // default
+
+		if (stroke) {
+
+			const sourceStrokeKey = `${font +
+				(bold ? 'Bold' : '') +
+				(stroke ? 'Stroke' : '')
+			}#FFFFFF`;
+
+			const sourceStrokeData = bitmapCache.get(sourceStrokeKey);
+			const sourceFillTexture = textures.get(sourceStrokeData.texture);
+			const sourceStrokeImage = sourceFillTexture
+				.getSourceImage() as HTMLImageElement;
+
+			const tempCanvas = Phaser.Display.Canvas.CanvasPool
+				.create2D(null, w, h);
+
+			const tempCtx = tempCanvas.getContext('2d');
+			tempCtx.clearRect(0, 0, w, h);
+			tempCtx.drawImage(canvas, 0, 0, w, h);
+
+			ctx.drawImage(sourceStrokeImage, 0, 0, w, h);
+			ctx.globalCompositeOperation = 'source-in';
+			ctx.fillStyle = '#000';
+			ctx.fillRect(0, 0, w, h);
+			ctx.globalCompositeOperation = 'source-over'; // default
+			ctx.drawImage(tempCanvas, 0, 0, w, h);
+
+			Phaser.Display.Canvas.CanvasPool.remove(tempCanvas);
+		}
 
 		textures.addCanvas(key, canvas);
 

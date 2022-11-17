@@ -68,7 +68,7 @@ class MobileControlsScene extends PhaserScene {
 						const label = this.add.bitmapText(
 							x + w/2, y + h/2,
 							BitmapFontManager.font(this,
-								'Arial', true, '#FFFFFF'
+								'Arial', true, false, '#FFFFFF'
 							),
 							text
 						);
