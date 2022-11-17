@@ -123,13 +123,14 @@ var MenuUiComponent = IgeEntity.extend({
 			});
 
 			$('#toggle-dev-panels').on('click', function () {
-				if (!ige.game.data.isGameDeveloper) {
+				if (!ige.game.data.isGameDeveloper && !window.isStandalone) {
 					return;
 				}
 				if((['1', '4', '5'].includes(window.gameDetails?.tier)) || window.isStandalone) {
 					loadEditor();
 					$('#game-editor').show();
 					$('#kick-player').hide();
+					ige.developerMode.enter();
 
 					// commeting this code because we are handling changes in editor now.
 					/* if (restoreWindows) {
