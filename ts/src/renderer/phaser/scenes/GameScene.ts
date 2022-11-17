@@ -129,6 +129,8 @@ class GameScene extends PhaserScene {
 		data.map.layers.forEach(layer => {
 			if (layer.name !== 'debris') {
 				const length = layer.data.length;
+				layer.width = data.map.width;
+				layer.height = data.map.height;
 				console.log('before', layer.name, length, tilesPerLayer)
 				if (length < tilesPerLayer) {
 					for (let i = length + 1; i < tilesPerLayer; i++) {
