@@ -10,14 +10,11 @@ class DeveloperMode {
 	enter(): void {
 		console.log('client enter developer mode');
 		this.active = true;
-		this.changeTab('map');
-		//ige.client.emit('enterDevMode');
 	}
 
 	leave (): void {
 		console.log('client leave developer mode');
 		this.active = false;
-		ige.client.emit('leaveDevMode');
 	}
 
 	changeTab(tab: devModeTab) {
@@ -26,6 +23,11 @@ class DeveloperMode {
 			ige.client.emit('enterMapTab');
 		} else {
 			ige.client.emit('leaveMapTab');
+		}
+		if (tab === 'play') {
+			ige.client.emit('lockCamera');
+		} else {
+			ige.client.emit('unlockCamera');
 		}
 	}
 

@@ -91,7 +91,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		const ctrlKey = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CTRL, false);
 
 		this.scene.input.on('pointermove', function (p) {
-			if (ige.developerMode.active && (p.rightButtonDown() || (p.isDown && ctrlKey.isDown))) {
+			if (ige.developerMode.active && ige.developerMode.activeTab !== 'play' && (p.rightButtonDown() || (p.isDown && ctrlKey.isDown))) {
 				const camera = this.scene.gameScene.cameras.main;
 				const scrollX = (p.x - p.prevPosition.x) / camera.zoom
 				const scrollY = (p.y - p.prevPosition.y) / camera.zoom;
@@ -101,24 +101,24 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		});
 	}
 
-	enterDevMode(): void {
+	enterMapTab(): void {
 		this.layerButtonsContainer.setVisible(true);
 		this.toolButtonsContainer.setVisible(true);
 		this.highlightModeButton(0);
 		this.tileEditor.activateMarker(false);
 		this.palette.show();
 		this.regionEditor.showRegions();
-		this.scene.gameScene.cameras.main.stopFollow();
+		//this.scene.gameScene.cameras.main.stopFollow();
 	}
 
-	leaveDevMode(): void {
+	leaveMapTab(): void {
 		this.regionEditor.cancelDrawRegion();
 		this.palette.hide();
 		this.layerButtonsContainer.setVisible(false);
 		this.toolButtonsContainer.setVisible(false);
 		this.regionEditor.hideRegions();
-		ige.client.emit('zoom', this.scene.defaultZoom);
-		if (this.scene.gameScene.cameraTarget) this.scene.gameScene.cameras.main.startFollow(this.scene.gameScene.cameraTarget, false, 0.05, 0.05);
+		//ige.client.emit('zoom', this.scene.defaultZoom);
+		//if (this.scene.gameScene.cameraTarget) this.scene.gameScene.cameras.main.startFollow(this.scene.gameScene.cameraTarget, false, 0.05, 0.05);
 	}
 
 	keyBindings(): void {
@@ -144,7 +144,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 				keyboard.disableGlobalCapture();
 			} else {
 				keyboard.enableGlobalCapture();
-				if(ige.developerMode.active) {
+				if(ige.developerMode.active && ige.developerMode.activeTab === 'map') {
 					if (this.palette.visible) {
 						this.palette.hide();
 					}
@@ -157,14 +157,14 @@ class DevModeTools extends Phaser.GameObjects.Container {
 
 		const plusKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.PLUS, false);
 		plusKey.on('down', () => {
-			if(ige.developerMode.active && !ige.developerMode.shouldPreventKeybindings()) {
+			if(ige.developerMode.active && ige.developerMode.activeTab !== 'play' && !ige.developerMode.shouldPreventKeybindings()) {
 				const zoom = (gameScene.zoomSize / 2.15) / 1.1;
 				ige.client.emit('zoom', zoom);
 			}
 		});
 		const minusKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.MINUS, false);
 		minusKey.on('down', () => {
-			if(ige.developerMode.active && !ige.developerMode.shouldPreventKeybindings()) {
+			if(ige.developerMode.active && ige.developerMode.activeTab !== 'play' && !ige.developerMode.shouldPreventKeybindings()) {
 				const zoom =(gameScene.zoomSize / 2.15) * 1.1;
 				ige.client.emit('zoom', zoom);
 			}

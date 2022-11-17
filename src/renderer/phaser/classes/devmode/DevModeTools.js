@@ -72,7 +72,7 @@ var DevModeTools = /** @class */ (function (_super) {
         _this.regionEditor.hideRegions();
         var ctrlKey = _this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CTRL, false);
         _this.scene.input.on('pointermove', function (p) {
-            if (ige.developerMode.active && (p.rightButtonDown() || (p.isDown && ctrlKey.isDown))) {
+            if (ige.developerMode.active && ige.developerMode.activeTab !== 'play' && (p.rightButtonDown() || (p.isDown && ctrlKey.isDown))) {
                 var camera = this.scene.gameScene.cameras.main;
                 var scrollX_1 = (p.x - p.prevPosition.x) / camera.zoom;
                 var scrollY_1 = (p.y - p.prevPosition.y) / camera.zoom;
@@ -83,24 +83,23 @@ var DevModeTools = /** @class */ (function (_super) {
         });
         return _this;
     }
-    DevModeTools.prototype.enterDevMode = function () {
+    DevModeTools.prototype.enterMapTab = function () {
         this.layerButtonsContainer.setVisible(true);
         this.toolButtonsContainer.setVisible(true);
         this.highlightModeButton(0);
         this.tileEditor.activateMarker(false);
         this.palette.show();
         this.regionEditor.showRegions();
-        this.scene.gameScene.cameras.main.stopFollow();
+        //this.scene.gameScene.cameras.main.stopFollow();
     };
-    DevModeTools.prototype.leaveDevMode = function () {
+    DevModeTools.prototype.leaveMapTab = function () {
         this.regionEditor.cancelDrawRegion();
         this.palette.hide();
         this.layerButtonsContainer.setVisible(false);
         this.toolButtonsContainer.setVisible(false);
         this.regionEditor.hideRegions();
-        ige.client.emit('zoom', this.scene.defaultZoom);
-        if (this.scene.gameScene.cameraTarget)
-            this.scene.gameScene.cameras.main.startFollow(this.scene.gameScene.cameraTarget, false, 0.05, 0.05);
+        //ige.client.emit('zoom', this.scene.defaultZoom);
+        //if (this.scene.gameScene.cameraTarget) this.scene.gameScene.cameras.main.startFollow(this.scene.gameScene.cameraTarget, false, 0.05, 0.05);
     };
     DevModeTools.prototype.keyBindings = function () {
         var _this = this;
@@ -125,7 +124,7 @@ var DevModeTools = /** @class */ (function (_super) {
             }
             else {
                 keyboard.enableGlobalCapture();
-                if (ige.developerMode.active) {
+                if (ige.developerMode.active && ige.developerMode.activeTab === 'map') {
                     if (_this.palette.visible) {
                         _this.palette.hide();
                     }
@@ -137,14 +136,14 @@ var DevModeTools = /** @class */ (function (_super) {
         });
         var plusKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.PLUS, false);
         plusKey.on('down', function () {
-            if (ige.developerMode.active && !ige.developerMode.shouldPreventKeybindings()) {
+            if (ige.developerMode.active && ige.developerMode.activeTab !== 'play' && !ige.developerMode.shouldPreventKeybindings()) {
                 var zoom = (gameScene.zoomSize / 2.15) / 1.1;
                 ige.client.emit('zoom', zoom);
             }
         });
         var minusKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.MINUS, false);
         minusKey.on('down', function () {
-            if (ige.developerMode.active && !ige.developerMode.shouldPreventKeybindings()) {
+            if (ige.developerMode.active && ige.developerMode.activeTab !== 'play' && !ige.developerMode.shouldPreventKeybindings()) {
                 var zoom = (gameScene.zoomSize / 2.15) * 1.1;
                 ige.client.emit('zoom', zoom);
             }

@@ -113,7 +113,7 @@ class TilePalette extends Phaser.GameObjects.Container {
 		});
 
 		this.scene.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
-			if (ige.developerMode.active) {
+			if (ige.developerMode.active && ige.developerMode.activeTab !== 'play') {
 				if (this.visible && pointerover) {
 					this.zoom(deltaY);
 				} else if (deltaY < 0) {

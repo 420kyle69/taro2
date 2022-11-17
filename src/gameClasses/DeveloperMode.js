@@ -7,13 +7,10 @@ var DeveloperMode = /** @class */ (function () {
     DeveloperMode.prototype.enter = function () {
         console.log('client enter developer mode');
         this.active = true;
-        this.changeTab('map');
-        //ige.client.emit('enterDevMode');
     };
     DeveloperMode.prototype.leave = function () {
         console.log('client leave developer mode');
         this.active = false;
-        ige.client.emit('leaveDevMode');
     };
     DeveloperMode.prototype.changeTab = function (tab) {
         this.activeTab = tab;
@@ -22,6 +19,12 @@ var DeveloperMode = /** @class */ (function () {
         }
         else {
             ige.client.emit('leaveMapTab');
+        }
+        if (tab === 'play') {
+            ige.client.emit('lockCamera');
+        }
+        else {
+            ige.client.emit('unlockCamera');
         }
     };
     DeveloperMode.prototype.shouldPreventKeybindings = function () {

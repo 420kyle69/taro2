@@ -70,7 +70,7 @@ var TileEditor = /** @class */ (function () {
         }
     };
     TileEditor.prototype.update = function () {
-        if (ige.developerMode.active) {
+        if (ige.developerMode.active && ige.developerMode.activeTab !== 'play') {
             var devModeScene = this.devModeTools.scene;
             var palette = this.tilePalette;
             var map = this.gameScene.tilemap;
