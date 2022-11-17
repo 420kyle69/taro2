@@ -105,39 +105,94 @@ var DeveloperMode = /** @class */ (function () {
             ige.network.send("editRegion", data);
         }
     };
+    DeveloperMode.prototype.createUnit = function (data) {
+        //const player = ige.game.getPlayerByClientId(clientId);
+        var player;
+        ige.$$('player').forEach(function (p) {
+            if (p.id() === data.playerId)
+                player = p;
+        });
+        var unitTypeId = data.typeId;
+        var unitTypeData = ige.game.getAsset('unitTypes', unitTypeId);
+        var spawnPosition = data.position;
+        var facingAngle = data.angle;
+        if (player && spawnPosition && unitTypeId && unitTypeData) {
+            var unitData = Object.assign(unitTypeData, {
+                type: unitTypeId,
+                defaultData: {
+                    translate: spawnPosition,
+                    rotate: facingAngle
+                }
+            });
+            var unit = player.createUnit(unitData);
+            ige.game.lastCreatedUnitId = unit.id();
+        }
+    };
+    DeveloperMode.prototype.updateUnit = function () {
+        // 1. broadcast update to all players
+        // 2. force update its dimension/scale/layer/image
+    };
+    DeveloperMode.prototype.deleteUnit = function () {
+    };
+    DeveloperMode.prototype.createItem = function (data) {
+        var itemTypeId = data.typeId;
+        var itemData = ige.game.getAsset('itemTypes', itemTypeId);
+        var position = data.position;
+        var facingAngle = data.angle;
+        var quantity = itemData.maxQuantity;
+        if (quantity == -1) {
+            quantity = null;
+        }
+        if (itemData) {
+            itemData.itemTypeId = itemTypeId;
+            itemData.isHidden = false;
+            itemData.stateId = 'dropped';
+            itemData.spawnPosition = position;
+            itemData.quantity = quantity;
+            itemData.defaultData = {
+                translate: position,
+                rotate: facingAngle
+            };
+            var item = new Item(itemData);
+            ige.game.lastCreatedUnitId = item._id;
+            item.script.trigger("entityCreated");
+        }
+    };
+    DeveloperMode.prototype.updateItem = function () {
+        // 1. broadcast update to all players
+        // 2. force update its dimension/scale/layer/image
+        // 3. we may need to re-mount the item on unit
+    };
+    DeveloperMode.prototype.deleteItem = function () {
+    };
+    DeveloperMode.prototype.createProjectile = function () {
+    };
+    DeveloperMode.prototype.updateProjectile = function () {
+        // 1. broadcast update to all players
+        // 2. force update its dimension/scale/layer/image
+    };
+    DeveloperMode.prototype.deleteProjectile = function () {
+    };
     DeveloperMode.prototype.editEntity = function (data, clientId) {
         if (data.entityType === 'unit') {
-            //const player = ige.game.getPlayerByClientId(clientId);
-            var player_1;
-            ige.$$('player').forEach(function (p) {
-                if (p.id() === data.playerId)
-                    player_1 = p;
-            });
-            var unitTypeId = data.typeId;
-            var unitTypeData = ige.game.getAsset('unitTypes', unitTypeId);
-            var spawnPosition = data.position;
-            var facingAngle = data.angle;
-            if (player_1 && spawnPosition && unitTypeId && unitTypeData) {
-                var unitData = Object.assign(unitTypeData, {
-                    type: unitTypeId,
-                    defaultData: {
-                        translate: spawnPosition,
-                        rotate: facingAngle
-                    }
-                });
-                var unit = player_1.createUnit(unitData);
-                ige.game.lastCreatedUnitId = unit.id();
+            if (data.create) {
+                this.createUnit(data);
             }
         }
         else if (data.entityType === 'item') {
-            var itemTypeId = data.typeId;
-            var itemData = ige.game.getAsset('itemTypes', itemTypeId);
-            var position = data.position;
-            var facingAngle = data.angle;
-            var quantity = itemData.maxQuantity;
+            if (data.create) {
+                this.createItem(data);
+            }
+            /*const itemTypeId = data.typeId;
+            const itemData = ige.game.getAsset('itemTypes', itemTypeId);
+            const position = data.position;
+            const facingAngle = data.angle;
+            let quantity = itemData.maxQuantity;
+
             if (quantity == -1) {
                 quantity = null;
             }
+
             if (itemData) {
                 itemData.itemTypeId = itemTypeId;
                 itemData.isHidden = false;
@@ -151,7 +206,7 @@ var DeveloperMode = /** @class */ (function () {
                 var item = new Item(itemData);
                 ige.game.lastCreatedUnitId = item._id;
                 item.script.trigger("entityCreated");
-            }
+            }*/
         }
     };
     DeveloperMode.prototype.updateClientMap = function (data) {

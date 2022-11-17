@@ -42,6 +42,7 @@ var DevModeScene = /** @class */ (function (_super) {
                 var worldPoint = _this.gameScene.cameras.main.getWorldPoint(p.x, p.y);
                 var playerId = ige.game.getPlayerByClientId(ige.network.id()).id();
                 var data = {
+                    create: true,
                     entityType: draggedEntity.entityType,
                     typeId: draggedEntity.typeId,
                     playerId: playerId,
@@ -108,7 +109,6 @@ var DevModeScene = /** @class */ (function (_super) {
     DevModeScene.prototype.leaveDevMode = function () {
         this.devModeTools.leaveDevMode();
     };
-    //TODO: call this with data example: {entityType: 'unit', typeId: 'bear', playerId: ige.network.id(), position: {x: 0, y: 0}, angle: 0}
     DevModeScene.prototype.editEntity = function (data) {
         ige.network.send('editEntity', data);
     };

@@ -47,6 +47,7 @@ class DevModeScene extends PhaserScene {
 				const worldPoint = this.gameScene.cameras.main.getWorldPoint(p.x, p.y);
 				const playerId = ige.game.getPlayerByClientId(ige.network.id()).id();
 				const data = {
+					create: true,
 					entityType: draggedEntity.entityType,
 					typeId: draggedEntity.typeId,
 					playerId: playerId,
@@ -130,7 +131,6 @@ class DevModeScene extends PhaserScene {
 		this.devModeTools.leaveDevMode();
 	}
 
-	//TODO: call this with data example: {entityType: 'unit', typeId: 'bear', playerId: ige.network.id(), position: {x: 0, y: 0}, angle: 0}
 	editEntity (data: {entityType: string, 
 		typeId: string, 
 		playerId: string, 
