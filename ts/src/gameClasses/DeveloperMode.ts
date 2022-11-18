@@ -32,7 +32,7 @@ class DeveloperMode {
 	}
 
 	shouldPreventKeybindings (): boolean {
-		return this.activeTab !== 'play';
+		return this.activeTab && this.activeTab !== 'play';
 	}
 
 	editTile (data: TileData, clientId: string): void {
