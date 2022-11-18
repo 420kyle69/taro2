@@ -386,7 +386,7 @@ var IgeInputComponent = IgeEventingClass.extend({
 	 * @private
 	 */
 	_mouseDown: function (event) {
-		if (ige.developerMode.active) {
+		if (ige.developerMode && ige.developerMode.shouldPreventKeybindings()) {
 			return;
 		}
 		if (this._debug) {
