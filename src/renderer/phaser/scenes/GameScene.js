@@ -102,6 +102,8 @@ var GameScene = /** @class */ (function (_super) {
         data.map.layers.forEach(function (layer) {
             if (layer.name !== 'debris') {
                 var length_1 = layer.data.length;
+                layer.width = data.map.width;
+                layer.height = data.map.height;
                 console.log('before', layer.name, length_1, tilesPerLayer);
                 if (length_1 < tilesPerLayer) {
                     for (var i = length_1 + 1; i < tilesPerLayer; i++) {

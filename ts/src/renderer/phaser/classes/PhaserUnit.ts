@@ -137,7 +137,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			return;
 		}
 		this.scene.cameraTarget = this.gameObject;
-		if (!ige.developerMode.active) {
+		if (!ige.developerMode.active || ige.developerMode.activeTab === 'play') {
 			camera.startFollow(this.gameObject, false, 0.05, 0.05);
 		}
 	}

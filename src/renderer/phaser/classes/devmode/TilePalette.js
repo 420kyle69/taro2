@@ -90,7 +90,7 @@ var TilePalette = /** @class */ (function (_super) {
             pointerover = false;
         });
         _this.scene.input.on('wheel', function (pointer, gameObjects, deltaX, deltaY, deltaZ) {
-            if (ige.developerMode.active) {
+            if (ige.developerMode.active && ige.developerMode.activeTab !== 'play') {
                 if (_this.visible && pointerover) {
                     _this.zoom(deltaY);
                 }

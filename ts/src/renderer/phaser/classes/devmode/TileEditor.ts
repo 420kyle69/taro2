@@ -88,7 +88,7 @@ class TileEditor {
 	}
 
     update (): void {
-        if(ige.developerMode.active) {
+        if(ige.developerMode.active && ige.developerMode.activeTab !== 'play') {
             const devModeScene = this.devModeTools.scene;
 			const palette = this.tilePalette;
 			const map = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
