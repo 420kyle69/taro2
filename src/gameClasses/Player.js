@@ -698,7 +698,11 @@ var Player = IgeEntity.extend({
 					// $("#invite-players-card").show();
 					// $('#toggle-dev-panels').show();
 					$('#toggle-dev-panels').click();
-				} 
+				} else {
+					if (ige.game.data.isDeveloper) {
+						$('#toggle-dev-panels').show();
+					}
+				}
 				if (ige.game.data.isDeveloper) {
 					$('#kick-player').show();
 				}
