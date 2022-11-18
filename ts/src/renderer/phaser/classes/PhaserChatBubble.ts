@@ -39,7 +39,10 @@ class PhaserChatBubble extends Phaser.GameObjects.Container {
 	}
 
 	showMessage(chatText: string): void {
-		this.textObject.text = this.trimText(chatText);
+		const text = this.textObject;
+		text.setText(BitmapFontManager.sanitize(
+			text.fontData, this.trimText(chatText)
+		));
 
 		this.drawBubble();
 

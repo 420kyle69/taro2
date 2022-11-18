@@ -69,9 +69,11 @@ class MobileControlsScene extends PhaserScene {
 							x + w/2, y + h/2,
 							BitmapFontManager.font(this,
 								'Arial', true, false, '#FFFFFF'
-							),
-							text
+							)
 						);
+						label.setText(BitmapFontManager.sanitize(
+							label.fontData, text
+						));
 						label.setCenterAlign();
 						label.setFontSize(24);
 						label.setOrigin(0.5);

@@ -3,6 +3,8 @@ type Font = 'Arial' | 'Verdana';
 
 class BitmapFontManager {
 
+	private static REPLACEMENT_CHAR = String.fromCharCode(65533);
+
 	static preload (scene: Phaser.Scene): void {
 
 		const load = scene.load;
@@ -144,5 +146,23 @@ class BitmapFontManager {
 			frame: null,
 			texture: key
 		});
+	}
+
+	static sanitize (
+		fontData: Phaser.Types.GameObjects.BitmapText.BitmapFontData,
+		text: string
+	): string {
+
+		for (let i = 0; i < text.length; i++) {
+
+			if (!fontData.chars[text.charCodeAt(i)]) {
+
+				text = text.substring(0, i)
+					+ this.REPLACEMENT_CHAR
+					+ text.substring(i + 1);
+			}
+		}
+
+		return text;
 	}
 }
