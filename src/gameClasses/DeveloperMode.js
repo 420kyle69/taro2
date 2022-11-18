@@ -28,7 +28,7 @@ var DeveloperMode = /** @class */ (function () {
         }
     };
     DeveloperMode.prototype.shouldPreventKeybindings = function () {
-        return this.activeTab !== 'play';
+        return this.activeTab && this.activeTab !== 'play';
     };
     DeveloperMode.prototype.editTile = function (data, clientId) {
         // only allow developers to modify the tiles
