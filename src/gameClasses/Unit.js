@@ -2,7 +2,6 @@ var Unit = IgeEntityPhysics.extend({
 	classId: 'Unit',
 
 	init: function (data, entityIdFromServer) {
-
 		IgeEntityPhysics.prototype.init.call(this, data.defaultData);
 
 		this.id(entityIdFromServer);
@@ -24,7 +23,7 @@ var Unit = IgeEntityPhysics.extend({
 			data.equipmentAllowed = 9;
 		}
 		unitData = ige.game.getAsset('unitTypes', data.type);
-
+		
 		self._stats = _.merge(unitData, data);
 
 		self.entityId = entityIdFromServer;
@@ -91,7 +90,6 @@ var Unit = IgeEntityPhysics.extend({
 			// hence while making its minimap unit we will get null as unit
 			self._stats.minimapUnitVisibleToClients = {};
 			self.mount(ige.$('baseScene'));
-
 			if (ige.network.isPaused) {
 				this.streamMode(0);
 			} else {
@@ -748,6 +746,7 @@ var Unit = IgeEntityPhysics.extend({
 		self.previousState = null;
 
 		var data = ige.game.getAsset('unitTypes', type);
+		delete data.type // hotfix for dealing with corrupted game json that has unitData.type = "unitType". This is caused by bug in the game editor.
 
 		// console.log("change unit type", type)
 		if (data == undefined) {
