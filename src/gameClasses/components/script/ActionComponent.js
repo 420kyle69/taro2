@@ -271,7 +271,7 @@ var ActionComponent = IgeEntity.extend({
 					case 'kickPlayer':
 						var player = self._script.variable.getValue(action.entity, vars);
 						if (player && player._category == 'player') {
-							ige.game.kickPlayer(player._stats.clientId);
+							ige.game.kickPlayer(player.id());
 						}
 
 						break;
