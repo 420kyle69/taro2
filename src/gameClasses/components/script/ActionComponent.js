@@ -2463,9 +2463,8 @@ var ActionComponent = IgeEntity.extend({
 							controlledBy: "human",
 							name: name
 						});
-						player.joinGame();
 						player._stats.isBot = true;
-						player._stats.playerJoined = true; // bot player should be counted for getPlayerCount
+						player.joinGame();
 						break;
 
 					
