@@ -233,16 +233,16 @@ var GameScene = /** @class */ (function (_super) {
                 var layerId_1;
                 switch (layer.name) {
                     case 'floor':
-                        layerId_1 = TileLayer.FLOOR;
+                        layerId_1 = 0;
                         break;
                     case 'floor2':
-                        layerId_1 = TileLayer.FLOOR_2;
+                        layerId_1 = 1;
                         break;
                     case 'walls':
-                        layerId_1 = TileLayer.WALLS;
+                        layerId_1 = 2;
                         break;
                     case 'trees':
-                        layerId_1 = TileLayer.TREES;
+                        layerId_1 = 3;
                         break;
                 }
                 layer.data.forEach(function (tile, index) {

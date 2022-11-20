@@ -309,16 +309,16 @@ class GameScene extends PhaserScene {
 				let layerId;
 				switch (layer.name) {
 					case 'floor':
-						layerId = TileLayer.FLOOR;
+						layerId = 0;
 						break;
 					case 'floor2':
-						layerId = TileLayer.FLOOR_2;
+						layerId = 1;
 						break;
 					case 'walls':
-						layerId = TileLayer.WALLS;
+						layerId = 2;
 						break;
 					case 'trees':
-						layerId = TileLayer.TREES;
+						layerId = 3;
 						break;
 				}
 				layer.data.forEach((tile, index) => {
