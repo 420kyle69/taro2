@@ -49,7 +49,8 @@ var MobileControlsScene = /** @class */ (function (_super) {
                         controls.add(icon);
                     }
                     else {
-                        var label = _this.add.bitmapText(x + w / 2, y + h / 2, BitmapFontManager.font(_this, 'Arial', true, '#FFFFFF'), text);
+                        var label = _this.add.bitmapText(x + w / 2, y + h / 2, BitmapFontManager.font(_this, 'Arial', true, false, '#FFFFFF'));
+                        label.setText(BitmapFontManager.sanitize(label.fontData, text));
                         label.setCenterAlign();
                         label.setFontSize(24);
                         label.setOrigin(0.5);

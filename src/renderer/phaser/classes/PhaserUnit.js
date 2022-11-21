@@ -118,9 +118,12 @@ var PhaserUnit = /** @class */ (function (_super) {
     };
     PhaserUnit.prototype.getLabel = function () {
         if (!this.label) {
-            var label = this.label = this.scene.add.text(0, 0, 'cccccc');
+            var scene = this.scene;
+            var label = this.label = scene.add.bitmapText(0, 0, BitmapFontManager.font(scene, // default font
+            'Verdana', false, false, '#FFFFFF'), 'cccccc', 16);
+            label.letterSpacing = 1.3;
             // needs to be created with the correct scale of the client
-            this.label.setScale(1 / this.scene.cameras.main.zoom);
+            label.setScale(1 / this.scene.cameras.main.zoom);
             label.setOrigin(0.5);
             this.gameObject.add(label);
         }
@@ -129,15 +132,9 @@ var PhaserUnit = /** @class */ (function (_super) {
     PhaserUnit.prototype.updateLabel = function (data) {
         var label = this.getLabel();
         label.visible = true;
-        label.setFontFamily('Verdana');
-        label.setFontSize(16);
-        label.setFontStyle(data.bold ? 'bold' : 'normal');
-        label.setFill(data.color || '#fff');
-        //label.setResolution(4);
-        var strokeThickness = ige.game.data.settings
-            .addStrokeToNameAndAttributes !== false ? 4 : 0;
-        label.setStroke('#000', strokeThickness);
-        label.setText(data.text || '');
+        label.setFont(BitmapFontManager.font(this.scene, 'Verdana', data.bold, ige.game.data.settings
+            .addStrokeToNameAndAttributes !== false, data.color || '#FFFFFF'));
+        label.setText(BitmapFontManager.sanitize(label.fontData, data.text || ''));
         this.updateLabelOffset();
     };
     PhaserUnit.prototype.showLabel = function () {

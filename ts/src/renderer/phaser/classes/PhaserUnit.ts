@@ -1,7 +1,7 @@
 class PhaserUnit extends PhaserAnimatedEntity {
 
 	sprite: Phaser.GameObjects.Sprite & IRenderProps;
-	label: Phaser.GameObjects.Text;
+	label: Phaser.GameObjects.BitmapText;
 	private chat: PhaserChatBubble;
 
 	gameObject: Phaser.GameObjects.Container & IRenderProps;
@@ -64,14 +64,12 @@ class PhaserUnit extends PhaserAnimatedEntity {
 					}
 				}, this);
 				this.scene.load.start();
-			}
-			else {
+			} else {
 				this.sprite.setTexture(`unit/${this.entity._stats.cellSheet.url}`);
 				const bounds = this.entity._bounds2d;
 				this.sprite.setDisplaySize(bounds.x, bounds.y);
 			}
-		}
-		else {
+		} else {
 			this.key = `unit/${this.entity._stats.type}`;
 			this.sprite.setTexture(`unit/${this.entity._stats.type}`);
 			const bounds = this.entity._bounds2d;
@@ -142,12 +140,20 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		}
 	}
 
-	private getLabel (): Phaser.GameObjects.Text {
+	private getLabel (): Phaser.GameObjects.BitmapText {
 		if (!this.label) {
-			const label = this.label = this.scene.add.text(0, 0, 'cccccc');
+			const scene = this.scene;
+			const label = this.label = scene.add.bitmapText(0, 0,
+				BitmapFontManager.font(scene, // default font
+					'Verdana', false, false, '#FFFFFF'
+				),
+				'cccccc',
+				16
+			);
+			label.letterSpacing = 1.3;
 
 			// needs to be created with the correct scale of the client
-			this.label.setScale(1 / this.scene.cameras.main.zoom);
+			label.setScale(1 / this.scene.cameras.main.zoom);
 			label.setOrigin(0.5);
 
 			this.gameObject.add(label);
@@ -163,16 +169,16 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		const label = this.getLabel();
 		label.visible = true;
 
-		label.setFontFamily('Verdana');
-		label.setFontSize(16);
-		label.setFontStyle(data.bold ? 'bold' : 'normal');
-		label.setFill(data.color || '#fff');
-		//label.setResolution(4);
+		label.setFont(BitmapFontManager.font(this.scene,
+			'Verdana', data.bold,
+			ige.game.data.settings
+				.addStrokeToNameAndAttributes !== false,
+			data.color || '#FFFFFF'
+		));
+		label.setText(BitmapFontManager.sanitize(
+			label.fontData, data.text || ''
+		));
 
-		const strokeThickness = ige.game.data.settings
-			.addStrokeToNameAndAttributes !== false ? 4 : 0;
-		label.setStroke('#000', strokeThickness);
-		label.setText(data.text || '');
 		this.updateLabelOffset();
 	}
 
