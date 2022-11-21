@@ -79,9 +79,6 @@ class TileEditor {
 				selectedTile = map.getTileAt(tileX, tileY);
 				if (map === this.tilePalette.map) selectedTile.tint = 0x87cfff;
 			}
-			if (this.devModeTools.modeButtons[3].active) {
-				this.devModeTools.highlightModeButton(2);
-			}
 			return selectedTile;
 		}
 	}
@@ -111,7 +108,7 @@ class TileEditor {
 				paletteMarker.graphics.x = paletteMap.tileToWorldX(palettePointerTileX);
 				paletteMarker.graphics.y = paletteMap.tileToWorldY(palettePointerTileY);
 
-				if (devModeScene.input.manager.activePointer.isDown) {
+				if (devModeScene.input.manager.activePointer.isDown && !this.devModeTools.modeButtons[3].active) {
 					if (this.area.x > 1 || this.area.y > 1) {
 						for (let i = 0; i < this.area.x; i++) {
 							for (let j = 0; j < this.area.y; j++) {
@@ -134,7 +131,7 @@ class TileEditor {
 				marker.graphics.x = map.tileToWorldX(pointerTileX);
 				marker.graphics.y = map.tileToWorldY(pointerTileY);
 
-				if (devModeScene.input.manager.activePointer.rightButtonDown()) {
+				if (devModeScene.input.manager.activePointer.rightButtonDown() && !this.devModeTools.modeButtons[3].active) {
 					if (this.area.x > 1 || this.area.y > 1) {
 						for (let i = 0; i < this.area.x; i++) {
 							for (let j = 0; j < this.area.y; j++) {
