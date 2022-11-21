@@ -300,15 +300,15 @@ var Unit = IgeEntityPhysics.extend({
 		if (previousOwnerPlayer && previousOwnerPlayer.id() !== newOwnerPlayerId) {
 			previousOwnerPlayer.disownUnit(self);
 		}
-		
 		// add this unit to the new owner
 		var newOwnerPlayer = newOwnerPlayerId ? ige.$(newOwnerPlayerId) : undefined;
+
 		if (newOwnerPlayer && newOwnerPlayer._stats) {
 			self._stats.ownerId = newOwnerPlayerId;
 			self.ownerPlayer = newOwnerPlayer;
-			self._stats.name = (config && config.dontUpdateName) // if unit already has name dont update it
-														? (self._stats.name || newOwnerPlayer._stats.name)
-														: newOwnerPlayer._stats.name;
+			// self._stats.name = (config && config.dontUpdateName) // if unit already has name dont update it
+			// 											? (self._stats.name || newOwnerPlayer._stats.name)
+			// 											: newOwnerPlayer._stats.name;
 			self._stats.clientId = newOwnerPlayer && newOwnerPlayer._stats ? newOwnerPlayer._stats.clientId : undefined;
 			if (ige.isServer) {
 				self.streamUpdateData([{ ownerPlayerId: newOwnerPlayerId }]);
@@ -1553,6 +1553,7 @@ var Unit = IgeEntityPhysics.extend({
 						if (ige.isClient) {
 							self.updateNameLabel();
 						}
+
 						break;
 					case 'isHidden':
 						self._stats[attrName] = newValue;
