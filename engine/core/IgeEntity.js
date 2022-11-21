@@ -4700,41 +4700,43 @@ var IgeEntity = IgeObject.extend({
 		if (ige.isServer) {
 			var data = {};
 			var keys = [];
-			switch(this._category) {
 
-				case 'unit': 
+			switch(this._category) {
+				// here we are picking keys from this._stats to include in the data sent from server
+				// these data are used in the class constructor for the specific entity in IgeStreamComponent._onStreamCreate() [data[4]]
+				case 'unit':
 					// cellsheet is used for purchasable-skins
-					keys = ['name', 'type', 'stateId', 'ownerId', 'currentItemIndex', 'currentItemId', 'flip', 'skin', 'anim', 'scale', 'cellSheet']
-					data = { 
-						attributes: {}, 
-						// variables: {} 
+					keys = ['name', 'type', 'stateId', 'ownerId', 'currentItemIndex', 'currentItemId', 'flip', 'skin', 'anim', 'scale', 'cellSheet'];
+					data = {
+						attributes: {},
+						// variables: {}
 					};
-				break;
+					break;
 
 				case 'item':
 					// TODO: we shouldn't have to send currentBody. for some reason, all items have 'dropped' stateId
-					keys = ['itemTypeId', 'anim', 'stateId', 'ownerUnitId', 'quantity', 'currentBody', 'flip', 'isBeingUsed']
-					data = { 
-						attributes: {}, 
-						// variables: {} 
+					keys = ['itemTypeId', 'anim', 'stateId', 'ownerUnitId', 'quantity', 'currentBody', 'flip', 'isBeingUsed'];
+					data = {
+						attributes: {},
+						// variables: {}
 					};
 					break;
 
 				case 'projectile':
-					keys = ['type', 'anim', 'stateId', 'flip']
-					data = { 
-						attributes: {}, 
-						// variables: {} 
+					keys = ['type', 'anim', 'stateId', 'flip'];
+					data = {
+						attributes: {},
+						// variables: {}
 					};
 					break;
 
 				case 'player':
 					// purchasables is required for rendering this player's owned skin to the other players
-					keys = ['name', 'clientId', 'playerTypeId', 'controlledBy', 'playerJoined', 'unitIds', 'selectedUnitId', 'userId', 'banChat', 'purchasables']
-					data = { 
-						attributes: {}, 
-						// variables: {} 
-					};				
+					keys = ['name', 'clientId', 'playerTypeId', 'controlledBy', 'playerJoined', 'unitIds', 'selectedUnitId', 'userId', 'banChat', 'purchasables'];
+					data = {
+						attributes: {},
+						// variables: {}
+					};
 
 					// send sensitive information to the target clients only
 					if (this._stats.clientId == clientId) {
@@ -4750,16 +4752,17 @@ var IgeEntity = IgeObject.extend({
 
 					break;
 
-				case 'region': 
+				case 'region':
 					keys = ['id', 'default'];
-					data = { currentBody: {
-									height: this._stats.currentBody.height, 
-									width: this._stats.currentBody.width,
+					data = { currentBody:
+						{
+							height: this._stats.currentBody.height,
+							width: this._stats.currentBody.width,
 						}
 					};
 					break;
 			}
-			
+
 			for (i in keys) {
 				var key = keys[i];
 				data[key] = this._stats[key];
@@ -4767,10 +4770,11 @@ var IgeEntity = IgeObject.extend({
 
 			if (data.attributes != undefined) {
 				for (key in this._stats.attributes) {
-					data.attributes[key] = {value: this._stats.attributes[key].value};
-				}	
+					// send the whole attribute objects
+					data.attributes[key] = this._stats.attributes[key];
+				}
 			}
-			
+
 			// commented out variables as it's causing circular JSON error
 			// when a unit variable is set as a unit. we need to use unitId going fwd. not the actual unit.
 			// if (data.variables != undefined) {

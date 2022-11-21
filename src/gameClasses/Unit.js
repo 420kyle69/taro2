@@ -23,7 +23,7 @@ var Unit = IgeEntityPhysics.extend({
 			data.equipmentAllowed = 9;
 		}
 		unitData = ige.game.getAsset('unitTypes', data.type);
-		
+
 		self._stats = _.merge(unitData, data);
 
 		self.entityId = entityIdFromServer;
@@ -60,7 +60,7 @@ var Unit = IgeEntityPhysics.extend({
 			if (this._stats.states) {
 				var currentState = this._stats.states[this._stats.stateId];
 				if (currentState) {
-					var defaultAnimation = this._stats.animations[currentState.animation];	
+					var defaultAnimation = this._stats.animations[currentState.animation];
 				}
 			}
 		}
@@ -68,7 +68,6 @@ var Unit = IgeEntityPhysics.extend({
 		// initialize body & texture of the unit
 		self.changeUnitType(data.type, data.defaultData);
 
-		// if unit's scale as already been changed by some script then use that scale
 		if (self._stats.scale) {
 
 		}
@@ -759,6 +758,7 @@ var Unit = IgeEntityPhysics.extend({
 		self._stats.type = type;
 
 		var oldAttributes = self._stats.attributes;
+
 		for (var i in data) {
 			if (i == 'name') { // don't overwrite unit's name with unit type name
 				continue;
@@ -792,9 +792,14 @@ var Unit = IgeEntityPhysics.extend({
 					// if old unit type had a same attribute, then take the value from it.
 					if (oldAttributes && oldAttributes[attrId]) {
 						attributeValue = oldAttributes[attrId].value;
+						attributeMax = oldAttributes[attrId].max;
+						attributeMin = oldAttributes[attrId].min;
 					}
+
 					if (this._stats.attributes[attrId]) {
-						this._stats.attributes[attrId].value = Math.max(data.attributes[attrId].min, Math.min(data.attributes[attrId].max, parseFloat(attributeValue)));
+						this._stats.attributes[attrId].max = attributeMax;
+						this._stats.attributes[attrId].min = attributeMin;
+						this._stats.attributes[attrId].value = Math.max(attributeMin, Math.min(attributeMax, parseFloat(attributeValue)));
 					}
 				}
 			}
