@@ -13,7 +13,6 @@ var DeveloperMode = /** @class */ (function () {
         this.active = false;
     };
     DeveloperMode.prototype.changeTab = function (tab) {
-        this.activeTab = tab;
         if (tab === 'map') {
             ige.client.emit('enterMapTab');
         }
@@ -23,9 +22,10 @@ var DeveloperMode = /** @class */ (function () {
         if (tab === 'play') {
             ige.client.emit('lockCamera');
         }
-        else {
+        else if (this.activeTab === 'play') {
             ige.client.emit('unlockCamera');
         }
+        this.activeTab = tab;
     };
     DeveloperMode.prototype.shouldPreventKeybindings = function () {
         return this.activeTab && this.activeTab !== 'play';

@@ -13,6 +13,8 @@ var TileEditor = /** @class */ (function () {
     TileEditor.prototype.activateMarker = function (active) {
         this.marker.active = active;
         this.marker.graphics.setVisible(active);
+        this.paletteMarker.active = active;
+        this.paletteMarker.graphics.setVisible(active);
         if (active)
             this.devModeTools.regionEditor.regionTool = false;
     };
@@ -59,18 +61,14 @@ var TileEditor = /** @class */ (function () {
                 if (map === this.tilePalette.map)
                     selectedTile.tint = 0x87cfff;
             }
-            else {
-                selectedTile = null;
-            }
             if (this.devModeTools.modeButtons[3].active) {
-                //this.activateMarker(true);
                 this.devModeTools.highlightModeButton(2);
             }
             return selectedTile;
         }
     };
     TileEditor.prototype.update = function () {
-        if (ige.developerMode.active && ige.developerMode.activeTab !== 'play') {
+        if (ige.developerMode.active && ige.developerMode.activeTab === 'map') {
             var devModeScene = this.devModeTools.scene;
             var palette = this.tilePalette;
             var map = this.gameScene.tilemap;
@@ -139,8 +137,10 @@ var TileEditor = /** @class */ (function () {
                 }
             }
         }
-        else
+        else {
             this.marker.graphics.setVisible(false);
+            this.paletteMarker.graphics.setVisible(false);
+        }
     };
     return TileEditor;
 }());
