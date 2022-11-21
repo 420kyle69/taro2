@@ -18,7 +18,6 @@ class DeveloperMode {
 	}
 
 	changeTab(tab: devModeTab) {
-		this.activeTab = tab;
 		if (tab === 'map') {
 			ige.client.emit('enterMapTab');
 		} else {
@@ -26,9 +25,10 @@ class DeveloperMode {
 		}
 		if (tab === 'play') {
 			ige.client.emit('lockCamera');
-		} else {
+		} else if (this.activeTab === 'play') {
 			ige.client.emit('unlockCamera');
 		}
+		this.activeTab = tab;
 	}
 
 	shouldPreventKeybindings (): boolean {

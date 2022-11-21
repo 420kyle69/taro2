@@ -33,6 +33,8 @@ class TileEditor {
     activateMarker(active: boolean): void {
 		this.marker.active = active;
 		this.marker.graphics.setVisible(active);
+		this.paletteMarker.active = active;
+		this.paletteMarker.graphics.setVisible(active);
 		if (active) this.devModeTools.regionEditor.regionTool = false;
 	}
 
@@ -76,11 +78,8 @@ class TileEditor {
 			if (map.getTileAt(tileX, tileY) && map.getTileAt(tileX, tileY).index !== 0) {
 				selectedTile = map.getTileAt(tileX, tileY);
 				if (map === this.tilePalette.map) selectedTile.tint = 0x87cfff;
-			} else {
-				selectedTile = null;
 			}
 			if (this.devModeTools.modeButtons[3].active) {
-				//this.activateMarker(true);
 				this.devModeTools.highlightModeButton(2);
 			}
 			return selectedTile;
@@ -88,7 +87,7 @@ class TileEditor {
 	}
 
     update (): void {
-        if(ige.developerMode.active && ige.developerMode.activeTab !== 'play') {
+        if(ige.developerMode.active && ige.developerMode.activeTab === 'map') {
             const devModeScene = this.devModeTools.scene;
 			const palette = this.tilePalette;
 			const map = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
@@ -161,7 +160,10 @@ class TileEditor {
 				}
 			}
 		}
-		else this.marker.graphics.setVisible(false);
+		else {
+			this.marker.graphics.setVisible(false);
+			this.paletteMarker.graphics.setVisible(false);
+		}
 	}
 }
  
