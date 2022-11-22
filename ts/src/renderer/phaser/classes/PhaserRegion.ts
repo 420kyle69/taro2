@@ -1,8 +1,8 @@
 class PhaserRegion extends PhaserEntity {
 
 	public name: string;
-	public label: Phaser.GameObjects.Text;
-	private graphics: Phaser.GameObjects.Graphics
+	public label: Phaser.GameObjects.BitmapText;
+	private readonly graphics: Phaser.GameObjects.Graphics;
 	public gameObject: Phaser.GameObjects.Container & IRenderProps;
 	public devModeOnly: boolean;
 	private devModeScene: DevModeScene;
@@ -40,7 +40,7 @@ class PhaserRegion extends PhaserEntity {
 		scene.renderedEntities.push(this.gameObject);
 		scene.entityLayers[EntityLayer.TREES].add(this.gameObject);
 
-		this.name = this.entity._stats.id
+		this.name = this.entity._stats.id;
 
 		if (!stats.inside) {
 			this.devModeOnly = true;
@@ -57,13 +57,24 @@ class PhaserRegion extends PhaserEntity {
 		this.transform();
 	}
 
-	private getLabel (): Phaser.GameObjects.Text {
+	private getLabel (): Phaser.GameObjects.BitmapText {
 		if (!this.label) {
-			const label = this.label = this.scene.add.text(0, 0, 'cccccc');
+			const scene = this.scene;
+			const label = this.label = scene.add.bitmapText(0, 0,
+				BitmapFontManager.font(scene,
+					'Verdana', false,
+					ige.game.data.settings
+						.addStrokeToNameAndAttributes !== false,
+					'#FFFFFF'
+				),
+				'cccccc',
+				16
+			);
+			label.letterSpacing = 1.3;
 			label.visible = false;
 
 			// needs to be created with the correct scale of the client
-			this.label.setScale(1.3);
+			label.setScale(1.3);
 			label.setOrigin(0);
 
 			this.gameObject.add(label);
@@ -74,16 +85,9 @@ class PhaserRegion extends PhaserEntity {
 	public updateLabel (): void {
 		const label = this.getLabel();
 		label.visible = true;
-
-		label.setFontFamily('Verdana');
-		label.setFontSize(16);
-		label.setFontStyle('normal');
-		label.setFill('#fff');
-
-		const strokeThickness = ige.game.data.settings
-			.addStrokeToNameAndAttributes !== false ? 4 : 0;
-		label.setStroke('#000', strokeThickness);
-		label.setText(this.name || '');
+		label.setText(BitmapFontManager.sanitize(
+			label.fontData, this.name || ''
+		));
 
 		const stats = this.entity._stats.default;
 		label.setPosition(5 - stats.width/2, 5 - stats.height/2);
@@ -101,7 +105,7 @@ class PhaserRegion extends PhaserEntity {
 		label.setPosition(5 - stats.width/2, 5 - stats.height/2);
 
 		graphics.clear();
-		
+
 		if (this.devModeOnly) {
 			graphics.lineStyle(
 				2,
@@ -122,11 +126,12 @@ class PhaserRegion extends PhaserEntity {
 				(stats.alpha && stats.alpha >= 0 && stats.alpha <= 1) ? stats.alpha : 0.4
 			);
 			graphics.fillRect(
-			0,
-			0,
-			stats.width,
-			stats.height
-		)};
+				0,
+				0,
+				stats.width,
+				stats.height
+			);
+		}
 	}
 
 	protected destroy (): void {

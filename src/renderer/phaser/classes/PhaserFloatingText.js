@@ -15,16 +15,14 @@ var __extends = (this && this.__extends) || (function () {
 })();
 var PhaserFloatingText = /** @class */ (function (_super) {
     __extends(PhaserFloatingText, _super);
+    // TODO object pool
     function PhaserFloatingText(scene, data) {
-        var _this = _super.call(this, scene, data.x, data.y, data.text, { fontFamily: 'Verdana' }) || this;
+        var _this = _super.call(this, scene, data.x, data.y, BitmapFontManager.font(scene, 'Verdana', true, ige.game.data.settings
+            .addStrokeToNameAndAttributes !== false, data.color || '#FFFFFF')) || this;
+        _this.setText(BitmapFontManager.sanitize(_this.fontData, data.text));
         _this.setOrigin(0.5);
         _this.setFontSize(16);
-        _this.setFontStyle('bold');
-        _this.setFill(data.color || '#fff');
-        //this.setResolution(4);
-        var strokeThickness = ige.game.data.settings
-            .addStrokeToNameAndAttributes !== false ? 4 : 0;
-        _this.setStroke('#000', strokeThickness);
+        _this.letterSpacing = 1.3;
         scene.add.existing(_this);
         scene.tweens.add({
             targets: _this,
@@ -32,11 +30,11 @@ var PhaserFloatingText = /** @class */ (function (_super) {
             duration: 2500,
             y: _this.y - 40,
             onComplete: function () {
-                _this.destroy();
+                _this.destroy(); // TODO object pool
             }
         });
         return _this;
     }
     return PhaserFloatingText;
-}(Phaser.GameObjects.Text));
+}(Phaser.GameObjects.BitmapText));
 //# sourceMappingURL=PhaserFloatingText.js.map

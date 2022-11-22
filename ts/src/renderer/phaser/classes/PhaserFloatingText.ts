@@ -1,4 +1,6 @@
-class PhaserFloatingText extends Phaser.GameObjects.Text {
+class PhaserFloatingText extends Phaser.GameObjects.BitmapText {
+
+	// TODO object pool
 
 	constructor (
 		scene: Phaser.Scene,
@@ -9,17 +11,21 @@ class PhaserFloatingText extends Phaser.GameObjects.Text {
 			color: string
 		},
 	) {
-		super(scene, data.x, data.y, data.text, { fontFamily: 'Verdana' });
-
+		super(scene,
+			data.x, data.y,
+			BitmapFontManager.font(scene,
+				'Verdana', true,
+				ige.game.data.settings
+					.addStrokeToNameAndAttributes !== false,
+				data.color || '#FFFFFF'
+			)
+		);
+		this.setText(BitmapFontManager.sanitize(
+			this.fontData, data.text
+		));
 		this.setOrigin(0.5);
 		this.setFontSize(16);
-		this.setFontStyle('bold');
-		this.setFill(data.color || '#fff');
-		//this.setResolution(4);
-
-		const strokeThickness = ige.game.data.settings
-			.addStrokeToNameAndAttributes !== false ? 4 : 0;
-		this.setStroke('#000', strokeThickness);
+		this.letterSpacing = 1.3;
 
 		scene.add.existing(this);
 		scene.tweens.add({
@@ -28,7 +34,7 @@ class PhaserFloatingText extends Phaser.GameObjects.Text {
 			duration: 2500,
 			y: this.y - 40,
 			onComplete: () => {
-				this.destroy();
+				this.destroy(); // TODO object pool
 			}
 		});
 	}
