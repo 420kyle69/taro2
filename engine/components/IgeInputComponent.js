@@ -386,7 +386,7 @@ var IgeInputComponent = IgeEventingClass.extend({
 	 * @private
 	 */
 	_mouseDown: function (event) {
-		if (ige.developerMode.active) {
+		if (ige.developerMode && ige.developerMode.shouldPreventKeybindings()) {
 			return;
 		}
 		if (this._debug) {
@@ -547,7 +547,7 @@ var IgeInputComponent = IgeEventingClass.extend({
 			});
 		}
 	},
-	shouldPreventKeybindings: function () {
+	shouldPreventChat: function () {
 		if (!ige.isClient || !$('#game-editor').is(':visible')) {
 			return false;
 		}
@@ -567,10 +567,9 @@ var IgeInputComponent = IgeEventingClass.extend({
 	_keyDown: function (event) {
 		var self = this;
 		this._updateMouseData(event);
-		if (!this.shouldPreventKeybindings()) {
+		if(!this.shouldPreventChat()) {
 			this._chatHandler(event);
 		}
-
 		if (this._state[event.keyCode] == false) {
 			// reset streamed target position & existing force when key is pressed
 			if (ige.game.data.defaultData && ige.client.selectedUnit) {

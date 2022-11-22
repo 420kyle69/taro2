@@ -22,11 +22,21 @@ var DevModeScene = /** @class */ (function (_super) {
         var _this = this;
         this.gameScene = ige.renderer.scene.getScene('Game');
         this.regions = [];
-        ige.client.on('enterDevMode', function () {
-            _this.enterDevMode();
+        this.defaultZoom = (this.gameScene.zoomSize / 2.15);
+        ige.client.on('unlockCamera', function () {
+            _this.defaultZoom = (_this.gameScene.zoomSize / 2.15);
+            _this.gameScene.cameras.main.stopFollow();
         });
-        ige.client.on('leaveDevMode', function () {
-            _this.leaveDevMode();
+        ige.client.on('lockCamera', function () {
+            ige.client.emit('zoom', _this.defaultZoom);
+            if (_this.gameScene.cameraTarget)
+                _this.gameScene.cameras.main.startFollow(_this.gameScene.cameraTarget, false, 0.05, 0.05);
+        });
+        ige.client.on('enterMapTab', function () {
+            _this.enterMapTab();
+        });
+        ige.client.on('leaveMapTab', function () {
+            _this.leaveMapTab();
         });
         ige.client.on('editTile', function (data) {
             _this.tileEditor.edit(data);
@@ -80,12 +90,11 @@ var DevModeScene = /** @class */ (function (_super) {
         this.tilePalette = this.devModeTools.palette;
         this.regionEditor = this.devModeTools.regionEditor;
     };
-    DevModeScene.prototype.enterDevMode = function () {
-        this.defaultZoom = (this.gameScene.zoomSize / 2.15);
-        this.devModeTools.enterDevMode();
+    DevModeScene.prototype.enterMapTab = function () {
+        this.devModeTools.enterMapTab();
     };
-    DevModeScene.prototype.leaveDevMode = function () {
-        this.devModeTools.leaveDevMode();
+    DevModeScene.prototype.leaveMapTab = function () {
+        this.devModeTools.leaveMapTab();
     };
     DevModeScene.prototype.pointerInsideMap = function (pointerX, pointerY, map) {
         return (0 <= pointerX && pointerX < map.width

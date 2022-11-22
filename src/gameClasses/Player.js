@@ -688,8 +688,8 @@ var Player = IgeEntity.extend({
 				$('.open-menu-button').show();
 			}
 
-			if (typeof (userId) !== 'undefined' && typeof (sessionId) !== 'undefined') {
-				if (ige.game.data.isGameDeveloper && ['1', '4', '5'].includes(ige.game.data.defaultData.tier)) {
+			if ((typeof (userId) !== 'undefined' && typeof (sessionId) !== 'undefined') || window.isStandalone) {
+				if ((ige.game.data.isGameDeveloper && ['1', '4', '5'].includes(ige.game.data.defaultData.tier)) || window.isStandalone) {
 					// dont show dev menu by default
 					// if (!ige.isMobile) {
 					// 	$("#dev-console").show() // if user has access of this game, show dev console
@@ -698,8 +698,11 @@ var Player = IgeEntity.extend({
 					// $("#invite-players-card").show();
 					// $('#toggle-dev-panels').show();
 					$('#toggle-dev-panels').click();
-					window.enterDirectlyInDevMode = true;
-				} 
+				} else {
+					if (ige.game.data.isDeveloper) {
+						$('#toggle-dev-panels').show();
+					}
+				}
 				if (ige.game.data.isDeveloper) {
 					$('#kick-player').show();
 				}

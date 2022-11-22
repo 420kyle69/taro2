@@ -2,7 +2,6 @@ var Unit = IgeEntityPhysics.extend({
 	classId: 'Unit',
 
 	init: function (data, entityIdFromServer) {
-
 		IgeEntityPhysics.prototype.init.call(this, data.defaultData);
 
 		this.id(entityIdFromServer);
@@ -43,7 +42,9 @@ var Unit = IgeEntityPhysics.extend({
 			.addComponent(AttributeComponent); // every units gets one
 
 		self.addComponent(ScriptComponent); // entity-requireScriptLoading
-		self.script.load(unitData.scripts);
+		if (unitData && unitData) {
+			self.script.load(unitData.scripts);
+		}
 
 		self.addComponent(AIComponent);
 
@@ -59,7 +60,7 @@ var Unit = IgeEntityPhysics.extend({
 			if (this._stats.states) {
 				var currentState = this._stats.states[this._stats.stateId];
 				if (currentState) {
-					var defaultAnimation = this._stats.animations[currentState.animation];	
+					var defaultAnimation = this._stats.animations[currentState.animation];
 				}
 			}
 		}
@@ -67,7 +68,6 @@ var Unit = IgeEntityPhysics.extend({
 		// initialize body & texture of the unit
 		self.changeUnitType(data.type, data.defaultData);
 
-		// if unit's scale as already been changed by some script then use that scale
 		if (self._stats.scale) {
 
 		}
@@ -89,7 +89,6 @@ var Unit = IgeEntityPhysics.extend({
 			// hence while making its minimap unit we will get null as unit
 			self._stats.minimapUnitVisibleToClients = {};
 			self.mount(ige.$('baseScene'));
-
 			if (ige.network.isPaused) {
 				this.streamMode(0);
 			} else {
@@ -301,15 +300,15 @@ var Unit = IgeEntityPhysics.extend({
 		if (previousOwnerPlayer && previousOwnerPlayer.id() !== newOwnerPlayerId) {
 			previousOwnerPlayer.disownUnit(self);
 		}
-		
 		// add this unit to the new owner
 		var newOwnerPlayer = newOwnerPlayerId ? ige.$(newOwnerPlayerId) : undefined;
+
 		if (newOwnerPlayer && newOwnerPlayer._stats) {
 			self._stats.ownerId = newOwnerPlayerId;
 			self.ownerPlayer = newOwnerPlayer;
-			self._stats.name = (config && config.dontUpdateName) // if unit already has name dont update it
-														? (self._stats.name || newOwnerPlayer._stats.name)
-														: newOwnerPlayer._stats.name;
+			// self._stats.name = (config && config.dontUpdateName) // if unit already has name dont update it
+			// 											? (self._stats.name || newOwnerPlayer._stats.name)
+			// 											: newOwnerPlayer._stats.name;
 			self._stats.clientId = newOwnerPlayer && newOwnerPlayer._stats ? newOwnerPlayer._stats.clientId : undefined;
 			if (ige.isServer) {
 				self.streamUpdateData([{ ownerPlayerId: newOwnerPlayerId }]);
@@ -746,6 +745,7 @@ var Unit = IgeEntityPhysics.extend({
 		self.previousState = null;
 
 		var data = ige.game.getAsset('unitTypes', type);
+		delete data.type // hotfix for dealing with corrupted game json that has unitData.type = "unitType". This is caused by bug in the game editor.
 
 		// console.log("change unit type", type)
 		if (data == undefined) {
@@ -758,6 +758,7 @@ var Unit = IgeEntityPhysics.extend({
 		self._stats.type = type;
 
 		var oldAttributes = self._stats.attributes;
+
 		for (var i in data) {
 			if (i == 'name') { // don't overwrite unit's name with unit type name
 				continue;
@@ -791,9 +792,14 @@ var Unit = IgeEntityPhysics.extend({
 					// if old unit type had a same attribute, then take the value from it.
 					if (oldAttributes && oldAttributes[attrId]) {
 						attributeValue = oldAttributes[attrId].value;
+						attributeMax = oldAttributes[attrId].max;
+						attributeMin = oldAttributes[attrId].min;
 					}
+
 					if (this._stats.attributes[attrId]) {
-						this._stats.attributes[attrId].value = Math.max(data.attributes[attrId].min, Math.min(data.attributes[attrId].max, parseFloat(attributeValue)));
+						this._stats.attributes[attrId].max = attributeMax;
+						this._stats.attributes[attrId].min = attributeMin;
+						this._stats.attributes[attrId].value = Math.max(attributeMin, Math.min(attributeMax, parseFloat(attributeValue)));
 					}
 				}
 			}
@@ -1547,6 +1553,7 @@ var Unit = IgeEntityPhysics.extend({
 						if (ige.isClient) {
 							self.updateNameLabel();
 						}
+
 						break;
 					case 'isHidden':
 						self._stats[attrName] = newValue;

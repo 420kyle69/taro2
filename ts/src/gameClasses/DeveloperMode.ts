@@ -1,21 +1,38 @@
 class DeveloperMode {
 	active: boolean;
+	activeTab: devModeTab;
 
 	constructor() {
 		if (ige.isClient) this.active = false;
-		console.log('create deve mode', this)
 	}
 
 	enter(): void {
 		console.log('client enter developer mode');
 		this.active = true;
-		ige.client.emit('enterDevMode');
+		this.changeTab('play');
 	}
 
 	leave (): void {
 		console.log('client leave developer mode');
 		this.active = false;
-		ige.client.emit('leaveDevMode');
+	}
+
+	changeTab(tab: devModeTab) {
+		if (tab === 'map') {
+			ige.client.emit('enterMapTab');
+		} else {
+			ige.client.emit('leaveMapTab');
+		}
+		if (tab === 'play') {
+			ige.client.emit('lockCamera');
+		} else if (this.activeTab === 'play') {
+			ige.client.emit('unlockCamera');
+		}
+		this.activeTab = tab;
+	}
+
+	shouldPreventKeybindings (): boolean {
+		return this.activeTab && this.activeTab !== 'play';
 	}
 
 	editTile (data: TileData, clientId: string): void {
@@ -147,6 +164,8 @@ interface RegionData {
 	delete?: boolean,
 	showModal?: boolean
 }
+
+type devModeTab = 'play' | 'map' | 'entities' | 'moderate' | 'debug';
 
 if (typeof (module) !== 'undefined' && typeof (module.exports) !== 'undefined') {
 	module.exports = DeveloperMode;

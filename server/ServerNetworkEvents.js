@@ -55,7 +55,7 @@ var ServerNetworkEvents = {
 		}
 
 		delete client;
-
+		
 		if (player) {
 			player.remove();
 		}
@@ -582,6 +582,7 @@ var ServerNetworkEvents = {
 
 	_onKick: function (kickedClientId, modClientId) {
 		var modPlayer = ige.game.getPlayerByClientId(modClientId);
+		var kickedPlayer = ige.game.getPlayerByClientId(kickedClientId);
 
 		if (!modPlayer) {
 			return;
@@ -592,8 +593,8 @@ var ServerNetworkEvents = {
 			modPlayer._stats.isUserAdmin ||
 			modPlayer._stats.isUserMod;
 			
-		if (isUserDeveloper) {
-			ige.game.kickPlayer(kickedClientId);
+		if (isUserDeveloper && kickedPlayer) {
+			ige.game.kickPlayer(kickedPlayer.id());
 		}
 	},
 	
