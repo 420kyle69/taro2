@@ -4706,7 +4706,7 @@ var IgeEntity = IgeObject.extend({
 				// these data are used in the class constructor for the specific entity in IgeStreamComponent._onStreamCreate() [data[4]]
 				case 'unit':
 					// cellsheet is used for purchasable-skins
-					keys = ['name', 'type', 'stateId', 'ownerId', 'currentItemIndex', 'currentItemId', 'flip', 'skin', 'anim', 'scale', 'cellSheet'];
+					keys = ['name', 'type', 'stateId', 'ownerId', 'currentItemIndex', 'currentItemId', 'flip', 'skin', 'anim', 'scale', 'cellSheet', 'width', 'height', 'scaleDimensions'];
 					data = {
 						attributes: {},
 						// variables: {}
@@ -4715,7 +4715,7 @@ var IgeEntity = IgeObject.extend({
 
 				case 'item':
 					// TODO: we shouldn't have to send currentBody. for some reason, all items have 'dropped' stateId
-					keys = ['itemTypeId', 'anim', 'stateId', 'ownerUnitId', 'quantity', 'currentBody', 'flip', 'isBeingUsed'];
+					keys = ['itemTypeId', 'anim', 'stateId', 'ownerUnitId', 'quantity', 'currentBody', 'flip', 'isBeingUsed', 'width', 'height', 'scaleDimensions'];
 					data = {
 						attributes: {},
 						// variables: {}
