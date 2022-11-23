@@ -131,12 +131,12 @@ var PhaserUnit = /** @class */ (function (_super) {
             label.setScale(1 / scene.cameras.main.zoom);
             label.setOrigin(0.5);
             this.gameObject.add(label);
-            // if (scene.renderer.type === Phaser.CANVAS) {
-            var rt = this.rtLabel = scene.add.renderTexture(0, 0);
-            rt.setScale(label.scale);
-            rt.setOrigin(0.5);
-            this.gameObject.add(rt);
-            // }
+            if (scene.renderer.type === Phaser.CANVAS) {
+                var rt = this.rtLabel = scene.add.renderTexture(0, 0);
+                rt.setScale(label.scale);
+                rt.setOrigin(0.5);
+                this.gameObject.add(rt);
+            }
         }
         return this.label;
     };

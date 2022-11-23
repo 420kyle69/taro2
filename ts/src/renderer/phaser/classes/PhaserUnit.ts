@@ -164,13 +164,13 @@ class PhaserUnit extends PhaserAnimatedEntity {
 
 			this.gameObject.add(label);
 
-			// if (scene.renderer.type === Phaser.CANVAS) {
-			const rt = this.rtLabel = scene.add.renderTexture(0, 0);
-			rt.setScale(label.scale);
-			rt.setOrigin(0.5);
+			if (scene.renderer.type === Phaser.CANVAS) {
+				const rt = this.rtLabel = scene.add.renderTexture(0, 0);
+				rt.setScale(label.scale);
+				rt.setOrigin(0.5);
 
-			this.gameObject.add(rt);
-			// }
+				this.gameObject.add(rt);
+			}
 		}
 		return this.label;
 	}
