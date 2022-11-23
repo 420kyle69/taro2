@@ -2,6 +2,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 
 	sprite: Phaser.GameObjects.Sprite & IRenderProps;
 	label: Phaser.GameObjects.BitmapText;
+	private rtLabel: Phaser.GameObjects.RenderTexture;
 	private chat: PhaserChatBubble;
 
 	gameObject: Phaser.GameObjects.Container & IRenderProps;
@@ -120,11 +121,16 @@ class PhaserUnit extends PhaserAnimatedEntity {
 	}
 
 	private updateLabelOffset (): void {
-		this.label.y = -25 - (this.sprite.displayHeight + this.sprite.displayWidth) / 4;
+		const {displayHeight, displayWidth} = this.sprite;
+		this.label.y = -25 - (displayHeight + displayWidth) / 4;
+		if (this.rtLabel) {
+			this.rtLabel.y = this.label.y;
+		}
 	}
 
 	private updateAttributesOffset (): void {
-		this.attributesContainer.y = 25 + (this.sprite.displayHeight + this.sprite.displayWidth) / 4;
+		const {displayHeight, displayWidth} = this.sprite;
+		this.attributesContainer.y = 25 + (displayHeight + displayWidth) / 4;
 	}
 
 	private follow (): void {
@@ -153,10 +159,18 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			label.letterSpacing = 1.3;
 
 			// needs to be created with the correct scale of the client
-			label.setScale(1 / this.scene.cameras.main.zoom);
+			label.setScale(1 / scene.cameras.main.zoom);
 			label.setOrigin(0.5);
 
 			this.gameObject.add(label);
+
+			// if (scene.renderer.type === Phaser.CANVAS) {
+			const rt = this.rtLabel = scene.add.renderTexture(0, 0);
+			rt.setScale(label.scale);
+			rt.setOrigin(0.5);
+
+			this.gameObject.add(rt);
+			// }
 		}
 		return this.label;
 	}
@@ -179,15 +193,39 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			label.fontData, data.text || ''
 		));
 
+		const rt = this.rtLabel;
+		if (rt) {
+			const tempScale = label.scale;
+			label.setScale(1);
+
+			rt.visible = true;
+			rt.resize(label.width, label.height);
+			rt.clear();
+			rt.draw(label, label.width/2, label.height/2);
+
+			label.setScale(tempScale);
+			label.visible = false;
+		}
+
 		this.updateLabelOffset();
 	}
 
 	private showLabel (): void {
-		this.getLabel().visible = true;
+		const label = this.getLabel();
+		const rt = this.rtLabel;
+		if (rt) {
+			label.visible = false;
+			rt.visible = true;
+		} else {
+			label.visible = true;
+		}
 	}
 
 	private hideLabel (): void {
 		this.getLabel().visible = false;
+		if (this.rtLabel) {
+			this.rtLabel.visible = false;
+		}
 	}
 
 	private fadingText (data: {
@@ -205,7 +243,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 
 	private getAttributesContainer (): Phaser.GameObjects.Container {
 		if (!this.attributesContainer) {
-			this.attributesContainer = this.scene.add.container(0,	0);
+			this.attributesContainer = this.scene.add.container(0, 0);
 
 			// needs to be created with the correct scale of the client
 			this.attributesContainer.setScale(1 / this.scene.cameras.main.zoom);
@@ -295,6 +333,9 @@ class PhaserUnit extends PhaserAnimatedEntity {
 
 		if (this.label) {
 			targets.push(this.label);
+			if (this.rtLabel) {
+				targets.push(this.rtLabel);
+			}
 		}
 
 		this.scaleTween = this.scene.tweens.add({
@@ -332,6 +373,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		this.attributesContainer = null;
 		this.attributes = null;
 		this.label = null;
+		this.rtLabel = null;
 		this.scene = null;
 
 		super.destroy();

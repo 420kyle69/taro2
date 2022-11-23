@@ -1,7 +1,8 @@
 class PhaserChatBubble extends Phaser.GameObjects.Container {
 
 	private readonly bubble: Phaser.GameObjects.Graphics;
-	private readonly textObject: Phaser.GameObjects.BitmapText;
+	private readonly bitmapText: Phaser.GameObjects.BitmapText;
+	private readonly rtText: Phaser.GameObjects.RenderTexture;
 
 	private offset: number;
 
@@ -18,7 +19,7 @@ class PhaserChatBubble extends Phaser.GameObjects.Container {
 		const bubble = this.bubble = scene.add.graphics();
 		this.add(bubble);
 
-		const text = this.textObject = scene.add.bitmapText(
+		const text = this.bitmapText = scene.add.bitmapText(
 			0, 0,
 			BitmapFontManager.font(scene, 'Arial', true, false, '#FFFFFF')
 		);
@@ -33,16 +34,33 @@ class PhaserChatBubble extends Phaser.GameObjects.Container {
 
 		this.add(text);
 
+		if (scene.renderer.type === Phaser.CANVAS) {
+
+			text.visible = false;
+
+			const rt = this.rtText = scene.add.renderTexture(0, 0);
+			rt.setOrigin(0.5);
+
+			this.add(rt);
+		}
+
 		scene.add.existing(this);
 
 		this.showMessage(chatText);
 	}
 
 	showMessage(chatText: string): void {
-		const text = this.textObject;
+		const text = this.bitmapText;
 		text.setText(BitmapFontManager.sanitize(
 			text.fontData, this.trimText(chatText)
 		));
+
+		const rt = this.rtText;
+		if (rt) {
+			rt.resize(text.width, text.height);
+			rt.clear();
+			rt.draw(text, text.width/2, text.height/2);
+		}
 
 		this.drawBubble();
 
@@ -87,7 +105,7 @@ class PhaserChatBubble extends Phaser.GameObjects.Container {
 	}
 
 	private trimText (chatText: string): string {
-		if (chatText.length > 40) {
+		if (chatText.length > 43) {
 			chatText = chatText.substring(0, 40);
 			chatText += '...';
 		}
@@ -96,7 +114,7 @@ class PhaserChatBubble extends Phaser.GameObjects.Container {
 
 	private drawBubble (): void {
 		const bubble = this.bubble;
-		const text = this.textObject;
+		const text = this.rtText || this.bitmapText;
 		const width = text.width + 20;
 		const height = text.height + 10;
 
@@ -120,7 +138,7 @@ class PhaserChatBubble extends Phaser.GameObjects.Container {
 		const { sprite, label, gameObject } = this.unit;
 		this.offset =  25 +
 			(sprite.displayHeight + sprite.displayWidth) / 4 +
-			label.getTextBounds().global.height * 2;
+			label.height * 2;
 		this.y = gameObject.y - this.offset;
 	}
 
