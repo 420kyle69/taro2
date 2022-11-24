@@ -79,6 +79,17 @@ class MobileControlsScene extends PhaserScene {
 						label.setOrigin(0.5);
 						label.letterSpacing = -0.4;
 						controls.add(label);
+
+						if (this.renderer.type === Phaser.CANVAS) {
+							const rt = this.add.renderTexture(
+								label.x, label.y, label.width, label.height
+							);
+							rt.draw(label, label.width/2, label.height/2);
+							rt.setOrigin(0.5);
+							controls.add(rt);
+
+							label.visible = false;
+						}
 					}
 
 					button.setInteractive();

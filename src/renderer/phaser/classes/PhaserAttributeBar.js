@@ -22,12 +22,19 @@ var PhaserAttributeBar = /** @class */ (function (_super) {
         _this.unit = unit;
         var bar = _this.bar = scene.add.graphics();
         _this.add(bar);
-        var text = _this.text = scene.add.bitmapText(0, 0, BitmapFontManager.font(scene, 'Arial', true, false, '#000000'));
+        var text = _this.bitmapText = scene.add.bitmapText(0, 0, BitmapFontManager.font(scene, 'Arial', true, false, '#000000'));
         text.setCenterAlign();
         text.setFontSize(14);
         text.setOrigin(0.5);
         text.letterSpacing = -0.8;
         _this.add(text);
+        if (scene.renderer.type === Phaser.CANVAS) {
+            var rt = _this.rtText = scene.add.renderTexture(0, 0);
+            rt.setOrigin(0.5);
+            _this.add(rt);
+            text.visible = false;
+        }
+        // TODO batch entire attribute bar, not only text
         unit.attributesContainer.add(_this);
         return _this;
     }
@@ -71,10 +78,17 @@ var PhaserAttributeBar = /** @class */ (function (_super) {
         bar.lineStyle(2, 0x000000, 1);
         bar.strokeRoundedRect(-w / 2, -h / 2, w, h, borderRadius);
         var valueText = value.toFixed(decimalPlaces);
-        this.text.setText(displayValue ?
+        var text = this.bitmapText;
+        text.setText(displayValue ?
             valueText :
             '' // no text
         );
+        var rt = this.rtText;
+        if (rt) {
+            rt.resize(text.width, text.height);
+            rt.clear();
+            rt.draw(text, text.width / 2, text.height / 2);
+        }
         this.y = (index - 1) * h * 1.1;
         this.resetFadeOut();
         if ((showWhen instanceof Array &&

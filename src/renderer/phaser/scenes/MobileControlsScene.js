@@ -56,6 +56,13 @@ var MobileControlsScene = /** @class */ (function (_super) {
                         label.setOrigin(0.5);
                         label.letterSpacing = -0.4;
                         controls.add(label);
+                        if (_this.renderer.type === Phaser.CANVAS) {
+                            var rt = _this.add.renderTexture(label.x, label.y, label.width, label.height);
+                            rt.draw(label, label.width / 2, label.height / 2);
+                            rt.setOrigin(0.5);
+                            controls.add(rt);
+                            label.visible = false;
+                        }
                     }
                     button_1.setInteractive();
                     var clicked_1 = false;

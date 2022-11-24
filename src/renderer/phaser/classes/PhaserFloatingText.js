@@ -15,7 +15,6 @@ var __extends = (this && this.__extends) || (function () {
 })();
 var PhaserFloatingText = /** @class */ (function (_super) {
     __extends(PhaserFloatingText, _super);
-    // TODO object pool
     function PhaserFloatingText(scene, data) {
         var _this = _super.call(this, scene, data.x, data.y, BitmapFontManager.font(scene, 'Verdana', true, ige.game.data.settings
             .addStrokeToNameAndAttributes !== false, data.color || '#FFFFFF')) || this;
@@ -24,12 +23,20 @@ var PhaserFloatingText = /** @class */ (function (_super) {
         _this.setFontSize(16);
         _this.letterSpacing = 1.3;
         scene.add.existing(_this);
+        if (scene.renderer.type === Phaser.CANVAS) {
+            var rt = _this.rt = scene.add.renderTexture(_this.x, _this.y, _this.width, _this.height);
+            // TODO clear when pooled
+            rt.draw(_this, _this.width / 2, _this.height / 2);
+            rt.setOrigin(0.5);
+            _this.visible = false;
+        }
         scene.tweens.add({
-            targets: _this,
+            targets: _this.rt || _this,
             alpha: 0.5,
             duration: 2500,
             y: _this.y - 40,
             onComplete: function () {
+                _this.rt && _this.rt.destroy();
                 _this.destroy(); // TODO object pool
             }
         });

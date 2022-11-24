@@ -2,6 +2,8 @@ class PhaserFloatingText extends Phaser.GameObjects.BitmapText {
 
 	// TODO object pool
 
+	private readonly rt: Phaser.GameObjects.RenderTexture;
+
 	constructor (
 		scene: Phaser.Scene,
 		data: {
@@ -28,12 +30,25 @@ class PhaserFloatingText extends Phaser.GameObjects.BitmapText {
 		this.letterSpacing = 1.3;
 
 		scene.add.existing(this);
+
+		if (scene.renderer.type === Phaser.CANVAS) {
+			const rt = this.rt = scene.add.renderTexture(
+				this.x, this.y, this.width, this.height
+			);
+			// TODO clear when pooled
+			rt.draw(this, this.width/2, this.height/2);
+			rt.setOrigin(0.5);
+
+			this.visible = false;
+		}
+
 		scene.tweens.add({
-			targets: this,
+			targets: this.rt || this,
 			alpha: 0.5,
 			duration: 2500,
 			y: this.y - 40,
 			onComplete: () => {
+				this.rt && this.rt.destroy();
 				this.destroy(); // TODO object pool
 			}
 		});

@@ -36,7 +36,8 @@ class PhaserAttributeBar extends Phaser.GameObjects.Container {
 	}
 
 	private readonly bar: Phaser.GameObjects.Graphics;
-	private readonly text: Phaser.GameObjects.BitmapText;
+	private readonly bitmapText: Phaser.GameObjects.BitmapText;
+	private readonly rtText: Phaser.GameObjects.RenderTexture;
 
 	private fadeTimerEvent: Phaser.Time.TimerEvent;
 	private fadeTween: Phaser.Tweens.Tween;
@@ -50,7 +51,7 @@ class PhaserAttributeBar extends Phaser.GameObjects.Container {
 		const bar = this.bar = scene.add.graphics();
 		this.add(bar);
 
-		const text = this.text = scene.add.bitmapText(0, 0,
+		const text = this.bitmapText = scene.add.bitmapText(0, 0,
 			BitmapFontManager.font(scene, 'Arial', true, false, '#000000')
 		);
 		text.setCenterAlign();
@@ -58,6 +59,16 @@ class PhaserAttributeBar extends Phaser.GameObjects.Container {
 		text.setOrigin(0.5);
 		text.letterSpacing = -0.8;
 		this.add(text);
+
+		if (scene.renderer.type === Phaser.CANVAS) {
+			const rt = this.rtText = scene.add.renderTexture(0, 0);
+			rt.setOrigin(0.5);
+			this.add(rt);
+
+			text.visible = false;
+		}
+
+		// TODO batch entire attribute bar, not only text
 
 		unit.attributesContainer.add(this);
 	}
@@ -108,11 +119,19 @@ class PhaserAttributeBar extends Phaser.GameObjects.Container {
 
 		const valueText = value.toFixed(decimalPlaces);
 
-		this.text.setText(
+		const text = this.bitmapText;
+		text.setText(
 			displayValue ?
 				valueText :
 				'' // no text
 		);
+
+		const rt = this.rtText;
+		if (rt) {
+			rt.resize(text.width, text.height);
+			rt.clear();
+			rt.draw(text, text.width/2, text.height/2);
+		}
 
 		this.y = (index - 1) * h*1.1;
 
