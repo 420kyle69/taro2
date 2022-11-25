@@ -181,7 +181,9 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		color?: string;
 	}): void {
 		const label = this.getLabel();
-		label.visible = true;
+		const rt = this.rtLabel;
+
+		label.visible = !rt;
 
 		label.setFont(BitmapFontManager.font(this.scene,
 			'Verdana', data.bold,
@@ -193,7 +195,6 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			label.fontData, data.text || ''
 		));
 
-		const rt = this.rtLabel;
 		if (rt) {
 			const tempScale = label.scale;
 			label.setScale(1);
@@ -204,7 +205,6 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			rt.draw(label, label.width/2, label.height/2);
 
 			label.setScale(tempScale);
-			label.visible = false;
 		}
 
 		this.updateLabelOffset();
@@ -213,19 +213,17 @@ class PhaserUnit extends PhaserAnimatedEntity {
 	private showLabel (): void {
 		const label = this.getLabel();
 		const rt = this.rtLabel;
-		if (rt) {
-			label.visible = false;
-			rt.visible = true;
-		} else {
-			label.visible = true;
-		}
+
+		label.visible = !rt;
+		rt && (rt.visible = true);
 	}
 
 	private hideLabel (): void {
-		this.getLabel().visible = false;
-		if (this.rtLabel) {
-			this.rtLabel.visible = false;
-		}
+		const label = this.getLabel();
+		const rt = this.rtLabel;
+
+		label.visible = false;
+		rt && (rt.visible = false);
 	}
 
 	private fadingText (data: {

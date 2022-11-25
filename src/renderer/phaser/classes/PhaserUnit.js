@@ -142,11 +142,11 @@ var PhaserUnit = /** @class */ (function (_super) {
     };
     PhaserUnit.prototype.updateLabel = function (data) {
         var label = this.getLabel();
-        label.visible = true;
+        var rt = this.rtLabel;
+        label.visible = !rt;
         label.setFont(BitmapFontManager.font(this.scene, 'Verdana', data.bold, ige.game.data.settings
             .addStrokeToNameAndAttributes !== false, data.color || '#FFFFFF'));
         label.setText(BitmapFontManager.sanitize(label.fontData, data.text || ''));
-        var rt = this.rtLabel;
         if (rt) {
             var tempScale = label.scale;
             label.setScale(1);
@@ -155,26 +155,20 @@ var PhaserUnit = /** @class */ (function (_super) {
             rt.clear();
             rt.draw(label, label.width / 2, label.height / 2);
             label.setScale(tempScale);
-            label.visible = false;
         }
         this.updateLabelOffset();
     };
     PhaserUnit.prototype.showLabel = function () {
         var label = this.getLabel();
         var rt = this.rtLabel;
-        if (rt) {
-            label.visible = false;
-            rt.visible = true;
-        }
-        else {
-            label.visible = true;
-        }
+        label.visible = !rt;
+        rt && (rt.visible = true);
     };
     PhaserUnit.prototype.hideLabel = function () {
-        this.getLabel().visible = false;
-        if (this.rtLabel) {
-            this.rtLabel.visible = false;
-        }
+        var label = this.getLabel();
+        var rt = this.rtLabel;
+        label.visible = false;
+        rt && (rt.visible = false);
     };
     PhaserUnit.prototype.fadingText = function (data) {
         var offset = -25 - Math.max(this.sprite.displayHeight, this.sprite.displayWidth) / 2;

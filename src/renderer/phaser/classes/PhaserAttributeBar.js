@@ -27,12 +27,13 @@ var PhaserAttributeBar = /** @class */ (function (_super) {
         text.setFontSize(14);
         text.setOrigin(0.5);
         text.letterSpacing = -0.8;
+        text.visible = false;
         _this.add(text);
         if (scene.renderer.type === Phaser.CANVAS) {
             var rt = _this.rtText = scene.add.renderTexture(0, 0);
             rt.setOrigin(0.5);
+            rt.visible = false;
             _this.add(rt);
-            text.visible = false;
         }
         // TODO batch entire attribute bar, not only text
         unit.attributesContainer.add(_this);
@@ -77,17 +78,22 @@ var PhaserAttributeBar = /** @class */ (function (_super) {
         }
         bar.lineStyle(2, 0x000000, 1);
         bar.strokeRoundedRect(-w / 2, -h / 2, w, h, borderRadius);
-        var valueText = value.toFixed(decimalPlaces);
         var text = this.bitmapText;
-        text.setText(displayValue ?
-            valueText :
-            '' // no text
-        );
         var rt = this.rtText;
-        if (rt) {
-            rt.resize(text.width, text.height);
-            rt.clear();
-            rt.draw(text, text.width / 2, text.height / 2);
+        if (displayValue) {
+            text.setText(value.toFixed(decimalPlaces));
+            text.visible = !rt;
+            if (rt) {
+                rt.resize(text.width, text.height);
+                rt.clear();
+                rt.draw(text, text.width / 2, text.height / 2);
+                rt.visible = true;
+            }
+        }
+        else {
+            text.setText('');
+            text.visible = false;
+            rt && (rt.visible = false);
         }
         this.y = (index - 1) * h * 1.1;
         this.resetFadeOut();
