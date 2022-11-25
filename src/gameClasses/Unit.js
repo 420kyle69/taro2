@@ -1809,7 +1809,7 @@ var Unit = IgeEntityPhysics.extend({
 		if (ownerPlayer) {
 
 			// mobile control: rotate to rotation provided by the client
-			if (this._stats.controls.absoluteRotation) {
+			if (this._stats.controls && this._stats.controls.absoluteRotation) {
 				this.angleToTarget = ownerPlayer.absoluteAngle;
 
 			// desktop control: if this unit's not under a command, rotate to mouse xy coordinate
