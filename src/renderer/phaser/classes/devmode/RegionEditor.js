@@ -95,15 +95,11 @@ var RegionEditor = /** @class */ (function () {
     RegionEditor.prototype.showRegions = function () {
         this.devModeScene.regions.forEach(function (region) {
             region.show();
-            region.label.visible = true;
         });
     };
     RegionEditor.prototype.hideRegions = function () {
         this.devModeScene.regions.forEach(function (region) {
-            if (region.devModeOnly) {
-                region.hide();
-            }
-            region.label.visible = false;
+            region.hide();
         });
     };
     return RegionEditor;

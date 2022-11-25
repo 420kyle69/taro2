@@ -21,6 +21,13 @@ var DevToolButton = /** @class */ (function () {
             label.setOrigin(0.5);
             label.letterSpacing = 1.3;
             container.add(label);
+            if (scene.renderer.type === Phaser.CANVAS) {
+                var rt = scene.add.renderTexture(label.x, label.y, label.width, label.height);
+                rt.draw(label, label.width / 2, label.height / 2);
+                rt.setOrigin(0.5);
+                container.add(rt);
+                label.visible = false;
+            }
         }
         button.on('pointerdown', function () {
             if (value || value === 0)

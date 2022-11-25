@@ -1,10 +1,11 @@
 class PhaserRegion extends PhaserEntity {
 
-	public name: string;
-	public label: Phaser.GameObjects.BitmapText;
+	name: string;
+	private label: Phaser.GameObjects.BitmapText;
+	private rtLabel: Phaser.GameObjects.RenderTexture;
 	private readonly graphics: Phaser.GameObjects.Graphics;
-	public gameObject: Phaser.GameObjects.Container & IRenderProps;
-	public devModeOnly: boolean;
+	gameObject: Phaser.GameObjects.Container & IRenderProps;
+	private readonly devModeOnly: boolean;
 	private devModeScene: DevModeScene;
 
 	constructor (
@@ -78,31 +79,60 @@ class PhaserRegion extends PhaserEntity {
 			label.setOrigin(0);
 
 			this.gameObject.add(label);
+
+			if (scene.renderer.type === Phaser.CANVAS) {
+				const rt = this.rtLabel = scene.add.renderTexture(0, 0);
+				rt.visible = false;
+				rt.setScale(label.scale);
+				rt.setOrigin(0);
+
+				this.gameObject.add(rt);
+			}
 		}
 		return this.label;
 	}
 
-	public updateLabel (): void {
+	updateLabel (): void {
 		const label = this.getLabel();
-		label.visible = true;
+		const rt = this.rtLabel;
+
+		label.visible = !rt;
 		label.setText(BitmapFontManager.sanitize(
 			label.fontData, this.name || ''
 		));
 
 		const stats = this.entity._stats.default;
 		label.setPosition(5 - stats.width/2, 5 - stats.height/2);
+
+		if (rt) {
+			const tempScale = label.scale;
+			label.setScale(1);
+
+			rt.visible = true;
+			rt.resize(label.width, label.height);
+			rt.clear();
+			rt.draw(label, 0, 0);
+
+			label.setScale(tempScale);
+
+			rt.setPosition(label.x, label.y);
+		}
 	}
 
 	protected transform (): void {
 		const gameObject =  this.gameObject;
 		const graphics = this.graphics;
 		const label = this.label;
+		const rtLabel = this.rtLabel;
 		const stats = this.entity._stats.default;
 
 		gameObject.setSize(stats.width, stats.height);
 		gameObject.setPosition(stats.x + stats.width/2, stats.y + stats.height/2);
 		graphics.setPosition(-stats.width/2, -stats.height/2);
 		label.setPosition(5 - stats.width/2, 5 - stats.height/2);
+		if (rtLabel) {
+			rtLabel.setPosition(label.x, label.y);
+		}
 
 		graphics.clear();
 
@@ -132,6 +162,27 @@ class PhaserRegion extends PhaserEntity {
 				stats.height
 			);
 		}
+	}
+
+	show() {
+		super.show();
+
+		const label = this.label;
+		const rt = this.rtLabel;
+
+		label && (label.visible = !rt);
+		rt && (rt.visible = true);
+	}
+
+	hide() {
+		if (this.devModeOnly) {
+			super.hide();
+		}
+		const label = this.label;
+		const rt = this.rtLabel;
+
+		label && (label.visible = false);
+		rt && (rt.visible = false);
 	}
 
 	protected destroy (): void {
