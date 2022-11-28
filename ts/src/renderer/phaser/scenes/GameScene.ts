@@ -209,7 +209,10 @@ class GameScene extends PhaserScene {
 
 	create (): void {
 		this.scene.launch('DevMode');
-		ige.client.rendererLoaded.resolve();
+
+		this.events.once('render', () => {
+			ige.client.rendererLoaded.resolve();
+		});
 
 		BitmapFontManager.create(this);
 
