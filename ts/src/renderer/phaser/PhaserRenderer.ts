@@ -23,6 +23,9 @@ class PhaserRenderer extends Phaser.Game {
 				pixelArt: false,
 				transparent: false
 			},
+			fps: {
+				smoothStep: false
+			},
 			scene: [
 				GameScene,
 				DevModeScene,
@@ -63,7 +66,7 @@ class PhaserRenderer extends Phaser.Game {
 	}
 
 	private setupInputListeners(): void {
-		// Ask the input component to setup any listeners it has
+		// Ask the input component to set up any listeners it has
 		ige.input.setupListeners(this.canvas);
 	}
 
