@@ -1,7 +1,8 @@
 class PhaserUnit extends PhaserAnimatedEntity {
 
 	sprite: Phaser.GameObjects.Sprite & IRenderProps;
-	label: Phaser.GameObjects.Text;
+	label: Phaser.GameObjects.BitmapText;
+	private rtLabel: Phaser.GameObjects.RenderTexture;
 	private chat: PhaserChatBubble;
 
 	gameObject: Phaser.GameObjects.Container & IRenderProps;
@@ -64,14 +65,12 @@ class PhaserUnit extends PhaserAnimatedEntity {
 					}
 				}, this);
 				this.scene.load.start();
-			}
-			else {
+			} else {
 				this.sprite.setTexture(`unit/${this.entity._stats.cellSheet.url}`);
 				const bounds = this.entity._bounds2d;
 				this.sprite.setDisplaySize(bounds.x, bounds.y);
 			}
-		}
-		else {
+		} else {
 			this.key = `unit/${this.entity._stats.type}`;
 			this.sprite.setTexture(`unit/${this.entity._stats.type}`);
 			const bounds = this.entity._bounds2d;
@@ -122,11 +121,16 @@ class PhaserUnit extends PhaserAnimatedEntity {
 	}
 
 	private updateLabelOffset (): void {
-		this.label.y = -25 - (this.sprite.displayHeight + this.sprite.displayWidth) / 4;
+		const {displayHeight, displayWidth} = this.sprite;
+		this.label.y = -25 - (displayHeight + displayWidth) / 4;
+		if (this.rtLabel) {
+			this.rtLabel.y = this.label.y;
+		}
 	}
 
 	private updateAttributesOffset (): void {
-		this.attributesContainer.y = 25 + (this.sprite.displayHeight + this.sprite.displayWidth) / 4;
+		const {displayHeight, displayWidth} = this.sprite;
+		this.attributesContainer.y = 25 + (displayHeight + displayWidth) / 4;
 	}
 
 	private follow (): void {
@@ -142,15 +146,31 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		}
 	}
 
-	private getLabel (): Phaser.GameObjects.Text {
+	private getLabel (): Phaser.GameObjects.BitmapText {
 		if (!this.label) {
-			const label = this.label = this.scene.add.text(0, 0, 'cccccc');
+			const scene = this.scene;
+			const label = this.label = scene.add.bitmapText(0, 0,
+				BitmapFontManager.font(scene, // default font
+					'Verdana', false, false, '#FFFFFF'
+				),
+				'cccccc',
+				16
+			);
+			label.letterSpacing = 1.3;
 
 			// needs to be created with the correct scale of the client
-			this.label.setScale(1 / this.scene.cameras.main.zoom);
+			label.setScale(1 / scene.cameras.main.zoom);
 			label.setOrigin(0.5);
 
 			this.gameObject.add(label);
+
+			if (scene.renderer.type === Phaser.CANVAS) {
+				const rt = this.rtLabel = scene.add.renderTexture(0, 0);
+				rt.setScale(label.scale);
+				rt.setOrigin(0.5);
+
+				this.gameObject.add(rt);
+			}
 		}
 		return this.label;
 	}
@@ -161,27 +181,49 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		color?: string;
 	}): void {
 		const label = this.getLabel();
-		label.visible = true;
+		const rt = this.rtLabel;
 
-		label.setFontFamily('Verdana');
-		label.setFontSize(16);
-		label.setFontStyle(data.bold ? 'bold' : 'normal');
-		label.setFill(data.color || '#fff');
-		//label.setResolution(4);
+		label.visible = !rt;
 
-		const strokeThickness = ige.game.data.settings
-			.addStrokeToNameAndAttributes !== false ? 4 : 0;
-		label.setStroke('#000', strokeThickness);
-		label.setText(data.text || '');
+		label.setFont(BitmapFontManager.font(this.scene,
+			'Verdana', data.bold,
+			ige.game.data.settings
+				.addStrokeToNameAndAttributes !== false,
+			data.color || '#FFFFFF'
+		));
+		label.setText(BitmapFontManager.sanitize(
+			label.fontData, data.text || ''
+		));
+
+		if (rt) {
+			const tempScale = label.scale;
+			label.setScale(1);
+
+			rt.visible = true;
+			rt.resize(label.width, label.height);
+			rt.clear();
+			rt.draw(label, label.width/2, label.height/2);
+
+			label.setScale(tempScale);
+		}
+
 		this.updateLabelOffset();
 	}
 
 	private showLabel (): void {
-		this.getLabel().visible = true;
+		const label = this.getLabel();
+		const rt = this.rtLabel;
+
+		label.visible = !rt;
+		rt && (rt.visible = true);
 	}
 
 	private hideLabel (): void {
-		this.getLabel().visible = false;
+		const label = this.getLabel();
+		const rt = this.rtLabel;
+
+		label.visible = false;
+		rt && (rt.visible = false);
 	}
 
 	private fadingText (data: {
@@ -199,7 +241,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 
 	private getAttributesContainer (): Phaser.GameObjects.Container {
 		if (!this.attributesContainer) {
-			this.attributesContainer = this.scene.add.container(0,	0);
+			this.attributesContainer = this.scene.add.container(0, 0);
 
 			// needs to be created with the correct scale of the client
 			this.attributesContainer.setScale(1 / this.scene.cameras.main.zoom);
@@ -289,6 +331,9 @@ class PhaserUnit extends PhaserAnimatedEntity {
 
 		if (this.label) {
 			targets.push(this.label);
+			if (this.rtLabel) {
+				targets.push(this.rtLabel);
+			}
 		}
 
 		this.scaleTween = this.scene.tweens.add({
@@ -326,6 +371,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		this.attributesContainer = null;
 		this.attributes = null;
 		this.label = null;
+		this.rtLabel = null;
 		this.scene = null;
 
 		super.destroy();

@@ -101,10 +101,15 @@ var PhaserUnit = /** @class */ (function (_super) {
         }
     };
     PhaserUnit.prototype.updateLabelOffset = function () {
-        this.label.y = -25 - (this.sprite.displayHeight + this.sprite.displayWidth) / 4;
+        var _a = this.sprite, displayHeight = _a.displayHeight, displayWidth = _a.displayWidth;
+        this.label.y = -25 - (displayHeight + displayWidth) / 4;
+        if (this.rtLabel) {
+            this.rtLabel.y = this.label.y;
+        }
     };
     PhaserUnit.prototype.updateAttributesOffset = function () {
-        this.attributesContainer.y = 25 + (this.sprite.displayHeight + this.sprite.displayWidth) / 4;
+        var _a = this.sprite, displayHeight = _a.displayHeight, displayWidth = _a.displayWidth;
+        this.attributesContainer.y = 25 + (displayHeight + displayWidth) / 4;
     };
     PhaserUnit.prototype.follow = function () {
         var camera = this.scene.cameras.main;
@@ -118,33 +123,52 @@ var PhaserUnit = /** @class */ (function (_super) {
     };
     PhaserUnit.prototype.getLabel = function () {
         if (!this.label) {
-            var label = this.label = this.scene.add.text(0, 0, 'cccccc');
+            var scene = this.scene;
+            var label = this.label = scene.add.bitmapText(0, 0, BitmapFontManager.font(scene, // default font
+            'Verdana', false, false, '#FFFFFF'), 'cccccc', 16);
+            label.letterSpacing = 1.3;
             // needs to be created with the correct scale of the client
-            this.label.setScale(1 / this.scene.cameras.main.zoom);
+            label.setScale(1 / scene.cameras.main.zoom);
             label.setOrigin(0.5);
             this.gameObject.add(label);
+            if (scene.renderer.type === Phaser.CANVAS) {
+                var rt = this.rtLabel = scene.add.renderTexture(0, 0);
+                rt.setScale(label.scale);
+                rt.setOrigin(0.5);
+                this.gameObject.add(rt);
+            }
         }
         return this.label;
     };
     PhaserUnit.prototype.updateLabel = function (data) {
         var label = this.getLabel();
-        label.visible = true;
-        label.setFontFamily('Verdana');
-        label.setFontSize(16);
-        label.setFontStyle(data.bold ? 'bold' : 'normal');
-        label.setFill(data.color || '#fff');
-        //label.setResolution(4);
-        var strokeThickness = ige.game.data.settings
-            .addStrokeToNameAndAttributes !== false ? 4 : 0;
-        label.setStroke('#000', strokeThickness);
-        label.setText(data.text || '');
+        var rt = this.rtLabel;
+        label.visible = !rt;
+        label.setFont(BitmapFontManager.font(this.scene, 'Verdana', data.bold, ige.game.data.settings
+            .addStrokeToNameAndAttributes !== false, data.color || '#FFFFFF'));
+        label.setText(BitmapFontManager.sanitize(label.fontData, data.text || ''));
+        if (rt) {
+            var tempScale = label.scale;
+            label.setScale(1);
+            rt.visible = true;
+            rt.resize(label.width, label.height);
+            rt.clear();
+            rt.draw(label, label.width / 2, label.height / 2);
+            label.setScale(tempScale);
+        }
         this.updateLabelOffset();
     };
     PhaserUnit.prototype.showLabel = function () {
-        this.getLabel().visible = true;
+        var label = this.getLabel();
+        var rt = this.rtLabel;
+        label.visible = !rt;
+        rt && (rt.visible = true);
     };
     PhaserUnit.prototype.hideLabel = function () {
-        this.getLabel().visible = false;
+        var label = this.getLabel();
+        var rt = this.rtLabel;
+        label.visible = false;
+        rt && (rt.visible = false);
     };
     PhaserUnit.prototype.fadingText = function (data) {
         var offset = -25 - Math.max(this.sprite.displayHeight, this.sprite.displayWidth) / 2;
@@ -231,6 +255,9 @@ var PhaserUnit = /** @class */ (function (_super) {
         }
         if (this.label) {
             targets.push(this.label);
+            if (this.rtLabel) {
+                targets.push(this.rtLabel);
+            }
         }
         this.scaleTween = this.scene.tweens.add({
             targets: targets,
@@ -264,6 +291,7 @@ var PhaserUnit = /** @class */ (function (_super) {
         this.attributesContainer = null;
         this.attributes = null;
         this.label = null;
+        this.rtLabel = null;
         this.scene = null;
         _super.prototype.destroy.call(this);
     };

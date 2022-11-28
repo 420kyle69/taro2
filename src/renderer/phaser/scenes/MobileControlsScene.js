@@ -49,11 +49,20 @@ var MobileControlsScene = /** @class */ (function (_super) {
                         controls.add(icon);
                     }
                     else {
-                        var label = _this.add.bitmapText(x + w / 2, y + h / 2, 'Arial_24px_bold_white', text);
+                        var label = _this.add.bitmapText(x + w / 2, y + h / 2, BitmapFontManager.font(_this, 'Arial', true, false, '#FFFFFF'));
+                        label.setText(BitmapFontManager.sanitize(label.fontData, text));
                         label.setCenterAlign();
-                        label.setFontSize(26);
+                        label.setFontSize(24);
                         label.setOrigin(0.5);
+                        label.letterSpacing = -0.4;
                         controls.add(label);
+                        if (_this.renderer.type === Phaser.CANVAS) {
+                            var rt = _this.add.renderTexture(label.x, label.y, label.width, label.height);
+                            rt.draw(label, label.width / 2, label.height / 2);
+                            rt.setOrigin(0.5);
+                            controls.add(rt);
+                            label.visible = false;
+                        }
                     }
                     button_1.setInteractive();
                     var clicked_1 = false;
@@ -97,7 +106,7 @@ var MobileControlsScene = /** @class */ (function (_super) {
                 if (touchX < this.cameras.main.displayWidth / 2.4) {
                     var leftJoystick = this.joysticks.find(function (_a) {
                         var side = _a.side;
-                        return side === "left";
+                        return side === 'left';
                     });
                     if (leftJoystick) {
                         leftJoystick.show();
@@ -109,7 +118,7 @@ var MobileControlsScene = /** @class */ (function (_super) {
                 else if (touchX > this.cameras.main.displayWidth - (this.cameras.main.displayWidth / 2.4)) {
                     var rightJoystick = this.joysticks.find(function (_a) {
                         var side = _a.side;
-                        return side === "right";
+                        return side === 'right';
                     });
                     if (rightJoystick) {
                         rightJoystick.show();

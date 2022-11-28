@@ -65,6 +65,7 @@ var igeClientConfig = {
 		'renderer/phaser/enums/FlipMode.js',
 		'renderer/phaser/enums/TileLayer.js',
 		'renderer/phaser/enums/EntityLayer.js',
+		'renderer/phaser/classes/BitmapFontManager.js',
 		'renderer/phaser/classes/PhaserEntity.js',
 		'renderer/phaser/classes/PhaserAnimatedEntity.js',
 		'renderer/phaser/classes/PhaserUnit.js',

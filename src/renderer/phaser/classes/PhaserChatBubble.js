@@ -20,19 +20,33 @@ var PhaserChatBubble = /** @class */ (function (_super) {
         _this.unit = unit;
         var bubble = _this.bubble = scene.add.graphics();
         _this.add(bubble);
-        var text = _this.textObject = scene.add.bitmapText(0, 0, 'Arial_24px_bold_white');
+        var text = _this.bitmapText = scene.add.bitmapText(0, 0, BitmapFontManager.font(scene, 'Arial', true, false, '#FFFFFF'));
         // needs to be created with the correct scale of the client
         _this.setScale(1 / _this.scene.cameras.main.zoom);
-        text.setFontSize(14);
+        text.setFontSize(12);
         text.setCenterAlign();
         text.setOrigin(0.5);
+        text.letterSpacing = -0.6;
         _this.add(text);
+        if (scene.renderer.type === Phaser.CANVAS) {
+            text.visible = false;
+            var rt = _this.rtText = scene.add.renderTexture(0, 0);
+            rt.setOrigin(0.5);
+            _this.add(rt);
+        }
         scene.add.existing(_this);
         _this.showMessage(chatText);
         return _this;
     }
     PhaserChatBubble.prototype.showMessage = function (chatText) {
-        this.textObject.text = this.trimText(chatText);
+        var text = this.bitmapText;
+        text.setText(BitmapFontManager.sanitize(text.fontData, this.trimText(chatText)));
+        var rt = this.rtText;
+        if (rt) {
+            rt.resize(text.width, text.height);
+            rt.clear();
+            rt.draw(text, text.width / 2, text.height / 2);
+        }
         this.drawBubble();
         this.updateScale();
         this.updateOffset();
@@ -69,7 +83,7 @@ var PhaserChatBubble = /** @class */ (function (_super) {
         this.setScale(1 / this.scene.cameras.main.zoom);
     };
     PhaserChatBubble.prototype.trimText = function (chatText) {
-        if (chatText.length > 40) {
+        if (chatText.length > 43) {
             chatText = chatText.substring(0, 40);
             chatText += '...';
         }
@@ -77,7 +91,7 @@ var PhaserChatBubble = /** @class */ (function (_super) {
     };
     PhaserChatBubble.prototype.drawBubble = function () {
         var bubble = this.bubble;
-        var text = this.textObject;
+        var text = this.rtText || this.bitmapText;
         var width = text.width + 20;
         var height = text.height + 10;
         bubble.clear();
@@ -89,7 +103,7 @@ var PhaserChatBubble = /** @class */ (function (_super) {
         var _a = this.unit, sprite = _a.sprite, label = _a.label, gameObject = _a.gameObject;
         this.offset = 25 +
             (sprite.displayHeight + sprite.displayWidth) / 4 +
-            label.displayHeight * 2;
+            label.height * 2;
         this.y = gameObject.y - this.offset;
     };
     PhaserChatBubble.prototype.updatePosition = function () {
