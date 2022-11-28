@@ -796,13 +796,9 @@ var Unit = IgeEntityPhysics.extend({
 						// if old unit type had a same attribute, then take the value from it.
 						if (oldAttributes && oldAttributes[attrId]) {
 							attributeValue = oldAttributes[attrId].value;
-							// attributeMax = oldAttributes[attrId].max;
-							// attributeMin = oldAttributes[attrId].min;
 						}
 
 						if (this._stats.attributes[attrId]) {
-							// this._stats.attributes[attrId].max = attributeMax;
-							// this._stats.attributes[attrId].min = attributeMin;
 							this._stats.attributes[attrId].value = Math.max(data.attributes[attrId].min, Math.min(data.attributes[attrId].max, parseFloat(attributeValue)));
 						}
 					}
