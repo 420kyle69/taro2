@@ -144,8 +144,6 @@ class GameScene extends PhaserScene {
 		this.load.tilemapTiledJSON('map', this.patchMapData(data.map));
 
 		BitmapFontManager.preload(this);
-
-		// TODO optimize font textures
 	}
 
 	loadEntity (key: string, data: EntityData, skin = false): void {
