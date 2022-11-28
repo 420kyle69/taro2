@@ -226,8 +226,8 @@ class GameScene extends PhaserScene {
 			if (this.textures.exists(extrudedKey)) {
 				this.tileset = map.addTilesetImage(tileset.name, extrudedKey,
 					tileset.tilewidth, tileset.tileheight,
-					(tileset.margin || 0) + 1,
-					(tileset.spacing || 0) + 2
+					(tileset.margin || 0) + 2,
+					(tileset.spacing || 0) + 4
 				);
 			} else {
 				this.tileset = map.addTilesetImage(tileset.name, key);
@@ -366,7 +366,7 @@ class GameScene extends PhaserScene {
 	private extrude (
 		tileset: ArrayElement<GameComponent['data']['map']['tilesets']>,
 		sourceImage: HTMLImageElement,
-		extrusion = 1,
+		extrusion = 2,
 		color = '#ffffff00'
 	): HTMLCanvasElement {
 
