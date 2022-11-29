@@ -410,6 +410,9 @@ var MenuUiComponent = IgeEntity.extend({
 		html += '</table>';
 
 		$('#kick-player-body').html(html);
+
+		// update list of players for in-game editor
+		window.updateEditorPlayerList && window.updateEditorPlayerList(excludeEntity);
 	},
 	showMenu: function (selectBestServer) {
 		var self = this;
