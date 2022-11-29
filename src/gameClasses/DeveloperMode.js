@@ -199,30 +199,6 @@ var DeveloperMode = /** @class */ (function () {
             if (data.create) {
                 this.createItem(data);
             }
-            /*const itemTypeId = data.typeId;
-            const itemData = ige.game.getAsset('itemTypes', itemTypeId);
-            const position = data.position;
-            const facingAngle = data.angle;
-            let quantity = itemData.maxQuantity;
-
-            if (quantity == -1) {
-                quantity = null;
-            }
-
-            if (itemData) {
-                itemData.itemTypeId = itemTypeId;
-                itemData.isHidden = false;
-                itemData.stateId = 'dropped';
-                itemData.spawnPosition = position;
-                itemData.quantity = quantity;
-                itemData.defaultData = {
-                    translate: position,
-                    rotate: facingAngle
-                };
-                var item = new Item(itemData);
-                ige.game.lastCreatedUnitId = item._id;
-                item.script.trigger("entityCreated");
-            }*/
         }
     };
     DeveloperMode.prototype.updateClientMap = function (data) {
