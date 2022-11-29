@@ -129,27 +129,23 @@ class GameScene extends PhaserScene {
 		data.map.layers.forEach(layer => {
 			if (layer.name !== 'debris') {
 				const length = layer.data.length;
-				console.log('before', layer.name, length, tilesPerLayer)
+				layer.width = data.map.width;
+				layer.height = data.map.height;
+				console.log('before', layer.name, length, tilesPerLayer);
 				if (length < tilesPerLayer) {
 					for (let i = length + 1; i < tilesPerLayer; i++) {
 						layer.data[i] = 0;
 					}
 				}
-				console.log('after', layer.name, layer.data.length, tilesPerLayer)
+				console.log('after', layer.name, layer.data.length, tilesPerLayer);
 			}
 		});
 
 		this.load.tilemapTiledJSON('map', this.patchMapData(data.map));
 
-		this.load.bitmapFont('Arial_24px_bold_black',
-			'/assets/fonts/Arial_24px_bold_black_0.png',
-			'/assets/fonts/Arial_24px_bold_black.fnt'
-		);
+		BitmapFontManager.preload(this);
 
-		this.load.bitmapFont('Arial_24px_bold_white',
-			'/assets/fonts/Arial_24px_bold_white_0.png',
-			'/assets/fonts/Arial_24px_bold_white.fnt'
-		);
+		// TODO optimize font textures
 	}
 
 	loadEntity (key: string, data: EntityData, skin = false): void {
@@ -215,12 +211,14 @@ class GameScene extends PhaserScene {
 		this.scene.launch('DevMode');
 		ige.client.rendererLoaded.resolve();
 
+		BitmapFontManager.create(this);
+
 		const map = this.tilemap = this.make.tilemap({ key: 'map' });
 
 		const data = ige.game.data;
 		const scaleFactor = ige.scaleMapDetails.scaleFactor;
 
-		console.log('map data', data.map)
+		console.log('map data', data.map);
 
 		data.map.tilesets.forEach((tileset) => {
 			const key = `tiles/${tileset.name}`;
@@ -307,23 +305,23 @@ class GameScene extends PhaserScene {
 				let layerId;
 				switch (layer.name) {
 					case 'floor':
-						layerId = TileLayer.FLOOR;
+						layerId = 0;
 						break;
 					case 'floor2':
-						layerId = TileLayer.FLOOR_2;
+						layerId = 1;
 						break;
 					case 'walls':
-						layerId = TileLayer.WALLS;
+						layerId = 2;
 						break;
 					case 'trees':
-						layerId = TileLayer.TREES;
+						layerId = 3;
 						break;
 				}
 				layer.data.forEach((tile, index) => {
 					const x = index % layer.width;
 					const y = Math.floor(index/layer.width);
 					map.putTileAt(tile, x, y, false, layerId);
-			});
+				});
 			}
 		});
 	}

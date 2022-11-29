@@ -80,20 +80,8 @@ var ControlComponent = IgeEntity.extend({
 			}
 		}
 	},
-	shouldPreventKeybindings: function () {
-		if (!ige.isClient || !$('#game-editor').is(':visible')) {
-			return false;
-		}
-		let activeElement = document.activeElement;
-		let inputs = ['input', 'select', 'textarea'];
-
-		if (activeElement && inputs.indexOf(activeElement.tagName.toLowerCase()) !== -1) {
-			return true;
-		}
-		return false;
-	},
 	keyDown: function (device, key) {
-		if(this.shouldPreventKeybindings()) {
+		if(ige.developerMode.shouldPreventKeybindings()) {
 			return;
 		}
 		// check for input modal is open
@@ -208,7 +196,7 @@ var ControlComponent = IgeEntity.extend({
 	},
 
 	keyUp: function (device, key) {
-		if(this.shouldPreventKeybindings()) {
+		if(ige.developerMode.shouldPreventKeybindings()) {
 			return;
 		}
 		this.lastActionAt = Date.now();

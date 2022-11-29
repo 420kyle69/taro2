@@ -1,10 +1,11 @@
 class PhaserRegion extends PhaserEntity {
 
-	public name: string;
-	public label: Phaser.GameObjects.Text;
-	private graphics: Phaser.GameObjects.Graphics
-	public gameObject: Phaser.GameObjects.Container & IRenderProps;
-	public devModeOnly: boolean;
+	name: string;
+	private label: Phaser.GameObjects.BitmapText;
+	private rtLabel: Phaser.GameObjects.RenderTexture;
+	private readonly graphics: Phaser.GameObjects.Graphics;
+	gameObject: Phaser.GameObjects.Container & IRenderProps;
+	private readonly devModeOnly: boolean;
 	private devModeScene: DevModeScene;
 
 	constructor (
@@ -24,13 +25,13 @@ class PhaserRegion extends PhaserEntity {
 		gameObject.setPosition(stats.x + stats.width/2, stats.y + stats.height/2);
 		gameObject.setInteractive();
 		gameObject.on('pointerdown', (p) => {
-			if (ige.developerMode.active && this.devModeScene.devModeTools.cursorButton.active && p.leftButtonDown()) {
+			if (ige.developerMode.active && ige.developerMode.activeTab !== 'play' && this.devModeScene.devModeTools.cursorButton.active && p.leftButtonDown()) {
 				this.scene.input.setTopOnly(true);
 				this.devModeScene.regionEditor.addClickedList({name: this.entity._stats.id, x: stats.x, y: stats.y, width: stats.width, height: stats.height});
 			}
 		});
 		gameObject.on('pointerup', (p) => {
-			if (ige.developerMode.active && this.devModeScene.devModeTools.cursorButton.active && p.leftButtonReleased()) {
+			if (ige.developerMode.active && ige.developerMode.activeTab !== 'play' && this.devModeScene.devModeTools.cursorButton.active && p.leftButtonReleased()) {
 				this.scene.input.setTopOnly(false);
 				this.devModeScene.regionEditor.showClickedList();
 			}
@@ -40,7 +41,7 @@ class PhaserRegion extends PhaserEntity {
 		scene.renderedEntities.push(this.gameObject);
 		scene.entityLayers[EntityLayer.TREES].add(this.gameObject);
 
-		this.name = this.entity._stats.id
+		this.name = this.entity._stats.id;
 
 		if (!stats.inside) {
 			this.devModeOnly = true;
@@ -49,7 +50,7 @@ class PhaserRegion extends PhaserEntity {
 		const devModeScene = this.devModeScene = ige.renderer.scene.getScene('DevMode') as DevModeScene;
 		devModeScene.regions.push(this);
 
-		if (this.devModeOnly && !ige.developerMode.active) {
+		if (this.devModeOnly && !ige.developerMode.active && ige.developerMode.activeTab !== 'play') {
 			this.hide();
 		}
 
@@ -57,51 +58,84 @@ class PhaserRegion extends PhaserEntity {
 		this.transform();
 	}
 
-	private getLabel (): Phaser.GameObjects.Text {
+	private getLabel (): Phaser.GameObjects.BitmapText {
 		if (!this.label) {
-			const label = this.label = this.scene.add.text(0, 0, 'cccccc');
+			const scene = this.scene;
+			const label = this.label = scene.add.bitmapText(0, 0,
+				BitmapFontManager.font(scene,
+					'Verdana', false,
+					ige.game.data.settings
+						.addStrokeToNameAndAttributes !== false,
+					'#FFFFFF'
+				),
+				'cccccc',
+				16
+			);
+			label.letterSpacing = 1.3;
 			label.visible = false;
 
 			// needs to be created with the correct scale of the client
-			this.label.setScale(1.3);
+			label.setScale(1.3);
 			label.setOrigin(0);
 
 			this.gameObject.add(label);
+
+			if (scene.renderer.type === Phaser.CANVAS) {
+				const rt = this.rtLabel = scene.add.renderTexture(0, 0);
+				rt.visible = false;
+				rt.setScale(label.scale);
+				rt.setOrigin(0);
+
+				this.gameObject.add(rt);
+			}
 		}
 		return this.label;
 	}
 
-	public updateLabel (): void {
+	updateLabel (): void {
 		const label = this.getLabel();
-		label.visible = true;
+		const rt = this.rtLabel;
 
-		label.setFontFamily('Verdana');
-		label.setFontSize(16);
-		label.setFontStyle('normal');
-		label.setFill('#fff');
-
-		const strokeThickness = ige.game.data.settings
-			.addStrokeToNameAndAttributes !== false ? 4 : 0;
-		label.setStroke('#000', strokeThickness);
-		label.setText(this.name || '');
+		label.visible = !rt;
+		label.setText(BitmapFontManager.sanitize(
+			label.fontData, this.name || ''
+		));
 
 		const stats = this.entity._stats.default;
 		label.setPosition(5 - stats.width/2, 5 - stats.height/2);
+
+		if (rt) {
+			const tempScale = label.scale;
+			label.setScale(1);
+
+			rt.visible = true;
+			rt.resize(label.width, label.height);
+			rt.clear();
+			rt.draw(label, 0, 0);
+
+			label.setScale(tempScale);
+
+			rt.setPosition(label.x, label.y);
+		}
 	}
 
 	protected transform (): void {
 		const gameObject =  this.gameObject;
 		const graphics = this.graphics;
 		const label = this.label;
+		const rtLabel = this.rtLabel;
 		const stats = this.entity._stats.default;
 
 		gameObject.setSize(stats.width, stats.height);
 		gameObject.setPosition(stats.x + stats.width/2, stats.y + stats.height/2);
 		graphics.setPosition(-stats.width/2, -stats.height/2);
 		label.setPosition(5 - stats.width/2, 5 - stats.height/2);
+		if (rtLabel) {
+			rtLabel.setPosition(label.x, label.y);
+		}
 
 		graphics.clear();
-		
+
 		if (this.devModeOnly) {
 			graphics.lineStyle(
 				2,
@@ -122,11 +156,33 @@ class PhaserRegion extends PhaserEntity {
 				(stats.alpha && stats.alpha >= 0 && stats.alpha <= 1) ? stats.alpha : 0.4
 			);
 			graphics.fillRect(
-			0,
-			0,
-			stats.width,
-			stats.height
-		)};
+				0,
+				0,
+				stats.width,
+				stats.height
+			);
+		}
+	}
+
+	show() {
+		super.show();
+
+		const label = this.label;
+		const rt = this.rtLabel;
+
+		label && (label.visible = !rt);
+		rt && (rt.visible = true);
+	}
+
+	hide() {
+		if (this.devModeOnly) {
+			super.hide();
+		}
+		const label = this.label;
+		const rt = this.rtLabel;
+
+		label && (label.visible = false);
+		rt && (rt.visible = false);
 	}
 
 	protected destroy (): void {

@@ -13,6 +13,8 @@ var TileEditor = /** @class */ (function () {
     TileEditor.prototype.activateMarker = function (active) {
         this.marker.active = active;
         this.marker.graphics.setVisible(active);
+        this.paletteMarker.active = active;
+        this.paletteMarker.graphics.setVisible(active);
         if (active)
             this.devModeTools.regionEditor.regionTool = false;
     };
@@ -59,18 +61,11 @@ var TileEditor = /** @class */ (function () {
                 if (map === this.tilePalette.map)
                     selectedTile.tint = 0x87cfff;
             }
-            else {
-                selectedTile = null;
-            }
-            if (this.devModeTools.modeButtons[3].active) {
-                //this.activateMarker(true);
-                this.devModeTools.highlightModeButton(2);
-            }
             return selectedTile;
         }
     };
     TileEditor.prototype.update = function () {
-        if (ige.developerMode.active) {
+        if (ige.developerMode.active && ige.developerMode.activeTab === 'map') {
             var devModeScene = this.devModeTools.scene;
             var palette = this.tilePalette;
             var map = this.gameScene.tilemap;
@@ -91,6 +86,7 @@ var TileEditor = /** @class */ (function () {
                 paletteMarker.graphics.x = paletteMap.tileToWorldX(palettePointerTileX);
                 paletteMarker.graphics.y = paletteMap.tileToWorldY(palettePointerTileY);
                 if (devModeScene.input.manager.activePointer.isDown) {
+                    this.devModeTools.brush();
                     if (this.area.x > 1 || this.area.y > 1) {
                         for (var i = 0; i < this.area.x; i++) {
                             for (var j = 0; j < this.area.y; j++) {
@@ -113,7 +109,7 @@ var TileEditor = /** @class */ (function () {
                 // Snap to tile coordinates, but in world space
                 marker.graphics.x = map.tileToWorldX(pointerTileX);
                 marker.graphics.y = map.tileToWorldY(pointerTileY);
-                if (devModeScene.input.manager.activePointer.rightButtonDown()) {
+                if (devModeScene.input.manager.activePointer.rightButtonDown() && !this.devModeTools.modeButtons[3].active) {
                     if (this.area.x > 1 || this.area.y > 1) {
                         for (var i = 0; i < this.area.x; i++) {
                             for (var j = 0; j < this.area.y; j++) {
@@ -139,8 +135,10 @@ var TileEditor = /** @class */ (function () {
                 }
             }
         }
-        else
+        else {
             this.marker.graphics.setVisible(false);
+            this.paletteMarker.graphics.setVisible(false);
+        }
     };
     return TileEditor;
 }());

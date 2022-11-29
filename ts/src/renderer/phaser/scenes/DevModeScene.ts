@@ -22,13 +22,24 @@ class DevModeScene extends PhaserScene {
 	init (): void {
 		this.gameScene = ige.renderer.scene.getScene('Game');
 		this.regions = [];
+		this.defaultZoom = (this.gameScene.zoomSize / 2.15);
 
-		ige.client.on('enterDevMode', () => {
-			this.enterDevMode();
+		ige.client.on('unlockCamera', () => {
+			this.defaultZoom = (this.gameScene.zoomSize / 2.15);
+			this.gameScene.cameras.main.stopFollow();
 		});
 
-		ige.client.on('leaveDevMode', () => {
-			this.leaveDevMode();
+		ige.client.on('lockCamera', () => {
+			ige.client.emit('zoom', this.defaultZoom);
+			if (this.gameScene.cameraTarget) this.gameScene.cameras.main.startFollow(this.gameScene.cameraTarget, false, 0.05, 0.05);
+		});
+
+		ige.client.on('enterMapTab', () => {
+			this.enterMapTab();
+		});
+
+		ige.client.on('leaveMapTab', () => {
+			this.leaveMapTab();
 		});
 
 		ige.client.on('editTile', (data: TileData) => {
@@ -122,13 +133,12 @@ class DevModeScene extends PhaserScene {
 		this.regionEditor = this.devModeTools.regionEditor;
 	}
 
-	enterDevMode (): void {
-		this.defaultZoom = (this.gameScene.zoomSize / 2.15)
-		this.devModeTools.enterDevMode();
+	enterMapTab (): void {
+		this.devModeTools.enterMapTab();
 	}
 
-	leaveDevMode (): void {
-		this.devModeTools.leaveDevMode();
+	leaveMapTab (): void {
+		this.devModeTools.leaveMapTab();
 	}
 
 	editEntity (data: {entityType: string, 

@@ -102,6 +102,8 @@ var GameScene = /** @class */ (function (_super) {
         data.map.layers.forEach(function (layer) {
             if (layer.name !== 'debris') {
                 var length_1 = layer.data.length;
+                layer.width = data.map.width;
+                layer.height = data.map.height;
                 console.log('before', layer.name, length_1, tilesPerLayer);
                 if (length_1 < tilesPerLayer) {
                     for (var i = length_1 + 1; i < tilesPerLayer; i++) {
@@ -112,8 +114,8 @@ var GameScene = /** @class */ (function (_super) {
             }
         });
         this.load.tilemapTiledJSON('map', this.patchMapData(data.map));
-        this.load.bitmapFont('Arial_24px_bold_black', '/assets/fonts/Arial_24px_bold_black_0.png', '/assets/fonts/Arial_24px_bold_black.fnt');
-        this.load.bitmapFont('Arial_24px_bold_white', '/assets/fonts/Arial_24px_bold_white_0.png', '/assets/fonts/Arial_24px_bold_white.fnt');
+        BitmapFontManager.preload(this);
+        // TODO optimize font textures
     };
     GameScene.prototype.loadEntity = function (key, data, skin) {
         var _this = this;
@@ -165,6 +167,7 @@ var GameScene = /** @class */ (function (_super) {
         var _this = this;
         this.scene.launch('DevMode');
         ige.client.rendererLoaded.resolve();
+        BitmapFontManager.create(this);
         var map = this.tilemap = this.make.tilemap({ key: 'map' });
         var data = ige.game.data;
         var scaleFactor = ige.scaleMapDetails.scaleFactor;
@@ -231,16 +234,16 @@ var GameScene = /** @class */ (function (_super) {
                 var layerId_1;
                 switch (layer.name) {
                     case 'floor':
-                        layerId_1 = TileLayer.FLOOR;
+                        layerId_1 = 0;
                         break;
                     case 'floor2':
-                        layerId_1 = TileLayer.FLOOR_2;
+                        layerId_1 = 1;
                         break;
                     case 'walls':
-                        layerId_1 = TileLayer.WALLS;
+                        layerId_1 = 2;
                         break;
                     case 'trees':
-                        layerId_1 = TileLayer.TREES;
+                        layerId_1 = 3;
                         break;
                 }
                 layer.data.forEach(function (tile, index) {

@@ -131,6 +131,7 @@ var AbilityComponent = IgeEntity.extend({
 		if (handle.cost && handle.scriptName) {
 			ability = handle;
 		} else {
+			console.log(ige.game.data, handle)
 			ability = ige.game.data.abilities[handle];
 		}
 

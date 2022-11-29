@@ -154,16 +154,26 @@ var GameComponent = IgeEntity.extend({
 		// get existing players to re-join
 	},
 
-	kickPlayer: function(clientId) {
+	kickPlayer: function(playerId) {
 		// var player = this.getPlayerByClientId(clientId);		
 		// if (player) {
 		// 	player.streamUpdateData([{ playerJoined: false }]);
 		// }
 
-		var client = ige.server.clients[clientId];		
-		if (client) {
-			client.socket.close()
-		}
+		var player = ige.$(playerId);
+
+		if (player) {
+			
+			if (player._stats.clientId) {
+				var client = ige.server.clients[player._stats.clientId];
+				if (client) {
+					client.socket.close()
+				}
+			} else {
+				// bot players don't have clientId
+				player.remove();
+			}
+		}		
 	},
 
 	// get client with ip
