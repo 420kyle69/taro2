@@ -85,7 +85,8 @@ var TileEditor = /** @class */ (function () {
                 // Snap to tile coordinates, but in world space
                 paletteMarker.graphics.x = paletteMap.tileToWorldX(palettePointerTileX);
                 paletteMarker.graphics.y = paletteMap.tileToWorldY(palettePointerTileY);
-                if (devModeScene.input.manager.activePointer.isDown && !this.devModeTools.modeButtons[3].active) {
+                if (devModeScene.input.manager.activePointer.isDown) {
+                    this.devModeTools.brush();
                     if (this.area.x > 1 || this.area.y > 1) {
                         for (var i = 0; i < this.area.x; i++) {
                             for (var j = 0; j < this.area.y; j++) {
