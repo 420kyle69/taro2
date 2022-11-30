@@ -1649,6 +1649,7 @@ var Unit = IgeEntityPhysics.extend({
 				owner._stats.purchasables.splice(index, 1);
 			}
 			var purchasables = _.cloneDeep(owner._stats.purchasables);
+			equipPurchasable = _.pick(equipPurchasable, ['_id', 'image', 'owner', 'target', 'type']);
 			purchasables.push(equipPurchasable);
 			owner.streamUpdateData([
 				{ purchasables: purchasables },
