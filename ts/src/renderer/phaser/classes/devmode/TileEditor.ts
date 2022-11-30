@@ -59,7 +59,7 @@ class TileEditor {
 
     putTile (tileX: number, tileY: number, selectedTile: Phaser.Tilemaps.Tile): void {
 		const map = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
-		if (selectedTile && this.devModeTools.scene.pointerInsideMap(tileX, tileY, map)) {
+		if (this.gameScene.tilemapLayers[map.currentLayerIndex].visible && selectedTile && this.devModeTools.scene.pointerInsideMap(tileX, tileY, map)) {
 			let index = selectedTile.index;
 			if (selectedTile.index === -1) index = 0;
 			if  (index !== (map.getTileAt(tileX, tileY, true)).index &&
