@@ -11,13 +11,13 @@ var DevToolButton = /** @class */ (function () {
         button.setInteractive();
         container.add(button);
         if (texture) {
-            var image = scene.add.image(x + w / 4 + h * 0.1, y + h * 0.1, texture)
+            var image = this.image = scene.add.image(x + w / 4 + h * 0.1, y + h * 0.1, texture)
                 .setDisplaySize(h * 0.8, h * 0.8)
                 .setOrigin(0);
             container.add(image);
         }
         else {
-            var label = scene.add.bitmapText(x + w / 2, y + h / 2, BitmapFontManager.font(scene, 'Verdana', false, false, '#000000'), text, 26);
+            var label = scene.add.bitmapText(x + w / 2, y + h / 2, BitmapFontManager.font(scene, 'Verdana', false, false, '#000000'), text, 22);
             label.setOrigin(0.5);
             label.letterSpacing = 1.3;
             container.add(label);

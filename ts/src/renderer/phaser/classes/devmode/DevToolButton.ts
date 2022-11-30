@@ -1,6 +1,7 @@
 class DevToolButton {
 	button: Phaser.GameObjects.Rectangle;
 	active: boolean;
+	image: Phaser.GameObjects.Image;
 
 	constructor (
 		public devModeTools: DevModeTools,
@@ -24,7 +25,7 @@ class DevToolButton {
 		container.add(button);
 
 		if (texture) {
-			const image = scene.add.image(x + w/4 + h * 0.1, y + h * 0.1, texture)
+			const image = this.image = scene.add.image(x + w/4 + h * 0.1, y + h * 0.1, texture)
 				.setDisplaySize(h * 0.8, h * 0.8)
 				.setOrigin(0);
 			container.add(image);
@@ -35,7 +36,7 @@ class DevToolButton {
 					'Verdana', false, false, '#000000'
 				),
 				text,
-				26
+				22
 			);
 			label.setOrigin(0.5);
 			label.letterSpacing = 1.3;
