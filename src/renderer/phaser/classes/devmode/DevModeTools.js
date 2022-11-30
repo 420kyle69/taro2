@@ -51,8 +51,11 @@ var DevModeTools = /** @class */ (function (_super) {
         scene.add.existing(layerButtonsContainer);
         new DevToolButton(_this, 'palette', null, 0, 170, 120, layerButtonsContainer, palette.toggle.bind(palette));
         _this.layerButtons = [];
-        _this.layerButtons.push(new DevToolButton(_this, 'floor', null, 0, 102, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 0), new DevToolButton(_this, 'floor2', null, 0, 68, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 1), new DevToolButton(_this, 'walls', null, 0, 34, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 2), new DevToolButton(_this, 'trees', null, 0, 0, 120, layerButtonsContainer, _this.switchLayer.bind(_this), 3));
+        _this.layerButtons.push(new DevToolButton(_this, 'floor', null, 30, 102, 85, layerButtonsContainer, _this.switchLayer.bind(_this), 0), new DevToolButton(_this, 'floor2', null, 30, 68, 85, layerButtonsContainer, _this.switchLayer.bind(_this), 1), new DevToolButton(_this, 'walls', null, 30, 34, 85, layerButtonsContainer, _this.switchLayer.bind(_this), 2), new DevToolButton(_this, 'trees', null, 30, 0, 85, layerButtonsContainer, _this.switchLayer.bind(_this), 3));
         _this.layerButtons[0].highlight(true);
+        _this.layerHideButtons = [];
+        _this.layerHideButtons.push(new DevToolButton(_this, '', 'eyeopen', 0, 102, 35, layerButtonsContainer, _this.hideLayer.bind(_this), 0), new DevToolButton(_this, '', 'eyeopen', 0, 68, 35, layerButtonsContainer, _this.hideLayer.bind(_this), 1), new DevToolButton(_this, '', 'eyeopen', 0, 34, 35, layerButtonsContainer, _this.hideLayer.bind(_this), 2), new DevToolButton(_this, '', 'eyeopen', 0, 0, 35, layerButtonsContainer, _this.hideLayer.bind(_this), 3));
+        _this.layerHideButtons[0].highlight(true);
         var toolButtonsContainer = _this.toolButtonsContainer = new Phaser.GameObjects.Container(scene);
         toolButtonsContainer.x = palette.camera.x + palette.paletteWidth - 98;
         toolButtonsContainer.y = palette.camera.y - layerButtonsContainer.height - 184;
@@ -229,7 +232,24 @@ var DevModeTools = /** @class */ (function (_super) {
         this.layerButtons.forEach(function (button) {
             button.highlight(false);
         });
+        this.layerHideButtons.forEach(function (button) {
+            button.highlight(false);
+        });
         this.layerButtons[value].highlight(true);
+        this.layerHideButtons[value].highlight(true);
+    };
+    DevModeTools.prototype.hideLayer = function (value) {
+        this.switchLayer(value);
+        var scene = this.scene;
+        var tilemapLayers = scene.gameScene.tilemapLayers;
+        if (this.layerHideButtons[value].image.texture.key === 'eyeopen') {
+            this.layerHideButtons[value].image.setTexture('eyeclosed');
+            tilemapLayers[value].setVisible(false);
+        }
+        else {
+            this.layerHideButtons[value].image.setTexture('eyeopen');
+            tilemapLayers[value].setVisible(true);
+        }
     };
     return DevModeTools;
 }(Phaser.GameObjects.Container));
