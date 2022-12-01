@@ -184,10 +184,12 @@ var GameScene = /** @class */ (function (_super) {
         });
         //this.loadMap();
         var entityLayers = this.entityLayers;
+        this.tilemapLayers = [];
         data.map.layers.forEach(function (layer) {
             if (layer.type === 'tilelayer') {
                 var tileLayer = map.createLayer(layer.name, map.tilesets, 0, 0);
                 tileLayer.setScale(scaleFactor.x, scaleFactor.y);
+                _this.tilemapLayers.push(tileLayer);
             }
             entityLayers.push(_this.add.layer());
         });

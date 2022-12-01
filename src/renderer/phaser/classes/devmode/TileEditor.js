@@ -39,7 +39,7 @@ var TileEditor = /** @class */ (function () {
     };
     TileEditor.prototype.putTile = function (tileX, tileY, selectedTile) {
         var map = this.gameScene.tilemap;
-        if (selectedTile && this.devModeTools.scene.pointerInsideMap(tileX, tileY, map)) {
+        if (this.gameScene.tilemapLayers[map.currentLayerIndex].visible && selectedTile && this.devModeTools.scene.pointerInsideMap(tileX, tileY, map)) {
             var index = selectedTile.index;
             if (selectedTile.index === -1)
                 index = 0;

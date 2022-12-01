@@ -479,8 +479,10 @@ var Player = IgeEntity.extend({
 						if (typeof refreshUserName == 'function') {
 							refreshUserName(newValue);
 						}
-					}
-					if (attrName === 'equiped') {
+					} else if (attrName === 'purchasables') {
+						// update client purchasables if streamed from server to make sure equip/unequip skin works
+						self._stats[attrName] = newValue;
+					} else if (attrName === 'equiped') {
 						self._stats[attrName] = newValue;
 						var unit = self.getSelectedUnit();
 						if (unit) {
