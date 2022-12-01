@@ -206,9 +206,8 @@ class GameScene extends PhaserScene {
 	}
 
 	create (): void {
-		this.scene.launch('DevMode');
-
 		this.events.once('render', () => {
+			this.scene.launch('DevMode');
 			ige.client.rendererLoaded.resolve();
 		});
 
@@ -284,7 +283,7 @@ class GameScene extends PhaserScene {
 		//temporary making each loaded texture not smoothed (later planned to add option for smoothing some of them)
 		Object.values(this.textures.list).forEach(val => {
 			val.setFilter(Phaser.Textures.FilterMode.NEAREST);
-		  });
+		});
 	}
 
 	private setZoomSize (height: number): void {

@@ -164,8 +164,8 @@ var GameScene = /** @class */ (function (_super) {
     };
     GameScene.prototype.create = function () {
         var _this = this;
-        this.scene.launch('DevMode');
         this.events.once('render', function () {
+            _this.scene.launch('DevMode');
             ige.client.rendererLoaded.resolve();
         });
         BitmapFontManager.create(this);
