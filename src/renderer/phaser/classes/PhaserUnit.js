@@ -49,7 +49,7 @@ var PhaserUnit = /** @class */ (function (_super) {
                 this.scene.loadEntity("unit/".concat(this.entity._stats.cellSheet.url), this.entity._stats, true);
                 this.scene.load.on("filecomplete-image-".concat(this.key), function cnsl() {
                     if (this && this.sprite) {
-                        this.sprite.setTexture("unit/".concat(this.entity._stats.cellSheet.url));
+                        this.setTexture("unit/".concat(this.entity._stats.cellSheet.url));
                         this.sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
                         var bounds = this.entity._bounds2d;
                         this.sprite.setDisplaySize(bounds.x, bounds.y);
@@ -58,14 +58,14 @@ var PhaserUnit = /** @class */ (function (_super) {
                 this.scene.load.start();
             }
             else {
-                this.sprite.setTexture("unit/".concat(this.entity._stats.cellSheet.url));
+                this.setTexture("unit/".concat(this.entity._stats.cellSheet.url));
                 var bounds = this.entity._bounds2d;
                 this.sprite.setDisplaySize(bounds.x, bounds.y);
             }
         }
         else {
             this.key = "unit/".concat(this.entity._stats.type);
-            this.sprite.setTexture("unit/".concat(this.entity._stats.type));
+            this.setTexture("unit/".concat(this.entity._stats.type));
             var bounds = this.entity._bounds2d;
             this.sprite.setDisplaySize(bounds.x, bounds.y);
         }

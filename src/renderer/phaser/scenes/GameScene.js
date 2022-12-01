@@ -76,6 +76,15 @@ var GameScene = /** @class */ (function (_super) {
     GameScene.prototype.preload = function () {
         var _this = this;
         var data = ige.game.data;
+        if (data.texturePack) {
+            // todo: multiatlas
+            this.load.atlas({
+                key: 'pack-result',
+                atlasURL: data.texturePack.atlasURL,
+                textureURL: data.texturePack.textureURL,
+                // baseURL: "cache.modd.io"
+            });
+        }
         for (var type in data.unitTypes) {
             this.loadEntity("unit/".concat(type), data.unitTypes[type]);
         }
@@ -161,7 +170,9 @@ var GameScene = /** @class */ (function (_super) {
                 });
             }
         });
-        this.load.image(key, this.patchAssetUrl(cellSheet.url));
+        // todo: preload texture pack before loading entities,
+        //  then only load image here if texture pack does not have the image already loaded
+        // this.load.image(key, this.patchAssetUrl(cellSheet.url));
     };
     GameScene.prototype.create = function () {
         var _this = this;

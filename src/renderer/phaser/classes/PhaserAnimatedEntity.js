@@ -20,10 +20,9 @@ var PhaserAnimatedEntity = /** @class */ (function (_super) {
         _this.scene = scene;
         _this.key = key;
         var bounds = entity._bounds2d;
-        var sprite = scene.add.sprite(0, 0, key);
-        _this.sprite = sprite;
-        sprite.setDisplaySize(bounds.x, bounds.y);
-        sprite.rotation = entity._rotate.z;
+        _this.sprite = _this.addSprite(key);
+        _this.sprite.setDisplaySize(bounds.x, bounds.y);
+        _this.sprite.rotation = entity._rotate.z;
         Object.assign(_this.evtListeners, {
             'play-animation': entity.on('play-animation', _this.playAnimation, _this),
             size: entity.on('size', _this.size, _this),
@@ -57,6 +56,22 @@ var PhaserAnimatedEntity = /** @class */ (function (_super) {
     PhaserAnimatedEntity.prototype.destroy = function () {
         this.sprite = null;
         _super.prototype.destroy.call(this);
+    };
+    PhaserAnimatedEntity.prototype.addSprite = function (key) {
+        if (this.scene.textures.exists('pack-result') && this.scene.textures.getFrame('pack-result', key)) {
+            return this.scene.add.sprite(0, 0, 'pack-result', key);
+        }
+        else {
+            return this.scene.add.sprite(0, 0, key);
+        }
+    };
+    PhaserAnimatedEntity.prototype.setTexture = function (key) {
+        if (this.scene.textures.exists('pack-result') && this.scene.textures.getFrame('pack-result', key)) {
+            this.sprite.setTexture('pack-result', key);
+        }
+        else {
+            this.sprite.setTexture(key);
+        }
     };
     return PhaserAnimatedEntity;
 }(PhaserEntity));

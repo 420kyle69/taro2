@@ -55,6 +55,7 @@ declare class GameComponent extends IgeEntity {
 			}
 		}
 		heightBasedZIndex: boolean;
+		texturePack: any;
 	};
 
 	entitiesCollidingWithLastRaycast: IgeEntity[];

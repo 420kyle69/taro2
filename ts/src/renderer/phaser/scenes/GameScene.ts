@@ -97,6 +97,16 @@ class GameScene extends PhaserScene {
 
 		const data = ige.game.data;
 
+		if (data.texturePack) {
+			// todo: multiatlas
+			this.load.atlas({
+				key: 'pack-result',
+				atlasURL: data.texturePack.atlasURL,
+				textureURL: data.texturePack.textureURL,
+				// baseURL: "cache.modd.io"
+			});
+		}
+
 		for (let type in data.unitTypes) {
 			this.loadEntity(`unit/${type}`, data.unitTypes[type]);
 		}
@@ -210,7 +220,9 @@ class GameScene extends PhaserScene {
 			}
 		});
 
-		this.load.image(key, this.patchAssetUrl(cellSheet.url));
+		// todo: preload texture pack before loading entities,
+		//  then only load image here if texture pack does not have the image already loaded
+		// this.load.image(key, this.patchAssetUrl(cellSheet.url));
 	}
 
 	create (): void {
