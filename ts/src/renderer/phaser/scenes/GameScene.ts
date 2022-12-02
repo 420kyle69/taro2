@@ -6,7 +6,7 @@ class GameScene extends PhaserScene {
 	entityLayers: Phaser.GameObjects.Layer[] = [];
 	renderedEntities: TGameObject[] = [];
 	unitsList: PhaserUnit[] = [];
-
+	public tilemapLayers: Phaser.Tilemaps.TilemapLayer[];
 
 	public tilemap: Phaser.Tilemaps.Tilemap;
 	tileset: Phaser.Tilemaps.Tileset;
@@ -237,11 +237,13 @@ class GameScene extends PhaserScene {
 		//this.loadMap();
 
 		const entityLayers = this.entityLayers;
+		this.tilemapLayers = [];
 		data.map.layers.forEach((layer) => {
 
 			if (layer.type === 'tilelayer') {
 				const tileLayer = map.createLayer(layer.name, map.tilesets, 0, 0);
 				tileLayer.setScale(scaleFactor.x, scaleFactor.y);
+				this.tilemapLayers.push(tileLayer);
 			}
 
 			entityLayers.push(this.add.layer());
