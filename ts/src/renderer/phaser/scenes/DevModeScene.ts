@@ -144,12 +144,12 @@ class DevModeScene extends PhaserScene {
 		this.devModeTools.leaveMapTab();
 	}
 
-	editEntity (data: {entityType: string, 
+	editEntity (data: any/*{entityType: string, 
 		typeId: string, 
 		playerId: string, 
 		position: {x: number, y: number}, 
 		angle: number
-	}): void {
+	}*/): void {
 		ige.network.send('editEntity', data);
 	}
 

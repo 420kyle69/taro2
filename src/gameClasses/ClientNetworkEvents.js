@@ -477,6 +477,10 @@ var ClientNetworkEvents = {
 		ige.client.emit('editRegion', data);
 	},
 
+	_onUpdateUnit: function(data) {
+		ige.developerMode.updateUnit(data);
+	},
+
 	_onErrorLogs: function (logs) {
 		var element = document.getElementById('error-log-content');
 		for (actionName in logs) {

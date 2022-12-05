@@ -155,7 +155,15 @@ class DeveloperMode {
 		}
 	}
 
-	updateUnit() {
+	updateUnit(data) {
+		ige.game.data.unitTypes[data.typeId] = data.newData;
+		ige.$$('unit').forEach(unit => {
+			if (unit._stats.type === data.typeId) {
+				console.log('updating units with type', data.typeId);
+				unit.changeUnitType(data.typeId, data, false);
+			}
+		});
+		if (ige.isServer) ige.network.send('updateUnit', data);
 		// 1. broadcast update to all players
 		// 2. force update its dimension/scale/layer/image
 	}
@@ -217,8 +225,10 @@ class DeveloperMode {
 
 	editEntity (data, clientId) {
 		if (data.entityType === 'unit') {
-			if (data.create) {
+			if (data.action === 'create') {
 				this.createUnit(data);
+			} else if (data.action === 'update') {
+				this.updateUnit(data)
 			}
 		} else if (data.entityType === 'item') {
 			if (data.create) {

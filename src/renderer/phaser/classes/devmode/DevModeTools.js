@@ -119,6 +119,338 @@ var DevModeTools = /** @class */ (function (_super) {
         }*/
         var tabKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, true);
         tabKey.on('down', function () {
+            //temporary for testing
+            var newData = {
+                "defaultItem": [],
+                "controls": {
+                    "movementMethod": "velocity",
+                    "movementControlScheme": "wasd",
+                    "abilities": {
+                        "movementWheel": {
+                            "mobilePosition": {
+                                "y": 204,
+                                "x": 35
+                            }
+                        },
+                        "lookWheel": {
+                            "mobilePosition": {
+                                "y": 204,
+                                "x": 407
+                            }
+                        }
+                    },
+                    "mouseBehaviour": {
+                        "flipSpriteHorizontallyWRTMouse": false,
+                        "rotateToFaceMouseCursor": true
+                    },
+                    "movementType": "wasd",
+                    "permittedInventorySlots": [],
+                    "absoluteRotation": false
+                },
+                "inventoryImage": "",
+                "animations": {
+                    "default": {
+                        "framesPerSecond": 0,
+                        "loopCount": 0,
+                        "frames": [
+                            1
+                        ],
+                        "name": "default"
+                    }
+                },
+                "canBePurchasedBy": [],
+                "isPurchasable": false,
+                "states": {
+                    "default": {
+                        "name": "default",
+                        "sound": {},
+                        "particles": {},
+                        "animation": "default",
+                        "body": "default"
+                    }
+                },
+                "sound": {
+                    "KK9JlU1UQy": {
+                        "name": "Cough",
+                        "file": "https://modd.s3.amazonaws.com/asset/sound/1517554516253_man_cough.mp3"
+                    },
+                    "fEhDyJ8knx": {
+                        "name": "Scream",
+                        "file": "https://modd.s3.amazonaws.com/asset/sound/1517556903046_man_scream1.mp3"
+                    }
+                },
+                "particles": {},
+                "body": {
+                    "spriteScale": 1,
+                    "fixtures": [
+                        {
+                            "shape": {
+                                "type": "rectangle"
+                            },
+                            "restitution": 0.01,
+                            "friction": 0.01,
+                            "density": 3
+                        }
+                    ],
+                    "isFlying": false,
+                    "fixedRotation": false,
+                    "constantSpeed +DestroyedOnCollisionWithWall/unit": false,
+                    "allowSleep": true,
+                    "angularDamping": 1,
+                    "linearDamping": 5,
+                    "rotationSpeed": 2,
+                    "type": "dynamic",
+                    "height": 40,
+                    "width": 40,
+                    "collidesWith": {
+                        "units": true,
+                        "items": true,
+                        "projectiles": true,
+                        "walls": true,
+                        "unit": true,
+                        "item": true,
+                        "debris": true
+                    },
+                    "z-index": {
+                        "layer": 3,
+                        "depth": 3
+                    },
+                    "name": "Human-body"
+                },
+                "spawnPosition": {
+                    "y": 2200,
+                    "x": 1500
+                },
+                "attributes": {
+                    "speed": {
+                        "decimalPlaces": 0,
+                        "dataType": "",
+                        "name": "speed",
+                        "min": 0,
+                        "max": 200,
+                        "value": 10,
+                        "regenerateSpeed": 0,
+                        "isVisible": [],
+                        "showAsHUD": true,
+                        "color": "#00fff0",
+                        "displayValue": true
+                    },
+                    "health": {
+                        "decimalPlaces": 0,
+                        "color": "#ffff0f",
+                        "showAsHUD": true,
+                        "displayValue": true,
+                        "isVisible": [],
+                        "regenerateSpeed": 100,
+                        "value": 10000,
+                        "dataType": "",
+                        "max": 10000,
+                        "min": 0,
+                        "name": "health "
+                    }
+                },
+                "abilitiesJ8Gtv5hQ8j": {
+                    "movementWheel": {
+                        "mobilePosition": {
+                            "y": 204,
+                            "x": 35
+                        }
+                    },
+                    "lookWheel": {
+                        "mobilePosition": {
+                            "y": 204,
+                            "x": 407
+                        }
+                    },
+                    "w": {
+                        "keyUp": "stopMovingUp",
+                        "keyDown": "moveUp"
+                    },
+                    "a": {
+                        "keyUp": "stopMovingLeft",
+                        "keyDown": "moveLeft"
+                    },
+                    "s": {
+                        "keyUp": "stopMovingDown",
+                        "keyDown": "moveDown"
+                    },
+                    "d": {
+                        "keyUp": "stopMovingRight",
+                        "keyDown": "moveRight"
+                    },
+                    "button1": {
+                        "keyUp": "stopUsingItem",
+                        "keyDown": "startUsingItem",
+                        "mobilePosition": {
+                            "x": 326,
+                            "y": 132
+                        }
+                    },
+                    "up": {
+                        "keyUp": "stopMovingUp",
+                        "keyDown": "moveUp"
+                    },
+                    "down": {
+                        "keyUp": "stopMovingDown",
+                        "keyDown": "moveDown"
+                    },
+                    "left": {
+                        "keyUp": "stopMovingLeft",
+                        "keyDown": "moveLeft"
+                    },
+                    "right": {
+                        "keyUp": "stopMovingRight",
+                        "keyDown": "moveRight"
+                    },
+                    "e": {
+                        "keyUp": "",
+                        "keyDown": "pickUp",
+                        "mobilePosition": {
+                            "x": 366,
+                            "y": 85
+                        }
+                    },
+                    "f": {
+                        "keyUp": "",
+                        "keyDown": "pickUp"
+                    },
+                    "g": {
+                        "keyUp": "",
+                        "keyDown": "drop",
+                        "mobilePosition": {
+                            "x": 365,
+                            "y": 33
+                        }
+                    },
+                    "b": {
+                        "keyUp": "",
+                        "keyDown": "shop",
+                        "mobilePosition": {
+                            "x": 419,
+                            "y": 32
+                        }
+                    }
+                },
+                "baseSpeed": 53,
+                "price": {},
+                "skin": "https://s3-us-west-1.amazonaws.com/modd/halloween-0.18/spritesheet/man.png",
+                "canBuyItem": true,
+                "handle": "human",
+                "name": "Tree",
+                "inventorySize": 0,
+                "cellSheet": {
+                    "columnCount": 1,
+                    "rowCount": 1,
+                    "url": "https://cache.modd.io/asset/spriteImage/1589568802553_Stone_Rocks.png"
+                },
+                "bodies": {
+                    "default": {
+                        "bullet": false,
+                        "name": "default",
+                        "type": "static",
+                        "width": 105,
+                        "height": 105,
+                        "z-index": {
+                            "layer": 3,
+                            "depth": 3
+                        },
+                        "fixedRotation": true,
+                        "constantSpeed +DestroyedOnCollisionWithWall/unit": false,
+                        "allowSleep": true,
+                        "collidesWith": {
+                            "units": true,
+                            "items": true,
+                            "projectiles": true,
+                            "walls": true,
+                            "debris": true
+                        },
+                        "angularDamping": 1,
+                        "linearDamping": 8,
+                        "rotationSpeed": 1,
+                        "spriteScale": 1,
+                        "fixtures": [
+                            {
+                                "density": 1,
+                                "friction": 0,
+                                "restitution": 0,
+                                "shape": {
+                                    "type": "circle"
+                                },
+                                "isSensor": false
+                            }
+                        ],
+                        "jointType": "weldJoint",
+                        "unitAnchor": {
+                            "x": 0,
+                            "y": 33,
+                            "rotation": 0
+                        },
+                        "itemAnchor": {
+                            "x": 0,
+                            "y": 0,
+                            "lowerAngle": 0,
+                            "upperAngle": 0
+                        },
+                        "affectedByGravity": false
+                    }
+                },
+                "variables": {},
+                "effects": {
+                    "idle": {
+                        "projectileType": "",
+                        "sound": {},
+                        "animation": "",
+                        "tween": "",
+                        "runScript": ""
+                    },
+                    "attacked": {
+                        "projectileType": "",
+                        "sound": {},
+                        "animation": "",
+                        "tween": "",
+                        "runScript": ""
+                    },
+                    "move": {
+                        "projectileType": "",
+                        "sound": {},
+                        "animation": "",
+                        "tween": "",
+                        "runScript": ""
+                    },
+                    "create": {
+                        "projectileType": "",
+                        "sound": {},
+                        "animation": "",
+                        "runScript": ""
+                    },
+                    "destroy": {
+                        "projectileType": "",
+                        "sound": {},
+                        "animation": "",
+                        "runScript": ""
+                    }
+                },
+                "confinedWithinMapBoundaries": true,
+                "ai": {
+                    "pathFindingMethod": "simple",
+                    "idleBehaviour": "stay",
+                    "sensorResponse": "none",
+                    "attackResponse": "none",
+                    "maxTravelDistance": 300,
+                    "letGoDistance": "",
+                    "sensorRadius": 0,
+                    "maxAttackRange": 400,
+                    "enabled": false
+                },
+                "backpackSize": 0,
+                "defaultItems": [],
+                "isUnTargetable": false
+            };
+            _this.scene.editEntity({ entityType: 'unit',
+                typeId: 'tree',
+                action: 'update',
+                newData: newData
+            });
             if (ige.developerMode.shouldPreventKeybindings()) {
                 keyboard.disableGlobalCapture();
             }

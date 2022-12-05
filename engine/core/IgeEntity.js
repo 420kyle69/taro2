@@ -299,6 +299,7 @@ var IgeEntity = IgeObject.extend({
 	},
 
 	updateTexture: function () {
+		console.log('update texture');
 		var stateId = this._stats.stateId;
 		// if state not explicitly set, use default state
 		if (stateId === null) {

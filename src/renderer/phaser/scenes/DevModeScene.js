@@ -120,7 +120,12 @@ var DevModeScene = /** @class */ (function (_super) {
     DevModeScene.prototype.leaveMapTab = function () {
         this.devModeTools.leaveMapTab();
     };
-    DevModeScene.prototype.editEntity = function (data) {
+    DevModeScene.prototype.editEntity = function (data /*{entityType: string,
+        typeId: string,
+        playerId: string,
+        position: {x: number, y: number},
+        angle: number
+    }*/) {
         ige.network.send('editEntity', data);
     };
     DevModeScene.prototype.pointerInsideMap = function (pointerX, pointerY, map) {

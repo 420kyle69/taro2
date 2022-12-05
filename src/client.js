@@ -747,6 +747,7 @@ const Client = IgeEventingClass.extend({
 
 		ige.network.define('editTile', this._onEditTile);
 		ige.network.define('editRegion', this._onEditRegion);
+		ige.network.define('updateUnit', this._onUpdateUnit);
 	},
 
 	login: function() {
