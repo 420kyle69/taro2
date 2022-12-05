@@ -215,7 +215,11 @@ var Item = IgeEntityPhysics.extend({
 			return;
 		if (newOwner) {
 
-			if (newOwner._stats.currentItemIndex !== this._stats.slotIndex) {
+			if (
+				ige.isClient &&
+				newOwner == ige.client.selectedUnit &&
+				newOwner._stats.currentItemIndex !== this._stats.slotIndex
+			) {
 				this.setState('unselected');
 			}
 
