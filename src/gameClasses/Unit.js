@@ -1596,7 +1596,7 @@ var Unit = IgeEntityPhysics.extend({
 	updateTexture: function () {
 		var self = this;
 		var defaultUnit = ige.game.getAsset('unitTypes', self._stats.type);
-		self.emit('update-texture', self._stats.cellSheet.url !== defaultUnit.cellSheet.url);
+		self.emit('update-texture', true/*, self._stats.cellSheet.url !== defaultUnit.cellSheet.url*/);
 
 		var ownerPlayer = self.getOwner();
 		var isInvisible = self.shouldBeInvisible(ownerPlayer, ige.client.myPlayer);

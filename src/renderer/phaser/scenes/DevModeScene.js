@@ -121,6 +121,7 @@ var DevModeScene = /** @class */ (function (_super) {
         this.devModeTools.leaveMapTab();
     };
     DevModeScene.prototype.editEntity = function (data) {
+        //ige.game.data.unitTypes[data.typeId] = data.newData;
         ige.network.send('editEntity', data);
     };
     DevModeScene.prototype.pointerInsideMap = function (pointerX, pointerY, map) {

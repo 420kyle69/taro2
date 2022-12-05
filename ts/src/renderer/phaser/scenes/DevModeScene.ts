@@ -152,6 +152,7 @@ class DevModeScene extends PhaserScene {
 		position?: {x: number, y: number}, 
 		angle?: number,
 	}): void {
+		//ige.game.data.unitTypes[data.typeId] = data.newData;
 		ige.network.send('editEntity', data);
 	}
 
