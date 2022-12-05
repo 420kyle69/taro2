@@ -80,7 +80,7 @@ var DevModeScene = /** @class */ (function (_super) {
             var key = "tiles/".concat(tileset.name);
             var extrudedKey = "extruded-".concat(key);
             //if (this.textures.exists(extrudedKey)) {
-            _this.tileset = map.addTilesetImage(tileset.name, extrudedKey, tileset.tilewidth, tileset.tileheight, (tileset.margin || 0) + 1, (tileset.spacing || 0) + 2);
+            _this.tileset = map.addTilesetImage(tileset.name, extrudedKey, tileset.tilewidth, tileset.tileheight, (tileset.margin || 0) + 2, (tileset.spacing || 0) + 4);
             /*} else {
                 this.tileset = map.addTilesetImage(tileset.name, key);
             }*/

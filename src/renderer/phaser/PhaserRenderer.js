@@ -34,6 +34,9 @@ var PhaserRenderer = /** @class */ (function (_super) {
                 pixelArt: false,
                 transparent: false
             },
+            fps: {
+                smoothStep: false
+            },
             scene: [
                 GameScene,
                 DevModeScene,
@@ -71,7 +74,7 @@ var PhaserRenderer = /** @class */ (function (_super) {
         return _this;
     }
     PhaserRenderer.prototype.setupInputListeners = function () {
-        // Ask the input component to setup any listeners it has
+        // Ask the input component to set up any listeners it has
         ige.input.setupListeners(this.canvas);
     };
     PhaserRenderer.prototype.getViewportBounds = function () {

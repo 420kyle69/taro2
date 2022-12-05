@@ -146,7 +146,7 @@ var MenuUiComponent = IgeEntity.extend({
 					$('#kick-player').hide();
 					ige.developerMode.enter();
 
-					// commeting this code because we are handling changes in editor now.
+					// commenting this code because we are handling changes in editor now.
 					/* if (restoreWindows) {
 						$('.winbox').show();
 						restoreWindows = false;
@@ -773,9 +773,9 @@ var MenuUiComponent = IgeEntity.extend({
 		// 		window.location.reload();
 		// 	}, 200);
 		// } else {
-			// window.preventFurtherAutoJoin = true;
-			$('#server-disconnect-modal .modal-body').html(message || defaultContent);
-			$('#server-disconnect-modal').modal('show');
+		// window.preventFurtherAutoJoin = true;
+		$('#server-disconnect-modal .modal-body').html(message || defaultContent);
+		$('#server-disconnect-modal').modal('show');
 		// }
 
 		// refreshIn("connection-lost-refresh", 5);
