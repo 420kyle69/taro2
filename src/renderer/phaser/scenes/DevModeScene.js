@@ -44,6 +44,9 @@ var DevModeScene = /** @class */ (function (_super) {
         ige.client.on('editRegion', function (data) {
             _this.regionEditor.edit(data);
         });
+        ige.client.on('default-zoom', function (height) {
+            _this.defaultZoom = height;
+        });
     };
     DevModeScene.prototype.preload = function () {
         /*const data = ige.game.data;
