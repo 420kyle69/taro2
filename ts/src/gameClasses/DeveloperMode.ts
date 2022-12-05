@@ -160,7 +160,8 @@ class DeveloperMode {
 		ige.$$('unit').forEach(unit => {
 			if (unit._stats.type === data.typeId) {
 				console.log('updating units with type', data.typeId);
-				unit.changeUnitType(data.typeId, data, false);
+				unit.streamUpdateData([{ type: data.typeId }]);
+				//unit.changeUnitType(data.typeId, data, false);
 			}
 		});
 		if (ige.isServer) ige.network.send('updateUnit', data);
