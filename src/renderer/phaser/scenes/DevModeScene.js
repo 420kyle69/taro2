@@ -52,7 +52,7 @@ var DevModeScene = /** @class */ (function (_super) {
                 var worldPoint = _this.gameScene.cameras.main.getWorldPoint(p.x, p.y);
                 var playerId = ige.game.getPlayerByClientId(ige.network.id()).id();
                 var data = {
-                    create: true,
+                    action: 'create',
                     entityType: draggedEntity.entityType,
                     typeId: draggedEntity.typeId,
                     playerId: playerId,
@@ -120,12 +120,7 @@ var DevModeScene = /** @class */ (function (_super) {
     DevModeScene.prototype.leaveMapTab = function () {
         this.devModeTools.leaveMapTab();
     };
-    DevModeScene.prototype.editEntity = function (data /*{entityType: string,
-        typeId: string,
-        playerId: string,
-        position: {x: number, y: number},
-        angle: number
-    }*/) {
+    DevModeScene.prototype.editEntity = function (data) {
         ige.network.send('editEntity', data);
     };
     DevModeScene.prototype.pointerInsideMap = function (pointerX, pointerY, map) {

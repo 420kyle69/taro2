@@ -58,7 +58,7 @@ class DevModeScene extends PhaserScene {
 				const worldPoint = this.gameScene.cameras.main.getWorldPoint(p.x, p.y);
 				const playerId = ige.game.getPlayerByClientId(ige.network.id()).id();
 				const data = {
-					create: true,
+					action: 'create',
 					entityType: draggedEntity.entityType,
 					typeId: draggedEntity.typeId,
 					playerId: playerId,
@@ -144,12 +144,14 @@ class DevModeScene extends PhaserScene {
 		this.devModeTools.leaveMapTab();
 	}
 
-	editEntity (data: any/*{entityType: string, 
-		typeId: string, 
-		playerId: string, 
-		position: {x: number, y: number}, 
-		angle: number
-	}*/): void {
+	editEntity (data: {entityType: string, 
+		typeId: string,
+		action: string,
+		newData?: any,
+		playerId?: string, 
+		position?: {x: number, y: number}, 
+		angle?: number,
+	}): void {
 		ige.network.send('editEntity', data);
 	}
 
