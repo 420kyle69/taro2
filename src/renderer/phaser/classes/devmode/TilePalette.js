@@ -21,8 +21,6 @@ var TilePalette = /** @class */ (function (_super) {
         _this.tileset = tileset;
         _this.rexUI = rexUI;
         _this.scene = scene;
-        _this.x = -1000;
-        _this.y = 0;
         // Load a map from a 2D array of tile indices
         var paletteMap = [];
         for (var i = 0; i < tileset.rows; i++) {
@@ -33,7 +31,10 @@ var TilePalette = /** @class */ (function (_super) {
         }
         // When loading from an array, make sure to specify the tileWidth and tileHeight
         var map = _this.map = _this.scene.make.tilemap({ key: 'palette', data: paletteMap, tileWidth: 16, tileHeight: 16 });
-        var texturesLayer = _this.texturesLayer = map.createLayer(0, tileset, 0, 0).setOrigin(0, 0).setInteractive().setPosition(_this.x, _this.y);
+        var texturesLayer = _this.texturesLayer = map.createLayer(0, tileset, 0, 0).setOrigin(0, 0).setInteractive();
+        _this.x = -texturesLayer.width;
+        _this.y = 0;
+        texturesLayer.setPosition(_this.x, _this.y);
         scene.add.existing(texturesLayer);
         var paletteWidth = _this.paletteWidth = _this.scene.sys.game.canvas.width * 0.25;
         var paletteHeight = _this.paletteHeight = _this.scene.sys.game.canvas.height * 0.25;

@@ -14,7 +14,7 @@ class DevModeScene extends PhaserScene {
 	regions: PhaserRegion[];
 
 	defaultZoom: number;
-	
+
 	constructor() {
 		super({ key: 'DevMode' });
 	}
@@ -49,6 +49,10 @@ class DevModeScene extends PhaserScene {
 		ige.client.on('editRegion', (data: RegionData) => {
 			this.regionEditor.edit(data);
 		});
+
+		ige.client.on('default-zoom', (height: number) => {
+			this.defaultZoom = height;
+		});
 	}
 
 	preload (): void {
@@ -73,6 +77,9 @@ class DevModeScene extends PhaserScene {
 		this.load.image('region', 'https://cache.modd.io/asset/spriteImage/1666882309997_region.png');
 		this.load.image('stamp', 'https://cache.modd.io/asset/spriteImage/1666724706664_stamp.png');
 		this.load.image('eraser', 'https://cache.modd.io/asset/spriteImage/1666276083246_erasergap.png');
+		this.load.image('eyeopen', 'https://cache.modd.io/asset/spriteImage/1669820752914_eyeopen.png');
+		this.load.image('eyeclosed', 'https://cache.modd.io/asset/spriteImage/1669821066279_eyeclosed.png');
+		
 
 		this.load.scenePlugin(
 			'rexuiplugin',
@@ -86,16 +93,16 @@ class DevModeScene extends PhaserScene {
 	create(): void {
 		const data = ige.game.data;
 		const map = this.tilemap = this.make.tilemap({ key: 'map' });
-		
+
 		data.map.tilesets.forEach((tileset) => {
 			const key = `tiles/${tileset.name}`;
 			const extrudedKey = `extruded-${key}`;
 			//if (this.textures.exists(extrudedKey)) {
-				this.tileset = map.addTilesetImage(tileset.name, extrudedKey,
-					tileset.tilewidth, tileset.tileheight,
-					(tileset.margin || 0) + 1,
-					(tileset.spacing || 0) + 2
-				);
+			this.tileset = map.addTilesetImage(tileset.name, extrudedKey,
+				tileset.tilewidth, tileset.tileheight,
+				(tileset.margin || 0) + 2,
+				(tileset.spacing || 0) + 4
+			);
 			/*} else {
 				this.tileset = map.addTilesetImage(tileset.name, key);
 			}*/
@@ -127,18 +134,18 @@ class DevModeScene extends PhaserScene {
 		return (this.input.activePointer.x > this.tilePalette.scrollBarContainer.x
 			&& this.input.activePointer.x < this.tilePalette.scrollBarContainer.x + this.tilePalette.scrollBarContainer.width
 			&& this.input.activePointer.y > this.tilePalette.scrollBarContainer.y - 30
-			&& this.input.activePointer.y < this.tilePalette.scrollBarContainer.y + this.tilePalette.scrollBarContainer.height)
+			&& this.input.activePointer.y < this.tilePalette.scrollBarContainer.y + this.tilePalette.scrollBarContainer.height);
 	}
 
 	pointerInsideButtons(): boolean {
 		return ((this.input.activePointer.x > this.devModeTools.layerButtonsContainer.x
 			&& this.input.activePointer.x < this.devModeTools.layerButtonsContainer.x + this.devModeTools.layerButtonsContainer.width
-			&& this.input.activePointer.y > this.devModeTools.layerButtonsContainer.y 
+			&& this.input.activePointer.y > this.devModeTools.layerButtonsContainer.y
 			&& this.input.activePointer.y < this.devModeTools.layerButtonsContainer.y + this.devModeTools.layerButtonsContainer.height)
 			|| (this.input.activePointer.x > this.devModeTools.toolButtonsContainer.x
 			&& this.input.activePointer.x < this.devModeTools.toolButtonsContainer.x + this.devModeTools.toolButtonsContainer.width
-			&& this.input.activePointer.y > this.devModeTools.toolButtonsContainer.y 
-			&& this.input.activePointer.y < this.devModeTools.toolButtonsContainer.y + this.devModeTools.toolButtonsContainer.height))
+			&& this.input.activePointer.y > this.devModeTools.toolButtonsContainer.y
+			&& this.input.activePointer.y < this.devModeTools.toolButtonsContainer.y + this.devModeTools.toolButtonsContainer.height));
 	}
 
 	update (): void {

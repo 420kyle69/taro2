@@ -65,7 +65,7 @@ var GameComponent = IgeEntity.extend({
 		if (data.purchasables) {
 			for (var i = 0; i < data.purchasables.length; i++) {
 				var purchasable = data.purchasables[i];
-				purchasable = _.pick(purchasable, ['_id', 'image', 'owner', 'target']);
+				purchasable = _.pick(purchasable, ['_id', 'image', 'owner', 'target', 'type']);
 				purchases.push(purchasable);
 			}
 		}

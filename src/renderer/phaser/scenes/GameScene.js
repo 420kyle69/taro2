@@ -115,7 +115,6 @@ var GameScene = /** @class */ (function (_super) {
         });
         this.load.tilemapTiledJSON('map', this.patchMapData(data.map));
         BitmapFontManager.preload(this);
-        // TODO optimize font textures
     };
     GameScene.prototype.loadEntity = function (key, data, skin) {
         var _this = this;
@@ -165,8 +164,10 @@ var GameScene = /** @class */ (function (_super) {
     };
     GameScene.prototype.create = function () {
         var _this = this;
-        this.scene.launch('DevMode');
-        ige.client.rendererLoaded.resolve();
+        this.events.once('render', function () {
+            _this.scene.launch('DevMode');
+            ige.client.rendererLoaded.resolve();
+        });
         BitmapFontManager.create(this);
         var map = this.tilemap = this.make.tilemap({ key: 'map' });
         var data = ige.game.data;
@@ -176,7 +177,7 @@ var GameScene = /** @class */ (function (_super) {
             var key = "tiles/".concat(tileset.name);
             var extrudedKey = "extruded-".concat(key);
             if (_this.textures.exists(extrudedKey)) {
-                _this.tileset = map.addTilesetImage(tileset.name, extrudedKey, tileset.tilewidth, tileset.tileheight, (tileset.margin || 0) + 1, (tileset.spacing || 0) + 2);
+                _this.tileset = map.addTilesetImage(tileset.name, extrudedKey, tileset.tilewidth, tileset.tileheight, (tileset.margin || 0) + 2, (tileset.spacing || 0) + 4);
             }
             else {
                 _this.tileset = map.addTilesetImage(tileset.name, key);
@@ -184,10 +185,12 @@ var GameScene = /** @class */ (function (_super) {
         });
         //this.loadMap();
         var entityLayers = this.entityLayers;
+        this.tilemapLayers = [];
         data.map.layers.forEach(function (layer) {
             if (layer.type === 'tilelayer') {
                 var tileLayer = map.createLayer(layer.name, map.tilesets, 0, 0);
                 tileLayer.setScale(scaleFactor.x, scaleFactor.y);
+                _this.tilemapLayers.push(tileLayer);
             }
             entityLayers.push(_this.add.layer());
         });
@@ -275,7 +278,7 @@ var GameScene = /** @class */ (function (_super) {
         return map;
     };
     GameScene.prototype.extrude = function (tileset, sourceImage, extrusion, color) {
-        if (extrusion === void 0) { extrusion = 1; }
+        if (extrusion === void 0) { extrusion = 2; }
         if (color === void 0) { color = '#ffffff00'; }
         var tilewidth = tileset.tilewidth, tileheight = tileset.tileheight, _a = tileset.margin, margin = _a === void 0 ? 0 : _a, _b = tileset.spacing, spacing = _b === void 0 ? 0 : _b;
         var width = sourceImage.width, height = sourceImage.height;

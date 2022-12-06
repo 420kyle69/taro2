@@ -50,6 +50,20 @@ var MenuUiComponent = IgeEntity.extend({
 				}
 			});
 
+			$('#forceCanvas-on').on('click', function () {
+				self.setForceCanvas(true);
+				self.toggleButton('forceCanvas', 'on');
+				$('#forceCanvas-refresh-prompt').css('display', 'block');
+			});
+
+			$('#forceCanvas-off').on('click', function () {
+				self.setForceCanvas(false);
+				self.toggleButton('forceCanvas', 'off');
+				$('#forceCanvas-refresh-prompt').css('display', 'block');
+			});
+
+			self.toggleButton('forceCanvas', self.getForceCanvas() ? 'on' : 'off');
+
 			// register error log modal btn;
 			$('#dev-error-button').on('click', function () {
 				$('#error-log-modal').modal('show');
@@ -132,7 +146,7 @@ var MenuUiComponent = IgeEntity.extend({
 					$('#kick-player').hide();
 					ige.developerMode.enter();
 
-					// commeting this code because we are handling changes in editor now.
+					// commenting this code because we are handling changes in editor now.
 					/* if (restoreWindows) {
 						$('.winbox').show();
 						restoreWindows = false;
@@ -172,7 +186,7 @@ var MenuUiComponent = IgeEntity.extend({
 							$('#dev-console').hide();
 							restoreDevConsole = true;
 						}
-					} 
+					}
 					$('#toggle-dev-panels').text(isEditorVisible ? 'Exit Dev Mode' : 'Enter Dev Mode'); */
 
 				} else {
@@ -291,6 +305,23 @@ var MenuUiComponent = IgeEntity.extend({
 			$('#help-button').on('click', function () {
 				$('#help-modal').modal('show');
 			});
+		}
+	},
+	toggleButton: function (type, mode) {
+		if (mode == 'on') {
+			$(`#${type}-on`)
+				.removeClass('btn-light')
+				.addClass('btn-success');
+			$(`#${type}-off`)
+				.removeClass('btn-success')
+				.addClass('btn-light');
+		} else {
+			$(`#${type}-off`)
+				.removeClass('btn-light')
+				.addClass('btn-success');
+			$(`#${type}-on`)
+				.removeClass('btn-success')
+				.addClass('btn-light');
 		}
 	},
 	toggleScoreBoard: function (show) {
@@ -740,14 +771,14 @@ var MenuUiComponent = IgeEntity.extend({
 		// 		allowOutsideClick: false,
 		// 		allowEscapeKey: false
 		// 	});
-			
+
 		// 	setTimeout(function () {
 		// 		window.location.reload();
 		// 	}, 200);
 		// } else {
-			// window.preventFurtherAutoJoin = true;
-			$('#server-disconnect-modal .modal-body').html(message || defaultContent);
-			$('#server-disconnect-modal').modal('show');
+		// window.preventFurtherAutoJoin = true;
+		$('#server-disconnect-modal .modal-body').html(message || defaultContent);
+		$('#server-disconnect-modal').modal('show');
 		// }
 
 		// refreshIn("connection-lost-refresh", 5);
@@ -770,6 +801,25 @@ var MenuUiComponent = IgeEntity.extend({
 			$('#resolution-low').addClass('btn-success').removeClass('btn-light');
 			$('#resolution-high').removeClass('btn-success').addClass('btn-light');
 		}
+	},
+	setForceCanvas: function (enabled) {
+		const forceCanvas = JSON.parse(
+			localStorage.getItem('forceCanvas')
+		) || {};
+
+		if (enabled) {
+			forceCanvas[0] = enabled;
+		} else {
+			delete forceCanvas[0];
+		}
+
+		localStorage.setItem('forceCanvas', JSON.stringify(forceCanvas));
+	},
+	getForceCanvas: function() {
+		const forceCanvas = JSON.parse(
+			localStorage.getItem('forceCanvas')
+		) || {};
+		return forceCanvas[0];
 	}
 });
 

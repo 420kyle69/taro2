@@ -59,7 +59,7 @@ class TileEditor {
 
     putTile (tileX: number, tileY: number, selectedTile: Phaser.Tilemaps.Tile): void {
 		const map = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
-		if (selectedTile && this.devModeTools.scene.pointerInsideMap(tileX, tileY, map)) {
+		if (this.gameScene.tilemapLayers[map.currentLayerIndex].visible && selectedTile && this.devModeTools.scene.pointerInsideMap(tileX, tileY, map)) {
 			let index = selectedTile.index;
 			if (selectedTile.index === -1) index = 0;
 			if  (index !== (map.getTileAt(tileX, tileY, true)).index &&
@@ -108,7 +108,8 @@ class TileEditor {
 				paletteMarker.graphics.x = paletteMap.tileToWorldX(palettePointerTileX);
 				paletteMarker.graphics.y = paletteMap.tileToWorldY(palettePointerTileY);
 
-				if (devModeScene.input.manager.activePointer.isDown && !this.devModeTools.modeButtons[3].active) {
+				if (devModeScene.input.manager.activePointer.isDown) {
+					this.devModeTools.brush();
 					if (this.area.x > 1 || this.area.y > 1) {
 						for (let i = 0; i < this.area.x; i++) {
 							for (let j = 0; j < this.area.y; j++) {

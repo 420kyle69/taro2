@@ -44,6 +44,9 @@ var DevModeScene = /** @class */ (function (_super) {
         ige.client.on('editRegion', function (data) {
             _this.regionEditor.edit(data);
         });
+        ige.client.on('default-zoom', function (height) {
+            _this.defaultZoom = height;
+        });
     };
     DevModeScene.prototype.preload = function () {
         /*const data = ige.game.data;
@@ -66,6 +69,8 @@ var DevModeScene = /** @class */ (function (_super) {
         this.load.image('region', 'https://cache.modd.io/asset/spriteImage/1666882309997_region.png');
         this.load.image('stamp', 'https://cache.modd.io/asset/spriteImage/1666724706664_stamp.png');
         this.load.image('eraser', 'https://cache.modd.io/asset/spriteImage/1666276083246_erasergap.png');
+        this.load.image('eyeopen', 'https://cache.modd.io/asset/spriteImage/1669820752914_eyeopen.png');
+        this.load.image('eyeclosed', 'https://cache.modd.io/asset/spriteImage/1669821066279_eyeclosed.png');
         this.load.scenePlugin('rexuiplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js', 
         //'src/renderer/phaser/rexuiplugin.min.js',
         'rexUI', 'rexUI');
@@ -78,7 +83,7 @@ var DevModeScene = /** @class */ (function (_super) {
             var key = "tiles/".concat(tileset.name);
             var extrudedKey = "extruded-".concat(key);
             //if (this.textures.exists(extrudedKey)) {
-            _this.tileset = map.addTilesetImage(tileset.name, extrudedKey, tileset.tilewidth, tileset.tileheight, (tileset.margin || 0) + 1, (tileset.spacing || 0) + 2);
+            _this.tileset = map.addTilesetImage(tileset.name, extrudedKey, tileset.tilewidth, tileset.tileheight, (tileset.margin || 0) + 2, (tileset.spacing || 0) + 4);
             /*} else {
                 this.tileset = map.addTilesetImage(tileset.name, key);
             }*/
