@@ -149,334 +149,305 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		tabKey.on('down', () => {
 			//temporary for testing
 			const newData = {
-				"defaultItem": [],
-				"controls": {
-					"movementMethod": "velocity",
-					"movementControlScheme": "wasd",
-					"abilities": {
-						"movementWheel": {
-							"mobilePosition": {
-								"y": 204,
-								"x": 35
-							}
-						},
-						"lookWheel": {
-							"mobilePosition": {
-								"y": 204,
-								"x": 407
-							}
-						}
-					},
-					"mouseBehaviour": {
-						"flipSpriteHorizontallyWRTMouse": false,
-						"rotateToFaceMouseCursor": true
-					},
-					"movementType": "wasd",
-					"permittedInventorySlots": [],
-					"absoluteRotation": false
+				"carriedBy": [],
+				"buffTypes": [],
+				"cost": {
+					"quantity": 0
 				},
-				"inventoryImage": "",
-				"animations": {
-					"default": {
-						"framesPerSecond": 0,
-						"loopCount": 0,
-						"frames": [
-							1
-						],
-						"name": "default"
+				"bonus": {
+					"passive": {
+						"unitAttribute": {},
+						"playerAttribute": {}
+					},
+					"consume": {
+						"unitAttribute": {},
+						"playerAttribute": {}
 					}
 				},
-				"canBePurchasedBy": [],
-				"isPurchasable": false,
-				"states": {
-					"default": {
-						"name": "default",
-						"sound": {},
-						"particles": {},
-						"animation": "default",
-						"body": "default"
-					}
-				},
-				"sound": {
-					"KK9JlU1UQy": {
-						"name": "Cough",
-						"file": "https://modd.s3.amazonaws.com/asset/sound/1517554516253_man_cough.mp3"
-					},
-					"fEhDyJ8knx": {
-						"name": "Scream",
-						"file": "https://modd.s3.amazonaws.com/asset/sound/1517556903046_man_scream1.mp3"
+				"removeWhenEmpty": false,
+				"isUsedOnPickup": false,
+				"canBeUsedBy": [],
+				"sound": {},
+				"damage": {
+					"unitAttributes": {
+						"health": 10
 					}
 				},
 				"particles": {},
-				"body": {
-					"spriteScale": 1,
+				"destroyTimer": 30000,
+				"penetration": false,
+				"bulletDestroyedOnCollisionWithWall/unitDistance": 1300,
+				"bulletDestroyedOnCollisionWithWall/unitStartPosition": {
+					"rotation": 0,
+					"y": 0,
+					"x": 0
+				},
+				"effects": {
+					"empty": {
+						"sound": {},
+						"animation": ""
+					},
+					"reload": {
+						"sound": {},
+						"animation": ""
+					},
+					"destroy": {
+						"animation": "",
+						"sound": {},
+						"projectileType": ""
+					},
+					"create": {
+						"animation": "",
+						"sound": {},
+						"projectileType": ""
+					},
+					"use": {
+						"tween": "swingCCW",
+						"animation": "use",
+						"sound": {},
+						"projectileType": ""
+					}
+				},
+				"knockbackForce": 0,
+				"bulletDestroyedOnCollisionWithWall/unitForce": 14,
+				"fireRate": 500,
+				"recoilForce": 0,
+				"reloadRate": 2800,
+				"description": null,
+				"maxQuantity": null,
+				"quantity": null,
+				"projectileType": "",
+				"hideIfUnaffordable": false,
+				"bodies": {
+					"dropped": {
+						"bullet": false,
+						"itemAnchor": {
+							"y": 0,
+							"x": 0
+						},
+						"unitAnchor": {
+							"rotation": 90,
+							"x": 0,
+							"y": 52
+						},
+						"jointType": "weldJoint",
+						"fixtures": [
+							{
+								"isSensor": true,
+								"shape": {
+									"type": "rectangle"
+								},
+								"restitution": 0.01,
+								"friction": 0.01,
+								"density": 1
+							}
+						],
+						"spriteScale": 1,
+						"rotationSpeed": 1,
+						"linearDamping": 1,
+						"angularDamping": 1,
+						"collidesWith": {
+							"debris": false,
+							"walls": false,
+							"projectiles": false,
+							"items": false,
+							"units": false
+						},
+						"allowSleep": true,
+						"constantSpeed +DestroyedOnCollisionWithWall/unit": false,
+						"fixedRotation": false,
+						"z-index": {
+							"depth": 2,
+							"layer": 1
+						},
+						"height": 53,
+						"width": 26,
+						"type": "dynamic",
+						"name": "dropped"
+					},
+					"selected": {
+						"itemAnchor": {
+							"x": 0,
+							"y": 52
+						},
+						"unitAnchor": {
+							"x": 0,
+							"y": 0,
+							"rotation": 90
+						},
+						"jointType": "weldJoint",
+						"fixtures": [
+							{
+								"isSensor": false,
+								"shape": {
+									"type": "rectangle"
+								},
+								"restitution": 0.01,
+								"friction": 0.01,
+								"density": 1
+							}
+						],
+						"spriteScale": 1,
+						"rotationSpeed": 3,
+						"linearDamping": 5,
+						"angularDamping": 1,
+						"collidesWith": {
+							"debris": false,
+							"walls": true,
+							"projectiles": true,
+							"items": true,
+							"units": true
+						},
+						"allowSleep": true,
+						"constantSpeed +DestroyedOnCollisionWithWall/unit": false,
+						"fixedRotation": false,
+						"z-index": {
+							"depth": 4,
+							"layer": 3
+						},
+						"height": 53,
+						"width": 26,
+						"type": "spriteOnly",
+						"name": "selected"
+					}
+				},
+				"animations": {
+					"default": {
+						"name": "default",
+						"frames": [
+							1
+						],
+						"loopCount": null,
+						"framesPerSecond": null
+					}
+				},
+				"states": {
+					"dropped": {
+						"sound": {},
+						"particles": {},
+						"body": "dropped",
+						"animation": "default",
+						"name": "dropped"
+					},
+					"unselected": {
+						"sound": {},
+						"particles": {},
+						"body": "none",
+						"animation": "none",
+						"name": "unselected"
+					},
+					"selected": {
+						"sound": {},
+						"particles": {},
+						"body": "selected",
+						"animation": "default",
+						"name": "selected"
+					}
+				},
+				"hits": [],
+				"type": "weapon",
+				"bulletDestroyedOnCollisionWithWall/unitType": "raycast",
+				"isGun": false,
+				"canBePurchasedBy": [],
+				"isPurchasable": true,
+				"isStackable": false,
+				"inventoryImage": "https://cache.modd.io/asset/spriteImage/1588116120030_axe.png",
+				"cellSheet": {
+					"columnCount": 1,
+					"rowCount": 1,
+					"url": "https://cache.modd.io/asset/spriteImage/1567137993943_crowbar.png"
+				},
+				"attributes": {},
+				"handle": "",
+				"name": "Axe",
+				"frames": {},
+				"bulletStartPosition": {
+					"x": 0,
+					"y": 0,
+					"rotation": 0
+				},
+				"damageHitBox": {
+					"width": 38,
+					"height": 30,
+					"offsetX": 0,
+					"offsetY": 50
+				},
+				"damageDelay": 0,
+				"controls": {
+					"undroppable": true,
+					"designatedInventorySlot": 1,
+					"mouseBehaviour": {
+						"rotateToFaceMouseCursor": true,
+						"flipSpriteHorizontallyWRTMouse": false
+					},
+					"permittedInventorySlots": []
+				},
+				"lifeSpan": 60000,
+				"confinedWithinMapBoundaries": true,
+				"delayBeforeUse": 0,
+				"itemTypeId": "axe",
+				"stateId": "selected",
+				"currentBody": {
+					"itemAnchor": {
+						"x": 0,
+						"y": 52
+					},
+					"unitAnchor": {
+						"x": 0,
+						"y": 0,
+						"rotation": 90
+					},
+					"jointType": "weldJoint",
 					"fixtures": [
 						{
+							"isSensor": false,
 							"shape": {
 								"type": "rectangle"
 							},
 							"restitution": 0.01,
 							"friction": 0.01,
-							"density": 3
+							"density": 1
 						}
 					],
-					"isFlying": false,
-					"fixedRotation": false,
-					"constantSpeed +DestroyedOnCollisionWithWall/unit": false,
-					"allowSleep": true,
-					"angularDamping": 1,
+					"spriteScale": 1,
+					"rotationSpeed": 3,
 					"linearDamping": 5,
-					"rotationSpeed": 2,
-					"type": "dynamic",
-					"height": 40,
-					"width": 40,
+					"angularDamping": 1,
 					"collidesWith": {
-						"units": true,
-						"items": true,
-						"projectiles": true,
+						"debris": false,
 						"walls": true,
-						"unit": true,
-						"item": true,
-						"debris": true
+						"projectiles": true,
+						"items": true,
+						"units": true
 					},
+					"allowSleep": true,
+					"constantSpeed +DestroyedOnCollisionWithWall/unit": false,
+					"fixedRotation": false,
 					"z-index": {
-						"layer": 3,
-						"depth": 3
+						"depth": 4,
+						"layer": 3
 					},
-					"name": "Human-body"
+					"height": 53,
+					"width": 26,
+					"type": "spriteOnly",
+					"name": "selected"
 				},
-				"spawnPosition": {
-					"y": 2200,
-					"x": 1500
+				"defaultData": {
+					"translate": {
+						"x": 0,
+						"y": 0
+					},
+					"rotate": 0
 				},
-				"attributes": {
-					"speed": {
-						"decimalPlaces": 0,
-						"dataType": "",
-						"name": "speed",
-						"min": 0,
-						"max": 200,
-						"value": 10,
-						"regenerateSpeed": 0,
-						"isVisible": [],
-						"showAsHUD": true,
-						"color": "#00fff0",
-						"displayValue": true
-					},
-					"health": {
-						"decimalPlaces": 0,
-						"color": "#ffff0f",
-						"showAsHUD": true,
-						"displayValue": true,
-						"isVisible": [],
-						"regenerateSpeed": 100,
-						"value": 10000,
-						"dataType": "",
-						"max": 10000,
-						"min": 0,
-						"name": "health "
-					}
-				},
-				"abilitiesJ8Gtv5hQ8j": {
-					"movementWheel": {
-						"mobilePosition": {
-							"y": 204,
-							"x": 35
-						}
-					},
-					"lookWheel": {
-						"mobilePosition": {
-							"y": 204,
-							"x": 407
-						}
-					},
-					"w": {
-						"keyUp": "stopMovingUp",
-						"keyDown": "moveUp"
-					},
-					"a": {
-						"keyUp": "stopMovingLeft",
-						"keyDown": "moveLeft"
-					},
-					"s": {
-						"keyUp": "stopMovingDown",
-						"keyDown": "moveDown"
-					},
-					"d": {
-						"keyUp": "stopMovingRight",
-						"keyDown": "moveRight"
-					},
-					"button1": {
-						"keyUp": "stopUsingItem",
-						"keyDown": "startUsingItem",
-						"mobilePosition": {
-							"x": 326,
-							"y": 132
-						}
-					},
-					"up": {
-						"keyUp": "stopMovingUp",
-						"keyDown": "moveUp"
-					},
-					"down": {
-						"keyUp": "stopMovingDown",
-						"keyDown": "moveDown"
-					},
-					"left": {
-						"keyUp": "stopMovingLeft",
-						"keyDown": "moveLeft"
-					},
-					"right": {
-						"keyUp": "stopMovingRight",
-						"keyDown": "moveRight"
-					},
-					"e": {
-						"keyUp": "",
-						"keyDown": "pickUp",
-						"mobilePosition": {
-							"x": 366,
-							"y": 85
-						}
-					},
-					"f": {
-						"keyUp": "",
-						"keyDown": "pickUp"
-					},
-					"g": {
-						"keyUp": "",
-						"keyDown": "drop",
-						"mobilePosition": {
-							"x": 365,
-							"y": 33
-						}
-					},
-					"b": {
-						"keyUp": "",
-						"keyDown": "shop",
-						"mobilePosition": {
-							"x": 419,
-							"y": 32
-						}
-					}
-				},
-				"baseSpeed": 53,
-				"price": {},
-				"skin": "https://s3-us-west-1.amazonaws.com/modd/halloween-0.18/spritesheet/man.png",
-				"canBuyItem": true,
-				"handle": "human",
-				"name": "Tree",
-				"inventorySize": 0,
-				"cellSheet": {
-					"columnCount": 1,
-					"rowCount": 1,
-					"url": "https://cache.modd.io/asset/spriteImage/1589568802553_Stone_Rocks.png"
-				},
-				"bodies": {
-					"default": {
-						"bullet": false,
-						"name": "default",
-						"type": "static",
-						"width": 105,
-						"height": 105,
-						"z-index": {
-							"layer": 3,
-							"depth": 3
-						},
-						"fixedRotation": true,
-						"constantSpeed +DestroyedOnCollisionWithWall/unit": false,
-						"allowSleep": true,
-						"collidesWith": {
-							"units": true,
-							"items": true,
-							"projectiles": true,
-							"walls": true,
-							"debris": true
-						},
-						"angularDamping": 1,
-						"linearDamping": 8,
-						"rotationSpeed": 1,
-						"spriteScale": 1,
-						"fixtures": [
-							{
-								"density": 1,
-								"friction": 0,
-								"restitution": 0,
-								"shape": {
-									"type": "circle"
-								},
-								"isSensor": false
-							}
-						],
-						"jointType": "weldJoint",
-						"unitAnchor": {
-							"x": 0,
-							"y": 33,
-							"rotation": 0
-						},
-						"itemAnchor": {
-							"x": 0,
-							"y": 0,
-							"lowerAngle": 0,
-							"upperAngle": 0
-						},
-						"affectedByGravity": false
-					}
-				},
-				"variables": {},
-				"effects": {
-					"idle": {
-						"projectileType": "",
-						"sound": {},
-						"animation": "",
-						"tween": "",
-						"runScript": ""
-					},
-					"attacked": {
-						"projectileType": "",
-						"sound": {},
-						"animation": "",
-						"tween": "",
-						"runScript": ""
-					},
-					"move": {
-						"projectileType": "",
-						"sound": {},
-						"animation": "",
-						"tween": "",
-						"runScript": ""
-					},
-					"create": {
-						"projectileType": "",
-						"sound": {},
-						"animation": "",
-						"runScript": ""
-					},
-					"destroy": {
-						"projectileType": "",
-						"sound": {},
-						"animation": "",
-						"runScript": ""
-					}
-				},
-				"confinedWithinMapBoundaries": true,
-				"ai": {
-					"pathFindingMethod": "simple",
-					"idleBehaviour": "stay",
-					"sensorResponse": "none",
-					"attackResponse": "none",
-					"maxTravelDistance": 300,
-					"letGoDistance": "",
-					"sensorRadius": 0,
-					"maxAttackRange": 400,
-					"enabled": false
-				},
-				"backpackSize": 0,
-				"defaultItems": [],
-				"isUnTargetable": false
-			};
+				"lastUsed": 1670337003795,
+				"animationId": "default",
+				"slotIndex": 0,
+				"ownerUnitId": "23f744e6",
+				"isBeingUsed": false
+			}
 
-			this.scene.editEntity({entityType: 'unit', 
-				typeId: 'tree',
+			this.scene.editEntity({entityType: 'item', 
+				typeId: 'axe',
 				action: 'update',
 				newData: newData
 			})

@@ -145,20 +145,23 @@ var DeveloperMode = /** @class */ (function () {
         }
     };
     DeveloperMode.prototype.updateUnit = function (data) {
+        // 1. broadcast update to all players
+        // 2. force update its dimension/scale/layer/image
         ige.game.data.unitTypes[data.typeId] = data.newData;
         ige.$$('unit').forEach(function (unit) {
             if (unit._stats.type === data.typeId) {
-                console.log('updating units with type', data.typeId);
                 unit.streamUpdateData([{ type: data.typeId }]);
-                //unit.changeUnitType(data.typeId, data, false);
             }
         });
         if (ige.isServer)
             ige.network.send('updateUnit', data);
-        // 1. broadcast update to all players
-        // 2. force update its dimension/scale/layer/image
     };
-    DeveloperMode.prototype.deleteUnit = function () {
+    DeveloperMode.prototype.deleteUnit = function (data) {
+        ige.$$('unit').forEach(function (unit) {
+            if (unit._stats.type === data.typeId) {
+                unit.destroy();
+            }
+        });
     };
     DeveloperMode.prototype.createItem = function (data) {
         var itemTypeId = data.typeId;
@@ -184,33 +187,86 @@ var DeveloperMode = /** @class */ (function () {
             item.script.trigger("entityCreated");
         }
     };
-    DeveloperMode.prototype.updateItem = function () {
+    DeveloperMode.prototype.updateItem = function (data) {
+        console.log('updating item', data);
         // 1. broadcast update to all players
         // 2. force update its dimension/scale/layer/image
         // 3. we may need to re-mount the item on unit
+        ige.game.data.itemTypes[data.typeId] = data.newData;
+        ige.$$('item').forEach(function (item) {
+            if (item._stats.type === data.typeId) {
+                item.streamUpdateData([{ type: data.typeId }]);
+            }
+        });
+        if (ige.isServer)
+            ige.network.send('updateItem', data);
     };
-    DeveloperMode.prototype.deleteItem = function () {
+    DeveloperMode.prototype.deleteItem = function (data) {
+        ige.$$('item').forEach(function (item) {
+            if (item._stats.type === data.typeId) {
+                item.destroy();
+            }
+        });
     };
-    DeveloperMode.prototype.createProjectile = function () {
+    DeveloperMode.prototype.createProjectile = function (data) {
     };
-    DeveloperMode.prototype.updateProjectile = function () {
+    DeveloperMode.prototype.updateProjectile = function (data) {
         // 1. broadcast update to all players
         // 2. force update its dimension/scale/layer/image
+        ige.game.data.projectileTypes[data.typeId] = data.newData;
+        ige.$$('projectile').forEach(function (projectile) {
+            if (projectile._stats.type === data.typeId) {
+                projectile.streamUpdateData([{ type: data.typeId }]);
+            }
+        });
+        if (ige.isServer)
+            ige.network.send('updateProjectile', data);
     };
-    DeveloperMode.prototype.deleteProjectile = function () {
+    DeveloperMode.prototype.deleteProjectile = function (data) {
+        ige.$$('projectile').forEach(function (projectile) {
+            if (projectile._stats.type === data.typeId) {
+                projectile.destroy();
+            }
+        });
     };
     DeveloperMode.prototype.editEntity = function (data, clientId) {
         if (data.entityType === 'unit') {
-            if (data.action === 'create') {
-                this.createUnit(data);
-            }
-            else if (data.action === 'update') {
-                this.updateUnit(data);
+            switch (data.action) {
+                case 'create':
+                    //this.createUnit(data);
+                    break;
+                case 'update':
+                    this.updateUnit(data);
+                    break;
+                case 'delete':
+                    this.deleteUnit(data);
+                    break;
             }
         }
         else if (data.entityType === 'item') {
-            if (data.create) {
-                this.createItem(data);
+            switch (data.action) {
+                case 'create':
+                    //this.createItem(data);
+                    break;
+                case 'update':
+                    this.updateItem(data);
+                    break;
+                case 'delete':
+                    this.deleteItem(data);
+                    break;
+            }
+        }
+        else if (data.entityType === 'projectile') {
+            switch (data.action) {
+                case 'create':
+                    //this.createProjectile(data);
+                    break;
+                case 'update':
+                    this.updateProjectile(data);
+                    break;
+                case 'delete':
+                    this.deleteProjectile(data);
+                    break;
             }
         }
     };

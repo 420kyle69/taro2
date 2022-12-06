@@ -481,6 +481,14 @@ var ClientNetworkEvents = {
 		ige.developerMode.updateUnit(data);
 	},
 
+	_onUpdateItem: function(data) {
+		ige.developerMode.updateItem(data);
+	},
+
+	_onUpdateProjectile: function(data) {
+		ige.developerMode.updateProjectile(data);
+	},
+
 	_onErrorLogs: function (logs) {
 		var element = document.getElementById('error-log-content');
 		for (actionName in logs) {

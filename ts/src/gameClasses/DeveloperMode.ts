@@ -155,21 +155,23 @@ class DeveloperMode {
 	}
 
 	updateUnit(data) {
+		// 1. broadcast update to all players
+		// 2. force update its dimension/scale/layer/image
 		ige.game.data.unitTypes[data.typeId] = data.newData;
 		ige.$$('unit').forEach(unit => {
 			if (unit._stats.type === data.typeId) {
-				console.log('updating units with type', data.typeId);
 				unit.streamUpdateData([{ type: data.typeId }]);
-				//unit.changeUnitType(data.typeId, data, false);
 			}
 		});
 		if (ige.isServer) ige.network.send('updateUnit', data);
-		// 1. broadcast update to all players
-		// 2. force update its dimension/scale/layer/image
 	}
 
-	deleteUnit() {
-
+	deleteUnit(data) {
+		ige.$$('unit').forEach(unit => {
+			if (unit._stats.type === data.typeId) {
+				unit.destroy();
+			}
+		});
 	}
 
 	createItem(data) {
@@ -199,40 +201,95 @@ class DeveloperMode {
 		}
 	}
 
-	updateItem() {
+	updateItem(data) {
+		console.log('updating item', data)
 		// 1. broadcast update to all players
 		// 2. force update its dimension/scale/layer/image
 		// 3. we may need to re-mount the item on unit
+		ige.game.data.itemTypes[data.typeId] = data.newData;
+		ige.$$('item').forEach(item => {
+			if (item._stats.type === data.typeId) {
+				item.streamUpdateData([{ type: data.typeId }]);
+			}
+		});
+		if (ige.isServer) ige.network.send('updateItem', data);
 	}
 
-	deleteItem() {
+	deleteItem(data) {
+		ige.$$('item').forEach(item => {
+			if (item._stats.type === data.typeId) {
+				item.destroy();
+			}
+		});
+	}
+
+	createProjectile(data) {
 
 	}
 
-	createProjectile() {
-
-	}
-
-	updateProjectile() {
+	updateProjectile(data) {
 		// 1. broadcast update to all players
 		// 2. force update its dimension/scale/layer/image
+		ige.game.data.projectileTypes[data.typeId] = data.newData;
+		ige.$$('projectile').forEach(projectile => {
+			if (projectile._stats.type === data.typeId) {
+				projectile.streamUpdateData([{ type: data.typeId }]);
+			}
+		});
+		if (ige.isServer) ige.network.send('updateProjectile', data);
 	}
 
-	deleteProjectile() {
-
+	deleteProjectile(data) {
+		ige.$$('projectile').forEach(projectile => {
+			if (projectile._stats.type === data.typeId) {
+				projectile.destroy();
+			}
+		});
 	}
 
 
 	editEntity (data, clientId) {
 		if (data.entityType === 'unit') {
-			if (data.action === 'create') {
-				this.createUnit(data);
-			} else if (data.action === 'update') {
-				this.updateUnit(data)
+			switch (data.action) {
+				case 'create':
+					//this.createUnit(data);
+					break;
+
+				case 'update':
+					this.updateUnit(data);
+					break;
+
+				case 'delete':
+					this.deleteUnit(data);
+					break;
 			}
 		} else if (data.entityType === 'item') {
-			if (data.create) {
-				this.createItem(data);
+			switch (data.action) {
+				case 'create':
+					//this.createItem(data);
+					break;
+
+				case 'update':
+					this.updateItem(data);
+					break;
+
+				case 'delete':
+					this.deleteItem(data);
+					break;
+			}
+		} else if (data.entityType === 'projectile') {
+			switch (data.action) {
+				case 'create':
+					//this.createProjectile(data);
+					break;
+
+				case 'update':
+					this.updateProjectile(data);
+					break;
+
+				case 'delete':
+					this.deleteProjectile(data);
+					break;
 			}
 		}
 	}

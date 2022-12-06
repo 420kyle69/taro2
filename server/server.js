@@ -674,6 +674,8 @@ var Server = IgeClass.extend({
 		ige.network.define('editRegion', self._onEditRegion);
 		ige.network.define('editEntity', self._onEditEntity);
 		ige.network.define('updateUnit', self._onUpdateUnit);
+		ige.network.define('updateItem', this._onUpdateItem);
+		ige.network.define('updateProjectile', this._onUpdateProjectile);
 	},
 
 	unpublish: function (msg) {
