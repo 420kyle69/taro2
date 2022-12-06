@@ -49,6 +49,10 @@ class DevModeScene extends PhaserScene {
 		ige.client.on('editRegion', (data: RegionData) => {
 			this.regionEditor.edit(data);
 		});
+
+		ige.client.on('default-zoom', (height: number) => {
+			this.defaultZoom = height;
+		});
 	}
 
 	preload (): void {
