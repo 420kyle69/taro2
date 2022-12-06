@@ -20,7 +20,7 @@ var PhaserRenderer = /** @class */ (function (_super) {
         var _this = this;
         var forceCanvas = JSON.parse(localStorage.getItem('forceCanvas')) || {};
         _this = _super.call(this, {
-            type: forceCanvas[gameId] ?
+            type: forceCanvas[gameId] || forceCanvas[0] ?
                 Phaser.CANVAS : Phaser.AUTO,
             scale: {
                 width: 600,
@@ -33,6 +33,9 @@ var PhaserRenderer = /** @class */ (function (_super) {
             render: {
                 pixelArt: false,
                 transparent: false
+            },
+            fps: {
+                smoothStep: false
             },
             scene: [
                 GameScene,
@@ -71,7 +74,7 @@ var PhaserRenderer = /** @class */ (function (_super) {
         return _this;
     }
     PhaserRenderer.prototype.setupInputListeners = function () {
-        // Ask the input component to setup any listeners it has
+        // Ask the input component to set up any listeners it has
         ige.input.setupListeners(this.canvas);
     };
     PhaserRenderer.prototype.getViewportBounds = function () {

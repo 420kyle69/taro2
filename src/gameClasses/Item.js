@@ -1021,13 +1021,19 @@ var Item = IgeEntityPhysics.extend({
 
 			
 			if (ige.isServer || (ige.isClient && ige.client.selectedUnit == ownerUnit)) {
-				if (self._stats.controls && self._stats.controls.mouseBehaviour) {
-					if (self._stats.controls.mouseBehaviour.flipSpriteHorizontallyWRTMouse) {
+				if (
+					self._stats.controls &&
+					self._stats.controls.mouseBehaviour &&
+					self._stats.controls.mouseBehaviour.flipSpriteHorizontallyWRTMouse
+				) {
+					if (self._stats.controls.mouseBehaviour.rotateToFaceMouseCursor) {
 						if (rotate > 0 && rotate < Math.PI) {
 							self.flip(0);
 						} else {
 							self.flip(1);
 						}
+					} else {
+						self.flip(ownerUnit._stats.flip);
 					}
 				}
 			}

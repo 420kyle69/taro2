@@ -9,7 +9,7 @@ class PhaserRenderer extends Phaser.Game {
 		) || {};
 
 		super({
-			type: forceCanvas[gameId] ?
+			type: forceCanvas[gameId] || forceCanvas[0] ?
 				Phaser.CANVAS : Phaser.AUTO,
 			scale: {
 				width: 600,
@@ -22,6 +22,9 @@ class PhaserRenderer extends Phaser.Game {
 			render: {
 				pixelArt: false,
 				transparent: false
+			},
+			fps: {
+				smoothStep: false
 			},
 			scene: [
 				GameScene,
@@ -63,7 +66,7 @@ class PhaserRenderer extends Phaser.Game {
 	}
 
 	private setupInputListeners(): void {
-		// Ask the input component to setup any listeners it has
+		// Ask the input component to set up any listeners it has
 		ige.input.setupListeners(this.canvas);
 	}
 

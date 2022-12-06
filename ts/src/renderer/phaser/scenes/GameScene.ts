@@ -144,8 +144,6 @@ class GameScene extends PhaserScene {
 		this.load.tilemapTiledJSON('map', this.patchMapData(data.map));
 
 		BitmapFontManager.preload(this);
-
-		// TODO optimize font textures
 	}
 
 	loadEntity (key: string, data: EntityData, skin = false): void {
@@ -208,8 +206,10 @@ class GameScene extends PhaserScene {
 	}
 
 	create (): void {
-		this.scene.launch('DevMode');
-		ige.client.rendererLoaded.resolve();
+		this.events.once('render', () => {
+			this.scene.launch('DevMode');
+			ige.client.rendererLoaded.resolve();
+		});
 
 		BitmapFontManager.create(this);
 
@@ -226,8 +226,8 @@ class GameScene extends PhaserScene {
 			if (this.textures.exists(extrudedKey)) {
 				this.tileset = map.addTilesetImage(tileset.name, extrudedKey,
 					tileset.tilewidth, tileset.tileheight,
-					(tileset.margin || 0) + 1,
-					(tileset.spacing || 0) + 2
+					(tileset.margin || 0) + 2,
+					(tileset.spacing || 0) + 4
 				);
 			} else {
 				this.tileset = map.addTilesetImage(tileset.name, key);
@@ -285,7 +285,7 @@ class GameScene extends PhaserScene {
 		//temporary making each loaded texture not smoothed (later planned to add option for smoothing some of them)
 		Object.values(this.textures.list).forEach(val => {
 			val.setFilter(Phaser.Textures.FilterMode.NEAREST);
-		  });
+		});
 	}
 
 	private setZoomSize (height: number): void {
@@ -368,7 +368,7 @@ class GameScene extends PhaserScene {
 	private extrude (
 		tileset: ArrayElement<GameComponent['data']['map']['tilesets']>,
 		sourceImage: HTMLImageElement,
-		extrusion = 1,
+		extrusion = 2,
 		color = '#ffffff00'
 	): HTMLCanvasElement {
 

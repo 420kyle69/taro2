@@ -34,7 +34,7 @@ var DeveloperMode = /** @class */ (function () {
         // only allow developers to modify the tiles
         if (ige.server.developerClientIds.includes(clientId)) {
             ige.game.data.map.wasEdited = true;
-            ige.network.send("editTile", data);
+            ige.network.send('editTile', data);
             var serverData = _.clone(data);
             var width = ige.game.data.map.width;
             if (ige.game.data.map.layers.length > 4 && serverData.layer >= 2)
@@ -60,10 +60,10 @@ var DeveloperMode = /** @class */ (function () {
             else if (data.name === undefined) { // create new region
                 // create new region name (smallest available number)
                 var regionNameNumber = 0;
-                var newRegionName = 'region' + regionNameNumber;
+                var newRegionName = "region".concat(regionNameNumber);
                 do {
                     regionNameNumber++;
-                    newRegionName = 'region' + regionNameNumber;
+                    newRegionName = "region".concat(regionNameNumber);
                 } while (ige.regionManager.getRegionById(newRegionName));
                 data.name = newRegionName;
                 data.showModal = true;
@@ -118,7 +118,7 @@ var DeveloperMode = /** @class */ (function () {
                 }
             }
             // broadcast region change to all clients
-            ige.network.send("editRegion", data);
+            ige.network.send('editRegion', data);
         }
     };
     DeveloperMode.prototype.createUnit = function (data) {

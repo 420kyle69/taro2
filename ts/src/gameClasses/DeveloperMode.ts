@@ -39,7 +39,7 @@ class DeveloperMode {
 		// only allow developers to modify the tiles
 		if (ige.server.developerClientIds.includes(clientId)) {
 			ige.game.data.map.wasEdited = true;
-			ige.network.send("editTile", data);
+			ige.network.send('editTile', data);
 
 			const serverData = _.clone(data);
 			const width = ige.game.data.map.width;
@@ -52,23 +52,23 @@ class DeveloperMode {
 				let map = ige.scaleMap(_.cloneDeep(ige.game.data.map));
 				ige.tiled.loadJson(map, function (layerArray, layersById) {
 					ige.physics.staticsFromMap(layersById.walls);
-				})
+				});
 			}
 		}
 	}
 
 	editRegion (data: RegionData, clientId: string): void {
 		// only allow developers to modify regions
-		if (ige.server.developerClientIds.includes(clientId)) {  
+		if (ige.server.developerClientIds.includes(clientId)) {
 			if (data.name === '' || data.width <= 0 || data.height <= 0) {
 				console.log ('empty name, negative or 0 size is not allowed');
 			} else if (data.name === undefined) { // create new region
 				// create new region name (smallest available number)
 				let regionNameNumber = 0;
-				let newRegionName = 'region' + regionNameNumber
+				let newRegionName = `region${  regionNameNumber}`;
 				do {
 					regionNameNumber ++;
-					newRegionName = 'region' + regionNameNumber;
+					newRegionName = `region${  regionNameNumber}`;
 				} while (ige.regionManager.getRegionById(newRegionName));
 
 				data.name = newRegionName;
@@ -92,7 +92,7 @@ class DeveloperMode {
 						height: data.height,
 						key: newRegionName
 					}
-				}
+				};
 				const region = new Region(regionData);
 
 				// create new region in game.data
@@ -107,8 +107,7 @@ class DeveloperMode {
 						if (data.name !== data.newName) {
 							if (ige.regionManager.getRegionById(data.newName)) {
 								console.log('This name is unavailable');
-							} 
-							else {
+							} else {
 								region._stats.id = data.newName;
 							}
 						}
@@ -124,7 +123,7 @@ class DeveloperMode {
 				}
 			}
 			// broadcast region change to all clients
-			ige.network.send("editRegion", data);
+			ige.network.send('editRegion', data);
 		}
 	}
 
@@ -239,7 +238,7 @@ class DeveloperMode {
 	}
  
 	updateClientMap (data: { mapData: MapData }): void {
-		console.log ('map data was edited', data.mapData.wasEdited)
+		console.log ('map data was edited', data.mapData.wasEdited);
 		if (data.mapData.wasEdited) {
 			data.mapData.wasEdited = false;
 			ige.game.data.map = data.mapData;
@@ -249,7 +248,7 @@ class DeveloperMode {
 				let map = ige.scaleMap(_.cloneDeep(ige.game.data.map));
 				ige.tiled.loadJson(map, function (layerArray, IgeLayersById) {
 					ige.physics.staticsFromMap(IgeLayersById.walls);
-				})
+				});
 			}
 			ige.client.emit('updateMap');
 		}
@@ -265,11 +264,11 @@ interface TileData {
 
 interface RegionData {
 	userId?: string,
-	name: string, 
+	name: string,
 	newName?: string,
-	x?: number, 
-	y?: number, 
-	width?: number, 
+	x?: number,
+	y?: number,
+	width?: number,
 	height?: number,
 	delete?: boolean,
 	showModal?: boolean
