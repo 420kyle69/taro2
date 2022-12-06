@@ -148,13 +148,19 @@ var DeveloperMode = /** @class */ (function () {
         // 1. broadcast update to all players
         // 2. force update its dimension/scale/layer/image
         ige.game.data.unitTypes[data.typeId] = data.newData;
-        ige.$$('unit').forEach(function (unit) {
+        /*ige.$$('unit').forEach(unit => {
             if (unit._stats.type === data.typeId) {
                 unit.streamUpdateData([{ type: data.typeId }]);
             }
-        });
-        if (ige.isServer)
+        });*/
+        if (ige.isServer) {
+            ige.$$('unit').forEach(function (unit) {
+                if (unit._stats.type === data.typeId) {
+                    unit.streamUpdateData([{ type: data.typeId }]);
+                }
+            });
             ige.network.send('updateUnit', data);
+        }
     };
     DeveloperMode.prototype.deleteUnit = function (data) {
         ige.$$('unit').forEach(function (unit) {
@@ -188,18 +194,25 @@ var DeveloperMode = /** @class */ (function () {
         }
     };
     DeveloperMode.prototype.updateItem = function (data) {
-        console.log('updating item', data);
         // 1. broadcast update to all players
         // 2. force update its dimension/scale/layer/image
         // 3. we may need to re-mount the item on unit
         ige.game.data.itemTypes[data.typeId] = data.newData;
-        ige.$$('item').forEach(function (item) {
-            if (item._stats.type === data.typeId) {
+        /*ige.$$('item').forEach(item => {
+            console.log('updating item', item._stats.itemTypeId, data.typeId)
+            if (item._stats.itemTypeId === data.typeId) {
                 item.streamUpdateData([{ type: data.typeId }]);
             }
-        });
-        if (ige.isServer)
+        });*/
+        if (ige.isServer) {
+            ige.$$('item').forEach(function (item) {
+                console.log('updating item', item._stats.itemTypeId, data.typeId);
+                if (item._stats.itemTypeId === data.typeId) {
+                    item.streamUpdateData([{ type: data.typeId }]);
+                }
+            });
             ige.network.send('updateItem', data);
+        }
     };
     DeveloperMode.prototype.deleteItem = function (data) {
         ige.$$('item').forEach(function (item) {
@@ -214,13 +227,19 @@ var DeveloperMode = /** @class */ (function () {
         // 1. broadcast update to all players
         // 2. force update its dimension/scale/layer/image
         ige.game.data.projectileTypes[data.typeId] = data.newData;
-        ige.$$('projectile').forEach(function (projectile) {
+        /*ige.$$('projectile').forEach(projectile => {
             if (projectile._stats.type === data.typeId) {
                 projectile.streamUpdateData([{ type: data.typeId }]);
             }
-        });
-        if (ige.isServer)
+        });*/
+        if (ige.isServer) {
+            ige.$$('projectile').forEach(function (projectile) {
+                if (projectile._stats.type === data.typeId) {
+                    projectile.streamUpdateData([{ type: data.typeId }]);
+                }
+            });
             ige.network.send('updateProjectile', data);
+        }
     };
     DeveloperMode.prototype.deleteProjectile = function (data) {
         ige.$$('projectile').forEach(function (projectile) {

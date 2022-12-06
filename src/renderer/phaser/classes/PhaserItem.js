@@ -23,7 +23,8 @@ var PhaserItem = /** @class */ (function (_super) {
         _this.gameObject.setPosition(x, y);
         Object.assign(_this.evtListeners, {
             // this event is only emitted by height-based-zindex games
-            setOwnerUnit: entity.on('setOwnerUnit', _this.setOwnerUnit, _this)
+            setOwnerUnit: entity.on('setOwnerUnit', _this.setOwnerUnit, _this),
+            'update-texture': entity.on('update-texture', _this.updateTexture, _this),
         });
         if (scene.heightRenderer) {
             // don't waste cpu tracking owner of items on renderer
@@ -37,6 +38,35 @@ var PhaserItem = /** @class */ (function (_super) {
         _this.scene.renderedEntities.push(_this.sprite);
         return _this;
     }
+    PhaserItem.prototype.updateTexture = function (usingSkin) {
+        if (usingSkin) {
+            this.sprite.anims.stop();
+            this.key = "item/".concat(this.entity._stats.cellSheet.url);
+            if (!this.scene.textures.exists("item/".concat(this.entity._stats.cellSheet.url))) {
+                this.scene.loadEntity("item/".concat(this.entity._stats.cellSheet.url), this.entity._stats, true);
+                this.scene.load.on("filecomplete-image-".concat(this.key), function cnsl() {
+                    if (this && this.sprite) {
+                        this.sprite.setTexture("item/".concat(this.entity._stats.cellSheet.url));
+                        this.sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
+                        var bounds = this.entity._bounds2d;
+                        this.sprite.setDisplaySize(bounds.x, bounds.y);
+                    }
+                }, this);
+                this.scene.load.start();
+            }
+            else {
+                this.sprite.setTexture("item/".concat(this.entity._stats.cellSheet.url));
+                var bounds = this.entity._bounds2d;
+                this.sprite.setDisplaySize(bounds.x, bounds.y);
+            }
+        }
+        else {
+            this.key = "item/".concat(this.entity._stats.type);
+            this.sprite.setTexture("item/".concat(this.entity._stats.type));
+            var bounds = this.entity._bounds2d;
+            this.sprite.setDisplaySize(bounds.x, bounds.y);
+        }
+    };
     PhaserItem.prototype.depth = function (value) {
         var scene = this.gameObject.scene;
         this.gameObject.taroDepth = value;

@@ -21,7 +21,8 @@ class PhaserItem extends PhaserAnimatedEntity {
 
 		Object.assign(this.evtListeners, {
 			// this event is only emitted by height-based-zindex games
-			setOwnerUnit: entity.on('setOwnerUnit', this.setOwnerUnit, this)
+			setOwnerUnit: entity.on('setOwnerUnit', this.setOwnerUnit, this),
+			'update-texture': entity.on('update-texture', this.updateTexture, this),
 		});
 
 		if (scene.heightRenderer) {
@@ -37,6 +38,34 @@ class PhaserItem extends PhaserAnimatedEntity {
 		}
 
 		this.scene.renderedEntities.push(this.sprite);
+	}
+
+	protected updateTexture (usingSkin) {
+		if (usingSkin) {
+			this.sprite.anims.stop();
+			this.key = `item/${this.entity._stats.cellSheet.url}`;
+			if (!this.scene.textures.exists(`item/${this.entity._stats.cellSheet.url}`)) {
+				this.scene.loadEntity(`item/${this.entity._stats.cellSheet.url}`, this.entity._stats, true);
+				this.scene.load.on(`filecomplete-image-${this.key}`, function cnsl() {
+					if (this && this.sprite) {
+						this.sprite.setTexture(`item/${this.entity._stats.cellSheet.url}`);
+						this.sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
+						const bounds = this.entity._bounds2d;
+						this.sprite.setDisplaySize(bounds.x, bounds.y);
+					}
+				}, this);
+				this.scene.load.start();
+			} else {
+				this.sprite.setTexture(`item/${this.entity._stats.cellSheet.url}`);
+				const bounds = this.entity._bounds2d;
+				this.sprite.setDisplaySize(bounds.x, bounds.y);
+			}
+		} else {
+			this.key = `item/${this.entity._stats.type}`;
+			this.sprite.setTexture(`item/${this.entity._stats.type}`);
+			const bounds = this.entity._bounds2d;
+			this.sprite.setDisplaySize(bounds.x, bounds.y);
+		}
 	}
 
 	protected depth (value: number): void {

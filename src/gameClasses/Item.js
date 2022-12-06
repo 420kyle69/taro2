@@ -847,6 +847,194 @@ var Item = IgeEntityPhysics.extend({
 		return offset;
 	},
 
+	changeItemType: function (type, defaultData, isItemCreation) {
+		var self = this;
+		var ownerUnit = ige.$(this._stats.ownerUnitId);
+		self.previousState = null;
+
+		var data = ige.game.getAsset('itemTypes', type);
+		delete data.type // hotfix for dealing with corrupted game json that has unitData.type = "unitType". This is caused by bug in the game editor.
+
+		// console.log("change item type", type)
+		if (data == undefined) {
+			ige.script.errorLog('changeItemType: invalid data');
+			return;
+		}
+
+		self.script.load(data.scripts);
+
+		self._stats.type = type;
+
+		if (!isItemCreation) {
+			// adding this flag so that clients receiving entity data from onStreamCreate don't overwrite values with default data
+			// when they are created by a client that has just joined.
+			var oldAttributes = self._stats.attributes;
+
+			for (var i in data) {
+				if (i == 'name') { // don't overwrite item's name with item type name
+					continue;
+				}
+
+				self._stats[i] = data[i];
+			}
+
+			// if the new item type has the same entity variables as the old item type, then pass the values
+			var variables = {};
+			if (data.variables) {
+				for (var key in data.variables) {
+					if (self.variables && self.variables[key]) {
+						variables[key] = self.variables[key] == undefined ? data.variables[key] : self.variables[key];
+					} else {
+						variables[key] = data.variables[key];
+					}
+				}
+				self.variables = variables;
+			}
+
+			// deleting variables from stats bcz it causes json.stringify error due to variable of type unit,item,etc.
+			if (self._stats.variables) {
+				delete self._stats.variables;
+			}
+
+			if (data.attributes) {
+				for (var attrId in data.attributes) {
+					if (data.attributes[attrId]) {
+						var attributeValue = data.attributes[attrId].value; // default attribute value from new unit type
+						// if old unit type had a same attribute, then take the value from it.
+						if (oldAttributes && oldAttributes[attrId]) {
+							attributeValue = oldAttributes[attrId].value;
+						}
+
+						if (this._stats.attributes[attrId]) {
+							this._stats.attributes[attrId].value = Math.max(data.attributes[attrId].min, Math.min(data.attributes[attrId].max, parseFloat(attributeValue)));
+						}
+					}
+				}
+			}
+		}
+
+		self.setState(this._stats.stateId, defaultData);
+
+		if (ige.isClient) {
+			self.updateTexture();
+			self._scaleTexture();
+		}
+
+		this._stats.ownerUnitId = ownerUnit.id();
+
+		// update bodies of all items in the inventory of owner
+		/*for (let i = 0; i < ownerUnit._stats.itemIds.length; i++) {
+			var itemId = ownerUnit._stats.itemIds[i];
+			var item = ige.$(itemId);
+			if (item) {
+				// removing passive attributes
+				if (item._stats.bonus && item._stats.bonus.passive) {
+					if (item._stats.slotIndex < this._stats.inventorySize || item._stats.bonus.passive.isDisabledInBackpack != true) {
+						ownerUnit.updateStats(itemId, true);
+					}
+				} else {
+					ownerUnit.updateStats(itemId, true);
+				}
+
+				// if the new unit type cannot carry the item, then remove it.
+				if (ownerUnit.canCarryItem(item._stats) == false) {
+					item.remove();
+				} else if (ownerUnit.canUseItem(item._stats)) { // if unit cannot use the item, then unselect the item
+					if (item._stats.slotIndex != undefined && ownerUnit._stats.currentItemIndex != undefined) {
+						if (ownerUnit._stats.currentItemIndex === item._stats.slotIndex) {
+							item.setState('selected');
+						} else {
+							item.setState('unselected');
+						}
+					}
+				} else {
+					item.setState('unselected');
+				}
+
+				// adding back passive attributes
+				if (item._stats.bonus && item._stats.bonus.passive) {
+					if (item._stats.slotIndex < this._stats.inventorySize || item._stats.bonus.passive.isDisabledInBackpack != true) {
+						ownerUnit.updateStats(itemId);
+					}
+				} else {
+					ownerUnit.updateStats(itemId);
+				}
+			}
+		}*/
+
+		if (ige.isServer) {
+			/*self._stats.currentItemIndex = 0;
+			self._stats.currentItemId = null;
+
+			// give default items to the unit
+			if (data.defaultItems) {
+				for (var i = 0; i < data.defaultItems.length; i++) {
+					var item = data.defaultItems[i];
+
+					var itemData = ige.game.getAsset('itemTypes', item.key);
+					if (itemData) {
+						itemData.itemTypeId = item.key;
+						self.pickUpItem(itemData);
+					}
+				}
+			}
+
+			self.changeItem(self._stats.currentItemIndex); // this will call change item on client for all units*/
+		} else if (ige.isClient) {
+			var zIndex = self._stats.currentBody && self._stats.currentBody['z-index'] || { layer: 3, depth: 3 };
+
+			if (zIndex && ige.network.id() == self._stats.clientId && !ige.game.data.heightBasedZIndex) {
+				// depth of this player's units should have +1 depth to avoid flickering on overlap
+				zIndex.depth++;
+			}
+
+			self.updateLayer();
+
+			/*var ownerPlayer = self.getOwner();
+			if (ownerPlayer && ownerPlayer._stats.selectedUnitId == self.id() && this._stats.clientId == ige.network.id()) {
+				self.inventory.createInventorySlots();
+			}*/
+
+			// destroy existing particle emitters first
+			for (var particleId in self.particleEmitters) {
+				if (self.particleEmitters[particleId]) {
+					self.particleEmitters[particleId].destroy();
+					delete self.particleEmitters[particleId];
+				}
+			}
+
+			// remove forceredraw from attributebar bcz it was calling
+			// redraw for units which are not having attributebars too
+			//self.redrawAttributeBars();
+			//self.equipSkin(undefined);
+			// if mobile controls are in use configure for this unit
+			/*self.renderMobileControl();
+
+			if (self.unitUi) {
+				self.unitUi.updateAllAttributeBars();
+			}*/
+			ownerUnit.inventory.update();
+		}
+	},
+
+	// apply texture based on state
+	updateTexture: function () {
+		var self = this;
+		var defaultUnit = ige.game.getAsset('itemTypes', self._stats.type);
+		self.emit('update-texture', true/*, self._stats.cellSheet.url !== defaultUnit.cellSheet.url*/);
+
+		/*var ownerPlayer = self.getOwner();
+		var isInvisible = self.shouldBeInvisible(ownerPlayer, ige.client.myPlayer);
+		// if owner player is not available (due to race condition) then render everything or it is hostile and player is invisible them make unit invisible to hostile players. it can still move and interact with objects
+		if (isInvisible) {
+			// item is invisible
+			self.texture('');
+			return;
+		}*/
+
+		IgeEntity.prototype.updateTexture.call(this);
+	},
+
 	remove: function () {
 		// traverse through owner's inventory, and remove itself
 		Item.prototype.log('remove item');
@@ -890,6 +1078,10 @@ var Item = IgeEntityPhysics.extend({
 				var newValue = data[attrName];
 
 				switch (attrName) {
+					case 'type':
+						self._stats[attrName] = newValue;
+						this.changeItemType(newValue, {}, false);
+						break;
 					case 'ownerUnitId':
 						this._stats[attrName] = newValue;
 						if (ige.isClient) {

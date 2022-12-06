@@ -414,7 +414,6 @@ var DevModeTools = /** @class */ (function (_super) {
                 "lastUsed": 1670337003795,
                 "animationId": "default",
                 "slotIndex": 0,
-                "ownerUnitId": "23f744e6",
                 "isBeingUsed": false
             };
             _this.scene.editEntity({ entityType: 'item',

@@ -158,12 +158,19 @@ class DeveloperMode {
 		// 1. broadcast update to all players
 		// 2. force update its dimension/scale/layer/image
 		ige.game.data.unitTypes[data.typeId] = data.newData;
-		ige.$$('unit').forEach(unit => {
+		/*ige.$$('unit').forEach(unit => {
 			if (unit._stats.type === data.typeId) {
 				unit.streamUpdateData([{ type: data.typeId }]);
 			}
-		});
-		if (ige.isServer) ige.network.send('updateUnit', data);
+		});*/
+		if (ige.isServer) {
+			ige.$$('unit').forEach(unit => {
+				if (unit._stats.type === data.typeId) {
+					unit.streamUpdateData([{ type: data.typeId }]);
+				}
+			});
+			ige.network.send('updateUnit', data);
+		}
 	}
 
 	deleteUnit(data) {
@@ -202,17 +209,25 @@ class DeveloperMode {
 	}
 
 	updateItem(data) {
-		console.log('updating item', data)
 		// 1. broadcast update to all players
 		// 2. force update its dimension/scale/layer/image
 		// 3. we may need to re-mount the item on unit
 		ige.game.data.itemTypes[data.typeId] = data.newData;
-		ige.$$('item').forEach(item => {
-			if (item._stats.type === data.typeId) {
+		/*ige.$$('item').forEach(item => {
+			console.log('updating item', item._stats.itemTypeId, data.typeId)
+			if (item._stats.itemTypeId === data.typeId) {
 				item.streamUpdateData([{ type: data.typeId }]);
 			}
-		});
-		if (ige.isServer) ige.network.send('updateItem', data);
+		});*/
+		if (ige.isServer) {
+			ige.$$('item').forEach(item => {
+				console.log('updating item', item._stats.itemTypeId, data.typeId)
+				if (item._stats.itemTypeId === data.typeId) {
+					item.streamUpdateData([{ type: data.typeId }]);
+				}
+			});
+			ige.network.send('updateItem', data);
+		}
 	}
 
 	deleteItem(data) {
@@ -231,12 +246,19 @@ class DeveloperMode {
 		// 1. broadcast update to all players
 		// 2. force update its dimension/scale/layer/image
 		ige.game.data.projectileTypes[data.typeId] = data.newData;
-		ige.$$('projectile').forEach(projectile => {
+		/*ige.$$('projectile').forEach(projectile => {
 			if (projectile._stats.type === data.typeId) {
 				projectile.streamUpdateData([{ type: data.typeId }]);
 			}
-		});
-		if (ige.isServer) ige.network.send('updateProjectile', data);
+		});*/
+		if (ige.isServer) {
+			ige.$$('projectile').forEach(projectile => {
+				if (projectile._stats.type === data.typeId) {
+					projectile.streamUpdateData([{ type: data.typeId }]);
+				}
+			});
+			ige.network.send('updateProjectile', data);
+		}
 	}
 
 	deleteProjectile(data) {

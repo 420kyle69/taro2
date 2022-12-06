@@ -442,7 +442,6 @@ class DevModeTools extends Phaser.GameObjects.Container {
 				"lastUsed": 1670337003795,
 				"animationId": "default",
 				"slotIndex": 0,
-				"ownerUnitId": "23f744e6",
 				"isBeingUsed": false
 			}
 
