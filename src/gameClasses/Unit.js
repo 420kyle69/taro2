@@ -794,9 +794,9 @@ var Unit = IgeEntityPhysics.extend({
 					if (data.attributes[attrId]) {
 						var attributeValue = data.attributes[attrId].value; // default attribute value from new unit type
 						// if old unit type had a same attribute, then take the value from it.
-						if (oldAttributes && oldAttributes[attrId]) {
+						/*if (oldAttributes && oldAttributes[attrId]) {
 							attributeValue = oldAttributes[attrId].value;
-						}
+						}*/
 
 						if (this._stats.attributes[attrId]) {
 							this._stats.attributes[attrId].value = Math.max(data.attributes[attrId].min, Math.min(data.attributes[attrId].max, parseFloat(attributeValue)));
