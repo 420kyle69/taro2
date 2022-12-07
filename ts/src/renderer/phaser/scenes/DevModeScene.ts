@@ -72,6 +72,10 @@ class DevModeScene extends PhaserScene {
 				ige.unitBeingDragged = null;
 			}
 		});
+		
+		ige.client.on('default-zoom', (height: number) => {
+			this.defaultZoom = height;
+		});
 	}
 
 	preload (): void {
