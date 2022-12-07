@@ -221,7 +221,6 @@ class DeveloperMode {
 		});*/
 		if (ige.isServer) {
 			ige.$$('item').forEach(item => {
-				console.log('updating item', item._stats.itemTypeId, data.typeId)
 				if (item._stats.itemTypeId === data.typeId) {
 					item.streamUpdateData([{ type: data.typeId }]);
 				}
@@ -282,7 +281,7 @@ class DeveloperMode {
 					break;
 
 				case 'delete':
-					this.deleteUnit(data);
+					//this.deleteUnit(data);
 					break;
 			}
 		} else if (data.entityType === 'item') {
@@ -296,7 +295,7 @@ class DeveloperMode {
 					break;
 
 				case 'delete':
-					this.deleteItem(data);
+					//this.deleteItem(data);
 					break;
 			}
 		} else if (data.entityType === 'projectile') {
@@ -310,7 +309,7 @@ class DeveloperMode {
 					break;
 
 				case 'delete':
-					this.deleteProjectile(data);
+					//this.deleteProjectile(data);
 					break;
 			}
 		}

@@ -963,23 +963,9 @@ var Item = IgeEntityPhysics.extend({
 		}*/
 
 		if (ige.isServer) {
-			/*self._stats.currentItemIndex = 0;
-			self._stats.currentItemId = null;
-
-			// give default items to the unit
-			if (data.defaultItems) {
-				for (var i = 0; i < data.defaultItems.length; i++) {
-					var item = data.defaultItems[i];
-
-					var itemData = ige.game.getAsset('itemTypes', item.key);
-					if (itemData) {
-						itemData.itemTypeId = item.key;
-						self.pickUpItem(itemData);
-					}
-				}
-			}
-
-			self.changeItem(self._stats.currentItemIndex); // this will call change item on client for all units*/
+			var index = ownerUnit._stats.currentItemIndex;
+			ownerUnit.changeItem(1);
+			ownerUnit.changeItem(index); // this will call change item on client for all units*/
 		} else if (ige.isClient) {
 			var zIndex = self._stats.currentBody && self._stats.currentBody['z-index'] || { layer: 3, depth: 3 };
 
@@ -1003,16 +989,6 @@ var Item = IgeEntityPhysics.extend({
 				}
 			}
 
-			// remove forceredraw from attributebar bcz it was calling
-			// redraw for units which are not having attributebars too
-			//self.redrawAttributeBars();
-			//self.equipSkin(undefined);
-			// if mobile controls are in use configure for this unit
-			/*self.renderMobileControl();
-
-			if (self.unitUi) {
-				self.unitUi.updateAllAttributeBars();
-			}*/
 			ownerUnit.inventory.update();
 		}
 	},

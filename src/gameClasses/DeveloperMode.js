@@ -206,7 +206,6 @@ var DeveloperMode = /** @class */ (function () {
         });*/
         if (ige.isServer) {
             ige.$$('item').forEach(function (item) {
-                console.log('updating item', item._stats.itemTypeId, data.typeId);
                 if (item._stats.itemTypeId === data.typeId) {
                     item.streamUpdateData([{ type: data.typeId }]);
                 }
@@ -258,7 +257,7 @@ var DeveloperMode = /** @class */ (function () {
                     this.updateUnit(data);
                     break;
                 case 'delete':
-                    this.deleteUnit(data);
+                    //this.deleteUnit(data);
                     break;
             }
         }
@@ -271,7 +270,7 @@ var DeveloperMode = /** @class */ (function () {
                     this.updateItem(data);
                     break;
                 case 'delete':
-                    this.deleteItem(data);
+                    //this.deleteItem(data);
                     break;
             }
         }
@@ -284,7 +283,7 @@ var DeveloperMode = /** @class */ (function () {
                     this.updateProjectile(data);
                     break;
                 case 'delete':
-                    this.deleteProjectile(data);
+                    //this.deleteProjectile(data);
                     break;
             }
         }
