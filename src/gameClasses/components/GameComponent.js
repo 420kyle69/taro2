@@ -212,7 +212,7 @@ var GameComponent = IgeEntity.extend({
 
 	getPlayerByClientId: function (clientId) {
 		return ige.$$('player').find(function (player) {
-			return player._stats && player._stats.controlledBy != 'computer' && player._stats.clientId == clientId;
+			return player._stats && player._stats.controlledBy != 'computer' && player._stats.clientId && player._stats.clientId == clientId;
 		});
 	},
 
