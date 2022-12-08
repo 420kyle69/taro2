@@ -847,7 +847,7 @@ var Item = IgeEntityPhysics.extend({
 		return offset;
 	},
 
-	changeItemType: function (type, defaultData, isItemCreation) {
+	changeItemType: function (type, defaultData) {
 		var self = this;
 		var ownerUnit = ige.$(this._stats.ownerUnitId);
 		self.previousState = null;
@@ -865,49 +865,41 @@ var Item = IgeEntityPhysics.extend({
 
 		self._stats.type = type;
 
-		if (!isItemCreation) {
-			// adding this flag so that clients receiving entity data from onStreamCreate don't overwrite values with default data
-			// when they are created by a client that has just joined.
-			var oldAttributes = self._stats.attributes;
-
-			for (var i in data) {
-				if (i == 'name') { // don't overwrite item's name with item type name
-					continue;
+		// adding this flag so that clients receiving entity data from onStreamCreate don't overwrite values with default data
+		// when they are created by a client that has just joined.
+		var oldAttributes = self._stats.attributes;
+		for (var i in data) {
+			if (i == 'name') { // don't overwrite item's name with item type name
+				continue;
+			}
+			self._stats[i] = data[i];
+		}
+		// if the new item type has the same entity variables as the old item type, then pass the values
+		var variables = {};
+		if (data.variables) {
+			for (var key in data.variables) {
+				if (self.variables && self.variables[key]) {
+					variables[key] = self.variables[key] == undefined ? data.variables[key] : self.variables[key];
+				} else {
+					variables[key] = data.variables[key];
 				}
-
-				self._stats[i] = data[i];
 			}
-
-			// if the new item type has the same entity variables as the old item type, then pass the values
-			var variables = {};
-			if (data.variables) {
-				for (var key in data.variables) {
-					if (self.variables && self.variables[key]) {
-						variables[key] = self.variables[key] == undefined ? data.variables[key] : self.variables[key];
-					} else {
-						variables[key] = data.variables[key];
-					}
-				}
-				self.variables = variables;
-			}
-
-			// deleting variables from stats bcz it causes json.stringify error due to variable of type unit,item,etc.
-			if (self._stats.variables) {
-				delete self._stats.variables;
-			}
-
-			if (data.attributes) {
-				for (var attrId in data.attributes) {
-					if (data.attributes[attrId]) {
-						var attributeValue = data.attributes[attrId].value; // default attribute value from new unit type
-						// if old unit type had a same attribute, then take the value from it.
-						if (oldAttributes && oldAttributes[attrId]) {
-							attributeValue = oldAttributes[attrId].value;
-						}
-
-						if (this._stats.attributes[attrId]) {
-							this._stats.attributes[attrId].value = Math.max(data.attributes[attrId].min, Math.min(data.attributes[attrId].max, parseFloat(attributeValue)));
-						}
+			self.variables = variables;
+		}
+		// deleting variables from stats bcz it causes json.stringify error due to variable of type unit,item,etc.
+		if (self._stats.variables) {
+			delete self._stats.variables;
+		}
+		if (data.attributes) {
+			for (var attrId in data.attributes) {
+				if (data.attributes[attrId]) {
+					var attributeValue = data.attributes[attrId].value; // default attribute value from new unit type
+					// if old unit type had a same attribute, then take the value from it.
+					/*if (oldAttributes && oldAttributes[attrId]) {
+						attributeValue = oldAttributes[attrId].value;
+					}*/
+					if (this._stats.attributes[attrId]) {
+						this._stats.attributes[attrId].value = Math.max(data.attributes[attrId].min, Math.min(data.attributes[attrId].max, parseFloat(attributeValue)));
 					}
 				}
 			}
@@ -923,7 +915,7 @@ var Item = IgeEntityPhysics.extend({
 		this._stats.ownerUnitId = ownerUnit.id();
 
 		// update bodies of all items in the inventory of owner
-		/*for (let i = 0; i < ownerUnit._stats.itemIds.length; i++) {
+		for (let i = 0; i < ownerUnit._stats.itemIds.length; i++) {
 			var itemId = ownerUnit._stats.itemIds[i];
 			var item = ige.$(itemId);
 			if (item) {
@@ -936,7 +928,7 @@ var Item = IgeEntityPhysics.extend({
 					ownerUnit.updateStats(itemId, true);
 				}
 
-				// if the new unit type cannot carry the item, then remove it.
+				// if the unit type cannot carry the item, then remove it.
 				if (ownerUnit.canCarryItem(item._stats) == false) {
 					item.remove();
 				} else if (ownerUnit.canUseItem(item._stats)) { // if unit cannot use the item, then unselect the item
@@ -960,11 +952,11 @@ var Item = IgeEntityPhysics.extend({
 					ownerUnit.updateStats(itemId);
 				}
 			}
-		}*/
+		}
 
 		if (ige.isServer) {
 			var index = ownerUnit._stats.currentItemIndex;
-			ownerUnit.changeItem(1);
+			//ownerUnit.changeItem(1);
 			ownerUnit.changeItem(index); // this will call change item on client for all units*/
 		} else if (ige.isClient) {
 			var zIndex = self._stats.currentBody && self._stats.currentBody['z-index'] || { layer: 3, depth: 3 };
@@ -991,6 +983,9 @@ var Item = IgeEntityPhysics.extend({
 
 			ownerUnit.inventory.update();
 		}
+
+		//self.updateBody();
+		//ownerUnit.streamUpdateData([{ type: ownerUnit._stats.type }]);
 	},
 
 	// apply texture based on state

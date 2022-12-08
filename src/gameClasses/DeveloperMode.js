@@ -201,7 +201,9 @@ var DeveloperMode = /** @class */ (function () {
         ige.$$('item').forEach(function (item) {
             console.log('updating item', item._stats.itemTypeId, data.typeId);
             if (item._stats.itemTypeId === data.typeId) {
-                item.streamUpdateData([{ type: data.typeId }]);
+                item._stats.type = data.typeId;
+                item.changeItemType(data.typeId, {}, false);
+                //item.streamUpdateData([{ type: data.typeId }]);
             }
         });
         if (ige.isServer) {

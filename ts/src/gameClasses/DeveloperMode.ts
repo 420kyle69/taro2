@@ -160,15 +160,11 @@ class DeveloperMode {
 		ige.game.data.unitTypes[data.typeId] = data.newData;
 		ige.$$('unit').forEach(unit => {
 			if (unit._stats.type === data.typeId) {
-				unit.streamUpdateData([{ type: data.typeId }]);
+				unit._stats.type = data.typeId;
+				unit.changeUnitType(data.typeId, {}, false);
 			}
 		});
 		if (ige.isServer) {
-			/*ige.$$('unit').forEach(unit => {
-				if (unit._stats.type === data.typeId) {
-					unit.streamUpdateData([{ type: data.typeId }]);
-				}
-			});*/
 			ige.network.send('updateUnit', data);
 		}
 	}
@@ -216,15 +212,11 @@ class DeveloperMode {
 		ige.$$('item').forEach(item => {
 			console.log('updating item', item._stats.itemTypeId, data.typeId)
 			if (item._stats.itemTypeId === data.typeId) {
-				item.streamUpdateData([{ type: data.typeId }]);
+				item._stats.type = data.typeId;
+				item.changeItemType(data.typeId, {}, false);
 			}
 		});
 		if (ige.isServer) {
-			/*ige.$$('item').forEach(item => {
-				if (item._stats.itemTypeId === data.typeId) {
-					item.streamUpdateData([{ type: data.typeId }]);
-				}
-			});*/
 			ige.network.send('updateItem', data);
 		}
 	}
