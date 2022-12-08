@@ -73,11 +73,99 @@ var GameScene = /** @class */ (function (_super) {
             camera.setScroll(x, y);
         });
     };
+    // createAnimationsFromFrame (key: string, data: EntityData, skin = false, texturePackFrame: any): void {
+    // // private createAnimationsFromFrame(frame: any) {
+    // 	// create spritesheet,
+    // 	// even if it has only one sprite
+    //
+    // 	const cellSheet = data.cellSheet;
+    //
+    // 	if (!cellSheet) { // skip if no cell sheet data
+    // 		return;
+    // 	}
+    //
+    // 	if (skin) {
+    // 		cellSheet.columnCount = 1;
+    // 		cellSheet.rowCount = 1;
+    // 	}
+    //
+    // 	if (cellSheet.columnCount == 1 && cellSheet.rowCount == 1) {
+    // 		return;
+    // 	}
+    //
+    // 	let frame = texturePackFrame;
+    // 	// let frame = this.textures.getFrame('pack-result', key);
+    //
+    // 	this.textures.addSpriteSheetFromAtlas(key, {
+    // 		atlas: 'pack-result',
+    // 		frame: key,
+    // 		frameWidth: frame.frame.w / cellSheet.columnCount,
+    // 		frameHeight: frame.frame.h / cellSheet.rowCount,
+    // 		// frameWidth: frame.width / cellSheet.columnCount,
+    // 		// frameHeight: frame.height / cellSheet.rowCount,
+    // 	});
+    //
+    // 	// add animations
+    // 	for (let animationsKey in data.animations) {
+    //
+    // 		const animation = data.animations[animationsKey];
+    // 		const frames = animation.frames;
+    // 		const animationFrames: number[] = [];
+    //
+    // 		for (let i = 0; i < frames.length; i++) {
+    // 			// correction for 0-based indexing
+    // 			animationFrames.push(frames[i] - 1);
+    // 		}
+    //
+    // 		if (animationFrames.length === 0) {
+    // 			// avoid crash by giving it frame 0 if no frame data provided
+    // 			animationFrames.push(0);
+    // 		}
+    //
+    // 		this.anims.create({
+    // 			key: `${key}/${animationsKey}`,
+    // 			frames: this.anims.generateFrameNumbers(key, {
+    // 				frames: animationFrames
+    // 			}),
+    // 			frameRate: animation.framesPerSecond || 15,
+    // 			repeat: (animation.loopCount - 1) // correction for loop/repeat values
+    // 		});
+    // 	}
+    // }
     GameScene.prototype.preload = function () {
         var _this = this;
         var data = ige.game.data;
         if (data.texturePack) {
-            // todo: multiatlas
+            // this.load.on(`filecomplete-json-pack-result`, (key, type, fileData) => {
+            // 	console.log("FILECOMPLETE loaded!");
+            // 	console.log({
+            // 		key, type, data
+            // 	});
+            // 	// data.textures[0] = {image: 'pack-result.png', format: 'RGBA8888', size: {…}, scale: 1, frames: Array(136)};
+            // 	// key = "pack-result";
+            // 	// type = "json";
+            //
+            // 	for (let i = 0; i < fileData.textures[0].frames.length; i++) {
+            // 		const frame = fileData.textures[0].frames[i];
+            // 		// filename:"projectile/wRhlgvGpDK",
+            // 		// frame:{x: 2711, y: 929, w: 191, h: 80},
+            // 		// rotated:false,
+            // 		// sourceSize:{w: 200, h: 80},
+            // 		// spriteSourceSize:{x: 5, y: 0, w: 191, h: 80},
+            // 		// trimmed:true
+            //
+            // 		const [type, ...split] = frame.filename.split('/');
+            // 		const key = split.join('-');
+            //
+            // 		// dino
+            // 		if (key.includes("aa38rwGgUj")) {
+            // 			debugger;
+            // 		}
+            //
+            // 		this.createAnimationsFromFrame(`${type}/${key}`, data[`${type}Types`][key], false, frame);
+            // 		// this.createAnimationsFromFrame(frame);
+            // 	}
+            // });
             this.load.atlas({
                 key: 'pack-result',
                 atlasURL: data.texturePack.atlasURL,
@@ -85,14 +173,16 @@ var GameScene = /** @class */ (function (_super) {
                 // baseURL: "cache.modd.io"
             });
         }
-        for (var type in data.unitTypes) {
-            this.loadEntity("unit/".concat(type), data.unitTypes[type]);
-        }
-        for (var type in data.projectileTypes) {
-            this.loadEntity("projectile/".concat(type), data.projectileTypes[type]);
-        }
-        for (var type in data.itemTypes) {
-            this.loadEntity("item/".concat(type), data.itemTypes[type]);
+        else {
+            for (var type in data.unitTypes) {
+                this.loadEntity("unit/".concat(type), data.unitTypes[type]);
+            }
+            for (var type in data.projectileTypes) {
+                this.loadEntity("projectile/".concat(type), data.projectileTypes[type]);
+            }
+            for (var type in data.itemTypes) {
+                this.loadEntity("item/".concat(type), data.itemTypes[type]);
+            }
         }
         data.map.tilesets.forEach(function (tileset) {
             var key = "tiles/".concat(tileset.name);
@@ -137,9 +227,28 @@ var GameScene = /** @class */ (function (_super) {
             cellSheet.columnCount = 1;
             cellSheet.rowCount = 1;
         }
+        if (cellSheet.columnCount == 1 && cellSheet.rowCount == 1) {
+            return;
+        }
         this.load.once("filecomplete-image-".concat(key), function () {
             // create spritesheet,
             // even if it has only one sprite
+            // const data = ige.game.data;
+            // if (data.texturePack) {
+            // if (this.textures.exists('pack-result') && this.textures.getFrame('pack-result', key)) {
+            // 	console.log('using pack frame!');
+            //
+            // 	let frame = this.textures.getFrame('pack-result', key);
+            //
+            // this.textures.addSpriteSheet(key, );
+            // 	this.textures.addSpriteSheetFromAtlas(key, {
+            // 		atlas: 'texture-pack',
+            // 		frame: key,
+            // 		frameWidth: frame.width / cellSheet.columnCount,
+            // 		frameHeight: frame.height / cellSheet.rowCount,
+            // 	});
+            // } else {
+            // 	console.log('NOT using pack frame!');
             var texture = _this.textures.get(key);
             var width = texture.source[0].width;
             var height = texture.source[0].height;
@@ -147,6 +256,7 @@ var GameScene = /** @class */ (function (_super) {
                 frameWidth: width / cellSheet.columnCount,
                 frameHeight: height / cellSheet.rowCount,
             });
+            // }
             // add animations
             for (var animationsKey in data.animations) {
                 var animation = data.animations[animationsKey];

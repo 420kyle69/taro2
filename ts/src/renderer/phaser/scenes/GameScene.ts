@@ -177,6 +177,10 @@ class GameScene extends PhaserScene {
 			cellSheet.rowCount = 1;
 		}
 
+		if (cellSheet.columnCount == 1 && cellSheet.rowCount == 1) {
+			return;
+		}
+
 		this.load.once(`filecomplete-image-${key}`, () => {
 			// create spritesheet,
 			// even if it has only one sprite
