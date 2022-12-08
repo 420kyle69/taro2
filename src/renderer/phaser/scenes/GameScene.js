@@ -170,9 +170,7 @@ var GameScene = /** @class */ (function (_super) {
                 });
             }
         });
-        // todo: preload texture pack before loading entities,
-        //  then only load image here if texture pack does not have the image already loaded
-        // this.load.image(key, this.patchAssetUrl(cellSheet.url));
+        this.load.image(key, this.patchAssetUrl(cellSheet.url));
     };
     GameScene.prototype.create = function () {
         var _this = this;
