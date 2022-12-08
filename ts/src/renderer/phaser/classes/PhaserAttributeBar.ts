@@ -76,7 +76,7 @@ class PhaserAttributeBar extends Phaser.GameObjects.Container {
 	render (data: AttributeData): void {
 		const {
 			color,
-			value,
+			value = Number(data.value),
 			max,
 			displayValue,
 			index,
@@ -119,7 +119,8 @@ class PhaserAttributeBar extends Phaser.GameObjects.Container {
 
 		const text = this.bitmapText;
 		const rt = this.rtText;
-		if (value && displayValue) {
+
+		if (displayValue) {
 			text.setText(value.toFixed(decimalPlaces));
 			text.visible = !rt;
 			if (rt) {
