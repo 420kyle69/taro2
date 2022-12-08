@@ -919,15 +919,6 @@ var Item = IgeEntityPhysics.extend({
 			var itemId = ownerUnit._stats.itemIds[i];
 			var item = ige.$(itemId);
 			if (item) {
-				// removing passive attributes
-				if (item._stats.bonus && item._stats.bonus.passive) {
-					if (item._stats.slotIndex < this._stats.inventorySize || item._stats.bonus.passive.isDisabledInBackpack != true) {
-						ownerUnit.updateStats(itemId, true);
-					}
-				} else {
-					ownerUnit.updateStats(itemId, true);
-				}
-
 				// if the unit type cannot carry the item, then remove it.
 				if (ownerUnit.canCarryItem(item._stats) == false) {
 					item.remove();
@@ -943,14 +934,7 @@ var Item = IgeEntityPhysics.extend({
 					item.setState('unselected');
 				}
 
-				// adding back passive attributes
-				if (item._stats.bonus && item._stats.bonus.passive) {
-					if (item._stats.slotIndex < this._stats.inventorySize || item._stats.bonus.passive.isDisabledInBackpack != true) {
-						ownerUnit.updateStats(itemId);
-					}
-				} else {
-					ownerUnit.updateStats(itemId);
-				}
+				ownerUnit.updateStats(itemId);
 			}
 		}
 
@@ -984,8 +968,7 @@ var Item = IgeEntityPhysics.extend({
 			ownerUnit.inventory.update();
 		}
 
-		//self.updateBody();
-		//ownerUnit.streamUpdateData([{ type: ownerUnit._stats.type }]);
+		//ownerUnit.changeUnitType(ownerUnit._stats.type);
 	},
 
 	// apply texture based on state
