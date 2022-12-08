@@ -170,7 +170,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 				"sound": {},
 				"damage": {
 					"unitAttributes": {
-						"health": 10
+						"health": 25
 					}
 				},
 				"particles": {},

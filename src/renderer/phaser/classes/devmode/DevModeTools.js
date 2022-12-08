@@ -142,7 +142,7 @@ var DevModeTools = /** @class */ (function (_super) {
                 "sound": {},
                 "damage": {
                     "unitAttributes": {
-                        "health": 10
+                        "health": 25
                     }
                 },
                 "particles": {},

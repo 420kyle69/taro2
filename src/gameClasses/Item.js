@@ -863,7 +863,7 @@ var Item = IgeEntityPhysics.extend({
 
 		self.script.load(data.scripts);
 
-		self._stats.type = type;
+		self._stats.itemTypeId = type;
 
 		// adding this flag so that clients receiving entity data from onStreamCreate don't overwrite values with default data
 		// when they are created by a client that has just joined.
