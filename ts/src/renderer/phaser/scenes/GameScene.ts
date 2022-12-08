@@ -105,18 +105,18 @@ class GameScene extends PhaserScene {
 				textureURL: data.texturePack.textureURL,
 				// baseURL: "cache.modd.io"
 			});
-		}
+		} else {
+			for (let type in data.unitTypes) {
+				this.loadEntity(`unit/${type}`, data.unitTypes[type]);
+			}
 
-		for (let type in data.unitTypes) {
-			this.loadEntity(`unit/${type}`, data.unitTypes[type]);
-		}
+			for (let type in data.projectileTypes) {
+				this.loadEntity(`projectile/${type}`, data.projectileTypes[type]);
+			}
 
-		for (let type in data.projectileTypes) {
-			this.loadEntity(`projectile/${type}`, data.projectileTypes[type]);
-		}
-
-		for (let type in data.itemTypes) {
-			this.loadEntity(`item/${type}`, data.itemTypes[type]);
+			for (let type in data.itemTypes) {
+				this.loadEntity(`item/${type}`, data.itemTypes[type]);
+			}
 		}
 
 		data.map.tilesets.forEach((tileset) => {
