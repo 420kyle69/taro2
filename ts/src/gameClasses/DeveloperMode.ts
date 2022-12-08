@@ -160,7 +160,6 @@ class DeveloperMode {
 		ige.game.data.unitTypes[data.typeId] = data.newData;
 		ige.$$('unit').forEach(unit => {
 			if (unit._stats.type === data.typeId) {
-				unit._stats.type = data.typeId;
 				unit.changeUnitType(data.typeId, {}, false);
 			}
 		});
@@ -211,7 +210,6 @@ class DeveloperMode {
 		ige.game.data.itemTypes[data.typeId] = data.newData;
 		ige.$$('item').forEach(item => {
 			if (item._stats.itemTypeId === data.typeId) {
-				item._stats.type = data.typeId;
 				item.changeItemType(data.typeId, {}, false);
 			}
 		});
