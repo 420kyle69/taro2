@@ -210,7 +210,6 @@ class DeveloperMode {
 		// 3. we may need to re-mount the item on unit
 		ige.game.data.itemTypes[data.typeId] = data.newData;
 		ige.$$('item').forEach(item => {
-			console.log('updating item', item._stats.itemTypeId, data.typeId)
 			if (item._stats.itemTypeId === data.typeId) {
 				item._stats.type = data.typeId;
 				item.changeItemType(data.typeId, {}, false);
@@ -239,7 +238,7 @@ class DeveloperMode {
 		ige.game.data.projectileTypes[data.typeId] = data.newData;
 		ige.$$('projectile').forEach(projectile => {
 			if (projectile._stats.type === data.typeId) {
-				projectile.streamUpdateData([{ type: data.typeId }]);
+				//projectile.streamUpdateData([{ type: data.typeId }]);
 			}
 		});
 		if (ige.isServer) {
