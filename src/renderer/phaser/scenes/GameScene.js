@@ -85,16 +85,14 @@ var GameScene = /** @class */ (function (_super) {
                 // baseURL: "cache.modd.io"
             });
         }
-        else {
-            for (var type in data.unitTypes) {
-                this.loadEntity("unit/".concat(type), data.unitTypes[type]);
-            }
-            for (var type in data.projectileTypes) {
-                this.loadEntity("projectile/".concat(type), data.projectileTypes[type]);
-            }
-            for (var type in data.itemTypes) {
-                this.loadEntity("item/".concat(type), data.itemTypes[type]);
-            }
+        for (var type in data.unitTypes) {
+            this.loadEntity("unit/".concat(type), data.unitTypes[type]);
+        }
+        for (var type in data.projectileTypes) {
+            this.loadEntity("projectile/".concat(type), data.projectileTypes[type]);
+        }
+        for (var type in data.itemTypes) {
+            this.loadEntity("item/".concat(type), data.itemTypes[type]);
         }
         data.map.tilesets.forEach(function (tileset) {
             var key = "tiles/".concat(tileset.name);
