@@ -150,15 +150,11 @@ var DeveloperMode = /** @class */ (function () {
         ige.game.data.unitTypes[data.typeId] = data.newData;
         ige.$$('unit').forEach(function (unit) {
             if (unit._stats.type === data.typeId) {
-                unit.streamUpdateData([{ type: data.typeId }]);
+                unit._stats.type = data.typeId;
+                unit.changeUnitType(data.typeId, {}, false);
             }
         });
         if (ige.isServer) {
-            /*ige.$$('unit').forEach(unit => {
-                if (unit._stats.type === data.typeId) {
-                    unit.streamUpdateData([{ type: data.typeId }]);
-                }
-            });*/
             ige.network.send('updateUnit', data);
         }
     };
@@ -203,15 +199,9 @@ var DeveloperMode = /** @class */ (function () {
             if (item._stats.itemTypeId === data.typeId) {
                 item._stats.type = data.typeId;
                 item.changeItemType(data.typeId, {}, false);
-                //item.streamUpdateData([{ type: data.typeId }]);
             }
         });
         if (ige.isServer) {
-            /*ige.$$('item').forEach(item => {
-                if (item._stats.itemTypeId === data.typeId) {
-                    item.streamUpdateData([{ type: data.typeId }]);
-                }
-            });*/
             ige.network.send('updateItem', data);
         }
     };
