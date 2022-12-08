@@ -150,6 +150,13 @@ var DeveloperMode = /** @class */ (function () {
         ige.game.data.unitTypes[data.typeId] = data.newData;
         ige.$$('unit').forEach(function (unit) {
             if (unit._stats.type === data.typeId) {
+                for (var i = 0; i < unit._stats.itemIds.length; i++) {
+                    var itemId = unit._stats.itemIds[i];
+                    var item = ige.$(itemId);
+                    if (item) {
+                        item.remove();
+                    }
+                }
                 unit.changeUnitType(data.typeId, {}, false);
             }
         });
