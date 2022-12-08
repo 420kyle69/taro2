@@ -906,6 +906,14 @@ var Unit = IgeEntityPhysics.extend({
 			}
 			self.inventory.update();
 		}
+
+		if (self.ai && self._stats.ai) {
+			if (self._stats.ai.enabled) {
+				self.ai.enable();
+			} else {
+				self.ai.disable();
+			}
+		}
 	},
 
 	addAttributeBuff: function (attributeId, value, time, percentage) {
