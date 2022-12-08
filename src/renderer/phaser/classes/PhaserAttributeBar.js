@@ -80,7 +80,7 @@ var PhaserAttributeBar = /** @class */ (function (_super) {
         bar.strokeRoundedRect(-w / 2, -h / 2, w, h, borderRadius);
         var text = this.bitmapText;
         var rt = this.rtText;
-        if (displayValue) {
+        if (value && displayValue) {
             text.setText(value.toFixed(decimalPlaces));
             text.visible = !rt;
             if (rt) {

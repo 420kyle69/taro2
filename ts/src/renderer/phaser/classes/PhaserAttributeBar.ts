@@ -119,7 +119,7 @@ class PhaserAttributeBar extends Phaser.GameObjects.Container {
 
 		const text = this.bitmapText;
 		const rt = this.rtText;
-		if (displayValue) {
+		if (value && displayValue) {
 			text.setText(value.toFixed(decimalPlaces));
 			text.visible = !rt;
 			if (rt) {
