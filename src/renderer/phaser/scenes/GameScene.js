@@ -137,42 +137,41 @@ var GameScene = /** @class */ (function (_super) {
             cellSheet.columnCount = 1;
             cellSheet.rowCount = 1;
         }
-        if (cellSheet.columnCount == 1 && cellSheet.rowCount == 1) {
-            return;
-        }
-        this.load.once("filecomplete-image-".concat(key), function () {
-            // create spritesheet,
-            // even if it has only one sprite
-            var texture = _this.textures.get(key);
-            var width = texture.source[0].width;
-            var height = texture.source[0].height;
-            Phaser.Textures.Parsers.SpriteSheet(texture, 0, 0, 0, width, height, {
-                frameWidth: width / cellSheet.columnCount,
-                frameHeight: height / cellSheet.rowCount,
-            });
-            // add animations
-            for (var animationsKey in data.animations) {
-                var animation = data.animations[animationsKey];
-                var frames_1 = animation.frames;
-                var animationFrames = [];
-                for (var i = 0; i < frames_1.length; i++) {
-                    // correction for 0-based indexing
-                    animationFrames.push(frames_1[i] - 1);
-                }
-                if (animationFrames.length === 0) {
-                    // avoid crash by giving it frame 0 if no frame data provided
-                    animationFrames.push(0);
-                }
-                _this.anims.create({
-                    key: "".concat(key, "/").concat(animationsKey),
-                    frames: _this.anims.generateFrameNumbers(key, {
-                        frames: animationFrames
-                    }),
-                    frameRate: animation.framesPerSecond || 15,
-                    repeat: (animation.loopCount - 1) // correction for loop/repeat values
+        if (cellSheet.columnCount != 1 || cellSheet.rowCount != 1) {
+            this.load.once("filecomplete-image-".concat(key), function () {
+                // create spritesheet,
+                // even if it has only one sprite
+                var texture = _this.textures.get(key);
+                var width = texture.source[0].width;
+                var height = texture.source[0].height;
+                Phaser.Textures.Parsers.SpriteSheet(texture, 0, 0, 0, width, height, {
+                    frameWidth: width / cellSheet.columnCount,
+                    frameHeight: height / cellSheet.rowCount,
                 });
-            }
-        });
+                // add animations
+                for (var animationsKey in data.animations) {
+                    var animation = data.animations[animationsKey];
+                    var frames_1 = animation.frames;
+                    var animationFrames = [];
+                    for (var i = 0; i < frames_1.length; i++) {
+                        // correction for 0-based indexing
+                        animationFrames.push(frames_1[i] - 1);
+                    }
+                    if (animationFrames.length === 0) {
+                        // avoid crash by giving it frame 0 if no frame data provided
+                        animationFrames.push(0);
+                    }
+                    _this.anims.create({
+                        key: "".concat(key, "/").concat(animationsKey),
+                        frames: _this.anims.generateFrameNumbers(key, {
+                            frames: animationFrames
+                        }),
+                        frameRate: animation.framesPerSecond || 15,
+                        repeat: (animation.loopCount - 1) // correction for loop/repeat values
+                    });
+                }
+            });
+        }
         this.load.image(key, this.patchAssetUrl(cellSheet.url));
     };
     GameScene.prototype.create = function () {
