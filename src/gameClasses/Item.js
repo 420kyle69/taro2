@@ -850,6 +850,16 @@ var Item = IgeEntityPhysics.extend({
 	changeItemType: function (type, defaultData) {
 		var self = this;
 		var ownerUnit = ige.$(this._stats.ownerUnitId);
+
+		// removing passive attributes
+		if (self._stats.bonus && self._stats.bonus.passive) {
+			if (self._stats.slotIndex < this._stats.inventorySize || self._stats.bonus.passive.isDisabledInBackpack != true) {
+				ownerUnit.updateStats(self.id(), true);
+			}
+		} else {
+			ownerUnit.updateStats(self.id(), true);
+		}
+
 		self.previousState = null;
 
 		var data = ige.game.getAsset('itemTypes', type);
@@ -862,12 +872,8 @@ var Item = IgeEntityPhysics.extend({
 		}
 
 		self.script.load(data.scripts);
-
 		self._stats.itemTypeId = type;
 
-		// adding this flag so that clients receiving entity data from onStreamCreate don't overwrite values with default data
-		// when they are created by a client that has just joined.
-		var oldAttributes = self._stats.attributes;
 		for (var i in data) {
 			if (i == 'name') { // don't overwrite item's name with item type name
 				continue;
@@ -894,10 +900,6 @@ var Item = IgeEntityPhysics.extend({
 			for (var attrId in data.attributes) {
 				if (data.attributes[attrId]) {
 					var attributeValue = data.attributes[attrId].value; // default attribute value from new unit type
-					// if old unit type had a same attribute, then take the value from it.
-					/*if (oldAttributes && oldAttributes[attrId]) {
-						attributeValue = oldAttributes[attrId].value;
-					}*/
 					if (this._stats.attributes[attrId]) {
 						this._stats.attributes[attrId].value = Math.max(data.attributes[attrId].min, Math.min(data.attributes[attrId].max, parseFloat(attributeValue)));
 					}
@@ -914,28 +916,27 @@ var Item = IgeEntityPhysics.extend({
 
 		this._stats.ownerUnitId = ownerUnit.id();
 
-		// update bodies of all items in the inventory of owner
-		for (let i = 0; i < ownerUnit._stats.itemIds.length; i++) {
-			var itemId = ownerUnit._stats.itemIds[i];
-			var item = ige.$(itemId);
-			if (item) {
-				// if the unit type cannot carry the item, then remove it.
-				if (ownerUnit.canCarryItem(item._stats) == false) {
-					item.remove();
-				} else if (ownerUnit.canUseItem(item._stats)) { // if unit cannot use the item, then unselect the item
-					if (item._stats.slotIndex != undefined && ownerUnit._stats.currentItemIndex != undefined) {
-						if (ownerUnit._stats.currentItemIndex === item._stats.slotIndex) {
-							item.setState('selected');
-						} else {
-							item.setState('unselected');
-						}
-					}
+		// if the unit type cannot carry the item, then remove it.
+		if (ownerUnit.canCarryItem(self._stats) == false) {
+			self.remove();
+		} else if (ownerUnit.canUseItem(self._stats)) { // if unit cannot use the item, then unselect the item
+			if (self._stats.slotIndex != undefined && ownerUnit._stats.currentItemIndex != undefined) {
+				if (ownerUnit._stats.currentItemIndex === self._stats.slotIndex) {
+					self.setState('selected');
 				} else {
-					item.setState('unselected');
+					self.setState('unselected');
 				}
-
-				ownerUnit.updateStats(itemId);
 			}
+		} else {
+			self.setState('unselected');
+		}
+		// adding back passive attributes
+		if (self._stats.bonus && self._stats.bonus.passive) {
+			if (self._stats.slotIndex < this._stats.inventorySize || self._stats.bonus.passive.isDisabledInBackpack != true) {
+				ownerUnit.updateStats(self.id());
+			}
+		} else {
+			ownerUnit.updateStats(self.id());
 		}
 
 		if (ige.isServer) {
