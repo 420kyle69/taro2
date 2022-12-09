@@ -114,16 +114,14 @@ var DevModeScene = /** @class */ (function (_super) {
         var _this = this;
         var inside = false;
         this.gameEditorWidgets.forEach(function (widget) {
-            var rect = widget.getBoundingClientRect();
-            if (_this.input.activePointer.x > rect.left
-                && _this.input.activePointer.x < rect.left + rect.width
-                && _this.input.activePointer.y > rect.top
-                && _this.input.activePointer.y < rect.top + rect.height) {
+            if (_this.input.activePointer.x >= widget.left
+                && _this.input.activePointer.x <= widget.right
+                && _this.input.activePointer.y >= widget.top
+                && _this.input.activePointer.y <= widget.bottom) {
                 inside = true;
                 return;
             }
         });
-        // console.log('pointer x', this.input.activePointer.x, 'pointer y', this.input.activePointer.y, 'inside', inside);
         return inside;
     };
     DevModeScene.prototype.pointerInsidePalette = function () {

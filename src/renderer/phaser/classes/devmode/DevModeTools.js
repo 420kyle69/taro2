@@ -103,7 +103,8 @@ var DevModeTools = /** @class */ (function (_super) {
         this.regionEditor.hideRegions();
     };
     DevModeTools.prototype.queryWidgets = function () {
-        this.gameEditorWidgets = Array.from(document.querySelectorAll('.game-editor-widget'));
+        this.gameEditorWidgets = Array.from(document.querySelectorAll('.game-editor-widget'))
+            .map(function (widget) { return widget.getBoundingClientRect(); });
     };
     DevModeTools.prototype.keyBindings = function () {
         var _this = this;

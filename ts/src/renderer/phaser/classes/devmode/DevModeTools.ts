@@ -4,7 +4,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	public palette: TilePalette;
 	public tileEditor: TileEditor;
 	public regionEditor: RegionEditor;
-	public gameEditorWidgets: Array<HTMLElement>;
+	public gameEditorWidgets: Array<DOMRect>;
 
 	cursorButton: DevToolButton;
 	layerButtonsContainer: Phaser.GameObjects.Container;
@@ -131,7 +131,8 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	}
 
 	queryWidgets(): void {
-		this.gameEditorWidgets = Array.from(document.querySelectorAll<HTMLElement>('.game-editor-widget'));
+		this.gameEditorWidgets = Array.from(document.querySelectorAll<HTMLElement>('.game-editor-widget'))
+			.map((widget: HTMLElement) => widget.getBoundingClientRect());
 	}
 
 	keyBindings(): void {

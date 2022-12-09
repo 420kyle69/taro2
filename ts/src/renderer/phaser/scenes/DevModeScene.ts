@@ -6,7 +6,7 @@ class DevModeScene extends PhaserScene {
 	devModeTools: DevModeTools;
 	regionEditor: RegionEditor;
 	tileEditor: TileEditor;
-	gameEditorWidgets: Array<HTMLElement>;
+	gameEditorWidgets: Array<DOMRect>;
 
 	tilePalette: TilePalette;
 	tilemap: Phaser.Tilemaps.Tilemap;
@@ -140,20 +140,16 @@ class DevModeScene extends PhaserScene {
 	pointerInsideWidgets(): boolean {
 		let inside = false;
 
-		this.gameEditorWidgets.forEach((widget) => {
-			const rect = widget.getBoundingClientRect();
-
-			if (this.input.activePointer.x > rect.left
-				&& this.input.activePointer.x < rect.left + rect.width
-				&& this.input.activePointer.y > rect.top
-				&& this.input.activePointer.y < rect.top + rect.height) {
+		this.gameEditorWidgets.forEach((widget: DOMRect) => {
+			if (this.input.activePointer.x >= widget.left
+				&& this.input.activePointer.x <= widget.right
+				&& this.input.activePointer.y >= widget.top
+				&& this.input.activePointer.y <= widget.bottom) {
 				inside = true;
 				return;
 			}
 		});
 
-		// console.log('pointer x', this.input.activePointer.x, 'pointer y', this.input.activePointer.y, 'inside', inside);
-		
 		return inside;
 	}
 
