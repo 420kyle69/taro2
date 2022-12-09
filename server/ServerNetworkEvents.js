@@ -443,7 +443,7 @@ var ServerNetworkEvents = {
 	},
 
 	_onEditEntity: function(data, clientId) {
-		ige.developerMode.editEntity(data, clientId);
+		ige.developerMode.editEntity(data);
 	},
 
 	_onBuyItem: function (data, clientId) {

@@ -62,7 +62,7 @@ var DevModeScene = /** @class */ (function (_super) {
                     },
                     angle: draggedEntity.angle
                 };
-                _this.editEntity(data);
+                ige.developerMode.editEntity(data);
                 ige.unitBeingDragged = null;
             }
         });
@@ -122,10 +122,6 @@ var DevModeScene = /** @class */ (function (_super) {
     };
     DevModeScene.prototype.leaveMapTab = function () {
         this.devModeTools.leaveMapTab();
-    };
-    DevModeScene.prototype.editEntity = function (data) {
-        //ige.game.data.unitTypes[data.typeId] = data.newData;
-        ige.network.send('editEntity', data);
     };
     DevModeScene.prototype.pointerInsideMap = function (pointerX, pointerY, map) {
         return (0 <= pointerX && pointerX < map.width

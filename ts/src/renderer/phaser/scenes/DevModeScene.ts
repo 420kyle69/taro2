@@ -68,7 +68,7 @@ class DevModeScene extends PhaserScene {
 					}, 
 					angle: draggedEntity.angle
 				}
-				this.editEntity(data);
+				ige.developerMode.editEntity(data);
 				ige.unitBeingDragged = null;
 			}
 		});
@@ -146,18 +146,6 @@ class DevModeScene extends PhaserScene {
 
 	leaveMapTab (): void {
 		this.devModeTools.leaveMapTab();
-	}
-
-	editEntity (data: {entityType: string, 
-		typeId: string,
-		action: string,
-		newData?: any,
-		playerId?: string, 
-		position?: {x: number, y: number}, 
-		angle?: number,
-	}): void {
-		//ige.game.data.unitTypes[data.typeId] = data.newData;
-		ige.network.send('editEntity', data);
 	}
 
 	pointerInsideMap(pointerX: number, pointerY: number, map: Phaser.Tilemaps.Tilemap): boolean {

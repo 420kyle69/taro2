@@ -416,7 +416,7 @@ var DevModeTools = /** @class */ (function (_super) {
                 "slotIndex": 0,
                 "isBeingUsed": false
             };
-            _this.scene.editEntity({ entityType: 'item',
+            ige.developerMode.editEntity({ entityType: 'item',
                 typeId: 'axe',
                 action: 'update',
                 newData: newData

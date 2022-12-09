@@ -265,48 +265,52 @@ class DeveloperMode {
 	}
 
 
-	editEntity (data, clientId) {
-		if (data.entityType === 'unit') {
-			switch (data.action) {
-				case 'create':
-					//this.createUnit(data);
-					break;
-
-				case 'update':
-					this.updateUnit(data);
-					break;
-
-				case 'delete':
-					//this.deleteUnit(data);
-					break;
-			}
-		} else if (data.entityType === 'item') {
-			switch (data.action) {
-				case 'create':
-					//this.createItem(data);
-					break;
-
-				case 'update':
-					this.updateItem(data);
-					break;
-
-				case 'delete':
-					//this.deleteItem(data);
-					break;
-			}
-		} else if (data.entityType === 'projectile') {
-			switch (data.action) {
-				case 'create':
-					//this.createProjectile(data);
-					break;
-
-				case 'update':
-					this.updateProjectile(data);
-					break;
-
-				case 'delete':
-					//this.deleteProjectile(data);
-					break;
+	editEntity (data: EditEntityData) {
+		if (ige.isClient) {
+			ige.network.send('editEntity', data);
+		} else {
+			if (data.entityType === 'unit') {
+				switch (data.action) {
+					case 'create':
+						//this.createUnit(data);
+						break;
+	
+					case 'update':
+						this.updateUnit(data);
+						break;
+	
+					case 'delete':
+						//this.deleteUnit(data);
+						break;
+				}
+			} else if (data.entityType === 'item') {
+				switch (data.action) {
+					case 'create':
+						//this.createItem(data);
+						break;
+	
+					case 'update':
+						this.updateItem(data);
+						break;
+	
+					case 'delete':
+						//this.deleteItem(data);
+						break;
+				}
+			} else if (data.entityType === 'projectile') {
+				switch (data.action) {
+					case 'create':
+						//this.createProjectile(data);
+						break;
+	
+					case 'update':
+						this.updateProjectile(data);
+						break;
+	
+					case 'delete':
+						//this.deleteProjectile(data);
+						break;
+				}
 			}
 		}
 	}
@@ -346,6 +350,16 @@ interface RegionData {
 	height?: number,
 	delete?: boolean,
 	showModal?: boolean
+}
+
+interface EditEntityData {
+	entityType: string, 
+	typeId: string,
+	action: string,
+	newData?: any, //EntityStats,
+	playerId?: string, 
+	position?: {x: number, y: number}, 
+	angle?: number,
 }
 
 type devModeTab = 'play' | 'map' | 'entities' | 'moderate' | 'debug';

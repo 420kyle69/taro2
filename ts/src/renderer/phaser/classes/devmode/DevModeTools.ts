@@ -445,7 +445,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 				"isBeingUsed": false
 			}
 
-			this.scene.editEntity({entityType: 'item', 
+			ige.developerMode.editEntity({entityType: 'item', 
 				typeId: 'axe',
 				action: 'update',
 				newData: newData
