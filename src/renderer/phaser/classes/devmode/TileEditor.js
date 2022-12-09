@@ -100,7 +100,7 @@ var TileEditor = /** @class */ (function () {
                 }
             }
             else if ((!devModeScene.pointerInsidePalette() || !palette.visible) &&
-                !devModeScene.pointerInsideButtons() && marker.active) {
+                !devModeScene.pointerInsideButtons() && !devModeScene.pointerInsideWidgets() && marker.active) {
                 paletteMarker.graphics.setVisible(false);
                 marker.graphics.setVisible(true);
                 // Rounds down to nearest tile

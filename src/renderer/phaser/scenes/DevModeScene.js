@@ -94,8 +94,13 @@ var DevModeScene = /** @class */ (function (_super) {
         this.tileEditor = this.devModeTools.tileEditor;
         this.tilePalette = this.devModeTools.palette;
         this.regionEditor = this.devModeTools.regionEditor;
+        this.gameEditorWidgets = this.devModeTools.gameEditorWidgets;
     };
     DevModeScene.prototype.enterMapTab = function () {
+        if (this.gameEditorWidgets.length === 0) {
+            this.devModeTools.queryWidgets();
+            this.gameEditorWidgets = this.devModeTools.gameEditorWidgets;
+        }
         this.devModeTools.enterMapTab();
     };
     DevModeScene.prototype.leaveMapTab = function () {
@@ -104,6 +109,22 @@ var DevModeScene = /** @class */ (function (_super) {
     DevModeScene.prototype.pointerInsideMap = function (pointerX, pointerY, map) {
         return (0 <= pointerX && pointerX < map.width
             && 0 <= pointerY && pointerY < map.height);
+    };
+    DevModeScene.prototype.pointerInsideWidgets = function () {
+        var _this = this;
+        var inside = false;
+        this.gameEditorWidgets.forEach(function (widget) {
+            var rect = widget.getBoundingClientRect();
+            if (_this.input.activePointer.x > rect.left
+                && _this.input.activePointer.x < rect.left + rect.width
+                && _this.input.activePointer.y > rect.top
+                && _this.input.activePointer.y < rect.top + rect.height) {
+                inside = true;
+                return;
+            }
+        });
+        // console.log('pointer x', this.input.activePointer.x, 'pointer y', this.input.activePointer.y, 'inside', inside);
+        return inside;
     };
     DevModeScene.prototype.pointerInsidePalette = function () {
         return (this.input.activePointer.x > this.tilePalette.scrollBarContainer.x

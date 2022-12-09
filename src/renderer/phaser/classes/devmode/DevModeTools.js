@@ -31,6 +31,7 @@ var DevModeTools = /** @class */ (function (_super) {
         var palette = _this.palette = new TilePalette(_this.scene, _this.scene.tileset, _this.scene.rexUI);
         _this.tileEditor = new TileEditor(_this.scene.gameScene, _this.scene, _this);
         _this.regionEditor = new RegionEditor(_this.scene.gameScene, _this.scene, _this);
+        _this.gameEditorWidgets = [];
         _this.keyBindings();
         _this.COLOR_PRIMARY = palette.COLOR_PRIMARY;
         _this.COLOR_LIGHT = palette.COLOR_LIGHT;
@@ -100,6 +101,9 @@ var DevModeTools = /** @class */ (function (_super) {
         this.layerButtonsContainer.setVisible(false);
         this.toolButtonsContainer.setVisible(false);
         this.regionEditor.hideRegions();
+    };
+    DevModeTools.prototype.queryWidgets = function () {
+        this.gameEditorWidgets = Array.from(document.querySelectorAll('.game-editor-widget'));
     };
     DevModeTools.prototype.keyBindings = function () {
         var _this = this;
