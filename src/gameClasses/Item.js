@@ -911,6 +911,7 @@ var Item = IgeEntityPhysics.extend({
 
 		if (ige.isClient) {
 			self.updateTexture();
+			self.emit('update-texture', true/*, self._stats.cellSheet.url !== defaultUnit.cellSheet.url*/);
 			self._scaleTexture();
 		}
 
@@ -972,24 +973,6 @@ var Item = IgeEntityPhysics.extend({
 		//ownerUnit.changeUnitType(ownerUnit._stats.type);
 	},
 
-	// apply texture based on state
-	updateTexture: function () {
-		var self = this;
-		var defaultUnit = ige.game.getAsset('itemTypes', self._stats.type);
-		self.emit('update-texture', true/*, self._stats.cellSheet.url !== defaultUnit.cellSheet.url*/);
-
-		/*var ownerPlayer = self.getOwner();
-		var isInvisible = self.shouldBeInvisible(ownerPlayer, ige.client.myPlayer);
-		// if owner player is not available (due to race condition) then render everything or it is hostile and player is invisible them make unit invisible to hostile players. it can still move and interact with objects
-		if (isInvisible) {
-			// item is invisible
-			self.texture('');
-			return;
-		}*/
-
-		IgeEntity.prototype.updateTexture.call(this);
-	},
-
 	remove: function () {
 		// traverse through owner's inventory, and remove itself
 		Item.prototype.log('remove item');
@@ -1034,8 +1017,8 @@ var Item = IgeEntityPhysics.extend({
 
 				switch (attrName) {
 					case 'type':
-						self._stats[attrName] = newValue;
-						this.changeItemType(newValue, {}, false);
+						//self._stats[attrName] = newValue;
+						//this.changeItemType(newValue, {}, false);
 						break;
 					case 'ownerUnitId':
 						this._stats[attrName] = newValue;
