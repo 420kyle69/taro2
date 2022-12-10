@@ -27,25 +27,21 @@ var PhaserProjectile = /** @class */ (function (_super) {
         });
         return _this;
     }
-    PhaserProjectile.prototype.updateTexture = function () {
-        this.sprite.anims.stop();
-        this.key = "projectile/".concat(this.entity._stats.cellSheet.url);
-        if (!this.scene.textures.exists("projectile/".concat(this.entity._stats.cellSheet.url))) {
-            this.scene.loadEntity("projectile/".concat(this.entity._stats.cellSheet.url), this.entity._stats, true);
+    PhaserProjectile.prototype.updateTexture = function (data) {
+        if (data === 'basic_texture_change') {
+            this.sprite.anims.stop();
+            this.scene.textures.removeKey("projectile/".concat(this.entity._stats.type));
+            //this.scene.textures.renameTexture(`projectile/${this.entity._stats.type}`, `projectile/${this.entity._stats.type}`+Math.random().toString());
+            this.scene.loadEntity("projectile/".concat(this.entity._stats.type), this.entity._stats, false);
             this.scene.load.on("filecomplete-image-".concat(this.key), function cnsl() {
                 if (this && this.sprite) {
-                    this.sprite.setTexture("projectile/".concat(this.entity._stats.cellSheet.url));
+                    this.sprite.setTexture("projectile/".concat(this.entity._stats.type));
                     this.sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
                     var bounds = this.entity._bounds2d;
                     this.sprite.setDisplaySize(bounds.x, bounds.y);
                 }
             }, this);
             this.scene.load.start();
-        }
-        else {
-            this.sprite.setTexture("projectile/".concat(this.entity._stats.cellSheet.url));
-            var bounds = this.entity._bounds2d;
-            this.sprite.setDisplaySize(bounds.x, bounds.y);
         }
     };
     PhaserProjectile.prototype.destroy = function () {

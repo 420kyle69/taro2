@@ -1604,7 +1604,13 @@ var Unit = IgeEntityPhysics.extend({
 	updateTexture: function () {
 		var self = this;
 		var defaultUnit = ige.game.getAsset('unitTypes', self._stats.type);
-		self.emit('update-texture', self._stats.cellSheet.url !== defaultUnit.cellSheet.url);
+		var changeTextureType;
+		if (self._stats.cellSheet.url !== defaultUnit.cellSheet.url) {
+			changeTextureType = 'using_skin'
+		} else {
+			changeTextureType = 'normal'
+		}
+		self.emit('update-texture', changeTextureType);
 
 		var ownerPlayer = self.getOwner();
 		var isInvisible = self.shouldBeInvisible(ownerPlayer, ige.client.myPlayer);

@@ -148,7 +148,6 @@ class DevModeTools extends Phaser.GameObjects.Container {
 				}
 			}
 		});
-
 		const plusKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.PLUS, false);
 		plusKey.on('down', () => {
 			if(ige.developerMode.active && ige.developerMode.activeTab !== 'play' && !ige.developerMode.shouldPreventKeybindings()) {

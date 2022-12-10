@@ -910,7 +910,6 @@ var Item = IgeEntityPhysics.extend({
 
 		if (ige.isClient) {
 			self.updateTexture();
-			self.emit('update-texture', true);
 			self._scaleTexture();
 		}
 

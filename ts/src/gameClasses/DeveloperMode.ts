@@ -168,7 +168,7 @@ class DeveloperMode {
 						}
 					}
 				unit.changeUnitType(data.typeId, {}, false);
-				unit.emit('update-texture', true);
+				unit.emit('update-texture', 'basic_texture_change');
 			}
 		});
 		if (ige.isServer) {
@@ -219,6 +219,7 @@ class DeveloperMode {
 		ige.$$('item').forEach(item => {
 			if (item._stats.itemTypeId === data.typeId) {
 				item.changeItemType(data.typeId, {}, false);
+				item.emit('update-texture', 'basic_texture_change');
 			}
 		});
 		if (ige.isServer) {
@@ -244,8 +245,8 @@ class DeveloperMode {
 		ige.game.data.projectileTypes[data.typeId] = data.newData;
 		ige.$$('projectile').forEach(projectile => {
 			if (projectile._stats.type === data.typeId) {
-				projectile._stats.type = data.typeId;
 				projectile.changeProjectileType(data.typeId, {}, false);
+				projectile.emit('update-texture', 'basic_texture_change');
 			}
 		});
 		if (ige.isServer) {
