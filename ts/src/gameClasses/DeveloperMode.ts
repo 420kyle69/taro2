@@ -168,7 +168,7 @@ class DeveloperMode {
 						}
 					}
 				unit.changeUnitType(data.typeId, {}, false);
-				unit.emit('update-texture', 'using_skin');
+				//unit.emit('update-texture', 'using_skin');
 			}
 		});
 		if (ige.isServer) {
