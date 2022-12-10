@@ -168,7 +168,7 @@ class DeveloperMode {
 						}
 					}
 				unit.changeUnitType(data.typeId, {}, false);
-				unit.emit('update-texture', 'basic_texture_change');
+				unit.emit('update-texture', 'using_skin');
 			}
 		});
 		if (ige.isServer) {
@@ -219,7 +219,7 @@ class DeveloperMode {
 		ige.$$('item').forEach(item => {
 			if (item._stats.itemTypeId === data.typeId) {
 				item.changeItemType(data.typeId, {}, false);
-				item.emit('update-texture', 'basic_texture_change');
+				item.emit('update-texture', 'using_skin');
 			}
 		});
 		if (ige.isServer) {
