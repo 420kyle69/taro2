@@ -168,6 +168,7 @@ class DeveloperMode {
 						}
 					}
 				unit.changeUnitType(data.typeId, {}, false);
+				unit.emit('update-texture', true);
 			}
 		});
 		if (ige.isServer) {
@@ -243,15 +244,11 @@ class DeveloperMode {
 		ige.game.data.projectileTypes[data.typeId] = data.newData;
 		ige.$$('projectile').forEach(projectile => {
 			if (projectile._stats.type === data.typeId) {
-				//projectile.streamUpdateData([{ type: data.typeId }]);
+				projectile._stats.type = data.typeId;
+				projectile.changeProjectileType(data.typeId, {}, false);
 			}
 		});
 		if (ige.isServer) {
-			/*ige.$$('projectile').forEach(projectile => {
-				if (projectile._stats.type === data.typeId) {
-					projectile.streamUpdateData([{ type: data.typeId }]);
-				}
-			});*/
 			ige.network.send('updateProjectile', data);
 		}
 	}

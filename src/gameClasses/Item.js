@@ -865,7 +865,6 @@ var Item = IgeEntityPhysics.extend({
 		var data = ige.game.getAsset('itemTypes', type);
 		delete data.type // hotfix for dealing with corrupted game json that has unitData.type = "unitType". This is caused by bug in the game editor.
 
-		// console.log("change item type", type)
 		if (data == undefined) {
 			ige.script.errorLog('changeItemType: invalid data');
 			return;
@@ -911,7 +910,7 @@ var Item = IgeEntityPhysics.extend({
 
 		if (ige.isClient) {
 			self.updateTexture();
-			self.emit('update-texture', true/*, self._stats.cellSheet.url !== defaultUnit.cellSheet.url*/);
+			self.emit('update-texture', true);
 			self._scaleTexture();
 		}
 

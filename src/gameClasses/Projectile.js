@@ -126,6 +126,73 @@ var Projectile = IgeEntityPhysics.extend({
 		}
 	},
 
+	changeProjectileType: function (type, defaultData) {
+		var self = this;
+		var sourceUnit = ige.$(this._stats.sourceUnitId);
+		var sourceItem = ige.$(this._stats.sourceItemId);
+
+		self.previousState = null;
+
+		var data = ige.game.getAsset('projectileTypes', type);
+		delete data.type // hotfix for dealing with corrupted game json that has unitData.type = "unitType". This is caused by bug in the game editor.
+
+		if (data == undefined) {
+			ige.script.errorLog('changeProjectileType: invalid data');
+			return;
+		}
+
+		self.script.load(data.scripts);
+
+		self._stats.type = type;
+
+		// adding this flag so that clients receiving entity data from onStreamCreate don't overwrite values with default data
+		// when they are created by a client that has just joined.
+		for (var i in data) {
+			if (i == 'name') { // don't overwrite projectile's name with projectile type name
+				continue;
+			}
+			self._stats[i] = data[i];
+		}
+		// if the new projectile type has the same entity variables as the old projectile type, then pass the values
+		var variables = {};
+		if (data.variables) {
+			for (var key in data.variables) {
+				if (self.variables && self.variables[key]) {
+					variables[key] = self.variables[key] == undefined ? data.variables[key] : self.variables[key];
+				} else {
+					variables[key] = data.variables[key];
+				}
+			}
+			self.variables = variables;
+		}
+		// deleting variables from stats bcz it causes json.stringify error due to variable of type unit,item,etc.
+		if (self._stats.variables) {
+			delete self._stats.variables;
+		}
+		if (data.attributes) {
+			for (var attrId in data.attributes) {
+				if (data.attributes[attrId]) {
+					var attributeValue = data.attributes[attrId].value; // default attribute value from new projectile type
+					if (this._stats.attributes[attrId]) {
+						this._stats.attributes[attrId].value = Math.max(data.attributes[attrId].min, Math.min(data.attributes[attrId].max, parseFloat(attributeValue)));
+					}
+				}
+			}
+		}
+
+		self.setState(this._stats.stateId, defaultData);
+
+		if (ige.isClient) {
+			self.updateTexture();
+			self.emit('update-texture', true);
+			//self._scaleTexture();
+		}
+
+		this._stats.sourceUnitId = sourceUnit.id();
+		this._stats.sourceItemId = sourceItem.id();
+
+	},
+
 	streamUpdateData: function (queuedData) {
 
 		// if (ige.isServer && ige.network.isPaused) 
