@@ -810,7 +810,6 @@ var Unit = IgeEntityPhysics.extend({
 
 		if (ige.isClient) {
 			self.updateTexture();
-			self.emit('update-texture', 'using_skin');
 			self._scaleTexture();
 		}
 
