@@ -157,20 +157,21 @@ class DeveloperMode {
 	updateUnit(data) {
 		// 1. broadcast update to all players
 		// 2. force update its dimension/scale/layer/image
-
 		if (ige.isServer) {
 			let textureChanged;
+			let cellSheetChanges = ige.game.data.unitTypes[data.typeId].cellSheetChanges;
 			if (ige.game.data.unitTypes[data.typeId].cellSheet !== data.newData.cellSheet) {
 				textureChanged = true;
 			}
 			ige.game.data.unitTypes[data.typeId] = data.newData;
 			if (textureChanged) {
-				if (ige.game.data.unitTypes[data.typeId].cellSheetChanges) {
-					ige.game.data.unitTypes[data.typeId].cellSheetChanges++
+				if (cellSheetChanges) {
+					cellSheetChanges++
 				} else {
-					ige.game.data.unitTypes[data.typeId].cellSheetChanges = 1;
+					cellSheetChanges = 1;
 				}
-				data.newData.cellSheetChanges = ige.game.data.unitTypes[data.typeId].cellSheetChanges;
+				ige.game.data.unitTypes[data.typeId].cellSheetChanges = cellSheetChanges;
+				data.newData.cellSheetChanges = cellSheetChanges;
 			}
 		} else {
 			ige.game.data.unitTypes[data.typeId] = data.newData;
@@ -235,17 +236,19 @@ class DeveloperMode {
 		// 3. we may need to re-mount the item on unit
 		if (ige.isServer) {
 			let textureChanged;
+			let cellSheetChanges = ige.game.data.itemTypes[data.typeId].cellSheetChanges;
 			if (ige.game.data.itemTypes[data.typeId].cellSheet !== data.newData.cellSheet) {
 				textureChanged = true;
 			}
 			ige.game.data.itemTypes[data.typeId] = data.newData;
 			if (textureChanged) {
-				if (ige.game.data.itemTypes[data.typeId].cellSheetChanges) {
-					ige.game.data.itemTypes[data.typeId].cellSheetChanges++
+				if (cellSheetChanges) {
+					cellSheetChanges++
 				} else {
-					ige.game.data.itemTypes[data.typeId].cellSheetChanges = 1;
+					cellSheetChanges = 1;
 				}
-				data.newData.cellSheetChanges = ige.game.data.itemTypes[data.typeId].cellSheetChanges;
+				ige.game.data.itemTypes[data.typeId].cellSheetChanges = cellSheetChanges;
+				data.newData.cellSheetChanges = cellSheetChanges;
 			}
 		} else {
 			ige.game.data.itemTypes[data.typeId] = data.newData;
@@ -279,17 +282,19 @@ class DeveloperMode {
 		// 2. force update its dimension/scale/layer/image
 		if (ige.isServer) {
 			let textureChanged;
+			let cellSheetChanges = ige.game.data.projectileTypes[data.typeId].cellSheetChanges;
 			if (ige.game.data.projectileTypes[data.typeId].cellSheet !== data.newData.cellSheet) {
 				textureChanged = true;
 			}
 			ige.game.data.projectileTypes[data.typeId] = data.newData;
 			if (textureChanged) {
-				if (ige.game.data.projectileTypes[data.typeId].cellSheetChanges) {
-					ige.game.data.projectileTypes[data.typeId].cellSheetChanges++
+				if (cellSheetChanges) {
+					cellSheetChanges++
 				} else {
-					ige.game.data.projectileTypes[data.typeId].cellSheetChanges = 1;
+					cellSheetChanges = 1;
 				}
-				data.newData.cellSheetChanges = ige.game.data.projectileTypes[data.typeId].cellSheetChanges;
+				ige.game.data.projectileTypes[data.typeId].cellSheetChanges = cellSheetChanges;
+				data.newData.cellSheetChanges = cellSheetChanges;
 			}
 		} else {
 			ige.game.data.projectileTypes[data.typeId] = data.newData;
