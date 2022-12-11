@@ -1623,6 +1623,15 @@ var Unit = IgeEntityPhysics.extend({
 		IgeEntity.prototype.updateTexture.call(this);
 	},
 
+	cellSheetWasEdited: function () {
+		var defaultUnit = ige.game.getAsset('unitTypes', this._stats.type);
+		if (defaultUnit.cellSheetChanges) {
+			return defaultUnit.cellSheetChanges;
+		} else {
+			return false;
+		}
+	},
+
 	equipSkin: function (equipPurchasable) {
 		var self = this;
 		var owner = this.getOwner();

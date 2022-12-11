@@ -971,6 +971,15 @@ var Item = IgeEntityPhysics.extend({
 		//ownerUnit.changeUnitType(ownerUnit._stats.type);
 	},
 
+	cellSheetWasEdited: function () {
+		var defaultItem = ige.game.getAsset('itemTypes', this._stats.itemTypeId);
+		if (defaultItem.cellSheetChanges) {
+			return defaultItem.cellSheetChanges;
+		} else {
+			return false;
+		}
+	},
+
 	remove: function () {
 		// traverse through owner's inventory, and remove itself
 		Item.prototype.log('remove item');

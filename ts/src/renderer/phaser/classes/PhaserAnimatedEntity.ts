@@ -9,10 +9,10 @@ class PhaserAnimatedEntity extends PhaserEntity {
 	) {
 		super(entity);
 		const bounds = entity._bounds2d;
-		
+
 		let sprite;
-		if (entity._stats.cellSheetChanges) {
-			this.key = key + '_' + this.entity._stats.cellSheetChanges;
+		if (entity.cellSheetWasEdited()) {
+			this.key = key + '_' + entity.cellSheetWasEdited();
 			sprite = scene.add.sprite(0, 0, this.key);
 		} else {
 			sprite = scene.add.sprite(0, 0, key);

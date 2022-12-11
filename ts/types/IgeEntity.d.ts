@@ -1,4 +1,5 @@
 declare class IgeEntity extends IgeObject {
+	cellSheetWasEdited(): boolean | number;
 
 	_alive: boolean;
 	_destroyed: boolean;

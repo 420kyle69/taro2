@@ -192,6 +192,15 @@ var Projectile = IgeEntityPhysics.extend({
 
 	},
 
+	cellSheetWasEdited: function () {
+		var defaultProjectile = ige.game.getAsset('projectileTypes', this._stats.type);
+		if (defaultProjectile.cellSheetChanges) {
+			return defaultProjectile.cellSheetChanges;
+		} else {
+			return false;
+		}
+	},
+
 	streamUpdateData: function (queuedData) {
 
 		// if (ige.isServer && ige.network.isPaused) 
