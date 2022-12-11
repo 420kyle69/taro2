@@ -147,16 +147,24 @@ var DeveloperMode = /** @class */ (function () {
     DeveloperMode.prototype.updateUnit = function (data) {
         // 1. broadcast update to all players
         // 2. force update its dimension/scale/layer/image
-        var textureChanged;
-        if (ige.game.data.unitTypes[data.typeId].cellSheet !== data.newData.cellSheet) {
-            textureChanged = true;
-        }
-        ige.game.data.unitTypes[data.typeId] = data.newData;
-        if (ige.game.data.unitTypes[data.typeId].cellSheetChanges) {
-            ige.game.data.unitTypes[data.typeId].cellSheetChanges++;
+        if (ige.isServer) {
+            var textureChanged = void 0;
+            if (ige.game.data.unitTypes[data.typeId].cellSheet !== data.newData.cellSheet) {
+                textureChanged = true;
+            }
+            ige.game.data.unitTypes[data.typeId] = data.newData;
+            if (textureChanged) {
+                if (ige.game.data.unitTypes[data.typeId].cellSheetChanges) {
+                    ige.game.data.unitTypes[data.typeId].cellSheetChanges++;
+                }
+                else {
+                    ige.game.data.unitTypes[data.typeId].cellSheetChanges = 1;
+                }
+                data.newData.cellSheetChanges = ige.game.data.unitTypes[data.typeId].cellSheetChanges;
+            }
         }
         else {
-            ige.game.data.unitTypes[data.typeId].cellSheetChanges = 1;
+            ige.game.data.unitTypes[data.typeId] = data.newData;
         }
         ige.$$('unit').forEach(function (unit) {
             if (unit._stats.type === data.typeId) {
@@ -210,16 +218,24 @@ var DeveloperMode = /** @class */ (function () {
         // 1. broadcast update to all players
         // 2. force update its dimension/scale/layer/image
         // 3. we may need to re-mount the item on unit
-        var textureChanged;
-        if (ige.game.data.itemTypes[data.typeId].cellSheet !== data.newData.cellSheet) {
-            textureChanged = true;
-        }
-        ige.game.data.itemTypes[data.typeId] = data.newData;
-        if (ige.game.data.itemTypes[data.typeId].cellSheetChanges) {
-            ige.game.data.itemTypes[data.typeId].cellSheetChanges++;
+        if (ige.isServer) {
+            var textureChanged = void 0;
+            if (ige.game.data.itemTypes[data.typeId].cellSheet !== data.newData.cellSheet) {
+                textureChanged = true;
+            }
+            ige.game.data.itemTypes[data.typeId] = data.newData;
+            if (textureChanged) {
+                if (ige.game.data.itemTypes[data.typeId].cellSheetChanges) {
+                    ige.game.data.itemTypes[data.typeId].cellSheetChanges++;
+                }
+                else {
+                    ige.game.data.itemTypes[data.typeId].cellSheetChanges = 1;
+                }
+                data.newData.cellSheetChanges = ige.game.data.itemTypes[data.typeId].cellSheetChanges;
+            }
         }
         else {
-            ige.game.data.itemTypes[data.typeId].cellSheetChanges = 1;
+            ige.game.data.itemTypes[data.typeId] = data.newData;
         }
         ige.$$('item').forEach(function (item) {
             if (item._stats.itemTypeId === data.typeId) {
@@ -243,16 +259,24 @@ var DeveloperMode = /** @class */ (function () {
     DeveloperMode.prototype.updateProjectile = function (data) {
         // 1. broadcast update to all players
         // 2. force update its dimension/scale/layer/image
-        var textureChanged;
-        if (ige.game.data.projectileTypes[data.typeId].cellSheet !== data.newData.cellSheet) {
-            textureChanged = true;
-        }
-        ige.game.data.projectileTypes[data.typeId] = data.newData;
-        if (ige.game.data.projectileTypes[data.typeId].cellSheetChanges) {
-            ige.game.data.projectileTypes[data.typeId].cellSheetChanges++;
+        if (ige.isServer) {
+            var textureChanged = void 0;
+            if (ige.game.data.projectileTypes[data.typeId].cellSheet !== data.newData.cellSheet) {
+                textureChanged = true;
+            }
+            ige.game.data.projectileTypes[data.typeId] = data.newData;
+            if (textureChanged) {
+                if (ige.game.data.projectileTypes[data.typeId].cellSheetChanges) {
+                    ige.game.data.projectileTypes[data.typeId].cellSheetChanges++;
+                }
+                else {
+                    ige.game.data.projectileTypes[data.typeId].cellSheetChanges = 1;
+                }
+                data.newData.cellSheetChanges = ige.game.data.projectileTypes[data.typeId].cellSheetChanges;
+            }
         }
         else {
-            ige.game.data.projectileTypes[data.typeId].cellSheetChanges = 1;
+            ige.game.data.projectileTypes[data.typeId] = data.newData;
         }
         ige.$$('projectile').forEach(function (projectile) {
             if (projectile._stats.type === data.typeId) {
