@@ -16,7 +16,7 @@ var __extends = (this && this.__extends) || (function () {
 var PhaserUnit = /** @class */ (function (_super) {
     __extends(PhaserUnit, _super);
     function PhaserUnit(scene, entity) {
-        var _this = _super.call(this, scene, entity, "unit/".concat(entity._stats.type)) || this;
+        var _this = _super.call(this, scene, entity, "unit/".concat(entity._stats.cellSheet.url)) || this;
         _this.attributes = [];
         var translate = entity._translate;
         var gameObject = scene.add.container(translate.x, translate.y, [_this.sprite]);
@@ -44,17 +44,24 @@ var PhaserUnit = /** @class */ (function (_super) {
     PhaserUnit.prototype.updateTexture = function (data) {
         if (data === 'basic_texture_change') {
             this.sprite.anims.stop();
-            this.key = "unit/".concat(this.entity._stats.type, "_") + this.entity._stats.cellSheetChanges;
-            this.scene.loadEntity(this.key, this.entity._stats, false);
-            this.scene.load.on("filecomplete-image-".concat(this.key), function cnsl() {
-                if (this && this.sprite) {
-                    this.sprite.setTexture(this.key);
-                    this.sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
-                    var bounds = this.entity._bounds2d;
-                    this.sprite.setDisplaySize(bounds.x, bounds.y);
-                }
-            }, this);
-            this.scene.load.start();
+            this.key = "unit/".concat(this.entity._stats.cellSheet.url);
+            if (!this.scene.textures.exists(this.key)) {
+                this.scene.loadEntity(this.key, this.entity._stats, false);
+                this.scene.load.on("filecomplete-image-".concat(this.key), function cnsl() {
+                    if (this && this.sprite) {
+                        this.sprite.setTexture(this.key);
+                        this.sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
+                        var bounds = this.entity._bounds2d;
+                        this.sprite.setDisplaySize(bounds.x, bounds.y);
+                    }
+                }, this);
+                this.scene.load.start();
+            }
+            else {
+                this.sprite.setTexture(this.key);
+                var bounds = this.entity._bounds2d;
+                this.sprite.setDisplaySize(bounds.x, bounds.y);
+            }
         }
         else if (data === 'using_skin') {
             this.sprite.anims.stop();
@@ -78,12 +85,7 @@ var PhaserUnit = /** @class */ (function (_super) {
             }
         }
         else {
-            if (this.entity._stats.cellSheetChanges) {
-                this.key = "unit/".concat(this.entity._stats.type) + '_' + this.entity._stats.cellSheetChanges;
-            }
-            else {
-                this.key = "unit/".concat(this.entity._stats.type);
-            }
+            this.key = "unit/".concat(this.entity._stats.cellSheet.url);
             this.sprite.setTexture(this.key);
             var bounds = this.entity._bounds2d;
             this.sprite.setDisplaySize(bounds.x, bounds.y);

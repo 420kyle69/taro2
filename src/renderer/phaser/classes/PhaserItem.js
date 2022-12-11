@@ -16,7 +16,7 @@ var __extends = (this && this.__extends) || (function () {
 var PhaserItem = /** @class */ (function (_super) {
     __extends(PhaserItem, _super);
     function PhaserItem(scene, entity) {
-        var _this = _super.call(this, scene, entity, "item/".concat(entity._stats.itemTypeId)) || this;
+        var _this = _super.call(this, scene, entity, "item/".concat(entity._stats.cellSheet.url)) || this;
         _this.sprite.visible = false;
         _this.gameObject = _this.sprite;
         var _a = entity._translate, x = _a.x, y = _a.y;
@@ -41,17 +41,24 @@ var PhaserItem = /** @class */ (function (_super) {
     PhaserItem.prototype.updateTexture = function (data) {
         if (data === 'basic_texture_change') {
             this.sprite.anims.stop();
-            this.key = "item/".concat(this.entity._stats.type, "_") + this.entity._stats.cellSheetChanges;
-            this.scene.loadEntity(this.key, this.entity._stats, false);
-            this.scene.load.on("filecomplete-image-".concat(this.key), function cnsl() {
-                if (this && this.sprite) {
-                    this.sprite.setTexture(this.key);
-                    this.sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
-                    var bounds = this.entity._bounds2d;
-                    this.sprite.setDisplaySize(bounds.x, bounds.y);
-                }
-            }, this);
-            this.scene.load.start();
+            this.key = "item/".concat(this.entity._stats.cellSheet.url);
+            if (!this.scene.textures.exists(this.key)) {
+                this.scene.loadEntity(this.key, this.entity._stats, false);
+                this.scene.load.on("filecomplete-image-".concat(this.key), function cnsl() {
+                    if (this && this.sprite) {
+                        this.sprite.setTexture(this.key);
+                        this.sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
+                        var bounds = this.entity._bounds2d;
+                        this.sprite.setDisplaySize(bounds.x, bounds.y);
+                    }
+                }, this);
+                this.scene.load.start();
+            }
+            else {
+                this.sprite.setTexture(this.key);
+                var bounds = this.entity._bounds2d;
+                this.sprite.setDisplaySize(bounds.x, bounds.y);
+            }
         }
     };
     PhaserItem.prototype.depth = function (value) {

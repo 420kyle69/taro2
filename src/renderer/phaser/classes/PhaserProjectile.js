@@ -16,7 +16,7 @@ var __extends = (this && this.__extends) || (function () {
 var PhaserProjectile = /** @class */ (function (_super) {
     __extends(PhaserProjectile, _super);
     function PhaserProjectile(scene, entity) {
-        var _this = _super.call(this, scene, entity, "projectile/".concat(entity._stats.type)) || this;
+        var _this = _super.call(this, scene, entity, "projectile/".concat(entity._stats.cellSheet.url)) || this;
         _this.sprite.visible = false;
         _this.scene.renderedEntities.push(_this.sprite);
         _this.gameObject = _this.sprite;
@@ -30,17 +30,24 @@ var PhaserProjectile = /** @class */ (function (_super) {
     PhaserProjectile.prototype.updateTexture = function (data) {
         if (data === 'basic_texture_change') {
             this.sprite.anims.stop();
-            this.key = "projectile/".concat(this.entity._stats.type, "_") + this.entity._stats.cellSheetChanges;
-            this.scene.loadEntity(this.key, this.entity._stats, false);
-            this.scene.load.on("filecomplete-image-".concat(this.key), function cnsl() {
-                if (this && this.sprite) {
-                    this.sprite.setTexture(this.key);
-                    this.sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
-                    var bounds = this.entity._bounds2d;
-                    this.sprite.setDisplaySize(bounds.x, bounds.y);
-                }
-            }, this);
-            this.scene.load.start();
+            this.key = "projectile/".concat(this.entity._stats.cellSheet.url);
+            if (!this.scene.textures.exists(this.key)) {
+                this.scene.loadEntity(this.key, this.entity._stats, false);
+                this.scene.load.on("filecomplete-image-".concat(this.key), function cnsl() {
+                    if (this && this.sprite) {
+                        this.sprite.setTexture(this.key);
+                        this.sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
+                        var bounds = this.entity._bounds2d;
+                        this.sprite.setDisplaySize(bounds.x, bounds.y);
+                    }
+                }, this);
+                this.scene.load.start();
+            }
+            else {
+                this.sprite.setTexture(this.key);
+                var bounds = this.entity._bounds2d;
+                this.sprite.setDisplaySize(bounds.x, bounds.y);
+            }
         }
     };
     PhaserProjectile.prototype.destroy = function () {
