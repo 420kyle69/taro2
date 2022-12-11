@@ -2,7 +2,6 @@ declare interface EntityStats {
 	selectedUnitId: string | number | object;
 	userId: string;
 	defaultData: any;
-	cellSheetChanges?: number;
 
 	name: string;
 	currentBody: {

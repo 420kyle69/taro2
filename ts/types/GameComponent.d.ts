@@ -1,5 +1,4 @@
 interface EntityData {
-	cellSheetChanges?: number;
 	cellSheet: {
 		columnCount: number;
 		rowCount: number;
