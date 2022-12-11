@@ -147,27 +147,7 @@ var DeveloperMode = /** @class */ (function () {
     DeveloperMode.prototype.updateUnit = function (data) {
         // 1. broadcast update to all players
         // 2. force update its dimension/scale/layer/image
-        if (ige.isServer) {
-            var textureChanged = void 0;
-            var cellSheetChanges = ige.game.data.unitTypes[data.typeId].cellSheetChanges;
-            if (ige.game.data.unitTypes[data.typeId].cellSheet !== data.newData.cellSheet) {
-                textureChanged = true;
-            }
-            ige.game.data.unitTypes[data.typeId] = data.newData;
-            if (textureChanged) {
-                if (cellSheetChanges) {
-                    cellSheetChanges++;
-                }
-                else {
-                    cellSheetChanges = 1;
-                }
-                ige.game.data.unitTypes[data.typeId].cellSheetChanges = cellSheetChanges;
-                data.newData.cellSheetChanges = cellSheetChanges;
-            }
-        }
-        else {
-            ige.game.data.unitTypes[data.typeId] = data.newData;
-        }
+        ige.game.data.unitTypes[data.typeId] = data.newData;
         ige.$$('unit').forEach(function (unit) {
             if (unit._stats.type === data.typeId) {
                 for (var i = 0; i < unit._stats.itemIds.length; i++) {
@@ -220,27 +200,7 @@ var DeveloperMode = /** @class */ (function () {
         // 1. broadcast update to all players
         // 2. force update its dimension/scale/layer/image
         // 3. we may need to re-mount the item on unit
-        if (ige.isServer) {
-            var textureChanged = void 0;
-            var cellSheetChanges = ige.game.data.itemTypes[data.typeId].cellSheetChanges;
-            if (ige.game.data.itemTypes[data.typeId].cellSheet !== data.newData.cellSheet) {
-                textureChanged = true;
-            }
-            ige.game.data.itemTypes[data.typeId] = data.newData;
-            if (textureChanged) {
-                if (cellSheetChanges) {
-                    cellSheetChanges++;
-                }
-                else {
-                    cellSheetChanges = 1;
-                }
-                ige.game.data.itemTypes[data.typeId].cellSheetChanges = cellSheetChanges;
-                data.newData.cellSheetChanges = cellSheetChanges;
-            }
-        }
-        else {
-            ige.game.data.itemTypes[data.typeId] = data.newData;
-        }
+        ige.game.data.itemTypes[data.typeId] = data.newData;
         ige.$$('item').forEach(function (item) {
             if (item._stats.itemTypeId === data.typeId) {
                 item.changeItemType(data.typeId, {}, false);
@@ -263,27 +223,7 @@ var DeveloperMode = /** @class */ (function () {
     DeveloperMode.prototype.updateProjectile = function (data) {
         // 1. broadcast update to all players
         // 2. force update its dimension/scale/layer/image
-        if (ige.isServer) {
-            var textureChanged = void 0;
-            var cellSheetChanges = ige.game.data.projectileTypes[data.typeId].cellSheetChanges;
-            if (ige.game.data.projectileTypes[data.typeId].cellSheet !== data.newData.cellSheet) {
-                textureChanged = true;
-            }
-            ige.game.data.projectileTypes[data.typeId] = data.newData;
-            if (textureChanged) {
-                if (cellSheetChanges) {
-                    cellSheetChanges++;
-                }
-                else {
-                    cellSheetChanges = 1;
-                }
-                ige.game.data.projectileTypes[data.typeId].cellSheetChanges = cellSheetChanges;
-                data.newData.cellSheetChanges = cellSheetChanges;
-            }
-        }
-        else {
-            ige.game.data.projectileTypes[data.typeId] = data.newData;
-        }
+        ige.game.data.projectileTypes[data.typeId] = data.newData;
         ige.$$('projectile').forEach(function (projectile) {
             if (projectile._stats.type === data.typeId) {
                 projectile.changeProjectileType(data.typeId, {}, false);

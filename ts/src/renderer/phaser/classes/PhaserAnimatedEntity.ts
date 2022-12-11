@@ -11,12 +11,6 @@ class PhaserAnimatedEntity extends PhaserEntity {
 		const bounds = entity._bounds2d;
 
 		const sprite = scene.add.sprite(0, 0, key);
-		/*if (entity.cellSheetWasEdited()) {
-			this.key = key + '_' + entity.cellSheetWasEdited();
-			sprite = scene.add.sprite(0, 0, this.key);
-		} else {
-			sprite = scene.add.sprite(0, 0, key);
-		}*/
 		this.sprite = sprite as Phaser.GameObjects.Sprite & IRenderProps;
 
 		sprite.setDisplaySize(bounds.x, bounds.y);

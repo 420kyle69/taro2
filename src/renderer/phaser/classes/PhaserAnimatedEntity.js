@@ -21,12 +21,6 @@ var PhaserAnimatedEntity = /** @class */ (function (_super) {
         _this.key = key;
         var bounds = entity._bounds2d;
         var sprite = scene.add.sprite(0, 0, key);
-        /*if (entity.cellSheetWasEdited()) {
-            this.key = key + '_' + entity.cellSheetWasEdited();
-            sprite = scene.add.sprite(0, 0, this.key);
-        } else {
-            sprite = scene.add.sprite(0, 0, key);
-        }*/
         _this.sprite = sprite;
         sprite.setDisplaySize(bounds.x, bounds.y);
         sprite.rotation = entity._rotate.z;
