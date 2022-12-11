@@ -671,7 +671,6 @@ var Unit = IgeEntityPhysics.extend({
 	// hold an item given in the inventory slot. hide the last item
 	// @currentItemIndex refers to the selected item slot
 	changeItem: function (itemIndex) {
-		//console.log('change item',itemIndex)
 		var self = this;
 
 		if (itemIndex == undefined) {
