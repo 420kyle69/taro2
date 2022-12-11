@@ -30,12 +30,11 @@ var PhaserProjectile = /** @class */ (function (_super) {
     PhaserProjectile.prototype.updateTexture = function (data) {
         if (data === 'basic_texture_change') {
             this.sprite.anims.stop();
-            this.scene.textures.removeKey("projectile/".concat(this.entity._stats.type));
-            //this.scene.textures.renameTexture(`projectile/${this.entity._stats.type}`, `projectile/${this.entity._stats.type}`+Math.random().toString());
-            this.scene.loadEntity("projectile/".concat(this.entity._stats.type), this.entity._stats, false);
+            this.key = "projectile/".concat(this.entity._stats.type, "_") + this.entity._stats.cellSheetChanges;
+            this.scene.loadEntity(this.key, this.entity._stats, false);
             this.scene.load.on("filecomplete-image-".concat(this.key), function cnsl() {
                 if (this && this.sprite) {
-                    this.sprite.setTexture("projectile/".concat(this.entity._stats.type));
+                    this.sprite.setTexture(this.key);
                     this.sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
                     var bounds = this.entity._bounds2d;
                     this.sprite.setDisplaySize(bounds.x, bounds.y);

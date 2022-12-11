@@ -157,7 +157,17 @@ class DeveloperMode {
 	updateUnit(data) {
 		// 1. broadcast update to all players
 		// 2. force update its dimension/scale/layer/image
+		let textureChanged;
+		if (ige.game.data.unitTypes[data.typeId].cellSheet !== data.newData.cellSheet) {
+			textureChanged = true;
+		}
 		ige.game.data.unitTypes[data.typeId] = data.newData;
+		if (ige.game.data.unitTypes[data.typeId].cellSheetChanges) {
+			ige.game.data.unitTypes[data.typeId].cellSheetChanges++
+		} else {
+			ige.game.data.unitTypes[data.typeId].cellSheetChanges = 1;
+		}
+
 		ige.$$('unit').forEach(unit => {
 			if (unit._stats.type === data.typeId) {
 				for (let i = 0; i < unit._stats.itemIds.length; i++) {
@@ -168,7 +178,7 @@ class DeveloperMode {
 						}
 					}
 				unit.changeUnitType(data.typeId, {}, false);
-				unit.emit('update-texture', 'using_skin');
+				unit.emit('update-texture', 'basic_texture_change');
 			}
 		});
 		if (ige.isServer) {
@@ -215,11 +225,21 @@ class DeveloperMode {
 		// 1. broadcast update to all players
 		// 2. force update its dimension/scale/layer/image
 		// 3. we may need to re-mount the item on unit
+		let textureChanged;
+		if (ige.game.data.itemTypes[data.typeId].cellSheet !== data.newData.cellSheet) {
+			textureChanged = true;
+		}
 		ige.game.data.itemTypes[data.typeId] = data.newData;
+		if (ige.game.data.itemTypes[data.typeId].cellSheetChanges) {
+			ige.game.data.itemTypes[data.typeId].cellSheetChanges++
+		} else {
+			ige.game.data.itemTypes[data.typeId].cellSheetChanges = 1;
+		}
+		
 		ige.$$('item').forEach(item => {
 			if (item._stats.itemTypeId === data.typeId) {
 				item.changeItemType(data.typeId, {}, false);
-				item.emit('update-texture', 'using_skin');
+				item.emit('update-texture', 'basic_texture_change');
 			}
 		});
 		if (ige.isServer) {
@@ -242,7 +262,17 @@ class DeveloperMode {
 	updateProjectile(data) {
 		// 1. broadcast update to all players
 		// 2. force update its dimension/scale/layer/image
+		let textureChanged;
+		if (ige.game.data.projectileTypes[data.typeId].cellSheet !== data.newData.cellSheet) {
+			textureChanged = true;
+		}
 		ige.game.data.projectileTypes[data.typeId] = data.newData;
+		if (ige.game.data.projectileTypes[data.typeId].cellSheetChanges) {
+			ige.game.data.projectileTypes[data.typeId].cellSheetChanges++
+		} else {
+			ige.game.data.projectileTypes[data.typeId].cellSheetChanges = 1;
+		}
+
 		ige.$$('projectile').forEach(projectile => {
 			if (projectile._stats.type === data.typeId) {
 				projectile.changeProjectileType(data.typeId, {}, false);

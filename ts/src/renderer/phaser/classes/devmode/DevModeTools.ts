@@ -133,6 +133,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		const keyboard = this.scene.input.keyboard;
 		const tabKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, true);
 		tabKey.on('down', () => {
+			
 			if (ige.developerMode.shouldPreventKeybindings()) {
 				keyboard.disableGlobalCapture();
 			} else {

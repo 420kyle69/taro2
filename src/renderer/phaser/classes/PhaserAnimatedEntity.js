@@ -20,7 +20,14 @@ var PhaserAnimatedEntity = /** @class */ (function (_super) {
         _this.scene = scene;
         _this.key = key;
         var bounds = entity._bounds2d;
-        var sprite = scene.add.sprite(0, 0, key);
+        var sprite;
+        if (entity._stats.cellSheetChanges) {
+            _this.key = key + '_' + _this.entity._stats.cellSheetChanges;
+            sprite = scene.add.sprite(0, 0, _this.key);
+        }
+        else {
+            sprite = scene.add.sprite(0, 0, key);
+        }
         _this.sprite = sprite;
         sprite.setDisplaySize(bounds.x, bounds.y);
         sprite.rotation = entity._rotate.z;

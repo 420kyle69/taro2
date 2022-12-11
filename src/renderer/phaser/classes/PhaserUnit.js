@@ -44,11 +44,11 @@ var PhaserUnit = /** @class */ (function (_super) {
     PhaserUnit.prototype.updateTexture = function (data) {
         if (data === 'basic_texture_change') {
             this.sprite.anims.stop();
-            this.scene.textures.removeKey("unit/".concat(this.entity._stats.type));
-            this.scene.loadEntity("unit/".concat(this.entity._stats.type), this.entity._stats, false);
+            this.key = "unit/".concat(this.entity._stats.type, "_") + this.entity._stats.cellSheetChanges;
+            this.scene.loadEntity(this.key, this.entity._stats, false);
             this.scene.load.on("filecomplete-image-".concat(this.key), function cnsl() {
                 if (this && this.sprite) {
-                    this.sprite.setTexture("unit/".concat(this.entity._stats.type));
+                    this.sprite.setTexture(this.key);
                     this.sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
                     var bounds = this.entity._bounds2d;
                     this.sprite.setDisplaySize(bounds.x, bounds.y);
@@ -59,11 +59,11 @@ var PhaserUnit = /** @class */ (function (_super) {
         else if (data === 'using_skin') {
             this.sprite.anims.stop();
             this.key = "unit/".concat(this.entity._stats.cellSheet.url);
-            if (!this.scene.textures.exists("unit/".concat(this.entity._stats.cellSheet.url))) {
-                this.scene.loadEntity("unit/".concat(this.entity._stats.cellSheet.url), this.entity._stats, true);
+            if (!this.scene.textures.exists(this.key)) {
+                this.scene.loadEntity(this.key, this.entity._stats, true);
                 this.scene.load.on("filecomplete-image-".concat(this.key), function cnsl() {
                     if (this && this.sprite) {
-                        this.sprite.setTexture("unit/".concat(this.entity._stats.cellSheet.url));
+                        this.sprite.setTexture(this.key);
                         this.sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
                         var bounds = this.entity._bounds2d;
                         this.sprite.setDisplaySize(bounds.x, bounds.y);
@@ -72,14 +72,19 @@ var PhaserUnit = /** @class */ (function (_super) {
                 this.scene.load.start();
             }
             else {
-                this.sprite.setTexture("unit/".concat(this.entity._stats.cellSheet.url));
+                this.sprite.setTexture(this.key);
                 var bounds = this.entity._bounds2d;
                 this.sprite.setDisplaySize(bounds.x, bounds.y);
             }
         }
         else {
-            this.key = "unit/".concat(this.entity._stats.type);
-            this.sprite.setTexture("unit/".concat(this.entity._stats.type));
+            if (this.entity._stats.cellSheetChanges) {
+                this.key = "unit/".concat(this.entity._stats.type) + '_' + this.entity._stats.cellSheetChanges;
+            }
+            else {
+                this.key = "unit/".concat(this.entity._stats.type);
+            }
+            this.sprite.setTexture(this.key);
             var bounds = this.entity._bounds2d;
             this.sprite.setDisplaySize(bounds.x, bounds.y);
         }

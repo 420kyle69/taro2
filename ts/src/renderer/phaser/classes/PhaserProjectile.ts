@@ -23,12 +23,11 @@ class PhaserProjectile extends PhaserAnimatedEntity {
 	protected updateTexture (data) {
 		if (data === 'basic_texture_change') {
 			this.sprite.anims.stop();
-			this.scene.textures.removeKey(`projectile/${this.entity._stats.type}`);
-			//this.scene.textures.renameTexture(`projectile/${this.entity._stats.type}`, `projectile/${this.entity._stats.type}`+Math.random().toString());
-			this.scene.loadEntity(`projectile/${this.entity._stats.type}`, this.entity._stats, false);
+			this.key = `projectile/${this.entity._stats.type}_` + this.entity._stats.cellSheetChanges;
+			this.scene.loadEntity(this.key, this.entity._stats, false);
 			this.scene.load.on(`filecomplete-image-${this.key}`, function cnsl() {
 				if (this && this.sprite) {
-					this.sprite.setTexture(`projectile/${this.entity._stats.type}`);
+					this.sprite.setTexture(this.key);
 					this.sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
 					const bounds = this.entity._bounds2d;
 					this.sprite.setDisplaySize(bounds.x, bounds.y);

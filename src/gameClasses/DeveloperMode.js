@@ -147,7 +147,17 @@ var DeveloperMode = /** @class */ (function () {
     DeveloperMode.prototype.updateUnit = function (data) {
         // 1. broadcast update to all players
         // 2. force update its dimension/scale/layer/image
+        var textureChanged;
+        if (ige.game.data.unitTypes[data.typeId].cellSheet !== data.newData.cellSheet) {
+            textureChanged = true;
+        }
         ige.game.data.unitTypes[data.typeId] = data.newData;
+        if (ige.game.data.unitTypes[data.typeId].cellSheetChanges) {
+            ige.game.data.unitTypes[data.typeId].cellSheetChanges++;
+        }
+        else {
+            ige.game.data.unitTypes[data.typeId].cellSheetChanges = 1;
+        }
         ige.$$('unit').forEach(function (unit) {
             if (unit._stats.type === data.typeId) {
                 for (var i = 0; i < unit._stats.itemIds.length; i++) {
@@ -158,7 +168,7 @@ var DeveloperMode = /** @class */ (function () {
                     }
                 }
                 unit.changeUnitType(data.typeId, {}, false);
-                unit.emit('update-texture', 'using_skin');
+                unit.emit('update-texture', 'basic_texture_change');
             }
         });
         if (ige.isServer) {
@@ -200,11 +210,21 @@ var DeveloperMode = /** @class */ (function () {
         // 1. broadcast update to all players
         // 2. force update its dimension/scale/layer/image
         // 3. we may need to re-mount the item on unit
+        var textureChanged;
+        if (ige.game.data.itemTypes[data.typeId].cellSheet !== data.newData.cellSheet) {
+            textureChanged = true;
+        }
         ige.game.data.itemTypes[data.typeId] = data.newData;
+        if (ige.game.data.itemTypes[data.typeId].cellSheetChanges) {
+            ige.game.data.itemTypes[data.typeId].cellSheetChanges++;
+        }
+        else {
+            ige.game.data.itemTypes[data.typeId].cellSheetChanges = 1;
+        }
         ige.$$('item').forEach(function (item) {
             if (item._stats.itemTypeId === data.typeId) {
                 item.changeItemType(data.typeId, {}, false);
-                item.emit('update-texture', 'using_skin');
+                item.emit('update-texture', 'basic_texture_change');
             }
         });
         if (ige.isServer) {
@@ -223,7 +243,17 @@ var DeveloperMode = /** @class */ (function () {
     DeveloperMode.prototype.updateProjectile = function (data) {
         // 1. broadcast update to all players
         // 2. force update its dimension/scale/layer/image
+        var textureChanged;
+        if (ige.game.data.projectileTypes[data.typeId].cellSheet !== data.newData.cellSheet) {
+            textureChanged = true;
+        }
         ige.game.data.projectileTypes[data.typeId] = data.newData;
+        if (ige.game.data.projectileTypes[data.typeId].cellSheetChanges) {
+            ige.game.data.projectileTypes[data.typeId].cellSheetChanges++;
+        }
+        else {
+            ige.game.data.projectileTypes[data.typeId].cellSheetChanges = 1;
+        }
         ige.$$('projectile').forEach(function (projectile) {
             if (projectile._stats.type === data.typeId) {
                 projectile.changeProjectileType(data.typeId, {}, false);
