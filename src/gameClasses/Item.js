@@ -354,6 +354,7 @@ var Item = IgeEntityPhysics.extend({
 
 									// we don't create a Projectile entity for raycasts
 									if (this._stats.bulletType !== 'raycast') {
+										self.projectileData = ige.game.getAsset('projectileTypes', self._stats.projectileType);
 										var projectileData = Object.assign(
 											JSON.parse(JSON.stringify(self.projectileData)),
 											{
@@ -370,7 +371,6 @@ var Item = IgeEntityPhysics.extend({
 													playerAttributes: this._stats.damage.playerAttributes
 												}
 											});
-
 									 	var projectile = new Projectile(projectileData);
 										projectile.script.trigger('entityCreated');
 										ige.game.lastCreatedProjectileId = projectile.id();
