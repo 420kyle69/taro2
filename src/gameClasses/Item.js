@@ -98,17 +98,18 @@ var Item = IgeEntityPhysics.extend({
 		// behaviour handles:
 		this.addBehaviour('itemBehaviour', this._behaviour);
 		this.scaleDimensions(this._stats.width, this._stats.height);
+
 	},
 
 	updateBody: function (initTransform) {
 		var self = this;
 		var body = self._stats.currentBody;
-		
+
 		if (ige.isServer) {
-			if (this._stats.stateId == 'dropped') {			
+			if (this._stats.stateId == 'dropped') {
 				this.lifeSpan(this._stats.lifeSpan);
 				self.mount(ige.$('baseScene'));
-				this.streamMode(1);			
+				this.streamMode(1);
 			} else {
 				this.deathTime(undefined); // remove lifespan, so the entity stays indefinitely
 				if (body) {
@@ -121,8 +122,6 @@ var Item = IgeEntityPhysics.extend({
 			}
 		}
 
-
-		
 		if (body && body.type != 'none') {
 			IgeEntityPhysics.prototype.updateBody.call(self, initTransform);
 
@@ -317,21 +316,16 @@ var Item = IgeEntityPhysics.extend({
 								self.anchoredOffset = { x: 0, y: 0, rotate: 0 };
 							}
 
-							var offsetAngle = rotate;
-							if (self._stats.flip == 1) {
-								offsetAngle += Math.PI;
-							}
-
 							// item is flipped, then mirror the rotation
 							if (owner._stats.flip == 1) {
 								var bulletY = -self._stats.bulletStartPosition.y || 0;
 							} else {
 								var bulletY = self._stats.bulletStartPosition.y || 0;
 							}
-							
+
 							var bulletStartPosition = {
-								x: (owner._translate.x + self.anchoredOffset.x) + (self._stats.bulletStartPosition.x * Math.cos(offsetAngle)) + (bulletY * Math.sin(offsetAngle)),
-								y: (owner._translate.y + self.anchoredOffset.y) + (self._stats.bulletStartPosition.x * Math.sin(offsetAngle)) - (bulletY * Math.cos(offsetAngle))
+								x: (owner._translate.x + self.anchoredOffset.x) + (self._stats.bulletStartPosition.x * Math.cos(rotate)) + (bulletY * Math.sin(rotate)),
+								y: (owner._translate.y + self.anchoredOffset.y) + (self._stats.bulletStartPosition.x * Math.sin(rotate)) - (bulletY * Math.cos(rotate))
 							};
 
 							if (
