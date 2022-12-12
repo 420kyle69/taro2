@@ -116,8 +116,13 @@ var DevModeScene = /** @class */ (function (_super) {
         this.tileEditor = this.devModeTools.tileEditor;
         this.tilePalette = this.devModeTools.palette;
         this.regionEditor = this.devModeTools.regionEditor;
+        this.gameEditorWidgets = this.devModeTools.gameEditorWidgets;
     };
     DevModeScene.prototype.enterMapTab = function () {
+        if (this.gameEditorWidgets.length === 0) {
+            this.devModeTools.queryWidgets();
+            this.gameEditorWidgets = this.devModeTools.gameEditorWidgets;
+        }
         this.devModeTools.enterMapTab();
     };
     DevModeScene.prototype.leaveMapTab = function () {
@@ -126,6 +131,20 @@ var DevModeScene = /** @class */ (function (_super) {
     DevModeScene.prototype.pointerInsideMap = function (pointerX, pointerY, map) {
         return (0 <= pointerX && pointerX < map.width
             && 0 <= pointerY && pointerY < map.height);
+    };
+    DevModeScene.prototype.pointerInsideWidgets = function () {
+        var _this = this;
+        var inside = false;
+        this.gameEditorWidgets.forEach(function (widget) {
+            if (_this.input.activePointer.x >= widget.left
+                && _this.input.activePointer.x <= widget.right
+                && _this.input.activePointer.y >= widget.top
+                && _this.input.activePointer.y <= widget.bottom) {
+                inside = true;
+                return;
+            }
+        });
+        return inside;
     };
     DevModeScene.prototype.pointerInsidePalette = function () {
         return (this.input.activePointer.x > this.tilePalette.scrollBarContainer.x

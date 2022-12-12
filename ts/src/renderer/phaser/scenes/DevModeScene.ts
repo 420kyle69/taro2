@@ -6,6 +6,7 @@ class DevModeScene extends PhaserScene {
 	devModeTools: DevModeTools;
 	regionEditor: RegionEditor;
 	tileEditor: TileEditor;
+	gameEditorWidgets: Array<DOMRect>;
 
 	tilePalette: TilePalette;
 	tilemap: Phaser.Tilemaps.Tilemap;
@@ -138,9 +139,15 @@ class DevModeScene extends PhaserScene {
 		this.tileEditor = this.devModeTools.tileEditor;
 		this.tilePalette = this.devModeTools.palette;
 		this.regionEditor = this.devModeTools.regionEditor;
+		this.gameEditorWidgets = this.devModeTools.gameEditorWidgets;
 	}
 
 	enterMapTab (): void {
+		if (this.gameEditorWidgets.length === 0) {
+			this.devModeTools.queryWidgets();
+			this.gameEditorWidgets = this.devModeTools.gameEditorWidgets;
+		}
+
 		this.devModeTools.enterMapTab();
 	}
 
@@ -151,6 +158,22 @@ class DevModeScene extends PhaserScene {
 	pointerInsideMap(pointerX: number, pointerY: number, map: Phaser.Tilemaps.Tilemap): boolean {
 		return (0 <= pointerX && pointerX < map.width
 			&& 0 <= pointerY && pointerY < map.height);
+	}
+
+	pointerInsideWidgets(): boolean {
+		let inside = false;
+
+		this.gameEditorWidgets.forEach((widget: DOMRect) => {
+			if (this.input.activePointer.x >= widget.left
+				&& this.input.activePointer.x <= widget.right
+				&& this.input.activePointer.y >= widget.top
+				&& this.input.activePointer.y <= widget.bottom) {
+				inside = true;
+				return;
+			}
+		});
+
+		return inside;
 	}
 
 	pointerInsidePalette(): boolean {

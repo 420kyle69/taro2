@@ -4,6 +4,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	public palette: TilePalette;
 	public tileEditor: TileEditor;
 	public regionEditor: RegionEditor;
+	public gameEditorWidgets: Array<DOMRect>;
 
 	cursorButton: DevToolButton;
 	layerButtonsContainer: Phaser.GameObjects.Container;
@@ -26,6 +27,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		const palette = this.palette = new TilePalette(this.scene, this.scene.tileset, this.scene.rexUI)
 		this.tileEditor = new TileEditor(this.scene.gameScene, this.scene, this);
 		this.regionEditor = new RegionEditor(this.scene.gameScene, this.scene, this);
+		this.gameEditorWidgets = [];
 
 		this.keyBindings();
 
@@ -126,6 +128,11 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.layerButtonsContainer.setVisible(false);
 		this.toolButtonsContainer.setVisible(false);
 		this.regionEditor.hideRegions();
+	}
+
+	queryWidgets(): void {
+		this.gameEditorWidgets = Array.from(document.querySelectorAll<HTMLElement>('.game-editor-widget'))
+			.map((widget: HTMLElement) => widget.getBoundingClientRect());
 	}
 
 	keyBindings(): void {
