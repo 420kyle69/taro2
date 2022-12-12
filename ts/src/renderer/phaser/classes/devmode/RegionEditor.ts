@@ -103,11 +103,14 @@ class RegionEditor {
 	}
 
 	showClickedList(): void {
-		if (this.clickedList.length === 1) {
-			ige.addNewRegion && ige.addNewRegion(this.clickedList[0]);
-		} else if ( this.clickedList.length > 1 ) {
-			ige.showRegionList && ige.showRegionList(this.clickedList);
+		if (!this.devModeScene.pointerInsideWidgets()) {
+			if (this.clickedList.length === 1) {
+				ige.addNewRegion && ige.addNewRegion(this.clickedList[0]);
+			} else if ( this.clickedList.length > 1 ) {
+				ige.showRegionList && ige.showRegionList(this.clickedList);
+			}
 		}
+		
 		this.clickedList = [];
 	}
 
