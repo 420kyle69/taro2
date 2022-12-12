@@ -138,22 +138,9 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	keyBindings(): void {
 		const gameScene = this.scene.gameScene;
 		const keyboard = this.scene.input.keyboard;
-
-		/*const shouldPreventKeybindings = function () {
-			if (!$('#game-editor').is(':visible')) {
-				return false;
-			}
-			let activeElement = document.activeElement;
-			let inputs = ['input', 'select', 'textarea'];
-	
-			if (activeElement && inputs.indexOf(activeElement.tagName.toLowerCase()) !== -1 ) {
-				return true;
-			}
-			return false;
-		}*/
-
 		const tabKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, true);
 		tabKey.on('down', () => {
+			
 			if (ige.developerMode.shouldPreventKeybindings()) {
 				keyboard.disableGlobalCapture();
 			} else {
@@ -168,7 +155,6 @@ class DevModeTools extends Phaser.GameObjects.Container {
 				}
 			}
 		});
-
 		const plusKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.PLUS, false);
 		plusKey.on('down', () => {
 			if(ige.developerMode.active && ige.developerMode.activeTab !== 'play' && !ige.developerMode.shouldPreventKeybindings()) {

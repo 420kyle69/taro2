@@ -44,6 +44,28 @@ var DevModeScene = /** @class */ (function (_super) {
         ige.client.on('editRegion', function (data) {
             _this.regionEditor.edit(data);
         });
+        this.gameScene.input.on('pointerup', function (p) {
+            var draggedEntity = ige.unitBeingDragged;
+            // ige.unitBeingDragged = {typeId: 'unit id', playerId: 'xyz', angle: 0, entityType: 'unit'}
+            if (draggedEntity) {
+                // find position and call editEntity function.
+                var worldPoint = _this.gameScene.cameras.main.getWorldPoint(p.x, p.y);
+                var playerId = ige.game.getPlayerByClientId(ige.network.id()).id();
+                var data = {
+                    action: 'create',
+                    entityType: draggedEntity.entityType,
+                    typeId: draggedEntity.typeId,
+                    playerId: playerId,
+                    position: {
+                        x: worldPoint.x,
+                        y: worldPoint.y
+                    },
+                    angle: draggedEntity.angle
+                };
+                ige.developerMode.editEntity(data);
+                ige.unitBeingDragged = null;
+            }
+        });
         ige.client.on('default-zoom', function (height) {
             _this.defaultZoom = height;
         });

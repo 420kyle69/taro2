@@ -110,18 +110,6 @@ var DevModeTools = /** @class */ (function (_super) {
         var _this = this;
         var gameScene = this.scene.gameScene;
         var keyboard = this.scene.input.keyboard;
-        /*const shouldPreventKeybindings = function () {
-            if (!$('#game-editor').is(':visible')) {
-                return false;
-            }
-            let activeElement = document.activeElement;
-            let inputs = ['input', 'select', 'textarea'];
-    
-            if (activeElement && inputs.indexOf(activeElement.tagName.toLowerCase()) !== -1 ) {
-                return true;
-            }
-            return false;
-        }*/
         var tabKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, true);
         tabKey.on('down', function () {
             if (ige.developerMode.shouldPreventKeybindings()) {

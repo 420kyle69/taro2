@@ -77,13 +77,13 @@ var GameScene = /** @class */ (function (_super) {
         var _this = this;
         var data = ige.game.data;
         for (var type in data.unitTypes) {
-            this.loadEntity("unit/".concat(type), data.unitTypes[type]);
+            this.loadEntity("unit/".concat(data.unitTypes[type].cellSheet.url), data.unitTypes[type]);
         }
         for (var type in data.projectileTypes) {
-            this.loadEntity("projectile/".concat(type), data.projectileTypes[type]);
+            this.loadEntity("projectile/".concat(data.projectileTypes[type].cellSheet.url), data.projectileTypes[type]);
         }
         for (var type in data.itemTypes) {
-            this.loadEntity("item/".concat(type), data.itemTypes[type]);
+            this.loadEntity("item/".concat(data.itemTypes[type].cellSheet.url), data.itemTypes[type]);
         }
         data.map.tilesets.forEach(function (tileset) {
             var key = "tiles/".concat(tileset.name);

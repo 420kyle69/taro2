@@ -671,7 +671,6 @@ var Unit = IgeEntityPhysics.extend({
 	// hold an item given in the inventory slot. hide the last item
 	// @currentItemIndex refers to the selected item slot
 	changeItem: function (itemIndex) {
-
 		var self = this;
 
 		if (itemIndex == undefined) {
@@ -905,6 +904,14 @@ var Unit = IgeEntityPhysics.extend({
 				self.unitUi.updateAllAttributeBars();
 			}
 			self.inventory.update();
+		}
+
+		if (self.ai && self._stats.ai) {
+			if (self._stats.ai.enabled) {
+				self.ai.enable();
+			} else {
+				self.ai.disable();
+			}
 		}
 	},
 
@@ -1596,7 +1603,13 @@ var Unit = IgeEntityPhysics.extend({
 	updateTexture: function () {
 		var self = this;
 		var defaultUnit = ige.game.getAsset('unitTypes', self._stats.type);
-		self.emit('update-texture', self._stats.cellSheet.url !== defaultUnit.cellSheet.url);
+		var changeTextureType;
+		if (self._stats.cellSheet.url !== defaultUnit.cellSheet.url) {
+			changeTextureType = 'using_skin'
+		} else {
+			changeTextureType = 'normal'
+		}
+		self.emit('update-texture', changeTextureType);
 
 		var ownerPlayer = self.getOwner();
 		var isInvisible = self.shouldBeInvisible(ownerPlayer, ige.client.myPlayer);

@@ -748,8 +748,12 @@ const Client = IgeEventingClass.extend({
 		ige.network.define('userJoinedGame', this._onUserJoinedGame);
 
 		ige.network.define('trade', this._onTrade);
+
 		ige.network.define('editTile', this._onEditTile);
 		ige.network.define('editRegion', this._onEditRegion);
+		ige.network.define('updateUnit', this._onUpdateUnit);
+		ige.network.define('updateItem', this._onUpdateItem);
+		ige.network.define('updateProjectile', this._onUpdateProjectile);
 	},
 
 	login: function() {

@@ -51,6 +51,29 @@ class DevModeScene extends PhaserScene {
 			this.regionEditor.edit(data);
 		});
 
+		this.gameScene.input.on('pointerup', (p) => {
+			const draggedEntity = ige.unitBeingDragged;
+			// ige.unitBeingDragged = {typeId: 'unit id', playerId: 'xyz', angle: 0, entityType: 'unit'}
+			if (draggedEntity) {
+			    // find position and call editEntity function.
+				const worldPoint = this.gameScene.cameras.main.getWorldPoint(p.x, p.y);
+				const playerId = ige.game.getPlayerByClientId(ige.network.id()).id();
+				const data = {
+					action: 'create',
+					entityType: draggedEntity.entityType,
+					typeId: draggedEntity.typeId,
+					playerId: playerId,
+					position: {
+						x: worldPoint.x,
+						y: worldPoint.y
+					}, 
+					angle: draggedEntity.angle
+				}
+				ige.developerMode.editEntity(data);
+				ige.unitBeingDragged = null;
+			}
+		});
+		
 		ige.client.on('default-zoom', (height: number) => {
 			this.defaultZoom = height;
 		});
