@@ -164,10 +164,10 @@ class GameScene extends PhaserScene {
 			return;
 		}
 
-		if (skin) {
+		/*if (skin) {
 			cellSheet.columnCount = 1;
 			cellSheet.rowCount = 1;
-		}
+		}*/
 
 		if (cellSheet.columnCount != 1 || cellSheet.rowCount != 1) {
 			this.load.once(`filecomplete-image-${key}`, () => {

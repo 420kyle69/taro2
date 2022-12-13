@@ -132,10 +132,10 @@ var GameScene = /** @class */ (function (_super) {
         if (!cellSheet) { // skip if no cell sheet data
             return;
         }
-        if (skin) {
+        /*if (skin) {
             cellSheet.columnCount = 1;
             cellSheet.rowCount = 1;
-        }
+        }*/
         if (cellSheet.columnCount != 1 || cellSheet.rowCount != 1) {
             this.load.once("filecomplete-image-".concat(key), function () {
                 // create spritesheet,
