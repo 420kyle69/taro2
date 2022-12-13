@@ -125,17 +125,12 @@ var GameScene = /** @class */ (function (_super) {
         this.load.tilemapTiledJSON('map', this.patchMapData(data.map));
         BitmapFontManager.preload(this);
     };
-    GameScene.prototype.loadEntity = function (key, data, skin) {
+    GameScene.prototype.loadEntity = function (key, data) {
         var _this = this;
-        if (skin === void 0) { skin = false; }
         var cellSheet = data.cellSheet;
         if (!cellSheet) { // skip if no cell sheet data
             return;
         }
-        /*if (skin) {
-            cellSheet.columnCount = 1;
-            cellSheet.rowCount = 1;
-        }*/
         if (cellSheet.columnCount != 1 || cellSheet.rowCount != 1) {
             this.load.once("filecomplete-image-".concat(key), function () {
                 // create spritesheet,
