@@ -97,6 +97,16 @@ class GameScene extends PhaserScene {
 
 		const data = ige.game.data;
 
+		if (data.texturePack) {
+			// todo: multiatlas
+			this.load.atlas({
+				key: 'pack-result',
+				atlasURL: data.texturePack.atlasURL,
+				textureURL: data.texturePack.textureURL,
+				// baseURL: "cache.modd.io"
+			});
+		}
+
 		for (let type in data.unitTypes) {
 			this.loadEntity(`unit/${data.unitTypes[type].cellSheet.url}`, data.unitTypes[type]);
 		}
@@ -159,48 +169,50 @@ class GameScene extends PhaserScene {
 			cellSheet.rowCount = 1;
 		}
 
-		this.load.once(`filecomplete-image-${key}`, () => {
-			// create spritesheet,
-			// even if it has only one sprite
-			const texture = this.textures.get(key);
-			const width = texture.source[0].width;
-			const height = texture.source[0].height;
-			Phaser.Textures.Parsers.SpriteSheet(
-				texture,
-				0, 0, 0, width, height,
-				{
-					frameWidth: width / cellSheet.columnCount,
-					frameHeight: height / cellSheet.rowCount,
+		if (cellSheet.columnCount != 1 || cellSheet.rowCount != 1) {
+			this.load.once(`filecomplete-image-${key}`, () => {
+				// create spritesheet,
+				// even if it has only one sprite
+				const texture = this.textures.get(key);
+				const width = texture.source[0].width;
+				const height = texture.source[0].height;
+				Phaser.Textures.Parsers.SpriteSheet(
+					texture,
+					0, 0, 0, width, height,
+					{
+						frameWidth: width / cellSheet.columnCount,
+						frameHeight: height / cellSheet.rowCount,
+					}
+				);
+
+				// add animations
+				for (let animationsKey in data.animations) {
+
+					const animation = data.animations[animationsKey];
+					const frames = animation.frames;
+					const animationFrames: number[] = [];
+
+					for (let i = 0; i < frames.length; i++) {
+						// correction for 0-based indexing
+						animationFrames.push(frames[i] - 1);
+					}
+
+					if (animationFrames.length === 0) {
+						// avoid crash by giving it frame 0 if no frame data provided
+						animationFrames.push(0);
+					}
+
+					this.anims.create({
+						key: `${key}/${animationsKey}`,
+						frames: this.anims.generateFrameNumbers(key, {
+							frames: animationFrames
+						}),
+						frameRate: animation.framesPerSecond || 15,
+						repeat: (animation.loopCount - 1) // correction for loop/repeat values
+					});
 				}
-			);
-
-			// add animations
-			for (let animationsKey in data.animations) {
-
-				const animation = data.animations[animationsKey];
-				const frames = animation.frames;
-				const animationFrames: number[] = [];
-
-				for (let i = 0; i < frames.length; i++) {
-					// correction for 0-based indexing
-					animationFrames.push(frames[i] - 1);
-				}
-
-				if (animationFrames.length === 0) {
-					// avoid crash by giving it frame 0 if no frame data provided
-					animationFrames.push(0);
-				}
-
-				this.anims.create({
-					key: `${key}/${animationsKey}`,
-					frames: this.anims.generateFrameNumbers(key, {
-						frames: animationFrames
-					}),
-					frameRate: animation.framesPerSecond || 15,
-					repeat: (animation.loopCount - 1) // correction for loop/repeat values
-				});
-			}
-		});
+			});
+		}
 
 		this.load.image(key, this.patchAssetUrl(cellSheet.url));
 	}

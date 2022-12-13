@@ -58,7 +58,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 				this.scene.loadEntity(this.key, this.entity._stats, false);
 				this.scene.load.on(`filecomplete-image-${this.key}`, function cnsl() {
 					if (this && this.sprite) {
-						this.sprite.setTexture(this.key);
+						this.setTexture(this.key);
 						this.sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
 						const bounds = this.entity._bounds2d;
 						this.sprite.setDisplaySize(bounds.x, bounds.y);
@@ -66,7 +66,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 				}, this);
 			this.scene.load.start();
 			} else {
-				this.sprite.setTexture(this.key);
+				this.setTexture(this.key);
 				const bounds = this.entity._bounds2d;
 				this.sprite.setDisplaySize(bounds.x, bounds.y);
 			}
@@ -77,7 +77,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 				this.scene.loadEntity(this.key, this.entity._stats, true);
 				this.scene.load.on(`filecomplete-image-${this.key}`, function cnsl() {
 					if (this && this.sprite) {
-						this.sprite.setTexture(this.key);
+						this.setTexture(this.key);
 						this.sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
 						const bounds = this.entity._bounds2d;
 						this.sprite.setDisplaySize(bounds.x, bounds.y);
@@ -85,13 +85,13 @@ class PhaserUnit extends PhaserAnimatedEntity {
 				}, this);
 				this.scene.load.start();
 			} else {
-				this.sprite.setTexture(this.key);
+				this.setTexture(this.key);
 				const bounds = this.entity._bounds2d;
 				this.sprite.setDisplaySize(bounds.x, bounds.y);
 			}
 		} else {
 			this.key = `unit/${this.entity._stats.cellSheet.url}`;
-			this.sprite.setTexture(this.key);
+			this.setTexture(this.key);
 			const bounds = this.entity._bounds2d;
 			this.sprite.setDisplaySize(bounds.x, bounds.y);
 		}

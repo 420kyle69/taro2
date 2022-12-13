@@ -10,11 +10,9 @@ class PhaserAnimatedEntity extends PhaserEntity {
 		super(entity);
 		const bounds = entity._bounds2d;
 
-		const sprite = scene.add.sprite(0, 0, key);
-		this.sprite = sprite as Phaser.GameObjects.Sprite & IRenderProps;
-
-		sprite.setDisplaySize(bounds.x, bounds.y);
-		sprite.rotation = entity._rotate.z;
+		this.sprite = this.addSprite(key) as Phaser.GameObjects.Sprite & IRenderProps;
+		this.sprite.setDisplaySize(bounds.x, bounds.y);
+		this.sprite.rotation = entity._rotate.z;
 
 		Object.assign(this.evtListeners, {
 			'play-animation': entity.on('play-animation', this.playAnimation, this),
@@ -68,5 +66,21 @@ class PhaserAnimatedEntity extends PhaserEntity {
 		this.sprite = null;
 
 		super.destroy();
+	}
+
+	protected addSprite(key): Phaser.GameObjects.Sprite {
+		if (this.scene.textures.exists('pack-result') && this.scene.textures.getFrame('pack-result', key)) {
+			return this.scene.add.sprite(0, 0, 'pack-result', key);
+		} else {
+			return this.scene.add.sprite(0, 0, key);
+		}
+	}
+
+	protected setTexture(key) {
+		if (this.scene.textures.exists('pack-result') && this.scene.textures.getFrame('pack-result', key)) {
+			this.sprite.setTexture('pack-result', key);
+		} else {
+			this.sprite.setTexture(key);
+		}
 	}
 }
