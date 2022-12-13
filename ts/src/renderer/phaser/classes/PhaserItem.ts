@@ -9,7 +9,7 @@ class PhaserItem extends PhaserAnimatedEntity {
 		scene: GameScene,
 		entity: Item
 	) {
-		super(scene, entity, `item/${entity._stats.itemTypeId}`);
+		super(scene, entity, `item/${entity._stats.cellSheet.url}`);
 
 		this.sprite.visible = false;
 
@@ -21,7 +21,8 @@ class PhaserItem extends PhaserAnimatedEntity {
 
 		Object.assign(this.evtListeners, {
 			// this event is only emitted by height-based-zindex games
-			setOwnerUnit: entity.on('setOwnerUnit', this.setOwnerUnit, this)
+			setOwnerUnit: entity.on('setOwnerUnit', this.setOwnerUnit, this),
+			'update-texture': entity.on('update-texture', this.updateTexture, this),
 		});
 
 		if (scene.heightRenderer) {
@@ -37,6 +38,29 @@ class PhaserItem extends PhaserAnimatedEntity {
 		}
 
 		this.scene.renderedEntities.push(this.sprite);
+	}
+
+	protected updateTexture (data) {
+		if (data === 'basic_texture_change') {
+			this.sprite.anims.stop();
+			this.key = `item/${this.entity._stats.cellSheet.url}`;
+			if (!this.scene.textures.exists(this.key)) {
+				this.scene.loadEntity(this.key, this.entity._stats, false);
+				this.scene.load.on(`filecomplete-image-${this.key}`, function cnsl() {
+					if (this && this.sprite) {
+						this.sprite.setTexture(this.key);
+						this.sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
+						const bounds = this.entity._bounds2d;
+						this.sprite.setDisplaySize(bounds.x, bounds.y);
+					}
+				}, this);
+			this.scene.load.start();
+			} else {
+				this.sprite.setTexture(this.key);
+				const bounds = this.entity._bounds2d;
+				this.sprite.setDisplaySize(bounds.x, bounds.y);
+			}
+		}
 	}
 
 	protected depth (value: number): void {

@@ -2054,7 +2054,9 @@ var IgeEntity = IgeObject.extend({
 
 				this.tween.start(effect.tween, angle);
 
-			} else if (ige.isServer) {
+			}
+
+			if (ige.isServer) {
 				if (effect.runScript) {
 					ige.script.runScript(effect.runScript, {});
 				}
@@ -2158,7 +2160,7 @@ var IgeEntity = IgeObject.extend({
 				this.streamUpdateData([{ flip: flip }]);
 
 			} else if (ige.isClient) {
-				
+
 				this.emit('flip', [ flip ]);
 			}
 		}

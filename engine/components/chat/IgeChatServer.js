@@ -74,13 +74,13 @@ var IgeChatServer = {
 		if (sender == undefined) {
 			ige.network.send('igeChatMsg', msg, to);
 			return;
-		} 
+		}
 		else if (sender && sender._stats) {
-			
+
 			// prevent sending messages from banned/unverified users
 			if (!global.isDev && (sender._stats.banChat || (gameData && gameData.allowVerifiedUserToChat && !sender._stats.isUserVerified))) {
 				return;
-			} 
+			}
 			else if (this.isSpamming(from, message)) { // mute spammers
 				sender._stats.banChat = true;
 				msg.text = 'You have been muted for spamming.',
@@ -97,17 +97,17 @@ var IgeChatServer = {
 				playerId: sender.id()
 			});
 		}
-		
+
 		// do not show command messages that start with '/'. e.g. /ban user
 		if (message != undefined && message[0] == '/') {
-			return;	
+			return;
 		}
 
 		if (self._rooms[roomId]) {
 			var room = self._rooms[roomId];
 
 			if (message !== undefined) {
-				
+
 
 				if (msg.text && msg.text.length > 80) {
 					msg.text = msg.text.substr(0, 80);

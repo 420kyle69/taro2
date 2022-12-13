@@ -7,7 +7,7 @@ var Unit = IgeEntityPhysics.extend({
 		this.id(entityIdFromServer);
 		var self = this;
 		self.dob = Date.now();
-		
+
 		self.direction = {
 			x: 0,
 			y: 0
@@ -66,7 +66,7 @@ var Unit = IgeEntityPhysics.extend({
 		}
 
 		// initialize body & texture of the unit
-		self.changeUnitType(data.type, data.defaultData);
+		self.changeUnitType(data.type, data.defaultData, true);
 
 		if (self._stats.scale) {
 
@@ -671,7 +671,6 @@ var Unit = IgeEntityPhysics.extend({
 	// hold an item given in the inventory slot. hide the last item
 	// @currentItemIndex refers to the selected item slot
 	changeItem: function (itemIndex) {
-
 		var self = this;
 
 		if (itemIndex == undefined) {
@@ -740,7 +739,8 @@ var Unit = IgeEntityPhysics.extend({
 		this.setCurrentItem(itemIndex);
 	},
 
-	changeUnitType: function (type, defaultData) {
+	// added boolean isUnitCreation to tell whether the function call came from init or elsewhere
+	changeUnitType: function (type, defaultData, isUnitCreation) {
 		var self = this;
 		self.previousState = null;
 
@@ -757,49 +757,49 @@ var Unit = IgeEntityPhysics.extend({
 
 		self._stats.type = type;
 
-		var oldAttributes = self._stats.attributes;
+		if (!isUnitCreation) {
+			// adding this flag so that clients receiving entity data from onStreamCreate don't overwrite values with default data
+			// when they are created by a client that has just joined.
+			var oldAttributes = self._stats.attributes;
 
-		for (var i in data) {
-			if (i == 'name') { // don't overwrite unit's name with unit type name
-				continue;
-			}
-
-			self._stats[i] = data[i];
-		}
-
-		// if the new unit type has the same entity variables as the old unit type, then pass the values
-		var variables = {};
-		if (data.variables) {
-			for (var key in data.variables) {
-				if (self.variables && self.variables[key]) {
-					variables[key] = self.variables[key] == undefined ? data.variables[key] : self.variables[key];
-				} else {
-					variables[key] = data.variables[key];
+			for (var i in data) {
+				if (i == 'name') { // don't overwrite unit's name with unit type name
+					continue;
 				}
+
+				self._stats[i] = data[i];
 			}
-			self.variables = variables;
-		}
 
-		// deleting variables from stats bcz it causes json.stringify error due to variable of type unit,item,etc.
-		if (self._stats.variables) {
-			delete self._stats.variables;
-		}
-
-		if (data.attributes) {
-			for (var attrId in data.attributes) {
-				if (data.attributes[attrId]) {
-					var attributeValue = data.attributes[attrId].value; // default attribute value from new unit type
-					// if old unit type had a same attribute, then take the value from it.
-					if (oldAttributes && oldAttributes[attrId]) {
-						attributeValue = oldAttributes[attrId].value;
-						// attributeMax = oldAttributes[attrId].max;
-						// attributeMin = oldAttributes[attrId].min;
+			// if the new unit type has the same entity variables as the old unit type, then pass the values
+			var variables = {};
+			if (data.variables) {
+				for (var key in data.variables) {
+					if (self.variables && self.variables[key]) {
+						variables[key] = self.variables[key] == undefined ? data.variables[key] : self.variables[key];
+					} else {
+						variables[key] = data.variables[key];
 					}
+				}
+				self.variables = variables;
+			}
 
-					if (this._stats.attributes[attrId]) {
-						// this._stats.attributes[attrId].max = attributeMax;
-						// this._stats.attributes[attrId].min = attributeMin;
-						this._stats.attributes[attrId].value = Math.max(data.attributes[attrId].min, Math.min(data.attributes[attrId].max, parseFloat(attributeValue)));
+			// deleting variables from stats bcz it causes json.stringify error due to variable of type unit,item,etc.
+			if (self._stats.variables) {
+				delete self._stats.variables;
+			}
+
+			if (data.attributes) {
+				for (var attrId in data.attributes) {
+					if (data.attributes[attrId]) {
+						var attributeValue = data.attributes[attrId].value; // default attribute value from new unit type
+						// if old unit type had a same attribute, then take the value from it.
+						if (oldAttributes && oldAttributes[attrId]) {
+							attributeValue = oldAttributes[attrId].value;
+						}
+
+						if (this._stats.attributes[attrId]) {
+							this._stats.attributes[attrId].value = Math.max(data.attributes[attrId].min, Math.min(data.attributes[attrId].max, parseFloat(attributeValue)));
+						}
 					}
 				}
 			}
@@ -904,6 +904,14 @@ var Unit = IgeEntityPhysics.extend({
 				self.unitUi.updateAllAttributeBars();
 			}
 			self.inventory.update();
+		}
+
+		if (self.ai && self._stats.ai) {
+			if (self._stats.ai.enabled) {
+				self.ai.enable();
+			} else {
+				self.ai.disable();
+			}
 		}
 	},
 
@@ -1467,7 +1475,7 @@ var Unit = IgeEntityPhysics.extend({
 				switch (attrName) {
 					case 'type':
 						self._stats[attrName] = newValue;
-						this.changeUnitType(newValue);
+						this.changeUnitType(newValue, {}, false);
 						break;
 
 					case 'aiEnabled':
@@ -1595,7 +1603,13 @@ var Unit = IgeEntityPhysics.extend({
 	updateTexture: function () {
 		var self = this;
 		var defaultUnit = ige.game.getAsset('unitTypes', self._stats.type);
-		self.emit('update-texture', self._stats.cellSheet.url !== defaultUnit.cellSheet.url);
+		var changeTextureType;
+		if (self._stats.cellSheet.url !== defaultUnit.cellSheet.url) {
+			changeTextureType = 'using_skin'
+		} else {
+			changeTextureType = 'normal'
+		}
+		self.emit('update-texture', changeTextureType);
 
 		var ownerPlayer = self.getOwner();
 		var isInvisible = self.shouldBeInvisible(ownerPlayer, ige.client.myPlayer);
@@ -1648,6 +1662,7 @@ var Unit = IgeEntityPhysics.extend({
 				owner._stats.purchasables.splice(index, 1);
 			}
 			var purchasables = _.cloneDeep(owner._stats.purchasables);
+			equipPurchasable = _.pick(equipPurchasable, ['_id', 'image', 'owner', 'target', 'type']);
 			purchasables.push(equipPurchasable);
 			owner.streamUpdateData([
 				{ purchasables: purchasables },
@@ -1809,7 +1824,7 @@ var Unit = IgeEntityPhysics.extend({
 		if (ownerPlayer) {
 
 			// mobile control: rotate to rotation provided by the client
-			if (this._stats.controls.absoluteRotation) {
+			if (this._stats.controls && this._stats.controls.absoluteRotation) {
 				this.angleToTarget = ownerPlayer.absoluteAngle;
 
 			// desktop control: if this unit's not under a command, rotate to mouse xy coordinate

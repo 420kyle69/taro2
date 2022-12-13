@@ -1,8 +1,8 @@
 class RegionEditor {
 
-    gameScene: GameScene;
-    devModeScene: DevModeScene;
-    devModeTools: DevModeTools;
+	gameScene: GameScene;
+	devModeScene: DevModeScene;
+	devModeTools: DevModeTools;
 
 	regionDrawGraphics: Phaser.GameObjects.Graphics;
 	regionDrawStart: {x: number, y: number};
@@ -11,19 +11,19 @@ class RegionEditor {
 	clickedList: RegionData[];
 
 	constructor (
-        gameScene: GameScene, devModeScene: DevModeScene, devModeTools: DevModeTools
+		gameScene: GameScene, devModeScene: DevModeScene, devModeTools: DevModeTools
 	) {
-        this.gameScene = gameScene;
-        this.devModeScene = devModeScene;
-        this.devModeTools = devModeTools;
+		this.gameScene = gameScene;
+		this.devModeScene = devModeScene;
+		this.devModeTools = devModeTools;
 
-        gameScene.input.on('pointerdown', (pointer) => {
+		gameScene.input.on('pointerdown', (pointer) => {
 			if (this.regionTool) {
 				const worldPoint = this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
 				this.regionDrawStart = {
 					x: worldPoint.x,
 					y: worldPoint.y,
-				}
+				};
 			}
 		}, this);
 
@@ -40,8 +40,8 @@ class RegionEditor {
 				graphics.clear();
 				graphics.lineStyle(	2, 0x036ffc, 1);
 				graphics.strokeRect( this.regionDrawStart.x, this.regionDrawStart.y , width, height);
-				}
-			}, this);
+			}
+		}, this);
 
 		gameScene.input.on('pointerup', (pointer) => {
 			if (!pointer.leftButtonReleased()) return;
@@ -60,9 +60,9 @@ class RegionEditor {
 					y = this.regionDrawStart.y + height;
 					height *= -1;
 				}
-				ige.network.send('editRegion', {x: Math.trunc(x), 
-					y: Math.trunc(y), 
-					width: Math.trunc(width), 
+				ige.network.send('editRegion', {x: Math.trunc(x),
+					y: Math.trunc(y),
+					width: Math.trunc(width),
 					height: Math.trunc(height)});
 
 				this.regionDrawStart = null;
@@ -72,25 +72,24 @@ class RegionEditor {
 		this.clickedList = [];
 	}
 
-    edit (data: RegionData): void {
-        if (data.newName && data.name !== data.newName) {
-            const region = ige.regionManager.getRegionById(data.name);
-            if (region) region._stats.id = data.newName;
-            this.devModeScene.regions.forEach(region => {
-                if (region.name === data.name) {
-                    region.name = data.newName;
-                    region.updateLabel();
-                }
-            });
-        }
-        else if (data.showModal) {
-            ige.addNewRegion && ige.addNewRegion({name: data.name, x: data.x, y: data.y, width: data.width, height: data.height, userId: data.userId});
-        }
+	edit (data: RegionData): void {
+		if (data.newName && data.name !== data.newName) {
+			const region = ige.regionManager.getRegionById(data.name);
+			if (region) region._stats.id = data.newName;
+			this.devModeScene.regions.forEach(region => {
+				if (region.name === data.name) {
+					region.name = data.newName;
+					region.updateLabel();
+				}
+			});
+		} else if (data.showModal) {
+			ige.addNewRegion && ige.addNewRegion({name: data.name, x: data.x, y: data.y, width: data.width, height: data.height, userId: data.userId});
+		}
 
-        ige.updateRegionInReact && ige.updateRegionInReact(data);
-    }
+		ige.updateRegionInReact && ige.updateRegionInReact(data);
+	}
 
-    cancelDrawRegion(): void {
+	cancelDrawRegion(): void {
 		if (this.regionTool) {
 			this.regionDrawGraphics.clear();
 			this.regionTool = false;
@@ -104,27 +103,26 @@ class RegionEditor {
 	}
 
 	showClickedList(): void {
-		if (this.clickedList.length === 1) {
-			ige.addNewRegion && ige.addNewRegion(this.clickedList[0]);
-		} else if ( this.clickedList.length > 1 ) {
-			ige.showRegionList && ige.showRegionList(this.clickedList);
+		if (!this.devModeScene.pointerInsideWidgets()) {
+			if (this.clickedList.length === 1) {
+				ige.addNewRegion && ige.addNewRegion(this.clickedList[0]);
+			} else if ( this.clickedList.length > 1 ) {
+				ige.showRegionList && ige.showRegionList(this.clickedList);
+			}
 		}
+		
 		this.clickedList = [];
 	}
 
-    showRegions(): void {
-        this.devModeScene.regions.forEach(region => {
-            region.show();
-            region.label.visible = true;
-        });
-    }
-
-    hideRegions(): void {
-        this.devModeScene.regions.forEach(region => {
-			if (region.devModeOnly) {
-				region.hide();
-			}
-			region.label.visible = false;
+	showRegions(): void {
+		this.devModeScene.regions.forEach(region => {
+			region.show();
 		});
-    }
+	}
+
+	hideRegions(): void {
+		this.devModeScene.regions.forEach(region => {
+			region.hide();
+		});
+	}
 }

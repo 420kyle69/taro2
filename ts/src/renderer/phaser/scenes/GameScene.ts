@@ -6,7 +6,7 @@ class GameScene extends PhaserScene {
 	entityLayers: Phaser.GameObjects.Layer[] = [];
 	renderedEntities: TGameObject[] = [];
 	unitsList: PhaserUnit[] = [];
-
+	public tilemapLayers: Phaser.Tilemaps.TilemapLayer[];
 
 	public tilemap: Phaser.Tilemaps.Tilemap;
 	tileset: Phaser.Tilemaps.Tileset;
@@ -108,15 +108,15 @@ class GameScene extends PhaserScene {
 		}
 
 		for (let type in data.unitTypes) {
-			this.loadEntity(`unit/${type}`, data.unitTypes[type]);
+			this.loadEntity(`unit/${data.unitTypes[type].cellSheet.url}`, data.unitTypes[type]);
 		}
 
 		for (let type in data.projectileTypes) {
-			this.loadEntity(`projectile/${type}`, data.projectileTypes[type]);
+			this.loadEntity(`projectile/${data.projectileTypes[type].cellSheet.url}`, data.projectileTypes[type]);
 		}
 
 		for (let type in data.itemTypes) {
-			this.loadEntity(`item/${type}`, data.itemTypes[type]);
+			this.loadEntity(`item/${data.itemTypes[type].cellSheet.url}`, data.itemTypes[type]);
 		}
 
 		data.map.tilesets.forEach((tileset) => {
@@ -141,27 +141,19 @@ class GameScene extends PhaserScene {
 				const length = layer.data.length;
 				layer.width = data.map.width;
 				layer.height = data.map.height;
-				console.log('before', layer.name, length, tilesPerLayer)
+				console.log('before', layer.name, length, tilesPerLayer);
 				if (length < tilesPerLayer) {
 					for (let i = length + 1; i < tilesPerLayer; i++) {
 						layer.data[i] = 0;
 					}
 				}
-				console.log('after', layer.name, layer.data.length, tilesPerLayer)
+				console.log('after', layer.name, layer.data.length, tilesPerLayer);
 			}
 		});
 
 		this.load.tilemapTiledJSON('map', this.patchMapData(data.map));
 
-		this.load.bitmapFont('Arial_24px_bold_black',
-			'/assets/fonts/Arial_24px_bold_black_0.png',
-			'/assets/fonts/Arial_24px_bold_black.fnt'
-		);
-
-		this.load.bitmapFont('Arial_24px_bold_white',
-			'/assets/fonts/Arial_24px_bold_white_0.png',
-			'/assets/fonts/Arial_24px_bold_white.fnt'
-		);
+		BitmapFontManager.preload(this);
 	}
 
 	loadEntity (key: string, data: EntityData, skin = false): void {
@@ -226,15 +218,19 @@ class GameScene extends PhaserScene {
 	}
 
 	create (): void {
-		this.scene.launch('DevMode');
-		ige.client.rendererLoaded.resolve();
+		this.events.once('render', () => {
+			this.scene.launch('DevMode');
+			ige.client.rendererLoaded.resolve();
+		});
+
+		BitmapFontManager.create(this);
 
 		const map = this.tilemap = this.make.tilemap({ key: 'map' });
 
 		const data = ige.game.data;
 		const scaleFactor = ige.scaleMapDetails.scaleFactor;
 
-		console.log('map data', data.map)
+		console.log('map data', data.map);
 
 		data.map.tilesets.forEach((tileset) => {
 			const key = `tiles/${tileset.name}`;
@@ -242,8 +238,8 @@ class GameScene extends PhaserScene {
 			if (this.textures.exists(extrudedKey)) {
 				this.tileset = map.addTilesetImage(tileset.name, extrudedKey,
 					tileset.tilewidth, tileset.tileheight,
-					(tileset.margin || 0) + 1,
-					(tileset.spacing || 0) + 2
+					(tileset.margin || 0) + 2,
+					(tileset.spacing || 0) + 4
 				);
 			} else {
 				this.tileset = map.addTilesetImage(tileset.name, key);
@@ -253,11 +249,13 @@ class GameScene extends PhaserScene {
 		//this.loadMap();
 
 		const entityLayers = this.entityLayers;
+		this.tilemapLayers = [];
 		data.map.layers.forEach((layer) => {
 
 			if (layer.type === 'tilelayer') {
 				const tileLayer = map.createLayer(layer.name, map.tilesets, 0, 0);
 				tileLayer.setScale(scaleFactor.x, scaleFactor.y);
+				this.tilemapLayers.push(tileLayer);
 			}
 
 			entityLayers.push(this.add.layer());
@@ -299,7 +297,7 @@ class GameScene extends PhaserScene {
 		//temporary making each loaded texture not smoothed (later planned to add option for smoothing some of them)
 		Object.values(this.textures.list).forEach(val => {
 			val.setFilter(Phaser.Textures.FilterMode.NEAREST);
-		  });
+		});
 	}
 
 	private setZoomSize (height: number): void {
@@ -337,7 +335,7 @@ class GameScene extends PhaserScene {
 					const x = index % layer.width;
 					const y = Math.floor(index/layer.width);
 					map.putTileAt(tile, x, y, false, layerId);
-			});
+				});
 			}
 		});
 	}
@@ -382,7 +380,7 @@ class GameScene extends PhaserScene {
 	private extrude (
 		tileset: ArrayElement<GameComponent['data']['map']['tilesets']>,
 		sourceImage: HTMLImageElement,
-		extrusion = 1,
+		extrusion = 2,
 		color = '#ffffff00'
 	): HTMLCanvasElement {
 

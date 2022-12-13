@@ -84,26 +84,24 @@ var RegionEditor = /** @class */ (function () {
         this.clickedList.push(regionData);
     };
     RegionEditor.prototype.showClickedList = function () {
-        if (this.clickedList.length === 1) {
-            ige.addNewRegion && ige.addNewRegion(this.clickedList[0]);
-        }
-        else if (this.clickedList.length > 1) {
-            ige.showRegionList && ige.showRegionList(this.clickedList);
+        if (!this.devModeScene.pointerInsideWidgets()) {
+            if (this.clickedList.length === 1) {
+                ige.addNewRegion && ige.addNewRegion(this.clickedList[0]);
+            }
+            else if (this.clickedList.length > 1) {
+                ige.showRegionList && ige.showRegionList(this.clickedList);
+            }
         }
         this.clickedList = [];
     };
     RegionEditor.prototype.showRegions = function () {
         this.devModeScene.regions.forEach(function (region) {
             region.show();
-            region.label.visible = true;
         });
     };
     RegionEditor.prototype.hideRegions = function () {
         this.devModeScene.regions.forEach(function (region) {
-            if (region.devModeOnly) {
-                region.hide();
-            }
-            region.label.visible = false;
+            region.hide();
         });
     };
     return RegionEditor;

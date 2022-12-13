@@ -9,8 +9,8 @@ class PhaserAnimatedEntity extends PhaserEntity {
 	) {
 		super(entity);
 		const bounds = entity._bounds2d;
-		this.sprite = this.addSprite(key) as Phaser.GameObjects.Sprite & IRenderProps;
 
+		this.sprite = this.addSprite(key) as Phaser.GameObjects.Sprite & IRenderProps;
 		this.sprite.setDisplaySize(bounds.x, bounds.y);
 		this.sprite.rotation = entity._rotate.z;
 

@@ -176,6 +176,8 @@ var IgeInputComponent = IgeEventingClass.extend({
 
 		// 	}, 100);
 		// }
+
+		this.editorWidgets = [];
 	},
 	processInputOnEveryFps: function () {
 		var self = this;
@@ -394,12 +396,36 @@ var IgeInputComponent = IgeEventingClass.extend({
 		}
 		// Update the mouse position within the viewports
 		this._updateMouseData(event);
-		if ($('#chat-message-input').css('display') === 'block') {
-			$('#chat-message-input').css('display', 'none');
-		}
+
 		var mx = event.igeX - ige._bounds2d.x2;
 		var my = event.igeY - ige._bounds2d.y2;
 		var self = this;
+		
+		if (ige.developerMode) {
+			let inside = false;
+
+			if (this.editorWidgets.length === 0) {
+				this.editorWidgets = Array.from(document.querySelectorAll('.game-editor-widget')).map((widget) => widget.getBoundingClientRect());
+			}
+
+			this.editorWidgets.forEach((widget) => {
+				if (event.igeX >= widget.left &&
+					event.igeX <= widget.right &&
+					event.igeY >= widget.top &&
+					event.igeY <= widget.bottom) {
+					inside = true;
+					return;
+				}
+			});
+
+			if (inside) {
+				return;
+			}
+		}
+
+		if ($('#chat-message-input').css('display') === 'block') {
+			$('#chat-message-input').css('display', 'none');
+		}
 
 		if (event.button === 0) {
 			this._state[this.mouse.button1] = true;

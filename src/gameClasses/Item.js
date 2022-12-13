@@ -98,17 +98,18 @@ var Item = IgeEntityPhysics.extend({
 		// behaviour handles:
 		this.addBehaviour('itemBehaviour', this._behaviour);
 		this.scaleDimensions(this._stats.width, this._stats.height);
+
 	},
 
 	updateBody: function (initTransform) {
 		var self = this;
 		var body = self._stats.currentBody;
-		
+
 		if (ige.isServer) {
-			if (this._stats.stateId == 'dropped') {			
+			if (this._stats.stateId == 'dropped') {
 				this.lifeSpan(this._stats.lifeSpan);
 				self.mount(ige.$('baseScene'));
-				this.streamMode(1);			
+				this.streamMode(1);
 			} else {
 				this.deathTime(undefined); // remove lifespan, so the entity stays indefinitely
 				if (body) {
@@ -121,8 +122,6 @@ var Item = IgeEntityPhysics.extend({
 			}
 		}
 
-
-		
 		if (body && body.type != 'none') {
 			IgeEntityPhysics.prototype.updateBody.call(self, initTransform);
 
@@ -215,7 +214,11 @@ var Item = IgeEntityPhysics.extend({
 			return;
 		if (newOwner) {
 
-			if (newOwner._stats.currentItemIndex !== this._stats.slotIndex) {
+			if (
+				ige.isClient &&
+				newOwner == ige.client.selectedUnit &&
+				newOwner._stats.currentItemIndex !== this._stats.slotIndex
+			) {
 				this.setState('unselected');
 			}
 
@@ -313,21 +316,16 @@ var Item = IgeEntityPhysics.extend({
 								self.anchoredOffset = { x: 0, y: 0, rotate: 0 };
 							}
 
-							var offsetAngle = rotate;
-							if (self._stats.flip == 1) {
-								offsetAngle += Math.PI;
-							}
-
 							// item is flipped, then mirror the rotation
 							if (owner._stats.flip == 1) {
 								var bulletY = -self._stats.bulletStartPosition.y || 0;
 							} else {
 								var bulletY = self._stats.bulletStartPosition.y || 0;
 							}
-							
+
 							var bulletStartPosition = {
-								x: (owner._translate.x + self.anchoredOffset.x) + (self._stats.bulletStartPosition.x * Math.cos(offsetAngle)) + (bulletY * Math.sin(offsetAngle)),
-								y: (owner._translate.y + self.anchoredOffset.y) + (self._stats.bulletStartPosition.x * Math.sin(offsetAngle)) - (bulletY * Math.cos(offsetAngle))
+								x: (owner._translate.x + self.anchoredOffset.x) + (self._stats.bulletStartPosition.x * Math.cos(rotate)) + (bulletY * Math.sin(rotate)),
+								y: (owner._translate.y + self.anchoredOffset.y) + (self._stats.bulletStartPosition.x * Math.sin(rotate)) - (bulletY * Math.cos(rotate))
 							};
 
 							if (
@@ -350,6 +348,7 @@ var Item = IgeEntityPhysics.extend({
 
 									// we don't create a Projectile entity for raycasts
 									if (this._stats.bulletType !== 'raycast') {
+										self.projectileData = ige.game.getAsset('projectileTypes', self._stats.projectileType);
 										var projectileData = Object.assign(
 											JSON.parse(JSON.stringify(self.projectileData)),
 											{
@@ -366,7 +365,6 @@ var Item = IgeEntityPhysics.extend({
 													playerAttributes: this._stats.damage.playerAttributes
 												}
 											});
-
 									 	var projectile = new Projectile(projectileData);
 										projectile.script.trigger('entityCreated');
 										ige.game.lastCreatedProjectileId = projectile.id();
@@ -843,6 +841,130 @@ var Item = IgeEntityPhysics.extend({
 		return offset;
 	},
 
+	changeItemType: function (type, defaultData) {
+		var self = this;
+		var ownerUnit = ige.$(this._stats.ownerUnitId);
+
+		// removing passive attributes
+		if (self._stats.bonus && self._stats.bonus.passive) {
+			if (self._stats.slotIndex < this._stats.inventorySize || self._stats.bonus.passive.isDisabledInBackpack != true) {
+				ownerUnit.updateStats(self.id(), true);
+			}
+		} else {
+			ownerUnit.updateStats(self.id(), true);
+		}
+
+		self.previousState = null;
+
+		var data = ige.game.getAsset('itemTypes', type);
+		delete data.type // hotfix for dealing with corrupted game json that has unitData.type = "unitType". This is caused by bug in the game editor.
+
+		if (data == undefined) {
+			ige.script.errorLog('changeItemType: invalid data');
+			return;
+		}
+
+		self.script.load(data.scripts);
+		self._stats.itemTypeId = type;
+
+		for (var i in data) {
+			if (i == 'name') { // don't overwrite item's name with item type name
+				continue;
+			}
+			self._stats[i] = data[i];
+		}
+		// if the new item type has the same entity variables as the old item type, then pass the values
+		var variables = {};
+		if (data.variables) {
+			for (var key in data.variables) {
+				if (self.variables && self.variables[key]) {
+					variables[key] = self.variables[key] == undefined ? data.variables[key] : self.variables[key];
+				} else {
+					variables[key] = data.variables[key];
+				}
+			}
+			self.variables = variables;
+		}
+		// deleting variables from stats bcz it causes json.stringify error due to variable of type unit,item,etc.
+		if (self._stats.variables) {
+			delete self._stats.variables;
+		}
+		if (data.attributes) {
+			for (var attrId in data.attributes) {
+				if (data.attributes[attrId]) {
+					var attributeValue = data.attributes[attrId].value; // default attribute value from new unit type
+					if (this._stats.attributes[attrId]) {
+						this._stats.attributes[attrId].value = Math.max(data.attributes[attrId].min, Math.min(data.attributes[attrId].max, parseFloat(attributeValue)));
+					}
+				}
+			}
+		}
+
+		self.setState(this._stats.stateId, defaultData);
+
+		if (ige.isClient) {
+			self.updateTexture();
+			self._scaleTexture();
+		}
+
+		this._stats.ownerUnitId = ownerUnit.id();
+
+		// if the unit type cannot carry the item, then remove it.
+		if (ownerUnit.canCarryItem(self._stats) == false) {
+			self.remove();
+		} else if (ownerUnit.canUseItem(self._stats)) { // if unit cannot use the item, then unselect the item
+			if (self._stats.slotIndex != undefined && ownerUnit._stats.currentItemIndex != undefined) {
+				if (ownerUnit._stats.currentItemIndex === self._stats.slotIndex) {
+					self.setState('selected');
+				} else {
+					self.setState('unselected');
+				}
+			}
+		} else {
+			self.setState('unselected');
+		}
+		// adding back passive attributes
+		if (self._stats.bonus && self._stats.bonus.passive) {
+			if (self._stats.slotIndex < this._stats.inventorySize || self._stats.bonus.passive.isDisabledInBackpack != true) {
+				ownerUnit.updateStats(self.id());
+			}
+		} else {
+			ownerUnit.updateStats(self.id());
+		}
+
+		if (ige.isServer) {
+			var index = ownerUnit._stats.currentItemIndex;
+			//ownerUnit.changeItem(1);
+			ownerUnit.changeItem(index); // this will call change item on client for all units*/
+		} else if (ige.isClient) {
+			var zIndex = self._stats.currentBody && self._stats.currentBody['z-index'] || { layer: 3, depth: 3 };
+
+			if (zIndex && ige.network.id() == self._stats.clientId && !ige.game.data.heightBasedZIndex) {
+				// depth of this player's units should have +1 depth to avoid flickering on overlap
+				zIndex.depth++;
+			}
+
+			self.updateLayer();
+
+			/*var ownerPlayer = self.getOwner();
+			if (ownerPlayer && ownerPlayer._stats.selectedUnitId == self.id() && this._stats.clientId == ige.network.id()) {
+				self.inventory.createInventorySlots();
+			}*/
+
+			// destroy existing particle emitters first
+			for (var particleId in self.particleEmitters) {
+				if (self.particleEmitters[particleId]) {
+					self.particleEmitters[particleId].destroy();
+					delete self.particleEmitters[particleId];
+				}
+			}
+
+			ownerUnit.inventory.update();
+		}
+
+		//ownerUnit.changeUnitType(ownerUnit._stats.type);
+	},
+
 	remove: function () {
 		// traverse through owner's inventory, and remove itself
 		Item.prototype.log('remove item');
@@ -886,6 +1008,10 @@ var Item = IgeEntityPhysics.extend({
 				var newValue = data[attrName];
 
 				switch (attrName) {
+					case 'type':
+						//self._stats[attrName] = newValue;
+						//this.changeItemType(newValue, {}, false);
+						break;
 					case 'ownerUnitId':
 						this._stats[attrName] = newValue;
 						if (ige.isClient) {
@@ -1017,13 +1143,19 @@ var Item = IgeEntityPhysics.extend({
 
 			
 			if (ige.isServer || (ige.isClient && ige.client.selectedUnit == ownerUnit)) {
-				if (self._stats.controls && self._stats.controls.mouseBehaviour) {
-					if (self._stats.controls.mouseBehaviour.flipSpriteHorizontallyWRTMouse) {
+				if (
+					self._stats.controls &&
+					self._stats.controls.mouseBehaviour &&
+					self._stats.controls.mouseBehaviour.flipSpriteHorizontallyWRTMouse
+				) {
+					if (self._stats.controls.mouseBehaviour.rotateToFaceMouseCursor) {
 						if (rotate > 0 && rotate < Math.PI) {
 							self.flip(0);
 						} else {
 							self.flip(1);
 						}
+					} else {
+						self.flip(ownerUnit._stats.flip);
 					}
 				}
 			}

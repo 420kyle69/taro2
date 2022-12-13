@@ -65,7 +65,7 @@ var GameComponent = IgeEntity.extend({
 		if (data.purchasables) {
 			for (var i = 0; i < data.purchasables.length; i++) {
 				var purchasable = data.purchasables[i];
-				purchasable = _.pick(purchasable, ['_id', 'image', 'owner', 'target']);
+				purchasable = _.pick(purchasable, ['_id', 'image', 'owner', 'target', 'type']);
 				purchases.push(purchasable);
 			}
 		}
@@ -212,7 +212,7 @@ var GameComponent = IgeEntity.extend({
 
 	getPlayerByClientId: function (clientId) {
 		return ige.$$('player').find(function (player) {
-			return player._stats && player._stats.controlledBy != 'computer' && player._stats.clientId == clientId;
+			return player._stats && player._stats.controlledBy != 'computer' && player._stats.clientId && player._stats.clientId == clientId;
 		});
 	},
 

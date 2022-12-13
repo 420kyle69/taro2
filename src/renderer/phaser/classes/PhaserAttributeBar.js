@@ -22,11 +22,20 @@ var PhaserAttributeBar = /** @class */ (function (_super) {
         _this.unit = unit;
         var bar = _this.bar = scene.add.graphics();
         _this.add(bar);
-        var text = _this.text = scene.add.bitmapText(0, 0, 'Arial_24px_bold_black');
+        var text = _this.bitmapText = scene.add.bitmapText(0, 0, BitmapFontManager.font(scene, 'Arial', true, false, '#000000'));
         text.setCenterAlign();
-        text.setFontSize(16);
+        text.setFontSize(14);
         text.setOrigin(0.5);
+        text.letterSpacing = -0.8;
+        text.visible = false;
         _this.add(text);
+        if (scene.renderer.type === Phaser.CANVAS) {
+            var rt = _this.rtText = scene.add.renderTexture(0, 0);
+            rt.setOrigin(0.5);
+            rt.visible = false;
+            _this.add(rt);
+        }
+        // TODO batch entire attribute bar, not only text
         unit.attributesContainer.add(_this);
         return _this;
     }
@@ -54,7 +63,7 @@ var PhaserAttributeBar = /** @class */ (function (_super) {
         bar.setActive(false);
     };
     PhaserAttributeBar.prototype.render = function (data) {
-        var color = data.color, value = data.value, max = data.max, displayValue = data.displayValue, index = data.index, showWhen = data.showWhen, decimalPlaces = data.decimalPlaces;
+        var color = data.color, _a = data.value, value = _a === void 0 ? Number(data.value) : _a, max = data.max, displayValue = data.displayValue, index = data.index, showWhen = data.showWhen, decimalPlaces = data.decimalPlaces;
         this.name = data.type || data.key;
         var bar = this.bar;
         var w = 94;
@@ -69,11 +78,23 @@ var PhaserAttributeBar = /** @class */ (function (_super) {
         }
         bar.lineStyle(2, 0x000000, 1);
         bar.strokeRoundedRect(-w / 2, -h / 2, w, h, borderRadius);
-        var valueText = value.toFixed(decimalPlaces);
-        this.text.setText(displayValue ?
-            valueText :
-            '' // no text
-        );
+        var text = this.bitmapText;
+        var rt = this.rtText;
+        if (displayValue) {
+            text.setText(value.toFixed(decimalPlaces));
+            text.visible = !rt;
+            if (rt) {
+                rt.resize(text.width, text.height);
+                rt.clear();
+                rt.draw(text, text.width / 2, text.height / 2);
+                rt.visible = true;
+            }
+        }
+        else {
+            text.setText('');
+            text.visible = false;
+            rt && (rt.visible = false);
+        }
         this.y = (index - 1) * h * 1.1;
         this.resetFadeOut();
         if ((showWhen instanceof Array &&

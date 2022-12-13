@@ -1,4 +1,5 @@
 declare class IgeNetIoComponent extends IgeEventingClass implements IgeNetIoClient {
+	id(): string;
 
 	stream: IgeStreamComponent;
 

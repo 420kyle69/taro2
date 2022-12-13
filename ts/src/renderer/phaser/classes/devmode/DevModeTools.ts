@@ -4,10 +4,12 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	public palette: TilePalette;
 	public tileEditor: TileEditor;
 	public regionEditor: RegionEditor;
+	public gameEditorWidgets: Array<DOMRect>;
 
 	cursorButton: DevToolButton;
 	layerButtonsContainer: Phaser.GameObjects.Container;
 	layerButtons: DevToolButton[];
+	layerHideButtons: DevToolButton[];
 	toolButtonsContainer: Phaser.GameObjects.Container;
 	modeButtons: DevToolButton[];
 	brushButtons: DevToolButton[];
@@ -15,6 +17,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	COLOR_DARK: number;
 	COLOR_LIGHT: number;
 	COLOR_PRIMARY: number;
+	
 	
 	constructor(
 		scene: DevModeScene,
@@ -24,6 +27,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		const palette = this.palette = new TilePalette(this.scene, this.scene.tileset, this.scene.rexUI)
 		this.tileEditor = new TileEditor(this.scene.gameScene, this.scene, this);
 		this.regionEditor = new RegionEditor(this.scene.gameScene, this.scene, this);
+		this.gameEditorWidgets = [];
 
 		this.keyBindings();
 
@@ -52,12 +56,20 @@ class DevModeTools extends Phaser.GameObjects.Container {
 
 		this.layerButtons = [];
 		this.layerButtons.push (
-			new DevToolButton (this, 'floor', null, 0, 102, 120, layerButtonsContainer, this.switchLayer.bind(this), 0),
-			new DevToolButton (this, 'floor2', null, 0, 68, 120, layerButtonsContainer, this.switchLayer.bind(this), 1),
-			new DevToolButton (this, 'walls', null, 0, 34, 120, layerButtonsContainer, this.switchLayer.bind(this), 2),
-			new DevToolButton (this, 'trees', null, 0, 0, 120, layerButtonsContainer, this.switchLayer.bind(this), 3)
+			new DevToolButton (this, 'floor', null, 30, 102, 85, layerButtonsContainer, this.switchLayer.bind(this), 0),
+			new DevToolButton (this, 'floor2', null, 30, 68, 85, layerButtonsContainer, this.switchLayer.bind(this), 1),
+			new DevToolButton (this, 'walls', null, 30, 34, 85, layerButtonsContainer, this.switchLayer.bind(this), 2),
+			new DevToolButton (this, 'trees', null, 30, 0, 85, layerButtonsContainer, this.switchLayer.bind(this), 3)
 		)
 		this.layerButtons[0].highlight(true);
+		this.layerHideButtons = [];
+		this.layerHideButtons.push (
+			new DevToolButton (this, '', 'eyeopen', 0, 102, 35, layerButtonsContainer, this.hideLayer.bind(this), 0),
+			new DevToolButton (this, '', 'eyeopen', 0, 68, 35, layerButtonsContainer, this.hideLayer.bind(this), 1),
+			new DevToolButton (this, '', 'eyeopen', 0, 34, 35, layerButtonsContainer, this.hideLayer.bind(this), 2),
+			new DevToolButton (this, '', 'eyeopen', 0, 0, 35, layerButtonsContainer, this.hideLayer.bind(this), 3)
+		)
+		this.layerHideButtons[0].highlight(true);
 
 		const toolButtonsContainer = this.toolButtonsContainer = new Phaser.GameObjects.Container(scene);
 		toolButtonsContainer.x = palette.camera.x + palette.paletteWidth - 98;
@@ -118,25 +130,17 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.regionEditor.hideRegions();
 	}
 
+	queryWidgets(): void {
+		this.gameEditorWidgets = Array.from(document.querySelectorAll<HTMLElement>('.game-editor-widget'))
+			.map((widget: HTMLElement) => widget.getBoundingClientRect());
+	}
+
 	keyBindings(): void {
 		const gameScene = this.scene.gameScene;
 		const keyboard = this.scene.input.keyboard;
-
-		/*const shouldPreventKeybindings = function () {
-			if (!$('#game-editor').is(':visible')) {
-				return false;
-			}
-			let activeElement = document.activeElement;
-			let inputs = ['input', 'select', 'textarea'];
-	
-			if (activeElement && inputs.indexOf(activeElement.tagName.toLowerCase()) !== -1 ) {
-				return true;
-			}
-			return false;
-		}*/
-
 		const tabKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, true);
 		tabKey.on('down', () => {
+			
 			if (ige.developerMode.shouldPreventKeybindings()) {
 				keyboard.disableGlobalCapture();
 			} else {
@@ -151,7 +155,6 @@ class DevModeTools extends Phaser.GameObjects.Container {
 				}
 			}
 		});
-
 		const plusKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.PLUS, false);
 		plusKey.on('down', () => {
 			if(ige.developerMode.active && ige.developerMode.activeTab !== 'play' && !ige.developerMode.shouldPreventKeybindings()) {
@@ -254,6 +257,23 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.layerButtons.forEach(button => {
 			button.highlight(false);
 		});
+		this.layerHideButtons.forEach(button => {
+			button.highlight(false);
+		});
 		this.layerButtons[value].highlight(true);
+		this.layerHideButtons[value].highlight(true);
+	}
+
+	hideLayer(value: number): void {
+		this.switchLayer(value);
+		const scene = this.scene as any;
+		const tilemapLayers = scene.gameScene.tilemapLayers;
+		if (this.layerHideButtons[value].image.texture.key === 'eyeopen') {
+			this.layerHideButtons[value].image.setTexture('eyeclosed');
+			tilemapLayers[value].setVisible(false);
+		} else {
+			this.layerHideButtons[value].image.setTexture('eyeopen');
+			tilemapLayers[value].setVisible(true);
+		}
 	}
 }

@@ -2,5 +2,5 @@ declare class IgeObject extends IgeEventingClass {
 
 	destroy (): void;
 
-	id (id?: string): this | string;
+	id (id?: string): string;
 }

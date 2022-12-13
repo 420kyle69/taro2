@@ -31,9 +31,6 @@ class TilePalette extends Phaser.GameObjects.Container {
 		this.rexUI = rexUI;
 		this.scene = scene;
 
-		this.x = -1000;
-		this.y = 0;
-
 		// Load a map from a 2D array of tile indices
 		const paletteMap = [];
 		for (let i = 0; i < tileset.rows; i++) {
@@ -45,8 +42,10 @@ class TilePalette extends Phaser.GameObjects.Container {
 
 		// When loading from an array, make sure to specify the tileWidth and tileHeight
 		const map = this.map = this.scene.make.tilemap({ key: 'palette', data: paletteMap, tileWidth: 16, tileHeight: 16 });
-		const texturesLayer = this.texturesLayer = map.createLayer(0, tileset, 0, 0).setOrigin(0, 0).setInteractive().setPosition(this.x, this.y);
-		
+		const texturesLayer = this.texturesLayer = map.createLayer(0, tileset, 0, 0).setOrigin(0, 0).setInteractive();
+		this.x = -texturesLayer.width;
+		this.y = 0;
+		texturesLayer.setPosition(this.x, this.y);
 		scene.add.existing(texturesLayer);
 
 		const paletteWidth = this.paletteWidth = this.scene.sys.game.canvas.width * 0.25;

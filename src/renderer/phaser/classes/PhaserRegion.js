@@ -56,38 +56,56 @@ var PhaserRegion = /** @class */ (function (_super) {
     }
     PhaserRegion.prototype.getLabel = function () {
         if (!this.label) {
-            var label = this.label = this.scene.add.text(0, 0, 'cccccc');
+            var scene = this.scene;
+            var label = this.label = scene.add.bitmapText(0, 0, BitmapFontManager.font(scene, 'Verdana', false, ige.game.data.settings
+                .addStrokeToNameAndAttributes !== false, '#FFFFFF'), 'cccccc', 16);
+            label.letterSpacing = 1.3;
             label.visible = false;
             // needs to be created with the correct scale of the client
-            this.label.setScale(1.3);
+            label.setScale(1.3);
             label.setOrigin(0);
             this.gameObject.add(label);
+            if (scene.renderer.type === Phaser.CANVAS) {
+                var rt = this.rtLabel = scene.add.renderTexture(0, 0);
+                rt.visible = false;
+                rt.setScale(label.scale);
+                rt.setOrigin(0);
+                this.gameObject.add(rt);
+            }
         }
         return this.label;
     };
     PhaserRegion.prototype.updateLabel = function () {
         var label = this.getLabel();
-        label.visible = true;
-        label.setFontFamily('Verdana');
-        label.setFontSize(16);
-        label.setFontStyle('normal');
-        label.setFill('#fff');
-        var strokeThickness = ige.game.data.settings
-            .addStrokeToNameAndAttributes !== false ? 4 : 0;
-        label.setStroke('#000', strokeThickness);
-        label.setText(this.name || '');
+        var rt = this.rtLabel;
+        label.visible = !rt;
+        label.setText(BitmapFontManager.sanitize(label.fontData, this.name || ''));
         var stats = this.entity._stats.default;
         label.setPosition(5 - stats.width / 2, 5 - stats.height / 2);
+        if (rt) {
+            var tempScale = label.scale;
+            label.setScale(1);
+            rt.visible = true;
+            rt.resize(label.width, label.height);
+            rt.clear();
+            rt.draw(label, 0, 0);
+            label.setScale(tempScale);
+            rt.setPosition(label.x, label.y);
+        }
     };
     PhaserRegion.prototype.transform = function () {
         var gameObject = this.gameObject;
         var graphics = this.graphics;
         var label = this.label;
+        var rtLabel = this.rtLabel;
         var stats = this.entity._stats.default;
         gameObject.setSize(stats.width, stats.height);
         gameObject.setPosition(stats.x + stats.width / 2, stats.y + stats.height / 2);
         graphics.setPosition(-stats.width / 2, -stats.height / 2);
         label.setPosition(5 - stats.width / 2, 5 - stats.height / 2);
+        if (rtLabel) {
+            rtLabel.setPosition(label.x, label.y);
+        }
         graphics.clear();
         if (this.devModeOnly) {
             graphics.lineStyle(2, 0x11fa05, 
@@ -101,7 +119,22 @@ var PhaserRegion = /** @class */ (function (_super) {
             (stats.alpha && stats.alpha >= 0 && stats.alpha <= 1) ? stats.alpha : 0.4);
             graphics.fillRect(0, 0, stats.width, stats.height);
         }
-        ;
+    };
+    PhaserRegion.prototype.show = function () {
+        _super.prototype.show.call(this);
+        var label = this.label;
+        var rt = this.rtLabel;
+        label && (label.visible = !rt);
+        rt && (rt.visible = true);
+    };
+    PhaserRegion.prototype.hide = function () {
+        if (this.devModeOnly) {
+            _super.prototype.hide.call(this);
+        }
+        var label = this.label;
+        var rt = this.rtLabel;
+        label && (label.visible = false);
+        rt && (rt.visible = false);
     };
     PhaserRegion.prototype.destroy = function () {
         var _this = this;

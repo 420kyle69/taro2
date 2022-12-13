@@ -532,7 +532,11 @@ const Client = IgeEventingClass.extend({
 	},
 
 	setZoom: function(zoom) {
-		this.emit('zoom', zoom);
+		if (ige.developerMode.active && ige.developerMode.activeTab !== 'play') {
+			this.emit('default-zoom', zoom);
+		} else {
+			this.emit('zoom', zoom);
+		}
 	},
 
 	connectToServer: function() {
@@ -744,8 +748,12 @@ const Client = IgeEventingClass.extend({
 		ige.network.define('userJoinedGame', this._onUserJoinedGame);
 
 		ige.network.define('trade', this._onTrade);
+
 		ige.network.define('editTile', this._onEditTile);
 		ige.network.define('editRegion', this._onEditRegion);
+		ige.network.define('updateUnit', this._onUpdateUnit);
+		ige.network.define('updateItem', this._onUpdateItem);
+		ige.network.define('updateProjectile', this._onUpdateProjectile);
 	},
 
 	login: function() {
