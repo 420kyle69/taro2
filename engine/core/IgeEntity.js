@@ -1969,7 +1969,7 @@ var IgeEntity = IgeObject.extend({
 
 				if (effect.runScript) {
 					if (effect.isEntityScript) {
-						this.script.runScript(effect.runScript);
+						this.script.runScript(effect.runScript, {});
 					} else {
 						ige.script.runScript(effect.runScript, {});
 					}
