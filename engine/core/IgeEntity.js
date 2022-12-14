@@ -1967,6 +1967,14 @@ var IgeEntity = IgeObject.extend({
 					this.streamUpdateData([{ effect: type }]);
 				}
 
+				if (effect.runScript) {
+					if (effect.isEntityScript) {
+						this.script.runScript(effect.runScript);
+					} else {
+						ige.script.runScript(effect.runScript, {});
+					}
+				}
+
 			} else if (ige.isClient) {
 
 				if (!this.isRendering()) {
@@ -2054,12 +2062,6 @@ var IgeEntity = IgeObject.extend({
 
 				this.tween.start(effect.tween, angle);
 
-			}
-
-			if (ige.isServer) {
-				if (effect.runScript) {
-					ige.script.runScript(effect.runScript, {});
-				}
 			}
 		}
 	},
