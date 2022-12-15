@@ -104,11 +104,12 @@ var DevModeScene = /** @class */ (function (_super) {
         data.map.tilesets.forEach(function (tileset) {
             var key = "tiles/".concat(tileset.name);
             var extrudedKey = "extruded-".concat(key);
-            //if (this.textures.exists(extrudedKey)) {
-            _this.tileset = map.addTilesetImage(tileset.name, extrudedKey, tileset.tilewidth, tileset.tileheight, (tileset.margin || 0) + 2, (tileset.spacing || 0) + 4);
-            /*} else {
-                this.tileset = map.addTilesetImage(tileset.name, key);
-            }*/
+            if (_this.textures.exists(extrudedKey)) {
+                _this.tileset = map.addTilesetImage(tileset.name, extrudedKey, tileset.tilewidth, tileset.tileheight, (tileset.margin || 0) + 2, (tileset.spacing || 0) + 4);
+            }
+            else {
+                _this.tileset = map.addTilesetImage(tileset.name, key);
+            }
         });
         var gameMap = this.gameScene.tilemap;
         gameMap.currentLayerIndex = 0;
