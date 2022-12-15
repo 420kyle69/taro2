@@ -69,18 +69,22 @@ class PhaserAnimatedEntity extends PhaserEntity {
 	}
 
 	protected addSprite(key): Phaser.GameObjects.Sprite {
-		if (this.scene.textures.exists('pack-result') && this.scene.textures.getFrame('pack-result', key)) {
-			return this.scene.add.sprite(0, 0, 'pack-result', key);
-		} else {
-			return this.scene.add.sprite(0, 0, key);
+		if (this.scene.textures.exists('pack-result')) {
+			const frame = this.scene.textures.getFrame('pack-result', key);
+			if (frame && frame.name === key) {
+				return this.scene.add.sprite(0, 0, 'pack-result', key);
+			}
 		}
+		return this.scene.add.sprite(0, 0, key);
 	}
 
 	protected setTexture(key) {
-		if (this.scene.textures.exists('pack-result') && this.scene.textures.getFrame('pack-result', key)) {
-			this.sprite.setTexture('pack-result', key);
-		} else {
-			this.sprite.setTexture(key);
+		if (this.scene.textures.exists('pack-result')) {
+			const frame = this.scene.textures.getFrame('pack-result', key);
+			if (frame && frame.name === key) {
+				return this.sprite.setTexture('pack-result', key);
+			}
 		}
+		return this.sprite.setTexture(key);
 	}
 }
