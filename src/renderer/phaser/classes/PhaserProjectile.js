@@ -32,7 +32,7 @@ var PhaserProjectile = /** @class */ (function (_super) {
             this.sprite.anims.stop();
             this.key = "projectile/".concat(this.entity._stats.cellSheet.url);
             if (!this.scene.textures.exists(this.key)) {
-                this.scene.loadEntity(this.key, this.entity._stats, false);
+                this.scene.loadEntity(this.key, this.entity._stats);
                 this.scene.load.on("filecomplete-image-".concat(this.key), function cnsl() {
                     if (this && this.sprite) {
                         this.sprite.setTexture(this.key);

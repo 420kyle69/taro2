@@ -156,17 +156,12 @@ class GameScene extends PhaserScene {
 		BitmapFontManager.preload(this);
 	}
 
-	loadEntity (key: string, data: EntityData, skin = false): void {
+	loadEntity (key: string, data: EntityData): void {
 
 		const cellSheet = data.cellSheet;
 
 		if (!cellSheet) { // skip if no cell sheet data
 			return;
-		}
-
-		if (skin) {
-			cellSheet.columnCount = 1;
-			cellSheet.rowCount = 1;
 		}
 
 		if (cellSheet.columnCount != 1 || cellSheet.rowCount != 1) {

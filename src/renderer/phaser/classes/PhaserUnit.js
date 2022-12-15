@@ -46,7 +46,7 @@ var PhaserUnit = /** @class */ (function (_super) {
             this.sprite.anims.stop();
             this.key = "unit/".concat(this.entity._stats.cellSheet.url);
             if (!this.scene.textures.exists(this.key)) {
-                this.scene.loadEntity(this.key, this.entity._stats, false);
+                this.scene.loadEntity(this.key, this.entity._stats);
                 this.scene.load.on("filecomplete-image-".concat(this.key), function cnsl() {
                     if (this && this.sprite) {
                         this.setTexture(this.key);
@@ -67,7 +67,7 @@ var PhaserUnit = /** @class */ (function (_super) {
             this.sprite.anims.stop();
             this.key = "unit/".concat(this.entity._stats.cellSheet.url);
             if (!this.scene.textures.exists(this.key)) {
-                this.scene.loadEntity(this.key, this.entity._stats, true);
+                this.scene.loadEntity(this.key, this.entity._stats);
                 this.scene.load.on("filecomplete-image-".concat(this.key), function cnsl() {
                     if (this && this.sprite) {
                         this.setTexture(this.key);
