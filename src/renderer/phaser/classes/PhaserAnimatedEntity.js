@@ -58,20 +58,22 @@ var PhaserAnimatedEntity = /** @class */ (function (_super) {
         _super.prototype.destroy.call(this);
     };
     PhaserAnimatedEntity.prototype.addSprite = function (key) {
-        if (this.scene.textures.exists('pack-result') && this.scene.textures.getFrame('pack-result', key)) {
-            return this.scene.add.sprite(0, 0, 'pack-result', key);
+        if (this.scene.textures.exists('pack-result')) {
+            var frame = this.scene.textures.getFrame('pack-result', key);
+            if (frame && frame.name === key) {
+                return this.scene.add.sprite(0, 0, 'pack-result', key);
+            }
         }
-        else {
-            return this.scene.add.sprite(0, 0, key);
-        }
+        return this.scene.add.sprite(0, 0, key);
     };
     PhaserAnimatedEntity.prototype.setTexture = function (key) {
-        if (this.scene.textures.exists('pack-result') && this.scene.textures.getFrame('pack-result', key)) {
-            this.sprite.setTexture('pack-result', key);
+        if (this.scene.textures.exists('pack-result')) {
+            var frame = this.scene.textures.getFrame('pack-result', key);
+            if (frame && frame.name === key) {
+                return this.sprite.setTexture('pack-result', key);
+            }
         }
-        else {
-            this.sprite.setTexture(key);
-        }
+        return this.sprite.setTexture(key);
     };
     return PhaserAnimatedEntity;
 }(PhaserEntity));
