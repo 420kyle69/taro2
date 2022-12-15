@@ -14,8 +14,6 @@ class DevModeScene extends PhaserScene {
 
 	regions: PhaserRegion[];
 
-	defaultZoom: number;
-
 	constructor() {
 		super({ key: 'DevMode' });
 	}
@@ -23,15 +21,13 @@ class DevModeScene extends PhaserScene {
 	init (): void {
 		this.gameScene = ige.renderer.scene.getScene('Game');
 		this.regions = [];
-		this.defaultZoom = (this.gameScene.zoomSize / 2.15);
 
 		ige.client.on('unlockCamera', () => {
-			this.defaultZoom = (this.gameScene.zoomSize / 2.15);
 			this.gameScene.cameras.main.stopFollow();
 		});
 
 		ige.client.on('lockCamera', () => {
-			ige.client.emit('zoom', this.defaultZoom);
+			ige.client.emit('zoom', ige.client.zoom);
 			if (this.gameScene.cameraTarget) this.gameScene.cameras.main.startFollow(this.gameScene.cameraTarget, false, 0.05, 0.05);
 		});
 
@@ -72,10 +68,6 @@ class DevModeScene extends PhaserScene {
 				ige.developerMode.editEntity(data);
 				ige.unitBeingDragged = null;
 			}
-		});
-		
-		ige.client.on('default-zoom', (height: number) => {
-			this.defaultZoom = height;
 		});
 	}
 

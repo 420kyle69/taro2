@@ -8,6 +8,7 @@ declare class Client extends IgeEventingClass {
 
 	isZooming: boolean;
 	developerClientIds: any;
+	zoom: number;
 
 	constructor(options?: object);
 }

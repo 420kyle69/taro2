@@ -22,13 +22,11 @@ var DevModeScene = /** @class */ (function (_super) {
         var _this = this;
         this.gameScene = ige.renderer.scene.getScene('Game');
         this.regions = [];
-        this.defaultZoom = (this.gameScene.zoomSize / 2.15);
         ige.client.on('unlockCamera', function () {
-            _this.defaultZoom = (_this.gameScene.zoomSize / 2.15);
             _this.gameScene.cameras.main.stopFollow();
         });
         ige.client.on('lockCamera', function () {
-            ige.client.emit('zoom', _this.defaultZoom);
+            ige.client.emit('zoom', ige.client.zoom);
             if (_this.gameScene.cameraTarget)
                 _this.gameScene.cameras.main.startFollow(_this.gameScene.cameraTarget, false, 0.05, 0.05);
         });
@@ -65,9 +63,6 @@ var DevModeScene = /** @class */ (function (_super) {
                 ige.developerMode.editEntity(data);
                 ige.unitBeingDragged = null;
             }
-        });
-        ige.client.on('default-zoom', function (height) {
-            _this.defaultZoom = height;
         });
     };
     DevModeScene.prototype.preload = function () {
