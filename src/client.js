@@ -533,7 +533,9 @@ const Client = IgeEventingClass.extend({
 
 	setZoom: function(zoom) {
 		this.zoom = zoom;
-		if (ige.developerMode.active && ige.developerMode.activeTab === 'play') {
+		if (ige.developerMode.active && ige.developerMode.activeTab !== 'play') {
+			
+		} else {
 			this.emit('zoom', zoom);
 		}
 	},
