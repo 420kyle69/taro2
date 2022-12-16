@@ -37,6 +37,8 @@ var PhaserAttributeBar = /** @class */ (function (_super) {
         }
         // TODO batch entire attribute bar, not only text
         unit.attributesContainer.add(_this);
+        unit.attributesContainer.height = 16;
+        unit.updateGameObjectSize();
         return _this;
     }
     PhaserAttributeBar.get = function (unit) {
@@ -51,6 +53,8 @@ var PhaserAttributeBar = /** @class */ (function (_super) {
         bar.setActive(true);
         bar.unit = unit;
         unit.attributesContainer.add(bar);
+        unit.attributesContainer.height += 16;
+        unit.updateGameObjectSize();
         bar.setVisible(true);
         return bar;
     };
@@ -58,6 +62,8 @@ var PhaserAttributeBar = /** @class */ (function (_super) {
         bar.resetFadeOut();
         bar.setVisible(false);
         bar.unit.attributesContainer.remove(bar);
+        bar.unit.attributesContainer.height -= 16;
+        bar.unit.updateGameObjectSize();
         bar.unit = null;
         bar.name = null;
         bar.setActive(false);

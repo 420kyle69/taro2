@@ -27,8 +27,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 
 		this.gameObject = gameObject as Phaser.GameObjects.Container & IRenderProps;
 
-		const containerSize = Math.max(this.sprite.displayHeight, this.sprite.displayWidth);
-		gameObject.setSize(containerSize, containerSize);
+		this.updateGameObjectSize();
 		// this is hbz-index logic but could be useful for other container operations
 		this.gameObject.spriteHeight2 = this.sprite.displayHeight / 2;
 
@@ -137,6 +136,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		if (this.attributesContainer) {
 			this.updateAttributesOffset();
 		}
+		this.updateGameObjectSize();
 	}
 
 	private updateLabelOffset (): void {
@@ -145,11 +145,27 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		if (this.rtLabel) {
 			this.rtLabel.y = this.label.y;
 		}
+		this.updateGameObjectSize();
 	}
 
 	private updateAttributesOffset (): void {
 		const {displayHeight, displayWidth} = this.sprite;
 		this.attributesContainer.y = 25 + (displayHeight + displayWidth) / 4;
+		this.updateGameObjectSize();
+	}
+
+	public updateGameObjectSize (): void {
+		const containerSize = Math.max(this.sprite.displayHeight, this.sprite.displayWidth);
+		let height = containerSize;
+		if (this.attributesContainer) {
+			height += this.attributesContainer.height;
+			height += this.attributesContainer.y;
+		}
+		if (this.label) {
+			height += this.label.height;
+			height -= this.label.y;
+		}
+		this.gameObject.setSize(containerSize, containerSize + height);
 	}
 
 	private follow (): void {
@@ -227,6 +243,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		}
 
 		this.updateLabelOffset();
+		this.updateGameObjectSize();
 	}
 
 	private showLabel (): void {

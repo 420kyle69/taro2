@@ -21,8 +21,7 @@ var PhaserUnit = /** @class */ (function (_super) {
         var translate = entity._translate;
         var gameObject = scene.add.container(translate.x, translate.y, [_this.sprite]);
         _this.gameObject = gameObject;
-        var containerSize = Math.max(_this.sprite.displayHeight, _this.sprite.displayWidth);
-        gameObject.setSize(containerSize, containerSize);
+        _this.updateGameObjectSize();
         // this is hbz-index logic but could be useful for other container operations
         _this.gameObject.spriteHeight2 = _this.sprite.displayHeight / 2;
         Object.assign(_this.evtListeners, {
@@ -120,6 +119,7 @@ var PhaserUnit = /** @class */ (function (_super) {
         if (this.attributesContainer) {
             this.updateAttributesOffset();
         }
+        this.updateGameObjectSize();
     };
     PhaserUnit.prototype.updateLabelOffset = function () {
         var _a = this.sprite, displayHeight = _a.displayHeight, displayWidth = _a.displayWidth;
@@ -127,10 +127,25 @@ var PhaserUnit = /** @class */ (function (_super) {
         if (this.rtLabel) {
             this.rtLabel.y = this.label.y;
         }
+        this.updateGameObjectSize();
     };
     PhaserUnit.prototype.updateAttributesOffset = function () {
         var _a = this.sprite, displayHeight = _a.displayHeight, displayWidth = _a.displayWidth;
         this.attributesContainer.y = 25 + (displayHeight + displayWidth) / 4;
+        this.updateGameObjectSize();
+    };
+    PhaserUnit.prototype.updateGameObjectSize = function () {
+        var containerSize = Math.max(this.sprite.displayHeight, this.sprite.displayWidth);
+        var height = containerSize;
+        if (this.attributesContainer) {
+            height += this.attributesContainer.height;
+            height += this.attributesContainer.y;
+        }
+        if (this.label) {
+            height += this.label.height;
+            height -= this.label.y;
+        }
+        this.gameObject.setSize(containerSize, containerSize + height);
     };
     PhaserUnit.prototype.follow = function () {
         var camera = this.scene.cameras.main;
@@ -178,6 +193,7 @@ var PhaserUnit = /** @class */ (function (_super) {
             label.setScale(tempScale);
         }
         this.updateLabelOffset();
+        this.updateGameObjectSize();
     };
     PhaserUnit.prototype.showLabel = function () {
         var label = this.getLabel();
