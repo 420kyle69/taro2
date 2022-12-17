@@ -54,7 +54,7 @@ var ScriptComponent = IgeEntity.extend({
 			// var actions = JSON.parse(JSON.stringify(this.scripts[scriptId].actions));
 			var actions = self.getScriptActions(scriptId);
 			///
-			console.log(scriptId, ': ', actions);
+			// console.log(scriptId, ': ', actions, params);
 			///
 			if (actions) {
 				var cmd = self.action.run(actions, params);

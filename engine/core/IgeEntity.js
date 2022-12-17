@@ -1963,11 +1963,10 @@ var IgeEntity = IgeObject.extend({
 			var effect = this._stats.effects[type];
 
 			if (effect.runScript) {
-				if (effect.isEntityScript) {
-					this.script.runScript(effect.runScript, {});
-				} else {
-					ige.script.runScript(effect.runScript, {});
-				}
+
+				const triggeredBy = {};
+				triggeredBy[`${this._category}Id`] = this._id;
+				this.script.runScript(effect.runScript, { triggeredBy });
 			}
 
 			if (ige.isServer) {
