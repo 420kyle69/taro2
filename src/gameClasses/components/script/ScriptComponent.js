@@ -48,6 +48,7 @@ var ScriptComponent = IgeEntity.extend({
 	runScript: function (scriptId, params = {}) {
 		var self = this;
 
+		// for logging script history
 		self.currentScriptId = scriptId;
 		if (this.scripts && this.scripts[scriptId]) {
 			// var actions = JSON.parse(JSON.stringify(this.scripts[scriptId].actions));
@@ -62,6 +63,16 @@ var ScriptComponent = IgeEntity.extend({
 					return;
 				}
 			}
+		// check if we are trying to run a global script from inside entity scripts
+
+		// if we are running from entity script and the script was not found
+		// then check for the script on the global script component
+		} else if (
+			this._entity &&
+			this._entity._id &&
+			this._entity._id !== 'ige'
+		) {
+			ige.script.runScript(scriptId, params);
 		}
 	},
 
