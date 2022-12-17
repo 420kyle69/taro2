@@ -202,14 +202,12 @@ var AbilityComponent = IgeEntity.extend({
 						}
 
 						ige.game.lastCastingUnitId = self._entity.id();
-						
+
 						if (ability.isEntityScript) {
 							self._entity.script.runScript(ability.scriptName, { triggeredBy: { unitId: self._entity.id()} }); // entity script
 						} else {
 							ige.script.runScript(ability.scriptName, { triggeredBy: { unitId: self._entity.id()} }); // global script
 						}
-						
-
 					}
 				}
 			} else {
