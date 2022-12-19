@@ -567,7 +567,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 		});
 		this._socketServerHttp = new this._websocket.Server({
 			server: this._httpServer,
-			maxPayload: 10 * 1024, // 10 KB - The maximum allowed message size
+			maxPayload: 100 * 1024, // 100 KB - The maximum allowed message size
 		});
 		// this._socketServerHttp = new this._websocket.WebSocketServer({
 		// 	server: this._httpServer
