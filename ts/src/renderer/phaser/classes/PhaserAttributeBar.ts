@@ -17,6 +17,8 @@ class PhaserAttributeBar extends Phaser.GameObjects.Container {
 
 		bar.unit = unit;
 		unit.attributesContainer.add(bar);
+		unit.attributesContainer.height += 16;
+		unit.updateGameObjectSize();
 		bar.setVisible(true);
 
 		return bar;
@@ -28,6 +30,8 @@ class PhaserAttributeBar extends Phaser.GameObjects.Container {
 
 		bar.setVisible(false);
 		bar.unit.attributesContainer.remove(bar);
+		bar.unit.attributesContainer.height -= 16;
+		bar.unit.updateGameObjectSize();
 		bar.unit = null;
 
 		bar.name = null;
@@ -71,6 +75,8 @@ class PhaserAttributeBar extends Phaser.GameObjects.Container {
 		// TODO batch entire attribute bar, not only text
 
 		unit.attributesContainer.add(this);
+		unit.attributesContainer.height = 16;
+		unit.updateGameObjectSize();
 	}
 
 	render (data: AttributeData): void {

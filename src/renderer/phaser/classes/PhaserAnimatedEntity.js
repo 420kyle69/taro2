@@ -57,21 +57,26 @@ var PhaserAnimatedEntity = /** @class */ (function (_super) {
         this.sprite = null;
         _super.prototype.destroy.call(this);
     };
-    PhaserAnimatedEntity.prototype.addSprite = function (key) {
+    PhaserAnimatedEntity.prototype.useTexturePack = function (key) {
         if (this.scene.textures.exists('pack-result')) {
             var frame = this.scene.textures.getFrame('pack-result', key);
             if (frame && frame.name === key) {
-                return this.scene.add.sprite(0, 0, 'pack-result', key);
+                if (this.entity._stats.cellSheet.columnCount === 1 && this.entity._stats.cellSheet.rowCount === 1) {
+                    return true;
+                }
             }
+        }
+        return false;
+    };
+    PhaserAnimatedEntity.prototype.addSprite = function (key) {
+        if (this.useTexturePack(key)) {
+            return this.scene.add.sprite(0, 0, 'pack-result', key);
         }
         return this.scene.add.sprite(0, 0, key);
     };
     PhaserAnimatedEntity.prototype.setTexture = function (key) {
-        if (this.scene.textures.exists('pack-result')) {
-            var frame = this.scene.textures.getFrame('pack-result', key);
-            if (frame && frame.name === key) {
-                return this.sprite.setTexture('pack-result', key);
-            }
+        if (this.useTexturePack(key)) {
+            return this.sprite.setTexture('pack-result', key);
         }
         return this.sprite.setTexture(key);
     };

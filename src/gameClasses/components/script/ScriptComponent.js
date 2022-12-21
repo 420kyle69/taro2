@@ -4,8 +4,8 @@ var ScriptComponent = IgeEntity.extend({
 
 	init: function (entity) {
 		var self = this;
-		
-		self._entity = entity
+
+		self._entity = entity;
 		// self.logStr = "";
 		self.scripts = undefined;
 		self.entryCount = 0;
@@ -36,9 +36,9 @@ var ScriptComponent = IgeEntity.extend({
 				for (j = 0; j < script.triggers.length; j++) {
 					var trigger = script.triggers[j];
 					if (this.triggeredScripts[trigger.type] == undefined) {
-						this.triggeredScripts[trigger.type] = [scriptId]
+						this.triggeredScripts[trigger.type] = [scriptId];
 					} else {
-						this.triggeredScripts[trigger.type].push(scriptId)
+						this.triggeredScripts[trigger.type].push(scriptId);
 					}
 				}
 			}
@@ -48,10 +48,14 @@ var ScriptComponent = IgeEntity.extend({
 	runScript: function (scriptId, params = {}) {
 		var self = this;
 
+		// for logging script history
 		self.currentScriptId = scriptId;
 		if (this.scripts && this.scripts[scriptId]) {
 			// var actions = JSON.parse(JSON.stringify(this.scripts[scriptId].actions));
 			var actions = self.getScriptActions(scriptId);
+			///
+			// console.log(scriptId, ': ', actions, params);
+			///
 			if (actions) {
 				var cmd = self.action.run(actions, params);
 				if (cmd == 'return') {
@@ -59,9 +63,17 @@ var ScriptComponent = IgeEntity.extend({
 					return;
 				}
 			}
-		}
+		// check if we are trying to run a global script from inside entity scripts
 
-		
+		// if we are running from entity script and the script was not found
+		// then check for the script on the global script component
+		} else if (
+			this._entity &&
+			this._entity._id &&
+			this._entity._id !== 'ige'
+		) {
+			ige.script.runScript(scriptId, params);
+		}
 	},
 
 	getScriptActions: function (scriptId) {
@@ -78,23 +90,22 @@ var ScriptComponent = IgeEntity.extend({
 		}
 		return null;
 	},
-	
+
 	/* trigger and run all of the corresponding script(s) */
 	trigger: function (triggerName, triggeredBy) {
-		
-		
+
 		if (ige.isServer) {
-			var now = Date.now();		
+			var now = Date.now();
 			var lastTriggerRunTime = now - ige.lastTriggerRanAt;
 
 			if (ige.lastTrigger) {
 				if (ige.triggerProfiler[ige.lastTrigger]) {
-					var count = ige.triggerProfiler[ige.lastTrigger].count;					
-					ige.triggerProfiler[ige.lastTrigger].count++;					
-					ige.triggerProfiler[ige.lastTrigger].avgTime = ((ige.triggerProfiler[ige.lastTrigger].avgTime * count) + lastTriggerRunTime ) / (count + 1)
-					ige.triggerProfiler[ige.lastTrigger].totalTime += lastTriggerRunTime					 
+					var count = ige.triggerProfiler[ige.lastTrigger].count;
+					ige.triggerProfiler[ige.lastTrigger].count++;
+					ige.triggerProfiler[ige.lastTrigger].avgTime = ((ige.triggerProfiler[ige.lastTrigger].avgTime * count) + lastTriggerRunTime ) / (count + 1);
+					ige.triggerProfiler[ige.lastTrigger].totalTime += lastTriggerRunTime;
 				} else {
-					ige.triggerProfiler[ige.lastTrigger] = {count: 1, avgTime: lastTriggerRunTime, totalTime: lastTriggerRunTime}
+					ige.triggerProfiler[ige.lastTrigger] = {count: 1, avgTime: lastTriggerRunTime, totalTime: lastTriggerRunTime};
 				}
 			}
 
@@ -102,10 +113,10 @@ var ScriptComponent = IgeEntity.extend({
 			ige.lastTriggerRanAt = now;
 		}
 
-		let scriptIds = this.triggeredScripts[triggerName]
-		
+		let scriptIds = this.triggeredScripts[triggerName];
+
 		for (var i in scriptIds) {
-			let scriptId = scriptIds[i]
+			let scriptId = scriptIds[i];
 			this.scriptLog(`\ntrigger: ${triggerName}`);
 
 			var localVariables = {
@@ -165,7 +176,7 @@ var ScriptComponent = IgeEntity.extend({
 		var record = `script '${scriptName}' in Action '${action}'`;
 		self.last50Actions.push(record);
 	},
-	
+
 	errorLog: function (message) {
 		if (this.scripts) {
 			var script = this.scripts[this.currentScriptId];
@@ -174,7 +185,7 @@ var ScriptComponent = IgeEntity.extend({
 			ige.devLog('script errorLog', log, message);
 			ScriptComponent.prototype.log(log);
 			return log;
-		}		
+		}
 	}
 
 });

@@ -1962,17 +1962,16 @@ var IgeEntity = IgeObject.extend({
 		if (this._stats && this._stats.effects && this._stats.effects[type]) {
 			var effect = this._stats.effects[type];
 
+			if (effect.runScript) {
+
+				const triggeredBy = {};
+				triggeredBy[`${this._category}Id`] = this._id;
+				this.script.runScript(effect.runScript, { triggeredBy });
+			}
+
 			if (ige.isServer) {
 				if (type == 'move' || type == 'idle' || type == 'none') {
 					this.streamUpdateData([{ effect: type }]);
-				}
-
-				if (effect.runScript) {
-					if (effect.isEntityScript) {
-						this.script.runScript(effect.runScript, {});
-					} else {
-						ige.script.runScript(effect.runScript, {});
-					}
 				}
 
 			} else if (ige.isClient) {
@@ -4273,7 +4272,7 @@ var IgeEntity = IgeObject.extend({
 								break;
 							case 'effect':
 								// don't use streamed effect call for my own unit or its items
-								if (this == ige.client.selectedUnit || 
+								if (this == ige.client.selectedUnit ||
 									(this._category == 'item' && this.getOwnerUnit() == ige.client.selectedUnit)
 								) {
 									return;
