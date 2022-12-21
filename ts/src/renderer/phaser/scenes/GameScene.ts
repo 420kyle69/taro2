@@ -517,6 +517,7 @@ class GameScene extends PhaserScene {
 			x: worldPoint.x,
 			y: worldPoint.y,
 		}]);
+		
 		this.renderedEntities.forEach(element => {
 			element.setVisible(false);
 		});

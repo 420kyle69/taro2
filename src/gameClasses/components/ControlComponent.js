@@ -294,6 +294,7 @@ var ControlComponent = IgeEntity.extend({
 							if (self.input[device][key] == false) {
 								if (ige.isMobile && device == 'mouse') {
 									// block
+									self.keyDown(device, key);
 								} else {
 									self.keyDown(device, key);
 								}
@@ -302,6 +303,7 @@ var ControlComponent = IgeEntity.extend({
 							if (self.input[device][key] == true) {
 								if (ige.isMobile && device == 'mouse') {
 									// block
+									self.keyUp(device, key);
 								} else {
 									self.keyUp(device, key);
 								}
@@ -315,10 +317,9 @@ var ControlComponent = IgeEntity.extend({
 					self.sendPlayerInput = true;
 					self.lastInputSent = ige._currentTime;
 				}
-	
 				if (self.newMousePosition && (self.newMousePosition[0] != self.lastMousePosition[0] || self.newMousePosition[1] != self.lastMousePosition[1])) {
 					// if we are using mobile controls don't send mouse moves to server here as we will do so from a look touch stick
-					if (!ige.isMobile) {
+					//if (!ige.isMobile) {
 						// absolute mouse position wrt window
 						if (ige._mouseAbsoluteTranslation && ige._mouseAbsoluteTranslation[0] && ige._mouseAbsoluteTranslation[1]) {
 							var centerOfScreen = {};
@@ -345,7 +346,7 @@ var ControlComponent = IgeEntity.extend({
 						if (self.sendPlayerInput) {
 							ige.network.send('playerMouseMoved', self.newMousePosition);
 						}
-					}
+					//}
 					self.lastMousePosition = self.newMousePosition;
 				}
 	
@@ -359,7 +360,7 @@ var ControlComponent = IgeEntity.extend({
 						self.lastPositionSent = pos;
 					}
 				}
-	
+				
 				self.sendPlayerInput = false;
 			}
 			
