@@ -488,8 +488,19 @@ var ActionComponent = IgeEntity.extend({
 						}
 
 						break;
+					
+					/* Coins */
+					case 'sendCoinsToPlayer':
+						var coins = self._script.variable.getValue(action.coins, vars);
+						var player = self._script.variable.getValue(action.player, vars);
+						var userId = player && player._stats && player._stats.userId;
 
-						/* UI */
+						if (player && userId && coins && parseInt(coins) > 0) {
+							ige.server.sendCoinsToPlayer(userId, coins);
+						}
+						break;
+						
+					/* UI */
 					case 'showUiTextForPlayer':
 						if (entity && entity._stats) {
 							var text = self._script.variable.getValue(action.value, vars);
