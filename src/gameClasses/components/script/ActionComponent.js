@@ -18,14 +18,18 @@ var ActionComponent = IgeEntity.extend({
 		for (var i = 0; i < actionList.length; i++) {
 			var action = actionList[i];
 
+			// run on client only			
+			if (!action || action.disabled == true || // if action is disabled or
+				(ige.isClient && action.runMode == 0) || // don't run on client if runMode is 'server authoratative'
+				(ige.isServer && action.runMode == 1) // don't run on server if runMode is 'client only'
+			) {
+				continue;
+			}
+			
 			// if CSP is enabled, then server will pause streaming
 			// the server side is still running (e.g. creating entities), but it won't be streamed to the client
 			if (ige.isServer) {
 
-				if(action.runOnClient) {
-					ige.network.pause();
-				}
-				
 				var now = Date.now();
 				var lastActionRunTime = now - ige.lastActionRanAt;
 				var engineTickDelta = now - ige.now;
@@ -64,12 +68,6 @@ var ActionComponent = IgeEntity.extend({
 
 				ige.lastAction = action.type;
 				ige.lastActionRanAt = now;
-			}
-
-			if (!action || action.disabled == true || // if action is disabled or
-				(ige.isClient && !action.runOnClient) // CSP isn't enabled, don't run on client side
-			) {
-				continue;
 			}
 
 			var params = {};
@@ -2295,8 +2293,7 @@ var ActionComponent = IgeEntity.extend({
 					case 'destroyEntity':
 						var entity = self._script.variable.getValue(action.entity, vars);
 						if (entity && self.entityCategories.indexOf(entity._category) > -1) {
-							let isStreaming = !action.runOnClient; // don't stream to client is runOnClient is enabled
-							entity.remove(isStreaming);
+							entity.remove();
 						} else {
 							self._script.errorLog('invalid unit');
 						}
