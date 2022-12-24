@@ -113,7 +113,6 @@ var Player = IgeEntity.extend({
 				// console.log(`Player.joinGame(): sending ACK to client ${self._stats.clientId} ${self._stats.name} (time elapsed: ${Date.now() - client.lastEventAt})`, playerJoinStreamData);
 
 				self.streamUpdateData(playerJoinStreamData);
-				ige.clusterClient && ige.clusterClient.playerJoined(self._stats.userId);
 			}
 
 		} else {
