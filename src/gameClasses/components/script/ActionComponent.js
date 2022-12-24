@@ -19,7 +19,7 @@ var ActionComponent = IgeEntity.extend({
 			var action = actionList[i];
 
 			if (!action || action.disabled == true || // if action is disabled or
-				(ige.isClient && (action.runOnClient == false || action.runMode == 0)) || // don't run on client if runMode is 'server authoratative'
+				(ige.isClient && (!action.runOnClient || action.runMode == 0)) || // don't run on client if runMode is 'server authoratative'
 				(ige.isServer && action.runMode == 1) // don't run on server if runMode is 'client only'
 			) {
 				continue;
