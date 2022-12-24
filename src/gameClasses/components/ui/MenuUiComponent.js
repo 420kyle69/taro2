@@ -374,14 +374,6 @@ var MenuUiComponent = IgeEntity.extend({
 
 		$('#featured-youtuber').hide();
 
-		setTimeout(function () {
-			var html = $('#play-game-button .content').html();
-
-			if (/connecting/i.test(html)) {
-				$.post(`${analyticsUrl}api/game-report/game-access/${gameId}/infinite-connecting`);
-			}
-		}, 10000);
-
 		var gameId = ige.game.data.defaultData._id;
 
 		if (gameId && !wasGamePaused && !window.isStandalone) {
@@ -392,16 +384,6 @@ var MenuUiComponent = IgeEntity.extend({
 					$('#chat-box').addClass('d-none');
 				}, 1500);
 			}
-
-			$.post(`${analyticsUrl}api/game-report/game-access/${gameId}/play-button`)
-				.then(function () { }, function (xhr, status, error) {
-					$.post('/api/log', {
-						event: 'play-button',
-						game: gameId,
-						status: xhr.status,
-						text: xhr.statusText
-					});
-				});
 		}
 
 		ige.client.joinGame();
