@@ -140,12 +140,20 @@ class MobileControlsScene extends PhaserScene {
 
 		this.input.on('pointerdown', function(pointer) {
 
-			const gameScene = ige.renderer.scene.getScene('Game');
-			const worldPoint = gameScene.cameras.main.getWorldPoint(gameScene.input.activePointer.x, gameScene.input.activePointer.y);
-			ige.input.emit('touchpointermove', [{
-				x: worldPoint.x,
-				y: worldPoint.y,
-			}]);
+			let emitPointerPosition = true;
+			Object.keys(ige.mobileControls.controls).forEach(control => {
+				if (control === 'lookWheel' || control === 'lookAndFireWheel') emitPointerPosition = false;
+			});
+			console.log('emitPointerPosition', emitPointerPosition)
+
+			if (emitPointerPosition) {
+				const gameScene = ige.renderer.scene.getScene('Game');
+				const worldPoint = gameScene.cameras.main.getWorldPoint(gameScene.input.activePointer.x, gameScene.input.activePointer.y);
+				ige.input.emit('touchpointermove', [{
+					x: worldPoint.x,
+					y: worldPoint.y,
+				}]);
+			}
 
 			if (!this.disablePointerEvents) {
 				var touchX = pointer.x;

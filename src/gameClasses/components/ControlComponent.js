@@ -319,7 +319,7 @@ var ControlComponent = IgeEntity.extend({
 				}
 				if (self.newMousePosition && (self.newMousePosition[0] != self.lastMousePosition[0] || self.newMousePosition[1] != self.lastMousePosition[1])) {
 					// if we are using mobile controls don't send mouse moves to server here as we will do so from a look touch stick
-					//if (!ige.isMobile) {
+					if (!ige.isMobile) {
 						// absolute mouse position wrt window
 						if (ige._mouseAbsoluteTranslation && ige._mouseAbsoluteTranslation[0] && ige._mouseAbsoluteTranslation[1]) {
 							var centerOfScreen = {};
@@ -346,7 +346,7 @@ var ControlComponent = IgeEntity.extend({
 						if (self.sendPlayerInput) {
 							ige.network.send('playerMouseMoved', self.newMousePosition);
 						}
-					//}
+					}
 					self.lastMousePosition = self.newMousePosition;
 				}
 	

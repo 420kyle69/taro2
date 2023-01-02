@@ -100,12 +100,20 @@ var MobileControlsScene = /** @class */ (function (_super) {
             _this.scene.setVisible(value);
         });
         this.input.on('pointerdown', function (pointer) {
-            var gameScene = ige.renderer.scene.getScene('Game');
-            var worldPoint = gameScene.cameras.main.getWorldPoint(gameScene.input.activePointer.x, gameScene.input.activePointer.y);
-            ige.input.emit('touchpointermove', [{
-                    x: worldPoint.x,
-                    y: worldPoint.y,
-                }]);
+            var emitPointerPosition = true;
+            Object.keys(ige.mobileControls.controls).forEach(function (control) {
+                if (control === 'lookWheel' || control === 'lookAndFireWheel')
+                    emitPointerPosition = false;
+            });
+            console.log('emitPointerPosition', emitPointerPosition);
+            if (emitPointerPosition) {
+                var gameScene = ige.renderer.scene.getScene('Game');
+                var worldPoint = gameScene.cameras.main.getWorldPoint(gameScene.input.activePointer.x, gameScene.input.activePointer.y);
+                ige.input.emit('touchpointermove', [{
+                        x: worldPoint.x,
+                        y: worldPoint.y,
+                    }]);
+            }
             if (!this.disablePointerEvents) {
                 var touchX = pointer.x;
                 var touchY = pointer.y;
