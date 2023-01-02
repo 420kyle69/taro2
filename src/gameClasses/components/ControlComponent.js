@@ -293,8 +293,8 @@ var ControlComponent = IgeEntity.extend({
 						if (ige.input.actionState(key)) {
 							if (self.input[device][key] == false) {
 								if (ige.isMobile && device == 'mouse') {
-									// block
-									self.keyDown(device, key);
+									// tap on mobile will be detected as right click for now, so old games with joysticks will not have problems
+									self.keyDown('mouse', 'button3');
 								} else {
 									self.keyDown(device, key);
 								}
@@ -302,8 +302,8 @@ var ControlComponent = IgeEntity.extend({
 						} else {
 							if (self.input[device][key] == true) {
 								if (ige.isMobile && device == 'mouse') {
-									// block
-									self.keyUp(device, key);
+									// tap on mobile will be detected as right click for now, so old games with joysticks will not have problems
+									self.keyUp('mouse', 'button3');
 								} else {
 									self.keyUp(device, key);
 								}
