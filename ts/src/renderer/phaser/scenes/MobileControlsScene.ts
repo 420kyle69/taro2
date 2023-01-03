@@ -138,7 +138,22 @@ class MobileControlsScene extends PhaserScene {
 			this.scene.setVisible(value);
 		});
 
-		this.input.on('pointerdown', function(pointer){
+		this.input.on('pointerdown', function(pointer) {
+
+			let emitPointerPosition = true;
+			Object.keys(ige.mobileControls.controls).forEach(control => {
+				if (control === 'lookWheel' || control === 'lookAndFireWheel') emitPointerPosition = false;
+			});
+
+			if (emitPointerPosition) {
+				const gameScene = ige.renderer.scene.getScene('Game');
+				const worldPoint = gameScene.cameras.main.getWorldPoint(gameScene.input.activePointer.x, gameScene.input.activePointer.y);
+				ige.input.emit('touchpointermove', [{
+					x: worldPoint.x,
+					y: worldPoint.y,
+				}]);
+			}
+
 			if (!this.disablePointerEvents) {
 				var touchX = pointer.x;
 				var touchY = pointer.y;
@@ -162,15 +177,15 @@ class MobileControlsScene extends PhaserScene {
 			}
 		}, this);
 
-		this.input.on('pointerup', function(pointer){
+		this.input.on('pointerup', function(pointer) {
 			if (!this.disablePointerEvents) {
 				var touchX = pointer.x;
 				if (touchX < this.cameras.main.displayWidth / 2.4) {
-					const leftJoystick = this.joysticks[0];
-					leftJoystick.hide();
+					const leftJoystick = this.joysticks.find(({ side }) => side === 'left');
+					if (leftJoystick) leftJoystick.hide();
 				} else if (touchX > this.cameras.main.displayWidth - (this.cameras.main.displayWidth / 2.4)) {
-					const rightJoystick = this.joysticks[1];
-					rightJoystick.hide();
+					const rightJoystick = this.joysticks.find(({ side }) => side === 'right');
+					if (rightJoystick) rightJoystick.hide();
 				}
 			}
 		}, this);

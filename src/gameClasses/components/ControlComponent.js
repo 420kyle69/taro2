@@ -293,7 +293,8 @@ var ControlComponent = IgeEntity.extend({
 						if (ige.input.actionState(key)) {
 							if (self.input[device][key] == false) {
 								if (ige.isMobile && device == 'mouse') {
-									// block
+									// tap on mobile will be detected as right click for now, so old games with joysticks will not have problems
+									self.keyDown('mouse', 'button3');
 								} else {
 									self.keyDown(device, key);
 								}
@@ -301,7 +302,8 @@ var ControlComponent = IgeEntity.extend({
 						} else {
 							if (self.input[device][key] == true) {
 								if (ige.isMobile && device == 'mouse') {
-									// block
+									// tap on mobile will be detected as right click for now, so old games with joysticks will not have problems
+									self.keyUp('mouse', 'button3');
 								} else {
 									self.keyUp(device, key);
 								}
@@ -315,7 +317,6 @@ var ControlComponent = IgeEntity.extend({
 					self.sendPlayerInput = true;
 					self.lastInputSent = ige._currentTime;
 				}
-	
 				if (self.newMousePosition && (self.newMousePosition[0] != self.lastMousePosition[0] || self.newMousePosition[1] != self.lastMousePosition[1])) {
 					// if we are using mobile controls don't send mouse moves to server here as we will do so from a look touch stick
 					if (!ige.isMobile) {
@@ -359,7 +360,7 @@ var ControlComponent = IgeEntity.extend({
 						self.lastPositionSent = pos;
 					}
 				}
-	
+				
 				self.sendPlayerInput = false;
 			}
 			
