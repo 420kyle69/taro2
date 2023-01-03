@@ -144,7 +144,6 @@ class MobileControlsScene extends PhaserScene {
 			Object.keys(ige.mobileControls.controls).forEach(control => {
 				if (control === 'lookWheel' || control === 'lookAndFireWheel') emitPointerPosition = false;
 			});
-			console.log('emitPointerPosition', emitPointerPosition)
 
 			if (emitPointerPosition) {
 				const gameScene = ige.renderer.scene.getScene('Game');

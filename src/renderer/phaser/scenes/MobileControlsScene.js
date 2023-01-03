@@ -105,7 +105,6 @@ var MobileControlsScene = /** @class */ (function (_super) {
                 if (control === 'lookWheel' || control === 'lookAndFireWheel')
                     emitPointerPosition = false;
             });
-            console.log('emitPointerPosition', emitPointerPosition);
             if (emitPointerPosition) {
                 var gameScene = ige.renderer.scene.getScene('Game');
                 var worldPoint = gameScene.cameras.main.getWorldPoint(gameScene.input.activePointer.x, gameScene.input.activePointer.y);
