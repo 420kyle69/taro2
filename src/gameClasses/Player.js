@@ -113,7 +113,6 @@ var Player = IgeEntity.extend({
 				// console.log(`Player.joinGame(): sending ACK to client ${self._stats.clientId} ${self._stats.name} (time elapsed: ${Date.now() - client.lastEventAt})`, playerJoinStreamData);
 
 				self.streamUpdateData(playerJoinStreamData);
-				ige.clusterClient && ige.clusterClient.playerJoined(self._stats.userId);
 			}
 
 		} else {
@@ -388,7 +387,6 @@ var Player = IgeEntity.extend({
 
 			ige.script.trigger('playerLeavesGame', { playerId: this.id() });
 			// session is in second
-			ige.clusterClient && ige.clusterClient.emit('log-session-duration', (Date.now() - this._stats.jointsOn) / 1000);
 			if (this.variables && this.variables.progression != undefined && this.variables.progression.value != undefined) {
 				ige.clusterClient && ige.clusterClient.emit('log-progression', this.variables.progression.value);
 			}
