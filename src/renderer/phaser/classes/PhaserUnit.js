@@ -123,7 +123,8 @@ var PhaserUnit = /** @class */ (function (_super) {
     };
     PhaserUnit.prototype.updateLabelOffset = function () {
         var _a = this.sprite, displayHeight = _a.displayHeight, displayWidth = _a.displayWidth;
-        this.label.y = -25 - (displayHeight + displayWidth) / 4;
+        var labelHeight = this.label.getTextBounds(true).global.height;
+        this.label.y = -displayHeight / 2 - labelHeight * 1.5;
         if (this.rtLabel) {
             this.rtLabel.y = this.label.y;
         }
@@ -131,7 +132,7 @@ var PhaserUnit = /** @class */ (function (_super) {
     };
     PhaserUnit.prototype.updateAttributesOffset = function () {
         var _a = this.sprite, displayHeight = _a.displayHeight, displayWidth = _a.displayWidth;
-        this.attributesContainer.y = 25 + (displayHeight + displayWidth) / 4;
+        this.attributesContainer.y = (this.attributesContainer.height * this.attributesContainer.scaleX) / 2 + 16 * this.attributesContainer.scaleX + displayHeight / 2;
         this.updateGameObjectSize();
     };
     PhaserUnit.prototype.updateGameObjectSize = function () {
@@ -302,6 +303,8 @@ var PhaserUnit = /** @class */ (function (_super) {
             ease: Phaser.Math.Easing.Quadratic.Out,
             scale: targetScale,
             onComplete: function () {
+                _this.updateLabelOffset();
+                _this.updateAttributesOffset();
                 _this.scaleTween = null;
             }
         });

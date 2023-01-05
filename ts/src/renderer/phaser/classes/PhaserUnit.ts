@@ -141,7 +141,8 @@ class PhaserUnit extends PhaserAnimatedEntity {
 
 	private updateLabelOffset (): void {
 		const {displayHeight, displayWidth} = this.sprite;
-		this.label.y = -25 - (displayHeight + displayWidth) / 4;
+		const labelHeight = this.label.getTextBounds(true).global.height;
+		this.label.y = - displayHeight/2 - labelHeight*1.5;
 		if (this.rtLabel) {
 			this.rtLabel.y = this.label.y;
 		}
@@ -150,7 +151,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 
 	private updateAttributesOffset (): void {
 		const {displayHeight, displayWidth} = this.sprite;
-		this.attributesContainer.y = 25 + (displayHeight + displayWidth) / 4;
+		this.attributesContainer.y = (this.attributesContainer.height*this.attributesContainer.scaleX)/2 + 16*this.attributesContainer.scaleX + displayHeight/2;
 		this.updateGameObjectSize();
 	}
 
@@ -378,6 +379,8 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			ease: Phaser.Math.Easing.Quadratic.Out,
 			scale: targetScale,
 			onComplete: () => {
+				this.updateLabelOffset();
+				this.updateAttributesOffset();
 				this.scaleTween = null;
 			}
 		});
