@@ -1825,7 +1825,8 @@ var Unit = IgeEntityPhysics.extend({
 
 			// mobile control: rotate to rotation provided by the client and convert it to radians
 			if (this._stats.controls && this._stats.controls.absoluteRotation) {
-				this.angleToTarget = ownerPlayer.absoluteAngle * 0.017453;
+				if (ige.isMobile) this.angleToTarget = ownerPlayer.absoluteAngle * 0.017453;
+				else this.angleToTarget = ownerPlayer.absoluteAngle;
 
 			// desktop control: if this unit's not under a command, rotate to mouse xy coordinate
 			} else {
