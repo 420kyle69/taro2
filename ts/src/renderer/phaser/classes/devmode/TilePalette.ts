@@ -12,9 +12,10 @@ class TilePalette extends Phaser.GameObjects.Container {
 	scrollBarBottom: any;
 	scrollBarRight: any;
 
-	COLOR_DARK: number;
+	COLOR_WHITE: number;
 	COLOR_LIGHT: number;
 	COLOR_PRIMARY: number;
+	COLOR_GRAY: number;
 
 	paletteWidth: number;
 	paletteHeight: number;
@@ -85,7 +86,8 @@ class TilePalette extends Phaser.GameObjects.Container {
 
 		this.COLOR_PRIMARY = 0x0036cc;
 		this.COLOR_LIGHT = 0x6690ff;
-		this.COLOR_DARK = 0xffffff;
+		this.COLOR_WHITE = 0xffffff;
+		this.COLOR_GRAY = 0xbababa;
 
 		const scrollBarContainer = this.scrollBarContainer = new Phaser.GameObjects.Container(scene);
 		scene.add.existing(scrollBarContainer);
@@ -185,7 +187,7 @@ class TilePalette extends Phaser.GameObjects.Container {
 		const scrollBar = this.rexUI.add.scrollBar({
 			[orientSize]: length,
 			orientation: orient,
-			background: this.rexUI.add.roundRectangle(0, 0, 0, 0, 0, this.COLOR_DARK),
+			background: this.rexUI.add.roundRectangle(0, 0, 0, 0, 0, this.COLOR_WHITE),
 			buttons: {
 				left: this.rexUI.add.roundRectangle(0, 0, 20, 20, 0, this.COLOR_PRIMARY),
 				right: this.rexUI.add.roundRectangle(0, 0, 20, 20, 0, this.COLOR_PRIMARY),

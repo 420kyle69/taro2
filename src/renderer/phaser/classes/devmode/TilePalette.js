@@ -70,7 +70,8 @@ var TilePalette = /** @class */ (function (_super) {
         });
         _this.COLOR_PRIMARY = 0x0036cc;
         _this.COLOR_LIGHT = 0x6690ff;
-        _this.COLOR_DARK = 0xffffff;
+        _this.COLOR_WHITE = 0xffffff;
+        _this.COLOR_GRAY = 0xbababa;
         var scrollBarContainer = _this.scrollBarContainer = new Phaser.GameObjects.Container(scene);
         scene.add.existing(scrollBarContainer);
         scrollBarContainer.x = camera.x;
@@ -166,7 +167,7 @@ var TilePalette = /** @class */ (function (_super) {
         var scrollBar = this.rexUI.add.scrollBar((_a = {},
             _a[orientSize] = length,
             _a.orientation = orient,
-            _a.background = this.rexUI.add.roundRectangle(0, 0, 0, 0, 0, this.COLOR_DARK),
+            _a.background = this.rexUI.add.roundRectangle(0, 0, 0, 0, 0, this.COLOR_WHITE),
             _a.buttons = {
                 left: this.rexUI.add.roundRectangle(0, 0, 20, 20, 0, this.COLOR_PRIMARY),
                 right: this.rexUI.add.roundRectangle(0, 0, 20, 20, 0, this.COLOR_PRIMARY),

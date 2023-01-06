@@ -14,9 +14,10 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	modeButtons: DevToolButton[];
 	brushButtons: DevToolButton[];
 
-	COLOR_DARK: number;
+	COLOR_WHITE: number;
 	COLOR_LIGHT: number;
 	COLOR_PRIMARY: number;
+	COLOR_GRAY: number;
 	
 	
 	constructor(
@@ -33,7 +34,8 @@ class DevModeTools extends Phaser.GameObjects.Container {
 
 		this.COLOR_PRIMARY = palette.COLOR_PRIMARY;
 		this.COLOR_LIGHT = palette.COLOR_LIGHT;
-		this.COLOR_DARK = palette.COLOR_DARK;
+		this.COLOR_WHITE = palette.COLOR_WHITE;
+		this.COLOR_GRAY = palette.COLOR_GRAY;
 
 		this.scene.scale.on(Phaser.Scale.Events.RESIZE, () => {
 			layerButtonsContainer.x = palette.camera.x + palette.paletteWidth - 98;
@@ -61,7 +63,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 			new DevToolButton (this, 'walls', null, 30, 34, 85, layerButtonsContainer, this.switchLayer.bind(this), 2),
 			new DevToolButton (this, 'trees', null, 30, 0, 85, layerButtonsContainer, this.switchLayer.bind(this), 3)
 		)
-		this.layerButtons[0].highlight(true);
+		this.layerButtons[0].highlight('active');
 		this.layerHideButtons = [];
 		this.layerHideButtons.push (
 			new DevToolButton (this, '', 'eyeopen', 0, 102, 35, layerButtonsContainer, this.hideLayer.bind(this), 0),
@@ -69,7 +71,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 			new DevToolButton (this, '', 'eyeopen', 0, 34, 35, layerButtonsContainer, this.hideLayer.bind(this), 2),
 			new DevToolButton (this, '', 'eyeopen', 0, 0, 35, layerButtonsContainer, this.hideLayer.bind(this), 3)
 		)
-		this.layerHideButtons[0].highlight(true);
+		this.layerHideButtons[0].highlight('active');
 
 		const toolButtonsContainer = this.toolButtonsContainer = new Phaser.GameObjects.Container(scene);
 		toolButtonsContainer.x = palette.camera.x + palette.paletteWidth - 98;
@@ -93,7 +95,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 			new DevToolButton (this, '1x1', null, 0, 102, 58, toolButtonsContainer, this.selectSingle.bind(this)),
 			new DevToolButton (this, '2x2', null, 62, 102, 58, toolButtonsContainer, this.selectArea.bind(this))
 		)
-		this.brushButtons[0].highlight(true);
+		this.brushButtons[0].highlight('active');
 
 		this.palette.hide();
 		this.layerButtonsContainer.setVisible(false);
@@ -215,8 +217,8 @@ class DevModeTools extends Phaser.GameObjects.Container {
 
 	highlightModeButton(n: number): void {
 		this.modeButtons.forEach((button, index) => {
-			if (index === n) button.highlight(true);
-			else button.highlight(false);
+			if (index === n) button.highlight('active');
+			else button.highlight('no');
 		});
 	}
 
@@ -229,8 +231,8 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.tileEditor.area = {x: 1, y: 1};
 		this.tileEditor.marker.graphics.scale = 1;
 		this.tileEditor.paletteMarker.graphics.scale = 1;
-		this.brushButtons[0].highlight(true);
-		this.brushButtons[1].highlight(false);
+		this.brushButtons[0].highlight('active');
+		this.brushButtons[1].highlight('no');
 		this.tileEditor.activateMarker(true);
 		if (!this.modeButtons[3].active) {
 			this.brush();
@@ -242,8 +244,8 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.tileEditor.area = {x: 2, y: 2};
 		this.tileEditor.marker.graphics.scale = 2;
 		this.tileEditor.paletteMarker.graphics.scale = 2;
-		this.brushButtons[1].highlight(true);
-		this.brushButtons[0].highlight(false);
+		this.brushButtons[1].highlight('active');
+		this.brushButtons[0].highlight('no');
 		this.tileEditor.activateMarker(true);
 		if (!this.modeButtons[3].active) {
 			this.brush();
@@ -255,24 +257,41 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		const gameMap = scene.gameScene.tilemap;
 		gameMap.currentLayerIndex = value;
 		this.layerButtons.forEach(button => {
-			button.highlight(false);
+			button.highlight('no');
+			button.increaseSize(false);
 		});
 		this.layerHideButtons.forEach(button => {
-			button.highlight(false);
+			button.highlight('no');
+			button.increaseSize(false);
 		});
-		this.layerButtons[value].highlight(true);
-		this.layerHideButtons[value].highlight(true);
+		if (this.layerButtons[value] && this.layerHideButtons[value]) {
+			this.layerHideButtons[value].image.setTexture('eyeopen');
+			this.layerButtons[value].highlight('no');
+			this.layerHideButtons[value].highlight('no');
+			scene.gameScene.tilemapLayers[value].setVisible(true);
+
+			this.layerButtons[value].highlight('active');
+			this.layerButtons[value].increaseSize(true);
+			this.layerHideButtons[value].highlight('active');
+			this.layerHideButtons[value].increaseSize(true);
+		}
 	}
 
 	hideLayer(value: number): void {
-		this.switchLayer(value);
+		this.switchLayer(-1);
 		const scene = this.scene as any;
 		const tilemapLayers = scene.gameScene.tilemapLayers;
 		if (this.layerHideButtons[value].image.texture.key === 'eyeopen') {
 			this.layerHideButtons[value].image.setTexture('eyeclosed');
+			this.layerButtons[value].highlight('hidden');
+			this.layerHideButtons[value].highlight('hidden');
 			tilemapLayers[value].setVisible(false);
 		} else {
 			this.layerHideButtons[value].image.setTexture('eyeopen');
+			this.layerButtons[value].hidden = false;
+			this.layerButtons[value].highlight('no');
+			this.layerHideButtons[value].hidden = false;
+			this.layerHideButtons[value].highlight('no');
 			tilemapLayers[value].setVisible(true);
 		}
 	}

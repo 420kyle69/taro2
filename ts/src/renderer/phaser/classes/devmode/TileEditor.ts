@@ -121,7 +121,7 @@ class TileEditor {
 					}
 				}
 			} else if ((!devModeScene.pointerInsidePalette() || !palette.visible) &&
-				!devModeScene.pointerInsideButtons() && !devModeScene.pointerInsideWidgets() && marker.active) {
+				!devModeScene.pointerInsideButtons() && !devModeScene.pointerInsideWidgets() && marker.active && map.currentLayerIndex >=0) {
 				paletteMarker.graphics.setVisible(false);
 				marker.graphics.setVisible(true);
 				// Rounds down to nearest tile
