@@ -61,8 +61,8 @@ class DevToolButton {
 		});
 	}
 
-	highlight (value: 'no'|'active'|'hidden'): void {
-		switch (value) {
+	highlight (mode: 'no'|'active'|'hidden'): void {
+		switch (mode) {
 			case 'hidden':
 				this.hidden = true;
 				this.active = false;
@@ -78,7 +78,6 @@ class DevToolButton {
 			case 'no':
 				if (!this.hidden) {
 					this.active = false;
-					//this.hidden = false;
 					this.button.setFillStyle(this.devModeTools['COLOR_WHITE'], 1);
 				}
 				break;
