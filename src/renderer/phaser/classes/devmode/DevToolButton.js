@@ -36,8 +36,8 @@ var DevToolButton = /** @class */ (function () {
                 func();
         });
     }
-    DevToolButton.prototype.highlight = function (value) {
-        switch (value) {
+    DevToolButton.prototype.highlight = function (mode) {
+        switch (mode) {
             case 'hidden':
                 this.hidden = true;
                 this.active = false;
@@ -51,7 +51,6 @@ var DevToolButton = /** @class */ (function () {
             case 'no':
                 if (!this.hidden) {
                     this.active = false;
-                    //this.hidden = false;
                     this.button.setFillStyle(this.devModeTools['COLOR_WHITE'], 1);
                 }
                 break;
