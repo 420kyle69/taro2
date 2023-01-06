@@ -1823,9 +1823,9 @@ var Unit = IgeEntityPhysics.extend({
 		var ownerPlayer = this.getOwner();
 		if (ownerPlayer) {
 
-			// mobile control: rotate to rotation provided by the client
+			// mobile control: rotate to rotation provided by the client and convert it to radians
 			if (this._stats.controls && this._stats.controls.absoluteRotation) {
-				this.angleToTarget = ownerPlayer.absoluteAngle;
+				this.angleToTarget = ownerPlayer.absoluteAngle * 0.017453;
 
 			// desktop control: if this unit's not under a command, rotate to mouse xy coordinate
 			} else {
@@ -1947,7 +1947,7 @@ var Unit = IgeEntityPhysics.extend({
 			}
 
 			// flip unit
-			if (this._stats.controls && this._stats.controls.mouseBehaviour.flipSpriteHorizontallyWRTMouse && self.angleToTarget != undefined) {
+			if (this._stats.controls && this._stats.controls.mouseBehaviour.flipSpriteHorizontallyWRTMouse && self.angleToTarget) {
 				if (self.angleToTarget > 0 && self.angleToTarget < Math.PI) {
 					self.flip(0);
 				} else {
