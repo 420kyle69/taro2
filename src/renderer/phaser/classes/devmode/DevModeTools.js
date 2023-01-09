@@ -35,7 +35,8 @@ var DevModeTools = /** @class */ (function (_super) {
         _this.keyBindings();
         _this.COLOR_PRIMARY = palette.COLOR_PRIMARY;
         _this.COLOR_LIGHT = palette.COLOR_LIGHT;
-        _this.COLOR_DARK = palette.COLOR_DARK;
+        _this.COLOR_WHITE = palette.COLOR_WHITE;
+        _this.COLOR_GRAY = palette.COLOR_GRAY;
         _this.scene.scale.on(Phaser.Scale.Events.RESIZE, function () {
             layerButtonsContainer.x = palette.camera.x + palette.paletteWidth - 98;
             layerButtonsContainer.y = palette.camera.y - 170;
@@ -50,13 +51,13 @@ var DevModeTools = /** @class */ (function (_super) {
         layerButtonsContainer.x = palette.camera.x + palette.paletteWidth - 98;
         layerButtonsContainer.y = palette.camera.y - 204;
         scene.add.existing(layerButtonsContainer);
-        new DevToolButton(_this, 'palette', null, 0, 170, 120, layerButtonsContainer, palette.toggle.bind(palette));
+        _this.paletteButton = new DevToolButton(_this, 'palette', null, 0, 170, 120, layerButtonsContainer, palette.toggle.bind(palette));
         _this.layerButtons = [];
         _this.layerButtons.push(new DevToolButton(_this, 'floor', null, 30, 102, 85, layerButtonsContainer, _this.switchLayer.bind(_this), 0), new DevToolButton(_this, 'floor2', null, 30, 68, 85, layerButtonsContainer, _this.switchLayer.bind(_this), 1), new DevToolButton(_this, 'walls', null, 30, 34, 85, layerButtonsContainer, _this.switchLayer.bind(_this), 2), new DevToolButton(_this, 'trees', null, 30, 0, 85, layerButtonsContainer, _this.switchLayer.bind(_this), 3));
-        _this.layerButtons[0].highlight(true);
+        _this.layerButtons[0].highlight('active');
         _this.layerHideButtons = [];
         _this.layerHideButtons.push(new DevToolButton(_this, '', 'eyeopen', 0, 102, 35, layerButtonsContainer, _this.hideLayer.bind(_this), 0), new DevToolButton(_this, '', 'eyeopen', 0, 68, 35, layerButtonsContainer, _this.hideLayer.bind(_this), 1), new DevToolButton(_this, '', 'eyeopen', 0, 34, 35, layerButtonsContainer, _this.hideLayer.bind(_this), 2), new DevToolButton(_this, '', 'eyeopen', 0, 0, 35, layerButtonsContainer, _this.hideLayer.bind(_this), 3));
-        _this.layerHideButtons[0].highlight(true);
+        _this.layerHideButtons[0].highlight('active');
         var toolButtonsContainer = _this.toolButtonsContainer = new Phaser.GameObjects.Container(scene);
         toolButtonsContainer.x = palette.camera.x + palette.paletteWidth - 98;
         toolButtonsContainer.y = palette.camera.y - layerButtonsContainer.height - 184;
@@ -69,7 +70,7 @@ var DevModeTools = /** @class */ (function (_super) {
         _this.highlightModeButton(0);
         _this.brushButtons = [];
         _this.brushButtons.push(new DevToolButton(_this, '1x1', null, 0, 102, 58, toolButtonsContainer, _this.selectSingle.bind(_this)), new DevToolButton(_this, '2x2', null, 62, 102, 58, toolButtonsContainer, _this.selectArea.bind(_this)));
-        _this.brushButtons[0].highlight(true);
+        _this.brushButtons[0].highlight('active');
         _this.palette.hide();
         _this.layerButtonsContainer.setVisible(false);
         _this.toolButtonsContainer.setVisible(false);
@@ -183,9 +184,9 @@ var DevModeTools = /** @class */ (function (_super) {
     DevModeTools.prototype.highlightModeButton = function (n) {
         this.modeButtons.forEach(function (button, index) {
             if (index === n)
-                button.highlight(true);
+                button.highlight('active');
             else
-                button.highlight(false);
+                button.highlight('no');
         });
     };
     DevModeTools.prototype.selectSingle = function () {
@@ -198,8 +199,8 @@ var DevModeTools = /** @class */ (function (_super) {
         this.tileEditor.area = { x: 1, y: 1 };
         this.tileEditor.marker.graphics.scale = 1;
         this.tileEditor.paletteMarker.graphics.scale = 1;
-        this.brushButtons[0].highlight(true);
-        this.brushButtons[1].highlight(false);
+        this.brushButtons[0].highlight('active');
+        this.brushButtons[1].highlight('no');
         this.tileEditor.activateMarker(true);
         if (!this.modeButtons[3].active) {
             this.brush();
@@ -211,8 +212,8 @@ var DevModeTools = /** @class */ (function (_super) {
         this.tileEditor.area = { x: 2, y: 2 };
         this.tileEditor.marker.graphics.scale = 2;
         this.tileEditor.paletteMarker.graphics.scale = 2;
-        this.brushButtons[1].highlight(true);
-        this.brushButtons[0].highlight(false);
+        this.brushButtons[1].highlight('active');
+        this.brushButtons[0].highlight('no');
         this.tileEditor.activateMarker(true);
         if (!this.modeButtons[3].active) {
             this.brush();
@@ -223,24 +224,43 @@ var DevModeTools = /** @class */ (function (_super) {
         var gameMap = scene.gameScene.tilemap;
         gameMap.currentLayerIndex = value;
         this.layerButtons.forEach(function (button) {
-            button.highlight(false);
+            button.highlight('no');
+            button.increaseSize(false);
         });
         this.layerHideButtons.forEach(function (button) {
-            button.highlight(false);
+            button.highlight('no');
+            button.increaseSize(false);
         });
-        this.layerButtons[value].highlight(true);
-        this.layerHideButtons[value].highlight(true);
+        if (this.layerButtons[value] && this.layerHideButtons[value]) {
+            this.layerHideButtons[value].image.setTexture('eyeopen');
+            this.layerButtons[value].highlight('no');
+            this.layerHideButtons[value].highlight('no');
+            scene.gameScene.tilemapLayers[value].setVisible(true);
+            this.layerButtons[value].highlight('active');
+            this.layerButtons[value].increaseSize(true);
+            this.layerHideButtons[value].highlight('active');
+            this.layerHideButtons[value].increaseSize(true);
+        }
     };
     DevModeTools.prototype.hideLayer = function (value) {
-        this.switchLayer(value);
         var scene = this.scene;
+        if (scene.gameScene.tilemap.currentLayerIndex === value) {
+            this.switchLayer(-1);
+            this.tileEditor.marker.graphics.setVisible(false);
+        }
         var tilemapLayers = scene.gameScene.tilemapLayers;
         if (this.layerHideButtons[value].image.texture.key === 'eyeopen') {
             this.layerHideButtons[value].image.setTexture('eyeclosed');
+            this.layerButtons[value].highlight('hidden');
+            this.layerHideButtons[value].highlight('hidden');
             tilemapLayers[value].setVisible(false);
         }
         else {
             this.layerHideButtons[value].image.setTexture('eyeopen');
+            this.layerButtons[value].hidden = false;
+            this.layerButtons[value].highlight('no');
+            this.layerHideButtons[value].hidden = false;
+            this.layerHideButtons[value].highlight('no');
             tilemapLayers[value].setVisible(true);
         }
     };

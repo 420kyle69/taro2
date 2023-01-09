@@ -81,6 +81,7 @@ var TileEditor = /** @class */ (function () {
             var palettePointerTileX = paletteMap.worldToTileX(palettePoint.x);
             var palettePointerTileY = paletteMap.worldToTileY(palettePoint.y);
             if (palette.visible && devModeScene.pointerInsidePalette()) {
+                devModeScene.regionEditor.cancelDrawRegion();
                 marker.graphics.setVisible(false);
                 // Snap to tile coordinates, but in world space
                 paletteMarker.graphics.x = paletteMap.tileToWorldX(palettePointerTileX);
@@ -100,7 +101,7 @@ var TileEditor = /** @class */ (function () {
                 }
             }
             else if ((!devModeScene.pointerInsidePalette() || !palette.visible) &&
-                !devModeScene.pointerInsideButtons() && !devModeScene.pointerInsideWidgets() && marker.active) {
+                !devModeScene.pointerInsideButtons() && !devModeScene.pointerInsideWidgets() && marker.active && map.currentLayerIndex >= 0) {
                 paletteMarker.graphics.setVisible(false);
                 marker.graphics.setVisible(true);
                 // Rounds down to nearest tile

@@ -7,7 +7,7 @@ var DevToolButton = /** @class */ (function () {
         //const x = 0;
         //const y = -h -1;
         var scene = devModeTools.scene;
-        var button = this.button = scene.add.rectangle(x + w / 2, y + h / 2, w, h, devModeTools.COLOR_DARK);
+        var button = this.button = scene.add.rectangle(x + w / 2, y + h / 2, w, h, devModeTools.COLOR_WHITE);
         button.setInteractive();
         container.add(button);
         if (texture) {
@@ -36,9 +36,34 @@ var DevToolButton = /** @class */ (function () {
                 func();
         });
     }
-    DevToolButton.prototype.highlight = function (active) {
-        this.active = active;
-        this.button.setFillStyle(this.devModeTools[active ? 'COLOR_LIGHT' : 'COLOR_DARK'], 1);
+    DevToolButton.prototype.highlight = function (mode) {
+        switch (mode) {
+            case 'hidden':
+                this.hidden = true;
+                this.active = false;
+                this.button.setFillStyle(this.devModeTools['COLOR_GRAY'], 1);
+                break;
+            case 'active':
+                this.active = true;
+                this.hidden = false;
+                this.button.setFillStyle(this.devModeTools['COLOR_LIGHT'], 1);
+                break;
+            case 'no':
+                if (!this.hidden) {
+                    this.active = false;
+                    this.button.setFillStyle(this.devModeTools['COLOR_WHITE'], 1);
+                }
+                break;
+        }
+    };
+    DevToolButton.prototype.increaseSize = function (value) {
+        this.button.setScale(1 + (Number(value) * 0.3), 1 + (Number(value) * 0.15));
+        /*if (value) {
+            this.button.setStrokeStyle(2, 0x000000, 1);
+        }
+        else {
+            this.button.setStrokeStyle();
+        }*/
     };
     return DevToolButton;
 }());

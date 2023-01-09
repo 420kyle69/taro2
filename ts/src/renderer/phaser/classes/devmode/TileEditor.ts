@@ -103,6 +103,7 @@ class TileEditor {
 			const palettePointerTileY = paletteMap.worldToTileY(palettePoint.y);
 
 			if (palette.visible	&& devModeScene.pointerInsidePalette()) {
+				devModeScene.regionEditor.cancelDrawRegion();
 				marker.graphics.setVisible(false);
 				// Snap to tile coordinates, but in world space
 				paletteMarker.graphics.x = paletteMap.tileToWorldX(palettePointerTileX);
@@ -121,7 +122,7 @@ class TileEditor {
 					}
 				}
 			} else if ((!devModeScene.pointerInsidePalette() || !palette.visible) &&
-				!devModeScene.pointerInsideButtons() && !devModeScene.pointerInsideWidgets() && marker.active) {
+				!devModeScene.pointerInsideButtons() && !devModeScene.pointerInsideWidgets() && marker.active && map.currentLayerIndex >=0) {
 				paletteMarker.graphics.setVisible(false);
 				marker.graphics.setVisible(true);
 				// Rounds down to nearest tile

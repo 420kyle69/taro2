@@ -1,6 +1,7 @@
 class DevToolButton {
 	button: Phaser.GameObjects.Rectangle;
 	active: boolean;
+	hidden: boolean;
 	image: Phaser.GameObjects.Image;
 
 	constructor (
@@ -20,7 +21,7 @@ class DevToolButton {
 		//const x = 0;
 		//const y = -h -1;
 		const scene = devModeTools.scene;
-		const button = this.button = scene.add.rectangle(x + w/2, y + h/2, w, h, devModeTools.COLOR_DARK);
+		const button = this.button = scene.add.rectangle(x + w/2, y + h/2, w, h, devModeTools.COLOR_WHITE);
 		button.setInteractive();
 		container.add(button);
 
@@ -60,10 +61,36 @@ class DevToolButton {
 		});
 	}
 
-	highlight (active: boolean): void {
-		this.active = active;
-		this.button.setFillStyle(this.devModeTools[
-			active ? 'COLOR_LIGHT' : 'COLOR_DARK'
-		], 1);
+	highlight (mode: 'no'|'active'|'hidden'): void {
+		switch (mode) {
+			case 'hidden':
+				this.hidden = true;
+				this.active = false;
+				this.button.setFillStyle(this.devModeTools['COLOR_GRAY'], 1);
+				break;
+
+			case 'active':
+				this.active = true;
+				this.hidden = false;
+				this.button.setFillStyle(this.devModeTools['COLOR_LIGHT'], 1);
+				break;
+
+			case 'no':
+				if (!this.hidden) {
+					this.active = false;
+					this.button.setFillStyle(this.devModeTools['COLOR_WHITE'], 1);
+				}
+				break;
+		}
+	}
+
+	increaseSize (value: boolean): void {
+		this.button.setScale(1 + (Number(value) * 0.3), 1 + (Number(value) * 0.15));
+		/*if (value) {
+			this.button.setStrokeStyle(2, 0x000000, 1);
+		}
+		else {
+			this.button.setStrokeStyle();
+		}*/
 	}
 }
