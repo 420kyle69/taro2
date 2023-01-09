@@ -278,8 +278,11 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	}
 
 	hideLayer(value: number): void {
-		this.switchLayer(-1);
 		const scene = this.scene as any;
+		if (scene.gameScene.tilemap.currentLayerIndex === value) {
+			this.switchLayer(-1);
+			this.tileEditor.marker.graphics.setVisible(false);
+		}
 		const tilemapLayers = scene.gameScene.tilemapLayers;
 		if (this.layerHideButtons[value].image.texture.key === 'eyeopen') {
 			this.layerHideButtons[value].image.setTexture('eyeclosed');

@@ -243,8 +243,11 @@ var DevModeTools = /** @class */ (function (_super) {
         }
     };
     DevModeTools.prototype.hideLayer = function (value) {
-        this.switchLayer(-1);
         var scene = this.scene;
+        if (scene.gameScene.tilemap.currentLayerIndex === value) {
+            this.switchLayer(-1);
+            this.tileEditor.marker.graphics.setVisible(false);
+        }
         var tilemapLayers = scene.gameScene.tilemapLayers;
         if (this.layerHideButtons[value].image.texture.key === 'eyeopen') {
             this.layerHideButtons[value].image.setTexture('eyeclosed');
