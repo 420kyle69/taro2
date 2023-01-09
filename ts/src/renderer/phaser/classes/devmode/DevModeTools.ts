@@ -7,6 +7,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	public gameEditorWidgets: Array<DOMRect>;
 
 	cursorButton: DevToolButton;
+	paletteButton: DevToolButton;
 	layerButtonsContainer: Phaser.GameObjects.Container;
 	layerButtons: DevToolButton[];
 	layerHideButtons: DevToolButton[];
@@ -54,7 +55,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		layerButtonsContainer.y = palette.camera.y - 204;
 		scene.add.existing(layerButtonsContainer);
 		
-		new DevToolButton (this, 'palette', null, 0, 170, 120, layerButtonsContainer, palette.toggle.bind(palette));
+		this.paletteButton = new DevToolButton (this, 'palette', null, 0, 170, 120, layerButtonsContainer, palette.toggle.bind(palette));
 
 		this.layerButtons = [];
 		this.layerButtons.push (

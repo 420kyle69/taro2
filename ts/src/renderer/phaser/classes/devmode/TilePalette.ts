@@ -129,8 +129,14 @@ class TilePalette extends Phaser.GameObjects.Container {
 	}
 
 	toggle(): void {
-		if (this.visible) this.hide();
-		else this.show()
+		if (this.visible) {
+			this.scene.devModeTools.paletteButton.highlight('hidden');
+			this.hide();
+		} else {
+			this.scene.devModeTools.paletteButton.hidden = false;
+			this.scene.devModeTools.paletteButton.highlight('no');
+			this.show();
+		}
 	}
 
 	hide (): void {

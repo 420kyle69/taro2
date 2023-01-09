@@ -81,6 +81,7 @@ var TileEditor = /** @class */ (function () {
             var palettePointerTileX = paletteMap.worldToTileX(palettePoint.x);
             var palettePointerTileY = paletteMap.worldToTileY(palettePoint.y);
             if (palette.visible && devModeScene.pointerInsidePalette()) {
+                devModeScene.regionEditor.cancelDrawRegion();
                 marker.graphics.setVisible(false);
                 // Snap to tile coordinates, but in world space
                 paletteMarker.graphics.x = paletteMap.tileToWorldX(palettePointerTileX);

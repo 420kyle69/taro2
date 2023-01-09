@@ -51,7 +51,7 @@ var DevModeTools = /** @class */ (function (_super) {
         layerButtonsContainer.x = palette.camera.x + palette.paletteWidth - 98;
         layerButtonsContainer.y = palette.camera.y - 204;
         scene.add.existing(layerButtonsContainer);
-        new DevToolButton(_this, 'palette', null, 0, 170, 120, layerButtonsContainer, palette.toggle.bind(palette));
+        _this.paletteButton = new DevToolButton(_this, 'palette', null, 0, 170, 120, layerButtonsContainer, palette.toggle.bind(palette));
         _this.layerButtons = [];
         _this.layerButtons.push(new DevToolButton(_this, 'floor', null, 30, 102, 85, layerButtonsContainer, _this.switchLayer.bind(_this), 0), new DevToolButton(_this, 'floor2', null, 30, 68, 85, layerButtonsContainer, _this.switchLayer.bind(_this), 1), new DevToolButton(_this, 'walls', null, 30, 34, 85, layerButtonsContainer, _this.switchLayer.bind(_this), 2), new DevToolButton(_this, 'trees', null, 30, 0, 85, layerButtonsContainer, _this.switchLayer.bind(_this), 3));
         _this.layerButtons[0].highlight('active');

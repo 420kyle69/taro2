@@ -109,10 +109,15 @@ var TilePalette = /** @class */ (function (_super) {
         return _this;
     }
     TilePalette.prototype.toggle = function () {
-        if (this.visible)
+        if (this.visible) {
+            this.scene.devModeTools.paletteButton.highlight('hidden');
             this.hide();
-        else
+        }
+        else {
+            this.scene.devModeTools.paletteButton.hidden = false;
+            this.scene.devModeTools.paletteButton.highlight('no');
             this.show();
+        }
     };
     TilePalette.prototype.hide = function () {
         this.setVisible(false);
