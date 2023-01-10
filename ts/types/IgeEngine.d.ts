@@ -4,6 +4,7 @@ declare class IgeEngine extends IgeClass {
 	regionManager: any;
 	showRegionList: any;
 	unitBeingDragged: any;
+	map: any;
 	scaleMap(data: any): void;
 
 	_renderFrames: number;
