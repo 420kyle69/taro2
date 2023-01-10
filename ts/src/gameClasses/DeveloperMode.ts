@@ -46,6 +46,7 @@ class DeveloperMode {
 			if (ige.game.data.map.layers.length > 4 && serverData.layer >= 2) serverData.layer ++;
 			//save tile change to ige.game.map.data
 			ige.game.data.map.layers[serverData.layer].data[serverData.y * width + serverData.x] = serverData.gid;
+			ige.map.data.layers[serverData.layer].data[serverData.y * width + serverData.x] = serverData.gid;
 			if (ige.game.data.map.layers[serverData.layer].name === 'walls') {
 				//if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
 				ige.physics.destroyWalls();
