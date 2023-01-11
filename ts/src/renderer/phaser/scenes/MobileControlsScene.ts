@@ -221,6 +221,19 @@ class MobileControlsScene extends PhaserScene {
 			this.enablePointerNextUpdate = false;
 			this.disablePointerEvents = false;
 		}
+		//hide joysticks if no touching screen
+		const gameScene = ige.renderer.scene.getScene('Game');
+		let pointerDown = false;
+		for (let i = 1; i < 6; i++) {
+			var pointer = gameScene.input['pointer'+i.toString()];
+			if (pointer.primaryDown) pointerDown = true;
+		}
+		if (!pointerDown) {
+		    const leftJoystick = this.joysticks.find(({ side }) => side === 'left');
+			if (leftJoystick) leftJoystick.hide();
+			const rightJoystick = this.joysticks.find(({ side }) => side === 'right');
+			if (rightJoystick) rightJoystick.hide();
+		}
 	}
 
 	private enterFullscreen() {
