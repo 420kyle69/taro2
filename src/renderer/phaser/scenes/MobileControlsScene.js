@@ -184,6 +184,28 @@ var MobileControlsScene = /** @class */ (function (_super) {
             this.enablePointerNextUpdate = false;
             this.disablePointerEvents = false;
         }
+        //hide joysticks if no touching screen
+        var gameScene = ige.renderer.scene.getScene('Game');
+        var pointerDown = false;
+        for (var i = 1; i < 6; i++) {
+            var pointer = gameScene.input['pointer' + i.toString()];
+            if (pointer.primaryDown)
+                pointerDown = true;
+        }
+        if (!pointerDown) {
+            var leftJoystick = this.joysticks.find(function (_a) {
+                var side = _a.side;
+                return side === 'left';
+            });
+            if (leftJoystick)
+                leftJoystick.hide();
+            var rightJoystick = this.joysticks.find(function (_a) {
+                var side = _a.side;
+                return side === 'right';
+            });
+            if (rightJoystick)
+                rightJoystick.hide();
+        }
     };
     MobileControlsScene.prototype.enterFullscreen = function () {
         if (!this.scale.isFullscreen) {

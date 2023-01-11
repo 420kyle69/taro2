@@ -2,7 +2,7 @@ var PhaserJoystick = /** @class */ (function () {
     function PhaserJoystick(scene, x, y, settings) {
         this.x = x;
         this.y = y;
-        var radius = 72;
+        var radius = this.radius = scene.cameras.main.displayWidth * 0.05;
         var base = scene.add.graphics();
         if (settings.redFireZone) {
             base.lineStyle(10, 0xff0000);
@@ -71,7 +71,7 @@ var PhaserJoystick = /** @class */ (function () {
         var controls = scene.controls;
         var x = this.x;
         var y = this.y;
-        virtualJoystick.radius = 72 * controls.scaleX;
+        virtualJoystick.radius = this.radius * controls.scaleX;
         var base = virtualJoystick.base;
         base.setScale(controls.scaleX, controls.scaleY);
         base.setPosition(x, y);
