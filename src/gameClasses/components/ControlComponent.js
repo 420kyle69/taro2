@@ -196,9 +196,6 @@ var ControlComponent = IgeEntity.extend({
 	},
 
 	keyUp: function (device, key) {
-		if(ige.developerMode.shouldPreventKeybindings()) {
-			return;
-		}
 		this.lastActionAt = Date.now();
 
 		var player = this._entity;		
@@ -239,6 +236,10 @@ var ControlComponent = IgeEntity.extend({
 						unit.ability.stopUsingItem();
 					}
 					break;
+			}
+
+			if(ige.developerMode.shouldPreventKeybindings()) {
+				return;
 			}
 
 			// traverse through abilities, and see if any of them is being casted by the owner
