@@ -846,12 +846,14 @@ var Item = IgeEntityPhysics.extend({
 		var ownerUnit = ige.$(this._stats.ownerUnitId);
 
 		// removing passive attributes
-		if (self._stats.bonus && self._stats.bonus.passive) {
-			if (self._stats.slotIndex < this._stats.inventorySize || self._stats.bonus.passive.isDisabledInBackpack != true) {
+		if (ownerUnit) {
+			if (self._stats.bonus && self._stats.bonus.passive) {
+				if (self._stats.slotIndex < this._stats.inventorySize || self._stats.bonus.passive.isDisabledInBackpack != true) {
+					ownerUnit.updateStats(self.id(), true);
+				}
+			} else {
 				ownerUnit.updateStats(self.id(), true);
 			}
-		} else {
-			ownerUnit.updateStats(self.id(), true);
 		}
 
 		self.previousState = null;
@@ -907,35 +909,39 @@ var Item = IgeEntityPhysics.extend({
 			self._scaleTexture();
 		}
 
-		this._stats.ownerUnitId = ownerUnit.id();
+		if (ownerUnit) {
+			this._stats.ownerUnitId = ownerUnit.id();
 
-		// if the unit type cannot carry the item, then remove it.
-		if (ownerUnit.canCarryItem(self._stats) == false) {
-			self.remove();
-		} else if (ownerUnit.canUseItem(self._stats)) { // if unit cannot use the item, then unselect the item
-			if (self._stats.slotIndex != undefined && ownerUnit._stats.currentItemIndex != undefined) {
-				if (ownerUnit._stats.currentItemIndex === self._stats.slotIndex) {
-					self.setState('selected');
-				} else {
-					self.setState('unselected');
+			// if the unit type cannot carry the item, then remove it.
+			if (ownerUnit.canCarryItem(self._stats) == false) {
+				self.remove();
+			} else if (ownerUnit.canUseItem(self._stats)) { // if unit cannot use the item, then unselect the item
+				if (self._stats.slotIndex != undefined && ownerUnit._stats.currentItemIndex != undefined) {
+					if (ownerUnit._stats.currentItemIndex === self._stats.slotIndex) {
+						self.setState('selected');
+					} else {
+						self.setState('unselected');
+					}
 				}
+			} else {
+				self.setState('unselected');
 			}
-		} else {
-			self.setState('unselected');
-		}
-		// adding back passive attributes
-		if (self._stats.bonus && self._stats.bonus.passive) {
-			if (self._stats.slotIndex < this._stats.inventorySize || self._stats.bonus.passive.isDisabledInBackpack != true) {
+			// adding back passive attributes
+			if (self._stats.bonus && self._stats.bonus.passive) {
+				if (self._stats.slotIndex < this._stats.inventorySize || self._stats.bonus.passive.isDisabledInBackpack != true) {
+					ownerUnit.updateStats(self.id());
+				}
+			} else {
 				ownerUnit.updateStats(self.id());
 			}
-		} else {
-			ownerUnit.updateStats(self.id());
 		}
 
 		if (ige.isServer) {
-			var index = ownerUnit._stats.currentItemIndex;
-			//ownerUnit.changeItem(1);
-			ownerUnit.changeItem(index); // this will call change item on client for all units*/
+			if (ownerUnit) {
+				var index = ownerUnit._stats.currentItemIndex;
+				//ownerUnit.changeItem(1);
+				ownerUnit.changeItem(index); // this will call change item on client for all units*/
+			}
 		} else if (ige.isClient) {
 			var zIndex = self._stats.currentBody && self._stats.currentBody['z-index'] || { layer: 3, depth: 3 };
 
@@ -959,7 +965,9 @@ var Item = IgeEntityPhysics.extend({
 				}
 			}
 
-			ownerUnit.inventory.update();
+			if (ownerUnit) {
+				ownerUnit.inventory.update();
+			}
 		}
 
 		//ownerUnit.changeUnitType(ownerUnit._stats.type);
