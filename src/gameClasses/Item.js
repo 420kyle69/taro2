@@ -308,8 +308,13 @@ var Item = IgeEntityPhysics.extend({
 					if (self._stats.isGun) {
 						if (self._stats.bulletStartPosition) {
 							var rotate = this._rotate.z;
+							let bulletY = self._stats.bulletStartPosition.y || 0;
+
 							if (owner && self._stats.currentBody && self._stats.currentBody.jointType == 'weldJoint') {
 								rotate = owner._rotate.z;
+								// if we are welded to owner unit, we have to invert the start position when the item is flipped
+								// multiply bullet start position y-component by -1 if flip === 1
+								bulletY *= (owner._stats.flip === 1 ? -1 : 1);
 							}
 
 							if (self.anchoredOffset == undefined) {
@@ -317,11 +322,7 @@ var Item = IgeEntityPhysics.extend({
 							}
 
 							// item is flipped, then mirror the rotation
-							if (owner._stats.flip == 1) {
-								var bulletY = -self._stats.bulletStartPosition.y || 0;
-							} else {
-								var bulletY = self._stats.bulletStartPosition.y || 0;
-							}
+
 
 							var bulletStartPosition = {
 								x: (owner._translate.x + self.anchoredOffset.x) + (self._stats.bulletStartPosition.x * Math.cos(rotate)) + (bulletY * Math.sin(rotate)),
