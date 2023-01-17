@@ -11,6 +11,7 @@ class GameScene extends PhaserScene {
 	public tilemap: Phaser.Tilemaps.Tilemap;
 	tileset: Phaser.Tilemaps.Tileset;
 	cameraTarget: Phaser.GameObjects.Container & IRenderProps;
+	filter: Phaser.Textures.FilterMode;
 
 	constructor() {
 		super({ key: 'Game' });
@@ -47,6 +48,10 @@ class GameScene extends PhaserScene {
 			);
 
 			ige.client.emit('scale', { ratio: ratio });
+		});
+
+		ige.client.on('change-filter', (data: {filter: renderingFilter}) => {
+			this.changeTextureFilter(data.filter);
 		});
 
 		ige.client.on('updateMap', () => {
@@ -289,9 +294,19 @@ class GameScene extends PhaserScene {
 			this.heightRenderer = new HeightRenderComponent(this, map.height * map.tileHeight);
 		}
 
-		//temporary making each loaded texture not smoothed (later planned to add option for smoothing some of them)
+		//get filter from game data
+		this.changeTextureFilter(ige.game.data.defaultData.renderingFilter);
+	}
+
+	private changeTextureFilter (filter: renderingFilter) {
+		if (filter === 'pixelArt') {
+			this.filter = Phaser.Textures.FilterMode.NEAREST;
+		} else {
+			this.filter = Phaser.Textures.FilterMode.LINEAR;
+		}
+		//apply filter to each texture
 		Object.values(this.textures.list).forEach(val => {
-			val.setFilter(Phaser.Textures.FilterMode.NEAREST);
+			val.setFilter(this.filter);
 		});
 	}
 
@@ -534,3 +549,5 @@ class GameScene extends PhaserScene {
 		});
 	}
 }
+
+type renderingFilter = 'pixelArt' | 'smooth';
