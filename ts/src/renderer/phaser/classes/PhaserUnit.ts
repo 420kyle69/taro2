@@ -58,7 +58,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 				this.scene.load.on(`filecomplete-image-${this.key}`, function cnsl() {
 					if (this && this.sprite) {
 						this.setTexture(this.key);
-						this.sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
+						this.sprite.texture.setFilter(this.scene.filter);
 						const bounds = this.entity._bounds2d;
 						this.sprite.setDisplaySize(bounds.x, bounds.y);
 					}
@@ -77,7 +77,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 				this.scene.load.on(`filecomplete-image-${this.key}`, function cnsl() {
 					if (this && this.sprite) {
 						this.setTexture(this.key);
-						this.sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
+						this.sprite.texture.setFilter(this.scene.filter);
 						const bounds = this.entity._bounds2d;
 						this.sprite.setDisplaySize(bounds.x, bounds.y);
 					}

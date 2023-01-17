@@ -222,9 +222,16 @@ var GameScene = /** @class */ (function (_super) {
         if (data.defaultData.heightBasedZIndex) {
             this.heightRenderer = new HeightRenderComponent(this, map.height * map.tileHeight);
         }
-        //temporary making each loaded texture not smoothed (later planned to add option for smoothing some of them)
+        //get filter from game data
+        if (ige.game.data.defaultData.renderingFilter === 'pixelArt') {
+            this.filter = Phaser.Textures.FilterMode.NEAREST;
+        }
+        else {
+            this.filter = Phaser.Textures.FilterMode.LINEAR;
+        }
+        //apply filter to each texture
         Object.values(this.textures.list).forEach(function (val) {
-            val.setFilter(Phaser.Textures.FilterMode.NEAREST);
+            val.setFilter(_this.filter);
         });
     };
     GameScene.prototype.setZoomSize = function (height) {

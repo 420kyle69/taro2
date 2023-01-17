@@ -47,7 +47,7 @@ var PhaserItem = /** @class */ (function (_super) {
                 this.scene.load.on("filecomplete-image-".concat(this.key), function cnsl() {
                     if (this && this.sprite) {
                         this.sprite.setTexture(this.key);
-                        this.sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
+                        this.sprite.texture.setFilter(this.scene.filter);
                         var bounds = this.entity._bounds2d;
                         this.sprite.setDisplaySize(bounds.x, bounds.y);
                     }

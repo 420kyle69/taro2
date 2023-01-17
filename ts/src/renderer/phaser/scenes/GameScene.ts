@@ -11,6 +11,7 @@ class GameScene extends PhaserScene {
 	public tilemap: Phaser.Tilemaps.Tilemap;
 	tileset: Phaser.Tilemaps.Tileset;
 	cameraTarget: Phaser.GameObjects.Container & IRenderProps;
+	filter: Phaser.Textures.FilterMode;
 
 	constructor() {
 		super({ key: 'Game' });
@@ -289,9 +290,16 @@ class GameScene extends PhaserScene {
 			this.heightRenderer = new HeightRenderComponent(this, map.height * map.tileHeight);
 		}
 
-		//temporary making each loaded texture not smoothed (later planned to add option for smoothing some of them)
+		//get filter from game data
+		if (ige.game.data.defaultData.renderingFilter === 'pixelArt') {
+			this.filter = Phaser.Textures.FilterMode.NEAREST;
+		} else {
+			this.filter = Phaser.Textures.FilterMode.LINEAR;
+		}
+
+		//apply filter to each texture
 		Object.values(this.textures.list).forEach(val => {
-			val.setFilter(Phaser.Textures.FilterMode.NEAREST);
+			val.setFilter(this.filter);
 		});
 	}
 
