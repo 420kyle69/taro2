@@ -43,6 +43,9 @@ var GameScene = /** @class */ (function (_super) {
             camera.zoomTo(ratio, 1000, Phaser.Math.Easing.Quadratic.Out, true);
             ige.client.emit('scale', { ratio: ratio });
         });
+        ige.client.on('change-filter', function (data) {
+            _this.changeTextureFilter(data.filter);
+        });
         ige.client.on('updateMap', function () {
             _this.updateMap();
         });
@@ -223,7 +226,11 @@ var GameScene = /** @class */ (function (_super) {
             this.heightRenderer = new HeightRenderComponent(this, map.height * map.tileHeight);
         }
         //get filter from game data
-        if (ige.game.data.defaultData.renderingFilter === 'pixelArt') {
+        this.changeTextureFilter(ige.game.data.defaultData.renderingFilter);
+    };
+    GameScene.prototype.changeTextureFilter = function (filter) {
+        var _this = this;
+        if (filter === 'pixelArt') {
             this.filter = Phaser.Textures.FilterMode.NEAREST;
         }
         else {

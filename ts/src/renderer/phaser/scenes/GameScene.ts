@@ -50,6 +50,10 @@ class GameScene extends PhaserScene {
 			ige.client.emit('scale', { ratio: ratio });
 		});
 
+		ige.client.on('change-filter', (data: {filter: renderingFilter}) => {
+			this.changeTextureFilter(data.filter);
+		});
+
 		ige.client.on('updateMap', () => {
 			this.updateMap();
 		});
@@ -291,12 +295,15 @@ class GameScene extends PhaserScene {
 		}
 
 		//get filter from game data
-		if (ige.game.data.defaultData.renderingFilter === 'pixelArt') {
+		this.changeTextureFilter(ige.game.data.defaultData.renderingFilter);
+	}
+
+	private changeTextureFilter (filter: renderingFilter) {
+		if (filter === 'pixelArt') {
 			this.filter = Phaser.Textures.FilterMode.NEAREST;
 		} else {
 			this.filter = Phaser.Textures.FilterMode.LINEAR;
 		}
-
 		//apply filter to each texture
 		Object.values(this.textures.list).forEach(val => {
 			val.setFilter(this.filter);
@@ -542,3 +549,5 @@ class GameScene extends PhaserScene {
 		});
 	}
 }
+
+type renderingFilter = 'pixelArt' | 'smooth';
