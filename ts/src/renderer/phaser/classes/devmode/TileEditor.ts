@@ -11,6 +11,8 @@ class TileEditor {
 	selectedTileArea: Phaser.Tilemaps.Tile[][];
 	lastSelectedTile: Phaser.Tilemaps.Tile;
 	lastSelectedTileArea: Phaser.Tilemaps.Tile[][];
+	newSelectedTile: Phaser.Tilemaps.Tile;
+	newSelectedTileArea: Phaser.Tilemaps.Tile[][];
 
 	constructor (
         gameScene: GameScene, devModeScene: DevModeScene, devModeTools: DevModeTools
@@ -28,6 +30,41 @@ class TileEditor {
 
         this.selectedTile = null;
 		this.selectedTileArea = [[null, null],[null, null]];
+
+		this.newSelectedTile = null;
+		this.newSelectedTileArea = [[null, null],[null, null]];
+
+		const pointerPosition = {x: 0, y: 0}
+
+		this.gameScene.input.on('pointerdown', (p) => {
+			if ((!devModeScene.pointerInsidePalette() || !this.tilePalette.visible) &&
+				!devModeScene.pointerInsideButtons() && 
+				!devModeScene.pointerInsideWidgets() && 
+				this.marker.active && this.gameScene.tilemap.currentLayerIndex >=0 && 
+				devModeScene.input.manager.activePointer.rightButtonDown() && 
+				!this.devModeTools.modeButtons[3].active) {
+					pointerPosition.x = this.gameScene.input.activePointer.x;
+					pointerPosition.y = this.gameScene.input.activePointer.y;
+				}
+		});
+
+		this.gameScene.input.on('pointerup', (p) => {
+			if ((!devModeScene.pointerInsidePalette() || !this.tilePalette.visible) &&
+				!devModeScene.pointerInsideButtons() && 
+				!devModeScene.pointerInsideWidgets() && 
+				this.marker.active && this.gameScene.tilemap.currentLayerIndex >=0 && 
+				!this.devModeTools.modeButtons[3].active) {
+					if (Math.abs(pointerPosition.x - this.gameScene.input.activePointer.x) < 50 &&
+						Math.abs(pointerPosition.y - this.gameScene.input.activePointer.y) < 50) {
+							console.log('changed selected tile', Math.abs(pointerPosition.x - this.gameScene.input.activePointer.x), Math.abs(pointerPosition.y - this.gameScene.input.activePointer.y))
+							if (this.area.x > 1 || this.area.y > 1) {
+								this.selectedTileArea = this.newSelectedTileArea;
+							} else {
+								this.selectedTile = this.newSelectedTile;
+							}
+					}
+				}
+		});
     }
 
     activateMarker(active: boolean): void {
@@ -39,7 +76,6 @@ class TileEditor {
 	}
 
     edit (data:TileData): void {
-        console.log('editTile', data);
         const map = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
 		map.putTileAt(data.gid, data.x, data.y, false, data.layer);
 		/* TODO: SAVE MAP DATA FROM SERVER SIDE */
@@ -66,7 +102,6 @@ class TileEditor {
 			!(index === 0 && map.getTileAt(tileX, tileY, true).index === -1)) {
 				map.putTileAt(index, tileX, tileY);
 				map.getTileAt(tileX, tileY, true).tint = 0xffffff;
-				console.log('place tile', index)
 				ige.network.send('editTile', {gid: index, layer: map.currentLayerIndex, x: tileX, y: tileY});
 			}
 		}
@@ -137,11 +172,11 @@ class TileEditor {
 					if (this.area.x > 1 || this.area.y > 1) {
 						for (let i = 0; i < this.area.x; i++) {
 							for (let j = 0; j < this.area.y; j++) {
-								this.selectedTileArea[i][j] = this.getTile(pointerTileX + i, pointerTileY + j, this.selectedTileArea[i][j], map);
+								this.newSelectedTileArea[i][j] = this.getTile(pointerTileX + i, pointerTileY + j, this.selectedTileArea[i][j], map);
 							}
 						}
 					} else {
-						this.selectedTile = this.getTile(pointerTileX, pointerTileY, this.selectedTile, map);
+						this.newSelectedTile = this.getTile(pointerTileX, pointerTileY, this.selectedTile, map);
 					}
 				}
 

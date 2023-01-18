@@ -1,5 +1,6 @@
 var TileEditor = /** @class */ (function () {
     function TileEditor(gameScene, devModeScene, devModeTools) {
+        var _this = this;
         this.gameScene = gameScene;
         this.devModeTools = devModeTools;
         this.tilePalette = this.devModeTools.palette;
@@ -9,6 +10,38 @@ var TileEditor = /** @class */ (function () {
         this.area = { x: 1, y: 1 };
         this.selectedTile = null;
         this.selectedTileArea = [[null, null], [null, null]];
+        this.newSelectedTile = null;
+        this.newSelectedTileArea = [[null, null], [null, null]];
+        var pointerPosition = { x: 0, y: 0 };
+        this.gameScene.input.on('pointerdown', function (p) {
+            if ((!devModeScene.pointerInsidePalette() || !_this.tilePalette.visible) &&
+                !devModeScene.pointerInsideButtons() &&
+                !devModeScene.pointerInsideWidgets() &&
+                _this.marker.active && _this.gameScene.tilemap.currentLayerIndex >= 0 &&
+                devModeScene.input.manager.activePointer.rightButtonDown() &&
+                !_this.devModeTools.modeButtons[3].active) {
+                pointerPosition.x = _this.gameScene.input.activePointer.x;
+                pointerPosition.y = _this.gameScene.input.activePointer.y;
+            }
+        });
+        this.gameScene.input.on('pointerup', function (p) {
+            if ((!devModeScene.pointerInsidePalette() || !_this.tilePalette.visible) &&
+                !devModeScene.pointerInsideButtons() &&
+                !devModeScene.pointerInsideWidgets() &&
+                _this.marker.active && _this.gameScene.tilemap.currentLayerIndex >= 0 &&
+                !_this.devModeTools.modeButtons[3].active) {
+                if (Math.abs(pointerPosition.x - _this.gameScene.input.activePointer.x) < 50 &&
+                    Math.abs(pointerPosition.y - _this.gameScene.input.activePointer.y) < 50) {
+                    console.log('changed selected tile', Math.abs(pointerPosition.x - _this.gameScene.input.activePointer.x), Math.abs(pointerPosition.y - _this.gameScene.input.activePointer.y));
+                    if (_this.area.x > 1 || _this.area.y > 1) {
+                        _this.selectedTileArea = _this.newSelectedTileArea;
+                    }
+                    else {
+                        _this.selectedTile = _this.newSelectedTile;
+                    }
+                }
+            }
+        });
     }
     TileEditor.prototype.activateMarker = function (active) {
         this.marker.active = active;
@@ -19,7 +52,6 @@ var TileEditor = /** @class */ (function () {
             this.devModeTools.regionEditor.regionTool = false;
     };
     TileEditor.prototype.edit = function (data) {
-        console.log('editTile', data);
         var map = this.gameScene.tilemap;
         map.putTileAt(data.gid, data.x, data.y, false, data.layer);
         /* TODO: SAVE MAP DATA FROM SERVER SIDE */
@@ -47,7 +79,6 @@ var TileEditor = /** @class */ (function () {
                 !(index === 0 && map.getTileAt(tileX, tileY, true).index === -1)) {
                 map.putTileAt(index, tileX, tileY);
                 map.getTileAt(tileX, tileY, true).tint = 0xffffff;
-                console.log('place tile', index);
                 ige.network.send('editTile', { gid: index, layer: map.currentLayerIndex, x: tileX, y: tileY });
             }
         }
@@ -114,12 +145,12 @@ var TileEditor = /** @class */ (function () {
                     if (this.area.x > 1 || this.area.y > 1) {
                         for (var i = 0; i < this.area.x; i++) {
                             for (var j = 0; j < this.area.y; j++) {
-                                this.selectedTileArea[i][j] = this.getTile(pointerTileX + i, pointerTileY + j, this.selectedTileArea[i][j], map);
+                                this.newSelectedTileArea[i][j] = this.getTile(pointerTileX + i, pointerTileY + j, this.selectedTileArea[i][j], map);
                             }
                         }
                     }
                     else {
-                        this.selectedTile = this.getTile(pointerTileX, pointerTileY, this.selectedTile, map);
+                        this.newSelectedTile = this.getTile(pointerTileX, pointerTileY, this.selectedTile, map);
                     }
                 }
                 if (devModeScene.input.manager.activePointer.leftButtonDown()) {
