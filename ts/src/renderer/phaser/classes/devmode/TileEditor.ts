@@ -11,15 +11,15 @@ class TileEditor {
 	selectedTileArea: Phaser.Tilemaps.Tile[][];
 	lastSelectedTile: Phaser.Tilemaps.Tile;
 	lastSelectedTileArea: Phaser.Tilemaps.Tile[][];
-	newSelectedTile: Phaser.Tilemaps.Tile;
-	newSelectedTileArea: Phaser.Tilemaps.Tile[][];
+
+	startDragIn: string;
 
 	constructor (
         gameScene: GameScene, devModeScene: DevModeScene, devModeTools: DevModeTools
 	) {
         this.gameScene = gameScene;
         this.devModeTools = devModeTools;
-        this.tilePalette = this.devModeTools.palette;
+        const palette = this.tilePalette = this.devModeTools.palette;
 
         const gameMap = this.gameScene.tilemap;
 
@@ -31,39 +31,76 @@ class TileEditor {
         this.selectedTile = null;
 		this.selectedTileArea = [[null, null],[null, null]];
 
-		this.newSelectedTile = null;
-		this.newSelectedTileArea = [[null, null],[null, null]];
-
 		const pointerPosition = {x: 0, y: 0}
 
-		this.gameScene.input.on('pointerdown', (p) => {
-			if ((!devModeScene.pointerInsidePalette() || !this.tilePalette.visible) &&
-				!devModeScene.pointerInsideButtons() && 
+		let startDragIn = this.startDragIn = 'none';
+
+		devModeScene.input.on('pointerdown', (p) => {
+			if (!devModeScene.pointerInsideButtons() && 
+				!devModeScene.pointerInsideWidgets() &&
+				palette.visible	&& devModeScene.pointerInsidePalette()) {
+					startDragIn = 'palette';
+					pointerPosition.x = devModeScene.input.activePointer.x;
+					pointerPosition.y = devModeScene.input.activePointer.y;
+				}
+		});
+
+		gameScene.input.on('pointerdown', (p) => {
+			if (!devModeScene.pointerInsideButtons() && 
 				!devModeScene.pointerInsideWidgets() && 
 				this.marker.active && this.gameScene.tilemap.currentLayerIndex >=0 && 
 				devModeScene.input.manager.activePointer.rightButtonDown() && 
 				!this.devModeTools.modeButtons[3].active) {
-					pointerPosition.x = this.gameScene.input.activePointer.x;
-					pointerPosition.y = this.gameScene.input.activePointer.y;
+					startDragIn = 'map';
+					pointerPosition.x = gameScene.input.activePointer.x;
+					pointerPosition.y = gameScene.input.activePointer.y;
 				}
 		});
 
-		this.gameScene.input.on('pointerup', (p) => {
-			if ((!devModeScene.pointerInsidePalette() || !this.tilePalette.visible) &&
-				!devModeScene.pointerInsideButtons() && 
-				!devModeScene.pointerInsideWidgets() && 
-				this.marker.active && this.gameScene.tilemap.currentLayerIndex >=0 && 
-				!this.devModeTools.modeButtons[3].active) {
-					if (Math.abs(pointerPosition.x - this.gameScene.input.activePointer.x) < 50 &&
-						Math.abs(pointerPosition.y - this.gameScene.input.activePointer.y) < 50) {
-							console.log('changed selected tile', Math.abs(pointerPosition.x - this.gameScene.input.activePointer.x), Math.abs(pointerPosition.y - this.gameScene.input.activePointer.y))
-							if (this.area.x > 1 || this.area.y > 1) {
-								this.selectedTileArea = this.newSelectedTileArea;
-							} else {
-								this.selectedTile = this.newSelectedTile;
+		devModeScene.input.on('pointerup', (p) => {
+			if (startDragIn === 'palette' && 
+				Math.abs(pointerPosition.x - devModeScene.input.activePointer.x) < 50 &&
+				Math.abs(pointerPosition.y - devModeScene.input.activePointer.y) < 50) {
+					const palettePoint = devModeScene.cameras.getCamera('palette').getWorldPoint(devModeScene.input.activePointer.x, devModeScene.input.activePointer.y);
+					const palettePointerTileX = palette.map.worldToTileX(palettePoint.x);
+					const palettePointerTileY = palette.map.worldToTileY(palettePoint.y);
+						this.devModeTools.brush();
+						if (this.area.x > 1 || this.area.y > 1) {
+							for (let i = 0; i < this.area.x; i++) {
+								for (let j = 0; j < this.area.y; j++) {
+									this.selectedTileArea[i][j] = this.getTile(palettePointerTileX + i, palettePointerTileY + j, this.selectedTileArea[i][j], palette.map);
+								}
 							}
+						} else {
+							this.selectedTile = this.getTile(palettePointerTileX, palettePointerTileY, this.selectedTile, palette.map);
+						}
+				}
+			if (startDragIn === 'palette') {
+				startDragIn = 'none';
+			}
+		});
+
+		gameScene.input.on('pointerup', (p) => {
+			if (startDragIn === 'map' && 
+				Math.abs(pointerPosition.x - gameScene.input.activePointer.x) < 50 &&
+				Math.abs(pointerPosition.y - gameScene.input.activePointer.y) < 50 && 
+				!this.devModeTools.modeButtons[3].active) {
+					const worldPoint = this.gameScene.cameras.main.getWorldPoint(this.gameScene.input.activePointer.x, this.gameScene.input.activePointer.y);
+					const pointerTileX = gameMap.worldToTileX(worldPoint.x);
+					const pointerTileY = gameMap.worldToTileY(worldPoint.y);
+					if (this.area.x > 1 || this.area.y > 1) {
+						for (let i = 0; i < this.area.x; i++) {
+							for (let j = 0; j < this.area.y; j++) {
+								this.selectedTileArea[i][j] = this.getTile(pointerTileX + i, pointerTileY + j, this.selectedTileArea[i][j], gameMap);
+							}
+						}
+					} else {
+						this.selectedTile = this.getTile(pointerTileX, pointerTileY, this.selectedTile, gameMap);
 					}
 				}
+			if (startDragIn === 'map') {
+				startDragIn = 'none';
+			}
 		});
     }
 
@@ -144,18 +181,18 @@ class TileEditor {
 				paletteMarker.graphics.x = paletteMap.tileToWorldX(palettePointerTileX);
 				paletteMarker.graphics.y = paletteMap.tileToWorldY(palettePointerTileY);
 
-				if (devModeScene.input.manager.activePointer.isDown) {
+				/*if (devModeScene.input.manager.activePointer.isDown) {
 					this.devModeTools.brush();
 					if (this.area.x > 1 || this.area.y > 1) {
 						for (let i = 0; i < this.area.x; i++) {
 							for (let j = 0; j < this.area.y; j++) {
-								this.selectedTileArea[i][j] = this.getTile(palettePointerTileX + i, palettePointerTileY + j, this.selectedTileArea[i][j], paletteMap);
+								this.newSelectedTileArea[i][j] = this.getTile(palettePointerTileX + i, palettePointerTileY + j, this.selectedTileArea[i][j], paletteMap);
 							}
 						}
 					} else {
-						this.selectedTile = this.getTile(palettePointerTileX, palettePointerTileY, this.selectedTile, paletteMap);
+						this.newSelectedTile = this.getTile(palettePointerTileX, palettePointerTileY, this.selectedTile, paletteMap);
 					}
-				}
+				}*/
 			} else if ((!devModeScene.pointerInsidePalette() || !palette.visible) &&
 				!devModeScene.pointerInsideButtons() && !devModeScene.pointerInsideWidgets() && marker.active && map.currentLayerIndex >=0) {
 				paletteMarker.graphics.setVisible(false);
@@ -169,15 +206,15 @@ class TileEditor {
 				marker.graphics.y = map.tileToWorldY(pointerTileY);
 
 				if (devModeScene.input.manager.activePointer.rightButtonDown() && !this.devModeTools.modeButtons[3].active) {
-					if (this.area.x > 1 || this.area.y > 1) {
+					/*if (this.area.x > 1 || this.area.y > 1) {
 						for (let i = 0; i < this.area.x; i++) {
 							for (let j = 0; j < this.area.y; j++) {
-								this.newSelectedTileArea[i][j] = this.getTile(pointerTileX + i, pointerTileY + j, this.selectedTileArea[i][j], map);
+								this.selectedTileArea[i][j] = this.getTile(pointerTileX + i, pointerTileY + j, this.selectedTileArea[i][j], map);
 							}
 						}
 					} else {
-						this.newSelectedTile = this.getTile(pointerTileX, pointerTileY, this.selectedTile, map);
-					}
+						this.selectedTile = this.getTile(pointerTileX, pointerTileY, this.selectedTile, map);
+					}*/
 				}
 
 				if (devModeScene.input.manager.activePointer.leftButtonDown()) {

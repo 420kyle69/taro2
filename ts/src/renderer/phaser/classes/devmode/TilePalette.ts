@@ -59,7 +59,7 @@ class TilePalette extends Phaser.GameObjects.Container {
 
 		camera.setBackgroundColor(0x000000);
 
-		texturesLayer.on('pointermove', function (p) {
+		texturesLayer.on('pointermove', (p) => {
 			const devModeScene = ige.renderer.scene.getScene('DevMode') as DevModeScene;
             devModeScene.regionEditor.cancelDrawRegion();
 			if (!p.isDown) return;
