@@ -140,11 +140,13 @@ class PhaserUnit extends PhaserAnimatedEntity {
 	}
 
 	private updateLabelOffset (): void {
-		const {displayHeight, displayWidth} = this.sprite;
-		const labelHeight = this.label.getTextBounds(true).global.height;
-		this.label.y = - displayHeight/2 - labelHeight*1.5;
-		if (this.rtLabel) {
-			this.rtLabel.y = this.label.y;
+		if (this.label) {
+			const {displayHeight, displayWidth} = this.sprite;
+			const labelHeight = this.label.getTextBounds(true).global.height;
+			this.label.y = - displayHeight/2 - labelHeight*1.5;
+			if (this.rtLabel) {
+				this.rtLabel.y = this.label.y;
+			}
 		}
 		this.updateGameObjectSize();
 	}
