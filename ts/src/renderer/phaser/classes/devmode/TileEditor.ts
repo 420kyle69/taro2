@@ -84,8 +84,8 @@ class TileEditor {
 			if (this.startDragIn === 'map' && 
 				Math.abs(pointerPosition.x - gameScene.input.activePointer.x) < 50 &&
 				Math.abs(pointerPosition.y - gameScene.input.activePointer.y) < 50 && 
-				!this.devModeTools.modeButtons[3].active) {
-					const worldPoint = this.gameScene.cameras.main.getWorldPoint(this.gameScene.input.activePointer.x, this.gameScene.input.activePointer.y);
+				!devModeTools.modeButtons[3].active) {
+					const worldPoint = gameScene.cameras.main.getWorldPoint(gameScene.input.activePointer.x, gameScene.input.activePointer.y);
 					const pointerTileX = gameMap.worldToTileX(worldPoint.x);
 					const pointerTileY = gameMap.worldToTileY(worldPoint.y);
 					if (this.area.x > 1 || this.area.y > 1) {
@@ -187,7 +187,7 @@ class TileEditor {
 
 				paletteMarker.graphics.setVisible(false);
 				marker.graphics.setVisible(true);
-				
+
 				// Rounds down to nearest tile
 				const pointerTileX = map.worldToTileX(worldPoint.x);
 				const pointerTileY = map.worldToTileY(worldPoint.y);

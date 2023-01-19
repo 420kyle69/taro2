@@ -59,8 +59,8 @@ var TileEditor = /** @class */ (function () {
             if (_this.startDragIn === 'map' &&
                 Math.abs(pointerPosition.x - gameScene.input.activePointer.x) < 50 &&
                 Math.abs(pointerPosition.y - gameScene.input.activePointer.y) < 50 &&
-                !_this.devModeTools.modeButtons[3].active) {
-                var worldPoint = _this.gameScene.cameras.main.getWorldPoint(_this.gameScene.input.activePointer.x, _this.gameScene.input.activePointer.y);
+                !devModeTools.modeButtons[3].active) {
+                var worldPoint = gameScene.cameras.main.getWorldPoint(gameScene.input.activePointer.x, gameScene.input.activePointer.y);
                 var pointerTileX = gameMap.worldToTileX(worldPoint.x);
                 var pointerTileY = gameMap.worldToTileY(worldPoint.y);
                 if (_this.area.x > 1 || _this.area.y > 1) {
