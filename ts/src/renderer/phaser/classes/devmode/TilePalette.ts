@@ -27,7 +27,6 @@ class TilePalette extends Phaser.GameObjects.Container {
 	) {
 		super(scene);
 
-		console.log('create palette', this);
 		this.tileset = tileset;
 		this.rexUI = rexUI;
 		this.scene = scene;
@@ -59,10 +58,10 @@ class TilePalette extends Phaser.GameObjects.Container {
 
 		camera.setBackgroundColor(0x000000);
 
-		texturesLayer.on('pointermove', function (p) {
+		texturesLayer.on('pointermove', (p) => {
 			const devModeScene = ige.renderer.scene.getScene('DevMode') as DevModeScene;
             devModeScene.regionEditor.cancelDrawRegion();
-			if (!p.isDown) return;
+			if (!p.isDown || scene.tileEditor.startDragIn !== 'palette') return;
 			const scrollX = (p.x - p.prevPosition.x) / camera.zoom
 			const scrollY = (p.y - p.prevPosition.y) / camera.zoom;
 			camera.scrollX -= scrollX;

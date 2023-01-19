@@ -105,8 +105,8 @@ class DevModeTools extends Phaser.GameObjects.Container {
 
 		const ctrlKey = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CTRL, false);
 
-		this.scene.input.on('pointermove', function (p) {
-			if (ige.developerMode.active && ige.developerMode.activeTab !== 'play' && (p.rightButtonDown() || (p.isDown && ctrlKey.isDown))) {
+		this.scene.input.on('pointermove', (p) => {
+			if (ige.developerMode.active && ige.developerMode.activeTab !== 'play' && scene.tileEditor.startDragIn !== 'palette' && (p.rightButtonDown() || (p.isDown && ctrlKey.isDown))) {
 				const camera = this.scene.gameScene.cameras.main;
 				const scrollX = (p.x - p.prevPosition.x) / camera.zoom
 				const scrollY = (p.y - p.prevPosition.y) / camera.zoom;
@@ -143,30 +143,27 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		const keyboard = this.scene.input.keyboard;
 		const tabKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, true);
 		tabKey.on('down', () => {
-			if (ige.developerMode.shouldPreventKeybindings()) {
+			if(ige.developerMode.active && ige.developerMode.activeTab === 'map') {
 				keyboard.disableGlobalCapture();
-			} else {
-				keyboard.enableGlobalCapture();
-				if(ige.developerMode.active && ige.developerMode.activeTab === 'map') {
-					if (this.palette.visible) {
-						this.palette.hide();
-					}
-					else {
-						this.palette.show()
-					}
+				if (this.palette.visible) {
+					this.palette.hide();
 				}
+				else {
+					this.palette.show()
+				}
+				keyboard.enableGlobalCapture();
 			}
 		});
 		const plusKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.PLUS, false);
 		plusKey.on('down', () => {
-			if(ige.developerMode.active && ige.developerMode.activeTab !== 'play' && !ige.developerMode.shouldPreventKeybindings()) {
+			if(ige.developerMode.active && ige.developerMode.activeTab === 'map') {
 				const zoom = (gameScene.zoomSize / 2.15) / 1.1;
 				ige.client.emit('zoom', zoom);
 			}
 		});
 		const minusKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.MINUS, false);
 		minusKey.on('down', () => {
-			if(ige.developerMode.active && ige.developerMode.activeTab !== 'play' && !ige.developerMode.shouldPreventKeybindings()) {
+			if(ige.developerMode.active && ige.developerMode.activeTab === 'map') {
 				const zoom =(gameScene.zoomSize / 2.15) * 1.1;
 				ige.client.emit('zoom', zoom);
 			}
