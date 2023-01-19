@@ -106,7 +106,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		const ctrlKey = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CTRL, false);
 
 		this.scene.input.on('pointermove', (p) => {
-			if (ige.developerMode.active && ige.developerMode.activeTab !== 'play' && !scene.pointerInsidePalette() && (p.rightButtonDown() || (p.isDown && ctrlKey.isDown))) {
+			if (ige.developerMode.active && ige.developerMode.activeTab !== 'play' && scene.tileEditor.startDragIn !== 'palette' && (p.rightButtonDown() || (p.isDown && ctrlKey.isDown))) {
 				const camera = this.scene.gameScene.cameras.main;
 				const scrollX = (p.x - p.prevPosition.x) / camera.zoom
 				const scrollY = (p.y - p.prevPosition.y) / camera.zoom;
