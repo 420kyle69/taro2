@@ -1578,7 +1578,7 @@ var IgeObject = IgeEventingClass.extend({
 					}
 				} else {
 					while (arrCount--) {
-						arr[arrCount].update(ctx, tickDelta);
+						arr[arrCount]?.update(ctx, tickDelta);
 					}
 				}
 			}
