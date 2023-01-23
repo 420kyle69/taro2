@@ -23,8 +23,8 @@ class TileEditor {
 
         const gameMap = this.gameScene.tilemap;
 
-        this.marker = new TileMarker (this.gameScene, gameMap, 2);
-        this.paletteMarker = new TileMarker(this.devModeTools.scene, this.tilePalette.map, 1);
+        this.marker = new TileMarker (this.gameScene, gameMap, false, 2);
+        this.paletteMarker = new TileMarker(this.devModeTools.scene, this.tilePalette.map, true, 1);
 
         this.area = {x: 1, y: 1};
 
@@ -105,8 +105,12 @@ class TileEditor {
     }
 
     activateMarker(active: boolean): void {
+		//this.marker.activate(active);
 		this.marker.active = active;
 		this.marker.graphics.setVisible(active);
+		if (this.marker.visiblePreview) this.marker.preview.setVisible(active)
+		else this.marker.preview.setVisible(false);
+		//this.paletteMarker.activate(active);
 		this.paletteMarker.active = active;
 		this.paletteMarker.graphics.setVisible(active);
 		if (active) this.devModeTools.regionEditor.regionTool = false;
@@ -149,6 +153,7 @@ class TileEditor {
 			if (selectedTile) selectedTile.tint = 0xffffff;
 			if (map.getTileAt(tileX, tileY) && map.getTileAt(tileX, tileY).index !== 0) {
 				selectedTile = map.getTileAt(tileX, tileY);
+				this.marker.preview.setTexture('extruded-tiles/tilesheet_complete', selectedTile.index - 1);
 				if (map === this.tilePalette.map) selectedTile.tint = 0x87cfff;
 			}
 			return selectedTile;
@@ -177,6 +182,7 @@ class TileEditor {
 			if (palette.visible	&& devModeScene.pointerInsidePalette()) {
 				devModeScene.regionEditor.cancelDrawRegion();
 				marker.graphics.setVisible(false);
+				marker.preview.setVisible(false);
 				
 				// Snap to tile coordinates, but in world space
 				paletteMarker.graphics.x = paletteMap.tileToWorldX(palettePointerTileX);
@@ -187,6 +193,7 @@ class TileEditor {
 
 				paletteMarker.graphics.setVisible(false);
 				marker.graphics.setVisible(true);
+				if (this.marker.visiblePreview) marker.preview.setVisible(true);
 
 				// Rounds down to nearest tile
 				const pointerTileX = map.worldToTileX(worldPoint.x);
@@ -195,6 +202,8 @@ class TileEditor {
 				// Snap to tile coordinates, but in world space
 				marker.graphics.x = map.tileToWorldX(pointerTileX);
 				marker.graphics.y = map.tileToWorldY(pointerTileY);
+				marker.preview.x = map.tileToWorldX(pointerTileX);
+				marker.preview.y = map.tileToWorldY(pointerTileY);
 
 				if (devModeScene.input.manager.activePointer.leftButtonDown()) {
 					if (this.area.x > 1 || this.area.y > 1) {
@@ -212,6 +221,7 @@ class TileEditor {
 		}
 		else {
 			this.marker.graphics.setVisible(false);
+			if (this.marker.visiblePreview) this.marker.preview.setVisible(false);
 			this.paletteMarker.graphics.setVisible(false);
 		}
 	}
