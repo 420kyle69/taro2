@@ -43,6 +43,9 @@ var GameScene = /** @class */ (function (_super) {
             camera.zoomTo(ratio, 1000, Phaser.Math.Easing.Quadratic.Out, true);
             ige.client.emit('scale', { ratio: ratio });
         });
+        ige.client.on('change-filter', function (data) {
+            _this.changeTextureFilter(data.filter);
+        });
         ige.client.on('updateMap', function () {
             _this.updateMap();
         });
@@ -222,9 +225,20 @@ var GameScene = /** @class */ (function (_super) {
         if (data.defaultData.heightBasedZIndex) {
             this.heightRenderer = new HeightRenderComponent(this, map.height * map.tileHeight);
         }
-        //temporary making each loaded texture not smoothed (later planned to add option for smoothing some of them)
+        //get filter from game data
+        this.changeTextureFilter(ige.game.data.defaultData.renderingFilter);
+    };
+    GameScene.prototype.changeTextureFilter = function (filter) {
+        var _this = this;
+        if (filter === 'pixelArt') {
+            this.filter = Phaser.Textures.FilterMode.NEAREST;
+        }
+        else {
+            this.filter = Phaser.Textures.FilterMode.LINEAR;
+        }
+        //apply filter to each texture
         Object.values(this.textures.list).forEach(function (val) {
-            val.setFilter(Phaser.Textures.FilterMode.NEAREST);
+            val.setFilter(_this.filter);
         });
     };
     GameScene.prototype.setZoomSize = function (height) {

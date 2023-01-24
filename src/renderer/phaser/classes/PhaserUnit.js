@@ -49,7 +49,7 @@ var PhaserUnit = /** @class */ (function (_super) {
                 this.scene.load.on("filecomplete-image-".concat(this.key), function cnsl() {
                     if (this && this.sprite) {
                         this.setTexture(this.key);
-                        this.sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
+                        this.sprite.texture.setFilter(this.scene.filter);
                         var bounds = this.entity._bounds2d;
                         this.sprite.setDisplaySize(bounds.x, bounds.y);
                     }
@@ -70,7 +70,7 @@ var PhaserUnit = /** @class */ (function (_super) {
                 this.scene.load.on("filecomplete-image-".concat(this.key), function cnsl() {
                     if (this && this.sprite) {
                         this.setTexture(this.key);
-                        this.sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
+                        this.sprite.texture.setFilter(this.scene.filter);
                         var bounds = this.entity._bounds2d;
                         this.sprite.setDisplaySize(bounds.x, bounds.y);
                     }
@@ -122,11 +122,13 @@ var PhaserUnit = /** @class */ (function (_super) {
         this.updateGameObjectSize();
     };
     PhaserUnit.prototype.updateLabelOffset = function () {
-        var _a = this.sprite, displayHeight = _a.displayHeight, displayWidth = _a.displayWidth;
-        var labelHeight = this.label.getTextBounds(true).global.height;
-        this.label.y = -displayHeight / 2 - labelHeight * 1.5;
-        if (this.rtLabel) {
-            this.rtLabel.y = this.label.y;
+        if (this.label) {
+            var _a = this.sprite, displayHeight = _a.displayHeight, displayWidth = _a.displayWidth;
+            var labelHeight = this.label.getTextBounds(true).global.height;
+            this.label.y = -displayHeight / 2 - labelHeight * 1.5;
+            if (this.rtLabel) {
+                this.rtLabel.y = this.label.y;
+            }
         }
         this.updateGameObjectSize();
     };
