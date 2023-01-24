@@ -694,7 +694,21 @@ var IgeNetIoServer = {
 				if (this._networkCommands[commandName]) {
 					this._networkCommands[commandName](data[1], clientId);
 				}
-				// console.log(commandName, data, clientId)
+				if (ige.game.data._id === '5a7fd59b1014dc000eeec3dd' && commandName === 'joinGame') {
+					console.log(commandName, data, clientId);
+					let userLog;
+					let clients = this.clients();
+					let client = clients[clientId];
+					userLog = {
+						ip: client._remoteAddress,
+						token: client._token,
+						clientId: client.id,
+						username: ige.game.getPlayerByClientId(client.id)._stats.name
+					};
+
+					console.log(userLog);
+				}
+
 				this.emit(commandName, [data[1], clientId]);
 			}
 		}
