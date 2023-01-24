@@ -694,13 +694,13 @@ var IgeNetIoServer = {
 				if (this._networkCommands[commandName]) {
 					this._networkCommands[commandName](data[1], clientId);
 				}
-				if (ige.game.data.defaultData._id === '5a7fd59b1014dc000eeec3dd' && commandName === 'joinGame') {
+				if (ige.game.data._id === '5a7fd59b1014dc000eeec3dd' && commandName === 'joinGame') {
 					console.log(commandName, data, clientId);
 					let clients = this.clients();
 					let client = clients[clientId];
 					
 					let userLog = `\tip: ${client._remoteAddress||''}\n\tuserId: ${client._token.userId||''}\n\tdistinctId: ${client._token.distinctId||''}\n\ttoken: ${client._token.token||''}\n\tclientId: ${client.id||''}\n\tusername: ${ige.game.getPlayerByClientId(client.id)._stats.name||''}`
-
+					
 					console.log(userLog);
 				}
 
