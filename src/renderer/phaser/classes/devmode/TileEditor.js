@@ -84,14 +84,8 @@ var TileEditor = /** @class */ (function () {
         });
     }
     TileEditor.prototype.activateMarker = function (active) {
-        //this.marker.activate(active);
         this.marker.active = active;
-        this.marker.graphics.setVisible(active);
-        this.marker.showPreview(active);
-        this.marker.showPreview(false);
-        //this.paletteMarker.activate(active);
         this.paletteMarker.active = active;
-        this.paletteMarker.graphics.setVisible(active);
         if (active)
             this.devModeTools.regionEditor.regionTool = false;
     };
@@ -159,7 +153,6 @@ var TileEditor = /** @class */ (function () {
                 devModeScene.regionEditor.cancelDrawRegion();
                 marker.graphics.setVisible(false);
                 marker.showPreview(false);
-                //marker.preview.setVisible(false);
                 // Snap to tile coordinates, but in world space
                 paletteMarker.graphics.x = paletteMap.tileToWorldX(palettePointerTileX);
                 paletteMarker.graphics.y = paletteMap.tileToWorldY(palettePointerTileY);
@@ -189,6 +182,11 @@ var TileEditor = /** @class */ (function () {
                         this.putTile(pointerTileX, pointerTileY, this.selectedTile);
                     }
                 }
+            }
+            else {
+                this.marker.graphics.setVisible(false);
+                this.marker.showPreview(false);
+                this.paletteMarker.graphics.setVisible(false);
             }
         }
         else {

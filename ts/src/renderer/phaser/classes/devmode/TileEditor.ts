@@ -109,14 +109,8 @@ class TileEditor {
     }
 
     activateMarker(active: boolean): void {
-		//this.marker.activate(active);
 		this.marker.active = active;
-		this.marker.graphics.setVisible(active);
-		this.marker.showPreview(active);
-		this.marker.showPreview(false);
-		//this.paletteMarker.activate(active);
 		this.paletteMarker.active = active;
-		this.paletteMarker.graphics.setVisible(active);
 		if (active) this.devModeTools.regionEditor.regionTool = false;
 	}
 
@@ -186,7 +180,6 @@ class TileEditor {
 				devModeScene.regionEditor.cancelDrawRegion();
 				marker.graphics.setVisible(false);
 				marker.showPreview(false);
-				//marker.preview.setVisible(false);
 				
 				// Snap to tile coordinates, but in world space
 				paletteMarker.graphics.x = paletteMap.tileToWorldX(palettePointerTileX);
@@ -221,6 +214,10 @@ class TileEditor {
 						this.putTile(pointerTileX, pointerTileY, this.selectedTile);
 					}
 				}
+			} else {
+				this.marker.graphics.setVisible(false);
+				this.marker.showPreview(false);
+				this.paletteMarker.graphics.setVisible(false);
 			}
 		}
 		else {
