@@ -51,7 +51,16 @@ class TileMarker {
 		return image;
 	}
 
-	changePreview () {
+	changeImage (tile: Phaser.Tilemaps.Tile, i: number, j: number): void {
+		if (tile && tile.index !== 0) {
+			if (!this.images[i][j])  {
+				this.images[i][j] = this.addImage(i, j);
+			} 
+			this.images[i][j].setTexture(this.extrudedKey, tile.index - 1).setAlpha(0.75);
+		} else if (this.images[i][j]) this.images[i][j].setAlpha(0);
+	}
+
+	changePreview (): void {
 		const {x, y} = this.devModeScene.tileEditor.area;
 		this.graphics.scale = x;
 		if (!this.palette) {
@@ -60,22 +69,12 @@ class TileMarker {
 				const previewTarget = this.devModeScene.tileEditor.selectedTileArea;
 				for (let i = 0; i < x; i++) {
 					for (let j = 0; j < y; j++) {
-						if (previewTarget[i][j] && previewTarget[i][j].index !== 0) {
-							if (!this.images[i][j])  {
-								this.images[i][j] = this.addImage(i, j);
-							} 
-							this.images[i][j].setTexture(this.extrudedKey, previewTarget[i][j].index - 1).setAlpha(0.75);
-						} else if (this.images[i][j]) this.images[i][j].setAlpha(0);
+						this.changeImage(previewTarget[i][j], i, j);
 					}
 				}
 			} else if (x === 1 && y === 1) {
 				const previewTarget = this.devModeScene.tileEditor.selectedTile;
-				if (previewTarget && previewTarget.index !== 0) {
-					if (!this.images[0][0])  {
-						this.images[0][0] = this.addImage(0, 0);
-					} 
-					this.images[0][0].setTexture(this.extrudedKey, previewTarget.index - 1).setAlpha(0.75);
-				} else if (this.images[0][0]) this.images[0][0].setAlpha(0);
+				this.changeImage(previewTarget, 0, 0);	
 			}
 		}
 	}

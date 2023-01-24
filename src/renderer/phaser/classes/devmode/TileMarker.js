@@ -37,6 +37,16 @@ var TileMarker = /** @class */ (function () {
         this.preview.add(image);
         return image;
     };
+    TileMarker.prototype.changeImage = function (tile, i, j) {
+        if (tile && tile.index !== 0) {
+            if (!this.images[i][j]) {
+                this.images[i][j] = this.addImage(i, j);
+            }
+            this.images[i][j].setTexture(this.extrudedKey, tile.index - 1).setAlpha(0.75);
+        }
+        else if (this.images[i][j])
+            this.images[i][j].setAlpha(0);
+    };
     TileMarker.prototype.changePreview = function () {
         var _a = this.devModeScene.tileEditor.area, x = _a.x, y = _a.y;
         this.graphics.scale = x;
@@ -46,27 +56,25 @@ var TileMarker = /** @class */ (function () {
                 var previewTarget = this.devModeScene.tileEditor.selectedTileArea;
                 for (var i = 0; i < x; i++) {
                     for (var j = 0; j < y; j++) {
-                        if (previewTarget[i][j] && previewTarget[i][j].index !== 0) {
-                            if (!this.images[i][j]) {
+                        this.changeImage(previewTarget[i][j], i, j);
+                        /*if (previewTarget[i][j] && previewTarget[i][j].index !== 0) {
+                            if (!this.images[i][j])  {
                                 this.images[i][j] = this.addImage(i, j);
                             }
                             this.images[i][j].setTexture(this.extrudedKey, previewTarget[i][j].index - 1).setAlpha(0.75);
-                        }
-                        else if (this.images[i][j])
-                            this.images[i][j].setAlpha(0);
+                        } else if (this.images[i][j]) this.images[i][j].setAlpha(0);*/
                     }
                 }
             }
             else if (x === 1 && y === 1) {
                 var previewTarget = this.devModeScene.tileEditor.selectedTile;
-                if (previewTarget && previewTarget.index !== 0) {
-                    if (!this.images[0][0]) {
+                this.changeImage(previewTarget, 0, 0);
+                /*if (previewTarget && previewTarget.index !== 0) {
+                    if (!this.images[0][0])  {
                         this.images[0][0] = this.addImage(0, 0);
                     }
                     this.images[0][0].setTexture(this.extrudedKey, previewTarget.index - 1).setAlpha(0.75);
-                }
-                else if (this.images[0][0])
-                    this.images[0][0].setAlpha(0);
+                } else if (this.images[0][0]) this.images[0][0].setAlpha(0);*/
             }
         }
     };
