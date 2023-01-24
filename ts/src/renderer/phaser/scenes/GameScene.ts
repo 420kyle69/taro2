@@ -135,10 +135,10 @@ class GameScene extends PhaserScene {
 					this.textures.remove(texture);
 					this.textures.addCanvas(`extruded-${key}`, canvas);
 				}
-				const text2 = this.textures.get(`extruded-${key}`);
+				const extrudedTexture = this.textures.get(`extruded-${key}`);
 				Phaser.Textures.Parsers.SpriteSheet(
-					text2,
-					0, 0, 0, text2.source[0].width, text2.source[0].height,
+					extrudedTexture,
+					0, 0, 0, extrudedTexture.source[0].width, extrudedTexture.source[0].height,
 					{
 						frameWidth: tileset.tilewidth,
 						frameHeight: tileset.tileheight,
