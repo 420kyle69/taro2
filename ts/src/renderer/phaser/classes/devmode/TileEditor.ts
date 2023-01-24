@@ -1,6 +1,4 @@
 class TileEditor {
-    gameScene: GameScene;
-    devModeTools: DevModeTools;
     tilePalette: TilePalette;
 
     marker: TileMarker;
@@ -15,12 +13,11 @@ class TileEditor {
 	startDragIn: string;
 
 	constructor (
-        gameScene: GameScene, devModeScene: DevModeScene, devModeTools: DevModeTools
+        private gameScene: GameScene, 
+		devModeScene: DevModeScene, 
+		private devModeTools: DevModeTools
 	) {
-        this.gameScene = gameScene;
-        this.devModeTools = devModeTools;
         const palette = this.tilePalette = this.devModeTools.palette;
-
         const gameMap = this.gameScene.tilemap;
 
         this.marker = new TileMarker (this.gameScene, devModeScene, gameMap, false, 2);

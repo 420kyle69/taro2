@@ -1,6 +1,5 @@
 class DevModeTools extends Phaser.GameObjects.Container {
 
-	public scene: DevModeScene;
 	public palette: TilePalette;
 	public tileEditor: TileEditor;
 	public regionEditor: RegionEditor;
@@ -22,7 +21,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	
 	
 	constructor(
-		scene: DevModeScene,
+		public scene: DevModeScene,
 	) {
 		super(scene);
 

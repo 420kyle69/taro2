@@ -28,6 +28,7 @@ var DevModeTools = /** @class */ (function (_super) {
     __extends(DevModeTools, _super);
     function DevModeTools(scene) {
         var _this = _super.call(this, scene) || this;
+        _this.scene = scene;
         var palette = _this.palette = new TilePalette(_this.scene, _this.scene.tileset, _this.scene.rexUI);
         _this.tileEditor = new TileEditor(_this.scene.gameScene, _this.scene, _this);
         _this.regionEditor = new RegionEditor(_this.scene.gameScene, _this.scene, _this);
