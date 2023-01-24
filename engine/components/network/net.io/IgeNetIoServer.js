@@ -700,8 +700,7 @@ var IgeNetIoServer = {
 					let client = clients[clientId];
 					
 					let userLog = `\tip: ${client._remoteAddress||''}\n\tuserId: ${client._token.userId||''}\n\tdistinctId: ${client._token.distinctId||''}\n\ttoken: ${client._token.token||''}\n\tclientId: ${client.id||''}\n\tusername: ${ige.game.getPlayerByClientId(client.id)._stats.name||''}`
-					console.log(ige.game.data.defaultData._id);
-					
+
 					console.log(userLog);
 				}
 
