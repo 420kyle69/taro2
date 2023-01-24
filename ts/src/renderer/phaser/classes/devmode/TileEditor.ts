@@ -108,10 +108,16 @@ class TileEditor {
 		});
     }
 
-    activateMarker(active: boolean): void {
+    activateMarkers (active: boolean): void {
 		this.marker.active = active;
 		this.paletteMarker.active = active;
 		if (active) this.devModeTools.regionEditor.regionTool = false;
+	}
+
+	showMarkers (value: boolean): void {
+		this.marker.graphics.setVisible(value);
+		this.marker.showPreview(value);
+		this.paletteMarker.graphics.setVisible(value);
 	}
 
     edit (data:TileData): void {
@@ -215,15 +221,11 @@ class TileEditor {
 					}
 				}
 			} else {
-				this.marker.graphics.setVisible(false);
-				this.marker.showPreview(false);
-				this.paletteMarker.graphics.setVisible(false);
+				this.showMarkers(false);
 			}
 		}
 		else {
-			this.marker.graphics.setVisible(false);
-			this.marker.showPreview(false);
-			this.paletteMarker.graphics.setVisible(false);
+			this.showMarkers(false);
 		}
 	}
 }

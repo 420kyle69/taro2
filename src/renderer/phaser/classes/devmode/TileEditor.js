@@ -83,11 +83,16 @@ var TileEditor = /** @class */ (function () {
             }
         });
     }
-    TileEditor.prototype.activateMarker = function (active) {
+    TileEditor.prototype.activateMarkers = function (active) {
         this.marker.active = active;
         this.paletteMarker.active = active;
         if (active)
             this.devModeTools.regionEditor.regionTool = false;
+    };
+    TileEditor.prototype.showMarkers = function (value) {
+        this.marker.graphics.setVisible(value);
+        this.marker.showPreview(value);
+        this.paletteMarker.graphics.setVisible(value);
     };
     TileEditor.prototype.edit = function (data) {
         var map = this.gameScene.tilemap;
@@ -184,15 +189,11 @@ var TileEditor = /** @class */ (function () {
                 }
             }
             else {
-                this.marker.graphics.setVisible(false);
-                this.marker.showPreview(false);
-                this.paletteMarker.graphics.setVisible(false);
+                this.showMarkers(false);
             }
         }
         else {
-            this.marker.graphics.setVisible(false);
-            this.marker.showPreview(false);
-            this.paletteMarker.graphics.setVisible(false);
+            this.showMarkers(false);
         }
     };
     return TileEditor;

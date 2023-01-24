@@ -92,7 +92,7 @@ var DevModeTools = /** @class */ (function (_super) {
         this.layerButtonsContainer.setVisible(true);
         this.toolButtonsContainer.setVisible(true);
         this.highlightModeButton(0);
-        this.tileEditor.activateMarker(false);
+        this.tileEditor.activateMarkers(false);
         this.palette.show();
         this.regionEditor.showRegions();
     };
@@ -142,10 +142,10 @@ var DevModeTools = /** @class */ (function (_super) {
     DevModeTools.prototype.cursor = function () {
         this.highlightModeButton(0);
         this.scene.regionEditor.regionTool = false;
-        this.tileEditor.activateMarker(false);
+        this.tileEditor.activateMarkers(false);
     };
     DevModeTools.prototype.drawRegion = function () {
-        this.tileEditor.activateMarker(false);
+        this.tileEditor.activateMarkers(false);
         this.highlightModeButton(1);
         this.scene.regionEditor.regionTool = true;
     };
@@ -154,7 +154,7 @@ var DevModeTools = /** @class */ (function (_super) {
             this.tileEditor.selectedTile = this.tileEditor.lastSelectedTile;
             this.tileEditor.selectedTileArea = this.tileEditor.lastSelectedTileArea;
         }
-        this.tileEditor.activateMarker(true);
+        this.tileEditor.activateMarkers(true);
         this.tileEditor.marker.changePreview();
         this.scene.regionEditor.regionTool = false;
         this.highlightModeButton(2);
@@ -167,7 +167,7 @@ var DevModeTools = /** @class */ (function (_super) {
             copy.index = 0;
             this.tileEditor.selectedTile = copy;
             this.tileEditor.selectedTileArea = [[copy, copy], [copy, copy]];
-            this.tileEditor.activateMarker(true);
+            this.tileEditor.activateMarkers(true);
             this.tileEditor.marker.changePreview();
             this.scene.regionEditor.regionTool = false;
             this.highlightModeButton(3);
@@ -191,7 +191,7 @@ var DevModeTools = /** @class */ (function (_super) {
         this.tileEditor.area = { x: 1, y: 1 };
         this.brushButtons[0].highlight('active');
         this.brushButtons[1].highlight('no');
-        this.tileEditor.activateMarker(true);
+        this.tileEditor.activateMarkers(true);
         this.tileEditor.marker.changePreview();
         this.tileEditor.paletteMarker.changePreview();
         if (!this.modeButtons[3].active) {
@@ -204,7 +204,7 @@ var DevModeTools = /** @class */ (function (_super) {
         this.tileEditor.area = { x: 2, y: 2 };
         this.brushButtons[1].highlight('active');
         this.brushButtons[0].highlight('no');
-        this.tileEditor.activateMarker(true);
+        this.tileEditor.activateMarkers(true);
         this.tileEditor.marker.changePreview();
         this.tileEditor.paletteMarker.changePreview();
         if (!this.modeButtons[3].active) {
