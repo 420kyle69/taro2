@@ -78,7 +78,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		toolButtonsContainer.x = palette.camera.x + palette.paletteWidth - 98;
 		toolButtonsContainer.y = palette.camera.y - layerButtonsContainer.height - 184;
 		toolButtonsContainer.width = 120;
-		toolButtonsContainer.height = 98;
+		toolButtonsContainer.height = 136;
 		scene.add.existing(toolButtonsContainer);
 
 		this.modeButtons = [];
@@ -187,19 +187,13 @@ class DevModeTools extends Phaser.GameObjects.Container {
 			this.tileEditor.selectedTile = this.tileEditor.lastSelectedTile;
 			this.tileEditor.selectedTileArea = this.tileEditor.lastSelectedTileArea;
 		}
-		this.tileEditor.marker.visiblePreview = true;
 		this.tileEditor.activateMarker(true);
+		this.tileEditor.marker.changePreview();
 		this.scene.regionEditor.regionTool = false;
 		this.highlightModeButton(2);
 	}
 
 	emptyTile(): void {
-		/*if (this.tileEditor.selectedTile) this.tileEditor.selectedTile.tint = 0xffffff;
-		for (let i = 0; i < this.tileEditor.area.x; i++) {
-			for (let j = 0; j < this.tileEditor.area.y; j++) {
-				if (this.tileEditor.selectedTileArea[i][j]) this.tileEditor.selectedTileArea[i][j].tint = 0xffffff;
-			}
-		}*/
 		if (!this.modeButtons[3].active) {
 			this.tileEditor.lastSelectedTile = this.tileEditor.selectedTile;
 			this.tileEditor.lastSelectedTileArea = this.tileEditor.selectedTileArea
@@ -207,8 +201,8 @@ class DevModeTools extends Phaser.GameObjects.Container {
 			copy.index = 0;
 			this.tileEditor.selectedTile = copy as any;
 			this.tileEditor.selectedTileArea = [[copy, copy],[copy, copy]] as any;
-			this.tileEditor.marker.visiblePreview = false;
 			this.tileEditor.activateMarker(true);
+			this.tileEditor.marker.changePreview();
 			this.scene.regionEditor.regionTool = false;
 			this.highlightModeButton(3);
 		}
@@ -228,12 +222,11 @@ class DevModeTools extends Phaser.GameObjects.Container {
 			}
 		}
 		this.tileEditor.area = {x: 1, y: 1};
-		this.tileEditor.marker.graphics.scale = 1;
-		this.tileEditor.paletteMarker.graphics.scale = 1;
 		this.brushButtons[0].highlight('active');
 		this.brushButtons[1].highlight('no');
-		this.tileEditor.marker.visiblePreview = true;
 		this.tileEditor.activateMarker(true);
+		this.tileEditor.marker.changePreview();
+		this.tileEditor.paletteMarker.changePreview();
 		if (!this.modeButtons[3].active) {
 			this.brush();
 		}
@@ -242,12 +235,11 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	selectArea(): void {
 		if (this.tileEditor.selectedTile) this.tileEditor.selectedTile.tint = 0xffffff;
 		this.tileEditor.area = {x: 2, y: 2};
-		this.tileEditor.marker.graphics.scale = 2;
-		this.tileEditor.paletteMarker.graphics.scale = 2;
 		this.brushButtons[1].highlight('active');
 		this.brushButtons[0].highlight('no');
-		this.tileEditor.marker.visiblePreview = true;
 		this.tileEditor.activateMarker(true);
+		this.tileEditor.marker.changePreview();
+		this.tileEditor.paletteMarker.changePreview();
 		if (!this.modeButtons[3].active) {
 			this.brush();
 		}

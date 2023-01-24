@@ -1,17 +1,18 @@
 class TileMarker {
     graphics: Phaser.GameObjects.Graphics;
-	preview: Phaser.GameObjects.Image;
-	visiblePreview: boolean;
+	preview: Phaser.GameObjects.Container;
+	images: Phaser.GameObjects.Image [][];
+
 	active: boolean;
 
 	constructor (
-		scene: Phaser.Scene,
-        map: Phaser.Tilemaps.Tilemap,
-		palette: boolean,
+		private scene: Phaser.Scene,
+		private devModeScene: DevModeScene,
+        private map: Phaser.Tilemaps.Tilemap,
+		private palette: boolean,
         w: number
 	) {
         this.active = true;
-		this.visiblePreview = false;
 
         this.graphics = scene.add.graphics();
 		this.graphics.lineStyle(w, 0x000000, 1);
@@ -23,22 +24,76 @@ class TileMarker {
 		this.graphics.setVisible(false);
 
 		if (!palette) {
-			const data = ige.game.data;
-			const tileset = data.map.tilesets[0];
-			const key = `tiles/${tileset.name}`;
-			const extrudedKey = `extruded-${key}`;
-			
-			const preview = this.preview = scene.add.image(0, 0, extrudedKey, 0);
-			preview.setOrigin(0,0).setTint(0xabcbff).setAlpha(0.75).setVisible(false);
+			this.preview = scene.add.container();
+			this.images = [[],[]];
 		}
-		
 	}
 
-	/*activate (value: boolean): void {
-		this.active = value;
-		this.graphics.setVisible(value);
-		if (this.preview) this.preview.setVisible(value);
-	}*/
+	addImage (x: number, y: number): Phaser.GameObjects.Image {
+		const map = this.map;
+		const data = ige.game.data;
+		const tileset = data.map.tilesets[0];
+		const key = `tiles/${tileset.name}`;
+		const extrudedKey = `extruded-${key}`;
 
-	
+		let width = 64;
+		let height = 64;
+		if (ige.game.data.defaultData.dontResize) {
+			width = map.tileWidth;
+			height = map.tileHeight;
+		}
+
+		const image = this.scene.add.image(x * width, y * height, extrudedKey, 0);
+		image.setOrigin(0,0).setTint(0xabcbff).setAlpha(0).setVisible(false);
+		image.setDisplaySize(width, height);
+		this.preview.add(image);
+		return image;
+	}
+
+	changePreview () {
+		const {x, y} = this.devModeScene.tileEditor.area;
+		this.graphics.scale = x;
+		if (!this.palette) {
+			this.hideImages();
+			if (x === 2 && y === 2) {
+				const previewTarget = this.devModeScene.tileEditor.selectedTileArea;
+				for (let i = 0; i < x; i++) {
+					for (let j = 0; j < y; j++) {
+						if (previewTarget[i][j] && previewTarget[i][j].index !== 0) {
+							if (!this.images[i][j])  {
+								this.images[i][j] = this.addImage(i, j);
+							} 
+							this.images[i][j].setTexture('extruded-tiles/tilesheet_complete', previewTarget[i][j].index - 1).setAlpha(0.75);
+						} else if (this.images[i][j]) this.images[i][j].setAlpha(0);
+					}
+				}
+			} else if (x === 1 && y === 1) {
+				const previewTarget = this.devModeScene.tileEditor.selectedTile;
+				if (previewTarget && previewTarget.index !== 0) {
+					if (!this.images[0][0])  {
+						this.images[0][0] = this.addImage(0, 0);
+					} 
+					this.images[0][0].setTexture('extruded-tiles/tilesheet_complete', previewTarget.index - 1).setAlpha(0.75);
+				} else if (this.images[0][0]) this.images[0][0].setAlpha(0);
+			}
+		}
+	}
+
+	hideImages (): void {
+		for (let i = 0; i < this.images.length; i++) {
+			for (let j = 0; j < this.images[0].length; j++) {
+				if (this.images[i] && this.images[i][j]) this.images[i][j].setAlpha(0);
+			}
+		}
+	}
+
+	showPreview (value: boolean): void {
+		const devModeScene = ige.renderer.scene.getScene('DevMode') as DevModeScene;
+		const area = devModeScene.tileEditor.area;
+		for (let i = 0; i < area.x; i++) {
+			for (let j = 0; j < area.y; j++) {
+				if (this.images[i] && this.images[i][j]) this.images[i][j].setVisible(value);
+			}
+		}
+	}
 }

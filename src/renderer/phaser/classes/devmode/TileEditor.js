@@ -5,8 +5,8 @@ var TileEditor = /** @class */ (function () {
         this.devModeTools = devModeTools;
         var palette = this.tilePalette = this.devModeTools.palette;
         var gameMap = this.gameScene.tilemap;
-        this.marker = new TileMarker(this.gameScene, gameMap, false, 2);
-        this.paletteMarker = new TileMarker(this.devModeTools.scene, this.tilePalette.map, true, 1);
+        this.marker = new TileMarker(this.gameScene, devModeScene, gameMap, false, 2);
+        this.paletteMarker = new TileMarker(this.devModeTools.scene, devModeScene, this.tilePalette.map, true, 1);
         this.area = { x: 1, y: 1 };
         this.selectedTile = null;
         this.selectedTileArea = [[null, null], [null, null]];
@@ -46,9 +46,11 @@ var TileEditor = /** @class */ (function () {
                             _this.selectedTileArea[i][j] = _this.getTile(palettePointerTileX + i, palettePointerTileY + j, _this.selectedTileArea[i][j], palette.map);
                         }
                     }
+                    _this.marker.changePreview();
                 }
                 else {
                     _this.selectedTile = _this.getTile(palettePointerTileX, palettePointerTileY, _this.selectedTile, palette.map);
+                    _this.marker.changePreview();
                 }
             }
             if (_this.startDragIn === 'palette') {
@@ -69,9 +71,11 @@ var TileEditor = /** @class */ (function () {
                             _this.selectedTileArea[i][j] = _this.getTile(pointerTileX + i, pointerTileY + j, _this.selectedTileArea[i][j], gameMap);
                         }
                     }
+                    _this.marker.changePreview();
                 }
                 else {
                     _this.selectedTile = _this.getTile(pointerTileX, pointerTileY, _this.selectedTile, gameMap);
+                    _this.marker.changePreview();
                 }
             }
             if (_this.startDragIn === 'map') {
@@ -83,10 +87,8 @@ var TileEditor = /** @class */ (function () {
         //this.marker.activate(active);
         this.marker.active = active;
         this.marker.graphics.setVisible(active);
-        if (this.marker.visiblePreview)
-            this.marker.preview.setVisible(active);
-        else
-            this.marker.preview.setVisible(false);
+        this.marker.showPreview(active);
+        this.marker.showPreview(false);
         //this.paletteMarker.activate(active);
         this.paletteMarker.active = active;
         this.paletteMarker.graphics.setVisible(active);
@@ -131,7 +133,6 @@ var TileEditor = /** @class */ (function () {
                 selectedTile.tint = 0xffffff;
             if (map.getTileAt(tileX, tileY) && map.getTileAt(tileX, tileY).index !== 0) {
                 selectedTile = map.getTileAt(tileX, tileY);
-                this.marker.preview.setTexture('extruded-tiles/tilesheet_complete', selectedTile.index - 1);
                 if (map === this.tilePalette.map)
                     selectedTile.tint = 0x87cfff;
             }
@@ -157,7 +158,8 @@ var TileEditor = /** @class */ (function () {
             if (palette.visible && devModeScene.pointerInsidePalette()) {
                 devModeScene.regionEditor.cancelDrawRegion();
                 marker.graphics.setVisible(false);
-                marker.preview.setVisible(false);
+                marker.showPreview(false);
+                //marker.preview.setVisible(false);
                 // Snap to tile coordinates, but in world space
                 paletteMarker.graphics.x = paletteMap.tileToWorldX(palettePointerTileX);
                 paletteMarker.graphics.y = paletteMap.tileToWorldY(palettePointerTileY);
@@ -166,8 +168,7 @@ var TileEditor = /** @class */ (function () {
                 !devModeScene.pointerInsideButtons() && !devModeScene.pointerInsideWidgets() && marker.active && map.currentLayerIndex >= 0) {
                 paletteMarker.graphics.setVisible(false);
                 marker.graphics.setVisible(true);
-                if (this.marker.visiblePreview)
-                    marker.preview.setVisible(true);
+                marker.showPreview(true);
                 // Rounds down to nearest tile
                 var pointerTileX = map.worldToTileX(worldPoint.x);
                 var pointerTileY = map.worldToTileY(worldPoint.y);
@@ -192,8 +193,7 @@ var TileEditor = /** @class */ (function () {
         }
         else {
             this.marker.graphics.setVisible(false);
-            if (this.marker.visiblePreview)
-                this.marker.preview.setVisible(false);
+            this.marker.showPreview(false);
             this.paletteMarker.graphics.setVisible(false);
         }
     };
