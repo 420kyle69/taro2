@@ -24,7 +24,7 @@ var TileMarker = /** @class */ (function () {
         var data = ige.game.data;
         var tileset = data.map.tilesets[0];
         var key = "tiles/".concat(tileset.name);
-        var extrudedKey = "extruded-".concat(key);
+        var extrudedKey = this.extrudedKey = "extruded-".concat(key);
         var width = 64;
         var height = 64;
         if (ige.game.data.defaultData.dontResize) {
@@ -50,7 +50,7 @@ var TileMarker = /** @class */ (function () {
                             if (!this.images[i][j]) {
                                 this.images[i][j] = this.addImage(i, j);
                             }
-                            this.images[i][j].setTexture('extruded-tiles/tilesheet_complete', previewTarget[i][j].index - 1).setAlpha(0.75);
+                            this.images[i][j].setTexture(this.extrudedKey, previewTarget[i][j].index - 1).setAlpha(0.75);
                         }
                         else if (this.images[i][j])
                             this.images[i][j].setAlpha(0);
@@ -63,7 +63,7 @@ var TileMarker = /** @class */ (function () {
                     if (!this.images[0][0]) {
                         this.images[0][0] = this.addImage(0, 0);
                     }
-                    this.images[0][0].setTexture('extruded-tiles/tilesheet_complete', previewTarget.index - 1).setAlpha(0.75);
+                    this.images[0][0].setTexture(this.extrudedKey, previewTarget.index - 1).setAlpha(0.75);
                 }
                 else if (this.images[0][0])
                     this.images[0][0].setAlpha(0);

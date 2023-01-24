@@ -4,6 +4,7 @@ class TileMarker {
 	images: Phaser.GameObjects.Image [][];
 
 	active: boolean;
+	extrudedKey: string;
 
 	constructor (
 		private scene: Phaser.Scene,
@@ -34,7 +35,7 @@ class TileMarker {
 		const data = ige.game.data;
 		const tileset = data.map.tilesets[0];
 		const key = `tiles/${tileset.name}`;
-		const extrudedKey = `extruded-${key}`;
+		const extrudedKey = this.extrudedKey = `extruded-${key}`;
 
 		let width = 64;
 		let height = 64;
@@ -63,7 +64,7 @@ class TileMarker {
 							if (!this.images[i][j])  {
 								this.images[i][j] = this.addImage(i, j);
 							} 
-							this.images[i][j].setTexture('extruded-tiles/tilesheet_complete', previewTarget[i][j].index - 1).setAlpha(0.75);
+							this.images[i][j].setTexture(this.extrudedKey, previewTarget[i][j].index - 1).setAlpha(0.75);
 						} else if (this.images[i][j]) this.images[i][j].setAlpha(0);
 					}
 				}
@@ -73,7 +74,7 @@ class TileMarker {
 					if (!this.images[0][0])  {
 						this.images[0][0] = this.addImage(0, 0);
 					} 
-					this.images[0][0].setTexture('extruded-tiles/tilesheet_complete', previewTarget.index - 1).setAlpha(0.75);
+					this.images[0][0].setTexture(this.extrudedKey, previewTarget.index - 1).setAlpha(0.75);
 				} else if (this.images[0][0]) this.images[0][0].setAlpha(0);
 			}
 		}
