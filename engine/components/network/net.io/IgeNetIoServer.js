@@ -699,18 +699,22 @@ var IgeNetIoServer = {
 					let clients = this.clients();
 					let client = clients[clientId];
 
-					let user = {
-						ip: client?._remoteAddress,
-						userId: client?._token?.userId,
-						distinctId: client?._token?.distinctId,
-						token: client?._token?.token,
-						clientId: clientId,
-						name: ige.game.getPlayerByClientId(clientId)?._stats?.name
-					}
-					
-					let userLog = `\tip: ${user.ip}\n\tuserId: ${user.userId||''}\n\tdistinctId: ${user.distinctId||''}\n\ttoken: ${user.token||''}\n\tclientId: ${user.clientId}\n\tusername: ${user.name}`
+					try {
+						let user = {
+							ip: client?._remoteAddress,
+							userId: client?._token?.userId,
+							distinctId: client?._token?.distinctId,
+							token: client?._token?.token,
+							clientId: clientId,
+							name: ige.game.getPlayerByClientId(clientId)?._stats?.name
+						}
+						
+						let userLog = `\tip: ${user.ip}\n\tuserId: ${user.userId||''}\n\tdistinctId: ${user.distinctId||''}\n\ttoken: ${user.token||''}\n\tclientId: ${user.clientId}\n\tusername: ${user.name}`
 
-					console.log(userLog);
+						console.log(userLog);
+					} catch (err) {
+						console.log('joinGame log error', err)
+					}
 				}
 
 				this.emit(commandName, [data[1], clientId]);
