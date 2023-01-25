@@ -5,8 +5,8 @@ var TileEditor = /** @class */ (function () {
         this.devModeTools = devModeTools;
         var palette = this.tilePalette = this.devModeTools.palette;
         var gameMap = this.gameScene.tilemap;
-        this.marker = new TileMarker(this.gameScene, gameMap, 2);
-        this.paletteMarker = new TileMarker(this.devModeTools.scene, this.tilePalette.map, 1);
+        this.marker = new TileMarker(this.gameScene, devModeScene, gameMap, false, 2);
+        this.paletteMarker = new TileMarker(this.devModeTools.scene, devModeScene, this.tilePalette.map, true, 1);
         this.area = { x: 1, y: 1 };
         this.selectedTile = null;
         this.selectedTileArea = [[null, null], [null, null]];
@@ -46,9 +46,11 @@ var TileEditor = /** @class */ (function () {
                             _this.selectedTileArea[i][j] = _this.getTile(palettePointerTileX + i, palettePointerTileY + j, _this.selectedTileArea[i][j], palette.map);
                         }
                     }
+                    _this.marker.changePreview();
                 }
                 else {
                     _this.selectedTile = _this.getTile(palettePointerTileX, palettePointerTileY, _this.selectedTile, palette.map);
+                    _this.marker.changePreview();
                 }
             }
             if (_this.startDragIn === 'palette') {
@@ -69,9 +71,11 @@ var TileEditor = /** @class */ (function () {
                             _this.selectedTileArea[i][j] = _this.getTile(pointerTileX + i, pointerTileY + j, _this.selectedTileArea[i][j], gameMap);
                         }
                     }
+                    _this.marker.changePreview();
                 }
                 else {
                     _this.selectedTile = _this.getTile(pointerTileX, pointerTileY, _this.selectedTile, gameMap);
+                    _this.marker.changePreview();
                 }
             }
             if (_this.startDragIn === 'map') {
@@ -79,13 +83,16 @@ var TileEditor = /** @class */ (function () {
             }
         });
     }
-    TileEditor.prototype.activateMarker = function (active) {
+    TileEditor.prototype.activateMarkers = function (active) {
         this.marker.active = active;
-        this.marker.graphics.setVisible(active);
         this.paletteMarker.active = active;
-        this.paletteMarker.graphics.setVisible(active);
         if (active)
             this.devModeTools.regionEditor.regionTool = false;
+    };
+    TileEditor.prototype.showMarkers = function (value) {
+        this.marker.graphics.setVisible(value);
+        this.marker.showPreview(value);
+        this.paletteMarker.graphics.setVisible(value);
     };
     TileEditor.prototype.edit = function (data) {
         var map = this.gameScene.tilemap;
@@ -150,6 +157,7 @@ var TileEditor = /** @class */ (function () {
             if (palette.visible && devModeScene.pointerInsidePalette()) {
                 devModeScene.regionEditor.cancelDrawRegion();
                 marker.graphics.setVisible(false);
+                marker.showPreview(false);
                 // Snap to tile coordinates, but in world space
                 paletteMarker.graphics.x = paletteMap.tileToWorldX(palettePointerTileX);
                 paletteMarker.graphics.y = paletteMap.tileToWorldY(palettePointerTileY);
@@ -158,12 +166,15 @@ var TileEditor = /** @class */ (function () {
                 !devModeScene.pointerInsideButtons() && !devModeScene.pointerInsideWidgets() && marker.active && map.currentLayerIndex >= 0) {
                 paletteMarker.graphics.setVisible(false);
                 marker.graphics.setVisible(true);
+                marker.showPreview(true);
                 // Rounds down to nearest tile
                 var pointerTileX = map.worldToTileX(worldPoint.x);
                 var pointerTileY = map.worldToTileY(worldPoint.y);
                 // Snap to tile coordinates, but in world space
                 marker.graphics.x = map.tileToWorldX(pointerTileX);
                 marker.graphics.y = map.tileToWorldY(pointerTileY);
+                marker.preview.x = map.tileToWorldX(pointerTileX);
+                marker.preview.y = map.tileToWorldY(pointerTileY);
                 if (devModeScene.input.manager.activePointer.leftButtonDown()) {
                     if (this.area.x > 1 || this.area.y > 1) {
                         for (var i = 0; i < this.area.x; i++) {
@@ -177,10 +188,12 @@ var TileEditor = /** @class */ (function () {
                     }
                 }
             }
+            else {
+                this.showMarkers(false);
+            }
         }
         else {
-            this.marker.graphics.setVisible(false);
-            this.paletteMarker.graphics.setVisible(false);
+            this.showMarkers(false);
         }
     };
     return TileEditor;

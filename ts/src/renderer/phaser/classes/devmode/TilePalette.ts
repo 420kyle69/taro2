@@ -1,8 +1,5 @@
 class TilePalette extends Phaser.GameObjects.Container {
 
-	private readonly tileset: Phaser.Tilemaps.Tileset;
-
-	scene: DevModeScene;
 	texturesLayer: any;
 	map: Phaser.Tilemaps.Tilemap;
 	camera: Phaser.Cameras.Scene2D.Camera;
@@ -21,15 +18,13 @@ class TilePalette extends Phaser.GameObjects.Container {
 	paletteHeight: number;
 	
 	constructor(
-		scene: DevModeScene,
+		public scene: DevModeScene,
 		tileset: Phaser.Tilemaps.Tileset,
 		rexUI?: any
 	) {
 		super(scene);
 
-		this.tileset = tileset;
 		this.rexUI = rexUI;
-		this.scene = scene;
 
 		// Load a map from a 2D array of tile indices
 		const paletteMap = [];

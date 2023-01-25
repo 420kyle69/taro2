@@ -106,6 +106,13 @@ var GameScene = /** @class */ (function (_super) {
                     _this.textures.remove(texture);
                     _this.textures.addCanvas("extruded-".concat(key), canvas);
                 }
+                var extrudedTexture = _this.textures.get("extruded-".concat(key));
+                Phaser.Textures.Parsers.SpriteSheet(extrudedTexture, 0, 0, 0, extrudedTexture.source[0].width, extrudedTexture.source[0].height, {
+                    frameWidth: tileset.tilewidth,
+                    frameHeight: tileset.tileheight,
+                    margin: (tileset.margin || 0) + 2,
+                    spacing: (tileset.spacing || 0) + 4
+                });
             });
             _this.load.image(key, _this.patchAssetUrl(tileset.image));
         });

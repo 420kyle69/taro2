@@ -1,20 +1,99 @@
 class TileMarker {
     graphics: Phaser.GameObjects.Graphics;
-    active: boolean;
+	preview: Phaser.GameObjects.Container;
+	images: Phaser.GameObjects.Image [][];
+
+	active: boolean;
+	extrudedKey: string;
 
 	constructor (
-		scene: Phaser.Scene,
-        gameMap: Phaser.Tilemaps.Tilemap,
+		private scene: Phaser.Scene,
+		private devModeScene: DevModeScene,
+        private map: Phaser.Tilemaps.Tilemap,
+		private palette: boolean,
         w: number
 	) {
         this.active = true;
+
         this.graphics = scene.add.graphics();
 		this.graphics.lineStyle(w, 0x000000, 1);
 		if (ige.game.data.defaultData.dontResize) {
-			this.graphics.strokeRect(0, 0, gameMap.tileWidth, gameMap.tileHeight);
+			this.graphics.strokeRect(0, 0, map.tileWidth, map.tileHeight);
 		} else {
 			this.graphics.strokeRect(0, 0, 64, 64);
 		}
 		this.graphics.setVisible(false);
+
+		if (!palette) {
+			this.preview = scene.add.container();
+			this.images = [[],[]];
+		}
+	}
+
+	addImage (x: number, y: number): Phaser.GameObjects.Image {
+		const map = this.map;
+		const data = ige.game.data;
+		const tileset = data.map.tilesets[0];
+		const key = `tiles/${tileset.name}`;
+		const extrudedKey = this.extrudedKey = `extruded-${key}`;
+
+		let width = 64;
+		let height = 64;
+		if (ige.game.data.defaultData.dontResize) {
+			width = map.tileWidth;
+			height = map.tileHeight;
+		}
+
+		const image = this.scene.add.image(x * width, y * height, extrudedKey, 0);
+		image.setOrigin(0,0).setTint(0xabcbff).setAlpha(0).setVisible(false);
+		image.setDisplaySize(width, height);
+		this.preview.add(image);
+		return image;
+	}
+
+	changeImage (tile: Phaser.Tilemaps.Tile, i: number, j: number): void {
+		if (tile && tile.index !== 0) {
+			if (!this.images[i][j])  {
+				this.images[i][j] = this.addImage(i, j);
+			} 
+			this.images[i][j].setTexture(this.extrudedKey, tile.index - 1).setAlpha(0.75);
+		} else if (this.images[i][j]) this.images[i][j].setAlpha(0);
+	}
+
+	changePreview (): void {
+		const {x, y} = this.devModeScene.tileEditor.area;
+		this.graphics.scale = x;
+		if (!this.palette) {
+			this.hideImages();
+			if (x === 2 && y === 2) {
+				const previewTarget = this.devModeScene.tileEditor.selectedTileArea;
+				for (let i = 0; i < x; i++) {
+					for (let j = 0; j < y; j++) {
+						this.changeImage(previewTarget[i][j], i, j);
+					}
+				}
+			} else if (x === 1 && y === 1) {
+				const previewTarget = this.devModeScene.tileEditor.selectedTile;
+				this.changeImage(previewTarget, 0, 0);	
+			}
+		}
+	}
+
+	hideImages (): void {
+		for (let i = 0; i < this.images.length; i++) {
+			for (let j = 0; j < this.images[0].length; j++) {
+				if (this.images[i] && this.images[i][j]) this.images[i][j].setAlpha(0);
+			}
+		}
+	}
+
+	showPreview (value: boolean): void {
+		const devModeScene = ige.renderer.scene.getScene('DevMode') as DevModeScene;
+		const area = devModeScene.tileEditor.area;
+		for (let i = 0; i < area.x; i++) {
+			for (let j = 0; j < area.y; j++) {
+				if (this.images[i] && this.images[i][j]) this.images[i][j].setVisible(value);
+			}
+		}
 	}
 }

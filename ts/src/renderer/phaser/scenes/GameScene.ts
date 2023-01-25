@@ -135,6 +135,17 @@ class GameScene extends PhaserScene {
 					this.textures.remove(texture);
 					this.textures.addCanvas(`extruded-${key}`, canvas);
 				}
+				const extrudedTexture = this.textures.get(`extruded-${key}`);
+				Phaser.Textures.Parsers.SpriteSheet(
+					extrudedTexture,
+					0, 0, 0, extrudedTexture.source[0].width, extrudedTexture.source[0].height,
+					{
+						frameWidth: tileset.tilewidth,
+						frameHeight: tileset.tileheight,
+						margin: (tileset.margin || 0) + 2,
+						spacing: (tileset.spacing || 0) + 4
+					}
+				);
 			});
 			this.load.image(key, this.patchAssetUrl(tileset.image));
 		});

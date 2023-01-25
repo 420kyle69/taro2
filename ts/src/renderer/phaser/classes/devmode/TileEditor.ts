@@ -1,6 +1,4 @@
 class TileEditor {
-    gameScene: GameScene;
-    devModeTools: DevModeTools;
     tilePalette: TilePalette;
 
     marker: TileMarker;
@@ -15,16 +13,15 @@ class TileEditor {
 	startDragIn: string;
 
 	constructor (
-        gameScene: GameScene, devModeScene: DevModeScene, devModeTools: DevModeTools
+        private gameScene: GameScene, 
+		devModeScene: DevModeScene, 
+		private devModeTools: DevModeTools
 	) {
-        this.gameScene = gameScene;
-        this.devModeTools = devModeTools;
         const palette = this.tilePalette = this.devModeTools.palette;
-
         const gameMap = this.gameScene.tilemap;
 
-        this.marker = new TileMarker (this.gameScene, gameMap, 2);
-        this.paletteMarker = new TileMarker(this.devModeTools.scene, this.tilePalette.map, 1);
+        this.marker = new TileMarker (this.gameScene, devModeScene, gameMap, false, 2);
+        this.paletteMarker = new TileMarker(this.devModeTools.scene, devModeScene, this.tilePalette.map, true, 1);
 
         this.area = {x: 1, y: 1};
 
@@ -71,8 +68,10 @@ class TileEditor {
 									this.selectedTileArea[i][j] = this.getTile(palettePointerTileX + i, palettePointerTileY + j, this.selectedTileArea[i][j], palette.map);
 								}
 							}
+							this.marker.changePreview();
 						} else {
 							this.selectedTile = this.getTile(palettePointerTileX, palettePointerTileY, this.selectedTile, palette.map);
+							this.marker.changePreview();
 						}
 				}
 			if (this.startDragIn === 'palette') {
@@ -94,8 +93,10 @@ class TileEditor {
 								this.selectedTileArea[i][j] = this.getTile(pointerTileX + i, pointerTileY + j, this.selectedTileArea[i][j], gameMap);
 							}
 						}
+						this.marker.changePreview();
 					} else {
 						this.selectedTile = this.getTile(pointerTileX, pointerTileY, this.selectedTile, gameMap);
+						this.marker.changePreview();
 					}
 				}
 			if (this.startDragIn === 'map') {
@@ -104,12 +105,16 @@ class TileEditor {
 		});
     }
 
-    activateMarker(active: boolean): void {
+    activateMarkers (active: boolean): void {
 		this.marker.active = active;
-		this.marker.graphics.setVisible(active);
 		this.paletteMarker.active = active;
-		this.paletteMarker.graphics.setVisible(active);
 		if (active) this.devModeTools.regionEditor.regionTool = false;
+	}
+
+	showMarkers (value: boolean): void {
+		this.marker.graphics.setVisible(value);
+		this.marker.showPreview(value);
+		this.paletteMarker.graphics.setVisible(value);
 	}
 
     edit (data:TileData): void {
@@ -177,6 +182,7 @@ class TileEditor {
 			if (palette.visible	&& devModeScene.pointerInsidePalette()) {
 				devModeScene.regionEditor.cancelDrawRegion();
 				marker.graphics.setVisible(false);
+				marker.showPreview(false);
 				
 				// Snap to tile coordinates, but in world space
 				paletteMarker.graphics.x = paletteMap.tileToWorldX(palettePointerTileX);
@@ -187,6 +193,7 @@ class TileEditor {
 
 				paletteMarker.graphics.setVisible(false);
 				marker.graphics.setVisible(true);
+				marker.showPreview(true);
 
 				// Rounds down to nearest tile
 				const pointerTileX = map.worldToTileX(worldPoint.x);
@@ -195,6 +202,8 @@ class TileEditor {
 				// Snap to tile coordinates, but in world space
 				marker.graphics.x = map.tileToWorldX(pointerTileX);
 				marker.graphics.y = map.tileToWorldY(pointerTileY);
+				marker.preview.x = map.tileToWorldX(pointerTileX);
+				marker.preview.y = map.tileToWorldY(pointerTileY);
 
 				if (devModeScene.input.manager.activePointer.leftButtonDown()) {
 					if (this.area.x > 1 || this.area.y > 1) {
@@ -208,11 +217,12 @@ class TileEditor {
 						this.putTile(pointerTileX, pointerTileY, this.selectedTile);
 					}
 				}
+			} else {
+				this.showMarkers(false);
 			}
 		}
 		else {
-			this.marker.graphics.setVisible(false);
-			this.paletteMarker.graphics.setVisible(false);
+			this.showMarkers(false);
 		}
 	}
 }

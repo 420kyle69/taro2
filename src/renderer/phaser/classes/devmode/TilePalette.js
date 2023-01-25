@@ -17,9 +17,8 @@ var TilePalette = /** @class */ (function (_super) {
     __extends(TilePalette, _super);
     function TilePalette(scene, tileset, rexUI) {
         var _this = _super.call(this, scene) || this;
-        _this.tileset = tileset;
-        _this.rexUI = rexUI;
         _this.scene = scene;
+        _this.rexUI = rexUI;
         // Load a map from a 2D array of tile indices
         var paletteMap = [];
         for (var i = 0; i < tileset.rows; i++) {
