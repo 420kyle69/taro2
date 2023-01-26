@@ -787,7 +787,7 @@ const Client = IgeEventingClass.extend({
 	//
 	//i'm not going to change the join game function
 	//
-	joinGame: function() {
+	joinGame: function(wasGamePaused = false) {
 
 		let isAdBlockEnabled = true;
 		const data = {
@@ -864,8 +864,11 @@ const Client = IgeEventingClass.extend({
 		});
 
 		data.isAdBlockEnabled = !!isAdBlockEnabled;
-
-		ige.network.send('joinGame', data);
+		
+		// send joinGame command only if game was paused and menu was open.
+		if (wasGamePaused) {
+			ige.network.send('joinGame', data);
+		}
 
 		window.joinGameSent.start = Date.now();
 
