@@ -686,6 +686,14 @@ var IgeNetIoServer = {
 	_onClientMessage: function (data, clientId) {
 		var self = this;
 		
+		var socket = ige.network._socketById[clientId];
+		// check if the clientId belongs to this socket connection.
+		if (!(socket?._token?.clientId && socket?._token?.clientId === clientId)) {
+			console.log('_onClientMessage: clientId validation failed', socket._token.clientId, clientId, data);
+			socket.close('Client could not be validated, please refresh the page.');
+			return;
+		}
+		
 		if (typeof data[0] === 'string') {
 			if (data[0].charCodeAt(0) != undefined) {
 				var ciDecoded = data[0].charCodeAt(0);
