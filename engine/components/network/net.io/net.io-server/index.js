@@ -702,7 +702,38 @@ NetIo.Server = NetIo.EventingClass.extend({
 					token,
 					tokenCreatedAt: decodedToken.createdAt
 				};
-
+				
+				// if the token has been used already, close the connection.
+				const isUsedToken = ige.server.usedConnectionJwts[token];
+				if (isUsedToken) {
+					console.log('Token has been used already', token);
+					socket.close('Security token could not be validated, please refresh the page.');
+					return;
+				}
+				
+				// store token for current client
+				ige.server.usedConnectionJwts[token] = socket._token.tokenCreatedAt;
+				
+				// remove expired tokens
+				const filteredUsedConnectionJwts = {};
+				const usedTokenEntries = Object.entries(ige.server.usedConnectionJwts).filter(([token, tokenCreatedAt]) => (Date.now() - tokenCreatedAt) < ige.server.CONNECTION_JWT_EXPIRES_IN);
+				for (const [key, value] of usedTokenEntries) {
+					if (typeof value === 'number') {
+						filteredUsedConnectionJwts[key] = value;
+					}
+				}
+				
+				ige.server.usedConnectionJwts = filteredUsedConnectionJwts;
+				
+				// Give the socket a unique ID
+				socket.id = self.newIdHex();
+				// Add the socket to the internal lookups
+				self._sockets.push(socket);
+				self._socketsById[socket.id] = socket;
+				
+				// store socket.id as clientId in _token data to validate socket messages later 
+				socket._token.clientId = socket.id;
+				
 			} catch (e) {
 				// A token is required to connect with socket server
 				socket.close('Security token could not be validated, please refresh the page.');
@@ -710,34 +741,6 @@ NetIo.Server = NetIo.EventingClass.extend({
 				return;
 			}
 
-			// if the token has been used already, close the connection.
-			const isUsedToken = ige.server.usedConnectionJwts[token];
-			if (isUsedToken) {
-				console.log('Token has been used already', token);
-				socket.close('Security token could not be validated, please refresh the page.');
-				return;
-			}
-
-			// store token for current client
-			ige.server.usedConnectionJwts[token] = socket._token.tokenCreatedAt;
-
-			// remove expired tokens
-			const filteredUsedConnectionJwts = {};
-			const usedTokenEntries = Object.entries(ige.server.usedConnectionJwts).filter(([token, tokenCreatedAt]) => (Date.now() - tokenCreatedAt) < ige.server.CONNECTION_JWT_EXPIRES_IN);
-			for (const [key, value] of usedTokenEntries) {
-				if (typeof value === 'number') {
-					filteredUsedConnectionJwts[key] = value;
-				}
-			}
-			
-			ige.server.usedConnectionJwts = filteredUsedConnectionJwts;
-			
-			// Give the socket a unique ID
-			socket.id = self.newIdHex();
-			// Add the socket to the internal lookups
-			self._sockets.push(socket);
-			self._socketsById[socket.id] = socket;
-			
 			console.log('1. Client ', socket.id,' connected (net.io-server index.js)');
 			
 			// Register a listener so that if the socket disconnects,
