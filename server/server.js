@@ -318,7 +318,7 @@ var Server = IgeClass.extend({
 
 			const jwt = require('jsonwebtoken');
 
-			const token = jwt.sign({ userId: '', createdAt: Date.now(), gameSlug: global.standaloneGame.defaultData.gameSlug }, process.env.JWT_SECRET_KEY, {
+			const token = jwt.sign({ userId: '', sessionId: '', createdAt: Date.now(), gameSlug: global.standaloneGame.defaultData.gameSlug }, process.env.JWT_SECRET_KEY, {
 				expiresIn: ige.server.CONNECTION_JWT_EXPIRES_IN.toString(),
 			});
 
