@@ -109,7 +109,7 @@ var ServerNetworkEvents = {
 		}
 
 		// check joining user is same as token user.
-		if (data._id && socket._token && socket._token.userId !== data._id) {
+		if (socket._token.userId !== data._id || socket._token.sessionId !== data.sessionId) {
 			console.log('Unauthenticated user joining the game (ServerNetworkEvent.js)');
 			socket.close('Unauthenticated user joining the game');
 			return;
@@ -121,7 +121,7 @@ var ServerNetworkEvents = {
 			client.receivedJoinGame = Date.now();
 		}
 
-		// assing ip address to player stats
+		// assigning ip address to player stats
 		data.ipAddress = client && client.ip;
 
 		var currentClientIp = data.ipAddress;

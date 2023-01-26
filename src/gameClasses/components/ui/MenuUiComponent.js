@@ -386,7 +386,10 @@ var MenuUiComponent = IgeEntity.extend({
 			}
 		}
 
-		ige.client.joinGame();
+		// send joinGame command only if game was paused and menu was open.
+		if (wasGamePaused) {
+			ige.client.joinGame();
+		}
 
 		if (!window.isStandalone) {
 			ige.ad.showAnchorTag();
