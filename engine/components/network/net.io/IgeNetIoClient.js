@@ -44,10 +44,11 @@ var IgeNetIoClient = {
 			var sortedServers = [server];
 			var ignoreServerIds = [server.id];
 
-			while (server = ige.client.getBestServer(ignoreServerIds)) {
-				ignoreServerIds.push(server.id);
-				sortedServers.push(server);
-			}
+			// let's not try to connect to multiple servers at the same time, only connect with user's selected server
+			// while (server = ige.client.getBestServer(ignoreServerIds)) {
+			// 	ignoreServerIds.push(server.id);
+			// 	sortedServers.push(server);
+			// }
 
 			sortedServers.reduce(function (p, server) {
 				var defer = $.Deferred();
