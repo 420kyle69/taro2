@@ -96,9 +96,19 @@ var ServerNetworkEvents = {
 		// assign _id and sessionID to the new client
 		var client = ige.server.clients[clientId];
 		var socket = ige.network._socketById[clientId];
+
+		if (!socket) {
+			global.rollbar.log('No socket found with this clientId',
+				{
+					data: data,
+					clientId: clientId
+				});
+
+			return;
+		}
 		
 		// check joining user is same as token user.
-		if (socket._token.userId !== data._id || socket._token.sessionId !== data.sessionId) {
+		else if (socket._token.userId !== data._id || socket._token.sessionId !== data.sessionId) {
 			console.log('Unauthenticated user joining the game (ServerNetworkEvent.js)');
 			socket.close('Unauthenticated user joining the game');
 			return;
