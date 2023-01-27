@@ -755,6 +755,17 @@ NetIo.Server = NetIo.EventingClass.extend({
 				delete self._socketsById[socket.id];
 			});
 			
+			// Tell the client their new ID - triggers this._io.on('connect', ...) on client
+			try {
+				socket.send({
+					_netioCmd: 'id',
+					data: socket.id
+				});
+			} catch (err) {
+				console.log('err while sending client its socket.id!');
+			}
+			
+			// add socket message listeners, send 'init' message to client
 			self.emit('connection', [socket]);
 			
 			// trigger joinGame command as part of socket connection, no need for client to send joinGame anymore
@@ -768,16 +779,17 @@ NetIo.Server = NetIo.EventingClass.extend({
 			const clientId = socket.id;
 			
 			ige.server._onJoinGame(joinGameData, clientId);
-		}
-		
-		// Tell the client their new ID
-		try {
-			socket.send({
-				_netioCmd: 'id',
-				data: socket.id
-			});
-		} catch (err) {
-			console.log('err while sending client its socket.id!');
+		} else {
+			// PING service only 
+			// Tell the client their new ID
+			try {
+				socket.send({
+					_netioCmd: 'id',
+					data: socket.id
+				});
+			} catch (err) {
+				console.log('err while sending client its socket.id!');
+			}
 		}
 	},
 
