@@ -505,7 +505,8 @@ NetIo.Socket = NetIo.EventingClass.extend({
 			_netioCmd: 'close',
 			data: reason
 		});
-
+		// to trace unexpected close events.
+		console.trace();
 		console.log('socket.close (code:', code, '):', reason);
 		// for backward compatibility
 		// if reason is valid numeric code and code is falsey
