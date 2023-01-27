@@ -17,10 +17,8 @@ var TilePalette = /** @class */ (function (_super) {
     __extends(TilePalette, _super);
     function TilePalette(scene, tileset, rexUI) {
         var _this = _super.call(this, scene) || this;
-        console.log('create palette', _this);
-        _this.tileset = tileset;
-        _this.rexUI = rexUI;
         _this.scene = scene;
+        _this.rexUI = rexUI;
         // Load a map from a 2D array of tile indices
         var paletteMap = [];
         for (var i = 0; i < tileset.rows; i++) {
@@ -45,7 +43,7 @@ var TilePalette = /** @class */ (function (_super) {
         texturesLayer.on('pointermove', function (p) {
             var devModeScene = ige.renderer.scene.getScene('DevMode');
             devModeScene.regionEditor.cancelDrawRegion();
-            if (!p.isDown)
+            if (!p.isDown || scene.tileEditor.startDragIn !== 'palette')
                 return;
             var scrollX = (p.x - p.prevPosition.x) / camera.zoom;
             var scrollY = (p.y - p.prevPosition.y) / camera.zoom;

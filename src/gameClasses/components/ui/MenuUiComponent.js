@@ -385,8 +385,8 @@ var MenuUiComponent = IgeEntity.extend({
 				}, 1500);
 			}
 		}
-
-		ige.client.joinGame();
+		
+		ige.client.joinGame(wasGamePaused);
 
 		if (!window.isStandalone) {
 			ige.ad.showAnchorTag();

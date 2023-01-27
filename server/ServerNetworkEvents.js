@@ -96,8 +96,14 @@ var ServerNetworkEvents = {
 		// assign _id and sessionID to the new client
 		var client = ige.server.clients[clientId];
 		var socket = ige.network._socketById[clientId];
-
-
+		
+		// check joining user is same as token user.
+		if (socket._token.userId !== data._id || socket._token.sessionId !== data.sessionId) {
+			console.log('Unauthenticated user joining the game (ServerNetworkEvent.js)');
+			socket.close('Unauthenticated user joining the game');
+			return;
+		}
+		
 		if (process.env.ENV === 'standalone' || process.env.ENV == 'standalone-remote') {
 			delete data._id;
 		}
@@ -108,20 +114,13 @@ var ServerNetworkEvents = {
 			logInfo._id = data._id;
 		}
 
-		// check joining user is same as token user.
-		if (data._id && socket._token && socket._token.userId !== data._id) {
-			console.log('Unauthenticated user joining the game (ServerNetworkEvent.js)');
-			socket.close('Unauthenticated user joining the game');
-			return;
-		}
-
 		if (client) {
 			console.log('4. _onJoinGame ' + clientId + ' time elapsed: ' + (Date.now() - client.lastEventAt), '(ServerNetworkEvent.js)');
 			client.lastEventAt = Date.now();
 			client.receivedJoinGame = Date.now();
 		}
 
-		// assing ip address to player stats
+		// assigning ip address to player stats
 		data.ipAddress = client && client.ip;
 
 		var currentClientIp = data.ipAddress;
