@@ -68,9 +68,9 @@ var RegionEditor = /** @class */ (function () {
             });
         }
         else if (data.showModal) {
-            ige.addNewRegion && ige.addNewRegion({ name: data.name, x: data.x, y: data.y, width: data.width, height: data.height, userId: data.userId });
+            inGameEditor.addNewRegion && inGameEditor.addNewRegion({ name: data.name, x: data.x, y: data.y, width: data.width, height: data.height, userId: data.userId });
         }
-        ige.updateRegionInReact && ige.updateRegionInReact(data);
+        inGameEditor.updateRegionInReact && inGameEditor.updateRegionInReact(data);
     };
     RegionEditor.prototype.cancelDrawRegion = function () {
         if (this.regionTool) {
@@ -86,7 +86,7 @@ var RegionEditor = /** @class */ (function () {
     RegionEditor.prototype.showClickedList = function () {
         if (!this.devModeScene.pointerInsideWidgets()) {
             if (this.clickedList.length === 1) {
-                ige.addNewRegion && ige.addNewRegion(this.clickedList[0]);
+                inGameEditor.addNewRegion && inGameEditor.addNewRegion(this.clickedList[0]);
             }
             else if (this.clickedList.length > 1) {
                 ige.showRegionList && ige.showRegionList(this.clickedList);
