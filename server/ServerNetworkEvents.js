@@ -98,12 +98,15 @@ var ServerNetworkEvents = {
 		var socket = ige.network._socketById[clientId];
 
 		if (!socket) {
-			global.rollbar.log('No socket found with this clientId',
-				{
-					data: data,
-					clientId: clientId
-				});
-
+			try {
+				global.rollbar.log('No socket found with this clientId',
+					{
+						data: data,
+						clientId: clientId
+					});
+			} catch (error) {
+				console.log(error);
+			}
 			return;
 		}
 		
