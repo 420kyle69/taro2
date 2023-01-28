@@ -678,6 +678,7 @@ var Server = IgeClass.extend({
 		ige.network.define('updateProjectile', this._onUpdateProjectile);
 
 		ige.network.define('recordSocketMsgs', this._onRecordSocketMsgs);
+		ige.network.define('getSocketMsgs', this._onGetSocketMsgs);
 	},
 
 	unpublish: function (msg) {
