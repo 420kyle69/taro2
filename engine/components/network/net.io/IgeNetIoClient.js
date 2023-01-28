@@ -459,7 +459,7 @@ var IgeNetIoClient = {
 	_onMessageFromServer: function (data) {
 		var ciDecoded = data[0].charCodeAt(0);
 		var commandName = this._networkCommandsIndex[ciDecoded];
-		// console.log("name = " + commandName, data);
+		console.log("name = " + commandName, data);
 
 		if (commandName === 'sendSocketLogs') {
 			console.log(data);
