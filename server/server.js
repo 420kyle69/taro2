@@ -679,6 +679,7 @@ var Server = IgeClass.extend({
 
 		ige.network.define('recordSocketMsgs', this._onRecordSocketMsgs);
 		ige.network.define('getSocketMsgs', this._onGetSocketMsgs);
+		ige.network.define('stopRecordSocketMsgs', this._onStopRecordSocketMsgs);
 		ige.network.define('renderSocketLogs', this._onSomeBullshit);
 	},
 

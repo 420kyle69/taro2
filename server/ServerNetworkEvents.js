@@ -823,6 +823,18 @@ var ServerNetworkEvents = {
 		}
 	},
 
+	_onStopRecordSocketMsgs: function (data, clientId) {
+		var player = ige.game.getPlayerByClientId(clientId);
+
+		if (!player?._stats.isUserAdmin) {
+			return;
+		}
+
+		if (ige.clusterClient) {
+			ige.clusterClient.stopRecordLogs(data);
+		}
+	}
+
 	_onSomeBullshit: function () {
 		//bullshit
 	}
