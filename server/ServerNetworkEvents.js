@@ -816,6 +816,8 @@ var ServerNetworkEvents = {
 			return;
 		}
 
+		data = {...data, requester: clientId };
+
 		if (ige.clusterClient) {
 			ige.clusterClient.sendLogs(data);
 		}
