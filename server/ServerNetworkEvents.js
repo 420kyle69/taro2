@@ -833,7 +833,7 @@ var ServerNetworkEvents = {
 		if (ige.clusterClient) {
 			ige.clusterClient.stopRecordLogs(data);
 		}
-	}
+	},
 
 	_onSomeBullshit: function () {
 		//bullshit
