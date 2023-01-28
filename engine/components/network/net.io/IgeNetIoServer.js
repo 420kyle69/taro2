@@ -691,8 +691,9 @@ var IgeNetIoServer = {
 		if (this.socket(clientId)?.markedForTracking && ige.clusterClient) {
 			var ciDecoded = data[0].charCodeAt(0);
 			var commandName = this._networkCommandsIndex[ciDecoded];
-			let decoded = data;
+			let decoded = _.clone(data);
 			decoded[0] = ciDecoded;
+			decoded.append(commandName);
 			
 			ige.clusterClient.socketMessages[clientId] += JSON.stringify(decoded);
 		}
