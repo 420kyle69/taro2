@@ -461,6 +461,10 @@ var IgeNetIoClient = {
 		var commandName = this._networkCommandsIndex[ciDecoded];
 		// console.log("name = " + commandName, data);
 
+		if (commandName === 'renderSocketLogs') {
+			console.log(data);
+		}
+
 		if (commandName === '_snapshot') {
 			var snapshot = _.cloneDeep(data)[1];
 			var newSnapshotTimestamp = snapshot[snapshot.length - 1][1];
