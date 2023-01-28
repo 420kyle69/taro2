@@ -693,7 +693,7 @@ var IgeNetIoServer = {
 			var commandName = this._networkCommandsIndex[ciDecoded];
 			let decoded = _.clone(data);
 			decoded[0] = ciDecoded;
-			decoded.append(commandName);
+			decoded.push(commandName);
 			
 			ige.clusterClient.socketMessages[clientId] += JSON.stringify(decoded);
 		}
