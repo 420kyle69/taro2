@@ -685,6 +685,10 @@ var IgeNetIoServer = {
    */
 	_onClientMessage: function (data, clientId) {
 		var self = this;
+
+		if (this.socket(clientId)?.markedForTracking && ige.clusterClient) {
+			ige.clusterClient.socketMessages[clientId] += JSON.stringify(data);
+		}
 		
 		if (typeof data[0] === 'string') {
 			if (data[0].charCodeAt(0) != undefined) {
