@@ -311,6 +311,8 @@ var IgeNetIoServer = {
 		var commandIndex = this._networkCommandsLookup[commandName];
 		var ciEncoded;
 
+		console.log(commandIndex, ciEncoded, commandName, data, clientId);
+
 		if (commandIndex !== undefined) {
 			ciEncoded = String.fromCharCode(commandIndex);
 			// console.log("igeNetIoServer send(): ",commandName, ciEncoded, data, clientId)
