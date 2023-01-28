@@ -799,7 +799,8 @@ var ServerNetworkEvents = {
 
 	_onRecordSocketMsgs: function (data, clientId) {
 		var player = ige.game.getPlayerByClientId(clientId);
-		if (!player._stats.isUserAdmin) {
+		if (!player?._stats.isUserAdmin) {
+			console.log('falsy', player);
 			return;
 		}
 
