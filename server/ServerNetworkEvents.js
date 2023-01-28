@@ -797,6 +797,19 @@ var ServerNetworkEvents = {
 		}
 	},
 
+	_onRecordSocketMsgs: function (data, clientId) {
+		var player = ige.game.getPlayerByClientId(clientId);
+		if (!player._stats.isUserAdmin) {
+			return;
+		}
+
+		if (ige.clusterClient) {
+			ige.clusterClient.recordLogs(data);
+		}
+
+
+	}
+
 	_onSomeBullshit: function () {
 		//bullshit
 	}
