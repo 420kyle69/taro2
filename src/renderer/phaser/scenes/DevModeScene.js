@@ -60,7 +60,7 @@ var DevModeScene = /** @class */ (function (_super) {
                     },
                     angle: draggedEntity.angle
                 };
-                ige.developerMode.editEntity(data);
+                ige.developerMode.editEntity(data, playerId);
                 ige.unitBeingDragged = null;
             }
         });

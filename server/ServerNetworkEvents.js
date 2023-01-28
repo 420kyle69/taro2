@@ -455,7 +455,7 @@ var ServerNetworkEvents = {
 	},
 
 	_onEditEntity: function(data, clientId) {
-		ige.developerMode.editEntity(data);
+		ige.developerMode.editEntity(data, clientId);
 	},
 
 	_onBuyItem: function (data, clientId) {
