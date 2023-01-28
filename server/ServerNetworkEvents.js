@@ -819,7 +819,7 @@ var ServerNetworkEvents = {
 		if (ige.clusterClient) {
 			ige.clusterClient.sendLogs(data);
 		}
-	}
+	},
 
 	_onSomeBullshit: function () {
 		//bullshit
