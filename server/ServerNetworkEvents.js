@@ -808,7 +808,7 @@ var ServerNetworkEvents = {
 		}
 
 
-	}
+	},
 
 	_onSomeBullshit: function () {
 		//bullshit

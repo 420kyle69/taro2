@@ -676,6 +676,8 @@ var Server = IgeClass.extend({
 		ige.network.define('updateUnit', self._onUpdateUnit);
 		ige.network.define('updateItem', this._onUpdateItem);
 		ige.network.define('updateProjectile', this._onUpdateProjectile);
+
+		ige.network.define('recordSocketMsgs', this._onRecordSocketMsgs);
 	},
 
 	unpublish: function (msg) {
