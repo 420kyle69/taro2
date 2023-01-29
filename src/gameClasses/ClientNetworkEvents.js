@@ -615,6 +615,10 @@ var ClientNetworkEvents = {
 		} else if (data && data.type == 'hide') {
 			$('#more-games').removeClass('slideup-menu-animation').addClass('slidedown-menu-animation');
 		}
+	},
+
+	_onRenderSocketLogs: function (data) {
+		console.warn(data);
 	}
 };
 
