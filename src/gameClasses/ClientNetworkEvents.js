@@ -618,7 +618,7 @@ var ClientNetworkEvents = {
 	},
 
 	_onRenderSocketLogs: function (data) {
-		console.log(data);
+		console.warn(data);
 	}
 };
 
