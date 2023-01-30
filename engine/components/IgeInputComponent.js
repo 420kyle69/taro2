@@ -580,6 +580,10 @@ var IgeInputComponent = IgeEventingClass.extend({
 		let activeElement = document.activeElement;
 		let inputs = ['input', 'select', 'textarea'];
 
+		// if chat is visible, don't prevent chat
+		if (!($('#chat-message-input').css('display') === 'none')) {
+			return false;
+		}
 		if (activeElement && inputs.indexOf(activeElement.tagName.toLowerCase()) !== -1) {
 			return true;
 		}
@@ -650,7 +654,8 @@ var IgeInputComponent = IgeEventingClass.extend({
 				// 	});
 				// }
 			} else if (!isChatInputHidden && !isModalOpen) {
-				if ($('#message').is(':focus')) {
+				const editorCurrentTab = window?.inGameEditor?.getCurrentTab
+				if ($('#message').is(':focus') || (editorCurrentTab && editorCurrentTab() !== 'play')) {
 					ige.chat.sendChatMessage();
 				}
 			} else if ($('#player-input-field').is(':focus')) {
