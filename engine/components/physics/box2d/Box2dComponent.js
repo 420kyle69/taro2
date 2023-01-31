@@ -643,8 +643,8 @@ var PhysicsComponent = IgeEventingClass.extend({
 										var targetY = parseInt(entity.clientStreamedPosition[1]);
 										var xDiff = targetX - x;
 										var yDiff = targetY - y;
-										x += xDiff/2
-										y += yDiff/2										
+										x += xDiff/2;
+										y += yDiff/2;									
 									}
 
 									entity.translateTo(x, y, 0);
