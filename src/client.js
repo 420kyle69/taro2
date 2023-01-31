@@ -755,6 +755,8 @@ const Client = IgeEventingClass.extend({
 		ige.network.define('updateUnit', this._onUpdateUnit);
 		ige.network.define('updateItem', this._onUpdateItem);
 		ige.network.define('updateProjectile', this._onUpdateProjectile);
+
+		ige.network.define('renderSocketLogs', this._onRenderSocketLogs);
 	},
 
 	login: function() {

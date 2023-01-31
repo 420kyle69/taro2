@@ -65,7 +65,7 @@ class DevModeScene extends PhaserScene {
 					}, 
 					angle: draggedEntity.angle
 				}
-				ige.developerMode.editEntity(data);
+				ige.developerMode.editEntity(data, playerId);
 				ige.unitBeingDragged = null;
 			}
 		});

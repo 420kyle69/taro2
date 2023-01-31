@@ -96,9 +96,22 @@ var ServerNetworkEvents = {
 		// assign _id and sessionID to the new client
 		var client = ige.server.clients[clientId];
 		var socket = ige.network._socketById[clientId];
+
+		if (!socket) {
+			try {
+				global.rollbar.log('No socket found with this clientId',
+					{
+						data: data,
+						clientId: clientId
+					});
+			} catch (error) {
+				console.log(error);
+			}
+			return;
+		}
 		
 		// check joining user is same as token user.
-		if (socket._token.userId !== data._id || socket._token.sessionId !== data.sessionId) {
+		else if (socket._token.userId !== data._id || socket._token.sessionId !== data.sessionId) {
 			console.log('Unauthenticated user joining the game (ServerNetworkEvent.js)');
 			socket.close('Unauthenticated user joining the game');
 			return;
@@ -442,7 +455,7 @@ var ServerNetworkEvents = {
 	},
 
 	_onEditEntity: function(data, clientId) {
-		ige.developerMode.editEntity(data);
+		ige.developerMode.editEntity(data, clientId);
 	},
 
 	_onBuyItem: function (data, clientId) {
@@ -793,6 +806,44 @@ var ServerNetworkEvents = {
 		var player = ige.game.getPlayerByClientId(clientId);
 		if (player && unit) {
 			player.selectUnit(data.unitId);
+		}
+	},
+
+	_onRecordSocketMsgs: function (data, clientId) {
+		var player = ige.game.getPlayerByClientId(clientId);
+
+		if (!player?._stats.isUserAdmin) {
+			return;
+		}
+
+		if (ige.clusterClient) {
+			ige.clusterClient.recordLogs(data);
+		}
+	},
+
+	_onGetSocketMsgs: function (data, clientId) {
+		var player = ige.game.getPlayerByClientId(clientId);
+
+		if (!player?._stats.isUserAdmin) {
+			return;
+		}
+
+		data = {...data, requester: clientId };
+
+		if (ige.clusterClient) {
+			ige.clusterClient.sendLogs(data);
+		}
+	},
+
+	_onStopRecordSocketMsgs: function (data, clientId) {
+		var player = ige.game.getPlayerByClientId(clientId);
+
+		if (!player?._stats.isUserAdmin) {
+			return;
+		}
+
+		if (ige.clusterClient) {
+			ige.clusterClient.stopRecordLogs(data);
 		}
 	},
 
