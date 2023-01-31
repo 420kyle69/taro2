@@ -88,12 +88,12 @@
                 return;
             }
             // if ('<%= constants.editorUrl %>' === 'http://localhost:3001') {
-                const scriptEl = document.createElement('script');
-                scriptEl.src = `http://localhost:3001/bundle.js`;
-                scriptEl.id = 'editor-script';
-                document.body.appendChild(scriptEl);
-                initEditor = true;
-                return;
+            //     const scriptEl = document.createElement('script');
+            //     scriptEl.src = `http://localhost:3001/bundle.js`;
+            //     scriptEl.id = 'editor-script';
+            //     document.body.appendChild(scriptEl);
+            //     initEditor = true;
+            //     return;
             // }
       
             axios.get('https://prod2.modd.io/client/')

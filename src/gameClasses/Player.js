@@ -698,7 +698,7 @@ var Player = IgeEntity.extend({
 					// $('#game-suggestions-card').removeClass('d-xl-block');
 					// $("#invite-players-card").show();
 					// $('#toggle-dev-panels').show();
-					// window.inGameEditor && window.inGameEditor.playerJoinedGame && window.inGameEditor.playerJoinedGame();
+					window.inGameEditor && window.inGameEditor.playerJoinedGame && window.inGameEditor.playerJoinedGame();
 					// for edge case handling
 					window.playerJoinedTheGame = true;
 					if(window.isStandalone) {
