@@ -700,6 +700,8 @@ var Player = IgeEntity.extend({
 					// $('#toggle-dev-panels').show();
 					// $('#toggle-dev-panels').click();
 					window.inGameEditor && window.inGameEditor.playerJoinedGame && window.inGameEditor.playerJoinedGame();
+					// for edge case handling
+					window.playerJoinedTheGame = true;
 				} else {
 					if (ige.game.data.isDeveloper) {
 						$('#toggle-dev-panels').show();
