@@ -141,10 +141,12 @@ var MenuUiComponent = IgeEntity.extend({
 					return;
 				}
 				if((['1', '4', '5'].includes(window.gameDetails?.tier)) || window.isStandalone) {
+					console.log("ige developermode: ", ige.developerMode)
+					ige.developerMode.enter();
+
 					loadEditor();
 					$('#game-editor').show();
 					$('#kick-player').hide();
-					ige.developerMode.enter();
 
 					// commenting this code because we are handling changes in editor now.
 					/* if (restoreWindows) {
