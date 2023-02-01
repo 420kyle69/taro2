@@ -626,7 +626,6 @@ var PhysicsComponent = IgeEventingClass.extend({
 
 							// entity just has teleported
 							if (entity.teleportDestination != undefined) {
-								console.log('teleportDestination' , entity.teleportDestination)
 								entity.finalKeyFrame[1] = entity.teleportDestination;
 								x = entity.teleportDestination[0]
 								y = entity.teleportDestination[1]
@@ -635,7 +634,7 @@ var PhysicsComponent = IgeEventingClass.extend({
 							} else {
 								if (ige.isServer) {
 									
-									/* server-side reconciliation */ /*check later*/
+									/* server-side reconciliation */
 									// hard-correct client entity's position (teleport) if the distance between server & client is greater than 100px
 									// continuously for 10 frames in a row
 									if (ige.game.cspEnabled && !entity._stats.aiEnabled && entity.clientStreamedPosition) {
