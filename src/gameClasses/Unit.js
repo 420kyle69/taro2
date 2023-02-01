@@ -1856,8 +1856,6 @@ var Unit = IgeEntityPhysics.extend({
 
 		if (ige.isServer || (ige.isClient && ige.client.selectedUnit == this)) {
 
-			if ((ige.isClient && ige.client.selectedUnit == this)) console.log(/*this.teleported, */this._translate.x, this._translate.y)
-
 			// translate unit
 			var speed = (this._stats.attributes && this._stats.attributes.speed && this._stats.attributes.speed.value) || 0;
 			var vector = {x: 0, y: 0};
@@ -1870,7 +1868,6 @@ var Unit = IgeEntityPhysics.extend({
 				if (ige.isServer) {
 
 					if (!self._stats.aiEnabled && ownerPlayer._stats.controlledBy == 'human' && ownerPlayer.getSelectedUnit() == this) {
-						console.log(/*this.teleported, */this._translate.x, this._translate.y)
 						self.updateAngleToTarget();
 					}
 

@@ -357,7 +357,6 @@ var ControlComponent = IgeEntity.extend({
 					var y = unit._translate.y.toFixed(0);
 					if (self.sendPlayerInput && (self.lastPositionSent == undefined || self.lastPositionSent[0] != x || self.lastPositionSent[1] != y)) {
 						var pos = [x, y];
-						console.log('playerUnitMoved', pos)
 						ige.network.send('playerUnitMoved', pos);
 						self.lastPositionSent = pos;
 					}

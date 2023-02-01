@@ -492,7 +492,6 @@ var IgeNetIoClient = {
 						// we are not executing this in igeEngine or igeEntity, becuase they don't execute when browser tab is inactive
 						var entity = ige.$(entityId);
 						if (entityData[3]) {
-							entity.teleported = entityData[3];
 							entity.teleportTo(entityData[0], entityData[1], entityData[2]);
 						}
 

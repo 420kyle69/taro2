@@ -3131,8 +3131,8 @@ var IgeEntity = IgeObject.extend({
 	},
 
 	teleportTo: function (x, y, rotate) {
+		this.teleported = true;
 		this.teleportDestination = [x, y, rotate]
-		console.log('teleport target', x, y, rotate)
 
 		this.translateTo(x, y);
 		if (rotate != undefined) {
@@ -3142,7 +3142,6 @@ var IgeEntity = IgeObject.extend({
 		if (ige.isServer) {
 
 			this.clientStreamedPosition = undefined;
-			this.teleported = true;
 			if (ige.physics && ige.physics.engine == 'CRASH') {
 				this.translateColliderTo(x, y);
 			}
@@ -4392,9 +4391,10 @@ var IgeEntity = IgeObject.extend({
 						buffArr.push(Number(x));
 						buffArr.push(Number(y));
 						buffArr.push(Number(angle));
-						buffArr.push(Number(this.teleported));
-
-						this.teleported = false;
+						if (this.teleported) {
+							buffArr.push(Number(this.teleported));
+							this.teleported = false;
+						}
 
 						// IgeEntity.prototype.log(this._size, this._translate, this._rotate)
 						if (this.bypassSmoothing) {
@@ -5217,7 +5217,6 @@ var IgeEntity = IgeObject.extend({
 		if (prevTransform != undefined && nextTransform != undefined &&
             prevKeyFrame[0] != nextKeyFrame[0] &&
 			prevKeyFrame[0] - 50 < ige._currentTime && ige._currentTime < nextKeyFrame[0] + 50 // allow extrapolation of entity motion up to 50ms (outside of prevKeyFrame & nextKeyFrame range)
-            //prevKeyFrame[0] < ige._currentTime && ige._currentTime < nextKeyFrame[0]
 		) {
 			if (!this.teleported) {
 				x = this.interpolateValue(xStart, xEnd, prevKeyFrame[0], ige._currentTime, nextKeyFrame[0]);
