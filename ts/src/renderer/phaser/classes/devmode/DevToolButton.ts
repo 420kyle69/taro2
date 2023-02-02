@@ -7,6 +7,7 @@ class DevToolButton {
 	constructor (
 		public devModeTools: DevModeTools,
 		text: string,
+		tooltipText: string,
 		texture: string | null,
 		x: number,
 		y: number,
@@ -58,6 +59,14 @@ class DevToolButton {
 		button.on('pointerdown', () => {
 			if (value || value === 0) func(value);
 			else func();
+		});
+		button.on('pointerover', () => {
+			console.log('pointer over start')
+			devModeTools.tooltip.showMessage(tooltipText);
+		});
+		button.on('pointerout', () => {
+			console.log('pointer over end')
+			devModeTools.tooltip.fadeOut();
 		});
 	}
 

@@ -44,34 +44,35 @@ var DevModeTools = /** @class */ (function (_super) {
             toolButtonsContainer.x = palette.camera.x + palette.paletteWidth - 98;
             toolButtonsContainer.y = palette.camera.y - layerButtonsContainer.height - 136;
         });
-        new DevToolButton(_this, '+', null, 0, -34, 30, palette.scrollBarContainer, palette.zoom.bind(palette), -1);
-        new DevToolButton(_this, '-', null, 34, -34, 30, palette.scrollBarContainer, palette.zoom.bind(palette), 1);
+        new DevToolButton(_this, '+', 'Zoom in (+)', null, 0, -34, 30, palette.scrollBarContainer, palette.zoom.bind(palette), -1);
+        new DevToolButton(_this, '-', 'Zoom out (-)', null, 34, -34, 30, palette.scrollBarContainer, palette.zoom.bind(palette), 1);
         var layerButtonsContainer = _this.layerButtonsContainer = new Phaser.GameObjects.Container(scene);
         layerButtonsContainer.width = 120;
         layerButtonsContainer.height = 204;
         layerButtonsContainer.x = palette.camera.x + palette.paletteWidth - 98;
         layerButtonsContainer.y = palette.camera.y - 204;
         scene.add.existing(layerButtonsContainer);
-        _this.paletteButton = new DevToolButton(_this, 'palette', null, 0, 170, 120, layerButtonsContainer, palette.toggle.bind(palette));
+        _this.paletteButton = new DevToolButton(_this, 'palette', 'Show/Hide palette', null, 0, 170, 120, layerButtonsContainer, palette.toggle.bind(palette));
         _this.layerButtons = [];
-        _this.layerButtons.push(new DevToolButton(_this, 'floor', null, 30, 102, 85, layerButtonsContainer, _this.switchLayer.bind(_this), 0), new DevToolButton(_this, 'floor2', null, 30, 68, 85, layerButtonsContainer, _this.switchLayer.bind(_this), 1), new DevToolButton(_this, 'walls', null, 30, 34, 85, layerButtonsContainer, _this.switchLayer.bind(_this), 2), new DevToolButton(_this, 'trees', null, 30, 0, 85, layerButtonsContainer, _this.switchLayer.bind(_this), 3));
+        _this.layerButtons.push(new DevToolButton(_this, 'floor', 'Layer (1) select the Floor layer', null, 30, 102, 85, layerButtonsContainer, _this.switchLayer.bind(_this), 0), new DevToolButton(_this, 'floor2', 'Layer (2) select the Floor 2 layer', null, 30, 68, 85, layerButtonsContainer, _this.switchLayer.bind(_this), 1), new DevToolButton(_this, 'walls', 'Layer (3) select the Walls layer', null, 30, 34, 85, layerButtonsContainer, _this.switchLayer.bind(_this), 2), new DevToolButton(_this, 'trees', 'Layer (4) select the Trees layer', null, 30, 0, 85, layerButtonsContainer, _this.switchLayer.bind(_this), 3));
         _this.layerButtons[0].highlight('active');
         _this.layerHideButtons = [];
-        _this.layerHideButtons.push(new DevToolButton(_this, '', 'eyeopen', 0, 102, 35, layerButtonsContainer, _this.hideLayer.bind(_this), 0), new DevToolButton(_this, '', 'eyeopen', 0, 68, 35, layerButtonsContainer, _this.hideLayer.bind(_this), 1), new DevToolButton(_this, '', 'eyeopen', 0, 34, 35, layerButtonsContainer, _this.hideLayer.bind(_this), 2), new DevToolButton(_this, '', 'eyeopen', 0, 0, 35, layerButtonsContainer, _this.hideLayer.bind(_this), 3));
+        _this.layerHideButtons.push(new DevToolButton(_this, '', 'Layer visibility (shift-1) show/hide floor layer', 'eyeopen', 0, 102, 35, layerButtonsContainer, _this.hideLayer.bind(_this), 0), new DevToolButton(_this, '', 'Layer visibility (shift-1) show/hide floor 2 layer', 'eyeopen', 0, 68, 35, layerButtonsContainer, _this.hideLayer.bind(_this), 1), new DevToolButton(_this, '', 'Layer visibility (shift-1) show/hide walls layer', 'eyeopen', 0, 34, 35, layerButtonsContainer, _this.hideLayer.bind(_this), 2), new DevToolButton(_this, '', 'Layer visibility (shift-1) show/hide trees layer', 'eyeopen', 0, 0, 35, layerButtonsContainer, _this.hideLayer.bind(_this), 3));
         _this.layerHideButtons[0].highlight('active');
         var toolButtonsContainer = _this.toolButtonsContainer = new Phaser.GameObjects.Container(scene);
         toolButtonsContainer.x = palette.camera.x + palette.paletteWidth - 98;
-        toolButtonsContainer.y = palette.camera.y - layerButtonsContainer.height - 184;
+        toolButtonsContainer.y = palette.camera.y - layerButtonsContainer.height - 204;
         toolButtonsContainer.width = 120;
         toolButtonsContainer.height = 136;
         scene.add.existing(toolButtonsContainer);
         _this.modeButtons = [];
-        _this.modeButtons.push(new DevToolButton(_this, '', 'cursor', 0, 0, 58, toolButtonsContainer, _this.cursor.bind(_this)), new DevToolButton(_this, '', 'region', 62, 0, 58, toolButtonsContainer, _this.drawRegion.bind(_this)), new DevToolButton(_this, '', 'stamp', 0, 34, 58, toolButtonsContainer, _this.brush.bind(_this)), new DevToolButton(_this, '', 'eraser', 62, 34, 58, toolButtonsContainer, _this.emptyTile.bind(_this)));
+        _this.modeButtons.push(new DevToolButton(_this, '', 'Cursor Tool (C) interact with regions and entities', 'cursor', 0, 0, 58, toolButtonsContainer, _this.cursor.bind(_this)), new DevToolButton(_this, '', 'Region Tool (R) draw new region', 'region', 62, 0, 58, toolButtonsContainer, _this.drawRegion.bind(_this)), new DevToolButton(_this, '', 'Stamp Brush (B) LMB: place selected tiles. RMB: copy tiles', 'stamp', 0, 34, 58, toolButtonsContainer, _this.brush.bind(_this)), new DevToolButton(_this, '', 'Eraser (E) delete tiles from selected layer', 'eraser', 62, 34, 58, toolButtonsContainer, _this.emptyTile.bind(_this)), new DevToolButton(_this, '', 'Bucket Fill (F) fill an area with the selected tile', 'fill', 0, 68, 58, toolButtonsContainer, _this.floodFill.bind(_this)));
         _this.cursorButton = _this.modeButtons[0];
         _this.highlightModeButton(0);
         _this.brushButtons = [];
-        _this.brushButtons.push(new DevToolButton(_this, '1x1', null, 0, 102, 58, toolButtonsContainer, _this.selectSingle.bind(_this)), new DevToolButton(_this, '2x2', null, 62, 102, 58, toolButtonsContainer, _this.selectArea.bind(_this)));
+        _this.brushButtons.push(new DevToolButton(_this, '1x1', '1x1 changes the brush size to 1x1', null, 0, 136, 58, toolButtonsContainer, _this.selectSingle.bind(_this)), new DevToolButton(_this, '2x2', '2x2 changes the brush size to 2x2', null, 62, 136, 58, toolButtonsContainer, _this.selectArea.bind(_this)));
         _this.brushButtons[0].highlight('active');
+        _this.tooltip = new DevTooltip(_this.scene);
         _this.palette.hide();
         _this.layerButtonsContainer.setVisible(false);
         _this.toolButtonsContainer.setVisible(false);
@@ -173,6 +174,10 @@ var DevModeTools = /** @class */ (function (_super) {
             this.scene.regionEditor.regionTool = false;
             this.highlightModeButton(3);
         }
+    };
+    DevModeTools.prototype.floodFill = function () {
+        console.log('flood fill button');
+        this.highlightModeButton(4);
     };
     DevModeTools.prototype.highlightModeButton = function (n) {
         this.modeButtons.forEach(function (button, index) {
