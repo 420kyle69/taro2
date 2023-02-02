@@ -42,13 +42,13 @@ var DevModeTools = /** @class */ (function (_super) {
             layerButtonsContainer.x = palette.camera.x + palette.paletteWidth - 98;
             layerButtonsContainer.y = palette.camera.y - 170;
             toolButtonsContainer.x = palette.camera.x + palette.paletteWidth - 98;
-            toolButtonsContainer.y = palette.camera.y - layerButtonsContainer.height - 136;
+            toolButtonsContainer.y = palette.camera.y - layerButtonsContainer.height - 170;
         });
         new DevToolButton(_this, '+', 'Zoom in (+)', null, 0, -34, 30, palette.scrollBarContainer, palette.zoom.bind(palette), -1);
         new DevToolButton(_this, '-', 'Zoom out (-)', null, 34, -34, 30, palette.scrollBarContainer, palette.zoom.bind(palette), 1);
         var layerButtonsContainer = _this.layerButtonsContainer = new Phaser.GameObjects.Container(scene);
         layerButtonsContainer.width = 120;
-        layerButtonsContainer.height = 204;
+        layerButtonsContainer.height = 238;
         layerButtonsContainer.x = palette.camera.x + palette.paletteWidth - 98;
         layerButtonsContainer.y = palette.camera.y - 204;
         scene.add.existing(layerButtonsContainer);
@@ -57,7 +57,7 @@ var DevModeTools = /** @class */ (function (_super) {
         _this.layerButtons.push(new DevToolButton(_this, 'floor', 'Layer (1) select the Floor layer', null, 30, 102, 85, layerButtonsContainer, _this.switchLayer.bind(_this), 0), new DevToolButton(_this, 'floor2', 'Layer (2) select the Floor 2 layer', null, 30, 68, 85, layerButtonsContainer, _this.switchLayer.bind(_this), 1), new DevToolButton(_this, 'walls', 'Layer (3) select the Walls layer', null, 30, 34, 85, layerButtonsContainer, _this.switchLayer.bind(_this), 2), new DevToolButton(_this, 'trees', 'Layer (4) select the Trees layer', null, 30, 0, 85, layerButtonsContainer, _this.switchLayer.bind(_this), 3));
         _this.layerButtons[0].highlight('active');
         _this.layerHideButtons = [];
-        _this.layerHideButtons.push(new DevToolButton(_this, '', 'Layer visibility (shift-1) show/hide floor layer', 'eyeopen', 0, 102, 35, layerButtonsContainer, _this.hideLayer.bind(_this), 0), new DevToolButton(_this, '', 'Layer visibility (shift-1) show/hide floor 2 layer', 'eyeopen', 0, 68, 35, layerButtonsContainer, _this.hideLayer.bind(_this), 1), new DevToolButton(_this, '', 'Layer visibility (shift-1) show/hide walls layer', 'eyeopen', 0, 34, 35, layerButtonsContainer, _this.hideLayer.bind(_this), 2), new DevToolButton(_this, '', 'Layer visibility (shift-1) show/hide trees layer', 'eyeopen', 0, 0, 35, layerButtonsContainer, _this.hideLayer.bind(_this), 3));
+        _this.layerHideButtons.push(new DevToolButton(_this, '', 'Layer visibility (shift-1) show/hide floor layer', 'eyeopen', 0, 102, 35, layerButtonsContainer, _this.hideLayer.bind(_this), 0), new DevToolButton(_this, '', 'Layer visibility (shift-2) show/hide floor 2 layer', 'eyeopen', 0, 68, 35, layerButtonsContainer, _this.hideLayer.bind(_this), 1), new DevToolButton(_this, '', 'Layer visibility (shift-3) show/hide walls layer', 'eyeopen', 0, 34, 35, layerButtonsContainer, _this.hideLayer.bind(_this), 2), new DevToolButton(_this, '', 'Layer visibility (shift-4) show/hide trees layer', 'eyeopen', 0, 0, 35, layerButtonsContainer, _this.hideLayer.bind(_this), 3));
         _this.layerHideButtons[0].highlight('active');
         var toolButtonsContainer = _this.toolButtonsContainer = new Phaser.GameObjects.Container(scene);
         toolButtonsContainer.x = palette.camera.x + palette.paletteWidth - 98;
@@ -113,6 +113,7 @@ var DevModeTools = /** @class */ (function (_super) {
         var _this = this;
         var gameScene = this.scene.gameScene;
         var keyboard = this.scene.input.keyboard;
+        var shiftKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT, false);
         var tabKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, true);
         tabKey.on('down', function () {
             if (ige.developerMode.active && ige.developerMode.activeTab === 'map') {
@@ -138,6 +139,80 @@ var DevModeTools = /** @class */ (function (_super) {
             if (ige.developerMode.active && ige.developerMode.activeTab === 'map') {
                 var zoom = (gameScene.zoomSize / 2.15) * 1.1;
                 ige.client.emit('zoom', zoom);
+            }
+        });
+        var cKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C, false);
+        cKey.on('down', function () {
+            if (ige.developerMode.active && ige.developerMode.activeTab === 'map') {
+                _this.cursor();
+            }
+        });
+        var rKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R, false);
+        rKey.on('down', function () {
+            if (ige.developerMode.active && ige.developerMode.activeTab === 'map') {
+                _this.drawRegion();
+            }
+        });
+        var bKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.B, false);
+        bKey.on('down', function () {
+            if (ige.developerMode.active && ige.developerMode.activeTab === 'map') {
+                _this.brush();
+            }
+        });
+        var eKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E, false);
+        eKey.on('down', function () {
+            if (ige.developerMode.active && ige.developerMode.activeTab === 'map') {
+                _this.emptyTile();
+            }
+        });
+        var fKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F, false);
+        fKey.on('down', function () {
+            if (ige.developerMode.active && ige.developerMode.activeTab === 'map') {
+                _this.floodFill();
+            }
+        });
+        var oneKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE, false);
+        oneKey.on('down', function () {
+            if (ige.developerMode.active && ige.developerMode.activeTab === 'map') {
+                if (shiftKey.isDown) {
+                    _this.hideLayer(0);
+                }
+                else {
+                    _this.switchLayer(0);
+                }
+            }
+        });
+        var twoKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO, false);
+        twoKey.on('down', function () {
+            if (ige.developerMode.active && ige.developerMode.activeTab === 'map') {
+                if (shiftKey.isDown) {
+                    _this.hideLayer(1);
+                }
+                else {
+                    _this.switchLayer(1);
+                }
+            }
+        });
+        var threeKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE, false);
+        threeKey.on('down', function () {
+            if (ige.developerMode.active && ige.developerMode.activeTab === 'map') {
+                if (shiftKey.isDown) {
+                    _this.hideLayer(2);
+                }
+                else {
+                    _this.switchLayer(2);
+                }
+            }
+        });
+        var fourKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.FOUR, false);
+        fourKey.on('down', function () {
+            if (ige.developerMode.active && ige.developerMode.activeTab === 'map') {
+                if (shiftKey.isDown) {
+                    _this.hideLayer(3);
+                }
+                else {
+                    _this.switchLayer(3);
+                }
             }
         });
     };
