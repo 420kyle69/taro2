@@ -70,6 +70,7 @@ var IgeEntity = IgeObject.extend({
 		this.prevKeyFrame = this.finalKeyFrame
 		this._lastTransformAt = null;
 		this.lastTeleportedAt = 0;
+		this.teleported = false;
 		this.teleportDestination = this.finalKeyFrame[1];
 
 		if (ige.isClient) {
@@ -3130,6 +3131,7 @@ var IgeEntity = IgeObject.extend({
 	},
 
 	teleportTo: function (x, y, rotate) {
+		this.teleported = true;
 		this.teleportDestination = [x, y, rotate]
 
 		this.translateTo(x, y);
@@ -3139,21 +3141,18 @@ var IgeEntity = IgeObject.extend({
 
 		if (ige.isServer) {
 
-
-			ige.network.send('teleport', { entityId: this.id(), position: [x, y, rotate] });
 			this.clientStreamedPosition = undefined;
 			if (ige.physics && ige.physics.engine == 'CRASH') {
 				this.translateColliderTo(x, y);
 			}
 		} else if (ige.isClient) {
-
+			this.finalKeyFrame[1] = [x, y, rotate];
 			if (ige.physics && this.prevPhysicsFrame && this.nextPhysicsFrame) {
 				let prevFrameTime = this.prevPhysicsFrame[0]
 				let nextFrameTime = this.nextPhysicsFrame[0]
 				this.prevPhysicsFrame = [prevFrameTime, [x, y, rotate]];
 				this.nextPhysicsFrame = [nextFrameTime, [x, y, rotate]];
 			}
-
 		}
 
 		this.discrepancyCount = 0;
@@ -4388,9 +4387,14 @@ var IgeEntity = IgeObject.extend({
 						// ige.lastSnapshotTime = ige._currentTime;
 
 						let buffArr = [];
+						
 						buffArr.push(Number(x));
 						buffArr.push(Number(y));
 						buffArr.push(Number(angle));
+						if (this.teleported) {
+							buffArr.push(Number(this.teleported));
+							this.teleported = false;
+						}
 
 						// IgeEntity.prototype.log(this._size, this._translate, this._rotate)
 						if (this.bypassSmoothing) {
@@ -5212,10 +5216,18 @@ var IgeEntity = IgeObject.extend({
 		// interpolate using snapshots streamed from the server.
 		if (prevTransform != undefined && nextTransform != undefined &&
             prevKeyFrame[0] != nextKeyFrame[0] &&
-            prevKeyFrame[0] - 50 < ige._currentTime && ige._currentTime < nextKeyFrame[0] + 50 // allow extrapolation of entity motion up to 50ms (outside of prevKeyFrame & nextKeyFrame range)
+			prevKeyFrame[0] - 50 < ige._currentTime && ige._currentTime < nextKeyFrame[0] + 50 // allow extrapolation of entity motion up to 50ms (outside of prevKeyFrame & nextKeyFrame range)
 		) {
-			x = this.interpolateValue(xStart, xEnd, prevKeyFrame[0], ige._currentTime, nextKeyFrame[0]);
-			y = this.interpolateValue(yStart, yEnd, prevKeyFrame[0], ige._currentTime, nextKeyFrame[0]);
+			if (!this.teleported) {
+				x = this.interpolateValue(xStart, xEnd, prevKeyFrame[0], ige._currentTime, nextKeyFrame[0]);
+				y = this.interpolateValue(yStart, yEnd, prevKeyFrame[0], ige._currentTime, nextKeyFrame[0]);
+			} else {
+				x = xEnd;
+				y = yEnd;
+				prevTransform[0] = x;
+				prevTransform[1] = y;
+			}
+
 
 			
 			// a hack to prevent rotational interpolation suddnely jumping by 2 PI (e.g. 0.01 to -6.27)
@@ -5244,6 +5256,8 @@ var IgeEntity = IgeObject.extend({
 		// this.rotateTo(0, 0, rotate);		
 		// this.translateTo(x, y, 0);
 		this._lastTransformAt = ige._currentTime;
+
+		this.teleported = false;
 	},
 
 	getAttributeBarContainer: function () {
