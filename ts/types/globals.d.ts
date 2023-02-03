@@ -7,3 +7,6 @@ declare const rexvirtualjoystickplugin: any;
 
 type ArrayElement<ArrayType extends readonly unknown[]> =
 	ArrayType extends readonly (infer ElementType)[] ? ElementType : never;
+
+// react editor
+declare const inGameEditor : InGameEditor;

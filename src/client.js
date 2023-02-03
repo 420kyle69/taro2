@@ -713,8 +713,6 @@ const Client = IgeEventingClass.extend({
 		ige.network.define('showUnitNameLabelFromPlayer', this._onShowUnitNameLabelFromPlayer);
 
 		ige.network.define('updateAllEntities', this._onUpdateAllEntities);
-		ige.network.define('teleport', this._onTeleport);
-
 		ige.network.define('updateEntityAttribute', this._onUpdateEntityAttribute);
 
 		ige.network.define('updateUiText', this._onUpdateUiText);
@@ -755,6 +753,8 @@ const Client = IgeEventingClass.extend({
 		ige.network.define('updateUnit', this._onUpdateUnit);
 		ige.network.define('updateItem', this._onUpdateItem);
 		ige.network.define('updateProjectile', this._onUpdateProjectile);
+
+		ige.network.define('renderSocketLogs', this._onRenderSocketLogs);
 	},
 
 	login: function() {

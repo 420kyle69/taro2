@@ -311,6 +311,8 @@ var IgeNetIoServer = {
 		var commandIndex = this._networkCommandsLookup[commandName];
 		var ciEncoded;
 
+		// console.log(commandIndex, ciEncoded, commandName, data, clientId);
+
 		if (commandIndex !== undefined) {
 			ciEncoded = String.fromCharCode(commandIndex);
 			// console.log("igeNetIoServer send(): ",commandName, ciEncoded, data, clientId)
@@ -685,6 +687,15 @@ var IgeNetIoServer = {
    */
 	_onClientMessage: function (data, clientId) {
 		var self = this;
+
+		if (this.socket(clientId)?.markedForTracking && ige.clusterClient) {
+			var ciDecoded = data[0].charCodeAt(0);
+			var commandName = this._networkCommandsIndex[ciDecoded];
+			let decoded = _.clone(data);
+			decoded[0] = commandName;
+
+			ige.clusterClient.socketMessages[clientId] += JSON.stringify(decoded);
+		}
 		
 		var socket = ige.network._socketById[clientId];
 		// check if the clientId belongs to this socket connection.

@@ -460,7 +460,6 @@ var IgeNetIoClient = {
 	_onMessageFromServer: function (data) {
 		var ciDecoded = data[0].charCodeAt(0);
 		var commandName = this._networkCommandsIndex[ciDecoded];
-		// console.log("name = " + commandName, data);
 
 		if (commandName === '_snapshot') {
 			var snapshot = _.cloneDeep(data)[1];
@@ -483,7 +482,8 @@ var IgeNetIoClient = {
 						entityData = [
 							parseInt(entityData[0], 16), // x
 							parseInt(entityData[1], 16), // y
-							parseInt(entityData[2], 16) / 1000 // rotation
+							parseInt(entityData[2], 16) / 1000, // rotation
+							Boolean(parseInt(entityData[3], 16)) // teleported boolean
 						];
 
 						obj[entityId] = entityData;
@@ -491,10 +491,13 @@ var IgeNetIoClient = {
 						// update each entities' final position, so player knows where everything are when returning from a different browser tab
 						// we are not executing this in igeEngine or igeEntity, becuase they don't execute when browser tab is inactive
 						var entity = ige.$(entityId);
+						if (entityData[3]) {
+							entity.teleportTo(entityData[0], entityData[1], entityData[2]);
+						}
 
 						// if csp movement is enabled, don't use server-streamed position for my unit
 						// instead, we'll use position updated by physics engine
-						if (ige.game.cspEnabled && entity && 
+						else if (ige.game.cspEnabled && entity && 
 							entity.finalKeyFrame[0] < newSnapshotTimestamp && 
 							entity != ige.client.selectedUnit
 						) {
