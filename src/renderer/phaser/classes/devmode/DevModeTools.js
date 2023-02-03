@@ -111,6 +111,7 @@ var DevModeTools = /** @class */ (function (_super) {
         var _this = this;
         var gameScene = this.scene.gameScene;
         var keyboard = this.scene.input.keyboard;
+        var altKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ALT, false);
         var shiftKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT, false);
         var tabKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, true);
         tabKey.on('down', function () {
@@ -171,7 +172,7 @@ var DevModeTools = /** @class */ (function (_super) {
         });
         var oneKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE, false);
         oneKey.on('down', function () {
-            if (ige.developerMode.active && ige.developerMode.activeTab === 'map') {
+            if (ige.developerMode.active && ige.developerMode.activeTab === 'map' && !altKey.isDown) {
                 if (shiftKey.isDown) {
                     _this.hideLayer(0);
                 }
@@ -182,7 +183,7 @@ var DevModeTools = /** @class */ (function (_super) {
         });
         var twoKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO, false);
         twoKey.on('down', function () {
-            if (ige.developerMode.active && ige.developerMode.activeTab === 'map') {
+            if (ige.developerMode.active && ige.developerMode.activeTab === 'map' && !altKey.isDown) {
                 if (shiftKey.isDown) {
                     _this.hideLayer(1);
                 }
@@ -193,7 +194,7 @@ var DevModeTools = /** @class */ (function (_super) {
         });
         var threeKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE, false);
         threeKey.on('down', function () {
-            if (ige.developerMode.active && ige.developerMode.activeTab === 'map') {
+            if (ige.developerMode.active && ige.developerMode.activeTab === 'map' && !altKey.isDown) {
                 if (shiftKey.isDown) {
                     _this.hideLayer(2);
                 }
@@ -204,7 +205,7 @@ var DevModeTools = /** @class */ (function (_super) {
         });
         var fourKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.FOUR, false);
         fourKey.on('down', function () {
-            if (ige.developerMode.active && ige.developerMode.activeTab === 'map') {
+            if (ige.developerMode.active && ige.developerMode.activeTab === 'map' && !altKey.isDown) {
                 if (shiftKey.isDown) {
                     _this.hideLayer(3);
                 }

@@ -141,6 +141,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	keyBindings(): void {
 		const gameScene = this.scene.gameScene;
 		const keyboard = this.scene.input.keyboard;
+		const altKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ALT, false);
 		const shiftKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT, false);
 		const tabKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, true);
 		tabKey.on('down', () => {
@@ -201,7 +202,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		});
 		const oneKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE, false);
 		oneKey.on('down', () => {
-			if(ige.developerMode.active && ige.developerMode.activeTab === 'map') {
+			if(ige.developerMode.active && ige.developerMode.activeTab === 'map' && !altKey.isDown) {
 				if (shiftKey.isDown) {
         		    this.hideLayer(0);
         		} else {
@@ -211,7 +212,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		});
 		const twoKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO, false);
 		twoKey.on('down', () => {
-			if(ige.developerMode.active && ige.developerMode.activeTab === 'map') {
+			if(ige.developerMode.active && ige.developerMode.activeTab === 'map' && !altKey.isDown) {
 				if (shiftKey.isDown) {
         		    this.hideLayer(1);
         		} else {
@@ -221,7 +222,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		});
 		const threeKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE, false);
 		threeKey.on('down', () => {
-			if(ige.developerMode.active && ige.developerMode.activeTab === 'map') {
+			if(ige.developerMode.active && ige.developerMode.activeTab === 'map' && !altKey.isDown) {
 				if (shiftKey.isDown) {
         		    this.hideLayer(2);
         		} else {
@@ -231,7 +232,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		});
 		const fourKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.FOUR, false);
 		fourKey.on('down', () => {
-			if(ige.developerMode.active && ige.developerMode.activeTab === 'map') {
+			if(ige.developerMode.active && ige.developerMode.activeTab === 'map' && !altKey.isDown) {
 				if (shiftKey.isDown) {
         		    this.hideLayer(3);
         		} else {
