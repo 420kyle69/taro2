@@ -171,17 +171,20 @@ var Player = IgeEntity.extend({
 	// 3. update attribute bars
 	selectUnit: function (unitId) {
 		var self = this;
-		self._stats.selectedUnitId = unitId;
+		
+		var unit = ige.$(unitId);
 
-		if (ige.isServer && self._stats.clientId) {
+		if (ige.isServer && self._stats.clientId && unit.getOwner() == this) {
+
+			self._stats.selectedUnitId = unitId;
 			ige.network.send('makePlayerSelectUnit', { unitId: unitId }, self._stats.clientId);
 		}
 
-		if (ige.isClient) {
-			var unit = ige.$(unitId);
-
+		if (ige.isClient && unit.getOwner() == this) {
+			
 			if (self._stats.clientId == ige.network.id() && unit && unit._category == 'unit') {
-
+				self._stats.selectedUnitId = unitId;
+			
 				if (unit.inventory) {
 					unit.inventory.createInventorySlots();
 				}
