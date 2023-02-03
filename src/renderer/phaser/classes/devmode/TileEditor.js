@@ -39,7 +39,8 @@ var TileEditor = /** @class */ (function () {
                 var palettePoint = devModeScene.cameras.getCamera('palette').getWorldPoint(devModeScene.input.activePointer.x, devModeScene.input.activePointer.y);
                 var palettePointerTileX = palette.map.worldToTileX(palettePoint.x);
                 var palettePointerTileY = palette.map.worldToTileY(palettePoint.y);
-                _this.devModeTools.brush();
+                if (!devModeTools.modeButtons[4].active)
+                    _this.devModeTools.brush();
                 if (_this.area.x > 1 || _this.area.y > 1) {
                     for (var i = 0; i < _this.area.x; i++) {
                         for (var j = 0; j < _this.area.y; j++) {
@@ -138,6 +139,25 @@ var TileEditor = /** @class */ (function () {
             return selectedTile;
         }
     };
+    TileEditor.prototype.floodFill = function (oldTile, newTile, x, y) {
+        var map = this.gameScene.tilemap;
+        if (oldTile === newTile || this.getTile(x, y, this.selectedTile, map).index !== oldTile) {
+            return;
+        }
+        this.putTile(x, y, this.selectedTile);
+        if (x > 0) {
+            this.floodFill(oldTile, newTile, x - 1, y);
+        }
+        if (x < (map.width - 1)) {
+            this.floodFill(oldTile, newTile, x + 1, y);
+        }
+        if (y > 0) {
+            this.floodFill(oldTile, newTile, x, y - 1);
+        }
+        if (y < (map.height - 1)) {
+            this.floodFill(oldTile, newTile, x, y + 1);
+        }
+    };
     TileEditor.prototype.update = function () {
         if (ige.developerMode.active && ige.developerMode.activeTab === 'map') {
             var devModeScene = this.devModeTools.scene;
@@ -176,15 +196,23 @@ var TileEditor = /** @class */ (function () {
                 marker.preview.x = map.tileToWorldX(pointerTileX);
                 marker.preview.y = map.tileToWorldY(pointerTileY);
                 if (devModeScene.input.manager.activePointer.leftButtonDown()) {
-                    if (this.area.x > 1 || this.area.y > 1) {
-                        for (var i = 0; i < this.area.x; i++) {
-                            for (var j = 0; j < this.area.y; j++) {
-                                this.putTile(pointerTileX + i, pointerTileY + j, this.selectedTileArea[i][j]);
+                    if (this.devModeTools.modeButtons[2].active || this.devModeTools.modeButtons[3].active) {
+                        if (this.area.x > 1 || this.area.y > 1) {
+                            for (var i = 0; i < this.area.x; i++) {
+                                for (var j = 0; j < this.area.y; j++) {
+                                    this.putTile(pointerTileX + i, pointerTileY + j, this.selectedTileArea[i][j]);
+                                }
                             }
                         }
+                        else {
+                            this.putTile(pointerTileX, pointerTileY, this.selectedTile);
+                        }
                     }
-                    else {
-                        this.putTile(pointerTileX, pointerTileY, this.selectedTile);
+                    else if (this.devModeTools.modeButtons[4].active) {
+                        var targetTile = this.getTile(pointerTileX, pointerTileY, this.selectedTile, map);
+                        if (targetTile && this.selectedTile && targetTile.index !== this.selectedTile.index) {
+                            this.floodFill(targetTile.index, this.selectedTile.index, pointerTileX, pointerTileY);
+                        }
                     }
                 }
             }

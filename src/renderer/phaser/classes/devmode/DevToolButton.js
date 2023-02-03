@@ -1,5 +1,5 @@
 var DevToolButton = /** @class */ (function () {
-    function DevToolButton(devModeTools, text, texture, x, y, w, container, func, value) {
+    function DevToolButton(devModeTools, text, tooltipLabel, tooltipText, texture, x, y, w, container, func, value) {
         this.devModeTools = devModeTools;
         //const text = '+';
         //const w = 30;
@@ -34,6 +34,12 @@ var DevToolButton = /** @class */ (function () {
                 func(value);
             else
                 func();
+        });
+        button.on('pointerover', function () {
+            devModeTools.tooltip.showMessage(tooltipLabel, tooltipText);
+        });
+        button.on('pointerout', function () {
+            devModeTools.tooltip.fadeOut();
         });
     }
     DevToolButton.prototype.highlight = function (mode) {
