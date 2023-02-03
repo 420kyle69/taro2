@@ -17,8 +17,6 @@ var DevTooltip = /** @class */ (function (_super) {
     __extends(DevTooltip, _super);
     function DevTooltip(scene) {
         var _this = _super.call(this, scene) || this;
-        _this.x = _this.scene.sys.game.canvas.width - 100;
-        _this.y = 70;
         _this.visible = false;
         _this.setScrollFactor(0);
         var bubble = _this.bubble = scene.add.graphics();
@@ -49,6 +47,8 @@ var DevTooltip = /** @class */ (function (_super) {
         bubble.clear();
         bubble.fillStyle(0xffffff, 1);
         bubble.fillRect(-width / 2, -height / 2, width, height);
+        this.x = this.scene.sys.game.canvas.width - width / 2 - 20;
+        this.y = 70;
     };
     DevTooltip.prototype.showMessage = function (labelText, tooltipText) {
         // reset fade timer and tween
@@ -66,8 +66,6 @@ var DevTooltip = /** @class */ (function (_super) {
         label.setText(BitmapFontManager.sanitize(label.fontData, labelText));
         var text = this.bitmapText;
         text.setText(BitmapFontManager.sanitize(text.fontData, tooltipText));
-        this.x = this.scene.sys.game.canvas.width - text.width / 2 - 50;
-        this.y = 70;
         this.drawBubble();
     };
     DevTooltip.prototype.fadeOut = function () {

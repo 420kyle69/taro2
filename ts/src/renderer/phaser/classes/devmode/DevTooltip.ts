@@ -9,8 +9,6 @@ class DevTooltip extends Phaser.GameObjects.Container {
 	constructor (scene: Phaser.Scene) {
 		super(scene)
 
-		this.x = this.scene.sys.game.canvas.width - 100;
-		this.y = 70;
 		this.visible = false;
 		this.setScrollFactor(0);
 
@@ -57,6 +55,9 @@ class DevTooltip extends Phaser.GameObjects.Container {
 			width,
 			height
 		);
+
+		this.x = this.scene.sys.game.canvas.width - width/2 - 20;
+		this.y = 70;
 	}
 
 	showMessage(labelText: string, tooltipText: string): void {
@@ -81,8 +82,6 @@ class DevTooltip extends Phaser.GameObjects.Container {
 		text.setText(BitmapFontManager.sanitize(
 			text.fontData, tooltipText
 		));
-		this.x = this.scene.sys.game.canvas.width - text.width/2 - 50;
-		this.y = 70;
 
 		this.drawBubble();
 	}

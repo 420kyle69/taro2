@@ -49,7 +49,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 
 		const layerButtonsContainer = this.layerButtonsContainer = new Phaser.GameObjects.Container(scene);
 		layerButtonsContainer.width = 120;
-		layerButtonsContainer.height = 238;
+		layerButtonsContainer.height = 204;
 		layerButtonsContainer.x = palette.camera.x + palette.paletteWidth - 98;
 		layerButtonsContainer.y = palette.camera.y - 204;
 		scene.add.existing(layerButtonsContainer);
@@ -77,24 +77,24 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		toolButtonsContainer.x = palette.camera.x + palette.paletteWidth - 98;
 		toolButtonsContainer.y = palette.camera.y - layerButtonsContainer.height - 204;
 		toolButtonsContainer.width = 120;
-		toolButtonsContainer.height = 136;
+		toolButtonsContainer.height = 170;
 		scene.add.existing(toolButtonsContainer);
 
 		this.modeButtons = [];
 		this.modeButtons.push (
-			new DevToolButton (this, '', 'Cursor Tool (C)', 'interact with regions and entities', 'cursor', 0, 0, 58, toolButtonsContainer, this.cursor.bind(this)),
-			new DevToolButton (this, '', 'Region Tool (R)', 'draw new region', 'region', 62, 0, 58, toolButtonsContainer, this.drawRegion.bind(this)),
-			new DevToolButton (this, '', 'Stamp Brush (B)', 'LMB: place selected tiles. RMB: copy tiles', 'stamp', 0, 34, 58, toolButtonsContainer, this.brush.bind(this)),
-			new DevToolButton (this, '', 'Eraser (E)', 'delete tiles from selected layer', 'eraser', 62, 34, 58, toolButtonsContainer, this.emptyTile.bind(this)),
-			new DevToolButton (this, '', 'Bucket Fill (F)', 'fill an area with the selected tile', 'fill', 0, 68, 58, toolButtonsContainer, this.floodFill.bind(this))
+			new DevToolButton (this, '', 'Cursor Tool (C)', 'interact with regions and entities', 'cursor', 0, 0, 56, toolButtonsContainer, this.cursor.bind(this)),
+			new DevToolButton (this, '', 'Region Tool (R)', 'draw new region', 'region', 60, 0, 56, toolButtonsContainer, this.drawRegion.bind(this)),
+			new DevToolButton (this, '', 'Stamp Brush (B)', 'LMB: place selected tiles. RMB: copy tiles', 'stamp', 0, 34, 56, toolButtonsContainer, this.brush.bind(this)),
+			new DevToolButton (this, '', 'Eraser (E)', 'delete tiles from selected layer', 'eraser', 60, 34, 56, toolButtonsContainer, this.emptyTile.bind(this)),
+			new DevToolButton (this, '', 'Bucket Fill (F)', 'fill an area with the selected tile', 'fill', 0, 68, 56, toolButtonsContainer, this.fill.bind(this))
 		)
 		this.cursorButton = this.modeButtons[0];
 		this.highlightModeButton(0);
 
 		this.brushButtons = [];
 		this.brushButtons.push (
-			new DevToolButton (this, '1x1', '1x1', 'changes the brush size to 1x1', null, 0, 136, 58, toolButtonsContainer, this.selectSingle.bind(this)),
-			new DevToolButton (this, '2x2', '2x2', 'changes the brush size to 2x2', null, 62, 136, 58, toolButtonsContainer, this.selectArea.bind(this))
+			new DevToolButton (this, '1x1', '1x1', 'changes the brush size to 1x1', null, 0, 136, 56, toolButtonsContainer, this.selectSingle.bind(this)),
+			new DevToolButton (this, '2x2', '2x2', 'changes the brush size to 2x2', null, 60, 136, 56, toolButtonsContainer, this.selectArea.bind(this))
 		)
 		this.brushButtons[0].highlight('active');
 
@@ -121,8 +121,6 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	enterMapTab(): void {
 		this.layerButtonsContainer.setVisible(true);
 		this.toolButtonsContainer.setVisible(true);
-		this.highlightModeButton(0);
-		this.tileEditor.activateMarkers(false);
 		this.palette.show();
 		this.regionEditor.showRegions();
 	}
@@ -198,7 +196,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		const fKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F, false);
 		fKey.on('down', () => {
 			if(ige.developerMode.active && ige.developerMode.activeTab === 'map') {
-				this.floodFill();
+				this.fill();
 			}
 		});
 		const oneKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE, false);
@@ -281,8 +279,15 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		}
 	}
 
-	floodFill(): void {
-		console.log('flood fill button');
+	fill(): void {
+		if (this.modeButtons[3].active) {
+			this.tileEditor.selectedTile = this.tileEditor.lastSelectedTile;
+			this.tileEditor.selectedTileArea = this.tileEditor.lastSelectedTileArea;
+		}
+		this.tileEditor.activateMarkers(true);
+		this.tileEditor.marker.changePreview();
+		this.scene.regionEditor.regionTool = false;
+		this.selectSingle();
 		this.highlightModeButton(4);
 	}
 

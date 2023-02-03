@@ -48,7 +48,7 @@ var DevModeTools = /** @class */ (function (_super) {
         new DevToolButton(_this, '-', '-', 'Zoom out (-)', null, 34, -34, 30, palette.scrollBarContainer, palette.zoom.bind(palette), 1);
         var layerButtonsContainer = _this.layerButtonsContainer = new Phaser.GameObjects.Container(scene);
         layerButtonsContainer.width = 120;
-        layerButtonsContainer.height = 238;
+        layerButtonsContainer.height = 204;
         layerButtonsContainer.x = palette.camera.x + palette.paletteWidth - 98;
         layerButtonsContainer.y = palette.camera.y - 204;
         scene.add.existing(layerButtonsContainer);
@@ -63,14 +63,14 @@ var DevModeTools = /** @class */ (function (_super) {
         toolButtonsContainer.x = palette.camera.x + palette.paletteWidth - 98;
         toolButtonsContainer.y = palette.camera.y - layerButtonsContainer.height - 204;
         toolButtonsContainer.width = 120;
-        toolButtonsContainer.height = 136;
+        toolButtonsContainer.height = 170;
         scene.add.existing(toolButtonsContainer);
         _this.modeButtons = [];
-        _this.modeButtons.push(new DevToolButton(_this, '', 'Cursor Tool (C)', 'interact with regions and entities', 'cursor', 0, 0, 58, toolButtonsContainer, _this.cursor.bind(_this)), new DevToolButton(_this, '', 'Region Tool (R)', 'draw new region', 'region', 62, 0, 58, toolButtonsContainer, _this.drawRegion.bind(_this)), new DevToolButton(_this, '', 'Stamp Brush (B)', 'LMB: place selected tiles. RMB: copy tiles', 'stamp', 0, 34, 58, toolButtonsContainer, _this.brush.bind(_this)), new DevToolButton(_this, '', 'Eraser (E)', 'delete tiles from selected layer', 'eraser', 62, 34, 58, toolButtonsContainer, _this.emptyTile.bind(_this)), new DevToolButton(_this, '', 'Bucket Fill (F)', 'fill an area with the selected tile', 'fill', 0, 68, 58, toolButtonsContainer, _this.floodFill.bind(_this)));
+        _this.modeButtons.push(new DevToolButton(_this, '', 'Cursor Tool (C)', 'interact with regions and entities', 'cursor', 0, 0, 56, toolButtonsContainer, _this.cursor.bind(_this)), new DevToolButton(_this, '', 'Region Tool (R)', 'draw new region', 'region', 60, 0, 56, toolButtonsContainer, _this.drawRegion.bind(_this)), new DevToolButton(_this, '', 'Stamp Brush (B)', 'LMB: place selected tiles. RMB: copy tiles', 'stamp', 0, 34, 56, toolButtonsContainer, _this.brush.bind(_this)), new DevToolButton(_this, '', 'Eraser (E)', 'delete tiles from selected layer', 'eraser', 60, 34, 56, toolButtonsContainer, _this.emptyTile.bind(_this)), new DevToolButton(_this, '', 'Bucket Fill (F)', 'fill an area with the selected tile', 'fill', 0, 68, 56, toolButtonsContainer, _this.fill.bind(_this)));
         _this.cursorButton = _this.modeButtons[0];
         _this.highlightModeButton(0);
         _this.brushButtons = [];
-        _this.brushButtons.push(new DevToolButton(_this, '1x1', '1x1', 'changes the brush size to 1x1', null, 0, 136, 58, toolButtonsContainer, _this.selectSingle.bind(_this)), new DevToolButton(_this, '2x2', '2x2', 'changes the brush size to 2x2', null, 62, 136, 58, toolButtonsContainer, _this.selectArea.bind(_this)));
+        _this.brushButtons.push(new DevToolButton(_this, '1x1', '1x1', 'changes the brush size to 1x1', null, 0, 136, 56, toolButtonsContainer, _this.selectSingle.bind(_this)), new DevToolButton(_this, '2x2', '2x2', 'changes the brush size to 2x2', null, 60, 136, 56, toolButtonsContainer, _this.selectArea.bind(_this)));
         _this.brushButtons[0].highlight('active');
         _this.tooltip = new DevTooltip(_this.scene);
         _this.palette.hide();
@@ -93,8 +93,6 @@ var DevModeTools = /** @class */ (function (_super) {
     DevModeTools.prototype.enterMapTab = function () {
         this.layerButtonsContainer.setVisible(true);
         this.toolButtonsContainer.setVisible(true);
-        this.highlightModeButton(0);
-        this.tileEditor.activateMarkers(false);
         this.palette.show();
         this.regionEditor.showRegions();
     };
@@ -168,7 +166,7 @@ var DevModeTools = /** @class */ (function (_super) {
         var fKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F, false);
         fKey.on('down', function () {
             if (ige.developerMode.active && ige.developerMode.activeTab === 'map') {
-                _this.floodFill();
+                _this.fill();
             }
         });
         var oneKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE, false);
@@ -250,8 +248,15 @@ var DevModeTools = /** @class */ (function (_super) {
             this.highlightModeButton(3);
         }
     };
-    DevModeTools.prototype.floodFill = function () {
-        console.log('flood fill button');
+    DevModeTools.prototype.fill = function () {
+        if (this.modeButtons[3].active) {
+            this.tileEditor.selectedTile = this.tileEditor.lastSelectedTile;
+            this.tileEditor.selectedTileArea = this.tileEditor.lastSelectedTileArea;
+        }
+        this.tileEditor.activateMarkers(true);
+        this.tileEditor.marker.changePreview();
+        this.scene.regionEditor.regionTool = false;
+        this.selectSingle();
         this.highlightModeButton(4);
     };
     DevModeTools.prototype.highlightModeButton = function (n) {
