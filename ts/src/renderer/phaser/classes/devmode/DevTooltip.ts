@@ -1,5 +1,6 @@
 class DevTooltip extends Phaser.GameObjects.Container {
 	private readonly bubble: Phaser.GameObjects.Graphics;
+	private readonly bitmapLabel: Phaser.GameObjects.BitmapText;
 	private readonly bitmapText: Phaser.GameObjects.BitmapText;
 
 	private fadeTimerEvent: Phaser.Time.TimerEvent;
@@ -16,25 +17,37 @@ class DevTooltip extends Phaser.GameObjects.Container {
 		const bubble = this.bubble = scene.add.graphics();
 		this.add(bubble);
 
-		const text = this.bitmapText = scene.add.bitmapText(
+		const label = this.bitmapLabel = scene.add.bitmapText(
 			0, 0,
 			BitmapFontManager.font(scene, 'Verdana', true, false, '#000000')
 		);
+		label.setFontSize(14);
+		label.setCenterAlign();
+		label.setOrigin(0.5);
+		label.letterSpacing = -0.6;
+		label.y = -10
 
+		const text = this.bitmapText = scene.add.bitmapText(
+			0, 0,
+			BitmapFontManager.font(scene, 'Verdana', false, false, '#000000')
+		);
 		text.setFontSize(14);
 		text.setCenterAlign();
 		text.setOrigin(0.5);
 		text.letterSpacing = -0.6;
+		text.y = 10;
 
+		this.add(label);
 		this.add(text);
 		scene.add.existing(this);
 	}
 
 	private drawBubble (): void {
 		const bubble = this.bubble;
-		const text = /*this.rtText ||*/ this.bitmapText;
-		const width = text.width + 30;
-		const height = text.height + 30;
+		const label = this.bitmapLabel;
+		const text = this.bitmapText;
+		const width = (text.width > label.width ? text.width : label.width) + 30;
+		const height = text.height + 50;
 
 		bubble.clear();
 		bubble.fillStyle(0xffffff, 1);
@@ -46,7 +59,7 @@ class DevTooltip extends Phaser.GameObjects.Container {
 		);
 	}
 
-	showMessage(tooltipText: string): void {
+	showMessage(labelText: string, tooltipText: string): void {
 		// reset fade timer and tween
 		if (this.fadeTimerEvent) {
 			this.scene.time.removeEvent(this.fadeTimerEvent);
@@ -60,11 +73,14 @@ class DevTooltip extends Phaser.GameObjects.Container {
 		this.visible = true;
 		this.alpha = 1;
 
+		const label = this.bitmapLabel;
+		label.setText(BitmapFontManager.sanitize(
+			label.fontData, labelText
+		));
 		const text = this.bitmapText;
 		text.setText(BitmapFontManager.sanitize(
 			text.fontData, tooltipText
 		));
-
 		this.x = this.scene.sys.game.canvas.width - text.width/2 - 50;
 		this.y = 70;
 
@@ -73,7 +89,6 @@ class DevTooltip extends Phaser.GameObjects.Container {
 
 	fadeOut(): void {
 		const scene = this.scene;
-
 		this.fadeTimerEvent = scene.time.delayedCall(500, () => {
 			this.fadeTimerEvent = null;
 			this.fadeTween = scene.tweens.add({

@@ -1,5 +1,5 @@
 var DevToolButton = /** @class */ (function () {
-    function DevToolButton(devModeTools, text, tooltipText, texture, x, y, w, container, func, value) {
+    function DevToolButton(devModeTools, text, tooltipLabel, tooltipText, texture, x, y, w, container, func, value) {
         this.devModeTools = devModeTools;
         //const text = '+';
         //const w = 30;
@@ -36,11 +36,9 @@ var DevToolButton = /** @class */ (function () {
                 func();
         });
         button.on('pointerover', function () {
-            console.log('pointer over start');
-            devModeTools.tooltip.showMessage(tooltipText);
+            devModeTools.tooltip.showMessage(tooltipLabel, tooltipText);
         });
         button.on('pointerout', function () {
-            console.log('pointer over end');
             devModeTools.tooltip.fadeOut();
         });
     }
