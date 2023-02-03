@@ -180,7 +180,7 @@ var Player = IgeEntity.extend({
 			ige.network.send('makePlayerSelectUnit', { unitId: unitId }, self._stats.clientId);
 		}
 
-		if (ige.isClient && unit.getOwner() == this) {
+		if (ige.isClient) {
 			
 			if (self._stats.clientId == ige.network.id() && unit && unit._category == 'unit') {
 				self._stats.selectedUnitId = unitId;
