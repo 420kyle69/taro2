@@ -176,7 +176,7 @@ var Player = IgeEntity.extend({
 
 		if (ige.isServer && self._stats.clientId) {
 			
-			if (unit && unit.getOwner() != this) {
+			if (unit && unit._category == 'unit' && unit.getOwner() != this) {
 				// someone's attempting exploit by trying to assign a unit to a player that's not the unit's owner				
 				var client = ige.server.clients[self._stats.clientId];				
 				var logData = {
