@@ -50,6 +50,7 @@ global.mixpanel = {
 	},
 };
 
+console.log("process.env.ENV = ", process.env.ENV)
 if (process.env.ENV == 'production') {
 	var Rollbar = require('rollbar');
 	global.rollbar = new Rollbar({
