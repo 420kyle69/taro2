@@ -173,10 +173,11 @@ var Player = IgeEntity.extend({
 		var self = this;
 		
 		var unit = ige.$(unitId);
-
-		if (ige.isServer && self._stats.clientId) {
-			
-			if (unit && unit._category == 'unit' && unit.getOwner() != this) {
+		if (ige.isServer && self._stats.clientId) {			
+			if (unit && unit._category == 'unit' && unit.getOwner() == this) {
+				self._stats.selectedUnitId = unitId;
+				ige.network.send('makePlayerSelectUnit', { unitId: unitId }, self._stats.clientId);
+			} else {
 				// someone's attempting exploit by trying to assign a unit to a player that's not the unit's owner				
 				var client = ige.server.clients[self._stats.clientId];				
 				var logData = {
@@ -187,10 +188,7 @@ var Player = IgeEntity.extend({
 					userId: client.userId
 				};
 				global.rollbar.log("selectUnit exploit", logData);
-			}
-
-			self._stats.selectedUnitId = unitId;
-			ige.network.send('makePlayerSelectUnit', { unitId: unitId }, self._stats.clientId);
+			}			
 		}
 
 		if (ige.isClient) {
