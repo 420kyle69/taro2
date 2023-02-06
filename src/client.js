@@ -491,7 +491,8 @@ const Client = IgeEventingClass.extend({
 				owner: $(serverOption).attr('owner'),
 				url: $(serverOption).attr('data-url'),
 				gameId: gameId,
-				id: $(serverOption).attr('value')
+				id: $(serverOption).attr('value'),
+				name: $(serverOption).attr('data-name')
 			};
 
 			serversList.push(server);
@@ -557,10 +558,9 @@ const Client = IgeEventingClass.extend({
 
 				if (serverIP) {
 
-					const serverName = serverIP.split('.')[0];
+					const serverName = ige.client.server.name || serverIP.split('.')[0];
 
 					if (serverName) {
-
 						$('#server-text').text(`to ${serverName}`);
 					}
 				}
