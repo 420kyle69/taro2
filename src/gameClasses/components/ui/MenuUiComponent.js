@@ -489,7 +489,7 @@ var MenuUiComponent = IgeEntity.extend({
 							if (server) {
 								var serverIP = server.ip.slice(0, server.ip.indexOf('.'));
 								var separated = separate(serverIP);
-								var optionText = `${separated.alphabets} ${separated.numbers}`;
+								var optionText = ige.client.server.name || `${separated.alphabets} ${separated.numbers}`;
 								var acceptingPlayers = server.acceptingPlayers ? '' : ' not accepting players';
 								serversList += `${'<option ' +
 									' class="game-server"' +
