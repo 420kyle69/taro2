@@ -82,13 +82,14 @@ class PhaserAttributeBar extends Phaser.GameObjects.Container {
 	render (data: AttributeData): void {
 		const {
 			color,
-			value = Number(data.value),
 			max,
 			displayValue,
 			index,
 			showWhen,
 			decimalPlaces
 		} = data;
+
+		const value = Number(data.value);
 
 		this.name = data.type || data.key;
 
