@@ -24,6 +24,7 @@ class GameScene extends PhaserScene {
 		}
 
 		const camera = this.cameras.main;
+		camera.setBackgroundColor(ige.game.data.defaultData.mapBackgroundColor);
 
 		this.scale.on(Phaser.Scale.Events.RESIZE, () => {
 			if (this.zoomSize) {

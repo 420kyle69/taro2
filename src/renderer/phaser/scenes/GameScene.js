@@ -28,6 +28,7 @@ var GameScene = /** @class */ (function (_super) {
             this.scene.launch('MobileControls');
         }
         var camera = this.cameras.main;
+        camera.setBackgroundColor(ige.game.data.defaultData.mapBackgroundColor);
         this.scale.on(Phaser.Scale.Events.RESIZE, function () {
             if (_this.zoomSize) {
                 camera.zoom = _this.calculateZoom();
