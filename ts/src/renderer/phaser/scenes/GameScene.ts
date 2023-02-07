@@ -11,6 +11,7 @@ class GameScene extends PhaserScene {
 	public tilemap: Phaser.Tilemaps.Tilemap;
 	tileset: Phaser.Tilemaps.Tileset;
 	cameraTarget: Phaser.GameObjects.Container & IRenderProps;
+	filter: Phaser.Textures.FilterMode;
 
 	constructor() {
 		super({ key: 'Game' });
@@ -23,6 +24,7 @@ class GameScene extends PhaserScene {
 		}
 
 		const camera = this.cameras.main;
+		camera.setBackgroundColor(ige.game.data.defaultData.mapBackgroundColor);
 
 		this.scale.on(Phaser.Scale.Events.RESIZE, () => {
 			if (this.zoomSize) {
@@ -47,6 +49,10 @@ class GameScene extends PhaserScene {
 			);
 
 			ige.client.emit('scale', { ratio: ratio });
+		});
+
+		ige.client.on('change-filter', (data: {filter: renderingFilter}) => {
+			this.changeTextureFilter(data.filter);
 		});
 
 		ige.client.on('updateMap', () => {
@@ -130,6 +136,17 @@ class GameScene extends PhaserScene {
 					this.textures.remove(texture);
 					this.textures.addCanvas(`extruded-${key}`, canvas);
 				}
+				const extrudedTexture = this.textures.get(`extruded-${key}`);
+				Phaser.Textures.Parsers.SpriteSheet(
+					extrudedTexture,
+					0, 0, 0, extrudedTexture.source[0].width, extrudedTexture.source[0].height,
+					{
+						frameWidth: tileset.tilewidth,
+						frameHeight: tileset.tileheight,
+						margin: (tileset.margin || 0) + 2,
+						spacing: (tileset.spacing || 0) + 4
+					}
+				);
 			});
 			this.load.image(key, this.patchAssetUrl(tileset.image));
 		});
@@ -289,9 +306,19 @@ class GameScene extends PhaserScene {
 			this.heightRenderer = new HeightRenderComponent(this, map.height * map.tileHeight);
 		}
 
-		//temporary making each loaded texture not smoothed (later planned to add option for smoothing some of them)
+		//get filter from game data
+		this.changeTextureFilter(ige.game.data.defaultData.renderingFilter);
+	}
+
+	private changeTextureFilter (filter: renderingFilter) {
+		if (filter === 'pixelArt') {
+			this.filter = Phaser.Textures.FilterMode.NEAREST;
+		} else {
+			this.filter = Phaser.Textures.FilterMode.LINEAR;
+		}
+		//apply filter to each texture
 		Object.values(this.textures.list).forEach(val => {
-			val.setFilter(Phaser.Textures.FilterMode.NEAREST);
+			val.setFilter(this.filter);
 		});
 	}
 
@@ -517,6 +544,7 @@ class GameScene extends PhaserScene {
 			x: worldPoint.x,
 			y: worldPoint.y,
 		}]);
+		
 		this.renderedEntities.forEach(element => {
 			element.setVisible(false);
 		});
@@ -533,3 +561,5 @@ class GameScene extends PhaserScene {
 		});
 	}
 }
+
+type renderingFilter = 'pixelArt' | 'smooth';

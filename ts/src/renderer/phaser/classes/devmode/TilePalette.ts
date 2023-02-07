@@ -1,8 +1,5 @@
 class TilePalette extends Phaser.GameObjects.Container {
 
-	private readonly tileset: Phaser.Tilemaps.Tileset;
-
-	scene: DevModeScene;
 	texturesLayer: any;
 	map: Phaser.Tilemaps.Tilemap;
 	camera: Phaser.Cameras.Scene2D.Camera;
@@ -12,24 +9,22 @@ class TilePalette extends Phaser.GameObjects.Container {
 	scrollBarBottom: any;
 	scrollBarRight: any;
 
-	COLOR_DARK: number;
+	COLOR_WHITE: number;
 	COLOR_LIGHT: number;
 	COLOR_PRIMARY: number;
+	COLOR_GRAY: number;
 
 	paletteWidth: number;
 	paletteHeight: number;
 	
 	constructor(
-		scene: DevModeScene,
+		public scene: DevModeScene,
 		tileset: Phaser.Tilemaps.Tileset,
 		rexUI?: any
 	) {
 		super(scene);
 
-		console.log('create palette', this);
-		this.tileset = tileset;
 		this.rexUI = rexUI;
-		this.scene = scene;
 
 		// Load a map from a 2D array of tile indices
 		const paletteMap = [];
@@ -58,10 +53,10 @@ class TilePalette extends Phaser.GameObjects.Container {
 
 		camera.setBackgroundColor(0x000000);
 
-		texturesLayer.on('pointermove', function (p) {
+		texturesLayer.on('pointermove', (p) => {
 			const devModeScene = ige.renderer.scene.getScene('DevMode') as DevModeScene;
             devModeScene.regionEditor.cancelDrawRegion();
-			if (!p.isDown) return;
+			if (!p.isDown || scene.tileEditor.startDragIn !== 'palette') return;
 			const scrollX = (p.x - p.prevPosition.x) / camera.zoom
 			const scrollY = (p.y - p.prevPosition.y) / camera.zoom;
 			camera.scrollX -= scrollX;
@@ -85,7 +80,8 @@ class TilePalette extends Phaser.GameObjects.Container {
 
 		this.COLOR_PRIMARY = 0x0036cc;
 		this.COLOR_LIGHT = 0x6690ff;
-		this.COLOR_DARK = 0xffffff;
+		this.COLOR_WHITE = 0xffffff;
+		this.COLOR_GRAY = 0xbababa;
 
 		const scrollBarContainer = this.scrollBarContainer = new Phaser.GameObjects.Container(scene);
 		scene.add.existing(scrollBarContainer);
@@ -127,8 +123,14 @@ class TilePalette extends Phaser.GameObjects.Container {
 	}
 
 	toggle(): void {
-		if (this.visible) this.hide();
-		else this.show()
+		if (this.visible) {
+			this.scene.devModeTools.paletteButton.highlight('hidden');
+			this.hide();
+		} else {
+			this.scene.devModeTools.paletteButton.hidden = false;
+			this.scene.devModeTools.paletteButton.highlight('no');
+			this.show();
+		}
 	}
 
 	hide (): void {
@@ -185,7 +187,7 @@ class TilePalette extends Phaser.GameObjects.Container {
 		const scrollBar = this.rexUI.add.scrollBar({
 			[orientSize]: length,
 			orientation: orient,
-			background: this.rexUI.add.roundRectangle(0, 0, 0, 0, 0, this.COLOR_DARK),
+			background: this.rexUI.add.roundRectangle(0, 0, 0, 0, 0, this.COLOR_WHITE),
 			buttons: {
 				left: this.rexUI.add.roundRectangle(0, 0, 20, 20, 0, this.COLOR_PRIMARY),
 				right: this.rexUI.add.roundRectangle(0, 0, 20, 20, 0, this.COLOR_PRIMARY),

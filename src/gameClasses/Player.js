@@ -171,17 +171,31 @@ var Player = IgeEntity.extend({
 	// 3. update attribute bars
 	selectUnit: function (unitId) {
 		var self = this;
-		self._stats.selectedUnitId = unitId;
-
-		if (ige.isServer && self._stats.clientId) {
-			ige.network.send('makePlayerSelectUnit', { unitId: unitId }, self._stats.clientId);
+		
+		var unit = ige.$(unitId);
+		if (ige.isServer && self._stats.clientId) {			
+			if (unit && unit._category == 'unit' && unit.getOwner() == this) {
+				self._stats.selectedUnitId = unitId;
+				ige.network.send('makePlayerSelectUnit', { unitId: unitId }, self._stats.clientId);
+			} else {
+				// someone's attempting exploit by trying to assign a unit to a player that's not the unit's owner				
+				var client = ige.server.clients[self._stats.clientId];				
+				var logData = {
+					query: 'exploitSelectUnit',
+					gameTitle: ige.game.data.defaultData.title,
+					playerName: this._stats.name,
+					ip: client.ip,
+					userId: client.userId
+				};
+				global.rollbar.log("selectUnit exploit", logData);
+			}			
 		}
 
 		if (ige.isClient) {
-			var unit = ige.$(unitId);
-
+			
 			if (self._stats.clientId == ige.network.id() && unit && unit._category == 'unit') {
-
+				self._stats.selectedUnitId = unitId;
+			
 				if (unit.inventory) {
 					unit.inventory.createInventorySlots();
 				}
@@ -388,7 +402,6 @@ var Player = IgeEntity.extend({
 
 			ige.script.trigger('playerLeavesGame', { playerId: this.id() });
 			// session is in second
-			ige.clusterClient && ige.clusterClient.emit('log-session-duration', (Date.now() - this._stats.jointsOn) / 1000);
 			if (this.variables && this.variables.progression != undefined && this.variables.progression.value != undefined) {
 				ige.clusterClient && ige.clusterClient.emit('log-progression', this.variables.progression.value);
 			}
@@ -699,7 +712,12 @@ var Player = IgeEntity.extend({
 					// $('#game-suggestions-card').removeClass('d-xl-block');
 					// $("#invite-players-card").show();
 					// $('#toggle-dev-panels').show();
-					$('#toggle-dev-panels').click();
+					window.inGameEditor && window.inGameEditor.playerJoinedGame && window.inGameEditor.playerJoinedGame();
+					// for edge case handling
+					window.playerJoinedTheGame = true;
+					if(window.isStandalone) {
+						$('#toggle-dev-panels').click();
+					}
 				} else {
 					if (ige.game.data.isDeveloper) {
 						$('#toggle-dev-panels').show();

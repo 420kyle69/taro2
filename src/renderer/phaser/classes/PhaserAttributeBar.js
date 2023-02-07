@@ -69,7 +69,8 @@ var PhaserAttributeBar = /** @class */ (function (_super) {
         bar.setActive(false);
     };
     PhaserAttributeBar.prototype.render = function (data) {
-        var color = data.color, _a = data.value, value = _a === void 0 ? Number(data.value) : _a, max = data.max, displayValue = data.displayValue, index = data.index, showWhen = data.showWhen, decimalPlaces = data.decimalPlaces;
+        var color = data.color, max = data.max, displayValue = data.displayValue, index = data.index, showWhen = data.showWhen, decimalPlaces = data.decimalPlaces;
+        var value = Number(data.value);
         this.name = data.type || data.key;
         var bar = this.bar;
         var w = 94;

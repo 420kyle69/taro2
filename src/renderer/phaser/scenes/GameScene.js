@@ -28,6 +28,7 @@ var GameScene = /** @class */ (function (_super) {
             this.scene.launch('MobileControls');
         }
         var camera = this.cameras.main;
+        camera.setBackgroundColor(ige.game.data.defaultData.mapBackgroundColor);
         this.scale.on(Phaser.Scale.Events.RESIZE, function () {
             if (_this.zoomSize) {
                 camera.zoom = _this.calculateZoom();
@@ -42,6 +43,9 @@ var GameScene = /** @class */ (function (_super) {
             var ratio = _this.calculateZoom();
             camera.zoomTo(ratio, 1000, Phaser.Math.Easing.Quadratic.Out, true);
             ige.client.emit('scale', { ratio: ratio });
+        });
+        ige.client.on('change-filter', function (data) {
+            _this.changeTextureFilter(data.filter);
         });
         ige.client.on('updateMap', function () {
             _this.updateMap();
@@ -103,6 +107,13 @@ var GameScene = /** @class */ (function (_super) {
                     _this.textures.remove(texture);
                     _this.textures.addCanvas("extruded-".concat(key), canvas);
                 }
+                var extrudedTexture = _this.textures.get("extruded-".concat(key));
+                Phaser.Textures.Parsers.SpriteSheet(extrudedTexture, 0, 0, 0, extrudedTexture.source[0].width, extrudedTexture.source[0].height, {
+                    frameWidth: tileset.tilewidth,
+                    frameHeight: tileset.tileheight,
+                    margin: (tileset.margin || 0) + 2,
+                    spacing: (tileset.spacing || 0) + 4
+                });
             });
             _this.load.image(key, _this.patchAssetUrl(tileset.image));
         });
@@ -222,9 +233,20 @@ var GameScene = /** @class */ (function (_super) {
         if (data.defaultData.heightBasedZIndex) {
             this.heightRenderer = new HeightRenderComponent(this, map.height * map.tileHeight);
         }
-        //temporary making each loaded texture not smoothed (later planned to add option for smoothing some of them)
+        //get filter from game data
+        this.changeTextureFilter(ige.game.data.defaultData.renderingFilter);
+    };
+    GameScene.prototype.changeTextureFilter = function (filter) {
+        var _this = this;
+        if (filter === 'pixelArt') {
+            this.filter = Phaser.Textures.FilterMode.NEAREST;
+        }
+        else {
+            this.filter = Phaser.Textures.FilterMode.LINEAR;
+        }
+        //apply filter to each texture
         Object.values(this.textures.list).forEach(function (val) {
-            val.setFilter(Phaser.Textures.FilterMode.NEAREST);
+            val.setFilter(_this.filter);
         });
     };
     GameScene.prototype.setZoomSize = function (height) {

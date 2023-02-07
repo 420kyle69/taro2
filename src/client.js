@@ -491,7 +491,8 @@ const Client = IgeEventingClass.extend({
 				owner: $(serverOption).attr('owner'),
 				url: $(serverOption).attr('data-url'),
 				gameId: gameId,
-				id: $(serverOption).attr('value')
+				id: $(serverOption).attr('value'),
+				name: $(serverOption).attr('data-name')
 			};
 
 			serversList.push(server);
@@ -557,10 +558,9 @@ const Client = IgeEventingClass.extend({
 
 				if (serverIP) {
 
-					const serverName = serverIP.split('.')[0];
+					const serverName = ige.client.server.name || serverIP.split('.')[0];
 
 					if (serverName) {
-
 						$('#server-text').text(`to ${serverName}`);
 					}
 				}
@@ -713,8 +713,6 @@ const Client = IgeEventingClass.extend({
 		ige.network.define('showUnitNameLabelFromPlayer', this._onShowUnitNameLabelFromPlayer);
 
 		ige.network.define('updateAllEntities', this._onUpdateAllEntities);
-		ige.network.define('teleport', this._onTeleport);
-
 		ige.network.define('updateEntityAttribute', this._onUpdateEntityAttribute);
 
 		ige.network.define('updateUiText', this._onUpdateUiText);
@@ -755,6 +753,8 @@ const Client = IgeEventingClass.extend({
 		ige.network.define('updateUnit', this._onUpdateUnit);
 		ige.network.define('updateItem', this._onUpdateItem);
 		ige.network.define('updateProjectile', this._onUpdateProjectile);
+
+		ige.network.define('renderSocketLogs', this._onRenderSocketLogs);
 	},
 
 	login: function() {
@@ -787,7 +787,7 @@ const Client = IgeEventingClass.extend({
 	//
 	//i'm not going to change the join game function
 	//
-	joinGame: function() {
+	joinGame: function(wasGamePaused = false) {
 
 		let isAdBlockEnabled = true;
 		const data = {
@@ -864,8 +864,11 @@ const Client = IgeEventingClass.extend({
 		});
 
 		data.isAdBlockEnabled = !!isAdBlockEnabled;
-
-		ige.network.send('joinGame', data);
+		
+		// send joinGame command only if game was paused and menu was open.
+		if (wasGamePaused) {
+			ige.network.send('joinGame', data);
+		}
 
 		window.joinGameSent.start = Date.now();
 

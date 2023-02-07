@@ -17,10 +17,8 @@ var TilePalette = /** @class */ (function (_super) {
     __extends(TilePalette, _super);
     function TilePalette(scene, tileset, rexUI) {
         var _this = _super.call(this, scene) || this;
-        console.log('create palette', _this);
-        _this.tileset = tileset;
-        _this.rexUI = rexUI;
         _this.scene = scene;
+        _this.rexUI = rexUI;
         // Load a map from a 2D array of tile indices
         var paletteMap = [];
         for (var i = 0; i < tileset.rows; i++) {
@@ -45,7 +43,7 @@ var TilePalette = /** @class */ (function (_super) {
         texturesLayer.on('pointermove', function (p) {
             var devModeScene = ige.renderer.scene.getScene('DevMode');
             devModeScene.regionEditor.cancelDrawRegion();
-            if (!p.isDown)
+            if (!p.isDown || scene.tileEditor.startDragIn !== 'palette')
                 return;
             var scrollX = (p.x - p.prevPosition.x) / camera.zoom;
             var scrollY = (p.y - p.prevPosition.y) / camera.zoom;
@@ -70,7 +68,8 @@ var TilePalette = /** @class */ (function (_super) {
         });
         _this.COLOR_PRIMARY = 0x0036cc;
         _this.COLOR_LIGHT = 0x6690ff;
-        _this.COLOR_DARK = 0xffffff;
+        _this.COLOR_WHITE = 0xffffff;
+        _this.COLOR_GRAY = 0xbababa;
         var scrollBarContainer = _this.scrollBarContainer = new Phaser.GameObjects.Container(scene);
         scene.add.existing(scrollBarContainer);
         scrollBarContainer.x = camera.x;
@@ -108,10 +107,15 @@ var TilePalette = /** @class */ (function (_super) {
         return _this;
     }
     TilePalette.prototype.toggle = function () {
-        if (this.visible)
+        if (this.visible) {
+            this.scene.devModeTools.paletteButton.highlight('hidden');
             this.hide();
-        else
+        }
+        else {
+            this.scene.devModeTools.paletteButton.hidden = false;
+            this.scene.devModeTools.paletteButton.highlight('no');
             this.show();
+        }
     };
     TilePalette.prototype.hide = function () {
         this.setVisible(false);
@@ -166,7 +170,7 @@ var TilePalette = /** @class */ (function (_super) {
         var scrollBar = this.rexUI.add.scrollBar((_a = {},
             _a[orientSize] = length,
             _a.orientation = orient,
-            _a.background = this.rexUI.add.roundRectangle(0, 0, 0, 0, 0, this.COLOR_DARK),
+            _a.background = this.rexUI.add.roundRectangle(0, 0, 0, 0, 0, this.COLOR_WHITE),
             _a.buttons = {
                 left: this.rexUI.add.roundRectangle(0, 0, 20, 20, 0, this.COLOR_PRIMARY),
                 right: this.rexUI.add.roundRectangle(0, 0, 20, 20, 0, this.COLOR_PRIMARY),

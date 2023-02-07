@@ -46,6 +46,7 @@
         var gameId = '<%= gameId %>';
         var gameSlug = '<%= gameSlug %>';
         var userId = '';
+        var sessionId = '';
         var isLoggedIn = false;
         window.joinGameSent = {};
         //
@@ -79,13 +80,23 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
         let initEditor = false;
-
+        window.inGameEditor = {
+            // this object will be filled from in-game editor as per need
+        };
         function loadEditor() {
             if (initEditor) {
                 return;
             }
-
-            axios.get('https://prod2.modd.io/client')
+            // if ('<%= constants.editorUrl %>' === 'http://localhost:3001') {
+            //     const scriptEl = document.createElement('script');
+            //     scriptEl.src = `http://localhost:3001/bundle.js`;
+            //     scriptEl.id = 'editor-script';
+            //     document.body.appendChild(scriptEl);
+            //     initEditor = true;
+            //     return;
+            // }
+      
+            axios.get('https://prod2.modd.io/client/')
                 .then((res) => {
                     const { styles, scripts } = res.data;
 

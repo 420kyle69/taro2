@@ -100,6 +100,19 @@ var MobileControlsScene = /** @class */ (function (_super) {
             _this.scene.setVisible(value);
         });
         this.input.on('pointerdown', function (pointer) {
+            var emitPointerPosition = true;
+            Object.keys(ige.mobileControls.controls).forEach(function (control) {
+                if (control === 'lookWheel' || control === 'lookAndFireWheel')
+                    emitPointerPosition = false;
+            });
+            if (emitPointerPosition) {
+                var gameScene = ige.renderer.scene.getScene('Game');
+                var worldPoint = gameScene.cameras.main.getWorldPoint(gameScene.input.activePointer.x, gameScene.input.activePointer.y);
+                ige.input.emit('touchpointermove', [{
+                        x: worldPoint.x,
+                        y: worldPoint.y,
+                    }]);
+            }
             if (!this.disablePointerEvents) {
                 var touchX = pointer.x;
                 var touchY = pointer.y;
@@ -133,12 +146,20 @@ var MobileControlsScene = /** @class */ (function (_super) {
             if (!this.disablePointerEvents) {
                 var touchX = pointer.x;
                 if (touchX < this.cameras.main.displayWidth / 2.4) {
-                    var leftJoystick = this.joysticks[0];
-                    leftJoystick.hide();
+                    var leftJoystick = this.joysticks.find(function (_a) {
+                        var side = _a.side;
+                        return side === 'left';
+                    });
+                    if (leftJoystick)
+                        leftJoystick.hide();
                 }
                 else if (touchX > this.cameras.main.displayWidth - (this.cameras.main.displayWidth / 2.4)) {
-                    var rightJoystick = this.joysticks[1];
-                    rightJoystick.hide();
+                    var rightJoystick = this.joysticks.find(function (_a) {
+                        var side = _a.side;
+                        return side === 'right';
+                    });
+                    if (rightJoystick)
+                        rightJoystick.hide();
                 }
             }
         }, this);
@@ -162,6 +183,28 @@ var MobileControlsScene = /** @class */ (function (_super) {
         if (this.enablePointerNextUpdate) {
             this.enablePointerNextUpdate = false;
             this.disablePointerEvents = false;
+        }
+        //hide joysticks if no touching screen
+        var gameScene = ige.renderer.scene.getScene('Game');
+        var pointerDown = false;
+        for (var i = 1; i < 6; i++) {
+            var pointer = gameScene.input['pointer' + i.toString()];
+            if (pointer.primaryDown)
+                pointerDown = true;
+        }
+        if (!pointerDown) {
+            var leftJoystick = this.joysticks.find(function (_a) {
+                var side = _a.side;
+                return side === 'left';
+            });
+            if (leftJoystick)
+                leftJoystick.hide();
+            var rightJoystick = this.joysticks.find(function (_a) {
+                var side = _a.side;
+                return side === 'right';
+            });
+            if (rightJoystick)
+                rightJoystick.hide();
         }
     };
     MobileControlsScene.prototype.enterFullscreen = function () {

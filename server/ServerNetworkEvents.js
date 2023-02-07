@@ -97,7 +97,26 @@ var ServerNetworkEvents = {
 		var client = ige.server.clients[clientId];
 		var socket = ige.network._socketById[clientId];
 
-
+		if (!socket) {
+			try {
+				global.rollbar.log('No socket found with this clientId',
+					{
+						data: data,
+						clientId: clientId
+					});
+			} catch (error) {
+				console.log(error);
+			}
+			return;
+		}
+		
+		// check joining user is same as token user.
+		else if (socket._token.userId !== data._id || socket._token.sessionId !== data.sessionId) {
+			console.log('Unauthenticated user joining the game (ServerNetworkEvent.js)');
+			socket.close('Unauthenticated user joining the game');
+			return;
+		}
+		
 		if (process.env.ENV === 'standalone' || process.env.ENV == 'standalone-remote') {
 			delete data._id;
 		}
@@ -108,20 +127,13 @@ var ServerNetworkEvents = {
 			logInfo._id = data._id;
 		}
 
-		// check joining user is same as token user.
-		if (data._id && socket._token && socket._token.userId !== data._id) {
-			console.log('Unauthenticated user joining the game (ServerNetworkEvent.js)');
-			socket.close('Unauthenticated user joining the game');
-			return;
-		}
-
 		if (client) {
 			console.log('4. _onJoinGame ' + clientId + ' time elapsed: ' + (Date.now() - client.lastEventAt), '(ServerNetworkEvent.js)');
 			client.lastEventAt = Date.now();
 			client.receivedJoinGame = Date.now();
 		}
 
-		// assing ip address to player stats
+		// assigning ip address to player stats
 		data.ipAddress = client && client.ip;
 
 		var currentClientIp = data.ipAddress;
@@ -443,7 +455,7 @@ var ServerNetworkEvents = {
 	},
 
 	_onEditEntity: function(data, clientId) {
-		ige.developerMode.editEntity(data);
+		ige.developerMode.editEntity(data, clientId);
 	},
 
 	_onBuyItem: function (data, clientId) {
@@ -794,6 +806,44 @@ var ServerNetworkEvents = {
 		var player = ige.game.getPlayerByClientId(clientId);
 		if (player && unit) {
 			player.selectUnit(data.unitId);
+		}
+	},
+
+	_onRecordSocketMsgs: function (data, clientId) {
+		var player = ige.game.getPlayerByClientId(clientId);
+
+		if (!player?._stats.isUserAdmin) {
+			return;
+		}
+
+		if (ige.clusterClient) {
+			ige.clusterClient.recordLogs(data);
+		}
+	},
+
+	_onGetSocketMsgs: function (data, clientId) {
+		var player = ige.game.getPlayerByClientId(clientId);
+
+		if (!player?._stats.isUserAdmin) {
+			return;
+		}
+
+		data = {...data, requester: clientId };
+
+		if (ige.clusterClient) {
+			ige.clusterClient.sendLogs(data);
+		}
+	},
+
+	_onStopRecordSocketMsgs: function (data, clientId) {
+		var player = ige.game.getPlayerByClientId(clientId);
+
+		if (!player?._stats.isUserAdmin) {
+			return;
+		}
+
+		if (ige.clusterClient) {
+			ige.clusterClient.stopRecordLogs(data);
 		}
 	},
 

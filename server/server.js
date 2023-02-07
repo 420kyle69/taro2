@@ -50,6 +50,7 @@ global.mixpanel = {
 	},
 };
 
+console.log("process.env.ENV = ", process.env.ENV)
 if (process.env.ENV == 'production') {
 	var Rollbar = require('rollbar');
 	global.rollbar = new Rollbar({
@@ -318,7 +319,7 @@ var Server = IgeClass.extend({
 
 			const jwt = require('jsonwebtoken');
 
-			const token = jwt.sign({ userId: '', createdAt: Date.now(), gameSlug: global.standaloneGame.defaultData.gameSlug }, process.env.JWT_SECRET_KEY, {
+			const token = jwt.sign({ userId: '', sessionId: '', createdAt: Date.now(), gameSlug: global.standaloneGame.defaultData.gameSlug }, process.env.JWT_SECRET_KEY, {
 				expiresIn: ige.server.CONNECTION_JWT_EXPIRES_IN.toString(),
 			});
 
@@ -637,7 +638,6 @@ var Server = IgeClass.extend({
 		// ige.network.define('updateEntity', self._onSomeBullshit);
 		ige.network.define('updateEntityAttribute', self._onSomeBullshit);
 		ige.network.define('updateAllEntities', self._onSomeBullshit);
-		ige.network.define('teleport', self._onSomeBullshit);
 		ige.network.define('itemHold', self._onSomeBullshit);
 		ige.network.define('item', self._onSomeBullshit);
 		ige.network.define('clientConnect', self._onSomeBullshit);
@@ -676,6 +676,11 @@ var Server = IgeClass.extend({
 		ige.network.define('updateUnit', self._onUpdateUnit);
 		ige.network.define('updateItem', this._onUpdateItem);
 		ige.network.define('updateProjectile', this._onUpdateProjectile);
+
+		ige.network.define('recordSocketMsgs', this._onRecordSocketMsgs);
+		ige.network.define('getSocketMsgs', this._onGetSocketMsgs);
+		ige.network.define('stopRecordSocketMsgs', this._onStopRecordSocketMsgs);
+		ige.network.define('renderSocketLogs', this._onSomeBullshit);
 	},
 
 	unpublish: function (msg) {

@@ -505,7 +505,8 @@ NetIo.Socket = NetIo.EventingClass.extend({
 			_netioCmd: 'close',
 			data: reason
 		});
-
+		// to trace unexpected close events.
+		console.trace();
 		console.log('socket.close (code:', code, '):', reason);
 		// for backward compatibility
 		// if reason is valid numeric code and code is falsey
@@ -669,11 +670,10 @@ NetIo.Server = NetIo.EventingClass.extend({
 		socket._decode = self._decode;
 		socket._remoteAddress = (request.headers['x-forwarded-for'] && request.headers['x-forwarded-for'].split(',').shift()) || ws._socket.remoteAddress;
 		socket._fromPingService = request.headers[PING_SERVICE_HEADER] && request.headers[PING_SERVICE_HEADER] === process.env.PING_SERVICE_HEADER_SECRET;
-
-		// extracting user from token and adding it in _token.
-		// if token does not exist in request close the socket.
-
+		
 		if (!socket._fromPingService) {
+			
+			// if token does not exist in request close the socket.
 			if (request.url.indexOf('/?token=') === -1) {
 				socket.close('Security token could not be validated, please refresh the page.');
 				console.log('Unauthorized request', request.url);
@@ -686,14 +686,55 @@ NetIo.Server = NetIo.EventingClass.extend({
 
 			try {
 				const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
-
+				
+				const isGuestUserAllowed = ige.game?.data?.defaultData?.isGuestPlayerAllowed;
+				
+				if (!isGuestUserAllowed && (!decodedToken.userId || !decodedToken.sessionId)) {
+					socket.close('Guest user not allowed. Please login or signup.');
+					console.log('Guest user not allowed', token);
+					return;
+				}
+				
+				// extracting user from token and adding it in _token.
 				socket._token = {
 					userId: decodedToken.userId,
+					sessionId: decodedToken.sessionId,
 					distinctId : searchParams.get('distinctId'),
 					token,
 					tokenCreatedAt: decodedToken.createdAt
 				};
-
+				
+				// if the token has been used already, close the connection.
+				const isUsedToken = ige.server.usedConnectionJwts[token];
+				if (isUsedToken) {
+					console.log('Token has been used already', token);
+					socket.close('Security token could not be validated, please refresh the page.');
+					return;
+				}
+				
+				// store token for current client
+				ige.server.usedConnectionJwts[token] = socket._token.tokenCreatedAt;
+				
+				// remove expired tokens
+				const filteredUsedConnectionJwts = {};
+				const usedTokenEntries = Object.entries(ige.server.usedConnectionJwts).filter(([token, tokenCreatedAt]) => (Date.now() - tokenCreatedAt) < ige.server.CONNECTION_JWT_EXPIRES_IN);
+				for (const [key, value] of usedTokenEntries) {
+					if (typeof value === 'number') {
+						filteredUsedConnectionJwts[key] = value;
+					}
+				}
+				
+				ige.server.usedConnectionJwts = filteredUsedConnectionJwts;
+				
+				// Give the socket a unique ID
+				socket.id = self.newIdHex();
+				// Add the socket to the internal lookups
+				self._sockets.push(socket);
+				self._socketsById[socket.id] = socket;
+				
+				// store socket.id as clientId in _token data to validate socket messages later 
+				socket._token.clientId = socket.id;
+				
 			} catch (e) {
 				// A token is required to connect with socket server
 				socket.close('Security token could not be validated, please refresh the page.');
@@ -701,70 +742,56 @@ NetIo.Server = NetIo.EventingClass.extend({
 				return;
 			}
 
-			// if the token has been used already, close the connection.
-			const isUsedToken = ige.server.usedConnectionJwts[token];
-			if (isUsedToken) {
-				console.log('Token has been used already', token);
-				socket.close('Security token could not be validated, please refresh the page.');
-				return;
-			}
-
-			// store token for current client
-			ige.server.usedConnectionJwts[token] = socket._token.tokenCreatedAt;
-
-			// remove expired tokens
-			const filteredUsedConnectionJwts = {};
-			const usedTokenEntries = Object.entries(ige.server.usedConnectionJwts).filter(([token, tokenCreatedAt]) => (Date.now() - tokenCreatedAt) < ige.server.CONNECTION_JWT_EXPIRES_IN);
-			for (const [key, value] of usedTokenEntries) {
-				if (typeof value === 'number') {
-					filteredUsedConnectionJwts[key] = value;
+			console.log('1. Client ', socket.id,' connected (net.io-server index.js)');
+			
+			// Register a listener so that if the socket disconnects,
+			// we can remove it from the active socket lookups
+			socket.on('disconnect', function (response) {
+				var index = self._sockets.indexOf(socket);
+				if (index > -1) {
+					// Remove the socket from the array
+					self._sockets.splice(index, 1);
 				}
-			}
-			ige.server.usedConnectionJwts = filteredUsedConnectionJwts;
-
-		}
-
-		// Give the socket a unique ID
-		socket.id = self.newIdHex();
-		// Add the socket to the internal lookups
-		self._sockets.push(socket);
-		self._socketsById[socket.id] = socket;
-
-		console.log('1. Client ', socket.id,' connected (net.io-server index.js)');
-
-		// Register a listener so that if the socket disconnects,
-		// we can remove it from the active socket lookups
-		socket.on('disconnect', function (response) {
-			// if (!socket._fromPingService) {
-			// 	if (response.code !== 1000 && response.code !== 1001) {
-			// 		console.log('client disconnected.', socket.id, ' code:', response.code, ' reason:', response.reason);
-			// 		// console.trace()
-
-			// 		// global.rollbar.error("client got disconnected involuntarily reason: " + response, {
-			// 		//     reason: response,
-			// 		//     ip: process.env.IP
-			// 		// })
-			// 	}
-			// }
-			var index = self._sockets.indexOf(socket);
-			if (index > -1) {
-				// Remove the socket from the array
-				self._sockets.splice(index, 1);
-			}
-
-			delete self._socketsById[socket.id];
-		});
-
-		// Tell the client their new ID
-		try {
-			socket.send({
-				_netioCmd: 'id',
-				data: socket.id
+				
+				delete self._socketsById[socket.id];
 			});
-		} catch (err) {
-			console.log('err while sending client its socket.id!');
+			
+			// Tell the client their new ID - triggers this._io.on('connect', ...) on client
+			try {
+				socket.send({
+					_netioCmd: 'id',
+					data: socket.id
+				});
+			} catch (err) {
+				console.log('err while sending client its socket.id!');
+			}
+			
+			// add socket message listeners, send 'init' message to client
+			self.emit('connection', [socket]);
+			
+			// trigger joinGame command as part of socket connection, no need for client to send joinGame anymore
+			// joinGame takes care of disconnecting unauthenticated users, banned ips, duplicate IPs, creates a new player and request user data from gs manager and make sure the user exists on moddio
+			const joinGameData = {
+				number: (Math.floor(Math.random() * 999) + 100),
+				_id: socket._token.userId,
+				sessionId: socket._token.sessionId,
+				isAdBlockEnabled: false
+			};
+			const clientId = socket.id;
+			
+			ige.server._onJoinGame(joinGameData, clientId);
+		} else {
+			// PING service only 
+			// Tell the client their new ID
+			try {
+				socket.send({
+					_netioCmd: 'id',
+					data: socket.id
+				});
+			} catch (err) {
+				console.log('err while sending client its socket.id!');
+			}
 		}
-		self.emit('connection', [socket]);
 	},
 
 	/**

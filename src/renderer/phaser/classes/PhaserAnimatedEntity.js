@@ -45,6 +45,7 @@ var PhaserAnimatedEntity = /** @class */ (function (_super) {
         this.flip(this.entity._stats.flip);
     };
     PhaserAnimatedEntity.prototype.size = function (data) {
+        this.sprite.setSize(data.width, data.height);
         this.sprite.setDisplaySize(data.width, data.height);
     };
     PhaserAnimatedEntity.prototype.scale = function (data) {

@@ -141,10 +141,12 @@ var MenuUiComponent = IgeEntity.extend({
 					return;
 				}
 				if((['1', '4', '5'].includes(window.gameDetails?.tier)) || window.isStandalone) {
+					console.log("ige developermode: ", ige.developerMode)
+					ige.developerMode.enter();
+
 					loadEditor();
 					$('#game-editor').show();
 					$('#kick-player').hide();
-					ige.developerMode.enter();
 
 					// commenting this code because we are handling changes in editor now.
 					/* if (restoreWindows) {
@@ -374,14 +376,6 @@ var MenuUiComponent = IgeEntity.extend({
 
 		$('#featured-youtuber').hide();
 
-		setTimeout(function () {
-			var html = $('#play-game-button .content').html();
-
-			if (/connecting/i.test(html)) {
-				$.post(`${analyticsUrl}api/game-report/game-access/${gameId}/infinite-connecting`);
-			}
-		}, 10000);
-
 		var gameId = ige.game.data.defaultData._id;
 
 		if (gameId && !wasGamePaused && !window.isStandalone) {
@@ -392,19 +386,9 @@ var MenuUiComponent = IgeEntity.extend({
 					$('#chat-box').addClass('d-none');
 				}, 1500);
 			}
-
-			$.post(`${analyticsUrl}api/game-report/game-access/${gameId}/play-button`)
-				.then(function () { }, function (xhr, status, error) {
-					$.post('/api/log', {
-						event: 'play-button',
-						game: gameId,
-						status: xhr.status,
-						text: xhr.statusText
-					});
-				});
 		}
-
-		ige.client.joinGame();
+		
+		ige.client.joinGame(wasGamePaused);
 
 		if (!window.isStandalone) {
 			ige.ad.showAnchorTag();
@@ -505,7 +489,7 @@ var MenuUiComponent = IgeEntity.extend({
 							if (server) {
 								var serverIP = server.ip.slice(0, server.ip.indexOf('.'));
 								var separated = separate(serverIP);
-								var optionText = `${separated.alphabets} ${separated.numbers}`;
+								var optionText = server.name || `${separated.alphabets} ${separated.numbers}`;
 								var acceptingPlayers = server.acceptingPlayers ? '' : ' not accepting players';
 								serversList += `${'<option ' +
 									' class="game-server"' +

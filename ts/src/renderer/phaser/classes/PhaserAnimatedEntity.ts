@@ -47,6 +47,7 @@ class PhaserAnimatedEntity extends PhaserEntity {
 			height: number
 		}
 	): void {
+		this.sprite.setSize(data.width, data.height);
 		this.sprite.setDisplaySize(data.width, data.height);
 	}
 

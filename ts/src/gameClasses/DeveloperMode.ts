@@ -46,6 +46,7 @@ class DeveloperMode {
 			if (ige.game.data.map.layers.length > 4 && serverData.layer >= 2) serverData.layer ++;
 			//save tile change to ige.game.map.data
 			ige.game.data.map.layers[serverData.layer].data[serverData.y * width + serverData.x] = serverData.gid;
+			ige.map.data.layers[serverData.layer].data[serverData.y * width + serverData.x] = serverData.gid;
 			if (ige.game.data.map.layers[serverData.layer].name === 'walls') {
 				//if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
 				ige.physics.destroyWalls();
@@ -263,51 +264,54 @@ class DeveloperMode {
 	}
 
 
-	editEntity (data: EditEntityData) {
+	editEntity (data: EditEntityData, clientId: string) {
 		if (ige.isClient) {
 			ige.network.send('editEntity', data);
 		} else {
-			if (data.entityType === 'unit') {
-				switch (data.action) {
-					case 'create':
-						//this.createUnit(data);
-						break;
-	
-					case 'update':
-						this.updateUnit(data);
-						break;
-	
-					case 'delete':
-						//this.deleteUnit(data);
-						break;
-				}
-			} else if (data.entityType === 'item') {
-				switch (data.action) {
-					case 'create':
-						//this.createItem(data);
-						break;
-	
-					case 'update':
-						this.updateItem(data);
-						break;
-	
-					case 'delete':
-						//this.deleteItem(data);
-						break;
-				}
-			} else if (data.entityType === 'projectile') {
-				switch (data.action) {
-					case 'create':
-						//this.createProjectile(data);
-						break;
-	
-					case 'update':
-						this.updateProjectile(data);
-						break;
-	
-					case 'delete':
-						//this.deleteProjectile(data);
-						break;
+			// only allow developers to modify entities
+			if (ige.server.developerClientIds.includes(clientId)) {
+				if (data.entityType === 'unit') {
+					switch (data.action) {
+						case 'create':
+							//this.createUnit(data);
+							break;
+					
+						case 'update':
+							this.updateUnit(data);
+							break;
+					
+						case 'delete':
+							//this.deleteUnit(data);
+							break;
+					}
+				} else if (data.entityType === 'item') {
+					switch (data.action) {
+						case 'create':
+							//this.createItem(data);
+							break;
+					
+						case 'update':
+							this.updateItem(data);
+							break;
+					
+						case 'delete':
+							//this.deleteItem(data);
+							break;
+					}
+				} else if (data.entityType === 'projectile') {
+					switch (data.action) {
+						case 'create':
+							//this.createProjectile(data);
+							break;
+					
+						case 'update':
+							this.updateProjectile(data);
+							break;
+					
+						case 'delete':
+							//this.deleteProjectile(data);
+							break;
+					}
 				}
 			}
 		}

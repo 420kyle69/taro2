@@ -65,7 +65,7 @@ class DevModeScene extends PhaserScene {
 					}, 
 					angle: draggedEntity.angle
 				}
-				ige.developerMode.editEntity(data);
+				ige.developerMode.editEntity(data, playerId);
 				ige.unitBeingDragged = null;
 			}
 		});
@@ -95,6 +95,7 @@ class DevModeScene extends PhaserScene {
 		this.load.image('eraser', 'https://cache.modd.io/asset/spriteImage/1666276083246_erasergap.png');
 		this.load.image('eyeopen', 'https://cache.modd.io/asset/spriteImage/1669820752914_eyeopen.png');
 		this.load.image('eyeclosed', 'https://cache.modd.io/asset/spriteImage/1669821066279_eyeclosed.png');
+		this.load.image('fill', 'https://cache.modd.io/asset/spriteImage/1675428550006_fill_(1).png');
 		
 
 		this.load.scenePlugin(

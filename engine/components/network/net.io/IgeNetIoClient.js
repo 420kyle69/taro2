@@ -44,10 +44,11 @@ var IgeNetIoClient = {
 			var sortedServers = [server];
 			var ignoreServerIds = [server.id];
 
-			while (server = ige.client.getBestServer(ignoreServerIds)) {
-				ignoreServerIds.push(server.id);
-				sortedServers.push(server);
-			}
+			// let's not try to connect to multiple servers at the same time, only connect with user's selected server
+			// while (server = ige.client.getBestServer(ignoreServerIds)) {
+			// 	ignoreServerIds.push(server.id);
+			// 	sortedServers.push(server);
+			// }
 
 			sortedServers.reduce(function (p, server) {
 				var defer = $.Deferred();
@@ -76,17 +77,6 @@ var IgeNetIoClient = {
 							self.connectToGS(url, server.id)
 								.done(function () {
 									window.activatePlayGame = true;
-									// if (gameId && typeof analyticsUrl != 'undefined' && analyticsUrl) {
-									// 	$.post(`${analyticsUrl}api/game-report/game-access/${gameId}/gs-connected`)
-									// 		.then(function () { }, function (xhr, status, error) {
-									// 			$.post('/api/log', {
-									// 				event: 'gs-connected',
-									// 				game: gameId,
-									// 				status: xhr.status,
-									// 				text: xhr.statusText
-									// 			});
-									// 		});
-									// }
 									defer.resolve();
 								})
 								.fail(function (err) {
@@ -112,18 +102,6 @@ var IgeNetIoClient = {
 						self._state = 0; // Disconnected
 						self._onDisconnectFromServer.apply(self, arguments);
 
-						if (gameId && typeof analyticsUrl != undefined) {
-							$.post(`${analyticsUrl}api/game-report/game-access/${gameId}/could-not-connect`)
-								.fail(function (xhr) {
-									$.post('/api/log', {
-										event: 'could-not-connect',
-										game: gameId,
-										status: xhr.status,
-										text: xhr.statusText
-									});
-								});
-						}
-
 						if ($('#menu-wrapper').is(':visible')) {
 							$('#play-game-button .content').addClass('bg-danger');
 							$('#play-game-button .content').html(
@@ -143,13 +121,6 @@ var IgeNetIoClient = {
 							ige.menuUi.onDisconnectFromServer('igeNetIoClient #143');
 						}
 					}
-				})
-				.fail(function (error) {
-					$.post('/api/log', {
-						event: 'could-not-connect',
-						game: gameId,
-						text: error.toString()
-					});
 				});
 		}
 	},
@@ -489,7 +460,6 @@ var IgeNetIoClient = {
 	_onMessageFromServer: function (data) {
 		var ciDecoded = data[0].charCodeAt(0);
 		var commandName = this._networkCommandsIndex[ciDecoded];
-		// console.log("name = " + commandName, data);
 
 		if (commandName === '_snapshot') {
 			var snapshot = _.cloneDeep(data)[1];
@@ -512,7 +482,8 @@ var IgeNetIoClient = {
 						entityData = [
 							parseInt(entityData[0], 16), // x
 							parseInt(entityData[1], 16), // y
-							parseInt(entityData[2], 16) / 1000 // rotation
+							parseInt(entityData[2], 16) / 1000, // rotation
+							Boolean(parseInt(entityData[3], 16)) // teleported boolean
 						];
 
 						obj[entityId] = entityData;
@@ -520,10 +491,13 @@ var IgeNetIoClient = {
 						// update each entities' final position, so player knows where everything are when returning from a different browser tab
 						// we are not executing this in igeEngine or igeEntity, becuase they don't execute when browser tab is inactive
 						var entity = ige.$(entityId);
+						if (entityData[3]) {
+							entity.teleportTo(entityData[0], entityData[1], entityData[2]);
+						}
 
 						// if csp movement is enabled, don't use server-streamed position for my unit
 						// instead, we'll use position updated by physics engine
-						if (ige.game.cspEnabled && entity && 
+						else if (ige.game.cspEnabled && entity && 
 							entity.finalKeyFrame[0] < newSnapshotTimestamp && 
 							entity != ige.client.selectedUnit
 						) {

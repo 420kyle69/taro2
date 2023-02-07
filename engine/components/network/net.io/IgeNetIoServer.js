@@ -311,6 +311,8 @@ var IgeNetIoServer = {
 		var commandIndex = this._networkCommandsLookup[commandName];
 		var ciEncoded;
 
+		// console.log(commandIndex, ciEncoded, commandName, data, clientId);
+
 		if (commandIndex !== undefined) {
 			ciEncoded = String.fromCharCode(commandIndex);
 			// console.log("igeNetIoServer send(): ",commandName, ciEncoded, data, clientId)
@@ -685,6 +687,23 @@ var IgeNetIoServer = {
    */
 	_onClientMessage: function (data, clientId) {
 		var self = this;
+
+		if (this.socket(clientId)?.markedForTracking && ige.clusterClient) {
+			var ciDecoded = data[0].charCodeAt(0);
+			var commandName = this._networkCommandsIndex[ciDecoded];
+			let decoded = _.clone(data);
+			decoded[0] = commandName;
+
+			ige.clusterClient.socketMessages[clientId] += JSON.stringify(decoded);
+		}
+		
+		var socket = ige.network._socketById[clientId];
+		// check if the clientId belongs to this socket connection.
+		if (!(socket?._token?.clientId && socket?._token?.clientId === clientId)) {
+			console.log('_onClientMessage: clientId validation failed', socket._token.clientId, clientId, data);
+			socket.close('Client could not be validated, please refresh the page.');
+			return;
+		}
 		
 		if (typeof data[0] === 'string') {
 			if (data[0].charCodeAt(0) != undefined) {
@@ -694,7 +713,29 @@ var IgeNetIoServer = {
 				if (this._networkCommands[commandName]) {
 					this._networkCommands[commandName](data[1], clientId);
 				}
-				// console.log(commandName, data, clientId)
+				if (ige.game.data.defaultData._id === '5a7fd59b1014dc000eeec3dd' && commandName === 'joinGame') {
+					// console.log(commandName, data, clientId);
+					let clients = this.clients();
+					let client = clients[clientId];
+
+					try {
+						let user = {
+							ip: client?._remoteAddress,
+							userId: client?._token?.userId,
+							distinctId: client?._token?.distinctId,
+							token: client?._token?.token,
+							clientId: clientId,
+							name: ige.game.getPlayerByClientId(clientId)?._stats?.name
+						}
+						
+						let userLog = `\tip: ${user.ip}\n\tuserId: ${user.userId||''}\n\tdistinctId: ${user.distinctId||''}\n\ttoken: ${user.token||''}\n\tclientId: ${user.clientId}\n\tusername: ${user.name}`
+
+						console.log(userLog);
+					} catch (err) {
+						console.log('joinGame log error', err)
+					}
+				}
+
 				this.emit(commandName, [data[1], clientId]);
 			}
 		}

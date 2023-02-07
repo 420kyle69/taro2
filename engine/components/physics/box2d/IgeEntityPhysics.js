@@ -798,7 +798,7 @@ var IgeEntityPhysics = IgeEntity.extend({
 		}
 	},
 
-	remove: function (isStreaming = true) {
+	remove: function () {
 		this._isBeingRemoved = true;
 		this.destroy();
 

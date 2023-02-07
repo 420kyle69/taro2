@@ -22,6 +22,7 @@ class PhaserJoystick {
 		destroy (): void;
 	} & Phaser.Events.EventEmitter;
 	side: string;
+	radius: number;
 
 	constructor (
 		scene: MobileControlsScene,
@@ -29,7 +30,7 @@ class PhaserJoystick {
 		private y: number,
 		settings: MobileControlSettings
 	) {
-		const radius = 72;
+		const radius = this.radius = scene.cameras.main.displayWidth * 0.05;
 
 		const base = scene.add.graphics();
 		if (settings.redFireZone) {
@@ -108,7 +109,7 @@ class PhaserJoystick {
 		const x = this.x;
 		const y = this.y;
 
-		virtualJoystick.radius = 72 * controls.scaleX;
+		virtualJoystick.radius = this.radius * controls.scaleX;
 
 		const base = virtualJoystick.base;
 		base.setScale(controls.scaleX, controls.scaleY);
