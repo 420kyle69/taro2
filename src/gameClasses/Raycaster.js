@@ -9,9 +9,9 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 };
 var Raycaster = /** @class */ (function () {
     function Raycaster() {
-        this.engine = ige.physics.engine;
-        this.world = ige.physics.world();
-        this.scaleRatio = ige.physics._scaleRatio;
+        this.engine = taro.physics.engine;
+        this.world = taro.physics.world();
+        this.scaleRatio = taro.physics._scaleRatio;
         this.data = {};
         this.closest = RayCastClosest;
         this.multiple = RayCastMultiple;
@@ -24,16 +24,16 @@ var Raycaster = /** @class */ (function () {
         var raycast = this.multiple;
         raycast.reset();
         this.world.rayCast(end, start, raycast.callback);
-        ige.game.entitiesCollidingWithLastRaycast = _.clone(raycast.entities);
+        taro.game.entitiesCollidingWithLastRaycast = _.clone(raycast.entities);
         // forward
         raycast.reset();
         this.world.rayCast(start, end, raycast.callback);
-        var missedEntities = _.difference(ige.game.entitiesCollidingWithLastRaycast, raycast.entities);
+        var missedEntities = _.difference(taro.game.entitiesCollidingWithLastRaycast, raycast.entities);
         missedEntities.forEach(function (x) { return x.raycastFraction = 1 - x.raycastFraction; });
-        ige.game.entitiesCollidingWithLastRaycast = __spreadArray(__spreadArray([], raycast.entities, true), missedEntities, true);
-        ige.game.entitiesCollidingWithLastRaycast = this.sortHits(ige.game.entitiesCollidingWithLastRaycast);
+        taro.game.entitiesCollidingWithLastRaycast = __spreadArray(__spreadArray([], raycast.entities, true), missedEntities, true);
+        taro.game.entitiesCollidingWithLastRaycast = this.sortHits(taro.game.entitiesCollidingWithLastRaycast);
         //debug
-        // console.log(ige.game.entitiesCollidingWithLastRaycast.map(x=> `${x.id()} ${x._category} ${x.raycastFraction}`));
+        // console.log(taro.game.entitiesCollidingWithLastRaycast.map(x=> `${x.id()} ${x._category} ${x.raycastFraction}`));
     };
     Raycaster.prototype.raycastBullet = function (start, end) {
         // forward
@@ -41,7 +41,7 @@ var Raycaster = /** @class */ (function () {
         forwardRaycast.reset();
         this.world.rayCast(start, end, forwardRaycast.callback // though it is currently hard-coded for 'Closest'
         );
-        ige.game.entitiesCollidingWithLastRaycast = forwardRaycast.entity ? [forwardRaycast.entity] : [];
+        taro.game.entitiesCollidingWithLastRaycast = forwardRaycast.entity ? [forwardRaycast.entity] : [];
         this.forwardHit = true;
         var point = forwardRaycast.point ? forwardRaycast.point : end;
         var fraction = forwardRaycast.fraction;
@@ -52,7 +52,7 @@ var Raycaster = /** @class */ (function () {
         if (reverseRaycast.hit) {
             // we were obstructed when shooting
             this.reverseHit = true;
-            ige.game.entitiesCollidingWithLastRaycast = [];
+            taro.game.entitiesCollidingWithLastRaycast = [];
         }
         var bulletReturn = {
             start: start,
@@ -68,7 +68,7 @@ var Raycaster = /** @class */ (function () {
         return array = _.orderBy(array, ['raycastFraction'], ['asc']);
     };
     Raycaster.prototype.renderBullet = function (start, end, config) {
-        ige.client.emit('create-ray', {
+        taro.client.emit('create-ray', {
             start: {
                 x: start.x * this.scaleRatio,
                 y: start.y * this.scaleRatio
@@ -94,13 +94,13 @@ var RayCastClosest = (function () {
     };
     def.callback = function (fixture, point, normal, fraction) {
         var fixtureList = fixture.m_body.m_fixtureList;
-        var entity = fixtureList && fixtureList.igeId && ige.$(fixtureList.igeId);
+        var entity = fixtureList && fixtureList.taroId && taro.$(fixtureList.taroId);
         if (entity &&
             (entity._category === 'unit' ||
                 entity._category === 'wall')) {
             entity.lastRaycastCollisionPosition = {
-                x: point.x * ige.physics._scaleRatio,
-                y: point.y * ige.physics._scaleRatio
+                x: point.x * taro.physics._scaleRatio,
+                y: point.y * taro.physics._scaleRatio
             };
             entity.raycastFraction = fraction;
             def.entity = entity;
@@ -134,13 +134,13 @@ var RayCastMultiple = (function () {
     };
     def.callback = function (fixture, point, normal, fraction) {
         var fixtureList = fixture.m_body.m_fixtureList;
-        var entity = fixtureList && fixtureList.igeId && ige.$(fixtureList.igeId);
+        var entity = fixtureList && fixtureList.taroId && taro.$(fixtureList.taroId);
         if (entity &&
             (entity._category === 'unit' ||
                 entity._category === 'wall')) {
             entity.lastRaycastCollisionPosition = {
-                x: point.x * ige.physics._scaleRatio,
-                y: point.y * ige.physics._scaleRatio
+                x: point.x * taro.physics._scaleRatio,
+                y: point.y * taro.physics._scaleRatio
             };
             entity.raycastFraction = fraction;
             def.entities.push(entity);
@@ -163,7 +163,7 @@ var RaycastAny = (function () {
     };
     def.callback = function (fixture, point, normal, fraction) {
         var fixtureList = fixture.m_body.m_fixtureList;
-        var entity = fixtureList && fixtureList.igeId && ige.$(fixtureList.igeId);
+        var entity = fixtureList && fixtureList.taroId && taro.$(fixtureList.taroId);
         if (entity &&
             (entity._category === 'unit' ||
                 entity._category === 'wall')) {

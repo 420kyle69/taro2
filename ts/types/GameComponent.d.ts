@@ -37,7 +37,7 @@ interface MapData {
 	}[];
 }
 
-declare class GameComponent extends IgeEntity {
+declare class GameComponent extends TaroEntity {
 	lastCreatedUnitId: string;
 	getAsset(arg0: string, unitTypeId: string): any;
 	getPlayerByClientId(clientId: string): Player;
@@ -60,6 +60,6 @@ declare class GameComponent extends IgeEntity {
 		texturePack: any;
 	};
 
-	entitiesCollidingWithLastRaycast: IgeEntity[];
+	entitiesCollidingWithLastRaycast: TaroEntity[];
 
 }

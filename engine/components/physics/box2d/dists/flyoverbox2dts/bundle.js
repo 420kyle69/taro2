@@ -22159,7 +22159,7 @@
 			this.maxTimestep = 0;
 		}
 
-		// Typically one wants maxTimestep to be 1/(max eigenvalue of T), so that damping will never cause something to reverse direction
+		// Typically one wants maxTimestep to be 1/(max etaronvalue of T), so that damping will never cause something to reverse direction
 		/**
          * @see b2Controller::Step
          */

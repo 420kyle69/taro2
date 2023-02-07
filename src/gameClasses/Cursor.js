@@ -1,13 +1,13 @@
-var Cursor = IgeEntity.extend({
+var Cursor = TaroEntity.extend({
 	classId: 'Cursor',
 
 	init: function () {
-		IgeEntity.prototype.init.call(this);
+		TaroEntity.prototype.init.call(this);
 
 		var self = this;
 
-		if (ige.isClient) {
-			var tex = new IgeTexture(`${ige.map.mapUrl}/spritesheet/baseball_bat.png`);
+		if (taro.isClient) {
+			var tex = new TaroTexture(`${taro.map.mapUrl}/spritesheet/baseball_bat.png`);
 			self.depth(10)
 				.layer(20)
 				.width(50)
@@ -21,8 +21,8 @@ var Cursor = IgeEntity.extend({
 	 * @param ctx The canvas context to render to.
 	 */
 	tick: function (ctx) {
-		// Call the IgeEntity (super-class) tick() method
-		IgeEntity.prototype.tick.call(this, ctx);
+		// Call the TaroEntity (super-class) tick() method
+		TaroEntity.prototype.tick.call(this, ctx);
 	}
 });
 

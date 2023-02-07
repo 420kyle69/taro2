@@ -1,3 +1,3 @@
-declare class Unit extends IgeEntityPhysics {
+declare class Unit extends TaroEntityPhysics {
 
 }

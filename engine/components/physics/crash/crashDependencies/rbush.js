@@ -118,7 +118,7 @@
 		insert: function (item) {
 			if (item) {
 				this._insert(item, this.data.height - 1);
-				// console.log('rbush insert...', item.data.entity._category, item.data.igeId, item.data.uid);
+				// console.log('rbush insert...', item.data.entity._category, item.data.taroId, item.data.uid);
 			}
 			return this;
 		},
@@ -155,7 +155,7 @@
 						node.children.splice(index, 1);
 						path.push(node);
 						this._condense(path);
-						// console.log('rbush remove...', item.data.entity._category, item.data.igeId, item.data.uid);
+						// console.log('rbush remove...', item.data.entity._category, item.data.taroId, item.data.uid);
 						return this;
 					}
 				}

@@ -1,3 +1,3 @@
-declare class IgeEntityPhysics extends IgeEntity {
+declare class TaroEntityPhysics extends TaroEntity {
 
 }

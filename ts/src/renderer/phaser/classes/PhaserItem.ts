@@ -1,7 +1,7 @@
 class PhaserItem extends PhaserAnimatedEntity {
 
 	public gameObject: Phaser.GameObjects.Sprite & IRenderProps;
-	public entity: IgeEntity;
+	public entity: TaroEntity;
 
 	ownerUnitId?: string;
 

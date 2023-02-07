@@ -1,10 +1,10 @@
-var AdComponent = IgeEntity.extend({
+var AdComponent = TaroEntity.extend({
 	classId: 'AdComponent',
 	componentId: 'ad',
 
 	init: function () {
 		var self = this;
-		if (ige.isClient && $('#user-permission-tracker').length) {
+		if (taro.isClient && $('#user-permission-tracker').length) {
 			$('body').append($('<div/>', {
 				id: 'preroll',
 				style: 'z-index:40000; display: none',
@@ -16,11 +16,11 @@ var AdComponent = IgeEntity.extend({
 	},
 
 	play: function (data, clientId) {
-		if (ige.isServer) {
-			ige.network.send('playAd', data, clientId); // update text for all clients
-		} else if (ige.isClient) {
+		if (taro.isServer) {
+			taro.network.send('playAd', data, clientId); // update text for all clients
+		} else if (taro.isClient) {
 			// are we running on mobile
-			if (ige.isMobile) {
+			if (taro.isMobile) {
 				// on mobile
 				var eventData = { msg: 'showad' };
 

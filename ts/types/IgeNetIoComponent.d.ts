@@ -1,7 +1,7 @@
-declare class IgeNetIoComponent extends IgeEventingClass implements IgeNetIoClient {
+declare class TaroNetIoComponent extends TaroEventingClass implements TaroNetIoClient {
 	id(): string;
 
-	stream: IgeStreamComponent;
+	stream: TaroStreamComponent;
 
 	send(commandName: string, data: any): void;
 }

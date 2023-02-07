@@ -1,11 +1,11 @@
-var ShopComponent = IgeEntity.extend({
+var ShopComponent = TaroEntity.extend({
 	classId: 'ShopComponent',
 	componentId: 'shop',
 
 	init: function (entity, options) {
 		var self = this;
 
-		if (ige.isClient) {
+		if (taro.isClient) {
 			// $("#confirm-purchase-button").on("click", function() {
 			// 	self.purchase(self.itemToBePurchased.id)
 			// })
@@ -21,9 +21,9 @@ var ShopComponent = IgeEntity.extend({
 			self.perPageItems = 20;
 			self.currentType = '';
 			self.oldModalHTMLBody = '';
-			// if (!ige.isMobile) {
+			// if (!taro.isMobile) {
 			$('.open-modd-shop-button').on('click', function () {
-				var player = ige.client.myPlayer;
+				var player = taro.client.myPlayer;
 				if (player && !player._stats.isAdBlockEnabled) {
 					countAdImpression(gameId, 'shop');
 				}
@@ -132,7 +132,7 @@ var ShopComponent = IgeEntity.extend({
 
 				if (price <= 0) {
 					promise = $.ajax({
-						url: `/api/user/has-shared/${ige.game.data.defaultData.parentGame || ige.client.server.gameId}`,
+						url: `/api/user/has-shared/${taro.game.data.defaultData.parentGame || taro.client.server.gameId}`,
 						dataType: 'html',
 						type: 'GET',
 						success: function (data) {
@@ -156,7 +156,7 @@ var ShopComponent = IgeEntity.extend({
 					.then(function (hasShared) {
 						if (hasShared) {
 							var itemId = itemDom.attr('id');
-							var gameData = ige.game.data.defaultData;
+							var gameData = taro.game.data.defaultData;
 
 							if (price === 'facebook' || price === 'twitter') {
 								var item = { value: gameData._id, type: 'game' };
@@ -204,7 +204,7 @@ var ShopComponent = IgeEntity.extend({
 				var button = $(this);
 
 				$.ajax({
-					url: `/api/user/equip/${ige.game.data.defaultData.parentGame || ige.client.server.gameId}/${button.attr('id')}`,
+					url: `/api/user/equip/${taro.game.data.defaultData.parentGame || taro.client.server.gameId}/${button.attr('id')}`,
 					dataType: 'html',
 					type: 'POST',
 					success: function (data) {
@@ -212,11 +212,11 @@ var ShopComponent = IgeEntity.extend({
 
 						if (response.status == 'success') {
 							self.updateModdShop();
-							if (!ige.client.myPlayer._stats.purchasables || !(ige.client.myPlayer._stats.purchasables instanceof Array)) ige.client.myPlayer._stats.purchasables = [];
+							if (!taro.client.myPlayer._stats.purchasables || !(taro.client.myPlayer._stats.purchasables instanceof Array)) taro.client.myPlayer._stats.purchasables = [];
 							var equipedPurchasable = response.message;
-							// ige.client.myPlayer._stats.purchasables.push(equipedPurchasable);
-							var myUnit = ige.$(ige.client.myPlayer._stats.selectedUnitId);
-							ige.network.send('equipSkin', equipedPurchasable);
+							// taro.client.myPlayer._stats.purchasables.push(equipedPurchasable);
+							var myUnit = taro.$(taro.client.myPlayer._stats.selectedUnitId);
+							taro.network.send('equipSkin', equipedPurchasable);
 							// myUnit.equipSkin();
 						} else if (response.status == 'error') {
 							if (!response.message.includes('No matching document found')) {
@@ -232,16 +232,16 @@ var ShopComponent = IgeEntity.extend({
 				var button = $(this);
 				var unEquipedId = button.attr('id');
 				$.ajax({
-					url: `/api/user/unequip/${ige.game.data.defaultData.parentGame || ige.client.server.gameId}/${unEquipedId}`,
+					url: `/api/user/unequip/${taro.game.data.defaultData.parentGame || taro.client.server.gameId}/${unEquipedId}`,
 					dataType: 'html',
 					type: 'POST',
 					success: function (data) {
 						var response = JSON.parse(data);
 
 						if (response.status == 'success') {
-							var myUnit = ige.$(ige.client.myPlayer._stats.selectedUnitId);
+							var myUnit = taro.$(taro.client.myPlayer._stats.selectedUnitId);
 							// myUnit.unEquipSkin(unEquipedId);
-							ige.network.send('unEquipSkin', unEquipedId);
+							taro.network.send('unEquipSkin', unEquipedId);
 							self.updateModdShop();
 						} else if (response.status == 'error') {
 							alert(response.message);
@@ -328,7 +328,7 @@ var ShopComponent = IgeEntity.extend({
 						// var itemDetails = null;
 						$('#skins-list').append(skin);
 						// if (purchasable.target && purchasable.target.entityType == 'unit') {
-						// 	itemDetails = ige.game.getAsset('unitTypes', purchasable.target.key);
+						// 	itemDetails = taro.game.getAsset('unitTypes', purchasable.target.key);
 						// }
 						// self.renderShopImage(itemDetails, purchasable, 'menu_image');
 					});
@@ -371,7 +371,7 @@ var ShopComponent = IgeEntity.extend({
 	buySkin: function (itemId, sharedOn = '', token = '') {
 		var self = this;
 		$.ajax({
-			url: `/api/user/purchase/${ige.game.data.defaultData.parentGame || ige.client.server.gameId}/${itemId}?sharedOn=${sharedOn}`,
+			url: `/api/user/purchase/${taro.game.data.defaultData.parentGame || taro.client.server.gameId}/${itemId}?sharedOn=${sharedOn}`,
 			dataType: 'html',
 			type: 'POST',
 			data: {
@@ -383,8 +383,8 @@ var ShopComponent = IgeEntity.extend({
 				if (response.status == 'success') {
 					$('.player-coins').html(parseInt(response.remaining_coins));
 
-					if (ige.client.myPlayer) {
-						ige.client.myPlayer._stats.coins = parseInt(response.remaining_coins);
+					if (taro.client.myPlayer) {
+						taro.client.myPlayer._stats.coins = parseInt(response.remaining_coins);
 					}
 
 					$('#purchasable-purchase-modal').modal('hide');
@@ -410,7 +410,7 @@ var ShopComponent = IgeEntity.extend({
 
 	// tabSelected = unit/item
 	openModdShop: function (tabSelected, elementIdToFocus) {
-		if (ige.isClient) {
+		if (taro.isClient) {
 			var self = this;
 
 			this.hideEmptyTabs();
@@ -447,12 +447,12 @@ var ShopComponent = IgeEntity.extend({
 		var unitArr = [];
 		var itemArr = [];
 
-		if (!ige.game.data.unitTypes) {
+		if (!taro.game.data.unitTypes) {
 			$('[id=unit]').hide();
 			$('[id=unitSkins]').hide();
 		} else {
-			for (unitId in ige.game.data.unitTypes) {
-				var unit = ige.game.data.unitTypes[unitId];
+			for (unitId in taro.game.data.unitTypes) {
+				var unit = taro.game.data.unitTypes[unitId];
 				if (unit.isPurchasable) {
 					unitArr.push(unit);
 				}
@@ -461,12 +461,12 @@ var ShopComponent = IgeEntity.extend({
 				$('[id=unit]').hide();
 			}
 		}
-		if (!ige.game.data.itemTypes) {
+		if (!taro.game.data.itemTypes) {
 			$('[id=item]').hide();
 			$('[id=itemSkins]').hide();
 		} else {
-			for (itemId in ige.game.data.itemTypes) {
-				var item = ige.game.data.itemTypes[itemId];
+			for (itemId in taro.game.data.itemTypes) {
+				var item = taro.game.data.itemTypes[itemId];
 				if (item.isPurchasable) {
 					itemArr.push(item);
 				}
@@ -482,7 +482,7 @@ var ShopComponent = IgeEntity.extend({
 		}
 
 		$.ajax({
-			url: `/api/game/${ige.game.data.defaultData.parentGame || ige.client.server.gameId}/shopCount`,
+			url: `/api/game/${taro.game.data.defaultData.parentGame || taro.client.server.gameId}/shopCount`,
 			type: 'GET',
 			success: function (data) {
 				if (data.status === 'success') {
@@ -490,7 +490,7 @@ var ShopComponent = IgeEntity.extend({
 						if (!data.message.unitCount || data.message.unitCount.length === 0) {
 							$('[id=unitSkins]').hide();
 						} else if (data.message.unitCount) {
-							for (var i in ige.game.data.unitTypes) {
+							for (var i in taro.game.data.unitTypes) {
 								var total = data.message.unitCount.filter(function (unit, key) {
 									if (unit && unit.target && unit.target.key === i) return true;
 								});
@@ -505,7 +505,7 @@ var ShopComponent = IgeEntity.extend({
 						if (!data.message.itemCount || data.message.itemCount.length === 0) {
 							$('[id=itemSkins]').hide();
 						} else if (data.message.itemCount) {
-							for (var i in ige.game.data.itemTypes) {
+							for (var i in taro.game.data.itemTypes) {
 								var total = data.message.itemCount.filter(function (item, key) {
 									if (item && item.target && item.target.key === i) return true;
 								});
@@ -528,8 +528,8 @@ var ShopComponent = IgeEntity.extend({
 		var sharedOn = item.sharedOn || {};
 		var title = item.title || item.name;
 		var sharedOnTwitter = sharedOn.twitter ? 'disabled' : '';
-		var gameId = ige.game.data.defaultData._id;
-		var textToTweet = `Join me in ${ige.game.data.defaultData.title} (${location.href})`;
+		var gameId = taro.game.data.defaultData._id;
+		var textToTweet = `Join me in ${taro.game.data.defaultData.title} (${location.href})`;
 		var hashTags = ['games', 'moddio'];
 		var mentions = ['moddio'];
 		var twitterUrl = `https://twitter.com/intent/tweet?text=${textToTweet}&hashtags=${hashTags.join(',')}&via=${mentions.join(',')}`;
@@ -540,7 +540,7 @@ var ShopComponent = IgeEntity.extend({
 		var btnHtml = '';
 		var sharedOn = item.sharedOn || {};
 		var sharedOnFacebook = sharedOn.facebook ? 'disabled' : '';
-		var gameId = ige.game.data.defaultData._id;
+		var gameId = taro.game.data.defaultData._id;
 
 		if (item) {
 			var title = item.title || item.name;
@@ -556,7 +556,7 @@ var ShopComponent = IgeEntity.extend({
 	updateModdShop: function (tabSelected) {
 		var self = this;
 
-		if (ige.isMobile) {
+		if (taro.isMobile) {
 			$('.open-coin-shop-button').hide();
 		}
 
@@ -577,7 +577,7 @@ var ShopComponent = IgeEntity.extend({
 				$(this).removeClass('active');
 			});
 			$('#unitSkins').addClass('active');
-			var unitKeys = Object.keys(ige.game.data.unitTypes);
+			var unitKeys = Object.keys(taro.game.data.unitTypes);
 			unitKeys = unitKeys.sort();
 
 			// generating li column for unit type selection
@@ -591,7 +591,7 @@ var ShopComponent = IgeEntity.extend({
 					}
 					keyDiv = $('<li/>', {
 						class: `list-group-item list-group-item-action cursor-pointer ${(key == self.shopKey) ? 'active' : ''}`,
-						text: `${ige.game.data.unitTypes[key].name} (${self.unitSkinCount[key]})`,
+						text: `${taro.game.data.unitTypes[key].name} (${self.unitSkinCount[key]})`,
 						name: key
 					}).on('click', function () {
 						self.shopKey = $(this).attr('name');
@@ -612,7 +612,7 @@ var ShopComponent = IgeEntity.extend({
 				$(this).removeClass('active');
 			});
 			$('#itemSkins').addClass('active');
-			for (key in ige.game.data.itemTypes) {
+			for (key in taro.game.data.itemTypes) {
 				$('#modd-shop-modal .shop-items').html('');
 				if (self.itemSkinCount[key] > 0) {
 					// by default, choose the first key
@@ -621,7 +621,7 @@ var ShopComponent = IgeEntity.extend({
 					}
 					keyDiv = $('<li/>', {
 						class: `list-group-item ${(key == self.shopKey) ? 'active' : ''}`,
-						text: `${ige.game.data.itemTypes[key].name} (${self.itemSkinCount[key]})`,
+						text: `${taro.game.data.itemTypes[key].name} (${self.itemSkinCount[key]})`,
 						name: key
 					}).on('click', function () {
 						self.shopKey = $(this).attr('name');
@@ -648,7 +648,7 @@ var ShopComponent = IgeEntity.extend({
 		if (self.shopType == 'unitSkins' || self.shopType == 'itemSkins') // skins
 		{
 			$.ajax({
-				url: `/api/game/${ige.game.data.defaultData.parentGame || ige.client.server.gameId}/shop`,
+				url: `/api/game/${taro.game.data.defaultData.parentGame || taro.client.server.gameId}/shop`,
 				data: {
 					type: self.shopType === 'unitSkins' ? 'unit' : 'item',
 					key: self.shopKey,
@@ -712,7 +712,7 @@ var ShopComponent = IgeEntity.extend({
 		}
 	},
 	isItemRequirementSetisfied: function (req, priceAttr) {
-		var ownerPlayer = ige.client.myPlayer;
+		var ownerPlayer = taro.client.myPlayer;
 		var playerTypeAttribute = ownerPlayer._stats.attributes;
 		if (playerTypeAttribute[priceAttr]) {
 			switch (req.type) {
@@ -740,8 +740,8 @@ var ShopComponent = IgeEntity.extend({
 	getItemPopoverHtml: function (item, shopItem) {
 		var self = this;
 		var html = '';
-		var ownerPlayer = ige.client.myPlayer;
-		var ownerUnit = ige.$(ownerPlayer._stats.selectedUnitId);
+		var ownerPlayer = taro.client.myPlayer;
+		var ownerUnit = taro.$(ownerPlayer._stats.selectedUnitId);
 		if (item.description) {
 			html += `<p>${item.description}</P>`;
 		}
@@ -753,8 +753,8 @@ var ShopComponent = IgeEntity.extend({
 				requirements += `<p class='mb-2 ml-2 no-selection ${requirementsSatisfied}'>`;
 				requirements += req.value;
 				requirements += ' ';
-				requirements += ige.game.data.attributeTypes[priceAttr] &&
-					ige.game.data.attributeTypes[priceAttr].name ||
+				requirements += taro.game.data.attributeTypes[priceAttr] &&
+					taro.game.data.attributeTypes[priceAttr].name ||
 					ownerPlayer._stats.attributes[priceAttr] && ownerPlayer._stats.attributes[priceAttr].name;
 				requirements += '</p>';
 			}
@@ -763,7 +763,7 @@ var ShopComponent = IgeEntity.extend({
 			for (var i = 0; i < requiredItemTypesKeys.length; i++) {
 				var itemKey = requiredItemTypesKeys[i];
 				var requiredQty = shopItem.requirement.requiredItemTypes[itemKey];
-				var item = ige.game.getAsset('itemTypes', itemKey);
+				var item = taro.game.getAsset('itemTypes', itemKey);
 				var requirementsSatisfied = ownerUnit.inventory.hasRequiredQuantity(itemKey, requiredQty) && 'text-success' || 'text-danger';
 				requirements += `<p  class="mb-2 ml-2 no-selection ${requirementsSatisfied}">${requiredQty || ''} ${item.name}</p>`;
 			}
@@ -783,8 +783,8 @@ var ShopComponent = IgeEntity.extend({
 				prices += `<p class='mb-2 ml-2 ${requirementsSatisfied}'>`;
 				prices += shopItem.price.playerAttributes[priceAttr];
 				prices += ' ';
-				prices += ige.game.data.attributeTypes[priceAttr] &&
-					ige.game.data.attributeTypes[priceAttr].name ||
+				prices += taro.game.data.attributeTypes[priceAttr] &&
+					taro.game.data.attributeTypes[priceAttr].name ||
 					ownerPlayer._stats.attributes[priceAttr] && ownerPlayer._stats.attributes[priceAttr].name;
 				prices += '</p>';
 			}
@@ -794,7 +794,7 @@ var ShopComponent = IgeEntity.extend({
 			for (var i = 0; i < requiredItemTypesKeys.length; i++) {
 				var itemKey = requiredItemTypesKeys[i];
 				var requiredQty = shopItem.price.requiredItemTypes[itemKey];
-				var item = ige.game.getAsset('itemTypes', itemKey);
+				var item = taro.game.getAsset('itemTypes', itemKey);
 				var requirementsSatisfied = ownerUnit.inventory.hasRequiredQuantity(itemKey, requiredQty) && 'text-success' || 'text-danger';
 				prices += `<p  class="mb-2 ml-2 no-selection ${requirementsSatisfied}">${requiredQty || ''} ${item.name}</p>`;
 			}
@@ -814,16 +814,16 @@ var ShopComponent = IgeEntity.extend({
 	},
 	openItemShop: function (type, selectedTab) {
 		var self = this;
-		if (!ige.game.data.shops) return;
+		if (!taro.game.data.shops) return;
 		self.currentType = type || self.currentType;
 		if (!self.currentType) return;
-		var shopItemsKeys = ige.game.data.shops[self.currentType] ? Object.keys(ige.game.data.shops[self.currentType].itemTypes || {}) : [];
+		var shopItemsKeys = taro.game.data.shops[self.currentType] ? Object.keys(taro.game.data.shops[self.currentType].itemTypes || {}) : [];
 		shopItemsKeys = shopItemsKeys.sort();
-		var shopUnitsKeys = ige.game.data.shops[self.currentType] ? Object.keys(ige.game.data.shops[self.currentType].unitTypes || {}) : [];
+		var shopUnitsKeys = taro.game.data.shops[self.currentType] ? Object.keys(taro.game.data.shops[self.currentType].unitTypes || {}) : [];
 		shopUnitsKeys = shopUnitsKeys.sort();
-		var shopItems = ige.game.data.shops[self.currentType] ? _.cloneDeep(ige.game.data.shops[self.currentType].itemTypes) : [];
-		var shopUnits = ige.game.data.shops[self.currentType] ? ige.game.data.shops[self.currentType].unitTypes : [];
-		var isDismissible = ige.game.data.shops[self.currentType] && ige.game.data.shops[self.currentType].dismissible != undefined ? ige.game.data.shops[self.currentType].dismissible : true;
+		var shopItems = taro.game.data.shops[self.currentType] ? _.cloneDeep(taro.game.data.shops[self.currentType].itemTypes) : [];
+		var shopUnits = taro.game.data.shops[self.currentType] ? taro.game.data.shops[self.currentType].unitTypes : [];
+		var isDismissible = taro.game.data.shops[self.currentType] && taro.game.data.shops[self.currentType].dismissible != undefined ? taro.game.data.shops[self.currentType].dismissible : true;
 		var shopItemsKeysUsingCoins = [];
 		for (var key in shopItems) {
 			if (typeof shopItems[key].price == 'object' && shopItems[key].price.coins != undefined && shopItems[key].price.coins > 0) {
@@ -860,11 +860,11 @@ var ShopComponent = IgeEntity.extend({
 			class: 'row text-center'
 		});
 
-		var ownerPlayer = ige.client.myPlayer;
+		var ownerPlayer = taro.client.myPlayer;
 		if (!ownerPlayer) return;
 
 		var isAdBlockEnabled = ownerPlayer._stats.isAdBlockEnabled;
-		var ownerUnit = ige.$(ownerPlayer._stats.selectedUnitId);
+		var ownerUnit = taro.$(ownerPlayer._stats.selectedUnitId);
 
 		var playerTypeAttribute = ownerPlayer._stats.attributes;
 		var imgArray = [];
@@ -874,7 +874,7 @@ var ShopComponent = IgeEntity.extend({
 			});
 			$('[id=item]').addClass('active');
 			for (var i = 0; i < shopItemsKeys.length; i++) {
-				var item = ige.game.getAsset('itemTypes', shopItemsKeys[i]);
+				var item = taro.game.getAsset('itemTypes', shopItemsKeys[i]);
 				var shopItem = shopItems[shopItemsKeys[i]];
 
 				if (item && shopItem && shopItem.isPurchasable) {
@@ -991,7 +991,7 @@ var ShopComponent = IgeEntity.extend({
 			});
 			$('[id=unit]').addClass('active');
 			for (var i = 0; i < shopUnitsKeys.length; i++) {
-				var unit = ige.game.getAsset('unitTypes', shopUnitsKeys[i]);
+				var unit = taro.game.getAsset('unitTypes', shopUnitsKeys[i]);
 				var shopUnit = shopUnits[shopUnitsKeys[i]];
 
 				if (shopUnit && shopUnit.isPurchasable) {
@@ -1094,7 +1094,7 @@ var ShopComponent = IgeEntity.extend({
 		var priceKey = [];
 		var coins = 0;
 		var itemsRequired = [];
-		var attributeTypes = ige.game.data.attributeTypes;
+		var attributeTypes = taro.game.data.attributeTypes;
 
 		if (typeof type.price === 'object') {
 			coins = type.price.coins;
@@ -1110,7 +1110,7 @@ var ShopComponent = IgeEntity.extend({
 
 			var selectedAttribute = {};
 
-			selectedAttribute = ige.game.data.attributeTypes[key] || playerTypeAttribute[key];
+			selectedAttribute = taro.game.data.attributeTypes[key] || playerTypeAttribute[key];
 
 			if (typeof selectedAttribute === 'object') {
 				if (Object.keys(selectedAttribute || []).length === 0) {
@@ -1134,7 +1134,7 @@ var ShopComponent = IgeEntity.extend({
 		for (var i = 0; i < requiredItemTypesKeys.length; i++) {
 			var itemKey = requiredItemTypesKeys[i];
 			var requiredQty = itemsRequired[itemKey];
-			var item = ige.game.getAsset('itemTypes', itemKey);
+			var item = taro.game.getAsset('itemTypes', itemKey);
 			if (btnLabel == 'free') {
 				btnLabel = '';
 			}
@@ -1161,7 +1161,7 @@ var ShopComponent = IgeEntity.extend({
 	},
 
 	openCoinShop: function () {
-		if (ige.isClient) {
+		if (taro.isClient) {
 			$('#coin-shop-modal').modal({
 				show: true,
 				keybfoard: true
@@ -1259,7 +1259,7 @@ var ShopComponent = IgeEntity.extend({
 			);
 
 			if (item.target && item.target.entityType == 'unit') {
-				itemDetails = ige.game.getAsset('unitTypes', item.target.key);
+				itemDetails = taro.game.getAsset('unitTypes', item.target.key);
 			}
 
 			this.renderShopImage(itemDetails, item, 'image');
@@ -1303,7 +1303,7 @@ var ShopComponent = IgeEntity.extend({
 
 		var totalPages = Math.ceil(self.skinItems.length / self.perPageItems);
 		var maxPageNumber = Math.min(11, totalPages);
-		if (ige.isMobile) {
+		if (taro.isMobile) {
 			maxPageNumber = Math.min(3, totalPages);
 		}
 		var currentPage = self.currentPagination - 1;
@@ -1333,29 +1333,29 @@ var ShopComponent = IgeEntity.extend({
 	},
 
 	closeShop: function (clientId) {
-		if (ige.isClient) {
+		if (taro.isClient) {
 			// console.log("hide!")
 			$('#shop-modal').modal('hide');
 			this.closeModals();
-		} else if (ige.isServer) {
-			ige.network.send('ui', { command: 'closeShop' }, clientId);
+		} else if (taro.isServer) {
+			taro.network.send('ui', { command: 'closeShop' }, clientId);
 		}
 	},
 
 	purchase: function (id, token = null) {
-		ige.network.send('buyItem', {id, token}); // using attr name instead of skinName, otherwise, it'll send the last itemName in constants.itemTypes only
+		taro.network.send('buyItem', {id, token}); // using attr name instead of skinName, otherwise, it'll send the last itemName in constants.itemTypes only
 	},
 	purchaseUnit: function (id) {
-		ige.network.send('buyUnit', id);
+		taro.network.send('buyUnit', id);
 	},
 	
 	verifyUserPinForPurchase: function (id) {
-		const serverId = ige.client.server.id;
+		const serverId = taro.client.server.id;
 
 		if (typeof window.validateUserPin === 'function') {
-			window.validateUserPin('ige.shop.purchase', id, serverId);
+			window.validateUserPin('taro.shop.purchase', id, serverId);
 		} else {
-			ige.network.send('buyItem', {id});
+			taro.network.send('buyItem', {id});
 		}
 	},
 	
@@ -1364,7 +1364,7 @@ var ShopComponent = IgeEntity.extend({
 		var stockClock = setInterval(function () {
 			self.removeOldestItem();
 			while (self.inventory.length < self.maxInventorySize) {
-				self.addItem(ige.item.getRandomItemData({ isPurchasable: true })); // only get items that have isPurchasable set as true
+				self.addItem(taro.item.getRandomItemData({ isPurchasable: true })); // only get items that have isPurchasable set as true
 			}
 		}, (process.env.ENV == 'dev') ? 3000 : 30000);
 	},
@@ -1374,18 +1374,18 @@ var ShopComponent = IgeEntity.extend({
 
 		self.inventory.push(data);
 
-		if (ige.isServer) {
+		if (taro.isServer) {
 			if (data) {
-				data.id = ige.newIdHex();
-				ige.network.send('addShopItem', data);
+				data.id = taro.newIdHex();
+				taro.network.send('addShopItem', data);
 			}
-		} else if (ige.isClient) {
+		} else if (taro.isClient) {
 			var self = this;
 			var modalBody = $('#shop-modal .modal-body');
 			$('.popover').remove();
 
 			// console.log("adding item", data)
-			var itemDiv = ige.itemUi.getItemSlotDiv(data, {
+			var itemDiv = taro.itemUi.getItemSlotDiv(data, {
 				popover: 'bottom',
 				isDraggable: false,
 				isPurchasable: true
@@ -1404,10 +1404,10 @@ var ShopComponent = IgeEntity.extend({
 	},
 
 	removeItem: function (id) {
-		if (ige.isServer) {
+		if (taro.isServer) {
 			delete this.inventory[id];
-			ige.network.send('removeShopItem', { id: id });
-		} else if (ige.isClient) {
+			taro.network.send('removeShopItem', { id: id });
+		} else if (taro.isClient) {
 			$(`.inventory-slot[id='${id}']`).remove();
 		}
 	},
@@ -1418,11 +1418,11 @@ var ShopComponent = IgeEntity.extend({
 
 	updateShopInventory: function (items, clientId) {
 		var self = this;
-		if (ige.isServer) {
+		if (taro.isServer) {
 			if (items.length > 0) {
-				ige.network.send('updateShopInventory', items, clientId);
+				taro.network.send('updateShopInventory', items, clientId);
 			}
-		} else if (ige.isClient) {
+		} else if (taro.isClient) {
 			for (i in items) {
 				self.addItem(items[i]);
 			}
@@ -1436,14 +1436,14 @@ var ShopComponent = IgeEntity.extend({
 	},
 
 	getItemById: function (itemTypeId) {
-		var itemData = ige.game.getAsset('itemTypes', itemTypeId);
+		var itemData = taro.game.getAsset('itemTypes', itemTypeId);
 		if (itemData) {
 			itemData.itemTypeId = itemTypeId;
 			return itemData;
 		}
 	},
 	getUnitById: function (unitId) {
-		var unitData = ige.game.getAsset('unitTypes', unitId);
+		var unitData = taro.game.getAsset('unitTypes', unitId);
 		if (unitData) {
 			unitData.unitTypeId = unitId;
 			return unitData;

@@ -1,4 +1,4 @@
-declare class IgeObject extends IgeEventingClass {
+declare class TaroObject extends TaroEventingClass {
 
 	destroy (): void;
 

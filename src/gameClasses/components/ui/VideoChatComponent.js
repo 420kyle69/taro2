@@ -1,4 +1,4 @@
-var VideoChatComponent = IgeEntity.extend({
+var VideoChatComponent = TaroEntity.extend({
 	classId: 'VideoChatComponent',
 	componentId: 'videoChat',
 
@@ -10,13 +10,13 @@ var VideoChatComponent = IgeEntity.extend({
 		this.groupedPlayers = {};
 		self.playerDistances = {};
 
-		if (ige.isServer) {
+		if (taro.isServer) {
 			self.chatEnterDistance = 50000;
 			self.chatLeaveDistance = 50000;
 
 			// update player groups every 1s
 			setInterval(self.updatePlayerGroups, 1000, self);
-		} else if (ige.isClient) {
+		} else if (taro.isClient) {
 			self.minRange = 300; // myPlayer's video & audio chat radius. when range is at 700, fade value & audio should be at 0.
 			self.maxRange = 700;
 			if (typeof videoChatUpdateSpatialVideo == 'function') {
@@ -26,8 +26,8 @@ var VideoChatComponent = IgeEntity.extend({
 	},
 
 	updatePlayerGroups: function (self) {
-		var players = ige.$$('player').filter(function (player) { return player._stats.controlledBy == 'human'; });
-		// var players = ige.$$('player')
+		var players = taro.$$('player').filter(function (player) { return player._stats.controlledBy == 'human'; });
+		// var players = taro.$$('player')
 
 		// update centoid of the groups
 		for (groupId in self.groups) {
@@ -47,7 +47,7 @@ var VideoChatComponent = IgeEntity.extend({
 			// 	for (var i = 0; i < playerIds.length; i++) {
 			// 		var playerId = playerIds[i]
 			// 		console.log("inspecting player", playerId)
-			// 		var player = ige.$(playerId);
+			// 		var player = taro.$(playerId);
 			// 		var unit = player.getSelectedUnit();
 			// 		if (unit != undefined)
 			// 			console.log(unit._translate)
@@ -124,7 +124,7 @@ var VideoChatComponent = IgeEntity.extend({
 		var self = this;
 		// group needs ID, and its members' PlayerID and their positions
 		// console.log("creating a group.. initial members:", playerIds)
-		var groupId = ige.newIdHex();
+		var groupId = taro.newIdHex();
 		self.groups[groupId] = {
 			playerIds: []
 		};
@@ -146,7 +146,7 @@ var VideoChatComponent = IgeEntity.extend({
 				if (playerIds) {
 					for (i = 0; i < playerIds.length; i++) {
 						var playerId = playerIds[i];
-						var player = ige.$(playerId);
+						var player = taro.$(playerId);
 						if (player) {
 							this.removePlayerFromGroup(playerId);
 						}
@@ -159,20 +159,20 @@ var VideoChatComponent = IgeEntity.extend({
 	},
 
 	addPlayerToGroup: function (playerId, groupId) {
-		var player = ige.$(playerId);
+		var player = taro.$(playerId);
 		if (player) {
 			this.groups[groupId].playerIds.push(playerId);
 			player.vcGroupId = groupId;
 			console.log('Adding player ', player._stats.name, '(', playerId, ') from the group', groupId);
 			this.groupedPlayers[playerId] = groupId;
-			ige.network.send('videoChat', { command: 'joinGroup', groupId: groupId }, player._stats.clientId);
+			taro.network.send('videoChat', { command: 'joinGroup', groupId: groupId }, player._stats.clientId);
 		} else {
 			console.log('Cannot add player to videoChat group. Player doesn\'t exist!');
 		}
 	},
 
 	removePlayerFromGroup: function (playerId, sendNetworkEvent = true) {
-		var player = ige.$(playerId);
+		var player = taro.$(playerId);
 		if (player) {
 			if (player.vcGroupId) {
 				var playerIds = this.groups[player.vcGroupId].playerIds;
@@ -185,7 +185,7 @@ var VideoChatComponent = IgeEntity.extend({
 								delete this.groupedPlayers[playerId];
 							}
 							if (sendNetworkEvent) {
-								ige.network.send('videoChat', { command: 'leaveGroup' }, player._stats.clientId);
+								taro.network.send('videoChat', { command: 'leaveGroup' }, player._stats.clientId);
 							}
 
 							// if there's only 1 person in a group, destroy the group
@@ -220,7 +220,7 @@ var VideoChatComponent = IgeEntity.extend({
 		if (playerIds) {
 			for (var i = 0; i < playerIds.length; i++) {
 				var playerId = playerIds[i];
-				var player = ige.$(playerId);
+				var player = taro.$(playerId);
 				if (player) {
 					var unit = player.getSelectedUnit();
 					if (unit) {
@@ -253,7 +253,7 @@ var VideoChatComponent = IgeEntity.extend({
 
 	updatePlayerDistanceMatrix: function (self) {
 		self.playerDistances = {};
-		var players = ige.$$('player').filter(function (player) { return player._stats.controlledBy == 'human'; });
+		var players = taro.$$('player').filter(function (player) { return player._stats.controlledBy == 'human'; });
 
 		for (var i = 0; i < players.length; i++) {
 			var playerA = players[i];
@@ -283,10 +283,10 @@ var VideoChatComponent = IgeEntity.extend({
 		}
 
 		// console.log(self.playerDistances)
-		if (ige.client.myPlayer != undefined) {
-			videoChatUpdateSpatialVideo(self.playerDistances[ige.client.myPlayer.id()]);
+		if (taro.client.myPlayer != undefined) {
+			videoChatUpdateSpatialVideo(self.playerDistances[taro.client.myPlayer.id()]);
 		}
-		// console.log("distance to other players", self.playerDistances[ige.client.myPlayer.id()])
+		// console.log("distance to other players", self.playerDistances[taro.client.myPlayer.id()])
 	}
 
 });

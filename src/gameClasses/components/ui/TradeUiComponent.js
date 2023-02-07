@@ -1,4 +1,4 @@
-var TradeUiComponent = IgeEntity.extend({
+var TradeUiComponent = TaroEntity.extend({
 	classId: 'TradeUiComponent',
 	componentId: 'tradeUi',
 
@@ -7,28 +7,28 @@ var TradeUiComponent = IgeEntity.extend({
 
 		$('#accept-trade-request-button').on('click', function () {
 			var requestedBy = $('#requested-by').text();
-			var acceptedBy = ige.client.myPlayer.id();
-			ige.network.send('trade', { type: 'start', requestedBy: requestedBy, acceptedBy: acceptedBy });
+			var acceptedBy = taro.client.myPlayer.id();
+			taro.network.send('trade', { type: 'start', requestedBy: requestedBy, acceptedBy: acceptedBy });
 			$('#trade-request-div').hide();
-			ige.tradeUi.startTrading(ige.client.myPlayer, ige.$(requestedBy));
+			taro.tradeUi.startTrading(taro.client.myPlayer, taro.$(requestedBy));
 		});
 
 		$('#accept-trade-button').on('click', function () {
-			ige.network.send('trade', {
+			taro.network.send('trade', {
 				type: 'accept',
-				acceptedBy: ige.client.myPlayer.id(),
-				acceptedFor: ige.client.myPlayer.tradingWith
+				acceptedBy: taro.client.myPlayer.id(),
+				acceptedFor: taro.client.myPlayer.tradingWith
 			});
 		});
 
 		$('.cancel-trade-request-button').on('click', function () {
-			// ige.network.send('trade', { type: 'cancel' });
-			ige.tradeUi.closeTradeRequest();
+			// taro.network.send('trade', { type: 'cancel' });
+			taro.tradeUi.closeTradeRequest();
 		});
 
 		$('.cancel-trade-button').on('click', function () {
-			// ige.network.send('trade', { type: 'cancel' });
-			ige.tradeUi.closeTrading();
+			// taro.network.send('trade', { type: 'cancel' });
+			taro.tradeUi.closeTrading();
 		});
 	},
 
@@ -54,9 +54,9 @@ var TradeUiComponent = IgeEntity.extend({
 	},
 
 	startTrading: function (playerA, playerB) {
-		if (playerA !== ige.client.myPlayer) {
+		if (playerA !== taro.client.myPlayer) {
 			$('#trader-name').text(playerA._stats.name);
-		} else if (playerB !== ige.client.myPlayer) {
+		} else if (playerB !== taro.client.myPlayer) {
 			$('#trader-name').text(playerB._stats.name);
 		}
 		playerA.tradingWith = playerB.id();
@@ -68,17 +68,17 @@ var TradeUiComponent = IgeEntity.extend({
 		$('#trade-div').show();
 	},
 	sendOfferingItems: function () {
-		var selectedUnit = ige.client.myPlayer.getSelectedUnit();
+		var selectedUnit = taro.client.myPlayer.getSelectedUnit();
 		var totalInventorySlot = selectedUnit.inventory.getTotalInventorySize();
 		var tradeItems = [];
 		var id = 0;
 		for (var i = totalInventorySlot; i < totalInventorySlot + 5; i++) {
 			tradeItems[id++] = selectedUnit._stats.itemIds[i];
 		}
-		ige.network.send('trade', {
+		taro.network.send('trade', {
 			type: 'offer',
-			from: ige.client.myPlayer.id(),
-			to: ige.client.myPlayer.tradingWith,
+			from: taro.client.myPlayer.id(),
+			to: taro.client.myPlayer.tradingWith,
 			tradeItems: tradeItems
 		});
 	},
@@ -86,10 +86,10 @@ var TradeUiComponent = IgeEntity.extend({
 		for (var i = 0; i < tradeItems.length; i++) {
 			var index = i + 1;
 			var itemId = tradeItems[i];
-			var item = ige.$(itemId);
+			var item = taro.$(itemId);
 			$(`#offer-${index}`).html('');
 			if (itemId && item && item._category === 'item') {
-				var itemDiv = ige.itemUi.getItemDiv(item, {
+				var itemDiv = taro.itemUi.getItemDiv(item, {
 					isDraggable: false,
 					popover: 'top',
 					isTrading: true
@@ -103,9 +103,9 @@ var TradeUiComponent = IgeEntity.extend({
 	},
 
 	closeTrading: function () {
-		var playerA = ige.client.myPlayer;
-		var playerB = ige.$(ige.client.myPlayer.tradingWith);
-		ige.network.send('trade', { type: 'cancel', cancleBy: playerA.id(), cancleTo: playerB.id() });
+		var playerA = taro.client.myPlayer;
+		var playerB = taro.$(taro.client.myPlayer.tradingWith);
+		taro.network.send('trade', { type: 'cancel', cancleBy: playerA.id(), cancleTo: playerB.id() });
 		delete playerA.tradingWith;
 		delete playerB.tradingWith;
 		delete playerA.isTrading;

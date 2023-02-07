@@ -1,7 +1,7 @@
-IgeFilters.outlineDetect = function (canvas, ctx, originalImage, texture, data) {
+TaroFilters.outlineDetect = function (canvas, ctx, originalImage, texture, data) {
 	// Apply the filter and then put the new pixel data
 	ctx.putImageData(
-		IgeFilters._convolute(
+		TaroFilters._convolute(
 			ctx.getImageData(
 				0,
 				0,

@@ -1,14 +1,14 @@
-declare class IgeEntity extends IgeObject {
+declare class TaroEntity extends TaroObject {
 
 	_alive: boolean;
 	_destroyed: boolean;
 	_deathTime: number;
 	_category: string; // TODO more specific values
-	_translate: IgePoint3d;
-	_rotate: IgePoint3d;
-	_scale: IgePoint3d;
+	_translate: TaroPoint3d;
+	_rotate: TaroPoint3d;
+	_scale: TaroPoint3d;
 	_stats: EntityStats;
-	_bounds2d: IgePoint2d;
+	_bounds2d: TaroPoint2d;
 	_depth: number;
 	_layer: number;
 	_id: string;
@@ -22,7 +22,7 @@ declare class IgeEntity extends IgeObject {
 	_processTransform (): void
 
 	isHidden (): boolean;
-	getOwnerUnit (): IgeEntity | undefined;
+	getOwnerUnit (): TaroEntity | undefined;
 	streamUpdateData (queuedData: UpdateData[]);
 	transformTexture (x: number, y: number, z: number, type?: boolean);
 

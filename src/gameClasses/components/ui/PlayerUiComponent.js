@@ -1,4 +1,4 @@
-var PlayerUiComponent = IgeEntity.extend({
+var PlayerUiComponent = TaroEntity.extend({
 	classId: 'PlayerUiComponent',
 	componentId: 'playerUi',
 
@@ -22,10 +22,10 @@ var PlayerUiComponent = IgeEntity.extend({
 
 		$('#player-input-modal').on('hidden.bs.modal', function () {
 			if (self.pressedButton) {
-				ige.network.send('playerCustomInput', { status: 'submitted', inputText: self.lastInputValue });
+				taro.network.send('playerCustomInput', { status: 'submitted', inputText: self.lastInputValue });
 				self.lastInputValue = '';
 			} else {
-				ige.network.send('playerCustomInput', { status: 'dismissed' });
+				taro.network.send('playerCustomInput', { status: 'dismissed' });
 			}
 
 			$('#player-input-modal').removeClass('d-flex');
@@ -55,7 +55,7 @@ var PlayerUiComponent = IgeEntity.extend({
 
 		$('button#player-input-cancel').on('click', function () {
 			self.pressedButton = false;
-			ige.network.send('playerCustomInput', { status: 'cancelled' });
+			taro.network.send('playerCustomInput', { status: 'cancelled' });
 			$('#player-input-modal').modal('hide');
 		});
 	},
@@ -64,7 +64,7 @@ var PlayerUiComponent = IgeEntity.extend({
 		var self = this;
 
 		$('#players-attribute-div').html('');
-		var attributeTypes = ige.game.data.attributeTypes;
+		var attributeTypes = taro.game.data.attributeTypes;
 
 		if (attributeTypes == undefined)
 			return;
@@ -115,7 +115,7 @@ var PlayerUiComponent = IgeEntity.extend({
 
 		// update shop as player points are changed and when shop modal is open
 		if ($('#modd-item-shop-modal').hasClass('show')) {
-			ige.shop.openItemShop();
+			taro.shop.openItemShop();
 		}
 	},
 
@@ -256,7 +256,7 @@ var PlayerUiComponent = IgeEntity.extend({
 			const optionId = index.toString()
 			$('.dialogue-option').addClass('disabled');
 			$(this).find('.option-check').removeClass('d-none');
-			ige.playerUi.submitDialogueModal(dialogueId, optionId);
+			taro.playerUi.submitDialogueModal(dialogueId, optionId);
 		}
 
 		var self = this;
@@ -379,7 +379,7 @@ var PlayerUiComponent = IgeEntity.extend({
 			}
 		}
 
-		var dialogue = ige.game.data.dialogues[dialogueId];
+		var dialogue = taro.game.data.dialogues[dialogueId];
 		dialogue.message = dialogue.message || '';
 		if (dialogue) {
 			dialogue = getDialogueInstance(dialogue);
@@ -403,7 +403,7 @@ var PlayerUiComponent = IgeEntity.extend({
 	submitDialogueModal: function (dialogueId, optionId) {
 		var self = this;
 		var willOpenNewDialogue = false;
-		var dialogue = ige.game.data.dialogues[dialogueId];
+		var dialogue = taro.game.data.dialogues[dialogueId];
 
 		for (var key in dialogue.options) {
 			if (key === optionId) {
@@ -418,7 +418,7 @@ var PlayerUiComponent = IgeEntity.extend({
 		}
 
 		if (dialogueId && optionId) {
-			ige.network.send('playerDialogueSubmit', {
+			taro.network.send('playerDialogueSubmit', {
 				status: 'submitted',
 				dialogue: dialogueId,
 				option: optionId

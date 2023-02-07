@@ -121,16 +121,16 @@ class TileEditor {
         const map = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
 		map.putTileAt(data.gid, data.x, data.y, false, data.layer);
 		/* TODO: SAVE MAP DATA FROM SERVER SIDE */
-		const width = ige.game.data.map.width;
-		//save tile change to ige.game.map.data
-		if (ige.game.data.map.layers.length > 4 && data.layer >= 2) data.layer ++;
-		ige.game.data.map.layers[data.layer].data[data.y*width + data.x] = data.gid;
-		if (ige.physics && ige.game.data.map.layers[data.layer].name === 'walls') {
+		const width = taro.game.data.map.width;
+		//save tile change to taro.game.map.data
+		if (taro.game.data.map.layers.length > 4 && data.layer >= 2) data.layer ++;
+		taro.game.data.map.layers[data.layer].data[data.y*width + data.x] = data.gid;
+		if (taro.physics && taro.game.data.map.layers[data.layer].name === 'walls') {
 			//if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
-			ige.physics.destroyWalls();
-			let map = ige.scaleMap(_.cloneDeep(ige.game.data.map));
-			ige.tiled.loadJson(map, function (layerArray, IgeLayersById) {
-				ige.physics.staticsFromMap(IgeLayersById.walls);
+			taro.physics.destroyWalls();
+			let map = taro.scaleMap(_.cloneDeep(taro.game.data.map));
+			taro.tiled.loadJson(map, function (layerArray, TaroLayersById) {
+				taro.physics.staticsFromMap(TaroLayersById.walls);
 			})
 		}
     }
@@ -144,7 +144,7 @@ class TileEditor {
 			!(index === 0 && map.getTileAt(tileX, tileY, true).index === -1)) {
 				map.putTileAt(index, tileX, tileY);
 				map.getTileAt(tileX, tileY, true).tint = 0xffffff;
-				ige.network.send('editTile', {gid: index, layer: map.currentLayerIndex, x: tileX, y: tileY});
+				taro.network.send('editTile', {gid: index, layer: map.currentLayerIndex, x: tileX, y: tileY});
 			}
 		}
 	}
@@ -183,7 +183,7 @@ class TileEditor {
 	}
 
     update (): void {
-        if(ige.developerMode.active && ige.developerMode.activeTab === 'map') {
+        if(taro.developerMode.active && taro.developerMode.activeTab === 'map') {
             const devModeScene = this.devModeTools.scene;
 			const palette = this.tilePalette;
 			const map = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;

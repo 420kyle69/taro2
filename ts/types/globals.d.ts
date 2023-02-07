@@ -1,5 +1,5 @@
 declare let _: any;
-declare let ige: IgeEngine;
+declare let taro: TaroEngine;
 declare const gameId: string;
 
 declare const UIPlugin: any;

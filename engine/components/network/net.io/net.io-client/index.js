@@ -31,9 +31,9 @@ NetIo._debug = {
  * Define the class system.
  * @type {*}
  */
-NetIo.Class = IgeClass;
+NetIo.Class = TaroClass;
 
-NetIo.EventingClass = IgeEventingClass;
+NetIo.EventingClass = TaroEventingClass;
 
 NetIo.Client = NetIo.EventingClass.extend({
 	classId: 'NetIo.Client',
@@ -106,7 +106,7 @@ NetIo.Client = NetIo.EventingClass.extend({
 
 		var distinctId = window.distinctId || ''		
 		
-		this._socket = new WebSocket(`${url}?token=${gsAuthToken}&sid=${ige.client.server.id}&distinctId=${distinctId}`, 'netio1');
+		this._socket = new WebSocket(`${url}?token=${gsAuthToken}&sid=${taro.client.server.id}&distinctId=${distinctId}`, 'netio1');
 
 		// Setup event listeners
 		this._socket.onopen = function () { self._onOpen.apply(self, arguments); };
@@ -117,7 +117,7 @@ NetIo.Client = NetIo.EventingClass.extend({
 
 	disconnect: function (reason) {
 		this._socket.close(1000, reason);
-		// this.emit('_igeStreamDestroy');
+		// this.emit('_taroStreamDestroy');
 	},
 
 	send: function (data) {

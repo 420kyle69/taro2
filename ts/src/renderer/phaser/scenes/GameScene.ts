@@ -19,21 +19,21 @@ class GameScene extends PhaserScene {
 
 	init (): void {
 
-		if (ige.isMobile) {
+		if (taro.isMobile) {
 			this.scene.launch('MobileControls');
 		}
 
 		const camera = this.cameras.main;
-		camera.setBackgroundColor(ige.game.data.defaultData.mapBackgroundColor);
+		camera.setBackgroundColor(taro.game.data.defaultData.mapBackgroundColor);
 
 		this.scale.on(Phaser.Scale.Events.RESIZE, () => {
 			if (this.zoomSize) {
 				camera.zoom = this.calculateZoom();
-				ige.client.emit('scale', { ratio: camera.zoom });
+				taro.client.emit('scale', { ratio: camera.zoom });
 			}
 		});
 
-		ige.client.on('zoom', (height: number) => {
+		taro.client.on('zoom', (height: number) => {
 			if (this.zoomSize === height * 2.15) {
 				return;
 			}
@@ -48,38 +48,38 @@ class GameScene extends PhaserScene {
 				true
 			);
 
-			ige.client.emit('scale', { ratio: ratio });
+			taro.client.emit('scale', { ratio: ratio });
 		});
 
-		ige.client.on('change-filter', (data: {filter: renderingFilter}) => {
+		taro.client.on('change-filter', (data: {filter: renderingFilter}) => {
 			this.changeTextureFilter(data.filter);
 		});
 
-		ige.client.on('updateMap', () => {
+		taro.client.on('updateMap', () => {
 			this.updateMap();
 		});
 
-		ige.client.on('create-unit', (unit: Unit) => {
+		taro.client.on('create-unit', (unit: Unit) => {
 			new PhaserUnit(this, unit);
 		});
 
-		ige.client.on('create-item', (item: Item) => {
+		taro.client.on('create-item', (item: Item) => {
 			new PhaserItem(this, item);
 		});
 
-		ige.client.on('create-projectile', (projectile: Projectile) => {
+		taro.client.on('create-projectile', (projectile: Projectile) => {
 			new PhaserProjectile(this, projectile);
 		});
 
-		ige.client.on('create-region', (region: Region) => {
+		taro.client.on('create-region', (region: Region) => {
 			new PhaserRegion(this, region);
 		});
 
-		ige.client.on('create-ray', (data: any) => {
+		taro.client.on('create-ray', (data: any) => {
 			new PhaserRay(this, data.start, data.end, data.config);
 		});
 
-		ige.client.on('floating-text', (data: {
+		taro.client.on('floating-text', (data: {
 			text: string,
 			x: number,
 			y: number,
@@ -88,11 +88,11 @@ class GameScene extends PhaserScene {
 			new PhaserFloatingText(this, data);
 		});
 
-		ige.client.on('stop-follow', () => {
+		taro.client.on('stop-follow', () => {
 			camera.stopFollow();
 		});
 
-		ige.client.on('position-camera', (x: number, y: number) => {
+		taro.client.on('position-camera', (x: number, y: number) => {
 			x -= camera.width / 2;
 			y -= camera.height / 2;
 			camera.setScroll(x, y);
@@ -101,7 +101,7 @@ class GameScene extends PhaserScene {
 
 	preload (): void {
 
-		const data = ige.game.data;
+		const data = taro.game.data;
 
 		if (data.texturePack) {
 			// todo: multiatlas
@@ -232,15 +232,15 @@ class GameScene extends PhaserScene {
 	create (): void {
 		this.events.once('render', () => {
 			this.scene.launch('DevMode');
-			ige.client.rendererLoaded.resolve();
+			taro.client.rendererLoaded.resolve();
 		});
 
 		BitmapFontManager.create(this);
 
 		const map = this.tilemap = this.make.tilemap({ key: 'map' });
 
-		const data = ige.game.data;
-		const scaleFactor = ige.scaleMapDetails.scaleFactor;
+		const data = taro.game.data;
+		const scaleFactor = taro.scaleMapDetails.scaleFactor;
 
 		console.log('map data', data.map);
 
@@ -299,7 +299,7 @@ class GameScene extends PhaserScene {
 		);
 
 		this.events.on('update', () => {
-			ige.client.emit('tick');
+			taro.client.emit('tick');
 		});
 
 		if (data.defaultData.heightBasedZIndex) {
@@ -307,7 +307,7 @@ class GameScene extends PhaserScene {
 		}
 
 		//get filter from game data
-		this.changeTextureFilter(ige.game.data.defaultData.renderingFilter);
+		this.changeTextureFilter(taro.game.data.defaultData.renderingFilter);
 	}
 
 	private changeTextureFilter (filter: renderingFilter) {
@@ -334,7 +334,7 @@ class GameScene extends PhaserScene {
 
 	private updateMap(): void {
 		const map = this.tilemap;
-		const data = ige.game.data;
+		const data = taro.game.data;
 
 		data.map.layers.forEach((layer) => {
 			if (layer.type === 'tilelayer') {
@@ -540,7 +540,7 @@ class GameScene extends PhaserScene {
 
 		const worldPoint = this.cameras.main.getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
 
-		ige.input.emit('pointermove', [{
+		taro.input.emit('pointermove', [{
 			x: worldPoint.x,
 			y: worldPoint.y,
 		}]);

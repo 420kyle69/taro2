@@ -1,7 +1,7 @@
-IgeFilters.brighten = function (canvas, ctx, originalImage, texture, data) {
+TaroFilters.brighten = function (canvas, ctx, originalImage, texture, data) {
 	// Apply the filter and then put the new pixel data
 	ctx.putImageData(
-		IgeFilters._brighten(
+		TaroFilters._brighten(
 			ctx.getImageData(
 				0,
 				0,
@@ -16,10 +16,10 @@ IgeFilters.brighten = function (canvas, ctx, originalImage, texture, data) {
 	);
 };
 
-IgeFilters._brighten = function (imageData, texture, data) {
+TaroFilters._brighten = function (imageData, texture, data) {
 	var arr;
 	var arrCount;
-	var i; var adjustment = texture.data('IgeFilters.brighten.value') || data.value;
+	var i; var adjustment = texture.data('TaroFilters.brighten.value') || data.value;
 
 	arr = imageData.data;
 	arrCount = arr.length;

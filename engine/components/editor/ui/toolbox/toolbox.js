@@ -1,4 +1,4 @@
-var UiToolBox = IgeEventingClass.extend({
+var UiToolBox = TaroEventingClass.extend({
 	classId: 'UiToolBox',
 
 	init: function () {
@@ -7,25 +7,25 @@ var UiToolBox = IgeEventingClass.extend({
 		this.tools = {};
 
 		// Load tool scripts
-		ige.requireScript(`${igeRoot}components/editor/ui/toolbox/tools/UiToolBox_ToolCreate.js`, function () {
-			self.tools.UiToolBox_ToolCreate = ige.newClassInstance('UiToolBox_ToolCreate');
+		taro.requireScript(`${taroRoot}components/editor/ui/toolbox/tools/UiToolBox_ToolCreate.js`, function () {
+			self.tools.UiToolBox_ToolCreate = taro.newClassInstance('UiToolBox_ToolCreate');
 		});
 
-		ige.requireScript(`${igeRoot}components/editor/ui/toolbox/tools/UiToolBox_ToolSelect.js`, function () {
-			self.tools.UiToolBox_ToolSelect = ige.newClassInstance('UiToolBox_ToolSelect');
+		taro.requireScript(`${taroRoot}components/editor/ui/toolbox/tools/UiToolBox_ToolSelect.js`, function () {
+			self.tools.UiToolBox_ToolSelect = taro.newClassInstance('UiToolBox_ToolSelect');
 			self.select('toolSelect');
 		});
 
-		ige.requireScript(`${igeRoot}components/editor/ui/toolbox/tools/UiToolBox_ToolPan.js`, function () {
-			self.tools.UiToolBox_ToolSelect = ige.newClassInstance('UiToolBox_ToolSelect');
+		taro.requireScript(`${taroRoot}components/editor/ui/toolbox/tools/UiToolBox_ToolPan.js`, function () {
+			self.tools.UiToolBox_ToolSelect = taro.newClassInstance('UiToolBox_ToolSelect');
 		});
 
-		ige.requireScript(`${igeRoot}components/editor/ui/toolbox/tools/UiToolBox_ToolTranslate.js`, function () {
-			self.tools.UiToolBox_ToolTranslate = ige.newClassInstance('UiToolBox_ToolTranslate');
+		taro.requireScript(`${taroRoot}components/editor/ui/toolbox/tools/UiToolBox_ToolTranslate.js`, function () {
+			self.tools.UiToolBox_ToolTranslate = taro.newClassInstance('UiToolBox_ToolTranslate');
 		});
 
 		// Load the toolbox html into the editor DOM
-		ige.editor.loadHtml(`${igeRoot}components/editor/ui/toolbox/toolbox.html`, function (html) {
+		taro.editor.loadHtml(`${taroRoot}components/editor/ui/toolbox/toolbox.html`, function (html) {
 			var toolbox = $(html);
 
 			// Attach logic handlers to tools
@@ -64,11 +64,11 @@ var UiToolBox = IgeEventingClass.extend({
 	action: function (actionId) {
 		switch (actionId) {
 			case 'play':
-				ige.pause(false);
+				taro.pause(false);
 				break;
 
 			case 'pause':
-				ige.pause(true);
+				taro.pause(true);
 				break;
 		}
 	},
@@ -89,8 +89,8 @@ var UiToolBox = IgeEventingClass.extend({
 		// Handle tool init logic
 		if (toolClassId) {
 			if (!this.tools[toolClassId]) {
-				if (ige.classDefined(toolClassId)) {
-					this.tools[toolClassId] = this._currentToolInstance = ige.newClassInstance(toolClassId);
+				if (taro.classDefined(toolClassId)) {
+					this.tools[toolClassId] = this._currentToolInstance = taro.newClassInstance(toolClassId);
 					this._currentToolInstance.enabled(true);
 				} else {
 					this.log(`No class for tool or class not defined: ${toolClassId}`, 'warning');
@@ -119,4 +119,4 @@ var UiToolBox = IgeEventingClass.extend({
 });
 
 // Init
-ige.editor.ui.toolbox = new UiToolBox();
+taro.editor.ui.toolbox = new UiToolBox();

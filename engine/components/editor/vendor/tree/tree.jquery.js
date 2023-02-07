@@ -1,11 +1,11 @@
 (function ($) {
 	function generateList (listData, parent) {
 		var list = $('<ul></ul>');
-		var item = $(`<li id="${listData.id}"><div class="expandLink"></div><span class="igeObject" data-id="${listData.id}" data-classId="${listData.classId}">${listData.text}</span></li>`);
+		var item = $(`<li id="${listData.id}"><div class="expandLink"></div><span class="taroObject" data-id="${listData.id}" data-classId="${listData.classId}">${listData.text}</span></li>`);
 		var i;
 
 		if (!parent) {
-			item.find('.igeObject').addClass('selected');
+			item.find('.taroObject').addClass('selected');
 		}
 
 		list.append(item);

@@ -1,4 +1,4 @@
-declare class ControlComponent extends IgeEntity {
+declare class ControlComponent extends TaroEntity {
 
 	newMousePosition: number[];
 }

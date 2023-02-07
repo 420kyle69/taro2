@@ -1,4 +1,4 @@
-IgeFilters.invert = function (canvas, ctx, originalImage, texture, data) {
+TaroFilters.invert = function (canvas, ctx, originalImage, texture, data) {
 	var w, h, canvasData, i;
 	w = canvas.width;
 	h = canvas.height;

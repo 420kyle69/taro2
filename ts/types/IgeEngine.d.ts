@@ -1,4 +1,4 @@
-declare class IgeEngine extends IgeClass {
+declare class TaroEngine extends TaroClass {
 	
 	tiled: any;
 	regionManager: any;
@@ -23,9 +23,9 @@ declare class IgeEngine extends IgeClass {
 	client: Client;
 	server: Client;
 
-	network: IgeNetIoComponent;
+	network: TaroNetIoComponent;
 
-	input: IgeInputComponent;
+	input: TaroInputComponent;
 
 	mobileControls: MobileControlsComponent;
 

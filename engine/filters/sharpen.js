@@ -1,4 +1,4 @@
-IgeFilters.sharpen = function (canvas, ctx, originalImage, texture, data) {
+TaroFilters.sharpen = function (canvas, ctx, originalImage, texture, data) {
 	var strength = 1;
 	var loop;
 
@@ -9,7 +9,7 @@ IgeFilters.sharpen = function (canvas, ctx, originalImage, texture, data) {
 	for (loop = 0; loop < strength; loop++) {
 		// Apply the filter and then put the new pixel data
 		ctx.putImageData(
-			IgeFilters._convolute(
+			TaroFilters._convolute(
 				ctx.getImageData(
 					0,
 					0,

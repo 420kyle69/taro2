@@ -1,4 +1,4 @@
-var InventoryComponent = IgeEntity.extend({
+var InventoryComponent = TaroEntity.extend({
 	classId: 'InventoryComponent',
 	componentId: 'inventory',
 
@@ -15,8 +15,8 @@ var InventoryComponent = IgeEntity.extend({
 		// render inventory slots on client end
 		var entity = this._entity;
 		var ownerPlayer = entity.getOwner();
-		var mobileClass = ige.isMobile ? 'inventory-slot-mobile ' : 'inventory-slot ';
-		if (ownerPlayer && ige.isClient && entity._stats.clientId === ige.network.id() && ownerPlayer._stats.selectedUnitId == entity.id()) {
+		var mobileClass = taro.isMobile ? 'inventory-slot-mobile ' : 'inventory-slot ';
+		if (ownerPlayer && taro.isClient && entity._stats.clientId === taro.network.id() && ownerPlayer._stats.selectedUnitId == entity.id()) {
 			$('#inventory-slots').html('');
 			$('#inventory-slots-key-stroke').html('');
 			for (var i = 0; i < this._entity._stats.inventorySize; i++) {
@@ -27,8 +27,8 @@ var InventoryComponent = IgeEntity.extend({
 					role: 'button'
 				}).on('click', function () {
 					var slotIndex = parseInt($(this).attr('name')) + 1;
-					if (ige.client.myPlayer) {
-						ige.client.myPlayer.control.keyDown('key', slotIndex);
+					if (taro.client.myPlayer) {
+						taro.client.myPlayer.control.keyDown('key', slotIndex);
 					}
 				}));
 
@@ -53,7 +53,7 @@ var InventoryComponent = IgeEntity.extend({
 	createBackpack () {
 		var entity = this._entity;
 		var backpackSize = entity._stats.backpackSize;
-		var mobileClass = ige.isMobile ? 'inventory-slot-mobile ' : 'inventory-slot ';
+		var mobileClass = taro.isMobile ? 'inventory-slot-mobile ' : 'inventory-slot ';
 
 		if (backpackSize > 0) {
 			this.updateBackpackButton(true);
@@ -82,7 +82,7 @@ var InventoryComponent = IgeEntity.extend({
 		}
 	},
 	createTradingSlots: function () {
-		var mobileClass = ige.isMobile ? 'inventory-slot-mobile ' : 'inventory-slot ';
+		var mobileClass = taro.isMobile ? 'inventory-slot-mobile ' : 'inventory-slot ';
 		if (this._entity._stats.inventorySize) {
 			var totalInventorySize = this.getTotalInventorySize();
 			// total 5 trading slots
@@ -100,7 +100,7 @@ var InventoryComponent = IgeEntity.extend({
 					})
 				);
 
-				ige.itemUi.updateItemSlot(undefined, i);
+				taro.itemUi.updateItemSlot(undefined, i);
 			}
 		}
 	},
@@ -121,7 +121,7 @@ var InventoryComponent = IgeEntity.extend({
 	getSameItemsFromInventory: function (itemTypeId) {
 		var items = this._entity._stats.itemIds;
 		return items && items.filter((id) => {
-			var item = ige.$(id);
+			var item = taro.$(id);
 			if (item && item._stats && item._stats.itemTypeId === itemTypeId) {
 				return true;
 			}
@@ -144,7 +144,7 @@ var InventoryComponent = IgeEntity.extend({
 			if (sameItemTypesInInventory.length) {
 				for (var i = 0; i < sameItemTypesInInventory.length; i++) {
 					var id = sameItemTypesInInventory[i];
-					var item = ige.$(id);
+					var item = taro.$(id);
 					if (!isNaN(parseFloat(item._stats.quantity))) {
 						quantity += item._stats.quantity;
 					} else {
@@ -188,8 +188,8 @@ var InventoryComponent = IgeEntity.extend({
 				if (ownerPlayer) {
 					var lastOpenedShop = ownerPlayer._stats.lastOpenedShop;
 					if (lastOpenedShop) {
-						var shopItems = ige.game.data.shops[lastOpenedShop] ? ige.game.data.shops[lastOpenedShop].itemTypes : [];
-						var itemData = ige.shop.getItemById(itemTypeId);
+						var shopItems = taro.game.data.shops[lastOpenedShop] ? taro.game.data.shops[lastOpenedShop].itemTypes : [];
+						var itemData = taro.shop.getItemById(itemTypeId);
 						var shopData = shopItems[itemTypeId];
 						if (shopData) {
 							if (existingItem && existingItem._stats.removeWhenEmpty && existingItem._stats.quantity == shopData.price.requiredItemTypes[existingItem._stats.itemTypeId]) {
@@ -208,7 +208,7 @@ var InventoryComponent = IgeEntity.extend({
 			for (var i = 0; i < totalInventorySize; i++) {
 				var itemId = self._entity._stats.itemIds[i];
 				if (itemId) {
-					var item = ige.$(itemId);
+					var item = taro.$(itemId);
 					// matching item found in inventory
 					if (item && item._stats.itemTypeId == itemTypeId) {
 						// matching item has infinite quantity. merge items unless item also has infinite quantity
@@ -248,7 +248,7 @@ var InventoryComponent = IgeEntity.extend({
 				)
 			) {
 				var itemId = self._entity._stats.itemIds[i];
-				if (!(itemId && ige.$(itemId))) {
+				if (!(itemId && taro.$(itemId))) {
 					return i + 1; // empty slot found
 				}
 			}
@@ -269,24 +269,24 @@ var InventoryComponent = IgeEntity.extend({
 			slotIndex = self.getFirstAvailableSlotForItem();
 
 		if (slotIndex != undefined && item && unit.canCarryItem(item._stats)) {
-			if (ige.isServer) {
+			if (taro.isServer) {
 				// console.log("inserting item at slot", slotIndex)
 				self._entity._stats.itemIds[slotIndex] = item.id();
 				if (slotIndex != self._entity.currentItemIndex) {
 					item._stats.slotIndex = slotIndex;
 					item.hide();
 				}
-			} else if (ige.isClient && self._entity._stats.clientId === ige.network.id()) {
+			} else if (taro.isClient && self._entity._stats.clientId === taro.network.id()) {
 				var ownerPlayer = self._entity.getOwner();
 				if (ownerPlayer) {
 					if (ownerPlayer._stats.selectedUnitId == self._entity.id()) {
 						item._stats.slotIndex = slotIndex;
-						ige.itemUi.updateItemSlot(item, slotIndex);
+						taro.itemUi.updateItemSlot(item, slotIndex);
 					}
 				}
 			}
 
-			ige.queueTrigger('unitPickedAnItem', {
+			taro.queueTrigger('unitPickedAnItem', {
 				unitId: unit.id(),
 				itemId: item.id()
 			});
@@ -298,7 +298,7 @@ var InventoryComponent = IgeEntity.extend({
 		var self = this;
 		for (var k = 0; k < self._entity._stats.itemIds.length; k++) {
 			var id = self._entity._stats.itemIds[k];
-			var item = ige.$(id);
+			var item = taro.$(id);
 			if (item && item._stats && item._stats.itemTypeId === itemTypeId) {
 				return item;
 			}
@@ -309,7 +309,7 @@ var InventoryComponent = IgeEntity.extend({
 		var self = this;
 		for (var k = 0; k < self._entity._stats.itemIds.length; k++) {
 			var id = self._entity._stats.itemIds[k];
-			var item = ige.$(id);
+			var item = taro.$(id);
 			if (item &&
 				item._stats &&
 				item._stats.itemTypeId === itemTypeId &&
@@ -328,12 +328,12 @@ var InventoryComponent = IgeEntity.extend({
 			itemExistInItemIds = true;
 		}
 
-		if (ige.isServer) {
+		if (taro.isServer) {
 			unit.streamUpdateData([{ itemIds: unit._stats.itemIds }]);
-		} else if (ige.isClient) {
-			if (ige.client.myPlayer && ige.client.myPlayer._stats.selectedUnitId == unit.id() && itemExistInItemIds) {
+		} else if (taro.isClient) {
+			if (taro.client.myPlayer && taro.client.myPlayer._stats.selectedUnitId == unit.id() && itemExistInItemIds) {
 				$(`#item-${slotIndex}`).html('');
-				ige.itemUi.updateItemSlot(item, slotIndex);
+				taro.itemUi.updateItemSlot(item, slotIndex);
 			}
 		}
 	},
@@ -356,7 +356,7 @@ var InventoryComponent = IgeEntity.extend({
 		if (this._entity._stats.itemIds) {
 			var itemId = this._entity._stats.itemIds[slotNumber - 1];
 			if (itemId) {
-				var item = ige.$(itemId);
+				var item = taro.$(itemId);
 				// make sure item is owned by the unit calling this function
 				return item;
 			}
@@ -367,7 +367,7 @@ var InventoryComponent = IgeEntity.extend({
 	// 1. highlight currently selected inventory item (using currentItemIndex)
 	// 2. if inventory slot is occupied by item, then show item in the inventory slot. otherwise, empty inventory slot
 	update: function () {
-		if (ige.isClient && this._entity._stats.clientId === ige.network.id()) {
+		if (taro.isClient && this._entity._stats.clientId === taro.network.id()) {
 			var ownerPlayer = this._entity.getOwner();
 			if (ownerPlayer && ownerPlayer._stats.selectedUnitId == this._entity.id()) {
 				$('.popover').popover('hide');
@@ -378,7 +378,7 @@ var InventoryComponent = IgeEntity.extend({
 				var totalInventorySize = this.getTotalInventorySize();
 				for (var slotIndex = 0; slotIndex < totalInventorySize + 5; slotIndex++) { // +5 for trade slots?
 					var itemId = this._entity._stats.itemIds[slotIndex];
-					var item = ige.$(itemId);
+					var item = taro.$(itemId);
 					// if (item) {
 					// 	item._stats.slotIndex = slotIndex;
 					// 	if (slotIndex == this._entity._stats.currentItemIndex) {
@@ -392,7 +392,7 @@ var InventoryComponent = IgeEntity.extend({
 					} else {
 						$(`#item-${slotIndex}`).css('background-image', 'none');
 					}
-					ige.itemUi.updateItemSlot(item, slotIndex);
+					taro.itemUi.updateItemSlot(item, slotIndex);
 
 					// highlight currently selected inventory item (using currentItemIndex)
 					if (this._entity._stats.currentItemIndex != undefined && this._entity._stats.currentItemIndex == slotIndex) {

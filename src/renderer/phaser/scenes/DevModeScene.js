@@ -20,35 +20,35 @@ var DevModeScene = /** @class */ (function (_super) {
     }
     DevModeScene.prototype.init = function () {
         var _this = this;
-        this.gameScene = ige.renderer.scene.getScene('Game');
+        this.gameScene = taro.renderer.scene.getScene('Game');
         this.regions = [];
-        ige.client.on('unlockCamera', function () {
+        taro.client.on('unlockCamera', function () {
             _this.gameScene.cameras.main.stopFollow();
         });
-        ige.client.on('lockCamera', function () {
-            ige.client.emit('zoom', ige.client.zoom);
+        taro.client.on('lockCamera', function () {
+            taro.client.emit('zoom', taro.client.zoom);
             if (_this.gameScene.cameraTarget)
                 _this.gameScene.cameras.main.startFollow(_this.gameScene.cameraTarget, false, 0.05, 0.05);
         });
-        ige.client.on('enterMapTab', function () {
+        taro.client.on('enterMapTab', function () {
             _this.enterMapTab();
         });
-        ige.client.on('leaveMapTab', function () {
+        taro.client.on('leaveMapTab', function () {
             _this.leaveMapTab();
         });
-        ige.client.on('editTile', function (data) {
+        taro.client.on('editTile', function (data) {
             _this.tileEditor.edit(data);
         });
-        ige.client.on('editRegion', function (data) {
+        taro.client.on('editRegion', function (data) {
             _this.regionEditor.edit(data);
         });
         this.gameScene.input.on('pointerup', function (p) {
-            var draggedEntity = ige.unitBeingDragged;
-            // ige.unitBeingDragged = {typeId: 'unit id', playerId: 'xyz', angle: 0, entityType: 'unit'}
+            var draggedEntity = taro.unitBeingDragged;
+            // taro.unitBeingDragged = {typeId: 'unit id', playerId: 'xyz', angle: 0, entityType: 'unit'}
             if (draggedEntity) {
                 // find position and call editEntity function.
                 var worldPoint = _this.gameScene.cameras.main.getWorldPoint(p.x, p.y);
-                var playerId = ige.game.getPlayerByClientId(ige.network.id()).id();
+                var playerId = taro.game.getPlayerByClientId(taro.network.id()).id();
                 var data = {
                     action: 'create',
                     entityType: draggedEntity.entityType,
@@ -60,13 +60,13 @@ var DevModeScene = /** @class */ (function (_super) {
                     },
                     angle: draggedEntity.angle
                 };
-                ige.developerMode.editEntity(data, playerId);
-                ige.unitBeingDragged = null;
+                taro.developerMode.editEntity(data, playerId);
+                taro.unitBeingDragged = null;
             }
         });
     };
     DevModeScene.prototype.preload = function () {
-        /*const data = ige.game.data;
+        /*const data = taro.game.data;
 
         data.map.tilesets.forEach((tileset) => {
             const key = `tiles/${tileset.name}`;
@@ -95,7 +95,7 @@ var DevModeScene = /** @class */ (function (_super) {
     };
     DevModeScene.prototype.create = function () {
         var _this = this;
-        var data = ige.game.data;
+        var data = taro.game.data;
         var map = this.tilemap = this.make.tilemap({ key: 'map' });
         data.map.tilesets.forEach(function (tileset) {
             var key = "tiles/".concat(tileset.name);

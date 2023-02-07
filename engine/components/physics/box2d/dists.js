@@ -201,7 +201,7 @@ var dists = {
 											fd.filterMaskBits = fixtureDef.filter.filterMaskBits;
 
 											finalFixture = tempBod.createFixture(tempShape, fd, isLossTolerant);
-											finalFixture.igeId = fixtureDef.igeId;
+											finalFixture.taroId = fixtureDef.taroId;
 										}
 									}
 								}
@@ -521,7 +521,7 @@ var dists = {
 
 									// Create the fixture
 									tempFixture = self.createFixture(fixtureDef);
-									tempFixture.igeId = fixtureDef.igeId;
+									tempFixture.taroId = fixtureDef.taroId;
 
 									// Check for a shape definition for the fixture
 									if (fixtureDef.shape) {
@@ -576,7 +576,7 @@ var dists = {
 										if (tempShape && fixtureDef.filter) {
 											tempFixture.shape = tempShape;
 											finalFixture = tempBod.CreateFixture(tempFixture, isLossTolerant);
-											finalFixture.igeId = tempFixture.igeId;
+											finalFixture.taroId = tempFixture.taroId;
 										}
 									}
 
@@ -670,7 +670,7 @@ var dists = {
 
 				var joint = self._world.CreateJoint(joint_def); // joint between two pieces
 
-				// var serverStats = ige.server.getStatus()
+				// var serverStats = taro.server.getStatus()
 				PhysicsComponent.prototype.log('joint created ', aBody.jointType);
 
 				entityA.jointsAttached[entityB.id()] = joint;
@@ -887,7 +887,7 @@ var dists = {
 
 									// Create the fixture
 									tempFixture = self.createFixture(fixtureDef);
-									tempFixture.igeId = fixtureDef.igeId;
+									tempFixture.taroId = fixtureDef.taroId;
 
 									// Check for a shape definition for the fixture
 									if (fixtureDef.shape) {
@@ -942,7 +942,7 @@ var dists = {
 										if (tempShape && fixtureDef.filter) {
 											tempFixture.shape = tempShape;
 											finalFixture = tempBod.CreateFixture(tempFixture);
-											finalFixture.igeId = tempFixture.igeId;
+											finalFixture.taroId = tempFixture.taroId;
 										}
 									}
 
@@ -1035,7 +1035,7 @@ var dists = {
 
 				var joint = self._world.CreateJoint(joint_def); // joint between two pieces
 
-				// var serverStats = ige.server.getStatus()
+				// var serverStats = taro.server.getStatus()
 				PhysicsComponent.prototype.log('joint created ', aBody.jointType);
 
 				entityA.jointsAttached[entityB.id()] = joint;
@@ -1108,9 +1108,9 @@ var dists = {
 
 			component.b2Joint.prototype.getNext = component.b2Joint.prototype.GetNext;
 
-			// Extend the b2Contact class to allow the IGE entity accessor
+			// Extend the b2Contact class to allow the taro entity accessor
 			// and other helper methods
-			component.b2Contact.prototype.igeEntityA = function () {
+			component.b2Contact.prototype.taroEntityA = function () {
 				var ent = this.m_fixtureA.m_body._entity;
 
 				// commented below as they were causing memory leak
@@ -1118,7 +1118,7 @@ var dists = {
 				// ent._box2dTheirContactFixture = component.m_fixtureB;
 				return ent;
 			};
-			component.b2Contact.prototype.igeEntityB = function () {
+			component.b2Contact.prototype.taroEntityB = function () {
 				var ent = this.m_fixtureB.m_body._entity;
 
 				// commented below as they were causing memory leak
@@ -1276,7 +1276,7 @@ var dists = {
 
 									// Create the fixture
 									tempFixture = self.createFixture(fixtureDef);
-									tempFixture.igeId = fixtureDef.igeId;
+									tempFixture.taroId = fixtureDef.taroId;
 
 									// Check for a shape definition for the fixture
 									if (fixtureDef.shape) {
@@ -1355,7 +1355,7 @@ var dists = {
 											// tempFixture.density = 1; //fixtureDef.density;
 											// console.log('fixtureDef',fixtureDef);
 											finalFixture = tempBod.CreateFixture(tempFixture);
-											finalFixture.igeId = tempFixture.igeId;
+											finalFixture.taroId = tempFixture.taroId;
 										}
 									}
 
@@ -1450,7 +1450,7 @@ var dists = {
 
 				var joint = self._world.CreateJoint(joint_def); // joint between two pieces
 
-				// var serverStats = ige.server.getStatus()
+				// var serverStats = taro.server.getStatus()
 				PhysicsComponent.prototype.log('joint created ', aBody.jointType);
 
 				entityA.jointsAttached[entityB.id()] = joint;
@@ -1651,7 +1651,7 @@ var dists = {
 
 									// Create the fixture
 									tempFixture = self.createFixture(fixtureDef);
-									tempFixture.igeId = fixtureDef.igeId;
+									tempFixture.taroId = fixtureDef.taroId;
 
 									// Check for a shape definition for the fixture
 									if (fixtureDef.shape) {
@@ -1730,7 +1730,7 @@ var dists = {
 											// tempFixture.density = 1; //fixtureDef.density;
 											// console.log('fixtureDef',fixtureDef);
 											finalFixture = tempBod.CreateFixture(tempFixture);
-											finalFixture.igeId = tempFixture.igeId;
+											finalFixture.taroId = tempFixture.taroId;
 										}
 									}
 
@@ -1825,7 +1825,7 @@ var dists = {
 
 				var joint = self._world.CreateJoint(joint_def); // joint between two pieces
 
-				// var serverStats = ige.server.getStatus()
+				// var serverStats = taro.server.getStatus()
 				PhysicsComponent.prototype.log('joint created ', aBody.jointType);
 
 				entityA.jointsAttached[entityB.id()] = joint;
@@ -2030,7 +2030,7 @@ var dists = {
 
 									// Create the fixture
 									tempFixture = self.createFixture(fixtureDef);
-									tempFixture.igeId = fixtureDef.igeId;
+									tempFixture.taroId = fixtureDef.taroId;
 
 									// Check for a shape definition for the fixture
 									if (fixtureDef.shape) {
@@ -2107,7 +2107,7 @@ var dists = {
 										if (tempShape && fixtureDef.filter) {
 											tempFixture.shape = tempShape;
 											finalFixture = tempBod.CreateFixture(tempFixture);
-											finalFixture.igeId = tempFixture.igeId;
+											finalFixture.taroId = tempFixture.taroId;
 										}
 									}
 
@@ -2215,7 +2215,7 @@ var dists = {
 
 				var joint = self._world.CreateJoint(joint_def); // joint between two pieces
 
-				// var serverStats = ige.server.getStatus()
+				// var serverStats = taro.server.getStatus()
 				PhysicsComponent.prototype.log('joint created ', aBody.jointType);
 
 				entityA.jointsAttached[entityB.id()] = joint;

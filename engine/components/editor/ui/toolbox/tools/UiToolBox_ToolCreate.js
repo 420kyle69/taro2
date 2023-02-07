@@ -1,4 +1,4 @@
-var UiToolBox_ToolCreate = IgeEventingClass.extend({
+var UiToolBox_ToolCreate = TaroEventingClass.extend({
 	classId: 'UiToolBox_ToolCreate',
 	editorOptions: {
 		hide: true
@@ -11,9 +11,9 @@ var UiToolBox_ToolCreate = IgeEventingClass.extend({
 
 		var sortArr = []; var i;
 
-		for (i in igeClassStore) {
-			if (igeClassStore.hasOwnProperty(i)) {
-				if (!igeClassStore[i].prototype.editorOptions || !igeClassStore[i].prototype.editorOptions.hide) {
+		for (i in taroClassStore) {
+			if (taroClassStore.hasOwnProperty(i)) {
+				if (!taroClassStore[i].prototype.editorOptions || !taroClassStore[i].prototype.editorOptions.hide) {
 					sortArr.push(i);
 				}
 			}
@@ -26,7 +26,7 @@ var UiToolBox_ToolCreate = IgeEventingClass.extend({
 				id: sortArr[i],
 				icon: 'none',
 				text: sortArr[i],
-				action: `ige.editor.createObject('${sortArr[i]}', true);`
+				action: `taro.editor.createObject('${sortArr[i]}', true);`
 			});
 		}
 	},
@@ -41,7 +41,7 @@ var UiToolBox_ToolCreate = IgeEventingClass.extend({
 			var top = position.top;
 			var height = $('body').height();
 
-			ige.editor.ui.menus.create({
+			taro.editor.ui.menus.create({
 				header: {
 					icon: 'log_in',
 					text: 'Create Object'
@@ -66,7 +66,7 @@ var UiToolBox_ToolCreate = IgeEventingClass.extend({
 					.css('top', top);
 			});
 		} else {
-			ige.editor.ui.menus.closeAll();
+			taro.editor.ui.menus.closeAll();
 		}
 	}
 });

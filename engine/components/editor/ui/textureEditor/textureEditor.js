@@ -1,9 +1,9 @@
-var UiTextureEditor = IgeEventingClass.extend({
+var UiTextureEditor = TaroEventingClass.extend({
 	classId: 'UiTextureEditor',
 
 	init: function () {
 		var self = this;
-		ige.requireStylesheet(`${igeRoot}components/editor/ui/textureEditor/textureEditor.css`);
+		taro.requireStylesheet(`${taroRoot}components/editor/ui/textureEditor/textureEditor.css`);
 
 		self.reset();
 	},
@@ -11,12 +11,12 @@ var UiTextureEditor = IgeEventingClass.extend({
 	ready: function () {
 		var self = this;
 
-		ige.editor.ui.menus.addMenuGroup('toolsMenu', 'textures');
-		ige.editor.ui.menus.addMenuItem('toolsMenu', 'textures', {
+		taro.editor.ui.menus.addMenuGroup('toolsMenu', 'textures');
+		taro.editor.ui.menus.addMenuItem('toolsMenu', 'textures', {
 			id: 'textureEditor',
 			icon: 'none',
 			text: 'Texture Editor...',
-			action: 'ige.editor.ui.textureEditor.show();'
+			action: 'taro.editor.ui.textureEditor.show();'
 		});
 	},
 
@@ -42,13 +42,13 @@ var UiTextureEditor = IgeEventingClass.extend({
 		var self = this;
 		self.reset();
 
-		ige.editor.ui.dialogs.create({
+		taro.editor.ui.dialogs.create({
 			id: 'textureEditorDialog',
 			icon: 'halflings-icon white picture',
 			title: 'Texture Editor',
-			contentTemplate: `${igeRoot}components/editor/ui/textureEditor/templates/textureEditor.html`,
+			contentTemplate: `${taroRoot}components/editor/ui/textureEditor/templates/textureEditor.html`,
 			blur: function () {
-				ige.editor.ui.dialogs.confirm({
+				taro.editor.ui.dialogs.confirm({
 					title: 'Exit Texture Editor',
 					width: 400,
 					height: 150,
@@ -59,7 +59,7 @@ var UiTextureEditor = IgeEventingClass.extend({
 					},
 
 					positive: function () {
-						ige.editor.ui.dialogs.close('textureEditorDialog');
+						taro.editor.ui.dialogs.close('textureEditorDialog');
 					}
 				});
 			},
@@ -72,14 +72,14 @@ var UiTextureEditor = IgeEventingClass.extend({
 			ready: function (err) {
 				if (!err) {
 					// Add dialog controls
-					ige.editor.ui.dialogs.addControl('textureEditorDialog', $('<div class="control sep"></div>'));
-					ige.editor.ui.dialogs.addControl('textureEditorDialog', $('<div class="control download" title="Download as Image..."><span class="halflings-icon white download-alt"></span></div>'));
-					ige.editor.ui.dialogs.addControl('textureEditorDialog', $('<div class="control split" title="Split Image Into Cells"><span class="halflings-icon white th"></span></div>'));
-					ige.editor.ui.dialogs.addControl('textureEditorDialog', $('<div class="control clear" title="Clear"><span class="halflings-icon white file"></span></div>'));
-					ige.editor.ui.dialogs.addControl('textureEditorDialog', $('<div class="control sep"></div>'));
-					ige.editor.ui.dialogs.addControl('textureEditorDialog', $('<div class="control animate" title="Test as Animation..."><span class="halflings-icon white film"></span></div>'));
-					ige.editor.ui.dialogs.addControl('textureEditorDialog', $('<div class="control sep"></div>'));
-					ige.editor.ui.dialogs.addControl('textureEditorDialog', $('<div class="control help" title="Help..."><span class="halflings-icon white question-sign"></span></div>'));
+					taro.editor.ui.dialogs.addControl('textureEditorDialog', $('<div class="control sep"></div>'));
+					taro.editor.ui.dialogs.addControl('textureEditorDialog', $('<div class="control download" title="Download as Image..."><span class="halflings-icon white download-alt"></span></div>'));
+					taro.editor.ui.dialogs.addControl('textureEditorDialog', $('<div class="control split" title="Split Image Into Cells"><span class="halflings-icon white th"></span></div>'));
+					taro.editor.ui.dialogs.addControl('textureEditorDialog', $('<div class="control clear" title="Clear"><span class="halflings-icon white file"></span></div>'));
+					taro.editor.ui.dialogs.addControl('textureEditorDialog', $('<div class="control sep"></div>'));
+					taro.editor.ui.dialogs.addControl('textureEditorDialog', $('<div class="control animate" title="Test as Animation..."><span class="halflings-icon white film"></span></div>'));
+					taro.editor.ui.dialogs.addControl('textureEditorDialog', $('<div class="control sep"></div>'));
+					taro.editor.ui.dialogs.addControl('textureEditorDialog', $('<div class="control help" title="Help..."><span class="halflings-icon white question-sign"></span></div>'));
 
 					$('.control.download').on('click', function () { self.downloadImage(); });
 					$('.control.split').on('click', function () { self.splitImage(); });
@@ -148,10 +148,10 @@ var UiTextureEditor = IgeEventingClass.extend({
 					}
 
 					// Show multi-file input dialog
-					ige.editor.ui.dialogs.input({
+					taro.editor.ui.dialogs.input({
 						id: 'multiFileInput',
 						title: 'Multi-File Import',
-						contentTemplate: `${igeRoot}components/editor/ui/textureEditor/templates/multiFiles.html`,
+						contentTemplate: `${taroRoot}components/editor/ui/textureEditor/templates/multiFiles.html`,
 						contentData: {
 							fileCount: dataTransfer.files.length,
 							positiveTitle: 'OK',
@@ -333,11 +333,11 @@ var UiTextureEditor = IgeEventingClass.extend({
 		var rows = self._cellRows;
 
 		// Show split image dialog to select rows and columns
-		ige.editor.ui.dialogs.input({
+		taro.editor.ui.dialogs.input({
 			title: 'Split Image Into Cells',
 			width: 400,
 			height: 250,
-			contentTemplate: `${igeRoot}components/editor/ui/textureEditor/templates/splitImage.html`,
+			contentTemplate: `${taroRoot}components/editor/ui/textureEditor/templates/splitImage.html`,
 			contentData: {
 				positiveTitle: 'OK',
 				negativeTitle: 'Cancel',
@@ -543,7 +543,7 @@ var UiTextureEditor = IgeEventingClass.extend({
 	clearImage: function () {
 		var self = this;
 
-		ige.editor.ui.dialogs.confirm({
+		taro.editor.ui.dialogs.confirm({
 			title: 'Clear Texture',
 			width: 400,
 			height: 150,
@@ -564,7 +564,7 @@ var UiTextureEditor = IgeEventingClass.extend({
 		var self = this;
 
 		// Show the animation dialog with the texture and settings already filled in
-		ige.editor.ui.animationEditor.show({
+		taro.editor.ui.animationEditor.show({
 			textureImage: self.getFinalTexture(),
 			cellWidth: self._cellWidth,
 			cellHeight: self._cellHeight
@@ -574,12 +574,12 @@ var UiTextureEditor = IgeEventingClass.extend({
 	help: function () {
 		var self = this;
 
-		ige.editor.ui.dialogs.prompt({
+		taro.editor.ui.dialogs.prompt({
 			icon: 'halflings-icon white question-sign',
 			title: 'Texture Editor Help',
 			width: 400,
 			height: 220,
-			contentTemplate: `${igeRoot}components/editor/ui/textureEditor/templates/help.html`,
+			contentTemplate: `${taroRoot}components/editor/ui/textureEditor/templates/help.html`,
 			contentData: {
 				positiveTitle: 'OK'
 			}
@@ -664,4 +664,4 @@ var UiTextureEditor = IgeEventingClass.extend({
 });
 
 // Init
-ige.editor.ui.textureEditor = new UiTextureEditor();
+taro.editor.ui.textureEditor = new UiTextureEditor();

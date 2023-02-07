@@ -1,4 +1,4 @@
-var RegionManager = IgeClass.extend({
+var RegionManager = TaroClass.extend({
 	classId: 'RegionManager',
 	componentId: 'regionManager',
 
@@ -7,7 +7,7 @@ var RegionManager = IgeClass.extend({
 		self.isAddNewRegion = false;
 		self.entitiesInRegion = {};
 
-		if (ige.isClient) {
+		if (taro.isClient) {
 			$('#region-modal-client').on('submit', '#region-form', function (e) {
 				e.preventDefault();
 				var defaultKey = $('#region-modal-key').val();
@@ -33,7 +33,7 @@ var RegionManager = IgeClass.extend({
 	},
 
 	getRegionById (regionName) {
-		return ige.$$('region').find(function (region) {
+		return taro.$$('region').find(function (region) {
 			if (region && region._stats && region._stats.id === regionName) {
 				return true;
 			}
@@ -64,12 +64,12 @@ var RegionManager = IgeClass.extend({
 	updateRegionToDatabase: function (updatedRegion) {
 		var self = this;
 		var isRegionDeleted = false;
-		var region = ige.regionManager.getRegionById(updatedRegion.key);
-		var deleteRegion = ige.regionManager.getRegionById(updatedRegion.deleteKey);
+		var region = taro.regionManager.getRegionById(updatedRegion.key);
+		var deleteRegion = taro.regionManager.getRegionById(updatedRegion.deleteKey);
 		var isRegionSameAsDeleted = region === deleteRegion;
 
 		if (deleteRegion && updatedRegion.deleteKey) {
-			delete ige.game.data.variables[updatedRegion.deleteKey];
+			delete taro.game.data.variables[updatedRegion.deleteKey];
 			deleteRegion.deleteRegion();
 			isRegionDeleted = true;
 		}
@@ -96,24 +96,24 @@ var RegionManager = IgeClass.extend({
 				var updatedRegionKey = updatedRegion.key;
 				var copiedRegion = JSON.parse(JSON.stringify(updatedRegion));
 				delete copiedRegion.key;
-				ige.game.data.variables[updatedRegionKey] = copiedRegion;
-				ige.map.createRegions();
+				taro.game.data.variables[updatedRegionKey] = copiedRegion;
+				taro.map.createRegions();
 			}
 		}
-		if (ige.isClient) window.updateReactGameState(JSON.parse(JSON.stringify(updatedRegion)));
+		if (taro.isClient) window.updateReactGameState(JSON.parse(JSON.stringify(updatedRegion)));
 		if (isRegionDeleted) {
 			var newRegion = JSON.parse(JSON.stringify(updatedRegion));
 			var regionKey = newRegion.key;
 			delete newRegion.key;
-			ige.game.data.variables[regionKey] = newRegion;
-			ige.map.createRegions();
+			taro.game.data.variables[regionKey] = newRegion;
+			taro.map.createRegions();
 		}
 
-		if (ige.isClient) $('#region-modal-client').modal('hide');
+		if (taro.isClient) $('#region-modal-client').modal('hide');
 	},
 	openRegionModal: function (region, key, isAddNewRegion) {
 		if (isAddNewRegion) {
-			ige.regionManager.isAddNewRegion = isAddNewRegion;
+			taro.regionManager.isAddNewRegion = isAddNewRegion;
 		}
 		if (region && !$('#region-modal-client').hasClass('show')) {
 			$('#region-modal-datatype').val(region.dataType);
@@ -127,7 +127,7 @@ var RegionManager = IgeClass.extend({
 				$('#region-update-btn').html('<i class=\'fa fa-plus\'></i> Create</button>');
 				$('#region-delete-btn').prop('disabled', true);
 			} else {
-				ige.regionManager.isAddNewRegion = false;
+				taro.regionManager.isAddNewRegion = false;
 				$('#region-update-btn').html('<i class=\'fa fa-floppy-o\'></i> Save</button>');
 				$('#region-delete-btn').prop('disabled', false);
 				// $('#region-modal-key').prop("disabled", true);

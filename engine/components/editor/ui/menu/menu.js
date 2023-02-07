@@ -1,14 +1,14 @@
-var UiMenu = IgeEventingClass.extend({
+var UiMenu = TaroEventingClass.extend({
 	classId: 'UiMenu',
 
 	init: function () {
 		var self = this;
 		self._menus = {};
-		ige.requireStylesheet(`${igeRoot}components/editor/ui/menu/menu.css`);
+		taro.requireStylesheet(`${taroRoot}components/editor/ui/menu/menu.css`);
 
 		// Pre-load the template we need
-		ige.editor.template(
-			`${igeRoot}components/editor/ui/menu/templates/menuButton.html`,
+		taro.editor.template(
+			`${taroRoot}components/editor/ui/menu/templates/menuButton.html`,
 			function () {
 				self.add({
 					id: 'fileMenu',
@@ -48,8 +48,8 @@ var UiMenu = IgeEventingClass.extend({
 
 		self.closeAll();
 
-		ige.editor.renderTemplate(
-			`${igeRoot}components/editor/ui/menu/templates/menu.html`,
+		taro.editor.renderTemplate(
+			`${taroRoot}components/editor/ui/menu/templates/menu.html`,
 			menuData,
 			function (err, htmlElem) {
 				if (!err) {
@@ -65,7 +65,7 @@ var UiMenu = IgeEventingClass.extend({
 							.appendTo('body');
 					}
 
-					htmlElem.attr('id', `menu_${menuData.id || ige.newIdHex()}`);
+					htmlElem.attr('id', `menu_${menuData.id || taro.newIdHex()}`);
 
 					if (menuData.left !== undefined) {
 						htmlElem.css('left', menuData.left);
@@ -119,8 +119,8 @@ var UiMenu = IgeEventingClass.extend({
 
 		self._menus[obj.id] = obj;
 
-		ige.editor.renderTemplate(
-			`${igeRoot}components/editor/ui/menu/templates/menuButton.html`,
+		taro.editor.renderTemplate(
+			`${taroRoot}components/editor/ui/menu/templates/menuButton.html`,
 			obj,
 			function (err, htmlElem) {
 				if (!err) {
@@ -151,10 +151,10 @@ var UiMenu = IgeEventingClass.extend({
 		if (menuButton.hasClass('active')) {
 			// Deactivate the menu
 			$('.dropMenuContainer .menuButton').removeClass('active');
-			ige.editor.ui.menus.closeAll();
+			taro.editor.ui.menus.closeAll();
 
 			if (self._editorTool) {
-				ige.editor.ui.toolbox.select(self._editorTool);
+				taro.editor.ui.toolbox.select(self._editorTool);
 				delete self._editorTool;
 			}
 		}
@@ -166,12 +166,12 @@ var UiMenu = IgeEventingClass.extend({
 		var menuButton = $(`.dropMenuContainer #${id}`);
 
 		// Store the current selected editor tool and then deactivate the tool
-		self._editorTool = ige.editor.ui.toolbox._currentTool ? ige.editor.ui.toolbox._currentTool : self._editorTool;
-		ige.editor.ui.toolbox.deselect();
+		self._editorTool = taro.editor.ui.toolbox._currentTool ? taro.editor.ui.toolbox._currentTool : self._editorTool;
+		taro.editor.ui.toolbox.deselect();
 
 		// Toggle all other menus off
 		$('.dropMenuContainer .menuButton').removeClass('active');
-		ige.editor.ui.menus.closeAll();
+		taro.editor.ui.menus.closeAll();
 
 		// Activate the menu
 		if (obj) {
@@ -183,7 +183,7 @@ var UiMenu = IgeEventingClass.extend({
 			var top = position.top;
 			var height = $('body').height();
 
-			ige.editor.ui.menus.create({
+			taro.editor.ui.menus.create({
 				groups: obj.menu,
 				search: false,
 				blur: function (underlayElem) {
@@ -238,4 +238,4 @@ var UiMenu = IgeEventingClass.extend({
 	}
 });
 
-ige.editor.ui.menus = new UiMenu();
+taro.editor.ui.menus = new UiMenu();

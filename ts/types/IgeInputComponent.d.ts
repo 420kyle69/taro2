@@ -1,4 +1,4 @@
-declare class IgeInputComponent extends IgeEventingClass {
+declare class TaroInputComponent extends TaroEventingClass {
 
 	processInputOnEveryFps (): void
 

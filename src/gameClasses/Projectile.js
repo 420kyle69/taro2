@@ -1,15 +1,15 @@
-var Projectile = IgeEntityPhysics.extend({
+var Projectile = TaroEntityPhysics.extend({
 	classId: 'Projectile',
 
 	init: function (data, entityIdFromServer) {
-		IgeEntityPhysics.prototype.init.call(this, data.defaultData);
+		TaroEntityPhysics.prototype.init.call(this, data.defaultData);
 		this.id(entityIdFromServer);
 		var self = this;
 		self.category('projectile');
 
 		var projectileData = {};
-		if (ige.isClient) {
-			projectileData = ige.game.getAsset('projectileTypes', data.type);
+		if (taro.isClient) {
+			projectileData = taro.game.getAsset('projectileTypes', data.type);
 		}
 
 		self.entityId = this._id;
@@ -33,12 +33,12 @@ var Projectile = IgeEntityPhysics.extend({
 			}
 		}
 
-		if (ige.isServer) {
-			self.mount(ige.$('baseScene'));
+		if (taro.isServer) {
+			self.mount(taro.$('baseScene'));
 		}
 
-		if (ige.isClient) {
-			ige.client.emit('create-projectile', this);
+		if (taro.isClient) {
+			taro.client.emit('create-projectile', this);
 		}
 
 		if (self._stats.states) {
@@ -73,11 +73,11 @@ var Projectile = IgeEntityPhysics.extend({
 		
 		var sourceItem = this.getSourceItem();
 
-		if (ige.isServer) {
+		if (taro.isServer) {
 
 			// stream projectile data if
-			if (!ige.network.isPaused && (
-					!ige.game.data.defaultData.clientPhysicsEngine || // client side isn't running physics (csp requires physics) OR
+			if (!taro.network.isPaused && (
+					!taro.game.data.defaultData.clientPhysicsEngine || // client side isn't running physics (csp requires physics) OR
 					!sourceItem || // projectile does not have source item (created via script) OR
 					(sourceItem && sourceItem._stats.projectileStreamMode == 1) // item is set to stream its projectiles from server
 				)
@@ -86,8 +86,8 @@ var Projectile = IgeEntityPhysics.extend({
 			} else {
 				this.streamMode(0);
 			}
-			ige.server.totalProjectilesCreated++;
-		} else if (ige.isClient) {
+			taro.server.totalProjectilesCreated++;
+		} else if (taro.isClient) {
 			if (currentState) {
 				var defaultAnimation = this._stats.animations[currentState.animation];
 				this.addToRenderer(defaultAnimation && defaultAnimation.frames[0] - 1, data.defaultData);
@@ -109,35 +109,35 @@ var Projectile = IgeEntityPhysics.extend({
 
 	_behaviour: function (ctx) {
 		var self = this;
-		_.forEach(ige.triggersQueued, function (trigger) {
+		_.forEach(taro.triggersQueued, function (trigger) {
 			trigger.params['thisEntityId'] = self.id();
 			self.script.trigger(trigger.name, trigger.params);
 		});
 
 		// if entity (unit/item/player/projectile) has attribute, run regenerate
-		if (ige.isServer) {
+		if (taro.isServer) {
 			if (this.attribute) {
 				this.attribute.regenerate();
 			}
 		}
 
-		if (ige.physics && ige.physics.engine != 'CRASH') {
+		if (taro.physics && taro.physics.engine != 'CRASH') {
 			this.processBox2dQueue();
 		}
 	},
 
 	changeProjectileType: function (type, defaultData) {
 		var self = this;
-		var sourceUnit = ige.$(this._stats.sourceUnitId);
-		var sourceItem = ige.$(this._stats.sourceItemId);
+		var sourceUnit = taro.$(this._stats.sourceUnitId);
+		var sourceItem = taro.$(this._stats.sourceItemId);
 
 		self.previousState = null;
 
-		var data = ige.game.getAsset('projectileTypes', type);
+		var data = taro.game.getAsset('projectileTypes', type);
 		delete data.type // hotfix for dealing with corrupted game json that has unitData.type = "unitType". This is caused by bug in the game editor.
 
 		if (data == undefined) {
-			ige.script.errorLog('changeProjectileType: invalid data');
+			taro.script.errorLog('changeProjectileType: invalid data');
 			return;
 		}
 
@@ -182,7 +182,7 @@ var Projectile = IgeEntityPhysics.extend({
 
 		self.setState(this._stats.stateId, defaultData);
 
-		if (ige.isClient) {
+		if (taro.isClient) {
 			self.updateTexture();
 			//self._scaleTexture();
 		}
@@ -194,10 +194,10 @@ var Projectile = IgeEntityPhysics.extend({
 
 	streamUpdateData: function (queuedData) {
 
-		// if (ige.isServer && ige.network.isPaused) 
+		// if (taro.isServer && taro.network.isPaused) 
 		// 	return;
 			
-		IgeEntity.prototype.streamUpdateData.call(this, data);
+		TaroEntity.prototype.streamUpdateData.call(this, data);
 		for (var i = 0; i < queuedData.length; i++) {
 			var data = queuedData[i];
 			for (attrName in data) {
@@ -207,7 +207,7 @@ var Projectile = IgeEntityPhysics.extend({
 
 					case 'scaleBody':
 						this._stats[attrName] = newValue;
-						if (ige.isServer) {
+						if (taro.isServer) {
 							// finding all attach entities before changing body dimensions
 							if (this.jointsAttached) {
 								var attachedEntities = {};
@@ -219,7 +219,7 @@ var Projectile = IgeEntityPhysics.extend({
 							}
 
 							this._scaleBox2dBody(newValue);
-						} else if (ige.isClient) {
+						} else if (taro.isClient) {
 							this._stats.scale = newValue;
 							this._scaleTexture();
 						}
@@ -230,7 +230,7 @@ var Projectile = IgeEntityPhysics.extend({
 	},
 
 	tick: function (ctx) {
-		IgeEntity.prototype.tick.call(this, ctx);
+		TaroEntity.prototype.tick.call(this, ctx);
 	},
 
 	setSourceUnit: function (unit) {
@@ -243,13 +243,13 @@ var Projectile = IgeEntityPhysics.extend({
 	getSourceItem: function () {
 		var self = this;
 
-		return self._stats && self._stats.sourceItemId && ige.$(self._stats.sourceItemId);
+		return self._stats && self._stats.sourceItemId && taro.$(self._stats.sourceItemId);
 	},
 
 	destroy: function () {
 		this.playEffect('destroy');
-		IgeEntityPhysics.prototype.destroy.call(this);
-		if (ige.physics && ige.physics.engine == 'CRASH') {
+		TaroEntityPhysics.prototype.destroy.call(this);
+		if (taro.physics && taro.physics.engine == 'CRASH') {
 			this.destroyBody();
 		}
 	}, 
@@ -257,7 +257,7 @@ var Projectile = IgeEntityPhysics.extend({
 	// update this projectile's stats in the client side
 	streamUpdateData: function (queuedData) {
 		var self = this;
-		IgeEntity.prototype.streamUpdateData.call(this, queuedData);
+		TaroEntity.prototype.streamUpdateData.call(this, queuedData);
 		
 		for (var i = 0; i < queuedData.length; i++) {
 			var data = queuedData[i];

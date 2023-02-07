@@ -7,7 +7,7 @@ var TileMarker = /** @class */ (function () {
         this.active = true;
         this.graphics = scene.add.graphics();
         this.graphics.lineStyle(w, 0x000000, 1);
-        if (ige.game.data.defaultData.dontResize) {
+        if (taro.game.data.defaultData.dontResize) {
             this.graphics.strokeRect(0, 0, map.tileWidth, map.tileHeight);
         }
         else {
@@ -21,13 +21,13 @@ var TileMarker = /** @class */ (function () {
     }
     TileMarker.prototype.addImage = function (x, y) {
         var map = this.map;
-        var data = ige.game.data;
+        var data = taro.game.data;
         var tileset = data.map.tilesets[0];
         var key = "tiles/".concat(tileset.name);
         var extrudedKey = this.extrudedKey = "extruded-".concat(key);
         var width = 64;
         var height = 64;
-        if (ige.game.data.defaultData.dontResize) {
+        if (taro.game.data.defaultData.dontResize) {
             width = map.tileWidth;
             height = map.tileHeight;
         }
@@ -75,7 +75,7 @@ var TileMarker = /** @class */ (function () {
         }
     };
     TileMarker.prototype.showPreview = function (value) {
-        var devModeScene = ige.renderer.scene.getScene('DevMode');
+        var devModeScene = taro.renderer.scene.getScene('DevMode');
         var area = devModeScene.tileEditor.area;
         for (var i = 0; i < area.x; i++) {
             for (var j = 0; j < area.y; j++) {

@@ -99,17 +99,17 @@ var TileEditor = /** @class */ (function () {
         var map = this.gameScene.tilemap;
         map.putTileAt(data.gid, data.x, data.y, false, data.layer);
         /* TODO: SAVE MAP DATA FROM SERVER SIDE */
-        var width = ige.game.data.map.width;
-        //save tile change to ige.game.map.data
-        if (ige.game.data.map.layers.length > 4 && data.layer >= 2)
+        var width = taro.game.data.map.width;
+        //save tile change to taro.game.map.data
+        if (taro.game.data.map.layers.length > 4 && data.layer >= 2)
             data.layer++;
-        ige.game.data.map.layers[data.layer].data[data.y * width + data.x] = data.gid;
-        if (ige.physics && ige.game.data.map.layers[data.layer].name === 'walls') {
+        taro.game.data.map.layers[data.layer].data[data.y * width + data.x] = data.gid;
+        if (taro.physics && taro.game.data.map.layers[data.layer].name === 'walls') {
             //if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
-            ige.physics.destroyWalls();
-            var map_1 = ige.scaleMap(_.cloneDeep(ige.game.data.map));
-            ige.tiled.loadJson(map_1, function (layerArray, IgeLayersById) {
-                ige.physics.staticsFromMap(IgeLayersById.walls);
+            taro.physics.destroyWalls();
+            var map_1 = taro.scaleMap(_.cloneDeep(taro.game.data.map));
+            taro.tiled.loadJson(map_1, function (layerArray, TaroLayersById) {
+                taro.physics.staticsFromMap(TaroLayersById.walls);
             });
         }
     };
@@ -123,7 +123,7 @@ var TileEditor = /** @class */ (function () {
                 !(index === 0 && map.getTileAt(tileX, tileY, true).index === -1)) {
                 map.putTileAt(index, tileX, tileY);
                 map.getTileAt(tileX, tileY, true).tint = 0xffffff;
-                ige.network.send('editTile', { gid: index, layer: map.currentLayerIndex, x: tileX, y: tileY });
+                taro.network.send('editTile', { gid: index, layer: map.currentLayerIndex, x: tileX, y: tileY });
             }
         }
     };
@@ -159,7 +159,7 @@ var TileEditor = /** @class */ (function () {
         }
     };
     TileEditor.prototype.update = function () {
-        if (ige.developerMode.active && ige.developerMode.activeTab === 'map') {
+        if (taro.developerMode.active && taro.developerMode.activeTab === 'map') {
             var devModeScene = this.devModeTools.scene;
             var palette = this.tilePalette;
             var map = this.gameScene.tilemap;

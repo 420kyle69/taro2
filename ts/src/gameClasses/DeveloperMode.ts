@@ -3,7 +3,7 @@ class DeveloperMode {
 	activeTab: devModeTab;
 
 	constructor() {
-		if (ige.isClient) this.active = false;
+		if (taro.isClient) this.active = false;
 	}
 
 	enter(): void {
@@ -19,14 +19,14 @@ class DeveloperMode {
 
 	changeTab(tab: devModeTab) {
 		if (tab === 'map') {
-			ige.client.emit('enterMapTab');
+			taro.client.emit('enterMapTab');
 		} else {
-			ige.client.emit('leaveMapTab');
+			taro.client.emit('leaveMapTab');
 		}
 		if (tab === 'play') {
-			ige.client.emit('lockCamera');
+			taro.client.emit('lockCamera');
 		} else if (this.activeTab === 'play') {
-			ige.client.emit('unlockCamera');
+			taro.client.emit('unlockCamera');
 		}
 		this.activeTab = tab;
 	}
@@ -37,22 +37,22 @@ class DeveloperMode {
 
 	editTile (data: TileData, clientId: string): void {
 		// only allow developers to modify the tiles
-		if (ige.server.developerClientIds.includes(clientId)) {
-			ige.game.data.map.wasEdited = true;
-			ige.network.send('editTile', data);
+		if (taro.server.developerClientIds.includes(clientId)) {
+			taro.game.data.map.wasEdited = true;
+			taro.network.send('editTile', data);
 
 			const serverData = _.clone(data);
-			const width = ige.game.data.map.width;
-			if (ige.game.data.map.layers.length > 4 && serverData.layer >= 2) serverData.layer ++;
-			//save tile change to ige.game.map.data
-			ige.game.data.map.layers[serverData.layer].data[serverData.y * width + serverData.x] = serverData.gid;
-			ige.map.data.layers[serverData.layer].data[serverData.y * width + serverData.x] = serverData.gid;
-			if (ige.game.data.map.layers[serverData.layer].name === 'walls') {
+			const width = taro.game.data.map.width;
+			if (taro.game.data.map.layers.length > 4 && serverData.layer >= 2) serverData.layer ++;
+			//save tile change to taro.game.map.data
+			taro.game.data.map.layers[serverData.layer].data[serverData.y * width + serverData.x] = serverData.gid;
+			taro.map.data.layers[serverData.layer].data[serverData.y * width + serverData.x] = serverData.gid;
+			if (taro.game.data.map.layers[serverData.layer].name === 'walls') {
 				//if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
-				ige.physics.destroyWalls();
-				let map = ige.scaleMap(_.cloneDeep(ige.game.data.map));
-				ige.tiled.loadJson(map, function (layerArray, layersById) {
-					ige.physics.staticsFromMap(layersById.walls);
+				taro.physics.destroyWalls();
+				let map = taro.scaleMap(_.cloneDeep(taro.game.data.map));
+				taro.tiled.loadJson(map, function (layerArray, layersById) {
+					taro.physics.staticsFromMap(layersById.walls);
 				});
 			}
 		}
@@ -60,7 +60,7 @@ class DeveloperMode {
 
 	editRegion (data: RegionData, clientId: string): void {
 		// only allow developers to modify regions
-		if (ige.server.developerClientIds.includes(clientId)) {
+		if (taro.server.developerClientIds.includes(clientId)) {
 			if (data.name === '' || data.width <= 0 || data.height <= 0) {
 				console.log ('empty name, negative or 0 size is not allowed');
 			} else if (data.name === undefined) { // create new region
@@ -70,11 +70,11 @@ class DeveloperMode {
 				do {
 					regionNameNumber ++;
 					newRegionName = `region${  regionNameNumber}`;
-				} while (ige.regionManager.getRegionById(newRegionName));
+				} while (taro.regionManager.getRegionById(newRegionName));
 
 				data.name = newRegionName;
 				data.showModal = true;
-				data.userId = ige.game.getPlayerByClientId(clientId)._stats.userId;
+				data.userId = taro.game.getPlayerByClientId(clientId)._stats.userId;
 				// changed to Region from RegionUi
 				const regionData = {
 					dataType: 'region',
@@ -97,16 +97,16 @@ class DeveloperMode {
 				const region = new Region(regionData);
 
 				// create new region in game.data
-				ige.regionManager.updateRegionToDatabase(regionData);
+				taro.regionManager.updateRegionToDatabase(regionData);
 
 			} else { // modify existing region
-				const region = ige.regionManager.getRegionById(data.name);
+				const region = taro.regionManager.getRegionById(data.name);
 				if (region) {
 					if (data.delete) {
 						region.destroy();
 					} else {
 						if (data.name !== data.newName) {
-							if (ige.regionManager.getRegionById(data.newName)) {
+							if (taro.regionManager.getRegionById(data.newName)) {
 								console.log('This name is unavailable');
 							} else {
 								region._stats.id = data.newName;
@@ -124,18 +124,18 @@ class DeveloperMode {
 				}
 			}
 			// broadcast region change to all clients
-			ige.network.send('editRegion', data);
+			taro.network.send('editRegion', data);
 		}
 	}
 
 	createUnit(data) {
-		//const player = ige.game.getPlayerByClientId(clientId);
+		//const player = taro.game.getPlayerByClientId(clientId);
 		let player;
-		ige.$$('player').forEach(p => {
+		taro.$$('player').forEach(p => {
 			if (p.id() === data.playerId) player = p;
 		});
 		const unitTypeId = data.typeId;
-		const unitTypeData = ige.game.getAsset('unitTypes', unitTypeId);
+		const unitTypeData = taro.game.getAsset('unitTypes', unitTypeId);
 		const spawnPosition = data.position;
 		const facingAngle = data.angle;
 
@@ -151,19 +151,19 @@ class DeveloperMode {
 				}
 			);
 			const unit = player.createUnit(unitData);
-			ige.game.lastCreatedUnitId = unit.id();
+			taro.game.lastCreatedUnitId = unit.id();
 		}
 	}
 
 	updateUnit(data) {
 		// 1. broadcast update to all players
 		// 2. force update its dimension/scale/layer/image
-		ige.game.data.unitTypes[data.typeId] = data.newData;
-		ige.$$('unit').forEach(unit => {
+		taro.game.data.unitTypes[data.typeId] = data.newData;
+		taro.$$('unit').forEach(unit => {
 			if (unit._stats.type === data.typeId) {
 				for (let i = 0; i < unit._stats.itemIds.length; i++) {
 					var itemId = unit._stats.itemIds[i];
-					var item = ige.$(itemId);
+					var item = taro.$(itemId);
 						if (item) {
 							item.remove();
 						}
@@ -172,13 +172,13 @@ class DeveloperMode {
 				unit.emit('update-texture', 'basic_texture_change');
 			}
 		});
-		if (ige.isServer) {
-			ige.network.send('updateUnit', data);
+		if (taro.isServer) {
+			taro.network.send('updateUnit', data);
 		}
 	}
 
 	deleteUnit(data) {
-		ige.$$('unit').forEach(unit => {
+		taro.$$('unit').forEach(unit => {
 			if (unit._stats.type === data.typeId) {
 				unit.destroy();
 			}
@@ -187,7 +187,7 @@ class DeveloperMode {
 
 	createItem(data) {
 		const itemTypeId = data.typeId;
-		const itemData = ige.game.getAsset('itemTypes', itemTypeId);
+		const itemData = taro.game.getAsset('itemTypes', itemTypeId);
 		const position = data.position;
 		const facingAngle = data.angle;
 		let quantity = itemData.maxQuantity;
@@ -207,7 +207,7 @@ class DeveloperMode {
 				rotate: facingAngle
 			};
 			var item = new Item(itemData);
-			ige.game.lastCreatedUnitId = item._id;
+			taro.game.lastCreatedUnitId = item._id;
 			item.script.trigger("entityCreated");
 		}
 	}
@@ -216,20 +216,20 @@ class DeveloperMode {
 		// 1. broadcast update to all players
 		// 2. force update its dimension/scale/layer/image
 		// 3. we may need to re-mount the item on unit
-		ige.game.data.itemTypes[data.typeId] = data.newData;
-		ige.$$('item').forEach(item => {
+		taro.game.data.itemTypes[data.typeId] = data.newData;
+		taro.$$('item').forEach(item => {
 			if (item._stats.itemTypeId === data.typeId) {
 				item.changeItemType(data.typeId, {}, false);
 				item.emit('update-texture', 'basic_texture_change');
 			}
 		});
-		if (ige.isServer) {
-			ige.network.send('updateItem', data);
+		if (taro.isServer) {
+			taro.network.send('updateItem', data);
 		}
 	}
 
 	deleteItem(data) {
-		ige.$$('item').forEach(item => {
+		taro.$$('item').forEach(item => {
 			if (item._stats.type === data.typeId) {
 				item.destroy();
 			}
@@ -243,20 +243,20 @@ class DeveloperMode {
 	updateProjectile(data) {
 		// 1. broadcast update to all players
 		// 2. force update its dimension/scale/layer/image
-		ige.game.data.projectileTypes[data.typeId] = data.newData;
-		ige.$$('projectile').forEach(projectile => {
+		taro.game.data.projectileTypes[data.typeId] = data.newData;
+		taro.$$('projectile').forEach(projectile => {
 			if (projectile._stats.type === data.typeId) {
 				projectile.changeProjectileType(data.typeId, {}, false);
 				projectile.emit('update-texture', 'basic_texture_change');
 			}
 		});
-		if (ige.isServer) {
-			ige.network.send('updateProjectile', data);
+		if (taro.isServer) {
+			taro.network.send('updateProjectile', data);
 		}
 	}
 
 	deleteProjectile(data) {
-		ige.$$('projectile').forEach(projectile => {
+		taro.$$('projectile').forEach(projectile => {
 			if (projectile._stats.type === data.typeId) {
 				projectile.destroy();
 			}
@@ -265,11 +265,11 @@ class DeveloperMode {
 
 
 	editEntity (data: EditEntityData, clientId: string) {
-		if (ige.isClient) {
-			ige.network.send('editEntity', data);
+		if (taro.isClient) {
+			taro.network.send('editEntity', data);
 		} else {
 			// only allow developers to modify entities
-			if (ige.server.developerClientIds.includes(clientId)) {
+			if (taro.server.developerClientIds.includes(clientId)) {
 				if (data.entityType === 'unit') {
 					switch (data.action) {
 						case 'create':
@@ -321,16 +321,16 @@ class DeveloperMode {
 		console.log ('map data was edited', data.mapData.wasEdited);
 		if (data.mapData.wasEdited) {
 			data.mapData.wasEdited = false;
-			ige.game.data.map = data.mapData;
-			if (ige.physics) {
+			taro.game.data.map = data.mapData;
+			if (taro.physics) {
 				//if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
-				ige.physics.destroyWalls();
-				let map = ige.scaleMap(_.cloneDeep(ige.game.data.map));
-				ige.tiled.loadJson(map, function (layerArray, IgeLayersById) {
-					ige.physics.staticsFromMap(IgeLayersById.walls);
+				taro.physics.destroyWalls();
+				let map = taro.scaleMap(_.cloneDeep(taro.game.data.map));
+				taro.tiled.loadJson(map, function (layerArray, TaroLayersById) {
+					taro.physics.staticsFromMap(TaroLayersById.walls);
 				});
 			}
-			ige.client.emit('updateMap');
+			taro.client.emit('updateMap');
 		}
 	}
 }

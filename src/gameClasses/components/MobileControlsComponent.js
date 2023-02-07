@@ -2,12 +2,12 @@
  * MobileControlsComponent
  * Virtual game controls for use on mobile devices
  */
-var MobileControlsComponent = IgeEntity.extend({
+var MobileControlsComponent = TaroEntity.extend({
 	classId: 'MobileControlsComponent',
 	componentId: 'mobileControls',
 
 	init: function (entity) {
-		IgeEntity.prototype.init.call(this);
+		TaroEntity.prototype.init.call(this);
 
 		// Store the entity that this component has been added to
 		this._entity = entity;
@@ -17,20 +17,20 @@ var MobileControlsComponent = IgeEntity.extend({
 		this.controls = {};
 
 		// mouse move listener
-		ige.input.on('touchpointermove', function (point) {
-			ige.network.send('playerMouseMoved', [point.x, point.y]);
+		taro.input.on('touchpointermove', function (point) {
+			taro.network.send('playerMouseMoved', [point.x, point.y]);
 		});
 
 		$(window).on('orientationchange load resize', function () {
-			if (ige.mobileControls) {
+			if (taro.mobileControls) {
 				// and this unit is our player
-				if (ige.client && ige.client.myPlayer && ige.network.id() == ige.client.myPlayer._stats.clientId) {
-					var unit = ige.$(ige.client.myPlayer._stats.selectedUnitId);
+				if (taro.client && taro.client.myPlayer && taro.network.id() == taro.client.myPlayer._stats.clientId) {
+					var unit = taro.$(taro.client.myPlayer._stats.selectedUnitId);
 					if (unit && unit._stats.controls) {
 						var unitAbilities = unit._stats.controls.abilities;
 						if (unitAbilities) {
 							// update mobile controls
-							ige.mobileControls.configure(unitAbilities);
+							taro.mobileControls.configure(unitAbilities);
 						}
 					}
 				}
@@ -38,7 +38,7 @@ var MobileControlsComponent = IgeEntity.extend({
 		});
 
 		this.id();
-		ige.entitiesToRender.trackEntityById[this.id()] = this;
+		taro.entitiesToRender.trackEntityById[this.id()] = this;
 		this.addBehaviour('mobileControl', this._behaviour);
 	},
 
@@ -52,7 +52,7 @@ var MobileControlsComponent = IgeEntity.extend({
 	},
 
 	configure: function (abilities) {
-		if (!ige.isMobile || !abilities) return;
+		if (!taro.isMobile || !abilities) return;
 
 		// $("#show-chat").show();
 		$('#show-chat').hide(); // completely disable chat on mobile (app review)
@@ -65,7 +65,7 @@ var MobileControlsComponent = IgeEntity.extend({
 		$('#modd-item-shop-modal').css({
 			zIndex: 9050
 		});
-		ige.scoreboard.hideScores(); // default to collapsed state on mobile
+		taro.scoreboard.hideScores(); // default to collapsed state on mobile
 
 		var self = this;
 
@@ -87,73 +87,73 @@ var MobileControlsComponent = IgeEntity.extend({
 
 	upPressed: function () {
 		if (this.debug) console.log('UP PRESSED');
-		var unit = ige.client.myPlayer.getSelectedUnit();
+		var unit = taro.client.myPlayer.getSelectedUnit();
 		unit.ability.moveUp();
-		if (ige.isClient) {
-			ige.network.send('playerKeyDown', { device: 'key', key: 'w' });
+		if (taro.isClient) {
+			taro.network.send('playerKeyDown', { device: 'key', key: 'w' });
 		}
 	},
 
 	downPressed: function () {
 		if (this.debug) console.log('DOWN PRESSED');
-		var unit = ige.client.myPlayer.getSelectedUnit();
+		var unit = taro.client.myPlayer.getSelectedUnit();
 		unit.ability.moveDown();
-		if (ige.isClient) {
-			ige.network.send('playerKeyDown', { device: 'key', key: 's' });
+		if (taro.isClient) {
+			taro.network.send('playerKeyDown', { device: 'key', key: 's' });
 		}
 	},
 
 	leftPressed: function () {
 		if (this.debug) console.log('LEFT PRESSED');
-		var unit = ige.client.myPlayer.getSelectedUnit();
+		var unit = taro.client.myPlayer.getSelectedUnit();
 		unit.ability.moveLeft();
-		if (ige.isClient) {
-			ige.network.send('playerKeyDown', { device: 'key', key: 'a' });
+		if (taro.isClient) {
+			taro.network.send('playerKeyDown', { device: 'key', key: 'a' });
 		}
 	},
 
 	rightPressed: function () {
 		if (self.debug) console.log('RIGHT PRESSED');
-		var unit = ige.client.myPlayer.getSelectedUnit();
+		var unit = taro.client.myPlayer.getSelectedUnit();
 		unit.ability.moveRight();
-		if (ige.isClient) {
-			ige.network.send('playerKeyDown', { device: 'key', key: 'd' });
+		if (taro.isClient) {
+			taro.network.send('playerKeyDown', { device: 'key', key: 'd' });
 		}
 	},
 
 	upReleased: function () {
 		if (this.debug) console.log('UP RELEASED');
-		var unit = ige.client.myPlayer.getSelectedUnit();
+		var unit = taro.client.myPlayer.getSelectedUnit();
 		if (unit.direction.y == -1) unit.ability.stopMovingY();
-		if (ige.isClient) {
-			ige.network.send('playerKeyUp', { device: 'key', key: 'w' });
+		if (taro.isClient) {
+			taro.network.send('playerKeyUp', { device: 'key', key: 'w' });
 		}
 	},
 
 	downReleased: function () {
 		if (this.debug) console.log('DOWN RELEASED');
-		var unit = ige.client.myPlayer.getSelectedUnit();
+		var unit = taro.client.myPlayer.getSelectedUnit();
 		if (unit.direction.y == 1) unit.ability.stopMovingY();
-		if (ige.isClient) {
-			ige.network.send('playerKeyUp', { device: 'key', key: 's' });
+		if (taro.isClient) {
+			taro.network.send('playerKeyUp', { device: 'key', key: 's' });
 		}
 	},
 
 	leftReleased: function () {
 		if (this.debug) console.log('LEFT RELEASED');
-		var unit = ige.client.myPlayer.getSelectedUnit();
+		var unit = taro.client.myPlayer.getSelectedUnit();
 		if (unit.direction.x == -1) unit.ability.stopMovingX();
-		if (ige.isClient) {
-			ige.network.send('playerKeyUp', { device: 'key', key: 'a' });
+		if (taro.isClient) {
+			taro.network.send('playerKeyUp', { device: 'key', key: 'a' });
 		}
 	},
 
 	rightReleased: function () {
 		if (this.debug) console.log('RIGHT RELEASED');
-		var unit = ige.client.myPlayer.getSelectedUnit();
+		var unit = taro.client.myPlayer.getSelectedUnit();
 		if (unit.direction.x == 1) unit.ability.stopMovingX();
-		if (ige.isClient) {
-			ige.network.send('playerKeyUp', { device: 'key', key: 'd' });
+		if (taro.isClient) {
+			taro.network.send('playerKeyUp', { device: 'key', key: 'd' });
 		}
 	},
 
@@ -181,7 +181,7 @@ var MobileControlsComponent = IgeEntity.extend({
 
 				Object.assign(settings, {
 					onChange: (data) => {
-						if (ige.client.myPlayer) {
+						if (taro.client.myPlayer) {
 							// Endel's joystick angles are in "Maths style" (zero degrees is EAST and positive anticlockwise)
 							// Convert into compass style angle (zero degrees NORTH and positive clockwise)
 							var compassAngle = (360 - (data.angle - 90)) % 360;
@@ -268,22 +268,22 @@ var MobileControlsComponent = IgeEntity.extend({
 
 				Object.assign(settings, {
 					onChange: (data) => {
-						if (ige.client.myPlayer) {
+						if (taro.client.myPlayer) {
 							// Endel's joystick angles are in "Maths style" (zero degrees is EAST and positive anticlockwise)
 							// Convert into compass style angle (zero degrees NORTH and positive clockwise)
 							var compassAngle = -(data.angle - 90);
 
 							// simulate mouse movement 10 units away from player (scaled by joystick "power") character but at the angle
-							var unitTranslate = ige.client.myPlayer.getSelectedUnit()._translate;
+							var unitTranslate = taro.client.myPlayer.getSelectedUnit()._translate;
 							var mx = unitTranslate.x + Math.sin(compassAngle / 360 * 2 * Math.PI) * 10 * data.power;
 							var my = unitTranslate.y - Math.cos(compassAngle / 360 * 2 * Math.PI) * 10 * data.power;
 
-							ige.client.myPlayer.control.input.mouse.x = mx;
-							ige.client.myPlayer.control.input.mouse.y = my;
+							taro.client.myPlayer.control.input.mouse.x = mx;
+							taro.client.myPlayer.control.input.mouse.y = my;
 
-							ige.client.myPlayer.absoluteAngle = compassAngle;
-							ige.network.send('playerMouseMoved', [mx, my]);
-							ige.network.send('playerAbsoluteAngle', compassAngle);
+							taro.client.myPlayer.absoluteAngle = compassAngle;
+							taro.network.send('playerMouseMoved', [mx, my]);
+							taro.network.send('playerAbsoluteAngle', compassAngle);
 						}
 					}
 				});
@@ -295,37 +295,37 @@ var MobileControlsComponent = IgeEntity.extend({
 				Object.assign(settings, {
 					redFireZone: true,
 					onChange: (data) => {
-						if (ige.client.myPlayer) {
+						if (taro.client.myPlayer) {
 							// Endel's joystick angles are in "Maths style" (zero degrees is EAST and positive anticlockwise)
 							// Convert into compass style angle (zero degrees NORTH and positive clockwise)
 							var compassAngle = -(data.angle - 90);
 
 							// simulate mouse movement 10 units away from player (scaled by joystick "power") character but at the angle
-							var unitTranslate = ige.client.myPlayer.getSelectedUnit()._translate;
+							var unitTranslate = taro.client.myPlayer.getSelectedUnit()._translate;
 							var mx = unitTranslate.x + Math.sin(compassAngle / 360 * 2 * Math.PI) * 10 * data.power;
 							var my = unitTranslate.y - Math.cos(compassAngle / 360 * 2 * Math.PI) * 10 * data.power;
 
-							ige.client.myPlayer.control.input.mouse.x = mx;
-							ige.client.myPlayer.control.input.mouse.y = my;
+							taro.client.myPlayer.control.input.mouse.x = mx;
+							taro.client.myPlayer.control.input.mouse.y = my;
 
-							ige.client.myPlayer.absoluteAngle = compassAngle;
-							ige.network.send('playerMouseMoved', [mx, my]);
-							ige.network.send('playerAbsoluteAngle', compassAngle);
+							taro.client.myPlayer.absoluteAngle = compassAngle;
+							taro.network.send('playerMouseMoved', [mx, my]);
+							taro.network.send('playerAbsoluteAngle', compassAngle);
 
 							// when fire stick is moved to the red ring...
 							if (data.power > 0.75) {
 								// start firing
-								ige.client.myPlayer.control.keyDown('mouse', 'button1');
+								taro.client.myPlayer.control.keyDown('mouse', 'button1');
 							} else {
 								// otherwise stop firing
-								ige.client.myPlayer.control.keyUp('mouse', 'button1');
+								taro.client.myPlayer.control.keyUp('mouse', 'button1');
 							}
 						}
 					},
 					onEnd: () => {
 						// if the player lets go of the fire stick perform a keyup on mouse button1 to stop firing
-						if (ige.client.myPlayer) {
-							ige.client.myPlayer.control.keyUp('mouse', 'button1');
+						if (taro.client.myPlayer) {
+							taro.client.myPlayer.control.keyUp('mouse', 'button1');
 						}
 					}
 				});
@@ -337,14 +337,14 @@ var MobileControlsComponent = IgeEntity.extend({
 				Object.assign(settings, {
 					onStart: () => {
 						if (key) {
-							ige.network.send('playerKeyDown', {
+							taro.network.send('playerKeyDown', {
 								device: 'key', key: key.toLowerCase()
 							});
 						}
 					},
 					onEnd: () => {
 						if (key) {
-							ige.network.send('playerKeyUp', {
+							taro.network.send('playerKeyUp', {
 								device: 'key', key: key.toLowerCase()
 							});
 						}

@@ -1,4 +1,4 @@
-var ConditionComponent = IgeEntity.extend({
+var ConditionComponent = TaroEntity.extend({
 	classId: 'ConditionComponent',
 	componentId: 'condition',
 
@@ -22,14 +22,14 @@ var ConditionComponent = IgeEntity.extend({
 		var leftVar = self._script.variable.getValue(left, vars);
 		var rightVar = self._script.variable.getValue(right, vars);
 
-		// if the operands are igeEntities, then compare their id's
+		// if the operands are taroEntities, then compare their id's
 		if (leftVar && leftVar._id != undefined && rightVar && rightVar._id != undefined) {
 			leftVar = leftVar._id;
 			rightVar = rightVar._id;
 		}
 
-		// ige.script.scriptLog("condition comparing two variables: "+JSON.stringify(left)+op+JSON.stringify(right)+"\n")
-		// ige.script.scriptLog("condition comparing: "+ leftVar+" "+ op +" " + rightVar+'\n')
+		// taro.script.scriptLog("condition comparing two variables: "+JSON.stringify(left)+op+JSON.stringify(right)+"\n")
+		// taro.script.scriptLog("condition comparing: "+ leftVar+" "+ op +" " + rightVar+'\n')
 
 		if (op == 'AND') {
 			return this.run(left, vars) && this.run(right, vars);

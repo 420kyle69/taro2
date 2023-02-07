@@ -1,7 +1,7 @@
-declare class Client extends IgeEventingClass {
+declare class Client extends TaroEventingClass {
 
-	myPlayer: IgeEntity;
-	selectedUnit: IgeEntity;
+	myPlayer: TaroEntity;
+	selectedUnit: TaroEntity;
 	entityUpdateQueue: Record<string, UpdateData[]>;
 
 	rendererLoaded: JQueryDeferred<void>;

@@ -1,4 +1,4 @@
-declare interface IgeNetIoClient {
+declare interface TaroNetIoClient {
 
 	send (commandName: string, data: any): void
 }

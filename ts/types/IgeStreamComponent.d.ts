@@ -1,3 +1,3 @@
-declare class IgeStreamComponent extends IgeEventingClass {
+declare class TaroStreamComponent extends TaroEventingClass {
 
 }

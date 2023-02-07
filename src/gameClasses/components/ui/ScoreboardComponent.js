@@ -1,19 +1,19 @@
-var ScoreboardComponent = IgeEntity.extend({
+var ScoreboardComponent = TaroEntity.extend({
 	classId: 'ScoreboardComponent',
 	componentId: 'scoreboard',
 
 	init: function () {
 		var self = this;
-		// self.scoreAttributeId = ige.game.data.settings.scoreBoard
-		// console.log("ige.game.data.settings", ige.game.data.settings)
-		self.scoreAttributeId = ige.game.data.settings.scoreAttributeId;
+		// self.scoreAttributeId = taro.game.data.settings.scoreBoard
+		// console.log("taro.game.data.settings", taro.game.data.settings)
+		self.scoreAttributeId = taro.game.data.settings.scoreAttributeId;
 		self._hidden = false;
 
 		self.setUI();
 	},
 
 	setUI: function () {
-		if (ige.isMobile) {
+		if (taro.isMobile) {
 			$('#scoreboard-header').addClass('small');
 			$('#scoreboard').addClass('small');
 		} else {
@@ -35,7 +35,7 @@ var ScoreboardComponent = IgeEntity.extend({
 				selector: '.scoreboard-user-entry',
 				build: function ($trigger) {
 					var userData = $trigger.data();
-					var myPlayer = ige.client.myPlayer;
+					var myPlayer = taro.client.myPlayer;
 
 					if (!myPlayer || !myPlayer._stats) {
 						return;
@@ -48,9 +48,9 @@ var ScoreboardComponent = IgeEntity.extend({
 						return;
 					}
 
-					ige.scoreboard.selectedUser = userData;
+					taro.scoreboard.selectedUser = userData;
 
-					var index = mutedUsers.indexOf(ige.scoreboard.selectedUser.userId);
+					var index = mutedUsers.indexOf(taro.scoreboard.selectedUser.userId);
 
 					return {
 						callback: function (key) {
@@ -58,7 +58,7 @@ var ScoreboardComponent = IgeEntity.extend({
 								case 'unmute': {
 									mutedUsers.splice(index, 1);
 									$.ajax({
-										url: `/api/user/toggle-mute/${ige.scoreboard.selectedUser.userId}`,
+										url: `/api/user/toggle-mute/${taro.scoreboard.selectedUser.userId}`,
 										type: 'POST',
 										success: function (data) {
 											console.log(data);											// alert('request sent');
@@ -67,9 +67,9 @@ var ScoreboardComponent = IgeEntity.extend({
 									break;
 								}
 								case 'mute': {
-									mutedUsers.push(ige.scoreboard.selectedUser.userId);
+									mutedUsers.push(taro.scoreboard.selectedUser.userId);
 									$.ajax({
-										url: `/api/user/toggle-mute/${ige.scoreboard.selectedUser.userId}`,
+										url: `/api/user/toggle-mute/${taro.scoreboard.selectedUser.userId}`,
 										type: 'POST',
 										success: function (data) {
 											console.log(data);											// alert('request sent');
@@ -79,7 +79,7 @@ var ScoreboardComponent = IgeEntity.extend({
 								}
 								case 'addFriend': {
 									$.ajax({
-										url: `/api/user/request/${ige.scoreboard.selectedUser.userId}`,
+										url: `/api/user/request/${taro.scoreboard.selectedUser.userId}`,
 										type: 'POST',
 										success: function (data) {
 											alert('request sent');
@@ -95,11 +95,11 @@ var ScoreboardComponent = IgeEntity.extend({
 							},
 							separator: { type: 'cm_separator' },
 							unmute: {
-								name: `Unmute ${ige.scoreboard.selectedUser.userName}`,
+								name: `Unmute ${taro.scoreboard.selectedUser.userName}`,
 								visible: index > -1
 							},
 							mute: {
-								name: `Mute ${ige.scoreboard.selectedUser.userName}`,
+								name: `Mute ${taro.scoreboard.selectedUser.userName}`,
 								visible: index === -1,
 								className: 'context-menu-item context-menu-hover context-menu-danger'
 							}
@@ -111,7 +111,7 @@ var ScoreboardComponent = IgeEntity.extend({
 	},
 
 	convertNumbersToKMB: function (labelValue) {
-		if (ige.game.data.settings.prettifyingScoreboard) {
+		if (taro.game.data.settings.prettifyingScoreboard) {
 			// Nine Zeroes for Billions
 			return Math.abs(Number(labelValue)) >= 1.0e+9
 
@@ -134,11 +134,11 @@ var ScoreboardComponent = IgeEntity.extend({
 		var self = this;
 		var DEFAULT_COLOR = 'white';
 
-		if (ige.isClient) {
+		if (taro.isClient) {
 			var scoreboard = '';
 			var sortedScores = [];
-			var players = ige.$$('player');
-			var topPlayersToShow = ige.isMobile ? 3 : 10;
+			var players = taro.$$('player');
+			var topPlayersToShow = taro.isMobile ? 3 : 10;
 
 			players.forEach(function (player) {
 				if (player._stats && (
@@ -168,19 +168,19 @@ var ScoreboardComponent = IgeEntity.extend({
 
 			for (var i = sortedScores.length - 1; i >= 0; i--) {
 				var playerId = sortedScores[i].key;
-				var player = ige.$(playerId);
+				var player = taro.$(playerId);
 				var defaultFontWeight = 500;
 				if (player) {
 					var color = null; // color to indicate human, animal, or my player on scoreboard
 
-					var playerType = ige.game.getAsset('playerTypes', player._stats.playerTypeId);
+					var playerType = taro.game.getAsset('playerTypes', player._stats.playerTypeId);
 
 					if (playerType && playerType.color) {
 						color = playerType.color;
 					}
 
 					// highlight myself (player) on leaderboard
-					if (player._stats.controlledBy == 'human' && player._stats.clientId == ige.network.id()) {
+					if (player._stats.controlledBy == 'human' && player._stats.clientId == taro.network.id()) {
 						defaultFontWeight = 800;
 						color = '#99FF00';
 					}
@@ -195,16 +195,16 @@ var ScoreboardComponent = IgeEntity.extend({
 				}
 			}
 
-			ige.client.clientCount = sortedScores.length;
+			taro.client.clientCount = sortedScores.length;
 
 			$('#player-count').html(players.length);
 
 			if (self._hidden) {
 				$('#scoreboard').html('');
-				$('#leaderboard-toggle').html('&nbsp;<i class="far fa-caret-square-down" aria-hidden="true" onclick="ige.scoreboard.toggleScores()" style="cursor:pointer;"></i>');
+				$('#leaderboard-toggle').html('&nbsp;<i class="far fa-caret-square-down" aria-hidden="true" onclick="taro.scoreboard.toggleScores()" style="cursor:pointer;"></i>');
 			} else {
 				$('#scoreboard').html(scoreboard);
-				$('#leaderboard-toggle').html('&nbsp;<i class="far fa-caret-square-up" aria-hidden="true" onclick="ige.scoreboard.toggleScores()" style="cursor:pointer;"></i>');
+				$('#leaderboard-toggle').html('&nbsp;<i class="far fa-caret-square-up" aria-hidden="true" onclick="taro.scoreboard.toggleScores()" style="cursor:pointer;"></i>');
 			}
 		}
 	},

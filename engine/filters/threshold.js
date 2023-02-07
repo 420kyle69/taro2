@@ -1,7 +1,7 @@
-IgeFilters.threshold = function (canvas, ctx, originalImage, texture, data) {
+TaroFilters.threshold = function (canvas, ctx, originalImage, texture, data) {
 	// Apply the filter and then put the new pixel data
 	ctx.putImageData(
-		IgeFilters._threshold(
+		TaroFilters._threshold(
 			ctx.getImageData(
 				0,
 				0,
@@ -16,11 +16,11 @@ IgeFilters.threshold = function (canvas, ctx, originalImage, texture, data) {
 	);
 };
 
-IgeFilters._threshold = function (imageData, texture, data) {
+TaroFilters._threshold = function (imageData, texture, data) {
 	var arr;
 	var arrCount;
 	var i; var r; var g; var b; var v;
-	var threshold = texture.data('IgeFilters.threshold.value') || data.value;
+	var threshold = texture.data('TaroFilters.threshold.value') || data.value;
 
 	arr = imageData.data;
 	arrCount = arr.length;

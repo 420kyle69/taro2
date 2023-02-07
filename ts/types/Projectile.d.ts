@@ -1,3 +1,3 @@
-declare class Projectile extends IgeEntityPhysics {
+declare class Projectile extends TaroEntityPhysics {
 
 }

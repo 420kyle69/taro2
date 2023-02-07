@@ -31,16 +31,16 @@ var shutdownMessages = [
 	}
 ];
 
-var TimerComponent = IgeEntity.extend({
+var TimerComponent = TaroEntity.extend({
 	classId: 'TimerComponent',
 	componentId: 'timer',
 
 	init: function () {
 		var self = this;
 
-		if (ige.isServer) {
+		if (taro.isServer) {
 			self.emptyTimeLimit = self.getTimeLimit();
-			self.startedAt = new Date(ige.server.startedOn);
+			self.startedAt = new Date(taro.server.startedOn);
 			console.log('initialized timer component', self.startedAt);
 			self.now = self.serverEmptySince = self.startedAt;
 		}
@@ -48,7 +48,7 @@ var TimerComponent = IgeEntity.extend({
 
 	getTimeLimit: function () {
 		let timeLimitMin = 10; // kill t1/t2 if empty for 10 mins
-		// const totalPlayCount = ige.server.totalPlayCount || 0;
+		// const totalPlayCount = taro.server.totalPlayCount || 0;
 
 		// // add 1 minute for every 2000 total play count
 		// let extraMinutes = totalPlayCount / 2000;
@@ -61,7 +61,7 @@ var TimerComponent = IgeEntity.extend({
 
 	getLifeSpan: function () {
 		var maxLifeSpan = 6 * 60 * 60 * 1000;
-		var lifeSpan = ige.server.lifeSpan;
+		var lifeSpan = taro.server.lifeSpan;
 
 		if (lifeSpan > maxLifeSpan) {
 			lifeSpan = maxLifeSpan;
@@ -79,17 +79,17 @@ var TimerComponent = IgeEntity.extend({
 		var everySecond = setInterval(function () {
 			self.now = Date.now();
 
-			if (ige.isServer) {
+			if (taro.isServer) {
 				self.lastTick = self.now;
-				// var shouldLog = ige.server.logTriggers && ige.server.logTriggers.timerLogs;
+				// var shouldLog = taro.server.logTriggers && taro.server.logTriggers.timerLogs;
 
 				
 				// kill tier 1 servers that has been empty for over 15 minutes
-				// var playerCount = ige.$$('player').filter(function (player) { return player._stats.controlledBy == 'human' }).length;
+				// var playerCount = taro.$$('player').filter(function (player) { return player._stats.controlledBy == 'human' }).length;
 
 				// if (playerCount <= 0) {
 				// 	if (self.now - self.serverEmptySince > self.emptyTimeLimit) {
-				// 		ige.server.kill("game's been empty for too long (15 min)");
+				// 		taro.server.kill("game's been empty for too long (15 min)");
 				// 	}
 				// }
 				// else {
@@ -110,17 +110,17 @@ var TimerComponent = IgeEntity.extend({
 					var message = `shutting down server in ${messageToBroadcast.message}`;
 					self.shutdownMessageCheckpoint = messageToBroadcast.checkpoint;
 
-					ige.chat.sendToRoom('1', message, undefined, undefined);
+					taro.chat.sendToRoom('1', message, undefined, undefined);
 				}
 
 				// if (shouldLog) {
 				// 	console.log(self.now, self.startedAt, age, lifeSpan, age > lifeSpan);
 				// }
 				// if (age > lifeSpan) {
-				// 	ige.server.kill("server lifespan expired");
+				// 	taro.server.kill("server lifespan expired");
 				// }
-			} else if (ige.isClient) {
-				ige.scoreboard.update();
+			} else if (taro.isClient) {
+				taro.scoreboard.update();
 			}
 		}, 1000);
 	}

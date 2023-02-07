@@ -1,4 +1,4 @@
-var AIComponent = IgeEntity.extend({
+var AIComponent = TaroEntity.extend({
 	classId: 'AIComponent',
 	componentId: 'ai',
 
@@ -30,7 +30,7 @@ var AIComponent = IgeEntity.extend({
 		var self = this;
 		var unit = self._entity;
 		unit._stats.aiEnabled = true;
-		if (ige.isServer) {
+		if (taro.isServer) {
 			unit.streamUpdateData([{aiEnabled: true }]);		
 		}
 		
@@ -42,7 +42,7 @@ var AIComponent = IgeEntity.extend({
 		self.letGoDistance = unit._stats.ai.letGoDistance; // options: undefined value for infinite distance
 		self.maxAttackRange = unit._stats.ai.maxAttackRange;
 		self.previousPosition = { x: unit._translate.x, y: unit._translate.y }; // last position recorded before fleeing
-		self.nextMoveAt = ige._currentTime;
+		self.nextMoveAt = taro._currentTime;
 		self.goIdle();
 
 		// if (unit._stats.ai.sensorRadius > 0 && unit.sensor == undefined) {
@@ -54,7 +54,7 @@ var AIComponent = IgeEntity.extend({
 		var unit = this._entity;
 		unit._stats.aiEnabled = false;
 		
-		if (ige.isServer) {
+		if (taro.isServer) {
 			unit.streamUpdateData([{aiEnabled: false }]);
 		}
 
@@ -97,7 +97,7 @@ var AIComponent = IgeEntity.extend({
 		// only response to hostile/neutral units
 		var ownerPlayer = self._entity.getOwner();
 		if (unit) {
-			var ownerPlayerOfTargetUnit = ige.$(unit._stats.ownerId);
+			var ownerPlayerOfTargetUnit = taro.$(unit._stats.ownerId);
 			if (ownerPlayer && ownerPlayer.isHostileTo(ownerPlayerOfTargetUnit) && unit._stats.isUnTargetable != true) {
 				// if I already have a target, re-target if new target unit is closer
 				var targetUnit = this.getTargetUnit();
@@ -121,7 +121,7 @@ var AIComponent = IgeEntity.extend({
 	announceDeath: function () {
 		var unitIds = this.unitsTargetingMe;
 		for (var i = 0; i < unitIds.length; i++) {
-			var attackingUnit = ige.$(unitIds[i]);
+			var attackingUnit = taro.$(unitIds[i]);
 			if (attackingUnit && attackingUnit.ai.getTargetUnit() == this._entity && attackingUnit.sensor && attackingUnit._stats.ai && attackingUnit._stats.aiEnabled) {
 				attackingUnit.ai.goIdle();
 				attackingUnit.sensor.updateBody(); // re-detect nearby units
@@ -134,7 +134,7 @@ var AIComponent = IgeEntity.extend({
 
 	getTargetUnit: function () {
 		if (this.targetUnitId)
-			return ige.$(this.targetUnitId);
+			return taro.$(this.targetUnitId);
 
 		return undefined
 	},
@@ -204,7 +204,7 @@ var AIComponent = IgeEntity.extend({
 		this.targetUnitId = undefined;
 		this.targetPosition = undefined;
 		this.currentAction = 'idle';
-		this.nextMoveAt = ige._currentTime + 2000 + Math.floor(Math.random() * 2000);
+		this.nextMoveAt = taro._currentTime + 2000 + Math.floor(Math.random() * 2000);
 	},
 
 	fleeFromUnit: function (unit) {
@@ -216,7 +216,7 @@ var AIComponent = IgeEntity.extend({
 		}
 		this.currentAction = 'flee';
 		this._entity.startMoving();
-		this.nextMoveAt = ige._currentTime + 5000 + Math.floor(Math.random() * 5000);
+		this.nextMoveAt = taro._currentTime + 5000 + Math.floor(Math.random() * 5000);
 	},
 
 	attackUnit: function (unit) {
@@ -292,15 +292,15 @@ var AIComponent = IgeEntity.extend({
 		switch (self.currentAction) {
 			case 'idle':
 				// wandering unit will repeat between moving to a random position every 2~4 seconds, then stop for 2~4 seconds
-				if (self.idleBehaviour == 'wander' && ige._currentTime > self.nextMoveAt) {
+				if (self.idleBehaviour == 'wander' && taro._currentTime > self.nextMoveAt) {
 					// assign a random destination within 25px radius
 					if (unit.isMoving == false) {
 						unit.angleToTarget = Math.random() * Math.PI * 2;
 						unit.startMoving();
-						self.nextMoveAt = ige._currentTime + 1500 + Math.floor(Math.random() * 1500);
+						self.nextMoveAt = taro._currentTime + 1500 + Math.floor(Math.random() * 1500);
 					} else {
 						unit.stopMoving();
-						self.nextMoveAt = ige._currentTime + 2000 + Math.floor(Math.random() * 2000);
+						self.nextMoveAt = taro._currentTime + 2000 + Math.floor(Math.random() * 2000);
 					}
 				}
 				break;
@@ -351,7 +351,7 @@ var AIComponent = IgeEntity.extend({
 					var b = self.previousPosition.y - targetUnit._translate.y;
 					var distanceTravelled = Math.sqrt(a * a + b * b);
 					// we've ran far enough OR we've been running for long enough (5-10s) let's stop running
-					if (distanceTravelled > self.maxTravelDistance || ige._currentTime > self.nextMoveAt) {
+					if (distanceTravelled > self.maxTravelDistance || taro._currentTime > self.nextMoveAt) {
 						self.goIdle();
 					}
 				} else { // target unit doesn't exist. stop fleeing.

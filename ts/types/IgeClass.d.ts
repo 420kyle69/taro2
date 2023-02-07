@@ -1,4 +1,4 @@
-declare class IgeClass {
-	static extend<T extends IgeClass & { init(...args: any[]) }> (options: T):
+declare class TaroClass {
+	static extend<T extends TaroClass & { init(...args: any[]) }> (options: T):
         new(...args: Parameters<typeof options.init>) => T;
 }

@@ -1,14 +1,14 @@
-var Player = IgeEntity.extend({
+var Player = TaroEntity.extend({
 	classId: 'Player',
 	componentId: 'player',
 
 	init: function (data, entityIdFromServer) {
-		IgeEntity.prototype.init.call(this);
+		TaroEntity.prototype.init.call(this);
 		this.id(entityIdFromServer);
 		var self = this;
 
 
-		var playerData = ige.game.getAsset('playerTypes', data.playerTypeId);
+		var playerData = taro.game.getAsset('playerTypes', data.playerTypeId);
 		this._stats = _.merge(playerData, data);
 
 		// dont save variables in _stats as _stats is stringified and synced
@@ -23,23 +23,23 @@ var Player = IgeEntity.extend({
 		Player.prototype.log(`player created ${this.id()}`);
 
 		this.category('player');
-		this.mount(ige.$('baseScene'));
+		this.mount(taro.$('baseScene'));
 
 		self.addComponent(AttributeComponent);
 
-		if (ige.isServer) {
+		if (taro.isServer) {
 			this.streamMode(2);
 			// self._stats.unitId = self.getCurrentUnit().id()
 			self.addComponent(ControlComponent);
-			ige.server.totalPlayersCreated++;
-		} else if (ige.isClient) {
+			taro.server.totalPlayersCreated++;
+		} else if (taro.isClient) {
 			// if this player is "me"
-			if (self._stats.clientId == ige.network.id()) {
+			if (self._stats.clientId == taro.network.id()) {
 				self.addComponent(ControlComponent);
 
 				// mouse move listener
-				ige.input.on('pointermove', function (point) {
-					if (ige.client.myPlayer) {
+				taro.input.on('pointermove', function (point) {
+					if (taro.client.myPlayer) {
 						self.control.newMousePosition = [
 							point.x.toFixed(0),
 							point.y.toFixed(0)
@@ -52,7 +52,7 @@ var Player = IgeEntity.extend({
 
 			// apply skin to the selected unit if the unit already exists on the client side
 			if (this._stats && this._stats.selectedUnitId) {
-				const unit = ige.$(this._stats.selectedUnitId);
+				const unit = taro.$(this._stats.selectedUnitId);
 				if (unit) {
 					unit.equipSkin();
 				}
@@ -63,7 +63,7 @@ var Player = IgeEntity.extend({
 				return unit && unit.getOwner() && unit.getOwner().id() === self.id();
 			}, ['texture', 'nameLabel']);
 
-			ige.entitiesToRender.trackEntityById[entityIdFromServer] = this;
+			taro.entitiesToRender.trackEntityById[entityIdFromServer] = this;
 		}
 	},
 
@@ -74,30 +74,30 @@ var Player = IgeEntity.extend({
 		if (self._stats.playerJoined != true) {
 			// notify GS manager that a user has joined, do not notify if player joins again after pausing the game
 			if (self._stats.userId) {
-				ige.clusterClient.userJoined(self._stats.userId);
+				taro.clusterClient.userJoined(self._stats.userId);
 			}
 
-			if (ige.script) // do not send trigger for neutral player
+			if (taro.script) // do not send trigger for neutral player
 			{
-				ige.script.trigger('playerJoinsGame', { playerId: self.id() });
+				taro.script.trigger('playerJoinsGame', { playerId: self.id() });
 			}
 			
 			if (self._stats.controlledBy == 'human' && !self._stats.isBot) {
 				var clientId = self._stats.clientId;
-				var client = ige.server.clients[clientId];
+				var client = taro.server.clients[clientId];
 				var receivedJoinGame = client.receivedJoinGame;
 				var processedJoinGame = Date.now() - receivedJoinGame;
 				var dataLoadTime = self._stats.totalTime;
 				client.lastEventAt = Date.now();
 
-				if (ige.game.data.map.wasEdited) {
+				if (taro.game.data.map.wasEdited) {
 					var playerJoinStreamData = [
 						{ streamedOn: Date.now() },
 						{ playerJoined: true },
 						{ dataLoadTime: dataLoadTime },
 						{ processedJoinGame: processedJoinGame },
 						{ receivedJoinGame: receivedJoinGame },
-						{ mapData: ige.game.data.map }
+						{ mapData: taro.game.data.map }
 					];
 				} else {
 					var playerJoinStreamData = [
@@ -113,7 +113,7 @@ var Player = IgeEntity.extend({
 				// console.log(`Player.joinGame(): sending ACK to client ${self._stats.clientId} ${self._stats.name} (time elapsed: ${Date.now() - client.lastEventAt})`, playerJoinStreamData);
 
 				self.streamUpdateData(playerJoinStreamData);
-				ige.clusterClient && ige.clusterClient.playerJoined(self._stats.userId);
+				taro.clusterClient && taro.clusterClient.playerJoined(self._stats.userId);
 			}
 
 		} else {
@@ -125,7 +125,7 @@ var Player = IgeEntity.extend({
 	createUnit: function (data) {
 		var self = this;
 
-		if (ige.isServer) {
+		if (taro.isServer) {
 			var data = Object.assign(
 				data,
 				{
@@ -147,7 +147,7 @@ var Player = IgeEntity.extend({
 	},
 
 	ownUnit: function (unit) {
-		if (this._stats.unitIds.indexOf(unit.id()) == -1 && unit.id() != 'ige') {
+		if (this._stats.unitIds.indexOf(unit.id()) == -1 && unit.id() != 'taro') {
 			this._stats.unitIds.push(unit.id());
 		}
 
@@ -172,17 +172,17 @@ var Player = IgeEntity.extend({
 	selectUnit: function (unitId) {
 		var self = this;
 		
-		var unit = ige.$(unitId);
-		if (ige.isServer && self._stats.clientId) {			
+		var unit = taro.$(unitId);
+		if (taro.isServer && self._stats.clientId) {			
 			if (unit && unit._category == 'unit' && unit.getOwner() == this) {
 				self._stats.selectedUnitId = unitId;
-				ige.network.send('makePlayerSelectUnit', { unitId: unitId }, self._stats.clientId);
+				taro.network.send('makePlayerSelectUnit', { unitId: unitId }, self._stats.clientId);
 			} else {
 				// someone's attempting exploit by trying to assign a unit to a player that's not the unit's owner				
-				var client = ige.server.clients[self._stats.clientId];				
+				var client = taro.server.clients[self._stats.clientId];				
 				var logData = {
 					query: 'exploitSelectUnit',
-					gameTitle: ige.game.data.defaultData.title,
+					gameTitle: taro.game.data.defaultData.title,
 					playerName: this._stats.name,
 					ip: client.ip,
 					userId: client.userId
@@ -191,9 +191,9 @@ var Player = IgeEntity.extend({
 			}			
 		}
 
-		if (ige.isClient) {
+		if (taro.isClient) {
 			
-			if (self._stats.clientId == ige.network.id() && unit && unit._category == 'unit') {
+			if (self._stats.clientId == taro.network.id() && unit && unit._category == 'unit') {
 				self._stats.selectedUnitId = unitId;
 			
 				if (unit.inventory) {
@@ -208,8 +208,8 @@ var Player = IgeEntity.extend({
 				}
 
 				unit.renderMobileControl();
-				ige.client.selectedUnit = unit;
-				ige.client.eventLog.push([ige._currentTime, `my unit selected ${unitId}`]);
+				taro.client.selectedUnit = unit;
+				taro.client.eventLog.push([taro._currentTime, `my unit selected ${unitId}`]);
 			}
 		}
 	},
@@ -217,20 +217,20 @@ var Player = IgeEntity.extend({
 	cameraTrackUnit: function (unit) {
 		if (unit) {
 			// self._stats.selectedUnitId = unit.id()
-			if (ige.isServer && this._stats.clientId) {
-				ige.network.send(
+			if (taro.isServer && this._stats.clientId) {
+				taro.network.send(
 					'makePlayerCameraTrackUnit',
 					{ unitId: unit.id() },
 					this._stats.clientId
 				);
 
 			} else if (
-				ige.isClient &&
-				this._stats.clientId == ige.network.id()
+				taro.isClient &&
+				this._stats.clientId == taro.network.id()
 				&& unit
 				&& unit._category == 'unit'
 			) {
-				ige.client.myPlayer.currentFollowUnit = unit._id;
+				taro.client.myPlayer.currentFollowUnit = unit._id;
 
 				unit.emit('follow');
 			}
@@ -240,17 +240,17 @@ var Player = IgeEntity.extend({
 	changeCameraPanSpeed: function (panSpeed) {
 		var self = this;
 
-		if (ige.isServer && self._stats.clientId) {
-			ige.network.send('changePlayerCameraPanSpeed', { panSpeed: panSpeed }, self._stats.clientId);
-		} else if (ige.isClient && self._stats.clientId == ige.network.id() && panSpeed !== undefined) {
-			ige.client.vp1.camera.trackTranslateSmoothing(panSpeed);
+		if (taro.isServer && self._stats.clientId) {
+			taro.network.send('changePlayerCameraPanSpeed', { panSpeed: panSpeed }, self._stats.clientId);
+		} else if (taro.isClient && self._stats.clientId == taro.network.id() && panSpeed !== undefined) {
+			taro.client.vp1.camera.trackTranslateSmoothing(panSpeed);
 		}
 	},
 
 	// get selectedUnits' 0th index unit
 	selectFirstAvailableUnit: function () {
 		if (this._stats.unitIds) {
-			var unit = ige.$(this._stats.unitIds[0]);
+			var unit = taro.$(this._stats.unitIds[0]);
 			if (unit) {
 				this.selectUnit(unit.id());
 			}
@@ -258,12 +258,12 @@ var Player = IgeEntity.extend({
 	},
 
 	getSelectedUnit: function () {
-		return ige.$(this._stats.selectedUnitId);
+		return taro.$(this._stats.selectedUnitId);
 	},
 
 	getUnits: function (clientId) {
 		var self = this;
-		return ige
+		return taro
 			.$$('unit')
 			.filter(function (unit) {
 				return unit._stats && unit._stats.ownerId == self.id();
@@ -276,11 +276,11 @@ var Player = IgeEntity.extend({
 
 	castAbility: function (command) {
 		var self = this;
-		var units = ige.game.getUnitsByClientId(this._stats.clientId);
+		var units = taro.game.getUnitsByClientId(this._stats.clientId);
 		for (i in units) {
 			var unit = units[i];
 			if (unit) {
-				var unitType = ige.game.getAsset('unitTypes', unit._stats.type);
+				var unitType = taro.game.getAsset('unitTypes', unit._stats.type);
 				if (unitType && unitType.abilities) {
 					var ability = unitType.abilities[command];
 					if (ability) {
@@ -322,8 +322,8 @@ var Player = IgeEntity.extend({
 			delete self._stats.variables;
 		}
 
-		if (ige.isClient) {
-			var isMyPlayerUpdated = self._stats.clientId == ige.network.id();
+		if (taro.isClient) {
+			var isMyPlayerUpdated = self._stats.clientId == taro.network.id();
 			// show name label can be false for assignedPlyerType so updateNameLabel accordingly
 			self.redrawUnits(function (unit) {
 				var owner = unit.getOwner();
@@ -340,11 +340,11 @@ var Player = IgeEntity.extend({
 
 			if (isMyPlayerUpdated) {
 				// update UI
-				ige.playerUi.updatePlayerAttributesDiv(self._stats.attributes);
+				taro.playerUi.updatePlayerAttributesDiv(self._stats.attributes);
 			}
 
-			if (ige.scoreboard) {
-				ige.scoreboard.update();
+			if (taro.scoreboard) {
+				taro.scoreboard.update();
 			}
 		}
 	},
@@ -362,7 +362,7 @@ var Player = IgeEntity.extend({
 			return false;
 		}
 
-		var myPlayerType = ige.game.getAsset('playerTypes', this._stats.playerTypeId);
+		var myPlayerType = taro.game.getAsset('playerTypes', this._stats.playerTypeId);
 		if (myPlayerType && myPlayerType.relationships) {
 			if (myPlayerType.relationships[player._stats.playerTypeId] == 'hostile')
 				return true;
@@ -376,7 +376,7 @@ var Player = IgeEntity.extend({
 			return false;
 		}
 
-		var myPlayerType = ige.game.getAsset('playerTypes', this._stats.playerTypeId);
+		var myPlayerType = taro.game.getAsset('playerTypes', this._stats.playerTypeId);
 		if (myPlayerType && myPlayerType.relationships) {
 			if (myPlayerType.relationships[player._stats.playerTypeId] == 'friendly') {
 				return true;
@@ -395,15 +395,15 @@ var Player = IgeEntity.extend({
 		if (this._stats.controlledBy == 'human') // do not send trigger for neutral player
 		{
 
-			if (ige.isServer) {
-				const i = ige.server.developerClientIds.indexOf(this._stats.clientId);
-				if (i != -1) ige.server.developerClientIds.splice(i, 1);
+			if (taro.isServer) {
+				const i = taro.server.developerClientIds.indexOf(this._stats.clientId);
+				if (i != -1) taro.server.developerClientIds.splice(i, 1);
 			}
 
-			ige.script.trigger('playerLeavesGame', { playerId: this.id() });
+			taro.script.trigger('playerLeavesGame', { playerId: this.id() });
 			// session is in second
 			if (this.variables && this.variables.progression != undefined && this.variables.progression.value != undefined) {
-				ige.clusterClient && ige.clusterClient.emit('log-progression', this.variables.progression.value);
+				taro.clusterClient && taro.clusterClient.emit('log-progression', this.variables.progression.value);
 			}
 			this.streamDestroy();
 			this.destroy();
@@ -411,7 +411,7 @@ var Player = IgeEntity.extend({
 	},
 
 	updateVisibility: function (playerId) {
-		var player = ige.$(playerId);
+		var player = taro.$(playerId);
 
 		if (!player) {
 			return;
@@ -424,7 +424,7 @@ var Player = IgeEntity.extend({
 		}, ['texture', 'nameLabel']);
 
 		// make the items visible/invisible that belongs to any unit of this player
-		ige.$$('item')
+		taro.$$('item')
 			.forEach(function (item) {
 				var ownerUnit = item.getOwnerUnit();
 				var ownerPlayer = ownerUnit && ownerUnit.getOwner();
@@ -440,7 +440,7 @@ var Player = IgeEntity.extend({
 	streamUpdateData: function (queuedData) {
 		var self = this;
 		var oldStats = JSON.parse(JSON.stringify(self._stats));
-		IgeEntity.prototype.streamUpdateData.call(this, queuedData);
+		TaroEntity.prototype.streamUpdateData.call(this, queuedData);
 
 		for (var i = 0; i < queuedData.length; i++) {
 			var data = queuedData[i];
@@ -449,15 +449,15 @@ var Player = IgeEntity.extend({
 				// if player's type changed, then update all of its base stats (speed, stamina, etc..)
 				if (attrName === 'playerTypeId') {
 					self._stats[attrName] = newValue;
-					var playerTypeData = ige.game.getAsset('playerTypes', newValue);
+					var playerTypeData = taro.game.getAsset('playerTypes', newValue);
 					if (playerTypeData) {
 						playerTypeData.playerTypeId = newValue;
 
-						if (ige.isClient) {
+						if (taro.isClient) {
 							// change color of label of all units that belongs to updating player
 							self.redrawUnits(function (unit) {
 								// dont update color if unitType of my unit is changed on my screen as it will be always Lime
-								var isMyPlayerUpdated = self._stats.clientId === ige.network.id();
+								var isMyPlayerUpdated = self._stats.clientId === taro.network.id();
 								// update color of all units that belongs to player whose playerType just changed
 								var ownerPlayer = unit.getOwner();
 								var unitBelongsToUpdatingPlayer = ownerPlayer && ownerPlayer.id() === self.id();
@@ -470,12 +470,12 @@ var Player = IgeEntity.extend({
 					}
 				}
 
-				if (ige.isServer) {
+				if (taro.isServer) {
 					if (attrName === 'name' && oldStats.name !== newValue) {
 						self._stats[attrName] = newValue;
 						// update all units
 						self._stats.unitIds.forEach(function (unitId) {
-							var unit = ige.$(unitId);
+							var unit = taro.$(unitId);
 							unit.streamUpdateData([{ name: newValue }]);
 						});
 					} else if (attrName === 'playerJoined' && newValue == false) {
@@ -485,7 +485,7 @@ var Player = IgeEntity.extend({
 					}
 				}
 				
-				if (ige.isClient) {
+				if (taro.isClient) {
 					if (attrName === 'name') {
 						self._stats[attrName] = newValue;
 						// update here
@@ -509,17 +509,17 @@ var Player = IgeEntity.extend({
 						}
 					}
 
-					if (self._stats.clientId == ige.network.id()) {
+					if (self._stats.clientId == taro.network.id()) {
 						if (attrName === 'mapData') {
 							self._stats[attrName] = newValue;
-							ige.developerMode.updateClientMap(data);
+							taro.developerMode.updateClientMap(data);
 						}
 						if (attrName === 'attributes') {
-							ige.playerUi.updatePlayerAttributesDiv(self._stats.attributes);
+							taro.playerUi.updatePlayerAttributesDiv(self._stats.attributes);
 						}
 						if (attrName === 'coins') {
 							self._stats[attrName] = newValue;
-							ige.playerUi.updatePlayerCoin(newValue);
+							taro.playerUi.updatePlayerCoin(newValue);
 						}
 						if (attrName === 'playerJoinedAgain') {
 							self.hideMenu();
@@ -531,12 +531,12 @@ var Player = IgeEntity.extend({
 						if (attrName === 'playerJoined') {
 							self._stats[attrName] = newValue;
 							// console.log('received player.playerJoined');
-							ige.client.eventLog.push([ige._currentTime, 'playerJoined received']);
+							taro.client.eventLog.push([taro._currentTime, 'playerJoined received']);
 							// render name labels of all other units
 							self.redrawUnits(['nameLabel']);
 
 							self._stats.receivedJoinGame = data.receivedJoinGame;
-							ige.client.eventLog.push([ige._currentTime - ige.client.eventLogStartTime, '\'playerJoined\' received from server']);
+							taro.client.eventLog.push([taro._currentTime - taro.client.eventLogStartTime, '\'playerJoined\' received from server']);
 							self._stats.processedJoinGame = data.processedJoinGame;
 							var streamingDiff = `${Date.now() - data.streamedOn}ms`;
 
@@ -583,16 +583,16 @@ var Player = IgeEntity.extend({
 						}
 					}
 
-					if (attrName === 'banChat' && (ige.game.data.isDeveloper || (ige.client.myPlayer && ige.client.myPlayer._stats.isUserMod))) {
+					if (attrName === 'banChat' && (taro.game.data.isDeveloper || (taro.client.myPlayer && taro.client.myPlayer._stats.isUserMod))) {
 						self._stats[attrName] = newValue;
-						ige.menuUi.kickPlayerFromGame();
+						taro.menuUi.kickPlayerFromGame();
 					}
 				}
 			}
 		}
 	},
 	setChatMute: function (value) {
-		if (ige.env == 'local') // don't mute users in dev env
+		if (taro.env == 'local') // don't mute users in dev env
 			return;
 
 		if (value) {
@@ -610,7 +610,7 @@ var Player = IgeEntity.extend({
 			filterFn = null;
 		}
 
-		ige.$$('unit')
+		taro.$$('unit')
 			.filter(function (unit) {
 				return filterFn ? filterFn(unit) : true;
 			})
@@ -636,17 +636,17 @@ var Player = IgeEntity.extend({
 
 	updatePlayerHighscore: function () {
 		var self = this;
-		var scoreId = ige.game.data.settings.scoreAttributeId;
+		var scoreId = taro.game.data.settings.scoreAttributeId;
 		try {
 			// comparing player highscore with current highscore. if current highscore is greter then request it to update server
 			if (scoreId && self._stats && self._stats.attributes && self._stats.attributes[scoreId] && (self._stats.highscore < self._stats.newHighscore || self._stats.highscore < self._stats.attributes[scoreId].value)) {
-				var score = Math.max(self._stats.newHighscore || 0, self._stats.attributes[ige.game.data.settings.scoreAttributeId].value || 0);
+				var score = Math.max(self._stats.newHighscore || 0, self._stats.attributes[taro.game.data.settings.scoreAttributeId].value || 0);
 
 				if (score > self._stats.highscore) {
 					// highscore updated
-					ige.clusterClient && ige.clusterClient.updatePlayerHighscore({
+					taro.clusterClient && taro.clusterClient.updatePlayerHighscore({
 						userId: self._stats.userId,
-						gameId: ige.game.data.defaultData._id,
+						gameId: taro.game.data.defaultData._id,
 						highscore: score,
 					});
 				}
@@ -658,13 +658,13 @@ var Player = IgeEntity.extend({
 
 	tick: function (ctx) {
 		// if entity (unit/item/player/projectile) has attribute, run regenerate
-		if (ige.isServer) {
+		if (taro.isServer) {
 			if (this.attribute) {
 				this.attribute.regenerate();
 			}
 		}
 
-		IgeEntity.prototype.tick.call(this, ctx);
+		TaroEntity.prototype.tick.call(this, ctx);
 	},
 
 	loadPersistentData: function () {
@@ -672,7 +672,7 @@ var Player = IgeEntity.extend({
 
 		var persistData = _.cloneDeep(self.persistedData);
 		if (persistData && persistData.data && persistData.data.player) {
-			IgeEntity.prototype.loadPersistentData.call(this, persistData.data.player);
+			TaroEntity.prototype.loadPersistentData.call(this, persistData.data.player);
 		}
 		console.log('load persisted data is now true');
 		self.persistentDataLoaded = true;
@@ -683,30 +683,30 @@ var Player = IgeEntity.extend({
 
 		var persistData = data;
 		if (persistData) {
-			IgeEntity.prototype.loadPersistentData.call(this, persistData);
+			TaroEntity.prototype.loadPersistentData.call(this, persistData);
 		}
 		self.persistentDataLoaded = true;
 	},
 
 	hideMenu: function () {
-		if (ige.isClient) {
+		if (taro.isClient) {
 			// UI related changes like hiding menu, etc...
 			$('#play-game-button').removeAttr('disabled');
 			var html = '<i class="fa fa-gamepad pr-2 py-3" aria-hidden="true"></i>Continue';
 			$('#play-game-button .content').html(html);
 
 			$('#modd-shop-div').addClass('d-flex');
-			ige.client.eventLog.push([ige._currentTime - ige.client.eventLogStartTime, 'hide menu called']);
-			ige.menuUi.hideMenu(); // if player's already joined the game, then just hide menu when "play game" button is clicked
+			taro.client.eventLog.push([taro._currentTime - taro.client.eventLogStartTime, 'hide menu called']);
+			taro.menuUi.hideMenu(); // if player's already joined the game, then just hide menu when "play game" button is clicked
 
-			if (!ige.client.guestmode) {
+			if (!taro.client.guestmode) {
 				$('.open-menu-button').show();
 			}
 
 			if ((typeof (userId) !== 'undefined' && typeof (sessionId) !== 'undefined') || window.isStandalone) {
-				if ((ige.game.data.isGameDeveloper && ['1', '4', '5'].includes(ige.game.data.defaultData.tier)) || window.isStandalone) {
+				if ((taro.game.data.isGameDeveloper && ['1', '4', '5'].includes(taro.game.data.defaultData.tier)) || window.isStandalone) {
 					// dont show dev menu by default
-					// if (!ige.isMobile) {
+					// if (!taro.isMobile) {
 					// 	$("#dev-console").show() // if user has access of this game, show dev console
 					// }
 					// $('#game-suggestions-card').removeClass('d-xl-block');
@@ -719,14 +719,14 @@ var Player = IgeEntity.extend({
 						$('#toggle-dev-panels').click();
 					}
 				} else {
-					if (ige.game.data.isDeveloper) {
+					if (taro.game.data.isDeveloper) {
 						$('#toggle-dev-panels').show();
 					}
 				}
-				if (ige.game.data.isDeveloper) {
+				if (taro.game.data.isDeveloper) {
 					$('#kick-player').show();
 				}
-				if (ige.client.myPlayer && ige.client.myPlayer._stats.isUserMod) {
+				if (taro.client.myPlayer && taro.client.myPlayer._stats.isUserMod) {
 					$('#kick-player').show();
 				}
 			}

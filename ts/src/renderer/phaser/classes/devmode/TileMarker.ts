@@ -17,7 +17,7 @@ class TileMarker {
 
         this.graphics = scene.add.graphics();
 		this.graphics.lineStyle(w, 0x000000, 1);
-		if (ige.game.data.defaultData.dontResize) {
+		if (taro.game.data.defaultData.dontResize) {
 			this.graphics.strokeRect(0, 0, map.tileWidth, map.tileHeight);
 		} else {
 			this.graphics.strokeRect(0, 0, 64, 64);
@@ -32,14 +32,14 @@ class TileMarker {
 
 	addImage (x: number, y: number): Phaser.GameObjects.Image {
 		const map = this.map;
-		const data = ige.game.data;
+		const data = taro.game.data;
 		const tileset = data.map.tilesets[0];
 		const key = `tiles/${tileset.name}`;
 		const extrudedKey = this.extrudedKey = `extruded-${key}`;
 
 		let width = 64;
 		let height = 64;
-		if (ige.game.data.defaultData.dontResize) {
+		if (taro.game.data.defaultData.dontResize) {
 			width = map.tileWidth;
 			height = map.tileHeight;
 		}
@@ -88,7 +88,7 @@ class TileMarker {
 	}
 
 	showPreview (value: boolean): void {
-		const devModeScene = ige.renderer.scene.getScene('DevMode') as DevModeScene;
+		const devModeScene = taro.renderer.scene.getScene('DevMode') as DevModeScene;
 		const area = devModeScene.tileEditor.area;
 		for (let i = 0; i < area.x; i++) {
 			for (let j = 0; j < area.y; j++) {

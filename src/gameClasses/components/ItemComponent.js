@@ -1,4 +1,4 @@
-var ItemComponent = IgeEntity.extend({
+var ItemComponent = TaroEntity.extend({
 	classId: 'ItemComponent',
 	componentId: 'item',
 
@@ -14,8 +14,8 @@ var ItemComponent = IgeEntity.extend({
 	calculateItemSpawnChanceTotal: function (options) {
 		// itemSpawnChanceTotal is used to ensure that some item types are more rare to come by than the othr item types
 		this.itemSpawnChanceTotal = 0;
-		for (i in ige.game.data.itemTypes) {
-			var item = ige.game.data.itemTypes[i];
+		for (i in taro.game.data.itemTypes) {
+			var item = taro.game.data.itemTypes[i];
 			if ((options && options.isPurchasable && item.isPurchasable) || !options) {
 				this.itemSpawnChanceTotal += parseFloat(item.spawnChance);
 				// console.log("itemSPawn", this.itemSpawnChanceTotal, item.spawnChance)
@@ -31,7 +31,7 @@ var ItemComponent = IgeEntity.extend({
 		var randomTotal = 0;
 		// pick a random item type
 
-		var itemTypes = JSON.parse(JSON.stringify(ige.game.data.itemTypes));
+		var itemTypes = JSON.parse(JSON.stringify(taro.game.data.itemTypes));
 		for (itemTypeId in itemTypes) {
 			var item = itemTypes[itemTypeId];
 
@@ -61,7 +61,7 @@ var ItemComponent = IgeEntity.extend({
 			maxBuffCount = 99;
 		}
 
-		if (ige.isServer) {
+		if (taro.isServer) {
 			// traverse through available buffTypes of this item
 			var buffTypeName, buffType, maxBuffValue, chanceOfOccuring, randomBonusValue;
 			var buffCount = 0;
@@ -73,7 +73,7 @@ var ItemComponent = IgeEntity.extend({
 				while (buffCount < maxBuffCount) {
 					for (var i = 0; i < availableBuffTypes.length; i++) {
 						buffTypeName = availableBuffTypes[i];
-						buffType = ige.game.getAsset('buffTypes', buffTypeName);
+						buffType = taro.game.getAsset('buffTypes', buffTypeName);
 						// console.log(buffTypeName, buffType)
 
 						if (buffType.unit == 'percentage') {

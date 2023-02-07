@@ -60,7 +60,7 @@ class RegionEditor {
 					y = this.regionDrawStart.y + height;
 					height *= -1;
 				}
-				ige.network.send('editRegion', {x: Math.trunc(x),
+				taro.network.send('editRegion', {x: Math.trunc(x),
 					y: Math.trunc(y),
 					width: Math.trunc(width),
 					height: Math.trunc(height)});
@@ -74,7 +74,7 @@ class RegionEditor {
 
 	edit (data: RegionData): void {
 		if (data.newName && data.name !== data.newName) {
-			const region = ige.regionManager.getRegionById(data.name);
+			const region = taro.regionManager.getRegionById(data.name);
 			if (region) region._stats.id = data.newName;
 			this.devModeScene.regions.forEach(region => {
 				if (region.name === data.name) {
@@ -107,7 +107,7 @@ class RegionEditor {
 			if (this.clickedList.length === 1) {
 				inGameEditor.addNewRegion && inGameEditor.addNewRegion(this.clickedList[0]);
 			} else if ( this.clickedList.length > 1 ) {
-				ige.showRegionList && ige.showRegionList(this.clickedList);
+				taro.showRegionList && taro.showRegionList(this.clickedList);
 			}
 		}
 		

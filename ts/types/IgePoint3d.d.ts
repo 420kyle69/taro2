@@ -1,4 +1,4 @@
-declare class IgePoint3d extends IgeClass {
+declare class TaroPoint3d extends TaroClass {
 
 	x: number;
 	y: number;

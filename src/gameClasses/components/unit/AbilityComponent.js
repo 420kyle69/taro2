@@ -1,4 +1,4 @@
-var AbilityComponent = IgeEntity.extend({
+var AbilityComponent = TaroEntity.extend({
 	classId: 'AbilityComponent',
 	componentId: 'ability',
 
@@ -10,28 +10,28 @@ var AbilityComponent = IgeEntity.extend({
 	moveUp: function () {
 		if (this._entity.direction) {
 			this._entity.direction.y = -1;
-			// entity.body.setLinearVelocity(new IgePoint3d(velocityX, velocityY, 0));
+			// entity.body.setLinearVelocity(new TaroPoint3d(velocityX, velocityY, 0));
 		}
 	},
 
 	moveLeft: function () {
 		if (this._entity.direction) {
 			this._entity.direction.x = -1;
-			// this._entity.body.setLinearVelocity(new IgePoint3d(velocityX, velocityY, 0));
+			// this._entity.body.setLinearVelocity(new TaroPoint3d(velocityX, velocityY, 0));
 		}
 	},
 
 	moveDown: function () {
 		if (this._entity.direction) {
 			this._entity.direction.y = 1;
-			// this._entity.body.setLinearVelocity(new IgePoint3d(velocityX, velocityY, 0));
+			// this._entity.body.setLinearVelocity(new TaroPoint3d(velocityX, velocityY, 0));
 		}
 	},
 
 	moveRight: function () {
 		if (this._entity.direction) {
 			this._entity.direction.x = 1;
-			// this._entity.body.setLinearVelocity(new IgePoint3d(velocityX, velocityY, 0));
+			// this._entity.body.setLinearVelocity(new TaroPoint3d(velocityX, velocityY, 0));
 		}
 	},
 
@@ -41,7 +41,7 @@ var AbilityComponent = IgeEntity.extend({
 
 			// only velocity-based units will stop immediately
 			// if (this._entity._stats.controls.movementMethod == 'velocity') {
-			// 	this._entity.body.setLinearVelocity(new IgePoint3d(this._entity.body.getLinearVelocity().x, 0, 0));
+			// 	this._entity.body.setLinearVelocity(new TaroPoint3d(this._entity.body.getLinearVelocity().x, 0, 0));
 			// }
 		}
 	},
@@ -52,7 +52,7 @@ var AbilityComponent = IgeEntity.extend({
 
 			// only velocity-based units will stop immediately
 			// if (this._entity._stats.controls.movementMethod == 'velocity') {
-			// 	this._entity.body.setLinearVelocity(new IgePoint3d(0, this._entity.body.getLinearVelocity().y, 0));
+			// 	this._entity.body.setLinearVelocity(new TaroPoint3d(0, this._entity.body.getLinearVelocity().y, 0));
 			// }
 		}
 	},
@@ -73,7 +73,7 @@ var AbilityComponent = IgeEntity.extend({
 
 	pickupItem: function () {
 		var self = this;
-		if (ige.isServer) {
+		if (taro.isServer) {
 			var region = {
 				x: self._entity._translate.x - self._entity._bounds2d.x / 2,
 				y: self._entity._translate.y - self._entity._bounds2d.y / 2,
@@ -81,7 +81,7 @@ var AbilityComponent = IgeEntity.extend({
 				height: self._entity._bounds2d.y
 			};
 
-			var entities = ige.physics.getBodiesInRegion(region).filter(({ _category }) => _category === 'item');
+			var entities = taro.physics.getBodiesInRegion(region).filter(({ _category }) => _category === 'item');
 			// pickup ownerLess items
 			var unit = self._entity;
 			unit.reasonForFailingToPickUpItem = undefined;
@@ -131,7 +131,7 @@ var AbilityComponent = IgeEntity.extend({
 		if (handle.cost && handle.scriptName) {
 			ability = handle;
 		} else {
-			ability = ige.game.data.abilities[handle];
+			ability = taro.game.data.abilities[handle];
 		}
 
 		var player = self._entity.getOwner();
@@ -183,14 +183,14 @@ var AbilityComponent = IgeEntity.extend({
 					}
 				}
 
-				if (ige.isServer || ige.isClient && ige.physics) {
+				if (taro.isServer || taro.isClient && taro.physics) {
 
 					if (ability.scriptName && ability.scriptName != '') {
-						if (ige.game.data.scripts[ability.scriptName]) {
-							AbilityComponent.prototype.log(`ability cast: running script ${ige.game.data.scripts[ability.scriptName].name} ${ability.scriptName}`);
+						if (taro.game.data.scripts[ability.scriptName]) {
+							AbilityComponent.prototype.log(`ability cast: running script ${taro.game.data.scripts[ability.scriptName].name} ${ability.scriptName}`);
 						}
 
-						if (ige.isServer) {
+						if (taro.isServer) {
 							// calling stream for unit because there is delay in transferring attributes data
 							if (Object.keys(unitAttr.attributes || []).length > 0) {
 								self._entity.streamUpdateData(unitAttr);
@@ -201,7 +201,7 @@ var AbilityComponent = IgeEntity.extend({
 							}
 						}
 
-						ige.game.lastCastingUnitId = self._entity.id();
+						taro.game.lastCastingUnitId = self._entity.id();
 						// now both entity and global scripts (removed if/else)
 						self._entity.script.runScript(ability.scriptName, { triggeredBy: { unitId: self._entity.id()} });
 					}

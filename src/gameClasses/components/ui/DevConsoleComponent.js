@@ -1,4 +1,4 @@
-var DevConsoleComponent = IgeEntity.extend({
+var DevConsoleComponent = TaroEntity.extend({
 	classId: 'DevConsole',
 	componentId: 'ad',
 
@@ -30,37 +30,37 @@ var DevConsoleComponent = IgeEntity.extend({
 			var engineDiv = $('<div class="col-sm-12 mb-2"></div>');
 			engineDiv.append('<h6>Engine:</h6>');
 
-			statsPanels.igefps = new Stats();
-			statsPanels.igefps.showPanel(3); // 0: fps, 1: ms, 2: mb, 3+: custom
-			statsPanels.igefps.domElement.style.cssText = 'position:relative;display:inline-block;';
-			statsPanels.igefps._igefpsPanel = statsPanels.igefps.addPanel(new Stats.Panel('fps', '#ff8', '#221'));
-			engineDiv.append(statsPanels.igefps.dom);
+			statsPanels.tarofps = new Stats();
+			statsPanels.tarofps.showPanel(3); // 0: fps, 1: ms, 2: mb, 3+: custom
+			statsPanels.tarofps.domElement.style.cssText = 'position:relative;display:inline-block;';
+			statsPanels.tarofps._tarofpsPanel = statsPanels.tarofps.addPanel(new Stats.Panel('fps', '#ff8', '#221'));
+			engineDiv.append(statsPanels.tarofps.dom);
 
-			statsPanels.igedpf = new Stats();
-			statsPanels.igedpf.showPanel(3); // 0: dpf, 1: ms, 2: mb, 3+: custom
-			statsPanels.igedpf.domElement.style.cssText = 'position:relative;display:inline-block;';
-			statsPanels.igedpf._igedpfPanel = statsPanels.igedpf.addPanel(new Stats.Panel('dpf', '#ff8', '#221'));
-			engineDiv.append(statsPanels.igedpf.dom);
+			statsPanels.tarodpf = new Stats();
+			statsPanels.tarodpf.showPanel(3); // 0: dpf, 1: ms, 2: mb, 3+: custom
+			statsPanels.tarodpf.domElement.style.cssText = 'position:relative;display:inline-block;';
+			statsPanels.tarodpf._tarodpfPanel = statsPanels.tarodpf.addPanel(new Stats.Panel('dpf', '#ff8', '#221'));
+			engineDiv.append(statsPanels.tarodpf.dom);
 
-			igeConfig.debug._timing = true;
+			taroConfig.debug._timing = true;
 
-			statsPanels.igeut = new Stats();
-			statsPanels.igeut.showPanel(3); // 0: ut, 1: ms, 2: mb, 3+: custom
-			statsPanels.igeut.domElement.style.cssText = 'position:relative;display:inline-block;';
-			statsPanels.igeut._igeutPanel = statsPanels.igeut.addPanel(new Stats.Panel('ut', '#ff8', '#221'));
-			engineDiv.append(statsPanels.igeut.dom);
+			statsPanels.tarout = new Stats();
+			statsPanels.tarout.showPanel(3); // 0: ut, 1: ms, 2: mb, 3+: custom
+			statsPanels.tarout.domElement.style.cssText = 'position:relative;display:inline-block;';
+			statsPanels.tarout._taroutPanel = statsPanels.tarout.addPanel(new Stats.Panel('ut', '#ff8', '#221'));
+			engineDiv.append(statsPanels.tarout.dom);
 
-			statsPanels.igert = new Stats();
-			statsPanels.igert.showPanel(3); // 0: rt, 1: ms, 2: mb, 3+: custom
-			statsPanels.igert.domElement.style.cssText = 'position:relative;display:inline-block;';
-			statsPanels.igert._igertPanel = statsPanels.igert.addPanel(new Stats.Panel('rt', '#ff8', '#221'));
-			engineDiv.append(statsPanels.igert.dom);
+			statsPanels.tarort = new Stats();
+			statsPanels.tarort.showPanel(3); // 0: rt, 1: ms, 2: mb, 3+: custom
+			statsPanels.tarort.domElement.style.cssText = 'position:relative;display:inline-block;';
+			statsPanels.tarort._tarortPanel = statsPanels.tarort.addPanel(new Stats.Panel('rt', '#ff8', '#221'));
+			engineDiv.append(statsPanels.tarort.dom);
 
-			statsPanels.igett = new Stats();
-			statsPanels.igett.showPanel(3); // 0: tt, 1: ms, 2: mb, 3+: custom
-			statsPanels.igett.domElement.style.cssText = 'position:relative;display:inline-block;';
-			statsPanels.igett._igettPanel = statsPanels.igett.addPanel(new Stats.Panel('tt', '#ff8', '#221'));
-			engineDiv.append(statsPanels.igett.dom);
+			statsPanels.tarott = new Stats();
+			statsPanels.tarott.showPanel(3); // 0: tt, 1: ms, 2: mb, 3+: custom
+			statsPanels.tarott.domElement.style.cssText = 'position:relative;display:inline-block;';
+			statsPanels.tarott._tarottPanel = statsPanels.tarott.addPanel(new Stats.Panel('tt', '#ff8', '#221'));
+			engineDiv.append(statsPanels.tarott.dom);
 
 			// GS Div
 			var GSDiv = $('<div class="col-sm-12 mb-2"></div>');
@@ -121,14 +121,14 @@ var DevConsoleComponent = IgeEntity.extend({
 				var now = new Date();
 				var elapsed = (now - statsPanels.clock._started) * 0.001;
 				statsPanels.clock._clockPanel.update(elapsed, 120);
-				statsPanels.igefps._igefpsPanel.update(ige._renderFPS, 60);
-				statsPanels.igedpf._igedpfPanel.update(ige._dpf, 1000);
-				statsPanels.igeut._igeutPanel.update(ige._updateTime, 100);
-				statsPanels.igert._igertPanel.update(ige.renderTime, 100);
-				statsPanels.igett._igettPanel.update(ige._tickTime, 100);
+				statsPanels.tarofps._tarofpsPanel.update(taro._renderFPS, 60);
+				statsPanels.tarodpf._tarodpfPanel.update(taro._dpf, 1000);
+				statsPanels.tarout._taroutPanel.update(taro._updateTime, 100);
+				statsPanels.tarort._tarortPanel.update(taro.renderTime, 100);
+				statsPanels.tarott._tarottPanel.update(taro._tickTime, 100);
 
-				ige.physicsTickCount = 0;
-				ige.unitBehaviourCount = 0;
+				taro.physicsTickCount = 0;
+				taro.unitBehaviourCount = 0;
 			}, 1000);
 
 			graphsDiv.append(connectionDiv);
@@ -141,59 +141,59 @@ var DevConsoleComponent = IgeEntity.extend({
 			// Tuning Div
 			var tuningDiv = $('<div id="tuning-div" class="col-sm-12 mb-4"></div>');
 
-			ige.client.inputDelay = 0;
-			// ige.client.streamSendInterval = 15;
+			taro.client.inputDelay = 0;
+			// taro.client.streamSendInterval = 15;
 			var gui = new dat.GUI({ autoPlace: false, width: 400 });
-			// var controllerLatency = gui.add(ige.client, 'streamSendInterval', 15, 1000);
+			// var controllerLatency = gui.add(taro.client, 'streamSendInterval', 15, 1000);
 			// controllerLatency.onChange(function (value) {
 			//     // Fires on every change, drag, keypress, etc.
 			//     value = parseInt(value);
 			//     //console.log(value, ' ms');
-			//     ige.network.send("setStreamSendInterval", { "interval": value });
+			//     taro.network.send("setStreamSendInterval", { "interval": value });
 			// });
 
-			var controllerExtrapolation = gui.add(ige.client, 'extrapolation');
-			var controllerResolution = gui.add(ige.client, 'resolution', { Auto: 0, '320x240': 320, '640x480': 640, '800x600': 800, '1024x768': 1024, '1280x720': 1280, '1920x1080': 1920 });
+			var controllerExtrapolation = gui.add(taro.client, 'extrapolation');
+			var controllerResolution = gui.add(taro.client, 'resolution', { Auto: 0, '320x240': 320, '640x480': 640, '800x600': 800, '1024x768': 1024, '1280x720': 1280, '1920x1080': 1920 });
 			controllerResolution.onChange(function (value) {
 				if (value == 0) {
-					ige._autoSize = true;
+					taro._autoSize = true;
 				} else {
-					ige._autoSize = false;
+					taro._autoSize = false;
 				}
-				ige._resizeEvent();
+				taro._resizeEvent();
 			});
-			var controllerScaleMode = gui.add(ige.client, 'scaleMode', { None: 0, Fit: 1, Stretch: 3 });
+			var controllerScaleMode = gui.add(taro.client, 'scaleMode', { None: 0, Fit: 1, Stretch: 3 });
 			controllerScaleMode.onChange(function (value) {
-				ige._resizeEvent();
+				taro._resizeEvent();
 			});
 
-			var controllerClientSideInputDelay = gui.add(ige.client, 'inputDelay', 0, 1000);
+			var controllerClientSideInputDelay = gui.add(taro.client, 'inputDelay', 0, 1000);
 			controllerClientSideInputDelay.onChange(function (value) {
 
 			});
 
 			var f1 = gui.addFolder('Render control');
 
-			var controllerMapRenderEnabled = f1.add(ige.client, 'mapRenderEnabled');
+			var controllerMapRenderEnabled = f1.add(taro.client, 'mapRenderEnabled');
 			controllerMapRenderEnabled.onChange(function (value) {
 				// console.log('mapRenderEnabled:',value);
 			});
 
-			var controllerUnitRenderEnabled = f1.add(ige.client, 'unitRenderEnabled');
+			var controllerUnitRenderEnabled = f1.add(taro.client, 'unitRenderEnabled');
 			controllerUnitRenderEnabled.onChange(function (value) {
 				// console.log('unitRenderEnabled:',value);
 			});
 
-			var controllerItemRenderEnabled = f1.add(ige.client, 'itemRenderEnabled');
+			var controllerItemRenderEnabled = f1.add(taro.client, 'itemRenderEnabled');
 			controllerItemRenderEnabled.onChange(function (value) {
 				// console.log('itemRenderEnabled:',value);
 			});
 
-			var controllerUiEntityRenderEnabled = f1.add(ige.client, 'uiEntityRenderEnabled');
+			var controllerUiEntityRenderEnabled = f1.add(taro.client, 'uiEntityRenderEnabled');
 
-			var controllerClearEveryFrame = f1.add(ige.client, 'clearEveryFrame');
+			var controllerClearEveryFrame = f1.add(taro.client, 'clearEveryFrame');
 
-			var controllerViewportClippingEnabled = f1.add(ige.client, 'viewportClippingEnabled');
+			var controllerViewportClippingEnabled = f1.add(taro.client, 'viewportClippingEnabled');
 
 			tuningDiv.append(gui.domElement);
 

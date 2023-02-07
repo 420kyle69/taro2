@@ -2,7 +2,7 @@ let restoreWindows = false;
 let restoreDevMode = false;
 let restoreDevConsole = false;
 
-var MenuUiComponent = IgeEntity.extend({
+var MenuUiComponent = TaroEntity.extend({
 	classId: 'MenuUiComponent',
 	componentId: 'menuUi',
 
@@ -11,7 +11,7 @@ var MenuUiComponent = IgeEntity.extend({
 		// adding event for taro engine button
 		var playButtonClick = document.querySelector('#play-game-button');
 
-		if (ige.isClient) {
+		if (taro.isClient) {
 			console.log('initializing UI elements...');
 			self.shopType = '';
 			self.shopKey = '';
@@ -26,10 +26,10 @@ var MenuUiComponent = IgeEntity.extend({
 			});
 
 			// $(".inventory-item-button").on("click", function () {
-			// 	if (ige.client.selectedUnit) {
+			// 	if (taro.client.selectedUnit) {
 			// 		var index = $(this).attr('name');
-			// 		ige.client.selectedUnit._stats.currentItemIndex = index;
-			// 		ige.client.selectedUnit.changeItem(index);
+			// 		taro.client.selectedUnit._stats.currentItemIndex = index;
+			// 		taro.client.selectedUnit.changeItem(index);
 			// 	}
 			// });
 
@@ -79,21 +79,21 @@ var MenuUiComponent = IgeEntity.extend({
 			});
 
 			$('#refresh-server-list-button').on('click', function () {
-				ige.client.refreshServerList();
+				taro.client.refreshServerList();
 			});
 
 			$('#max-players').on('change', function () {
-				ige.client.refreshServerList();
+				taro.client.refreshServerList();
 			});
 
 			$('#map-list').on('change', function () {
-				ige.client.refreshServerList();
+				taro.client.refreshServerList();
 			});
 
 			$('#kick-player-body').on('click', '.kick-player-btn', function () {
 				var clientId = $(this).attr('data-clientid');
-				if ((ige.game.data.isDeveloper || (ige.client.myPlayer && ige.client.myPlayer._stats.isUserMod)) && clientId) {
-					ige.network.send('kick', clientId);
+				if ((taro.game.data.isDeveloper || (taro.client.myPlayer && taro.client.myPlayer._stats.isUserMod)) && clientId) {
+					taro.network.send('kick', clientId);
 				}
 			});
 
@@ -101,16 +101,16 @@ var MenuUiComponent = IgeEntity.extend({
 				var userId = $(this).attr('data-userId');
 				var gameId = $(this).attr('data-gameId');
 				var clientId = $(this).attr('data-clientid');
-				if ((ige.game.data.isDeveloper || (ige.client.myPlayer && ige.client.myPlayer._stats.isUserMod)) && userId) {
-					ige.network.send('ban-user', { kickuserId: clientId, userId: userId });
+				if ((taro.game.data.isDeveloper || (taro.client.myPlayer && taro.client.myPlayer._stats.isUserMod)) && userId) {
+					taro.network.send('ban-user', { kickuserId: clientId, userId: userId });
 				}
 			});
 
 			$('#kick-player-body').on('click', '.ban-ip-btn', function () {
 				var gameId = $(this).attr('data-gameId');
 				var clientId = $(this).attr('data-clientid');
-				if ((ige.game.data.isDeveloper || (ige.client.myPlayer && ige.client.myPlayer._stats.isUserMod)) && gameId) {
-					ige.network.send('ban-ip', {
+				if ((taro.game.data.isDeveloper || (taro.client.myPlayer && taro.client.myPlayer._stats.isUserMod)) && gameId) {
+					taro.network.send('ban-ip', {
 						gameId: gameId,
 						kickuserId: clientId
 					});
@@ -120,8 +120,8 @@ var MenuUiComponent = IgeEntity.extend({
 			$('#kick-player-body').on('click', '.ban-chat-btn', function () {
 				var gameId = $(this).attr('data-gameId');
 				var clientId = $(this).attr('data-clientid');
-				if ((ige.game.data.isDeveloper || (ige.client.myPlayer && ige.client.myPlayer._stats.isUserMod)) && gameId) {
-					ige.network.send('ban-chat', {
+				if ((taro.game.data.isDeveloper || (taro.client.myPlayer && taro.client.myPlayer._stats.isUserMod)) && gameId) {
+					taro.network.send('ban-chat', {
 						gameId: gameId,
 						kickuserId: clientId
 					});
@@ -137,12 +137,12 @@ var MenuUiComponent = IgeEntity.extend({
 			});
 
 			$('#toggle-dev-panels').on('click', function () {
-				if (!ige.game.data.isGameDeveloper && !window.isStandalone) {
+				if (!taro.game.data.isGameDeveloper && !window.isStandalone) {
 					return;
 				}
 				if((['1', '4', '5'].includes(window.gameDetails?.tier)) || window.isStandalone) {
-					console.log("ige developermode: ", ige.developerMode)
-					ige.developerMode.enter();
+					console.log("taro developermode: ", taro.developerMode)
+					taro.developerMode.enter();
 
 					loadEditor();
 					$('#game-editor').show();
@@ -154,7 +154,7 @@ var MenuUiComponent = IgeEntity.extend({
 						restoreWindows = false;
 					}
 					if (restoreDevMode) {
-						ige.developerMode.enter();
+						taro.developerMode.enter();
 						if ($('#open-inventory-button').is(':visible')) {
 							$('#backpack').hide();
 						}
@@ -172,8 +172,8 @@ var MenuUiComponent = IgeEntity.extend({
 							restoreWindows = true;
 						}
 
-						if (ige.developerMode.active) {
-							ige.developerMode.leave();
+						if (taro.developerMode.active) {
+							taro.developerMode.leave();
 
 							if ($('#open-inventory-button').is(':visible')) {
 								$('#backpack').show();
@@ -202,7 +202,7 @@ var MenuUiComponent = IgeEntity.extend({
 			});
 
 			$('#change-server').on('click', function () {
-				window.location.replace(`/play/${gameSlug}?serverId=${ige.client.changedServer}&joinGame=true`);
+				window.location.replace(`/play/${gameSlug}?serverId=${taro.client.changedServer}&joinGame=true`);
 			});
 
 			$('#add-player-instance').on('click', function () {
@@ -220,19 +220,19 @@ var MenuUiComponent = IgeEntity.extend({
 
 			$('#server-list').on('change', function () {
 				var gameSlug = $(this).attr('game-slug');
-				ige.client.gameSlug = gameSlug;
+				taro.client.gameSlug = gameSlug;
 				const serverListOptions = document.querySelector('#server-list > option');
-				if (serverListOptions.length !== ige.client.servers.length) {
+				if (serverListOptions.length !== taro.client.servers.length) {
 					// server options have been added/removed dynamically
 					// refresh the server list
-					ige.client.servers = ige.client.getServersArray();
+					taro.client.servers = taro.client.getServersArray();
 				}
-				if (ige.client.servers) {
-					for (var i = 0; i < ige.client.servers.length; i++) {
-						var serverObj = ige.client.servers[i];
+				if (taro.client.servers) {
+					for (var i = 0; i < taro.client.servers.length; i++) {
+						var serverObj = taro.client.servers[i];
 
 						if (serverObj.id === this.value) {
-							ige.client.server = serverObj;
+							taro.client.server = serverObj;
 						}
 					}
 				}
@@ -247,12 +247,12 @@ var MenuUiComponent = IgeEntity.extend({
 
 			$('#menu-form').keyup(function (e) {
 				if (e.keyCode == 13) {
-					ige.client.login();
+					taro.client.login();
 				}
 			});
 
 			$('#login-button').on('click', function () {
-				ige.client.login();
+				taro.client.login();
 			});
 
 			$('#close-game-suggestion').on('click', function () {
@@ -261,7 +261,7 @@ var MenuUiComponent = IgeEntity.extend({
 
 			$('#play-as-guest-button').on('click', function () {
 				// console.log("Play !");
-				// ige.client.joinGame()
+				// taro.client.joinGame()
 				self.playGame();
 			});
 			$('#server-list').on('blur', function () {
@@ -284,21 +284,21 @@ var MenuUiComponent = IgeEntity.extend({
 					$('#server-list').focus();
 				} else {
 					// did user tried to change server
-					var isServerChanged = window.connectedServer && ige.client.server.id !== window.connectedServer.id;
+					var isServerChanged = window.connectedServer && taro.client.server.id !== window.connectedServer.id;
 
 					if (isServerChanged) {
-						window.location = `${window.location.pathname}?serverId=${ige.client.server.id}&joinGame=true`;
+						window.location = `${window.location.pathname}?serverId=${taro.client.server.id}&joinGame=true`;
 						return;
 					}
 
-					if (ige.game && ige.game.isGameStarted) {
+					if (taro.game && taro.game.isGameStarted) {
 						var wasGamePaused = this.innerText.includes('Continue');
 						self.playGame(wasGamePaused);
 						self.setResolution();
 					} else {
 						$('#play-game-button').attr('disabled', true);
 						self.startLoading();
-						ige.client.connectToServer();
+						taro.client.connectToServer();
 					}
 				}
 				$('#play-game-button-wrapper').addClass('d-none-important');
@@ -327,7 +327,7 @@ var MenuUiComponent = IgeEntity.extend({
 		}
 	},
 	toggleScoreBoard: function (show) {
-		if (ige.game.data && ige.game.data.settings && !ige.game.data.settings.displayScoreboard) {
+		if (taro.game.data && taro.game.data.settings && !taro.game.data.settings.displayScoreboard) {
 			$('#scoreboard-header').hide();
 			$('#scoreboard').hide();
 		} else {
@@ -376,7 +376,7 @@ var MenuUiComponent = IgeEntity.extend({
 
 		$('#featured-youtuber').hide();
 
-		var gameId = ige.game.data.defaultData._id;
+		var gameId = taro.game.data.defaultData._id;
 
 		if (gameId && !wasGamePaused && !window.isStandalone) {
 			if (window.innerWidth < 1000) {
@@ -388,16 +388,16 @@ var MenuUiComponent = IgeEntity.extend({
 			}
 		}
 		
-		ige.client.joinGame(wasGamePaused);
+		taro.client.joinGame(wasGamePaused);
 
 		if (!window.isStandalone) {
-			ige.ad.showAnchorTag();
+			taro.ad.showAnchorTag();
 		}
 	},
 
 	kickPlayerFromGame: function (excludeEntity) {
 		var self = this;
-		var players = ige.$$('player').filter(function (player) {
+		var players = taro.$$('player').filter(function (player) {
 			if (player && player._stats && player._stats.controlledBy === 'human' && player._alive && player.id() !== excludeEntity) return true;
 		});
 		var html = '<table class="table table-hover">';
@@ -408,16 +408,16 @@ var MenuUiComponent = IgeEntity.extend({
 		players.forEach(function (player) {
 			html += '<tr class="border-bottom">';
 			html += `<td class="border-top-0">${player._stats.name}`;
-			if (ige.client.myPlayer && player.id() === ige.client.myPlayer.id()) {
+			if (taro.client.myPlayer && player.id() === taro.client.myPlayer.id()) {
 				html += ' (you)';
 			}
 			html += '</td>';
 			html += '<td class="border-top-0 text-center">';
 			html += '<div class="btn-group" role="group" aria-label="Basic example">';
 			html += `<button class="btn btn-danger kick-player-btn" data-clientid="${player._stats.clientId}" > Kick</button>`;
-			// html += '<button class="btn btn-warning ban-player-btn" data-clientid="' + player._stats.clientId + '" data-gameId="' + ige.game.data.defaultData._id + '" data-userId="' + player._stats.userId + '">Ban user</button>'
-			html += `<button class="btn btn-success ban-ip-btn" data-clientid="${player._stats.clientId}" data-gameId="${ige.game.data.defaultData._id}">Ban Ip</button>`;
-			html += `<button class="btn btn-primary ban-chat-btn" data-clientid="${player._stats.clientId}" data-gameId="${ige.game.data.defaultData._id}">${player._stats.banChat ? 'unmute' : 'mute'}</button>`;
+			// html += '<button class="btn btn-warning ban-player-btn" data-clientid="' + player._stats.clientId + '" data-gameId="' + taro.game.data.defaultData._id + '" data-userId="' + player._stats.userId + '">Ban user</button>'
+			html += `<button class="btn btn-success ban-ip-btn" data-clientid="${player._stats.clientId}" data-gameId="${taro.game.data.defaultData._id}">Ban Ip</button>`;
+			html += `<button class="btn btn-primary ban-chat-btn" data-clientid="${player._stats.clientId}" data-gameId="${taro.game.data.defaultData._id}">${player._stats.banChat ? 'unmute' : 'mute'}</button>`;
 			html += '</div>';
 			html += '</td>';
 			html += '</tr>';
@@ -432,7 +432,7 @@ var MenuUiComponent = IgeEntity.extend({
 	showMenu: function (selectBestServer) {
 		var self = this;
 
-		if (ige.isClient) {
+		if (taro.isClient) {
 			var selectedServer = undefined;
 			var gameSlug = window.location.pathname.split('/').pop();
 
@@ -440,7 +440,7 @@ var MenuUiComponent = IgeEntity.extend({
 				return $('#menu-wrapper').removeClass('d-none').addClass('d-flex');
 			}
 
-			if (!ige.isMobile) {
+			if (!taro.isMobile) {
 				$('#friends-panel').removeClass('d-none');
 			}
 
@@ -514,15 +514,15 @@ var MenuUiComponent = IgeEntity.extend({
 							$('#server-list').html(serversList);
 
 							// update servers array in case some new servers were added/removed to list
-							ige.client.servers = ige.client.getServersArray();
+							taro.client.servers = taro.client.getServersArray();
 
 							if (selectBestServer && selectedServer) {
-								ige.client.server = selectedServer.id;
+								taro.client.server = selectedServer.id;
 								$('#server-list').val(selectedServer.id);
 								$('#play-game-button').hide();
 								$('#change-server').show();
 							} else {
-								$('#server-list').val(ige.client.server.id);
+								$('#server-list').val(taro.client.server.id);
 							}
 							self.getServerPing();
 						} else {
@@ -626,7 +626,7 @@ var MenuUiComponent = IgeEntity.extend({
 	},
 
 	changesForMobile: function (isMenuVisible) {
-		if (ige.isMobile) {
+		if (taro.isMobile) {
 			var loginDiv = $('#login-div');
 			var myScoreDiv = $('#my-score-div');
 			var leaderBoard = $('#leaderboard');
@@ -661,8 +661,8 @@ var MenuUiComponent = IgeEntity.extend({
 			}
 			$('#modd-shop-modal').css({ fontSize: 11 });
 			// hide mobile controls
-			if (ige.mobileControls) {
-				ige.mobileControls.setVisible(!isMenuVisible);
+			if (taro.mobileControls) {
+				taro.mobileControls.setVisible(!isMenuVisible);
 			}
 		}
 	},
@@ -670,7 +670,7 @@ var MenuUiComponent = IgeEntity.extend({
 	hideMenu: function () {
 		$('#menu-wrapper').removeClass('d-flex').addClass('d-none');
 
-		if (!ige.isMobile) {
+		if (!taro.isMobile) {
 			$('#friends-panel').addClass('d-none');
 		}
 
@@ -699,7 +699,7 @@ var MenuUiComponent = IgeEntity.extend({
 				let replacingImage = data.children[0];
 				if (replacingImage) {
 					let url = data.dataset.src;
-					let itemDetails = ige.game.data.unitTypes[dataSets.key];
+					let itemDetails = taro.game.data.unitTypes[dataSets.key];
 					let originalHeight = itemDetails && `${image.height / itemDetails.cellSheet.rowCount}px`;
 					let originalWidth = itemDetails && `${image.width / itemDetails.cellSheet.columnCount}px`;
 					// clipping = "height:" + originalHeight + "px;width:" + originalWidth + "px;background:url('" + item.image + "') 0px 0px no-repeat;";
@@ -734,14 +734,14 @@ var MenuUiComponent = IgeEntity.extend({
 	onDisconnectFromServer: function (src, message) {
 		console.log('modal shown from', src, message);
 
-		if (ige.isMobile) return;
+		if (taro.isMobile) return;
 
-		ige.client.disconnected = true;
+		taro.client.disconnected = true;
 		var defaultContent = 'Lost connection to the game server. Please refresh this page or visit our homepage.';
 
 		// if (['1', '4', '5'].includes(window.gameDetails?.tier) && !src.includes('clientNetworkEvents') && !window.preventFurtherAutoJoin) {
 		// 	defaultContent = 'Republish action triggered. Refreshing page...';
-		// 	if (ige.developerMode.active) {
+		// 	if (taro.developerMode.active) {
 		// 		window.history.replaceState({}, '', `/play/${gameSlug}?enterDevMode=true`);
 		// 	} else {
 		// 		window.history.replaceState({}, '', `/play/${gameSlug}?enterDevMode=false`);
@@ -772,16 +772,16 @@ var MenuUiComponent = IgeEntity.extend({
 		// 	.addClass('slideup-menu-animation');
 	},
 	setResolution: function () {
-		if (ige.isMobile) return;
+		if (taro.isMobile) return;
 		var resolution = localStorage.getItem('resolution') || 'high';
 		if (resolution == 'high') {
-			ige.client.resolutionQuality = 'high';
-			ige._resizeEvent();
+			taro.client.resolutionQuality = 'high';
+			taro._resizeEvent();
 			$('#resolution-high').addClass('btn-success').removeClass('btn-light');
 			$('#resolution-low').removeClass('btn-success').addClass('btn-light');
 		} else {
-			ige.client.resolutionQuality = 'low';
-			ige._resizeEvent();
+			taro.client.resolutionQuality = 'low';
+			taro._resizeEvent();
 			$('#resolution-low').addClass('btn-success').removeClass('btn-light');
 			$('#resolution-high').removeClass('btn-success').addClass('btn-light');
 		}

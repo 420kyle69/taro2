@@ -1,6 +1,6 @@
 type EvtListener = any;
 
-declare class IgeEventingClass extends IgeClass {
+declare class TaroEventingClass extends TaroClass {
 
 	on (
 		eventName: string | string[],

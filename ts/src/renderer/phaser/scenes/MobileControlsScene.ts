@@ -28,7 +28,7 @@ class MobileControlsScene extends PhaserScene {
 
 		const joysticks = this.joysticks;
 
-		ige.mobileControls.on('add-control',(
+		taro.mobileControls.on('add-control',(
 			key: MobileControlKey,
 			x: number,
 			y: number,
@@ -121,7 +121,7 @@ class MobileControlsScene extends PhaserScene {
 			}
 		});
 
-		ige.mobileControls.on('clear-controls', () => {
+		taro.mobileControls.on('clear-controls', () => {
 
 			joysticks.forEach((j) => {
 				j.destroy();
@@ -134,21 +134,21 @@ class MobileControlsScene extends PhaserScene {
 
 		});
 
-		ige.mobileControls.on('visible', (value: boolean) => {
+		taro.mobileControls.on('visible', (value: boolean) => {
 			this.scene.setVisible(value);
 		});
 
 		this.input.on('pointerdown', function(pointer) {
 
 			let emitPointerPosition = true;
-			Object.keys(ige.mobileControls.controls).forEach(control => {
+			Object.keys(taro.mobileControls.controls).forEach(control => {
 				if (control === 'lookWheel' || control === 'lookAndFireWheel') emitPointerPosition = false;
 			});
 
 			if (emitPointerPosition) {
-				const gameScene = ige.renderer.scene.getScene('Game');
+				const gameScene = taro.renderer.scene.getScene('Game');
 				const worldPoint = gameScene.cameras.main.getWorldPoint(gameScene.input.activePointer.x, gameScene.input.activePointer.y);
-				ige.input.emit('touchpointermove', [{
+				taro.input.emit('touchpointermove', [{
 					x: worldPoint.x,
 					y: worldPoint.y,
 				}]);
@@ -222,7 +222,7 @@ class MobileControlsScene extends PhaserScene {
 			this.disablePointerEvents = false;
 		}
 		//hide joysticks if no touching screen
-		const gameScene = ige.renderer.scene.getScene('Game');
+		const gameScene = taro.renderer.scene.getScene('Game');
 		let pointerDown = false;
 		for (let i = 1; i < 6; i++) {
 			var pointer = gameScene.input['pointer'+i.toString()];

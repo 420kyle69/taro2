@@ -2,7 +2,7 @@
  * The engine's crash component class.
  */
 
-const PhysicsComponent = IgeEventingClass.extend({
+const PhysicsComponent = TaroEventingClass.extend({
 	classId: 'PhysicsComponent',
 	componentId: 'physics',
 
@@ -11,8 +11,8 @@ const PhysicsComponent = IgeEventingClass.extend({
 		// Check that the engine has not already started
 		// as this will mess everything up if it has
 		this.engine = 'CRASH';
-		if (ige._state !== 0) {
-			console.log('Cannot add box2d physics component to the ige instance once the engine has started!', 'error');
+		if (taro._state !== 0) {
+			console.log('Cannot add box2d physics component to the taro instance once the engine has started!', 'error');
 		}
 
 		this.crash = new Crash();
@@ -44,7 +44,7 @@ const PhysicsComponent = IgeEventingClass.extend({
 		const contactDetails = function (a, b, res, cancel) {
 
 			// since I removed triggerComponent, you'll have to move contact callback function inside crashComponent.
-			// ige.trigger._beginContactCallback({
+			// taro.trigger._beginContactCallback({
 			// 	m_fixtureA: {
 			// 		m_body: {
 			// 			_entity: a.data.entity,
@@ -71,14 +71,14 @@ const PhysicsComponent = IgeEventingClass.extend({
 		this._world.m_joints = [];
 		this._world.isLocked = function () { return false; };
 
-		//console.log('map boundaries', ige.map.data.width, ige.map.data.height)
+		//console.log('map boundaries', taro.map.data.width, taro.map.data.height)
 	},
 
 	addBorders: function () {
-		// console.log('map boundaries', ige.map.data.width, ige.map.data.height);
+		// console.log('map boundaries', taro.map.data.width, taro.map.data.height);
 		const borderWidth = 100;
-		const mapWidth = ige.map.data.width * 64;
-		const mapHeight = ige.map.data.height * 64;
+		const mapWidth = taro.map.data.width * 64;
+		const mapHeight = taro.map.data.height * 64;
 		this.addBorder(borderWidth, 1, 0, 0, -borderWidth);
 		this.addBorder(borderWidth, 0, 1, mapWidth, 0);
 		this.addBorder(borderWidth, 1, 0, -borderWidth, mapHeight);
@@ -109,8 +109,8 @@ const PhysicsComponent = IgeEventingClass.extend({
 			}
 		};
 
-		const width = ige.map.data.width * 64 * w + borderWidth;
-		const height = ige.map.data.height * 64 * h + borderWidth;
+		const width = taro.map.data.width * 64 * w + borderWidth;
+		const height = taro.map.data.height * 64 * h + borderWidth;
 		const pos = new this.crash.Vector(x, y);
 		crashBody = new this.crash.Box(pos, width, height, false, { entity: wallEntity });
 		this.crash.insert(crashBody);
@@ -125,9 +125,9 @@ const PhysicsComponent = IgeEventingClass.extend({
 	},
 
 	/**
-	 * Creates a Box2d body and attaches it to an IGE entity
+	 * Creates a Box2d body and attaches it to an taro entity
 	 * based on the supplied body definition.
-	 * @param {IgeEntity} entity
+	 * @param {TaroEntity} entity
 	 * @param {Object} body the body definition
 	 * @return {Collider}
 	 */
@@ -163,7 +163,7 @@ const PhysicsComponent = IgeEventingClass.extend({
 			// 	new this.crash.Vector(width, height),
 			// 	new this.crash.Vector(0, height)
 			// ];
-			// crashBody = new this.crash.Polygon(new this.crash.Vector(x - (width / 2) , y - (height / 2)), points, false, { igeId: igeId, entity: entity, uid: Math.floor(Math.random() * 100) });
+			// crashBody = new this.crash.Polygon(new this.crash.Vector(x - (width / 2) , y - (height / 2)), points, false, { taroId: taroId, entity: entity, uid: Math.floor(Math.random() * 100) });
 			// crashBody.sat.setAngle(entity._rotate.z);
 			const points = [
 				new this.crash.Vector((width / 2), 0 - (height / 2)),
@@ -225,9 +225,9 @@ const PhysicsComponent = IgeEventingClass.extend({
 	},
 
 	update: function () {
-		let timeStart = ige.now;
+		let timeStart = taro.now;
 		this.crash.check();
-		ige._physicsFrames++;
+		taro._physicsFrames++;
 
 		// Get stats for dev panel;
 		const timeEnd = Date.now();
@@ -235,7 +235,7 @@ const PhysicsComponent = IgeEventingClass.extend({
 
 		if (timeEnd - this.lastSecondAt > 1000) {
 			this.lastSecondAt = timeEnd;
-			this.avgPhysicsTickDuration = this.physicsTickDuration / ige._fpsRate;
+			this.avgPhysicsTickDuration = this.physicsTickDuration / taro._fpsRate;
 			this.totalDisplacement = 0;
 			this.totalTimeElapsed =  0;
 			this.physicsTickDuration = 0;
@@ -246,8 +246,8 @@ const PhysicsComponent = IgeEventingClass.extend({
 	staticsFromMap: function (mapLayer, callback) {
 
 		if (mapLayer.map) {
-			const tileWidth = ige.scaleMapDetails.tileWidth || mapLayer.tileWidth();
-			const tileHeight = ige.scaleMapDetails.tileHeight || mapLayer.tileHeight();
+			const tileWidth = taro.scaleMapDetails.tileWidth || mapLayer.tileWidth();
+			const tileHeight = taro.scaleMapDetails.tileHeight || mapLayer.tileHeight();
 			let rectArray; let rectCount; let rect;
 
 			// Get the array of rectangle bounds based on the map's data
@@ -265,7 +265,7 @@ const PhysicsComponent = IgeEventingClass.extend({
 				};
 
 				// we can chain these methods because they return the entity
-				const wall = new IgeEntityPhysics(defaultData)
+				const wall = new TaroEntityPhysics(defaultData)
 					.width(rect.width * tileWidth)
 					.height(rect.height * tileHeight)
 					.drawBounds(false)
@@ -275,7 +275,7 @@ const PhysicsComponent = IgeEventingClass.extend({
 				// {copied comment}
 				// walls must be created immediately because there isn't an actionQueue for walls
 
-				ige.physics.createBody(wall, {
+				taro.physics.createBody(wall, {
 					type: 'static',
 					linearDamping: 0,
 					angularDamping: 0,
@@ -292,12 +292,12 @@ const PhysicsComponent = IgeEventingClass.extend({
 							// i collide with everything except other walls
 							filterMaskBits: 0x0002 /*| 0x0004*/ | 0x0008 | 0x0010 | 0x0020
 						},
-						igeId: wall.id()
+						taroId: wall.id()
 					}]
 				});
 
-				if (ige.isServer) {
-					ige.server.totalWallsCreated++;
+				if (taro.isServer) {
+					taro.server.totalWallsCreated++;
 				}
 			}
 		} else {
@@ -345,7 +345,7 @@ const PhysicsComponent = IgeEventingClass.extend({
 
 		for (collider of foundColliders) {
 			const entity = collider.data.entity;
-			// ige.$(collider.data.igeId);
+			// taro.$(collider.data.taroId);
 			if (entity) {
 				entities.push(entity);
 			}

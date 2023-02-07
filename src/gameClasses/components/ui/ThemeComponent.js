@@ -1,17 +1,17 @@
-var ThemeComponent = IgeEntity.extend({
+var ThemeComponent = TaroEntity.extend({
 	classId: 'ThemeComponent',
 	componentId: 'theme',
 
 	init: function () {
 		var self = this;
-		self.applyTheme(ige.client.server);
+		self.applyTheme(taro.client.server);
 	},
 
 	applyTheme: function (server) {
-		if (ige.game.data.settings.images && ige.game.data.settings.images.logo) {
+		if (taro.game.data.settings.images && taro.game.data.settings.images.logo) {
 			$('.game-title').html(
 				$('<img/>', {
-					src: ige.game.data.settings.images.logo,
+					src: taro.game.data.settings.images.logo,
 					height: '75px'
 				})
 			);

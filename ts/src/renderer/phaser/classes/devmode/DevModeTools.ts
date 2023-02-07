@@ -108,7 +108,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		const ctrlKey = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CTRL, false);
 
 		this.scene.input.on('pointermove', (p) => {
-			if (ige.developerMode.active && ige.developerMode.activeTab !== 'play' && scene.tileEditor.startDragIn !== 'palette' && (p.rightButtonDown() || (p.isDown && ctrlKey.isDown))) {
+			if (taro.developerMode.active && taro.developerMode.activeTab !== 'play' && scene.tileEditor.startDragIn !== 'palette' && (p.rightButtonDown() || (p.isDown && ctrlKey.isDown))) {
 				const camera = this.scene.gameScene.cameras.main;
 				const scrollX = (p.x - p.prevPosition.x) / camera.zoom
 				const scrollY = (p.y - p.prevPosition.y) / camera.zoom;
@@ -145,7 +145,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		const shiftKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT, false);
 		const tabKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, true);
 		tabKey.on('down', () => {
-			if(ige.developerMode.active && ige.developerMode.activeTab === 'map') {
+			if(taro.developerMode.active && taro.developerMode.activeTab === 'map') {
 				keyboard.disableGlobalCapture();
 				if (this.palette.visible) {
 					this.palette.hide();
@@ -158,51 +158,51 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		});
 		const plusKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.PLUS, false);
 		plusKey.on('down', () => {
-			if(ige.developerMode.active && ige.developerMode.activeTab === 'map') {
+			if(taro.developerMode.active && taro.developerMode.activeTab === 'map') {
 				const zoom = (gameScene.zoomSize / 2.15) / 1.1;
-				ige.client.emit('zoom', zoom);
+				taro.client.emit('zoom', zoom);
 			}
 		});
 		const minusKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.MINUS, false);
 		minusKey.on('down', () => {
-			if(ige.developerMode.active && ige.developerMode.activeTab === 'map') {
+			if(taro.developerMode.active && taro.developerMode.activeTab === 'map') {
 				const zoom =(gameScene.zoomSize / 2.15) * 1.1;
-				ige.client.emit('zoom', zoom);
+				taro.client.emit('zoom', zoom);
 			}
 		});
 		const cKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C, false);
 		cKey.on('down', () => {
-			if(ige.developerMode.active && ige.developerMode.activeTab === 'map') {
+			if(taro.developerMode.active && taro.developerMode.activeTab === 'map') {
 				this.cursor();
 			}
 		});
 		const rKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R, false);
 		rKey.on('down', () => {
-			if(ige.developerMode.active && ige.developerMode.activeTab === 'map') {
+			if(taro.developerMode.active && taro.developerMode.activeTab === 'map') {
 				this.drawRegion();
 			}
 		});
 		const bKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.B, false);
 		bKey.on('down', () => {
-			if(ige.developerMode.active && ige.developerMode.activeTab === 'map') {
+			if(taro.developerMode.active && taro.developerMode.activeTab === 'map') {
 				this.brush();
 			}
 		});
 		const eKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E, false);
 		eKey.on('down', () => {
-			if(ige.developerMode.active && ige.developerMode.activeTab === 'map') {
+			if(taro.developerMode.active && taro.developerMode.activeTab === 'map') {
 				this.emptyTile();
 			}
 		});
 		const fKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F, false);
 		fKey.on('down', () => {
-			if(ige.developerMode.active && ige.developerMode.activeTab === 'map') {
+			if(taro.developerMode.active && taro.developerMode.activeTab === 'map') {
 				this.fill();
 			}
 		});
 		const oneKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE, false);
 		oneKey.on('down', () => {
-			if(ige.developerMode.active && ige.developerMode.activeTab === 'map' && !altKey.isDown) {
+			if(taro.developerMode.active && taro.developerMode.activeTab === 'map' && !altKey.isDown) {
 				if (shiftKey.isDown) {
         		    this.hideLayer(0);
         		} else {
@@ -212,7 +212,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		});
 		const twoKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO, false);
 		twoKey.on('down', () => {
-			if(ige.developerMode.active && ige.developerMode.activeTab === 'map' && !altKey.isDown) {
+			if(taro.developerMode.active && taro.developerMode.activeTab === 'map' && !altKey.isDown) {
 				if (shiftKey.isDown) {
         		    this.hideLayer(1);
         		} else {
@@ -222,7 +222,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		});
 		const threeKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE, false);
 		threeKey.on('down', () => {
-			if(ige.developerMode.active && ige.developerMode.activeTab === 'map' && !altKey.isDown) {
+			if(taro.developerMode.active && taro.developerMode.activeTab === 'map' && !altKey.isDown) {
 				if (shiftKey.isDown) {
         		    this.hideLayer(2);
         		} else {
@@ -232,7 +232,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		});
 		const fourKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.FOUR, false);
 		fourKey.on('down', () => {
-			if(ige.developerMode.active && ige.developerMode.activeTab === 'map' && !altKey.isDown) {
+			if(taro.developerMode.active && taro.developerMode.activeTab === 'map' && !altKey.isDown) {
 				if (shiftKey.isDown) {
         		    this.hideLayer(3);
         		} else {

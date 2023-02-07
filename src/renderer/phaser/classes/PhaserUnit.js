@@ -37,7 +37,7 @@ var PhaserUnit = /** @class */ (function (_super) {
         });
         _this.scene.unitsList.push(_this);
         _this.scene.renderedEntities.push(_this.gameObject);
-        _this.zoomEvtListener = ige.client.on('scale', _this.scaleElements, _this);
+        _this.zoomEvtListener = taro.client.on('scale', _this.scaleElements, _this);
         return _this;
     }
     PhaserUnit.prototype.updateTexture = function (data) {
@@ -156,7 +156,7 @@ var PhaserUnit = /** @class */ (function (_super) {
             return;
         }
         this.scene.cameraTarget = this.gameObject;
-        if (!ige.developerMode.active || ige.developerMode.activeTab === 'play') {
+        if (!taro.developerMode.active || taro.developerMode.activeTab === 'play') {
             camera.startFollow(this.gameObject, false, 0.05, 0.05);
         }
     };
@@ -183,7 +183,7 @@ var PhaserUnit = /** @class */ (function (_super) {
         var label = this.getLabel();
         var rt = this.rtLabel;
         label.visible = !rt;
-        label.setFont(BitmapFontManager.font(this.scene, 'Verdana', data.bold, ige.game.data.settings
+        label.setFont(BitmapFontManager.font(this.scene, 'Verdana', data.bold, taro.game.data.settings
             .addStrokeToNameAndAttributes !== false, data.color || '#FFFFFF'));
         label.setText(BitmapFontManager.sanitize(label.fontData, data.text || ''));
         if (rt) {
@@ -315,7 +315,7 @@ var PhaserUnit = /** @class */ (function (_super) {
         var _this = this;
         this.scene.renderedEntities = this.scene.renderedEntities.filter(function (item) { return item !== _this.gameObject; });
         this.scene.unitsList = this.scene.unitsList.filter(function (item) { return item.entity.id() !== _this.entity.id(); });
-        ige.client.off('scale', this.zoomEvtListener);
+        taro.client.off('scale', this.zoomEvtListener);
         this.zoomEvtListener = null;
         if (this.scaleTween) {
             this.scaleTween.stop();

@@ -1,4 +1,4 @@
-IgeFilters.sobel = function (canvas, ctx, originalImage, texture, data) {
+TaroFilters.sobel = function (canvas, ctx, originalImage, texture, data) {
 	var strength = 1;
 	var loop;
 
@@ -9,7 +9,7 @@ IgeFilters.sobel = function (canvas, ctx, originalImage, texture, data) {
 	for (loop = 0; loop < strength; loop++) {
 		// Apply the filter and then put the new pixel data
 		ctx.putImageData(
-			IgeFilters._convolute(
+			TaroFilters._convolute(
 				ctx.getImageData(
 					0,
 					0,
@@ -28,10 +28,10 @@ IgeFilters.sobel = function (canvas, ctx, originalImage, texture, data) {
 		);
 	}
 
-	// IgeFilters._invert(canvas, ctx);
+	// TaroFilters._invert(canvas, ctx);
 };
 
-IgeFilters._invert = function (canvas, ctx) {
+TaroFilters._invert = function (canvas, ctx) {
 	var w, h, canvasData, i;
 	w = canvas.width;
 	h = canvas.height;
