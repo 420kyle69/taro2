@@ -31,9 +31,8 @@ var IgeNetIoClient = {
 				callback(server);
 			}
 		} else {
-			this.artificialDelay = 0;
-			this.lagVariance = 0;
-			this._discrepancySamples = []
+
+			this._discrepancySamples = [];
 			this.medianDiscrepancy = undefined;
 			var self = this;
 
@@ -317,14 +316,8 @@ var IgeNetIoClient = {
 
 			ciEncoded = String.fromCharCode(commandIndex);
 
-			if (ige.env) {
-				setTimeout(function (ci, d) {
-					self._io.send([ci, d]);
-				}, (Math.random() * self.lagVariance) + self.artificialDelay, ciEncoded, data);
-			} else {
-				this._io.send([ciEncoded, data]);
-			}
-			// console.log("sent");
+			this._io.send([ciEncoded, data]);
+
 		} else {
 			// console.log("error ?");
 			this.log(`Cannot send network packet with command "${commandName}" because the command has not been defined!`, 'error');
