@@ -36,12 +36,17 @@ var DeveloperMode = /** @class */ (function () {
             ige.game.data.map.wasEdited = true;
             ige.network.send('editTile', data);
             var serverData = _.clone(data);
-            var width = ige.game.data.map.width;
             if (ige.game.data.map.layers.length > 4 && serverData.layer >= 2)
                 serverData.layer++;
-            //save tile change to ige.game.map.data
-            ige.game.data.map.layers[serverData.layer].data[serverData.y * width + serverData.x] = serverData.gid;
-            ige.map.data.layers[serverData.layer].data[serverData.y * width + serverData.x] = serverData.gid;
+            var width = ige.game.data.map.width;
+            if (data.tool === 'flood') {
+                this.floodTiles(serverData.layer, ige.game.data.map.layers[serverData.layer].data[serverData.y * width + serverData.x], serverData.gid, serverData.x, serverData.y);
+            }
+            else {
+                //save tile change to ige.game.data.map and ige.map.data
+                ige.game.data.map.layers[serverData.layer].data[serverData.y * width + serverData.x] = serverData.gid;
+                ige.map.data.layers[serverData.layer].data[serverData.y * width + serverData.x] = serverData.gid;
+            }
             if (ige.game.data.map.layers[serverData.layer].name === 'walls') {
                 //if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
                 ige.physics.destroyWalls();
@@ -50,6 +55,28 @@ var DeveloperMode = /** @class */ (function () {
                     ige.physics.staticsFromMap(layersById.walls);
                 });
             }
+        }
+    };
+    DeveloperMode.prototype.floodTiles = function (layer, oldTile, newTile, x, y) {
+        var map = ige.game.data.map;
+        var width = map.width;
+        if (oldTile === newTile || ige.game.data.map.layers[layer].data[y * width + x] !== oldTile) {
+            return;
+        }
+        //save tile change to ige.game.data.map and ige.map.data
+        ige.game.data.map.layers[layer].data[y * width + x] = newTile;
+        ige.map.data.layers[layer].data[y * width + x] = newTile;
+        if (x > 0) {
+            this.floodTiles(layer, oldTile, newTile, x - 1, y);
+        }
+        if (x < (map.width - 1)) {
+            this.floodTiles(layer, oldTile, newTile, x + 1, y);
+        }
+        if (y > 0) {
+            this.floodTiles(layer, oldTile, newTile, x, y - 1);
+        }
+        if (y < (map.height - 1)) {
+            this.floodTiles(layer, oldTile, newTile, x, y + 1);
         }
     };
     DeveloperMode.prototype.editRegion = function (data, clientId) {
