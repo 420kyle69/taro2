@@ -38,28 +38,29 @@ class DeveloperMode {
 	editTile (data: TileData, clientId: string): void {
 		// only allow developers to modify the tiles
 		if (ige.server.developerClientIds.includes(clientId)) {
-			ige.game.data.map.wasEdited = true;
+			const gameMap = ige.game.data.map;
+			gameMap.wasEdited = true;
 			ige.network.send('editTile', data);
 			const serverData = _.clone(data);
-			if (ige.game.data.map.layers.length > 4 && serverData.layer >= 2) serverData.layer ++;
-			const width = ige.game.data.map.width;
+			if (gameMap.layers.length > 4 && serverData.layer >= 2) serverData.layer ++;
+			const width = gameMap.width;
 			if (data.tool === 'flood') {
 				this.floodTiles(
 					serverData.layer, 
-					ige.game.data.map.layers[serverData.layer].data[serverData.y * width + serverData.x],
+					gameMap.layers[serverData.layer].data[serverData.y * width + serverData.x],
 					serverData.gid,
 					serverData.x,
 					serverData.y
 					);
 			} else {
 				//save tile change to ige.game.data.map and ige.map.data
-				ige.game.data.map.layers[serverData.layer].data[serverData.y * width + serverData.x] = serverData.gid;
+				gameMap.layers[serverData.layer].data[serverData.y * width + serverData.x] = serverData.gid;
 				ige.map.data.layers[serverData.layer].data[serverData.y * width + serverData.x] = serverData.gid;
 			}
-			if (ige.game.data.map.layers[serverData.layer].name === 'walls') {
+			if (gameMap.layers[serverData.layer].name === 'walls') {
 				//if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
 				ige.physics.destroyWalls();
-				let map = ige.scaleMap(_.cloneDeep(ige.game.data.map));
+				let map = ige.scaleMap(_.cloneDeep(gameMap));
 				ige.tiled.loadJson(map, function (layerArray, layersById) {
 					ige.physics.staticsFromMap(layersById.walls);
 				});
@@ -70,11 +71,11 @@ class DeveloperMode {
 	floodTiles (layer: number, oldTile: number, newTile: number, x: number, y: number): void {
 		const map = ige.game.data.map;
 		const width = map.width;
-        if (oldTile === newTile || ige.game.data.map.layers[layer].data[y * width + x] !== oldTile) {
+        if (oldTile === newTile || map.layers[layer].data[y * width + x] !== oldTile) {
             return;
         }
 		//save tile change to ige.game.data.map and ige.map.data
-		ige.game.data.map.layers[layer].data[y * width + x] = newTile;
+		map.layers[layer].data[y * width + x] = newTile;
 		ige.map.data.layers[layer].data[y * width + x] = newTile;
 			
         if (x > 0) {
