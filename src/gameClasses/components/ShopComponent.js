@@ -100,7 +100,7 @@ var ShopComponent = IgeEntity.extend({
 					return;
 				}
 
-				if(itemPrice && window.userId && window.userId.toString() !== window.gameJson?.data?.defaultData?.owner?.toString()) {
+				if(itemPrice && (parseFloat(itemPrice) > 0) && window.userId && window.userId.toString() !== window.gameJson?.data?.defaultData?.owner?.toString()) {
 					window.userId && window.trackEvent && window.trackEvent('Coin Purchase', {
 						coins: parseFloat(itemPrice),
 						distinct_id: window.userId.toString(),
