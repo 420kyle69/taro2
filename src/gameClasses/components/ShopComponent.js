@@ -89,6 +89,7 @@ var ShopComponent = IgeEntity.extend({
 				var isItemRequirementSetisfied = $(this).attr('requirementsSatisfied') == 'true';
 				var isItemAffordable = $(this).attr('isItemAffordable') == 'true';
 				var isCoinTxRequired = $(this).attr('isCoinTxRequired') == 'true';
+				var itemPrice = $(this).attr('itemPrice');
 				var name = $(this).attr('name');
 				if (!isItemRequirementSetisfied) {
 					self.purchaseWarning('requirement', name);
@@ -97,6 +98,17 @@ var ShopComponent = IgeEntity.extend({
 				if (!isItemAffordable) {
 					self.purchaseWarning('price', name);
 					return;
+				}
+
+				if(itemPrice && window.userId && window.userId.toString() !== window.gameJson?.data?.defaultData?.owner?.toString()) {
+					window.userId && window.trackEvent && window.trackEvent('Coin Purchase', {
+						coins: parseFloat(itemPrice),
+						distinct_id: window.userId.toString(),
+						type: "ingame-item",
+						// purchaseId: purchasableId,
+						gameId: window.gameId?.toString(),
+						status: "initiated"
+					});
 				}
 				
 				if (isCoinTxRequired) {
@@ -185,6 +197,7 @@ var ShopComponent = IgeEntity.extend({
 								}
 							} else {
 								$('#purchasable-purchase-modal').data('purchasable', itemId);
+								$('#purchasable-purchase-modal').data('price', price);
 								$('#purchasable-purchase-modal').modal('show');
 								// if (confirm("Are you sure you want to purchase " + name + " ?")) {
 								// 	self.buySkin(itemId);
@@ -947,7 +960,8 @@ var ShopComponent = IgeEntity.extend({
 						name: item.name,
 						requirementsSatisfied: !!requirementsSatisfied,
 						isItemAffordable: !!isItemAffordable,
-						isCoinTxRequired: !!shopItem.price.coins
+						isCoinTxRequired: !!shopItem.price.coins,
+						itemPrice: shopItem.price.coins || 0,
 					});
 					
 					if (
@@ -1185,7 +1199,7 @@ var ShopComponent = IgeEntity.extend({
 		var modalBody = $('<div/>', {
 			class: 'row text-center'
 		});
-		for (var i in items) {
+		for (let i = 0; i < items.length; i++) {
 			var item = items[i];
 			// console.log(item)
 
