@@ -286,7 +286,7 @@ var ShopComponent = IgeEntity.extend({
 					purchasableItems = purchasableItems.slice(0, 4);
 
 					// remove skin shop UI if there are no skins in the game which user can purchase
-					if (purchasableItems.length === 0) {
+					if (purchasables.length === 0) {
 						var menuColumnRightContainer = $("#menu-column-right-container")[0];
 
 						if (!menuColumnRightContainer) {
