@@ -100,7 +100,7 @@ var ShopComponent = IgeEntity.extend({
 					return;
 				}
 
-				if(itemPrice && window.userId && window.userId.toString() !== window.gameJson?.data?.defaultData?.owner?.toString()) {
+				if(itemPrice && (parseFloat(itemPrice) > 0) && window.userId && window.userId.toString() !== window.gameJson?.data?.defaultData?.owner?.toString()) {
 					window.userId && window.trackEvent && window.trackEvent('Coin Purchase', {
 						coins: parseFloat(itemPrice),
 						distinct_id: window.userId.toString(),
@@ -286,33 +286,33 @@ var ShopComponent = IgeEntity.extend({
 					purchasableItems = purchasableItems.slice(0, 4);
 
 					// remove skin shop UI if there are no skins in the game which user can purchase
-					if (purchasables.length === 0) {
-						var menuColumnRightContainer = $("#menu-column-right-container")[0];
+					// if (purchasables.length === 0) {
+					// 	var menuColumnRightContainer = $("#menu-column-right-container")[0];
 
-						if (!menuColumnRightContainer) {
-							return;
-						}
+					// 	if (!menuColumnRightContainer) {
+					// 		return;
+					// 	}
 
-						var skinShopParent = $(menuColumnRightContainer).find("#menu-column-left")[0];
+					// 	var skinShopParent = $(menuColumnRightContainer).find("#menu-column-left")[0];
 
-						if (skinShopParent) {
-							skinShopParent.remove();
-						}
-						else {
-							var skinShop = $("#skin-shop-container")[0];
+					// 	if (skinShopParent) {
+					// 		skinShopParent.remove();
+					// 	}
+					// 	else {
+					// 		var skinShop = $("#skin-shop-container")[0];
 
-							if (skinShop) {
-								skinShop.remove();
-							}
-						}
+					// 		if (skinShop) {
+					// 			skinShop.remove();
+					// 		}
+					// 	}
 
-						// since we removed the skin shop, to make sure we are not showing empty div check for text content on
-						var isRightColumnBlank = menuColumnRightContainer.innerText.trim().length === 0;
+					// 	// since we removed the skin shop, to make sure we are not showing empty div check for text content on
+					// 	var isRightColumnBlank = menuColumnRightContainer.innerText.trim().length === 0;
 
-						if (isRightColumnBlank) {
-							menuColumnRightContainer.remove();
-						}
-					}
+					// 	if (isRightColumnBlank) {
+					// 		menuColumnRightContainer.remove();
+					// 	}
+					// }
 
 					purchasableItems.forEach(function (purchasable, index) {
 						let html = `<div id="skin-list-${purchasable._id}" class="border rounded bg-light p-2 mx-2 ${index < 2 ? 'mb-3' : ''} col-5 d-flex flex-column justify-content-between">` +
