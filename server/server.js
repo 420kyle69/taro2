@@ -734,6 +734,17 @@ var Server = IgeClass.extend({
 		}
 	},
 	
+	sendCoinsToPlayer: function (userId, coins) {
+		if (userId && coins && ige.game.data.defaultData.tier != 2) {
+			ige.clusterClient && ige.clusterClient.sendCoinsToPlayer({
+				creatorId: ige.game.data.defaultData.owner,
+				userId,
+				coins,
+				game: ige.game.data.defaultData._id,
+			});
+		}
+	},
+	
 	consumeCoinFromUser: function (player, coins, boughtItemId) {
 		var self = this;
 		if (player && coins && (ige.game.data.defaultData.tier >= 2)) {
