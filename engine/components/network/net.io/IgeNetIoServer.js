@@ -62,7 +62,12 @@ var IgeNetIoServer = {
 				if (socket && ups > 75000) {
 					var player = ige.game.getPlayerByIp(ip);
 
-					socket.close();
+					let clientSyncs = self.clientCommandCount[socket._remoteAddress]._igeNetTimeSync;
+					let kicked = false;
+					if (clientSyncs && clientSyncs <= 5) {
+						kicked = true;
+						socket.close();
+					}
 
 					let playerName = 'guest user';
 					var player = ige.game.getPlayerByClientId(socket.id);
@@ -77,7 +82,8 @@ var IgeNetIoServer = {
 						playerName: playerName,
 						ip: ip,
 						uploadPerSecond: ups,
-						clientCommandCount: self.clientCommandCount[socket._remoteAddress]
+						clientCommandCount: self.clientCommandCount[socket._remoteAddress],
+						kicked: kicked
 					};
 
 					global.rollbar.log('user kicked for sending over 75 kB/s', logData);
