@@ -97,13 +97,19 @@ var TileEditor = /** @class */ (function () {
     };
     TileEditor.prototype.edit = function (data) {
         var map = this.gameScene.tilemap;
-        map.putTileAt(data.gid, data.x, data.y, false, data.layer);
-        /* TODO: SAVE MAP DATA FROM SERVER SIDE */
-        var width = ige.game.data.map.width;
-        //save tile change to ige.game.map.data
-        if (ige.game.data.map.layers.length > 4 && data.layer >= 2)
-            data.layer++;
-        ige.game.data.map.layers[data.layer].data[data.y * width + data.x] = data.gid;
+        if (data.tool === 'flood') {
+            var oldTile = map.getTileAt(data.x, data.y, true, data.layer).index;
+            this.floodFill(data.layer, oldTile, data.gid, data.x, data.y, true);
+        }
+        else {
+            map.putTileAt(data.gid, data.x, data.y, false, data.layer);
+            /* TODO: SAVE MAP DATA FROM SERVER SIDE */
+            var width = ige.game.data.map.width;
+            //save tile change to ige.game.map.data
+            if (ige.game.data.map.layers.length > 4 && data.layer >= 2)
+                data.layer++;
+            ige.game.data.map.layers[data.layer].data[data.y * width + data.x] = data.gid;
+        }
         if (ige.physics && ige.game.data.map.layers[data.layer].name === 'walls') {
             //if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
             ige.physics.destroyWalls();
@@ -113,7 +119,7 @@ var TileEditor = /** @class */ (function () {
             });
         }
     };
-    TileEditor.prototype.putTile = function (tileX, tileY, selectedTile) {
+    TileEditor.prototype.putTile = function (tileX, tileY, selectedTile, local) {
         var map = this.gameScene.tilemap;
         if (this.gameScene.tilemapLayers[map.currentLayerIndex].visible && selectedTile && this.devModeTools.scene.pointerInsideMap(tileX, tileY, map)) {
             var index = selectedTile.index;
@@ -123,7 +129,9 @@ var TileEditor = /** @class */ (function () {
                 !(index === 0 && map.getTileAt(tileX, tileY, true).index === -1)) {
                 map.putTileAt(index, tileX, tileY);
                 map.getTileAt(tileX, tileY, true).tint = 0xffffff;
-                ige.network.send('editTile', { gid: index, layer: map.currentLayerIndex, x: tileX, y: tileY });
+                if (!local) {
+                    ige.network.send('editTile', { gid: index, layer: map.currentLayerIndex, x: tileX, y: tileY });
+                }
             }
         }
     };
@@ -139,23 +147,34 @@ var TileEditor = /** @class */ (function () {
             return selectedTile;
         }
     };
-    TileEditor.prototype.floodFill = function (oldTile, newTile, x, y) {
+    TileEditor.prototype.floodFill = function (layer, oldTile, newTile, x, y, fromServer) {
         var map = this.gameScene.tilemap;
-        if (oldTile === newTile || this.getTile(x, y, this.selectedTile, map).index !== oldTile) {
+        if (oldTile === newTile || map.getTileAt(x, y, true, layer).index !== oldTile || map.getTileAt(x, y, true, layer).index === 0 || map.getTileAt(x, y, true, layer).index === -1) {
             return;
         }
-        this.putTile(x, y, this.selectedTile);
+        if (fromServer) {
+            map.putTileAt(newTile, x, y, false, layer);
+            //save tile change to ige.game.map.data
+            var width = ige.game.data.map.width;
+            var tempLayer = layer;
+            if (ige.game.data.map.layers.length > 4 && layer >= 2)
+                tempLayer++;
+            ige.game.data.map.layers[tempLayer].data[y * width + x] = newTile;
+        }
+        else {
+            map.putTileAt(newTile, x, y, false, layer);
+        }
         if (x > 0) {
-            this.floodFill(oldTile, newTile, x - 1, y);
+            this.floodFill(layer, oldTile, newTile, x - 1, y, fromServer);
         }
         if (x < (map.width - 1)) {
-            this.floodFill(oldTile, newTile, x + 1, y);
+            this.floodFill(layer, oldTile, newTile, x + 1, y, fromServer);
         }
         if (y > 0) {
-            this.floodFill(oldTile, newTile, x, y - 1);
+            this.floodFill(layer, oldTile, newTile, x, y - 1, fromServer);
         }
         if (y < (map.height - 1)) {
-            this.floodFill(oldTile, newTile, x, y + 1);
+            this.floodFill(layer, oldTile, newTile, x, y + 1, fromServer);
         }
     };
     TileEditor.prototype.update = function () {
@@ -211,7 +230,8 @@ var TileEditor = /** @class */ (function () {
                     else if (this.devModeTools.modeButtons[4].active) {
                         var targetTile = this.getTile(pointerTileX, pointerTileY, this.selectedTile, map);
                         if (targetTile && this.selectedTile && targetTile.index !== this.selectedTile.index) {
-                            this.floodFill(targetTile.index, this.selectedTile.index, pointerTileX, pointerTileY);
+                            this.floodFill(map.currentLayerIndex, targetTile.index, this.selectedTile.index, pointerTileX, pointerTileY, false);
+                            ige.network.send('editTile', { gid: this.selectedTile.index, layer: map.currentLayerIndex, x: pointerTileX, y: pointerTileY, tool: 'flood' });
                         }
                     }
                 }
