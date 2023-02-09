@@ -11,9 +11,6 @@ var IgeNetIoServer = {
 	start: function (data, callback) {
 		var self = this;
 
-		this.artificialDelay = 300; // simulated lag (ms)
-		this.lagVariance = 0;
-
 		this._socketById = {};
 		this._socketByIp = {};
 		this._socketsByRoomId = {};
@@ -60,35 +57,42 @@ var IgeNetIoServer = {
 		var upsDetector = setInterval(function() {
 			for (ip in self.uploadPerSecond) {
 				let ups = self.uploadPerSecond[ip];
-				var socket = self._socketByIp[ip]
-				
+				var socket = self._socketByIp[ip];
+
 				if (socket && ups > 75000) {
 					var player = ige.game.getPlayerByIp(ip);
-					
-					ige.server.bannedIps.push(ip);
-					socket.close();
-					
-					let playerName = 'guest user'
-					var player = ige.game.getPlayerByClientId(socket.id)
+
+					let clientSyncs = self.clientCommandCount[socket._remoteAddress]._igeNetTimeSync;
+					let kicked = false;
+					if (clientSyncs && clientSyncs <= 5) {
+						kicked = true;
+						socket.close();
+					}
+
+					let playerName = 'guest user';
+					var player = ige.game.getPlayerByClientId(socket.id);
 					if (player) {
-						playerName = player._stats.name
+						playerName = player._stats.name;
 					}
 
 					var logData = {
-						query: 'banUser',
+						query: 'kickUser',
 						masterServer: global.myIp,
 						gameTitle: ige.game.data.defaultData.title,
 						playerName: playerName,
 						ip: ip,
 						uploadPerSecond: ups,
-						clientCommandCount: self.clientCommandCount[socket._remoteAddress]						
+						clientCommandCount: self.clientCommandCount[socket._remoteAddress],
+						kicked: kicked
 					};
 
-					global.rollbar.log("user banned for sending over 75 kBps", logData);
-					
-					console.log("banning user", playerName, "(ip: ", ip,"for spamming network commands (sending ", ups, " bytes over 5 seconds)", logData)
+					let actuallyKicked = kicked ? '' : 'not ';
+
+					global.rollbar.log('user ', actuallyKicked, ' kicked for sending over 75 kB/s', logData);
+
+					console.log(actuallyKicked, 'kicking user', playerName, '(ip: ', ip,'for spamming network commands (sending ', ups, ' bytes over 5 seconds)', logData);
 				}
-				
+
 				// console.log(self.uploadPerSecond[ip]);
 				self.uploadPerSecond[ip] = 0;
 
@@ -96,7 +100,7 @@ var IgeNetIoServer = {
 					self.clientCommandCount[socket._remoteAddress] = {};
 				}
 			}
-		}, 5000)
+		}, 5000);
 
 		return this._entity;
 	},
@@ -366,21 +370,10 @@ var IgeNetIoServer = {
 			// send sendQueue
 			if (self.sendQueue) {
 				for (var clientId in self.sendQueue) {
-					// simulate lag for dev environment
-					if (global.isDev) {
-						setTimeout(function (data, id, ci) {
-							self._io.send(
-								[ci, data],
-								id === 'undefined' ? undefined : id
-							);
-						}, (Math.random() * self.lagVariance) + self.artificialDelay, self.sendQueue[clientId], clientId, ciEncoded);
-					} else {
-						// production we don't simulate lag
-						self._io.send(
-							[ciEncoded, self.sendQueue[clientId]],
-							clientId === 'undefined' ? undefined : clientId
-						);
-					}
+					self._io.send(
+						[ciEncoded, self.sendQueue[clientId]],
+						clientId === 'undefined' ? undefined : clientId
+					);
 				}
 				self.sendQueue = {};
 			}
@@ -392,14 +385,8 @@ var IgeNetIoServer = {
 
 			// append serverTime timestamp to the snapshot
 			self.snapshot.push([String.fromCharCode(this._networkCommandsLookup._igeStreamTime), timestamp]);
-			if (global.isDev) {
-				// generate artificial lag in dev environment
-				setTimeout(function (data, ci) {
-					self._io.send([ci, data]);
-				}, (Math.random() * self.lagVariance) + self.artificialDelay, self.snapshot, ciEncoded);
-			} else {
-				self._io.send([ciEncoded, self.snapshot]);
-			}
+			self._io.send([ciEncoded, self.snapshot]);
+
 			ige.server.lastSnapshot = self.snapshot;
 			this.snapshot = [];
 		} else {
@@ -498,15 +485,15 @@ var IgeNetIoServer = {
    * @param {Object} socket The client socket object.
    * @private
    */
-	 _onClientConnect: function (socket) {		
+	 _onClientConnect: function (socket) {
 		var self = this;
 
 		if (self.uploadPerSecond[socket._remoteAddress] == undefined) {
-			self.uploadPerSecond[socket._remoteAddress] = 0;			
+			self.uploadPerSecond[socket._remoteAddress] = 0;
 		}
 
 		self.uploadPerSecond[socket._remoteAddress] += 1500; // add 1500 bytes as connection cost
-		self.logCommandCount(socket._remoteAddress, "connection");
+		self.logCommandCount(socket._remoteAddress, 'connection');
 
 		var remoteAddress = socket._remoteAddress;
 		console.log('client is attempting to connect', remoteAddress);
@@ -527,16 +514,16 @@ var IgeNetIoServer = {
 			return player._stats.controlledBy == 'human';
 		}).length;
 
-		var clientRejectReason = []
-		
+		var clientRejectReason = [];
+
 		if (this._acceptConnections != true)
-			clientRejectReason.push('server not accepting connections')
-		
+			clientRejectReason.push('server not accepting connections');
+
 		if (playerCount > ige.server.maxPlayers)
-			clientRejectReason.push('server is full')
-		
+			clientRejectReason.push('server is full');
+
 		if (playerIsBanned)
-			clientRejectReason.push('player ',socket._remoteAddress,' is banned')
+			clientRejectReason.push('player ',socket._remoteAddress,' is banned');
 
 		if (clientRejectReason.length == 0) {
 			// Check if any listener cancels this
@@ -552,12 +539,12 @@ var IgeNetIoServer = {
 
 				this.clientIds.push(socket.id);
 				self._socketById[socket.id].start = Date.now();
-				
+
 				ige.server.socketConnectionCount.connected++;
 
 				// Store a rooms array for this client
 				this._clientRooms[socket.id] = this._clientRooms[socket.id] || [];
-				
+
 				if (self._socketById[socket.id]._token && self._socketById[socket.id]._token.distinctId) {
 					// Mixpanel Event to Track user game successfully started.
 					global.mixpanel.track('User Connected to Game Server', {
@@ -569,20 +556,19 @@ var IgeNetIoServer = {
 				}
 
 				socket.on('message', function (data) {
-					
 					// track all commands being sent from client
-					var commandName = 'unknown'
-					if (typeof data[0] === 'string') {		
+					var commandName = 'unknown';
+					if (typeof data[0] === 'string') {
 						var code = data[0];
 						if (code.charCodeAt(0) != undefined) {
-							commandName = ige.network._networkCommandsIndex[code.charCodeAt(0)]
+							commandName = ige.network._networkCommandsIndex[code.charCodeAt(0)];
 						}
 					}
 
-					self.logCommandCount(socket._remoteAddress, commandName, data)
+					self.logCommandCount(socket._remoteAddress, commandName, data);
 
 					self.uploadPerSecond[socket._remoteAddress] += JSON.stringify(data).length;
-					
+
 					if (data.type === 'ping') {
 						socket.send({
 							type: 'pong',
@@ -592,7 +578,7 @@ var IgeNetIoServer = {
 						});
 						return;
 					}
-					
+
 					self._onClientMessage.apply(self, [data, socket.id]);
 				});
 
@@ -606,7 +592,7 @@ var IgeNetIoServer = {
 						if (end - self._socketById[socket.id].start < 3000) {
 							ige.server.socketConnectionCount.immediatelyDisconnected++;
 						}
-						
+
 						if (self._socketById[socket.id]._token && self._socketById[socket.id]._token.distinctId) {
 							/** additional part to send some info for marketing purposes */
 							global.mixpanel.track('Game Session Duration', {
@@ -650,7 +636,7 @@ var IgeNetIoServer = {
 		let self = this;
 
 		if (self.clientCommandCount[ip] == undefined) {
-			self.clientCommandCount[ip] = {}
+			self.clientCommandCount[ip] = {};
 		}
 
 		if (commandName == 'playerKeyDown') {
@@ -658,24 +644,24 @@ var IgeNetIoServer = {
 				self.clientCommandCount[ip][commandName] = {};
 			}
 
-			if (self.clientCommandCount[ip][commandName][data[1].device+"-"+data[1].key] == undefined) {
-				self.clientCommandCount[ip][commandName][data[1].device+"-"+data[1].key] = 0;
+			if (self.clientCommandCount[ip][commandName][data[1].device+'-'+data[1].key] == undefined) {
+				self.clientCommandCount[ip][commandName][data[1].device+'-'+data[1].key] = 0;
 			}
 
-			self.clientCommandCount[ip][commandName][data[1].device+"-"+data[1].key]++;
-			
+			self.clientCommandCount[ip][commandName][data[1].device+'-'+data[1].key]++;
+
 		} else {
 			if (self.clientCommandCount[ip][commandName] == undefined) {
 				self.clientCommandCount[ip][commandName] = 0;
 			}
 
 			self.clientCommandCount[ip][commandName]++;
-		}		
+		}
 
 		if (self.totalCommandCount[commandName] == undefined) {
 			self.totalCommandCount[commandName] = 0;
 		}
-		
+
 		self.totalCommandCount[commandName]++;
 	},
 
@@ -696,7 +682,7 @@ var IgeNetIoServer = {
 
 			ige.clusterClient.socketMessages[clientId] += JSON.stringify(decoded);
 		}
-		
+
 		var socket = ige.network._socketById[clientId];
 		// check if the clientId belongs to this socket connection.
 		if (!(socket?._token?.clientId && socket?._token?.clientId === clientId)) {
@@ -704,7 +690,7 @@ var IgeNetIoServer = {
 			socket.close('Client could not be validated, please refresh the page.');
 			return;
 		}
-		
+
 		if (typeof data[0] === 'string') {
 			if (data[0].charCodeAt(0) != undefined) {
 				var ciDecoded = data[0].charCodeAt(0);
@@ -712,28 +698,6 @@ var IgeNetIoServer = {
 
 				if (this._networkCommands[commandName]) {
 					this._networkCommands[commandName](data[1], clientId);
-				}
-				if (ige.game.data.defaultData._id === '5a7fd59b1014dc000eeec3dd' && commandName === 'joinGame') {
-					// console.log(commandName, data, clientId);
-					let clients = this.clients();
-					let client = clients[clientId];
-
-					try {
-						let user = {
-							ip: client?._remoteAddress,
-							userId: client?._token?.userId,
-							distinctId: client?._token?.distinctId,
-							token: client?._token?.token,
-							clientId: clientId,
-							name: ige.game.getPlayerByClientId(clientId)?._stats?.name
-						}
-						
-						let userLog = `\tip: ${user.ip}\n\tuserId: ${user.userId||''}\n\tdistinctId: ${user.distinctId||''}\n\ttoken: ${user.token||''}\n\tclientId: ${user.clientId}\n\tusername: ${user.name}`
-
-						console.log(userLog);
-					} catch (err) {
-						console.log('joinGame log error', err)
-					}
 				}
 
 				this.emit(commandName, [data[1], clientId]);
