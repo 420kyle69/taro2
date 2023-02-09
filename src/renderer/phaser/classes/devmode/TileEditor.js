@@ -154,7 +154,6 @@ var TileEditor = /** @class */ (function () {
     };
     TileEditor.prototype.floodFill = function (layer, oldTile, newTile, x, y, fromServer) {
         if (fromServer) {
-            console.log(layer, oldTile, newTile, x, y);
             var map = ige.game.data.map;
             var tileMap = this.gameScene.tilemap;
             var width = map.width;
@@ -163,7 +162,6 @@ var TileEditor = /** @class */ (function () {
             if (map.layers.length > 4 && layer >= 2) {
                 tempLayer++;
             }
-            console.log(map.layers[tempLayer].data[y * width + x]);
             if (oldTile === newTile || map.layers[tempLayer].data[y * width + x] !== oldTile) {
                 return;
             }

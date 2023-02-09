@@ -174,7 +174,6 @@ class TileEditor {
 
 	floodFill (layer: number, oldTile: number, newTile: number, x: number, y: number, fromServer: boolean): void {
 		if (fromServer) { 
-			console.log(layer, oldTile, newTile, x, y)
 			const map = ige.game.data.map;
 			const tileMap = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
 			const width = map.width;
@@ -183,7 +182,6 @@ class TileEditor {
 			if (map.layers.length > 4 && layer >= 2) {
 				tempLayer ++;
 			}
-			console.log(map.layers[tempLayer].data[y * width + x]);
         	if (oldTile === newTile || map.layers[tempLayer].data[y * width + x] !== oldTile) {
         	    return;
         	}
