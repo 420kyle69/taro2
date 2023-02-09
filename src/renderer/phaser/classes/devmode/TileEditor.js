@@ -96,25 +96,30 @@ var TileEditor = /** @class */ (function () {
         this.paletteMarker.graphics.setVisible(value);
     };
     TileEditor.prototype.edit = function (data) {
-        var map = this.gameScene.tilemap;
+        var map = ige.game.data.map;
+        var width = map.width;
+        var tileMap = this.gameScene.tilemap;
         if (data.tool === 'flood') {
-            var oldTile = map.getTileAt(data.x, data.y, true, data.layer).index;
+            var tempLayer = data.layer;
+            if (map.layers.length > 4 && data.layer >= 2) {
+                tempLayer++;
+            }
+            var oldTile = map.layers[tempLayer].data[data.y * width + data.x];
             this.floodFill(data.layer, oldTile, data.gid, data.x, data.y, true);
         }
         else {
-            map.putTileAt(data.gid, data.x, data.y, false, data.layer);
+            tileMap.putTileAt(data.gid, data.x, data.y, false, data.layer);
             /* TODO: SAVE MAP DATA FROM SERVER SIDE */
-            var width = ige.game.data.map.width;
             //save tile change to ige.game.map.data
-            if (ige.game.data.map.layers.length > 4 && data.layer >= 2)
+            if (map.layers.length > 4 && data.layer >= 2)
                 data.layer++;
-            ige.game.data.map.layers[data.layer].data[data.y * width + data.x] = data.gid;
+            map.layers[data.layer].data[data.y * width + data.x] = data.gid;
         }
-        if (ige.physics && ige.game.data.map.layers[data.layer].name === 'walls') {
+        if (ige.physics && map.layers[data.layer].name === 'walls') {
             //if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
             ige.physics.destroyWalls();
-            var map_1 = ige.scaleMap(_.cloneDeep(ige.game.data.map));
-            ige.tiled.loadJson(map_1, function (layerArray, IgeLayersById) {
+            var mapCopy = ige.scaleMap(_.cloneDeep(map));
+            ige.tiled.loadJson(mapCopy, function (layerArray, IgeLayersById) {
                 ige.physics.staticsFromMap(IgeLayersById.walls);
             });
         }
@@ -148,33 +153,57 @@ var TileEditor = /** @class */ (function () {
         }
     };
     TileEditor.prototype.floodFill = function (layer, oldTile, newTile, x, y, fromServer) {
-        var map = this.gameScene.tilemap;
-        if (oldTile === newTile || map.getTileAt(x, y, true, layer).index !== oldTile || map.getTileAt(x, y, true, layer).index === 0 || map.getTileAt(x, y, true, layer).index === -1) {
-            return;
-        }
         if (fromServer) {
-            map.putTileAt(newTile, x, y, false, layer);
-            //save tile change to ige.game.map.data
-            var width = ige.game.data.map.width;
+            console.log(layer, oldTile, newTile, x, y);
+            var map = ige.game.data.map;
+            var tileMap = this.gameScene.tilemap;
+            var width = map.width;
+            //fix for debris layer
             var tempLayer = layer;
-            if (ige.game.data.map.layers.length > 4 && layer >= 2)
+            if (map.layers.length > 4 && layer >= 2) {
                 tempLayer++;
-            ige.game.data.map.layers[tempLayer].data[y * width + x] = newTile;
+            }
+            console.log(map.layers[tempLayer].data[y * width + x]);
+            if (oldTile === newTile || map.layers[tempLayer].data[y * width + x] !== oldTile) {
+                return;
+            }
+            tileMap.putTileAt(newTile, x, y, false, layer);
+            //save tile change to ige.game.map.data
+            map.layers[tempLayer].data[y * width + x] = newTile;
+            if (x > 0) {
+                this.floodFill(layer, oldTile, newTile, x - 1, y, fromServer);
+            }
+            if (x < (map.width - 1)) {
+                this.floodFill(layer, oldTile, newTile, x + 1, y, fromServer);
+            }
+            if (y > 0) {
+                this.floodFill(layer, oldTile, newTile, x, y - 1, fromServer);
+            }
+            if (y < (map.height - 1)) {
+                this.floodFill(layer, oldTile, newTile, x, y + 1, fromServer);
+            }
         }
         else {
-            map.putTileAt(newTile, x, y, false, layer);
-        }
-        if (x > 0) {
-            this.floodFill(layer, oldTile, newTile, x - 1, y, fromServer);
-        }
-        if (x < (map.width - 1)) {
-            this.floodFill(layer, oldTile, newTile, x + 1, y, fromServer);
-        }
-        if (y > 0) {
-            this.floodFill(layer, oldTile, newTile, x, y - 1, fromServer);
-        }
-        if (y < (map.height - 1)) {
-            this.floodFill(layer, oldTile, newTile, x, y + 1, fromServer);
+            var tileMap = this.gameScene.tilemap;
+            if (oldTile === newTile ||
+                tileMap.getTileAt(x, y, true, layer).index !== oldTile ||
+                tileMap.getTileAt(x, y, true, layer).index === 0 ||
+                tileMap.getTileAt(x, y, true, layer).index === -1) {
+                return;
+            }
+            tileMap.putTileAt(newTile, x, y, false, layer);
+            if (x > 0) {
+                this.floodFill(layer, oldTile, newTile, x - 1, y, fromServer);
+            }
+            if (x < (tileMap.width - 1)) {
+                this.floodFill(layer, oldTile, newTile, x + 1, y, fromServer);
+            }
+            if (y > 0) {
+                this.floodFill(layer, oldTile, newTile, x, y - 1, fromServer);
+            }
+            if (y < (tileMap.height - 1)) {
+                this.floodFill(layer, oldTile, newTile, x, y + 1, fromServer);
+            }
         }
     };
     TileEditor.prototype.update = function () {
