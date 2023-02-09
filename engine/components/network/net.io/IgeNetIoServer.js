@@ -86,9 +86,11 @@ var IgeNetIoServer = {
 						kicked: kicked
 					};
 
-					global.rollbar.log('user kicked for sending over 75 kB/s', logData);
+					let actuallyKicked = kicked ? '' : 'not ';
 
-					console.log('kicking user', playerName, '(ip: ', ip,'for spamming network commands (sending ', ups, ' bytes over 5 seconds)', logData);
+					global.rollbar.log('user ', actuallyKicked, ' kicked for sending over 75 kB/s', logData);
+
+					console.log(actuallyKicked, 'kicking user', playerName, '(ip: ', ip,'for spamming network commands (sending ', ups, ' bytes over 5 seconds)', logData);
 				}
 
 				// console.log(self.uploadPerSecond[ip]);
