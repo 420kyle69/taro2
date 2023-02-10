@@ -669,7 +669,15 @@ var ActionComponent = IgeEntity.extend({
 						}
 
 						break;
-
+						
+					case 'addChatFilter':
+						let words = self._script.variable.getValue(action.words, vars);
+						if (words) {
+							words = words.match(/(?=\S)[^,]+?(?=\s*(,|$))/g);
+							ige.chat.filter?.addWords(...words);
+						}
+						break;
+						
 					case 'banPlayerFromChat':
 						var player = self._script.variable.getValue(action.player, vars);
 						if (player) {
