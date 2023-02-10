@@ -344,9 +344,9 @@ var ControlComponent = IgeEntity.extend({
 							ige.client.myPlayer.control.input.mouse.x = self.newMousePosition[0];
 							ige.client.myPlayer.control.input.mouse.y = self.newMousePosition[1];
 						}
-						if (self.sendPlayerInput) {
-							ige.network.send('playerMouseMoved', self.newMousePosition);
-						}
+					}
+					if (self.sendPlayerInput) {
+						ige.network.send('playerMouseMoved', self.newMousePosition);
 					}
 					self.lastMousePosition = self.newMousePosition;
 				}

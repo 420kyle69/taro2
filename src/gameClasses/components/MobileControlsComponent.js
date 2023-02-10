@@ -18,7 +18,8 @@ var MobileControlsComponent = IgeEntity.extend({
 
 		// mouse move listener
 		ige.input.on('touchpointermove', function (point) {
-			ige.network.send('playerMouseMoved', [point.x, point.y]);
+			ige.client.myPlayer.control.newMousePosition[0] = point.x;
+			ige.client.myPlayer.control.newMousePosition[1] = point.y;
 		});
 
 		$(window).on('orientationchange load resize', function () {
