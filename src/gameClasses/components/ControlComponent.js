@@ -347,6 +347,10 @@ var ControlComponent = IgeEntity.extend({
 						if (self.sendPlayerInput) {
 							ige.network.send('playerMouseMoved', self.newMousePosition);
 						}
+					} else {
+						if (self.sendPlayerInput) {
+							ige.network.send('playerMouseMoved', self.newMousePosition);
+						}
 					}
 					self.lastMousePosition = self.newMousePosition;
 				}
