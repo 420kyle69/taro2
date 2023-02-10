@@ -671,9 +671,10 @@ var ActionComponent = IgeEntity.extend({
 						break;
 						
 					case 'addChatFilter':
-						var word = self._script.variable.getValue(action.word, vars);
-						if (word) {
-							ige.chat.filter?.addWords(word);
+						let words = self._script.variable.getValue(action.words, vars);
+						if (words) {
+							words = words.match(/(?=\S)[^,]+?(?=\s*(,|$))/g);
+							ige.chat.filter?.addWords(...words);
 						}
 						break;
 						
