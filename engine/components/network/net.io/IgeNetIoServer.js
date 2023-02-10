@@ -88,7 +88,7 @@ var IgeNetIoServer = {
 
 					let actuallyKicked = kicked ? '' : 'not ';
 
-					global.rollbar.log('user ', actuallyKicked, ' kicked for sending over 75 kB/s', logData);
+					global.rollbar.log(`user ${actuallyKicked}kicked for sending over 75 kB/s`, logData);
 
 					console.log(actuallyKicked, 'kicking user', playerName, '(ip: ', ip,'for spamming network commands (sending ', ups, ' bytes over 5 seconds)', logData);
 				}
