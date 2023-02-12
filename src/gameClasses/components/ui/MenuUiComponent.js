@@ -444,6 +444,11 @@ var MenuUiComponent = IgeEntity.extend({
 				$('#friends-panel').removeClass('d-none');
 			}
 
+			var inGameEditor = $('#game-editor');
+			if (inGameEditor) {
+				inGameEditor.hide();
+			}
+
 			this.changesForMobile(true);
 			this.toggleScoreBoard(false);
 			this.toggleLeaderBoard(false);
@@ -672,6 +677,11 @@ var MenuUiComponent = IgeEntity.extend({
 
 		if (!ige.isMobile) {
 			$('#friends-panel').addClass('d-none');
+		}
+
+		var inGameEditor = $('#game-editor');
+		if (inGameEditor) {
+			inGameEditor.show();
 		}
 
 		this.changesForMobile(false);
