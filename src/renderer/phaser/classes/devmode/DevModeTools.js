@@ -107,23 +107,38 @@ var DevModeTools = /** @class */ (function (_super) {
         this.gameEditorWidgets = Array.from(document.querySelectorAll('.game-editor-widget'))
             .map(function (widget) { return widget.getBoundingClientRect(); });
     };
+    DevModeTools.prototype.checkIfInputModalPresent = function () {
+        var customModals = document.querySelectorAll(".winbox, .modal, .custom-editor-modal");
+        for (var _i = 0, customModals_1 = customModals; _i < customModals_1.length; _i++) {
+            var customModal = customModals_1[_i];
+            var inputs = customModal.querySelectorAll("input, select, textarea, button");
+            for (var i = 0; i < inputs.length; i++) {
+                if (inputs[i] === document.activeElement) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    };
     DevModeTools.prototype.keyBindings = function () {
         var _this = this;
         var gameScene = this.scene.gameScene;
         var keyboard = this.scene.input.keyboard;
         var altKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ALT, false);
         var shiftKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT, false);
-        var tabKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, true);
-        tabKey.on('down', function () {
-            if (ige.developerMode.active && ige.developerMode.activeTab === 'map') {
-                keyboard.disableGlobalCapture();
+        var tabKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, false);
+        tabKey.on('down', function (key) {
+            var isInputModalPresent = _this.checkIfInputModalPresent();
+            if (!isInputModalPresent) {
+                key.originalEvent.preventDefault();
+            }
+            if (!isInputModalPresent && ige.developerMode.active && ige.developerMode.activeTab === 'map') {
                 if (_this.palette.visible) {
                     _this.palette.hide();
                 }
                 else {
                     _this.palette.show();
                 }
-                keyboard.enableGlobalCapture();
             }
         });
         var plusKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.PLUS, false);
