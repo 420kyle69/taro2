@@ -444,10 +444,10 @@ var MenuUiComponent = IgeEntity.extend({
 				$('#friends-panel').removeClass('d-none');
 			}
 
-			var inGameEditor = $('#game-editor');
-			if (inGameEditor) {
-				inGameEditor.hide();
-			}
+			// var inGameEditor = $('#game-editor');
+			// if (inGameEditor) {
+			// 	inGameEditor.hide();
+			// }
 
 			this.changesForMobile(true);
 			this.toggleScoreBoard(false);
@@ -679,10 +679,10 @@ var MenuUiComponent = IgeEntity.extend({
 			$('#friends-panel').addClass('d-none');
 		}
 
-		var inGameEditor = $('#game-editor');
-		if (inGameEditor) {
-			inGameEditor.show();
-		}
+		// var inGameEditor = $('#game-editor');
+		// if (inGameEditor) {
+		// 	inGameEditor.show();
+		// }
 
 		this.changesForMobile(false);
 		this.toggleScoreBoard(true);
