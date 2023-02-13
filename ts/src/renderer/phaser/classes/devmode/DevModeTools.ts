@@ -138,22 +138,38 @@ class DevModeTools extends Phaser.GameObjects.Container {
 			.map((widget: HTMLElement) => widget.getBoundingClientRect());
 	}
 
+	checkIfInputIsFocused(): boolean {
+		const customModals: any = document.querySelectorAll(".winbox, .modal, .custom-editor-modal");
+		for (const customModal of customModals) {
+			const inputs = customModal.querySelectorAll("input, select, textarea, button");
+			for (let i = 0; i < inputs.length; i++) {
+				if (inputs[i] === document.activeElement) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
 	keyBindings(): void {
 		const gameScene = this.scene.gameScene;
 		const keyboard = this.scene.input.keyboard;
 		const altKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ALT, false);
 		const shiftKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT, false);
-		const tabKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, true);
-		tabKey.on('down', () => {
+		const tabKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, false);
+		tabKey.on('down', (key) => {
+			if (!this.checkIfInputIsFocused()) {
+				key.originalEvent.preventDefault();
+			}
+
 			if(ige.developerMode.active && ige.developerMode.activeTab === 'map') {
-				keyboard.disableGlobalCapture();
 				if (this.palette.visible) {
 					this.palette.hide();
 				}
 				else {
 					this.palette.show()
 				}
-				keyboard.enableGlobalCapture();
 			}
 		});
 		const plusKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.PLUS, false);
