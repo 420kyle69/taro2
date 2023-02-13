@@ -138,7 +138,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 			.map((widget: HTMLElement) => widget.getBoundingClientRect());
 	}
 
-	checkIfInputIsFocused(): boolean {
+	checkIfInputModalPresent(): boolean {
 		const customModals: any = document.querySelectorAll(".winbox, .modal, .custom-editor-modal");
 		for (const customModal of customModals) {
 			const inputs = customModal.querySelectorAll("input, select, textarea, button");
@@ -159,11 +159,12 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		const shiftKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT, false);
 		const tabKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, false);
 		tabKey.on('down', (key) => {
-			if (!this.checkIfInputIsFocused()) {
+			const isInputModalPresent = this.checkIfInputModalPresent()
+			if (!isInputModalPresent) {
 				key.originalEvent.preventDefault();
 			}
 
-			if(ige.developerMode.active && ige.developerMode.activeTab === 'map') {
+			if(!isInputModalPresent && ige.developerMode.active && ige.developerMode.activeTab === 'map') {
 				if (this.palette.visible) {
 					this.palette.hide();
 				}

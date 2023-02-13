@@ -107,7 +107,7 @@ var DevModeTools = /** @class */ (function (_super) {
         this.gameEditorWidgets = Array.from(document.querySelectorAll('.game-editor-widget'))
             .map(function (widget) { return widget.getBoundingClientRect(); });
     };
-    DevModeTools.prototype.checkIfInputIsFocused = function () {
+    DevModeTools.prototype.checkIfInputModalPresent = function () {
         var customModals = document.querySelectorAll(".winbox, .modal, .custom-editor-modal");
         for (var _i = 0, customModals_1 = customModals; _i < customModals_1.length; _i++) {
             var customModal = customModals_1[_i];
@@ -128,10 +128,11 @@ var DevModeTools = /** @class */ (function (_super) {
         var shiftKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT, false);
         var tabKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, false);
         tabKey.on('down', function (key) {
-            if (!_this.checkIfInputIsFocused()) {
+            var isInputModalPresent = _this.checkIfInputModalPresent();
+            if (!isInputModalPresent) {
                 key.originalEvent.preventDefault();
             }
-            if (ige.developerMode.active && ige.developerMode.activeTab === 'map') {
+            if (!isInputModalPresent && ige.developerMode.active && ige.developerMode.activeTab === 'map') {
                 if (_this.palette.visible) {
                     _this.palette.hide();
                 }
