@@ -745,6 +745,38 @@ var Server = IgeClass.extend({
 		}
 	},
 	
+	sendCoinsToPlayerCallback: function (body) {
+		if (body) {
+			if (body.status === 'success') {
+				if (body.message && body.message.userId && body.message.creatorId) {
+					const {
+						updatedCoinsCreator,
+						updatedCoinsPlayer,
+						creatorId,
+						userId
+					} = body.message;
+					
+					var creator = ige.$$('player').find(function (player) {
+						return player && player._stats && player._stats.userId == creatorId;
+					});
+					if (creator) {
+						creator.streamUpdateData([{ coins: updatedCoinsCreator }]);
+					}
+					
+					var player = ige.$$('player').find(function (player) {
+						return player && player._stats && player._stats.userId == userId;
+					});
+					if (player) {
+						player.streamUpdateData([{ coins: updatedCoinsPlayer }]);
+					}
+				}
+			}
+			if (body.status === 'error') {
+				console.log('error in sending coins')
+			}
+		}
+	},
+	
 	consumeCoinFromUser: function (player, coins, boughtItemId) {
 		var self = this;
 		if (player && coins && (ige.game.data.defaultData.tier >= 2)) {
