@@ -808,7 +808,7 @@ var ShopComponent = IgeEntity.extend({
 				var itemKey = requiredItemTypesKeys[i];
 				var requiredQty = shopItem.price.requiredItemTypes[itemKey];
 				var item = ige.game.getAsset('itemTypes', itemKey);
-				var requirementsSatisfied = ownerUnit.inventory.hasRequiredQuantity(itemKey, requiredQty) && 'text-success' || 'text-danger';
+				var requirementsSatisfied = ownerUnit?.inventory?.hasRequiredQuantity(itemKey, requiredQty) && 'text-success' || 'text-danger';
 				prices += `<p  class="mb-2 ml-2 no-selection ${requirementsSatisfied}">${requiredQty || ''} ${item.name}</p>`;
 			}
 
@@ -940,7 +940,7 @@ var ShopComponent = IgeEntity.extend({
 							for (var j = 0; j < requiredItemTypesKeys.length; j++) {
 								var itemKey = requiredItemTypesKeys[j];
 								var requiredQuantity = shopItem.price.requiredItemTypes[itemKey];
-								isItemAffordable = ownerUnit.inventory.hasRequiredQuantity(itemKey, requiredQuantity);
+								isItemAffordable = ownerUnit?.inventory?.hasRequiredQuantity(itemKey, requiredQuantity);
 								if (!isItemAffordable) {
 									break;
 								}
