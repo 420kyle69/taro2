@@ -27,12 +27,12 @@ var taroCoreConfig = {
 		['csap', 'TaroUiManagerComponent', 'components/TaroUiManagerComponent.js'],
 		/* Network Stream */
 		['csap', 'TaroTimeSyncExtension', 'components/network/TaroTimeSyncExtension.js'],
-		['csap', 'TaroStreamComponent', 'components/network/stream/TaroStreamComponent.js'],
+		['csap', 'TaroStreamComponent', 'components/network/TaroStreamComponent.js'],
 		/* Net.io */
 		['cap', 'NetIo', 'components/network/net.io/net.io-client/index.js'],
 		['cap', 'TaroNetIoClient', 'components/network/net.io/TaroNetIoClient.js'],
 		['sap', 'TaroNetIoServer', 'components/network/net.io/TaroNetIoServer.js'],
-		['csap', 'TaroNetIoComponent', 'components/network/net.io/TaroNetIoComponent.js'],
+		['csap','TaroNetIoComponent', 'components/network/net.io/TaroNetIoComponent.js'],
 		/* Chat System */
 		['cap', 'TaroChatClient', 'components/chat/TaroChatClient.js'],
 		['sap', 'TaroChatServer', 'components/chat/TaroChatServer.js'],
