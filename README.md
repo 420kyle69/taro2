@@ -10,13 +10,13 @@
 </div>
 
 <div align="center">
-  <img src="https://img.shields.io/github/contributors/moddio/taro?style=for-the-badge&color=f01313">
-  <img src="https://img.shields.io/github/last-commit/moddio/taro?style=for-the-badge&color=f01313">
-  <img src="https://img.shields.io/github/languages/code-size/moddio/taro?style=for-the-badge&color=f01313">
+  <img src="https://img.shields.io/github/contributors/moddio/taro2?style=for-the-badge&color=f01313">
+  <img src="https://img.shields.io/github/last-commit/moddio/taro2?style=for-the-badge&color=f01313">
+  <img src="https://img.shields.io/github/languages/code-size/moddio/taro2?style=for-the-badge&color=f01313">
 </div>
 
 
-<h3><a href="http://beta.modd.io/play/two-houses">Demo</a></h3>
+<h3><a href="http://modd.io/play/two-houses">Demo</a></h3>
 <br>
 
 ## What's included in the box.
