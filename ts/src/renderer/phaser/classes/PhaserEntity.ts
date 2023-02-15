@@ -5,7 +5,7 @@ class PhaserEntity {
 	protected evtListeners: Record<string, EvtListener> = {};
 
 	protected constructor (
-		public entity: IgeEntity
+		public entity: TaroEntity
 	) {
 		Object.assign(this.evtListeners, {
 			transform: entity.on('transform', this.transform, this),

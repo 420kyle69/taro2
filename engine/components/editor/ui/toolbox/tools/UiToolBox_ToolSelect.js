@@ -1,44 +1,44 @@
-var UiToolBox_ToolSelect = IgeEventingClass.extend({
+var UiToolBox_ToolSelect = TaroEventingClass.extend({
 	classId: 'UiToolBox_ToolSelect',
 
 	init: function () {
 		var self = this;
 
 		// Hook editor select object updates so we can keep in sync
-		ige.editor.on('selectedObject', function (id) {
-			ige._currentViewport.drawBounds(true);
-			ige._currentViewport.drawBoundsLimitId(id);
+		taro.editor.on('selectedObject', function (id) {
+			taro._currentViewport.drawBounds(true);
+			taro._currentViewport.drawBoundsLimitId(id);
 		});
 
 		this.menuDefinition = {
-			IgeEntity: [{
+			TaroEntity: [{
 				mode: [{
 					id: 'select',
 					icon: 'hand-top',
 					text: 'Select',
-					action: 'ige.editor.ui.toolbox.select(\'toolSelect\');'
+					action: 'taro.editor.ui.toolbox.select(\'toolSelect\');'
 				}],
 				transform: [{
 					sep: true,
 					id: 'transform',
 					icon: 'th',
 					text: 'Transform',
-					action: 'ige.editor.ui.toolbox.select(\'toolTransform\');'
+					action: 'taro.editor.ui.toolbox.select(\'toolTransform\');'
 				}, {
 					id: 'translate',
 					icon: 'move',
 					text: 'Translate',
-					action: 'ige.editor.ui.toolbox.select(\'toolTranslate\');'
+					action: 'taro.editor.ui.toolbox.select(\'toolTranslate\');'
 				}, {
 					id: 'rotate',
 					icon: 'repeat',
 					text: 'Rotate',
-					action: 'ige.editor.ui.toolbox.select(\'toolRotate\');'
+					action: 'taro.editor.ui.toolbox.select(\'toolRotate\');'
 				}, {
 					id: 'scale',
 					icon: 'resize-full',
 					text: 'Scale',
-					action: 'ige.editor.ui.toolbox.select(\'toolRotate\');'
+					action: 'taro.editor.ui.toolbox.select(\'toolRotate\');'
 				}],
 				export: [{
 					sep: true,
@@ -55,18 +55,18 @@ var UiToolBox_ToolSelect = IgeEventingClass.extend({
 					id: 'destroy',
 					icon: 'certificate',
 					text: 'Destroy',
-					action: 'ige.editor.destroySelected();'
+					action: 'taro.editor.destroySelected();'
 				}]
 			}]
 		};
 
-		ige.editor.on('mouseUp', function (event) {
+		taro.editor.on('mouseUp', function (event) {
 			if (event.button === 0) {
-				ige.editor.ui.menus.closeAll();
+				taro.editor.ui.menus.closeAll();
 			}
 
-			if (event.button === 2 && ige.editor._selectedObject) {
-				var classArr = ige.editor._selectedObjectClassList;
+			if (event.button === 2 && taro.editor._selectedObject) {
+				var classArr = taro.editor._selectedObjectClassList;
 				var i;
 
 				for (i = 0; i < classArr.length; i++) {
@@ -79,12 +79,12 @@ var UiToolBox_ToolSelect = IgeEventingClass.extend({
 				var left = event.pageX;
 				var top = event.pageY;
 
-				ige.editor.ui.menus.create({
+				taro.editor.ui.menus.create({
 					header: {
 						icon: 'th-large',
-						text: `[${ige.editor._selectedObject.classId()}]` + ` ${ige.editor._selectedObject.id()}`
+						text: `[${taro.editor._selectedObject.classId()}]` + ` ${taro.editor._selectedObject.id()}`
 					},
-					groups: self.menuDefinition.IgeEntity
+					groups: self.menuDefinition.TaroEntity
 				}, function (elem) {
 					// Now position the menu
 					var menuWidth = elem.width();
@@ -110,34 +110,34 @@ var UiToolBox_ToolSelect = IgeEventingClass.extend({
 			this._enabled = val;
 
 			if (val) {
-				ige.editor.interceptMouse(true);
+				taro.editor.interceptMouse(true);
 
 				var self = this;
 
 				// Hook the engine's input system and take over mouse interaction
-				this._mouseUpHandle = ige.editor.on('mouseUp', function (event) {
+				this._mouseUpHandle = taro.editor.on('mouseUp', function (event) {
 					self._mouseUp(event);
 				});
 
-				this._mouseDownHandle = ige.editor.on('mouseDown', function (event) {
+				this._mouseDownHandle = taro.editor.on('mouseDown', function (event) {
 					self._mouseDown(event);
 				});
 
-				this._mouseMoveHandle = ige.editor.on('mouseMove', function (event) {
+				this._mouseMoveHandle = taro.editor.on('mouseMove', function (event) {
 					self._mouseMove(event);
 				});
 			} else {
-				ige.editor.interceptMouse(false);
-				ige.editor.off('mouseUp', this._mouseUpHandle);
-				ige.editor.off('mouseDown', this._mouseDownHandle);
-				ige.editor.off('mouseMove', this._mouseMoveHandle);
+				taro.editor.interceptMouse(false);
+				taro.editor.off('mouseUp', this._mouseUpHandle);
+				taro.editor.off('mouseDown', this._mouseDownHandle);
+				taro.editor.off('mouseMove', this._mouseMoveHandle);
 
-				if (ige.editor._selectedObject) {
-					ige._currentViewport.drawBoundsData(true);
-					ige._currentViewport.drawBoundsLimitId(ige.editor._selectedObject.id());
+				if (taro.editor._selectedObject) {
+					taro._currentViewport.drawBoundsData(true);
+					taro._currentViewport.drawBoundsLimitId(taro.editor._selectedObject.id());
 				} else {
-					ige._currentViewport.drawBounds(false);
-					ige._currentViewport.drawBoundsLimitId('');
+					taro._currentViewport.drawBounds(false);
+					taro._currentViewport.drawBoundsLimitId('');
 				}
 			}
 		}
@@ -158,30 +158,30 @@ var UiToolBox_ToolSelect = IgeEventingClass.extend({
 	 * @private
 	 */
 	_mouseMove: function (event) {
-		var arr = ige.mouseOverList();
+		var arr = taro.mouseOverList();
 		if (arr.length) {
-			if (!ige.editor._selectedObject) {
-				ige._currentViewport.drawBounds(true);
-				ige._currentViewport.drawBoundsData(true);
-				ige._currentViewport.drawBoundsLimitId(arr[0].id());
+			if (!taro.editor._selectedObject) {
+				taro._currentViewport.drawBounds(true);
+				taro._currentViewport.drawBoundsData(true);
+				taro._currentViewport.drawBoundsLimitId(arr[0].id());
 			} else {
-				ige._currentViewport.drawBounds(true);
-				ige._currentViewport.drawBoundsData(true);
-				ige._currentViewport.drawBoundsLimitId([ige.editor._selectedObject.id(), arr[0].id()]);
+				taro._currentViewport.drawBounds(true);
+				taro._currentViewport.drawBoundsData(true);
+				taro._currentViewport.drawBoundsLimitId([taro.editor._selectedObject.id(), arr[0].id()]);
 			}
 
 			this._overObject = arr[0];
 		} else {
 			delete this._overObject;
 
-			if (!ige.editor._selectedObject) {
-				ige._currentViewport.drawBounds(false);
-				ige._currentViewport.drawBoundsData(false);
-				ige._currentViewport.drawBoundsLimitId('');
+			if (!taro.editor._selectedObject) {
+				taro._currentViewport.drawBounds(false);
+				taro._currentViewport.drawBoundsData(false);
+				taro._currentViewport.drawBoundsLimitId('');
 			} else {
-				ige._currentViewport.drawBounds(true);
-				ige._currentViewport.drawBoundsData(true);
-				ige._currentViewport.drawBoundsLimitId(ige.editor._selectedObject.id());
+				taro._currentViewport.drawBounds(true);
+				taro._currentViewport.drawBoundsData(true);
+				taro._currentViewport.drawBoundsLimitId(taro.editor._selectedObject.id());
 			}
 		}
 
@@ -196,8 +196,8 @@ var UiToolBox_ToolSelect = IgeEventingClass.extend({
 	_mouseUp: function (event) {
 		if (event.button === 0) {
 			if (this._overObject) {
-				ige.editor.selectObject(this._overObject.id());
-				this.emit('selected', ige.editor._selectedObject);
+				taro.editor.selectObject(this._overObject.id());
+				this.emit('selected', taro.editor._selectedObject);
 
 				this.emit('mouseUp', event);
 			}

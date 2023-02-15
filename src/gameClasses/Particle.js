@@ -1,14 +1,14 @@
-var Particle = IgeEntityPhysics.extend({
+var Particle = TaroEntityPhysics.extend({
 	classId: 'Particle',
 
 	init: function (emitter) {
 		this._emitter = emitter;
-		IgeEntityPhysics.prototype.init.call(this);
+		TaroEntityPhysics.prototype.init.call(this);
 
 		// Set the rectangle colour (this is read in the Rectangle.js smart texture)
 		this._rectColor = emitter.color;
 
-		this.addComponent(IgeVelocityComponent)
+		this.addComponent(TaroVelocityComponent)
 			.texture(emitter.texture)
 			.width((emitter.size && emitter.size.width) ? emitter.size.width : 5)
 			.height((emitter.size && emitter.size.height) ? emitter.size.height : 5)
@@ -22,6 +22,6 @@ var Particle = IgeEntityPhysics.extend({
 		if (this._emitter !== undefined) {
 			this._emitter._particles.pull(this);
 		}
-		IgeEntityPhysics.prototype.destroy.call(this);
+		TaroEntityPhysics.prototype.destroy.call(this);
 	}
 });

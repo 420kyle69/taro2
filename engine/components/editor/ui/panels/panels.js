@@ -1,4 +1,4 @@
-var UiPanels = IgeEventingClass.extend({
+var UiPanels = TaroEventingClass.extend({
 	classId: 'UiPanels',
 
 	init: function () {
@@ -13,7 +13,7 @@ var UiPanels = IgeEventingClass.extend({
 			.appendTo('#tabContents');
 
 		// Define the classes and properties to expose
-		this.definition('IgeEntity', {
+		this.definition('TaroEntity', {
 			groups: {
 				transform: {
 					label: 'Transform',
@@ -25,7 +25,7 @@ var UiPanels = IgeEventingClass.extend({
 							desc: '',
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								var selector = $(`#igeEditorProperty_${propItem.id}`);
+								var selector = $(`#taroEditorProperty_${propItem.id}`);
 
 								selector.find('.setNumberX').on('change', function () {
 									// Set the property value to the newly selected one
@@ -48,7 +48,7 @@ var UiPanels = IgeEventingClass.extend({
 							desc: '',
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								var selector = $(`#igeEditorProperty_${propItem.id}`);
+								var selector = $(`#taroEditorProperty_${propItem.id}`);
 
 								selector.find('.setNumberX').on('change', function () {
 									// Set the property value to the newly selected one
@@ -74,7 +74,7 @@ var UiPanels = IgeEventingClass.extend({
 							},
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								var selector = $(`#igeEditorProperty_${propItem.id}`);
+								var selector = $(`#taroEditorProperty_${propItem.id}`);
 
 								selector.find('.setNumberX').on('change', function () {
 									// Set the property value to the newly selected one
@@ -104,7 +104,7 @@ var UiPanels = IgeEventingClass.extend({
 							desc: '',
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								var selector = $(`#igeEditorProperty_${propItem.id}`);
+								var selector = $(`#taroEditorProperty_${propItem.id}`);
 
 								selector.find('.setNumberX').on('change', function () {
 									// Set the property value to the newly selected one
@@ -124,7 +124,7 @@ var UiPanels = IgeEventingClass.extend({
 							desc: '',
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								var selector = $(`#igeEditorProperty_${propItem.id}`);
+								var selector = $(`#taroEditorProperty_${propItem.id}`);
 
 								selector.find('.setNumberX').on('change', function () {
 									// Set the property value to the newly selected one
@@ -156,10 +156,10 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Set Texture',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/IgeTexture.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/TaroTexture.html`,
 							// Setup the data the template needs to render correctly
 							beforeRender: function (obj, propItem) {
-								var textureArr = ige._textureStore;
+								var textureArr = taro._textureStore;
 								var textureIndex;
 								var tex;
 
@@ -185,21 +185,21 @@ var UiPanels = IgeEventingClass.extend({
 							},
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								var panel = $(`#igeEditorProperty_${propItem.id}`);
+								var panel = $(`#taroEditorProperty_${propItem.id}`);
 
 								panel.find('.setTexture').on('change', function () {
 									var textureId = $(this).val();
 
-									if (textureId && ige.$(textureId)) {
+									if (textureId && taro.$(textureId)) {
 										// Set the object's texture to the newly selected one
-										obj.texture(ige.$(textureId));
+										obj.texture(taro.$(textureId));
 									} else {
 										// Set texture to none
 										delete obj._texture;
 									}
 
 									// Update the cell panel
-									var updateMethod = $('#igeEditorProperty__cell').data('igePanelUpdate');
+									var updateMethod = $('#taroEditorProperty__cell').data('taroPanelUpdate');
 									if (updateMethod) {
 										updateMethod();
 									} else {
@@ -224,7 +224,7 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Texture Cell',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/ImageGallery.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/ImageGallery.html`,
 							// Setup the data the template needs to render correctly
 							beforeRender: function (obj, propItem) {
 								var cellIndex,
@@ -263,7 +263,7 @@ var UiPanels = IgeEventingClass.extend({
 							},
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								var panel = $(`#igeEditorProperty_${propItem.id}`);
+								var panel = $(`#taroEditorProperty_${propItem.id}`);
 
 								panel.find('.image').on('click', function () {
 									panel.find('.image').removeClass('active');
@@ -281,7 +281,7 @@ var UiPanels = IgeEventingClass.extend({
 							desc: '',
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								var selector = $(`#igeEditorProperty_${propItem.id}`);
+								var selector = $(`#taroEditorProperty_${propItem.id}`);
 
 								selector.find('.setNumberX').on('change', function () {
 									// Set the property value to the newly selected one
@@ -311,10 +311,10 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Isometric Mounts',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/List.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/List.html`,
 							// Setup the data the template needs to render correctly
 							beforeRender: function (obj, propItem) {
-								var textureArr = ige._textureStore;
+								var textureArr = taro._textureStore;
 								var textureIndex;
 								var tex;
 
@@ -331,7 +331,7 @@ var UiPanels = IgeEventingClass.extend({
 							},
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								var panel = $(`#igeEditorProperty_${propItem.id}`);
+								var panel = $(`#taroEditorProperty_${propItem.id}`);
 
 								panel.find('.listValue').on('change', function () {
 									var itemValue = $(this).val();
@@ -356,10 +356,10 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Hidden',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/List.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/List.html`,
 							// Setup the data the template needs to render correctly
 							beforeRender: function (obj, propItem) {
-								var textureArr = ige._textureStore;
+								var textureArr = taro._textureStore;
 								var textureIndex;
 								var tex;
 
@@ -376,7 +376,7 @@ var UiPanels = IgeEventingClass.extend({
 							},
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								var panel = $(`#igeEditorProperty_${propItem.id}`);
+								var panel = $(`#taroEditorProperty_${propItem.id}`);
 
 								panel.find('.listValue').on('change', function () {
 									var itemValue = $(this).val();
@@ -394,10 +394,10 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Opacity',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberFloat.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberFloat.html`,
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								$(`#igeEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
+								$(`#taroEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
 									// Set the property value to the newly selected one
 									obj.opacity(parseFloat($(this).val()));
 								});
@@ -414,10 +414,10 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Layer',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberInt.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberInt.html`,
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								$(`#igeEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
+								$(`#taroEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
 									// Set the property value to the newly selected one
 									obj.layer(parseInt($(this).val()));
 								});
@@ -427,10 +427,10 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Depth',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberInt.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberInt.html`,
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								$(`#igeEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
+								$(`#taroEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
 									// Set the property value to the newly selected one
 									obj.layer(parseInt($(this).val()));
 								});
@@ -441,7 +441,7 @@ var UiPanels = IgeEventingClass.extend({
 			}
 		});
 
-		this.definition('IgeTileMap2d', {
+		this.definition('TaroTileMap2d', {
 			groups: {
 				tiles: {
 					label: 'Tile Settings',
@@ -452,10 +452,10 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Width of Tiles',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberInt.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberInt.html`,
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								$(`#igeEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
+								$(`#taroEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
 									// Set the property value to the newly selected one
 									obj.tileWidth(parseInt($(this).val()));
 								});
@@ -465,10 +465,10 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Height of Tiles',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberInt.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberInt.html`,
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								$(`#igeEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
+								$(`#taroEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
 									// Set the property value to the newly selected one
 									obj.tileHeight(parseInt($(this).val()));
 								});
@@ -479,7 +479,7 @@ var UiPanels = IgeEventingClass.extend({
 			}
 		});
 
-		this.definition('IgeParticleEmitter', {
+		this.definition('TaroParticleEmitter', {
 			groups: {
 				particleQuantity: {
 					label: 'Particle Quantity',
@@ -490,10 +490,10 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Timespan',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberInt.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberInt.html`,
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								$(`#igeEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
+								$(`#taroEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
 									// Set the property value to the newly selected one
 									obj[propItem.id] = parseInt($(this).val());
 									obj.updateSettings();
@@ -504,10 +504,10 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Base Value',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberInt.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberInt.html`,
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								$(`#igeEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
+								$(`#taroEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
 									// Set the property value to the newly selected one
 									obj[propItem.id] = parseInt($(this).val());
 									obj.updateSettings();
@@ -518,10 +518,10 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Variance',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberIntMinMax.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberIntMinMax.html`,
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								var selector = $(`#igeEditorProperty_${propItem.id}`);
+								var selector = $(`#taroEditorProperty_${propItem.id}`);
 
 								selector.find('.setNumberMin').on('change', function () {
 									// Set the property value to the newly selected one
@@ -548,10 +548,10 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Base X',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberFloat.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberFloat.html`,
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								$(`#igeEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
+								$(`#taroEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
 									// Set the property value to the newly selected one
 									obj[propItem.id] = parseFloat($(this).val());
 								});
@@ -561,10 +561,10 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Base Y',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberFloat.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberFloat.html`,
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								$(`#igeEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
+								$(`#taroEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
 									// Set the property value to the newly selected one
 									obj[propItem.id] = parseFloat($(this).val());
 								});
@@ -574,10 +574,10 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Base Z',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberFloat.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberFloat.html`,
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								$(`#igeEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
+								$(`#taroEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
 									// Set the property value to the newly selected one
 									obj[propItem.id] = parseFloat($(this).val());
 								});
@@ -587,10 +587,10 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Variance X',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberFloatMinMax.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberFloatMinMax.html`,
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								var selector = $(`#igeEditorProperty_${propItem.id}`);
+								var selector = $(`#taroEditorProperty_${propItem.id}`);
 
 								selector.find('.setNumberMin').on('change', function () {
 									// Set the property value to the newly selected one
@@ -607,10 +607,10 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Variance Y',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberFloatMinMax.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberFloatMinMax.html`,
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								var selector = $(`#igeEditorProperty_${propItem.id}`);
+								var selector = $(`#taroEditorProperty_${propItem.id}`);
 
 								selector.find('.setNumberMin').on('change', function () {
 									// Set the property value to the newly selected one
@@ -627,10 +627,10 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Variance Z',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberFloatMinMax.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberFloatMinMax.html`,
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								var selector = $(`#igeEditorProperty_${propItem.id}`);
+								var selector = $(`#taroEditorProperty_${propItem.id}`);
 
 								selector.find('.setNumberMin').on('change', function () {
 									// Set the property value to the newly selected one
@@ -655,10 +655,10 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Base',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberFloat.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberFloat.html`,
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								$(`#igeEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
+								$(`#taroEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
 									// Set the property value to the newly selected one
 									obj[propItem.id] = parseFloat($(this).val());
 								});
@@ -668,10 +668,10 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Variance',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberFloatMinMax.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberFloatMinMax.html`,
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								var selector = $(`#igeEditorProperty_${propItem.id}`);
+								var selector = $(`#taroEditorProperty_${propItem.id}`);
 
 								selector.find('.setNumberMin').on('change', function () {
 									// Set the property value to the newly selected one
@@ -696,10 +696,10 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Base {Degrees}',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberFloat.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberFloat.html`,
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								$(`#igeEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
+								$(`#taroEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
 									// Set the property value to the newly selected one
 									obj[propItem.id] = parseFloat($(this).val());
 								});
@@ -709,10 +709,10 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Variance {Degrees} (Min, Max)',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberFloatMinMax.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberFloatMinMax.html`,
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								var selector = $(`#igeEditorProperty_${propItem.id}`);
+								var selector = $(`#taroEditorProperty_${propItem.id}`);
 
 								selector.find('.setNumberMin').on('change', function () {
 									// Set the property value to the newly selected one
@@ -737,10 +737,10 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Base X',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberFloat.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberFloat.html`,
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								$(`#igeEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
+								$(`#taroEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
 									// Set the property value to the newly selected one
 									obj[propItem.id] = parseFloat($(this).val());
 								});
@@ -750,10 +750,10 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Base Y',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberFloat.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberFloat.html`,
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								$(`#igeEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
+								$(`#taroEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
 									// Set the property value to the newly selected one
 									obj[propItem.id] = parseFloat($(this).val());
 								});
@@ -763,10 +763,10 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Base Z',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberFloat.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberFloat.html`,
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								$(`#igeEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
+								$(`#taroEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
 									// Set the property value to the newly selected one
 									obj[propItem.id] = parseFloat($(this).val());
 								});
@@ -776,10 +776,10 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Variance X',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberFloatMinMax.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberFloatMinMax.html`,
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								var selector = $(`#igeEditorProperty_${propItem.id}`);
+								var selector = $(`#taroEditorProperty_${propItem.id}`);
 
 								selector.find('.setNumberMin').on('change', function () {
 									// Set the property value to the newly selected one
@@ -796,10 +796,10 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Variance Y',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberFloatMinMax.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberFloatMinMax.html`,
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								var selector = $(`#igeEditorProperty_${propItem.id}`);
+								var selector = $(`#taroEditorProperty_${propItem.id}`);
 
 								selector.find('.setNumberMin').on('change', function () {
 									// Set the property value to the newly selected one
@@ -816,10 +816,10 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Variance Z',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberFloatMinMax.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberFloatMinMax.html`,
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								var selector = $(`#igeEditorProperty_${propItem.id}`);
+								var selector = $(`#taroEditorProperty_${propItem.id}`);
 
 								selector.find('.setNumberMin').on('change', function () {
 									// Set the property value to the newly selected one
@@ -844,10 +844,10 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Base X',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberFloat.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberFloat.html`,
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								$(`#igeEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
+								$(`#taroEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
 									// Set the property value to the newly selected one
 									obj[propItem.id] = parseFloat($(this).val());
 								});
@@ -857,10 +857,10 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Base Y',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberFloat.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberFloat.html`,
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								$(`#igeEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
+								$(`#taroEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
 									// Set the property value to the newly selected one
 									obj[propItem.id] = parseFloat($(this).val());
 								});
@@ -870,10 +870,10 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Base Z',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberFloat.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberFloat.html`,
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								$(`#igeEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
+								$(`#taroEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
 									// Set the property value to the newly selected one
 									obj[propItem.id] = parseFloat($(this).val());
 								});
@@ -883,10 +883,10 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Variance X',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberFloatMinMax.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberFloatMinMax.html`,
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								var selector = $(`#igeEditorProperty_${propItem.id}`);
+								var selector = $(`#taroEditorProperty_${propItem.id}`);
 
 								selector.find('.setNumberMin').on('change', function () {
 									// Set the property value to the newly selected one
@@ -903,10 +903,10 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Variance Y',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberFloatMinMax.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberFloatMinMax.html`,
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								var selector = $(`#igeEditorProperty_${propItem.id}`);
+								var selector = $(`#taroEditorProperty_${propItem.id}`);
 
 								selector.find('.setNumberMin').on('change', function () {
 									// Set the property value to the newly selected one
@@ -923,10 +923,10 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Variance Z',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberFloatMinMax.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberFloatMinMax.html`,
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								var selector = $(`#igeEditorProperty_${propItem.id}`);
+								var selector = $(`#taroEditorProperty_${propItem.id}`);
 
 								selector.find('.setNumberMin').on('change', function () {
 									// Set the property value to the newly selected one
@@ -951,10 +951,10 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Base',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberFloat.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberFloat.html`,
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								$(`#igeEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
+								$(`#taroEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
 									// Set the property value to the newly selected one
 									obj[propItem.id] = parseFloat($(this).val());
 								});
@@ -964,10 +964,10 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Variance',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberFloatMinMax.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberFloatMinMax.html`,
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								var selector = $(`#igeEditorProperty_${propItem.id}`);
+								var selector = $(`#taroEditorProperty_${propItem.id}`);
 
 								selector.find('.setNumberMin').on('change', function () {
 									// Set the property value to the newly selected one
@@ -992,10 +992,10 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Base',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberFloat.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberFloat.html`,
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								$(`#igeEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
+								$(`#taroEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
 									// Set the property value to the newly selected one
 									obj[propItem.id] = parseFloat($(this).val());
 								});
@@ -1005,10 +1005,10 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Variance',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberFloatMinMax.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberFloatMinMax.html`,
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								var selector = $(`#igeEditorProperty_${propItem.id}`);
+								var selector = $(`#taroEditorProperty_${propItem.id}`);
 
 								selector.find('.setNumberMin').on('change', function () {
 									// Set the property value to the newly selected one
@@ -1033,10 +1033,10 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Base',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberFloat.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberFloat.html`,
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								$(`#igeEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
+								$(`#taroEditorProperty_${propItem.id}`).find('.setNumber').on('change', function () {
 									// Set the property value to the newly selected one
 									obj[propItem.id] = parseFloat($(this).val());
 								});
@@ -1046,10 +1046,10 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Variance',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberFloatMinMax.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberFloatMinMax.html`,
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								var selector = $(`#igeEditorProperty_${propItem.id}`);
+								var selector = $(`#taroEditorProperty_${propItem.id}`);
 
 								selector.find('.setNumberMin').on('change', function () {
 									// Set the property value to the newly selected one
@@ -1074,15 +1074,15 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Base Vector',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberFloatXYZ.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberFloatXYZ.html`,
 							// Setup values for the template
 							beforeRender: function (obj, propItem) {
 								if (!obj._velocityVector) {
-									obj.velocityVector(new IgePoint3d(0, 0, 0), new IgePoint3d(0, 0, 0), new IgePoint3d(0, 0, 0));
+									obj.velocityVector(new TaroPoint3d(0, 0, 0), new TaroPoint3d(0, 0, 0), new TaroPoint3d(0, 0, 0));
 								}
 
 								if (!obj._velocityVector.base) {
-									obj._velocityVector.base = new IgePoint3d(0, 0, 0);
+									obj._velocityVector.base = new TaroPoint3d(0, 0, 0);
 								}
 								propItem.x = obj._velocityVector.base.x;
 								propItem.y = obj._velocityVector.base.y;
@@ -1090,7 +1090,7 @@ var UiPanels = IgeEventingClass.extend({
 							},
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								var selector = $(`#igeEditorProperty_${propItem.id}`);
+								var selector = $(`#taroEditorProperty_${propItem.id}`);
 
 								selector.find('.setNumberX').on('change', function () {
 									var x = parseFloat($(this).val());
@@ -1100,7 +1100,7 @@ var UiPanels = IgeEventingClass.extend({
 										if (obj._velocityVector.base) {
 											obj._velocityVector.base.x = x;
 										} else {
-											obj._velocityVector.base = new IgePoint3d(x, 0, 0);
+											obj._velocityVector.base = new TaroPoint3d(x, 0, 0);
 										}
 									}
 								});
@@ -1113,7 +1113,7 @@ var UiPanels = IgeEventingClass.extend({
 										if (obj._velocityVector.base) {
 											obj._velocityVector.base.y = y;
 										} else {
-											obj._velocityVector.base = new IgePoint3d(0, y, 0);
+											obj._velocityVector.base = new TaroPoint3d(0, y, 0);
 										}
 									}
 								});
@@ -1126,7 +1126,7 @@ var UiPanels = IgeEventingClass.extend({
 										if (obj._velocityVector.base) {
 											obj._velocityVector.base.z = z;
 										} else {
-											obj._velocityVector.base = new IgePoint3d(0, 0, z);
+											obj._velocityVector.base = new TaroPoint3d(0, 0, z);
 										}
 									}
 								});
@@ -1136,15 +1136,15 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Variance Min Vector',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberFloatXYZ.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberFloatXYZ.html`,
 							// Setup values for the template
 							beforeRender: function (obj, propItem) {
 								if (!obj._velocityVector) {
-									obj.velocityVector(new IgePoint3d(0, 0, 0), new IgePoint3d(0, 0, 0), new IgePoint3d(0, 0, 0));
+									obj.velocityVector(new TaroPoint3d(0, 0, 0), new TaroPoint3d(0, 0, 0), new TaroPoint3d(0, 0, 0));
 								}
 
 								if (!obj._velocityVector.min) {
-									obj._velocityVector.min = new IgePoint3d(0, 0, 0);
+									obj._velocityVector.min = new TaroPoint3d(0, 0, 0);
 								}
 								propItem.x = obj._velocityVector.min.x;
 								propItem.y = obj._velocityVector.min.y;
@@ -1152,7 +1152,7 @@ var UiPanels = IgeEventingClass.extend({
 							},
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								var selector = $(`#igeEditorProperty_${propItem.id}`);
+								var selector = $(`#taroEditorProperty_${propItem.id}`);
 
 								selector.find('.setNumberX').on('change', function () {
 									var x = parseFloat($(this).val());
@@ -1162,7 +1162,7 @@ var UiPanels = IgeEventingClass.extend({
 										if (obj._velocityVector.min) {
 											obj._velocityVector.min.x = x;
 										} else {
-											obj._velocityVector.min = new IgePoint3d(x, 0, 0);
+											obj._velocityVector.min = new TaroPoint3d(x, 0, 0);
 										}
 									}
 								});
@@ -1175,7 +1175,7 @@ var UiPanels = IgeEventingClass.extend({
 										if (obj._velocityVector.min) {
 											obj._velocityVector.min.y = y;
 										} else {
-											obj._velocityVector.min = new IgePoint3d(0, y, 0);
+											obj._velocityVector.min = new TaroPoint3d(0, y, 0);
 										}
 									}
 								});
@@ -1188,7 +1188,7 @@ var UiPanels = IgeEventingClass.extend({
 										if (obj._velocityVector.min) {
 											obj._velocityVector.min.z = z;
 										} else {
-											obj._velocityVector.min = new IgePoint3d(0, 0, z);
+											obj._velocityVector.min = new TaroPoint3d(0, 0, z);
 										}
 									}
 								});
@@ -1198,15 +1198,15 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Variance Max Vector',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberFloatXYZ.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberFloatXYZ.html`,
 							// Setup values for the template
 							beforeRender: function (obj, propItem) {
 								if (!obj._velocityVector) {
-									obj.velocityVector(new IgePoint3d(0, 0, 0), new IgePoint3d(0, 0, 0), new IgePoint3d(0, 0, 0));
+									obj.velocityVector(new TaroPoint3d(0, 0, 0), new TaroPoint3d(0, 0, 0), new TaroPoint3d(0, 0, 0));
 								}
 
 								if (!obj._velocityVector.max) {
-									obj._velocityVector.max = new IgePoint3d(0, 0, 0);
+									obj._velocityVector.max = new TaroPoint3d(0, 0, 0);
 								}
 								propItem.x = obj._velocityVector.max.x;
 								propItem.y = obj._velocityVector.max.y;
@@ -1214,7 +1214,7 @@ var UiPanels = IgeEventingClass.extend({
 							},
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								var selector = $(`#igeEditorProperty_${propItem.id}`);
+								var selector = $(`#taroEditorProperty_${propItem.id}`);
 
 								selector.find('.setNumberX').on('change', function () {
 									var x = parseFloat($(this).val());
@@ -1224,7 +1224,7 @@ var UiPanels = IgeEventingClass.extend({
 										if (obj._velocityVector.max) {
 											obj._velocityVector.max.x = x;
 										} else {
-											obj._velocityVector.max = new IgePoint3d(x, 0, 0);
+											obj._velocityVector.max = new TaroPoint3d(x, 0, 0);
 										}
 									}
 								});
@@ -1237,7 +1237,7 @@ var UiPanels = IgeEventingClass.extend({
 										if (obj._velocityVector.max) {
 											obj._velocityVector.max.y = y;
 										} else {
-											obj._velocityVector.max = new IgePoint3d(0, y, 0);
+											obj._velocityVector.max = new TaroPoint3d(0, y, 0);
 										}
 									}
 								});
@@ -1250,7 +1250,7 @@ var UiPanels = IgeEventingClass.extend({
 										if (obj._velocityVector.max) {
 											obj._velocityVector.max.z = z;
 										} else {
-											obj._velocityVector.max = new IgePoint3d(0, 0, z);
+											obj._velocityVector.max = new TaroPoint3d(0, 0, z);
 										}
 									}
 								});
@@ -1268,7 +1268,7 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Base Vector',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberFloatXYZ.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberFloatXYZ.html`,
 							// Setup values for the template
 							beforeRender: function (obj, propItem) {
 								if (obj._linearForceVector && obj._linearForceVector.base) {
@@ -1281,7 +1281,7 @@ var UiPanels = IgeEventingClass.extend({
 							},
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								var selector = $(`#igeEditorProperty_${propItem.id}`);
+								var selector = $(`#taroEditorProperty_${propItem.id}`);
 
 								selector.find('.setNumberX').on('change', function () {
 									var x = parseFloat($(this).val());
@@ -1290,7 +1290,7 @@ var UiPanels = IgeEventingClass.extend({
 									if (obj._linearForceVector && obj._linearForceVector.base) {
 										obj._linearForceVector.base.x = x;
 									} else {
-										obj._linearForceVector = new IgePoint3d(x, 0, 0);
+										obj._linearForceVector = new TaroPoint3d(x, 0, 0);
 									}
 								});
 
@@ -1301,7 +1301,7 @@ var UiPanels = IgeEventingClass.extend({
 									if (obj._linearForceVector && obj._linearForceVector.base) {
 										obj._linearForceVector.base.y = y;
 									} else {
-										obj._linearForceVector = new IgePoint3d(y, 0, 0);
+										obj._linearForceVector = new TaroPoint3d(y, 0, 0);
 									}
 								});
 
@@ -1312,7 +1312,7 @@ var UiPanels = IgeEventingClass.extend({
 									if (obj._linearForceVector && obj._linearForceVector.base) {
 										obj._linearForceVector.base.z = z;
 									} else {
-										obj._linearForceVector = new IgePoint3d(z, 0, 0);
+										obj._linearForceVector = new TaroPoint3d(z, 0, 0);
 									}
 								});
 							}
@@ -1321,7 +1321,7 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Variance Min Vector',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberFloatXYZ.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberFloatXYZ.html`,
 							// Setup values for the template
 							beforeRender: function (obj, propItem) {
 								if (obj._linearForceVector && obj._linearForceVector.min) {
@@ -1334,7 +1334,7 @@ var UiPanels = IgeEventingClass.extend({
 							},
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								var selector = $(`#igeEditorProperty_${propItem.id}`);
+								var selector = $(`#taroEditorProperty_${propItem.id}`);
 
 								selector.find('.setNumberX').on('change', function () {
 									var x = parseFloat($(this).val());
@@ -1343,7 +1343,7 @@ var UiPanels = IgeEventingClass.extend({
 									if (obj._linearForceVector && obj._linearForceVector.min) {
 										obj._linearForceVector.min.x = x;
 									} else {
-										obj._linearForceVector = new IgePoint3d(x, 0, 0);
+										obj._linearForceVector = new TaroPoint3d(x, 0, 0);
 									}
 								});
 
@@ -1354,7 +1354,7 @@ var UiPanels = IgeEventingClass.extend({
 									if (obj._linearForceVector && obj._linearForceVector.min) {
 										obj._linearForceVector.min.y = y;
 									} else {
-										obj._linearForceVector = new IgePoint3d(y, 0, 0);
+										obj._linearForceVector = new TaroPoint3d(y, 0, 0);
 									}
 								});
 
@@ -1365,7 +1365,7 @@ var UiPanels = IgeEventingClass.extend({
 									if (obj._linearForceVector && obj._linearForceVector.min) {
 										obj._linearForceVector.min.z = z;
 									} else {
-										obj._linearForceVector = new IgePoint3d(z, 0, 0);
+										obj._linearForceVector = new TaroPoint3d(z, 0, 0);
 									}
 								});
 							}
@@ -1374,7 +1374,7 @@ var UiPanels = IgeEventingClass.extend({
 							label: 'Variance Max Vector',
 							desc: '',
 							alwaysShow: true,
-							templateUrl: `${igeRoot}components/editor/ui/panels/templates/NumberFloatXYZ.html`,
+							templateUrl: `${taroRoot}components/editor/ui/panels/templates/NumberFloatXYZ.html`,
 							// Setup values for the template
 							beforeRender: function (obj, propItem) {
 								if (obj._linearForceVector && obj._linearForceVector.max) {
@@ -1387,7 +1387,7 @@ var UiPanels = IgeEventingClass.extend({
 							},
 							// Enable any listeners and logic to take action when the user interacts with the panel
 							afterRender: function (obj, propItem) {
-								var selector = $(`#igeEditorProperty_${propItem.id}`);
+								var selector = $(`#taroEditorProperty_${propItem.id}`);
 
 								selector.find('.setNumberX').on('change', function () {
 									var x = parseFloat($(this).val());
@@ -1396,7 +1396,7 @@ var UiPanels = IgeEventingClass.extend({
 									if (obj._linearForceVector && obj._linearForceVector.max) {
 										obj._linearForceVector.max.x = x;
 									} else {
-										obj._linearForceVector = new IgePoint3d(x, 0, 0);
+										obj._linearForceVector = new TaroPoint3d(x, 0, 0);
 									}
 								});
 
@@ -1407,7 +1407,7 @@ var UiPanels = IgeEventingClass.extend({
 									if (obj._linearForceVector && obj._linearForceVector.max) {
 										obj._linearForceVector.max.y = y;
 									} else {
-										obj._linearForceVector = new IgePoint3d(y, 0, 0);
+										obj._linearForceVector = new TaroPoint3d(y, 0, 0);
 									}
 								});
 
@@ -1418,7 +1418,7 @@ var UiPanels = IgeEventingClass.extend({
 									if (obj._linearForceVector && obj._linearForceVector.max) {
 										obj._linearForceVector.max.z = z;
 									} else {
-										obj._linearForceVector = new IgePoint3d(z, 0, 0);
+										obj._linearForceVector = new TaroPoint3d(z, 0, 0);
 									}
 								});
 							}
@@ -1457,12 +1457,12 @@ var UiPanels = IgeEventingClass.extend({
 
 	showPanelByInstance: function (obj) {
 		if (obj) {
-			var classArr = ige.getClassDerivedList(obj);
+			var classArr = taro.getClassDerivedList(obj);
 			var classIndex;
 			var className;
 
 			// Remove all existing panels from the DOM
-			$('.igeEditorPanel').remove();
+			$('.taroEditorPanel').remove();
 
 			if (classArr) {
 				// Loop the classes this object was derived from and show the relevant panels
@@ -1497,7 +1497,7 @@ var UiPanels = IgeEventingClass.extend({
 
 						(function (groupData) {
 							// Generate HTML for this group from the template
-							ige.editor.template(`${igeRoot}components/editor/ui/panels/templates/group.html`, function (err, template) {
+							taro.editor.template(`${taroRoot}components/editor/ui/panels/templates/group.html`, function (err, template) {
 								if (!err) {
 									var groupSelector = $($.parseHTML(template.render(groupData)));
 									var propName;
@@ -1517,28 +1517,28 @@ var UiPanels = IgeEventingClass.extend({
 											(function (propData) {
 												// Check the property currently exists in the object
 												if (propData.obj && (propData.alwaysShow || propData.obj[propData.id])) {
-													var igeClass,
+													var taroClass,
 														propertyTemplateUrl;
 
 													if (propData.obj[propData.id] && typeof (propData.obj[propData.id]) === 'object') {
-														// Get the IGE class that this property derives from
-														igeClass = ige.findBaseClass(propData.obj[propData.id]);
-														propertyTemplateUrl = propData.templateUrl || `${igeRoot}components/editor/ui/panels/templates/${igeClass}.html`;
+														// Get the taro class that this property derives from
+														taroClass = taro.findBaseClass(propData.obj[propData.id]);
+														propertyTemplateUrl = propData.templateUrl || `${taroRoot}components/editor/ui/panels/templates/${taroClass}.html`;
 													} else {
 														propertyTemplateUrl = propData.templateUrl;
 													}
 
 													if (propertyTemplateUrl) {
 														// Generate HTML for this property from the template
-														ige.editor.template(propertyTemplateUrl, function (err, template) {
+														taro.editor.template(propertyTemplateUrl, function (err, template) {
 															if (!err) {
 																var propSelector,
 																	updateMethod;
 
 																updateMethod = function () {
 																	// Remove existing property panel section
-																	var existingSelector = $(`#igeEditorProperty_${propData.id}`);
-																	var existingData = existingSelector.data('igePanelUpdate');
+																	var existingSelector = $(`#taroEditorProperty_${propData.id}`);
+																	var existingData = existingSelector.data('taroPanelUpdate');
 
 																	existingSelector.remove();
 
@@ -1557,19 +1557,19 @@ var UiPanels = IgeEventingClass.extend({
 																	}
 
 																	if (existingData) {
-																		propSelector.data('igePanelUpdate', existingData);
+																		propSelector.data('taroPanelUpdate', existingData);
 																	}
 																};
 
 																updateMethod();
-																propSelector.data('igePanelUpdate', updateMethod);
+																propSelector.data('taroPanelUpdate', updateMethod);
 															}
 														});
 													}
 												}
 											}({
 												id: propName,
-												ige: ige,
+												taro: taro,
 												obj: obj,
 												label: propItem.label,
 												desc: propItem.desc,
@@ -1587,7 +1587,7 @@ var UiPanels = IgeEventingClass.extend({
 							});
 						}({
 							id: propName,
-							ige: ige,
+							taro: taro,
 							obj: obj,
 							label: item.label,
 							desc: item.desc,
@@ -1601,4 +1601,4 @@ var UiPanels = IgeEventingClass.extend({
 });
 
 // Init
-ige.editor.ui.panels = new UiPanels();
+taro.editor.ui.panels = new UiPanels();

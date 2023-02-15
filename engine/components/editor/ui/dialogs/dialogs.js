@@ -1,10 +1,10 @@
-var UiDialogs = IgeEventingClass.extend({
+var UiDialogs = TaroEventingClass.extend({
 	classId: 'UiDialogs',
 
 	init: function () {
 		var self = this;
 		self._dialogOrder = 200010;
-		ige.requireStylesheet(`${igeRoot}components/editor/ui/dialogs/dialogs.css`);
+		taro.requireStylesheet(`${taroRoot}components/editor/ui/dialogs/dialogs.css`);
 	},
 
 	ready: function () {
@@ -15,12 +15,12 @@ var UiDialogs = IgeEventingClass.extend({
 		var self = this;
 		self._dialogOrder += 2;
 
-		dialogData.id = dialogData.id || ige.newIdHex();
+		dialogData.id = dialogData.id || taro.newIdHex();
 		dialogData.title = dialogData.title || 'Dialog';
 
 		// Create a dialog and show as loading
-		ige.editor.renderTemplate(
-			`${igeRoot}components/editor/ui/dialogs/templates/dialog.html`,
+		taro.editor.renderTemplate(
+			`${taroRoot}components/editor/ui/dialogs/templates/dialog.html`,
 			dialogData,
 			function (err, dialogElem) {
 				if (!err) {
@@ -46,7 +46,7 @@ var UiDialogs = IgeEventingClass.extend({
 							if (dialogData.blur) {
 								dialogData.blur($(this));
 							} else {
-								ige.editor.ui.dialogs.close(dialogData.id);
+								taro.editor.ui.dialogs.close(dialogData.id);
 							}
 						});
 					} else {
@@ -59,13 +59,13 @@ var UiDialogs = IgeEventingClass.extend({
 							if (dialogData.blur) {
 								dialogData.blur($(this));
 							} else {
-								ige.editor.ui.dialogs.close(dialogData.id);
+								taro.editor.ui.dialogs.close(dialogData.id);
 							}
 						});
 					}
 
 					if (dialogData.contentTemplate) {
-						ige.editor.renderTemplate(
+						taro.editor.renderTemplate(
 							dialogData.contentTemplate,
 							dialogData.contentData || {},
 							function (err, contentElem) {
@@ -115,7 +115,7 @@ var UiDialogs = IgeEventingClass.extend({
 	},
 
 	confirm: function (dialogOptions) {
-		dialogOptions.id = dialogOptions.id || ige.newIdHex();
+		dialogOptions.id = dialogOptions.id || taro.newIdHex();
 		if (dialogOptions.dialogClass) {
 			dialogOptions.dialogClass += ' confirm';
 		} else {
@@ -123,7 +123,7 @@ var UiDialogs = IgeEventingClass.extend({
 		}
 
 		dialogOptions.modal = true;
-		dialogOptions.contentTemplate = dialogOptions.contentTemplate || `${igeRoot}components/editor/ui/dialogs/templates/confirm.html`;
+		dialogOptions.contentTemplate = dialogOptions.contentTemplate || `${taroRoot}components/editor/ui/dialogs/templates/confirm.html`;
 		dialogOptions.width = dialogOptions.width || 400;
 		dialogOptions.height = dialogOptions.height || 200;
 		dialogOptions.contentData = dialogOptions.contentData || {
@@ -139,14 +139,14 @@ var UiDialogs = IgeEventingClass.extend({
 					if (dialogOptions.negative) {
 						dialogOptions.negative.apply(dialogElem);
 					}
-					ige.editor.ui.dialogs.close(dialogOptions.id);
+					taro.editor.ui.dialogs.close(dialogOptions.id);
 				});
 
 				buttons.find('.positive').on('click', function () {
 					if (dialogOptions.positive) {
 						dialogOptions.positive.apply(dialogElem);
 					}
-					ige.editor.ui.dialogs.close(dialogOptions.id);
+					taro.editor.ui.dialogs.close(dialogOptions.id);
 				});
 
 				if (dialogOptions.ready) {
@@ -159,7 +159,7 @@ var UiDialogs = IgeEventingClass.extend({
 	},
 
 	input: function (dialogOptions) {
-		dialogOptions.id = dialogOptions.id || ige.newIdHex();
+		dialogOptions.id = dialogOptions.id || taro.newIdHex();
 		if (dialogOptions.dialogClass) {
 			dialogOptions.dialogClass += ' input';
 		} else {
@@ -167,7 +167,7 @@ var UiDialogs = IgeEventingClass.extend({
 		}
 
 		dialogOptions.modal = true;
-		dialogOptions.contentTemplate = dialogOptions.contentTemplate || `${igeRoot}components/editor/ui/dialogs/templates/input.html`;
+		dialogOptions.contentTemplate = dialogOptions.contentTemplate || `${taroRoot}components/editor/ui/dialogs/templates/input.html`;
 		dialogOptions.width = dialogOptions.width || 400;
 		dialogOptions.height = dialogOptions.height || 200;
 		dialogOptions.contentData = dialogOptions.contentData || {
@@ -184,14 +184,14 @@ var UiDialogs = IgeEventingClass.extend({
 					if (dialogOptions.negative) {
 						dialogOptions.negative.apply(dialogElem);
 					}
-					ige.editor.ui.dialogs.close(dialogOptions.id);
+					taro.editor.ui.dialogs.close(dialogOptions.id);
 				});
 
 				buttons.find('.positive').on('click', function () {
 					if (dialogOptions.positive) {
 						dialogOptions.positive.apply(dialogElem);
 					}
-					ige.editor.ui.dialogs.close(dialogOptions.id);
+					taro.editor.ui.dialogs.close(dialogOptions.id);
 				});
 
 				if (dialogOptions.ready) {
@@ -204,7 +204,7 @@ var UiDialogs = IgeEventingClass.extend({
 	},
 
 	prompt: function (dialogOptions) {
-		dialogOptions.id = dialogOptions.id || ige.newIdHex();
+		dialogOptions.id = dialogOptions.id || taro.newIdHex();
 		if (dialogOptions.dialogClass) {
 			dialogOptions.dialogClass += ' prompt';
 		} else {
@@ -212,7 +212,7 @@ var UiDialogs = IgeEventingClass.extend({
 		}
 
 		dialogOptions.modal = true;
-		dialogOptions.contentTemplate = dialogOptions.contentTemplate || `${igeRoot}components/editor/ui/dialogs/templates/prompt.html`;
+		dialogOptions.contentTemplate = dialogOptions.contentTemplate || `${taroRoot}components/editor/ui/dialogs/templates/prompt.html`;
 		dialogOptions.width = dialogOptions.width || 400;
 		dialogOptions.height = dialogOptions.height || 200;
 		dialogOptions.contentData = dialogOptions.contentData || {
@@ -227,7 +227,7 @@ var UiDialogs = IgeEventingClass.extend({
 					if (dialogOptions.positive) {
 						dialogOptions.positive.apply(dialogElem);
 					}
-					ige.editor.ui.dialogs.close(dialogOptions.id);
+					taro.editor.ui.dialogs.close(dialogOptions.id);
 				});
 
 				if (dialogOptions.ready) {
@@ -248,4 +248,4 @@ var UiDialogs = IgeEventingClass.extend({
 });
 
 // Init
-ige.editor.ui.dialogs = new UiDialogs();
+taro.editor.ui.dialogs = new UiDialogs();

@@ -1,4 +1,4 @@
-var ItemUiComponent = IgeEntity.extend({
+var ItemUiComponent = TaroEntity.extend({
 	classId: 'ItemUiComponent',
 	componentId: 'itemUi',
 
@@ -101,7 +101,7 @@ var ItemUiComponent = IgeEntity.extend({
 		}
 	},
 	getItemSlotDiv: function (itemStats, options) {
-		var mobileClass = ige.isMobile ? 'inventory-slot-mobile ' : 'inventory-slot ';
+		var mobileClass = taro.isMobile ? 'inventory-slot-mobile ' : 'inventory-slot ';
 		if (itemStats) {
 			var itemSlot = $('<div/>', {
 				id: itemStats.id,
@@ -110,7 +110,7 @@ var ItemUiComponent = IgeEntity.extend({
 
 			if (options.isPurchasable) {
 				itemSlot.on('click', function () {
-					// ige.shopkeeper.confirmPurchase($(this).attr("id"))
+					// taro.shopkeeper.confirmPurchase($(this).attr("id"))
 				});
 			}
 
@@ -135,7 +135,7 @@ var ItemUiComponent = IgeEntity.extend({
 				}
 
 				var img = itemStats.inventoryImage || (itemStats.cellSheet ? itemStats.cellSheet.url : '');
-				var mobileClass = ige.isMobile ? 'height:17px;max-width:20px;object-fit:contain' : 'height:30px;max-width:27px;object-fit:contain';
+				var mobileClass = taro.isMobile ? 'height:17px;max-width:20px;object-fit:contain' : 'height:30px;max-width:27px;object-fit:contain';
 				var isTrading = options.isTrading;
 				if (img) {
 					var itemDiv = $('<div/>', {
@@ -195,11 +195,11 @@ var ItemUiComponent = IgeEntity.extend({
 						left: 0, top: 0
 					});
 
-					var selectedUnit = ige.client.myPlayer.getSelectedUnit();
+					var selectedUnit = taro.client.myPlayer.getSelectedUnit();
 					var items = selectedUnit._stats.itemIds;
 
-					var fromItem = ige.$(items[fromIndex]);
-					var toItem = ige.$(items[toIndex]);
+					var fromItem = taro.$(items[fromIndex]);
+					var toItem = taro.$(items[toIndex]);
 					if (fromItem) {
 						fromItem.stopUsing();
 					}
@@ -208,15 +208,15 @@ var ItemUiComponent = IgeEntity.extend({
 						toItem.stopUsing();
 					}
 
-					ige.network.send('swapInventory', { from: fromIndex, to: toIndex });
+					taro.network.send('swapInventory', { from: fromIndex, to: toIndex });
 
 					var tempItem = items[fromIndex];
 					items[fromIndex] = items[toIndex];
 					items[toIndex] = tempItem;
 
 					var totalInventorySlot = selectedUnit._stats.inventorySize;
-					if (ige.client.myPlayer.isTrading && (fromIndex >= totalInventorySlot || toIndex >= totalInventorySlot)) {
-						ige.tradeUi.sendOfferingItems();
+					if (taro.client.myPlayer.isTrading && (fromIndex >= totalInventorySlot || toIndex >= totalInventorySlot)) {
+						taro.tradeUi.sendOfferingItems();
 					}
 				}
 			});
@@ -291,12 +291,12 @@ var ItemUiComponent = IgeEntity.extend({
 				var consumeBonus = '';
 
 				for (var i in stats.bonus.consume.playerAttribute) {
-					var attrName = ige.game.data.attributeTypes[i] ? ige.game.data.attributeTypes[i].name : i;
+					var attrName = taro.game.data.attributeTypes[i] ? taro.game.data.attributeTypes[i].name : i;
 					consumeBonus += `<p class="mb-2 ml-2">${attrName}: ${stats.bonus.consume.playerAttribute[i]}</p>`;
 				}
 
 				for (var i in stats.bonus.consume.unitAttribute) {
-					var attrName = ige.game.data.attributeTypes[i] ? ige.game.data.attributeTypes[i].name : i;
+					var attrName = taro.game.data.attributeTypes[i] ? taro.game.data.attributeTypes[i].name : i;
 					consumeBonus += `<p class="mb-2 ml-2">${attrName}: ${stats.bonus.consume.unitAttribute[i]}</p>`;
 				}
 
@@ -308,7 +308,7 @@ var ItemUiComponent = IgeEntity.extend({
 			if (stats.bonus.passive && Object.keys(stats.bonus.passive).length > 0) {
 				var passiveBonus = '';
 				for (var i in stats.bonus.passive.playerAttribute) {
-					var attrName = ige.game.data.attributeTypes[i] ? ige.game.data.attributeTypes[i].name : i;
+					var attrName = taro.game.data.attributeTypes[i] ? taro.game.data.attributeTypes[i].name : i;
 					var value = stats.bonus.passive.playerAttribute[i] && stats.bonus.passive.playerAttribute[i].value || 0;
 					var type = stats.bonus.passive.playerAttribute[i] && stats.bonus.passive.playerAttribute[i].type || '';
 					if (type == 'percentage') {
@@ -320,7 +320,7 @@ var ItemUiComponent = IgeEntity.extend({
 				}
 
 				for (var i in stats.bonus.passive.unitAttribute) {
-					var attrName = ige.game.data.attributeTypes[i] ? ige.game.data.attributeTypes[i].name : i;
+					var attrName = taro.game.data.attributeTypes[i] ? taro.game.data.attributeTypes[i].name : i;
 					var value = stats.bonus.passive.unitAttribute[i] && stats.bonus.passive.unitAttribute[i].value || 0;
 					var type = stats.bonus.passive.unitAttribute[i] && stats.bonus.passive.unitAttribute[i].type || '';
 					if (type == 'percentage') {
@@ -344,7 +344,7 @@ var ItemUiComponent = IgeEntity.extend({
 				info += '<p class="mb-1">';
 				var value = null;
 				if (attribute.dataType === 'time') {
-					value = ige.game.secondsToHms(attribute.value);
+					value = taro.game.secondsToHms(attribute.value);
 				} else {
 					var decimalPlace = parseInt(attribute.decimalPlaces) || 0;
 					value = parseFloat(attribute.value).toFixed(decimalPlace);
@@ -357,11 +357,11 @@ var ItemUiComponent = IgeEntity.extend({
 		if (stats && stats.cost) {
 			var costHtml = '';
 			for (var key in stats.cost.unitAttributes) {
-				var attrName = ige.game.data.attributeTypes[key] ? ige.game.data.attributeTypes[key].name : key;
+				var attrName = taro.game.data.attributeTypes[key] ? taro.game.data.attributeTypes[key].name : key;
 				costHtml += `<span>${attrName}: ${stats.cost.unitAttributes[key]}</span>,`;
 			}
 			for (var key in stats.cost.playerAttributes) {
-				var attrName = ige.game.data.attributeTypes[key] ? ige.game.data.attributeTypes[key].name : key;
+				var attrName = taro.game.data.attributeTypes[key] ? taro.game.data.attributeTypes[key].name : key;
 				costHtml += `<span>${attrName}: ${stats.cost.playerAttributes[key]}</span>,`;
 			}
 
@@ -424,7 +424,7 @@ var ItemUiComponent = IgeEntity.extend({
 			for (var i = 0; i < itemStats.buffTypes.length; i++) {
 				var buffTypeName = itemStats.buffTypes[i];
 				var itemValue = itemStats[buffTypeName];
-				var itemType = ige.game.getAsset('itemTypes', itemStats.itemTypeId);
+				var itemType = taro.game.getAsset('itemTypes', itemStats.itemTypeId);
 
 				var defaultValue = 0;
 
@@ -432,7 +432,7 @@ var ItemUiComponent = IgeEntity.extend({
 					var defaultValue = itemType[buffTypeName] || 0;
 				}
 
-				var buffType = ige.game.getAsset('buffTypes', buffTypeName);
+				var buffType = taro.game.getAsset('buffTypes', buffTypeName);
 
 				if (buffType) {
 					var isPercentageBased = buffType.unit == 'percentage';

@@ -1,9 +1,9 @@
-var UiAnimationEditor = IgeEventingClass.extend({
+var UiAnimationEditor = TaroEventingClass.extend({
 	classId: 'UiAnimationEditor',
 
 	init: function () {
 		var self = this;
-		ige.requireStylesheet(`${igeRoot}components/editor/ui/animationEditor/animationEditor.css`);
+		taro.requireStylesheet(`${taroRoot}components/editor/ui/animationEditor/animationEditor.css`);
 		self.reset();
 	},
 
@@ -17,19 +17,19 @@ var UiAnimationEditor = IgeEventingClass.extend({
 		self._lastTick = new Date().getTime();
 		self._tickDelta = 0;
 
-		self._animationEntity = new IgeEntity()
-			.addComponent(IgeAnimationComponent);
+		self._animationEntity = new TaroEntity()
+			.addComponent(TaroAnimationComponent);
 	},
 
 	ready: function () {
 		var self = this;
 
-		ige.editor.ui.menus.addMenuGroup('toolsMenu', 'textures');
-		ige.editor.ui.menus.addMenuItem('toolsMenu', 'textures', {
+		taro.editor.ui.menus.addMenuGroup('toolsMenu', 'textures');
+		taro.editor.ui.menus.addMenuItem('toolsMenu', 'textures', {
 			id: 'animationEditor',
 			icon: 'none',
 			text: 'Animation Editor...',
-			action: 'ige.editor.ui.animationEditor.show();'
+			action: 'taro.editor.ui.animationEditor.show();'
 		});
 	},
 
@@ -43,13 +43,13 @@ var UiAnimationEditor = IgeEventingClass.extend({
 			self._cellHeight = settings.cellHeight;
 		}
 
-		ige.editor.ui.dialogs.create({
+		taro.editor.ui.dialogs.create({
 			id: 'animationEditorDialog',
 			icon: 'halflings-icon white film',
 			title: 'Animation Editor',
-			contentTemplate: `${igeRoot}components/editor/ui/animationEditor/templates/animationEditor.html`,
+			contentTemplate: `${taroRoot}components/editor/ui/animationEditor/templates/animationEditor.html`,
 			blur: function () {
-				ige.editor.ui.dialogs.confirm({
+				taro.editor.ui.dialogs.confirm({
 					title: 'Exit Animation Editor',
 					width: 400,
 					height: 150,
@@ -60,7 +60,7 @@ var UiAnimationEditor = IgeEventingClass.extend({
 					},
 					positive: function () {
 						self.destroy();
-						ige.editor.ui.dialogs.close('animationEditorDialog');
+						taro.editor.ui.dialogs.close('animationEditorDialog');
 					}
 				});
 			},
@@ -347,4 +347,4 @@ var UiAnimationEditor = IgeEventingClass.extend({
 });
 
 // Init
-ige.editor.ui.animationEditor = new UiAnimationEditor();
+taro.editor.ui.animationEditor = new UiAnimationEditor();

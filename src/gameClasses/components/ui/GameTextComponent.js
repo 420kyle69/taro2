@@ -1,11 +1,11 @@
-var GameTextComponent = IgeEntity.extend({
+var GameTextComponent = TaroEntity.extend({
 	classId: 'GameTextComponent',
 	componentId: 'gameText',
 
 	init: function () {
 		var self = this;
 
-		if (ige.isServer) {
+		if (taro.isServer) {
 			self.latestText = {}; // stores last sent text, so newly joined users can see it
 		}
 	},
@@ -13,38 +13,38 @@ var GameTextComponent = IgeEntity.extend({
 	updateText: function (data, clientId) {
 		this.latestText[data.target] = data.value;
 
-		if (ige.isServer) {
-			data.value = ige.sanitizer(data.value);
-			ige.network.send('updateUiText', data, clientId); // update text for all clients
+		if (taro.isServer) {
+			data.value = taro.sanitizer(data.value);
+			taro.network.send('updateUiText', data, clientId); // update text for all clients
 		}
 	},
 
 	updateTextForTime: function (data, clientId) {
 		this.latestText[data.target] = data.value;
 
-		if (ige.isServer) {
-			data.value = ige.sanitizer(data.value);
-			ige.network.send('updateUiTextForTime', data, clientId); // update text for all clients
+		if (taro.isServer) {
+			data.value = taro.sanitizer(data.value);
+			taro.network.send('updateUiTextForTime', data, clientId); // update text for all clients
 		}
 	},
 
 	sendLatestText: function (clientId) {
-		if (ige.isServer) {
+		if (taro.isServer) {
 			for (i in this.latestText) {
 				var data = {
 					target: i,
 					value: this.latestText[i]
 				};
-				// ige.log("sendLatestText: " + JSON.stringify(data) + " to "+clientId)
-				data.value = ige.sanitizer(data.value);
-				ige.network.send('updateUiText', data, clientId);
+				// taro.log("sendLatestText: " + JSON.stringify(data) + " to "+clientId)
+				data.value = taro.sanitizer(data.value);
+				taro.network.send('updateUiText', data, clientId);
 			}
 		}
 	},
 
 	alertHighscore: function (clientId) {
-		if (ige.isServer) {
-			ige.network.send('alertHighscore', {}, clientId);
+		if (taro.isServer) {
+			taro.network.send('alertHighscore', {}, clientId);
 		}
 	}
 

@@ -1,4 +1,4 @@
-declare class TweenComponent extends IgeEntity {
+declare class TweenComponent extends TaroEntity {
 
 	offset: OffsetData;
 	isTweening: boolean;

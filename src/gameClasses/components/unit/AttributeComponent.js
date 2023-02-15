@@ -1,4 +1,4 @@
-var AttributeComponent = IgeEntity.extend({
+var AttributeComponent = TaroEntity.extend({
 	classId: 'AttributeComponent',
 	componentId: 'attribute',
 
@@ -44,7 +44,7 @@ var AttributeComponent = IgeEntity.extend({
 		for (var attributeTypeId in attributes) {
 			var attr = attributes[attributeTypeId];
 			// if unit is my unit, update UI
-			if (ige.isClient && ige.network.id() == self._entity._stats.clientId) {
+			if (taro.isClient && taro.network.id() == self._entity._stats.clientId) {
 				if (attr.isVisible) {
 					self._entity.unitUi.updateAttributeBar(attr);
 				}
@@ -65,19 +65,19 @@ var AttributeComponent = IgeEntity.extend({
 			}
 			return itemId;
 		});
-		var unitType = ige.game.getAsset('unitTypes', unit._stats.type);
+		var unitType = taro.game.getAsset('unitTypes', unit._stats.type);
 		var defaultUnitAttributes = unitType ? unitType.attributes : undefined;
 
 		var player = unit.getOwner();
 		if (player) {
-			var playerType = ige.game.getAsset('playerTypes', player._stats.playerTypeId);
+			var playerType = taro.game.getAsset('playerTypes', player._stats.playerTypeId);
 			var defaultPlayerAttributes = playerType ? playerType.attributes : undefined;
 		}
 
 		var unitAttr = { attributes: {}, attributesMax: {} };
 		var playerAttr = { attributes: {}, attributesMax: {} };
 		for (var i = 0; i < itemIds.length; i++) {
-			var item = ige.$(itemIds[i]);
+			var item = taro.$(itemIds[i]);
 			if (item) {
 				if (item && item._stats.bonus && item._stats.bonus.passive && unit) {
 					// passive unit attribute bonus
@@ -197,7 +197,7 @@ var AttributeComponent = IgeEntity.extend({
 
 				self._entity._stats.attributes[attributeTypeId].value = parseFloat(newValue);
 
-				if (ige.isServer) {
+				if (taro.isServer) {
 					if (newValue != oldValue) {
 						// force sync with client every 5 seconds
 						if (
@@ -230,7 +230,7 @@ var AttributeComponent = IgeEntity.extend({
 								self._entity.script.trigger('entityAttributeBecomesZero', triggeredBy);
 							}
 
-							ige.queueTrigger(`${this._entity._category}AttributeBecomesZero`, triggeredBy);							
+							taro.queueTrigger(`${this._entity._category}AttributeBecomesZero`, triggeredBy);							
 						} else if (newValue >= attribute.max) // when attribute becomes full, trigger attributeBecomesFull event
 						{
 							// necessary as self._entity can be 'player' which doesn't have scriptComponent
@@ -238,19 +238,19 @@ var AttributeComponent = IgeEntity.extend({
 								self._entity.script.trigger('entityAttributeBecomesFull', triggeredBy);
 							}
 
-							ige.queueTrigger(`${this._entity._category}AttributeBecomesFull`, triggeredBy);
+							taro.queueTrigger(`${this._entity._category}AttributeBecomesFull`, triggeredBy);
 						}
 
 						// check if user breaks his highscore then assign it to new highscore
-						if (attributeTypeId == ige.game.data.settings.scoreAttributeId && self._entity._stats.highscore < newValue) {
+						if (attributeTypeId == taro.game.data.settings.scoreAttributeId && self._entity._stats.highscore < newValue) {
 							if (!self._entity._stats.newHighscore) {
-								ige.gameText.alertHighscore(self._entity._stats.clientId);
+								taro.gameText.alertHighscore(self._entity._stats.clientId);
 							}
 							self._entity._stats.newHighscore = newValue;
 						}
 					}
-				} else if (ige.isClient) {
-					if (ige.client.myPlayer) {
+				} else if (taro.isClient) {
+					if (taro.client.myPlayer) {
 						var unit = null;
 
 						attribute.hasChanged = newValue !== oldValue;
@@ -260,7 +260,7 @@ var AttributeComponent = IgeEntity.extend({
 								unit = self._entity;
 
 								// console.log(attribute, attribute.value);
-								if (ige.client.myPlayer._stats.selectedUnitId == unit.id()) {
+								if (taro.client.myPlayer._stats.selectedUnitId == unit.id()) {
 									self._entity.unitUi.updateAttributeBar({...attribute, ...{value: parseFloat(newValue)}});
 								}
 
@@ -275,10 +275,10 @@ var AttributeComponent = IgeEntity.extend({
 								var item = self._entity;
 								unit = item.getOwnerUnit();
 
-								// if (unit && ige.client.myPlayer._stats.selectedUnitId == unit.id()) {
+								// if (unit && taro.client.myPlayer._stats.selectedUnitId == unit.id()) {
 								// 	item.updateAttributeBar(attribute);
 								// 	if (attribute && attribute.isVisible && attribute.isVisible.includes('itemDescription')) {
-								// 		ige.itemUi.updateItemSlot(item, item._stats.slotIndex);
+								// 		taro.itemUi.updateItemSlot(item, item._stats.slotIndex);
 								// 	}
 								// }
 								break;
@@ -288,7 +288,7 @@ var AttributeComponent = IgeEntity.extend({
 								var item = projectile.getSourceItem();
 								unit = item && item.getOwnerUnit();
 
-								if (unit && ige.client.myPlayer._stats.selectedUnitId == unit.id()) {
+								if (unit && taro.client.myPlayer._stats.selectedUnitId == unit.id()) {
 									projectile.updateAttributeBar(attribute);
 								}
 								break;
@@ -319,13 +319,13 @@ var AttributeComponent = IgeEntity.extend({
 
 			if (attribute) {
 				attribute.max = value;
-				if (ige.isServer) {
+				if (taro.isServer) {
 					var attribute = {
 						attributesMax: {}
 					};
 					attribute.attributesMax[attrId] = value;
 					this._entity.streamUpdateData([attribute]);
-					// ige.network.send('updateEntityAttribute', {
+					// taro.network.send('updateEntityAttribute', {
 					// 	"e": this._entity._id,
 					// 	"a": attrId,
 					// 	"x": value,
@@ -344,13 +344,13 @@ var AttributeComponent = IgeEntity.extend({
 
 			if (attribute) {
 				// attribute.min = value
-				if (ige.isServer) {
+				if (taro.isServer) {
 					var attribute = {
 						attributesMin: {}
 					};
 					attribute.attributesMin[attrId] = value;
 					this._entity.streamUpdateData([attribute]);
-					// ige.network.send('updateEntityAttribute', {
+					// taro.network.send('updateEntityAttribute', {
 					// 	"e": this._entity._id,
 					// 	"a": attrId,
 					// 	"x": value,
@@ -370,8 +370,8 @@ var AttributeComponent = IgeEntity.extend({
 
 			if (attribute) {
 				attribute.regenerateSpeed = value;
-				if (ige.isServer) {
-					ige.network.send('updateEntityAttribute', {
+				if (taro.isServer) {
+					taro.network.send('updateEntityAttribute', {
 						e: this._entity._id,
 						a: attrId,
 						x: value,
@@ -385,7 +385,7 @@ var AttributeComponent = IgeEntity.extend({
 	destroy: function () {
 		clearInterval(this.regenTick);
 
-		IgeEntity.prototype.destroy.call(this);
+		TaroEntity.prototype.destroy.call(this);
 	}
 });
 

@@ -1,18 +1,18 @@
 var EntitiesToRender = /** @class */ (function () {
     function EntitiesToRender() {
         this.trackEntityById = {};
-        ige.client.on('tick', this.frameTick, this);
+        taro.client.on('tick', this.frameTick, this);
     }
     EntitiesToRender.prototype.updateAllEntities = function ( /*timeStamp*/) {
         var currentTime = Date.now();
-        if (!ige.lastTickTime)
-            ige.lastTickTime = currentTime;
+        if (!taro.lastTickTime)
+            taro.lastTickTime = currentTime;
         for (var entityId in this.trackEntityById) {
-            var entity = ige.$(entityId);
+            var entity = taro.$(entityId);
             if (entity) {
                 // handle entity behaviour and transformation offsets
-                if (ige.gameLoopTickHasExecuted) {
-                    if (entity._deathTime !== undefined && entity._deathTime <= ige._tickStart) {
+                if (taro.gameLoopTickHasExecuted) {
+                    if (entity._deathTime !== undefined && entity._deathTime <= taro._tickStart) {
                         // Check if the deathCallBack was set
                         if (entity._deathCallBack) {
                             entity._deathCallBack.apply(entity);
@@ -24,8 +24,8 @@ var EntitiesToRender = /** @class */ (function () {
                         entity._behaviour();
                     }
                     // handle streamUpdateData
-                    if (ige.client.myPlayer) {
-                        var updateQueue = ige.client.entityUpdateQueue[entityId];
+                    if (taro.client.myPlayer) {
+                        var updateQueue = taro.client.entityUpdateQueue[entityId];
                         var processedUpdates = [];
                         while (updateQueue && updateQueue.length > 0) {
                             var nextUpdate = updateQueue[0];
@@ -33,14 +33,14 @@ var EntitiesToRender = /** @class */ (function () {
                             // Don't run if we're updating item's state/owner unit, but its owner doesn't exist yet
                             entity._category == 'item' &&
                                 ( // updating item's owner unit, but the owner hasn't been created yet
-                                (nextUpdate.ownerUnitId && ige.$(nextUpdate.ownerUnitId) == undefined) ||
+                                (nextUpdate.ownerUnitId && taro.$(nextUpdate.ownerUnitId) == undefined) ||
                                     ( // changing item's state to selected/unselected, but owner doesn't exist yet
                                     (nextUpdate.stateId == 'selected' || nextUpdate.stateId == 'unselected') &&
                                         entity.getOwnerUnit() == undefined))) {
                                 break;
                             }
                             else {
-                                processedUpdates.push(ige.client.entityUpdateQueue[entityId].shift());
+                                processedUpdates.push(taro.client.entityUpdateQueue[entityId].shift());
                             }
                         }
                         if (processedUpdates.length > 0) {
@@ -52,7 +52,7 @@ var EntitiesToRender = /** @class */ (function () {
                     }
                 }
                 // update transformation using incoming network stream
-                if (ige.network.stream) {
+                if (taro.network.stream) {
                     entity._processTransform();
                 }
                 if (entity._translate && !entity.isHidden()) {
@@ -65,11 +65,11 @@ var EntitiesToRender = /** @class */ (function () {
                             // if ownerUnit's transformation hasn't been processed yet, then it'll cause item to drag behind. so we're running it now
                             ownerUnit._processTransform();
                             // immediately rotate items for my own unit
-                            if (ownerUnit == ige.client.selectedUnit) {
+                            if (ownerUnit == taro.client.selectedUnit) {
                                 if (entity._stats.currentBody && entity._stats.currentBody.jointType == 'weldJoint') {
                                     rotate = ownerUnit._rotate.z;
                                 }
-                                else if (ownerUnit == ige.client.selectedUnit) {
+                                else if (ownerUnit == taro.client.selectedUnit) {
                                     rotate = ownerUnit.angleToTarget; // angleToTarget is updated at 60fps
                                 }
                                 entity._rotate.z = rotate; // update the item's rotation immediately for more accurate aiming (instead of 20fps)
@@ -92,16 +92,16 @@ var EntitiesToRender = /** @class */ (function () {
                 }
             }
         }
-        ige.triggersQueued = [];
-        ige.lastTickTime = currentTime;
-        if (ige.gameLoopTickHasExecuted) {
-            ige.gameLoopTickHasExecuted = false;
+        taro.triggersQueued = [];
+        taro.lastTickTime = currentTime;
+        if (taro.gameLoopTickHasExecuted) {
+            taro.gameLoopTickHasExecuted = false;
         }
     };
     EntitiesToRender.prototype.frameTick = function () {
-        ige.engineStep();
-        ige.input.processInputOnEveryFps();
-        ige._renderFrames++;
+        taro.engineStep();
+        taro.input.processInputOnEveryFps();
+        taro._renderFrames++;
         this.updateAllEntities();
     };
     return EntitiesToRender;

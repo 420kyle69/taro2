@@ -14,9 +14,9 @@ type bulletReturn = {
 }
 
 class Raycaster {
-	engine = ige.physics.engine;
-	world = ige.physics.world();
-	scaleRatio = ige.physics._scaleRatio;
+	engine = taro.physics.engine;
+	world = taro.physics.world();
+	scaleRatio = taro.physics._scaleRatio;
 
 	data: any = {};
 	closest = RayCastClosest;
@@ -46,7 +46,7 @@ class Raycaster {
 			raycast.callback
 		);
 
-		ige.game.entitiesCollidingWithLastRaycast = _.clone(raycast.entities);
+		taro.game.entitiesCollidingWithLastRaycast = _.clone(raycast.entities);
 
 		// forward
 		raycast.reset();
@@ -56,15 +56,15 @@ class Raycaster {
 			raycast.callback
 		);
 
-		const missedEntities = _.difference(ige.game.entitiesCollidingWithLastRaycast, raycast.entities);
+		const missedEntities = _.difference(taro.game.entitiesCollidingWithLastRaycast, raycast.entities);
 		missedEntities.forEach(x => x.raycastFraction = 1 - x.raycastFraction);
 
-		ige.game.entitiesCollidingWithLastRaycast = [...raycast.entities, ...missedEntities];
+		taro.game.entitiesCollidingWithLastRaycast = [...raycast.entities, ...missedEntities];
 
-		ige.game.entitiesCollidingWithLastRaycast = this.sortHits(ige.game.entitiesCollidingWithLastRaycast);
+		taro.game.entitiesCollidingWithLastRaycast = this.sortHits(taro.game.entitiesCollidingWithLastRaycast);
 
 		//debug
-		// console.log(ige.game.entitiesCollidingWithLastRaycast.map(x=> `${x.id()} ${x._category} ${x.raycastFraction}`));
+		// console.log(taro.game.entitiesCollidingWithLastRaycast.map(x=> `${x.id()} ${x._category} ${x.raycastFraction}`));
 	}
 
 	raycastBullet (
@@ -88,7 +88,7 @@ class Raycaster {
 			forwardRaycast.callback // though it is currently hard-coded for 'Closest'
 		);
 
-		ige.game.entitiesCollidingWithLastRaycast = forwardRaycast.entity ? [forwardRaycast.entity] : [];
+		taro.game.entitiesCollidingWithLastRaycast = forwardRaycast.entity ? [forwardRaycast.entity] : [];
 		this.forwardHit = true;
 
 		const point = forwardRaycast.point ? forwardRaycast.point : end;
@@ -108,7 +108,7 @@ class Raycaster {
 		if (reverseRaycast.hit) {
 			// we were obstructed when shooting
 			this.reverseHit = true;
-			ige.game.entitiesCollidingWithLastRaycast = [];
+			taro.game.entitiesCollidingWithLastRaycast = [];
 		}
 
 		const bulletReturn = {
@@ -124,7 +124,7 @@ class Raycaster {
 		return bulletReturn;
 	}
 
-	sortHits (array: IgeEntity[]): IgeEntity[] {
+	sortHits (array: TaroEntity[]): TaroEntity[] {
 		return array = _.orderBy(array, ['raycastFraction'], ['asc']);
 	}
 
@@ -134,7 +134,7 @@ class Raycaster {
 		config: {color: number, projType: string, fraction: number, rotation: number}
 
 	): void {
-		ige.client.emit('create-ray', {
+		taro.client.emit('create-ray', {
 			start: {
 				x: start.x * this.scaleRatio,
 				y: start.y * this.scaleRatio
@@ -163,7 +163,7 @@ const RayCastClosest = (function() {
 	def.callback = function(fixture, point, normal, fraction) {
 
 		var fixtureList = fixture.m_body.m_fixtureList;
-		var entity = fixtureList && fixtureList.igeId && ige.$(fixtureList.igeId);
+		var entity = fixtureList && fixtureList.taroId && taro.$(fixtureList.taroId);
 		if (
 			entity &&
 				(
@@ -172,8 +172,8 @@ const RayCastClosest = (function() {
 				)
 		) {
 			entity.lastRaycastCollisionPosition = {
-				x: point.x * ige.physics._scaleRatio,
-				y: point.y * ige.physics._scaleRatio
+				x: point.x * taro.physics._scaleRatio,
+				y: point.y * taro.physics._scaleRatio
 			};
 
 			entity.raycastFraction = fraction;
@@ -219,7 +219,7 @@ const RayCastMultiple = (function() {
 	def.callback = function (fixture, point, normal, fraction) {
 
 		var fixtureList = fixture.m_body.m_fixtureList;
-		var entity = fixtureList && fixtureList.igeId && ige.$(fixtureList.igeId);
+		var entity = fixtureList && fixtureList.taroId && taro.$(fixtureList.taroId);
 		if (
 			entity &&
 				(
@@ -228,8 +228,8 @@ const RayCastMultiple = (function() {
 				)
 		) {
 			entity.lastRaycastCollisionPosition = {
-				x: point.x * ige.physics._scaleRatio,
-				y: point.y * ige.physics._scaleRatio
+				x: point.x * taro.physics._scaleRatio,
+				y: point.y * taro.physics._scaleRatio
 			};
 
 			entity.raycastFraction = fraction;
@@ -259,7 +259,7 @@ const RaycastAny = (function() {
 	def.callback = function(fixture, point, normal, fraction) {
 
 		var fixtureList = fixture.m_body.m_fixtureList;
-		var entity = fixtureList && fixtureList.igeId && ige.$(fixtureList.igeId);
+		var entity = fixtureList && fixtureList.taroId && taro.$(fixtureList.taroId);
 		if (
 			entity &&
 				(

@@ -2,13 +2,13 @@
  * When added to a viewport, automatically adds mouse panning
  * capabilities to the viewport's camera.
  */
-var MapPanComponent = IgeEventingClass.extend({
+var MapPanComponent = TaroEventingClass.extend({
 	classId: 'MapPanComponent',
 	componentId: 'mapPan',
 
 	/**
 	 * @constructor
-	 * @param {IgeObject} entity The object that the component is added to.
+	 * @param {TaroObject} entity The object that the component is added to.
 	 * @param {Object=} options The options object that was passed to the component during
 	 * the call to addComponent.
 	 */
@@ -41,8 +41,8 @@ var MapPanComponent = IgeEventingClass.extend({
 
 	/**
 	 * Gets / sets the rectangle that the pan operation will be limited
-	 * to using an IgeRect instance.
-	 * @param {IgeRect=} rect
+	 * to using an TaroRect instance.
+	 * @param {TaroRect=} rect
 	 * @return {*}
 	 */
 	limit: function (rect) {
@@ -98,9 +98,9 @@ var MapPanComponent = IgeEventingClass.extend({
 	 * @private
 	 */
 	_mouseDown: function (event) {
-		if (!this._panStarted && this._enabled && event.igeViewport.id() === this._entity.id()) {
+		if (!this._panStarted && this._enabled && event.taroViewport.id() === this._entity.id()) {
 			// Record the mouse down position - pan pre-start
-			var curMousePos = ige._mousePos;
+			var curMousePos = taro._mousePos;
 			this._panStartMouse = curMousePos.clone();
 
 			this._panStartCamera = {
@@ -120,17 +120,17 @@ var MapPanComponent = IgeEventingClass.extend({
 	 * @private
 	 */
 	_mouseMove: function (event) {
-		var vpId = event && event.igeViewport && event.igeViewport.id();
+		var vpId = event && event.taroViewport && event.taroViewport.id();
 		if (vpId === 'minimapVp') {
 			vpId = 'vp1';
 		}
 		if (vpId)
-			ige._selectedViewport = ige.client[vpId];
+			taro._selectedViewport = taro.client[vpId];
 
 		if (this._enabled) {
 			// Pan the camera if the mouse is down
 			if (this._panStartMouse) {
-				var curMousePos = ige._mousePos;
+				var curMousePos = taro._mousePos;
 				var panCords = {
 					x: this._panStartMouse.x - curMousePos.x,
 					y: this._panStartMouse.y - curMousePos.y
@@ -188,7 +188,7 @@ var MapPanComponent = IgeEventingClass.extend({
 				}
 
 				// update mini map position
-				ige.mapEditor.positionViewPortRect();
+				taro.mapEditor.positionViewPortRect();
 			}
 		}
 	},
@@ -204,7 +204,7 @@ var MapPanComponent = IgeEventingClass.extend({
 			// End the pan
 			if (this._panStarted) {
 				if (this._panStartMouse) {
-					var curMousePos = ige._mousePos;
+					var curMousePos = taro._mousePos;
 					var panCords = {
 						x: this._panStartMouse.x - curMousePos.x,
 						y: this._panStartMouse.y - curMousePos.y
@@ -265,7 +265,7 @@ var MapPanComponent = IgeEventingClass.extend({
 			}
 
 			var scale = this.zoomStartThreshold / 100;
-			ige._selectedViewport.camera.scaleTo(
+			taro._selectedViewport.camera.scaleTo(
 				scale,
 				scale,
 				0

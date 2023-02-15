@@ -1,14 +1,14 @@
-var Game = IgeClass.extend({
+var Game = TaroClass.extend({
     classId: 'Game',
     init: function (App, options) {
         // Create the engine
-        ige = new IgeEngine(options);
-        console.log('ige initialized', ige.isClient, ige.isServer);
-        if (ige.isClient) {
-            ige.client = new App();
+        taro = new TaroEngine(options);
+        console.log('taro initialized', taro.isClient, taro.isServer);
+        if (taro.isClient) {
+            taro.client = new App();
         }
-        if (ige.isServer) {
-            ige.server = new App(options);
+        if (taro.isServer) {
+            taro.server = new App(options);
         }
     }
 });

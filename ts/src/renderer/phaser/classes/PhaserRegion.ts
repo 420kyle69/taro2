@@ -25,13 +25,13 @@ class PhaserRegion extends PhaserEntity {
 		gameObject.setPosition(stats.x + stats.width/2, stats.y + stats.height/2);
 		gameObject.setInteractive();
 		gameObject.on('pointerdown', (p) => {
-			if (ige.developerMode.active && ige.developerMode.activeTab !== 'play' && this.devModeScene.devModeTools.cursorButton.active && p.leftButtonDown()) {
+			if (taro.developerMode.active && taro.developerMode.activeTab !== 'play' && this.devModeScene.devModeTools.cursorButton.active && p.leftButtonDown()) {
 				this.scene.input.setTopOnly(true);
 				this.devModeScene.regionEditor.addClickedList({name: this.entity._stats.id, x: stats.x, y: stats.y, width: stats.width, height: stats.height});
 			}
 		});
 		gameObject.on('pointerup', (p) => {
-			if (ige.developerMode.active && ige.developerMode.activeTab !== 'play' && this.devModeScene.devModeTools.cursorButton.active && p.leftButtonReleased()) {
+			if (taro.developerMode.active && taro.developerMode.activeTab !== 'play' && this.devModeScene.devModeTools.cursorButton.active && p.leftButtonReleased()) {
 				this.scene.input.setTopOnly(false);
 				this.devModeScene.regionEditor.showClickedList();
 			}
@@ -47,10 +47,10 @@ class PhaserRegion extends PhaserEntity {
 			this.devModeOnly = true;
 		}
 
-		const devModeScene = this.devModeScene = ige.renderer.scene.getScene('DevMode') as DevModeScene;
+		const devModeScene = this.devModeScene = taro.renderer.scene.getScene('DevMode') as DevModeScene;
 		devModeScene.regions.push(this);
 
-		if (this.devModeOnly && !ige.developerMode.active && ige.developerMode.activeTab !== 'play') {
+		if (this.devModeOnly && !taro.developerMode.active && taro.developerMode.activeTab !== 'play') {
 			this.hide();
 		}
 
@@ -64,7 +64,7 @@ class PhaserRegion extends PhaserEntity {
 			const label = this.label = scene.add.bitmapText(0, 0,
 				BitmapFontManager.font(scene,
 					'Verdana', false,
-					ige.game.data.settings
+					taro.game.data.settings
 						.addStrokeToNameAndAttributes !== false,
 					'#FFFFFF'
 				),

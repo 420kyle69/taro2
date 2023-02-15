@@ -24,54 +24,54 @@ var GameScene = /** @class */ (function (_super) {
     }
     GameScene.prototype.init = function () {
         var _this = this;
-        if (ige.isMobile) {
+        if (taro.isMobile) {
             this.scene.launch('MobileControls');
         }
         var camera = this.cameras.main;
-        camera.setBackgroundColor(ige.game.data.defaultData.mapBackgroundColor);
+        camera.setBackgroundColor(taro.game.data.defaultData.mapBackgroundColor);
         this.scale.on(Phaser.Scale.Events.RESIZE, function () {
             if (_this.zoomSize) {
                 camera.zoom = _this.calculateZoom();
-                ige.client.emit('scale', { ratio: camera.zoom });
+                taro.client.emit('scale', { ratio: camera.zoom });
             }
         });
-        ige.client.on('zoom', function (height) {
+        taro.client.on('zoom', function (height) {
             if (_this.zoomSize === height * 2.15) {
                 return;
             }
             _this.setZoomSize(height);
             var ratio = _this.calculateZoom();
             camera.zoomTo(ratio, 1000, Phaser.Math.Easing.Quadratic.Out, true);
-            ige.client.emit('scale', { ratio: ratio });
+            taro.client.emit('scale', { ratio: ratio });
         });
-        ige.client.on('change-filter', function (data) {
+        taro.client.on('change-filter', function (data) {
             _this.changeTextureFilter(data.filter);
         });
-        ige.client.on('updateMap', function () {
+        taro.client.on('updateMap', function () {
             _this.updateMap();
         });
-        ige.client.on('create-unit', function (unit) {
+        taro.client.on('create-unit', function (unit) {
             new PhaserUnit(_this, unit);
         });
-        ige.client.on('create-item', function (item) {
+        taro.client.on('create-item', function (item) {
             new PhaserItem(_this, item);
         });
-        ige.client.on('create-projectile', function (projectile) {
+        taro.client.on('create-projectile', function (projectile) {
             new PhaserProjectile(_this, projectile);
         });
-        ige.client.on('create-region', function (region) {
+        taro.client.on('create-region', function (region) {
             new PhaserRegion(_this, region);
         });
-        ige.client.on('create-ray', function (data) {
+        taro.client.on('create-ray', function (data) {
             new PhaserRay(_this, data.start, data.end, data.config);
         });
-        ige.client.on('floating-text', function (data) {
+        taro.client.on('floating-text', function (data) {
             new PhaserFloatingText(_this, data);
         });
-        ige.client.on('stop-follow', function () {
+        taro.client.on('stop-follow', function () {
             camera.stopFollow();
         });
-        ige.client.on('position-camera', function (x, y) {
+        taro.client.on('position-camera', function (x, y) {
             x -= camera.width / 2;
             y -= camera.height / 2;
             camera.setScroll(x, y);
@@ -79,7 +79,7 @@ var GameScene = /** @class */ (function (_super) {
     };
     GameScene.prototype.preload = function () {
         var _this = this;
-        var data = ige.game.data;
+        var data = taro.game.data;
         if (data.texturePack) {
             // todo: multiatlas
             this.load.atlas({
@@ -183,12 +183,12 @@ var GameScene = /** @class */ (function (_super) {
         var _this = this;
         this.events.once('render', function () {
             _this.scene.launch('DevMode');
-            ige.client.rendererLoaded.resolve();
+            taro.client.rendererLoaded.resolve();
         });
         BitmapFontManager.create(this);
         var map = this.tilemap = this.make.tilemap({ key: 'map' });
-        var data = ige.game.data;
-        var scaleFactor = ige.scaleMapDetails.scaleFactor;
+        var data = taro.game.data;
+        var scaleFactor = taro.scaleMapDetails.scaleFactor;
         console.log('map data', data.map);
         data.map.tilesets.forEach(function (tileset) {
             var key = "tiles/".concat(tileset.name);
@@ -228,13 +228,13 @@ var GameScene = /** @class */ (function (_super) {
         var camera = this.cameras.main;
         camera.centerOn(map.width * map.tileWidth / 2 * scaleFactor.x, map.height * map.tileHeight / 2 * scaleFactor.y);
         this.events.on('update', function () {
-            ige.client.emit('tick');
+            taro.client.emit('tick');
         });
         if (data.defaultData.heightBasedZIndex) {
             this.heightRenderer = new HeightRenderComponent(this, map.height * map.tileHeight);
         }
         //get filter from game data
-        this.changeTextureFilter(ige.game.data.defaultData.renderingFilter);
+        this.changeTextureFilter(taro.game.data.defaultData.renderingFilter);
     };
     GameScene.prototype.changeTextureFilter = function (filter) {
         var _this = this;
@@ -259,7 +259,7 @@ var GameScene = /** @class */ (function (_super) {
     };
     GameScene.prototype.updateMap = function () {
         var map = this.tilemap;
-        var data = ige.game.data;
+        var data = taro.game.data;
         data.map.layers.forEach(function (layer) {
             if (layer.type === 'tilelayer') {
                 var layerId_1;
@@ -365,7 +365,7 @@ var GameScene = /** @class */ (function (_super) {
     GameScene.prototype.update = function () {
         var _this = this;
         var worldPoint = this.cameras.main.getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
-        ige.input.emit('pointermove', [{
+        taro.input.emit('pointermove', [{
                 x: worldPoint.x,
                 y: worldPoint.y,
             }]);

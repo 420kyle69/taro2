@@ -10,7 +10,7 @@ interface ControlAbility {
 	keyUp?: ControlAbility['keyDown']
 }
 
-declare class MobileControlsComponent extends IgeEntity {
+declare class MobileControlsComponent extends TaroEntity {
 
 	controls: Record<MobileControlKey, MobileControlSettings>;
 

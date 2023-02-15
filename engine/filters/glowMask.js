@@ -1,4 +1,4 @@
-IgeFilters.glowMask = function (canvas, ctx, originalImage, texture, data) {
+TaroFilters.glowMask = function (canvas, ctx, originalImage, texture, data) {
 	var oneNinth = 1 / 9;
 	var pixelData;
 	var tempCanvas;
@@ -20,7 +20,7 @@ IgeFilters.glowMask = function (canvas, ctx, originalImage, texture, data) {
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 
 		for (i = 0; i < data.blurPasses; i++) {
-			pixelData = IgeFilters._convolute(
+			pixelData = TaroFilters._convolute(
 				pixelData,
 				[
 					oneNinth, oneNinth, oneNinth,

@@ -1,4 +1,4 @@
-declare class Player extends IgeEntity {
+declare class Player extends TaroEntity {
 	createUnit(data: any): Unit
 
 }

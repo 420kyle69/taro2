@@ -1,7 +1,7 @@
-var igePhysicsConfig = {
+var taroPhysicsConfig = {
 
-	igePhysicsChoices: {
-		/* Includes for the main IGE loader. Flags are indicated as:
+	taroPhysicsChoices: {
+		/* Includes for the main taro loader. Flags are indicated as:
 		* c = client
 		* s = server
 		* a =
@@ -11,16 +11,16 @@ var igePhysicsConfig = {
 		/* Physics Libraries */
 		planck: [
 			['csap', 'PhysicsComponent', './components/physics/box2d/Box2dComponent.js'],
-			['csap', 'IgeEntityPhysics', './components/physics/box2d/IgeEntityPhysics.js'],
-			['csap', 'IgeBox2dWorld', './components/physics/box2d/IgeBox2dDebugPainter.js'],
+			['csap', 'TaroEntityPhysics', './components/physics/box2d/TaroEntityPhysics.js'],
+			['csap', 'TaroBox2dWorld', './components/physics/box2d/TaroBox2dDebugPainter.js'],
 			['csap', 'dists', './components/physics/box2d/dists.js'],
 			['csap', 'planck', './components/physics/box2d/dists/planck/planck.js']
 		],
 
 		box2dweb: [
 			['csap', 'PhysicsComponent', './components/physics/box2d/Box2dComponent.js'],
-			['csap', 'IgeEntityPhysics', './components/physics/box2d/IgeEntityPhysics.js'],
-			['csap', 'IgeBox2dWorld', './components/physics/box2d/IgeBox2dDebugPainter.js'],
+			['csap', 'TaroEntityPhysics', './components/physics/box2d/TaroEntityPhysics.js'],
+			['csap', 'TaroBox2dWorld', './components/physics/box2d/TaroBox2dDebugPainter.js'],
 			['csap', 'dists', './components/physics/box2d/dists.js'],
 			['csap', 'box2dweb', './components/physics/box2d/dists/box2dweb/lib_box2d.js', 'box2dweb'],
 			['csap', 'box2dninja', './components/physics/box2d/dists/box2dweb/box2d_ninja.js', 'box2dninja']
@@ -28,15 +28,15 @@ var igePhysicsConfig = {
 
 		box2dts: [
 			['csap', 'PhysicsComponent', './components/physics/box2d/Box2dComponent.js'],
-			['csap', 'IgeEntityPhysics', './components/physics/box2d/IgeEntityPhysics.js'],
-			['csap', 'IgeBox2dWorld', './components/physics/box2d/IgeBox2dDebugPainter.js'],
+			['csap', 'TaroEntityPhysics', './components/physics/box2d/TaroEntityPhysics.js'],
+			['csap', 'TaroBox2dWorld', './components/physics/box2d/TaroBox2dDebugPainter.js'],
 			['csap', 'dists', './components/physics/box2d/dists.js'],
 			['csap', 'box2dts', './components/physics/box2d/dists/flyoverbox2dts/bundle.js']
 		],
 
 		crash: [
 			['csap', 'PhysicsComponent', './components/physics/crash/CrashComponent.js'],
-			['csap', 'IgeEntityPhysics', './components/physics/crash/IgeEntityPhysics.js'],
+			['csap', 'TaroEntityPhysics', './components/physics/crash/TaroEntityPhysics.js'],
 			['csap', 'CollisionController', './components/physics/crash/CollisionController.js'],
 			['csap', 'quickselect', './components/physics/crash/crashDependencies/quickselect.js'],
 			['csap', 'rbush', './components/physics/crash/crashDependencies/rbush.js'],
@@ -56,7 +56,7 @@ var igePhysicsConfig = {
 	],
 
 	loadSelectPhysics: function (physicsChoice) {
-		this.loadFiles(this.igePhysicsChoices[physicsChoice]);
+		this.loadFiles(this.taroPhysicsChoices[physicsChoice]);
 	},
 
 	loadPhysicsGameClasses: function () {
@@ -75,7 +75,7 @@ var igePhysicsConfig = {
 		var args = argParse(process.argv, { separator: '-' });
 
 		if (!args['-deploy']) {
-			// Loop the igeCoreConfig object's include array
+			// Loop the taroCoreConfig object's include array
 			// and load the required files
 			for (arrIndex = 0; arrIndex < arrCount; arrIndex++) {
 				arrItem = arr[arrIndex];
@@ -93,4 +93,4 @@ var igePhysicsConfig = {
 		}
 	}
 };
-if (typeof (module) !== 'undefined' && typeof (module.exports) !== 'undefined') { module.exports = igePhysicsConfig; }
+if (typeof (module) !== 'undefined' && typeof (module.exports) !== 'undefined') { module.exports = taroPhysicsConfig; }

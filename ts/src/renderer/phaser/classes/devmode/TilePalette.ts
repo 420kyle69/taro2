@@ -54,7 +54,7 @@ class TilePalette extends Phaser.GameObjects.Container {
 		camera.setBackgroundColor(0x000000);
 
 		texturesLayer.on('pointermove', (p) => {
-			const devModeScene = ige.renderer.scene.getScene('DevMode') as DevModeScene;
+			const devModeScene = taro.renderer.scene.getScene('DevMode') as DevModeScene;
             devModeScene.regionEditor.cancelDrawRegion();
 			if (!p.isDown || scene.tileEditor.startDragIn !== 'palette') return;
 			const scrollX = (p.x - p.prevPosition.x) / camera.zoom
@@ -108,15 +108,15 @@ class TilePalette extends Phaser.GameObjects.Container {
 		});
 
 		this.scene.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
-			if (ige.developerMode.active && ige.developerMode.activeTab !== 'play') {
+			if (taro.developerMode.active && taro.developerMode.activeTab !== 'play') {
 				if (this.visible && pointerover) {
 					this.zoom(deltaY);
 				} else if (deltaY < 0) {
 					const zoom = (this.scene.gameScene.zoomSize / 2.15) / 1.1;
-					ige.client.emit('zoom', zoom);
+					taro.client.emit('zoom', zoom);
 				} else if (deltaY > 0) {
 					const zoom = (this.scene.gameScene.zoomSize / 2.15) * 1.1;
-					ige.client.emit('zoom', zoom);
+					taro.client.emit('zoom', zoom);
 				}
 			}
 		})

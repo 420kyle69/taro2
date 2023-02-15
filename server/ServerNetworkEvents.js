@@ -13,45 +13,45 @@ var ServerNetworkEvents = {
 		// Tell the client to track their player entity
 		// Don't reject the client connection
 		var clientId = socket.id;
-		console.log('3. _onClientConnect ' + clientId + ' (ip: ' + socket._remoteAddress + ') client count: ' + Object.keys(ige.server.clients).length, '(ServerNetworkEvents.js)');
+		console.log('3. _onClientConnect ' + clientId + ' (ip: ' + socket._remoteAddress + ') client count: ' + Object.keys(taro.server.clients).length, '(ServerNetworkEvents.js)');
 
-		ige.server.clients[clientId] = {
+		taro.server.clients[clientId] = {
 			id: clientId,
 			socket: socket,
 			ip: socket._remoteAddress
 		};
 
-		ige.server.clients[clientId].lastEventAt = Date.now();
+		taro.server.clients[clientId].lastEventAt = Date.now();
 
-		ige.server.testerId = clientId;
+		taro.server.testerId = clientId;
 	},
 
 	_onClientDisconnect: function (clientId) {
 		var self = this;
 
-		ige.network.send('clientDisconnect', { reason: 'Player disconnected', clientId: clientId });
+		taro.network.send('clientDisconnect', { reason: 'Player disconnected', clientId: clientId });
 
 		// remove client from streamData
-		for (entityId in ige.network.stream._streamClientCreated) {
-			delete ige.network.stream._streamClientCreated[entityId][clientId];
+		for (entityId in taro.network.stream._streamClientCreated) {
+			delete taro.network.stream._streamClientCreated[entityId][clientId];
 		}
 
-		var client = ige.server.clients[clientId];
-		var player = ige.game.getPlayerByClientId(clientId);
+		var client = taro.server.clients[clientId];
+		var player = taro.game.getPlayerByClientId(clientId);
 
 		if (client && client._id) {
-			ige.devLog('BE(out): clientDisconnect: ' + clientId + ' ' + client._id);
+			taro.devLog('BE(out): clientDisconnect: ' + clientId + ' ' + client._id);
 
 			if (player) {
 				console.log('_onclientDisconnect' + clientId + ' (' + player._stats.name + ')' + (Date.now() - client.lastEventAt));
 				player.updatePlayerHighscore();
 
 				if (player._stats.userId) {
-					ige.clusterClient.saveLastPlayedTime(player._stats.userId);
+					taro.clusterClient.saveLastPlayedTime(player._stats.userId);
 				}
 			}
 
-			ige.clusterClient.emit('clientDisconnect', client._id);
+			taro.clusterClient.emit('clientDisconnect', client._id);
 		}
 
 		delete client;
@@ -64,38 +64,38 @@ var ServerNetworkEvents = {
 	_onJoinGameWrapper: function (data, clientId) {
 
 		var reason = 'IP banned.';
-		var client = ige.server.clients[clientId];
-		var socket = ige.network._socketById[clientId];
+		var client = taro.server.clients[clientId];
+		var socket = taro.network._socketById[clientId];
 		if (client) {
 			var ipAddress = client.ip;
 
 			var removeAllConnectedPlayerWithSameIp = function () {
 				var getAllPlayers = true;
-				var players = ige.game.getPlayerByIp(ipAddress, undefined, getAllPlayers);
+				var players = taro.game.getPlayerByIp(ipAddress, undefined, getAllPlayers);
 				players.forEach((player) => {
 					if (player) {
 						player.remove();
-						var ps = ige.network._socketById[player._stats.clientId];
+						var ps = taro.network._socketById[player._stats.clientId];
 						ps && ps.close(reason);
 					}
 				});
 			}
 
-			if (ige.banIpsList.includes(ipAddress)) {
+			if (taro.banIpsList.includes(ipAddress)) {
 				removeAllConnectedPlayerWithSameIp();
 				socket.close(reason);
 				return;
 			}
 
-			ige.server._onJoinGame(data, clientId);
+			taro.server._onJoinGame(data, clientId);
 		}
 	},
 
 	_onJoinGame: function (data, clientId) {
 
 		// assign _id and sessionID to the new client
-		var client = ige.server.clients[clientId];
-		var socket = ige.network._socketById[clientId];
+		var client = taro.server.clients[clientId];
+		var socket = taro.network._socketById[clientId];
 
 		if (!socket) {
 			try {
@@ -137,14 +137,14 @@ var ServerNetworkEvents = {
 		data.ipAddress = client && client.ip;
 
 		var currentClientIp = data.ipAddress;
-		var isIpRestricted = ige.game.data.defaultData.banIps.find(function (obj) {
+		var isIpRestricted = taro.game.data.defaultData.banIps.find(function (obj) {
 			if (obj.ip == currentClientIp) return true;
 		});
 
 		if (isIpRestricted) {
 			console.log('IP is banned for ', clientId);
 			var reason = 'Restricted IP detected.';
-			ige.network.send('clientDisconnect', { reason, clientId: clientId });
+			taro.network.send('clientDisconnect', { reason, clientId: clientId });
 			if (socket) {
 				socket.close(reason);
 				return;
@@ -152,13 +152,13 @@ var ServerNetworkEvents = {
 		}
 
 		// var ip = socket._remoteAddress;
-		var playerWithDuplicateIP = ige.game.getPlayerByIp(currentClientIp, data._id);
+		var playerWithDuplicateIP = taro.game.getPlayerByIp(currentClientIp, data._id);
 		var maximumDuplicateIpsAllowed = 5;
-		// if (playerWithDuplicateIP && playerWithDuplicateIP.getUnitCount() >= 1 && !(ige.game.data && ige.game.data.settings.allowDuplicateIPs)) {
+		// if (playerWithDuplicateIP && playerWithDuplicateIP.getUnitCount() >= 1 && !(taro.game.data && taro.game.data.settings.allowDuplicateIPs)) {
 		if (playerWithDuplicateIP && playerWithDuplicateIP.getUnitCount() >= maximumDuplicateIpsAllowed) {
 			var reason = 'Duplicate IP detected. <br/>Please login to play the game <br/><a href="/?login=true" class="btn btn-primary">Login</a>';
 			console.log('Duplicate IP ' + currentClientIp + ' detected for ' + clientId);
-			ige.network.send('clientDisconnect', { reason, clientId: clientId });
+			taro.network.send('clientDisconnect', { reason, clientId: clientId });
 			socket.close(reason);
 			return;
 		}
@@ -166,20 +166,20 @@ var ServerNetworkEvents = {
 		// if user is logged-in
 		if (data && data._id) {
 			// if player already exists in the game
-			var player = ige.game.getPlayerByUserId(data._id);
+			var player = taro.game.getPlayerByUserId(data._id);
 
 			//condition for menu open and click for play game button durring current play game.
 			if (player && player._stats && clientId != player._stats.clientId) {
 				console.log('Client already exists. Kicking the existing player ' + player._stats.clientId + ' (' + player._stats.name + ')');
 				player.updatePlayerHighscore();
 				var oldPlayerClientId = player._stats.clientId;
-				ige.network.send('clientDisconnect', { reason: 'Player disconnected', clientId: oldPlayerClientId });
+				taro.network.send('clientDisconnect', { reason: 'Player disconnected', clientId: oldPlayerClientId });
 
-				if (ige.server.clients[oldPlayerClientId] && ige.server.clients[oldPlayerClientId]._id) {
-					ige.clusterClient.emit('clientDisconnect', ige.server.clients[oldPlayerClientId]._id);
+				if (taro.server.clients[oldPlayerClientId] && taro.server.clients[oldPlayerClientId]._id) {
+					taro.clusterClient.emit('clientDisconnect', taro.server.clients[oldPlayerClientId]._id);
 				}
 
-				delete ige.server.clients[oldPlayerClientId];
+				delete taro.server.clients[oldPlayerClientId];
 
 				//kicking player out of the game.
 				player.remove();
@@ -201,7 +201,7 @@ var ServerNetworkEvents = {
 				}
 
 				console.log('request-user-data for ' + clientId + ' (user._id:' + data._id + ')');
-				ige.clusterClient && ige.clusterClient.emit('request-user-data', data);
+				taro.clusterClient && taro.clusterClient.emit('request-user-data', data);
 				if (process.env.ENV === 'standalone') {
 					if (player == undefined) {
 						var userData = {
@@ -213,7 +213,7 @@ var ServerNetworkEvents = {
 							purchasables: {}
 						};
 						// console.log("createPlayer (logged-in user)")		
-						var player = ige.game.createPlayer();
+						var player = taro.game.createPlayer();
 						for (key in userData) {
 							var obj = {};
 							obj[key] = userData[key];
@@ -230,11 +230,11 @@ var ServerNetworkEvents = {
 		{
 			console.log('5. joining as a guest player (ServerNetworkEvents.js)');
 
-			var socket = ige.network._socketById[clientId];
+			var socket = taro.network._socketById[clientId];
 			if (socket) {
 
 				// if this guest hasn't created player yet (hasn't joined the game yet)
-				var player = ige.game.getPlayerByClientId(socket.id);
+				var player = taro.game.getPlayerByClientId(socket.id);
 
 				if (player) {
 					player._stats.isAdBlockEnabled = data.isAdBlockEnabled;
@@ -244,7 +244,7 @@ var ServerNetworkEvents = {
 					}
 
 					// console.log("createPlayer (guest user)")				
-					var player = ige.game.createPlayer({
+					var player = taro.game.createPlayer({
 						controlledBy: 'human',
 						name: 'user' + data.number,
 						coins: 0,
@@ -261,21 +261,21 @@ var ServerNetworkEvents = {
 
 
 	_onBuySkin: function (skinHandle, clientId) {
-		var player = ige.game.getPlayerByClientId(clientId);
+		var player = taro.game.getPlayerByClientId(clientId);
 		if (player) {
 			var unit = player.getSelectedUnit();
 			if (
 				unit &&
-				ige.game.data.skins &&
-				ige.game.data.skins[skinHandle] &&
-				unit._stats.points >= ige.game.data.skins[skinHandle].price &&
+				taro.game.data.skins &&
+				taro.game.data.skins[skinHandle] &&
+				unit._stats.points >= taro.game.data.skins[skinHandle].price &&
 				unit._stats.skin != skinHandle
 			) {
-				unit._stats.points -= ige.game.data.skins[skinHandle].price;
+				unit._stats.points -= taro.game.data.skins[skinHandle].price;
 				unit._stats.skin = skinHandle;
 				unit.updateTexture(skinHandle);
 
-				ige.network.send('buySkin', skinHandle, clientId);
+				taro.network.send('buySkin', skinHandle, clientId);
 				unit.streamUpdateData([
 					{ skin: unit._stats.skin },
 					{ points: unit._stats.points }
@@ -287,11 +287,11 @@ var ServerNetworkEvents = {
 	_onTrade: function (msg, clientId) {
 		switch (msg.type) {
 			case 'start': {
-				var requestedBy = ige.$(msg.requestedBy);
-				var acceptedBy = ige.$(msg.acceptedBy);
+				var requestedBy = taro.$(msg.requestedBy);
+				var acceptedBy = taro.$(msg.acceptedBy);
 				if (requestedBy && acceptedBy && requestedBy._category === 'player' && acceptedBy._category === 'player') {
 					var tradeBetween = { playerA: requestedBy.id(), playerB: acceptedBy.id() };
-					ige.network.send('trade', { type: 'start', between: tradeBetween }, requestedBy._stats.clientId);
+					taro.network.send('trade', { type: 'start', between: tradeBetween }, requestedBy._stats.clientId);
 					requestedBy.tradingWith = acceptedBy.id();
 					requestedBy.isTrading = true;
 					acceptedBy.tradingWith = requestedBy.id();
@@ -300,10 +300,10 @@ var ServerNetworkEvents = {
 				break;
 			}
 			case 'offer': {
-				var from = ige.$(msg.from);
-				var to = ige.$(msg.to);
+				var from = taro.$(msg.from);
+				var to = taro.$(msg.to);
 				if (from && to && from._category === 'player' && from._category === 'player' && from.tradingWith === to.id()) {
-					ige.network.send('trade', {
+					taro.network.send('trade', {
 						type: 'offer',
 						from: msg.from,
 						to: msg.to,
@@ -313,12 +313,12 @@ var ServerNetworkEvents = {
 				break;
 			}
 			case 'accept': {
-				var acceptedBy = ige.$(msg.acceptedBy);
-				var acceptedFor = ige.$(msg.acceptedFor);
+				var acceptedBy = taro.$(msg.acceptedBy);
+				var acceptedFor = taro.$(msg.acceptedFor);
 
 				if (acceptedBy && acceptedFor) {
 					if (!acceptedBy.acceptTrading) {
-						ige.chat.sendToRoom('1', 'Trading has been accepted by ' + acceptedBy._stats.name, acceptedFor._stats.clientId);
+						taro.chat.sendToRoom('1', 'Trading has been accepted by ' + acceptedBy._stats.name, acceptedFor._stats.clientId);
 					}
 					if (acceptedBy.tradingWith === acceptedFor.id()) {
 						acceptedBy.acceptTrading = true;
@@ -334,7 +334,7 @@ var ServerNetworkEvents = {
 
 						for (var i = 0; i < unitAItems.length; i++) {
 							if (unitAItems[i]) {
-								var item = ige.$(unitAItems[i]);
+								var item = taro.$(unitAItems[i]);
 								unitA.dropItem(item._stats.slotIndex);
 								isTradingSuccessful = unitB.pickUpItem(item);
 
@@ -347,7 +347,7 @@ var ServerNetworkEvents = {
 
 						for (var i = 0; i < unitBItems.length; i++) {
 							if (unitBItems[i]) {
-								var item = ige.$(unitBItems[i]);
+								var item = taro.$(unitBItems[i]);
 								unitB.dropItem(item._stats.slotIndex);
 								isTradingSuccessful = unitA.pickUpItem(item);
 
@@ -363,9 +363,9 @@ var ServerNetworkEvents = {
 						};
 
 						if (!isTradingSuccessful) {
-							ige.network.send('trade', { type: 'error', between: tradeBetween }, acceptedFor._stats.clientId);
+							taro.network.send('trade', { type: 'error', between: tradeBetween }, acceptedFor._stats.clientId);
 
-							ige.network.send('trade', { type: 'error', between: tradeBetween }, acceptedBy._stats.clientId);
+							taro.network.send('trade', { type: 'error', between: tradeBetween }, acceptedBy._stats.clientId);
 							return;
 						}
 
@@ -374,9 +374,9 @@ var ServerNetworkEvents = {
 
 
 
-						ige.network.send('trade', { type: 'success', between: tradeBetween }, acceptedFor._stats.clientId);
+						taro.network.send('trade', { type: 'success', between: tradeBetween }, acceptedFor._stats.clientId);
 
-						ige.network.send('trade', { type: 'success', between: tradeBetween }, acceptedBy._stats.clientId);
+						taro.network.send('trade', { type: 'success', between: tradeBetween }, acceptedBy._stats.clientId);
 						if (acceptedBy) {
 							delete acceptedBy.isTrading;
 							delete acceptedBy.tradingWith;
@@ -393,8 +393,8 @@ var ServerNetworkEvents = {
 				break;
 			}
 			case 'cancel': {
-				var playerA = ige.$(msg.cancleBy);
-				var playerB = ige.$(msg.cancleTo);
+				var playerA = taro.$(msg.cancleBy);
+				var playerB = taro.$(msg.cancleTo);
 				if (playerA) {
 					delete playerA.isTrading;
 					delete playerA.tradingWith;
@@ -407,15 +407,15 @@ var ServerNetworkEvents = {
 				}
 
 				var tradeBetween = { playerA: msg.cancleBy, playerB: msg.cancleTo };
-				ige.network.send('trade', { type: 'cancel', between: tradeBetween }, playerB._stats.clientId);
-				ige.chat.sendToRoom('1', 'Trading has been cancel by ' + playerA._stats.name, playerB._stats.clientId);
+				taro.network.send('trade', { type: 'cancel', between: tradeBetween }, playerB._stats.clientId);
+				taro.chat.sendToRoom('1', 'Trading has been cancel by ' + playerA._stats.name, playerB._stats.clientId);
 
 				var unitA = playerA.getSelectedUnit();
 				if (unitA) {
 					var unitAInventorySize = unitA.inventory.getTotalInventorySize();
 					for (var i = unitAInventorySize; i < unitAInventorySize + 5; i++) {
 						var offeringItemId = unitA._stats.itemIds[i];
-						var item = offeringItemId && ige.$(offeringItemId);
+						var item = offeringItemId && taro.$(offeringItemId);
 						if (item && item._category === 'item') {
 							var availSlot = unitA.inventory.getFirstAvailableSlotForItem(item);
 							unitA._stats.itemIds[availSlot] = unitA._stats.itemIds[i];
@@ -431,7 +431,7 @@ var ServerNetworkEvents = {
 					var unitBInventorySize = unitB.inventory.getTotalInventorySize();
 					for (var i = unitBInventorySize; i < unitBInventorySize + 5; i++) {
 						var offeringItemId = unitB._stats.itemIds[i];
-						var item = offeringItemId && ige.$(offeringItemId);
+						var item = offeringItemId && taro.$(offeringItemId);
 						if (item && item._category === 'item') {
 							var availSlot = unitB.inventory.getFirstAvailableSlotForItem(item);
 							unitB._stats.itemIds[availSlot] = unitB._stats.itemIds[i];
@@ -447,22 +447,22 @@ var ServerNetworkEvents = {
 	},
 
 	_onEditTile: function(data, clientId) {
-		ige.developerMode.editTile(data, clientId);
+		taro.developerMode.editTile(data, clientId);
 	},
 
 	_onEditRegion: function(data, clientId) {
-		ige.developerMode.editRegion(data, clientId);
+		taro.developerMode.editRegion(data, clientId);
 	},
 
 	_onEditEntity: function(data, clientId) {
-		ige.developerMode.editEntity(data, clientId);
+		taro.developerMode.editEntity(data, clientId);
 	},
 
 	_onBuyItem: function (data, clientId) {
 		const {id, token} = data;
-		ige.devLog('player ' + clientId + ' wants to purchase item' + id);
+		taro.devLog('player ' + clientId + ' wants to purchase item' + id);
 
-		var player = ige.game.getPlayerByClientId(clientId);
+		var player = taro.game.getPlayerByClientId(clientId);
 		if (player) {
 			var unit = player.getSelectedUnit();
 			if (unit) {
@@ -472,8 +472,8 @@ var ServerNetworkEvents = {
 	},
 	
 	_onBuyUnit: function (id, clientId) {
-		ige.devLog('player ' + clientId + ' wants to purchase item' + id);
-		var player = ige.game.getPlayerByClientId(clientId);
+		taro.devLog('player ' + clientId + ' wants to purchase item' + id);
+		var player = taro.game.getPlayerByClientId(clientId);
 		if (player) {
 			var unit = player.getSelectedUnit();
 			if (unit) {
@@ -483,7 +483,7 @@ var ServerNetworkEvents = {
 	},
 
 	_onEquipSkin: function (equipPurchasable, clientId) {
-		var player = ige.game.getPlayerByClientId(clientId);
+		var player = taro.game.getPlayerByClientId(clientId);
 		if (player) {
 			var unit = player.getSelectedUnit();
 			if (unit) {
@@ -493,13 +493,13 @@ var ServerNetworkEvents = {
 	},
 
 	_onSwapInventory: function (data, clientId) {
-		var player = ige.game.getPlayerByClientId(clientId);
+		var player = taro.game.getPlayerByClientId(clientId);
 		if (player) {
 			var unit = player.getSelectedUnit();		
 			if (unit && unit._stats) {
 				var itemIds = _.cloneDeep(unit._stats.itemIds);
-				var fromItem = ige.$(itemIds[data.from]);
-				var toItem = ige.$(itemIds[data.to]);
+				var fromItem = taro.$(itemIds[data.from]);
+				var toItem = taro.$(itemIds[data.to]);
 
 				// both FROM & TO slots have items
 				if (
@@ -597,74 +597,74 @@ var ServerNetworkEvents = {
 	},
 
 	_onKick: function (kickedClientId, modClientId) {
-		var modPlayer = ige.game.getPlayerByClientId(modClientId);
-		var kickedPlayer = ige.game.getPlayerByClientId(kickedClientId);
+		var modPlayer = taro.game.getPlayerByClientId(modClientId);
+		var kickedPlayer = taro.game.getPlayerByClientId(kickedClientId);
 
 		if (!modPlayer) {
 			return;
 		}
 
-		var isUserDeveloper = (modPlayer._stats.userId == ige.game.data.defaultData.owner) ||
-			ige.game.data.defaultData.invitedUsers.find(function (iu) { if (iu.user === modPlayer._stats.userId) { return true; } }) ||
+		var isUserDeveloper = (modPlayer._stats.userId == taro.game.data.defaultData.owner) ||
+			taro.game.data.defaultData.invitedUsers.find(function (iu) { if (iu.user === modPlayer._stats.userId) { return true; } }) ||
 			modPlayer._stats.isUserAdmin ||
 			modPlayer._stats.isUserMod;
 			
 		if (isUserDeveloper && kickedPlayer) {
-			ige.game.kickPlayer(kickedPlayer.id());
+			taro.game.kickPlayer(kickedPlayer.id());
 		}
 	},
 	
 	_onBanUser: function ({ userId, kickuserId }, clientId) {
-		var player = ige.game.getPlayerByClientId(clientId);
+		var player = taro.game.getPlayerByClientId(clientId);
 
 		if (!player) {
 			return;
 		}
 
-		var isUserDeveloper = (player._stats.userId == ige.game.data.defaultData.owner) ||
-			ige.game.data.defaultData.invitedUsers.find(function (iu) { if (iu.user === player._stats.userId) { return true; } }) ||
+		var isUserDeveloper = (player._stats.userId == taro.game.data.defaultData.owner) ||
+			taro.game.data.defaultData.invitedUsers.find(function (iu) { if (iu.user === player._stats.userId) { return true; } }) ||
 			player._stats.isUserAdmin ||
 			player._stats.isUserMod;
 
 		if (isUserDeveloper) {
-			var kickedPlayer = ige.$$('player').find(function (player) {
+			var kickedPlayer = taro.$$('player').find(function (player) {
 				if (player._stats && player._stats.clientId === kickuserId) return true;
 			});
 			kickedPlayer.streamUpdateData([{ playerJoined: false }]);
-			ige.clusterClient.banUser({
+			taro.clusterClient.banUser({
 				userId: userId
 			});
 		}
 	},
 	_onBanIp: function ({ gameId, kickuserId }, clientId) {
-		var player = ige.game.getPlayerByClientId(clientId);
+		var player = taro.game.getPlayerByClientId(clientId);
 
 		if (!player) {
 			return;
 		}
 
-		var isUserDeveloper = (player._stats.userId == ige.game.data.defaultData.owner) ||
-			ige.game.data.defaultData.invitedUsers.find(function (iu) { if (iu.user === player._stats.userId) { return true; } }) ||
+		var isUserDeveloper = (player._stats.userId == taro.game.data.defaultData.owner) ||
+			taro.game.data.defaultData.invitedUsers.find(function (iu) { if (iu.user === player._stats.userId) { return true; } }) ||
 			player._stats.isUserAdmin ||
 			player._stats.isUserMod;
 
 		if (isUserDeveloper) {
-			var kickedPlayer = ige.$$('player').find(function (player) {
+			var kickedPlayer = taro.$$('player').find(function (player) {
 				return player._stats && player._stats.clientId === kickuserId;
 			});
 			let ipaddress = null;
 			let userId = null;
-			for (let clientId in ige.server.clients) {
+			for (let clientId in taro.server.clients) {
 				if (clientId === kickuserId) {
-					ipaddress = ige.server.clients[clientId].ip;
-					userId = ige.server.clients[clientId]._id;
+					ipaddress = taro.server.clients[clientId].ip;
+					userId = taro.server.clients[clientId]._id;
 				}
 			}
 
 			kickedPlayer.streamUpdateData([{ playerJoined: false }]);
 
 			if (ipaddress) {
-				ige.clusterClient.banIp({
+				taro.clusterClient.banIp({
 					ipaddress: ipaddress,
 					gameId: gameId,
 					userId: userId
@@ -673,24 +673,24 @@ var ServerNetworkEvents = {
 		}
 	},
 	_onBanChat: function ({ gameId, kickuserId }, clientId) {
-		var player = ige.game.getPlayerByClientId(clientId);
+		var player = taro.game.getPlayerByClientId(clientId);
 
 		if (!player) {
 			return;
 		}
 
-		var isUserDeveloper = (player._stats.userId == ige.game.data.defaultData.owner) ||
-			ige.game.data.defaultData.invitedUsers.find(function (iu) { if (iu.user === player._stats.userId) { return true; } }) ||
+		var isUserDeveloper = (player._stats.userId == taro.game.data.defaultData.owner) ||
+			taro.game.data.defaultData.invitedUsers.find(function (iu) { if (iu.user === player._stats.userId) { return true; } }) ||
 			player._stats.isUserAdmin ||
 			player._stats.isUserMod;
 
 		if (isUserDeveloper) {
-			var banPlayer = ige.$$('player').find(function (player) {
+			var banPlayer = taro.$$('player').find(function (player) {
 				if (player._stats && player._stats.clientId === kickuserId) return true;
 			});
 			// kickedPlayer.streamUpdateData([{ playerJoined: false }]);
 
-			ige.clusterClient.banChat({
+			taro.clusterClient.banChat({
 				userId: banPlayer._stats.userId,
 				gameId: gameId,
 				status: !banPlayer._stats.banChat
@@ -700,7 +700,7 @@ var ServerNetworkEvents = {
 		}
 	},
 	_onUnEquipSkin: function (unEquipedId, clientId) {
-		var player = ige.game.getPlayerByClientId(clientId);
+		var player = taro.game.getPlayerByClientId(clientId);
 
 		if (!player) {
 			return;
@@ -713,7 +713,7 @@ var ServerNetworkEvents = {
 	},
 
 	_onPlayerMouseMoved: function (position, clientId) {
-		var player = ige.game.getPlayerByClientId(clientId);
+		var player = taro.game.getPlayerByClientId(clientId);
 		if (player) {
 			var unit = player.getSelectedUnit();
 			// prevent taking mouse input if mouse cursor is right above the selected unit
@@ -725,7 +725,7 @@ var ServerNetworkEvents = {
 	},
 
 	_onPlayerUnitMoved: function (position, clientId) {
-		var player = ige.game.getPlayerByClientId(clientId);
+		var player = taro.game.getPlayerByClientId(clientId);
 		if (player) {
 			var unit = player.getSelectedUnit();
 			if (unit) {
@@ -735,26 +735,26 @@ var ServerNetworkEvents = {
 	},
 
 	_onPlayerCustomInput: function (data, clientId) {
-		var player = ige.game.getPlayerByClientId(clientId);
+		var player = taro.game.getPlayerByClientId(clientId);
 		if (player && data && data.status === 'submitted') {
 			player.lastCustomInput = data.inputText;
-			ige.script.trigger('playerCustomInput', { playerId: player.id() });
+			taro.script.trigger('playerCustomInput', { playerId: player.id() });
 		}
 	},
 	_onPlayerAbsoluteAngle: function (data, clientId) {
-		var player = ige.game.getPlayerByClientId(clientId);
+		var player = taro.game.getPlayerByClientId(clientId);
 		if (player) {
 			player.absoluteAngle = data;
 		}
 	},
 	_onPlayerDialogueSubmit: function (data, clientId) {
-		var player = ige.game.getPlayerByClientId(clientId);
+		var player = taro.game.getPlayerByClientId(clientId);
 
 		if (player) {
 			var selectedOption = null;
 
-			for (var dialogId in ige.game.data.dialogues) {
-				var dialog = ige.game.data.dialogues[dialogId];
+			for (var dialogId in taro.game.data.dialogues) {
+				var dialog = taro.game.data.dialogues[dialogId];
 
 				if (dialogId === data.dialogue) {
 					for (var optionId in dialog.options) {
@@ -769,16 +769,16 @@ var ServerNetworkEvents = {
 			}
 
 			if (selectedOption) {
-				ige.game.lastPlayerSelectingDialogueOption = player.id();
+				taro.game.lastPlayerSelectingDialogueOption = player.id();
 				if (selectedOption.scriptName) {
-					ige.script.runScript(selectedOption.scriptName, {});
+					taro.script.runScript(selectedOption.scriptName, {});
 				}
 				if (selectedOption.followUpDialogue) {
-					ige.network.send('openDialogue', {
+					taro.network.send('openDialogue', {
 						type: selectedOption.followUpDialogue,
 						extraData: {
 							playerName: player._stats.name,
-							dialogueTemplate: _.get(ige, 'game.data.ui.dialogueview.htmlData', '')
+							dialogueTemplate: _.get(taro, 'game.data.ui.dialogueview.htmlData', '')
 						}
 					}, player._stats.clientId);
 				}
@@ -787,7 +787,7 @@ var ServerNetworkEvents = {
 	},
 
 	_onPlayerKeyDown: function (data, clientId) {
-		var player = ige.game.getPlayerByClientId(clientId);
+		var player = taro.game.getPlayerByClientId(clientId);
 		if (player != undefined) {
 			player.control.keyDown(data.device, data.key);
 		}
@@ -795,34 +795,34 @@ var ServerNetworkEvents = {
 
 
 	_onPlayerKeyUp: function (data, clientId) {
-		var player = ige.game.getPlayerByClientId(clientId);
+		var player = taro.game.getPlayerByClientId(clientId);
 		if (player != undefined) {
 			player.control.keyUp(data.device, data.key);
 		}
 	},
 
 	_onPlayerSelectUnit: function (data, clientId) {
-		var unit = ige.$(data.unitId);
-		var player = ige.game.getPlayerByClientId(clientId);
+		var unit = taro.$(data.unitId);
+		var player = taro.game.getPlayerByClientId(clientId);
 		if (player && unit) {
 			player.selectUnit(data.unitId);
 		}
 	},
 
 	_onRecordSocketMsgs: function (data, clientId) {
-		var player = ige.game.getPlayerByClientId(clientId);
+		var player = taro.game.getPlayerByClientId(clientId);
 
 		if (!player?._stats.isUserAdmin) {
 			return;
 		}
 
-		if (ige.clusterClient) {
-			ige.clusterClient.recordLogs(data);
+		if (taro.clusterClient) {
+			taro.clusterClient.recordLogs(data);
 		}
 	},
 
 	_onGetSocketMsgs: function (data, clientId) {
-		var player = ige.game.getPlayerByClientId(clientId);
+		var player = taro.game.getPlayerByClientId(clientId);
 
 		if (!player?._stats.isUserAdmin) {
 			return;
@@ -830,20 +830,20 @@ var ServerNetworkEvents = {
 
 		data = {...data, requester: clientId };
 
-		if (ige.clusterClient) {
-			ige.clusterClient.sendLogs(data);
+		if (taro.clusterClient) {
+			taro.clusterClient.sendLogs(data);
 		}
 	},
 
 	_onStopRecordSocketMsgs: function (data, clientId) {
-		var player = ige.game.getPlayerByClientId(clientId);
+		var player = taro.game.getPlayerByClientId(clientId);
 
 		if (!player?._stats.isUserAdmin) {
 			return;
 		}
 
-		if (ige.clusterClient) {
-			ige.clusterClient.stopRecordLogs(data);
+		if (taro.clusterClient) {
+			taro.clusterClient.stopRecordLogs(data);
 		}
 	},
 

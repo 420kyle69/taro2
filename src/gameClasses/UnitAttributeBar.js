@@ -1,10 +1,10 @@
-var UnitAttributeBar = IgeEntity.extend({
+var UnitAttributeBar = TaroEntity.extend({
 	classId: 'UnitAttributeBar',
 
 	init: function (parentEntityId, attributeData, config) {
 		var self = this;
 
-		IgeEntity.prototype.init.call(self);
+		TaroEntity.prototype.init.call(self);
 		self.id();
 		self.category('unitBar');
 
@@ -54,7 +54,7 @@ var UnitAttributeBar = IgeEntity.extend({
 	},
 
 	getOwner: function () {
-		return ige.$(this._stats.parentId);
+		return taro.$(this._stats.parentId);
 	},
 
 	/**

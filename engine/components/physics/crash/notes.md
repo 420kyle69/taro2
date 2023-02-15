@@ -8,8 +8,8 @@ const dyn_dyn_exitVelocities = function(aEntity, bEntity, overlapN) {
  const tangent = normal.clone().perp();
  let temp;
 
- let aVel = new ige.physics.crash.Vector(aEntity._velocity.x, aEntity._velocity.y);
- let bVel = new ige.physics.crash.Vector(bEntity._velocity.x, bEntity._velocity.y);
+ let aVel = new taro.physics.crash.Vector(aEntity._velocity.x, aEntity._velocity.y);
+ let bVel = new taro.physics.crash.Vector(bEntity._velocity.x, bEntity._velocity.y);
  temp = aVel;
  // const aVel_n = bVel.clone().projectN(normal);
  // const aVel_t = aVel.clone().projectN(tangent);
@@ -34,7 +34,7 @@ const dyn_dyn_exitVelocities = function(aEntity, bEntity, overlapN) {
 };
 
 const dyn_static_exitVelocity = function(aEntity, overlapN) {
- let aVel = new ige.physics.crash.Vector(aEntity._velocity.x, aEntity._velocity.y);
+ let aVel = new taro.physics.crash.Vector(aEntity._velocity.x, aEntity._velocity.y);
 
  // aVelVec = aVelVec.sub(res.overlapN.clone().scale((aVelVec.dot(res.overlapN))));
  aVel = aVel.clone().sub(aVel.projectN(overlapN).scale(2));
@@ -66,8 +66,8 @@ const listener = function(a, b, res, cancel) {
    //
    // new consideration, if we are going to use entity._velocity,
    // let's convert it to a SAT.Vector
-   // aVelVec = new ige.physics.crash.Vector(a.data.entity._velocity.x, a.data.entity._velocity.y);
-   // bVelVec = new ige.physics.crash.Vector(b.data.entity._velocity.x, b.data.entity._velocity.y);
+   // aVelVec = new taro.physics.crash.Vector(a.data.entity._velocity.x, a.data.entity._velocity.y);
+   // bVelVec = new taro.physics.crash.Vector(b.data.entity._velocity.x, b.data.entity._velocity.y);
    // scale the vector to 1/2
    // console.log(res);
    // console.log('overlap', res.overlapV);
@@ -77,7 +77,7 @@ const listener = function(a, b, res, cancel) {
    const halfOverlapVB = res.overlapV.clone().scale(0.5);
    const halfOverlapVA = halfOverlapVB.clone().reverse();
 
-   // console.log(a.data.igeId, b.data.igeId);
+   // console.log(a.data.taroId, b.data.taroId);
    // remember this overlapV is defined as if 'a' is the acting body
    // so we subtract from 'a' and add to 'b'
    // added 'moveByVec' to crash. It adds a vector to Collider.pos
@@ -101,7 +101,7 @@ const listener = function(a, b, res, cancel) {
    // if ((Math.PI * 2) % Math.abs(appliedAngle) !== 0) {
 
    //  b.data.entity.rotateTo(0, 0, -(Math.atan2(res.overlapN.y, res.overlapN.x) + (Math.PI / 2)));
-   //  // console.log('Applying angle to... ', b.data.igeId, round(Math.atan2(res.overlapN.y, res.overlapN.x) + (Math.PI / 2)), '\n');
+   //  // console.log('Applying angle to... ', b.data.taroId, round(Math.atan2(res.overlapN.y, res.overlapN.x) + (Math.PI / 2)), '\n');
    // } else {
    //  // console.log('Not applying this angle to b... ', round(Math.atan2(res.overlapN.y, res.overlapN.x) + (Math.PI / 2)), '\n');
    // }

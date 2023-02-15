@@ -1,4 +1,4 @@
-var UnitUiComponent = IgeEntity.extend({
+var UnitUiComponent = TaroEntity.extend({
 	classId: 'UnitUiComponent',
 	componentId: 'unitUi',
 
@@ -16,7 +16,7 @@ var UnitUiComponent = IgeEntity.extend({
 			attributes[attributeId].type = attributeId;
 		}
 
-		if (ige.isClient && ige.network.id() == self._entity._stats.clientId) {
+		if (taro.isClient && taro.network.id() == self._entity._stats.clientId) {
 			// var attributeContainerComponent = self._entity.getAttributeBarContainer()
 			var ownerPlayer = self._entity.getOwner();
 			var belongsToSelectedUnit = ownerPlayer && ownerPlayer._stats && ownerPlayer._stats.selectedUnitId === self._entity.id();
@@ -74,7 +74,7 @@ var UnitUiComponent = IgeEntity.extend({
 	},
 	removeAllAttributeBars: function () {
 		var self = this;
-		if (ige.isClient && ige.network.id() == self._entity._stats.clientId) {
+		if (taro.isClient && taro.network.id() == self._entity._stats.clientId) {
 			$('#attribute-bars').html('');
 		}
 	},
@@ -83,10 +83,10 @@ var UnitUiComponent = IgeEntity.extend({
 		var self = this;
 
 		// only update attributes for this unit
-		if (self._entity && self._entity._stats.clientId != ige.network.id()) {
+		if (self._entity && self._entity._stats.clientId != taro.network.id()) {
 			return;
 		}
-		var attributeTypes = ige.game.data.attributeTypes;
+		var attributeTypes = taro.game.data.attributeTypes;
 		if (attributeTypes == undefined || attr == undefined)
 			return;
 
@@ -117,7 +117,7 @@ var UnitUiComponent = IgeEntity.extend({
 
 			var value = null;
 			if (attr.dataType === 'time') {
-				value = ige.game.secondsToHms(attr.value);
+				value = taro.game.secondsToHms(attr.value);
 			} else {
 				value = attr.value;
 			}

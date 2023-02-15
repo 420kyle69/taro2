@@ -27,13 +27,13 @@ var PhaserRegion = /** @class */ (function (_super) {
         gameObject.setPosition(stats.x + stats.width / 2, stats.y + stats.height / 2);
         gameObject.setInteractive();
         gameObject.on('pointerdown', function (p) {
-            if (ige.developerMode.active && ige.developerMode.activeTab !== 'play' && _this.devModeScene.devModeTools.cursorButton.active && p.leftButtonDown()) {
+            if (taro.developerMode.active && taro.developerMode.activeTab !== 'play' && _this.devModeScene.devModeTools.cursorButton.active && p.leftButtonDown()) {
                 _this.scene.input.setTopOnly(true);
                 _this.devModeScene.regionEditor.addClickedList({ name: _this.entity._stats.id, x: stats.x, y: stats.y, width: stats.width, height: stats.height });
             }
         });
         gameObject.on('pointerup', function (p) {
-            if (ige.developerMode.active && ige.developerMode.activeTab !== 'play' && _this.devModeScene.devModeTools.cursorButton.active && p.leftButtonReleased()) {
+            if (taro.developerMode.active && taro.developerMode.activeTab !== 'play' && _this.devModeScene.devModeTools.cursorButton.active && p.leftButtonReleased()) {
                 _this.scene.input.setTopOnly(false);
                 _this.devModeScene.regionEditor.showClickedList();
             }
@@ -45,9 +45,9 @@ var PhaserRegion = /** @class */ (function (_super) {
         if (!stats.inside) {
             _this.devModeOnly = true;
         }
-        var devModeScene = _this.devModeScene = ige.renderer.scene.getScene('DevMode');
+        var devModeScene = _this.devModeScene = taro.renderer.scene.getScene('DevMode');
         devModeScene.regions.push(_this);
-        if (_this.devModeOnly && !ige.developerMode.active && ige.developerMode.activeTab !== 'play') {
+        if (_this.devModeOnly && !taro.developerMode.active && taro.developerMode.activeTab !== 'play') {
             _this.hide();
         }
         _this.updateLabel();
@@ -57,7 +57,7 @@ var PhaserRegion = /** @class */ (function (_super) {
     PhaserRegion.prototype.getLabel = function () {
         if (!this.label) {
             var scene = this.scene;
-            var label = this.label = scene.add.bitmapText(0, 0, BitmapFontManager.font(scene, 'Verdana', false, ige.game.data.settings
+            var label = this.label = scene.add.bitmapText(0, 0, BitmapFontManager.font(scene, 'Verdana', false, taro.game.data.settings
                 .addStrokeToNameAndAttributes !== false, '#FFFFFF'), 'cccccc', 16);
             label.letterSpacing = 1.3;
             label.visible = false;

@@ -75,11 +75,11 @@ if(process.env.MIXPANEL_TOKEN) {
 
 process.on('exit', function () {
 	console.log('process exit called.');
-	ige.clusterClient && ige.clusterClient.sendRollbarCrashData(global.lastRollbarUuid);
+	taro.clusterClient && taro.clusterClient.sendRollbarCrashData(global.lastRollbarUuid);
 	console.trace();
 });
 
-var Server = IgeClass.extend({
+var Server = TaroClass.extend({
 	classId: 'Server',
 	Server: true,
 
@@ -110,8 +110,8 @@ var Server = IgeClass.extend({
 		};
 		self.developerClientIds = [];
 
-		ige.env = process.env.ENV || 'production';
-		self.config = config[ige.env];
+		taro.env = process.env.ENV || 'production';
+		self.config = config[taro.env];
 
 		if (!self.config) {
 			self.config = config.default;
@@ -142,22 +142,22 @@ var Server = IgeClass.extend({
 		};
 
 		self.serverStartTime = new Date();// record start time
-		global.isDev = ige.env == 'dev' || ige.env == 'local' || ige.env === 'standalone' || ige.env === 'standalone-remote';
+		global.isDev = taro.env == 'dev' || taro.env == 'local' || taro.env === 'standalone' || taro.env === 'standalone-remote';
 		global.myIp = process.env.IP;
 		global.beUrl = self.config.BE_URL;
 
-		console.log('environment', ige.env, self.config);
+		console.log('environment', taro.env, self.config);
 		console.log('isDev =', global.isDev);
 
 		self.internalPingCount = 0;
 
-		ige.debugEnabled(global.isDev);
+		taro.debugEnabled(global.isDev);
 
 		var rateLimiterOptions = {
 			points: 20, // 6 points
 			duration: 60 // Per second
 		};
-		ige.rateLimiter = new RateLimiterMemory(rateLimiterOptions);
+		taro.rateLimiter = new RateLimiterMemory(rateLimiterOptions);
 
 		self.keysToRemoveBeforeSend = [
 			'abilities', 'animations', 'bodies', 'body', 'cellSheet',
@@ -175,10 +175,10 @@ var Server = IgeClass.extend({
 		];
 
 		// for debugging reasons
-		global.isServer = ige.isServer;
+		global.isServer = taro.isServer;
 
 		if (typeof HttpComponent != 'undefined') {
-			ige.addComponent(HttpComponent);
+			taro.addComponent(HttpComponent);
 		}
 		console.log('cluster.isMaster', cluster.isMaster);
 		if (cluster.isMaster) {
@@ -188,19 +188,19 @@ var Server = IgeClass.extend({
 				self.start();
 				self.startGame();
 			} else if (typeof ClusterServerComponent != 'undefined') {
-				ige.addComponent(ClusterServerComponent);
+				taro.addComponent(ClusterServerComponent);
 			}
 			// Include ProxyComponent to master cluster
 			if (typeof ProxyComponent !== 'undefined') {
-				ige.addComponent(ProxyComponent);
+				taro.addComponent(ProxyComponent);
 			}
 		} else {
 			if (typeof ClusterClientComponent != 'undefined') {
-				ige.addComponent(ClusterClientComponent); // backend component will retrieve "start" command from BE
+				taro.addComponent(ClusterClientComponent); // backend component will retrieve "start" command from BE
 			}
 
 			// if production, then get ip first, and then start
-			if (['production', 'staging', 'standalone-remote'].includes(ige.env)) {
+			if (['production', 'staging', 'standalone-remote'].includes(taro.env)) {
 				console.log('getting IP address');
 				publicIp.v4().then(ip => { // get public ip of server
 					self.ip = ip;
@@ -226,7 +226,7 @@ var Server = IgeClass.extend({
 
 		// Add the server-side game methods / event handlers
 		this.implement(ServerNetworkEvents);
-		ige.addComponent(IgeNetIoComponent);
+		taro.addComponent(TaroNetIoComponent);
 	},
 
 	loadGameJSON: function (gameUrl) {
@@ -320,10 +320,10 @@ var Server = IgeClass.extend({
 			const jwt = require('jsonwebtoken');
 
 			const token = jwt.sign({ userId: '', sessionId: '', createdAt: Date.now(), gameSlug: global.standaloneGame.defaultData.gameSlug }, process.env.JWT_SECRET_KEY, {
-				expiresIn: ige.server.CONNECTION_JWT_EXPIRES_IN.toString(),
+				expiresIn: taro.server.CONNECTION_JWT_EXPIRES_IN.toString(),
 			});
 
-			const videoChatEnabled = ige.game.data && ige.game.data.defaultData && ige.game.data.defaultData.enableVideoChat ? ige.game.data.defaultData.enableVideoChat : false;
+			const videoChatEnabled = taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.enableVideoChat ? taro.game.data.defaultData.enableVideoChat : false;
 			const game = {
 				_id: global.standaloneGame.defaultData._id,
 				title: global.standaloneGame.defaultData.title,
@@ -397,7 +397,7 @@ var Server = IgeClass.extend({
 
 	// run a specific game in this server
 	startGame: function (gameJson) {
-		console.log('ige.server.startGame()');
+		console.log('taro.server.startGame()');
 		var self = this;
 
 		if (self.gameLoaded) {
@@ -422,9 +422,9 @@ var Server = IgeClass.extend({
 		this.clients = {};
 
 		// Add the networking component
-		ige.network.debug(self.isDebugging);
+		taro.network.debug(self.isDebugging);
 		// Start the network server
-		ige.network.start(self.port, function (data) {
+		taro.network.start(self.port, function (data) {
 
 			var domain = global.beUrl;
 
@@ -434,8 +434,8 @@ var Server = IgeClass.extend({
 
 			if (gameJson) {
 				promise = Promise.resolve(gameJson);
-			} else if (ige.server.gameId && ige.env !== 'standalone') {
-				var gameUrl = `${domain}/api/game-client/${ige.server.gameId}`;
+			} else if (taro.server.gameId && taro.env !== 'standalone') {
+				var gameUrl = `${domain}/api/game-client/${taro.server.gameId}`;
 				console.log('gameUrl', gameUrl);
 				promise = self.loadGameJSON(gameUrl);
 			} else {
@@ -459,11 +459,11 @@ var Server = IgeClass.extend({
 			}
 
 			promise.then((game) => {
-				ige.addComponent(GameComponent);
+				taro.addComponent(GameComponent);
 				self.gameStartedAt = new Date();
 
-				ige.game.data = game.data;
-				ige.game.cspEnabled = !!ige.game.data.defaultData.clientSidePredictionEnabled;
+				taro.game.data = game.data;
+				taro.game.cspEnabled = !!taro.game.data.defaultData.clientSidePredictionEnabled;
 
 				global.standaloneGame = game.data;
 				var baseTilesize = 64;
@@ -476,15 +476,15 @@ var Server = IgeClass.extend({
 				//  * Significant changes below
 				//  * Let's test loading PhysicsConfig here
 				// */
-				// var igePhysicsConfig = require('../engine/PhysicsConfig');
-				// igePhysicsConfig.loadSelectPhysics(game.data.defaultData.physicsEngine);
-				// igePhysicsConfig.loadPhysicsGameClasses();
+				// var taroPhysicsConfig = require('../engine/PhysicsConfig');
+				// taroPhysicsConfig.loadSelectPhysics(game.data.defaultData.physicsEngine);
+				// taroPhysicsConfig.loadPhysicsGameClasses();
 				// /*
 				//  * Significant changes above
 				// */
 
 				// Add physics and setup physics world
-				ige.addComponent(PhysicsComponent)
+				taro.addComponent(PhysicsComponent)
 					.physics.sleep(true)
 					.physics.tilesizeRatio(tilesizeRatio);
 
@@ -492,85 +492,85 @@ var Server = IgeClass.extend({
 					var gravity = game.data.settings.gravity;
 					if (gravity) {
 						// console.log('setting gravity', gravity);
-						ige.physics.gravity(gravity.x, gravity.y);
+						taro.physics.gravity(gravity.x, gravity.y);
 					}
 				}
 
-				ige.physics.createWorld();
-				ige.physics.start();
-				ige.raycaster = new Raycaster();
-				ige.developerMode = new DeveloperMode();
+				taro.physics.createWorld();
+				taro.physics.start();
+				taro.raycaster = new Raycaster();
+				taro.developerMode = new DeveloperMode();
 
 				// console.log("game data", game)
-				// mapComponent needs to be inside IgeStreamComponent, because debris' are created and streaming is enabled which requires IgeStreamComponent
+				// mapComponent needs to be inside TaroStreamComponent, because debris' are created and streaming is enabled which requires TaroStreamComponent
 				console.log('initializing components');
 
-				ige.network.on('connect', self._onClientConnect);
-				ige.network.on('disconnect', self._onClientDisconnect);
+				taro.network.on('connect', self._onClientConnect);
+				taro.network.on('disconnect', self._onClientDisconnect);
 
 				// Networking has started so start the game engine
-				ige.start(function (success) {
+				taro.start(function (success) {
 					// Check if the engine started successfully
 					if (success) {
-						console.log('IgeNetIoComponent started successfully');
+						console.log('TaroNetIoComponent started successfully');
 
 						self.defineNetworkEvents();
-						// console.log("game data", ige.game.data.settings)
+						// console.log("game data", taro.game.data.settings)
 
 						// Add the network stream component
-						ige.network.addComponent(IgeStreamComponent)
+						taro.network.addComponent(TaroStreamComponent)
 							.stream.start(); // Start the stream
 
 						// Accept incoming network connections
-						ige.network.acceptConnections(true);
+						taro.network.acceptConnections(true);
 
-						ige.addGraph('IgeBaseScene');
+						taro.addGraph('TaroBaseScene');
 
-						ige.addComponent(MapComponent);
-						ige.addComponent(ShopComponent);
-						ige.addComponent(IgeChatComponent);
-						ige.addComponent(ItemComponent);
-						ige.addComponent(TimerComponent);
-						ige.addComponent(GameTextComponent);
+						taro.addComponent(MapComponent);
+						taro.addComponent(ShopComponent);
+						taro.addComponent(TaroChatComponent);
+						taro.addComponent(ItemComponent);
+						taro.addComponent(TimerComponent);
+						taro.addComponent(GameTextComponent);
 
-						ige.addComponent(AdComponent);
-						ige.addComponent(SoundComponent);
-						ige.addComponent(RegionManager);
+						taro.addComponent(AdComponent);
+						taro.addComponent(SoundComponent);
+						taro.addComponent(RegionManager);
 
-						if (ige.game.data.defaultData.enableVideoChat) {
-							ige.addComponent(VideoChatComponent);
+						if (taro.game.data.defaultData.enableVideoChat) {
+							taro.addComponent(VideoChatComponent);
 						}
 
-						let map = ige.scaleMap(_.cloneDeep(ige.game.data.map));
-						ige.map.load(map);
+						let map = taro.scaleMap(_.cloneDeep(taro.game.data.map));
+						taro.map.load(map);
 
-						ige.game.start();
+						taro.game.start();
 
 						self.gameLoaded = true;
 
 						// send dev logs to developer every second
 						var logInterval = setInterval(function () {
 							// send only if developer client is connect
-							if (ige.isServer && self.developerClientIds.length) {
+							if (taro.isServer && self.developerClientIds.length) {
 
-								ige.game.devLogs.status = ige.server.getStatus();
-								const sendErrors = Object.keys(ige.script.errorLogs).length;
+								taro.game.devLogs.status = taro.server.getStatus();
+								const sendErrors = Object.keys(taro.script.errorLogs).length;
 								self.developerClientIds.forEach(
 									id => {
-										ige.network.send('devLogs', ige.game.devLogs, id);
+										taro.network.send('devLogs', taro.game.devLogs, id);
 
 										if (sendErrors) {
-											ige.network.send('errorLogs', ige.script.errorLogs, id);
+											taro.network.send('errorLogs', taro.script.errorLogs, id);
 										}
 
 									});
 
 								if (sendErrors) {
-									ige.script.errorLogs = {};
+									taro.script.errorLogs = {};
 								}
 							}
-							ige.physicsTickCount = 0;
-							ige.unitBehaviourCount = 0;
+							taro.physicsTickCount = 0;
+							taro.unitBehaviourCount = 0;
 						}, 1000);
 
 						setInterval(function () {
@@ -581,14 +581,14 @@ var Server = IgeClass.extend({
 								immediatelyDisconnected: 0
 							};
 
-							ige.clusterClient && ige.clusterClient.recordSocketConnections(copyCount);
+							taro.clusterClient && taro.clusterClient.recordSocketConnections(copyCount);
 						}, 900000);
 					}
 				});
 			})
 				.catch((err) => {
 					console.log('got error while loading game json', err);
-					ige.clusterClient && ige.clusterClient.kill('got error while loading game json');
+					taro.clusterClient && taro.clusterClient.kill('got error while loading game json');
 				});
 		});
 	},
@@ -597,96 +597,96 @@ var Server = IgeClass.extend({
 		var self = this;
 
 		console.log('server.js: defineNetworkEvents');
-		ige.network.define('joinGame', self._onJoinGameWrapper);
-		ige.network.define('gameOver', self._onGameOver);
+		taro.network.define('joinGame', self._onJoinGameWrapper);
+		taro.network.define('gameOver', self._onGameOver);
 
-		ige.network.define('makePlayerSelectUnit', self._onPlayerSelectUnit);
-		ige.network.define('playerUnitMoved', self._onPlayerUnitMoved);
-		ige.network.define('playerKeyDown', self._onPlayerKeyDown);
-		ige.network.define('playerKeyUp', self._onPlayerKeyUp);
-		ige.network.define('playerMouseMoved', self._onPlayerMouseMoved);
-		ige.network.define('playerCustomInput', self._onPlayerCustomInput);
-		ige.network.define('playerAbsoluteAngle', self._onPlayerAbsoluteAngle);
-		ige.network.define('playerDialogueSubmit', self._onPlayerDialogueSubmit);
+		taro.network.define('makePlayerSelectUnit', self._onPlayerSelectUnit);
+		taro.network.define('playerUnitMoved', self._onPlayerUnitMoved);
+		taro.network.define('playerKeyDown', self._onPlayerKeyDown);
+		taro.network.define('playerKeyUp', self._onPlayerKeyUp);
+		taro.network.define('playerMouseMoved', self._onPlayerMouseMoved);
+		taro.network.define('playerCustomInput', self._onPlayerCustomInput);
+		taro.network.define('playerAbsoluteAngle', self._onPlayerAbsoluteAngle);
+		taro.network.define('playerDialogueSubmit', self._onPlayerDialogueSubmit);
 
-		ige.network.define('buyItem', self._onBuyItem);
-		ige.network.define('buyUnit', self._onBuyUnit);
-		ige.network.define('buySkin', self._onBuySkin);
+		taro.network.define('buyItem', self._onBuyItem);
+		taro.network.define('buyUnit', self._onBuyUnit);
+		taro.network.define('buySkin', self._onBuySkin);
 
-		ige.network.define('equipSkin', self._onEquipSkin);
-		ige.network.define('unEquipSkin', self._onUnEquipSkin);
+		taro.network.define('equipSkin', self._onEquipSkin);
+		taro.network.define('unEquipSkin', self._onUnEquipSkin);
 
-		ige.network.define('swapInventory', self._onSwapInventory);
+		taro.network.define('swapInventory', self._onSwapInventory);
 
 		// bullshit that's necessary for sending data to client
-		ige.network.define('makePlayerCameraTrackUnit', self._onSomeBullshit);
-		ige.network.define('changePlayerCameraPanSpeed', self._onSomeBullshit);
+		taro.network.define('makePlayerCameraTrackUnit', self._onSomeBullshit);
+		taro.network.define('changePlayerCameraPanSpeed', self._onSomeBullshit);
 
-		ige.network.define('hideUnitFromPlayer', self._onSomeBullshit);
-		ige.network.define('showUnitFromPlayer', self._onSomeBullshit);
-		ige.network.define('hideUnitNameLabelFromPlayer', self._onSomeBullshit);
-		ige.network.define('showUnitNameLabelFromPlayer', self._onSomeBullshit);
+		taro.network.define('hideUnitFromPlayer', self._onSomeBullshit);
+		taro.network.define('showUnitFromPlayer', self._onSomeBullshit);
+		taro.network.define('hideUnitNameLabelFromPlayer', self._onSomeBullshit);
+		taro.network.define('showUnitNameLabelFromPlayer', self._onSomeBullshit);
 
-		ige.network.define('createPlayer', self._onSomeBullshit);
-		ige.network.define('updateUiText', self._onSomeBullshit);
-		ige.network.define('updateUiTextForTime', self._onSomeBullshit);
-		ige.network.define('alertHighscore', self._onSomeBullshit);
-		ige.network.define('addShopItem', self._onSomeBullshit);
-		ige.network.define('removeShopItem', self._onSomeBullshit);
-		ige.network.define('gameState', self._onSomeBullshit);
+		taro.network.define('createPlayer', self._onSomeBullshit);
+		taro.network.define('updateUiText', self._onSomeBullshit);
+		taro.network.define('updateUiTextForTime', self._onSomeBullshit);
+		taro.network.define('alertHighscore', self._onSomeBullshit);
+		taro.network.define('addShopItem', self._onSomeBullshit);
+		taro.network.define('removeShopItem', self._onSomeBullshit);
+		taro.network.define('gameState', self._onSomeBullshit);
 
-		// ige.network.define('updateEntity', self._onSomeBullshit);
-		ige.network.define('updateEntityAttribute', self._onSomeBullshit);
-		ige.network.define('updateAllEntities', self._onSomeBullshit);
-		ige.network.define('itemHold', self._onSomeBullshit);
-		ige.network.define('item', self._onSomeBullshit);
-		ige.network.define('clientConnect', self._onSomeBullshit);
-		ige.network.define('clientDisconnect', self._onSomeBullshit);
-		ige.network.define('killStreakMessage', self._onSomeBullshit);
-		ige.network.define('insertItem', self._onSomeBullshit);
-		ige.network.define('playAd', self._onSomeBullshit);
-		ige.network.define('ui', self._onSomeBullshit);
-		ige.network.define('updateShopInventory', self._onSomeBullshit);
-		ige.network.define('errorLogs', self._onSomeBullshit);
-		ige.network.define('devLogs', self._onSomeBullshit);
-		ige.network.define('sound', self._onSomeBullshit);
-		ige.network.define('particle', self._onSomeBullshit);
-		ige.network.define('camera', self._onSomeBullshit);
-		ige.network.define('videoChat', self._onSomeBullshit);
+		// taro.network.define('updateEntity', self._onSomeBullshit);
+		taro.network.define('updateEntityAttribute', self._onSomeBullshit);
+		taro.network.define('updateAllEntities', self._onSomeBullshit);
+		taro.network.define('itemHold', self._onSomeBullshit);
+		taro.network.define('item', self._onSomeBullshit);
+		taro.network.define('clientConnect', self._onSomeBullshit);
+		taro.network.define('clientDisconnect', self._onSomeBullshit);
+		taro.network.define('killStreakMessage', self._onSomeBullshit);
+		taro.network.define('insertItem', self._onSomeBullshit);
+		taro.network.define('playAd', self._onSomeBullshit);
+		taro.network.define('ui', self._onSomeBullshit);
+		taro.network.define('updateShopInventory', self._onSomeBullshit);
+		taro.network.define('errorLogs', self._onSomeBullshit);
+		taro.network.define('devLogs', self._onSomeBullshit);
+		taro.network.define('sound', self._onSomeBullshit);
+		taro.network.define('particle', self._onSomeBullshit);
+		taro.network.define('camera', self._onSomeBullshit);
+		taro.network.define('videoChat', self._onSomeBullshit);
 
-		ige.network.define('gameSuggestion', self._onSomeBullshit);
-		ige.network.define('minimap', self._onSomeBullshit);
+		taro.network.define('gameSuggestion', self._onSomeBullshit);
+		taro.network.define('minimap', self._onSomeBullshit);
 
-		ige.network.define('createFloatingText', self._onSomeBullshit);
+		taro.network.define('createFloatingText', self._onSomeBullshit);
 
-		ige.network.define('openShop', self._onSomeBullshit);
-		ige.network.define('openDialogue', self._onSomeBullshit);
-		ige.network.define('closeDialogue', self._onSomeBullshit);
-		ige.network.define('userJoinedGame', self._onSomeBullshit);
+		taro.network.define('openShop', self._onSomeBullshit);
+		taro.network.define('openDialogue', self._onSomeBullshit);
+		taro.network.define('closeDialogue', self._onSomeBullshit);
+		taro.network.define('userJoinedGame', self._onSomeBullshit);
 		
-		ige.network.define('kick', self._onKick);
-		ige.network.define('ban-user', self._onBanUser);
-		ige.network.define('ban-ip', self._onBanIp);
-		ige.network.define('ban-chat', self._onBanChat);
+		taro.network.define('kick', self._onKick);
+		taro.network.define('ban-user', self._onBanUser);
+		taro.network.define('ban-ip', self._onBanIp);
+		taro.network.define('ban-chat', self._onBanChat);
 
-		ige.network.define('trade', self._onTrade);
-		ige.network.define('editTile', self._onEditTile);
-		ige.network.define('editRegion', self._onEditRegion);
-		ige.network.define('editEntity', self._onEditEntity);
-		ige.network.define('updateUnit', self._onUpdateUnit);
-		ige.network.define('updateItem', this._onUpdateItem);
-		ige.network.define('updateProjectile', this._onUpdateProjectile);
+		taro.network.define('trade', self._onTrade);
+		taro.network.define('editTile', self._onEditTile);
+		taro.network.define('editRegion', self._onEditRegion);
+		taro.network.define('editEntity', self._onEditEntity);
+		taro.network.define('updateUnit', self._onUpdateUnit);
+		taro.network.define('updateItem', this._onUpdateItem);
+		taro.network.define('updateProjectile', this._onUpdateProjectile);
 
-		ige.network.define('recordSocketMsgs', this._onRecordSocketMsgs);
-		ige.network.define('getSocketMsgs', this._onGetSocketMsgs);
-		ige.network.define('stopRecordSocketMsgs', this._onStopRecordSocketMsgs);
-		ige.network.define('renderSocketLogs', this._onSomeBullshit);
+		taro.network.define('recordSocketMsgs', this._onRecordSocketMsgs);
+		taro.network.define('getSocketMsgs', this._onGetSocketMsgs);
+		taro.network.define('stopRecordSocketMsgs', this._onStopRecordSocketMsgs);
+		taro.network.define('renderSocketLogs', this._onSomeBullshit);
 	},
 
 	unpublish: function (msg) {
 		console.log('unpublishing...');
-		if (ige.clusterClient) {
-			ige.clusterClient.unpublish(msg);
+		if (taro.clusterClient) {
+			taro.clusterClient.unpublish(msg);
 		}
 
 		process.exit(0);
@@ -697,50 +697,50 @@ var Server = IgeClass.extend({
 	},
 
 	kill: function (log) {
-		if (ige.clusterClient && ige.clusterClient.markedAsKilled) {
+		if (taro.clusterClient && taro.clusterClient.markedAsKilled) {
 			return;
 		}
 
 		// send a message to master cluster
-		if (ige.env != 'dev' && process && process.send) {
+		if (taro.env != 'dev' && process && process.send) {
 			process.send({ chat: 'kill server called' });
 		}
-		// ige.clusterClient.disconnect();
+		// taro.clusterClient.disconnect();
 
-		ige.clusterClient && ige.clusterClient.kill(log);
+		taro.clusterClient && taro.clusterClient.kill(log);
 	},
 
 	// get client with _id from BE
 	getClientByUserId: function (_id) {
 		var self = this;
 
-		for (i in ige.server.clients) {
-			if (ige.server.clients[i]._id == _id) {
-				return ige.server.clients[i];
+		for (i in taro.server.clients) {
+			if (taro.server.clients[i]._id == _id) {
+				return taro.server.clients[i];
 			}
 		}
 	},
 
 	giveCoinToUser: function (player, coin, itemName) {
-		if (coin && player._stats && player._stats.userId && (ige.game.data.defaultData.tier == 3 || ige.game.data.defaultData.tier == 4)) {
+		if (coin && player._stats && player._stats.userId && (taro.game.data.defaultData.tier == 3 || taro.game.data.defaultData.tier == 4)) {
 
-			ige.clusterClient && ige.clusterClient.giveCoinToUser({
-				creatorId: ige.game.data.defaultData.owner,
+			taro.clusterClient && taro.clusterClient.giveCoinToUser({
+				creatorId: taro.game.data.defaultData.owner,
 				userId: player._stats.userId,
 				coins: coin,
-				game: ige.game.data.defaultData._id,
+				game: taro.game.data.defaultData._id,
 				itemName
 			});
 		}
 	},
 	
 	sendCoinsToPlayer: function (userId, coins) {
-		if (userId && coins && ige.game.data.defaultData.tier != 2) {
-			ige.clusterClient && ige.clusterClient.sendCoinsToPlayer({
-				creatorId: ige.game.data.defaultData.owner,
+		if (userId && coins && taro.game.data.defaultData.tier != 2) {
+			taro.clusterClient && taro.clusterClient.sendCoinsToPlayer({
+				creatorId: taro.game.data.defaultData.owner,
 				userId,
 				coins,
-				game: ige.game.data.defaultData._id,
+				game: taro.game.data.defaultData._id,
 			});
 		}
 	},
@@ -756,14 +756,14 @@ var Server = IgeClass.extend({
 						userId
 					} = body.message;
 					
-					var creator = ige.$$('player').find(function (player) {
+					var creator = taro.$$('player').find(function (player) {
 						return player && player._stats && player._stats.userId == creatorId;
 					});
 					if (creator) {
 						creator.streamUpdateData([{ coins: updatedCoinsCreator }]);
 					}
 					
-					var player = ige.$$('player').find(function (player) {
+					var player = taro.$$('player').find(function (player) {
 						return player && player._stats && player._stats.userId == userId;
 					});
 					if (player) {
@@ -779,14 +779,14 @@ var Server = IgeClass.extend({
 	
 	consumeCoinFromUser: function (player, coins, boughtItemId) {
 		var self = this;
-		if (player && coins && (ige.game.data.defaultData.tier >= 2)) {
-			if (ige.game.data.defaultData.owner != player._stats.userId) {
+		if (player && coins && (taro.game.data.defaultData.tier >= 2)) {
+			if (taro.game.data.defaultData.owner != player._stats.userId) {
 				if (!self.coinUpdate[player._stats.clientId]) {
 					self.coinUpdate[player._stats.clientId] = {
-						creatorId: ige.game.data.defaultData.owner,
+						creatorId: taro.game.data.defaultData.owner,
 						userId: player._stats.userId,
 						coins: coins,
-						game: ige.game.data.defaultData._id,
+						game: taro.game.data.defaultData._id,
 						boughtItems: []
 					};
 				} else {
@@ -805,7 +805,7 @@ var Server = IgeClass.extend({
 		}
 		
 		if (Object.keys(self.coinUpdate || {}).length > 0) {
-			ige.clusterClient && ige.clusterClient.consumeCoinFromUser(self.coinUpdate);
+			taro.clusterClient && taro.clusterClient.consumeCoinFromUser(self.coinUpdate);
 			self.coinUpdate = {};
 		}
 	},
@@ -816,7 +816,7 @@ var Server = IgeClass.extend({
 			if (body.status === 'success') {
 				if (body.message && body.message.length > 0) {
 					body.message.forEach(function (updatedCoinsValue) {
-						var foundPlayer = ige.$$('player').find(function (player) {
+						var foundPlayer = taro.$$('player').find(function (player) {
 							return player && player._stats && player._stats.clientId == updatedCoinsValue.clientId;
 						});
 						if (foundPlayer) {
@@ -835,56 +835,56 @@ var Server = IgeClass.extend({
 		var self = this;
 
 		var cpuDelta = null;
-		if (ige._lastCpuUsage) {
-			// console.log('before',ige._lastCpuUsage);
-			cpuDelta = process.cpuUsage(ige._lastCpuUsage);
-			ige._lastCpuUsage = process.cpuUsage();
+		if (taro._lastCpuUsage) {
+			// console.log('before',taro._lastCpuUsage);
+			cpuDelta = process.cpuUsage(taro._lastCpuUsage);
+			taro._lastCpuUsage = process.cpuUsage();
 		} else {
-			ige._lastCpuUsage = cpuDelta = process.cpuUsage();
+			taro._lastCpuUsage = cpuDelta = process.cpuUsage();
 		}
 
-		if (ige.physics && ige.physics.engine != 'CRASH') {
-			// console.log('ige stream',ige.stream);
+		if (taro.physics && taro.physics.engine != 'CRASH') {
+			// console.log('taro stream',taro.stream);
 
 			var jointCount = 0;
-			var jointList = ige.physics._world && ige.physics._world.getJointList();
+			var jointList = taro.physics._world && taro.physics._world.getJointList();
 			while (jointList) {
 				jointCount++;
 				jointList = jointList.getNext();
 			}
 			var returnData = {
-				clientCount: Object.keys(ige.network._socketById).length,
+				clientCount: Object.keys(taro.network._socketById).length,
 				entityCount: {
-					player: ige.$$('player').filter(function (player) {
+					player: taro.$$('player').filter(function (player) {
 						return player._stats.controlledBy == 'human';
 					}).length,
-					unit: ige.$$('unit').length,
-					item: ige.$$('item').length,
-					projectile: ige.$$('projectile').length,
-					sensor: ige.$$('sensor').length,
-					region: ige.$$('region').length
+					unit: taro.$$('unit').length,
+					item: taro.$$('item').length,
+					projectile: taro.$$('projectile').length,
+					sensor: taro.$$('sensor').length,
+					region: taro.$$('region').length
 				},
 				bandwidth: self.bandwidthUsage,
 				heapUsed: process.memoryUsage().heapUsed / 1024 / 1024,
-				currentTime: ige._currentTime,
+				currentTime: taro._currentTime,
 				physics: {
-					engine: ige.physics.engine,
-					bodyCount: ige.physics._world.m_bodyCount,
-					contactCount: ige.physics._world.m_contactCount,
-					jointCount: ige.physics._world.m_jointCount,
-					stepDuration: ige.physics.avgPhysicsTickDuration.toFixed(2),
-					stepsPerSecond: ige._physicsFPS,
-					totalBodiesCreated: ige.physics.totalBodiesCreated
+					engine: taro.physics.engine,
+					bodyCount: taro.physics._world.m_bodyCount,
+					contactCount: taro.physics._world.m_contactCount,
+					jointCount: taro.physics._world.m_jointCount,
+					stepDuration: taro.physics.avgPhysicsTickDuration.toFixed(2),
+					stepsPerSecond: taro._physicsFPS,
+					totalBodiesCreated: taro.physics.totalBodiesCreated
 				},
 				etc: {
-					totalPlayersCreated: ige.server.totalPlayersCreated,
-					totalUnitsCreated: ige.server.totalUnitsCreated,
-					totalItemsCreated: ige.server.totalItemsCreated,
-					totalProjectilesCreated: ige.server.totalProjectilesCreated,
-					totalWallsCreated: ige.server.totalWallsCreated
+					totalPlayersCreated: taro.server.totalPlayersCreated,
+					totalUnitsCreated: taro.server.totalUnitsCreated,
+					totalItemsCreated: taro.server.totalItemsCreated,
+					totalProjectilesCreated: taro.server.totalProjectilesCreated,
+					totalWallsCreated: taro.server.totalWallsCreated
 				},
 				cpu: cpuDelta,
-				lastSnapshotLength: JSON.stringify(ige.server.lastSnapshot).length
+				lastSnapshotLength: JSON.stringify(taro.server.lastSnapshot).length
 			};
 
 			self.bandwidthUsage = {
@@ -900,40 +900,40 @@ var Server = IgeClass.extend({
 		}
 		//temprorary for testing crash engine
 		// else {
-		// 	ige.physics.getInfo();
+		// 	taro.physics.getInfo();
 		// 	var returnData = {
-		// 		clientCount: Object.keys(ige.network._socketById).length,
+		// 		clientCount: Object.keys(taro.network._socketById).length,
 		// 		entityCount: {
-		// 			player: ige.$$('player').filter(function (player) {
+		// 			player: taro.$$('player').filter(function (player) {
 		// 				return player._stats.controlledBy == 'human';
 		// 			}).length,
-		// 			unit: ige.$$('unit').length,
-		// 			item: ige.$$('item').length,
-		// 			projectile: ige.$$('projectile').length,
-		// 			sensor: ige.$$('sensor').length,
-		// 			region: ige.$$('region').length
+		// 			unit: taro.$$('unit').length,
+		// 			item: taro.$$('item').length,
+		// 			projectile: taro.$$('projectile').length,
+		// 			sensor: taro.$$('sensor').length,
+		// 			region: taro.$$('region').length
 		// 		},
 		// 		bandwidth: self.bandwidthUsage,
 		// 		heapUsed: process.memoryUsage().heapUsed / 1024 / 1024,
-		// 		currentTime: ige._currentTime,
+		// 		currentTime: taro._currentTime,
 		// 		physics: {
-		// 			engine: ige.physics.engine,
-		// 			bodyCount: ige.physics._world.m_bodyCount,
-		// 			contactCount: ige.physics._world.m_contactCount,
-		// 			jointCount: ige.physics._world.m_jointCount,
-		// 			stepDuration: ige.physics.avgPhysicsTickDuration.toFixed(2),
-		// 			stepsPerSecond: ige._physicsFPS,
-		// 			totalBodiesCreated: ige.physics.totalBodiesCreated
+		// 			engine: taro.physics.engine,
+		// 			bodyCount: taro.physics._world.m_bodyCount,
+		// 			contactCount: taro.physics._world.m_contactCount,
+		// 			jointCount: taro.physics._world.m_jointCount,
+		// 			stepDuration: taro.physics.avgPhysicsTickDuration.toFixed(2),
+		// 			stepsPerSecond: taro._physicsFPS,
+		// 			totalBodiesCreated: taro.physics.totalBodiesCreated
 		// 		},
 		// 		etc: {
-		// 			totalPlayersCreated: ige.server.totalPlayersCreated,
-		// 			totalUnitsCreated: ige.server.totalUnitsCreated,
-		// 			totalItemsCreated: ige.server.totalItemsCreated,
-		// 			totalProjectilesCreated: ige.server.totalProjectilesCreated,
-		// 			totalWallsCreated: ige.server.totalWallsCreated
+		// 			totalPlayersCreated: taro.server.totalPlayersCreated,
+		// 			totalUnitsCreated: taro.server.totalUnitsCreated,
+		// 			totalItemsCreated: taro.server.totalItemsCreated,
+		// 			totalProjectilesCreated: taro.server.totalProjectilesCreated,
+		// 			totalWallsCreated: taro.server.totalWallsCreated
 		// 		},
 		// 		cpu: cpuDelta,
-		// 		lastSnapshotLength: JSON.stringify(ige.server.lastSnapshot).length
+		// 		lastSnapshotLength: JSON.stringify(taro.server.lastSnapshot).length
 		// 	};
 
 		// 	self.bandwidthUsage = {

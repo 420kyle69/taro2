@@ -1,4 +1,4 @@
-declare class InGameEditor extends IgeClass {
+declare class InGameEditor extends TaroClass {
     addNewRegion: any
     updateRegionInReact: any
 }

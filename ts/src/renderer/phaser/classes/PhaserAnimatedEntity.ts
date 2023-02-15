@@ -4,7 +4,7 @@ class PhaserAnimatedEntity extends PhaserEntity {
 
 	protected constructor (
 		public scene: GameScene,
-		entity: IgeEntity,
+		entity: TaroEntity,
 		protected key: string
 	) {
 		super(entity);

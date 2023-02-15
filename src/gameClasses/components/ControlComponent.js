@@ -1,4 +1,4 @@
-var ControlComponent = IgeEntity.extend({
+var ControlComponent = TaroEntity.extend({
 	classId: 'ControlComponent',
 	componentId: 'control',
 
@@ -76,16 +76,16 @@ var ControlComponent = IgeEntity.extend({
 
 		for (device in this.input) {
 			for (key in this.input[device]) {
-				ige.input.mapAction(key, ige.input[device][key]);
+				taro.input.mapAction(key, taro.input[device][key]);
 			}
 		}
 	},
 	keyDown: function (device, key) {
-		if(ige.developerMode.shouldPreventKeybindings()) {
+		if(taro.developerMode.shouldPreventKeybindings()) {
 			return;
 		}
 		// check for input modal is open
-		if (ige.isClient) {
+		if (taro.isClient) {
 			this.isChatOpen = ($('#message').is(':focus') && !$('#player-input-field').is(':focus')) ||
 				$('#modd-dialogue-modal').hasClass('show') ||
 				$('#player-input-modal').hasClass('show') ||
@@ -96,7 +96,7 @@ var ControlComponent = IgeEntity.extend({
 		this.lastActionAt = Date.now();
 
 		if (this.input[device]) {
-			if ((ige.isClient && !this.isChatOpen) || ige.isServer) {
+			if ((taro.isClient && !this.isChatOpen) || taro.isServer) {
 				this.input[device][key] = true;
 			}
 		}
@@ -109,7 +109,7 @@ var ControlComponent = IgeEntity.extend({
 		var unit = player.getSelectedUnit();
 		
 		if (unit && unit._category == 'unit') {
-			if (ige.isServer || (ige.isClient && !this.isChatOpen)) {
+			if (taro.isServer || (taro.isClient && !this.isChatOpen)) {
 				var unitAbility = null;
 				// execute movement command is AI is disabled
 				if (unit._stats.controls && !unit._stats.aiEnabled){
@@ -118,7 +118,7 @@ var ControlComponent = IgeEntity.extend({
 							case 'w':
 							case 'up':
 								unit.ability.moveUp();
-								// ige.inputReceived = Date.now();
+								// taro.inputReceived = Date.now();
 								break;
 
 							case 'a':
@@ -156,10 +156,10 @@ var ControlComponent = IgeEntity.extend({
 				}
 
 				if (unitAbility && unitAbility.keyDown && unit.ability) {
-					if (ige.client && ige.client.inputDelay && ige.client.inputDelay > 0) {
+					if (taro.client && taro.client.inputDelay && taro.client.inputDelay > 0) {
 						setTimeout(function () {
 							unit.ability.cast(unitAbility.keyDown);
-						}, ige.client.inputDelay);
+						}, taro.client.inputDelay);
 					} else {
 						// console.log(key, Date.now());
 						unit.ability.cast(unitAbility.keyDown);
@@ -177,9 +177,9 @@ var ControlComponent = IgeEntity.extend({
 		}
 		// }
 
-		if (ige.isClient) {
+		if (taro.isClient) {
 			if (!this.isChatOpen) {
-				ige.network.send('playerKeyDown', { device: device, key: key });
+				taro.network.send('playerKeyDown', { device: device, key: key });
 
 				// this.lastCommandSentAt = Date.now();
 				if (key == '1' || key == '2' || key == '3' || key == '4' ||
@@ -238,12 +238,12 @@ var ControlComponent = IgeEntity.extend({
 					break;
 			}
 
-			if(ige.developerMode.shouldPreventKeybindings()) {
+			if(taro.developerMode.shouldPreventKeybindings()) {
 				return;
 			}
 
 			// traverse through abilities, and see if any of them is being casted by the owner
-			if (ige.isServer || ige.isClient) {
+			if (taro.isServer || taro.isClient) {
 				var unitAbility = null;
 
 				// if (unit._stats.abilities) {
@@ -255,10 +255,10 @@ var ControlComponent = IgeEntity.extend({
 				}
 
 				if (unitAbility && unitAbility.keyUp && unit.ability) {
-					if (ige.client && ige.client.inputDelay && ige.client.inputDelay > 0) {
+					if (taro.client && taro.client.inputDelay && taro.client.inputDelay > 0) {
 						setTimeout(function () {
 							unit.ability.cast(unitAbility.keyUp);
-						}, ige.client.inputDelay);
+						}, taro.client.inputDelay);
 					} else {
 						unit.ability.cast(unitAbility.keyUp);
 					}
@@ -266,9 +266,9 @@ var ControlComponent = IgeEntity.extend({
 			}
 		}
 
-		if (ige.isClient) {
+		if (taro.isClient) {
 			if (this.input[device][key]) {
-				ige.network.send('playerKeyUp', { device: device, key: key });
+				taro.network.send('playerKeyUp', { device: device, key: key });
 			}
 		}
 
@@ -288,12 +288,12 @@ var ControlComponent = IgeEntity.extend({
 		var unit = player.getSelectedUnit();
 		
 		if (unit) {
-			if (ige.isClient) {
+			if (taro.isClient) {
 				for (device in self.input) {
 					for (key in self.input[device]) {
-						if (ige.input.actionState(key)) {
+						if (taro.input.actionState(key)) {
 							if (self.input[device][key] == false) {
-								if (ige.isMobile && device == 'mouse') {
+								if (taro.isMobile && device == 'mouse') {
 									// tap on mobile will be detected as right click for now, so old games with joysticks will not have problems
 									self.keyDown('mouse', 'button3');
 								} else {
@@ -302,7 +302,7 @@ var ControlComponent = IgeEntity.extend({
 							}
 						} else {
 							if (self.input[device][key] == true) {
-								if (ige.isMobile && device == 'mouse') {
+								if (taro.isMobile && device == 'mouse') {
 									// tap on mobile will be detected as right click for now, so old games with joysticks will not have problems
 									self.keyUp('mouse', 'button3');
 								} else {
@@ -314,50 +314,50 @@ var ControlComponent = IgeEntity.extend({
 				}
 	
 				// check if sending player input is due (every 100ms)
-				if (ige._currentTime - self.lastInputSent > 100) {
+				if (taro._currentTime - self.lastInputSent > 100) {
 					self.sendPlayerInput = true;
-					self.lastInputSent = ige._currentTime;
+					self.lastInputSent = taro._currentTime;
 				}
 				if (self.newMousePosition && (self.newMousePosition[0] != self.lastMousePosition[0] || self.newMousePosition[1] != self.lastMousePosition[1])) {
 					// if we are using mobile controls don't send mouse moves to server here as we will do so from a look touch stick
-					if (!ige.isMobile) {
+					if (!taro.isMobile) {
 						// absolute mouse position wrt window
-						if (ige._mouseAbsoluteTranslation && ige._mouseAbsoluteTranslation[0] && ige._mouseAbsoluteTranslation[1]) {
+						if (taro._mouseAbsoluteTranslation && taro._mouseAbsoluteTranslation[0] && taro._mouseAbsoluteTranslation[1]) {
 							var centerOfScreen = {};
 							centerOfScreen.innerWidth = window.innerWidth / 2;
 							centerOfScreen.innerHeight = window.innerHeight / 2;
 							var angle = 0;
-							if (centerOfScreen && ige._mouseAbsoluteTranslation[0] != centerOfScreen.innerWidth && centerOfScreen.innerHeight != ige._mouseAbsoluteTranslation[1]) {
-								angle = Math.atan2(ige._mouseAbsoluteTranslation[0] - centerOfScreen.innerWidth, centerOfScreen.innerHeight - ige._mouseAbsoluteTranslation[1]);
+							if (centerOfScreen && taro._mouseAbsoluteTranslation[0] != centerOfScreen.innerWidth && centerOfScreen.innerHeight != taro._mouseAbsoluteTranslation[1]) {
+								angle = Math.atan2(taro._mouseAbsoluteTranslation[0] - centerOfScreen.innerWidth, centerOfScreen.innerHeight - taro._mouseAbsoluteTranslation[1]);
 							}
 							// angle = angle % Math.PI;
 							angle = parseFloat(angle.toPrecision(5));
 							if (self.sendPlayerInput)
-								ige.network.send('playerAbsoluteAngle', angle);
+								taro.network.send('playerAbsoluteAngle', angle);
 	
-							if (ige.client.myPlayer) {
-								ige.client.myPlayer.absoluteAngle = angle;
+							if (taro.client.myPlayer) {
+								taro.client.myPlayer.absoluteAngle = angle;
 							}
 							self.absoluteAngle = angle;
 						}
-						if (ige.client && ige.client.myPlayer) {
-							ige.client.myPlayer.control.input.mouse.x = self.newMousePosition[0];
-							ige.client.myPlayer.control.input.mouse.y = self.newMousePosition[1];
+						if (taro.client && taro.client.myPlayer) {
+							taro.client.myPlayer.control.input.mouse.x = self.newMousePosition[0];
+							taro.client.myPlayer.control.input.mouse.y = self.newMousePosition[1];
 						}
 					}
 					if (self.sendPlayerInput) {
-						ige.network.send('playerMouseMoved', self.newMousePosition);
+						taro.network.send('playerMouseMoved', self.newMousePosition);
 					}
 					self.lastMousePosition = self.newMousePosition;
 				}
 	
 				// send unit position to server (client-authoritative movement)
-				if (ige.physics && ige.game.cspEnabled && !unit._stats.aiEnabled && !unit.teleported) {
+				if (taro.physics && taro.game.cspEnabled && !unit._stats.aiEnabled && !unit.teleported) {
 					var x = unit._translate.x.toFixed(0);
 					var y = unit._translate.y.toFixed(0);
 					if (self.sendPlayerInput && (self.lastPositionSent == undefined || self.lastPositionSent[0] != x || self.lastPositionSent[1] != y)) {
 						var pos = [x, y];
-						ige.network.send('playerUnitMoved', pos);
+						taro.network.send('playerUnitMoved', pos);
 						self.lastPositionSent = pos;
 					}
 				}

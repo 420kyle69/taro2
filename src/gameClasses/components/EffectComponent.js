@@ -1,4 +1,4 @@
-var EffectComponent = IgeEntity.extend({
+var EffectComponent = TaroEntity.extend({
 	classId: 'EffectComponent',
 	componentId: 'effect',
 
@@ -30,7 +30,7 @@ var EffectComponent = IgeEntity.extend({
 							};
 						}
 
-						self.particleEmitters[event][particleTypeId] = new IgeParticleEmitter() // Set the particle entity to generate for each particle
+						self.particleEmitters[event][particleTypeId] = new TaroParticleEmitter() // Set the particle entity to generate for each particle
 							.layer(particleData['z-index'].layer)
 							.depth(particleData['z-index'].depth)
 							.color(particleData.color)
@@ -41,11 +41,11 @@ var EffectComponent = IgeEntity.extend({
 							.quantityTimespan(parseFloat(particleData.quantityTimespan))
 							.deathOpacityBase(parseFloat(particleData.deathOpacityBase)) // Set the particle's death opacity to zero so it fades out as it's lifespan runs out
 							.velocityVector(
-								new IgePoint3d(parseFloat(particleData.velocityVector.baseVector.x), parseFloat(particleData.velocityVector.baseVector.y), 0),
-								new IgePoint3d(parseFloat(particleData.velocityVector.minVector.x), parseFloat(particleData.velocityVector.minVector.y), 0),
-								new IgePoint3d(parseFloat(particleData.velocityVector.maxVector.x), parseFloat(particleData.velocityVector.maxVector.y), 0)
+								new TaroPoint3d(parseFloat(particleData.velocityVector.baseVector.x), parseFloat(particleData.velocityVector.baseVector.y), 0),
+								new TaroPoint3d(parseFloat(particleData.velocityVector.minVector.x), parseFloat(particleData.velocityVector.minVector.y), 0),
+								new TaroPoint3d(parseFloat(particleData.velocityVector.maxVector.x), parseFloat(particleData.velocityVector.maxVector.y), 0)
 							)
-							.particleMountTarget(ige.client.mainScene) // Mount new particles to the object scene
+							.particleMountTarget(taro.client.mainScene) // Mount new particles to the object scene
 							.translateTo(parseFloat(particleData.mountPosition.x), parseFloat(-particleData.mountPosition.y), 0) // Move the particle emitter to the bottom of the ship
 							.mount(self._entity);
 					}
@@ -63,10 +63,10 @@ var EffectComponent = IgeEntity.extend({
 			// emit particles
 			// the particle emitter must be within myPlayer's camera viewing range
 			if (
-				self._entity._translate.x > ige.client.vp1.camera._translate.x - 1000 &&
-				self._entity._translate.x < ige.client.vp1.camera._translate.x + 1000 &&
-				self._entity._translate.y > ige.client.vp1.camera._translate.y - 1000 &&
-				self._entity._translate.y < ige.client.vp1.camera._translate.y + 1000
+				self._entity._translate.x > taro.client.vp1.camera._translate.x - 1000 &&
+				self._entity._translate.x < taro.client.vp1.camera._translate.x + 1000 &&
+				self._entity._translate.y > taro.client.vp1.camera._translate.y - 1000 &&
+				self._entity._translate.y < taro.client.vp1.camera._translate.y + 1000
 			) {
 				for (particleTypeId in data.particles) {
 					if (self.particleEmitters[event] && self.particleEmitters[event][particleTypeId]) {
@@ -81,7 +81,7 @@ var EffectComponent = IgeEntity.extend({
 					var data = this._entity._stats.effects[event];
 					if (data.sound && data.sound[soundId]) {
 						// console.log('play sound called',this._entity)
-						ige.sound.playSound(data.sound[soundId], this._entity._translate, soundId);
+						taro.sound.playSound(data.sound[soundId], this._entity._translate, soundId);
 					}
 				}
 			}

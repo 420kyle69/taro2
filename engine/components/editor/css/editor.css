@@ -336,7 +336,7 @@
   min-width: 75px;
   white-space: nowrap;
 }
-#igeSgTree {
+#taroSgTree {
   display: block;
   position: absolute;
   top: 4px;
@@ -355,25 +355,25 @@
   z-index: 200000;
   overflow: auto;
 }
-#igeSgTree ul {
+#taroSgTree ul {
   list-style: none;
   margin: 0;
   padding: 0px 0px 0px 14px;
   white-space: nowrap;
 }
-#igeSgTree li {
+#taroSgTree li {
   cursor: pointer;
   margin: 3px;
   white-space: nowrap;
   padding-right: 10px;
 }
-#igeSgTree li.selected {
+#taroSgTree li.selected {
   font-weight: bold;
 }
-#igeSgTree li.selected ul {
+#taroSgTree li.selected ul {
   font-weight: normal;
 }
-#igeSgConsoleHolder {
+#taroSgConsoleHolder {
   display: none;
   position: absolute;
   left: 410px;
@@ -384,24 +384,24 @@
   font-size: 11px;
   color: #ffffff;
 }
-#igeSgConsoleHolder a {
+#taroSgConsoleHolder a {
   color: #ffffff;
 }
-#igeSgConsole {
+#taroSgConsole {
   width: 800px;
 }
-#igeSgDocPage {
+#taroSgDocPage {
   width: 800px;
   height: 400px;
   display: none;
   background-color: #ffffff;
 }
-#igeSgItemClassChain {
+#taroSgItemClassChain {
   display: none;
   margin-top: 4px;
   margin-bottom: 4px;
 }
-#igeSgEditorRoot {
+#taroSgEditorRoot {
   display: block;
   position: absolute;
   top: 4px;
@@ -420,70 +420,70 @@
   z-index: 200000;
   overflow: auto;
 }
-#igeSgEditorRoot .content {
+#taroSgEditorRoot .content {
   width: 100%;
   box-sizing: border-box;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
 }
-#igeSgEditorRoot .content .span1 {
+#taroSgEditorRoot .content .span1 {
   width: 11.11%;
   box-sizing: border-box;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
 }
-#igeSgEditorRoot .content .span2 {
+#taroSgEditorRoot .content .span2 {
   width: 22.22%;
   box-sizing: border-box;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
 }
-#igeSgEditorRoot .content .span3 {
+#taroSgEditorRoot .content .span3 {
   width: 33.33%;
   box-sizing: border-box;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
 }
-#igeSgEditorRoot .content .span4 {
+#taroSgEditorRoot .content .span4 {
   width: 44.44%;
   box-sizing: border-box;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
 }
-#igeSgEditorRoot .content .span5 {
+#taroSgEditorRoot .content .span5 {
   width: 55.55%;
   box-sizing: border-box;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
 }
-#igeSgEditorRoot .content .span6 {
+#taroSgEditorRoot .content .span6 {
   width: 66.66%;
   box-sizing: border-box;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
 }
-#igeSgEditorRoot .content .span7 {
+#taroSgEditorRoot .content .span7 {
   width: 77.77%;
   box-sizing: border-box;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
 }
-#igeSgEditorRoot .content .span8 {
+#taroSgEditorRoot .content .span8 {
   width: 88.88%;
   box-sizing: border-box;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
 }
-#igeSgEditorRoot .content .span9 {
+#taroSgEditorRoot .content .span9 {
   width: 99.99%;
   box-sizing: border-box;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
 }
-#igeSgEditorRoot .label {
+#taroSgEditorRoot .label {
   font-weight: bold;
 }
-.igeEditorGroup {
+.taroEditorGroup {
   font-family: Verdana, Tahoma, sans-serif;
   font-size: 11px;
   color: #ffffff;
@@ -501,15 +501,15 @@
   /*border-bottom: 1px solid #000;*/
   height: 20px;
 }
-.igeEditorGroup .header .label {
+.taroEditorGroup .header .label {
   padding: 0;
   background-color: inherit;
   border: none;
 }
-.igeEditorProperty input[type="number"] {
+.taroEditorProperty input[type="number"] {
   width: 80px;
 }
-.igeEditorProperty .header .label {
+.taroEditorProperty .header .label {
   padding: 0;
   background-color: inherit;
   font-weight: normal;

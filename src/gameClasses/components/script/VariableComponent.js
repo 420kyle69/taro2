@@ -1,4 +1,4 @@
-var VariableComponent = IgeEntity.extend({
+var VariableComponent = TaroEntity.extend({
 	classId: 'VariableComponent',
 	componentId: 'variable',
 
@@ -38,8 +38,8 @@ var VariableComponent = IgeEntity.extend({
 	isPositionInWall: function (position) {
 		var wallLayer = null;
 
-		for (var i = 0; i < ige.map.data.layers.length; i++) {
-			var layer = ige.map.data.layers[i];
+		for (var i = 0; i < taro.map.data.layers.length; i++) {
+			var layer = taro.map.data.layers[i];
 			if (layer.name === 'walls') {
 				wallLayer = layer;
 				break;
@@ -50,9 +50,9 @@ var VariableComponent = IgeEntity.extend({
 			return false;
 		}
 
-		var worldWidth = ige.map.data.width;
-		var tileWidth = ige.scaleMapDetails.tileWidth || ige.game.data.map.tilewidth;
-		var tileHeight = ige.scaleMapDetails.tileHeight || ige.game.data.map.tilewidth;
+		var worldWidth = taro.map.data.width;
+		var tileWidth = taro.scaleMapDetails.tileWidth || taro.game.data.map.tilewidth;
+		var tileHeight = taro.scaleMapDetails.tileHeight || taro.game.data.map.tilewidth;
 
 		var tile = {
 			x: Math.floor(position.x / tileWidth),
@@ -70,7 +70,7 @@ var VariableComponent = IgeEntity.extend({
 			width: 100
 		};
 
-		var entities = ige.physics.getBodiesInRegion({
+		var entities = taro.physics.getBodiesInRegion({
 			x: position.x,
 			y: position.y,
 			width: defaultArea.width,
@@ -149,16 +149,16 @@ var VariableComponent = IgeEntity.extend({
 					returnValue = false;
 
 					if (region && unit) {
-						// if region is an instance of IgeRegion component
+						// if region is an instance of TaroRegion component
 						if (region._stats) {
-							var entitiesInRegion = ige.regionManager.entitiesInRegion &&
-								ige.regionManager.entitiesInRegion[region._stats.id];
+							var entitiesInRegion = taro.regionManager.entitiesInRegion &&
+								taro.regionManager.entitiesInRegion[region._stats.id];
 
 							if (entitiesInRegion) {
 								returnValue = !!entitiesInRegion[unit.id()];
 							}
 						} else { // region is either dynamic or a variable with {x, y, height, width} properties
-							returnValue = ige.physics.getBodiesInRegion(region)
+							returnValue = taro.physics.getBodiesInRegion(region)
 								.filter(function (entity) {
 									return entity.id() === unit.id();
 								})
@@ -194,8 +194,8 @@ var VariableComponent = IgeEntity.extend({
 						regionB = regionB.getBounds();
 					}
 					if (regionA && regionB) {
-						regionA = new IgeRect(regionA.x, regionA.y, regionA.width, regionA.height);
-						regionB = new IgeRect(regionB.x, regionB.y, regionB.width, regionB.height);
+						regionA = new TaroRect(regionA.x, regionA.y, regionA.width, regionA.height);
+						regionB = new TaroRect(regionB.x, regionB.y, regionB.width, regionB.height);
 						returnValue = regionA.intersects(regionB);
 					}
 					break;
@@ -207,16 +207,16 @@ var VariableComponent = IgeEntity.extend({
 					returnValue = false;
 
 					if (region && item) {
-						// if region is an instance of IgeRegion component
+						// if region is an instance of TaroRegion component
 						if (region._stats) {
-							var entitiesInRegion = ige.regionManager.entitiesInRegion &&
-								ige.regionManager.entitiesInRegion[region._stats.id];
+							var entitiesInRegion = taro.regionManager.entitiesInRegion &&
+								taro.regionManager.entitiesInRegion[region._stats.id];
 
 							if (entitiesInRegion) {
 								returnValue = !!entitiesInRegion[item.id()];
 							}
 						} else { // region is either dynamic or a variable with {x, y, height, width} properties
-							returnValue = ige.physics.getBodiesInRegion(region)
+							returnValue = taro.physics.getBodiesInRegion(region)
 								.filter(function (entity) {
 									return entity.id() === item.id();
 								})
@@ -353,20 +353,20 @@ var VariableComponent = IgeEntity.extend({
 					break;
 
 				case 'entityExists':
-					returnValue = !!(entity && entity._id && ige.$(entity._id));
+					returnValue = !!(entity && entity._id && taro.$(entity._id));
 					break;
 
 				case 'getTriggeringPlayer':
 					if (vars && vars.triggeredBy && vars.triggeredBy.playerId) {
 						var id = vars.triggeredBy.playerId;
-						returnValue = ige.$(id);
+						returnValue = taro.$(id);
 					}
 					break;
 
 				case 'getTriggeringUnit':
 					if (vars && vars.triggeredBy && vars.triggeredBy.unitId) {
 						var id = vars.triggeredBy.unitId;
-						returnValue = ige.$(id);
+						returnValue = taro.$(id);
 					}
 					break;
 
@@ -379,21 +379,21 @@ var VariableComponent = IgeEntity.extend({
 				case 'getTriggeringProjectile':
 					if (vars && vars.triggeredBy && vars.triggeredBy.projectileId) {
 						var id = vars.triggeredBy.projectileId;
-						returnValue = ige.$(id);
+						returnValue = taro.$(id);
 					}
 					break;
 
 				case 'getTriggeringItem':
 					if (vars && vars.triggeredBy && vars.triggeredBy.itemId) {
 						var id = vars.triggeredBy.itemId;
-						returnValue = ige.$(id);
+						returnValue = taro.$(id);
 					}
 					break;
 
 				case 'getTriggeringSensor':
 					if (vars && vars.triggeredBy && vars.triggeredBy.sensorId) {
 						var id = vars.triggeredBy.sensorId;
-						returnValue = ige.$(id);
+						returnValue = taro.$(id);
 					}
 					break;
 
@@ -410,14 +410,14 @@ var VariableComponent = IgeEntity.extend({
 				case 'getPlayerFromId':
 					var id = self.getValue(text.string, vars);
 					if (id) {
-						returnValue = ige.$(id);
+						returnValue = taro.$(id);
 					}
 					break;
 
 				case 'getUnitFromId':
 					var id = self.getValue(text.string, vars);
 					if (id) {
-						returnValue = ige.$(id);
+						returnValue = taro.$(id);
 					}
 					break;
 
@@ -436,7 +436,7 @@ var VariableComponent = IgeEntity.extend({
 							var value = parseFloat(attributeType.value);
 							returnValue = self.getValue(value, vars);
 						} else {
-							// ige.script.errorLog("attribute "+ attributeTypeId +" doesn't exist in unit "+((unit._stats)?unit._stats.name:''))
+							// taro.script.errorLog("attribute "+ attributeTypeId +" doesn't exist in unit "+((unit._stats)?unit._stats.name:''))
 						}
 					}
 
@@ -533,7 +533,7 @@ var VariableComponent = IgeEntity.extend({
 							var value = parseFloat(attributeType.value);
 							returnValue = self.getValue(value, vars);
 						} else {
-							// ige.script.errorLog("attribute "+ attributeTypeId +" doesn't exist in unit "+((unit._stats)?unit._stats.name:''))
+							// taro.script.errorLog("attribute "+ attributeTypeId +" doesn't exist in unit "+((unit._stats)?unit._stats.name:''))
 						}
 					}
 
@@ -685,40 +685,40 @@ var VariableComponent = IgeEntity.extend({
 					break;
 
 				case 'getLastPurchasedUnit':
-					var id = ige.game.lastPurchasedUnitId;
-					unit = ige.$(id);
+					var id = taro.game.lastPurchasedUnitId;
+					unit = taro.$(id);
 					if (unit && unit._category == 'unit') {
 						return unit;
 					}
 					break;
 
 				case 'getLastTouchingUnit':
-					var id = ige.game.lastTouchingUnitId;
-					unit = ige.$(id);
+					var id = taro.game.lastTouchingUnitId;
+					unit = taro.$(id);
 					if (unit && unit._category == 'unit') {
 						return unit;
 					}
 					break;
 
 				case 'getLastAttackingUnit':
-					var id = ige.game.lastAttackingUnitId;
-					unit = ige.$(id);
+					var id = taro.game.lastAttackingUnitId;
+					unit = taro.$(id);
 					if (unit && unit._category == 'unit') {
 						return unit;
 					}
 					break;
 
 				case 'getLastAttackedUnit':
-					var id = ige.game.lastAttackedUnitId;
-					unit = ige.$(id);
+					var id = taro.game.lastAttackedUnitId;
+					unit = taro.$(id);
 					if (unit && unit._category == 'unit') {
 						return unit;
 					}
 					break;
 
 				case 'getLastTouchedUnit':
-					var id = ige.game.lastTouchedUnitId;
-					unit = ige.$(id);
+					var id = taro.game.lastTouchedUnitId;
+					unit = taro.$(id);
 					if (unit && unit._category == 'unit') {
 						returnValue = unit;
 					}
@@ -732,13 +732,13 @@ var VariableComponent = IgeEntity.extend({
 					break;
 
 				case 'getLastTouchedItem':
-					var id = ige.game.lastTouchedItemId;
-					returnValue = ige.$(id);
+					var id = taro.game.lastTouchedItemId;
+					returnValue = taro.$(id);
 					break;
 
 				case 'getLastAttackingItem':
-				 	var id = ige.game.lastAttackingItemId;
-				 	item = ige.$(id);
+				 	var id = taro.game.lastAttackingItemId;
+				 	item = taro.$(id);
 					if (item && item._category == 'item') {
 						returnValue = item;
 					}
@@ -746,9 +746,9 @@ var VariableComponent = IgeEntity.extend({
 
 				case 'lastUsedItem':
 				case 'getLastUsedItem': // will be deprecated soon
-					var id = ige.game.lastUsedItemId;
+					var id = taro.game.lastUsedItemId;
 
-					item = ige.$(id);
+					item = taro.$(id);
 					if (item && item._category == 'item') {
 						returnValue = item;
 					}
@@ -756,9 +756,9 @@ var VariableComponent = IgeEntity.extend({
 					break;
 
 				case 'getLastTouchedProjectile':
-					var id = ige.game.lastTouchedProjectileId;
+					var id = taro.game.lastTouchedProjectileId;
 
-					projectile = ige.$(id);
+					projectile = taro.$(id);
 					if (projectile && projectile._category == 'projectile') {
 						returnValue = projectile;
 					}
@@ -776,7 +776,7 @@ var VariableComponent = IgeEntity.extend({
 				case 'getSourceUnitOfProjectile':
 					if (entity && entity._category == 'projectile') {
 						var sourceUnitId = entity._stats.sourceUnitId;
-						unit = ige.$(sourceUnitId);
+						unit = taro.$(sourceUnitId);
 						if (unit && unit._category == 'unit') {
 							returnValue = unit;
 						}
@@ -819,20 +819,20 @@ var VariableComponent = IgeEntity.extend({
 					break;
 
 				case 'lastCreatedItem':
-					var id = ige.game.lastCreatedItemId;
-					returnValue = ige.$(id);
+					var id = taro.game.lastCreatedItemId;
+					returnValue = taro.$(id);
 					break;
 
 				case 'ownerUnitOfSensor':
 					var sensor = self.getValue(text.sensor, vars);
 					if (sensor && sensor._category == 'sensor') {
-						returnValue = ige.$(sensor.ownerUnitId);
+						returnValue = taro.$(sensor.ownerUnitId);
 					}
 					break;
 
 				case 'getLastCreatedProjectile':
-					var id = ige.game.lastCreatedProjectileId;
-					returnValue = ige.$(id);
+					var id = taro.game.lastCreatedProjectileId;
+					returnValue = taro.$(id);
 					break;
 
 				case 'getProjectileBody':
@@ -843,26 +843,26 @@ var VariableComponent = IgeEntity.extend({
 					break;
 
 				case 'getLastCreatedUnit':
-					var id = ige.game.lastCreatedUnitId;
-					returnValue = ige.$(id);
+					var id = taro.game.lastCreatedUnitId;
+					returnValue = taro.$(id);
 					break;
 
 				case 'getLastPlayerSelectingDialogueOption':
-					var id = ige.game.lastPlayerSelectingDialogueOption;
-					returnValue = ige.$(id);
+					var id = taro.game.lastPlayerSelectingDialogueOption;
+					returnValue = taro.$(id);
 					break;
 
 				case 'getLastCastingUnit':
-					var id = ige.game.lastCastingUnitId;
-					var unit = ige.$(id);
+					var id = taro.game.lastCastingUnitId;
+					var unit = taro.$(id);
 					if (unit && unit._category == 'unit') {
 						returnValue = unit;
 					}
 					break;
 
 				case 'getLastCreatedItem':
-					var id = ige.game.lastCreatedItemId;
-					returnValue = ige.$(id);
+					var id = taro.game.lastCreatedItemId;
+					returnValue = taro.$(id);
 					break;
 
 				case 'getItemCurrentlyHeldByUnit':
@@ -879,7 +879,7 @@ var VariableComponent = IgeEntity.extend({
 					break;
 
 				case 'getLastChatMessageSentByPlayer':
-					returnValue = ige.game.lastChatMessageSentByPlayer;
+					returnValue = taro.game.lastChatMessageSentByPlayer;
 					break;
 
 				// doesn't work yet
@@ -894,7 +894,7 @@ var VariableComponent = IgeEntity.extend({
 					break;
 
 				case 'allItemsDroppedOnGround':
-					returnValue = ige.$$('item')
+					returnValue = taro.$$('item')
 						.filter(function (item) {
 							return !item.getOwnerUnit();
 						});
@@ -903,7 +903,7 @@ var VariableComponent = IgeEntity.extend({
 				case 'allItemsOwnedByUnit':
 					var unit = self.getValue(text.entity, vars);
 					if (unit && unit._category == 'unit') {
-						returnValue = ige.$$('item')
+						returnValue = taro.$$('item')
 							.filter(function (item) {
 								return item._stats.ownerUnitId == unit.id();
 							});
@@ -918,7 +918,7 @@ var VariableComponent = IgeEntity.extend({
 					break;
 					// case 'getUnitInFrontOfUnit':
 					// 	if (entity && entity._category == 'unit') {
-					// 		var entities = ige.physics.getBodiesInRegion({
+					// 		var entities = taro.physics.getBodiesInRegion({
 					// 			x: entity._translate.x - 7 + (35 * Math.cos(entity._rotate.z + Math.radians(-90))),
 					// 			y: entity._translate.y - 7 + (35 * Math.sin(entity._rotate.z + Math.radians(-90))),
 					// 			width: 14,
@@ -949,22 +949,22 @@ var VariableComponent = IgeEntity.extend({
 					break;
 
 				case 'getPlayerCount':
-					returnValue = ige.$$('player').filter(function (player) {
+					returnValue = taro.$$('player').filter(function (player) {
 						return player._stats.controlledBy == 'human' && player._stats.playerJoined == true;
 					}).length;
 					break;
 
 				case 'getNumberOfItemsPresent':
-					returnValue = ige.$$('item').length;
+					returnValue = taro.$$('item').length;
 					break;
 
 				case 'getUnitCount':
-					returnValue = ige.$$('unit').length;
+					returnValue = taro.$$('unit').length;
 					break;
 
 				case 'getNumberOfUnitsOfUnitType':
 					var unitType = self.getValue(text.unitType, vars);
-					var units = ige.$$('unit').filter((unit) => {
+					var units = taro.$$('unit').filter((unit) => {
 						return unit._stats.type === unitType;
 					});
 
@@ -973,7 +973,7 @@ var VariableComponent = IgeEntity.extend({
 
 				case 'getNumberOfPlayersOfPlayerType':
 					var playerType = self.getValue(text.playerType, vars);
-					var players = ige.$$('player').filter((player) => {
+					var players = taro.$$('player').filter((player) => {
 						return player._stats.playerTypeId === playerType;
 					});
 
@@ -988,14 +988,14 @@ var VariableComponent = IgeEntity.extend({
 					break;
 
 				case 'getMapHeight':
-					var worldHeight = ige.map.data.height;
-					var tileHeight = ige.game.data.map.tileheight;
+					var worldHeight = taro.map.data.height;
+					var tileHeight = taro.game.data.map.tileheight;
 					returnValue = tileHeight * worldHeight;
 					break;
 
 				case 'getMapWidth':
-					var worldWidth = ige.map.data.width;
-					var tileWidth = 64 || ige.game.data.map.tilewidth;
+					var worldWidth = taro.map.data.width;
+					var tileWidth = 64 || taro.game.data.map.tilewidth;
 					returnValue = tileWidth * worldWidth;
 					break;
 
@@ -1026,14 +1026,14 @@ var VariableComponent = IgeEntity.extend({
 					
 				case 'defaultQuantityOfItemType':
 					var itemTypeId = self.getValue(text.itemType, vars);
-					var itemType = ige.game.getAsset('itemTypes', itemTypeId);
+					var itemType = taro.game.getAsset('itemTypes', itemTypeId);
 					if (itemType) {
 						returnValue = itemType.quantity;
 					}
 					break;
 				case 'maxValueOfItemType':
 					var itemTypeId = self.getValue(text.itemType, vars);
-					var itemType = ige.game.getAsset('itemTypes', itemTypeId);
+					var itemType = taro.game.getAsset('itemTypes', itemTypeId);
 
 					if (itemType) {
 						returnValue = itemType.maxQuantity;
@@ -1044,7 +1044,7 @@ var VariableComponent = IgeEntity.extend({
 					break;
 
 				case 'allItemTypesInGame':
-					var itemTypesObject = ige.game.data.itemTypes;
+					var itemTypesObject = taro.game.data.itemTypes;
 
 					if (itemTypesObject) {
 						returnValue = itemTypesObject;
@@ -1053,7 +1053,7 @@ var VariableComponent = IgeEntity.extend({
 					break;
 
 				case 'allUnitTypesInGame':
-					var unitTypesObject = ige.game.data.unitTypes;
+					var unitTypesObject = taro.game.data.unitTypes;
 
 					if (unitTypesObject) {
 						returnValue = unitTypesObject;
@@ -1125,7 +1125,7 @@ var VariableComponent = IgeEntity.extend({
 						}
 
 						if (!returnValue) {
-							ige.script.errorLog(`could not find valid position even after${attempts} attempts`);
+							taro.script.errorLog(`could not find valid position even after${attempts} attempts`);
 						}
 					}
 					break;
@@ -1145,16 +1145,16 @@ var VariableComponent = IgeEntity.extend({
 
 				case 'getEntireMapRegion':
 					// var region = {
-					// 	x: ige.map.data.tilewidth * 2,
-					// 	y: ige.map.data.tileheight * 2,
-					// 	width: (ige.map.data.width * ige.map.data.tilewidth) - (ige.map.data.tilewidth * 2),
-					// 	height: (ige.map.data.height * ige.map.data.tileheight) - (ige.map.data.tileheight * 2)
+					// 	x: taro.map.data.tilewidth * 2,
+					// 	y: taro.map.data.tileheight * 2,
+					// 	width: (taro.map.data.width * taro.map.data.tilewidth) - (taro.map.data.tilewidth * 2),
+					// 	height: (taro.map.data.height * taro.map.data.tileheight) - (taro.map.data.tileheight * 2)
 					// };
 					var region = {
 						x: 0,
 						y: 0,
-						width: ige.map.data.width * ige.map.data.tilewidth,
-						height: ige.map.data.height * ige.map.data.tileheight
+						width: taro.map.data.width * taro.map.data.tilewidth,
+						height: taro.map.data.height * taro.map.data.tileheight
 					};
 
 					returnValue = { _stats: { default: region } };
@@ -1209,7 +1209,7 @@ var VariableComponent = IgeEntity.extend({
 					}
 					break;
 				case 'entitiesCollidingWithLastRaycast': {
-					returnValue = ige.game.entitiesCollidingWithLastRaycast;
+					returnValue = taro.game.entitiesCollidingWithLastRaycast;
 					break;
 				}
 				case 'entitiesBetweenTwoPositions': {
@@ -1218,19 +1218,19 @@ var VariableComponent = IgeEntity.extend({
 
 					if (positionA && positionB) {
 						positionA = {
-							x: positionA.x / ige.physics._scaleRatio,
-							y: positionA.y / ige.physics._scaleRatio
+							x: positionA.x / taro.physics._scaleRatio,
+							y: positionA.y / taro.physics._scaleRatio
 						};
 						positionB = {
-							x: positionB.x / ige.physics._scaleRatio,
-							y: positionB.y / ige.physics._scaleRatio
+							x: positionB.x / taro.physics._scaleRatio,
+							y: positionB.y / taro.physics._scaleRatio
 						};
-						ige.raycaster.raycastLine(
+						taro.raycaster.raycastLine(
 							positionA,
 							positionB,
 						);
 	
-						returnValue = ige.game.entitiesCollidingWithLastRaycast;
+						returnValue = taro.game.entitiesCollidingWithLastRaycast;
 					}					
 					break;
 				}
@@ -1291,7 +1291,7 @@ var VariableComponent = IgeEntity.extend({
 
 				case 'getUnitTypeName':
 					var unitTypeId = self.getValue(text.unitType, vars);
-					var unitType = ige.game.getAsset('unitTypes', unitTypeId);
+					var unitType = taro.game.getAsset('unitTypes', unitTypeId);
 					if (unitType) {
 						returnValue = unitType.name;
 					}
@@ -1299,7 +1299,7 @@ var VariableComponent = IgeEntity.extend({
 
 				case 'getItemTypeName':
 					var itemTypeId = self.getValue(text.itemType, vars);
-					var itemType = ige.game.getAsset('itemTypes', itemTypeId);
+					var itemType = taro.game.getAsset('itemTypes', itemTypeId);
 					if (itemType) {
 						returnValue = itemType.name;
 					}
@@ -1425,7 +1425,7 @@ var VariableComponent = IgeEntity.extend({
 
 				case 'getItemTypeDamage':
 					var itemTypeId = self.getValue(text.itemType, vars);
-					var itemType = ige.game.getAsset('itemTypes', itemTypeId);
+					var itemType = taro.game.getAsset('itemTypes', itemTypeId);
 					if (itemType) {
 						returnValue = parseFloat(itemType.damage);
 					} else {
@@ -1463,7 +1463,7 @@ var VariableComponent = IgeEntity.extend({
 					break;
 
 				case 'lastPurchasedUnitTypetId':
-					returnValue = ige.game.lastPurchasedUniTypetId;
+					returnValue = taro.game.lastPurchasedUniTypetId;
 					break;
 
 				case 'getXCoordinateOfRegion':
@@ -1517,7 +1517,7 @@ var VariableComponent = IgeEntity.extend({
 
 				case 'getRotateSpeed':
 					var unitTypeId = self.getValue(text.unitType, vars);
-					var unitType = ige.game.getAsset('unitTypes', unitTypeId);
+					var unitType = taro.game.getAsset('unitTypes', unitTypeId);
 					if (unitType && unitType.body && unitType.body.rotationSpeed) {
 						returnValue = unitType.body.rotationSpeed;
 					}
@@ -1730,11 +1730,11 @@ var VariableComponent = IgeEntity.extend({
 					/* Groups */
 
 				case 'allUnits':
-					returnValue = ige.$$('unit');
+					returnValue = taro.$$('unit');
 					break;
 
 				case 'allRegions':
-					returnValue = ige.$$('region');
+					returnValue = taro.$$('region');
 					break;
 
 				case 'allUnitsOwnedByPlayer':
@@ -1744,7 +1744,7 @@ var VariableComponent = IgeEntity.extend({
 						var units = [];
 						for (var i = 0; i < player._stats.unitIds.length; i++) {
 							var unitId = player._stats.unitIds[i];
-							units.push(ige.$(unitId));
+							units.push(taro.$(unitId));
 						}
 						returnValue = units;
 					}
@@ -1757,7 +1757,7 @@ var VariableComponent = IgeEntity.extend({
 
 					if (region) {
 						var regionBounds = region._stats ? region._stats.default : region;
-						returnValue = ige.physics.getBodiesInRegion(regionBounds)
+						returnValue = taro.physics.getBodiesInRegion(regionBounds)
 							.filter(({ _category }) => {
 								return _category === 'unit';
 							});
@@ -1768,28 +1768,28 @@ var VariableComponent = IgeEntity.extend({
 					break;
 
 				case 'allPlayers':
-					returnValue = ige.$$('player');
+					returnValue = taro.$$('player');
 					break;
 
 				case 'humanPlayers':
-					returnValue = ige.$$('player').filter(function (player) { return player._stats.controlledBy == 'human'; });
+					returnValue = taro.$$('player').filter(function (player) { return player._stats.controlledBy == 'human'; });
 					break;
 
 				case 'computerPlayers':
-					returnValue = ige.$$('player').filter(function (player) { return player._stats.controlledBy == 'computer'; });
+					returnValue = taro.$$('player').filter(function (player) { return player._stats.controlledBy == 'computer'; });
 					break;
 
 				case 'botPlayers':
-					returnValue = ige.$$('player').filter(function (player) { return player._stats.isBot });
+					returnValue = taro.$$('player').filter(function (player) { return player._stats.isBot });
 					break;
 
 
 				case 'allItems':
-					returnValue = ige.$$('item');
+					returnValue = taro.$$('item');
 					break;
 
 				case 'allProjectiles':
-					returnValue = ige.$$('projectile');
+					returnValue = taro.$$('projectile');
 					break;
 
 				/* entity */
@@ -1799,8 +1799,8 @@ var VariableComponent = IgeEntity.extend({
 					break;
 
 				case 'allEntities':
-					var igeRegister = ige.register();
-					returnValue = _.values(igeRegister)
+					var taroRegister = taro.register();
+					returnValue = _.values(taroRegister)
 						.filter(({ _category }) => {
 							return self._entity.script.action.entityCategories.includes(_category) || !_category;
 						});
@@ -1832,11 +1832,11 @@ var VariableComponent = IgeEntity.extend({
 						region.y -= region.height / 2;
 
 						if (region.x && !isNaN(region.x) && region.y && !isNaN(region.y) && region.width && !isNaN(region.width) && region.height && !isNaN(region.height)) {
-							returnValue = ige.physics.getBodiesInRegion(region).filter(({ _category }) => {
+							returnValue = taro.physics.getBodiesInRegion(region).filter(({ _category }) => {
 								return self._entity.script.action.entityCategories.includes(_category) || !_category;
 							});
 						} else {
-							ige.script.errorLog(`region ${JSON.stringify(region)} is not a valid region`);
+							taro.script.errorLog(`region ${JSON.stringify(region)} is not a valid region`);
 							returnValue = [];
 						}
 					}
@@ -1845,24 +1845,24 @@ var VariableComponent = IgeEntity.extend({
 				case 'entitiesInRegion':
 					var region = self.getValue(text.region, vars);
 
-					var id = ige.game.lastCastingUnitId;
-					var unit = ige.$(id);
+					var id = taro.game.lastCastingUnitId;
+					var unit = taro.$(id);
 
 					if (region) {
-						// region represent some instance of IgeRegion
+						// region represent some instance of TaroRegion
 						if (region._stats) {
-							returnValue = ige.physics.getBodiesInRegion(region._stats.default)
+							returnValue = taro.physics.getBodiesInRegion(region._stats.default)
 								.filter(({ _category }) => {
 									return self._entity.script.action.entityCategories.includes(_category) || !_category;
 								});
 						} else {
-							returnValue = ige.physics.getBodiesInRegion(region)
+							returnValue = taro.physics.getBodiesInRegion(region)
 								.filter(({ _category }) => {
 									return self._entity.script.action.entityCategories.includes(_category) || !_category;
 								});
 						}
 					} else {
-						ige.script.errorLog('region is not a valid region');
+						taro.script.errorLog('region is not a valid region');
 						returnValue = [];
 					}
 
@@ -1912,7 +1912,7 @@ var VariableComponent = IgeEntity.extend({
 
 				default:
 					if (text.function) {
-						ige.script.errorLog(`warning: function '${text.function}' not found`);
+						taro.script.errorLog(`warning: function '${text.function}' not found`);
 					} else {
 						returnValue = text;
 					}
@@ -1921,7 +1921,7 @@ var VariableComponent = IgeEntity.extend({
 		}
 
 		// For debugging purpose. if type of returnValue is object, it can sometimes cause TypeError: Converting circular structure to JSON
-		if (ige.isServer) {
+		if (taro.isServer) {
 			var output = returnValue;
 			if (typeof returnValue == 'object' && returnValue && returnValue._category) {
 				output = returnValue._category;
@@ -1963,7 +1963,7 @@ var VariableComponent = IgeEntity.extend({
 		}
 
 		if (isNaN(result)) {
-			ige.script.errorLog('\'Calculate\' detected NaN value. Returning undefined');
+			taro.script.errorLog('\'Calculate\' detected NaN value. Returning undefined');
 			return undefined;
 		}
 
@@ -1973,16 +1973,16 @@ var VariableComponent = IgeEntity.extend({
 	getAllVariables: function (selectedTypes) {
 		var returnObj = {};
 
-		for (var variableName in ige.game.data.variables) {
-			var variable = ige.game.data.variables[variableName];
+		for (var variableName in taro.game.data.variables) {
+			var variable = taro.game.data.variables[variableName];
 
 			if (!selectedTypes || selectedTypes.includes(variable.dataType)) {
 				// if variable's current value isn't set, set value as default
 				if (variable.value == undefined && variable.default != undefined) {
 					if (variable.dataType == 'player' || variable.dataType == 'unit') {
-						variable.value = ige.game[variable.default];
+						variable.value = taro.game[variable.default];
 					} else if (variable.dataType == 'region') {
-						var region = ige.regionManager.getRegionById(variableName);
+						var region = taro.regionManager.getRegionById(variableName);
 						variable.value = region || variable.default;
 						variable.value.key = variableName;
 						return variable.value;
@@ -2003,14 +2003,14 @@ var VariableComponent = IgeEntity.extend({
 	},
 
 	getVariable: function (variableName) {
-		var variable = ige.game.data.variables[variableName];
+		var variable = taro.game.data.variables[variableName];
 		if (variable) {
 			// if variable's current value isn't set, set value as default
 			if (variable.value == undefined && variable.default != undefined) {
 				if (variable.dataType == 'player' || variable.dataType == 'unit') {
-					variable.value = ige.game[variable.default];
+					variable.value = taro.game[variable.default];
 				} else if (variable.dataType == 'region') {
-					var region = ige.regionManager.getRegionById(variableName);
+					var region = taro.regionManager.getRegionById(variableName);
 					variable.value = region || variable.default;
 					variable.value.key = variableName;
 					return variable.value;
@@ -2029,23 +2029,23 @@ var VariableComponent = IgeEntity.extend({
 	},
 
 	setGlobalVariable: function (name, newValue) {
-		if (ige.isServer) {
-			if (ige.game.data.variables.hasOwnProperty(name)) {
-				ige.game.data.variables[name].value = newValue;
+		if (taro.isServer) {
+			if (taro.game.data.variables.hasOwnProperty(name)) {
+				taro.game.data.variables[name].value = newValue;
 				// if variable has default field then it will be returned when variable's value is undefined
 				if (
 					newValue === undefined &&
 					action.value &&
 					action.value.function === 'undefinedValue' &&
-					ige.game.data.variables[name].hasOwnProperty('default')
+					taro.game.data.variables[name].hasOwnProperty('default')
 				) {
-					ige.game.data.variables[name].default = undefined;
+					taro.game.data.variables[name].default = undefined;
 				}
 			}
 
 			params.newValue = newValue;
 			this.updateDevConsole({ type: 'setVariable', params: params });
-		} else if (ige.isClient) {
+		} else if (taro.isClient) {
 			// empty
 		}
 	}

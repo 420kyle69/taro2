@@ -1,6 +1,6 @@
 var DeveloperMode = /** @class */ (function () {
     function DeveloperMode() {
-        if (ige.isClient)
+        if (taro.isClient)
             this.active = false;
     }
     DeveloperMode.prototype.enter = function () {
@@ -14,16 +14,16 @@ var DeveloperMode = /** @class */ (function () {
     };
     DeveloperMode.prototype.changeTab = function (tab) {
         if (tab === 'map') {
-            ige.client.emit('enterMapTab');
+            taro.client.emit('enterMapTab');
         }
         else {
-            ige.client.emit('leaveMapTab');
+            taro.client.emit('leaveMapTab');
         }
         if (tab === 'play') {
-            ige.client.emit('lockCamera');
+            taro.client.emit('lockCamera');
         }
         else if (this.activeTab === 'play') {
-            ige.client.emit('unlockCamera');
+            taro.client.emit('unlockCamera');
         }
         this.activeTab = tab;
     };
@@ -32,10 +32,10 @@ var DeveloperMode = /** @class */ (function () {
     };
     DeveloperMode.prototype.editTile = function (data, clientId) {
         // only allow developers to modify the tiles
-        if (ige.server.developerClientIds.includes(clientId)) {
-            var gameMap = ige.game.data.map;
+        if (taro.server.developerClientIds.includes(clientId)) {
+            var gameMap = taro.game.data.map;
             gameMap.wasEdited = true;
-            ige.network.send('editTile', data);
+            taro.network.send('editTile', data);
             var serverData = _.clone(data);
             if (gameMap.layers.length > 4 && serverData.layer >= 2)
                 serverData.layer++;
@@ -44,29 +44,29 @@ var DeveloperMode = /** @class */ (function () {
                 this.floodTiles(serverData.layer, gameMap.layers[serverData.layer].data[serverData.y * width + serverData.x], serverData.gid, serverData.x, serverData.y);
             }
             else {
-                //save tile change to ige.game.data.map and ige.map.data
+                //save tile change to taro.game.data.map and taro.map.data
                 gameMap.layers[serverData.layer].data[serverData.y * width + serverData.x] = serverData.gid;
-                ige.map.data.layers[serverData.layer].data[serverData.y * width + serverData.x] = serverData.gid;
+                taro.map.data.layers[serverData.layer].data[serverData.y * width + serverData.x] = serverData.gid;
             }
             if (gameMap.layers[serverData.layer].name === 'walls') {
                 //if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
-                ige.physics.destroyWalls();
-                var map = ige.scaleMap(_.cloneDeep(gameMap));
-                ige.tiled.loadJson(map, function (layerArray, layersById) {
-                    ige.physics.staticsFromMap(layersById.walls);
+                taro.physics.destroyWalls();
+                var map = taro.scaleMap(_.cloneDeep(gameMap));
+                taro.tiled.loadJson(map, function (layerArray, layersById) {
+                    taro.physics.staticsFromMap(layersById.walls);
                 });
             }
         }
     };
     DeveloperMode.prototype.floodTiles = function (layer, oldTile, newTile, x, y) {
-        var map = ige.game.data.map;
+        var map = taro.game.data.map;
         var width = map.width;
         if (oldTile === newTile || map.layers[layer].data[y * width + x] !== oldTile) {
             return;
         }
-        //save tile change to ige.game.data.map and ige.map.data
+        //save tile change to taro.game.data.map and taro.map.data
         map.layers[layer].data[y * width + x] = newTile;
-        ige.map.data.layers[layer].data[y * width + x] = newTile;
+        taro.map.data.layers[layer].data[y * width + x] = newTile;
         if (x > 0) {
             this.floodTiles(layer, oldTile, newTile, x - 1, y);
         }
@@ -82,7 +82,7 @@ var DeveloperMode = /** @class */ (function () {
     };
     DeveloperMode.prototype.editRegion = function (data, clientId) {
         // only allow developers to modify regions
-        if (ige.server.developerClientIds.includes(clientId)) {
+        if (taro.server.developerClientIds.includes(clientId)) {
             if (data.name === '' || data.width <= 0 || data.height <= 0) {
                 console.log('empty name, negative or 0 size is not allowed');
             }
@@ -93,10 +93,10 @@ var DeveloperMode = /** @class */ (function () {
                 do {
                     regionNameNumber++;
                     newRegionName = "region".concat(regionNameNumber);
-                } while (ige.regionManager.getRegionById(newRegionName));
+                } while (taro.regionManager.getRegionById(newRegionName));
                 data.name = newRegionName;
                 data.showModal = true;
-                data.userId = ige.game.getPlayerByClientId(clientId)._stats.userId;
+                data.userId = taro.game.getPlayerByClientId(clientId)._stats.userId;
                 // changed to Region from RegionUi
                 var regionData = {
                     dataType: 'region',
@@ -118,17 +118,17 @@ var DeveloperMode = /** @class */ (function () {
                 };
                 var region = new Region(regionData);
                 // create new region in game.data
-                ige.regionManager.updateRegionToDatabase(regionData);
+                taro.regionManager.updateRegionToDatabase(regionData);
             }
             else { // modify existing region
-                var region = ige.regionManager.getRegionById(data.name);
+                var region = taro.regionManager.getRegionById(data.name);
                 if (region) {
                     if (data.delete) {
                         region.destroy();
                     }
                     else {
                         if (data.name !== data.newName) {
-                            if (ige.regionManager.getRegionById(data.newName)) {
+                            if (taro.regionManager.getRegionById(data.newName)) {
                                 console.log('This name is unavailable');
                             }
                             else {
@@ -147,18 +147,18 @@ var DeveloperMode = /** @class */ (function () {
                 }
             }
             // broadcast region change to all clients
-            ige.network.send('editRegion', data);
+            taro.network.send('editRegion', data);
         }
     };
     DeveloperMode.prototype.createUnit = function (data) {
-        //const player = ige.game.getPlayerByClientId(clientId);
+        //const player = taro.game.getPlayerByClientId(clientId);
         var player;
-        ige.$$('player').forEach(function (p) {
+        taro.$$('player').forEach(function (p) {
             if (p.id() === data.playerId)
                 player = p;
         });
         var unitTypeId = data.typeId;
-        var unitTypeData = ige.game.getAsset('unitTypes', unitTypeId);
+        var unitTypeData = taro.game.getAsset('unitTypes', unitTypeId);
         var spawnPosition = data.position;
         var facingAngle = data.angle;
         if (player && spawnPosition && unitTypeId && unitTypeData) {
@@ -170,18 +170,18 @@ var DeveloperMode = /** @class */ (function () {
                 }
             });
             var unit = player.createUnit(unitData);
-            ige.game.lastCreatedUnitId = unit.id();
+            taro.game.lastCreatedUnitId = unit.id();
         }
     };
     DeveloperMode.prototype.updateUnit = function (data) {
         // 1. broadcast update to all players
         // 2. force update its dimension/scale/layer/image
-        ige.game.data.unitTypes[data.typeId] = data.newData;
-        ige.$$('unit').forEach(function (unit) {
+        taro.game.data.unitTypes[data.typeId] = data.newData;
+        taro.$$('unit').forEach(function (unit) {
             if (unit._stats.type === data.typeId) {
                 for (var i = 0; i < unit._stats.itemIds.length; i++) {
                     var itemId = unit._stats.itemIds[i];
-                    var item = ige.$(itemId);
+                    var item = taro.$(itemId);
                     if (item) {
                         item.remove();
                     }
@@ -190,12 +190,12 @@ var DeveloperMode = /** @class */ (function () {
                 unit.emit('update-texture', 'basic_texture_change');
             }
         });
-        if (ige.isServer) {
-            ige.network.send('updateUnit', data);
+        if (taro.isServer) {
+            taro.network.send('updateUnit', data);
         }
     };
     DeveloperMode.prototype.deleteUnit = function (data) {
-        ige.$$('unit').forEach(function (unit) {
+        taro.$$('unit').forEach(function (unit) {
             if (unit._stats.type === data.typeId) {
                 unit.destroy();
             }
@@ -203,7 +203,7 @@ var DeveloperMode = /** @class */ (function () {
     };
     DeveloperMode.prototype.createItem = function (data) {
         var itemTypeId = data.typeId;
-        var itemData = ige.game.getAsset('itemTypes', itemTypeId);
+        var itemData = taro.game.getAsset('itemTypes', itemTypeId);
         var position = data.position;
         var facingAngle = data.angle;
         var quantity = itemData.maxQuantity;
@@ -221,7 +221,7 @@ var DeveloperMode = /** @class */ (function () {
                 rotate: facingAngle
             };
             var item = new Item(itemData);
-            ige.game.lastCreatedUnitId = item._id;
+            taro.game.lastCreatedUnitId = item._id;
             item.script.trigger("entityCreated");
         }
     };
@@ -229,19 +229,19 @@ var DeveloperMode = /** @class */ (function () {
         // 1. broadcast update to all players
         // 2. force update its dimension/scale/layer/image
         // 3. we may need to re-mount the item on unit
-        ige.game.data.itemTypes[data.typeId] = data.newData;
-        ige.$$('item').forEach(function (item) {
+        taro.game.data.itemTypes[data.typeId] = data.newData;
+        taro.$$('item').forEach(function (item) {
             if (item._stats.itemTypeId === data.typeId) {
                 item.changeItemType(data.typeId, {}, false);
                 item.emit('update-texture', 'basic_texture_change');
             }
         });
-        if (ige.isServer) {
-            ige.network.send('updateItem', data);
+        if (taro.isServer) {
+            taro.network.send('updateItem', data);
         }
     };
     DeveloperMode.prototype.deleteItem = function (data) {
-        ige.$$('item').forEach(function (item) {
+        taro.$$('item').forEach(function (item) {
             if (item._stats.type === data.typeId) {
                 item.destroy();
             }
@@ -252,31 +252,31 @@ var DeveloperMode = /** @class */ (function () {
     DeveloperMode.prototype.updateProjectile = function (data) {
         // 1. broadcast update to all players
         // 2. force update its dimension/scale/layer/image
-        ige.game.data.projectileTypes[data.typeId] = data.newData;
-        ige.$$('projectile').forEach(function (projectile) {
+        taro.game.data.projectileTypes[data.typeId] = data.newData;
+        taro.$$('projectile').forEach(function (projectile) {
             if (projectile._stats.type === data.typeId) {
                 projectile.changeProjectileType(data.typeId, {}, false);
                 projectile.emit('update-texture', 'basic_texture_change');
             }
         });
-        if (ige.isServer) {
-            ige.network.send('updateProjectile', data);
+        if (taro.isServer) {
+            taro.network.send('updateProjectile', data);
         }
     };
     DeveloperMode.prototype.deleteProjectile = function (data) {
-        ige.$$('projectile').forEach(function (projectile) {
+        taro.$$('projectile').forEach(function (projectile) {
             if (projectile._stats.type === data.typeId) {
                 projectile.destroy();
             }
         });
     };
     DeveloperMode.prototype.editEntity = function (data, clientId) {
-        if (ige.isClient) {
-            ige.network.send('editEntity', data);
+        if (taro.isClient) {
+            taro.network.send('editEntity', data);
         }
         else {
             // only allow developers to modify entities
-            if (ige.server.developerClientIds.includes(clientId)) {
+            if (taro.server.developerClientIds.includes(clientId)) {
                 if (data.entityType === 'unit') {
                     switch (data.action) {
                         case 'create':
@@ -323,16 +323,16 @@ var DeveloperMode = /** @class */ (function () {
         console.log('map data was edited', data.mapData.wasEdited);
         if (data.mapData.wasEdited) {
             data.mapData.wasEdited = false;
-            ige.game.data.map = data.mapData;
-            if (ige.physics) {
+            taro.game.data.map = data.mapData;
+            if (taro.physics) {
                 //if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
-                ige.physics.destroyWalls();
-                var map = ige.scaleMap(_.cloneDeep(ige.game.data.map));
-                ige.tiled.loadJson(map, function (layerArray, IgeLayersById) {
-                    ige.physics.staticsFromMap(IgeLayersById.walls);
+                taro.physics.destroyWalls();
+                var map = taro.scaleMap(_.cloneDeep(taro.game.data.map));
+                taro.tiled.loadJson(map, function (layerArray, TaroLayersById) {
+                    taro.physics.staticsFromMap(TaroLayersById.walls);
                 });
             }
-            ige.client.emit('updateMap');
+            taro.client.emit('updateMap');
         }
     };
     return DeveloperMode;

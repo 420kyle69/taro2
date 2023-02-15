@@ -1,21 +1,21 @@
-var Sensor = IgeEntityPhysics.extend({
+var Sensor = TaroEntityPhysics.extend({
 	classId: 'Sensor',
 
 	init: function (ownerUnit, radius) {
 		var self = this;
 		self.category('sensor');
 		self.ownerUnitId = ownerUnit.id();
-		IgeEntityPhysics.prototype.init.call(this, {});
+		TaroEntityPhysics.prototype.init.call(this, {});
 		this.updateRadius(radius);
-		if (ige.isServer) {
-			self.mount(ige.$('baseScene'));
+		if (taro.isServer) {
+			self.mount(taro.$('baseScene'));
 			this.streamMode(0);
 			this.addBehaviour('sensorBehaviour', this._behaviour);
 		}
 	},
 
 	getOwnerUnit: function () {
-		return ige.$(this.ownerUnitId);
+		return taro.$(this.ownerUnitId);
 	},
 
 	updateRadius: function (radius) {
@@ -43,7 +43,7 @@ var Sensor = IgeEntityPhysics.extend({
 				}
 			};
 
-			var ownerUnit = ige.$(this.ownerUnitId);
+			var ownerUnit = taro.$(this.ownerUnitId);
 			if (ownerUnit) {
 				var defaultData = {
 					translate: {
@@ -66,18 +66,18 @@ var Sensor = IgeEntityPhysics.extend({
 		if (ownerUnit) {
 			ownerUnit.sensor = undefined;
 		}
-		IgeEntityPhysics.prototype.remove.call(this);
+		TaroEntityPhysics.prototype.remove.call(this);
 	},
 
 	destroy: function () {
-		IgeEntityPhysics.prototype.destroy.call(this);
+		TaroEntityPhysics.prototype.destroy.call(this);
 	},
 
 	_behaviour: function (ctx) {
 		var ownerUnit = this.getOwnerUnit();
 		if (ownerUnit) {
 			if (this.body) {
-				if (ige.physics.engine === 'CRASH') {
+				if (taro.physics.engine === 'CRASH') {
 					this.translateTo(ownerUnit._translate.x, ownerUnit._translate.y);
 				}
 				else this.translateTo(ownerUnit._translate.x, ownerUnit._translate.y); // keep sensor following its owner unit
@@ -86,7 +86,7 @@ var Sensor = IgeEntityPhysics.extend({
 			// destroy ownerless sensors
 			this.remove();
 		}
-		if (ige.physics && ige.physics.engine != 'CRASH') {
+		if (taro.physics && taro.physics.engine != 'CRASH') {
 			this.processBox2dQueue();
 		}
 	}

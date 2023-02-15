@@ -1,4 +1,4 @@
-var ActionComponent = IgeEntity.extend({
+var ActionComponent = TaroEntity.extend({
 	classId: 'ActionComponent',
 	componentId: 'action',
 
@@ -19,54 +19,54 @@ var ActionComponent = IgeEntity.extend({
 			var action = actionList[i];
 
 			if (!action || action.disabled == true || // if action is disabled or
-				(ige.isClient && (!action.runOnClient || action.runMode == 0)) || // don't run on client if runMode is 'server authoratative'
-				(ige.isServer && action.runMode == 1) // don't run on server if runMode is 'client only'
+				(taro.isClient && (!action.runOnClient || action.runMode == 0)) || // don't run on client if runMode is 'server authoratative'
+				(taro.isServer && action.runMode == 1) // don't run on server if runMode is 'client only'
 			) {
 				continue;
 			}
 			
 			// if CSP is enabled, then server will pause streaming
 			// the server side is still running (e.g. creating entities), but it won't be streamed to the client
-			if (ige.isServer) {
+			if (taro.isServer) {
 
 				var now = Date.now();
-				var lastActionRunTime = now - ige.lastActionRanAt;
-				var engineTickDelta = now - ige.now;
+				var lastActionRunTime = now - taro.lastActionRanAt;
+				var engineTickDelta = now - taro.now;
 
 				// prevent recursive/infinite action calls consuming CPU
-				if (engineTickDelta > 1000 && !ige.engineLagReported) {
+				if (engineTickDelta > 1000 && !taro.engineLagReported) {
 					var rollbarData = {
 						query: 'engineFreeze',
 						engineTickDelta: engineTickDelta,
 						masterServer: global.myIp,
-						gameTitle: ige.game.data.defaultData.title,
-						clientCommands: ige.network.commandCount,
-						actionProfiler: ige.actionProfiler,
+						gameTitle: taro.game.data.defaultData.title,
+						clientCommands: taro.network.commandCount,
+						actionProfiler: taro.actionProfiler,
 						lastAction: action.type,
-						triggerProfiler: ige.triggerProfiler
+						triggerProfiler: taro.triggerProfiler
 					};
 
 					global.rollbar.log("engineStep is taking longer than 1000ms", rollbarData);
 
-					var errorMsg = ige.script.errorLog("engineTick is taking longer than 1000ms (took"+engineTickDelta+"ms)");
+					var errorMsg = taro.script.errorLog("engineTick is taking longer than 1000ms (took"+engineTickDelta+"ms)");
 					console.log(errorMsg, rollbarData);
-					ige.engineLagReported = true;
-					// ige.server.unpublish(errorMsg); // not publishing yet cuz TwoHouses will get unpub. loggin instead.
+					taro.engineLagReported = true;
+					// taro.server.unpublish(errorMsg); // not publishing yet cuz TwoHouses will get unpub. loggin instead.
 				}
 
-				if (ige.lastAction) {
-					if (ige.actionProfiler[ige.lastAction]) {
-						var count = ige.actionProfiler[ige.lastAction].count;
-						ige.actionProfiler[ige.lastAction].count++;
-						ige.actionProfiler[ige.lastAction].avgTime = ((ige.actionProfiler[ige.lastAction].avgTime * count) + lastActionRunTime ) / (count + 1)
-						ige.actionProfiler[ige.lastAction].totalTime += lastActionRunTime;
+				if (taro.lastAction) {
+					if (taro.actionProfiler[taro.lastAction]) {
+						var count = taro.actionProfiler[taro.lastAction].count;
+						taro.actionProfiler[taro.lastAction].count++;
+						taro.actionProfiler[taro.lastAction].avgTime = ((taro.actionProfiler[taro.lastAction].avgTime * count) + lastActionRunTime ) / (count + 1)
+						taro.actionProfiler[taro.lastAction].totalTime += lastActionRunTime;
 					} else {
-						ige.actionProfiler[ige.lastAction] = { count: 1, avgTime: lastActionRunTime, totalTime: lastActionRunTime };
+						taro.actionProfiler[taro.lastAction] = { count: 1, avgTime: lastActionRunTime, totalTime: lastActionRunTime };
 					}
 				}
 
-				ige.lastAction = action.type;
-				ige.lastActionRanAt = now;
+				taro.lastAction = action.type;
+				taro.lastActionRanAt = now;
 			}
 
 			var params = {};
@@ -91,23 +91,23 @@ var ActionComponent = IgeEntity.extend({
 					case 'setVariable': // store variables with formula processed
 						var newValue = self._script.variable.getValue(action.value, vars);
 						params.newValue = newValue;
-						if (ige.game.data.variables.hasOwnProperty(action.variableName)) {
-							ige.game.data.variables[action.variableName].value = newValue;
+						if (taro.game.data.variables.hasOwnProperty(action.variableName)) {
+							taro.game.data.variables[action.variableName].value = newValue;
 							// if variable has default field then it will be returned when variable's value is undefined
 							if (
 								newValue === undefined &&
                                 				action.value &&
                                 				action.value.function === 'undefinedValue' &&
-                                				ige.game.data.variables[action.variableName].hasOwnProperty('default')
+                                				taro.game.data.variables[action.variableName].hasOwnProperty('default')
 							) {
-								ige.game.data.variables[action.variableName].default = undefined;
+								taro.game.data.variables[action.variableName].default = undefined;
 							}
 						}
 
 						// not sure if we want to be doing this on the client
 						// causing issues so disabled on client for now
-						if (ige.isServer) {
-							ige.game.updateDevConsole({ type: 'setVariable', params: params });
+						if (taro.isServer) {
+							taro.game.updateDevConsole({ type: 'setVariable', params: params });
 						} else {
 							// console.log('setVariable:', action.variableName, newValue);
 						}
@@ -199,19 +199,19 @@ var ActionComponent = IgeEntity.extend({
 
 					case 'setLastAttackingUnit':
 						var unit = self._script.variable.getValue(action.unit, vars);
-						ige.game.lastAttackingUnitId = unit.id();
+						taro.game.lastAttackingUnitId = unit.id();
 
 						break;
 
 					case 'setLastAttackedUnit':
 						var unit = self._script.variable.getValue(action.unit, vars);
-						ige.game.lastAttackedUnitId = unit.id();
+						taro.game.lastAttackedUnitId = unit.id();
 
 						break;
 
 					case 'setLastAttackingItem':
 						var item = self._script.variable.getValue(action.item, vars);
-						ige.game.lastAttackingItemId = item.id();
+						taro.game.lastAttackingItemId = item.id();
 
 						break;
 
@@ -228,16 +228,16 @@ var ActionComponent = IgeEntity.extend({
 						}
 
 						// ensure we aren't sending more than 30 POST requests within 10 seconds
-						ige.server.postReqTimestamps.push(ige.currentTime());
-						var oldestReqTimestamp = ige.server.postReqTimestamps[0]
-						while (Date.now() - oldestReqTimestamp > 10000 && ige.server.postReqTimestamps.length > 0) {
-							oldestReqTimestamp = ige.server.postReqTimestamps.shift();
+						taro.server.postReqTimestamps.push(taro.currentTime());
+						var oldestReqTimestamp = taro.server.postReqTimestamps[0]
+						while (Date.now() - oldestReqTimestamp > 10000 && taro.server.postReqTimestamps.length > 0) {
+							oldestReqTimestamp = taro.server.postReqTimestamps.shift();
 						}
-						if (ige.server.postReqTimestamps.length > 30) {
-							ige.server.unpublish('Game server is sending too many POST requests. You cannot send more than 30 req per every 10s.');
+						if (taro.server.postReqTimestamps.length > 30) {
+							taro.server.unpublish('Game server is sending too many POST requests. You cannot send more than 30 req per every 10s.');
 						}
 
-						ige.server.request.post({
+						taro.server.request.post({
 						    url: url,
 						    form: obj
 						}, function optionalCallback (err, httpResponse, body) {
@@ -250,13 +250,13 @@ var ActionComponent = IgeEntity.extend({
 								var newValue = res.response;
 								params['newValue'] = newValue;
 
-								if (ige.game.data.variables.hasOwnProperty(varName)) {
-									ige.game.data.variables[varName].value = newValue;
+								if (taro.game.data.variables.hasOwnProperty(varName)) {
+									taro.game.data.variables[varName].value = newValue;
 								}
 							} catch (err) {
-								console.error('sendPostRequest', ige.game.data.defaultData.title, url, err);
-								if (ige.game.data.variables.hasOwnProperty(varName)) {
-									ige.game.data.variables[varName].value = 'error';
+								console.error('sendPostRequest', taro.game.data.defaultData.title, url, err);
+								if (taro.game.data.variables.hasOwnProperty(varName)) {
+									taro.game.data.variables[varName].value = 'error';
 								}
 							}
 						});
@@ -268,7 +268,7 @@ var ActionComponent = IgeEntity.extend({
 					case 'kickPlayer':
 						var player = self._script.variable.getValue(action.entity, vars);
 						if (player && player._category == 'player') {
-							ige.game.kickPlayer(player.id());
+							taro.game.kickPlayer(player.id());
 						}
 
 						break;
@@ -402,7 +402,7 @@ var ActionComponent = IgeEntity.extend({
 									variableObj.default = undefined;
 								}
 							} else {
-								ige.devLog('datatype of value does not match datatype of variable');
+								taro.devLog('datatype of value does not match datatype of variable');
 							}
 						}
 
@@ -424,11 +424,11 @@ var ActionComponent = IgeEntity.extend({
 						break;
 
 					case 'startAcceptingPlayers':
-						ige.clusterClient.setAcceptingPlayerStatus(true);
+						taro.clusterClient.setAcceptingPlayerStatus(true);
 						break;
 
 					case 'stopAcceptingPlayers':
-						ige.clusterClient.setAcceptingPlayerStatus(false);
+						taro.clusterClient.setAcceptingPlayerStatus(false);
 						break;
 					case 'saveUnitData':
 						var unit = self._script.variable.getValue(action.unit, vars);
@@ -437,12 +437,12 @@ var ActionComponent = IgeEntity.extend({
 
 						if (unit && ownerPlayer && userId && ownerPlayer.persistentDataLoaded) {
 							var data = unit.getPersistentData('unit');
-							ige.clusterClient.saveUserData(userId, data, 'unit');
+							taro.clusterClient.saveUserData(userId, data, 'unit');
 						} else {
 							if (!unit.persistentDataLoaded) {
-								ige.devLog('Fail saving unit data bcz persisted data not set correctly');
+								taro.devLog('Fail saving unit data bcz persisted data not set correctly');
 							} else {
-								ige.devLog('Fail saving unit data');
+								taro.devLog('Fail saving unit data');
 							}
 						}
 						break;
@@ -452,26 +452,26 @@ var ActionComponent = IgeEntity.extend({
 
 						if (player && userId && player.persistentDataLoaded) {
 							var data = player.getPersistentData('player');
-							ige.clusterClient.saveUserData(userId, data, 'player');
+							taro.clusterClient.saveUserData(userId, data, 'player');
 
 							var unit = player.getSelectedUnit();
 							var userId = player._stats.userId;
 
 							if (unit && player && userId && unit.persistentDataLoaded) {
 								var data = unit.getPersistentData('unit');
-								ige.clusterClient.saveUserData(userId, data, 'unit');
+								taro.clusterClient.saveUserData(userId, data, 'unit');
 							} else {
 								if (!unit.persistentDataLoaded) {
-									ige.devLog('Fail saving unit data bcz persisted data not set correctly');
+									taro.devLog('Fail saving unit data bcz persisted data not set correctly');
 								} else {
-									ige.devLog('Fail saving unit data');
+									taro.devLog('Fail saving unit data');
 								}
 							}
 						} else {
 							if (player && !player.persistentDataLoaded) {
-								ige.devLog('Fail saving unit data bcz persisted data not set correctly');
+								taro.devLog('Fail saving unit data bcz persisted data not set correctly');
 							} else {
-								ige.devLog('Fail saving player data');
+								taro.devLog('Fail saving player data');
 							}
 						}
 
@@ -493,7 +493,7 @@ var ActionComponent = IgeEntity.extend({
 						var userId = player && player._stats && player._stats.userId;
 
 						if (player && userId && coins && parseInt(coins) > 0) {
-							ige.server.sendCoinsToPlayer(userId, coins);
+							taro.server.sendCoinsToPlayer(userId, coins);
 						}
 						break;
 						
@@ -501,25 +501,25 @@ var ActionComponent = IgeEntity.extend({
 					case 'showUiTextForPlayer':
 						if (entity && entity._stats) {
 							var text = self._script.variable.getValue(action.value, vars);
-							ige.gameText.updateText({ target: action.target, value: text, action: 'show' }, entity._stats.clientId);
+							taro.gameText.updateText({ target: action.target, value: text, action: 'show' }, entity._stats.clientId);
 						}
 						break;
 
 					case 'showUiTextForEveryone':
 						var text = self._script.variable.getValue(action.value, vars);
-						ige.gameText.updateText({ target: action.target, value: text, action: 'show' });
+						taro.gameText.updateText({ target: action.target, value: text, action: 'show' });
 						break;
 
 					case 'hideUiTextForPlayer':
 						if (entity && entity._stats) {
 							var text = self._script.variable.getValue(action.value, vars);
-							ige.gameText.updateText({ target: action.target, value: text, action: 'hide' }, entity._stats.clientId);
+							taro.gameText.updateText({ target: action.target, value: text, action: 'hide' }, entity._stats.clientId);
 						}
 						break;
 
 					case 'hideUiTextForEveryone':
 						var text = self._script.variable.getValue(action.value, vars);
-						ige.gameText.updateText({ target: action.target, value: text, action: 'hide' });
+						taro.gameText.updateText({ target: action.target, value: text, action: 'hide' });
 						break;
 
 					case 'updateUiTextForTimeForPlayer':
@@ -528,7 +528,7 @@ var ActionComponent = IgeEntity.extend({
 						var time = self._script.variable.getValue(action.time, vars);
 						// don't send text to AI players. If player is undefined, then send to all players
 						if (player == undefined || (player && player._stats && player._stats.controlledBy == 'human')) {
-							ige.gameText.updateTextForTime({
+							taro.gameText.updateTextForTime({
 								target: action.target,
 								value: text,
 								action: 'update',
@@ -540,7 +540,7 @@ var ActionComponent = IgeEntity.extend({
 					case 'updateUiTextForPlayer':
 						if (entity && entity._stats) {
 							var text = self._script.variable.getValue(action.value, vars);
-							ige.gameText.updateText({ target: action.target, value: text, action: 'update' }, entity._stats.clientId);
+							taro.gameText.updateText({ target: action.target, value: text, action: 'update' }, entity._stats.clientId);
 						}
 						break;
 
@@ -548,7 +548,7 @@ var ActionComponent = IgeEntity.extend({
 
 						var player = self._script.variable.getValue(action.player, vars);
 						if (player && player._stats && player._stats.clientId) {
-							ige.network.send('gameSuggestion', { type: 'show' }, player._stats.clientId);
+							taro.network.send('gameSuggestion', { type: 'show' }, player._stats.clientId);
 						}
 
 						break;
@@ -557,13 +557,13 @@ var ActionComponent = IgeEntity.extend({
 
 						var player = self._script.variable.getValue(action.player, vars);
 						if (player && player._stats && player._stats.clientId) {
-							ige.network.send('gameSuggestion', { type: 'hide' }, player._stats.clientId);
+							taro.network.send('gameSuggestion', { type: 'hide' }, player._stats.clientId);
 						}
 						break;
 
 					case 'updateUiTextForEveryone':
 						var text = self._script.variable.getValue(action.value, vars);
-						ige.gameText.updateText({ target: action.target, value: text, action: 'update' });
+						taro.gameText.updateText({ target: action.target, value: text, action: 'update' });
 						break;
 
 					case 'showInputModalToPlayer':
@@ -571,7 +571,7 @@ var ActionComponent = IgeEntity.extend({
 						var inputLabel = self._script.variable.getValue(action.inputLabel, vars);
 
 						if (player && player._stats && player._stats.clientId) {
-							ige.network.send('ui', {
+							taro.network.send('ui', {
 								command: 'showInputModal',
 								fieldLabel: inputLabel,
 								isDismissible: false
@@ -583,7 +583,7 @@ var ActionComponent = IgeEntity.extend({
 						var inputLabel = self._script.variable.getValue(action.inputLabel, vars);
 
 						if (player && player._stats && player._stats.clientId) {
-							ige.network.send('ui', {
+							taro.network.send('ui', {
 								command: 'showInputModal',
 								fieldLabel: inputLabel,
 								isDismissible: true
@@ -596,7 +596,7 @@ var ActionComponent = IgeEntity.extend({
 						var modalTitle = self._script.variable.getValue(action.title, vars) || '';
 
 						if (player && player._stats && player._stats.clientId) {
-							ige.network.send('ui', {
+							taro.network.send('ui', {
 								command: 'showCustomModal',
 								title: modalTitle,
 								content: htmlContent,
@@ -609,7 +609,7 @@ var ActionComponent = IgeEntity.extend({
 						var url = self._script.variable.getValue(action.string, vars) || '';
 
 						if (player && player._stats && player._stats.clientId) {
-							ige.network.send('ui', {
+							taro.network.send('ui', {
 								command: 'showWebsiteModal',
 								url: url,
 								isDismissible: true
@@ -620,7 +620,7 @@ var ActionComponent = IgeEntity.extend({
 						var player = self._script.variable.getValue(action.player, vars);
 
 						if (player && player._stats && player._stats.clientId) {
-							ige.network.send('ui', {
+							taro.network.send('ui', {
 								command: 'showSocialShareModal',
 								isDismissible: true
 							}, player._stats.clientId);
@@ -631,7 +631,7 @@ var ActionComponent = IgeEntity.extend({
 						var url = self._script.variable.getValue(action.string, vars) || '';
 
 						if (player && player._stats && player._stats.clientId) {
-							ige.network.send('ui', {
+							taro.network.send('ui', {
 								command: 'openWebsite',
 								url: url,
 								isDismissible: true
@@ -643,7 +643,7 @@ var ActionComponent = IgeEntity.extend({
 						var player = self._script.variable.getValue(action.player, vars);
 
 						if (player && player._stats && player._stats.clientId) {
-							ige.network.send('ui', {
+							taro.network.send('ui', {
 								command: 'showFriendsModal'
 							}, player._stats.clientId);
 						}
@@ -652,20 +652,20 @@ var ActionComponent = IgeEntity.extend({
 					case 'showMenu':
 						var player = self._script.variable.getValue(action.player, vars);
 						if (player && player._stats) {
-							ige.network.send('ui', { command: 'showMenu' }, player._stats.clientId);
+							taro.network.send('ui', { command: 'showMenu' }, player._stats.clientId);
 						}
 						break;
 
 					case 'sendChatMessage':
 						var message = self._script.variable.getValue(action.message, vars);
-						ige.chat.sendToRoom('1', message, undefined, undefined);
+						taro.chat.sendToRoom('1', message, undefined, undefined);
 						break;
 
 					case 'sendChatMessageToPlayer':
 						var player = self._script.variable.getValue(action.player, vars);
 						if (player && player._category == 'player' && player._stats.clientId) {
 							var clientId = player._stats.clientId;
-							ige.chat.sendToRoom('1', self._script.variable.getValue(action.message, vars), clientId, undefined);
+							taro.chat.sendToRoom('1', self._script.variable.getValue(action.message, vars), clientId, undefined);
 						}
 
 						break;
@@ -674,7 +674,7 @@ var ActionComponent = IgeEntity.extend({
 						let words = self._script.variable.getValue(action.words, vars);
 						if (words) {
 							words = words.match(/(?=\S)[^,]+?(?=\s*(,|$))/g);
-							ige.chat.filter?.addWords(...words);
+							taro.chat.filter?.addWords(...words);
 						}
 						break;
 						
@@ -696,7 +696,7 @@ var ActionComponent = IgeEntity.extend({
 						var player = self._script.variable.getValue(action.player, vars);
 						var zoom = self._script.variable.getValue(action.zoom, vars);
 						if (player && player._category == 'player' && zoom != undefined && player._stats.clientId) {
-							ige.network.send('camera', { cmd: 'zoom', zoom: zoom }, player._stats.clientId);
+							taro.network.send('camera', { cmd: 'zoom', zoom: zoom }, player._stats.clientId);
 						}
 						break;
 
@@ -710,7 +710,7 @@ var ActionComponent = IgeEntity.extend({
 
 							unit._stats.minimapUnitVisibleToClients[clientId] = color;
 
-							ige.network.send('minimap', {
+							taro.network.send('minimap', {
 								type: 'showUnit',
 								unitId: unit.id(),
 								color: color
@@ -729,7 +729,7 @@ var ActionComponent = IgeEntity.extend({
 
 							delete unit._stats.minimapUnitVisibleToClients[clientId];
 
-							ige.network.send('minimap', {
+							taro.network.send('minimap', {
 								type: 'hideUnit',
 								unitId: unit.id()
 							}, player._stats.clientId);
@@ -750,12 +750,12 @@ var ActionComponent = IgeEntity.extend({
 
 								if (brk == 'break' || vars.break) {
 									vars.break = false;
-									ige.devLog('break called');
+									taro.devLog('break called');
 									break;
 								} else if (brk == 'continue') {
 									continue;
 								} else if (brk == 'return') {
-									ige.devLog('return without executing script');
+									taro.devLog('return without executing script');
 									return 'return';
 								}
 							}
@@ -774,12 +774,12 @@ var ActionComponent = IgeEntity.extend({
 
 								if (brk == 'break' || vars.break) {
 									vars.break = false;
-									ige.devLog('break called');
+									taro.devLog('break called');
 									break;
 								} else if (brk == 'continue') {
 									continue;
 								} else if (brk == 'return') {
-									ige.devLog('return without executing script');
+									taro.devLog('return without executing script');
 									return 'return';
 								}
 							}
@@ -798,12 +798,12 @@ var ActionComponent = IgeEntity.extend({
 
 								if (brk == 'break' || vars.break) {
 									vars.break = false;
-									ige.devLog('break called');
+									taro.devLog('break called');
 									break;
 								} else if (brk == 'continue') {
 									continue;
 								} else if (brk == 'return') {
-									ige.devLog('return without executing script');
+									taro.devLog('return without executing script');
 									return 'return';
 								}
 							}
@@ -822,12 +822,12 @@ var ActionComponent = IgeEntity.extend({
 
 								if (brk == 'break' || vars.break) {
 									vars.break = false;
-									ige.devLog('break called');
+									taro.devLog('break called');
 									break;
 								} else if (brk == 'continue') {
 									continue;
 								} else if (brk == 'return') {
-									ige.devLog('return without executing script');
+									taro.devLog('return without executing script');
 									return 'return';
 								}
 							}
@@ -848,12 +848,12 @@ var ActionComponent = IgeEntity.extend({
 
 									if (brk == 'break' || vars.break) {
 										vars.break = false;
-										ige.devLog('break called');
+										taro.devLog('break called');
 										break;
 									} else if (brk == 'continue') {
 										continue;
 									} else if (brk == 'return') {
-										ige.devLog('return without executing script');
+										taro.devLog('return without executing script');
 										return 'return';
 									}
 								}
@@ -873,12 +873,12 @@ var ActionComponent = IgeEntity.extend({
 
 								if (brk == 'break' || vars.break) {
 									vars.break = false;
-									ige.devLog('break called');
+									taro.devLog('break called');
 									break;
 								} else if (brk == 'continue') {
 									continue;
 								} else if (brk == 'return') {
-									ige.devLog('return without executing script');
+									taro.devLog('return without executing script');
 									return 'return';
 								}
 							}
@@ -900,12 +900,12 @@ var ActionComponent = IgeEntity.extend({
 
 								if (brk == 'break' || vars.break) {
 									vars.break = false;
-									ige.devLog('break called');
+									taro.devLog('break called');
 									break;
 								} else if (brk == 'continue') {
 									continue;
 								} else if (brk == 'return') {
-									ige.devLog('return without executing script');
+									taro.devLog('return without executing script');
 									return 'return';
 								}
 							}
@@ -925,7 +925,7 @@ var ActionComponent = IgeEntity.extend({
 							// sorting items before they are used. which solves issue of getting first item in slot
 							itemTypes = Object.keys(itemTypes);
 							var itemsArr = _.map(itemTypes, (itemId) => {
-								var item = ige.game.getAsset('itemTypes', itemId);
+								var item = taro.game.getAsset('itemTypes', itemId);
 								if (item) {
 									return {
 										name: item.name,
@@ -944,12 +944,12 @@ var ActionComponent = IgeEntity.extend({
 
 									if (brk == 'break' || vars.break) {
 										vars.break = false;
-										ige.devLog('break called');
+										taro.devLog('break called');
 										break;
 									} else if (brk == 'continue') {
 										continue;
 									} else if (brk == 'return') {
-										ige.devLog('return without executing script');
+										taro.devLog('return without executing script');
 										return 'return';
 									}
 								}
@@ -976,12 +976,12 @@ var ActionComponent = IgeEntity.extend({
 							if (loopCounter > 10000) {
 								var errorMsg = self._script.errorLog('infinite loop detected');
 								console.log(errorMsg);
-								ige.server.unpublish(errorMsg);
+								taro.server.unpublish(errorMsg);
 							}
 						}
 						break;
 					case 'for':
-						var variables = ige.game.data.variables;
+						var variables = taro.game.data.variables;
 						var variableName = action.variableName;
 
 						if (variables[variableName] !== undefined) {
@@ -1039,7 +1039,7 @@ var ActionComponent = IgeEntity.extend({
 						break;
 
 					case 'endGame':
-						ige.server.kill('end game called');
+						taro.server.kill('end game called');
 						break;
 
 						/* Unit */
@@ -1048,7 +1048,7 @@ var ActionComponent = IgeEntity.extend({
 						var player = self._script.variable.getValue(action.entity, vars);
 
 						var unitTypeId = self._script.variable.getValue(action.unitType, vars);
-						var unitTypeData = ige.game.getAsset('unitTypes', unitTypeId);
+						var unitTypeData = taro.game.getAsset('unitTypes', unitTypeId);
 
 						var spawnPosition = self._script.variable.getValue(action.position, vars);
 						var facingAngle = self._script.variable.getValue(action.angle, vars) || 0;
@@ -1067,7 +1067,7 @@ var ActionComponent = IgeEntity.extend({
 							
 		
 							var unit = player.createUnit(data);
-							ige.game.lastCreatedUnitId = unit.id();
+							taro.game.lastCreatedUnitId = unit.id();
 						} else {
 							self._script.errorLog('cannot create unit. parameters are spawnPosition:', spawnPosition, ' player:', !!player, ' unitTypeId:', unitTypeId);
 							if (!player) invalidParameters.push('player');
@@ -1121,7 +1121,7 @@ var ActionComponent = IgeEntity.extend({
 						if (entity && radians !== undefined && !isNaN(radians) && !isNaN(speed)) {
 							radians -= Math.radians(90);
 							// console.log("2. setting linear velocity", radians, speed)
-							// entity.body.setLinearVelocity(new IgePoint3d(Math.cos(radians) * speed, Math.sin(radians) * speed, 0));
+							// entity.body.setLinearVelocity(new TaroPoint3d(Math.cos(radians) * speed, Math.sin(radians) * speed, 0));
 							// entity.setLinearVelocityLT(Math.cos(radians) * speed, Math.sin(radians) * speed);
 							entity.setLinearVelocity(Math.cos(radians) * speed, Math.sin(radians) * speed);
 						}
@@ -1191,7 +1191,7 @@ var ActionComponent = IgeEntity.extend({
 						var position = self._script.variable.getValue(action.position, vars);
 						var text = self._script.variable.getValue(action.text, vars);
 						var color = self._script.variable.getValue(action.color, vars);
-						ige.network.send('createFloatingText', { position: position, text: text, color: color });
+						taro.network.send('createFloatingText', { position: position, text: text, color: color });
 						break;
 
 						/* Item */
@@ -1321,7 +1321,7 @@ var ActionComponent = IgeEntity.extend({
 
 						if (player && player._category === 'player' && player._stats.clientId) {
 							player._stats.lastOpenedShop = action.shop;
-							ige.network.send('openShop', { type: action.shop }, player._stats.clientId);
+							taro.network.send('openShop', { type: action.shop }, player._stats.clientId);
 						}
 						break;
 
@@ -1329,7 +1329,7 @@ var ActionComponent = IgeEntity.extend({
 						var player = self._script.variable.getValue(action.player, vars);
 
 						if (player && player._category === 'player' && player._stats.clientId) {
-							ige.network.send('ui', { command: 'closeShop' }, player._stats.clientId);
+							taro.network.send('ui', { command: 'closeShop' }, player._stats.clientId);
 						}
 						break;
 
@@ -1343,12 +1343,12 @@ var ActionComponent = IgeEntity.extend({
 
 						if (player && player._category === 'player' && player._stats.clientId) {
 							player._stats.lastOpenedDialogue = action.dialogue;
-							ige.network.send('openDialogue', {
+							taro.network.send('openDialogue', {
 								type: action.dialogue,
 								extraData: {
 									playerName: player._stats && player._stats.name,
 									variables: primitiveVariables,
-									dialogueTemplate: _.get(ige, "game.data.ui.dialogueview.htmlData", "")
+									dialogueTemplate: _.get(taro, "game.data.ui.dialogueview.htmlData", "")
 								}
 							}, player._stats.clientId);
 						}
@@ -1358,7 +1358,7 @@ var ActionComponent = IgeEntity.extend({
 						var player = self._script.variable.getValue(action.player, vars);
 
 						if (player && player._category === 'player' && player._stats.clientId) {
-							ige.network.send('closeDialogue', player._stats.clientId);
+							taro.network.send('closeDialogue', player._stats.clientId);
 						}
 						break;
 
@@ -1382,7 +1382,7 @@ var ActionComponent = IgeEntity.extend({
 						var item = self._script.variable.getValue(action.item, vars);
 						var particleTypeId = self._script.variable.getValue(action.particleType, vars);
 						if (item && item._category == 'item' && item._stats.particles && item._stats.particles[particleTypeId]) {
-							ige.network.send('particle', { eid: item.id(), pid: particleTypeId, action: 'start' });
+							taro.network.send('particle', { eid: item.id(), pid: particleTypeId, action: 'start' });
 						}
 						break;
 
@@ -1390,7 +1390,7 @@ var ActionComponent = IgeEntity.extend({
 						var item = self._script.variable.getValue(action.item, vars);
 						var particleTypeId = self._script.variable.getValue(action.particleType, vars);
 						if (item && item._category == 'item' && item._stats.particles && item._stats.particles[particleTypeId]) {
-							ige.network.send('particle', { eid: item.id(), pid: particleTypeId, action: 'stop' });
+							taro.network.send('particle', { eid: item.id(), pid: particleTypeId, action: 'stop' });
 						}
 						break;
 
@@ -1398,7 +1398,7 @@ var ActionComponent = IgeEntity.extend({
 						var item = self._script.variable.getValue(action.item, vars);
 						var particleTypeId = self._script.variable.getValue(action.particleType, vars);
 						if (item && item._category == 'item' && item._stats.particles && item._stats.particles[particleTypeId]) {
-							ige.network.send('particle', { eid: item.id(), pid: particleTypeId, action: 'emitOnce' });
+							taro.network.send('particle', { eid: item.id(), pid: particleTypeId, action: 'emitOnce' });
 						}
 						break;
 
@@ -1406,7 +1406,7 @@ var ActionComponent = IgeEntity.extend({
 						var unit = self._script.variable.getValue(action.unit, vars);
 						var particleTypeId = self._script.variable.getValue(action.particleType, vars);
 						if (unit && unit._category == 'unit' && unit._stats.particles && unit._stats.particles[particleTypeId]) {
-							ige.network.send('particle', { eid: unit.id(), pid: particleTypeId, action: 'start' });
+							taro.network.send('particle', { eid: unit.id(), pid: particleTypeId, action: 'start' });
 						}
 						break;
 
@@ -1414,7 +1414,7 @@ var ActionComponent = IgeEntity.extend({
 						var unit = self._script.variable.getValue(action.unit, vars);
 						var particleTypeId = self._script.variable.getValue(action.particleType, vars);
 						if (unit && unit._category == 'unit' && unit._stats.particles && unit._stats.particles[particleTypeId]) {
-							ige.network.send('particle', { eid: unit.id(), pid: particleTypeId, action: 'stop' });
+							taro.network.send('particle', { eid: unit.id(), pid: particleTypeId, action: 'stop' });
 						}
 						break;
 
@@ -1422,7 +1422,7 @@ var ActionComponent = IgeEntity.extend({
 						var unit = self._script.variable.getValue(action.unit, vars);
 						var particleTypeId = self._script.variable.getValue(action.particleType, vars);
 						if (unit && unit._category == 'unit' && unit._stats.particles && unit._stats.particles[particleTypeId]) {
-							ige.network.send('particle', { eid: unit.id(), pid: particleTypeId, action: 'emitOnce' });
+							taro.network.send('particle', { eid: unit.id(), pid: particleTypeId, action: 'emitOnce' });
 						}
 						break;
 
@@ -1430,7 +1430,7 @@ var ActionComponent = IgeEntity.extend({
 						var position = self._script.variable.getValue(action.position, vars);
 						var particleTypeId = self._script.variable.getValue(action.particleType, vars);
 						if (particleTypeId && position) {
-							ige.network.send('particle', { pid: particleTypeId, action: 'emitOnce', position: position });
+							taro.network.send('particle', { pid: particleTypeId, action: 'emitOnce', position: position });
 						}
 						break;
 
@@ -1510,28 +1510,28 @@ var ActionComponent = IgeEntity.extend({
 						var unit = self._script.variable.getValue(action.entity, vars);
 						var player = self._script.variable.getValue(action.player, vars);
 						if (unit && player && player._stats && unit._stats) {
-							ige.network.send('hideUnitNameLabelFromPlayer', { unitId: unit.id() }, player._stats.clientId);
+							taro.network.send('hideUnitNameLabelFromPlayer', { unitId: unit.id() }, player._stats.clientId);
 						}
 						break;
 					case 'showUnitNameLabelToPlayer':
 						var unit = self._script.variable.getValue(action.entity, vars);
 						var player = self._script.variable.getValue(action.player, vars);
 						if (unit && player && player._stats && unit._stats) {
-							ige.network.send('showUnitNameLabelFromPlayer', { unitId: unit.id() }, player._stats.clientId);
+							taro.network.send('showUnitNameLabelFromPlayer', { unitId: unit.id() }, player._stats.clientId);
 						}
 						break;
 					case 'hideUnitFromPlayer':
 						var unit = self._script.variable.getValue(action.entity, vars);
 						var player = self._script.variable.getValue(action.player, vars);
 						if (unit && player && player._stats && unit._stats) {
-							ige.network.send('hideUnitFromPlayer', { unitId: unit.id() }, player._stats.clientId);
+							taro.network.send('hideUnitFromPlayer', { unitId: unit.id() }, player._stats.clientId);
 						}
 						break;
 					case 'showUnitToPlayer':
 						var unit = self._script.variable.getValue(action.entity, vars);
 						var player = self._script.variable.getValue(action.player, vars);
 						if (unit && player && player._stats && unit._stats) {
-							ige.network.send('showUnitFromPlayer', { unitId: unit.id() }, player._stats.clientId);
+							taro.network.send('showUnitFromPlayer', { unitId: unit.id() }, player._stats.clientId);
 						}
 						break;
 					case 'makeUnitInvisibleToNeutralPlayers':
@@ -1583,7 +1583,7 @@ var ActionComponent = IgeEntity.extend({
 						}
 
 						if (projectileTypeId) {
-							var projectileData = ige.game.getAsset('projectileTypes', projectileTypeId);
+							var projectileData = taro.game.getAsset('projectileTypes', projectileTypeId);
 
 							if (projectileData != undefined && position != undefined && position.x != undefined && position.y != undefined && force != undefined && angle != undefined) {
 								var facingAngleInRadians = angle + facingAngleDelta;
@@ -1608,7 +1608,7 @@ var ActionComponent = IgeEntity.extend({
 								);
 
 								var projectile = new Projectile(data);
-								ige.game.lastCreatedProjectileId = projectile._id;
+								taro.game.lastCreatedProjectileId = projectile._id;
 								projectile.script.trigger("entityCreated");		
 							} else {
 								if (!projectileData) {
@@ -1649,7 +1649,7 @@ var ActionComponent = IgeEntity.extend({
 						var player = self._script.variable.getValue(action.player, vars);
 
 						if (position && player && player._stats.clientId) {
-							ige.network.send('camera', { cmd: 'positionCamera', position: position }, player._stats.clientId);
+							taro.network.send('camera', { cmd: 'positionCamera', position: position }, player._stats.clientId);
 						}
 						break;
 
@@ -1657,7 +1657,7 @@ var ActionComponent = IgeEntity.extend({
 						var itemTypeId = self._script.variable.getValue(action.itemType, vars);
 						var position = self._script.variable.getValue(action.position, vars);
 						var quantity = self._script.variable.getValue(action.quantity, vars);
-						var itemData = ige.game.getAsset('itemTypes', itemTypeId);
+						var itemData = taro.game.getAsset('itemTypes', itemTypeId);
 						if (quantity == -1 || !quantity) {
 							quantity = null;
 						}
@@ -1672,7 +1672,7 @@ var ActionComponent = IgeEntity.extend({
 								facingAngle: Math.random(0, 700) / 100
 							};
 							var item = new Item(itemData);
-							ige.game.lastCreatedItemId = item._id;
+							taro.game.lastCreatedItemId = item._id;
 							item.script.trigger("entityCreated");
 						} else {
 							self._script.errorLog('invalid item type data');
@@ -1681,7 +1681,7 @@ var ActionComponent = IgeEntity.extend({
 						/* depreciated and can be removed */
 					case 'createItemWithMaxQuantityAtPosition':
 						var itemTypeId = self._script.variable.getValue(action.itemType, vars);
-						var itemData = ige.game.getAsset('itemTypes', itemTypeId);
+						var itemData = taro.game.getAsset('itemTypes', itemTypeId);
 						var position = self._script.variable.getValue(action.position, vars);
 						var quantity = itemData.maxQuantity;
 
@@ -1700,7 +1700,7 @@ var ActionComponent = IgeEntity.extend({
 								rotate: Math.random(0, 700) / 100
 							};
 							var item = new Item(itemData);
-							ige.game.lastCreatedItemId = item._id;
+							taro.game.lastCreatedItemId = item._id;
 							item.script.trigger("entityCreated");
 						} else {
 							self._script.errorLog('invalid item type data');
@@ -1710,7 +1710,7 @@ var ActionComponent = IgeEntity.extend({
 					case 'spawnItem':
 
 						var itemTypeId = self._script.variable.getValue(action.itemType, vars);
-						var itemData = ige.game.getAsset('itemTypes', itemTypeId);
+						var itemData = taro.game.getAsset('itemTypes', itemTypeId);
 						var position = self._script.variable.getValue(action.position, vars);
 
 						if (itemData) {
@@ -1722,7 +1722,7 @@ var ActionComponent = IgeEntity.extend({
 								rotate: Math.random(0, 700) / 100
 							};
 							var item = new Item(itemData);
-							ige.game.lastCreatedItemId = item._id;
+							taro.game.lastCreatedItemId = item._id;
 							item.script.trigger("entityCreated");
 						} else {
 							self._script.errorLog('invalid item type data');
@@ -1731,7 +1731,7 @@ var ActionComponent = IgeEntity.extend({
 
 					case 'giveNewItemToUnit':
 						var itemTypeId = self._script.variable.getValue(action.itemType, vars);
-						var itemData = ige.game.getAsset('itemTypes', itemTypeId);
+						var itemData = taro.game.getAsset('itemTypes', itemTypeId);
 						var unit = self._script.variable.getValue(action.unit, vars);
 
 						if (itemData && unit && unit._category == 'unit') {
@@ -1747,7 +1747,7 @@ var ActionComponent = IgeEntity.extend({
 
 					case 'giveNewItemWithQuantityToUnit':
 						var itemTypeId = self._script.variable.getValue(action.itemType, vars);
-						var itemData = ige.game.getAsset('itemTypes', itemTypeId);
+						var itemData = taro.game.getAsset('itemTypes', itemTypeId);
 						var unit = null;
 
 						if (itemData) {
@@ -1814,9 +1814,9 @@ var ActionComponent = IgeEntity.extend({
 						/* Ads */
 
 					case 'playAdForEveryone':
-						if (!ige.ad.lastPlayedAd || ((Date.now() - ige.ad.lastPlayedAd) >= 60000)) {
-							ige.ad.play({ type: 'preroll' });
-							ige.ad.lastPlayedAd = Date.now();
+						if (!taro.ad.lastPlayedAd || ((Date.now() - taro.ad.lastPlayedAd) >= 60000)) {
+							taro.ad.play({ type: 'preroll' });
+							taro.ad.lastPlayedAd = Date.now();
 						}
 						break;
 
@@ -1824,8 +1824,8 @@ var ActionComponent = IgeEntity.extend({
 						if (action.entity) {
 							var unit = self._script.variable.getValue(action.entity, vars);
 							if (unit && unit._stats && unit._stats.clientId) {
-								if (!ige.ad.lastPlayedAd || ((Date.now() - ige.ad.lastPlayedAd) >= 60000)) {
-									ige.ad.play({ type: 'preroll' }, unit._stats.clientId);
+								if (!taro.ad.lastPlayedAd || ((Date.now() - taro.ad.lastPlayedAd) >= 60000)) {
+									taro.ad.play({ type: 'preroll' }, unit._stats.clientId);
 								}
 							}
 						}
@@ -1847,54 +1847,54 @@ var ActionComponent = IgeEntity.extend({
 						/* Sound */
 					case 'playSoundAtPosition':
 						var position = self._script.variable.getValue(action.position, vars);
-						var sound = ige.game.data.sound[action.sound];
+						var sound = taro.game.data.sound[action.sound];
 						// if csp enable dont stream sound
 						if (sound && position) {
-							ige.network.send('sound', { id: action.sound, position: position });
+							taro.network.send('sound', { id: action.sound, position: position });
 						}
 						break;
 
 						/* Music */
 
 					case 'playMusic':
-						var music = ige.game.data.music[action.music];
+						var music = taro.game.data.music[action.music];
 						// if csp enable dont stream music
 						if (music) {
-							ige.network.send('sound', { cmd: 'playMusic', id: action.music });
+							taro.network.send('sound', { cmd: 'playMusic', id: action.music });
 						}
 
 						break;
 
 					case 'stopMusic':
-						ige.network.send('sound', { cmd: 'stopMusic' });
+						taro.network.send('sound', { cmd: 'stopMusic' });
 						break;
 
 					case 'playSoundForPlayer':
-						var sound = ige.game.data.sound[action.sound];
+						var sound = taro.game.data.sound[action.sound];
 						var player = self._script.variable.getValue(action.player, vars);
 						if (sound && player && player._stats.clientId) {
-							ige.network.send('sound', {
+							taro.network.send('sound', {
 								cmd: 'playSoundForPlayer',
 								sound: action.sound
 							}, player._stats.clientId);
 						}
 						break;
 					case 'stopSoundForPlayer':
-						var sound = ige.game.data.sound[action.sound];
+						var sound = taro.game.data.sound[action.sound];
 						var player = self._script.variable.getValue(action.player, vars);
 						if (sound && player && player._stats.clientId) {
-							ige.network.send('sound', {
+							taro.network.send('sound', {
 								cmd: 'stopSoundForPlayer',
 								sound: action.sound
 							}, player._stats.clientId);
 						}
 						break;
 					case 'playMusicForPlayer':
-						var music = ige.game.data.music[action.music];
+						var music = taro.game.data.music[action.music];
 						var player = self._script.variable.getValue(action.player, vars);
 
 						if (music && player && player._stats.clientId) {
-							ige.network.send('sound', {
+							taro.network.send('sound', {
 								cmd: 'playMusicForPlayer',
 								music: action.music
 							}, player._stats.clientId);
@@ -1903,10 +1903,10 @@ var ActionComponent = IgeEntity.extend({
 						break;
 
 					case 'playMusicForPlayerRepeatedly':
-						var music = ige.game.data.music[action.music];
+						var music = taro.game.data.music[action.music];
 						var player = self._script.variable.getValue(action.player, vars);
 						if (music && player && player._category == 'player' && player._stats.clientId) {
-							ige.network.send('sound', {
+							taro.network.send('sound', {
 								cmd: 'playMusicForPlayerRepeatedly',
 								music: action.music
 							}, player._stats.clientId);
@@ -1917,7 +1917,7 @@ var ActionComponent = IgeEntity.extend({
 
 						var player = self._script.variable.getValue(action.player, vars);
 						if (player && player._stats && player._category == 'player' && player._stats.clientId) {
-							ige.network.send('ui', {
+							taro.network.send('ui', {
 								command: 'showMenuAndSelectCurrentServer'
 							}, player._stats.clientId);
 						}
@@ -1926,7 +1926,7 @@ var ActionComponent = IgeEntity.extend({
 						var player = self._script.variable.getValue(action.player, vars);
 
 						if (player && player._stats && player._category == 'player' && player._stats.clientId) {
-							ige.network.send('ui', {
+							taro.network.send('ui', {
 								command: 'showMenuAndSelectBestServer'
 							}, player._stats.clientId);
 						}
@@ -1936,7 +1936,7 @@ var ActionComponent = IgeEntity.extend({
 						var player = self._script.variable.getValue(action.player, vars);
 
 						if (player && player._category === 'player' && player._stats.clientId) {
-							ige.network.send('sound', {
+							taro.network.send('sound', {
 								cmd: 'stopMusicForPlayer'
 							}, player._stats.clientId);
 						}
@@ -2080,7 +2080,7 @@ var ActionComponent = IgeEntity.extend({
 						var width = self._script.variable.getValue(action.width, vars) || 100;
 						var angle = self._script.variable.getValue(action.angle, vars) || 0;
 
-						const entityTypeData = ige.game.data[entityType] && ige.game.data[entityType][entityToCreate];
+						const entityTypeData = taro.game.data[entityType] && taro.game.data[entityType][entityToCreate];
 
 						if (entityType && entityToCreate && position && height && width) {
 							let data = Object.assign({}, entityTypeData);
@@ -2107,7 +2107,7 @@ var ActionComponent = IgeEntity.extend({
 								data.scaleDimensions = true;
 
 								createdEntity = new Item(_.cloneDeep(data));
-								ige.game.lastCreatedItemId = createdEntity._id;
+								taro.game.lastCreatedItemId = createdEntity._id;
 							} else if (entityType === 'projectileTypes') {
 								data = Object.assign(data, {
 									type: entityToCreate,
@@ -2125,7 +2125,7 @@ var ActionComponent = IgeEntity.extend({
 								});
 
 								createdEntity = new Projectile(_.cloneDeep(data));
-								ige.game.lastCreatedProjectileId = createdEntity._id;
+								taro.game.lastCreatedProjectileId = createdEntity._id;
 							} else if (entityType === 'unitTypes') {
 								data = Object.assign(data, {
 									type: entityToCreate,
@@ -2146,7 +2146,7 @@ var ActionComponent = IgeEntity.extend({
 										createdEntity = player.createUnit(_.cloneDeep(data));
 									}
 								}
-								ige.game.lastCreatedUnitId = createdEntity._id;
+								taro.game.lastCreatedUnitId = createdEntity._id;
 							}
 							createdEntity.scriptValues = {
 								index: i,
@@ -2163,8 +2163,8 @@ var ActionComponent = IgeEntity.extend({
 							createdEntity.script.trigger("entityCreated", {thisEntityId: createdEntity.id()});
 
 							if (isSandbox) {
-								if (!ige.game.createdEntities) ige.game.createdEntities = [];
-								ige.game.createdEntities.push(createdEntity);
+								if (!taro.game.createdEntities) taro.game.createdEntities = [];
+								taro.game.createdEntities.push(createdEntity);
 							}
 						}
 						break;
@@ -2366,7 +2366,7 @@ var ActionComponent = IgeEntity.extend({
 									variableObj.default = undefined;
 								}
 							} else {
-								ige.devLog('datatype of value does not match datatype of variable');
+								taro.devLog('datatype of value does not match datatype of variable');
 							}
 						}
 
@@ -2403,7 +2403,7 @@ var ActionComponent = IgeEntity.extend({
 							self.entityCategories.indexOf(entity._category) > -1 &&
                             position.x != undefined && position.y != undefined
 						) {
-							if (ige.isServer) {
+							if (taro.isServer) {
 								var oldFacingAngle = entity._rotate.z;
 
 								// var rotateDiff = (newFacingAngle - (oldFacingAngle % (Math.PI * 2))) % (Math.PI * 2)
@@ -2421,13 +2421,13 @@ var ActionComponent = IgeEntity.extend({
 								// console.log('rotating')
 							}
 							// &&
-							else if (ige.isClient && ige.client.myPlayer && (entity == ige.client.selectedUnit || entity.getOwner() == ige.client.selectedUnit)) {
+							else if (taro.isClient && taro.client.myPlayer && (entity == taro.client.selectedUnit || entity.getOwner() == taro.client.selectedUnit)) {
 								if (entity._category === 'item') {
 									console.log(newFacingAngle);
 								}
 								entity.rotateTo(0, 0, newFacingAngle);
 								// force timeStream to process rotation right away
-								// entity._keyFrames.push([ige.network.stream._streamDataTime, [entity._translate.x, entity._translate.y, newFacingAngle]]);
+								// entity._keyFrames.push([taro.network.stream._streamDataTime, [entity._translate.x, entity._translate.y, newFacingAngle]]);
 							}
 						}
 						break;
@@ -2474,7 +2474,7 @@ var ActionComponent = IgeEntity.extend({
 					case 'addBotPlayer':
 						var name = self._script.variable.getValue(action.name, vars) || "";
 						// bot players meant to be indistinguishable from 'human' players. hence we're not tempering with controlledBy variable
-						var player = ige.game.createPlayer({
+						var player = taro.game.createPlayer({
 							controlledBy: "human",
 							name: name
 						});
@@ -2542,10 +2542,10 @@ var ActionComponent = IgeEntity.extend({
 						var playerB = self._script.variable.getValue(action.playerB, vars);
 						if (playerA && playerB && playerA._category === 'player' && playerB._category === 'player') {
 							if (!playerB.isTrading) {
-								ige.network.send('trade', { type: 'init', from: playerA.id() }, playerB._stats.clientId);
+								taro.network.send('trade', { type: 'init', from: playerA.id() }, playerB._stats.clientId);
 							} else {
 								var message = `${playerB._stats.name}is busy`;
-								ige.chat.sendToRoom('1', message, playerA._stats.clientId, undefined);
+								taro.chat.sendToRoom('1', message, playerA._stats.clientId, undefined);
 							}
 						}
 						break;
@@ -2596,8 +2596,8 @@ var ActionComponent = IgeEntity.extend({
 						break;
 					case 'increaseVariableByNumber':
 						var newValue = self._script.variable.getValue(action.number, vars);
-						if (ige.game.data.variables.hasOwnProperty(action.variable) && !_.isNaN(newValue) && !_.isNil(newValue)) {
-							var variable = ige.game.data.variables[action.variable];
+						if (taro.game.data.variables.hasOwnProperty(action.variable) && !_.isNaN(newValue) && !_.isNil(newValue)) {
+							var variable = taro.game.data.variables[action.variable];
 							if (variable.value === undefined || isNaN(variable.value)) {
 								variable = variable.default || 0;
 							}
@@ -2607,8 +2607,8 @@ var ActionComponent = IgeEntity.extend({
 
 					case 'decreaseVariableByNumber':
 						var newValue = self._script.variable.getValue(action.number, vars);
-						if (ige.game.data.variables.hasOwnProperty(action.variable) && !_.isNaN(newValue) && !_.isNil(newValue)) {
-							var variable = ige.game.data.variables[action.variable];
+						if (taro.game.data.variables.hasOwnProperty(action.variable) && !_.isNaN(newValue) && !_.isNil(newValue)) {
+							var variable = taro.game.data.variables[action.variable];
 							if (variable.value === undefined || isNaN(variable.value)) {
 								variable = variable.default || 0;
 							}
@@ -2682,7 +2682,7 @@ var ActionComponent = IgeEntity.extend({
 						break;
 				}
 				
-				ige.network.resume();	
+				taro.network.resume();	
 
 			} catch (e) {
 				console.log(e);

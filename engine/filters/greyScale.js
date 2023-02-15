@@ -1,7 +1,7 @@
-IgeFilters.greyScale = function (canvas, ctx, originalImage, texture, data) {
+TaroFilters.greyScale = function (canvas, ctx, originalImage, texture, data) {
 	// Apply the filter and then put the new pixel data
 	ctx.putImageData(
-		IgeFilters._greyScale(
+		TaroFilters._greyScale(
 			ctx.getImageData(
 				0,
 				0,
@@ -14,7 +14,7 @@ IgeFilters.greyScale = function (canvas, ctx, originalImage, texture, data) {
 	);
 };
 
-IgeFilters._greyScale = function (imageData) {
+TaroFilters._greyScale = function (imageData) {
 	var arr,
 		arrCount,
 		i, r, g, b, v;

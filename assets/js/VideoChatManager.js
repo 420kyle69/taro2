@@ -1,5 +1,5 @@
 // @@@@@@@ IMPORTANT NOTICE @@@@@//
-// @@ WEBRTC WORKS ONLY ON HTTPS, edit igeRoot and igeClientRoot on engine/loader.js in production
+// @@ WEBRTC WORKS ONLY ON HTTPS, edit taroRoot and taroClientRoot on engine/loader.js in production
 
 const videoGrid = document.getElementById('video-grid');
 const myVideo = document.createElement('video');
@@ -23,7 +23,7 @@ let users = {};
 // ##updateUsers: used mostly to update username, for now.
 function updateUsers() {
 	console.log('updating users...');
-	for (let p of ige.$$('player')) {
+	for (let p of taro.$$('player')) {
 		const uID = p.id();
 		p = p._stats;
 		if (p.controlledBy && p.controlledBy == 'human') {
@@ -67,7 +67,7 @@ function videoChatUpdateSpatialVideo(players) {
 		const v = document.getElementById(`video-${p}`);
 		if (v) {
 			const dist = players[p];
-			let presence = (dist < ige.videoChat.minRange) ? 1 : 1 - ((dist - ige.videoChat.minRange) / (ige.videoChat.maxRange - ige.videoChat.minRange));
+			let presence = (dist < taro.videoChat.minRange) ? 1 : 1 - ((dist - taro.videoChat.minRange) / (taro.videoChat.maxRange - taro.videoChat.minRange));
 			if (presence < 0) {
 				presence = 0;
 			}
@@ -78,7 +78,7 @@ function videoChatUpdateSpatialVideo(players) {
 			if (!peerSettings[p].hidden) {
 				v.style = `opacity: ${presence}`;
 			}
-			if (dist > ige.videoChat.maxRange) {
+			if (dist > taro.videoChat.maxRange) {
 				document.getElementById(`video-div-id-${p}`).style = 'display: none';
 				v.pause();
 			} else {
@@ -102,7 +102,7 @@ function switchRoom(_roomId) {
 	if (_roomId != myID) {
 
 	}
-	const player = ige.game.getPlayerByClientId(ige.client.myPlayer._stats.clientId);
+	const player = taro.game.getPlayerByClientId(taro.client.myPlayer._stats.clientId);
 	$('#video-div-id-myPeer .name-label').html(player._stats.name);
 	// socket.emit('sendPlayerName', { peerID: myID, playerName: player._stats.name });
 	disconnectFromRoom(_roomId);
@@ -467,7 +467,7 @@ function processMyStream(stream) {
 	});
 }
 function refreshUserName(_name) {
-	for (let p of ige.$$('player')) {
+	for (let p of taro.$$('player')) {
 		const uID = p.id();
 		p = p._stats;
 		if (p.controlledBy && p.controlledBy == 'human') {
@@ -525,7 +525,7 @@ function startVideoChat(_peerID = undefined) {
 			console.log(ROOM_ID);
 			myPeer.on('open', id => {
 				myID = id;
-				const player = ige.game.getPlayerByClientId(ige.client.myPlayer._stats.clientId);
+				const player = taro.game.getPlayerByClientId(taro.client.myPlayer._stats.clientId);
 				const playerName = (player._stats.name);
 				socket.emit('join-room', ROOM_ID, id, playerName);
 			});

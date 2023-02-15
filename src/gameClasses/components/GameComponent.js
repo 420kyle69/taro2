@@ -1,4 +1,4 @@
-var GameComponent = IgeEntity.extend({
+var GameComponent = TaroEntity.extend({
 	classId: 'GameComponent',
 	componentId: 'game',
 
@@ -21,8 +21,8 @@ var GameComponent = IgeEntity.extend({
 	start: function () {
 		var self = this;
 		GameComponent.prototype.log('Game component started');
-		if (ige.isServer) {
-			ige.chat.createRoom('lobby', {}, '1');
+		if (taro.isServer) {
+			taro.chat.createRoom('lobby', {}, '1');
 
 			// by default, create 5 computer players
 			var aiCount = 10;
@@ -37,25 +37,25 @@ var GameComponent = IgeEntity.extend({
 					unitIds: [] // all units owned by player
 				});
 			}
-		} else if (ige.isClient) {
+		} else if (taro.isClient) {
 			// determine which attribute will be used for scoreboard
 			var attr = 'points';
 			if (
-				ige.game.data.settings &&
-				ige.game.data.settings.constants &&
-				ige.game.data.settings.constants.currency != undefined
+				taro.game.data.settings &&
+				taro.game.data.settings.constants &&
+				taro.game.data.settings.constants.currency != undefined
 			) {
-				attr = ige.game.data.settings.constants.currency;
+				attr = taro.game.data.settings.constants.currency;
 			}
 			$('.game-currency').html(attr);
 		}
 
-		ige.addComponent(ScriptComponent);
-		ige.script.load(ige.game.data.scripts);
+		taro.addComponent(ScriptComponent);
+		taro.script.load(taro.game.data.scripts);
 
-		ige.script.trigger('gameStart');
+		taro.script.trigger('gameStart');
 		self.isGameStarted = true;
-		ige.timer.startGameClock();
+		taro.timer.startGameClock();
 	},
 
 	// this applies to logged in players only
@@ -98,7 +98,7 @@ var GameComponent = IgeEntity.extend({
 
 		var player = new Player(playerData);
 
-		if (ige.isServer) {
+		if (taro.isServer) {
 			var logInfo = {
 				name: playerData.name,
 				clientId: playerData.clientId
@@ -115,16 +115,16 @@ var GameComponent = IgeEntity.extend({
 			player.persistedData = persistedData;
 		}
 
-		if (ige.isServer) {
+		if (taro.isServer) {
 
 			// send latest ui information to the client
-			ige.gameText.sendLatestText(data.clientId);
-			// ige.shopkeeper.updateShopInventory(ige.shopkeeper.inventory, data.clientId) // send latest ui information to the client
+			taro.gameText.sendLatestText(data.clientId);
+			// taro.shopkeeper.updateShopInventory(taro.shopkeeper.inventory, data.clientId) // send latest ui information to the client
 
-			var isOwner = ige.server.owner == data._id && data.controlledBy == 'human';
+			var isOwner = taro.server.owner == data._id && data.controlledBy == 'human';
 			var isInvitedUser = false;
-			if (ige.game.data.defaultData && ige.game.data.defaultData.invitedUsers) {
-				isInvitedUser = ige.game.data.defaultData.invitedUsers.some(e => e.user === data._id && e.role === 'contributor');
+			if (taro.game.data.defaultData && taro.game.data.defaultData.invitedUsers) {
+				isInvitedUser = taro.game.data.defaultData.invitedUsers.some(e => e.user === data._id && e.role === 'contributor');
 			}
 			var isUserAdmin = false;
 			var isUserMod = false;
@@ -138,7 +138,7 @@ var GameComponent = IgeEntity.extend({
 			// if User/Admin has access to game then show developer logs
 			if (isOwner || isInvitedUser || isUserAdmin) {
 				GameComponent.prototype.log(`owner/admin/mod connected. _id: ${data._id}`);
-				ige.server.developerClientIds.push(data.clientId);
+				taro.server.developerClientIds.push(data.clientId);
 			}
 		}
 
@@ -160,12 +160,12 @@ var GameComponent = IgeEntity.extend({
 		// 	player.streamUpdateData([{ playerJoined: false }]);
 		// }
 
-		var player = ige.$(playerId);
+		var player = taro.$(playerId);
 
 		if (player) {
 			
 			if (player._stats.clientId) {
-				var client = ige.server.clients[player._stats.clientId];
+				var client = taro.server.clients[player._stats.clientId];
 				if (client) {
 					client.socket.close()
 				}
@@ -179,8 +179,8 @@ var GameComponent = IgeEntity.extend({
 	// get client with ip
 	getPlayerByIp: function (ip, currentUserId, all = false) {
 		var clientIds = [];
-		for (let clientId in ige.server.clients) {
-			const clientObj = ige.server.clients[clientId];
+		for (let clientId in taro.server.clients) {
+			const clientObj = taro.server.clients[clientId];
 
 			if (clientObj.ip === ip) {
 				clientIds.push(clientId);
@@ -192,7 +192,7 @@ var GameComponent = IgeEntity.extend({
 
 		if (clientIds.length > 0) {
 			var method = all ? 'filter' : 'find';
-			return ige.$$('player')[method](player => {
+			return taro.$$('player')[method](player => {
 				// var clientId = player && player._stats && player._stats.clientId;
 				// added currentUserId check to confirm it is logged in user and not add-instance bot.
 				return (
@@ -205,13 +205,13 @@ var GameComponent = IgeEntity.extend({
 	},
 
 	getPlayerByUserId: function (userId) {
-		return ige.$$('player').find(function (player) {
+		return taro.$$('player').find(function (player) {
 			return player._stats && player._stats.userId == userId;
 		});
 	},
 
 	getPlayerByClientId: function (clientId) {
-		return ige.$$('player').find(function (player) {
+		return taro.$$('player').find(function (player) {
 			return player._stats && player._stats.controlledBy != 'computer' && player._stats.clientId && player._stats.clientId == clientId;
 		});
 	},
@@ -242,19 +242,19 @@ var GameComponent = IgeEntity.extend({
 	updateDevConsole: function (data) {
 		var self = this;
 		// if a developer is connected, send devLog of global variables only
-		if (ige.isServer && (ige.server.developerClientIds.length || process.env.ENV === 'standalone' || process.env.ENV == 'standalone-remote')) {
+		if (taro.isServer && (taro.server.developerClientIds.length || process.env.ENV === 'standalone' || process.env.ENV == 'standalone-remote')) {
 			// only show 'object' string if env variable is object
 			if (typeof data.params.newValue == 'object') {
 				if (data.params.newValue._stats) {
-					ige.game.devLogs[data.params.variableName] = `object (${data.params.newValue._category}): ${data.params.newValue._stats.name}`;
+					taro.game.devLogs[data.params.variableName] = `object (${data.params.newValue._category}): ${data.params.newValue._stats.name}`;
 				} else {
-					ige.game.devLogs[data.params.variableName] = 'object';
+					taro.game.devLogs[data.params.variableName] = 'object';
 				}
 			} else { // otherwise, show the actual value
 
-				ige.game.devLogs[data.params.variableName] = data.params.newValue;
+				taro.game.devLogs[data.params.variableName] = data.params.newValue;
 			}
-		} else if (ige.isClient) {
+		} else if (taro.isClient) {
 			// update GS CPU graphs if data present
 			if (data.status && data.status.cpu) {
 				// cpu time spent in user code (ms) since last dev console update - may end up being greater than actual elapsed time if multiple CPU cores are performing work for this process
@@ -299,7 +299,7 @@ var GameComponent = IgeEntity.extend({
 				}
 			}
 
-			if (data.status != {} /*&& ige.physics && ige.physics.engine != 'CRASH'*/) {
+			if (data.status != {} /*&& taro.physics && taro.physics.engine != 'CRASH'*/) {
 				// if streaming entity count > 150 warn user
 				if (data.status && data.status.entityCount && data.status.entityCount.streaming > 150 && !self.streamingWarningShown) {
 					$('#streaming-entity-warning').show();
@@ -319,61 +319,61 @@ var GameComponent = IgeEntity.extend({
 					'<tr>' +
 					'<td>Unit</td>' +
 					'<td>'}${data.status.entityCount.unit}</td>` +
-					`<td>${ige.$$('unit').length}</td>` +
+					`<td>${taro.$$('unit').length}</td>` +
 					`<td>${data.status.bandwidth.unit}</td>` +
 					'</tr>' +
 					'<tr>' +
 					'<td>Item</td>' +
 					`<td>${data.status.entityCount.item}</td>` +
-					`<td>${ige.$$('item').length}</td>` +
+					`<td>${taro.$$('item').length}</td>` +
 					`<td>${data.status.bandwidth.item}</td>` +
 					'</tr>' +
 					'<tr>' +
 					'<td>Player</td>' +
 					`<td>${data.status.entityCount.player}</td>` +
-					`<td>${ige.$$('player').length}</td>` +
+					`<td>${taro.$$('player').length}</td>` +
 					`<td>${data.status.bandwidth.player}</td>` +
 					'</tr>' +
 					'<tr>' +
 					'<td>Projectile</td>' +
 					`<td>${data.status.entityCount.projectile}</td>` +
-					`<td>${ige.$$('projectile').length}</td>` +
+					`<td>${taro.$$('projectile').length}</td>` +
 					`<td>${data.status.bandwidth.projectile}</td>` +
 					'</tr>' +
 					'<tr>' +
 					'<td>Region</td>' +
 					`<td>${data.status.entityCount.region}</td>` +
-					`<td>${ige.$$('region').length}</td>` +
+					`<td>${taro.$$('region').length}</td>` +
 					`<td>${data.status.bandwidth.region}</td>` +
 					'</tr>' +
 					'<tr>' +
 					'<td>Sensor</td>' +
 					`<td>${data.status.entityCount.sensor}</td>` +
-					`<td>${ige.$$('sensor').length}</td>` +
+					`<td>${taro.$$('sensor').length}</td>` +
 					`<td>${data.status.bandwidth.sensor}</td>` +
 					'</tr>' +
 					'<tr>' +
 					'<th colspan= >Physics</th>' +
 					`<th>${data.status.physics.engine}</th>` +
-					`<th>${(ige.physics) ? ige.physics.engine : 'NONE'}</th>` +
+					`<th>${(taro.physics) ? taro.physics.engine : 'NONE'}</th>` +
 					'<td></td>' +
 					'</tr>' +
 					'<tr>' +
 					'<td>Bodies</td>' +
 					`<td>${data.status.physics.bodyCount}</td>` +
-					`<td>${(ige.physics && ige.physics._world) ? ige.physics._world.m_bodyCount : ''}</td>` +
+					`<td>${(taro.physics && taro.physics._world) ? taro.physics._world.m_bodyCount : ''}</td>` +
 					'<td></td>' +
 					'</tr>' +
 					'<tr>' +
 					'<td>Joints</td>' +
 					`<td>${data.status.physics.jointCount}</td>` +
-					`<td>${(ige.physics && ige.physics._world) ? ige.physics._world.m_jointCount : ''}</td>` +
+					`<td>${(taro.physics && taro.physics._world) ? taro.physics._world.m_jointCount : ''}</td>` +
 					'<td></td>' +
 					'</tr>' +
 					'<tr>' +
 					'<td>Contacts</td>' +
 					`<td>${data.status.physics.contactCount}</td>` +
-					`<td>${(ige.physics && ige.physics._world) ? ige.physics._world.m_contactCount : ''}</td>` +
+					`<td>${(taro.physics && taro.physics._world) ? taro.physics._world.m_contactCount : ''}</td>` +
 					'<td></td>' +
 					'</tr>' +
 					'<tr>' +
@@ -385,13 +385,13 @@ var GameComponent = IgeEntity.extend({
 					'<tr>' +
 					'<td>Avg Step Duration(ms)</td>' +
 					`<td>${data.status.physics.stepDuration}</td>` +
-					`<td>${(ige.physics && ige.physics._world) ? ige.physics.avgPhysicsTickDuration.toFixed(2) : ''}</td>` +
+					`<td>${(taro.physics && taro.physics._world) ? taro.physics.avgPhysicsTickDuration.toFixed(2) : ''}</td>` +
 					'<td></td>' +
 					'</tr>' +
 					'<tr>' +
 					'<td>Physics FPS</td>' +
 					`<td>${data.status.physics.stepsPerSecond}</td>` +
-					`<td>${(ige.physics) ? ige._physicsFPS : ''}</td>` +
+					`<td>${(taro.physics) ? taro._physicsFPS : ''}</td>` +
 					'<td></td>' +
 					'</tr>' +
 					'<tr>' +
@@ -400,10 +400,10 @@ var GameComponent = IgeEntity.extend({
 					'<tr>' +
 					'<td>Current Time</td>' +
 					// + '<td>' + data.status.currentTime + '(' + (data.status.currentTime - this.prevServerTime) + ')' + '</td>'
-					// + '<td>' + Math.floor(ige._currentTime) + '(' + (Math.floor(ige._currentTime) - this.prevClientTime) + ')' + '</td>'
+					// + '<td>' + Math.floor(taro._currentTime) + '(' + (Math.floor(taro._currentTime) - this.prevClientTime) + ')' + '</td>'
 					`<td>${data.status.currentTime}</td>` +
-					`<td>${Math.floor(ige._currentTime)}(${Math.floor(ige._currentTime) - data.status.currentTime})</td>` +
-					`<td>${ige.timeScale()}</td>` +
+					`<td>${Math.floor(taro._currentTime)}(${Math.floor(taro._currentTime) - data.status.currentTime})</td>` +
+					`<td>${taro.timeScale()}</td>` +
 					'</tr>' +
 
 					'<tr>' +
@@ -416,7 +416,7 @@ var GameComponent = IgeEntity.extend({
 					'<tr>' +
 					'<td>entityUpdateQueue size</td>' +
 					'<td></td>' +
-					`<td>${Object.keys(ige.client.entityUpdateQueue).length}</td>` +
+					`<td>${Object.keys(taro.client.entityUpdateQueue).length}</td>` +
 					'<td></td>' +
 					'</tr>' +
 					'<tr>' +
@@ -443,7 +443,7 @@ var GameComponent = IgeEntity.extend({
 					'<tr>' +
 					'<td>Total Bodies Created</td>' +
 					`<td>${data.status.physics.totalBodiesCreated}</td>` +
-					`<td>${(ige.physics && ige.physics._world) ? ige.physics.totalBodiesCreated : ''}</td>` +
+					`<td>${(taro.physics && taro.physics._world) ? taro.physics.totalBodiesCreated : ''}</td>` +
 					'<td></td>' +
 					'</tr>' +
 
@@ -463,8 +463,8 @@ var GameComponent = IgeEntity.extend({
 
 					'</table>';
 
-				ige.script.variable.prevServerTime = data.status.currentTime;
-				ige.script.variable.prevClientTime = Math.floor(ige._currentTime);
+				taro.script.variable.prevServerTime = data.status.currentTime;
+				taro.script.variable.prevClientTime = Math.floor(taro._currentTime);
 
 				$('#dev-status-content').html(innerHtml);
 				self.secondCount++;

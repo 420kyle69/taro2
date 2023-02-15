@@ -16,7 +16,7 @@ var __extends = (this && this.__extends) || (function () {
 var PhaserFloatingText = /** @class */ (function (_super) {
     __extends(PhaserFloatingText, _super);
     function PhaserFloatingText(scene, data) {
-        var _this = _super.call(this, scene, data.x, data.y, BitmapFontManager.font(scene, 'Verdana', true, ige.game.data.settings
+        var _this = _super.call(this, scene, data.x, data.y, BitmapFontManager.font(scene, 'Verdana', true, taro.game.data.settings
             .addStrokeToNameAndAttributes !== false, data.color || '#FFFFFF')) || this;
         _this.setText(BitmapFontManager.sanitize(_this.fontData, data.text));
         _this.setOrigin(0.5);

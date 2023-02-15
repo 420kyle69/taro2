@@ -1,4 +1,4 @@
-var UiToolBox_ToolTranslate = IgeEventingClass.extend({
+var UiToolBox_ToolTranslate = TaroEventingClass.extend({
 	classId: 'UiToolBox_ToolTranslate',
 
 	init: function () {
@@ -7,25 +7,25 @@ var UiToolBox_ToolTranslate = IgeEventingClass.extend({
 
 	enabled: function (val) {
 		if (val !== undefined) {
-			if (ige.editor._selectedObject) {
+			if (taro.editor._selectedObject) {
 				this._enabled = val;
 
 				if (val) {
-					ige.editor.interceptMouse(true);
+					taro.editor.interceptMouse(true);
 					var self = this;
 
-					this._targetEntity = ige.editor._selectedObject;
+					this._targetEntity = taro.editor._selectedObject;
 
 					// Hook the engine's input system and take over mouse interaction
-					this._mouseUpHandle = ige.editor.on('mouseUp', function (event) {
+					this._mouseUpHandle = taro.editor.on('mouseUp', function (event) {
 						self._mouseUp(event);
 					});
 
-					this._mouseDownHandle = ige.editor.on('mouseDown', function (event) {
+					this._mouseDownHandle = taro.editor.on('mouseDown', function (event) {
 						self._mouseDown(event);
 					});
 
-					this._mouseMoveHandle = ige.editor.on('mouseMove', function (event) {
+					this._mouseMoveHandle = taro.editor.on('mouseMove', function (event) {
 						self._mouseMove(event);
 					});
 
@@ -34,10 +34,10 @@ var UiToolBox_ToolTranslate = IgeEventingClass.extend({
 					this._opStarted = false;
 					this._startThreshold = 1; // The number of pixels the mouse should move to activate
 				} else {
-					ige.editor.interceptMouse(false);
-					ige.editor.off('mouseUp', this._mouseUpHandle);
-					ige.editor.off('mouseDown', this._mouseDownHandle);
-					ige.editor.off('mouseMove', this._mouseMoveHandle);
+					taro.editor.interceptMouse(false);
+					taro.editor.off('mouseUp', this._mouseUpHandle);
+					taro.editor.off('mouseDown', this._mouseDownHandle);
+					taro.editor.off('mouseMove', this._mouseMoveHandle);
 				}
 			}
 		}
@@ -52,9 +52,9 @@ var UiToolBox_ToolTranslate = IgeEventingClass.extend({
 	_mouseDown: function (event) {
 		if (!this._opStarted) {
 			// Record the mouse down position - pre-start
-			var mx = (event.igeX - ige._bounds2d.x2);
-			var my = (event.igeY - ige._bounds2d.y2);
-			var curMousePos = new IgePoint3d(mx, my, 0);
+			var mx = (event.taroX - taro._bounds2d.x2);
+			var my = (event.taroY - taro._bounds2d.y2);
+			var curMousePos = new TaroPoint3d(mx, my, 0);
 
 			this._opStartMouse = curMousePos.clone();
 
@@ -65,7 +65,7 @@ var UiToolBox_ToolTranslate = IgeEventingClass.extend({
 
 			this._opPreStart = true;
 			this._opStarted = false;
-			// document.getElementById('igeSgEditorStatus').innerHTML = 'X: ' + ige._translate.x + ' Y:' + ige._translate.y;
+			// document.getElementById('taroSgEditorStatus').innerHTML = 'X: ' + taro._translate.x + ' Y:' + taro._translate.y;
 		}
 	},
 
@@ -79,15 +79,15 @@ var UiToolBox_ToolTranslate = IgeEventingClass.extend({
 		if (this._enabled && this._targetEntity) {
 			// Pan the camera if the mouse is down
 			if (this._opStartMouse) {
-				var mx = (event.igeX - ige._bounds2d.x2);
-				var my = (event.igeY - ige._bounds2d.y2);
+				var mx = (event.taroX - taro._bounds2d.x2);
+				var my = (event.taroY - taro._bounds2d.y2);
 				var curMousePos = { x: mx, y: my };
 				var panCords = {
 					x: this._opStartMouse.x - curMousePos.x,
 					y: this._opStartMouse.y - curMousePos.y
 				}; var distX = Math.abs(panCords.x); var distY = Math.abs(panCords.y);
-				var panFinalX = this._opStartTranslate.x - (panCords.x / ige._currentViewport.camera._scale.x);
-				var panFinalY = this._opStartTranslate.y - (panCords.y / ige._currentViewport.camera._scale.y);
+				var panFinalX = this._opStartTranslate.x - (panCords.x / taro._currentViewport.camera._scale.x);
+				var panFinalY = this._opStartTranslate.y - (panCords.y / taro._currentViewport.camera._scale.y);
 
 				if (this._opPreStart) {
 					// Check if we've reached the start threshold
@@ -115,7 +115,7 @@ var UiToolBox_ToolTranslate = IgeEventingClass.extend({
 					this.emit('panMove');
 				}
 
-				// document.getElementById('igeSgEditorStatus').innerHTML = 'X: ' + panFinalX + ' Y:' + panFinalY;
+				// document.getElementById('taroSgEditorStatus').innerHTML = 'X: ' + panFinalX + ' Y:' + panFinalY;
 			}
 		}
 	},
@@ -131,15 +131,15 @@ var UiToolBox_ToolTranslate = IgeEventingClass.extend({
 			// End the pan
 			if (this._opStarted) {
 				if (this._opStartMouse) {
-					var mx = (event.igeX - ige._bounds2d.x2);
-					var my = (event.igeY - ige._bounds2d.y2);
+					var mx = (event.taroX - taro._bounds2d.x2);
+					var my = (event.taroY - taro._bounds2d.y2);
 					var curMousePos = { x: mx, y: my };
 					var panCords = {
 						x: this._opStartMouse.x - curMousePos.x,
 						y: this._opStartMouse.y - curMousePos.y
 					};
-					var panFinalX = this._opStartTranslate.x - (panCords.x / ige._currentViewport.camera._scale.x);
-					var panFinalY = this._opStartTranslate.y - (panCords.y / ige._currentViewport.camera._scale.y);
+					var panFinalX = this._opStartTranslate.x - (panCords.x / taro._currentViewport.camera._scale.x);
+					var panFinalY = this._opStartTranslate.y - (panCords.y / taro._currentViewport.camera._scale.y);
 
 					// Check if we have a limiter on the rectangle area
 					// that we should allow panning inside.
@@ -169,7 +169,7 @@ var UiToolBox_ToolTranslate = IgeEventingClass.extend({
 						0
 					);
 
-					// document.getElementById('igeSgEditorStatus').innerHTML = 'X: ' + panFinalX + ' Y:' + panFinalY;
+					// document.getElementById('taroSgEditorStatus').innerHTML = 'X: ' + panFinalX + ' Y:' + panFinalY;
 
 					// Remove the pan start data to end the pan operation
 					delete this._opStartMouse;

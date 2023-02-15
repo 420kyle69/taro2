@@ -1,9 +1,9 @@
-var Region = IgeEntityPhysics.extend({
+var Region = TaroEntityPhysics.extend({
 	classId: 'Region',
 	componentId: 'region',
 
 	init: function (data, entityIdFromServer) {
-		IgeEntityPhysics.prototype.init.call(this);
+		TaroEntityPhysics.prototype.init.call(this);
 
 		this.id(entityIdFromServer);
 
@@ -15,8 +15,8 @@ var Region = IgeEntityPhysics.extend({
 
 			self.category('region');
 
-			if (ige.isServer) {
-				self.mount(ige.$('baseScene'));
+			if (taro.isServer) {
+				self.mount(taro.$('baseScene'));
 			}
 
 			this._stats.currentBody = {
@@ -44,7 +44,7 @@ var Region = IgeEntityPhysics.extend({
 
 			var regionDimension = self._stats.default;
 
-			if (ige.physics && ige.physics.engine === 'CRASH') {
+			if (taro.physics && taro.physics.engine === 'CRASH') {
 				self._translate.x = regionDimension.x;
 				self._translate.y = regionDimension.y;
 			}
@@ -57,41 +57,41 @@ var Region = IgeEntityPhysics.extend({
 				translate: { x: self._translate.x, y: self._translate.y}
 			});
 
-			if (ige.isServer) {
-				// IgeEntity.streamMode(val)
+			if (taro.isServer) {
+				// TaroEntity.streamMode(val)
 				// 1 is 'automatic' streaming
 				self.streamMode(1);
-			} else if (ige.isClient) {
+			} else if (taro.isClient) {
 				if ((mode === 'play' /*&& self._stats.default.inside*/) || mode === 'sandbox') {
 					// o.O TODO: Remove /refactor
-					ige.entitiesToRender.trackEntityById[entityIdFromServer] = this;
+					taro.entitiesToRender.trackEntityById[entityIdFromServer] = this;
 					
-					ige.client.emit('create-region', this);
+					taro.client.emit('create-region', this);
 				}
 
 				if (typeof mode === 'string' && mode === 'sandbox') {
 					delete self._stats.value;
 
-					if (ige.game.data.isDeveloper) {
+					if (taro.game.data.isDeveloper) {
 						// creating region click handler if user is developer
 						// /
 						// need to see if we can do this with simple region instead
 						// of using regionUi because we want to remove it entirely
 						// /
 
-						// IgeObject method
+						// TaroObject method
 						self.drawMouse(true)
-							// IgeEntity method (IgeUiEntity extends...)
+							// TaroEntity method (TaroUiEntity extends...)
 							.mouseDown(function (event, evc) {
 								if (
-									ige.mapEditor.selectEntities &&
+									taro.mapEditor.selectEntities &&
 									event.which === 1 &&
-									!ige.mapEditor.mouseDownOnMiniMap &&
-									!ige.mapEditor.checkIfClickedMiniMap(event.pageX, event.pageY)
+									!taro.mapEditor.mouseDownOnMiniMap &&
+									!taro.mapEditor.checkIfClickedMiniMap(event.pageX, event.pageY)
 								) {
 									var selectedRegion = self;
 									if (selectedRegion._stats && selectedRegion._stats.id) {
-										ige.regionManager.openRegionModal(selectedRegion._stats, selectedRegion._stats.id, false);
+										taro.regionManager.openRegionModal(selectedRegion._stats, selectedRegion._stats.id, false);
 									}
 								}
 							});
@@ -107,7 +107,7 @@ var Region = IgeEntityPhysics.extend({
 		this.width(regionCordinates.width);
 		this.height(regionCordinates.height);
 
-		if (ige.isServer) {
+		if (taro.isServer) {
 			var shapeData = {};
 			var normalizer = 0.45;
 			shapeData.width = regionCordinates.width * normalizer;
@@ -123,7 +123,7 @@ var Region = IgeEntityPhysics.extend({
 	},
 
 	streamUpdateData: function (queuedData) {
-		IgeEntity.prototype.streamUpdateData.call(this, queuedData);
+		TaroEntity.prototype.streamUpdateData.call(this, queuedData);
 
 		for (var i = 0; i < queuedData.length; i++) {
 			var data = queuedData[i];

@@ -1,4 +1,4 @@
-var SoundComponent = IgeEntity.extend({
+var SoundComponent = TaroEntity.extend({
 	classId: 'SoundComponent',
 	componentId: 'sound',
 
@@ -8,7 +8,7 @@ var SoundComponent = IgeEntity.extend({
 		self.musicFiles = [];
 		self.preLoadedSounds = {};
 		self.preLoadedMusic = {};
-		if (ige.isClient) {
+		if (taro.isClient) {
 			var soundSetting = localStorage.getItem('sound');
 			var musicSetting = localStorage.getItem('music');
 			if (soundSetting == undefined || soundSetting == 'on') {
@@ -75,8 +75,8 @@ var SoundComponent = IgeEntity.extend({
 
 	preLoadSound: function () {
 		var self = this;
-		for (var soundKey in ige.game.data.sound) {
-			var sound = ige.game.data.sound[soundKey];
+		for (var soundKey in taro.game.data.sound) {
+			var sound = taro.game.data.sound[soundKey];
 			self.preLoadedSounds[soundKey] = document.createElement('audio');
 			self.preLoadedSounds[soundKey].src = sound.file;
 			if (sound.volume) {
@@ -88,8 +88,8 @@ var SoundComponent = IgeEntity.extend({
 
 	preLoadMusic: function () {
 		var self = this;
-		for (var musicKey in ige.game.data.music) {
-			var music = ige.game.data.music[musicKey];
+		for (var musicKey in taro.game.data.music) {
+			var music = taro.game.data.music[musicKey];
 			self.preLoadedMusic[musicKey] = document.createElement('audio');
 			self.preLoadedMusic[musicKey].src = music.file;
 			if (music.volume) {
@@ -104,10 +104,10 @@ var SoundComponent = IgeEntity.extend({
 		settingsVolume = isNaN(settingsVolume) ? 1 : settingsVolume / 100;
 
 		var distanceSoundShouldHeard = 500;
-		if (ige.game.data.settings && ige.game.data.settings.camera && ige.game.data.settings.camera.zoom && ige.game.data.settings.camera.zoom.default) {
-			distanceSoundShouldHeard = ige.game.data.settings.camera.zoom.default * 1.5;
+		if (taro.game.data.settings && taro.game.data.settings.camera && taro.game.data.settings.camera.zoom && taro.game.data.settings.camera.zoom.default) {
+			distanceSoundShouldHeard = taro.game.data.settings.camera.zoom.default * 1.5;
 		}
-		var vpBound = ige.renderer.getViewportBounds();
+		var vpBound = taro.renderer.getViewportBounds();
 		var myPosition = { x: vpBound.x + vpBound.width / 2, y: vpBound.y + vpBound.height / 2 };
 		var xDistance = position.x - myPosition.x;
 		var yDistance = position.y - myPosition.y;
@@ -125,7 +125,7 @@ var SoundComponent = IgeEntity.extend({
 
 	playSound: function (sound, position, key, shouldRepeat = false) {
 		var self = this;
-		if (ige.isClient) {
+		if (taro.isClient) {
 			var soundSetting = localStorage.getItem('sound');
 
 			if (soundSetting == 'on') {
@@ -181,7 +181,7 @@ var SoundComponent = IgeEntity.extend({
 	playMusic: function (music, startAt, shouldRepeat, key) {
 		var self = this;
 		var playMusic;
-		if (ige.isClient) {
+		if (taro.isClient) {
 			var musicSetting = localStorage.getItem('music');
 			var settingsVolume = parseFloat(localStorage.getItem('music-volume'));
 			settingsVolume = isNaN(settingsVolume) ? 1 : settingsVolume / 100;
@@ -235,7 +235,7 @@ var SoundComponent = IgeEntity.extend({
 		}
 	},
 	startMusic: function () {
-		if (ige.isClient) {
+		if (taro.isClient) {
 			if (this.musicCurrentlyPlaying) {
 				this.musicCurrentlyPlaying.play().catch(function (e) {
 					console.log(e);
@@ -246,7 +246,7 @@ var SoundComponent = IgeEntity.extend({
 	},
 
 	updateMusicVolume: function (volume) {
-		if (ige.isClient) {
+		if (taro.isClient) {
 			if (this.musicCurrentlyPlaying) {
 				var originalVolume = this.musicCurrentlyPlaying.originalVolume;
 				this.musicCurrentlyPlaying.volume = Math.min(originalVolume * (volume / 100), 1);
@@ -255,7 +255,7 @@ var SoundComponent = IgeEntity.extend({
 	},
 
 	stopMusic: function () {
-		if (ige.isClient) {
+		if (taro.isClient) {
 			if (this.musicCurrentlyPlaying) {
 				this.musicCurrentlyPlaying.pause();
 				this.musicCurrentlyPlaying.currentTime = 0;

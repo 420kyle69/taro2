@@ -41,7 +41,7 @@ var TilePalette = /** @class */ (function (_super) {
             .setZoom(1).setName('palette');
         camera.setBackgroundColor(0x000000);
         texturesLayer.on('pointermove', function (p) {
-            var devModeScene = ige.renderer.scene.getScene('DevMode');
+            var devModeScene = taro.renderer.scene.getScene('DevMode');
             devModeScene.regionEditor.cancelDrawRegion();
             if (!p.isDown || scene.tileEditor.startDragIn !== 'palette')
                 return;
@@ -90,17 +90,17 @@ var TilePalette = /** @class */ (function (_super) {
             pointerover = false;
         });
         _this.scene.input.on('wheel', function (pointer, gameObjects, deltaX, deltaY, deltaZ) {
-            if (ige.developerMode.active && ige.developerMode.activeTab !== 'play') {
+            if (taro.developerMode.active && taro.developerMode.activeTab !== 'play') {
                 if (_this.visible && pointerover) {
                     _this.zoom(deltaY);
                 }
                 else if (deltaY < 0) {
                     var zoom = (_this.scene.gameScene.zoomSize / 2.15) / 1.1;
-                    ige.client.emit('zoom', zoom);
+                    taro.client.emit('zoom', zoom);
                 }
                 else if (deltaY > 0) {
                     var zoom = (_this.scene.gameScene.zoomSize / 2.15) * 1.1;
-                    ige.client.emit('zoom', zoom);
+                    taro.client.emit('zoom', zoom);
                 }
             }
         });

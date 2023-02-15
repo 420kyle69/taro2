@@ -1,4 +1,4 @@
-IgeFilters.blur = function (canvas, ctx, originalImage, texture, data) {
+TaroFilters.blur = function (canvas, ctx, originalImage, texture, data) {
 	var strength = 1;
 	var loop;
 	var oneNinth = 1 / 9;
@@ -16,7 +16,7 @@ IgeFilters.blur = function (canvas, ctx, originalImage, texture, data) {
 	}
 
 	for (loop = 0; loop < strength; loop++) {
-		pixelData = IgeFilters._convolute(
+		pixelData = TaroFilters._convolute(
 			pixelData,
 			[
 				oneNinth, oneNinth, oneNinth,

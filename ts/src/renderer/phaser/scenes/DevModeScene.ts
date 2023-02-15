@@ -19,41 +19,41 @@ class DevModeScene extends PhaserScene {
 	}
 
 	init (): void {
-		this.gameScene = ige.renderer.scene.getScene('Game');
+		this.gameScene = taro.renderer.scene.getScene('Game');
 		this.regions = [];
 
-		ige.client.on('unlockCamera', () => {
+		taro.client.on('unlockCamera', () => {
 			this.gameScene.cameras.main.stopFollow();
 		});
 
-		ige.client.on('lockCamera', () => {
-			ige.client.emit('zoom', ige.client.zoom);
+		taro.client.on('lockCamera', () => {
+			taro.client.emit('zoom', taro.client.zoom);
 			if (this.gameScene.cameraTarget) this.gameScene.cameras.main.startFollow(this.gameScene.cameraTarget, false, 0.05, 0.05);
 		});
 
-		ige.client.on('enterMapTab', () => {
+		taro.client.on('enterMapTab', () => {
 			this.enterMapTab();
 		});
 
-		ige.client.on('leaveMapTab', () => {
+		taro.client.on('leaveMapTab', () => {
 			this.leaveMapTab();
 		});
 
-		ige.client.on('editTile', (data: TileData) => {
+		taro.client.on('editTile', (data: TileData) => {
 			this.tileEditor.edit(data);
 		});
 
-		ige.client.on('editRegion', (data: RegionData) => {
+		taro.client.on('editRegion', (data: RegionData) => {
 			this.regionEditor.edit(data);
 		});
 
 		this.gameScene.input.on('pointerup', (p) => {
-			const draggedEntity = ige.unitBeingDragged;
-			// ige.unitBeingDragged = {typeId: 'unit id', playerId: 'xyz', angle: 0, entityType: 'unit'}
+			const draggedEntity = taro.unitBeingDragged;
+			// taro.unitBeingDragged = {typeId: 'unit id', playerId: 'xyz', angle: 0, entityType: 'unit'}
 			if (draggedEntity) {
 			    // find position and call editEntity function.
 				const worldPoint = this.gameScene.cameras.main.getWorldPoint(p.x, p.y);
-				const playerId = ige.game.getPlayerByClientId(ige.network.id()).id();
+				const playerId = taro.game.getPlayerByClientId(taro.network.id()).id();
 				const data = {
 					action: 'create',
 					entityType: draggedEntity.entityType,
@@ -65,14 +65,14 @@ class DevModeScene extends PhaserScene {
 					}, 
 					angle: draggedEntity.angle
 				}
-				ige.developerMode.editEntity(data, playerId);
-				ige.unitBeingDragged = null;
+				taro.developerMode.editEntity(data, playerId);
+				taro.unitBeingDragged = null;
 			}
 		});
 	}
 
 	preload (): void {
-		/*const data = ige.game.data;
+		/*const data = taro.game.data;
 
 		data.map.tilesets.forEach((tileset) => {
 			const key = `tiles/${tileset.name}`;
@@ -108,7 +108,7 @@ class DevModeScene extends PhaserScene {
 	}
 
 	create(): void {
-		const data = ige.game.data;
+		const data = taro.game.data;
 		const map = this.tilemap = this.make.tilemap({ key: 'map' });
 
 		data.map.tilesets.forEach((tileset) => {

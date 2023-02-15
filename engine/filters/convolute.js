@@ -1,8 +1,8 @@
-IgeFilters.createImageData = function (w, h) {
-	return IgeFilters.tmpCtx.createImageData(w, h);
+TaroFilters.createImageData = function (w, h) {
+	return TaroFilters.tmpCtx.createImageData(w, h);
 };
 
-IgeFilters._convolute = function (pixels, weights, opaque) {
+TaroFilters._convolute = function (pixels, weights, opaque) {
 	var side = Math.round(Math.sqrt(weights.length));
 	var halfSide = Math.floor(side / 2);
 	var src = pixels.data;
@@ -11,7 +11,7 @@ IgeFilters._convolute = function (pixels, weights, opaque) {
 	// pad output by the convolution matrix
 	var w = sw;
 	var h = sh;
-	var output = IgeFilters.createImageData(w, h);
+	var output = TaroFilters.createImageData(w, h);
 	var dst = output.data;
 	// go through the destination image pixels
 	var alphaFac = opaque ? 1 : 0;

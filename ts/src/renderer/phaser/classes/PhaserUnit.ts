@@ -46,7 +46,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		this.scene.unitsList.push(this);
 
 		this.scene.renderedEntities.push(this.gameObject);
-		this.zoomEvtListener = ige.client.on('scale', this.scaleElements, this);
+		this.zoomEvtListener = taro.client.on('scale', this.scaleElements, this);
 	}
 
 	protected updateTexture (data) {
@@ -179,7 +179,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			return;
 		}
 		this.scene.cameraTarget = this.gameObject;
-		if (!ige.developerMode.active || ige.developerMode.activeTab === 'play') {
+		if (!taro.developerMode.active || taro.developerMode.activeTab === 'play') {
 			camera.startFollow(this.gameObject, false, 0.05, 0.05);
 		}
 	}
@@ -225,7 +225,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 
 		label.setFont(BitmapFontManager.font(this.scene,
 			'Verdana', data.bold,
-			ige.game.data.settings
+			taro.game.data.settings
 				.addStrokeToNameAndAttributes !== false,
 			data.color || '#FFFFFF'
 		));
@@ -392,7 +392,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 
 		this.scene.renderedEntities = this.scene.renderedEntities.filter(item => item !== this.gameObject);
 		this.scene.unitsList = this.scene.unitsList.filter(item => item.entity.id() !== this.entity.id());
-		ige.client.off('scale', this.zoomEvtListener);
+		taro.client.off('scale', this.zoomEvtListener);
 		this.zoomEvtListener = null;
 
 		if (this.scaleTween) {

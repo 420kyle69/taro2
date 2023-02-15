@@ -118,7 +118,7 @@ class TileEditor {
 	}
 
     edit (data:TileData): void {
-		const map = ige.game.data.map;
+		const map = taro.game.data.map;
 		const width = map.width;
         const tileMap = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
 		if (data.tool === 'flood') {
@@ -131,16 +131,16 @@ class TileEditor {
 		} else {
 			tileMap.putTileAt(data.gid, data.x, data.y, false, data.layer);
 			/* TODO: SAVE MAP DATA FROM SERVER SIDE */
-			//save tile change to ige.game.map.data
+			//save tile change to taro.game.map.data
 			if (map.layers.length > 4 && data.layer >= 2) data.layer ++;
 			map.layers[data.layer].data[data.y*width + data.x] = data.gid;
 		}
-		if (ige.physics && map.layers[data.layer].name === 'walls') {
+		if (taro.physics && map.layers[data.layer].name === 'walls') {
 			//if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
-			ige.physics.destroyWalls();
-			let mapCopy = ige.scaleMap(_.cloneDeep(map));
-			ige.tiled.loadJson(mapCopy, function (layerArray, IgeLayersById) {
-				ige.physics.staticsFromMap(IgeLayersById.walls);
+			taro.physics.destroyWalls();
+			let mapCopy = taro.scaleMap(_.cloneDeep(map));
+			taro.tiled.loadJson(mapCopy, function (layerArray, TaroLayersById) {
+				taro.physics.staticsFromMap(TaroLayersById.walls);
 			})
 		}
     }
@@ -155,7 +155,7 @@ class TileEditor {
 				map.putTileAt(index, tileX, tileY);
 				map.getTileAt(tileX, tileY, true).tint = 0xffffff;
 				if (!local) {
-					ige.network.send('editTile', {gid: index, layer: map.currentLayerIndex, x: tileX, y: tileY});
+					taro.network.send('editTile', {gid: index, layer: map.currentLayerIndex, x: tileX, y: tileY});
 				}
 			}
 		}
@@ -174,7 +174,7 @@ class TileEditor {
 
 	floodFill (layer: number, oldTile: number, newTile: number, x: number, y: number, fromServer: boolean): void {
 		if (fromServer) { 
-			const map = ige.game.data.map;
+			const map = taro.game.data.map;
 			const tileMap = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
 			const width = map.width;
 			//fix for debris layer
@@ -186,7 +186,7 @@ class TileEditor {
         	    return;
         	}
 			tileMap.putTileAt(newTile, x, y, false, layer);
-			//save tile change to ige.game.map.data
+			//save tile change to taro.game.map.data
 			map.layers[tempLayer].data[y*width + x] = newTile;
 				
         	if (x > 0) {
@@ -229,7 +229,7 @@ class TileEditor {
 	}
 
     update (): void {
-        if(ige.developerMode.active && ige.developerMode.activeTab === 'map') {
+        if(taro.developerMode.active && taro.developerMode.activeTab === 'map') {
             const devModeScene = this.devModeTools.scene;
 			const palette = this.tilePalette;
 			const map = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
@@ -289,7 +289,7 @@ class TileEditor {
 						const targetTile = this.getTile(pointerTileX, pointerTileY, this.selectedTile, map);
 						if (targetTile && this.selectedTile && targetTile.index !== this.selectedTile.index) {
 							this.floodFill(map.currentLayerIndex, targetTile.index, this.selectedTile.index, pointerTileX, pointerTileY, false);
-							ige.network.send('editTile', {gid: this.selectedTile.index, layer: map.currentLayerIndex, x: pointerTileX, y: pointerTileY, tool: 'flood'});
+							taro.network.send('editTile', {gid: this.selectedTile.index, layer: map.currentLayerIndex, x: pointerTileX, y: pointerTileY, tool: 'flood'});
 						}
 						
 					}

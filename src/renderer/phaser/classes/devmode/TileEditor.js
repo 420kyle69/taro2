@@ -96,7 +96,7 @@ var TileEditor = /** @class */ (function () {
         this.paletteMarker.graphics.setVisible(value);
     };
     TileEditor.prototype.edit = function (data) {
-        var map = ige.game.data.map;
+        var map = taro.game.data.map;
         var width = map.width;
         var tileMap = this.gameScene.tilemap;
         if (data.tool === 'flood') {
@@ -110,17 +110,17 @@ var TileEditor = /** @class */ (function () {
         else {
             tileMap.putTileAt(data.gid, data.x, data.y, false, data.layer);
             /* TODO: SAVE MAP DATA FROM SERVER SIDE */
-            //save tile change to ige.game.map.data
+            //save tile change to taro.game.map.data
             if (map.layers.length > 4 && data.layer >= 2)
                 data.layer++;
             map.layers[data.layer].data[data.y * width + data.x] = data.gid;
         }
-        if (ige.physics && map.layers[data.layer].name === 'walls') {
+        if (taro.physics && map.layers[data.layer].name === 'walls') {
             //if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
-            ige.physics.destroyWalls();
-            var mapCopy = ige.scaleMap(_.cloneDeep(map));
-            ige.tiled.loadJson(mapCopy, function (layerArray, IgeLayersById) {
-                ige.physics.staticsFromMap(IgeLayersById.walls);
+            taro.physics.destroyWalls();
+            var mapCopy = taro.scaleMap(_.cloneDeep(map));
+            taro.tiled.loadJson(mapCopy, function (layerArray, TaroLayersById) {
+                taro.physics.staticsFromMap(TaroLayersById.walls);
             });
         }
     };
@@ -135,7 +135,7 @@ var TileEditor = /** @class */ (function () {
                 map.putTileAt(index, tileX, tileY);
                 map.getTileAt(tileX, tileY, true).tint = 0xffffff;
                 if (!local) {
-                    ige.network.send('editTile', { gid: index, layer: map.currentLayerIndex, x: tileX, y: tileY });
+                    taro.network.send('editTile', { gid: index, layer: map.currentLayerIndex, x: tileX, y: tileY });
                 }
             }
         }
@@ -154,7 +154,7 @@ var TileEditor = /** @class */ (function () {
     };
     TileEditor.prototype.floodFill = function (layer, oldTile, newTile, x, y, fromServer) {
         if (fromServer) {
-            var map = ige.game.data.map;
+            var map = taro.game.data.map;
             var tileMap = this.gameScene.tilemap;
             var width = map.width;
             //fix for debris layer
@@ -166,7 +166,7 @@ var TileEditor = /** @class */ (function () {
                 return;
             }
             tileMap.putTileAt(newTile, x, y, false, layer);
-            //save tile change to ige.game.map.data
+            //save tile change to taro.game.map.data
             map.layers[tempLayer].data[y * width + x] = newTile;
             if (x > 0) {
                 this.floodFill(layer, oldTile, newTile, x - 1, y, fromServer);
@@ -205,7 +205,7 @@ var TileEditor = /** @class */ (function () {
         }
     };
     TileEditor.prototype.update = function () {
-        if (ige.developerMode.active && ige.developerMode.activeTab === 'map') {
+        if (taro.developerMode.active && taro.developerMode.activeTab === 'map') {
             var devModeScene = this.devModeTools.scene;
             var palette = this.tilePalette;
             var map = this.gameScene.tilemap;
@@ -258,7 +258,7 @@ var TileEditor = /** @class */ (function () {
                         var targetTile = this.getTile(pointerTileX, pointerTileY, this.selectedTile, map);
                         if (targetTile && this.selectedTile && targetTile.index !== this.selectedTile.index) {
                             this.floodFill(map.currentLayerIndex, targetTile.index, this.selectedTile.index, pointerTileX, pointerTileY, false);
-                            ige.network.send('editTile', { gid: this.selectedTile.index, layer: map.currentLayerIndex, x: pointerTileX, y: pointerTileY, tool: 'flood' });
+                            taro.network.send('editTile', { gid: this.selectedTile.index, layer: map.currentLayerIndex, x: pointerTileX, y: pointerTileY, tool: 'flood' });
                         }
                     }
                 }

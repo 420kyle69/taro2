@@ -22,7 +22,7 @@ NetIo._debug = {
  * Define the class system.
  * @type {*}
  */
-NetIo.Class = typeof (IgeClass) !== 'undefined' ? IgeClass : (function () {
+NetIo.Class = typeof (TaroClass) !== 'undefined' ? TaroClass : (function () {
 	var initializing = false;
 	var fnTest = /xyz/.test(function () { xyz; }) ? /\b_super\b/ : /.*/;
 
@@ -72,7 +72,7 @@ NetIo.Class = typeof (IgeClass) !== 'undefined' ? IgeClass : (function () {
 	/**
          * Gets / sets the class id. Primarily used to help identify
          * what class an instance was instantiated with and is also
-         * output during the ige.scenegraph() method's console logging
+         * output during the taro.scenegraph() method's console logging
          * to show what class an object belogs to.
          */
 	var classId = function (name) {
@@ -254,7 +254,7 @@ NetIo.Class = typeof (IgeClass) !== 'undefined' ? IgeClass : (function () {
 	return Class;
 }());
 
-NetIo.EventingClass = typeof (IgeEventingClass) !== 'undefined' ? IgeEventingClass : NetIo.Class.extend({
+NetIo.EventingClass = typeof (TaroEventingClass) !== 'undefined' ? TaroEventingClass : NetIo.Class.extend({
 	/**
      * Add an event listener method for an event.
      * @param {String || Array} eventName The name of the event to listen for (string), or an array of events to listen for.
@@ -604,8 +604,8 @@ NetIo.Server = NetIo.EventingClass.extend({
 		if (secure) {
 			// https - production/staging env
 
-			console.log(`https port ${ige.server.httpsPort}`);
-			self._portSecure = ige.server.httpsPort;
+			console.log(`https port ${taro.server.httpsPort}`);
+			self._portSecure = taro.server.httpsPort;
 			var privateKey = this._fs.readFileSync('../sslcert/modd_ssl.key', 'utf8');
 			var certificate = this._fs.readFileSync('../sslcert/modd_ssl.crt', 'utf8');
 			var options = { key: privateKey, cert: certificate };
@@ -687,7 +687,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 			try {
 				const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
 				
-				const isGuestUserAllowed = ige.game?.data?.defaultData?.isGuestPlayerAllowed;
+				const isGuestUserAllowed = taro.game?.data?.defaultData?.isGuestPlayerAllowed;
 				
 				if (!isGuestUserAllowed && (!decodedToken.userId || !decodedToken.sessionId)) {
 					socket.close('Guest user not allowed. Please login or signup.');
@@ -705,7 +705,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 				};
 				
 				// if the token has been used already, close the connection.
-				const isUsedToken = ige.server.usedConnectionJwts[token];
+				const isUsedToken = taro.server.usedConnectionJwts[token];
 				if (isUsedToken) {
 					console.log('Token has been used already', token);
 					socket.close('Security token could not be validated, please refresh the page.');
@@ -713,18 +713,18 @@ NetIo.Server = NetIo.EventingClass.extend({
 				}
 				
 				// store token for current client
-				ige.server.usedConnectionJwts[token] = socket._token.tokenCreatedAt;
+				taro.server.usedConnectionJwts[token] = socket._token.tokenCreatedAt;
 				
 				// remove expired tokens
 				const filteredUsedConnectionJwts = {};
-				const usedTokenEntries = Object.entries(ige.server.usedConnectionJwts).filter(([token, tokenCreatedAt]) => (Date.now() - tokenCreatedAt) < ige.server.CONNECTION_JWT_EXPIRES_IN);
+				const usedTokenEntries = Object.entries(taro.server.usedConnectionJwts).filter(([token, tokenCreatedAt]) => (Date.now() - tokenCreatedAt) < taro.server.CONNECTION_JWT_EXPIRES_IN);
 				for (const [key, value] of usedTokenEntries) {
 					if (typeof value === 'number') {
 						filteredUsedConnectionJwts[key] = value;
 					}
 				}
 				
-				ige.server.usedConnectionJwts = filteredUsedConnectionJwts;
+				taro.server.usedConnectionJwts = filteredUsedConnectionJwts;
 				
 				// Give the socket a unique ID
 				socket.id = self.newIdHex();
@@ -779,7 +779,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 			};
 			const clientId = socket.id;
 			
-			ige.server._onJoinGame(joinGameData, clientId);
+			taro.server._onJoinGame(joinGameData, clientId);
 		} else {
 			// PING service only 
 			// Tell the client their new ID
@@ -888,7 +888,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 			//     timeStart = Date.now();
 			// }
 
-			json = ige.network._io._compress(json);
+			json = taro.network._io._compress(json);
 
 			// NOTE: make sure than COMPRESSION_THRESHOLD is same on both client and server
 			// LOGIC:
@@ -899,11 +899,11 @@ NetIo.Server = NetIo.EventingClass.extend({
 			//        then compression will not be applied to it and send the stringified form only
 			//        as we have found that compressing large string take toll on CPU
 
-			// if (json.length < ige.network._io.COMPRESSION_THRESHOLD) {
-			//     json = ige.network._io._compress(json);
+			// if (json.length < taro.network._io.COMPRESSION_THRESHOLD) {
+			//     json = taro.network._io._compress(json);
 			// }
 
-			// if (json.length > ige.network._io.COMPRESSION_THRESHOLD) {
+			// if (json.length > taro.network._io.COMPRESSION_THRESHOLD) {
 			// console.log(json.length)
 			// }
 			// if(jsonLength > 100000){
@@ -911,7 +911,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 			// }
 
 			return json;
-			// return ige.network._io._msgpack.encode(obj);
+			// return taro.network._io._msgpack.encode(obj);
 		} catch (e) {
 			console.log(e);
 		}

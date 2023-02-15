@@ -46,7 +46,7 @@ var RegionEditor = /** @class */ (function () {
                     y = _this.regionDrawStart.y + height;
                     height *= -1;
                 }
-                ige.network.send('editRegion', { x: Math.trunc(x),
+                taro.network.send('editRegion', { x: Math.trunc(x),
                     y: Math.trunc(y),
                     width: Math.trunc(width),
                     height: Math.trunc(height) });
@@ -57,7 +57,7 @@ var RegionEditor = /** @class */ (function () {
     }
     RegionEditor.prototype.edit = function (data) {
         if (data.newName && data.name !== data.newName) {
-            var region = ige.regionManager.getRegionById(data.name);
+            var region = taro.regionManager.getRegionById(data.name);
             if (region)
                 region._stats.id = data.newName;
             this.devModeScene.regions.forEach(function (region) {
@@ -89,7 +89,7 @@ var RegionEditor = /** @class */ (function () {
                 inGameEditor.addNewRegion && inGameEditor.addNewRegion(this.clickedList[0]);
             }
             else if (this.clickedList.length > 1) {
-                ige.showRegionList && ige.showRegionList(this.clickedList);
+                taro.showRegionList && taro.showRegionList(this.clickedList);
             }
         }
         this.clickedList = [];

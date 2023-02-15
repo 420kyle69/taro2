@@ -1,11 +1,11 @@
-IgeFilters.edgeDetect = function (canvas, ctx, originalImage, texture, data) {
+TaroFilters.edgeDetect = function (canvas, ctx, originalImage, texture, data) {
 	if (!texture._filterImageDrawn || !data || !data.cumulative) {
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 		ctx.drawImage(originalImage, 0, 0);
 		texture._filterImageDrawn = true;
 	}
 
-	var newData = IgeFilters._convolute(
+	var newData = TaroFilters._convolute(
 		ctx.getImageData(
 			0,
 			0,

@@ -1,4 +1,4 @@
-var ScriptComponent = IgeEntity.extend({
+var ScriptComponent = TaroEntity.extend({
 	classId: 'ScriptComponent',
 	componentId: 'script',
 
@@ -59,7 +59,7 @@ var ScriptComponent = IgeEntity.extend({
 			if (actions) {
 				var cmd = self.action.run(actions, params);
 				if (cmd == 'return') {
-					ige.log('script return called');
+					taro.log('script return called');
 					return;
 				}
 			}
@@ -70,9 +70,9 @@ var ScriptComponent = IgeEntity.extend({
 		} else if (
 			this._entity &&
 			this._entity._id &&
-			this._entity._id !== 'ige'
+			this._entity._id !== 'taro'
 		) {
-			ige.script.runScript(scriptId, params);
+			taro.script.runScript(scriptId, params);
 		}
 	},
 
@@ -94,23 +94,23 @@ var ScriptComponent = IgeEntity.extend({
 	/* trigger and run all of the corresponding script(s) */
 	trigger: function (triggerName, triggeredBy) {
 
-		if (ige.isServer) {
+		if (taro.isServer) {
 			var now = Date.now();
-			var lastTriggerRunTime = now - ige.lastTriggerRanAt;
+			var lastTriggerRunTime = now - taro.lastTriggerRanAt;
 
-			if (ige.lastTrigger) {
-				if (ige.triggerProfiler[ige.lastTrigger]) {
-					var count = ige.triggerProfiler[ige.lastTrigger].count;
-					ige.triggerProfiler[ige.lastTrigger].count++;
-					ige.triggerProfiler[ige.lastTrigger].avgTime = ((ige.triggerProfiler[ige.lastTrigger].avgTime * count) + lastTriggerRunTime ) / (count + 1);
-					ige.triggerProfiler[ige.lastTrigger].totalTime += lastTriggerRunTime;
+			if (taro.lastTrigger) {
+				if (taro.triggerProfiler[taro.lastTrigger]) {
+					var count = taro.triggerProfiler[taro.lastTrigger].count;
+					taro.triggerProfiler[taro.lastTrigger].count++;
+					taro.triggerProfiler[taro.lastTrigger].avgTime = ((taro.triggerProfiler[taro.lastTrigger].avgTime * count) + lastTriggerRunTime ) / (count + 1);
+					taro.triggerProfiler[taro.lastTrigger].totalTime += lastTriggerRunTime;
 				} else {
-					ige.triggerProfiler[ige.lastTrigger] = {count: 1, avgTime: lastTriggerRunTime, totalTime: lastTriggerRunTime};
+					taro.triggerProfiler[taro.lastTrigger] = {count: 1, avgTime: lastTriggerRunTime, totalTime: lastTriggerRunTime};
 				}
 			}
 
-			ige.lastTrigger = triggerName;
-			ige.lastTriggerRanAt = now;
+			taro.lastTrigger = triggerName;
+			taro.lastTriggerRanAt = now;
 		}
 
 		let scriptIds = this.triggeredScripts[triggerName];
@@ -139,7 +139,7 @@ var ScriptComponent = IgeEntity.extend({
 			tabs += '    ';
 		}
 
-		// if (ige.server.isScriptLogOn)
+		// if (taro.server.isScriptLogOn)
 		// console.log(tabs+str)
 
 		// this.logStr = this.logStr  + tabs + str
@@ -147,7 +147,7 @@ var ScriptComponent = IgeEntity.extend({
 		// if (this.entryCount > 50000)
 		// {
 
-		// 	var filename = "logs/"+ige.server.serverId+"script.log"
+		// 	var filename = "logs/"+taro.server.serverId+"script.log"
 
 		// 	fs.writeFile(filename, this.logStr, function(err) {
 		// 	    if(err) {
@@ -182,7 +182,7 @@ var ScriptComponent = IgeEntity.extend({
 			var script = this.scripts[this.currentScriptId];
 			var log = `Script error '${(script) ? script.name : ''}' in Action '${this.currentActionName}' : ${message}`;
 			this.errorLogs[this.currentActionName] = log;
-			ige.devLog('script errorLog', log, message);
+			taro.devLog('script errorLog', log, message);
 			ScriptComponent.prototype.log(log);
 			return log;
 		}
