@@ -62,41 +62,8 @@ var Region = TaroEntityPhysics.extend({
 				// 1 is 'automatic' streaming
 				self.streamMode(1);
 			} else if (taro.isClient) {
-				if ((mode === 'play' /*&& self._stats.default.inside*/) || mode === 'sandbox') {
-					// o.O TODO: Remove /refactor
-					taro.entitiesToRender.trackEntityById[entityIdFromServer] = this;
-					
-					taro.client.emit('create-region', this);
-				}
-
-				if (typeof mode === 'string' && mode === 'sandbox') {
-					delete self._stats.value;
-
-					if (taro.game.data.isDeveloper) {
-						// creating region click handler if user is developer
-						// /
-						// need to see if we can do this with simple region instead
-						// of using regionUi because we want to remove it entirely
-						// /
-
-						// TaroObject method
-						self.drawMouse(true)
-							// TaroEntity method (TaroUiEntity extends...)
-							.mouseDown(function (event, evc) {
-								if (
-									taro.mapEditor.selectEntities &&
-									event.which === 1 &&
-									!taro.mapEditor.mouseDownOnMiniMap &&
-									!taro.mapEditor.checkIfClickedMiniMap(event.pageX, event.pageY)
-								) {
-									var selectedRegion = self;
-									if (selectedRegion._stats && selectedRegion._stats.id) {
-										taro.regionManager.openRegionModal(selectedRegion._stats, selectedRegion._stats.id, false);
-									}
-								}
-							});
-					}
-				}
+				taro.entitiesToRender.trackEntityById[entityIdFromServer] = this;
+				taro.client.emit('create-region', this);
 			}
 		}
 		self.addBehaviour('regionBehaviour', self._behaviour);

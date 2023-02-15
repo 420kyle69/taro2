@@ -250,7 +250,7 @@ const Client = TaroEventingClass.extend({
 
 			taro.addComponent(PhysicsComponent)
 				.physics.sleep(true);
-		
+
 		}
 
 		this.physicsConfigLoaded.resolve();
@@ -290,32 +290,7 @@ const Client = TaroEventingClass.extend({
 				// old comment => 'always enable CSP'
 				this.loadCSP();
 			}
-			
-			// added important configuration details for sandbox
-			if (mode == 'sandbox') {
-				$.when(this.mapLoaded, this.rendererLoaded)
-					.done(() => {
-						taro.mapEditor.scanMapLayers();
-						taro.mapEditor.drawTile();
-						taro.mapEditor.addUI();
-						taro.mapEditor.customEditor();
 
-						if (!gameData.isDeveloper) {
-							//
-							taro.mapEditor.selectEntities = false;
-						}
-
-						taro.setFps(15);
-						$('#loading-container').addClass('slider-out');
-					})
-					.fail((err) => {
-						$('#loading-container').addClass('slider-out');
-						console.error(err); // for now
-					});
-
-			}
-
-			// don't really know if this needs to be inside this
 			if(gameData.isDeveloper) {
 
 				taro.addComponent(DevConsoleComponent);
@@ -435,43 +410,6 @@ const Client = TaroEventingClass.extend({
 					.drawBounds(false)
 					.mount(taro);
 
-				// sandbox check for minimap
-				if (mode == 'sandbox') {
-
-					taro.addComponent(MapEditorComponent)
-						.mapEditor.createMiniMap();
-
-					// sandbox also gets a second viewport
-					// moved the code under a duplicate conditional
-					this.vp2 = new TaroViewport()
-						.id('vp2')
-						.layer(100)
-						.drawBounds(true)
-						.height(0)
-						.width(0)
-						.borderColor('#0bcc38')
-						.borderWidth(20)
-						.bottom(0)
-						.right(0)
-						.scene(this.tilesheetScene)
-						.mount(taro);
-
-					// sandbox also gets map pan components
-					this.vp1.addComponent(MapPanComponent)
-						.mapPan.enabled(true);
-
-					this.vp2.addComponent(MapPanComponent)
-						.mapPan.enabled(true);
-
-					taro.client.vp1.drawBounds(true);
-
-				} else if (mode == 'play') {
-
-				} else {
-
-					console.error('mode was not == to "sandbox" or "play"');
-				}
-
 				// moved this down here
 				taro._selectedViewport = this.vp1;
 
@@ -535,7 +473,7 @@ const Client = TaroEventingClass.extend({
 	setZoom: function(zoom) {
 		this.zoom = zoom;
 		if (taro.developerMode.active && taro.developerMode.activeTab !== 'play') {
-			
+
 		} else {
 			this.emit('zoom', zoom);
 		}
@@ -586,13 +524,13 @@ const Client = TaroEventingClass.extend({
 				if (entity._category == 'player') {
 					// old comment => 'apply skin to all units owned by this player'
 					const player = entity;
-				
+
 					// assign those units' owner as this player
 					const units = player.getUnits();
 					for (let unitId in units) {
 						units[unitId].setOwnerPlayer(player.id());
 					}
-					
+
 					if (player._stats.controlledBy == 'human') {
 						// old comment => 'if the player is me'
 						if (player._stats.clientId == taro.network.id()) {
@@ -611,7 +549,7 @@ const Client = TaroEventingClass.extend({
 
 							player.redrawUnits(['nameLabel']);
 						}
-						
+
 
 						if (player._stats && player._stats.selectedUnitId) {
 							const unit = taro.$(player._stats.selectedUnitId);
@@ -695,9 +633,6 @@ const Client = TaroEventingClass.extend({
 		taro.physics.start();
 		taro.raycaster = new Raycaster();
 
-		if (typeof mode == 'string' && mode == 'sandbox') {
-			taro.script.runScript('initialize', {}); // loading entities to display in the sandbox
-		}
 	},
 
 	// not much here except definitions

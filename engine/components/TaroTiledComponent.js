@@ -49,7 +49,7 @@ var TaroTiledComponent = TaroClass.extend({
 			taro.server.unpublish('TaroTiledComponent#51');
 		}
 		var self = this;
-		var mapClass = taro.isServer === true ? TaroTileMap2d : TaroTextureMap;
+		var mapClass = TaroTileMap2d;
 		var mapWidth = data.width;
 		var mapHeight = data.height;
 		var layerArray = data.layers;
@@ -65,22 +65,16 @@ var TaroTiledComponent = TaroClass.extend({
 		var tileSetItem;
 		var tileSetsTotal = tileSetCount;
 		var tileSetsLoaded = 0;
-		var textureCellLookup = [];
-		var currentTexture;
-		var currentCell;
 		var onLoadFunc;
 		var image;
-		var textures = [];
-		var allTexturesLoadedFunc;
+		var tilesetsLoadedFunc;
 		var i; var k; var x; var y; var z;
-		var ent;
 
-		//if (taro.isClient) {
-			taro.layersById = layersById;
-		//}
+		taro.layersById = layersById;
 
-		// Define the function to call when all textures have finished loading
-		allTexturesLoadedFunc = function () {
+
+		// Define the function to call when all tilesets have finished loading
+		tilesetsLoadedFunc = function () {
 			// Create a map for each layer
 			for (i = 0; i < layerCount; i++) {
 				layer = layerArray[i];
@@ -115,12 +109,6 @@ var TaroTiledComponent = TaroClass.extend({
 					layersById[layer.name] = maps[i];
 					tileSetCount = tileSetArray.length;
 
-					if (taro.isClient && !self.cs) {
-						for (k = 0; k < tileSetCount; k++) {
-							maps[i].addTexture(textures[k]);
-						}
-					}
-
 					// Loop through the layer data and paint the tiles
 					layerDataCount = layerData.length;
 
@@ -145,12 +133,11 @@ var TaroTiledComponent = TaroClass.extend({
 		};
 
 		if (taro.isClient && !self.cs) {
-			onLoadFunc = function (textures, tileSetCount, tileSetItem) {
+			onLoadFunc = function (tileSetCount, tileSetItem) {
 				return function () {
-					var i, cc;
 
 					var imageUrl = tileSetItem.image;
-					var scaleFactor = taro.scaleMapDetails.scaleFactor;
+
 
 					if (imageUrl.includes('tilesheet') || tileSetCount === 0) {
 						tileSetItem.tilewidth = taro.scaleMapDetails.originalTileWidth;
@@ -158,48 +145,32 @@ var TaroTiledComponent = TaroClass.extend({
 					}
 
 					if (!self.cs) {
-						self.cs = new TaroCellSheet(imageUrl, this.width * scaleFactor.x / tileSetItem.tilewidth, this.height * scaleFactor.y / tileSetItem.tileheight, taro.scaleMapDetails.shouldScaleTilesheet)
-						.id(tileSetItem.name)
-						.on('loaded', function () {
-							if (taro.scaleMapDetails.shouldScaleTilesheet && (imageUrl.includes('tilesheet') || tileSetCount === 0)) {
-								this.resize(this._sizeX * scaleFactor.x, this._sizeY * scaleFactor.y);
-							}
-							cc = this.cellCount();
+						self.cs = true;
+						tileSetsLoaded++;
 
-							this._tiledStartingId = tileSetItem.firstgid;
-							// Fill the lookup array
-							for (i = 0; i < cc; i++) {
-								textureCellLookup[this._tiledStartingId + i] = this;
-							}
-
-							textures.push(this);
-
-							tileSetsLoaded++;
-
-							if (tileSetsLoaded === tileSetsTotal) {
-								// All textures loaded, fire processing function
-								allTexturesLoadedFunc();
-							}
-						});
+						if (tileSetsLoaded === tileSetsTotal) {
+							// All tilesets loaded, fire processing function
+							tilesetsLoadedFunc();
+						}
 					}
 				};
 			};
 
 			// TODO remove image loading or entire TaroTiledComponent
 
-			// Load the tile sets as textures
+			// Load the tile sets
 			while (tileSetCount--) {
 				// Load the image into memory first so we can read the total width and height
 				image = new Image();
 
 				tileSetItem = tileSetArray[tileSetCount];
-				image.onload = onLoadFunc(textures, tileSetCount, tileSetItem);
+				image.onload = onLoadFunc(tileSetCount, tileSetItem);
 
 				image.src = tileSetItem.image;
 			}
 		} else {
-			// We're on the server so no textures are actually loaded
-			allTexturesLoadedFunc();
+			// We're on the server so no tilesets are actually loaded
+			tilesetsLoadedFunc();
 		}
 	}
 });

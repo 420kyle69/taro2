@@ -14,7 +14,7 @@ var Projectile = TaroEntityPhysics.extend({
 
 		self.entityId = this._id;
 		self._stats = {...projectileData, ...data};
-		
+
 		// dont save variables in _stats as _stats is stringified and synced
 		// and some variables of type unit, item, projectile may contain circular json objects
 		if (self._stats.variables) {
@@ -57,9 +57,9 @@ var Projectile = TaroEntityPhysics.extend({
 		}
 
 		self.addComponent(AttributeComponent); // every projectile gets one
-		
-		self.addComponent(ScriptComponent); // entity-scripting		
-		self.script.load(data.scripts)
+
+		self.addComponent(ScriptComponent); // entity-scripting
+		self.script.load(data.scripts);
 
 		// convert number variables into Int
 		self.parseEntityObject(self._stats);
@@ -70,7 +70,7 @@ var Projectile = TaroEntityPhysics.extend({
 		}
 
 		this.updateBody(data.defaultData);
-		
+
 		var sourceItem = this.getSourceItem();
 
 		if (taro.isServer) {
@@ -96,8 +96,6 @@ var Projectile = TaroEntityPhysics.extend({
 
 			self.updateLayer();
 			self.updateTexture();
-			//mouseEvents for sandbox mode only
-			self.mouseEvents();
 
 		}
 		this.playEffect('create');
