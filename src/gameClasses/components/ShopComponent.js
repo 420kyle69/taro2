@@ -110,7 +110,7 @@ var ShopComponent = IgeEntity.extend({
 						status: "initiated"
 					});
 				}
-				
+
 				if (isCoinTxRequired) {
 					self.verifyUserPinForPurchase($(this).attr('id'));
 				} else {
@@ -323,14 +323,11 @@ var ShopComponent = IgeEntity.extend({
 						if (purchasable.soldForSocialShare) {
 							html += self.getTwitterBtnHtml(purchasable);
 						} else {
-							html += `		 <button class="btn btn-sm btn-outline-success btn-purchase-purchasable" id="${purchasable._id}"` +
+							html += `<button class="btn btn-sm btn-outline-success btn-purchase-purchasable" id="${purchasable._id}"` +
 								`			 data-purchasabled="${purchasable.name}" data-price="${purchasable.price}">` +
-								'			 <div class="d-flex">' +
-								'				 <div>' +
-								'					 <img src="/assets/images/coin.png" style="width:15px; height: 15px" />' +
-								'				 </div>' +
-								`				 <div>${purchasable.price
-								}				 </div>` +
+								'			 <div class="d-flex align-items-center">' +
+								'				 <img src="/assets/images/coin.png" height="20" alt="Modd Coins" class="mr-1" />' +
+								`				 ${purchasable.price}` +
 								'			 </div>' +
 								'		 </button>';
 						}
@@ -963,7 +960,7 @@ var ShopComponent = IgeEntity.extend({
 						isCoinTxRequired: !!shopItem.price.coins,
 						itemPrice: shopItem.price.coins || 0,
 					});
-					
+
 					if (
 						((!isItemAffordable || !isPurchasableByCurrentPlayerType) && shopItem.hideIfUnaffordable) ||
 						(!requirementsSatisfied && shopItem.hideIfRequirementNotMet)
@@ -1214,11 +1211,16 @@ var ShopComponent = IgeEntity.extend({
 						'data-purchasable': item.title || item.name,
 						'data-price': item.price
 					}).append(
-						$('<img/>', {
-							src: `${assetsProvider}/assets/images/coin.png`,
-							style: 'width:18; height: 18px'
-						})
-					).append(item.price);
+            $('<div/>', {
+              class: 'd-flex align-items-center'
+            }).append(
+              $('<img/>', {
+                src: `${assetsProvider}/assets/images/coin.png`,
+                class: 'mr-1',
+                style: 'height: 20px'
+              })
+            ).append(item.price)
+					);
 				}
 			} else if (item.status == 'purchased') {
 				var button = $('<button/>', {
@@ -1246,11 +1248,16 @@ var ShopComponent = IgeEntity.extend({
 						'data-price': item.price,
 						'data-unauthenticated': 'true'
 					}).append(
-						$('<img/>', {
-							src: `${assetsProvider}/assets/images/coin.png`,
-							style: 'width:18; height: 18px'
-						})
-					).append(item.price);
+            $('<div/>', {
+              class: 'd-flex align-items-center'
+            }).append(
+              $('<img/>', {
+                src: `${assetsProvider}/assets/images/coin.png`,
+                class: 'mr-1',
+                style: 'height: 20px'
+              })
+            ).append(item.price)
+					);
 				}
 			}
 
@@ -1362,7 +1369,7 @@ var ShopComponent = IgeEntity.extend({
 	purchaseUnit: function (id) {
 		ige.network.send('buyUnit', id);
 	},
-	
+
 	verifyUserPinForPurchase: function (id) {
 		const serverId = ige.client.server.id;
 
@@ -1372,7 +1379,7 @@ var ShopComponent = IgeEntity.extend({
 			ige.network.send('buyItem', {id});
 		}
 	},
-	
+
 	enableStockCycle: function () {
 		var self = this;
 		var stockClock = setInterval(function () {
