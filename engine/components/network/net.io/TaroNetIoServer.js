@@ -400,7 +400,7 @@ var TaroNetIoServer = {
 			self._io.send([ciEncoded, self.snapshot]);
 
 			taro.server.lastSnapshot = self.snapshot;
->>>>>>> master:engine/components/network/net.io/IgeNetIoServer.js
+>>>>>>> master:engine/components/network/net.io/TaroNetIoServer.js
 			this.snapshot = [];
 		} else {
 			this.log('_snapshot error @ flush');
@@ -542,7 +542,7 @@ var TaroNetIoServer = {
 		if (playerCount > taro.server.maxPlayers)
 			clientRejectReason.push('server is full');
 
->>>>>>> master:engine/components/network/net.io/IgeNetIoServer.js
+>>>>>>> master:engine/components/network/net.io/TaroNetIoServer.js
 		if (playerIsBanned)
 			clientRejectReason.push('player ',socket._remoteAddress,' is banned');
 
@@ -566,7 +566,7 @@ var TaroNetIoServer = {
 =======
 
 				taro.server.socketConnectionCount.connected++;
->>>>>>> master:engine/components/network/net.io/IgeNetIoServer.js
+>>>>>>> master:engine/components/network/net.io/TaroNetIoServer.js
 
 				// Store a rooms array for this client
 				this._clientRooms[socket.id] = this._clientRooms[socket.id] || [];
@@ -591,7 +591,7 @@ var TaroNetIoServer = {
 							commandName = taro.network._networkCommandsIndex[code.charCodeAt(0)]
 =======
 							commandName = taro.network._networkCommandsIndex[code.charCodeAt(0)];
->>>>>>> master:engine/components/network/net.io/IgeNetIoServer.js
+>>>>>>> master:engine/components/network/net.io/TaroNetIoServer.js
 						}
 					}
 
@@ -718,7 +718,7 @@ var TaroNetIoServer = {
 =======
 
 		var socket = taro.network._socketById[clientId];
->>>>>>> master:engine/components/network/net.io/IgeNetIoServer.js
+>>>>>>> master:engine/components/network/net.io/TaroNetIoServer.js
 		// check if the clientId belongs to this socket connection.
 		if (!(socket?._token?.clientId && socket?._token?.clientId === clientId)) {
 			console.log('_onClientMessage: clientId validation failed', socket._token.clientId, clientId, data);
@@ -758,7 +758,7 @@ var TaroNetIoServer = {
 					}
 				}
 =======
->>>>>>> master:engine/components/network/net.io/IgeNetIoServer.js
+>>>>>>> master:engine/components/network/net.io/TaroNetIoServer.js
 
 				this.emit(commandName, [data[1], clientId]);
 			}

@@ -119,8 +119,8 @@ var TileEditor = /** @class */ (function () {
             //if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
             taro.physics.destroyWalls();
             var mapCopy = taro.scaleMap(_.cloneDeep(map));
-            taro.tiled.loadJson(mapCopy, function (layerArray, IgeLayersById) {
-                taro.physics.staticsFromMap(IgeLayersById.walls);
+            taro.tiled.loadJson(mapCopy, function (layerArray, TaroLayersById) {
+                taro.physics.staticsFromMap(TaroLayersById.walls);
             });
         }
     };
