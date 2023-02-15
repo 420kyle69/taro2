@@ -54,7 +54,7 @@ console.log("process.env.ENV = ", process.env.ENV)
 if (process.env.ENV == 'production') {
 	var Rollbar = require('rollbar');
 	global.rollbar = new Rollbar({
-		accessToken: '326308ea71e041dc87e30fce4eb48d99',
+		accessToken: process.env.ROLLBAR_ACCESS_TOKEN,
 		environment: process.env.ENV,
 		captureUncaught: true,
 		captureUnhandledRejections: true,
@@ -731,6 +731,49 @@ var Server = TaroClass.extend({
 				game: taro.game.data.defaultData._id,
 				itemName
 			});
+		}
+	},
+	
+	sendCoinsToPlayer: function (userId, coins) {
+		if (userId && coins && taro.game.data.defaultData.tier != 2) {
+			taro.clusterClient && taro.clusterClient.sendCoinsToPlayer({
+				creatorId: taro.game.data.defaultData.owner,
+				userId,
+				coins,
+				game: taro.game.data.defaultData._id,
+			});
+		}
+	},
+	
+	sendCoinsToPlayerCallback: function (body) {
+		if (body) {
+			if (body.status === 'success') {
+				if (body.message && body.message.userId && body.message.creatorId) {
+					const {
+						updatedCoinsCreator,
+						updatedCoinsPlayer,
+						creatorId,
+						userId
+					} = body.message;
+					
+					var creator = taro.$$('player').find(function (player) {
+						return player && player._stats && player._stats.userId == creatorId;
+					});
+					if (creator) {
+						creator.streamUpdateData([{ coins: updatedCoinsCreator }]);
+					}
+					
+					var player = taro.$$('player').find(function (player) {
+						return player && player._stats && player._stats.userId == userId;
+					});
+					if (player) {
+						player.streamUpdateData([{ coins: updatedCoinsPlayer }]);
+					}
+				}
+			}
+			if (body.status === 'error') {
+				console.log('error in sending coins')
+			}
 		}
 	},
 	

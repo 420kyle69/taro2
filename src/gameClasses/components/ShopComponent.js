@@ -89,6 +89,7 @@ var ShopComponent = TaroEntity.extend({
 				var isItemRequirementSetisfied = $(this).attr('requirementsSatisfied') == 'true';
 				var isItemAffordable = $(this).attr('isItemAffordable') == 'true';
 				var isCoinTxRequired = $(this).attr('isCoinTxRequired') == 'true';
+				var itemPrice = $(this).attr('itemPrice');
 				var name = $(this).attr('name');
 				if (!isItemRequirementSetisfied) {
 					self.purchaseWarning('requirement', name);
@@ -97,6 +98,17 @@ var ShopComponent = TaroEntity.extend({
 				if (!isItemAffordable) {
 					self.purchaseWarning('price', name);
 					return;
+				}
+
+				if(itemPrice && (parseFloat(itemPrice) > 0) && window.userId && window.userId.toString() !== window.gameJson?.data?.defaultData?.owner?.toString()) {
+					window.userId && window.trackEvent && window.trackEvent('Coin Purchase', {
+						coins: parseFloat(itemPrice),
+						distinct_id: window.userId.toString(),
+						type: "ingame-item",
+						// purchaseId: purchasableId,
+						gameId: window.gameId?.toString(),
+						status: "initiated"
+					});
 				}
 				
 				if (isCoinTxRequired) {
@@ -185,6 +197,7 @@ var ShopComponent = TaroEntity.extend({
 								}
 							} else {
 								$('#purchasable-purchase-modal').data('purchasable', itemId);
+								$('#purchasable-purchase-modal').data('price', price);
 								$('#purchasable-purchase-modal').modal('show');
 								// if (confirm("Are you sure you want to purchase " + name + " ?")) {
 								// 	self.buySkin(itemId);
@@ -273,33 +286,33 @@ var ShopComponent = TaroEntity.extend({
 					purchasableItems = purchasableItems.slice(0, 4);
 
 					// remove skin shop UI if there are no skins in the game which user can purchase
-					if (purchasableItems.length === 0) {
-						var menuColumnRightContainer = $("#menu-column-right-container")[0];
+					// if (purchasables.length === 0) {
+					// 	var menuColumnRightContainer = $("#menu-column-right-container")[0];
 
-						if (!menuColumnRightContainer) {
-							return;
-						}
+					// 	if (!menuColumnRightContainer) {
+					// 		return;
+					// 	}
 
-						var skinShopParent = $(menuColumnRightContainer).find("#menu-column-left")[0];
+					// 	var skinShopParent = $(menuColumnRightContainer).find("#menu-column-left")[0];
 
-						if (skinShopParent) {
-							skinShopParent.remove();
-						}
-						else {
-							var skinShop = $("#skin-shop-container")[0];
+					// 	if (skinShopParent) {
+					// 		skinShopParent.remove();
+					// 	}
+					// 	else {
+					// 		var skinShop = $("#skin-shop-container")[0];
 
-							if (skinShop) {
-								skinShop.remove();
-							}
-						}
+					// 		if (skinShop) {
+					// 			skinShop.remove();
+					// 		}
+					// 	}
 
-						// since we removed the skin shop, to make sure we are not showing empty div check for text content on
-						var isRightColumnBlank = menuColumnRightContainer.innerText.trim().length === 0;
+					// 	// since we removed the skin shop, to make sure we are not showing empty div check for text content on
+					// 	var isRightColumnBlank = menuColumnRightContainer.innerText.trim().length === 0;
 
-						if (isRightColumnBlank) {
-							menuColumnRightContainer.remove();
-						}
-					}
+					// 	if (isRightColumnBlank) {
+					// 		menuColumnRightContainer.remove();
+					// 	}
+					// }
 
 					purchasableItems.forEach(function (purchasable, index) {
 						let html = `<div id="skin-list-${purchasable._id}" class="border rounded bg-light p-2 mx-2 ${index < 2 ? 'mb-3' : ''} col-5 d-flex flex-column justify-content-between">` +
@@ -795,7 +808,7 @@ var ShopComponent = TaroEntity.extend({
 				var itemKey = requiredItemTypesKeys[i];
 				var requiredQty = shopItem.price.requiredItemTypes[itemKey];
 				var item = taro.game.getAsset('itemTypes', itemKey);
-				var requirementsSatisfied = ownerUnit.inventory.hasRequiredQuantity(itemKey, requiredQty) && 'text-success' || 'text-danger';
+				var requirementsSatisfied = ownerUnit?.inventory?.hasRequiredQuantity(itemKey, requiredQty) && 'text-success' || 'text-danger';
 				prices += `<p  class="mb-2 ml-2 no-selection ${requirementsSatisfied}">${requiredQty || ''} ${item.name}</p>`;
 			}
 
@@ -927,7 +940,7 @@ var ShopComponent = TaroEntity.extend({
 							for (var j = 0; j < requiredItemTypesKeys.length; j++) {
 								var itemKey = requiredItemTypesKeys[j];
 								var requiredQuantity = shopItem.price.requiredItemTypes[itemKey];
-								isItemAffordable = ownerUnit.inventory.hasRequiredQuantity(itemKey, requiredQuantity);
+								isItemAffordable = ownerUnit?.inventory?.hasRequiredQuantity(itemKey, requiredQuantity);
 								if (!isItemAffordable) {
 									break;
 								}
@@ -947,7 +960,8 @@ var ShopComponent = TaroEntity.extend({
 						name: item.name,
 						requirementsSatisfied: !!requirementsSatisfied,
 						isItemAffordable: !!isItemAffordable,
-						isCoinTxRequired: !!shopItem.price.coins
+						isCoinTxRequired: !!shopItem.price.coins,
+						itemPrice: shopItem.price.coins || 0,
 					});
 					
 					if (
@@ -1185,7 +1199,7 @@ var ShopComponent = TaroEntity.extend({
 		var modalBody = $('<div/>', {
 			class: 'row text-center'
 		});
-		for (var i in items) {
+		for (let i = 0; i < items.length; i++) {
 			var item = items[i];
 			// console.log(item)
 

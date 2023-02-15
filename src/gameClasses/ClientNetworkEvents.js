@@ -469,7 +469,7 @@ var ClientNetworkEvents = {
 
 	// when other players' update tiles, apply the change to my local
 	_onEditTile: function (data) {
-		taro.client.emit('editTile', {gid: data.gid, layer: data.layer, x: data.x, y: data.y});
+		taro.client.emit('editTile', data);
 	},
 
 	// when other players' update regions, apply the change to my local

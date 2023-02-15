@@ -18,7 +18,8 @@ var MobileControlsComponent = TaroEntity.extend({
 
 		// mouse move listener
 		taro.input.on('touchpointermove', function (point) {
-			taro.network.send('playerMouseMoved', [point.x, point.y]);
+			taro.client.myPlayer.control.newMousePosition[0] = point.x;
+			taro.client.myPlayer.control.newMousePosition[1] = point.y;
 		});
 
 		$(window).on('orientationchange load resize', function () {

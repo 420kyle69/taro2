@@ -38,24 +38,58 @@ class DeveloperMode {
 	editTile (data: TileData, clientId: string): void {
 		// only allow developers to modify the tiles
 		if (taro.server.developerClientIds.includes(clientId)) {
-			taro.game.data.map.wasEdited = true;
+			const gameMap = taro.game.data.map;
+			gameMap.wasEdited = true;
 			taro.network.send('editTile', data);
-
 			const serverData = _.clone(data);
-			const width = taro.game.data.map.width;
-			if (taro.game.data.map.layers.length > 4 && serverData.layer >= 2) serverData.layer ++;
-			//save tile change to taro.game.map.data
-			taro.game.data.map.layers[serverData.layer].data[serverData.y * width + serverData.x] = serverData.gid;
-			taro.map.data.layers[serverData.layer].data[serverData.y * width + serverData.x] = serverData.gid;
-			if (taro.game.data.map.layers[serverData.layer].name === 'walls') {
+			if (gameMap.layers.length > 4 && serverData.layer >= 2) serverData.layer ++;
+			const width = gameMap.width;
+			if (data.tool === 'flood') {
+				this.floodTiles(
+					serverData.layer, 
+					gameMap.layers[serverData.layer].data[serverData.y * width + serverData.x],
+					serverData.gid,
+					serverData.x,
+					serverData.y
+					);
+			} else {
+				//save tile change to taro.game.data.map and taro.map.data
+				gameMap.layers[serverData.layer].data[serverData.y * width + serverData.x] = serverData.gid;
+				taro.map.data.layers[serverData.layer].data[serverData.y * width + serverData.x] = serverData.gid;
+			}
+			if (gameMap.layers[serverData.layer].name === 'walls') {
 				//if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
 				taro.physics.destroyWalls();
-				let map = taro.scaleMap(_.cloneDeep(taro.game.data.map));
+				let map = taro.scaleMap(_.cloneDeep(gameMap));
 				taro.tiled.loadJson(map, function (layerArray, layersById) {
 					taro.physics.staticsFromMap(layersById.walls);
 				});
 			}
 		}
+	}
+
+	floodTiles (layer: number, oldTile: number, newTile: number, x: number, y: number): void {
+		const map = taro.game.data.map;
+		const width = map.width;
+        if (oldTile === newTile || map.layers[layer].data[y * width + x] !== oldTile) {
+            return;
+        }
+		//save tile change to taro.game.data.map and taro.map.data
+		map.layers[layer].data[y * width + x] = newTile;
+		taro.map.data.layers[layer].data[y * width + x] = newTile;
+			
+        if (x > 0) {
+            this.floodTiles(layer, oldTile, newTile, x - 1, y);
+        }
+        if (x < (map.width - 1)) {
+            this.floodTiles(layer, oldTile, newTile, x + 1, y);
+        }
+        if (y > 0) {
+            this.floodTiles(layer, oldTile, newTile, x, y - 1);
+        }
+        if (y < (map.height - 1)) {
+            this.floodTiles(layer, oldTile, newTile, x, y + 1);
+        }
 	}
 
 	editRegion (data: RegionData, clientId: string): void {
@@ -339,7 +373,8 @@ interface TileData {
 	gid: number,
 	layer: number,
 	x: number,
-	y: number
+	y: number,
+	tool?: string
 }
 
 interface RegionData {

@@ -485,8 +485,19 @@ var ActionComponent = TaroEntity.extend({
 						}
 
 						break;
+					
+					/* Coins */
+					case 'sendCoinsToPlayer':
+						var coins = self._script.variable.getValue(action.coins, vars);
+						var player = self._script.variable.getValue(action.player, vars);
+						var userId = player && player._stats && player._stats.userId;
 
-						/* UI */
+						if (player && userId && coins && parseInt(coins) > 0) {
+							taro.server.sendCoinsToPlayer(userId, coins);
+						}
+						break;
+						
+					/* UI */
 					case 'showUiTextForPlayer':
 						if (entity && entity._stats) {
 							var text = self._script.variable.getValue(action.value, vars);
@@ -658,7 +669,15 @@ var ActionComponent = TaroEntity.extend({
 						}
 
 						break;
-
+						
+					case 'addChatFilter':
+						let words = self._script.variable.getValue(action.words, vars);
+						if (words) {
+							words = words.match(/(?=\S)[^,]+?(?=\s*(,|$))/g);
+							taro.chat.filter?.addWords(...words);
+						}
+						break;
+						
 					case 'banPlayerFromChat':
 						var player = self._script.variable.getValue(action.player, vars);
 						if (player) {

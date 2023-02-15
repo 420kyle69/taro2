@@ -11,9 +11,6 @@ var TaroNetIoServer = {
 	start: function (data, callback) {
 		var self = this;
 
-		this.artificialDelay = 300; // simulated lag (ms)
-		this.lagVariance = 0;
-
 		this._socketById = {};
 		this._socketByIp = {};
 		this._socketsByRoomId = {};
@@ -60,35 +57,42 @@ var TaroNetIoServer = {
 		var upsDetector = setInterval(function() {
 			for (ip in self.uploadPerSecond) {
 				let ups = self.uploadPerSecond[ip];
-				var socket = self._socketByIp[ip]
-				
+				var socket = self._socketByIp[ip];
+
 				if (socket && ups > 75000) {
 					var player = taro.game.getPlayerByIp(ip);
-					
-					taro.server.bannedIps.push(ip);
-					socket.close();
-					
-					let playerName = 'guest user'
-					var player = taro.game.getPlayerByClientId(socket.id)
+
+					let clientSyncs = self.clientCommandCount[socket._remoteAddress]._taroNetTimeSync;
+					let kicked = false;
+					if (clientSyncs && clientSyncs <= 5) {
+						kicked = true;
+						socket.close();
+					}
+
+					let playerName = 'guest user';
+					var player = taro.game.getPlayerByClientId(socket.id);
 					if (player) {
-						playerName = player._stats.name
+						playerName = player._stats.name;
 					}
 
 					var logData = {
-						query: 'banUser',
+						query: 'kickUser',
 						masterServer: global.myIp,
 						gameTitle: taro.game.data.defaultData.title,
 						playerName: playerName,
 						ip: ip,
 						uploadPerSecond: ups,
-						clientCommandCount: self.clientCommandCount[socket._remoteAddress]						
+						clientCommandCount: self.clientCommandCount[socket._remoteAddress],
+						kicked: kicked
 					};
 
-					global.rollbar.log("user banned for sending over 75 kBps", logData);
-					
-					console.log("banning user", playerName, "(ip: ", ip,"for spamming network commands (sending ", ups, " bytes over 5 seconds)", logData)
+					let actuallyKicked = kicked ? '' : 'not ';
+
+					global.rollbar.log(`user ${actuallyKicked}kicked for sending over 75 kB/s`, logData);
+
+					console.log(actuallyKicked, 'kicking user', playerName, '(ip: ', ip,'for spamming network commands (sending ', ups, ' bytes over 5 seconds)', logData);
 				}
-				
+
 				// console.log(self.uploadPerSecond[ip]);
 				self.uploadPerSecond[ip] = 0;
 
@@ -96,7 +100,7 @@ var TaroNetIoServer = {
 					self.clientCommandCount[socket._remoteAddress] = {};
 				}
 			}
-		}, 5000)
+		}, 5000);
 
 		return this._entity;
 	},
@@ -366,21 +370,10 @@ var TaroNetIoServer = {
 			// send sendQueue
 			if (self.sendQueue) {
 				for (var clientId in self.sendQueue) {
-					// simulate lag for dev environment
-					if (global.isDev) {
-						setTimeout(function (data, id, ci) {
-							self._io.send(
-								[ci, data],
-								id === 'undefined' ? undefined : id
-							);
-						}, (Math.random() * self.lagVariance) + self.artificialDelay, self.sendQueue[clientId], clientId, ciEncoded);
-					} else {
-						// production we don't simulate lag
-						self._io.send(
-							[ciEncoded, self.sendQueue[clientId]],
-							clientId === 'undefined' ? undefined : clientId
-						);
-					}
+					self._io.send(
+						[ciEncoded, self.sendQueue[clientId]],
+						clientId === 'undefined' ? undefined : clientId
+					);
 				}
 				self.sendQueue = {};
 			}
@@ -391,6 +384,7 @@ var TaroNetIoServer = {
 			}
 
 			// append serverTime timestamp to the snapshot
+<<<<<<< HEAD:engine/components/network/net.io/TaroNetIoServer.js
 			self.snapshot.push([String.fromCharCode(this._networkCommandsLookup._taroStreamTime), timestamp]);
 			if (global.isDev) {
 				// generate artificial lag in dev environment
@@ -401,6 +395,12 @@ var TaroNetIoServer = {
 				self._io.send([ciEncoded, self.snapshot]);
 			}
 			taro.server.lastSnapshot = self.snapshot;
+=======
+			self.snapshot.push([String.fromCharCode(this._networkCommandsLookup._taroStreamTime), timestamp]);
+			self._io.send([ciEncoded, self.snapshot]);
+
+			taro.server.lastSnapshot = self.snapshot;
+>>>>>>> master:engine/components/network/net.io/IgeNetIoServer.js
 			this.snapshot = [];
 		} else {
 			this.log('_snapshot error @ flush');
@@ -498,15 +498,15 @@ var TaroNetIoServer = {
    * @param {Object} socket The client socket object.
    * @private
    */
-	 _onClientConnect: function (socket) {		
+	 _onClientConnect: function (socket) {
 		var self = this;
 
 		if (self.uploadPerSecond[socket._remoteAddress] == undefined) {
-			self.uploadPerSecond[socket._remoteAddress] = 0;			
+			self.uploadPerSecond[socket._remoteAddress] = 0;
 		}
 
 		self.uploadPerSecond[socket._remoteAddress] += 1500; // add 1500 bytes as connection cost
-		self.logCommandCount(socket._remoteAddress, "connection");
+		self.logCommandCount(socket._remoteAddress, 'connection');
 
 		var remoteAddress = socket._remoteAddress;
 		console.log('client is attempting to connect', remoteAddress);
@@ -527,16 +527,24 @@ var TaroNetIoServer = {
 			return player._stats.controlledBy == 'human';
 		}).length;
 
-		var clientRejectReason = []
-		
+		var clientRejectReason = [];
+
 		if (this._acceptConnections != true)
+<<<<<<< HEAD:engine/components/network/net.io/TaroNetIoServer.js
 			clientRejectReason.push('server not accepting connections')
 		
 		if (playerCount > taro.server.maxPlayers)
 			clientRejectReason.push('server is full')
 		
+=======
+			clientRejectReason.push('server not accepting connections');
+
+		if (playerCount > taro.server.maxPlayers)
+			clientRejectReason.push('server is full');
+
+>>>>>>> master:engine/components/network/net.io/IgeNetIoServer.js
 		if (playerIsBanned)
-			clientRejectReason.push('player ',socket._remoteAddress,' is banned')
+			clientRejectReason.push('player ',socket._remoteAddress,' is banned');
 
 		if (clientRejectReason.length == 0) {
 			// Check if any listener cancels this
@@ -552,12 +560,17 @@ var TaroNetIoServer = {
 
 				this.clientIds.push(socket.id);
 				self._socketById[socket.id].start = Date.now();
+<<<<<<< HEAD:engine/components/network/net.io/TaroNetIoServer.js
 				
 				taro.server.socketConnectionCount.connected++;
+=======
+
+				taro.server.socketConnectionCount.connected++;
+>>>>>>> master:engine/components/network/net.io/IgeNetIoServer.js
 
 				// Store a rooms array for this client
 				this._clientRooms[socket.id] = this._clientRooms[socket.id] || [];
-				
+
 				if (self._socketById[socket.id]._token && self._socketById[socket.id]._token.distinctId) {
 					// Mixpanel Event to Track user game successfully started.
 					global.mixpanel.track('User Connected to Game Server', {
@@ -569,20 +582,23 @@ var TaroNetIoServer = {
 				}
 
 				socket.on('message', function (data) {
-					
 					// track all commands being sent from client
-					var commandName = 'unknown'
-					if (typeof data[0] === 'string') {		
+					var commandName = 'unknown';
+					if (typeof data[0] === 'string') {
 						var code = data[0];
 						if (code.charCodeAt(0) != undefined) {
+<<<<<<< HEAD:engine/components/network/net.io/TaroNetIoServer.js
 							commandName = taro.network._networkCommandsIndex[code.charCodeAt(0)]
+=======
+							commandName = taro.network._networkCommandsIndex[code.charCodeAt(0)];
+>>>>>>> master:engine/components/network/net.io/IgeNetIoServer.js
 						}
 					}
 
-					self.logCommandCount(socket._remoteAddress, commandName, data)
+					self.logCommandCount(socket._remoteAddress, commandName, data);
 
 					self.uploadPerSecond[socket._remoteAddress] += JSON.stringify(data).length;
-					
+
 					if (data.type === 'ping') {
 						socket.send({
 							type: 'pong',
@@ -592,7 +608,7 @@ var TaroNetIoServer = {
 						});
 						return;
 					}
-					
+
 					self._onClientMessage.apply(self, [data, socket.id]);
 				});
 
@@ -606,7 +622,7 @@ var TaroNetIoServer = {
 						if (end - self._socketById[socket.id].start < 3000) {
 							taro.server.socketConnectionCount.immediatelyDisconnected++;
 						}
-						
+
 						if (self._socketById[socket.id]._token && self._socketById[socket.id]._token.distinctId) {
 							/** additional part to send some info for marketing purposes */
 							global.mixpanel.track('Game Session Duration', {
@@ -650,7 +666,7 @@ var TaroNetIoServer = {
 		let self = this;
 
 		if (self.clientCommandCount[ip] == undefined) {
-			self.clientCommandCount[ip] = {}
+			self.clientCommandCount[ip] = {};
 		}
 
 		if (commandName == 'playerKeyDown') {
@@ -658,24 +674,24 @@ var TaroNetIoServer = {
 				self.clientCommandCount[ip][commandName] = {};
 			}
 
-			if (self.clientCommandCount[ip][commandName][data[1].device+"-"+data[1].key] == undefined) {
-				self.clientCommandCount[ip][commandName][data[1].device+"-"+data[1].key] = 0;
+			if (self.clientCommandCount[ip][commandName][data[1].device+'-'+data[1].key] == undefined) {
+				self.clientCommandCount[ip][commandName][data[1].device+'-'+data[1].key] = 0;
 			}
 
-			self.clientCommandCount[ip][commandName][data[1].device+"-"+data[1].key]++;
-			
+			self.clientCommandCount[ip][commandName][data[1].device+'-'+data[1].key]++;
+
 		} else {
 			if (self.clientCommandCount[ip][commandName] == undefined) {
 				self.clientCommandCount[ip][commandName] = 0;
 			}
 
 			self.clientCommandCount[ip][commandName]++;
-		}		
+		}
 
 		if (self.totalCommandCount[commandName] == undefined) {
 			self.totalCommandCount[commandName] = 0;
 		}
-		
+
 		self.totalCommandCount[commandName]++;
 	},
 
@@ -696,15 +712,20 @@ var TaroNetIoServer = {
 
 			taro.clusterClient.socketMessages[clientId] += JSON.stringify(decoded);
 		}
+<<<<<<< HEAD:engine/components/network/net.io/TaroNetIoServer.js
 		
 		var socket = taro.network._socketById[clientId];
+=======
+
+		var socket = taro.network._socketById[clientId];
+>>>>>>> master:engine/components/network/net.io/IgeNetIoServer.js
 		// check if the clientId belongs to this socket connection.
 		if (!(socket?._token?.clientId && socket?._token?.clientId === clientId)) {
 			console.log('_onClientMessage: clientId validation failed', socket._token.clientId, clientId, data);
 			socket.close('Client could not be validated, please refresh the page.');
 			return;
 		}
-		
+
 		if (typeof data[0] === 'string') {
 			if (data[0].charCodeAt(0) != undefined) {
 				var ciDecoded = data[0].charCodeAt(0);
@@ -713,6 +734,7 @@ var TaroNetIoServer = {
 				if (this._networkCommands[commandName]) {
 					this._networkCommands[commandName](data[1], clientId);
 				}
+<<<<<<< HEAD:engine/components/network/net.io/TaroNetIoServer.js
 				if (taro.game.data.defaultData._id === '5a7fd59b1014dc000eeec3dd' && commandName === 'joinGame') {
 					// console.log(commandName, data, clientId);
 					let clients = this.clients();
@@ -735,6 +757,8 @@ var TaroNetIoServer = {
 						console.log('joinGame log error', err)
 					}
 				}
+=======
+>>>>>>> master:engine/components/network/net.io/IgeNetIoServer.js
 
 				this.emit(commandName, [data[1], clientId]);
 			}

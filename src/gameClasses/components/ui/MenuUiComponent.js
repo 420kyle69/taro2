@@ -444,6 +444,11 @@ var MenuUiComponent = TaroEntity.extend({
 				$('#friends-panel').removeClass('d-none');
 			}
 
+			// var inGameEditor = $('#game-editor');
+			// if (inGameEditor) {
+			// 	inGameEditor.hide();
+			// }
+
 			this.changesForMobile(true);
 			this.toggleScoreBoard(false);
 			this.toggleLeaderBoard(false);
@@ -673,6 +678,11 @@ var MenuUiComponent = TaroEntity.extend({
 		if (!taro.isMobile) {
 			$('#friends-panel').addClass('d-none');
 		}
+
+		// var inGameEditor = $('#game-editor');
+		// if (inGameEditor) {
+		// 	inGameEditor.show();
+		// }
 
 		this.changesForMobile(false);
 		this.toggleScoreBoard(true);

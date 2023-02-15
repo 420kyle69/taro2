@@ -96,24 +96,35 @@ var TileEditor = /** @class */ (function () {
         this.paletteMarker.graphics.setVisible(value);
     };
     TileEditor.prototype.edit = function (data) {
-        var map = this.gameScene.tilemap;
-        map.putTileAt(data.gid, data.x, data.y, false, data.layer);
-        /* TODO: SAVE MAP DATA FROM SERVER SIDE */
-        var width = taro.game.data.map.width;
-        //save tile change to taro.game.map.data
-        if (taro.game.data.map.layers.length > 4 && data.layer >= 2)
-            data.layer++;
-        taro.game.data.map.layers[data.layer].data[data.y * width + data.x] = data.gid;
-        if (taro.physics && taro.game.data.map.layers[data.layer].name === 'walls') {
+        var map = taro.game.data.map;
+        var width = map.width;
+        var tileMap = this.gameScene.tilemap;
+        if (data.tool === 'flood') {
+            var tempLayer = data.layer;
+            if (map.layers.length > 4 && data.layer >= 2) {
+                tempLayer++;
+            }
+            var oldTile = map.layers[tempLayer].data[data.y * width + data.x];
+            this.floodFill(data.layer, oldTile, data.gid, data.x, data.y, true);
+        }
+        else {
+            tileMap.putTileAt(data.gid, data.x, data.y, false, data.layer);
+            /* TODO: SAVE MAP DATA FROM SERVER SIDE */
+            //save tile change to taro.game.map.data
+            if (map.layers.length > 4 && data.layer >= 2)
+                data.layer++;
+            map.layers[data.layer].data[data.y * width + data.x] = data.gid;
+        }
+        if (taro.physics && map.layers[data.layer].name === 'walls') {
             //if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
             taro.physics.destroyWalls();
-            var map_1 = taro.scaleMap(_.cloneDeep(taro.game.data.map));
-            taro.tiled.loadJson(map_1, function (layerArray, TaroLayersById) {
-                taro.physics.staticsFromMap(TaroLayersById.walls);
+            var mapCopy = taro.scaleMap(_.cloneDeep(map));
+            taro.tiled.loadJson(mapCopy, function (layerArray, IgeLayersById) {
+                taro.physics.staticsFromMap(IgeLayersById.walls);
             });
         }
     };
-    TileEditor.prototype.putTile = function (tileX, tileY, selectedTile) {
+    TileEditor.prototype.putTile = function (tileX, tileY, selectedTile, local) {
         var map = this.gameScene.tilemap;
         if (this.gameScene.tilemapLayers[map.currentLayerIndex].visible && selectedTile && this.devModeTools.scene.pointerInsideMap(tileX, tileY, map)) {
             var index = selectedTile.index;
@@ -123,7 +134,9 @@ var TileEditor = /** @class */ (function () {
                 !(index === 0 && map.getTileAt(tileX, tileY, true).index === -1)) {
                 map.putTileAt(index, tileX, tileY);
                 map.getTileAt(tileX, tileY, true).tint = 0xffffff;
-                taro.network.send('editTile', { gid: index, layer: map.currentLayerIndex, x: tileX, y: tileY });
+                if (!local) {
+                    taro.network.send('editTile', { gid: index, layer: map.currentLayerIndex, x: tileX, y: tileY });
+                }
             }
         }
     };
@@ -139,23 +152,56 @@ var TileEditor = /** @class */ (function () {
             return selectedTile;
         }
     };
-    TileEditor.prototype.floodFill = function (oldTile, newTile, x, y) {
-        var map = this.gameScene.tilemap;
-        if (oldTile === newTile || this.getTile(x, y, this.selectedTile, map).index !== oldTile) {
-            return;
+    TileEditor.prototype.floodFill = function (layer, oldTile, newTile, x, y, fromServer) {
+        if (fromServer) {
+            var map = taro.game.data.map;
+            var tileMap = this.gameScene.tilemap;
+            var width = map.width;
+            //fix for debris layer
+            var tempLayer = layer;
+            if (map.layers.length > 4 && layer >= 2) {
+                tempLayer++;
+            }
+            if (oldTile === newTile || map.layers[tempLayer].data[y * width + x] !== oldTile) {
+                return;
+            }
+            tileMap.putTileAt(newTile, x, y, false, layer);
+            //save tile change to taro.game.map.data
+            map.layers[tempLayer].data[y * width + x] = newTile;
+            if (x > 0) {
+                this.floodFill(layer, oldTile, newTile, x - 1, y, fromServer);
+            }
+            if (x < (map.width - 1)) {
+                this.floodFill(layer, oldTile, newTile, x + 1, y, fromServer);
+            }
+            if (y > 0) {
+                this.floodFill(layer, oldTile, newTile, x, y - 1, fromServer);
+            }
+            if (y < (map.height - 1)) {
+                this.floodFill(layer, oldTile, newTile, x, y + 1, fromServer);
+            }
         }
-        this.putTile(x, y, this.selectedTile);
-        if (x > 0) {
-            this.floodFill(oldTile, newTile, x - 1, y);
-        }
-        if (x < (map.width - 1)) {
-            this.floodFill(oldTile, newTile, x + 1, y);
-        }
-        if (y > 0) {
-            this.floodFill(oldTile, newTile, x, y - 1);
-        }
-        if (y < (map.height - 1)) {
-            this.floodFill(oldTile, newTile, x, y + 1);
+        else {
+            var tileMap = this.gameScene.tilemap;
+            if (oldTile === newTile ||
+                tileMap.getTileAt(x, y, true, layer).index !== oldTile ||
+                tileMap.getTileAt(x, y, true, layer).index === 0 ||
+                tileMap.getTileAt(x, y, true, layer).index === -1) {
+                return;
+            }
+            tileMap.putTileAt(newTile, x, y, false, layer);
+            if (x > 0) {
+                this.floodFill(layer, oldTile, newTile, x - 1, y, fromServer);
+            }
+            if (x < (tileMap.width - 1)) {
+                this.floodFill(layer, oldTile, newTile, x + 1, y, fromServer);
+            }
+            if (y > 0) {
+                this.floodFill(layer, oldTile, newTile, x, y - 1, fromServer);
+            }
+            if (y < (tileMap.height - 1)) {
+                this.floodFill(layer, oldTile, newTile, x, y + 1, fromServer);
+            }
         }
     };
     TileEditor.prototype.update = function () {
@@ -211,7 +257,8 @@ var TileEditor = /** @class */ (function () {
                     else if (this.devModeTools.modeButtons[4].active) {
                         var targetTile = this.getTile(pointerTileX, pointerTileY, this.selectedTile, map);
                         if (targetTile && this.selectedTile && targetTile.index !== this.selectedTile.index) {
-                            this.floodFill(targetTile.index, this.selectedTile.index, pointerTileX, pointerTileY);
+                            this.floodFill(map.currentLayerIndex, targetTile.index, this.selectedTile.index, pointerTileX, pointerTileY, false);
+                            taro.network.send('editTile', { gid: this.selectedTile.index, layer: map.currentLayerIndex, x: pointerTileX, y: pointerTileY, tool: 'flood' });
                         }
                     }
                 }

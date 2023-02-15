@@ -344,9 +344,9 @@ var ControlComponent = TaroEntity.extend({
 							taro.client.myPlayer.control.input.mouse.x = self.newMousePosition[0];
 							taro.client.myPlayer.control.input.mouse.y = self.newMousePosition[1];
 						}
-						if (self.sendPlayerInput) {
-							taro.network.send('playerMouseMoved', self.newMousePosition);
-						}
+					}
+					if (self.sendPlayerInput) {
+						taro.network.send('playerMouseMoved', self.newMousePosition);
 					}
 					self.lastMousePosition = self.newMousePosition;
 				}
