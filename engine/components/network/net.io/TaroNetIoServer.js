@@ -384,23 +384,10 @@ var TaroNetIoServer = {
 			}
 
 			// append serverTime timestamp to the snapshot
-<<<<<<< HEAD:engine/components/network/net.io/TaroNetIoServer.js
-			self.snapshot.push([String.fromCharCode(this._networkCommandsLookup._taroStreamTime), timestamp]);
-			if (global.isDev) {
-				// generate artificial lag in dev environment
-				setTimeout(function (data, ci) {
-					self._io.send([ci, data]);
-				}, (Math.random() * self.lagVariance) + self.artificialDelay, self.snapshot, ciEncoded);
-			} else {
-				self._io.send([ciEncoded, self.snapshot]);
-			}
-			taro.server.lastSnapshot = self.snapshot;
-=======
 			self.snapshot.push([String.fromCharCode(this._networkCommandsLookup._taroStreamTime), timestamp]);
 			self._io.send([ciEncoded, self.snapshot]);
 
 			taro.server.lastSnapshot = self.snapshot;
->>>>>>> master:engine/components/network/net.io/TaroNetIoServer.js
 			this.snapshot = [];
 		} else {
 			this.log('_snapshot error @ flush');
@@ -530,19 +517,11 @@ var TaroNetIoServer = {
 		var clientRejectReason = [];
 
 		if (this._acceptConnections != true)
-<<<<<<< HEAD:engine/components/network/net.io/TaroNetIoServer.js
-			clientRejectReason.push('server not accepting connections')
-		
-		if (playerCount > taro.server.maxPlayers)
-			clientRejectReason.push('server is full')
-		
-=======
 			clientRejectReason.push('server not accepting connections');
 
 		if (playerCount > taro.server.maxPlayers)
 			clientRejectReason.push('server is full');
 
->>>>>>> master:engine/components/network/net.io/TaroNetIoServer.js
 		if (playerIsBanned)
 			clientRejectReason.push('player ',socket._remoteAddress,' is banned');
 
@@ -560,13 +539,8 @@ var TaroNetIoServer = {
 
 				this.clientIds.push(socket.id);
 				self._socketById[socket.id].start = Date.now();
-<<<<<<< HEAD:engine/components/network/net.io/TaroNetIoServer.js
-				
-				taro.server.socketConnectionCount.connected++;
-=======
 
 				taro.server.socketConnectionCount.connected++;
->>>>>>> master:engine/components/network/net.io/TaroNetIoServer.js
 
 				// Store a rooms array for this client
 				this._clientRooms[socket.id] = this._clientRooms[socket.id] || [];
@@ -587,11 +561,7 @@ var TaroNetIoServer = {
 					if (typeof data[0] === 'string') {
 						var code = data[0];
 						if (code.charCodeAt(0) != undefined) {
-<<<<<<< HEAD:engine/components/network/net.io/TaroNetIoServer.js
-							commandName = taro.network._networkCommandsIndex[code.charCodeAt(0)]
-=======
 							commandName = taro.network._networkCommandsIndex[code.charCodeAt(0)];
->>>>>>> master:engine/components/network/net.io/TaroNetIoServer.js
 						}
 					}
 
@@ -712,13 +682,8 @@ var TaroNetIoServer = {
 
 			taro.clusterClient.socketMessages[clientId] += JSON.stringify(decoded);
 		}
-<<<<<<< HEAD:engine/components/network/net.io/TaroNetIoServer.js
-		
-		var socket = taro.network._socketById[clientId];
-=======
 
 		var socket = taro.network._socketById[clientId];
->>>>>>> master:engine/components/network/net.io/TaroNetIoServer.js
 		// check if the clientId belongs to this socket connection.
 		if (!(socket?._token?.clientId && socket?._token?.clientId === clientId)) {
 			console.log('_onClientMessage: clientId validation failed', socket._token.clientId, clientId, data);
@@ -734,31 +699,6 @@ var TaroNetIoServer = {
 				if (this._networkCommands[commandName]) {
 					this._networkCommands[commandName](data[1], clientId);
 				}
-<<<<<<< HEAD:engine/components/network/net.io/TaroNetIoServer.js
-				if (taro.game.data.defaultData._id === '5a7fd59b1014dc000eeec3dd' && commandName === 'joinGame') {
-					// console.log(commandName, data, clientId);
-					let clients = this.clients();
-					let client = clients[clientId];
-
-					try {
-						let user = {
-							ip: client?._remoteAddress,
-							userId: client?._token?.userId,
-							distinctId: client?._token?.distinctId,
-							token: client?._token?.token,
-							clientId: clientId,
-							name: taro.game.getPlayerByClientId(clientId)?._stats?.name
-						}
-						
-						let userLog = `\tip: ${user.ip}\n\tuserId: ${user.userId||''}\n\tdistinctId: ${user.distinctId||''}\n\ttoken: ${user.token||''}\n\tclientId: ${user.clientId}\n\tusername: ${user.name}`
-
-						console.log(userLog);
-					} catch (err) {
-						console.log('joinGame log error', err)
-					}
-				}
-=======
->>>>>>> master:engine/components/network/net.io/TaroNetIoServer.js
 
 				this.emit(commandName, [data[1], clientId]);
 			}
