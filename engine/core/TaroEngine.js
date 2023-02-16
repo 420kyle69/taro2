@@ -61,9 +61,6 @@ var TaroEngine = TaroEntity.extend({
 			this.addComponent(TaroCocoonJsComponent);
 		}
 
-		// Create storage
-		this._textureStore = [];
-
 		// Set the initial id as the current time in milliseconds. This ensures that under successive
 		// restarts of the engine, new ids will still always be created compared to earlier runs -
 		// which is important when storing persistent data with ids etc
@@ -79,7 +76,6 @@ var TaroEngine = TaroEntity.extend({
 
 		// Setup components
 		this.addComponent(TaroInputComponent);
-		this.addComponent(TaroTweenComponent);
 		this.addComponent(TaroTimeComponent);
 
 		if (this.isClient) {
@@ -96,7 +92,6 @@ var TaroEngine = TaroEntity.extend({
 
 		this._requireScriptTotal = 0;
 		this._requireScriptLoading = 0;
-		this._loadingPreText = undefined; // The text to put in front of the loading percent on the loading progress screen
 		this._enableUpdates = true;
 		this._enableRenders = true;
 		this._debugEvents = {}; // Holds debug event booleans for named events
@@ -118,9 +113,6 @@ var TaroEngine = TaroEntity.extend({
 		this._aSecondAgo = 0;
 
 		this._state = 0; // Currently stopped
-		this._textureImageStore = {};
-		this._texturesLoading = 0; // Holds a count of currently loading textures
-		this._texturesTotal = 0; // Holds total number of textures loading / loaded
 		this._dependencyQueue = []; // Holds an array of functions that must all return true for the engine to start
 		this._drawCount = 0; // Holds the number of draws since the last frame (calls to drawImage)
 		this._dps = 0; // Number of draws that occurred last tick
@@ -681,9 +673,7 @@ var TaroEngine = TaroEntity.extend({
 			} else {
 				// Client-side implementation
 				window.requestAnimFrame = function (callback, element) {
-					if (typeof mode === 'string' && mode === 'sandbox') {
-						fpsRate = 20;
-					}
+
 					setTimeout(function () {
 						callback(new Date().getTime());
 					}, 1000 / fpsRate); // client will always run at 60 fps.
@@ -777,117 +767,6 @@ var TaroEngine = TaroEntity.extend({
 	 */
 	dependencyTimeout: function (val) {
 		this._dependencyCheckTimeout = val;
-	},
-
-	/**
-	 * Updates the loading screen DOM elements to show the update progress.
-	 */
-	updateProgress: function () {
-		// Check for a loading progress bar DOM element
-		if (typeof (document) !== 'undefined' && document.getElementById) {
-			var elem = document.getElementById('loadingProgressBar');
-			var textElem = document.getElementById('loadingText');
-
-			if (elem) {
-				// Calculate the width from progress
-				var totalWidth = parseInt(elem.parentNode.offsetWidth);
-				var currentWidth = Math.floor((totalWidth / this._texturesTotal) * (this._texturesTotal - this._texturesLoading));
-
-				// Set the current bar width
-				elem.style.width = `${currentWidth}px`;
-
-				if (textElem) {
-					if (this._loadingPreText === undefined) {
-						// Fill the text to use
-						this._loadingPreText = textElem.innerHTML;
-					}
-					textElem.innerHTML = `${this._loadingPreText} ${Math.floor((100 / this._texturesTotal) * (this._texturesTotal - this._texturesLoading))}%`;
-				}
-			}
-		}
-	},
-
-	/**
-	 * Adds one to the number of textures currently loading.
-	 */
-	textureLoadStart: function (url, textureObj) {
-		this._texturesLoading++;
-		this._texturesTotal++;
-
-		this.updateProgress();
-
-		this.emit('textureLoadStart', textureObj);
-	},
-
-	/**
-	 * Subtracts one from the number of textures currently loading and if no more need
-	 * to load, it will also call the _allTexturesLoaded() method.
-	 */
-	textureLoadEnd: function (url, textureObj) {
-		var self = this;
-
-		if (!textureObj._destroyed) {
-			// Add the texture to the _textureStore array
-			this._textureStore.push(textureObj);
-		}
-
-		// Decrement the overall loading number
-		this._texturesLoading--;
-		console.log('texture load remaining', this._texturesLoading);
-		this.updateProgress();
-
-		this.emit('textureLoadEnd', textureObj);
-
-		// If we've finished...
-		if (this._texturesLoading === 0) {
-			// All textures have finished loading
-			this.updateProgress();
-
-			setTimeout(function () {
-				console.log('all textures loaded (why is this being called twice?)');
-				self._allTexturesLoaded();
-			}, 100);
-		}
-	},
-
-	/**
-	 * Returns a texture from the texture store by it's url.
-	 * @param {String} url
-	 * @return {TaroTexture}
-	 */
-	textureFromUrl: function (url) {
-		var arr = this._textureStore;
-		var arrCount = arr.length;
-		var item;
-
-		while (arrCount--) {
-			item = arr[arrCount];
-			if (item._url === url) {
-				return item;
-			}
-		}
-	},
-
-	/**
-	 * Checks if all textures have finished loading and returns true if so.
-	 * @return {Boolean}
-	 */
-	texturesLoaded: function () {
-		return taro._texturesLoading === 0;
-	},
-
-	/**
-	 * Emits the "texturesLoaded" event.
-	 * @private
-	 */
-	_allTexturesLoaded: function () {
-		if (!this._loggedATL) {
-			this._loggedATL = true;
-			TaroEngine.prototype.log('All textures have loaded');
-		}
-
-		// Fire off an event about this
-		this.emit('texturesLoaded');
 	},
 
 	/**
@@ -1047,15 +926,6 @@ var TaroEngine = TaroEntity.extend({
 		}
 
 		return this._autoSize;
-	},
-
-	pixelRatioScaling: function (val) {
-		if (val !== undefined) {
-			this._pixelRatioScaling = val;
-			return this;
-		}
-
-		return this._pixelRatioScaling;
 	},
 
 	/**

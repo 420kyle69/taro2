@@ -572,7 +572,7 @@ var ClientNetworkEvents = {
 					};
 				}
 
-				new TaroParticleEmitter() // Set the particle entity to generate for each particle
+				/*new TaroParticleEmitter() // Set the particle entity to generate for each particle
 					.layer(particle['z-index'].layer)
 					.depth(particle['z-index'].depth)
 					.color(particle.color)
@@ -586,7 +586,7 @@ var ClientNetworkEvents = {
 					.particleMountTarget(taro.client.mainScene) // Mount new particles to the object scene
 					.translateTo(parseFloat(data.position.x), parseFloat(data.position.y), 0) // Move the particle emitter to the bottom of the ship
 					.mount(taro.client.mainScene)
-					.emitOnce();
+					.emitOnce();*/
 			}
 		}
 	},

@@ -2072,7 +2072,6 @@ var ActionComponent = TaroEntity.extend({
 					case 'createEntityForPlayerAtPositionWithDimensions':
 					case 'createEntityAtPositionWithDimensions':
 
-						let isSandbox = typeof mode === 'string' && mode === 'sandbox';
 						let entityType = self._script.variable.getValue(action.entityType, vars);
 						let entityToCreate = self._script.variable.getValue(action.entity, vars);
 						var position = self._script.variable.getValue(action.position, vars);
@@ -2138,14 +2137,12 @@ var ActionComponent = TaroEntity.extend({
 									scaleDimensions: true
 								});
 
-								if (isSandbox) {
-									createdEntity = new Unit(data);
-								} else {
-									var player = self._script.variable.getValue(action.player, vars);
-									if (player) {
-										createdEntity = player.createUnit(_.cloneDeep(data));
-									}
+								var player = self._script.variable.getValue(action.player, vars);
+
+								if (player) {
+									createdEntity = player.createUnit(_.cloneDeep(data));
 								}
+
 								taro.game.lastCreatedUnitId = createdEntity._id;
 							}
 							createdEntity.scriptValues = {
@@ -2162,10 +2159,6 @@ var ActionComponent = TaroEntity.extend({
 
 							createdEntity.script.trigger("entityCreated", {thisEntityId: createdEntity.id()});
 
-							if (isSandbox) {
-								if (!taro.game.createdEntities) taro.game.createdEntities = [];
-								taro.game.createdEntities.push(createdEntity);
-							}
 						}
 						break;
 					case 'setEntityDepth':

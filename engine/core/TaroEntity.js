@@ -4018,43 +4018,7 @@ var TaroEntity = TaroObject.extend({
 			}
 		}
 	},
-	//mouseEvents for sandbox mode only
-	mouseEvents: function (defaultData) {
-		var self = this;
-		if (typeof mode === 'string' && mode === 'sandbox') {
-			TaroObject.prototype.mount.call(this, taro.client.rootScene);
-			self.mount(taro.client.rootScene);
-			self.drawMouse(true)
-				.drawBoundsData(false)
-				.mouseMove(function (event) {
-					if (this.onMouseDown && taro.mapEditor.selectEntities) {
-						this.onMouseMove = true;
-						this.translateTo(taro.mapEditor.mouseCoordinatesWRTVp.x, taro.mapEditor.mouseCoordinatesWRTVp.y, 0);
-					}
-				})
-				.mouseDown(function (event, evc) {
-					if (event.which === 1 && taro.mapEditor.selectEntities) {
-						this.onMouseDown = true;
-						this.onMouseMove = false;
-					}
-				})
-				.mouseUp(function (event) {
-					if (this.onMouseDown === true) {
-						if (this.onMouseMove === true) {
-							self.scriptValues.x = taro.mapEditor.mouseCoordinatesWRTVp.x;
-							self.scriptValues.y = taro.mapEditor.mouseCoordinatesWRTVp.y;
-							taro.mapEditor.upsertMapEntities(self.scriptValues, parseInt(self.scriptValues.index));
-						} else if (this.onMouseMove === false && taro.mapEditor.selectEntities && event.which === 1) {
-							taro.mapEditor.openEntitiesModal(self.scriptValues, true);
-							this.selectedEntityForMovement = true;
-						}
-					}
 
-					this.onMouseDown = false;
-					this.onMouseMove = false;
-				});
-		}
-	},
 	// use to apply max,min value before attributes value
 	// orderData: function (data) {
 	// 	var attributes = data.attributes && _.cloneDeep(data.attributes);

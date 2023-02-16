@@ -15,11 +15,6 @@ var TaroTileMap2d = TaroEntity.extend({
 
 		var self = this;
 
-		if (!taro.isServer) {
-			var tex = new TaroTexture(TaroTileMap2dSmartTexture);
-			self.texture(tex);
-		}
-
 		self.map = new TaroMap2d();
 		self._adjustmentMatrix = new TaroMatrix2d();
 
@@ -27,32 +22,6 @@ var TaroTileMap2d = TaroEntity.extend({
 		self.tileHeight(tileHeight);
 		self.gridSize(3, 3);
 
-		self._drawGrid = 0;
-		self._gridColor = '#ffffff';
-	},
-
-	/**
-	 * Gets / sets the flag that determines if the tile map will paint the
-	 * occupied tiles with an overlay colour so that it is easy to spot them.
-	 * @param val
-	 * @return {*}
-	 */
-	highlightOccupied: function (val) {
-		if (val !== undefined) {
-			this._highlightOccupied = val;
-			return this;
-		}
-
-		return this._highlightOccupied;
-	},
-
-	highlightTileRect: function (val) {
-		if (val !== undefined) {
-			this._highlightTileRect = val;
-			return this;
-		}
-
-		return this._highlightTileRect;
 	},
 
 	/**
@@ -121,37 +90,6 @@ var TaroTileMap2d = TaroEntity.extend({
 		}
 
 		return this._gridSize;
-	},
-
-	/**
-	 * Gets / sets if the tile map should paint a grid to the context during
-	 * the tick method.
-	 * @param {Boolean=} val If true, will paint the grid on tick.
-	 * @return {*}
-	 */
-	drawGrid: function (val) {
-		if (val !== undefined) {
-			this._drawGrid = val;
-			return this;
-		}
-
-		return this._drawGrid;
-	},
-
-	/**
-	 * Gets / sets the color of the grid overlay. It accepts a string color
-	 * definition with the same specifications as the canvas context strokeStyle
-	 * property.
-	 * @param {String=} val The color of the grid.
-	 * @return {*}
-	 */
-	gridColor: function (val) {
-		if (val !== undefined) {
-			this._gridColor = val;
-			return this;
-		}
-
-		return this._gridColor;
 	},
 
 	/**
@@ -427,21 +365,6 @@ var TaroTileMap2d = TaroEntity.extend({
 
 		// Checks if the passed area is inside the tile map grid as defined by gridSize
 		return x >= 0 && y >= 0 && x + width <= this._gridSize.x && y + height <= this._gridSize.y;
-	},
-
-	/**
-	 * Gets / sets the mouse tile hover color used in conjunction with the
-	 * drawMouse() method.
-	 * @param {String=} val The hex or rbg string color definition e.g. #ff0099.
-	 * @returns {*}
-	 */
-	hoverColor: function (val) {
-		if (val !== undefined) {
-			this._hoverColor = val;
-			return this;
-		}
-
-		return this._hoverColor;
 	},
 
 	/**
