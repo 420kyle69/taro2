@@ -610,7 +610,7 @@ var ServerNetworkEvents = {
 			modPlayer._stats.isUserMod;
 			
 		if (isUserDeveloper && kickedPlayer) {
-			taro.game.kickPlayer(kickedPlayer.id());
+			taro.game.kickPlayer(kickedPlayer.id(), modPlayer.id());
 		}
 	},
 	
