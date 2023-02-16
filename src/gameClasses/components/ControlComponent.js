@@ -238,17 +238,9 @@ var ControlComponent = TaroEntity.extend({
 					break;
 			}
 
-			if(taro.developerMode.shouldPreventKeybindings()) {
-				return;
-			}
-
 			// traverse through abilities, and see if any of them is being casted by the owner
-			if (taro.isServer || taro.isClient) {
+			if ((taro.isServer || taro.isClient) && !taro.developerMode.shouldPreventKeybindings()) {
 				var unitAbility = null;
-
-				// if (unit._stats.abilities) {
-				// 	unitAbility = unit._stats.abilities[key]
-				// }
 
 				if (!unitAbility && unit._stats.controls && unit._stats.controls.abilities) {
 					unitAbility = unit._stats.controls.abilities[key];
