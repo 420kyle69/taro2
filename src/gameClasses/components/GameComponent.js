@@ -169,7 +169,7 @@ var GameComponent = TaroEntity.extend({
 					var modPlayerName = 'a moderator';
 
 					if (modPlayerId) {
-						var modPlayer = ige.$(modPlayerId);
+						var modPlayer = taro.$(modPlayerId);
 						modPlayerName = modPlayer && modPlayer._stats && modPlayer._stats.name;
 					}
 
