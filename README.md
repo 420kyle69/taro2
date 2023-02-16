@@ -45,7 +45,7 @@ npm run server
 ```
 *The engine will use game.json stored in `/src` directory.
 
-You can download Game JSON from your modd.io's game's sandbox ([example](https://beta.modd.io/sandbox/game/two-houses/scripts)). Go to menu -> Export JSON.
+You can download Game JSON from your modd.io's game's sandbox ([example](https://modd.io/edit/two-houses)). Go to menu -> Export JSON.
 
 <img src="./assets/images/gamejson.png" width="600" alt="How to get game json">
 
@@ -54,7 +54,7 @@ You can download Game JSON from your modd.io's game's sandbox ([example](https:/
 Install [Node 14](https://nodejs.org) or later and then...
 
 ```
-git clone https://github.com/moddio/taro.git
+git clone https://github.com/moddio/taro2.git
 cd taro
 npm install
 npm run server
@@ -78,7 +78,7 @@ and uncomment
 ```
 
 ## How to customize game client UI
-Game client's user interface is rendered by [/src/index.ejs](https://github.com/moddio/taro/blob/master/src/index.ejs) file and the theme files in [/src/templates/](https://github.com/moddio/taro/tree/master/src/templates)
+Game client's user interface is rendered by [/src/index.ejs](https://github.com/moddio/taro2/blob/master/src/index.ejs) file and the theme files in [/src/templates/](https://github.com/moddio/taro2/tree/master/src/templates)
 
 ## How to make games on modd.io
 Please visit https://www.modd.io/tutorials for more information.
