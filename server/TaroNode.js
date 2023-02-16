@@ -18,9 +18,9 @@ var TaroNode = TaroClass.extend({
 			if (args['-g']) {
 				// Output our header
 				console.log('------------------------------------------------------------------------------');
-				console.log(`* Isogenic Game Engine Server ${taroVersion}                                  *`);
-				console.log('* (C)opyright 2012 Irrelon Software Limited                                  *');
-				console.log('* http://www.isogenicengine.com                                              *');
+				console.log(`* Taro Game Engine Server ${taroVersion}                                     *`);
+				console.log('*                                                                            *');
+				console.log('* http://modd.io                                                             *');
 				console.log('------------------------------------------------------------------------------');
 				this.log('Starting pre-init process. taro Game Server loading...');
 				this.log(`Current working directory is: ${process.cwd()}`);
@@ -51,9 +51,9 @@ var TaroNode = TaroClass.extend({
 
 	printHelp: function () {
 		console.log('------------------------------------------------------------------------------');
-		console.log(`* Isogenic Game Engine Server ${taroVersion}                                  *`);
-		console.log('* (C)opyright 2012 Irrelon Software Limited                                  *');
-		console.log('* http://www.isogenicengine.com                                              *');
+		console.log(`* Taro Game Engine Server ${taroVersion}                                     *`);
+		console.log('*                                                                            *');
+		console.log('* http://modd.io                                                             *');
 		console.log('------------------------------------------------------------------------------');
 
 		console.log('Usage:');
