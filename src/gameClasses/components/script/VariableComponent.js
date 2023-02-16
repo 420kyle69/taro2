@@ -1144,17 +1144,11 @@ var VariableComponent = TaroEntity.extend({
 					break;
 
 				case 'getEntireMapRegion':
-					// var region = {
-					// 	x: taro.map.data.tilewidth * 2,
-					// 	y: taro.map.data.tileheight * 2,
-					// 	width: (taro.map.data.width * taro.map.data.tilewidth) - (taro.map.data.tilewidth * 2),
-					// 	height: (taro.map.data.height * taro.map.data.tileheight) - (taro.map.data.tileheight * 2)
-					// };
 					var region = {
 						x: 0,
 						y: 0,
-						width: taro.map.data.width * taro.map.data.tilewidth,
-						height: taro.map.data.height * taro.map.data.tileheight
+						width: taro.map.data.width * taro.scaleMapDetails.tileWidth,
+						height: taro.map.data.height * taro.scaleMapDetails.tileHeight
 					};
 
 					returnValue = { _stats: { default: region } };
