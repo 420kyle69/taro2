@@ -137,7 +137,7 @@ var ShopComponent = TaroEntity.extend({
 
 				if (isUnauthenticated === 'true' && !(price === 'facebook' || price === 'twitter')) {
 					// alert('You should be logged in to purchase the item.');
-					$('#login-modal').modal('show');
+					window.openLoginOptionFrameModal();
 					return;
 				}
 				var hasSharedDefer = $.Deferred();
