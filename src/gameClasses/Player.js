@@ -703,7 +703,11 @@ var Player = TaroEntity.extend({
 				$('.open-menu-button').show();
 			}
 
+			window.reactApp && window.reactApp.playerJoinedGame && window.reactApp.playerJoinedGame();
+			window.playerJoinedTheGame = true;
+				
 			if ((typeof (userId) !== 'undefined' && typeof (sessionId) !== 'undefined') || window.isStandalone) {
+				
 				if ((taro.game.data.isGameDeveloper && ['1', '4', '5'].includes(taro.game.data.defaultData.tier)) || window.isStandalone) {
 					// dont show dev menu by default
 					// if (!taro.isMobile) {
@@ -712,9 +716,7 @@ var Player = TaroEntity.extend({
 					// $('#game-suggestions-card').removeClass('d-xl-block');
 					// $("#invite-players-card").show();
 					// $('#toggle-dev-panels').show();
-					window.inGameEditor && window.inGameEditor.playerJoinedGame && window.inGameEditor.playerJoinedGame();
 					// for edge case handling
-					window.playerJoinedTheGame = true;
 					if(window.isStandalone) {
 						$('#toggle-dev-panels').click();
 					}
