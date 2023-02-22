@@ -492,7 +492,7 @@ var ActionComponent = TaroEntity.extend({
 						var player = self._script.variable.getValue(action.player, vars);
 						var userId = player && player._stats && player._stats.userId;
 
-						if (player && userId && coins && parseInt(coins) > 0) {
+						if (player && userId && coins && parseFloat(coins) > 0) {
 							taro.server.sendCoinsToPlayer(userId, coins);
 						}
 						break;

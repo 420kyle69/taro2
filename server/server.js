@@ -9,6 +9,7 @@ const fs = require('fs');
 const cluster = require('cluster');
 const { RateLimiterMemory } = require('rate-limiter-flexible');
 _ = require('lodash');
+const currency = require("currency.js");
 
 const config = require('../config');
 const Console = console.constructor;
@@ -40,6 +41,14 @@ global.rollbar = {
 	lastError: function () {
 		// do nothing in non prod env
 	},
+};
+
+global.coinHelper = {
+	value: (x) => currency(x).value,
+	add: (x, y) => currency(x).add(y).value,
+	subtract: (x, y) => currency(x).subtract(y).value,
+	multiply: (x, y) => currency(x).multiply(y).value,
+	divide: (x, y) => currency(x).divide(y).value,
 };
 
 global.lastRollbarUuid = null;
@@ -790,7 +799,7 @@ var Server = TaroClass.extend({
 						boughtItems: []
 					};
 				} else {
-					self.coinUpdate[player._stats.clientId].coins += coins;
+					self.coinUpdate[player._stats.clientId].coins = global.coinHelper.add(self.coinUpdate[player._stats.clientId].coins, coins);
 				}
 				if (self.coinUpdate[player._stats.clientId].boughtItems) {
 					self.coinUpdate[player._stats.clientId].boughtItems.push({
