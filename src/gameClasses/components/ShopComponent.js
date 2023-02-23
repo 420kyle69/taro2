@@ -394,10 +394,10 @@ var ShopComponent = TaroEntity.extend({
 				var response = JSON.parse(data);
 
 				if (response.status == 'success') {
-					$('.player-coins').html(parseInt(response.remaining_coins));
+					$('.player-coins').html(parseFloat(response.remaining_coins));
 
 					if (taro.client.myPlayer) {
-						taro.client.myPlayer._stats.coins = parseInt(response.remaining_coins);
+						taro.client.myPlayer._stats.coins = parseFloat(response.remaining_coins);
 					}
 
 					$('#purchasable-purchase-modal').modal('hide');
