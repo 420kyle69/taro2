@@ -552,6 +552,9 @@ var TaroNetIoServer = {
 						'$ip': socket._remoteAddress,
 						'gameSlug': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.gameSlug,
 						'gameId': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData._id,
+						'tier': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.tier,
+						'playCount': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.playCount,
+						'totalPlayCount': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.totalPlayCount,
 					});
 				}
 
