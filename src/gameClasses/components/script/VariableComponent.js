@@ -610,6 +610,10 @@ var VariableComponent = TaroEntity.extend({
 					}
 
 					break;
+				case 'numberToString':
+					var value = self.getValue(text.value, vars);
+					returnValue = String(value);
+					break;
 				case 'getEntityVelocityX':
 					if (entity && entity.body) {
 						var velocity = entity.body.m_linearVelocity && entity.body.m_linearVelocity.x;
