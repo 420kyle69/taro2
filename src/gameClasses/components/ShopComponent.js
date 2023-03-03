@@ -107,7 +107,8 @@ var ShopComponent = TaroEntity.extend({
 						type: "ingame-item",
 						// purchaseId: purchasableId,
 						gameId: window.gameId?.toString(),
-						status: "initiated"
+						status: "initiated",
+						isPINsetupCompleted: window.isPinExists
 					});
 				}
 
