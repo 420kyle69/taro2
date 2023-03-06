@@ -32,7 +32,7 @@ const Client = TaroEventingClass.extend({
 
 		$('coin-icon').append(
 			$('<img/>', {
-				src: `${this.host}/assets/images/coin.png`,
+				src: `${this.host}/assets/images/coin.svg`,
 				width: 32,
 				height: 32
 			})

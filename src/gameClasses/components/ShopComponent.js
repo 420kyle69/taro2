@@ -327,7 +327,7 @@ var ShopComponent = TaroEntity.extend({
 							html += `<button class="btn btn-sm btn-outline-success btn-purchase-purchasable" id="${purchasable._id}"` +
 								`			 data-purchasabled="${purchasable.name}" data-price="${purchasable.price}">` +
 								'			 <div class="d-flex align-items-center">' +
-								'				 <img src="/assets/images/coin.png" height="20" alt="Modd Coins" class="mr-1" />' +
+								'				 <img src="/assets/images/coin.svg" height="20" alt="Modd Coins" class="mr-1" />' +
 								`				 ${purchasable.price}` +
 								'			 </div>' +
 								'		 </button>';
@@ -811,7 +811,7 @@ var ShopComponent = TaroEntity.extend({
 			}
 
 			if (shopItem.price.coins) {
-				prices += `<p><span><img src="${assetsProvider}/assets/images/coin.png" style="height:20px"/></span>${shopItem.price.coins}</p>`;
+				prices += `<p><span><img src="${assetsProvider}/assets/images/coin.svg" style="height:20px"/></span>${shopItem.price.coins}</p>`;
 			}
 			html += '<p class=\'font-weight-bold mb-2\'>Price:</p>';
 			if (prices) {
@@ -1166,7 +1166,7 @@ var ShopComponent = TaroEntity.extend({
 			if (btnLabel) {
 				btnLabel += '<br/>';
 			}
-			btnLabel += `<span><img src="${assetsProvider}/assets/images/coin.png" style="height:20px"/></span>${coins}`;
+			btnLabel += `<span><img src="${assetsProvider}/assets/images/coin.svg" style="height:20px"/></span>${coins}`;
 		}
 
 		return btnLabel;
@@ -1216,7 +1216,7 @@ var ShopComponent = TaroEntity.extend({
               class: 'd-flex align-items-center'
             }).append(
               $('<img/>', {
-                src: `${assetsProvider}/assets/images/coin.png`,
+                src: `${assetsProvider}/assets/images/coin.svg`,
                 class: 'mr-1',
                 style: 'height: 20px'
               })
@@ -1253,7 +1253,7 @@ var ShopComponent = TaroEntity.extend({
               class: 'd-flex align-items-center'
             }).append(
               $('<img/>', {
-                src: `${assetsProvider}/assets/images/coin.png`,
+                src: `${assetsProvider}/assets/images/coin.svg`,
                 class: 'mr-1',
                 style: 'height: 20px'
               })
