@@ -94,9 +94,14 @@ var AdComponent = TaroEntity.extend({
 				//check if the adslib is loaded correctly or blocked by adblockers etc.
 				if (typeof window.aiptag.adplayer !== 'undefined') {
 					// showing ad
-					window.aiptag.cmd.player.push(function() {
-						window.aiptag.adplayer.startPreRoll();
-					});
+					try {
+						window.aiptag.cmd.player.push(function() {
+							window.aiptag.adplayer.startPreRoll();
+						});
+					} catch (e) {
+						console.log('AIP startPreRoll failed', e.message);
+						self.prerollEventHandler('video-ad-error');
+					}
 				} else {
 					//Adlib didn't load this could be due to an adblocker, timeout etc.
 					//Please add your script here that starts the content, this usually is the same script as added in AIP_COMPLETE.
@@ -140,21 +145,36 @@ var AdComponent = TaroEntity.extend({
 		}
 	},
 	
-	prerollEventHandler: function (type) {
+	prerollEventSender: function (data, clientId = null) {
+		if (taro.isServer) {
+			if (clientId) {
+				this.playCallback(data, clientId);
+			} else {
+				for (const cId in taro.server.clients) {
+					this.playCallback(data, cId);
+				}
+			}
+		} else {
+			taro.network.send('playAdCallback', data);
+		}
+	},
+	
+	// clientId only required if called from server side
+	prerollEventHandler: function (type, clientId = null) {
 		const token = this.token;
 		switch (type) {
 			case 'video-ad-completed':
 				// ad watch completed
 				// credit coins to creator
-				taro.network.send('playAdCallback', {status: 'completed', type, token});
+				this.prerollEventSender({status: 'completed', type, token}, clientId);
 				break;
 			case 'video-ad-skipped':
 				// ad watch started and skipped after a few seconds
-				taro.network.send('playAdCallback', {status: 'skipped', type, token});
+				this.prerollEventSender({status: 'skipped', type, token}, clientId);
 				break;
 			case 'video-ad-blocked':
 				// ad didn't load or errored
-				taro.network.send('playAdCallback', {status: 'blocked', type, token});
+				this.prerollEventSender({status: 'blocked', type, token}, clientId);
 				break;
 			case 'video-ad-close':
 			case 'video-ad-empty':
@@ -164,7 +184,7 @@ var AdComponent = TaroEntity.extend({
 			case 'video-ad-skip-in-iframe':
 			case 'video-ad-action-limit-reached':
 				// ad didn't load or errored
-				taro.network.send('playAdCallback', {status: 'failed', type, token});
+				this.prerollEventSender({status: 'failed', type, token}, clientId);
 				break;
 			case 'video-ad-clicked':
 			case 'video-ad-loaded':
