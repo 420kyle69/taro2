@@ -114,6 +114,8 @@ var Server = TaroClass.extend({
 		self.usedConnectionJwts = {}; // these jwts used for gs connection verification, stored in memory to prevent a token being used multiple times
 		self.COIN_JWT_EXPIRES_IN = 15 * 1000; // token expires in 15 seconds
 		self.usedCoinJwts = {}; // these jwts used for coin transaction, stored in memory to prevent a token being used multiple times
+		self.usedAdRewardJwts = {};
+		self.AD_REWARD_JWT_EXPIRES_IN = 5 * 60 * 1000; // token expires in 5 minutes
 		self.logTriggers = {
 
 		};
@@ -627,6 +629,8 @@ var Server = TaroClass.extend({
 
 		taro.network.define('swapInventory', self._onSwapInventory);
 
+		taro.network.define('playAdCallback', self._onPlayAdCallback);
+
 		// bullshit that's necessary for sending data to client
 		taro.network.define('makePlayerCameraTrackUnit', self._onSomeBullshit);
 		taro.network.define('changePlayerCameraPanSpeed', self._onSomeBullshit);
@@ -729,19 +733,6 @@ var Server = TaroClass.extend({
 			}
 		}
 	},
-
-	giveCoinToUser: function (player, coin, itemName) {
-		if (coin && player._stats && player._stats.userId && (taro.game.data.defaultData.tier == 3 || taro.game.data.defaultData.tier == 4)) {
-
-			taro.clusterClient && taro.clusterClient.giveCoinToUser({
-				creatorId: taro.game.data.defaultData.owner,
-				userId: player._stats.userId,
-				coins: coin,
-				game: taro.game.data.defaultData._id,
-				itemName
-			});
-		}
-	},
 	
 	sendCoinsToPlayer: function (userId, coins) {
 		if (userId && coins && taro.game.data.defaultData.tier != 2) {
@@ -836,6 +827,80 @@ var Server = TaroClass.extend({
 			}
 			if (body.status === 'error') {
 				console.log('error in buying item')
+			}
+		}
+	},
+	
+	creditAdRewardToOwner: function (data, clientId) {
+		const token = data.token;
+		if (token && data.status && clientId) {
+			try {
+				const isUsedToken = taro.server.usedAdRewardJwts[token];
+				if (isUsedToken) {
+					console.log('creditAdRewardToOwner - Token has been used already', token);
+					return;
+				}
+				
+				const jwt = require("jsonwebtoken");
+				
+				const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
+				const {type, clientId: decodedClientId, createdAt} = decodedToken;
+				
+				if (type === 'creditAdRewardToken' && decodedClientId === clientId) {
+					// allow transaction since token has been verified
+					
+					// store token for current client
+					taro.server.usedAdRewardJwts[token] = createdAt;
+					
+					// remove expired tokens
+					const filteredUsedAdRewardJwts = {};
+					const usedTokenEntries = Object.entries(taro.server.usedAdRewardJwts).filter(([token, tokenCreatedAt]) => (Date.now() - tokenCreatedAt) < taro.server.AD_REWARD_JWT_EXPIRES_IN);
+					for (const [key, value] of usedTokenEntries) {
+						if (typeof value === 'number') {
+							filteredUsedAdRewardJwts[key] = value;
+						}
+					}
+					taro.server.usedAdRewardJwts = filteredUsedAdRewardJwts;
+					
+				} else {
+					return;
+				}
+				
+				var player = taro.game.getPlayerByClientId(clientId);
+				
+				taro.clusterClient && taro.clusterClient.creditAdRewardToOwner({
+					creatorId: taro.game.data.defaultData.owner,
+					game: taro.game.data.defaultData._id,
+					userId: player._stats.userId,
+					clientId,
+					status: data.status,
+				});
+				
+			} catch (e) {
+				console.log('creditAdRewardToOwner - invalid token', e.message, data.token);
+			}
+		}
+	},
+	
+	creditAdRewardToOwnerCallback: function (body) {
+		if (body) {
+			if (body.status === 'success') {
+				if (body.message && body.message.userId && body.message.creatorId) {
+					const {
+						updatedCoinsCreator,
+						creatorId
+					} = body.message;
+					
+					var creator = taro.$$('player').find(function (player) {
+						return player && player._stats && player._stats.userId == creatorId;
+					});
+					if (creator) {
+						creator.streamUpdateData([{ coins: updatedCoinsCreator }]);
+					}
+				}
+			}
+			if (body.status === 'error') {
+				console.log('error in crediting ad-reward coins')
 			}
 		}
 	},
