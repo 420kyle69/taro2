@@ -87,7 +87,7 @@ var AdComponent = TaroEntity.extend({
 			// } else {
 				// on desktop
 				if (typeof isInIFrame !== 'undefined' && isInIFrame) {
-					self.prerollEventHandler('video-ad-skip-iframe');
+					self.prerollEventHandler('video-ad-skip-in-iframe');
 					return;
 				}
 				
@@ -161,7 +161,8 @@ var AdComponent = TaroEntity.extend({
 			case 'video-ad-error':
 			case 'video-ad-timeout':
 			case 'video-ad-removed':
-			case 'video-ad-skip-iframe':
+			case 'video-ad-skip-in-iframe':
+			case 'video-ad-action-limit-reached':
 				// ad didn't load or errored
 				taro.network.send('playAdCallback', {status: 'failed', type, token});
 				break;
