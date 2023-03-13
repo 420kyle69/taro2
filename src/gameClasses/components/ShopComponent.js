@@ -23,10 +23,6 @@ var ShopComponent = TaroEntity.extend({
 			self.oldModalHTMLBody = '';
 			// if (!taro.isMobile) {
 			$('.open-modd-shop-button').on('click', function () {
-				var player = taro.client.myPlayer;
-				if (player && !player._stats.isAdBlockEnabled) {
-					countAdImpression(gameId, 'shop');
-				}
 				self.openModdShop();
 			});
 			// }

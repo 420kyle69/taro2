@@ -846,7 +846,11 @@ var ServerNetworkEvents = {
 			taro.clusterClient.stopRecordLogs(data);
 		}
 	},
-
+	
+	_onPlayAdCallback: function (data, clientId) {
+		taro.ad.playCallback(data, clientId);
+	},
+	
 	_onSomeBullshit: function () {
 		//bullshit
 	}
