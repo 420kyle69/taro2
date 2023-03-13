@@ -735,7 +735,7 @@ var Server = TaroClass.extend({
 	},
 	
 	sendCoinsToPlayer: function (userId, coins) {
-		if (userId && coins && taro.game.data.defaultData.tier != 2) {
+		if (userId && coins) {
 			taro.clusterClient && taro.clusterClient.sendCoinsToPlayer({
 				creatorId: taro.game.data.defaultData.owner,
 				userId,
