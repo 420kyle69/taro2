@@ -133,7 +133,7 @@ var AdComponent = TaroEntity.extend({
 		
 		if (socket && socket._token && socket._token.distinctId) {
 			/** additional part to send some info for marketing purposes */
-			global.mixpanel.track('Game Session Duration', {
+			global.mixpanel.track('Ad Watch', {
 				'distinct_id': socket._token.distinctId,
 				'$ip': socket._remoteAddress,
 				'gameSlug': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.gameSlug,
