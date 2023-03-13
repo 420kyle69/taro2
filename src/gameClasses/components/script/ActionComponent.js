@@ -1113,6 +1113,40 @@ var ActionComponent = TaroEntity.extend({
 						}
 						break;
 
+					case 'setMaxAttackRange':
+						var unit = self._script.variable.getValue(action.unit, vars);
+						var value = self._script.variable.getValue(action.number, vars);
+						if (unit) {
+							if (!isNaN(value)) {
+								unit.ai.maxAttackRange = value;
+							}
+						}
+						break;
+
+					case 'setLetGoDistance':
+						var unit = self._script.variable.getValue(action.unit, vars);
+						var value = self._script.variable.getValue(action.number, vars);
+						if (unit) {
+							if (!isNaN(value)) {
+								unit.ai.letGoDistance = value;
+							} else {
+								unit.ai.letGoDistance = undefined;
+							}
+						}
+						break;
+
+					case 'setMaxTravelDistance':
+						var unit = self._script.variable.getValue(action.unit, vars);
+						var value = self._script.variable.getValue(action.number, vars);
+						if (unit) {
+							if (!isNaN(value)) {
+								unit.ai.maxTravelDistance = value;
+							} else {
+								unit.ai.maxTravelDistance = undefined;
+							}
+						}
+						break;
+
 					case 'setEntityVelocityAtAngle':
 
 						var entity = self._script.variable.getValue(action.entity, vars);
