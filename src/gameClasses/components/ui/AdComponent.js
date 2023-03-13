@@ -92,7 +92,7 @@ var AdComponent = TaroEntity.extend({
 				}
 				
 				//check if the adslib is loaded correctly or blocked by adblockers etc.
-				if (typeof window.aiptag.adplayer !== 'undefined') {
+				if (!window.isAdBlockEnabled && typeof window.aiptag.adplayer !== 'undefined') {
 					// showing ad
 					try {
 						window.aiptag.cmd.player.push(function() {

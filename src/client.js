@@ -724,7 +724,7 @@ const Client = TaroEventingClass.extend({
 	joinGame: function(wasGamePaused = false) {
 		
 		// if the AdInPlay player is initialised, means the ad blocker is not enabled
-		let isAdBlockEnabled = typeof window?.aiptag?.adplayer === 'undefined';
+		let isAdBlockEnabled = window.isAdBlockEnabled || typeof window?.aiptag?.adplayer === 'undefined';
 		const data = {
 			number: (Math.floor(Math.random() * 999) + 100) // yeah ok cool, why?
 		};
