@@ -712,7 +712,6 @@ const Client = TaroEventingClass.extend({
 					this.joinGame();
 
 				} else {
-
 					$('#login-error-message').html(data.message).show().fadeOut(7000)
 				}
 			}
@@ -723,8 +722,9 @@ const Client = TaroEventingClass.extend({
 	//i'm not going to change the join game function
 	//
 	joinGame: function(wasGamePaused = false) {
-
-		let isAdBlockEnabled = true;
+		
+		// if the AdInPlay player is initialised, means the ad blocker is not enabled
+		let isAdBlockEnabled = window.isAdBlockEnabled || typeof window?.aiptag?.adplayer === 'undefined';
 		const data = {
 			number: (Math.floor(Math.random() * 999) + 100) // yeah ok cool, why?
 		};
@@ -747,37 +747,10 @@ const Client = TaroEventingClass.extend({
 
 		// old comment => 'try loading an ad to find out whether adblocker is active or not
 		if (window.isStandalone) {
-
 			isAdBlockEnabled = false;
-
-			if (typeof adBlockStatus == 'function') {
-
-				adBlockStatus(false);
-			}
-
-		} else {
-
-			$.ajax(
-				'/showads.js',
-				{
-					async: false,
-					success: () => {
-						isAdBlockEnabled = false;
-						adBlockStatus(true);
-					},
-					fail: () => {
-						adBlockStatus(true);
-					}
-				}
-			);
-			//notify for ad block
-			if (window.isAdBlockEnabled) {
-
-				notifyAboutAdBlocker();
-			}
 		}
 
-		// old comment => 'show popover on settings icon for low fram rate'
+		// old comment => 'show popover on settings icon for low frame rate'
 		if (!taro.isMobile) {
 
 			setTimeout(() => {

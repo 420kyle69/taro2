@@ -492,7 +492,7 @@ var ActionComponent = TaroEntity.extend({
 						var player = self._script.variable.getValue(action.player, vars);
 						var userId = player && player._stats && player._stats.userId;
 
-						if (player && userId && coins && parseFloat(coins) > 0) {
+						if (player && userId && coins && Math.floor(coins) > 0) {
 							taro.server.sendCoinsToPlayer(userId, coins);
 						}
 						break;
@@ -1817,6 +1817,8 @@ var ActionComponent = TaroEntity.extend({
 						if (!taro.ad.lastPlayedAd || ((Date.now() - taro.ad.lastPlayedAd) >= 60000)) {
 							taro.ad.play({ type: 'preroll' });
 							taro.ad.lastPlayedAd = Date.now();
+						} else {
+							taro.ad.prerollEventHandler('video-ad-action-limit-reached');
 						}
 						break;
 
@@ -1826,6 +1828,8 @@ var ActionComponent = TaroEntity.extend({
 							if (unit && unit._stats && unit._stats.clientId) {
 								if (!taro.ad.lastPlayedAd || ((Date.now() - taro.ad.lastPlayedAd) >= 60000)) {
 									taro.ad.play({ type: 'preroll' }, unit._stats.clientId);
+								} else {
+									taro.ad.prerollEventHandler('video-ad-action-limit-reached', unit._stats.clientId);
 								}
 							}
 						}

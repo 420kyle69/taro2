@@ -135,10 +135,6 @@ var ClientNetworkEvents = {
 
 			taro.shop.openItemShop(data.type);
 			$('#modd-item-shop-modal').modal('show');
-			var player = taro.client.myPlayer;
-			if (typeof countAdImpression === 'function' && player && !player._stats.isAdBlockEnabled) {
-				countAdImpression(gameId, 'shop');
-			}
 		}
 	},
 	_onCreateFloatingText: function (data) {
@@ -282,10 +278,6 @@ var ClientNetworkEvents = {
 	},
 
 	_onPlayAd: function (data) {
-		var player = taro.client.myPlayer;
-		if (typeof countAdImpression === 'function' && player && !player._stats.isAdBlockEnabled) {
-			countAdImpression(gameId, 'video');
-		}
 		taro.ad.play(data);
 	},
 
