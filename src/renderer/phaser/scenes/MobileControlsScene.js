@@ -100,6 +100,7 @@ var MobileControlsScene = /** @class */ (function (_super) {
             _this.scene.setVisible(value);
         });
         this.input.on('pointerdown', function (pointer) {
+            reactApp.closeMobileChat();
             var emitPointerPosition = true;
             Object.keys(taro.mobileControls.controls).forEach(function (control) {
                 if (control === 'lookWheel' || control === 'lookAndFireWheel')

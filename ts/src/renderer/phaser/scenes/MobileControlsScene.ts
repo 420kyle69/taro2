@@ -139,6 +139,7 @@ class MobileControlsScene extends PhaserScene {
 		});
 
 		this.input.on('pointerdown', function(pointer) {
+			reactApp.closeMobileChat(pointer);
 
 			let emitPointerPosition = true;
 			Object.keys(taro.mobileControls.controls).forEach(control => {
