@@ -166,7 +166,7 @@ var MobileControlsScene = /** @class */ (function (_super) {
                 var chatEleY2 = chatEleY + chatEleHeight;
                 // if the pointer is within the joystick
                 if (pointer.x > chatEleX && pointer.x < chatEleX2 && pointer.y > chatEleY && pointer.y < chatEleY2) {
-                    $('#mobile-chat-button-id').click();
+                    reactApp.openExpendedChat();
                 }
             }
             if (!this.disablePointerEvents) {
