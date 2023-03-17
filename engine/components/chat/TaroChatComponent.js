@@ -66,11 +66,11 @@ var TaroChatComponent = TaroEventingClass.extend({
 		this.log('Chat component initiated!');
 	},
 
-	sendChatMessage: function () {
+	sendChatMessage: function (val) {
 		if (taro.isClient) {
 			var player = taro.client.myPlayer;
 			var gameData = taro.game && taro.game.data && taro.game.data.defaultData;
-			var message = $('#message').val();
+			var message = val === undefined ? $('#message').val() : val;
 
 			// set character limit to 100 characters
 			if (message.length > 80)
