@@ -206,7 +206,6 @@ var TaroChatServer = {
 				distinct_id: userId,
 				gameSlug: taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.gameSlug,
 				gameId: taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData._id,
-				message: unfilteredMessage,
 				containsBadWord: msg.text != unfilteredMessage
 			});
 		}
