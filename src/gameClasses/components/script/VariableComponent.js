@@ -1687,15 +1687,6 @@ var VariableComponent = TaroEntity.extend({
 					var stringA = self.getValue(text.textA, vars);
 					var stringB = self.getValue(text.textB, vars);
 
-					// isNaN('') is true
-					if (typeof stringA === 'string' && stringA.length && !isNaN(stringA)) {
-						stringA = parseFloat(stringA).toFixed(0);
-					}
-
-					if (typeof stringB === 'string' && stringB.length && !isNaN(stringB)) {
-						stringB = parseFloat(stringB).toFixed(0);
-					}
-
 					returnValue = `${stringA}${stringB}`;
 					break;
 
