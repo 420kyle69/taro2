@@ -487,6 +487,7 @@ var ActionComponent = TaroEntity.extend({
 						break;
 					
 					/* Coins */
+					// fee is deducted from the player to whom sending the coins
 					case 'sendCoinsToPlayer':
 						var coins = self._script.variable.getValue(action.coins, vars);
 						var player = self._script.variable.getValue(action.player, vars);
@@ -494,6 +495,18 @@ var ActionComponent = TaroEntity.extend({
 
 						if (player && userId && coins && Math.floor(coins) > 0) {
 							taro.server.sendCoinsToPlayer(userId, coins);
+						}
+						break;
+
+					// fee is deducted from the owner end
+					case 'sendCoinsToPlayer2':
+						var coins = self._script.variable.getValue(action.coins, vars);
+						var player = self._script.variable.getValue(action.player, vars);
+						var userId = player && player._stats && player._stats.userId;
+
+						if (player && userId && coins && Math.floor(coins) > 0) {
+							// only difference is the addition *10/9 
+							taro.server.sendCoinsToPlayer(userId, coins * 10/9);
 						}
 						break;
 						
