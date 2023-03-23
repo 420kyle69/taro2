@@ -120,7 +120,8 @@ var Server = TaroClass.extend({
 
 		};
 		self.developerClientIds = [];
-
+		self.userAdStats = {};
+		
 		taro.env = process.env.ENV || 'production';
 		self.config = config[taro.env];
 
@@ -905,6 +906,13 @@ var Server = TaroClass.extend({
 				console.log('error in crediting ad-reward coins')
 			}
 		}
+	},
+	
+	addServerLog: function (type, reason) {
+		taro.clusterClient && taro.clusterClient.addServerLog({
+			type,
+			reason
+		});
 	},
 	
 	getStatus: function () {
