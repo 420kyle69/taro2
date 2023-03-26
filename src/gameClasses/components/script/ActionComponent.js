@@ -506,7 +506,7 @@ var ActionComponent = TaroEntity.extend({
 
 						if (player && userId && coins && Math.floor(coins) > 0) {
 							// only difference is the addition *10/9 
-							taro.server.sendCoinsToPlayer(userId, coins * 10/9);
+							taro.server.sendCoinsToPlayer(userId, coins, true);
 						}
 						break;
 						

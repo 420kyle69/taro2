@@ -824,8 +824,25 @@ var ShopComponent = TaroEntity.extend({
 		if (!taro.game.data.shops) return;
 		self.currentType = type || self.currentType;
 		if (!self.currentType) return;
-		var shopItemsKeys = taro.game.data.shops[self.currentType] ? Object.keys(taro.game.data.shops[self.currentType].itemTypes || {}) : [];
-		shopItemsKeys = shopItemsKeys.sort();
+		
+		var shopItems = {};
+
+		var shopItemsKeys = [];
+		if (taro.game.data.shops[self.currentType] && taro.game.data.shops[self.currentType].itemTypes) {
+			var shopItemsKeys = Object.keys(taro.game.data.shops[self.currentType].itemTypes);
+
+			shopItemsKeys = shopItemsKeys.sort();
+
+			shopItemsKeys = shopItemsKeys.sort(function (a, b) {
+				const aOrder = taro.game.data.shops[self.currentType].itemTypes[a].order;
+				const bOrder = taro.game.data.shops[self.currentType].itemTypes[b].order;
+				if (aOrder === undefined && bOrder === undefined) return 0;
+				if (aOrder === undefined) return 1;
+				if (bOrder === undefined) return -1;
+				return aOrder - bOrder;
+			});
+		}
+
 		var shopUnitsKeys = taro.game.data.shops[self.currentType] ? Object.keys(taro.game.data.shops[self.currentType].unitTypes || {}) : [];
 		shopUnitsKeys = shopUnitsKeys.sort();
 		var shopItems = taro.game.data.shops[self.currentType] ? _.cloneDeep(taro.game.data.shops[self.currentType].itemTypes) : [];
