@@ -1113,6 +1113,10 @@ var Item = TaroEntityPhysics.extend({
 							this._stats.isBeingUsed = newValue;
 						}
 						break;
+
+					case 'fireRate':
+						this._stats.fireRate = newValue;
+						break;
 				}
 			}
 		}
