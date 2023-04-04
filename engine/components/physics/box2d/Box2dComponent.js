@@ -826,7 +826,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 					variableName: entityB._stats.id
 				});
 				triggeredBy.region = region;
-				console.log(entityA._category+" leaving region: ",region.id());
 				entityA.script.trigger("entityLeavesRegion", triggeredBy);
 				taro.script.trigger(entityA._category+'LeavesRegion', triggeredBy);
 				break;
@@ -834,7 +833,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 			case 'sensor':
 				triggeredBy.sensorId = entityB.id();
 				var sensoringUnit = entityB.getOwnerUnit();
-				console.log(entityA._category+" leaving sensor: ",entityB.id());
 				if (sensoringUnit && sensoringUnit.script) {
 					sensoringUnit.script.trigger(entityA._category+'LeavesSensor', triggeredBy);
 				};
