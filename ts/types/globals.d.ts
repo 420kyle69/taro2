@@ -10,3 +10,4 @@ type ArrayElement<ArrayType extends readonly unknown[]> =
 
 // react editor
 declare const inGameEditor : InGameEditor;
+declare const reactApp : any;

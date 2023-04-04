@@ -128,13 +128,13 @@ var ClientNetworkEvents = {
 	_onOpenShop: function (data) {
 		if (data.type) {
 			var shopName = taro.game.data.shops[data.type] ? taro.game.data.shops[data.type].name : 'Item shop';
+			var shopDescription = taro.game.data.shops[data.type] ? taro.game.data.shops[data.type].description : '';
 			$('#modd-item-shop-header').text(shopName);
+			
+			shopDescription?.length > 0 && $('#modd-item-shop-description').text(shopDescription);
+
 			taro.shop.openItemShop(data.type);
 			$('#modd-item-shop-modal').modal('show');
-			var player = taro.client.myPlayer;
-			if (typeof countAdImpression === 'function' && player && !player._stats.isAdBlockEnabled) {
-				countAdImpression(gameId, 'shop');
-			}
 		}
 	},
 	_onCreateFloatingText: function (data) {
@@ -278,10 +278,6 @@ var ClientNetworkEvents = {
 	},
 
 	_onPlayAd: function (data) {
-		var player = taro.client.myPlayer;
-		if (typeof countAdImpression === 'function' && player && !player._stats.isAdBlockEnabled) {
-			countAdImpression(gameId, 'video');
-		}
 		taro.ad.play(data);
 	},
 
