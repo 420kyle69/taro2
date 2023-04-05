@@ -129,7 +129,6 @@ class TileEditor {
 			const oldTile = map.layers[tempLayer].data[data.y * width + data.x];
 			this.floodFill(data.layer, oldTile, data.gid, data.x, data.y, true);
 		} else {
-			console.log('editTile', data.gid, data.x, data.y, data.layer);
 			let index = data.gid;
 			if (data.gid === 0) index = -1;
 			tileMap.putTileAt(index, data.x, data.y, false, data.layer);
@@ -154,7 +153,6 @@ class TileEditor {
 			let index = selectedTile.index;
 			if  (index !== (map.getTileAt(tileX, tileY, true)).index &&
 			!(index === 0 && map.getTileAt(tileX, tileY, true).index === -1)) {
-				console.log('putTile', index, tileX, tileY, map.currentLayerIndex);
 				map.putTileAt(index, tileX, tileY);
 				map.getTileAt(tileX, tileY, true).tint = 0xffffff;
 				if (!local) {
