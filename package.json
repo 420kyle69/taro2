@@ -42,7 +42,7 @@
     "lz-string": "^1.4.4",
     "mixpanel": "^0.17.0",
     "msgpack-lite": "^0.1.26",
-    "phaser": "^3.60.0-beta.21",
+    "phaser": "^3.60.0-beta.23",
     "phaser3-rex-plugins": "1.1.70",
     "phaser3-rex-plugins-types": "^0.2.0",
     "public-ip": "^2.5.0",
