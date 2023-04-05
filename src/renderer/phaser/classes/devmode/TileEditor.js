@@ -108,7 +108,10 @@ var TileEditor = /** @class */ (function () {
             this.floodFill(data.layer, oldTile, data.gid, data.x, data.y, true);
         }
         else {
-            tileMap.putTileAt(data.gid, data.x, data.y, false, data.layer);
+            var index = data.gid;
+            if (data.gid === 0)
+                index = -1;
+            tileMap.putTileAt(index, data.x, data.y, false, data.layer);
             /* TODO: SAVE MAP DATA FROM SERVER SIDE */
             //save tile change to taro.game.map.data
             if (map.layers.length > 4 && data.layer >= 2)
@@ -128,13 +131,13 @@ var TileEditor = /** @class */ (function () {
         var map = this.gameScene.tilemap;
         if (this.gameScene.tilemapLayers[map.currentLayerIndex].visible && selectedTile && this.devModeTools.scene.pointerInsideMap(tileX, tileY, map)) {
             var index = selectedTile.index;
-            if (selectedTile.index === -1)
-                index = 0;
             if (index !== (map.getTileAt(tileX, tileY, true)).index &&
                 !(index === 0 && map.getTileAt(tileX, tileY, true).index === -1)) {
                 map.putTileAt(index, tileX, tileY);
                 map.getTileAt(tileX, tileY, true).tint = 0xffffff;
                 if (!local) {
+                    if (index === -1)
+                        index = 0;
                     taro.network.send('editTile', { gid: index, layer: map.currentLayerIndex, x: tileX, y: tileY });
                 }
             }

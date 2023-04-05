@@ -255,7 +255,7 @@ var DevModeTools = /** @class */ (function (_super) {
             this.tileEditor.lastSelectedTile = this.tileEditor.selectedTile;
             this.tileEditor.lastSelectedTileArea = this.tileEditor.selectedTileArea;
             var copy = __assign({}, this.tileEditor.selectedTile);
-            copy.index = 0;
+            copy.index = -1;
             this.tileEditor.selectedTile = copy;
             this.tileEditor.selectedTileArea = [[copy, copy], [copy, copy]];
             this.tileEditor.activateMarkers(true);

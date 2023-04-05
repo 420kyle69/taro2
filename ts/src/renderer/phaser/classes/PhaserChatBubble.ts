@@ -90,6 +90,7 @@ class PhaserChatBubble extends Phaser.GameObjects.Container {
 			this.fadeTimerEvent = null;
 			this.fadeTween = scene.tweens.add({
 				targets: this,
+				// @ts-ignore
 				alpha: 0,
 				duration: 500,
 				onComplete: () => {
