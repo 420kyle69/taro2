@@ -287,7 +287,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 			this.tileEditor.lastSelectedTile = this.tileEditor.selectedTile;
 			this.tileEditor.lastSelectedTileArea = this.tileEditor.selectedTileArea
 			const copy = { ...this.tileEditor.selectedTile };
-			copy.index = 0;
+			copy.index = -1;
 			this.tileEditor.selectedTile = copy as any;
 			this.tileEditor.selectedTileArea = [[copy, copy],[copy, copy]] as any;
 			this.tileEditor.activateMarkers(true);
