@@ -119,7 +119,7 @@ class TileEditor {
 
     edit (data:TileData): void {
 		const map = taro.game.data.map;
-		map.haveUnsavedChanges = true;
+		inGameEditor.mapWasEdited && inGameEditor.mapWasEdited();
 		const width = map.width;
         const tileMap = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
 		if (data.tool === 'flood') {
@@ -178,7 +178,7 @@ class TileEditor {
 	floodFill (layer: number, oldTile: number, newTile: number, x: number, y: number, fromServer: boolean): void {
 		if (fromServer) { 
 			const map = taro.game.data.map;
-			map.haveUnsavedChanges = true;
+			inGameEditor.mapWasEdited && inGameEditor.mapWasEdited();
 			const tileMap = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
 			const width = map.width;
 			//fix for debris layer
