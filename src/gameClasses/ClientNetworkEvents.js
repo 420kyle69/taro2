@@ -131,7 +131,11 @@ var ClientNetworkEvents = {
 			var shopDescription = taro.game.data.shops[data.type] ? taro.game.data.shops[data.type].description : '';
 			$('#modd-item-shop-header').text(shopName);
 			
-			shopDescription?.length > 0 && $('#modd-item-shop-description').text(shopDescription);
+			if (shopDescription?.length) {
+				$('#modd-item-shop-description').text(shopDescription);
+			} else {
+				$('#modd-item-shop-description').text('');
+			}
 
 			taro.shop.openItemShop(data.type);
 			$('#modd-item-shop-modal').modal('show');
