@@ -97,6 +97,7 @@ var TileEditor = /** @class */ (function () {
     };
     TileEditor.prototype.edit = function (data) {
         var map = taro.game.data.map;
+        inGameEditor.mapWasEdited && inGameEditor.mapWasEdited();
         var width = map.width;
         var tileMap = this.gameScene.tilemap;
         if (data.tool === 'flood') {
@@ -158,6 +159,7 @@ var TileEditor = /** @class */ (function () {
     TileEditor.prototype.floodFill = function (layer, oldTile, newTile, x, y, fromServer) {
         if (fromServer) {
             var map = taro.game.data.map;
+            inGameEditor.mapWasEdited && inGameEditor.mapWasEdited();
             var tileMap = this.gameScene.tilemap;
             var width = map.width;
             //fix for debris layer
