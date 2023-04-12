@@ -37,7 +37,7 @@ class PhaserChatBubble extends Phaser.GameObjects.Container {
 
 		text.setOrigin(0.5);
 		text.depth = 1;
-		text.setResolution(2);
+		if (this.scene.renderer.type !== Phaser.CANVAS) text.setResolution(2);
 		//this.textObject.setScale(0.5);
 
 		// needs to be created with the correct scale of the client
@@ -52,7 +52,7 @@ class PhaserChatBubble extends Phaser.GameObjects.Container {
 
 		if (scene.renderer.type === Phaser.CANVAS) {
 
-			text.visible = false;
+			//text.visible = false;
 
 			/*const rt = this.rtText = scene.add.renderTexture(0, 0);
 			rt.setOrigin(0.5);

@@ -208,7 +208,8 @@ var PhaserUnit = /** @class */ (function (_super) {
         label.setFontSize(16);
         label.setFontStyle(data.bold ? 'bold' : 'normal');
         label.setFill(data.color || '#fff');
-        label.setResolution(4);
+        if (this.scene.renderer.type !== Phaser.CANVAS)
+            label.setResolution(4);
         var strokeThickness = taro.game.data.settings
             .addStrokeToNameAndAttributes !== false ? 4 : 0;
         label.setStroke('#000', strokeThickness);

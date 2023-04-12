@@ -31,7 +31,8 @@ var PhaserChatBubble = /** @class */ (function (_super) {
         });
         text.setOrigin(0.5);
         text.depth = 1;
-        text.setResolution(2);
+        if (_this.scene.renderer.type !== Phaser.CANVAS)
+            text.setResolution(2);
         //this.textObject.setScale(0.5);
         // needs to be created with the correct scale of the client
         _this.setScale(1 / _this.scene.cameras.main.zoom);
@@ -41,7 +42,7 @@ var PhaserChatBubble = /** @class */ (function (_super) {
         //text.letterSpacing = -0.6;
         _this.add(text);
         if (scene.renderer.type === Phaser.CANVAS) {
-            text.visible = false;
+            //text.visible = false;
             /*const rt = this.rtText = scene.add.renderTexture(0, 0);
             rt.setOrigin(0.5);
 
