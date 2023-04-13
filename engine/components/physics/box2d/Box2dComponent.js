@@ -790,13 +790,12 @@ var PhysicsComponent = TaroEventingClass.extend({
 				}
 
 				break;
-
+			
+			case undefined:
 			case 'wall':
 				taro.script.trigger(entityA._category+'TouchesWall', triggeredBy);
 				entityA.script.trigger("entityTouchesWall");
 				break;
-
-			case undefined:
 		}
 	},
 
