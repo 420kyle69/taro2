@@ -355,6 +355,7 @@ class DeveloperMode {
 		console.log ('map data was edited', data.mapData.wasEdited);
 		if (data.mapData.wasEdited) {
 			data.mapData.wasEdited = false;
+			data.mapData.haveUnsavedChanges = true;
 			taro.game.data.map = data.mapData;
 			if (taro.physics) {
 				//if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap

@@ -790,15 +790,55 @@ var PhysicsComponent = TaroEventingClass.extend({
 				}
 
 				break;
-
+			
 			case undefined:
 			case 'wall':
-				taro.game.lastTouchingUnitId = entityA.id();
-				var triggeredBy = { unitId: entityA.id() };
-				taro.script.trigger('unitTouchesWall', triggeredBy);
+				taro.script.trigger(entityA._category+'TouchesWall', triggeredBy);
 				entityA.script.trigger("entityTouchesWall");
 				break;
 		}
+	},
+
+	_triggerLeaveEvent: function (entityA, entityB) {
+		var triggeredBy = {};
+
+		if (!['unit', 'projectile', 'item'].includes(entityA._category)) {
+			return;
+		};
+
+		switch (entityA._category) {
+			case 'unit':
+				triggeredBy.unitId = entityA.id();
+				break;
+			case 'item':
+				triggeredBy.itemId = entityA.id();
+				break;
+			case 'projectile':
+				triggeredBy.projectileId = entityA.id();
+				break;
+		};
+
+		switch (entityB._category) {
+			case 'region':
+				var region = taro.script.variable.getValue({
+					function: 'getVariable',
+					variableName: entityB._stats.id
+				});
+				triggeredBy.region = region;
+				entityA.script.trigger("entityLeavesRegion", triggeredBy);
+				taro.script.trigger(entityA._category+'LeavesRegion', triggeredBy);
+				break;
+
+			case 'sensor':
+				triggeredBy.sensorId = entityB.id();
+				var sensoringUnit = entityB.getOwnerUnit();
+				if (sensoringUnit && sensoringUnit.script) {
+					sensoringUnit.script.trigger(entityA._category+'LeavesSensor', triggeredBy);
+				};
+				break;
+
+			case undefined:
+		};
 	},
 
 	// Listen for when contact's begin
@@ -815,13 +855,20 @@ var PhysicsComponent = TaroEventingClass.extend({
 	},
 
 	_endContactCallback: function (contact) {
+		var entityA = contact.m_fixtureA.m_body._entity;
+		var entityB = contact.m_fixtureB.m_body._entity;
 
+		if (!entityA || !entityB)
+			return;
+
+		taro.physics._triggerLeaveEvent(entityA, entityB);
+		taro.physics._triggerLeaveEvent(entityB, entityA);
 	},
 
 	_enableContactListener: function () {
 		// Set the contact listener methods to detect when
 		// contacts (collisions) begin and end
-		taro.physics.contactListener(this._beginContactCallback, this.endContactCallback);
+		taro.physics.contactListener(this._beginContactCallback, this._endContactCallback);
 	}
 });
 

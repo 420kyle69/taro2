@@ -280,7 +280,7 @@ var GameScene = /** @class */ (function (_super) {
                 layer.data.forEach(function (tile, index) {
                     var x = index % layer.width;
                     var y = Math.floor(index / layer.width);
-                    if (tile === 0)
+                    if (tile === 0 || tile === null)
                         tile = -1;
                     map.putTileAt(tile, x, y, false, layerId_1);
                 });
