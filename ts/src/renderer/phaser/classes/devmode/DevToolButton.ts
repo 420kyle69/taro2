@@ -62,9 +62,11 @@ class DevToolButton {
 			else func();
 		});
 		button.on('pointerover', () => {
+			scene.pointerInsideButtons = true;
 			devModeTools.tooltip.showMessage(tooltipLabel, tooltipText);
 		});
 		button.on('pointerout', () => {
+			scene.pointerInsideButtons = false;
 			devModeTools.tooltip.fadeOut();
 		});
 	}

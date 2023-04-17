@@ -33,7 +33,7 @@ class TileEditor {
 		this.startDragIn = 'none';
 
 		devModeScene.input.on('pointerdown', (p) => {
-			if (!devModeScene.pointerInsideButtons() && 
+			if (!devModeScene.pointerInsideButtons && 
 				!devModeScene.pointerInsideWidgets() &&
 				palette.visible	&& devModeScene.pointerInsidePalette()) {
 					this.startDragIn = 'palette';
@@ -43,7 +43,7 @@ class TileEditor {
 		});
 
 		gameScene.input.on('pointerdown', (p) => {
-			if (!devModeScene.pointerInsideButtons() && 
+			if (!devModeScene.pointerInsideButtons && 
 				!devModeScene.pointerInsideWidgets() && 
 				(palette.visible || devModeScene.pointerInsidePalette()) &&
 				this.gameScene.tilemap.currentLayerIndex >=0 && 
@@ -261,8 +261,8 @@ class TileEditor {
 				paletteMarker.graphics.y = paletteMap.tileToWorldY(palettePointerTileY);
 
 			} else if ((!devModeScene.pointerInsidePalette() || !palette.visible) &&
-				!devModeScene.pointerInsideButtons() && !devModeScene.pointerInsideWidgets() && marker.active && map.currentLayerIndex >=0) {
-
+				!devModeScene.pointerInsideButtons && !devModeScene.pointerInsideWidgets() && marker.active && map.currentLayerIndex >=0) {
+				this.devModeTools.tooltip.showMessage('Position', 'X: ' + Math.floor(worldPoint.x).toString() + ', Y: ' + Math.floor(worldPoint.y).toString());
 				paletteMarker.graphics.setVisible(false);
 				marker.graphics.setVisible(true);
 				marker.showPreview(true);

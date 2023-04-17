@@ -13,7 +13,7 @@ var TileEditor = /** @class */ (function () {
         var pointerPosition = { x: 0, y: 0 };
         this.startDragIn = 'none';
         devModeScene.input.on('pointerdown', function (p) {
-            if (!devModeScene.pointerInsideButtons() &&
+            if (!devModeScene.pointerInsideButtons &&
                 !devModeScene.pointerInsideWidgets() &&
                 palette.visible && devModeScene.pointerInsidePalette()) {
                 _this.startDragIn = 'palette';
@@ -22,7 +22,7 @@ var TileEditor = /** @class */ (function () {
             }
         });
         gameScene.input.on('pointerdown', function (p) {
-            if (!devModeScene.pointerInsideButtons() &&
+            if (!devModeScene.pointerInsideButtons &&
                 !devModeScene.pointerInsideWidgets() &&
                 (palette.visible || devModeScene.pointerInsidePalette()) &&
                 _this.gameScene.tilemap.currentLayerIndex >= 0 &&
@@ -234,7 +234,8 @@ var TileEditor = /** @class */ (function () {
                 paletteMarker.graphics.y = paletteMap.tileToWorldY(palettePointerTileY);
             }
             else if ((!devModeScene.pointerInsidePalette() || !palette.visible) &&
-                !devModeScene.pointerInsideButtons() && !devModeScene.pointerInsideWidgets() && marker.active && map.currentLayerIndex >= 0) {
+                !devModeScene.pointerInsideButtons && !devModeScene.pointerInsideWidgets() && marker.active && map.currentLayerIndex >= 0) {
+                this.devModeTools.tooltip.showMessage('Position', 'X: ' + Math.floor(worldPoint.x).toString() + ', Y: ' + Math.floor(worldPoint.y).toString());
                 paletteMarker.graphics.setVisible(false);
                 marker.graphics.setVisible(true);
                 marker.showPreview(true);

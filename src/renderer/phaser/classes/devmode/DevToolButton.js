@@ -36,9 +36,11 @@ var DevToolButton = /** @class */ (function () {
                 func();
         });
         button.on('pointerover', function () {
+            scene.pointerInsideButtons = true;
             devModeTools.tooltip.showMessage(tooltipLabel, tooltipText);
         });
         button.on('pointerout', function () {
+            scene.pointerInsideButtons = false;
             devModeTools.tooltip.fadeOut();
         });
     }

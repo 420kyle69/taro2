@@ -51,6 +51,7 @@ var DevTooltip = /** @class */ (function (_super) {
         this.y = 70;
     };
     DevTooltip.prototype.showMessage = function (labelText, tooltipText) {
+        console.log('showMessage', labelText, tooltipText);
         // reset fade timer and tween
         if (this.fadeTimerEvent) {
             this.scene.time.removeEvent(this.fadeTimerEvent);
@@ -67,6 +68,9 @@ var DevTooltip = /** @class */ (function (_super) {
         var text = this.bitmapText;
         text.setText(BitmapFontManager.sanitize(text.fontData, tooltipText));
         this.drawBubble();
+        if (labelText === 'Position') {
+            this.fadeOut();
+        }
     };
     DevTooltip.prototype.fadeOut = function () {
         var _this = this;

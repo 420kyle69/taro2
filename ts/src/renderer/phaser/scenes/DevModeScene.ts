@@ -8,6 +8,8 @@ class DevModeScene extends PhaserScene {
 	tileEditor: TileEditor;
 	gameEditorWidgets: Array<DOMRect>;
 
+	pointerInsideButtons: boolean;
+
 	tilePalette: TilePalette;
 	tilemap: Phaser.Tilemaps.Tilemap;
 	tileset: Phaser.Tilemaps.Tileset;
@@ -20,6 +22,7 @@ class DevModeScene extends PhaserScene {
 
 	init (): void {
 		this.gameScene = taro.renderer.scene.getScene('Game');
+		this.pointerInsideButtons = false;
 		this.regions = [];
 
 		taro.client.on('unlockCamera', () => {
@@ -174,17 +177,6 @@ class DevModeScene extends PhaserScene {
 			&& this.input.activePointer.x < this.tilePalette.scrollBarContainer.x + this.tilePalette.scrollBarContainer.width
 			&& this.input.activePointer.y > this.tilePalette.scrollBarContainer.y - 30
 			&& this.input.activePointer.y < this.tilePalette.scrollBarContainer.y + this.tilePalette.scrollBarContainer.height);
-	}
-
-	pointerInsideButtons(): boolean {
-		return ((this.input.activePointer.x > this.devModeTools.layerButtonsContainer.x
-			&& this.input.activePointer.x < this.devModeTools.layerButtonsContainer.x + this.devModeTools.layerButtonsContainer.width
-			&& this.input.activePointer.y > this.devModeTools.layerButtonsContainer.y
-			&& this.input.activePointer.y < this.devModeTools.layerButtonsContainer.y + this.devModeTools.layerButtonsContainer.height)
-			|| (this.input.activePointer.x > this.devModeTools.toolButtonsContainer.x
-			&& this.input.activePointer.x < this.devModeTools.toolButtonsContainer.x + this.devModeTools.toolButtonsContainer.width
-			&& this.input.activePointer.y > this.devModeTools.toolButtonsContainer.y
-			&& this.input.activePointer.y < this.devModeTools.toolButtonsContainer.y + this.devModeTools.toolButtonsContainer.height));
 	}
 
 	update (): void {
