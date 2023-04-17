@@ -337,7 +337,6 @@ var PhaserUnit = /** @class */ (function (_super) {
             targets: targets,
             duration: 1000,
             ease: Phaser.Math.Easing.Quadratic.Out,
-            // @ts-ignore
             scale: targetScale,
             onComplete: function () {
                 _this.updateLabelOffset();

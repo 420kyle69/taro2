@@ -164,7 +164,6 @@ class PhaserAttributeBar extends Phaser.GameObjects.Container {
 
 			this.fadeTween = scene.tweens.add({
 				targets: this,
-				// @ts-ignore
 				alpha: 0,
 				duration: 500,
 				onComplete: () => {

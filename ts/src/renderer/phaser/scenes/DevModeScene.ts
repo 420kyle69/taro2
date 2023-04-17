@@ -145,7 +145,7 @@ class DevModeScene extends PhaserScene {
 	}
 
 	leaveMapTab (): void {
-		this.devModeTools.leaveMapTab();
+		if (this.devModeTools) this.devModeTools.leaveMapTab();
 	}
 
 	pointerInsideMap(pointerX: number, pointerY: number, map: Phaser.Tilemaps.Tilemap): boolean {

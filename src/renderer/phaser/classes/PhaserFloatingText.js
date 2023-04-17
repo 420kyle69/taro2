@@ -32,7 +32,6 @@ var PhaserFloatingText = /** @class */ (function (_super) {
         }
         scene.tweens.add({
             targets: _this.rt || _this,
-            // @ts-ignore
             alpha: 0.5,
             duration: 2500,
             y: _this.y - 40,
