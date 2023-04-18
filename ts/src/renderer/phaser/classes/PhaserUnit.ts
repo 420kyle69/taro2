@@ -402,7 +402,6 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			targets: targets,
 			duration: 1000,
 			ease: Phaser.Math.Easing.Quadratic.Out,
-			// @ts-ignore
 			scale: targetScale,
 			onComplete: () => {
 				this.updateLabelOffset();

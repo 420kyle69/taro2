@@ -75,7 +75,6 @@ var DevTooltip = /** @class */ (function (_super) {
             _this.fadeTimerEvent = null;
             _this.fadeTween = scene.tweens.add({
                 targets: _this,
-                // @ts-ignore
                 alpha: 0,
                 duration: 500,
                 onComplete: function () {

@@ -123,7 +123,8 @@ var DevModeScene = /** @class */ (function (_super) {
         this.devModeTools.enterMapTab();
     };
     DevModeScene.prototype.leaveMapTab = function () {
-        this.devModeTools.leaveMapTab();
+        if (this.devModeTools)
+            this.devModeTools.leaveMapTab();
     };
     DevModeScene.prototype.pointerInsideMap = function (pointerX, pointerY, map) {
         return (0 <= pointerX && pointerX < map.width

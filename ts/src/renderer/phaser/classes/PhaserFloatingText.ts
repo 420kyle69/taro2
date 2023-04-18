@@ -44,7 +44,6 @@ class PhaserFloatingText extends Phaser.GameObjects.BitmapText {
 
 		scene.tweens.add({
 			targets: this.rt || this,
-			// @ts-ignore
 			alpha: 0.5,
 			duration: 2500,
 			y: this.y - 40,
