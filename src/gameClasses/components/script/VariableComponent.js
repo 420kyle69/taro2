@@ -1699,6 +1699,13 @@ var VariableComponent = TaroEntity.extend({
 					returnValue = `${stringA}${stringB}`;
 					break;
 
+				case 'filterString':
+					var string = self.getValue(text.string, vars);
+					if (taro.chat && taro.chat.filter){
+						returnValue = taro.chat.filter.cleanHacked(string);
+					}
+					break;
+
 				case 'getMin':
 					var num1 = self.getValue(text.num1, vars);
 					var num2 = self.getValue(text.num2, vars);
