@@ -61,7 +61,6 @@ class DevTooltip extends Phaser.GameObjects.Container {
 	}
 
 	showMessage(labelText: string, tooltipText: string): void {
-		console.log('showMessage', labelText, tooltipText)
 		// reset fade timer and tween
 		if (this.fadeTimerEvent) {
 			this.scene.time.removeEvent(this.fadeTimerEvent);

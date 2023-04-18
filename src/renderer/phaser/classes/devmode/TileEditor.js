@@ -108,6 +108,11 @@ var TileEditor = /** @class */ (function () {
             var oldTile = map.layers[tempLayer].data[data.y * width + data.x];
             this.floodFill(data.layer, oldTile, data.gid, data.x, data.y, true);
         }
+        else if (data.tool === 'clear') {
+            this.clearLayer(data.layer, true);
+            if (map.layers.length > 4 && data.layer >= 2)
+                data.layer++;
+        }
         else {
             var index = data.gid;
             if (data.gid === 0)
@@ -120,6 +125,7 @@ var TileEditor = /** @class */ (function () {
             map.layers[data.layer].data[data.y * width + data.x] = data.gid;
         }
         if (taro.physics && map.layers[data.layer].name === 'walls') {
+            console.log('walls changed');
             //if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
             taro.physics.destroyWalls();
             var mapCopy = taro.scaleMap(_.cloneDeep(map));
@@ -206,6 +212,39 @@ var TileEditor = /** @class */ (function () {
             }
             if (y < (tileMap.height - 1)) {
                 this.floodFill(layer, oldTile, newTile, x, y + 1, fromServer);
+            }
+        }
+    };
+    TileEditor.prototype.clearLayer = function (layer, fromServer) {
+        console.log('clear layer', layer);
+        if (fromServer) {
+            var map = taro.game.data.map;
+            inGameEditor.mapWasEdited && inGameEditor.mapWasEdited();
+            var tileMap = this.gameScene.tilemap;
+            var width = map.width;
+            //fix for debris layer
+            var tempLayer = layer;
+            if (map.layers.length > 4 && layer >= 2) {
+                tempLayer++;
+            }
+            for (var i = 0; i < map.width; i++) {
+                for (var j = 0; j < map.height; j++) {
+                    if (map.layers[tempLayer].data[j * width + i] !== 0) {
+                        tileMap.putTileAt(-1, i, j, false, layer);
+                        //save tile change to taro.game.map.data
+                        map.layers[tempLayer].data[j * width + i] = 0;
+                    }
+                }
+            }
+        }
+        else {
+            var tileMap = this.gameScene.tilemap;
+            for (var i = 0; i < tileMap.width; i++) {
+                for (var j = 0; j < tileMap.height; j++) {
+                    if (tileMap.getTileAt(i, j, true, layer).index !== 0) {
+                        tileMap.putTileAt(-1, i, j, false, layer);
+                    }
+                }
             }
         }
     };

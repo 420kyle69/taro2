@@ -151,16 +151,6 @@ var DevModeScene = /** @class */ (function (_super) {
             && this.input.activePointer.y > this.tilePalette.scrollBarContainer.y - 30
             && this.input.activePointer.y < this.tilePalette.scrollBarContainer.y + this.tilePalette.scrollBarContainer.height);
     };
-    /*pointerInsideButtons(): boolean {
-        return ((this.input.activePointer.x > this.devModeTools.layerButtonsContainer.x
-            && this.input.activePointer.x < this.devModeTools.layerButtonsContainer.x + this.devModeTools.layerButtonsContainer.width
-            && this.input.activePointer.y > this.devModeTools.layerButtonsContainer.y
-            && this.input.activePointer.y < this.devModeTools.layerButtonsContainer.y + this.devModeTools.layerButtonsContainer.height)
-            || (this.input.activePointer.x > this.devModeTools.toolButtonsContainer.x
-            && this.input.activePointer.x < this.devModeTools.toolButtonsContainer.x + this.devModeTools.toolButtonsContainer.width
-            && this.input.activePointer.y > this.devModeTools.toolButtonsContainer.y
-            && this.input.activePointer.y < this.devModeTools.toolButtonsContainer.y + this.devModeTools.toolButtonsContainer.height));
-    }*/
     DevModeScene.prototype.update = function () {
         if (this.tileEditor)
             this.tileEditor.update();

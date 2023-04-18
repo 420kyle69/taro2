@@ -66,7 +66,7 @@ var DevModeTools = /** @class */ (function (_super) {
         toolButtonsContainer.height = 170;
         scene.add.existing(toolButtonsContainer);
         _this.modeButtons = [];
-        _this.modeButtons.push(new DevToolButton(_this, '', 'Cursor Tool (C)', 'interact with regions and entities', 'cursor', 0, 0, 56, toolButtonsContainer, _this.cursor.bind(_this)), new DevToolButton(_this, '', 'Region Tool (R)', 'draw new region', 'region', 60, 0, 56, toolButtonsContainer, _this.drawRegion.bind(_this)), new DevToolButton(_this, '', 'Stamp Brush (B)', 'LMB: place selected tiles. RMB: copy tiles', 'stamp', 0, 34, 56, toolButtonsContainer, _this.brush.bind(_this)), new DevToolButton(_this, '', 'Eraser (E)', 'delete tiles from selected layer', 'eraser', 60, 34, 56, toolButtonsContainer, _this.emptyTile.bind(_this)), new DevToolButton(_this, '', 'Bucket Fill (F)', 'fill an area with the selected tile', 'fill', 0, 68, 56, toolButtonsContainer, _this.fill.bind(_this)));
+        _this.modeButtons.push(new DevToolButton(_this, '', 'Cursor Tool (C)', 'interact with regions and entities', 'cursor', 0, 0, 56, toolButtonsContainer, _this.cursor.bind(_this)), new DevToolButton(_this, '', 'Region Tool (R)', 'draw new region', 'region', 60, 0, 56, toolButtonsContainer, _this.drawRegion.bind(_this)), new DevToolButton(_this, '', 'Stamp Brush (B)', 'LMB: place selected tiles. RMB: copy tiles', 'stamp', 0, 34, 56, toolButtonsContainer, _this.brush.bind(_this)), new DevToolButton(_this, '', 'Eraser (E)', 'delete tiles from selected layer', 'eraser', 60, 34, 56, toolButtonsContainer, _this.emptyTile.bind(_this)), new DevToolButton(_this, '', 'Bucket Fill (F)', 'fill an area with the selected tile', 'fill', 0, 68, 56, toolButtonsContainer, _this.fill.bind(_this)), new DevToolButton(_this, 'XX', 'Clear Layer (L)', 'clear selected layer', null, 60, 68, 56, toolButtonsContainer, _this.clear.bind(_this)));
         _this.cursorButton = _this.modeButtons[0];
         _this.highlightModeButton(0);
         _this.brushButtons = [];
@@ -185,6 +185,12 @@ var DevModeTools = /** @class */ (function (_super) {
                 _this.fill();
             }
         });
+        var lKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.L, false);
+        lKey.on('down', function () {
+            if (taro.developerMode.active && taro.developerMode.activeTab === 'map') {
+                _this.clear();
+            }
+        });
         var oneKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE, false);
         oneKey.on('down', function () {
             if (taro.developerMode.active && taro.developerMode.activeTab === 'map' && !altKey.isDown) {
@@ -274,6 +280,11 @@ var DevModeTools = /** @class */ (function (_super) {
         this.scene.regionEditor.regionTool = false;
         this.selectSingle();
         this.highlightModeButton(4);
+    };
+    DevModeTools.prototype.clear = function () {
+        var gameMap = this.scene.gameScene.tilemap;
+        //this.tileEditor.clearLayer(gameMap.currentLayerIndex, false);
+        taro.network.send('editTile', { gid: 0, layer: gameMap.currentLayerIndex, x: 0, y: 0, tool: 'clear' });
     };
     DevModeTools.prototype.highlightModeButton = function (n) {
         this.modeButtons.forEach(function (button, index) {

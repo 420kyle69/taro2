@@ -43,12 +43,16 @@ var DeveloperMode = /** @class */ (function () {
             if (data.tool === 'flood') {
                 this.floodTiles(serverData.layer, gameMap.layers[serverData.layer].data[serverData.y * width + serverData.x], serverData.gid, serverData.x, serverData.y);
             }
+            else if (data.tool === 'clear') {
+                this.clearLayer(serverData.layer);
+            }
             else {
                 //save tile change to taro.game.data.map and taro.map.data
                 gameMap.layers[serverData.layer].data[serverData.y * width + serverData.x] = serverData.gid;
                 taro.map.data.layers[serverData.layer].data[serverData.y * width + serverData.x] = serverData.gid;
             }
             if (gameMap.layers[serverData.layer].name === 'walls') {
+                console.log('walls changed');
                 //if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
                 taro.physics.destroyWalls();
                 var map = taro.scaleMap(_.cloneDeep(gameMap));
@@ -78,6 +82,18 @@ var DeveloperMode = /** @class */ (function () {
         }
         if (y < (map.height - 1)) {
             this.floodTiles(layer, oldTile, newTile, x, y + 1);
+        }
+    };
+    DeveloperMode.prototype.clearLayer = function (layer) {
+        var map = taro.game.data.map;
+        var width = map.width;
+        for (var i = 0; i < map.width; i++) {
+            for (var j = 0; j < map.height; j++) {
+                if (map.layers[layer].data[j * width + i] !== 0) {
+                    //save tile change to taro.game.map.data
+                    map.layers[layer].data[j * width + i] = 0;
+                }
+            }
         }
     };
     DeveloperMode.prototype.editRegion = function (data, clientId) {

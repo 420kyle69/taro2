@@ -51,7 +51,6 @@ var DevTooltip = /** @class */ (function (_super) {
         this.y = 70;
     };
     DevTooltip.prototype.showMessage = function (labelText, tooltipText) {
-        console.log('showMessage', labelText, tooltipText);
         // reset fade timer and tween
         if (this.fadeTimerEvent) {
             this.scene.time.removeEvent(this.fadeTimerEvent);

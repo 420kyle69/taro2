@@ -86,7 +86,8 @@ class DevModeTools extends Phaser.GameObjects.Container {
 			new DevToolButton (this, '', 'Region Tool (R)', 'draw new region', 'region', 60, 0, 56, toolButtonsContainer, this.drawRegion.bind(this)),
 			new DevToolButton (this, '', 'Stamp Brush (B)', 'LMB: place selected tiles. RMB: copy tiles', 'stamp', 0, 34, 56, toolButtonsContainer, this.brush.bind(this)),
 			new DevToolButton (this, '', 'Eraser (E)', 'delete tiles from selected layer', 'eraser', 60, 34, 56, toolButtonsContainer, this.emptyTile.bind(this)),
-			new DevToolButton (this, '', 'Bucket Fill (F)', 'fill an area with the selected tile', 'fill', 0, 68, 56, toolButtonsContainer, this.fill.bind(this))
+			new DevToolButton (this, '', 'Bucket Fill (F)', 'fill an area with the selected tile', 'fill', 0, 68, 56, toolButtonsContainer, this.fill.bind(this)),
+			new DevToolButton (this, 'XX', 'Clear Layer (L)', 'clear selected layer', null, 60, 68, 56, toolButtonsContainer, this.clear.bind(this))
 		)
 		this.cursorButton = this.modeButtons[0];
 		this.highlightModeButton(0);
@@ -217,6 +218,12 @@ class DevModeTools extends Phaser.GameObjects.Container {
 				this.fill();
 			}
 		});
+		const lKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.L, false);
+		lKey.on('down', () => {
+			if(taro.developerMode.active && taro.developerMode.activeTab === 'map') {
+				this.clear();
+			}
+		});
 		const oneKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE, false);
 		oneKey.on('down', () => {
 			if(taro.developerMode.active && taro.developerMode.activeTab === 'map' && !altKey.isDown) {
@@ -307,6 +314,12 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.scene.regionEditor.regionTool = false;
 		this.selectSingle();
 		this.highlightModeButton(4);
+	}
+
+	clear(): void {
+		const gameMap = this.scene.gameScene.tilemap;
+		//this.tileEditor.clearLayer(gameMap.currentLayerIndex, false);
+		taro.network.send('editTile', {gid: 0, layer: gameMap.currentLayerIndex, x: 0, y: 0, tool: 'clear'});
 	}
 
 	highlightModeButton(n: number): void {
