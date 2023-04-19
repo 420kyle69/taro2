@@ -92,6 +92,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 			new DevToolButton (this, 'trees', 'Layer (4)', 'select the Trees layer', null, h+s, (h+s) * 7, h*2 + 25, toolButtonsContainer, this.switchLayer.bind(this), 3)
 		)
 		this.layerButtons[0].highlight('active');
+		this.layerButtons[0].increaseSize(true);
 		this.layerHideButtons = [];
 		this.layerHideButtons.push (
 			new DevToolButton (this, '', 'Layer visibility (shift-1)', 'show/hide floor layer', 'eyeopen', 0, (h+s) * 10, h*2 - 25, toolButtonsContainer, this.hideLayer.bind(this), 0),
@@ -100,6 +101,8 @@ class DevModeTools extends Phaser.GameObjects.Container {
 			new DevToolButton (this, '', 'Layer visibility (shift-4)', 'show/hide trees layer', 'eyeopen', 0, (h+s) * 7, h*2 - 25, toolButtonsContainer, this.hideLayer.bind(this), 3)
 		)
 		this.layerHideButtons[0].highlight('active');
+		this.layerHideButtons[0].increaseSize(true);
+		
 
 		this.paletteButton = new DevToolButton (this, 'palette', 'Palette', 'show/hide palette', null, 0, (h+s) * 12, h*4, toolButtonsContainer, palette.toggle.bind(palette));
 
