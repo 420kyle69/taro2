@@ -44,16 +44,24 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		const s = this.BUTTON_INTERSPACE;
 
 		this.scene.scale.on(Phaser.Scale.Events.RESIZE, () => {
-			toolButtonsContainer.x = palette.camera.x + palette.paletteWidth - (h+s) * 3 + s;
-			toolButtonsContainer.y = palette.camera.y - (h+s) * 13;
+			toolButtonsContainer.height = (h+s) * 13;
+			if (toolButtonsContainer.height > this.scene.sys.game.canvas.height * 0.5) {
+				toolButtonsContainer.scale = (this.scene.sys.game.canvas.height * 0.5) / toolButtonsContainer.height;
+			}
+			toolButtonsContainer.x = palette.camera.x + palette.paletteWidth - ((h*4) * toolButtonsContainer.scale) + 22;
+			toolButtonsContainer.y = palette.camera.y - (toolButtonsContainer.height * toolButtonsContainer.scale);
 		});
 
 		new DevToolButton (this, '+', '+', 'Zoom in (+)', null, 0, -(h+s), h, palette.scrollBarContainer, palette.zoom.bind(palette), -1);
 		new DevToolButton (this, '-', '-', 'Zoom out (-)', null, h+s, -(h+s), h, palette.scrollBarContainer, palette.zoom.bind(palette), 1);
 
 		const toolButtonsContainer = this.toolButtonsContainer = new Phaser.GameObjects.Container(scene);
-		toolButtonsContainer.x = palette.camera.x + palette.paletteWidth - (h+s) * 3 + s;
-		toolButtonsContainer.y = palette.camera.y - (h+s) * 13;
+		toolButtonsContainer.height = (h+s) * 13;
+		if (toolButtonsContainer.height > this.scene.sys.game.canvas.height * 0.5) {
+			toolButtonsContainer.scale = (this.scene.sys.game.canvas.height * 0.5) / toolButtonsContainer.height;
+		}
+		toolButtonsContainer.x = palette.camera.x + palette.paletteWidth - ((h*4) * toolButtonsContainer.scale) + 22;
+		toolButtonsContainer.y = palette.camera.y - (toolButtonsContainer.height * toolButtonsContainer.scale);
 		scene.add.existing(toolButtonsContainer);
 
 		this.modeButtons = [];
@@ -64,7 +72,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 			new DevToolButton (this, '', 'Eraser (E)', 'delete tiles from selected layer', 'eraser', h*2, h+s, h*2 - s, toolButtonsContainer, this.emptyTile.bind(this)),
 			new DevToolButton (this, '', 'Bucket Fill (F)', 'fill an area with the selected tile', 'fill', 0, (h+s) * 2, h*2 - s, toolButtonsContainer, this.fill.bind(this)),
 			new DevToolButton (this, 'XX', 'Clear Layer (L)', 'clear selected layer', null, h*2, (h+s) * 2, h*2 - s, toolButtonsContainer, this.clear.bind(this)),
-			new DevToolButton (this, 'S', 'Save Map (S)', 'save all changes', null, 0, (h+s) * 3, h*2 - s, toolButtonsContainer, this.save.bind(this))
+			new DevToolButton (this, '', 'Save Map (S)', 'save all changes', 'save', 0, (h+s) * 3, h*2 - s, toolButtonsContainer, this.save.bind(this))
 		)
 		this.cursorButton = this.modeButtons[0];
 		this.highlightModeButton(0);
