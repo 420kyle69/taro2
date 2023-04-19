@@ -17,11 +17,7 @@ class DevToolButton {
 		func: (...args: any[]) => void,
 		value?: number
 	) {
-		//const text = '+';
-		//const w = 30;
-		const h = 30;
-		//const x = 0;
-		//const y = -h -1;
+		const h = devModeTools.BUTTON_HEIGHT;
 		const scene = devModeTools.scene;
 		const button = this.button = scene.add.rectangle(x + w/2, y + h/2, w, h, devModeTools.COLOR_WHITE);
 		button.setInteractive();

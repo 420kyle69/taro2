@@ -52,7 +52,6 @@ var DeveloperMode = /** @class */ (function () {
                 taro.map.data.layers[serverData.layer].data[serverData.y * width + serverData.x] = serverData.gid;
             }
             if (gameMap.layers[serverData.layer].name === 'walls') {
-                console.log('walls changed');
                 //if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
                 taro.physics.destroyWalls();
                 var map = taro.scaleMap(_.cloneDeep(gameMap));
