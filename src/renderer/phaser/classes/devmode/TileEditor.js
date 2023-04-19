@@ -125,7 +125,6 @@ var TileEditor = /** @class */ (function () {
             map.layers[data.layer].data[data.y * width + data.x] = data.gid;
         }
         if (taro.physics && map.layers[data.layer].name === 'walls') {
-            console.log('walls changed');
             //if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
             taro.physics.destroyWalls();
             var mapCopy = taro.scaleMap(_.cloneDeep(map));
@@ -216,7 +215,6 @@ var TileEditor = /** @class */ (function () {
         }
     };
     TileEditor.prototype.clearLayer = function (layer, fromServer) {
-        console.log('clear layer', layer);
         if (fromServer) {
             var map = taro.game.data.map;
             inGameEditor.mapWasEdited && inGameEditor.mapWasEdited();

@@ -99,6 +99,8 @@ class DevModeScene extends PhaserScene {
 		this.load.image('eyeopen', 'https://cache.modd.io/asset/spriteImage/1669820752914_eyeopen.png');
 		this.load.image('eyeclosed', 'https://cache.modd.io/asset/spriteImage/1669821066279_eyeclosed.png');
 		this.load.image('fill', 'https://cache.modd.io/asset/spriteImage/1675428550006_fill_(1).png');
+		this.load.image('clear', 'https://cache.modd.io/asset/spriteImage/1681917489086_layerClear.png');
+		this.load.image('save', 'https://cache.modd.io/asset/spriteImage/1681916834218_saveIcon.png');
 		
 
 		this.load.scenePlugin(
