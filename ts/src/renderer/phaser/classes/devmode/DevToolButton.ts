@@ -1,4 +1,5 @@
 class DevToolButton {
+	name: string;
 	button: Phaser.GameObjects.Rectangle;
 	active: boolean;
 	hidden: boolean;
@@ -17,6 +18,7 @@ class DevToolButton {
 		func: (...args: any[]) => void,
 		value?: number
 	) {
+		this.name = text;
 		const h = devModeTools.BUTTON_HEIGHT;
 		const scene = devModeTools.scene;
 		const button = this.button = scene.add.rectangle(x + w/2, y + h/2, w, h, devModeTools.COLOR_WHITE);

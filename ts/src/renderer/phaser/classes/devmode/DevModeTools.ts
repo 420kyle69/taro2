@@ -86,18 +86,18 @@ class DevModeTools extends Phaser.GameObjects.Container {
 
 		this.layerButtons = [];
 		this.layerButtons.push (
-			new DevToolButton (this, 'trees', 'Layer (4)', 'select the Trees layer', null, h+s, (h+s) * 7, h*2 + 25, toolButtonsContainer, this.switchLayer.bind(this), 3),
-			new DevToolButton (this, 'walls', 'Layer (3)', 'select the Walls layer', null, h+s, (h+s) * 8, h*2 + 25, toolButtonsContainer, this.switchLayer.bind(this), 2),
+			new DevToolButton (this, 'floor', 'Layer (1)', 'select the Floor layer', null, h+s, (h+s) * 10, h*2 + 25, toolButtonsContainer, this.switchLayer.bind(this), 0),
 			new DevToolButton (this, 'floor2', 'Layer (2)', 'select the Floor 2 layer', null, h+s, (h+s) * 9, h*2 + 25, toolButtonsContainer, this.switchLayer.bind(this), 1),
-			new DevToolButton (this, 'floor', 'Layer (1)', 'select the Floor layer', null, h+s, (h+s) * 10, h*2 + 25, toolButtonsContainer, this.switchLayer.bind(this), 0)
+			new DevToolButton (this, 'walls', 'Layer (3)', 'select the Walls layer', null, h+s, (h+s) * 8, h*2 + 25, toolButtonsContainer, this.switchLayer.bind(this), 2),
+			new DevToolButton (this, 'trees', 'Layer (4)', 'select the Trees layer', null, h+s, (h+s) * 7, h*2 + 25, toolButtonsContainer, this.switchLayer.bind(this), 3)
 		)
 		this.layerButtons[0].highlight('active');
 		this.layerHideButtons = [];
 		this.layerHideButtons.push (
-			new DevToolButton (this, '', 'Layer visibility (shift-4)', 'show/hide trees layer', 'eyeopen', 0, (h+s) * 7, h*2 - 25, toolButtonsContainer, this.hideLayer.bind(this), 3),
-			new DevToolButton (this, '', 'Layer visibility (shift-3)', 'show/hide walls layer', 'eyeopen', 0, (h+s) * 8, h*2 - 25, toolButtonsContainer, this.hideLayer.bind(this), 2),
+			new DevToolButton (this, '', 'Layer visibility (shift-1)', 'show/hide floor layer', 'eyeopen', 0, (h+s) * 10, h*2 - 25, toolButtonsContainer, this.hideLayer.bind(this), 0),
 			new DevToolButton (this, '', 'Layer visibility (shift-2)', 'show/hide floor 2 layer', 'eyeopen', 0, (h+s) * 9, h*2 - 25, toolButtonsContainer, this.hideLayer.bind(this), 1),
-			new DevToolButton (this, '', 'Layer visibility (shift-1)', 'show/hide floor layer', 'eyeopen', 0, (h+s) * 10, h*2 - 25, toolButtonsContainer, this.hideLayer.bind(this), 0)
+			new DevToolButton (this, '', 'Layer visibility (shift-3)', 'show/hide walls layer', 'eyeopen', 0, (h+s) * 8, h*2 - 25, toolButtonsContainer, this.hideLayer.bind(this), 2),
+			new DevToolButton (this, '', 'Layer visibility (shift-4)', 'show/hide trees layer', 'eyeopen', 0, (h+s) * 7, h*2 - 25, toolButtonsContainer, this.hideLayer.bind(this), 3)
 		)
 		this.layerHideButtons[0].highlight('active');
 
@@ -325,6 +325,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 
 	clear(): void {
 		const gameMap = this.scene.gameScene.tilemap;
+		console.log('clear layer', this.layerButtons[gameMap.currentLayerIndex].name)
 		//this.tileEditor.clearLayer(gameMap.currentLayerIndex, false);
 		taro.network.send('editTile', {gid: 0, layer: gameMap.currentLayerIndex, x: 0, y: 0, tool: 'clear'});
 	}
