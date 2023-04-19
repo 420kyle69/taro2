@@ -329,7 +329,6 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	clear(): void {
 		const gameMap = this.scene.gameScene.tilemap;
 		console.log('clear layer', this.layerButtons[gameMap.currentLayerIndex].name)
-		//this.tileEditor.clearLayer(gameMap.currentLayerIndex, false);
 		taro.network.send('editTile', {gid: 0, layer: gameMap.currentLayerIndex, x: 0, y: 0, tool: 'clear'});
 	}
 

@@ -130,7 +130,7 @@ class TileEditor {
 			const oldTile = map.layers[tempLayer].data[data.y * width + data.x];
 			this.floodFill(data.layer, oldTile, data.gid, data.x, data.y, true);
 		} else if (data.tool === 'clear') {
-			this.clearLayer(data.layer, true);
+			this.clearLayer(data.layer);
 			if (map.layers.length > 4 && data.layer >= 2) data.layer ++;
 		}
 		else {
@@ -236,33 +236,22 @@ class TileEditor {
 		}
 	}
 
-	clearLayer (layer: number, fromServer: boolean): void {
-		if (fromServer) {
-			const map = taro.game.data.map;
-			inGameEditor.mapWasEdited && inGameEditor.mapWasEdited();
-			const tileMap = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
-			const width = map.width;
-			//fix for debris layer
-			let tempLayer = layer;
-			if (map.layers.length > 4 && layer >= 2) {
-				tempLayer ++;
-			}
-			for (let i = 0; i < map.width; i++) {
-				for (let j = 0; j < map.height; j++) {
-					if (map.layers[tempLayer].data[j * width + i] !== 0) {
-						tileMap.putTileAt(-1, i, j, false, layer);
-						//save tile change to taro.game.map.data
-						map.layers[tempLayer].data[j*width + i] = 0;
-					}
-				}
-			}
-		} else {
-			const tileMap = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
-			for (let i = 0; i < tileMap.width; i++) {
-				for (let j = 0; j < tileMap.height; j++) {
-					if (tileMap.getTileAt(i, j, true, layer).index !== 0) {
-						tileMap.putTileAt(-1, i, j, false, layer);
-					}
+	clearLayer (layer: number): void {
+		const map = taro.game.data.map;
+		inGameEditor.mapWasEdited && inGameEditor.mapWasEdited();
+		const tileMap = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
+		const width = map.width;
+		//fix for debris layer
+		let tempLayer = layer;
+		if (map.layers.length > 4 && layer >= 2) {
+			tempLayer ++;
+		}
+		for (let i = 0; i < map.width; i++) {
+			for (let j = 0; j < map.height; j++) {
+				if (map.layers[tempLayer].data[j * width + i] !== 0) {
+					tileMap.putTileAt(-1, i, j, false, layer);
+					//save tile change to taro.game.map.data
+					map.layers[tempLayer].data[j*width + i] = 0;
 				}
 			}
 		}
