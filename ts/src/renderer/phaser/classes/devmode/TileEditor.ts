@@ -33,7 +33,7 @@ class TileEditor {
 		this.startDragIn = 'none';
 
 		devModeScene.input.on('pointerdown', (p) => {
-			if (!devModeScene.pointerInsideButtons() && 
+			if (!devModeScene.pointerInsideButtons && 
 				!devModeScene.pointerInsideWidgets() &&
 				palette.visible	&& devModeScene.pointerInsidePalette()) {
 					this.startDragIn = 'palette';
@@ -43,7 +43,7 @@ class TileEditor {
 		});
 
 		gameScene.input.on('pointerdown', (p) => {
-			if (!devModeScene.pointerInsideButtons() && 
+			if (!devModeScene.pointerInsideButtons && 
 				!devModeScene.pointerInsideWidgets() && 
 				(palette.visible || devModeScene.pointerInsidePalette()) &&
 				this.gameScene.tilemap.currentLayerIndex >=0 && 
@@ -129,7 +129,11 @@ class TileEditor {
 			}
 			const oldTile = map.layers[tempLayer].data[data.y * width + data.x];
 			this.floodFill(data.layer, oldTile, data.gid, data.x, data.y, true);
-		} else {
+		} else if (data.tool === 'clear') {
+			this.clearLayer(data.layer);
+			if (map.layers.length > 4 && data.layer >= 2) data.layer ++;
+		}
+		else {
 			let index = data.gid;
 			if (data.gid === 0) index = -1;
 			tileMap.putTileAt(index, data.x, data.y, false, data.layer);
@@ -232,6 +236,27 @@ class TileEditor {
 		}
 	}
 
+	clearLayer (layer: number): void {
+		const map = taro.game.data.map;
+		inGameEditor.mapWasEdited && inGameEditor.mapWasEdited();
+		const tileMap = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
+		const width = map.width;
+		//fix for debris layer
+		let tempLayer = layer;
+		if (map.layers.length > 4 && layer >= 2) {
+			tempLayer ++;
+		}
+		for (let i = 0; i < map.width; i++) {
+			for (let j = 0; j < map.height; j++) {
+				if (map.layers[tempLayer].data[j * width + i] !== 0) {
+					tileMap.putTileAt(-1, i, j, false, layer);
+					//save tile change to taro.game.map.data
+					map.layers[tempLayer].data[j*width + i] = 0;
+				}
+			}
+		}
+	}
+
     update (): void {
         if(taro.developerMode.active && taro.developerMode.activeTab === 'map') {
             const devModeScene = this.devModeTools.scene;
@@ -261,8 +286,8 @@ class TileEditor {
 				paletteMarker.graphics.y = paletteMap.tileToWorldY(palettePointerTileY);
 
 			} else if ((!devModeScene.pointerInsidePalette() || !palette.visible) &&
-				!devModeScene.pointerInsideButtons() && !devModeScene.pointerInsideWidgets() && marker.active && map.currentLayerIndex >=0) {
-
+				!devModeScene.pointerInsideButtons && !devModeScene.pointerInsideWidgets() && marker.active && map.currentLayerIndex >=0) {
+				this.devModeTools.tooltip.showMessage('Position', 'X: ' + Math.floor(worldPoint.x).toString() + ', Y: ' + Math.floor(worldPoint.y).toString());
 				paletteMarker.graphics.setVisible(false);
 				marker.graphics.setVisible(true);
 				marker.showPreview(true);

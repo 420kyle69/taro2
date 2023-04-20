@@ -13,7 +13,7 @@ var TileEditor = /** @class */ (function () {
         var pointerPosition = { x: 0, y: 0 };
         this.startDragIn = 'none';
         devModeScene.input.on('pointerdown', function (p) {
-            if (!devModeScene.pointerInsideButtons() &&
+            if (!devModeScene.pointerInsideButtons &&
                 !devModeScene.pointerInsideWidgets() &&
                 palette.visible && devModeScene.pointerInsidePalette()) {
                 _this.startDragIn = 'palette';
@@ -22,7 +22,7 @@ var TileEditor = /** @class */ (function () {
             }
         });
         gameScene.input.on('pointerdown', function (p) {
-            if (!devModeScene.pointerInsideButtons() &&
+            if (!devModeScene.pointerInsideButtons &&
                 !devModeScene.pointerInsideWidgets() &&
                 (palette.visible || devModeScene.pointerInsidePalette()) &&
                 _this.gameScene.tilemap.currentLayerIndex >= 0 &&
@@ -107,6 +107,11 @@ var TileEditor = /** @class */ (function () {
             }
             var oldTile = map.layers[tempLayer].data[data.y * width + data.x];
             this.floodFill(data.layer, oldTile, data.gid, data.x, data.y, true);
+        }
+        else if (data.tool === 'clear') {
+            this.clearLayer(data.layer);
+            if (map.layers.length > 4 && data.layer >= 2)
+                data.layer++;
         }
         else {
             var index = data.gid;
@@ -209,6 +214,26 @@ var TileEditor = /** @class */ (function () {
             }
         }
     };
+    TileEditor.prototype.clearLayer = function (layer) {
+        var map = taro.game.data.map;
+        inGameEditor.mapWasEdited && inGameEditor.mapWasEdited();
+        var tileMap = this.gameScene.tilemap;
+        var width = map.width;
+        //fix for debris layer
+        var tempLayer = layer;
+        if (map.layers.length > 4 && layer >= 2) {
+            tempLayer++;
+        }
+        for (var i = 0; i < map.width; i++) {
+            for (var j = 0; j < map.height; j++) {
+                if (map.layers[tempLayer].data[j * width + i] !== 0) {
+                    tileMap.putTileAt(-1, i, j, false, layer);
+                    //save tile change to taro.game.map.data
+                    map.layers[tempLayer].data[j * width + i] = 0;
+                }
+            }
+        }
+    };
     TileEditor.prototype.update = function () {
         if (taro.developerMode.active && taro.developerMode.activeTab === 'map') {
             var devModeScene = this.devModeTools.scene;
@@ -234,7 +259,8 @@ var TileEditor = /** @class */ (function () {
                 paletteMarker.graphics.y = paletteMap.tileToWorldY(palettePointerTileY);
             }
             else if ((!devModeScene.pointerInsidePalette() || !palette.visible) &&
-                !devModeScene.pointerInsideButtons() && !devModeScene.pointerInsideWidgets() && marker.active && map.currentLayerIndex >= 0) {
+                !devModeScene.pointerInsideButtons && !devModeScene.pointerInsideWidgets() && marker.active && map.currentLayerIndex >= 0) {
+                this.devModeTools.tooltip.showMessage('Position', 'X: ' + Math.floor(worldPoint.x).toString() + ', Y: ' + Math.floor(worldPoint.y).toString());
                 paletteMarker.graphics.setVisible(false);
                 marker.graphics.setVisible(true);
                 marker.showPreview(true);
