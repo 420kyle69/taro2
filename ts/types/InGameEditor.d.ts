@@ -3,4 +3,5 @@ declare class InGameEditor extends TaroClass {
     updateRegionInReact: any
     mapWasEdited: any
     showClearLayerConfirmation: any
+    saveMap: any
 }

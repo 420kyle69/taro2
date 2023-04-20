@@ -330,7 +330,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	}
 
 	save(): void {
-		console.log('save map');
+		inGameEditor.saveMap();
 	}
 
 	highlightModeButton(n: number): void {

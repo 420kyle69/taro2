@@ -289,10 +289,10 @@ var DevModeTools = /** @class */ (function (_super) {
     DevModeTools.prototype.clear = function () {
         var gameMap = this.scene.gameScene.tilemap;
         //this.tileEditor.clearLayer(gameMap.currentLayerIndex, false);
-        taro.network.send('editTile', { gid: 0, layer: gameMap.currentLayerIndex, x: 0, y: 0, tool: 'clear' });
+        inGameEditor.showClearLayerConfirmation({ gid: 0, layer: gameMap.currentLayerIndex, x: 0, y: 0, tool: 'clear' });
     };
     DevModeTools.prototype.save = function () {
-        console.log('save map');
+        inGameEditor.saveMap();
     };
     DevModeTools.prototype.highlightModeButton = function (n) {
         this.modeButtons.forEach(function (button, index) {
