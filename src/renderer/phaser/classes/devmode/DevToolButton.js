@@ -1,6 +1,7 @@
 var DevToolButton = /** @class */ (function () {
     function DevToolButton(devModeTools, text, tooltipLabel, tooltipText, texture, x, y, w, container, func, value) {
         this.devModeTools = devModeTools;
+        this.name = text;
         var h = devModeTools.BUTTON_HEIGHT;
         var scene = devModeTools.scene;
         var button = this.button = scene.add.rectangle(x + w / 2, y + h / 2, w, h, devModeTools.COLOR_WHITE);
@@ -61,7 +62,7 @@ var DevToolButton = /** @class */ (function () {
         }
     };
     DevToolButton.prototype.increaseSize = function (value) {
-        this.button.setScale(1 + (Number(value) * 0.3), 1 + (Number(value) * 0.15));
+        this.button.setScale(1 + (Number(value) * 0.2), 1 + (Number(value) * 0.10));
         /*if (value) {
             this.button.setStrokeStyle(2, 0x000000, 1);
         }
