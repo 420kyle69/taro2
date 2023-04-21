@@ -51,12 +51,12 @@ class TileMarker {
 		return image;
 	}
 
-	changeImage (tile: Phaser.Tilemaps.Tile, i: number, j: number): void {
-		if (tile && tile.index !== 0) {
+	changeImage (tile: number, i: number, j: number): void {
+		if (tile && tile !== 0) {
 			if (!this.images[i][j])  {
 				this.images[i][j] = this.addImage(i, j);
 			} 
-			this.images[i][j].setTexture(this.extrudedKey, tile.index - 1).setAlpha(0.75);
+			this.images[i][j].setTexture(this.extrudedKey, tile - 1).setAlpha(0.75);
 		} else if (this.images[i][j]) this.images[i][j].setAlpha(0);
 	}
 

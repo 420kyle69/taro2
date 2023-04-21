@@ -13,17 +13,6 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 var DevModeTools = /** @class */ (function (_super) {
     __extends(DevModeTools, _super);
     function DevModeTools(scene) {
@@ -270,8 +259,8 @@ var DevModeTools = /** @class */ (function (_super) {
         if (!this.modeButtons[3].active) {
             this.tileEditor.lastSelectedTile = this.tileEditor.selectedTile;
             this.tileEditor.lastSelectedTileArea = this.tileEditor.selectedTileArea;
-            var copy = __assign({}, this.tileEditor.selectedTile);
-            copy.index = -1;
+            //const copy = this.tileEditor.selectedTile;
+            var copy = -1;
             this.tileEditor.selectedTile = copy;
             this.tileEditor.selectedTileArea = [[copy, copy], [copy, copy]];
             this.tileEditor.activateMarkers(true);
@@ -308,12 +297,7 @@ var DevModeTools = /** @class */ (function (_super) {
         });
     };
     DevModeTools.prototype.selectSingle = function () {
-        for (var i = 0; i < this.tileEditor.area.x; i++) {
-            for (var j = 0; j < this.tileEditor.area.y; j++) {
-                if (this.tileEditor.selectedTileArea[i][j])
-                    this.tileEditor.selectedTileArea[i][j].tint = 0xffffff;
-            }
-        }
+        this.tileEditor.clearTint();
         this.tileEditor.area = { x: 1, y: 1 };
         this.brushButtons[0].highlight('active');
         this.brushButtons[1].highlight('no');
@@ -325,8 +309,7 @@ var DevModeTools = /** @class */ (function (_super) {
         }
     };
     DevModeTools.prototype.selectArea = function () {
-        if (this.tileEditor.selectedTile)
-            this.tileEditor.selectedTile.tint = 0xffffff;
+        this.tileEditor.clearTint();
         this.tileEditor.area = { x: 2, y: 2 };
         this.brushButtons[1].highlight('active');
         this.brushButtons[0].highlight('no');
