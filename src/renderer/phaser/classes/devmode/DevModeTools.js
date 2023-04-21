@@ -134,9 +134,9 @@ var DevModeTools = /** @class */ (function (_super) {
         tabKey.on('down', function (key) {
             var isInputModalPresent = _this.checkIfInputModalPresent();
             if (!isInputModalPresent) {
-                return key.originalEvent.preventDefault();
+                key.originalEvent.preventDefault();
             }
-            if (taro.developerMode.active && taro.developerMode.activeTab === 'map') {
+            if (!isInputModalPresent && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
                 if (_this.palette.visible) {
                     _this.palette.hide();
                 }

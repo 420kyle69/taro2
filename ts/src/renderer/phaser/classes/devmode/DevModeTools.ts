@@ -169,10 +169,10 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		tabKey.on('down', (key) => {
 			const isInputModalPresent = this.checkIfInputModalPresent();
 			if (!isInputModalPresent) {
-				return key.originalEvent.preventDefault();
+				key.originalEvent.preventDefault();
 			}
 
-			if(taro.developerMode.active && taro.developerMode.activeTab === 'map') {
+			if(!isInputModalPresent && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
 				if (this.palette.visible) {
 					this.palette.hide();
 				}
