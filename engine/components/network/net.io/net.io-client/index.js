@@ -116,6 +116,8 @@ NetIo.Client = NetIo.EventingClass.extend({
 	},
 
 	disconnect: function (reason) {
+		console.log("disconnected with reason", reason)
+		console.trace();
 		this._socket.close(1000, reason);
 		// this.emit('_taroStreamDestroy');
 	},
