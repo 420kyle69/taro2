@@ -43,6 +43,10 @@ var TileMarker = /** @class */ (function () {
                 this.images[i][j] = this.addImage(i, j);
             }
             this.images[i][j].setTexture(this.extrudedKey, tile - 1).setAlpha(0.75);
+            // apply tint to palette tile
+            var paletteLayer = this.devModeScene.tileEditor.tilePalette.map.layers[0];
+            var row = Math.floor((tile - 1) / paletteLayer.width);
+            paletteLayer.data[row][tile - 1 - (row * paletteLayer.width)].tint = 0x87cfff;
         }
         else if (this.images[i][j])
             this.images[i][j].setAlpha(0);

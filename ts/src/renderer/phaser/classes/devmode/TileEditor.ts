@@ -58,7 +58,6 @@ class TileEditor {
 		});
 
 		devModeScene.input.on('pointerup', (p) => {
-			console.log('pointerup', this.startDragIn)
 			if (this.startDragIn === 'palette' && 
 				Math.abs(pointerPosition.x - devModeScene.input.activePointer.x) < 50 &&
 				Math.abs(pointerPosition.y - devModeScene.input.activePointer.y) < 50) {
@@ -75,12 +74,9 @@ class TileEditor {
 							}
 							this.marker.changePreview();
 						} else {
-							if (this.devModeTools.scene.pointerInsideMap(palettePointerTileX, palettePointerTileY, palette.map)) {
-								console.log('pointer inside map')
-								this.clearTint();
-								this.selectedTile = this.getTile(palettePointerTileX, palettePointerTileY, palette.map);
-								this.marker.changePreview();
-							}
+							this.clearTint();
+							this.selectedTile = this.getTile(palettePointerTileX, palettePointerTileY, palette.map);
+							this.marker.changePreview();
 						}
 				}
 			if (this.startDragIn === 'palette') {
@@ -105,11 +101,9 @@ class TileEditor {
 						}
 						this.marker.changePreview();
 					} else {
-						if (this.devModeTools.scene.pointerInsideMap(pointerTileX, pointerTileY, gameMap)) {
-							this.clearTint();
-							this.selectedTile = this.getTile(pointerTileX, pointerTileY, gameMap);
-							this.marker.changePreview();
-						}
+						this.clearTint();
+						this.selectedTile = this.getTile(pointerTileX, pointerTileY, gameMap);
+						this.marker.changePreview();
 					}
 				}
 			if (this.startDragIn === 'map') {
@@ -193,9 +187,6 @@ class TileEditor {
 		if (this.devModeTools.scene.pointerInsideMap(tileX, tileY, map)) {
 			if (map.getTileAt(tileX, tileY) && map.getTileAt(tileX, tileY).index !== 0) {
 				let selectedTile = map.getTileAt(tileX, tileY);
-				if (map === this.tilePalette.map) {
-					selectedTile.tint = 0x87cfff;
-				}
 				return selectedTile.index;
 			}
 		}

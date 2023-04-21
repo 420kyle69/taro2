@@ -34,7 +34,6 @@ var TileEditor = /** @class */ (function () {
             }
         });
         devModeScene.input.on('pointerup', function (p) {
-            console.log('pointerup', _this.startDragIn);
             if (_this.startDragIn === 'palette' &&
                 Math.abs(pointerPosition.x - devModeScene.input.activePointer.x) < 50 &&
                 Math.abs(pointerPosition.y - devModeScene.input.activePointer.y) < 50) {
@@ -53,12 +52,9 @@ var TileEditor = /** @class */ (function () {
                     _this.marker.changePreview();
                 }
                 else {
-                    if (_this.devModeTools.scene.pointerInsideMap(palettePointerTileX, palettePointerTileY, palette.map)) {
-                        console.log('pointer inside map');
-                        _this.clearTint();
-                        _this.selectedTile = _this.getTile(palettePointerTileX, palettePointerTileY, palette.map);
-                        _this.marker.changePreview();
-                    }
+                    _this.clearTint();
+                    _this.selectedTile = _this.getTile(palettePointerTileX, palettePointerTileY, palette.map);
+                    _this.marker.changePreview();
                 }
             }
             if (_this.startDragIn === 'palette') {
@@ -83,11 +79,9 @@ var TileEditor = /** @class */ (function () {
                     _this.marker.changePreview();
                 }
                 else {
-                    if (_this.devModeTools.scene.pointerInsideMap(pointerTileX, pointerTileY, gameMap)) {
-                        _this.clearTint();
-                        _this.selectedTile = _this.getTile(pointerTileX, pointerTileY, gameMap);
-                        _this.marker.changePreview();
-                    }
+                    _this.clearTint();
+                    _this.selectedTile = _this.getTile(pointerTileX, pointerTileY, gameMap);
+                    _this.marker.changePreview();
                 }
             }
             if (_this.startDragIn === 'map') {
@@ -172,9 +166,6 @@ var TileEditor = /** @class */ (function () {
         if (this.devModeTools.scene.pointerInsideMap(tileX, tileY, map)) {
             if (map.getTileAt(tileX, tileY) && map.getTileAt(tileX, tileY).index !== 0) {
                 var selectedTile = map.getTileAt(tileX, tileY);
-                if (map === this.tilePalette.map) {
-                    selectedTile.tint = 0x87cfff;
-                }
                 return selectedTile.index;
             }
         }
