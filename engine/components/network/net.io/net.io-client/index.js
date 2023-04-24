@@ -110,37 +110,41 @@ NetIo.Client = NetIo.EventingClass.extend({
 		
 		this._socket = new WebSocket(wsUrl, 'netio1');
 		
-		const tracer = window.newrelic && window.newrelic.interaction().createTracer('gs-websocket-request', () => {
-			return {
-				url: wsUrl,
-				state: this._socket.readyState,
-				distinctId,
-				gameSlug,
-				serverName: taro.client.server.name,
-				serverUrl: taro.client.server.url
-			};
-		});
-		
-		const traceWsReq = () => {
-			if (typeof tracer === 'function') {
-				tracer();
+		const wsStartTime = Date.now();
+		const startTime = performance.now();
+
+		const traceWsReq = (action) => {
+			const endTime = performance.now();
+			if (window.newrelic) {
+				window.newrelic.addPageAction('gs-websocket-connect', {
+					wsUrl: wsUrl,
+					wsAction: action,
+					wsState: this._socket.readyState,
+					wsDistinctId: distinctId,
+					wsGameSlug: gameSlug,
+					wsServerName: taro.client.server.name,
+					wsServerUrl: taro.client.server.url,
+					wsLatency: endTime - startTime,
+					wsStartTime,
+					wsEndTime: Date.now()
+				});
 			}
 		};
 		
 		// Setup event listeners
 		this._socket.onopen = function () {
-			traceWsReq();
+			traceWsReq('onopen');
 			self._onOpen.apply(self, arguments); 
 		};
 		this._socket.onmessage = function () {
 			self._onData.apply(self, arguments); 
 		};
 		this._socket.onclose = function () {
-			traceWsReq();
+			traceWsReq('onclose');
 			self._onClose.apply(self, arguments); 
 		};
 		this._socket.onerror = function () {
-			traceWsReq();
+			traceWsReq('onerror');
 			self._onError.apply(self, arguments); 
 		};
 	},
