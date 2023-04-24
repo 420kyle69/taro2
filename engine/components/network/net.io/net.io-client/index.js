@@ -108,23 +108,25 @@ NetIo.Client = NetIo.EventingClass.extend({
 		
 		const wsUrl = `${url}?token=${gsAuthToken}&sid=${taro.client.server.id}&distinctId=${distinctId}`;
 		
-		this._socket = new WebSocket(wsUrl, 'netio1');
-		
 		const wsStartTime = Date.now();
-		const startTime = performance.now();
+		const startTimeSinceLoad = performance.now();
+
+		this._socket = new WebSocket(wsUrl, 'netio1');
 
 		const traceWsReq = (action) => {
-			const endTime = performance.now();
+			const endTimeSinceLoad = performance.now();
 			if (window.newrelic) {
 				window.newrelic.addPageAction('gs-websocket-connect', {
 					wsUrl: wsUrl,
 					wsAction: action,
 					wsState: this._socket.readyState,
-					wsDistinctId: distinctId,
+					wsUserId: userId,
 					wsGameSlug: gameSlug,
 					wsServerName: taro.client.server.name,
 					wsServerUrl: taro.client.server.url,
-					wsLatency: endTime - startTime,
+					wsLatency: endTimeSinceLoad - startTimeSinceLoad,
+					wsStartTimeSinceLoad: startTimeSinceLoad,
+					wsEndTimeSinceLoad: endTimeSinceLoad,
 					wsStartTime,
 					wsEndTime: Date.now()
 				});
