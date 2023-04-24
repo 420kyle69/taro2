@@ -133,7 +133,6 @@ const Client = TaroEventingClass.extend({
 						game.defaultData = game;
 
 						for (let [key, value] of Object.entries(game)) {
-
 							data['data'][key] = value;
 						}
 
@@ -171,13 +170,12 @@ const Client = TaroEventingClass.extend({
 			if (taro.isMobile) {
 				taro.addComponent(MobileControlsComponent);
 			}
+
+			this.configureEngine();
 		})
-			.catch((err) => {
-				console.error(err);
-			})
-			.finally(() => {
-				this.configureEngine();
-			});
+		.catch((err) => {
+			console.error(err);
+		})
 
 		// these were under separate conditionals before. idk why.
 		if (mode == 'play') {
@@ -256,7 +254,7 @@ const Client = TaroEventingClass.extend({
 		this.physicsConfigLoaded.resolve();
 	},
 
-	loadMap: function() {
+	 loadMap: function() {
 		//we need the contents of physicsConfig to progress
 		taro.addComponent(MapComponent);
 		taro.addComponent(RegionManager);
