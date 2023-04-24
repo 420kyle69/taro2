@@ -300,7 +300,9 @@ class TileEditor {
 
 			} else if ((!devModeScene.pointerInsidePalette() || !palette.visible) &&
 				!devModeScene.pointerInsideButtons && !devModeScene.pointerInsideWidgets() && marker.active && map.currentLayerIndex >=0) {
-				this.devModeTools.tooltip.showMessage('Position', 'X: ' + Math.floor(worldPoint.x).toString() + ', Y: ' + Math.floor(worldPoint.y).toString());
+
+				this.devModeTools.tooltip.showMessage('Position', 'X: ' + Math.floor(worldPoint.x).toString() + ', Y: ' + Math.floor(worldPoint.y).toString());	
+
 				paletteMarker.graphics.setVisible(false);
 				marker.graphics.setVisible(true);
 				marker.showPreview(true);
@@ -336,6 +338,8 @@ class TileEditor {
 						
 					}
 				}
+			} else if (!marker.active) {
+				this.devModeTools.tooltip.showMessage('Position', 'X: ' + Math.floor(worldPoint.x).toString() + ', Y: ' + Math.floor(worldPoint.y).toString());
 			} else {
 				this.showMarkers(false);
 			}

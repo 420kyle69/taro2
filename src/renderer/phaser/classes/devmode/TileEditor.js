@@ -303,6 +303,9 @@ var TileEditor = /** @class */ (function () {
                     }
                 }
             }
+            else if (!marker.active) {
+                this.devModeTools.tooltip.showMessage('Position', 'X: ' + Math.floor(worldPoint.x).toString() + ', Y: ' + Math.floor(worldPoint.y).toString());
+            }
             else {
                 this.showMarkers(false);
             }
