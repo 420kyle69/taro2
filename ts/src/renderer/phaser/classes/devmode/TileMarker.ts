@@ -52,7 +52,7 @@ class TileMarker {
 	}
 
 	changeImage (tile: number, i: number, j: number): void {
-		if (tile && tile !== 0) {
+		if (tile && tile !== 0 && tile !== -1) {
 			if (!this.images[i][j])  {
 				this.images[i][j] = this.addImage(i, j);
 			} 
