@@ -4,4 +4,5 @@ declare class InGameEditor extends TaroClass {
     mapWasEdited: any
     showClearLayerConfirmation: any
     saveMap: any
+    showRegionList: any
 }
