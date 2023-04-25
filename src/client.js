@@ -106,6 +106,7 @@ const Client = TaroEventingClass.extend({
 		//go fetch
 
 		taro.addComponent(GameComponent);
+		taro.addComponent(MenuUiComponent);
 		// we're going to try and insert the fetch here
 		let promise = new Promise((resolve, reject) => {
 			// if the gameJson is available as a global object, use it instead of sending another ajax request
@@ -117,7 +118,6 @@ const Client = TaroEventingClass.extend({
 					dataType: 'json',
 					type: 'GET',
 					success: (game) => {
-
 						resolve(game);
 					}
 				});
@@ -143,6 +143,7 @@ const Client = TaroEventingClass.extend({
 						}
 
 						resolve(data);
+
 					}
 				});
 			}
@@ -164,20 +165,18 @@ const Client = TaroEventingClass.extend({
 			// old comment => 'components required for client-side game logic'
 			taro.addComponent(TaroNetIoComponent);
 			taro.addComponent(SoundComponent);
-
-			taro.addComponent(MenuUiComponent);
 			taro.addComponent(TradeUiComponent); // could we comment this one out?
 
 			if (taro.isMobile) {
 				taro.addComponent(MobileControlsComponent);
 			}
+
+			this.configureEngine();
 		})
-			.catch((err) => {
-				console.error(err);
-			})
-			.finally(() => {
-				this.configureEngine();
-			});
+		.catch((err) => {
+			console.error(err);
+		});
+
 
 		// these were under separate conditionals before. idk why.
 		if (mode == 'play') {
@@ -281,7 +280,6 @@ const Client = TaroEventingClass.extend({
 		this.loadPhysics();
 
 		$.when(this.physicsConfigLoaded).done(() => {
-
 			this.startTaroEngine();
 
 			this.loadMap();
@@ -295,6 +293,8 @@ const Client = TaroEventingClass.extend({
 
 				taro.addComponent(DevConsoleComponent);
 			}
+
+
 		});
 
 		//this doesn't depend on physics config
@@ -312,6 +312,7 @@ const Client = TaroEventingClass.extend({
 		// we can move the Deferred for mapLoaded to before engine start
 
 		$.when(this.taroEngineStarted, this.mapLoaded, this.rendererLoaded).done(() => {
+
 			// old comment => 'center camera while loading'
 			const tileWidth = taro.scaleMapDetails.tileWidth;
 			const tileHeight = taro.scaleMapDetails.tileHeight;
