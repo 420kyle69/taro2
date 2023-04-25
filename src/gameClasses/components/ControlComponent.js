@@ -7,6 +7,7 @@ var ControlComponent = TaroEntity.extend({
 		this._entity = entity;
 
 		this.lastInputSent = 0;
+		this.sendMobileInput = true;
 
 		// Store any options that were passed to us
 		this._options = options;
@@ -283,6 +284,7 @@ var ControlComponent = TaroEntity.extend({
 			if (taro.isClient) {
 				// check if sending player input is due (every 100ms)
 				if (taro._currentTime - self.lastInputSent > 100) {
+					self.sendMobileInput = true;
 					self.sendPlayerInput = true;
 					self.lastInputSent = taro._currentTime;
 				}
@@ -291,18 +293,20 @@ var ControlComponent = TaroEntity.extend({
 					for (key in self.input[device]) {
 						if (taro.input.actionState(key)) {
 							if (self.input[device][key] == false) {
-								if (taro.isMobile && self.sendPlayerInput && device == 'mouse') {
+								if (taro.isMobile && self.sendMobileInput && device == 'mouse') {
 									// tap on mobile will be detected as right click for now, so old games with joysticks will not have problems
 									self.keyDown('mouse', 'button3');
+									self.sendMobileInput = false;
 								} else {
 									self.keyDown(device, key);
 								}
 							}
 						} else {
 							if (self.input[device][key] == true) {
-								if (taro.isMobile && self.sendPlayerInput && device == 'mouse') {
+								if (taro.isMobile && self.sendMobileInput && device == 'mouse') {
 									// tap on mobile will be detected as right click for now, so old games with joysticks will not have problems
 									self.keyUp('mouse', 'button3');
+									self.sendMobileInput = false;
 								} else {
 									self.keyUp(device, key);
 								}
