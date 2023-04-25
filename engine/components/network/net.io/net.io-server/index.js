@@ -606,8 +606,8 @@ NetIo.Server = NetIo.EventingClass.extend({
 
 			console.log(`https port ${taro.server.httpsPort}`);
 			self._portSecure = taro.server.httpsPort;
-			var privateKey = this._fs.readFileSync('../sslcert/modd_ssl.key', 'utf8');
-			var certificate = this._fs.readFileSync('../sslcert/modd_ssl.crt', 'utf8');
+			const privateKey = this._fs.readFileSync('/etc/letsencrypt/live/t5-stage-1.modd.io/privkey.pem', 'utf8');
+			const certificate = this._fs.readFileSync('/etc/letsencrypt/live/t5-stage-1.modd.io/fullchain.pem', 'utf8');
 			var options = { key: privateKey, cert: certificate };
 			this._httpsServer = this._https.createServer(options, function (request, response) {
 				response.writeHead(404);
