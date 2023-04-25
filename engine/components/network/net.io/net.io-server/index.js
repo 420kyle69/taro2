@@ -607,8 +607,8 @@ NetIo.Server = NetIo.EventingClass.extend({
 			console.log(`https port ${taro.server.httpsPort}`);
 			self._portSecure = taro.server.httpsPort;
 			
-			var privateKey = this._fs.readFileSync('../../../../../../sslcert/modd_ssl.key', 'utf8');
-			var certificate = this._fs.readFileSync('../../../../../../sslcert/modd_ssl.crt', 'utf8');
+			var privateKey = this._fs.readFileSync(`${__dirname}/../../../../../../sslcert/modd_ssl.key`, 'utf8');
+			var certificate = this._fs.readFileSync(`${__dirname}/../../../../../../sslcert/modd_ssl.crt`, 'utf8');
 			var options = { key: privateKey, cert: certificate };
 			this._httpsServer = this._https.createServer(options, function (request, response) {
 				response.writeHead(404);
