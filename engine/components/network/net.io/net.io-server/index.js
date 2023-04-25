@@ -549,9 +549,9 @@ NetIo.Server = NetIo.EventingClass.extend({
 		var self = this;
 		this._port = port;
 
-		// Cloudflare SSL flexible mode only encrypt traffic between browser and cloudflare. All the https/wss traffic is diverted to http/ws from Clouflare to server hence https proxy server is not needed.
+		// Cloudflare SSL flexible mode only encrypt traffic between browser and cloudflare. All the https/wss traffic is diverted to http/ws from Cloudflare to server hence https proxy server is not needed.
 		// Https/wss server is not being used currently on production
-		var secure = false; // to turn on/off https
+		var secure = true; // to turn on/off https
 
 		if (process.env.ENV == 'local' || process.env.ENV == 'standalone' || process.env.ENV == 'standalone-remote') {
 			secure = false;
@@ -614,7 +614,8 @@ NetIo.Server = NetIo.EventingClass.extend({
 				response.end();
 			});
 			this._socketServerHttps = new this._websocket.Server({
-			    server: this._httpsServer
+			    server: this._httpsServer,
+					maxPayload: 100 * 1024, // 100 KB - The maximum allowed message size
 			});
 			// this._socketServerHttps = new this._websocket.WebSocketServer({
 			// 	server: this._httpsServer
