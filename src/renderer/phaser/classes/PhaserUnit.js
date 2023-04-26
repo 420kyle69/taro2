@@ -123,13 +123,12 @@ var PhaserUnit = /** @class */ (function (_super) {
     };
     PhaserUnit.prototype.updateLabelOffset = function () {
         if (this.label) {
-            /*const {displayHeight, displayWidth} = this.sprite;
-            const labelHeight = this.label.getTextBounds(true).global.height;
-            this.label.y = - displayHeight/2 - labelHeight*1.5;
-            if (this.rtLabel) {
+            var _a = this.sprite, displayHeight = _a.displayHeight, displayWidth = _a.displayWidth;
+            var labelHeight = this.label.getBounds().height;
+            this.label.y = -displayHeight / 2 - labelHeight * 1.5;
+            /*if (this.rtLabel) {
                 this.rtLabel.y = this.label.y;
             }*/
-            this.label.y = -25 - (this.sprite.displayHeight + this.sprite.displayWidth) / 4;
         }
         this.updateGameObjectSize();
     };
