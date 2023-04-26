@@ -640,7 +640,6 @@ var MenuUiComponent = TaroEntity.extend({
 			var friendsPanel = $('#friends-panel');
 			var mobileChatBox = $('#mobile-chat-box');
 			var shopButton = $('#mobile-shop-button');
-			var shopButton = $('#mobile-shop-button');
 			var homeButton = $('#home-button');
 
 			if (isMenuVisible) {

@@ -56,6 +56,10 @@ NetIo.Client = NetIo.EventingClass.extend({
 		this._lastReceiveUpdated = new Date();
 		this._receiveRate = 0;
 		this._sendRate = 0;
+		this.wsUrl = '';
+		this.wsStartTime = null;
+		this.startTimeSinceLoad = null;
+		this.pingInterval = null;
 
 		// this.COMPRESSION_THRESHOLD = 30000;
 
@@ -106,47 +110,23 @@ NetIo.Client = NetIo.EventingClass.extend({
 
 		var distinctId = window.distinctId || ''		
 		
-		const wsUrl = `${url}?token=${gsAuthToken}&sid=${taro.client.server.id}&distinctId=${distinctId}`;
-		
-		const wsStartTime = Date.now();
-		const startTimeSinceLoad = performance.now();
+		this.wsUrl = `${url}?token=${gsAuthToken}&sid=${taro.client.server.id}&distinctId=${distinctId}`;
+		this.wsStartTime = Date.now();
+		this.startTimeSinceLoad = performance.now();
 
-		this._socket = new WebSocket(wsUrl, 'netio1');
-
-		const traceWsReq = (action) => {
-			const endTimeSinceLoad = performance.now();
-			if (window.newrelic) {
-				window.newrelic.addPageAction('gs-websocket-connect', {
-					wsUrl: wsUrl,
-					wsAction: action,
-					wsState: this._socket.readyState,
-					wsUserId: userId,
-					wsGameSlug: gameSlug,
-					wsServerName: taro.client.server.name,
-					wsServerUrl: taro.client.server.url,
-					wsLatency: endTimeSinceLoad - startTimeSinceLoad,
-					wsStartTimeSinceLoad: startTimeSinceLoad,
-					wsEndTimeSinceLoad: endTimeSinceLoad,
-					wsStartTime,
-					wsEndTime: Date.now()
-				});
-			}
-		};
+		this._socket = new WebSocket(this.wsUrl, 'netio1');
 		
 		// Setup event listeners
 		this._socket.onopen = function () {
-			traceWsReq('onopen');
 			self._onOpen.apply(self, arguments); 
 		};
 		this._socket.onmessage = function () {
 			self._onData.apply(self, arguments); 
 		};
 		this._socket.onclose = function () {
-			traceWsReq('onclose');
 			self._onClose.apply(self, arguments); 
 		};
 		this._socket.onerror = function () {
-			traceWsReq('onerror');
 			self._onError.apply(self, arguments); 
 		};
 	},
@@ -188,8 +168,66 @@ NetIo.Client = NetIo.EventingClass.extend({
 			this.disconnect();
 		}
 	},
-
+	
+	trackLatency: function (actionName, actionEvent, data) {
+		var self = this;
+		
+		if (actionName === 'gs-websocket-ping') {
+			const endTime = Date.now();
+			if (window.newrelic) {
+				window.newrelic.addPageAction(actionName, {
+					wsUrl: this.wsUrl,
+					wsAction: actionEvent,
+					wsState: this._socket.readyState,
+					wsUserId: userId,
+					wsGameSlug: gameSlug,
+					wsServerName: taro.client.server.name,
+					wsServerUrl: taro.client.server.url,
+					wsLatency: endTime - data.clientSentAt,
+					wsStartTime: data.clientSentAt,
+					wsEndTime: endTime
+				});
+			}
+		} else {
+			const endTimeSinceLoad = performance.now();
+			if (window.newrelic) {
+				window.newrelic.addPageAction(actionName, {
+					wsUrl: this.wsUrl,
+					wsAction: actionEvent,
+					wsState: this._socket.readyState,
+					wsUserId: userId,
+					wsGameSlug: gameSlug,
+					wsServerName: taro.client.server.name,
+					wsServerUrl: taro.client.server.url,
+					wsLatency: endTimeSinceLoad - this.startTimeSinceLoad,
+					wsStartTimeSinceLoad: this.startTimeSinceLoad,
+					wsEndTimeSinceLoad: endTimeSinceLoad,
+					wsStartTime: this.wsStartTime,
+					wsEndTime: Date.now()
+				});
+			}
+			
+			if (this.pingInterval) {
+				clearInterval(this.pingInterval);
+			}
+			
+			if (actionEvent === 'onopen') {
+				// start ping interval
+				const pingIntervalTimeout = 10000; // every 10s
+				
+				this.pingInterval = setInterval(() => {
+					self._socket.send(JSON.stringify({
+						type: 'ping',
+						sentAt: Date.now()
+					}));
+				}, pingIntervalTimeout);
+			}
+		}
+	},
+	
 	_onOpen: function (event) {
+		this.trackLatency('gs-websocket-connect', 'onopen');
+		
 		var url = event.target.url;
 		var urlWithoutProtocol = url.split('://')[1];
 		var serverDomain = urlWithoutProtocol.split('/')[0];
@@ -215,6 +253,13 @@ NetIo.Client = NetIo.EventingClass.extend({
 	},
 
 	_onDecode: function (packet, data) {
+		
+		if (packet && packet.type === 'pong') {
+			const latency = Date.now() - packet.clientSentAt;
+			this.trackLatency('gs-websocket-ping', 'pong', packet);
+			return;
+		}
+		
 		// how many UTF8 characters did we receive (assume 1 byte per char and mostly ascii)
 		// var receivedBytes = data.data.size;
 		var receivedBytes = (data.data && data.data.length) || 0;
@@ -275,6 +320,8 @@ NetIo.Client = NetIo.EventingClass.extend({
 	},
 
 	_onClose: function (event) {
+		this.trackLatency('gs-websocket-connect', 'onclose');
+		
 		var wasClean = event.wasClean;
 		var reason = event.reason;
 		var code = event.code;
@@ -359,6 +406,8 @@ NetIo.Client = NetIo.EventingClass.extend({
 	},
 
 	_onError: function () {
+		this.trackLatency('gs-websocket-connect', 'onerror');
+		
 		this.log('An error occurred with the net.io socket!', 'error', arguments);
 		console.log('An error occurred with the net.io socket!', 'error', arguments);
 		this.emit('error', arguments);
