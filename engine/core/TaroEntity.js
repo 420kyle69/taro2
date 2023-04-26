@@ -239,18 +239,20 @@ var TaroEntity = TaroObject.extend({
 
 		var body = self._stats.currentBody;
 
-		if (body && !body['z-index']) {
-			body['z-index'] = defaultLayer;
+		if (body) {
+			if (!body['z-index']) {
+				body['z-index'] = defaultLayer;
+			}
+	
+			if (isNaN(body['z-index'].depth)) {
+				body['z-index'].depth = defaultLayer.depth;
+			}
+			if (isNaN(body['z-index'].layer)) {
+				body['z-index'].layer = defaultLayer.layer;
+			}
+			self.layer(body['z-index'].layer) // above "floor 2 layer", but under "trees layer"
+				.depth(body['z-index'].depth);
 		}
-
-		if (isNaN(body['z-index'].depth)) {
-			body['z-index'].depth = defaultLayer.depth;
-		}
-		if (isNaN(body['z-index'].layer)) {
-			body['z-index'].layer = defaultLayer.layer;
-		}
-		self.layer(body['z-index'].layer) // above "floor 2 layer", but under "trees layer"
-			.depth(body['z-index'].depth);
 	},
 
 	applyAnimationById: function (animationId) {
