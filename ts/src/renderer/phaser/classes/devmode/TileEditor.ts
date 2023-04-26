@@ -299,47 +299,47 @@ class TileEditor {
 				paletteMarker.graphics.y = paletteMap.tileToWorldY(palettePointerTileY);
 
 			} else if ((!devModeScene.pointerInsidePalette() || !palette.visible) &&
-				!devModeScene.pointerInsideButtons && !devModeScene.pointerInsideWidgets() && marker.active && map.currentLayerIndex >=0) {
+				!devModeScene.pointerInsideButtons && !devModeScene.pointerInsideWidgets() && map.currentLayerIndex >=0) {
 
-				this.devModeTools.tooltip.showMessage('Position', 'X: ' + Math.floor(worldPoint.x).toString() + ', Y: ' + Math.floor(worldPoint.y).toString());	
+				this.devModeTools.tooltip.showMessage('Position', 'X: ' + Math.floor(worldPoint.x).toString() + ', Y: ' + Math.floor(worldPoint.y).toString());
 
-				paletteMarker.graphics.setVisible(false);
-				marker.graphics.setVisible(true);
-				marker.showPreview(true);
+				if (marker.active) {
+					paletteMarker.graphics.setVisible(false);
+					marker.graphics.setVisible(true);
+					marker.showPreview(true);
 
-				// Rounds down to nearest tile
-				const pointerTileX = map.worldToTileX(worldPoint.x);
-				const pointerTileY = map.worldToTileY(worldPoint.y);
+					// Rounds down to nearest tile
+					const pointerTileX = map.worldToTileX(worldPoint.x);
+					const pointerTileY = map.worldToTileY(worldPoint.y);
 
-				// Snap to tile coordinates, but in world space
-				marker.graphics.x = map.tileToWorldX(pointerTileX);
-				marker.graphics.y = map.tileToWorldY(pointerTileY);
-				marker.preview.x = map.tileToWorldX(pointerTileX);
-				marker.preview.y = map.tileToWorldY(pointerTileY);
+					// Snap to tile coordinates, but in world space
+					marker.graphics.x = map.tileToWorldX(pointerTileX);
+					marker.graphics.y = map.tileToWorldY(pointerTileY);
+					marker.preview.x = map.tileToWorldX(pointerTileX);
+					marker.preview.y = map.tileToWorldY(pointerTileY);
 
-				if (devModeScene.input.manager.activePointer.leftButtonDown()) {
-					if (this.devModeTools.modeButtons[2].active || this.devModeTools.modeButtons[3].active) {
-						if (this.area.x > 1 || this.area.y > 1) {
-							for (let i = 0; i < this.area.x; i++) {
-								for (let j = 0; j < this.area.y; j++) {
-									this.putTile(pointerTileX + i, pointerTileY + j, this.selectedTileArea[i][j]);
+					if (devModeScene.input.manager.activePointer.leftButtonDown()) {
+						if (this.devModeTools.modeButtons[2].active || this.devModeTools.modeButtons[3].active) {
+							if (this.area.x > 1 || this.area.y > 1) {
+								for (let i = 0; i < this.area.x; i++) {
+									for (let j = 0; j < this.area.y; j++) {
+										this.putTile(pointerTileX + i, pointerTileY + j, this.selectedTileArea[i][j]);
+									}
 								}
 							}
+							else {
+								this.putTile(pointerTileX, pointerTileY, this.selectedTile);
+							}
+						} else if (this.devModeTools.modeButtons[4].active) {
+							const targetTile = this.getTile(pointerTileX, pointerTileY, map);
+							if (targetTile && this.selectedTile && targetTile !== this.selectedTile) {
+								this.floodFill(map.currentLayerIndex, targetTile, this.selectedTile, pointerTileX, pointerTileY, false);
+								taro.network.send('editTile', {gid: this.selectedTile, layer: map.currentLayerIndex, x: pointerTileX, y: pointerTileY, tool: 'flood'});
+							}
+
 						}
-						else {
-							this.putTile(pointerTileX, pointerTileY, this.selectedTile);
-						}
-					} else if (this.devModeTools.modeButtons[4].active) {
-						const targetTile = this.getTile(pointerTileX, pointerTileY, map);
-						if (targetTile && this.selectedTile && targetTile !== this.selectedTile) {
-							this.floodFill(map.currentLayerIndex, targetTile, this.selectedTile, pointerTileX, pointerTileY, false);
-							taro.network.send('editTile', {gid: this.selectedTile, layer: map.currentLayerIndex, x: pointerTileX, y: pointerTileY, tool: 'flood'});
-						}
-						
 					}
-				}
-			} else if (!marker.active) {
-				this.devModeTools.tooltip.showMessage('Position', 'X: ' + Math.floor(worldPoint.x).toString() + ', Y: ' + Math.floor(worldPoint.y).toString());
+				} 
 			} else {
 				this.showMarkers(false);
 			}
