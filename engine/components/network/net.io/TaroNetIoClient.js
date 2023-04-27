@@ -247,7 +247,6 @@ var TaroNetIoClient = {
 
 		// Define disconnect listener
 		self._io.on('disconnect', function (data) {
-			console.trace();
 			var reason = data.reason;
 			var code = data.code;
 			var wasClean = data.wasClean;
