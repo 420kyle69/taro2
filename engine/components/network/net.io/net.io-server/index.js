@@ -673,7 +673,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 		socket._decode = self._decode;
 		socket._remoteAddress = (request.headers['x-forwarded-for'] && request.headers['x-forwarded-for'].split(',').shift()) || ws._socket.remoteAddress;
 		socket._fromPingService = request.headers[PING_SERVICE_HEADER] && request.headers[PING_SERVICE_HEADER] === process.env.PING_SERVICE_HEADER_SECRET;
-		
+		console.log('x-forwarded-for', request.headers['x-forwarded-for'], socket._remoteAddress);
 		if (!socket._fromPingService) {
 			
 			// if token does not exist in request close the socket.
