@@ -105,34 +105,34 @@ NetIo.Client = NetIo.EventingClass.extend({
 				url = url.replace('http://', 'ws://');
 		}
 		*/
-		
+
 		// Create new websocket to the url
 
-		var distinctId = window.distinctId || ''		
-		
+		var distinctId = window.distinctId || '';
+
 		this.wsUrl = `${url}?token=${gsAuthToken}&sid=${taro.client.server.id}&distinctId=${distinctId}`;
 		this.wsStartTime = Date.now();
 		this.startTimeSinceLoad = performance.now();
 
 		this._socket = new WebSocket(this.wsUrl, 'netio1');
-		
+
 		// Setup event listeners
 		this._socket.onopen = function () {
-			self._onOpen.apply(self, arguments); 
+			self._onOpen.apply(self, arguments);
 		};
 		this._socket.onmessage = function () {
-			self._onData.apply(self, arguments); 
+			self._onData.apply(self, arguments);
 		};
 		this._socket.onclose = function () {
-			self._onClose.apply(self, arguments); 
+			self._onClose.apply(self, arguments);
 		};
 		this._socket.onerror = function () {
-			self._onError.apply(self, arguments); 
+			self._onError.apply(self, arguments);
 		};
 	},
 
 	disconnect: function (reason) {
-		console.log("disconnected with reason", reason)
+		console.log('disconnected with reason', reason);
 		console.trace();
 		this._socket.close(1000, reason);
 		// this.emit('_taroStreamDestroy');
@@ -168,10 +168,10 @@ NetIo.Client = NetIo.EventingClass.extend({
 			this.disconnect();
 		}
 	},
-	
+
 	trackLatency: function (actionName, actionEvent, data) {
 		var self = this;
-		
+
 		if (actionName === 'gs-websocket-ping') {
 			const endTime = Date.now();
 			if (window.newrelic) {
@@ -206,15 +206,15 @@ NetIo.Client = NetIo.EventingClass.extend({
 					wsEndTime: Date.now()
 				});
 			}
-			
+
 			if (this.pingInterval) {
 				clearInterval(this.pingInterval);
 			}
-			
+
 			if (actionEvent === 'onopen') {
 				// start ping interval
 				const pingIntervalTimeout = 10000; // every 10s
-				
+
 				this.pingInterval = setInterval(() => {
 					self._socket.send(JSON.stringify({
 						type: 'ping',
@@ -224,10 +224,10 @@ NetIo.Client = NetIo.EventingClass.extend({
 			}
 		}
 	},
-	
+
 	_onOpen: function (event) {
 		this.trackLatency('gs-websocket-connect', 'onopen');
-		
+
 		var url = event.target.url;
 		var urlWithoutProtocol = url.split('://')[1];
 		var serverDomain = urlWithoutProtocol.split('/')[0];
@@ -253,13 +253,13 @@ NetIo.Client = NetIo.EventingClass.extend({
 	},
 
 	_onDecode: function (packet, data) {
-		
+
 		if (packet && packet.type === 'pong') {
 			const latency = Date.now() - packet.clientSentAt;
 			this.trackLatency('gs-websocket-ping', 'pong', packet);
 			return;
 		}
-		
+
 		// how many UTF8 characters did we receive (assume 1 byte per char and mostly ascii)
 		// var receivedBytes = data.data.size;
 		var receivedBytes = (data.data && data.data.length) || 0;
@@ -310,6 +310,7 @@ NetIo.Client = NetIo.EventingClass.extend({
 				case 'close':
 					// The server told us our connection has been closed
 					// so store the reason the server gave us!
+					console.error('Server sent close command packet [netio]');
 					this._disconnectReason = packet.data;
 					break;
 			}
@@ -321,7 +322,7 @@ NetIo.Client = NetIo.EventingClass.extend({
 
 	_onClose: function (event) {
 		this.trackLatency('gs-websocket-connect', 'onclose');
-		
+
 		var wasClean = event.wasClean;
 		var reason = event.reason;
 		var code = event.code;
@@ -407,7 +408,7 @@ NetIo.Client = NetIo.EventingClass.extend({
 
 	_onError: function () {
 		this.trackLatency('gs-websocket-connect', 'onerror');
-		
+
 		this.log('An error occurred with the net.io socket!', 'error', arguments);
 		console.log('An error occurred with the net.io socket!', 'error', arguments);
 		this.emit('error', arguments);

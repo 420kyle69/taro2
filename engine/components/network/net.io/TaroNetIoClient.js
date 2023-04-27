@@ -247,6 +247,7 @@ var TaroNetIoClient = {
 
 		// Define disconnect listener
 		self._io.on('disconnect', function (data) {
+			console.trace();
 			var reason = data.reason;
 			var code = data.code;
 			var wasClean = data.wasClean;
@@ -489,13 +490,13 @@ var TaroNetIoClient = {
 						}
 						// if csp movement is enabled, don't use server-streamed position for my unit
 						// instead, we'll use position updated by physics engine
-						else if (taro.game.cspEnabled && entity && 
-							entity.finalKeyFrame[0] < newSnapshotTimestamp && 
+						else if (taro.game.cspEnabled && entity &&
+							entity.finalKeyFrame[0] < newSnapshotTimestamp &&
 							entity != taro.client.selectedUnit
 						) {
-							entity.finalKeyFrame = [newSnapshotTimestamp, obj[entityId]]
+							entity.finalKeyFrame = [newSnapshotTimestamp, obj[entityId]];
 						}
-						
+
 					} else {
 						this._networkCommands[commandName](entityData);
 					}
@@ -505,17 +506,17 @@ var TaroNetIoClient = {
 
 					var newSnapshot = [newSnapshotTimestamp, obj];
 					taro.snapshots.push(newSnapshot);
-					
+
 					// prevent memory leak that's caused when the client's browser tab isn't focused
 					if (taro.snapshots.length > 2) {
 						taro.snapshots.shift();
 					}
 
-                    let now = Date.now();
+					let now = Date.now();
 
-                    // if cspEnabled, we ignore server-streamed timestamp as all entities rubber-banded towards 
-                    // their latest server-streamed position regardless of their timestamp
-                    if (!taro.game.cspEnabled) {
+					// if cspEnabled, we ignore server-streamed timestamp as all entities rubber-banded towards 
+					// their latest server-streamed position regardless of their timestamp
+					if (!taro.game.cspEnabled) {
                     	// if client's timestamp more than 100ms behind the server's timestamp, immediately update it to be 50ms behind the server's
 						// otherwise, apply rubberbanding
 						this._discrepancySamples.push(newSnapshotTimestamp - now)
@@ -535,9 +536,7 @@ var TaroNetIoClient = {
 								taro.timeDiscrepancy += ((this.medianDiscrepancy - 50) - taro.timeDiscrepancy) / 10;
 							}
 						}
-
-                    }
-					
+					}
 				}
 			}
 		} else {
@@ -555,17 +554,17 @@ var TaroNetIoClient = {
 	},
 
 	getMedian: function (values) {
-	  if(values.length ===0) throw new Error("No inputs");
+	  if(values.length ===0) throw new Error('No inputs');
 
 	  values.sort(function(a,b){
 	    return a-b;
 	  });
 
 	  var half = Math.floor(values.length / 2);
-	  
+
 	  if (values.length % 2)
 	    return values[half];
-	  
+
 	  return (values[half - 1] + values[half]) / 2.0;
 	},
 

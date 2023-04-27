@@ -55,7 +55,7 @@ var ServerNetworkEvents = {
 		}
 
 		delete client;
-		
+
 		if (player) {
 			player.remove();
 		}
