@@ -139,7 +139,7 @@ class MobileControlsScene extends PhaserScene {
 		});
 
 		this.input.on('pointerdown', function(pointer) {
-			reactApp?.handlePointerDownForMobile(pointer);
+			reactApp && reactApp.handlePointerDownForMobile(pointer);
 			this.initialPosition = {
 				x: pointer.x,
 				y: pointer.y,
