@@ -100,7 +100,7 @@ var MobileControlsScene = /** @class */ (function (_super) {
             _this.scene.setVisible(value);
         });
         this.input.on('pointerdown', function (pointer) {
-            reactApp && reactApp.handlePointerDownForMobile(pointer);
+            reactApp.handlePointerDownForMobile && reactApp.handlePointerDownForMobile(pointer);
             this.initialPosition = {
                 x: pointer.x,
                 y: pointer.y,
