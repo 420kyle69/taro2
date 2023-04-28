@@ -954,7 +954,7 @@ var VariableComponent = TaroEntity.extend({
 
 				case 'getPlayerCount':
 					returnValue = taro.$$('player').filter(function (player) {
-						return player._stats.controlledBy == 'human' && player._stats.playerJoined == true;
+						return player._stats.controlledBy == 'human';
 					}).length;
 					break;
 
