@@ -108,9 +108,10 @@ NetIo.Client = NetIo.EventingClass.extend({
 		
 		// Create new websocket to the url
 
-		var distinctId = window.distinctId || ''		
+		var distinctId = window.distinctId || '';
+		var posthogDistinctId = window.posthog && window.posthog.get_distinct_id ? window.posthog.get_distinct_id() : '';		
 		
-		this.wsUrl = `${url}?token=${gsAuthToken}&sid=${taro.client.server.id}&distinctId=${distinctId}`;
+		this.wsUrl = `${url}?token=${gsAuthToken}&sid=${taro.client.server.id}&distinctId=${distinctId}&posthogDistinctId=${posthogDistinctId}`;
 		this.wsStartTime = Date.now();
 		this.startTimeSinceLoad = performance.now();
 

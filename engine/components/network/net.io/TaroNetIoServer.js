@@ -545,17 +545,34 @@ var TaroNetIoServer = {
 				// Store a rooms array for this client
 				this._clientRooms[socket.id] = this._clientRooms[socket.id] || [];
 
-				if (self._socketById[socket.id]._token && self._socketById[socket.id]._token.distinctId) {
+				if (self._socketById[socket.id]._token) {
 					// Mixpanel Event to Track user game successfully started.
-					global.mixpanel.track('User Connected to Game Server', {
-						'distinct_id': self._socketById[socket.id]._token.distinctId,
-						'$ip': socket._remoteAddress,
-						'gameSlug': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.gameSlug,
-						'gameId': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData._id,
-						'tier': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.tier,
-						'playCount': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.playCount,
-						'totalPlayCount': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.totalPlayCount,
-					});
+					if (self._socketById[socket.id]._token.distinctId) {
+						global.mixpanel.track('User Connected to Game Server', {
+							'distinct_id': self._socketById[socket.id]._token.posthogDistinctId,
+							'$ip': socket._remoteAddress,
+							'gameSlug': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.gameSlug,
+							'gameId': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData._id,
+							'tier': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.tier,
+							'playCount': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.playCount,
+							'totalPlayCount': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.totalPlayCount,
+						});
+					}
+
+					if (self._socketById[socket.id]._token.posthogDistinctId) {
+						global.posthog.capture({
+							distinctId: self._socketById[socket.id]._token.posthogDistinctId,
+							'event': 'User Connected to Game Server',
+							properties: {
+								'$ip': socket._remoteAddress,
+								'gameSlug': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.gameSlug,
+								'gameId': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData._id,
+								'tier': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.tier,
+								'playCount': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.playCount,
+								'totalPlayCount': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.totalPlayCount
+							}
+						});
+					}
 				}
 
 				socket.on('message', function (data) {
