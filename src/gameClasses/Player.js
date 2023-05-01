@@ -169,7 +169,7 @@ var Player = TaroEntity.extend({
 					unit.ability.stopMovingY();
 					unit.ability.stopUsingItem();
 				}*/
-				this.selectUnit(null);
+				//this.selectUnit(null);
 			}
 		}
 	},
