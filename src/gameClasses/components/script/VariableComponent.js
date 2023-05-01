@@ -414,7 +414,14 @@ var VariableComponent = TaroEntity.extend({
 					}
 					break;
 
-				case 'getUnitFromId':
+				case 'getUnitFromId': //should remove soon and replace with the below one
+					var id = self.getValue(text.string, vars);
+					if (id) {
+						returnValue = taro.$(id);
+					}
+					break;
+
+				case 'getEntityFromId':
 					var id = self.getValue(text.string, vars);
 					if (id) {
 						returnValue = taro.$(id);
