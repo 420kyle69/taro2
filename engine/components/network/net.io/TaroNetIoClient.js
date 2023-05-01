@@ -129,6 +129,7 @@ var TaroNetIoClient = {
 	 * @param {string} id the game server ID
 	 */
 	connectToGS: function (url, id) {
+
 		var self = this;
 		var defer = $.Deferred();
 
@@ -518,7 +519,7 @@ var TaroNetIoClient = {
 					if (!taro.game.cspEnabled) {
                     	// if client's timestamp more than 100ms behind the server's timestamp, immediately update it to be 50ms behind the server's
 						// otherwise, apply rubberbanding
-						this._discrepancySamples.push(newSnapshotTimestamp - now)
+						this._discrepancySamples.push(newSnapshotTimestamp - now);
 
 						if ((this.medianDiscrepancy == undefined && this._discrepancySamples.length > 2) ||
 							this._discrepancySamples.length > 5

@@ -131,6 +131,12 @@ NetIo.Client = NetIo.EventingClass.extend({
 		};
 	},
 
+	// testing
+	reconnect: function() {
+		console.log('\nreconnecting...\n');
+		console.log(this._socket);
+	},
+
 	disconnect: function (reason) {
 		console.log('disconnected with reason', reason);
 		console.trace();
@@ -165,7 +171,8 @@ NetIo.Client = NetIo.EventingClass.extend({
 				}
 			}
 		} else {
-			this.disconnect();
+			// testing commenting this out.
+			// this.disconnect();
 		}
 	},
 
@@ -302,6 +309,7 @@ NetIo.Client = NetIo.EventingClass.extend({
 
 					// Now we have an id, set the state to connected
 					this._state = 3;
+					console.log(this.id);
 
 					// Emit the connect event
 					this.emit('connect', this.id);
@@ -310,6 +318,7 @@ NetIo.Client = NetIo.EventingClass.extend({
 				case 'close':
 					// The server told us our connection has been closed
 					// so store the reason the server gave us!
+					//TODO: Remove
 					console.error('Server sent close command packet [netio]');
 					this._disconnectReason = packet.data;
 					break;
@@ -328,6 +337,13 @@ NetIo.Client = NetIo.EventingClass.extend({
 		var code = event.code;
 
 		console.log('close event', event, { state: this._state, reason: this._disconnectReason });
+		console.log(taro.client);
+		if (!reason) {
+			return setTimeout(() => {
+				this.connect(this.wsUrl);
+			}, 1000);
+		}
+
 
 		if (code === 1006) {
 			var url = event.target.url;
@@ -384,6 +400,7 @@ NetIo.Client = NetIo.EventingClass.extend({
 		// 	}
 		// }
 
+		console.log(this._state, 'this._state with code 1006');
 		// If we are already connected and have an id...
 		if (this._state === 3) {
 			this._state = 0;

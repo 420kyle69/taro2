@@ -663,6 +663,8 @@ NetIo.Server = NetIo.EventingClass.extend({
 	},
 
 	socketConnection: function (ws, request) {
+		console.log(request);
+
 		var self = this;
 		var jwt = require('jsonwebtoken');
 		const PING_SERVICE_HEADER = 'x-ping-service';
@@ -733,9 +735,10 @@ NetIo.Server = NetIo.EventingClass.extend({
 				socket.id = self.newIdHex();
 				// Add the socket to the internal lookups
 				self._sockets.push(socket);
+
 				self._socketsById[socket.id] = socket;
 
-				// store socket.id as clientId in _token data to validate socket messages later 
+				// store socket.id as clientId in _token data to validate socket messages later
 				socket._token.clientId = socket.id;
 
 			} catch (e) {
@@ -749,15 +752,17 @@ NetIo.Server = NetIo.EventingClass.extend({
 			// Register a listener so that if the socket disconnects,
 			// we can remove it from the active socket lookups
 			socket.on('disconnect', function (response) {
+				console.log('socket.on(\'disconnect\')\ndeleting token...');
+
+				// delete taro.server.usedConnectionJwts[token];
+
 				var index = self._sockets.indexOf(socket);
 				if (index > -1) {
 					// Remove the socket from the array
 					self._sockets.splice(index, 1);
 				}
-
 				delete self._socketsById[socket.id];
 			});
-
 			// Tell the client their new ID - triggers this._io.on('connect', ...) on client
 			try {
 				socket.send({

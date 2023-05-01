@@ -54,7 +54,7 @@ var TaroNetIoComponent = TaroEventingClass.extend([
 		// console.log("network pause")
 		this.isPaused = true;
 	},
-	
+
 	resume: function() {
 		// console.log("network resume")
 		this.isPaused = false;

@@ -586,6 +586,7 @@ var TaroNetIoServer = {
 				});
 
 				socket.on('disconnect', function (data) {
+					console.log('socket.on(\'disconnect\')');
 					var isClient = self.clientIds.includes(socket.id);
 
 					if (isClient) {
@@ -759,6 +760,7 @@ var TaroNetIoServer = {
    */
 	_onClientDisconnect: function (data, socket) {
 		this.log(`Client disconnected with id ${socket.id}`);
+		console.log(`Client disconnected with id ${socket.id}`);
 
 		// this.emit('disconnect', socket.id, { code: 'DUPLICATE_IP' });
 		this.emit('disconnect', socket.id);
@@ -767,8 +769,8 @@ var TaroNetIoServer = {
 		this.clientLeaveAllRooms(socket.id);
 
 		delete taro.server.clients[socket.id];
-		delete this.uploadPerSecond[socket._remoteAddress]
-		delete this.clientCommandCount[socket._remoteAddress]
+		delete this.uploadPerSecond[socket._remoteAddress];
+		delete this.clientCommandCount[socket._remoteAddress];
 		delete this._socketById[socket.id];
 		delete this._socketByIp[socket._remoteAddress];
 
