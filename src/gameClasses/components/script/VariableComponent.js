@@ -1556,6 +1556,13 @@ var VariableComponent = TaroEntity.extend({
 					}
 					break;
 
+				case 'getEntityId':
+					var entity = self.getValue(text.entity, vars);
+					if (entity) {
+						returnValue = entity.id()
+					}
+					break;
+
 				case 'getLengthOfString':
 					var string = self.getValue(text.string, vars);
 					if (string && !isNaN(string.length)) {
