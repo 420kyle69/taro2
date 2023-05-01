@@ -19,12 +19,13 @@ var ActionComponent = TaroEntity.extend({
 			var action = actionList[i];
 
 			if (!action || action.disabled == true || // if action is disabled or
-				(taro.isClient && (!action.runOnClient || action.runMode == 0)) || // don't run on client if runMode is 'server authoratative'
-				(taro.isServer && action.runMode == 1) // don't run on server if runMode is 'client only'
-			) {
-				continue;
-			}
-			
+                (taro.isClient && action.runMode == 0) || // don't run on client if runMode is 'server authoratative'
+                (taro.isServer && action.runMode == 1) || // don't run on server if runMode is 'client only'
+                (taro.isClient && (!action.runOnClient && !action.runMode)) // backward compatibility for older versions
+            ) {
+                continue;
+            }
+
 			// if CSP is enabled, then server will pause streaming
 			// the server side is still running (e.g. creating entities), but it won't be streamed to the client
 			if (taro.isServer) {
