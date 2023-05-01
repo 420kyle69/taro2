@@ -55,14 +55,6 @@ class PhaserRenderer extends Phaser.Game {
 				this.setupInputListeners, this
 			);
 		}
-
-		if (typeof ga != 'undefined' && taro.env != 'local') {
-			ga('send', {
-				hitType: 'event',
-				eventCategory: 'Rendering Engine',
-				eventAction: this.renderer.type
-			});
-		}
 	}
 
 	private setupInputListeners(): void {

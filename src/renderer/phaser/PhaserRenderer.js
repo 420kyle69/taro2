@@ -64,13 +64,6 @@ var PhaserRenderer = /** @class */ (function (_super) {
         else {
             _this.events.once(Phaser.Core.Events.BOOT, _this.setupInputListeners, _this);
         }
-        if (typeof ga != 'undefined' && taro.env != 'local') {
-            ga('send', {
-                hitType: 'event',
-                eventCategory: 'Rendering Engine',
-                eventAction: _this.renderer.type
-            });
-        }
         return _this;
     }
     PhaserRenderer.prototype.setupInputListeners = function () {
