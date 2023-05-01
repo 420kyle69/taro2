@@ -162,6 +162,15 @@ var Player = TaroEntity.extend({
 		var index = this._stats.unitIds.indexOf(unit.id());
 		if (index !== -1) {
 			this._stats.unitIds.splice(index, 1);
+			if (this._stats.selectedUnitId === unit.id()) {
+				var unit = taro.$(unit.id());
+				if (unit) {
+					unit.ability.stopMovingX();
+					unit.ability.stopMovingY();
+					unit.ability.stopUsingItem();
+				}
+				this.selectUnit(null);
+			}
 		}
 	},
 
@@ -174,7 +183,7 @@ var Player = TaroEntity.extend({
 		
 		var unit = taro.$(unitId);
 		if (taro.isServer && self._stats.clientId) {			
-			if (unit && unit._category == 'unit' && unit.getOwner() == this) {
+			if (unit && unit._category == 'unit' && unit.getOwner() == this || unitId === null) {
 				self._stats.selectedUnitId = unitId;
 				taro.network.send('makePlayerSelectUnit', { unitId: unitId }, self._stats.clientId);
 			} else {
@@ -195,7 +204,7 @@ var Player = TaroEntity.extend({
 			
 			if (self._stats.clientId == taro.network.id() && unit && unit._category == 'unit') {
 				self._stats.selectedUnitId = unitId;
-			
+
 				if (unit.inventory) {
 					unit.inventory.createInventorySlots();
 				}
@@ -210,6 +219,9 @@ var Player = TaroEntity.extend({
 				unit.renderMobileControl();
 				taro.client.selectedUnit = unit;
 				taro.client.eventLog.push([taro._currentTime, `my unit selected ${unitId}`]);
+			} else if (unitId === null) {
+				self._stats.selectedUnitId = null;
+				taro.client.selectedUnit = null;
 			}
 		}
 	},
