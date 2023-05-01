@@ -164,11 +164,11 @@ var Player = TaroEntity.extend({
 			this._stats.unitIds.splice(index, 1);
 			if (this._stats.selectedUnitId === unit.id()) {
 				var unit = taro.$(unit.id());
-				if (unit) {
+				/*if (unit) {
 					unit.ability.stopMovingX();
 					unit.ability.stopMovingY();
 					unit.ability.stopUsingItem();
-				}
+				}*/
 				this.selectUnit(null);
 			}
 		}
