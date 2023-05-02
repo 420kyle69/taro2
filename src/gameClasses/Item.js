@@ -290,6 +290,8 @@ var Item = TaroEntityPhysics.extend({
 					return;
 				}
 
+				console.log('item is used', self._stats.quantity, ' quantity remaining')
+
 				isUsed = true;
 
 				// item must be ready to fire (accordingly to fire rate), and must have ammo or have infinite ammo
@@ -341,6 +343,7 @@ var Item = TaroEntityPhysics.extend({
 								// projectileStreamMode: 0 is clientside predicted
 								// projectileStreamMode: 1 is serverside streamed
 								if (self.projectileData && (taro.isServer || (taro.isClient && self._stats.projectileStreamMode != 1))) {
+									console.log('projectile stream mode', self._stats.projectileStreamMode);
 									defaultData.velocity = {
 										deployMethod: self._stats.deployMethod,
 										x: Math.cos(rotate + Math.radians(-90)) * self._stats.bulletForce,

@@ -7,6 +7,8 @@ var Projectile = TaroEntityPhysics.extend({
 		var self = this;
 		self.category('projectile');
 
+		console.log('starting position', this.finalKeyFrame[1]);
+
 		var projectileData = {};
 		if (taro.isClient) {
 			projectileData = taro.game.getAsset('projectileTypes', data.type);
@@ -106,6 +108,8 @@ var Projectile = TaroEntityPhysics.extend({
 	},
 
 	_behaviour: function (ctx) {
+		console.log(this._translate.x, this._translate.y);
+
 		var self = this;
 		_.forEach(taro.triggersQueued, function (trigger) {
 			trigger.params['thisEntityId'] = self.id();

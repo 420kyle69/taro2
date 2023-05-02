@@ -110,7 +110,7 @@ class EntitiesToRender {
 						y += entity.tween.offset.y;
 						rotate += entity.tween.offset.rotate;
 					}
-
+					//if (entity._category == 'projectile') console.log(x, y);
 					entity.transformTexture(x, y, rotate);
 				}
 			}
