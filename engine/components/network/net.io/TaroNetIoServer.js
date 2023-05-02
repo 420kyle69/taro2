@@ -549,7 +549,7 @@ var TaroNetIoServer = {
 					// Mixpanel Event to Track user game successfully started.
 					if (self._socketById[socket.id]._token.distinctId) {
 						global.mixpanel.track('User Connected to Game Server', {
-							'distinct_id': self._socketById[socket.id]._token.posthogDistinctId,
+							'distinct_id': self._socketById[socket.id]._token.distinctId,
 							'$ip': socket._remoteAddress,
 							'gameSlug': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.gameSlug,
 							'gameId': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData._id,
