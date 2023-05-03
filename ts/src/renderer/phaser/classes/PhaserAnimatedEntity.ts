@@ -36,7 +36,6 @@ class PhaserAnimatedEntity extends PhaserEntity {
 		y: number;
 		rotation: number
 	}): void {
-		if (this.entity._category === 'projectile') console.log(data.x, data.y);
 		this.gameObject.setPosition(data.x, data.y);
 		this.sprite.rotation = data.rotation;
 		this.flip(this.entity._stats.flip);

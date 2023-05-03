@@ -15,7 +15,6 @@ var TaroEntity = TaroObject.extend({
 		var rotate = defaultData.rotate || 0;
 
 		this.prevPhysicsFrame = [taro._currentTime, [translateX, translateY, rotate]];
-		//this.nextPhysicsFrame = [taro._currentTime, [translateX, translateY, rotate]];
 
 		this._specialProp.push('_texture');
 		this._specialProp.push('_eventListeners');
@@ -5163,7 +5162,6 @@ var TaroEntity = TaroObject.extend({
 		if (taro.physics && this._category == 'projectile' && 
 			this._stats.sourceItemId != undefined && !this._streamMode
 		) {
-			//console.log(this.prevPhysicsFrame, this.nextPhysicsFrame)
 			prevKeyFrame = this.prevPhysicsFrame;
 			nextKeyFrame = this.nextPhysicsFrame;
 			
@@ -5172,7 +5170,6 @@ var TaroEntity = TaroObject.extend({
 
 			if (prevTransform && nextTransform) {
 				if (!this.renderingStarted) this.startRendering();
-				console.log('prevTransform && nextTransform')
 				xStart = prevTransform[0]
 				yStart = prevTransform[1]
 				xEnd = nextTransform[0]

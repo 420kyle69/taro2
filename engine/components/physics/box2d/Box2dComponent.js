@@ -569,7 +569,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 						entity = tempBod._entity;
 
 						if (entity) {
-							//if (entity._category == 'projectile') console.log('1:', timeElapsedSinceLastStep);
 							var mxfp = dists[taro.physics.engine].getmxfp(tempBod);
 							var x = mxfp.x * taro.physics._scaleRatio;
 							var y = mxfp.y * taro.physics._scaleRatio;
@@ -624,7 +623,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 									entity.isOutOfBounds = false;
 								}
 							}
-							//if (entity._category == 'projectile') console.log('2:', timeElapsedSinceLastStep/*, entity.teleportDestination*/);
 							// entity just has teleported
 							if (entity.teleportDestination != undefined && entity.teleported) {
 								entity.finalKeyFrame[1] = entity.teleportDestination;
@@ -650,7 +648,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 									entity.translateTo(x, y, 0);
 									entity.rotateTo(0, 0, angle);
 								} else if (taro.isClient) {
-									//if (entity._category == 'projectile') console.log('3:', timeElapsedSinceLastStep);
 									// my unit's position is dictated by clientside physics
 									if (entity == taro.client.selectedUnit) {
 										entity.finalKeyFrame= [taro._currentTime, [x, y, angle]];
@@ -659,14 +656,8 @@ var PhysicsComponent = TaroEventingClass.extend({
 									else if (entity._category == 'projectile' && 
 										entity._stats.sourceItemId != undefined && !entity._streamMode
 									) {
-										entity.prevPhysicsFrame = entity.nextPhysicsFrame //? entity.nextPhysicsFrame : [nextFrameTime - timeElapsedSinceLastStep, [x, y, angle]];
+										entity.prevPhysicsFrame = entity.nextPhysicsFrame;
 										entity.nextPhysicsFrame = [nextFrameTime, [x, y, angle]];
-										if (entity._category == 'projectile') {
-											console.log(entity.prevPhysicsFrame, entity.nextPhysicsFrame);
-											//console.log(x, y);
-										}
-										//entity.translateTo(x, y, 0);
-										//entity.rotateTo(0, 0, angle);
 									} else { // update server-streamed entities' body position
 										x = entity.finalKeyFrame[1][0]
 										y = entity.finalKeyFrame[1][1]
