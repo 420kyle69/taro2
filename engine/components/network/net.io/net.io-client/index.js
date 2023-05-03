@@ -133,8 +133,40 @@ NetIo.Client = NetIo.EventingClass.extend({
 
 	// testing
 	reconnect: function() {
+		var self = this;
 		console.log('\nreconnecting...\n');
-		console.log(this._socket);
+
+		// Set the state to connecting
+		this._state = 1;
+
+		/*
+		// Replace http:// with ws://
+		if (window.location.protocol == 'https:'){
+				url = url.replace('http://', 'wss://');
+		} else {
+				url = url.replace('http://', 'ws://');
+		}
+		*/
+
+		// Create new websocket to the url
+		this.wsStartTime = Date.now();
+		this.startTimeSinceLoad = performance.now();
+
+		this._socket = new WebSocket(this.wsUrl, ['netio1', 'reconnect']);
+
+		// Setup event listeners
+		this._socket.onopen = function () {
+			self._onOpen.apply(self, arguments);
+		};
+		this._socket.onmessage = function () {
+			self._onData.apply(self, arguments);
+		};
+		this._socket.onclose = function () {
+			self._onClose.apply(self, arguments);
+		};
+		this._socket.onerror = function () {
+			self._onError.apply(self, arguments);
+		};
 	},
 
 	disconnect: function (reason) {
@@ -337,11 +369,12 @@ NetIo.Client = NetIo.EventingClass.extend({
 		var code = event.code;
 
 		console.log('close event', event, { state: this._state, reason: this._disconnectReason });
-		console.log(taro.client);
-		if (!reason) {
+
+		// if we don't know why we disconnected and the server IS responding(!1)
+		if (!this._disconnectReason && this._state !== 1) {
 			return setTimeout(() => {
-				this.connect(this.wsUrl);
-			}, 1000);
+				this.reconnect(this.wsUrl);
+			}, 3000);
 		}
 
 

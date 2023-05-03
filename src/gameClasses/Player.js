@@ -81,7 +81,7 @@ var Player = TaroEntity.extend({
 			{
 				taro.script.trigger('playerJoinsGame', { playerId: self.id() });
 			}
-			
+
 			if (self._stats.controlledBy == 'human' && !self._stats.isBot) {
 				var clientId = self._stats.clientId;
 				var client = taro.server.clients[clientId];
@@ -108,7 +108,6 @@ var Player = TaroEntity.extend({
 						{ receivedJoinGame: receivedJoinGame }
 					];
 				}
-				
 
 				// console.log(`Player.joinGame(): sending ACK to client ${self._stats.clientId} ${self._stats.name} (time elapsed: ${Date.now() - client.lastEventAt})`, playerJoinStreamData);
 

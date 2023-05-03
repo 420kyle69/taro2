@@ -663,8 +663,6 @@ NetIo.Server = NetIo.EventingClass.extend({
 	},
 
 	socketConnection: function (ws, request) {
-		console.log(request);
-
 		var self = this;
 		var jwt = require('jsonwebtoken');
 		const PING_SERVICE_HEADER = 'x-ping-service';
@@ -709,12 +707,25 @@ NetIo.Server = NetIo.EventingClass.extend({
 					tokenCreatedAt: decodedToken.createdAt
 				};
 
+				// make socket id assignment a variable
+				let assignedId = self.newIdHex();
+
 				// if the token has been used already, close the connection.
 				const isUsedToken = taro.server.usedConnectionJwts[token];
 				if (isUsedToken) {
-					console.log('Token has been used already', token);
-					socket.close('Security token could not be validated, please refresh the page.');
-					return;
+					let matchedTokens = Object.entries(this._socketsById).filter(([id, oldSocket]) => {
+						return oldSocket._token.token == socket._token.token;
+					});
+
+					if (matchedTokens.length === 0) {
+						console.log('Token has been used already', token);
+						socket.close('Security token could not be validated, please refresh the page.');
+						return;
+					}
+					// else if matchedTokens.length > 1?
+					assignedId = matchedTokens[0][1].id;
+					clearTimeout(matchedTokens[0][1].grace);
+					matchedTokens = [];
 				}
 
 				// store token for current client
@@ -732,7 +743,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 				taro.server.usedConnectionJwts = filteredUsedConnectionJwts;
 
 				// Give the socket a unique ID
-				socket.id = self.newIdHex();
+				socket.id = assignedId;
 				// Add the socket to the internal lookups
 				self._sockets.push(socket);
 
@@ -752,16 +763,17 @@ NetIo.Server = NetIo.EventingClass.extend({
 			// Register a listener so that if the socket disconnects,
 			// we can remove it from the active socket lookups
 			socket.on('disconnect', function (response) {
-				console.log('socket.on(\'disconnect\')\ndeleting token...');
-
-				// delete taro.server.usedConnectionJwts[token];
+				console.log('socket.on(\'disconnect\')\nstarting grace period');
 
 				var index = self._sockets.indexOf(socket);
 				if (index > -1) {
 					// Remove the socket from the array
 					self._sockets.splice(index, 1);
 				}
-				delete self._socketsById[socket.id];
+				self._socketsById[socket.id].grace = setTimeout(() => {
+					console.log(`removing ${socket.id} from self._socketsById`);
+					delete self._socketsById[socket.id];
+				}, 5000);
 			});
 			// Tell the client their new ID - triggers this._io.on('connect', ...) on client
 			try {

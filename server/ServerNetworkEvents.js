@@ -54,8 +54,6 @@ var ServerNetworkEvents = {
 			taro.clusterClient.emit('clientDisconnect', client._id);
 		}
 
-		delete client;
-
 		if (player) {
 			player.remove();
 		}
