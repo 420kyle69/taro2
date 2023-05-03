@@ -5171,7 +5171,8 @@ var TaroEntity = TaroObject.extend({
 			var nextTransform = (this.nextPhysicsFrame) ? this.nextPhysicsFrame[1] : undefined;
 
 			if (prevTransform && nextTransform) {
-				//console.log('prevTransform && nextTransform')
+				if (!this.renderingStarted) this.startRendering();
+				console.log('prevTransform && nextTransform')
 				xStart = prevTransform[0]
 				yStart = prevTransform[1]
 				xEnd = nextTransform[0]
