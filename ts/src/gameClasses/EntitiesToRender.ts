@@ -110,6 +110,7 @@ class EntitiesToRender {
 						y += entity.tween.offset.y;
 						rotate += entity.tween.offset.rotate;
 					}
+					
 					entity.transformTexture(x, y, rotate);
 				}
 			}
