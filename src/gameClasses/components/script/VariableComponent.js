@@ -269,7 +269,7 @@ var VariableComponent = TaroEntity.extend({
 					var sourceString = self.getValue(text.sourceString, vars);
 					var patternString = self.getValue(text.patternString, vars);
 
-					if (sourceString && patternString && typeof sourceString == 'string' && typeof patternString == 'string') {
+					if (typeof sourceString == 'string' && typeof patternString == 'string') {
 						returnValue = sourceString.includes(patternString);
 					}
 					break;
@@ -1676,7 +1676,7 @@ var VariableComponent = TaroEntity.extend({
 					var sourceString = self.getValue(text.sourceString, vars);
 					var patternString = self.getValue(text.patternString, vars);
 
-					if (sourceString && patternString && typeof sourceString == 'string' && typeof patternString == 'string') {
+					if (typeof sourceString == 'string' && typeof patternString == 'string') {
 						returnValue = sourceString.startsWith(patternString);
 					}
 					break;
@@ -1684,7 +1684,7 @@ var VariableComponent = TaroEntity.extend({
 					var sourceString = self.getValue(text.sourceString, vars);
 					var patternString = self.getValue(text.patternString, vars);
 
-					if (sourceString && patternString && typeof sourceString == 'string' && typeof patternString == 'string') {
+					if (typeof sourceString == 'string' && typeof patternString == 'string') {
 						returnValue = sourceString.endsWith(patternString);
 					}
 					break;
@@ -1693,22 +1693,13 @@ var VariableComponent = TaroEntity.extend({
 					var matchString = self.getValue(text.matchString, vars);
 					var newString = self.getValue(text.newString, vars);
 
-					if (sourceString && matchString && newString && typeof sourceString == 'string' && typeof matchString == 'string' && typeof newString == 'string') {
+					if (typeof sourceString == 'string' && typeof matchString == 'string' && typeof newString == 'string') {
 						returnValue = sourceString.split(matchString).join(newString);
 					}
 					break;
 				case 'concat':
 					var stringA = self.getValue(text.textA, vars);
 					var stringB = self.getValue(text.textB, vars);
-
-					// isNaN('') is true
-					if (typeof stringA === 'string' && stringA.length && !isNaN(stringA)) {
-						stringA = parseFloat(stringA).toFixed(0);
-					}
-
-					if (typeof stringB === 'string' && stringB.length && !isNaN(stringB)) {
-						stringB = parseFloat(stringB).toFixed(0);
-					}
 
 					returnValue = `${stringA}${stringB}`;
 					break;
