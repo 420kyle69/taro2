@@ -623,9 +623,8 @@ var PhysicsComponent = TaroEventingClass.extend({
 									entity.isOutOfBounds = false;
 								}
 							}
-
 							// entity just has teleported
-							if (entity.teleportDestination != undefined) {
+							if (entity.teleportDestination != undefined && entity.teleported) {
 								entity.finalKeyFrame[1] = entity.teleportDestination;
 								x = entity.teleportDestination[0]
 								y = entity.teleportDestination[1]
@@ -649,7 +648,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 									entity.translateTo(x, y, 0);
 									entity.rotateTo(0, 0, angle);
 								} else if (taro.isClient) {
-									
 									// my unit's position is dictated by clientside physics
 									if (entity == taro.client.selectedUnit) {
 										entity.finalKeyFrame= [taro._currentTime, [x, y, angle]];
