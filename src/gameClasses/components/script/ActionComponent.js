@@ -120,7 +120,7 @@ var ActionComponent = TaroEntity.extend({
 						// const use for creating new instance of variable every time.
 						const setTimeOutActions = JSON.parse(JSON.stringify(action.actions));
 						// const setTimeoutVars = _.cloneDeep(vars);
-						var duration = self._script.variable.getValue(action.value, vars);
+						var duration = self._script.variable.getValue(action.duration, vars);
 						setTimeout(function (actions, currentScriptId) {
 							let previousScriptId = currentScriptId;
 							self._script.currentScriptId = currentScriptId;
