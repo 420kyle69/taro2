@@ -676,7 +676,6 @@ NetIo.Server = NetIo.EventingClass.extend({
 		socket._fromPingService = request.headers[PING_SERVICE_HEADER] && request.headers[PING_SERVICE_HEADER] === process.env.PING_SERVICE_HEADER_SECRET;
 		console.log('x-forwarded-for', request.headers['x-forwarded-for'], socket._remoteAddress);
 		if (!socket._fromPingService) {
-			console.log(`'sec-websocket-protocol' HEADERS:  ${request.headers['sec-websocket-protocol']}`);
 			// if token does not exist in request close the socket.
 			if (request.url.indexOf('/?token=') === -1) {
 				socket.close('Security token could not be validated, please refresh the page.');
@@ -728,7 +727,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 					}
 					// else if matchedTokens.length > 1?
 					assignedId = matchedTokens[0][1].id;
-					clearTimeout(matchedTokens[0][1].grace);
+					clearTimeout(matchedTokens[0][1].gracePeriod);
 					console.log('grace period cancelled');
 					matchedTokens = [];
 				}
@@ -775,9 +774,8 @@ NetIo.Server = NetIo.EventingClass.extend({
 					// Remove the socket from the array
 					self._sockets.splice(index, 1);
 				}
-				self._socketsById[socket.id].grace = setTimeout(() => {
+				self._socketsById[socket.id].gracePeriod = setTimeout(() => {
 					console.log('grace period ends');
-					console.log(`removing ${socket.id} from self._socketsById`);
 					delete self._socketsById[socket.id];
 
 					// moved from .on('disconnect') in TaroNetIoServer.js:~588

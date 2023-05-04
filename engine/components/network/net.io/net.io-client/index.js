@@ -372,6 +372,7 @@ NetIo.Client = NetIo.EventingClass.extend({
 
 		// if we don't know why we disconnected and the server IS responding(!1)
 		if (!this._disconnectReason && this._state !== 1) {
+			// wait 500ms before attempting reconnection
 			return setTimeout(() => {
 				this.reconnect(this.wsUrl);
 			}, 500);
