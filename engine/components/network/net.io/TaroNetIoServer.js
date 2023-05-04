@@ -586,10 +586,7 @@ var TaroNetIoServer = {
 				});
 
 				socket.on('disconnect', function (data) {
-					console.log('socket.on(\'disconnect\')');
-					var isClient = self.clientIds.includes(socket.id);
-
-					if (isClient) {
+					if (self.clientIds.includes(socket.id)) {
 						var end = Date.now();
 						taro.server.socketConnectionCount.disconnected++;
 
@@ -608,8 +605,6 @@ var TaroNetIoServer = {
 							});
 						}
 					}
-
-					self._onClientDisconnect.apply(self, [data, socket]);
 				});
 
 				// Send an init message to the client
@@ -759,10 +754,9 @@ var TaroNetIoServer = {
    * @private
    */
 	_onClientDisconnect: function (data, socket) {
+		// this is where we should pause disconnect propagation for silent reconnect
 		this.log(`Client disconnected with id ${socket.id}`);
-		console.log(`Client disconnected with id ${socket.id}`);
 
-		// this.emit('disconnect', socket.id, { code: 'DUPLICATE_IP' });
 		this.emit('disconnect', socket.id);
 
 		// Remove them from all rooms

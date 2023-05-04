@@ -374,7 +374,7 @@ NetIo.Client = NetIo.EventingClass.extend({
 		if (!this._disconnectReason && this._state !== 1) {
 			return setTimeout(() => {
 				this.reconnect(this.wsUrl);
-			}, 3000);
+			}, 500);
 		}
 
 

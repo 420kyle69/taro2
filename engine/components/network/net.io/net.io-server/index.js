@@ -453,6 +453,7 @@ NetIo.Socket = NetIo.EventingClass.extend({
 		});
 
 		this._socket.on('close', function (reasonCode, description) {
+			// first step in the propagation of the disconnect event.
 			self.emit('disconnect', {
 				socket: self._socket,
 				reason: description,
@@ -675,7 +676,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 		socket._fromPingService = request.headers[PING_SERVICE_HEADER] && request.headers[PING_SERVICE_HEADER] === process.env.PING_SERVICE_HEADER_SECRET;
 		console.log('x-forwarded-for', request.headers['x-forwarded-for'], socket._remoteAddress);
 		if (!socket._fromPingService) {
-
+			console.log(`'sec-websocket-protocol' HEADERS:  ${request.headers['sec-websocket-protocol']}`);
 			// if token does not exist in request close the socket.
 			if (request.url.indexOf('/?token=') === -1) {
 				socket.close('Security token could not be validated, please refresh the page.');
@@ -712,8 +713,11 @@ NetIo.Server = NetIo.EventingClass.extend({
 
 				// if the token has been used already, close the connection.
 				const isUsedToken = taro.server.usedConnectionJwts[token];
-				if (isUsedToken) {
+
+				if (isUsedToken && request.headers['sec-websocket-protocol'].split(', ')[1] == 'reconnect') {
+					// TODO: this will match sockets for users that are still in the game
 					let matchedTokens = Object.entries(this._socketsById).filter(([id, oldSocket]) => {
+						// TODO: check whether _sockets still has a reference? It should not because of the disconnect listener just below
 						return oldSocket._token.token == socket._token.token;
 					});
 
@@ -725,6 +729,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 					// else if matchedTokens.length > 1?
 					assignedId = matchedTokens[0][1].id;
 					clearTimeout(matchedTokens[0][1].grace);
+					console.log('grace period cancelled');
 					matchedTokens = [];
 				}
 
@@ -762,8 +767,8 @@ NetIo.Server = NetIo.EventingClass.extend({
 			console.log('1. Client ', socket.id,' connected (net.io-server index.js)');
 			// Register a listener so that if the socket disconnects,
 			// we can remove it from the active socket lookups
-			socket.on('disconnect', function (response) {
-				console.log('socket.on(\'disconnect\')\nstarting grace period');
+			socket.on('disconnect', function (data) {
+				console.log('grace period starts');
 
 				var index = self._sockets.indexOf(socket);
 				if (index > -1) {
@@ -771,8 +776,13 @@ NetIo.Server = NetIo.EventingClass.extend({
 					self._sockets.splice(index, 1);
 				}
 				self._socketsById[socket.id].grace = setTimeout(() => {
+					console.log('grace period ends');
 					console.log(`removing ${socket.id} from self._socketsById`);
 					delete self._socketsById[socket.id];
+
+					// moved from .on('disconnect') in TaroNetIoServer.js:~588
+					// data contains {WebSocket socket, <Buffer > reason, Number code}
+					taro.network._onClientDisconnect(data, socket);
 				}, 5000);
 			});
 			// Tell the client their new ID - triggers this._io.on('connect', ...) on client
