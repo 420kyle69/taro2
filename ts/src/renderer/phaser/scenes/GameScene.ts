@@ -79,6 +79,18 @@ class GameScene extends PhaserScene {
 			new PhaserRay(this, data.start, data.end, data.config);
 		});
 
+		
+		taro.client.on('create-particle', (particle: Particle) => {
+			let data = particle.data;
+			let frame = this.textures.getFrame(`particle/${data.url}`);
+			let config = {scaleX: data.dimensions.width / frame.width, scaleY: data.dimensions.height / frame.height, ...particle.config};
+			let emitter = this.add.particles(particle.position.x, particle.position.y, `particle/${data.url}`, config);
+			
+			emitter.on('complete', (emitter: Phaser.GameObjects.Particles.ParticleEmitter) => {emitter.destroy();});
+			this.entityLayers[data["z-index"].layer - 1].add(emitter);
+		});
+
+
 		taro.client.on('floating-text', (data: {
 			text: string,
 			x: number,
@@ -123,6 +135,10 @@ class GameScene extends PhaserScene {
 
 		for (let type in data.itemTypes) {
 			this.loadEntity(`item/${data.itemTypes[type].cellSheet.url}`, data.itemTypes[type]);
+		}
+
+		for (let type in data.particleTypes) {
+			this.load.image(`particle/${data.particleTypes[type].url}`, this.patchAssetUrl(data.particleTypes[type].url));
 		}
 
 		data.map.tilesets.forEach((tileset) => {

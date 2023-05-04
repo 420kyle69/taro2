@@ -1425,59 +1425,13 @@ var ActionComponent = TaroEntity.extend({
 						break;
 
 						/* particles */
-					case 'startItemParticle':
-						var item = self._script.variable.getValue(action.item, vars);
-						var particleTypeId = self._script.variable.getValue(action.particleType, vars);
-						if (item && item._category == 'item' && item._stats.particles && item._stats.particles[particleTypeId]) {
-							taro.network.send('particle', { eid: item.id(), pid: particleTypeId, action: 'start' });
-						}
-						break;
-
-					case 'stopItemParticle':
-						var item = self._script.variable.getValue(action.item, vars);
-						var particleTypeId = self._script.variable.getValue(action.particleType, vars);
-						if (item && item._category == 'item' && item._stats.particles && item._stats.particles[particleTypeId]) {
-							taro.network.send('particle', { eid: item.id(), pid: particleTypeId, action: 'stop' });
-						}
-						break;
-
-					case 'emitItemParticle':
-						var item = self._script.variable.getValue(action.item, vars);
-						var particleTypeId = self._script.variable.getValue(action.particleType, vars);
-						if (item && item._category == 'item' && item._stats.particles && item._stats.particles[particleTypeId]) {
-							taro.network.send('particle', { eid: item.id(), pid: particleTypeId, action: 'emitOnce' });
-						}
-						break;
-
-					case 'startUnitParticle':
-						var unit = self._script.variable.getValue(action.unit, vars);
-						var particleTypeId = self._script.variable.getValue(action.particleType, vars);
-						if (unit && unit._category == 'unit' && unit._stats.particles && unit._stats.particles[particleTypeId]) {
-							taro.network.send('particle', { eid: unit.id(), pid: particleTypeId, action: 'start' });
-						}
-						break;
-
-					case 'stopUnitParticle':
-						var unit = self._script.variable.getValue(action.unit, vars);
-						var particleTypeId = self._script.variable.getValue(action.particleType, vars);
-						if (unit && unit._category == 'unit' && unit._stats.particles && unit._stats.particles[particleTypeId]) {
-							taro.network.send('particle', { eid: unit.id(), pid: particleTypeId, action: 'stop' });
-						}
-						break;
-
-					case 'emitUnitParticle':
-						var unit = self._script.variable.getValue(action.unit, vars);
-						var particleTypeId = self._script.variable.getValue(action.particleType, vars);
-						if (unit && unit._category == 'unit' && unit._stats.particles && unit._stats.particles[particleTypeId]) {
-							taro.network.send('particle', { eid: unit.id(), pid: particleTypeId, action: 'emitOnce' });
-						}
-						break;
 
 					case 'emitParticleOnceAtPosition':
 						var position = self._script.variable.getValue(action.position, vars);
 						var particleTypeId = self._script.variable.getValue(action.particleType, vars);
+						var angle = self._script.variable.getValue(action.angle, vars);
 						if (particleTypeId && position) {
-							taro.network.send('particle', { pid: particleTypeId, action: 'emitOnce', position: position });
+							taro.network.send('particle', { pid: particleTypeId, position: position, angle: angle || 0});
 						}
 						break;
 

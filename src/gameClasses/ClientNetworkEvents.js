@@ -541,52 +541,39 @@ var ClientNetworkEvents = {
 	},
 
 	_onParticle: function (data) {
-		if (data.eid && data.pid) {
-			var entity = taro.$(data.eid);
-
-			// the particle emitter must be within myPlayer's camera viewing range
-			if (entity && entity.particleEmitters[data.pid] && entity._translate.x > taro.client.vp1.camera._translate.x - 1000 && entity._translate.x < taro.client.vp1.camera._translate.x + 1000 && entity._translate.y > taro.client.vp1.camera._translate.y - 1000 && entity._translate.y < taro.client.vp1.camera._translate.y + 1000) {
-				var particleEmitter = entity.effect.particleEmitters[data.pid];
-
-				if (data.action == 'start') {
-					particleEmitter.start();
-				} else if (data.action == 'stop') {
-					particleEmitter.stop();
-				} else if (data.action == 'emitOnce') {
-					particleEmitter.emitOnce();
+		if (data.pid && data.position) {
+			var particleData = taro.game.data.particleTypes[data.pid];
+			if (particleData) {
+				if (particleData.dimensions == undefined) {
+					particleData.dimensions = { width: 5, height: 5 };
 				}
-			}
-		} else if (data.pid && data.position) {
-			// my unit
-			var entity = taro.client.vp1.camera._trackTranslateTarget;
-			var particle = taro.game.data.particleTypes[data.pid];
-			if (entity && particle && entity._translate.x > taro.client.vp1.camera._translate.x - 1000 && entity._translate.x < taro.client.vp1.camera._translate.x + 1000 && entity._translate.y > taro.client.vp1.camera._translate.y - 1000 && entity._translate.y < taro.client.vp1.camera._translate.y + 1000) {
-				if (particle.dimensions == undefined) {
-					particle.dimensions = { width: 5, height: 5 };
-				}
-
-				if (particle['z-index'] === undefined) {
-					particle['z-index'] = {
+				if (particleData['z-index'] === undefined) {
+					particleData['z-index'] = {
 						layer: 3,
 						depth: 5
 					};
 				}
+				let config = {
+					angle: (particle, key, t, value) => {
+						let angle = Math.floor(Math.random() * (particleData.angle.max - particleData.angle.min + 1) + particleData.angle.min) + data.angle;
+						if (!particleData.fixedRotation) {
+							particle.angle = angle;
+						}
+						return angle - 90;
+					},
+					speed: { min: particleData.speed.min, max: particleData.speed.max },
+					depth: particleData['z-index'].depth,
+					lifespan: particleData.lifeBase,
+					alpha: { start: 1, end: particleData.deathOpacityBase },
+					name: particleData.name,
+					duration: particleData.quantityTimespan,
+					frequency: particleData.quantityTimespan / particleData.quantityBase,
+				};
+				if (particleData.emitZone.x && particleData.emitZone.y) {
+					config.emitZone = new Phaser.GameObjects.Particles.Zones.RandomZone(new Phaser.Geom.Rectangle(-particleData.emitZone.x / 2, -particleData.emitZone.y / 2, particleData.emitZone.x, particleData.emitZone.y));
+				};
 
-				/*new TaroParticleEmitter() // Set the particle entity to generate for each particle
-					.layer(particle['z-index'].layer)
-					.depth(particle['z-index'].depth)
-					.color(particle.color)
-					.size(particle.dimensions.height, particle.dimensions.width)
-					.particle(Particle)
-					.lifeBase(parseFloat(particle.lifeBase)) // Set particle life to 300ms
-					.quantityBase(parseFloat(particle.quantityBase)) // Set output to 60 particles a second (1000ms)
-					.quantityTimespan(parseFloat(particle.quantityTimespan))
-					.deathOpacityBase(parseFloat(particle.deathOpacityBase)) // Set the particle's death opacity to zero so it fades out as it's lifespan runs out
-					.velocityVector(new TaroPoint3d(parseFloat(particle.velocityVector.baseVector.x), parseFloat(particle.velocityVector.baseVector.y), 0), new TaroPoint3d(parseFloat(particle.velocityVector.minVector.x), parseFloat(particle.velocityVector.minVector.y), 0), new TaroPoint3d(parseFloat(particle.velocityVector.maxVector.x), parseFloat(particle.velocityVector.maxVector.y), 0))
-					.particleMountTarget(taro.client.mainScene) // Mount new particles to the object scene
-					.translateTo(parseFloat(data.position.x), parseFloat(data.position.y), 0) // Move the particle emitter to the bottom of the ship
-					.mount(taro.client.mainScene)
-					.emitOnce();*/
+				taro.client.emit('create-particle', {position:data.position, data:particleData, config:config});
 			}
 		}
 	},

@@ -13,6 +13,17 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var GameScene = /** @class */ (function (_super) {
     __extends(GameScene, _super);
     function GameScene() {
@@ -65,6 +76,14 @@ var GameScene = /** @class */ (function (_super) {
         taro.client.on('create-ray', function (data) {
             new PhaserRay(_this, data.start, data.end, data.config);
         });
+        taro.client.on('create-particle', function (particle) {
+            var data = particle.data;
+            var frame = _this.textures.getFrame("particle/".concat(data.url));
+            var config = __assign({ scaleX: data.dimensions.width / frame.width, scaleY: data.dimensions.height / frame.height }, particle.config);
+            var emitter = _this.add.particles(particle.position.x, particle.position.y, "particle/".concat(data.url), config);
+            emitter.on('complete', function (emitter) { emitter.destroy(); });
+            _this.entityLayers[data["z-index"].layer - 1].add(emitter);
+        });
         taro.client.on('floating-text', function (data) {
             new PhaserFloatingText(_this, data);
         });
@@ -97,6 +116,9 @@ var GameScene = /** @class */ (function (_super) {
         }
         for (var type in data.itemTypes) {
             this.loadEntity("item/".concat(data.itemTypes[type].cellSheet.url), data.itemTypes[type]);
+        }
+        for (var type in data.particleTypes) {
+            this.load.image("particle/".concat(data.particleTypes[type].url), this.patchAssetUrl(data.particleTypes[type].url));
         }
         data.map.tilesets.forEach(function (tileset) {
             var key = "tiles/".concat(tileset.name);
