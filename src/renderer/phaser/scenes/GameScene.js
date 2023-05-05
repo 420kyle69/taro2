@@ -80,6 +80,10 @@ var GameScene = /** @class */ (function (_super) {
             var data = particle.data;
             var frame = _this.textures.getFrame("particle/".concat(data.url));
             var config = __assign({ scaleX: data.dimensions.width / frame.width, scaleY: data.dimensions.height / frame.height }, particle.config);
+            if (data.emitZone && data.emitZone.x && data.emitZone.y) {
+                config.emitZone = new Phaser.GameObjects.Particles.Zones.RandomZone(new Phaser.Geom.Rectangle(-data.emitZone.x / 2, -data.emitZone.y / 2, data.emitZone.x, data.emitZone.y));
+            }
+            ;
             var emitter = _this.add.particles(particle.position.x, particle.position.y, "particle/".concat(data.url), config);
             emitter.on('complete', function (emitter) { emitter.destroy(); });
             _this.entityLayers[data["z-index"].layer - 1].add(emitter);

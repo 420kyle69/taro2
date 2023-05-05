@@ -556,10 +556,11 @@ var ClientNetworkEvents = {
 				let config = {
 					angle: (particle, key, t, value) => {
 						let angle = Math.floor(Math.random() * (particleData.angle.max - particleData.angle.min + 1) + particleData.angle.min) + data.angle;
-						if (!particleData.fixedRotation) {
-							particle.angle = angle;
-						}
+						particle.angle = particleData.fixedRotation ? 0 : angle;
 						return angle - 90;
+					},
+					rotate: (particle, key, t, value) => {
+						return value
 					},
 					speed: { min: particleData.speed.min, max: particleData.speed.max },
 					depth: particleData['z-index'].depth,
