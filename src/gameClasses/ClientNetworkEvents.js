@@ -541,8 +541,8 @@ var ClientNetworkEvents = {
 	},
 
 	_onParticle: function (data) {
-		if (data.pid && data.position) {
-			var particleData = taro.game.data.particleTypes[data.pid];
+		if (data.particleId && data.position) {
+			var particleData = taro.game.data.particleTypes[data.particleId];
 			if (particleData) {
 				if (particleData.dimensions == undefined) {
 					particleData.dimensions = { width: 5, height: 5 };
