@@ -398,7 +398,8 @@ var MenuUiComponent = TaroEntity.extend({
 	kickPlayerFromGame: function (excludeEntity) {
 		var self = this;
 		var players = taro.$$('player').filter(function (player) {
-			if (player && player._stats && player._stats.controlledBy === 'human' && player._alive && player.id() !== excludeEntity) return true;
+			if (player && player._stats && player._stats.controlledBy === 'human' && player._alive && player.id() !== excludeEntity) 
+				return true;
 		});
 		var html = '<table class="table table-hover">';
 		html += '<tr class="border-bottom">';

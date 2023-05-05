@@ -510,9 +510,7 @@ var TaroNetIoServer = {
 			}
 		}
 
-		const playerCount = taro.$$('player').filter(function (player) {
-			return player._stats.controlledBy == 'human';
-		}).length;
+		const playerCount = taro.getPlayerCount();
 
 		var clientRejectReason = [];
 

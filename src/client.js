@@ -571,7 +571,6 @@ const Client = TaroEventingClass.extend({
 			taro.network.stream.on('entityDestroyed', (entityBeingDestroyed) => { // renamed param from 'unitBeingDestroyed' to 'entityBeingDestroyed'
 
 				if (entityBeingDestroyed._category == 'unit') {
-
 					entityBeingDestroyed.remove();
 
 				} else if (
@@ -584,7 +583,6 @@ const Client = TaroEventingClass.extend({
 					) &&
 					entityBeingDestroyed._category == 'player'
 				) {
-
 					taro.menuUi.kickPlayerFromGame(entityBeingDestroyed.id()); // this is inside the 'Moderate' menu
 				} else {
 					try {

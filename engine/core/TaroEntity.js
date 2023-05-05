@@ -2472,7 +2472,7 @@ var TaroEntity = TaroObject.extend({
      *     entity.destroy();
      */
 	destroy: function (destroyOrphan) {
-		TaroEntity.prototype.log(`taroEntity: destroy ${this._category} ${this.id()}`);
+		// console.log(`taroEntity: destroy ${this._category} ${this.id()}`);
 
 		this._alive = false;
 		/* CEXCLUDE */

@@ -420,6 +420,7 @@ var Player = TaroEntity.extend({
 			this.streamDestroy();
 			this.destroy();
 		}
+		
 	},
 
 	updateVisibility: function (playerId) {

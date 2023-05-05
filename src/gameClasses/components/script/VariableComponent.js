@@ -960,9 +960,7 @@ var VariableComponent = TaroEntity.extend({
 					break;
 
 				case 'getPlayerCount':
-					returnValue = taro.$$('player').filter(function (player) {
-						return player._stats.controlledBy == 'human';
-					}).length;
+					returnValue = taro.getPlayerCount();
 					break;
 
 				case 'getNumberOfItemsPresent':
