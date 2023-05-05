@@ -84,6 +84,9 @@ class GameScene extends PhaserScene {
 			let data = particle.data;
 			let frame = this.textures.getFrame(`particle/${data.url}`);
 			let config = {scaleX: data.dimensions.width / frame.width, scaleY: data.dimensions.height / frame.height, ...particle.config};
+			if (data.emitZone && data.emitZone.x && data.emitZone.y) {
+				config.emitZone = new Phaser.GameObjects.Particles.Zones.RandomZone(new Phaser.Geom.Rectangle(-data.emitZone.x / 2, -data.emitZone.y / 2, data.emitZone.x, data.emitZone.y));
+			};
 			let emitter = this.add.particles(particle.position.x, particle.position.y, `particle/${data.url}`, config);
 			
 			emitter.on('complete', (emitter: Phaser.GameObjects.Particles.ParticleEmitter) => {emitter.destroy();});
