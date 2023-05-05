@@ -402,6 +402,13 @@ var Player = TaroEntity.extend({
 		return this.isHostileTo(player) == false && this.isFriendlyTo(player) == false;
 	},
 
+	isDeveloper: function() {
+		return (this._stats.userId == taro.game.data.defaultData.owner) ||
+			taro.game.data.defaultData.invitedUsers.find(function (iu) { if (iu.user === this._stats.userId) { return true; } }) ||
+			this._stats.isUserAdmin ||
+			this._stats.isUserMod;	
+	},
+
 	remove: function () {
 		// AI players cannot be removed
 		if (this._stats.controlledBy == 'human') // do not send trigger for neutral player

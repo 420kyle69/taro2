@@ -1618,7 +1618,7 @@ var TaroEngine = TaroEntity.extend({
 
 				if (taro.isClient) {
 					// if I'm the only player in the game, suggest me a different game to play
-					if (playerCount == 1) {
+					if (playerCount == 1 && !taro.client.myPlayer?.isDeveloper()) {
 						if (typeof window.raidAlert === 'function') {
 							window.raidAlert()
 						}							
