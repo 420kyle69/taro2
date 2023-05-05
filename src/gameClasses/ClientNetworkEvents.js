@@ -544,10 +544,10 @@ var ClientNetworkEvents = {
 		if (data.particleId && data.position) {
 			var particleData = taro.game.data.particleTypes[data.particleId];
 			if (particleData) {
-				if (particleData.dimensions == undefined) {
+				if (!particleData.dimensions) {
 					particleData.dimensions = { width: 5, height: 5 };
 				}
-				if (particleData['z-index'] === undefined) {
+				if (!particleData['z-index']) {
 					particleData['z-index'] = {
 						layer: 3,
 						depth: 5
@@ -568,9 +568,6 @@ var ClientNetworkEvents = {
 					name: particleData.name,
 					duration: particleData.quantityTimespan,
 					frequency: particleData.quantityTimespan / particleData.quantityBase,
-				};
-				if (particleData.emitZone.x && particleData.emitZone.y) {
-					config.emitZone = new Phaser.GameObjects.Particles.Zones.RandomZone(new Phaser.Geom.Rectangle(-particleData.emitZone.x / 2, -particleData.emitZone.y / 2, particleData.emitZone.x, particleData.emitZone.y));
 				};
 
 				taro.client.emit('create-particle', {position:data.position, data:particleData, config:config});
