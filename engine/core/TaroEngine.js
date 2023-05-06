@@ -1635,8 +1635,6 @@ var TaroEngine = TaroEntity.extend({
 							}
 						}
 						
-						
-
 						if (typeof window.raidAlert === 'function') {
 							window.raidAlert()
 						}							
