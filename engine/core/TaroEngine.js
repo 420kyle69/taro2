@@ -1620,6 +1620,23 @@ var TaroEngine = TaroEntity.extend({
 					// if I'm the only player in the game, suggest me a different game to play
 					// wait at least 5s, because playerCount is not accurate at the beginning
 					if (playerCount == 1 && !taro.client.myPlayer?.isDeveloper() && taro._currentTime - taro.client.playerJoinedAt > 5000) {
+
+						// log the event to posthog for AB testing players who join a game with 1 player
+						if (window.posthog) {
+							var posthogDistinctId = window.posthog.get_distinct_id ? window.posthog.get_distinct_id() : '';		
+							console.log("posthogDistinctId", posthogDistinctId)
+							if (window.posthogEventCaptured === undefined) {
+								window.posthogEventCaptured = true;
+								window.posthog.capture({
+									distinctId: posthogDistinctId,
+									'event': 'Player is alone in the game',
+									properties: {}
+								});
+							}
+						}
+						
+						
+
 						if (typeof window.raidAlert === 'function') {
 							window.raidAlert()
 						}							
