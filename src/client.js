@@ -777,8 +777,7 @@ const Client = TaroEventingClass.extend({
 		}
 
 		window.joinGameSent.start = Date.now();
-		taro.client.playerJoinedAt = taro._currentTime
-		
+
 		console.log('joinGame sent'); // you already know how I feel about these
 
 		// old comment => 'if game was paused'
@@ -788,7 +787,6 @@ const Client = TaroEventingClass.extend({
 				0,
 				`joinGame sent. userId: ${userId}`
 			]);
-
 		}
 	},
 

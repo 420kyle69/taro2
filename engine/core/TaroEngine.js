@@ -1623,18 +1623,12 @@ var TaroEngine = TaroEntity.extend({
 
 						// log the event to posthog for AB testing players who join a game with 1 player
 						if (window.posthog) {
-							var posthogDistinctId = window.posthog.get_distinct_id ? window.posthog.get_distinct_id() : '';		
-							console.log("posthogDistinctId", posthogDistinctId)
 							if (window.posthogEventCaptured === undefined) {
 								window.posthogEventCaptured = true;
-								window.posthog.capture({
-									distinctId: posthogDistinctId,
-									'event': 'Player is alone in the game',
-									properties: {}
-								});
+								window.posthog.capture('player is alone in the game');
 							}
 						}
-						
+
 						if (typeof window.raidAlert === 'function') {
 							window.raidAlert()
 						}							
