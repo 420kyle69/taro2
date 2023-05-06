@@ -536,7 +536,7 @@ const Client = TaroEventingClass.extend({
 						if (player._stats.clientId == taro.network.id()) {
 
 							taro.client.eventLog.push([
-								taro._currentTime - taro.client.eventLogStartTime,
+								taro._currentTime - taro.client.playerJoinedAt,
 								'My player created'
 							]);
 							// old comment => 'declare my player'
@@ -787,7 +787,7 @@ const Client = TaroEventingClass.extend({
 				0,
 				`joinGame sent. userId: ${userId}`
 			]);
-			taro.client.eventLogStartTime = taro._currentTime;
+			taro.client.playerJoinedAt = taro._currentTime;
 
 		}
 	},

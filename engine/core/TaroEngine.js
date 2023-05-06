@@ -1618,7 +1618,8 @@ var TaroEngine = TaroEntity.extend({
 
 				if (taro.isClient) {
 					// if I'm the only player in the game, suggest me a different game to play
-					if (playerCount == 1 && !taro.client.myPlayer?.isDeveloper()) {
+					// wait at least 5s, because playerCount is not accurate at the beginning
+					if (playerCount == 1 && !taro.client.myPlayer?.isDeveloper() && taro._currentTime - taro.client.playerJoinedAt > 5000) {
 						if (typeof window.raidAlert === 'function') {
 							window.raidAlert()
 						}							
