@@ -6,6 +6,8 @@ class GameScene extends PhaserScene {
 	entityLayers: Phaser.GameObjects.Layer[] = [];
 	renderedEntities: TGameObject[] = [];
 	unitsList: PhaserUnit[] = [];
+	projectilesList: PhaserProjectile[] = [];
+	itemList: PhaserItem[] = [];
 	public tilemapLayers: Phaser.Tilemaps.TilemapLayer[];
 
 	public tilemap: Phaser.Tilemaps.Tilemap;
@@ -87,8 +89,15 @@ class GameScene extends PhaserScene {
 			if (data.emitZone && data.emitZone.x && data.emitZone.y) {
 				config.emitZone = new Phaser.GameObjects.Particles.Zones.RandomZone(new Phaser.Geom.Rectangle(-data.emitZone.x / 2, -data.emitZone.y / 2, data.emitZone.x, data.emitZone.y));
 			};
+
 			let emitter = this.add.particles(particle.position.x, particle.position.y, `particle/${data.url}`, config);
 			
+			if(particle.entityId){
+				let entity = this.findEntity(particle.entityId);
+				entity.attachedParticles.push(emitter);
+				emitter.startFollow(entity.gameObject);
+			};
+			emitter.setDepth(data["z-index"].depth);
 			emitter.on('complete', (emitter: Phaser.GameObjects.Particles.ParticleEmitter) => {emitter.destroy();});
 			this.entityLayers[data["z-index"].layer - 1].add(emitter);
 		});
@@ -552,6 +561,14 @@ class GameScene extends PhaserScene {
 		return this.unitsList.find(
 			(unit) => {
 				return unit.entity._id === unitId;
+			}
+		);
+	}
+
+	findEntity (entityId: string): PhaserUnit | PhaserProjectile | PhaserItem {
+		return [...this.unitsList, ...this.itemList, ...this.projectilesList].find(
+			(entity) => {
+				return entity.entity._id === entityId;
 			}
 		);
 	}

@@ -10,8 +10,8 @@ interface ParticleData {
 		y: number;
 	}
 	name: string;
-	quantityBase: number;
-	quantityTimespan: number;
+	emitFrequency: number;
+	duration: number;
 	url: string;
 	"z-index": {
 		layer: number;
@@ -35,4 +35,5 @@ interface Particle{
     };
 	config: Phaser.Types.GameObjects.Particles.ParticleEmitterConfig;
     data: ParticleData;
+	entityId?: string;
 }

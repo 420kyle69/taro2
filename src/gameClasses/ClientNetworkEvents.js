@@ -541,7 +541,7 @@ var ClientNetworkEvents = {
 	},
 
 	_onParticle: function (data) {
-		if (data.particleId && data.position) {
+		if (data.particleId) {
 			var particleData = taro.game.data.particleTypes[data.particleId];
 			if (particleData) {
 				if (!particleData.dimensions) {
@@ -563,15 +563,13 @@ var ClientNetworkEvents = {
 						return value
 					},
 					speed: { min: particleData.speed.min, max: particleData.speed.max },
-					depth: particleData['z-index'].depth,
 					lifespan: particleData.lifeBase,
 					alpha: { start: 1, end: particleData.deathOpacityBase },
 					name: particleData.name,
-					duration: particleData.quantityTimespan,
-					frequency: particleData.quantityTimespan / particleData.quantityBase,
+					duration: particleData.duration,
+					frequency: particleData.emitFrequency
 				};
-
-				taro.client.emit('create-particle', {position:data.position, data:particleData, config:config});
+				taro.client.emit('create-particle', {position:data.position || {x:0, y:0}, data:particleData, config:config, entityId:data.entityId || null});
 			}
 		}
 	},

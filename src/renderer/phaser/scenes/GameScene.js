@@ -24,6 +24,15 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 var GameScene = /** @class */ (function (_super) {
     __extends(GameScene, _super);
     function GameScene() {
@@ -31,6 +40,8 @@ var GameScene = /** @class */ (function (_super) {
         _this.entityLayers = [];
         _this.renderedEntities = [];
         _this.unitsList = [];
+        _this.projectilesList = [];
+        _this.itemList = [];
         return _this;
     }
     GameScene.prototype.init = function () {
@@ -85,6 +96,12 @@ var GameScene = /** @class */ (function (_super) {
             }
             ;
             var emitter = _this.add.particles(particle.position.x, particle.position.y, "particle/".concat(data.url), config);
+            if (particle.entityId) {
+                var entity = _this.findEntity(particle.entityId);
+                entity.attachedParticles.push(emitter);
+                emitter.startFollow(entity.gameObject);
+            }
+            emitter.setDepth(data["z-index"].depth);
             emitter.on('complete', function (emitter) { emitter.destroy(); });
             _this.entityLayers[data["z-index"].layer - 1].add(emitter);
         });
@@ -388,6 +405,11 @@ var GameScene = /** @class */ (function (_super) {
     GameScene.prototype.findUnit = function (unitId) {
         return this.unitsList.find(function (unit) {
             return unit.entity._id === unitId;
+        });
+    };
+    GameScene.prototype.findEntity = function (entityId) {
+        return __spreadArray(__spreadArray(__spreadArray([], this.unitsList, true), this.itemList, true), this.projectilesList, true).find(function (entity) {
+            return entity.entity._id === entityId;
         });
     };
     GameScene.prototype.update = function () {
