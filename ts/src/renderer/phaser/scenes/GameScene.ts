@@ -83,23 +83,7 @@ class GameScene extends PhaserScene {
 
 		
 		taro.client.on('create-particle', (particle: Particle) => {
-			let data = particle.data;
-			let frame = this.textures.getFrame(`particle/${data.url}`);
-			let config = {scaleX: data.dimensions.width / frame.width, scaleY: data.dimensions.height / frame.height, ...particle.config};
-			if (data.emitZone && data.emitZone.x && data.emitZone.y) {
-				config.emitZone = new Phaser.GameObjects.Particles.Zones.RandomZone(new Phaser.Geom.Rectangle(-data.emitZone.x / 2, -data.emitZone.y / 2, data.emitZone.x, data.emitZone.y));
-			};
-
-			let emitter = this.add.particles(particle.position.x, particle.position.y, `particle/${data.url}`, config);
-			
-			if(particle.entityId){
-				let entity = this.findEntity(particle.entityId);
-				entity.attachedParticles.push(emitter);
-				emitter.startFollow(entity.gameObject);
-			};
-			emitter.setDepth(data["z-index"].depth);
-			emitter.on('complete', (emitter: Phaser.GameObjects.Particles.ParticleEmitter) => {emitter.destroy();});
-			this.entityLayers[data["z-index"].layer - 1].add(emitter);
+			new PhaserParticle(this, particle);
 		});
 
 

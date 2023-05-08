@@ -13,17 +13,6 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
         if (ar || !(i in from)) {
@@ -88,22 +77,7 @@ var GameScene = /** @class */ (function (_super) {
             new PhaserRay(_this, data.start, data.end, data.config);
         });
         taro.client.on('create-particle', function (particle) {
-            var data = particle.data;
-            var frame = _this.textures.getFrame("particle/".concat(data.url));
-            var config = __assign({ scaleX: data.dimensions.width / frame.width, scaleY: data.dimensions.height / frame.height }, particle.config);
-            if (data.emitZone && data.emitZone.x && data.emitZone.y) {
-                config.emitZone = new Phaser.GameObjects.Particles.Zones.RandomZone(new Phaser.Geom.Rectangle(-data.emitZone.x / 2, -data.emitZone.y / 2, data.emitZone.x, data.emitZone.y));
-            }
-            ;
-            var emitter = _this.add.particles(particle.position.x, particle.position.y, "particle/".concat(data.url), config);
-            if (particle.entityId) {
-                var entity = _this.findEntity(particle.entityId);
-                entity.attachedParticles.push(emitter);
-                emitter.startFollow(entity.gameObject);
-            }
-            emitter.setDepth(data["z-index"].depth);
-            emitter.on('complete', function (emitter) { emitter.destroy(); });
-            _this.entityLayers[data["z-index"].layer - 1].add(emitter);
+            new PhaserParticle(_this, particle);
         });
         taro.client.on('floating-text', function (data) {
             new PhaserFloatingText(_this, data);
