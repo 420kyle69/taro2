@@ -11,6 +11,25 @@ $(document).mousedown(function() {
 	mouseIsDown = false;
 });
 
+// explain this
+const USE_LOCAL_STORAGE = (() => {
+	try {
+		return !!localStorage.getItem;
+	} catch(e) {
+		return false;
+	}
+})();
+
+	storage = {
+		// running locally, these are the only ones that appear
+		sound: 'on',
+		'sound-volume': 75,
+		music: 'on',
+		'music-volume': 75,
+		'force-canvas': true,
+	};
+
+
 const statsPanels = {}; // will we need this?
 
 const Client = TaroEventingClass.extend({
