@@ -34,6 +34,7 @@ var PhaserParticle = /** @class */ (function (_super) {
     }
     PhaserParticle.createConfig = function (scene, data, angle) {
         if (data) {
+            var frame = scene.textures.getFrame("particle/".concat(data.url));
             var config = {
                 angle: function (particle, key, value) {
                     var direction = Math.floor(Math.random() * (data.angle.max - data.angle.min + 1) + data.angle.min) + angle;
@@ -48,11 +49,10 @@ var PhaserParticle = /** @class */ (function (_super) {
                 alpha: { start: 1, end: data.deathOpacityBase },
                 name: data.name,
                 duration: data.duration,
-                frequency: data.emitFrequency
+                frequency: data.emitFrequency,
+                scaleX: data.dimensions.width / frame.width,
+                scaleY: data.dimensions.height / frame.height
             };
-            var frame = scene.textures.getFrame("particle/".concat(data.url));
-            config.scaleX = data.dimensions.width / frame.width;
-            config.scaleY = data.dimensions.height / frame.height;
             if (data.emitZone && data.emitZone.x && data.emitZone.y) {
                 config.emitZone = new Phaser.GameObjects.Particles.Zones.RandomZone(new Phaser.Geom.Rectangle(-data.emitZone.x / 2, -data.emitZone.y / 2, data.emitZone.x, data.emitZone.y));
             }
