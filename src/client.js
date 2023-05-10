@@ -23,10 +23,10 @@ const USE_LOCAL_STORAGE = (() => {
 	storage = {
 		// running locally, these are the only ones that appear
 		sound: 'on',
-		'sound-volume': 75,
+		'sound-volume': 100,
 		music: 'on',
-		'music-volume': 75,
-		'force-canvas': true,
+		'music-volume': 100,
+		'force-canvas': false,
 	};
 
 
