@@ -7,7 +7,7 @@ class PhaserParticle extends Phaser.GameObjects.Particles.ParticleEmitter {
         //@ts-ignore //there seems to be an issue with phaser's type def for particleEmitter
         super(scene, particle.position.x, particle.position.y, `particle/${particleData.url}`, PhaserParticle.createConfig(scene, particleData, particle.angle));
 
-        if(particle.entityId){
+        if (particle.entityId) {
             let entity = scene.findEntity(particle.entityId);
             if (entity) {
                 entity.attachedParticles.push(this);
@@ -21,6 +21,7 @@ class PhaserParticle extends Phaser.GameObjects.Particles.ParticleEmitter {
 
     static createConfig (scene: GameScene, data: ParticleData, angle: number): Phaser.Types.GameObjects.Particles.ParticleEmitterConfig {
 		if (data) {
+            let frame = scene.textures.getFrame(`particle/${data.url}`);
 			let config: Phaser.Types.GameObjects.Particles.ParticleEmitterConfig = {
 				angle: (particle, key, value) => {
 					let direction = Math.floor(Math.random() * (data.angle.max - data.angle.min + 1) + data.angle.min) + angle;
@@ -35,11 +36,10 @@ class PhaserParticle extends Phaser.GameObjects.Particles.ParticleEmitter {
 				alpha: { start: 1, end: data.deathOpacityBase },
 				name: data.name,
 				duration: data.duration,
-				frequency: data.emitFrequency
+				frequency: data.emitFrequency,
+                scaleX: data.dimensions.width / frame.width,
+                scaleY: data.dimensions.height / frame.height
 			};
-            let frame = scene.textures.getFrame(`particle/${data.url}`);
-            config.scaleX = data.dimensions.width / frame.width;
-            config.scaleY = data.dimensions.height / frame.height;
             if (data.emitZone && data.emitZone.x && data.emitZone.y) {
                 config.emitZone = new Phaser.GameObjects.Particles.Zones.RandomZone(new Phaser.Geom.Rectangle(-data.emitZone.x / 2, -data.emitZone.y / 2, data.emitZone.x, data.emitZone.y));
             };
