@@ -1863,16 +1863,18 @@ var ActionComponent = TaroEntity.extend({
 						/* Ads */
 
 					case 'playAdForEveryone':
-						if (!taro.ad.lastPlayedAd || ((Date.now() - taro.ad.lastPlayedAd) >= 60000)) {
-							taro.ad.play({ type: 'preroll' });
-							taro.ad.lastPlayedAd = Date.now();
-						} else {
-							taro.ad.prerollEventHandler('video-ad-action-limit-reached');
+						if (taro.game.data.defaultData.tier && parseInt(taro.game.data.defaultData.tier) !== 1) {
+							if (!taro.ad.lastPlayedAd || ((Date.now() - taro.ad.lastPlayedAd) >= 60000)) {
+								taro.ad.play({ type: 'preroll' });
+								taro.ad.lastPlayedAd = Date.now();
+							} else {
+								taro.ad.prerollEventHandler('video-ad-action-limit-reached');
+							}
 						}
 						break;
 
 					case 'playAdForPlayer':
-						if (action.entity) {
+						if (action.entity && taro.game.data.defaultData.tier && parseInt(taro.game.data.defaultData.tier) !== 1) {
 							var unit = self._script.variable.getValue(action.entity, vars);
 							if (unit && unit._stats && unit._stats.clientId) {
 								if (!taro.ad.lastPlayedAd || ((Date.now() - taro.ad.lastPlayedAd) >= 60000)) {
