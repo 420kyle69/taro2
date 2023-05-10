@@ -33,7 +33,7 @@ interface Particle{
         x: number;
         y: number;
     };
-	config: Phaser.Types.GameObjects.Particles.ParticleEmitterConfig;
-    data: ParticleData;
+	particleId: string;
+	angle: number;
 	entityId?: string;
 }

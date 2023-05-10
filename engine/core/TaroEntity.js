@@ -4264,7 +4264,9 @@ var TaroEntity = TaroObject.extend({
 							case 'showNameLabel':
 								this.emit('show-label');
 								break;
-
+							case 'particle':
+								taro.client.emit('create-particle', newValue);
+								break;
 						}
 					}
 				}

@@ -541,35 +541,15 @@ var ClientNetworkEvents = {
 	},
 
 	_onParticle: function (data) {
-		if (data.particleId) {
-			var particleData = taro.game.data.particleTypes[data.particleId];
-			if (particleData) {
-				if (!particleData.dimensions) {
-					particleData.dimensions = { width: 5, height: 5 };
+		var particleData = taro.game.data.particleTypes[data.particleId];
+		if (particleData) {
+			if (data.entityId) {
+				if (taro.client.entityUpdateQueue[data.entityId] == undefined) {
+					taro.client.entityUpdateQueue[data.entityId] = [];
 				}
-				if (!particleData['z-index']) {
-					particleData['z-index'] = {
-						layer: 3,
-						depth: 5
-					};
-				}
-				let config = {
-					angle: (particle, key, t, value) => {
-						let angle = Math.floor(Math.random() * (particleData.angle.max - particleData.angle.min + 1) + particleData.angle.min) + data.angle;
-						particle.angle = particleData.fixedRotation ? 0 : angle;
-						return angle - 90;
-					},
-					rotate: (particle, key, t, value) => {
-						return value
-					},
-					speed: { min: particleData.speed.min, max: particleData.speed.max },
-					lifespan: particleData.lifeBase,
-					alpha: { start: 1, end: particleData.deathOpacityBase },
-					name: particleData.name,
-					duration: particleData.duration,
-					frequency: particleData.emitFrequency
-				};
-				taro.client.emit('create-particle', {position:data.position || {x:0, y:0}, data:particleData, config:config, entityId:data.entityId || null});
+				taro.client.entityUpdateQueue[data.entityId].push({particle: data})
+			} else {
+				taro.client.emit('create-particle', data);
 			}
 		}
 	},

@@ -1440,7 +1440,7 @@ var ActionComponent = TaroEntity.extend({
 						var angle = self._script.variable.getValue(action.angle, vars);
 						var entity = self._script.variable.getValue(action.entity, vars);
 						if (particleTypeId && entity) {
-							taro.network.send('particle', { particleId: particleTypeId, angle: angle || 0, entityId: entity.id()});
+							taro.network.send('particle', { particleId: particleTypeId, position: {x:0, y:0}, angle: angle || 0, entityId: entity.id()});
 						}
 						break;
 
