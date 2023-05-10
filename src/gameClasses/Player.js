@@ -401,17 +401,19 @@ var Player = TaroEntity.extend({
 	isNeutralTo: function (player) {
 		return this.isHostileTo(player) == false && this.isFriendlyTo(player) == false;
 	},
-	
+
 	isDeveloper: function() {
 		var self = this;
 		return self._stats && (
-					self._stats.userId == taro.game.data.defaultData.owner ||
-					taro.game.data.defaultData.invitedUsers.find(function (iu) {
-						if (iu.user === self._stats.userId) { return true; } 
-					}) ||
-					self._stats.isUserAdmin ||
-					self._stats.isUserMod
-				);
+			(self._stats.userId == taro.game.data.defaultData.owner) ||
+			taro.game.data.defaultData.invitedUsers.find(function (iu) {
+				if (iu.user === self._stats.userId) {
+					return true;
+				}
+			}) ||
+			self._stats.isUserAdmin ||
+			self._stats.isUserMod
+		);
 	},
 
 	remove: function () {
