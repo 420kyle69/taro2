@@ -401,15 +401,19 @@ var Player = TaroEntity.extend({
 	isNeutralTo: function (player) {
 		return this.isHostileTo(player) == false && this.isFriendlyTo(player) == false;
 	},
-	
+
 	isDeveloper: function() {
 		var self = this;
 		return self._stats && (
-					(self._stats.userId == taro.game.data.defaultData.owner) ||
-					taro.game.data.defaultData.invitedUsers.find(function (iu) { if (iu.user === self._stats.userId) { return true; } }) ||
-					self._stats.isUserAdmin ||
-					self._stats.isUserMod
-				);
+			(self._stats.userId == taro.game.data.defaultData.owner) ||
+			taro.game.data.defaultData.invitedUsers.find(function (iu) {
+				if (iu.user === self._stats.userId) {
+					return true;
+				}
+			}) ||
+			self._stats.isUserAdmin ||
+			self._stats.isUserMod
+		);
 	},
 
 	remove: function () {
@@ -559,7 +563,7 @@ var Player = TaroEntity.extend({
 							self.redrawUnits(['nameLabel']);
 
 							self._stats.receivedJoinGame = data.receivedJoinGame;
-							taro.client.eventLog.push([taro._currentTime - taro.client.eventLogStartTime, '\'playerJoined\' received from server']);
+							taro.client.eventLog.push([taro._currentTime - taro.client.playerJoinedAt, '\'playerJoined\' received from server']);
 							self._stats.processedJoinGame = data.processedJoinGame;
 							var streamingDiff = `${Date.now() - data.streamedOn}ms`;
 
@@ -719,7 +723,7 @@ var Player = TaroEntity.extend({
 			$('#play-game-button .content').html(html);
 
 			$('#modd-shop-div').addClass('d-flex');
-			taro.client.eventLog.push([taro._currentTime - taro.client.eventLogStartTime, 'hide menu called']);
+			taro.client.eventLog.push([taro._currentTime - taro.client.playerJoinedAt, 'hide menu called']);
 			taro.menuUi.hideMenu(); // if player's already joined the game, then just hide menu when "play game" button is clicked
 
 			if (!taro.client.guestmode) {
