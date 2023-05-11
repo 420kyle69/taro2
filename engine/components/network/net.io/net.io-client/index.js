@@ -60,6 +60,7 @@ NetIo.Client = NetIo.EventingClass.extend({
 		this.wsStartTime = null;
 		this.startTimeSinceLoad = null;
 		this.pingInterval = null;
+		this.reconnectedAt = null;
 
 		// this.COMPRESSION_THRESHOLD = 30000;
 
@@ -133,7 +134,9 @@ NetIo.Client = NetIo.EventingClass.extend({
 
 	reconnect: function() {
 		var self = this;
+		this.reconnectedAt = Date.now();
 		this.trackLatency('gs-websocket-connect', 'onreconnect');
+		this.reconnectedAt = null;
 
 		// Set the state to connecting
 		this._state = 1;
@@ -232,7 +235,8 @@ NetIo.Client = NetIo.EventingClass.extend({
 					wsStartTimeSinceLoad: this.startTimeSinceLoad,
 					wsEndTimeSinceLoad: endTimeSinceLoad,
 					wsStartTime: this.wsStartTime,
-					wsEndTime: Date.now()
+					wsEndTime: Date.now(),
+					reconnectedAt: this.reconnectedAt
 				});
 			}
 
@@ -340,8 +344,6 @@ NetIo.Client = NetIo.EventingClass.extend({
 				case 'close':
 					// The server told us our connection has been closed
 					// so store the reason the server gave us!
-					//TODO: Remove
-					console.error('Server sent close command packet [netio]');
 					this._disconnectReason = packet.data;
 					break;
 			}

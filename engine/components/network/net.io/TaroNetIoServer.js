@@ -593,17 +593,6 @@ var TaroNetIoServer = {
 						if (end - self._socketById[socket.id].start < 3000) {
 							taro.server.socketConnectionCount.immediatelyDisconnected++;
 						}
-
-						if (self._socketById[socket.id]._token && self._socketById[socket.id]._token.distinctId) {
-							/** additional part to send some info for marketing purposes */
-							global.mixpanel.track('Game Session Duration', {
-								'distinct_id': self._socketById[socket.id]._token.distinctId,
-								'$ip': socket._remoteAddress,
-								'gameSlug': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.gameSlug,
-								'gameId': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData._id,
-								'playTime': end - self._socketById[socket.id].start,
-							});
-						}
 					}
 				});
 
@@ -756,6 +745,18 @@ var TaroNetIoServer = {
 	_onClientDisconnect: function (data, socket) {
 		// this is where we should pause disconnect propagation for silent reconnect
 		this.log(`Client disconnected with id ${socket.id}`);
+		var end = Date.now();
+
+		if (self._socketById[socket.id]._token && self._socketById[socket.id]._token.distinctId) {
+			/** additional part to send some info for marketing purposes */
+			global.mixpanel.track('Game Session Duration', {
+				'distinct_id': self._socketById[socket.id]._token.distinctId,
+				'$ip': socket._remoteAddress,
+				'gameSlug': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.gameSlug,
+				'gameId': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData._id,
+				'playTime': end - self._socketById[socket.id].start,
+			});
+		}
 
 		this.emit('disconnect', socket.id);
 
