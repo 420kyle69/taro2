@@ -110,8 +110,9 @@ NetIo.Client = NetIo.EventingClass.extend({
 		// Create new websocket to the url
 
 		var distinctId = window.distinctId || '';
-
-		this.wsUrl = `${url}?token=${gsAuthToken}&sid=${taro.client.server.id}&distinctId=${distinctId}`;
+		var posthogDistinctId = window.posthog && window.posthog.get_distinct_id ? window.posthog.get_distinct_id() : '';		
+		
+		this.wsUrl = `${url}?token=${gsAuthToken}&sid=${taro.client.server.id}&distinctId=${distinctId}&posthogDistinctId=${posthogDistinctId}`;
 		this.wsStartTime = Date.now();
 		this.startTimeSinceLoad = performance.now();
 
@@ -163,8 +164,9 @@ NetIo.Client = NetIo.EventingClass.extend({
 	},
 
 	disconnect: function (reason) {
-		console.log('disconnected with reason', reason);
-		console.trace();
+		console.log("disconnected with reason", reason)
+		// console.trace();
+
 		this._socket.close(1000, reason);
 		// this.emit('_taroStreamDestroy');
 	},

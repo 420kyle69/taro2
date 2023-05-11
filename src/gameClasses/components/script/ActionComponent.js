@@ -19,12 +19,13 @@ var ActionComponent = TaroEntity.extend({
 			var action = actionList[i];
 
 			if (!action || action.disabled == true || // if action is disabled or
-				(taro.isClient && (!action.runOnClient || action.runMode == 0)) || // don't run on client if runMode is 'server authoratative'
-				(taro.isServer && action.runMode == 1) // don't run on server if runMode is 'client only'
-			) {
-				continue;
-			}
-			
+                (taro.isClient && action.runMode == 0) || // don't run on client if runMode is 'server authoratative'
+                (taro.isServer && action.runMode == 1) || // don't run on server if runMode is 'client only'
+                (taro.isClient && (!action.runOnClient && !action.runMode)) // backward compatibility for older versions
+            ) {
+                continue;
+            }
+
 			// if CSP is enabled, then server will pause streaming
 			// the server side is still running (e.g. creating entities), but it won't be streamed to the client
 			if (taro.isServer) {
@@ -119,12 +120,13 @@ var ActionComponent = TaroEntity.extend({
 						// const use for creating new instance of variable every time.
 						const setTimeOutActions = JSON.parse(JSON.stringify(action.actions));
 						// const setTimeoutVars = _.cloneDeep(vars);
+						var duration = self._script.variable.getValue(action.duration, vars);
 						setTimeout(function (actions, currentScriptId) {
 							let previousScriptId = currentScriptId;
 							self._script.currentScriptId = currentScriptId;
 							self.run(actions, vars);
 							self._script.currentScriptId = previousScriptId;
-						}, action.duration, setTimeOutActions, self._script.currentScriptId);
+						}, duration, setTimeOutActions, self._script.currentScriptId);
 						break;
 
 					case 'repeat':

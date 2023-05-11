@@ -601,10 +601,7 @@ var ServerNetworkEvents = {
 			return;
 		}
 
-		var isUserDeveloper = (modPlayer._stats.userId == taro.game.data.defaultData.owner) ||
-			taro.game.data.defaultData.invitedUsers.find(function (iu) { if (iu.user === modPlayer._stats.userId) { return true; } }) ||
-			modPlayer._stats.isUserAdmin ||
-			modPlayer._stats.isUserMod;
+		var isUserDeveloper = modPlayer.isDeveloper();
 			
 		if (isUserDeveloper && kickedPlayer) {
 			taro.game.kickPlayer(kickedPlayer.id(), modPlayer.id());
@@ -618,10 +615,7 @@ var ServerNetworkEvents = {
 			return;
 		}
 
-		var isUserDeveloper = (player._stats.userId == taro.game.data.defaultData.owner) ||
-			taro.game.data.defaultData.invitedUsers.find(function (iu) { if (iu.user === player._stats.userId) { return true; } }) ||
-			player._stats.isUserAdmin ||
-			player._stats.isUserMod;
+		var isUserDeveloper = player.isDeveloper();
 
 		if (isUserDeveloper) {
 			var kickedPlayer = taro.$$('player').find(function (player) {
@@ -640,10 +634,7 @@ var ServerNetworkEvents = {
 			return;
 		}
 
-		var isUserDeveloper = (player._stats.userId == taro.game.data.defaultData.owner) ||
-			taro.game.data.defaultData.invitedUsers.find(function (iu) { if (iu.user === player._stats.userId) { return true; } }) ||
-			player._stats.isUserAdmin ||
-			player._stats.isUserMod;
+		var isUserDeveloper = player.isDeveloper();
 
 		if (isUserDeveloper) {
 			var kickedPlayer = taro.$$('player').find(function (player) {
@@ -676,10 +667,7 @@ var ServerNetworkEvents = {
 			return;
 		}
 
-		var isUserDeveloper = (player._stats.userId == taro.game.data.defaultData.owner) ||
-			taro.game.data.defaultData.invitedUsers.find(function (iu) { if (iu.user === player._stats.userId) { return true; } }) ||
-			player._stats.isUserAdmin ||
-			player._stats.isUserMod;
+		var isUserDeveloper = player.isDeveloper();
 
 		if (isUserDeveloper) {
 			var banPlayer = taro.$$('player').find(function (player) {

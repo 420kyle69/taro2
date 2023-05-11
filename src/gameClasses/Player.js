@@ -161,6 +161,15 @@ var Player = TaroEntity.extend({
 		var index = this._stats.unitIds.indexOf(unit.id());
 		if (index !== -1) {
 			this._stats.unitIds.splice(index, 1);
+			if (this._stats.selectedUnitId === unit.id()) {
+				var unit = taro.$(unit.id());
+				/*if (unit) {
+					unit.ability.stopMovingX();
+					unit.ability.stopMovingY();
+					unit.ability.stopUsingItem();
+				}*/
+				//this.selectUnit(null);
+			}
 		}
 	},
 
@@ -173,7 +182,7 @@ var Player = TaroEntity.extend({
 		
 		var unit = taro.$(unitId);
 		if (taro.isServer && self._stats.clientId) {			
-			if (unit && unit._category == 'unit' && unit.getOwner() == this) {
+			if (unit && unit._category == 'unit' && unit.getOwner() == this || unitId === null) {
 				self._stats.selectedUnitId = unitId;
 				taro.network.send('makePlayerSelectUnit', { unitId: unitId }, self._stats.clientId);
 			} else {
@@ -194,7 +203,7 @@ var Player = TaroEntity.extend({
 			
 			if (self._stats.clientId == taro.network.id() && unit && unit._category == 'unit') {
 				self._stats.selectedUnitId = unitId;
-			
+
 				if (unit.inventory) {
 					unit.inventory.createInventorySlots();
 				}
@@ -209,6 +218,9 @@ var Player = TaroEntity.extend({
 				unit.renderMobileControl();
 				taro.client.selectedUnit = unit;
 				taro.client.eventLog.push([taro._currentTime, `my unit selected ${unitId}`]);
+			} else if (unitId === null) {
+				self._stats.selectedUnitId = null;
+				taro.client.selectedUnit = null;
 			}
 		}
 	},
@@ -389,6 +401,20 @@ var Player = TaroEntity.extend({
 		return this.isHostileTo(player) == false && this.isFriendlyTo(player) == false;
 	},
 
+	isDeveloper: function() {
+		var self = this;
+		return self._stats && (
+			(self._stats.userId == taro.game.data.defaultData.owner) ||
+			taro.game.data.defaultData.invitedUsers.find(function (iu) {
+				if (iu.user === self._stats.userId) {
+					return true;
+				}
+			}) ||
+			self._stats.isUserAdmin ||
+			self._stats.isUserMod
+		);
+	},
+
 	remove: function () {
 		// AI players cannot be removed
 		if (this._stats.controlledBy == 'human') // do not send trigger for neutral player
@@ -407,6 +433,7 @@ var Player = TaroEntity.extend({
 			this.streamDestroy();
 			this.destroy();
 		}
+		
 	},
 
 	updateVisibility: function (playerId) {
@@ -535,7 +562,7 @@ var Player = TaroEntity.extend({
 							self.redrawUnits(['nameLabel']);
 
 							self._stats.receivedJoinGame = data.receivedJoinGame;
-							taro.client.eventLog.push([taro._currentTime - taro.client.eventLogStartTime, '\'playerJoined\' received from server']);
+							taro.client.eventLog.push([taro._currentTime - taro.client.playerJoinedAt, '\'playerJoined\' received from server']);
 							self._stats.processedJoinGame = data.processedJoinGame;
 							var streamingDiff = `${Date.now() - data.streamedOn}ms`;
 
@@ -695,7 +722,7 @@ var Player = TaroEntity.extend({
 			$('#play-game-button .content').html(html);
 
 			$('#modd-shop-div').addClass('d-flex');
-			taro.client.eventLog.push([taro._currentTime - taro.client.eventLogStartTime, 'hide menu called']);
+			taro.client.eventLog.push([taro._currentTime - taro.client.playerJoinedAt, 'hide menu called']);
 			taro.menuUi.hideMenu(); // if player's already joined the game, then just hide menu when "play game" button is clicked
 
 			if (!taro.client.guestmode) {
