@@ -131,22 +131,12 @@ NetIo.Client = NetIo.EventingClass.extend({
 		};
 	},
 
-	// testing
 	reconnect: function() {
 		var self = this;
-		console.log('\nreconnecting...\n');
+		this.trackLatency('gs-websocket-connect', 'onreconnect');
 
 		// Set the state to connecting
 		this._state = 1;
-
-		/*
-		// Replace http:// with ws://
-		if (window.location.protocol == 'https:'){
-				url = url.replace('http://', 'wss://');
-		} else {
-				url = url.replace('http://', 'ws://');
-		}
-		*/
 
 		// Create new websocket to the url
 		this.wsStartTime = Date.now();
