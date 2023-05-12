@@ -601,29 +601,14 @@ var TaroNetIoServer = {
 				});
 
 				socket.on('disconnect', function (data) {
-					var isClient = self.clientIds.includes(socket.id);
-
-					if (isClient) {
+					if (self.clientIds.includes(socket.id)) {
 						var end = Date.now();
 						taro.server.socketConnectionCount.disconnected++;
 
 						if (end - self._socketById[socket.id].start < 3000) {
 							taro.server.socketConnectionCount.immediatelyDisconnected++;
 						}
-
-						if (self._socketById[socket.id]._token && self._socketById[socket.id]._token.distinctId) {
-							/** additional part to send some info for marketing purposes */
-							global.mixpanel.track('Game Session Duration', {
-								'distinct_id': self._socketById[socket.id]._token.distinctId,
-								'$ip': socket._remoteAddress,
-								'gameSlug': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.gameSlug,
-								'gameId': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData._id,
-								'playTime': end - self._socketById[socket.id].start,
-							});
-						}
 					}
-
-					self._onClientDisconnect.apply(self, [data, socket]);
 				});
 
 				// Send an init message to the client
@@ -773,17 +758,29 @@ var TaroNetIoServer = {
    * @private
    */
 	_onClientDisconnect: function (data, socket) {
+		var self = this;
 		this.log(`Client disconnected with id ${socket.id}`);
+		var end = Date.now();
 
-		// this.emit('disconnect', socket.id, { code: 'DUPLICATE_IP' });
+		if (self._socketById[socket.id]._token && self._socketById[socket.id]._token.distinctId) {
+			/** additional part to send some info for marketing purposes */
+			global.mixpanel.track('Game Session Duration', {
+				'distinct_id': self._socketById[socket.id]._token.distinctId,
+				'$ip': socket._remoteAddress,
+				'gameSlug': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.gameSlug,
+				'gameId': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData._id,
+				'playTime': end - self._socketById[socket.id].start,
+			});
+		}
+
 		this.emit('disconnect', socket.id);
 
 		// Remove them from all rooms
 		this.clientLeaveAllRooms(socket.id);
 
 		delete taro.server.clients[socket.id];
-		delete this.uploadPerSecond[socket._remoteAddress]
-		delete this.clientCommandCount[socket._remoteAddress]
+		delete this.uploadPerSecond[socket._remoteAddress];
+		delete this.clientCommandCount[socket._remoteAddress];
 		delete this._socketById[socket.id];
 		delete this._socketByIp[socket._remoteAddress];
 

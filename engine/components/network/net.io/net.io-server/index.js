@@ -453,6 +453,7 @@ NetIo.Socket = NetIo.EventingClass.extend({
 		});
 
 		this._socket.on('close', function (reasonCode, description) {
+			// first step in the propagation of the disconnect event.
 			self.emit('disconnect', {
 				socket: self._socket,
 				reason: description,
@@ -606,10 +607,10 @@ NetIo.Server = NetIo.EventingClass.extend({
 
 			console.log(`https port ${taro.server.httpsPort}`);
 			self._portSecure = taro.server.httpsPort;
-			
+
 			var privateKey = this._fs.readFileSync(`${__dirname}/../../../../../../sslcert/modd_ssl.key`, 'utf8');
 			var certificate = this._fs.readFileSync(`${__dirname}/../../../../../../sslcert/modd_ssl.crt`, 'utf8');
-			
+
 			var options = { key: privateKey, cert: certificate };
 			this._httpsServer = this._https.createServer(options, function (request, response) {
 				response.writeHead(404);
@@ -617,7 +618,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 			});
 			this._socketServerHttps = new this._websocket.Server({
 			    server: this._httpsServer,
-					maxPayload: 100 * 1024, // 100 KB - The maximum allowed message size
+				maxPayload: 100 * 1024, // 100 KB - The maximum allowed message size
 			});
 			// this._socketServerHttps = new this._websocket.WebSocketServer({
 			// 	server: this._httpsServer
@@ -675,7 +676,6 @@ NetIo.Server = NetIo.EventingClass.extend({
 		socket._fromPingService = request.headers[PING_SERVICE_HEADER] && request.headers[PING_SERVICE_HEADER] === process.env.PING_SERVICE_HEADER_SECRET;
 		console.log('x-forwarded-for', request.headers['x-forwarded-for'], socket._remoteAddress);
 		if (!socket._fromPingService) {
-			
 			// if token does not exist in request close the socket.
 			if (request.url.indexOf('/?token=') === -1) {
 				socket.close('Security token could not be validated, please refresh the page.');
@@ -689,15 +689,15 @@ NetIo.Server = NetIo.EventingClass.extend({
 
 			try {
 				const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
-				
+
 				const isGuestUserAllowed = taro.game?.data?.defaultData?.isGuestPlayerAllowed;
-				
+
 				if (!isGuestUserAllowed && (!decodedToken.userId || !decodedToken.sessionId)) {
 					socket.close('Guest user not allowed. Please login or signup.');
 					console.log('Guest user not allowed', token);
 					return;
 				}
-				
+
 				// extracting user from token and adding it in _token.
 				socket._token = {
 					userId: decodedToken.userId,
@@ -707,18 +707,35 @@ NetIo.Server = NetIo.EventingClass.extend({
 					token,
 					tokenCreatedAt: decodedToken.createdAt
 				};
-				
+
+				// make socket id assignment a variable
+				let assignedId = self.newIdHex();
+
 				// if the token has been used already, close the connection.
 				const isUsedToken = taro.server.usedConnectionJwts[token];
-				if (isUsedToken) {
-					console.log('Token has been used already', token);
-					socket.close('Security token could not be validated, please refresh the page.');
-					return;
+
+				if (isUsedToken && request.headers['sec-websocket-protocol'].split(', ')[1] == 'reconnect') {
+					// TODO: this will match sockets for users that are still in the game
+					let matchedTokens = Object.entries(this._socketsById).filter(([id, oldSocket]) => {
+						// TODO: check whether _sockets still has a reference? It should not because of the disconnect listener just below
+						return oldSocket._token.token == socket._token.token;
+					});
+
+					if (matchedTokens.length === 0) {
+						console.log('Token has been used already', token);
+						socket.close('Security token could not be validated, please refresh the page.');
+						return;
+					}
+					// else if matchedTokens.length > 1?
+					assignedId = matchedTokens[0][1].id;
+					clearTimeout(matchedTokens[0][1].gracePeriod);
+					console.log('grace period cancelled');
+					matchedTokens = [];
 				}
-				
+
 				// store token for current client
 				taro.server.usedConnectionJwts[token] = socket._token.tokenCreatedAt;
-				
+
 				// remove expired tokens
 				const filteredUsedConnectionJwts = {};
 				const usedTokenEntries = Object.entries(taro.server.usedConnectionJwts).filter(([token, tokenCreatedAt]) => (Date.now() - tokenCreatedAt) < taro.server.CONNECTION_JWT_EXPIRES_IN);
@@ -727,18 +744,19 @@ NetIo.Server = NetIo.EventingClass.extend({
 						filteredUsedConnectionJwts[key] = value;
 					}
 				}
-				
+
 				taro.server.usedConnectionJwts = filteredUsedConnectionJwts;
-				
+
 				// Give the socket a unique ID
-				socket.id = self.newIdHex();
+				socket.id = assignedId;
 				// Add the socket to the internal lookups
 				self._sockets.push(socket);
+
 				self._socketsById[socket.id] = socket;
-				
-				// store socket.id as clientId in _token data to validate socket messages later 
+
+				// store socket.id as clientId in _token data to validate socket messages later
 				socket._token.clientId = socket.id;
-				
+
 			} catch (e) {
 				// A token is required to connect with socket server
 				socket.close('Security token could not be validated, please refresh the page.');
@@ -747,19 +765,23 @@ NetIo.Server = NetIo.EventingClass.extend({
 			}
 
 			console.log('1. Client ', socket.id,' connected (net.io-server index.js)');
-			
 			// Register a listener so that if the socket disconnects,
 			// we can remove it from the active socket lookups
-			socket.on('disconnect', function (response) {
+			socket.on('disconnect', function (data) {
 				var index = self._sockets.indexOf(socket);
 				if (index > -1) {
 					// Remove the socket from the array
 					self._sockets.splice(index, 1);
 				}
-				
-				delete self._socketsById[socket.id];
+
+				self._socketsById[socket.id].gracePeriod = setTimeout(() => {
+					delete self._socketsById[socket.id];
+
+					// moved from .on('disconnect') in TaroNetIoServer.js:~588
+					// data contains {WebSocket socket, <Buffer > reason, Number code}
+					taro.network._onClientDisconnect(data, socket);
+				}, 5000);
 			});
-			
 			// Tell the client their new ID - triggers this._io.on('connect', ...) on client
 			try {
 				socket.send({
@@ -769,10 +791,10 @@ NetIo.Server = NetIo.EventingClass.extend({
 			} catch (err) {
 				console.log('err while sending client its socket.id!');
 			}
-			
+
 			// add socket message listeners, send 'init' message to client
 			self.emit('connection', [socket]);
-			
+
 			// trigger joinGame command as part of socket connection, no need for client to send joinGame anymore
 			// joinGame takes care of disconnecting unauthenticated users, banned ips, duplicate IPs, creates a new player and request user data from gs manager and make sure the user exists on moddio
 			const joinGameData = {
@@ -782,10 +804,10 @@ NetIo.Server = NetIo.EventingClass.extend({
 				isAdBlockEnabled: false
 			};
 			const clientId = socket.id;
-			
+
 			taro.server._onJoinGame(joinGameData, clientId);
 		} else {
-			// PING service only 
+			// PING service only
 			// Tell the client their new ID
 			try {
 				socket.send({

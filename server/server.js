@@ -132,7 +132,7 @@ var Server = TaroClass.extend({
 		};
 		self.developerClientIds = [];
 		self.userAdStats = {};
-		
+
 		taro.env = process.env.ENV || 'production';
 		self.config = config[taro.env];
 
@@ -141,7 +141,7 @@ var Server = TaroClass.extend({
 		}
 
 		self.tier = (cluster.isMaster ? process.env.TIER : (process.env.WORKER_TIER || process.env.TIER)) || 2;
-		
+
 		self.region = process.env.REGION || 'apocalypse';
 		self.isScriptLogOn = process.env.SCRIPTLOG == 'on';
 		self.gameLoaded = false;
