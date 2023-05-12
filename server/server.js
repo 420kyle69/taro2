@@ -59,6 +59,12 @@ global.mixpanel = {
 	},
 };
 
+global.posthog = {
+	capture: function () {
+		// do nothing
+	},
+}
+
 console.log("process.env.ENV = ", process.env.ENV)
 if (process.env.ENV == 'production') {
 	var Rollbar = require('rollbar');
@@ -77,9 +83,14 @@ if (process.env.ENV == 'production') {
 
 // initialize mixpanel.
 var Mixpanel = require('mixpanel');
+var { PostHog } = require('posthog-node')
 // create an instance of the mixpanel client
 if(process.env.MIXPANEL_TOKEN) {
 	global.mixpanel = Mixpanel.init(process.env.MIXPANEL_TOKEN);
+}
+
+if (process.env.POSTHOG_TOKEN) {
+	global.posthog = new PostHog(process.env.POSTHOG_TOKEN, { host: 'https://app.posthog.com' } );
 }
 
 process.on('exit', function () {
