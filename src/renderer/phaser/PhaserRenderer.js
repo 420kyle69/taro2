@@ -18,7 +18,9 @@ var PhaserRenderer = /** @class */ (function (_super) {
     __extends(PhaserRenderer, _super);
     function PhaserRenderer() {
         var _this = this;
-        var forceCanvas = JSON.parse(localStorage.getItem('forceCanvas')) || {};
+        var forceCanvas = (USE_LOCAL_STORAGE ?
+            JSON.parse(localStorage.getItem('forceCanvas')) || {} :
+            storage['force-canvas']);
         _this = _super.call(this, {
             type: forceCanvas[gameId] || forceCanvas[0] ?
                 Phaser.CANVAS : Phaser.AUTO,

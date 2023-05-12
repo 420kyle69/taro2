@@ -1332,10 +1332,13 @@ var ShopComponent = TaroEntity.extend({
 				let originalHeight = `${image.height / itemDetails.cellSheet.rowCount}px`;
 				let originalWidth = `${image.width / itemDetails.cellSheet.columnCount}px`;
 				// clipping = "height:" + originalHeight + "px;width:" + originalWidth + "px;background:url('" + item.image + "') 0px 0px no-repeat;";
-				img.style.height = originalHeight;
-				img.style.width = originalWidth;
-				img.style.background = `url('${image.src}')`;
-				img.src = '';
+				
+				img.style = `height:${originalHeight};width:${originalWidth};background:url('${image.src}');src:'';`;
+				// img.style.height = originalHeight;
+				// img.style.width = originalWidth;
+				// img.style.background = `url('${image.src}')`;
+				// img.src = '';
+			
 				if (itemDetails.cellSheet.rowCount <= 1 && itemDetails.cellSheet.columnCount <= 1) {
 					img.style.backgroundRepeat = 'no-repeat';
 					img.style.backgroundPosition = 'center center';

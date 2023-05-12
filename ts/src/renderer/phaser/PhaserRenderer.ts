@@ -4,9 +4,13 @@ class PhaserRenderer extends Phaser.Game {
 
 	constructor () {
 
-		const forceCanvas = JSON.parse(
-			localStorage.getItem('forceCanvas')
-		) || {};
+		const forceCanvas = (
+			USE_LOCAL_STORAGE ?
+				JSON.parse(
+					localStorage.getItem('forceCanvas')
+				) || {}:
+				storage['force-canvas']
+		);
 
 		super({
 			type: forceCanvas[gameId] || forceCanvas[0] ?

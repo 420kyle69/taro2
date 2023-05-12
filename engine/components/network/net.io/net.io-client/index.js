@@ -60,6 +60,7 @@ NetIo.Client = NetIo.EventingClass.extend({
 		this.wsStartTime = null;
 		this.startTimeSinceLoad = null;
 		this.pingInterval = null;
+		this.reconnectedAt = null;
 
 		// this.COMPRESSION_THRESHOLD = 30000;
 
@@ -105,7 +106,7 @@ NetIo.Client = NetIo.EventingClass.extend({
 				url = url.replace('http://', 'ws://');
 		}
 		*/
-		
+
 		// Create new websocket to the url
 
 		var distinctId = window.distinctId || '';
@@ -116,25 +117,56 @@ NetIo.Client = NetIo.EventingClass.extend({
 		this.startTimeSinceLoad = performance.now();
 
 		this._socket = new WebSocket(this.wsUrl, 'netio1');
-		
+
 		// Setup event listeners
 		this._socket.onopen = function () {
-			self._onOpen.apply(self, arguments); 
+			self._onOpen.apply(self, arguments);
 		};
 		this._socket.onmessage = function () {
-			self._onData.apply(self, arguments); 
+			self._onData.apply(self, arguments);
 		};
 		this._socket.onclose = function () {
-			self._onClose.apply(self, arguments); 
+			self._onClose.apply(self, arguments);
 		};
 		this._socket.onerror = function () {
-			self._onError.apply(self, arguments); 
+			self._onError.apply(self, arguments);
+		};
+	},
+
+	reconnect: function() {
+		var self = this;
+		this.reconnectedAt = Date.now();
+		this.trackLatency('gs-websocket-connect', 'onreconnect');
+		this.reconnectedAt = null;
+
+		// Set the state to connecting
+		this._state = 1;
+
+		// Create new websocket to the url
+		this.wsStartTime = Date.now();
+		this.startTimeSinceLoad = performance.now();
+
+		this._socket = new WebSocket(this.wsUrl, ['netio1', 'reconnect']);
+
+		// Setup event listeners
+		this._socket.onopen = function () {
+			self._onOpen.apply(self, arguments);
+		};
+		this._socket.onmessage = function () {
+			self._onData.apply(self, arguments);
+		};
+		this._socket.onclose = function () {
+			self._onClose.apply(self, arguments);
+		};
+		this._socket.onerror = function () {
+			self._onError.apply(self, arguments);
 		};
 	},
 
 	disconnect: function (reason) {
 		console.log("disconnected with reason", reason)
 		// console.trace();
+
 		this._socket.close(1000, reason);
 		// this.emit('_taroStreamDestroy');
 	},
@@ -166,13 +198,14 @@ NetIo.Client = NetIo.EventingClass.extend({
 				}
 			}
 		} else {
-			this.disconnect();
+			// testing commenting this out.
+			// this.disconnect();
 		}
 	},
-	
+
 	trackLatency: function (actionName, actionEvent, data) {
 		var self = this;
-		
+
 		if (actionName === 'gs-websocket-ping') {
 			const endTime = Date.now();
 			if (window.newrelic) {
@@ -204,18 +237,19 @@ NetIo.Client = NetIo.EventingClass.extend({
 					wsStartTimeSinceLoad: this.startTimeSinceLoad,
 					wsEndTimeSinceLoad: endTimeSinceLoad,
 					wsStartTime: this.wsStartTime,
-					wsEndTime: Date.now()
+					wsEndTime: Date.now(),
+					reconnectedAt: this.reconnectedAt
 				});
 			}
-			
+
 			if (this.pingInterval) {
 				clearInterval(this.pingInterval);
 			}
-			
+
 			if (actionEvent === 'onopen') {
 				// start ping interval
 				const pingIntervalTimeout = 10000; // every 10s
-				
+
 				this.pingInterval = setInterval(() => {
 					self._socket.send(JSON.stringify({
 						type: 'ping',
@@ -225,10 +259,10 @@ NetIo.Client = NetIo.EventingClass.extend({
 			}
 		}
 	},
-	
+
 	_onOpen: function (event) {
 		this.trackLatency('gs-websocket-connect', 'onopen');
-		
+
 		var url = event.target.url;
 		var urlWithoutProtocol = url.split('://')[1];
 		var serverDomain = urlWithoutProtocol.split('/')[0];
@@ -254,13 +288,13 @@ NetIo.Client = NetIo.EventingClass.extend({
 	},
 
 	_onDecode: function (packet, data) {
-		
+
 		if (packet && packet.type === 'pong') {
 			const latency = Date.now() - packet.clientSentAt;
 			this.trackLatency('gs-websocket-ping', 'pong', packet);
 			return;
 		}
-		
+
 		// how many UTF8 characters did we receive (assume 1 byte per char and mostly ascii)
 		// var receivedBytes = data.data.size;
 		var receivedBytes = (data.data && data.data.length) || 0;
@@ -303,6 +337,7 @@ NetIo.Client = NetIo.EventingClass.extend({
 
 					// Now we have an id, set the state to connected
 					this._state = 3;
+					console.log(this.id);
 
 					// Emit the connect event
 					this.emit('connect', this.id);
@@ -322,12 +357,21 @@ NetIo.Client = NetIo.EventingClass.extend({
 
 	_onClose: function (event) {
 		this.trackLatency('gs-websocket-connect', 'onclose');
-		
+
 		var wasClean = event.wasClean;
 		var reason = event.reason;
 		var code = event.code;
 
 		console.log('close event', event, { state: this._state, reason: this._disconnectReason });
+
+		// if we don't know why we disconnected and the server IS responding(!1)
+		if (!this._disconnectReason && this._state !== 1) {
+			// wait 500ms before attempting reconnection
+			return setTimeout(() => {
+				this.reconnect(this.wsUrl);
+			}, 500);
+		}
+
 
 		if (code === 1006) {
 			var url = event.target.url;
@@ -384,6 +428,7 @@ NetIo.Client = NetIo.EventingClass.extend({
 		// 	}
 		// }
 
+		console.log(this._state, 'this._state with code 1006');
 		// If we are already connected and have an id...
 		if (this._state === 3) {
 			this._state = 0;
@@ -408,7 +453,7 @@ NetIo.Client = NetIo.EventingClass.extend({
 
 	_onError: function () {
 		this.trackLatency('gs-websocket-connect', 'onerror');
-		
+
 		this.log('An error occurred with the net.io socket!', 'error', arguments);
 		console.log('An error occurred with the net.io socket!', 'error', arguments);
 		this.emit('error', arguments);

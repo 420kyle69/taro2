@@ -28,7 +28,6 @@ var ServerNetworkEvents = {
 
 	_onClientDisconnect: function (clientId) {
 		var self = this;
-
 		taro.network.send('clientDisconnect', { reason: 'Player disconnected', clientId: clientId });
 
 		// remove client from streamData
@@ -54,8 +53,6 @@ var ServerNetworkEvents = {
 			taro.clusterClient.emit('clientDisconnect', client._id);
 		}
 
-		delete client;
-		
 		if (player) {
 			player.remove();
 		}
@@ -109,14 +106,14 @@ var ServerNetworkEvents = {
 			}
 			return;
 		}
-		
+
 		// check joining user is same as token user.
 		else if (socket._token.userId !== data._id || socket._token.sessionId !== data.sessionId) {
 			console.log('Unauthenticated user joining the game (ServerNetworkEvent.js)');
 			socket.close('Unauthenticated user joining the game');
 			return;
 		}
-		
+
 		if (process.env.ENV === 'standalone' || process.env.ENV == 'standalone-remote') {
 			delete data._id;
 		}
@@ -212,7 +209,7 @@ var ServerNetworkEvents = {
 							clientId: client._id,
 							purchasables: {}
 						};
-						// console.log("createPlayer (logged-in user)")		
+						// console.log("createPlayer (logged-in user)")
 						var player = taro.game.createPlayer();
 						for (key in userData) {
 							var obj = {};
@@ -243,7 +240,7 @@ var ServerNetworkEvents = {
 						data.number = ' lol';
 					}
 
-					// console.log("createPlayer (guest user)")				
+					// console.log("createPlayer (guest user)")
 					var player = taro.game.createPlayer({
 						controlledBy: 'human',
 						name: 'user' + data.number,
