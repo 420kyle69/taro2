@@ -620,51 +620,9 @@ var TaroInputComponent = TaroEventingClass.extend({
 		}
 	},
 	_chatHandler: function (e) {
-		var isChatInputHidden = $('#chat-message-input').css('display') === 'none';
-		if (e.keyCode === 13) {
-			// ignore enter click if modal is open because it was pressed to skip text
-			var isModalOpen = $('.modal').hasClass('show');
-
-			// ignore enter if menu is visible
-			var isMenuVisible = $('#menu-wrapper').is(':visible');
-
-			if (isChatInputHidden && !isModalOpen && !isMenuVisible) {
-				// if (taro.client.myPlayer && taro.client.myPlayer._stats.email) {
-				var gameData = taro.game && taro.game.data && taro.game.data.defaultData;
-				var player = taro.client.myPlayer;
-
-				if (gameData.allowVerifiedUserToChat && !player._stats.isUserVerified) {
-					$('#message').attr('disabled', true);
-					$('#message').attr(
-						'placeholder',
-						!player._stats.userId ? 'Please log in to chat' : 'Chat available after 1 day'
-					);
-				}
-
-				$('#chat-message-input').show();
-
-				setTimeout(function () {
-					$('#message').focus();
-				}, 1);
-
-				// }
-				// else {
-				// 	$('#enter-email-modal').modal({
-				// 		show: true,
-				// 		keyboard: true
-				// 	});
-				// }
-			} else if (!isChatInputHidden && !isModalOpen) {
-				const editorCurrentTab = window?.inGameEditor?.getCurrentTab
-				if ($('#message').is(':focus') || (editorCurrentTab && editorCurrentTab() !== 'play')) {
-					taro.chat.sendChatMessage();
-				}
-			} else if ($('#player-input-field').is(':focus')) {
-				$('button#player-input-submit').click();
-			}
-		} else if (e.keyCode === 27 && !isChatInputHidden) {
-			$('#chat-message-input').hide();
-		}
+		// CHAT IS NOW HANDLED BY EDITOR
+		// THIS FUNCTION IS ONLY USED TO FOCUS THE CHAT INPUT
+		// CAN BE REMOVED AS WELL
 	},
 	/**
 	 * Emits the "keyUp" event.
@@ -953,3 +911,4 @@ var TaroInputComponent = TaroEventingClass.extend({
 if (typeof (module) !== 'undefined' && typeof (module.exports) !== 'undefined') {
 	module.exports = TaroInputComponent;
 }
+
