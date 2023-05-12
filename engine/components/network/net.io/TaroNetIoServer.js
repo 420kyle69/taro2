@@ -512,18 +512,19 @@ var TaroNetIoServer = {
 
 		const playerCount = taro.getPlayerCount();
 
-		var clientRejectReason = [];
+		var clientRejectReason = null;
 
-		if (this._acceptConnections != true)
-			clientRejectReason.push('server not accepting connections');
+		if (playerIsBanned) {
+			clientRejectReason = 'player ',socket._remoteAddress,' is banned';
+		} else if (this._acceptConnections != true) {
+			clientRejectReason = 'server not accepting connections';
+		} else if (playerCount > taro.server.maxPlayers)
+			clientRejectReason = {
+				message: 'Sorry, the server you are trying to join is currently full. Please try again later or join a different server to play this game.',
+				type: 'SERVER_FULL'
+		};
 
-		if (playerCount > taro.server.maxPlayers)
-			clientRejectReason.push('server is full');
-
-		if (playerIsBanned)
-			clientRejectReason.push('player ',socket._remoteAddress,' is banned');
-
-		if (clientRejectReason.length == 0) {
+		if (clientRejectReason === null) {
 			// Check if any listener cancels this
 			if (!this.emit('connect', socket)) {
 				this.log(
