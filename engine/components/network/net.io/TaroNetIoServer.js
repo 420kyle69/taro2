@@ -758,7 +758,7 @@ var TaroNetIoServer = {
    * @private
    */
 	_onClientDisconnect: function (data, socket) {
-		// this is where we should pause disconnect propagation for silent reconnect
+		var self = this;
 		this.log(`Client disconnected with id ${socket.id}`);
 		var end = Date.now();
 
