@@ -9,6 +9,10 @@ var AIComponent = TaroEntity.extend({
 		self.targetPosition = undefined;
 		self.unitsTargetingMe = []; // unit IDs of units attacking/fleeing away from this unit
 		self.debugEnabled = true;
+
+		// A* algorithm variables
+		self.path = [];
+
 		// AI settings
 
 		// sensor needs to be enabled regardless of AI to process sensor collision triggers
@@ -188,7 +192,7 @@ var AIComponent = TaroEntity.extend({
 	// return target position whether it's a unit or a position.
 	getTargetPosition: function () {
 		var targetUnit = this.getTargetUnit();
-		if (targetUnit) {
+		if (targetUnit && this.pathFindingMethod == "simple") { // only set target position for simple pathfinding
 			return { x: targetUnit._translate.x, y: targetUnit._translate.y };
 		}
 		if (this.targetPosition) {
@@ -209,7 +213,14 @@ var AIComponent = TaroEntity.extend({
 
 	fleeFromUnit: function (unit) {
 		this.setTargetUnit(unit);
-		this.targetPosition = undefined;
+		switch (this.pathFindingMethod) {
+			case "simple":
+				this.targetPosition = undefined;
+				break;
+			case "a*":
+				this.setTargetPosition(this._entity._translate.x + (unit._translate.x - this._entity._translate.x), this._entity._translate.y + (unit._translate.y - this._entity._translate.y));
+				break;
+		}
 		// only update its return position if unit was provked while in idle state
 		if (this.currentAction == 'idle') {
 			this.previousPosition = { x: this._entity._translate.x, y: this._entity._translate.y };
@@ -225,16 +236,154 @@ var AIComponent = TaroEntity.extend({
 		if (this.currentAction == 'idle') {
 			this.previousPosition = { x: this._entity._translate.x, y: this._entity._translate.y };
 		}
+		if (this.pathFindingMethod == "a*") {
+			this.path = this.getAStarPath(unit._translate.x, unit._translate.y);
+			if (this.path.length > 0) {
+				this.setTargetPosition(this.path[this.path.length - 1].x * taro.map.data.tilewidth + taro.map.data.tilewidth / 2, this.path[this.path.length - 1].y * taro.map.data.tilewidth + taro.map.data.tilewidth / 2);
+			}
+		}
 		this.currentAction = 'fight';
 		this._entity.startMoving();
 	},
 
 	moveToTargetPosition: function (x, y) {
-		this.setTargetPosition(x, y);
+		switch (this.pathFindingMethod)
+		{
+			case "simple":
+				this.setTargetPosition(x, y);
+				break;
+			case "a*":
+				this.path = this.getAStarPath(x, y);
+				if (this.path.length > 0) {
+					this.setTargetPosition(this.path[this.path.length - 1].x * taro.map.data.tilewidth + taro.map.data.tilewidth / 2, this.path[this.path.length - 1].y * taro.map.data.tilewidth + taro.map.data.tilewidth / 2);
+				} else {
+					return; // dont move if path failed to generate
+				}
+				break;
+		}
 		this.currentAction = 'move';
 		this._entity.startMoving();
-		this.targetUnitId = undefined;
-		
+		this.targetUnitId = undefined;		
+	},
+
+	/*
+	* @param x
+	* @param y
+	* @return {Array} 
+	* Return array with x and y coordinates of the path (Start and End node Exclusive)
+	* if the target location is inside a wall, not reachable, or the unit already at the target location, return empty array
+	*/
+	getAStarPath: function (x, y) { 
+		let unit = this._entity;
+		let unitPosition = {x: unit._translate.x, y: unit._translate.y};
+		let unitTilePosition = {x: Math.floor(unitPosition.x / taro.map.data.tilewidth), y: Math.floor(unitPosition.y / taro.map.data.tilewidth)};
+		let targetTilePosition = {x: Math.floor(x / taro.map.data.tilewidth), y: Math.floor(y / taro.map.data.tilewidth)};
+		targetTilePosition.x = Math.min(Math.max(0, targetTilePosition.x), taro.map.data.width - 1); // confine with map boundary
+		targetTilePosition.y = Math.min(Math.max(0, targetTilePosition.y), taro.map.data.height - 1);
+		let wallMap = JSON.parse(JSON.stringify(taro.map.data.layers[3].data)); // wall
+		let openList = [];
+		let closeList = [];
+		let tempPath = [];
+		for (let i = 0; i < wallMap.length; i++) {
+			if (wallMap[i] != 0) {
+				wallMap[i] = 1;
+			}
+		}
+		if (wallMap[targetTilePosition.x + targetTilePosition.y * taro.map.data.width] == 1) { // teminate if the target position is wall
+			return [];
+		}
+		openList.push(JSON.parse(JSON.stringify({current: unitTilePosition, parent: {x: -1, y: -1}, totalHeuristic: 0})));
+		while (openList.length > 0) {
+			let minNode = JSON.parse(JSON.stringify(openList[0]));
+			let minNodeIndex = 0;
+			for (let i = 1; i < openList.length; i++) {
+				if (openList[i].totalHeuristic < minNode.totalHeuristic) {
+					minNodeIndex = i;
+					minNode = JSON.parse(JSON.stringify(openList[i]));
+				}
+			}
+			openList.splice(minNodeIndex, 1);
+			closeList.push(JSON.parse(JSON.stringify(minNode)));
+			if (minNode.current.x == targetTilePosition.x && minNode.current.y == targetTilePosition.y) { // break when the goal is found
+				tempPath.push(JSON.parse(JSON.stringify(targetTilePosition)));
+				break;
+			}
+			for (let i = 0; i < 4; i++) {
+				let newPosition = JSON.parse(JSON.stringify(minNode.current));
+				switch (i) {
+					case 0: // right
+						newPosition.x += 1;
+						if (newPosition.x >= taro.map.data.width) {
+							continue;
+						}
+						break;
+					case 1: // left
+						newPosition.x -= 1;
+						if (newPosition.x < 0) {
+							continue;
+						}
+						break;
+					case 2: // top
+						newPosition.y -= 1;
+						if (newPosition.y < 0) {
+							continue;
+						}
+						break;
+					case 3: // bottom
+						newPosition.y += 1;
+						if (newPosition.y >= taro.map.data.height) {
+							continue;
+						}
+						break;
+				}
+				if (wallMap[newPosition.x + newPosition.y * taro.map.data.width] == 0) {
+					// 10 to 1 A* heuristic for node with distance that closer to the goal
+					let heuristic = 10;
+					let nodeFound = false;
+					if (Math.sqrt(Math.pow(newPosition.x - targetTilePosition.x, 2) + Math.pow(newPosition.y - targetTilePosition.y, 2)) <
+						Math.sqrt(Math.pow(minNode.current.x - targetTilePosition.x, 2) + Math.pow(minNode.current.y - targetTilePosition.y, 2))) {
+							heuristic = 1;
+						}
+					for (let j = 0; j < openList.length; j++)
+					{
+						if (newPosition.x == openList[j].current.x && newPosition.y == openList[j].current.y) {
+							if (minNode.totalHeuristic + heuristic < openList[j].totalHeuristic) {
+								openList[j] = JSON.parse(JSON.stringify({current: newPosition, parent: minNode.current, totalHeuristic: minNode.totalHeuristic + heuristic}));
+							}
+							nodeFound = true;
+							break;
+						}
+					}
+					if (!nodeFound) { 
+						for (let j = 0; j < closeList.length; j++)
+						{
+							if (newPosition.x == closeList[j].current.x && newPosition.y == closeList[j].current.y) {
+								nodeFound = true;
+								break;
+							}
+						}
+					}
+					if (!nodeFound) {
+						openList.push(JSON.parse(JSON.stringify({current: newPosition, parent: minNode.current, totalHeuristic: minNode.totalHeuristic + heuristic})));
+					}
+				}
+			}
+		}
+		if (tempPath.length == 0) { // goal is unreachable
+			return [];
+		} else {
+			while (tempPath[tempPath.length - 1].x != unitTilePosition.x || tempPath[tempPath.length - 1].y != unitTilePosition.y) { // retrieve the path
+				for (let i = 0; i < closeList.length; i++) {
+					if (tempPath[tempPath.length - 1].x == closeList[i].current.x && tempPath[tempPath.length - 1].y == closeList[i].current.y) {
+						tempPath.push(JSON.parse(JSON.stringify(closeList[i].parent)));
+						closeList.splice(i, 1);
+						break;
+					}
+				}
+			}
+			tempPath.pop(); // omit start tile
+			return tempPath;
+		}
 	},
 
 	setTargetUnit: function (unit) {
@@ -276,7 +425,7 @@ var AIComponent = TaroEntity.extend({
 		
 		var targetUnit = this.getTargetUnit();
 
-		// update unit's directino toward its target
+		// update unit's direction toward its target
 		var targetPosition = self.getTargetPosition();
 		// wandering units should move in straight direction. no need to re-assign angleToTarget
 		if (targetPosition && self.currentAction != 'wander') {
@@ -307,7 +456,19 @@ var AIComponent = TaroEntity.extend({
 
 			case 'move':
 				if (this.getDistanceToTarget() < 10) {
-					self.goIdle();
+					switch (this.pathFindingMethod) {
+						case "simple":
+							self.goIdle();
+							break;
+						case "a*":
+							this.path.pop();
+							if (this.path.length > 0) {
+								this.setTargetPosition(this.path[this.path.length - 1].x * taro.map.data.tilewidth + taro.map.data.tilewidth / 2, this.path[this.path.length - 1].y * taro.map.data.tilewidth + taro.map.data.tilewidth / 2);
+							} else {
+								self.goIdle();
+							}
+							break;
+					}
 				}
 				break;
 
@@ -333,6 +494,17 @@ var AIComponent = TaroEntity.extend({
 							if (unit.sensor) {
 								unit.sensor.updateBody(); // re-detect nearby units
 							}
+						} else {
+							if (this.pathFindingMethod == "a*") {
+								if (this.path.length > 0 && Math.sqrt(Math.pow(this.path[this.path.length - 1].x * taro.map.data.tilewidth - unit._translate.x, 2) + Math.pow(this.path[this.path.length - 1].y * taro.map.data.tilewidth - unit._translate.y, 2)) < taro.map.data.tilewidth / 2) {
+									this.path.pop();
+									if (this.path.length > 0) { // select next node to go
+										this.setTargetPosition(this.path[this.path.length - 1].x * taro.map.data.tilewidth + taro.map.data.tilewidth / 2, this.path[this.path.length - 1].y * taro.map.data.tilewidth + taro.map.data.tilewidth / 2);
+									}
+								} else {
+									this.setTargetPosition(targetUnit._translate.x, targetUnit._translate.y); // target the targetUnit if no more path or path failed to generate
+								}
+							}
 						}
 					}
 				} else { // target unit doesn't exist. go back to what I was doing before
@@ -346,6 +518,9 @@ var AIComponent = TaroEntity.extend({
 				break;
 
 			case 'flee':
+				if (this.pathFindingMethod == "a*") {
+					this.setTargetPosition(unit._translate.x + (targetUnit._translate.x - unit._translate.x), unit._translate.y + (targetUnit._translate.y - unit._translate.y));
+				}
 				if (targetUnit) {
 					var a = self.previousPosition.x - targetUnit._translate.x;
 					var b = self.previousPosition.y - targetUnit._translate.y;
