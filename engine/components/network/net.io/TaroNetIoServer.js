@@ -515,7 +515,7 @@ var TaroNetIoServer = {
 		var clientRejectReason = null;
 
 		if (playerIsBanned) {
-			clientRejectReason = 'player ',socket._remoteAddress,' is banned';
+			clientRejectReason = 'player ' + socket._remoteAddress + ' is banned';
 		} else if (this._acceptConnections != true) {
 			clientRejectReason = 'server not accepting connections';
 		} else if (playerCount > taro.server.maxPlayers)
