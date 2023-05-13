@@ -317,7 +317,7 @@ var MenuUiComponent = TaroEntity.extend({
 			} catch (e) {
 				if (e instanceof SyntaxError) {
 					// this won't tell us much, but it will tell us what type we tried to stringify
-					throw new Error(`cannot stringify ${value}`);
+					throw new SyntaxError(`cannot stringify ${value}`);
 				}
 
 			}
