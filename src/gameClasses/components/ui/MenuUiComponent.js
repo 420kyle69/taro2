@@ -312,6 +312,16 @@ var MenuUiComponent = TaroEntity.extend({
 
 	setItem: function (key, value) {
 		if (USE_LOCAL_STORAGE) {
+			try {
+				JSON.stringify(value);
+			} catch (e) {
+				if (e instanceof SyntaxError) {
+					// this won't tell us much, but it will tell us what type we tried to stringify
+					throw new SyntaxError(`cannot stringify ${value}`);
+				}
+
+			}
+
 			return localStorage.setItem(key, value);
 		}
 
