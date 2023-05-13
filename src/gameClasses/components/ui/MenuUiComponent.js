@@ -312,7 +312,7 @@ var MenuUiComponent = TaroEntity.extend({
 
 	setItem: function (key, value) {
 		if (USE_LOCAL_STORAGE) {
-			return JSON.stringify(localStorage.setItem(key, value));
+			return localStorage.setItem(key, value);
 		}
 
 		return storage[key] = value;
@@ -320,7 +320,15 @@ var MenuUiComponent = TaroEntity.extend({
 
 	getItem: function (key) {
 		if (USE_LOCAL_STORAGE) {
-			return JSON.parse(localStorage.getItem(key));
+			try {
+				JSON.parse(localStorage.getItem(key));
+			} catch (e) {
+				// testing this catch for cases where we fail to parse because it is just a string
+				if (e instanceof SyntaxError) {
+					localStorage.getItem(key);
+				}
+			}
+			return;
 		}
 
 		return storage[key];
