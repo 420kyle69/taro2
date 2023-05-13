@@ -18,9 +18,23 @@ var PhaserRenderer = /** @class */ (function (_super) {
     __extends(PhaserRenderer, _super);
     function PhaserRenderer() {
         var _this = this;
-        var forceCanvas = (USE_LOCAL_STORAGE ?
-            JSON.parse(localStorage.getItem('forceCanvas')) || {} :
-            storage['force-canvas']);
+        var forceCanvas;
+        if (!USE_LOCAL_STORAGE) {
+            forceCanvas = storage['force-canvas'];
+        }
+        else {
+            try {
+                forceCanvas = JSON.parse(localStorage.getItem('forceCanvas')) || {};
+            }
+            catch (e) {
+                // attempting to reset bugged localStorage.forceCanvas that just return [object Object]
+                if (e instanceof SyntaxError) {
+                    // enable on menuUi
+                    taro.menuUi.setForceCanvas(true);
+                    forceCanvas = JSON.parse(localStorage.getItem('forceCanvas')) || {};
+                }
+            }
+        }
         _this = _super.call(this, {
             type: forceCanvas[gameId] || forceCanvas[0] ?
                 Phaser.CANVAS : Phaser.AUTO,
