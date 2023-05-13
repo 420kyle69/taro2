@@ -3,14 +3,25 @@
 class PhaserRenderer extends Phaser.Game {
 
 	constructor () {
-
-		const forceCanvas = (
-			USE_LOCAL_STORAGE ?
-				JSON.parse(
+		let forceCanvas;
+		if (!USE_LOCAL_STORAGE) {
+			forceCanvas = storage['force-canvas'];
+		} else {
+			try {
+				forceCanvas = JSON.parse(
 					localStorage.getItem('forceCanvas')
-				) || {}:
-				storage['force-canvas']
-		);
+				) || {};
+			} catch (e) {
+				// attempting to reset bugged localStorage.forceCanvas that just return [object Object]
+				if (e instanceof SyntaxError) {
+					// enable on menuUi
+					taro.menuUi.setForceCanvas(true);
+					forceCanvas = JSON.parse(
+						localStorage.getItem('forceCanvas')
+					) || {};
+				}
+			}
+		}
 
 		super({
 			type: forceCanvas[gameId] || forceCanvas[0] ?

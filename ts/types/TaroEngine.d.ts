@@ -1,5 +1,5 @@
 declare class TaroEngine extends TaroClass {
-	
+
 	tiled: any;
 	regionManager: any;
 	showRegionList: any;
@@ -69,4 +69,6 @@ declare class TaroEngine extends TaroClass {
 
 	$ (item: number | string | object): any;
 	$$(item: number | string | object): any;
+
+	menuUi: MenuUiComponent;
 }
