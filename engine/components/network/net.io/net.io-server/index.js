@@ -774,13 +774,15 @@ NetIo.Server = NetIo.EventingClass.extend({
 					self._sockets.splice(index, 1);
 				}
 
-				self._socketsById[socket.id].gracePeriod = setTimeout(() => {
-					delete self._socketsById[socket.id];
-
-					// moved from .on('disconnect') in TaroNetIoServer.js:~588
-					// data contains {WebSocket socket, <Buffer > reason, Number code}
-					taro.network._onClientDisconnect(data, socket);
-				}, 5000);
+				if (self._socketsById[socket.id]) {
+					self._socketsById[socket.id].gracePeriod = setTimeout(() => {
+						delete self._socketsById[socket.id];
+	
+						// moved from .on('disconnect') in TaroNetIoServer.js:~588
+						// data contains {WebSocket socket, <Buffer > reason, Number code}
+						taro.network._onClientDisconnect(data, socket);
+					}, 5000);
+				}				
 			});
 			// Tell the client their new ID - triggers this._io.on('connect', ...) on client
 			try {
