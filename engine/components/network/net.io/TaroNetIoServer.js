@@ -687,11 +687,14 @@ var TaroNetIoServer = {
 		}
 
 		var socket = taro.network._socketById[clientId];
+		
 		// check if the clientId belongs to this socket connection.
-		if (!(socket?._token?.clientId && socket?._token?.clientId === clientId)) {
-			console.log('_onClientMessage: clientId validation failed', socket._token.clientId, clientId, data);
-			socket.close('Client could not be validated, please refresh the page.');
-			return;
+		if (socket && socket._token && socket._token.clientId) {
+			if (socket._token.clientId !== clientId) {
+				console.log('_onClientMessage: clientId validation failed', socket._token.clientId, clientId, data);
+				socket.close('Client could not be validated, please refresh the page.');
+				return;
+			}
 		}
 
 		if (typeof data[0] === 'string') {
