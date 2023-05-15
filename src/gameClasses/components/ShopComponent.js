@@ -12,6 +12,8 @@ var ShopComponent = TaroEntity.extend({
 
 			if (isLoggedIn) {
 				self.loadUserPurchases();
+			}else{
+				self.loadShopItems();
 			}
 
 			self.unitSkinCount = {};
@@ -261,7 +263,61 @@ var ShopComponent = TaroEntity.extend({
 			});
 		}
 	},
+	loadShopItems: function () {
+		let self = this;
+		$.ajax({
+			url:`/api/game/${gameId}/shopCount`,
+			type: 'GET',
+			success: function (response) {
+				if(response.status == 'success') {
+					try {
+						let shopItems = response.message || [];
 
+					// check if shop item is object or array
+					let purchasableItems = [];
+					if (shopItems instanceof Array) {
+						purchasableItems = shopItems;
+					}
+					 else {
+						// get first key of object
+						purchasableItems = shopItems[Object.keys(shopItems)[0]];
+					}
+
+					purchasableItems = purchasableItems.slice(0, 4);
+
+					purchasableItems.forEach(function (purchasable, index) {
+						let html = `<div id="${purchasable._id}-locked" class="border rounded bg-light p-2 mx-2 ${index < 2 ? 'mb-3' : ''} col-5 d-flex flex-column justify-content-between">` +
+							'  <div class="my-2 text-center">' +
+							`	<img src=" ${purchasable.image} " style="height: 45px; width: 45px;" />` +
+							'	 </div>' +
+							'	 <div class="d-flex justify-content-center action-button-container">';
+						if (purchasable.soldForSocialShare) {
+							html += self.getTwitterBtnHtml(purchasable);
+						} else {
+							html += `<button class="btn btn-sm btn-outline-success" id="${purchasable._id}-locked-button"` +
+								`			 onClick="openLoginOptionFrameModal()">` +
+								'			 <div class="d-flex align-items-center">' +
+								'				 <img src="/assets/images/coin.svg" height="20" alt="Modd Coins" class="mr-1" />' +
+								`				 ${purchasable.price}` +
+								'			 </div>' +
+								'		 </button>';
+						}
+
+						html += '	 </div>' +
+							'</div>';
+						var skin = $(html);
+						$('#skins-list').append(skin);
+					});
+					$('#loading-skins').addClass('d-none');
+					$('#skins-list').removeClass('d-none').addClass('row');
+					}catch{
+						$('#loading-skins').addClass('d-none');
+						$('#error-loading-shop').removeClass('d-none');
+					}
+				}
+			}
+		})
+	},
 	loadUserPurchases: function () {
 		let self = this;
 		$.ajax({
