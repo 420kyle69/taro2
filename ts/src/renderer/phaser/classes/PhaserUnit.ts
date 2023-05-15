@@ -49,6 +49,18 @@ class PhaserUnit extends PhaserAnimatedEntity {
 
 		this.scene.renderedEntities.push(this.gameObject);
 		this.zoomEvtListener = taro.client.on('scale', this.scaleElements, this);
+
+		this.sprite.setInteractive();
+		this.sprite.on('pointerdown', (p) => {
+			if (taro.developerMode.active && taro.developerMode.activeTab === 'play' && p.rightButtonDown()) {
+				if (this.entity._stats.ownerId && this.entity._stats.controlledBy === 'human') {
+					console.log('right click on unit, owner of unit: ', this.entity._stats.ownerId);
+					//this.scene.input.setTopOnly(true);
+					//this.devModeScene.regionEditor.addClickedList({name: this.entity._stats.id, x: stats.x, y: stats.y, width: stats.width, height: stats.height});
+				}
+				
+			}
+		});
 	}
 
 	protected updateTexture (data) {
