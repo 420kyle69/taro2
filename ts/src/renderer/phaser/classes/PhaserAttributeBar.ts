@@ -109,7 +109,9 @@ class PhaserAttributeBar extends Phaser.GameObjects.Container {
 			bar.fillRoundedRect(
 				-w / 2,
 				-h / 2,
-				Math.max(w * Math.min(value, max) / max, borderRadius * 1.5),
+				// we should not clamp here because it will mask whether or not there is a fault elsewhere in the attribute logic
+				// because of this, changed from Math.max(w * Math.min(value, max)/ max...)
+				Math.max(w * value / max, borderRadius * 1.5),
 				h,
 				borderRadius
 			);
