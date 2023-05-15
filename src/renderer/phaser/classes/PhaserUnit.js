@@ -40,8 +40,8 @@ var PhaserUnit = /** @class */ (function (_super) {
         _this.zoomEvtListener = taro.client.on('scale', _this.scaleElements, _this);
         _this.sprite.setInteractive();
         _this.sprite.on('pointerdown', function (p) {
-            if (taro.developerMode.active && taro.developerMode.activeTab === 'play' && p.rightButtonDown()) {
-                if (_this.entity._stats.ownerId && _this.entity._stats.controlledBy === 'human') {
+            if ((!taro.developerMode.active || (taro.developerMode.active && taro.developerMode.activeTab === 'play')) && p.rightButtonDown()) {
+                if (_this.entity._stats.ownerId /*&& this.entity._stats.controlledBy === 'human'*/) {
                     console.log('right click on unit, owner of unit: ', _this.entity._stats.ownerId);
                     //this.scene.input.setTopOnly(true);
                     //this.devModeScene.regionEditor.addClickedList({name: this.entity._stats.id, x: stats.x, y: stats.y, width: stats.width, height: stats.height});
