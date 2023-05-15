@@ -68,16 +68,6 @@ var Unit = TaroEntityPhysics.extend({
 		// initialize body & texture of the unit
 		self.changeUnitType(data.type, data.defaultData, true);
 
-		// attributes is an object
-		if (this._stats.attributes) {
-			const attributes = this._stats.attributes;
-			for (var attrId in attributes) {
-				const individualAttribute = attributes[attrId];
-				individualAttribute.value = Math.max(individualAttribute.min, Math.min(individualAttribute.max, individualAttribute.value));
-			}
-		}
-
-
 		if (self._stats.scaleBody) {
 			self._stats.scale = parseFloat(self._stats.scaleBody);
 		} else {
