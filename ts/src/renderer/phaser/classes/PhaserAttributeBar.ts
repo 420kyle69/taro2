@@ -105,19 +105,11 @@ class PhaserAttributeBar extends Phaser.GameObjects.Container {
 			.HexStringToColor(color)
 			.color);
 
-		if (value !== 0 && value > max) {
+		if (value !== 0) {
 			bar.fillRoundedRect(
 				-w / 2,
 				-h / 2,
-				Math.max(w, borderRadius * 1.5),
-				h,
-				borderRadius
-			);
-		} else if (value !== 0) {
-			bar.fillRoundedRect(
-				-w / 2,
-				-h / 2,
-				Math.max(w * value / max, borderRadius * 1.5),
+				Math.max(w * Math.min(value, max) / max, borderRadius * 1.5),
 				h,
 				borderRadius
 			);

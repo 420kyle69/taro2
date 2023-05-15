@@ -80,11 +80,8 @@ var PhaserAttributeBar = /** @class */ (function (_super) {
         bar.fillStyle(Phaser.Display.Color
             .HexStringToColor(color)
             .color);
-        if (value !== 0 && value > max) {
-            bar.fillRoundedRect(-w / 2, -h / 2, Math.max(w, borderRadius * 1.5), h, borderRadius);
-        }
-        else if (value !== 0) {
-            bar.fillRoundedRect(-w / 2, -h / 2, Math.max(w * value / max, borderRadius * 1.5), h, borderRadius);
+        if (value !== 0) {
+            bar.fillRoundedRect(-w / 2, -h / 2, Math.max(w * Math.min(value, max) / max, borderRadius * 1.5), h, borderRadius);
         }
         bar.lineStyle(2, 0x000000, 1);
         bar.strokeRoundedRect(-w / 2, -h / 2, w, h, borderRadius);
