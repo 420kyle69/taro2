@@ -216,7 +216,7 @@ class TilePalette extends Phaser.GameObjects.Container {
 			}
 		});
 		scrollBar.value = 0.5;
-		this.scrollBarContainer.add(scrollBar);
+		if (this.scrollBarContainer) this.scrollBarContainer.add(scrollBar);
 		scrollBar.setPosition(posX, posY).setOrigin(0, 0).setScrollFactor(0,0).layout();
 
 		scrollBar.on('valuechange',
