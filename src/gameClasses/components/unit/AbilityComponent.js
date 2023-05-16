@@ -169,11 +169,7 @@ var AbilityComponent = TaroEntity.extend({
 					for (attrName in ability.cost.unitAttributes) {
 						if (self._entity._stats.attributes[attrName]) {
 							var newValue = self._entity._stats.attributes[attrName].value - ability.cost.unitAttributes[attrName];
-
-							self._entity._stats.attributes[attrName].value -= ability.cost.unitAttributes[attrName];
-							unitAttr.attributes[attrName] = self._entity._stats.attributes[attrName].value;
-
-							self._entity.attribute.update(attrName, newValue, true);
+							self._entity.attribute.update(attrName, newValue, true);						
 						}
 					}
 				}
@@ -182,10 +178,6 @@ var AbilityComponent = TaroEntity.extend({
 					for (attrName in ability.cost.playerAttributes) {
 						if (player._stats.attributes[attrName]) {
 							var newValue = player._stats.attributes[attrName].value - ability.cost.playerAttributes[attrName];
-
-							player._stats.attributes[attrName].value -= ability.cost.playerAttributes[attrName];
-							playerAttr.attributes[attrName] = player._stats.attributes[attrName].value;
-
 							player.attribute.update(attrName, newValue, true);
 						}
 					}
