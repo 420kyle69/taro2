@@ -20,7 +20,7 @@ class TilePalette extends Phaser.GameObjects.Container {
 	constructor(
 		public scene: DevModeScene,
 		tileset: Phaser.Tilemaps.Tileset,
-		rexUI?: any
+		rexUI: any
 	) {
 		super(scene);
 
