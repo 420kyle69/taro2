@@ -4158,6 +4158,12 @@ var TaroEntity = TaroObject.extend({
 							this.oldOwnerId = this._stats[attrName];
 							break;
 
+						case 'rotate': 
+							if (typeof newValue === 'number') {
+								this.rotateTo(0, 0, newValue);
+							}
+							break;
+
 						default:
 							if (taro.isServer) {
 								this._stats[attrName] = newValue;
