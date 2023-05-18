@@ -1,6 +1,6 @@
 <div align="center">
   <a href="https://modd.io">
-    <img src="./assets/images/logo.png" width="400" alt="Taro Engine logo">
+    <img src="./images/logo.png" width="400" alt="Taro Engine logo">
   </a>
 </div>
 
