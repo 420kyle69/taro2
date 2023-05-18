@@ -2426,7 +2426,11 @@ var ActionComponent = TaroEntity.extend({
 						var radians = self._script.variable.getValue(action.radians, vars);
 						if (entity && self.entityCategories.indexOf(entity._category) > -1 && radians !== undefined && !isNaN(radians)) {
 							// hack to rotate entity properly
-							entity.streamUpdateData([{ rotate: radians}]);
+							if (taro.isClient) {
+								entity.rotateTo(0, 0, radians);
+							} else {
+								entity.streamUpdateData([{ rotate: radians}]);
+							}
 						}
 
 						break;
