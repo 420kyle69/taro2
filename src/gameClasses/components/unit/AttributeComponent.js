@@ -240,7 +240,7 @@ var AttributeComponent = TaroEntity.extend({
 								self._entity.script.trigger('entityAttributeBecomesZero', triggeredBy);
 							}
 
-							taro.queueTrigger(`${this._entity._category}AttributeBecomesZero`, triggeredBy);							
+							taro.queueTrigger(`${this._entity._category}AttributeBecomesZero`, triggeredBy);
 						} else if (newValue >= attribute.max) // when attribute becomes full, trigger attributeBecomesFull event
 						{
 							// necessary as self._entity can be 'player' which doesn't have scriptComponent
