@@ -2060,7 +2060,7 @@ var TaroEntity = TaroObject.extend({
 				var angle = this._rotate.z;
 				if (type == 'attacked') {
 					// get angle between attacked unit and attacking unit
-					var attacker = taro.$(data.attackerId);
+					var attacker = taro.$(data?.attackerId);
 					if (attacker) {
 						angle = Math.atan2(attacker._translate.y - this._translate.y, attacker._translate.x - this._translate.x) + Math.radians(90);
 					}
@@ -4160,7 +4160,7 @@ var TaroEntity = TaroObject.extend({
 							this.oldOwnerId = this._stats[attrName];
 							break;
 
-						case 'rotate': 
+						case 'rotate':
 							if (typeof newValue === 'number') {
 								this.rotateTo(0, 0, newValue);
 							}
@@ -4247,12 +4247,13 @@ var TaroEntity = TaroObject.extend({
 								break;
 							case 'effect':
 								// don't use streamed effect call for my own unit or its items
-								if (this == taro.client.selectedUnit ||
-									(this._category == 'item' && this.getOwnerUnit() == taro.client.selectedUnit)
+								if (newValue.type != 'attacked' && 
+									(this == taro.client.selectedUnit ||
+									(this._category == 'item' && this.getOwnerUnit() == taro.client.selectedUnit))
 								) {
-									//return;
+									return;
 								}
-								this.playEffect(newValue.type, newValue.data? newValue.data : {});
+								this.playEffect(newValue.type, newValue.data ? newValue.data : {});
 								break;
 							case 'makePlayerSelectUnit':
 								// this unit was queued to be selected by a player
