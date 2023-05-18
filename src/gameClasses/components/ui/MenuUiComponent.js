@@ -331,15 +331,16 @@ var MenuUiComponent = TaroEntity.extend({
 
 	getItem: function (key) {
 		if (USE_LOCAL_STORAGE) {
+			let value = null;
 			try {
-				JSON.parse(localStorage.getItem(key));
+				value = JSON.parse(localStorage.getItem(key));
 			} catch (e) {
 				// testing this catch for cases where we fail to parse because it is just a string
 				if (e instanceof SyntaxError) {
-					localStorage.getItem(key);
+					value = localStorage.getItem(key);
 				}
 			}
-			return;
+			return value;
 		}
 
 		return storage[key];
