@@ -1,15 +1,14 @@
-<div align="center">
-  <a href="https://modd.io">
-    <img src="https://res.cloudinary.com/davvp7lix/image/fetch/w_300,f_auto/https://www.modd.io/_next/static/media/logo.08e05f95.svg?w=3840&q=75" width="400" alt="Moddio logo">
-  </a>
-</div>
+<a href="https://modd.io">
+  <img src="https://res.cloudinary.com/davvp7lix/image/fetch/w_300,f_auto/https://www.modd.io/_next/static/media/logo.08e05f95.svg?w=3840&q=75" width="200" alt="Moddio logo">
+</a>
 
-<div align="center">
-  <h2>Modd.io - 2D Multiplayer Game Engine</h2>
-  <p>Make IO games in seconds! With Moddio's drag & drop game editor, creators can make multiplayer games without coding
-</div>
+# Modd.io - 2D Multiplayer Game Engine
+Make IO games in seconds! With Moddio's drag & drop game editor, creators can make multiplayer games without coding
 
-## What's included in the box.
+
+
+
+# What's included in the box.
 - Box2D Physics
 - Netcode using UWS and LZ-string compression
 - Inventory & item system
@@ -23,7 +22,15 @@
 - Mobile controls
 - and more!
 
-## We need contributors, and we are also hiring
-Performance optimization is a hard problem that takes aeons to solve. We are always looking for more developers to help us. To be a contributor, please contact m0dE in our [Discord](https://discord.gg/XRe8T7K) If you find yourself enjoying working with us, then we should seriously consider working together.
+# We need contributors, and we are also hiring
+First, join our [Discord](https://discord.gg/XRe8T7K) :mechanical_arm:
+## Game Engine Contribution
+  Our Game Engine, [Taro](https://github.com/moddio/taro2) is completely free and open source under the MIT license. We are always looking for more help from the community. PR's are always welcomed.
+  
+## Documentation Contribution
+To contribute in our documentation, first, clone [our repo](https://github.com/moddio/taro2). Then you'll find documentation files in [./docs/](https://github.com/moddio/taro2/tree/master/docs) folder.
 
-Our Game Engine, Taro is completely free and open source under the MIT license.
+You can run documentation locally by typing below in the root folder:
+```
+docsify serve ./docs
+```

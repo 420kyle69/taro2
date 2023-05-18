@@ -10,6 +10,8 @@ Taro Engine is gratefully powered by the following technologies & assets:
 
 - Kenney Assets https://www.kenney.nl/
 
-- Pixi.js
+- Pixi.js https://github.com/pixijs/pixijs
 
 - uWebsocket https://github.com/uNetworking/uWebSockets
+
+- Docsify https://github.com/docsifyjs/docsify/
