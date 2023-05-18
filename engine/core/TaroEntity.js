@@ -1963,7 +1963,7 @@ var TaroEntity = TaroObject.extend({
 			}
 		}
 	},
-	playEffect: function (type) {
+	playEffect: function (type, data) {
 		if (this._stats && this._stats.effects && this._stats.effects[type]) {
 			var effect = this._stats.effects[type];
 
@@ -1976,7 +1976,9 @@ var TaroEntity = TaroObject.extend({
 
 			if (taro.isServer) {
 				if (type == 'move' || type == 'idle' || type == 'none') {
-					this.streamUpdateData([{ effect: type }]);
+					this.streamUpdateData([{ effect: {type: type} }]);
+				} else if (type == 'attacked') {
+					this.streamUpdateData([{ effect: {type: type, data: data} }]);
 				}
 
 			} else if (taro.isClient) {
@@ -2058,7 +2060,7 @@ var TaroEntity = TaroObject.extend({
 				var angle = this._rotate.z;
 				if (type == 'attacked') {
 					// get angle between attacked unit and attacking unit
-					var attacker = this.lastAttackedBy;
+					var attacker = taro.$(data.attackerId);
 					if (attacker) {
 						angle = Math.atan2(attacker._translate.y - this._translate.y, attacker._translate.x - this._translate.x) + Math.radians(90);
 					}
@@ -4248,9 +4250,9 @@ var TaroEntity = TaroObject.extend({
 								if (this == taro.client.selectedUnit ||
 									(this._category == 'item' && this.getOwnerUnit() == taro.client.selectedUnit)
 								) {
-									return;
+									//return;
 								}
-								this.playEffect(newValue);
+								this.playEffect(newValue.type, newValue.data? newValue.data : {});
 								break;
 							case 'makePlayerSelectUnit':
 								// this unit was queued to be selected by a player
