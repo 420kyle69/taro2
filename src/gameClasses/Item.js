@@ -1116,6 +1116,12 @@ var Item = TaroEntityPhysics.extend({
 							this._stats.isBeingUsed = newValue;
 						}
 						break;
+
+					case 'fireRate':
+						if (taro.isClient) {
+							this._stats.fireRate = newValue;
+						}
+						break;
 				}
 			}
 		}
