@@ -1,6 +1,6 @@
 declare interface EntityStats {
 	controlledBy: string;
-	ownerId: any;
+	ownerId: string;
 	selectedUnitId: string | number | object;
 	userId: string;
 	defaultData: any;

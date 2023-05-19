@@ -44,8 +44,6 @@ var PhaserUnit = /** @class */ (function (_super) {
                 var ownerPlayer = taro.$(_this.entity._stats.ownerId);
                 if (ownerPlayer._stats.controlledBy === 'human') {
                     reactApp && reactApp.showUnitOwnerDropdown && reactApp.showUnitOwnerDropdown(_this.entity._stats.ownerId, p);
-                    //this.scene.input.setTopOnly(true);
-                    //this.devModeScene.regionEditor.addClickedList({name: this.entity._stats.id, x: stats.x, y: stats.y, width: stats.width, height: stats.height});
                 }
             }
         });
