@@ -103,7 +103,6 @@ var TaroChatComponent = TaroEventingClass.extend({
 			var msgDiv = '';
 
 			if (msgData.from) {
-				console.log("msgData.from", msgData.from);
 				var player = taro.game.getPlayerByClientId(msgData.from);
 				if (player && player._stats) {
 					msgDiv = $('<div><span class=\'author\' style=\'color: #99F000;\'></span><span class=\'msg ml-1\'></span></div>');
