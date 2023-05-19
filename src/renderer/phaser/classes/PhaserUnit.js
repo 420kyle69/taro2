@@ -38,6 +38,15 @@ var PhaserUnit = /** @class */ (function (_super) {
         _this.scene.unitsList.push(_this);
         _this.scene.renderedEntities.push(_this.gameObject);
         _this.zoomEvtListener = taro.client.on('scale', _this.scaleElements, _this);
+        _this.sprite.setInteractive();
+        _this.sprite.on('pointerdown', function (p) {
+            if (taro.game.data.defaultData.contextMenuEnabled && (!taro.developerMode.active || (taro.developerMode.active && taro.developerMode.activeTab === 'play')) && p.rightButtonDown()) {
+                var ownerPlayer = taro.$(_this.entity._stats.ownerId);
+                if (ownerPlayer._stats.controlledBy === 'human') {
+                    reactApp && reactApp.showUnitOwnerDropdown && reactApp.showUnitOwnerDropdown(_this.entity._stats.ownerId, p);
+                }
+            }
+        });
         return _this;
     }
     PhaserUnit.prototype.updateTexture = function (data) {
