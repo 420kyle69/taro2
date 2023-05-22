@@ -167,7 +167,7 @@ var PhaserUnit = /** @class */ (function (_super) {
         this.scene.cameraTarget = this.gameObject;
         if (!taro.developerMode.active || taro.developerMode.activeTab === 'play') {
             var trackingDelay = taro.game.data.settings.camera.trackingDelay || 15;
-            trackingDelay = trackingDelay / 30;
+            trackingDelay = trackingDelay / 300;
             camera.startFollow(this.gameObject, false, trackingDelay, trackingDelay);
         }
     };

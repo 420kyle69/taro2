@@ -29,7 +29,7 @@ var DevModeScene = /** @class */ (function (_super) {
         taro.client.on('lockCamera', function () {
             taro.client.emit('zoom', taro.client.zoom);
             var trackingDelay = taro.game.data.settings.camera.trackingDelay || 15;
-            trackingDelay = trackingDelay / 30;
+            trackingDelay = trackingDelay / 300;
             if (_this.gameScene.cameraTarget)
                 _this.gameScene.cameras.main.startFollow(_this.gameScene.cameraTarget, false, trackingDelay, trackingDelay);
         });
