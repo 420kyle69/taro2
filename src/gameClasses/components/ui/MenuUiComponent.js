@@ -311,8 +311,19 @@ var MenuUiComponent = TaroEntity.extend({
 	},
 
 	setItem: function (key, value) {
+
 		if (USE_LOCAL_STORAGE) {
-			return JSON.stringify(localStorage.setItem(key, value));
+			try {
+				value = JSON.stringify(value);
+			} catch (e) {
+				if (e instanceof SyntaxError) {
+					// this won't tell us much, but it will tell us what type we tried to stringify
+					throw new SyntaxError(`cannot stringify ${value}`);
+				}
+
+			}
+
+			return localStorage.setItem(key, value);
 		}
 
 		return storage[key] = value;
@@ -320,7 +331,16 @@ var MenuUiComponent = TaroEntity.extend({
 
 	getItem: function (key) {
 		if (USE_LOCAL_STORAGE) {
-			return JSON.parse(localStorage.getItem(key));
+			let value = null;
+			try {
+				value = JSON.parse(localStorage.getItem(key));
+			} catch (e) {
+				// testing this catch for cases where we fail to parse because it is just a string
+				if (e instanceof SyntaxError) {
+					value = localStorage.getItem(key);
+				}
+			}
+			return value;
 		}
 
 		return storage[key];
@@ -825,7 +845,14 @@ var MenuUiComponent = TaroEntity.extend({
 	},
 	setForceCanvas: function (enabled) {
 		var self = this;
-		const forceCanvas = self.getItem('forceCanvas') || {};
+		let forceCanvas;
+		try {
+			forceCanvas = self.getItem('forceCanvas') || {};
+		} catch (e) {
+			if (e instanceof SyntaxError) {
+				forceCanvas = {};
+			}
+		}
 
 		if (enabled) {
 			forceCanvas[0] = enabled;

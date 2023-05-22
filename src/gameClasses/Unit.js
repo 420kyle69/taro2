@@ -68,9 +68,6 @@ var Unit = TaroEntityPhysics.extend({
 		// initialize body & texture of the unit
 		self.changeUnitType(data.type, data.defaultData, true);
 
-		if (self._stats.scale) {
-
-		}
 		if (self._stats.scaleBody) {
 			self._stats.scale = parseFloat(self._stats.scaleBody);
 		} else {
@@ -1355,12 +1352,12 @@ var Unit = TaroEntityPhysics.extend({
 				taro.game.lastAttackingUnitId = damageData.sourceUnitId;
 				taro.game.lastAttackedUnitId = this.id();
 				taro.game.lastAttackingItemId = damageData.sourceItemId;
-				this.lastAttackedBy = sourceUnit;
+				this.lastAttackedBy = damageData.sourceUnitId;
 
 				if (taro.isClient) {
-					this.playEffect('attacked');
 					return true;
 				}
+				this.playEffect('attacked', {attackerId: damageData.sourceUnitId});
 
 				var triggeredBy = {
 					unitId: taro.game.lastAttackingUnitId,

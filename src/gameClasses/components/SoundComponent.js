@@ -117,6 +117,7 @@ var SoundComponent = TaroEntity.extend({
 	},
 
 	getVolume: function (position, volume = 0) {
+		var self = this;
 		var settingsVolume = parseFloat(self.getItem('sound-volume'));
 		settingsVolume = isNaN(settingsVolume) ? 1 : settingsVolume / 100;
 

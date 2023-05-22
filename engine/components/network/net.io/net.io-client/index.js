@@ -164,7 +164,7 @@ NetIo.Client = NetIo.EventingClass.extend({
 	},
 
 	disconnect: function (reason) {
-		console.log("disconnected with reason", reason)
+		console.log('disconnected with reason', reason);
 		// console.trace();
 
 		this._socket.close(1000, reason);
@@ -337,7 +337,6 @@ NetIo.Client = NetIo.EventingClass.extend({
 
 					// Now we have an id, set the state to connected
 					this._state = 3;
-					console.log(this.id);
 
 					// Emit the connect event
 					this.emit('connect', this.id);
@@ -427,8 +426,8 @@ NetIo.Client = NetIo.EventingClass.extend({
 		// 		}
 		// 	}
 		// }
+		// console.log(this._state, 'this._state with code 1006');
 
-		console.log(this._state, 'this._state with code 1006');
 		// If we are already connected and have an id...
 		if (this._state === 3) {
 			this._state = 0;

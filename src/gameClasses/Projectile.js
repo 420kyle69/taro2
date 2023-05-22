@@ -190,8 +190,8 @@ var Projectile = TaroEntityPhysics.extend({
 			//self._scaleTexture();
 		}
 
-		this._stats.sourceUnitId = sourceUnit.id();
-		this._stats.sourceItemId = sourceItem.id();
+		this._stats.sourceUnitId = sourceUnit?.id();
+		this._stats.sourceItemId = sourceItem?.id();
 
 	},
 

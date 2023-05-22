@@ -768,21 +768,21 @@ NetIo.Server = NetIo.EventingClass.extend({
 			// Register a listener so that if the socket disconnects,
 			// we can remove it from the active socket lookups
 			socket.on('disconnect', function (data) {
-				console.log('grace period starts');
-
 				var index = self._sockets.indexOf(socket);
 				if (index > -1) {
 					// Remove the socket from the array
 					self._sockets.splice(index, 1);
 				}
-				self._socketsById[socket.id].gracePeriod = setTimeout(() => {
-					console.log('grace period ends');
-					delete self._socketsById[socket.id];
 
-					// moved from .on('disconnect') in TaroNetIoServer.js:~588
-					// data contains {WebSocket socket, <Buffer > reason, Number code}
-					taro.network._onClientDisconnect(data, socket);
-				}, 5000);
+				if (self._socketsById[socket.id]) {
+					self._socketsById[socket.id].gracePeriod = setTimeout(() => {
+						delete self._socketsById[socket.id];
+	
+						// moved from .on('disconnect') in TaroNetIoServer.js:~588
+						// data contains {WebSocket socket, <Buffer > reason, Number code}
+						taro.network._onClientDisconnect(data, socket);
+					}, 5000);
+				}				
 			});
 			// Tell the client their new ID - triggers this._io.on('connect', ...) on client
 			try {
