@@ -52,7 +52,6 @@ declare class GameComponent extends TaroEntity {
 		settings: {
 			addStrokeToNameAndAttributes: boolean;
 			camera: {
-				trackingDelay: number;
 				zoom : {
 					default:number;
 				}
