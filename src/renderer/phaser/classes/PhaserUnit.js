@@ -167,8 +167,8 @@ var PhaserUnit = /** @class */ (function (_super) {
         }
         this.scene.cameraTarget = this.gameObject;
         if (!taro.developerMode.active || taro.developerMode.activeTab === 'play') {
-            var trackingDelay = ((_d = (_c = (_b = (_a = taro === null || taro === void 0 ? void 0 : taro.game) === null || _a === void 0 ? void 0 : _a.data) === null || _b === void 0 ? void 0 : _b.settings) === null || _c === void 0 ? void 0 : _c.camera) === null || _d === void 0 ? void 0 : _d.trackingDelay) || 15;
-            trackingDelay = trackingDelay / 300;
+            var trackingDelay = ((_d = (_c = (_b = (_a = taro === null || taro === void 0 ? void 0 : taro.game) === null || _a === void 0 ? void 0 : _a.data) === null || _b === void 0 ? void 0 : _b.settings) === null || _c === void 0 ? void 0 : _c.camera) === null || _d === void 0 ? void 0 : _d.trackingDelay) || 3;
+            trackingDelay = trackingDelay / 60;
             camera.startFollow(this.gameObject, false, trackingDelay, trackingDelay);
         }
     };
