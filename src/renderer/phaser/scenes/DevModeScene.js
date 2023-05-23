@@ -28,8 +28,10 @@ var DevModeScene = /** @class */ (function (_super) {
         });
         taro.client.on('lockCamera', function () {
             taro.client.emit('zoom', taro.client.zoom);
+            var trackingDelay = taro.game.data.settings.camera.trackingDelay || 15;
+            trackingDelay = trackingDelay / 300;
             if (_this.gameScene.cameraTarget)
-                _this.gameScene.cameras.main.startFollow(_this.gameScene.cameraTarget, false, 0.05, 0.05);
+                _this.gameScene.cameras.main.startFollow(_this.gameScene.cameraTarget, false, trackingDelay, trackingDelay);
         });
         taro.client.on('enterMapTab', function () {
             _this.enterMapTab();
