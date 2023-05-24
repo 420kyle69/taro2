@@ -1810,7 +1810,9 @@ var VariableComponent = TaroEntity.extend({
 					var taroRegister = taro.register();
 					returnValue = _.values(taroRegister)
 						.filter(({ _category }) => {
-							return self._entity.script.action.entityCategories.includes(_category) || !_category;
+							// uncomment to see on server what is registered with taro AND included in 'all entities in game'
+							// console.log('category:  ',_category,'. returning: ',(_category != 'region' && self._entity.script.action.entityCategories.includes(_category)) || !_category);
+							return (_category != 'region' && self._entity.script.action.entityCategories.includes(_category)) || !_category;
 						});
 					break;
 
