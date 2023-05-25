@@ -120,9 +120,12 @@ var PhaserChatBubble = /** @class */ (function (_super) {
     };
     PhaserChatBubble.prototype.updateOffset = function () {
         var _a = this.unit, sprite = _a.sprite, label = _a.label, gameObject = _a.gameObject;
-        this.offset = 25 +
+        var displayHeight = sprite.displayHeight, displayWidth = sprite.displayWidth;
+        var labelHeight = label.getBounds().height;
+        this.offset = displayHeight / 2 - labelHeight * 4;
+        /*this.offset =  25 +
             (sprite.displayHeight + sprite.displayWidth) / 4 +
-            label.height * 2;
+            label.height * 2;*/
         this.y = gameObject.y - this.offset;
     };
     PhaserChatBubble.prototype.updatePosition = function () {
