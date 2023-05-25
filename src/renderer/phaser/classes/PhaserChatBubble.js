@@ -122,7 +122,7 @@ var PhaserChatBubble = /** @class */ (function (_super) {
         var _a = this.unit, sprite = _a.sprite, label = _a.label, gameObject = _a.gameObject;
         var displayHeight = sprite.displayHeight, displayWidth = sprite.displayWidth;
         var labelHeight = label.getBounds().height;
-        this.offset = -displayHeight / 2 - labelHeight * 4;
+        this.offset = displayHeight / 2 + labelHeight * 4;
         /*this.offset =  25 +
             (sprite.displayHeight + sprite.displayWidth) / 4 +
             label.height * 2;*/
