@@ -155,9 +155,12 @@ class PhaserChatBubble extends Phaser.GameObjects.Container {
 
 	private updateOffset (): void {
 		const { sprite, label, gameObject } = this.unit;
-		this.offset =  25 +
+		const {displayHeight, displayWidth} = sprite;
+		const labelHeight = label.getBounds().height;
+		this.offset = displayHeight/2 + labelHeight*4;
+		/*this.offset =  25 +
 			(sprite.displayHeight + sprite.displayWidth) / 4 +
-			label.height * 2;
+			label.height * 2;*/
 		this.y = gameObject.y - this.offset;
 	}
 

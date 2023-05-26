@@ -622,6 +622,8 @@ var dists = {
 
 			// Add the body to the world with the passed fixture
 			entity.body = tempBod;
+
+			entity.gravitic(!!body.affectedByGravity);
 			// rotate body to its previous value
 			// console.log('box2dweb',entity._rotate.z)
 			entity.rotateTo(0, 0, entity._rotate.z);
@@ -988,6 +990,8 @@ var dists = {
 
 			// Add the body to the world with the passed fixture
 			entity.body = tempBod;
+
+			entity.gravitic(!!body.affectedByGravity);
 
 			// rotate body to its previous value
 			// console.log('box2dninja',entity._rotate.z)
@@ -1402,6 +1406,8 @@ var dists = {
 			// Add the body to the world with the passed fixture
 			entity.body = tempBod;
 
+			entity.gravitic(!!body.affectedByGravity);
+
 			// rotate body to its previous value
 			// entity.rotateTo(0, 0, entity._rotate.z)
 
@@ -1776,6 +1782,8 @@ var dists = {
 
 			// Add the body to the world with the passed fixture
 			entity.body = tempBod;
+
+			entity.gravitic(!!body.affectedByGravity);
 
 			// rotate body to its previous value
 			entity.rotateTo(0, 0, entity._rotate.z);
@@ -2153,6 +2161,8 @@ var dists = {
 
 			// Add the body to the world with the passed fixture
 			entity.body = tempBod;
+
+			entity.gravitic(!!body.affectedByGravity);
 
 			// rotate body to its previous value
 			entity.rotateTo(0, 0, entity._rotate.z);
