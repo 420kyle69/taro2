@@ -3,13 +3,6 @@ var GameComponent = TaroEntity.extend({
 	componentId: 'game',
 
 	init: function () {
-		var self = this;
-
-		this.units = {};
-		this.players = {};
-		this.items = {};
-		this.food = {};
-		this.joints = {};
 		this.highlights = {};
 		this.createdEntities = [];
 		this.gameOverModalIsShowing = false;
