@@ -297,7 +297,7 @@ var TileEditor = /** @class */ (function () {
                         }
                         else if (this.devModeTools.modeButtons[4].active) {
                             var targetTile = this.getTile(pointerTileX, pointerTileY, map);
-                            if (targetTile && this.selectedTile && targetTile !== this.selectedTile) {
+                            if (this.selectedTile && targetTile !== this.selectedTile && (targetTile || map.currentLayerIndex === 0 || map.currentLayerIndex === 1)) {
                                 this.floodFill(map.currentLayerIndex, targetTile, this.selectedTile, pointerTileX, pointerTileY, false);
                                 taro.network.send('editTile', { gid: this.selectedTile, layer: map.currentLayerIndex, x: pointerTileX, y: pointerTileY, tool: 'flood' });
                             }

@@ -110,7 +110,7 @@ NetIo.Client = NetIo.EventingClass.extend({
 		// Create new websocket to the url
 
 		var distinctId = window.distinctId || '';
-		var posthogDistinctId = window.posthog && window.posthog.get_distinct_id ? window.posthog.get_distinct_id() : '';		
+		var posthogDistinctId = window.posthogDistinctId || (window.posthog && window.posthog.get_distinct_id ? window.posthog.get_distinct_id() : '');	
 		
 		this.wsUrl = `${url}?token=${gsAuthToken}&sid=${taro.client.server.id}&distinctId=${distinctId}&posthogDistinctId=${posthogDistinctId}`;
 		this.wsStartTime = Date.now();
@@ -443,6 +443,7 @@ NetIo.Client = NetIo.EventingClass.extend({
 		// If we were trying to connect...
 		if (this._state === 1) {
 			this._state = 0;
+			taro.menuUi.onDisconnectFromServer('netio-client index:446','Error trying to contact server. Please refresh this page or visit our homepage.');
 			this.emit('error', { reason: 'Cannot establish connection, is server running?' });
 		}
 
