@@ -12,6 +12,8 @@ var VariableComponent = TaroEntity.extend({
 		self.streamingWarningShown = false;
 		self.prevServerTime = 0;
 		self.prevClientTime = 0;
+		self.RADIAN_COEFFICIENT = 0.01745329251;
+		self.DEGREE_COEFFICIENT = 57.2957795131;
 	},
 
 	roundOff: function (num, precision) {
@@ -436,10 +438,11 @@ var VariableComponent = TaroEntity.extend({
 
 				case 'getPlayerSelectedUnit':
 					var player = self.getValue(text.player, vars);
-					var unit = taro.$(player._stats.selectedUnitId);
+					var unit = taro.$(player?._stats?.selectedUnitId);
 					if (unit) {
 						returnValue = unit;
 					}
+					break;
 
 				case 'getEntityAttribute':
 					var attributeTypeId = self.getValue(text.attribute, vars);
@@ -586,15 +589,16 @@ var VariableComponent = TaroEntity.extend({
 				case 'toRadians':
 					var num = self.getValue(text.number, vars);
 					if (!isNaN(num)) {
-						returnValue = num * (Math.PI / 180);
+						returnValue = num * self.RADIAN_COEFFICIENT;
 					}
 					break;
 
 				case 'toDegrees':
 					var num = self.getValue(text.number, vars);
 					if (!isNaN(num)) {
-						returnValue = num * (180 / Math.PI);
+						returnValue = num * self.DEGREE_COEFFICIENT;
 					}
+					break;
 				
 				case 'absoluteValueOfNumber':
 					var num = self.getValue(text.number, vars);
