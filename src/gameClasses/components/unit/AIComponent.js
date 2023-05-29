@@ -228,7 +228,9 @@ var AIComponent = TaroEntity.extend({
 		this.currentAction = 'fight';
 		this._entity.startMoving();
 		let targetAngle = this.getAngleToTarget();
-		this._entity.streamUpdateData([{rotate: targetAngle}]);
+		if (targetAngle) {
+			this._entity.streamUpdateData([{rotate: targetAngle}]);
+		}
 	},
 
 	moveToTargetPosition: function (x, y) {
