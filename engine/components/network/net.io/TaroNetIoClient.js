@@ -492,7 +492,7 @@ var TaroNetIoClient = {
 						// instead, we'll use position updated by physics engine
 						else if (taro.game.cspEnabled && entity &&
 							entity.finalKeyFrame[0] < newSnapshotTimestamp &&
-							entity != taro.client.selectedUnit && !entity._stats.aiEnabled
+							entity != taro.client.selectedUnit
 						) {
 							entity.finalKeyFrame = [newSnapshotTimestamp, obj[entityId]];
 						}
