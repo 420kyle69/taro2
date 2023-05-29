@@ -117,12 +117,10 @@ var VariableComponent = TaroEntity.extend({
 
 				case 'playerIsCreator':
 					var player = self.getValue(text.player, vars);
-
 					if (player) {
-						returnValue = player._stats.userId == taro.game.data.owner._id;
+						returnValue = player._stats.userId == taro.game.data.defaultData.owner;
 					}
 					break;
-
 
 				case 'playersAreHostile':
 					var playerA = self.getValue(text.playerA, vars);
