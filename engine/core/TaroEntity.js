@@ -5116,7 +5116,7 @@ var TaroEntity = TaroObject.extend({
 
 		var finalTransform = this.finalKeyFrame[1];
 		// using cspMovement for my unit will cause it to rubberband to the latest known position
-		if (taro.game.cspEnabled && finalTransform && !this._stats.aiEnabled) {
+		if (taro.game.cspEnabled && finalTransform /*&& !this._stats.aiEnabled*/) {
 
 			if (this.body &&
 				!(this._category == 'item' && this.getOwnerUnit() != undefined) && // don't apply to item that's held by unit as that's calculated by anchor calculation
