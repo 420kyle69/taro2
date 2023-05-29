@@ -1,5 +1,5 @@
 var TileMarker = /** @class */ (function () {
-    function TileMarker(scene, devModeScene, map, palette, w) {
+    function TileMarker(scene, devModeScene, map, palette, w, commandController) {
         this.scene = scene;
         this.devModeScene = devModeScene;
         this.map = map;
@@ -16,7 +16,7 @@ var TileMarker = /** @class */ (function () {
         this.graphics.setVisible(false);
         if (!palette) {
             this.preview = scene.add.container();
-            this.images = [[], []];
+            this.images = {};
         }
     }
     TileMarker.prototype.addImage = function (x, y) {
@@ -40,9 +40,10 @@ var TileMarker = /** @class */ (function () {
     TileMarker.prototype.changeImage = function (tile, i, j) {
         var _a;
         if (tile && tile !== 0 && tile !== -1) {
-            if (!this.images[i][j]) {
-                this.images[i][j] = this.addImage(i, j);
+            if (!this.images[i]) {
+                this.images[i] = {};
             }
+            this.images[i][j] = this.addImage(i, j);
             this.images[i][j].setTexture(this.extrudedKey, tile - 1).setAlpha(0.75);
             // apply tint to palette tile
             var paletteLayer = this.devModeScene.tileEditor.tilePalette.map.layers[0];
@@ -51,11 +52,11 @@ var TileMarker = /** @class */ (function () {
             if (paletteTile)
                 paletteTile.tint = 0x87cfff;
         }
-        else if (this.images[i][j])
+        else if (this.images[i] && this.images[i][j])
             this.images[i][j].setAlpha(0);
     };
     TileMarker.prototype.changePreview = function () {
-        var _a = this.devModeScene.tileEditor.area, x = _a.x, y = _a.y;
+        var _a = this.devModeScene.tileEditor.paletteArea, x = _a.x, y = _a.y;
         this.graphics.scale = x;
         if (!this.palette) {
             this.hideImages();
@@ -69,21 +70,24 @@ var TileMarker = /** @class */ (function () {
             }
             else if (x === 1 && y === 1) {
                 var previewTarget = this.devModeScene.tileEditor.selectedTile;
-                this.changeImage(previewTarget, 0, 0);
+                for (var i = 0; i < this.devModeScene.tileEditor.brushArea.x; i++) {
+                    for (var j = 0; j < this.devModeScene.tileEditor.brushArea.y; j++) {
+                        this.changeImage(previewTarget, i, j);
+                    }
+                }
             }
         }
     };
     TileMarker.prototype.hideImages = function () {
-        for (var i = 0; i < this.images.length; i++) {
-            for (var j = 0; j < this.images[0].length; j++) {
-                if (this.images[i] && this.images[i][j])
-                    this.images[i][j].setAlpha(0);
-            }
-        }
+        Object.values(this.images).forEach(function (v) {
+            Object.values(v).forEach(function (img) {
+                img.setAlpha(0);
+            });
+        });
     };
     TileMarker.prototype.showPreview = function (value) {
         var devModeScene = taro.renderer.scene.getScene('DevMode');
-        var area = devModeScene.tileEditor.area;
+        var area = devModeScene.tileEditor.brushArea;
         for (var i = 0; i < area.x; i++) {
             for (var j = 0; j < area.y; j++) {
                 if (this.images[i] && this.images[i][j])

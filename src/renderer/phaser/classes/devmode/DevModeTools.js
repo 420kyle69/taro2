@@ -18,10 +18,20 @@ var DevModeTools = /** @class */ (function (_super) {
     function DevModeTools(scene) {
         var _this = _super.call(this, scene) || this;
         _this.scene = scene;
+        _this.brushSize = 1;
         _this.BUTTON_HEIGHT = 30;
         _this.BUTTON_INTERSPACE = 4;
-        var palette = _this.palette = new TilePalette(_this.scene, _this.scene.tileset, _this.scene.rexUI);
-        _this.tileEditor = new TileEditor(_this.scene.gameScene, _this.scene, _this);
+        _this.commandController = new CommandController({
+            'increaseBrushSize': function () {
+                _this.brushSize = Math.min(_this.brushSize + 1, 50);
+                _this.updateBrushArea();
+            }, 'decreaseBrushSize': function () {
+                _this.brushSize = Math.max(_this.brushSize - 1, 1);
+                _this.updateBrushArea();
+            }
+        });
+        var palette = _this.palette = new TilePalette(_this.scene, _this.scene.tileset, _this.scene.rexUI, _this.commandController);
+        _this.tileEditor = new TileEditor(_this.scene.gameScene, _this.scene, _this, _this.commandController);
         _this.regionEditor = new RegionEditor(_this.scene.gameScene, _this.scene, _this);
         _this.gameEditorWidgets = [];
         _this.keyBindings();
@@ -54,7 +64,7 @@ var DevModeTools = /** @class */ (function (_super) {
         _this.cursorButton = _this.modeButtons[0];
         _this.highlightModeButton(0);
         _this.brushButtons = [];
-        _this.brushButtons.push(new DevToolButton(_this, '1x1', '1x1', 'changes the brush size to 1x1', null, 0, (h + s) * 5, h * 2 - s, toolButtonsContainer, _this.selectSingle.bind(_this)), new DevToolButton(_this, '2x2', '2x2', 'changes the brush size to 2x2', null, h * 2, (h + s) * 5, h * 2 - s, toolButtonsContainer, _this.selectArea.bind(_this)));
+        _this.brushButtons.push(new DevToolButton(_this, '1x1', '1x1', 'changes the palette area size to 1x1', null, 0, (h + s) * 5, h * 2 - s, toolButtonsContainer, _this.selectSingle.bind(_this)), new DevToolButton(_this, '2x2', '2x2', 'changes the palette area size to 2x2', null, h * 2, (h + s) * 5, h * 2 - s, toolButtonsContainer, _this.selectArea.bind(_this)));
         _this.brushButtons[0].highlight('active');
         _this.layerButtons = [];
         _this.layerButtons.push(new DevToolButton(_this, 'floor', 'Layer (1)', 'select the Floor layer', null, h + s, (h + s) * 10, h * 2 + 25, toolButtonsContainer, _this.switchLayer.bind(_this), 0), new DevToolButton(_this, 'floor2', 'Layer (2)', 'select the Floor 2 layer', null, h + s, (h + s) * 9, h * 2 + 25, toolButtonsContainer, _this.switchLayer.bind(_this), 1), new DevToolButton(_this, 'walls', 'Layer (3)', 'select the Walls layer', null, h + s, (h + s) * 8, h * 2 + 25, toolButtonsContainer, _this.switchLayer.bind(_this), 2), new DevToolButton(_this, 'trees', 'Layer (4)', 'select the Trees layer', null, h + s, (h + s) * 7, h * 2 + 25, toolButtonsContainer, _this.switchLayer.bind(_this), 3));
@@ -82,6 +92,11 @@ var DevModeTools = /** @class */ (function (_super) {
         });
         return _this;
     }
+    DevModeTools.prototype.updateBrushArea = function () {
+        this.tileEditor.brushArea = { x: this.brushSize, y: this.brushSize };
+        console.log(this.brushSize);
+        this.tileEditor.marker.changePreview();
+    };
     DevModeTools.prototype.enterMapTab = function () {
         this.toolButtonsContainer.setVisible(true);
         this.palette.show();
@@ -234,6 +249,20 @@ var DevModeTools = /** @class */ (function (_super) {
                 }
             }
         });
+        var undoKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z, false, true);
+        undoKey.on('down', function (event) {
+            if (event.ctrlKey) {
+                console.log('undo');
+                _this.commandController.undo();
+            }
+        });
+        var redoKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Y, false, true);
+        redoKey.on('down', function (event) {
+            if (event.ctrlKey) {
+                console.log('redo');
+                _this.commandController.redo();
+            }
+        });
     };
     DevModeTools.prototype.cursor = function () {
         this.highlightModeButton(0);
@@ -296,7 +325,7 @@ var DevModeTools = /** @class */ (function (_super) {
     };
     DevModeTools.prototype.selectSingle = function () {
         this.tileEditor.clearTint();
-        this.tileEditor.area = { x: 1, y: 1 };
+        this.tileEditor.paletteArea = { x: 1, y: 1 };
         this.brushButtons[0].highlight('active');
         this.brushButtons[1].highlight('no');
         this.tileEditor.activateMarkers(true);
@@ -308,7 +337,7 @@ var DevModeTools = /** @class */ (function (_super) {
     };
     DevModeTools.prototype.selectArea = function () {
         this.tileEditor.clearTint();
-        this.tileEditor.area = { x: 2, y: 2 };
+        this.tileEditor.paletteArea = { x: 2, y: 2 };
         this.brushButtons[1].highlight('active');
         this.brushButtons[0].highlight('no');
         this.tileEditor.activateMarkers(true);

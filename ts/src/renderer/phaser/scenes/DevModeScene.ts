@@ -67,7 +67,7 @@ class DevModeScene extends PhaserScene {
 					position: {
 						x: worldPoint.x,
 						y: worldPoint.y
-					}, 
+					},
 					angle: draggedEntity.angle
 				}
 				taro.developerMode.editEntity(data, playerId);
@@ -103,7 +103,7 @@ class DevModeScene extends PhaserScene {
 		this.load.image('fill', 'https://cache.modd.io/asset/spriteImage/1675428550006_fill_(1).png');
 		this.load.image('clear', 'https://cache.modd.io/asset/spriteImage/1681917489086_layerClear.png');
 		this.load.image('save', 'https://cache.modd.io/asset/spriteImage/1681916834218_saveIcon.png');
-		
+
 
 		this.load.scenePlugin(
 			'rexuiplugin',

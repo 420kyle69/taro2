@@ -15,10 +15,11 @@ var __extends = (this && this.__extends) || (function () {
 })();
 var TilePalette = /** @class */ (function (_super) {
     __extends(TilePalette, _super);
-    function TilePalette(scene, tileset, rexUI) {
+    function TilePalette(scene, tileset, rexUI, commandController) {
         var _this = _super.call(this, scene) || this;
         _this.scene = scene;
         _this.rexUI = rexUI;
+        var keyAlt = _this.scene.input.keyboard.addKey('ALT');
         // Load a map from a 2D array of tile indices
         var paletteMap = [];
         for (var i = 0; i < tileset.rows; i++) {
@@ -104,16 +105,27 @@ var TilePalette = /** @class */ (function (_super) {
         });
         _this.scene.input.on('wheel', function (pointer, gameObjects, deltaX, deltaY, deltaZ) {
             if (taro.developerMode.active && taro.developerMode.activeTab !== 'play') {
-                if (_this.visible && pointerover) {
-                    _this.zoom(deltaY);
+                var isAltDown = keyAlt.isDown;
+                if (isAltDown) {
+                    if (deltaY > 0) {
+                        commandController.defaultCommands.decreaseBrushSize();
+                    }
+                    else if (deltaY < 0) {
+                        commandController.defaultCommands.increaseBrushSize();
+                    }
                 }
-                else if (deltaY < 0) {
-                    var zoom = (_this.scene.gameScene.zoomSize / 2.15) / 1.1;
-                    taro.client.emit('zoom', zoom);
-                }
-                else if (deltaY > 0) {
-                    var zoom = (_this.scene.gameScene.zoomSize / 2.15) * 1.1;
-                    taro.client.emit('zoom', zoom);
+                else {
+                    if (_this.visible && pointerover) {
+                        _this.zoom(deltaY);
+                    }
+                    else if (deltaY < 0) {
+                        var zoom = (_this.scene.gameScene.zoomSize / 2.15) / 1.1;
+                        taro.client.emit('zoom', zoom);
+                    }
+                    else if (deltaY > 0) {
+                        var zoom = (_this.scene.gameScene.zoomSize / 2.15) * 1.1;
+                        taro.client.emit('zoom', zoom);
+                    }
                 }
             }
         });

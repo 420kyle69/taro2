@@ -9,7 +9,7 @@ class DeveloperMode {
 	enter(): void {
 		console.log('client enter developer mode');
 		this.active = true;
-		this.changeTab('play');
+		this.changeTab('map');
 	}
 
 	leave (): void {
@@ -46,7 +46,7 @@ class DeveloperMode {
 			const width = gameMap.width;
 			if (data.tool === 'flood') {
 				this.floodTiles(
-					serverData.layer, 
+					serverData.layer,
 					gameMap.layers[serverData.layer].data[serverData.y * width + serverData.x],
 					serverData.gid,
 					serverData.x,
@@ -80,7 +80,7 @@ class DeveloperMode {
 		//save tile change to taro.game.data.map and taro.map.data
 		map.layers[layer].data[y * width + x] = newTile;
 		taro.map.data.layers[layer].data[y * width + x] = newTile;
-			
+
         if (x > 0) {
             this.floodTiles(layer, oldTile, newTile, x - 1, y);
         }
@@ -325,11 +325,11 @@ class DeveloperMode {
 						case 'create':
 							//this.createUnit(data);
 							break;
-					
+
 						case 'update':
 							this.updateUnit(data);
 							break;
-					
+
 						case 'delete':
 							//this.deleteUnit(data);
 							break;
@@ -339,11 +339,11 @@ class DeveloperMode {
 						case 'create':
 							//this.createItem(data);
 							break;
-					
+
 						case 'update':
 							this.updateItem(data);
 							break;
-					
+
 						case 'delete':
 							//this.deleteItem(data);
 							break;
@@ -353,11 +353,11 @@ class DeveloperMode {
 						case 'create':
 							//this.createProjectile(data);
 							break;
-					
+
 						case 'update':
 							this.updateProjectile(data);
 							break;
-					
+
 						case 'delete':
 							//this.deleteProjectile(data);
 							break;
@@ -366,7 +366,7 @@ class DeveloperMode {
 			}
 		}
 	}
- 
+
 	updateClientMap (data: { mapData: MapData }): void {
 		console.log ('map data was edited', data.mapData.wasEdited);
 		if (data.mapData.wasEdited) {
@@ -407,12 +407,12 @@ interface RegionData {
 }
 
 interface EditEntityData {
-	entityType: string, 
+	entityType: string,
 	typeId: string,
 	action: string,
 	newData?: any, //EntityStats,
-	playerId?: string, 
-	position?: {x: number, y: number}, 
+	playerId?: string,
+	position?: {x: number, y: number},
 	angle?: number,
 }
 
