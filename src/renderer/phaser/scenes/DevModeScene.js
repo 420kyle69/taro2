@@ -23,6 +23,26 @@ var DevModeScene = /** @class */ (function (_super) {
         this.gameScene = taro.renderer.scene.getScene('Game');
         this.pointerInsideButtons = false;
         this.regions = [];
+        this.entitiesOnInit = [];
+        // create images for entities created in initialize script
+        Object.values(taro.game.data.scripts).forEach(function (script) {
+            if (script.name === 'initialize') {
+                Object.values(script.actions).forEach(function (action) {
+                    if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || action.type === 'createEntityAtPositionWithDimensions') {
+                        console.log(action);
+                        var entityTypeData = taro.game.data[action.entityType] && taro.game.data[action.entityType][action.entity];
+                        var key = "unit/".concat(entityTypeData.cellSheet.url);
+                        var image = _this.gameScene.add.image(action.position.x, action.position.y, key);
+                        image.angle = Number(action.angle);
+                        image.setDisplaySize(action.width, action.height);
+                        image.setTint(0x707780);
+                        image.setAlpha(0.75);
+                        image.setVisible(false);
+                        _this.entitiesOnInit.push(image);
+                    }
+                });
+            }
+        });
         taro.client.on('unlockCamera', function () {
             _this.gameScene.cameras.main.stopFollow();
         });
@@ -127,10 +147,39 @@ var DevModeScene = /** @class */ (function (_super) {
             this.gameEditorWidgets = this.devModeTools.gameEditorWidgets;
         }
         this.devModeTools.enterMapTab();
+        this.entitiesOnInit.forEach(function (entity) {
+            entity.setVisible(true);
+        });
+        //console.log(Object.values(taro.game.data.scripts))
+        /*Object.values(taro.game.data.scripts).forEach((script) => {
+            // @ts-ignore
+            if (script.name === 'initialize') {
+                //console.log(Object.values(script))
+                // @ts-ignore
+                Object.values(script.actions).forEach((action) => {
+                    // @ts-ignore
+                    if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || action.type === 'createEntityAtPositionWithDimensions') {
+                        //console.log(action);
+                        // @ts-ignore
+                        const entityTypeData = taro.game.data[action.entityType] && taro.game.data[action.entityType][action.entity];
+                        const key = `unit/${entityTypeData.cellSheet.url}`
+                        // @ts-ignore
+                        const image = this.gameScene.add.image(action.position.x, action.position.y, key);
+                        // @ts-ignore
+                        image.setDisplaySize(action.width, action.height);
+                        image.setTint(0x707780);
+                        image.setAlpha(0.75);
+                    }
+                });
+            }
+        });*/
     };
     DevModeScene.prototype.leaveMapTab = function () {
         if (this.devModeTools)
             this.devModeTools.leaveMapTab();
+        this.entitiesOnInit.forEach(function (entity) {
+            entity.setVisible(false);
+        });
     };
     DevModeScene.prototype.pointerInsideMap = function (pointerX, pointerY, map) {
         return (0 <= pointerX && pointerX < map.width

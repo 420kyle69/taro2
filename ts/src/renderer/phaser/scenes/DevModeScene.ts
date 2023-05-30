@@ -16,6 +16,8 @@ class DevModeScene extends PhaserScene {
 
 	regions: PhaserRegion[];
 
+	entitiesOnInit: Phaser.GameObjects.Image[];
+
 	constructor() {
 		super({ key: 'DevMode' });
 	}
@@ -23,7 +25,28 @@ class DevModeScene extends PhaserScene {
 	init (): void {
 		this.gameScene = taro.renderer.scene.getScene('Game');
 		this.pointerInsideButtons = false;
+
 		this.regions = [];
+		this.entitiesOnInit = [];
+		// create images for entities created in initialize script
+		Object.values(taro.game.data.scripts).forEach((script) => {
+			if (script.name === 'initialize') {
+				Object.values(script.actions).forEach((action) => {
+					if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || action.type === 'createEntityAtPositionWithDimensions') {
+						console.log(action);
+						const entityTypeData = taro.game.data[action.entityType] && taro.game.data[action.entityType][action.entity];
+						const key = `unit/${entityTypeData.cellSheet.url}`
+						const image = this.gameScene.add.image(action.position.x, action.position.y, key);
+						image.angle = Number(action.angle);
+						image.setDisplaySize(action.width, action.height);
+						image.setTint(0x707780);
+						image.setAlpha(0.75);
+						image.setVisible(false);
+						this.entitiesOnInit.push(image);
+					}
+				});
+			}
+		});
 
 		taro.client.on('unlockCamera', () => {
 			this.gameScene.cameras.main.stopFollow();
@@ -149,10 +172,43 @@ class DevModeScene extends PhaserScene {
 		}
 
 		this.devModeTools.enterMapTab();
+
+		this.entitiesOnInit.forEach((entity) => {
+			entity.setVisible(true);
+		});
+
+		//console.log(Object.values(taro.game.data.scripts))
+
+		/*Object.values(taro.game.data.scripts).forEach((script) => {
+			// @ts-ignore
+			if (script.name === 'initialize') {
+				//console.log(Object.values(script))
+				// @ts-ignore
+				Object.values(script.actions).forEach((action) => {
+					// @ts-ignore
+					if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || action.type === 'createEntityAtPositionWithDimensions') {
+						//console.log(action);
+						// @ts-ignore
+						const entityTypeData = taro.game.data[action.entityType] && taro.game.data[action.entityType][action.entity];
+						const key = `unit/${entityTypeData.cellSheet.url}`
+						// @ts-ignore
+						const image = this.gameScene.add.image(action.position.x, action.position.y, key);
+						// @ts-ignore
+						image.setDisplaySize(action.width, action.height);
+						image.setTint(0x707780);
+						image.setAlpha(0.75);
+					}
+				});
+			}
+		});*/
 	}
 
 	leaveMapTab (): void {
 		if (this.devModeTools) this.devModeTools.leaveMapTab();
+		this.entitiesOnInit.forEach((entity) => {
+			entity.setVisible(false);
+		});
+
 	}
 
 	pointerInsideMap(pointerX: number, pointerY: number, map: Phaser.Tilemaps.Tilemap): boolean {
