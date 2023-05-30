@@ -30,19 +30,13 @@ class DevModeScene extends PhaserScene {
 		this.entitiesOnInit = [];
 		// create images for entities created in initialize script
 		Object.values(taro.game.data.scripts).forEach((script) => {
-			if (script.name === 'initialize') {
+			if (script.triggers?.[0]?.type === 'gameStart') {
 				Object.values(script.actions).forEach((action) => {
 					if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || action.type === 'createEntityAtPositionWithDimensions') {
 						console.log(action);
-						const entityTypeData = taro.game.data[action.entityType] && taro.game.data[action.entityType][action.entity];
-						const key = `unit/${entityTypeData.cellSheet.url}`
-						const image = this.gameScene.add.image(action.position.x, action.position.y, key);
-						image.angle = Number(action.angle);
-						image.setDisplaySize(action.width, action.height);
-						image.setTint(0x707780);
-						image.setAlpha(0.75);
-						image.setVisible(false);
-						this.entitiesOnInit.push(image);
+						new EntityImage(this.gameScene, this.entitiesOnInit, action);
+					} else if (action.type === 'createUnitAtPosition') {
+						console.log('createUnitAtPosition', action);
 					}
 				});
 			}

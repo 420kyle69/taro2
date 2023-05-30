@@ -26,19 +26,15 @@ var DevModeScene = /** @class */ (function (_super) {
         this.entitiesOnInit = [];
         // create images for entities created in initialize script
         Object.values(taro.game.data.scripts).forEach(function (script) {
-            if (script.name === 'initialize') {
+            var _a, _b;
+            if (((_b = (_a = script.triggers) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.type) === 'gameStart') {
                 Object.values(script.actions).forEach(function (action) {
                     if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || action.type === 'createEntityAtPositionWithDimensions') {
                         console.log(action);
-                        var entityTypeData = taro.game.data[action.entityType] && taro.game.data[action.entityType][action.entity];
-                        var key = "unit/".concat(entityTypeData.cellSheet.url);
-                        var image = _this.gameScene.add.image(action.position.x, action.position.y, key);
-                        image.angle = Number(action.angle);
-                        image.setDisplaySize(action.width, action.height);
-                        image.setTint(0x707780);
-                        image.setAlpha(0.75);
-                        image.setVisible(false);
-                        _this.entitiesOnInit.push(image);
+                        new EntityImage(_this.gameScene, _this.entitiesOnInit, action);
+                    }
+                    else if (action.type === 'createUnitAtPosition') {
+                        console.log('createUnitAtPosition', action);
                     }
                 });
             }

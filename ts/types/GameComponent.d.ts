@@ -14,15 +14,20 @@ interface EntityData {
 
 interface ScriptData {
 	name: string;
-	actions: Record<string, {
+	triggers: Record<string, {
 		type: string;
-		entity: string;
-		entityType: string;
-		position: {x: number, y: number};
-		angle: string;
-		width: number;
-		height: number;
-	}>
+	}>;
+	actions: Record<string, ActionData>;
+}
+
+interface ActionData {
+	type: string;
+	entity: string;
+	entityType: string;
+	position: {x: number, y: number};
+	angle: string;
+	width: number;
+	height: number;
 }
 
 interface MapData {
