@@ -1,5 +1,6 @@
 var EntityImage = /** @class */ (function () {
-    function EntityImage(scene, entitiesOnInit, action) {
+    function EntityImage(scene, devModeTools, entitiesOnInit, action) {
+        var _this = this;
         var _a, _b;
         var key;
         if (action.entityType === 'unitTypes') {
@@ -20,10 +21,30 @@ var EntityImage = /** @class */ (function () {
         image.setTint(0x9CA3AF);
         image.setAlpha(0.75);
         image.setVisible(false);
-        image.setInteractive();
+        image.setInteractive({ draggable: true });
         entitiesOnInit.push(image);
         this.image.on('pointerdown', function () {
             console.log('pointerdown', action);
+        });
+        scene.input.on('dragstart', function (pointer, gameObject) {
+            _this.startDragX = gameObject.x;
+            _this.startDragY = gameObject.y;
+            _this.scale = gameObject.scale;
+        });
+        scene.input.on('drag', function (pointer, gameObject, dragX, dragY) {
+            console.log(_this.startDragX - dragX, _this.startDragY - dragY);
+            if (!devModeTools.altKey.isDown && !devModeTools.shiftKey.isDown) {
+                gameObject.x = dragX;
+                gameObject.y = dragY;
+            }
+            else if (devModeTools.altKey.isDown) {
+                var target = Phaser.Math.Angle.BetweenPoints(gameObject, { x: dragX, y: dragY });
+                gameObject.rotation = target;
+            }
+            else if (devModeTools.shiftKey.isDown) {
+                var dragScale = Math.min(500, Math.max(-250, (_this.startDragY - dragY)));
+                gameObject.scale = _this.scale + _this.scale * dragScale / 500;
+            }
         });
     }
     return EntityImage;

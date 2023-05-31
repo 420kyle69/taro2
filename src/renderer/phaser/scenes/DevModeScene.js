@@ -25,20 +25,18 @@ var DevModeScene = /** @class */ (function (_super) {
         this.regions = [];
         this.entitiesOnInit = [];
         // create images for entities created in initialize script
-        Object.values(taro.game.data.scripts).forEach(function (script) {
-            var _a, _b;
-            if (((_b = (_a = script.triggers) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.type) === 'gameStart') {
-                Object.values(script.actions).forEach(function (action) {
+        /*Object.values(taro.game.data.scripts).forEach((script) => {
+            if (script.triggers?.[0]?.type === 'gameStart') {
+                Object.values(script.actions).forEach((action) => {
                     if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || action.type === 'createEntityAtPositionWithDimensions') {
                         console.log(action);
-                        new EntityImage(_this.gameScene, _this.entitiesOnInit, action);
-                    }
-                    else if (action.type === 'createUnitAtPosition') {
+                        new EntityImage(this.gameScene, this.entitiesOnInit, action);
+                    } else if (action.type === 'createUnitAtPosition') {
                         console.log('createUnitAtPosition', action);
                     }
                 });
             }
-        });
+        });*/
         taro.client.on('unlockCamera', function () {
             _this.gameScene.cameras.main.stopFollow();
         });
@@ -138,43 +136,45 @@ var DevModeScene = /** @class */ (function (_super) {
         this.gameEditorWidgets = this.devModeTools.gameEditorWidgets;
     };
     DevModeScene.prototype.enterMapTab = function () {
+        var _this = this;
         if (this.gameEditorWidgets.length === 0) {
             this.devModeTools.queryWidgets();
             this.gameEditorWidgets = this.devModeTools.gameEditorWidgets;
         }
         this.devModeTools.enterMapTab();
+        this.gameScene.renderedEntities.forEach(function (element) {
+            element.setVisible(false);
+        });
+        if (this.entitiesOnInit.length === 0) {
+            // create images for entities created in initialize script
+            Object.values(taro.game.data.scripts).forEach(function (script) {
+                var _a, _b;
+                if (((_b = (_a = script.triggers) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.type) === 'gameStart') {
+                    Object.values(script.actions).forEach(function (action) {
+                        if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || action.type === 'createEntityAtPositionWithDimensions') {
+                            console.log(action);
+                            new EntityImage(_this.gameScene, _this.devModeTools, _this.entitiesOnInit, action);
+                        }
+                        else if (action.type === 'createUnitAtPosition') {
+                            console.log('createUnitAtPosition', action);
+                        }
+                    });
+                }
+            });
+        }
         this.entitiesOnInit.forEach(function (entity) {
             entity.setVisible(true);
         });
         //console.log(Object.values(taro.game.data.scripts))
-        /*Object.values(taro.game.data.scripts).forEach((script) => {
-            // @ts-ignore
-            if (script.name === 'initialize') {
-                //console.log(Object.values(script))
-                // @ts-ignore
-                Object.values(script.actions).forEach((action) => {
-                    // @ts-ignore
-                    if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || action.type === 'createEntityAtPositionWithDimensions') {
-                        //console.log(action);
-                        // @ts-ignore
-                        const entityTypeData = taro.game.data[action.entityType] && taro.game.data[action.entityType][action.entity];
-                        const key = `unit/${entityTypeData.cellSheet.url}`
-                        // @ts-ignore
-                        const image = this.gameScene.add.image(action.position.x, action.position.y, key);
-                        // @ts-ignore
-                        image.setDisplaySize(action.width, action.height);
-                        image.setTint(0x707780);
-                        image.setAlpha(0.75);
-                    }
-                });
-            }
-        });*/
     };
     DevModeScene.prototype.leaveMapTab = function () {
         if (this.devModeTools)
             this.devModeTools.leaveMapTab();
         this.entitiesOnInit.forEach(function (entity) {
             entity.setVisible(false);
+        });
+        this.gameScene.renderedEntities.forEach(function (element) {
+            element.setVisible(true);
         });
     };
     DevModeScene.prototype.pointerInsideMap = function (pointerX, pointerY, map) {

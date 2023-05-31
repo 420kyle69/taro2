@@ -549,17 +549,19 @@ class GameScene extends PhaserScene {
 		this.renderedEntities.forEach(element => {
 			element.setVisible(false);
 		});
-		this.cameras.main.cull(this.renderedEntities).forEach(element => {
-			if (!element.hidden) {
-				element.setVisible(true);
 
-				if (element.dynamic) {
-					// dynamic is only assigned through an hbz-index-only event
-					this.heightRenderer.adjustDepth(element as TGameObject & Phaser.GameObjects.Components.Size);
+		if (taro.developerMode.active && taro.developerMode.activeTab !== 'map') {
+			this.cameras.main.cull(this.renderedEntities).forEach(element => {
+				if (!element.hidden) {
+					element.setVisible(true);
+
+					if (element.dynamic) {
+						// dynamic is only assigned through an hbz-index-only event
+						this.heightRenderer.adjustDepth(element as TGameObject & Phaser.GameObjects.Components.Size);
+					}
 				}
-			}
-
-		});
+			});
+		}
 	}
 }
 

@@ -1,7 +1,11 @@
 class EntityImage {
-    image: Phaser.GameObjects.Image;
+  image: Phaser.GameObjects.Image;
 
-  constructor(scene, entitiesOnInit, action: ActionData) {
+  startDragX: number;
+  startDragY: number;
+  scale: any;
+
+  constructor(scene, devModeTools, entitiesOnInit, action: ActionData) {
 
     let key;
 
@@ -22,11 +26,32 @@ class EntityImage {
     image.setTint(0x9CA3AF);
     image.setAlpha(0.75);
     image.setVisible(false);
-    image.setInteractive();
+    image.setInteractive({ draggable: true });
     entitiesOnInit.push(image);
 
     this.image.on('pointerdown', () => {
-      console.log('pointerdown', action);
+        console.log('pointerdown', action);
+    });
+
+    scene.input.on('dragstart', (pointer, gameObject) => {
+      this.startDragX = gameObject.x;
+      this.startDragY = gameObject.y;
+
+      this.scale = gameObject.scale;
+    });
+
+    scene.input.on('drag', (pointer, gameObject, dragX, dragY) => {
+      console.log(this.startDragX - dragX, this.startDragY - dragY)
+      if (!devModeTools.altKey.isDown && !devModeTools.shiftKey.isDown) {
+          gameObject.x = dragX;
+          gameObject.y = dragY;
+      } else if (devModeTools.altKey.isDown) {
+          const target = Phaser.Math.Angle.BetweenPoints(gameObject, {x: dragX, y: dragY});
+          gameObject.rotation = target;
+      } else if (devModeTools.shiftKey.isDown) {
+          const dragScale = Math.min(500, Math.max(-250, (this.startDragY - dragY)));
+          gameObject.scale = this.scale + this.scale * dragScale / 500;
+      }
     });
   }
 }

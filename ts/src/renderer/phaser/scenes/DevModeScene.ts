@@ -29,7 +29,7 @@ class DevModeScene extends PhaserScene {
 		this.regions = [];
 		this.entitiesOnInit = [];
 		// create images for entities created in initialize script
-		Object.values(taro.game.data.scripts).forEach((script) => {
+		/*Object.values(taro.game.data.scripts).forEach((script) => {
 			if (script.triggers?.[0]?.type === 'gameStart') {
 				Object.values(script.actions).forEach((action) => {
 					if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || action.type === 'createEntityAtPositionWithDimensions') {
@@ -40,7 +40,7 @@ class DevModeScene extends PhaserScene {
 					}
 				});
 			}
-		});
+		});*/
 
 		taro.client.on('unlockCamera', () => {
 			this.gameScene.cameras.main.stopFollow();
@@ -167,40 +167,41 @@ class DevModeScene extends PhaserScene {
 
 		this.devModeTools.enterMapTab();
 
+		this.gameScene.renderedEntities.forEach(element => {
+			element.setVisible(false);
+		});
+
+		if (this.entitiesOnInit.length === 0) {
+			// create images for entities created in initialize script
+			Object.values(taro.game.data.scripts).forEach((script) => {
+				if (script.triggers?.[0]?.type === 'gameStart') {
+					Object.values(script.actions).forEach((action) => {
+						if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || action.type === 'createEntityAtPositionWithDimensions') {
+							console.log(action);
+							new EntityImage(this.gameScene, this.devModeTools, this.entitiesOnInit, action);
+						} else if (action.type === 'createUnitAtPosition') {
+							console.log('createUnitAtPosition', action);
+						}
+					});
+				}
+			});
+		}
 		this.entitiesOnInit.forEach((entity) => {
 			entity.setVisible(true);
 		});
 
-		//console.log(Object.values(taro.game.data.scripts))
 
-		/*Object.values(taro.game.data.scripts).forEach((script) => {
-			// @ts-ignore
-			if (script.name === 'initialize') {
-				//console.log(Object.values(script))
-				// @ts-ignore
-				Object.values(script.actions).forEach((action) => {
-					// @ts-ignore
-					if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || action.type === 'createEntityAtPositionWithDimensions') {
-						//console.log(action);
-						// @ts-ignore
-						const entityTypeData = taro.game.data[action.entityType] && taro.game.data[action.entityType][action.entity];
-						const key = `unit/${entityTypeData.cellSheet.url}`
-						// @ts-ignore
-						const image = this.gameScene.add.image(action.position.x, action.position.y, key);
-						// @ts-ignore
-						image.setDisplaySize(action.width, action.height);
-						image.setTint(0x707780);
-						image.setAlpha(0.75);
-					}
-				});
-			}
-		});*/
+		//console.log(Object.values(taro.game.data.scripts))
 	}
 
 	leaveMapTab (): void {
 		if (this.devModeTools) this.devModeTools.leaveMapTab();
 		this.entitiesOnInit.forEach((entity) => {
 			entity.setVisible(false);
+		});
+
+		this.gameScene.renderedEntities.forEach(element => {
+			element.setVisible(true);
 		});
 
 	}

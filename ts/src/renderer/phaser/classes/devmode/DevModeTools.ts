@@ -23,6 +23,9 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	BUTTON_HEIGHT: number = 30;
 	BUTTON_INTERSPACE: number = 4;
 	
+	altKey: Phaser.Input.Keyboard.Key;
+	shiftKey: Phaser.Input.Keyboard.Key;
+	
 	constructor(
 		public scene: DevModeScene,
 	) {
@@ -163,8 +166,8 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	keyBindings(): void {
 		const gameScene = this.scene.gameScene;
 		const keyboard = this.scene.input.keyboard;
-		const altKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ALT, false);
-		const shiftKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT, false);
+		const altKey = this.altKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ALT, false);
+		const shiftKey = this.shiftKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT, false);
 		const tabKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, false);
 		tabKey.on('down', (key) => {
 			const isInputModalPresent = this.checkIfInputModalPresent();
