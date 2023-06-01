@@ -209,6 +209,7 @@ var AIComponent = TaroEntity.extend({
 		this.targetPosition = undefined;
 		this.currentAction = 'idle';
 		this.nextMoveAt = taro._currentTime + 2000 + Math.floor(Math.random() * 2000);
+		this.path = []; // clear the A* path
 	},
 
 	fleeFromUnit: function (unit) {
@@ -282,6 +283,8 @@ var AIComponent = TaroEntity.extend({
 		let mapData = taro.map.data; // cache the map data for rapid use
 
 		let unitTilePosition = {x: Math.floor(unit._translate.x / mapData.tilewidth), y: Math.floor(unit._translate.y / mapData.tilewidth)};
+		unitTilePosition.x = Math.min(Math.max(0, unitTilePosition.x), mapData.width - 1); // confine with map boundary
+		unitTilePosition.y = Math.min(Math.max(0, unitTilePosition.y), mapData.height - 1);
 		let targetTilePosition = {x: Math.floor(x / mapData.tilewidth), y: Math.floor(y / mapData.tilewidth)};
 		targetTilePosition.x = Math.min(Math.max(0, targetTilePosition.x), mapData.width - 1); // confine with map boundary
 		targetTilePosition.y = Math.min(Math.max(0, targetTilePosition.y), mapData.height - 1);
@@ -473,7 +476,7 @@ var AIComponent = TaroEntity.extend({
 				break;
 
 			case 'move':
-				if (this.getDistanceToTarget() < 10) {
+				if (this.getDistanceToTarget() < Math.min(10, mapData.tilewidth)) { // map with smaller tile size requires a more precise stop
 					switch (this.pathFindingMethod) {
 						case 'simple':
 							self.goIdle();
@@ -514,9 +517,11 @@ var AIComponent = TaroEntity.extend({
 							}
 						} else {
 							if (this.pathFindingMethod == 'a*') {
-								if (this.path.length <= 0) {
-									this.setTargetPosition(targetUnit._translate.x, targetUnit._translate.y); // target the targetUnit if no more path or path failed to generate
+								this.path = this.getAStarPath(targetUnit._translate.x, targetUnit._translate.y); // update A* path to the targetUnit
+								if (this.path.length == 0) {
+									this.setTargetPosition(targetUnit._translate.x, targetUnit._translate.y); // target the targetUnit directly if no more path or path failed to generate
 								} else {
+									this.setTargetPosition(this.path[this.path.length - 1].x * mapData.tilewidth + mapData.tilewidth / 2, this.path[this.path.length - 1].y * mapData.tilewidth + mapData.tilewidth / 2); // tell ai to move according to A* path
 									let a = this.path[this.path.length - 1].x * mapData.tilewidth - unit._translate.x;
 									let b = this.path[this.path.length - 1].y * mapData.tilewidth - unit._translate.y;
 									if (Math.sqrt(a * a + b * b) < mapData.tilewidth / 2) { // Euclidean distance is smaller than half of the tile
