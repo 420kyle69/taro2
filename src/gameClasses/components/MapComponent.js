@@ -33,10 +33,16 @@ var MapComponent = TaroEntity.extend({
 					});
 			});
 		}
-		self.data.wallMap = _.cloneDeep(self.data.layers[3].data); // cache a copy of wall layer
-		for (let i = 0; i < self.data.wallMap.length; i++) { // convert all non zero number to 1 (the index does not matter as long as it is not 0)
-			if (self.data.wallMap[i] != 0) {
-				self.data.wallMap[i] = 1;
+
+		let wallLayer = self.data.layers.find(layerObject => {
+			return layerObject.name === 'walls';
+		});
+
+		self.wallMap = _.cloneDeep(wallLayer.data); // cache a copy of wall layer's data
+
+		for (let i = 0; i < self.wallMap.length; i++) { // convert all non zero number to 1 (the index does not matter as long as it is not 0)
+			if (self.wallMap[i] != 0) {
+				self.wallMap[i] = 1;
 			}
 		}
 	},
