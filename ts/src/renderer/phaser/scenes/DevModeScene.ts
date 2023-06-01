@@ -28,19 +28,6 @@ class DevModeScene extends PhaserScene {
 
 		this.regions = [];
 		this.entitiesOnInit = [];
-		// create images for entities created in initialize script
-		/*Object.values(taro.game.data.scripts).forEach((script) => {
-			if (script.triggers?.[0]?.type === 'gameStart') {
-				Object.values(script.actions).forEach((action) => {
-					if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || action.type === 'createEntityAtPositionWithDimensions') {
-						console.log(action);
-						new EntityImage(this.gameScene, this.entitiesOnInit, action);
-					} else if (action.type === 'createUnitAtPosition') {
-						console.log('createUnitAtPosition', action);
-					}
-				});
-			}
-		});*/
 
 		taro.client.on('unlockCamera', () => {
 			this.gameScene.cameras.main.stopFollow();
@@ -68,6 +55,11 @@ class DevModeScene extends PhaserScene {
 		taro.client.on('editRegion', (data: RegionData) => {
 			this.regionEditor.edit(data);
 		});
+
+        taro.client.on('editInitEntity', (data) => {
+            console.log('editInitEntity', data);
+            //this.devModeTools.editEntity(data);
+        });
 
 		this.gameScene.input.on('pointerup', (p) => {
 			const draggedEntity = taro.unitBeingDragged;

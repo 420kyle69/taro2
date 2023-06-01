@@ -21,13 +21,13 @@ interface ScriptData {
 }
 
 interface ActionData {
-	type: string;
-	entity: string;
-	entityType: string;
-	position: {x: number, y: number};
-	angle: string;
-	width: number;
-	height: number;
+	type?: string;
+	entity?: string;
+	entityType?: string;
+	position?: {x: number, y: number};
+	angle?: string;
+	width?: number;
+	height?: number;
 }
 
 interface MapData {

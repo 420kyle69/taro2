@@ -178,6 +178,15 @@ class DeveloperMode {
 		}
 	}
 
+    editInitEntity (data, clientId: string): void {
+        // only allow developers to modify initial entities
+		if (taro.server.developerClientIds.includes(clientId)) {
+            console.log('editInitEntity', data);
+            // broadcast region change to all clients
+			//taro.network.send('editInitEntity', data);
+        }
+    }
+
 	createUnit(data) {
 		//const player = taro.game.getPlayerByClientId(clientId);
 		let player;

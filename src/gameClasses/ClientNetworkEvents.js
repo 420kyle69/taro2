@@ -477,6 +477,10 @@ var ClientNetworkEvents = {
 		taro.client.emit('editRegion', data);
 	},
 
+    _onEditInitEntity: function (data) {
+        taro.client.emit('editInitEntity', data);
+    },
+
 	_onUpdateUnit: function(data) {
 		taro.developerMode.updateUnit(data);
 	},

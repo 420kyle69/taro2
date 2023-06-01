@@ -165,6 +165,14 @@ var DeveloperMode = /** @class */ (function () {
             taro.network.send('editRegion', data);
         }
     };
+    DeveloperMode.prototype.editInitEntity = function (data, clientId) {
+        // only allow developers to modify initial entities
+        if (taro.server.developerClientIds.includes(clientId)) {
+            console.log('editInitEntity', data);
+            // broadcast region change to all clients
+            //taro.network.send('editInitEntity', data);
+        }
+    };
     DeveloperMode.prototype.createUnit = function (data) {
         //const player = taro.game.getPlayerByClientId(clientId);
         var player;

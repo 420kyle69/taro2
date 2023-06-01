@@ -451,6 +451,10 @@ var ServerNetworkEvents = {
 		taro.developerMode.editRegion(data, clientId);
 	},
 
+    _onEditInitEntity: function(data, clientId) {
+        taro.developerMode.editInitEntity(data, clientId);
+    },
+
 	_onEditEntity: function(data, clientId) {
 		taro.developerMode.editEntity(data, clientId);
 	},

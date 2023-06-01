@@ -24,19 +24,6 @@ var DevModeScene = /** @class */ (function (_super) {
         this.pointerInsideButtons = false;
         this.regions = [];
         this.entitiesOnInit = [];
-        // create images for entities created in initialize script
-        /*Object.values(taro.game.data.scripts).forEach((script) => {
-            if (script.triggers?.[0]?.type === 'gameStart') {
-                Object.values(script.actions).forEach((action) => {
-                    if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || action.type === 'createEntityAtPositionWithDimensions') {
-                        console.log(action);
-                        new EntityImage(this.gameScene, this.entitiesOnInit, action);
-                    } else if (action.type === 'createUnitAtPosition') {
-                        console.log('createUnitAtPosition', action);
-                    }
-                });
-            }
-        });*/
         taro.client.on('unlockCamera', function () {
             _this.gameScene.cameras.main.stopFollow();
         });
@@ -59,6 +46,10 @@ var DevModeScene = /** @class */ (function (_super) {
         });
         taro.client.on('editRegion', function (data) {
             _this.regionEditor.edit(data);
+        });
+        taro.client.on('editInitEntity', function (data) {
+            console.log('editInitEntity', data);
+            //this.devModeTools.editEntity(data);
         });
         this.gameScene.input.on('pointerup', function (p) {
             var draggedEntity = taro.unitBeingDragged;

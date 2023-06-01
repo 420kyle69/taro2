@@ -702,6 +702,7 @@ const Client = TaroEventingClass.extend({
 
 		taro.network.define('editTile', this._onEditTile);
 		taro.network.define('editRegion', this._onEditRegion);
+        taro.network.define('editInitEntity', self._onEditInitEntity);
 		taro.network.define('updateUnit', this._onUpdateUnit);
 		taro.network.define('updateItem', this._onUpdateItem);
 		taro.network.define('updateProjectile', this._onUpdateProjectile);
