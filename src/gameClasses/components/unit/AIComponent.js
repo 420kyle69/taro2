@@ -244,8 +244,10 @@ var AIComponent = TaroEntity.extend({
 			}
 		}
 		this.currentAction = 'fight';
-		this._entity.startMoving();
-		let targetAngle = this.getAngleToTarget();
+		if (this.maxAttackRange < this.getDistanceToTarget()) { // only need to move if the maxAttackRange is not enough to reach the target
+			this._entity.startMoving();
+		}
+		let targetAngle = this.getAngleToTarget(); // rotating here cause fixed rotation unit rotate, disabled
 		if (targetAngle) {
 			this._entity.streamUpdateData([{rotate: targetAngle}]);
 		}
@@ -439,10 +441,7 @@ var AIComponent = TaroEntity.extend({
 		if (!unit._stats.aiEnabled)
 			return;
 
-		let mapData;
-		if (this.pathFindingMethod == 'a*') { // only cache mapData if using a* as pathfinding
-			mapData = taro.map.data;
-		}
+		let mapData = taro.map.data; // both pathfinding method need it to check
 
 		var targetUnit = this.getTargetUnit();
 
@@ -518,8 +517,7 @@ var AIComponent = TaroEntity.extend({
 							}
 						} else {
 							if (this.pathFindingMethod == 'a*') {
-								this.path = this.getAStarPath(targetUnit._translate.x, targetUnit._translate.y); // update A* path to the targetUnit
-								if (this.path.length == 0) {
+								if (this.path.length == 0) { // A* path is updated once in attackUnit
 									this.setTargetPosition(targetUnit._translate.x, targetUnit._translate.y); // target the targetUnit directly if no more path or path failed to generate
 								} else {
 									this.setTargetPosition(this.path[this.path.length - 1].x * mapData.tilewidth + mapData.tilewidth / 2, this.path[this.path.length - 1].y * mapData.tilewidth + mapData.tilewidth / 2); // tell ai to move according to A* path
