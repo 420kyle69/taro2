@@ -508,6 +508,7 @@ var AIComponent = TaroEntity.extend({
 						if (self.maxAttackRange > this.getDistanceToTarget()) {
 							unit.isMoving = false;
 							unit.ability.startUsingItem();
+							this.setTargetPosition(targetUnit._translate.x, targetUnit._translate.y); // ai should target targetUnit when stop moving and fight
 						} else if (!unit.isMoving) {
 							// target's too far. stop firing, and start chasing
 							unit.ability.stopUsingItem();
