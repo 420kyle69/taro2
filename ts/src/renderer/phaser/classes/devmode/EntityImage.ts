@@ -45,7 +45,7 @@ class EntityImage {
             }
         });
 
-        let editedAction: ActionData = {id: action.id};
+        let editedAction: ActionData = {actionId: action.actionId};
     
         scene.input.on('drag', (pointer, gameObject, dragX, dragY) => {
             if (gameObject !== image) return;
