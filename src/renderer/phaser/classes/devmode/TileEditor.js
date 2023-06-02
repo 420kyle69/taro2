@@ -278,8 +278,8 @@ var TileEditor = /** @class */ (function () {
                     marker.graphics.setVisible(true);
                     marker.showPreview(true);
                     // Rounds down to nearest tile
-                    var pointerTileX_1 = map.worldToTileX(worldPoint.x - marker.graphics.scaleX * 64 / 2 + 32, true);
-                    var pointerTileY_1 = map.worldToTileY(worldPoint.y - marker.graphics.scaleY * 64 / 2 + 32, true);
+                    var pointerTileX_1 = map.worldToTileX(worldPoint.x - (marker.graphics.scaleX - 0.5) * TILE_SIZE / 2, true);
+                    var pointerTileY_1 = map.worldToTileY(worldPoint.y - (marker.graphics.scaleY - 0.5) * TILE_SIZE / 2, true);
                     // Snap to tile coordinates, but in world space
                     marker.graphics.x = map.tileToWorldX(pointerTileX_1);
                     marker.graphics.y = map.tileToWorldY(pointerTileY_1);

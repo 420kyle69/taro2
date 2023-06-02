@@ -314,8 +314,8 @@ class TileEditor {
 					marker.showPreview(true);
 
 					// Rounds down to nearest tile
-					const pointerTileX = map.worldToTileX(worldPoint.x  - marker.graphics.scaleX * 64 / 2 + 32, true);
-					const pointerTileY = map.worldToTileY(worldPoint.y  - marker.graphics.scaleY * 64 / 2 + 32, true);
+					const pointerTileX = map.worldToTileX(worldPoint.x - (marker.graphics.scaleX - 0.5) * TILE_SIZE / 2, true);
+					const pointerTileY = map.worldToTileY(worldPoint.y - (marker.graphics.scaleY - 0.5) * TILE_SIZE / 2, true);
 
 					// Snap to tile coordinates, but in world space
 					marker.graphics.x = map.tileToWorldX(pointerTileX);
