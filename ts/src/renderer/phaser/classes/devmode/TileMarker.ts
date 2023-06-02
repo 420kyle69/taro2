@@ -69,7 +69,7 @@ class TileMarker {
 
 	changePreview(): void {
 		const { x, y } = this.devModeScene.tileEditor.paletteArea;
-		this.graphics.scale = x;
+		this.graphics.scale = this.devModeScene.tileEditor.brushArea.x;
 		if (!this.palette) {
 			this.hideImages();
 			if (x === 2 && y === 2) {

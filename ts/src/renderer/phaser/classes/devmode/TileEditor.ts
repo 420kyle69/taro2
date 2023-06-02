@@ -306,7 +306,7 @@ class TileEditor {
 			} else if ((!devModeScene.pointerInsidePalette() || !palette.visible) &&
 				!devModeScene.pointerInsideButtons && !devModeScene.pointerInsideWidgets() && map.currentLayerIndex >= 0) {
 
-				this.devModeTools.tooltip.showMessage('Position', `X: ${  Math.floor(worldPoint.x).toString()  }, Y: ${  Math.floor(worldPoint.y).toString()}`);
+				this.devModeTools.tooltip.showMessage('Position', `X: ${Math.floor(worldPoint.x).toString()}, Y: ${Math.floor(worldPoint.y).toString()}`);
 
 				if (marker.active) {
 					paletteMarker.graphics.setVisible(false);
@@ -314,8 +314,8 @@ class TileEditor {
 					marker.showPreview(true);
 
 					// Rounds down to nearest tile
-					const pointerTileX = map.worldToTileX(worldPoint.x);
-					const pointerTileY = map.worldToTileY(worldPoint.y);
+					const pointerTileX = map.worldToTileX(worldPoint.x  - marker.graphics.scaleX * 64 / 2 + 32, true);
+					const pointerTileY = map.worldToTileY(worldPoint.y  - marker.graphics.scaleY * 64 / 2 + 32, true);
 
 					// Snap to tile coordinates, but in world space
 					marker.graphics.x = map.tileToWorldX(pointerTileX);

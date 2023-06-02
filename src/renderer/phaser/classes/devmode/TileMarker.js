@@ -57,7 +57,7 @@ var TileMarker = /** @class */ (function () {
     };
     TileMarker.prototype.changePreview = function () {
         var _a = this.devModeScene.tileEditor.paletteArea, x = _a.x, y = _a.y;
-        this.graphics.scale = x;
+        this.graphics.scale = this.devModeScene.tileEditor.brushArea.x;
         if (!this.palette) {
             this.hideImages();
             if (x === 2 && y === 2) {
