@@ -492,13 +492,13 @@ var AIComponent = TaroEntity.extend({
 			case 'move':
 				switch (this.pathFindingMethod) {
 					case 'simple':
-						if (this.getDistanceToTarget() < Math.min(10, mapData.tilewidth / 2)) { // map with smaller tile size requires a more precise stop
+						if (this.getDistanceToTarget() < mapData.tilewidth / 2) { // map with smaller tile size requires a more precise stop, vice versa
 							self.goIdle();
 						}
 						break;
 					case 'a*':
-						if (this.getDistanceToClosestAStarNode() < Math.min(mapData.tilewidth / 2)) { // after moved to the closest A* node, pop the array and let ai move to next A* node
-							this.path.pop();
+						if (this.getDistanceToClosestAStarNode() < mapData.tilewidth / 2) { // reduced chances of shaky move
+							this.path.pop(); // after moved to the closest A* node, pop the array and let ai move to next A* node
 						}
 						if (this.path.length > 0) { // Move to the highest index of path saved (closest node to start node)
 							this.setTargetPosition(this.path[this.path.length - 1].x * mapData.tilewidth + mapData.tilewidth / 2, this.path[this.path.length - 1].y * mapData.tilewidth + mapData.tilewidth / 2);
