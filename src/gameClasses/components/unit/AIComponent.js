@@ -228,7 +228,7 @@ var AIComponent = TaroEntity.extend({
 		this.currentAction = 'fight';
 		this._entity.startMoving();
 		let targetAngle = this.getAngleToTarget();
-		if (targetAngle) {
+		if (targetAngle && !this._entity._stats.currentBody?.fixedRotation && this._entity._stats.controls.mouseBehaviour.rotateToFaceMouseCursor) {
 			this._entity.streamUpdateData([{rotate: targetAngle}]);
 		}
 	},
