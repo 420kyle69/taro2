@@ -567,9 +567,6 @@ var AIComponent = TaroEntity.extend({
 				break;
 
 			case 'flee':
-				if (this.pathFindingMethod == 'a*') {
-					this.setTargetPosition(unit._translate.x + (targetUnit._translate.x - unit._translate.x), unit._translate.y + (targetUnit._translate.y - unit._translate.y)); // manually assign target position
-				}
 				if (targetUnit) {
 					var a = self.previousPosition.x - targetUnit._translate.x;
 					var b = self.previousPosition.y - targetUnit._translate.y;
