@@ -1,32 +1,10 @@
 class DeveloperMode {
 	active: boolean;
 	activeTab: devModeTab;
-    //entitiesOnInit: ActionData[];
 
 	constructor() {
 		if (taro.isClient) this.active = false;
-        //this.applyActionsId ();
 	}
-
-    /*applyActionsId (): void {
-        // add id for actions creating entities in initialize script
-        this.entitiesOnInit = [];
-		Object.values(taro.game.data.scripts).forEach((script) => {
-			if (script.triggers?.[0]?.type === 'gameStart') {
-				Object.values(script.actions).forEach((action) => {
-					if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || action.type === 'createEntityAtPositionWithDimensions') {
-						console.log(action);
-                        if (!action.id) {
-                            console.log('pls republish json is outdated');
-                        }
-                        this.entitiesOnInit.push(action);
-					} else if (action.type === 'createUnitAtPosition') {
-						console.log('createUnitAtPosition', action);
-					}
-				});
-			}
-		});
-    }*/
 
 	enter(): void {
 		console.log('client enter developer mode');
@@ -417,11 +395,6 @@ class DeveloperMode {
 			taro.client.emit('updateMap');
 		}
 	}
-
-    /*updateClientInitEntities (data: { entitiesOnInit: ActionData[] }) {
-        this.entitiesOnInit = data.entitiesOnInit;
-        console.log(this.entitiesOnInit);
-    }*/
 }
 
 interface TileData {

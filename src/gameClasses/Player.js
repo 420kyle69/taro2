@@ -98,7 +98,6 @@ var Player = TaroEntity.extend({
 						{ processedJoinGame: processedJoinGame },
 						{ receivedJoinGame: receivedJoinGame },
 						{ mapData: taro.game.data.map }
-                        //{ entitiesOnInit: taro.developerMode.entitiesOnInit }
 					];
 				} else {
 					var playerJoinStreamData = [
@@ -107,7 +106,6 @@ var Player = TaroEntity.extend({
 						{ dataLoadTime: dataLoadTime },
 						{ processedJoinGame: processedJoinGame },
 						{ receivedJoinGame: receivedJoinGame }
-                        //{ entitiesOnInit: taro.developerMode.entitiesOnInit }
 					];
 				}
 
@@ -538,11 +536,6 @@ var Player = TaroEntity.extend({
 					}
 
 					if (self._stats.clientId == taro.network.id()) {
-                        /*if (attrName === 'entitiesOnInit') {
-                            console.log('streamed entitiesOnInit')
-							//self._stats[attrName] = newValue;
-                            taro.developerMode.updateClientInitEntities(data);
-						}*/
 						if (attrName === 'mapData') {
 							self._stats[attrName] = newValue;
 							taro.developerMode.updateClientMap(data);
