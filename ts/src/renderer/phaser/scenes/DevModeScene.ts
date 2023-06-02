@@ -170,7 +170,10 @@ class DevModeScene extends PhaserScene {
 					Object.values(script.actions).forEach((action) => {
 						if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || action.type === 'createEntityAtPositionWithDimensions') {
 							console.log(action);
-							new EntityImage(this.gameScene, this.devModeTools, this.entitiesOnInit, action);
+							if (action.id) new EntityImage(this.gameScene, this.devModeTools, this.entitiesOnInit, action);
+                            else {
+                                console.log('no action id, json is incorrect, pls republish game');
+                            }
 						} else if (action.type === 'createUnitAtPosition') {
 							console.log('createUnitAtPosition', action);
 						}

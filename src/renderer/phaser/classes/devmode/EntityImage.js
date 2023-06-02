@@ -38,7 +38,7 @@ var EntityImage = /** @class */ (function () {
                 _this.dragMode = 'scale';
             }
         });
-        var editedAction = {};
+        var editedAction = { id: action.id };
         scene.input.on('drag', function (pointer, gameObject, dragX, dragY) {
             if (gameObject !== image)
                 return;

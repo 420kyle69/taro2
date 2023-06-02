@@ -144,7 +144,11 @@ var DevModeScene = /** @class */ (function (_super) {
                     Object.values(script.actions).forEach(function (action) {
                         if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || action.type === 'createEntityAtPositionWithDimensions') {
                             console.log(action);
-                            new EntityImage(_this.gameScene, _this.devModeTools, _this.entitiesOnInit, action);
+                            if (action.id)
+                                new EntityImage(_this.gameScene, _this.devModeTools, _this.entitiesOnInit, action);
+                            else {
+                                console.log('no action id, json is incorrect, pls republish game');
+                            }
                         }
                         else if (action.type === 'createUnitAtPosition') {
                             console.log('createUnitAtPosition', action);

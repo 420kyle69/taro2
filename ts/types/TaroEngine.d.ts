@@ -1,4 +1,5 @@
 declare class TaroEngine extends TaroClass {
+    newIdHex(): any;
 
 	tiled: any;
 	regionManager: any;

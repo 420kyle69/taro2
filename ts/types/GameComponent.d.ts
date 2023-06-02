@@ -21,6 +21,7 @@ interface ScriptData {
 }
 
 interface ActionData {
+    id?: string;
 	type?: string;
 	entity?: string;
 	entityType?: string;
