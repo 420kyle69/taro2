@@ -79,7 +79,7 @@ var AIComponent = TaroEntity.extend({
 		var ownerPlayer = self._entity.getOwner();
 		if (unit) {
 			var ownerPlayerOfTargetUnit = unit.getOwner();
-			if (ownerPlayer && ownerPlayer.isHostileTo(ownerPlayerOfTargetUnit)) {
+			if (ownerPlayer && ownerPlayer.isHostileTo(ownerPlayerOfTargetUnit) && ownerPlayer != ownerPlayerOfTargetUnit) { // AI should only attack hostile and non self-controlled unit
 				// if I already have a target, re-target if new target unit is closer
 				var targetUnit = this.getTargetUnit();
 				if (targetUnit == undefined || (targetUnit && self.getDistanceToUnit(unit)) < self.getDistanceToUnit(targetUnit)) {
@@ -102,7 +102,7 @@ var AIComponent = TaroEntity.extend({
 		var ownerPlayer = self._entity.getOwner();
 		if (unit) {
 			var ownerPlayerOfTargetUnit = taro.$(unit._stats.ownerId);
-			if (ownerPlayer && ownerPlayer.isHostileTo(ownerPlayerOfTargetUnit) && unit._stats.isUnTargetable != true) {
+			if (ownerPlayer && ownerPlayer.isHostileTo(ownerPlayerOfTargetUnit) && ownerPlayer != ownerPlayerOfTargetUnit && unit._stats.isUnTargetable != true) {
 				// if I already have a target, re-target if new target unit is closer
 				var targetUnit = this.getTargetUnit();
 				if (targetUnit == undefined || (self.maxAttackRange < this.getDistanceToTarget())) {
