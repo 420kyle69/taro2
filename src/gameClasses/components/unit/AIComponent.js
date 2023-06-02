@@ -292,7 +292,7 @@ var AIComponent = TaroEntity.extend({
 	* @param x
 	* @param y
 	* @return {Array}
-	* Return array with x and y coordinates of the path (Start and End node Exclusive)
+	* Return array with x and y coordinates of the path (Start node exclusive)
 	* if the target location is inside a wall, not reachable, or the unit already at the target location, return empty array
 	*/
 	getAStarPath: function (x, y) {
@@ -497,7 +497,7 @@ var AIComponent = TaroEntity.extend({
 						}
 						break;
 					case 'a*':
-						if (this.getDistanceToClosestAStarNode() < Math.min(mapData.tilewidth / 2)) {
+						if (this.getDistanceToClosestAStarNode() < Math.min(mapData.tilewidth / 2)) { // after moved to the closest A* node, pop the array and let ai move to next A* node
 							this.path.pop();
 						}
 						if (this.path.length > 0) { // Move to the highest index of path saved (closest node to start node)
