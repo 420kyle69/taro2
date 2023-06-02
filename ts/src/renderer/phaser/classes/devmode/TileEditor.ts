@@ -35,7 +35,7 @@ class TileEditor {
 		this.selectedTile = null;
 		this.selectedTileArea = [[null, null], [null, null]];
 
-		const pointerPosition = { x: 0, y: 0 }
+		const pointerPosition = { x: 0, y: 0 };
 
 		this.activateMarkers(false);
 
@@ -153,8 +153,7 @@ class TileEditor {
 		} else if (data.tool === 'clear') {
 			this.clearLayer(data.layer);
 			if (map.layers.length > 4 && data.layer >= 2) data.layer++;
-		}
-		else {
+		} else {
 			let index = data.gid;
 			if (data.gid === 0) index = -1;
 			tileMap.putTileAt(index, data.x, data.y, false, data.layer);
@@ -169,7 +168,7 @@ class TileEditor {
 			let mapCopy = taro.scaleMap(_.cloneDeep(map));
 			taro.tiled.loadJson(mapCopy, function (layerArray, TaroLayersById) {
 				taro.physics.staticsFromMap(TaroLayersById.walls);
-			})
+			});
 		}
 	}
 
@@ -307,7 +306,7 @@ class TileEditor {
 			} else if ((!devModeScene.pointerInsidePalette() || !palette.visible) &&
 				!devModeScene.pointerInsideButtons && !devModeScene.pointerInsideWidgets() && map.currentLayerIndex >= 0) {
 
-				this.devModeTools.tooltip.showMessage('Position', 'X: ' + Math.floor(worldPoint.x).toString() + ', Y: ' + Math.floor(worldPoint.y).toString());
+				this.devModeTools.tooltip.showMessage('Position', `X: ${  Math.floor(worldPoint.x).toString()  }, Y: ${  Math.floor(worldPoint.y).toString()}`);
 
 				if (marker.active) {
 					paletteMarker.graphics.setVisible(false);
@@ -326,23 +325,22 @@ class TileEditor {
 
 					if (devModeScene.input.manager.activePointer.leftButtonDown()) {
 						if (this.devModeTools.modeButtons[2].active || this.devModeTools.modeButtons[3].active) {
-							const selectedTile = this.selectedTile
-							const originTileArea = {}
+							const selectedTile = this.selectedTile;
+							const originTileArea = {};
 							const nowBrushArea = this.brushArea;
 							let noDifferent = true;
 							for (let i = 0; i < this.brushArea.x; i++) {
 								for (let j = 0; j < this.brushArea.y; j++) {
 									if (!originTileArea[i]) {
-										originTileArea[i] = {}
+										originTileArea[i] = {};
 									}
 									originTileArea[i][j] = this.getTile(pointerTileX + i, pointerTileY + j, map);
 									if (selectedTile !== originTileArea[i][j]) {
-										noDifferent = false
+										noDifferent = false;
 									}
 								}
 							}
 							if (!noDifferent) {
-
 								this.commandController.addCommand({
 									func: () => {
 										if (nowBrushArea.x > 1 || nowBrushArea.y > 1) {
@@ -351,8 +349,7 @@ class TileEditor {
 													this.putTile(pointerTileX + i, pointerTileY + j, selectedTile);
 												}
 											}
-										}
-										else {
+										} else {
 											this.putTile(pointerTileX, pointerTileY, selectedTile);
 										}
 									},
@@ -363,12 +360,11 @@ class TileEditor {
 													this.putTile(pointerTileX + i, pointerTileY + j, originTileArea[i][j]);
 												}
 											}
-										}
-										else {
+										} else {
 											this.putTile(pointerTileX, pointerTileY, selectedTile);
 										}
 									}
-								})
+								});
 
 							}
 						} else if (this.devModeTools.modeButtons[4].active) {
@@ -384,8 +380,7 @@ class TileEditor {
 			} else {
 				this.showMarkers(false);
 			}
-		}
-		else {
+		} else {
 			this.showMarkers(false);
 		}
 	}
