@@ -524,14 +524,18 @@ var AIComponent = TaroEntity.extend({
 						if (self.maxAttackRange > this.getDistanceToTarget()) {
 							unit.isMoving = false;
 							unit.ability.startUsingItem();
-							this.setTargetPosition(targetUnit._translate.x, targetUnit._translate.y); // ai should target targetUnit when stop moving and fight
+							if (this.pathFindingMethod == 'a*') {
+								this.setTargetPosition(targetUnit._translate.x, targetUnit._translate.y); // ai should target targetUnit when stop moving and fight
+							}
 						} else if (!unit.isMoving) {
 							// target's too far. stop firing, and start chasing
 							unit.ability.stopUsingItem();
 							unit.startMoving();
-							this.path = this.getAStarPath(targetUnit._translate.x, targetUnit._translate.y); // recalculate the moving path to chase
-							if (this.path.length > 0) {
-								this.setTargetPosition(this.path[this.path.length - 1].x * taro.map.data.tilewidth + taro.map.data.tilewidth / 2, this.path[this.path.length - 1].y * taro.map.data.tilewidth + taro.map.data.tilewidth / 2);
+							if (this.pathFindingMethod == 'a*') {
+								this.path = this.getAStarPath(targetUnit._translate.x, targetUnit._translate.y); // recalculate the moving path to chase
+								if (this.path.length > 0) {
+									this.setTargetPosition(this.path[this.path.length - 1].x * taro.map.data.tilewidth + taro.map.data.tilewidth / 2, this.path[this.path.length - 1].y * taro.map.data.tilewidth + taro.map.data.tilewidth / 2);
+								}
 							}
 							if (unit.sensor) {
 								unit.sensor.updateBody(); // re-detect nearby units
@@ -539,15 +543,15 @@ var AIComponent = TaroEntity.extend({
 						} else {
 							if (this.pathFindingMethod == 'a*') {
 								if (this.path.length == 0) { // A* path is updated once in attackUnit
-									this.setTargetPosition(targetUnit._translate.x, targetUnit._translate.y); // target the targetUnit directly if no more path or path failed to generate
+									this.path = this.getAStarPath(targetUnit._translate.x, targetUnit._translate.y); // try to create a new path if the path is empty (Arrived / old path outdated)
+								} else if (this.getDistanceToClosestAStarNode() < mapData.tilewidth / 2) { // Euclidean distance is smaller than half of the tile
+									this.path.pop();
+								}
+								// After the above decision, choose whether directly move to targetUnit or according to path
+								if (this.path.length > 0) { // select next node to go
+									this.setTargetPosition(this.path[this.path.length - 1].x * mapData.tilewidth + mapData.tilewidth / 2, this.path[this.path.length - 1].y * mapData.tilewidth + mapData.tilewidth / 2); // path
 								} else {
-									this.setTargetPosition(this.path[this.path.length - 1].x * mapData.tilewidth + mapData.tilewidth / 2, this.path[this.path.length - 1].y * mapData.tilewidth + mapData.tilewidth / 2); // tell ai to move according to A* path
-									if (this.getDistanceToClosestAStarNode() < Math.min(10, mapData.tilewidth / 2)) { // Euclidean distance is smaller than half of the tile
-										this.path.pop();
-										if (this.path.length > 0) { // select next node to go
-											this.setTargetPosition(this.path[this.path.length - 1].x * mapData.tilewidth + mapData.tilewidth / 2, this.path[this.path.length - 1].y * mapData.tilewidth + mapData.tilewidth / 2);
-										}
-									}
+									this.setTargetPosition(targetUnit._translate.x, targetUnit._translate.y); // direct
 								}
 							}
 						}
