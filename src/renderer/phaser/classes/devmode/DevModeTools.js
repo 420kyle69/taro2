@@ -88,7 +88,6 @@ var DevModeTools = /** @class */ (function (_super) {
                 camera.scrollX -= scrollX_1;
                 camera.scrollY -= scrollY_1;
             }
-            ;
         });
         return _this;
     }
@@ -113,13 +112,13 @@ var DevModeTools = /** @class */ (function (_super) {
             .map(function (widget) { return widget.getBoundingClientRect(); });
     };
     DevModeTools.prototype.checkIfInputModalPresent = function () {
-        var customModals = document.querySelectorAll(".winbox, .modal, .custom-editor-modal, #chat-message-input");
+        var customModals = document.querySelectorAll('.winbox, .modal, .custom-editor-modal, #chat-message-input');
         for (var _i = 0, customModals_1 = customModals; _i < customModals_1.length; _i++) {
             var customModal = customModals_1[_i];
             if (customModal.style.display === 'none') {
                 continue;
             }
-            var inputs = customModal.querySelectorAll("input, select, textarea, button");
+            var inputs = customModal.querySelectorAll('input, select, textarea, button');
             for (var i = 0; i < inputs.length; i++) {
                 if (inputs[i] === document.activeElement) {
                     return true;
@@ -276,7 +275,6 @@ var DevModeTools = /** @class */ (function (_super) {
     };
     DevModeTools.prototype.brush = function () {
         if (this.modeButtons[3].active) {
-            this.tileEditor.selectedTile = this.tileEditor.lastSelectedTile;
             this.tileEditor.selectedTileArea = this.tileEditor.lastSelectedTileArea;
         }
         this.tileEditor.activateMarkers(true);
@@ -286,10 +284,8 @@ var DevModeTools = /** @class */ (function (_super) {
     };
     DevModeTools.prototype.emptyTile = function () {
         if (!this.modeButtons[3].active) {
-            this.tileEditor.lastSelectedTile = this.tileEditor.selectedTile;
             this.tileEditor.lastSelectedTileArea = this.tileEditor.selectedTileArea;
-            this.tileEditor.selectedTile = -1;
-            this.tileEditor.selectedTileArea = [[-1, -1], [-1, -1]];
+            this.tileEditor.selectedTileArea = {};
             this.tileEditor.activateMarkers(true);
             this.tileEditor.marker.changePreview();
             this.scene.regionEditor.regionTool = false;
@@ -298,7 +294,6 @@ var DevModeTools = /** @class */ (function (_super) {
     };
     DevModeTools.prototype.fill = function () {
         if (this.modeButtons[3].active) {
-            this.tileEditor.selectedTile = this.tileEditor.lastSelectedTile;
             this.tileEditor.selectedTileArea = this.tileEditor.lastSelectedTileArea;
         }
         this.tileEditor.activateMarkers(true);

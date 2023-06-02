@@ -60,20 +60,10 @@ var TileMarker = /** @class */ (function () {
         this.graphics.scale = this.devModeScene.tileEditor.brushArea.x;
         if (!this.palette) {
             this.hideImages();
-            if (x === 2 && y === 2) {
-                var previewTarget = this.devModeScene.tileEditor.selectedTileArea;
-                for (var i = 0; i < x; i++) {
-                    for (var j = 0; j < y; j++) {
-                        this.changeImage(previewTarget[i][j], i, j);
-                    }
-                }
-            }
-            else if (x === 1 && y === 1) {
-                var previewTarget = this.devModeScene.tileEditor.selectedTile;
-                for (var i = 0; i < this.devModeScene.tileEditor.brushArea.x; i++) {
-                    for (var j = 0; j < this.devModeScene.tileEditor.brushArea.y; j++) {
-                        this.changeImage(previewTarget, i, j);
-                    }
+            var previewTarget = this.devModeScene.tileEditor.selectedTileArea;
+            for (var i = 0; i < x; i++) {
+                for (var j = 0; j < y; j++) {
+                    this.changeImage(previewTarget[i][j], i, j);
                 }
             }
         }

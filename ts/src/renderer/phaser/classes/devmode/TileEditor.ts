@@ -11,10 +11,9 @@ class TileEditor {
 	paletteArea: Area;
 	brushArea: Area;
 
-	selectedTile: number;
-	selectedTileArea: number[][];
-	lastSelectedTile: number;
-	lastSelectedTileArea: number[][];
+
+	selectedTileArea: Record<number, Record<number, number>>;
+	lastSelectedTileArea: Record<number, Record<number, number>>;
 	commandController: CommandController;
 	startDragIn: string;
 
@@ -32,8 +31,7 @@ class TileEditor {
 		this.commandController = commandController;
 		this.paletteArea = { x: 1, y: 1 };
 		this.brushArea = { x: 1, y: 1 };
-		this.selectedTile = null;
-		this.selectedTileArea = [[null, null], [null, null]];
+		this.selectedTileArea = {};
 
 		const pointerPosition = { x: 0, y: 0 };
 
@@ -71,19 +69,17 @@ class TileEditor {
 				const palettePointerTileX = palette.map.worldToTileX(palettePoint.x);
 				const palettePointerTileY = palette.map.worldToTileY(palettePoint.y);
 				if (!devModeTools.modeButtons[4].active) this.devModeTools.brush();
-				if (this.paletteArea.x > 1 || this.paletteArea.y > 1) {
-					this.clearTint();
-					for (let i = 0; i < this.paletteArea.x; i++) {
-						for (let j = 0; j < this.paletteArea.y; j++) {
-							this.selectedTileArea[i][j] = this.getTile(palettePointerTileX + i, palettePointerTileY + j, palette.map);
-						}
+				this.clearTint();
+				for (let i = 0; i < this.paletteArea.x; i++) {
+					if (!this.selectedTileArea[i]) {
+						this.selectedTileArea[i] = {};
 					}
-					this.marker.changePreview();
-				} else {
-					this.clearTint();
-					this.selectedTile = this.getTile(palettePointerTileX, palettePointerTileY, palette.map);
-					this.marker.changePreview();
+					for (let j = 0; j < this.paletteArea.y; j++) {
+						//TODO handle the update of selecetedTileArea
+						this.selectedTileArea[i][j] = this.getTile(palettePointerTileX + i, palettePointerTileY + j, palette.map);
+					}
 				}
+				this.marker.changePreview();
 			}
 			if (this.startDragIn === 'palette') {
 				this.startDragIn = 'none';
@@ -98,19 +94,16 @@ class TileEditor {
 				const worldPoint = gameScene.cameras.main.getWorldPoint(gameScene.input.activePointer.x, gameScene.input.activePointer.y);
 				const pointerTileX = gameMap.worldToTileX(worldPoint.x);
 				const pointerTileY = gameMap.worldToTileY(worldPoint.y);
-				if (this.brushArea.x > 1 || this.brushArea.y > 1) {
-					this.clearTint();
-					for (let i = 0; i < this.brushArea.x; i++) {
-						for (let j = 0; j < this.brushArea.y; j++) {
-							this.selectedTileArea[i][j] = this.getTile(pointerTileX, pointerTileY, gameMap);
-						}
+				this.clearTint();
+				for (let i = 0; i < this.brushArea.x; i++) {
+					if (!this.selectedTileArea[i]) {
+						this.selectedTileArea[i] = {};
 					}
-					this.marker.changePreview();
-				} else {
-					this.clearTint();
-					this.selectedTile = this.getTile(pointerTileX, pointerTileY, gameMap);
-					this.marker.changePreview();
+					for (let j = 0; j < this.brushArea.y; j++) {
+						this.selectedTileArea[i][j] = this.getTile(pointerTileX, pointerTileY, gameMap);
+					}
 				}
+				this.marker.changePreview();
 			}
 			if (this.startDragIn === 'map') {
 				this.startDragIn = 'none';
@@ -325,9 +318,9 @@ class TileEditor {
 
 					if (devModeScene.input.manager.activePointer.leftButtonDown()) {
 						if (this.devModeTools.modeButtons[2].active || this.devModeTools.modeButtons[3].active) {
-							const selectedTile = this.selectedTile;
 							const originTileArea = {};
 							const nowBrushArea = this.brushArea;
+							const selectedTileArea = JSON.parse(JSON.stringify(this.selectedTileArea));
 							let noDifferent = true;
 							for (let i = 0; i < this.brushArea.x; i++) {
 								for (let j = 0; j < this.brushArea.y; j++) {
@@ -335,7 +328,7 @@ class TileEditor {
 										originTileArea[i] = {};
 									}
 									originTileArea[i][j] = this.getTile(pointerTileX + i, pointerTileY + j, map);
-									if (selectedTile !== originTileArea[i][j]) {
+									if (this.selectedTileArea[i][j] !== originTileArea[i][j]) {
 										noDifferent = false;
 									}
 								}
@@ -346,11 +339,9 @@ class TileEditor {
 										if (nowBrushArea.x > 1 || nowBrushArea.y > 1) {
 											for (let i = 0; i < nowBrushArea.x; i++) {
 												for (let j = 0; j < nowBrushArea.y; j++) {
-													this.putTile(pointerTileX + i, pointerTileY + j, selectedTile);
+													this.putTile(pointerTileX + i, pointerTileY + j, selectedTileArea[i][j]);
 												}
 											}
-										} else {
-											this.putTile(pointerTileX, pointerTileY, selectedTile);
 										}
 									},
 									undo: () => {
@@ -360,8 +351,6 @@ class TileEditor {
 													this.putTile(pointerTileX + i, pointerTileY + j, originTileArea[i][j]);
 												}
 											}
-										} else {
-											this.putTile(pointerTileX, pointerTileY, selectedTile);
 										}
 									}
 								});
@@ -369,9 +358,10 @@ class TileEditor {
 							}
 						} else if (this.devModeTools.modeButtons[4].active) {
 							const targetTile = this.getTile(pointerTileX, pointerTileY, map);
-							if (this.selectedTile && targetTile !== this.selectedTile && (targetTile || map.currentLayerIndex === 0 || map.currentLayerIndex === 1)) {
-								this.floodFill(map.currentLayerIndex, targetTile, this.selectedTile, pointerTileX, pointerTileY, false);
-								taro.network.send('editTile', { gid: this.selectedTile, layer: map.currentLayerIndex, x: pointerTileX, y: pointerTileY, tool: 'flood' });
+							const selectedTile = Object.values(Object.values(this.selectedTileArea)[0])[0];
+							if (selectedTile && targetTile !== selectedTile && (targetTile || map.currentLayerIndex === 0 || map.currentLayerIndex === 1)) {
+								this.floodFill(map.currentLayerIndex, targetTile, selectedTile, pointerTileX, pointerTileY, false);
+								taro.network.send('editTile', { gid: selectedTile, layer: map.currentLayerIndex, x: pointerTileX, y: pointerTileY, tool: 'flood' });
 							}
 
 						}

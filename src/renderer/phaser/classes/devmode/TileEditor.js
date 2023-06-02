@@ -10,8 +10,7 @@ var TileEditor = /** @class */ (function () {
         this.commandController = commandController;
         this.paletteArea = { x: 1, y: 1 };
         this.brushArea = { x: 1, y: 1 };
-        this.selectedTile = null;
-        this.selectedTileArea = [[null, null], [null, null]];
+        this.selectedTileArea = {};
         var pointerPosition = { x: 0, y: 0 };
         this.activateMarkers(false);
         this.startDragIn = 'none';
@@ -44,20 +43,17 @@ var TileEditor = /** @class */ (function () {
                 var palettePointerTileY = palette.map.worldToTileY(palettePoint.y);
                 if (!devModeTools.modeButtons[4].active)
                     _this.devModeTools.brush();
-                if (_this.paletteArea.x > 1 || _this.paletteArea.y > 1) {
-                    _this.clearTint();
-                    for (var i = 0; i < _this.paletteArea.x; i++) {
-                        for (var j = 0; j < _this.paletteArea.y; j++) {
-                            _this.selectedTileArea[i][j] = _this.getTile(palettePointerTileX + i, palettePointerTileY + j, palette.map);
-                        }
+                _this.clearTint();
+                for (var i = 0; i < _this.paletteArea.x; i++) {
+                    if (!_this.selectedTileArea[i]) {
+                        _this.selectedTileArea[i] = {};
                     }
-                    _this.marker.changePreview();
+                    for (var j = 0; j < _this.paletteArea.y; j++) {
+                        //TODO handle the update of selecetedTileArea
+                        _this.selectedTileArea[i][j] = _this.getTile(palettePointerTileX + i, palettePointerTileY + j, palette.map);
+                    }
                 }
-                else {
-                    _this.clearTint();
-                    _this.selectedTile = _this.getTile(palettePointerTileX, palettePointerTileY, palette.map);
-                    _this.marker.changePreview();
-                }
+                _this.marker.changePreview();
             }
             if (_this.startDragIn === 'palette') {
                 _this.startDragIn = 'none';
@@ -71,20 +67,16 @@ var TileEditor = /** @class */ (function () {
                 var worldPoint = gameScene.cameras.main.getWorldPoint(gameScene.input.activePointer.x, gameScene.input.activePointer.y);
                 var pointerTileX = gameMap.worldToTileX(worldPoint.x);
                 var pointerTileY = gameMap.worldToTileY(worldPoint.y);
-                if (_this.brushArea.x > 1 || _this.brushArea.y > 1) {
-                    _this.clearTint();
-                    for (var i = 0; i < _this.brushArea.x; i++) {
-                        for (var j = 0; j < _this.brushArea.y; j++) {
-                            _this.selectedTileArea[i][j] = _this.getTile(pointerTileX, pointerTileY, gameMap);
-                        }
+                _this.clearTint();
+                for (var i = 0; i < _this.brushArea.x; i++) {
+                    if (!_this.selectedTileArea[i]) {
+                        _this.selectedTileArea[i] = {};
                     }
-                    _this.marker.changePreview();
+                    for (var j = 0; j < _this.brushArea.y; j++) {
+                        _this.selectedTileArea[i][j] = _this.getTile(pointerTileX, pointerTileY, gameMap);
+                    }
                 }
-                else {
-                    _this.clearTint();
-                    _this.selectedTile = _this.getTile(pointerTileX, pointerTileY, gameMap);
-                    _this.marker.changePreview();
-                }
+                _this.marker.changePreview();
             }
             if (_this.startDragIn === 'map') {
                 _this.startDragIn = 'none';
@@ -287,9 +279,9 @@ var TileEditor = /** @class */ (function () {
                     marker.preview.y = map.tileToWorldY(pointerTileY_1);
                     if (devModeScene.input.manager.activePointer.leftButtonDown()) {
                         if (this.devModeTools.modeButtons[2].active || this.devModeTools.modeButtons[3].active) {
-                            var selectedTile_1 = this.selectedTile;
                             var originTileArea_1 = {};
                             var nowBrushArea_1 = this.brushArea;
+                            var selectedTileArea_1 = JSON.parse(JSON.stringify(this.selectedTileArea));
                             var noDifferent = true;
                             for (var i = 0; i < this.brushArea.x; i++) {
                                 for (var j = 0; j < this.brushArea.y; j++) {
@@ -297,7 +289,7 @@ var TileEditor = /** @class */ (function () {
                                         originTileArea_1[i] = {};
                                     }
                                     originTileArea_1[i][j] = this.getTile(pointerTileX_1 + i, pointerTileY_1 + j, map);
-                                    if (selectedTile_1 !== originTileArea_1[i][j]) {
+                                    if (this.selectedTileArea[i][j] !== originTileArea_1[i][j]) {
                                         noDifferent = false;
                                     }
                                 }
@@ -308,12 +300,9 @@ var TileEditor = /** @class */ (function () {
                                         if (nowBrushArea_1.x > 1 || nowBrushArea_1.y > 1) {
                                             for (var i = 0; i < nowBrushArea_1.x; i++) {
                                                 for (var j = 0; j < nowBrushArea_1.y; j++) {
-                                                    _this.putTile(pointerTileX_1 + i, pointerTileY_1 + j, selectedTile_1);
+                                                    _this.putTile(pointerTileX_1 + i, pointerTileY_1 + j, selectedTileArea_1[i][j]);
                                                 }
                                             }
-                                        }
-                                        else {
-                                            _this.putTile(pointerTileX_1, pointerTileY_1, selectedTile_1);
                                         }
                                     },
                                     undo: function () {
@@ -324,18 +313,16 @@ var TileEditor = /** @class */ (function () {
                                                 }
                                             }
                                         }
-                                        else {
-                                            _this.putTile(pointerTileX_1, pointerTileY_1, selectedTile_1);
-                                        }
                                     }
                                 });
                             }
                         }
                         else if (this.devModeTools.modeButtons[4].active) {
                             var targetTile = this.getTile(pointerTileX_1, pointerTileY_1, map);
-                            if (this.selectedTile && targetTile !== this.selectedTile && (targetTile || map.currentLayerIndex === 0 || map.currentLayerIndex === 1)) {
-                                this.floodFill(map.currentLayerIndex, targetTile, this.selectedTile, pointerTileX_1, pointerTileY_1, false);
-                                taro.network.send('editTile', { gid: this.selectedTile, layer: map.currentLayerIndex, x: pointerTileX_1, y: pointerTileY_1, tool: 'flood' });
+                            var selectedTile = Object.values(Object.values(this.selectedTileArea)[0])[0];
+                            if (selectedTile && targetTile !== selectedTile && (targetTile || map.currentLayerIndex === 0 || map.currentLayerIndex === 1)) {
+                                this.floodFill(map.currentLayerIndex, targetTile, selectedTile, pointerTileX_1, pointerTileY_1, false);
+                                taro.network.send('editTile', { gid: selectedTile, layer: map.currentLayerIndex, x: pointerTileX_1, y: pointerTileY_1, tool: 'flood' });
                             }
                         }
                     }

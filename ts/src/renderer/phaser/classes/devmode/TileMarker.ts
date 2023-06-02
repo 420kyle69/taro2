@@ -72,21 +72,14 @@ class TileMarker {
 		this.graphics.scale = this.devModeScene.tileEditor.brushArea.x;
 		if (!this.palette) {
 			this.hideImages();
-			if (x === 2 && y === 2) {
-				const previewTarget = this.devModeScene.tileEditor.selectedTileArea;
-				for (let i = 0; i < x; i++) {
-					for (let j = 0; j < y; j++) {
-						this.changeImage(previewTarget[i][j], i, j);
-					}
-				}
-			} else if (x === 1 && y === 1) {
-				const previewTarget = this.devModeScene.tileEditor.selectedTile;
-				for (let i = 0; i < this.devModeScene.tileEditor.brushArea.x; i++) {
-					for (let j = 0; j < this.devModeScene.tileEditor.brushArea.y; j++) {
-						this.changeImage(previewTarget, i, j);
-					}
+
+			const previewTarget = this.devModeScene.tileEditor.selectedTileArea;
+			for (let i = 0; i < x; i++) {
+				for (let j = 0; j < y; j++) {
+					this.changeImage(previewTarget[i][j], i, j);
 				}
 			}
+
 		}
 	}
 
