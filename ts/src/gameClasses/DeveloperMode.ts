@@ -2,9 +2,37 @@ class DeveloperMode {
 	active: boolean;
 	activeTab: devModeTab;
 
+    initEntities: ActionData[];
+
 	constructor() {
 		if (taro.isClient) this.active = false;
+        this.applyActionsId ();
 	}
+
+    applyActionsId (): void {
+        // add id for actions creating entities in initialize script
+        this.initEntities = [];
+		Object.values(taro.game.data.scripts).forEach((script) => {
+			if (script.triggers?.[0]?.type === 'gameStart') {
+				Object.values(script.actions).forEach((action) => {
+                    if (!action.disabled) {
+                        if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || 
+                        action.type === 'createEntityAtPositionWithDimensions' ||
+                        action.type === 'createUnitAtPosition') {
+					    	console.log(action);
+                            if (action.actionId) {
+                                this.initEntities.push(action);
+                            } else {
+                                console.log('no action id, json is incorrect, pls republish game');
+                            }
+					    } /*else if (action.type === 'createUnitAtPosition') {
+					    	console.log('createUnitAtPosition', action);
+					    }*/
+                    }
+				});
+			}
+		});
+    }
 
 	enter(): void {
 		console.log('client enter developer mode');

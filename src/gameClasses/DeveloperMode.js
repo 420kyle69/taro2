@@ -2,7 +2,35 @@ var DeveloperMode = /** @class */ (function () {
     function DeveloperMode() {
         if (taro.isClient)
             this.active = false;
+        this.applyActionsId();
     }
+    DeveloperMode.prototype.applyActionsId = function () {
+        var _this = this;
+        // add id for actions creating entities in initialize script
+        this.initEntities = [];
+        Object.values(taro.game.data.scripts).forEach(function (script) {
+            var _a, _b;
+            if (((_b = (_a = script.triggers) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.type) === 'gameStart') {
+                Object.values(script.actions).forEach(function (action) {
+                    if (!action.disabled) {
+                        if (action.type === 'createEntityForPlayerAtPositionWithDimensions' ||
+                            action.type === 'createEntityAtPositionWithDimensions' ||
+                            action.type === 'createUnitAtPosition') {
+                            console.log(action);
+                            if (action.actionId) {
+                                _this.initEntities.push(action);
+                            }
+                            else {
+                                console.log('no action id, json is incorrect, pls republish game');
+                            }
+                        } /*else if (action.type === 'createUnitAtPosition') {
+                            console.log('createUnitAtPosition', action);
+                        }*/
+                    }
+                });
+            }
+        });
+    };
     DeveloperMode.prototype.enter = function () {
         console.log('client enter developer mode');
         this.active = true;

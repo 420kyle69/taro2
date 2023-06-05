@@ -52,6 +52,7 @@ var DevModeScene = /** @class */ (function (_super) {
                 if (image.entity.action.actionId === data.actionId) {
                     image.entity.update(data);
                 }
+                //update database here
             });
         });
         /*taro.client.on('editInitEntity', (data) => {
@@ -149,16 +150,37 @@ var DevModeScene = /** @class */ (function (_super) {
                 var _a, _b;
                 if (((_b = (_a = script.triggers) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.type) === 'gameStart') {
                     Object.values(script.actions).forEach(function (action) {
-                        if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || action.type === 'createEntityAtPositionWithDimensions') {
-                            console.log(action);
-                            if (action.actionId)
-                                new EntityImage(_this.gameScene, _this.devModeTools, _this.entityImages, action);
-                            else {
-                                console.log('no action id, json is incorrect, pls republish game');
+                        if (!action.disabled) {
+                            if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || action.type === 'createEntityAtPositionWithDimensions') {
+                                //console.log(action);
+                                if (action.actionId)
+                                    new EntityImage(_this.gameScene, _this.devModeTools, _this.entityImages, action);
+                                else {
+                                    console.log('no action id, json is incorrect, pls republish game');
+                                }
                             }
-                        }
-                        else if (action.type === 'createUnitAtPosition') {
-                            console.log('createUnitAtPosition', action);
+                            else if (action.type === 'createUnitAtPosition') {
+                                //console.log('createUnitAtPosition', action);
+                                if (action.actionId)
+                                    new EntityImage(_this.gameScene, _this.devModeTools, _this.entityImages, action, 'unit');
+                                else {
+                                    console.log('no action id, json is incorrect, pls republish game');
+                                }
+                            }
+                            else if (action.type === 'spawnItem') {
+                                if (action.actionId)
+                                    new EntityImage(_this.gameScene, _this.devModeTools, _this.entityImages, action, 'item');
+                                else {
+                                    console.log('no action id, json is incorrect, pls republish game');
+                                }
+                            }
+                            else if (action.type === 'createProjectileAtPosition') {
+                                if (action.actionId)
+                                    new EntityImage(_this.gameScene, _this.devModeTools, _this.entityImages, action, 'projectile');
+                                else {
+                                    console.log('no action id, json is incorrect, pls republish game');
+                                }
+                            }
                         }
                     });
                 }

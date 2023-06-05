@@ -21,6 +21,10 @@ interface ScriptData {
 }
 
 interface ActionData {
+    disabled?: boolean;
+    unitType?: string;
+    itemType?: string;
+    projectileType?: string;
     actionId?: string;
 	type?: string;
 	entity?: string;
