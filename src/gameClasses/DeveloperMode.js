@@ -15,7 +15,9 @@ var DeveloperMode = /** @class */ (function () {
                     if (!action.disabled) {
                         if (action.type === 'createEntityForPlayerAtPositionWithDimensions' ||
                             action.type === 'createEntityAtPositionWithDimensions' ||
-                            action.type === 'createUnitAtPosition') {
+                            action.type === 'createUnitAtPosition' ||
+                            action.type === 'spawnItem' || action.type === 'createItemWithMaxQuantityAtPosition' ||
+                            action.type === 'createProjectileAtPosition') {
                             console.log(action);
                             if (action.actionId) {
                                 _this.initEntities.push(action);
@@ -23,9 +25,7 @@ var DeveloperMode = /** @class */ (function () {
                             else {
                                 console.log('no action id, json is incorrect, pls republish game');
                             }
-                        } /*else if (action.type === 'createUnitAtPosition') {
-                            console.log('createUnitAtPosition', action);
-                        }*/
+                        }
                     }
                 });
             }
@@ -199,6 +199,18 @@ var DeveloperMode = /** @class */ (function () {
             console.log('editInitEntity', data);
             // broadcast region change to all clients
             taro.network.send('editInitEntity', data);
+            this.initEntities.forEach(function (action) {
+                if (action.position && action.position.x && action.position.y) {
+                    action.position = data.position;
+                }
+                else if (action.angle) {
+                    action.angle = data.angle;
+                }
+                else if (action.width && action.height) {
+                    action.width = data.width;
+                    action.height = data.height;
+                }
+            });
         }
     };
     DeveloperMode.prototype.createUnit = function (data) {

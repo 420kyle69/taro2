@@ -18,16 +18,16 @@ class DeveloperMode {
                     if (!action.disabled) {
                         if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || 
                         action.type === 'createEntityAtPositionWithDimensions' ||
-                        action.type === 'createUnitAtPosition') {
+                        action.type === 'createUnitAtPosition' ||
+                        action.type === 'spawnItem' || action.type === 'createItemWithMaxQuantityAtPosition' || 
+                        action.type === 'createProjectileAtPosition') {
 					    	console.log(action);
                             if (action.actionId) {
                                 this.initEntities.push(action);
                             } else {
                                 console.log('no action id, json is incorrect, pls republish game');
                             }
-					    } /*else if (action.type === 'createUnitAtPosition') {
-					    	console.log('createUnitAtPosition', action);
-					    }*/
+					    }
                     }
 				});
 			}
@@ -212,6 +212,16 @@ class DeveloperMode {
             console.log('editInitEntity', data);
             // broadcast region change to all clients
 			taro.network.send('editInitEntity', data);
+            this.initEntities.forEach((action) => {
+                if (action.position && action.position.x && action.position.y) {
+                    action.position = data.position;
+                } else if (action.angle) {
+                    action.angle = data.angle;
+                } else if (action.width && action.height) {
+                    action.width = data.width;
+                    action.height = data.height;
+                }
+            });
         }
     }
 

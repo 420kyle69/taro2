@@ -167,7 +167,7 @@ var DevModeScene = /** @class */ (function (_super) {
                                     console.log('no action id, json is incorrect, pls republish game');
                                 }
                             }
-                            else if (action.type === 'spawnItem') {
+                            else if (action.type === 'spawnItem' || action.type === 'createItemWithMaxQuantityAtPosition') {
                                 if (action.actionId)
                                     new EntityImage(_this.gameScene, _this.devModeTools, _this.entityImages, action, 'item');
                                 else {

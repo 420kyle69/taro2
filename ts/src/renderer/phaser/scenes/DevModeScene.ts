@@ -190,7 +190,7 @@ class DevModeScene extends PhaserScene {
                                 else {
                                     console.log('no action id, json is incorrect, pls republish game');
                                 }
-                            } else if (action.type === 'spawnItem') {
+                            } else if (action.type === 'spawnItem' || action.type === 'createItemWithMaxQuantityAtPosition') {
                                 if (action.actionId) new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action, 'item');
                                 else {
                                     console.log('no action id, json is incorrect, pls republish game');
