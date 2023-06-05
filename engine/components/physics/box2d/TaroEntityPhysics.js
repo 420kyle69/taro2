@@ -70,6 +70,31 @@ var TaroEntityPhysics = TaroEntity.extend({
 		this.width(parseFloat(body.width) * this._scale.x);
 		this.height(parseFloat(body.height) * this._scale.y);
 
+		var shapeData = (body.fixtures && body.fixtures[0] && body.fixtures[0].shape && body.fixtures[0].shape.data) ? body.fixtures[0].shape.data : undefined;
+
+		// override body bounds
+		var sizeX = taro.game.data.bodyTypes["dropped"].fixtures[0].size.width;
+		var sizeY = taro.game.data.bodyTypes["dropped"].fixtures[0].size.height;
+		var offsetX = taro.game.data.bodyTypes["dropped"].fixtures[0].offset.x;
+		var offsetY = taro.game.data.bodyTypes["dropped"].fixtures[0].offset.y;
+		if (sizeX != 0 || sizeY != 0 || offsetX != 0 || offsetY != 0) {
+			if (shapeData === undefined) {
+				shapeData = {};
+			}
+			if (sizeX != 0) {
+				shapeData.width = sizeX;
+			}
+			if (sizeY != 0) {
+				shapeData.height = sizeY;
+			}
+			if (offsetX != 0) {
+				shapeData.x = offsetX;
+			}
+			if (offsetY != 0) {
+				shapeData.y = offsetY;
+			}
+		}
+
 		var filterCategoryBits = 0x0002;
 		if (this._category === 'units') {
 			filterCategoryBits = 0x0002;
@@ -111,7 +136,7 @@ var TaroEntityPhysics = TaroEntity.extend({
 				},
 				shape: {
 					type: (body.fixtures && body.fixtures[0] && body.fixtures[0].shape && body.fixtures[0].shape.type) ? body.fixtures[0].shape.type : 'rectangle',
-					data: (body.fixtures && body.fixtures[0] && body.fixtures[0].shape && body.fixtures[0].shape.data) ? body.fixtures[0].shape.data : undefined
+					data: shapeData,
 				},
 				taroId: this.id() // in box2dbody, add reference to this entity
 			}]
