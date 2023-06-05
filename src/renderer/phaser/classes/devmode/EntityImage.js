@@ -1,7 +1,8 @@
 var EntityImage = /** @class */ (function () {
-    function EntityImage(scene, devModeTools, entitiesOnInit, action) {
+    function EntityImage(scene, devModeTools, entityImages, action) {
         var _this = this;
         var _a, _b;
+        this.action = action;
         var key;
         if (action.entityType === 'unitTypes') {
             var entityTypeData = taro.game.data[action.entityType] && taro.game.data[action.entityType][action.entity];
@@ -22,7 +23,8 @@ var EntityImage = /** @class */ (function () {
         image.setAlpha(0.75);
         image.setVisible(false);
         image.setInteractive({ draggable: true });
-        entitiesOnInit.push(image);
+        image.entity = this;
+        entityImages.push(image);
         image.on('pointerdown', function () {
             console.log('pointerdown', action);
             _this.startDragX = image.x;
@@ -66,11 +68,24 @@ var EntityImage = /** @class */ (function () {
             _this.dragMode = null;
             console.log('dragend', action);
             _this.edit(editedAction);
-            editedAction = {};
+            editedAction = { actionId: action.actionId };
         });
     }
     EntityImage.prototype.edit = function (action) {
         taro.network.send('editInitEntity', action);
+    };
+    EntityImage.prototype.update = function (action) {
+        console.log('update image', action);
+        if (action.position && action.position.x && action.position.y) {
+            this.image.x = action.position.x;
+            this.image.y = action.position.y;
+        }
+        else if (action.angle) {
+            this.image.angle = Number(action.angle);
+        }
+        else if (action.width && action.height) {
+            this.image.setDisplaySize(action.width, action.height);
+        }
     };
     return EntityImage;
 }());

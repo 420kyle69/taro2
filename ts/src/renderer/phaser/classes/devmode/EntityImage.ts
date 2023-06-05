@@ -1,13 +1,16 @@
 class EntityImage {
-    image: Phaser.GameObjects.Image;
+    action: ActionData;
+    image: Phaser.GameObjects.Image & {entity: EntityImage};
 
     startDragX: number;
     startDragY: number;
     scale: any;
     dragMode: 'position' | 'angle' | 'scale';
 
-    constructor(scene, devModeTools, entitiesOnInit, action: ActionData) {
+    constructor(scene, devModeTools, entityImages, action: ActionData) {
         
+        this.action = action;
+
         let key;
         
         if (action.entityType === 'unitTypes') {
@@ -28,7 +31,8 @@ class EntityImage {
         image.setAlpha(0.75);
         image.setVisible(false);
         image.setInteractive({ draggable: true });
-        entitiesOnInit.push(image);
+        image.entity = this;
+        entityImages.push(image);
     
         image.on('pointerdown', () => {
             console.log('pointerdown', action);
@@ -71,11 +75,23 @@ class EntityImage {
             this.dragMode = null;
             console.log('dragend', action);
             this.edit(editedAction);
-            editedAction = {};
+            editedAction = {actionId: action.actionId};
         });
     }
 
     edit (action: ActionData): void {
         taro.network.send('editInitEntity', action);
+    }
+
+    update (action: ActionData): void {
+        console.log('update image', action)
+        if (action.position && action.position.x && action.position.y) {
+            this.image.x = action.position.x;
+            this.image.y = action.position.y;
+        } else if (action.angle) {
+            this.image.angle = Number(action.angle);
+        } else if (action.width && action.height) {
+            this.image.setDisplaySize(action.width, action.height);
+        }
     }
 }

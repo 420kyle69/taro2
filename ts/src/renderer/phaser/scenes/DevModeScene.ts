@@ -16,7 +16,7 @@ class DevModeScene extends PhaserScene {
 
 	regions: PhaserRegion[];
 
-	entitiesOnInit: Phaser.GameObjects.Image[];
+	entityImages: (Phaser.GameObjects.Image & {entity: EntityImage})[] ;
 
 	constructor() {
 		super({ key: 'DevMode' });
@@ -27,7 +27,7 @@ class DevModeScene extends PhaserScene {
 		this.pointerInsideButtons = false;
 
 		this.regions = [];
-		this.entitiesOnInit = [];
+		this.entityImages = [];
 
 		taro.client.on('unlockCamera', () => {
 			this.gameScene.cameras.main.stopFollow();
@@ -56,10 +56,19 @@ class DevModeScene extends PhaserScene {
 			this.regionEditor.edit(data);
 		});
 
-        taro.client.on('editInitEntity', (data) => {
+        taro.client.on('editInitEntity', (data: ActionData) => {
+            this.entityImages.forEach((image) => {
+                if (image.entity.action.actionId === data.actionId) {
+                    image.entity.update(data);
+                }
+                //update database here
+            });
+		});
+
+        /*taro.client.on('editInitEntity', (data) => {
             console.log('editInitEntity', data);
             //this.devModeTools.editEntity(data);
-        });
+        });*/
 
 		this.gameScene.input.on('pointerup', (p) => {
 			const draggedEntity = taro.unitBeingDragged;
@@ -163,14 +172,14 @@ class DevModeScene extends PhaserScene {
 			element.setVisible(false);
 		});
 
-		if (this.entitiesOnInit.length === 0) {
+		if (this.entityImages.length === 0) {
 			// create images for entities created in initialize script
 			Object.values(taro.game.data.scripts).forEach((script) => {
 				if (script.triggers?.[0]?.type === 'gameStart') {
 					Object.values(script.actions).forEach((action) => {
 						if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || action.type === 'createEntityAtPositionWithDimensions') {
 							console.log(action);
-							if (action.actionId) new EntityImage(this.gameScene, this.devModeTools, this.entitiesOnInit, action);
+							if (action.actionId) new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action);
                             else {
                                 console.log('no action id, json is incorrect, pls republish game');
                             }
@@ -181,8 +190,8 @@ class DevModeScene extends PhaserScene {
 				}
 			});
 		}
-		this.entitiesOnInit.forEach((entity) => {
-			entity.setVisible(true);
+		this.entityImages.forEach((image) => {
+			image.setVisible(true);
 		});
 
 
@@ -191,8 +200,8 @@ class DevModeScene extends PhaserScene {
 
 	leaveMapTab (): void {
 		if (this.devModeTools) this.devModeTools.leaveMapTab();
-		this.entitiesOnInit.forEach((entity) => {
-			entity.setVisible(false);
+		this.entityImages.forEach((image) => {
+			image.setVisible(false);
 		});
 
 		this.gameScene.renderedEntities.forEach(element => {

@@ -178,8 +178,6 @@ class DeveloperMode {
 		}
 	}
 
-
-
     editInitEntity (data, clientId: string): void {
         // only allow developers to modify initial entities
 		if (taro.server.developerClientIds.includes(clientId)) {

@@ -23,7 +23,7 @@ var DevModeScene = /** @class */ (function (_super) {
         this.gameScene = taro.renderer.scene.getScene('Game');
         this.pointerInsideButtons = false;
         this.regions = [];
-        this.entitiesOnInit = [];
+        this.entityImages = [];
         taro.client.on('unlockCamera', function () {
             _this.gameScene.cameras.main.stopFollow();
         });
@@ -48,9 +48,16 @@ var DevModeScene = /** @class */ (function (_super) {
             _this.regionEditor.edit(data);
         });
         taro.client.on('editInitEntity', function (data) {
+            _this.entityImages.forEach(function (image) {
+                if (image.entity.action.actionId === data.actionId) {
+                    image.entity.update(data);
+                }
+            });
+        });
+        /*taro.client.on('editInitEntity', (data) => {
             console.log('editInitEntity', data);
             //this.devModeTools.editEntity(data);
-        });
+        });*/
         this.gameScene.input.on('pointerup', function (p) {
             var draggedEntity = taro.unitBeingDragged;
             // taro.unitBeingDragged = {typeId: 'unit id', playerId: 'xyz', angle: 0, entityType: 'unit'}
@@ -136,7 +143,7 @@ var DevModeScene = /** @class */ (function (_super) {
         this.gameScene.renderedEntities.forEach(function (element) {
             element.setVisible(false);
         });
-        if (this.entitiesOnInit.length === 0) {
+        if (this.entityImages.length === 0) {
             // create images for entities created in initialize script
             Object.values(taro.game.data.scripts).forEach(function (script) {
                 var _a, _b;
@@ -145,7 +152,7 @@ var DevModeScene = /** @class */ (function (_super) {
                         if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || action.type === 'createEntityAtPositionWithDimensions') {
                             console.log(action);
                             if (action.actionId)
-                                new EntityImage(_this.gameScene, _this.devModeTools, _this.entitiesOnInit, action);
+                                new EntityImage(_this.gameScene, _this.devModeTools, _this.entityImages, action);
                             else {
                                 console.log('no action id, json is incorrect, pls republish game');
                             }
@@ -157,16 +164,16 @@ var DevModeScene = /** @class */ (function (_super) {
                 }
             });
         }
-        this.entitiesOnInit.forEach(function (entity) {
-            entity.setVisible(true);
+        this.entityImages.forEach(function (image) {
+            image.setVisible(true);
         });
         //console.log(Object.values(taro.game.data.scripts))
     };
     DevModeScene.prototype.leaveMapTab = function () {
         if (this.devModeTools)
             this.devModeTools.leaveMapTab();
-        this.entitiesOnInit.forEach(function (entity) {
-            entity.setVisible(false);
+        this.entityImages.forEach(function (image) {
+            image.setVisible(false);
         });
         this.gameScene.renderedEntities.forEach(function (element) {
             element.setVisible(true);
