@@ -88,6 +88,7 @@ var taroClientConfig = {
 		'renderer/phaser/classes/devmode/TileShape.js',
 		'renderer/phaser/classes/devmode/CommandsController.js',
 		'renderer/phaser/classes/devmode/Constants.js',
+		'renderer/phaser/classes/devmode/Combinator.js',
 		'renderer/phaser/PhaserRenderer.js',
 		'/client.js',
 		'/index.js'
