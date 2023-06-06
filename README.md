@@ -45,7 +45,7 @@ npm run server
 ```
 *The engine will use game.json stored in `/src` directory.
 
-You can download Game JSON from your modd.io in-game editor. Go to `Editor` -> Click `Export JSON`.
+You can download Game JSON from your modd.io's game's in-game editor. Go to `Editor` -> Click `Export JSON`.
 
 <img src="./assets/images/gamejson2.png" width="600" alt="How to get game json in modd.io in-game editor">
 
