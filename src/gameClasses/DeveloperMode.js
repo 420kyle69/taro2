@@ -2,9 +2,8 @@ var DeveloperMode = /** @class */ (function () {
     function DeveloperMode() {
         if (taro.isClient)
             this.active = false;
-        this.applyActionsId();
     }
-    DeveloperMode.prototype.applyActionsId = function () {
+    DeveloperMode.prototype.addInitEntities = function () {
         var _this = this;
         // add id for actions creating entities in initialize script
         this.initEntities = [];
@@ -30,6 +29,11 @@ var DeveloperMode = /** @class */ (function () {
                 });
             }
         });
+    };
+    DeveloperMode.prototype.requestInitEntities = function () {
+        if (this.initEntities) {
+            taro.network.send('updateClientInitEntities', this.initEntities);
+        }
     };
     DeveloperMode.prototype.enter = function () {
         console.log('client enter developer mode');
@@ -199,16 +203,21 @@ var DeveloperMode = /** @class */ (function () {
             console.log('editInitEntity', data);
             // broadcast region change to all clients
             taro.network.send('editInitEntity', data);
+            if (!this.initEntities) {
+                this.addInitEntities();
+            }
             this.initEntities.forEach(function (action) {
-                if (action.position && action.position.x && action.position.y) {
-                    action.position = data.position;
-                }
-                else if (action.angle) {
-                    action.angle = data.angle;
-                }
-                else if (action.width && action.height) {
-                    action.width = data.width;
-                    action.height = data.height;
+                if (action.actionId === data.actionId) {
+                    if (action.position && action.position.x && action.position.y) {
+                        action.position = data.position;
+                    }
+                    else if (action.angle) {
+                        action.angle = data.angle;
+                    }
+                    else if (action.width && action.height) {
+                        action.width = data.width;
+                        action.height = data.height;
+                    }
                 }
             });
         }
@@ -398,6 +407,10 @@ var DeveloperMode = /** @class */ (function () {
             }
             taro.client.emit('updateMap');
         }
+    };
+    DeveloperMode.prototype.updateClientInitEntities = function (initEntities) {
+        this.initEntities = initEntities;
+        taro.client.emit('updateInitEntities');
     };
     return DeveloperMode;
 }());

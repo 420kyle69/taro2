@@ -481,6 +481,10 @@ var ClientNetworkEvents = {
         taro.client.emit('editInitEntity', data);
     },
 
+    _updateClientInitEntities: function (data) {
+        taro.developerMode.updateClientInitEntities(data);
+    },
+
 	_onUpdateUnit: function(data) {
 		taro.developerMode.updateUnit(data);
 	},

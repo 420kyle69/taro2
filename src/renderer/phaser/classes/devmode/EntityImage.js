@@ -56,7 +56,7 @@ var EntityImage = /** @class */ (function () {
         });
         var editedAction = { actionId: action.actionId };
         scene.input.on('drag', function (pointer, gameObject, dragX, dragY) {
-            if (gameObject !== image)
+            if (!devModeTools.cursorButton.active || gameObject !== image)
                 return;
             console.log(_this.dragMode);
             if (_this.dragMode === 'position') {
@@ -89,7 +89,6 @@ var EntityImage = /** @class */ (function () {
         taro.network.send('editInitEntity', action);
     };
     EntityImage.prototype.update = function (action) {
-        console.log('update image', action);
         if (this.action.position && this.action.position.x && this.action.position.y &&
             action.position && action.position.x && action.position.y) {
             this.action.position = action.position;

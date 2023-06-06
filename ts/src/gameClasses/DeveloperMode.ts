@@ -6,10 +6,9 @@ class DeveloperMode {
 
 	constructor() {
 		if (taro.isClient) this.active = false;
-        this.applyActionsId ();
 	}
 
-    applyActionsId (): void {
+    addInitEntities (): void {
         // add id for actions creating entities in initialize script
         this.initEntities = [];
 		Object.values(taro.game.data.scripts).forEach((script) => {
@@ -32,6 +31,12 @@ class DeveloperMode {
 				});
 			}
 		});
+    }
+
+    requestInitEntities (): void {
+        if (this.initEntities) {
+            taro.network.send('updateClientInitEntities', this.initEntities);
+        }
     }
 
 	enter(): void {
@@ -212,14 +217,19 @@ class DeveloperMode {
             console.log('editInitEntity', data);
             // broadcast region change to all clients
 			taro.network.send('editInitEntity', data);
+            if (!this.initEntities) {
+                this.addInitEntities();
+            }
             this.initEntities.forEach((action) => {
-                if (action.position && action.position.x && action.position.y) {
-                    action.position = data.position;
-                } else if (action.angle) {
-                    action.angle = data.angle;
-                } else if (action.width && action.height) {
-                    action.width = data.width;
-                    action.height = data.height;
+                if (action.actionId === data.actionId) {
+                    if (action.position && action.position.x && action.position.y) {
+                        action.position = data.position;
+                    } else if (action.angle) {
+                        action.angle = data.angle;
+                    } else if (action.width && action.height) {
+                        action.width = data.width;
+                        action.height = data.height;
+                    }
                 }
             });
         }
@@ -431,6 +441,11 @@ class DeveloperMode {
 			taro.client.emit('updateMap');
 		}
 	}
+
+    updateClientInitEntities (initEntities: ActionData[] ) {
+        this.initEntities = initEntities;
+        taro.client.emit('updateInitEntities');
+    }
 }
 
 interface TileData {

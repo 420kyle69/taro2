@@ -65,6 +65,10 @@ class DevModeScene extends PhaserScene {
             });
 		});
 
+        taro.client.on('updateInitEntities', () => {
+			this.updateInitEntities();
+		});
+
         /*taro.client.on('editInitEntity', (data) => {
             console.log('editInitEntity', data);
             //this.devModeTools.editEntity(data);
@@ -206,6 +210,9 @@ class DevModeScene extends PhaserScene {
 				}
 			});
 		}
+
+        taro.network.send('updateClientInitEntities', true);
+
 		this.entityImages.forEach((image) => {
 			image.setVisible(true);
 		});
@@ -257,5 +264,13 @@ class DevModeScene extends PhaserScene {
 	update (): void {
 		if (this.tileEditor) this.tileEditor.update();
 	}
+
+    updateInitEntities(): void {
+        this.entityImages.forEach((image) => {
+            taro.developerMode.initEntities.forEach((action) =>{
+                if (image.entity.action.actionId === action.actionId) image.entity.update(action);
+            });
+        });
+    }
 
 }

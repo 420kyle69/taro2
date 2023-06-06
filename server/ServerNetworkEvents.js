@@ -455,6 +455,10 @@ var ServerNetworkEvents = {
         taro.developerMode.editInitEntity(data, clientId);
     },
 
+    _onRequestInitEntities: function(data, clientId) {
+        taro.developerMode.requestInitEntities(data, clientId);
+    },
+
 	_onEditEntity: function(data, clientId) {
 		taro.developerMode.editEntity(data, clientId);
 	},

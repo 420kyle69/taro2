@@ -61,7 +61,7 @@ class EntityImage {
         let editedAction: ActionData = {actionId: action.actionId};
     
         scene.input.on('drag', (pointer, gameObject, dragX, dragY) => {
-            if (gameObject !== image) return;
+            if (!devModeTools.cursorButton.active || gameObject !== image) return;
             console.log(this.dragMode)
             if (this.dragMode === 'position') {
                 gameObject.x = dragX;
@@ -93,7 +93,6 @@ class EntityImage {
     }
 
     update (action: ActionData): void {
-        console.log('update image', action)
         if (this.action.position && this.action.position.x && this.action.position.y &&
             action.position && action.position.x && action.position.y) {
             this.action.position = action.position;

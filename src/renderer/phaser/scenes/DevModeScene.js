@@ -55,6 +55,9 @@ var DevModeScene = /** @class */ (function (_super) {
                 //update database here
             });
         });
+        taro.client.on('updateInitEntities', function () {
+            _this.updateInitEntities();
+        });
         /*taro.client.on('editInitEntity', (data) => {
             console.log('editInitEntity', data);
             //this.devModeTools.editEntity(data);
@@ -186,6 +189,7 @@ var DevModeScene = /** @class */ (function (_super) {
                 }
             });
         }
+        taro.network.send('updateClientInitEntities', true);
         this.entityImages.forEach(function (image) {
             image.setVisible(true);
         });
@@ -228,6 +232,14 @@ var DevModeScene = /** @class */ (function (_super) {
     DevModeScene.prototype.update = function () {
         if (this.tileEditor)
             this.tileEditor.update();
+    };
+    DevModeScene.prototype.updateInitEntities = function () {
+        this.entityImages.forEach(function (image) {
+            taro.developerMode.initEntities.forEach(function (action) {
+                if (image.entity.action.actionId === action.actionId)
+                    image.entity.update(action);
+            });
+        });
     };
     return DevModeScene;
 }(PhaserScene));
