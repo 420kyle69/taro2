@@ -92,8 +92,7 @@ var DevModeTools = /** @class */ (function (_super) {
         return _this;
     }
     DevModeTools.prototype.updateBrushArea = function () {
-        this.tileEditor.brushArea = { x: this.brushSize, y: this.brushSize };
-        console.log(this.brushSize);
+        this.tileEditor.brushArea.size = { x: this.brushSize, y: this.brushSize };
         this.tileEditor.marker.changePreview();
     };
     DevModeTools.prototype.enterMapTab = function () {

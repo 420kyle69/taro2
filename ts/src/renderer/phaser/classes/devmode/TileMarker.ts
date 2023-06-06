@@ -21,7 +21,7 @@ class TileMarker {
 		if (taro.game.data.defaultData.dontResize) {
 			this.graphics.strokeRect(0, 0, map.tileWidth, map.tileHeight);
 		} else {
-			this.graphics.strokeRect(0, 0, 64, 64);
+			this.graphics.strokeRect(0, 0, TILE_SIZE, TILE_SIZE);
 		}
 		this.graphics.setVisible(false);
 
@@ -38,8 +38,8 @@ class TileMarker {
 		const key = `tiles/${tileset.name}`;
 		const extrudedKey = this.extrudedKey = `extruded-${key}`;
 
-		let width = 64;
-		let height = 64;
+		let width = TILE_SIZE;
+		let height = TILE_SIZE;
 		if (taro.game.data.defaultData.dontResize) {
 			width = map.tileWidth;
 			height = map.tileHeight;
@@ -64,21 +64,29 @@ class TileMarker {
 			const row = Math.floor((tile - 1) / paletteLayer.width);
 			const paletteTile = paletteLayer?.data[row]?.[tile - 1 - (row * paletteLayer.width)];
 			if (paletteTile) paletteTile.tint = 0x87cfff;
-		} else if (this.images[i] && this.images[i][j]) this.images[i][j].setAlpha(0);
+		} else if (this.images[i][j]) this.images[i][j].setAlpha(0);
 	}
 
 	changePreview(): void {
-		const { x, y } = this.devModeScene.tileEditor.paletteArea;
-		this.graphics.scale = this.devModeScene.tileEditor.brushArea.x;
+		const { x, y } = this.devModeScene.tileEditor.brushArea.size;
+		this.graphics.scaleX = x;
+		this.graphics.scaleY = y;
 		if (!this.palette) {
 			this.hideImages();
-
 			const previewTarget = this.devModeScene.tileEditor.selectedTileArea;
+			const sample = this.devModeScene.tileEditor.brushArea.calcSample(previewTarget, { x, y });
 			for (let i = 0; i < x; i++) {
 				for (let j = 0; j < y; j++) {
-					this.changeImage(previewTarget[i][j], i, j);
+					if (sample[i] && sample[i][j]) {
+						this.changeImage(sample[i][j], i, j);
+					}
 				}
 			}
+			// Object.entries(previewTarget).map(([x, object]) => {
+			// 	Object.entries(object).map(([y, v]) => {
+			// 		this.changeImage(v, parseInt(x), parseInt(y));
+			// 	});
+			// });
 
 		}
 	}
@@ -94,8 +102,8 @@ class TileMarker {
 	showPreview(value: boolean): void {
 		const devModeScene = taro.renderer.scene.getScene('DevMode') as DevModeScene;
 		const area = devModeScene.tileEditor.brushArea;
-		for (let i = 0; i < area.x; i++) {
-			for (let j = 0; j < area.y; j++) {
+		for (let i = 0; i < area.size.x; i++) {
+			for (let j = 0; j < area.size.y; j++) {
 				if (this.images[i] && this.images[i][j]) this.images[i][j].setVisible(value);
 			}
 		}

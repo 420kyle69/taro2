@@ -9,11 +9,12 @@ var TileEditor = /** @class */ (function () {
         this.paletteMarker = new TileMarker(this.devModeTools.scene, devModeScene, this.tilePalette.map, true, 1, commandController);
         this.commandController = commandController;
         this.paletteArea = { x: 1, y: 1 };
-        this.brushArea = { x: 1, y: 1 };
+        this.brushArea = new TileShape();
         this.selectedTileArea = {};
         var pointerPosition = { x: 0, y: 0 };
         this.activateMarkers(false);
         this.startDragIn = 'none';
+        var shiftKey = devModeScene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT, false);
         gameScene.input.on('pointerdown', function (p) {
             if (!devModeScene.pointerInsideButtons &&
                 !devModeScene.pointerInsideWidgets() &&
@@ -32,6 +33,30 @@ var TileEditor = /** @class */ (function () {
                 _this.startDragIn = 'palette';
                 pointerPosition.x = devModeScene.input.activePointer.x;
                 pointerPosition.y = devModeScene.input.activePointer.y;
+                if (shiftKey.isDown) {
+                    //pass
+                }
+                else {
+                    _this.selectedTileArea = {};
+                }
+            }
+        });
+        devModeScene.input.on('pointermove', function (p) {
+            if (devModeTools.modeButtons[2].active && p.isDown && p.button === 0 &&
+                Math.abs(pointerPosition.x - devModeScene.input.activePointer.x) < 50 &&
+                Math.abs(pointerPosition.y - devModeScene.input.activePointer.y) < 50 &&
+                _this.startDragIn === 'palette') {
+                var palettePoint = devModeScene.cameras.getCamera('palette').getWorldPoint(p.x, p.y);
+                var palettePointerTileX = palette.map.worldToTileX(palettePoint.x);
+                var palettePointerTileY = palette.map.worldToTileY(palettePoint.y);
+                if (!devModeTools.modeButtons[4].active)
+                    _this.devModeTools.brush();
+                _this.clearTint();
+                if (!_this.selectedTileArea[palettePointerTileX]) {
+                    _this.selectedTileArea[palettePointerTileX] = {};
+                }
+                _this.selectedTileArea[palettePointerTileX][palettePointerTileY] = _this.getTile(palettePointerTileX, palettePointerTileY, palette.map);
+                _this.marker.changePreview();
             }
         });
         devModeScene.input.on('pointerup', function (p) {
@@ -44,15 +69,10 @@ var TileEditor = /** @class */ (function () {
                 if (!devModeTools.modeButtons[4].active)
                     _this.devModeTools.brush();
                 _this.clearTint();
-                for (var i = 0; i < _this.paletteArea.x; i++) {
-                    if (!_this.selectedTileArea[i]) {
-                        _this.selectedTileArea[i] = {};
-                    }
-                    for (var j = 0; j < _this.paletteArea.y; j++) {
-                        //TODO handle the update of selecetedTileArea
-                        _this.selectedTileArea[i][j] = _this.getTile(palettePointerTileX + i, palettePointerTileY + j, palette.map);
-                    }
+                if (!_this.selectedTileArea[palettePointerTileX]) {
+                    _this.selectedTileArea[palettePointerTileX] = {};
                 }
+                _this.selectedTileArea[palettePointerTileX][palettePointerTileY] = _this.getTile(palettePointerTileX, palettePointerTileY, palette.map);
                 _this.marker.changePreview();
             }
             if (_this.startDragIn === 'palette') {
@@ -60,6 +80,7 @@ var TileEditor = /** @class */ (function () {
             }
         });
         gameScene.input.on('pointerup', function (p) {
+            //TODO hanlde pick color
             if (_this.startDragIn === 'map' &&
                 Math.abs(pointerPosition.x - gameScene.input.activePointer.x) < 50 &&
                 Math.abs(pointerPosition.y - gameScene.input.activePointer.y) < 50 &&
@@ -68,11 +89,11 @@ var TileEditor = /** @class */ (function () {
                 var pointerTileX = gameMap.worldToTileX(worldPoint.x);
                 var pointerTileY = gameMap.worldToTileY(worldPoint.y);
                 _this.clearTint();
-                for (var i = 0; i < _this.brushArea.x; i++) {
+                for (var i = 0; i < _this.brushArea.size.x; i++) {
                     if (!_this.selectedTileArea[i]) {
                         _this.selectedTileArea[i] = {};
                     }
-                    for (var j = 0; j < _this.brushArea.y; j++) {
+                    for (var j = 0; j < _this.brushArea.size.y; j++) {
                         _this.selectedTileArea[i][j] = _this.getTile(pointerTileX, pointerTileY, gameMap);
                     }
                 }
@@ -281,15 +302,15 @@ var TileEditor = /** @class */ (function () {
                         if (this.devModeTools.modeButtons[2].active || this.devModeTools.modeButtons[3].active) {
                             var originTileArea_1 = {};
                             var nowBrushArea_1 = this.brushArea;
-                            var selectedTileArea_1 = JSON.parse(JSON.stringify(this.selectedTileArea));
+                            var sample_1 = JSON.parse(JSON.stringify(this.brushArea.sample));
                             var noDifferent = true;
-                            for (var i = 0; i < this.brushArea.x; i++) {
-                                for (var j = 0; j < this.brushArea.y; j++) {
+                            for (var i = 0; i < this.brushArea.size.x; i++) {
+                                for (var j = 0; j < this.brushArea.size.y; j++) {
                                     if (!originTileArea_1[i]) {
                                         originTileArea_1[i] = {};
                                     }
                                     originTileArea_1[i][j] = this.getTile(pointerTileX_1 + i, pointerTileY_1 + j, map);
-                                    if (this.selectedTileArea[i][j] !== originTileArea_1[i][j]) {
+                                    if (sample_1[i][j] !== originTileArea_1[i][j]) {
                                         noDifferent = false;
                                     }
                                 }
@@ -297,20 +318,18 @@ var TileEditor = /** @class */ (function () {
                             if (!noDifferent) {
                                 this.commandController.addCommand({
                                     func: function () {
-                                        if (nowBrushArea_1.x > 1 || nowBrushArea_1.y > 1) {
-                                            for (var i = 0; i < nowBrushArea_1.x; i++) {
-                                                for (var j = 0; j < nowBrushArea_1.y; j++) {
-                                                    _this.putTile(pointerTileX_1 + i, pointerTileY_1 + j, selectedTileArea_1[i][j]);
+                                        for (var i = 0; i < nowBrushArea_1.size.x; i++) {
+                                            for (var j = 0; j < nowBrushArea_1.size.y; j++) {
+                                                if (sample_1[i] && sample_1[i][j]) {
+                                                    _this.putTile(pointerTileX_1 + i, pointerTileY_1 + j, sample_1[i][j]);
                                                 }
                                             }
                                         }
                                     },
                                     undo: function () {
-                                        if (nowBrushArea_1.x > 1 || nowBrushArea_1.y > 1) {
-                                            for (var i = 0; i < nowBrushArea_1.x; i++) {
-                                                for (var j = 0; j < nowBrushArea_1.y; j++) {
-                                                    _this.putTile(pointerTileX_1 + i, pointerTileY_1 + j, originTileArea_1[i][j]);
-                                                }
+                                        for (var i = 0; i < nowBrushArea_1.size.x; i++) {
+                                            for (var j = 0; j < nowBrushArea_1.size.y; j++) {
+                                                _this.putTile(pointerTileX_1 + i, pointerTileY_1 + j, originTileArea_1[i][j]);
                                             }
                                         }
                                     }

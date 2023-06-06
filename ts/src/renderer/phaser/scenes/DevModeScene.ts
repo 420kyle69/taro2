@@ -69,7 +69,7 @@ class DevModeScene extends PhaserScene {
 						y: worldPoint.y
 					},
 					angle: draggedEntity.angle
-				}
+				};
 				taro.developerMode.editEntity(data, playerId);
 				taro.unitBeingDragged = null;
 			}

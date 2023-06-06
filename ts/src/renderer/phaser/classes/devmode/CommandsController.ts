@@ -1,6 +1,6 @@
 interface CommandEmitterProps {
-	func: Function;
-	undo: Function;
+	func: () => void;
+	undo: () => void;
 }
 
 interface CommandControllerProps {
@@ -11,15 +11,15 @@ type DefaultCommands = 'increaseBrushSize' | 'decreaseBrushSize';
 
 class CommandController implements CommandControllerProps {
 	commands: CommandEmitterProps[] = [];
-	defaultCommands: Record<DefaultCommands, Function>;
-	nowInsertIndex: number = 0;
+	defaultCommands: Record<DefaultCommands, () => void>;
+	nowInsertIndex = 0;
 	maxCommands: number;
-	constructor(defaultCommands: Record<DefaultCommands, Function>, maxCommands: number = 50) {
+	constructor(defaultCommands: Record<DefaultCommands, () => void>, maxCommands = 50) {
 		this.defaultCommands = defaultCommands;
 		this.maxCommands = maxCommands;
 	}
 
-	addCommand(command: CommandEmitterProps, history: boolean = true) {
+	addCommand(command: CommandEmitterProps, history = true) {
 		if (history) {
 			if (this.nowInsertIndex < this.commands.length) {
 				this.commands.splice(this.nowInsertIndex, this.commands.length - this.nowInsertIndex);

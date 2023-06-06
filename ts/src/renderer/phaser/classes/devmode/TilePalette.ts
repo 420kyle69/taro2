@@ -62,8 +62,8 @@ class TilePalette extends Phaser.GameObjects.Container {
 		texturesLayer.on('pointermove', (p) => {
 			const devModeScene = taro.renderer.scene.getScene('DevMode') as DevModeScene;
 			devModeScene.regionEditor.cancelDrawRegion();
-			if (!p.isDown || scene.tileEditor.startDragIn !== 'palette') return;
-			const scrollX = (p.x - p.prevPosition.x) / camera.zoom
+			if (p.button === 0 || !p.isDown || scene.tileEditor.startDragIn !== 'palette') return;
+			const scrollX = (p.x - p.prevPosition.x) / camera.zoom;
 			const scrollY = (p.y - p.prevPosition.y) / camera.zoom;
 			camera.scrollX -= scrollX;
 			camera.scrollY -= scrollY;
@@ -151,7 +151,7 @@ class TilePalette extends Phaser.GameObjects.Container {
 				}
 
 			}
-		})
+		});
 	}
 
 	toggle(): void {
@@ -208,8 +208,7 @@ class TilePalette extends Phaser.GameObjects.Container {
 			thumbWidth = (length - 60) / 2;
 			thumbHeight = 20;
 			posY = this.camera.height;
-		}
-		else if (orient === 'y') {
+		} else if (orient === 'y') {
 			orientSize = 'height';
 			length = this.camera.height;
 			thumbWidth = 20;

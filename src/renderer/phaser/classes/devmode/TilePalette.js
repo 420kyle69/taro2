@@ -44,7 +44,7 @@ var TilePalette = /** @class */ (function (_super) {
         texturesLayer.on('pointermove', function (p) {
             var devModeScene = taro.renderer.scene.getScene('DevMode');
             devModeScene.regionEditor.cancelDrawRegion();
-            if (!p.isDown || scene.tileEditor.startDragIn !== 'palette')
+            if (p.button === 0 || !p.isDown || scene.tileEditor.startDragIn !== 'palette')
                 return;
             var scrollX = (p.x - p.prevPosition.x) / camera.zoom;
             var scrollY = (p.y - p.prevPosition.y) / camera.zoom;

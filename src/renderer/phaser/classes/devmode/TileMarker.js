@@ -11,7 +11,7 @@ var TileMarker = /** @class */ (function () {
             this.graphics.strokeRect(0, 0, map.tileWidth, map.tileHeight);
         }
         else {
-            this.graphics.strokeRect(0, 0, 64, 64);
+            this.graphics.strokeRect(0, 0, TILE_SIZE, TILE_SIZE);
         }
         this.graphics.setVisible(false);
         if (!palette) {
@@ -25,8 +25,8 @@ var TileMarker = /** @class */ (function () {
         var tileset = data.map.tilesets[0];
         var key = "tiles/".concat(tileset.name);
         var extrudedKey = this.extrudedKey = "extruded-".concat(key);
-        var width = 64;
-        var height = 64;
+        var width = TILE_SIZE;
+        var height = TILE_SIZE;
         if (taro.game.data.defaultData.dontResize) {
             width = map.tileWidth;
             height = map.tileHeight;
@@ -52,20 +52,29 @@ var TileMarker = /** @class */ (function () {
             if (paletteTile)
                 paletteTile.tint = 0x87cfff;
         }
-        else if (this.images[i] && this.images[i][j])
+        else if (this.images[i][j])
             this.images[i][j].setAlpha(0);
     };
     TileMarker.prototype.changePreview = function () {
-        var _a = this.devModeScene.tileEditor.paletteArea, x = _a.x, y = _a.y;
-        this.graphics.scale = this.devModeScene.tileEditor.brushArea.x;
+        var _a = this.devModeScene.tileEditor.brushArea.size, x = _a.x, y = _a.y;
+        this.graphics.scaleX = x;
+        this.graphics.scaleY = y;
         if (!this.palette) {
             this.hideImages();
             var previewTarget = this.devModeScene.tileEditor.selectedTileArea;
+            var sample = this.devModeScene.tileEditor.brushArea.calcSample(previewTarget, { x: x, y: y });
             for (var i = 0; i < x; i++) {
                 for (var j = 0; j < y; j++) {
-                    this.changeImage(previewTarget[i][j], i, j);
+                    if (sample[i] && sample[i][j]) {
+                        this.changeImage(sample[i][j], i, j);
+                    }
                 }
             }
+            // Object.entries(previewTarget).map(([x, object]) => {
+            // 	Object.entries(object).map(([y, v]) => {
+            // 		this.changeImage(v, parseInt(x), parseInt(y));
+            // 	});
+            // });
         }
     };
     TileMarker.prototype.hideImages = function () {
@@ -78,8 +87,8 @@ var TileMarker = /** @class */ (function () {
     TileMarker.prototype.showPreview = function (value) {
         var devModeScene = taro.renderer.scene.getScene('DevMode');
         var area = devModeScene.tileEditor.brushArea;
-        for (var i = 0; i < area.x; i++) {
-            for (var j = 0; j < area.y; j++) {
+        for (var i = 0; i < area.size.x; i++) {
+            for (var j = 0; j < area.size.y; j++) {
                 if (this.images[i] && this.images[i][j])
                     this.images[i][j].setVisible(value);
             }
