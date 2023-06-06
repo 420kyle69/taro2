@@ -36,8 +36,8 @@ class EntityImage {
         const image = this.image = scene.add.image(action.position?.x, action.position?.y, key);
         if (action.angle) image.angle = Number(action.angle);
         if (action.width && action.height) image.setDisplaySize(action.width, action.height);
-        image.setTint(0x9CA3AF);
-        image.setAlpha(0.75);
+        //image.setTint(0x9CA3AF);
+        //image.setAlpha(0.75);
         image.setVisible(false);
         image.setInteractive({ draggable: true });
         image.entity = this;
@@ -62,7 +62,7 @@ class EntityImage {
     
         scene.input.on('drag', (pointer, gameObject, dragX, dragY) => {
             if (!devModeTools.cursorButton.active || gameObject !== image) return;
-            console.log(this.dragMode)
+            //console.log(this.dragMode)
             if (this.dragMode === 'position') {
                 gameObject.x = dragX;
                 gameObject.y = dragY;
@@ -82,7 +82,7 @@ class EntityImage {
         scene.input.on('dragend', (pointer, gameObject) => {
             if (gameObject !== image) return;
             this.dragMode = null;
-            console.log('dragend', action);
+            //console.log('dragend', action);
             this.edit(editedAction);
             editedAction = {actionId: action.actionId};
         });

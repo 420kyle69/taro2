@@ -20,7 +20,7 @@ class DeveloperMode {
                         action.type === 'createUnitAtPosition' ||
                         action.type === 'spawnItem' || action.type === 'createItemWithMaxQuantityAtPosition' || 
                         action.type === 'createProjectileAtPosition') {
-					    	console.log(action);
+					    	//console.log(action);
                             if (action.actionId) {
                                 this.initEntities.push(action);
                             } else {
@@ -214,7 +214,7 @@ class DeveloperMode {
     editInitEntity (data, clientId: string): void {
         // only allow developers to modify initial entities
 		if (taro.server.developerClientIds.includes(clientId)) {
-            console.log('editInitEntity', data);
+            //console.log('editInitEntity', data);
             // broadcast region change to all clients
 			taro.network.send('editInitEntity', data);
             if (!this.initEntities) {
