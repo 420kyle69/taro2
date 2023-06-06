@@ -47,7 +47,7 @@ npm run server
 
 You can download Game JSON from your modd.io's game's in-game editor. Go to `Editor` -> Click `Export JSON`.
 
-<img src="./assets/images/gamejson2.png" width="600" alt="How to get game json in modd.io in-game editor">
+<img src="./assets/images/gamejson2.png" width="600" alt="How to get game json in game's in-game editor">
 
 Alternatively, you can download Game JSON from your modd.io's game's sandbox. ([example](https://modd.io/edit/two-houses)). Go to `Menu` -> Click `Export JSON`.
 
