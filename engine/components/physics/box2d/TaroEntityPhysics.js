@@ -73,10 +73,10 @@ var TaroEntityPhysics = TaroEntity.extend({
 		var shapeData = (body.fixtures && body.fixtures[0] && body.fixtures[0].shape && body.fixtures[0].shape.data) ? body.fixtures[0].shape.data : undefined;
 
 		// override body bounds
-		var sizeX = taro.game.data.bodyTypes["dropped"].fixtures[0].size.width;
-		var sizeY = taro.game.data.bodyTypes["dropped"].fixtures[0].size.height;
-		var offsetX = taro.game.data.bodyTypes["dropped"].fixtures[0].offset.x;
-		var offsetY = taro.game.data.bodyTypes["dropped"].fixtures[0].offset.y;
+		var sizeX = taro.game.data.bodyTypes["dropped"].fixtures[0].size?.width;
+		var sizeY = taro.game.data.bodyTypes["dropped"].fixtures[0].size?.height;
+		var offsetX = taro.game.data.bodyTypes["dropped"].fixtures[0].offset?.x;
+		var offsetY = taro.game.data.bodyTypes["dropped"].fixtures[0].offset?.y;
 		if (sizeX != 0 || sizeY != 0 || offsetX != 0 || offsetY != 0) {
 			if (shapeData === undefined) {
 				shapeData = {};
