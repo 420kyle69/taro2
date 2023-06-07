@@ -44,7 +44,7 @@ const spread = function (start: number, end: number, step = 1) {
 	if (start === end) {
 		return equal(start);
 	}
-	let middle = Math.floor((end - start) / 2);
+	let middle = Math.floor((end + start) / 2);
 	return toggle(
 		range(middle, start, step),
 		range(middle + step, end, step)
@@ -76,6 +76,39 @@ const rect = function* (x: number, y: number) {
 };
 
 const circle = function* (radius: number) {
+	if (radius < 1) {
+		throw ('radius must greater than 1');
+	}
+	let rightIndex = (radius - 1) * 2;
+	let _y = spread(0, rightIndex);
+	let distance = 0;
+
+	while (true) {
+		let valueY = _y.next();
+		if (valueY.done) {
+			break;
+		} else {
+			let chord = Math.ceil(Math.sqrt(radius ** 2 - Math.floor(distance) ** 2) - 0.1);
+			let _x = spread(0 + radius - chord , rightIndex - radius + chord);
+			while (true) {
+				let valueX = _x.next();
+				if (valueX.done) {
+					if (distance === 0) {
+						distance += 1;
+					} else {
+						distance += 0.5;
+					}
+					break;
+				} else {
+					yield { x: valueX.value, y: valueY.value };
+				}
+			}
+		}
+	}
+};
+
+
+const diamond = function* (radius: number) {
 	if (radius < 1) {
 		throw ('radius must greater than 1');
 	}

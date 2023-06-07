@@ -106,7 +106,7 @@ var spread = function (start, end, step) {
     if (start === end) {
         return equal(start);
     }
-    var middle = Math.floor((end - start) / 2);
+    var middle = Math.floor((end + start) / 2);
     return toggle(range(middle, start, step), range(middle + step, end, step));
 };
 var rect = function (x, y) {
@@ -140,6 +140,48 @@ var rect = function (x, y) {
     });
 };
 var circle = function (radius) {
+    var rightIndex, _y, distance, valueY, chord, _x, valueX;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                if (radius < 1) {
+                    throw ('radius must greater than 1');
+                }
+                rightIndex = (radius - 1) * 2;
+                _y = spread(0, rightIndex);
+                distance = 0;
+                _a.label = 1;
+            case 1:
+                if (!true) return [3 /*break*/, 8];
+                valueY = _y.next();
+                if (!valueY.done) return [3 /*break*/, 2];
+                return [3 /*break*/, 8];
+            case 2:
+                chord = Math.ceil(Math.sqrt(Math.pow(radius, 2) - Math.pow(Math.floor(distance), 2)) - 0.1);
+                _x = spread(0 + radius - chord, rightIndex - radius + chord);
+                _a.label = 3;
+            case 3:
+                if (!true) return [3 /*break*/, 7];
+                valueX = _x.next();
+                if (!valueX.done) return [3 /*break*/, 4];
+                if (distance === 0) {
+                    distance += 1;
+                }
+                else {
+                    distance += 0.5;
+                }
+                return [3 /*break*/, 7];
+            case 4: return [4 /*yield*/, { x: valueX.value, y: valueY.value }];
+            case 5:
+                _a.sent();
+                _a.label = 6;
+            case 6: return [3 /*break*/, 3];
+            case 7: return [3 /*break*/, 1];
+            case 8: return [2 /*return*/];
+        }
+    });
+};
+var diamond = function (radius) {
     var rightIndex, _y, distance, valueY, _x, valueX;
     return __generator(this, function (_a) {
         switch (_a.label) {

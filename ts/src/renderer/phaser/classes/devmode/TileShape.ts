@@ -1,4 +1,4 @@
-type Shape = 'circle' | 'rectangle'
+type Shape = 'circle' | 'rectangle' | 'diamond'
 
 interface Vector2D {
 	x: number;
@@ -31,6 +31,10 @@ class TileShape {
 				this.calcRect(minX, xLength, minY, yLength, selectedTileArea, size);
 				break;
 			}
+			case 'diamond': {
+				this.calcDiamond(minX, xLength, minY, yLength, selectedTileArea, size);
+				break;
+			}
 			case 'circle': {
 				this.calcCircle(minX, xLength, minY, yLength, selectedTileArea, size);
 				break;
@@ -50,6 +54,28 @@ class TileShape {
 				break;
 			}
 			const vec2d = circleValue.value as Vector2D;
+			if (selectedTileArea[minX + vec2d.x % xLength] && selectedTileArea[minX + vec2d.x % xLength][minY + vec2d.y % yLength]) {
+				if (!this.sample[vec2d.x]) {
+					this.sample[vec2d.x] = {};
+				}
+				this.sample[vec2d.x][vec2d.y] = selectedTileArea[minX + vec2d.x % xLength][minY + vec2d.y % yLength];
+			}
+			console.log(vec2d);
+			maxLoop -= 1;
+		}
+	}
+
+
+	calcDiamond(minX: number, xLength: number, minY: number, yLength: number, selectedTileArea: Record<number, Record<number, number>>, size: Vector2D) {
+
+		const diamondGenerator = diamond(Math.floor(Math.max(size.x, size.y) / 2) + 1);
+		let maxLoop = MAX_LOOP;
+		while (maxLoop > 0) {
+			const diamondValue = diamondGenerator.next();
+			if (diamondValue.done) {
+				break;
+			}
+			const vec2d = diamondValue.value as Vector2D;
 			if (selectedTileArea[minX + vec2d.x % xLength] && selectedTileArea[minX + vec2d.x % xLength][minY + vec2d.y % yLength]) {
 				if (!this.sample[vec2d.x]) {
 					this.sample[vec2d.x] = {};

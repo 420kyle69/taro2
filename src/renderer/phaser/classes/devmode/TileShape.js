@@ -21,6 +21,10 @@ var TileShape = /** @class */ (function () {
                 this.calcRect(minX, xLength, minY, yLength, selectedTileArea, size);
                 break;
             }
+            case 'diamond': {
+                this.calcDiamond(minX, xLength, minY, yLength, selectedTileArea, size);
+                break;
+            }
             case 'circle': {
                 this.calcCircle(minX, xLength, minY, yLength, selectedTileArea, size);
                 break;
@@ -37,6 +41,25 @@ var TileShape = /** @class */ (function () {
                 break;
             }
             var vec2d = circleValue.value;
+            if (selectedTileArea[minX + vec2d.x % xLength] && selectedTileArea[minX + vec2d.x % xLength][minY + vec2d.y % yLength]) {
+                if (!this.sample[vec2d.x]) {
+                    this.sample[vec2d.x] = {};
+                }
+                this.sample[vec2d.x][vec2d.y] = selectedTileArea[minX + vec2d.x % xLength][minY + vec2d.y % yLength];
+            }
+            console.log(vec2d);
+            maxLoop -= 1;
+        }
+    };
+    TileShape.prototype.calcDiamond = function (minX, xLength, minY, yLength, selectedTileArea, size) {
+        var diamondGenerator = diamond(Math.floor(Math.max(size.x, size.y) / 2) + 1);
+        var maxLoop = MAX_LOOP;
+        while (maxLoop > 0) {
+            var diamondValue = diamondGenerator.next();
+            if (diamondValue.done) {
+                break;
+            }
+            var vec2d = diamondValue.value;
             if (selectedTileArea[minX + vec2d.x % xLength] && selectedTileArea[minX + vec2d.x % xLength][minY + vec2d.y % yLength]) {
                 if (!this.sample[vec2d.x]) {
                     this.sample[vec2d.x] = {};
