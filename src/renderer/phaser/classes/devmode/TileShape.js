@@ -1,7 +1,7 @@
 var TileShape = /** @class */ (function () {
     function TileShape(size, shape) {
         if (size === void 0) { size = { x: 1, y: 1 }; }
-        if (shape === void 0) { shape = 'circle'; }
+        if (shape === void 0) { shape = 'rectangle'; }
         this.sample = {};
         this.shape = shape;
         this.size = size;
@@ -80,6 +80,9 @@ var TileShape = /** @class */ (function () {
             }
             var vec2d = rectValue.value;
             if (selectedTileArea[minX + vec2d.x % xLength] && selectedTileArea[minX + vec2d.x % xLength][minY + vec2d.y % yLength]) {
+                if (!this.sample[vec2d.x]) {
+                    this.sample[vec2d.x] = {};
+                }
                 this.sample[vec2d.x][vec2d.y] = selectedTileArea[minX + vec2d.x % xLength][minY + vec2d.y % yLength];
             }
         }

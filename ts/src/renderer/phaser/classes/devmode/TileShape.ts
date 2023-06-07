@@ -11,7 +11,7 @@ class TileShape {
 	size: Vector2D;
 	sample: Record<number, Record<number, number>> = {};
 
-	constructor(size: Vector2D = { x: 1, y: 1 }, shape: Shape = 'circle') {
+	constructor(size: Vector2D = { x: 1, y: 1 }, shape: Shape = 'rectangle') {
 		this.shape = shape;
 		this.size = size;
 	}
@@ -92,12 +92,15 @@ class TileShape {
 		let maxLoop = MAX_LOOP;
 		while (maxLoop > 0) {
 			const rectValue = rectGenerator.next();
-			if(rectValue.done) {
+			if (rectValue.done) {
 				break;
 			}
 			const vec2d = rectValue.value as Vector2D;
 
 			if (selectedTileArea[minX + vec2d.x % xLength] && selectedTileArea[minX + vec2d.x % xLength][minY + vec2d.y % yLength]) {
+				if (!this.sample[vec2d.x]) {
+					this.sample[vec2d.x] = {};
+				}
 				this.sample[vec2d.x][vec2d.y] = selectedTileArea[minX + vec2d.x % xLength][minY + vec2d.y % yLength];
 			}
 		}
