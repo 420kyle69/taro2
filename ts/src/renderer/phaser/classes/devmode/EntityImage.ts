@@ -44,7 +44,7 @@ class EntityImage {
         entityImages.push(image);
     
         image.on('pointerdown', () => {
-            console.log('pointerdown', action);
+            //console.log('pointerdown', action);
 
             this.startDragX = image.x;
             this.startDragY = image.y;
@@ -62,7 +62,6 @@ class EntityImage {
     
         scene.input.on('drag', (pointer, gameObject, dragX, dragY) => {
             if (!devModeTools.cursorButton.active || gameObject !== image) return;
-            //console.log(this.dragMode)
             if (this.dragMode === 'position') {
                 gameObject.x = dragX;
                 gameObject.y = dragY;
@@ -82,7 +81,6 @@ class EntityImage {
         scene.input.on('dragend', (pointer, gameObject) => {
             if (gameObject !== image) return;
             this.dragMode = null;
-            //console.log('dragend', action);
             this.edit(editedAction);
             editedAction = {actionId: action.actionId};
         });
@@ -98,10 +96,12 @@ class EntityImage {
             this.action.position = action.position;
             this.image.x = action.position.x;
             this.image.y = action.position.y;
-        } else if (this.action.angle && action.angle) {
+        } 
+        if (this.action.angle && action.angle) {
             this.action.angle = action.angle;
             this.image.angle = Number(action.angle);
-        } else if (this.action.width && this.action.height && action.width && action.height) {
+        } 
+        if (this.action.width && this.action.height && action.width && action.height) {
             this.action.width = action.width;
             this.action.height = action.height;
             this.image.setDisplaySize(action.width, action.height);

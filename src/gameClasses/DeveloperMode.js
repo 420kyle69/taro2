@@ -200,21 +200,21 @@ var DeveloperMode = /** @class */ (function () {
     DeveloperMode.prototype.editInitEntity = function (data, clientId) {
         // only allow developers to modify initial entities
         if (taro.server.developerClientIds.includes(clientId)) {
-            //console.log('editInitEntity', data);
-            // broadcast region change to all clients
+            // broadcast init entity change to all clients
             taro.network.send('editInitEntity', data);
             if (!this.initEntities) {
                 this.addInitEntities();
             }
             this.initEntities.forEach(function (action) {
                 if (action.actionId === data.actionId) {
-                    if (action.position && action.position.x && action.position.y) {
+                    if (data.position && data.position.x && data.position.y &&
+                        action.position && action.position.x && action.position.y) {
                         action.position = data.position;
                     }
-                    else if (action.angle) {
+                    if (data.angle && action.angle) {
                         action.angle = data.angle;
                     }
-                    else if (action.width && action.height) {
+                    if (data.width && data.height && action.width && action.height) {
                         action.width = data.width;
                         action.height = data.height;
                     }
