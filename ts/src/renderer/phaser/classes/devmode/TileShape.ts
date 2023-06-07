@@ -82,13 +82,12 @@ class TileShape {
 				}
 				this.sample[vec2d.x][vec2d.y] = selectedTileArea[minX + vec2d.x % xLength][minY + vec2d.y % yLength];
 			}
-			console.log(vec2d);
 			maxLoop -= 1;
 		}
 	}
 
 	calcRect(minX: number, xLength: number, minY: number, yLength: number, selectedTileArea: Record<number, Record<number, number>>, size: Vector2D) {
-		const rectGenerator = rect(xLength, yLength);
+		const rectGenerator = rect(size.x, size.y);
 		let maxLoop = MAX_LOOP;
 		while (maxLoop > 0) {
 			const rectValue = rectGenerator.next();
@@ -103,6 +102,7 @@ class TileShape {
 				}
 				this.sample[vec2d.x][vec2d.y] = selectedTileArea[minX + vec2d.x % xLength][minY + vec2d.y % yLength];
 			}
+			maxLoop -= 1;
 		}
 	}
 
