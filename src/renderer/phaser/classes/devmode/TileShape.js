@@ -71,14 +71,16 @@ var TileShape = /** @class */ (function () {
         }
     };
     TileShape.prototype.calcRect = function (minX, xLength, minY, yLength, selectedTileArea, size) {
-        for (var i = 0; i < size.x; i++) {
-            if (!this.sample[i]) {
-                this.sample[i] = {};
+        var rectGenerator = rect(xLength, yLength);
+        var maxLoop = MAX_LOOP;
+        while (maxLoop > 0) {
+            var rectValue = rectGenerator.next();
+            if (rectValue.done) {
+                break;
             }
-            for (var j = 0; j < size.y; j++) {
-                if (selectedTileArea[minX + i % xLength] && selectedTileArea[minX + i % xLength][minY + j % yLength]) {
-                    this.sample[i][j] = selectedTileArea[minX + i % xLength][minY + j % yLength];
-                }
+            var vec2d = rectValue.value;
+            if (selectedTileArea[minX + vec2d.x % xLength] && selectedTileArea[minX + vec2d.x % xLength][minY + vec2d.y % yLength]) {
+                this.sample[vec2d.x][vec2d.y] = selectedTileArea[minX + vec2d.x % xLength][minY + vec2d.y % yLength];
             }
         }
     };

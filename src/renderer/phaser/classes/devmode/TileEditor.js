@@ -263,7 +263,7 @@ var TileEditor = /** @class */ (function () {
         if (taro.developerMode.active && taro.developerMode.activeTab === 'map') {
             var devModeScene = this.devModeTools.scene;
             var palette = this.tilePalette;
-            var map = this.gameScene.tilemap;
+            var map_1 = this.gameScene.tilemap;
             var paletteMap = palette.map;
             var worldPoint = this.gameScene.cameras.main.getWorldPoint(this.gameScene.input.activePointer.x, this.gameScene.input.activePointer.y);
             var palettePoint = devModeScene.cameras.getCamera('palette').getWorldPoint(devModeScene.input.activePointer.x, devModeScene.input.activePointer.y);
@@ -284,38 +284,40 @@ var TileEditor = /** @class */ (function () {
                 paletteMarker.graphics.y = paletteMap.tileToWorldY(palettePointerTileY);
             }
             else if ((!devModeScene.pointerInsidePalette() || !palette.visible) &&
-                !devModeScene.pointerInsideButtons && !devModeScene.pointerInsideWidgets() && map.currentLayerIndex >= 0) {
+                !devModeScene.pointerInsideButtons && !devModeScene.pointerInsideWidgets() && map_1.currentLayerIndex >= 0) {
                 this.devModeTools.tooltip.showMessage('Position', "X: ".concat(Math.floor(worldPoint.x).toString(), ", Y: ").concat(Math.floor(worldPoint.y).toString()));
                 if (marker.active) {
                     paletteMarker.graphics.setVisible(false);
                     marker.graphics.setVisible(true);
                     marker.showPreview(true);
                     // Rounds down to nearest tile
-                    var pointerTileX_1 = map.worldToTileX(worldPoint.x - (marker.graphics.scaleX - 0.5) * TILE_SIZE / 2, true);
-                    var pointerTileY_1 = map.worldToTileY(worldPoint.y - (marker.graphics.scaleY - 0.5) * TILE_SIZE / 2, true);
+                    var pointerTileX_1 = map_1.worldToTileX(worldPoint.x - (marker.graphics.scaleX - 0.5) * TILE_SIZE / 2, true);
+                    var pointerTileY_1 = map_1.worldToTileY(worldPoint.y - (marker.graphics.scaleY - 0.5) * TILE_SIZE / 2, true);
                     // Snap to tile coordinates, but in world space
-                    marker.graphics.x = map.tileToWorldX(pointerTileX_1);
-                    marker.graphics.y = map.tileToWorldY(pointerTileY_1);
-                    marker.preview.x = map.tileToWorldX(pointerTileX_1);
-                    marker.preview.y = map.tileToWorldY(pointerTileY_1);
+                    marker.graphics.x = map_1.tileToWorldX(pointerTileX_1);
+                    marker.graphics.y = map_1.tileToWorldY(pointerTileY_1);
+                    marker.preview.x = map_1.tileToWorldX(pointerTileX_1);
+                    marker.preview.y = map_1.tileToWorldY(pointerTileY_1);
                     if (devModeScene.input.manager.activePointer.leftButtonDown()) {
                         if (this.devModeTools.modeButtons[2].active || this.devModeTools.modeButtons[3].active) {
                             var originTileArea_1 = {};
                             var nowBrushArea_1 = this.brushArea;
                             var sample_1 = JSON.parse(JSON.stringify(this.brushArea.sample));
-                            var noDifferent = true;
-                            for (var i = 0; i < this.brushArea.size.x; i++) {
-                                for (var j = 0; j < this.brushArea.size.y; j++) {
-                                    if (!originTileArea_1[i]) {
-                                        originTileArea_1[i] = {};
+                            var noDifferent_1 = true;
+                            Object.entries(sample_1).map(function (_a) {
+                                var x = _a[0], obj = _a[1];
+                                Object.entries(obj).map(function (_a) {
+                                    var y = _a[0], value = _a[1];
+                                    if (!originTileArea_1[x]) {
+                                        originTileArea_1[x] = {};
                                     }
-                                    originTileArea_1[i][j] = this.getTile(pointerTileX_1 + i, pointerTileY_1 + j, map);
-                                    if (sample_1[i][j] !== originTileArea_1[i][j]) {
-                                        noDifferent = false;
+                                    originTileArea_1[x][y] = _this.getTile(pointerTileX_1 + parseInt(x), pointerTileY_1 + parseInt(y), map_1);
+                                    if (value !== originTileArea_1[x][y]) {
+                                        noDifferent_1 = false;
                                     }
-                                }
-                            }
-                            if (!noDifferent) {
+                                });
+                            });
+                            if (!noDifferent_1) {
                                 this.commandController.addCommand({
                                     func: function () {
                                         for (var i = 0; i < nowBrushArea_1.size.x; i++) {
@@ -337,11 +339,11 @@ var TileEditor = /** @class */ (function () {
                             }
                         }
                         else if (this.devModeTools.modeButtons[4].active) {
-                            var targetTile = this.getTile(pointerTileX_1, pointerTileY_1, map);
+                            var targetTile = this.getTile(pointerTileX_1, pointerTileY_1, map_1);
                             var selectedTile = Object.values(Object.values(this.selectedTileArea)[0])[0];
-                            if (selectedTile && targetTile !== selectedTile && (targetTile || map.currentLayerIndex === 0 || map.currentLayerIndex === 1)) {
-                                this.floodFill(map.currentLayerIndex, targetTile, selectedTile, pointerTileX_1, pointerTileY_1, false);
-                                taro.network.send('editTile', { gid: selectedTile, layer: map.currentLayerIndex, x: pointerTileX_1, y: pointerTileY_1, tool: 'flood' });
+                            if (selectedTile && targetTile !== selectedTile && (targetTile || map_1.currentLayerIndex === 0 || map_1.currentLayerIndex === 1)) {
+                                this.floodFill(map_1.currentLayerIndex, targetTile, selectedTile, pointerTileX_1, pointerTileY_1, false);
+                                taro.network.send('editTile', { gid: selectedTile, layer: map_1.currentLayerIndex, x: pointerTileX_1, y: pointerTileY_1, tool: 'flood' });
                             }
                         }
                     }

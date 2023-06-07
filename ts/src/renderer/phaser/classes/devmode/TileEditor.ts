@@ -340,17 +340,17 @@ class TileEditor {
 							const nowBrushArea = this.brushArea;
 							const sample = JSON.parse(JSON.stringify(this.brushArea.sample));
 							let noDifferent = true;
-							for (let i = 0; i < this.brushArea.size.x; i++) {
-								for (let j = 0; j < this.brushArea.size.y; j++) {
-									if (!originTileArea[i]) {
-										originTileArea[i] = {};
+							Object.entries(sample).map(([x, obj]) => {
+								Object.entries(obj).map(([y, value]) => {
+									if (!originTileArea[x]) {
+										originTileArea[x] = {};
 									}
-									originTileArea[i][j] = this.getTile(pointerTileX + i, pointerTileY + j, map);
-									if (sample[i][j] !== originTileArea[i][j]) {
+									originTileArea[x][y] = this.getTile(pointerTileX + parseInt(x), pointerTileY + parseInt(y), map);
+									if (value !== originTileArea[x][y]) {
 										noDifferent = false;
 									}
-								}
-							}
+								});
+							});
 							if (!noDifferent) {
 								this.commandController.addCommand({
 									func: () => {

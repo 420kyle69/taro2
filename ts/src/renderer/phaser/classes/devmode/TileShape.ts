@@ -88,14 +88,17 @@ class TileShape {
 	}
 
 	calcRect(minX: number, xLength: number, minY: number, yLength: number, selectedTileArea: Record<number, Record<number, number>>, size: Vector2D) {
-		for (let i = 0; i < size.x; i++) {
-			if (!this.sample[i]) {
-				this.sample[i] = {};
+		const rectGenerator = rect(xLength, yLength);
+		let maxLoop = MAX_LOOP;
+		while (maxLoop > 0) {
+			const rectValue = rectGenerator.next();
+			if(rectValue.done) {
+				break;
 			}
-			for (let j = 0; j < size.y; j++) {
-				if (selectedTileArea[minX + i % xLength] && selectedTileArea[minX + i % xLength][minY + j % yLength]) {
-					this.sample[i][j] = selectedTileArea[minX + i % xLength][minY + j % yLength];
-				}
+			const vec2d = rectValue.value as Vector2D;
+
+			if (selectedTileArea[minX + vec2d.x % xLength] && selectedTileArea[minX + vec2d.x % xLength][minY + vec2d.y % yLength]) {
+				this.sample[vec2d.x][vec2d.y] = selectedTileArea[minX + vec2d.x % xLength][minY + vec2d.y % yLength];
 			}
 		}
 	}
