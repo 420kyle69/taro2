@@ -24,6 +24,7 @@ var DevModeScene = /** @class */ (function (_super) {
         this.pointerInsideButtons = false;
         this.regions = [];
         this.entityImages = [];
+        this.showRepublishWarning = false;
         taro.client.on('unlockCamera', function () {
             _this.gameScene.cameras.main.stopFollow();
         });
@@ -157,6 +158,9 @@ var DevModeScene = /** @class */ (function (_super) {
                     });
                 }
             });
+            if (this.showRepublishWarning) {
+                inGameEditor.showRepublishToInitEntitiesWarning();
+            }
         }
         taro.network.send('updateClientInitEntities', true);
         this.entityImages.forEach(function (image) {
@@ -180,7 +184,7 @@ var DevModeScene = /** @class */ (function (_super) {
                 if (action.actionId)
                     new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action);
                 else {
-                    console.log('no action id, json is incorrect, pls republish game');
+                    this.showRepublishWarning = true;
                 }
             }
             else if (action.type === 'createUnitAtPosition') {
@@ -188,21 +192,21 @@ var DevModeScene = /** @class */ (function (_super) {
                 if (action.actionId)
                     new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action, 'unit');
                 else {
-                    console.log('no action id, json is incorrect, pls republish game');
+                    this.showRepublishWarning = true;
                 }
             }
             else if (action.type === 'spawnItem' || action.type === 'createItemWithMaxQuantityAtPosition') {
                 if (action.actionId)
                     new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action, 'item');
                 else {
-                    console.log('no action id, json is incorrect, pls republish game');
+                    this.showRepublishWarning = true;
                 }
             }
             else if (action.type === 'createProjectileAtPosition') {
                 if (action.actionId)
                     new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action, 'projectile');
                 else {
-                    console.log('no action id, json is incorrect, pls republish game');
+                    this.showRepublishWarning = true;
                 }
             }
         }
