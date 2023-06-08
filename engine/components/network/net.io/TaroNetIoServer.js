@@ -66,7 +66,7 @@ var TaroNetIoServer = {
 					let kicked = false;
 					if (clientSyncs && clientSyncs <= 5) {
 						kicked = true;
-						socket.close();
+						socket.close('User kicked for spamming network commands.');
 					}
 
 					let playerName = 'guest user';
