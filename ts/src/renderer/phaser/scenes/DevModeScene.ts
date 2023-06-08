@@ -181,31 +181,7 @@ class DevModeScene extends PhaserScene {
 			Object.values(taro.game.data.scripts).forEach((script) => {
 				if (script.triggers?.[0]?.type === 'gameStart') {
 					Object.values(script.actions).forEach((action) => {
-                        if (!action.disabled) {
-                            if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || action.type === 'createEntityAtPositionWithDimensions') {
-                                //console.log(action);
-                                if (action.actionId) new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action);
-                                else {
-                                    console.log('no action id, json is incorrect, pls republish game');
-                                }
-                            } else if (action.type === 'createUnitAtPosition') {
-                                //console.log('createUnitAtPosition', action);
-                                if (action.actionId) new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action, 'unit');
-                                else {
-                                    console.log('no action id, json is incorrect, pls republish game');
-                                }
-                            } else if (action.type === 'spawnItem' || action.type === 'createItemWithMaxQuantityAtPosition') {
-                                if (action.actionId) new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action, 'item');
-                                else {
-                                    console.log('no action id, json is incorrect, pls republish game');
-                                }
-                            } else if (action.type === 'createProjectileAtPosition') {
-                                if (action.actionId) new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action, 'projectile');
-                                else {
-                                    console.log('no action id, json is incorrect, pls republish game');
-                                }
-                            } 
-                        }
+                        this.createEntityImage(action);
 					});
 				}
 			});
@@ -216,9 +192,6 @@ class DevModeScene extends PhaserScene {
 		this.entityImages.forEach((image) => {
 			image.setVisible(true);
 		});
-
-
-		//console.log(Object.values(taro.game.data.scripts))
 	}
 
 	leaveMapTab (): void {
@@ -232,6 +205,34 @@ class DevModeScene extends PhaserScene {
 		});
 
 	}
+
+    createEntityImage(action: ActionData): void {
+        if (!action.disabled) {
+            if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || action.type === 'createEntityAtPositionWithDimensions') {
+                //console.log(action);
+                if (action.actionId) new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action);
+                else {
+                    console.log('no action id, json is incorrect, pls republish game');
+                }
+            } else if (action.type === 'createUnitAtPosition') {
+                //console.log('createUnitAtPosition', action);
+                if (action.actionId) new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action, 'unit');
+                else {
+                    console.log('no action id, json is incorrect, pls republish game');
+                }
+            } else if (action.type === 'spawnItem' || action.type === 'createItemWithMaxQuantityAtPosition') {
+                if (action.actionId) new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action, 'item');
+                else {
+                    console.log('no action id, json is incorrect, pls republish game');
+                }
+            } else if (action.type === 'createProjectileAtPosition') {
+                if (action.actionId) new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action, 'projectile');
+                else {
+                    console.log('no action id, json is incorrect, pls republish game');
+                }
+            } 
+        }
+    }
 
 	pointerInsideMap(pointerX: number, pointerY: number, map: Phaser.Tilemaps.Tilemap): boolean {
 		return (0 <= pointerX && pointerX < map.width
