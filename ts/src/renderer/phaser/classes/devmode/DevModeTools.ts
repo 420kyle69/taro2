@@ -13,7 +13,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	layerHideButtons: DevToolButton[];
 	toolButtonsContainer: Phaser.GameObjects.Container;
 	modeButtons: DevToolButton[];
-	brushButtons: DevToolButton[];
+	brushButtons: Record<Shape, DevToolButton>;
 	brushSize = 1;
 	tooltip: DevTooltip;
 
@@ -89,12 +89,12 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.cursorButton = this.modeButtons[0];
 		this.highlightModeButton(0);
 
-		this.brushButtons = [];
-		this.brushButtons.push(
-			new DevToolButton(this, '1x1', '1x1', 'changes the palette area size to 1x1', null, 0, (h + s) * 5, h * 2 - s, toolButtonsContainer, this.selectSingle.bind(this)),
-			new DevToolButton(this, '2x2', '2x2', 'changes the palette area size to 2x2', null, h * 2, (h + s) * 5, h * 2 - s, toolButtonsContainer, this.selectArea.bind(this))
-		);
-		this.brushButtons[0].highlight('active');
+		this.brushButtons = {
+			'circle': new DevToolButton(this, 'circle', 'circle', 'changes the brush shape to circle', null, 0, (h + s) * 6, h * 4 - s, toolButtonsContainer, this.changeShape.bind(this), 'circle'),
+			'rectangle': new DevToolButton(this, 'rectangle', 'rectangle', 'changes the brush shape to rectangle', null, 0, (h + s) * 4, h * 4 - s, toolButtonsContainer, this.changeShape.bind(this), 'rectangle'),
+			'diamond': new DevToolButton(this, 'diamond', 'diamond', 'changes the brush shape to diamond', null, 0, (h + s) * 5, h * 4 - s, toolButtonsContainer, this.changeShape.bind(this), 'diamond')
+		};
+		this.brushButtons['rectangle'].highlight('active');
 
 		this.layerButtons = [];
 		this.layerButtons.push(
@@ -298,14 +298,12 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		const undoKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z, false, true);
 		undoKey.on('down', (event) => {
 			if (event.ctrlKey) {
-				console.log('undo');
 				this.commandController.undo();
 			}
 		});
 		const redoKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Y, false, true);
 		redoKey.on('down', (event) => {
 			if (event.ctrlKey) {
-				console.log('redo');
 				this.commandController.redo();
 			}
 		});
@@ -337,7 +335,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	emptyTile(): void {
 		if (!this.modeButtons[3].active) {
 			this.tileEditor.lastSelectedTileArea = this.tileEditor.selectedTileArea;
-			this.tileEditor.selectedTileArea = {};
+			this.tileEditor.selectedTileArea = { 0: { 0: -1 } };
 			this.tileEditor.activateMarkers(true);
 			this.tileEditor.marker.changePreview();
 			this.scene.regionEditor.regionTool = false;
@@ -376,8 +374,8 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	selectSingle(): void {
 		this.tileEditor.clearTint();
 		this.tileEditor.paletteArea = { x: 1, y: 1 };
-		this.brushButtons[0].highlight('active');
-		this.brushButtons[1].highlight('no');
+		// this.brushButtons[0].highlight('active');
+		// this.brushButtons[1].highlight('no');
 		this.tileEditor.activateMarkers(true);
 		this.tileEditor.marker.changePreview();
 		this.tileEditor.paletteMarker.changePreview();
@@ -394,6 +392,18 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.tileEditor.activateMarkers(true);
 		this.tileEditor.marker.changePreview();
 		this.tileEditor.paletteMarker.changePreview();
+		if (!this.modeButtons[3].active) {
+			this.brush();
+		}
+	}
+
+	changeShape(shape: Shape): void {
+		this.tileEditor.brushArea.shape = shape;
+		Object.values(this.brushButtons).map((btn) => {
+			btn.highlight('no');
+		});
+		this.brushButtons[shape].highlight('active');
+		this.tileEditor.marker.changePreview();
 		if (!this.modeButtons[3].active) {
 			this.brush();
 		}

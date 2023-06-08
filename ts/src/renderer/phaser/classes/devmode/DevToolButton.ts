@@ -16,7 +16,7 @@ class DevToolButton {
 		w: number,
 		container: Phaser.GameObjects.Container,
 		func: (...args: any[]) => void,
-		value?: number
+		value?: number | string
 	) {
 		this.name = text;
 		const h = devModeTools.BUTTON_HEIGHT;

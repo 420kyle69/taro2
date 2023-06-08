@@ -59,11 +59,6 @@ class TileMarker {
 			}
 			this.images[i][j] = this.addImage(i, j);
 			this.images[i][j].setTexture(this.extrudedKey, tile - 1).setAlpha(0.75);
-			// apply tint to palette tile
-			const paletteLayer = this.devModeScene.tileEditor.tilePalette.map.layers[0];
-			const row = Math.floor((tile - 1) / paletteLayer.width);
-			const paletteTile = paletteLayer?.data[row]?.[tile - 1 - (row * paletteLayer.width)];
-			if (paletteTile) paletteTile.tint = 0x87cfff;
 		} else if (this.images[i][j]) this.images[i][j].setAlpha(0);
 	}
 
@@ -82,12 +77,6 @@ class TileMarker {
 					}
 				}
 			}
-			// Object.entries(previewTarget).map(([x, object]) => {
-			// 	Object.entries(object).map(([y, v]) => {
-			// 		this.changeImage(v, parseInt(x), parseInt(y));
-			// 	});
-			// });
-
 		}
 	}
 

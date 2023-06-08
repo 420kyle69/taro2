@@ -138,3 +138,4 @@ const diamond = function* (radius: number) {
 		}
 	}
 };
+

@@ -38,19 +38,12 @@ var TileMarker = /** @class */ (function () {
         return image;
     };
     TileMarker.prototype.changeImage = function (tile, i, j) {
-        var _a;
         if (tile && tile !== 0 && tile !== -1) {
             if (!this.images[i]) {
                 this.images[i] = {};
             }
             this.images[i][j] = this.addImage(i, j);
             this.images[i][j].setTexture(this.extrudedKey, tile - 1).setAlpha(0.75);
-            // apply tint to palette tile
-            var paletteLayer = this.devModeScene.tileEditor.tilePalette.map.layers[0];
-            var row = Math.floor((tile - 1) / paletteLayer.width);
-            var paletteTile = (_a = paletteLayer === null || paletteLayer === void 0 ? void 0 : paletteLayer.data[row]) === null || _a === void 0 ? void 0 : _a[tile - 1 - (row * paletteLayer.width)];
-            if (paletteTile)
-                paletteTile.tint = 0x87cfff;
         }
         else if (this.images[i][j])
             this.images[i][j].setAlpha(0);
@@ -70,11 +63,6 @@ var TileMarker = /** @class */ (function () {
                     }
                 }
             }
-            // Object.entries(previewTarget).map(([x, object]) => {
-            // 	Object.entries(object).map(([y, v]) => {
-            // 		this.changeImage(v, parseInt(x), parseInt(y));
-            // 	});
-            // });
         }
     };
     TileMarker.prototype.hideImages = function () {

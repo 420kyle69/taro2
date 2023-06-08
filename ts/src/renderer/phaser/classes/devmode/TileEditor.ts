@@ -54,10 +54,14 @@ class TileEditor {
 				this.startDragIn = 'palette';
 				pointerPosition.x = devModeScene.input.activePointer.x;
 				pointerPosition.y = devModeScene.input.activePointer.y;
+				if (!devModeTools.modeButtons[3].active) this.devModeTools.brush();
 				if (shiftKey.isDown) {
 					//pass
 				} else {
-					this.selectedTileArea = {};
+					if (p.button === 0) {
+						this.selectedTileArea = {};
+						this.clearTint();
+					}
 				}
 			}
 		});
@@ -70,32 +74,37 @@ class TileEditor {
 				const palettePoint = devModeScene.cameras.getCamera('palette').getWorldPoint(p.x, p.y);
 				const palettePointerTileX = palette.map.worldToTileX(palettePoint.x);
 				const palettePointerTileY = palette.map.worldToTileY(palettePoint.y);
-				if (!devModeTools.modeButtons[4].active) this.devModeTools.brush();
-				this.clearTint();
 				if (!this.selectedTileArea[palettePointerTileX]) {
 					this.selectedTileArea[palettePointerTileX] = {};
 				}
-				this.selectedTileArea[palettePointerTileX][palettePointerTileY] = this.getTile(palettePointerTileX, palettePointerTileY, palette.map);
+				const tile = this.getTile(palettePointerTileX, palettePointerTileY, palette.map);
+				this.selectedTileArea[palettePointerTileX][palettePointerTileY] = tile;
+				// apply tint to palette tile
+				const paletteLayer = this.tilePalette.map.layers[0];
+				const row = Math.floor((tile - 1) / paletteLayer.width);
+				const paletteTile = paletteLayer?.data[row]?.[tile - 1 - (row * paletteLayer.width)];
+				if (paletteTile) paletteTile.tint = 0x87cfff;
 				this.marker.changePreview();
-
 			}
-
-
 		});
 
 		devModeScene.input.on('pointerup', (p) => {
 			if (this.startDragIn === 'palette' &&
 				Math.abs(pointerPosition.x - devModeScene.input.activePointer.x) < 50 &&
-				Math.abs(pointerPosition.y - devModeScene.input.activePointer.y) < 50) {
+				Math.abs(pointerPosition.y - devModeScene.input.activePointer.y) < 50 && p.button === 0) {
 				const palettePoint = devModeScene.cameras.getCamera('palette').getWorldPoint(devModeScene.input.activePointer.x, devModeScene.input.activePointer.y);
 				const palettePointerTileX = palette.map.worldToTileX(palettePoint.x);
 				const palettePointerTileY = palette.map.worldToTileY(palettePoint.y);
-				if (!devModeTools.modeButtons[4].active) this.devModeTools.brush();
-				this.clearTint();
 				if (!this.selectedTileArea[palettePointerTileX]) {
 					this.selectedTileArea[palettePointerTileX] = {};
 				}
-				this.selectedTileArea[palettePointerTileX][palettePointerTileY] = this.getTile(palettePointerTileX, palettePointerTileY, palette.map);
+				const tile = this.getTile(palettePointerTileX, palettePointerTileY, palette.map);
+				this.selectedTileArea[palettePointerTileX][palettePointerTileY] = tile;
+				// apply tint to palette tile
+				const paletteLayer = this.tilePalette.map.layers[0];
+				const row = Math.floor((tile - 1) / paletteLayer.width);
+				const paletteTile = paletteLayer?.data[row]?.[tile - 1 - (row * paletteLayer.width)];
+				if (paletteTile) paletteTile.tint = 0x87cfff;
 				this.marker.changePreview();
 			}
 			if (this.startDragIn === 'palette') {
@@ -108,6 +117,7 @@ class TileEditor {
 			if (this.startDragIn === 'map' &&
 				Math.abs(pointerPosition.x - gameScene.input.activePointer.x) < 50 &&
 				Math.abs(pointerPosition.y - gameScene.input.activePointer.y) < 50 &&
+				p.button === 0 &&
 				!devModeTools.modeButtons[3].active) {
 				const worldPoint = gameScene.cameras.main.getWorldPoint(gameScene.input.activePointer.x, gameScene.input.activePointer.y);
 				const pointerTileX = gameMap.worldToTileX(worldPoint.x);
@@ -140,6 +150,7 @@ class TileEditor {
 		this.marker.showPreview(value);
 		this.paletteMarker.graphics.setVisible(value);
 	}
+
 
 	clearTint(): void {
 		this.tilePalette.map.layers[0].data.forEach((tilearray) => {
@@ -337,7 +348,7 @@ class TileEditor {
 					if (devModeScene.input.manager.activePointer.leftButtonDown()) {
 						if (this.devModeTools.modeButtons[2].active || this.devModeTools.modeButtons[3].active) {
 							const originTileArea = {};
-							const nowBrushArea = this.brushArea;
+							const nowBrushArea = JSON.parse(JSON.stringify(this.brushArea));
 							const sample = JSON.parse(JSON.stringify(this.brushArea.sample));
 							let noDifferent = true;
 							Object.entries(sample).map(([x, obj]) => {

@@ -14,7 +14,7 @@ class CommandController implements CommandControllerProps {
 	defaultCommands: Record<DefaultCommands, () => void>;
 	nowInsertIndex = 0;
 	maxCommands: number;
-	constructor(defaultCommands: Record<DefaultCommands, () => void>, maxCommands = 50) {
+	constructor(defaultCommands: Record<DefaultCommands, () => void>, maxCommands = 200) {
 		this.defaultCommands = defaultCommands;
 		this.maxCommands = maxCommands;
 	}

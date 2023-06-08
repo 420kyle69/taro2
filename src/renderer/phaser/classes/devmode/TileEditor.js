@@ -33,15 +33,21 @@ var TileEditor = /** @class */ (function () {
                 _this.startDragIn = 'palette';
                 pointerPosition.x = devModeScene.input.activePointer.x;
                 pointerPosition.y = devModeScene.input.activePointer.y;
+                if (!devModeTools.modeButtons[3].active)
+                    _this.devModeTools.brush();
                 if (shiftKey.isDown) {
                     //pass
                 }
                 else {
-                    _this.selectedTileArea = {};
+                    if (p.button === 0) {
+                        _this.selectedTileArea = {};
+                        _this.clearTint();
+                    }
                 }
             }
         });
         devModeScene.input.on('pointermove', function (p) {
+            var _a;
             if (devModeTools.modeButtons[2].active && p.isDown && p.button === 0 &&
                 Math.abs(pointerPosition.x - devModeScene.input.activePointer.x) < 50 &&
                 Math.abs(pointerPosition.y - devModeScene.input.activePointer.y) < 50 &&
@@ -49,30 +55,39 @@ var TileEditor = /** @class */ (function () {
                 var palettePoint = devModeScene.cameras.getCamera('palette').getWorldPoint(p.x, p.y);
                 var palettePointerTileX = palette.map.worldToTileX(palettePoint.x);
                 var palettePointerTileY = palette.map.worldToTileY(palettePoint.y);
-                if (!devModeTools.modeButtons[4].active)
-                    _this.devModeTools.brush();
-                _this.clearTint();
                 if (!_this.selectedTileArea[palettePointerTileX]) {
                     _this.selectedTileArea[palettePointerTileX] = {};
                 }
-                _this.selectedTileArea[palettePointerTileX][palettePointerTileY] = _this.getTile(palettePointerTileX, palettePointerTileY, palette.map);
+                var tile = _this.getTile(palettePointerTileX, palettePointerTileY, palette.map);
+                _this.selectedTileArea[palettePointerTileX][palettePointerTileY] = tile;
+                // apply tint to palette tile
+                var paletteLayer = _this.tilePalette.map.layers[0];
+                var row = Math.floor((tile - 1) / paletteLayer.width);
+                var paletteTile = (_a = paletteLayer === null || paletteLayer === void 0 ? void 0 : paletteLayer.data[row]) === null || _a === void 0 ? void 0 : _a[tile - 1 - (row * paletteLayer.width)];
+                if (paletteTile)
+                    paletteTile.tint = 0x87cfff;
                 _this.marker.changePreview();
             }
         });
         devModeScene.input.on('pointerup', function (p) {
+            var _a;
             if (_this.startDragIn === 'palette' &&
                 Math.abs(pointerPosition.x - devModeScene.input.activePointer.x) < 50 &&
-                Math.abs(pointerPosition.y - devModeScene.input.activePointer.y) < 50) {
+                Math.abs(pointerPosition.y - devModeScene.input.activePointer.y) < 50 && p.button === 0) {
                 var palettePoint = devModeScene.cameras.getCamera('palette').getWorldPoint(devModeScene.input.activePointer.x, devModeScene.input.activePointer.y);
                 var palettePointerTileX = palette.map.worldToTileX(palettePoint.x);
                 var palettePointerTileY = palette.map.worldToTileY(palettePoint.y);
-                if (!devModeTools.modeButtons[4].active)
-                    _this.devModeTools.brush();
-                _this.clearTint();
                 if (!_this.selectedTileArea[palettePointerTileX]) {
                     _this.selectedTileArea[palettePointerTileX] = {};
                 }
-                _this.selectedTileArea[palettePointerTileX][palettePointerTileY] = _this.getTile(palettePointerTileX, palettePointerTileY, palette.map);
+                var tile = _this.getTile(palettePointerTileX, palettePointerTileY, palette.map);
+                _this.selectedTileArea[palettePointerTileX][palettePointerTileY] = tile;
+                // apply tint to palette tile
+                var paletteLayer = _this.tilePalette.map.layers[0];
+                var row = Math.floor((tile - 1) / paletteLayer.width);
+                var paletteTile = (_a = paletteLayer === null || paletteLayer === void 0 ? void 0 : paletteLayer.data[row]) === null || _a === void 0 ? void 0 : _a[tile - 1 - (row * paletteLayer.width)];
+                if (paletteTile)
+                    paletteTile.tint = 0x87cfff;
                 _this.marker.changePreview();
             }
             if (_this.startDragIn === 'palette') {
@@ -84,6 +99,7 @@ var TileEditor = /** @class */ (function () {
             if (_this.startDragIn === 'map' &&
                 Math.abs(pointerPosition.x - gameScene.input.activePointer.x) < 50 &&
                 Math.abs(pointerPosition.y - gameScene.input.activePointer.y) < 50 &&
+                p.button === 0 &&
                 !devModeTools.modeButtons[3].active) {
                 var worldPoint = gameScene.cameras.main.getWorldPoint(gameScene.input.activePointer.x, gameScene.input.activePointer.y);
                 var pointerTileX = gameMap.worldToTileX(worldPoint.x);
@@ -301,7 +317,7 @@ var TileEditor = /** @class */ (function () {
                     if (devModeScene.input.manager.activePointer.leftButtonDown()) {
                         if (this.devModeTools.modeButtons[2].active || this.devModeTools.modeButtons[3].active) {
                             var originTileArea_1 = {};
-                            var nowBrushArea_1 = this.brushArea;
+                            var nowBrushArea_1 = JSON.parse(JSON.stringify(this.brushArea));
                             var sample_1 = JSON.parse(JSON.stringify(this.brushArea.sample));
                             var noDifferent_1 = true;
                             Object.entries(sample_1).map(function (_a) {

@@ -60,7 +60,6 @@ class TileShape {
 				}
 				this.sample[vec2d.x][vec2d.y] = selectedTileArea[minX + vec2d.x % xLength][minY + vec2d.y % yLength];
 			}
-			console.log(vec2d);
 			maxLoop -= 1;
 		}
 	}

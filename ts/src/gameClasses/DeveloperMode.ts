@@ -9,7 +9,7 @@ class DeveloperMode {
 	enter(): void {
 		console.log('client enter developer mode');
 		this.active = true;
-		this.changeTab('map');
+		this.changeTab('play');
 	}
 
 	leave (): void {

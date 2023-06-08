@@ -1,6 +1,6 @@
 var CommandController = /** @class */ (function () {
     function CommandController(defaultCommands, maxCommands) {
-        if (maxCommands === void 0) { maxCommands = 50; }
+        if (maxCommands === void 0) { maxCommands = 200; }
         this.commands = [];
         this.nowInsertIndex = 0;
         this.defaultCommands = defaultCommands;

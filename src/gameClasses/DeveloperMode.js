@@ -6,7 +6,7 @@ var DeveloperMode = /** @class */ (function () {
     DeveloperMode.prototype.enter = function () {
         console.log('client enter developer mode');
         this.active = true;
-        this.changeTab('map');
+        this.changeTab('play');
     };
     DeveloperMode.prototype.leave = function () {
         console.log('client leave developer mode');
