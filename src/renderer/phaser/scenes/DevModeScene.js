@@ -153,38 +153,7 @@ var DevModeScene = /** @class */ (function (_super) {
                 var _a, _b;
                 if (((_b = (_a = script.triggers) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.type) === 'gameStart') {
                     Object.values(script.actions).forEach(function (action) {
-                        if (!action.disabled) {
-                            if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || action.type === 'createEntityAtPositionWithDimensions') {
-                                //console.log(action);
-                                if (action.actionId)
-                                    new EntityImage(_this.gameScene, _this.devModeTools, _this.entityImages, action);
-                                else {
-                                    console.log('no action id, json is incorrect, pls republish game');
-                                }
-                            }
-                            else if (action.type === 'createUnitAtPosition') {
-                                //console.log('createUnitAtPosition', action);
-                                if (action.actionId)
-                                    new EntityImage(_this.gameScene, _this.devModeTools, _this.entityImages, action, 'unit');
-                                else {
-                                    console.log('no action id, json is incorrect, pls republish game');
-                                }
-                            }
-                            else if (action.type === 'spawnItem' || action.type === 'createItemWithMaxQuantityAtPosition') {
-                                if (action.actionId)
-                                    new EntityImage(_this.gameScene, _this.devModeTools, _this.entityImages, action, 'item');
-                                else {
-                                    console.log('no action id, json is incorrect, pls republish game');
-                                }
-                            }
-                            else if (action.type === 'createProjectileAtPosition') {
-                                if (action.actionId)
-                                    new EntityImage(_this.gameScene, _this.devModeTools, _this.entityImages, action, 'projectile');
-                                else {
-                                    console.log('no action id, json is incorrect, pls republish game');
-                                }
-                            }
-                        }
+                        _this.createEntityImage(action);
                     });
                 }
             });
@@ -193,7 +162,6 @@ var DevModeScene = /** @class */ (function (_super) {
         this.entityImages.forEach(function (image) {
             image.setVisible(true);
         });
-        //console.log(Object.values(taro.game.data.scripts))
     };
     DevModeScene.prototype.leaveMapTab = function () {
         if (this.devModeTools)
@@ -204,6 +172,40 @@ var DevModeScene = /** @class */ (function (_super) {
         this.gameScene.renderedEntities.forEach(function (element) {
             element.setVisible(true);
         });
+    };
+    DevModeScene.prototype.createEntityImage = function (action) {
+        if (!action.disabled) {
+            if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || action.type === 'createEntityAtPositionWithDimensions') {
+                //console.log(action);
+                if (action.actionId)
+                    new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action);
+                else {
+                    console.log('no action id, json is incorrect, pls republish game');
+                }
+            }
+            else if (action.type === 'createUnitAtPosition') {
+                //console.log('createUnitAtPosition', action);
+                if (action.actionId)
+                    new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action, 'unit');
+                else {
+                    console.log('no action id, json is incorrect, pls republish game');
+                }
+            }
+            else if (action.type === 'spawnItem' || action.type === 'createItemWithMaxQuantityAtPosition') {
+                if (action.actionId)
+                    new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action, 'item');
+                else {
+                    console.log('no action id, json is incorrect, pls republish game');
+                }
+            }
+            else if (action.type === 'createProjectileAtPosition') {
+                if (action.actionId)
+                    new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action, 'projectile');
+                else {
+                    console.log('no action id, json is incorrect, pls republish game');
+                }
+            }
+        }
     };
     DevModeScene.prototype.pointerInsideMap = function (pointerX, pointerY, map) {
         return (0 <= pointerX && pointerX < map.width

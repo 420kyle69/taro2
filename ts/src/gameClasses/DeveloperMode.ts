@@ -15,12 +15,8 @@ class DeveloperMode {
 			if (script.triggers?.[0]?.type === 'gameStart') {
 				Object.values(script.actions).forEach((action) => {
                     if (!action.disabled) {
-                        if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || 
-                        action.type === 'createEntityAtPositionWithDimensions' ||
-                        action.type === 'createUnitAtPosition' ||
-                        action.type === 'spawnItem' || action.type === 'createItemWithMaxQuantityAtPosition' || 
-                        action.type === 'createProjectileAtPosition') {
-					    	//console.log(action);
+                        const actionTypesArray = ['createEntityForPlayerAtPositionWithDimensions', 'createEntityAtPositionWithDimensions', 'createUnitAtPosition', 'spawnItem', 'createItemWithMaxQuantityAtPosition', 'createProjectileAtPosition']
+                        if (actionTypesArray.includes(action.type)) {
                             if (action.actionId) {
                                 this.initEntities.push(action);
                             } else {
