@@ -17,14 +17,18 @@ class DeveloperMode {
                     if (!action.disabled && action.position?.function === 'xyCoordinate' 
                     && !isNaN(action.position?.x) && !isNaN(action.position?.y) 
                     && !isNaN(action.width) && !isNaN(action.height) && !isNaN(action.angle)) {
-                        const actionTypesArray = ['createEntityForPlayerAtPositionWithDimensions', 'createEntityAtPositionWithDimensions', 'createUnitAtPosition', 'spawnItem', 'createItemWithMaxQuantityAtPosition', 'createProjectileAtPosition']
-                        if (actionTypesArray.includes(action.type)) {
-                            if (action.actionId) {
-                                this.initEntities.push(action);
-                            } else {
-                                console.log('no action id, json is incorrect, pls republish game');
-                            }
-					    }
+                        if ((action.type === 'createEntityForPlayerAtPositionWithDimensions' 
+                        || action.type === 'createEntityAtPositionWithDimensions'
+                        || action.type === 'createUnitForPlayerAtPosition')
+                        && !isNaN(action.width) && !isNaN(action.height) && !isNaN(action.angle)) {
+                            if (action.actionId) this.initEntities.push(action);
+                        } else if ((action.type === 'createUnitAtPosition'
+                        || action.type === 'createProjectileAtPosition') 
+                        && !isNaN(action.angle)) {
+                            if (action.actionId) this.initEntities.push(action);
+                        } else if (action.type === 'spawnItem' || action.type === 'createItemWithMaxQuantityAtPosition') {
+                            if (action.actionId) this.initEntities.push(action);
+                        } 
                     }
 				});
 			}

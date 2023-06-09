@@ -175,18 +175,24 @@ var DevModeScene = /** @class */ (function (_super) {
     DevModeScene.prototype.createEntityImage = function (action) {
         var _a, _b, _c;
         if (!action.disabled && ((_a = action.position) === null || _a === void 0 ? void 0 : _a.function) === 'xyCoordinate'
-            && !isNaN((_b = action.position) === null || _b === void 0 ? void 0 : _b.x) && !isNaN((_c = action.position) === null || _c === void 0 ? void 0 : _c.y)
-            && !isNaN(action.width) && !isNaN(action.height) && !isNaN(action.angle)) {
-            if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || action.type === 'createEntityAtPositionWithDimensions') {
-                //console.log(action);
+            && !isNaN((_b = action.position) === null || _b === void 0 ? void 0 : _b.x) && !isNaN((_c = action.position) === null || _c === void 0 ? void 0 : _c.y)) {
+            if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || action.type === 'createEntityAtPositionWithDimensions'
+                && !isNaN(action.width) && !isNaN(action.height) && !isNaN(action.angle)) {
                 if (action.actionId)
                     new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action);
                 else {
                     this.showRepublishWarning = true;
                 }
             }
-            else if (action.type === 'createUnitAtPosition') {
-                //console.log('createUnitAtPosition', action);
+            else if (action.type === 'createUnitAtPosition' && !isNaN(action.angle)) {
+                if (action.actionId)
+                    new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action, 'unit');
+                else {
+                    this.showRepublishWarning = true;
+                }
+            }
+            else if (action.type === 'createUnitForPlayerAtPosition'
+                && !isNaN(action.angle) && !isNaN(action.width) && !isNaN(action.height)) {
                 if (action.actionId)
                     new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action, 'unit');
                 else {
@@ -200,7 +206,7 @@ var DevModeScene = /** @class */ (function (_super) {
                     this.showRepublishWarning = true;
                 }
             }
-            else if (action.type === 'createProjectileAtPosition') {
+            else if (action.type === 'createProjectileAtPosition' && !isNaN(action.angle)) {
                 if (action.actionId)
                     new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action, 'projectile');
                 else {

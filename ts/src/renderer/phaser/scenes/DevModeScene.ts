@@ -210,26 +210,31 @@ class DevModeScene extends PhaserScene {
 
     createEntityImage(action: ActionData): void {
         if (!action.disabled && action.position?.function === 'xyCoordinate' 
-        && !isNaN(action.position?.x) && !isNaN(action.position?.y) 
-        && !isNaN(action.width) && !isNaN(action.height) && !isNaN(action.angle)) {
-            if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || action.type === 'createEntityAtPositionWithDimensions') {
-                //console.log(action);
+        && !isNaN(action.position?.x) && !isNaN(action.position?.y)) {
+            if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || action.type === 'createEntityAtPositionWithDimensions'
+            && !isNaN(action.width) && !isNaN(action.height) && !isNaN(action.angle)) {
                 if (action.actionId) new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action);
                 else {
 					this.showRepublishWarning = true;
                 }
-            } else if (action.type === 'createUnitAtPosition') {
-                //console.log('createUnitAtPosition', action);
+            } else if (action.type === 'createUnitAtPosition' && !isNaN(action.angle)) {
                 if (action.actionId) new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action, 'unit');
                 else {
 					this.showRepublishWarning = true;
                 }
-            } else if (action.type === 'spawnItem' || action.type === 'createItemWithMaxQuantityAtPosition') {
+            } else if (action.type === 'createUnitForPlayerAtPosition' 
+            && !isNaN(action.angle) && !isNaN(action.width) && !isNaN(action.height)) {
+                if (action.actionId) new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action, 'unit');
+                else {
+					this.showRepublishWarning = true;
+                }
+            }
+            else if (action.type === 'spawnItem' || action.type === 'createItemWithMaxQuantityAtPosition') {
                 if (action.actionId) new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action, 'item');
                 else {
 					this.showRepublishWarning = true;
                 }
-            } else if (action.type === 'createProjectileAtPosition') {
+            } else if (action.type === 'createProjectileAtPosition' && !isNaN(action.angle)) {
                 if (action.actionId) new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action, 'projectile');
                 else {
 					this.showRepublishWarning = true;

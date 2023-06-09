@@ -15,14 +15,22 @@ var DeveloperMode = /** @class */ (function () {
                     if (!action.disabled && ((_a = action.position) === null || _a === void 0 ? void 0 : _a.function) === 'xyCoordinate'
                         && !isNaN((_b = action.position) === null || _b === void 0 ? void 0 : _b.x) && !isNaN((_c = action.position) === null || _c === void 0 ? void 0 : _c.y)
                         && !isNaN(action.width) && !isNaN(action.height) && !isNaN(action.angle)) {
-                        var actionTypesArray = ['createEntityForPlayerAtPositionWithDimensions', 'createEntityAtPositionWithDimensions', 'createUnitAtPosition', 'spawnItem', 'createItemWithMaxQuantityAtPosition', 'createProjectileAtPosition'];
-                        if (actionTypesArray.includes(action.type)) {
-                            if (action.actionId) {
+                        if ((action.type === 'createEntityForPlayerAtPositionWithDimensions'
+                            || action.type === 'createEntityAtPositionWithDimensions'
+                            || action.type === 'createUnitForPlayerAtPosition')
+                            && !isNaN(action.width) && !isNaN(action.height) && !isNaN(action.angle)) {
+                            if (action.actionId)
                                 _this.initEntities.push(action);
-                            }
-                            else {
-                                console.log('no action id, json is incorrect, pls republish game');
-                            }
+                        }
+                        else if ((action.type === 'createUnitAtPosition'
+                            || action.type === 'createProjectileAtPosition')
+                            && !isNaN(action.angle)) {
+                            if (action.actionId)
+                                _this.initEntities.push(action);
+                        }
+                        else if (action.type === 'spawnItem' || action.type === 'createItemWithMaxQuantityAtPosition') {
+                            if (action.actionId)
+                                _this.initEntities.push(action);
                         }
                     }
                 });
