@@ -16,7 +16,7 @@ class DevModeScene extends PhaserScene {
 
 	regions: PhaserRegion[];
 
-	entityImages: (Phaser.GameObjects.Image & {entity: EntityImage})[] ;
+	entityImages: (Phaser.GameObjects.Image & {entity: EntityImage})[];
 
 	showRepublishWarning: boolean;
 

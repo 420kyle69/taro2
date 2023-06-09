@@ -80,6 +80,7 @@ var DevModeTools = /** @class */ (function (_super) {
             }
             ;
         });
+        _this.outline = scene.gameScene.add.graphics();
         return _this;
     }
     DevModeTools.prototype.enterMapTab = function () {

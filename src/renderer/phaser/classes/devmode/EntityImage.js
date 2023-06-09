@@ -2,6 +2,7 @@ var EntityImage = /** @class */ (function () {
     function EntityImage(scene, devModeTools, entityImages, action, type) {
         var _this = this;
         var _a, _b;
+        this.devModeTools = devModeTools;
         this.action = action;
         var key;
         if (action.entityType === 'unitTypes') {
@@ -66,11 +67,13 @@ var EntityImage = /** @class */ (function () {
                 _this.dragMode = 'scale';
             }
         });
-        var outline = scene.add.graphics();
+        var outline = devModeTools.outline;
         image.on('pointerover', function () {
-            _this.updateOutline(outline);
+            console.log('pointerover');
+            _this.updateOutline();
         });
         image.on('pointerout', function () {
+            console.log('pointerout');
             outline.clear();
         });
         var editedAction = { actionId: action.actionId };
@@ -93,7 +96,7 @@ var EntityImage = /** @class */ (function () {
                 editedAction.width = image.displayWidth;
                 editedAction.height = image.displayHeight;
             }
-            _this.updateOutline(outline);
+            _this.updateOutline();
         });
         scene.input.on('dragend', function (pointer, gameObject) {
             if (gameObject !== image)
@@ -106,12 +109,19 @@ var EntityImage = /** @class */ (function () {
     EntityImage.prototype.edit = function (action) {
         taro.network.send('editInitEntity', action);
     };
-    EntityImage.prototype.updateOutline = function (outline) {
+    EntityImage.prototype.updateOutline = function () {
+        var outline = this.devModeTools.outline;
         var image = this.image;
-        var bounds = image.getBounds();
         outline.clear();
         outline.lineStyle(2, 0x036ffc, 1);
-        outline.strokeRectShape(bounds);
+        outline.beginPath();
+        outline.moveTo(image.getTopLeft().x, image.getTopLeft().y);
+        outline.lineTo(image.getTopRight().x, image.getTopRight().y);
+        outline.lineTo(image.getBottomRight().x, image.getBottomRight().y);
+        outline.lineTo(image.getBottomLeft().x, image.getBottomLeft().y);
+        outline.lineTo(image.getTopLeft().x, image.getTopLeft().y);
+        outline.closePath();
+        outline.strokePath();
     };
     EntityImage.prototype.update = function (action) {
         if (this.action.position && this.action.position.x && this.action.position.y &&

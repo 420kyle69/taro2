@@ -1,4 +1,5 @@
 class EntityImage {
+    devModeTools: DevModeTools;
     action: ActionData;
     image: Phaser.GameObjects.Image & {entity: EntityImage};
 
@@ -6,9 +7,11 @@ class EntityImage {
     startDragY: number;
     scale: any;
     dragMode: 'position' | 'angle' | 'scale';
+    
 
-    constructor(scene, devModeTools, entityImages, action: ActionData, type?: string) {
+    constructor(scene, devModeTools: DevModeTools, entityImages: (Phaser.GameObjects.Image & {entity: EntityImage})[], action: ActionData, type?: string) {
         
+        this.devModeTools = devModeTools;
         this.action = action;
 
         let key;
@@ -64,13 +67,15 @@ class EntityImage {
             }
         });
 
-        const outline = scene.add.graphics();
+        const outline = devModeTools.outline;
 
         image.on('pointerover', () => {
-            this.updateOutline(outline);
+            console.log('pointerover')
+            this.updateOutline();
         });
 
         image.on('pointerout', () => {
+            console.log('pointerout')
             outline.clear();
         });
 
@@ -92,7 +97,7 @@ class EntityImage {
                 editedAction.width = image.displayWidth;
                 editedAction.height = image.displayHeight;
             }
-            this.updateOutline(outline);
+            this.updateOutline();
         });
 
         scene.input.on('dragend', (pointer, gameObject) => {
@@ -107,13 +112,20 @@ class EntityImage {
         taro.network.send('editInitEntity', action);
     }
 
-    updateOutline (outline: Phaser.GameObjects.Graphics): void {
+    updateOutline (): void {
+        const outline = this.devModeTools.outline;
         const image = this.image;
-        const bounds = image.getBounds();
         
 		outline.clear();
-		outline.lineStyle(	2, 0x036ffc, 1);
-        outline.strokeRectShape(bounds);
+		outline.lineStyle(2, 0x036ffc, 1);
+        outline.beginPath();
+        outline.moveTo(image.getTopLeft().x, image.getTopLeft().y);
+        outline.lineTo(image.getTopRight().x, image.getTopRight().y);
+        outline.lineTo(image.getBottomRight().x, image.getBottomRight().y);
+        outline.lineTo(image.getBottomLeft().x, image.getBottomLeft().y);
+        outline.lineTo(image.getTopLeft().x, image.getTopLeft().y);
+        outline.closePath();
+        outline.strokePath();
     }
 
     update (action: ActionData): void {

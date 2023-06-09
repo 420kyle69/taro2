@@ -25,6 +25,8 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	
 	altKey: Phaser.Input.Keyboard.Key;
 	shiftKey: Phaser.Input.Keyboard.Key;
+
+    outline: Phaser.GameObjects.Graphics;
 	
 	constructor(
 		public scene: DevModeScene,
@@ -126,6 +128,8 @@ class DevModeTools extends Phaser.GameObjects.Container {
 				camera.scrollY -= scrollY;
 			};
 		});
+
+        this.outline = scene.gameScene.add.graphics();
 	}
 
 	enterMapTab(): void {
