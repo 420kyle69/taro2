@@ -118,14 +118,10 @@ class EntityImage {
         
 		outline.clear();
 		outline.lineStyle(2, 0x036ffc, 1);
-        outline.beginPath();
-        outline.moveTo(image.getTopLeft().x, image.getTopLeft().y);
-        outline.lineTo(image.getTopRight().x, image.getTopRight().y);
-        outline.lineTo(image.getBottomRight().x, image.getBottomRight().y);
-        outline.lineTo(image.getBottomLeft().x, image.getBottomLeft().y);
-        outline.lineTo(image.getTopLeft().x, image.getTopLeft().y);
-        outline.closePath();
-        outline.strokePath();
+        outline.strokeRect(-image.displayWidth / 2, -image.displayHeight / 2, image.displayWidth, image.displayHeight);
+        outline.x = image.x;
+        outline.y = image.y;
+        outline.angle = image.angle;
     }
 
     update (action: ActionData): void {

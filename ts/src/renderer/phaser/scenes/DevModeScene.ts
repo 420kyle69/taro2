@@ -65,18 +65,12 @@ class DevModeScene extends PhaserScene {
                 if (image.entity.action.actionId === data.actionId) {
                     image.entity.update(data);
                 }
-                //update database here
             });
 		});
 
         taro.client.on('updateInitEntities', () => {
 			this.updateInitEntities();
 		});
-
-        /*taro.client.on('editInitEntity', (data) => {
-            console.log('editInitEntity', data);
-            //this.devModeTools.editEntity(data);
-        });*/
 
 		this.gameScene.input.on('pointerup', (p) => {
 			const draggedEntity = taro.unitBeingDragged;
@@ -215,7 +209,7 @@ class DevModeScene extends PhaserScene {
 	}
 
     createEntityImage(action: ActionData): void {
-        if (!action.disabled) {
+        if (!action.disabled && action.position?.function === 'xyCoordinate') {
             if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || action.type === 'createEntityAtPositionWithDimensions') {
                 //console.log(action);
                 if (action.actionId) new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action);

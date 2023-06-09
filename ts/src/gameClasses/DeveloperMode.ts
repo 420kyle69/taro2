@@ -14,7 +14,7 @@ class DeveloperMode {
 		Object.values(taro.game.data.scripts).forEach((script) => {
 			if (script.triggers?.[0]?.type === 'gameStart') {
 				Object.values(script.actions).forEach((action) => {
-                    if (!action.disabled) {
+                    if (!action.disabled && action.position?.function === 'xyCoordinate') {
                         const actionTypesArray = ['createEntityForPlayerAtPositionWithDimensions', 'createEntityAtPositionWithDimensions', 'createUnitAtPosition', 'spawnItem', 'createItemWithMaxQuantityAtPosition', 'createProjectileAtPosition']
                         if (actionTypesArray.includes(action.type)) {
                             if (action.actionId) {

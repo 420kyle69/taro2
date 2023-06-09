@@ -29,7 +29,11 @@ interface ActionData {
 	type?: string;
 	entity?: string;
 	entityType?: string;
-	position?: {x: number, y: number};
+	position?: {
+        function?: string,
+        x: number, 
+        y: number
+    };
 	angle?: string;
 	width?: number;
 	height?: number;

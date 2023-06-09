@@ -53,16 +53,11 @@ var DevModeScene = /** @class */ (function (_super) {
                 if (image.entity.action.actionId === data.actionId) {
                     image.entity.update(data);
                 }
-                //update database here
             });
         });
         taro.client.on('updateInitEntities', function () {
             _this.updateInitEntities();
         });
-        /*taro.client.on('editInitEntity', (data) => {
-            console.log('editInitEntity', data);
-            //this.devModeTools.editEntity(data);
-        });*/
         this.gameScene.input.on('pointerup', function (p) {
             var draggedEntity = taro.unitBeingDragged;
             // taro.unitBeingDragged = {typeId: 'unit id', playerId: 'xyz', angle: 0, entityType: 'unit'}
@@ -178,7 +173,8 @@ var DevModeScene = /** @class */ (function (_super) {
         });
     };
     DevModeScene.prototype.createEntityImage = function (action) {
-        if (!action.disabled) {
+        var _a;
+        if (!action.disabled && ((_a = action.position) === null || _a === void 0 ? void 0 : _a.function) === 'xyCoordinate') {
             if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || action.type === 'createEntityAtPositionWithDimensions') {
                 //console.log(action);
                 if (action.actionId)
