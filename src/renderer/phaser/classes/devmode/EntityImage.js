@@ -6,26 +6,38 @@ var EntityImage = /** @class */ (function () {
         var key;
         if (action.entityType === 'unitTypes') {
             var entityTypeData = taro.game.data[action.entityType] && taro.game.data[action.entityType][action.entity];
+            if (!entityTypeData)
+                return;
             key = "unit/".concat(entityTypeData.cellSheet.url);
         }
         else if (type === 'unit') {
             var entityTypeData = taro.game.data['unitTypes'] && taro.game.data['unitTypes'][action.unitType];
+            if (!entityTypeData)
+                return;
             key = "unit/".concat(entityTypeData.cellSheet.url);
         }
         else if (action.entityType === 'itemTypes') {
             var entityTypeData = taro.game.data[action.entityType] && taro.game.data[action.entityType][action.entity];
+            if (!entityTypeData)
+                return;
             key = "item/".concat(entityTypeData.cellSheet.url);
         }
         else if (type === 'item') {
             var entityTypeData = taro.game.data['itemTypes'] && taro.game.data['itemTypes'][action.itemType];
+            if (!entityTypeData)
+                return;
             key = "item/".concat(entityTypeData.cellSheet.url);
         }
         else if (action.entityType === 'projectileTypes') {
             var entityTypeData = taro.game.data[action.entityType] && taro.game.data[action.entityType][action.entity];
+            if (!entityTypeData)
+                return;
             key = "projectile/".concat(entityTypeData.cellSheet.url);
         }
         else if (type === 'projectile') {
             var entityTypeData = taro.game.data['projectileTypes'] && taro.game.data['projectileTypes'][action.projectileType];
+            if (!entityTypeData)
+                return;
             key = "projectile/".concat(entityTypeData.cellSheet.url);
         }
         var image = this.image = scene.add.image((_a = action.position) === null || _a === void 0 ? void 0 : _a.x, (_b = action.position) === null || _b === void 0 ? void 0 : _b.y, key);
@@ -54,6 +66,13 @@ var EntityImage = /** @class */ (function () {
                 _this.dragMode = 'scale';
             }
         });
+        var outline = scene.add.graphics();
+        image.on('pointerover', function () {
+            _this.updateOutline(outline);
+        });
+        image.on('pointerout', function () {
+            outline.clear();
+        });
         var editedAction = { actionId: action.actionId };
         scene.input.on('drag', function (pointer, gameObject, dragX, dragY) {
             if (!devModeTools.cursorButton.active || gameObject !== image)
@@ -74,6 +93,7 @@ var EntityImage = /** @class */ (function () {
                 editedAction.width = image.displayWidth;
                 editedAction.height = image.displayHeight;
             }
+            _this.updateOutline(outline);
         });
         scene.input.on('dragend', function (pointer, gameObject) {
             if (gameObject !== image)
@@ -85,6 +105,13 @@ var EntityImage = /** @class */ (function () {
     }
     EntityImage.prototype.edit = function (action) {
         taro.network.send('editInitEntity', action);
+    };
+    EntityImage.prototype.updateOutline = function (outline) {
+        var image = this.image;
+        var bounds = image.getBounds();
+        outline.clear();
+        outline.lineStyle(2, 0x036ffc, 1);
+        outline.strokeRectShape(bounds);
     };
     EntityImage.prototype.update = function (action) {
         if (this.action.position && this.action.position.x && this.action.position.y &&

@@ -15,21 +15,27 @@ class EntityImage {
         
         if (action.entityType === 'unitTypes') {
             const entityTypeData = taro.game.data[action.entityType] && taro.game.data[action.entityType][action.entity];
+            if (!entityTypeData) return;
             key = `unit/${entityTypeData.cellSheet.url}`
         } else if (type === 'unit') {
             const entityTypeData = taro.game.data['unitTypes'] && taro.game.data['unitTypes'][action.unitType];
+            if (!entityTypeData) return;
             key = `unit/${entityTypeData.cellSheet.url}`
         } else if (action.entityType === 'itemTypes') {
             const entityTypeData = taro.game.data[action.entityType] && taro.game.data[action.entityType][action.entity];
+            if (!entityTypeData) return;
             key = `item/${entityTypeData.cellSheet.url}`
         } else if (type === 'item') {
             const entityTypeData = taro.game.data['itemTypes'] && taro.game.data['itemTypes'][action.itemType];
+            if (!entityTypeData) return;
             key = `item/${entityTypeData.cellSheet.url}`
         } else if (action.entityType === 'projectileTypes') {
             const entityTypeData = taro.game.data[action.entityType] && taro.game.data[action.entityType][action.entity];
+            if (!entityTypeData) return;
             key = `projectile/${entityTypeData.cellSheet.url}`
         } else if (type === 'projectile') {
             const entityTypeData = taro.game.data['projectileTypes'] && taro.game.data['projectileTypes'][action.projectileType];
+            if (!entityTypeData) return;
             key = `projectile/${entityTypeData.cellSheet.url}`
         }
     
@@ -58,6 +64,16 @@ class EntityImage {
             }
         });
 
+        const outline = scene.add.graphics();
+
+        image.on('pointerover', () => {
+            this.updateOutline(outline);
+        });
+
+        image.on('pointerout', () => {
+            outline.clear();
+        });
+
         let editedAction: ActionData = {actionId: action.actionId};
     
         scene.input.on('drag', (pointer, gameObject, dragX, dragY) => {
@@ -76,6 +92,7 @@ class EntityImage {
                 editedAction.width = image.displayWidth;
                 editedAction.height = image.displayHeight;
             }
+            this.updateOutline(outline);
         });
 
         scene.input.on('dragend', (pointer, gameObject) => {
@@ -88,6 +105,15 @@ class EntityImage {
 
     edit (action: ActionData): void {
         taro.network.send('editInitEntity', action);
+    }
+
+    updateOutline (outline: Phaser.GameObjects.Graphics): void {
+        const image = this.image;
+        const bounds = image.getBounds();
+        
+		outline.clear();
+		outline.lineStyle(	2, 0x036ffc, 1);
+        outline.strokeRectShape(bounds);
     }
 
     update (action: ActionData): void {
