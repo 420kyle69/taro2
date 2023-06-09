@@ -43,7 +43,7 @@ var EntityImage = /** @class */ (function () {
         }
         var image = this.image = scene.add.image((_a = action.position) === null || _a === void 0 ? void 0 : _a.x, (_b = action.position) === null || _b === void 0 ? void 0 : _b.y, key);
         if (action.angle)
-            image.angle = Number(action.angle);
+            image.angle = action.angle;
         if (action.width && action.height)
             image.setDisplaySize(action.width, action.height);
         //image.setTint(0x9CA3AF);
@@ -128,7 +128,7 @@ var EntityImage = /** @class */ (function () {
         }
         if (this.action.angle && action.angle) {
             this.action.angle = action.angle;
-            this.image.angle = Number(action.angle);
+            this.image.angle = action.angle;
         }
         if (this.action.width && this.action.height && action.width && action.height) {
             this.action.width = action.width;

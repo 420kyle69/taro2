@@ -34,7 +34,7 @@ interface ActionData {
         x: number, 
         y: number
     };
-	angle?: string;
+	angle?: number;
 	width?: number;
 	height?: number;
 }

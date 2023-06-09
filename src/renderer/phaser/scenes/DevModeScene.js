@@ -173,8 +173,10 @@ var DevModeScene = /** @class */ (function (_super) {
         });
     };
     DevModeScene.prototype.createEntityImage = function (action) {
-        var _a;
-        if (!action.disabled && ((_a = action.position) === null || _a === void 0 ? void 0 : _a.function) === 'xyCoordinate') {
+        var _a, _b, _c;
+        if (!action.disabled && ((_a = action.position) === null || _a === void 0 ? void 0 : _a.function) === 'xyCoordinate'
+            && !isNaN((_b = action.position) === null || _b === void 0 ? void 0 : _b.x) && !isNaN((_c = action.position) === null || _c === void 0 ? void 0 : _c.y)
+            && !isNaN(action.width) && !isNaN(action.height) && !isNaN(action.angle)) {
             if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || action.type === 'createEntityAtPositionWithDimensions') {
                 //console.log(action);
                 if (action.actionId)

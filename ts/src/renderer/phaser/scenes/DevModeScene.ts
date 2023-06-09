@@ -209,7 +209,9 @@ class DevModeScene extends PhaserScene {
 	}
 
     createEntityImage(action: ActionData): void {
-        if (!action.disabled && action.position?.function === 'xyCoordinate') {
+        if (!action.disabled && action.position?.function === 'xyCoordinate' 
+        && !isNaN(action.position?.x) && !isNaN(action.position?.y) 
+        && !isNaN(action.width) && !isNaN(action.height) && !isNaN(action.angle)) {
             if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || action.type === 'createEntityAtPositionWithDimensions') {
                 //console.log(action);
                 if (action.actionId) new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action);

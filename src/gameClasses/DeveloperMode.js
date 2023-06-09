@@ -11,8 +11,10 @@ var DeveloperMode = /** @class */ (function () {
             var _a, _b;
             if (((_b = (_a = script.triggers) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.type) === 'gameStart') {
                 Object.values(script.actions).forEach(function (action) {
-                    var _a;
-                    if (!action.disabled && ((_a = action.position) === null || _a === void 0 ? void 0 : _a.function) === 'xyCoordinate') {
+                    var _a, _b, _c;
+                    if (!action.disabled && ((_a = action.position) === null || _a === void 0 ? void 0 : _a.function) === 'xyCoordinate'
+                        && !isNaN((_b = action.position) === null || _b === void 0 ? void 0 : _b.x) && !isNaN((_c = action.position) === null || _c === void 0 ? void 0 : _c.y)
+                        && !isNaN(action.width) && !isNaN(action.height) && !isNaN(action.angle)) {
                         var actionTypesArray = ['createEntityForPlayerAtPositionWithDimensions', 'createEntityAtPositionWithDimensions', 'createUnitAtPosition', 'spawnItem', 'createItemWithMaxQuantityAtPosition', 'createProjectileAtPosition'];
                         if (actionTypesArray.includes(action.type)) {
                             if (action.actionId) {

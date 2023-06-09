@@ -43,7 +43,7 @@ class EntityImage {
         }
     
         const image = this.image = scene.add.image(action.position?.x, action.position?.y, key);
-        if (action.angle) image.angle = Number(action.angle);
+        if (action.angle) image.angle = action.angle;
         if (action.width && action.height) image.setDisplaySize(action.width, action.height);
         //image.setTint(0x9CA3AF);
         //image.setAlpha(0.75);
@@ -133,7 +133,7 @@ class EntityImage {
         } 
         if (this.action.angle && action.angle) {
             this.action.angle = action.angle;
-            this.image.angle = Number(action.angle);
+            this.image.angle = action.angle;
         } 
         if (this.action.width && this.action.height && action.width && action.height) {
             this.action.width = action.width;
