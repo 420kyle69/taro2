@@ -2063,6 +2063,22 @@ var ActionComponent = TaroEntity.extend({
 
 						break;
 
+					case 'applyImpulseOnEntityAngle':
+						var entity = self._script.variable.getValue(action.entity, vars);
+						var angle = self._script.variable.getValue(action.angle, vars);
+						var impulse = self._script.variable.getValue(action.impulse, vars);
+						var radians = angle - Math.radians(90); // entity's facing angle
+
+						if (!isNaN(radians) && !isNaN(impulse) && entity && self.entityCategories.indexOf(entity._category) > -1) {
+							impulse = {
+								x: Math.cos(radians) * impulse,
+								y: Math.sin(radians) * impulse
+							};
+							entity.applyImpulse(impulse.x, impulse.y);
+						}
+
+						break;
+
 					case 'applyForceOnEntityXYRelative':
 
 						var entity = self._script.variable.getValue(action.entity, vars);
