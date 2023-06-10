@@ -380,6 +380,7 @@ var PlayerUiComponent = TaroEntity.extend({
 		}
 
 		var dialogue = taro.game.data.dialogues[dialogueId];
+
 		dialogue.message = dialogue.message || '';
 		if (dialogue) {
 			dialogue = getDialogueInstance(dialogue);

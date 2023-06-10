@@ -507,7 +507,7 @@ NetIo.Socket = NetIo.EventingClass.extend({
 			data: reason
 		});
 		// to trace unexpected close events.
-		console.trace();
+		// console.trace();
 		console.log('socket.close (code:', code, '):', reason);
 		// for backward compatibility
 		// if reason is valid numeric code and code is falsey
@@ -564,8 +564,48 @@ NetIo.Server = NetIo.EventingClass.extend({
 		// http - local, standalone, standalone-remote env
 
 		this._httpServer = this._http.createServer(function (request, response) {
-			response.writeHead(404);
-			response.end();
+			if (request.url === '/heapdump') {
+				// Handle heapdump request
+				if (request.method === 'GET') {
+					const fs = require('fs');
+					const path = require('path');
+					const heapdump = require('heapdump');
+					
+					// Generate a unique filename for the heap dump
+					const _filename = `worker_heapdump_${Date.now()}.heapsnapshot`;
+					
+					// Start recording the heap dump
+					heapdump.writeSnapshot(path.join(__dirname, _filename), (err, filename) => {
+						if (err) {
+							console.error('Error while generating heap dump:', err);
+							response.writeHead(500);
+							response.end('Error while generating heap dump');
+						} else {
+							// Send the heap dump file as a response
+							response.setHeader('Content-disposition', `attachment; filename=${_filename}`);
+							response.setHeader('Content-type', 'application/octet-stream');
+							const fileStream = fs.createReadStream(filename);
+							
+							fileStream.on('end', () => {
+								// Delete the heap dump file after it's downloaded
+								fs.unlink(filename, (err) => {
+									if (err) {
+										console.error('Error while deleting heap dump:', err);
+									}
+								});
+							});
+							
+							fileStream.pipe(response);
+						}
+					});
+				} else {
+					response.writeHead(405);
+					response.end('Method Not Allowed');
+				}
+			} else {
+				response.writeHead(404);
+				response.end();
+			}
 		});
 		this._socketServerHttp = new this._websocket.Server({
 			server: this._httpServer,
@@ -592,7 +632,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 
 			console.log('websocket error', err);
 		});
-
+		
 		this._httpServer.listen(this._port, function (err) {
 			self.log(`Server is listening on port ${self._port}`);
 			if (!secure) {
@@ -613,8 +653,49 @@ NetIo.Server = NetIo.EventingClass.extend({
 
 			var options = { key: privateKey, cert: certificate };
 			this._httpsServer = this._https.createServer(options, function (request, response) {
-				response.writeHead(404);
-				response.end();
+				if (request.url === '/heapdump') {
+					// Handle heapdump request
+					if (request.method === 'GET') {
+						const fs = require('fs');
+						const path = require('path');
+						const heapdump = require('heapdump');
+						
+						// Generate a unique filename for the heap dump
+						const _filename = `worker_heapdump_${Date.now()}.heapsnapshot`;
+						
+						// Start recording the heap dump
+						heapdump.writeSnapshot(path.join(__dirname, _filename), (err, filename) => {
+							if (err) {
+								console.error('Error while generating heap dump:', err);
+								response.writeHead(500);
+								response.end('Error while generating heap dump');
+							} else {
+								// Send the heap dump file as a response
+								response.setHeader('Content-disposition', `attachment; filename=${_filename}`);
+								response.setHeader('Content-type', 'application/octet-stream');
+								
+								const fileStream = fs.createReadStream(filename);
+								
+								fileStream.on('end', () => {
+									// Delete the heap dump file after it's downloaded
+									fs.unlink(filename, (err) => {
+										if (err) {
+											console.error('Error while deleting heap dump:', err);
+										}
+									});
+								});
+								
+								fileStream.pipe(response);
+							}
+						});
+					} else {
+						response.writeHead(405);
+						response.end('Method Not Allowed');
+					}
+				} else {
+					response.writeHead(404);
+					response.end();
+				}
 			});
 			this._socketServerHttps = new this._websocket.Server({
 			    server: this._httpsServer,
@@ -647,7 +728,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 				self.log(message, 'error');
 				console.log('websocket error', err);
 			});
-
+			
 			this._httpsServer.listen(self._portSecure, function (err) {
 				if (err) {
 					console.log(err);
