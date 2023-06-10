@@ -263,7 +263,7 @@ var AIComponent = TaroEntity.extend({
 			this._entity.startMoving();
 		}
 		// let targetAngle = this.getAngleToTarget(); // rotating here cause fixed rotation unit rotate, disabled
-		// if (targetAngle) {
+		// if (targetAngle && !this._entity._stats.currentBody?.fixedRotation) {
 		// 	this._entity.streamUpdateData([{rotate: targetAngle}]);
 		// }
 	},
