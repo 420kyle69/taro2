@@ -453,21 +453,31 @@ var ActionComponent = TaroEntity.extend({
 						var userId = player && player._stats && player._stats.userId;
 
 						if (player && userId && player.persistentDataLoaded) {
-							var data = player.getPersistentData('player');
-							taro.clusterClient.saveUserData(userId, data, 'player');
+							var playerData = player.getPersistentData('player');
 
 							var unit = player.getSelectedUnit();
 							var userId = player._stats.userId;
 
 							if (unit && player && userId && unit.persistentDataLoaded) {
-								var data = unit.getPersistentData('unit');
-								taro.clusterClient.saveUserData(userId, data, 'unit');
+								var unitData = unit.getPersistentData('unit');
+								
+								const data = {
+									player: playerData || {},
+									unit: unitData || {}
+								}
+								
+								// save both player and unit data together to avoid duplicate calls
+								taro.clusterClient.saveUserData(userId, data);
+								
 							} else {
 								if (!unit.persistentDataLoaded) {
 									taro.devLog('Fail saving unit data bcz persisted data not set correctly');
 								} else {
 									taro.devLog('Fail saving unit data');
 								}
+								
+								// unit data not available, just save player data
+								taro.clusterClient.saveUserData(userId, playerData, 'player');
 							}
 						} else {
 							if (player && !player.persistentDataLoaded) {
