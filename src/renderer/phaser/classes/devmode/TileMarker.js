@@ -49,6 +49,7 @@ var TileMarker = /** @class */ (function () {
             this.images[i][j].setAlpha(0);
     };
     TileMarker.prototype.changePreview = function () {
+        var _this = this;
         var _a = this.devModeScene.tileEditor.brushArea.size, x = _a.x, y = _a.y;
         this.graphics.scaleX = x;
         this.graphics.scaleY = y;
@@ -63,6 +64,17 @@ var TileMarker = /** @class */ (function () {
                     }
                 }
             }
+            Object.values(previewTarget).map(function (obj) {
+                Object.values(obj).map(function (tile) {
+                    var _a;
+                    // apply tint to palette tile
+                    var paletteLayer = _this.devModeScene.tilePalette.map.layers[0];
+                    var row = Math.floor((tile - 1) / paletteLayer.width);
+                    var paletteTile = (_a = paletteLayer === null || paletteLayer === void 0 ? void 0 : paletteLayer.data[row]) === null || _a === void 0 ? void 0 : _a[tile - 1 - (row * paletteLayer.width)];
+                    if (paletteTile)
+                        paletteTile.tint = 0x87cfff;
+                });
+            });
         }
     };
     TileMarker.prototype.hideImages = function () {

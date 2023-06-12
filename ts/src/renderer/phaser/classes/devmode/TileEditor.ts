@@ -71,20 +71,7 @@ class TileEditor {
 				Math.abs(pointerPosition.x - devModeScene.input.activePointer.x) < 50 &&
 				Math.abs(pointerPosition.y - devModeScene.input.activePointer.y) < 50 &&
 				this.startDragIn === 'palette') {
-				const palettePoint = devModeScene.cameras.getCamera('palette').getWorldPoint(p.x, p.y);
-				const palettePointerTileX = palette.map.worldToTileX(palettePoint.x);
-				const palettePointerTileY = palette.map.worldToTileY(palettePoint.y);
-				if (!this.selectedTileArea[palettePointerTileX]) {
-					this.selectedTileArea[palettePointerTileX] = {};
-				}
-				const tile = this.getTile(palettePointerTileX, palettePointerTileY, palette.map);
-				this.selectedTileArea[palettePointerTileX][palettePointerTileY] = tile;
-				// apply tint to palette tile
-				const paletteLayer = this.tilePalette.map.layers[0];
-				const row = Math.floor((tile - 1) / paletteLayer.width);
-				const paletteTile = paletteLayer?.data[row]?.[tile - 1 - (row * paletteLayer.width)];
-				if (paletteTile) paletteTile.tint = 0x87cfff;
-				this.marker.changePreview();
+				this.updateSelectedTiles(devModeScene);
 			}
 		});
 
@@ -92,20 +79,7 @@ class TileEditor {
 			if (this.startDragIn === 'palette' &&
 				Math.abs(pointerPosition.x - devModeScene.input.activePointer.x) < 50 &&
 				Math.abs(pointerPosition.y - devModeScene.input.activePointer.y) < 50 && p.button === 0) {
-				const palettePoint = devModeScene.cameras.getCamera('palette').getWorldPoint(devModeScene.input.activePointer.x, devModeScene.input.activePointer.y);
-				const palettePointerTileX = palette.map.worldToTileX(palettePoint.x);
-				const palettePointerTileY = palette.map.worldToTileY(palettePoint.y);
-				if (!this.selectedTileArea[palettePointerTileX]) {
-					this.selectedTileArea[palettePointerTileX] = {};
-				}
-				const tile = this.getTile(palettePointerTileX, palettePointerTileY, palette.map);
-				this.selectedTileArea[palettePointerTileX][palettePointerTileY] = tile;
-				// apply tint to palette tile
-				const paletteLayer = this.tilePalette.map.layers[0];
-				const row = Math.floor((tile - 1) / paletteLayer.width);
-				const paletteTile = paletteLayer?.data[row]?.[tile - 1 - (row * paletteLayer.width)];
-				if (paletteTile) paletteTile.tint = 0x87cfff;
-				this.marker.changePreview();
+				this.updateSelectedTiles(devModeScene);
 			}
 			if (this.startDragIn === 'palette') {
 				this.startDragIn = 'none';
@@ -121,22 +95,29 @@ class TileEditor {
 				const worldPoint = gameScene.cameras.main.getWorldPoint(gameScene.input.activePointer.x, gameScene.input.activePointer.y);
 				const pointerTileX = gameMap.worldToTileX(worldPoint.x);
 				const pointerTileY = gameMap.worldToTileY(worldPoint.y);
+				const tile = this.getTile(pointerTileX, pointerTileY, gameMap);
 				this.clearTint();
 				this.selectedTileArea = {};
 				this.selectedTileArea[pointerTileX] = {};
-				const tile = this.getTile(pointerTileX, pointerTileY, gameMap);
 				this.selectedTileArea[pointerTileX][pointerTileY] = tile;
-				// apply tint to palette tile
-				const paletteLayer = this.tilePalette.map.layers[0];
-				const row = Math.floor((tile - 1) / paletteLayer.width);
-				const paletteTile = paletteLayer?.data[row]?.[tile - 1 - (row * paletteLayer.width)];
-				if (paletteTile) paletteTile.tint = 0x87cfff;
 				this.marker.changePreview();
 			}
 			if (this.startDragIn === 'map') {
 				this.startDragIn = 'none';
 			}
 		});
+	}
+
+	updateSelectedTiles(devModeScene: DevModeScene) {
+		const palettePoint = devModeScene.cameras.getCamera('palette').getWorldPoint(devModeScene.input.activePointer.x, devModeScene.input.activePointer.y);
+		const palettePointerTileX = this.tilePalette.map.worldToTileX(palettePoint.x);
+		const palettePointerTileY = this.tilePalette.map.worldToTileY(palettePoint.y);
+		if (!this.selectedTileArea[palettePointerTileX]) {
+			this.selectedTileArea[palettePointerTileX] = {};
+		}
+		const tile = this.getTile(palettePointerTileX, palettePointerTileY, this.tilePalette.map);
+		this.selectedTileArea[palettePointerTileX][palettePointerTileY] = tile;
+		this.marker.changePreview();
 	}
 
 	activateMarkers(active: boolean): void {

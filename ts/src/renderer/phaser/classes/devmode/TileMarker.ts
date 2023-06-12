@@ -77,6 +77,15 @@ class TileMarker {
 					}
 				}
 			}
+			Object.values(previewTarget).map((obj) => {
+				Object.values(obj).map((tile) => {
+					// apply tint to palette tile
+					const paletteLayer = this.devModeScene.tilePalette.map.layers[0];
+					const row = Math.floor((tile - 1) / paletteLayer.width);
+					const paletteTile = paletteLayer?.data[row]?.[tile - 1 - (row * paletteLayer.width)];
+					if (paletteTile) paletteTile.tint = 0x87cfff;
+				});
+			});
 		}
 	}
 
