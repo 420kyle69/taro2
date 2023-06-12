@@ -95,24 +95,26 @@ var TileEditor = /** @class */ (function () {
             }
         });
         gameScene.input.on('pointerup', function (p) {
+            var _a;
             //TODO hanlde pick color
             if (_this.startDragIn === 'map' &&
                 Math.abs(pointerPosition.x - gameScene.input.activePointer.x) < 50 &&
                 Math.abs(pointerPosition.y - gameScene.input.activePointer.y) < 50 &&
-                p.button === 0 &&
                 !devModeTools.modeButtons[3].active) {
                 var worldPoint = gameScene.cameras.main.getWorldPoint(gameScene.input.activePointer.x, gameScene.input.activePointer.y);
                 var pointerTileX = gameMap.worldToTileX(worldPoint.x);
                 var pointerTileY = gameMap.worldToTileY(worldPoint.y);
                 _this.clearTint();
-                for (var i = 0; i < _this.brushArea.size.x; i++) {
-                    if (!_this.selectedTileArea[i]) {
-                        _this.selectedTileArea[i] = {};
-                    }
-                    for (var j = 0; j < _this.brushArea.size.y; j++) {
-                        _this.selectedTileArea[i][j] = _this.getTile(pointerTileX, pointerTileY, gameMap);
-                    }
-                }
+                _this.selectedTileArea = {};
+                _this.selectedTileArea[pointerTileX] = {};
+                var tile = _this.getTile(pointerTileX, pointerTileY, gameMap);
+                _this.selectedTileArea[pointerTileX][pointerTileY] = tile;
+                // apply tint to palette tile
+                var paletteLayer = _this.tilePalette.map.layers[0];
+                var row = Math.floor((tile - 1) / paletteLayer.width);
+                var paletteTile = (_a = paletteLayer === null || paletteLayer === void 0 ? void 0 : paletteLayer.data[row]) === null || _a === void 0 ? void 0 : _a[tile - 1 - (row * paletteLayer.width)];
+                if (paletteTile)
+                    paletteTile.tint = 0x87cfff;
                 _this.marker.changePreview();
             }
             if (_this.startDragIn === 'map') {

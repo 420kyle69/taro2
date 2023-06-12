@@ -117,20 +117,20 @@ class TileEditor {
 			if (this.startDragIn === 'map' &&
 				Math.abs(pointerPosition.x - gameScene.input.activePointer.x) < 50 &&
 				Math.abs(pointerPosition.y - gameScene.input.activePointer.y) < 50 &&
-				p.button === 0 &&
 				!devModeTools.modeButtons[3].active) {
 				const worldPoint = gameScene.cameras.main.getWorldPoint(gameScene.input.activePointer.x, gameScene.input.activePointer.y);
 				const pointerTileX = gameMap.worldToTileX(worldPoint.x);
 				const pointerTileY = gameMap.worldToTileY(worldPoint.y);
 				this.clearTint();
-				for (let i = 0; i < this.brushArea.size.x; i++) {
-					if (!this.selectedTileArea[i]) {
-						this.selectedTileArea[i] = {};
-					}
-					for (let j = 0; j < this.brushArea.size.y; j++) {
-						this.selectedTileArea[i][j] = this.getTile(pointerTileX, pointerTileY, gameMap);
-					}
-				}
+				this.selectedTileArea = {};
+				this.selectedTileArea[pointerTileX] = {};
+				const tile = this.getTile(pointerTileX, pointerTileY, gameMap);
+				this.selectedTileArea[pointerTileX][pointerTileY] = tile;
+				// apply tint to palette tile
+				const paletteLayer = this.tilePalette.map.layers[0];
+				const row = Math.floor((tile - 1) / paletteLayer.width);
+				const paletteTile = paletteLayer?.data[row]?.[tile - 1 - (row * paletteLayer.width)];
+				if (paletteTile) paletteTile.tint = 0x87cfff;
 				this.marker.changePreview();
 			}
 			if (this.startDragIn === 'map') {
