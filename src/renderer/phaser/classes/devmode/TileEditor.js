@@ -48,16 +48,12 @@ var TileEditor = /** @class */ (function () {
         });
         devModeScene.input.on('pointermove', function (p) {
             if (devModeTools.modeButtons[2].active && p.isDown && p.button === 0 &&
-                Math.abs(pointerPosition.x - devModeScene.input.activePointer.x) < 50 &&
-                Math.abs(pointerPosition.y - devModeScene.input.activePointer.y) < 50 &&
                 _this.startDragIn === 'palette') {
                 _this.updateSelectedTiles(devModeScene);
             }
         });
         devModeScene.input.on('pointerup', function (p) {
-            if (_this.startDragIn === 'palette' &&
-                Math.abs(pointerPosition.x - devModeScene.input.activePointer.x) < 50 &&
-                Math.abs(pointerPosition.y - devModeScene.input.activePointer.y) < 50 && p.button === 0) {
+            if (_this.startDragIn === 'palette' && p.button === 0) {
                 _this.updateSelectedTiles(devModeScene);
             }
             if (_this.startDragIn === 'palette') {
@@ -65,7 +61,6 @@ var TileEditor = /** @class */ (function () {
             }
         });
         gameScene.input.on('pointerup', function (p) {
-            //TODO hanlde pick color
             if (_this.startDragIn === 'map' &&
                 Math.abs(pointerPosition.x - gameScene.input.activePointer.x) < 50 &&
                 Math.abs(pointerPosition.y - gameScene.input.activePointer.y) < 50 &&

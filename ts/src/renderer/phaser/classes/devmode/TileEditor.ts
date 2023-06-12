@@ -68,17 +68,13 @@ class TileEditor {
 
 		devModeScene.input.on('pointermove', (p) => {
 			if (devModeTools.modeButtons[2].active && p.isDown && p.button === 0 &&
-				Math.abs(pointerPosition.x - devModeScene.input.activePointer.x) < 50 &&
-				Math.abs(pointerPosition.y - devModeScene.input.activePointer.y) < 50 &&
 				this.startDragIn === 'palette') {
 				this.updateSelectedTiles(devModeScene);
 			}
 		});
 
 		devModeScene.input.on('pointerup', (p) => {
-			if (this.startDragIn === 'palette' &&
-				Math.abs(pointerPosition.x - devModeScene.input.activePointer.x) < 50 &&
-				Math.abs(pointerPosition.y - devModeScene.input.activePointer.y) < 50 && p.button === 0) {
+			if (this.startDragIn === 'palette' && p.button === 0) {
 				this.updateSelectedTiles(devModeScene);
 			}
 			if (this.startDragIn === 'palette') {
@@ -87,7 +83,6 @@ class TileEditor {
 		});
 
 		gameScene.input.on('pointerup', (p) => {
-			//TODO hanlde pick color
 			if (this.startDragIn === 'map' &&
 				Math.abs(pointerPosition.x - gameScene.input.activePointer.x) < 50 &&
 				Math.abs(pointerPosition.y - gameScene.input.activePointer.y) < 50 &&
