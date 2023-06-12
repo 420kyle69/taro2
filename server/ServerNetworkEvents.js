@@ -47,7 +47,7 @@ var ServerNetworkEvents = {
 
 				if (player._stats.userId) {
 					taro.clusterClient.saveLastPlayedTime(player._stats.userId);
-					taro.clusterClient.savePlayerData(player._stats.userId);
+					// taro.clusterClient.savePlayerData(player._stats.userId);
 				}
 			}
 
