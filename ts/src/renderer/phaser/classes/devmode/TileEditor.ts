@@ -88,14 +88,22 @@ class TileEditor {
 				Math.abs(pointerPosition.y - gameScene.input.activePointer.y) < 50 &&
 				!devModeTools.modeButtons[3].active) {
 				const worldPoint = gameScene.cameras.main.getWorldPoint(gameScene.input.activePointer.x, gameScene.input.activePointer.y);
-				const pointerTileX = gameMap.worldToTileX(worldPoint.x);
-				const pointerTileY = gameMap.worldToTileY(worldPoint.y);
-				const tile = this.getTile(pointerTileX, pointerTileY, gameMap);
+				const pointerTileX = gameMap.worldToTileX(worldPoint.x - (this.brushArea.size.x - 0.5) * TILE_SIZE / 2, true);
+				const pointerTileY = gameMap.worldToTileY(worldPoint.y - (this.brushArea.size.y - 0.5) * TILE_SIZE / 2, true);
 				this.clearTint();
 				this.selectedTileArea = {};
-				this.selectedTileArea[pointerTileX] = {};
-				this.selectedTileArea[pointerTileX][pointerTileY] = tile;
+				for (let i = 0; i < this.brushArea.size.x; i++) {
+					for (let j = 0; j < this.brushArea.size.y; j++) {
+						const tile = this.getTile(pointerTileX + i, pointerTileY + j, gameMap);
+						if (!this.selectedTileArea[pointerTileX + i]) {
+							this.selectedTileArea[pointerTileX + i] = {};
+						}
+						this.selectedTileArea[pointerTileX + i][pointerTileY + j] = tile;
+
+					}
+				}
 				this.marker.changePreview();
+
 			}
 			if (this.startDragIn === 'map') {
 				this.startDragIn = 'none';

@@ -66,13 +66,19 @@ var TileEditor = /** @class */ (function () {
                 Math.abs(pointerPosition.y - gameScene.input.activePointer.y) < 50 &&
                 !devModeTools.modeButtons[3].active) {
                 var worldPoint = gameScene.cameras.main.getWorldPoint(gameScene.input.activePointer.x, gameScene.input.activePointer.y);
-                var pointerTileX = gameMap.worldToTileX(worldPoint.x);
-                var pointerTileY = gameMap.worldToTileY(worldPoint.y);
-                var tile = _this.getTile(pointerTileX, pointerTileY, gameMap);
+                var pointerTileX = gameMap.worldToTileX(worldPoint.x - (_this.brushArea.size.x - 0.5) * TILE_SIZE / 2, true);
+                var pointerTileY = gameMap.worldToTileY(worldPoint.y - (_this.brushArea.size.y - 0.5) * TILE_SIZE / 2, true);
                 _this.clearTint();
                 _this.selectedTileArea = {};
-                _this.selectedTileArea[pointerTileX] = {};
-                _this.selectedTileArea[pointerTileX][pointerTileY] = tile;
+                for (var i = 0; i < _this.brushArea.size.x; i++) {
+                    for (var j = 0; j < _this.brushArea.size.y; j++) {
+                        var tile = _this.getTile(pointerTileX + i, pointerTileY + j, gameMap);
+                        if (!_this.selectedTileArea[pointerTileX + i]) {
+                            _this.selectedTileArea[pointerTileX + i] = {};
+                        }
+                        _this.selectedTileArea[pointerTileX + i][pointerTileY + j] = tile;
+                    }
+                }
                 _this.marker.changePreview();
             }
             if (_this.startDragIn === 'map') {
