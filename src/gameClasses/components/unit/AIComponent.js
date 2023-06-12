@@ -79,7 +79,7 @@ var AIComponent = TaroEntity.extend({
 		var ownerPlayer = self._entity.getOwner();
 		if (unit) {
 			var ownerPlayerOfTargetUnit = unit.getOwner();
-			if (ownerPlayer && ownerPlayer.isHostileTo(ownerPlayerOfTargetUnit)) {
+			if (ownerPlayer && ownerPlayer.isHostileTo(ownerPlayerOfTargetUnit) && ownerPlayer != ownerPlayerOfTargetUnit) { // AI should only attack hostile and non self-controlled unit
 				// if I already have a target, re-target if new target unit is closer
 				var targetUnit = this.getTargetUnit();
 				if (targetUnit == undefined || (targetUnit && self.getDistanceToUnit(unit)) < self.getDistanceToUnit(targetUnit)) {
@@ -102,7 +102,7 @@ var AIComponent = TaroEntity.extend({
 		var ownerPlayer = self._entity.getOwner();
 		if (unit) {
 			var ownerPlayerOfTargetUnit = taro.$(unit._stats.ownerId);
-			if (ownerPlayer && ownerPlayer.isHostileTo(ownerPlayerOfTargetUnit) && unit._stats.isUnTargetable != true) {
+			if (ownerPlayer && ownerPlayer.isHostileTo(ownerPlayerOfTargetUnit) && ownerPlayer != ownerPlayerOfTargetUnit && unit._stats.isUnTargetable != true) {
 				// if I already have a target, re-target if new target unit is closer
 				var targetUnit = this.getTargetUnit();
 				if (targetUnit == undefined || (self.maxAttackRange < this.getDistanceToTarget())) {
@@ -174,6 +174,18 @@ var AIComponent = TaroEntity.extend({
 		return distance;
 	},
 
+	getDistanceToClosestAStarNode: function () {
+		let distance = 0;
+		let mapData = taro.map.data;
+		let unit = this._entity;
+		if (this.path.length > 0) { // closestAStarNode exist
+			let a = this.path[this.path.length - 1].x * mapData.tilewidth + mapData.tilewidth / 2 - unit._translate.x;
+			let b = this.path[this.path.length - 1].y * mapData.tilewidth + mapData.tilewidth / 2 - unit._translate.y;
+			distance = Math.sqrt(a * a + b * b);
+		}
+		return distance;
+	},
+
 	// return distance with consideration of both units body radius
 	getDistanceToUnit: function (targetUnit) {
 		var myUnit = this._entity;
@@ -209,6 +221,7 @@ var AIComponent = TaroEntity.extend({
 		this.targetPosition = undefined;
 		this.currentAction = 'idle';
 		this.nextMoveAt = taro._currentTime + 2000 + Math.floor(Math.random() * 2000);
+		this.path = []; // clear the A* path
 	},
 
 	fleeFromUnit: function (unit) {
@@ -231,6 +244,9 @@ var AIComponent = TaroEntity.extend({
 	},
 
 	attackUnit: function (unit) {
+		if (this.getTargetUnit() == unit && this.currentAction == 'fight') { // the target unit is the same and the ai is already fighting it
+			return;
+		}
 		this.setTargetUnit(unit);
 		// only update its return position if unit was provked while in idle state
 		if (this.currentAction == 'idle') {
@@ -243,11 +259,13 @@ var AIComponent = TaroEntity.extend({
 			}
 		}
 		this.currentAction = 'fight';
-		this._entity.startMoving();
-		let targetAngle = this.getAngleToTarget();
-		if (targetAngle && !this._entity._stats.currentBody?.fixedRotation) {
-			this._entity.streamUpdateData([{rotate: targetAngle}]);
+		if (this.maxAttackRange < this.getDistanceToTarget()) { // only need to move if the maxAttackRange is not enough to reach the target
+			this._entity.startMoving();
 		}
+		// let targetAngle = this.getAngleToTarget(); // rotating here cause inaccurate rotation on AI unit
+		// if (targetAngle && !this._entity._stats.currentBody?.fixedRotation) {
+		// 	this._entity.streamUpdateData([{rotate: targetAngle}]);
+		// }
 	},
 
 	moveToTargetPosition: function (x, y) {
@@ -274,7 +292,7 @@ var AIComponent = TaroEntity.extend({
 	* @param x
 	* @param y
 	* @return {Array}
-	* Return array with x and y coordinates of the path (Start and End node Exclusive)
+	* Return array with x and y coordinates of the path (Start node exclusive)
 	* if the target location is inside a wall, not reachable, or the unit already at the target location, return empty array
 	*/
 	getAStarPath: function (x, y) {
@@ -282,6 +300,8 @@ var AIComponent = TaroEntity.extend({
 		let mapData = taro.map.data; // cache the map data for rapid use
 
 		let unitTilePosition = {x: Math.floor(unit._translate.x / mapData.tilewidth), y: Math.floor(unit._translate.y / mapData.tilewidth)};
+		unitTilePosition.x = Math.min(Math.max(0, unitTilePosition.x), mapData.width - 1); // confine with map boundary
+		unitTilePosition.y = Math.min(Math.max(0, unitTilePosition.y), mapData.height - 1);
 		let targetTilePosition = {x: Math.floor(x / mapData.tilewidth), y: Math.floor(y / mapData.tilewidth)};
 		targetTilePosition.x = Math.min(Math.max(0, targetTilePosition.x), mapData.width - 1); // confine with map boundary
 		targetTilePosition.y = Math.min(Math.max(0, targetTilePosition.y), mapData.height - 1);
@@ -436,10 +456,7 @@ var AIComponent = TaroEntity.extend({
 		if (!unit._stats.aiEnabled)
 			return;
 
-		let mapData;
-		if (this.pathFindingMethod == 'a*') { // only cache mapData if using a* as pathfinding
-			mapData = taro.map.data;
-		}
+		let mapData = taro.map.data; // both pathfinding method need it to check
 
 		var targetUnit = this.getTargetUnit();
 
@@ -473,20 +490,22 @@ var AIComponent = TaroEntity.extend({
 				break;
 
 			case 'move':
-				if (this.getDistanceToTarget() < 10) {
-					switch (this.pathFindingMethod) {
-						case 'simple':
+				switch (this.pathFindingMethod) {
+					case 'simple':
+						if (this.getDistanceToTarget() < mapData.tilewidth / 2) { // map with smaller tile size requires a more precise stop, vice versa
 							self.goIdle();
-							break;
-						case 'a*':
-							this.path.pop();
-							if (this.path.length > 0) { // Move to the highest index of path saved (closest node to start node)
-								this.setTargetPosition(this.path[this.path.length - 1].x * mapData.tilewidth + mapData.tilewidth / 2, this.path[this.path.length - 1].y * mapData.tilewidth + mapData.tilewidth / 2);
-							} else {
-								self.goIdle();
-							}
-							break;
-					}
+						}
+						break;
+					case 'a*':
+						if (this.getDistanceToClosestAStarNode() < mapData.tilewidth / 2) { // reduced chances of shaky move
+							this.path.pop(); // after moved to the closest A* node, pop the array and let ai move to next A* node
+						}
+						if (this.path.length > 0) { // Move to the highest index of path saved (closest node to start node)
+							this.setTargetPosition(this.path[this.path.length - 1].x * mapData.tilewidth + mapData.tilewidth / 2, this.path[this.path.length - 1].y * mapData.tilewidth + mapData.tilewidth / 2);
+						} else {
+							self.goIdle();
+						}
+						break;
 				}
 				break;
 
@@ -505,26 +524,34 @@ var AIComponent = TaroEntity.extend({
 						if (self.maxAttackRange > this.getDistanceToTarget()) {
 							unit.isMoving = false;
 							unit.ability.startUsingItem();
+							if (this.pathFindingMethod == 'a*') {
+								this.setTargetPosition(targetUnit._translate.x, targetUnit._translate.y); // ai should target targetUnit when stop moving and fight
+							}
 						} else if (!unit.isMoving) {
 							// target's too far. stop firing, and start chasing
 							unit.ability.stopUsingItem();
 							unit.startMoving();
+							if (this.pathFindingMethod == 'a*') {
+								this.path = this.getAStarPath(targetUnit._translate.x, targetUnit._translate.y); // recalculate the moving path to chase
+								if (this.path.length > 0) {
+									this.setTargetPosition(this.path[this.path.length - 1].x * taro.map.data.tilewidth + taro.map.data.tilewidth / 2, this.path[this.path.length - 1].y * taro.map.data.tilewidth + taro.map.data.tilewidth / 2);
+								}
+							}
 							if (unit.sensor) {
 								unit.sensor.updateBody(); // re-detect nearby units
 							}
 						} else {
 							if (this.pathFindingMethod == 'a*') {
-								if (this.path.length <= 0) {
-									this.setTargetPosition(targetUnit._translate.x, targetUnit._translate.y); // target the targetUnit if no more path or path failed to generate
+								if (this.path.length == 0) { // A* path is updated once in attackUnit
+									this.path = this.getAStarPath(targetUnit._translate.x, targetUnit._translate.y); // try to create a new path if the path is empty (Arrived / old path outdated)
+								} else if (this.getDistanceToClosestAStarNode() < mapData.tilewidth / 2) { // Euclidean distance is smaller than half of the tile
+									this.path.pop();
+								}
+								// After the above decision, choose whether directly move to targetUnit or according to path
+								if (this.path.length > 0) { // select next node to go
+									this.setTargetPosition(this.path[this.path.length - 1].x * mapData.tilewidth + mapData.tilewidth / 2, this.path[this.path.length - 1].y * mapData.tilewidth + mapData.tilewidth / 2); // path
 								} else {
-									let a = this.path[this.path.length - 1].x * mapData.tilewidth - unit._translate.x;
-									let b = this.path[this.path.length - 1].y * mapData.tilewidth - unit._translate.y;
-									if (Math.sqrt(a * a + b * b) < mapData.tilewidth / 2) { // Euclidean distance is smaller than half of the tile
-										this.path.pop();
-										if (this.path.length > 0) { // select next node to go
-											this.setTargetPosition(this.path[this.path.length - 1].x * mapData.tilewidth + mapData.tilewidth / 2, this.path[this.path.length - 1].y * mapData.tilewidth + mapData.tilewidth / 2);
-										}
-									}
+									this.setTargetPosition(targetUnit._translate.x, targetUnit._translate.y); // direct
 								}
 							}
 						}
@@ -540,9 +567,6 @@ var AIComponent = TaroEntity.extend({
 				break;
 
 			case 'flee':
-				if (this.pathFindingMethod == 'a*') {
-					this.setTargetPosition(unit._translate.x + (targetUnit._translate.x - unit._translate.x), unit._translate.y + (targetUnit._translate.y - unit._translate.y)); // manually assign target position
-				}
 				if (targetUnit) {
 					var a = self.previousPosition.x - targetUnit._translate.x;
 					var b = self.previousPosition.y - targetUnit._translate.y;
