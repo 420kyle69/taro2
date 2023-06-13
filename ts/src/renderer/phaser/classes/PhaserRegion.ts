@@ -50,9 +50,9 @@ class PhaserRegion extends PhaserEntity {
 		const devModeScene = this.devModeScene = taro.renderer.scene.getScene('DevMode') as DevModeScene;
 		devModeScene.regions.push(this);
 
-		if (this.devModeOnly && !taro.developerMode.active && taro.developerMode.activeTab !== 'play') {
+		//if (this.devModeOnly && !taro.developerMode.active && taro.developerMode.activeTab !== 'play') {
 			this.hide();
-		}
+		//}
 
 		this.updateLabel();
 		this.transform();
@@ -171,7 +171,7 @@ class PhaserRegion extends PhaserEntity {
 		const label = this.label;
 		const rt = this.rtLabel;
 
-		label && (label.visible = !rt);
+		label && (label.visible = true);
 		rt && (rt.visible = true);
 	}
 
