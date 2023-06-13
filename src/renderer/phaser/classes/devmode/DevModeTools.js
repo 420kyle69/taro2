@@ -130,6 +130,12 @@ var DevModeTools = /** @class */ (function (_super) {
         }
         return false;
     };
+    DevModeTools.prototype.isForceTo1x1 = function () {
+        if (this.modeButtons[4].active) {
+            return true;
+        }
+        return false;
+    };
     DevModeTools.prototype.keyBindings = function () {
         var _this = this;
         var gameScene = this.scene.gameScene;
@@ -279,18 +285,18 @@ var DevModeTools = /** @class */ (function (_super) {
             this.tileEditor.selectedTileArea = this.tileEditor.lastSelectedTileArea;
         }
         this.tileEditor.activateMarkers(true);
-        this.tileEditor.marker.changePreview();
         this.scene.regionEditor.regionTool = false;
         this.highlightModeButton(2);
+        this.tileEditor.marker.changePreview();
     };
     DevModeTools.prototype.emptyTile = function () {
         if (!this.modeButtons[3].active) {
             this.tileEditor.lastSelectedTileArea = this.tileEditor.selectedTileArea;
             this.tileEditor.selectedTileArea = { 0: { 0: -1 } };
             this.tileEditor.activateMarkers(true);
-            this.tileEditor.marker.changePreview();
             this.scene.regionEditor.regionTool = false;
             this.highlightModeButton(3);
+            this.tileEditor.marker.changePreview();
         }
     };
     DevModeTools.prototype.fill = function () {
@@ -298,10 +304,9 @@ var DevModeTools = /** @class */ (function (_super) {
             this.tileEditor.selectedTileArea = this.tileEditor.lastSelectedTileArea;
         }
         this.tileEditor.activateMarkers(true);
-        this.tileEditor.marker.changePreview();
         this.scene.regionEditor.regionTool = false;
-        this.selectSingle();
         this.highlightModeButton(4);
+        this.tileEditor.marker.changePreview();
     };
     DevModeTools.prototype.clear = function () {
         var gameMap = this.scene.gameScene.tilemap;
@@ -319,40 +324,16 @@ var DevModeTools = /** @class */ (function (_super) {
                 button.highlight('no');
         });
     };
-    DevModeTools.prototype.selectSingle = function () {
-        this.tileEditor.clearTint();
-        this.tileEditor.paletteArea = { x: 1, y: 1 };
-        // this.brushButtons[0].highlight('active');
-        // this.brushButtons[1].highlight('no');
-        this.tileEditor.activateMarkers(true);
-        this.tileEditor.marker.changePreview();
-        this.tileEditor.paletteMarker.changePreview();
-        if (!this.modeButtons[3].active) {
-            this.brush();
-        }
-    };
-    DevModeTools.prototype.selectArea = function () {
-        this.tileEditor.clearTint();
-        this.tileEditor.paletteArea = { x: 2, y: 2 };
-        this.brushButtons[1].highlight('active');
-        this.brushButtons[0].highlight('no');
-        this.tileEditor.activateMarkers(true);
-        this.tileEditor.marker.changePreview();
-        this.tileEditor.paletteMarker.changePreview();
-        if (!this.modeButtons[3].active) {
-            this.brush();
-        }
-    };
     DevModeTools.prototype.changeShape = function (shape) {
         this.tileEditor.brushArea.shape = shape;
         Object.values(this.brushButtons).map(function (btn) {
             btn.highlight('no');
         });
         this.brushButtons[shape].highlight('active');
-        this.tileEditor.marker.changePreview();
         if (!this.modeButtons[3].active) {
             this.brush();
         }
+        this.tileEditor.marker.changePreview();
     };
     DevModeTools.prototype.switchLayer = function (value) {
         var scene = this.scene;

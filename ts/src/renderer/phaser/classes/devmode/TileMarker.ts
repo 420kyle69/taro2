@@ -2,7 +2,7 @@ class TileMarker {
 	graphics: Phaser.GameObjects.Graphics;
 	preview: Phaser.GameObjects.Container;
 	images: Record<number, Record<number, Phaser.GameObjects.Image>>;
-
+	commandController: CommandController;
 	active: boolean;
 	extrudedKey: string;
 
@@ -15,7 +15,7 @@ class TileMarker {
 		commandController: CommandController,
 	) {
 		this.active = true;
-
+		this.commandController = commandController;
 		this.graphics = scene.add.graphics();
 		this.graphics.lineStyle(w, 0x000000, 1);
 		if (taro.game.data.defaultData.dontResize) {
@@ -64,7 +64,7 @@ class TileMarker {
 
 	changePreview(): void {
 		if (!this.palette) {
-			const { x, y } = this.devModeScene.tileEditor.brushArea.size;
+			const { x, y } = this.devModeScene.devModeTools.isForceTo1x1() ? { x: 1, y: 1 } : this.devModeScene.tileEditor.brushArea.size;
 			this.graphics.scaleX = x;
 			this.graphics.scaleY = y;
 			this.hideImages();

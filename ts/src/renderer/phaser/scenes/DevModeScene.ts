@@ -9,7 +9,6 @@ class DevModeScene extends PhaserScene {
 	gameEditorWidgets: Array<DOMRect>;
 
 	pointerInsideButtons: boolean;
-
 	tilePalette: TilePalette;
 	tilemap: Phaser.Tilemaps.Tilemap;
 	tileset: Phaser.Tilemaps.Tileset;
@@ -198,7 +197,7 @@ class DevModeScene extends PhaserScene {
 
 	leaveMapTab (): void {
 		if (this.devModeTools) this.devModeTools.leaveMapTab();
-        
+
 		this.entityImages.forEach((image) => {
 			image.setVisible(false);
 		});
@@ -210,7 +209,7 @@ class DevModeScene extends PhaserScene {
 	}
 
     createEntityImage(action: ActionData): void {
-        if (!action.disabled && action.position?.function === 'xyCoordinate' 
+        if (!action.disabled && action.position?.function === 'xyCoordinate'
         && !isNaN(action.position?.x) && !isNaN(action.position?.y)) {
             if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || action.type === 'createEntityAtPositionWithDimensions'
             && !isNaN(action.width) && !isNaN(action.height) && !isNaN(action.angle)) {
@@ -223,7 +222,7 @@ class DevModeScene extends PhaserScene {
                 else {
 					this.showRepublishWarning = true;
                 }
-            } else if (action.type === 'createUnitForPlayerAtPosition' 
+            } else if (action.type === 'createUnitForPlayerAtPosition'
             && !isNaN(action.angle) && !isNaN(action.width) && !isNaN(action.height)) {
                 if (action.actionId) new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action, 'unit');
                 else {
@@ -240,7 +239,7 @@ class DevModeScene extends PhaserScene {
                 else {
 					this.showRepublishWarning = true;
                 }
-            } 
+            }
         }
     }
 

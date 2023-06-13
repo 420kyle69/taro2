@@ -155,14 +155,7 @@ class TileEditor {
 				tempLayer++;
 			}
 			const oldTile = map.layers[tempLayer].data[data.y * width + data.x];
-			this.commandController.addCommand({
-				func: () => {
-					this.floodFill(data.layer, oldTile, data.gid, data.x, data.y, true);
-				},
-				undo: () => {
-					this.floodFill(data.layer, data.gid, oldTile === 0 ? -1 : oldTile, data.x, data.y, true);
-				}
-			});
+			this.floodFill(data.layer, oldTile, data.gid === 0 ? -1 : data.gid, data.x, data.y, true);
 		} else if (data.tool === 'clear') {
 			this.clearLayer(data.layer);
 			if (map.layers.length > 4 && data.layer >= 2) data.layer++;
@@ -357,15 +350,31 @@ class TileEditor {
 										}
 									}
 
-								}
+								},
+								paint: this.devModeTools.modeButtons[2].active ? true : false,
 							});
 
 						} else if (this.devModeTools.modeButtons[4].active) {
 							const targetTile = this.getTile(pointerTileX, pointerTileY, map);
 							const selectedTile = Object.values(Object.values(this.selectedTileArea)[0])[0];
-							if (selectedTile && targetTile !== selectedTile && (targetTile || map.currentLayerIndex === 0 || map.currentLayerIndex === 1)) {
-								this.floodFill(map.currentLayerIndex, targetTile, selectedTile, pointerTileX, pointerTileY, false);
-								taro.network.send('editTile', { gid: selectedTile, layer: map.currentLayerIndex, x: pointerTileX, y: pointerTileY, tool: 'flood' });
+							if (selectedTile && targetTile !== selectedTile && (map.currentLayerIndex === 0 || map.currentLayerIndex === 1)) {
+								const nowCommandCount = this.commandController.nowInsertIndex - 1;
+								this.commandController.addCommand(
+									{
+										func: () => {
+											taro.network.send('editTile', { gid: selectedTile, layer: map.currentLayerIndex, x: pointerTileX, y: pointerTileY, tool: 'flood' });
+											this.floodFill(map.currentLayerIndex, targetTile, selectedTile, pointerTileX, pointerTileY, false);
+										},
+										undo: () => {
+											taro.network.send('editTile', { gid: targetTile, layer: map.currentLayerIndex, x: pointerTileX, y: pointerTileY, tool: 'flood' });
+											this.floodFill(map.currentLayerIndex, selectedTile, targetTile, pointerTileX, pointerTileY, false);
+											if (this.commandController.commands[nowCommandCount] && this.commandController.commands[nowCommandCount].paint) {
+												this.commandController.commands[nowCommandCount].func();
+											}
+										},
+									}, true
+								);
+
 							}
 
 						}

@@ -117,7 +117,6 @@ var TileEditor = /** @class */ (function () {
         });
     };
     TileEditor.prototype.edit = function (data) {
-        var _this = this;
         var map = taro.game.data.map;
         inGameEditor.mapWasEdited && inGameEditor.mapWasEdited();
         var width = map.width;
@@ -127,15 +126,8 @@ var TileEditor = /** @class */ (function () {
             if (map.layers.length > 4 && data.layer >= 2) {
                 tempLayer++;
             }
-            var oldTile_1 = map.layers[tempLayer].data[data.y * width + data.x];
-            this.commandController.addCommand({
-                func: function () {
-                    _this.floodFill(data.layer, oldTile_1, data.gid, data.x, data.y, true);
-                },
-                undo: function () {
-                    _this.floodFill(data.layer, data.gid, oldTile_1 === 0 ? -1 : oldTile_1, data.x, data.y, true);
-                }
-            });
+            var oldTile = map.layers[tempLayer].data[data.y * width + data.x];
+            this.floodFill(data.layer, oldTile, data.gid === 0 ? -1 : data.gid, data.x, data.y, true);
         }
         else if (data.tool === 'clear') {
             this.clearLayer(data.layer);
@@ -320,15 +312,28 @@ var TileEditor = /** @class */ (function () {
                                             _this.putTile(pointerTileX_1 + i, pointerTileY_1 + j, originTileArea_1[i][j]);
                                         }
                                     }
-                                }
+                                },
+                                paint: this.devModeTools.modeButtons[2].active ? true : false,
                             });
                         }
                         else if (this.devModeTools.modeButtons[4].active) {
-                            var targetTile = this.getTile(pointerTileX_1, pointerTileY_1, map_1);
-                            var selectedTile = Object.values(Object.values(this.selectedTileArea)[0])[0];
-                            if (selectedTile && targetTile !== selectedTile && (targetTile || map_1.currentLayerIndex === 0 || map_1.currentLayerIndex === 1)) {
-                                this.floodFill(map_1.currentLayerIndex, targetTile, selectedTile, pointerTileX_1, pointerTileY_1, false);
-                                taro.network.send('editTile', { gid: selectedTile, layer: map_1.currentLayerIndex, x: pointerTileX_1, y: pointerTileY_1, tool: 'flood' });
+                            var targetTile_1 = this.getTile(pointerTileX_1, pointerTileY_1, map_1);
+                            var selectedTile_1 = Object.values(Object.values(this.selectedTileArea)[0])[0];
+                            if (selectedTile_1 && targetTile_1 !== selectedTile_1 && (map_1.currentLayerIndex === 0 || map_1.currentLayerIndex === 1)) {
+                                var nowCommandCount_1 = this.commandController.nowInsertIndex - 1;
+                                this.commandController.addCommand({
+                                    func: function () {
+                                        taro.network.send('editTile', { gid: selectedTile_1, layer: map_1.currentLayerIndex, x: pointerTileX_1, y: pointerTileY_1, tool: 'flood' });
+                                        _this.floodFill(map_1.currentLayerIndex, targetTile_1, selectedTile_1, pointerTileX_1, pointerTileY_1, false);
+                                    },
+                                    undo: function () {
+                                        taro.network.send('editTile', { gid: targetTile_1, layer: map_1.currentLayerIndex, x: pointerTileX_1, y: pointerTileY_1, tool: 'flood' });
+                                        _this.floodFill(map_1.currentLayerIndex, selectedTile_1, targetTile_1, pointerTileX_1, pointerTileY_1, false);
+                                        if (_this.commandController.commands[nowCommandCount_1] && _this.commandController.commands[nowCommandCount_1].paint) {
+                                            _this.commandController.commands[nowCommandCount_1].func();
+                                        }
+                                    },
+                                }, true);
                             }
                         }
                     }

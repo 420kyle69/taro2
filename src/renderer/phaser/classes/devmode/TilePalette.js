@@ -18,6 +18,7 @@ var TilePalette = /** @class */ (function (_super) {
     function TilePalette(scene, tileset, rexUI, commandController) {
         var _this = _super.call(this, scene) || this;
         _this.scene = scene;
+        _this.devModeScene = scene;
         _this.rexUI = rexUI;
         var keyAlt = _this.scene.input.keyboard.addKey('ALT');
         // Load a map from a 2D array of tile indices
@@ -106,7 +107,7 @@ var TilePalette = /** @class */ (function (_super) {
         _this.scene.input.on('wheel', function (pointer, gameObjects, deltaX, deltaY, deltaZ) {
             if (taro.developerMode.active && taro.developerMode.activeTab !== 'play') {
                 var isAltDown = keyAlt.isDown;
-                if (isAltDown) {
+                if (isAltDown && !_this.devModeScene.devModeTools.isForceTo1x1()) {
                     if (deltaY > 0) {
                         commandController.defaultCommands.decreaseBrushSize();
                     }

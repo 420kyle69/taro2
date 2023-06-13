@@ -10,18 +10,22 @@ var CommandController = /** @class */ (function () {
     /**
      * add command to exec
      * @param command new command
+     * @param forceToHistory force to history
      * @param history whether the added command will go into the history? (can be undo and redo)
      * @param mapEdit this command is for map editing? if so, it will check if the map changed after
      * command exec, if no change happened, it will not go into the history.
      */
-    CommandController.prototype.addCommand = function (command, history, mapEdit) {
+    CommandController.prototype.addCommand = function (command, forceToHistory, history, mapEdit) {
+        if (forceToHistory === void 0) { forceToHistory = false; }
         if (history === void 0) { history = true; }
         if (mapEdit === void 0) { mapEdit = true; }
         var mapBeforeCommand = this.getAllTiles();
+        var oldTaroMap = JSON.stringify(taro.game.data.map.layers);
         command.func();
-        if (history) {
-            if (mapEdit) {
-                if (JSON.stringify(this.getAllTiles()) === JSON.stringify(mapBeforeCommand)) {
+        if (history || forceToHistory) {
+            if (mapEdit && !forceToHistory) {
+                if (JSON.stringify(this.getAllTiles()) === JSON.stringify(mapBeforeCommand) &&
+                    JSON.stringify(taro.game.data.map.layers) === oldTaroMap) {
                     return;
                 }
             }

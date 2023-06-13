@@ -457,7 +457,8 @@ interface TileData {
 	layer: number,
 	x: number,
 	y: number,
-	tool?: string
+	tool?: string,
+	oldTile?: number,
 }
 
 interface RegionData {

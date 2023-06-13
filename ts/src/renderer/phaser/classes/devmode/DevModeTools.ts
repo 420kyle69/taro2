@@ -184,6 +184,13 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		return false;
 	}
 
+	isForceTo1x1(): boolean {
+		if (this.modeButtons[4].active) {
+			return true;
+		}
+		return false;
+	}
+
 	keyBindings(): void {
 		const gameScene = this.scene.gameScene;
 		const keyboard = this.scene.input.keyboard;
@@ -333,9 +340,9 @@ class DevModeTools extends Phaser.GameObjects.Container {
 			this.tileEditor.selectedTileArea = this.tileEditor.lastSelectedTileArea;
 		}
 		this.tileEditor.activateMarkers(true);
-		this.tileEditor.marker.changePreview();
 		this.scene.regionEditor.regionTool = false;
 		this.highlightModeButton(2);
+		this.tileEditor.marker.changePreview();
 	}
 
 	emptyTile(): void {
@@ -343,9 +350,9 @@ class DevModeTools extends Phaser.GameObjects.Container {
 			this.tileEditor.lastSelectedTileArea = this.tileEditor.selectedTileArea;
 			this.tileEditor.selectedTileArea = { 0: { 0: -1 } };
 			this.tileEditor.activateMarkers(true);
-			this.tileEditor.marker.changePreview();
 			this.scene.regionEditor.regionTool = false;
 			this.highlightModeButton(3);
+			this.tileEditor.marker.changePreview();
 		}
 	}
 
@@ -354,10 +361,9 @@ class DevModeTools extends Phaser.GameObjects.Container {
 			this.tileEditor.selectedTileArea = this.tileEditor.lastSelectedTileArea;
 		}
 		this.tileEditor.activateMarkers(true);
-		this.tileEditor.marker.changePreview();
 		this.scene.regionEditor.regionTool = false;
-		this.selectSingle();
 		this.highlightModeButton(4);
+		this.tileEditor.marker.changePreview();
 	}
 
 	clear(): void {
@@ -377,42 +383,16 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		});
 	}
 
-	selectSingle(): void {
-		this.tileEditor.clearTint();
-		this.tileEditor.paletteArea = { x: 1, y: 1 };
-		// this.brushButtons[0].highlight('active');
-		// this.brushButtons[1].highlight('no');
-		this.tileEditor.activateMarkers(true);
-		this.tileEditor.marker.changePreview();
-		this.tileEditor.paletteMarker.changePreview();
-		if (!this.modeButtons[3].active) {
-			this.brush();
-		}
-	}
-
-	selectArea(): void {
-		this.tileEditor.clearTint();
-		this.tileEditor.paletteArea = { x: 2, y: 2 };
-		this.brushButtons[1].highlight('active');
-		this.brushButtons[0].highlight('no');
-		this.tileEditor.activateMarkers(true);
-		this.tileEditor.marker.changePreview();
-		this.tileEditor.paletteMarker.changePreview();
-		if (!this.modeButtons[3].active) {
-			this.brush();
-		}
-	}
-
 	changeShape(shape: Shape): void {
 		this.tileEditor.brushArea.shape = shape;
 		Object.values(this.brushButtons).map((btn) => {
 			btn.highlight('no');
 		});
 		this.brushButtons[shape].highlight('active');
-		this.tileEditor.marker.changePreview();
 		if (!this.modeButtons[3].active) {
 			this.brush();
 		}
+		this.tileEditor.marker.changePreview();
 	}
 
 	switchLayer(value: number): void {

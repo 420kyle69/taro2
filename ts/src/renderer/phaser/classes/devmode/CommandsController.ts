@@ -1,6 +1,7 @@
 interface CommandEmitterProps {
 	func: () => void;
 	undo: () => void;
+	paint?: boolean;
 }
 
 interface CommandControllerProps {
@@ -24,16 +25,19 @@ class CommandController implements CommandControllerProps {
 	/**
 	 * add command to exec
 	 * @param command new command
+	 * @param forceToHistory force to history
 	 * @param history whether the added command will go into the history? (can be undo and redo)
 	 * @param mapEdit this command is for map editing? if so, it will check if the map changed after
 	 * command exec, if no change happened, it will not go into the history.
 	 */
-	addCommand(command: CommandEmitterProps, history = true, mapEdit = true) {
+	addCommand(command: CommandEmitterProps, forceToHistory = false, history = true, mapEdit = true) {
 		const mapBeforeCommand = this.getAllTiles();
+		const oldTaroMap = JSON.stringify(taro.game.data.map.layers);
 		command.func();
-		if (history) {
-			if (mapEdit) {
-				if (JSON.stringify(this.getAllTiles()) === JSON.stringify(mapBeforeCommand)) {
+		if (history || forceToHistory) {
+			if (mapEdit && !forceToHistory) {
+				if (JSON.stringify(this.getAllTiles()) === JSON.stringify(mapBeforeCommand) &&
+					JSON.stringify(taro.game.data.map.layers) === oldTaroMap) {
 					return;
 				}
 			}
@@ -68,7 +72,7 @@ class CommandController implements CommandControllerProps {
 		}
 	}
 
-	getAllTiles() {
+	getAllTiles(): Record<number, Record<number, number>> {
 		const nowTiles = {};
 		Object.entries(this.map.layer.data).map(([x, obj]) => {
 			nowTiles[x] = {};
