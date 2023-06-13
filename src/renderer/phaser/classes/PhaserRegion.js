@@ -49,10 +49,10 @@ var PhaserRegion = /** @class */ (function (_super) {
         devModeScene.regions.push(_this);
         _this.updateLabel();
         _this.transform();
-        //if (this.devModeOnly && !taro.developerMode.active && taro.developerMode.activeTab !== 'play') {
-        _this.hide();
+        if (_this.devModeOnly && !taro.developerMode.active && taro.developerMode.activeTab !== 'play') {
+            _this.hide();
+        }
         return _this;
-        //}
     }
     PhaserRegion.prototype.getLabel = function () {
         if (!this.label) {

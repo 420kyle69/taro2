@@ -53,9 +53,9 @@ class PhaserRegion extends PhaserEntity {
 		this.updateLabel();
 		this.transform();
 
-        //if (this.devModeOnly && !taro.developerMode.active && taro.developerMode.activeTab !== 'play') {
+        if (this.devModeOnly && !taro.developerMode.active && taro.developerMode.activeTab !== 'play') {
 			this.hide();
-        //}
+        }
 	}
 
 	private getLabel (): Phaser.GameObjects.BitmapText {
