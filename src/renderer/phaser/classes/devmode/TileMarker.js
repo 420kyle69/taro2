@@ -45,7 +45,7 @@ var TileMarker = /** @class */ (function () {
             this.images[i][j] = this.addImage(i, j);
             this.images[i][j].setTexture(this.extrudedKey, tile - 1).setAlpha(0.75);
         }
-        else if (this.images[i][j])
+        else if (this.images[i] && this.images[i][j])
             this.images[i][j].setAlpha(0);
     };
     TileMarker.prototype.changePreview = function () {

@@ -33,7 +33,7 @@ var TileEditor = /** @class */ (function () {
                 _this.startDragIn = 'palette';
                 pointerPosition.x = devModeScene.input.activePointer.x;
                 pointerPosition.y = devModeScene.input.activePointer.y;
-                if (!devModeTools.modeButtons[3].active)
+                if (!devModeTools.modeButtons[4].active)
                     _this.devModeTools.brush();
                 if (shiftKey.isDown) {
                     //pass

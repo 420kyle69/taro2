@@ -54,7 +54,7 @@ class TileEditor {
 				this.startDragIn = 'palette';
 				pointerPosition.x = devModeScene.input.activePointer.x;
 				pointerPosition.y = devModeScene.input.activePointer.y;
-				if (!devModeTools.modeButtons[3].active) this.devModeTools.brush();
+				if (!devModeTools.modeButtons[4].active) this.devModeTools.brush();
 				if (shiftKey.isDown) {
 					//pass
 				} else {
