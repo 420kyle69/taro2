@@ -165,7 +165,8 @@ class PhaserRegion extends PhaserEntity {
 	}
 
 	show() {
-		super.show();
+        this.graphics.visible = true;
+		//super.show();
 
 		const label = this.label;
 		const rt = this.rtLabel;
@@ -176,7 +177,8 @@ class PhaserRegion extends PhaserEntity {
 
 	hide() {
 		if (this.devModeOnly) {
-			super.hide();
+            this.graphics.visible = false;
+			//super.hide();
 		}
 		const label = this.label;
 		const rt = this.rtLabel;
