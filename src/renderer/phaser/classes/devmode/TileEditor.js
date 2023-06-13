@@ -133,7 +133,7 @@ var TileEditor = /** @class */ (function () {
                     _this.floodFill(data.layer, oldTile_1, data.gid, data.x, data.y, true);
                 },
                 undo: function () {
-                    _this.floodFill(data.layer, data.gid, oldTile_1, data.x, data.y, true);
+                    _this.floodFill(data.layer, data.gid, oldTile_1 === 0 ? -1 : oldTile_1, data.x, data.y, true);
                 }
             });
         }
@@ -294,7 +294,6 @@ var TileEditor = /** @class */ (function () {
                             var originTileArea_1 = {};
                             var nowBrushArea_1 = JSON.parse(JSON.stringify(this.brushArea));
                             var sample_1 = JSON.parse(JSON.stringify(this.brushArea.sample));
-                            var noDifferent_1 = true;
                             Object.entries(sample_1).map(function (_a) {
                                 var x = _a[0], obj = _a[1];
                                 Object.entries(obj).map(function (_a) {
@@ -303,31 +302,26 @@ var TileEditor = /** @class */ (function () {
                                         originTileArea_1[x] = {};
                                     }
                                     originTileArea_1[x][y] = _this.getTile(pointerTileX_1 + parseInt(x), pointerTileY_1 + parseInt(y), map_1);
-                                    if (value !== originTileArea_1[x][y]) {
-                                        noDifferent_1 = false;
-                                    }
                                 });
                             });
-                            if (!noDifferent_1) {
-                                this.commandController.addCommand({
-                                    func: function () {
-                                        for (var i = 0; i < nowBrushArea_1.size.x; i++) {
-                                            for (var j = 0; j < nowBrushArea_1.size.y; j++) {
-                                                if (sample_1[i] && sample_1[i][j]) {
-                                                    _this.putTile(pointerTileX_1 + i, pointerTileY_1 + j, sample_1[i][j]);
-                                                }
-                                            }
-                                        }
-                                    },
-                                    undo: function () {
-                                        for (var i = 0; i < nowBrushArea_1.size.x; i++) {
-                                            for (var j = 0; j < nowBrushArea_1.size.y; j++) {
-                                                _this.putTile(pointerTileX_1 + i, pointerTileY_1 + j, originTileArea_1[i][j]);
+                            this.commandController.addCommand({
+                                func: function () {
+                                    for (var i = 0; i < nowBrushArea_1.size.x; i++) {
+                                        for (var j = 0; j < nowBrushArea_1.size.y; j++) {
+                                            if (sample_1[i] && sample_1[i][j]) {
+                                                _this.putTile(pointerTileX_1 + i, pointerTileY_1 + j, sample_1[i][j]);
                                             }
                                         }
                                     }
-                                });
-                            }
+                                },
+                                undo: function () {
+                                    for (var i = 0; i < nowBrushArea_1.size.x; i++) {
+                                        for (var j = 0; j < nowBrushArea_1.size.y; j++) {
+                                            _this.putTile(pointerTileX_1 + i, pointerTileY_1 + j, originTileArea_1[i][j]);
+                                        }
+                                    }
+                                }
+                            });
                         }
                         else if (this.devModeTools.modeButtons[4].active) {
                             var targetTile = this.getTile(pointerTileX_1, pointerTileY_1, map_1);

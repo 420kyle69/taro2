@@ -29,7 +29,7 @@ var DevModeTools = /** @class */ (function (_super) {
                 _this.brushSize = Math.max(_this.brushSize - 1, 1);
                 _this.updateBrushArea();
             }
-        });
+        }, _this.scene.gameScene.tilemap);
         var palette = _this.palette = new TilePalette(_this.scene, _this.scene.tileset, _this.scene.rexUI, _this.commandController);
         _this.tileEditor = new TileEditor(_this.scene.gameScene, _this.scene, _this, _this.commandController);
         _this.regionEditor = new RegionEditor(_this.scene.gameScene, _this.scene, _this);

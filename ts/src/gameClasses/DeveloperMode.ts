@@ -2,44 +2,44 @@ class DeveloperMode {
 	active: boolean;
 	activeTab: devModeTab;
 
-    initEntities: ActionData[];
+	initEntities: ActionData[];
 
 	constructor() {
 		if (taro.isClient) this.active = false;
 	}
 
-    addInitEntities (): void {
-        // add id for actions creating entities in initialize script
-        this.initEntities = [];
+	addInitEntities(): void {
+		// add id for actions creating entities in initialize script
+		this.initEntities = [];
 		Object.values(taro.game.data.scripts).forEach((script) => {
 			if (script.triggers?.[0]?.type === 'gameStart') {
 				Object.values(script.actions).forEach((action) => {
-                    if (!action.disabled && action.position?.function === 'xyCoordinate' 
-                    && !isNaN(action.position?.x) && !isNaN(action.position?.y) 
-                    && !isNaN(action.width) && !isNaN(action.height) && !isNaN(action.angle)) {
-                        if ((action.type === 'createEntityForPlayerAtPositionWithDimensions' 
-                        || action.type === 'createEntityAtPositionWithDimensions'
-                        || action.type === 'createUnitForPlayerAtPosition')
-                        && !isNaN(action.width) && !isNaN(action.height) && !isNaN(action.angle)) {
-                            if (action.actionId) this.initEntities.push(action);
-                        } else if ((action.type === 'createUnitAtPosition'
-                        || action.type === 'createProjectileAtPosition') 
-                        && !isNaN(action.angle)) {
-                            if (action.actionId) this.initEntities.push(action);
-                        } else if (action.type === 'spawnItem' || action.type === 'createItemWithMaxQuantityAtPosition') {
-                            if (action.actionId) this.initEntities.push(action);
-                        } 
-                    }
+					if (!action.disabled && action.position?.function === 'xyCoordinate'
+						&& !isNaN(action.position?.x) && !isNaN(action.position?.y)
+						&& !isNaN(action.width) && !isNaN(action.height) && !isNaN(action.angle)) {
+						if ((action.type === 'createEntityForPlayerAtPositionWithDimensions'
+							|| action.type === 'createEntityAtPositionWithDimensions'
+							|| action.type === 'createUnitForPlayerAtPosition')
+							&& !isNaN(action.width) && !isNaN(action.height) && !isNaN(action.angle)) {
+							if (action.actionId) this.initEntities.push(action);
+						} else if ((action.type === 'createUnitAtPosition'
+							|| action.type === 'createProjectileAtPosition')
+							&& !isNaN(action.angle)) {
+							if (action.actionId) this.initEntities.push(action);
+						} else if (action.type === 'spawnItem' || action.type === 'createItemWithMaxQuantityAtPosition') {
+							if (action.actionId) this.initEntities.push(action);
+						}
+					}
 				});
 			}
 		});
-    }
+	}
 
-    requestInitEntities (): void {
-        if (this.initEntities) {
-            taro.network.send('updateClientInitEntities', this.initEntities);
-        }
-    }
+	requestInitEntities(): void {
+		if (this.initEntities) {
+			taro.network.send('updateClientInitEntities', this.initEntities);
+		}
+	}
 
 	enter(): void {
 		console.log('client enter developer mode');
@@ -47,7 +47,7 @@ class DeveloperMode {
 		this.changeTab('play');
 	}
 
-	leave (): void {
+	leave(): void {
 		console.log('client leave developer mode');
 		this.active = false;
 	}
@@ -66,18 +66,18 @@ class DeveloperMode {
 		this.activeTab = tab;
 	}
 
-	shouldPreventKeybindings (): boolean {
+	shouldPreventKeybindings(): boolean {
 		return this.activeTab && this.activeTab !== 'play';
 	}
 
-	editTile (data: TileData, clientId: string): void {
+	editTile(data: TileData, clientId: string): void {
 		// only allow developers to modify the tiles
 		if (taro.server.developerClientIds.includes(clientId) || clientId == "server") {
 			const gameMap = taro.game.data.map;
 			gameMap.wasEdited = true;
 			taro.network.send('editTile', data);
 			const serverData = _.clone(data);
-			if (gameMap.layers.length > 4 && serverData.layer >= 2) serverData.layer ++;
+			if (gameMap.layers.length > 4 && serverData.layer >= 2) serverData.layer++;
 			const width = gameMap.width;
 			if (data.tool === 'flood') {
 				this.floodTiles(
@@ -86,7 +86,7 @@ class DeveloperMode {
 					serverData.gid,
 					serverData.x,
 					serverData.y
-					);
+				);
 			} else if (data.tool === 'clear') {
 				this.clearLayer(serverData.layer);
 			}
@@ -106,55 +106,55 @@ class DeveloperMode {
 		}
 	}
 
-	floodTiles (layer: number, oldTile: number, newTile: number, x: number, y: number): void {
+	floodTiles(layer: number, oldTile: number, newTile: number, x: number, y: number): void {
 		const map = taro.game.data.map;
 		const width = map.width;
-        if (oldTile === newTile || map.layers[layer].data[y * width + x] !== oldTile) {
-            return;
-        }
+		if (oldTile === newTile || map.layers[layer].data[y * width + x] !== oldTile) {
+			return;
+		}
 		//save tile change to taro.game.data.map and taro.map.data
 		map.layers[layer].data[y * width + x] = newTile;
 		taro.map.data.layers[layer].data[y * width + x] = newTile;
 
-        if (x > 0) {
-            this.floodTiles(layer, oldTile, newTile, x - 1, y);
-        }
-        if (x < (map.width - 1)) {
-            this.floodTiles(layer, oldTile, newTile, x + 1, y);
-        }
-        if (y > 0) {
-            this.floodTiles(layer, oldTile, newTile, x, y - 1);
-        }
-        if (y < (map.height - 1)) {
-            this.floodTiles(layer, oldTile, newTile, x, y + 1);
-        }
+		if (x > 0) {
+			this.floodTiles(layer, oldTile, newTile, x - 1, y);
+		}
+		if (x < (map.width - 1)) {
+			this.floodTiles(layer, oldTile, newTile, x + 1, y);
+		}
+		if (y > 0) {
+			this.floodTiles(layer, oldTile, newTile, x, y - 1);
+		}
+		if (y < (map.height - 1)) {
+			this.floodTiles(layer, oldTile, newTile, x, y + 1);
+		}
 	}
 
-	clearLayer (layer: number): void {
+	clearLayer(layer: number): void {
 		const map = taro.game.data.map;
 		const width = map.width;
 		for (let i = 0; i < map.width; i++) {
 			for (let j = 0; j < map.height; j++) {
 				if (map.layers[layer].data[j * width + i] !== 0) {
 					//save tile change to taro.game.map.data
-					map.layers[layer].data[j*width + i] = 0;
+					map.layers[layer].data[j * width + i] = 0;
 				}
 			}
 		}
-	 }
+	}
 
-	editRegion (data: RegionData, clientId: string): void {
+	editRegion(data: RegionData, clientId: string): void {
 		// only allow developers to modify regions
 		if (taro.server.developerClientIds.includes(clientId)) {
 			if (data.name === '' || data.width <= 0 || data.height <= 0) {
-				console.log ('empty name, negative or 0 size is not allowed');
+				console.log('empty name, negative or 0 size is not allowed');
 			} else if (data.name === undefined) { // create new region
 				// create new region name (smallest available number)
 				let regionNameNumber = 0;
-				let newRegionName = `region${  regionNameNumber}`;
+				let newRegionName = `region${regionNameNumber}`;
 				do {
-					regionNameNumber ++;
-					newRegionName = `region${  regionNameNumber}`;
+					regionNameNumber++;
+					newRegionName = `region${regionNameNumber}`;
 				} while (taro.regionManager.getRegionById(newRegionName));
 
 				data.name = newRegionName;
@@ -213,31 +213,31 @@ class DeveloperMode {
 		}
 	}
 
-    editInitEntity (data, clientId: string): void {
-        // only allow developers to modify initial entities
+	editInitEntity(data, clientId: string): void {
+		// only allow developers to modify initial entities
 		if (taro.server.developerClientIds.includes(clientId)) {
-            // broadcast init entity change to all clients
+			// broadcast init entity change to all clients
 			taro.network.send('editInitEntity', data);
-            if (!this.initEntities) {
-                this.addInitEntities();
-            }
-            this.initEntities.forEach((action) => {
-                if (action.actionId === data.actionId) {
-                    if (data.position && data.position.x && data.position.y &&
-                        action.position && action.position.x && action.position.y) {
-                        action.position = data.position;
-                    } 
-                    if (data.angle && action.angle) {
-                        action.angle = data.angle;
-                    } 
-                    if (data.width && data.height && action.width && action.height) {
-                        action.width = data.width;
-                        action.height = data.height;
-                    }
-                }
-            });
-        }
-    }
+			if (!this.initEntities) {
+				this.addInitEntities();
+			}
+			this.initEntities.forEach((action) => {
+				if (action.actionId === data.actionId) {
+					if (data.position && data.position.x && data.position.y &&
+						action.position && action.position.x && action.position.y) {
+						action.position = data.position;
+					}
+					if (data.angle && action.angle) {
+						action.angle = data.angle;
+					}
+					if (data.width && data.height && action.width && action.height) {
+						action.width = data.width;
+						action.height = data.height;
+					}
+				}
+			});
+		}
+	}
 
 	createUnit(data) {
 		//const player = taro.game.getPlayerByClientId(clientId);
@@ -275,10 +275,10 @@ class DeveloperMode {
 				for (let i = 0; i < unit._stats.itemIds.length; i++) {
 					var itemId = unit._stats.itemIds[i];
 					var item = taro.$(itemId);
-						if (item) {
-							item.remove();
-						}
+					if (item) {
+						item.remove();
 					}
+				}
 				unit.changeUnitType(data.typeId, {}, false);
 				unit.emit('update-texture', 'basic_texture_change');
 			}
@@ -375,7 +375,7 @@ class DeveloperMode {
 	}
 
 
-	editEntity (data: EditEntityData, clientId: string) {
+	editEntity(data: EditEntityData, clientId: string) {
 		if (taro.isClient) {
 			taro.network.send('editEntity', data);
 		} else {
@@ -428,7 +428,7 @@ class DeveloperMode {
 		}
 	}
 
-	updateClientMap (data: { mapData: MapData }): void {
+	updateClientMap(data: { mapData: MapData }): void {
 		//console.log ('map data was edited', data.mapData.wasEdited);
 		if (data.mapData.wasEdited) {
 			data.mapData.wasEdited = false;
@@ -446,10 +446,10 @@ class DeveloperMode {
 		}
 	}
 
-    updateClientInitEntities (initEntities: ActionData[] ) {
-        this.initEntities = initEntities;
-        taro.client.emit('updateInitEntities');
-    }
+	updateClientInitEntities(initEntities: ActionData[]) {
+		this.initEntities = initEntities;
+		taro.client.emit('updateInitEntities');
+	}
 }
 
 interface TileData {
@@ -478,7 +478,7 @@ interface EditEntityData {
 	action: string,
 	newData?: any, //EntityStats,
 	playerId?: string,
-	position?: {x: number, y: number},
+	position?: { x: number, y: number },
 	angle?: number,
 }
 

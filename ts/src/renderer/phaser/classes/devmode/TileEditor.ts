@@ -160,7 +160,7 @@ class TileEditor {
 					this.floodFill(data.layer, oldTile, data.gid, data.x, data.y, true);
 				},
 				undo: () => {
-					this.floodFill(data.layer, data.gid, oldTile, data.x, data.y, true);
+					this.floodFill(data.layer, data.gid, oldTile === 0 ? -1 : oldTile, data.x, data.y, true);
 				}
 			});
 		} else if (data.tool === 'clear') {
@@ -329,41 +329,37 @@ class TileEditor {
 							const originTileArea = {};
 							const nowBrushArea = JSON.parse(JSON.stringify(this.brushArea));
 							const sample = JSON.parse(JSON.stringify(this.brushArea.sample));
-							let noDifferent = true;
+
 							Object.entries(sample).map(([x, obj]) => {
 								Object.entries(obj).map(([y, value]) => {
 									if (!originTileArea[x]) {
 										originTileArea[x] = {};
 									}
 									originTileArea[x][y] = this.getTile(pointerTileX + parseInt(x), pointerTileY + parseInt(y), map);
-									if (value !== originTileArea[x][y]) {
-										noDifferent = false;
-									}
 								});
 							});
-							if (!noDifferent) {
-								this.commandController.addCommand({
-									func: () => {
-										for (let i = 0; i < nowBrushArea.size.x; i++) {
-											for (let j = 0; j < nowBrushArea.size.y; j++) {
-												if (sample[i] && sample[i][j]) {
-													this.putTile(pointerTileX + i, pointerTileY + j, sample[i][j]);
-												}
+
+							this.commandController.addCommand({
+								func: () => {
+									for (let i = 0; i < nowBrushArea.size.x; i++) {
+										for (let j = 0; j < nowBrushArea.size.y; j++) {
+											if (sample[i] && sample[i][j]) {
+												this.putTile(pointerTileX + i, pointerTileY + j, sample[i][j]);
 											}
 										}
-
-									},
-									undo: () => {
-										for (let i = 0; i < nowBrushArea.size.x; i++) {
-											for (let j = 0; j < nowBrushArea.size.y; j++) {
-												this.putTile(pointerTileX + i, pointerTileY + j, originTileArea[i][j]);
-											}
-										}
-
 									}
-								});
 
-							}
+								},
+								undo: () => {
+									for (let i = 0; i < nowBrushArea.size.x; i++) {
+										for (let j = 0; j < nowBrushArea.size.y; j++) {
+											this.putTile(pointerTileX + i, pointerTileY + j, originTileArea[i][j]);
+										}
+									}
+
+								}
+							});
+
 						} else if (this.devModeTools.modeButtons[4].active) {
 							const targetTile = this.getTile(pointerTileX, pointerTileY, map);
 							const selectedTile = Object.values(Object.values(this.selectedTileArea)[0])[0];

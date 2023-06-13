@@ -43,7 +43,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 				this.brushSize = Math.max(this.brushSize - 1, 1);
 				this.updateBrushArea();
 			}
-		});
+		}, this.scene.gameScene.tilemap);
 
 		const palette = this.palette = new TilePalette(this.scene, this.scene.tileset, this.scene.rexUI, this.commandController);
 		this.tileEditor = new TileEditor(this.scene.gameScene, this.scene, this, this.commandController);
