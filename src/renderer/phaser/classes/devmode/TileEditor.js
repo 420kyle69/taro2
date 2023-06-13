@@ -208,7 +208,7 @@ var TileEditor = /** @class */ (function () {
         }
         else {
             map = this.gameScene.tilemap;
-            if (oldTile === newTile ||
+            if (oldTile === newTile || !map.getTileAt(x, y, true, layer) ||
                 map.getTileAt(x, y, true, layer).index !== oldTile ||
                 map.getTileAt(x, y, true, layer).index === 0 ||
                 map.getTileAt(x, y, true, layer).index === -1) {

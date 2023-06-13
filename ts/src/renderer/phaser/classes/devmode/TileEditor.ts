@@ -232,7 +232,7 @@ class TileEditor {
 		} else {
 			map = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
 			if (
-				oldTile === newTile ||
+				oldTile === newTile || !map.getTileAt(x, y, true, layer) ||
 				map.getTileAt(x, y, true, layer).index !== oldTile ||
 				map.getTileAt(x, y, true, layer).index === 0 ||
 				map.getTileAt(x, y, true, layer).index === -1
