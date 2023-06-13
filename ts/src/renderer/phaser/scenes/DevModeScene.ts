@@ -16,6 +16,10 @@ class DevModeScene extends PhaserScene {
 
 	regions: PhaserRegion[];
 
+	entityImages: (Phaser.GameObjects.Image & {entity: EntityImage})[];
+
+	showRepublishWarning: boolean;
+
 	constructor() {
 		super({ key: 'DevMode' });
 	}
@@ -23,7 +27,11 @@ class DevModeScene extends PhaserScene {
 	init (): void {
 		this.gameScene = taro.renderer.scene.getScene('Game');
 		this.pointerInsideButtons = false;
+
 		this.regions = [];
+		this.entityImages = [];
+
+		this.showRepublishWarning = false;
 
 		taro.client.on('unlockCamera', () => {
 			this.gameScene.cameras.main.stopFollow();
@@ -50,6 +58,18 @@ class DevModeScene extends PhaserScene {
 
 		taro.client.on('editRegion', (data: RegionData) => {
 			this.regionEditor.edit(data);
+		});
+
+        taro.client.on('editInitEntity', (data: ActionData) => {
+            this.entityImages.forEach((image) => {
+                if (image.entity.action.actionId === data.actionId) {
+                    image.entity.update(data);
+                }
+            });
+		});
+
+        taro.client.on('updateInitEntities', () => {
+			this.updateInitEntities();
 		});
 
 		this.gameScene.input.on('pointerup', (p) => {
@@ -149,11 +169,79 @@ class DevModeScene extends PhaserScene {
 		}
 
 		this.devModeTools.enterMapTab();
+
+		this.gameScene.renderedEntities.forEach(element => {
+			element.setVisible(false);
+		});
+
+		if (this.entityImages.length === 0) {
+			// create images for entities created in initialize script
+			Object.values(taro.game.data.scripts).forEach((script) => {
+				if (script.triggers?.[0]?.type === 'gameStart') {
+					Object.values(script.actions).forEach((action) => {
+                        this.createEntityImage(action);
+					});
+				}
+			});
+
+			if (this.showRepublishWarning) {
+				inGameEditor.showRepublishToInitEntitiesWarning();
+			}
+		}
+
+        taro.network.send('updateClientInitEntities', true);
+
+		this.entityImages.forEach((image) => {
+			image.setVisible(true);
+		});
 	}
 
 	leaveMapTab (): void {
 		if (this.devModeTools) this.devModeTools.leaveMapTab();
+		this.entityImages.forEach((image) => {
+			image.setVisible(false);
+		});
+
+		this.gameScene.renderedEntities.forEach(element => {
+			element.setVisible(true);
+		});
+
 	}
+
+    createEntityImage(action: ActionData): void {
+        if (!action.disabled && action.position?.function === 'xyCoordinate' 
+        && !isNaN(action.position?.x) && !isNaN(action.position?.y)) {
+            if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || action.type === 'createEntityAtPositionWithDimensions'
+            && !isNaN(action.width) && !isNaN(action.height) && !isNaN(action.angle)) {
+                if (action.actionId) new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action);
+                else {
+					this.showRepublishWarning = true;
+                }
+            } else if (action.type === 'createUnitAtPosition' && !isNaN(action.angle)) {
+                if (action.actionId) new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action, 'unit');
+                else {
+					this.showRepublishWarning = true;
+                }
+            } else if (action.type === 'createUnitForPlayerAtPosition' 
+            && !isNaN(action.angle) && !isNaN(action.width) && !isNaN(action.height)) {
+                if (action.actionId) new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action, 'unit');
+                else {
+					this.showRepublishWarning = true;
+                }
+            }
+            else if (action.type === 'spawnItem' || action.type === 'createItemWithMaxQuantityAtPosition') {
+                if (action.actionId) new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action, 'item');
+                else {
+					this.showRepublishWarning = true;
+                }
+            } else if (action.type === 'createProjectileAtPosition' && !isNaN(action.angle)) {
+                if (action.actionId) new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action, 'projectile');
+                else {
+					this.showRepublishWarning = true;
+                }
+            } 
+        }
+    }
 
 	pointerInsideMap(pointerX: number, pointerY: number, map: Phaser.Tilemaps.Tilemap): boolean {
 		return (0 <= pointerX && pointerX < map.width
@@ -186,5 +274,13 @@ class DevModeScene extends PhaserScene {
 	update (): void {
 		if (this.tileEditor) this.tileEditor.update();
 	}
+
+    updateInitEntities(): void {
+        this.entityImages.forEach((image) => {
+            taro.developerMode.initEntities.forEach((action) =>{
+                if (image.entity.action.actionId === action.actionId) image.entity.update(action);
+            });
+        });
+    }
 
 }

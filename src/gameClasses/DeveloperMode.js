@@ -3,6 +3,45 @@ var DeveloperMode = /** @class */ (function () {
         if (taro.isClient)
             this.active = false;
     }
+    DeveloperMode.prototype.addInitEntities = function () {
+        var _this = this;
+        // add id for actions creating entities in initialize script
+        this.initEntities = [];
+        Object.values(taro.game.data.scripts).forEach(function (script) {
+            var _a, _b;
+            if (((_b = (_a = script.triggers) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.type) === 'gameStart') {
+                Object.values(script.actions).forEach(function (action) {
+                    var _a, _b, _c;
+                    if (!action.disabled && ((_a = action.position) === null || _a === void 0 ? void 0 : _a.function) === 'xyCoordinate'
+                        && !isNaN((_b = action.position) === null || _b === void 0 ? void 0 : _b.x) && !isNaN((_c = action.position) === null || _c === void 0 ? void 0 : _c.y)
+                        && !isNaN(action.width) && !isNaN(action.height) && !isNaN(action.angle)) {
+                        if ((action.type === 'createEntityForPlayerAtPositionWithDimensions'
+                            || action.type === 'createEntityAtPositionWithDimensions'
+                            || action.type === 'createUnitForPlayerAtPosition')
+                            && !isNaN(action.width) && !isNaN(action.height) && !isNaN(action.angle)) {
+                            if (action.actionId)
+                                _this.initEntities.push(action);
+                        }
+                        else if ((action.type === 'createUnitAtPosition'
+                            || action.type === 'createProjectileAtPosition')
+                            && !isNaN(action.angle)) {
+                            if (action.actionId)
+                                _this.initEntities.push(action);
+                        }
+                        else if (action.type === 'spawnItem' || action.type === 'createItemWithMaxQuantityAtPosition') {
+                            if (action.actionId)
+                                _this.initEntities.push(action);
+                        }
+                    }
+                });
+            }
+        });
+    };
+    DeveloperMode.prototype.requestInitEntities = function () {
+        if (this.initEntities) {
+            taro.network.send('updateClientInitEntities', this.initEntities);
+        }
+    };
     DeveloperMode.prototype.enter = function () {
         console.log('client enter developer mode');
         this.active = true;
@@ -163,6 +202,31 @@ var DeveloperMode = /** @class */ (function () {
             }
             // broadcast region change to all clients
             taro.network.send('editRegion', data);
+        }
+    };
+    DeveloperMode.prototype.editInitEntity = function (data, clientId) {
+        // only allow developers to modify initial entities
+        if (taro.server.developerClientIds.includes(clientId)) {
+            // broadcast init entity change to all clients
+            taro.network.send('editInitEntity', data);
+            if (!this.initEntities) {
+                this.addInitEntities();
+            }
+            this.initEntities.forEach(function (action) {
+                if (action.actionId === data.actionId) {
+                    if (data.position && data.position.x && data.position.y &&
+                        action.position && action.position.x && action.position.y) {
+                        action.position = data.position;
+                    }
+                    if (data.angle && action.angle) {
+                        action.angle = data.angle;
+                    }
+                    if (data.width && data.height && action.width && action.height) {
+                        action.width = data.width;
+                        action.height = data.height;
+                    }
+                }
+            });
         }
     };
     DeveloperMode.prototype.createUnit = function (data) {
@@ -335,7 +399,7 @@ var DeveloperMode = /** @class */ (function () {
         }
     };
     DeveloperMode.prototype.updateClientMap = function (data) {
-        console.log('map data was edited', data.mapData.wasEdited);
+        //console.log ('map data was edited', data.mapData.wasEdited);
         if (data.mapData.wasEdited) {
             data.mapData.wasEdited = false;
             data.mapData.haveUnsavedChanges = true;
@@ -350,6 +414,10 @@ var DeveloperMode = /** @class */ (function () {
             }
             taro.client.emit('updateMap');
         }
+    };
+    DeveloperMode.prototype.updateClientInitEntities = function (initEntities) {
+        this.initEntities = initEntities;
+        taro.client.emit('updateInitEntities');
     };
     return DeveloperMode;
 }());

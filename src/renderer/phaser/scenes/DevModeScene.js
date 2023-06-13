@@ -23,6 +23,8 @@ var DevModeScene = /** @class */ (function (_super) {
         this.gameScene = taro.renderer.scene.getScene('Game');
         this.pointerInsideButtons = false;
         this.regions = [];
+        this.entityImages = [];
+        this.showRepublishWarning = false;
         taro.client.on('unlockCamera', function () {
             _this.gameScene.cameras.main.stopFollow();
         });
@@ -45,6 +47,16 @@ var DevModeScene = /** @class */ (function (_super) {
         });
         taro.client.on('editRegion', function (data) {
             _this.regionEditor.edit(data);
+        });
+        taro.client.on('editInitEntity', function (data) {
+            _this.entityImages.forEach(function (image) {
+                if (image.entity.action.actionId === data.actionId) {
+                    image.entity.update(data);
+                }
+            });
+        });
+        taro.client.on('updateInitEntities', function () {
+            _this.updateInitEntities();
         });
         this.gameScene.input.on('pointerup', function (p) {
             var draggedEntity = taro.unitBeingDragged;
@@ -122,15 +134,86 @@ var DevModeScene = /** @class */ (function (_super) {
         this.gameEditorWidgets = this.devModeTools.gameEditorWidgets;
     };
     DevModeScene.prototype.enterMapTab = function () {
+        var _this = this;
         if (this.gameEditorWidgets.length === 0) {
             this.devModeTools.queryWidgets();
             this.gameEditorWidgets = this.devModeTools.gameEditorWidgets;
         }
         this.devModeTools.enterMapTab();
+        this.gameScene.renderedEntities.forEach(function (element) {
+            element.setVisible(false);
+        });
+        if (this.entityImages.length === 0) {
+            // create images for entities created in initialize script
+            Object.values(taro.game.data.scripts).forEach(function (script) {
+                var _a, _b;
+                if (((_b = (_a = script.triggers) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.type) === 'gameStart') {
+                    Object.values(script.actions).forEach(function (action) {
+                        _this.createEntityImage(action);
+                    });
+                }
+            });
+            if (this.showRepublishWarning) {
+                inGameEditor.showRepublishToInitEntitiesWarning();
+            }
+        }
+        taro.network.send('updateClientInitEntities', true);
+        this.entityImages.forEach(function (image) {
+            image.setVisible(true);
+        });
     };
     DevModeScene.prototype.leaveMapTab = function () {
         if (this.devModeTools)
             this.devModeTools.leaveMapTab();
+        this.entityImages.forEach(function (image) {
+            image.setVisible(false);
+        });
+        this.gameScene.renderedEntities.forEach(function (element) {
+            element.setVisible(true);
+        });
+    };
+    DevModeScene.prototype.createEntityImage = function (action) {
+        var _a, _b, _c;
+        if (!action.disabled && ((_a = action.position) === null || _a === void 0 ? void 0 : _a.function) === 'xyCoordinate'
+            && !isNaN((_b = action.position) === null || _b === void 0 ? void 0 : _b.x) && !isNaN((_c = action.position) === null || _c === void 0 ? void 0 : _c.y)) {
+            if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || action.type === 'createEntityAtPositionWithDimensions'
+                && !isNaN(action.width) && !isNaN(action.height) && !isNaN(action.angle)) {
+                if (action.actionId)
+                    new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action);
+                else {
+                    this.showRepublishWarning = true;
+                }
+            }
+            else if (action.type === 'createUnitAtPosition' && !isNaN(action.angle)) {
+                if (action.actionId)
+                    new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action, 'unit');
+                else {
+                    this.showRepublishWarning = true;
+                }
+            }
+            else if (action.type === 'createUnitForPlayerAtPosition'
+                && !isNaN(action.angle) && !isNaN(action.width) && !isNaN(action.height)) {
+                if (action.actionId)
+                    new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action, 'unit');
+                else {
+                    this.showRepublishWarning = true;
+                }
+            }
+            else if (action.type === 'spawnItem' || action.type === 'createItemWithMaxQuantityAtPosition') {
+                if (action.actionId)
+                    new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action, 'item');
+                else {
+                    this.showRepublishWarning = true;
+                }
+            }
+            else if (action.type === 'createProjectileAtPosition' && !isNaN(action.angle)) {
+                if (action.actionId)
+                    new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action, 'projectile');
+                else {
+                    this.showRepublishWarning = true;
+                }
+            }
+        }
     };
     DevModeScene.prototype.pointerInsideMap = function (pointerX, pointerY, map) {
         return (0 <= pointerX && pointerX < map.width
@@ -159,6 +242,14 @@ var DevModeScene = /** @class */ (function (_super) {
     DevModeScene.prototype.update = function () {
         if (this.tileEditor)
             this.tileEditor.update();
+    };
+    DevModeScene.prototype.updateInitEntities = function () {
+        this.entityImages.forEach(function (image) {
+            taro.developerMode.initEntities.forEach(function (action) {
+                if (image.entity.action.actionId === action.actionId)
+                    image.entity.update(action);
+            });
+        });
     };
     return DevModeScene;
 }(PhaserScene));

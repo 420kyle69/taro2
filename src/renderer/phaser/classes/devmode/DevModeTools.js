@@ -80,6 +80,7 @@ var DevModeTools = /** @class */ (function (_super) {
             }
             ;
         });
+        _this.outline = scene.gameScene.add.graphics();
         return _this;
     }
     DevModeTools.prototype.enterMapTab = function () {
@@ -117,8 +118,8 @@ var DevModeTools = /** @class */ (function (_super) {
         var _this = this;
         var gameScene = this.scene.gameScene;
         var keyboard = this.scene.input.keyboard;
-        var altKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ALT, false);
-        var shiftKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT, false);
+        var altKey = this.altKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ALT, false);
+        var shiftKey = this.shiftKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT, false);
         var tabKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, false);
         tabKey.on('down', function (key) {
             var isInputModalPresent = _this.checkIfInputModalPresent();

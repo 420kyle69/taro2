@@ -39,7 +39,7 @@ var PhaserRegion = /** @class */ (function (_super) {
             }
         });
         _this.gameObject = gameObject;
-        scene.renderedEntities.push(_this.gameObject);
+        //scene.renderedEntities.push(this.gameObject);
         scene.entityLayers[EntityLayer.TREES].add(_this.gameObject);
         _this.name = _this.entity._stats.id;
         if (!stats.inside) {

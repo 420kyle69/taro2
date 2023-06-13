@@ -124,13 +124,13 @@ var GameScene = /** @class */ (function (_super) {
                 var length_1 = layer.data.length;
                 layer.width = data.map.width;
                 layer.height = data.map.height;
-                console.log('before', layer.name, length_1, tilesPerLayer);
+                // console.log('before', layer.name, length, tilesPerLayer);
                 if (length_1 < tilesPerLayer) {
                     for (var i = length_1 + 1; i < tilesPerLayer; i++) {
                         layer.data[i] = 0;
                     }
                 }
-                console.log('after', layer.name, layer.data.length, tilesPerLayer);
+                // console.log('after', layer.name, layer.data.length, tilesPerLayer);
             }
         });
         this.load.tilemapTiledJSON('map', this.patchMapData(data.map));
@@ -374,15 +374,17 @@ var GameScene = /** @class */ (function (_super) {
         this.renderedEntities.forEach(function (element) {
             element.setVisible(false);
         });
-        this.cameras.main.cull(this.renderedEntities).forEach(function (element) {
-            if (!element.hidden) {
-                element.setVisible(true);
-                if (element.dynamic) {
-                    // dynamic is only assigned through an hbz-index-only event
-                    _this.heightRenderer.adjustDepth(element);
+        if (!taro.developerMode.active || (taro.developerMode.active && taro.developerMode.activeTab !== 'map')) {
+            this.cameras.main.cull(this.renderedEntities).forEach(function (element) {
+                if (!element.hidden) {
+                    element.setVisible(true);
+                    if (element.dynamic) {
+                        // dynamic is only assigned through an hbz-index-only event
+                        _this.heightRenderer.adjustDepth(element);
+                    }
                 }
-            }
-        });
+            });
+        }
     };
     return GameScene;
 }(PhaserScene));
