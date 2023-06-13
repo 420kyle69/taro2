@@ -47,12 +47,12 @@ var PhaserRegion = /** @class */ (function (_super) {
         }
         var devModeScene = _this.devModeScene = taro.renderer.scene.getScene('DevMode');
         devModeScene.regions.push(_this);
-        //if (this.devModeOnly && !taro.developerMode.active && taro.developerMode.activeTab !== 'play') {
-        _this.hide();
-        //}
         _this.updateLabel();
         _this.transform();
+        //if (this.devModeOnly && !taro.developerMode.active && taro.developerMode.activeTab !== 'play') {
+        _this.hide();
         return _this;
+        //}
     }
     PhaserRegion.prototype.getLabel = function () {
         if (!this.label) {
@@ -122,7 +122,7 @@ var PhaserRegion = /** @class */ (function (_super) {
     };
     PhaserRegion.prototype.show = function () {
         this.graphics.visible = true;
-        //super.show();
+        _super.prototype.show.call(this);
         var label = this.label;
         var rt = this.rtLabel;
         label && (label.visible = true);
@@ -131,7 +131,7 @@ var PhaserRegion = /** @class */ (function (_super) {
     PhaserRegion.prototype.hide = function () {
         if (this.devModeOnly) {
             this.graphics.visible = false;
-            //super.hide();
+            _super.prototype.hide.call(this);
         }
         var label = this.label;
         var rt = this.rtLabel;
