@@ -2,9 +2,44 @@ class DeveloperMode {
 	active: boolean;
 	activeTab: devModeTab;
 
+    initEntities: ActionData[];
+
 	constructor() {
 		if (taro.isClient) this.active = false;
 	}
+
+    addInitEntities (): void {
+        // add id for actions creating entities in initialize script
+        this.initEntities = [];
+		Object.values(taro.game.data.scripts).forEach((script) => {
+			if (script.triggers?.[0]?.type === 'gameStart') {
+				Object.values(script.actions).forEach((action) => {
+                    if (!action.disabled && action.position?.function === 'xyCoordinate' 
+                    && !isNaN(action.position?.x) && !isNaN(action.position?.y) 
+                    && !isNaN(action.width) && !isNaN(action.height) && !isNaN(action.angle)) {
+                        if ((action.type === 'createEntityForPlayerAtPositionWithDimensions' 
+                        || action.type === 'createEntityAtPositionWithDimensions'
+                        || action.type === 'createUnitForPlayerAtPosition')
+                        && !isNaN(action.width) && !isNaN(action.height) && !isNaN(action.angle)) {
+                            if (action.actionId) this.initEntities.push(action);
+                        } else if ((action.type === 'createUnitAtPosition'
+                        || action.type === 'createProjectileAtPosition') 
+                        && !isNaN(action.angle)) {
+                            if (action.actionId) this.initEntities.push(action);
+                        } else if (action.type === 'spawnItem' || action.type === 'createItemWithMaxQuantityAtPosition') {
+                            if (action.actionId) this.initEntities.push(action);
+                        } 
+                    }
+				});
+			}
+		});
+    }
+
+    requestInitEntities (): void {
+        if (this.initEntities) {
+            taro.network.send('updateClientInitEntities', this.initEntities);
+        }
+    }
 
 	enter(): void {
 		console.log('client enter developer mode');
@@ -177,6 +212,32 @@ class DeveloperMode {
 			taro.network.send('editRegion', data);
 		}
 	}
+
+    editInitEntity (data, clientId: string): void {
+        // only allow developers to modify initial entities
+		if (taro.server.developerClientIds.includes(clientId)) {
+            // broadcast init entity change to all clients
+			taro.network.send('editInitEntity', data);
+            if (!this.initEntities) {
+                this.addInitEntities();
+            }
+            this.initEntities.forEach((action) => {
+                if (action.actionId === data.actionId) {
+                    if (data.position && data.position.x && data.position.y &&
+                        action.position && action.position.x && action.position.y) {
+                        action.position = data.position;
+                    } 
+                    if (data.angle && action.angle) {
+                        action.angle = data.angle;
+                    } 
+                    if (data.width && data.height && action.width && action.height) {
+                        action.width = data.width;
+                        action.height = data.height;
+                    }
+                }
+            });
+        }
+    }
 
 	createUnit(data) {
 		//const player = taro.game.getPlayerByClientId(clientId);
@@ -368,7 +429,7 @@ class DeveloperMode {
 	}
 
 	updateClientMap (data: { mapData: MapData }): void {
-		console.log ('map data was edited', data.mapData.wasEdited);
+		//console.log ('map data was edited', data.mapData.wasEdited);
 		if (data.mapData.wasEdited) {
 			data.mapData.wasEdited = false;
 			data.mapData.haveUnsavedChanges = true;
@@ -384,6 +445,11 @@ class DeveloperMode {
 			taro.client.emit('updateMap');
 		}
 	}
+
+    updateClientInitEntities (initEntities: ActionData[] ) {
+        this.initEntities = initEntities;
+        taro.client.emit('updateInitEntities');
+    }
 }
 
 interface TileData {

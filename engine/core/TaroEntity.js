@@ -3836,7 +3836,7 @@ var TaroEntity = TaroObject.extend({
 		for (var variablesId in self.variables) {
 			var variable = self.variables[variablesId];
 			if (!variablesToBeIgnored.includes(variable.dataType)) {
-				variables[variablesId] = JSON.parse(JSON.stringify(variable));
+				variables[variablesId] = _.cloneDeep(variable);
 			}
 		}
 

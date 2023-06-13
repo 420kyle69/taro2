@@ -47,6 +47,7 @@ var ServerNetworkEvents = {
 
 				if (player._stats.userId) {
 					taro.clusterClient.saveLastPlayedTime(player._stats.userId);
+					// taro.clusterClient.savePlayerData(player._stats.userId);
 				}
 			}
 
@@ -450,6 +451,14 @@ var ServerNetworkEvents = {
 	_onEditRegion: function(data, clientId) {
 		taro.developerMode.editRegion(data, clientId);
 	},
+
+    _onEditInitEntity: function(data, clientId) {
+        taro.developerMode.editInitEntity(data, clientId);
+    },
+
+    _onRequestInitEntities: function(data, clientId) {
+        taro.developerMode.requestInitEntities(data, clientId);
+    },
 
 	_onEditEntity: function(data, clientId) {
 		taro.developerMode.editEntity(data, clientId);

@@ -12,6 +12,33 @@ interface EntityData {
 	}>
 }
 
+interface ScriptData {
+	name: string;
+	triggers: Record<string, {
+		type: string;
+	}>;
+	actions: Record<string, ActionData>;
+}
+
+interface ActionData {
+    disabled?: boolean;
+    unitType?: string;
+    itemType?: string;
+    projectileType?: string;
+    actionId?: string;
+	type?: string;
+	entity?: string;
+	entityType?: string;
+	position?: {
+        function?: string,
+        x: number, 
+        y: number
+    };
+	angle?: number;
+	width?: number;
+	height?: number;
+}
+
 interface MapData {
 	wasEdited: boolean;
 	haveUnsavedChanges: boolean;
@@ -44,6 +71,7 @@ declare class GameComponent extends TaroEntity {
 	getPlayerByClientId(clientId: string): Player;
 
 	data: {
+		scripts: Record<string, ScriptData>;
 		defaultData: any;
 		map: MapData;
 		unitTypes: Record<string, EntityData>;

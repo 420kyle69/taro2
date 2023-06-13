@@ -43,6 +43,48 @@ global.rollbar = {
 	},
 };
 
+// override console.log and error to print additional data
+console.basicLog = console.log;
+console.log = function () {
+	
+	const log = [];
+	
+	log.push(new Date());
+	log.push(cluster.isMaster ? 'master' : 'worker');
+	
+	if (taro?.server?.httpsPort) {
+		log.push(taro?.server?.httpsPort);
+	}
+	
+	if (taro?.game?.data?.defaultData?.gameSlug) {
+		log.push(taro?.game?.data?.defaultData?.gameSlug);
+	}
+	
+	log.push(...arguments);
+	
+	console.basicLog(...log);
+};
+
+console.basicError = console.error;
+console.error = function () {
+	const log = [];
+	
+	log.push(new Date());
+	log.push(cluster.isMaster ? 'master' : 'worker');
+	
+	if (taro?.server?.httpsPort) {
+		log.push(taro?.server?.httpsPort);
+	}
+	
+	if (taro?.game?.data?.defaultData?.gameSlug) {
+		log.push(taro?.game?.data?.defaultData?.gameSlug);
+	}
+	
+	log.push(...arguments);
+	
+	console.basicError(...log);
+};
+
 global.coinHelper = {
 	value: (x) => currency(x).value,
 	add: (x, y) => currency(x).add(y).value,
@@ -697,6 +739,8 @@ var Server = TaroClass.extend({
 		taro.network.define('trade', self._onTrade);
 		taro.network.define('editTile', self._onEditTile);
 		taro.network.define('editRegion', self._onEditRegion);
+        taro.network.define('editInitEntity', self._onEditInitEntity);
+        taro.network.define('updateClientInitEntities', self._onRequestInitEntities);
 		taro.network.define('editEntity', self._onEditEntity);
 		taro.network.define('updateUnit', self._onUpdateUnit);
 		taro.network.define('updateItem', this._onUpdateItem);

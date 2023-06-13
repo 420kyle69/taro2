@@ -374,15 +374,17 @@ var GameScene = /** @class */ (function (_super) {
         this.renderedEntities.forEach(function (element) {
             element.setVisible(false);
         });
-        this.cameras.main.cull(this.renderedEntities).forEach(function (element) {
-            if (!element.hidden) {
-                element.setVisible(true);
-                if (element.dynamic) {
-                    // dynamic is only assigned through an hbz-index-only event
-                    _this.heightRenderer.adjustDepth(element);
+        if (!taro.developerMode.active || (taro.developerMode.active && taro.developerMode.activeTab !== 'map')) {
+            this.cameras.main.cull(this.renderedEntities).forEach(function (element) {
+                if (!element.hidden) {
+                    element.setVisible(true);
+                    if (element.dynamic) {
+                        // dynamic is only assigned through an hbz-index-only event
+                        _this.heightRenderer.adjustDepth(element);
+                    }
                 }
-            }
-        });
+            });
+        }
     };
     return GameScene;
 }(PhaserScene));

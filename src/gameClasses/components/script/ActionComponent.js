@@ -455,7 +455,7 @@ var ActionComponent = TaroEntity.extend({
 						if (player && userId && player.persistentDataLoaded) {
 							var data = player.getPersistentData('player');
 							taro.clusterClient.saveUserData(userId, data, 'player');
-
+							
 							var unit = player.getSelectedUnit();
 							var userId = player._stats.userId;
 
