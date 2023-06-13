@@ -121,7 +121,8 @@ var PhaserRegion = /** @class */ (function (_super) {
         }
     };
     PhaserRegion.prototype.show = function () {
-        _super.prototype.show.call(this);
+        this.graphics.visible = true;
+        //super.show();
         var label = this.label;
         var rt = this.rtLabel;
         label && (label.visible = !rt);
@@ -129,7 +130,8 @@ var PhaserRegion = /** @class */ (function (_super) {
     };
     PhaserRegion.prototype.hide = function () {
         if (this.devModeOnly) {
-            _super.prototype.hide.call(this);
+            this.graphics.visible = false;
+            //super.hide();
         }
         var label = this.label;
         var rt = this.rtLabel;
