@@ -201,6 +201,7 @@ class TileEditor {
 				return selectedTile.index;
 			}
 		}
+		return -1;
 	}
 
 	floodFill(layer: number, oldTile: number, newTile: number, x: number, y: number, fromServer: boolean): void {

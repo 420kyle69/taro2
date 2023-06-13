@@ -177,6 +177,7 @@ var TileEditor = /** @class */ (function () {
                 return selectedTile.index;
             }
         }
+        return -1;
     };
     TileEditor.prototype.floodFill = function (layer, oldTile, newTile, x, y, fromServer) {
         if (fromServer) {

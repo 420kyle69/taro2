@@ -63,10 +63,10 @@ class TileMarker {
 	}
 
 	changePreview(): void {
-		const { x, y } = this.devModeScene.tileEditor.brushArea.size;
-		this.graphics.scaleX = x;
-		this.graphics.scaleY = y;
 		if (!this.palette) {
+			const { x, y } = this.devModeScene.tileEditor.brushArea.size;
+			this.graphics.scaleX = x;
+			this.graphics.scaleY = y;
 			this.hideImages();
 			const previewTarget = this.devModeScene.tileEditor.selectedTileArea;
 			const sample = this.devModeScene.tileEditor.brushArea.calcSample(previewTarget, { x, y });

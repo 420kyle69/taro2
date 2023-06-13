@@ -50,10 +50,10 @@ var TileMarker = /** @class */ (function () {
     };
     TileMarker.prototype.changePreview = function () {
         var _this = this;
-        var _a = this.devModeScene.tileEditor.brushArea.size, x = _a.x, y = _a.y;
-        this.graphics.scaleX = x;
-        this.graphics.scaleY = y;
         if (!this.palette) {
+            var _a = this.devModeScene.tileEditor.brushArea.size, x = _a.x, y = _a.y;
+            this.graphics.scaleX = x;
+            this.graphics.scaleY = y;
             this.hideImages();
             var previewTarget = this.devModeScene.tileEditor.selectedTileArea;
             var sample = this.devModeScene.tileEditor.brushArea.calcSample(previewTarget, { x: x, y: y });
