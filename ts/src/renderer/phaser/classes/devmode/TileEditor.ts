@@ -155,7 +155,14 @@ class TileEditor {
 				tempLayer++;
 			}
 			const oldTile = map.layers[tempLayer].data[data.y * width + data.x];
-			this.floodFill(data.layer, oldTile, data.gid, data.x, data.y, true);
+			this.commandController.addCommand({
+				func: () => {
+					this.floodFill(data.layer, oldTile, data.gid, data.x, data.y, true);
+				},
+				undo: () => {
+					this.floodFill(data.layer, data.gid, oldTile, data.x, data.y, true);
+				}
+			});
 		} else if (data.tool === 'clear') {
 			this.clearLayer(data.layer);
 			if (map.layers.length > 4 && data.layer >= 2) data.layer++;

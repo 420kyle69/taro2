@@ -117,6 +117,7 @@ var TileEditor = /** @class */ (function () {
         });
     };
     TileEditor.prototype.edit = function (data) {
+        var _this = this;
         var map = taro.game.data.map;
         inGameEditor.mapWasEdited && inGameEditor.mapWasEdited();
         var width = map.width;
@@ -126,8 +127,15 @@ var TileEditor = /** @class */ (function () {
             if (map.layers.length > 4 && data.layer >= 2) {
                 tempLayer++;
             }
-            var oldTile = map.layers[tempLayer].data[data.y * width + data.x];
-            this.floodFill(data.layer, oldTile, data.gid, data.x, data.y, true);
+            var oldTile_1 = map.layers[tempLayer].data[data.y * width + data.x];
+            this.commandController.addCommand({
+                func: function () {
+                    _this.floodFill(data.layer, oldTile_1, data.gid, data.x, data.y, true);
+                },
+                undo: function () {
+                    _this.floodFill(data.layer, data.gid, oldTile_1, data.x, data.y, true);
+                }
+            });
         }
         else if (data.tool === 'clear') {
             this.clearLayer(data.layer);
