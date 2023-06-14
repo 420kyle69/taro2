@@ -31,7 +31,6 @@ class TilePalette extends Phaser.GameObjects.Container {
 		super(scene);
 		this.devModeScene = scene;
 		this.rexUI = rexUI;
-		let keyAlt = this.scene.input.keyboard.addKey('ALT');
 		// Load a map from a 2D array of tile indices
 		const paletteMap = [];
 		for (let i = 0; i < tileset.rows; i++) {
@@ -131,8 +130,7 @@ class TilePalette extends Phaser.GameObjects.Container {
 
 		this.scene.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
 			if (taro.developerMode.active && taro.developerMode.activeTab !== 'play') {
-				let isAltDown = keyAlt.isDown;
-				if (isAltDown && !this.devModeScene.devModeTools.isForceTo1x1()) {
+				if (this.devModeScene.devModeTools.altKey.isDown && !this.devModeScene.devModeTools.isForceTo1x1()) {
 					if (deltaY > 0) {
 						commandController.defaultCommands.decreaseBrushSize();
 					} else if (deltaY < 0) {

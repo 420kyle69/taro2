@@ -87,7 +87,6 @@ class DevToolButton {
 				this.hideHoverChildren(350);
 			});
 			btn.button.on('pointerdown', () => {
-				console.log(btn);
 				this.hideHoverChildren(0);
 			});
 		});

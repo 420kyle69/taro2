@@ -61,7 +61,6 @@ var DevToolButton = /** @class */ (function () {
                 _this.hideHoverChildren(350);
             });
             btn.button.on('pointerdown', function () {
-                console.log(btn);
                 _this.hideHoverChildren(0);
             });
         });
