@@ -458,7 +458,7 @@ interface TileData {
 	x: number,
 	y: number,
 	tool?: string,
-	oldTile?: number,
+	limits?: Record<number, Record<number, number>>,
 }
 
 interface RegionData {

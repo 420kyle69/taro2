@@ -3,6 +3,11 @@ var CommandController = /** @class */ (function () {
         if (maxCommands === void 0) { maxCommands = 200; }
         this.commands = [];
         this.nowInsertIndex = 0;
+        /**
+         * if CommandController shift(), the cache's pointer do not auto shift, so add offset to make
+         * sure it could point to right cache;
+        */
+        this.offset = 0;
         this.defaultCommands = defaultCommands;
         this.maxCommands = maxCommands;
         this.map = map;
@@ -40,6 +45,7 @@ var CommandController = /** @class */ (function () {
             }
             if (this.commands.length > this.maxCommands) {
                 this.commands.shift();
+                this.offset += 1;
                 this.nowInsertIndex -= 1;
                 this.commands.push(command);
             }

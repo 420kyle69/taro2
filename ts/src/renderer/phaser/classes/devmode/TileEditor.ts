@@ -155,7 +155,7 @@ class TileEditor {
 				tempLayer++;
 			}
 			const oldTile = map.layers[tempLayer].data[data.y * width + data.x];
-			this.floodFill(data.layer, oldTile, data.gid === 0 ? -1 : data.gid, data.x, data.y, true);
+			this.floodFill(data.layer, oldTile, data.gid === 0 ? -1 : data.gid, data.x, data.y, true, data.limits);
 		} else if (data.tool === 'clear') {
 			this.clearLayer(data.layer);
 			if (map.layers.length > 4 && data.layer >= 2) data.layer++;
@@ -204,8 +204,11 @@ class TileEditor {
 		return -1;
 	}
 
-	floodFill(layer: number, oldTile: number, newTile: number, x: number, y: number, fromServer: boolean): void {
+	floodFill(layer: number, oldTile: number, newTile: number, x: number, y: number, fromServer: boolean, limits?: Record<number, Record<number, number>>, addToLimits?: (v2d: Vector2D) => void, visited?: Record<number, Record<number, number>>): void {
 		let map: MapData | Phaser.Tilemaps.Tilemap;
+		if (!visited) {
+			visited = {};
+		}
 		if (fromServer) {
 			map = taro.game.data.map;
 			inGameEditor.mapWasEdited && inGameEditor.mapWasEdited();
@@ -216,35 +219,54 @@ class TileEditor {
 			if (map.layers.length > 4 && layer >= 2) {
 				tempLayer++;
 			}
-			if (oldTile === newTile || map.layers[tempLayer].data[y * width + x] !== oldTile) {
+			if (limits?.[x]?.[y] || visited?.[x]?.[y]) {
+				return;
+			}
+			if (map.layers[tempLayer].data[y * width + x] !== oldTile) {
+				addToLimits?.({ x, y });
 				return;
 			}
 			tileMap.putTileAt(newTile, x, y, false, layer);
+			if (!visited[x]) {
+				visited[x] = {};
+			}
+			visited[x][y] = 1;
 			//save tile change to taro.game.map.data
 			map.layers[tempLayer].data[y * width + x] = newTile;
 		} else {
 			map = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
-			if (
-				oldTile === newTile || !map.getTileAt(x, y, true, layer) ||
-				map.getTileAt(x, y, true, layer).index !== oldTile ||
+			if (limits?.[x]?.[y] ||
+				visited?.[x]?.[y] ||
 				map.getTileAt(x, y, true, layer).index === 0 ||
-				map.getTileAt(x, y, true, layer).index === -1
-			) {
+				map.getTileAt(x, y, true, layer).index === -1) {
 				return;
 			}
+
+			if (
+				!map.getTileAt(x, y, true, layer) ||
+				map.getTileAt(x, y, true, layer).index !== oldTile
+			) {
+				addToLimits?.({ x, y });
+				return;
+			}
+
 			map.putTileAt(newTile, x, y, false, layer);
+			if (!visited[x]) {
+				visited[x] = {};
+			}
+			visited[x][y] = 1;
 		}
 		if (x > 0) {
-			this.floodFill(layer, oldTile, newTile, x - 1, y, fromServer);
+			this.floodFill(layer, oldTile, newTile, x - 1, y, fromServer, limits, addToLimits, visited);
 		}
 		if (x < (map.width - 1)) {
-			this.floodFill(layer, oldTile, newTile, x + 1, y, fromServer);
+			this.floodFill(layer, oldTile, newTile, x + 1, y, fromServer, limits, addToLimits, visited);
 		}
 		if (y > 0) {
-			this.floodFill(layer, oldTile, newTile, x, y - 1, fromServer);
+			this.floodFill(layer, oldTile, newTile, x, y - 1, fromServer, limits, addToLimits, visited);
 		}
 		if (y < (map.height - 1)) {
-			this.floodFill(layer, oldTile, newTile, x, y + 1, fromServer);
+			this.floodFill(layer, oldTile, newTile, x, y + 1, fromServer, limits, addToLimits, visited);
 		}
 	}
 
@@ -351,27 +373,34 @@ class TileEditor {
 									}
 
 								},
-								paint: this.devModeTools.modeButtons[2].active ? true : false,
 							});
 
 						} else if (this.devModeTools.modeButtons[4].active) {
 							const targetTile = this.getTile(pointerTileX, pointerTileY, map);
 							const selectedTile = Object.values(Object.values(this.selectedTileArea)[0])[0];
 							if (selectedTile && targetTile !== selectedTile && (map.currentLayerIndex === 0 || map.currentLayerIndex === 1)) {
-								const nowCommandCount = this.commandController.nowInsertIndex - 1;
+								const nowCommandCount = this.commandController.nowInsertIndex;
+								const addToLimits = (v2d: Vector2D) => {
+									setTimeout(() => {
+										const cache = this.commandController.commands[nowCommandCount - this.commandController.offset].cache as Record<number, Record<number, number>>;
+										if (!cache[v2d.x]) {
+											cache[v2d.x] = {};
+										}
+										cache[v2d.x][v2d.y] = 1;
+									}, 0);
+								};
+
 								this.commandController.addCommand(
 									{
 										func: () => {
 											taro.network.send('editTile', { gid: selectedTile, layer: map.currentLayerIndex, x: pointerTileX, y: pointerTileY, tool: 'flood' });
-											this.floodFill(map.currentLayerIndex, targetTile, selectedTile, pointerTileX, pointerTileY, false);
+											this.floodFill(map.currentLayerIndex, targetTile, selectedTile, pointerTileX, pointerTileY, false, [], addToLimits);
 										},
 										undo: () => {
-											taro.network.send('editTile', { gid: targetTile, layer: map.currentLayerIndex, x: pointerTileX, y: pointerTileY, tool: 'flood' });
-											this.floodFill(map.currentLayerIndex, selectedTile, targetTile, pointerTileX, pointerTileY, false);
-											if (this.commandController.commands[nowCommandCount] && this.commandController.commands[nowCommandCount].paint) {
-												this.commandController.commands[nowCommandCount].func();
-											}
+											taro.network.send('editTile', { gid: targetTile, layer: map.currentLayerIndex, x: pointerTileX, y: pointerTileY, tool: 'flood', limits: this.commandController.commands[nowCommandCount - this.commandController.offset].cache });
+											this.floodFill(map.currentLayerIndex, selectedTile, targetTile, pointerTileX, pointerTileY, false, this.commandController.commands[nowCommandCount - this.commandController.offset].cache);
 										},
+										cache: {},
 									}, true
 								);
 

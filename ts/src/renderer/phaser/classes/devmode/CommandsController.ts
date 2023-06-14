@@ -1,7 +1,7 @@
 interface CommandEmitterProps {
 	func: () => void;
 	undo: () => void;
-	paint?: boolean;
+	cache?: any;
 }
 
 interface CommandControllerProps {
@@ -16,6 +16,11 @@ class CommandController implements CommandControllerProps {
 	nowInsertIndex = 0;
 	maxCommands: number;
 	map: Phaser.Tilemaps.Tilemap;
+	/**
+	 * if CommandController shift(), the cache's pointer do not auto shift, so add offset to make
+	 * sure it could point to right cache;
+	*/
+	offset = 0;
 	constructor(defaultCommands: Record<DefaultCommands, () => void>, map: Phaser.Tilemaps.Tilemap, maxCommands = 200) {
 		this.defaultCommands = defaultCommands;
 		this.maxCommands = maxCommands;
@@ -52,6 +57,7 @@ class CommandController implements CommandControllerProps {
 
 			if (this.commands.length > this.maxCommands) {
 				this.commands.shift();
+				this.offset += 1;
 				this.nowInsertIndex -= 1;
 				this.commands.push(command);
 			}

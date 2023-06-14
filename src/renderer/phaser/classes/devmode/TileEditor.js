@@ -127,7 +127,7 @@ var TileEditor = /** @class */ (function () {
                 tempLayer++;
             }
             var oldTile = map.layers[tempLayer].data[data.y * width + data.x];
-            this.floodFill(data.layer, oldTile, data.gid === 0 ? -1 : data.gid, data.x, data.y, true);
+            this.floodFill(data.layer, oldTile, data.gid === 0 ? -1 : data.gid, data.x, data.y, true, data.limits);
         }
         else if (data.tool === 'clear') {
             this.clearLayer(data.layer);
@@ -179,8 +179,12 @@ var TileEditor = /** @class */ (function () {
         }
         return -1;
     };
-    TileEditor.prototype.floodFill = function (layer, oldTile, newTile, x, y, fromServer) {
+    TileEditor.prototype.floodFill = function (layer, oldTile, newTile, x, y, fromServer, limits, addToLimits, visited) {
+        var _a, _b, _c, _d;
         var map;
+        if (!visited) {
+            visited = {};
+        }
         if (fromServer) {
             map = taro.game.data.map;
             inGameEditor.mapWasEdited && inGameEditor.mapWasEdited();
@@ -191,34 +195,51 @@ var TileEditor = /** @class */ (function () {
             if (map.layers.length > 4 && layer >= 2) {
                 tempLayer++;
             }
-            if (oldTile === newTile || map.layers[tempLayer].data[y * width + x] !== oldTile) {
+            if (((_a = limits === null || limits === void 0 ? void 0 : limits[x]) === null || _a === void 0 ? void 0 : _a[y]) || ((_b = visited === null || visited === void 0 ? void 0 : visited[x]) === null || _b === void 0 ? void 0 : _b[y])) {
+                return;
+            }
+            if (map.layers[tempLayer].data[y * width + x] !== oldTile) {
+                addToLimits === null || addToLimits === void 0 ? void 0 : addToLimits({ x: x, y: y });
                 return;
             }
             tileMap.putTileAt(newTile, x, y, false, layer);
+            if (!visited[x]) {
+                visited[x] = {};
+            }
+            visited[x][y] = 1;
             //save tile change to taro.game.map.data
             map.layers[tempLayer].data[y * width + x] = newTile;
         }
         else {
             map = this.gameScene.tilemap;
-            if (oldTile === newTile || !map.getTileAt(x, y, true, layer) ||
-                map.getTileAt(x, y, true, layer).index !== oldTile ||
+            if (((_c = limits === null || limits === void 0 ? void 0 : limits[x]) === null || _c === void 0 ? void 0 : _c[y]) ||
+                ((_d = visited === null || visited === void 0 ? void 0 : visited[x]) === null || _d === void 0 ? void 0 : _d[y]) ||
                 map.getTileAt(x, y, true, layer).index === 0 ||
                 map.getTileAt(x, y, true, layer).index === -1) {
                 return;
             }
+            if (!map.getTileAt(x, y, true, layer) ||
+                map.getTileAt(x, y, true, layer).index !== oldTile) {
+                addToLimits === null || addToLimits === void 0 ? void 0 : addToLimits({ x: x, y: y });
+                return;
+            }
             map.putTileAt(newTile, x, y, false, layer);
+            if (!visited[x]) {
+                visited[x] = {};
+            }
+            visited[x][y] = 1;
         }
         if (x > 0) {
-            this.floodFill(layer, oldTile, newTile, x - 1, y, fromServer);
+            this.floodFill(layer, oldTile, newTile, x - 1, y, fromServer, limits, addToLimits, visited);
         }
         if (x < (map.width - 1)) {
-            this.floodFill(layer, oldTile, newTile, x + 1, y, fromServer);
+            this.floodFill(layer, oldTile, newTile, x + 1, y, fromServer, limits, addToLimits, visited);
         }
         if (y > 0) {
-            this.floodFill(layer, oldTile, newTile, x, y - 1, fromServer);
+            this.floodFill(layer, oldTile, newTile, x, y - 1, fromServer, limits, addToLimits, visited);
         }
         if (y < (map.height - 1)) {
-            this.floodFill(layer, oldTile, newTile, x, y + 1, fromServer);
+            this.floodFill(layer, oldTile, newTile, x, y + 1, fromServer, limits, addToLimits, visited);
         }
     };
     TileEditor.prototype.clearLayer = function (layer) {
@@ -313,26 +334,32 @@ var TileEditor = /** @class */ (function () {
                                         }
                                     }
                                 },
-                                paint: this.devModeTools.modeButtons[2].active ? true : false,
                             });
                         }
                         else if (this.devModeTools.modeButtons[4].active) {
                             var targetTile_1 = this.getTile(pointerTileX_1, pointerTileY_1, map_1);
                             var selectedTile_1 = Object.values(Object.values(this.selectedTileArea)[0])[0];
                             if (selectedTile_1 && targetTile_1 !== selectedTile_1 && (map_1.currentLayerIndex === 0 || map_1.currentLayerIndex === 1)) {
-                                var nowCommandCount_1 = this.commandController.nowInsertIndex - 1;
+                                var nowCommandCount_1 = this.commandController.nowInsertIndex;
+                                var addToLimits_1 = function (v2d) {
+                                    setTimeout(function () {
+                                        var cache = _this.commandController.commands[nowCommandCount_1 - _this.commandController.offset].cache;
+                                        if (!cache[v2d.x]) {
+                                            cache[v2d.x] = {};
+                                        }
+                                        cache[v2d.x][v2d.y] = 1;
+                                    }, 0);
+                                };
                                 this.commandController.addCommand({
                                     func: function () {
                                         taro.network.send('editTile', { gid: selectedTile_1, layer: map_1.currentLayerIndex, x: pointerTileX_1, y: pointerTileY_1, tool: 'flood' });
-                                        _this.floodFill(map_1.currentLayerIndex, targetTile_1, selectedTile_1, pointerTileX_1, pointerTileY_1, false);
+                                        _this.floodFill(map_1.currentLayerIndex, targetTile_1, selectedTile_1, pointerTileX_1, pointerTileY_1, false, [], addToLimits_1);
                                     },
                                     undo: function () {
-                                        taro.network.send('editTile', { gid: targetTile_1, layer: map_1.currentLayerIndex, x: pointerTileX_1, y: pointerTileY_1, tool: 'flood' });
-                                        _this.floodFill(map_1.currentLayerIndex, selectedTile_1, targetTile_1, pointerTileX_1, pointerTileY_1, false);
-                                        if (_this.commandController.commands[nowCommandCount_1] && _this.commandController.commands[nowCommandCount_1].paint) {
-                                            _this.commandController.commands[nowCommandCount_1].func();
-                                        }
+                                        taro.network.send('editTile', { gid: targetTile_1, layer: map_1.currentLayerIndex, x: pointerTileX_1, y: pointerTileY_1, tool: 'flood', limits: _this.commandController.commands[nowCommandCount_1 - _this.commandController.offset].cache });
+                                        _this.floodFill(map_1.currentLayerIndex, selectedTile_1, targetTile_1, pointerTileX_1, pointerTileY_1, false, _this.commandController.commands[nowCommandCount_1 - _this.commandController.offset].cache);
                                     },
+                                    cache: {},
                                 }, true);
                             }
                         }
