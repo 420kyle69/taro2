@@ -27,13 +27,13 @@ var PhaserRegion = /** @class */ (function (_super) {
         gameObject.setPosition(stats.x + stats.width / 2, stats.y + stats.height / 2);
         gameObject.setInteractive();
         gameObject.on('pointerdown', function (p) {
-            if (taro.developerMode.active && taro.developerMode.activeTab !== 'play' && _this.devModeScene.devModeTools.cursorButton.active && p.leftButtonDown()) {
+            if (taro.developerMode.active && taro.developerMode.activeTab === 'map' && _this.devModeScene.devModeTools.cursorButton.active && p.leftButtonDown()) {
                 _this.scene.input.setTopOnly(true);
                 _this.devModeScene.regionEditor.addClickedList({ name: _this.entity._stats.id, x: stats.x, y: stats.y, width: stats.width, height: stats.height });
             }
         });
         gameObject.on('pointerup', function (p) {
-            if (taro.developerMode.active && taro.developerMode.activeTab !== 'play' && _this.devModeScene.devModeTools.cursorButton.active && p.leftButtonReleased()) {
+            if (taro.developerMode.active && taro.developerMode.activeTab === 'map' && _this.devModeScene.devModeTools.cursorButton.active && p.leftButtonReleased()) {
                 _this.scene.input.setTopOnly(false);
                 _this.devModeScene.regionEditor.showClickedList();
             }
