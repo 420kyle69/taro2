@@ -25,13 +25,13 @@ class PhaserRegion extends PhaserEntity {
 		gameObject.setPosition(stats.x + stats.width/2, stats.y + stats.height/2);
 		gameObject.setInteractive();
 		gameObject.on('pointerdown', (p) => {
-			if (taro.developerMode.active && taro.developerMode.activeTab !== 'play' && this.devModeScene.devModeTools.cursorButton.active && p.leftButtonDown()) {
+			if (taro.developerMode.active && taro.developerMode.activeTab === 'map' && this.devModeScene.devModeTools.cursorButton.active && p.leftButtonDown()) {
 				this.scene.input.setTopOnly(true);
 				this.devModeScene.regionEditor.addClickedList({name: this.entity._stats.id, x: stats.x, y: stats.y, width: stats.width, height: stats.height});
 			}
 		});
 		gameObject.on('pointerup', (p) => {
-			if (taro.developerMode.active && taro.developerMode.activeTab !== 'play' && this.devModeScene.devModeTools.cursorButton.active && p.leftButtonReleased()) {
+			if (taro.developerMode.active && taro.developerMode.activeTab === 'map' && this.devModeScene.devModeTools.cursorButton.active && p.leftButtonReleased()) {
 				this.scene.input.setTopOnly(false);
 				this.devModeScene.regionEditor.showClickedList();
 			}
