@@ -36,6 +36,12 @@ class TileEditor {
 		const shiftKey = devModeScene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT, false);
 
 		gameScene.input.on('pointerdown', (p) => {
+			if (!devModeScene.pointerInsideButtons) {
+				this.devModeTools.modeButtons.map((btn) => {
+					btn.hideHoverChildren(0);
+				});
+			}
+
 			if (!devModeScene.pointerInsideButtons &&
 				!devModeScene.pointerInsideWidgets() &&
 				(!palette.visible || !devModeScene.pointerInsidePalette()) &&
@@ -48,6 +54,11 @@ class TileEditor {
 		});
 
 		devModeScene.input.on('pointerdown', (p) => {
+			if (!devModeScene.pointerInsideButtons) {
+				this.devModeTools.modeButtons.map((btn) => {
+					btn.hideHoverChildren(0);
+				});
+			}
 			if (!devModeScene.pointerInsideButtons &&
 				!devModeScene.pointerInsideWidgets() &&
 				palette.visible && devModeScene.pointerInsidePalette()) {
@@ -206,6 +217,9 @@ class TileEditor {
 
 	floodFill(layer: number, oldTile: number, newTile: number, x: number, y: number, fromServer: boolean, limits?: Record<number, Record<number, number>>, addToLimits?: (v2d: Vector2D) => void, visited?: Record<number, Record<number, number>>): void {
 		let map: MapData | Phaser.Tilemaps.Tilemap;
+		if (x < 0 || x > (map.width - 1) || y < 0 || y > (map.height - 1)) {
+			return;
+		}
 		if (!visited) {
 			visited = {};
 		}
@@ -235,7 +249,7 @@ class TileEditor {
 			map.layers[tempLayer].data[y * width + x] = newTile;
 		} else {
 			map = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
-			if (limits?.[x]?.[y] ||
+			if (!map.getTileAt(x, y, true, layer) || limits?.[x]?.[y] ||
 				visited?.[x]?.[y] ||
 				map.getTileAt(x, y, true, layer).index === 0 ||
 				map.getTileAt(x, y, true, layer).index === -1) {
@@ -243,7 +257,6 @@ class TileEditor {
 			}
 
 			if (
-				!map.getTileAt(x, y, true, layer) ||
 				map.getTileAt(x, y, true, layer).index !== oldTile
 			) {
 				addToLimits?.({ x, y });
@@ -377,7 +390,7 @@ class TileEditor {
 
 						} else if (this.devModeTools.modeButtons[4].active) {
 							const targetTile = this.getTile(pointerTileX, pointerTileY, map);
-							const selectedTile = Object.values(Object.values(this.selectedTileArea)[0])[0];
+							const selectedTile = Object.values(Object.values(this.selectedTileArea)?.[0] || {})?.[0];
 							if (selectedTile && targetTile !== selectedTile && (map.currentLayerIndex === 0 || map.currentLayerIndex === 1)) {
 								const nowCommandCount = this.commandController.nowInsertIndex;
 								const addToLimits = (v2d: Vector2D) => {

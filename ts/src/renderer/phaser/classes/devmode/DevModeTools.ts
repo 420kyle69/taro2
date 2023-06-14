@@ -81,11 +81,18 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		toolButtonsContainer.y = palette.camera.y - (toolButtonsContainer.height * toolButtonsContainer.scale);
 		scene.add.existing(toolButtonsContainer);
 
+		this.brushButtons = {
+			'rectangle': new DevToolButton(this, 'rectangle', 'rectangle', 'changes the brush shape to rectangle', null, -(h * 4 + 1.5 * s), (h + s) * 1, h * 4 - s, toolButtonsContainer, this.changeShape.bind(this), 'rectangle', [], false),
+			'diamond': new DevToolButton(this, 'diamond', 'diamond', 'changes the brush shape to diamond', null, -(h * 4 + 1.5 * s), (h + s) * 2, h * 4 - s, toolButtonsContainer, this.changeShape.bind(this), 'diamond', [], false),
+			'circle': new DevToolButton(this, 'circle', 'circle', 'changes the brush shape to circle', null, -(h * 4 + 1.5 * s), (h + s) * 3, h * 4 - s, toolButtonsContainer, this.changeShape.bind(this), 'circle', [], false),
+		};
+		this.brushButtons['rectangle'].highlight('active');
+
 		this.modeButtons = [];
 		this.modeButtons.push(
 			new DevToolButton(this, '', 'Cursor Tool (C)', 'interact with regions and entities', 'cursor', 0, 0, h * 2 - s, toolButtonsContainer, this.cursor.bind(this)),
 			new DevToolButton(this, '', 'Region Tool (R)', 'draw new region', 'region', h * 2, 0, h * 2 - s, toolButtonsContainer, this.drawRegion.bind(this)),
-			new DevToolButton(this, '', 'Stamp Brush (B)', 'LMB: place selected tiles. RMB: copy tiles', 'stamp', 0, h + s, h * 2 - s, toolButtonsContainer, this.brush.bind(this)),
+			new DevToolButton(this, '', 'Stamp Brush (B)', 'LMB: place selected tiles. RMB: copy tiles', 'stamp', 0, h + s, h * 2 - s, toolButtonsContainer, this.brush.bind(this), undefined, Object.values(this.brushButtons)),
 			new DevToolButton(this, '', 'Eraser (E)', 'delete tiles from selected layer', 'eraser', h * 2, h + s, h * 2 - s, toolButtonsContainer, this.emptyTile.bind(this)),
 			new DevToolButton(this, '', 'Bucket Fill (F)', 'fill an area with the selected tile', 'fill', 0, (h + s) * 2, h * 2 - s, toolButtonsContainer, this.fill.bind(this)),
 			new DevToolButton(this, '', 'Clear Layer (L)', 'clear selected layer', 'clear', h * 2, (h + s) * 2, h * 2 - s, toolButtonsContainer, this.clear.bind(this)),
@@ -94,12 +101,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.cursorButton = this.modeButtons[0];
 		this.highlightModeButton(0);
 
-		this.brushButtons = {
-			'circle': new DevToolButton(this, 'circle', 'circle', 'changes the brush shape to circle', null, 0, (h + s) * 6, h * 4 - s, toolButtonsContainer, this.changeShape.bind(this), 'circle'),
-			'rectangle': new DevToolButton(this, 'rectangle', 'rectangle', 'changes the brush shape to rectangle', null, 0, (h + s) * 4, h * 4 - s, toolButtonsContainer, this.changeShape.bind(this), 'rectangle'),
-			'diamond': new DevToolButton(this, 'diamond', 'diamond', 'changes the brush shape to diamond', null, 0, (h + s) * 5, h * 4 - s, toolButtonsContainer, this.changeShape.bind(this), 'diamond')
-		};
-		this.brushButtons['rectangle'].highlight('active');
+
 
 		this.layerButtons = [];
 		this.layerButtons.push(
@@ -342,6 +344,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.tileEditor.activateMarkers(true);
 		this.scene.regionEditor.regionTool = false;
 		this.highlightModeButton(2);
+		this.changeShape('rectangle');
 		this.tileEditor.marker.changePreview();
 	}
 
@@ -384,14 +387,14 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	}
 
 	changeShape(shape: Shape): void {
+		if (!this.modeButtons[2].active) {
+			this.brush();
+		}
 		this.tileEditor.brushArea.shape = shape;
 		Object.values(this.brushButtons).map((btn) => {
 			btn.highlight('no');
 		});
 		this.brushButtons[shape].highlight('active');
-		if (!this.modeButtons[3].active) {
-			this.brush();
-		}
 		this.tileEditor.marker.changePreview();
 	}
 

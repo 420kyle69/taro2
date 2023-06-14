@@ -179,15 +179,15 @@ var Player = TaroEntity.extend({
 	// 3. update attribute bars
 	selectUnit: function (unitId) {
 		var self = this;
-		
+
 		var unit = taro.$(unitId);
-		if (taro.isServer && self._stats.clientId) {			
+		if (taro.isServer && self._stats.clientId) {
 			if (unit && unit._category == 'unit' && unit.getOwner() == this || unitId === null) {
 				self._stats.selectedUnitId = unitId;
 				taro.network.send('makePlayerSelectUnit', { unitId: unitId }, self._stats.clientId);
 			} else {
-				// someone's attempting exploit by trying to assign a unit to a player that's not the unit's owner				
-				var client = taro.server.clients[self._stats.clientId];				
+				// someone's attempting exploit by trying to assign a unit to a player that's not the unit's owner
+				var client = taro.server.clients[self._stats.clientId];
 				var logData = {
 					query: 'exploitSelectUnit',
 					gameTitle: taro.game.data.defaultData.title,
@@ -196,11 +196,11 @@ var Player = TaroEntity.extend({
 					userId: client.userId
 				};
 				global.rollbar.log("selectUnit exploit", logData);
-			}			
+			}
 		}
 
 		if (taro.isClient) {
-			
+
 			if (self._stats.clientId == taro.network.id() && unit && unit._category == 'unit') {
 				self._stats.selectedUnitId = unitId;
 
@@ -433,7 +433,7 @@ var Player = TaroEntity.extend({
 			this.streamDestroy();
 			this.destroy();
 		}
-		
+
 	},
 
 	updateVisibility: function (playerId) {
@@ -510,7 +510,7 @@ var Player = TaroEntity.extend({
 						self.remove();
 					}
 				}
-				
+
 				if (taro.isClient) {
 					if (attrName === 'name') {
 						self._stats[attrName] = newValue;
@@ -724,7 +724,6 @@ var Player = TaroEntity.extend({
 			$('#modd-shop-div').addClass('d-flex');
 			taro.client.eventLog.push([taro._currentTime - taro.client.playerJoinedAt, 'hide menu called']);
 			taro.menuUi.hideMenu(); // if player's already joined the game, then just hide menu when "play game" button is clicked
-
 			if (!taro.client.guestmode) {
 				$('.open-menu-button').show();
 			}
@@ -732,9 +731,9 @@ var Player = TaroEntity.extend({
 			window.reactApp && window.reactApp.playerJoinedGame && window.reactApp.playerJoinedGame();
 			window && window.playerJoinedGame && window.playerJoinedGame();
 			window.playerJoinedTheGame = true;
-				
+
 			if ((typeof (userId) !== 'undefined' && typeof (sessionId) !== 'undefined') || window.isStandalone) {
-				
+
 				if ((taro.game.data.isGameDeveloper && ['1', '4', '5'].includes(taro.game.data.defaultData.tier)) || window.isStandalone) {
 					// dont show dev menu by default
 					// if (!taro.isMobile) {

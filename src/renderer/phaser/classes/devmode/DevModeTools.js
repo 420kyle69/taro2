@@ -59,16 +59,16 @@ var DevModeTools = /** @class */ (function (_super) {
         toolButtonsContainer.x = palette.camera.x + palette.paletteWidth - ((h * 4) * toolButtonsContainer.scale) + 22;
         toolButtonsContainer.y = palette.camera.y - (toolButtonsContainer.height * toolButtonsContainer.scale);
         scene.add.existing(toolButtonsContainer);
-        _this.modeButtons = [];
-        _this.modeButtons.push(new DevToolButton(_this, '', 'Cursor Tool (C)', 'interact with regions and entities', 'cursor', 0, 0, h * 2 - s, toolButtonsContainer, _this.cursor.bind(_this)), new DevToolButton(_this, '', 'Region Tool (R)', 'draw new region', 'region', h * 2, 0, h * 2 - s, toolButtonsContainer, _this.drawRegion.bind(_this)), new DevToolButton(_this, '', 'Stamp Brush (B)', 'LMB: place selected tiles. RMB: copy tiles', 'stamp', 0, h + s, h * 2 - s, toolButtonsContainer, _this.brush.bind(_this)), new DevToolButton(_this, '', 'Eraser (E)', 'delete tiles from selected layer', 'eraser', h * 2, h + s, h * 2 - s, toolButtonsContainer, _this.emptyTile.bind(_this)), new DevToolButton(_this, '', 'Bucket Fill (F)', 'fill an area with the selected tile', 'fill', 0, (h + s) * 2, h * 2 - s, toolButtonsContainer, _this.fill.bind(_this)), new DevToolButton(_this, '', 'Clear Layer (L)', 'clear selected layer', 'clear', h * 2, (h + s) * 2, h * 2 - s, toolButtonsContainer, _this.clear.bind(_this)), new DevToolButton(_this, '', 'Save Map (S)', 'save all changes', 'save', 0, (h + s) * 3, h * 2 - s, toolButtonsContainer, _this.save.bind(_this)));
-        _this.cursorButton = _this.modeButtons[0];
-        _this.highlightModeButton(0);
         _this.brushButtons = {
-            'circle': new DevToolButton(_this, 'circle', 'circle', 'changes the brush shape to circle', null, 0, (h + s) * 6, h * 4 - s, toolButtonsContainer, _this.changeShape.bind(_this), 'circle'),
-            'rectangle': new DevToolButton(_this, 'rectangle', 'rectangle', 'changes the brush shape to rectangle', null, 0, (h + s) * 4, h * 4 - s, toolButtonsContainer, _this.changeShape.bind(_this), 'rectangle'),
-            'diamond': new DevToolButton(_this, 'diamond', 'diamond', 'changes the brush shape to diamond', null, 0, (h + s) * 5, h * 4 - s, toolButtonsContainer, _this.changeShape.bind(_this), 'diamond')
+            'rectangle': new DevToolButton(_this, 'rectangle', 'rectangle', 'changes the brush shape to rectangle', null, -(h * 4 + 1.5 * s), (h + s) * 1, h * 4 - s, toolButtonsContainer, _this.changeShape.bind(_this), 'rectangle', [], false),
+            'diamond': new DevToolButton(_this, 'diamond', 'diamond', 'changes the brush shape to diamond', null, -(h * 4 + 1.5 * s), (h + s) * 2, h * 4 - s, toolButtonsContainer, _this.changeShape.bind(_this), 'diamond', [], false),
+            'circle': new DevToolButton(_this, 'circle', 'circle', 'changes the brush shape to circle', null, -(h * 4 + 1.5 * s), (h + s) * 3, h * 4 - s, toolButtonsContainer, _this.changeShape.bind(_this), 'circle', [], false),
         };
         _this.brushButtons['rectangle'].highlight('active');
+        _this.modeButtons = [];
+        _this.modeButtons.push(new DevToolButton(_this, '', 'Cursor Tool (C)', 'interact with regions and entities', 'cursor', 0, 0, h * 2 - s, toolButtonsContainer, _this.cursor.bind(_this)), new DevToolButton(_this, '', 'Region Tool (R)', 'draw new region', 'region', h * 2, 0, h * 2 - s, toolButtonsContainer, _this.drawRegion.bind(_this)), new DevToolButton(_this, '', 'Stamp Brush (B)', 'LMB: place selected tiles. RMB: copy tiles', 'stamp', 0, h + s, h * 2 - s, toolButtonsContainer, _this.brush.bind(_this), undefined, Object.values(_this.brushButtons)), new DevToolButton(_this, '', 'Eraser (E)', 'delete tiles from selected layer', 'eraser', h * 2, h + s, h * 2 - s, toolButtonsContainer, _this.emptyTile.bind(_this)), new DevToolButton(_this, '', 'Bucket Fill (F)', 'fill an area with the selected tile', 'fill', 0, (h + s) * 2, h * 2 - s, toolButtonsContainer, _this.fill.bind(_this)), new DevToolButton(_this, '', 'Clear Layer (L)', 'clear selected layer', 'clear', h * 2, (h + s) * 2, h * 2 - s, toolButtonsContainer, _this.clear.bind(_this)), new DevToolButton(_this, '', 'Save Map (S)', 'save all changes', 'save', 0, (h + s) * 3, h * 2 - s, toolButtonsContainer, _this.save.bind(_this)));
+        _this.cursorButton = _this.modeButtons[0];
+        _this.highlightModeButton(0);
         _this.layerButtons = [];
         _this.layerButtons.push(new DevToolButton(_this, 'floor', 'Layer (1)', 'select the Floor layer', null, h + s, (h + s) * 10, h * 2 + 25, toolButtonsContainer, _this.switchLayer.bind(_this), 0), new DevToolButton(_this, 'floor2', 'Layer (2)', 'select the Floor 2 layer', null, h + s, (h + s) * 9, h * 2 + 25, toolButtonsContainer, _this.switchLayer.bind(_this), 1), new DevToolButton(_this, 'walls', 'Layer (3)', 'select the Walls layer', null, h + s, (h + s) * 8, h * 2 + 25, toolButtonsContainer, _this.switchLayer.bind(_this), 2), new DevToolButton(_this, 'trees', 'Layer (4)', 'select the Trees layer', null, h + s, (h + s) * 7, h * 2 + 25, toolButtonsContainer, _this.switchLayer.bind(_this), 3));
         _this.layerButtons[0].highlight('active');
@@ -287,6 +287,7 @@ var DevModeTools = /** @class */ (function (_super) {
         this.tileEditor.activateMarkers(true);
         this.scene.regionEditor.regionTool = false;
         this.highlightModeButton(2);
+        this.changeShape('rectangle');
         this.tileEditor.marker.changePreview();
     };
     DevModeTools.prototype.emptyTile = function () {
@@ -325,14 +326,14 @@ var DevModeTools = /** @class */ (function (_super) {
         });
     };
     DevModeTools.prototype.changeShape = function (shape) {
+        if (!this.modeButtons[2].active) {
+            this.brush();
+        }
         this.tileEditor.brushArea.shape = shape;
         Object.values(this.brushButtons).map(function (btn) {
             btn.highlight('no');
         });
         this.brushButtons[shape].highlight('active');
-        if (!this.modeButtons[3].active) {
-            this.brush();
-        }
         this.tileEditor.marker.changePreview();
     };
     DevModeTools.prototype.switchLayer = function (value) {

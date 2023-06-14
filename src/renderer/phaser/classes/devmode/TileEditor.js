@@ -16,6 +16,11 @@ var TileEditor = /** @class */ (function () {
         this.startDragIn = 'none';
         var shiftKey = devModeScene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT, false);
         gameScene.input.on('pointerdown', function (p) {
+            if (!devModeScene.pointerInsideButtons) {
+                _this.devModeTools.modeButtons.map(function (btn) {
+                    btn.hideHoverChildren(0);
+                });
+            }
             if (!devModeScene.pointerInsideButtons &&
                 !devModeScene.pointerInsideWidgets() &&
                 (!palette.visible || !devModeScene.pointerInsidePalette()) &&
@@ -27,6 +32,11 @@ var TileEditor = /** @class */ (function () {
             }
         });
         devModeScene.input.on('pointerdown', function (p) {
+            if (!devModeScene.pointerInsideButtons) {
+                _this.devModeTools.modeButtons.map(function (btn) {
+                    btn.hideHoverChildren(0);
+                });
+            }
             if (!devModeScene.pointerInsideButtons &&
                 !devModeScene.pointerInsideWidgets() &&
                 palette.visible && devModeScene.pointerInsidePalette()) {
@@ -182,6 +192,9 @@ var TileEditor = /** @class */ (function () {
     TileEditor.prototype.floodFill = function (layer, oldTile, newTile, x, y, fromServer, limits, addToLimits, visited) {
         var _a, _b, _c, _d;
         var map;
+        if (x < 0 || x > (map.width - 1) || y < 0 || y > (map.height - 1)) {
+            return;
+        }
         if (!visited) {
             visited = {};
         }
@@ -212,14 +225,13 @@ var TileEditor = /** @class */ (function () {
         }
         else {
             map = this.gameScene.tilemap;
-            if (((_c = limits === null || limits === void 0 ? void 0 : limits[x]) === null || _c === void 0 ? void 0 : _c[y]) ||
+            if (!map.getTileAt(x, y, true, layer) || ((_c = limits === null || limits === void 0 ? void 0 : limits[x]) === null || _c === void 0 ? void 0 : _c[y]) ||
                 ((_d = visited === null || visited === void 0 ? void 0 : visited[x]) === null || _d === void 0 ? void 0 : _d[y]) ||
                 map.getTileAt(x, y, true, layer).index === 0 ||
                 map.getTileAt(x, y, true, layer).index === -1) {
                 return;
             }
-            if (!map.getTileAt(x, y, true, layer) ||
-                map.getTileAt(x, y, true, layer).index !== oldTile) {
+            if (map.getTileAt(x, y, true, layer).index !== oldTile) {
                 addToLimits === null || addToLimits === void 0 ? void 0 : addToLimits({ x: x, y: y });
                 return;
             }
@@ -264,6 +276,7 @@ var TileEditor = /** @class */ (function () {
     };
     TileEditor.prototype.update = function () {
         var _this = this;
+        var _a, _b;
         if (taro.developerMode.active && taro.developerMode.activeTab === 'map') {
             var devModeScene = this.devModeTools.scene;
             var palette = this.tilePalette;
@@ -338,7 +351,7 @@ var TileEditor = /** @class */ (function () {
                         }
                         else if (this.devModeTools.modeButtons[4].active) {
                             var targetTile_1 = this.getTile(pointerTileX_1, pointerTileY_1, map_1);
-                            var selectedTile_1 = Object.values(Object.values(this.selectedTileArea)[0])[0];
+                            var selectedTile_1 = (_b = Object.values(((_a = Object.values(this.selectedTileArea)) === null || _a === void 0 ? void 0 : _a[0]) || {})) === null || _b === void 0 ? void 0 : _b[0];
                             if (selectedTile_1 && targetTile_1 !== selectedTile_1 && (map_1.currentLayerIndex === 0 || map_1.currentLayerIndex === 1)) {
                                 var nowCommandCount_1 = this.commandController.nowInsertIndex;
                                 var addToLimits_1 = function (v2d) {
