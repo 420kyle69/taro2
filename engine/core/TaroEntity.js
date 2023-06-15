@@ -3159,6 +3159,11 @@ var TaroEntity = TaroObject.extend({
 				this.prevPhysicsFrame = [prevFrameTime, [x, y, rotate]];
 				this.nextPhysicsFrame = [nextFrameTime, [x, y, rotate]];
 			}
+            //instantly move to camera the new position
+            if (taro.client.myPlayer.currentFollowUnit === this.id()) {
+                taro.client.emit('instant-move-camera', [x, y]);
+            }
+            
 		}
 
 		this.discrepancyCount = 0;
