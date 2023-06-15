@@ -6,4 +6,5 @@ declare class InGameEditor extends TaroClass {
     saveMap: any
     showRegionList: any
     showRepublishToInitEntitiesWarning: any
+    toggleEntityPlacementWindow: any
 }

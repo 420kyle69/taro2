@@ -444,11 +444,15 @@ class DevModeTools extends Phaser.GameObjects.Container {
     activateEntities(active: boolean): void {
         if (active) {
             //show entities list
+			inGameEditor.toggleEntityPlacementWindow(true);
+
             if (!this.paletteButton.hidden) {
                 this.palette.toggle();
             }
         } else {
             //hide entities list
+			inGameEditor.toggleEntityPlacementWindow(false);
+
             if (this.paletteButton.hidden) {
                 this.palette.toggle();
             }

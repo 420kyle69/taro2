@@ -381,12 +381,14 @@ var DevModeTools = /** @class */ (function (_super) {
     DevModeTools.prototype.activateEntities = function (active) {
         if (active) {
             //show entities list
+            inGameEditor.toggleEntityPlacementWindow(true);
             if (!this.paletteButton.hidden) {
                 this.palette.toggle();
             }
         }
         else {
             //hide entities list
+            inGameEditor.toggleEntityPlacementWindow(false);
             if (this.paletteButton.hidden) {
                 this.palette.toggle();
             }
