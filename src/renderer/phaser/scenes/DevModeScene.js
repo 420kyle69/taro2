@@ -99,6 +99,7 @@ var DevModeScene = /** @class */ (function (_super) {
             this.load.image(key, this.patchAssetUrl(tileset.image));
         });*/
         this.load.image('cursor', 'https://cache.modd.io/asset/spriteImage/1666276041347_cursor.png');
+        this.load.image('entity', 'https://cache.modd.io/asset/spriteImage/1686840222943_cube.png');
         this.load.image('region', 'https://cache.modd.io/asset/spriteImage/1666882309997_region.png');
         this.load.image('stamp', 'https://cache.modd.io/asset/spriteImage/1666724706664_stamp.png');
         this.load.image('eraser', 'https://cache.modd.io/asset/spriteImage/1666276083246_erasergap.png');
