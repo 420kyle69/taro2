@@ -98,25 +98,23 @@ class TileEditor {
 				Math.abs(pointerPosition.y - gameScene.input.activePointer.y) < 50 &&
 				!devModeTools.modeButtons[3].active) {
 				const worldPoint = gameScene.cameras.main.getWorldPoint(gameScene.input.activePointer.x, gameScene.input.activePointer.y);
-				const pointerTileX = gameMap.worldToTileX(worldPoint.x - (this.brushArea.size.x - 0.5) * Constants.TILE_SIZE / 2, true);
-				const pointerTileY = gameMap.worldToTileY(worldPoint.y - (this.brushArea.size.y - 0.5) * Constants.TILE_SIZE / 2, true);
+				const nowBrushSize = JSON.parse(JSON.stringify(this.brushArea.size));
+				if (this.devModeTools.isForceTo1x1()) {
+					nowBrushSize.x = 1;
+					nowBrushSize.y = 1;
+				}
+				const pointerTileX = gameMap.worldToTileX(worldPoint.x - (nowBrushSize.x - 0.5) * Constants.TILE_SIZE / 2, true);
+				const pointerTileY = gameMap.worldToTileY(worldPoint.y - (nowBrushSize.y - 0.5) * Constants.TILE_SIZE / 2, true);
 				this.clearTint();
 				this.selectedTileArea = {};
-				if (this.devModeTools.isForceTo1x1()) {
-					this.selectedTileArea = {};
-					this.selectedTileArea[pointerTileX] = {};
-					const tile = this.getTile(pointerTileX, pointerTileY, gameMap);
-					this.selectedTileArea[pointerTileX][pointerTileY] = tile;
-				} else {
-					for (let i = 0; i < this.brushArea.size.x; i++) {
-						for (let j = 0; j < this.brushArea.size.y; j++) {
-							const tile = this.getTile(pointerTileX + i, pointerTileY + j, gameMap);
-							if (!this.selectedTileArea[pointerTileX + i]) {
-								this.selectedTileArea[pointerTileX + i] = {};
-							}
-							this.selectedTileArea[pointerTileX + i][pointerTileY + j] = tile;
-
+				for (let i = 0; i < nowBrushSize.x; i++) {
+					for (let j = 0; j < nowBrushSize.y; j++) {
+						const tile = this.getTile(pointerTileX + i, pointerTileY + j, gameMap);
+						if (!this.selectedTileArea[pointerTileX + i]) {
+							this.selectedTileArea[pointerTileX + i] = {};
 						}
+						this.selectedTileArea[pointerTileX + i][pointerTileY + j] = tile;
+
 					}
 				}
 				this.marker.changePreview();
@@ -188,6 +186,7 @@ class TileEditor {
 				//save tile change to taro.game.data.map and taro.map.data
 				const nowValue = dataValue as TileData<'edit'>['edit'];
 				map.layers[dataValue.layer].data[nowValue.y * width + dataValue.x] = dataValue.gid;
+				console.log(nowValue);
 				this.putTiles(nowValue.x, nowValue.y, nowValue.selectedTiles, nowValue.size, nowValue.shape, true);
 				break;
 			}
@@ -218,8 +217,7 @@ class TileEditor {
 	 */
 	putTiles(tileX: number, tileY: number, selectedTiles: Record<number, Record<number, number>>, brushSize: Vector2D, shape: Shape, local?: boolean): void {
 		const map = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
-		const nowShape = this.brushArea.shape;
-		const sample = this.brushArea.calcSample(selectedTiles, brushSize, nowShape, true);
+		const sample = this.brushArea.calcSample(selectedTiles, brushSize, shape, true);
 		if (this.gameScene.tilemapLayers[map.currentLayerIndex].visible && selectedTiles) {
 			for (let x = 0; x < brushSize.x; x++) {
 				for (let y = 0; y < brushSize.y; y++) {

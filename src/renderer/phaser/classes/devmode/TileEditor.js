@@ -75,25 +75,22 @@ var TileEditor = /** @class */ (function () {
                 Math.abs(pointerPosition.y - gameScene.input.activePointer.y) < 50 &&
                 !devModeTools.modeButtons[3].active) {
                 var worldPoint = gameScene.cameras.main.getWorldPoint(gameScene.input.activePointer.x, gameScene.input.activePointer.y);
-                var pointerTileX = gameMap.worldToTileX(worldPoint.x - (_this.brushArea.size.x - 0.5) * Constants.TILE_SIZE / 2, true);
-                var pointerTileY = gameMap.worldToTileY(worldPoint.y - (_this.brushArea.size.y - 0.5) * Constants.TILE_SIZE / 2, true);
+                var nowBrushSize = JSON.parse(JSON.stringify(_this.brushArea.size));
+                if (_this.devModeTools.isForceTo1x1()) {
+                    nowBrushSize.x = 1;
+                    nowBrushSize.y = 1;
+                }
+                var pointerTileX = gameMap.worldToTileX(worldPoint.x - (nowBrushSize.x - 0.5) * Constants.TILE_SIZE / 2, true);
+                var pointerTileY = gameMap.worldToTileY(worldPoint.y - (nowBrushSize.y - 0.5) * Constants.TILE_SIZE / 2, true);
                 _this.clearTint();
                 _this.selectedTileArea = {};
-                if (_this.devModeTools.isForceTo1x1()) {
-                    _this.selectedTileArea = {};
-                    _this.selectedTileArea[pointerTileX] = {};
-                    var tile = _this.getTile(pointerTileX, pointerTileY, gameMap);
-                    _this.selectedTileArea[pointerTileX][pointerTileY] = tile;
-                }
-                else {
-                    for (var i = 0; i < _this.brushArea.size.x; i++) {
-                        for (var j = 0; j < _this.brushArea.size.y; j++) {
-                            var tile = _this.getTile(pointerTileX + i, pointerTileY + j, gameMap);
-                            if (!_this.selectedTileArea[pointerTileX + i]) {
-                                _this.selectedTileArea[pointerTileX + i] = {};
-                            }
-                            _this.selectedTileArea[pointerTileX + i][pointerTileY + j] = tile;
+                for (var i = 0; i < nowBrushSize.x; i++) {
+                    for (var j = 0; j < nowBrushSize.y; j++) {
+                        var tile = _this.getTile(pointerTileX + i, pointerTileY + j, gameMap);
+                        if (!_this.selectedTileArea[pointerTileX + i]) {
+                            _this.selectedTileArea[pointerTileX + i] = {};
                         }
+                        _this.selectedTileArea[pointerTileX + i][pointerTileY + j] = tile;
                     }
                 }
                 _this.marker.changePreview();
@@ -162,6 +159,7 @@ var TileEditor = /** @class */ (function () {
                 //save tile change to taro.game.data.map and taro.map.data
                 var nowValue = dataValue;
                 map.layers[dataValue.layer].data[nowValue.y * width + dataValue.x] = dataValue.gid;
+                console.log(nowValue);
                 this.putTiles(nowValue.x, nowValue.y, nowValue.selectedTiles, nowValue.size, nowValue.shape, true);
                 break;
             }
@@ -189,8 +187,7 @@ var TileEditor = /** @class */ (function () {
      */
     TileEditor.prototype.putTiles = function (tileX, tileY, selectedTiles, brushSize, shape, local) {
         var map = this.gameScene.tilemap;
-        var nowShape = this.brushArea.shape;
-        var sample = this.brushArea.calcSample(selectedTiles, brushSize, nowShape, true);
+        var sample = this.brushArea.calcSample(selectedTiles, brushSize, shape, true);
         if (this.gameScene.tilemapLayers[map.currentLayerIndex].visible && selectedTiles) {
             for (var x = 0; x < brushSize.x; x++) {
                 for (var y = 0; y < brushSize.y; y++) {
