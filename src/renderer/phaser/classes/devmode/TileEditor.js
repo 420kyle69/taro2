@@ -79,6 +79,12 @@ var TileEditor = /** @class */ (function () {
                 var pointerTileY = gameMap.worldToTileY(worldPoint.y - (_this.brushArea.size.y - 0.5) * Constants.TILE_SIZE / 2, true);
                 _this.clearTint();
                 _this.selectedTileArea = {};
+                if (_this.devModeTools.isForceTo1x1()) {
+                    _this.selectedTileArea = {};
+                    _this.selectedTileArea[pointerTileX] = {};
+                    var tile = _this.getTile(pointerTileX, pointerTileY, gameMap);
+                    _this.selectedTileArea[pointerTileX][pointerTileY] = tile;
+                }
                 for (var i = 0; i < _this.brushArea.size.x; i++) {
                     for (var j = 0; j < _this.brushArea.size.y; j++) {
                         var tile = _this.getTile(pointerTileX + i, pointerTileY + j, gameMap);
@@ -351,7 +357,8 @@ var TileEditor = /** @class */ (function () {
                     if (devModeScene.input.manager.activePointer.leftButtonDown()) {
                         if (this.devModeTools.modeButtons[2].active || this.devModeTools.modeButtons[3].active) {
                             var originTileArea_1 = {};
-                            var nowBrushArea_1 = JSON.parse(JSON.stringify(this.brushArea));
+                            var nowBrushSize_1 = JSON.parse(JSON.stringify(this.brushArea.size));
+                            var nowBrushShape_1 = JSON.parse(JSON.stringify(this.brushArea.shape));
                             var sample = JSON.parse(JSON.stringify(this.brushArea.sample));
                             var selectedTiles_1 = JSON.parse(JSON.stringify(this.selectedTileArea));
                             Object.entries(sample).map(function (_a) {
@@ -366,10 +373,10 @@ var TileEditor = /** @class */ (function () {
                             });
                             this.commandController.addCommand({
                                 func: function () {
-                                    _this.putTiles(pointerTileX_1, pointerTileY_1, selectedTiles_1, nowBrushArea_1.size, nowBrushArea_1.shape, false);
+                                    _this.putTiles(pointerTileX_1, pointerTileY_1, selectedTiles_1, nowBrushSize_1, nowBrushShape_1, false);
                                 },
                                 undo: function () {
-                                    _this.putTiles(pointerTileX_1, pointerTileY_1, originTileArea_1, nowBrushArea_1.size, nowBrushArea_1.shape, false);
+                                    _this.putTiles(pointerTileX_1, pointerTileY_1, originTileArea_1, nowBrushSize_1, nowBrushShape_1, false);
                                 },
                             });
                         }
@@ -389,20 +396,20 @@ var TileEditor = /** @class */ (function () {
                                 };
                                 this.commandController.addCommand({
                                     func: function () {
+                                        _this.floodFill(map_1.currentLayerIndex, targetTile_1, selectedTile_1, pointerTileX_1, pointerTileY_1, false, [], addToLimits_1);
                                         taro.network.send('editTile', {
                                             fill: {
                                                 gid: selectedTile_1, layer: map_1.currentLayerIndex, x: pointerTileX_1, y: pointerTileY_1
                                             }
                                         });
-                                        _this.floodFill(map_1.currentLayerIndex, targetTile_1, selectedTile_1, pointerTileX_1, pointerTileY_1, false, [], addToLimits_1);
                                     },
                                     undo: function () {
+                                        _this.floodFill(map_1.currentLayerIndex, selectedTile_1, targetTile_1, pointerTileX_1, pointerTileY_1, false, _this.commandController.commands[nowCommandCount_1 - _this.commandController.offset].cache);
                                         taro.network.send('editTile', {
                                             fill: {
                                                 gid: targetTile_1, layer: map_1.currentLayerIndex, x: pointerTileX_1, y: pointerTileY_1, limits: _this.commandController.commands[nowCommandCount_1 - _this.commandController.offset].cache
                                             }
                                         });
-                                        _this.floodFill(map_1.currentLayerIndex, selectedTile_1, targetTile_1, pointerTileX_1, pointerTileY_1, false, _this.commandController.commands[nowCommandCount_1 - _this.commandController.offset].cache);
                                     },
                                     cache: {},
                                 }, true);

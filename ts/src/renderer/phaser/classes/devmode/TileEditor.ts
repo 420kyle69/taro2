@@ -102,6 +102,12 @@ class TileEditor {
 				const pointerTileY = gameMap.worldToTileY(worldPoint.y - (this.brushArea.size.y - 0.5) * Constants.TILE_SIZE / 2, true);
 				this.clearTint();
 				this.selectedTileArea = {};
+				if (this.devModeTools.isForceTo1x1()) {
+					this.selectedTileArea = {};
+					this.selectedTileArea[pointerTileX] = {};
+					const tile = this.getTile(pointerTileX, pointerTileY, gameMap);
+					this.selectedTileArea[pointerTileX][pointerTileY] = tile;
+				}
 				for (let i = 0; i < this.brushArea.size.x; i++) {
 					for (let j = 0; j < this.brushArea.size.y; j++) {
 						const tile = this.getTile(pointerTileX + i, pointerTileY + j, gameMap);
@@ -395,7 +401,8 @@ class TileEditor {
 					if (devModeScene.input.manager.activePointer.leftButtonDown()) {
 						if (this.devModeTools.modeButtons[2].active || this.devModeTools.modeButtons[3].active) {
 							const originTileArea = {};
-							const nowBrushArea = JSON.parse(JSON.stringify(this.brushArea)) as TileShape;
+							const nowBrushSize = JSON.parse(JSON.stringify(this.brushArea.size)) as Vector2D;
+							const nowBrushShape = JSON.parse(JSON.stringify(this.brushArea.shape)) as Shape;
 							const sample = JSON.parse(JSON.stringify(this.brushArea.sample));
 							const selectedTiles = JSON.parse(JSON.stringify(this.selectedTileArea));
 
@@ -410,10 +417,10 @@ class TileEditor {
 
 							this.commandController.addCommand({
 								func: () => {
-									this.putTiles(pointerTileX, pointerTileY, selectedTiles, nowBrushArea.size, nowBrushArea.shape, false);
+									this.putTiles(pointerTileX, pointerTileY, selectedTiles, nowBrushSize, nowBrushShape, false);
 								},
 								undo: () => {
-									this.putTiles(pointerTileX, pointerTileY, originTileArea, nowBrushArea.size, nowBrushArea.shape, false);
+									this.putTiles(pointerTileX, pointerTileY, originTileArea, nowBrushSize, nowBrushShape, false);
 								},
 							});
 
@@ -435,20 +442,20 @@ class TileEditor {
 								this.commandController.addCommand(
 									{
 										func: () => {
+											this.floodFill(map.currentLayerIndex, targetTile, selectedTile, pointerTileX, pointerTileY, false, [], addToLimits);
 											taro.network.send<'fill'>('editTile', {
 												fill: {
 													gid: selectedTile, layer: map.currentLayerIndex, x: pointerTileX, y: pointerTileY
 												}
 											});
-											this.floodFill(map.currentLayerIndex, targetTile, selectedTile, pointerTileX, pointerTileY, false, [], addToLimits);
 										},
 										undo: () => {
+											this.floodFill(map.currentLayerIndex, selectedTile, targetTile, pointerTileX, pointerTileY, false, this.commandController.commands[nowCommandCount - this.commandController.offset].cache);
 											taro.network.send<'fill'>('editTile', {
 												fill: {
 													gid: targetTile, layer: map.currentLayerIndex, x: pointerTileX, y: pointerTileY, limits: this.commandController.commands[nowCommandCount - this.commandController.offset].cache
 												}
 											});
-											this.floodFill(map.currentLayerIndex, selectedTile, targetTile, pointerTileX, pointerTileY, false, this.commandController.commands[nowCommandCount - this.commandController.offset].cache);
 										},
 										cache: {},
 									}, true
