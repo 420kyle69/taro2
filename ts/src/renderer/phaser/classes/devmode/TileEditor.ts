@@ -33,7 +33,6 @@ class TileEditor {
 		this.activateMarkers(false);
 
 		this.startDragIn = 'none';
-		const shiftKey = devModeScene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT, false);
 
 		gameScene.input.on('pointerdown', (p) => {
 			if (!devModeScene.pointerInsideButtons) {
@@ -66,7 +65,7 @@ class TileEditor {
 				pointerPosition.x = devModeScene.input.activePointer.x;
 				pointerPosition.y = devModeScene.input.activePointer.y;
 				if (!devModeTools.modeButtons[4].active) this.devModeTools.brush();
-				if (shiftKey.isDown) {
+				if (this.devModeTools.shiftKey.isDown) {
 					//pass
 				} else {
 					if (p.button === 0) {
