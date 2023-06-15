@@ -107,15 +107,16 @@ class TileEditor {
 					this.selectedTileArea[pointerTileX] = {};
 					const tile = this.getTile(pointerTileX, pointerTileY, gameMap);
 					this.selectedTileArea[pointerTileX][pointerTileY] = tile;
-				}
-				for (let i = 0; i < this.brushArea.size.x; i++) {
-					for (let j = 0; j < this.brushArea.size.y; j++) {
-						const tile = this.getTile(pointerTileX + i, pointerTileY + j, gameMap);
-						if (!this.selectedTileArea[pointerTileX + i]) {
-							this.selectedTileArea[pointerTileX + i] = {};
-						}
-						this.selectedTileArea[pointerTileX + i][pointerTileY + j] = tile;
+				} else {
+					for (let i = 0; i < this.brushArea.size.x; i++) {
+						for (let j = 0; j < this.brushArea.size.y; j++) {
+							const tile = this.getTile(pointerTileX + i, pointerTileY + j, gameMap);
+							if (!this.selectedTileArea[pointerTileX + i]) {
+								this.selectedTileArea[pointerTileX + i] = {};
+							}
+							this.selectedTileArea[pointerTileX + i][pointerTileY + j] = tile;
 
+						}
 					}
 				}
 				this.marker.changePreview();

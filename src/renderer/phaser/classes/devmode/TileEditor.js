@@ -85,13 +85,15 @@ var TileEditor = /** @class */ (function () {
                     var tile = _this.getTile(pointerTileX, pointerTileY, gameMap);
                     _this.selectedTileArea[pointerTileX][pointerTileY] = tile;
                 }
-                for (var i = 0; i < _this.brushArea.size.x; i++) {
-                    for (var j = 0; j < _this.brushArea.size.y; j++) {
-                        var tile = _this.getTile(pointerTileX + i, pointerTileY + j, gameMap);
-                        if (!_this.selectedTileArea[pointerTileX + i]) {
-                            _this.selectedTileArea[pointerTileX + i] = {};
+                else {
+                    for (var i = 0; i < _this.brushArea.size.x; i++) {
+                        for (var j = 0; j < _this.brushArea.size.y; j++) {
+                            var tile = _this.getTile(pointerTileX + i, pointerTileY + j, gameMap);
+                            if (!_this.selectedTileArea[pointerTileX + i]) {
+                                _this.selectedTileArea[pointerTileX + i] = {};
+                            }
+                            _this.selectedTileArea[pointerTileX + i][pointerTileY + j] = tile;
                         }
-                        _this.selectedTileArea[pointerTileX + i][pointerTileY + j] = tile;
                     }
                 }
                 _this.marker.changePreview();
