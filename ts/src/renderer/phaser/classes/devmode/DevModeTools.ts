@@ -196,7 +196,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	keyBindings(): void {
 		const gameScene = this.scene.gameScene;
 		const keyboard = this.scene.input.keyboard;
-		const altKey = this.altKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ALT, false);
+		const altKey = this.altKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ALT, true);
 		const shiftKey = this.shiftKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT, false);
 		const tabKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, false);
 		tabKey.on('down', (key) => {

@@ -140,7 +140,7 @@ var DevModeTools = /** @class */ (function (_super) {
         var _this = this;
         var gameScene = this.scene.gameScene;
         var keyboard = this.scene.input.keyboard;
-        var altKey = this.altKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ALT, false);
+        var altKey = this.altKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ALT, true);
         var shiftKey = this.shiftKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT, false);
         var tabKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, false);
         tabKey.on('down', function (key) {
