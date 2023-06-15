@@ -7,15 +7,15 @@ class EntityImage {
     startDragY: number;
     scale: any;
     dragMode: 'position' | 'angle' | 'scale';
-    
+
 
     constructor(scene, devModeTools: DevModeTools, entityImages: (Phaser.GameObjects.Image & {entity: EntityImage})[], action: ActionData, type?: string) {
-        
+
         this.devModeTools = devModeTools;
         this.action = action;
 
         let key;
-        
+
         if (action.entityType === 'unitTypes') {
             const entityTypeData = taro.game.data[action.entityType] && taro.game.data[action.entityType][action.entity];
             if (!entityTypeData) return;
@@ -41,7 +41,7 @@ class EntityImage {
             if (!entityTypeData) return;
             key = `projectile/${entityTypeData.cellSheet.url}`
         }
-    
+
         const image = this.image = scene.add.image(action.position?.x, action.position?.y, key);
         if (action.angle) image.angle = action.angle;
         if (action.width && action.height) image.setDisplaySize(action.width, action.height);
@@ -51,7 +51,7 @@ class EntityImage {
         image.setInteractive({ draggable: true });
         image.entity = this;
         entityImages.push(image);
-    
+
         image.on('pointerdown', () => {
             //console.log('pointerdown', action);
 
@@ -80,7 +80,7 @@ class EntityImage {
         });
 
         let editedAction: ActionData = {actionId: action.actionId};
-    
+
         scene.input.on('drag', (pointer, gameObject, dragX, dragY) => {
             if (!devModeTools.cursorButton.active || gameObject !== image) return;
             if (this.dragMode === 'position') {
@@ -109,13 +109,13 @@ class EntityImage {
     }
 
     edit (action: ActionData): void {
-        taro.network.send('editInitEntity', action);
+        taro.network.send<any>('editInitEntity', action);
     }
 
     updateOutline (): void {
         const outline = this.devModeTools.outline;
         const image = this.image;
-        
+
 		outline.clear();
 		outline.lineStyle(2, 0x036ffc, 1);
         outline.strokeRect(-image.displayWidth / 2, -image.displayHeight / 2, image.displayWidth, image.displayHeight);
@@ -130,11 +130,11 @@ class EntityImage {
             this.action.position = action.position;
             this.image.x = action.position.x;
             this.image.y = action.position.y;
-        } 
+        }
         if (this.action.angle && action.angle) {
             this.action.angle = action.angle;
             this.image.angle = action.angle;
-        } 
+        }
         if (this.action.width && this.action.height && action.width && action.height) {
             this.action.width = action.width;
             this.action.height = action.height;

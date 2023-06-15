@@ -12,7 +12,7 @@ var TileMarker = /** @class */ (function () {
             this.graphics.strokeRect(0, 0, map.tileWidth, map.tileHeight);
         }
         else {
-            this.graphics.strokeRect(0, 0, TILE_SIZE, TILE_SIZE);
+            this.graphics.strokeRect(0, 0, Constants.TILE_SIZE, Constants.TILE_SIZE);
         }
         this.graphics.setVisible(false);
         if (!palette) {
@@ -26,8 +26,8 @@ var TileMarker = /** @class */ (function () {
         var tileset = data.map.tilesets[0];
         var key = "tiles/".concat(tileset.name);
         var extrudedKey = this.extrudedKey = "extruded-".concat(key);
-        var width = TILE_SIZE;
-        var height = TILE_SIZE;
+        var width = Constants.TILE_SIZE;
+        var height = Constants.TILE_SIZE;
         if (taro.game.data.defaultData.dontResize) {
             width = map.tileWidth;
             height = map.tileHeight;

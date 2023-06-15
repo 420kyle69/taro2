@@ -21,7 +21,7 @@ class TileMarker {
 		if (taro.game.data.defaultData.dontResize) {
 			this.graphics.strokeRect(0, 0, map.tileWidth, map.tileHeight);
 		} else {
-			this.graphics.strokeRect(0, 0, TILE_SIZE, TILE_SIZE);
+			this.graphics.strokeRect(0, 0, Constants.TILE_SIZE, Constants.TILE_SIZE);
 		}
 		this.graphics.setVisible(false);
 
@@ -38,8 +38,8 @@ class TileMarker {
 		const key = `tiles/${tileset.name}`;
 		const extrudedKey = this.extrudedKey = `extruded-${key}`;
 
-		let width = TILE_SIZE;
-		let height = TILE_SIZE;
+		let width = Constants.TILE_SIZE;
+		let height = Constants.TILE_SIZE;
 		if (taro.game.data.defaultData.dontResize) {
 			width = map.tileWidth;
 			height = map.tileHeight;

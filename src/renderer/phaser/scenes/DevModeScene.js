@@ -215,7 +215,7 @@ var DevModeScene = /** @class */ (function (_super) {
             }
         }
     };
-    DevModeScene.prototype.pointerInsideMap = function (pointerX, pointerY, map) {
+    DevModeScene.pointerInsideMap = function (pointerX, pointerY, map) {
         return (0 <= pointerX && pointerX < map.width
             && 0 <= pointerY && pointerY < map.height);
     };

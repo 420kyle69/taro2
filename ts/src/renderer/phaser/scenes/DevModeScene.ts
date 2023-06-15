@@ -51,7 +51,7 @@ class DevModeScene extends PhaserScene {
 			this.leaveMapTab();
 		});
 
-		taro.client.on('editTile', (data: TileData) => {
+		taro.client.on('editTile', (data: TileData<MapEditToolEnum>) => {
 			this.tileEditor.edit(data);
 		});
 
@@ -188,7 +188,7 @@ class DevModeScene extends PhaserScene {
 			}
 		}
 
-        taro.network.send('updateClientInitEntities', true);
+        taro.network.send<any>('updateClientInitEntities', true);
 
 		this.entityImages.forEach((image) => {
 			image.setVisible(true);
@@ -243,7 +243,7 @@ class DevModeScene extends PhaserScene {
         }
     }
 
-	pointerInsideMap(pointerX: number, pointerY: number, map: Phaser.Tilemaps.Tilemap): boolean {
+	static pointerInsideMap(pointerX: number, pointerY: number, map: {width: number, height: number}): boolean {
 		return (0 <= pointerX && pointerX < map.width
 			&& 0 <= pointerY && pointerY < map.height);
 	}
