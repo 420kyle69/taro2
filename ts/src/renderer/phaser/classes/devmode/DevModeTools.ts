@@ -338,13 +338,15 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	}
 
 	brush(): void {
+		if (this.modeButtons[2].active) {
+			return;
+		}
 		if (this.modeButtons[3].active) {
 			this.tileEditor.selectedTileArea = this.tileEditor.lastSelectedTileArea;
 		}
 		this.tileEditor.activateMarkers(true);
 		this.scene.regionEditor.regionTool = false;
 		this.highlightModeButton(2);
-		this.changeShape('rectangle');
 		this.tileEditor.marker.changePreview();
 	}
 

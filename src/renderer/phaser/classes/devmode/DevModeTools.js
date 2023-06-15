@@ -281,13 +281,15 @@ var DevModeTools = /** @class */ (function (_super) {
         this.scene.regionEditor.regionTool = true;
     };
     DevModeTools.prototype.brush = function () {
+        if (this.modeButtons[2].active) {
+            return;
+        }
         if (this.modeButtons[3].active) {
             this.tileEditor.selectedTileArea = this.tileEditor.lastSelectedTileArea;
         }
         this.tileEditor.activateMarkers(true);
         this.scene.regionEditor.regionTool = false;
         this.highlightModeButton(2);
-        this.changeShape('rectangle');
         this.tileEditor.marker.changePreview();
     };
     DevModeTools.prototype.emptyTile = function () {

@@ -14,7 +14,6 @@ var TileEditor = /** @class */ (function () {
         var pointerPosition = { x: 0, y: 0 };
         this.activateMarkers(false);
         this.startDragIn = 'none';
-        var shiftKey = devModeScene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT, false);
         gameScene.input.on('pointerdown', function (p) {
             if (!devModeScene.pointerInsideButtons) {
                 _this.devModeTools.modeButtons.map(function (btn) {
@@ -45,7 +44,7 @@ var TileEditor = /** @class */ (function () {
                 pointerPosition.y = devModeScene.input.activePointer.y;
                 if (!devModeTools.modeButtons[4].active)
                     _this.devModeTools.brush();
-                if (shiftKey.isDown) {
+                if (_this.devModeTools.shiftKey.isDown) {
                     //pass
                 }
                 else {
