@@ -152,14 +152,13 @@ var TileEditor = /** @class */ (function () {
             case 'fill': {
                 var nowValue = dataValue;
                 var oldTile = map.layers[nowValue.layer].data[nowValue.y * width + nowValue.x];
-                this.floodFill(nowValue.layer, oldTile, nowValue.gid, nowValue.x, nowValue.y, true);
+                this.floodFill(nowValue.layer, oldTile, nowValue.gid, nowValue.x, nowValue.y, true, nowValue.limits);
                 break;
             }
             case 'edit': {
                 //save tile change to taro.game.data.map and taro.map.data
                 var nowValue = dataValue;
                 map.layers[dataValue.layer].data[nowValue.y * width + dataValue.x] = dataValue.gid;
-                console.log(nowValue);
                 this.putTiles(nowValue.x, nowValue.y, nowValue.selectedTiles, nowValue.size, nowValue.shape, true);
                 break;
             }
