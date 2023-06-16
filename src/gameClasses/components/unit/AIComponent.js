@@ -261,11 +261,7 @@ var AIComponent = TaroEntity.extend({
 					this.setTargetPosition(this.path[this.path.length - 1].x * taro.map.data.tilewidth + taro.map.data.tilewidth / 2, this.path[this.path.length - 1].y * taro.map.data.tilewidth + taro.map.data.tilewidth / 2);
 				}
 			} else {
-				let triggerParam = {
-					unitId: this._entity.id()
-				}
-				taro.script.trigger('unitAStarPathFindingFailed', triggerParam);
-				this._entity.script.trigger('entityAStarPathFindingFailed', triggerParam);
+				this.onAStarFailedTrigger();
 			}
 		}
 		this.currentAction = 'fight';
@@ -294,12 +290,8 @@ var AIComponent = TaroEntity.extend({
 						return; // already reached, dont move
 					}
 				} else {
-					let triggerParam = {
-						unitId: this._entity.id()
-					}
-					taro.script.trigger('unitAStarPathFindingFailed', triggerParam);
-					this._entity.script.trigger('entityAStarPathFindingFailed', triggerParam);
-					return // dont move if path failed to generate
+					this.onAStarFailedTrigger();
+					return; // dont move if path failed to generate
 				}
 				break;
 		}
@@ -320,7 +312,7 @@ var AIComponent = TaroEntity.extend({
 	* .ok return false if the target location is inside a wall, not reachable
 	*/
 	getAStarPath: function (x, y) {
-		let returnValue = { path: [], ok: false};
+		let returnValue = { path: [], ok: false };
 		let unit = this._entity;
 		let mapData = taro.map.data; // cache the map data for rapid use
 
@@ -446,6 +438,12 @@ var AIComponent = TaroEntity.extend({
 		}
 	},
 
+	onAStarFailedTrigger: function () {
+		let triggerParam = { unitId: this._entity.id() };
+		taro.script.trigger('unitAStarPathFindingFailed', triggerParam);
+		this._entity.script.trigger('entityAStarPathFindingFailed', triggerParam);
+	},
+
 	setTargetUnit: function (unit) {
 		// can't target self!
 		if (unit == this._entity)
@@ -566,11 +564,7 @@ var AIComponent = TaroEntity.extend({
 										this.setTargetPosition(this.path[this.path.length - 1].x * taro.map.data.tilewidth + taro.map.data.tilewidth / 2, this.path[this.path.length - 1].y * taro.map.data.tilewidth + taro.map.data.tilewidth / 2);
 									}
 								} else {
-									let triggerParam = {
-										unitId: this._entity.id()
-									}
-									taro.script.trigger('unitAStarPathFindingFailed', triggerParam);
-									this._entity.script.trigger('entityAStarPathFindingFailed', triggerParam);
+									this.onAStarFailedTrigger();
 								}
 							}
 							if (unit.sensor) {
@@ -582,11 +576,7 @@ var AIComponent = TaroEntity.extend({
 									let aStarResult = this.getAStarPath(targetUnit._translate.x, targetUnit._translate.y);
 									this.path = aStarResult.path; // try to create a new path if the path is empty (Arrived / old path outdated)
 									if (!aStarResult.ok) {
-										let triggerParam = {
-											unitId: this._entity.id()
-										}
-										taro.script.trigger('unitAStarPathFindingFailed', triggerParam);
-										this._entity.script.trigger('entityAStarPathFindingFailed', triggerParam);
+										this.onAStarFailedTrigger();
 									}
 								} else if (this.getDistanceToClosestAStarNode() < mapData.tilewidth / 2) { // Euclidean distance is smaller than half of the tile
 									this.path.pop();
