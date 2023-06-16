@@ -137,29 +137,27 @@ var TileEditor = /** @class */ (function () {
         var map = taro.game.data.map;
         inGameEditor.mapWasEdited && inGameEditor.mapWasEdited();
         var width = map.width;
-        var tileMap = this.gameScene.tilemap;
         var _a = Object.entries(data).map(function (_a) {
             var k = _a[0], v = _a[1];
             var dataType = k;
             var dataValue = v;
             return { dataType: dataType, dataValue: dataValue };
         })[0], dataType = _a.dataType, dataValue = _a.dataValue;
-        if (map.layers.length > 4 && dataValue.layer >= 2)
-            dataValue.layer++;
-        if (JSON.stringify(data) === '{}')
-            throw 'receive {}';
+        var tempLayer = dataValue.layer;
+        if (map.layers.length > 4 && dataValue.layer >= 2) {
+            tempLayer++;
+        }
         switch (dataType) {
             case 'fill': {
                 var nowValue = dataValue;
-                var oldTile = map.layers[nowValue.layer].data[nowValue.y * width + nowValue.x];
+                var oldTile = map.layers[tempLayer].data[nowValue.y * width + nowValue.x];
                 this.floodFill(nowValue.layer, oldTile, nowValue.gid, nowValue.x, nowValue.y, true, nowValue.limits);
                 break;
             }
             case 'edit': {
                 //save tile change to taro.game.data.map and taro.map.data
                 var nowValue = dataValue;
-                map.layers[dataValue.layer].data[nowValue.y * width + dataValue.x] = dataValue.gid;
-                this.putTiles(nowValue.x, nowValue.y, nowValue.selectedTiles, nowValue.size, nowValue.shape, true);
+                this.putTiles(nowValue.x, nowValue.y, nowValue.selectedTiles, nowValue.size, nowValue.shape, nowValue.layer, true);
                 break;
             }
             case 'clear': {
@@ -167,7 +165,7 @@ var TileEditor = /** @class */ (function () {
                 this.clearLayer(nowValue.layer);
             }
         }
-        if (taro.physics && map.layers[dataValue.layer].name === 'walls') {
+        if (taro.physics && map.layers[tempLayer].name === 'walls') {
             //if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
             taro.physics.destroyWalls();
             var mapCopy = taro.scaleMap(_.cloneDeep(map));
@@ -182,20 +180,28 @@ var TileEditor = /** @class */ (function () {
      * @param tileY pointerTileY
      * @param selectedTiles selectedTiles
      * @param brushSize brush's size
+     * @param layer layer
      * @param local is not, it will send command to other client
      */
-    TileEditor.prototype.putTiles = function (tileX, tileY, selectedTiles, brushSize, shape, local) {
+    TileEditor.prototype.putTiles = function (tileX, tileY, selectedTiles, brushSize, shape, layer, local) {
         var map = this.gameScene.tilemap;
         var sample = this.brushArea.calcSample(selectedTiles, brushSize, shape, true);
-        if (this.gameScene.tilemapLayers[map.currentLayerIndex].visible && selectedTiles) {
+        var taroMap = taro.game.data.map;
+        var width = taroMap.width;
+        var tempLayer = layer;
+        if (taroMap.layers.length > 4 && layer >= 2) {
+            tempLayer++;
+        }
+        if (this.gameScene.tilemapLayers[layer].visible && selectedTiles) {
             for (var x = 0; x < brushSize.x; x++) {
                 for (var y = 0; y < brushSize.y; y++) {
                     if (sample[x] && sample[x][y] && DevModeScene.pointerInsideMap(tileX + x, tileY + y, map)) {
                         var index = sample[x][y];
-                        if (index !== (map.getTileAt(tileX + x, tileY + y, true)).index &&
-                            !(index === 0 && map.getTileAt(tileX + x, tileY + y, true).index === -1)) {
-                            map.putTileAt(index, tileX + x, tileY + y);
-                            map.getTileAt(tileX + x, tileY + y, true).tint = 0xffffff;
+                        if (index !== (map.getTileAt(tileX + x, tileY + y, true, layer)).index &&
+                            !(index === 0 && map.getTileAt(tileX + x, tileY + y, true, layer).index === -1)) {
+                            map.putTileAt(index, tileX + x, tileY + y, false, layer);
+                            map.getTileAt(tileX + x, tileY + y, true, layer).tint = 0xffffff;
+                            taroMap.layers[tempLayer].data[(tileY + y) * width + tileX + x] = index;
                         }
                     }
                 }
@@ -205,7 +211,7 @@ var TileEditor = /** @class */ (function () {
             taro.network.send('editTile', {
                 edit: {
                     size: brushSize,
-                    layer: map.currentLayerIndex,
+                    layer: layer,
                     selectedTiles: selectedTiles,
                     x: tileX,
                     y: tileY,
@@ -359,6 +365,7 @@ var TileEditor = /** @class */ (function () {
                             var nowBrushShape_1 = JSON.parse(JSON.stringify(this.brushArea.shape));
                             var sample = JSON.parse(JSON.stringify(this.brushArea.sample));
                             var selectedTiles_1 = JSON.parse(JSON.stringify(this.selectedTileArea));
+                            var nowLayer_1 = map_1.currentLayerIndex;
                             Object.entries(sample).map(function (_a) {
                                 var x = _a[0], obj = _a[1];
                                 Object.entries(obj).map(function (_a) {
@@ -371,17 +378,17 @@ var TileEditor = /** @class */ (function () {
                             });
                             this.commandController.addCommand({
                                 func: function () {
-                                    _this.putTiles(pointerTileX_1, pointerTileY_1, selectedTiles_1, nowBrushSize_1, nowBrushShape_1, false);
+                                    _this.putTiles(pointerTileX_1, pointerTileY_1, selectedTiles_1, nowBrushSize_1, nowBrushShape_1, nowLayer_1, false);
                                 },
                                 undo: function () {
-                                    _this.putTiles(pointerTileX_1, pointerTileY_1, originTileArea_1, nowBrushSize_1, nowBrushShape_1, false);
+                                    _this.putTiles(pointerTileX_1, pointerTileY_1, originTileArea_1, nowBrushSize_1, nowBrushShape_1, nowLayer_1, false);
                                 },
                             });
                         }
                         else if (this.devModeTools.modeButtons[4].active) {
                             var targetTile_1 = this.getTile(pointerTileX_1, pointerTileY_1, map_1);
                             var selectedTile_1 = (_b = Object.values(((_a = Object.values(this.selectedTileArea)) === null || _a === void 0 ? void 0 : _a[0]) || {})) === null || _b === void 0 ? void 0 : _b[0];
-                            if (selectedTile_1 && targetTile_1 !== selectedTile_1 && (map_1.currentLayerIndex === 0 || map_1.currentLayerIndex === 1)) {
+                            if (selectedTile_1 && targetTile_1 !== selectedTile_1 && (targetTile_1 || map_1.currentLayerIndex === 0 || map_1.currentLayerIndex === 1)) {
                                 var nowCommandCount_1 = this.commandController.nowInsertIndex;
                                 var addToLimits_1 = function (v2d) {
                                     setTimeout(function () {
@@ -392,20 +399,21 @@ var TileEditor = /** @class */ (function () {
                                         cache[v2d.x][v2d.y] = 1;
                                     }, 0);
                                 };
+                                var nowLayer_2 = map_1.currentLayerIndex;
                                 this.commandController.addCommand({
                                     func: function () {
-                                        _this.floodFill(map_1.currentLayerIndex, targetTile_1, selectedTile_1, pointerTileX_1, pointerTileY_1, false, [], addToLimits_1);
+                                        _this.floodFill(nowLayer_2, targetTile_1, selectedTile_1, pointerTileX_1, pointerTileY_1, false, {}, addToLimits_1);
                                         taro.network.send('editTile', {
                                             fill: {
-                                                gid: selectedTile_1, layer: map_1.currentLayerIndex, x: pointerTileX_1, y: pointerTileY_1
+                                                gid: selectedTile_1, layer: nowLayer_2, x: pointerTileX_1, y: pointerTileY_1
                                             }
                                         });
                                     },
                                     undo: function () {
-                                        _this.floodFill(map_1.currentLayerIndex, selectedTile_1, targetTile_1, pointerTileX_1, pointerTileY_1, false, _this.commandController.commands[nowCommandCount_1 - _this.commandController.offset].cache);
+                                        _this.floodFill(nowLayer_2, selectedTile_1, targetTile_1, pointerTileX_1, pointerTileY_1, false, _this.commandController.commands[nowCommandCount_1 - _this.commandController.offset].cache);
                                         taro.network.send('editTile', {
                                             fill: {
-                                                gid: targetTile_1, layer: map_1.currentLayerIndex, x: pointerTileX_1, y: pointerTileY_1, limits: _this.commandController.commands[nowCommandCount_1 - _this.commandController.offset].cache
+                                                gid: targetTile_1, layer: nowLayer_2, x: pointerTileX_1, y: pointerTileY_1, limits: _this.commandController.commands[nowCommandCount_1 - _this.commandController.offset].cache
                                             }
                                         });
                                     },
