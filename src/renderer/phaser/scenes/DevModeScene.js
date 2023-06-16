@@ -248,6 +248,8 @@ var DevModeScene = /** @class */ (function (_super) {
     DevModeScene.prototype.update = function () {
         if (this.tileEditor)
             this.tileEditor.update();
+        if (this.devModeTools.entityEditor)
+            this.devModeTools.entityEditor.update();
     };
     DevModeScene.prototype.updateInitEntities = function () {
         var _this = this;

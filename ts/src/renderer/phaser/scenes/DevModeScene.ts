@@ -280,6 +280,7 @@ class DevModeScene extends PhaserScene {
 
 	update (): void {
 		if (this.tileEditor) this.tileEditor.update();
+        if (this.devModeTools.entityEditor) this.devModeTools.entityEditor.update();
 	}
 
     updateInitEntities(): void {
