@@ -12,6 +12,7 @@ var AIComponent = TaroEntity.extend({
 
 		// A* algorithm variables
 		self.path = []; // AI unit will keep going to highest index until there is no more node to go
+		// everytime when path generate failure, path should set to empty array (this.path = aStarResult.path automatically done for it)
 
 		// AI settings
 
@@ -253,9 +254,18 @@ var AIComponent = TaroEntity.extend({
 			this.previousPosition = { x: this._entity._translate.x, y: this._entity._translate.y };
 		}
 		if (this.pathFindingMethod == 'a*') {
-			this.path = this.getAStarPath(unit._translate.x, unit._translate.y);
-			if (this.path.length > 0) {
-				this.setTargetPosition(this.path[this.path.length - 1].x * taro.map.data.tilewidth + taro.map.data.tilewidth / 2, this.path[this.path.length - 1].y * taro.map.data.tilewidth + taro.map.data.tilewidth / 2);
+			let aStarResult = this.getAStarPath(unit._translate.x, unit._translate.y);
+			this.path = aStarResult.path;
+			if (aStarResult.ok) {
+				if (this.path.length > 0) {
+					this.setTargetPosition(this.path[this.path.length - 1].x * taro.map.data.tilewidth + taro.map.data.tilewidth / 2, this.path[this.path.length - 1].y * taro.map.data.tilewidth + taro.map.data.tilewidth / 2);
+				}
+			} else {
+				let triggerParam = {
+					unitId: this._entity.id()
+				}
+				taro.script.trigger('unitAStarPathFindingFailed', triggerParam);
+				this._entity.script.trigger('entityAStarPathFindingFailed', triggerParam);
 			}
 		}
 		this.currentAction = 'fight';
@@ -275,11 +285,21 @@ var AIComponent = TaroEntity.extend({
 				this.setTargetPosition(x, y);
 				break;
 			case 'a*':
-				this.path = this.getAStarPath(x, y);
-				if (this.path.length > 0) {
-					this.setTargetPosition(this.path[this.path.length - 1].x * taro.map.data.tilewidth + taro.map.data.tilewidth / 2, this.path[this.path.length - 1].y * taro.map.data.tilewidth + taro.map.data.tilewidth / 2);
+				let aStarResult = this.getAStarPath(x, y);
+				this.path = aStarResult.path;
+				if (aStarResult.ok) {
+					if (this.path.length > 0) {
+						this.setTargetPosition(this.path[this.path.length - 1].x * taro.map.data.tilewidth + taro.map.data.tilewidth / 2, this.path[this.path.length - 1].y * taro.map.data.tilewidth + taro.map.data.tilewidth / 2);
+					} else {
+						return; // already reached, dont move
+					}
 				} else {
-					return; // dont move if path failed to generate
+					let triggerParam = {
+						unitId: this._entity.id()
+					}
+					taro.script.trigger('unitAStarPathFindingFailed', triggerParam);
+					this._entity.script.trigger('entityAStarPathFindingFailed', triggerParam);
+					return // dont move if path failed to generate
 				}
 				break;
 		}
@@ -291,11 +311,16 @@ var AIComponent = TaroEntity.extend({
 	/*
 	* @param x
 	* @param y
-	* @return {Array}
-	* Return array with x and y coordinates of the path (Start node exclusive)
-	* if the target location is inside a wall, not reachable, or the unit already at the target location, return empty array
+	* @return .path = {Array}, .ok = {bool}
+	* Use .path to get return array with x and y coordinates of the path (Start node exclusive) 
+	* if the unit already at the target location, .path return empty array
+	* 
+	* Use .ok to check if path correctly generated 
+	* .ok return true if .path is found or the unit already at the target location
+	* .ok return false if the target location is inside a wall, not reachable
 	*/
 	getAStarPath: function (x, y) {
+		let returnValue = { path: [], ok: false};
 		let unit = this._entity;
 		let mapData = taro.map.data; // cache the map data for rapid use
 
@@ -311,7 +336,7 @@ var AIComponent = TaroEntity.extend({
 		let closeList = []; // store grid nodes that finished evaluation
 		let tempPath = []; // store path to return (smaller index: closer to target, larger index: closer to start)
 		if (wallMap[targetTilePosition.x + targetTilePosition.y * mapData.width] == 1) { // teminate if the target position is wall
-			return [];
+			return returnValue;
 		}
 		openList.push(_.cloneDeep({current: unitTilePosition, parent: {x: -1, y: -1}, totalHeuristic: 0})); // push start node to open List
 		while (openList.length > 0) {
@@ -404,7 +429,7 @@ var AIComponent = TaroEntity.extend({
 			}
 		}
 		if (tempPath.length == 0) { // goal is unreachable
-			return [];
+			return returnValue;
 		} else {
 			while (tempPath[tempPath.length - 1].x != unitTilePosition.x || tempPath[tempPath.length - 1].y != unitTilePosition.y) { // retrieve the path
 				for (let i = 0; i < closeList.length; i++) {
@@ -415,7 +440,9 @@ var AIComponent = TaroEntity.extend({
 				}
 			}
 			tempPath.pop(); // omit start tile, no need to step on it again as we are on it already
-			return tempPath;
+			returnValue.path = tempPath;
+			returnValue.ok = true;
+			return returnValue;
 		}
 	},
 
@@ -532,9 +559,18 @@ var AIComponent = TaroEntity.extend({
 							unit.ability.stopUsingItem();
 							unit.startMoving();
 							if (this.pathFindingMethod == 'a*') {
-								this.path = this.getAStarPath(targetUnit._translate.x, targetUnit._translate.y); // recalculate the moving path to chase
-								if (this.path.length > 0) {
-									this.setTargetPosition(this.path[this.path.length - 1].x * taro.map.data.tilewidth + taro.map.data.tilewidth / 2, this.path[this.path.length - 1].y * taro.map.data.tilewidth + taro.map.data.tilewidth / 2);
+								let aStarResult = this.getAStarPath(targetUnit._translate.x, targetUnit._translate.y); // recalculate the moving path to chase
+								this.path = aStarResult.path;
+								if (aStarResult.ok) {
+									if (this.path.length > 0) {
+										this.setTargetPosition(this.path[this.path.length - 1].x * taro.map.data.tilewidth + taro.map.data.tilewidth / 2, this.path[this.path.length - 1].y * taro.map.data.tilewidth + taro.map.data.tilewidth / 2);
+									}
+								} else {
+									let triggerParam = {
+										unitId: this._entity.id()
+									}
+									taro.script.trigger('unitAStarPathFindingFailed', triggerParam);
+									this._entity.script.trigger('entityAStarPathFindingFailed', triggerParam);
 								}
 							}
 							if (unit.sensor) {
@@ -543,7 +579,15 @@ var AIComponent = TaroEntity.extend({
 						} else {
 							if (this.pathFindingMethod == 'a*') {
 								if (this.path.length == 0) { // A* path is updated once in attackUnit
-									this.path = this.getAStarPath(targetUnit._translate.x, targetUnit._translate.y); // try to create a new path if the path is empty (Arrived / old path outdated)
+									let aStarResult = this.getAStarPath(targetUnit._translate.x, targetUnit._translate.y);
+									this.path = aStarResult.path; // try to create a new path if the path is empty (Arrived / old path outdated)
+									if (!aStarResult.ok) {
+										let triggerParam = {
+											unitId: this._entity.id()
+										}
+										taro.script.trigger('unitAStarPathFindingFailed', triggerParam);
+										this._entity.script.trigger('entityAStarPathFindingFailed', triggerParam);
+									}
 								} else if (this.getDistanceToClosestAStarNode() < mapData.tilewidth / 2) { // Euclidean distance is smaller than half of the tile
 									this.path.pop();
 								}
