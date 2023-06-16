@@ -11,7 +11,7 @@ class EntityEditor {
                 id: 'ROrWqytd2r',
                 player: 'AI resources',
                 entityType: 'unitTypes'
-            }*/inGameEditor.getActiveEntity();
+            }*/ inGameEditor.getActiveEntity && inGameEditor.getActiveEntity();
             if (this.activeEntityPlacement && entityData) {
                 const worldPoint = gameScene.cameras.main.getWorldPoint(this.gameScene.input.activePointer.x, this.gameScene.input.activePointer.y);
                 const entity = taro.game.data[entityData.entityType][entityData.id]

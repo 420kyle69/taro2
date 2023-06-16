@@ -8,7 +8,7 @@ var EntityEditor = /** @class */ (function () {
                 id: 'ROrWqytd2r',
                 player: 'AI resources',
                 entityType: 'unitTypes'
-            }*/ inGameEditor.getActiveEntity();
+            }*/ inGameEditor.getActiveEntity && inGameEditor.getActiveEntity();
             if (_this.activeEntityPlacement && entityData) {
                 var worldPoint = gameScene.cameras.main.getWorldPoint(_this.gameScene.input.activePointer.x, _this.gameScene.input.activePointer.y);
                 var entity = taro.game.data[entityData.entityType][entityData.id];
