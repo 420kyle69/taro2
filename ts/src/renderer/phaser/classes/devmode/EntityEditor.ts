@@ -8,18 +8,44 @@ class EntityEditor {
 	) {
 		gameScene.input.on('pointerdown', (p) => {
             const entityData = /*{
-                id: 'ROrWqytd2r',
+                id: 'uNdbzdXKIs',
                 player: 'AI resources',
-                entityType: 'unitTypes'
-            }*/ inGameEditor.getActiveEntity && inGameEditor.getActiveEntity();
+                entityType: 'itemTypes'
+            }*/ 
+            inGameEditor.getActiveEntity && inGameEditor.getActiveEntity();
             if (this.activeEntityPlacement && entityData) {
                 const worldPoint = gameScene.cameras.main.getWorldPoint(this.gameScene.input.activePointer.x, this.gameScene.input.activePointer.y);
                 const entity = taro.game.data[entityData.entityType][entityData.id]
                 let actionType;
+                let height;
+                let width;
                 if (entityData.entityType === 'unitTypes') {
                     actionType = 'createEntityForPlayerAtPositionWithDimensions';
-                } else {
+                    if (entity.bodies?.default) {
+                        height = entity.bodies.default.height;
+                        width = entity.bodies.default.width;
+                    } else {
+                        console.log('no default body for unit', entityData.id);
+                        return;
+                    }
+                } else if (entityData.entityType === 'itemTypes') {
                     actionType = 'createEntityAtPositionWithDimensions';
+                    if (entity.bodies?.dropped) {
+                        height = entity.bodies.dropped.height;
+                        width = entity.bodies.dropped.width;
+                    } else {
+                        console.log('no dropped body for item', entityData.id);
+                        return;
+                    }
+                } else if (entityData.entityType === 'projectileTypes') {
+                    actionType = 'createEntityAtPositionWithDimensions';
+                    if (entity.bodies?.default) {
+                        height = entity.bodies.default.height;
+                        width = entity.bodies.default.width;
+                    } else {
+                        console.log('no default body for projectile', entityData.id);
+                        return;
+                    }
                 }
 
                 const action: ActionData = {
@@ -31,8 +57,8 @@ class EntityEditor {
                         x: worldPoint.x,
                         y: worldPoint.y
                     },
-                    width: entity.bodies.default.width,
-                    height: entity.bodies.default.height,
+                    width: width,
+                    height: height,
                     angle: 0,
                     actionId: taro.newIdHex()
                 }

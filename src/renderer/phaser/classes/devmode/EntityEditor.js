@@ -4,20 +4,50 @@ var EntityEditor = /** @class */ (function () {
         this.gameScene = gameScene;
         this.devModeTools = devModeTools;
         gameScene.input.on('pointerdown', function (p) {
+            var _a, _b, _c;
             var entityData = /*{
-                id: 'ROrWqytd2r',
+                id: 'uNdbzdXKIs',
                 player: 'AI resources',
-                entityType: 'unitTypes'
+                entityType: 'itemTypes'
             }*/ inGameEditor.getActiveEntity && inGameEditor.getActiveEntity();
             if (_this.activeEntityPlacement && entityData) {
                 var worldPoint = gameScene.cameras.main.getWorldPoint(_this.gameScene.input.activePointer.x, _this.gameScene.input.activePointer.y);
                 var entity = taro.game.data[entityData.entityType][entityData.id];
                 var actionType = void 0;
+                var height = void 0;
+                var width = void 0;
                 if (entityData.entityType === 'unitTypes') {
                     actionType = 'createEntityForPlayerAtPositionWithDimensions';
+                    if ((_a = entity.bodies) === null || _a === void 0 ? void 0 : _a.default) {
+                        height = entity.bodies.default.height;
+                        width = entity.bodies.default.width;
+                    }
+                    else {
+                        console.log('no default body for unit', entityData.id);
+                        return;
+                    }
                 }
-                else {
+                else if (entityData.entityType === 'itemTypes') {
                     actionType = 'createEntityAtPositionWithDimensions';
+                    if ((_b = entity.bodies) === null || _b === void 0 ? void 0 : _b.dropped) {
+                        height = entity.bodies.dropped.height;
+                        width = entity.bodies.dropped.width;
+                    }
+                    else {
+                        console.log('no dropped body for item', entityData.id);
+                        return;
+                    }
+                }
+                else if (entityData.entityType === 'projectileTypes') {
+                    actionType = 'createEntityAtPositionWithDimensions';
+                    if ((_c = entity.bodies) === null || _c === void 0 ? void 0 : _c.default) {
+                        height = entity.bodies.default.height;
+                        width = entity.bodies.default.width;
+                    }
+                    else {
+                        console.log('no default body for projectile', entityData.id);
+                        return;
+                    }
                 }
                 var action = {
                     type: actionType,
@@ -28,8 +58,8 @@ var EntityEditor = /** @class */ (function () {
                         x: worldPoint.x,
                         y: worldPoint.y
                     },
-                    width: entity.bodies.default.width,
-                    height: entity.bodies.default.height,
+                    width: width,
+                    height: height,
                     angle: 0,
                     actionId: taro.newIdHex()
                 };
