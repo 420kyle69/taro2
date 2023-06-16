@@ -61,11 +61,16 @@ class DevModeScene extends PhaserScene {
 		});
 
         taro.client.on('editInitEntity', (data: ActionData) => {
+            let found = false;
             this.entityImages.forEach((image) => {
                 if (image.entity.action.actionId === data.actionId) {
+                    found = true;
                     image.entity.update(data);
                 }
             });
+            if (!found) {
+                this.createEntityImage(data);
+            }
 		});
 
         taro.client.on('updateInitEntities', () => {
@@ -278,11 +283,19 @@ class DevModeScene extends PhaserScene {
 	}
 
     updateInitEntities(): void {
-        this.entityImages.forEach((image) => {
-            taro.developerMode.initEntities.forEach((action) =>{
-                if (image.entity.action.actionId === action.actionId) image.entity.update(action);
+        taro.developerMode.initEntities.forEach((action) => {
+            let found = false;
+            this.entityImages.forEach((image) => {
+                if (image.entity.action.actionId === action.actionId) {
+                    found = true;
+                    image.entity.update(action);
+                }
             });
+            if (!found) {
+                this.createEntityImage(action);
+            }
         });
+
     }
 
 }

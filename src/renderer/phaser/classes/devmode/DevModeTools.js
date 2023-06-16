@@ -23,6 +23,7 @@ var DevModeTools = /** @class */ (function (_super) {
         var palette = _this.palette = new TilePalette(_this.scene, _this.scene.tileset, _this.scene.rexUI);
         _this.tileEditor = new TileEditor(_this.scene.gameScene, _this.scene, _this);
         _this.regionEditor = new RegionEditor(_this.scene.gameScene, _this.scene, _this);
+        _this.entityEditor = new EntityEditor(_this.scene.gameScene, _this.scene, _this);
         _this.gameEditorWidgets = [];
         _this.keyBindings();
         _this.COLOR_PRIMARY = palette.COLOR_PRIMARY;
@@ -69,7 +70,7 @@ var DevModeTools = /** @class */ (function (_super) {
         _this.palette.hide();
         _this.toolButtonsContainer.setVisible(false);
         _this.regionEditor.hideRegions();
-        _this.activateEntities(false);
+        _this.entityEditor.activatePlacement(false);
         var ctrlKey = _this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CTRL, false);
         _this.scene.input.on('pointermove', function (p) {
             if (taro.developerMode.active && taro.developerMode.activeTab !== 'play' && scene.tileEditor.startDragIn !== 'palette' && (p.rightButtonDown() || (p.isDown && ctrlKey.isDown))) {
@@ -241,17 +242,17 @@ var DevModeTools = /** @class */ (function (_super) {
         this.highlightModeButton(0);
         this.scene.regionEditor.regionTool = false;
         this.tileEditor.activateMarkers(false);
-        this.activateEntities(false);
+        this.entityEditor.activatePlacement(false);
     };
     DevModeTools.prototype.addEntities = function () {
         this.highlightModeButton(7);
         this.scene.regionEditor.regionTool = false;
         this.tileEditor.activateMarkers(false);
-        this.activateEntities(true);
+        this.entityEditor.activatePlacement(true);
     };
     DevModeTools.prototype.drawRegion = function () {
         this.tileEditor.activateMarkers(false);
-        this.activateEntities(false);
+        this.entityEditor.activatePlacement(false);
         this.highlightModeButton(1);
         this.scene.regionEditor.regionTool = true;
     };
@@ -261,7 +262,7 @@ var DevModeTools = /** @class */ (function (_super) {
             this.tileEditor.selectedTileArea = this.tileEditor.lastSelectedTileArea;
         }
         this.tileEditor.activateMarkers(true);
-        this.activateEntities(false);
+        this.entityEditor.activatePlacement(false);
         this.tileEditor.marker.changePreview();
         this.scene.regionEditor.regionTool = false;
         this.highlightModeButton(2);
@@ -273,7 +274,7 @@ var DevModeTools = /** @class */ (function (_super) {
             this.tileEditor.selectedTile = -1;
             this.tileEditor.selectedTileArea = [[-1, -1], [-1, -1]];
             this.tileEditor.activateMarkers(true);
-            this.activateEntities(false);
+            this.entityEditor.activatePlacement(false);
             this.tileEditor.marker.changePreview();
             this.scene.regionEditor.regionTool = false;
             this.highlightModeButton(3);
@@ -285,7 +286,7 @@ var DevModeTools = /** @class */ (function (_super) {
             this.tileEditor.selectedTileArea = this.tileEditor.lastSelectedTileArea;
         }
         this.tileEditor.activateMarkers(true);
-        this.activateEntities(false);
+        this.entityEditor.activatePlacement(false);
         this.tileEditor.marker.changePreview();
         this.scene.regionEditor.regionTool = false;
         this.selectSingle();
@@ -313,7 +314,7 @@ var DevModeTools = /** @class */ (function (_super) {
         this.brushButtons[0].highlight('active');
         this.brushButtons[1].highlight('no');
         this.tileEditor.activateMarkers(true);
-        this.activateEntities(false);
+        this.entityEditor.activatePlacement(false);
         this.tileEditor.marker.changePreview();
         this.tileEditor.paletteMarker.changePreview();
         if (!this.modeButtons[3].active) {
@@ -326,7 +327,7 @@ var DevModeTools = /** @class */ (function (_super) {
         this.brushButtons[1].highlight('active');
         this.brushButtons[0].highlight('no');
         this.tileEditor.activateMarkers(true);
-        this.activateEntities(false);
+        this.entityEditor.activatePlacement(false);
         this.tileEditor.marker.changePreview();
         this.tileEditor.paletteMarker.changePreview();
         if (!this.modeButtons[3].active) {
@@ -376,22 +377,6 @@ var DevModeTools = /** @class */ (function (_super) {
             this.layerHideButtons[value].hidden = false;
             this.layerHideButtons[value].highlight('no');
             tilemapLayers[value].setVisible(true);
-        }
-    };
-    DevModeTools.prototype.activateEntities = function (active) {
-        if (active) {
-            //show entities list
-            inGameEditor.toggleEntityPlacementWindow(true);
-            if (!this.paletteButton.hidden) {
-                this.palette.toggle();
-            }
-        }
-        else {
-            //hide entities list
-            inGameEditor.toggleEntityPlacementWindow(false);
-            if (this.paletteButton.hidden) {
-                this.palette.toggle();
-            }
         }
     };
     return DevModeTools;

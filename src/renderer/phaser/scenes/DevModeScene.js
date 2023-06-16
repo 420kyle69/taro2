@@ -49,11 +49,16 @@ var DevModeScene = /** @class */ (function (_super) {
             _this.regionEditor.edit(data);
         });
         taro.client.on('editInitEntity', function (data) {
+            var found = false;
             _this.entityImages.forEach(function (image) {
                 if (image.entity.action.actionId === data.actionId) {
+                    found = true;
                     image.entity.update(data);
                 }
             });
+            if (!found) {
+                _this.createEntityImage(data);
+            }
         });
         taro.client.on('updateInitEntities', function () {
             _this.updateInitEntities();
@@ -245,11 +250,18 @@ var DevModeScene = /** @class */ (function (_super) {
             this.tileEditor.update();
     };
     DevModeScene.prototype.updateInitEntities = function () {
-        this.entityImages.forEach(function (image) {
-            taro.developerMode.initEntities.forEach(function (action) {
-                if (image.entity.action.actionId === action.actionId)
+        var _this = this;
+        taro.developerMode.initEntities.forEach(function (action) {
+            var found = false;
+            _this.entityImages.forEach(function (image) {
+                if (image.entity.action.actionId === action.actionId) {
+                    found = true;
                     image.entity.update(action);
+                }
             });
+            if (!found) {
+                _this.createEntityImage(action);
+            }
         });
     };
     return DevModeScene;

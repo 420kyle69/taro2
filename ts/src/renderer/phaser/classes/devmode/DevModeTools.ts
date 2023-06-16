@@ -3,6 +3,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	public palette: TilePalette;
 	public tileEditor: TileEditor;
 	public regionEditor: RegionEditor;
+    public entityEditor: EntityEditor;
 	public gameEditorWidgets: Array<DOMRect>;
 
 	cursorButton: DevToolButton;
@@ -27,7 +28,8 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	shiftKey: Phaser.Input.Keyboard.Key;
 
     outline: Phaser.GameObjects.Graphics;
-	
+    activeEntityPlacement: boolean;
+    
 	constructor(
 		public scene: DevModeScene,
 	) {
@@ -36,6 +38,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		const palette = this.palette = new TilePalette(this.scene, this.scene.tileset, this.scene.rexUI)
 		this.tileEditor = new TileEditor(this.scene.gameScene, this.scene, this);
 		this.regionEditor = new RegionEditor(this.scene.gameScene, this.scene, this);
+        this.entityEditor = new EntityEditor(this.scene.gameScene, this.scene, this);
 		this.gameEditorWidgets = [];
 
 		this.keyBindings();
@@ -117,7 +120,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.palette.hide();
 		this.toolButtonsContainer.setVisible(false);
 		this.regionEditor.hideRegions();
-        this.activateEntities(false);
+        this.entityEditor.activatePlacement(false);
 
 		const ctrlKey = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CTRL, false);
 
@@ -293,19 +296,19 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.highlightModeButton(0);
 		this.scene.regionEditor.regionTool = false;
 		this.tileEditor.activateMarkers(false);
-        this.activateEntities(false);
+        this.entityEditor.activatePlacement(false);
 	}
 
     addEntities(): void {
         this.highlightModeButton(7);
         this.scene.regionEditor.regionTool = false;
         this.tileEditor.activateMarkers(false);
-        this.activateEntities(true);
+        this.entityEditor.activatePlacement(true);
     }
 
 	drawRegion(): void {
 		this.tileEditor.activateMarkers(false);
-        this.activateEntities(false);
+        this.entityEditor.activatePlacement(false);
 		this.highlightModeButton(1);
 		this.scene.regionEditor.regionTool = true;
 	}
@@ -316,7 +319,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 			this.tileEditor.selectedTileArea = this.tileEditor.lastSelectedTileArea;
 		}
 		this.tileEditor.activateMarkers(true);
-        this.activateEntities(false);
+        this.entityEditor.activatePlacement(false);
 		this.tileEditor.marker.changePreview();
 		this.scene.regionEditor.regionTool = false;
 		this.highlightModeButton(2);
@@ -329,7 +332,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 			this.tileEditor.selectedTile = -1;
 			this.tileEditor.selectedTileArea = [[-1, -1],[-1, -1]];
 			this.tileEditor.activateMarkers(true);
-            this.activateEntities(false);
+            this.entityEditor.activatePlacement(false);
 			this.tileEditor.marker.changePreview();
 			this.scene.regionEditor.regionTool = false;
 			this.highlightModeButton(3);
@@ -342,7 +345,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 			this.tileEditor.selectedTileArea = this.tileEditor.lastSelectedTileArea;
 		}
 		this.tileEditor.activateMarkers(true);
-        this.activateEntities(false);
+        this.entityEditor.activatePlacement(false);
 		this.tileEditor.marker.changePreview();
 		this.scene.regionEditor.regionTool = false;
 		this.selectSingle();
@@ -372,7 +375,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.brushButtons[0].highlight('active');
 		this.brushButtons[1].highlight('no');
 		this.tileEditor.activateMarkers(true);
-        this.activateEntities(false);
+        this.entityEditor.activatePlacement(false);
 		this.tileEditor.marker.changePreview();
 		this.tileEditor.paletteMarker.changePreview();
 		if (!this.modeButtons[3].active) {
@@ -386,7 +389,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.brushButtons[1].highlight('active');
 		this.brushButtons[0].highlight('no');
 		this.tileEditor.activateMarkers(true);
-        this.activateEntities(false);
+        this.entityEditor.activatePlacement(false);
 		this.tileEditor.marker.changePreview();
 		this.tileEditor.paletteMarker.changePreview();
 		if (!this.modeButtons[3].active) {
@@ -440,22 +443,4 @@ class DevModeTools extends Phaser.GameObjects.Container {
 			tilemapLayers[value].setVisible(true);
 		}
 	}
-
-    activateEntities(active: boolean): void {
-        if (active) {
-            //show entities list
-			inGameEditor.toggleEntityPlacementWindow(true);
-
-            if (!this.paletteButton.hidden) {
-                this.palette.toggle();
-            }
-        } else {
-            //hide entities list
-			inGameEditor.toggleEntityPlacementWindow(false);
-
-            if (this.paletteButton.hidden) {
-                this.palette.toggle();
-            }
-        }
-    }
 }
