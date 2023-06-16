@@ -21,6 +21,7 @@ class EntityEditor {
                 } else {
                     actionType = 'createEntityAtPositionWithDimensions';
                 }
+
                 const action: ActionData = {
                     type: actionType,
                     entity: entityData.id,
@@ -51,7 +52,7 @@ class EntityEditor {
         if (active) {
             //show entities list
             this.activeEntityPlacement = true;
-			inGameEditor.toggleEntityPlacementWindow(true);
+			inGameEditor.toggleEntityPlacementWindow && inGameEditor.toggleEntityPlacementWindow(true);
 
             if (!this.devModeTools.paletteButton.hidden) {
                 this.devModeTools.palette.toggle();
@@ -59,7 +60,7 @@ class EntityEditor {
         } else {
             //hide entities list
             this.activeEntityPlacement = false;
-			inGameEditor.toggleEntityPlacementWindow(false);
+			inGameEditor.toggleEntityPlacementWindow && inGameEditor.toggleEntityPlacementWindow(false);
 
             if (this.devModeTools.paletteButton.hidden) {
                 this.devModeTools.palette.toggle();

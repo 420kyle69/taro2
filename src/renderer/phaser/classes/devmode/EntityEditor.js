@@ -48,7 +48,7 @@ var EntityEditor = /** @class */ (function () {
         if (active) {
             //show entities list
             this.activeEntityPlacement = true;
-            inGameEditor.toggleEntityPlacementWindow(true);
+            inGameEditor.toggleEntityPlacementWindow && inGameEditor.toggleEntityPlacementWindow(true);
             if (!this.devModeTools.paletteButton.hidden) {
                 this.devModeTools.palette.toggle();
             }
@@ -56,7 +56,7 @@ var EntityEditor = /** @class */ (function () {
         else {
             //hide entities list
             this.activeEntityPlacement = false;
-            inGameEditor.toggleEntityPlacementWindow(false);
+            inGameEditor.toggleEntityPlacementWindow && inGameEditor.toggleEntityPlacementWindow(false);
             if (this.devModeTools.paletteButton.hidden) {
                 this.devModeTools.palette.toggle();
             }
