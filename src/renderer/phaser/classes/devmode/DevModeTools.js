@@ -77,6 +77,8 @@ var DevModeTools = /** @class */ (function (_super) {
         _this.layerHideButtons.push(new DevToolButton(_this, '', 'Layer visibility (shift-1)', 'show/hide floor layer', 'eyeopen', 0, (h + s) * 10, h * 2 - 25, toolButtonsContainer, _this.hideLayer.bind(_this), 0), new DevToolButton(_this, '', 'Layer visibility (shift-2)', 'show/hide floor 2 layer', 'eyeopen', 0, (h + s) * 9, h * 2 - 25, toolButtonsContainer, _this.hideLayer.bind(_this), 1), new DevToolButton(_this, '', 'Layer visibility (shift-3)', 'show/hide walls layer', 'eyeopen', 0, (h + s) * 8, h * 2 - 25, toolButtonsContainer, _this.hideLayer.bind(_this), 2), new DevToolButton(_this, '', 'Layer visibility (shift-4)', 'show/hide trees layer', 'eyeopen', 0, (h + s) * 7, h * 2 - 25, toolButtonsContainer, _this.hideLayer.bind(_this), 3));
         _this.layerHideButtons[0].highlight('active');
         _this.layerHideButtons[0].increaseSize(true);
+        var toolButton = [];
+        toolButton.push(new DevToolButton(_this, 'undo', 'undo', 'undo(ctrl-z)', 'undo', 0, (h + s) * 5, h * 2 - s, toolButtonsContainer, _this.commandController.undo.bind(_this.commandController)), new DevToolButton(_this, 'redo', 'redo', 'redo(ctrl-shift-z | ctrl-y', 'redo', h * 2, (h + s) * 5, h * 2 - s, toolButtonsContainer, _this.commandController.redo.bind(_this.commandController)));
         _this.paletteButton = new DevToolButton(_this, 'palette', 'Palette', 'show/hide palette', null, 0, (h + s) * 12, h * 4, toolButtonsContainer, palette.toggle.bind(palette));
         _this.tooltip = new DevTooltip(_this.scene);
         _this.palette.hide();
@@ -260,7 +262,12 @@ var DevModeTools = /** @class */ (function (_super) {
         var undoKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z, false, true);
         undoKey.on('down', function (event) {
             if (event.ctrlKey) {
-                _this.commandController.undo();
+                if (event.shiftKey) {
+                    _this.commandController.redo();
+                }
+                else {
+                    _this.commandController.undo();
+                }
             }
         });
         var redoKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Y, false, true);

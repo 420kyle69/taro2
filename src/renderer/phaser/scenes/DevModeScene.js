@@ -107,6 +107,8 @@ var DevModeScene = /** @class */ (function (_super) {
         this.load.image('fill', 'https://cache.modd.io/asset/spriteImage/1675428550006_fill_(1).png');
         this.load.image('clear', 'https://cache.modd.io/asset/spriteImage/1681917489086_layerClear.png');
         this.load.image('save', 'https://cache.modd.io/asset/spriteImage/1681916834218_saveIcon.png');
+        this.load.image('redo', 'https://cache.modd.io/asset/spriteImage/1686899810953_redo.png');
+        this.load.image('undo', 'https://cache.modd.io/asset/spriteImage/1686899853748_undo.png');
         this.load.scenePlugin('rexuiplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js', 
         //'src/renderer/phaser/rexuiplugin.min.js',
         'rexUI', 'rexUI');

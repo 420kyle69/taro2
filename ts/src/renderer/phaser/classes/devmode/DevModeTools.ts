@@ -123,6 +123,12 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.layerHideButtons[0].increaseSize(true);
 
 
+		const toolButton = [];
+		toolButton.push(
+			new DevToolButton(this, 'undo', 'undo', 'undo(ctrl-z)', 'undo', 0, (h + s) * 5, h * 2 - s, toolButtonsContainer, this.commandController.undo.bind(this.commandController)),
+			new DevToolButton(this, 'redo', 'redo', 'redo(ctrl-shift-z | ctrl-y', 'redo', h * 2, (h + s) * 5, h * 2 - s, toolButtonsContainer, this.commandController.redo.bind(this.commandController))
+		);
+
 		this.paletteButton = new DevToolButton(this, 'palette', 'Palette', 'show/hide palette', null, 0, (h + s) * 12, h * 4, toolButtonsContainer, palette.toggle.bind(palette));
 
 		this.tooltip = new DevTooltip(this.scene);
@@ -313,7 +319,11 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		const undoKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z, false, true);
 		undoKey.on('down', (event) => {
 			if (event.ctrlKey) {
-				this.commandController.undo();
+				if (event.shiftKey) {
+					this.commandController.redo();
+				} else {
+					this.commandController.undo();
+				}
 			}
 		});
 		const redoKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Y, false, true);
