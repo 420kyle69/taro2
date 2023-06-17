@@ -1,6 +1,7 @@
 class EntityEditor {
     activeEntityPlacement: boolean;
     preview: Phaser.GameObjects.Image;
+    activeEntity: { id: string; player: string; entityType: string; };
 
 	constructor (
         private gameScene: GameScene, 
@@ -8,23 +9,28 @@ class EntityEditor {
 		private devModeTools: DevModeTools
 	) {
         this.preview = this.gameScene.add.image(0, 0, null, 0);
-        this.preview.setAlpha(0.75);
-        this.updatePreview();
+        this.preview.setAlpha(0.75).setVisible(false);
 
+        /*
+        this.activeEntity = {
+            id: 'ROrWqytd2r',
+            player: 'AI resources',
+            entityType: 'unitTypes'
+        }
+        this.updatePreview();
+        */
+        
         taro.client.on('updateActiveEntity', () => {
+            this.activeEntity = inGameEditor.getActiveEntity && inGameEditor.getActiveEntity();
 			this.updatePreview();
 		});
 
 		gameScene.input.on('pointerdown', (p) => {
-            const entityData = {
-                id: 'uNdbzdXKIs',
-                player: 'AI resources',
-                entityType: 'itemTypes'
-            }
-            //inGameEditor.getActiveEntity && inGameEditor.getActiveEntity();
+            if (!p.leftButtonDown()) return;
+            const entityData = this.activeEntity;
             if (this.activeEntityPlacement && entityData) {
                 const worldPoint = gameScene.cameras.main.getWorldPoint(this.gameScene.input.activePointer.x, this.gameScene.input.activePointer.y);
-                const entity = taro.game.data[entityData.entityType][entityData.id];
+                const entity = taro.game.data[entityData.entityType] && taro.game.data[entityData.entityType][entityData.id];
                 let actionType;
                 let height;
                 let width;
@@ -104,20 +110,19 @@ class EntityEditor {
     }
 
     updatePreview(): void {
-        const entityData = {
-            id: 'uNdbzdXKIs',
-            player: 'AI resources',
-            entityType: 'itemTypes'
+        const entityData = this.activeEntity;
+        if (!entityData) {
+            this.preview.setVisible(false);
+            return;
         }
-        //inGameEditor.getActiveEntity && inGameEditor.getActiveEntity();
-        const entity = taro.game.data[entityData.entityType][entityData.id];
-        //let actionType;
+
+        const entity = taro.game.data[entityData.entityType] && taro.game.data[entityData.entityType][entityData.id];
         let height;
         let width;
         let key;
+        
         if (entityData.entityType === 'unitTypes') {
             key = `unit/${entity.cellSheet.url}`
-            //actionType = 'createEntityForPlayerAtPositionWithDimensions';
             if (entity.bodies?.default) {
                 height = entity.bodies.default.height;
                 width = entity.bodies.default.width;
@@ -127,7 +132,6 @@ class EntityEditor {
             }
         } else if (entityData.entityType === 'itemTypes') {
             key = `item/${entity.cellSheet.url}`
-            //actionType = 'createEntityAtPositionWithDimensions';
             if (entity.bodies?.dropped) {
                 height = entity.bodies.dropped.height;
                 width = entity.bodies.dropped.width;
@@ -137,7 +141,6 @@ class EntityEditor {
             }
         } else if (entityData.entityType === 'projectileTypes') {
             key = `projectile/${entity.cellSheet.url}`
-            //actionType = 'createEntityAtPositionWithDimensions';
             if (entity.bodies?.default) {
                 height = entity.bodies.default.height;
                 width = entity.bodies.default.width;
@@ -146,18 +149,11 @@ class EntityEditor {
                 return;
             }
         }
-        this.preview.setTexture(key, 0);
-        this.preview.setDisplaySize(width, height);
+        this.preview.setTexture(key, 0).setDisplaySize(width, height).setVisible(true);
     }
 
     update (): void {
-        const entityData = {
-            id: 'uNdbzdXKIs',
-            player: 'AI resources',
-            entityType: 'itemTypes'
-        }
-        //inGameEditor.getActiveEntity && inGameEditor.getActiveEntity();
-        if (this.activeEntityPlacement && entityData) {
+        if (this.activeEntityPlacement && this.preview) {
             const worldPoint = this.gameScene.cameras.main.getWorldPoint(this.gameScene.input.activePointer.x, this.gameScene.input.activePointer.y);
             this.preview.x = worldPoint.x;
             this.preview.y = worldPoint.y;

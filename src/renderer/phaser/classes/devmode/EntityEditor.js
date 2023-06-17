@@ -4,19 +4,25 @@ var EntityEditor = /** @class */ (function () {
         this.gameScene = gameScene;
         this.devModeTools = devModeTools;
         this.preview = this.gameScene.add.image(0, 0, null, 0);
-        this.preview.setAlpha(0.75);
+        this.preview.setAlpha(0.75).setVisible(false);
+        this.activeEntity = {
+            id: 'ROrWqytd2r',
+            player: 'AI resources',
+            entityType: 'unitTypes'
+        };
         this.updatePreview();
+        taro.client.on('updateActiveEntity', function () {
+            _this.activeEntity = inGameEditor.getActiveEntity && inGameEditor.getActiveEntity();
+            _this.updatePreview();
+        });
         gameScene.input.on('pointerdown', function (p) {
             var _a, _b, _c;
-            var entityData = {
-                id: 'uNdbzdXKIs',
-                player: 'AI resources',
-                entityType: 'itemTypes'
-            };
-            //inGameEditor.getActiveEntity && inGameEditor.getActiveEntity();
+            if (!p.leftButtonDown())
+                return;
+            var entityData = _this.activeEntity;
             if (_this.activeEntityPlacement && entityData) {
                 var worldPoint = gameScene.cameras.main.getWorldPoint(_this.gameScene.input.activePointer.x, _this.gameScene.input.activePointer.y);
-                var entity = taro.game.data[entityData.entityType][entityData.id];
+                var entity = taro.game.data[entityData.entityType] && taro.game.data[entityData.entityType][entityData.id];
                 var actionType = void 0;
                 var height = void 0;
                 var width = void 0;
@@ -98,20 +104,17 @@ var EntityEditor = /** @class */ (function () {
     };
     EntityEditor.prototype.updatePreview = function () {
         var _a, _b, _c;
-        var entityData = {
-            id: 'uNdbzdXKIs',
-            player: 'AI resources',
-            entityType: 'itemTypes'
-        };
-        //inGameEditor.getActiveEntity && inGameEditor.getActiveEntity();
-        var entity = taro.game.data[entityData.entityType][entityData.id];
-        //let actionType;
+        var entityData = this.activeEntity;
+        if (!entityData) {
+            this.preview.setVisible(false);
+            return;
+        }
+        var entity = taro.game.data[entityData.entityType] && taro.game.data[entityData.entityType][entityData.id];
         var height;
         var width;
         var key;
         if (entityData.entityType === 'unitTypes') {
             key = "unit/".concat(entity.cellSheet.url);
-            //actionType = 'createEntityForPlayerAtPositionWithDimensions';
             if ((_a = entity.bodies) === null || _a === void 0 ? void 0 : _a.default) {
                 height = entity.bodies.default.height;
                 width = entity.bodies.default.width;
@@ -123,7 +126,6 @@ var EntityEditor = /** @class */ (function () {
         }
         else if (entityData.entityType === 'itemTypes') {
             key = "item/".concat(entity.cellSheet.url);
-            //actionType = 'createEntityAtPositionWithDimensions';
             if ((_b = entity.bodies) === null || _b === void 0 ? void 0 : _b.dropped) {
                 height = entity.bodies.dropped.height;
                 width = entity.bodies.dropped.width;
@@ -135,7 +137,6 @@ var EntityEditor = /** @class */ (function () {
         }
         else if (entityData.entityType === 'projectileTypes') {
             key = "projectile/".concat(entity.cellSheet.url);
-            //actionType = 'createEntityAtPositionWithDimensions';
             if ((_c = entity.bodies) === null || _c === void 0 ? void 0 : _c.default) {
                 height = entity.bodies.default.height;
                 width = entity.bodies.default.width;
@@ -145,17 +146,10 @@ var EntityEditor = /** @class */ (function () {
                 return;
             }
         }
-        this.preview.setTexture(key, 0);
-        this.preview.setDisplaySize(width, height);
+        this.preview.setTexture(key, 0).setDisplaySize(width, height).setVisible(true);
     };
     EntityEditor.prototype.update = function () {
-        var entityData = {
-            id: 'uNdbzdXKIs',
-            player: 'AI resources',
-            entityType: 'itemTypes'
-        };
-        //inGameEditor.getActiveEntity && inGameEditor.getActiveEntity();
-        if (this.activeEntityPlacement && entityData) {
+        if (this.activeEntityPlacement && this.preview) {
             var worldPoint = this.gameScene.cameras.main.getWorldPoint(this.gameScene.input.activePointer.x, this.gameScene.input.activePointer.y);
             this.preview.x = worldPoint.x;
             this.preview.y = worldPoint.y;
