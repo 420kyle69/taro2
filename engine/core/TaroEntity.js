@@ -2502,10 +2502,7 @@ var TaroEntity = TaroObject.extend({
 		if (taro.isClient) {
 			var entityId = this.entityId || this.id();
 			if (taro.entitiesToRender.trackEntityById[entityId]) {
-				if (
-					taro.client.myPlayer &&
-					taro.client.myPlayer.currentFollowUnit == this.id()
-				) {
+				if (taro.client.myPlayer?.cameraTrackedUnit == this.id()) {
 					taro.client.emit('stop-follow');
 				}
 
@@ -3160,7 +3157,7 @@ var TaroEntity = TaroObject.extend({
 				this.nextPhysicsFrame = [nextFrameTime, [x, y, rotate]];
 			}
             //instantly move to camera the new position
-            if (taro.client.myPlayer.currentFollowUnit === this.id()) {
+            if (taro.client.myPlayer?.cameraTrackedUnit === this.id()) {
                 taro.client.emit('instant-move-camera', [x, y]);
             }
             
