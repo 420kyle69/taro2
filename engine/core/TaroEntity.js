@@ -5124,8 +5124,8 @@ var TaroEntity = TaroObject.extend({
 				!(this._category == 'item' && this.getOwnerUnit() != undefined) && // don't apply to item that's held by unit as that's calculated by anchor calculation
 				!(this._category == 'projectile' && this._stats.sourceItemId == undefined && this._streamMode) // don't apply to projectiles that are CSP'ed
 			) {
-				x += (finalTransform[0] - x)/5
-	        	y += (finalTransform[1] - y)/5
+				x += (finalTransform[0] - x)/10
+	        	y += (finalTransform[1] - y)/10
 	        }
 
 	        if (
