@@ -710,8 +710,7 @@ var ServerNetworkEvents = {
 		var player = taro.game.getPlayerByClientId(clientId);
 		if (player) {
 			var unit = player.getSelectedUnit();
-			// prevent taking mouse input if mouse cursor is right above the selected unit
-			if (unit && (Math.abs(position[0]) > 20 || Math.abs(position[1]) > 20)) {
+			if (unit) {
 				player.control.input.mouse.x = position[0];
 				player.control.input.mouse.y = position[1];
 			}

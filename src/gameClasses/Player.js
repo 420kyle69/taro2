@@ -241,8 +241,7 @@ var Player = TaroEntity.extend({
 				&& unit
 				&& unit._category == 'unit'
 			) {
-				taro.client.myPlayer.currentFollowUnit = unit._id;
-
+				taro.client.myPlayer.cameraTrackedUnit = unit._id;
 				unit.emit('follow');
 			}
 		}

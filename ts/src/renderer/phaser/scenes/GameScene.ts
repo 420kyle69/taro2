@@ -97,6 +97,10 @@ class GameScene extends PhaserScene {
 			y -= camera.height / 2;
 			camera.setScroll(x, y);
 		});
+
+        taro.client.on('instant-move-camera', (x: number, y: number) => {
+			camera.centerOn(x, y);
+		});
 	}
 
 	preload (): void {

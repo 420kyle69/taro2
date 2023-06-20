@@ -2502,10 +2502,7 @@ var TaroEntity = TaroObject.extend({
 		if (taro.isClient) {
 			var entityId = this.entityId || this.id();
 			if (taro.entitiesToRender.trackEntityById[entityId]) {
-				if (
-					taro.client.myPlayer &&
-					taro.client.myPlayer.currentFollowUnit == this.id()
-				) {
+				if (taro.client.myPlayer?.cameraTrackedUnit == this.id()) {
 					taro.client.emit('stop-follow');
 				}
 
@@ -3159,6 +3156,11 @@ var TaroEntity = TaroObject.extend({
 				this.prevPhysicsFrame = [prevFrameTime, [x, y, rotate]];
 				this.nextPhysicsFrame = [nextFrameTime, [x, y, rotate]];
 			}
+            //instantly move to camera the new position
+            if (taro.client.myPlayer?.cameraTrackedUnit === this.id()) {
+                taro.client.emit('instant-move-camera', [x, y]);
+            }
+            
 		}
 
 		this.discrepancyCount = 0;
@@ -5122,8 +5124,8 @@ var TaroEntity = TaroObject.extend({
 				!(this._category == 'item' && this.getOwnerUnit() != undefined) && // don't apply to item that's held by unit as that's calculated by anchor calculation
 				!(this._category == 'projectile' && this._stats.sourceItemId == undefined && this._streamMode) // don't apply to projectiles that are CSP'ed
 			) {
-				x += (finalTransform[0] - x)/5
-	        	y += (finalTransform[1] - y)/5
+				x += (finalTransform[0] - x)/10
+	        	y += (finalTransform[1] - y)/10
 	        }
 
 	        if (
