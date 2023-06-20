@@ -893,9 +893,60 @@ NetIo.Server = NetIo.EventingClass.extend({
 			// PING service only
 			// Tell the client their new ID
 			try {
+				let assignedId = self.newIdHex();
+				socket.id = assignedId;
+				
 				socket.send({
 					_netioCmd: 'id',
 					data: socket.id
+				});
+				
+				// add socket message listeners, send 'init' message to client
+				self.emit('connection', [socket]);
+				
+				socket._token = {
+					userId: '',
+					sessionId: '',
+					distinctId: '',
+					posthogDistinctId: '',
+					token: '',
+					tokenCreatedAt: Date.now()
+				};
+				
+				self._socketsById[socket.id] = socket;
+				
+				// store socket.id as clientId in _token data to validate socket messages later
+				socket._token.clientId = socket.id;
+				
+				// trigger joinGame command as part of socket connection, no need for client to send joinGame anymore
+				// joinGame takes care of disconnecting unauthenticated users, banned ips, duplicate IPs, creates a new player and request user data from gs manager and make sure the user exists on moddio
+				const joinGameData = {
+					number: (Math.floor(Math.random() * 999) + 100),
+					_id: socket._token.userId,
+					sessionId: socket._token.sessionId,
+					isAdBlockEnabled: false
+				};
+				
+				const clientId = socket.id;
+				
+				taro.server._onJoinGame(joinGameData, clientId);
+				
+				socket.on('disconnect', function (data) {
+					var index = self._sockets.indexOf(socket);
+					if (index > -1) {
+						// Remove the socket from the array
+						self._sockets.splice(index, 1);
+					}
+					
+					if (self._socketsById[socket.id]) {
+						self._socketsById[socket.id].gracePeriod = setTimeout(() => {
+							delete self._socketsById[socket.id];
+							
+							// moved from .on('disconnect') in TaroNetIoServer.js:~588
+							// data contains {WebSocket socket, <Buffer > reason, Number code}
+							taro.network._onClientDisconnect(data, socket);
+						}, 5000);
+					}
 				});
 			} catch (err) {
 				console.log('err while sending client its socket.id!');
