@@ -45,7 +45,11 @@ class EntityImage {
         const image = this.image = scene.add.image(action.position?.x, action.position?.y, key);
         if (action.angle) image.angle = action.angle;
         if (action.width && action.height) image.setDisplaySize(action.width, action.height);
-        //image.setVisible(false);
+        if (taro.developerMode.active && taro.developerMode.activeTab === 'map') {
+            image.setVisible(true);
+        } else {
+            image.setVisible(false);
+        }
         image.setInteractive({ draggable: true });
         image.entity = this;
         entityImages.push(image);
