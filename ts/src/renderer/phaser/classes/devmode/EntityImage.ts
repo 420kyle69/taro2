@@ -109,7 +109,7 @@ class EntityImage {
             this.action.wasEdited = true;
             action.wasEdited = true;
         }
-        taro.network.send('editInitEntity', action);
+        taro.network.send<any>('editInitEntity', action);
     }
 
     updateOutline (): void {
