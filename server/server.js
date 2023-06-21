@@ -519,6 +519,7 @@ var Server = TaroClass.extend({
 					}
 				}
 
+				taro.physics.setContinuousPhysics(!!game?.data?.settings?.continuousPhysics);
 				taro.physics.createWorld();
 				taro.physics.start();
 				taro.raycaster = new Raycaster();
@@ -688,7 +689,7 @@ var Server = TaroClass.extend({
 		taro.network.define('openDialogue', self._onSomeBullshit);
 		taro.network.define('closeDialogue', self._onSomeBullshit);
 		taro.network.define('userJoinedGame', self._onSomeBullshit);
-		
+
 		taro.network.define('kick', self._onKick);
 		taro.network.define('ban-user', self._onBanUser);
 		taro.network.define('ban-ip', self._onBanIp);
@@ -745,7 +746,7 @@ var Server = TaroClass.extend({
 			}
 		}
 	},
-	
+
 	sendCoinsToPlayer: function (userId, coins, deductFeeFromOwnerBalance = false) {
 		coins = Math.floor(coins);
 		if (userId && coins) {
@@ -758,7 +759,7 @@ var Server = TaroClass.extend({
 			});
 		}
 	},
-	
+
 	sendCoinsToPlayerCallback: function (body) {
 		if (body) {
 			if (body.status === 'success') {
@@ -769,7 +770,7 @@ var Server = TaroClass.extend({
 						creatorId,
 						userId
 					} = body.message;
-					
+
 
 					var creator = taro.$$('player').find(function (player) {
 						return player && player._stats && player._stats.userId == creatorId;
@@ -796,8 +797,8 @@ var Server = TaroClass.extend({
 					return;
 				}
 
-				const reason = body.reason;				
-				
+				const reason = body.reason;
+
 				const {
 					creatorId,
 					userId
@@ -806,7 +807,7 @@ var Server = TaroClass.extend({
 				let player = taro.$$('player').find(function (player) {
 					return player && player._stats && player._stats.userId == userId;
 				});
-				
+
 				if (!player) {
 					return;
 				}
@@ -824,7 +825,7 @@ var Server = TaroClass.extend({
 			}
 		}
 	},
-	
+
 	consumeCoinFromUser: function (player, coins, boughtItemId) {
 		var self = this;
 		coins = Math.floor(coins);
@@ -852,13 +853,13 @@ var Server = TaroClass.extend({
 				// console.log('You are the owner');
 			}
 		}
-		
+
 		if (Object.keys(self.coinUpdate || {}).length > 0) {
 			taro.clusterClient && taro.clusterClient.consumeCoinFromUser(self.coinUpdate);
 			self.coinUpdate = {};
 		}
 	},
-	
+
 	postConsumeCoinsForUsersCallback: function (body) {
 		var self = this;
 		if (body) {
@@ -879,7 +880,7 @@ var Server = TaroClass.extend({
 			}
 		}
 	},
-	
+
 	creditAdRewardToOwner: function (data, clientId) {
 		const token = data.token;
 		if (token && data.status && clientId) {
@@ -889,18 +890,18 @@ var Server = TaroClass.extend({
 					console.log('creditAdRewardToOwner - Token has been used already', token);
 					return;
 				}
-				
+
 				const jwt = require("jsonwebtoken");
-				
+
 				const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
 				const {type, clientId: decodedClientId, createdAt} = decodedToken;
-				
+
 				if (type === 'creditAdRewardToken' && decodedClientId === clientId) {
 					// allow transaction since token has been verified
-					
+
 					// store token for current client
 					taro.server.usedAdRewardJwts[token] = createdAt;
-					
+
 					// remove expired tokens
 					const filteredUsedAdRewardJwts = {};
 					const usedTokenEntries = Object.entries(taro.server.usedAdRewardJwts).filter(([token, tokenCreatedAt]) => (Date.now() - tokenCreatedAt) < taro.server.AD_REWARD_JWT_EXPIRES_IN);
@@ -910,13 +911,13 @@ var Server = TaroClass.extend({
 						}
 					}
 					taro.server.usedAdRewardJwts = filteredUsedAdRewardJwts;
-					
+
 				} else {
 					return;
 				}
-				
+
 				var player = taro.game.getPlayerByClientId(clientId);
-				
+
 				taro.clusterClient && taro.clusterClient.creditAdRewardToOwner({
 					creatorId: taro.game.data.defaultData.owner,
 					game: taro.game.data.defaultData._id,
@@ -924,13 +925,13 @@ var Server = TaroClass.extend({
 					clientId,
 					status: data.status,
 				});
-				
+
 			} catch (e) {
 				console.log('creditAdRewardToOwner - invalid token', e.message, data.token);
 			}
 		}
 	},
-	
+
 	creditAdRewardToOwnerCallback: function (body) {
 		if (body) {
 			if (body.status === 'success') {
@@ -939,7 +940,7 @@ var Server = TaroClass.extend({
 						updatedCoinsCreator,
 						creatorId
 					} = body.message;
-					
+
 					var creator = taro.$$('player').find(function (player) {
 						return player && player._stats && player._stats.userId == creatorId;
 					});
@@ -953,14 +954,14 @@ var Server = TaroClass.extend({
 			}
 		}
 	},
-	
+
 	addServerLog: function (type, reason) {
 		taro.clusterClient && taro.clusterClient.addServerLog({
 			type,
 			reason
 		});
 	},
-	
+
 	getStatus: function () {
 		var self = this;
 

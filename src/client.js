@@ -643,6 +643,7 @@ const Client = TaroEventingClass.extend({
 			console.log('setting gravity: ', gravity); // not in prod please
 			taro.physics.gravity(gravity.x, gravity.y);
 		}
+		taro.physics.setContinuousPhysics(!!taro?.game?.data?.settings?.continuousPhysics);
 		if (taro.physics.engine == 'CRASH') {
 			taro.physics.addBorders();
 		}
@@ -739,7 +740,7 @@ const Client = TaroEventingClass.extend({
 	//i'm not going to change the join game function
 	//
 	joinGame: function(wasGamePaused = false) {
-		
+
 		// if the AdInPlay player is initialised, means the ad blocker is not enabled
 		let isAdBlockEnabled = window.isAdBlockEnabled || typeof window?.aiptag?.adplayer === 'undefined';
 		const data = {
@@ -789,7 +790,7 @@ const Client = TaroEventingClass.extend({
 		});
 
 		data.isAdBlockEnabled = !!isAdBlockEnabled;
-		
+
 		// send joinGame command only if game was paused and menu was open.
 		if (wasGamePaused) {
 			taro.network.send('joinGame', data);
