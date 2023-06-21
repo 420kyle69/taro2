@@ -29,7 +29,7 @@ var dists = {
 
 			component.createWorld = function (id, options) {
 				component._world = new component.b2World(this._gravity, this._sleep);
-				component._world.setContinuousPhysics(false);
+				component._world.setContinuousPhysics(this._continuousPhysics);
 			};
 
 			/**
@@ -46,6 +46,11 @@ var dists = {
 
 				return this._gravity;
 			};
+
+			component.setContinuousPhysics = function (continuousPhysics) {
+				this._continuousPhysics = continuousPhysics;
+			};
+			component._continuousPhysics = false;
 
 			component._sleep = true;
 			component._gravity = new component.b2Vec2(0, 0);
@@ -382,6 +387,7 @@ var dists = {
 
 			component.createWorld = function (id, options) {
 				component._world = new component.b2World(this._gravity, this._sleep);
+				component._world.SetContinuousPhysics(this._continuousPhysics);
 			};
 
 			/**
@@ -398,6 +404,11 @@ var dists = {
 
 				return this._gravity;
 			};
+
+			component.setContinuousPhysics = function (continuousPhysics) {
+				this._continuousPhysics = continuousPhysics;
+			};
+			component._continuousPhysics = false;
 			component._sleep = true;
 			component._gravity = new component.b2Vec2(0, 0);
 		},
@@ -748,6 +759,7 @@ var dists = {
 
 			component.createWorld = function (id, options) {
 				component._world = new component.b2World(this._gravity, this._sleep);
+				component._world.SetContinuousPhysics(this._continuousPhysics);
 			};
 
 			/**
@@ -764,6 +776,11 @@ var dists = {
 
 				return this._gravity;
 			};
+
+			component.setContinuousPhysics = function (continuousPhysics) {
+				this._continuousPhysics = continuousPhysics;
+			};
+			component._continuousPhysics = false;
 			component._sleep = true;
 			component._gravity = new component.b2Vec2(0, 0);
 		},
@@ -1133,7 +1150,7 @@ var dists = {
 
 			component.createWorld = function (id, options) {
 				component._world = new component.b2World(this._gravity, this._sleep);
-				component._world.SetContinuousPhysics(false);
+				component._world.SetContinuousPhysics(this._continuousPhysics);
 			};
 
 			/**
@@ -1150,6 +1167,11 @@ var dists = {
 
 				return this._gravity;
 			};
+
+			component.setContinuousPhysics = function (continuousPhysics) {
+				this._continuousPhysics = continuousPhysics;
+			};
+			component._continuousPhysics = false;
 		},
 
 		contactListener: function (self, beginContactCallback, endContactCallback, preSolve, postSolve) {
