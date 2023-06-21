@@ -21,6 +21,10 @@ interface ScriptData {
 }
 
 interface ActionData {
+    player?: { 
+        variableName: string; 
+        function: string; 
+    };
     disabled?: boolean;
     unitType?: string;
     itemType?: string;
@@ -37,6 +41,7 @@ interface ActionData {
 	angle?: number;
 	width?: number;
 	height?: number;
+    wasEdited?: boolean;
 }
 
 interface MapData {

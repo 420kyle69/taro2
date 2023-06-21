@@ -221,8 +221,11 @@ class DeveloperMode {
             if (!this.initEntities) {
                 this.addInitEntities();
             }
+            let found = false;
             this.initEntities.forEach((action) => {
                 if (action.actionId === data.actionId) {
+                    found = true;
+                    if (data.wasEdited) action.wasEdited = true;
                     if (data.position && data.position.x && data.position.y &&
                         action.position && action.position.x && action.position.y) {
                         action.position = data.position;
@@ -236,6 +239,9 @@ class DeveloperMode {
                     }
                 }
             });
+            if (!found) {
+                this.initEntities.push(data);
+            }
         }
     }
 

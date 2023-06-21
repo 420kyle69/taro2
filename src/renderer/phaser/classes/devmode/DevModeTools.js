@@ -23,6 +23,7 @@ var DevModeTools = /** @class */ (function (_super) {
         var palette = _this.palette = new TilePalette(_this.scene, _this.scene.tileset, _this.scene.rexUI);
         _this.tileEditor = new TileEditor(_this.scene.gameScene, _this.scene, _this);
         _this.regionEditor = new RegionEditor(_this.scene.gameScene, _this.scene, _this);
+        _this.entityEditor = new EntityEditor(_this.scene.gameScene, _this.scene, _this);
         _this.gameEditorWidgets = [];
         _this.keyBindings();
         _this.COLOR_PRIMARY = palette.COLOR_PRIMARY;
@@ -50,7 +51,7 @@ var DevModeTools = /** @class */ (function (_super) {
         toolButtonsContainer.y = palette.camera.y - (toolButtonsContainer.height * toolButtonsContainer.scale);
         scene.add.existing(toolButtonsContainer);
         _this.modeButtons = [];
-        _this.modeButtons.push(new DevToolButton(_this, '', 'Cursor Tool (C)', 'interact with regions and entities', 'cursor', 0, 0, h * 2 - s, toolButtonsContainer, _this.cursor.bind(_this)), new DevToolButton(_this, '', 'Region Tool (R)', 'draw new region', 'region', h * 2, 0, h * 2 - s, toolButtonsContainer, _this.drawRegion.bind(_this)), new DevToolButton(_this, '', 'Stamp Brush (B)', 'LMB: place selected tiles. RMB: copy tiles', 'stamp', 0, h + s, h * 2 - s, toolButtonsContainer, _this.brush.bind(_this)), new DevToolButton(_this, '', 'Eraser (E)', 'delete tiles from selected layer', 'eraser', h * 2, h + s, h * 2 - s, toolButtonsContainer, _this.emptyTile.bind(_this)), new DevToolButton(_this, '', 'Bucket Fill (F)', 'fill an area with the selected tile', 'fill', 0, (h + s) * 2, h * 2 - s, toolButtonsContainer, _this.fill.bind(_this)), new DevToolButton(_this, '', 'Clear Layer (L)', 'clear selected layer', 'clear', h * 2, (h + s) * 2, h * 2 - s, toolButtonsContainer, _this.clear.bind(_this)), new DevToolButton(_this, '', 'Save Map (S)', 'save all changes', 'save', 0, (h + s) * 3, h * 2 - s, toolButtonsContainer, _this.save.bind(_this)));
+        _this.modeButtons.push(new DevToolButton(_this, '', 'Cursor Tool (C)', 'interact with regions and entities', 'cursor', 0, 0, h * 2 - s, toolButtonsContainer, _this.cursor.bind(_this)), new DevToolButton(_this, '', 'Region Tool (R)', 'draw new region', 'region', 0, (h + s) * 3, h * 2 - s, toolButtonsContainer, _this.drawRegion.bind(_this)), new DevToolButton(_this, '', 'Stamp Brush (B)', 'LMB: place selected tiles. RMB: copy tiles', 'stamp', 0, h + s, h * 2 - s, toolButtonsContainer, _this.brush.bind(_this)), new DevToolButton(_this, '', 'Eraser (E)', 'delete tiles from selected layer', 'eraser', h * 2, h + s, h * 2 - s, toolButtonsContainer, _this.emptyTile.bind(_this)), new DevToolButton(_this, '', 'Bucket Fill (F)', 'fill an area with the selected tile', 'fill', 0, (h + s) * 2, h * 2 - s, toolButtonsContainer, _this.fill.bind(_this)), new DevToolButton(_this, '', 'Clear Layer (L)', 'clear selected layer', 'clear', h * 2, (h + s) * 2, h * 2 - s, toolButtonsContainer, _this.clear.bind(_this)), new DevToolButton(_this, '', 'Save Map (S)', 'save all changes', 'save', h * 2, (h + s) * 3, h * 2 - s, toolButtonsContainer, _this.save.bind(_this)), new DevToolButton(_this, '', 'Entities Tool (A)', 'LMB: Place selected Entity on the Map RMB: copy entity', 'entity', h * 2, 0, h * 2 - s, toolButtonsContainer, _this.addEntities.bind(_this)));
         _this.cursorButton = _this.modeButtons[0];
         _this.highlightModeButton(0);
         _this.brushButtons = [];
@@ -69,6 +70,7 @@ var DevModeTools = /** @class */ (function (_super) {
         _this.palette.hide();
         _this.toolButtonsContainer.setVisible(false);
         _this.regionEditor.hideRegions();
+        _this.entityEditor.activatePlacement(false);
         var ctrlKey = _this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CTRL, false);
         _this.scene.input.on('pointermove', function (p) {
             if (taro.developerMode.active && taro.developerMode.activeTab !== 'play' && scene.tileEditor.startDragIn !== 'palette' && (p.rightButtonDown() || (p.isDown && ctrlKey.isDown))) {
@@ -240,9 +242,17 @@ var DevModeTools = /** @class */ (function (_super) {
         this.highlightModeButton(0);
         this.scene.regionEditor.regionTool = false;
         this.tileEditor.activateMarkers(false);
+        this.entityEditor.activatePlacement(false);
+    };
+    DevModeTools.prototype.addEntities = function () {
+        this.highlightModeButton(7);
+        this.scene.regionEditor.regionTool = false;
+        this.tileEditor.activateMarkers(false);
+        this.entityEditor.activatePlacement(true);
     };
     DevModeTools.prototype.drawRegion = function () {
         this.tileEditor.activateMarkers(false);
+        this.entityEditor.activatePlacement(false);
         this.highlightModeButton(1);
         this.scene.regionEditor.regionTool = true;
     };
@@ -252,6 +262,7 @@ var DevModeTools = /** @class */ (function (_super) {
             this.tileEditor.selectedTileArea = this.tileEditor.lastSelectedTileArea;
         }
         this.tileEditor.activateMarkers(true);
+        this.entityEditor.activatePlacement(false);
         this.tileEditor.marker.changePreview();
         this.scene.regionEditor.regionTool = false;
         this.highlightModeButton(2);
@@ -263,6 +274,7 @@ var DevModeTools = /** @class */ (function (_super) {
             this.tileEditor.selectedTile = -1;
             this.tileEditor.selectedTileArea = [[-1, -1], [-1, -1]];
             this.tileEditor.activateMarkers(true);
+            this.entityEditor.activatePlacement(false);
             this.tileEditor.marker.changePreview();
             this.scene.regionEditor.regionTool = false;
             this.highlightModeButton(3);
@@ -274,6 +286,7 @@ var DevModeTools = /** @class */ (function (_super) {
             this.tileEditor.selectedTileArea = this.tileEditor.lastSelectedTileArea;
         }
         this.tileEditor.activateMarkers(true);
+        this.entityEditor.activatePlacement(false);
         this.tileEditor.marker.changePreview();
         this.scene.regionEditor.regionTool = false;
         this.selectSingle();
@@ -301,6 +314,7 @@ var DevModeTools = /** @class */ (function (_super) {
         this.brushButtons[0].highlight('active');
         this.brushButtons[1].highlight('no');
         this.tileEditor.activateMarkers(true);
+        this.entityEditor.activatePlacement(false);
         this.tileEditor.marker.changePreview();
         this.tileEditor.paletteMarker.changePreview();
         if (!this.modeButtons[3].active) {
@@ -313,6 +327,7 @@ var DevModeTools = /** @class */ (function (_super) {
         this.brushButtons[1].highlight('active');
         this.brushButtons[0].highlight('no');
         this.tileEditor.activateMarkers(true);
+        this.entityEditor.activatePlacement(false);
         this.tileEditor.marker.changePreview();
         this.tileEditor.paletteMarker.changePreview();
         if (!this.modeButtons[3].active) {

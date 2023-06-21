@@ -46,9 +46,7 @@ var EntityImage = /** @class */ (function () {
             image.angle = action.angle;
         if (action.width && action.height)
             image.setDisplaySize(action.width, action.height);
-        //image.setTint(0x9CA3AF);
-        //image.setAlpha(0.75);
-        image.setVisible(false);
+        //image.setVisible(false);
         image.setInteractive({ draggable: true });
         image.entity = this;
         entityImages.push(image);
@@ -69,11 +67,9 @@ var EntityImage = /** @class */ (function () {
         });
         var outline = devModeTools.outline;
         image.on('pointerover', function () {
-            console.log('pointerover');
             _this.updateOutline();
         });
         image.on('pointerout', function () {
-            console.log('pointerout');
             outline.clear();
         });
         var editedAction = { actionId: action.actionId };
@@ -107,6 +103,10 @@ var EntityImage = /** @class */ (function () {
         });
     }
     EntityImage.prototype.edit = function (action) {
+        if (!this.action.wasEdited) {
+            this.action.wasEdited = true;
+            action.wasEdited = true;
+        }
         taro.network.send('editInitEntity', action);
     };
     EntityImage.prototype.updateOutline = function () {
@@ -120,6 +120,8 @@ var EntityImage = /** @class */ (function () {
         outline.angle = image.angle;
     };
     EntityImage.prototype.update = function (action) {
+        if (action.wasEdited)
+            this.action.wasEdited = true;
         if (this.action.position && this.action.position.x && this.action.position.y &&
             action.position && action.position.x && action.position.y) {
             this.action.position = action.position;
