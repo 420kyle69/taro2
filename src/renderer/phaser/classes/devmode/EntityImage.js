@@ -103,8 +103,10 @@ var EntityImage = /** @class */ (function () {
         });
     }
     EntityImage.prototype.edit = function (action) {
-        if (!action.wasEdited)
+        if (!this.action.wasEdited) {
+            this.action.wasEdited = true;
             action.wasEdited = true;
+        }
         taro.network.send('editInitEntity', action);
     };
     EntityImage.prototype.updateOutline = function () {
@@ -118,8 +120,8 @@ var EntityImage = /** @class */ (function () {
         outline.angle = image.angle;
     };
     EntityImage.prototype.update = function (action) {
-        if (!this.action.wasEdited)
-            action.wasEdited = true;
+        if (action.wasEdited)
+            this.action.wasEdited = true;
         if (this.action.position && this.action.position.x && this.action.position.y &&
             action.position && action.position.x && action.position.y) {
             this.action.position = action.position;

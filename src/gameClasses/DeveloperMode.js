@@ -216,6 +216,8 @@ var DeveloperMode = /** @class */ (function () {
             this.initEntities.forEach(function (action) {
                 if (action.actionId === data.actionId) {
                     found_1 = true;
+                    if (data.wasEdited)
+                        action.wasEdited = true;
                     if (data.position && data.position.x && data.position.y &&
                         action.position && action.position.x && action.position.y) {
                         action.position = data.position;
