@@ -70,6 +70,31 @@ var TaroEntityPhysics = TaroEntity.extend({
 		this.width(parseFloat(body.width) * this._scale.x);
 		this.height(parseFloat(body.height) * this._scale.y);
 
+		var shapeData = (body.fixtures && body.fixtures[0] && body.fixtures[0].shape && body.fixtures[0].shape.data) ? body.fixtures[0].shape.data : undefined;
+
+		// override body bounds
+		var sizeX = body?.fixtures[0].size?.width;
+		var sizeY = body?.fixtures[0].size?.height;
+		var offsetX =body?.fixtures[0].offset?.x;
+		var offsetY = body?.fixtures[0].offset?.y;
+		if (sizeX || sizeY || offsetX || offsetY) {
+			if (shapeData === undefined) {
+				shapeData = {};
+			}
+			if (sizeX) {
+				shapeData.width = sizeX;
+			}
+			if (sizeY) {
+				shapeData.height = sizeY;
+			}
+			if (offsetX) {
+				shapeData.x = offsetX;
+			}
+			if (offsetY) {
+				shapeData.y = offsetY;
+			}
+		}
+
 		var filterCategoryBits = 0x0002;
 		if (this._category === 'units') {
 			filterCategoryBits = 0x0002;
@@ -111,7 +136,7 @@ var TaroEntityPhysics = TaroEntity.extend({
 				},
 				shape: {
 					type: (body.fixtures && body.fixtures[0] && body.fixtures[0].shape && body.fixtures[0].shape.type) ? body.fixtures[0].shape.type : 'rectangle',
-					data: (body.fixtures && body.fixtures[0] && body.fixtures[0].shape && body.fixtures[0].shape.data) ? body.fixtures[0].shape.data : undefined
+					data: shapeData,
 				},
 				taroId: this.id() // in box2dbody, add reference to this entity
 			}]
