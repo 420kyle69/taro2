@@ -77,7 +77,6 @@ var GameScene = /** @class */ (function (_super) {
             camera.setScroll(x, y);
         });
         taro.client.on('instant-move-camera', function (x, y) {
-            console.log('instant move camera', x, y);
             camera.centerOn(x, y);
         });
     };

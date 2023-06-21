@@ -60,11 +60,16 @@ class DevModeScene extends PhaserScene {
 		});
 
         taro.client.on('editInitEntity', (data: ActionData) => {
+            let found = false;
             this.entityImages.forEach((image) => {
                 if (image.entity.action.actionId === data.actionId) {
+                    found = true;
                     image.entity.update(data);
                 }
             });
+            if (!found) {
+                this.createEntityImage(data);
+            }
 		});
 
         taro.client.on('updateInitEntities', () => {
@@ -114,6 +119,7 @@ class DevModeScene extends PhaserScene {
 		});*/
 
 		this.load.image('cursor', 'https://cache.modd.io/asset/spriteImage/1666276041347_cursor.png');
+        this.load.image('entity', 'https://cache.modd.io/asset/spriteImage/1686840222943_cube.png');
 		this.load.image('region', 'https://cache.modd.io/asset/spriteImage/1666882309997_region.png');
 		this.load.image('stamp', 'https://cache.modd.io/asset/spriteImage/1666724706664_stamp.png');
 		this.load.image('eraser', 'https://cache.modd.io/asset/spriteImage/1666276083246_erasergap.png');
@@ -274,14 +280,23 @@ class DevModeScene extends PhaserScene {
 
 	update (): void {
 		if (this.tileEditor) this.tileEditor.update();
+        if (this.devModeTools.entityEditor) this.devModeTools.entityEditor.update();
 	}
 
     updateInitEntities(): void {
-        this.entityImages.forEach((image) => {
-            taro.developerMode.initEntities.forEach((action) =>{
-                if (image.entity.action.actionId === action.actionId) image.entity.update(action);
+        taro.developerMode.initEntities.forEach((action) => {
+            let found = false;
+            this.entityImages.forEach((image) => {
+                if (image.entity.action.actionId === action.actionId) {
+                    found = true;
+                    image.entity.update(action);
+                }
             });
+            if (!found) {
+                this.createEntityImage(action);
+            }
         });
+
     }
 
 }

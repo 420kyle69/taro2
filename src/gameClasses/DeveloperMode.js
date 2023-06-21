@@ -288,8 +288,12 @@ var DeveloperMode = /** @class */ (function () {
             if (!this.initEntities) {
                 this.addInitEntities();
             }
+            var found_1 = false;
             this.initEntities.forEach(function (action) {
                 if (action.actionId === data.actionId) {
+                    found_1 = true;
+                    if (data.wasEdited)
+                        action.wasEdited = true;
                     if (data.position && data.position.x && data.position.y &&
                         action.position && action.position.x && action.position.y) {
                         action.position = data.position;
@@ -303,6 +307,9 @@ var DeveloperMode = /** @class */ (function () {
                     }
                 }
             });
+            if (!found_1) {
+                this.initEntities.push(data);
+            }
         }
     };
     DeveloperMode.prototype.createUnit = function (data) {

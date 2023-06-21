@@ -45,9 +45,7 @@ class EntityImage {
         const image = this.image = scene.add.image(action.position?.x, action.position?.y, key);
         if (action.angle) image.angle = action.angle;
         if (action.width && action.height) image.setDisplaySize(action.width, action.height);
-        //image.setTint(0x9CA3AF);
-        //image.setAlpha(0.75);
-        image.setVisible(false);
+        //image.setVisible(false);
         image.setInteractive({ draggable: true });
         image.entity = this;
         entityImages.push(image);
@@ -70,12 +68,10 @@ class EntityImage {
         const outline = devModeTools.outline;
 
         image.on('pointerover', () => {
-            console.log('pointerover')
             this.updateOutline();
         });
 
         image.on('pointerout', () => {
-            console.log('pointerout')
             outline.clear();
         });
 
@@ -109,7 +105,11 @@ class EntityImage {
     }
 
     edit (action: ActionData): void {
-        taro.network.send<any>('editInitEntity', action);
+        if (!this.action.wasEdited) {
+            this.action.wasEdited = true;
+            action.wasEdited = true;
+        }
+        taro.network.send('editInitEntity', action);
     }
 
     updateOutline (): void {
@@ -125,6 +125,7 @@ class EntityImage {
     }
 
     update (action: ActionData): void {
+        if (action.wasEdited) this.action.wasEdited = true;
         if (this.action.position && this.action.position.x && this.action.position.y &&
             action.position && action.position.x && action.position.y) {
             this.action.position = action.position;
