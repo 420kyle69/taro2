@@ -4,8 +4,8 @@ class EntityEditor {
     activeEntity: { id: string; player: string; entityType: string; };
 
 	constructor (
-        private gameScene: GameScene, 
-		devModeScene: DevModeScene, 
+        private gameScene: GameScene,
+		devModeScene: DevModeScene,
 		private devModeTools: DevModeTools
 	) {
         this.preview = this.gameScene.add.image(0, 0, null, 0);
@@ -19,7 +19,7 @@ class EntityEditor {
         }
         this.updatePreview();
         */
-        
+
         taro.client.on('updateActiveEntity', () => {
             this.activeEntity = inGameEditor.getActiveEntity && inGameEditor.getActiveEntity();
 			this.updatePreview();
@@ -84,7 +84,7 @@ class EntityEditor {
                     }
                 }
                 devModeScene.createEntityImage(action);
-                taro.network.send('editInitEntity', action);
+                taro.network.send<any>('editInitEntity', action);
             }
 		});
     }
@@ -120,7 +120,7 @@ class EntityEditor {
         let height;
         let width;
         let key;
-        
+
         if (entityData.entityType === 'unitTypes') {
             key = `unit/${entity.cellSheet.url}`
             if (entity.bodies?.default) {
@@ -160,4 +160,4 @@ class EntityEditor {
         }
 	}
 }
- 
+

@@ -54,6 +54,9 @@ var taroClientConfig = {
 		'/gameClasses/Raycaster.js',
 		'/gameClasses/HeightRenderComponent.js',
 
+		/* tile calc */
+		'/gameClasses/Combinator.js',
+		'/gameClasses/TileShape.js',
 		/* Phaser */
 		'renderer/phaser/phaser.min.js',
 		'renderer/phaser/rexuiplugin.min.js',
@@ -86,9 +89,10 @@ var taroClientConfig = {
         'renderer/phaser/classes/devmode/EntityEditor.js',
 		'renderer/phaser/classes/devmode/TilePalette.js',
 		'renderer/phaser/classes/devmode/TileMarker.js',
+		'renderer/phaser/classes/devmode/CommandsController.js',
+		'renderer/phaser/classes/devmode/Constants.js',
 		'renderer/phaser/classes/devmode/EntityImage.js',
 		'renderer/phaser/PhaserRenderer.js',
-
 		'/client.js',
 		'/index.js'
 	]

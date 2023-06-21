@@ -18,10 +18,20 @@ var DevModeTools = /** @class */ (function (_super) {
     function DevModeTools(scene) {
         var _this = _super.call(this, scene) || this;
         _this.scene = scene;
+        _this.brushSize = 1;
         _this.BUTTON_HEIGHT = 30;
         _this.BUTTON_INTERSPACE = 4;
-        var palette = _this.palette = new TilePalette(_this.scene, _this.scene.tileset, _this.scene.rexUI);
-        _this.tileEditor = new TileEditor(_this.scene.gameScene, _this.scene, _this);
+        _this.commandController = new CommandController({
+            'increaseBrushSize': function () {
+                _this.brushSize = Math.min(_this.brushSize + 1, 50);
+                _this.updateBrushArea();
+            }, 'decreaseBrushSize': function () {
+                _this.brushSize = Math.max(_this.brushSize - 1, 1);
+                _this.updateBrushArea();
+            }
+        }, _this.scene.gameScene.tilemap);
+        var palette = _this.palette = new TilePalette(_this.scene, _this.scene.tileset, _this.scene.rexUI, _this.commandController);
+        _this.tileEditor = new TileEditor(_this.scene.gameScene, _this.scene, _this, _this.commandController);
         _this.regionEditor = new RegionEditor(_this.scene.gameScene, _this.scene, _this);
         _this.entityEditor = new EntityEditor(_this.scene.gameScene, _this.scene, _this);
         _this.gameEditorWidgets = [];
@@ -50,13 +60,16 @@ var DevModeTools = /** @class */ (function (_super) {
         toolButtonsContainer.x = palette.camera.x + palette.paletteWidth - ((h * 4) * toolButtonsContainer.scale) + 22;
         toolButtonsContainer.y = palette.camera.y - (toolButtonsContainer.height * toolButtonsContainer.scale);
         scene.add.existing(toolButtonsContainer);
+        _this.brushButtons = {
+            'rectangle': new DevToolButton(_this, 'rectangle', 'rectangle', 'changes the brush shape to rectangle', null, -(h * 4 + 1.5 * s), (h + s) * 1, h * 4 - s, toolButtonsContainer, _this.changeShape.bind(_this), 'rectangle', [], false),
+            'diamond': new DevToolButton(_this, 'diamond', 'diamond', 'changes the brush shape to diamond', null, -(h * 4 + 1.5 * s), (h + s) * 2, h * 4 - s, toolButtonsContainer, _this.changeShape.bind(_this), 'diamond', [], false),
+            'circle': new DevToolButton(_this, 'circle', 'circle', 'changes the brush shape to circle', null, -(h * 4 + 1.5 * s), (h + s) * 3, h * 4 - s, toolButtonsContainer, _this.changeShape.bind(_this), 'circle', [], false),
+        };
+        _this.brushButtons['rectangle'].highlight('active');
         _this.modeButtons = [];
-        _this.modeButtons.push(new DevToolButton(_this, '', 'Cursor Tool (C)', 'interact with regions and entities', 'cursor', 0, 0, h * 2 - s, toolButtonsContainer, _this.cursor.bind(_this)), new DevToolButton(_this, '', 'Region Tool (R)', 'draw new region', 'region', 0, (h + s) * 3, h * 2 - s, toolButtonsContainer, _this.drawRegion.bind(_this)), new DevToolButton(_this, '', 'Stamp Brush (B)', 'LMB: place selected tiles. RMB: copy tiles', 'stamp', 0, h + s, h * 2 - s, toolButtonsContainer, _this.brush.bind(_this)), new DevToolButton(_this, '', 'Eraser (E)', 'delete tiles from selected layer', 'eraser', h * 2, h + s, h * 2 - s, toolButtonsContainer, _this.emptyTile.bind(_this)), new DevToolButton(_this, '', 'Bucket Fill (F)', 'fill an area with the selected tile', 'fill', 0, (h + s) * 2, h * 2 - s, toolButtonsContainer, _this.fill.bind(_this)), new DevToolButton(_this, '', 'Clear Layer (L)', 'clear selected layer', 'clear', h * 2, (h + s) * 2, h * 2 - s, toolButtonsContainer, _this.clear.bind(_this)), new DevToolButton(_this, '', 'Save Map (S)', 'save all changes', 'save', h * 2, (h + s) * 3, h * 2 - s, toolButtonsContainer, _this.save.bind(_this)), new DevToolButton(_this, '', 'Entities Tool (A)', 'LMB: Place selected Entity on the Map RMB: copy entity', 'entity', h * 2, 0, h * 2 - s, toolButtonsContainer, _this.addEntities.bind(_this)));
+        _this.modeButtons.push(new DevToolButton(_this, '', 'Cursor Tool (C)', 'interact with regions and entities', 'cursor', 0, 0, h * 2 - s, toolButtonsContainer, _this.cursor.bind(_this)), new DevToolButton(_this, '', 'Region Tool (R)', 'draw new region', 'region', 0, (h + s) * 3, h * 2 - s, toolButtonsContainer, _this.drawRegion.bind(_this)), new DevToolButton(_this, '', 'Stamp Brush (B)', 'LMB: place selected tiles. RMB: copy tiles', 'stamp', 0, h + s, h * 2 - s, toolButtonsContainer, _this.brush.bind(_this), undefined, Object.values(_this.brushButtons)), new DevToolButton(_this, '', 'Eraser (E)', 'delete tiles from selected layer', 'eraser', h * 2, h + s, h * 2 - s, toolButtonsContainer, _this.emptyTile.bind(_this)), new DevToolButton(_this, '', 'Bucket Fill (F)', 'fill an area with the selected tile', 'fill', 0, (h + s) * 2, h * 2 - s, toolButtonsContainer, _this.fill.bind(_this)), new DevToolButton(_this, '', 'Clear Layer (L)', 'clear selected layer', 'clear', h * 2, (h + s) * 2, h * 2 - s, toolButtonsContainer, _this.clear.bind(_this)), new DevToolButton(_this, '', 'Save Map (S)', 'save all changes', 'save', h * 2, (h + s) * 3, h * 2 - s, toolButtonsContainer, _this.save.bind(_this)), new DevToolButton(_this, '', 'Entities Tool (A)', 'LMB: Place selected Entity on the Map RMB: copy entity', 'entity', h * 2, 0, h * 2 - s, toolButtonsContainer, _this.addEntities.bind(_this)));
         _this.cursorButton = _this.modeButtons[0];
         _this.highlightModeButton(0);
-        _this.brushButtons = [];
-        _this.brushButtons.push(new DevToolButton(_this, '1x1', '1x1', 'changes the brush size to 1x1', null, 0, (h + s) * 5, h * 2 - s, toolButtonsContainer, _this.selectSingle.bind(_this)), new DevToolButton(_this, '2x2', '2x2', 'changes the brush size to 2x2', null, h * 2, (h + s) * 5, h * 2 - s, toolButtonsContainer, _this.selectArea.bind(_this)));
-        _this.brushButtons[0].highlight('active');
         _this.layerButtons = [];
         _this.layerButtons.push(new DevToolButton(_this, 'floor', 'Layer (1)', 'select the Floor layer', null, h + s, (h + s) * 10, h * 2 + 25, toolButtonsContainer, _this.switchLayer.bind(_this), 0), new DevToolButton(_this, 'floor2', 'Layer (2)', 'select the Floor 2 layer', null, h + s, (h + s) * 9, h * 2 + 25, toolButtonsContainer, _this.switchLayer.bind(_this), 1), new DevToolButton(_this, 'walls', 'Layer (3)', 'select the Walls layer', null, h + s, (h + s) * 8, h * 2 + 25, toolButtonsContainer, _this.switchLayer.bind(_this), 2), new DevToolButton(_this, 'trees', 'Layer (4)', 'select the Trees layer', null, h + s, (h + s) * 7, h * 2 + 25, toolButtonsContainer, _this.switchLayer.bind(_this), 3));
         _this.layerButtons[0].highlight('active');
@@ -65,6 +78,8 @@ var DevModeTools = /** @class */ (function (_super) {
         _this.layerHideButtons.push(new DevToolButton(_this, '', 'Layer visibility (shift-1)', 'show/hide floor layer', 'eyeopen', 0, (h + s) * 10, h * 2 - 25, toolButtonsContainer, _this.hideLayer.bind(_this), 0), new DevToolButton(_this, '', 'Layer visibility (shift-2)', 'show/hide floor 2 layer', 'eyeopen', 0, (h + s) * 9, h * 2 - 25, toolButtonsContainer, _this.hideLayer.bind(_this), 1), new DevToolButton(_this, '', 'Layer visibility (shift-3)', 'show/hide walls layer', 'eyeopen', 0, (h + s) * 8, h * 2 - 25, toolButtonsContainer, _this.hideLayer.bind(_this), 2), new DevToolButton(_this, '', 'Layer visibility (shift-4)', 'show/hide trees layer', 'eyeopen', 0, (h + s) * 7, h * 2 - 25, toolButtonsContainer, _this.hideLayer.bind(_this), 3));
         _this.layerHideButtons[0].highlight('active');
         _this.layerHideButtons[0].increaseSize(true);
+        var toolButton = [];
+        toolButton.push(new DevToolButton(_this, 'undo', 'undo', 'undo(ctrl-z)', 'undo', 0, (h + s) * 5, h * 2 - s, toolButtonsContainer, _this.commandController.undo.bind(_this.commandController)), new DevToolButton(_this, 'redo', 'redo', 'redo(ctrl-shift-z | ctrl-y', 'redo', h * 2, (h + s) * 5, h * 2 - s, toolButtonsContainer, _this.commandController.redo.bind(_this.commandController)));
         _this.paletteButton = new DevToolButton(_this, 'palette', 'Palette', 'show/hide palette', null, 0, (h + s) * 12, h * 4, toolButtonsContainer, palette.toggle.bind(palette));
         _this.tooltip = new DevTooltip(_this.scene);
         _this.palette.hide();
@@ -80,11 +95,14 @@ var DevModeTools = /** @class */ (function (_super) {
                 camera.scrollX -= scrollX_1;
                 camera.scrollY -= scrollY_1;
             }
-            ;
         });
         _this.outline = scene.gameScene.add.graphics();
         return _this;
     }
+    DevModeTools.prototype.updateBrushArea = function () {
+        this.tileEditor.brushArea.size = { x: this.brushSize, y: this.brushSize };
+        this.tileEditor.marker.changePreview();
+    };
     DevModeTools.prototype.enterMapTab = function () {
         this.toolButtonsContainer.setVisible(true);
         this.palette.show();
@@ -101,13 +119,13 @@ var DevModeTools = /** @class */ (function (_super) {
             .map(function (widget) { return widget.getBoundingClientRect(); });
     };
     DevModeTools.prototype.checkIfInputModalPresent = function () {
-        var customModals = document.querySelectorAll(".winbox, .modal, .custom-editor-modal, #chat-message-input");
+        var customModals = document.querySelectorAll('.winbox, .modal, .custom-editor-modal, #chat-message-input');
         for (var _i = 0, customModals_1 = customModals; _i < customModals_1.length; _i++) {
             var customModal = customModals_1[_i];
             if (customModal.style.display === 'none') {
                 continue;
             }
-            var inputs = customModal.querySelectorAll("input, select, textarea, button");
+            var inputs = customModal.querySelectorAll('input, select, textarea, button');
             for (var i = 0; i < inputs.length; i++) {
                 if (inputs[i] === document.activeElement) {
                     return true;
@@ -116,11 +134,17 @@ var DevModeTools = /** @class */ (function (_super) {
         }
         return false;
     };
+    DevModeTools.prototype.isForceTo1x1 = function () {
+        if (this.modeButtons[4].active) {
+            return true;
+        }
+        return false;
+    };
     DevModeTools.prototype.keyBindings = function () {
         var _this = this;
         var gameScene = this.scene.gameScene;
         var keyboard = this.scene.input.keyboard;
-        var altKey = this.altKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ALT, false);
+        var altKey = this.altKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ALT, true);
         var shiftKey = this.shiftKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT, false);
         var tabKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, false);
         tabKey.on('down', function (key) {
@@ -237,6 +261,23 @@ var DevModeTools = /** @class */ (function (_super) {
                 }
             }
         });
+        var undoKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z, false, true);
+        undoKey.on('down', function (event) {
+            if (event.ctrlKey) {
+                if (event.shiftKey) {
+                    _this.commandController.redo();
+                }
+                else {
+                    _this.commandController.undo();
+                }
+            }
+        });
+        var redoKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Y, false, true);
+        redoKey.on('down', function (event) {
+            if (event.ctrlKey) {
+                _this.commandController.redo();
+            }
+        });
     };
     DevModeTools.prototype.cursor = function () {
         this.highlightModeButton(0);
@@ -257,40 +298,38 @@ var DevModeTools = /** @class */ (function (_super) {
         this.scene.regionEditor.regionTool = true;
     };
     DevModeTools.prototype.brush = function () {
+        if (this.modeButtons[2].active) {
+            return;
+        }
         if (this.modeButtons[3].active) {
-            this.tileEditor.selectedTile = this.tileEditor.lastSelectedTile;
             this.tileEditor.selectedTileArea = this.tileEditor.lastSelectedTileArea;
         }
         this.tileEditor.activateMarkers(true);
         this.entityEditor.activatePlacement(false);
-        this.tileEditor.marker.changePreview();
         this.scene.regionEditor.regionTool = false;
         this.highlightModeButton(2);
+        this.tileEditor.marker.changePreview();
     };
     DevModeTools.prototype.emptyTile = function () {
         if (!this.modeButtons[3].active) {
-            this.tileEditor.lastSelectedTile = this.tileEditor.selectedTile;
             this.tileEditor.lastSelectedTileArea = this.tileEditor.selectedTileArea;
-            this.tileEditor.selectedTile = -1;
-            this.tileEditor.selectedTileArea = [[-1, -1], [-1, -1]];
+            this.tileEditor.selectedTileArea = { 0: { 0: -1 } };
             this.tileEditor.activateMarkers(true);
             this.entityEditor.activatePlacement(false);
-            this.tileEditor.marker.changePreview();
             this.scene.regionEditor.regionTool = false;
             this.highlightModeButton(3);
+            this.tileEditor.marker.changePreview();
         }
     };
     DevModeTools.prototype.fill = function () {
         if (this.modeButtons[3].active) {
-            this.tileEditor.selectedTile = this.tileEditor.lastSelectedTile;
             this.tileEditor.selectedTileArea = this.tileEditor.lastSelectedTileArea;
         }
         this.tileEditor.activateMarkers(true);
         this.entityEditor.activatePlacement(false);
-        this.tileEditor.marker.changePreview();
         this.scene.regionEditor.regionTool = false;
-        this.selectSingle();
         this.highlightModeButton(4);
+        this.tileEditor.marker.changePreview();
     };
     DevModeTools.prototype.clear = function () {
         var gameMap = this.scene.gameScene.tilemap;
@@ -308,31 +347,15 @@ var DevModeTools = /** @class */ (function (_super) {
                 button.highlight('no');
         });
     };
-    DevModeTools.prototype.selectSingle = function () {
-        this.tileEditor.clearTint();
-        this.tileEditor.area = { x: 1, y: 1 };
-        this.brushButtons[0].highlight('active');
-        this.brushButtons[1].highlight('no');
-        this.tileEditor.activateMarkers(true);
-        this.entityEditor.activatePlacement(false);
-        this.tileEditor.marker.changePreview();
-        this.tileEditor.paletteMarker.changePreview();
-        if (!this.modeButtons[3].active) {
+    DevModeTools.prototype.changeShape = function (shape) {
+        if (!this.modeButtons[2].active) {
             this.brush();
         }
-    };
-    DevModeTools.prototype.selectArea = function () {
-        this.tileEditor.clearTint();
-        this.tileEditor.area = { x: 2, y: 2 };
-        this.brushButtons[1].highlight('active');
-        this.brushButtons[0].highlight('no');
-        this.tileEditor.activateMarkers(true);
-        this.entityEditor.activatePlacement(false);
-        this.tileEditor.marker.changePreview();
-        this.tileEditor.paletteMarker.changePreview();
-        if (!this.modeButtons[3].active) {
-            this.brush();
-        }
+        this.tileEditor.brushArea.shape = shape;
+        Object.values(this.brushButtons).map(function (btn) {
+            btn.highlight('no');
+        });
+        this.brushButtons[shape].highlight('active');
     };
     DevModeTools.prototype.switchLayer = function (value) {
         var scene = this.scene;

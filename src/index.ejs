@@ -38,7 +38,6 @@
 
     <!-- Sweet Alert -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.4.0/sweetalert2.min.js"></script>
-
     <!-- Game Variables -->
     <script>
         var gsAuthToken = '<%= token %>';
@@ -105,7 +104,7 @@
             //     initEditor = true;
             //     return;
             // }
-      
+
             axios.get('https://staging.modd.io/client/')
                 .then((res) => {
                     const { styles, scripts } = res.data;

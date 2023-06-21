@@ -5,12 +5,12 @@ class RegionEditor {
 	devModeTools: DevModeTools;
 
 	regionDrawGraphics: Phaser.GameObjects.Graphics;
-	regionDrawStart: {x: number, y: number};
+	regionDrawStart: { x: number, y: number };
 	regionTool: boolean;
 
 	clickedList: RegionData[];
 
-	constructor (
+	constructor(
 		gameScene: GameScene, devModeScene: DevModeScene, devModeTools: DevModeTools
 	) {
 		this.gameScene = gameScene;
@@ -38,8 +38,8 @@ class RegionEditor {
 				width = worldPoint.x - this.regionDrawStart.x;
 				height = worldPoint.y - this.regionDrawStart.y;
 				graphics.clear();
-				graphics.lineStyle(	2, 0x036ffc, 1);
-				graphics.strokeRect( this.regionDrawStart.x, this.regionDrawStart.y , width, height);
+				graphics.lineStyle(2, 0x036ffc, 1);
+				graphics.strokeRect(this.regionDrawStart.x, this.regionDrawStart.y, width, height);
 			}
 		}, this);
 
@@ -60,10 +60,12 @@ class RegionEditor {
 					y = this.regionDrawStart.y + height;
 					height *= -1;
 				}
-				taro.network.send('editRegion', {x: Math.trunc(x),
+				taro.network.send<any>('editRegion', {
+					x: Math.trunc(x),
 					y: Math.trunc(y),
 					width: Math.trunc(width),
-					height: Math.trunc(height)});
+					height: Math.trunc(height)
+				});
 
 				this.regionDrawStart = null;
 			}
@@ -72,7 +74,7 @@ class RegionEditor {
 		this.clickedList = [];
 	}
 
-	edit (data: RegionData): void {
+	edit(data: RegionData): void {
 		if (data.newName && data.name !== data.newName) {
 			const region = taro.regionManager.getRegionById(data.name);
 			if (region) region._stats.id = data.newName;
@@ -83,7 +85,7 @@ class RegionEditor {
 				}
 			});
 		} else if (data.showModal) {
-			inGameEditor.addNewRegion && inGameEditor.addNewRegion({name: data.name, x: data.x, y: data.y, width: data.width, height: data.height, userId: data.userId});
+			inGameEditor.addNewRegion && inGameEditor.addNewRegion({ name: data.name, x: data.x, y: data.y, width: data.width, height: data.height, userId: data.userId });
 		}
 
 		inGameEditor.updateRegionInReact && inGameEditor.updateRegionInReact(data);
@@ -106,11 +108,11 @@ class RegionEditor {
 		if (!this.devModeScene.pointerInsideWidgets()) {
 			if (this.clickedList.length === 1) {
 				inGameEditor.addNewRegion && inGameEditor.addNewRegion(this.clickedList[0]);
-			} else if ( this.clickedList.length > 1 ) {
+			} else if (this.clickedList.length > 1) {
 				inGameEditor.showRegionList && inGameEditor.showRegionList(this.clickedList);
 			}
 		}
-		
+
 		this.clickedList = [];
 	}
 
