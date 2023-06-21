@@ -105,6 +105,7 @@ class EntityImage {
     }
 
     edit (action: ActionData): void {
+        if (!action.wasEdited) action.wasEdited = true;
         taro.network.send('editInitEntity', action);
     }
 
@@ -121,6 +122,7 @@ class EntityImage {
     }
 
     update (action: ActionData): void {
+        if (!this.action.wasEdited) action.wasEdited = true;
         if (this.action.position && this.action.position.x && this.action.position.y &&
             action.position && action.position.x && action.position.y) {
             this.action.position = action.position;

@@ -41,6 +41,7 @@ interface ActionData {
 	angle?: number;
 	width?: number;
 	height?: number;
+    wasEdited?: boolean;
 }
 
 interface MapData {

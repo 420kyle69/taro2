@@ -5,12 +5,14 @@ var EntityEditor = /** @class */ (function () {
         this.devModeTools = devModeTools;
         this.preview = this.gameScene.add.image(0, 0, null, 0);
         this.preview.setAlpha(0.75).setVisible(false);
+        /*
         this.activeEntity = {
             id: 'ROrWqytd2r',
             player: 'AI resources',
             entityType: 'unitTypes'
-        };
+        }
         this.updatePreview();
+        */
         taro.client.on('updateActiveEntity', function () {
             _this.activeEntity = inGameEditor.getActiveEntity && inGameEditor.getActiveEntity();
             _this.updatePreview();
