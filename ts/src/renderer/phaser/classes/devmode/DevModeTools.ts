@@ -94,12 +94,12 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.modeButtons = [];
 		this.modeButtons.push(
 			new DevToolButton(this, '', 'Cursor Tool (C)', 'interact with regions and entities', 'cursor', 0, 0, h * 2 - s, toolButtonsContainer, this.cursor.bind(this)),
-			new DevToolButton(this, '', 'Region Tool (R)', 'draw new region', 'region', h * 2, 0, h * 2 - s, toolButtonsContainer, this.drawRegion.bind(this)),
+			new DevToolButton(this, '', 'Region Tool (R)', 'draw new region', 'region', 0, (h + s) * 3, h * 2 - s, toolButtonsContainer, this.drawRegion.bind(this)),
 			new DevToolButton(this, '', 'Stamp Brush (B)', 'LMB: place selected tiles. RMB: copy tiles', 'stamp', 0, h + s, h * 2 - s, toolButtonsContainer, this.brush.bind(this), undefined, Object.values(this.brushButtons)),
 			new DevToolButton(this, '', 'Eraser (E)', 'delete tiles from selected layer', 'eraser', h * 2, h + s, h * 2 - s, toolButtonsContainer, this.emptyTile.bind(this)),
 			new DevToolButton(this, '', 'Bucket Fill (F)', 'fill an area with the selected tile', 'fill', 0, (h + s) * 2, h * 2 - s, toolButtonsContainer, this.fill.bind(this)),
 			new DevToolButton(this, '', 'Clear Layer (L)', 'clear selected layer', 'clear', h * 2, (h + s) * 2, h * 2 - s, toolButtonsContainer, this.clear.bind(this)),
-			new DevToolButton(this, '', 'Save Map (S)', 'save all changes', 'save', 0, (h + s) * 3, h * 2 - s, toolButtonsContainer, this.save.bind(this)),
+			new DevToolButton(this, '', 'Save Map (S)', 'save all changes', 'save', h * 2, (h + s) * 3, h * 2 - s, toolButtonsContainer, this.save.bind(this)),
 			new DevToolButton(this, '', 'Entities Tool (A)', 'LMB: Place selected Entity on the Map RMB: copy entity', 'entity', h * 2, 0, h * 2 - s, toolButtonsContainer, this.addEntities.bind(this))
 		);
 		this.cursorButton = this.modeButtons[0];
