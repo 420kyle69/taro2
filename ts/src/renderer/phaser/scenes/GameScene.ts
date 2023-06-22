@@ -99,7 +99,9 @@ class GameScene extends PhaserScene {
 		});
 
         taro.client.on('instant-move-camera', (x: number, y: number) => {
-			camera.centerOn(x, y);
+            if (!taro.developerMode.active || taro.developerMode.activeTab === 'play') {
+			    camera.centerOn(x, y);
+            }
 		});
 	}
 

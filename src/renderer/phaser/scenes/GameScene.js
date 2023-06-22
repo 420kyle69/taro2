@@ -77,7 +77,9 @@ var GameScene = /** @class */ (function (_super) {
             camera.setScroll(x, y);
         });
         taro.client.on('instant-move-camera', function (x, y) {
-            camera.centerOn(x, y);
+            if (!taro.developerMode.active || taro.developerMode.activeTab === 'play') {
+                camera.centerOn(x, y);
+            }
         });
     };
     GameScene.prototype.preload = function () {
