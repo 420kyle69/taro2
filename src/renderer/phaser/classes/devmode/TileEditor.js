@@ -195,10 +195,12 @@ var TileEditor = /** @class */ (function () {
         if (this.gameScene.tilemapLayers[layer].visible && selectedTiles) {
             for (var x = 0; x < brushSize.x; x++) {
                 for (var y = 0; y < brushSize.y; y++) {
-                    if (sample[x] && sample[x][y] && DevModeScene.pointerInsideMap(tileX + x, tileY + y, map)) {
+                    if (sample[x] && sample[x][y] !== undefined && DevModeScene.pointerInsideMap(tileX + x, tileY + y, map)) {
                         var index = sample[x][y];
                         if (index !== (map.getTileAt(tileX + x, tileY + y, true, layer)).index &&
                             !(index === 0 && map.getTileAt(tileX + x, tileY + y, true, layer).index === -1)) {
+                            if (index === 0)
+                                index = -1;
                             map.putTileAt(index, tileX + x, tileY + y, false, layer);
                             map.getTileAt(tileX + x, tileY + y, true, layer).tint = 0xffffff;
                             if (index === -1)

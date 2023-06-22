@@ -226,13 +226,14 @@ class TileEditor {
 		if (this.gameScene.tilemapLayers[layer].visible && selectedTiles) {
 			for (let x = 0; x < brushSize.x; x++) {
 				for (let y = 0; y < brushSize.y; y++) {
-					if (sample[x] && sample[x][y] && DevModeScene.pointerInsideMap(tileX + x, tileY + y, map)) {
+					if (sample[x] && sample[x][y] !== undefined && DevModeScene.pointerInsideMap(tileX + x, tileY + y, map)) {
 						let index = sample[x][y];
 						if (index !== (map.getTileAt(tileX + x, tileY + y, true, layer)).index &&
 							!(index === 0 && map.getTileAt(tileX + x, tileY + y, true, layer).index === -1)) {
+							if (index === 0) index = -1;
 							map.putTileAt(index, tileX + x, tileY + y, false, layer);
 							map.getTileAt(tileX + x, tileY + y, true, layer).tint = 0xffffff;
-                            if (index === -1) index = 0;
+							if (index === -1) index = 0;
 							taroMap.layers[tempLayer].data[(tileY + y) * width + tileX + x] = index;
 						}
 					}

@@ -64,7 +64,7 @@ class TileShape {
 				break;
 			}
 			const vec2d = circleValue.value as Vector2D;
-			if (selectedTileArea[minX + vec2d.x % xLength] && selectedTileArea[minX + vec2d.x % xLength][minY + vec2d.y % yLength]) {
+			if (selectedTileArea[minX + vec2d.x % xLength] && selectedTileArea[minX + vec2d.x % xLength][minY + vec2d.y % yLength] !== undefined) {
 				if (!newSample[vec2d.x]) {
 					newSample[vec2d.x] = {};
 				}
@@ -87,7 +87,7 @@ class TileShape {
 				break;
 			}
 			const vec2d = diamondValue.value as Vector2D;
-			if (selectedTileArea[minX + vec2d.x % xLength] && selectedTileArea[minX + vec2d.x % xLength][minY + vec2d.y % yLength]) {
+			if (selectedTileArea[minX + vec2d.x % xLength] && selectedTileArea[minX + vec2d.x % xLength][minY + vec2d.y % yLength] !== undefined) {
 				if (!newSample[vec2d.x]) {
 					newSample[vec2d.x] = {};
 				}
@@ -109,7 +109,7 @@ class TileShape {
 			}
 			const vec2d = rectValue.value as Vector2D;
 
-			if (selectedTileArea[minX + vec2d.x % xLength] && selectedTileArea[minX + vec2d.x % xLength][minY + vec2d.y % yLength]) {
+			if (selectedTileArea[minX + vec2d.x % xLength] && selectedTileArea[minX + vec2d.x % xLength][minY + vec2d.y % yLength] !== undefined) {
 				if (!newSample[vec2d.x]) {
 					newSample[vec2d.x] = {};
 				}

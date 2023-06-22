@@ -130,7 +130,7 @@ class DeveloperMode {
 		if (map.layers[layer]) {
 			for (let x = 0; x < brushSize.x; x++) {
 				for (let y = 0; y < brushSize.y; y++) {
-					if (sample[x] && sample[x][y] && this.pointerInsideMap(x + tileX, y + tileY, map)) {
+					if (sample[x] && sample[x][y] !== undefined && this.pointerInsideMap(x + tileX, y + tileY, map)) {
 						let index = sample[x][y];
                         if (index === -1) index = 0;
 						map.layers[layer].data[x + tileX + (y + tileY) * width] = index;
