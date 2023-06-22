@@ -5107,6 +5107,8 @@ var TaroEntity = TaroObject.extend({
 		let yStart = null;
 		let xEnd = null;
 		let yEnd = null;
+		let xDiff = null;
+		let yDiff = null;
 		let rotateStart = null;
 		let rotateEnd = null;
 		
@@ -5124,8 +5126,10 @@ var TaroEntity = TaroObject.extend({
 				!(this._category == 'item' && this.getOwnerUnit() != undefined) && // don't apply to item that's held by unit as that's calculated by anchor calculation
 				!(this._category == 'projectile' && this._stats.sourceItemId == undefined && this._streamMode) // don't apply to projectiles that are CSP'ed
 			) {
-				x += (finalTransform[0] - x)/10
-	        	y += (finalTransform[1] - y)/10
+				xDiff = (finalTransform[0] - x);
+				yDiff = (finalTransform[1] - y);				
+				x = x + xDiff / 10
+	        	y = y + yDiff / 10
 	        }
 
 	        if (

@@ -802,16 +802,20 @@ var Item = TaroEntityPhysics.extend({
 					// console.log(itemAngle, unitAnchoredPosition)
 					// }
 
-					var unitAnchorOffsetRotate = Math.radians(self._stats.currentBody.unitAnchor.rotation || 0);
-					var unitAnchorOffsetX = self._stats.currentBody.unitAnchor.x || 0;
-					var unitAnchorOffsetY = self._stats.currentBody.unitAnchor.y || 0;
+					var unitAnchorOffsetRotate = Math.radians(self._stats.currentBody.unitAnchor.rotation || 0);					
+					var unitAnchorOffsetY = self._stats.currentBody.unitAnchor.y || 0;					
+					var itemAnchorOffsetY = self._stats.currentBody.itemAnchor?.y || 0; // get translation offset based on itemAnchor
 
 					// item is flipped, then mirror the rotation
 					if (ownerUnit._stats.flip == 1) {
 						var unitAnchorOffsetX = -self._stats.currentBody.unitAnchor.x || 0;
+						var itemAnchorOffsetX = -self._stats.currentBody.itemAnchor?.x || 0;
+					
 						rotate -= unitAnchorOffsetRotate;
 					} else {
 						var unitAnchorOffsetX = self._stats.currentBody.unitAnchor.x || 0;
+						var itemAnchorOffsetX = self._stats.currentBody.itemAnchor?.x || 0;
+					
 						rotate += unitAnchorOffsetRotate;
 					}
 
@@ -821,12 +825,10 @@ var Item = TaroEntityPhysics.extend({
 						y: (unitAnchorOffsetX * Math.sin(unitRotate)) - (unitAnchorOffsetY * Math.cos(unitRotate))
 					};
 
-					// get translation offset based on itemAnchor
-					var itemAnchorOffsetX = self._stats.currentBody.itemAnchor && self._stats.currentBody.itemAnchor.x || 0;
-					var itemAnchorOffsetY = self._stats.currentBody.itemAnchor && self._stats.currentBody.itemAnchor.y || 0;
-
+					
 					offset.x = (unitAnchoredPosition.x) + (itemAnchorOffsetX * Math.cos(rotate)) + (itemAnchorOffsetY * Math.sin(rotate)),
 					offset.y = (unitAnchoredPosition.y) + (itemAnchorOffsetX * Math.sin(rotate)) - (itemAnchorOffsetY * Math.cos(rotate));
+					
 					if (self._stats.controls && self._stats.controls.mouseBehaviour) {
 						if (self._stats.controls.mouseBehaviour.rotateToFaceMouseCursor || (self._stats.currentBody && (self._stats.currentBody.jointType == 'weldJoint'))) {
 							offset.rotate = rotate;
