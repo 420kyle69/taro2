@@ -1841,11 +1841,15 @@ var VariableComponent = TaroEntity.extend({
 					if (string) {
 						try {
 							var array = JSON.parse(string);
-						} catch (err) {
-							console.error(err);
-						}
 
-						returnValue = array.length;
+							if (Array.isArray(array)) {
+								returnValue = array.length;
+							}
+						} catch (err) {
+							if (err instanceof SyntaxError) {
+								this._script.errorLog(`error parsing JSON within getStringArrayLength:  ${typeof string} ${string} is not a valid JSON string`);
+							}
+						}
 					}
 
 					break;
@@ -1854,14 +1858,16 @@ var VariableComponent = TaroEntity.extend({
 					var string = self.getValue(text.string, vars);
 					var index = self.getValue(text.number, vars);
 
-					if (string && index != undefined) {
+					if (string && index) {
 						try {
 							var array = JSON.parse(string);
-						} catch (err) {
-							console.error(err);
-						}
+							returnValue = array[index];
 
-						returnValue = array[index];
+						} catch (err) {
+							if (err instanceof SyntaxError) {
+								this._script.errorLog(`error parsing JSON within getStringArrayElement:  ${typeof string} ${string} is not a valid JSON string`);
+							}
+						}
 					}
 
 					break;
@@ -1873,12 +1879,18 @@ var VariableComponent = TaroEntity.extend({
 					if (string && value) {
 						try {
 							var array = JSON.parse(string);
-						} catch (err) {
-							console.error(err);
-						}
 
-						array.push(value);
-						returnValue = JSON.stringify(array);
+							if (Array.isArray(array)) {
+								array.push(value);
+								returnValue = JSON.stringify(array);
+							}
+						} catch (err) {
+							if (err instanceof SyntaxError) {
+								this._script.errorLog(`error parsing JSON within insertStringArrayElement:  ${typeof string} ${string} is not a valid JSON string`);
+							} else {
+								this._script.errorLog('error modifying array within insertStringArrayElement');
+							}
+						}
 					}
 
 					break;
@@ -1888,15 +1900,21 @@ var VariableComponent = TaroEntity.extend({
 					var index = self.getValue(text.number, vars);
 					var value = self.getValue(text.value, vars);
 
-					if (string && value && index != undefined) {
+					if (string && value && index) {
 						try {
 							var array = JSON.parse(string);
-						} catch (err) {
-							console.error(err);
-						}
 
-						array[index] = value;
-						returnValue = JSON.stringify(array);
+							if (Array.isArray(array)) {
+								array[index] = value;
+								returnValue = JSON.stringify(array);
+							}
+						} catch (err) {
+							if (err instanceof SyntaxError) {
+								this._script.errorLog(`error parsing JSON within updateStringArrayElement:  ${typeof string} ${string} is not a valid JSON string`);
+							} else {
+								this._script.errorLog('error modifying array within updateStringArrayElement');
+							}
+						}
 					}
 
 					break;
@@ -1908,12 +1926,18 @@ var VariableComponent = TaroEntity.extend({
 					if (string && index != undefined) {
 						try {
 							var array = JSON.parse(string);
-						} catch (err) {
-							console.error(err);
-						}
 
-						array.splice(index,1);
-						returnValue = JSON.stringify(array);
+							if (Array.isArray(array)) {
+								array.splice(index,1);
+								returnValue = JSON.stringify(array);
+							}
+						} catch (err) {
+							if (err instanceof SyntaxError) {
+								this._script.errorLog(`error parsing JSON within removeStringArrayElement:  ${typeof string} ${string} is not a valid JSON string`);
+							} else {
+								this._script.errorLog('error modifying array within removeStringArrayElement');
+							}
+						}
 					}
 
 					break;

@@ -181,9 +181,11 @@ var ScriptComponent = TaroEntity.extend({
 		if (this.scripts) {
 			var script = this.scripts[this.currentScriptId];
 			var log = `Script error '${(script) ? script.name : ''}' in Action '${this.currentActionName}' : ${message}`;
+
 			this.errorLogs[this.currentActionName] = log;
 			taro.devLog('script errorLog', log, message);
 			ScriptComponent.prototype.log(log);
+
 			return log;
 		}
 	}
