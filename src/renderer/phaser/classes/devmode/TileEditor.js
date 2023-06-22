@@ -201,6 +201,8 @@ var TileEditor = /** @class */ (function () {
                             !(index === 0 && map.getTileAt(tileX + x, tileY + y, true, layer).index === -1)) {
                             map.putTileAt(index, tileX + x, tileY + y, false, layer);
                             map.getTileAt(tileX + x, tileY + y, true, layer).tint = 0xffffff;
+                            if (index === -1)
+                                index = 0;
                             taroMap.layers[tempLayer].data[(tileY + y) * width + tileX + x] = index;
                         }
                     }
