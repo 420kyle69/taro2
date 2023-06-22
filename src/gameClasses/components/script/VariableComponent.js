@@ -1923,7 +1923,7 @@ var VariableComponent = TaroEntity.extend({
 					var string = self.getValue(text.string, vars);
 					var index = self.getValue(text.number, vars);
 
-					if (string && index != undefined) {
+					if (string && index) {
 						try {
 							var array = JSON.parse(string);
 
