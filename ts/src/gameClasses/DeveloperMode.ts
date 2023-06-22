@@ -132,7 +132,6 @@ class DeveloperMode {
 				for (let y = 0; y < brushSize.y; y++) {
 					if (sample[x] && sample[x][y] && this.pointerInsideMap(x + tileX, y + tileY, map)) {
 						let index = sample[x][y];
-                        if (index === -1) index = 0;
 						map.layers[layer].data[x + tileX + (y + tileY) * width] = index;
 						taro.map.data.layers[layer].data[x + tileX + (y + tileY) * width] = index;
 					}
