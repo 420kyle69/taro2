@@ -1838,6 +1838,7 @@ var VariableComponent = TaroEntity.extend({
 				case 'getStringArrayLength':
 					var string = self.getValue(text.string, vars);
 
+					// falsy check OK because empty string is not valid array
 					if (string) {
 						try {
 							var array = JSON.parse(string);
@@ -1858,7 +1859,8 @@ var VariableComponent = TaroEntity.extend({
 					var string = self.getValue(text.string, vars);
 					var index = self.getValue(text.number, vars);
 
-					if (string && index) {
+					// index can be zero so more than a falsy check is necessary
+					if (string && index !== undefined) {
 						try {
 							var array = JSON.parse(string);
 							returnValue = array[index];
@@ -1876,7 +1878,8 @@ var VariableComponent = TaroEntity.extend({
 					var string = self.getValue(text.string, vars);
 					var value = self.getValue(text.value, vars);
 
-					if (string && value) {
+					// value can be something that evaluates falsy so more is needed
+					if (string && value !== undefined) {
 						try {
 							var array = JSON.parse(string);
 
@@ -1900,7 +1903,8 @@ var VariableComponent = TaroEntity.extend({
 					var index = self.getValue(text.number, vars);
 					var value = self.getValue(text.value, vars);
 
-					if (string && value && index) {
+					// value and index can be falsy and valid so more is needed
+					if (string && value !== undefined && index !== undefined) {
 						try {
 							var array = JSON.parse(string);
 
@@ -1923,7 +1927,8 @@ var VariableComponent = TaroEntity.extend({
 					var string = self.getValue(text.string, vars);
 					var index = self.getValue(text.number, vars);
 
-					if (string && index) {
+					// index can be zero so more than falsy check is necessary
+					if (string && index !== undefined) {
 						try {
 							var array = JSON.parse(string);
 
