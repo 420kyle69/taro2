@@ -299,7 +299,7 @@ var ControlComponent = TaroEntity.extend({
 									// tap on mobile will be detected as right click for now, so old games with joysticks will not have problems
 									self.keyDown('mouse', 'button3');
 									self.sendMobileInput = false;
-								} else {
+								} else if (!taro.isMobile) {
 									self.keyDown(device, key);
 								}
 							}
@@ -309,7 +309,7 @@ var ControlComponent = TaroEntity.extend({
 									// tap on mobile will be detected as right click for now, so old games with joysticks will not have problems
 									self.keyUp('mouse', 'button3');
 									self.sendMobileInput = false;
-								} else {
+								} else if (!taro.isMobile) {
 									self.keyUp(device, key);
 								}
 							}
