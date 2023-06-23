@@ -4539,6 +4539,7 @@ var TaroEntity = TaroObject.extend({
 		// console.log("streamMode (" + val + ")", (this._stats) ? this._stats.name : this._category)
 		if (val !== undefined) {
 			this._streamMode = val;
+
 			return this;
 		}
 
@@ -4709,7 +4710,7 @@ var TaroEntity = TaroObject.extend({
 					break;
 
 				case 'projectile':
-					keys = ['type', 'anim', 'stateId', 'flip', 'sourceItemId'];
+					keys = ['type', 'anim', 'stateId', 'flip', 'sourceItemId', 'streamMode'];
 					data = {
 						attributes: {},
 						// variables: {}
@@ -5120,17 +5121,18 @@ var TaroEntity = TaroObject.extend({
 
 		var finalTransform = this.finalKeyFrame[1];
 		// using cspMovement for my unit will cause it to rubberband to the latest known position
-		if (taro.game.cspEnabled && finalTransform /*&& !this._stats.aiEnabled*/) {
-
+		if (taro.game.cspEnabled && finalTransform && !this._stats.streamMode/*&& !this._stats.aiEnabled*/) {
 			if (this.body &&
 				!(this._category == 'item' && this.getOwnerUnit() != undefined) && // don't apply to item that's held by unit as that's calculated by anchor calculation
-				!(this._category == 'projectile' && this._stats.sourceItemId == undefined && this._streamMode) // don't apply to projectiles that are CSP'ed
+				!(this._category == 'projectile' && this._stats.streamMode) // don't apply to projectiles that are CSP'ed
 			) {
 				xDiff = (finalTransform[0] - x);
 				yDiff = (finalTransform[1] - y);
 				x = x + xDiff / 10;
 	        	y = y + yDiff / 10;
+				if (this._category === 'projectile') console.log(this._stats.name, this._stats.streamMode);
 	        }
+			else if (this._category === 'projectile') console.log(this._stats.name, this._stats.streamMode);
 
 	        if (
 	        	// interpolate item rotation
@@ -5147,7 +5149,7 @@ var TaroEntity = TaroObject.extend({
 	        	rotate = this.interpolateValue(rotateStart, rotateEnd, taro._currentTime - 16, taro._currentTime, taro._currentTime + 16);
 	        }
 		} else { // use server-streamed keyFrames
-
+			if (this._category === 'projectile') console.log(taro.nextSnapshot, taro.nextSnapshot[1][this.id()], taro.prevSnapshot[1][this.id()]);
 			if (taro.nextSnapshot) {
 				var nextTransform = taro.nextSnapshot[1][this.id()];
 				if (nextTransform) {
@@ -5175,7 +5177,7 @@ var TaroEntity = TaroObject.extend({
 		// csp-projectiles are interpolated using physicsComponent-generated keyframes
 		// this is necessary, because physics don't run at 60 fps on clientside
 		if (taro.physics && this._category == 'projectile' &&
-			this._stats.sourceItemId != undefined && !this._streamMode
+			!this._stats.streamMode
 		) {
 			prevKeyFrame = this.prevPhysicsFrame;
 			nextKeyFrame = this.nextPhysicsFrame;
@@ -5184,7 +5186,9 @@ var TaroEntity = TaroObject.extend({
 			var nextTransform = (this.nextPhysicsFrame) ? this.nextPhysicsFrame[1] : undefined;
 
 			if (prevTransform && nextTransform) {
-				if (!this.renderingStarted) this.startRendering();
+				if (!this.renderingStarted) {
+					this.startRendering();
+				}
 				xStart = prevTransform[0];
 				yStart = prevTransform[1];
 				xEnd = nextTransform[0];
