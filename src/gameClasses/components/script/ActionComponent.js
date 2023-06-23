@@ -286,10 +286,9 @@ var ActionComponent = TaroEntity.extend({
 						break;
 
 					case 'setPlayerAttribute':
-
 						var attrId = self._script.variable.getValue(action.attribute, vars);
-						var player = entity;
-						if (player && player._category == 'player' && player._stats.attributes) {
+						var player = self._script.variable.getValue(action.entity, vars);
+						if (player && player._category == 'player' && player._stats.attributes) {							
 							var attribute = player._stats.attributes[attrId];
 							if (attribute != undefined) {
 								var decimalPlace = parseInt(attribute.decimalPlaces) || 0;

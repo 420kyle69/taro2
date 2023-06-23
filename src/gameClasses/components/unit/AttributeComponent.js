@@ -187,14 +187,12 @@ var AttributeComponent = TaroEntity.extend({
 	},
 	// change attribute's value manually
 	update: function (attributeTypeId, newValue, forceUpdate) {
-
 		var self = this;
 		if (!self._entity._stats || !self._entity._stats.attributes) {
 			return;
 		}
 
 		var attributes = JSON.parse(JSON.stringify(self._entity._stats.attributes)); // clone units existing attribute values
-
 		if (attributes) {
 			var attribute = attributes[attributeTypeId];
 			if (attribute) {
@@ -224,6 +222,9 @@ var AttributeComponent = TaroEntity.extend({
 							let attrData = { attributes: {} };
 							attrData.attributes[attributeTypeId] = newValue;
 							self._entity.streamUpdateData([attrData]);
+
+							
+
 						}
 
 						var triggeredBy = { attribute: attribute };
@@ -258,6 +259,25 @@ var AttributeComponent = TaroEntity.extend({
 							}
 							self._entity._stats.newHighscore = newValue;
 						}
+					}
+					
+					// track guided tutorial progress
+					var parentGameId = taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.parentGameId;
+					if (parentGameId == '646d39f8d9317a8253b8a143' && attribute.name == 'progress' && global.posthog && self._entity._category == 'player') {
+						// for tracking user progress in tutorials
+						var client = taro.server.clients[self._entity._stats.clientId];
+						var socket = client.socket;
+						global.posthog.capture({
+							distinctId: socket._token.posthogDistinctId,
+							'event': 'Tutorial Progress Updated',
+							properties: {
+								'$ip': socket._remoteAddress,
+								'gameSlug': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.gameSlug,
+								'gameId': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData._id,
+								'parentGameId': parentGameId,
+								'progress': newValue
+							}
+						});					
 					}
 				} else if (taro.isClient) {
 					if (taro.client.myPlayer) {
