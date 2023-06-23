@@ -55,9 +55,8 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			if (taro.game.data.defaultData.contextMenuEnabled && (!taro.developerMode.active || (taro.developerMode.active && taro.developerMode.activeTab === 'play')) && p.rightButtonDown()) {
 				const ownerPlayer = taro.$(this.entity._stats.ownerId);
 				if (ownerPlayer._stats.controlledBy === 'human') {
-					reactApp && reactApp.showUnitOwnerDropdown && reactApp.showUnitOwnerDropdown(this.entity._stats.ownerId, p);
+					showUnitOwnerDropdown(this.entity._stats.ownerId, p);
 				}
-				
 			}
 		});
 	}

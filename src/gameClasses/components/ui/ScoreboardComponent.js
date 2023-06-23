@@ -30,84 +30,84 @@ var ScoreboardComponent = TaroEntity.extend({
 			$('#leaderboard').css('z-index', 1);
 		}
 
-		$(function () {
-			$.contextMenu({
-				selector: '.scoreboard-user-entry',
-				build: function ($trigger) {
-					var userData = $trigger.data();
-					var myPlayer = taro.client.myPlayer;
+		// $(function () {
+		// 	$.contextMenu({
+		// 		selector: '.scoreboard-user-entry',
+		// 		build: function ($trigger) {
+		// 			var userData = $trigger.data();
+		// 			var myPlayer = taro.client.myPlayer;
 
-					if (!myPlayer || !myPlayer._stats) {
-						return;
-					}
+		// 			if (!myPlayer || !myPlayer._stats) {
+		// 				return;
+		// 			}
 
-					var userId = myPlayer._stats.userId;
-					var mutedUsers = myPlayer._stats.mutedUsers;
-					if (userId === userData.userId) {
-						// user cannot perform action on his/her own player
-						return;
-					}
+		// 			var userId = myPlayer._stats.userId;
+		// 			var mutedUsers = myPlayer._stats.mutedUsers;
+		// 			if (userId === userData.userId) {
+		// 				// user cannot perform action on his/her own player
+		// 				return;
+		// 			}
 
-					taro.scoreboard.selectedUser = userData;
+		// 			taro.scoreboard.selectedUser = userData;
 
-					var index = mutedUsers.indexOf(taro.scoreboard.selectedUser.userId);
+		// 			var index = mutedUsers.indexOf(taro.scoreboard.selectedUser.userId);
 
-					return {
-						callback: function (key) {
-							switch (key) {
-								case 'unmute': {
-									mutedUsers.splice(index, 1);
-									$.ajax({
-										url: `/api/user/toggle-mute/${taro.scoreboard.selectedUser.userId}`,
-										type: 'POST',
-										success: function (data) {
-											console.log(data);											// alert('request sent');
-										}
-									});
-									break;
-								}
-								case 'mute': {
-									mutedUsers.push(taro.scoreboard.selectedUser.userId);
-									$.ajax({
-										url: `/api/user/toggle-mute/${taro.scoreboard.selectedUser.userId}`,
-										type: 'POST',
-										success: function (data) {
-											console.log(data);											// alert('request sent');
-										}
-									});
-									break;
-								}
-								case 'addFriend': {
-									$.ajax({
-										url: `/api/user/request/${taro.scoreboard.selectedUser.userId}`,
-										type: 'POST',
-										success: function (data) {
-											alert('request sent');
-										}
-									});
-									break;
-								}
-							}
-						},
-						items: {
-							addFriend: {
-								name: 'Add Friend'
-							},
-							separator: { type: 'cm_separator' },
-							unmute: {
-								name: `Unmute ${taro.scoreboard.selectedUser.userName}`,
-								visible: index > -1
-							},
-							mute: {
-								name: `Mute ${taro.scoreboard.selectedUser.userName}`,
-								visible: index === -1,
-								className: 'context-menu-item context-menu-hover context-menu-danger'
-							}
-						}
-					};
-				}
-			});
-		});
+		// 			return {
+		// 				callback: function (key) {
+		// 					switch (key) {
+		// 						case 'unmute': {
+		// 							mutedUsers.splice(index, 1);
+		// 							$.ajax({
+		// 								url: `/api/user/toggle-mute/${taro.scoreboard.selectedUser.userId}`,
+		// 								type: 'POST',
+		// 								success: function (data) {
+		// 									console.log(data);											// alert('request sent');
+		// 								}
+		// 							});
+		// 							break;
+		// 						}
+		// 						case 'mute': {
+		// 							mutedUsers.push(taro.scoreboard.selectedUser.userId);
+		// 							$.ajax({
+		// 								url: `/api/user/toggle-mute/${taro.scoreboard.selectedUser.userId}`,
+		// 								type: 'POST',
+		// 								success: function (data) {
+		// 									console.log(data);											// alert('request sent');
+		// 								}
+		// 							});
+		// 							break;
+		// 						}
+		// 						case 'addFriend': {
+		// 							$.ajax({
+		// 								url: `/api/user/request/${taro.scoreboard.selectedUser.userId}`,
+		// 								type: 'POST',
+		// 								success: function (data) {
+		// 									alert('request sent');
+		// 								}
+		// 							});
+		// 							break;
+		// 						}
+		// 					}
+		// 				},
+		// 				items: {
+		// 					addFriend: {
+		// 						name: 'Add Friend'
+		// 					},
+		// 					separator: { type: 'cm_separator' },
+		// 					unmute: {
+		// 						name: `Unmute ${taro.scoreboard.selectedUser.userName}`,
+		// 						visible: index > -1
+		// 					},
+		// 					mute: {
+		// 						name: `Mute ${taro.scoreboard.selectedUser.userName}`,
+		// 						visible: index === -1,
+		// 						className: 'context-menu-item context-menu-hover context-menu-danger'
+		// 					}
+		// 				}
+		// 			};
+		// 		}
+		// 	});
+		// });
 	},
 
 	convertNumbersToKMB: function (labelValue) {
@@ -191,7 +191,7 @@ var ScoreboardComponent = TaroEntity.extend({
 					readableName = readableName.replace(/>/g, '&gt;');
 
 					color = color || DEFAULT_COLOR;
-					scoreboard += `<div data-user-name='${player._stats.name}' data-user-id='${player._stats.userId}' class='cursor-pointer scoreboard-user-entry' style='color: ${color};font-weight:${defaultFontWeight}'>${readableName} <small><span>${self.convertNumbersToKMB(sortedScores[i].value)}</span></small></div>`;
+					scoreboard += `<div onContextMenu="window.showUnitOwnerDropdown(null, event, '${player._stats.userId}')" class='cursor-pointer scoreboard-user-entry' style='color: ${color};font-weight:${defaultFontWeight}'>${readableName} <small><span>${self.convertNumbersToKMB(sortedScores[i].value)}</span></small></div>`;
 				}
 			}
 
