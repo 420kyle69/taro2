@@ -53,7 +53,7 @@ var TileShape = /** @class */ (function () {
                 break;
             }
             var vec2d = circleValue.value;
-            if (selectedTileArea[minX + vec2d.x % xLength] && selectedTileArea[minX + vec2d.x % xLength][minY + vec2d.y % yLength]) {
+            if (selectedTileArea[minX + vec2d.x % xLength] && selectedTileArea[minX + vec2d.x % xLength][minY + vec2d.y % yLength] !== undefined) {
                 if (!newSample[vec2d.x]) {
                     newSample[vec2d.x] = {};
                 }
@@ -73,7 +73,7 @@ var TileShape = /** @class */ (function () {
                 break;
             }
             var vec2d = diamondValue.value;
-            if (selectedTileArea[minX + vec2d.x % xLength] && selectedTileArea[minX + vec2d.x % xLength][minY + vec2d.y % yLength]) {
+            if (selectedTileArea[minX + vec2d.x % xLength] && selectedTileArea[minX + vec2d.x % xLength][minY + vec2d.y % yLength] !== undefined) {
                 if (!newSample[vec2d.x]) {
                     newSample[vec2d.x] = {};
                 }
@@ -93,7 +93,7 @@ var TileShape = /** @class */ (function () {
                 break;
             }
             var vec2d = rectValue.value;
-            if (selectedTileArea[minX + vec2d.x % xLength] && selectedTileArea[minX + vec2d.x % xLength][minY + vec2d.y % yLength]) {
+            if (selectedTileArea[minX + vec2d.x % xLength] && selectedTileArea[minX + vec2d.x % xLength][minY + vec2d.y % yLength] !== undefined) {
                 if (!newSample[vec2d.x]) {
                     newSample[vec2d.x] = {};
                 }

@@ -80,8 +80,8 @@ var TileEditor = /** @class */ (function () {
                     nowBrushSize.x = 1;
                     nowBrushSize.y = 1;
                 }
-                var pointerTileX = gameMap.worldToTileX(worldPoint.x - (nowBrushSize.x - 0.5) * Constants.TILE_SIZE / 2, true);
-                var pointerTileY = gameMap.worldToTileY(worldPoint.y - (nowBrushSize.y - 0.5) * Constants.TILE_SIZE / 2, true);
+                var pointerTileX = gameMap.worldToTileX(worldPoint.x - (nowBrushSize.x - 1) * Constants.TILE_SIZE / 2, true);
+                var pointerTileY = gameMap.worldToTileY(worldPoint.y - (nowBrushSize.y - 1) * Constants.TILE_SIZE / 2, true);
                 _this.clearTint();
                 _this.selectedTileArea = {};
                 for (var i = 0; i < nowBrushSize.x; i++) {
@@ -195,10 +195,12 @@ var TileEditor = /** @class */ (function () {
         if (this.gameScene.tilemapLayers[layer].visible && selectedTiles) {
             for (var x = 0; x < brushSize.x; x++) {
                 for (var y = 0; y < brushSize.y; y++) {
-                    if (sample[x] && sample[x][y] && DevModeScene.pointerInsideMap(tileX + x, tileY + y, map)) {
+                    if (sample[x] && sample[x][y] !== undefined && DevModeScene.pointerInsideMap(tileX + x, tileY + y, map)) {
                         var index = sample[x][y];
                         if (index !== (map.getTileAt(tileX + x, tileY + y, true, layer)).index &&
                             !(index === 0 && map.getTileAt(tileX + x, tileY + y, true, layer).index === -1)) {
+                            if (index === 0)
+                                index = -1;
                             map.putTileAt(index, tileX + x, tileY + y, false, layer);
                             map.getTileAt(tileX + x, tileY + y, true, layer).tint = 0xffffff;
                             if (index === -1)
@@ -353,8 +355,8 @@ var TileEditor = /** @class */ (function () {
                     marker.graphics.setVisible(true);
                     marker.showPreview(true);
                     // Rounds down to nearest tile
-                    var pointerTileX_1 = map_1.worldToTileX(worldPoint.x - (marker.graphics.scaleX - 0.5) * Constants.TILE_SIZE / 2, true);
-                    var pointerTileY_1 = map_1.worldToTileY(worldPoint.y - (marker.graphics.scaleY - 0.5) * Constants.TILE_SIZE / 2, true);
+                    var pointerTileX_1 = map_1.worldToTileX(worldPoint.x - (marker.graphics.scaleX - 1) * Constants.TILE_SIZE / 2, true);
+                    var pointerTileY_1 = map_1.worldToTileY(worldPoint.y - (marker.graphics.scaleY - 1) * Constants.TILE_SIZE / 2, true);
                     // Snap to tile coordinates, but in world space
                     marker.graphics.x = map_1.tileToWorldX(pointerTileX_1);
                     marker.graphics.y = map_1.tileToWorldY(pointerTileY_1);

@@ -130,7 +130,7 @@ var DeveloperMode = /** @class */ (function () {
         if (map.layers[layer]) {
             for (var x = 0; x < brushSize.x; x++) {
                 for (var y = 0; y < brushSize.y; y++) {
-                    if (sample[x] && sample[x][y] && this.pointerInsideMap(x + tileX, y + tileY, map)) {
+                    if (sample[x] && sample[x][y] !== undefined && this.pointerInsideMap(x + tileX, y + tileY, map)) {
                         var index = sample[x][y];
                         if (index === -1)
                             index = 0;
