@@ -10,6 +10,8 @@ var AttributeComponent = TaroEntity.extend({
 		self.lastRegenerated = self.now;
 		self.lastSynced = self.now;
 
+		self.lastProgressTrackedValue = null;
+
 		// attributes is an object
 		if (entity._stats.attributes) {
 			const attributes = entity._stats.attributes;
@@ -223,7 +225,7 @@ var AttributeComponent = TaroEntity.extend({
 							attrData.attributes[attributeTypeId] = newValue;
 							self._entity.streamUpdateData([attrData]);
 
-							
+
 
 						}
 
@@ -260,24 +262,30 @@ var AttributeComponent = TaroEntity.extend({
 							self._entity._stats.newHighscore = newValue;
 						}
 					}
-					
+
 					// track guided tutorial progress
 					var parentGameId = taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.parentGameId;
-					if (parentGameId == '646d39f8d9317a8253b8a143' && attribute.name == 'progress' && global.posthog && self._entity._category == 'player') {
+					if (parentGameId == '646d39f8d9317a8253b8a143' && attribute.name == 'progress' && self._entity._category == 'player') {
 						// for tracking user progress in tutorials
 						var client = taro.server.clients[self._entity._stats.clientId];
 						var socket = client.socket;
-						global.posthog.capture({
-							distinctId: socket._token.posthogDistinctId,
-							'event': 'Tutorial Progress Updated',
-							properties: {
-								'$ip': socket._remoteAddress,
-								'gameSlug': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.gameSlug,
-								'gameId': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData._id,
-								'parentGameId': parentGameId,
-								'progress': newValue
-							}
-						});					
+
+						if (newValue !== this.lastProgressTrackedValue) {
+							global.trackEvent && global.trackEvent({
+								eventName: 'Tutorial Progress Updated',
+								properties: {
+									'$ip': socket._remoteAddress,
+									'gameSlug': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.gameSlug,
+									'gameId': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData._id,
+									'parentGameId': parentGameId,
+									'progress': newValue
+								},
+								posthogDistinctId: socket?._token.posthogDistinctId,
+								mixpanelDistinctId: socket?._token?.distinctId,
+							});
+						}
+
+						this.lastProgressTrackedValue = newValue;
 					}
 				} else if (taro.isClient) {
 					if (taro.client.myPlayer) {
@@ -291,14 +299,14 @@ var AttributeComponent = TaroEntity.extend({
 
 								// console.log(attribute, attribute.value);
 								if (taro.client.myPlayer._stats.selectedUnitId == unit.id()) {
-									self._entity.unitUi.updateAttributeBar({...attribute, ...{value: parseFloat(newValue)}});
+									self._entity.unitUi.updateAttributeBar({ ...attribute, ...{ value: parseFloat(newValue) } });
 								}
 
 								// this is the only way to convert to number i guess??
 								// all of the old implementations pass a value as a string here
 								// even if we call attribute.value = parseFloat(attribute.value)
 								// or other variations of this
-								self._entity.updateAttributeBar({...attribute, ...{value: parseFloat(newValue)}});
+								self._entity.updateAttributeBar({ ...attribute, ...{ value: parseFloat(newValue) } });
 								break;
 							}
 							case 'item': {

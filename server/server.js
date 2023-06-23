@@ -135,6 +135,22 @@ if (process.env.POSTHOG_TOKEN) {
 	global.posthog = new PostHog(process.env.POSTHOG_TOKEN, { host: 'https://app.posthog.com' } );
 }
 
+global.trackEvent = function ({ eventName, properties, posthogDistinctId, mixpanelDistinctId, target = "all" }) {
+	if (global.mixpanel && mixpanelDistinctId && (target === "all" || target === "mixpanel")) {
+		global.mixpanel.track(eventName, {
+			'distinct_id' : mixpanelDistinctId,
+			...properties
+		});
+	}
+	if (global.posthog && posthogDistinctId && (target === "all" || target === "posthog")) {
+		global.posthog.capture({
+			distinctId: posthogDistinctId,
+			'event': eventName,
+			properties: properties
+		});	
+	}
+}
+
 process.on('exit', function () {
 	console.log('process exit called.');
 	taro.clusterClient && taro.clusterClient.sendRollbarCrashData(global.lastRollbarUuid);
