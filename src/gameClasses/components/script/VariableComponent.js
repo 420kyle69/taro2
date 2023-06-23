@@ -1163,6 +1163,17 @@ var VariableComponent = TaroEntity.extend({
 
 					break;
 
+				case 'getMapTileId':
+					var map = taro.map.data;
+					var x = self.getValue(text.x, vars);
+					var y = self.getValue(text.y, vars);
+					var layer = self.getValue(text.layer, vars);
+					if (map && x && y && layer && layer >= 0 && layer < 4) {
+						returnValue = map.layers[layer].data[x + y * map.width];
+					}
+					
+					break;
+
 				case 'entityWidth':
 					if (entity && self._entity.script.action.entityCategories.indexOf(entity._category) > -1) {
 						// returnValue = entity._aabb.width;
