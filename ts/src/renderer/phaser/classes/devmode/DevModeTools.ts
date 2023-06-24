@@ -420,6 +420,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 			this.brush();
 		}
 		this.tileEditor.brushArea.shape = shape;
+		this.updateBrushArea();
 		Object.values(this.brushButtons).map((btn) => {
 			btn.highlight('no');
 		});

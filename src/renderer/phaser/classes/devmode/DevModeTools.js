@@ -352,6 +352,7 @@ var DevModeTools = /** @class */ (function (_super) {
             this.brush();
         }
         this.tileEditor.brushArea.shape = shape;
+        this.updateBrushArea();
         Object.values(this.brushButtons).map(function (btn) {
             btn.highlight('no');
         });
