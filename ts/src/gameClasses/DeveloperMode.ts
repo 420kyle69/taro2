@@ -132,7 +132,7 @@ class DeveloperMode {
 				for (let y = 0; y < brushSize.y; y++) {
 					if (sample[x] && sample[x][y] !== undefined && this.pointerInsideMap(x + tileX, y + tileY, map)) {
 						let index = sample[x][y];
-                        if (index === -1) index = 0;
+						if (index === -1) index = 0;
 						map.layers[layer].data[x + tileX + (y + tileY) * width] = index;
 						taro.map.data.layers[layer].data[x + tileX + (y + tileY) * width] = index;
 					}
@@ -291,32 +291,32 @@ class DeveloperMode {
 		if (taro.server.developerClientIds.includes(clientId)) {
 			// broadcast init entity change to all clients
 			taro.network.send('editInitEntity', data);
-            if (!this.initEntities) {
-                this.addInitEntities();
-            }
-            let found = false;
-            this.initEntities.forEach((action) => {
-                if (action.actionId === data.actionId) {
-                    found = true;
-                    if (data.wasEdited) action.wasEdited = true;
-                    if (data.position && data.position.x && data.position.y &&
-                        action.position && action.position.x && action.position.y) {
-                        action.position = data.position;
-                    }
-                    if (data.angle && action.angle) {
-                        action.angle = data.angle;
-                    }
-                    if (data.width && data.height && action.width && action.height) {
-                        action.width = data.width;
-                        action.height = data.height;
-                    }
-                }
-            });
-            if (!found) {
-                this.initEntities.push(data);
-            }
-        }
-    }
+			if (!this.initEntities) {
+				this.addInitEntities();
+			}
+			let found = false;
+			this.initEntities.forEach((action) => {
+				if (action.actionId === data.actionId) {
+					found = true;
+					if (data.wasEdited) action.wasEdited = true;
+					if (data.position && data.position.x && data.position.y &&
+						action.position && action.position.x && action.position.y) {
+						action.position = data.position;
+					}
+					if (data.angle && action.angle) {
+						action.angle = data.angle;
+					}
+					if (data.width && data.height && action.width && action.height) {
+						action.width = data.width;
+						action.height = data.height;
+					}
+				}
+			});
+			if (!found) {
+				this.initEntities.push(data);
+			}
+		}
+	}
 
 	createUnit(data) {
 		//const player = taro.game.getPlayerByClientId(clientId);
