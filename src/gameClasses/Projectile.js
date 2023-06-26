@@ -92,7 +92,7 @@ var Projectile = TaroEntityPhysics.extend({
 			}
 			self.drawBounds(false);
 
-			self.updateLayer();
+			//self.updateLayer();
 			self.updateTexture();
 
 		}
@@ -107,6 +107,7 @@ var Projectile = TaroEntityPhysics.extend({
 		if (taro.isClient) {
 			this.renderingStarted = true;
 			taro.client.emit('create-projectile', this);
+            this.updateLayer();
 		}
 	},
 
