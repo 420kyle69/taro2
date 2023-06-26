@@ -334,7 +334,12 @@ var DevModeTools = /** @class */ (function (_super) {
     DevModeTools.prototype.clear = function () {
         var gameMap = this.scene.gameScene.tilemap;
         //this.tileEditor.clearLayer(gameMap.currentLayerIndex, false);
-        inGameEditor.showClearLayerConfirmation({ gid: 0, layer: gameMap.currentLayerIndex, layerName: this.layerButtons[gameMap.currentLayerIndex].name, x: 0, y: 0, tool: 'clear' });
+        var data = {
+            clear: {
+                layer: gameMap.currentLayerIndex
+            }
+        };
+        inGameEditor.showClearLayerConfirmation(data);
     };
     DevModeTools.prototype.save = function () {
         inGameEditor.saveMap();
