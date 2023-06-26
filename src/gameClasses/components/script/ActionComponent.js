@@ -6,6 +6,7 @@ var ActionComponent = TaroEntity.extend({
 		this._entity = entity;
 		this._script = scriptComponent;
 		this.entityCategories = ['unit', 'item', 'projectile', 'region', 'wall'];
+		this.lastProgressTrackedValue = null;
 	},
 
 	// entity can be either trigger entity, or entity in loop
@@ -285,19 +286,43 @@ var ActionComponent = TaroEntity.extend({
 
 						break;
 
-					case 'setPlayerAttribute':
-						var attrId = self._script.variable.getValue(action.attribute, vars);
-						var player = self._script.variable.getValue(action.entity, vars);
-						if (player && player._category == 'player' && player._stats.attributes) {							
-							var attribute = player._stats.attributes[attrId];
-							if (attribute != undefined) {
-								var decimalPlace = parseInt(attribute.decimalPlaces) || 0;
-								var value = parseFloat(self._script.variable.getValue(action.value, vars)).toFixed(decimalPlace);
-								player.attribute.update(attrId, value, true); // update attribute, and check for attribute becoming 0
+						case 'setPlayerAttribute':
+							var attrId = self._script.variable.getValue(action.attribute, vars);
+							var player = self._script.variable.getValue(action.entity, vars);
+							if (player && player._category == 'player' && player._stats.attributes) {							
+								var attribute = player._stats.attributes[attrId];
+								if (attribute != undefined) {
+									var decimalPlace = parseInt(attribute.decimalPlaces) || 0;
+									var value = parseFloat(self._script.variable.getValue(action.value, vars)).toFixed(decimalPlace);
+									player.attribute.update(attrId, value, true); // update attribute, and check for attribute becoming 0
+											
+									// track guided tutorial progress
+									var parentGameId = taro?.game?.data?.defaultData?.parentGameId;
+									if (parentGameId == '646d39f8d9317a8253b8a143' && attribute.name == 'progress') {
+										// for tracking user progress in tutorials
+										var client = taro.server.clients[player._stats.clientId];
+										var socket = client.socket;
+			
+										if (value !== this.lastProgressTrackedValue) {
+											global.trackEvent && global.trackServerEvent({
+												eventName: 'Tutorial Progress Updated',
+												properties: {
+													'$ip': socket._remoteAddress,
+													'gameSlug': taro?.game?.data?.defaultData?.gameSlug,
+													'gameId': taro?.game?.data?.defaultData?._id,
+													'parentGameId': parentGameId,
+													'progress': value,
+													'tutorialVersion': 'v2'
+												}
+											}, socket);
+										}	
+			
+										this.lastProgressTrackedValue = newValue;
+									}
+								}
 							}
-						}
-
-						break;
+	
+							break;
 
 					case 'setPlayerAttributeMax':
 						var attrId = self._script.variable.getValue(action.attributeType, vars);
