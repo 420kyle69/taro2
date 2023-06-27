@@ -304,7 +304,7 @@ var ActionComponent = TaroEntity.extend({
 									var socket = client.socket;
 		
 									if (value !== this.lastProgressTrackedValue) {
-										global.trackEvent && global.trackServerEvent({
+										global.trackServerEvent && global.trackServerEvent({
 											eventName: 'Tutorial Progress Updated',
 											properties: {
 												'$ip': socket._remoteAddress,
