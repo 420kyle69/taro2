@@ -92,7 +92,7 @@ var Projectile = TaroEntityPhysics.extend({
 			}
 			self.drawBounds(false);
 
-			//self.updateLayer();
+			self.updateLayer();
 			self.updateTexture();
 
 		}
