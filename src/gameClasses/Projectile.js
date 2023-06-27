@@ -68,15 +68,15 @@ var Projectile = TaroEntityPhysics.extend({
 		}
 
 		this.updateBody(data.defaultData);
+		if (this._stats.streamMode === undefined) {
+			console.log(this._stats.name, ':  undefined streamMode');
+		}
 
-		var sourceItem = this.getSourceItem();
-		console.log(this._stats.name, sourceItem);
 		if (taro.isServer) {
-
 			// stream projectile data if
-			if (!taro.network.isPaused && (
+			if (!taro.network.isPaused &&
+				(
 					!taro.game.data.defaultData.clientPhysicsEngine || // client side isn't running physics (csp requires physics) OR
-					!sourceItem || // projectile does not have source item (created via script) OR
 					this._stats.streamMode // item is set to stream its projectiles from server
 				)
 			) {
@@ -84,6 +84,7 @@ var Projectile = TaroEntityPhysics.extend({
 			} else {
 				this.streamMode(0);
 			}
+
 			taro.server.totalProjectilesCreated++;
 		} else if (taro.isClient) {
 			if (currentState) {

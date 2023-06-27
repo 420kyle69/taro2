@@ -651,10 +651,8 @@ var PhysicsComponent = TaroEventingClass.extend({
 										entity.finalKeyFrame= [taro._currentTime, [x, y, angle]];
 									}
 									// projectiles don't use server-streamed position
-									else if (entity._category == 'projectile' &&
-										entity._stats.sourceItemId != undefined && !entity._streamMode
+									else if (entity._category == 'projectile' && !entity._stats.streamMode
 									) {
-										console.log(entity._stats.name);
 										entity.prevPhysicsFrame = entity.nextPhysicsFrame;
 										entity.nextPhysicsFrame = [nextFrameTime, [x, y, angle]];
 									} else { // update server-streamed entities' body position
@@ -664,6 +662,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 									}
 								}
 							}
+
 
 							entity.body.setPosition({ x: x / entity._b2dRef._scaleRatio, y: y / entity._b2dRef._scaleRatio });
 							entity.body.setAngle(angle);

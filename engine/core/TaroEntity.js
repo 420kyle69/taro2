@@ -1980,6 +1980,7 @@ var TaroEntity = TaroObject.extend({
 				} else if (type == 'attacked') {
 					this.streamUpdateData([{ effect: {type: type, data: data} }]);
 				}
+				// playEffect projectile creation is only happening on the client;
 
 			} else if (taro.isClient) {
 
@@ -2011,13 +2012,13 @@ var TaroEntity = TaroObject.extend({
 				}
 
 				if (effect.projectileType) {
+					// these are never created on the server
 					var projectile = taro.game.getAsset('projectileTypes', effect.projectileType);
 
 					if (projectile) {
 						var position = taro.game.lastProjectileHitPosition ||
 							(this.body && this.body.getPosition()) ||
 							this._translate;
-
 						if (this.body) {
 							position.x *= this._b2dRef._scaleRatio;
 							position.y *= this._b2dRef._scaleRatio;
@@ -2033,6 +2034,8 @@ var TaroEntity = TaroObject.extend({
 						};
 						//fix added for correct phaser projectile texture
 						projectile.type = effect.projectileType;
+						// set property for client-only effect projectiles
+						projectile.streamMode = 0;
 						new Projectile(projectile);
 					}
 				}
@@ -4249,7 +4252,7 @@ var TaroEntity = TaroObject.extend({
 								break;
 							case 'effect':
 								// don't use streamed effect call for my own unit or its items
-								if (newValue.type != 'attacked' && 
+								if (newValue.type != 'attacked' &&
 									(this == taro.client.selectedUnit ||
 									(this._category == 'item' && this.getOwnerUnit() == taro.client.selectedUnit))
 								) {
@@ -5130,9 +5133,7 @@ var TaroEntity = TaroObject.extend({
 				yDiff = (finalTransform[1] - y);
 				x = x + xDiff / 10;
 	        	y = y + yDiff / 10;
-				if (this._category === 'projectile') console.log(this._stats.name, this._stats.streamMode);
 	        }
-			else if (this._category === 'projectile') console.log(this._stats.name, this._stats.streamMode);
 
 	        if (
 	        	// interpolate item rotation
@@ -5149,9 +5150,9 @@ var TaroEntity = TaroObject.extend({
 	        	rotate = this.interpolateValue(rotateStart, rotateEnd, taro._currentTime - 16, taro._currentTime, taro._currentTime + 16);
 	        }
 		} else { // use server-streamed keyFrames
-			if (this._category === 'projectile') console.log(taro.nextSnapshot, taro.nextSnapshot[1][this.id()], taro.prevSnapshot[1][this.id()]);
 			if (taro.nextSnapshot) {
 				var nextTransform = taro.nextSnapshot[1][this.id()];
+
 				if (nextTransform) {
 					nextKeyFrame = [taro.nextSnapshot[0], nextTransform];
 
