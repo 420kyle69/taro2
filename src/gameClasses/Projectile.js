@@ -68,9 +68,6 @@ var Projectile = TaroEntityPhysics.extend({
 		}
 
 		this.updateBody(data.defaultData);
-		if (this._stats.streamMode === undefined) {
-			console.log(this._stats.name, ':  undefined streamMode');
-		}
 
 		if (taro.isServer) {
 			// stream projectile data if
