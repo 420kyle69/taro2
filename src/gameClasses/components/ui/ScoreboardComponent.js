@@ -191,7 +191,7 @@ var ScoreboardComponent = TaroEntity.extend({
 					readableName = readableName.replace(/>/g, '&gt;');
 
 					color = color || DEFAULT_COLOR;
-					scoreboard += `<div onContextMenu="window.showUnitOwnerDropdown(null, event, '${player._stats.userId}')" class='cursor-pointer scoreboard-user-entry' style='color: ${color};font-weight:${defaultFontWeight}'>${readableName} <small><span>${self.convertNumbersToKMB(sortedScores[i].value)}</span></small></div>`;
+					scoreboard += `<div onContextMenu="window.showUserDropdown({ event, userId: '${player._stats.userId}' })" class='cursor-pointer scoreboard-user-entry' style='color: ${color};font-weight:${defaultFontWeight}'>${readableName} <small><span>${self.convertNumbersToKMB(sortedScores[i].value)}</span></small></div>`;
 				}
 			}
 
