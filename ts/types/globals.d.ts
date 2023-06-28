@@ -15,4 +15,4 @@ declare const reactApp : any;
 declare const USE_LOCAL_STORAGE: boolean;
 declare const storage: any;
 
-declare const showUnitOwnerDropdown: any;
+declare const showUserDropdown: any;
