@@ -2381,6 +2381,17 @@ var ActionComponent = TaroEntity.extend({
 						}
 
 						break;
+
+                    case 'teleportEntity':
+                        var position = self._script.variable.getValue(action.position, vars);
+                        var entity = self._script.variable.getValue(action.entity, vars);
+
+                        if (position && entity && ['unit', 'item', 'projectile'].includes(entity._category)) {
+                            entity.teleportTo(position.x, position.y, entity._rotate.z, true);
+                        }
+
+                        break;
+
 					case 'destroyEntity':
 						var entity = self._script.variable.getValue(action.entity, vars);
 						if (entity && self.entityCategories.indexOf(entity._category) > -1) {

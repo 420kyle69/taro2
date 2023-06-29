@@ -73,6 +73,7 @@ var TaroEntity = TaroObject.extend({
 		this._lastTransformAt = null;
 		this.lastTeleportedAt = 0;
 		this.teleported = false;
+        this.teleportCamera = false;
 		this.teleportDestination = this.finalKeyFrame[1];
 
 		if (taro.isClient) {
@@ -3133,8 +3134,10 @@ var TaroEntity = TaroObject.extend({
 		return this;
 	},
 
-	teleportTo: function (x, y, rotate) {
+	teleportTo: function (x, y, rotate, teleportCamera) {
+
 		this.teleported = true;
+        this.teleportCamera = teleportCamera;
 		this.teleportDestination = [x, y, rotate]
 
 		this.translateTo(x, y);
@@ -3157,7 +3160,7 @@ var TaroEntity = TaroObject.extend({
 				this.nextPhysicsFrame = [nextFrameTime, [x, y, rotate]];
 			}
             //instantly move to camera the new position
-            if (taro.client.myPlayer?.cameraTrackedUnit === this.id()) {
+            if (teleportCamera && taro.client.myPlayer?.cameraTrackedUnit === this.id()) {
                 taro.client.emit('instant-move-camera', [x, y]);
             }
             
@@ -4372,7 +4375,9 @@ var TaroEntity = TaroObject.extend({
 						buffArr.push(Number(angle));
 						if (this.teleported) {
 							buffArr.push(Number(this.teleported));
+                            buffArr.push(Number(this.teleportCamera));
 							this.teleported = false;
+                            this.teleportCamera = false;
 						}
 
 						// TaroEntity.prototype.log(this._size, this._translate, this._rotate)
