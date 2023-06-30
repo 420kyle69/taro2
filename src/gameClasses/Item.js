@@ -364,7 +364,8 @@ var Item = TaroEntityPhysics.extend({
 													sourcePlayerId: owner.getOwner().id(),
 													unitAttributes: this._stats.damage.unitAttributes,
 													playerAttributes: this._stats.damage.playerAttributes
-												}
+												},
+												streamMode: this._stats.projectileStreamMode
 											});
 									 	var projectile = new Projectile(projectileData);
 										projectile.script.trigger('entityCreated');

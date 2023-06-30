@@ -1641,7 +1641,6 @@ var ActionComponent = TaroEntity.extend({
 						break;
 
 					/* projectile */
-
 					case 'createProjectileAtPosition':
 						var projectileTypeId = self._script.variable.getValue(action.projectileType, vars);
 						var position = self._script.variable.getValue(action.position, vars);
@@ -1677,13 +1676,14 @@ var ActionComponent = TaroEntity.extend({
 												x: Math.cos(angle) * force,
 												y: Math.sin(angle) * force
 											}
-										}
+										},
+										streamMode: 1
 									}
 								);
 
 								var projectile = new Projectile(data);
 								taro.game.lastCreatedProjectileId = projectile._id;
-								projectile.script.trigger("entityCreated");
+								projectile.script.trigger('entityCreated');
 							} else {
 								if (!projectileData) {
 									self._script.errorLog('invalid projectile data');
