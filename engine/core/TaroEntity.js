@@ -67,14 +67,14 @@ var TaroEntity = TaroObject.extend({
 		// this ensures entity is spawning at a correct position initially. particularily useful for projectiles
 
 		this._keyFrames = [];
-		this.finalKeyFrame = [taro.now, [this._translate.x, this._translate.y, this._rotate.z]];
+		this.latestKeyFrame = [taro.now, [this._translate.x, this._translate.y, this._rotate.z]];
 		this.latestTimeStamp = 0;
-		this.prevKeyFrame = this.finalKeyFrame
+		this.prevKeyFrame = this.latestKeyFrame
 		this._lastTransformAt = null;
 		this.lastTeleportedAt = 0;
 		this.teleported = false;
         this.teleportCamera = false;
-		this.teleportDestination = this.finalKeyFrame[1];
+		this.teleportDestination = this.latestKeyFrame[1];
 
 		if (taro.isClient) {
 			this.anchorOffset = { x: 0, y: 0, rotate: 0 };
@@ -3155,7 +3155,7 @@ var TaroEntity = TaroObject.extend({
 				this.translateColliderTo(x, y);
 			}
 		} else if (taro.isClient) {
-			this.finalKeyFrame[1] = [x, y, rotate];
+			this.latestKeyFrame[1] = [x, y, rotate];
 			if (taro.physics && this.prevPhysicsFrame && this.nextPhysicsFrame) {
 				let prevFrameTime = this.prevPhysicsFrame[0]
 				let nextFrameTime = this.nextPhysicsFrame[0]
@@ -5127,58 +5127,86 @@ var TaroEntity = TaroObject.extend({
 		let prevKeyFrame = null;
 		let nextKeyFrame = null;
 
-		var finalTransform = this.finalKeyFrame[1];
+		var latestTransform = this.latestKeyFrame[1];
 		// using cspMovement for my unit will cause it to rubberband to the latest known position
-		if (taro.game.cspEnabled && finalTransform && !this._stats.streamMode/*&& !this._stats.aiEnabled*/) {
-			if (this.body &&
-				!(this._category == 'item' && this.getOwnerUnit() != undefined) && // don't apply to item that's held by unit as that's calculated by anchor calculation
-				!(this._category == 'projectile' && this._stats.streamMode) // don't apply to projectiles that are CSP'ed
-			) {
-				xDiff = (finalTransform[0] - x);
-				yDiff = (finalTransform[1] - y);
-				x = x + xDiff / 10;
-	        	y = y + yDiff / 10;
-	        }
 
-	        if (
-	        	// interpolate item rotation
-	        	(this._stats.controls && this._stats.controls.mouseBehaviour.rotateToFaceMouseCursor)
-			) {
-				rotateStart = rotate;
-	        	rotateEnd = finalTransform[2];
-	        	// a hack to prevent rotational interpolation suddnely jumping by 2 PI (e.g. 0.01 to -6.27)
-				if (Math.abs(rotateEnd - rotateStart) > Math.PI) {
-					if (rotateEnd > rotateStart) rotateStart += Math.PI * 2;
-					else rotateStart -= Math.PI * 2;
-				}
-
-	        	rotate = this.interpolateValue(rotateStart, rotateEnd, taro._currentTime - 16, taro._currentTime, taro._currentTime + 16);
-	        }
-		} else { // use server-streamed keyFrames
-			if (taro.nextSnapshot) {
-				var nextTransform = taro.nextSnapshot[1][this.id()];
-
-				if (nextTransform) {
-					nextKeyFrame = [taro.nextSnapshot[0], nextTransform];
-
-					xEnd = nextTransform[0];
-					yEnd = nextTransform[1];
-					rotateEnd = nextTransform[2];
-				}
-			}
-			// by default, prevTransform is where this unit currently is
-			if (taro.prevSnapshot) {
-				// Set variables up to store the previous and next data
-				var prevTransform = taro.prevSnapshot[1][this.id()];
-
-				if (prevTransform) {
-					prevKeyFrame = [taro.prevSnapshot[0], prevTransform];
-					xStart = prevTransform[0];
-					yStart = prevTransform[1];
-					rotateStart = prevTransform[2];
-				}
-			}
+		if (!(this._category == 'item' && this.getOwnerUnit() != undefined) && // don't apply to item that's held by unit as that's calculated by anchor calculation
+			!(this._category == 'projectile' && this._stats.streamMode) // don't apply to projectiles that are CSP'ed
+		) {
+			xDiff = (latestTransform[0] - x);
+			yDiff = (latestTransform[1] - y);
+			rotateDiff = (latestTransform[2] - rotate);
+			x = x + xDiff / 10;
+			y = y + yDiff / 10;
+			rotate = rotate + rotateDiff / 3;
 		}
+
+		if (
+			// interpolate item rotation
+			(this._stats.controls && this._stats.controls.mouseBehaviour.rotateToFaceMouseCursor)
+		) {
+			rotateStart = rotate;
+			rotateEnd = latestTransform[2];
+			// a hack to prevent rotational interpolation suddnely jumping by 2 PI (e.g. 0.01 to -6.27)
+			if (Math.abs(rotateEnd - rotateStart) > Math.PI) {
+				if (rotateEnd > rotateStart) rotateStart += Math.PI * 2;
+				else rotateStart -= Math.PI * 2;
+			}
+
+			rotate = this.interpolateValue(rotateStart, rotateEnd, taro._currentTime - 16, taro._currentTime, taro._currentTime + 16);
+		}
+
+		// if (taro.game.cspEnabled && latestTransform && !this._stats.streamMode/*&& !this._stats.aiEnabled*/) {
+		// 	if (this.body &&
+		// 		!(this._category == 'item' && this.getOwnerUnit() != undefined) && // don't apply to item that's held by unit as that's calculated by anchor calculation
+		// 		!(this._category == 'projectile' && this._stats.streamMode) // don't apply to projectiles that are CSP'ed
+		// 	) {
+		// 		console.log("yoyo")
+		// 		xDiff = (latestTransform[0] - x);
+		// 		yDiff = (latestTransform[1] - y);
+		// 		x = x + xDiff / 10;
+	    //     	y = y + yDiff / 10;
+	    //     }
+
+	    //     if (
+	    //     	// interpolate item rotation
+	    //     	(this._stats.controls && this._stats.controls.mouseBehaviour.rotateToFaceMouseCursor)
+		// 	) {
+		// 		rotateStart = rotate;
+	    //     	rotateEnd = latestTransform[2];
+	    //     	// a hack to prevent rotational interpolation suddnely jumping by 2 PI (e.g. 0.01 to -6.27)
+		// 		if (Math.abs(rotateEnd - rotateStart) > Math.PI) {
+		// 			if (rotateEnd > rotateStart) rotateStart += Math.PI * 2;
+		// 			else rotateStart -= Math.PI * 2;
+		// 		}
+
+	    //     	rotate = this.interpolateValue(rotateStart, rotateEnd, taro._currentTime - 16, taro._currentTime, taro._currentTime + 16);
+	    //     }
+		// } else { // use server-streamed keyFrames
+		// 	if (taro.nextSnapshot) {
+		// 		var nextTransform = taro.nextSnapshot[1][this.id()];
+
+		// 		if (nextTransform) {
+		// 			nextKeyFrame = [taro.nextSnapshot[0], nextTransform];
+
+		// 			xEnd = nextTransform[0];
+		// 			yEnd = nextTransform[1];
+		// 			rotateEnd = nextTransform[2];
+		// 		}
+		// 	}
+		// 	// by default, prevTransform is where this unit currently is
+		// 	if (taro.prevSnapshot) {
+		// 		// Set variables up to store the previous and next data
+		// 		var prevTransform = taro.prevSnapshot[1][this.id()];
+
+		// 		if (prevTransform) {
+		// 			prevKeyFrame = [taro.prevSnapshot[0], prevTransform];
+		// 			xStart = prevTransform[0];
+		// 			yStart = prevTransform[1];
+		// 			rotateStart = prevTransform[2];
+		// 		}
+		// 	}
+		// }
 
 		// csp-projectiles are interpolated using physicsComponent-generated keyframes
 		// this is necessary, because physics don't run at 60 fps on clientside
@@ -5205,30 +5233,30 @@ var TaroEntity = TaroObject.extend({
 					rotateEnd = nextTransform[2];
 				}
 			}
-		}
 
-		// interpolate using snapshots streamed from the server.
-		if (prevTransform != undefined && nextTransform != undefined &&
-            prevKeyFrame[0] != nextKeyFrame[0] &&
-			prevKeyFrame[0] - 50 < taro._currentTime && taro._currentTime < nextKeyFrame[0] + 50 // allow extrapolation of entity motion up to 50ms (outside of prevKeyFrame & nextKeyFrame range)
-		) {
-			if (!this.teleported) {
-				x = this.interpolateValue(xStart, xEnd, prevKeyFrame[0], taro._currentTime, nextKeyFrame[0]);
-				y = this.interpolateValue(yStart, yEnd, prevKeyFrame[0], taro._currentTime, nextKeyFrame[0]);
-			} else {
-				x = xEnd;
-				y = yEnd;
-				prevTransform[0] = x;
-				prevTransform[1] = y;
+			// interpolate using snapshots streamed from the server.
+			if (prevTransform != undefined && nextTransform != undefined &&
+				prevKeyFrame[0] != nextKeyFrame[0] &&
+				prevKeyFrame[0] - 50 < taro._currentTime && taro._currentTime < nextKeyFrame[0] + 50 // allow extrapolation of entity motion up to 50ms (outside of prevKeyFrame & nextKeyFrame range)
+			) {
+				if (!this.teleported) {
+					x = this.interpolateValue(xStart, xEnd, prevKeyFrame[0], taro._currentTime, nextKeyFrame[0]);
+					y = this.interpolateValue(yStart, yEnd, prevKeyFrame[0], taro._currentTime, nextKeyFrame[0]);
+				} else {
+					x = xEnd;
+					y = yEnd;
+					prevTransform[0] = x;
+					prevTransform[1] = y;
+				}
+
+				// a hack to prevent rotational interpolation suddnely jumping by 2 PI (e.g. 0.01 to -6.27)
+				if (Math.abs(rotateEnd - rotateStart) > Math.PI) {
+					if (rotateEnd > rotateStart) rotateStart += Math.PI * 2;
+					else rotateStart -= Math.PI * 2;
+				}
+
+				rotate = this.interpolateValue(rotateStart, rotateEnd, prevKeyFrame[0], taro._currentTime, nextKeyFrame[0]);
 			}
-
-			// a hack to prevent rotational interpolation suddnely jumping by 2 PI (e.g. 0.01 to -6.27)
-			if (Math.abs(rotateEnd - rotateStart) > Math.PI) {
-				if (rotateEnd > rotateStart) rotateStart += Math.PI * 2;
-				else rotateStart -= Math.PI * 2;
-			}
-
-			rotate = this.interpolateValue(rotateStart, rotateEnd, prevKeyFrame[0], taro._currentTime, nextKeyFrame[0]);
 		}
 
 		// ignore streamed angle if this unit control is set to face mouse cursor instantly.

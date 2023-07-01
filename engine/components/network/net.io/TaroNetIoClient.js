@@ -487,18 +487,13 @@ var TaroNetIoClient = {
 						// we are not executing this in taroEngine or taroEntity, becuase they don't execute when browser tab is inactive
 						var entity = taro.$(entityId);
 
-						if (entity && entityData[3]) {
-							entity.teleportTo(entityData[0], entityData[1], entityData[2], entityData[4]);
-						}
-						// if csp movement is enabled, don't use server-streamed position for my unit
-						// instead, we'll use position updated by physics engine
-						else if (taro.game.cspEnabled && entity &&
-							entity.finalKeyFrame[0] < newSnapshotTimestamp &&
-							entity != taro.client.selectedUnit
-						) {
-							entity.finalKeyFrame = [newSnapshotTimestamp, obj[entityId]];
-						}
-
+						if (entity) {
+							if (entityData[3]) {
+								entity.teleportTo(entityData[0], entityData[1], entityData[2], entityData[4]);
+							} else if (entity.latestKeyFrame[0] < newSnapshotTimestamp) {
+								entity.latestKeyFrame = [newSnapshotTimestamp, obj[entityId]];
+							}
+						}						
 					} else {
 						this._networkCommands[commandName](entityData);
 					}

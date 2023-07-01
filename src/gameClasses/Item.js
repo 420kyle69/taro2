@@ -1189,7 +1189,7 @@ var Item = TaroEntityPhysics.extend({
 			// }
 
 			if (taro.game.cspEnabled && taro.isClient) {
-				self.finalKeyFrame[1] = [x, y, rotate]; // prepare position for when this item's dropped. without this, item will appear at an incorrect position
+				self.latestKeyFrame[1] = [x, y, rotate]; // prepare position for when this item's dropped. without this, item will appear at an incorrect position
 			}
 		}
 
