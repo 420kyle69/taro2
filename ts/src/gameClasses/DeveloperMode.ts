@@ -183,23 +183,39 @@ class DeveloperMode {
 	floodTiles(layer: number, oldTile: number, newTile: number, x: number, y: number, limits?: Record<number, Record<number, number>>): void {
 		const map = taro.game.data.map;
 		const width = map.width;
-		if (oldTile === newTile || map.layers[layer].data[y * width + x] !== oldTile || limits?.[x]?.[y]) {
-			return;
-		}
-		//save tile change to taro.game.data.map and taro.map.data
-		map.layers[layer].data[y * width + x] = newTile;
-		taro.map.data.layers[layer].data[y * width + x] = newTile;
-		if (x > 0) {
-			this.floodTiles(layer, oldTile, newTile, x - 1, y, limits);
-		}
-		if (x < (map.width - 1)) {
-			this.floodTiles(layer, oldTile, newTile, x + 1, y, limits);
-		}
-		if (y > 0) {
-			this.floodTiles(layer, oldTile, newTile, x, y - 1, limits);
-		}
-		if (y < (map.height - 1)) {
-			this.floodTiles(layer, oldTile, newTile, x, y + 1, limits);
+		const openQueue: Vector2D[] = [{ x, y }];
+		const closedQueue: Record<number, Record<number, number>> = {};
+		while (openQueue.length !== 0) {
+			const nowPos = openQueue[0];
+			openQueue.shift();
+
+			if (closedQueue[nowPos.x]?.[nowPos.y]) {
+				continue;
+			}
+			if (!closedQueue[nowPos.x]) {
+				closedQueue[nowPos.x] = {};
+			}
+			closedQueue[nowPos.x][nowPos.y] = 1;
+			if (oldTile === newTile
+				|| map.layers[layer].data[nowPos.y * width + nowPos.x] !== oldTile
+				|| limits?.[nowPos.x]?.[nowPos.y]) {
+				continue;
+			}
+			//save tile change to taro.game.data.map and taro.map.data
+			map.layers[layer].data[nowPos.y * width + nowPos.x] = newTile;
+			taro.map.data.layers[layer].data[nowPos.y * width + nowPos.x] = newTile;
+			if (nowPos.x > 0 && !closedQueue[nowPos.x - 1]?.[nowPos.y]) {
+				openQueue.push({ x: nowPos.x - 1, y: nowPos.y });
+			}
+			if (nowPos.x < (map.width - 1) && !closedQueue[nowPos.x + 1]?.[nowPos.y]) {
+				openQueue.push({ x: nowPos.x + 1, y: nowPos.y });
+			}
+			if (nowPos.y > 0 && !closedQueue[nowPos.x]?.[nowPos.y - 1]) {
+				openQueue.push({ x: nowPos.x, y: nowPos.y - 1 });
+			}
+			if (nowPos.y < (map.height - 1) && !closedQueue[nowPos.x]?.[nowPos.y + 1]) {
+				openQueue.push({ x: nowPos.x, y: nowPos.y + 1 });
+			}
 		}
 	}
 
