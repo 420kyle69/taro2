@@ -100,7 +100,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 			new DevToolButton(this, '', 'Bucket Fill (F)', 'fill an area with the selected tile', 'fill', 0, (h + s) * 2, h * 2 - s, toolButtonsContainer, this.fill.bind(this)),
 			new DevToolButton(this, '', 'Clear Layer (L)', 'clear selected layer', 'clear', h * 2, (h + s) * 2, h * 2 - s, toolButtonsContainer, this.clear.bind(this)),
 			new DevToolButton(this, '', 'Save Map (S)', 'save all changes', 'save', h * 2, (h + s) * 3, h * 2 - s, toolButtonsContainer, this.save.bind(this)),
-			new DevToolButton(this, '', 'Entities Tool (A)', 'LMB: Place selected Entity on the Map RMB: copy entity', 'entity', h * 2, 0, h * 2 - s, toolButtonsContainer, this.addEntities.bind(this))
+			new DevToolButton(this, '', 'Entities Tool (A)', 'LMB: Place selected Entity on the Map', 'entity', h * 2, 0, h * 2 - s, toolButtonsContainer, this.addEntities.bind(this))
 		);
 		this.cursorButton = this.modeButtons[0];
 		this.highlightModeButton(0);
