@@ -477,7 +477,8 @@ var TaroNetIoClient = {
 							parseInt(entityData[0], 16), // x
 							parseInt(entityData[1], 16), // y
 							parseInt(entityData[2], 16) / 1000, // rotation
-							Boolean(parseInt(entityData[3], 16)) // teleported boolean
+							Boolean(parseInt(entityData[3], 16)), // teleported boolean
+                            Boolean(parseInt(entityData[4], 16)) // teleportedCamera boolean
 						];
 
 						obj[entityId] = entityData;
@@ -485,16 +486,17 @@ var TaroNetIoClient = {
 						// update each entities' final position, so player knows where everything are when returning from a different browser tab
 						// we are not executing this in taroEngine or taroEntity, becuase they don't execute when browser tab is inactive
 						var entity = taro.$(entityId);
+
 						if (entity && entityData[3]) {
-							entity.teleportTo(entityData[0], entityData[1], entityData[2]);
+							entity.teleportTo(entityData[0], entityData[1], entityData[2], entityData[4]);
 						}
 						// if csp movement is enabled, don't use server-streamed position for my unit
 						// instead, we'll use position updated by physics engine
 						else if (taro.game.cspEnabled && entity &&
-							entity.finalKeyFrame[0] < newSnapshotTimestamp &&
+							entity.latestKeyFrame[0] < newSnapshotTimestamp &&
 							entity != taro.client.selectedUnit
 						) {
-							entity.finalKeyFrame = [newSnapshotTimestamp, obj[entityId]];
+							entity.latestKeyFrame = [newSnapshotTimestamp, obj[entityId]];
 						}
 
 					} else {

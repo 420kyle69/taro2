@@ -559,7 +559,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 			} else {
 				self._world.step(timeElapsedSinceLastStep / 1000, 8, 3); // Call the world step; frame-rate, velocity iterations, position iterations
 				let nextFrameTime = taro._currentTime + (1000 / taro._gameLoopTickRate) - 10; // 10ms is to give extra buffer to prepare for the next frame
-				
 				var tempBod = self._world.getBodyList();
 
 				// iterate through every physics body
@@ -580,7 +579,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 							// ) {
 							// 	var angle = Math.atan2(tempBod.m_linearVelocity.y, tempBod.m_linearVelocity.x) + Math.PI / 2;
 							// } else {
-								var angle = tempBod.getAngle();
+							var angle = tempBod.getAngle();
 							// }
 
 							var tileWidth = taro.scaleMapDetails.tileWidth;
@@ -601,12 +600,12 @@ var PhysicsComponent = TaroEventingClass.extend({
 								// fire 'touchesWall' trigger when unit goes out of bounds for the first time
 								if (!entity.isOutOfBounds) {
 									if (entity._category == 'unit' || entity._category == 'item' || entity._category == 'projectile') {
-										entity.script.trigger("entityTouchesWall");
+										entity.script.trigger('entityTouchesWall');
 									}
 
 									if (entity._category == 'unit') {
 										// console.log("unitTouchesWall", entity.id());
-										taro.script.trigger('unitTouchesWall', { unitId: entity.id() });										
+										taro.script.trigger('unitTouchesWall', { unitId: entity.id() });
 									} else if (entity._category == 'item') {
 										taro.script.trigger('itemTouchesWall', { itemId: entity.id() });
 									} else if (entity._category == 'projectile') {
@@ -625,14 +624,13 @@ var PhysicsComponent = TaroEventingClass.extend({
 							}
 							// entity just has teleported
 							if (entity.teleportDestination != undefined && entity.teleported) {
-								entity.finalKeyFrame[1] = entity.teleportDestination;
-								x = entity.teleportDestination[0]
-								y = entity.teleportDestination[1]
-								angle = entity.teleportDestination[2]
+								entity.latestKeyFrame[1] = entity.teleportDestination;
+								x = entity.teleportDestination[0];
+								y = entity.teleportDestination[1];
+								angle = entity.teleportDestination[2];
 								entity.teleportDestination = undefined;
 							} else {
 								if (taro.isServer) {
-									
 									/* server-side reconciliation */
 									// hard-correct client entity's position (teleport) if the distance between server & client is greater than 100px
 									// continuously for 10 frames in a row
@@ -642,7 +640,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 										var xDiff = targetX - x;
 										var yDiff = targetY - y;
 										x += xDiff/2;
-										y += yDiff/2;									
+										y += yDiff/2;
 									}
 
 									entity.translateTo(x, y, 0);
@@ -650,25 +648,24 @@ var PhysicsComponent = TaroEventingClass.extend({
 								} else if (taro.isClient) {
 									// my unit's position is dictated by clientside physics
 									if (entity == taro.client.selectedUnit) {
-										entity.finalKeyFrame= [taro._currentTime, [x, y, angle]];
+										entity.latestKeyFrame= [taro._currentTime, [x, y, angle]];
 									}
 									// projectiles don't use server-streamed position
-									else if (entity._category == 'projectile' && 
-										entity._stats.sourceItemId != undefined && !entity._streamMode
+									else if (entity._category == 'projectile' && !entity._stats.streamMode
 									) {
 										entity.prevPhysicsFrame = entity.nextPhysicsFrame;
 										entity.nextPhysicsFrame = [nextFrameTime, [x, y, angle]];
 									} else { // update server-streamed entities' body position
-										x = entity.finalKeyFrame[1][0]
-										y = entity.finalKeyFrame[1][1]
-										angle = entity.finalKeyFrame[1][2]
+										x = entity.latestKeyFrame[1][0];
+										y = entity.latestKeyFrame[1][1];
+										angle = entity.latestKeyFrame[1][2];
 									}
-								}	
+								}
 							}
+
 
 							entity.body.setPosition({ x: x / entity._b2dRef._scaleRatio, y: y / entity._b2dRef._scaleRatio });
 							entity.body.setAngle(angle);
-							
 
 							if (tempBod.asleep) {
 								// The tempBod was asleep last frame, fire an awake event

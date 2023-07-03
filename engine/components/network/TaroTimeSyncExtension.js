@@ -51,7 +51,7 @@ var TaroTimeSyncExtension = {
 
 	_sendTimeSync: function (clientId) {
 		this.send('_taroNetTimeSync', taro._currentTime, clientId);
-		this.lastTimeSyncSentAt = Date.now();
+		this.lastTimeSyncSentAt = taro._currentTime;
 	},
 
 	_onTimeSync: function (serverTime, clientId) {
@@ -71,7 +71,7 @@ var TaroTimeSyncExtension = {
 	// // speed up or slow down taro.timeScale depending on discrepancy between client & server's time.
 	timeSync: function (serverTime) {
 
-		var latency = Math.floor(Date.now() - this.lastTimeSyncSentAt); // ping (round trip)
+		var latency = Math.floor(taro._currentTime - this.lastTimeSyncSentAt); // ping (round trip)
 
 		if (statsPanels.latency) {
 			statsPanels.latency._latencyPanel.update(latency, 1000);

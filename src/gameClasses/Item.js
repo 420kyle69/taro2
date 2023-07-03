@@ -364,7 +364,8 @@ var Item = TaroEntityPhysics.extend({
 													sourcePlayerId: owner.getOwner().id(),
 													unitAttributes: this._stats.damage.unitAttributes,
 													playerAttributes: this._stats.damage.playerAttributes
-												}
+												},
+												streamMode: this._stats.projectileStreamMode
 											});
 									 	var projectile = new Projectile(projectileData);
 										projectile.script.trigger('entityCreated');
@@ -1188,7 +1189,7 @@ var Item = TaroEntityPhysics.extend({
 			// }
 
 			if (taro.game.cspEnabled && taro.isClient) {
-				self.finalKeyFrame[1] = [x, y, rotate]; // prepare position for when this item's dropped. without this, item will appear at an incorrect position
+				self.latestKeyFrame[1] = [x, y, rotate]; // prepare position for when this item's dropped. without this, item will appear at an incorrect position
 			}
 		}
 

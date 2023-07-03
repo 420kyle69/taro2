@@ -67,13 +67,14 @@ var TaroEntity = TaroObject.extend({
 		// this ensures entity is spawning at a correct position initially. particularily useful for projectiles
 
 		this._keyFrames = [];
-		this.finalKeyFrame = [taro.now, [this._translate.x, this._translate.y, this._rotate.z]];
+		this.latestKeyFrame = [taro.now, [this._translate.x, this._translate.y, this._rotate.z]];
 		this.latestTimeStamp = 0;
-		this.prevKeyFrame = this.finalKeyFrame
+		this.prevKeyFrame = this.latestKeyFrame
 		this._lastTransformAt = null;
 		this.lastTeleportedAt = 0;
 		this.teleported = false;
-		this.teleportDestination = this.finalKeyFrame[1];
+        this.teleportCamera = false;
+		this.teleportDestination = this.latestKeyFrame[1];
 
 		if (taro.isClient) {
 			this.anchorOffset = { x: 0, y: 0, rotate: 0 };
@@ -1980,6 +1981,7 @@ var TaroEntity = TaroObject.extend({
 				} else if (type == 'attacked') {
 					this.streamUpdateData([{ effect: {type: type, data: data} }]);
 				}
+				// playEffect projectile creation is only happening on the client;
 
 			} else if (taro.isClient) {
 
@@ -2011,13 +2013,13 @@ var TaroEntity = TaroObject.extend({
 				}
 
 				if (effect.projectileType) {
+					// these are never created on the server
 					var projectile = taro.game.getAsset('projectileTypes', effect.projectileType);
 
 					if (projectile) {
 						var position = taro.game.lastProjectileHitPosition ||
 							(this.body && this.body.getPosition()) ||
 							this._translate;
-
 						if (this.body) {
 							position.x *= this._b2dRef._scaleRatio;
 							position.y *= this._b2dRef._scaleRatio;
@@ -2033,6 +2035,8 @@ var TaroEntity = TaroObject.extend({
 						};
 						//fix added for correct phaser projectile texture
 						projectile.type = effect.projectileType;
+						// set property for client-only effect projectiles
+						projectile.streamMode = 0;
 						new Projectile(projectile);
 					}
 				}
@@ -3133,8 +3137,10 @@ var TaroEntity = TaroObject.extend({
 		return this;
 	},
 
-	teleportTo: function (x, y, rotate) {
+	teleportTo: function (x, y, rotate, teleportCamera) {
+
 		this.teleported = true;
+        this.teleportCamera = teleportCamera;
 		this.teleportDestination = [x, y, rotate]
 
 		this.translateTo(x, y);
@@ -3149,7 +3155,7 @@ var TaroEntity = TaroObject.extend({
 				this.translateColliderTo(x, y);
 			}
 		} else if (taro.isClient) {
-			this.finalKeyFrame[1] = [x, y, rotate];
+			this.latestKeyFrame[1] = [x, y, rotate];
 			if (taro.physics && this.prevPhysicsFrame && this.nextPhysicsFrame) {
 				let prevFrameTime = this.prevPhysicsFrame[0]
 				let nextFrameTime = this.nextPhysicsFrame[0]
@@ -3157,7 +3163,7 @@ var TaroEntity = TaroObject.extend({
 				this.nextPhysicsFrame = [nextFrameTime, [x, y, rotate]];
 			}
             //instantly move to camera the new position
-            if (taro.client.myPlayer?.cameraTrackedUnit === this.id()) {
+            if (teleportCamera && taro.client.myPlayer?.cameraTrackedUnit === this.id()) {
                 taro.client.emit('instant-move-camera', [x, y]);
             }
             
@@ -4249,7 +4255,7 @@ var TaroEntity = TaroObject.extend({
 								break;
 							case 'effect':
 								// don't use streamed effect call for my own unit or its items
-								if (newValue.type != 'attacked' && 
+								if (newValue.type != 'attacked' &&
 									(this == taro.client.selectedUnit ||
 									(this._category == 'item' && this.getOwnerUnit() == taro.client.selectedUnit))
 								) {
@@ -4372,7 +4378,9 @@ var TaroEntity = TaroObject.extend({
 						buffArr.push(Number(angle));
 						if (this.teleported) {
 							buffArr.push(Number(this.teleported));
+                            buffArr.push(Number(this.teleportCamera));
 							this.teleported = false;
+                            this.teleportCamera = false;
 						}
 
 						// TaroEntity.prototype.log(this._size, this._translate, this._rotate)
@@ -4539,6 +4547,7 @@ var TaroEntity = TaroObject.extend({
 		// console.log("streamMode (" + val + ")", (this._stats) ? this._stats.name : this._category)
 		if (val !== undefined) {
 			this._streamMode = val;
+
 			return this;
 		}
 
@@ -4709,7 +4718,7 @@ var TaroEntity = TaroObject.extend({
 					break;
 
 				case 'projectile':
-					keys = ['type', 'anim', 'stateId', 'flip'];
+					keys = ['type', 'anim', 'stateId', 'flip', 'sourceItemId', 'streamMode'];
 					data = {
 						attributes: {},
 						// variables: {}
@@ -5092,11 +5101,11 @@ var TaroEntity = TaroObject.extend({
 			this._lastTransformAt == taro._currentTime ||
 			// entity has no body
 			this._translate == undefined ||
-			this._stats.currentBody == undefined ||			
+			this._stats.currentBody == undefined ||
 			(
 				// ignore server stream of my own unit's sprite-only item
-				this._stats.currentBody && this._stats.currentBody.type == 'spriteOnly' && 
-				(this.getOwnerUnit && this.getOwnerUnit() == taro.client.selectedUnit) 
+				this._stats.currentBody && this._stats.currentBody.type == 'spriteOnly' &&
+				(this.getOwnerUnit && this.getOwnerUnit() == taro.client.selectedUnit)
 			)
 		) {
 			return;
@@ -5111,33 +5120,32 @@ var TaroEntity = TaroObject.extend({
 		let yDiff = null;
 		let rotateStart = null;
 		let rotateEnd = null;
-		
+
 		let x = this._translate.x;
 		let y = this._translate.y;
 		let rotate = this._rotate.z;
 		let prevKeyFrame = null;
 		let nextKeyFrame = null;
 
-		var finalTransform = this.finalKeyFrame[1];
+		var latestTransform = this.latestKeyFrame[1];
 		// using cspMovement for my unit will cause it to rubberband to the latest known position
-		if (taro.game.cspEnabled && finalTransform /*&& !this._stats.aiEnabled*/) {
-
+		if (taro.game.cspEnabled && latestTransform && !this._stats.streamMode/*&& !this._stats.aiEnabled*/) {
 			if (this.body &&
 				!(this._category == 'item' && this.getOwnerUnit() != undefined) && // don't apply to item that's held by unit as that's calculated by anchor calculation
-				!(this._category == 'projectile' && this._stats.sourceItemId == undefined && this._streamMode) // don't apply to projectiles that are CSP'ed
+				!(this._category == 'projectile' && this._stats.streamMode) // don't apply to projectiles that are CSP'ed
 			) {
-				xDiff = (finalTransform[0] - x);
-				yDiff = (finalTransform[1] - y);				
-				x = x + xDiff / 10
-	        	y = y + yDiff / 10
+				xDiff = (latestTransform[0] - x);
+				yDiff = (latestTransform[1] - y);
+				x = x + xDiff / 10;
+	        	y = y + yDiff / 10;
 	        }
 
 	        if (
 	        	// interpolate item rotation
-	        	(this._stats.controls && this._stats.controls.mouseBehaviour.rotateToFaceMouseCursor) 
+	        	(this._stats.controls && this._stats.controls.mouseBehaviour.rotateToFaceMouseCursor)
 			) {
 				rotateStart = rotate;
-	        	rotateEnd = finalTransform[2]
+	        	rotateEnd = latestTransform[2];
 	        	// a hack to prevent rotational interpolation suddnely jumping by 2 PI (e.g. 0.01 to -6.27)
 				if (Math.abs(rotateEnd - rotateStart) > Math.PI) {
 					if (rotateEnd > rotateStart) rotateStart += Math.PI * 2;
@@ -5147,52 +5155,54 @@ var TaroEntity = TaroObject.extend({
 	        	rotate = this.interpolateValue(rotateStart, rotateEnd, taro._currentTime - 16, taro._currentTime, taro._currentTime + 16);
 	        }
 		} else { // use server-streamed keyFrames
-
 			if (taro.nextSnapshot) {
 				var nextTransform = taro.nextSnapshot[1][this.id()];
+
 				if (nextTransform) {
 					nextKeyFrame = [taro.nextSnapshot[0], nextTransform];
 
-					xEnd = nextTransform[0]
-					yEnd = nextTransform[1]
-					rotateEnd = nextTransform[2]
+					xEnd = nextTransform[0];
+					yEnd = nextTransform[1];
+					rotateEnd = nextTransform[2];
 				}
 			}
-			// by default, prevTransform is where this unit currently is	
+			// by default, prevTransform is where this unit currently is
 			if (taro.prevSnapshot) {
 				// Set variables up to store the previous and next data
-				var prevTransform = taro.prevSnapshot[1][this.id()];			
-				
+				var prevTransform = taro.prevSnapshot[1][this.id()];
+
 				if (prevTransform) {
 					prevKeyFrame = [taro.prevSnapshot[0], prevTransform];
-					xStart = prevTransform[0]
-					yStart = prevTransform[1]
-					rotateStart = prevTransform[2]									
-				}			
+					xStart = prevTransform[0];
+					yStart = prevTransform[1];
+					rotateStart = prevTransform[2];
+				}
 			}
 		}
 
 		// csp-projectiles are interpolated using physicsComponent-generated keyframes
 		// this is necessary, because physics don't run at 60 fps on clientside
-		if (taro.physics && this._category == 'projectile' && 
-			this._stats.sourceItemId != undefined && !this._streamMode
+		if (taro.physics && this._category == 'projectile' &&
+			!this._stats.streamMode
 		) {
 			prevKeyFrame = this.prevPhysicsFrame;
 			nextKeyFrame = this.nextPhysicsFrame;
-			
+
 			var prevTransform = (this.prevPhysicsFrame) ? this.prevPhysicsFrame[1] : undefined;
 			var nextTransform = (this.nextPhysicsFrame) ? this.nextPhysicsFrame[1] : undefined;
 
 			if (prevTransform && nextTransform) {
-				if (!this.renderingStarted) this.startRendering();
-				xStart = prevTransform[0]
-				yStart = prevTransform[1]
-				xEnd = nextTransform[0]
-				yEnd = nextTransform[1]
+				if (!this.renderingStarted) {
+					this.startRendering();
+				}
+				xStart = prevTransform[0];
+				yStart = prevTransform[1];
+				xEnd = nextTransform[0];
+				yEnd = nextTransform[1];
 
 				if (this._category == 'projectile' && this._stats.sourceItemId != undefined && !this._streamMode) {
-					rotateStart = prevTransform[2]	
-					rotateEnd = nextTransform[2]
+					rotateStart = prevTransform[2];
+					rotateEnd = nextTransform[2];
 				}
 			}
 		}
@@ -5212,8 +5222,6 @@ var TaroEntity = TaroObject.extend({
 				prevTransform[1] = y;
 			}
 
-
-			
 			// a hack to prevent rotational interpolation suddnely jumping by 2 PI (e.g. 0.01 to -6.27)
 			if (Math.abs(rotateEnd - rotateStart) > Math.PI) {
 				if (rotateEnd > rotateStart) rotateStart += Math.PI * 2;
@@ -5221,14 +5229,12 @@ var TaroEntity = TaroObject.extend({
 			}
 
 			rotate = this.interpolateValue(rotateStart, rotateEnd, prevKeyFrame[0], taro._currentTime, nextKeyFrame[0]);
-			
 		}
-		
 
 		// ignore streamed angle if this unit control is set to face mouse cursor instantly.
 		if (this == taro.client.selectedUnit &&
-			this.angleToTarget != undefined && !isNaN(this.angleToTarget) && 
-			this._stats.controls && this._stats.controls.mouseBehaviour.rotateToFaceMouseCursor && 
+			this.angleToTarget != undefined && !isNaN(this.angleToTarget) &&
+			this._stats.controls && this._stats.controls.mouseBehaviour.rotateToFaceMouseCursor &&
 			this._stats.currentBody && !this._stats.currentBody.fixedRotation
 		) {
 			rotate = this.angleToTarget;
@@ -5237,7 +5243,7 @@ var TaroEntity = TaroObject.extend({
 		this._translate.x = x;
 		this._translate.y = y;
 		this._rotate.z = rotate;
-		// this.rotateTo(0, 0, rotate);		
+		// this.rotateTo(0, 0, rotate);
 		// this.translateTo(x, y, 0);
 		this._lastTransformAt = taro._currentTime;
 
