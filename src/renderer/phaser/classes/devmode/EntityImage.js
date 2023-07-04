@@ -86,12 +86,12 @@ var EntityImage = /** @class */ (function () {
                 gameObject.y = dragY;
                 editedAction.position = { x: dragX, y: dragY };
             }
-            else if (_this.dragMode === 'angle' && action.angle) {
+            else if (_this.dragMode === 'angle' && !isNaN(action.angle)) {
                 var target = Phaser.Math.Angle.BetweenPoints(gameObject, { x: dragX, y: dragY });
                 gameObject.rotation = target;
                 editedAction.angle = gameObject.angle;
             }
-            else if (_this.dragMode === 'scale' && action.width && action.height) {
+            else if (_this.dragMode === 'scale' && !isNaN(action.width) && !isNaN(action.height)) {
                 var dragScale = Math.min(500, Math.max(-250, (_this.startDragY - dragY)));
                 gameObject.scale = _this.scale + _this.scale * dragScale / 500;
                 editedAction.width = image.displayWidth;
