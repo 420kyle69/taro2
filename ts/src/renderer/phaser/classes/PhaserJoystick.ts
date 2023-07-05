@@ -38,8 +38,8 @@ class PhaserJoystick {
 
 		if (settings.redFireZone) {
             base.beginPath();
-            base.lineStyle(radius/4, 0xff0000);
-            base.arc(0, 0, radius/1.17, Phaser.Math.DegToRad(0), Phaser.Math.DegToRad(360), true, 0.02);
+            base.lineStyle(radius/8, 0xff0000);
+            base.arc(0, 0, radius/1.08, Phaser.Math.DegToRad(0), Phaser.Math.DegToRad(360), true, 0.02);
             base.strokePath();
             base.closePath();
             base.alpha = 1;
