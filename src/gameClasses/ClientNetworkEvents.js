@@ -506,6 +506,8 @@ var ClientNetworkEvents = {
 			$('#dev-error-button').text(`Errors (${taro.client.errorLogs.length})`);
 			$('#server-console').append(`<span class="badge badge-danger">${log}</span><br/>`);
 		}
+
+		window.reactApp.showErrorToast(logs[Object.keys(logs)[Object.keys(logs).length - 1]]);
 	},
 
 	_onSound: function (data) {
