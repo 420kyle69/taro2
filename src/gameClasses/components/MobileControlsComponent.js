@@ -228,7 +228,7 @@ var MobileControlsComponent = TaroEntity.extend({
 									self.upReleased();
 								}
 								if (moveStick._isLeft) {
-									self.leftPressed();
+									self.leftReleased();
 								}
 								if (moveStick._isDown) {
 									self.downReleased();
@@ -275,11 +275,11 @@ var MobileControlsComponent = TaroEntity.extend({
 							var compassAngle = -(data.angle - 90);
 
 							var unit = taro.client.myPlayer.getSelectedUnit();
-							// simulate mouse movement 10 units away from player (scaled by joystick "power") character but at the angle
+							// simulate mouse movement 100000 units away from player (scaled by joystick "power") character but at the angle
 							if (unit) {
 								var unitTranslate = unit._translate;
-								var mx = unitTranslate.x + Math.sin(compassAngle / 360 * 2 * Math.PI) * 10 * data.power;
-								var my = unitTranslate.y - Math.cos(compassAngle / 360 * 2 * Math.PI) * 10 * data.power;
+								var mx = unitTranslate.x + Math.sin(compassAngle / 360 * 2 * Math.PI) * 100000 * data.power;
+								var my = unitTranslate.y - Math.cos(compassAngle / 360 * 2 * Math.PI) * 100000 * data.power;
 							}
 
 							taro.client.myPlayer.control.input.mouse.x = mx;
@@ -305,11 +305,11 @@ var MobileControlsComponent = TaroEntity.extend({
 							var compassAngle = -(data.angle - 90);
 
 							var unit = taro.client.myPlayer.getSelectedUnit();
-							// simulate mouse movement 10 units away from player (scaled by joystick "power") character but at the angle
+							// simulate mouse movement 100000 units away from player (scaled by joystick "power") character but at the angle
 							if (unit) {
 								var unitTranslate = unit._translate;
-								var mx = unitTranslate.x + Math.sin(compassAngle / 360 * 2 * Math.PI) * 10 * data.power;
-								var my = unitTranslate.y - Math.cos(compassAngle / 360 * 2 * Math.PI) * 10 * data.power;
+								var mx = unitTranslate.x + Math.sin(compassAngle / 360 * 2 * Math.PI) * 100000 * data.power;
+								var my = unitTranslate.y - Math.cos(compassAngle / 360 * 2 * Math.PI) * 100000 * data.power;
 							}
 
 							taro.client.myPlayer.control.input.mouse.x = mx;
