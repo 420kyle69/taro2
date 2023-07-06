@@ -1,45 +1,6 @@
-const aliasComponent = (component) => {
-	// aliases for camelcase
-	component.b2World.prototype.isLocked = component.b2World.prototype.IsLocked;
-	component.b2World.prototype.createBody = component.b2World.prototype.CreateBody;
-	component.b2World.prototype.destroyBody = component.b2World.prototype.DestroyBody;
-	// component.b2World.prototype.createJoint = component.b2World.prototype.CreateJoint;
-	component.b2World.prototype.destroyJoint = component.b2World.prototype.DestroyJoint;
-	component.b2World.prototype.createFixture = component.b2World.prototype.CreateFixture;
-	component.b2World.prototype.clearForces = component.b2World.prototype.ClearForces;
-	component.b2World.prototype.getBodyList = component.b2World.prototype.GetBodyList;
-	component.b2World.prototype.getJointList = component.b2World.prototype.GetJointList;
-	component.b2World.prototype.getFixtureList = component.b2World.prototype.GetFixtureList;
-	component.b2World.prototype.step = component.b2World.prototype.Step;
-	component.b2World.prototype.rayCast = component.b2World.prototype.RayCast;
+const { box2dwasm } = require('./dists/box2dwasm/entry.js');
 
-	// signature is backwards!
-	/*
-	component.b2World.prototype.queryAABB = function(aabb, queryCallback){
-		return component.b2World.prototype.QueryAABB(queryCallback,aabb);
-	}
-	*/
-
-	component.b2Body.prototype.getNext = component.b2Body.prototype.GetNext;
-	component.b2Body.prototype.getAngle = component.b2Body.prototype.GetAngle;
-	component.b2Body.prototype.setPosition = component.b2Body.prototype.SetPosition;
-	component.b2Body.prototype.getPosition = component.b2Body.prototype.GetPosition;
-	component.b2Body.prototype.setGravityScale = component.b2Body.prototype.SetGravityScale;
-	component.b2Body.prototype.setAngle = component.b2Body.prototype.SetAngle;
-	component.b2Body.prototype.setTransform = component.b2Body.prototype.SetTransform;
-	component.b2Body.prototype.isAwake = component.b2Body.prototype.IsAwake;
-	component.b2Body.prototype.setAwake = component.b2Body.prototype.SetAwake;
-	component.b2Body.prototype.setLinearVelocity = component.b2Body.prototype.SetLinearVelocity;
-	component.b2Body.prototype.getLinearVelocity = component.b2Body.prototype.GetLinearVelocity;
-	component.b2Body.prototype.applyLinearImpulse = component.b2Body.prototype.ApplyLinearImpulse;
-	component.b2Body.prototype.getWorldCenter = component.b2Body.prototype.GetWorldCenter;
-	component.b2Body.prototype.applyForce = component.b2Body.prototype.ApplyForce;
-	component.b2Vec2.prototype.set = component.b2Vec2.prototype.Set;
-	// component.b2Vec2.prototype.setV = component.b2Vec2.prototype.SetV;
-
-	component.b2Joint.prototype.getNext = component.b2Joint.prototype.GetNext;
-};
-
+var box2DMembers = ['b2AABB', 'b2Color', 'b2Vec2', 'b2Math', 'b2Shape', 'b2Body']
 var dists = {
 	// current: 'box2dts',
 	// current: 'planck',
@@ -365,32 +326,99 @@ var dists = {
 
 	BOX2DWASM: { // added by Moe'Thun for fixing memory leak bug
 		init: function (component) {
-			const Box2DFactory = Box2DWasm;
+			const Box2DFactory = box2dwasm;
 			Box2DFactory().then(box2D => {
-				component.b2AABB = box2D.Collision.b2AABB; // added by Jaeyun for world collision detection for raycast bullets
-				component.b2Color = box2D.Common.b2Color;
-				component.b2Vec2 = box2D.Common.Math.b2Vec2;
-				component.b2Math = box2D.Common.Math.b2Math;
-				component.b2Shape = box2D.Collision.Shapes.b2Shape;
-				component.b2BodyDef = box2D.Dynamics.b2BodyDef;
-				component.b2Body = box2D.Dynamics.b2Body;
-				component.b2Joint = box2D.Dynamics.Joints.b2Joint;
-				component.b2FixtureDef = box2D.Dynamics.b2FixtureDef;
-				component.b2Fixture = box2D.Dynamics.b2Fixture;
-				component.b2World = box2D.Dynamics.b2World;
-				component.b2MassData = box2D.Collision.Shapes.b2MassData;
-				component.b2PolygonShape = box2D.Collision.Shapes.b2PolygonShape;
-				component.b2CircleShape = box2D.Collision.Shapes.b2CircleShape;
-				component.b2DebugDraw = box2D.Dynamics.b2DebugDraw;
-				component.b2ContactListener = box2D.Dynamics.b2ContactListener;
-				component.b2Distance = box2D.Collision.b2Distance;
-				component.b2FilterData = box2D.Dynamics.b2FilterData;
-				component.b2DistanceJointDef = box2D.Dynamics.Joints.b2DistanceJointDef;
-				aliasComponent(component);
+				component.b2AABB = box2D.b2AABB; // added by Jaeyun for world collision detection for raycast bullets
+				component.b2Color = box2D.b2Color;
+				component.b2Vec2 = box2D.b2Vec2;
+				component.b2Math = box2D.b2Math;
+				component.b2Shape = box2D.b2Shape;
+				component.b2BodyDef = box2D.b2BodyDef;
+				component.b2Body = box2D.b2Body;
+				component.b2Joint = box2D.b2Joint;
+				component.b2FixtureDef = box2D.b2FixtureDef;
+				component.b2Fixture = box2D.b2Fixture;
+				component.b2World = box2D.b2World;
+				component.b2MassData = box2D.b2MassData;
+				component.b2PolygonShape = box2D.b2PolygonShape;
+				component.b2CircleShape = box2D.b2CircleShape;
+				component.b2DebugDraw = box2D.b2DebugDraw;
+				component.JSContactListener = box2D.JSContactListener;
+				component.b2Distance = box2D.b2Distance;
+				component.b2FilterData = box2D.b2FilterData;
+				component.b2DistanceJointDef = box2D.b2DistanceJointDef;
+				// aliases for camelcase
+				component.b2World.prototype.isLocked = component.b2World.prototype.IsLocked;
+				component.b2World.prototype.createBody = component.b2World.prototype.CreateBody;
+				component.b2World.prototype.destroyBody = component.b2World.prototype.DestroyBody;
+				// component.b2World.prototype.createJoint = component.b2World.prototype.CreateJoint;
+				component.b2World.prototype.destroyJoint = component.b2World.prototype.DestroyJoint;
+				component.b2World.prototype.createFixture = component.b2World.prototype.CreateFixture;
+				component.b2World.prototype.clearForces = component.b2World.prototype.ClearForces;
+				component.b2World.prototype.getBodyList = component.b2World.prototype.GetBodyList;
+				component.b2World.prototype.getJointList = component.b2World.prototype.GetJointList;
+				component.b2World.prototype.getFixtureList = component.b2World.prototype.GetFixtureList;
+				component.b2World.prototype.step = component.b2World.prototype.Step;
+				component.b2World.prototype.rayCast = component.b2World.prototype.RayCast;
+
+				// signature is backwards!
+				/*
+				component.b2World.prototype.queryAABB = function(aabb, queryCallback){
+					return component.b2World.prototype.QueryAABB(queryCallback,aabb);
+				}
+				*/
+
+				component.b2Body.prototype.getNext = component.b2Body.prototype.GetNext;
+				component.b2Body.prototype.getAngle = component.b2Body.prototype.GetAngle;
+				component.b2Body.prototype.setPosition = component.b2Body.prototype.SetPosition;
+				component.b2Body.prototype.getPosition = component.b2Body.prototype.GetPosition;
+				component.b2Body.prototype.setGravityScale = component.b2Body.prototype.SetGravityScale;
+				component.b2Body.prototype.setAngle = component.b2Body.prototype.SetAngle;
+				component.b2Body.prototype.setTransform = component.b2Body.prototype.SetTransform;
+				component.b2Body.prototype.isAwake = component.b2Body.prototype.IsAwake;
+				component.b2Body.prototype.setAwake = component.b2Body.prototype.SetAwake;
+				component.b2Body.prototype.setLinearVelocity = component.b2Body.prototype.SetLinearVelocity;
+				component.b2Body.prototype.getLinearVelocity = component.b2Body.prototype.GetLinearVelocity;
+				component.b2Body.prototype.applyLinearImpulse = component.b2Body.prototype.ApplyImpulse;
+				component.b2Body.prototype.applyTorque = component.b2Body.prototype.ApplyTorque;
+
+				component.b2Body.prototype.getWorldCenter = component.b2Body.prototype.GetWorldCenter;
+				component.b2Body.prototype.applyForce = component.b2Body.prototype.ApplyForce;
+				component.b2Vec2.prototype.set = component.b2Vec2.prototype.Set;
+				// component.b2Vec2.prototype.setV = component.b2Vec2.prototype.SetV;
+
+				component.b2Joint.prototype.getNext = component.b2Joint.prototype.GetNext;
+
+				component.createWorld = function (id, options) {
+					component._world = new component.b2World(this._gravity, this._sleep);
+					component._world.SetContinuousPhysics(this._continuousPhysics);
+				};
+
+				/**
+				 * Gets / sets the gravity vector.
+				 * @param x
+				 * @param y
+				 * @return {*}
+				 */
+				component.gravity = function (x, y) {
+					if (x !== undefined && y !== undefined) {
+						this._gravity = new this.b2Vec2(x, y);
+						return this._entity;
+					}
+
+					return this._gravity;
+				};
+
+				component.setContinuousPhysics = function (continuousPhysics) {
+					this._continuousPhysics = continuousPhysics;
+				};
+				component._continuousPhysics = false;
+				component._sleep = true;
+				component._gravity = new component.b2Vec2(0, 0);
 			});
 		},
 		contactListener: function (self, beginContactCallback, endContactCallback, preSolve, postSolve) {
-			var contactListener = new self.b2ContactListener();
+			var contactListener = new self.JSContactListener();
 			if (beginContactCallback !== undefined) {
 				contactListener.BeginContact = beginContactCallback;
 			}
@@ -667,6 +695,7 @@ var dists = {
 			}
 		}
 	},
+
 	BOX2DWEB: {
 		init: function (component) {
 			component.b2AABB = box2dweb.Collision.b2AABB; // added by Jaeyun for world collision detection for raycast bullets

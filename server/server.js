@@ -15,7 +15,7 @@ const config = require('../config');
 const Console = console.constructor;
 // redirect global console object to log file
 
-function logfile (file) {
+function logfile(file) {
 	var con = new Console(fs.createWriteStream(file));
 	Object.keys(Console.prototype).forEach(function (name) {
 		console[name] = function () {
@@ -46,42 +46,42 @@ global.rollbar = {
 // override console.log and error to print additional data
 console.basicLog = console.log;
 console.log = function () {
-	
+
 	const log = [];
-	
+
 	log.push(new Date());
 	log.push(cluster.isMaster ? 'master' : 'worker');
-	
+
 	if (taro?.server?.httpsPort) {
 		log.push(taro?.server?.httpsPort);
 	}
-	
+
 	if (taro?.game?.data?.defaultData?.gameSlug) {
 		log.push(taro?.game?.data?.defaultData?.gameSlug);
 	}
-	
+
 	log.push(...arguments);
-	
+
 	console.basicLog(...log);
 };
 
 console.basicError = console.error;
 console.error = function () {
 	const log = [];
-	
+
 	log.push(new Date());
 	log.push(cluster.isMaster ? 'master' : 'worker');
-	
+
 	if (taro?.server?.httpsPort) {
 		log.push(taro?.server?.httpsPort);
 	}
-	
+
 	if (taro?.game?.data?.defaultData?.gameSlug) {
 		log.push(taro?.game?.data?.defaultData?.gameSlug);
 	}
-	
+
 	log.push(...arguments);
-	
+
 	console.basicError(...log);
 };
 
@@ -127,12 +127,12 @@ if (process.env.ENV == 'production') {
 var Mixpanel = require('mixpanel');
 var { PostHog } = require('posthog-node')
 // create an instance of the mixpanel client
-if(process.env.MIXPANEL_TOKEN) {
+if (process.env.MIXPANEL_TOKEN) {
 	global.mixpanel = Mixpanel.init(process.env.MIXPANEL_TOKEN);
 }
 
 if (process.env.POSTHOG_TOKEN) {
-	global.posthog = new PostHog(process.env.POSTHOG_TOKEN, { host: 'https://app.posthog.com' } );
+	global.posthog = new PostHog(process.env.POSTHOG_TOKEN, { host: 'https://app.posthog.com' });
 }
 
 global.trackServerEvent = function ({ eventName, properties, target = "all" }, socket) {
@@ -140,7 +140,7 @@ global.trackServerEvent = function ({ eventName, properties, target = "all" }, s
 	var mixpanelDistinctId = socket?._token?.distinctId;
 	if (global.mixpanel && mixpanelDistinctId && (target === "all" || target === "mixpanel")) {
 		global.mixpanel.track(eventName, {
-			'distinct_id' : mixpanelDistinctId,
+			'distinct_id': mixpanelDistinctId,
 			...properties
 		});
 	}
@@ -149,7 +149,7 @@ global.trackServerEvent = function ({ eventName, properties, target = "all" }, s
 			distinctId: posthogDistinctId,
 			'event': eventName,
 			properties: properties
-		});	
+		});
 	}
 }
 
@@ -571,104 +571,108 @@ var Server = TaroClass.extend({
 					.physics.sleep(true)
 					.physics.tilesizeRatio(tilesizeRatio);
 
-				if (game.data.settings) {
-					var gravity = game.data.settings.gravity;
-					if (gravity) {
-						// console.log('setting gravity', gravity);
-						taro.physics.gravity(gravity.x, gravity.y);
-					}
-				}
 
-				taro.physics.setContinuousPhysics(!!game?.data?.settings?.continuousPhysics);
-				taro.physics.createWorld();
-				taro.physics.start();
-				taro.raycaster = new Raycaster();
-				taro.developerMode = new DeveloperMode();
 
-				// console.log("game data", game)
-				// mapComponent needs to be inside TaroStreamComponent, because debris' are created and streaming is enabled which requires TaroStreamComponent
-				console.log('initializing components');
-
-				taro.network.on('connect', self._onClientConnect);
-				taro.network.on('disconnect', self._onClientDisconnect);
-
-				// Networking has started so start the game engine
-				taro.start(function (success) {
-					// Check if the engine started successfully
-					if (success) {
-						console.log('TaroNetIoComponent started successfully');
-
-						self.defineNetworkEvents();
-						// console.log("game data", taro.game.data.settings)
-
-						// Add the network stream component
-						taro.network.addComponent(TaroStreamComponent)
-							.stream.start(); // Start the stream
-
-						// Accept incoming network connections
-						taro.network.acceptConnections(true);
-
-						taro.addGraph('TaroBaseScene');
-
-						taro.addComponent(MapComponent);
-						taro.addComponent(ShopComponent);
-						taro.addComponent(TaroChatComponent);
-						taro.addComponent(ItemComponent);
-						taro.addComponent(TimerComponent);
-						taro.addComponent(GameTextComponent);
-
-						taro.addComponent(AdComponent);
-						taro.addComponent(SoundComponent);
-						taro.addComponent(RegionManager);
-
-						if (taro.game.data.defaultData.enableVideoChat) {
-							taro.addComponent(VideoChatComponent);
+				setTimeout(() => {
+					if (game.data.settings) {
+						var gravity = game.data.settings.gravity;
+						if (gravity) {
+							// console.log('setting gravity', gravity);
+							taro.physics.gravity(gravity.x, gravity.y);
 						}
-
-						let map = taro.scaleMap(_.cloneDeep(taro.game.data.map));
-						taro.map.load(map);
-
-						taro.game.start();
-
-						self.gameLoaded = true;
-
-						// send dev logs to developer every second
-						var logInterval = setInterval(function () {
-							// send only if developer client is connect
-							if (taro.isServer && self.developerClientIds.length) {
-
-								taro.game.devLogs.status = taro.server.getStatus();
-								const sendErrors = Object.keys(taro.script.errorLogs).length;
-								self.developerClientIds.forEach(
-									id => {
-										taro.network.send('devLogs', taro.game.devLogs, id);
-
-										if (sendErrors) {
-											taro.network.send('errorLogs', taro.script.errorLogs, id);
-										}
-
-									});
-
-								if (sendErrors) {
-									taro.script.errorLogs = {};
-								}
-							}
-							taro.physicsTickCount = 0;
-							taro.unitBehaviourCount = 0;
-						}, 1000);
-
-						setInterval(function () {
-							var copyCount = Object.assign({}, self.socketConnectionCount);
-							self.socketConnectionCount = {
-								connected: 0,
-								disconnected: 0,
-								immediatelyDisconnected: 0
-							};
-
-							taro.clusterClient && taro.clusterClient.recordSocketConnections(copyCount);
-						}, 900000);
 					}
-				});
+					taro.physics.setContinuousPhysics(!!game?.data?.settings?.continuousPhysics);
+					taro.physics.createWorld();
+					taro.physics.start();
+					taro.raycaster = new Raycaster();
+					taro.developerMode = new DeveloperMode();
+
+					// console.log("game data", game)
+					// mapComponent needs to be inside TaroStreamComponent, because debris' are created and streaming is enabled which requires TaroStreamComponent
+					console.log('initializing components');
+
+					taro.network.on('connect', self._onClientConnect);
+					taro.network.on('disconnect', self._onClientDisconnect);
+
+					// Networking has started so start the game engine
+					taro.start(function (success) {
+						// Check if the engine started successfully
+						if (success) {
+							console.log('TaroNetIoComponent started successfully');
+
+							self.defineNetworkEvents();
+							// console.log("game data", taro.game.data.settings)
+
+							// Add the network stream component
+							taro.network.addComponent(TaroStreamComponent)
+								.stream.start(); // Start the stream
+
+							// Accept incoming network connections
+							taro.network.acceptConnections(true);
+
+							taro.addGraph('TaroBaseScene');
+
+							taro.addComponent(MapComponent);
+							taro.addComponent(ShopComponent);
+							taro.addComponent(TaroChatComponent);
+							taro.addComponent(ItemComponent);
+							taro.addComponent(TimerComponent);
+							taro.addComponent(GameTextComponent);
+
+							taro.addComponent(AdComponent);
+							taro.addComponent(SoundComponent);
+							taro.addComponent(RegionManager);
+
+							if (taro.game.data.defaultData.enableVideoChat) {
+								taro.addComponent(VideoChatComponent);
+							}
+
+							let map = taro.scaleMap(_.cloneDeep(taro.game.data.map));
+							taro.map.load(map);
+
+							taro.game.start();
+
+							self.gameLoaded = true;
+
+							// send dev logs to developer every second
+							var logInterval = setInterval(function () {
+								// send only if developer client is connect
+								if (taro.isServer && self.developerClientIds.length) {
+
+									taro.game.devLogs.status = taro.server.getStatus();
+									const sendErrors = Object.keys(taro.script.errorLogs).length;
+									self.developerClientIds.forEach(
+										id => {
+											taro.network.send('devLogs', taro.game.devLogs, id);
+
+											if (sendErrors) {
+												taro.network.send('errorLogs', taro.script.errorLogs, id);
+											}
+
+										});
+
+									if (sendErrors) {
+										taro.script.errorLogs = {};
+									}
+								}
+								taro.physicsTickCount = 0;
+								taro.unitBehaviourCount = 0;
+							}, 1000);
+
+							setInterval(function () {
+								var copyCount = Object.assign({}, self.socketConnectionCount);
+								self.socketConnectionCount = {
+									connected: 0,
+									disconnected: 0,
+									immediatelyDisconnected: 0
+								};
+
+								taro.clusterClient && taro.clusterClient.recordSocketConnections(copyCount);
+							}, 900000);
+						}
+					});
+				}, 100);
+
 			})
 				.catch((err) => {
 					console.log('got error while loading game json', err);
@@ -758,8 +762,8 @@ var Server = TaroClass.extend({
 		taro.network.define('trade', self._onTrade);
 		taro.network.define('editTile', self._onEditTile);
 		taro.network.define('editRegion', self._onEditRegion);
-        taro.network.define('editInitEntity', self._onEditInitEntity);
-        taro.network.define('updateClientInitEntities', self._onRequestInitEntities);
+		taro.network.define('editInitEntity', self._onEditInitEntity);
+		taro.network.define('updateClientInitEntities', self._onRequestInitEntities);
 		taro.network.define('editEntity', self._onEditEntity);
 		taro.network.define('updateUnit', self._onUpdateUnit);
 		taro.network.define('updateItem', this._onUpdateItem);
@@ -956,7 +960,7 @@ var Server = TaroClass.extend({
 				const jwt = require("jsonwebtoken");
 
 				const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
-				const {type, clientId: decodedClientId, createdAt} = decodedToken;
+				const { type, clientId: decodedClientId, createdAt } = decodedToken;
 
 				if (type === 'creditAdRewardToken' && decodedClientId === clientId) {
 					// allow transaction since token has been verified
