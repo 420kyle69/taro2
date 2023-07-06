@@ -193,6 +193,11 @@ var MobileControlsScene = /** @class */ (function (_super) {
                 pointerDown = true;
         }
         if (!pointerDown) {
+            var pointer = gameScene.input.mousePointer;
+            if (pointer && pointer.primaryDown)
+                pointerDown = true;
+        }
+        if (!pointerDown) {
             var leftJoystick = this.joysticks.find(function (_a) {
                 var side = _a.side;
                 return side === 'left';
