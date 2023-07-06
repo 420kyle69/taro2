@@ -85,6 +85,7 @@ var EntityEditor = /** @class */ (function () {
                 taro.network.send('editInitEntity', action);
             }
         });
+        this.selectedEntityImage = null;
     }
     EntityEditor.prototype.activatePlacement = function (active) {
         if (active) {
@@ -156,6 +157,12 @@ var EntityEditor = /** @class */ (function () {
             this.preview.x = worldPoint.x;
             this.preview.y = worldPoint.y;
         }
+    };
+    EntityEditor.prototype.selectEntityImage = function (entityImage) {
+        if (this.selectedEntityImage)
+            this.selectedEntityImage.updateOutline();
+        this.selectedEntityImage = entityImage;
+        entityImage.updateOutline();
     };
     return EntityEditor;
 }());

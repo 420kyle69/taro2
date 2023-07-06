@@ -57,6 +57,9 @@ var EntityImage = /** @class */ (function () {
         entityImages.push(image);
         image.on('pointerdown', function () {
             //console.log('pointerdown', action);
+            if (devModeTools.entityEditor.selectedEntityImage !== _this) {
+                devModeTools.entityEditor.selectEntityImage(_this);
+            }
             _this.startDragX = image.x;
             _this.startDragY = image.y;
             _this.scale = image.scale;
@@ -72,9 +75,13 @@ var EntityImage = /** @class */ (function () {
         });
         var outline = devModeTools.outline;
         image.on('pointerover', function () {
+            if (devModeTools.entityEditor.selectedEntityImage !== _this)
+                devModeTools.entityEditor.selectedEntityImage = null;
             _this.updateOutline();
         });
         image.on('pointerout', function () {
+            if (devModeTools.entityEditor.selectedEntityImage === _this)
+                return;
             outline.clear();
         });
         var editedAction = { actionId: action.actionId };
@@ -118,7 +125,12 @@ var EntityImage = /** @class */ (function () {
         var outline = this.devModeTools.outline;
         var image = this.image;
         outline.clear();
-        outline.lineStyle(2, 0x036ffc, 1);
+        if (this.devModeTools.entityEditor.selectedEntityImage === this) {
+            outline.lineStyle(6, 0x036ffc, 1);
+        }
+        else {
+            outline.lineStyle(2, 0x036ffc, 1);
+        }
         outline.strokeRect(-image.displayWidth / 2, -image.displayHeight / 2, image.displayWidth, image.displayHeight);
         outline.x = image.x;
         outline.y = image.y;

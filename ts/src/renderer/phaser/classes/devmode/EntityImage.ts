@@ -8,7 +8,6 @@ class EntityImage {
     scale: any;
     dragMode: 'position' | 'angle' | 'scale';
 
-
     constructor(scene, devModeTools: DevModeTools, entityImages: (Phaser.GameObjects.Image & {entity: EntityImage})[], action: ActionData, type?: string) {
 
         this.devModeTools = devModeTools;
@@ -56,6 +55,9 @@ class EntityImage {
 
         image.on('pointerdown', () => {
             //console.log('pointerdown', action);
+            if (devModeTools.entityEditor.selectedEntityImage !== this) {
+                devModeTools.entityEditor.selectEntityImage(this);
+            }
 
             this.startDragX = image.x;
             this.startDragY = image.y;
@@ -72,10 +74,12 @@ class EntityImage {
         const outline = devModeTools.outline;
 
         image.on('pointerover', () => {
+            if (devModeTools.entityEditor.selectedEntityImage !== this) devModeTools.entityEditor.selectedEntityImage = null;
             this.updateOutline();
         });
 
         image.on('pointerout', () => {
+            if (devModeTools.entityEditor.selectedEntityImage === this) return;
             outline.clear();
         });
 
@@ -121,7 +125,11 @@ class EntityImage {
         const image = this.image;
 
 		outline.clear();
-		outline.lineStyle(2, 0x036ffc, 1);
+        if (this.devModeTools.entityEditor.selectedEntityImage === this) {
+            outline.lineStyle(6, 0x036ffc, 1);
+        } else {
+            outline.lineStyle(2, 0x036ffc, 1);
+        }
         outline.strokeRect(-image.displayWidth / 2, -image.displayHeight / 2, image.displayWidth, image.displayHeight);
         outline.x = image.x;
         outline.y = image.y;
