@@ -270,27 +270,7 @@ var MobileControlsComponent = TaroEntity.extend({
 				Object.assign(settings, {
 					onChange: (data) => {
 						if (taro.client.myPlayer) {
-							// simulate mouse movement 100000 units away from player (scaled by joystick "power") character but at the angle
-                            if (data.power > 0) {
-                                // Endel's joystick angles are in "Maths style" (zero degrees is EAST and positive anticlockwise)
-							    // Convert into compass style angle (zero degrees NORTH and positive clockwise)
-							    var compassAngle = -(data.angle - 90);
-
-							    var unit = taro.client.myPlayer.getSelectedUnit();
-                                if (unit && data.power > 0) {
-                                    var unitTranslate = unit._translate;
-                                    var mx = unitTranslate.x + Math.sin(compassAngle / 360 * 2 * Math.PI) * 100000 * data.power;
-                                    var my = unitTranslate.y - Math.cos(compassAngle / 360 * 2 * Math.PI) * 100000 * data.power;
-                                }
-    
-                                taro.client.myPlayer.control.input.mouse.x = mx;
-                                taro.client.myPlayer.control.input.mouse.y = my;
-    
-                                taro.client.myPlayer.absoluteAngle = compassAngle;
-                                taro.network.send('playerMouseMoved', [mx, my]);
-                                taro.network.send('playerAbsoluteAngle', compassAngle);
-                            }
-							
+                            this.mouseMovement(data.power, data.angle);
 						}
 					}
 				});
@@ -303,26 +283,7 @@ var MobileControlsComponent = TaroEntity.extend({
 					redFireZone: true,
 					onChange: (data) => {
 						if (taro.client.myPlayer) {
-							// simulate mouse movement 100000 units away from player (scaled by joystick "power") character but at the angle
-                            if (data.power > 0) {
-                                // Endel's joystick angles are in "Maths style" (zero degrees is EAST and positive anticlockwise)
-							    // Convert into compass style angle (zero degrees NORTH and positive clockwise)
-							    var compassAngle = -(data.angle - 90);
-
-							    var unit = taro.client.myPlayer.getSelectedUnit();
-                                if (unit) {
-                                    var unitTranslate = unit._translate;
-                                    var mx = unitTranslate.x + Math.sin(compassAngle / 360 * 2 * Math.PI) * 100000 * data.power;
-                                    var my = unitTranslate.y - Math.cos(compassAngle / 360 * 2 * Math.PI) * 100000 * data.power;
-                                }
-    
-                                taro.client.myPlayer.control.input.mouse.x = mx;
-                                taro.client.myPlayer.control.input.mouse.y = my;
-    
-                                taro.client.myPlayer.absoluteAngle = compassAngle;
-                                taro.network.send('playerMouseMoved', [mx, my]);
-                                taro.network.send('playerAbsoluteAngle', compassAngle);
-                            }
+                            this.mouseMovement(data.power, data.angle);
 
 							// when fire stick is moved to the red ring...
 							if (data.power > 1) {
@@ -373,7 +334,31 @@ var MobileControlsComponent = TaroEntity.extend({
 
 	setVisible: function (value) {
 		this.emit('visible', value);
-	}
+	},
+
+    mouseMovement: function (power, angle) {
+        // simulate mouse movement 100000 units away from player (scaled by joystick "power") character but at the angle
+        if (power > 0) {
+            // Endel's joystick angles are in "Maths style" (zero degrees is EAST and positive anticlockwise)
+            // Convert into compass style angle (zero degrees NORTH and positive clockwise)
+            var compassAngle = -(angle - 90);
+
+            var unit = taro.client.myPlayer.getSelectedUnit();
+            if (unit) {
+                var unitTranslate = unit._translate;
+                var mx = unitTranslate.x + Math.sin(compassAngle / 360 * 2 * Math.PI) * 100000 * power;
+                var my = unitTranslate.y - Math.cos(compassAngle / 360 * 2 * Math.PI) * 100000 * power;
+            }
+
+            taro.client.myPlayer.control.input.mouse.x = mx;
+            taro.client.myPlayer.control.input.mouse.y = my;
+
+            taro.client.myPlayer.absoluteAngle = compassAngle;
+            taro.network.send('playerMouseMoved', [mx, my]);
+            taro.network.send('playerAbsoluteAngle', compassAngle);
+        }
+    }
+
 });
 
 // client side only
