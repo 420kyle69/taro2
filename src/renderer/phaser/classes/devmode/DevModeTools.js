@@ -278,12 +278,15 @@ var DevModeTools = /** @class */ (function (_super) {
                 _this.commandController.redo();
             }
         });
-        var deleteKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DELETE, false);
-        deleteKey.on('down', function (event) {
+        var deleteEntity = function (event) {
             if (!_this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
                 _this.entityEditor.deleteInitEntity();
             }
-        });
+        };
+        var deleteKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DELETE, false);
+        var backspaceKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.BACKSPACE, false);
+        deleteKey.on('down', deleteEntity);
+        backspaceKey.on('down', deleteEntity);
     };
     DevModeTools.prototype.cursor = function () {
         this.highlightModeButton(0);
