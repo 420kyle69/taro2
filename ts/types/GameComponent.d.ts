@@ -42,6 +42,7 @@ interface ActionData {
 	width?: number;
 	height?: number;
     wasEdited?: boolean;
+    wasDeleted?: boolean;
 }
 
 interface MapData {

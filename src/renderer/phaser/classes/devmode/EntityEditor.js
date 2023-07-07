@@ -164,6 +164,12 @@ var EntityEditor = /** @class */ (function () {
         this.selectedEntityImage = entityImage;
         entityImage.updateOutline();
     };
+    EntityEditor.prototype.deleteInitEntity = function () {
+        if (this.selectedEntityImage) {
+            this.selectedEntityImage.delete();
+            this.selectedEntityImage = null;
+        }
+    };
     return EntityEditor;
 }());
 //# sourceMappingURL=EntityEditor.js.map

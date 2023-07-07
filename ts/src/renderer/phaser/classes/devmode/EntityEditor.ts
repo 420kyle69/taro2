@@ -169,5 +169,12 @@ class EntityEditor {
         this.selectedEntityImage = entityImage;
         entityImage.updateOutline();
     }
+
+    deleteInitEntity(): void {
+        if (this.selectedEntityImage) {
+            this.selectedEntityImage.delete();
+            this.selectedEntityImage = null;
+        }
+    }
 }
 

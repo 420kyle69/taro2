@@ -57,6 +57,8 @@ var EntityImage = /** @class */ (function () {
         entityImages.push(image);
         image.on('pointerdown', function () {
             //console.log('pointerdown', action);
+            if (!devModeTools.cursorButton.active)
+                return;
             if (devModeTools.entityEditor.selectedEntityImage !== _this) {
                 devModeTools.entityEditor.selectEntityImage(_this);
             }
@@ -75,6 +77,8 @@ var EntityImage = /** @class */ (function () {
         });
         var outline = devModeTools.outline;
         image.on('pointerover', function () {
+            if (!devModeTools.cursorButton.active)
+                return;
             if (devModeTools.entityEditor.selectedEntityImage !== _this)
                 devModeTools.entityEditor.selectedEntityImage = null;
             _this.updateOutline();
@@ -154,6 +158,20 @@ var EntityImage = /** @class */ (function () {
             this.action.height = action.height;
             this.image.setDisplaySize(action.width, action.height);
         }
+        if (action.wasDeleted) {
+            this.hide();
+            this.action.wasDeleted = true;
+        }
+    };
+    EntityImage.prototype.hide = function () {
+        this.image.alpha = 0;
+        this.image.setInteractive(false);
+    };
+    EntityImage.prototype.delete = function () {
+        this.hide();
+        var editedAction = { actionId: this.action.actionId, wasDeleted: true };
+        this.edit(editedAction);
+        this.devModeTools.outline.clear();
     };
     return EntityImage;
 }());

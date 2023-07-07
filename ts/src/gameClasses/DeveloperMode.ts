@@ -326,6 +326,9 @@ class DeveloperMode {
 						action.width = data.width;
 						action.height = data.height;
 					}
+                    if (data.wasDeleted) {
+                        action.wasDeleted = true;
+                    }
 				}
 			});
 			if (!found) {

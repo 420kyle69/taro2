@@ -278,6 +278,12 @@ var DevModeTools = /** @class */ (function (_super) {
                 _this.commandController.redo();
             }
         });
+        var deleteKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DELETE, false);
+        deleteKey.on('down', function (event) {
+            if (!_this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
+                _this.entityEditor.deleteInitEntity();
+            }
+        });
     };
     DevModeTools.prototype.cursor = function () {
         this.highlightModeButton(0);

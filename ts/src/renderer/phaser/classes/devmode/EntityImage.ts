@@ -55,6 +55,7 @@ class EntityImage {
 
         image.on('pointerdown', () => {
             //console.log('pointerdown', action);
+            if (!devModeTools.cursorButton.active) return;
             if (devModeTools.entityEditor.selectedEntityImage !== this) {
                 devModeTools.entityEditor.selectEntityImage(this);
             }
@@ -74,6 +75,7 @@ class EntityImage {
         const outline = devModeTools.outline;
 
         image.on('pointerover', () => {
+            if (!devModeTools.cursorButton.active) return;
             if (devModeTools.entityEditor.selectedEntityImage !== this) devModeTools.entityEditor.selectedEntityImage = null;
             this.updateOutline();
         });
@@ -153,5 +155,21 @@ class EntityImage {
             this.action.height = action.height;
             this.image.setDisplaySize(action.width, action.height);
         }
+        if (action.wasDeleted) {
+            this.hide();
+            this.action.wasDeleted = true;
+        }
+    }
+
+    hide (): void {
+        this.image.alpha = 0;
+        this.image.setInteractive(false);
+    }
+
+    delete (): void {
+        this.hide();
+        let editedAction: ActionData = {actionId: this.action.actionId, wasDeleted: true};
+        this.edit(editedAction);
+        this.devModeTools.outline.clear();
     }
 }
