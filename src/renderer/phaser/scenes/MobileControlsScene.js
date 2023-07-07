@@ -189,7 +189,12 @@ var MobileControlsScene = /** @class */ (function (_super) {
         var pointerDown = false;
         for (var i = 1; i < 6; i++) {
             var pointer = gameScene.input['pointer' + i.toString()];
-            if (pointer.primaryDown)
+            if (pointer && pointer.primaryDown)
+                pointerDown = true;
+        }
+        if (!pointerDown) {
+            var pointer = gameScene.input.mousePointer;
+            if (pointer && pointer.primaryDown)
                 pointerDown = true;
         }
         if (!pointerDown) {
