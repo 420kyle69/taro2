@@ -2,6 +2,7 @@ class EntityEditor {
     activeEntityPlacement: boolean;
     preview: Phaser.GameObjects.Image;
     activeEntity: { id: string; player: string; entityType: string; };
+    selectedEntityImage: EntityImage;
 
 	constructor (
         private gameScene: GameScene,
@@ -87,6 +88,8 @@ class EntityEditor {
                 taro.network.send<any>('editInitEntity', action);
             }
 		});
+
+        this.selectedEntityImage = null;
     }
 
     activatePlacement(active: boolean): void {
@@ -159,5 +162,19 @@ class EntityEditor {
             this.preview.y = worldPoint.y;
         }
 	}
+
+    
+    selectEntityImage(entityImage: EntityImage): void {
+        if (this.selectedEntityImage) this.selectedEntityImage.updateOutline();
+        this.selectedEntityImage = entityImage;
+        entityImage.updateOutline();
+    }
+
+    deleteInitEntity(): void {
+        if (this.selectedEntityImage) {
+            this.selectedEntityImage.delete();
+            this.selectedEntityImage = null;
+        }
+    }
 }
 

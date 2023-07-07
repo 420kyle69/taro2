@@ -250,7 +250,6 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		});
 		const bKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.B, false);
 		bKey.on('down', (key) => {
-
 			if (!this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
 				this.brush();
 			}
@@ -336,6 +335,17 @@ class DevModeTools extends Phaser.GameObjects.Container {
 			}
 		});
 
+		const deleteEntity = (event) => {
+			if (!this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
+                this.entityEditor.deleteInitEntity();
+            }
+		}
+
+        const deleteKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DELETE, false);
+        const backspaceKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.BACKSPACE, false);
+
+		deleteKey.on('down', deleteEntity);
+		backspaceKey.on('down', deleteEntity);
 	}
 
 	cursor(): void {
