@@ -16,7 +16,64 @@ var TaroChatComponent = TaroEventingClass.extend({
 		/* CEXCLUDE */
 		if (taro.isServer) {
 			if (process.env.ENV != 'standalone') {
-				this.filter = betterFilter;
+				const filterList = ["Shit", "Fuck", "Bitch", "Ass", "Asshole"];
+				const characters = [
+					"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p",
+					"q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "1", "2", "3", "4", "5", "6",
+					"7", "8", "9", "0"
+				];
+				
+				for (let i = 0; i < filterList.length; i++) {
+					filterList[i] = filterList[i].toLowerCase();
+				}
+				
+				this.filter = {
+					cleanHacked(text) {
+						const splitOriginal = text.split(" ");
+						text = text.toLowerCase();
+						const split = text.split(" ");
+						let filtered = "";
+					
+						for (let i = 0; i < split.length; i++) {
+							let punctFixed = "";
+					
+							for (let j = 0; j < split[i].length; j++) {
+								if (characters.includes(split[i][j])) {
+									punctFixed += split[i][j];
+								}
+							}
+					
+							if (filterList.includes(punctFixed)) {
+								let replace = "";
+					
+								for (let k = 0; k < split[i].length; k++) {
+									if (characters.includes(split[i][k])) {
+										replace += "*";
+									} else {
+										replace += split[i][k];
+									}
+								}
+					
+								split[i] = replace;
+							} else {
+								split[i] = splitOriginal[i];
+							}
+					
+							if (i === split.length - 1) {
+								filtered += split[i];
+							} else {
+								filtered += split[i] + " ";
+							}
+						}
+					
+						return filtered;
+					},
+					addWords(...words) {
+						words.forEach(word => {
+							filterList.push(word.toLowerCase());
+						});
+					}
+				};
 			}
 
 			// this.sanitizer = require('sanitizer');
