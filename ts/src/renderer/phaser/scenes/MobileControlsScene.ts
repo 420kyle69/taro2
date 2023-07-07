@@ -225,8 +225,12 @@ class MobileControlsScene extends PhaserScene {
 		let pointerDown = false;
 		for (let i = 1; i < 6; i++) {
 			var pointer = gameScene.input['pointer'+i.toString()];
-			if (pointer.primaryDown) pointerDown = true;
+			if (pointer && pointer.primaryDown) pointerDown = true;
 		}
+        if (!pointerDown) {
+            var pointer = gameScene.input.mousePointer;
+            if (pointer && pointer.primaryDown) pointerDown = true;
+        }
 		if (!pointerDown) {
 		    const leftJoystick = this.joysticks.find(({ side }) => side === 'left');
 			if (leftJoystick) leftJoystick.hide();
