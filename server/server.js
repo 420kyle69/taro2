@@ -565,8 +565,8 @@ var Server = TaroClass.extend({
 				// /*
 				//  * Significant changes above
 				// */
-
 				// Add physics and setup physics world
+
 				taro.addComponent(PhysicsComponent)
 					.physics.sleep(true)
 					.physics.tilesizeRatio(tilesizeRatio);
@@ -591,9 +591,9 @@ var Server = TaroClass.extend({
 					// mapComponent needs to be inside TaroStreamComponent, because debris' are created and streaming is enabled which requires TaroStreamComponent
 					console.log('initializing components');
 
+
 					taro.network.on('connect', self._onClientConnect);
 					taro.network.on('disconnect', self._onClientDisconnect);
-
 					// Networking has started so start the game engine
 					taro.start(function (success) {
 						// Check if the engine started successfully

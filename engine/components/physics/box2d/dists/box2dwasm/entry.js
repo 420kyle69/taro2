@@ -1,4 +1,3 @@
-var box2dwasm = {};
 !function (root) {
 	/**
 	 * This validation expression comes from wasm-feature-detect:
@@ -25,7 +24,7 @@ var box2dwasm = {};
 	} else if (typeof module === 'object' && module.exports) {
 		// NodeJS
 		// we avoid using the moduleName variable, because Parcel (2.0.0-beta.3.1) only analyses imports that are compile-time constants
-		box2dwasm = hasSIMD ? require('./Box2D.simd') : require('./Box2D');
+		exports.box2dwasm = hasSIMD ? require('./Box2D.simd') : require('./Box2D');
 	} else {
 		// Browser globals (root is window)
 		const scripts = root.document.getElementsByTagName('script')
@@ -58,7 +57,3 @@ var box2dwasm = {};
 		};
 	}
 }(typeof self !== 'undefined' ? self : this);
-
-if (typeof (window) == 'undefined') {
-	exports.box2dwasm = box2dwasm;
-}

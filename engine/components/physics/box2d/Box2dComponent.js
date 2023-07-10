@@ -28,7 +28,8 @@ var PhysicsComponent = TaroEventingClass.extend({
 		this.divisor = 80;
 
 		this.walls = [];
-
+		this.nullPtr = undefined;
+		this.getPointer = undefined;
 		this.engine = dists.defaultEngine;
 
 		if (taro.game && taro.game.data && taro.game.data.defaultData) {
@@ -524,7 +525,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 		var self = this;
 		var tempBod;
 		var entity;
-
 		if (self && self._active && self._world) {
 			var queueSize = 0;
 			if (!self._world.isLocked()) {
@@ -565,9 +565,10 @@ var PhysicsComponent = TaroEventingClass.extend({
 				self._world.step(timeElapsedSinceLastStep / 1000, 8, 3); // Call the world step; frame-rate, velocity iterations, position iterations
 				let nextFrameTime = taro._currentTime + (1000 / taro._gameLoopTickRate) - 10; // 10ms is to give extra buffer to prepare for the next frame
 				var tempBod = self._world.getBodyList();
-
+				let hasNext = self.getPointer && self.getPointer(tempBod);
 				// iterate through every physics body
-				while (tempBod && typeof tempBod.getNext == 'function') {
+				// FIXME: sometimes it will loop forever if u add new physics engine
+				while (tempBod && typeof tempBod.getNext === 'function' && hasNext) {
 					// Check if the body is awake && not static
 					if (tempBod.m_type !== 'static' && tempBod.isAwake()) {
 						entity = tempBod._entity;
@@ -688,7 +689,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 
 					tempBod = tempBod.getNext();
 				}
-
 				taro._physicsFrames++;
 
 				// Clear forces because we have ended our physics simulation frame

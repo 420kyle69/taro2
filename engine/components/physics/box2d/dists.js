@@ -1,6 +1,3 @@
-const { box2dwasm } = require('./dists/box2dwasm/entry.js');
-
-var box2DMembers = ['b2AABB', 'b2Color', 'b2Vec2', 'b2Math', 'b2Shape', 'b2Body']
 var dists = {
 	// current: 'box2dts',
 	// current: 'planck',
@@ -328,6 +325,8 @@ var dists = {
 		init: function (component) {
 			const Box2DFactory = box2dwasm;
 			Box2DFactory().then(box2D => {
+				component.getPointer = box2D.getPointer;
+				component.nullPtr = box2D.NULL;
 				component.b2AABB = box2D.b2AABB; // added by Jaeyun for world collision detection for raycast bullets
 				component.b2Color = box2D.b2Color;
 				component.b2Vec2 = box2D.b2Vec2;
@@ -345,7 +344,7 @@ var dists = {
 				component.b2DebugDraw = box2D.b2DebugDraw;
 				component.JSContactListener = box2D.JSContactListener;
 				component.b2Distance = box2D.b2Distance;
-				component.b2FilterData = box2D.b2FilterData;
+				component.b2FilterData = box2D.b2Filter;
 				component.b2DistanceJointDef = box2D.b2DistanceJointDef;
 				// aliases for camelcase
 				component.b2World.prototype.isLocked = component.b2World.prototype.IsLocked;
@@ -545,16 +544,16 @@ var dists = {
 											case 'circle':
 												tempShape = new self.b2CircleShape();
 												if (fixtureDef.shape.data && typeof (fixtureDef.shape.data.radius) !== 'undefined') {
-													tempShape.SetRadius(fixtureDef.shape.data.radius / self._scaleRatio);
+													tempShape.m_radius = fixtureDef.shape.data.radius / self._scaleRatio;
 												} else {
-													tempShape.SetRadius((entity._bounds2d.x / self._scaleRatio) / 2);
+													tempShape.m_radius = entity._bounds2d.x / self._scaleRatio / 2;
 												}
 
 												if (fixtureDef.shape.data) {
 													finalX = fixtureDef.shape.data.x !== undefined ? fixtureDef.shape.data.x : 0;
 													finalY = fixtureDef.shape.data.y !== undefined ? fixtureDef.shape.data.y : 0;
 
-													tempShape.SetLocalPosition(new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio));
+													tempShape.m_p.SetV(new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio));
 												}
 												break;
 
@@ -596,7 +595,7 @@ var dists = {
 									}
 
 									if (fixtureDef.filter && finalFixture) {
-										tempFilterData = new self._entity.physics.b2FilterData();
+										tempFilterData = self._entity.physics.b2FilterData;
 
 										if (fixtureDef.filter.filterCategoryBits !== undefined) {
 											tempFilterData.categoryBits = fixtureDef.filter.filterCategoryBits;
@@ -967,7 +966,7 @@ var dists = {
 									}
 
 									if (fixtureDef.filter && finalFixture) {
-										tempFilterData = new self._entity.physics.b2FilterData();
+										tempFilterData = self._entity.physics.b2FilterData;
 
 										if (fixtureDef.filter.filterCategoryBits !== undefined) {
 											tempFilterData.categoryBits = fixtureDef.filter.filterCategoryBits;
