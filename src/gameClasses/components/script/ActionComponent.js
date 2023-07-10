@@ -2793,6 +2793,45 @@ var ActionComponent = TaroEntity.extend({
 						}
 						break;
 
+					case 'editMapTiles':
+						var tileGid = self._script.variable.getValue(action.gid, vars);
+						var tileLayer = self._script.variable.getValue(action.layer, vars);
+						var tileX = self._script.variable.getValue(action.x, vars);
+						var tileY = self._script.variable.getValue(action.y, vars);
+						var width = self._script.variable.getValue(action.width, vars);
+						var height = self._script.variable.getValue(action.height, vars);
+						if (
+							Number.isInteger(tileGid)
+							&& Number.isInteger(tileLayer)
+							&& Number.isInteger(tileX)
+							&& Number.isInteger(tileY)
+							&& Number.isInteger(width)
+							&& Number.isInteger(height)
+						) {
+							if (tileGid < 0 || tileGid > taro.game.data.map.tilesets[0].tilecount) {
+								break;
+							} else if (tileLayer > 3 || tileLayer < 0) {
+								break;
+							} else if (tileX < 0 || tileX >= taro.game.data.map.width) {
+								break;
+							} else if (tileY < 0 || tileY >= taro.game.data.map.height) {
+								break;
+							} else {
+								taro.developerMode.editTile({
+									edit: {
+										selectedTiles: { 0: { 0: tileGid } },
+										size: { x: width, y: height },
+										shape: 'rectangle',
+										layer: tileLayer,
+										x: tileX,
+										y: tileY,
+									},
+								}, 'server');
+							}
+
+						}
+						break;
+
 					case 'loadMapFromString':
 						//WON'T CHANGE CONNECTED PLAYERS MAP
 						//needs to be run before players join
