@@ -6,6 +6,15 @@ var EntityEditor = /** @class */ (function () {
         this.preview = gameScene.add.image(0, 0, null, 0);
         this.preview.setAlpha(0.75).setVisible(false);
         this.outline = gameScene.add.graphics();
+        this.dragPoints = {};
+        this.dragPoints['topLeft'] = this.gameScene.add.graphics();
+        this.dragPoints['top'] = this.gameScene.add.graphics();
+        this.dragPoints['topRight'] = this.gameScene.add.graphics();
+        this.dragPoints['right'] = this.gameScene.add.graphics();
+        this.dragPoints['bottomRight'] = this.gameScene.add.graphics();
+        this.dragPoints['bottom'] = this.gameScene.add.graphics();
+        this.dragPoints['bottomLeft'] = this.gameScene.add.graphics();
+        this.dragPoints['left'] = this.gameScene.add.graphics();
         /*for (let i = 0; i < 4; i++) {
             const dragPoint = this.gameScene.add.graphics();
             dragPoint.fillStyle(0xffffff, 1);

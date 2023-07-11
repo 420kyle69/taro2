@@ -126,11 +126,36 @@ class EntityImage {
 
     updateOutline (): void {
         const outline = this.entityEditor.outline;
+        const dragPoints = this.entityEditor.dragPoints;
         const image = this.image;
 
 		outline.clear();
+        Object.values(dragPoints).forEach(point => point.clear());
         if (this.devModeTools.entityEditor.selectedEntityImage === this) {
             outline.lineStyle(6, 0x036ffc, 1);
+
+            Object.values(dragPoints).forEach(point => {
+                point.lineStyle(5, 0x00fffb, 1);
+            });
+
+            dragPoints.topLeft.strokeRect(-image.displayWidth / 2 - 20, -image.displayHeight / 2 - 20, 5, 5);
+            dragPoints.top.strokeRect(0, -image.displayHeight / 2 - 20, 5, 5);
+            dragPoints.topRight.strokeRect(image.displayWidth / 2 + 20, -image.displayHeight / 2 - 20, 5, 5);
+            dragPoints.right.strokeRect(image.displayWidth / 2 + 20, 0, 5, 5);
+            dragPoints.bottomRight.strokeRect(image.displayWidth / 2 + 20, image.displayHeight / 2 + 20, 5, 5);
+            dragPoints.bottom.strokeRect(0, image.displayHeight / 2 + 20, 5, 5);
+            dragPoints.bottomLeft.strokeRect(-image.displayWidth / 2 - 20, image.displayHeight / 2 + 20, 5, 5);
+            dragPoints.left.strokeRect(-image.displayWidth / 2 - 20, 0, 5, 5);
+            //const point = this.entityEditor.dragPoints[0];
+            //point.lineStyle(5, 0x00fffb, 1);
+            //point.strokeRect(-image.displayWidth / 2 - 20, -image.displayHeight / 2 - 20, 5, 5);
+
+            Object.values(dragPoints).forEach(point => {
+                point.x = image.x;
+                point.y = image.y;
+                point.angle = image.angle;
+            });
+            
         } else {
             outline.lineStyle(2, 0x036ffc, 1);
         }

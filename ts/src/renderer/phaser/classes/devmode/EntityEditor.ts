@@ -2,7 +2,7 @@ class EntityEditor {
     activeEntityPlacement: boolean;
     preview: Phaser.GameObjects.Image;
     outline: Phaser.GameObjects.Graphics;
-    dragPoints: Phaser.GameObjects.Graphics[];
+    dragPoints: Record<string, Phaser.GameObjects.Graphics>;
     activeEntity: { id: string; player: string; entityType: string; };
     selectedEntityImage: EntityImage;
 
@@ -15,6 +15,15 @@ class EntityEditor {
         this.preview.setAlpha(0.75).setVisible(false);
 
         this.outline = gameScene.add.graphics();
+        this.dragPoints = {};
+        this.dragPoints['topLeft'] = this.gameScene.add.graphics();
+        this.dragPoints['top'] = this.gameScene.add.graphics();
+        this.dragPoints['topRight'] = this.gameScene.add.graphics();
+        this.dragPoints['right'] = this.gameScene.add.graphics();
+        this.dragPoints['bottomRight'] = this.gameScene.add.graphics();
+        this.dragPoints['bottom'] = this.gameScene.add.graphics();
+        this.dragPoints['bottomLeft'] = this.gameScene.add.graphics();
+        this.dragPoints['left'] = this.gameScene.add.graphics();
 
         /*for (let i = 0; i < 4; i++) {
             const dragPoint = this.gameScene.add.graphics();
