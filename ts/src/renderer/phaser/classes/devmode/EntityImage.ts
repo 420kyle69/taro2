@@ -1,5 +1,6 @@
 class EntityImage {
     devModeTools: DevModeTools;
+    entityEditor: EntityEditor;
     action: ActionData;
     image: Phaser.GameObjects.Image & {entity: EntityImage};
 
@@ -11,6 +12,7 @@ class EntityImage {
     constructor(scene, devModeTools: DevModeTools, entityImages: (Phaser.GameObjects.Image & {entity: EntityImage})[], action: ActionData, type?: string) {
 
         this.devModeTools = devModeTools;
+        const entityEditor = this.entityEditor = devModeTools.entityEditor;
         this.action = action;
 
         let key;
@@ -56,8 +58,8 @@ class EntityImage {
         image.on('pointerdown', () => {
             //console.log('pointerdown', action);
             if (!devModeTools.cursorButton.active) return;
-            if (devModeTools.entityEditor.selectedEntityImage !== this) {
-                devModeTools.entityEditor.selectEntityImage(this);
+            if (entityEditor.selectedEntityImage !== this) {
+                entityEditor.selectEntityImage(this);
             }
 
             this.startDragX = image.x;
@@ -72,16 +74,16 @@ class EntityImage {
             }
         });
 
-        const outline = devModeTools.outline;
+        const outline = entityEditor.outline;
 
         image.on('pointerover', () => {
             if (!devModeTools.cursorButton.active) return;
-            if (devModeTools.entityEditor.selectedEntityImage !== this) devModeTools.entityEditor.selectedEntityImage = null;
+            if (entityEditor.selectedEntityImage !== this) entityEditor.selectedEntityImage = null;
             this.updateOutline();
         });
 
         image.on('pointerout', () => {
-            if (devModeTools.entityEditor.selectedEntityImage === this) return;
+            if (entityEditor.selectedEntityImage === this) return;
             outline.clear();
         });
 
@@ -123,7 +125,7 @@ class EntityImage {
     }
 
     updateOutline (): void {
-        const outline = this.devModeTools.outline;
+        const outline = this.entityEditor.outline;
         const image = this.image;
 
 		outline.clear();
@@ -170,6 +172,6 @@ class EntityImage {
         this.hide();
         let editedAction: ActionData = {actionId: this.action.actionId, wasDeleted: true};
         this.edit(editedAction);
-        this.devModeTools.outline.clear();
+        this.entityEditor.outline.clear();
     }
 }

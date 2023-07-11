@@ -29,8 +29,8 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	altKey: Phaser.Input.Keyboard.Key;
 	shiftKey: Phaser.Input.Keyboard.Key;
 
-	outline: Phaser.GameObjects.Graphics;
-	activeEntityPlacement: boolean;
+	//outline: Phaser.GameObjects.Graphics;
+	//activeEntityPlacement: boolean;
 
 	constructor(
 		public scene: DevModeScene,
@@ -152,7 +152,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 			}
 		});
 
-		this.outline = scene.gameScene.add.graphics();
+		//this.outline = scene.gameScene.add.graphics();
 	}
 
 	updateBrushArea(): void {

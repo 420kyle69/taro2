@@ -1,6 +1,8 @@
 class EntityEditor {
     activeEntityPlacement: boolean;
     preview: Phaser.GameObjects.Image;
+    outline: Phaser.GameObjects.Graphics;
+    dragPoints: Phaser.GameObjects.Graphics[];
     activeEntity: { id: string; player: string; entityType: string; };
     selectedEntityImage: EntityImage;
 
@@ -9,8 +11,18 @@ class EntityEditor {
 		devModeScene: DevModeScene,
 		private devModeTools: DevModeTools
 	) {
-        this.preview = this.gameScene.add.image(0, 0, null, 0);
+        this.preview = gameScene.add.image(0, 0, null, 0);
         this.preview.setAlpha(0.75).setVisible(false);
+
+        this.outline = gameScene.add.graphics();
+
+        /*for (let i = 0; i < 4; i++) {
+            const dragPoint = this.gameScene.add.graphics();
+            dragPoint.fillStyle(0xffffff, 1);
+            dragPoint.fillRect(0, 0, 5, 5);
+            dragPoint.setVisible(true);
+            this.dragPoints.push(dragPoint);
+        }*/
 
         /*
         this.activeEntity = {

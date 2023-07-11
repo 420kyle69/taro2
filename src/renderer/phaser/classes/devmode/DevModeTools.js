@@ -15,6 +15,8 @@ var __extends = (this && this.__extends) || (function () {
 })();
 var DevModeTools = /** @class */ (function (_super) {
     __extends(DevModeTools, _super);
+    //outline: Phaser.GameObjects.Graphics;
+    //activeEntityPlacement: boolean;
     function DevModeTools(scene) {
         var _this = _super.call(this, scene) || this;
         _this.scene = scene;
@@ -96,8 +98,8 @@ var DevModeTools = /** @class */ (function (_super) {
                 camera.scrollY -= scrollY_1;
             }
         });
-        _this.outline = scene.gameScene.add.graphics();
         return _this;
+        //this.outline = scene.gameScene.add.graphics();
     }
     DevModeTools.prototype.updateBrushArea = function () {
         this.tileEditor.brushArea.size = { x: this.brushSize, y: this.brushSize };

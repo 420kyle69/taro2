@@ -3,8 +3,16 @@ var EntityEditor = /** @class */ (function () {
         var _this = this;
         this.gameScene = gameScene;
         this.devModeTools = devModeTools;
-        this.preview = this.gameScene.add.image(0, 0, null, 0);
+        this.preview = gameScene.add.image(0, 0, null, 0);
         this.preview.setAlpha(0.75).setVisible(false);
+        this.outline = gameScene.add.graphics();
+        /*for (let i = 0; i < 4; i++) {
+            const dragPoint = this.gameScene.add.graphics();
+            dragPoint.fillStyle(0xffffff, 1);
+            dragPoint.fillRect(0, 0, 5, 5);
+            dragPoint.setVisible(true);
+            this.dragPoints.push(dragPoint);
+        }*/
         /*
         this.activeEntity = {
             id: 'ROrWqytd2r',

@@ -169,7 +169,7 @@ class DevModeScene extends PhaserScene {
 	}
 
 	enterMapTab (): void {
-		if (this.gameEditorWidgets.length === 0) {
+		if (this.gameEditorWidgets?.length === 0) {
 			this.devModeTools.queryWidgets();
 			this.gameEditorWidgets = this.devModeTools.gameEditorWidgets;
 		}
