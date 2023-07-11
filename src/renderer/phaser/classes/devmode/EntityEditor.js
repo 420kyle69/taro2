@@ -15,6 +15,34 @@ var EntityEditor = /** @class */ (function () {
         this.dragPoints['bottom'] = this.gameScene.add.graphics();
         this.dragPoints['bottomLeft'] = this.gameScene.add.graphics();
         this.dragPoints['left'] = this.gameScene.add.graphics();
+        Object.values(this.dragPoints).forEach(function (point) {
+            point.setInteractive({ draggable: true });
+            /*scene.input.on('drag', (pointer, gameObject, dragX, dragY) => {
+                if (!devModeTools.cursorButton.active || gameObject !== image) return;
+                if (this.dragMode === 'position') {
+                    gameObject.x = dragX;
+                    gameObject.y = dragY;
+                    editedAction.position = {x: dragX, y: dragY};
+                } else if (this.dragMode === 'angle' && !isNaN(action.angle)) {
+                    const target = Phaser.Math.Angle.BetweenPoints(gameObject, { x: dragX, y: dragY });
+                    gameObject.rotation = target;
+                    editedAction.angle = gameObject.angle;
+                } else if (this.dragMode === 'scale' && !isNaN(action.width) && !isNaN(action.height)) {
+                    const dragScale = Math.min(500, Math.max(-250, (this.startDragY - dragY)));
+                    gameObject.scale = this.scale + this.scale * dragScale / 500;
+                    editedAction.width = image.displayWidth;
+                    editedAction.height = image.displayHeight;
+                }
+                this.updateOutline();
+            });
+    
+            scene.input.on('dragend', (pointer, gameObject) => {
+                if (gameObject !== image) return;
+                this.dragMode = null;
+                this.edit(editedAction);
+                editedAction = {actionId: action.actionId};
+            });*/
+        });
         /*for (let i = 0; i < 4; i++) {
             const dragPoint = this.gameScene.add.graphics();
             dragPoint.fillStyle(0xffffff, 1);
