@@ -88,6 +88,7 @@ var EntityImage = /** @class */ (function () {
             if (entityEditor.selectedEntityImage === _this)
                 return;
             outline.clear();
+            //Object.values(this.entityEditor.dragPoints).forEach(point => point.setVisible(false));
         });
         var editedAction = { actionId: action.actionId };
         scene.input.on('drag', function (pointer, gameObject, dragX, dragY) {
@@ -128,31 +129,28 @@ var EntityImage = /** @class */ (function () {
     };
     EntityImage.prototype.updateOutline = function () {
         var outline = this.entityEditor.outline;
+        var selectionContainer = this.entityEditor.selectionContainer;
         var dragPoints = this.entityEditor.dragPoints;
         var image = this.image;
         outline.clear();
-        Object.values(dragPoints).forEach(function (point) { return point.clear(); });
         if (this.devModeTools.entityEditor.selectedEntityImage === this) {
             outline.lineStyle(6, 0x036ffc, 1);
-            Object.values(dragPoints).forEach(function (point) {
-                point.lineStyle(5, 0x00fffb, 1);
-            });
-            dragPoints.topLeft.strokeRect(-image.displayWidth / 2 - 20, -image.displayHeight / 2 - 20, 5, 5);
-            dragPoints.top.strokeRect(0, -image.displayHeight / 2 - 20, 5, 5);
-            dragPoints.topRight.strokeRect(image.displayWidth / 2 + 20, -image.displayHeight / 2 - 20, 5, 5);
-            dragPoints.right.strokeRect(image.displayWidth / 2 + 20, 0, 5, 5);
-            dragPoints.bottomRight.strokeRect(image.displayWidth / 2 + 20, image.displayHeight / 2 + 20, 5, 5);
-            dragPoints.bottom.strokeRect(0, image.displayHeight / 2 + 20, 5, 5);
-            dragPoints.bottomLeft.strokeRect(-image.displayWidth / 2 - 20, image.displayHeight / 2 + 20, 5, 5);
-            dragPoints.left.strokeRect(-image.displayWidth / 2 - 20, 0, 5, 5);
-            Object.values(dragPoints).forEach(function (point) {
-                point.x = image.x;
-                point.y = image.y;
-                point.angle = image.angle;
-            });
+            selectionContainer.setVisible(true);
+            selectionContainer.x = image.x;
+            selectionContainer.y = image.y;
+            selectionContainer.angle = image.angle;
+            dragPoints.topLeft.setPosition(-image.displayWidth / 2 - 20, -image.displayHeight / 2 - 20);
+            dragPoints.top.setPosition(0, -image.displayHeight / 2 - 20);
+            dragPoints.topRight.setPosition(image.displayWidth / 2 + 20, -image.displayHeight / 2 - 20);
+            dragPoints.right.setPosition(image.displayWidth / 2 + 20, 0);
+            dragPoints.bottomRight.setPosition(image.displayWidth / 2 + 20, image.displayHeight / 2 + 20);
+            dragPoints.bottom.setPosition(0, image.displayHeight / 2 + 20);
+            dragPoints.bottomLeft.setPosition(-image.displayWidth / 2 - 20, image.displayHeight / 2 + 20);
+            dragPoints.left.setPosition(-image.displayWidth / 2 - 20, 0);
         }
         else {
             outline.lineStyle(2, 0x036ffc, 1);
+            selectionContainer.setVisible(false);
         }
         outline.strokeRect(-image.displayWidth / 2, -image.displayHeight / 2, image.displayWidth, image.displayHeight);
         outline.x = image.x;

@@ -6,17 +6,29 @@ var EntityEditor = /** @class */ (function () {
         this.preview = gameScene.add.image(0, 0, null, 0);
         this.preview.setAlpha(0.75).setVisible(false);
         this.outline = gameScene.add.graphics();
-        this.dragPoints = {};
-        this.dragPoints['topLeft'] = this.gameScene.add.graphics();
-        this.dragPoints['top'] = this.gameScene.add.graphics();
-        this.dragPoints['topRight'] = this.gameScene.add.graphics();
-        this.dragPoints['right'] = this.gameScene.add.graphics();
-        this.dragPoints['bottomRight'] = this.gameScene.add.graphics();
-        this.dragPoints['bottom'] = this.gameScene.add.graphics();
-        this.dragPoints['bottomLeft'] = this.gameScene.add.graphics();
-        this.dragPoints['left'] = this.gameScene.add.graphics();
+        var selectionContainer = this.selectionContainer = new Phaser.GameObjects.Container(gameScene);
+        var dragPoints = this.dragPoints = {};
+        dragPoints['topLeft'] = gameScene.add.rectangle(0, 0, 10, 10, 0x00fffb);
+        dragPoints['top'] = gameScene.add.rectangle(0, 0, 10, 10, 0x00fffb, 1);
+        dragPoints['topRight'] = gameScene.add.rectangle(0, 0, 10, 10, 0x00fffb, 1);
+        dragPoints['right'] = gameScene.add.rectangle(0, 0, 10, 10, 0x00fffb, 1);
+        dragPoints['bottomRight'] = gameScene.add.rectangle(0, 0, 10, 10, 0x00fffb, 1);
+        dragPoints['bottom'] = gameScene.add.rectangle(0, 0, 10, 10, 0x00fffb, 1);
+        dragPoints['bottomLeft'] = gameScene.add.rectangle(0, 0, 10, 10, 0x00fffb, 1);
+        dragPoints['left'] = gameScene.add.rectangle(0, 0, 10, 10, 0x00fffb, 1);
+        Object.values(dragPoints).forEach(function (point) { return selectionContainer.add(point); });
+        selectionContainer.setPosition(10, 10).setAngle(0).setVisible(false);
+        gameScene.add.existing(selectionContainer);
         Object.values(this.dragPoints).forEach(function (point) {
             point.setInteractive({ draggable: true });
+            point.on('pointerover', function () {
+                console.log('point over', point);
+                point.setScale(1.5);
+            });
+            point.on('pointerout', function () {
+                console.log('point out');
+                point.setScale(1);
+            });
             /*scene.input.on('drag', (pointer, gameObject, dragX, dragY) => {
                 if (!devModeTools.cursorButton.active || gameObject !== image) return;
                 if (this.dragMode === 'position') {

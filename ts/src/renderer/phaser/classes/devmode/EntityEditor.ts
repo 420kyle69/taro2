@@ -2,7 +2,8 @@ class EntityEditor {
     activeEntityPlacement: boolean;
     preview: Phaser.GameObjects.Image;
     outline: Phaser.GameObjects.Graphics;
-    dragPoints: Record<string, Phaser.GameObjects.Graphics>;
+    selectionContainer: Phaser.GameObjects.Container;
+    dragPoints: Record<string, Phaser.GameObjects.Rectangle>;
     activeEntity: { id: string; player: string; entityType: string; };
     selectedEntityImage: EntityImage;
 
@@ -15,18 +16,34 @@ class EntityEditor {
         this.preview.setAlpha(0.75).setVisible(false);
 
         this.outline = gameScene.add.graphics();
-        this.dragPoints = {};
-        this.dragPoints['topLeft'] = this.gameScene.add.graphics();
-        this.dragPoints['top'] = this.gameScene.add.graphics();
-        this.dragPoints['topRight'] = this.gameScene.add.graphics();
-        this.dragPoints['right'] = this.gameScene.add.graphics();
-        this.dragPoints['bottomRight'] = this.gameScene.add.graphics();
-        this.dragPoints['bottom'] = this.gameScene.add.graphics();
-        this.dragPoints['bottomLeft'] = this.gameScene.add.graphics();
-        this.dragPoints['left'] = this.gameScene.add.graphics();
+        const selectionContainer = this.selectionContainer = new Phaser.GameObjects.Container(gameScene);
+
+        const dragPoints = this.dragPoints = {};
+        dragPoints['topLeft'] = gameScene.add.rectangle(0, 0, 10, 10, 0x00fffb);
+        dragPoints['top'] = gameScene.add.rectangle(0, 0, 10, 10, 0x00fffb, 1);
+        dragPoints['topRight'] = gameScene.add.rectangle(0, 0, 10, 10, 0x00fffb, 1);
+        dragPoints['right'] = gameScene.add.rectangle(0, 0, 10, 10, 0x00fffb, 1);
+        dragPoints['bottomRight'] = gameScene.add.rectangle(0, 0, 10, 10, 0x00fffb, 1);
+        dragPoints['bottom'] = gameScene.add.rectangle(0, 0, 10, 10, 0x00fffb, 1);
+        dragPoints['bottomLeft'] = gameScene.add.rectangle(0, 0, 10, 10, 0x00fffb, 1);
+        dragPoints['left'] = gameScene.add.rectangle(0, 0, 10, 10, 0x00fffb, 1);
+        Object.values(dragPoints).forEach((point: Phaser.GameObjects.Rectangle) => selectionContainer.add(point));
+        selectionContainer.setPosition(10, 10).setAngle(0).setVisible(false);
+        gameScene.add.existing(selectionContainer);
+
 
         Object.values(this.dragPoints).forEach(point => {
             point.setInteractive({ draggable: true });
+
+            point.on('pointerover', () => {
+                console.log('point over', point)
+                point.setScale(1.5);
+            });
+    
+            point.on('pointerout', () => {
+                console.log('point out')
+                point.setScale(1);
+            });
 
             /*scene.input.on('drag', (pointer, gameObject, dragX, dragY) => {
                 if (!devModeTools.cursorButton.active || gameObject !== image) return;
