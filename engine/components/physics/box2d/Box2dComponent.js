@@ -97,7 +97,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 
 	/**
 	 * Gets / sets if the world should allow sleep or not.
-	 * @param {Boolean=} val
+	 * @param {Boolean} val
 	 * @return {*}
 	 */
 	sleep: function (val) {
@@ -182,7 +182,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 			var isBodyDestroyed = destroyBody.apply(this._world, [body]);
 
 			// clear references to prevent memory leak
-			if (this.engine == 'BOX2DWEB') {
+			if (this.engine === 'BOX2DWEB') {
 				this._world.m_contactSolver.m_constraints = [];
 				this._world.m_island.m_bodies = [];
 				this._world.m_island.m_contacts = [];
@@ -205,7 +205,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 				}
 			}
 
-			if (isBodyDestroyed) {
+			if (isBodyDestroyed || this.engine === 'BOX2DWASM') {
 				entity.body = null;
 				entity._box2dOurContactFixture = null;
 				entity._box2dTheirContactFixture = null;
@@ -565,18 +565,20 @@ var PhysicsComponent = TaroEventingClass.extend({
 				self._world.step(timeElapsedSinceLastStep / 1000, 8, 3); // Call the world step; frame-rate, velocity iterations, position iterations
 				let nextFrameTime = taro._currentTime + (1000 / taro._gameLoopTickRate) - 10; // 10ms is to give extra buffer to prepare for the next frame
 				var tempBod = self._world.getBodyList();
+				if (tempBod.GetPosition().x && tempBod.GetPosition().y) {
+					// console.log(tempBod.GetPosition().x, tempBod.GetPosition().y);
+				}
 				// iterate through every physics body
 				// FIXME: sometimes it will loop forever if u add new physics engine
 				while (tempBod && typeof tempBod.getNext === 'function' && (!self.getPointer || self.getPointer(tempBod) !== self.getPointer(self.nullPtr))) {
 					// Check if the body is awake && not static
 					if (tempBod.m_type !== 'static' && tempBod.isAwake()) {
 						entity = tempBod._entity;
-
 						if (entity) {
 							var mxfp = dists[taro.physics.engine].getmxfp(tempBod);
+
 							var x = mxfp.x * taro.physics._scaleRatio;
 							var y = mxfp.y * taro.physics._scaleRatio;
-
 							// make projectile auto-rotate toward its path. ideal for arrows or rockets that should point toward its direction
 							// if (entity._category == 'projectile' &&
 							// 	entity._stats.currentBody && !entity._stats.currentBody.fixedRotation &&
@@ -647,7 +649,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 										x += xDiff / 2;
 										y += yDiff / 2;
 									}
-
 									entity.translateTo(x, y, 0);
 									entity.rotateTo(0, 0, angle);
 								} else if (taro.isClient) {
@@ -668,9 +669,10 @@ var PhysicsComponent = TaroEventingClass.extend({
 								}
 							}
 
-
-							entity.body.setPosition({ x: x / entity._b2dRef._scaleRatio, y: y / entity._b2dRef._scaleRatio });
-							entity.body.setAngle(angle);
+							if (!isNaN(x) && !isNaN(y)) {
+								entity.body.setPosition({ x: x / entity._b2dRef._scaleRatio, y: y / entity._b2dRef._scaleRatio });
+								entity.body.setAngle(angle);
+							}
 
 							if (tempBod.asleep) {
 								// The tempBod was asleep last frame, fire an awake event
@@ -843,15 +845,27 @@ var PhysicsComponent = TaroEventingClass.extend({
 
 	// Listen for when contact's begin
 	_beginContactCallback: function (contact) {
+		var self = this;
+		if (self.engine === 'BOX2DWASM') {
+			var entityA = contact.GetFixtureA().GetBody()._entity;
+			var entityB = contact.GetFixtureB().GetBody()._entity;
 
-		var entityA = contact.m_fixtureA.m_body._entity;
-		var entityB = contact.m_fixtureB.m_body._entity;
+			if (!entityA || !entityB)
+				return;
 
-		if (!entityA || !entityB)
-			return;
+			taro.physics._triggerContactEvent(entityA, entityB);
+			taro.physics._triggerContactEvent(entityB, entityA);
+		} else {
+			var entityA = contact.m_fixtureA.m_body._entity;
+			var entityB = contact.m_fixtureB.m_body._entity;
 
-		taro.physics._triggerContactEvent(entityA, entityB);
-		taro.physics._triggerContactEvent(entityB, entityA);
+			if (!entityA || !entityB)
+				return;
+
+			taro.physics._triggerContactEvent(entityA, entityB);
+			taro.physics._triggerContactEvent(entityB, entityA);
+		}
+
 	},
 
 	_endContactCallback: function (contact) {
@@ -868,7 +882,8 @@ var PhysicsComponent = TaroEventingClass.extend({
 	_enableContactListener: function () {
 		// Set the contact listener methods to detect when
 		// contacts (collisions) begin and end
-		taro.physics.contactListener(this._beginContactCallback, this._endContactCallback);
+		// FIXME
+		// taro.physics.contactListener(this._beginContactCallback, this._endContactCallback);
 	}
 });
 

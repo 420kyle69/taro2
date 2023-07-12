@@ -567,13 +567,11 @@ var Server = TaroClass.extend({
 				// */
 				// Add physics and setup physics world
 
-				taro.addComponent(PhysicsComponent)
-					.physics.sleep(true)
-					.physics.tilesizeRatio(tilesizeRatio);
-
-
+				taro.addComponent(PhysicsComponent);
 
 				setTimeout(() => {
+					taro.physics.sleep(true);
+					taro.physics.tilesizeRatio(tilesizeRatio);
 					if (game.data.settings) {
 						var gravity = game.data.settings.gravity;
 						if (gravity) {
@@ -1067,9 +1065,9 @@ var Server = TaroClass.extend({
 				currentTime: taro._currentTime,
 				physics: {
 					engine: taro.physics.engine,
-					bodyCount: taro.physics._world.m_bodyCount,
-					contactCount: taro.physics._world.m_contactCount,
-					jointCount: taro.physics._world.m_jointCount,
+					bodyCount: taro.physics._world.m_bodyCount || taro.physics._world.GetBodyCount(),
+					contactCount: taro.physics._world.m_contactCount || taro.physics._world.GetContactCount(),
+					jointCount: taro.physics._world.m_jointCount || taro.physics._world.GetJointCount(),
 					stepDuration: taro.physics.avgPhysicsTickDuration.toFixed(2),
 					stepsPerSecond: taro._physicsFPS,
 					totalBodiesCreated: taro.physics.totalBodiesCreated

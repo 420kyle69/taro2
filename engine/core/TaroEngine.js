@@ -1528,7 +1528,7 @@ var TaroEngine = TaroEntity.extend({
 			taro.queueTrigger('secondTick');
 			self.lastSecond = timeStamp;
 		}
-		console.log(self._state);
+
 		if (self._state) {
 			// Call the input system tick to reset any flags etc
 			self.input.tick();

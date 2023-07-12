@@ -327,6 +327,7 @@ var dists = {
 			Box2DFactory().then(box2D => {
 				component.leakMitigator = new box2D.LeakMitigator();
 				component.getPointer = box2D.getPointer;
+				component.destroyB2dObj = box2D.destroy;
 				component.nullPtr = box2D.NULL;
 				component.b2AABB = box2D.b2AABB; // added by Jaeyun for world collision detection for raycast bullets
 				component.b2Color = box2D.b2Color;
@@ -334,6 +335,7 @@ var dists = {
 				component.b2Math = {};
 				component.b2Shape = box2D.b2Shape;
 				component.b2BodyDef = box2D.b2BodyDef;
+				component.b2_dynamicBody = box2D.b2_dynamicBody;
 				component.b2Body = box2D.b2Body;
 				component.b2Joint = box2D.b2Joint;
 				component.b2FixtureDef = box2D.b2FixtureDef;
@@ -342,8 +344,8 @@ var dists = {
 				component.b2MassData = box2D.b2MassData;
 				component.b2PolygonShape = box2D.b2PolygonShape;
 				component.b2CircleShape = box2D.b2CircleShape;
-				component.b2DebugDraw = box2D.b2DebugDraw;
-				component.JSContactListener = box2D.JSContactListener;
+				component.b2DebugDraw = box2D.DebugDraw;
+				component.b2ContactListener = box2D.JSContactListener;
 				component.b2Distance = box2D.b2Distance;
 				component.b2FilterData = box2D.b2Filter;
 				component.b2DistanceJointDef = box2D.b2DistanceJointDef;
@@ -390,7 +392,8 @@ var dists = {
 				component.b2Body.prototype.getAngle = component.b2Body.prototype.GetAngle;
 				component.b2Body.prototype.setPosition = function (position) {
 					let angle = this.GetAngle();
-					this.SetTransform(position, angle);
+					let pos = new box2D.b2Vec2(position.x, position.y);
+					this.SetTransform(pos, angle);
 				};
 				component.b2Body.prototype.getPosition = component.b2Body.prototype.GetPosition;
 				component.b2Body.prototype.setGravityScale = component.b2Body.prototype.SetGravityScale;
@@ -477,7 +480,7 @@ var dists = {
 			});
 		},
 		contactListener: function (self, beginContactCallback, endContactCallback, preSolve, postSolve) {
-			var contactListener = new self.JSContactListener();
+			var contactListener = new self.b2ContactListener();
 			if (beginContactCallback !== undefined) {
 				contactListener.BeginContact = beginContactCallback;
 			}
@@ -529,19 +532,18 @@ var dists = {
 			var i;
 			var finalX; var finalY;
 			var finalWidth; var finalHeight;
-
 			// Process body definition and create a box2d body for it
 			switch (body.type) {
 				case 'static':
-					tempDef.type = self.b2Body.b2_staticBody;
+					tempDef.set_type(0);
 					break;
 
 				case 'dynamic':
-					tempDef.type = self.b2Body.b2_dynamicBody;
+					tempDef.set_type(self.b2_dynamicBody);
 					break;
 
 				case 'kinematic':
-					tempDef.type = self.b2Body.b2_kinematicBody;
+					tempDef.set_type(1);
 					break;
 			}
 
@@ -565,12 +567,12 @@ var dists = {
 			}
 
 			// set rotation
-			tempDef.angle = entity._rotate.z;
+			tempDef.set_angle(entity._rotate.z);
 			// Set the position
-			tempDef.position = new self.b2Vec2(entity._translate.x / self._scaleRatio, entity._translate.y / self._scaleRatio);
+			tempDef.set_position(new self.b2Vec2(entity._translate.x / self._scaleRatio, entity._translate.y / self._scaleRatio));
 
 			// Create the new body
-			tempBod = self.leakMitigator.recordLeak(self._world.CreateBody(tempDef));
+			tempBod = self._world.CreateBody(tempDef);
 
 			// Now apply any post-creation attributes we need to
 			for (param in body) {
@@ -648,10 +650,9 @@ var dists = {
 														0
 													);
 												}
-
 												break;
 										}
-										if (tempShape && fixtureDef.filter && fixtureDef.shape.data) {
+										if (tempShape && fixtureDef.filter) {
 											tempFixture.shape = tempShape;
 											finalFixture = self.leakMitigator.recordLeak(tempBod.CreateFixture(tempFixture));
 											finalFixture.taroId = tempFixture.taroId;
