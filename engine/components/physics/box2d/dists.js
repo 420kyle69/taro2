@@ -330,7 +330,7 @@ var dists = {
 				component.b2AABB = box2D.b2AABB; // added by Jaeyun for world collision detection for raycast bullets
 				component.b2Color = box2D.b2Color;
 				component.b2Vec2 = box2D.b2Vec2;
-				component.b2Math = box2D.b2Math;
+				component.b2Math = {};
 				component.b2Shape = box2D.b2Shape;
 				component.b2BodyDef = box2D.b2BodyDef;
 				component.b2Body = box2D.b2Body;
@@ -366,13 +366,34 @@ var dists = {
 					return component.b2World.prototype.QueryAABB(queryCallback,aabb);
 				}
 				*/
-
+				component.b2Math.Dot = function (a, b) {
+					return a.x * b.x + a.y * b.y;
+				};
+				component.b2Math.MulMV = function (A, v) {
+					var u = new box2D.b2Vec2(A.col1.x * v.x + A.col2.x * v.y, A.col1.y * v.x + A.col2.y * v.y);
+					return u;
+				};
+				component.b2Math.MulTMV = function (A, v) {
+					var u = new box2D.b2Vec2(component.b2Math.Dot(v, A.col1), component.b2Math.Dot(v, A.col2));
+					return u;
+				};
+				component.b2Math.MulX = function (T, v) {
+					var a = component.b2Math.MulMV(T.R, v);
+					a.x += T.position.x;
+					a.y += T.position.y;
+					return a;
+				};
+				component.b2Transform = box2D.b2Transform;
+				component.b2Transform.prototype.R = { col1: new box2D.b2Vec2(), col2: new box2D.b2Vec2() };
 				component.b2Body.prototype.getNext = component.b2Body.prototype.GetNext;
 				component.b2Body.prototype.getAngle = component.b2Body.prototype.GetAngle;
 				component.b2Body.prototype.setPosition = component.b2Body.prototype.SetPosition;
 				component.b2Body.prototype.getPosition = component.b2Body.prototype.GetPosition;
 				component.b2Body.prototype.setGravityScale = component.b2Body.prototype.SetGravityScale;
-				component.b2Body.prototype.setAngle = component.b2Body.prototype.SetAngle;
+				component.b2Body.prototype.setAngle = function (angle) {
+					let pos = this.GetPosition();
+					this.SetTransform(pos, angle);
+				};
 				component.b2Body.prototype.setTransform = component.b2Body.prototype.SetTransform;
 				component.b2Body.prototype.isAwake = component.b2Body.prototype.IsAwake;
 				component.b2Body.prototype.setAwake = component.b2Body.prototype.SetAwake;
@@ -387,11 +408,41 @@ var dists = {
 				// component.b2Vec2.prototype.setV = component.b2Vec2.prototype.SetV;
 
 				component.b2Joint.prototype.getNext = component.b2Joint.prototype.GetNext;
-
-				component.createWorld = function (id, options) {
-					component._world = new component.b2World(this._gravity, this._sleep);
-					component._world.SetContinuousPhysics(this._continuousPhysics);
+				component.b2PolygonShape.prototype.Reserve = function (count) {
+					if (count === undefined) count = 0;
+					for (var i = parseInt(this.m_vertices.length); i < count; i++) {
+						this.m_vertices[i] = new box2D.b2Vec2();
+						this.m_normals[i] = new box2D.b2Vec2();
+					}
 				};
+				component.b2PolygonShape.prototype.SetAsOrientedBox = function (hx, hy, center, angle) {
+					if (hx === undefined) hx = 0;
+					if (hy === undefined) hy = 0;
+					if (center === undefined) center = null;
+					if (angle === undefined) angle = 0.0;
+					this.m_vertexCount = 4;
+					this.Reserve(4);
+					this.set_m_vertices(0, new box2D.b2Vec2(-hx, -hy));
+					this.set_m_vertices(1, new box2D.b2Vec2(hx, -hy));
+					this.set_m_vertices(2, new box2D.b2Vec2(hx, hy));
+					this.set_m_vertices(3, new box2D.b2Vec2(-hx, hy));
+					this.set_m_normals(0, new box2D.b2Vec2(0.0, -1.0));
+					this.set_m_normals(1, new box2D.b2Vec2(1.0, 0.0));
+					this.set_m_normals(2, new box2D.b2Vec2(0.0, 1.0));
+					this.set_m_normals(3, new box2D.b2Vec2(-1.0, 0.0));
+					this.m_centroid = center;
+					var xf = new component.b2Transform();
+					xf.position = center;
+					xf.set_q(new box2D.b2Rot(angle));
+					for (var i = 0; i < this.m_vertexCount; ++i)
+						this.m_vertices[i] = component.b2Math.MulX(xf, this.get_m_vertices(i));
+						this.m_normals[i] = component.b2Math.MulMV(xf.R, this.get_m_normals(i));
+					}
+					,
+					component.createWorld = function (id, options) {
+						component._world = new component.b2World(this._gravity, this._sleep);
+						component._world.SetContinuousPhysics(this._continuousPhysics);
+					};
 
 				/**
 				 * Gets / sets the gravity vector.
@@ -509,7 +560,7 @@ var dists = {
 			tempDef.position = new self.b2Vec2(entity._translate.x / self._scaleRatio, entity._translate.y / self._scaleRatio);
 
 			// Create the new body
-			tempBod = self._world.CreateBody(tempDef, isLossTolerant);
+			tempBod = self._world.CreateBody(tempDef);
 
 			// Now apply any post-creation attributes we need to
 			for (param in body) {
@@ -589,7 +640,7 @@ var dists = {
 
 										if (tempShape && fixtureDef.filter) {
 											tempFixture.shape = tempShape;
-											finalFixture = tempBod.CreateFixture(tempFixture, isLossTolerant);
+											finalFixture = tempBod.CreateFixture(fixtureDef);
 											finalFixture.taroId = tempFixture.taroId;
 										}
 									}
