@@ -66,11 +66,13 @@ var ItemUiComponent = TaroEntity.extend({
 		var equipmentAllowed = (owner && owner._stats.equipmentAllowed);
 		// update item info on bottom-right corner if it's currently selected item
 		$(`#item-${slotIndex}`).html(
-			self.getItemDiv(item, {
-				popover: 'top',
-				isDraggable: true,
-				isPurchasable: false
-			}, slotIndex)
+			self.getItemCooldownOverlay(slotIndex).add(
+				self.getItemDiv(item, {
+					popover: 'top',
+					isDraggable: true,
+					isPurchasable: false
+				}, slotIndex)
+			)
 		);
 
 		// if (equipmentAllowed && slotIndex != undefined && slotIndex <= equipmentAllowed) {
@@ -270,6 +272,22 @@ var ItemUiComponent = TaroEntity.extend({
 
 		return itemDiv;
 	},
+
+	getItemCooldownOverlay: function (slotIndex) {
+		let itemCDDiv = $('<div/>', {
+			id: `item-cooldown-overlay-${slotIndex}`,
+			class: 'item-cooldown-overlay ',
+			style: 'position: absolute; bottom: 0; width: 100%; height: 0; background-color: #101010aa; z-index: 10001; pointer-events: none', /* higher than item-div */
+		});
+		return itemCDDiv;
+	},
+
+	updateItemCooldownOverlay: function (item) {
+		let itemStats = item._stats;
+		let cdPercent = Math.trunc((1 - Math.min((taro.now - itemStats.lastUsed) / itemStats.fireRate, 1)) * 100);
+		$(`#item-cooldown-overlay-${itemStats.slotIndex}`).css('height', `${cdPercent}%`);
+	},
+
 	updateItemDescription: function (item) {
 		var inventorySlotIfPresent = item._stats.slotIndex;
 		if (item && item._stats && (inventorySlotIfPresent === 0 || inventorySlotIfPresent)) {
