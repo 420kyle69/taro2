@@ -1045,7 +1045,8 @@ var Server = TaroClass.extend({
 
 			var jointCount = 0;
 			var jointList = taro.physics._world && taro.physics._world.getJointList();
-			while (jointList) {
+			let getPointer = taro.physics.getPointer;
+			while (jointList && getPointer && getPointer(jointList) !== getPointer(taro.physics.nullPtr)) {
 				jointCount++;
 				jointList = jointList.getNext();
 			}

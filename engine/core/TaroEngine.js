@@ -1528,7 +1528,7 @@ var TaroEngine = TaroEntity.extend({
 			taro.queueTrigger('secondTick');
 			self.lastSecond = timeStamp;
 		}
-
+		console.log(self._state);
 		if (self._state) {
 			// Call the input system tick to reset any flags etc
 			self.input.tick();
@@ -1565,7 +1565,6 @@ var TaroEngine = TaroEntity.extend({
 				// console.log("wtf tick", self._tickStart, self.lastTick, self._tickDelta)
 			}
 			taro.now = Date.now();
-
 			timeElapsed = taro.now - taro._lastGameLoopTickAt;
 			if (timeElapsed >= (1000 / taro._gameLoopTickRate) - taro._gameLoopTickRemainder) {
 				taro._lastGameLoopTickAt = taro.now;
@@ -1631,7 +1630,7 @@ var TaroEngine = TaroEntity.extend({
 						}
 
 						if (typeof window.raidAlert === 'function') {
-							window.raidAlert()
+							window.raidAlert();
 						}
 					}
 				} else if (taro.isServer) {
@@ -1678,7 +1677,7 @@ var TaroEngine = TaroEntity.extend({
 
 				let oldestSnapshot = taro.snapshots[0];
 				while (taro.snapshots.length >= 2 && oldestSnapshot != undefined && taro._currentTime > oldestSnapshot[0]) {
-					taro.prevSnapshot = taro.nextSnapshot
+					taro.prevSnapshot = taro.nextSnapshot;
 					taro.nextSnapshot = taro.snapshots[taro.snapshots.length - 1];
 
 					// rubberband currentTime to the latest time received from server - 40ms
@@ -1869,7 +1868,6 @@ var TaroEngine = TaroEntity.extend({
 
 			if (arr) {
 				arrCount = arr.length;
-
 				// Loop our viewports and call their tick methods
 				if (taroConfig.debug._timing) {
 					while (arrCount--) {

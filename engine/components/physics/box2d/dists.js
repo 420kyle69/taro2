@@ -325,6 +325,7 @@ var dists = {
 		init: function (component) {
 			const Box2DFactory = box2dwasm;
 			Box2DFactory().then(box2D => {
+				component.leakMitigator = new box2D.LeakMitigator();
 				component.getPointer = box2D.getPointer;
 				component.nullPtr = box2D.NULL;
 				component.b2AABB = box2D.b2AABB; // added by Jaeyun for world collision detection for raycast bullets
@@ -387,7 +388,10 @@ var dists = {
 				component.b2Transform.prototype.R = { col1: new box2D.b2Vec2(), col2: new box2D.b2Vec2() };
 				component.b2Body.prototype.getNext = component.b2Body.prototype.GetNext;
 				component.b2Body.prototype.getAngle = component.b2Body.prototype.GetAngle;
-				component.b2Body.prototype.setPosition = component.b2Body.prototype.SetPosition;
+				component.b2Body.prototype.setPosition = function (position) {
+					let angle = this.GetAngle();
+					this.SetTransform(position, angle);
+				};
 				component.b2Body.prototype.getPosition = component.b2Body.prototype.GetPosition;
 				component.b2Body.prototype.setGravityScale = component.b2Body.prototype.SetGravityScale;
 				component.b2Body.prototype.setAngle = function (angle) {
@@ -433,16 +437,21 @@ var dists = {
 					this.m_centroid = center;
 					var xf = new component.b2Transform();
 					xf.position = center;
-					xf.set_q(new box2D.b2Rot(angle));
-					for (var i = 0; i < this.m_vertexCount; ++i)
+					let c = Math.cos(angle);
+					let s = Math.sin(angle);
+					xf.R.col1.x = c;
+					xf.R.col2.x = (-s);
+					xf.R.col1.y = s;
+					xf.R.col2.y = c;
+					for (var i = 0; i < this.m_vertexCount; ++i) {
 						this.m_vertices[i] = component.b2Math.MulX(xf, this.get_m_vertices(i));
 						this.m_normals[i] = component.b2Math.MulMV(xf.R, this.get_m_normals(i));
 					}
-					,
-					component.createWorld = function (id, options) {
-						component._world = new component.b2World(this._gravity, this._sleep);
-						component._world.SetContinuousPhysics(this._continuousPhysics);
-					};
+				};
+				component.createWorld = function (id, options) {
+					component._world = new component.b2World(this._gravity, this._sleep);
+					component._world.SetContinuousPhysics(this._continuousPhysics);
+				};
 
 				/**
 				 * Gets / sets the gravity vector.
@@ -488,7 +497,7 @@ var dists = {
 		},
 
 		getmxfp: function (body) {
-			return body.m_xf.position;
+			return body.GetPosition();
 		},
 
 		queryAABB: function (self, aabb, callback) {
@@ -560,7 +569,7 @@ var dists = {
 			tempDef.position = new self.b2Vec2(entity._translate.x / self._scaleRatio, entity._translate.y / self._scaleRatio);
 
 			// Create the new body
-			tempBod = self._world.CreateBody(tempDef);
+			tempBod = self.leakMitigator.recordLeak(self._world.CreateBody(tempDef));
 
 			// Now apply any post-creation attributes we need to
 			for (param in body) {
@@ -628,19 +637,21 @@ var dists = {
 													finalHeight = (entity._bounds2d.y / 2);
 												}
 
-												// Set the polygon as a box
-												tempShape.SetAsOrientedBox(
-													(finalWidth / self._scaleRatio),
-													(finalHeight / self._scaleRatio),
-													new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio),
-													0
-												);
+												if (finalX !== 0 && finalY !== 0) {
+													// Set the polygon as a box
+													tempShape.SetAsBox(
+														(finalWidth / self._scaleRatio),
+														(finalHeight / self._scaleRatio),
+														new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio),
+														0
+													);
+												}
+
 												break;
 										}
-
 										if (tempShape && fixtureDef.filter) {
 											tempFixture.shape = tempShape;
-											finalFixture = tempBod.CreateFixture(fixtureDef);
+											finalFixture = self.leakMitigator.recordLeak(tempBod.CreateFixture(tempFixture));
 											finalFixture.taroId = tempFixture.taroId;
 										}
 									}
