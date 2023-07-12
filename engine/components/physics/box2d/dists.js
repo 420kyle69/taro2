@@ -501,7 +501,8 @@ var dists = {
 		},
 
 		queryAABB: function (self, aabb, callback) {
-			self.world().QueryAABB(callback, aabb);
+			// FIXME
+			// self.world().QueryAABB(callback, aabb);
 		},
 
 		createBody: function (self, entity, body, isLossTolerant) {
@@ -612,8 +613,9 @@ var dists = {
 												if (fixtureDef.shape.data) {
 													finalX = fixtureDef.shape.data.x !== undefined ? fixtureDef.shape.data.x : 0;
 													finalY = fixtureDef.shape.data.y !== undefined ? fixtureDef.shape.data.y : 0;
-
-													tempShape.m_p.SetV(new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio));
+													if (finalX !== 0 && finalY !== 0) {
+														tempShape.m_p.SetV(new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio));
+													}
 												}
 												break;
 
@@ -649,7 +651,7 @@ var dists = {
 
 												break;
 										}
-										if (tempShape && fixtureDef.filter) {
+										if (tempShape && fixtureDef.filter && fixtureDef.shape.data) {
 											tempFixture.shape = tempShape;
 											finalFixture = self.leakMitigator.recordLeak(tempBod.CreateFixture(tempFixture));
 											finalFixture.taroId = tempFixture.taroId;
@@ -657,7 +659,7 @@ var dists = {
 									}
 
 									if (fixtureDef.filter && finalFixture) {
-										tempFilterData = self._entity.physics.b2FilterData;
+										tempFilterData = new self._entity.physics.b2FilterData();
 
 										if (fixtureDef.filter.filterCategoryBits !== undefined) {
 											tempFilterData.categoryBits = fixtureDef.filter.filterCategoryBits;
@@ -1028,7 +1030,7 @@ var dists = {
 									}
 
 									if (fixtureDef.filter && finalFixture) {
-										tempFilterData = self._entity.physics.b2FilterData;
+										tempFilterData = new self._entity.physics.b2FilterData();
 
 										if (fixtureDef.filter.filterCategoryBits !== undefined) {
 											tempFilterData.categoryBits = fixtureDef.filter.filterCategoryBits;
