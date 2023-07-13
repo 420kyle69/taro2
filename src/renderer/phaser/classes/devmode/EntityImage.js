@@ -90,7 +90,7 @@ var EntityImage = /** @class */ (function () {
             outline.clear();
             //Object.values(this.entityEditor.dragPoints).forEach(point => point.setVisible(false));
         });
-        var editedAction = { actionId: action.actionId };
+        var editedAction = this.editedAction = { actionId: action.actionId };
         scene.input.on('drag', function (pointer, gameObject, dragX, dragY) {
             if (!devModeTools.cursorButton.active || gameObject !== image)
                 return;

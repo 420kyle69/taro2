@@ -9,13 +9,21 @@ var EntityEditor = /** @class */ (function () {
         var selectionContainer = this.selectionContainer = new Phaser.GameObjects.Container(gameScene);
         var dragPoints = this.dragPoints = {};
         dragPoints['topLeft'] = gameScene.add.rectangle(0, 0, 10, 10, 0x00fffb);
-        dragPoints['top'] = gameScene.add.rectangle(0, 0, 10, 10, 0x00fffb, 1);
-        dragPoints['topRight'] = gameScene.add.rectangle(0, 0, 10, 10, 0x00fffb, 1);
-        dragPoints['right'] = gameScene.add.rectangle(0, 0, 10, 10, 0x00fffb, 1);
-        dragPoints['bottomRight'] = gameScene.add.rectangle(0, 0, 10, 10, 0x00fffb, 1);
-        dragPoints['bottom'] = gameScene.add.rectangle(0, 0, 10, 10, 0x00fffb, 1);
-        dragPoints['bottomLeft'] = gameScene.add.rectangle(0, 0, 10, 10, 0x00fffb, 1);
-        dragPoints['left'] = gameScene.add.rectangle(0, 0, 10, 10, 0x00fffb, 1);
+        dragPoints['topLeft'].functionality = 'angle';
+        dragPoints['top'] = gameScene.add.rectangle(0, 0, 10, 10, 0x00fffb);
+        dragPoints['top'].functionality = 'scale';
+        dragPoints['topRight'] = gameScene.add.rectangle(0, 0, 10, 10, 0x00fffb);
+        dragPoints['topRight'].functionality = 'angle';
+        dragPoints['right'] = gameScene.add.rectangle(0, 0, 10, 10, 0x00fffb);
+        dragPoints['right'].functionality = 'scale';
+        dragPoints['bottomRight'] = gameScene.add.rectangle(0, 0, 10, 10, 0x00fffb);
+        dragPoints['bottomRight'].functionality = 'angle';
+        dragPoints['bottom'] = gameScene.add.rectangle(0, 0, 10, 10, 0x00fffb);
+        dragPoints['bottom'].functionality = 'scale';
+        dragPoints['bottomLeft'] = gameScene.add.rectangle(0, 0, 10, 10, 0x00fffb);
+        dragPoints['bottomLeft'].functionality = 'angle';
+        dragPoints['left'] = gameScene.add.rectangle(0, 0, 10, 10, 0x00fffb);
+        dragPoints['left'].functionality = 'scale';
         Object.values(dragPoints).forEach(function (point) { return selectionContainer.add(point); });
         selectionContainer.setPosition(10, 10).setAngle(0).setVisible(false);
         gameScene.add.existing(selectionContainer);
@@ -29,31 +37,49 @@ var EntityEditor = /** @class */ (function () {
                 console.log('point out');
                 point.setScale(1);
             });
-            /*scene.input.on('drag', (pointer, gameObject, dragX, dragY) => {
-                if (!devModeTools.cursorButton.active || gameObject !== image) return;
-                if (this.dragMode === 'position') {
-                    gameObject.x = dragX;
-                    gameObject.y = dragY;
-                    editedAction.position = {x: dragX, y: dragY};
-                } else if (this.dragMode === 'angle' && !isNaN(action.angle)) {
-                    const target = Phaser.Math.Angle.BetweenPoints(gameObject, { x: dragX, y: dragY });
-                    gameObject.rotation = target;
-                    editedAction.angle = gameObject.angle;
-                } else if (this.dragMode === 'scale' && !isNaN(action.width) && !isNaN(action.height)) {
-                    const dragScale = Math.min(500, Math.max(-250, (this.startDragY - dragY)));
-                    gameObject.scale = this.scale + this.scale * dragScale / 500;
-                    editedAction.width = image.displayWidth;
-                    editedAction.height = image.displayHeight;
-                }
-                this.updateOutline();
+            point.on('pointerdown', function (pointer) {
+                var selectedEntityImage = _this.selectedEntityImage;
+                if (!devModeTools.cursorButton.active || !selectedEntityImage)
+                    return;
+                var worldPoint = _this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
+                selectedEntityImage.startDragX = worldPoint.x;
+                selectedEntityImage.startDragY = worldPoint.y;
+                selectedEntityImage.rotation = selectedEntityImage.image.rotation;
+                selectedEntityImage.scale = selectedEntityImage.image.scale;
             });
-    
-            scene.input.on('dragend', (pointer, gameObject) => {
-                if (gameObject !== image) return;
-                this.dragMode = null;
-                this.edit(editedAction);
-                editedAction = {actionId: action.actionId};
-            });*/
+            gameScene.input.on('drag', function (pointer, gameObject, dragX, dragY) {
+                var worldPoint = _this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
+                var selectedEntityImage = _this.selectedEntityImage;
+                if (!devModeTools.cursorButton.active || gameObject !== point || !selectedEntityImage)
+                    return;
+                var action = selectedEntityImage.action;
+                var editedAction = selectedEntityImage.editedAction;
+                if (!isNaN(action.angle) && gameObject.functionality === 'angle') {
+                    var startingAngle = Phaser.Math.Angle.BetweenPoints(selectedEntityImage.image, { x: selectedEntityImage.startDragX, y: selectedEntityImage.startDragY });
+                    var lastAngle = Phaser.Math.Angle.BetweenPoints(selectedEntityImage.image, worldPoint);
+                    var targetAngle = lastAngle - startingAngle;
+                    console.log('angle', selectedEntityImage.rotation, targetAngle);
+                    selectedEntityImage.image.rotation = selectedEntityImage.rotation + targetAngle;
+                    editedAction.angle = selectedEntityImage.image.angle;
+                }
+                else if (gameObject.functionality === 'scale' && !isNaN(action.width) && !isNaN(action.height)) {
+                    var distanceToStart = Phaser.Math.Distance.Between(selectedEntityImage.image.x, selectedEntityImage.image.y, selectedEntityImage.startDragX, selectedEntityImage.startDragY);
+                    var distanceToCurrent = Phaser.Math.Distance.Between(selectedEntityImage.image.x, selectedEntityImage.image.y, worldPoint.x, worldPoint.y);
+                    console.log('scale', distanceToStart, distanceToCurrent);
+                    selectedEntityImage.image.scale = selectedEntityImage.scale * (distanceToCurrent / distanceToStart);
+                    editedAction.width = selectedEntityImage.image.displayWidth;
+                    editedAction.height = selectedEntityImage.image.displayHeight;
+                }
+                selectedEntityImage.updateOutline();
+            });
+            gameScene.input.on('dragend', function (pointer, gameObject) {
+                var selectedEntityImage = _this.selectedEntityImage;
+                if (gameObject !== point || !selectedEntityImage)
+                    return;
+                selectedEntityImage.dragMode = null;
+                selectedEntityImage.edit(selectedEntityImage.editedAction);
+                selectedEntityImage.editedAction = { actionId: selectedEntityImage.action.actionId };
+            });
         });
         /*for (let i = 0; i < 4; i++) {
             const dragPoint = this.gameScene.add.graphics();

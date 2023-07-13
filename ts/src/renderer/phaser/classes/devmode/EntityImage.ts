@@ -2,12 +2,15 @@ class EntityImage {
     devModeTools: DevModeTools;
     entityEditor: EntityEditor;
     action: ActionData;
+    editedAction: ActionData;
     image: Phaser.GameObjects.Image & {entity: EntityImage};
 
     startDragX: number;
     startDragY: number;
-    scale: any;
+    scale: number;
+    rotation: number;
     dragMode: 'position' | 'angle' | 'scale';
+    
 
     constructor(scene, devModeTools: DevModeTools, entityImages: (Phaser.GameObjects.Image & {entity: EntityImage})[], action: ActionData, type?: string) {
 
@@ -88,7 +91,7 @@ class EntityImage {
             //Object.values(this.entityEditor.dragPoints).forEach(point => point.setVisible(false));
         });
 
-        let editedAction: ActionData = {actionId: action.actionId};
+        let editedAction: ActionData = this.editedAction = {actionId: action.actionId};
 
         scene.input.on('drag', (pointer, gameObject, dragX, dragY) => {
             if (!devModeTools.cursorButton.active || gameObject !== image) return;
@@ -133,7 +136,7 @@ class EntityImage {
 
 		outline.clear();
         if (this.devModeTools.entityEditor.selectedEntityImage === this) {
-            
+
             outline.lineStyle(6, 0x036ffc, 1);
 
             selectionContainer.setVisible(true);
