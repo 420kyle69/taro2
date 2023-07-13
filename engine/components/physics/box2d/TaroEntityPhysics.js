@@ -415,6 +415,7 @@ var TaroEntityPhysics = TaroEntity.extend({
 				if (taro.physics.engine === 'BOX2DWASM') {
 					let v = new taro.physics.b2Vec2(x, y);
 					this.body.setLinearVelocity(v);
+					taro.physics.destroyB2dObj(v);
 				} else {
 					this.body.setLinearVelocity(new TaroPoint3d(x, y, 0));
 				}

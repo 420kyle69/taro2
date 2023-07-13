@@ -180,7 +180,9 @@ var PhysicsComponent = TaroEventingClass.extend({
 			body = body || entity.body;
 			destroyBody = this._world.destroyBody;
 			var isBodyDestroyed = destroyBody.apply(this._world, [body]);
-
+			if (this.engine === 'BOX2DWASM') {
+				this.freeFromCache(body);
+			}
 			// clear references to prevent memory leak
 			if (this.engine === 'BOX2DWEB') {
 				this._world.m_contactSolver.m_constraints = [];
@@ -565,11 +567,8 @@ var PhysicsComponent = TaroEventingClass.extend({
 				self._world.step(timeElapsedSinceLastStep / 1000, 8, 3); // Call the world step; frame-rate, velocity iterations, position iterations
 				let nextFrameTime = taro._currentTime + (1000 / taro._gameLoopTickRate) - 10; // 10ms is to give extra buffer to prepare for the next frame
 				var tempBod = self._world.getBodyList();
-				if (tempBod.GetPosition().x && tempBod.GetPosition().y) {
-					// console.log(tempBod.GetPosition().x, tempBod.GetPosition().y);
-				}
+
 				// iterate through every physics body
-				// FIXME: sometimes it will loop forever if u add new physics engine
 				while (tempBod && typeof tempBod.getNext === 'function' && (!self.getPointer || self.getPointer(tempBod) !== self.getPointer(self.nullPtr))) {
 					// Check if the body is awake && not static
 					if (tempBod.m_type !== 'static' && tempBod.isAwake()) {
@@ -687,13 +686,11 @@ var PhysicsComponent = TaroEventingClass.extend({
 							}
 						}
 					}
-
 					tempBod = tempBod.getNext();
 				}
 				taro._physicsFrames++;
 				// Clear forces because we have ended our physics simulation frame
 				self._world.clearForces();
-
 				// get stats for dev panel
 				var timeEnd = Date.now();
 				self.physicsTickDuration += timeEnd - timeStart;
@@ -845,10 +842,10 @@ var PhysicsComponent = TaroEventingClass.extend({
 
 	// Listen for when contact's begin
 	_beginContactCallback: function (contact) {
-		var self = this;
-		if (self.engine === 'BOX2DWASM') {
-			var entityA = contact.GetFixtureA().GetBody()._entity;
-			var entityB = contact.GetFixtureB().GetBody()._entity;
+		if (taro.physics.engine === 'BOX2DWASM') {
+			const nowContact = taro.physics.wrapPointer(contact, taro.physics.b2Contact);
+			var entityA = nowContact.GetFixtureA().GetBody()._entity;
+			var entityB = nowContact.GetFixtureB().GetBody()._entity;
 
 			if (!entityA || !entityB)
 				return;
@@ -869,21 +866,32 @@ var PhysicsComponent = TaroEventingClass.extend({
 	},
 
 	_endContactCallback: function (contact) {
-		var entityA = contact.m_fixtureA.m_body._entity;
-		var entityB = contact.m_fixtureB.m_body._entity;
+		if (taro.physics.engine === 'BOX2DWASM') {
+			const nowContact = taro.physics.wrapPointer(contact, taro.physics.b2Contact);
+			var entityA = nowContact.GetFixtureA().GetBody()._entity;
+			var entityB = nowContact.GetFixtureB().GetBody()._entity;
 
-		if (!entityA || !entityB)
-			return;
+			if (!entityA || !entityB)
+				return;
 
-		taro.physics._triggerLeaveEvent(entityA, entityB);
-		taro.physics._triggerLeaveEvent(entityB, entityA);
+			taro.physics._triggerLeaveEvent(entityA, entityB);
+			taro.physics._triggerLeaveEvent(entityB, entityA);
+		} else {
+			var entityA = contact.m_fixtureA.m_body._entity;
+			var entityB = contact.m_fixtureB.m_body._entity;
+
+			if (!entityA || !entityB)
+				return;
+
+			taro.physics._triggerLeaveEvent(entityA, entityB);
+			taro.physics._triggerLeaveEvent(entityB, entityA);
+		}
 	},
 
 	_enableContactListener: function () {
 		// Set the contact listener methods to detect when
 		// contacts (collisions) begin and end
-		// FIXME
-		// taro.physics.contactListener(this._beginContactCallback, this._endContactCallback);
+		taro.physics.contactListener(this._beginContactCallback, this._endContactCallback);
 	}
 });
 

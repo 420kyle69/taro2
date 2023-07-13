@@ -325,7 +325,11 @@ var dists = {
 		init: function (component) {
 			const Box2DFactory = box2dwasm;
 			Box2DFactory().then(box2D => {
-				component.leakMitigator = new box2D.LeakMitigator();
+				const { freeLeaked, recordLeak } = new box2D.LeakMitigator();
+				component.freeLeaked = freeLeaked;
+				component.recordLeak = recordLeak;
+				component.freeFromCache = box2D.LeakMitigator.freeFromCache;
+				component.wrapPointer = box2D.wrapPointer;
 				component.getPointer = box2D.getPointer;
 				component.destroyB2dObj = box2D.destroy;
 				component.nullPtr = box2D.NULL;
@@ -346,6 +350,7 @@ var dists = {
 				component.b2CircleShape = box2D.b2CircleShape;
 				component.b2DebugDraw = box2D.DebugDraw;
 				component.b2ContactListener = box2D.JSContactListener;
+				component.b2Contact = box2D.b2Contact;
 				component.b2Distance = box2D.b2Distance;
 				component.b2FilterData = box2D.b2Filter;
 				component.b2DistanceJointDef = box2D.b2DistanceJointDef;
@@ -369,23 +374,7 @@ var dists = {
 					return component.b2World.prototype.QueryAABB(queryCallback,aabb);
 				}
 				*/
-				component.b2Math.Dot = function (a, b) {
-					return a.x * b.x + a.y * b.y;
-				};
-				component.b2Math.MulMV = function (A, v) {
-					var u = new box2D.b2Vec2(A.col1.x * v.x + A.col2.x * v.y, A.col1.y * v.x + A.col2.y * v.y);
-					return u;
-				};
-				component.b2Math.MulTMV = function (A, v) {
-					var u = new box2D.b2Vec2(component.b2Math.Dot(v, A.col1), component.b2Math.Dot(v, A.col2));
-					return u;
-				};
-				component.b2Math.MulX = function (T, v) {
-					var a = component.b2Math.MulMV(T.R, v);
-					a.x += T.position.x;
-					a.y += T.position.y;
-					return a;
-				};
+
 				component.b2Transform = box2D.b2Transform;
 				component.b2Transform.prototype.R = { col1: new box2D.b2Vec2(), col2: new box2D.b2Vec2() };
 				component.b2Body.prototype.getNext = component.b2Body.prototype.GetNext;
@@ -394,6 +383,7 @@ var dists = {
 					let angle = this.GetAngle();
 					let pos = new box2D.b2Vec2(position.x, position.y);
 					this.SetTransform(pos, angle);
+					component.destroyB2dObj(pos);
 				};
 				component.b2Body.prototype.getPosition = component.b2Body.prototype.GetPosition;
 				component.b2Body.prototype.setGravityScale = component.b2Body.prototype.SetGravityScale;
@@ -415,42 +405,7 @@ var dists = {
 				// component.b2Vec2.prototype.setV = component.b2Vec2.prototype.SetV;
 
 				component.b2Joint.prototype.getNext = component.b2Joint.prototype.GetNext;
-				component.b2PolygonShape.prototype.Reserve = function (count) {
-					if (count === undefined) count = 0;
-					for (var i = parseInt(this.m_vertices.length); i < count; i++) {
-						this.m_vertices[i] = new box2D.b2Vec2();
-						this.m_normals[i] = new box2D.b2Vec2();
-					}
-				};
-				component.b2PolygonShape.prototype.SetAsOrientedBox = function (hx, hy, center, angle) {
-					if (hx === undefined) hx = 0;
-					if (hy === undefined) hy = 0;
-					if (center === undefined) center = null;
-					if (angle === undefined) angle = 0.0;
-					this.m_vertexCount = 4;
-					this.Reserve(4);
-					this.set_m_vertices(0, new box2D.b2Vec2(-hx, -hy));
-					this.set_m_vertices(1, new box2D.b2Vec2(hx, -hy));
-					this.set_m_vertices(2, new box2D.b2Vec2(hx, hy));
-					this.set_m_vertices(3, new box2D.b2Vec2(-hx, hy));
-					this.set_m_normals(0, new box2D.b2Vec2(0.0, -1.0));
-					this.set_m_normals(1, new box2D.b2Vec2(1.0, 0.0));
-					this.set_m_normals(2, new box2D.b2Vec2(0.0, 1.0));
-					this.set_m_normals(3, new box2D.b2Vec2(-1.0, 0.0));
-					this.m_centroid = center;
-					var xf = new component.b2Transform();
-					xf.position = center;
-					let c = Math.cos(angle);
-					let s = Math.sin(angle);
-					xf.R.col1.x = c;
-					xf.R.col2.x = (-s);
-					xf.R.col1.y = s;
-					xf.R.col2.y = c;
-					for (var i = 0; i < this.m_vertexCount; ++i) {
-						this.m_vertices[i] = component.b2Math.MulX(xf, this.get_m_vertices(i));
-						this.m_normals[i] = component.b2Math.MulMV(xf.R, this.get_m_normals(i));
-					}
-				};
+
 				component.createWorld = function (id, options) {
 					component._world = new component.b2World(this._gravity);
 					component._world.SetContinuousPhysics(this._continuousPhysics);
@@ -464,7 +419,7 @@ var dists = {
 				 */
 				component.gravity = function (x, y) {
 					if (x !== undefined && y !== undefined) {
-						this._gravity = new this.b2Vec2(x, y);
+						this._gravity = component.recordLeak(new this.b2Vec2(x, y));
 						return this._entity;
 					}
 
@@ -476,7 +431,7 @@ var dists = {
 				};
 				component._continuousPhysics = false;
 				component._sleep = true;
-				component._gravity = new component.b2Vec2(0, 0);
+				component._gravity = component.recordLeak(new component.b2Vec2(0, 0));
 			});
 		},
 		contactListener: function (self, beginContactCallback, endContactCallback, preSolve, postSolve) {
@@ -491,10 +446,14 @@ var dists = {
 
 			if (preSolve !== undefined) {
 				contactListener.PreSolve = preSolve;
+			} else {
+				contactListener.PreSolve = () => { }
 			}
 
 			if (postSolve !== undefined) {
 				contactListener.PostSolve = postSolve;
+			} else {
+				contactListener.PostSolve = () => { }
 			}
 			self._world.SetContactListener(contactListener);
 		},
@@ -521,7 +480,7 @@ var dists = {
 			if (entity.body) {
 				self.destroyBody(entity);
 			}
-			var tempDef = new self.b2BodyDef();
+			var tempDef = self.recordLeak(new self.b2BodyDef());
 			var param;
 			var tempBod;
 			var fixtureDef;
@@ -569,11 +528,12 @@ var dists = {
 			// set rotation
 			tempDef.set_angle(entity._rotate.z);
 			// Set the position
-			tempDef.set_position(new self.b2Vec2(entity._translate.x / self._scaleRatio, entity._translate.y / self._scaleRatio));
-
+			let nowPoint = self.recordLeak(new self.b2Vec2(entity._translate.x / self._scaleRatio, entity._translate.y / self._scaleRatio));
+			tempDef.set_position(nowPoint);
+			self.destroyB2dObj(nowPoint);
+			self.destroyB2dObj(tempDef);
 			// Create the new body
 			tempBod = self._world.CreateBody(tempDef);
-
 			// Now apply any post-creation attributes we need to
 			for (param in body) {
 				if (body.hasOwnProperty(param)) {
@@ -605,7 +565,7 @@ var dists = {
 										// Create based on the shape type
 										switch (fixtureDef.shape.type) {
 											case 'circle':
-												tempShape = new self.b2CircleShape();
+												tempShape = self.recordLeak(new self.b2CircleShape());
 												if (fixtureDef.shape.data && typeof (fixtureDef.shape.data.radius) !== 'undefined') {
 													tempShape.m_radius = fixtureDef.shape.data.radius / self._scaleRatio;
 												} else {
@@ -622,12 +582,12 @@ var dists = {
 												break;
 
 											case 'polygon':
-												tempShape = new self.b2PolygonShape();
+												tempShape = self.recordLeak(new self.b2PolygonShape());
 												tempShape.SetAsArray(fixtureDef.shape.data._poly, fixtureDef.shape.data.length());
 												break;
 
 											case 'rectangle':
-												tempShape = new self.b2PolygonShape();
+												tempShape = self.recordLeak(new self.b2PolygonShape());
 
 												if (fixtureDef.shape.data) {
 													finalX = fixtureDef.shape.data.x !== undefined ? fixtureDef.shape.data.x : 0;
@@ -645,7 +605,7 @@ var dists = {
 												tempShape.SetAsBox(
 													(finalWidth / self._scaleRatio),
 													(finalHeight / self._scaleRatio),
-													new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio),
+													self.recordLeak(new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio)),
 													0
 												);
 
@@ -653,13 +613,14 @@ var dists = {
 										}
 										if (tempShape && fixtureDef.filter) {
 											tempFixture.shape = tempShape;
-											finalFixture = self.leakMitigator.recordLeak(tempBod.CreateFixture(tempFixture));
+											finalFixture = self.recordLeak(tempBod.CreateFixture(tempFixture));
+											self.destroyB2dObj(tempShape);
 											finalFixture.taroId = tempFixture.taroId;
 										}
 									}
 
 									if (fixtureDef.filter && finalFixture) {
-										tempFilterData = new self._entity.physics.b2FilterData();
+										tempFilterData = self.recordLeak(new self._entity.physics.b2FilterData());
 
 										if (fixtureDef.filter.filterCategoryBits !== undefined) {
 											tempFilterData.categoryBits = fixtureDef.filter.filterCategoryBits;
@@ -672,7 +633,7 @@ var dists = {
 										}
 
 										finalFixture.SetFilterData(tempFilterData);
-
+										self.destroyB2dObj(tempFilterData);
 									}
 
 									if (fixtureDef.friction !== undefined && finalFixture) {
@@ -707,6 +668,7 @@ var dists = {
 			// console.log('box2dweb',entity._rotate.z)
 			entity.rotateTo(0, 0, entity._rotate.z);
 			// Add the body to the world with the passed fixture
+			self.freeLeaked();
 			return tempBod;
 		},
 
