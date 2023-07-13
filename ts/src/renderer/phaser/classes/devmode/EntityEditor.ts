@@ -49,9 +49,8 @@ class EntityEditor {
             if (point.functionality === 'angle') {
                 point.setInteractive({ draggable: true , cursor: 'url(assets/cursors/rotate.cur), pointer' });
             } else {
-                point.setInteractive({ draggable: true , cursor: 'url(assets/cursors/resize.cur), pointer' });
+                point.setInteractive({ draggable: true/* , cursor: 'url(assets/cursors/resize.cur), pointer'*/ });
             }
-            //point.setInteractive({ draggable: true });
 
             point.on('pointerover', () => {
                 console.log('point over', point)
