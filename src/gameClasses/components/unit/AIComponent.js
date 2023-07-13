@@ -310,10 +310,12 @@ var AIComponent = TaroEntity.extend({
 	* Use .ok to check if path correctly generated 
 	* .ok return true if .path is found or the unit already at the target location
 	* .ok return false if the target location is inside a wall, not reachable
+	* if there is no wall between the start position and the end position, it will return the end position in .path, and return tru in .ok
 	*/
 	getAStarPath: function (x, y) {
 		let returnValue = { path: [], ok: false };
 		let unit = this._entity;
+
 		let mapData = taro.map.data; // cache the map data for rapid use
 
 		let unitTilePosition = {x: Math.floor(unit._translate.x / mapData.tilewidth), y: Math.floor(unit._translate.y / mapData.tilewidth)};
@@ -322,6 +324,12 @@ var AIComponent = TaroEntity.extend({
 		let targetTilePosition = {x: Math.floor(x / mapData.tilewidth), y: Math.floor(y / mapData.tilewidth)};
 		targetTilePosition.x = Math.min(Math.max(0, targetTilePosition.x), mapData.width - 1); // confine with map boundary
 		targetTilePosition.y = Math.min(Math.max(0, targetTilePosition.y), mapData.height - 1);
+		
+		if (!this.aStarIsPositionBlocked(x, y)) { // if there is no blocked, directly set the target to the end position
+			returnValue.path.push(_.cloneDeep(targetTilePosition));
+			returnValue.ok = true;
+			return returnValue;
+		}
 
 		let wallMap = taro.map.wallMap; // wall layer cached
 		let openList = []; // store grid nodes that is under evaluation
@@ -442,6 +450,26 @@ var AIComponent = TaroEntity.extend({
 		let triggerParam = { unitId: this._entity.id() };
 		taro.script.trigger('unitAStarPathFindingFailed', triggerParam);
 		this._entity.script.trigger('entityAStarPathFindingFailed', triggerParam);
+	},
+
+	aStarIsPositionBlocked: function (x, y) {
+		let unit = this._entity;
+		let xTune = [0, -1, 1, 0, 0];
+		let yTune = [0, 0, 0, -1, 1];
+		// center, left, right, up, down
+		let maxBodySizeShift = Math.max(unit.getBounds().width, unit.getBounds().height);
+		for (let i = 0; i < 5; i++) {
+			taro.raycaster.raycastLine(
+				{ x: (unit._translate.x + maxBodySizeShift * xTune[i]) / taro.physics._scaleRatio, y: (unit._translate.y + maxBodySizeShift * yTune[i]) / taro.physics._scaleRatio },
+				{ x: x / taro.physics._scaleRatio, y: y / taro.physics._scaleRatio },
+			)
+			for (let i = 0; i < taro.game.entitiesCollidingWithLastRaycast.length; i++) {
+				if (taro.game.entitiesCollidingWithLastRaycast[i]._category && taro.game.entitiesCollidingWithLastRaycast[i]._category == 'wall') {
+					return true;
+				}
+			}
+		}
+		return false;
 	},
 
 	setTargetUnit: function (unit) {
