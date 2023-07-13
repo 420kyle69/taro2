@@ -80,6 +80,7 @@ class EntityImage {
         const outline = entityEditor.outline;
 
         image.on('pointerover', () => {
+            //scene.input.setDefaultCursor('url(assets/cursors/resize.cur), pointer');
             if (!devModeTools.cursorButton.active || entityEditor.activeDragPoint) return;
             if (entityEditor.selectedEntityImage !== this) entityEditor.selectedEntityImage = null;
             this.updateOutline();
