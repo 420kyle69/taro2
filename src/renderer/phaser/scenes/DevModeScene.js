@@ -143,8 +143,7 @@ var DevModeScene = /** @class */ (function (_super) {
     };
     DevModeScene.prototype.enterMapTab = function () {
         var _this = this;
-        var _a;
-        if (((_a = this.gameEditorWidgets) === null || _a === void 0 ? void 0 : _a.length) === 0) {
+        if (this.gameEditorWidgets.length === 0) {
             this.devModeTools.queryWidgets();
             this.gameEditorWidgets = this.devModeTools.gameEditorWidgets;
         }
