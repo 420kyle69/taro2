@@ -3,26 +3,29 @@ var EntityEditor = /** @class */ (function () {
         var _this = this;
         this.gameScene = gameScene;
         this.devModeTools = devModeTools;
+        var COLOR_ANGLE = this.COLOR_ANGLE = 0xD1D5DB;
+        var COLOR_SCALE = this.COLOR_SCALE = 0x00fffb;
         this.preview = gameScene.add.image(0, 0, null, 0);
         this.preview.setAlpha(0.75).setVisible(false);
         this.outline = gameScene.add.graphics();
+        this.outline.depth = 1000;
         var selectionContainer = this.selectionContainer = new Phaser.GameObjects.Container(gameScene);
         var dragPoints = this.dragPoints = {};
-        dragPoints['topLeft'] = gameScene.add.rectangle(0, 0, 10, 10, 0x00fffb);
+        dragPoints['topLeft'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_ANGLE);
         dragPoints['topLeft'].functionality = 'angle';
-        dragPoints['top'] = gameScene.add.rectangle(0, 0, 10, 10, 0x00fffb);
+        dragPoints['top'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_SCALE);
         dragPoints['top'].functionality = 'scale';
-        dragPoints['topRight'] = gameScene.add.rectangle(0, 0, 10, 10, 0x00fffb);
+        dragPoints['topRight'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_ANGLE);
         dragPoints['topRight'].functionality = 'angle';
-        dragPoints['right'] = gameScene.add.rectangle(0, 0, 10, 10, 0x00fffb);
+        dragPoints['right'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_SCALE);
         dragPoints['right'].functionality = 'scale';
-        dragPoints['bottomRight'] = gameScene.add.rectangle(0, 0, 10, 10, 0x00fffb);
+        dragPoints['bottomRight'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_ANGLE);
         dragPoints['bottomRight'].functionality = 'angle';
-        dragPoints['bottom'] = gameScene.add.rectangle(0, 0, 10, 10, 0x00fffb);
+        dragPoints['bottom'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_SCALE);
         dragPoints['bottom'].functionality = 'scale';
-        dragPoints['bottomLeft'] = gameScene.add.rectangle(0, 0, 10, 10, 0x00fffb);
+        dragPoints['bottomLeft'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_ANGLE);
         dragPoints['bottomLeft'].functionality = 'angle';
-        dragPoints['left'] = gameScene.add.rectangle(0, 0, 10, 10, 0x00fffb);
+        dragPoints['left'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_SCALE);
         dragPoints['left'].functionality = 'scale';
         Object.values(dragPoints).forEach(function (point) { return selectionContainer.add(point); });
         selectionContainer.setPosition(10, 10).setAngle(0).setVisible(false);
@@ -35,12 +38,17 @@ var EntityEditor = /** @class */ (function () {
                 point.setInteractive({ draggable: true /* , cursor: 'url(assets/cursors/resize.cur), pointer'*/ });
             }
             point.on('pointerover', function () {
-                console.log('point over', point);
                 point.setScale(1.5);
+                point.fillColor = devModeTools.COLOR_LIGHT;
             });
             point.on('pointerout', function () {
-                console.log('point out');
                 point.setScale(1);
+                if (point.functionality === 'angle') {
+                    point.fillColor = COLOR_ANGLE;
+                }
+                else {
+                    point.fillColor = COLOR_SCALE;
+                }
             });
             point.on('pointerdown', function (pointer) {
                 var selectedEntityImage = _this.selectedEntityImage;
