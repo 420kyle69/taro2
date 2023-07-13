@@ -78,7 +78,7 @@ var EntityImage = /** @class */ (function () {
         });
         var outline = entityEditor.outline;
         image.on('pointerover', function () {
-            if (!devModeTools.cursorButton.active)
+            if (!devModeTools.cursorButton.active || entityEditor.activeDragPoint)
                 return;
             if (entityEditor.selectedEntityImage !== _this)
                 entityEditor.selectedEntityImage = null;
@@ -88,7 +88,6 @@ var EntityImage = /** @class */ (function () {
             if (entityEditor.selectedEntityImage === _this)
                 return;
             outline.clear();
-            //Object.values(this.entityEditor.dragPoints).forEach(point => point.setVisible(false));
         });
         var editedAction = this.editedAction = { actionId: action.actionId };
         scene.input.on('drag', function (pointer, gameObject, dragX, dragY) {
@@ -179,6 +178,8 @@ var EntityImage = /** @class */ (function () {
             this.hide();
             this.action.wasDeleted = true;
         }
+        if (this === this.entityEditor.selectedEntityImage)
+            this.updateOutline();
     };
     EntityImage.prototype.hide = function () {
         this.image.alpha = 0;

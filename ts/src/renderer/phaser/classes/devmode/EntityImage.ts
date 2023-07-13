@@ -80,7 +80,7 @@ class EntityImage {
         const outline = entityEditor.outline;
 
         image.on('pointerover', () => {
-            if (!devModeTools.cursorButton.active) return;
+            if (!devModeTools.cursorButton.active || entityEditor.activeDragPoint) return;
             if (entityEditor.selectedEntityImage !== this) entityEditor.selectedEntityImage = null;
             this.updateOutline();
         });
@@ -88,7 +88,6 @@ class EntityImage {
         image.on('pointerout', () => {
             if (entityEditor.selectedEntityImage === this) return;
             outline.clear();
-            //Object.values(this.entityEditor.dragPoints).forEach(point => point.setVisible(false));
         });
 
         let editedAction: ActionData = this.editedAction = {actionId: action.actionId};
@@ -136,9 +135,7 @@ class EntityImage {
 
 		outline.clear();
         if (this.devModeTools.entityEditor.selectedEntityImage === this) {
-
             outline.lineStyle(6, 0x036ffc, 1);
-
             selectionContainer.setVisible(true);
             selectionContainer.x = image.x;
             selectionContainer.y = image.y;
@@ -151,8 +148,7 @@ class EntityImage {
             dragPoints.bottomRight.setPosition(image.displayWidth / 2 + 20, image.displayHeight / 2 + 20);
             dragPoints.bottom.setPosition(0, image.displayHeight / 2 + 20);
             dragPoints.bottomLeft.setPosition(-image.displayWidth / 2 - 20, image.displayHeight / 2 + 20);
-            dragPoints.left.setPosition(-image.displayWidth / 2 - 20, 0);
-            
+            dragPoints.left.setPosition(-image.displayWidth / 2 - 20, 0); 
         } else {
             outline.lineStyle(2, 0x036ffc, 1);
             selectionContainer.setVisible(false);
@@ -184,6 +180,7 @@ class EntityImage {
             this.hide();
             this.action.wasDeleted = true;
         }
+        if (this === this.entityEditor.selectedEntityImage) this.updateOutline();
     }
 
     hide (): void {

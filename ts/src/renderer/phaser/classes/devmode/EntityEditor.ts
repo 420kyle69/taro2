@@ -1,11 +1,15 @@
 class EntityEditor {
     activeEntityPlacement: boolean;
     preview: Phaser.GameObjects.Image;
+
     outline: Phaser.GameObjects.Graphics;
     selectionContainer: Phaser.GameObjects.Container;
     dragPoints: Record<string, Phaser.GameObjects.Rectangle & {functionality: string}>;
+    activeDragPoint: boolean;
+
     activeEntity: { id: string; player: string; entityType: string; };
     selectedEntityImage: EntityImage;
+    
 
 	constructor (
         private gameScene: GameScene,
@@ -58,6 +62,7 @@ class EntityEditor {
                 const selectedEntityImage = this.selectedEntityImage;
                 if (!devModeTools.cursorButton.active || !selectedEntityImage) return;
 
+                this.activeDragPoint = true;
                 const worldPoint = this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
                 selectedEntityImage.startDragX = worldPoint.x;
                 selectedEntityImage.startDragY = worldPoint.y;
@@ -76,13 +81,11 @@ class EntityEditor {
                     const startingAngle = Phaser.Math.Angle.BetweenPoints(selectedEntityImage.image, { x: selectedEntityImage.startDragX, y: selectedEntityImage.startDragY });
                     const lastAngle = Phaser.Math.Angle.BetweenPoints(selectedEntityImage.image, worldPoint);
                     const targetAngle = lastAngle - startingAngle;
-                    console.log('angle', selectedEntityImage.rotation, targetAngle)
                     selectedEntityImage.image.rotation = selectedEntityImage.rotation + targetAngle;
                     editedAction.angle = selectedEntityImage.image.angle;
                 } else if (gameObject.functionality === 'scale' && !isNaN(action.width) && !isNaN(action.height)) {
                     const distanceToStart = Phaser.Math.Distance.Between(selectedEntityImage.image.x, selectedEntityImage.image.y, selectedEntityImage.startDragX, selectedEntityImage.startDragY);
                     const distanceToCurrent = Phaser.Math.Distance.Between(selectedEntityImage.image.x, selectedEntityImage.image.y, worldPoint.x, worldPoint.y);
-                    console.log('scale', distanceToStart, distanceToCurrent)
                     selectedEntityImage.image.scale = selectedEntityImage.scale * (distanceToCurrent / distanceToStart);
                     editedAction.width = selectedEntityImage.image.displayWidth;
                     editedAction.height = selectedEntityImage.image.displayHeight;
@@ -93,31 +96,12 @@ class EntityEditor {
             gameScene.input.on('dragend', (pointer, gameObject) => {
                 const selectedEntityImage = this.selectedEntityImage;
                 if (gameObject !== point || !selectedEntityImage) return;
+                this.activeDragPoint = false;
                 selectedEntityImage.dragMode = null;
                 selectedEntityImage.edit(selectedEntityImage.editedAction);
                 selectedEntityImage.editedAction = {actionId: selectedEntityImage.action.actionId};
             });
-
         });
-
-
-
-        /*for (let i = 0; i < 4; i++) {
-            const dragPoint = this.gameScene.add.graphics();
-            dragPoint.fillStyle(0xffffff, 1);
-            dragPoint.fillRect(0, 0, 5, 5);
-            dragPoint.setVisible(true);
-            this.dragPoints.push(dragPoint);
-        }*/
-
-        /*
-        this.activeEntity = {
-            id: 'ROrWqytd2r',
-            player: 'AI resources',
-            entityType: 'unitTypes'
-        }
-        this.updatePreview();
-        */
 
         taro.client.on('updateActiveEntity', () => {
             this.activeEntity = inGameEditor.getActiveEntity && inGameEditor.getActiveEntity();
