@@ -452,7 +452,7 @@ var dists = {
 					}
 				};
 				component.createWorld = function (id, options) {
-					component._world = new component.b2World(this._gravity, this._sleep);
+					component._world = new component.b2World(this._gravity);
 					component._world.SetContinuousPhysics(this._continuousPhysics);
 				};
 
@@ -641,15 +641,14 @@ var dists = {
 													finalHeight = (entity._bounds2d.y / 2);
 												}
 
-												if (finalX !== 0 && finalY !== 0) {
-													// Set the polygon as a box
-													tempShape.SetAsBox(
-														(finalWidth / self._scaleRatio),
-														(finalHeight / self._scaleRatio),
-														new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio),
-														0
-													);
-												}
+												// Set the polygon as a box
+												tempShape.SetAsBox(
+													(finalWidth / self._scaleRatio),
+													(finalHeight / self._scaleRatio),
+													new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio),
+													0
+												);
+
 												break;
 										}
 										if (tempShape && fixtureDef.filter) {
@@ -673,6 +672,7 @@ var dists = {
 										}
 
 										finalFixture.SetFilterData(tempFilterData);
+
 									}
 
 									if (fixtureDef.friction !== undefined && finalFixture) {
