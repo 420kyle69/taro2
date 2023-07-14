@@ -5,7 +5,7 @@ var dists = {
 	// current: 'box2D',
 	// current: 'native',
 	// current: 'matterjs',
-	defaultEngine: 'BOX2DWASM',
+	defaultEngine: 'PLANCK',
 
 	/**
 	 * NOTE:
