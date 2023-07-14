@@ -39,7 +39,6 @@ var MobileControlsScene = /** @class */ (function (_super) {
                 default:
                     var relativeX = Math.trunc((x + w / 2) / 960 * window.innerWidth - w / 2);
                     var relativeY = Math.trunc((y + h / 2) / 540 * window.innerHeight - h / 2);
-                    console.log("".concat(window.innerWidth, "\t ").concat(window.innerHeight, "\n").concat(x, "\t ").concat(y, "\n").concat(relativeX, "\t ").concat(relativeY, "\n").concat(w, "\t").concat(h));
                     var text = key.toUpperCase();
                     var button_1 = _this.add.image(relativeX, relativeY, 'mobile-button-up')
                         .setDisplaySize(w, h)
