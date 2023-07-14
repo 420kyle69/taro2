@@ -647,6 +647,9 @@ const Client = TaroEventingClass.extend({
 					taro.physics.addBorders();
 				}
 				taro.physics.createWorld();
+				while(!taro.physics._world) {
+
+				}
 				taro.physics.start();
 				taro.raycaster = new Raycaster();
 

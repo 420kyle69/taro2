@@ -323,6 +323,10 @@ var dists = {
 
 	BOX2DWASM: { // added by Moe'Thun for fixing memory leak bug
 		init: function (component) {
+			while (!box2dwasm) {
+
+			}
+
 			const Box2DFactory = box2dwasm;
 			Box2DFactory().then(box2D => {
 				const { freeLeaked, recordLeak } = new box2D.LeakMitigator();
