@@ -569,107 +569,111 @@ var Server = TaroClass.extend({
 
 				taro.addComponent(PhysicsComponent);
 
-				setTimeout(() => {
-					taro.physics.sleep(true);
-					taro.physics.tilesizeRatio(tilesizeRatio);
-					if (game.data.settings) {
-						var gravity = game.data.settings.gravity;
-						if (gravity) {
-							// console.log('setting gravity', gravity);
-							taro.physics.gravity(gravity.x, gravity.y);
-						}
-					}
-					taro.physics.setContinuousPhysics(!!game?.data?.settings?.continuousPhysics);
-					taro.physics.createWorld();
-					taro.physics.start();
-					taro.raycaster = new Raycaster();
-					taro.developerMode = new DeveloperMode();
-
-					// console.log("game data", game)
-					// mapComponent needs to be inside TaroStreamComponent, because debris' are created and streaming is enabled which requires TaroStreamComponent
-					console.log('initializing components');
-
-
-					taro.network.on('connect', self._onClientConnect);
-					taro.network.on('disconnect', self._onClientDisconnect);
-					// Networking has started so start the game engine
-					taro.start(function (success) {
-						// Check if the engine started successfully
-						if (success) {
-							console.log('TaroNetIoComponent started successfully');
-
-							self.defineNetworkEvents();
-							// console.log("game data", taro.game.data.settings)
-
-							// Add the network stream component
-							taro.network.addComponent(TaroStreamComponent)
-								.stream.start(); // Start the stream
-
-							// Accept incoming network connections
-							taro.network.acceptConnections(true);
-
-							taro.addGraph('TaroBaseScene');
-
-							taro.addComponent(MapComponent);
-							taro.addComponent(ShopComponent);
-							taro.addComponent(TaroChatComponent);
-							taro.addComponent(ItemComponent);
-							taro.addComponent(TimerComponent);
-							taro.addComponent(GameTextComponent);
-
-							taro.addComponent(AdComponent);
-							taro.addComponent(SoundComponent);
-							taro.addComponent(RegionManager);
-
-							if (taro.game.data.defaultData.enableVideoChat) {
-								taro.addComponent(VideoChatComponent);
+				const loadedInterval = setInterval(() => {
+					if (taro.physics.gravity) {
+						taro.physics.sleep(true);
+						taro.physics.tilesizeRatio(tilesizeRatio);
+						if (game.data.settings) {
+							var gravity = game.data.settings.gravity;
+							if (gravity) {
+								// console.log('setting gravity', gravity);
+								taro.physics.gravity(gravity.x, gravity.y);
 							}
-
-							let map = taro.scaleMap(_.cloneDeep(taro.game.data.map));
-							taro.map.load(map);
-
-							taro.game.start();
-
-							self.gameLoaded = true;
-
-							// send dev logs to developer every second
-							var logInterval = setInterval(function () {
-								// send only if developer client is connect
-								if (taro.isServer && self.developerClientIds.length) {
-
-									taro.game.devLogs.status = taro.server.getStatus();
-									const sendErrors = Object.keys(taro.script.errorLogs).length;
-									self.developerClientIds.forEach(
-										id => {
-											taro.network.send('devLogs', taro.game.devLogs, id);
-
-											if (sendErrors) {
-												taro.network.send('errorLogs', taro.script.errorLogs, id);
-											}
-
-										});
-
-									if (sendErrors) {
-										taro.script.errorLogs = {};
-									}
-								}
-								taro.physicsTickCount = 0;
-								taro.unitBehaviourCount = 0;
-							}, 1000);
-
-							setInterval(function () {
-								var copyCount = Object.assign({}, self.socketConnectionCount);
-								self.socketConnectionCount = {
-									connected: 0,
-									disconnected: 0,
-									immediatelyDisconnected: 0
-								};
-
-								taro.clusterClient && taro.clusterClient.recordSocketConnections(copyCount);
-							}, 900000);
 						}
-					});
-				}, 500);
+						taro.physics.setContinuousPhysics(!!game?.data?.settings?.continuousPhysics);
+						taro.physics.createWorld();
+						taro.physics.start();
+						taro.raycaster = new Raycaster();
+						taro.developerMode = new DeveloperMode();
+
+						// console.log("game data", game)
+						// mapComponent needs to be inside TaroStreamComponent, because debris' are created and streaming is enabled which requires TaroStreamComponent
+						console.log('initializing components');
+
+
+						taro.network.on('connect', self._onClientConnect);
+						taro.network.on('disconnect', self._onClientDisconnect);
+						// Networking has started so start the game engine
+						taro.start(function (success) {
+							// Check if the engine started successfully
+							if (success) {
+								console.log('TaroNetIoComponent started successfully');
+
+								self.defineNetworkEvents();
+								// console.log("game data", taro.game.data.settings)
+
+								// Add the network stream component
+								taro.network.addComponent(TaroStreamComponent)
+									.stream.start(); // Start the stream
+
+								// Accept incoming network connections
+								taro.network.acceptConnections(true);
+
+								taro.addGraph('TaroBaseScene');
+
+								taro.addComponent(MapComponent);
+								taro.addComponent(ShopComponent);
+								taro.addComponent(TaroChatComponent);
+								taro.addComponent(ItemComponent);
+								taro.addComponent(TimerComponent);
+								taro.addComponent(GameTextComponent);
+
+								taro.addComponent(AdComponent);
+								taro.addComponent(SoundComponent);
+								taro.addComponent(RegionManager);
+
+								if (taro.game.data.defaultData.enableVideoChat) {
+									taro.addComponent(VideoChatComponent);
+								}
+
+								let map = taro.scaleMap(_.cloneDeep(taro.game.data.map));
+								taro.map.load(map);
+
+								taro.game.start();
+
+								self.gameLoaded = true;
+
+								// send dev logs to developer every second
+								var logInterval = setInterval(function () {
+									// send only if developer client is connect
+									if (taro.isServer && self.developerClientIds.length) {
+
+										taro.game.devLogs.status = taro.server.getStatus();
+										const sendErrors = Object.keys(taro.script.errorLogs).length;
+										self.developerClientIds.forEach(
+											id => {
+												taro.network.send('devLogs', taro.game.devLogs, id);
+
+												if (sendErrors) {
+													taro.network.send('errorLogs', taro.script.errorLogs, id);
+												}
+
+											});
+
+										if (sendErrors) {
+											taro.script.errorLogs = {};
+										}
+									}
+									taro.physicsTickCount = 0;
+									taro.unitBehaviourCount = 0;
+								}, 1000);
+
+								setInterval(function () {
+									var copyCount = Object.assign({}, self.socketConnectionCount);
+									self.socketConnectionCount = {
+										connected: 0,
+										disconnected: 0,
+										immediatelyDisconnected: 0
+									};
+
+									taro.clusterClient && taro.clusterClient.recordSocketConnections(copyCount);
+								}, 900000);
+							}
+						});
+						clearInterval(loadedInterval);
+					}
+
+				}, 50);
 
 			})
 				.catch((err) => {
