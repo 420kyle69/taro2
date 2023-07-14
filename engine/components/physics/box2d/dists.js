@@ -350,6 +350,8 @@ var dists = {
 				component.b2CircleShape = box2D.b2CircleShape;
 				component.b2DebugDraw = box2D.DebugDraw;
 				component.b2ContactListener = box2D.JSContactListener;
+				component.b2RevoluteJointDef = box2D.b2RevoluteJointDef;
+				component.b2WeldJointDef = box2D.b2WeldJointDef;
 				component.b2Contact = box2D.b2Contact;
 				component.b2Distance = box2D.b2Distance;
 				component.b2FilterData = box2D.b2Filter;
@@ -686,7 +688,7 @@ var dists = {
 				entityA.id() != entityB.id() // im not creating joint to myself!
 			) {
 				if (aBody.jointType == 'revoluteJoint') {
-					var joint_def = new box2dweb.Dynamics.Joints.b2RevoluteJointDef();
+					var joint_def = self.recordLeak(new self.b2RevoluteJointDef());
 
 					joint_def.Initialize(
 						entityA.body,
@@ -701,7 +703,7 @@ var dists = {
 					joint_def.localAnchorB.Set(anchorB.x / self._scaleRatio, -anchorB.y / self._scaleRatio); // unit anchor
 				} else // weld joint
 				{
-					var joint_def = new box2dweb.Dynamics.Joints.b2WeldJointDef();
+					var joint_def = self.recordLeak(new self.b2WeldJointDef());
 					joint_def.Initialize(
 						entityA.body,
 						entityB.body,
@@ -711,7 +713,8 @@ var dists = {
 				}
 
 				var joint = self._world.CreateJoint(joint_def); // joint between two pieces
-
+				self.destroyB2dObj(joint_def);
+				self.freeLeaked();
 				// var serverStats = taro.server.getStatus()
 				PhysicsComponent.prototype.log('joint created ', aBody.jointType);
 
