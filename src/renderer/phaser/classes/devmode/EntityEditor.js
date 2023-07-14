@@ -91,24 +91,22 @@ var EntityEditor = /** @class */ (function () {
                     selectedEntityImage.image.rotation = selectedEntityImage.rotation + targetAngle;
                     editedAction.angle = selectedEntityImage.image.angle;
                 }
-                else if (scaleArray.includes(point.orientation) && !isNaN(action.width) && !isNaN(action.height)) {
+                else {
                     var distanceToStart = Phaser.Math.Distance.Between(selectedEntityImage.image.x, selectedEntityImage.image.y, selectedEntityImage.startDragX, selectedEntityImage.startDragY);
                     var distanceToCurrent = Phaser.Math.Distance.Between(selectedEntityImage.image.x, selectedEntityImage.image.y, worldPoint.x, worldPoint.y);
-                    selectedEntityImage.image.scale = selectedEntityImage.scale * (distanceToCurrent / distanceToStart);
-                    editedAction.width = selectedEntityImage.image.displayWidth;
-                    editedAction.height = selectedEntityImage.image.displayHeight;
-                }
-                else if (widthArray.includes(point.orientation) && !isNaN(action.width) && !isNaN(action.height)) {
-                    var distanceToStart = Phaser.Math.Distance.Between(selectedEntityImage.image.x, selectedEntityImage.image.y, selectedEntityImage.startDragX, selectedEntityImage.image.y);
-                    var distanceToCurrent = Phaser.Math.Distance.Between(selectedEntityImage.image.x, selectedEntityImage.image.y, worldPoint.x, selectedEntityImage.image.y);
-                    selectedEntityImage.image.scaleX = selectedEntityImage.scaleX * (distanceToCurrent / distanceToStart);
-                    editedAction.width = selectedEntityImage.image.displayWidth;
-                }
-                else if (heightArray.includes(point.orientation) && !isNaN(action.width) && !isNaN(action.height)) {
-                    var distanceToStart = Phaser.Math.Distance.Between(selectedEntityImage.image.x, selectedEntityImage.image.y, selectedEntityImage.image.x, selectedEntityImage.startDragY);
-                    var distanceToCurrent = Phaser.Math.Distance.Between(selectedEntityImage.image.x, selectedEntityImage.image.y, selectedEntityImage.image.x, worldPoint.y);
-                    selectedEntityImage.image.scaleY = selectedEntityImage.scaleY * (distanceToCurrent / distanceToStart);
-                    editedAction.height = selectedEntityImage.image.displayHeight;
+                    if (scaleArray.includes(point.orientation) && !isNaN(action.width) && !isNaN(action.height)) {
+                        selectedEntityImage.image.scale = selectedEntityImage.scale * (distanceToCurrent / distanceToStart);
+                        editedAction.width = selectedEntityImage.image.displayWidth;
+                        editedAction.height = selectedEntityImage.image.displayHeight;
+                    }
+                    else if (widthArray.includes(point.orientation) && !isNaN(action.width) && !isNaN(action.height)) {
+                        selectedEntityImage.image.scaleX = selectedEntityImage.scaleX * (distanceToCurrent / distanceToStart);
+                        editedAction.width = selectedEntityImage.image.displayWidth;
+                    }
+                    else if (heightArray.includes(point.orientation) && !isNaN(action.width) && !isNaN(action.height)) {
+                        selectedEntityImage.image.scaleY = selectedEntityImage.scaleY * (distanceToCurrent / distanceToStart);
+                        editedAction.height = selectedEntityImage.image.displayHeight;
+                    }
                 }
                 selectedEntityImage.updateOutline();
             });
