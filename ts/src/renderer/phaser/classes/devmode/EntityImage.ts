@@ -132,9 +132,14 @@ class EntityImage {
         taro.network.send<any>('editInitEntity', action);
     }
 
-    updateOutline (): void {
+    updateOutline (hide?): void {
         const outline = this.entityEditor.outline;
         const selectionContainer = this.entityEditor.selectionContainer;
+        if (hide) {
+            outline.clear();
+            selectionContainer.setVisible(false);
+            return;
+        }
         const dragPoints = this.entityEditor.dragPoints;
         const image = this.image;
 
@@ -146,7 +151,7 @@ class EntityImage {
             selectionContainer.y = image.y;
             selectionContainer.angle = image.angle;
             const smallDistance = 20 / this.scene.cameras.main.zoom;
-            const largeDistance = 30 / this.scene.cameras.main.zoom;
+            const largeDistance = 25 / this.scene.cameras.main.zoom;
 
             dragPoints.topLeft.setPosition(-image.displayWidth / 2 - smallDistance, -image.displayHeight / 2 - smallDistance);
             dragPoints.topLeftRotate.setPosition(-image.displayWidth / 2 - largeDistance, -image.displayHeight / 2 - largeDistance);
@@ -200,12 +205,12 @@ class EntityImage {
     hide (): void {
         this.image.alpha = 0;
         this.image.setInteractive(false);
+        this.updateOutline(true);
     }
 
     delete (): void {
         this.hide();
         let editedAction: ActionData = {actionId: this.action.actionId, wasDeleted: true};
         this.edit(editedAction);
-        this.entityEditor.outline.clear();
     }
 }

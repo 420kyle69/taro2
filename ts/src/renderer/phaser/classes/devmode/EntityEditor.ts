@@ -10,8 +10,7 @@ class EntityEditor {
     activeEntity: { id: string; player: string; entityType: string; };
     selectedEntityImage: EntityImage;
 
-    COLOR_ANGLE: number;
-    COLOR_SCALE: number;
+    COLOR_HANDLER: number;
     
 
 	constructor (
@@ -19,14 +18,12 @@ class EntityEditor {
 		devModeScene: DevModeScene,
 		private devModeTools: DevModeTools
 	) {
-        const COLOR_ANGLE = this.COLOR_ANGLE = 0xD1D5DB;
-        const COLOR_SCALE = this.COLOR_SCALE = 0x00fffb;
+        const COLOR_HANDLER = this.COLOR_HANDLER = 0x00fffb;
 
         this.preview = gameScene.add.image(0, 0, null, 0);
         this.preview.setAlpha(0.75).setVisible(false);
 
-        this.outline = gameScene.add.graphics();
-        this.outline.depth = 1000;
+        this.outline = gameScene.add.graphics().setDepth(1000);
         const selectionContainer = this.selectionContainer = new Phaser.GameObjects.Container(gameScene);
 
         const angleArray = ['topLeftRotate', 'topRightRotate', 'bottomRightRotate', 'bottomLeftRotate'];
@@ -35,33 +32,33 @@ class EntityEditor {
         const heightArray = ['top', 'bottom'];
 
         const dragPoints = this.dragPoints = {};
-        dragPoints['topLeft'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_ANGLE);
+        dragPoints['topLeft'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_HANDLER);
         dragPoints['topLeft'].orientation = 'topLeft';
-        dragPoints['topLeftRotate'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_ANGLE, 0);
+        dragPoints['topLeftRotate'] = gameScene.add.rectangle(0, 0, 20, 20, COLOR_HANDLER, 0);
         dragPoints['topLeftRotate'].orientation = 'topLeftRotate';
-        dragPoints['top'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_SCALE);
+        dragPoints['top'] = gameScene.add.rectangle(0, 0, 8, 8, COLOR_HANDLER);
         dragPoints['top'].orientation = 'top';
-        dragPoints['topRight'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_ANGLE);
+        dragPoints['topRight'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_HANDLER);
         dragPoints['topRight'].orientation = 'topRight';
-        dragPoints['topRightRotate'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_ANGLE, 0);
+        dragPoints['topRightRotate'] = gameScene.add.rectangle(0, 0, 20, 20, COLOR_HANDLER, 0);
         dragPoints['topRightRotate'].orientation = 'topRightRotate';
-        dragPoints['right'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_SCALE);
+        dragPoints['right'] = gameScene.add.rectangle(0, 0, 8, 8, COLOR_HANDLER);
         dragPoints['right'].orientation = 'right';
-        dragPoints['bottomRight'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_ANGLE);
+        dragPoints['bottomRight'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_HANDLER);
         dragPoints['bottomRight'].orientation = 'bottomRight';
-        dragPoints['bottomRightRotate'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_ANGLE, 0);
+        dragPoints['bottomRightRotate'] = gameScene.add.rectangle(0, 0, 20, 20, COLOR_HANDLER, 0);
         dragPoints['bottomRightRotate'].orientation = 'bottomRightRotate';
-        dragPoints['bottom'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_SCALE);
+        dragPoints['bottom'] = gameScene.add.rectangle(0, 0, 8, 8, COLOR_HANDLER);
         dragPoints['bottom'].orientation = 'bottom';
-        dragPoints['bottomLeft'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_ANGLE);
+        dragPoints['bottomLeft'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_HANDLER);
         dragPoints['bottomLeft'].orientation = 'bottomLeft';
-        dragPoints['bottomLeftRotate'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_ANGLE, 0);
+        dragPoints['bottomLeftRotate'] = gameScene.add.rectangle(0, 0, 20, 20, COLOR_HANDLER, 0);
         dragPoints['bottomLeftRotate'].orientation = 'bottomLeftRotate';
-        dragPoints['left'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_SCALE);
+        dragPoints['left'] = gameScene.add.rectangle(0, 0, 8, 8, COLOR_HANDLER);
         dragPoints['left'].orientation = 'left';
 
         Object.values(dragPoints).forEach((point: Phaser.GameObjects.Rectangle) => selectionContainer.add(point));
-        selectionContainer.setPosition(10, 10).setAngle(0).setVisible(false);
+        selectionContainer.setPosition(10, 10).setAngle(0).setDepth(1000).setVisible(false);
         gameScene.add.existing(selectionContainer);
 
         taro.client.on('scale', (data: { ratio: number }) => {
@@ -73,20 +70,19 @@ class EntityEditor {
             if (angleArray.includes(point.orientation)) {
                 point.setInteractive({ draggable: true , cursor: 'url(/assets/cursors/rotate.cur), pointer' });
             } else {
+                selectionContainer.bringToTop(point);
                 point.setInteractive({ draggable: true/* , cursor: 'url(assets/cursors/resize.cur), pointer'*/ });
             }
 
             point.on('pointerover', () => {
-                //point.setScale(1.5);
                 point.fillColor = devModeTools.COLOR_LIGHT;
             });
     
             point.on('pointerout', () => {
-                //point.setScale(1);
                 if (angleArray.includes(point.orientation)) {
-                    point.fillColor = COLOR_ANGLE;
+                    point.fillColor = COLOR_HANDLER;
                 } else {
-                    point.fillColor = COLOR_SCALE;
+                    point.fillColor = COLOR_HANDLER;
                 }
             });
 
@@ -288,10 +284,8 @@ class EntityEditor {
             this.preview.y = worldPoint.y;
         }
 	}
-
     
     selectEntityImage(entityImage: EntityImage): void {
-        if (this.selectedEntityImage) this.selectedEntityImage.updateOutline();
         this.selectedEntityImage = entityImage;
         entityImage.updateOutline();
     }

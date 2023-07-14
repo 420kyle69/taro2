@@ -128,9 +128,14 @@ var EntityImage = /** @class */ (function () {
         }
         taro.network.send('editInitEntity', action);
     };
-    EntityImage.prototype.updateOutline = function () {
+    EntityImage.prototype.updateOutline = function (hide) {
         var outline = this.entityEditor.outline;
         var selectionContainer = this.entityEditor.selectionContainer;
+        if (hide) {
+            outline.clear();
+            selectionContainer.setVisible(false);
+            return;
+        }
         var dragPoints = this.entityEditor.dragPoints;
         var image = this.image;
         outline.clear();
@@ -141,7 +146,7 @@ var EntityImage = /** @class */ (function () {
             selectionContainer.y = image.y;
             selectionContainer.angle = image.angle;
             var smallDistance = 20 / this.scene.cameras.main.zoom;
-            var largeDistance = 30 / this.scene.cameras.main.zoom;
+            var largeDistance = 25 / this.scene.cameras.main.zoom;
             dragPoints.topLeft.setPosition(-image.displayWidth / 2 - smallDistance, -image.displayHeight / 2 - smallDistance);
             dragPoints.topLeftRotate.setPosition(-image.displayWidth / 2 - largeDistance, -image.displayHeight / 2 - largeDistance);
             dragPoints.top.setPosition(0, -image.displayHeight / 2 - smallDistance);
@@ -195,12 +200,12 @@ var EntityImage = /** @class */ (function () {
     EntityImage.prototype.hide = function () {
         this.image.alpha = 0;
         this.image.setInteractive(false);
+        this.updateOutline(true);
     };
     EntityImage.prototype.delete = function () {
         this.hide();
         var editedAction = { actionId: this.action.actionId, wasDeleted: true };
         this.edit(editedAction);
-        this.entityEditor.outline.clear();
     };
     return EntityImage;
 }());
