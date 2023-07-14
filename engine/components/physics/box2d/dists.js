@@ -463,8 +463,7 @@ var dists = {
 		},
 
 		queryAABB: function (self, aabb, callback) {
-			// FIXME
-			// self.world().QueryAABB(callback, aabb);
+			self.world().QueryAABB(callback, aabb);
 		},
 
 		createBody: function (self, entity, body, isLossTolerant) {
