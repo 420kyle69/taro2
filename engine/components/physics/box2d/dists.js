@@ -323,9 +323,7 @@ var dists = {
 
 	BOX2DWASM: { // added by Moe'Thun for fixing memory leak bug
 		init: function (component) {
-			while (!box2dwasm) {
-
-			}
+			while (!box2dwasm) { }
 
 			const Box2DFactory = box2dwasm;
 			Box2DFactory().then(box2D => {
@@ -475,8 +473,12 @@ var dists = {
 
 		createBody: function (self, entity, body, isLossTolerant) {
 			PhysicsComponent.prototype.log(`createBody of ${entity._stats.name}`);
-
 			// immediately destroy body if entity already has box2dBody
+			while (!taro.physics._world) {
+				if (taro.physics.createWorld) {
+					taro.physics.createWorld();
+				}
+			}
 			if (!entity) {
 				PhysicsComponent.prototype.log('warning: creating body for non-existent entity');
 				return;

@@ -51,7 +51,10 @@
 		 * @return {ReturnType<import('box2d-wasm')>}
 		 */
 		root.box2dwasm = async (...args) => {
-			const Box2DFactory = await modulePromise;
+			let Box2DFactory = await modulePromise;
+			while (!Box2DFactory) {
+				Box2DFactory = await modulePromise;
+			}
 			// awaiting gives us a better stack trace (at the cost of an extra microtask)
 			return await Box2DFactory(...args);
 		};
