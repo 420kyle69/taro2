@@ -60,10 +60,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 		}
 	},
 
-	gravity: function (x, y) {
-		dists[this.engine].gravity(x, y);
-	},
-
 	useWorker: function (val) {
 		if (typeof (Worker) !== 'undefined') {
 			if (val !== undefined) {
