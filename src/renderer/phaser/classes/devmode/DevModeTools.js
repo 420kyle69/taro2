@@ -96,7 +96,6 @@ var DevModeTools = /** @class */ (function (_super) {
                 camera.scrollY -= scrollY_1;
             }
         });
-        _this.outline = scene.gameScene.add.graphics();
         return _this;
     }
     DevModeTools.prototype.updateBrushArea = function () {
@@ -163,16 +162,14 @@ var DevModeTools = /** @class */ (function (_super) {
         });
         var plusKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.PLUS, false);
         plusKey.on('down', function () {
-            if (!_this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
-                var zoom = (gameScene.zoomSize / 2.15) / 1.1;
-                taro.client.emit('zoom', zoom);
+            if (!_this.checkIfInputModalPresent()) {
+                _this.tileEditor.tilePalette.changeBrushSize(-1);
             }
         });
         var minusKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.MINUS, false);
         minusKey.on('down', function () {
-            if (!_this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
-                var zoom = (gameScene.zoomSize / 2.15) * 1.1;
-                taro.client.emit('zoom', zoom);
+            if (!_this.checkIfInputModalPresent()) {
+                _this.tileEditor.tilePalette.changeBrushSize(1);
             }
         });
         var cKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C, false);
@@ -278,6 +275,15 @@ var DevModeTools = /** @class */ (function (_super) {
                 _this.commandController.redo();
             }
         });
+        var deleteEntity = function (event) {
+            if (!_this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
+                _this.entityEditor.deleteInitEntity();
+            }
+        };
+        var deleteKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DELETE, false);
+        var backspaceKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.BACKSPACE, false);
+        deleteKey.on('down', deleteEntity);
+        backspaceKey.on('down', deleteEntity);
     };
     DevModeTools.prototype.cursor = function () {
         this.highlightModeButton(0);

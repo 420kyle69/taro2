@@ -265,74 +265,70 @@ class TileEditor {
 		return -1;
 	}
 
-	floodFill(layer: number, oldTile: number, newTile: number, x: number, y: number, fromServer: boolean, limits?: Record<number, Record<number, number>>, addToLimits?: (v2d: Vector2D) => void, visited?: Record<number, Record<number, number>>): void {
+	floodFill(layer: number, oldTile: number, newTile: number, x: number, y: number, fromServer: boolean, limits?: Record<number, Record<number, number>>, addToLimits?: (v2d: Vector2D) => void): void {
 		let map: MapData | Phaser.Tilemaps.Tilemap;
-		if (!visited) {
-			visited = {};
-		}
-		if (fromServer) {
-			map = taro.game.data.map;
-			if (x < 0 || x > (map.width - 1) || y < 0 || y > (map.height - 1)) {
-				return;
+		const openQueue: Vector2D[] = [{ x, y }];
+		const closedQueue: Record<number, Record<number, number>> = {};
+		while (openQueue.length !== 0) {
+			const nowPos = openQueue[0];
+			openQueue.shift();
+			if (closedQueue[nowPos.x]?.[nowPos.y]) {
+				continue;
 			}
-			inGameEditor.mapWasEdited && inGameEditor.mapWasEdited();
-			const tileMap = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
-			const width = map.width;
-			//fix for debris layer
-			let tempLayer = layer;
-			if (map.layers.length > 4 && layer >= 2) {
-				tempLayer++;
+			if (!closedQueue[nowPos.x]) {
+				closedQueue[nowPos.x] = {};
 			}
-			if (limits?.[x]?.[y] || visited?.[x]?.[y]) {
-				return;
+			closedQueue[nowPos.x][nowPos.y] = 1;
+
+			if (fromServer) {
+				map = taro.game.data.map;
+				inGameEditor.mapWasEdited && inGameEditor.mapWasEdited();
+				const tileMap = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
+				const width = map.width;
+				//fix for debris layer
+				let tempLayer = layer;
+				if (map.layers.length > 4 && layer >= 2) {
+					tempLayer++;
+				}
+				if (limits?.[nowPos.x]?.[nowPos.y]) {
+					continue;
+				}
+				if (map.layers[tempLayer].data[nowPos.y * width + nowPos.x] !== oldTile) {
+					addToLimits?.({ x: nowPos.x, y: nowPos.y });
+					continue;
+				}
+				tileMap.putTileAt(newTile, nowPos.x, nowPos.y, false, layer);
+				//save tile change to taro.game.map.data
+				map.layers[tempLayer].data[nowPos.y * width + nowPos.x] = newTile;
+			} else {
+				map = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
+				if (!map.getTileAt(nowPos.x, nowPos.y, true, layer) ||
+					limits?.[nowPos.x]?.[nowPos.y] ||
+					map.getTileAt(nowPos.x, nowPos.y, true, layer).index === 0 ||
+					map.getTileAt(nowPos.x, nowPos.y, true, layer).index === -1) {
+					continue;
+				}
+				if (
+					map.getTileAt(nowPos.x, nowPos.y, true, layer).index !== oldTile
+				) {
+					addToLimits?.({ x: nowPos.x, y: nowPos.y });
+					continue;
+				}
+				map.putTileAt(newTile, nowPos.x, nowPos.y, false, layer);
 			}
-			if (map.layers[tempLayer].data[y * width + x] !== oldTile) {
-				addToLimits?.({ x, y });
-				return;
+			if (nowPos.x > 0 && !closedQueue[nowPos.x - 1]?.[nowPos.y]) {
+				openQueue.push({ x: nowPos.x - 1, y: nowPos.y });
 			}
-			tileMap.putTileAt(newTile, x, y, false, layer);
-			if (!visited[x]) {
-				visited[x] = {};
+			if (nowPos.x < map.width - 1 && !closedQueue[nowPos.x + 1]?.[nowPos.y]) {
+				openQueue.push({ x: nowPos.x + 1, y: nowPos.y });
 			}
-			visited[x][y] = 1;
-			//save tile change to taro.game.map.data
-			map.layers[tempLayer].data[y * width + x] = newTile;
-		} else {
-			map = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
-			if (x < 0 || x > (map.width - 1) || y < 0 || y > (map.height - 1)) {
-				return;
+			if (nowPos.y > 0 && !closedQueue[nowPos.x]?.[nowPos.y - 1]) {
+				openQueue.push({ x: nowPos.x, y: nowPos.y - 1 });
 			}
-			if (!map.getTileAt(x, y, true, layer) || limits?.[x]?.[y] ||
-				visited?.[x]?.[y] ||
-				map.getTileAt(x, y, true, layer).index === 0 ||
-				map.getTileAt(x, y, true, layer).index === -1) {
-				return;
+			if (nowPos.x < map.height - 1 && !closedQueue[nowPos.x]?.[nowPos.y + 1]) {
+				openQueue.push({ x: nowPos.x, y: nowPos.y + 1 });
 			}
 
-			if (
-				map.getTileAt(x, y, true, layer).index !== oldTile
-			) {
-				addToLimits?.({ x, y });
-				return;
-			}
-
-			map.putTileAt(newTile, x, y, false, layer);
-			if (!visited[x]) {
-				visited[x] = {};
-			}
-			visited[x][y] = 1;
-		}
-		if (x > 0) {
-			this.floodFill(layer, oldTile, newTile, x - 1, y, fromServer, limits, addToLimits, visited);
-		}
-		if (x < (map.width - 1)) {
-			this.floodFill(layer, oldTile, newTile, x + 1, y, fromServer, limits, addToLimits, visited);
-		}
-		if (y > 0) {
-			this.floodFill(layer, oldTile, newTile, x, y - 1, fromServer, limits, addToLimits, visited);
-		}
-		if (y < (map.height - 1)) {
-			this.floodFill(layer, oldTile, newTile, x, y + 1, fromServer, limits, addToLimits, visited);
 		}
 	}
 

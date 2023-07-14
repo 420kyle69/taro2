@@ -7,6 +7,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	public entityEditor: EntityEditor;
 	public gameEditorWidgets: Array<DOMRect>;
 	public commandController: CommandController;
+
 	cursorButton: DevToolButton;
 	paletteButton: DevToolButton;
 	layerButtonsContainer: Phaser.GameObjects.Container;
@@ -28,9 +29,6 @@ class DevModeTools extends Phaser.GameObjects.Container {
 
 	altKey: Phaser.Input.Keyboard.Key;
 	shiftKey: Phaser.Input.Keyboard.Key;
-
-	outline: Phaser.GameObjects.Graphics;
-	activeEntityPlacement: boolean;
 
 	constructor(
 		public scene: DevModeScene,
@@ -151,8 +149,6 @@ class DevModeTools extends Phaser.GameObjects.Container {
 				camera.scrollY -= scrollY;
 			}
 		});
-
-		this.outline = scene.gameScene.add.graphics();
 	}
 
 	updateBrushArea(): void {
@@ -224,16 +220,14 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		});
 		const plusKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.PLUS, false);
 		plusKey.on('down', () => {
-			if (!this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
-				const zoom = (gameScene.zoomSize / 2.15) / 1.1;
-				taro.client.emit('zoom', zoom);
+			if (!this.checkIfInputModalPresent()) {
+                this.tileEditor.tilePalette.changeBrushSize(-1);
 			}
 		});
 		const minusKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.MINUS, false);
 		minusKey.on('down', () => {
-			if (!this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
-				const zoom = (gameScene.zoomSize / 2.15) * 1.1;
-				taro.client.emit('zoom', zoom);
+			if (!this.checkIfInputModalPresent()) {
+                this.tileEditor.tilePalette.changeBrushSize(1);
 			}
 		});
 		const cKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C, false);
@@ -250,7 +244,6 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		});
 		const bKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.B, false);
 		bKey.on('down', (key) => {
-
 			if (!this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
 				this.brush();
 			}
@@ -336,6 +329,17 @@ class DevModeTools extends Phaser.GameObjects.Container {
 			}
 		});
 
+		const deleteEntity = (event) => {
+			if (!this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
+                this.entityEditor.deleteInitEntity();
+            }
+		}
+
+        const deleteKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DELETE, false);
+        const backspaceKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.BACKSPACE, false);
+
+		deleteKey.on('down', deleteEntity);
+		backspaceKey.on('down', deleteEntity);
 	}
 
 	cursor(): void {
