@@ -334,6 +334,7 @@ var dists = {
 				component.destroyB2dObj = box2D.destroy;
 				component.nullPtr = box2D.NULL;
 				component.b2AABB = box2D.b2AABB; // added by Jaeyun for world collision detection for raycast bullets
+				component.JSQueryCallback = box2D.JSQueryCallback;
 				component.b2Color = box2D.b2Color;
 				component.b2Vec2 = box2D.b2Vec2;
 				component.b2Math = {};
@@ -614,7 +615,7 @@ var dists = {
 										}
 										if (tempShape && fixtureDef.filter) {
 											tempFixture.shape = tempShape;
-											finalFixture = self.recordLeak(tempBod.CreateFixture(tempFixture));
+											finalFixture = tempBod.CreateFixture(tempFixture);
 											self.destroyB2dObj(tempShape);
 											finalFixture.taroId = tempFixture.taroId;
 										}

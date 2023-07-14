@@ -251,21 +251,51 @@ var PhysicsComponent = TaroEventingClass.extend({
 			aabb.upperBound.set((region.x + region.width) / self._scaleRatio, (region.y + region.height) / self._scaleRatio);
 
 			var entities = [];
-			// Query the world for overlapping shapes.
-			function getBodyCallback(fixture) {
-				if (fixture && fixture.m_body && fixture.m_body.m_fixtureList) {
-					entityId = fixture.m_body.m_fixtureList.taroId;
-					var entity = taro.$(entityId);
-					if (entity) {
-						// taro.devLog("found", entity._category, entity._translate.x, entity._translate.y)
+			if (self.engine === 'BOX2DWASM') {
+				function getBodyCallback(fixture) {
+					if (fixture && fixture.m_body && fixture.m_body.m_fixtureList) {
+						entityId = fixture.m_body.m_fixtureList.taroId;
 						var entity = taro.$(entityId);
-						entities.push(taro.$(entityId));
+						if (entity) {
+							// taro.devLog("found", entity._category, entity._translate.x, entity._translate.y)
+							var entity = taro.$(entityId);
+							entities.push(taro.$(entityId));
+						}
 					}
+					return true;
 				}
-				return true;
-			}
+				const callback = Object.assign(new self.JSQueryCallback(), {
+					ReportFixture: (fixture_p) => {
+						const fixture = self.wrapPointer(fixture_p, self.b2Fixture);
+						entityId = fixture.GetBody().GetFixtureList().taroId;
+						var entity = taro.$(entityId);
+						if (entity) {
+							// taro.devLog("found", entity._category, entity._translate.x, entity._translate.y)
+							var entity = taro.$(entityId);
+							entities.push(taro.$(entityId));
+						}
+						return true;
+					}
+				});
+				dists[this.engine].queryAABB(self, aabb, callback);
+			} else {
+				function getBodyCallback(fixture) {
+					if (fixture && fixture.m_body && fixture.m_body.m_fixtureList) {
+						entityId = fixture.m_body.m_fixtureList.taroId;
+						var entity = taro.$(entityId);
+						if (entity) {
+							// taro.devLog("found", entity._category, entity._translate.x, entity._translate.y)
+							var entity = taro.$(entityId);
+							entities.push(taro.$(entityId));
+						}
+					}
+					return true;
+				}
 
-			dists[this.engine].queryAABB(self, aabb, getBodyCallback);
+				dists[this.engine].queryAABB(self, aabb, getBodyCallback);
+			}
+			// Query the world for overlapping shapes.
+
 
 			return entities;
 		}
