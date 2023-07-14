@@ -5,11 +5,13 @@ class EntityImage {
     editedAction: ActionData;
     image: Phaser.GameObjects.Image & {entity: EntityImage};
 
+    dragMode: 'position' | 'angle' | 'scale';
     startDragX: number;
     startDragY: number;
-    scale: number;
     rotation: number;
-    dragMode: 'position' | 'angle' | 'scale';
+    scale: number;
+    scaleX: number;
+    scaleY: number;
     
 
     constructor(scene, devModeTools: DevModeTools, entityImages: (Phaser.GameObjects.Image & {entity: EntityImage})[], action: ActionData, type?: string) {
@@ -143,12 +145,16 @@ class EntityImage {
             selectionContainer.angle = image.angle;
 
             dragPoints.topLeft.setPosition(-image.displayWidth / 2 - 20, -image.displayHeight / 2 - 20);
+            dragPoints.topLeftRotate.setPosition(-image.displayWidth / 2 - 30, -image.displayHeight / 2 - 30);
             dragPoints.top.setPosition(0, -image.displayHeight / 2 - 20);
             dragPoints.topRight.setPosition(image.displayWidth / 2 + 20, -image.displayHeight / 2 - 20);
+            dragPoints.topRightRotate.setPosition(image.displayWidth / 2 + 30, -image.displayHeight / 2 - 30);
             dragPoints.right.setPosition(image.displayWidth / 2 + 20, 0);
             dragPoints.bottomRight.setPosition(image.displayWidth / 2 + 20, image.displayHeight / 2 + 20);
+            dragPoints.bottomRightRotate.setPosition(image.displayWidth / 2 + 30, image.displayHeight / 2 + 30);
             dragPoints.bottom.setPosition(0, image.displayHeight / 2 + 20);
             dragPoints.bottomLeft.setPosition(-image.displayWidth / 2 - 20, image.displayHeight / 2 + 20);
+            dragPoints.bottomLeftRotate.setPosition(-image.displayWidth / 2 - 30, image.displayHeight / 2 + 30);
             dragPoints.left.setPosition(-image.displayWidth / 2 - 20, 0); 
         } else {
             outline.lineStyle(2, 0x036ffc, 1);
@@ -172,10 +178,13 @@ class EntityImage {
             this.action.angle = action.angle;
             this.image.angle = action.angle;
         }
-        if (this.action.width && this.action.height && action.width && action.height) {
+        if (this.action.width && action.width) {
             this.action.width = action.width;
+            this.image.setDisplaySize(action.width, this.image.displayHeight);
+        }
+        if (this.action.height && action.height) {
             this.action.height = action.height;
-            this.image.setDisplaySize(action.width, action.height);
+            this.image.setDisplaySize(this.image.displayWidth, action.height);
         }
         if (action.wasDeleted) {
             this.hide();
