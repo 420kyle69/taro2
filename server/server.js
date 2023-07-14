@@ -669,7 +669,7 @@ var Server = TaroClass.extend({
 							}, 900000);
 						}
 					});
-				}, 100);
+				}, 500);
 
 			})
 				.catch((err) => {
