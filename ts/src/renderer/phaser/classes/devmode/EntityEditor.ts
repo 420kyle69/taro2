@@ -64,6 +64,10 @@ class EntityEditor {
         selectionContainer.setPosition(10, 10).setAngle(0).setVisible(false);
         gameScene.add.existing(selectionContainer);
 
+        taro.client.on('scale', (data: { ratio: number }) => {
+            Object.values(this.dragPoints).forEach((point: Phaser.GameObjects.Rectangle) => point.setScale(1 / data.ratio));
+            if (this.selectedEntityImage) this.selectedEntityImage.updateOutline();
+        });
 
         Object.values(this.dragPoints).forEach(point => {
             if (angleArray.includes(point.orientation)) {
@@ -73,12 +77,12 @@ class EntityEditor {
             }
 
             point.on('pointerover', () => {
-                point.setScale(1.5);
+                //point.setScale(1.5);
                 point.fillColor = devModeTools.COLOR_LIGHT;
             });
     
             point.on('pointerout', () => {
-                point.setScale(1);
+                //point.setScale(1);
                 if (angleArray.includes(point.orientation)) {
                     point.fillColor = COLOR_ANGLE;
                 } else {

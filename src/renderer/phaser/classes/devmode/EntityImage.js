@@ -2,6 +2,7 @@ var EntityImage = /** @class */ (function () {
     function EntityImage(scene, devModeTools, entityImages, action, type) {
         var _this = this;
         var _a, _b;
+        this.scene = scene;
         this.devModeTools = devModeTools;
         var entityEditor = this.entityEditor = devModeTools.entityEditor;
         this.action = action;
@@ -139,18 +140,20 @@ var EntityImage = /** @class */ (function () {
             selectionContainer.x = image.x;
             selectionContainer.y = image.y;
             selectionContainer.angle = image.angle;
-            dragPoints.topLeft.setPosition(-image.displayWidth / 2 - 20, -image.displayHeight / 2 - 20);
-            dragPoints.topLeftRotate.setPosition(-image.displayWidth / 2 - 30, -image.displayHeight / 2 - 30);
-            dragPoints.top.setPosition(0, -image.displayHeight / 2 - 20);
-            dragPoints.topRight.setPosition(image.displayWidth / 2 + 20, -image.displayHeight / 2 - 20);
-            dragPoints.topRightRotate.setPosition(image.displayWidth / 2 + 30, -image.displayHeight / 2 - 30);
-            dragPoints.right.setPosition(image.displayWidth / 2 + 20, 0);
-            dragPoints.bottomRight.setPosition(image.displayWidth / 2 + 20, image.displayHeight / 2 + 20);
-            dragPoints.bottomRightRotate.setPosition(image.displayWidth / 2 + 30, image.displayHeight / 2 + 30);
-            dragPoints.bottom.setPosition(0, image.displayHeight / 2 + 20);
-            dragPoints.bottomLeft.setPosition(-image.displayWidth / 2 - 20, image.displayHeight / 2 + 20);
-            dragPoints.bottomLeftRotate.setPosition(-image.displayWidth / 2 - 30, image.displayHeight / 2 + 30);
-            dragPoints.left.setPosition(-image.displayWidth / 2 - 20, 0);
+            var smallDistance = 20 / this.scene.cameras.main.zoom;
+            var largeDistance = 30 / this.scene.cameras.main.zoom;
+            dragPoints.topLeft.setPosition(-image.displayWidth / 2 - smallDistance, -image.displayHeight / 2 - smallDistance);
+            dragPoints.topLeftRotate.setPosition(-image.displayWidth / 2 - largeDistance, -image.displayHeight / 2 - largeDistance);
+            dragPoints.top.setPosition(0, -image.displayHeight / 2 - smallDistance);
+            dragPoints.topRight.setPosition(image.displayWidth / 2 + smallDistance, -image.displayHeight / 2 - smallDistance);
+            dragPoints.topRightRotate.setPosition(image.displayWidth / 2 + largeDistance, -image.displayHeight / 2 - largeDistance);
+            dragPoints.right.setPosition(image.displayWidth / 2 + smallDistance, 0);
+            dragPoints.bottomRight.setPosition(image.displayWidth / 2 + smallDistance, image.displayHeight / 2 + smallDistance);
+            dragPoints.bottomRightRotate.setPosition(image.displayWidth / 2 + largeDistance, image.displayHeight / 2 + largeDistance);
+            dragPoints.bottom.setPosition(0, image.displayHeight / 2 + smallDistance);
+            dragPoints.bottomLeft.setPosition(-image.displayWidth / 2 - smallDistance, image.displayHeight / 2 + smallDistance);
+            dragPoints.bottomLeftRotate.setPosition(-image.displayWidth / 2 - largeDistance, image.displayHeight / 2 + largeDistance);
+            dragPoints.left.setPosition(-image.displayWidth / 2 - smallDistance, 0);
         }
         else {
             outline.lineStyle(2, 0x036ffc, 1);

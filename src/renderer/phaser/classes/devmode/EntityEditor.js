@@ -42,6 +42,11 @@ var EntityEditor = /** @class */ (function () {
         Object.values(dragPoints).forEach(function (point) { return selectionContainer.add(point); });
         selectionContainer.setPosition(10, 10).setAngle(0).setVisible(false);
         gameScene.add.existing(selectionContainer);
+        taro.client.on('scale', function (data) {
+            Object.values(_this.dragPoints).forEach(function (point) { return point.setScale(1 / data.ratio); });
+            if (_this.selectedEntityImage)
+                _this.selectedEntityImage.updateOutline();
+        });
         Object.values(this.dragPoints).forEach(function (point) {
             if (angleArray.includes(point.orientation)) {
                 point.setInteractive({ draggable: true, cursor: 'url(/assets/cursors/rotate.cur), pointer' });
@@ -50,11 +55,11 @@ var EntityEditor = /** @class */ (function () {
                 point.setInteractive({ draggable: true /* , cursor: 'url(assets/cursors/resize.cur), pointer'*/ });
             }
             point.on('pointerover', function () {
-                point.setScale(1.5);
+                //point.setScale(1.5);
                 point.fillColor = devModeTools.COLOR_LIGHT;
             });
             point.on('pointerout', function () {
-                point.setScale(1);
+                //point.setScale(1);
                 if (angleArray.includes(point.orientation)) {
                     point.fillColor = COLOR_ANGLE;
                 }
