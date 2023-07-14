@@ -264,13 +264,12 @@ const Client = TaroEventingClass.extend({
 		const serverPhysicsEngine = taro.game.data.defaultData.physicsEngine;
 
 		if (clientPhysicsEngine) {
-
 			taro.addComponent(PhysicsComponent)
-				.physics.sleep(true);
-
 		}
+		setTimeout(()=>{
+			this.physicsConfigLoaded.resolve();
+		}, 500);
 
-		this.physicsConfigLoaded.resolve();
 	},
 
 	 loadMap: function() {
