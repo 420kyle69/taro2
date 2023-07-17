@@ -25,13 +25,11 @@ class RegionEditor {
 					y: worldPoint.y,
 				};
 			} else if (taro.developerMode.active && taro.developerMode.activeTab === 'map' && this.devModeScene.devModeTools.cursorButton.active && pointer.leftButtonDown()) {
-                //this.gameScene.input.topOnly = false;
                 gameObjects = gameObjects.filter(gameObject => gameObject.phaserRegion);
                 console.log(gameObjects.length);
                 gameObjects.forEach(gameObject => {
                     this.devModeScene.regionEditor.addClickedList({name: gameObject.phaserRegion.entity._stats.id, x: gameObject.phaserRegion.stats.x, y: gameObject.phaserRegion.stats.y, width: gameObject.phaserRegion.stats.width, height: gameObject.phaserRegion.stats.height});
                 });
-                //this.gameScene.input.topOnly = true;
                 this.devModeScene.regionEditor.showClickedList();
             }
 		}, this);
