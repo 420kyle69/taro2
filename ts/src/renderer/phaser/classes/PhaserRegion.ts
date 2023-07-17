@@ -31,7 +31,8 @@ class PhaserRegion extends PhaserEntity {
 			}
 		});
 		gameObject.on('pointerup', (p) => {
-			if (taro.developerMode.active && taro.developerMode.activeTab === 'map' && this.devModeScene.devModeTools.cursorButton.active && p.leftButtonReleased()) {
+			if (taro.developerMode.active && taro.developerMode.activeTab === 'map' && this.devModeScene.devModeTools.cursorButton.active 
+            && p.leftButtonReleased() && !this.devModeScene.devModeTools.entityEditor.activeDragPoint) {
 				this.scene.input.setTopOnly(false);
 				this.devModeScene.regionEditor.showClickedList();
 			}
