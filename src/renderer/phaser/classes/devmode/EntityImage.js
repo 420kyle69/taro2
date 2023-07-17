@@ -79,7 +79,7 @@ var EntityImage = /** @class */ (function () {
         });
         var outline = entityEditor.outline;
         image.on('pointerover', function () {
-            //scene.input.setDefaultCursor('url(assets/cursors/resize.cur), pointer');
+            scene.input.setTopOnly(true);
             if (!devModeTools.cursorButton.active || entityEditor.activeDragPoint)
                 return;
             if (entityEditor.selectedEntityImage !== _this)

@@ -20,7 +20,7 @@ class EntityEditor {
 	) {
         const COLOR_HANDLER = this.COLOR_HANDLER = 0x00fffb;
 
-        this.preview = gameScene.add.image(0, 0, null, 0);
+        this.preview = gameScene.add.image(0, 0, null, 0).setDepth(1000);
         this.preview.setAlpha(0.75).setVisible(false);
 
         this.outline = gameScene.add.graphics().setDepth(1000);
@@ -75,6 +75,7 @@ class EntityEditor {
             }
 
             point.on('pointerover', () => {
+                gameScene.input.setTopOnly(true);
                 point.fillColor = devModeTools.COLOR_LIGHT;
             });
     

@@ -98,6 +98,7 @@ var TilePalette = /** @class */ (function (_super) {
             scrollBarBottom.setScale(_this.camera.width / scrollBarBottom.width, 1);
         });
         texturesLayer.on('pointerover', function (p) {
+            scene.gameScene.input.setTopOnly(true);
             _this.pointerover = true;
         });
         texturesLayer.on('pointerout', function (p) {
