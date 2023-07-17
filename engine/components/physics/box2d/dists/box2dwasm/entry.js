@@ -52,9 +52,7 @@
 		 */
 		root.box2dwasm = async (...args) => {
 			let Box2DFactory = await modulePromise;
-			while (!Box2DFactory) {
-				Box2DFactory = await modulePromise;
-			}
+
 			// awaiting gives us a better stack trace (at the cost of an extra microtask)
 			return await Box2DFactory(...args);
 		};
