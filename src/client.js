@@ -266,8 +266,12 @@ const Client = TaroEventingClass.extend({
 		if (clientPhysicsEngine) {
 			taro.addComponent(PhysicsComponent).physics.sleep(true);
 		}
-		this.physicsConfigLoaded.resolve();
-
+		const loadedInterval = setInterval(() => {
+			if (taro.physics.gravity) {
+				clearInterval(loadedInterval);
+				this.physicsConfigLoaded.resolve();
+			}
+		}, 50)
 	},
 
 	loadMap: function () {
@@ -296,8 +300,8 @@ const Client = TaroEventingClass.extend({
 
 		$.when(this.physicsConfigLoaded).done(() => {
 			this.startTaroEngine();
-
 			this.loadMap();
+
 
 			if (taro.physics) {
 				// old comment => 'always enable CSP'
@@ -632,27 +636,21 @@ const Client = TaroEventingClass.extend({
 	loadCSP: function () {
 
 		taro.game.cspEnabled = !!taro.game.data.defaultData.clientSidePredictionEnabled;
-		const loadedInterval = setInterval(() => {
-			if (taro.physics.gravity) {
-				clearInterval(loadedInterval);
-				const gravity = taro.game.data.settings.gravity;
 
-				if (gravity) {
+		const gravity = taro.game.data.settings.gravity;
 
-					console.log('setting gravity: ', gravity); // not in prod please
-					taro.physics.gravity(gravity.x, gravity.y);
-				}
-				taro.physics.setContinuousPhysics(!!taro?.game?.data?.settings?.continuousPhysics);
-				if (taro.physics.engine == 'CRASH') {
-					taro.physics.addBorders();
-				}
-				taro.physics.createWorld();
-				taro.physics.start();
-				taro.raycaster = new Raycaster();
+		if (gravity) {
 
-			}
-
-		}, 50)
+			console.log('setting gravity: ', gravity); // not in prod please
+			taro.physics.gravity(gravity.x, gravity.y);
+		}
+		taro.physics.setContinuousPhysics(!!taro?.game?.data?.settings?.continuousPhysics);
+		if (taro.physics.engine == 'CRASH') {
+			taro.physics.addBorders();
+		}
+		taro.physics.createWorld();
+		taro.physics.start();
+		taro.raycaster = new Raycaster();
 
 	},
 
