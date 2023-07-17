@@ -134,6 +134,8 @@ var AbilityComponent = TaroEntity.extend({
 			ability = taro.game.data.abilities[handle];
 		}
 
+		console.log('\nhandle:  ', handle, '\nability:  ', ability);
+
 		var player = self._entity.getOwner();
 		if (ability != undefined) {
 			var canAffordCost = true;
@@ -169,7 +171,7 @@ var AbilityComponent = TaroEntity.extend({
 					for (attrName in ability.cost.unitAttributes) {
 						if (self._entity._stats.attributes[attrName]) {
 							var newValue = self._entity._stats.attributes[attrName].value - ability.cost.unitAttributes[attrName];
-							self._entity.attribute.update(attrName, newValue, true);						
+							self._entity.attribute.update(attrName, newValue, true);
 						}
 					}
 				}
@@ -199,6 +201,8 @@ var AbilityComponent = TaroEntity.extend({
 							if (Object.keys(playerAttr.attributes || []).length > 0) {
 								player.streamUpdateData(playerAttr);
 							}
+
+							// self._entity.streamUpdateData({ ability: dxc });
 						}
 
 						taro.game.lastCastingUnitId = self._entity.id();

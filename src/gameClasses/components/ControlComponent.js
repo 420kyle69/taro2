@@ -12,7 +12,7 @@ var ControlComponent = TaroEntity.extend({
 		// Store any options that were passed to us
 		this._options = options;
 		this.lastActionAt = Date.now();
-		
+
 		this.lastMousePosition = [undefined, undefined];
 		this.mouseLocked = false;
 
@@ -109,7 +109,7 @@ var ControlComponent = TaroEntity.extend({
 		}
 
 		var unit = player.getSelectedUnit();
-		
+
 		if (unit && unit._category == 'unit') {
 			if (taro.isServer || (taro.isClient && !this.isChatOpen)) {
 				var unitAbility = null;
@@ -200,9 +200,9 @@ var ControlComponent = TaroEntity.extend({
 	keyUp: function (device, key) {
 		this.lastActionAt = Date.now();
 
-		var player = this._entity;		
+		var player = this._entity;
 		if (!player) return;
-		
+
 		var unit = player.getSelectedUnit();
 		// for (i in units) {
 		// 	var unit = units[i]
@@ -277,12 +277,13 @@ var ControlComponent = TaroEntity.extend({
 	 */
 	_behaviour: function (ctx) {
 		var self = this;
-		var player = this._entity;		
-		if (!player) return;		
+
+		var player = this._entity;
+		if (!player) return;
 		var unit = player.getSelectedUnit();
-		
+
 		if (taro.isClient) {
-			
+
 			if (unit) {
 				// check if sending player input is due (every 100ms)
 				if (taro._currentTime - self.lastInputSent > 100) {
@@ -316,7 +317,7 @@ var ControlComponent = TaroEntity.extend({
 						}
 					}
 				}
-	
+
 				if (self.newMousePosition && (self.newMousePosition[0] != self.lastMousePosition[0] || self.newMousePosition[1] != self.lastMousePosition[1])) {
 					// if we are using mobile controls don't send mouse moves to server here as we will do so from a look touch stick
 					if (!taro.isMobile) {
@@ -333,7 +334,7 @@ var ControlComponent = TaroEntity.extend({
 							angle = parseFloat(angle.toPrecision(5));
 							if (self.sendPlayerInput)
 								taro.network.send('playerAbsoluteAngle', angle);
-	
+
 							if (taro.client.myPlayer) {
 								taro.client.myPlayer.absoluteAngle = angle;
 							}
@@ -349,7 +350,7 @@ var ControlComponent = TaroEntity.extend({
 					}
 					self.lastMousePosition = self.newMousePosition;
 				}
-	
+
 				// send unit position to server (client-authoritative movement)
 				if (taro.physics && taro.game.cspEnabled && !unit._stats.aiEnabled && !unit.teleported) {
 					var x = unit._translate.x.toFixed(0);
@@ -360,16 +361,15 @@ var ControlComponent = TaroEntity.extend({
 						self.lastPositionSent = pos;
 					}
 				}
-				
+
 				self.sendPlayerInput = false;
 			}
 		}
 
 		// unit rotation for human player. this runs on client-side only
 		if (unit && !unit._stats.aiEnabled) {
-			unit.updateAngleToTarget();			
+			unit.updateAngleToTarget();
 		}
-		
 	}
 
 });
