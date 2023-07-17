@@ -4,7 +4,7 @@ var EntityEditor = /** @class */ (function () {
         this.gameScene = gameScene;
         this.devModeTools = devModeTools;
         var COLOR_HANDLER = this.COLOR_HANDLER = 0x00fffb;
-        this.preview = gameScene.add.image(0, 0, null, 0);
+        this.preview = gameScene.add.image(0, 0, null, 0).setDepth(1000);
         this.preview.setAlpha(0.75).setVisible(false);
         this.outline = gameScene.add.graphics().setDepth(1000);
         var selectionContainer = this.selectionContainer = new Phaser.GameObjects.Container(gameScene);
@@ -54,6 +54,7 @@ var EntityEditor = /** @class */ (function () {
                 point.setInteractive({ draggable: true /* , cursor: 'url(assets/cursors/resize.cur), pointer'*/ });
             }
             point.on('pointerover', function () {
+                gameScene.input.setTopOnly(true);
                 point.fillColor = devModeTools.COLOR_LIGHT;
             });
             point.on('pointerout', function () {

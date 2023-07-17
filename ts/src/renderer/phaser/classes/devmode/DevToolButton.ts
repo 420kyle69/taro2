@@ -67,6 +67,7 @@ class DevToolButton {
 			else func();
 		});
 		button.on('pointerover', () => {
+            scene.gameScene.input.setTopOnly(true);
 			scene.pointerInsideButtons = true;
 			devModeTools.tooltip.showMessage(tooltipLabel, tooltipText);
 			this.isHover = true;
