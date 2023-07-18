@@ -540,6 +540,20 @@ var ClientNetworkEvents = {
 		}
 	},
 
+	_onParticle: function (data) {
+		var particleData = taro.game.data.particleTypes[data.particleId];
+		if (particleData) {
+			if (data.entityId) {
+				if (taro.client.entityUpdateQueue[data.entityId] == undefined) {
+					taro.client.entityUpdateQueue[data.entityId] = [];
+				}
+				taro.client.entityUpdateQueue[data.entityId].push({particle: data})
+			} else {
+				taro.client.emit('create-particle', data);
+			}
+		}
+	},
+
 	_onCamera: function (data) {
 		// camera zoom change
 		if (data.cmd == 'zoom') {
