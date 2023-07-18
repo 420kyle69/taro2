@@ -124,6 +124,7 @@ class TilePalette extends Phaser.GameObjects.Container {
 		});
 
 		texturesLayer.on('pointerover', (p) => {
+            scene.gameScene.input.setTopOnly(true);
 			this.pointerover = true;
 		});
 		texturesLayer.on('pointerout', (p) => {

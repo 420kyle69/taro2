@@ -42,6 +42,7 @@ var DevToolButton = /** @class */ (function () {
         });
         button.on('pointerover', function () {
             var _a;
+            scene.gameScene.input.setTopOnly(true);
             scene.pointerInsideButtons = true;
             devModeTools.tooltip.showMessage(tooltipLabel, tooltipText);
             _this.isHover = true;
