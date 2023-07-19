@@ -1,3 +1,5 @@
+// FIXME: add more types to the physics part of taro2
+// @ts-nocheck
 const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing memory leak bug
 	init: async function (component) {
 		const box2D = await box2dwasm();

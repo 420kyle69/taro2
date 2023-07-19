@@ -6,7 +6,7 @@ type PhysicsDists = {
 	BOX2DTS: PhysicsDistProps,
 	NATIVE: PhysicsDistProps,
 	BOX2D: PhysicsDistProps,
-}
+};
 
 type PhysicsDistsEnum = keyof PhysicsDists;
 
@@ -16,8 +16,8 @@ type PhysicsDistProps = {
 	queryAABB: (self: any, aabb: any, callback: () => any) => void;
 	createBody: (self: any, entity: any, body: any, isLossTolerant: boolean) => any;
 	createJoint: (self: any, entityA: any, entityB: any, anchorA: any, anchorB: any) => void;
-	contactListener: (self: any, beginContactCallback: () => any, endContactCallback: () => any, preSolve: () => any, postSolve: () => any) => void;
-}
+	contactListener: (self: any, beginContactCallback: (contact: any) => any, endContactCallback: (contact: any) => any, preSolve: (contact: any) => any, postSolve: (contact: any) => any) => void;
+};
 
 const dists: PhysicsDists & { defaultEngine: PhysicsDistsEnum } = {
 	defaultEngine: 'PLANCK',

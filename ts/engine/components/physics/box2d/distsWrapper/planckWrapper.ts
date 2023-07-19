@@ -1,3 +1,6 @@
+// FIXME: add more types to the physics part of taro2
+// @ts-nocheck
+
 const planckWrapper: PhysicsDistProps = {
 	init: function (component) {
 		// component.b2Color = planck.Common.b2Color;

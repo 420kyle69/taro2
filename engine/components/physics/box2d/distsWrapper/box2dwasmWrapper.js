@@ -34,6 +34,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+// FIXME: add more types to the physics part of taro2
+// @ts-nocheck
 var box2dwasmWrapper = {
     init: function (component) {
         return __awaiter(this, void 0, void 0, function () {

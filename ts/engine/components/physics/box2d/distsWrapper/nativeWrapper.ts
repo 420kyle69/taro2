@@ -1,3 +1,6 @@
+// FIXME: add more types to the physics part of taro2
+// @ts-nocheck
+
 const nativeWrapper: PhysicsDistProps = {
 	init: function (component) {
 		component.native = require('box2d-native');
