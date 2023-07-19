@@ -131,10 +131,10 @@ var AbilityComponent = TaroEntity.extend({
 		if (handle.cost && handle.scriptName) {
 			ability = handle;
 		} else {
+			// not in use. this is an empty object in json
+			// abilities refactor will use this
 			ability = taro.game.data.abilities[handle];
 		}
-
-		console.log('\nhandle:  ', handle, '\nability:  ', ability);
 
 		var player = self._entity.getOwner();
 		if (ability != undefined) {
@@ -201,8 +201,6 @@ var AbilityComponent = TaroEntity.extend({
 							if (Object.keys(playerAttr.attributes || []).length > 0) {
 								player.streamUpdateData(playerAttr);
 							}
-
-							// self._entity.streamUpdateData({ ability: dxc });
 						}
 
 						taro.game.lastCastingUnitId = self._entity.id();

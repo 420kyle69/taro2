@@ -76,12 +76,46 @@ var ControlComponent = TaroEntity.extend({
 
 		};
 
+		this.abilityTriggers = {
+			keyDown: {},
+			keyUp: {}
+		};
+		this.mapTriggers();
+
 		for (device in this.input) {
 			for (key in this.input[device]) {
 				taro.input.mapAction(key, taro.input[device][key]);
 			}
 		}
 	},
+
+	mapTriggers: function () {
+		if (this._entity._stats.controlledBy === 'computer') {
+			return;
+		}
+		for (let id in taro.game.data.abilities) {
+			const ability = taro.game.data.abilities[id];
+
+			if (!this.abilityTriggers[ability.start[0]][ability.start[1]]) {
+				this.abilityTriggers[ability.start[0]][ability.start[1]] = {start: [], stop: []};
+			}
+
+			this.abilityTriggers[ability.start[0]][ability.start[1]].start.push([id, ability.usableBy]);
+
+			if (ability.stop[0] !== 'key') {
+				continue;
+			}
+
+			if (!this.abilityTriggers[ability.stop[1]][ability.stop[2]]) {
+				this.abilityTriggers[ability.stop[1]][ability.stop[2]] = {start: [], stop: []};
+			}
+
+			this.abilityTriggers[ability.stop[1]][ability.stop[2]].stop.push([id, ability.usableBy]);
+		}
+
+		console.log(this.abilityTriggers);
+	},
+
 	keyDown: function (device, key) {
 		if(taro.developerMode.shouldPreventKeybindings()) {
 			return;
@@ -175,9 +209,24 @@ var ControlComponent = TaroEntity.extend({
 						unit.changeItem(index);
 					}
 				}
+
+				// new ability functionality
+				// check first that we don't have a (deprecated) keybind
+				if (unitAbility) {
+					return;
+				}
+
+				// check triggers cache for start/stop
+				if (!this.abilityTriggers.keyDown[key]) {
+					return;
+				}
+
+			// 	switch (this.abilityTriggers.keyDown[key][0]) {
+			// 		case 'start':
+			// 			this.startAbility('')
+			// 	}
 			}
 		}
-		// }
 
 		if (taro.isClient) {
 			if (!this.isChatOpen) {
@@ -266,8 +315,9 @@ var ControlComponent = TaroEntity.extend({
 			}
 		}
 
-		if (this.input[device])
+		if (this.input[device]) {
 			this.input[device][key] = false;
+		}
 	},
 
 	/**
