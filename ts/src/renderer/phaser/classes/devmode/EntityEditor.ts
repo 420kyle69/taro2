@@ -4,7 +4,7 @@ class EntityEditor {
 
     outline: Phaser.GameObjects.Graphics;
     selectionContainer: Phaser.GameObjects.Container;
-    handlers: Record<string, Phaser.GameObjects.Rectangle & {orientation: string}>;
+    handlers: Record<string, Phaser.GameObjects.Rectangle & {orientation: HandlerType}>;
     activeHandler: boolean;
 
     activeEntity: { id: string; player: string; entityType: string; };
@@ -26,10 +26,8 @@ class EntityEditor {
         this.outline = gameScene.add.graphics().setDepth(1000);
         const selectionContainer = this.selectionContainer = new Phaser.GameObjects.Container(gameScene);
 
-        const angleArray = ['topLeftRotate', 'topRightRotate', 'bottomRightRotate', 'bottomLeftRotate'];
         const scaleArray = ['topLeft', 'topRight', 'bottomRight', 'bottomLeft', 'left', 'right', 'top', 'bottom'];
-        /*const widthArray = ['left', 'right'];
-        const heightArray = ['top', 'bottom'];*/
+        const angleArray = ['topLeftRotate', 'topRightRotate', 'bottomRightRotate', 'bottomLeftRotate'];
 
         const handlers = this.handlers = {};
         handlers['topLeft'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_HANDLER);
@@ -118,106 +116,45 @@ class EntityEditor {
                     const targetAngle = lastAngle - startingAngle;
                     selectedEntityImage.image.rotation = selectedEntityImage.rotation + targetAngle;
                     editedAction.angle = selectedEntityImage.image.angle;
-                    console.log('angle', editedAction.angle);
                 } else {
                     if (scaleArray.includes(handler.orientation) && !isNaN(action.width) && !isNaN(action.height)) {
                         let targetPoint;
-                        let distanceToStart;
-                        let distanceToCurrent;
                         switch (handler.orientation) {
                             case 'topLeft':
-                                distanceToStart = Phaser.Math.Distance.Between(selectedEntityImage.image.getBottomRight().x, selectedEntityImage.image.getBottomRight().y, selectedEntityImage.startDragX, selectedEntityImage.startDragY);
-                                distanceToCurrent = Phaser.Math.Distance.Between(selectedEntityImage.image.getBottomRight().x, selectedEntityImage.image.getBottomRight().y, worldPoint.x, worldPoint.y);
-                                selectedEntityImage.image.scaleX = selectedEntityImage.scaleX * (distanceToCurrent / distanceToStart);
-                                editedAction.width = selectedEntityImage.image.displayWidth;
-                                selectedEntityImage.image.scaleY = selectedEntityImage.scaleY * (distanceToCurrent / distanceToStart);
-                                editedAction.height = selectedEntityImage.image.displayHeight;
+                                this.rescaleInitEntity(true, true, worldPoint, selectedEntityImage.image.getBottomRight(), selectedEntityImage, editedAction);
                                 targetPoint = new Phaser.Math.Vector2 ((selectedEntityImage.displayWidth - selectedEntityImage.image.displayWidth) / 2, (selectedEntityImage.displayHeight - selectedEntityImage.image.displayHeight) / 2);
                                 break;
                             case 'topRight':
-                                distanceToStart = Phaser.Math.Distance.Between(selectedEntityImage.image.getBottomLeft().x, selectedEntityImage.image.getBottomLeft().y, selectedEntityImage.startDragX, selectedEntityImage.startDragY);
-                                distanceToCurrent = Phaser.Math.Distance.Between(selectedEntityImage.image.getBottomLeft().x, selectedEntityImage.image.getBottomLeft().y, worldPoint.x, worldPoint.y);
-                                selectedEntityImage.image.scaleX = selectedEntityImage.scaleX * (distanceToCurrent / distanceToStart);
-                                editedAction.width = selectedEntityImage.image.displayWidth;
-                                selectedEntityImage.image.scaleY = selectedEntityImage.scaleY * (distanceToCurrent / distanceToStart);
-                                editedAction.height = selectedEntityImage.image.displayHeight;
+                                this.rescaleInitEntity(true, true, worldPoint, selectedEntityImage.image.getBottomLeft(), selectedEntityImage, editedAction);
                                 targetPoint = new Phaser.Math.Vector2 ((selectedEntityImage.image.displayWidth - selectedEntityImage.displayWidth) / 2, (selectedEntityImage.displayHeight - selectedEntityImage.image.displayHeight) / 2);
                                 break;
                             case 'bottomRight':
-                                distanceToStart = Phaser.Math.Distance.Between(selectedEntityImage.image.getTopLeft().x, selectedEntityImage.image.getTopLeft().y, selectedEntityImage.startDragX, selectedEntityImage.startDragY);
-                                distanceToCurrent = Phaser.Math.Distance.Between(selectedEntityImage.image.getTopLeft().x, selectedEntityImage.image.getTopLeft().y, worldPoint.x, worldPoint.y);
-                                selectedEntityImage.image.scaleX = selectedEntityImage.scaleX * (distanceToCurrent / distanceToStart);
-                                editedAction.width = selectedEntityImage.image.displayWidth;
-                                selectedEntityImage.image.scaleY = selectedEntityImage.scaleY * (distanceToCurrent / distanceToStart);
-                                editedAction.height = selectedEntityImage.image.displayHeight;
+                                this.rescaleInitEntity(true, true, worldPoint, selectedEntityImage.image.getTopLeft(), selectedEntityImage, editedAction);
                                 targetPoint = new Phaser.Math.Vector2 ((selectedEntityImage.image.displayWidth - selectedEntityImage.displayWidth) / 2, (selectedEntityImage.image.displayHeight - selectedEntityImage.displayHeight) / 2);
                                 break;
                             case 'bottomLeft':
-                                distanceToStart = Phaser.Math.Distance.Between(selectedEntityImage.image.getTopRight().x, selectedEntityImage.image.getTopRight().y, selectedEntityImage.startDragX, selectedEntityImage.startDragY);
-                                distanceToCurrent = Phaser.Math.Distance.Between(selectedEntityImage.image.getTopRight().x, selectedEntityImage.image.getTopRight().y, worldPoint.x, worldPoint.y);
-                                selectedEntityImage.image.scaleX = selectedEntityImage.scaleX * (distanceToCurrent / distanceToStart);
-                                editedAction.width = selectedEntityImage.image.displayWidth;
-                                selectedEntityImage.image.scaleY = selectedEntityImage.scaleY * (distanceToCurrent / distanceToStart);
-                                editedAction.height = selectedEntityImage.image.displayHeight;
+                                this.rescaleInitEntity(true, true, worldPoint, selectedEntityImage.image.getTopRight(), selectedEntityImage, editedAction);
                                 targetPoint = new Phaser.Math.Vector2 ((selectedEntityImage.displayWidth - selectedEntityImage.image.displayWidth) / 2, (selectedEntityImage.image.displayHeight - selectedEntityImage.displayHeight) / 2);
                                 break;
                             case 'left':
-                                distanceToStart = Phaser.Math.Distance.Between(selectedEntityImage.image.getRightCenter().x, selectedEntityImage.image.getRightCenter().y, selectedEntityImage.startDragX, selectedEntityImage.startDragY);
-                                distanceToCurrent = Phaser.Math.Distance.Between(selectedEntityImage.image.getRightCenter().x, selectedEntityImage.image.getRightCenter().y, worldPoint.x, worldPoint.y);
-                                selectedEntityImage.image.scaleX = selectedEntityImage.scaleX * (distanceToCurrent / distanceToStart);
-                                editedAction.width = selectedEntityImage.image.displayWidth;
+                                this.rescaleInitEntity(true, false, worldPoint, selectedEntityImage.image.getRightCenter(), selectedEntityImage, editedAction);
                                 targetPoint = new Phaser.Math.Vector2 ((selectedEntityImage.displayWidth - selectedEntityImage.image.displayWidth) / 2, 0);
                                 break;
                             case 'right':
-                                distanceToStart = Phaser.Math.Distance.Between(selectedEntityImage.image.getLeftCenter().x, selectedEntityImage.image.getLeftCenter().y, selectedEntityImage.startDragX, selectedEntityImage.startDragY);
-                                distanceToCurrent = Phaser.Math.Distance.Between(selectedEntityImage.image.getLeftCenter().x, selectedEntityImage.image.getLeftCenter().y, worldPoint.x, worldPoint.y);
-                                selectedEntityImage.image.scaleX = selectedEntityImage.scaleX * (distanceToCurrent / distanceToStart);
-                                editedAction.width = selectedEntityImage.image.displayWidth;
+                                this.rescaleInitEntity(true, false, worldPoint, selectedEntityImage.image.getLeftCenter(), selectedEntityImage, editedAction);
                                 targetPoint = new Phaser.Math.Vector2 ((selectedEntityImage.image.displayWidth - selectedEntityImage.displayWidth) / 2, 0);
                                 break;
                             case 'top':
-                                distanceToStart = Phaser.Math.Distance.Between(selectedEntityImage.image.getBottomCenter().x, selectedEntityImage.image.getBottomCenter().y, selectedEntityImage.startDragX, selectedEntityImage.startDragY);
-                                distanceToCurrent = Phaser.Math.Distance.Between(selectedEntityImage.image.getBottomCenter().x, selectedEntityImage.image.getBottomCenter().y, worldPoint.x, worldPoint.y);
-                                selectedEntityImage.image.scaleY = selectedEntityImage.scaleY * (distanceToCurrent / distanceToStart);
-                                editedAction.height = selectedEntityImage.image.displayHeight;
+                                this.rescaleInitEntity(false, true, worldPoint, selectedEntityImage.image.getBottomCenter(), selectedEntityImage, editedAction);
                                 targetPoint = new Phaser.Math.Vector2 (0, (selectedEntityImage.displayHeight - selectedEntityImage.image.displayHeight) / 2);
                                 break;
                             case 'bottom':
-                                distanceToStart = Phaser.Math.Distance.Between(selectedEntityImage.image.getTopCenter().x, selectedEntityImage.image.getTopCenter().y, selectedEntityImage.startDragX, selectedEntityImage.startDragY);
-                                distanceToCurrent = Phaser.Math.Distance.Between(selectedEntityImage.image.getTopCenter().x, selectedEntityImage.image.getTopCenter().y, worldPoint.x, worldPoint.y);
-                                selectedEntityImage.image.scaleY = selectedEntityImage.scaleY * (distanceToCurrent / distanceToStart);
-                                editedAction.height = selectedEntityImage.image.displayHeight;
+                                this.rescaleInitEntity(false, true, worldPoint, selectedEntityImage.image.getTopCenter(), selectedEntityImage, editedAction);
                                 targetPoint = new Phaser.Math.Vector2 (0, (selectedEntityImage.image.displayHeight - selectedEntityImage.displayHeight) / 2);
                                 break;
                             default:
                                 break;
                         }
-                        /*if (point.orientation === 'left') {
-                            const distanceToStart = Phaser.Math.Distance.Between(selectedEntityImage.image.getRightCenter().x, selectedEntityImage.image.getRightCenter().y, selectedEntityImage.startDragX, selectedEntityImage.startDragY);
-                            const distanceToCurrent = Phaser.Math.Distance.Between(selectedEntityImage.image.getRightCenter().x, selectedEntityImage.image.getRightCenter().y, worldPoint.x, worldPoint.y);
-                            selectedEntityImage.image.scaleX = selectedEntityImage.scaleX * (distanceToCurrent / distanceToStart);
-                            editedAction.width = selectedEntityImage.image.displayWidth;
-                            targetPoint = new Phaser.Math.Vector2 ((selectedEntityImage.displayWidth - selectedEntityImage.image.displayWidth) / 2, 0);
-                        } else if (point.orientation === 'right') {
-                            const distanceToStart = Phaser.Math.Distance.Between(selectedEntityImage.image.getLeftCenter().x, selectedEntityImage.image.getLeftCenter().y, selectedEntityImage.startDragX, selectedEntityImage.startDragY);
-                            const distanceToCurrent = Phaser.Math.Distance.Between(selectedEntityImage.image.getLeftCenter().x, selectedEntityImage.image.getLeftCenter().y, worldPoint.x, worldPoint.y);
-                            selectedEntityImage.image.scaleX = selectedEntityImage.scaleX * (distanceToCurrent / distanceToStart);
-                            editedAction.width = selectedEntityImage.image.displayWidth;
-                            targetPoint = new Phaser.Math.Vector2 ((selectedEntityImage.image.displayWidth - selectedEntityImage.displayWidth) / 2, 0);
-                        }
-                        else if (point.orientation === 'top') {
-                            const distanceToStart = Phaser.Math.Distance.Between(selectedEntityImage.image.getBottomCenter().x, selectedEntityImage.image.getBottomCenter().y, selectedEntityImage.startDragX, selectedEntityImage.startDragY);
-                            const distanceToCurrent = Phaser.Math.Distance.Between(selectedEntityImage.image.getBottomCenter().x, selectedEntityImage.image.getBottomCenter().y, worldPoint.x, worldPoint.y);
-                            selectedEntityImage.image.scaleY = selectedEntityImage.scaleY * (distanceToCurrent / distanceToStart);
-                            editedAction.height = selectedEntityImage.image.displayHeight;
-                            targetPoint = new Phaser.Math.Vector2 (0, (selectedEntityImage.displayHeight - selectedEntityImage.image.displayHeight) / 2);
-                        } else if (point.orientation === 'bottom') {
-                            const distanceToStart = Phaser.Math.Distance.Between(selectedEntityImage.image.getTopCenter().x, selectedEntityImage.image.getTopCenter().y, selectedEntityImage.startDragX, selectedEntityImage.startDragY);
-                            const distanceToCurrent = Phaser.Math.Distance.Between(selectedEntityImage.image.getTopCenter().x, selectedEntityImage.image.getTopCenter().y, worldPoint.x, worldPoint.y);
-                            selectedEntityImage.image.scaleY = selectedEntityImage.scaleY * (distanceToCurrent / distanceToStart);
-                            editedAction.height = selectedEntityImage.image.displayHeight;
-                            targetPoint = new Phaser.Math.Vector2 (0, (selectedEntityImage.image.displayHeight - selectedEntityImage.displayHeight) / 2);
-                        }*/
                         targetPoint.rotate(selectedEntityImage.image.rotation);
                         const x = selectedEntityImage.x + targetPoint.x;
                         const y = selectedEntityImage.y + targetPoint.y;
@@ -234,7 +171,6 @@ class EntityEditor {
                 if (gameObject !== handler || !selectedEntityImage) return;
                 this.activeHandler = false;
                 selectedEntityImage.dragMode = null;
-                console.log('editedAction', selectedEntityImage.editedAction)
                 selectedEntityImage.edit(selectedEntityImage.editedAction);
                 selectedEntityImage.editedAction = {actionId: selectedEntityImage.action.actionId};
             });
@@ -387,6 +323,19 @@ class EntityEditor {
         entityImage.updateOutline();
     }
 
+    rescaleInitEntity (width: boolean, height: boolean, worldPoint: Phaser.Math.Vector2, imagePoint: Phaser.Types.Math.Vector2Like, selectedEntityImage: EntityImage, editedAction: ActionData): void {
+        const distanceToStart = Phaser.Math.Distance.Between(imagePoint.x, imagePoint.y, selectedEntityImage.startDragX, selectedEntityImage.startDragY);
+        const distanceToCurrent = Phaser.Math.Distance.Between(imagePoint.x, imagePoint.y, worldPoint.x, worldPoint.y);
+        if (width) {
+            selectedEntityImage.image.scaleX = selectedEntityImage.scaleX * (distanceToCurrent / distanceToStart);
+            editedAction.width = selectedEntityImage.image.displayWidth;
+        }
+        if (height) {
+            selectedEntityImage.image.scaleY = selectedEntityImage.scaleY * (distanceToCurrent / distanceToStart);
+            editedAction.height = selectedEntityImage.image.displayHeight;
+        }
+    }
+
     deleteInitEntity(): void {
         if (this.selectedEntityImage) {
             this.selectedEntityImage.delete();
@@ -394,4 +343,6 @@ class EntityEditor {
         }
     }
 }
+
+type HandlerType = 'topLeft' | 'topRight' | 'bottomRight' | 'bottomLeft' | 'left' | 'right' | 'top' | 'bottom' | 'topLeftRotate' | 'topRightRotate' | 'bottomRightRotate' | 'bottomLeftRotate';
 

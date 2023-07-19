@@ -5,6 +5,8 @@ class EntityImage {
     action: ActionData;
     editedAction: ActionData;
     image: Phaser.GameObjects.Image & {entity: EntityImage};
+    defaultWidth: number;
+    defaultHeight: number;
 
     dragMode: 'position' | 'angle' | 'scale';
     startDragX: number;
@@ -26,36 +28,39 @@ class EntityImage {
         this.action = action;
 
         let key;
-
+        let entityTypeData;
         if (action.entityType === 'unitTypes') {
-            const entityTypeData = taro.game.data[action.entityType] && taro.game.data[action.entityType][action.entity];
+            entityTypeData = taro.game.data[action.entityType] && taro.game.data[action.entityType][action.entity];
             if (!entityTypeData) return;
             key = `unit/${entityTypeData.cellSheet.url}`
         } else if (type === 'unit') {
-            const entityTypeData = taro.game.data['unitTypes'] && taro.game.data['unitTypes'][action.unitType];
+            entityTypeData = taro.game.data['unitTypes'] && taro.game.data['unitTypes'][action.unitType];
             if (!entityTypeData) return;
             key = `unit/${entityTypeData.cellSheet.url}`
         } else if (action.entityType === 'itemTypes') {
-            const entityTypeData = taro.game.data[action.entityType] && taro.game.data[action.entityType][action.entity];
+            entityTypeData = taro.game.data[action.entityType] && taro.game.data[action.entityType][action.entity];
             if (!entityTypeData) return;
             key = `item/${entityTypeData.cellSheet.url}`
         } else if (type === 'item') {
-            const entityTypeData = taro.game.data['itemTypes'] && taro.game.data['itemTypes'][action.itemType];
+            entityTypeData = taro.game.data['itemTypes'] && taro.game.data['itemTypes'][action.itemType];
             if (!entityTypeData) return;
             key = `item/${entityTypeData.cellSheet.url}`
         } else if (action.entityType === 'projectileTypes') {
-            const entityTypeData = taro.game.data[action.entityType] && taro.game.data[action.entityType][action.entity];
+            entityTypeData = taro.game.data[action.entityType] && taro.game.data[action.entityType][action.entity];
             if (!entityTypeData) return;
             key = `projectile/${entityTypeData.cellSheet.url}`
         } else if (type === 'projectile') {
-            const entityTypeData = taro.game.data['projectileTypes'] && taro.game.data['projectileTypes'][action.projectileType];
+            entityTypeData = taro.game.data['projectileTypes'] && taro.game.data['projectileTypes'][action.projectileType];
             if (!entityTypeData) return;
             key = `projectile/${entityTypeData.cellSheet.url}`
         }
 
+        this.defaultWidth = entityTypeData.bodies?.default?.width;
+        this.defaultHeight = entityTypeData.bodies?.default?.height;
+
         const image = this.image = scene.add.image(action.position?.x, action.position?.y, key);
-        if (action.angle) image.angle = action.angle;
-        if (action.width && action.height) image.setDisplaySize(action.width, action.height);
+        if (!isNaN(action.angle)) image.angle = action.angle;
+        if (!isNaN(action.width) && !isNaN(action.height)) image.setDisplaySize(action.width, action.height);
         if (taro.developerMode.active && taro.developerMode.activeTab === 'map') {
             image.setVisible(true);
         } else {
@@ -79,9 +84,17 @@ class EntityImage {
                 this.dragMode = 'position';
             } else if (devModeTools.altKey.isDown) {
                 this.dragMode = 'angle';
+                image.rotation = 0;
+                editedAction.angle = image.angle;
             } else if (devModeTools.shiftKey.isDown) {
                 this.dragMode = 'scale';
+                if (!isNaN(this.defaultWidth) && !isNaN(this.defaultHeight)) {
+                    image.setDisplaySize(this.defaultWidth, this.defaultHeight);
+                    editedAction.width = this.defaultWidth;
+                    editedAction.height = this.defaultHeight;
+                }
             }
+            this.updateOutline();
         });
 
         const outline = entityEditor.outline;
@@ -187,7 +200,6 @@ class EntityImage {
             this.image.y = action.position.y;
         }
         if (!isNaN(this.action.angle) && !isNaN(action.angle)) {
-            console.log('update angle', action.angle);
             this.action.angle = action.angle;
             this.image.angle = action.angle;
         }
