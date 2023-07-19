@@ -212,19 +212,34 @@ var ControlComponent = TaroEntity.extend({
 
 				// new ability functionality
 				// check first that we don't have a (deprecated) keybind
-				if (unitAbility) {
-					return;
-				}
+				if (!unitAbility && this.abilityTriggers.keyDown[key]) {
 
-				// check triggers cache for start/stop
-				if (!this.abilityTriggers.keyDown[key]) {
-					return;
-				}
+					for (let i = 0; i < this.abilityTriggers.keyDown[key].start.length; i++) {
+						if (
+							this.abilityTriggers.keyDown[key].start[i][1]
+								.find((id) => {
+									return id === unit._stats.type;
+								})
+						) {
+							// queue ability start
 
-			// 	switch (this.abilityTriggers.keyDown[key][0]) {
-			// 		case 'start':
-			// 			this.startAbility('')
-			// 	}
+							console.log('valid unit | ability start');
+						}
+					}
+
+					for (let i = 0; i < this.abilityTriggers.keyDown[key].stop.length; i++) {
+						if (
+							this.abilityTriggers.keyDown[key].stop[i][1]
+								.find((id) => {
+									return id === unit._stats.type;
+								})
+						) {
+							// queue ability stop
+
+							console.log('valid unit | ability stop');
+						}
+					}
+				}
 			}
 		}
 
@@ -304,6 +319,37 @@ var ControlComponent = TaroEntity.extend({
 						}, taro.client.inputDelay);
 					} else {
 						unit.ability.cast(unitAbility.keyUp);
+					}
+				}
+			}
+
+			// new ability functionality
+			// check first that we don't have a (deprecated) keybind
+			if (!unitAbility && this.abilityTriggers.keyUp[key]) {
+
+				for (let i = 0; i < this.abilityTriggers.keyUp[key].start.length; i++) {
+					if (
+						this.abilityTriggers.keyUp[key].start[i][1]
+							.find((id) => {
+								return id === unit._stats.type;
+							})
+					) {
+						// queue ability start
+
+						console.log('valid unit | ability start');
+					}
+				}
+
+				for (let i = 0; i < this.abilityTriggers.keyUp[key].stop.length; i++) {
+					if (
+						this.abilityTriggers.keyUp[key].stop[i][1]
+							.find((id) => {
+								return id === unit._stats.type;
+							})
+					) {
+						// queue ability stop
+
+						console.log('valid unit | ability stop');
 					}
 				}
 			}
