@@ -4,7 +4,7 @@ class EntityEditor {
 
     outline: Phaser.GameObjects.Graphics;
     selectionContainer: Phaser.GameObjects.Container;
-    handlers: Record<string, Phaser.GameObjects.Rectangle & {orientation: HandlerType}>;
+    handlers: Record<string, Phaser.GameObjects.Rectangle & {orientation?: HandlerType}>;
     activeHandler: boolean;
 
     activeEntity: { id: string; player: string; entityType: string; };
@@ -30,30 +30,18 @@ class EntityEditor {
         const angleArray = ['topLeftRotate', 'topRightRotate', 'bottomRightRotate', 'bottomLeftRotate'];
 
         const handlers = this.handlers = {};
-        handlers['topLeft'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_HANDLER);
-        handlers['topLeft'].orientation = 'topLeft';
-        handlers['topLeftRotate'] = gameScene.add.rectangle(0, 0, 20, 20, COLOR_HANDLER, 0);
-        handlers['topLeftRotate'].orientation = 'topLeftRotate';
-        handlers['top'] = gameScene.add.rectangle(0, 0, 8, 8, COLOR_HANDLER);
-        handlers['top'].orientation = 'top';
-        handlers['topRight'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_HANDLER);
-        handlers['topRight'].orientation = 'topRight';
-        handlers['topRightRotate'] = gameScene.add.rectangle(0, 0, 20, 20, COLOR_HANDLER, 0);
-        handlers['topRightRotate'].orientation = 'topRightRotate';
-        handlers['right'] = gameScene.add.rectangle(0, 0, 8, 8, COLOR_HANDLER);
-        handlers['right'].orientation = 'right';
-        handlers['bottomRight'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_HANDLER);
-        handlers['bottomRight'].orientation = 'bottomRight';
-        handlers['bottomRightRotate'] = gameScene.add.rectangle(0, 0, 20, 20, COLOR_HANDLER, 0);
-        handlers['bottomRightRotate'].orientation = 'bottomRightRotate';
-        handlers['bottom'] = gameScene.add.rectangle(0, 0, 8, 8, COLOR_HANDLER);
-        handlers['bottom'].orientation = 'bottom';
-        handlers['bottomLeft'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_HANDLER);
-        handlers['bottomLeft'].orientation = 'bottomLeft';
-        handlers['bottomLeftRotate'] = gameScene.add.rectangle(0, 0, 20, 20, COLOR_HANDLER, 0);
-        handlers['bottomLeftRotate'].orientation = 'bottomLeftRotate';
-        handlers['left'] = gameScene.add.rectangle(0, 0, 8, 8, COLOR_HANDLER);
-        handlers['left'].orientation = 'left';
+        this.createHandler('topLeft', 10, 1);
+        this.createHandler('topRight', 10, 1);
+        this.createHandler('bottomRight', 10, 1);
+        this.createHandler('bottomLeft', 10, 1);
+        this.createHandler('left', 8, 1);
+        this.createHandler('right', 8, 1);
+        this.createHandler('top', 8, 1);
+        this.createHandler('bottom', 8, 1);
+        this.createHandler('topLeftRotate', 20, 0);
+        this.createHandler('topRightRotate', 20, 0);
+        this.createHandler('bottomRightRotate', 20, 0);
+        this.createHandler('bottomLeftRotate', 20, 0);
 
         Object.values(handlers).forEach((handler: Phaser.GameObjects.Rectangle) => selectionContainer.add(handler));
         selectionContainer.setPosition(10, 10).setAngle(0).setDepth(1000).setVisible(false);
@@ -245,6 +233,11 @@ class EntityEditor {
 		});
 
         this.selectedEntityImage = null;
+    }
+
+    createHandler (orientation: HandlerType, size: number, alpha: number): void {
+        this.handlers[orientation] = this.gameScene.add.rectangle(0, 0, size, size, this.COLOR_HANDLER, alpha);
+        this.handlers[orientation].orientation = orientation;
     }
 
     activatePlacement(active: boolean): void {

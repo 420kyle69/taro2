@@ -71,7 +71,6 @@ class EntityImage {
         entityImages.push(image);
 
         image.on('pointerdown', () => {
-            //console.log('pointerdown', action);
             if (!devModeTools.cursorButton.active) return;
             if (entityEditor.selectedEntityImage !== this) {
                 entityEditor.selectEntityImage(this);

@@ -61,7 +61,6 @@ var EntityImage = /** @class */ (function () {
         image.entity = this;
         entityImages.push(image);
         image.on('pointerdown', function () {
-            //console.log('pointerdown', action);
             if (!devModeTools.cursorButton.active)
                 return;
             if (entityEditor.selectedEntityImage !== _this) {

@@ -11,30 +11,18 @@ var EntityEditor = /** @class */ (function () {
         var scaleArray = ['topLeft', 'topRight', 'bottomRight', 'bottomLeft', 'left', 'right', 'top', 'bottom'];
         var angleArray = ['topLeftRotate', 'topRightRotate', 'bottomRightRotate', 'bottomLeftRotate'];
         var handlers = this.handlers = {};
-        handlers['topLeft'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_HANDLER);
-        handlers['topLeft'].orientation = 'topLeft';
-        handlers['topLeftRotate'] = gameScene.add.rectangle(0, 0, 20, 20, COLOR_HANDLER, 0);
-        handlers['topLeftRotate'].orientation = 'topLeftRotate';
-        handlers['top'] = gameScene.add.rectangle(0, 0, 8, 8, COLOR_HANDLER);
-        handlers['top'].orientation = 'top';
-        handlers['topRight'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_HANDLER);
-        handlers['topRight'].orientation = 'topRight';
-        handlers['topRightRotate'] = gameScene.add.rectangle(0, 0, 20, 20, COLOR_HANDLER, 0);
-        handlers['topRightRotate'].orientation = 'topRightRotate';
-        handlers['right'] = gameScene.add.rectangle(0, 0, 8, 8, COLOR_HANDLER);
-        handlers['right'].orientation = 'right';
-        handlers['bottomRight'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_HANDLER);
-        handlers['bottomRight'].orientation = 'bottomRight';
-        handlers['bottomRightRotate'] = gameScene.add.rectangle(0, 0, 20, 20, COLOR_HANDLER, 0);
-        handlers['bottomRightRotate'].orientation = 'bottomRightRotate';
-        handlers['bottom'] = gameScene.add.rectangle(0, 0, 8, 8, COLOR_HANDLER);
-        handlers['bottom'].orientation = 'bottom';
-        handlers['bottomLeft'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_HANDLER);
-        handlers['bottomLeft'].orientation = 'bottomLeft';
-        handlers['bottomLeftRotate'] = gameScene.add.rectangle(0, 0, 20, 20, COLOR_HANDLER, 0);
-        handlers['bottomLeftRotate'].orientation = 'bottomLeftRotate';
-        handlers['left'] = gameScene.add.rectangle(0, 0, 8, 8, COLOR_HANDLER);
-        handlers['left'].orientation = 'left';
+        this.createHandler('topLeft', 10, 1);
+        this.createHandler('topRight', 10, 1);
+        this.createHandler('bottomRight', 10, 1);
+        this.createHandler('bottomLeft', 10, 1);
+        this.createHandler('left', 8, 1);
+        this.createHandler('right', 8, 1);
+        this.createHandler('top', 8, 1);
+        this.createHandler('bottom', 8, 1);
+        this.createHandler('topLeftRotate', 20, 0);
+        this.createHandler('topRightRotate', 20, 0);
+        this.createHandler('bottomRightRotate', 20, 0);
+        this.createHandler('bottomLeftRotate', 20, 0);
         Object.values(handlers).forEach(function (handler) { return selectionContainer.add(handler); });
         selectionContainer.setPosition(10, 10).setAngle(0).setDepth(1000).setVisible(false);
         gameScene.add.existing(selectionContainer);
@@ -227,6 +215,10 @@ var EntityEditor = /** @class */ (function () {
         });
         this.selectedEntityImage = null;
     }
+    EntityEditor.prototype.createHandler = function (orientation, size, alpha) {
+        this.handlers[orientation] = this.gameScene.add.rectangle(0, 0, size, size, this.COLOR_HANDLER, alpha);
+        this.handlers[orientation].orientation = orientation;
+    };
     EntityEditor.prototype.activatePlacement = function (active) {
         if (active) {
             //show entities list
