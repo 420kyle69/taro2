@@ -172,21 +172,22 @@ var EntityImage = /** @class */ (function () {
     EntityImage.prototype.update = function (action) {
         if (action.wasEdited)
             this.action.wasEdited = true;
-        if (this.action.position && this.action.position.x && this.action.position.y &&
-            action.position && action.position.x && action.position.y) {
+        if (this.action.position && !isNaN(this.action.position.x) && !isNaN(this.action.position.y) &&
+            action.position && !isNaN(action.position.x) && !isNaN(action.position.y)) {
             this.action.position = action.position;
             this.image.x = action.position.x;
             this.image.y = action.position.y;
         }
-        if (this.action.angle && action.angle) {
+        if (!isNaN(this.action.angle) && !isNaN(action.angle)) {
+            console.log('update angle', action.angle);
             this.action.angle = action.angle;
             this.image.angle = action.angle;
         }
-        if (this.action.width && action.width) {
+        if (!isNaN(this.action.width) && !isNaN(action.width)) {
             this.action.width = action.width;
             this.image.setDisplaySize(action.width, this.image.displayHeight);
         }
-        if (this.action.height && action.height) {
+        if (!isNaN(this.action.height) && !isNaN(action.height)) {
             this.action.height = action.height;
             this.image.setDisplaySize(this.image.displayWidth, action.height);
         }
