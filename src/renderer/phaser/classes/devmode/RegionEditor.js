@@ -14,7 +14,6 @@ var RegionEditor = /** @class */ (function () {
             }
             else if (taro.developerMode.active && taro.developerMode.activeTab === 'map' && _this.devModeScene.devModeTools.cursorButton.active && pointer.leftButtonDown()) {
                 gameObjects = gameObjects.filter(function (gameObject) { return gameObject.phaserRegion; });
-                console.log(gameObjects.length);
                 gameObjects.forEach(function (gameObject) {
                     _this.devModeScene.regionEditor.addClickedList({ name: gameObject.phaserRegion.entity._stats.id, x: gameObject.phaserRegion.stats.x, y: gameObject.phaserRegion.stats.y, width: gameObject.phaserRegion.stats.width, height: gameObject.phaserRegion.stats.height });
                 });
