@@ -4,8 +4,8 @@ class EntityEditor {
 
     outline: Phaser.GameObjects.Graphics;
     selectionContainer: Phaser.GameObjects.Container;
-    dragPoints: Record<string, Phaser.GameObjects.Rectangle & {orientation: string}>;
-    activeDragPoint: boolean;
+    handlers: Record<string, Phaser.GameObjects.Rectangle & {orientation: string}>;
+    activeHandler: boolean;
 
     activeEntity: { id: string; player: string; entityType: string; };
     selectedEntityImage: EntityImage;
@@ -31,67 +31,67 @@ class EntityEditor {
         /*const widthArray = ['left', 'right'];
         const heightArray = ['top', 'bottom'];*/
 
-        const dragPoints = this.dragPoints = {};
-        dragPoints['topLeft'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_HANDLER);
-        dragPoints['topLeft'].orientation = 'topLeft';
-        dragPoints['topLeftRotate'] = gameScene.add.rectangle(0, 0, 20, 20, COLOR_HANDLER, 0);
-        dragPoints['topLeftRotate'].orientation = 'topLeftRotate';
-        dragPoints['top'] = gameScene.add.rectangle(0, 0, 8, 8, COLOR_HANDLER);
-        dragPoints['top'].orientation = 'top';
-        dragPoints['topRight'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_HANDLER);
-        dragPoints['topRight'].orientation = 'topRight';
-        dragPoints['topRightRotate'] = gameScene.add.rectangle(0, 0, 20, 20, COLOR_HANDLER, 0);
-        dragPoints['topRightRotate'].orientation = 'topRightRotate';
-        dragPoints['right'] = gameScene.add.rectangle(0, 0, 8, 8, COLOR_HANDLER);
-        dragPoints['right'].orientation = 'right';
-        dragPoints['bottomRight'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_HANDLER);
-        dragPoints['bottomRight'].orientation = 'bottomRight';
-        dragPoints['bottomRightRotate'] = gameScene.add.rectangle(0, 0, 20, 20, COLOR_HANDLER, 0);
-        dragPoints['bottomRightRotate'].orientation = 'bottomRightRotate';
-        dragPoints['bottom'] = gameScene.add.rectangle(0, 0, 8, 8, COLOR_HANDLER);
-        dragPoints['bottom'].orientation = 'bottom';
-        dragPoints['bottomLeft'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_HANDLER);
-        dragPoints['bottomLeft'].orientation = 'bottomLeft';
-        dragPoints['bottomLeftRotate'] = gameScene.add.rectangle(0, 0, 20, 20, COLOR_HANDLER, 0);
-        dragPoints['bottomLeftRotate'].orientation = 'bottomLeftRotate';
-        dragPoints['left'] = gameScene.add.rectangle(0, 0, 8, 8, COLOR_HANDLER);
-        dragPoints['left'].orientation = 'left';
+        const handlers = this.handlers = {};
+        handlers['topLeft'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_HANDLER);
+        handlers['topLeft'].orientation = 'topLeft';
+        handlers['topLeftRotate'] = gameScene.add.rectangle(0, 0, 20, 20, COLOR_HANDLER, 0);
+        handlers['topLeftRotate'].orientation = 'topLeftRotate';
+        handlers['top'] = gameScene.add.rectangle(0, 0, 8, 8, COLOR_HANDLER);
+        handlers['top'].orientation = 'top';
+        handlers['topRight'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_HANDLER);
+        handlers['topRight'].orientation = 'topRight';
+        handlers['topRightRotate'] = gameScene.add.rectangle(0, 0, 20, 20, COLOR_HANDLER, 0);
+        handlers['topRightRotate'].orientation = 'topRightRotate';
+        handlers['right'] = gameScene.add.rectangle(0, 0, 8, 8, COLOR_HANDLER);
+        handlers['right'].orientation = 'right';
+        handlers['bottomRight'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_HANDLER);
+        handlers['bottomRight'].orientation = 'bottomRight';
+        handlers['bottomRightRotate'] = gameScene.add.rectangle(0, 0, 20, 20, COLOR_HANDLER, 0);
+        handlers['bottomRightRotate'].orientation = 'bottomRightRotate';
+        handlers['bottom'] = gameScene.add.rectangle(0, 0, 8, 8, COLOR_HANDLER);
+        handlers['bottom'].orientation = 'bottom';
+        handlers['bottomLeft'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_HANDLER);
+        handlers['bottomLeft'].orientation = 'bottomLeft';
+        handlers['bottomLeftRotate'] = gameScene.add.rectangle(0, 0, 20, 20, COLOR_HANDLER, 0);
+        handlers['bottomLeftRotate'].orientation = 'bottomLeftRotate';
+        handlers['left'] = gameScene.add.rectangle(0, 0, 8, 8, COLOR_HANDLER);
+        handlers['left'].orientation = 'left';
 
-        Object.values(dragPoints).forEach((point: Phaser.GameObjects.Rectangle) => selectionContainer.add(point));
+        Object.values(handlers).forEach((handler: Phaser.GameObjects.Rectangle) => selectionContainer.add(handler));
         selectionContainer.setPosition(10, 10).setAngle(0).setDepth(1000).setVisible(false);
         gameScene.add.existing(selectionContainer);
 
         taro.client.on('scale', (data: { ratio: number }) => {
-            Object.values(this.dragPoints).forEach((point: Phaser.GameObjects.Rectangle) => point.setScale(1 / data.ratio));
+            Object.values(this.handlers).forEach((handler: Phaser.GameObjects.Rectangle) => handler.setScale(1 / data.ratio));
             if (this.selectedEntityImage) this.selectedEntityImage.updateOutline();
         });
 
-        Object.values(this.dragPoints).forEach(point => {
-            if (angleArray.includes(point.orientation)) {
-                point.setInteractive({ draggable: true , cursor: 'url(/assets/cursors/rotate.cur), pointer' });
+        Object.values(this.handlers).forEach(handler => {
+            if (angleArray.includes(handler.orientation)) {
+                handler.setInteractive({ draggable: true , cursor: 'url(/assets/cursors/rotate.cur), pointer' });
             } else {
-                selectionContainer.bringToTop(point);
-                point.setInteractive({ draggable: true/* , cursor: 'url(assets/cursors/resize.cur), pointer'*/ });
+                selectionContainer.bringToTop(handler);
+                handler.setInteractive({ draggable: true/* , cursor: 'url(assets/cursors/resize.cur), pointer'*/ });
             }
 
-            point.on('pointerover', () => {
+            handler.on('pointerover', () => {
                 gameScene.input.setTopOnly(true);
-                point.fillColor = devModeTools.COLOR_LIGHT;
+                handler.fillColor = devModeTools.COLOR_LIGHT;
             });
     
-            point.on('pointerout', () => {
-                if (angleArray.includes(point.orientation)) {
-                    point.fillColor = COLOR_HANDLER;
+            handler.on('pointerout', () => {
+                if (angleArray.includes(handler.orientation)) {
+                    handler.fillColor = COLOR_HANDLER;
                 } else {
-                    point.fillColor = COLOR_HANDLER;
+                    handler.fillColor = COLOR_HANDLER;
                 }
             });
 
-            point.on('pointerdown', (pointer) => {
+            handler.on('pointerdown', (pointer) => {
                 const selectedEntityImage = this.selectedEntityImage;
                 if (!devModeTools.cursorButton.active || !selectedEntityImage) return;
 
-                this.activeDragPoint = true;
+                this.activeHandler = true;
                 const worldPoint = this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
                 selectedEntityImage.startDragX = worldPoint.x;
                 selectedEntityImage.startDragY = worldPoint.y;
@@ -108,11 +108,11 @@ class EntityEditor {
             gameScene.input.on('drag', (pointer, gameObject, dragX, dragY) => {
                 const worldPoint = this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
                 const selectedEntityImage = this.selectedEntityImage;
-                if (!devModeTools.cursorButton.active || gameObject !== point || !selectedEntityImage) return;
+                if (!devModeTools.cursorButton.active || gameObject !== handler || !selectedEntityImage) return;
                 const action = selectedEntityImage.action;
                 const editedAction = selectedEntityImage.editedAction;
                 
-                if (angleArray.includes(point.orientation) && !isNaN(action.angle)) {
+                if (angleArray.includes(handler.orientation) && !isNaN(action.angle)) {
                     const startingAngle = Phaser.Math.Angle.BetweenPoints(selectedEntityImage.image, { x: selectedEntityImage.startDragX, y: selectedEntityImage.startDragY });
                     const lastAngle = Phaser.Math.Angle.BetweenPoints(selectedEntityImage.image, worldPoint);
                     const targetAngle = lastAngle - startingAngle;
@@ -120,11 +120,11 @@ class EntityEditor {
                     editedAction.angle = selectedEntityImage.image.angle;
                     console.log('angle', editedAction.angle);
                 } else {
-                    if (scaleArray.includes(point.orientation) && !isNaN(action.width) && !isNaN(action.height)) {
+                    if (scaleArray.includes(handler.orientation) && !isNaN(action.width) && !isNaN(action.height)) {
                         let targetPoint;
                         let distanceToStart;
                         let distanceToCurrent;
-                        switch (point.orientation) {
+                        switch (handler.orientation) {
                             case 'topLeft':
                                 distanceToStart = Phaser.Math.Distance.Between(selectedEntityImage.image.getBottomRight().x, selectedEntityImage.image.getBottomRight().y, selectedEntityImage.startDragX, selectedEntityImage.startDragY);
                                 distanceToCurrent = Phaser.Math.Distance.Between(selectedEntityImage.image.getBottomRight().x, selectedEntityImage.image.getBottomRight().y, worldPoint.x, worldPoint.y);
@@ -231,8 +231,8 @@ class EntityEditor {
     
             gameScene.input.on('dragend', (pointer, gameObject) => {
                 const selectedEntityImage = this.selectedEntityImage;
-                if (gameObject !== point || !selectedEntityImage) return;
-                this.activeDragPoint = false;
+                if (gameObject !== handler || !selectedEntityImage) return;
+                this.activeHandler = false;
                 selectedEntityImage.dragMode = null;
                 console.log('editedAction', selectedEntityImage.editedAction)
                 selectedEntityImage.edit(selectedEntityImage.editedAction);

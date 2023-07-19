@@ -80,7 +80,7 @@ var EntityImage = /** @class */ (function () {
         var outline = entityEditor.outline;
         image.on('pointerover', function () {
             scene.input.setTopOnly(true);
-            if (!devModeTools.cursorButton.active || entityEditor.activeDragPoint)
+            if (!devModeTools.cursorButton.active || entityEditor.activeHandler)
                 return;
             if (entityEditor.selectedEntityImage !== _this)
                 entityEditor.selectedEntityImage = null;
@@ -136,7 +136,7 @@ var EntityImage = /** @class */ (function () {
             selectionContainer.setVisible(false);
             return;
         }
-        var dragPoints = this.entityEditor.dragPoints;
+        var handlers = this.entityEditor.handlers;
         var image = this.image;
         outline.clear();
         if (this.devModeTools.entityEditor.selectedEntityImage === this) {
@@ -147,18 +147,18 @@ var EntityImage = /** @class */ (function () {
             selectionContainer.angle = image.angle;
             var smallDistance = 20 / this.scene.cameras.main.zoom;
             var largeDistance = 25 / this.scene.cameras.main.zoom;
-            dragPoints.topLeft.setPosition(-image.displayWidth / 2 - smallDistance, -image.displayHeight / 2 - smallDistance);
-            dragPoints.topLeftRotate.setPosition(-image.displayWidth / 2 - largeDistance, -image.displayHeight / 2 - largeDistance);
-            dragPoints.top.setPosition(0, -image.displayHeight / 2 - smallDistance);
-            dragPoints.topRight.setPosition(image.displayWidth / 2 + smallDistance, -image.displayHeight / 2 - smallDistance);
-            dragPoints.topRightRotate.setPosition(image.displayWidth / 2 + largeDistance, -image.displayHeight / 2 - largeDistance);
-            dragPoints.right.setPosition(image.displayWidth / 2 + smallDistance, 0);
-            dragPoints.bottomRight.setPosition(image.displayWidth / 2 + smallDistance, image.displayHeight / 2 + smallDistance);
-            dragPoints.bottomRightRotate.setPosition(image.displayWidth / 2 + largeDistance, image.displayHeight / 2 + largeDistance);
-            dragPoints.bottom.setPosition(0, image.displayHeight / 2 + smallDistance);
-            dragPoints.bottomLeft.setPosition(-image.displayWidth / 2 - smallDistance, image.displayHeight / 2 + smallDistance);
-            dragPoints.bottomLeftRotate.setPosition(-image.displayWidth / 2 - largeDistance, image.displayHeight / 2 + largeDistance);
-            dragPoints.left.setPosition(-image.displayWidth / 2 - smallDistance, 0);
+            handlers.topLeft.setPosition(-image.displayWidth / 2 - smallDistance, -image.displayHeight / 2 - smallDistance);
+            handlers.topLeftRotate.setPosition(-image.displayWidth / 2 - largeDistance, -image.displayHeight / 2 - largeDistance);
+            handlers.top.setPosition(0, -image.displayHeight / 2 - smallDistance);
+            handlers.topRight.setPosition(image.displayWidth / 2 + smallDistance, -image.displayHeight / 2 - smallDistance);
+            handlers.topRightRotate.setPosition(image.displayWidth / 2 + largeDistance, -image.displayHeight / 2 - largeDistance);
+            handlers.right.setPosition(image.displayWidth / 2 + smallDistance, 0);
+            handlers.bottomRight.setPosition(image.displayWidth / 2 + smallDistance, image.displayHeight / 2 + smallDistance);
+            handlers.bottomRightRotate.setPosition(image.displayWidth / 2 + largeDistance, image.displayHeight / 2 + largeDistance);
+            handlers.bottom.setPosition(0, image.displayHeight / 2 + smallDistance);
+            handlers.bottomLeft.setPosition(-image.displayWidth / 2 - smallDistance, image.displayHeight / 2 + smallDistance);
+            handlers.bottomLeftRotate.setPosition(-image.displayWidth / 2 - largeDistance, image.displayHeight / 2 + largeDistance);
+            handlers.left.setPosition(-image.displayWidth / 2 - smallDistance, 0);
         }
         else {
             outline.lineStyle(2, 0x036ffc, 1);
