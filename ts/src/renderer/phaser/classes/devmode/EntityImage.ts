@@ -70,10 +70,20 @@ class EntityImage {
         image.entity = this;
         entityImages.push(image);
 
+        let lastTime = 0;
         image.on('pointerdown', () => {
             if (!devModeTools.cursorButton.active) return;
             if (entityEditor.selectedEntityImage !== this) {
                 entityEditor.selectEntityImage(this);
+            }
+
+            //double click
+            let clickDelay = taro._currentTime - lastTime;
+            lastTime = taro._currentTime;
+            if(clickDelay < 350) {
+                if (inGameEditor && inGameEditor.showScriptForEntity) {
+                    inGameEditor.showScriptForEntity(action.actionId);
+                }
             }
 
             this.startDragX = image.x;
@@ -191,6 +201,10 @@ class EntityImage {
     }
 
     update (action: ActionData): void {
+        //update action in editor
+        if (inGameEditor && inGameEditor.updateAction) {
+            inGameEditor.updateAction(action);
+        }
         if (action.wasEdited) this.action.wasEdited = true;
         if (this.action.position && !isNaN(this.action.position.x) && !isNaN(this.action.position.y) &&
             action.position && !isNaN(action.position.x) && !isNaN(action.position.y)) {
