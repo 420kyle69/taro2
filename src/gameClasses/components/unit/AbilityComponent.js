@@ -131,40 +131,15 @@ var AbilityComponent = TaroEntity.extend({
 		if (handle.cost && handle.scriptName) {
 			ability = handle;
 		} else {
-			// not in use. this is an empty object in json
 			// abilities refactor will use this
 			ability = taro.game.data.abilities[handle];
 		}
 
 		var player = self._entity.getOwner();
+
 		if (ability != undefined) {
-			var canAffordCost = true;
-
-			if (ability.cost && ability.cost.unitAttributes) {
-				// AbilityComponent.prototype.log("ability cost", ability.cost.cast)
-				for (attrName in ability.cost.unitAttributes) {
-					var cost = ability.cost.unitAttributes[attrName];
-
-					if (cost && (self._entity._stats.attributes[attrName] == undefined || self._entity._stats.attributes[attrName].value < cost)) {
-						canAffordCost = false;
-						break;
-					}
-				}
-			}
-			if (ability.cost && ability.cost.playerAttributes && canAffordCost && player && player._stats) {
-				// AbilityComponent.prototype.log("ability cost", ability.cost.cast)
-				for (attrName in ability.cost.playerAttributes) {
-					var cost = ability.cost.playerAttributes[attrName];
-					// AbilityComponent.prototype.log("attribute value", attrName, self._entity._stats.attributes[attrName])
-					if (cost && (player._stats.attributes[attrName] == undefined ||
-						player._stats.attributes[attrName].value < cost)
-					) {
-						canAffordCost = false;
-						break;
-					}
-				}
-			}
-			if (canAffordCost) {
+			// moved check for canAffordCost to its own method
+			if (this.canAffordCost(ability, player)) {
 				// process cost
 				var unitAttr = { attributes: {} };
 				if (ability.cost && ability.cost.unitAttributes) {
@@ -214,6 +189,37 @@ var AbilityComponent = TaroEntity.extend({
 		} else {
 			AbilityComponent.prototype.log(`undefined ability ${handle}`);
 		}
+	},
+
+	canAffordCost: function(ability, player) {
+		let canAffordCost = true;
+
+		if (ability.cost && ability.cost.unitAttributes) {
+			// AbilityComponent.prototype.log("ability cost", ability.cost.cast)
+			for (attrName in ability.cost.unitAttributes) {
+				const cost = ability.cost.unitAttributes[attrName];
+
+				if (cost && (this._entity._stats.attributes[attrName] == undefined || this._entity._stats.attributes[attrName].value < cost)) {
+					canAffordCost = false;
+					break;
+				}
+			}
+		}
+		if (ability.cost && ability.cost.playerAttributes && canAffordCost && player && player._stats) {
+			// AbilityComponent.prototype.log("ability cost", ability.cost.cast)
+			for (attrName in ability.cost.playerAttributes) {
+				const cost = ability.cost.playerAttributes[attrName];
+				// AbilityComponent.prototype.log("attribute value", attrName, this._entity._stats.attributes[attrName])
+				if (cost && (player._stats.attributes[attrName] == undefined ||
+					player._stats.attributes[attrName].value < cost)
+				) {
+					canAffordCost = false;
+					break;
+				}
+			}
+		}
+
+		return canAffordCost;
 	}
 });
 
