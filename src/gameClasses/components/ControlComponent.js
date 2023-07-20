@@ -221,9 +221,9 @@ var ControlComponent = TaroEntity.extend({
 									return id === unit._stats.type;
 								})
 						) {
-							// queue ability start
+							const ability = taro.game.data.abilities[this.abilityTriggers.keyDown[key].start[i][0]];
 
-							console.log('valid unit | ability start');
+							unit.ability.startCast(ability);
 						}
 					}
 
@@ -234,9 +234,9 @@ var ControlComponent = TaroEntity.extend({
 									return id === unit._stats.type;
 								})
 						) {
-							// queue ability stop
+							const ability = taro.game.data.abilities[this.abilityTriggers.keyDown[key].stop[i][0]];
 
-							console.log('valid unit | ability stop');
+							unit.ability.stopCast(ability);
 						}
 					}
 				}
@@ -334,9 +334,9 @@ var ControlComponent = TaroEntity.extend({
 								return id === unit._stats.type;
 							})
 					) {
-						// queue ability start
+						const ability = taro.game.data.abilities[this.abilityTriggers.keyUp[key].start[i][0]];
 
-						console.log('valid unit | ability start');
+						unit.ability.startCast(ability);
 					}
 				}
 
@@ -347,9 +347,10 @@ var ControlComponent = TaroEntity.extend({
 								return id === unit._stats.type;
 							})
 					) {
-						// queue ability stop
+						const ability = taro.game.data.abilities[this.abilityTriggers.keyUp[key].stop[i][0]];
 
-						console.log('valid unit | ability stop');
+						unit.ability.stopCast(ability);
+
 					}
 				}
 			}

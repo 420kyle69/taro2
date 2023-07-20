@@ -140,25 +140,8 @@ var AbilityComponent = TaroEntity.extend({
 		if (ability != undefined) {
 			// moved check for canAffordCost to its own method
 			if (this.canAffordCost(ability, player)) {
-				// process cost
-				var unitAttr = { attributes: {} };
-				if (ability.cost && ability.cost.unitAttributes) {
-					for (attrName in ability.cost.unitAttributes) {
-						if (self._entity._stats.attributes[attrName]) {
-							var newValue = self._entity._stats.attributes[attrName].value - ability.cost.unitAttributes[attrName];
-							self._entity.attribute.update(attrName, newValue, true);
-						}
-					}
-				}
-				var playerAttr = { attributes: {} };
-				if (ability.cost && ability.cost.playerAttributes && player && player._stats) {
-					for (attrName in ability.cost.playerAttributes) {
-						if (player._stats.attributes[attrName]) {
-							var newValue = player._stats.attributes[attrName].value - ability.cost.playerAttributes[attrName];
-							player.attribute.update(attrName, newValue, true);
-						}
-					}
-				}
+				// moved attribute cost processing to its own method
+				this.payCost(ability, player);
 
 				if (taro.isServer || taro.isClient && taro.physics) {
 
@@ -167,7 +150,11 @@ var AbilityComponent = TaroEntity.extend({
 							AbilityComponent.prototype.log(`ability cast: running script ${taro.game.data.scripts[ability.scriptName].name} ${ability.scriptName}`);
 						}
 
+						// not actually sending data within unitAttr or playerAttr. looks like this is just forcing update
 						if (taro.isServer) {
+
+							var playerAttr = { attributes: {} };
+							var unitAttr = { attributes: {} };
 							// calling stream for unit because there is delay in transferring attributes data
 							if (Object.keys(unitAttr.attributes || []).length > 0) {
 								self._entity.streamUpdateData(unitAttr);
@@ -220,6 +207,53 @@ var AbilityComponent = TaroEntity.extend({
 		}
 
 		return canAffordCost;
+	},
+
+	payCost: function(ability, player) {
+		// process cost
+		if (ability.cost && ability.cost.unitAttributes) {
+			for (attrName in ability.cost.unitAttributes) {
+				if (this._entity._stats.attributes[attrName]) {
+					var newValue = this._entity._stats.attributes[attrName].value - ability.cost.unitAttributes[attrName];
+					this._entity.attribute.update(attrName, newValue, true);
+				}
+			}
+		}
+
+		if (ability.cost && ability.cost.playerAttributes && player && player._stats) {
+			for (attrName in ability.cost.playerAttributes) {
+				if (player._stats.attributes[attrName]) {
+					var newValue = player._stats.attributes[attrName].value - ability.cost.playerAttributes[attrName];
+					player.attribute.update(attrName, newValue, true);
+				}
+			}
+		}
+	},
+
+	startCast: function (ability) {
+		const player = this._entity.getOwner();
+
+		if (!this.canAffordCost(ability, player)) {
+			return;
+		}
+
+		this.payCost(ability, player);
+
+		console.log(ability);
+		for (let obj in this._entity.script.scripts) {
+
+			if (
+				this._entity.script.scripts[obj].name &&
+				this._entity.script.scripts[obj].name === ability.script
+			) {
+				this._entity.script.runScript(obj, { triggeredBy: { unitId: this._entity.id()} });
+			}
+		}
+
+	},
+
+	stopCast: function (ability) {
+		console.log('stop casting: ', ability);
 	}
 });
 
