@@ -71,7 +71,7 @@ var EntityImage = /** @class */ (function () {
             var clickDelay = taro._currentTime - lastTime;
             lastTime = taro._currentTime;
             if (clickDelay < 350) {
-                if (inGameEditor && inGameEditor.updateAction) {
+                if (inGameEditor && inGameEditor.showScriptForEntity) {
                     inGameEditor.showScriptForEntity(action.actionId);
                 }
             }
