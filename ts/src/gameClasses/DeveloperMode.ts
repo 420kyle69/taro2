@@ -315,17 +315,17 @@ class DeveloperMode {
 				if (action.actionId === data.actionId) {
 					found = true;
 					if (data.wasEdited) action.wasEdited = true;
-					if (data.position && data.position.x && data.position.y &&
-						action.position && action.position.x && action.position.y) {
+					if (data.position && !isNaN(data.position.x) && !isNaN(data.position.y) &&
+						action.position && !isNaN(action.position.x) && !isNaN(action.position.y)) {
 						action.position = data.position;
 					}
-					if (data.angle && action.angle) {
+					if (!isNaN(data.angle) && !isNaN(action.angle)) {
 						action.angle = data.angle;
 					}
-                    if (data.width && action.width) {
+                    if (!isNaN(data.width) && !isNaN(action.width)) {
                         action.width = data.width;
                     }
-                    if (data.height && action.height) {
+                    if (!isNaN(data.height) && !isNaN(action.height)) {
                         action.height = data.height;
                     }
                     if (data.wasDeleted) {
