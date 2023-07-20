@@ -60,11 +60,20 @@ var EntityImage = /** @class */ (function () {
         image.setInteractive({ draggable: true });
         image.entity = this;
         entityImages.push(image);
+        var lastTime = 0;
         image.on('pointerdown', function () {
             if (!devModeTools.cursorButton.active)
                 return;
             if (entityEditor.selectedEntityImage !== _this) {
                 entityEditor.selectEntityImage(_this);
+            }
+            //double click
+            var clickDelay = taro._currentTime - lastTime;
+            lastTime = taro._currentTime;
+            if (clickDelay < 350) {
+                if (inGameEditor && inGameEditor.updateAction) {
+                    inGameEditor.showScriptForEntity(action.actionId);
+                }
             }
             _this.startDragX = image.x;
             _this.startDragY = image.y;
@@ -180,6 +189,10 @@ var EntityImage = /** @class */ (function () {
         outline.angle = image.angle;
     };
     EntityImage.prototype.update = function (action) {
+        //update action in editor
+        if (inGameEditor && inGameEditor.updateAction) {
+            inGameEditor.updateAction(action);
+        }
         if (action.wasEdited)
             this.action.wasEdited = true;
         if (this.action.position && !isNaN(this.action.position.x) && !isNaN(this.action.position.y) &&
