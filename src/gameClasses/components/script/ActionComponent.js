@@ -1426,7 +1426,7 @@ var ActionComponent = TaroEntity.extend({
 
 						/* particles */
 
-					case 'emitParticleOnceAtPosition':
+					case 'emitParticlesAtPosition':
 						var position = self._script.variable.getValue(action.position, vars);
 						var particleTypeId = self._script.variable.getValue(action.particleType, vars);
 						var angle = self._script.variable.getValue(action.angle, vars);
@@ -1435,7 +1435,7 @@ var ActionComponent = TaroEntity.extend({
 						}
 						break;
 
-					case 'emitParticleAttachedToEntity':
+					case 'emitParticlesFromEntity':
 						var particleTypeId = self._script.variable.getValue(action.particleType, vars);
 						var angle = self._script.variable.getValue(action.angle, vars);
 						var entity = self._script.variable.getValue(action.entity, vars);
