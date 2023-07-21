@@ -949,9 +949,8 @@ var Server = TaroClass.extend({
 		}
 	},
 
-	creditAdRewardToOwner: function (data, clientId) {
-		const token = data.token;
-		if (token && data.status && clientId) {
+	creditAdRewardToOwner: function (status, clientId) {
+		if (status && clientId) {
 			try {
 				const isUsedToken = taro.server.usedAdRewardJwts[token];
 				if (isUsedToken) {
@@ -992,11 +991,10 @@ var Server = TaroClass.extend({
 					game: taro.game.data.defaultData._id,
 					userId: player._stats.userId,
 					clientId,
-					status: data.status,
+					status: status,
 				});
-
 			} catch (e) {
-				console.log('creditAdRewardToOwner - invalid token', e.message, data.token);
+				console.log('creditAdRewardToOwner', e.message);
 			}
 		}
 	},
