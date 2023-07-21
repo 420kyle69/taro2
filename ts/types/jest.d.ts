@@ -29,7 +29,7 @@
 //                 Tom Mrazauskas <https://github.com/mrazauskas>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 // Minimum TypeScript Version: 4.3
-
+// @ts-nocheck
 declare var beforeAll: jest.Lifecycle;
 declare var beforeEach: jest.Lifecycle;
 declare var afterAll: jest.Lifecycle;
