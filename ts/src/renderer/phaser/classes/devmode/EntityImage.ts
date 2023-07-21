@@ -71,6 +71,7 @@ class EntityImage {
         entityImages.push(image);
 
         let lastTime = 0;
+        let editedAction: ActionData = this.editedAction = {actionId: action.actionId};
         image.on('pointerdown', () => {
             if (!devModeTools.cursorButton.active) return;
             if (entityEditor.selectedEntityImage !== this) {
@@ -106,51 +107,22 @@ class EntityImage {
             this.updateOutline();
         });
 
-        const outline = entityEditor.outline;
+        const outlineHover = entityEditor.outlineHover;
 
         image.on('pointerover', () => {
             scene.input.setTopOnly(true);
             if (!devModeTools.cursorButton.active || entityEditor.activeHandler) return;
-            if (entityEditor.selectedEntityImage !== this) entityEditor.selectedEntityImage = null;
             this.updateOutline();
         });
 
         image.on('pointerout', () => {
             if (entityEditor.selectedEntityImage === this) return;
-            outline.clear();
-        });
-
-        let editedAction: ActionData = this.editedAction = {actionId: action.actionId};
-
-        scene.input.on('drag', (pointer, gameObject, dragX, dragY) => {
-            if (!devModeTools.cursorButton.active || gameObject !== image) return;
-            if (this.dragMode === 'position') {
-                gameObject.x = dragX;
-                gameObject.y = dragY;
-                editedAction.position = {x: dragX, y: dragY};
-            } else if (this.dragMode === 'angle' && !isNaN(action.angle)) {
-                const target = Phaser.Math.Angle.BetweenPoints(gameObject, { x: dragX, y: dragY });
-                gameObject.rotation = target;
-                editedAction.angle = gameObject.angle;
-            } else if (this.dragMode === 'scale' && !isNaN(action.width) && !isNaN(action.height)) {
-                const dragScale = Math.min(500, Math.max(-250, (this.startDragY - dragY)));
-                gameObject.scale = this.scale + this.scale * dragScale / 500;
-                editedAction.width = image.displayWidth;
-                editedAction.height = image.displayHeight;
-            }
-            this.updateOutline();
-        });
-
-        scene.input.on('dragend', (pointer, gameObject) => {
-            if (gameObject !== image) return;
-            this.dragMode = null;
-            this.edit(editedAction);
-            editedAction = {actionId: action.actionId};
+            outlineHover.clear();
         });
     }
 
     edit (action: ActionData): void {
-        if (!this.action.wasEdited) {
+        if (!this.action.wasEdited || !action.wasEdited) {
             this.action.wasEdited = true;
             action.wasEdited = true;
         }
@@ -159,17 +131,20 @@ class EntityImage {
 
     updateOutline (hide?): void {
         const outline = this.entityEditor.outline;
+        const outlineHover = this.entityEditor.outlineHover;
         const selectionContainer = this.entityEditor.selectionContainer;
         if (hide) {
             outline.clear();
+            outlineHover.clear();
             selectionContainer.setVisible(false);
             return;
         }
         const handlers = this.entityEditor.handlers;
         const image = this.image;
 
-		outline.clear();
         if (this.devModeTools.entityEditor.selectedEntityImage === this) {
+            outline.clear();
+            outlineHover.clear();
             outline.lineStyle(6, 0x036ffc, 1);
             selectionContainer.setVisible(true);
             selectionContainer.x = image.x;
@@ -189,15 +164,20 @@ class EntityImage {
             handlers.bottom.setPosition(0, image.displayHeight / 2 + smallDistance);
             handlers.bottomLeft.setPosition(-image.displayWidth / 2 - smallDistance, image.displayHeight / 2 + smallDistance);
             handlers.bottomLeftRotate.setPosition(-image.displayWidth / 2 - largeDistance, image.displayHeight / 2 + largeDistance);
-            handlers.left.setPosition(-image.displayWidth / 2 - smallDistance, 0); 
+            handlers.left.setPosition(-image.displayWidth / 2 - smallDistance, 0);
+
+            outline.strokeRect(-image.displayWidth / 2, -image.displayHeight / 2, image.displayWidth, image.displayHeight);
+            outline.x = image.x;
+            outline.y = image.y;
+            outline.angle = image.angle;
         } else {
-            outline.lineStyle(2, 0x036ffc, 1);
-            selectionContainer.setVisible(false);
+            outlineHover.clear();
+            outlineHover.lineStyle(2, 0x036ffc, 1);
+            outlineHover.strokeRect(-image.displayWidth / 2, -image.displayHeight / 2, image.displayWidth, image.displayHeight);
+            outlineHover.x = image.x;
+            outlineHover.y = image.y;
+            outlineHover.angle = image.angle;
         }
-        outline.strokeRect(-image.displayWidth / 2, -image.displayHeight / 2, image.displayWidth, image.displayHeight);
-        outline.x = image.x;
-        outline.y = image.y;
-        outline.angle = image.angle;
     }
 
     update (action: ActionData): void {

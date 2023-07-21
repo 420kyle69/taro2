@@ -3,6 +3,7 @@ class EntityEditor {
     preview: Phaser.GameObjects.Image;
 
     outline: Phaser.GameObjects.Graphics;
+    outlineHover: Phaser.GameObjects.Graphics;
     selectionContainer: Phaser.GameObjects.Container;
     handlers: Record<string, Phaser.GameObjects.Rectangle & {orientation?: HandlerType}>;
     activeHandler: boolean;
@@ -24,6 +25,7 @@ class EntityEditor {
         this.preview.setAlpha(0.75).setVisible(false);
 
         this.outline = gameScene.add.graphics().setDepth(1000);
+        this.outlineHover = gameScene.add.graphics().setDepth(1000);
         const selectionContainer = this.selectionContainer = new Phaser.GameObjects.Container(gameScene);
 
         const scaleArray = ['topLeft', 'topRight', 'bottomRight', 'bottomLeft', 'left', 'right', 'top', 'bottom'];
@@ -52,46 +54,8 @@ class EntityEditor {
             if (this.selectedEntityImage) this.selectedEntityImage.updateOutline();
         });
 
-        Object.values(this.handlers).forEach(handler => {
-            if (angleArray.includes(handler.orientation)) {
-                handler.setInteractive({ draggable: true , cursor: 'url(/assets/cursors/rotate.cur), pointer' });
-            } else {
-                selectionContainer.bringToTop(handler);
-                handler.setInteractive({ draggable: true/* , cursor: 'url(assets/cursors/resize.cur), pointer'*/ });
-            }
-
-            handler.on('pointerover', () => {
-                gameScene.input.setTopOnly(true);
-                handler.fillColor = devModeTools.COLOR_LIGHT;
-            });
-    
-            handler.on('pointerout', () => {
-                if (angleArray.includes(handler.orientation)) {
-                    handler.fillColor = COLOR_HANDLER;
-                } else {
-                    handler.fillColor = COLOR_HANDLER;
-                }
-            });
-
-            handler.on('pointerdown', (pointer) => {
-                const selectedEntityImage = this.selectedEntityImage;
-                if (!devModeTools.cursorButton.active || !selectedEntityImage) return;
-
-                this.activeHandler = true;
-                const worldPoint = this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
-                selectedEntityImage.startDragX = worldPoint.x;
-                selectedEntityImage.startDragY = worldPoint.y;
-                selectedEntityImage.rotation = selectedEntityImage.image.rotation;
-                selectedEntityImage.scale = selectedEntityImage.image.scale;
-                selectedEntityImage.scaleX = selectedEntityImage.image.scaleX;
-                selectedEntityImage.scaleY = selectedEntityImage.image.scaleY;
-                selectedEntityImage.displayWidth = selectedEntityImage.image.displayWidth;
-                selectedEntityImage.displayHeight = selectedEntityImage.image.displayHeight;
-                selectedEntityImage.x = selectedEntityImage.image.x;
-                selectedEntityImage.y = selectedEntityImage.image.y;
-            });
-
-            gameScene.input.on('drag', (pointer, gameObject, dragX, dragY) => {
+        gameScene.input.on('drag', (pointer, gameObject, dragX, dragY) => {
+            Object.values(this.handlers).forEach(handler => {
                 const worldPoint = this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
                 const selectedEntityImage = this.selectedEntityImage;
                 if (!devModeTools.cursorButton.active || gameObject !== handler || !selectedEntityImage) return;
@@ -153,14 +117,83 @@ class EntityEditor {
                 }
                 selectedEntityImage.updateOutline();
             });
-    
-            gameScene.input.on('dragend', (pointer, gameObject) => {
+
+            devModeScene.entityImages.forEach((entityImage: Phaser.GameObjects.Image & {entity: EntityImage}) => {
+                if (!devModeTools.cursorButton.active || gameObject !== entityImage) return;
+                const entity = entityImage.entity;
+                if (entity.dragMode === 'position') {
+                    gameObject.x = dragX;
+                    gameObject.y = dragY;
+                    entity.editedAction.position = {x: dragX, y: dragY};
+                } else if (entity.dragMode === 'angle' && !isNaN(entity.action.angle)) {
+                    const target = Phaser.Math.Angle.BetweenPoints(gameObject, { x: dragX, y: dragY });
+                    gameObject.rotation = target;
+                    entity.editedAction.angle = gameObject.angle;
+                } else if (entity.dragMode === 'scale' && !isNaN(entity.action.width) && !isNaN(entity.action.height)) {
+                    const dragScale = Math.min(500, Math.max(-250, (entity.startDragY - dragY)));
+                    gameObject.scale = entity.scale + entity.scale * dragScale / 500;
+                    entity.editedAction.width = entityImage.displayWidth;
+                    entity.editedAction.height = entityImage.displayHeight;
+                }
+                entity.updateOutline();
+            });
+        });
+
+        gameScene.input.on('dragend', (pointer, gameObject) => {
+            Object.values(this.handlers).forEach(handler => {
                 const selectedEntityImage = this.selectedEntityImage;
                 if (gameObject !== handler || !selectedEntityImage) return;
                 this.activeHandler = false;
                 selectedEntityImage.dragMode = null;
                 selectedEntityImage.edit(selectedEntityImage.editedAction);
                 selectedEntityImage.editedAction = {actionId: selectedEntityImage.action.actionId};
+            });
+            devModeScene.entityImages.forEach((entityImage: Phaser.GameObjects.Image & {entity: EntityImage}) => {
+                if (gameObject !== entityImage) return;
+                const entity = entityImage.entity;
+                entity.dragMode = null;
+                entity.edit(entity.editedAction);
+                entity.editedAction = {actionId: entity.action.actionId};
+            });
+        });
+
+        Object.values(this.handlers).forEach(handler => {
+            if (angleArray.includes(handler.orientation)) {
+                handler.setInteractive({ draggable: true , cursor: 'url(/assets/cursors/rotate.cur), pointer' });
+            } else {
+                selectionContainer.bringToTop(handler);
+                handler.setInteractive({ draggable: true/* , cursor: 'url(assets/cursors/resize.cur), pointer'*/ });
+            }
+
+            handler.on('pointerover', () => {
+                gameScene.input.setTopOnly(true);
+                handler.fillColor = devModeTools.COLOR_LIGHT;
+            });
+    
+            handler.on('pointerout', () => {
+                if (angleArray.includes(handler.orientation)) {
+                    handler.fillColor = COLOR_HANDLER;
+                } else {
+                    handler.fillColor = COLOR_HANDLER;
+                }
+            });
+
+            handler.on('pointerdown', (pointer) => {
+                const selectedEntityImage = this.selectedEntityImage;
+                if (!devModeTools.cursorButton.active || !selectedEntityImage) return;
+
+                this.activeHandler = true;
+                const worldPoint = this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
+                selectedEntityImage.startDragX = worldPoint.x;
+                selectedEntityImage.startDragY = worldPoint.y;
+                selectedEntityImage.rotation = selectedEntityImage.image.rotation;
+                selectedEntityImage.scale = selectedEntityImage.image.scale;
+                selectedEntityImage.scaleX = selectedEntityImage.image.scaleX;
+                selectedEntityImage.scaleY = selectedEntityImage.image.scaleY;
+                selectedEntityImage.displayWidth = selectedEntityImage.image.displayWidth;
+                selectedEntityImage.displayHeight = selectedEntityImage.image.displayHeight;
+                selectedEntityImage.x = selectedEntityImage.image.x;
+                selectedEntityImage.y = selectedEntityImage.image.y;
             });
         });
 
@@ -232,7 +265,32 @@ class EntityEditor {
             }
 		});
 
-        this.selectedEntityImage = null;
+        gameScene.input.on('pointerdown', (pointer, gameObjects) => {
+            if (!pointer.leftButtonDown() || !this.selectedEntityImage) return;
+            if (gameObjects.includes(this.selectedEntityImage.image)) return;
+            let outside = false;
+            if (gameObjects.length === 0) {
+                outside = true;
+            }
+            gameObjects.forEach((gameObject) => {
+                if (!gameObject.entity && !gameObject.orientation) {
+                    outside = true;
+                }
+            });
+            if (outside) {
+                this.devModeTools.entityEditor.selectEntityImage(null);
+            }
+        });
+
+        devModeScene.input.on('pointerdown', (pointer, gameObjects) => {
+            if (!this.selectedEntityImage) return;
+            if (gameObjects.includes(this.selectedEntityImage.image)) return;
+            if (gameObjects.length > 0) {
+                this.devModeTools.entityEditor.selectEntityImage(null);
+            }
+        });
+
+        this.selectEntityImage(null);
     }
 
     createHandler (orientation: HandlerType, size: number, alpha: number): void {
@@ -312,6 +370,11 @@ class EntityEditor {
 	}
     
     selectEntityImage(entityImage: EntityImage): void {
+        if (entityImage === null) {
+            if (this.selectedEntityImage) this.selectedEntityImage.updateOutline(true);
+            this.selectedEntityImage = null;
+            return;
+        }
         this.selectedEntityImage = entityImage;
         entityImage.updateOutline();
     }
@@ -332,7 +395,7 @@ class EntityEditor {
     deleteInitEntity(): void {
         if (this.selectedEntityImage) {
             this.selectedEntityImage.delete();
-            this.selectedEntityImage = null;
+            this.selectEntityImage(null);
         }
     }
 }
