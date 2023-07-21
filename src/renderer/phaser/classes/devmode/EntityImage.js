@@ -111,7 +111,7 @@ var EntityImage = /** @class */ (function () {
         });
     }
     EntityImage.prototype.edit = function (action) {
-        if (!this.action.wasEdited) {
+        if (!this.action.wasEdited || !action.wasEdited) {
             this.action.wasEdited = true;
             action.wasEdited = true;
         }

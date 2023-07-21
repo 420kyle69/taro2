@@ -122,7 +122,7 @@ class EntityImage {
     }
 
     edit (action: ActionData): void {
-        if (!this.action.wasEdited) {
+        if (!this.action.wasEdited || !action.wasEdited) {
             this.action.wasEdited = true;
             action.wasEdited = true;
         }
