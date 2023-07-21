@@ -104,7 +104,7 @@ var AdComponent = TaroEntity.extend({
 			// 	sendMessageToReactNative(eventData);
 			// } else {
 				// on desktop
-				if (typeof isInIFrame !== 'undefined' && isInIFrame) {
+				if (typeof isInY8IFrame !== 'undefined' && isInY8IFrame) {
 					self.prerollEventHandler('video-ad-skip-in-iframe');
 					return;
 				}
