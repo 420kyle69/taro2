@@ -79,7 +79,8 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 		component.b2Body.prototype.getLinearVelocity = component.b2Body.prototype.GetLinearVelocity;
 		component.b2Body.prototype.applyLinearImpulse = component.b2Body.prototype.ApplyLinearImpulse;
 		component.b2Body.prototype.applyTorque = component.b2Body.prototype.ApplyTorque;
-
+		component.b2Body.prototype.setActive = component.b2Body.prototype.SetEnabled;
+		component.b2Body.prototype.isActive = component.b2Body.prototype.IsEnabled;
 		component.b2Body.prototype.getWorldCenter = component.b2Body.prototype.GetWorldCenter;
 		component.b2Body.prototype.applyForce = component.b2Body.prototype.ApplyForce;
 		component.b2Vec2.prototype.set = component.b2Vec2.prototype.Set;
