@@ -415,6 +415,7 @@ var Player = TaroEntity.extend({
 		}
 
 		let roles = taro.game.data.roles || [];
+
 		let isModerator = self._stats?.roleIds && roles.find(role => role?.permissions?.moderator && self._stats?.roleIds.includes(role._id.toString()));
 
 		return isModerator;
