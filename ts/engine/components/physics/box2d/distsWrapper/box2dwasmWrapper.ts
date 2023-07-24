@@ -280,14 +280,15 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 												finalWidth = (entity._bounds2d.x / 2);
 												finalHeight = (entity._bounds2d.y / 2);
 											}
-
+											const pos = self.recordLeak(new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio))
 											// Set the polygon as a box
 											tempShape.SetAsBox(
 												(finalWidth / self._scaleRatio),
 												(finalHeight / self._scaleRatio),
-												self.recordLeak(new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio)),
+												pos,
 												0
 											);
+											self.destroyB2dObj(pos);
 
 											break;
 									}
@@ -378,12 +379,12 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 				// joint_def.lowerAngle = aBody.itemAnchor.lowerAngle * 0.0174533; // degree to rad
 				// joint_def.upperAngle = aBody.itemAnchor.upperAngle * 0.0174533; // degree to rad
 
-				joint_def.localAnchorA.Set(anchorA.x / self._scaleRatio, anchorA.y / self._scaleRatio); // item anchor
-				joint_def.localAnchorB.Set(anchorB.x / self._scaleRatio, -anchorB.y / self._scaleRatio); // unit anchor
+				joint_def.GetLocalAnchorA().Set(anchorA.x / self._scaleRatio, anchorA.y / self._scaleRatio); // item anchor
+				joint_def.GetLocalAnchorB().Set(anchorB.x / self._scaleRatio, -anchorB.y / self._scaleRatio); // unit anchor
 			} else // weld joint
 			{
 				var joint_def = self.recordLeak(new self.b2WeldJointDef());
-				const pos = self.recordLeak(new self.b2Vec2(entityA.body.GetWorldCenter(), entityB.body.GetWorldCenter()));
+				const pos = self.recordLeak(entityA.body.GetWorldCenter());
 				joint_def.Initialize(
 					entityA.body,
 					entityB.body,
@@ -393,8 +394,8 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 			}
 
 			var joint = self._world.CreateJoint(joint_def); // joint between two pieces
-			self.destroyB2dObj(joint_def);
-			self.freeLeaked();
+			// self.destroyB2dObj(joint_def);
+			// self.freeLeaked();
 			// var serverStats = taro.server.getStatus()
 			PhysicsComponent.prototype.log('joint created ', aBody.jointType);
 
