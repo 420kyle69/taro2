@@ -60,11 +60,21 @@ var EntityImage = /** @class */ (function () {
         image.setInteractive({ draggable: true });
         image.entity = this;
         entityImages.push(image);
+        var lastTime = 0;
+        var editedAction = this.editedAction = { actionId: action.actionId };
         image.on('pointerdown', function () {
             if (!devModeTools.cursorButton.active)
                 return;
             if (entityEditor.selectedEntityImage !== _this) {
                 entityEditor.selectEntityImage(_this);
+            }
+            //double click
+            var clickDelay = taro._currentTime - lastTime;
+            lastTime = taro._currentTime;
+            if (clickDelay < 350) {
+                if (inGameEditor && inGameEditor.showScriptForEntity) {
+                    inGameEditor.showScriptForEntity(action.actionId);
+                }
             }
             _this.startDragX = image.x;
             _this.startDragY = image.y;
@@ -87,52 +97,21 @@ var EntityImage = /** @class */ (function () {
             }
             _this.updateOutline();
         });
-        var outline = entityEditor.outline;
+        var outlineHover = entityEditor.outlineHover;
         image.on('pointerover', function () {
             scene.input.setTopOnly(true);
             if (!devModeTools.cursorButton.active || entityEditor.activeHandler)
                 return;
-            if (entityEditor.selectedEntityImage !== _this)
-                entityEditor.selectedEntityImage = null;
             _this.updateOutline();
         });
         image.on('pointerout', function () {
             if (entityEditor.selectedEntityImage === _this)
                 return;
-            outline.clear();
-        });
-        var editedAction = this.editedAction = { actionId: action.actionId };
-        scene.input.on('drag', function (pointer, gameObject, dragX, dragY) {
-            if (!devModeTools.cursorButton.active || gameObject !== image)
-                return;
-            if (_this.dragMode === 'position') {
-                gameObject.x = dragX;
-                gameObject.y = dragY;
-                editedAction.position = { x: dragX, y: dragY };
-            }
-            else if (_this.dragMode === 'angle' && !isNaN(action.angle)) {
-                var target = Phaser.Math.Angle.BetweenPoints(gameObject, { x: dragX, y: dragY });
-                gameObject.rotation = target;
-                editedAction.angle = gameObject.angle;
-            }
-            else if (_this.dragMode === 'scale' && !isNaN(action.width) && !isNaN(action.height)) {
-                var dragScale = Math.min(500, Math.max(-250, (_this.startDragY - dragY)));
-                gameObject.scale = _this.scale + _this.scale * dragScale / 500;
-                editedAction.width = image.displayWidth;
-                editedAction.height = image.displayHeight;
-            }
-            _this.updateOutline();
-        });
-        scene.input.on('dragend', function (pointer, gameObject) {
-            if (gameObject !== image)
-                return;
-            _this.dragMode = null;
-            _this.edit(editedAction);
-            editedAction = { actionId: action.actionId };
+            outlineHover.clear();
         });
     }
     EntityImage.prototype.edit = function (action) {
-        if (!this.action.wasEdited) {
+        if (!this.action.wasEdited || !action.wasEdited) {
             this.action.wasEdited = true;
             action.wasEdited = true;
         }
@@ -140,16 +119,19 @@ var EntityImage = /** @class */ (function () {
     };
     EntityImage.prototype.updateOutline = function (hide) {
         var outline = this.entityEditor.outline;
+        var outlineHover = this.entityEditor.outlineHover;
         var selectionContainer = this.entityEditor.selectionContainer;
         if (hide) {
             outline.clear();
+            outlineHover.clear();
             selectionContainer.setVisible(false);
             return;
         }
         var handlers = this.entityEditor.handlers;
         var image = this.image;
-        outline.clear();
         if (this.devModeTools.entityEditor.selectedEntityImage === this) {
+            outline.clear();
+            outlineHover.clear();
             outline.lineStyle(6, 0x036ffc, 1);
             selectionContainer.setVisible(true);
             selectionContainer.x = image.x;
@@ -169,17 +151,25 @@ var EntityImage = /** @class */ (function () {
             handlers.bottomLeft.setPosition(-image.displayWidth / 2 - smallDistance, image.displayHeight / 2 + smallDistance);
             handlers.bottomLeftRotate.setPosition(-image.displayWidth / 2 - largeDistance, image.displayHeight / 2 + largeDistance);
             handlers.left.setPosition(-image.displayWidth / 2 - smallDistance, 0);
+            outline.strokeRect(-image.displayWidth / 2, -image.displayHeight / 2, image.displayWidth, image.displayHeight);
+            outline.x = image.x;
+            outline.y = image.y;
+            outline.angle = image.angle;
         }
         else {
-            outline.lineStyle(2, 0x036ffc, 1);
-            selectionContainer.setVisible(false);
+            outlineHover.clear();
+            outlineHover.lineStyle(2, 0x036ffc, 1);
+            outlineHover.strokeRect(-image.displayWidth / 2, -image.displayHeight / 2, image.displayWidth, image.displayHeight);
+            outlineHover.x = image.x;
+            outlineHover.y = image.y;
+            outlineHover.angle = image.angle;
         }
-        outline.strokeRect(-image.displayWidth / 2, -image.displayHeight / 2, image.displayWidth, image.displayHeight);
-        outline.x = image.x;
-        outline.y = image.y;
-        outline.angle = image.angle;
     };
     EntityImage.prototype.update = function (action) {
+        //update action in editor
+        if (inGameEditor && inGameEditor.updateAction) {
+            inGameEditor.updateAction(action);
+        }
         if (action.wasEdited)
             this.action.wasEdited = true;
         if (this.action.position && !isNaN(this.action.position.x) && !isNaN(this.action.position.y) &&
