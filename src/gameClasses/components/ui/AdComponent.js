@@ -109,6 +109,16 @@ var AdComponent = TaroEntity.extend({
 					return;
 				}
 				
+				// if user is not in the play tab, don't play ad
+				if (typeof window?.inGameEditor?.getCurrentTab === 'function' && window.inGameEditor.getCurrentTab() !== 'play') {
+					return;
+				}
+				
+				// if game tab is not focussed, don't play ad - won't work even if the devtools are focussed.
+				if (document.hasFocus() === false) {
+					return;
+				}
+				
 				//check if the adslib is loaded correctly or blocked by adblockers etc.
 				if (!window.isAdBlockEnabled && typeof window.aiptag.adplayer !== 'undefined') {
 					// showing ad
