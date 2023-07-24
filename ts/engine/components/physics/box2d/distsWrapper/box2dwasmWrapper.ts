@@ -383,12 +383,13 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 			} else // weld joint
 			{
 				var joint_def = self.recordLeak(new self.b2WeldJointDef());
+				const pos = self.recordLeak(new self.b2Vec2(entityA.body.GetWorldCenter(), entityB.body.GetWorldCenter()));
 				joint_def.Initialize(
 					entityA.body,
 					entityB.body,
-					entityA.body.GetWorldCenter(),
-					entityB.body.GetWorldCenter()
+					pos
 				);
+				self.destroyB2dObj(pos);
 			}
 
 			var joint = self._world.CreateJoint(joint_def); // joint between two pieces

@@ -266,7 +266,7 @@ const Client = TaroEventingClass.extend({
 		if (clientPhysicsEngine) {
 			taro.addComponent(PhysicsComponent).physics.sleep(true);
 		}
-		if (taro.physics?.engine === 'box2dwasm') {
+		if (clientPhysicsEngine === 'box2dwasm') {
 			const loadedInterval = setInterval(() => {
 				if (taro.physics.gravity) {
 					clearInterval(loadedInterval);

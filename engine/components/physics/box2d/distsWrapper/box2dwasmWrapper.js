@@ -385,7 +385,9 @@ var box2dwasmWrapper = {
             else // weld joint
              {
                 var joint_def = self.recordLeak(new self.b2WeldJointDef());
-                joint_def.Initialize(entityA.body, entityB.body, entityA.body.GetWorldCenter(), entityB.body.GetWorldCenter());
+                var pos = self.recordLeak(new self.b2Vec2(entityA.body.GetWorldCenter(), entityB.body.GetWorldCenter()));
+                joint_def.Initialize(entityA.body, entityB.body, pos);
+                self.destroyB2dObj(pos);
             }
             var joint = self._world.CreateJoint(joint_def); // joint between two pieces
             self.destroyB2dObj(joint_def);
