@@ -1,4 +1,5 @@
 
+// @ts-nocheck
 // https://www.npmjs.com/package/base64-arraybuffer
 const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
@@ -88,7 +89,7 @@ var box2dwasm = (function () {
 			};
 			(function () {
 				function b(p) { a.asm = p.exports; ra = a.asm.o; Ba(); Ca = a.asm.Wu; Ea.unshift(a.asm.p); Ja--; a.monitorRunDependencies && a.monitorRunDependencies(Ja); 0 == Ja && (null !== Ka && (clearInterval(Ka), Ka = null), La && (p = La, La = null, p())) } function c(p) { b(p.instance) } function d(p) { return WebAssembly.instantiate(buffer, f).then(function (W) { return W }).then(p, function (W) { pa("failed to asynchronously prepare wasm: " + W); na(W) }) } var f = { a: Za }; Ja++; a.monitorRunDependencies && a.monitorRunDependencies(Ja);
-				if (a.instantiateWasm) try { return a.instantiateWasm(f, b) } catch (p) { return pa("Module.instantiateWasm callback failed with error: " + p), !1 } (function () { return qa || "function" !== typeof WebAssembly.instantiateStreaming || Ma() || Na.startsWith("file://") || "function" !== typeof fetch ? d(c) : fetch(Na, { credentials: "same-origin" }).then(function (p) { return WebAssembly.instantiateStreaming(p, f).then(c, function (W) { pa("wasm streaming compile failed: " + W); pa("falling back to ArrayBuffer instantiation"); return d(c) }) }) })().catch(ba);
+				if (a.instantiateWasm) try { return a.instantiateWasm(f, b) } catch (p) { return pa("Module.instantiateWasm callback failed with error: " + p), !1 } (function () { return qa || "function" !== typeof WebAssembly.instantiateStreaming || Ma() || Na.startsWith("file://") || "function" !== typeof fetch ? d(c) : new Promise((resolve)=>resolve()).then(function (p) { return WebAssembly.instantiateStreaming(p, f).then(c, function (W) { pa("wasm streaming compile failed: " + W); pa("falling back to ArrayBuffer instantiation"); return d(c) }) }) })().catch(ba);
 				return {}
 			})(); a.___wasm_call_ctors = function () { return (a.___wasm_call_ctors = a.asm.p).apply(null, arguments) };
 			var $a = a._emscripten_bind_b2ContactListener___destroy___0 = function () { return ($a = a._emscripten_bind_b2ContactListener___destroy___0 = a.asm.q).apply(null, arguments) }, ab = a._emscripten_bind_b2Shape_GetType_0 = function () { return (ab = a._emscripten_bind_b2Shape_GetType_0 = a.asm.r).apply(null, arguments) }, bb = a._emscripten_bind_b2Shape_GetChildCount_0 = function () { return (bb = a._emscripten_bind_b2Shape_GetChildCount_0 = a.asm.s).apply(null, arguments) }, cb = a._emscripten_bind_b2Shape_TestPoint_2 = function () {
