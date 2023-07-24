@@ -273,10 +273,10 @@ var box2dwasmWrapper = {
                                         case 'circle':
                                             tempShape = self.recordLeak(new self.b2CircleShape());
                                             if (fixtureDef.shape.data && typeof (fixtureDef.shape.data.radius) !== 'undefined') {
-                                                tempShape.m_radius = fixtureDef.shape.data.radius / self._scaleRatio;
+                                                tempShape.set_m_radius(fixtureDef.shape.data.radius / self._scaleRatio);
                                             }
                                             else {
-                                                tempShape.m_radius = entity._bounds2d.x / self._scaleRatio / 2;
+                                                tempShape.set_m_radius(entity._bounds2d.x / self._scaleRatio / 2);
                                             }
                                             if (fixtureDef.shape.data) {
                                                 finalX = fixtureDef.shape.data.x !== undefined ? fixtureDef.shape.data.x : 0;
