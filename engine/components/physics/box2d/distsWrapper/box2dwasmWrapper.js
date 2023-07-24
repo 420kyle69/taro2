@@ -282,7 +282,7 @@ var box2dwasmWrapper = {
                                                 finalX = fixtureDef.shape.data.x !== undefined ? fixtureDef.shape.data.x : 0;
                                                 finalY = fixtureDef.shape.data.y !== undefined ? fixtureDef.shape.data.y : 0;
                                                 if (finalX !== 0 && finalY !== 0) {
-                                                    tempShape.m_p.SetV(new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio));
+                                                    tempShape.set_m_p(new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio));
                                                 }
                                             }
                                             break;
