@@ -164,18 +164,26 @@ class GameScene extends PhaserScene {
 				const length = layer.data.length;
 				layer.width = data.map.width;
 				layer.height = data.map.height;
-				// console.log('before', layer.name, length, tilesPerLayer);
 				if (length < tilesPerLayer) {
 					for (let i = length + 1; i < tilesPerLayer; i++) {
 						layer.data[i] = 0;
 					}
 				}
-				// console.log('after', layer.name, layer.data.length, tilesPerLayer);
 			}
 		});
 
-		this.load.tilemapTiledJSON('map', this.patchMapData(data.map));
+        //to be sure every map not contain null or -1 tiles
+        data.map.layers.forEach((layer) => {
+            if (layer && layer.data) {
+                layer.data.forEach((tile, index) => {
+                    if (tile === -1 || tile === null) {
+                        layer.data[index] = 0;
+                    }
+                });
+            }
+		});
 
+		this.load.tilemapTiledJSON('map', this.patchMapData(data.map));
 		BitmapFontManager.preload(this);
 	}
 
