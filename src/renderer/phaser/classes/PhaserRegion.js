@@ -18,7 +18,7 @@ var PhaserRegion = /** @class */ (function (_super) {
     function PhaserRegion(scene, entity) {
         var _this = _super.call(this, entity) || this;
         _this.scene = scene;
-        var stats = _this.entity._stats.default;
+        var stats = _this.stats = _this.entity._stats.default;
         var gameObject = scene.add.container();
         var graphics = scene.add.graphics();
         _this.graphics = graphics;
@@ -26,20 +26,14 @@ var PhaserRegion = /** @class */ (function (_super) {
         gameObject.setSize(stats.width, stats.height);
         gameObject.setPosition(stats.x + stats.width / 2, stats.y + stats.height / 2);
         gameObject.setInteractive();
-        gameObject.on('pointerdown', function (p) {
-            if (taro.developerMode.active && taro.developerMode.activeTab !== 'play' && _this.devModeScene.devModeTools.cursorButton.active && p.leftButtonDown()) {
-                _this.scene.input.setTopOnly(true);
-                _this.devModeScene.regionEditor.addClickedList({ name: _this.entity._stats.id, x: stats.x, y: stats.y, width: stats.width, height: stats.height });
-            }
-        });
-        gameObject.on('pointerup', function (p) {
-            if (taro.developerMode.active && taro.developerMode.activeTab !== 'play' && _this.devModeScene.devModeTools.cursorButton.active && p.leftButtonReleased()) {
+        gameObject.on('pointerover', function () {
+            if (taro.developerMode.active && taro.developerMode.activeTab === 'map' && _this.devModeScene.devModeTools.cursorButton.active) {
                 _this.scene.input.setTopOnly(false);
-                _this.devModeScene.regionEditor.showClickedList();
             }
         });
         _this.gameObject = gameObject;
-        scene.renderedEntities.push(_this.gameObject);
+        _this.gameObject.phaserRegion = _this;
+        //scene.renderedEntities.push(this.gameObject);
         scene.entityLayers[EntityLayer.TREES].add(_this.gameObject);
         _this.name = _this.entity._stats.id;
         if (!stats.inside) {
@@ -47,11 +41,11 @@ var PhaserRegion = /** @class */ (function (_super) {
         }
         var devModeScene = _this.devModeScene = taro.renderer.scene.getScene('DevMode');
         devModeScene.regions.push(_this);
+        _this.updateLabel();
+        _this.transform();
         if (_this.devModeOnly && !taro.developerMode.active && taro.developerMode.activeTab !== 'play') {
             _this.hide();
         }
-        _this.updateLabel();
-        _this.transform();
         return _this;
     }
     PhaserRegion.prototype.getLabel = function () {
@@ -121,14 +115,16 @@ var PhaserRegion = /** @class */ (function (_super) {
         }
     };
     PhaserRegion.prototype.show = function () {
+        this.graphics.visible = true;
         _super.prototype.show.call(this);
         var label = this.label;
         var rt = this.rtLabel;
-        label && (label.visible = !rt);
+        label && (label.visible = true);
         rt && (rt.visible = true);
     };
     PhaserRegion.prototype.hide = function () {
         if (this.devModeOnly) {
+            this.graphics.visible = false;
             _super.prototype.hide.call(this);
         }
         var label = this.label;

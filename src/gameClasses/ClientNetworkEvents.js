@@ -7,6 +7,7 @@ var ClientNetworkEvents = {
 			$('#disconnect-reason').html(data.reason);
 			taro.menuUi.onDisconnectFromServer('clientNetworkEvents #10', data.reason);
 		}
+		taro.network._io._disconnectReason = data.reason;
 	},
 
 	_onUpdateAllEntities: function (data) {
@@ -130,7 +131,7 @@ var ClientNetworkEvents = {
 			var shopName = taro.game.data.shops[data.type] ? taro.game.data.shops[data.type].name : 'Item shop';
 			var shopDescription = taro.game.data.shops[data.type] ? taro.game.data.shops[data.type].description : '';
 			$('#modd-item-shop-header').text(shopName);
-			
+
 			if (shopDescription?.length) {
 				$('#modd-item-shop-description').text(shopDescription);
 			} else {
@@ -151,8 +152,8 @@ var ClientNetworkEvents = {
 	},
 
 	_onOpenDialogue: function (data) {
-		if (data.type) {
-			taro.playerUi.openDialogueModal(data.type, data.extraData);
+		if (data.dialogueId) {
+			taro.playerUi.openDialogueModal(data.dialogueId, data.extraData);
 		}
 	},
 
@@ -477,6 +478,14 @@ var ClientNetworkEvents = {
 		taro.client.emit('editRegion', data);
 	},
 
+    _onEditInitEntity: function (data) {
+        taro.client.emit('editInitEntity', data);
+    },
+
+    _updateClientInitEntities: function (data) {
+        taro.developerMode.updateClientInitEntities(data);
+    },
+
 	_onUpdateUnit: function(data) {
 		taro.developerMode.updateUnit(data);
 	},
@@ -496,7 +505,10 @@ var ClientNetworkEvents = {
 			element.innerHTML += `<li style='font-size:12px;'>${log}</li>`;
 			taro.client.errorLogs.push(log);
 			$('#dev-error-button').text(`Errors (${taro.client.errorLogs.length})`);
+			$('#server-console').append(`<span class="badge badge-danger">${log}</span><br/>`);
 		}
+
+		window.reactApp.showErrorToast(logs[Object.keys(logs)[Object.keys(logs).length - 1]]);
 	},
 
 	_onSound: function (data) {

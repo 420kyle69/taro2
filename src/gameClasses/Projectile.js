@@ -37,8 +37,11 @@ var Projectile = TaroEntityPhysics.extend({
 			self.mount(taro.$('baseScene'));
 		}
 
-		if (taro.isClient) {
-			taro.client.emit('create-projectile', this);
+		if (
+			!taro.game.cspEnabled || // server-streamed projectiles are always rendered
+			(taro.game.cspEnabled && self._stats.sourceItemId === undefined || self._stats.streamMode) // if CSP is enabled
+		) {
+			this.startRendering();
 		}
 
 		if (self._stats.states) {
@@ -71,21 +74,19 @@ var Projectile = TaroEntityPhysics.extend({
 
 		this.updateBody(data.defaultData);
 
-		var sourceItem = this.getSourceItem();
-
 		if (taro.isServer) {
-
 			// stream projectile data if
-			if (!taro.network.isPaused && (
+			if (!taro.network.isPaused &&
+				(
 					!taro.game.data.defaultData.clientPhysicsEngine || // client side isn't running physics (csp requires physics) OR
-					!sourceItem || // projectile does not have source item (created via script) OR
-					(sourceItem && sourceItem._stats.projectileStreamMode == 1) // item is set to stream its projectiles from server
+					this._stats.streamMode // item is set to stream its projectiles from server
 				)
 			) {
 				this.streamMode(1);
 			} else {
 				this.streamMode(0);
 			}
+
 			taro.server.totalProjectilesCreated++;
 		} else if (taro.isClient) {
 			if (currentState) {
@@ -103,6 +104,14 @@ var Projectile = TaroEntityPhysics.extend({
 		// add behaviour also have isClient block so we will have to execute this in both client and server
 		this.addBehaviour('projectileBehaviour', this._behaviour);
 		this.scaleDimensions(this._stats.width, this._stats.height);
+	},
+
+	startRendering: function () {
+		if (taro.isClient) {
+			this.renderingStarted = true;
+			taro.client.emit('create-projectile', this);
+            this.updateLayer();
+		}
 	},
 
 	_behaviour: function (ctx) {
@@ -185,8 +194,8 @@ var Projectile = TaroEntityPhysics.extend({
 			//self._scaleTexture();
 		}
 
-		this._stats.sourceUnitId = sourceUnit.id();
-		this._stats.sourceItemId = sourceItem.id();
+		this._stats.sourceUnitId = sourceUnit?.id();
+		this._stats.sourceItemId = sourceItem?.id();
 
 	},
 

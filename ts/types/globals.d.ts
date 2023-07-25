@@ -11,3 +11,8 @@ type ArrayElement<ArrayType extends readonly unknown[]> =
 // react editor
 declare const inGameEditor : InGameEditor;
 declare const reactApp : any;
+
+declare const USE_LOCAL_STORAGE: boolean;
+declare const storage: any;
+
+declare const showUserDropdown: any;

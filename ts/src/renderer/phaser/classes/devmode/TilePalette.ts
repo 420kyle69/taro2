@@ -1,3 +1,8 @@
+type LocalEventTypes = {
+	'increaseBrushSize': [],
+	'decreaseBrushSize': [],
+}
+
 class TilePalette extends Phaser.GameObjects.Container {
 
 	texturesLayer: any;
@@ -16,23 +21,26 @@ class TilePalette extends Phaser.GameObjects.Container {
 
 	paletteWidth: number;
 	paletteHeight: number;
-	
+	devModeScene: DevModeScene;
+
+    pointerover: boolean;
+
 	constructor(
 		public scene: DevModeScene,
 		tileset: Phaser.Tilemaps.Tileset,
-		rexUI?: any
+		rexUI: any,
+		private commandController: CommandController
 	) {
 		super(scene);
-
+		this.devModeScene = scene;
 		this.rexUI = rexUI;
-
 		// Load a map from a 2D array of tile indices
 		const paletteMap = [];
 		for (let i = 0; i < tileset.rows; i++) {
 			paletteMap.push([]);
 		}
 		for (let i = 0; i < tileset.total; i++) {
-			paletteMap[Math.floor(i/tileset.columns)].push(i+1);
+			paletteMap[Math.floor(i / tileset.columns)].push(i + 1);
 		}
 
 		// When loading from an array, make sure to specify the tileWidth and tileHeight
@@ -46,18 +54,18 @@ class TilePalette extends Phaser.GameObjects.Container {
 		const paletteWidth = this.paletteWidth = this.scene.sys.game.canvas.width * 0.25;
 		const paletteHeight = this.paletteHeight = this.scene.sys.game.canvas.height * 0.25;
 		const camera = this.camera = this.scene.cameras.add(this.scene.sys.game.canvas.width - paletteWidth - 40,
-			this.scene.sys.game.canvas.height - paletteHeight - 40,	paletteWidth, paletteHeight)
-			.setBounds(texturesLayer.x - (texturesLayer.width/2), texturesLayer.y - (texturesLayer.height/2),
-			texturesLayer.width * 2, texturesLayer.height * 2, true)
+			this.scene.sys.game.canvas.height - paletteHeight - 40, paletteWidth, paletteHeight)
+			.setBounds(texturesLayer.x - (texturesLayer.width / 2), texturesLayer.y - (texturesLayer.height / 2),
+				texturesLayer.width * 2, texturesLayer.height * 2, true)
 			.setZoom(1).setName('palette');
 
 		camera.setBackgroundColor(0x000000);
 
 		texturesLayer.on('pointermove', (p) => {
 			const devModeScene = taro.renderer.scene.getScene('DevMode') as DevModeScene;
-            devModeScene.regionEditor.cancelDrawRegion();
-			if (!p.isDown || scene.tileEditor.startDragIn !== 'palette') return;
-			const scrollX = (p.x - p.prevPosition.x) / camera.zoom
+			devModeScene.regionEditor.cancelDrawRegion();
+			if (p.button === 0 || !p.isDown || scene.tileEditor.startDragIn !== 'palette') return;
+			const scrollX = (p.x - p.prevPosition.x) / camera.zoom;
 			const scrollY = (p.y - p.prevPosition.y) / camera.zoom;
 			camera.scrollX -= scrollX;
 			camera.scrollY -= scrollY;
@@ -69,7 +77,7 @@ class TilePalette extends Phaser.GameObjects.Container {
 			if (rightValue > 1) rightValue = 1;
 			if (bottomValue < 0) bottomValue = 0;
 			if (rightValue < 0) rightValue = 0;
-			
+
 			scrollBarBottom.blocked = true;
 			scrollBarRight.blocked = true;
 			scrollBarBottom.value = bottomValue;
@@ -115,28 +123,41 @@ class TilePalette extends Phaser.GameObjects.Container {
 			scrollBarBottom.setScale(this.camera.width / scrollBarBottom.width, 1);
 		});
 
-		let pointerover;
 		texturesLayer.on('pointerover', (p) => {
-			pointerover =  true;
+            scene.gameScene.input.setTopOnly(true);
+			this.pointerover = true;
 		});
 		texturesLayer.on('pointerout', (p) => {
-			pointerover =  false;
+			this.pointerover = false;
 		});
 
 		this.scene.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
-			if (taro.developerMode.active && taro.developerMode.activeTab !== 'play') {
-				if (this.visible && pointerover) {
-					this.zoom(deltaY);
-				} else if (deltaY < 0) {
-					const zoom = (this.scene.gameScene.zoomSize / 2.15) / 1.1;
-					taro.client.emit('zoom', zoom);
-				} else if (deltaY > 0) {
-					const zoom = (this.scene.gameScene.zoomSize / 2.15) * 1.1;
-					taro.client.emit('zoom', zoom);
-				}
-			}
-		})
+            this.changeBrushSize(deltaY);
+		});
 	}
+
+    changeBrushSize(deltaY: number): void {
+        const commandController = this.commandController;
+        if (taro.developerMode.active && taro.developerMode.activeTab !== 'play') {
+            if (this.devModeScene.devModeTools.altKey.isDown && !this.devModeScene.devModeTools.isForceTo1x1()) {
+                if (deltaY > 0) {
+                    commandController.defaultCommands.decreaseBrushSize();
+                } else if (deltaY < 0) {
+                    commandController.defaultCommands.increaseBrushSize();
+                }
+            } else {
+                if (this.visible && this.pointerover) {
+                    this.zoom(deltaY);
+                } else if (deltaY < 0) {
+                    const zoom = (this.scene.gameScene.zoomSize / 2.15) / 1.1;
+                    taro.client.emit('zoom', zoom);
+                } else if (deltaY > 0) {
+                    const zoom = (this.scene.gameScene.zoomSize / 2.15) * 1.1;
+                    taro.client.emit('zoom', zoom);
+                }
+            }
+        }
+    }
 
 	toggle(): void {
 		if (this.visible) {
@@ -149,21 +170,21 @@ class TilePalette extends Phaser.GameObjects.Container {
 		}
 	}
 
-	hide (): void {
+	hide(): void {
 		this.setVisible(false);
 		this.texturesLayer.setVisible(false);
 		this.camera.setVisible(false);
 		this.scrollBarContainer.setVisible(false);
 	}
 
-	show (): void {
+	show(): void {
 		this.setVisible(true);
 		this.texturesLayer.setVisible(true);
 		this.camera.setVisible(true);
 		this.scrollBarContainer.setVisible(true);
 	}
 
-	zoom (deltaY: number): void {
+	zoom(deltaY: number): void {
 		let targetZoom;
 		if (deltaY < 0) targetZoom = this.camera.zoom * 1.2;
 		else targetZoom = this.camera.zoom / 1.2;
@@ -192,44 +213,45 @@ class TilePalette extends Phaser.GameObjects.Container {
 			thumbWidth = (length - 60) / 2;
 			thumbHeight = 20;
 			posY = this.camera.height;
-		}
-		else if (orient === 'y') {
+		} else if (orient === 'y') {
 			orientSize = 'height';
 			length = this.camera.height;
 			thumbWidth = 20;
 			thumbHeight = (length - 60) / 2;
 			posX = this.camera.width;
 		}
-		const scrollBar = this.rexUI.add.scrollBar({
-			[orientSize]: length,
-			orientation: orient,
-			background: this.rexUI.add.roundRectangle(0, 0, 0, 0, 0, this.COLOR_WHITE),
-			buttons: {
-				left: this.rexUI.add.roundRectangle(0, 0, 20, 20, 0, this.COLOR_PRIMARY),
-				right: this.rexUI.add.roundRectangle(0, 0, 20, 20, 0, this.COLOR_PRIMARY),
-			},
-			slider: {
-				thumb: this.rexUI.add.roundRectangle(0, 0, thumbWidth, thumbHeight, 1, this.COLOR_LIGHT),
-			},
-			space: {
-				left: 1, right: 1, top: 1, bottom: 1
-			}
-		});
-		scrollBar.value = 0.5;
-		this.scrollBarContainer.add(scrollBar);
-		scrollBar.setPosition(posX, posY).setOrigin(0, 0).setScrollFactor(0,0).layout();
-
-		scrollBar.on('valuechange',
-			function (newValue, oldValue, scrollBar) {
-				if (!isNaN(newValue) && !scrollBar.blocked) {
-					newValue -= 0.5;
-					if (orient === 'x') this.camera.scrollX = this.x + (this.camera.width * newValue);
-					else if (orient === 'y') this.camera.scrollY = this.y + (this.camera.height * newValue);
+		if (this.rexUI) {
+			const scrollBar = this.rexUI.add.scrollBar({
+				[orientSize]: length,
+				orientation: orient,
+				background: this.rexUI.add.roundRectangle(0, 0, 0, 0, 0, this.COLOR_WHITE),
+				buttons: {
+					left: this.rexUI.add.roundRectangle(0, 0, 20, 20, 0, this.COLOR_PRIMARY),
+					right: this.rexUI.add.roundRectangle(0, 0, 20, 20, 0, this.COLOR_PRIMARY),
+				},
+				slider: {
+					thumb: this.rexUI.add.roundRectangle(0, 0, thumbWidth, thumbHeight, 1, this.COLOR_LIGHT),
+				},
+				space: {
+					left: 1, right: 1, top: 1, bottom: 1
 				}
-			},
-			this
-		);
+			});
+			scrollBar.value = 0.5;
+			this.scrollBarContainer.add(scrollBar);
+			scrollBar.setPosition(posX, posY).setOrigin(0, 0).setScrollFactor(0, 0).layout();
 
-		return scrollBar;
+			scrollBar.on('valuechange',
+				function (newValue, oldValue, scrollBar) {
+					if (!isNaN(newValue) && !scrollBar.blocked) {
+						newValue -= 0.5;
+						if (orient === 'x') this.camera.scrollX = this.x + (this.camera.width * newValue);
+						else if (orient === 'y') this.camera.scrollY = this.y + (this.camera.height * newValue);
+					}
+				},
+				this
+			);
+
+			return scrollBar;
+		}
 	}
 }

@@ -23,13 +23,18 @@ var DevModeScene = /** @class */ (function (_super) {
         this.gameScene = taro.renderer.scene.getScene('Game');
         this.pointerInsideButtons = false;
         this.regions = [];
+        this.entityImages = [];
+        this.showRepublishWarning = false;
         taro.client.on('unlockCamera', function () {
             _this.gameScene.cameras.main.stopFollow();
         });
         taro.client.on('lockCamera', function () {
+            var _a, _b, _c, _d;
             taro.client.emit('zoom', taro.client.zoom);
+            var trackingDelay = ((_d = (_c = (_b = (_a = taro === null || taro === void 0 ? void 0 : taro.game) === null || _a === void 0 ? void 0 : _a.data) === null || _b === void 0 ? void 0 : _b.settings) === null || _c === void 0 ? void 0 : _c.camera) === null || _d === void 0 ? void 0 : _d.trackingDelay) || 3;
+            trackingDelay = trackingDelay / 60;
             if (_this.gameScene.cameraTarget)
-                _this.gameScene.cameras.main.startFollow(_this.gameScene.cameraTarget, false, 0.05, 0.05);
+                _this.gameScene.cameras.main.startFollow(_this.gameScene.cameraTarget, false, trackingDelay, trackingDelay);
         });
         taro.client.on('enterMapTab', function () {
             _this.enterMapTab();
@@ -42,6 +47,21 @@ var DevModeScene = /** @class */ (function (_super) {
         });
         taro.client.on('editRegion', function (data) {
             _this.regionEditor.edit(data);
+        });
+        taro.client.on('editInitEntity', function (data) {
+            var found = false;
+            _this.entityImages.forEach(function (image) {
+                if (image.entity.action.actionId === data.actionId) {
+                    found = true;
+                    image.entity.update(data);
+                }
+            });
+            if (!found) {
+                _this.createEntityImage(data);
+            }
+        });
+        taro.client.on('updateInitEntities', function () {
+            _this.updateInitEntities();
         });
         this.gameScene.input.on('pointerup', function (p) {
             var draggedEntity = taro.unitBeingDragged;
@@ -84,6 +104,7 @@ var DevModeScene = /** @class */ (function (_super) {
             this.load.image(key, this.patchAssetUrl(tileset.image));
         });*/
         this.load.image('cursor', 'https://cache.modd.io/asset/spriteImage/1666276041347_cursor.png');
+        this.load.image('entity', 'https://cache.modd.io/asset/spriteImage/1686840222943_cube.png');
         this.load.image('region', 'https://cache.modd.io/asset/spriteImage/1666882309997_region.png');
         this.load.image('stamp', 'https://cache.modd.io/asset/spriteImage/1666724706664_stamp.png');
         this.load.image('eraser', 'https://cache.modd.io/asset/spriteImage/1666276083246_erasergap.png');
@@ -92,6 +113,8 @@ var DevModeScene = /** @class */ (function (_super) {
         this.load.image('fill', 'https://cache.modd.io/asset/spriteImage/1675428550006_fill_(1).png');
         this.load.image('clear', 'https://cache.modd.io/asset/spriteImage/1681917489086_layerClear.png');
         this.load.image('save', 'https://cache.modd.io/asset/spriteImage/1681916834218_saveIcon.png');
+        this.load.image('redo', 'https://cache.modd.io/asset/spriteImage/1686899810953_redo.png');
+        this.load.image('undo', 'https://cache.modd.io/asset/spriteImage/1686899853748_undo.png');
         this.load.scenePlugin('rexuiplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js', 
         //'src/renderer/phaser/rexuiplugin.min.js',
         'rexUI', 'rexUI');
@@ -119,17 +142,91 @@ var DevModeScene = /** @class */ (function (_super) {
         this.gameEditorWidgets = this.devModeTools.gameEditorWidgets;
     };
     DevModeScene.prototype.enterMapTab = function () {
+        var _this = this;
         if (this.gameEditorWidgets.length === 0) {
             this.devModeTools.queryWidgets();
             this.gameEditorWidgets = this.devModeTools.gameEditorWidgets;
         }
         this.devModeTools.enterMapTab();
+        this.gameScene.renderedEntities.forEach(function (element) {
+            element.setVisible(false);
+        });
+        if (this.entityImages.length === 0) {
+            // create images for entities created in initialize script
+            Object.values(taro.game.data.scripts).forEach(function (script) {
+                var _a, _b;
+                if (((_b = (_a = script.triggers) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.type) === 'gameStart') {
+                    Object.values(script.actions).forEach(function (action) {
+                        _this.createEntityImage(action);
+                    });
+                }
+            });
+            if (this.showRepublishWarning) {
+                inGameEditor.showRepublishToInitEntitiesWarning();
+            }
+        }
+        taro.network.send('updateClientInitEntities', true);
+        this.entityImages.forEach(function (image) {
+            image.setVisible(true);
+        });
     };
     DevModeScene.prototype.leaveMapTab = function () {
         if (this.devModeTools)
             this.devModeTools.leaveMapTab();
+        if (this.devModeTools.entityEditor.selectedEntityImage) {
+            this.devModeTools.entityEditor.selectEntityImage(null);
+        }
+        this.entityImages.forEach(function (image) {
+            image.setVisible(false);
+        });
+        this.gameScene.renderedEntities.forEach(function (element) {
+            element.setVisible(true);
+        });
     };
-    DevModeScene.prototype.pointerInsideMap = function (pointerX, pointerY, map) {
+    DevModeScene.prototype.createEntityImage = function (action) {
+        var _a, _b, _c;
+        if (!action.disabled && ((_a = action.position) === null || _a === void 0 ? void 0 : _a.function) === 'xyCoordinate'
+            && !isNaN((_b = action.position) === null || _b === void 0 ? void 0 : _b.x) && !isNaN((_c = action.position) === null || _c === void 0 ? void 0 : _c.y)) {
+            if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || action.type === 'createEntityAtPositionWithDimensions'
+                && !isNaN(action.width) && !isNaN(action.height) && !isNaN(action.angle)) {
+                if (action.actionId)
+                    new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action);
+                else {
+                    this.showRepublishWarning = true;
+                }
+            }
+            else if (action.type === 'createUnitAtPosition' && !isNaN(action.angle)) {
+                if (action.actionId)
+                    new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action, 'unit');
+                else {
+                    this.showRepublishWarning = true;
+                }
+            }
+            else if (action.type === 'createUnitForPlayerAtPosition'
+                && !isNaN(action.angle) && !isNaN(action.width) && !isNaN(action.height)) {
+                if (action.actionId)
+                    new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action, 'unit');
+                else {
+                    this.showRepublishWarning = true;
+                }
+            }
+            else if (action.type === 'spawnItem' || action.type === 'createItemWithMaxQuantityAtPosition') {
+                if (action.actionId)
+                    new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action, 'item');
+                else {
+                    this.showRepublishWarning = true;
+                }
+            }
+            else if (action.type === 'createProjectileAtPosition' && !isNaN(action.angle)) {
+                if (action.actionId)
+                    new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action, 'projectile');
+                else {
+                    this.showRepublishWarning = true;
+                }
+            }
+        }
+    };
+    DevModeScene.pointerInsideMap = function (pointerX, pointerY, map) {
         return (0 <= pointerX && pointerX < map.width
             && 0 <= pointerY && pointerY < map.height);
     };
@@ -156,6 +253,23 @@ var DevModeScene = /** @class */ (function (_super) {
     DevModeScene.prototype.update = function () {
         if (this.tileEditor)
             this.tileEditor.update();
+        if (this.devModeTools.entityEditor)
+            this.devModeTools.entityEditor.update();
+    };
+    DevModeScene.prototype.updateInitEntities = function () {
+        var _this = this;
+        taro.developerMode.initEntities.forEach(function (action) {
+            var found = false;
+            _this.entityImages.forEach(function (image) {
+                if (image.entity.action.actionId === action.actionId) {
+                    found = true;
+                    image.entity.update(action);
+                }
+            });
+            if (!found) {
+                _this.createEntityImage(action);
+            }
+        });
     };
     return DevModeScene;
 }(PhaserScene));

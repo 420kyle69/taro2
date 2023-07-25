@@ -81,7 +81,7 @@ var Player = TaroEntity.extend({
 			{
 				taro.script.trigger('playerJoinsGame', { playerId: self.id() });
 			}
-			
+
 			if (self._stats.controlledBy == 'human' && !self._stats.isBot) {
 				var clientId = self._stats.clientId;
 				var client = taro.server.clients[clientId];
@@ -108,7 +108,6 @@ var Player = TaroEntity.extend({
 						{ receivedJoinGame: receivedJoinGame }
 					];
 				}
-				
 
 				// console.log(`Player.joinGame(): sending ACK to client ${self._stats.clientId} ${self._stats.name} (time elapsed: ${Date.now() - client.lastEventAt})`, playerJoinStreamData);
 
@@ -180,15 +179,15 @@ var Player = TaroEntity.extend({
 	// 3. update attribute bars
 	selectUnit: function (unitId) {
 		var self = this;
-		
+
 		var unit = taro.$(unitId);
-		if (taro.isServer && self._stats.clientId) {			
+		if (taro.isServer && self._stats.clientId) {
 			if (unit && unit._category == 'unit' && unit.getOwner() == this || unitId === null) {
 				self._stats.selectedUnitId = unitId;
 				taro.network.send('makePlayerSelectUnit', { unitId: unitId }, self._stats.clientId);
 			} else {
-				// someone's attempting exploit by trying to assign a unit to a player that's not the unit's owner				
-				var client = taro.server.clients[self._stats.clientId];				
+				// someone's attempting exploit by trying to assign a unit to a player that's not the unit's owner
+				var client = taro.server.clients[self._stats.clientId];
 				var logData = {
 					query: 'exploitSelectUnit',
 					gameTitle: taro.game.data.defaultData.title,
@@ -197,11 +196,11 @@ var Player = TaroEntity.extend({
 					userId: client.userId
 				};
 				global.rollbar.log("selectUnit exploit", logData);
-			}			
+			}
 		}
 
 		if (taro.isClient) {
-			
+
 			if (self._stats.clientId == taro.network.id() && unit && unit._category == 'unit') {
 				self._stats.selectedUnitId = unitId;
 
@@ -242,8 +241,7 @@ var Player = TaroEntity.extend({
 				&& unit
 				&& unit._category == 'unit'
 			) {
-				taro.client.myPlayer.currentFollowUnit = unit._id;
-
+				taro.client.myPlayer.cameraTrackedUnit = unit._id;
 				unit.emit('follow');
 			}
 		}
@@ -402,6 +400,27 @@ var Player = TaroEntity.extend({
 		return this.isHostileTo(player) == false && this.isFriendlyTo(player) == false;
 	},
 
+	isDeveloper: function() {
+		var self = this;
+		if (!self._stats) {
+			return false;
+		}
+
+		if (self._stats.userId == taro.game.data.defaultData.owner) {
+			return true;
+		}
+
+		if (self._stats.isUserAdmin || self._stats.isUserMod) {
+			return true;
+		}
+
+		let roles = taro.game.data.roles || [];
+
+		let isModerator = self._stats?.roleIds && roles.find(role => role?.permissions?.moderator && self._stats?.roleIds.includes(role._id.toString()));
+
+		return isModerator;
+	},
+
 	remove: function () {
 		// AI players cannot be removed
 		if (this._stats.controlledBy == 'human') // do not send trigger for neutral player
@@ -420,6 +439,7 @@ var Player = TaroEntity.extend({
 			this.streamDestroy();
 			this.destroy();
 		}
+
 	},
 
 	updateVisibility: function (playerId) {
@@ -496,7 +516,7 @@ var Player = TaroEntity.extend({
 						self.remove();
 					}
 				}
-				
+
 				if (taro.isClient) {
 					if (attrName === 'name') {
 						self._stats[attrName] = newValue;
@@ -533,6 +553,9 @@ var Player = TaroEntity.extend({
 							self._stats[attrName] = newValue;
 							taro.playerUi.updatePlayerCoin(newValue);
 						}
+						if (attrName === 'roleIds') {
+							self._stats[attrName] = newValue;
+						}
 						if (attrName === 'playerJoinedAgain') {
 							self.hideMenu();
 						}
@@ -548,7 +571,7 @@ var Player = TaroEntity.extend({
 							self.redrawUnits(['nameLabel']);
 
 							self._stats.receivedJoinGame = data.receivedJoinGame;
-							taro.client.eventLog.push([taro._currentTime - taro.client.eventLogStartTime, '\'playerJoined\' received from server']);
+							taro.client.eventLog.push([taro._currentTime - taro.client.playerJoinedAt, '\'playerJoined\' received from server']);
 							self._stats.processedJoinGame = data.processedJoinGame;
 							var streamingDiff = `${Date.now() - data.streamedOn}ms`;
 
@@ -708,18 +731,18 @@ var Player = TaroEntity.extend({
 			$('#play-game-button .content').html(html);
 
 			$('#modd-shop-div').addClass('d-flex');
-			taro.client.eventLog.push([taro._currentTime - taro.client.eventLogStartTime, 'hide menu called']);
+			taro.client.eventLog.push([taro._currentTime - taro.client.playerJoinedAt, 'hide menu called']);
 			taro.menuUi.hideMenu(); // if player's already joined the game, then just hide menu when "play game" button is clicked
-
 			if (!taro.client.guestmode) {
 				$('.open-menu-button').show();
 			}
 
 			window.reactApp && window.reactApp.playerJoinedGame && window.reactApp.playerJoinedGame();
+			window && window.playerJoinedGame && window.playerJoinedGame();
 			window.playerJoinedTheGame = true;
-				
+
 			if ((typeof (userId) !== 'undefined' && typeof (sessionId) !== 'undefined') || window.isStandalone) {
-				
+
 				if ((taro.game.data.isGameDeveloper && ['1', '4', '5'].includes(taro.game.data.defaultData.tier)) || window.isStandalone) {
 					// dont show dev menu by default
 					// if (!taro.isMobile) {

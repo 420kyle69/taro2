@@ -364,7 +364,8 @@ var Item = TaroEntityPhysics.extend({
 													sourcePlayerId: owner.getOwner().id(),
 													unitAttributes: this._stats.damage.unitAttributes,
 													playerAttributes: this._stats.damage.playerAttributes
-												}
+												},
+												streamMode: this._stats.projectileStreamMode
 											});
 									 	var projectile = new Projectile(projectileData);
 										projectile.script.trigger('entityCreated');
@@ -546,16 +547,14 @@ var Item = TaroEntityPhysics.extend({
 						self.quantityCost = 1;
 					}
 
-					attrData = { attributes: {} };
+					let attrData = { attributes: {} };
 					if (self._stats.bonus && self._stats.bonus.consume) {
 						// apply unit bonuses
 						var unitAttributeBonuses = self._stats.bonus.consume.unitAttribute;
 						if (unitAttributeBonuses) {
 							for (var attrId in unitAttributeBonuses) {
-								if (attrData.attributes) {
-									var newValue = owner.attribute.getValue(attrId) + parseFloat(unitAttributeBonuses[attrId]);
-									attrData.attributes[attrId] = owner.attribute.update(attrId, newValue, true);
-								}
+								var newValue = owner.attribute.getValue(attrId) + parseFloat(unitAttributeBonuses[attrId]);
+								attrData.attributes[attrId] = owner.attribute.update(attrId, newValue, true);
 							}
 						}
 
@@ -804,31 +803,33 @@ var Item = TaroEntityPhysics.extend({
 					// console.log(itemAngle, unitAnchoredPosition)
 					// }
 
-					var unitAnchorOffsetRotate = Math.radians(self._stats.currentBody.unitAnchor.rotation || 0);
-					var unitAnchorOffsetX = self._stats.currentBody.unitAnchor.x || 0;
-					var unitAnchorOffsetY = self._stats.currentBody.unitAnchor.y || 0;
+					var unitAnchorOffsetRotate = Math.radians(self._stats.currentBody.unitAnchor.rotation || 0);					
+					var unitAnchorOffsetY = self._stats.currentBody.unitAnchor.y || 0;					
+					var itemAnchorOffsetY = self._stats.currentBody.itemAnchor?.y || 0; // get translation offset based on itemAnchor
 
 					// item is flipped, then mirror the rotation
 					if (ownerUnit._stats.flip == 1) {
 						var unitAnchorOffsetX = -self._stats.currentBody.unitAnchor.x || 0;
+						var itemAnchorOffsetX = -self._stats.currentBody.itemAnchor?.x || 0;
+					
 						rotate -= unitAnchorOffsetRotate;
 					} else {
 						var unitAnchorOffsetX = self._stats.currentBody.unitAnchor.x || 0;
+						var itemAnchorOffsetX = self._stats.currentBody.itemAnchor?.x || 0;
+					
 						rotate += unitAnchorOffsetRotate;
 					}
 
-					
+
 					var unitAnchoredPosition = {
 						x: (unitAnchorOffsetX * Math.cos(unitRotate)) + (unitAnchorOffsetY * Math.sin(unitRotate)),
 						y: (unitAnchorOffsetX * Math.sin(unitRotate)) - (unitAnchorOffsetY * Math.cos(unitRotate))
 					};
 
-					// get translation offset based on itemAnchor
-					var itemAnchorOffsetX = self._stats.currentBody.itemAnchor && self._stats.currentBody.itemAnchor.x || 0;
-					var itemAnchorOffsetY = self._stats.currentBody.itemAnchor && self._stats.currentBody.itemAnchor.y || 0;
-
+					
 					offset.x = (unitAnchoredPosition.x) + (itemAnchorOffsetX * Math.cos(rotate)) + (itemAnchorOffsetY * Math.sin(rotate)),
 					offset.y = (unitAnchoredPosition.y) + (itemAnchorOffsetX * Math.sin(rotate)) - (itemAnchorOffsetY * Math.cos(rotate));
+					
 					if (self._stats.controls && self._stats.controls.mouseBehaviour) {
 						if (self._stats.controls.mouseBehaviour.rotateToFaceMouseCursor || (self._stats.currentBody && (self._stats.currentBody.jointType == 'weldJoint'))) {
 							offset.rotate = rotate;
@@ -859,7 +860,7 @@ var Item = TaroEntityPhysics.extend({
 		self.previousState = null;
 
 		var data = taro.game.getAsset('itemTypes', type);
-		delete data.type // hotfix for dealing with corrupted game json that has unitData.type = "unitType". This is caused by bug in the game editor.
+		delete data.type; // hotfix for dealing with corrupted game json that has unitData.type = "unitType". This is caused by bug in the game editor.
 
 		if (data == undefined) {
 			taro.script.errorLog('changeItemType: invalid data');
@@ -1003,9 +1004,9 @@ var Item = TaroEntityPhysics.extend({
 
 	streamUpdateData: function (queuedData) {
 		var self = this;
-		
+
 		// this was preventing isBeingUsed from streaming hence preventing other players' projectiles from showing
-		// if (taro.isServer && taro.network.isPaused) 
+		// if (taro.isServer && taro.network.isPaused)
 		// 	return;
 
 		TaroEntity.prototype.streamUpdateData.call(this, queuedData);
@@ -1020,6 +1021,7 @@ var Item = TaroEntityPhysics.extend({
 						//self._stats[attrName] = newValue;
 						//this.changeItemType(newValue, {}, false);
 						break;
+
 					case 'ownerUnitId':
 						this._stats[attrName] = newValue;
 						if (taro.isClient) {
@@ -1027,6 +1029,7 @@ var Item = TaroEntityPhysics.extend({
 							self.setOwnerUnit(newOwner);
 						}
 						break;
+
 					case 'scale':
 					case 'scaleBody':
 						this._stats[attrName] = newValue;
@@ -1048,7 +1051,7 @@ var Item = TaroEntityPhysics.extend({
 							self._scaleBox2dBody(newValue);
 						}
 						break;
-					
+
 					case 'hidden':
 						this._stats[attrName] = newValue;
 						if (taro.isClient) {
@@ -1071,14 +1074,15 @@ var Item = TaroEntityPhysics.extend({
 							taro.itemUi.updateItemQuantity(self);
 						}
 						break;
+
 					case 'description':
 						this._stats[attrName] = newValue;
 						var owner = self.getOwnerUnit();
 						if (taro.isClient && taro.client.selectedUnit == owner) {
 							taro.itemUi.updateItemDescription(this);
 						}
-
 						break;
+
 					case 'name':
 						this._stats[attrName] = newValue;
 						var owner = self.getOwnerUnit();
@@ -1095,6 +1099,7 @@ var Item = TaroEntityPhysics.extend({
 							taro.itemUi.updateItemSlot(this, this._stats.slotIndex);
 						}
 						break;
+
 					case 'inventorySlotColor':
 						this._stats[attrName] = newValue;
 						var owner = self.getOwnerUnit();
@@ -1102,15 +1107,22 @@ var Item = TaroEntityPhysics.extend({
 							owner.inventory.update();
 						}
 						break;
+
 					case 'slotIndex':
 						this._stats[attrName] = newValue;
 						break;
-					
+
 					case 'isBeingUsed':
 						var owner = self.getOwnerUnit();
 						// ignore stream so my item use won't fire two bullets
 						if (taro.isClient && (owner != taro.client.selectedUnit || !this._stats.ignoreServerStream)) {
 							this._stats.isBeingUsed = newValue;
+						}
+						break;
+
+					case 'fireRate':
+						if (taro.isClient) {
+							this._stats.fireRate = newValue;
 						}
 						break;
 				}
@@ -1133,14 +1145,14 @@ var Item = TaroEntityPhysics.extend({
 
 		var ownerUnit = this.getOwnerUnit();
 		var rotate = this._rotate.z;
-				
+
 		if (ownerUnit && this._stats.stateId != 'dropped') {
-			
+
 			// angleToTarget is only available in server
 			if (taro.isServer && ownerUnit.angleToTarget) {
-				rotate = ownerUnit.angleToTarget;			
+				rotate = ownerUnit.angleToTarget;
 			}
-			
+
 			if (self._stats.currentBody && self._stats.currentBody.jointType == 'weldJoint') {
 				rotate = ownerUnit._rotate.z;
 			}
@@ -1149,7 +1161,6 @@ var Item = TaroEntityPhysics.extend({
 			var x = ownerUnit._translate.x + self.anchoredOffset.x;
 			var y = ownerUnit._translate.y + self.anchoredOffset.y;
 
-			
 			if (taro.isServer || (taro.isClient && taro.client.selectedUnit == ownerUnit)) {
 				if (
 					self._stats.controls &&
@@ -1170,7 +1181,7 @@ var Item = TaroEntityPhysics.extend({
 
 			// run both server & client.
 			// it's important that this runs on client side, because it prepares this item's position when it's dropped
-			self.translateTo(x, y);			
+			self.translateTo(x, y);
 			self.rotateTo(0, 0, rotate);
 
 			// if (this.getOwnerUnit() != taro.client.selectedUnit)	 {
@@ -1178,7 +1189,7 @@ var Item = TaroEntityPhysics.extend({
 			// }
 
 			if (taro.game.cspEnabled && taro.isClient) {
-				self.finalKeyFrame[1] = [x, y, rotate] // prepare position for when this item's dropped. without this, item will appear at an incorrect position
+				self.latestKeyFrame[1] = [x, y, rotate]; // prepare position for when this item's dropped. without this, item will appear at an incorrect position
 			}
 		}
 

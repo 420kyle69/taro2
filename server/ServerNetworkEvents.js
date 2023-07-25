@@ -28,7 +28,6 @@ var ServerNetworkEvents = {
 
 	_onClientDisconnect: function (clientId) {
 		var self = this;
-
 		taro.network.send('clientDisconnect', { reason: 'Player disconnected', clientId: clientId });
 
 		// remove client from streamData
@@ -48,14 +47,13 @@ var ServerNetworkEvents = {
 
 				if (player._stats.userId) {
 					taro.clusterClient.saveLastPlayedTime(player._stats.userId);
+					// taro.clusterClient.savePlayerData(player._stats.userId);
 				}
 			}
 
 			taro.clusterClient.emit('clientDisconnect', client._id);
 		}
 
-		delete client;
-		
 		if (player) {
 			player.remove();
 		}
@@ -96,7 +94,7 @@ var ServerNetworkEvents = {
 		// assign _id and sessionID to the new client
 		var client = taro.server.clients[clientId];
 		var socket = taro.network._socketById[clientId];
-
+		
 		if (!socket) {
 			try {
 				global.rollbar.log('No socket found with this clientId',
@@ -109,14 +107,13 @@ var ServerNetworkEvents = {
 			}
 			return;
 		}
-		
 		// check joining user is same as token user.
-		else if (socket._token.userId !== data._id || socket._token.sessionId !== data.sessionId) {
+		else if ((socket._token.userId && socket._token.userId !== data._id) || (socket._token.sessionId && socket._token.sessionId !== data.sessionId)) {
 			console.log('Unauthenticated user joining the game (ServerNetworkEvent.js)');
 			socket.close('Unauthenticated user joining the game');
 			return;
 		}
-		
+
 		if (process.env.ENV === 'standalone' || process.env.ENV == 'standalone-remote') {
 			delete data._id;
 		}
@@ -173,7 +170,7 @@ var ServerNetworkEvents = {
 				console.log('Client already exists. Kicking the existing player ' + player._stats.clientId + ' (' + player._stats.name + ')');
 				player.updatePlayerHighscore();
 				var oldPlayerClientId = player._stats.clientId;
-				taro.network.send('clientDisconnect', { reason: 'Player disconnected', clientId: oldPlayerClientId });
+				taro.network.send('clientDisconnect', { reason: 'User connected to another server.', clientId: oldPlayerClientId });
 
 				if (taro.server.clients[oldPlayerClientId] && taro.server.clients[oldPlayerClientId]._id) {
 					taro.clusterClient.emit('clientDisconnect', taro.server.clients[oldPlayerClientId]._id);
@@ -212,7 +209,7 @@ var ServerNetworkEvents = {
 							clientId: client._id,
 							purchasables: {}
 						};
-						// console.log("createPlayer (logged-in user)")		
+						// console.log("createPlayer (logged-in user)")
 						var player = taro.game.createPlayer();
 						for (key in userData) {
 							var obj = {};
@@ -243,7 +240,7 @@ var ServerNetworkEvents = {
 						data.number = ' lol';
 					}
 
-					// console.log("createPlayer (guest user)")				
+					// console.log("createPlayer (guest user)")
 					var player = taro.game.createPlayer({
 						controlledBy: 'human',
 						name: 'user' + data.number,
@@ -454,6 +451,14 @@ var ServerNetworkEvents = {
 		taro.developerMode.editRegion(data, clientId);
 	},
 
+    _onEditInitEntity: function(data, clientId) {
+        taro.developerMode.editInitEntity(data, clientId);
+    },
+
+    _onRequestInitEntities: function(data, clientId) {
+        taro.developerMode.requestInitEntities(data, clientId);
+    },
+
 	_onEditEntity: function(data, clientId) {
 		taro.developerMode.editEntity(data, clientId);
 	},
@@ -604,10 +609,7 @@ var ServerNetworkEvents = {
 			return;
 		}
 
-		var isUserDeveloper = (modPlayer._stats.userId == taro.game.data.defaultData.owner) ||
-			taro.game.data.defaultData.invitedUsers.find(function (iu) { if (iu.user === modPlayer._stats.userId) { return true; } }) ||
-			modPlayer._stats.isUserAdmin ||
-			modPlayer._stats.isUserMod;
+		var isUserDeveloper = modPlayer.isDeveloper();
 			
 		if (isUserDeveloper && kickedPlayer) {
 			taro.game.kickPlayer(kickedPlayer.id(), modPlayer.id());
@@ -621,10 +623,7 @@ var ServerNetworkEvents = {
 			return;
 		}
 
-		var isUserDeveloper = (player._stats.userId == taro.game.data.defaultData.owner) ||
-			taro.game.data.defaultData.invitedUsers.find(function (iu) { if (iu.user === player._stats.userId) { return true; } }) ||
-			player._stats.isUserAdmin ||
-			player._stats.isUserMod;
+		var isUserDeveloper = player.isDeveloper();
 
 		if (isUserDeveloper) {
 			var kickedPlayer = taro.$$('player').find(function (player) {
@@ -643,10 +642,7 @@ var ServerNetworkEvents = {
 			return;
 		}
 
-		var isUserDeveloper = (player._stats.userId == taro.game.data.defaultData.owner) ||
-			taro.game.data.defaultData.invitedUsers.find(function (iu) { if (iu.user === player._stats.userId) { return true; } }) ||
-			player._stats.isUserAdmin ||
-			player._stats.isUserMod;
+		var isUserDeveloper = player.isDeveloper();
 
 		if (isUserDeveloper) {
 			var kickedPlayer = taro.$$('player').find(function (player) {
@@ -679,10 +675,7 @@ var ServerNetworkEvents = {
 			return;
 		}
 
-		var isUserDeveloper = (player._stats.userId == taro.game.data.defaultData.owner) ||
-			taro.game.data.defaultData.invitedUsers.find(function (iu) { if (iu.user === player._stats.userId) { return true; } }) ||
-			player._stats.isUserAdmin ||
-			player._stats.isUserMod;
+		var isUserDeveloper = player.isDeveloper();
 
 		if (isUserDeveloper) {
 			var banPlayer = taro.$$('player').find(function (player) {
@@ -716,8 +709,7 @@ var ServerNetworkEvents = {
 		var player = taro.game.getPlayerByClientId(clientId);
 		if (player) {
 			var unit = player.getSelectedUnit();
-			// prevent taking mouse input if mouse cursor is right above the selected unit
-			if (unit && (Math.abs(position[0]) > 20 || Math.abs(position[1]) > 20)) {
+			if (unit) {
 				player.control.input.mouse.x = position[0];
 				player.control.input.mouse.y = position[1];
 			}
@@ -775,7 +767,7 @@ var ServerNetworkEvents = {
 				}
 				if (selectedOption.followUpDialogue) {
 					taro.network.send('openDialogue', {
-						type: selectedOption.followUpDialogue,
+						dialogueId: selectedOption.followUpDialogue,
 						extraData: {
 							playerName: player._stats.name,
 							dialogueTemplate: _.get(taro, 'game.data.ui.dialogueview.htmlData', '')

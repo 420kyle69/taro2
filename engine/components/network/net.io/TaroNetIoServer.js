@@ -54,7 +54,7 @@ var TaroNetIoServer = {
 		// Start network sync
 		// this.timeSyncStart();
 
-		var upsDetector = setInterval(function() {
+		var upsDetector = setInterval(function () {
 			for (ip in self.uploadPerSecond) {
 				let ups = self.uploadPerSecond[ip];
 				var socket = self._socketByIp[ip];
@@ -66,7 +66,7 @@ var TaroNetIoServer = {
 					let kicked = false;
 					if (clientSyncs && clientSyncs <= 5) {
 						kicked = true;
-						socket.close();
+						socket.close('User kicked for spamming network commands.');
 					}
 
 					let playerName = 'guest user';
@@ -90,7 +90,7 @@ var TaroNetIoServer = {
 
 					global.rollbar.log(`user ${actuallyKicked}kicked for sending over 75 kB/s`, logData);
 
-					console.log(actuallyKicked, 'kicking user', playerName, '(ip: ', ip,'for spamming network commands (sending ', ups, ' bytes over 5 seconds)', logData);
+					console.log(actuallyKicked, 'kicking user', playerName, '(ip: ', ip, 'for spamming network commands (sending ', ups, ' bytes over 5 seconds)', logData);
 				}
 
 				// console.log(self.uploadPerSecond[ip]);
@@ -218,12 +218,9 @@ var TaroNetIoServer = {
 			if (arr != undefined) {
 				for (var i = arr.length - 1; i >= 0; i--) {
 					console.log(
-						`client ${
-							clientId
-						} is leaving the room ${
-							arr[i]
-						}(${
-							i
+						`client ${clientId
+						} is leaving the room ${arr[i]
+						}(${i
 						})`
 					);
 					this.clientLeaveRoom(clientId, arr[i]);
@@ -328,8 +325,7 @@ var TaroNetIoServer = {
 			self.sendQueue[clientId].push([ciEncoded, data]);
 		} else {
 			this.log(
-				`Cannot send network packet with command "${
-					commandName
+				`Cannot send network packet with command "${commandName
 				}" because the command has not been defined!`,
 				'error'
 			);
@@ -346,13 +342,12 @@ var TaroNetIoServer = {
 			// to save space transform data of entities are send as a single string
 			// <ciEncoded><id><x><y><rot>
 			const snapshotData =
-        typeof data === 'string' ? ciEncoded + data : [ciEncoded, data];
+				typeof data === 'string' ? ciEncoded + data : [ciEncoded, data];
 
 			this.snapshot.push(snapshotData);
 		} else {
 			this.log(
-				`Cannot send network packet with command "${
-					commandName
+				`Cannot send network packet with command "${commandName
 				}" because the command has not been defined!`,
 				'error'
 			);
@@ -459,10 +454,10 @@ var TaroNetIoServer = {
 		this._idCounter++;
 		return (
 			this._idCounter +
-      (Math.random() * Math.pow(10, 17) +
-        Math.random() * Math.pow(10, 17) +
-        Math.random() * Math.pow(10, 17) +
-        Math.random() * Math.pow(10, 17))
+			(Math.random() * Math.pow(10, 17) +
+				Math.random() * Math.pow(10, 17) +
+				Math.random() * Math.pow(10, 17) +
+				Math.random() * Math.pow(10, 17))
 		).toString(16);
 	},
 
@@ -485,7 +480,7 @@ var TaroNetIoServer = {
    * @param {Object} socket The client socket object.
    * @private
    */
-	 _onClientConnect: function (socket) {
+	_onClientConnect: function (socket) {
 		var self = this;
 
 		if (self.uploadPerSecond[socket._remoteAddress] == undefined) {
@@ -510,29 +505,26 @@ var TaroNetIoServer = {
 			}
 		}
 
-		const playerCount = taro.$$('player').filter(function (player) {
-			return player._stats.controlledBy == 'human';
-		}).length;
+		const playerCount = taro.getPlayerCount();
 
-		var clientRejectReason = [];
+		var clientRejectReason = null;
 
-		if (this._acceptConnections != true)
-			clientRejectReason.push('server not accepting connections');
+		if (playerIsBanned) {
+			clientRejectReason = 'player ' + socket._remoteAddress + ' is banned';
+		} else if (this._acceptConnections != true) {
+			clientRejectReason = 'server not accepting connections';
+		} else if (playerCount > taro.server.maxPlayers)
+			clientRejectReason = {
+				message: 'Sorry, the server you are trying to join is currently full. Please try again later or join a different server to play this game.',
+				type: 'SERVER_FULL'
+		};
 
-		if (playerCount > taro.server.maxPlayers)
-			clientRejectReason.push('server is full');
-
-		if (playerIsBanned)
-			clientRejectReason.push('player ',socket._remoteAddress,' is banned');
-
-		if (clientRejectReason.length == 0) {
+		if (clientRejectReason === null) {
 			// Check if any listener cancels this
 			if (!this.emit('connect', socket)) {
 				this.log(
-					`Accepted connection with socket id ${
-						socket.id
-					} ip ${
-						remoteAddress}`
+					`Accepted connection with socket id ${socket.id
+					} ip ${remoteAddress}`
 				);
 				this._socketById[socket.id] = socket;
 				this._socketByIp[socket._remoteAddress] = socket;
@@ -549,7 +541,7 @@ var TaroNetIoServer = {
 					// Mixpanel Event to Track user game successfully started.
 					if (self._socketById[socket.id]._token.distinctId) {
 						global.mixpanel.track('User Connected to Game Server', {
-							'distinct_id': self._socketById[socket.id]._token.posthogDistinctId,
+							'distinct_id': self._socketById[socket.id]._token.distinctId,
 							'$ip': socket._remoteAddress,
 							'gameSlug': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.gameSlug,
 							'gameId': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData._id,
@@ -603,29 +595,14 @@ var TaroNetIoServer = {
 				});
 
 				socket.on('disconnect', function (data) {
-					var isClient = self.clientIds.includes(socket.id);
-
-					if (isClient) {
+					if (self.clientIds.includes(socket.id)) {
 						var end = Date.now();
 						taro.server.socketConnectionCount.disconnected++;
 
-						if (end - self._socketById[socket.id].start < 3000) {
+						if (self._socketById[socket.id]?.start && end - self._socketById[socket.id].start < 3000) {
 							taro.server.socketConnectionCount.immediatelyDisconnected++;
 						}
-
-						if (self._socketById[socket.id]._token && self._socketById[socket.id]._token.distinctId) {
-							/** additional part to send some info for marketing purposes */
-							global.mixpanel.track('Game Session Duration', {
-								'distinct_id': self._socketById[socket.id]._token.distinctId,
-								'$ip': socket._remoteAddress,
-								'gameSlug': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.gameSlug,
-								'gameId': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData._id,
-								'playTime': end - self._socketById[socket.id].start,
-							});
-						}
 					}
-
-					self._onClientDisconnect.apply(self, [data, socket]);
 				});
 
 				// Send an init message to the client
@@ -664,11 +641,11 @@ var TaroNetIoServer = {
 				self.clientCommandCount[ip][commandName] = {};
 			}
 
-			if (self.clientCommandCount[ip][commandName][data[1].device+'-'+data[1].key] == undefined) {
-				self.clientCommandCount[ip][commandName][data[1].device+'-'+data[1].key] = 0;
+			if (self.clientCommandCount[ip][commandName][data[1].device + '-' + data[1].key] == undefined) {
+				self.clientCommandCount[ip][commandName][data[1].device + '-' + data[1].key] = 0;
 			}
 
-			self.clientCommandCount[ip][commandName][data[1].device+'-'+data[1].key]++;
+			self.clientCommandCount[ip][commandName][data[1].device + '-' + data[1].key]++;
 
 		} else {
 			if (self.clientCommandCount[ip][commandName] == undefined) {
@@ -704,11 +681,14 @@ var TaroNetIoServer = {
 		}
 
 		var socket = taro.network._socketById[clientId];
+
 		// check if the clientId belongs to this socket connection.
-		if (!(socket?._token?.clientId && socket?._token?.clientId === clientId)) {
-			console.log('_onClientMessage: clientId validation failed', socket._token.clientId, clientId, data);
-			socket.close('Client could not be validated, please refresh the page.');
-			return;
+		if (socket && socket._token && socket._token.clientId) {
+			if (socket._token.clientId !== clientId) {
+				console.log('_onClientMessage: clientId validation failed', socket._token.clientId, clientId, data);
+				socket.close('Client could not be validated, please refresh the page.');
+				return;
+			}
 		}
 
 		if (typeof data[0] === 'string') {
@@ -719,7 +699,6 @@ var TaroNetIoServer = {
 				if (this._networkCommands[commandName]) {
 					this._networkCommands[commandName](data[1], clientId);
 				}
-
 				this.emit(commandName, [data[1], clientId]);
 			}
 		}
@@ -775,17 +754,42 @@ var TaroNetIoServer = {
    * @private
    */
 	_onClientDisconnect: function (data, socket) {
+		var self = this;
 		this.log(`Client disconnected with id ${socket.id}`);
+		var end = Date.now();
 
-		// this.emit('disconnect', socket.id, { code: 'DUPLICATE_IP' });
+		if (self._socketById[socket.id]?._token?.distinctId) {
+			/** additional part to send some info for marketing purposes */
+			global.mixpanel.track('Game Session Duration', {
+				'distinct_id': self._socketById[socket.id]._token.distinctId,
+				'$ip': socket._remoteAddress,
+				'gameSlug': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.gameSlug,
+				'gameId': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData._id,
+				'playTime': end - self._socketById[socket.id].start,
+			});
+		}
+
+		if (self._socketById[socket.id]?._token?.posthogDistinctId) {
+			global.posthog.capture({
+				distinctId: self._socketById[socket.id]._token.posthogDistinctId,
+				'event': 'Game Session Duration',
+				properties: {
+					'$ip': socket._remoteAddress,
+					'gameSlug': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.gameSlug,
+					'gameId': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData._id,
+					'playTime': end - self._socketById[socket.id].start,
+				}
+			});
+		}
+
 		this.emit('disconnect', socket.id);
 
 		// Remove them from all rooms
 		this.clientLeaveAllRooms(socket.id);
 
 		delete taro.server.clients[socket.id];
-		delete this.uploadPerSecond[socket._remoteAddress]
-		delete this.clientCommandCount[socket._remoteAddress]
+		delete this.uploadPerSecond[socket._remoteAddress];
+		delete this.clientCommandCount[socket._remoteAddress];
 		delete this._socketById[socket.id];
 		delete this._socketByIp[socket._remoteAddress];
 

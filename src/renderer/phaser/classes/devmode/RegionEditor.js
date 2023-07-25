@@ -4,13 +4,20 @@ var RegionEditor = /** @class */ (function () {
         this.gameScene = gameScene;
         this.devModeScene = devModeScene;
         this.devModeTools = devModeTools;
-        gameScene.input.on('pointerdown', function (pointer) {
+        gameScene.input.on('pointerdown', function (pointer, gameObjects) {
             if (_this.regionTool) {
                 var worldPoint = _this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
                 _this.regionDrawStart = {
                     x: worldPoint.x,
                     y: worldPoint.y,
                 };
+            }
+            else if (taro.developerMode.active && taro.developerMode.activeTab === 'map' && _this.devModeScene.devModeTools.cursorButton.active && pointer.leftButtonDown()) {
+                gameObjects = gameObjects.filter(function (gameObject) { return gameObject.phaserRegion; });
+                gameObjects.forEach(function (gameObject) {
+                    _this.devModeScene.regionEditor.addClickedList({ name: gameObject.phaserRegion.entity._stats.id, x: gameObject.phaserRegion.stats.x, y: gameObject.phaserRegion.stats.y, width: gameObject.phaserRegion.stats.width, height: gameObject.phaserRegion.stats.height });
+                });
+                _this.devModeScene.regionEditor.showClickedList();
             }
         }, this);
         var graphics = this.regionDrawGraphics = gameScene.add.graphics();
@@ -46,10 +53,12 @@ var RegionEditor = /** @class */ (function () {
                     y = _this.regionDrawStart.y + height;
                     height *= -1;
                 }
-                taro.network.send('editRegion', { x: Math.trunc(x),
+                taro.network.send('editRegion', {
+                    x: Math.trunc(x),
                     y: Math.trunc(y),
                     width: Math.trunc(width),
-                    height: Math.trunc(height) });
+                    height: Math.trunc(height)
+                });
                 _this.regionDrawStart = null;
             }
         }, this);

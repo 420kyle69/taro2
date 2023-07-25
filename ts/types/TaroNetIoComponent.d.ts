@@ -3,5 +3,5 @@ declare class TaroNetIoComponent extends TaroEventingClass implements TaroNetIoC
 
 	stream: TaroStreamComponent;
 
-	send(commandName: string, data: any): void;
+	send<T extends keyof MapEditTool = any>(commandName: string, data: TileData<T> | boolean): void;
 }

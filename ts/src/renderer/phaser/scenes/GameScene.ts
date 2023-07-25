@@ -105,6 +105,12 @@ class GameScene extends PhaserScene {
 			y -= camera.height / 2;
 			camera.setScroll(x, y);
 		});
+
+        taro.client.on('instant-move-camera', (x: number, y: number) => {
+            if (!taro.developerMode.active || taro.developerMode.activeTab === 'play') {
+			    camera.centerOn(x, y);
+            }
+		});
 	}
 
 	preload (): void {
@@ -170,18 +176,26 @@ class GameScene extends PhaserScene {
 				const length = layer.data.length;
 				layer.width = data.map.width;
 				layer.height = data.map.height;
-				console.log('before', layer.name, length, tilesPerLayer);
 				if (length < tilesPerLayer) {
 					for (let i = length + 1; i < tilesPerLayer; i++) {
 						layer.data[i] = 0;
 					}
 				}
-				console.log('after', layer.name, layer.data.length, tilesPerLayer);
 			}
 		});
 
-		this.load.tilemapTiledJSON('map', this.patchMapData(data.map));
+        //to be sure every map not contain null or -1 tiles
+        data.map.layers.forEach((layer) => {
+            if (layer && layer.data) {
+                layer.data.forEach((tile, index) => {
+                    if (tile === -1 || tile === null) {
+                        layer.data[index] = 0;
+                    }
+                });
+            }
+		});
 
+		this.load.tilemapTiledJSON('map', this.patchMapData(data.map));
 		BitmapFontManager.preload(this);
 	}
 
@@ -569,17 +583,19 @@ class GameScene extends PhaserScene {
 		this.renderedEntities.forEach(element => {
 			element.setVisible(false);
 		});
-		this.cameras.main.cull(this.renderedEntities).forEach(element => {
-			if (!element.hidden) {
-				element.setVisible(true);
 
-				if (element.dynamic) {
-					// dynamic is only assigned through an hbz-index-only event
-					this.heightRenderer.adjustDepth(element as TGameObject & Phaser.GameObjects.Components.Size);
+		if (!taro.developerMode.active || (taro.developerMode.active && taro.developerMode.activeTab !== 'map')) {
+			this.cameras.main.cull(this.renderedEntities).forEach(element => {
+				if (!element.hidden) {
+					element.setVisible(true);
+
+					if (element.dynamic) {
+						// dynamic is only assigned through an hbz-index-only event
+						this.heightRenderer.adjustDepth(element as TGameObject & Phaser.GameObjects.Components.Size);
+					}
 				}
-			}
-
-		});
+			});
+		}
 	}
 }
 

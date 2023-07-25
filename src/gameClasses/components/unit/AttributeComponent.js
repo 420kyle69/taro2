@@ -9,6 +9,16 @@ var AttributeComponent = TaroEntity.extend({
 		self.now = Date.now();
 		self.lastRegenerated = self.now;
 		self.lastSynced = self.now;
+
+		// attributes is an object
+		if (entity._stats.attributes) {
+			const attributes = entity._stats.attributes;
+
+			for (var attrId in attributes) {
+				const individualAttribute = attributes[attrId];
+				individualAttribute.value = Math.max(individualAttribute.min, Math.min(individualAttribute.max, individualAttribute.value));
+			}
+		}
 	},
 
 	// decay / regenerate
@@ -177,14 +187,12 @@ var AttributeComponent = TaroEntity.extend({
 	},
 	// change attribute's value manually
 	update: function (attributeTypeId, newValue, forceUpdate) {
-
 		var self = this;
 		if (!self._entity._stats || !self._entity._stats.attributes) {
 			return;
 		}
 
 		var attributes = JSON.parse(JSON.stringify(self._entity._stats.attributes)); // clone units existing attribute values
-
 		if (attributes) {
 			var attribute = attributes[attributeTypeId];
 			if (attribute) {
@@ -211,9 +219,12 @@ var AttributeComponent = TaroEntity.extend({
 						) {
 							self._entity._stats.attributes[attributeTypeId].lastSynced = self.now;
 							self._entity._stats.attributes[attributeTypeId].lastSyncedValue = newValue;
-							attrData = { attributes: {} };
+							let attrData = { attributes: {} };
 							attrData.attributes[attributeTypeId] = newValue;
 							self._entity.streamUpdateData([attrData]);
+
+
+
 						}
 
 						var triggeredBy = { attribute: attribute };
@@ -230,7 +241,7 @@ var AttributeComponent = TaroEntity.extend({
 								self._entity.script.trigger('entityAttributeBecomesZero', triggeredBy);
 							}
 
-							taro.queueTrigger(`${this._entity._category}AttributeBecomesZero`, triggeredBy);							
+							taro.queueTrigger(`${this._entity._category}AttributeBecomesZero`, triggeredBy);
 						} else if (newValue >= attribute.max) // when attribute becomes full, trigger attributeBecomesFull event
 						{
 							// necessary as self._entity can be 'player' which doesn't have scriptComponent
@@ -261,14 +272,14 @@ var AttributeComponent = TaroEntity.extend({
 
 								// console.log(attribute, attribute.value);
 								if (taro.client.myPlayer._stats.selectedUnitId == unit.id()) {
-									self._entity.unitUi.updateAttributeBar({...attribute, ...{value: parseFloat(newValue)}});
+									self._entity.unitUi.updateAttributeBar({ ...attribute, ...{ value: parseFloat(newValue) } });
 								}
 
 								// this is the only way to convert to number i guess??
 								// all of the old implementations pass a value as a string here
 								// even if we call attribute.value = parseFloat(attribute.value)
 								// or other variations of this
-								self._entity.updateAttributeBar({...attribute, ...{value: parseFloat(newValue)}});
+								self._entity.updateAttributeBar({ ...attribute, ...{ value: parseFloat(newValue) } });
 								break;
 							}
 							case 'item': {

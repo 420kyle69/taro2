@@ -12,6 +12,39 @@ interface EntityData {
 	}>
 }
 
+interface ScriptData {
+	name: string;
+	triggers: Record<string, {
+		type: string;
+	}>;
+	actions: Record<string, ActionData>;
+}
+
+interface ActionData {
+    player?: { 
+        variableName: string; 
+        function: string; 
+    };
+    disabled?: boolean;
+    unitType?: string;
+    itemType?: string;
+    projectileType?: string;
+    actionId?: string;
+	type?: string;
+	entity?: string;
+	entityType?: string;
+	position?: {
+        function?: string,
+        x: number, 
+        y: number
+    };
+	angle?: number;
+	width?: number;
+	height?: number;
+    wasEdited?: boolean;
+    wasDeleted?: boolean;
+}
+
 interface MapData {
 	wasEdited: boolean;
 	haveUnsavedChanges: boolean;
@@ -44,6 +77,7 @@ declare class GameComponent extends TaroEntity {
 	getPlayerByClientId(clientId: string): Player;
 
 	data: {
+		scripts: Record<string, ScriptData>;
 		defaultData: any;
 		map: MapData;
 		unitTypes: Record<string, EntityData>;
@@ -53,6 +87,7 @@ declare class GameComponent extends TaroEntity {
 		settings: {
 			addStrokeToNameAndAttributes: boolean;
 			camera: {
+				trackingDelay: number;
 				zoom : {
 					default:number;
 				}

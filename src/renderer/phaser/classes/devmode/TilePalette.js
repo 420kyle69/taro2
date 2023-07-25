@@ -15,9 +15,11 @@ var __extends = (this && this.__extends) || (function () {
 })();
 var TilePalette = /** @class */ (function (_super) {
     __extends(TilePalette, _super);
-    function TilePalette(scene, tileset, rexUI) {
+    function TilePalette(scene, tileset, rexUI, commandController) {
         var _this = _super.call(this, scene) || this;
         _this.scene = scene;
+        _this.commandController = commandController;
+        _this.devModeScene = scene;
         _this.rexUI = rexUI;
         // Load a map from a 2D array of tile indices
         var paletteMap = [];
@@ -43,7 +45,7 @@ var TilePalette = /** @class */ (function (_super) {
         texturesLayer.on('pointermove', function (p) {
             var devModeScene = taro.renderer.scene.getScene('DevMode');
             devModeScene.regionEditor.cancelDrawRegion();
-            if (!p.isDown || scene.tileEditor.startDragIn !== 'palette')
+            if (p.button === 0 || !p.isDown || scene.tileEditor.startDragIn !== 'palette')
                 return;
             var scrollX = (p.x - p.prevPosition.x) / camera.zoom;
             var scrollY = (p.y - p.prevPosition.y) / camera.zoom;
@@ -95,30 +97,44 @@ var TilePalette = /** @class */ (function (_super) {
             scrollBarBottom.setPosition(0, _this.camera.height);
             scrollBarBottom.setScale(_this.camera.width / scrollBarBottom.width, 1);
         });
-        var pointerover;
         texturesLayer.on('pointerover', function (p) {
-            pointerover = true;
+            scene.gameScene.input.setTopOnly(true);
+            _this.pointerover = true;
         });
         texturesLayer.on('pointerout', function (p) {
-            pointerover = false;
+            _this.pointerover = false;
         });
         _this.scene.input.on('wheel', function (pointer, gameObjects, deltaX, deltaY, deltaZ) {
-            if (taro.developerMode.active && taro.developerMode.activeTab !== 'play') {
-                if (_this.visible && pointerover) {
-                    _this.zoom(deltaY);
-                }
-                else if (deltaY < 0) {
-                    var zoom = (_this.scene.gameScene.zoomSize / 2.15) / 1.1;
-                    taro.client.emit('zoom', zoom);
-                }
-                else if (deltaY > 0) {
-                    var zoom = (_this.scene.gameScene.zoomSize / 2.15) * 1.1;
-                    taro.client.emit('zoom', zoom);
-                }
-            }
+            _this.changeBrushSize(deltaY);
         });
         return _this;
     }
+    TilePalette.prototype.changeBrushSize = function (deltaY) {
+        var commandController = this.commandController;
+        if (taro.developerMode.active && taro.developerMode.activeTab !== 'play') {
+            if (this.devModeScene.devModeTools.altKey.isDown && !this.devModeScene.devModeTools.isForceTo1x1()) {
+                if (deltaY > 0) {
+                    commandController.defaultCommands.decreaseBrushSize();
+                }
+                else if (deltaY < 0) {
+                    commandController.defaultCommands.increaseBrushSize();
+                }
+            }
+            else {
+                if (this.visible && this.pointerover) {
+                    this.zoom(deltaY);
+                }
+                else if (deltaY < 0) {
+                    var zoom = (this.scene.gameScene.zoomSize / 2.15) / 1.1;
+                    taro.client.emit('zoom', zoom);
+                }
+                else if (deltaY > 0) {
+                    var zoom = (this.scene.gameScene.zoomSize / 2.15) * 1.1;
+                    taro.client.emit('zoom', zoom);
+                }
+            }
+        }
+    };
     TilePalette.prototype.toggle = function () {
         if (this.visible) {
             this.scene.devModeTools.paletteButton.highlight('hidden');
@@ -180,34 +196,36 @@ var TilePalette = /** @class */ (function (_super) {
             thumbHeight = (length - 60) / 2;
             posX = this.camera.width;
         }
-        var scrollBar = this.rexUI.add.scrollBar((_a = {},
-            _a[orientSize] = length,
-            _a.orientation = orient,
-            _a.background = this.rexUI.add.roundRectangle(0, 0, 0, 0, 0, this.COLOR_WHITE),
-            _a.buttons = {
-                left: this.rexUI.add.roundRectangle(0, 0, 20, 20, 0, this.COLOR_PRIMARY),
-                right: this.rexUI.add.roundRectangle(0, 0, 20, 20, 0, this.COLOR_PRIMARY),
-            },
-            _a.slider = {
-                thumb: this.rexUI.add.roundRectangle(0, 0, thumbWidth, thumbHeight, 1, this.COLOR_LIGHT),
-            },
-            _a.space = {
-                left: 1, right: 1, top: 1, bottom: 1
-            },
-            _a));
-        scrollBar.value = 0.5;
-        this.scrollBarContainer.add(scrollBar);
-        scrollBar.setPosition(posX, posY).setOrigin(0, 0).setScrollFactor(0, 0).layout();
-        scrollBar.on('valuechange', function (newValue, oldValue, scrollBar) {
-            if (!isNaN(newValue) && !scrollBar.blocked) {
-                newValue -= 0.5;
-                if (orient === 'x')
-                    this.camera.scrollX = this.x + (this.camera.width * newValue);
-                else if (orient === 'y')
-                    this.camera.scrollY = this.y + (this.camera.height * newValue);
-            }
-        }, this);
-        return scrollBar;
+        if (this.rexUI) {
+            var scrollBar = this.rexUI.add.scrollBar((_a = {},
+                _a[orientSize] = length,
+                _a.orientation = orient,
+                _a.background = this.rexUI.add.roundRectangle(0, 0, 0, 0, 0, this.COLOR_WHITE),
+                _a.buttons = {
+                    left: this.rexUI.add.roundRectangle(0, 0, 20, 20, 0, this.COLOR_PRIMARY),
+                    right: this.rexUI.add.roundRectangle(0, 0, 20, 20, 0, this.COLOR_PRIMARY),
+                },
+                _a.slider = {
+                    thumb: this.rexUI.add.roundRectangle(0, 0, thumbWidth, thumbHeight, 1, this.COLOR_LIGHT),
+                },
+                _a.space = {
+                    left: 1, right: 1, top: 1, bottom: 1
+                },
+                _a));
+            scrollBar.value = 0.5;
+            this.scrollBarContainer.add(scrollBar);
+            scrollBar.setPosition(posX, posY).setOrigin(0, 0).setScrollFactor(0, 0).layout();
+            scrollBar.on('valuechange', function (newValue, oldValue, scrollBar) {
+                if (!isNaN(newValue) && !scrollBar.blocked) {
+                    newValue -= 0.5;
+                    if (orient === 'x')
+                        this.camera.scrollX = this.x + (this.camera.width * newValue);
+                    else if (orient === 'y')
+                        this.camera.scrollY = this.y + (this.camera.height * newValue);
+                }
+            }, this);
+            return scrollBar;
+        }
     };
     return TilePalette;
 }(Phaser.GameObjects.Container));

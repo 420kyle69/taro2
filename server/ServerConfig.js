@@ -46,9 +46,12 @@ var defaultConfig = [
 	{ name: 'Region', path: '../src/gameClasses/Region' },
 	{ name: 'RegionManager', path: '../src/gameClasses/components/RegionManager' },
 
+	// tiles calc
+	{ name: 'Combinator', path: '../src/gameClasses/Combinator' },
+	{ name: 'TileShape', path: '../src/gameClasses/TileShape' },
+	{ name: 'Constants', path: '../src/renderer/phaser/classes/devmode/Constants' },
+
 	{ name: 'DeveloperMode', path: '../src/gameClasses/DeveloperMode' },
-
-
 ];
 
 var config = {

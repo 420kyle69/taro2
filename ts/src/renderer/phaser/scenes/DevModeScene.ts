@@ -9,12 +9,15 @@ class DevModeScene extends PhaserScene {
 	gameEditorWidgets: Array<DOMRect>;
 
 	pointerInsideButtons: boolean;
-
 	tilePalette: TilePalette;
 	tilemap: Phaser.Tilemaps.Tilemap;
 	tileset: Phaser.Tilemaps.Tileset;
 
 	regions: PhaserRegion[];
+
+	entityImages: (Phaser.GameObjects.Image & {entity: EntityImage})[];
+
+	showRepublishWarning: boolean;
 
 	constructor() {
 		super({ key: 'DevMode' });
@@ -23,7 +26,11 @@ class DevModeScene extends PhaserScene {
 	init (): void {
 		this.gameScene = taro.renderer.scene.getScene('Game');
 		this.pointerInsideButtons = false;
+
 		this.regions = [];
+		this.entityImages = [];
+
+		this.showRepublishWarning = false;
 
 		taro.client.on('unlockCamera', () => {
 			this.gameScene.cameras.main.stopFollow();
@@ -31,7 +38,9 @@ class DevModeScene extends PhaserScene {
 
 		taro.client.on('lockCamera', () => {
 			taro.client.emit('zoom', taro.client.zoom);
-			if (this.gameScene.cameraTarget) this.gameScene.cameras.main.startFollow(this.gameScene.cameraTarget, false, 0.05, 0.05);
+			let trackingDelay = taro?.game?.data?.settings?.camera?.trackingDelay || 3;
+			trackingDelay = trackingDelay / 60;
+			if (this.gameScene.cameraTarget) this.gameScene.cameras.main.startFollow(this.gameScene.cameraTarget, false, trackingDelay, trackingDelay);
 		});
 
 		taro.client.on('enterMapTab', () => {
@@ -42,12 +51,29 @@ class DevModeScene extends PhaserScene {
 			this.leaveMapTab();
 		});
 
-		taro.client.on('editTile', (data: TileData) => {
+		taro.client.on('editTile', (data: TileData<MapEditToolEnum>) => {
 			this.tileEditor.edit(data);
 		});
 
 		taro.client.on('editRegion', (data: RegionData) => {
 			this.regionEditor.edit(data);
+		});
+
+        taro.client.on('editInitEntity', (data: ActionData) => {
+            let found = false;
+            this.entityImages.forEach((image) => {
+                if (image.entity.action.actionId === data.actionId) {
+                    found = true;
+                    image.entity.update(data);
+                }
+            });
+            if (!found) {
+                this.createEntityImage(data);
+            }
+		});
+
+        taro.client.on('updateInitEntities', () => {
+			this.updateInitEntities();
 		});
 
 		this.gameScene.input.on('pointerup', (p) => {
@@ -65,9 +91,9 @@ class DevModeScene extends PhaserScene {
 					position: {
 						x: worldPoint.x,
 						y: worldPoint.y
-					}, 
+					},
 					angle: draggedEntity.angle
-				}
+				};
 				taro.developerMode.editEntity(data, playerId);
 				taro.unitBeingDragged = null;
 			}
@@ -93,6 +119,7 @@ class DevModeScene extends PhaserScene {
 		});*/
 
 		this.load.image('cursor', 'https://cache.modd.io/asset/spriteImage/1666276041347_cursor.png');
+        this.load.image('entity', 'https://cache.modd.io/asset/spriteImage/1686840222943_cube.png');
 		this.load.image('region', 'https://cache.modd.io/asset/spriteImage/1666882309997_region.png');
 		this.load.image('stamp', 'https://cache.modd.io/asset/spriteImage/1666724706664_stamp.png');
 		this.load.image('eraser', 'https://cache.modd.io/asset/spriteImage/1666276083246_erasergap.png');
@@ -101,7 +128,8 @@ class DevModeScene extends PhaserScene {
 		this.load.image('fill', 'https://cache.modd.io/asset/spriteImage/1675428550006_fill_(1).png');
 		this.load.image('clear', 'https://cache.modd.io/asset/spriteImage/1681917489086_layerClear.png');
 		this.load.image('save', 'https://cache.modd.io/asset/spriteImage/1681916834218_saveIcon.png');
-		
+		this.load.image('redo', 'https://cache.modd.io/asset/spriteImage/1686899810953_redo.png');
+		this.load.image('undo', 'https://cache.modd.io/asset/spriteImage/1686899853748_undo.png');
 
 		this.load.scenePlugin(
 			'rexuiplugin',
@@ -147,13 +175,86 @@ class DevModeScene extends PhaserScene {
 		}
 
 		this.devModeTools.enterMapTab();
+
+		this.gameScene.renderedEntities.forEach(element => {
+			element.setVisible(false);
+		});
+
+		if (this.entityImages.length === 0) {
+			// create images for entities created in initialize script
+			Object.values(taro.game.data.scripts).forEach((script) => {
+				if (script.triggers?.[0]?.type === 'gameStart') {
+					Object.values(script.actions).forEach((action) => {
+                        this.createEntityImage(action);
+					});
+				}
+			});
+
+			if (this.showRepublishWarning) {
+				inGameEditor.showRepublishToInitEntitiesWarning();
+			}
+		}
+
+        taro.network.send<any>('updateClientInitEntities', true);
+
+		this.entityImages.forEach((image) => {
+			image.setVisible(true);
+		});
 	}
 
 	leaveMapTab (): void {
 		if (this.devModeTools) this.devModeTools.leaveMapTab();
+
+        if (this.devModeTools.entityEditor.selectedEntityImage) {
+            this.devModeTools.entityEditor.selectEntityImage(null);
+        }
+
+		this.entityImages.forEach((image) => {
+			image.setVisible(false);
+		});
+
+		this.gameScene.renderedEntities.forEach(element => {
+			element.setVisible(true);
+		});
+
 	}
 
-	pointerInsideMap(pointerX: number, pointerY: number, map: Phaser.Tilemaps.Tilemap): boolean {
+    createEntityImage(action: ActionData): void {
+        if (!action.disabled && action.position?.function === 'xyCoordinate'
+        && !isNaN(action.position?.x) && !isNaN(action.position?.y)) {
+            if (action.type === 'createEntityForPlayerAtPositionWithDimensions' || action.type === 'createEntityAtPositionWithDimensions'
+            && !isNaN(action.width) && !isNaN(action.height) && !isNaN(action.angle)) {
+                if (action.actionId) new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action);
+                else {
+					this.showRepublishWarning = true;
+                }
+            } else if (action.type === 'createUnitAtPosition' && !isNaN(action.angle)) {
+                if (action.actionId) new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action, 'unit');
+                else {
+					this.showRepublishWarning = true;
+                }
+            } else if (action.type === 'createUnitForPlayerAtPosition'
+            && !isNaN(action.angle) && !isNaN(action.width) && !isNaN(action.height)) {
+                if (action.actionId) new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action, 'unit');
+                else {
+					this.showRepublishWarning = true;
+                }
+            }
+            else if (action.type === 'spawnItem' || action.type === 'createItemWithMaxQuantityAtPosition') {
+                if (action.actionId) new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action, 'item');
+                else {
+					this.showRepublishWarning = true;
+                }
+            } else if (action.type === 'createProjectileAtPosition' && !isNaN(action.angle)) {
+                if (action.actionId) new EntityImage(this.gameScene, this.devModeTools, this.entityImages, action, 'projectile');
+                else {
+					this.showRepublishWarning = true;
+                }
+            }
+        }
+    }
+
+	static pointerInsideMap(pointerX: number, pointerY: number, map: {width: number, height: number}): boolean {
 		return (0 <= pointerX && pointerX < map.width
 			&& 0 <= pointerY && pointerY < map.height);
 	}
@@ -183,6 +284,23 @@ class DevModeScene extends PhaserScene {
 
 	update (): void {
 		if (this.tileEditor) this.tileEditor.update();
+        if (this.devModeTools.entityEditor) this.devModeTools.entityEditor.update();
 	}
+
+    updateInitEntities(): void {
+        taro.developerMode.initEntities.forEach((action) => {
+            let found = false;
+            this.entityImages.forEach((image) => {
+                if (image.entity.action.actionId === action.actionId) {
+                    found = true;
+                    image.entity.update(action);
+                }
+            });
+            if (!found) {
+                this.createEntityImage(action);
+            }
+        });
+
+    }
 
 }

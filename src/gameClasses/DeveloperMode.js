@@ -3,6 +3,45 @@ var DeveloperMode = /** @class */ (function () {
         if (taro.isClient)
             this.active = false;
     }
+    DeveloperMode.prototype.addInitEntities = function () {
+        var _this = this;
+        // add id for actions creating entities in initialize script
+        this.initEntities = [];
+        Object.values(taro.game.data.scripts).forEach(function (script) {
+            var _a, _b;
+            if (((_b = (_a = script.triggers) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.type) === 'gameStart') {
+                Object.values(script.actions).forEach(function (action) {
+                    var _a, _b, _c;
+                    if (!action.disabled && ((_a = action.position) === null || _a === void 0 ? void 0 : _a.function) === 'xyCoordinate'
+                        && !isNaN((_b = action.position) === null || _b === void 0 ? void 0 : _b.x) && !isNaN((_c = action.position) === null || _c === void 0 ? void 0 : _c.y)
+                        && !isNaN(action.width) && !isNaN(action.height) && !isNaN(action.angle)) {
+                        if ((action.type === 'createEntityForPlayerAtPositionWithDimensions'
+                            || action.type === 'createEntityAtPositionWithDimensions'
+                            || action.type === 'createUnitForPlayerAtPosition')
+                            && !isNaN(action.width) && !isNaN(action.height) && !isNaN(action.angle)) {
+                            if (action.actionId)
+                                _this.initEntities.push(action);
+                        }
+                        else if ((action.type === 'createUnitAtPosition'
+                            || action.type === 'createProjectileAtPosition')
+                            && !isNaN(action.angle)) {
+                            if (action.actionId)
+                                _this.initEntities.push(action);
+                        }
+                        else if (action.type === 'spawnItem' || action.type === 'createItemWithMaxQuantityAtPosition') {
+                            if (action.actionId)
+                                _this.initEntities.push(action);
+                        }
+                    }
+                });
+            }
+        });
+    };
+    DeveloperMode.prototype.requestInitEntities = function () {
+        if (this.initEntities) {
+            taro.network.send('updateClientInitEntities', this.initEntities);
+        }
+    };
     DeveloperMode.prototype.enter = function () {
         console.log('client enter developer mode');
         this.active = true;
@@ -32,24 +71,39 @@ var DeveloperMode = /** @class */ (function () {
     };
     DeveloperMode.prototype.editTile = function (data, clientId) {
         // only allow developers to modify the tiles
-        if (taro.server.developerClientIds.includes(clientId)) {
+        if (taro.server.developerClientIds.includes(clientId) || clientId === 'server') {
+            if (JSON.stringify(data) === '{}') {
+                throw 'receive: {}';
+            }
             var gameMap = taro.game.data.map;
             gameMap.wasEdited = true;
             taro.network.send('editTile', data);
-            var serverData = _.clone(data);
+            var _a = Object.entries(data).map(function (_a) {
+                var k = _a[0], dataValue = _a[1];
+                var dataType = k;
+                return { dataType: dataType, dataValue: dataValue };
+            })[0], dataType = _a.dataType, dataValue = _a.dataValue;
+            var serverData = _.clone(dataValue);
             if (gameMap.layers.length > 4 && serverData.layer >= 2)
                 serverData.layer++;
             var width = gameMap.width;
-            if (data.tool === 'flood') {
-                this.floodTiles(serverData.layer, gameMap.layers[serverData.layer].data[serverData.y * width + serverData.x], serverData.gid, serverData.x, serverData.y);
-            }
-            else if (data.tool === 'clear') {
-                this.clearLayer(serverData.layer);
-            }
-            else {
-                //save tile change to taro.game.data.map and taro.map.data
-                gameMap.layers[serverData.layer].data[serverData.y * width + serverData.x] = serverData.gid;
-                taro.map.data.layers[serverData.layer].data[serverData.y * width + serverData.x] = serverData.gid;
+            switch (dataType) {
+                case 'fill': {
+                    var nowValue = serverData;
+                    var oldTile = gameMap.layers[nowValue.layer].data[nowValue.y * width + nowValue.x];
+                    this.floodTiles(nowValue.layer, oldTile, nowValue.gid, nowValue.x, nowValue.y, nowValue.limits);
+                    break;
+                }
+                case 'edit': {
+                    //save tile change to taro.game.data.map and taro.map.data
+                    var nowValue = serverData;
+                    this.putTiles(nowValue.x, nowValue.y, nowValue.selectedTiles, nowValue.size, nowValue.shape, nowValue.layer);
+                    break;
+                }
+                case 'clear': {
+                    var nowValue = serverData;
+                    this.clearLayer(nowValue.layer);
+                }
             }
             if (gameMap.layers[serverData.layer].name === 'walls') {
                 //if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
@@ -61,26 +115,104 @@ var DeveloperMode = /** @class */ (function () {
             }
         }
     };
-    DeveloperMode.prototype.floodTiles = function (layer, oldTile, newTile, x, y) {
+    /**
+     * put tiles
+     * @param tileX pointerTileX
+     * @param tileY pointerTileY
+     * @param selectedTiles selectedTiles
+     * @param brushSize brush's size
+     * @param layer map's layer
+     */
+    DeveloperMode.prototype.putTiles = function (tileX, tileY, selectedTiles, brushSize, shape, layer) {
         var map = taro.game.data.map;
         var width = map.width;
-        if (oldTile === newTile || map.layers[layer].data[y * width + x] !== oldTile) {
-            return;
+        var sample = this.calcSample(selectedTiles, brushSize, shape);
+        if (map.layers[layer]) {
+            for (var x = 0; x < brushSize.x; x++) {
+                for (var y = 0; y < brushSize.y; y++) {
+                    if (sample[x] && sample[x][y] !== undefined && this.pointerInsideMap(x + tileX, y + tileY, map)) {
+                        var index = sample[x][y];
+                        if (index === -1)
+                            index = 0;
+                        map.layers[layer].data[x + tileX + (y + tileY) * width] = index;
+                        taro.map.data.layers[layer].data[x + tileX + (y + tileY) * width] = index;
+                    }
+                }
+            }
         }
-        //save tile change to taro.game.data.map and taro.map.data
-        map.layers[layer].data[y * width + x] = newTile;
-        taro.map.data.layers[layer].data[y * width + x] = newTile;
-        if (x > 0) {
-            this.floodTiles(layer, oldTile, newTile, x - 1, y);
+    };
+    DeveloperMode.prototype.pointerInsideMap = function (pointerX, pointerY, map) {
+        return (0 <= pointerX && pointerX < map.width
+            && 0 <= pointerY && pointerY < map.height);
+    };
+    /**
+     * calc the sample to print
+     * @param selectedTileArea selectedTiles
+     * @param size brush's size
+     * @returns sample to print
+     */
+    DeveloperMode.prototype.calcSample = function (selectedTileArea, size, shape) {
+        var xArray = Object.keys(selectedTileArea);
+        var yArray = Object.values(selectedTileArea).map(function (object) { return Object.keys(object); }).flat().sort(function (a, b) { return parseInt(a) - parseInt(b); });
+        var minX = parseInt(xArray[0]);
+        var minY = parseInt(yArray[0]);
+        var maxX = parseInt(xArray[xArray.length - 1]);
+        var maxY = parseInt(yArray[yArray.length - 1]);
+        var xLength = maxX - minX + 1;
+        var yLength = maxY - minY + 1;
+        var tempSample = {};
+        switch (shape) {
+            case 'rectangle': {
+                tempSample = TileShape.calcRect(minX, xLength, minY, yLength, selectedTileArea, size);
+                break;
+            }
+            case 'diamond': {
+                tempSample = TileShape.calcDiamond(minX, xLength, minY, yLength, selectedTileArea, size);
+                break;
+            }
+            case 'circle': {
+                tempSample = TileShape.calcCircle(minX, xLength, minY, yLength, selectedTileArea, size);
+                break;
+            }
         }
-        if (x < (map.width - 1)) {
-            this.floodTiles(layer, oldTile, newTile, x + 1, y);
-        }
-        if (y > 0) {
-            this.floodTiles(layer, oldTile, newTile, x, y - 1);
-        }
-        if (y < (map.height - 1)) {
-            this.floodTiles(layer, oldTile, newTile, x, y + 1);
+        return tempSample;
+    };
+    DeveloperMode.prototype.floodTiles = function (layer, oldTile, newTile, x, y, limits) {
+        var _a, _b, _c, _d, _e, _f;
+        var map = taro.game.data.map;
+        var width = map.width;
+        var openQueue = [{ x: x, y: y }];
+        var closedQueue = {};
+        while (openQueue.length !== 0) {
+            var nowPos = openQueue[0];
+            openQueue.shift();
+            if ((_a = closedQueue[nowPos.x]) === null || _a === void 0 ? void 0 : _a[nowPos.y]) {
+                continue;
+            }
+            if (!closedQueue[nowPos.x]) {
+                closedQueue[nowPos.x] = {};
+            }
+            closedQueue[nowPos.x][nowPos.y] = 1;
+            if (oldTile === newTile
+                || map.layers[layer].data[nowPos.y * width + nowPos.x] !== oldTile
+                || ((_b = limits === null || limits === void 0 ? void 0 : limits[nowPos.x]) === null || _b === void 0 ? void 0 : _b[nowPos.y])) {
+                continue;
+            }
+            //save tile change to taro.game.data.map and taro.map.data
+            map.layers[layer].data[nowPos.y * width + nowPos.x] = newTile;
+            taro.map.data.layers[layer].data[nowPos.y * width + nowPos.x] = newTile;
+            if (nowPos.x > 0 && !((_c = closedQueue[nowPos.x - 1]) === null || _c === void 0 ? void 0 : _c[nowPos.y])) {
+                openQueue.push({ x: nowPos.x - 1, y: nowPos.y });
+            }
+            if (nowPos.x < (map.width - 1) && !((_d = closedQueue[nowPos.x + 1]) === null || _d === void 0 ? void 0 : _d[nowPos.y])) {
+                openQueue.push({ x: nowPos.x + 1, y: nowPos.y });
+            }
+            if (nowPos.y > 0 && !((_e = closedQueue[nowPos.x]) === null || _e === void 0 ? void 0 : _e[nowPos.y - 1])) {
+                openQueue.push({ x: nowPos.x, y: nowPos.y - 1 });
+            }
+            if (nowPos.y < (map.height - 1) && !((_f = closedQueue[nowPos.x]) === null || _f === void 0 ? void 0 : _f[nowPos.y + 1])) {
+                openQueue.push({ x: nowPos.x, y: nowPos.y + 1 });
+            }
         }
     };
     DeveloperMode.prototype.clearLayer = function (layer) {
@@ -165,6 +297,43 @@ var DeveloperMode = /** @class */ (function () {
             taro.network.send('editRegion', data);
         }
     };
+    DeveloperMode.prototype.editInitEntity = function (data, clientId) {
+        // only allow developers to modify initial entities
+        if (taro.server.developerClientIds.includes(clientId)) {
+            // broadcast init entity change to all clients
+            taro.network.send('editInitEntity', data);
+            if (!this.initEntities) {
+                this.addInitEntities();
+            }
+            var found_1 = false;
+            this.initEntities.forEach(function (action) {
+                if (action.actionId === data.actionId) {
+                    found_1 = true;
+                    if (data.wasEdited)
+                        action.wasEdited = true;
+                    if (data.position && !isNaN(data.position.x) && !isNaN(data.position.y) &&
+                        action.position && !isNaN(action.position.x) && !isNaN(action.position.y)) {
+                        action.position = data.position;
+                    }
+                    if (!isNaN(data.angle) && !isNaN(action.angle)) {
+                        action.angle = data.angle;
+                    }
+                    if (!isNaN(data.width) && !isNaN(action.width)) {
+                        action.width = data.width;
+                    }
+                    if (!isNaN(data.height) && !isNaN(action.height)) {
+                        action.height = data.height;
+                    }
+                    if (data.wasDeleted) {
+                        action.wasDeleted = true;
+                    }
+                }
+            });
+            if (!found_1) {
+                this.initEntities.push(data);
+            }
+        }
+    };
     DeveloperMode.prototype.createUnit = function (data) {
         //const player = taro.game.getPlayerByClientId(clientId);
         var player;
@@ -237,7 +406,7 @@ var DeveloperMode = /** @class */ (function () {
             };
             var item = new Item(itemData);
             taro.game.lastCreatedUnitId = item._id;
-            item.script.trigger("entityCreated");
+            item.script.trigger('entityCreated');
         }
     };
     DeveloperMode.prototype.updateItem = function (data) {
@@ -335,7 +504,7 @@ var DeveloperMode = /** @class */ (function () {
         }
     };
     DeveloperMode.prototype.updateClientMap = function (data) {
-        console.log('map data was edited', data.mapData.wasEdited);
+        //console.log ('map data was edited', data.mapData.wasEdited);
         if (data.mapData.wasEdited) {
             data.mapData.wasEdited = false;
             data.mapData.haveUnsavedChanges = true;
@@ -350,6 +519,10 @@ var DeveloperMode = /** @class */ (function () {
             }
             taro.client.emit('updateMap');
         }
+    };
+    DeveloperMode.prototype.updateClientInitEntities = function (initEntities) {
+        this.initEntities = initEntities;
+        taro.client.emit('updateInitEntities');
     };
     return DeveloperMode;
 }());

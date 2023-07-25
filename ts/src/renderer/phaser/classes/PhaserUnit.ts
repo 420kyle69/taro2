@@ -14,7 +14,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 	private zoomEvtListener: EvtListener;
 	private scaleTween: Phaser.Tweens.Tween;
 
-	constructor (
+	constructor(
 		scene: GameScene,
 		entity: Unit
 	) {
@@ -24,7 +24,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		const gameObject = scene.add.container(
 			translate.x,
 			translate.y,
-			[ this.sprite ]
+			[this.sprite]
 		);
 
 		this.gameObject = gameObject as Phaser.GameObjects.Container & IRenderProps;
@@ -49,9 +49,19 @@ class PhaserUnit extends PhaserAnimatedEntity {
 
 		this.scene.renderedEntities.push(this.gameObject);
 		this.zoomEvtListener = taro.client.on('scale', this.scaleElements, this);
+
+		this.sprite.setInteractive();
+		this.sprite.on('pointerdown', (p) => {
+			if (taro.game.data.defaultData.contextMenuEnabled && (!taro.developerMode.active || (taro.developerMode.active && taro.developerMode.activeTab === 'play')) && p.rightButtonDown()) {
+				const ownerPlayer = taro.$(this.entity._stats.ownerId);
+				if (ownerPlayer._stats.controlledBy === 'human') {
+					showUserDropdown({ ownerId: this.entity._stats.ownerId, pointer: p });
+				}
+			}
+		});
 	}
 
-	protected updateTexture (data) {
+	protected updateTexture(data) {
 		if (data === 'basic_texture_change') {
 			this.sprite.anims.stop();
 			this.key = `unit/${this.entity._stats.cellSheet.url}`;
@@ -65,7 +75,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 						this.sprite.setDisplaySize(bounds.x, bounds.y);
 					}
 				}, this);
-			this.scene.load.start();
+				this.scene.load.start();
 			} else {
 				this.setTexture(this.key);
 				const bounds = this.entity._bounds2d;
@@ -98,7 +108,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		}
 	}
 
-	protected depth (value: number): void {
+	protected depth(value: number): void {
 		const scene = this.gameObject.scene as GameScene;
 		this.gameObject.taroDepth = value;
 
@@ -109,7 +119,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		}
 	}
 
-	protected transform (data: {
+	protected transform(data: {
 		x: number;
 		y: number;
 		rotation: number
@@ -120,7 +130,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		}
 	}
 
-	protected size (data: {
+	protected size(data: {
 		width: number,
 		height: number
 	}): void {
@@ -141,11 +151,11 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		this.updateGameObjectSize();
 	}
 
-	private updateLabelOffset (): void {
+	private updateLabelOffset(): void {
 		if (this.label) {
-			const {displayHeight, displayWidth} = this.sprite;
+			const { displayHeight, displayWidth } = this.sprite;
 			const labelHeight = this.label.getBounds().height;
-			this.label.y = - displayHeight/2 - labelHeight*1.5;
+			this.label.y = - displayHeight / 2 - labelHeight * 1.5;
 			/*if (this.rtLabel) {
 				this.rtLabel.y = this.label.y;
 			}*/
@@ -153,13 +163,13 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		this.updateGameObjectSize();
 	}
 
-	private updateAttributesOffset (): void {
-		const {displayHeight, displayWidth} = this.sprite;
-		this.attributesContainer.y = (this.attributesContainer.height*this.attributesContainer.scaleX)/2 + 16*this.attributesContainer.scaleX + displayHeight/2;
+	private updateAttributesOffset(): void {
+		const { displayHeight, displayWidth } = this.sprite;
+		this.attributesContainer.y = (this.attributesContainer.height * this.attributesContainer.scaleX) / 2 + 16 * this.attributesContainer.scaleX + displayHeight / 2;
 		this.updateGameObjectSize();
 	}
 
-	public updateGameObjectSize (): void {
+	public updateGameObjectSize(): void {
 		const containerSize = Math.max(this.sprite.displayHeight, this.sprite.displayWidth);
 		let height = containerSize;
 		if (this.attributesContainer) {
@@ -173,7 +183,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		this.gameObject.setSize(containerSize, containerSize + height);
 	}
 
-	private follow (): void {
+	private follow(): void {
 		const camera = this.scene.cameras.main as Phaser.Cameras.Scene2D.Camera & {
 			_follow: Phaser.GameObjects.GameObject
 		};
@@ -182,11 +192,13 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		}
 		this.scene.cameraTarget = this.gameObject;
 		if (!taro.developerMode.active || taro.developerMode.activeTab === 'play') {
-			camera.startFollow(this.gameObject, false, 0.05, 0.05);
+			let trackingDelay = taro?.game?.data?.settings?.camera?.trackingDelay || 3;
+			trackingDelay = trackingDelay / 60;
+			camera.startFollow(this.gameObject, false, trackingDelay, trackingDelay);
 		}
 	}
 
-	private getLabel (): Phaser.GameObjects.Text {
+	private getLabel(): Phaser.GameObjects.Text {
 		if (!this.label) {
 			const scene = this.scene;
 			/*const label = this.label = scene.add.bitmapText(0, 0,
@@ -221,8 +233,8 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		return this.label;
 	}
 
-	private updateLabel (data: {
-		text? : string;
+	private updateLabel(data: {
+		text?: string;
 		bold?: boolean;
 		color?: string;
 	}): void {
@@ -269,7 +281,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		this.updateGameObjectSize();
 	}
 
-	private showLabel (): void {
+	private showLabel(): void {
 		/*const label = this.getLabel();
 		const rt = this.rtLabel;
 
@@ -278,7 +290,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		this.getLabel().visible = true;
 	}
 
-	private hideLabel (): void {
+	private hideLabel(): void {
 		/*const label = this.getLabel();
 		const rt = this.rtLabel;
 
@@ -287,7 +299,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		this.getLabel().visible = false;
 	}
 
-	private fadingText (data: {
+	private fadingText(data: {
 		text: string;
 		color?: string;
 	}): void {
@@ -300,7 +312,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		});
 	}
 
-	private getAttributesContainer (): Phaser.GameObjects.Container {
+	private getAttributesContainer(): Phaser.GameObjects.Container {
 		if (!this.attributesContainer) {
 			this.attributesContainer = this.scene.add.container(0, 0);
 
@@ -313,7 +325,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		return this.attributesContainer;
 	}
 
-	private renderAttributes (data: {
+	private renderAttributes(data: {
 		attrs: AttributeData[]
 	}): void {
 		// creating attributeContainer on the fly,
@@ -333,7 +345,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		});
 	}
 
-	private updateAttribute (data: {
+	private updateAttribute(data: {
 		attr: AttributeData;
 		shouldRender: boolean;
 	}): void {
@@ -360,7 +372,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		a.render(data.attr);
 	}
 
-	private renderChat (text: string): void {
+	private renderChat(text: string): void {
 		if (this.chat) {
 			this.chat.showMessage(text);
 		} else {
@@ -368,7 +380,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		}
 	}
 
-	private scaleElements (data: {
+	private scaleElements(data: {
 		ratio: number;
 	}): void {
 
@@ -410,7 +422,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		});
 	}
 
-	protected destroy (): void {
+	protected destroy(): void {
 
 		this.scene.renderedEntities = this.scene.renderedEntities.filter(item => item !== this.gameObject);
 		this.scene.unitsList = this.scene.unitsList.filter(item => item.entity.id() !== this.entity.id());

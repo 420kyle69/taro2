@@ -2,8 +2,43 @@ class DeveloperMode {
 	active: boolean;
 	activeTab: devModeTab;
 
+	initEntities: ActionData[];
+
 	constructor() {
 		if (taro.isClient) this.active = false;
+	}
+
+	addInitEntities(): void {
+		// add id for actions creating entities in initialize script
+		this.initEntities = [];
+		Object.values(taro.game.data.scripts).forEach((script) => {
+			if (script.triggers?.[0]?.type === 'gameStart') {
+				Object.values(script.actions).forEach((action) => {
+					if (!action.disabled && action.position?.function === 'xyCoordinate'
+						&& !isNaN(action.position?.x) && !isNaN(action.position?.y)
+						&& !isNaN(action.width) && !isNaN(action.height) && !isNaN(action.angle)) {
+						if ((action.type === 'createEntityForPlayerAtPositionWithDimensions'
+							|| action.type === 'createEntityAtPositionWithDimensions'
+							|| action.type === 'createUnitForPlayerAtPosition')
+							&& !isNaN(action.width) && !isNaN(action.height) && !isNaN(action.angle)) {
+							if (action.actionId) this.initEntities.push(action);
+						} else if ((action.type === 'createUnitAtPosition'
+							|| action.type === 'createProjectileAtPosition')
+							&& !isNaN(action.angle)) {
+							if (action.actionId) this.initEntities.push(action);
+						} else if (action.type === 'spawnItem' || action.type === 'createItemWithMaxQuantityAtPosition') {
+							if (action.actionId) this.initEntities.push(action);
+						}
+					}
+				});
+			}
+		});
+	}
+
+	requestInitEntities(): void {
+		if (this.initEntities) {
+			taro.network.send<any>('updateClientInitEntities', this.initEntities);
+		}
 	}
 
 	enter(): void {
@@ -12,7 +47,7 @@ class DeveloperMode {
 		this.changeTab('play');
 	}
 
-	leave (): void {
+	leave(): void {
 		console.log('client leave developer mode');
 		this.active = false;
 	}
@@ -31,35 +66,44 @@ class DeveloperMode {
 		this.activeTab = tab;
 	}
 
-	shouldPreventKeybindings (): boolean {
+	shouldPreventKeybindings(): boolean {
 		return this.activeTab && this.activeTab !== 'play';
 	}
 
-	editTile (data: TileData, clientId: string): void {
+	editTile<T extends MapEditToolEnum>(data: TileData<T>, clientId: string): void {
 		// only allow developers to modify the tiles
-		if (taro.server.developerClientIds.includes(clientId)) {
+		if (taro.server.developerClientIds.includes(clientId) || clientId === 'server') {
+			if (JSON.stringify(data) === '{}') {
+				throw 'receive: {}';
+			}
 			const gameMap = taro.game.data.map;
 			gameMap.wasEdited = true;
 			taro.network.send('editTile', data);
-			const serverData = _.clone(data);
-			if (gameMap.layers.length > 4 && serverData.layer >= 2) serverData.layer ++;
+			const { dataType, dataValue } = Object.entries(data).map(([k, dataValue]) => {
+				const dataType = k as MapEditToolEnum; return { dataType, dataValue };
+			})[0];
+			const serverData = _.clone(dataValue);
+			if (gameMap.layers.length > 4 && serverData.layer >= 2) serverData.layer++;
 			const width = gameMap.width;
-			if (data.tool === 'flood') {
-				this.floodTiles(
-					serverData.layer, 
-					gameMap.layers[serverData.layer].data[serverData.y * width + serverData.x],
-					serverData.gid,
-					serverData.x,
-					serverData.y
-					);
-			} else if (data.tool === 'clear') {
-				this.clearLayer(serverData.layer);
+			switch (dataType) {
+				case 'fill': {
+					const nowValue = serverData as TileData<'fill'>['fill'];
+					const oldTile = gameMap.layers[nowValue.layer].data[nowValue.y * width + nowValue.x];
+					this.floodTiles(nowValue.layer, oldTile, nowValue.gid, nowValue.x, nowValue.y, nowValue.limits);
+					break;
+				}
+				case 'edit': {
+					//save tile change to taro.game.data.map and taro.map.data
+					const nowValue = serverData as TileData<'edit'>['edit'];
+					this.putTiles(nowValue.x, nowValue.y, nowValue.selectedTiles, nowValue.size, nowValue.shape, nowValue.layer);
+					break;
+				}
+				case 'clear': {
+					const nowValue = serverData as TileData<'clear'>['clear'];
+					this.clearLayer(nowValue.layer);
+				}
 			}
-			else {
-				//save tile change to taro.game.data.map and taro.map.data
-				gameMap.layers[serverData.layer].data[serverData.y * width + serverData.x] = serverData.gid;
-				taro.map.data.layers[serverData.layer].data[serverData.y * width + serverData.x] = serverData.gid;
-			}
+
 			if (gameMap.layers[serverData.layer].name === 'walls') {
 				//if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
 				taro.physics.destroyWalls();
@@ -71,55 +115,135 @@ class DeveloperMode {
 		}
 	}
 
-	floodTiles (layer: number, oldTile: number, newTile: number, x: number, y: number): void {
+	/**
+	 * put tiles
+	 * @param tileX pointerTileX
+	 * @param tileY pointerTileY
+	 * @param selectedTiles selectedTiles
+	 * @param brushSize brush's size
+	 * @param layer map's layer
+	 */
+	putTiles(tileX: number, tileY: number, selectedTiles: Record<number, Record<number, number>>, brushSize: Vector2D, shape: Shape, layer: number): void {
 		const map = taro.game.data.map;
 		const width = map.width;
-        if (oldTile === newTile || map.layers[layer].data[y * width + x] !== oldTile) {
-            return;
-        }
-		//save tile change to taro.game.data.map and taro.map.data
-		map.layers[layer].data[y * width + x] = newTile;
-		taro.map.data.layers[layer].data[y * width + x] = newTile;
-			
-        if (x > 0) {
-            this.floodTiles(layer, oldTile, newTile, x - 1, y);
-        }
-        if (x < (map.width - 1)) {
-            this.floodTiles(layer, oldTile, newTile, x + 1, y);
-        }
-        if (y > 0) {
-            this.floodTiles(layer, oldTile, newTile, x, y - 1);
-        }
-        if (y < (map.height - 1)) {
-            this.floodTiles(layer, oldTile, newTile, x, y + 1);
-        }
+		const sample = this.calcSample(selectedTiles, brushSize, shape);
+		if (map.layers[layer]) {
+			for (let x = 0; x < brushSize.x; x++) {
+				for (let y = 0; y < brushSize.y; y++) {
+					if (sample[x] && sample[x][y] !== undefined && this.pointerInsideMap(x + tileX, y + tileY, map)) {
+						let index = sample[x][y];
+						if (index === -1) index = 0;
+						map.layers[layer].data[x + tileX + (y + tileY) * width] = index;
+						taro.map.data.layers[layer].data[x + tileX + (y + tileY) * width] = index;
+					}
+				}
+			}
+		}
 	}
 
-	clearLayer (layer: number): void {
+	pointerInsideMap(pointerX: number, pointerY: number, map: { width: number, height: number }): boolean {
+		return (0 <= pointerX && pointerX < map.width
+			&& 0 <= pointerY && pointerY < map.height);
+	}
+
+	/**
+	 * calc the sample to print
+	 * @param selectedTileArea selectedTiles
+	 * @param size brush's size
+	 * @returns sample to print
+	 */
+	calcSample(selectedTileArea: Record<number, Record<number, number>>, size: Vector2D, shape?: Shape): Record<number, Record<number, number>> {
+		const xArray = Object.keys(selectedTileArea);
+		const yArray = Object.values(selectedTileArea).map((object) => Object.keys(object)).flat().sort((a, b) => parseInt(a) - parseInt(b));
+		const minX = parseInt(xArray[0]);
+		const minY = parseInt(yArray[0]);
+		const maxX = parseInt(xArray[xArray.length - 1]);
+		const maxY = parseInt(yArray[yArray.length - 1]);
+		const xLength = maxX - minX + 1;
+		const yLength = maxY - minY + 1;
+		let tempSample: Record<number, Record<number, number>> = {};
+		switch (shape) {
+			case 'rectangle': {
+				tempSample = TileShape.calcRect(minX, xLength, minY, yLength, selectedTileArea, size);
+				break;
+			}
+			case 'diamond': {
+				tempSample = TileShape.calcDiamond(minX, xLength, minY, yLength, selectedTileArea, size);
+				break;
+			}
+			case 'circle': {
+				tempSample = TileShape.calcCircle(minX, xLength, minY, yLength, selectedTileArea, size);
+				break;
+			}
+		}
+		return tempSample;
+	}
+
+
+	floodTiles(layer: number, oldTile: number, newTile: number, x: number, y: number, limits?: Record<number, Record<number, number>>): void {
+		const map = taro.game.data.map;
+		const width = map.width;
+		const openQueue: Vector2D[] = [{ x, y }];
+		const closedQueue: Record<number, Record<number, number>> = {};
+		while (openQueue.length !== 0) {
+			const nowPos = openQueue[0];
+			openQueue.shift();
+
+			if (closedQueue[nowPos.x]?.[nowPos.y]) {
+				continue;
+			}
+			if (!closedQueue[nowPos.x]) {
+				closedQueue[nowPos.x] = {};
+			}
+			closedQueue[nowPos.x][nowPos.y] = 1;
+			if (oldTile === newTile
+				|| map.layers[layer].data[nowPos.y * width + nowPos.x] !== oldTile
+				|| limits?.[nowPos.x]?.[nowPos.y]) {
+				continue;
+			}
+			//save tile change to taro.game.data.map and taro.map.data
+			map.layers[layer].data[nowPos.y * width + nowPos.x] = newTile;
+			taro.map.data.layers[layer].data[nowPos.y * width + nowPos.x] = newTile;
+			if (nowPos.x > 0 && !closedQueue[nowPos.x - 1]?.[nowPos.y]) {
+				openQueue.push({ x: nowPos.x - 1, y: nowPos.y });
+			}
+			if (nowPos.x < (map.width - 1) && !closedQueue[nowPos.x + 1]?.[nowPos.y]) {
+				openQueue.push({ x: nowPos.x + 1, y: nowPos.y });
+			}
+			if (nowPos.y > 0 && !closedQueue[nowPos.x]?.[nowPos.y - 1]) {
+				openQueue.push({ x: nowPos.x, y: nowPos.y - 1 });
+			}
+			if (nowPos.y < (map.height - 1) && !closedQueue[nowPos.x]?.[nowPos.y + 1]) {
+				openQueue.push({ x: nowPos.x, y: nowPos.y + 1 });
+			}
+		}
+	}
+
+	clearLayer(layer: number): void {
 		const map = taro.game.data.map;
 		const width = map.width;
 		for (let i = 0; i < map.width; i++) {
 			for (let j = 0; j < map.height; j++) {
 				if (map.layers[layer].data[j * width + i] !== 0) {
 					//save tile change to taro.game.map.data
-					map.layers[layer].data[j*width + i] = 0;
+					map.layers[layer].data[j * width + i] = 0;
 				}
 			}
 		}
-	 }
+	}
 
-	editRegion (data: RegionData, clientId: string): void {
+	editRegion(data: RegionData, clientId: string): void {
 		// only allow developers to modify regions
 		if (taro.server.developerClientIds.includes(clientId)) {
 			if (data.name === '' || data.width <= 0 || data.height <= 0) {
-				console.log ('empty name, negative or 0 size is not allowed');
+				console.log('empty name, negative or 0 size is not allowed');
 			} else if (data.name === undefined) { // create new region
 				// create new region name (smallest available number)
 				let regionNameNumber = 0;
-				let newRegionName = `region${  regionNameNumber}`;
+				let newRegionName = `region${regionNameNumber}`;
 				do {
-					regionNameNumber ++;
-					newRegionName = `region${  regionNameNumber}`;
+					regionNameNumber++;
+					newRegionName = `region${regionNameNumber}`;
 				} while (taro.regionManager.getRegionById(newRegionName));
 
 				data.name = newRegionName;
@@ -174,7 +298,44 @@ class DeveloperMode {
 				}
 			}
 			// broadcast region change to all clients
-			taro.network.send('editRegion', data);
+			taro.network.send<any>('editRegion', data);
+		}
+	}
+
+	editInitEntity(data, clientId: string): void {
+		// only allow developers to modify initial entities
+		if (taro.server.developerClientIds.includes(clientId)) {
+			// broadcast init entity change to all clients
+			taro.network.send('editInitEntity', data);
+			if (!this.initEntities) {
+				this.addInitEntities();
+			}
+			let found = false;
+			this.initEntities.forEach((action) => {
+				if (action.actionId === data.actionId) {
+					found = true;
+					if (data.wasEdited) action.wasEdited = true;
+					if (data.position && !isNaN(data.position.x) && !isNaN(data.position.y) &&
+						action.position && !isNaN(action.position.x) && !isNaN(action.position.y)) {
+						action.position = data.position;
+					}
+					if (!isNaN(data.angle) && !isNaN(action.angle)) {
+						action.angle = data.angle;
+					}
+                    if (!isNaN(data.width) && !isNaN(action.width)) {
+                        action.width = data.width;
+                    }
+                    if (!isNaN(data.height) && !isNaN(action.height)) {
+                        action.height = data.height;
+                    }
+                    if (data.wasDeleted) {
+                        action.wasDeleted = true;
+                    }
+				}
+			});
+			if (!found) {
+				this.initEntities.push(data);
+			}
 		}
 	}
 
@@ -214,10 +375,10 @@ class DeveloperMode {
 				for (let i = 0; i < unit._stats.itemIds.length; i++) {
 					var itemId = unit._stats.itemIds[i];
 					var item = taro.$(itemId);
-						if (item) {
-							item.remove();
-						}
+					if (item) {
+						item.remove();
 					}
+				}
 				unit.changeUnitType(data.typeId, {}, false);
 				unit.emit('update-texture', 'basic_texture_change');
 			}
@@ -258,7 +419,7 @@ class DeveloperMode {
 			};
 			var item = new Item(itemData);
 			taro.game.lastCreatedUnitId = item._id;
-			item.script.trigger("entityCreated");
+			item.script.trigger('entityCreated');
 		}
 	}
 
@@ -314,9 +475,9 @@ class DeveloperMode {
 	}
 
 
-	editEntity (data: EditEntityData, clientId: string) {
+	editEntity(data: EditEntityData, clientId: string) {
 		if (taro.isClient) {
-			taro.network.send('editEntity', data);
+			taro.network.send<any>('editEntity', data);
 		} else {
 			// only allow developers to modify entities
 			if (taro.server.developerClientIds.includes(clientId)) {
@@ -325,11 +486,11 @@ class DeveloperMode {
 						case 'create':
 							//this.createUnit(data);
 							break;
-					
+
 						case 'update':
 							this.updateUnit(data);
 							break;
-					
+
 						case 'delete':
 							//this.deleteUnit(data);
 							break;
@@ -339,11 +500,11 @@ class DeveloperMode {
 						case 'create':
 							//this.createItem(data);
 							break;
-					
+
 						case 'update':
 							this.updateItem(data);
 							break;
-					
+
 						case 'delete':
 							//this.deleteItem(data);
 							break;
@@ -353,11 +514,11 @@ class DeveloperMode {
 						case 'create':
 							//this.createProjectile(data);
 							break;
-					
+
 						case 'update':
 							this.updateProjectile(data);
 							break;
-					
+
 						case 'delete':
 							//this.deleteProjectile(data);
 							break;
@@ -366,9 +527,9 @@ class DeveloperMode {
 			}
 		}
 	}
- 
-	updateClientMap (data: { mapData: MapData }): void {
-		console.log ('map data was edited', data.mapData.wasEdited);
+
+	updateClientMap(data: { mapData: MapData }): void {
+		//console.log ('map data was edited', data.mapData.wasEdited);
 		if (data.mapData.wasEdited) {
 			data.mapData.wasEdited = false;
 			data.mapData.haveUnsavedChanges = true;
@@ -384,15 +545,39 @@ class DeveloperMode {
 			taro.client.emit('updateMap');
 		}
 	}
+
+	updateClientInitEntities(initEntities: ActionData[]) {
+		this.initEntities = initEntities;
+		taro.client.emit('updateInitEntities');
+	}
 }
 
-interface TileData {
-	gid: number,
+type BasicEditProps = {
 	layer: number,
 	x: number,
 	y: number,
-	tool?: string
 }
+type MapEditTool = {
+	fill: {
+		limits?: Record<number, Record<number, number>>,
+		gid: number;
+	} & BasicEditProps,
+
+	edit: {
+		size: Vector2D,
+		selectedTiles: Record<number, Record<number, number>>,
+		shape: Shape,
+	} & BasicEditProps
+
+	clear: {
+		layer: number;
+		layerName?: string;
+	}
+}
+
+type MapEditToolEnum = keyof MapEditTool;
+
+type TileData<T extends MapEditToolEnum> = Pick<MapEditTool, T>
 
 interface RegionData {
 	userId?: string,
@@ -407,12 +592,12 @@ interface RegionData {
 }
 
 interface EditEntityData {
-	entityType: string, 
+	entityType: string,
 	typeId: string,
 	action: string,
 	newData?: any, //EntityStats,
-	playerId?: string, 
-	position?: {x: number, y: number}, 
+	playerId?: string,
+	position?: { x: number, y: number },
 	angle?: number,
 }
 

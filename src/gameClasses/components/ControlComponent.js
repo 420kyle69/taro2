@@ -11,7 +11,8 @@ var ControlComponent = TaroEntity.extend({
 
 		// Store any options that were passed to us
 		this._options = options;
-		this.lastActionAt = undefined;
+		this.lastActionAt = Date.now();
+		
 		this.lastMousePosition = [undefined, undefined];
 		this.mouseLocked = false;
 
@@ -280,8 +281,9 @@ var ControlComponent = TaroEntity.extend({
 		if (!player) return;		
 		var unit = player.getSelectedUnit();
 		
-		if (unit) {
-			if (taro.isClient) {
+		if (taro.isClient) {
+			
+			if (unit) {
 				// check if sending player input is due (every 100ms)
 				if (taro._currentTime - self.lastInputSent > 100) {
 					self.sendMobileInput = true;
@@ -297,7 +299,7 @@ var ControlComponent = TaroEntity.extend({
 									// tap on mobile will be detected as right click for now, so old games with joysticks will not have problems
 									self.keyDown('mouse', 'button3');
 									self.sendMobileInput = false;
-								} else {
+								} else if (!taro.isMobile) {
 									self.keyDown(device, key);
 								}
 							}
@@ -307,7 +309,7 @@ var ControlComponent = TaroEntity.extend({
 									// tap on mobile will be detected as right click for now, so old games with joysticks will not have problems
 									self.keyUp('mouse', 'button3');
 									self.sendMobileInput = false;
-								} else {
+								} else if (!taro.isMobile) {
 									self.keyUp(device, key);
 								}
 							}
@@ -361,12 +363,13 @@ var ControlComponent = TaroEntity.extend({
 				
 				self.sendPlayerInput = false;
 			}
-			
-			// unit rotation for human player. this runs on client-side only
-			if (!unit._stats.aiEnabled) {
-				unit.updateAngleToTarget();			
-			}
-		}	
+		}
+
+		// unit rotation for human player. this runs on client-side only
+		if (unit && !unit._stats.aiEnabled) {
+			unit.updateAngleToTarget();			
+		}
+		
 	}
 
 });
