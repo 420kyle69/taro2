@@ -129,13 +129,21 @@ var GameScene = /** @class */ (function (_super) {
                 var length_1 = layer.data.length;
                 layer.width = data.map.width;
                 layer.height = data.map.height;
-                // console.log('before', layer.name, length, tilesPerLayer);
                 if (length_1 < tilesPerLayer) {
                     for (var i = length_1 + 1; i < tilesPerLayer; i++) {
                         layer.data[i] = 0;
                     }
                 }
-                // console.log('after', layer.name, layer.data.length, tilesPerLayer);
+            }
+        });
+        //to be sure every map not contain null or -1 tiles
+        data.map.layers.forEach(function (layer) {
+            if (layer && layer.data) {
+                layer.data.forEach(function (tile, index) {
+                    if (tile === -1 || tile === null) {
+                        layer.data[index] = 0;
+                    }
+                });
             }
         });
         this.load.tilemapTiledJSON('map', this.patchMapData(data.map));
