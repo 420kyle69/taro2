@@ -1076,9 +1076,9 @@ var Server = TaroClass.extend({
 				currentTime: taro._currentTime,
 				physics: {
 					engine: taro.physics.engine,
-					bodyCount: taro.physics._world.m_bodyCount || taro.physics._world.GetBodyCount?.(),
-					contactCount: taro.physics._world.m_contactCount || taro.physics._world.GetContactCount?.(),
-					jointCount: taro.physics._world.m_jointCount || taro.physics._world.GetJointCount?.(),
+					bodyCount: taro.physics._world?.m_bodyCount || taro.physics._world?.GetBodyCount?.() || 0,
+					contactCount: taro.physics._world?.m_contactCount || taro.physics._world?.GetContactCount?.() || 0,
+					jointCount: taro.physics._world?.m_jointCount || taro.physics._world?.GetJointCount?.() || 0,
 					stepDuration: taro.physics.avgPhysicsTickDuration.toFixed(2),
 					stepsPerSecond: taro._physicsFPS,
 					totalBodiesCreated: taro.physics.totalBodiesCreated
