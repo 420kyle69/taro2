@@ -405,7 +405,8 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		//this.tileEditor.clearLayer(gameMap.currentLayerIndex, false);
 		const data: TileData<'clear'> = {
 			clear: {
-				layer: gameMap.currentLayerIndex
+				layer: gameMap.currentLayerIndex,
+				layerName: this.layerButtons[gameMap.currentLayerIndex].name
 			}
 		};
 		inGameEditor.showClearLayerConfirmation(data);
