@@ -6,6 +6,8 @@ class GameScene extends PhaserScene {
 	entityLayers: Phaser.GameObjects.Layer[] = [];
 	renderedEntities: TGameObject[] = [];
 	unitsList: PhaserUnit[] = [];
+	projectilesList: PhaserProjectile[] = [];
+	itemList: PhaserItem[] = [];
 	public tilemapLayers: Phaser.Tilemaps.TilemapLayer[];
 
 	public tilemap: Phaser.Tilemaps.Tilemap;
@@ -79,6 +81,12 @@ class GameScene extends PhaserScene {
 			new PhaserRay(this, data.start, data.end, data.config);
 		});
 
+		
+		taro.client.on('create-particle', (particle: Particle) => {
+			new PhaserParticle(this, particle);
+		});
+
+
 		taro.client.on('floating-text', (data: {
 			text: string,
 			x: number,
@@ -129,6 +137,10 @@ class GameScene extends PhaserScene {
 
 		for (let type in data.itemTypes) {
 			this.loadEntity(`item/${data.itemTypes[type].cellSheet.url}`, data.itemTypes[type]);
+		}
+
+		for (let type in data.particleTypes) {
+			this.load.image(`particle/${data.particleTypes[type].url}`, this.patchAssetUrl(data.particleTypes[type].url));
 		}
 
 		data.map.tilesets.forEach((tileset) => {
@@ -547,6 +559,14 @@ class GameScene extends PhaserScene {
 		return this.unitsList.find(
 			(unit) => {
 				return unit.entity._id === unitId;
+			}
+		);
+	}
+
+	findEntity (entityId: string): PhaserUnit | PhaserProjectile | PhaserItem {
+		return [...this.unitsList, ...this.itemList, ...this.projectilesList].find(
+			(entity) => {
+				return entity.entity._id === entityId;
 			}
 		);
 	}
