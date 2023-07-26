@@ -301,8 +301,17 @@ var TaroNetIoServer = {
 		return this._acceptConnections;
 	},
 	
+	/**
+	 * Sends clientDisconnect command to client and closes the socket connection
+	 * @param {String} clientId
+	 * @param {String} reason
+	 */
 	disconnect: function (clientId, reason) {
-		this.send('clientDisconnect', {reason, clientId});
+		if (!clientId) {
+			return;
+		}
+		
+		this.send('clientDisconnect', {reason, clientId}, clientId);
 		
 		const socket = this._socketById[clientId];
 		if (socket) {

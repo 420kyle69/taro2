@@ -31,7 +31,7 @@ var ServerNetworkEvents = {
 
 		if (!reason) {
 			// socket already disconnected, why sending clientDisconnect command then?
-			taro.network.send('clientDisconnect', { reason: 'Player disconnected', clientId: clientId });
+			taro.network.send('clientDisconnect', { reason: 'Player disconnected', clientId: clientId }, clientId);
 		}
 		
 		// remove client from streamData
