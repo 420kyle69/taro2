@@ -1167,15 +1167,11 @@ var Item = TaroEntityPhysics.extend({
 					self._stats.controls.mouseBehaviour &&
 					self._stats.controls.mouseBehaviour.flipSpriteHorizontallyWRTMouse
 				) {
-					if (self._stats.controls.mouseBehaviour.rotateToFaceMouseCursor) {
-						if (rotate > 0 && rotate < Math.PI) {
-							self.flip(0);
-						} else {
-							self.flip(1);
-						}
+					if (ownerUnit.angleToTarget > 0 && ownerUnit.angleToTarget < Math.PI) {
+						self.flip(0);
 					} else {
-						self.flip(ownerUnit._stats.flip);
-					}
+						self.flip(1);
+					}					
 				}
 			}
 
