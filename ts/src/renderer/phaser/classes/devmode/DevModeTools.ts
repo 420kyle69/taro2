@@ -272,6 +272,12 @@ class DevModeTools extends Phaser.GameObjects.Container {
 				this.save();
 			}
 		});
+        const aKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A, false);
+		aKey.on('down', () => {
+			if (!this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
+				this.addEntities();
+			}
+		});
 		const oneKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE, false);
 		oneKey.on('down', () => {
 			if (!this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map' && !altKey.isDown) {
