@@ -286,12 +286,11 @@ var AttributeComponent = TaroEntity.extend({
 								var item = self._entity;
 								unit = item.getOwnerUnit();
 
-								// if (unit && taro.client.myPlayer._stats.selectedUnitId == unit.id()) {
-								// 	item.updateAttributeBar(attribute);
-								// 	if (attribute && attribute.isVisible && attribute.isVisible.includes('itemDescription')) {
-								// 		taro.itemUi.updateItemSlot(item, item._stats.slotIndex);
-								// 	}
-								// }
+								if (unit && taro.client.myPlayer._stats.selectedUnitId == unit.id()) {
+									if (attribute && attribute.isVisible && attribute.isVisible.includes('itemDescription')) {
+										taro.itemUi.updateItemSlot(item, item._stats.slotIndex);
+									}
+								}
 								break;
 							}
 							case 'projectile': {
