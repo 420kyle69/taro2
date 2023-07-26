@@ -780,8 +780,52 @@ var TaroNetIoServer = {
 		
 		var self = this;
 		
-		const reason = self._socketById[socket.id]?._disconnectReason || data?.reason.toString();
 		const code = data?.code; //https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent/code
+		const disconnectReason = self._socketById[socket.id]?._disconnectReason;
+		
+		let reason = disconnectReason || data?.reason.toString();
+		if (!reason) {
+			switch (code) {
+				case 1001:
+					reason = 'Going Away';
+					break;
+				case 1002:
+					reason = 'Protocol error';
+					break;
+				case 1003:
+					reason = 'Unsupported Data';
+					break;
+				case 1007:
+					reason = 'Invalid frame payload data';
+					break;
+				case 1008:
+					reason = 'Policy Violation';
+					break;
+				case 1009:
+					reason = 'Message Too Big';
+					break;
+				case 1010:
+					reason = 'Mandatory Ext.';
+					break;
+				case 1011:
+					reason = 'Internal Error';
+					break;
+				case 1012:
+					reason = 'Service Restart';
+					break;
+				case 1013:
+					reason = 'Try Again Later';
+					break;
+				case 1014:
+					reason = 'Bad Gateway';
+					break;
+				case 1015:
+					reason = 'TLS handshake';
+					break;
+				default:
+					reason = code;
+			}
+		}
 		
 		this.log(`Client disconnected with id ${socket.id}`);
 		console.log(`Client disconnected with id ${socket.id}, reason: ${reason}, code: ${code}`);
@@ -819,7 +863,7 @@ var TaroNetIoServer = {
 		// triggers _onClientDisconnect in ServerNetworkEvents.js
 		this.emit('disconnect', {
 			clientId: socket.id,
-			reason,
+			reason: disconnectReason,
 		});
 
 		// Remove them from all rooms
