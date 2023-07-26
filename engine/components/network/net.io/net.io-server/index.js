@@ -452,11 +452,11 @@ NetIo.Socket = NetIo.EventingClass.extend({
 			self.emit('message', [self._decode(message)]);
 		});
 
-		this._socket.on('close', function (reasonCode, description) {
+		this._socket.on('close', function (reasonCode, reason) {
 			// first step in the propagation of the disconnect event.
 			self.emit('disconnect', {
 				socket: self._socket,
-				reason: description,
+				reason: reason,
 				code: reasonCode
 			});
 		});
@@ -515,7 +515,10 @@ NetIo.Socket = NetIo.EventingClass.extend({
 		if (!isNaN(parseInt(reason)) && !code) {
 			code = reason;
 		}
-
+		
+		// store socket's disconnect reason, will be used in _onSocketDisconnect
+		this._disconnectReason = reason;
+		
 		this._socket.close(code);
 	}
 });
@@ -849,6 +852,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 			// Register a listener so that if the socket disconnects,
 			// we can remove it from the active socket lookups
 			socket.on('disconnect', function (data) {
+				
 				var index = self._sockets.indexOf(socket);
 				if (index > -1) {
 					// Remove the socket from the array
@@ -861,7 +865,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 
 						// moved from .on('disconnect') in TaroNetIoServer.js:~588
 						// data contains {WebSocket socket, <Buffer > reason, Number code}
-						taro.network._onClientDisconnect(data, socket);
+						taro.network._onSocketDisconnect(data, socket);
 					}, 5000);
 				}
 			});
@@ -944,7 +948,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 
 							// moved from .on('disconnect') in TaroNetIoServer.js:~588
 							// data contains {WebSocket socket, <Buffer > reason, Number code}
-							taro.network._onClientDisconnect(data, socket);
+							taro.network._onSocketDisconnect(data, socket);
 						}, 5000);
 					}
 				});
@@ -953,7 +957,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 			}
 		}
 	},
-
+	
 	/**
      * Sends a message. If the client id is not specified
      * the message will be sent to all connected clients.

@@ -300,7 +300,16 @@ var TaroNetIoServer = {
 
 		return this._acceptConnections;
 	},
-
+	
+	disconnect: function (clientId, reason) {
+		this.send('clientDisconnect', {reason, clientId});
+		
+		const socket = this._socketById[clientId];
+		if (socket) {
+			socket.close(reason);
+		}
+	},
+	
 	/**
    * Sends a message over the network.
    * @param {String} commandName
@@ -753,11 +762,16 @@ var TaroNetIoServer = {
    * @param {Object} socket The client socket object.
    * @private
    */
-	_onClientDisconnect: function (data, socket) {
+	_onSocketDisconnect: function (data, socket) {
+		
 		var self = this;
-		this.log(`Client disconnected with id ${socket.id}`);
+		
+		const reason = self._socketById[socket.id]?._disconnectReason || data?.reason.toString();
+		const code = data?.code; //https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent/code
+		
+		this.log(`Client disconnected with id ${socket.id}, reason: ${reason}, code: ${code}`);
 		var end = Date.now();
-
+		
 		if (self._socketById[socket.id]?._token?.distinctId) {
 			/** additional part to send some info for marketing purposes */
 			global.mixpanel.track('Game Session Duration', {
@@ -766,6 +780,8 @@ var TaroNetIoServer = {
 				'gameSlug': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.gameSlug,
 				'gameId': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData._id,
 				'playTime': end - self._socketById[socket.id].start,
+				'reason': reason,
+				'code': code,
 			});
 		}
 
@@ -778,11 +794,17 @@ var TaroNetIoServer = {
 					'gameSlug': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.gameSlug,
 					'gameId': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData._id,
 					'playTime': end - self._socketById[socket.id].start,
+					'reason': reason,
+					'code': code,
 				}
 			});
 		}
-
-		this.emit('disconnect', socket.id);
+		
+		// triggers _onClientDisconnect in ServerNetworkEvents.js
+		this.emit('disconnect', {
+			clientId: socket.id,
+			reason,
+		});
 
 		// Remove them from all rooms
 		this.clientLeaveAllRooms(socket.id);
