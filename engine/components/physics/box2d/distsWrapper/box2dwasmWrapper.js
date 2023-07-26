@@ -46,6 +46,7 @@ var box2dwasmWrapper = {
                     case 1:
                         box2D = _b.sent();
                         _a = new box2D.LeakMitigator(), freeLeaked = _a.freeLeaked, recordLeak = _a.recordLeak;
+                        component.box2D = box2D;
                         component.freeLeaked = freeLeaked;
                         component.recordLeak = recordLeak;
                         component.freeFromCache = box2D.LeakMitigator.freeFromCache;
@@ -127,7 +128,22 @@ var box2dwasmWrapper = {
                         // component.b2Vec2.prototype.setV = component.b2Vec2.prototype.SetV;
                         component.b2Joint.prototype.getNext = component.b2Joint.prototype.GetNext;
                         component.createWorld = function (id, options) {
+                            var _this = this;
                             component._world = new component.b2World(this._gravity);
+                            setInterval(function () {
+                                if (taro.isClient) {
+                                    if (!component.renderer) {
+                                        while (!taro._ctx) { }
+                                        var ctx = document.getElementsByTagName('canvas')[0].getContext('2d');
+                                        var newRenderer = new Box2dDebugDraw(_this.box2D, new Box2dHelpers(_this.box2D), ctx, 100).constructJSDraw();
+                                        newRenderer.SetFlags(_this.box2D.b2Draw.e_shapeBit);
+                                        component.renderer = newRenderer;
+                                    }
+                                    component._world.SetDebugDraw(_this.renderer);
+                                    component._world.DebugDraw();
+                                    ctx.restore();
+                                }
+                            }, 1);
                             component._world.SetContinuousPhysics(this._continuousPhysics);
                         };
                         /**

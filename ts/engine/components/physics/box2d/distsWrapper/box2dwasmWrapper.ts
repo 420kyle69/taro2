@@ -2,8 +2,9 @@
 // @ts-nocheck
 const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing memory leak bug
 	init: async function (component) {
-		const box2D = await box2dwasm();
+		const box2D = await box2dwasm() as typeof Box2D & EmscriptenModule;
 		const { freeLeaked, recordLeak } = new box2D.LeakMitigator();
+		component.box2D = box2D;
 		component.freeLeaked = freeLeaked;
 		component.recordLeak = recordLeak;
 		component.freeFromCache = box2D.LeakMitigator.freeFromCache;
@@ -90,6 +91,22 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 
 		component.createWorld = function (id, options) {
 			component._world = new component.b2World(this._gravity);
+
+			setInterval(() => {
+
+				if (taro.isClient) {
+					if (!component.renderer) {
+						while (!taro._ctx) { }
+						const ctx = document.getElementsByTagName('canvas')[0].getContext('2d');
+						const newRenderer = new Box2dDebugDraw(this.box2D, new Box2dHelpers(this.box2D), ctx, 100).constructJSDraw();
+						newRenderer.SetFlags(this.box2D.b2Draw.e_shapeBit);
+						component.renderer = newRenderer;
+					}
+					component._world.SetDebugDraw(this.renderer);
+					component._world.DebugDraw();
+					ctx.restore();
+				}
+			}, 1);
 			component._world.SetContinuousPhysics(this._continuousPhysics);
 		};
 

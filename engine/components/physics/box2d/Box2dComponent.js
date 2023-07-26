@@ -447,7 +447,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 	 */
 	enableDebug: function (mountScene) {
 		if (this.engine == 'PLANCK' || this.engine == 'CRASH') return; // planck doesn't support debugdraw
-
 		if (mountScene) {
 			// Define the debug drawing instance
 			var debugDraw = new this.b2DebugDraw();
