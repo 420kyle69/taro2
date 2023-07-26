@@ -342,7 +342,8 @@ var DevModeTools = /** @class */ (function (_super) {
         //this.tileEditor.clearLayer(gameMap.currentLayerIndex, false);
         var data = {
             clear: {
-                layer: gameMap.currentLayerIndex
+                layer: gameMap.currentLayerIndex,
+                layerName: this.layerButtons[gameMap.currentLayerIndex].name
             }
         };
         inGameEditor.showClearLayerConfirmation(data);

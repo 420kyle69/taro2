@@ -206,8 +206,7 @@ class DevModeScene extends PhaserScene {
 		if (this.devModeTools) this.devModeTools.leaveMapTab();
 
         if (this.devModeTools.entityEditor.selectedEntityImage) {
-            this.devModeTools.entityEditor.selectedEntityImage.updateOutline(true);
-            this.devModeTools.entityEditor.selectedEntityImage = null;
+            this.devModeTools.entityEditor.selectEntityImage(null);
         }
 
 		this.entityImages.forEach((image) => {
