@@ -140,8 +140,8 @@ var TaroEntity = TaroObject.extend({
 			*/
 			self._stats.currentBody = self._stats.bodies[newState.body];
 		}
-		
-		if (taro.isServer) {			
+
+		if (taro.isServer) {
 			self.streamUpdateData([{ stateId: stateId }]);
 		} else if (taro.isClient) {
 			self._stats.stateId = stateId;
@@ -246,7 +246,7 @@ var TaroEntity = TaroObject.extend({
 			if (!body['z-index']) {
 				body['z-index'] = defaultLayer;
 			}
-	
+
 			if (isNaN(body['z-index'].depth)) {
 				body['z-index'].depth = defaultLayer.depth;
 			}
@@ -3105,7 +3105,7 @@ var TaroEntity = TaroObject.extend({
 	 */
 	translateTo: function (x, y) {
 		// console.log('start translate', x, y)
-		if (x !== undefined && y !== undefined) {
+		if (x !== undefined && y !== undefined && !isNaN(x) && !isNaN(y)) {
 			// console.log('non-crash translate', this._translate)
 			/* if (taro.physics && taro.physics.engine == 'CRASH') {
 				console.log('crash translate');
@@ -3166,7 +3166,7 @@ var TaroEntity = TaroObject.extend({
             if (teleportCamera && taro.client.myPlayer?.cameraTrackedUnit === this.id()) {
                 taro.client.emit('instant-move-camera', [x, y]);
             }
-            
+
 		}
 
 		this.discrepancyCount = 0;
@@ -4162,7 +4162,7 @@ var TaroEntity = TaroObject.extend({
 								this.flip(newValue);
 							}
 							break;
-						
+
 						case 'ownerId':
 							this._stats[attrName] = newValue;
 							this.oldOwnerId = this._stats[attrName];
@@ -4283,7 +4283,9 @@ var TaroEntity = TaroObject.extend({
 							case 'showNameLabel':
 								this.emit('show-label');
 								break;
-
+							case 'particle':
+								taro.client.emit('create-particle', newValue);
+								break;
 						}
 					}
 				}
@@ -4372,7 +4374,7 @@ var TaroEntity = TaroObject.extend({
 						// taro.lastSnapshotTime = taro._currentTime;
 
 						let buffArr = [];
-						
+
 						buffArr.push(Number(x));
 						buffArr.push(Number(y));
 						buffArr.push(Number(angle));
@@ -4727,7 +4729,7 @@ var TaroEntity = TaroObject.extend({
 
 				case 'player':
 					// purchasables is required for rendering this player's owned skin to the other players
-					keys = ['name', 'clientId', 'playerTypeId', 'controlledBy', 'playerJoined', 'unitIds', 'selectedUnitId', 'userId', 'banChat', 'purchasables', 'username'];
+					keys = ['name', 'clientId', 'playerTypeId', 'controlledBy', 'playerJoined', 'unitIds', 'selectedUnitId', 'userId', 'banChat', 'purchasables', 'username', 'profilePicture', 'roleIds'];
 					data = {
 						attributes: {},
 						// variables: {}
@@ -4777,8 +4779,8 @@ var TaroEntity = TaroObject.extend({
 			// 		data.variables[key] = {value: this.variables[key].value};
 			// 	}
 			// }
-			
-			return data;			
+
+			return data;
 		}
 	},
 
@@ -4954,7 +4956,7 @@ var TaroEntity = TaroObject.extend({
 
 		// Send clients the stream destroy command for this entity
 		taro.network.send('_taroStreamDestroy', [taro._currentTime, thisId], clientId);
-		
+
 		if (!taro.network.stream) return true;
 
 		taro.network.stream._streamClientCreated[thisId] = taro.network.stream._streamClientCreated[thisId] || {};

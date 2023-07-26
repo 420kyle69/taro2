@@ -699,7 +699,6 @@ var TaroNetIoServer = {
 				if (this._networkCommands[commandName]) {
 					this._networkCommands[commandName](data[1], clientId);
 				}
-
 				this.emit(commandName, [data[1], clientId]);
 			}
 		}

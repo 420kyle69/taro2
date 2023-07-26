@@ -205,6 +205,10 @@ class DevModeScene extends PhaserScene {
 	leaveMapTab (): void {
 		if (this.devModeTools) this.devModeTools.leaveMapTab();
 
+        if (this.devModeTools.entityEditor.selectedEntityImage) {
+            this.devModeTools.entityEditor.selectEntityImage(null);
+        }
+
 		this.entityImages.forEach((image) => {
 			image.setVisible(false);
 		});

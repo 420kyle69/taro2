@@ -1452,59 +1452,22 @@ var ActionComponent = TaroEntity.extend({
 						break;
 
 					/* particles */
-					case 'startItemParticle':
-						var item = self._script.variable.getValue(action.item, vars);
-						var particleTypeId = self._script.variable.getValue(action.particleType, vars);
-						if (item && item._category == 'item' && item._stats.particles && item._stats.particles[particleTypeId]) {
-							taro.network.send('particle', { eid: item.id(), pid: particleTypeId, action: 'start' });
-						}
-						break;
 
-					case 'stopItemParticle':
-						var item = self._script.variable.getValue(action.item, vars);
-						var particleTypeId = self._script.variable.getValue(action.particleType, vars);
-						if (item && item._category == 'item' && item._stats.particles && item._stats.particles[particleTypeId]) {
-							taro.network.send('particle', { eid: item.id(), pid: particleTypeId, action: 'stop' });
-						}
-						break;
-
-					case 'emitItemParticle':
-						var item = self._script.variable.getValue(action.item, vars);
-						var particleTypeId = self._script.variable.getValue(action.particleType, vars);
-						if (item && item._category == 'item' && item._stats.particles && item._stats.particles[particleTypeId]) {
-							taro.network.send('particle', { eid: item.id(), pid: particleTypeId, action: 'emitOnce' });
-						}
-						break;
-
-					case 'startUnitParticle':
-						var unit = self._script.variable.getValue(action.unit, vars);
-						var particleTypeId = self._script.variable.getValue(action.particleType, vars);
-						if (unit && unit._category == 'unit' && unit._stats.particles && unit._stats.particles[particleTypeId]) {
-							taro.network.send('particle', { eid: unit.id(), pid: particleTypeId, action: 'start' });
-						}
-						break;
-
-					case 'stopUnitParticle':
-						var unit = self._script.variable.getValue(action.unit, vars);
-						var particleTypeId = self._script.variable.getValue(action.particleType, vars);
-						if (unit && unit._category == 'unit' && unit._stats.particles && unit._stats.particles[particleTypeId]) {
-							taro.network.send('particle', { eid: unit.id(), pid: particleTypeId, action: 'stop' });
-						}
-						break;
-
-					case 'emitUnitParticle':
-						var unit = self._script.variable.getValue(action.unit, vars);
-						var particleTypeId = self._script.variable.getValue(action.particleType, vars);
-						if (unit && unit._category == 'unit' && unit._stats.particles && unit._stats.particles[particleTypeId]) {
-							taro.network.send('particle', { eid: unit.id(), pid: particleTypeId, action: 'emitOnce' });
-						}
-						break;
-
-					case 'emitParticleOnceAtPosition':
+					case 'emitParticlesAtPosition':
 						var position = self._script.variable.getValue(action.position, vars);
 						var particleTypeId = self._script.variable.getValue(action.particleType, vars);
+						var angle = self._script.variable.getValue(action.angle, vars);
 						if (particleTypeId && position) {
-							taro.network.send('particle', { pid: particleTypeId, action: 'emitOnce', position: position });
+							taro.network.send('particle', { particleId: particleTypeId, position: position, angle: angle || 0});     
+						}
+						break;
+
+					case 'emitParticlesFromEntity':
+						var particleTypeId = self._script.variable.getValue(action.particleType, vars);
+						var angle = self._script.variable.getValue(action.angle, vars);
+						var entity = self._script.variable.getValue(action.entity, vars);
+						if (particleTypeId && entity) {
+							taro.network.send('particle', { particleId: particleTypeId, position: {x:0, y:0}, angle: angle || 0, entityId: entity.id()});
 						}
 						break;
 
@@ -2782,6 +2745,45 @@ var ActionComponent = TaroEntity.extend({
 									edit: {
 										selectedTiles: { 0: { 0: tileGid } },
 										size: { x: 1, y: 1 },
+										shape: 'rectangle',
+										layer: tileLayer,
+										x: tileX,
+										y: tileY,
+									},
+								}, 'server');
+							}
+
+						}
+						break;
+
+					case 'editMapTiles':
+						var tileGid = self._script.variable.getValue(action.gid, vars);
+						var tileLayer = self._script.variable.getValue(action.layer, vars);
+						var tileX = self._script.variable.getValue(action.x, vars);
+						var tileY = self._script.variable.getValue(action.y, vars);
+						var width = self._script.variable.getValue(action.width, vars);
+						var height = self._script.variable.getValue(action.height, vars);
+						if (
+							Number.isInteger(tileGid)
+							&& Number.isInteger(tileLayer)
+							&& Number.isInteger(tileX)
+							&& Number.isInteger(tileY)
+							&& Number.isInteger(width)
+							&& Number.isInteger(height)
+						) {
+							if (tileGid < 0 || tileGid > taro.game.data.map.tilesets[0].tilecount) {
+								break;
+							} else if (tileLayer > 3 || tileLayer < 0) {
+								break;
+							} else if (tileX < 0 || tileX >= taro.game.data.map.width) {
+								break;
+							} else if (tileY < 0 || tileY >= taro.game.data.map.height) {
+								break;
+							} else {
+								taro.developerMode.editTile({
+									edit: {
+										selectedTiles: { 0: { 0: tileGid } },
+										size: { x: width, y: height },
 										shape: 'rectangle',
 										layer: tileLayer,
 										x: tileX,

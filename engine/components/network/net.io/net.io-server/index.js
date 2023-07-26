@@ -570,10 +570,10 @@ NetIo.Server = NetIo.EventingClass.extend({
 					const fs = require('fs');
 					const path = require('path');
 					const heapdump = require('heapdump');
-					
+
 					// Generate a unique filename for the heap dump
 					const _filename = `worker_heapdump_${Date.now()}.heapsnapshot`;
-					
+
 					// Start recording the heap dump
 					heapdump.writeSnapshot(path.join(__dirname, _filename), (err, filename) => {
 						if (err) {
@@ -585,7 +585,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 							response.setHeader('Content-disposition', `attachment; filename=${_filename}`);
 							response.setHeader('Content-type', 'application/octet-stream');
 							const fileStream = fs.createReadStream(filename);
-							
+
 							fileStream.on('end', () => {
 								// Delete the heap dump file after it's downloaded
 								fs.unlink(filename, (err) => {
@@ -594,7 +594,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 									}
 								});
 							});
-							
+
 							fileStream.pipe(response);
 						}
 					});
@@ -632,7 +632,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 
 			console.log('websocket error', err);
 		});
-		
+
 		this._httpServer.listen(this._port, function (err) {
 			self.log(`Server is listening on port ${self._port}`);
 			if (!secure) {
@@ -659,10 +659,10 @@ NetIo.Server = NetIo.EventingClass.extend({
 						const fs = require('fs');
 						const path = require('path');
 						const heapdump = require('heapdump');
-						
+
 						// Generate a unique filename for the heap dump
 						const _filename = `worker_heapdump_${Date.now()}.heapsnapshot`;
-						
+
 						// Start recording the heap dump
 						heapdump.writeSnapshot(path.join(__dirname, _filename), (err, filename) => {
 							if (err) {
@@ -673,9 +673,9 @@ NetIo.Server = NetIo.EventingClass.extend({
 								// Send the heap dump file as a response
 								response.setHeader('Content-disposition', `attachment; filename=${_filename}`);
 								response.setHeader('Content-type', 'application/octet-stream');
-								
+
 								const fileStream = fs.createReadStream(filename);
-								
+
 								fileStream.on('end', () => {
 									// Delete the heap dump file after it's downloaded
 									fs.unlink(filename, (err) => {
@@ -684,7 +684,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 										}
 									});
 								});
-								
+
 								fileStream.pipe(response);
 							}
 						});
@@ -728,7 +728,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 				self.log(message, 'error');
 				console.log('websocket error', err);
 			});
-			
+
 			this._httpsServer.listen(self._portSecure, function (err) {
 				if (err) {
 					console.log(err);
@@ -771,13 +771,13 @@ NetIo.Server = NetIo.EventingClass.extend({
 			try {
 				const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
 
-				const isGuestUserAllowed = taro.game?.data?.defaultData?.isGuestPlayerAllowed;
+				// const isGuestUserAllowed = taro.game?.data?.defaultData?.isGuestPlayerAllowed;
 
-				if (!isGuestUserAllowed && (!decodedToken.userId || !decodedToken.sessionId)) {
-					socket.close('Guest user not allowed. Please login or signup.');
-					console.log('Guest user not allowed', token);
-					return;
-				}
+				// if (!isGuestUserAllowed && (!decodedToken.userId || !decodedToken.sessionId)) {
+				// 	socket.close('Guest user not allowed. Please login or signup.');
+				// 	console.log('Guest user not allowed', token);
+				// 	return;
+				// }
 
 				// extracting user from token and adding it in _token.
 				socket._token = {
@@ -858,12 +858,12 @@ NetIo.Server = NetIo.EventingClass.extend({
 				if (self._socketsById[socket.id]) {
 					self._socketsById[socket.id].gracePeriod = setTimeout(() => {
 						delete self._socketsById[socket.id];
-	
+
 						// moved from .on('disconnect') in TaroNetIoServer.js:~588
 						// data contains {WebSocket socket, <Buffer > reason, Number code}
 						taro.network._onClientDisconnect(data, socket);
 					}, 5000);
-				}				
+				}
 			});
 			// Tell the client their new ID - triggers this._io.on('connect', ...) on client
 			try {
@@ -895,15 +895,15 @@ NetIo.Server = NetIo.EventingClass.extend({
 			try {
 				let assignedId = self.newIdHex();
 				socket.id = assignedId;
-				
+
 				socket.send({
 					_netioCmd: 'id',
 					data: socket.id
 				});
-				
+
 				// add socket message listeners, send 'init' message to client
 				self.emit('connection', [socket]);
-				
+
 				socket._token = {
 					userId: '',
 					sessionId: '',
@@ -912,12 +912,12 @@ NetIo.Server = NetIo.EventingClass.extend({
 					token: '',
 					tokenCreatedAt: Date.now()
 				};
-				
+
 				self._socketsById[socket.id] = socket;
-				
+
 				// store socket.id as clientId in _token data to validate socket messages later
 				socket._token.clientId = socket.id;
-				
+
 				// trigger joinGame command as part of socket connection, no need for client to send joinGame anymore
 				// joinGame takes care of disconnecting unauthenticated users, banned ips, duplicate IPs, creates a new player and request user data from gs manager and make sure the user exists on moddio
 				const joinGameData = {
@@ -926,22 +926,22 @@ NetIo.Server = NetIo.EventingClass.extend({
 					sessionId: socket._token.sessionId,
 					isAdBlockEnabled: false
 				};
-				
+
 				const clientId = socket.id;
-				
+
 				taro.server._onJoinGame(joinGameData, clientId);
-				
+
 				socket.on('disconnect', function (data) {
 					var index = self._sockets.indexOf(socket);
 					if (index > -1) {
 						// Remove the socket from the array
 						self._sockets.splice(index, 1);
 					}
-					
+
 					if (self._socketsById[socket.id]) {
 						self._socketsById[socket.id].gracePeriod = setTimeout(() => {
 							delete self._socketsById[socket.id];
-							
+
 							// moved from .on('disconnect') in TaroNetIoServer.js:~588
 							// data contains {WebSocket socket, <Buffer > reason, Number code}
 							taro.network._onClientDisconnect(data, socket);
