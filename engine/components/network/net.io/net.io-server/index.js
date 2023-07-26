@@ -516,8 +516,8 @@ NetIo.Socket = NetIo.EventingClass.extend({
 			code = reason;
 		}
 		
-		// store socket's disconnect reason, will be used in _onSocketDisconnect
-		this._disconnectReason = reason;
+		// store socket's disconnect reason, if not set already
+		this._disconnectReason = this._disconnectReason || reason;
 		
 		this._socket.close(code);
 	}

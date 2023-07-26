@@ -1,13 +1,12 @@
 var ClientNetworkEvents = {
 	_onClientDisconnect: function (data) {
 		var clientId = data.clientId;
-		// console.log("diskonnekt", clientId, taro.network.id())
 		// if it's me that got disconnected!
 		if (clientId == taro.network.id()) {
 			$("#disconnect-reason").html(data.reason);
 			taro.menuUi.onDisconnectFromServer("clientNetworkEvents #10", data.reason);
+			taro.network._io._disconnectReason = data.reason;
 		}
-		taro.network._io._disconnectReason = data.reason;
 	},
 
 	_onUpdateAllEntities: function (data) {

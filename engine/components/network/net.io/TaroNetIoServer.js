@@ -305,8 +305,9 @@ var TaroNetIoServer = {
 	 * Sends clientDisconnect command to client and closes the socket connection
 	 * @param {String} clientId
 	 * @param {String} reason
+	 * @param {String} reasonCode
 	 */
-	disconnect: function (clientId, reason) {
+	disconnect: function (clientId, reason, reasonCode) {
 		if (!clientId) {
 			return;
 		}
@@ -315,6 +316,10 @@ var TaroNetIoServer = {
 		
 		const socket = this._socketById[clientId];
 		if (socket) {
+			
+			// store socket's disconnect reason, will be used in _onSocketDisconnect
+			socket._disconnectReason = reasonCode || reason;
+			
 			socket.close(reason);
 		}
 	},
@@ -778,7 +783,9 @@ var TaroNetIoServer = {
 		const reason = self._socketById[socket.id]?._disconnectReason || data?.reason.toString();
 		const code = data?.code; //https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent/code
 		
-		this.log(`Client disconnected with id ${socket.id}, reason: ${reason}, code: ${code}`);
+		this.log(`Client disconnected with id ${socket.id}`);
+		console.log(`Client disconnected with id ${socket.id}, reason: ${reason}, code: ${code}`);
+		
 		var end = Date.now();
 		
 		if (self._socketById[socket.id]?._token?.distinctId) {
