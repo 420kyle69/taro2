@@ -35,9 +35,6 @@ var Projectile = TaroEntityPhysics.extend({
 
 		if (taro.isServer) {
 			self.mount(taro.$('baseScene'));
-		} else {
-			// we want to re-enable update behaviours for projectiles
-			self.mount(taro);
 		}
 
 		if (
