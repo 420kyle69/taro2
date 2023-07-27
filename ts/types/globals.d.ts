@@ -2,6 +2,13 @@ declare let _: any;
 declare let taro: TaroEngine;
 declare const gameId: string;
 
+declare const box2dwasm: any;
+declare const box2dweb: any;
+declare const box2DJS: any;
+declare const box2dts: any;
+declare const planck: any;
+declare const box2dninja: any;
+declare const PhysicsComponent: any;
 declare const UIPlugin: any;
 declare const rexvirtualjoystickplugin: any;
 

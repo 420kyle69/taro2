@@ -1,5 +1,5 @@
 // FIXME: add more types to the physics part of taro2
-// @ts-nocheck
+//
 var nativeWrapper = {
     init: function (component) {
         component.native = require('box2d-native');

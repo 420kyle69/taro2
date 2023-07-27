@@ -61,6 +61,7 @@ declare class TaroEngine extends TaroClass {
 	engineStep(): void;
 
 	physics: {
+		_box2dDebug: any;
 		staticsFromMap(walls: any): unknown;
 		destroyWalls(): unknown;
 		world(): any;
