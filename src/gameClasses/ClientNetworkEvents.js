@@ -511,7 +511,11 @@ var ClientNetworkEvents = {
 			$("#serverconsolelogscounter").text(
 				`${taro.client.errorLogs.length > 99 ? "99+" : taro.client.errorLogs.length}`
 			);
-			$("#server-console").append(`<span class="badge badge-danger">${log}</span><br/>`);
+			$("#server-console").prepend(`<div
+              class="server-logs-element"
+            >
+              <span>${log}</span>
+            </div>`);
 		}
 
 		window.reactApp.showErrorToast(logs[Object.keys(logs)[Object.keys(logs).length - 1]]);
