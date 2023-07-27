@@ -28,12 +28,12 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 		component.b2MassData = box2D.b2MassData;
 		component.b2PolygonShape = box2D.b2PolygonShape;
 		component.b2CircleShape = box2D.b2CircleShape;
-		component.b2DebugDraw = box2D.DebugDraw;
+		component.b2DebugDraw = box2D.b2Draw;
 		component.b2ContactListener = box2D.JSContactListener;
 		component.b2RevoluteJointDef = box2D.b2RevoluteJointDef;
 		component.b2WeldJointDef = box2D.b2WeldJointDef;
 		component.b2Contact = box2D.b2Contact;
-		component.b2Distance = box2D.b2Distance;
+		component.b2Distance = box2D.b2DistanceJoint;
 		component.b2FilterData = box2D.b2Filter;
 		component.b2DistanceJointDef = box2D.b2DistanceJointDef;
 		// aliases for camelcase
@@ -42,7 +42,6 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 		component.b2World.prototype.destroyBody = component.b2World.prototype.DestroyBody;
 		// component.b2World.prototype.createJoint = component.b2World.prototype.CreateJoint;
 		component.b2World.prototype.destroyJoint = component.b2World.prototype.DestroyJoint;
-		component.b2World.prototype.createFixture = component.b2World.prototype.CreateFixture;
 		component.b2World.prototype.clearForces = component.b2World.prototype.ClearForces;
 		component.b2World.prototype.getBodyList = component.b2World.prototype.GetBodyList;
 		component.b2World.prototype.getJointList = component.b2World.prototype.GetJointList;
@@ -141,8 +140,8 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 					// canvas.width = 200;
 					ctx.save();
 					ctx.scale(pixelsPerMeter, pixelsPerMeter);
-					const { x, y } = cameraOffsetMetres;
-					ctx.translate(x, y);
+					// const { x, y } = cameraOffsetMetres;
+					// ctx.translate(x, y);
 					ctx.lineWidth /= pixelsPerMeter;
 
 					ctx.fillStyle = 'rgb(255,255,0)';
@@ -261,7 +260,12 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 						break;
 
 					default:
-						tempDef[param] = body[param];
+						const funcName = `set_${param}`;
+						if (typeof tempDef[funcName] === 'function') {
+							tempDef[funcName](body[param]);
+						} else {
+							tempDef[param] = body[param];
+						}
 						break;
 				}
 			}
@@ -273,9 +277,9 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 		let nowPoint = self.recordLeak(new self.b2Vec2(entity._translate.x / self._scaleRatio, entity._translate.y / self._scaleRatio));
 		tempDef.set_position(nowPoint);
 		self.destroyB2dObj(nowPoint);
-		self.destroyB2dObj(tempDef);
 		// Create the new body
 		tempBod = self._world.CreateBody(tempDef);
+
 		// Now apply any post-creation attributes we need to
 		for (param in body) {
 			if (body.hasOwnProperty(param)) {
@@ -297,11 +301,9 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 							for (i = 0; i < body.fixtures.length; i++) {
 								// Grab the fixture definition
 								fixtureDef = body.fixtures[i];
-
 								// Create the fixture
 								tempFixture = self.createFixture(fixtureDef);
 								tempFixture.taroId = fixtureDef.taroId;
-
 								// Check for a shape definition for the fixture
 								if (fixtureDef.shape) {
 									// Create based on the shape type
@@ -315,11 +317,9 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 											}
 
 											if (fixtureDef.shape.data) {
-												finalX = fixtureDef.shape.data.x !== undefined ? fixtureDef.shape.data.x : 0;
-												finalY = fixtureDef.shape.data.y !== undefined ? fixtureDef.shape.data.y : 0;
-												if (finalX !== 0 && finalY !== 0) {
-													tempShape.set_m_p(new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio));
-												}
+												finalX = fixtureDef.shape.data.x ?? 0;
+												finalY = fixtureDef.shape.data.y ?? 0;
+												tempShape.set_m_p(new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio));
 											}
 											break;
 
@@ -332,17 +332,17 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 											tempShape = self.recordLeak(new self.b2PolygonShape());
 
 											if (fixtureDef.shape.data) {
-												finalX = fixtureDef.shape.data.x !== undefined ? fixtureDef.shape.data.x : 0;
-												finalY = fixtureDef.shape.data.y !== undefined ? fixtureDef.shape.data.y : 0;
-												finalWidth = fixtureDef.shape.data.width !== undefined ? fixtureDef.shape.data.width : (entity._bounds2d.x / 2);
-												finalHeight = fixtureDef.shape.data.height !== undefined ? fixtureDef.shape.data.height : (entity._bounds2d.y / 2);
+												finalX = fixtureDef.shape.data.x ?? 0;
+												finalY = fixtureDef.shape.data.y ?? 0;
+												finalWidth = fixtureDef.shape.data.width ?? (entity._bounds2d.x / 2);
+												finalHeight = fixtureDef.shape.data.height ?? (entity._bounds2d.y / 2);
 											} else {
 												finalX = 0;
 												finalY = 0;
 												finalWidth = (entity._bounds2d.x / 2);
 												finalHeight = (entity._bounds2d.y / 2);
 											}
-											const pos = self.recordLeak(new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio))
+											const pos = self.recordLeak(new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio));
 											// Set the polygon as a box
 											tempShape.SetAsBox(
 												(finalWidth / self._scaleRatio),
@@ -380,6 +380,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 								}
 
 								if (fixtureDef.friction !== undefined && finalFixture) {
+
 									finalFixture.SetFriction(fixtureDef.friction);
 								}
 								if (fixtureDef.restitution !== undefined && finalFixture) {
@@ -411,6 +412,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 		// console.log('box2dweb',entity._rotate.z)
 		entity.rotateTo(0, 0, entity._rotate.z);
 		// Add the body to the world with the passed fixture
+		self.destroyB2dObj(tempDef);
 		self.freeLeaked();
 		return tempBod;
 	},
