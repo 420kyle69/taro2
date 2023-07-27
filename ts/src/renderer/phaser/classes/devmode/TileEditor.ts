@@ -12,6 +12,8 @@ class TileEditor {
 	commandController: CommandController;
 	startDragIn: string;
 
+    tileSize: number;
+
 	constructor(
 		private gameScene: GameScene,
 		devModeScene: DevModeScene,
@@ -33,6 +35,11 @@ class TileEditor {
 		this.activateMarkers(false);
 
 		this.startDragIn = 'none';
+
+        this.tileSize = Constants.TILE_SIZE;
+		if (taro.game.data.defaultData.dontResize) {
+			this.tileSize = gameMap.tileWidth;
+		}
 
 		gameScene.input.on('pointerdown', (p) => {
 			if (!devModeScene.pointerInsideButtons) {
@@ -103,8 +110,8 @@ class TileEditor {
 					nowBrushSize.x = 1;
 					nowBrushSize.y = 1;
 				}
-				const pointerTileX = gameMap.worldToTileX(worldPoint.x - (nowBrushSize.x - 1) * Constants.TILE_SIZE / 2, true);
-				const pointerTileY = gameMap.worldToTileY(worldPoint.y - (nowBrushSize.y - 1) * Constants.TILE_SIZE / 2, true);
+				const pointerTileX = gameMap.worldToTileX(worldPoint.x - (nowBrushSize.x - 1) * this.tileSize / 2, true);
+				const pointerTileY = gameMap.worldToTileY(worldPoint.y - (nowBrushSize.y - 1) * this.tileSize / 2, true);
 				this.clearTint();
 				this.selectedTileArea = {};
 				for (let i = 0; i < nowBrushSize.x; i++) {
@@ -396,8 +403,8 @@ class TileEditor {
 					marker.showPreview(true);
 
 					// Rounds down to nearest tile
-					const pointerTileX = map.worldToTileX(worldPoint.x - (marker.graphics.scaleX - 1) * Constants.TILE_SIZE / 2, true);
-					const pointerTileY = map.worldToTileY(worldPoint.y - (marker.graphics.scaleY - 1) * Constants.TILE_SIZE / 2, true);
+					const pointerTileX = map.worldToTileX(worldPoint.x - (marker.graphics.scaleX - 1) * this.tileSize / 2, true);
+					const pointerTileY = map.worldToTileY(worldPoint.y - (marker.graphics.scaleY - 1) * this.tileSize / 2, true);
 
 					// Snap to tile coordinates, but in world space
 					marker.graphics.x = map.tileToWorldX(pointerTileX);
