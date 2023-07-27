@@ -94,62 +94,57 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 			component.curOffset = { x: 0, y: 0 };
 			component.x = 0;
 			component.y = 0;
-			setInterval(() => {
+			if (taro.physics._box2dDebug) {
+				setInterval(() => {
+					if (taro.isClient) {
+						const canvas = document.getElementById('debug-canvas') as HTMLCanvasElement;
+						const ctx = canvas.getContext('2d');
+						const pixelsPerMeter = 4;
+						if (!component.renderer) {
+							canvas.style.display = 'block';
+							const onMousedown = (e) => {
+								if (e.button === 0) {
+									component.x = e.x;
+									component.y = e.y;
+									canvas.addEventListener('mousemove', onMousemove);
+									canvas.addEventListener('mouseup', onMouseup);
+								}
+							};
+							canvas.addEventListener('mousedown', onMousedown);
+							const onMousemove = (e) => {
+								component.offset.x = component.curOffset.x + (e.x - component.x);
+								component.offset.y = component.curOffset.y + (e.y - component.y);
+								canvas.width = 200;
+								ctx.translate(component.offset.x, component.offset.y);
+							};
 
-				if (taro.isClient) {
-					const canvas = document.getElementById('demo-canvas') as HTMLCanvasElement;
+							const onMouseup = () => {
+								component.curOffset.x = component.offset.x;
+								component.curOffset.y = component.offset.y;
+								canvas.removeEventListener('mousemove', onMousemove);
+								canvas.removeEventListener('mouseup', onMouseup);
+							};
+							const newRenderer = new Box2dDebugDraw(this.box2D, new Box2dHelpers(this.box2D), ctx, 100).constructJSDraw();
+							newRenderer.SetFlags(this.box2D.b2Draw.e_shapeBit);
+							component.renderer = newRenderer;
+							component._world.SetDebugDraw(newRenderer);
+						}
+						ctx.fillStyle = 'rgb(0,0,0)';
+						ctx.fillRect(0, 0, canvas.width, canvas.height);
+						// canvas.width = 200;
+						ctx.save();
+						ctx.scale(pixelsPerMeter, pixelsPerMeter);
+						// const { x, y } = cameraOffsetMetres;
+						// ctx.translate(x, y);
+						ctx.lineWidth /= pixelsPerMeter;
 
-					const ctx = canvas.getContext('2d');
-					const pixelsPerMeter = 4;
-					const cameraOffsetMetres = {
-						x: 0,
-						y: 0
-					};
-
-					if (!component.renderer) {
-						const onMousedown = (e) => {
-							if (e.button === 0) {
-								// 鼠标左键
-								component.x = e.x;
-								component.y = e.y;
-								canvas.addEventListener('mousemove', onMousemove);
-								canvas.addEventListener('mouseup', onMouseup);
-							}
-						};
-						canvas.addEventListener('mousedown', onMousedown);
-						const onMousemove = (e) => {
-							component.offset.x = component.curOffset.x + (e.x - component.x);
-							component.offset.y = component.curOffset.y + (e.y - component.y);
-							canvas.width = 200;
-							ctx.translate(component.offset.x, component.offset.y);
-						};
-
-						const onMouseup = () => {
-							component.curOffset.x = component.offset.x;
-							component.curOffset.y = component.offset.y;
-							canvas.removeEventListener('mousemove', onMousemove);
-							canvas.removeEventListener('mouseup', onMouseup);
-						};
-						const newRenderer = new Box2dDebugDraw(this.box2D, new Box2dHelpers(this.box2D), ctx, 100).constructJSDraw();
-						newRenderer.SetFlags(this.box2D.b2Draw.e_shapeBit);
-						component.renderer = newRenderer;
-						component._world.SetDebugDraw(newRenderer);
+						ctx.fillStyle = 'rgb(255,255,0)';
+						component._world.DebugDraw();
+						ctx.restore();
 					}
-					ctx.fillStyle = 'rgb(0,0,0)';
-					ctx.fillRect(0, 0, canvas.width, canvas.height);
-					// canvas.width = 200;
-					ctx.save();
-					ctx.scale(pixelsPerMeter, pixelsPerMeter);
-					// const { x, y } = cameraOffsetMetres;
-					// ctx.translate(x, y);
-					ctx.lineWidth /= pixelsPerMeter;
+				}, 1);
+			}
 
-					ctx.fillStyle = 'rgb(255,255,0)';
-					component._world.DebugDraw();
-
-					ctx.restore();
-				}
-			}, 1);
 			component._world.SetContinuousPhysics(this._continuousPhysics);
 		};
 

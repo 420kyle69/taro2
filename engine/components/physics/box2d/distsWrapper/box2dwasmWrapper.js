@@ -132,56 +132,54 @@ var box2dwasmWrapper = {
                             component.curOffset = { x: 0, y: 0 };
                             component.x = 0;
                             component.y = 0;
-                            setInterval(function () {
-                                if (taro.isClient) {
-                                    var canvas_1 = document.getElementById('demo-canvas');
-                                    var ctx_1 = canvas_1.getContext('2d');
-                                    var pixelsPerMeter = 4;
-                                    var cameraOffsetMetres = {
-                                        x: 0,
-                                        y: 0
-                                    };
-                                    if (!component.renderer) {
-                                        var onMousedown = function (e) {
-                                            if (e.button === 0) {
-                                                // 鼠标左键
-                                                component.x = e.x;
-                                                component.y = e.y;
-                                                canvas_1.addEventListener('mousemove', onMousemove_1);
-                                                canvas_1.addEventListener('mouseup', onMouseup_1);
-                                            }
-                                        };
-                                        canvas_1.addEventListener('mousedown', onMousedown);
-                                        var onMousemove_1 = function (e) {
-                                            component.offset.x = component.curOffset.x + (e.x - component.x);
-                                            component.offset.y = component.curOffset.y + (e.y - component.y);
-                                            canvas_1.width = 200;
-                                            ctx_1.translate(component.offset.x, component.offset.y);
-                                        };
-                                        var onMouseup_1 = function () {
-                                            component.curOffset.x = component.offset.x;
-                                            component.curOffset.y = component.offset.y;
-                                            canvas_1.removeEventListener('mousemove', onMousemove_1);
-                                            canvas_1.removeEventListener('mouseup', onMouseup_1);
-                                        };
-                                        var newRenderer = new Box2dDebugDraw(_this.box2D, new Box2dHelpers(_this.box2D), ctx_1, 100).constructJSDraw();
-                                        newRenderer.SetFlags(_this.box2D.b2Draw.e_shapeBit);
-                                        component.renderer = newRenderer;
-                                        component._world.SetDebugDraw(newRenderer);
+                            if (taro.physics._box2dDebug) {
+                                setInterval(function () {
+                                    if (taro.isClient) {
+                                        var canvas_1 = document.getElementById('debug-canvas');
+                                        var ctx_1 = canvas_1.getContext('2d');
+                                        var pixelsPerMeter = 4;
+                                        if (!component.renderer) {
+                                            canvas_1.style.display = 'block';
+                                            var onMousedown = function (e) {
+                                                if (e.button === 0) {
+                                                    component.x = e.x;
+                                                    component.y = e.y;
+                                                    canvas_1.addEventListener('mousemove', onMousemove_1);
+                                                    canvas_1.addEventListener('mouseup', onMouseup_1);
+                                                }
+                                            };
+                                            canvas_1.addEventListener('mousedown', onMousedown);
+                                            var onMousemove_1 = function (e) {
+                                                component.offset.x = component.curOffset.x + (e.x - component.x);
+                                                component.offset.y = component.curOffset.y + (e.y - component.y);
+                                                canvas_1.width = 200;
+                                                ctx_1.translate(component.offset.x, component.offset.y);
+                                            };
+                                            var onMouseup_1 = function () {
+                                                component.curOffset.x = component.offset.x;
+                                                component.curOffset.y = component.offset.y;
+                                                canvas_1.removeEventListener('mousemove', onMousemove_1);
+                                                canvas_1.removeEventListener('mouseup', onMouseup_1);
+                                            };
+                                            var newRenderer = new Box2dDebugDraw(_this.box2D, new Box2dHelpers(_this.box2D), ctx_1, 100).constructJSDraw();
+                                            newRenderer.SetFlags(_this.box2D.b2Draw.e_shapeBit);
+                                            component.renderer = newRenderer;
+                                            component._world.SetDebugDraw(newRenderer);
+                                        }
+                                        ctx_1.fillStyle = 'rgb(0,0,0)';
+                                        ctx_1.fillRect(0, 0, canvas_1.width, canvas_1.height);
+                                        // canvas.width = 200;
+                                        ctx_1.save();
+                                        ctx_1.scale(pixelsPerMeter, pixelsPerMeter);
+                                        // const { x, y } = cameraOffsetMetres;
+                                        // ctx.translate(x, y);
+                                        ctx_1.lineWidth /= pixelsPerMeter;
+                                        ctx_1.fillStyle = 'rgb(255,255,0)';
+                                        component._world.DebugDraw();
+                                        ctx_1.restore();
                                     }
-                                    ctx_1.fillStyle = 'rgb(0,0,0)';
-                                    ctx_1.fillRect(0, 0, canvas_1.width, canvas_1.height);
-                                    // canvas.width = 200;
-                                    ctx_1.save();
-                                    ctx_1.scale(pixelsPerMeter, pixelsPerMeter);
-                                    // const { x, y } = cameraOffsetMetres;
-                                    // ctx.translate(x, y);
-                                    ctx_1.lineWidth /= pixelsPerMeter;
-                                    ctx_1.fillStyle = 'rgb(255,255,0)';
-                                    component._world.DebugDraw();
-                                    ctx_1.restore();
-                                }
-                            }, 1);
+                                }, 1);
+                            }
                             component._world.SetContinuousPhysics(this._continuousPhysics);
                         };
                         /**
