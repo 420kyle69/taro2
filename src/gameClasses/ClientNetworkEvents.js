@@ -1,13 +1,12 @@
 var ClientNetworkEvents = {
 	_onClientDisconnect: function (data) {
 		var clientId = data.clientId;
-		// console.log("diskonnekt", clientId, taro.network.id())
 		// if it's me that got disconnected!
 		if (clientId == taro.network.id()) {
 			$("#disconnect-reason").html(data.reason);
 			taro.menuUi.onDisconnectFromServer("clientNetworkEvents #10", data.reason);
+			taro.network._io._disconnectReason = data.reason;
 		}
-		taro.network._io._disconnectReason = data.reason;
 	},
 
 	_onUpdateAllEntities: function (data) {
@@ -512,7 +511,11 @@ var ClientNetworkEvents = {
 			$("#serverconsolelogscounter").text(
 				`${taro.client.errorLogs.length > 99 ? "99+" : taro.client.errorLogs.length}`
 			);
-			$("#server-console").append(`<span class="badge badge-danger">${log}</span><br/>`);
+			$("#server-console").prepend(`<div
+              class="server-logs-element"
+            >
+              <span>${log}</span>
+            </div>`);
 		}
 
 		window.reactApp.showErrorToast(logs[Object.keys(logs)[Object.keys(logs).length - 1]]);

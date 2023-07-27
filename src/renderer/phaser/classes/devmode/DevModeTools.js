@@ -214,6 +214,12 @@ var DevModeTools = /** @class */ (function (_super) {
                 _this.save();
             }
         });
+        var aKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A, false);
+        aKey.on('down', function () {
+            if (!_this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
+                _this.addEntities();
+            }
+        });
         var oneKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE, false);
         oneKey.on('down', function () {
             if (!_this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map' && !altKey.isDown) {

@@ -2164,20 +2164,18 @@ var TaroEntity = TaroObject.extend({
 		this._renderEntity(_ctx, dontTransform);
 	},
 
-	flip: function (flip) {
-		if (this._stats.flip !== flip) {
+	flip: function (isFlipping) {
+		if (this._stats.flip !== isFlipping) {
 
 			if (taro.isServer) {
-
-				this.streamUpdateData([{ flip: flip }]);
+				this.streamUpdateData([{ flip: isFlipping }]);
 
 			} else if (taro.isClient) {
-
-				this.emit('flip', [ flip ]);
+				this.emit('flip', [ isFlipping ]);
 			}
 		}
 
-		this._stats.flip = flip;
+		this._stats.flip = isFlipping;
 	},
 
 	/**
@@ -4157,7 +4155,9 @@ var TaroEntity = TaroObject.extend({
 						case 'flip':
 							this._stats[attrName] = newValue;
 							// ignore flip command from server for my own unit, because it's already done locally
-							if (taro.isClient && this != taro.client.selectedUnit && !(this._category == 'item' && this.getOwnerUnit() == taro.client.selectedUnit)) {
+							if (this.category == 'item')
+								console.log("flip", newValue)
+							if (taro.isClient && this != taro.client.selectedUnit && !(this._category == 'item' && this.getOwnerUnit() == taro.client.selectedUnit)) {								
 								this.flip(newValue);
 							}
 							break;
