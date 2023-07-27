@@ -333,8 +333,6 @@ var TileEditor = /** @class */ (function () {
             var palettePoint = devModeScene.cameras.getCamera('palette').getWorldPoint(devModeScene.input.activePointer.x, devModeScene.input.activePointer.y);
             var marker = this.marker;
             var paletteMarker = this.paletteMarker;
-            paletteMarker.graphics.clear();
-            paletteMarker.graphics.strokeRect(0, 0, paletteMap.tileWidth * palette.texturesLayer.scaleX, paletteMap.tileHeight * palette.texturesLayer.scaleY);
             paletteMarker.graphics.setVisible(true);
             // Rounds down to nearest tile
             var palettePointerTileX = paletteMap.worldToTileX(palettePoint.x);
@@ -356,8 +354,8 @@ var TileEditor = /** @class */ (function () {
                     marker.graphics.setVisible(true);
                     marker.showPreview(true);
                     // Rounds down to nearest tile
-                    var pointerTileX_1 = map_1.worldToTileX(worldPoint.x - (marker.graphics.scaleX - 1) * this.tileSize / 2, true);
-                    var pointerTileY_1 = map_1.worldToTileY(worldPoint.y - (marker.graphics.scaleY - 1) * this.tileSize / 2, true);
+                    var pointerTileX_1 = map_1.worldToTileX(worldPoint.x - (marker.graphics.scaleSidesX - 1) * this.tileSize / 2, true);
+                    var pointerTileY_1 = map_1.worldToTileY(worldPoint.y - (marker.graphics.scaleSidesY - 1) * this.tileSize / 2, true);
                     // Snap to tile coordinates, but in world space
                     marker.graphics.x = map_1.tileToWorldX(pointerTileX_1);
                     marker.graphics.y = map_1.tileToWorldY(pointerTileY_1);
