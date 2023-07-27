@@ -90,6 +90,7 @@ var taroClientConfig = {
         'renderer/phaser/classes/devmode/EntityEditor.js',
 		'renderer/phaser/classes/devmode/TilePalette.js',
 		'renderer/phaser/classes/devmode/TileMarker.js',
+        'renderer/phaser/classes/devmode/MarkerGraphics.js',
 		'renderer/phaser/classes/devmode/CommandsController.js',
 		'renderer/phaser/classes/devmode/Constants.js',
 		'renderer/phaser/classes/devmode/EntityImage.js',
