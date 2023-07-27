@@ -795,6 +795,12 @@ var TaroNetIoServer = {
 				case 1003:
 					reason = 'Unsupported Data';
 					break;
+				case 1005:
+					reason = 'No Status Rcvd';
+					break;
+				case 1006:
+					reason = 'Abnormal Closure';
+					break;
 				case 1007:
 					reason = 'Invalid frame payload data';
 					break;
