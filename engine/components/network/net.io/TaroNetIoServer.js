@@ -300,7 +300,30 @@ var TaroNetIoServer = {
 
 		return this._acceptConnections;
 	},
-
+	
+	/**
+	 * Sends clientDisconnect command to client and closes the socket connection
+	 * @param {String} clientId
+	 * @param {String} reason
+	 * @param {String} reasonCode
+	 */
+	disconnect: function (clientId, reason, reasonCode) {
+		if (!clientId) {
+			return;
+		}
+		
+		this.send('clientDisconnect', {reason, clientId}, clientId);
+		
+		const socket = this._socketById[clientId];
+		if (socket) {
+			
+			// store socket's disconnect reason, will be used in _onSocketDisconnect
+			socket._disconnectReason = reasonCode || reason;
+			
+			socket.close(reason);
+		}
+	},
+	
 	/**
    * Sends a message over the network.
    * @param {String} commandName
@@ -753,11 +776,62 @@ var TaroNetIoServer = {
    * @param {Object} socket The client socket object.
    * @private
    */
-	_onClientDisconnect: function (data, socket) {
+	_onSocketDisconnect: function (data, socket) {
+		
 		var self = this;
+		
+		const code = data?.code; //https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent/code
+		const disconnectReason = self._socketById[socket.id]?._disconnectReason;
+		
+		let reason = disconnectReason || data?.reason.toString();
+		if (!reason) {
+			switch (code) {
+				case 1001:
+					reason = 'Going Away';
+					break;
+				case 1002:
+					reason = 'Protocol error';
+					break;
+				case 1003:
+					reason = 'Unsupported Data';
+					break;
+				case 1007:
+					reason = 'Invalid frame payload data';
+					break;
+				case 1008:
+					reason = 'Policy Violation';
+					break;
+				case 1009:
+					reason = 'Message Too Big';
+					break;
+				case 1010:
+					reason = 'Mandatory Ext.';
+					break;
+				case 1011:
+					reason = 'Internal Error';
+					break;
+				case 1012:
+					reason = 'Service Restart';
+					break;
+				case 1013:
+					reason = 'Try Again Later';
+					break;
+				case 1014:
+					reason = 'Bad Gateway';
+					break;
+				case 1015:
+					reason = 'TLS handshake';
+					break;
+				default:
+					reason = code;
+			}
+		}
+		
 		this.log(`Client disconnected with id ${socket.id}`);
+		console.log(`Client disconnected with id ${socket.id}, reason: ${reason}, code: ${code}`);
+		
 		var end = Date.now();
-
+		
 		if (self._socketById[socket.id]?._token?.distinctId) {
 			/** additional part to send some info for marketing purposes */
 			global.mixpanel.track('Game Session Duration', {
@@ -766,6 +840,8 @@ var TaroNetIoServer = {
 				'gameSlug': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.gameSlug,
 				'gameId': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData._id,
 				'playTime': end - self._socketById[socket.id].start,
+				'reason': reason,
+				'code': code,
 			});
 		}
 
@@ -778,11 +854,17 @@ var TaroNetIoServer = {
 					'gameSlug': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.gameSlug,
 					'gameId': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData._id,
 					'playTime': end - self._socketById[socket.id].start,
+					'reason': reason,
+					'code': code,
 				}
 			});
 		}
-
-		this.emit('disconnect', socket.id);
+		
+		// triggers _onClientDisconnect in ServerNetworkEvents.js
+		this.emit('disconnect', {
+			clientId: socket.id,
+			reason: disconnectReason,
+		});
 
 		// Remove them from all rooms
 		this.clientLeaveAllRooms(socket.id);
