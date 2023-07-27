@@ -23,8 +23,6 @@ class MobileControlsScene extends PhaserScene {
 
 		const scale = this.scale;
 		const controls = this.controls = this.add.container();
-		// this.resize();
-		// scale.on(Phaser.Scale.Events.RESIZE, this.resize, this);
 
 		const joysticks = this.joysticks;
 
@@ -245,19 +243,4 @@ class MobileControlsScene extends PhaserScene {
 			this.scale.startFullscreen();
 		}
 	}
-
-	/*
-	** This part no longer use, it used to lock the mobile control at the bottom of screen **
-	** However, the set scale of it will make some buttons out of canvas **
-	** And changing the y will make the upper area of canvas having no buttons **
-	private resize() {
-		// make the mobileControls container
-		// fit the width and be anchored to the bottom
-		const controls = this.controls;
-		const scale = this.scale;
-
-		controls.setScale(scale.width / 960);
-		controls.y = scale.height - 540 * controls.scale;
-	}
-	*/
 }

@@ -26,8 +26,6 @@ var MobileControlsScene = /** @class */ (function (_super) {
         this.input.addPointer(3);
         var scale = this.scale;
         var controls = this.controls = this.add.container();
-        // this.resize();
-        // scale.on(Phaser.Scale.Events.RESIZE, this.resize, this);
         var joysticks = this.joysticks;
         taro.mobileControls.on('add-control', function (key, x, y, w, h, settings) {
             switch (key) {
