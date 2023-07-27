@@ -92,6 +92,7 @@ var Box2dDebugDraw = /** @class */ (function () {
             _this.context.restore();
         };
         this.constructJSDraw = function () {
+            console.log(_this.box2D, _this.context);
             var _a = _this.box2D, JSDraw = _a.JSDraw, b2Vec2 = _a.b2Vec2, getPointer = _a.getPointer;
             var debugDraw = Object.assign(new JSDraw(), {
                 DrawSegment: function (vert1_p, vert2_p, color_p) {

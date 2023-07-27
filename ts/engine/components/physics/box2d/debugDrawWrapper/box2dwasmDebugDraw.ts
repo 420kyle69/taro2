@@ -115,6 +115,7 @@ class Box2dDebugDraw {
 	};
 
 	constructJSDraw = (): Box2D.JSDraw => {
+		console.log(this.box2D, this.context);
 		const { JSDraw, b2Vec2, getPointer } = this.box2D;
 		const debugDraw = Object.assign(new JSDraw(), {
 			DrawSegment: (vert1_p: number, vert2_p: number, color_p: number): void => {

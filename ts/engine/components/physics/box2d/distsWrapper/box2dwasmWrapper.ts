@@ -1,5 +1,5 @@
 // FIXME: add more types to the physics part of taro2
-// @ts-nocheck
+
 const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing memory leak bug
 	init: async function (component) {
 		const box2D = await box2dwasm() as typeof Box2D & EmscriptenModule;
@@ -91,19 +91,63 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 
 		component.createWorld = function (id, options) {
 			component._world = new component.b2World(this._gravity);
-
+			component.offset = { x: 0, y: 0 };
+			component.curOffset = { x: 0, y: 0 };
+			component.x = 0;
+			component.y = 0;
 			setInterval(() => {
 
 				if (taro.isClient) {
+					const canvas = document.getElementById('demo-canvas') as HTMLCanvasElement;
+
+					const ctx = canvas.getContext('2d');
+					const pixelsPerMeter = 4;
+					const cameraOffsetMetres = {
+						x: 0,
+						y: 0
+					};
+
 					if (!component.renderer) {
-						while (!taro._ctx) { }
-						const ctx = document.getElementsByTagName('canvas')[0].getContext('2d');
+						const onMousedown = (e) => {
+							if (e.button === 0) {
+								// 鼠标左键
+								component.x = e.x;
+								component.y = e.y;
+								canvas.addEventListener('mousemove', onMousemove);
+								canvas.addEventListener('mouseup', onMouseup);
+							}
+						};
+						canvas.addEventListener('mousedown', onMousedown);
+						const onMousemove = (e) => {
+							component.offset.x = component.curOffset.x + (e.x - component.x);
+							component.offset.y = component.curOffset.y + (e.y - component.y);
+							canvas.width = 200;
+							ctx.translate(component.offset.x, component.offset.y);
+						};
+
+						const onMouseup = () => {
+							component.curOffset.x = component.offset.x;
+							component.curOffset.y = component.offset.y;
+							canvas.removeEventListener('mousemove', onMousemove);
+							canvas.removeEventListener('mouseup', onMouseup);
+						};
 						const newRenderer = new Box2dDebugDraw(this.box2D, new Box2dHelpers(this.box2D), ctx, 100).constructJSDraw();
 						newRenderer.SetFlags(this.box2D.b2Draw.e_shapeBit);
 						component.renderer = newRenderer;
+						component._world.SetDebugDraw(newRenderer);
 					}
-					component._world.SetDebugDraw(this.renderer);
+					ctx.fillStyle = 'rgb(0,0,0)';
+					ctx.fillRect(0, 0, canvas.width, canvas.height);
+					// canvas.width = 200;
+					ctx.save();
+					ctx.scale(pixelsPerMeter, pixelsPerMeter);
+					const { x, y } = cameraOffsetMetres;
+					ctx.translate(x, y);
+					ctx.lineWidth /= pixelsPerMeter;
+
+					ctx.fillStyle = 'rgb(255,255,0)';
 					component._world.DebugDraw();
+
 					ctx.restore();
 				}
 			}, 1);
@@ -166,6 +210,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 	},
 
 	createBody: function (self, entity, body, isLossTolerant) {
+		const box2D = self.box2D as typeof Box2D & EmscriptenModule;
 		PhysicsComponent.prototype.log(`createBody of ${entity._stats.name}`);
 		// immediately destroy body if entity already has box2dBody
 		if (!entity) {
@@ -191,15 +236,15 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 		// Process body definition and create a box2d body for it
 		switch (body.type) {
 			case 'static':
-				tempDef.set_type(0);
+				tempDef.set_type(box2D.b2_staticBody);
 				break;
 
 			case 'dynamic':
-				tempDef.set_type(self.b2_dynamicBody);
+				tempDef.set_type(box2D.b2_dynamicBody);
 				break;
 
 			case 'kinematic':
-				tempDef.set_type(1);
+				tempDef.set_type(box2D.b2_kinematicBody);
 				break;
 		}
 

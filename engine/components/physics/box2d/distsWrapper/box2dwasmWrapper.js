@@ -1,3 +1,4 @@
+// FIXME: add more types to the physics part of taro2
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -34,8 +35,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-// FIXME: add more types to the physics part of taro2
-// @ts-nocheck
 var box2dwasmWrapper = {
     init: function (component) {
         return __awaiter(this, void 0, void 0, function () {
@@ -130,18 +129,58 @@ var box2dwasmWrapper = {
                         component.createWorld = function (id, options) {
                             var _this = this;
                             component._world = new component.b2World(this._gravity);
+                            component.offset = { x: 0, y: 0 };
+                            component.curOffset = { x: 0, y: 0 };
+                            component.x = 0;
+                            component.y = 0;
                             setInterval(function () {
                                 if (taro.isClient) {
+                                    var canvas_1 = document.getElementById('demo-canvas');
+                                    var ctx_1 = canvas_1.getContext('2d');
+                                    var pixelsPerMeter = 4;
+                                    var cameraOffsetMetres = {
+                                        x: 0,
+                                        y: 0
+                                    };
                                     if (!component.renderer) {
-                                        while (!taro._ctx) { }
-                                        var ctx = document.getElementsByTagName('canvas')[0].getContext('2d');
-                                        var newRenderer = new Box2dDebugDraw(_this.box2D, new Box2dHelpers(_this.box2D), ctx, 100).constructJSDraw();
+                                        var onMousedown = function (e) {
+                                            if (e.button === 0) {
+                                                // 鼠标左键
+                                                component.x = e.x;
+                                                component.y = e.y;
+                                                canvas_1.addEventListener('mousemove', onMousemove_1);
+                                                canvas_1.addEventListener('mouseup', onMouseup_1);
+                                            }
+                                        };
+                                        canvas_1.addEventListener('mousedown', onMousedown);
+                                        var onMousemove_1 = function (e) {
+                                            component.offset.x = component.curOffset.x + (e.x - component.x);
+                                            component.offset.y = component.curOffset.y + (e.y - component.y);
+                                            canvas_1.width = 200;
+                                            ctx_1.translate(component.offset.x, component.offset.y);
+                                        };
+                                        var onMouseup_1 = function () {
+                                            component.curOffset.x = component.offset.x;
+                                            component.curOffset.y = component.offset.y;
+                                            canvas_1.removeEventListener('mousemove', onMousemove_1);
+                                            canvas_1.removeEventListener('mouseup', onMouseup_1);
+                                        };
+                                        var newRenderer = new Box2dDebugDraw(_this.box2D, new Box2dHelpers(_this.box2D), ctx_1, 100).constructJSDraw();
                                         newRenderer.SetFlags(_this.box2D.b2Draw.e_shapeBit);
                                         component.renderer = newRenderer;
+                                        component._world.SetDebugDraw(newRenderer);
                                     }
-                                    component._world.SetDebugDraw(_this.renderer);
+                                    ctx_1.fillStyle = 'rgb(0,0,0)';
+                                    ctx_1.fillRect(0, 0, canvas_1.width, canvas_1.height);
+                                    // canvas.width = 200;
+                                    ctx_1.save();
+                                    ctx_1.scale(pixelsPerMeter, pixelsPerMeter);
+                                    var x = cameraOffsetMetres.x, y = cameraOffsetMetres.y;
+                                    ctx_1.translate(x, y);
+                                    ctx_1.lineWidth /= pixelsPerMeter;
+                                    ctx_1.fillStyle = 'rgb(255,255,0)';
                                     component._world.DebugDraw();
-                                    ctx.restore();
+                                    ctx_1.restore();
                                 }
                             }, 1);
                             component._world.SetContinuousPhysics(this._continuousPhysics);
@@ -199,6 +238,7 @@ var box2dwasmWrapper = {
         self.world().QueryAABB(callback, aabb);
     },
     createBody: function (self, entity, body, isLossTolerant) {
+        var box2D = self.box2D;
         PhysicsComponent.prototype.log("createBody of ".concat(entity._stats.name));
         // immediately destroy body if entity already has box2dBody
         if (!entity) {
@@ -225,13 +265,13 @@ var box2dwasmWrapper = {
         // Process body definition and create a box2d body for it
         switch (body.type) {
             case 'static':
-                tempDef.set_type(0);
+                tempDef.set_type(box2D.b2_staticBody);
                 break;
             case 'dynamic':
-                tempDef.set_type(self.b2_dynamicBody);
+                tempDef.set_type(box2D.b2_dynamicBody);
                 break;
             case 'kinematic':
-                tempDef.set_type(1);
+                tempDef.set_type(box2D.b2_kinematicBody);
                 break;
         }
         // Add the parameters of the body to the new body instance
