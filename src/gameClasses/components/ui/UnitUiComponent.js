@@ -126,7 +126,7 @@ var UnitUiComponent = TaroEntity.extend({
 				displayText = `
 					<span class='unit-attribute-name'>${name}: </span>
 					<span class='unit-attribute-value'>
-						<span class='unit-attribute-min'>${value}</span><span class='unit-attribute-divisor-sign'> / </span><span class='unit-attribute-max'>${parseFloat(attr.max).toFixed(0)}</span>
+						<span class='unit-attribute-current'>${value}</span><span class='unit-attribute-divisor-sign'> / </span><span class='unit-attribute-max'>${parseFloat(attr.max).toFixed(0)}</span>
 					</span>
 				`;
 			} else {
