@@ -184,7 +184,7 @@ var Player = TaroEntity.extend({
 		if (taro.isServer && self._stats.clientId) {
 			if (unit && unit._category == 'unit' && unit.getOwner() == this || unitId === null) {
 				self._stats.selectedUnitId = unitId;
-				taro.network.send('makePlayerSelectUnit', { unitId: unitId }, self._stats.clientId);
+				self.streamUpdateData([{ selectedUnitId: unitId }]);
 			} else {
 				// someone's attempting exploit by trying to assign a unit to a player that's not the unit's owner
 				var client = taro.server.clients[self._stats.clientId];
@@ -518,103 +518,135 @@ var Player = TaroEntity.extend({
 				}
 
 				if (taro.isClient) {
-					if (attrName === 'name') {
-						self._stats[attrName] = newValue;
-						// update here
-						if (typeof refreshUserName == 'function') {
+					switch (attrName) {
+						case 'name':
+							self._stats[attrName] = newValue;
+							// update here
+							if (typeof refreshUserName === 'function') {
 							refreshUserName(newValue);
-						}
-					} else if (attrName === 'purchasables') {
-						// update client purchasables if streamed from server to make sure equip/unequip skin works
-						self._stats[attrName] = newValue;
-					} else if (attrName === 'equiped') {
-						self._stats[attrName] = newValue;
-						var unit = self.getSelectedUnit();
-						if (unit) {
+							}
+							break;
+						
+						case 'purchasables':
+							// update client purchasables if streamed from server to make sure equip/unequip skin works
+							self._stats[attrName] = newValue;
+							break;
+						
+						case 'equiped':
+							self._stats[attrName] = newValue;
+							var unit = self.getSelectedUnit();
+							if (unit) {
 							unit.equipSkin();
-						}
-					} else if (attrName === 'unEquiped') {
-						self._stats[attrName] = newValue;
-						var unit = self.getSelectedUnit();
-						if (unit) {
+							}
+							break;
+						
+						case 'unEquiped':
+							self._stats[attrName] = newValue;
+							var unit = self.getSelectedUnit();
+							if (unit) {
 							unit.unEquipSkin(null, false, newValue);
-						}
+							}
+							break;
+						
+						case 'selectedUnitId':
+							self._stats[attrName] = newValue;			
+							// this unit was queued to be selected by a player
+							if (taro.isClient) {
+								self.selectUnit(newValue);
+							}
+							break;
+						default:
+							// Handle the case when attrName does not match any of the above cases.
+							break;
 					}
+				
 
 					if (self._stats.clientId == taro.network.id()) {
-						if (attrName === 'mapData') {
-							self._stats[attrName] = newValue;
-							taro.developerMode.updateClientMap(data);
-						}
-						if (attrName === 'attributes') {
-							taro.playerUi.updatePlayerAttributesDiv(self._stats.attributes);
-						}
-						if (attrName === 'coins') {
-							self._stats[attrName] = newValue;
-							taro.playerUi.updatePlayerCoin(newValue);
-						}
-						if (attrName === 'roleIds') {
-							self._stats[attrName] = newValue;
-						}
-						if (attrName === 'playerJoinedAgain') {
-							self.hideMenu();
-						}
-						if (attrName === 'banChat') {
-							self._stats[attrName] = newValue;
-							self.setChatMute(newValue);
-						}
-						if (attrName === 'playerJoined') {
-							self._stats[attrName] = newValue;
-							// console.log('received player.playerJoined');
-							taro.client.eventLog.push([taro._currentTime, 'playerJoined received']);
-							// render name labels of all other units
-							self.redrawUnits(['nameLabel']);
-
-							self._stats.receivedJoinGame = data.receivedJoinGame;
-							taro.client.eventLog.push([taro._currentTime - taro.client.playerJoinedAt, '\'playerJoined\' received from server']);
-							self._stats.processedJoinGame = data.processedJoinGame;
-							var streamingDiff = `${Date.now() - data.streamedOn}ms`;
-
-							window.joinGameSent.end = Date.now();
-							window.joinGameSent.completed = window.joinGameSent.end - window.joinGameSent.start;
-
-							console.log(
-								`JoinGame took ${window.joinGameSent.completed}ms to join player` +
-								`, client to gs: ${self._stats.receivedJoinGame - window.joinGameSent.start}ms` +
-								`, gs loading player data: ${self._stats.totalTime}ms` +
-								`, gs processed request for: ${self._stats.processedJoinGame}ms` +
-								`, gs to client: ${streamingDiff
-								}, client sent on: ${window.joinGameSent.start
-								}, server sent back on: ${data.streamedOn}`
-							);
-
-							if (window.joinGameSent.completed > 7000) {
-								$.post('/api/log', {
-									event: 'rollbar',
-									text: `${Date.now()}:- JoinGame took ${window.joinGameSent.completed}ms to join player` +
-										`, client to gs: ${self._stats.receivedJoinGame - window.joinGameSent.start}ms` +
-										`, gs loading player data: ${self._stats.totalTime}ms` +
-										`, gs processed request for: ${self._stats.processedJoinGame}ms` +
-										`, gs to client: ${streamingDiff
-										}, client sent on: ${window.joinGameSent.start
-										}, server sent back on: ${data.streamedOn}`
-								});
-							}
-							if (self._stats.processedJoinGame > 7000) {
-								$.post('/api/log', {
-									event: 'rollbar',
-									text: `${Date.now()}JoinGame took ${window.joinGameSent.completed}ms to create player` +
-										`, client to gs: ${self._stats.receivedJoinGame - window.joinGameSent.start}ms` +
-										`, gs loading player data: ${self._stats.totalTime}ms` +
-										`, gs processed request for: ${self._stats.processedJoinGame}ms` +
-										`, gs to client: ${streamingDiff
-										}, client sent on: ${window.joinGameSent.start
-										}, server sent back on: ${data.streamedOn}`
-								});
-							}
-
-							self.hideMenu();
-							clearTimeout(window.errorLogTimer);
+						switch (attrName) {
+							case 'mapData':
+							  self._stats[attrName] = newValue;
+							  taro.developerMode.updateClientMap(data);
+							  break;
+						  
+							case 'attributes':
+							  taro.playerUi.updatePlayerAttributesDiv(self._stats.attributes);
+							  break;
+						  
+							case 'coins':
+							  self._stats[attrName] = newValue;
+							  taro.playerUi.updatePlayerCoin(newValue);
+							  break;
+						  
+							case 'roleIds':
+							  self._stats[attrName] = newValue;
+							  break;
+						  
+							case 'playerJoinedAgain':
+							  self.hideMenu();
+							  break;
+						  
+							case 'banChat':
+							  self._stats[attrName] = newValue;
+							  self.setChatMute(newValue);
+							  break;
+						  
+							case 'playerJoined':
+								self._stats[attrName] = newValue;
+								// console.log('received player.playerJoined');
+								taro.client.eventLog.push([taro._currentTime, 'playerJoined received']);
+								// render name labels of all other units
+								self.redrawUnits(['nameLabel']);
+	
+								self._stats.receivedJoinGame = data.receivedJoinGame;
+								taro.client.eventLog.push([taro._currentTime - taro.client.playerJoinedAt, '\'playerJoined\' received from server']);
+								self._stats.processedJoinGame = data.processedJoinGame;
+								var streamingDiff = `${Date.now() - data.streamedOn}ms`;
+	
+								window.joinGameSent.end = Date.now();
+								window.joinGameSent.completed = window.joinGameSent.end - window.joinGameSent.start;
+	
+								console.log(
+									`JoinGame took ${window.joinGameSent.completed}ms to join player` +
+									`, client to gs: ${self._stats.receivedJoinGame - window.joinGameSent.start}ms` +
+									`, gs loading player data: ${self._stats.totalTime}ms` +
+									`, gs processed request for: ${self._stats.processedJoinGame}ms` +
+									`, gs to client: ${streamingDiff
+									}, client sent on: ${window.joinGameSent.start
+									}, server sent back on: ${data.streamedOn}`
+								);
+	
+								if (window.joinGameSent.completed > 7000) {
+									$.post('/api/log', {
+										event: 'rollbar',
+										text: `${Date.now()}:- JoinGame took ${window.joinGameSent.completed}ms to join player` +
+											`, client to gs: ${self._stats.receivedJoinGame - window.joinGameSent.start}ms` +
+											`, gs loading player data: ${self._stats.totalTime}ms` +
+											`, gs processed request for: ${self._stats.processedJoinGame}ms` +
+											`, gs to client: ${streamingDiff
+											}, client sent on: ${window.joinGameSent.start
+											}, server sent back on: ${data.streamedOn}`
+									});
+								}
+								if (self._stats.processedJoinGame > 7000) {
+									$.post('/api/log', {
+										event: 'rollbar',
+										text: `${Date.now()}JoinGame took ${window.joinGameSent.completed}ms to create player` +
+											`, client to gs: ${self._stats.receivedJoinGame - window.joinGameSent.start}ms` +
+											`, gs loading player data: ${self._stats.totalTime}ms` +
+											`, gs processed request for: ${self._stats.processedJoinGame}ms` +
+											`, gs to client: ${streamingDiff
+											}, client sent on: ${window.joinGameSent.start
+											}, server sent back on: ${data.streamedOn}`
+									});
+								}
+	
+								self.hideMenu();
+								clearTimeout(window.errorLogTimer);
+							  break;
+						  
+							default:
+							  // Handle the case when attrName does not match any of the above cases.
+							  break;
 						}
 					}
 

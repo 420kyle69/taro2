@@ -116,6 +116,7 @@ var Projectile = TaroEntityPhysics.extend({
 
 	_behaviour: function (ctx) {
 		var self = this;
+		
 		_.forEach(taro.triggersQueued, function (trigger) {
 			trigger.params['thisEntityId'] = self.id();
 			self.script.trigger(trigger.name, trigger.params);

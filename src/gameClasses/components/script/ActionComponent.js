@@ -84,7 +84,6 @@ var ActionComponent = TaroEntity.extend({
 					}
 				}
 			}
-
 			self._script.recordLast50Action(action.type);
 			try {
 				switch (action.type) {

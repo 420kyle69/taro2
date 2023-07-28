@@ -6,7 +6,7 @@ var GameComponent = TaroEntity.extend({
 		this.highlights = {};
 		this.createdEntities = [];
 		this.gameOverModalIsShowing = false;
-		this.isGameStarted = false;
+		this.hasStarted = false;
 		this.devLogs = {};
 
 	},
@@ -47,7 +47,7 @@ var GameComponent = TaroEntity.extend({
 		taro.script.load(taro.game.data.scripts);
 
 		taro.script.trigger('gameStart');
-		self.isGameStarted = true;
+		self.hasStarted = true;
 		taro.timer.startGameClock();
 	},
 

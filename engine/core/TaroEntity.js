@@ -76,6 +76,8 @@ var TaroEntity = TaroObject.extend({
         this.teleportCamera = false;
 		this.teleportDestination = this.latestKeyFrame[1];
 
+		this.queuedTriggers = [];
+
 		if (taro.isClient) {
 			this.anchorOffset = { x: 0, y: 0, rotate: 0 };
 			this.addComponent(TweenComponent);
@@ -4262,10 +4264,6 @@ var TaroEntity = TaroObject.extend({
 									return;
 								}
 								this.playEffect(newValue.type, newValue.data ? newValue.data : {});
-								break;
-							case 'makePlayerSelectUnit':
-								// this unit was queued to be selected by a player
-								taro.client.myPlayer.selectUnit(this.id());
 								break;
 							case 'makePlayerCameraTrackUnit':
 								// this unit was queued to be tracked by a player's camera

@@ -109,7 +109,6 @@ var ControlComponent = TaroEntity.extend({
 		}
 
 		var unit = player.getSelectedUnit();
-		
 		if (unit && unit._category == 'unit') {
 			if (taro.isServer || (taro.isClient && !this.isChatOpen)) {
 				var unitAbility = null;

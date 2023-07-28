@@ -1577,7 +1577,6 @@ var TaroEngine = TaroEntity.extend({
 					taro.physics.update(timeElapsed);
 				}
 
-				taro.queueTrigger('frameTick');
 			}
 
 			taro.tickCount = 0;
@@ -1600,19 +1599,11 @@ var TaroEngine = TaroEntity.extend({
 				}
 			}
 
-			if (taro.isServer) { // triggersQueued runs on client-side inside EntitiesToRender.ts
-				// triggersQueued is executed in the entities first (entity-script) then it runs for the world
-				while (taro.triggersQueued.length > 0) {
-					const trigger = taro.triggersQueued.shift();
-					taro.script.trigger(trigger.name, trigger.params);
-				}
-			}
 
 			taro.engineLagReported = false;
 			taro.actionProfiler = {};
 			taro.triggerProfiler = {};
-			taro.triggersQueued = []; // only empties on server-side as client-side never reaches here
-
+			
 			// periodical checks running every second
 			if (taro.now - self.lastCheckedAt > 1000) {
 				// kill tier 1 servers that has been empty for over 15 minutes
@@ -1673,6 +1664,13 @@ var TaroEngine = TaroEntity.extend({
 				}
 			}
 
+			
+			// triggersQueued is executed in the entities first (entity-script) then it runs for the world
+			while (taro.triggersQueued.length > 0) {
+				const trigger = taro.triggersQueued.shift();
+				taro.script.trigger(trigger.name, trigger.params);
+			}
+
 			if (taro.isClient) {
 				if (taro.client.myPlayer) {
 					taro.client.myPlayer.control._behaviour();
@@ -1689,9 +1687,13 @@ var TaroEngine = TaroEntity.extend({
 
 				return;
 			}
-
+			
 			if (!taro.gameLoopTickHasExecuted) {
 				return;
+			}
+
+			if (taro.isServer) {
+				taro.queueTrigger('frameTick');
 			}
 
 			// Check for unborn entities that should be born now
@@ -1728,6 +1730,8 @@ var TaroEngine = TaroEntity.extend({
 					}
 				}
 			}
+
+			
 
 			// console.log(taro.updateCount, taro.tickCount, taro.updateTransform,"inView", taro.inViewCount);
 			// Record the lastTick value so we can
