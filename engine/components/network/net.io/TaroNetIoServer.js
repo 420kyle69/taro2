@@ -318,7 +318,14 @@ var TaroNetIoServer = {
 		if (socket) {
 			
 			// store socket's disconnect reason, will be used in _onSocketDisconnect
-			socket._disconnectReason = reasonCode || reason;
+			const code = null;
+			
+			socket._disconnect = {
+				reasonCode: reasonCode || socket.getReasonCode(reason),
+				reason,
+				code,
+				at: new Date(),
+			};
 			
 			socket.close(reason);
 		}
@@ -780,61 +787,63 @@ var TaroNetIoServer = {
 		
 		var self = this;
 		
-		const code = data?.code; //https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent/code
-		const disconnectReason = self._socketById[socket.id]?._disconnectReason;
+		const _disconnect = self._socketById[socket.id]?._disconnect || {};
 		
-		let reason = disconnectReason || data?.reason.toString();
-		if (!reason) {
+		const code = _disconnect.code || data?.code; //https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent/code
+		let reasonCode = _disconnect.reasonCode || '';
+		let reason = _disconnect.reason || data?.reason.toString();
+		
+		if (!reason && !reasonCode) {
 			switch (code) {
 				case 1001:
-					reason = 'Going Away';
+					reason = reasonCode = 'Going Away';
 					break;
 				case 1002:
-					reason = 'Protocol error';
+					reason = reasonCode = 'Protocol error';
 					break;
 				case 1003:
-					reason = 'Unsupported Data';
+					reason = reasonCode = 'Unsupported Data';
 					break;
 				case 1005:
-					reason = 'No Status Rcvd';
+					reason = reasonCode = 'No Status Rcvd';
 					break;
 				case 1006:
-					reason = 'Abnormal Closure';
+					reason = reasonCode = 'Abnormal Closure';
 					break;
 				case 1007:
-					reason = 'Invalid frame payload data';
+					reason = reasonCode = 'Invalid frame payload data';
 					break;
 				case 1008:
-					reason = 'Policy Violation';
+					reason = reasonCode = 'Policy Violation';
 					break;
 				case 1009:
-					reason = 'Message Too Big';
+					reason = reasonCode = 'Message Too Big';
 					break;
 				case 1010:
-					reason = 'Mandatory Ext.';
+					reason = reasonCode = 'Mandatory Ext.';
 					break;
 				case 1011:
-					reason = 'Internal Error';
+					reason = reasonCode = 'Internal Error';
 					break;
 				case 1012:
-					reason = 'Service Restart';
+					reason = reasonCode = 'Service Restart';
 					break;
 				case 1013:
-					reason = 'Try Again Later';
+					reason = reasonCode = 'Try Again Later';
 					break;
 				case 1014:
-					reason = 'Bad Gateway';
+					reason = reasonCode = 'Bad Gateway';
 					break;
 				case 1015:
-					reason = 'TLS handshake';
+					reason = reasonCode = 'TLS handshake';
 					break;
 				default:
-					reason = code;
+					reason = reasonCode = code;
 			}
 		}
 		
 		this.log(`Client disconnected with id ${socket.id}`);
-		console.log(`Client disconnected with id ${socket.id}, reason: ${reason}, code: ${code}`);
+		console.log(`Client disconnected with id ${socket.id}, reason: ${reason}, reasonCode: ${reasonCode}, code: ${code}`);
 		
 		var end = Date.now();
 		
@@ -846,8 +855,13 @@ var TaroNetIoServer = {
 				'gameSlug': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.gameSlug,
 				'gameId': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData._id,
 				'playTime': end - self._socketById[socket.id].start,
-				'reason': reason,
 				'code': code,
+				'reason': reason,
+				'reasonCode': reasonCode,
+				'server': process.env.IP,
+				'tier': process.env.WORKER_TIER || process.env.TIER,
+				'previousDisconnects': socket._previousDisconnects || [],
+				'reconnectCount': socket._previousDisconnects?.length || 0,
 			});
 		}
 
@@ -860,8 +874,13 @@ var TaroNetIoServer = {
 					'gameSlug': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.gameSlug,
 					'gameId': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData._id,
 					'playTime': end - self._socketById[socket.id].start,
-					'reason': reason,
 					'code': code,
+					'reason': reason,
+					'reasonCode': reasonCode,
+					'server': process.env.IP,
+					'tier': process.env.WORKER_TIER || process.env.TIER,
+					'previousDisconnects': socket._previousDisconnects || [],
+					'reconnectCount': socket._previousDisconnects?.length || 0,
 				}
 			});
 		}
@@ -869,7 +888,7 @@ var TaroNetIoServer = {
 		// triggers _onClientDisconnect in ServerNetworkEvents.js
 		this.emit('disconnect', {
 			clientId: socket.id,
-			reason: disconnectReason,
+			reason: _disconnect.reason,
 		});
 
 		// Remove them from all rooms

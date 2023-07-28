@@ -16,7 +16,7 @@ class TileMarker {
 	) {
 		this.active = true;
 		this.commandController = commandController;
-        this.graphics = new MarkerGraphics(scene, map, w);
+        this.graphics = new MarkerGraphics(scene, map, w, palette);
 
 		if (!palette) {
 			this.preview = scene.add.container();
