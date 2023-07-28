@@ -871,7 +871,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 			const nowContact = taro.physics.wrapPointer(contact, taro.physics.b2Contact);
 			var entityA = nowContact.GetFixtureA().GetBody()._entity;
 			var entityB = nowContact.GetFixtureB().GetBody()._entity;
-
 			if (!entityA || !entityB)
 				return;
 

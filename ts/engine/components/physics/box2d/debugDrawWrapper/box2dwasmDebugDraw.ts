@@ -8,20 +8,20 @@
  */
 class Box2dDebugDraw {
 	constructor(
-    private readonly box2D: typeof Box2D & EmscriptenModule,
-    private readonly helpers: Box2dHelpers,
-    private readonly context: CanvasRenderingContext2D,
-    private readonly canvasScaleFactor: number
+		private readonly box2D: typeof Box2D & EmscriptenModule,
+		private readonly helpers: Box2dHelpers,
+		private readonly context: Phaser.GameObjects.Graphics,
+		private readonly canvasScaleFactor: number
 	) {
 	}
 
-	static drawAxes(ctx: CanvasRenderingContext2D): void {
-		ctx.strokeStyle = 'rgb(192,0,0)';
+	static drawAxes(ctx: Phaser.GameObjects.Graphics): void {
+		ctx.lineStyle(1, 0xff0000, 0.5);
 		ctx.beginPath();
 		ctx.moveTo(0, 0);
 		ctx.lineTo(1, 0);
 		ctx.stroke();
-		ctx.strokeStyle = 'rgb(0,192,0)';
+		ctx.lineStyle(1, 0x00ff00, 0.5);
 		ctx.beginPath();
 		ctx.moveTo(0, 0);
 		ctx.lineTo(0, 1);
@@ -31,20 +31,19 @@ class Box2dDebugDraw {
 	setColorFromDebugDrawCallback = (color_p: number): void => {
 		const { wrapPointer, b2Color } = this.box2D;
 		const col = wrapPointer(color_p, b2Color);
-		const red = (col.get_r() * 255)|0;
-		const green = (col.get_g() * 255)|0;
-		const blue = (col.get_b() * 255)|0;
-		const colStr = `${red},${green},${blue}`;
-		this.context.fillStyle = `rgba(${colStr},0.5)`;
-		this.context.strokeStyle = `rgb(${colStr})`;
+		const red = (col.get_r() * 255) | 0;
+		const green = (col.get_g() * 255) | 0;
+		const blue = (col.get_b() * 255) | 0;
+		const colNum = red << 16 | green << 8 | blue;
+		this.context.fillStyle(colNum, 0.5);
 	};
 
 	drawPoint = (vec_p: number, sizeMetres: number, color_p: number): void => {
 		const { wrapPointer, b2Vec2 } = this.box2D;
 		const vert = wrapPointer(vec_p, b2Vec2);
 		this.setColorFromDebugDrawCallback(color_p);
-		const sizePixels = sizeMetres/this.canvasScaleFactor;
-		this.context.fillRect(vert.get_x()-sizePixels/2, vert.get_y()-sizePixels/2, sizePixels, sizePixels);
+		const sizePixels = sizeMetres / this.canvasScaleFactor;
+		this.context.fillRect(vert.get_x() - sizePixels / 2, vert.get_y() - sizePixels / 2, sizePixels, sizePixels);
 	};
 
 	drawSegment = (vert1_p: number, vert2_p: number): void => {
@@ -60,8 +59,8 @@ class Box2dDebugDraw {
 	drawPolygon = (vertices: number, vertexCount: number, fill: boolean): void => {
 		const { wrapPointer, b2Vec2 } = this.box2D;
 		this.context.beginPath();
-		for(let tmpI=0; tmpI < vertexCount; tmpI++) {
-			const vert = wrapPointer(vertices+(tmpI*8), b2Vec2);
+		for (let tmpI = 0; tmpI < vertexCount; tmpI++) {
+			const vert = wrapPointer(vertices + (tmpI * 8), b2Vec2);
 			if (tmpI === 0) {
 				this.context.moveTo(vert.get_x(), vert.get_y());
 			} else {
@@ -82,7 +81,7 @@ class Box2dDebugDraw {
 		const axisV = wrapPointer(axis_p, b2Vec2);
 
 		this.context.beginPath();
-		this.context.arc(centerV.get_x(),centerV.get_y(), radius, 0, 2 * Math.PI, false);
+		this.context.arc(centerV.get_x(), centerV.get_y(), radius, 0, 2 * Math.PI, false);
 		if (fill) {
 			this.context.fill();
 		}
@@ -91,10 +90,10 @@ class Box2dDebugDraw {
 		if (fill) {
 			//render axis marker
 			const vert2V = copyVec2(centerV);
-			vert2V.op_add( scaledVec2(axisV, radius) );
+			vert2V.op_add(scaledVec2(axisV, radius));
 			this.context.beginPath();
-			this.context.moveTo(centerV.get_x(),centerV.get_y());
-			this.context.lineTo(vert2V.get_x(),vert2V.get_y());
+			this.context.moveTo(centerV.get_x(), centerV.get_y());
+			this.context.lineTo(vert2V.get_x(), vert2V.get_y());
 			this.context.stroke();
 		}
 	};
@@ -102,14 +101,12 @@ class Box2dDebugDraw {
 	drawTransform = (transform_p: number): void => {
 		const { wrapPointer, b2Transform } = this.box2D;
 		const trans = wrapPointer(transform_p, b2Transform);
+		this.context.save();
 		const pos = trans.get_p();
 		const rot = trans.get_q();
-
-		this.context.save();
-		this.context.translate(pos.get_x(), pos.get_y());
-		this.context.scale(0.5,0.5);
-		this.context.rotate(rot.GetAngle());
-		this.context.lineWidth *= 2;
+		this.context.translateCanvas(pos.get_x(), pos.get_y());
+		this.context.setScale(0.5, 0.5);
+		this.context.rotateCanvas(rot.GetAngle());
 		Box2dDebugDraw.drawAxes(this.context);
 		this.context.restore();
 	};
@@ -132,7 +129,7 @@ class Box2dDebugDraw {
 			},
 			DrawCircle: (center_p: number, radius: number, color_p: number): void => {
 				this.setColorFromDebugDrawCallback(color_p);
-				const dummyAxis = new b2Vec2(0,0);
+				const dummyAxis = new b2Vec2(0, 0);
 				const dummyAxis_p = getPointer(dummyAxis);
 				this.drawCircle(center_p, radius, dummyAxis_p, false);
 			},

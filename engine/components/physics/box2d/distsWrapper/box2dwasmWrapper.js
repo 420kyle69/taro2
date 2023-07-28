@@ -128,58 +128,29 @@ var box2dwasmWrapper = {
                         component.createWorld = function (id, options) {
                             var _this = this;
                             component._world = new component.b2World(this._gravity);
-                            component.offset = { x: 0, y: 0 };
-                            component.curOffset = { x: 0, y: 0 };
-                            component.x = 0;
-                            component.y = 0;
-                            if (taro.physics._box2dDebug) {
-                                setInterval(function () {
-                                    if (taro.isClient) {
-                                        var canvas_1 = document.getElementById('debug-canvas');
-                                        var ctx_1 = canvas_1.getContext('2d');
-                                        var pixelsPerMeter = 4;
-                                        if (!component.renderer) {
-                                            canvas_1.style.display = 'block';
-                                            var onMousedown = function (e) {
-                                                if (e.button === 0) {
-                                                    component.x = e.x;
-                                                    component.y = e.y;
-                                                    canvas_1.addEventListener('mousemove', onMousemove_1);
-                                                    canvas_1.addEventListener('mouseup', onMouseup_1);
-                                                }
-                                            };
-                                            canvas_1.addEventListener('mousedown', onMousedown);
-                                            var onMousemove_1 = function (e) {
-                                                component.offset.x = component.curOffset.x + (e.x - component.x);
-                                                component.offset.y = component.curOffset.y + (e.y - component.y);
-                                                canvas_1.width = 200;
-                                                ctx_1.translate(component.offset.x, component.offset.y);
-                                            };
-                                            var onMouseup_1 = function () {
-                                                component.curOffset.x = component.offset.x;
-                                                component.curOffset.y = component.offset.y;
-                                                canvas_1.removeEventListener('mousemove', onMousemove_1);
-                                                canvas_1.removeEventListener('mouseup', onMouseup_1);
-                                            };
-                                            var newRenderer = new Box2dDebugDraw(_this.box2D, new Box2dHelpers(_this.box2D), ctx_1, 100).constructJSDraw();
-                                            newRenderer.SetFlags(_this.box2D.b2Draw.e_shapeBit);
-                                            component.renderer = newRenderer;
-                                            component._world.SetDebugDraw(newRenderer);
-                                        }
-                                        ctx_1.fillStyle = 'rgb(0,0,0)';
-                                        ctx_1.fillRect(0, 0, canvas_1.width, canvas_1.height);
-                                        // canvas.width = 200;
-                                        ctx_1.save();
-                                        ctx_1.scale(pixelsPerMeter, pixelsPerMeter);
-                                        // const { x, y } = cameraOffsetMetres;
-                                        // ctx.translate(x, y);
-                                        ctx_1.lineWidth /= pixelsPerMeter;
-                                        ctx_1.fillStyle = 'rgb(255,255,0)';
-                                        component._world.DebugDraw();
-                                        ctx_1.restore();
+                            var ctx;
+                            setInterval(function () {
+                                if (taro.isClient) {
+                                    if (!component.renderer) {
+                                        var canvas = taro.renderer.scene.getScene('Game');
+                                        ctx = canvas.add.graphics().setDepth(9999);
+                                        ctx.setScale(30);
+                                        var newRenderer = new Box2dDebugDraw(_this.box2D, new Box2dHelpers(_this.box2D), ctx, 32).constructJSDraw();
+                                        newRenderer.SetFlags(_this.box2D.b2Draw.e_shapeBit |
+                                            _this.box2D.b2Draw.e_jointBit |
+                                            _this.box2D.b2Draw.e_pairBit |
+                                            _this.box2D.b2Draw.e_aabbBit
+                                        // this.box2D.b2Draw.e_centerOfMassBit
+                                        );
+                                        component.renderer = newRenderer;
+                                        component._world.SetDebugDraw(newRenderer);
                                     }
-                                }, 1);
-                            }
+                                    if (ctx) {
+                                        ctx.clear();
+                                        component._world.DebugDraw();
+                                    }
+                                }
+                            }, 1);
                             component._world.SetContinuousPhysics(this._continuousPhysics);
                         };
                         /**

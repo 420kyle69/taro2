@@ -19,9 +19,8 @@ var Box2dDebugDraw = /** @class */ (function () {
             var red = (col.get_r() * 255) | 0;
             var green = (col.get_g() * 255) | 0;
             var blue = (col.get_b() * 255) | 0;
-            var colStr = "".concat(red, ",").concat(green, ",").concat(blue);
-            _this.context.fillStyle = "rgba(".concat(colStr, ",0.5)");
-            _this.context.strokeStyle = "rgb(".concat(colStr, ")");
+            var colNum = red << 16 | green << 8 | blue;
+            _this.context.fillStyle(colNum, 0.5);
         };
         this.drawPoint = function (vec_p, sizeMetres, color_p) {
             var _a = _this.box2D, wrapPointer = _a.wrapPointer, b2Vec2 = _a.b2Vec2;
@@ -81,13 +80,12 @@ var Box2dDebugDraw = /** @class */ (function () {
         this.drawTransform = function (transform_p) {
             var _a = _this.box2D, wrapPointer = _a.wrapPointer, b2Transform = _a.b2Transform;
             var trans = wrapPointer(transform_p, b2Transform);
+            _this.context.save();
             var pos = trans.get_p();
             var rot = trans.get_q();
-            _this.context.save();
-            _this.context.translate(pos.get_x(), pos.get_y());
-            _this.context.scale(0.5, 0.5);
-            _this.context.rotate(rot.GetAngle());
-            _this.context.lineWidth *= 2;
+            _this.context.translateCanvas(pos.get_x(), pos.get_y());
+            _this.context.setScale(0.5, 0.5);
+            _this.context.rotateCanvas(rot.GetAngle());
             Box2dDebugDraw.drawAxes(_this.context);
             _this.context.restore();
         };
@@ -128,12 +126,12 @@ var Box2dDebugDraw = /** @class */ (function () {
         };
     }
     Box2dDebugDraw.drawAxes = function (ctx) {
-        ctx.strokeStyle = 'rgb(192,0,0)';
+        ctx.lineStyle(1, 0xff0000, 0.5);
         ctx.beginPath();
         ctx.moveTo(0, 0);
         ctx.lineTo(1, 0);
         ctx.stroke();
-        ctx.strokeStyle = 'rgb(0,192,0)';
+        ctx.lineStyle(1, 0x00ff00, 0.5);
         ctx.beginPath();
         ctx.moveTo(0, 0);
         ctx.lineTo(0, 1);

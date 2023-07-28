@@ -90,60 +90,31 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 
 		component.createWorld = function (id, options) {
 			component._world = new component.b2World(this._gravity);
-			component.offset = { x: 0, y: 0 };
-			component.curOffset = { x: 0, y: 0 };
-			component.x = 0;
-			component.y = 0;
-			if (taro.physics._box2dDebug) {
-				setInterval(() => {
-					if (taro.isClient) {
-						const canvas = document.getElementById('debug-canvas') as HTMLCanvasElement;
-						const ctx = canvas.getContext('2d');
-						const pixelsPerMeter = 4;
-						if (!component.renderer) {
-							canvas.style.display = 'block';
-							const onMousedown = (e) => {
-								if (e.button === 0) {
-									component.x = e.x;
-									component.y = e.y;
-									canvas.addEventListener('mousemove', onMousemove);
-									canvas.addEventListener('mouseup', onMouseup);
-								}
-							};
-							canvas.addEventListener('mousedown', onMousedown);
-							const onMousemove = (e) => {
-								component.offset.x = component.curOffset.x + (e.x - component.x);
-								component.offset.y = component.curOffset.y + (e.y - component.y);
-								canvas.width = 200;
-								ctx.translate(component.offset.x, component.offset.y);
-							};
-
-							const onMouseup = () => {
-								component.curOffset.x = component.offset.x;
-								component.curOffset.y = component.offset.y;
-								canvas.removeEventListener('mousemove', onMousemove);
-								canvas.removeEventListener('mouseup', onMouseup);
-							};
-							const newRenderer = new Box2dDebugDraw(this.box2D, new Box2dHelpers(this.box2D), ctx, 100).constructJSDraw();
-							newRenderer.SetFlags(this.box2D.b2Draw.e_shapeBit);
-							component.renderer = newRenderer;
-							component._world.SetDebugDraw(newRenderer);
-						}
-						ctx.fillStyle = 'rgb(0,0,0)';
-						ctx.fillRect(0, 0, canvas.width, canvas.height);
-						// canvas.width = 200;
-						ctx.save();
-						ctx.scale(pixelsPerMeter, pixelsPerMeter);
-						// const { x, y } = cameraOffsetMetres;
-						// ctx.translate(x, y);
-						ctx.lineWidth /= pixelsPerMeter;
-
-						ctx.fillStyle = 'rgb(255,255,0)';
-						component._world.DebugDraw();
-						ctx.restore();
+			let ctx: Phaser.GameObjects.Graphics;
+			setInterval(() => {
+				if (taro.isClient) {
+					if (!component.renderer) {
+						const canvas = taro.renderer.scene.getScene('Game');
+						ctx = canvas.add.graphics().setDepth(9999);
+						ctx.setScale(30);
+						const newRenderer = new Box2dDebugDraw(this.box2D, new Box2dHelpers(this.box2D), ctx, 32).constructJSDraw();
+						newRenderer.SetFlags(
+							this.box2D.b2Draw.e_shapeBit |
+							this.box2D.b2Draw.e_jointBit |
+							this.box2D.b2Draw.e_pairBit |
+							this.box2D.b2Draw.e_aabbBit
+							// this.box2D.b2Draw.e_centerOfMassBit
+						);
+						component.renderer = newRenderer;
+						component._world.SetDebugDraw(newRenderer);
 					}
-				}, 1);
-			}
+					if (ctx) {
+						ctx.clear();
+						component._world.DebugDraw();
+					}
+				}
+			}, 1);
+
 
 			component._world.SetContinuousPhysics(this._continuousPhysics);
 		};
