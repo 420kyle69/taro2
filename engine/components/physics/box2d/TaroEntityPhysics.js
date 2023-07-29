@@ -166,6 +166,7 @@ var TaroEntityPhysics = TaroEntity.extend({
 				this.rotateTo(0, 0, rotate);
 			}
 
+			// console.log("defaultData", defaultData)
 			if (defaultData.translate) {
 				var x = defaultData.translate.x;
 				var y = defaultData.translate.y;

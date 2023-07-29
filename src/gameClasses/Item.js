@@ -1175,17 +1175,10 @@ var Item = TaroEntityPhysics.extend({
 				}
 			}
 
-			// run both server & client.
-			// it's important that this runs on client side, because it prepares this item's position when it's dropped
-			self.translateTo(x, y);
-			self.rotateTo(0, 0, rotate);
-
-			// if (this.getOwnerUnit() != taro.client.selectedUnit)	 {
-			// 	console.log(x, y, rotate, ownerUnit.angleToTarget, this._rotate.z)
-			// }
-
-			if (taro.game.cspEnabled && taro.isClient) {
-				self.nextKeyFrame[1] = [x, y, rotate]; // prepare position for when this item's dropped. without this, item will appear at an incorrect position
+			// this is necessary for games that has sprite-only item with no joint. (e.g. team elimination)
+			if (taro.isServer) {
+				self.translateTo(x, y);
+				self.rotateTo(0, 0, rotate);
 			}
 		}
 

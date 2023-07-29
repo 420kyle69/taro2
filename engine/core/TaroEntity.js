@@ -3138,7 +3138,7 @@ var TaroEntity = TaroObject.extend({
 	},
 
 	teleportTo: function (x, y, rotate, teleportCamera) {
-
+		// console.log("teleportTo", x, y, rotate)
 		this.teleported = true;
         this.teleportCamera = teleportCamera;
 		this.teleportDestination = [x, y, rotate]
@@ -5126,45 +5126,40 @@ var TaroEntity = TaroObject.extend({
 		var nextTransform = this.nextKeyFrame[1];
 		
 		if (nextTransform) {
-			// don't apply to item that's held by unit as that's calculated by anchor calculation			
-			if (!(this._category == 'item' && this.getOwnerUnit() != undefined)) {
-
-				var nextTime = this.nextKeyFrame[0];
-				var timeRemaining = nextTime - now;
-				
-				// don't lerp is time remaining is less than 5ms
-				if (timeRemaining > 5) {
-
-					xDiff = nextTransform[0] - x;
-					yDiff = nextTransform[1] - y;	
-					
-					var xSpeed = xDiff / timeRemaining;
-					var ySpeed = yDiff / timeRemaining;
-					
-					x += xSpeed * tickDelta;
-					y += ySpeed * tickDelta;
-				
-				} else {
-					x = nextTransform[0];
-					y = nextTransform[1];
-				}
-
-				rotateStart = rotate;
-				rotateEnd = nextTransform[2];
-
-				// a hack to prevent rotational interpolation suddnely jumping by 2 PI (e.g. 0.01 to -6.27)
-				if (Math.abs(rotateEnd - rotateStart) > Math.PI) {
-					if (rotateEnd > rotateStart) {
-						rotateStart += Math.PI * 2;
-					} else {
-						rotateStart -= Math.PI * 2;
-					}
-				}			
-				
-				rotate = this.interpolateValue(rotateStart, rotateEnd, taro._currentTime - 16, taro._currentTime, taro._currentTime + 16);
-			}		
-
 			
+			var nextTime = this.nextKeyFrame[0];
+			var timeRemaining = nextTime - now;
+			
+			// don't lerp is time remaining is less than 5ms
+			if (timeRemaining > 5) {
+
+				xDiff = nextTransform[0] - x;
+				yDiff = nextTransform[1] - y;	
+				
+				var xSpeed = xDiff / timeRemaining;
+				var ySpeed = yDiff / timeRemaining;
+				
+				x += xSpeed * tickDelta;
+				y += ySpeed * tickDelta;
+			
+			} else {
+				x = nextTransform[0];
+				y = nextTransform[1];
+			}	
+
+			rotateStart = rotate;
+			rotateEnd = nextTransform[2];
+
+			// a hack to prevent rotational interpolation suddnely jumping by 2 PI (e.g. 0.01 to -6.27)
+			if (Math.abs(rotateEnd - rotateStart) > Math.PI) {
+				if (rotateEnd > rotateStart) {
+					rotateStart += Math.PI * 2;
+				} else {
+					rotateStart -= Math.PI * 2;
+				}
+			}			
+			
+			rotate = this.interpolateValue(rotateStart, rotateEnd, taro._currentTime - 16, taro._currentTime, taro._currentTime + 16);
 		}
 		
 		// for my own unit, ignore streamed angle if this unit control is set to face mouse cursor instantly.
@@ -5180,6 +5175,7 @@ var TaroEntity = TaroObject.extend({
 		this._translate.y = y;
 		this._rotate.z = rotate;
 
+		
 		this.teleported = false;
 		this.lastTransformedAt = taro._currentTime;
 	},

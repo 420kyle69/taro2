@@ -485,16 +485,15 @@ var TaroNetIoClient = {
 
 							// update each entities' final position, so player knows where everything are when returning from a different browser tab
 							// we are not executing this in taroEngine or taroEntity, becuase they don't execute when browser tab is inactive
-							var entity = taro.$(entityId);
+							var entity = taro.$(entityId);							
 
-										
+							// console.log(entity != undefined, isTeleporting)
 							if (entity) {
 								if (isTeleporting) {
+									// console.log("wtf")
 									entity.teleportTo(x, y, rotate, isTeleportingCamera);
 								} else if (
-									// if csp movement is enabled, don't use server-streamed position for my unit. 
-									// instead, we'll use position updated by physics engine
-									// serverTimeStamp > entity.lastStreamReceivedAt && // ignore duplicate translation stream coming from server
+									// if csp movement is enabled, don't use server-streamed position for my unit. (it's updated in box2dcomponent.js)
 									!(taro.physics && taro.game.cspEnabled && entity == taro.client.selectedUnit) 
 								) {
 									// console.log(entity._category, newPosition)
