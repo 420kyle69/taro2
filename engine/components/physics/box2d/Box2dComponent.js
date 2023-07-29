@@ -656,7 +656,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 							}
 							// entity just has teleported
 							if (entity.teleportDestination != undefined && entity.teleported) {
-								entity.latestKeyFrame[1] = entity.teleportDestination;
+								entity.nextKeyFrame[1] = entity.teleportDestination;
 								x = entity.teleportDestination[0];
 								y = entity.teleportDestination[1];
 								angle = entity.teleportDestination[2];
@@ -679,7 +679,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 								} else if (taro.isClient) {
 									// my unit's position is dictated by clientside physics
 									if (entity == taro.client.selectedUnit) {
-										entity.latestKeyFrame = [taro._currentTime, [x, y, angle]];
+										entity.nextKeyFrame = [taro._currentTime, [x, y, angle]];
 									}
 									// projectiles don't use server-streamed position
 									else if (entity._category == 'projectile' && !entity._stats.streamMode
@@ -687,9 +687,9 @@ var PhysicsComponent = TaroEventingClass.extend({
 										entity.prevPhysicsFrame = entity.nextPhysicsFrame;
 										entity.nextPhysicsFrame = [nextFrameTime, [x, y, angle]];
 									} else { // update server-streamed entities' body position
-										x = entity.latestKeyFrame[1][0];
-										y = entity.latestKeyFrame[1][1];
-										angle = entity.latestKeyFrame[1][2];
+										x = entity.nextKeyFrame[1][0];
+										y = entity.nextKeyFrame[1][1];
+										angle = entity.nextKeyFrame[1][2];
 									}
 								}
 							}

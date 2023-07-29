@@ -67,14 +67,14 @@ var TaroEntity = TaroObject.extend({
 		// this ensures entity is spawning at a correct position initially. particularily useful for projectiles
 
 		this._keyFrames = [];
-		this.latestKeyFrame = [taro.now, [this._translate.x, this._translate.y, this._rotate.z]];
+		this.nextKeyFrame = [taro.now, [this._translate.x, this._translate.y, this._rotate.z]];
 		this.latestTimeStamp = 0;
-		this.prevKeyFrame = this.latestKeyFrame
+		this.prevKeyFrame = this.nextKeyFrame
 		this._lastTransformAt = null;
 		this.lastTeleportedAt = 0;
 		this.teleported = false;
         this.teleportCamera = false;
-		this.teleportDestination = this.latestKeyFrame[1];
+		this.teleportDestination = this.nextKeyFrame[1];
 
 		this.queuedTriggers = [];
 
@@ -3155,7 +3155,7 @@ var TaroEntity = TaroObject.extend({
 				this.translateColliderTo(x, y);
 			}
 		} else if (taro.isClient) {
-			this.latestKeyFrame[1] = [x, y, rotate];
+			this.nextKeyFrame[1] = [x, y, rotate];
 			if (taro.physics && this.prevPhysicsFrame && this.nextPhysicsFrame) {
 				let prevFrameTime = this.prevPhysicsFrame[0]
 				let nextFrameTime = this.nextPhysicsFrame[0]
@@ -5127,7 +5127,7 @@ var TaroEntity = TaroObject.extend({
 		let prevKeyFrame = null;
 		let nextKeyFrame = null;
 
-		var latestTransform = this.latestKeyFrame[1];
+		var latestTransform = this.nextKeyFrame[1];
 		// using cspMovement for my unit will cause it to rubberband to the latest known position
 		if (taro.game.cspEnabled && latestTransform && !this._stats.streamMode/*&& !this._stats.aiEnabled*/) {
 			if (this.body &&
