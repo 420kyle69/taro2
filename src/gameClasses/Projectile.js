@@ -6,7 +6,6 @@ var Projectile = TaroEntityPhysics.extend({
 		this.id(entityIdFromServer);
 		var self = this;
 		self.category('projectile');
-		console.log("new projectile is created!")
 		var projectileData = {};
 		if (taro.isClient) {
 			projectileData = taro.game.getAsset('projectileTypes', data.type);
@@ -37,12 +36,7 @@ var Projectile = TaroEntityPhysics.extend({
 			self.mount(taro.$('baseScene'));
 		}
 
-		if (
-			!taro.game.cspEnabled || // server-streamed projectiles are always rendered
-			(taro.game.cspEnabled && self._stats.sourceItemId === undefined || self._stats.streamMode) // if CSP is enabled
-		) {
-			this.startRendering();
-		}
+		this.startRendering();
 
 		if (self._stats.states) {
 			var currentState = self._stats.states[self._stats.stateId];

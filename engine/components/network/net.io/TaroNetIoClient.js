@@ -478,8 +478,8 @@ var TaroNetIoClient = {
 								parseInt(entityData[0], 16), // x
 								parseInt(entityData[1], 16), // y
 								parseInt(entityData[2], 16) / 1000, // rotation
-								// Boolean(parseInt(entityData[3], 16)), // teleported boolean
-								// Boolean(parseInt(entityData[4], 16)) // teleportedCamera boolean
+								Boolean(parseInt(entityData[3], 16)), // teleported boolean
+								Boolean(parseInt(entityData[4], 16)) // teleportedCamera boolean
 							];
 
 							obj[entityId] = entityData;
@@ -496,30 +496,14 @@ var TaroNetIoClient = {
 									// if csp movement is enabled, don't use server-streamed position for my unit. 
 									// instead, we'll use position updated by physics engine
 									// serverTimeStamp > entity.lastStreamReceivedAt && // ignore duplicate translation stream coming from server
-									timeElapsed &&
 									!(taro.physics && taro.game.cspEnabled && entity == taro.client.selectedUnit) 
 								) {
-									// console.log(timeElapsed)
+									console.log(entity._category, newPosition)
 									// extra 20ms of buffer removes jitter
 									entity.nextKeyFrame = [now + taro.client.renderBuffer, newPosition];						
 								}
 							}
 							
-							break;
-
-						case 'teleport':
-							var entityData = snapshot[i].slice(1).split('&');
-							var entityId = entityData[0];
-							var entity = taro.$(entityId);
-							entityData.splice(0, 1); // removing entityId
-							newPosition = [
-								parseInt(entityData[0], 16), // x
-								parseInt(entityData[1], 16), // y
-								parseInt(entityData[2], 16) / 1000, // rotation
-							];
-							if (entity) {
-								entity.teleportTo(newPosition[0], newPosition[1], newPosition[2]);
-							}
 							break;
 
 						default: 

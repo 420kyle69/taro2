@@ -5144,9 +5144,6 @@ var TaroEntity = TaroObject.extend({
 					var xSpeed = xDiff / timeRemaining;
 					var ySpeed = yDiff / timeRemaining;
 					
-					if (this._category == 'projectile')
-						console.log(nextTransform, x.toFixed(0), nextTransform[0], "nextMove", (xSpeed * tickDelta).toFixed(2), "speed", xSpeed.toFixed(3), "timeRemaining", timeRemaining.toFixed(0), "tickDelta", tickDelta.toFixed(0), "taro._currentTime", taro._currentTime)
-					
 					x += xSpeed * tickDelta;
 					y += ySpeed * tickDelta;
 				
@@ -5183,6 +5180,11 @@ var TaroEntity = TaroObject.extend({
 		this._translate.x = x;
 		this._translate.y = y;
 		this._rotate.z = rotate;
+
+		if (this._category == 'projectile') {
+			// console.log(nextTransform, x.toFixed(0), nextTransform[0], "nextMove", (xSpeed * tickDelta).toFixed(2), "speed", xSpeed.toFixed(3), "timeRemaining", timeRemaining.toFixed(0), "tickDelta", tickDelta.toFixed(0), "taro._currentTime", taro._currentTime)
+			console.log(x, y, rotate)
+		}
 
 		this.teleported = false;
 		this.lastTransformedAt = taro._currentTime;
