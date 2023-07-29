@@ -659,7 +659,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 
 							// entity just has teleported
 							if (entity.teleportDestination != undefined && entity.teleported) {
-								console.log("teleported")
 								entity.nextKeyFrame[1] = entity.teleportDestination;
 								x = entity.teleportDestination[0];
 								y = entity.teleportDestination[1];

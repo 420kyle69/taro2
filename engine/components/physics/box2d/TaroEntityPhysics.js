@@ -149,6 +149,7 @@ var TaroEntityPhysics = TaroEntity.extend({
 		//     this.previousState = this._stats && this._stats.states && this._stats.states[this._stats.stateId] || {};
 		//     console.log('setting previous sate', this.previousState);
 		// }
+
 		// if initialTranform variable's provided, then transform this entity immediately after body creation
 		if (defaultData) {
 			var rotate = defaultData.rotate;
@@ -168,15 +169,7 @@ var TaroEntityPhysics = TaroEntity.extend({
 			if (defaultData.translate) {
 				var x = defaultData.translate.x;
 				var y = defaultData.translate.y;
-
-				// immediately translate entity if position is assigned
-
-				// if (isLossTolerant)
-				//     this.translateToLT(x, y, 0)
-				// else
-
-				this.nextKeyFrame = [taro._currentTime, [x, y, rotate]];
-				this.translateTo(x, y, 0);
+				this.teleportTo(x, y, rotate);
 			}
 
 			// immediately apply speed if assigned

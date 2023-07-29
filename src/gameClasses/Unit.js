@@ -1277,7 +1277,7 @@ var Unit = TaroEntityPhysics.extend({
 						x: this._translate.x + item.anchoredOffset.x,
 						y: this._translate.y + item.anchoredOffset.y
 					},
-					rotate: item._rotate.z
+					rotate: item.anchoredOffset.rotate,
 				};
 
 				if (taro.physics.engine === 'CRASH') {

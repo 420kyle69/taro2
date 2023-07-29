@@ -3157,10 +3157,7 @@ var TaroEntity = TaroObject.extend({
 		} else if (taro.isClient) {
 			this.nextKeyFrame[1] = [x, y, rotate];
 			if (taro.physics && this.prevPhysicsFrame && this.nextPhysicsFrame) {
-				let prevFrameTime = this.prevPhysicsFrame[0]
-				let nextFrameTime = this.nextPhysicsFrame[0]
-				this.prevPhysicsFrame = [prevFrameTime, [x, y, rotate]];
-				this.nextPhysicsFrame = [nextFrameTime, [x, y, rotate]];
+				this.nextPhysicsFrame = [taro._currentTime, [x, y, rotate]];
 			}
             //instantly move to camera the new position
             if (teleportCamera && taro.client.myPlayer?.cameraTrackedUnit === this.id()) {
@@ -5180,11 +5177,6 @@ var TaroEntity = TaroObject.extend({
 		this._translate.x = x;
 		this._translate.y = y;
 		this._rotate.z = rotate;
-
-		if (this._category == 'projectile') {
-			// console.log(nextTransform, x.toFixed(0), nextTransform[0], "nextMove", (xSpeed * tickDelta).toFixed(2), "speed", xSpeed.toFixed(3), "timeRemaining", timeRemaining.toFixed(0), "tickDelta", tickDelta.toFixed(0), "taro._currentTime", taro._currentTime)
-			console.log(x, y, rotate)
-		}
 
 		this.teleported = false;
 		this.lastTransformedAt = taro._currentTime;
