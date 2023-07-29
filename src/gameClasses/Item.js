@@ -367,7 +367,7 @@ var Item = TaroEntityPhysics.extend({
 												},
 												streamMode: this._stats.projectileStreamMode
 											});
-									 	var projectile = new Projectile(projectileData);
+										var projectile = new Projectile(projectileData);
 										projectile.script.trigger('entityCreated');
 										taro.game.lastCreatedProjectileId = projectile.id();
 									}

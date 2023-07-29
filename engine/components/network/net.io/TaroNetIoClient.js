@@ -493,7 +493,6 @@ var TaroNetIoClient = {
 								if (entityData[3]) {
 									entity.teleportTo(entityData[0], entityData[1], entityData[2], entityData[4]);
 								} else if (
-									// entity && entity.nextKeyFrame[0] < newSnapshotTimestamp && 
 									// if csp movement is enabled, don't use server-streamed position for my unit. 
 									// instead, we'll use position updated by physics engine
 									// serverTimeStamp > entity.lastStreamReceivedAt && // ignore duplicate translation stream coming from server

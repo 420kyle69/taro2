@@ -67,7 +67,8 @@ var TaroEntity = TaroObject.extend({
 		// this ensures entity is spawning at a correct position initially. particularily useful for projectiles
 
 		this._keyFrames = [];
-		this.nextKeyFrame = [taro.now, [this._translate.x, this._translate.y, this._rotate.z]];
+		this.nextKeyFrame = [taro._currentTime, [this._translate.x, this._translate.y, this._rotate.z]];
+		this.lastTransformedAt = 0;
 		this.latestTimeStamp = 0;
 		this._lastTransformAt = null;
 		this.lastTeleportedAt = 0;
@@ -4375,7 +4376,7 @@ var TaroEntity = TaroObject.extend({
 						buffArr.push(Number(x));
 						buffArr.push(Number(y));
 						buffArr.push(Number(angle));
-						
+
 						if (this.teleported) {
 							buffArr.push(Number(this.teleported));
                             buffArr.push(Number(this.teleportCamera));
@@ -5126,7 +5127,6 @@ var TaroEntity = TaroObject.extend({
 		let rotate = this._rotate.z;
 		
 		var nextTransform = this.nextKeyFrame[1];
-		// var rubberbandStrength = taro.fps() / 15;
 		
 		if (nextTransform) {
 			// don't apply to item that's held by unit as that's calculated by anchor calculation			
@@ -5144,10 +5144,8 @@ var TaroEntity = TaroObject.extend({
 					var xSpeed = xDiff / timeRemaining;
 					var ySpeed = yDiff / timeRemaining;
 					
-					// if (this == taro.client.selectedUnit) {
-					// 	console.log(x.toFixed(0), nextTransform[0], "nextMove", (speed * Math.cos(direction) * tickDelta).toFixed(2), "speed", speed.toFixed(3), "distanceToTarget", distanceToTarget.toFixed(3), "direction", direction.toFixed(2), "timeRemaining", timeRemaining.toFixed(0), "tickDelta", tickDelta.toFixed(0), "taro._currentTime", taro._currentTime)
-					// }
-
+					// console.log(nextTransform, x.toFixed(0), nextTransform[0], "nextMove", (xSpeed * tickDelta).toFixed(2), "speed", xSpeed.toFixed(3), "timeRemaining", timeRemaining.toFixed(0), "tickDelta", tickDelta.toFixed(0), "taro._currentTime", taro._currentTime)
+					
 					x += xSpeed * tickDelta;
 					y += ySpeed * tickDelta;
 				
@@ -5180,8 +5178,7 @@ var TaroEntity = TaroObject.extend({
 		) {
 			rotate = this.angleToTarget;
 		}
-
-			
+		
 		this._translate.x = x;
 		this._translate.y = y;
 		this._rotate.z = rotate;

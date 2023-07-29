@@ -553,6 +553,8 @@ var PhysicsComponent = TaroEventingClass.extend({
 		var self = this;
 		var tempBod;
 		var entity;
+		let now = Date.now();
+
 		if (self && self._active && self._world) {
 			var queueSize = 0;
 			if (!self._world.isLocked()) {
@@ -584,14 +586,12 @@ var PhysicsComponent = TaroEventingClass.extend({
 				}
 			}
 
-			let timeStart = taro.now;
+			let timeStart = now;
 
 			// Loop the physics objects and move the entities they are assigned to
 			if (self.engine == 'crash') { // crash's engine step happens in dist.js
 				self._world.step(timeElapsedSinceLastStep);
 			} else {
-				self._world.step(timeElapsedSinceLastStep / 1000, 8, 3); // Call the world step; frame-rate, velocity iterations, position iterations
-				let nextFrameTime = taro._currentTime + (1000 / taro._gameLoopTickRate) - 10; // 10ms is to give extra buffer to prepare for the next frame
 				var tempBod = self._world.getBodyList();
 
 				// iterate through every physics body
@@ -599,11 +599,13 @@ var PhysicsComponent = TaroEventingClass.extend({
 					// Check if the body is awake && not static
 					if (tempBod.m_type !== 'static' && tempBod.isAwake()) {
 						entity = tempBod._entity;
-						if (entity) {
-							var mxfp = dists[taro.physics.engine].getmxfp(tempBod);
 
+						if (entity) {
+
+							var mxfp = dists[taro.physics.engine].getmxfp(tempBod);
 							var x = mxfp.x * taro.physics._scaleRatio;
 							var y = mxfp.y * taro.physics._scaleRatio;
+
 							// make projectile auto-rotate toward its path. ideal for arrows or rockets that should point toward its direction
 							// if (entity._category == 'projectile' &&
 							// 	entity._stats.currentBody && !entity._stats.currentBody.fixedRotation &&
@@ -654,8 +656,10 @@ var PhysicsComponent = TaroEventingClass.extend({
 									entity.isOutOfBounds = false;
 								}
 							}
+
 							// entity just has teleported
 							if (entity.teleportDestination != undefined && entity.teleported) {
+								console.log("teleported")
 								entity.nextKeyFrame[1] = entity.teleportDestination;
 								x = entity.teleportDestination[0];
 								y = entity.teleportDestination[1];
@@ -671,44 +675,36 @@ var PhysicsComponent = TaroEventingClass.extend({
 										var targetY = parseInt(entity.clientStreamedPosition[1]);
 										var xDiff = targetX - x;
 										var yDiff = targetY - y;
-										x += xDiff / 2;
-										y += yDiff / 2;
+										x += xDiff/2;
+										y += yDiff/2;
 									}
+
 									entity.translateTo(x, y, 0);
 									entity.rotateTo(0, 0, angle);
+
+									this.lastX = x;
 								} else if (taro.isClient) {
-									// my unit's position is dictated by clientside physics
-									if (entity == taro.client.selectedUnit || (entity._category == 'projectile' && !entity._stats.streamMode)) {
-										entity.nextKeyFrame = [now + taro.client.renderBuffer, [x, y, angle]];						
-
-										// entity.nextKeyFrame = [Date.now(), [x, y, angle]];
-	
-										var xDiff = entity.nextKeyFrame[1][0] - entity._translate.x;
-										var yDiff = entity.nextKeyFrame[1][1] - entity._translate.y;
-
-										// var distanceToTarget = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2))						
-										// entity.renderSpeed = distanceToTarget / timeElapsedSinceLastStep;
-										// entity.renderDirection = Math.atan2(yDiff, xDiff);
-
-										// if (entity == taro.client.selectedUnit) { 
-										// 	console.log(x, entity.nextKeyFrame[1][0], entity.renderSpeed, xDiff, timeElapsedSinceLastStep)
-										// }
-										
-										// console.log(entity.nextKeyFrame[1], xDiff, entity.speed, entity.direction)
-										
-										
+									// if CSP is enabled, client-side physics will dictate:
+									// my unit's position and projectiles that are NOT server-streamed.
+									if (taro.game.cspEnabled && (
+											entity == taro.client.selectedUnit || (entity._category == 'projectile' && !entity._stats.streamMode)
+										)
+									) {
+										if (entity._category == 'projectile')
+											console.log(x, y, angle)
+										entity.nextKeyFrame = [taro._currentTime + taro.client.renderBuffer, [x, y, angle]];
 									} else { // update server-streamed entities' body position
 										x = entity.nextKeyFrame[1][0];
 										y = entity.nextKeyFrame[1][1];
 										angle = entity.nextKeyFrame[1][2];
 									}
+									
+									
 								}
 							}
 
-							if (!isNaN(x) && !isNaN(y)) {
-								entity.body.setPosition({ x: x / entity._b2dRef._scaleRatio, y: y / entity._b2dRef._scaleRatio });
-								entity.body.setAngle(angle);
-							}
+							entity.body.setPosition({ x: x / entity._b2dRef._scaleRatio, y: y / entity._b2dRef._scaleRatio });
+							entity.body.setAngle(angle);
 
 							if (tempBod.asleep) {
 								// The tempBod was asleep last frame, fire an awake event
@@ -723,11 +719,17 @@ var PhysicsComponent = TaroEventingClass.extend({
 							}
 						}
 					}
+
 					tempBod = tempBod.getNext();
 				}
+
+				self._world.step(timeElapsedSinceLastStep/1000, 8, 3); // Call the world step; frame-rate, velocity iterations, position iterations
+
 				taro._physicsFrames++;
+
 				// Clear forces because we have ended our physics simulation frame
 				self._world.clearForces();
+
 				// get stats for dev panel
 				var timeEnd = Date.now();
 				self.physicsTickDuration += timeEnd - timeStart;

@@ -175,7 +175,7 @@ var TaroEntityPhysics = TaroEntity.extend({
 				//     this.translateToLT(x, y, 0)
 				// else
 
-				this.nextKeyFrame = [taro.now, [x, y, rotate]];
+				this.nextKeyFrame = [taro._currentTime, [x, y, rotate]];
 				this.translateTo(x, y, 0);
 			}
 
