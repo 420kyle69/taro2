@@ -5148,21 +5148,23 @@ var TaroEntity = TaroObject.extend({
 					x = nextTransform[0];
 					y = nextTransform[1];
 				}
+
+				rotateStart = rotate;
+				rotateEnd = nextTransform[2];
+
+				// a hack to prevent rotational interpolation suddnely jumping by 2 PI (e.g. 0.01 to -6.27)
+				if (Math.abs(rotateEnd - rotateStart) > Math.PI) {
+					if (rotateEnd > rotateStart) {
+						rotateStart += Math.PI * 2;
+					} else {
+						rotateStart -= Math.PI * 2;
+					}
+				}			
+				
+				rotate = this.interpolateValue(rotateStart, rotateEnd, taro._currentTime - 16, taro._currentTime, taro._currentTime + 16);
 			}		
 
-			rotateStart = rotate;
-	        rotateEnd = nextTransform[2];
-
-			// a hack to prevent rotational interpolation suddnely jumping by 2 PI (e.g. 0.01 to -6.27)
-			if (Math.abs(rotateEnd - rotateStart) > Math.PI) {
-				if (rotateEnd > rotateStart) {
-					rotateStart += Math.PI * 2;
-				} else {
-					rotateStart -= Math.PI * 2;
-				}
-			}			
 			
-			rotate = this.interpolateValue(rotateStart, rotateEnd, taro._currentTime - 16, taro._currentTime, taro._currentTime + 16);
 		}
 		
 		// for my own unit, ignore streamed angle if this unit control is set to face mouse cursor instantly.
