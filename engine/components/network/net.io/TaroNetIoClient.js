@@ -453,7 +453,8 @@ var TaroNetIoClient = {
 	_onMessageFromServer: function (data) {
 		var ciDecoded = data[0].charCodeAt(0);
 		var commandName = this._networkCommandsIndex[ciDecoded];
-
+		var now = Date.now();
+		
 		if (commandName === '_snapshot') {
 			var snapshot = _.cloneDeep(data)[1];
 			var newSnapshotTimestamp = snapshot[snapshot.length - 1][1];
@@ -466,19 +467,19 @@ var TaroNetIoClient = {
 					var ciDecoded = snapshot[i][0].charCodeAt(0);
 					var commandName = this._networkCommandsIndex[ciDecoded];
 					var entityData = snapshot[i][1];
-					console.log(commandName, )
+					
 					switch (commandName) {
 						case '_taroStreamData':
 							var entityData = snapshot[i].slice(1).split('&');
 							var entityId = entityData[0];
 							entityData.splice(0, 1); // removing entityId
 
-							entityData = [
+							var newPosition = [
 								parseInt(entityData[0], 16), // x
 								parseInt(entityData[1], 16), // y
 								parseInt(entityData[2], 16) / 1000, // rotation
-								Boolean(parseInt(entityData[3], 16)), // teleported boolean
-								Boolean(parseInt(entityData[4], 16)) // teleportedCamera boolean
+								// Boolean(parseInt(entityData[3], 16)), // teleported boolean
+								// Boolean(parseInt(entityData[4], 16)) // teleportedCamera boolean
 							];
 
 							obj[entityId] = entityData;
@@ -487,36 +488,44 @@ var TaroNetIoClient = {
 							// we are not executing this in taroEngine or taroEntity, becuase they don't execute when browser tab is inactive
 							var entity = taro.$(entityId);
 
-								
-							if (entity && entityData[3]) {
-								entity.teleportTo(entityData[0], entityData[1], entityData[2], entityData[4]);
+										
+							if (entity) {
+								if (entityData[3]) {
+									entity.teleportTo(entityData[0], entityData[1], entityData[2], entityData[4]);
+								} else if (
+									// entity && entity.nextKeyFrame[0] < newSnapshotTimestamp && 
+									// if csp movement is enabled, don't use server-streamed position for my unit. 
+									// instead, we'll use position updated by physics engine
+									// serverTimeStamp > entity.lastStreamReceivedAt && // ignore duplicate translation stream coming from server
+									timeElapsed &&
+									!(taro.physics && taro.game.cspEnabled && entity == taro.client.selectedUnit) 
+								) {
+									// console.log(timeElapsed)
+									// extra 20ms of buffer removes jitter
+									entity.nextKeyFrame = [now + taro.client.renderBuffer, newPosition];						
+								}
 							}
-							// if csp movement is enabled, don't use server-streamed position for my unit
-							// instead, we'll use position updated by physics engine
-							else if (taro.game.cspEnabled && entity &&
-								entity.nextKeyFrame[0] < newSnapshotTimestamp &&
-								entity != taro.client.selectedUnit
-							) {
-								entity.nextKeyFrame = [newSnapshotTimestamp, obj[entityId]];
-							}
-
 							
+							break;
+
+						case 'teleport':
+							var entityData = snapshot[i].slice(1).split('&');
+							var entityId = entityData[0];
+							var entity = taro.$(entityId);
+							entityData.splice(0, 1); // removing entityId
+							newPosition = [
+								parseInt(entityData[0], 16), // x
+								parseInt(entityData[1], 16), // y
+								parseInt(entityData[2], 16) / 1000, // rotation
+							];
+							if (entity) {
+								entity.teleportTo(newPosition[0], newPosition[1], newPosition[2]);
+							}
 							break;
 
 						default: 
 							this._networkCommands[commandName](entityData);
 							break;
-					}
-				}
-
-				if (Object.keys(obj).length) {
-
-					var newSnapshot = [newSnapshotTimestamp, obj];
-					taro.snapshots.push(newSnapshot);
-
-					// prevent memory leak that's caused when the client's browser tab isn't focused
-					if (taro.snapshots.length > 2) {
-						taro.snapshots.shift();
 					}
 				}
 			}

@@ -153,7 +153,6 @@ var TaroEngine = TaroEntity.extend({
 		this.lastSecond = 0;
 		this.snapshots = [];
 		this.entityCreateSnapshot = {};
-		this.prevSnapshot = undefined;
 		this.tempSnapshot = [0, {}];
 		this.nextSnapshot = [0, {}];
 		this.renderTime = 0;
@@ -1377,9 +1376,7 @@ var TaroEngine = TaroEntity.extend({
 		const now = new Date().getTime();
 
 		if (!this._pause) {
-
-			// this._currentTime = (now + this.timeDiscrepancy) * this._timeScale;
-			this._currentTime = now;
+			this._currentTime = now * this._timeScale;
 			this.renderTime = this._currentTime;
 		}
 
@@ -1675,16 +1672,6 @@ var TaroEngine = TaroEntity.extend({
 				if (taro.client.myPlayer) {
 					taro.client.myPlayer.control._behaviour();
 				}
-
-				let oldestSnapshot = taro.snapshots[0];
-				while (taro.snapshots.length >= 2 && oldestSnapshot != undefined && taro._currentTime > oldestSnapshot[0]) {
-					taro.prevSnapshot = taro.nextSnapshot;
-					taro.nextSnapshot = taro.snapshots[taro.snapshots.length - 1];
-
-					// rubberband currentTime to the latest time received from server - 40ms
-					oldestSnapshot = taro.snapshots.shift();
-				}
-
 				return;
 			}
 			

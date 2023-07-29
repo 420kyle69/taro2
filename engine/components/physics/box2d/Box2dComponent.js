@@ -678,14 +678,25 @@ var PhysicsComponent = TaroEventingClass.extend({
 									entity.rotateTo(0, 0, angle);
 								} else if (taro.isClient) {
 									// my unit's position is dictated by clientside physics
-									if (entity == taro.client.selectedUnit) {
-										entity.nextKeyFrame = [taro._currentTime, [x, y, angle]];
-									}
-									// projectiles don't use server-streamed position
-									else if (entity._category == 'projectile' && !entity._stats.streamMode
-									) {
-										entity.prevPhysicsFrame = entity.nextPhysicsFrame;
-										entity.nextPhysicsFrame = [nextFrameTime, [x, y, angle]];
+									if (entity == taro.client.selectedUnit || (entity._category == 'projectile' && !entity._stats.streamMode)) {
+										entity.nextKeyFrame = [now + taro.client.renderBuffer, [x, y, angle]];						
+
+										// entity.nextKeyFrame = [Date.now(), [x, y, angle]];
+	
+										var xDiff = entity.nextKeyFrame[1][0] - entity._translate.x;
+										var yDiff = entity.nextKeyFrame[1][1] - entity._translate.y;
+
+										// var distanceToTarget = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2))						
+										// entity.renderSpeed = distanceToTarget / timeElapsedSinceLastStep;
+										// entity.renderDirection = Math.atan2(yDiff, xDiff);
+
+										// if (entity == taro.client.selectedUnit) { 
+										// 	console.log(x, entity.nextKeyFrame[1][0], entity.renderSpeed, xDiff, timeElapsedSinceLastStep)
+										// }
+										
+										// console.log(entity.nextKeyFrame[1], xDiff, entity.speed, entity.direction)
+										
+										
 									} else { // update server-streamed entities' body position
 										x = entity.nextKeyFrame[1][0];
 										y = entity.nextKeyFrame[1][1];
