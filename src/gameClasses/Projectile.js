@@ -6,7 +6,7 @@ var Projectile = TaroEntityPhysics.extend({
 		this.id(entityIdFromServer);
 		var self = this;
 		self.category('projectile');
-
+		console.log("new projectile is created!")
 		var projectileData = {};
 		if (taro.isClient) {
 			projectileData = taro.game.getAsset('projectileTypes', data.type);

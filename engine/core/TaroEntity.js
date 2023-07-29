@@ -5144,7 +5144,8 @@ var TaroEntity = TaroObject.extend({
 					var xSpeed = xDiff / timeRemaining;
 					var ySpeed = yDiff / timeRemaining;
 					
-					// console.log(nextTransform, x.toFixed(0), nextTransform[0], "nextMove", (xSpeed * tickDelta).toFixed(2), "speed", xSpeed.toFixed(3), "timeRemaining", timeRemaining.toFixed(0), "tickDelta", tickDelta.toFixed(0), "taro._currentTime", taro._currentTime)
+					if (this._category == 'projectile')
+						console.log(nextTransform, x.toFixed(0), nextTransform[0], "nextMove", (xSpeed * tickDelta).toFixed(2), "speed", xSpeed.toFixed(3), "timeRemaining", timeRemaining.toFixed(0), "tickDelta", tickDelta.toFixed(0), "taro._currentTime", taro._currentTime)
 					
 					x += xSpeed * tickDelta;
 					y += ySpeed * tickDelta;

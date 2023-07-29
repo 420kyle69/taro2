@@ -690,8 +690,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 											entity == taro.client.selectedUnit || (entity._category == 'projectile' && !entity._stats.streamMode)
 										)
 									) {
-										if (entity._category == 'projectile')
-											console.log(x, y, angle)
+										// if (entity._category == 'projectile') console.log(x, y, angle)
 										entity.nextKeyFrame = [taro._currentTime + taro.client.renderBuffer, [x, y, angle]];
 									} else { // update server-streamed entities' body position
 										x = entity.nextKeyFrame[1][0];
