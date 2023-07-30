@@ -592,6 +592,10 @@ var PhysicsComponent = TaroEventingClass.extend({
 			if (self.engine == 'crash') { // crash's engine step happens in dist.js
 				self._world.step(timeElapsedSinceLastStep);
 			} else {
+
+				self._world.step(timeElapsedSinceLastStep/1000, 8, 3); // Call the world step; frame-rate, velocity iterations, position iterations
+
+				
 				var tempBod = self._world.getBodyList();
 
 				// iterate through every physics body
@@ -721,8 +725,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 					tempBod = tempBod.getNext();
 				}
 
-				self._world.step(timeElapsedSinceLastStep/1000, 8, 3); // Call the world step; frame-rate, velocity iterations, position iterations
-
+				
 				taro._physicsFrames++;
 
 				// Clear forces because we have ended our physics simulation frame

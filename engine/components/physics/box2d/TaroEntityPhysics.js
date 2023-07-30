@@ -73,11 +73,11 @@ var TaroEntityPhysics = TaroEntity.extend({
 		var shapeData = (body.fixtures && body.fixtures[0] && body.fixtures[0].shape && body.fixtures[0].shape.data) ? body.fixtures[0].shape.data : undefined;
 
 		// override body bounds
-		var sizeX = body?.fixtures[0].size?.width;
-		var sizeY = body?.fixtures[0].size?.height;
-		var offsetX = body?.fixtures[0].offset?.x;
-		var offsetY = body?.fixtures[0].offset?.y;
-		if (sizeX || sizeY || offsetX || offsetY) {
+		if (body?.fixtures) {
+			var sizeX = body?.fixtures[0].size?.width;
+			var sizeY = body?.fixtures[0].size?.height;
+			var offsetX = body?.fixtures[0].offset?.x;
+			var offsetY = body?.fixtures[0].offset?.y;
 			if (shapeData === undefined) {
 				shapeData = {};
 			}
@@ -94,7 +94,7 @@ var TaroEntityPhysics = TaroEntity.extend({
 				shapeData.y = offsetY;
 			}
 		}
-
+		
 		var filterCategoryBits = 0x0002;
 		if (this._category === 'units') {
 			filterCategoryBits = 0x0002;
