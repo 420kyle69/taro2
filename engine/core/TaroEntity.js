@@ -3142,7 +3142,7 @@ var TaroEntity = TaroObject.extend({
 	},
 
 	teleportTo: function (x, y, rotate, teleportCamera) {
-		console.log("teleportTo", x, y, rotate)
+		// console.log("teleportTo", x, y, rotate)
 		this.teleported = true;
         this.teleportCamera = teleportCamera;
 		this.teleportDestination = [x, y, rotate]
