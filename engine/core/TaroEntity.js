@@ -1948,6 +1948,10 @@ var TaroEntity = TaroObject.extend({
 				}
 			}
 
+			if (this._translate.x != this._oldTranform[0] || this._translate.y != this._oldTranform[1] || this._rotate.z != this._oldTranform[2]) {
+				this._hasMoved = true;
+			}
+
 			// Process any automatic-mode stream updating required
 			if (this._streamMode === 1 || this._streamMode === 2) {
 				this.streamSync();
@@ -3138,7 +3142,7 @@ var TaroEntity = TaroObject.extend({
 	},
 
 	teleportTo: function (x, y, rotate, teleportCamera) {
-		// console.log("teleportTo", x, y, rotate)
+		console.log("teleportTo", x, y, rotate)
 		this.teleported = true;
         this.teleportCamera = teleportCamera;
 		this.teleportDestination = [x, y, rotate]
@@ -4357,10 +4361,7 @@ var TaroEntity = TaroObject.extend({
 					var y = this._translate.y.toFixed(0);
 					var angle = ((this._rotate.z % (2 * Math.PI)) * 1000).toFixed(0);
 
-					if (x == this._oldTranform[0] && y == this._oldTranform[1] && angle == this._oldTranform[2]) {
-						this._hasMoved = false;
-					} else {
-						this._hasMoved = true;
+					if (this._hasMoved) {
 						this._oldTranform = [x, y, angle];
 
 						// var distanceTravelled = x - taro.lastX;
@@ -4874,6 +4875,8 @@ var TaroEntity = TaroObject.extend({
 		if (data && recipientArr.length && this._streamMode === 1 && this._hasMoved) {
 			taro.server.bandwidthUsage[this._category] += data.length;
 			taro.network.stream.queue(thisId, data, recipientArr);
+
+			this._hasMoved = false;
 		}
 	},
 

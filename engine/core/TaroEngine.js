@@ -1573,7 +1573,6 @@ var TaroEngine = TaroEntity.extend({
 				if (taro.physics) {
 					taro.physics.update(timeElapsed);
 				}
-
 			}
 
 			taro.tickCount = 0;
@@ -1660,7 +1659,6 @@ var TaroEngine = TaroEntity.extend({
 					}
 				}
 			}
-
 			
 			// triggersQueued is executed in the entities first (entity-script) then it runs for the world
 			while (taro.triggersQueued.length > 0) {
