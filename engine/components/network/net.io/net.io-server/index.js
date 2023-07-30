@@ -1101,7 +1101,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 			//     timeStart = Date.now();
 			// }
 
-			json = taro.network._io._compress(json);
+			// json = taro.network._io._compress(json);
 
 			// NOTE: make sure than COMPRESSION_THRESHOLD is same on both client and server
 			// LOGIC:

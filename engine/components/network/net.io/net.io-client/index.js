@@ -468,7 +468,7 @@ NetIo.Client = NetIo.EventingClass.extend({
 	_decode: function (data) {
 		var self = this;
 
-		var jsonString = LZString.decompressFromUTF16(data.data);
+		// var jsonString = LZString.decompressFromUTF16(data.data);
 		// var jsonString = data.data;
 
 		// NOTE: make sure than COMPRESSION_THRESHOLD is same on both client and server
@@ -484,8 +484,8 @@ NetIo.Client = NetIo.EventingClass.extend({
 		// 	? data.data
 		// 	: LZString.decompressFromUTF16(data.data);
 
-		self._onDecode(JSON.parse(jsonString), data);
-		// self._onDecode(JSON.parse(data.data), data);
+		// self._onDecode(JSON.parse(jsonString), data);
+		self._onDecode(JSON.parse(data.data), data);
 		// var blob = data.data;
 		// var fileReader = new FileReader();
 		// fileReader.onload = function () {
