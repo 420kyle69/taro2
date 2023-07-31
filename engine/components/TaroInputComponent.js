@@ -268,7 +268,7 @@ var TaroInputComponent = TaroEventingClass.extend({
 		};
 
 		// Listen for mouse events
-		window.addEventListener('mousedown', this._evRef.mousedown, false);
+		canvas.addEventListener('mousedown', this._evRef.mousedown, false);
 		window.addEventListener('mouseup', this._evRef.mouseup, false);
 
 		canvas.addEventListener('mousemove', this._evRef.mousemove, false);
