@@ -38,7 +38,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 var box2dwasmWrapper = {
     init: function (component) {
         return __awaiter(this, void 0, void 0, function () {
-            var box2D, _a, freeLeaked, recordLeak;
+            var box2D, _a, freeLeaked, recordLeak, ctx;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0: return [4 /*yield*/, box2dwasm()];
@@ -124,26 +124,23 @@ var box2dwasmWrapper = {
                         component.b2Vec2.prototype.set = component.b2Vec2.prototype.Set;
                         // component.b2Vec2.prototype.setV = component.b2Vec2.prototype.SetV;
                         component.b2Joint.prototype.getNext = component.b2Joint.prototype.GetNext;
-                        component.createWorld = function (id, options) {
-                            component._world = new component.b2World(this._gravity);
-                            var ctx;
-                            if (taro.isClient) {
+                        if (taro.isClient) {
+                            window.taro.enableDebug = function (flags) {
+                                console.log('please make sure clientPhyscisEngine is not "", and enabled csp');
                                 if (!component.renderer) {
                                     var canvas = taro.renderer.scene.getScene('Game');
                                     ctx = canvas.add.graphics().setDepth(9999);
                                     ctx.setScale(30);
-                                    var newRenderer = new Box2dDebugDraw(this.box2D, new Box2dHelpers(this.box2D), ctx, 32).constructJSDraw();
-                                    newRenderer.SetFlags(this.box2D.b2Draw.e_shapeBit |
-                                        this.box2D.b2Draw.e_jointBit |
-                                        this.box2D.b2Draw.e_pairBit |
-                                        this.box2D.b2Draw.e_aabbBit
-                                    // this.box2D.b2Draw.e_centerOfMassBit
-                                    );
+                                    var newRenderer = new Box2dDebugDraw(box2D, new Box2dHelpers(box2D), ctx, 32).constructJSDraw();
+                                    newRenderer.SetFlags(flags);
                                     component.renderer = newRenderer;
                                     component._world.SetDebugDraw(newRenderer);
                                     component.ctx = ctx;
                                 }
-                            }
+                            };
+                        }
+                        component.createWorld = function (id, options) {
+                            component._world = new component.b2World(this._gravity);
                             component._world.SetContinuousPhysics(this._continuousPhysics);
                         };
                         /**
