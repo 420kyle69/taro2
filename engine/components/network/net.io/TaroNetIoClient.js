@@ -498,7 +498,10 @@ var TaroNetIoClient = {
 								) {
 									// console.log(entity._category, newPosition)
 									// extra 20ms of buffer removes jitter
-									entity.nextKeyFrame = [now + taro.client.renderBuffer, newPosition];						
+									if (newSnapshotTimestamp > entity.lastSnapshotTimestamp) {
+										entity.nextKeyFrame = [now + taro.client.renderBuffer, newPosition];
+										entity.lastSnapshotTimestamp = newSnapshotTimestamp;
+									}									
 								}
 							}
 							

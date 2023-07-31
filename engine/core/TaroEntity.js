@@ -68,9 +68,9 @@ var TaroEntity = TaroObject.extend({
 
 		this._keyFrames = [];
 		this.nextKeyFrame = [taro._currentTime, [this._translate.x, this._translate.y, this._rotate.z]];
+		this.lastSnapshotTimestamp = 0;
 		this.lastTransformedAt = 0;
 		this.latestTimeStamp = 0;
-		this._lastTransformAt = null;
 		this.lastTeleportedAt = 0;
 		this.teleported = false;
         this.teleportCamera = false;
