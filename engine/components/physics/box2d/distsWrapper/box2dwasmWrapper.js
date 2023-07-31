@@ -126,6 +126,7 @@ var box2dwasmWrapper = {
                         component.b2Joint.prototype.getNext = component.b2Joint.prototype.GetNext;
                         if (taro.isClient) {
                             window.taro.enableDebug = function (flags) {
+                                if (flags === void 0) { flags = 1; }
                                 console.log('please make sure clientPhyscisEngine is not "", and enabled csp');
                                 if (!component.renderer) {
                                     var canvas = taro.renderer.scene.getScene('Game');
@@ -137,6 +138,11 @@ var box2dwasmWrapper = {
                                     component._world.SetDebugDraw(newRenderer);
                                     component.ctx = ctx;
                                 }
+                                component.renderer.SetFlags(flags);
+                            };
+                            window.taro.disableDebug = function () {
+                                component.ctx.destroy();
+                                component.renderer = undefined;
                             };
                         }
                         component.createWorld = function (id, options) {
