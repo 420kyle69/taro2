@@ -81,7 +81,7 @@ var box2dwasmWrapper = {
                         component.b2World.prototype.isLocked = component.b2World.prototype.IsLocked;
                         component.b2World.prototype.createBody = component.b2World.prototype.CreateBody;
                         component.b2World.prototype.destroyBody = component.b2World.prototype.DestroyBody;
-                        // component.b2World.prototype.createJoint = component.b2World.prototype.CreateJoint;
+                        component.b2World.prototype.createJoint = component.b2World.prototype.CreateJoint;
                         component.b2World.prototype.destroyJoint = component.b2World.prototype.DestroyJoint;
                         component.b2World.prototype.clearForces = component.b2World.prototype.ClearForces;
                         component.b2World.prototype.getBodyList = component.b2World.prototype.GetBodyList;
@@ -96,7 +96,6 @@ var box2dwasmWrapper = {
                             }
                             */
                         component.b2Transform = box2D.b2Transform;
-                        component.b2Transform.prototype.R = { col1: new box2D.b2Vec2(), col2: new box2D.b2Vec2() };
                         component.b2Body.prototype.getNext = component.b2Body.prototype.GetNext;
                         component.b2Body.prototype.getAngle = component.b2Body.prototype.GetAngle;
                         component.b2Body.prototype.setPosition = function (position) {
@@ -376,6 +375,7 @@ var box2dwasmWrapper = {
         }
         // Store the entity that is linked to self body
         tempBod._entity = entity;
+        tempBod.SetEnabled(true);
         // Add the body to the world with the passed fixture
         entity.body = tempBod;
         entity.gravitic(!!body.affectedByGravity);

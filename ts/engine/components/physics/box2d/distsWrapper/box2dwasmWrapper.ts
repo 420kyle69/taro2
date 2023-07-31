@@ -40,7 +40,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 		component.b2World.prototype.isLocked = component.b2World.prototype.IsLocked;
 		component.b2World.prototype.createBody = component.b2World.prototype.CreateBody;
 		component.b2World.prototype.destroyBody = component.b2World.prototype.DestroyBody;
-		// component.b2World.prototype.createJoint = component.b2World.prototype.CreateJoint;
+		component.b2World.prototype.createJoint = component.b2World.prototype.CreateJoint;
 		component.b2World.prototype.destroyJoint = component.b2World.prototype.DestroyJoint;
 		component.b2World.prototype.clearForces = component.b2World.prototype.ClearForces;
 		component.b2World.prototype.getBodyList = component.b2World.prototype.GetBodyList;
@@ -57,7 +57,6 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 			*/
 
 		component.b2Transform = box2D.b2Transform;
-		component.b2Transform.prototype.R = { col1: new box2D.b2Vec2(), col2: new box2D.b2Vec2() };
 		component.b2Body.prototype.getNext = component.b2Body.prototype.GetNext;
 		component.b2Body.prototype.getAngle = component.b2Body.prototype.GetAngle;
 		component.b2Body.prototype.setPosition = function (position) {
@@ -99,10 +98,10 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 					const newRenderer = new Box2dDebugDraw(this.box2D, new Box2dHelpers(this.box2D), ctx, 32).constructJSDraw();
 					newRenderer.SetFlags(
 						this.box2D.b2Draw.e_shapeBit |
-							this.box2D.b2Draw.e_jointBit |
-							this.box2D.b2Draw.e_pairBit |
-							this.box2D.b2Draw.e_aabbBit
-							// this.box2D.b2Draw.e_centerOfMassBit
+						this.box2D.b2Draw.e_jointBit |
+						this.box2D.b2Draw.e_pairBit |
+						this.box2D.b2Draw.e_aabbBit
+						// this.box2D.b2Draw.e_centerOfMassBit
 					);
 					component.renderer = newRenderer;
 					component._world.SetDebugDraw(newRenderer);
@@ -137,6 +136,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 		component._gravity = component.recordLeak(new component.b2Vec2(0, 0));
 
 	},
+
 	contactListener: function (self, beginContactCallback, endContactCallback, preSolve, postSolve) {
 		var contactListener = new self.b2ContactListener();
 		if (beginContactCallback !== undefined) {
@@ -364,7 +364,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 
 		// Store the entity that is linked to self body
 		tempBod._entity = entity;
-
+		tempBod.SetEnabled(true);
 		// Add the body to the world with the passed fixture
 		entity.body = tempBod;
 

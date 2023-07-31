@@ -141,7 +141,6 @@ var TaroEntityPhysics = TaroEntity.extend({
 				taroId: this.id() // in box2dbody, add reference to this entity
 			}]
 		};
-
 		// console.log("collidesWith", this._category, filterCategoryBits, collidesWith, body)
 
 		this.physicsBody(body, isLossTolerant);
