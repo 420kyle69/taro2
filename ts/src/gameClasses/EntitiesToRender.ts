@@ -9,9 +9,6 @@ class EntitiesToRender {
 
 	updateAllEntities (/*timeStamp*/): void {
 		var currentTime = Date.now();
-
-		if (!taro.lastTickTime) taro.lastTickTime = currentTime;
-
 		for (var entityId in this.trackEntityById) {
 			var entity = taro.$(entityId);
 			if (entity) {
@@ -117,15 +114,13 @@ class EntitiesToRender {
 		}
 
 		// taro.triggersQueued = [];
-		taro.lastTickTime = currentTime;
-
 		if (taro.gameLoopTickHasExecuted) {
 			taro.gameLoopTickHasExecuted = false;
 		}
 	}
 
 	frameTick(): void {
-		taro.engineStep();
+		taro.engineStep(Date.now(), 1000/60);
 		taro.input.processInputOnEveryFps();
 
 		taro._renderFrames++;

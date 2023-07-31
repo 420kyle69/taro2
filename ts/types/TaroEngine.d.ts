@@ -50,15 +50,13 @@ declare class TaroEngine extends TaroClass {
 		originalTileWidth: number;
 	};
 
-	lastTickTime: number;
-
 	entitiesToRender: EntitiesToRender;
 	triggersQueued: any[];
 
 	constructor(options: object);
 
 	createFrontBuffer(autoSize: boolean, dontScale?: boolean): void
-	engineStep(): void;
+	engineStep(currentTime: number, ctx: number): void;
 
 	physics: {
 		staticsFromMap(walls: any): unknown;

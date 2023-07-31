@@ -5,8 +5,6 @@ var EntitiesToRender = /** @class */ (function () {
     }
     EntitiesToRender.prototype.updateAllEntities = function ( /*timeStamp*/) {
         var currentTime = Date.now();
-        if (!taro.lastTickTime)
-            taro.lastTickTime = currentTime;
         for (var entityId in this.trackEntityById) {
             var entity = taro.$(entityId);
             if (entity) {
@@ -93,13 +91,12 @@ var EntitiesToRender = /** @class */ (function () {
             }
         }
         // taro.triggersQueued = [];
-        taro.lastTickTime = currentTime;
         if (taro.gameLoopTickHasExecuted) {
             taro.gameLoopTickHasExecuted = false;
         }
     };
     EntitiesToRender.prototype.frameTick = function () {
-        taro.engineStep();
+        taro.engineStep(Date.now(), 1000 / 60);
         taro.input.processInputOnEveryFps();
         taro._renderFrames++;
         this.updateAllEntities();

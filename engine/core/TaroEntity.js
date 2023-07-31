@@ -5114,7 +5114,6 @@ var TaroEntity = TaroObject.extend({
 		) {
 			return;
 		}
-		let now = Date.now();
 
 		let xDiff = null;
 		let yDiff = null;
@@ -5128,10 +5127,13 @@ var TaroEntity = TaroObject.extend({
 		
 		var nextTransform = this.nextKeyFrame[1];
 		
+		
 		if (nextTransform) {
 			
 			var nextTime = this.nextKeyFrame[0];
-			var timeRemaining = nextTime - now;
+			var timeRemaining = nextTime - taro._currentTime;
+			
+			// if (this == taro.client.selectedUnit) console.log(taro._currentTime, x, tickDelta, timeRemaining)
 			
 			// don't lerp is time remaining is less than 5ms
 			if (timeRemaining > 5) {
@@ -5141,10 +5143,10 @@ var TaroEntity = TaroObject.extend({
 				
 				var xSpeed = xDiff / timeRemaining;
 				var ySpeed = yDiff / timeRemaining;
-				
+
 				x += xSpeed * tickDelta;
 				y += ySpeed * tickDelta;
-			
+
 			} else {
 				x = nextTransform[0];
 				y = nextTransform[1];
