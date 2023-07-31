@@ -166,19 +166,23 @@ var ClientNetworkEvents = {
 	_onUpdateUiTextForTime: function (data) {
 		$(`.ui-text-${data.target}`).show();
 		$(`.ui-text-${data.target}`).html(data.value);
+		
+		if (!this.textTimerData) {
+			this.textTimerData = {};
+		}
 
+		// stop the timeout and remove old textTimerData
+		if (this.textTimerData[data.target] && this.textTimerData[data.target].textTimer) {
+			clearTimeout(this.textTimerData[data.target].textTimer);
+			delete this.textTimerData[data.target];
+		}
+		
 		if (data.time && data.time > 0) {
-			if (this.textTimer) {
-				clearTimeout(this.textTimer);
-			}
-
-			var that = this;
-			this.textTimerData = {
-				target: data.target,
-			};
-
-			this.textTimer = setTimeout(function () {
-				$(`.ui-text-${that.textTimerData.target}`).hide();
+			this.textTimerData[data.target] = {};
+			this.textTimerData[data.target].target = data.target;
+			this.textTimerData[data.target].textTimer = setTimeout(() => {
+				$(`.ui-text-${this.textTimerData[data.target].target}`).hide();
+				delete this.textTimerData[data.target];
 			}, data.time);
 		}
 	},
