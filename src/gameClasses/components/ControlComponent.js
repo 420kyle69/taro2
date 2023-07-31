@@ -76,44 +76,11 @@ var ControlComponent = TaroEntity.extend({
 
 		};
 
-		this.abilityTriggers = {
-			keyDown: {},
-			keyUp: {}
-		};
-		this.mapTriggers();
-
 		for (device in this.input) {
 			for (key in this.input[device]) {
 				taro.input.mapAction(key, taro.input[device][key]);
 			}
 		}
-	},
-
-	mapTriggers: function () {
-		if (this._entity._stats.controlledBy === 'computer') {
-			return;
-		}
-		for (let id in taro.game.data.abilities) {
-			const ability = taro.game.data.abilities[id];
-
-			if (!this.abilityTriggers[ability.start[0]][ability.start[1]]) {
-				this.abilityTriggers[ability.start[0]][ability.start[1]] = {start: [], stop: []};
-			}
-
-			this.abilityTriggers[ability.start[0]][ability.start[1]].start.push([id, ability.usableBy]);
-
-			if (ability.stop[0] !== 'key') {
-				continue;
-			}
-
-			if (!this.abilityTriggers[ability.stop[1]][ability.stop[2]]) {
-				this.abilityTriggers[ability.stop[1]][ability.stop[2]] = {start: [], stop: []};
-			}
-
-			this.abilityTriggers[ability.stop[1]][ability.stop[2]].stop.push([id, ability.usableBy]);
-		}
-
-		console.log(this.abilityTriggers);
 	},
 
 	keyDown: function (device, key) {
@@ -209,37 +176,6 @@ var ControlComponent = TaroEntity.extend({
 						unit.changeItem(index);
 					}
 				}
-
-				// new ability functionality
-				// check first that we don't have a (deprecated) keybind
-				if (!unitAbility && this.abilityTriggers.keyDown[key]) {
-
-					for (let i = 0; i < this.abilityTriggers.keyDown[key].start.length; i++) {
-						if (
-							this.abilityTriggers.keyDown[key].start[i][1]
-								.find((id) => {
-									return id === unit._stats.type;
-								})
-						) {
-							const ability = taro.game.data.abilities[this.abilityTriggers.keyDown[key].start[i][0]];
-
-							unit.ability.startCast(ability);
-						}
-					}
-
-					for (let i = 0; i < this.abilityTriggers.keyDown[key].stop.length; i++) {
-						if (
-							this.abilityTriggers.keyDown[key].stop[i][1]
-								.find((id) => {
-									return id === unit._stats.type;
-								})
-						) {
-							const ability = taro.game.data.abilities[this.abilityTriggers.keyDown[key].stop[i][0]];
-
-							unit.ability.stopCast(ability);
-						}
-					}
-				}
 			}
 		}
 
@@ -319,38 +255,6 @@ var ControlComponent = TaroEntity.extend({
 						}, taro.client.inputDelay);
 					} else {
 						unit.ability.cast(unitAbility.keyUp);
-					}
-				}
-			}
-
-			// new ability functionality
-			// check first that we don't have a (deprecated) keybind
-			if (!unitAbility && this.abilityTriggers.keyUp[key]) {
-
-				for (let i = 0; i < this.abilityTriggers.keyUp[key].start.length; i++) {
-					if (
-						this.abilityTriggers.keyUp[key].start[i][1]
-							.find((id) => {
-								return id === unit._stats.type;
-							})
-					) {
-						const ability = taro.game.data.abilities[this.abilityTriggers.keyUp[key].start[i][0]];
-
-						unit.ability.startCast(ability);
-					}
-				}
-
-				for (let i = 0; i < this.abilityTriggers.keyUp[key].stop.length; i++) {
-					if (
-						this.abilityTriggers.keyUp[key].stop[i][1]
-							.find((id) => {
-								return id === unit._stats.type;
-							})
-					) {
-						const ability = taro.game.data.abilities[this.abilityTriggers.keyUp[key].stop[i][0]];
-
-						unit.ability.stopCast(ability);
-
 					}
 				}
 			}

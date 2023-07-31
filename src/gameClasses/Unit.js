@@ -1854,6 +1854,7 @@ var Unit = TaroEntityPhysics.extend({
 	 */
 	_behaviour: function (ctx) {
 		var self = this;
+		if (taro.isClient) { console.log('yo'); }
 
 		_.forEach(taro.triggersQueued, function (trigger) {
 			trigger.params['thisEntityId'] = self.id();
@@ -1861,6 +1862,8 @@ var Unit = TaroEntityPhysics.extend({
 		});
 
 		if (taro.isServer || (taro.isClient && taro.client.selectedUnit == this)) {
+			// ability component behaviour method call
+			this.ability._behaviour();
 
 			// translate unit
 			var speed = (this._stats.attributes && this._stats.attributes.speed && this._stats.attributes.speed.value) || 0;

@@ -5,6 +5,8 @@ var AbilityComponent = TaroEntity.extend({
 	init: function (entity, options) {
 		var self = this;
 		self._entity = entity;
+
+		this.activeAbilities = [];
 	},
 
 	moveUp: function () {
@@ -123,18 +125,33 @@ var AbilityComponent = TaroEntity.extend({
 	cast: function (handle) {
 		var self = this;
 
+		console.log(handle);
 		if (handle == undefined)
 			return;
 
 		var ability = null;
 
-		if (handle.cost && handle.scriptName) {
+
+		if ((handle.cost && handle.scriptName) || handle.event) {
 			ability = handle;
 		} else {
 			// abilities refactor will use this
 			ability = taro.game.data.abilities[handle];
 		}
 
+		switch (ability.event) {
+			// skip switch for old abilities
+			case undefined:
+				break;
+
+			case 'startCasting':
+				return this.startCasting(ability.id);
+
+			case 'stopCasting':
+				return this.stopCasting(ability.id);
+		}
+
+		// new abilities should have returned by now. following is for old system (backwards comp.)
 		var player = self._entity.getOwner();
 
 		if (ability != undefined) {
@@ -230,8 +247,9 @@ var AbilityComponent = TaroEntity.extend({
 		}
 	},
 
-	startCast: function (ability) {
+	startCasting: function (abilityId) {
 		const player = this._entity.getOwner();
+		const ability = taro.game.data.abilities[abilityId];
 
 		if (!this.canAffordCost(ability, player)) {
 			return;
@@ -239,21 +257,42 @@ var AbilityComponent = TaroEntity.extend({
 
 		this.payCost(ability, player);
 
-		console.log(ability);
 		for (let obj in this._entity.script.scripts) {
 
 			if (
 				this._entity.script.scripts[obj].name &&
-				this._entity.script.scripts[obj].name === ability.script
+				this._entity.script.scripts[obj].name === ability.events.startCasting
 			) {
+				console.log(obj);
 				this._entity.script.runScript(obj, { triggeredBy: { unitId: this._entity.id()} });
 			}
 		}
 
+		if (ability.events.castDuration) {
+			
+		}
+
 	},
 
-	stopCast: function (ability) {
-		console.log('stop casting: ', ability);
+	stopCasting: function (abilityId) {
+		const ability = taro.game.data.abilities[abilityId];
+
+		for (let obj in this._entity.script.scripts) {
+
+			if (
+				this._entity.script.scripts[obj].name &&
+				this._entity.script.scripts[obj].name === ability.events.stopCasting
+			) {
+				console.log(obj);
+				this._entity.script.runScript(obj, { triggeredBy: { unitId: this._entity.id()} });
+			}
+		}
+	},
+	_behaviour: function (ctx) {
+
+		if (true) {
+			console.log(Date.now());
+		}
 	}
 });
 
