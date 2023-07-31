@@ -460,6 +460,7 @@ NetIo.Socket = NetIo.EventingClass.extend({
 				reason: self._disconnect?.reason || reason.toString(),
 				code: self._disconnect?.code || code,
 				at: self._disconnect?.at || new Date(),
+				source: self._disconnect?.source || 'closeEvent',
 			};
 			
 			self.emit('disconnect', {
@@ -549,6 +550,7 @@ NetIo.Socket = NetIo.EventingClass.extend({
 			reason: this._disconnect?.reason || reason,
 			code: this._disconnect?.code || code,
 			at: this._disconnect?.at || new Date(),
+			source: this._disconnect?.source || 'closeFn',
 		};
 		
 		this._socket.close(code);
