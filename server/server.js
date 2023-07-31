@@ -698,7 +698,6 @@ var Server = TaroClass.extend({
 		taro.network.define('joinGame', self._onJoinGameWrapper);
 		taro.network.define('gameOver', self._onGameOver);
 
-		taro.network.define('makePlayerSelectUnit', self._onPlayerSelectUnit);
 		taro.network.define('playerUnitMoved', self._onPlayerUnitMoved);
 		taro.network.define('playerKeyDown', self._onPlayerKeyDown);
 		taro.network.define('playerKeyUp', self._onPlayerKeyUp);

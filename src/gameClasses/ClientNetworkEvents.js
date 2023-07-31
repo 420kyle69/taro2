@@ -59,16 +59,6 @@ var ClientNetworkEvents = {
 		}
 	},
 
-	_onMakePlayerSelectUnit: function (data) {
-		if (data.unitId) {
-			if (taro.client.entityUpdateQueue[data.unitId] == undefined) {
-				taro.client.entityUpdateQueue[data.unitId] = [];
-			}
-			// in case the unit doesn't exist when player tries to select it, we're pushing the command into entityUpdateQueue
-			taro.client.entityUpdateQueue[data.unitId].push({ makePlayerSelectUnit: true });
-		}
-	},
-
 	_onMakePlayerCameraTrackUnit: function (data) {
 		if (data.unitId) {
 			if (taro.client.entityUpdateQueue[data.unitId] == undefined) {

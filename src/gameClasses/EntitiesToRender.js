@@ -7,6 +7,11 @@ var EntitiesToRender = /** @class */ (function () {
         var currentTime = Date.now();
         if (!taro.lastTickTime)
             taro.lastTickTime = currentTime;
+
+        if (taro.gameLoopTickHasExecuted) {
+			taro.queueTrigger('frameTick');
+        }
+
         for (var entityId in this.trackEntityById) {
             var entity = taro.$(entityId);
             if (entity) {
@@ -64,16 +69,14 @@ var EntitiesToRender = /** @class */ (function () {
                         if (ownerUnit) {
                             // if ownerUnit's transformation hasn't been processed yet, then it'll cause item to drag behind. so we're running it now
                             ownerUnit._processTransform();
-                            // immediately rotate items for my own unit
-                            if (ownerUnit == taro.client.selectedUnit) {
-                                if (entity._stats.currentBody && entity._stats.currentBody.jointType == 'weldJoint') {
-                                    rotate = ownerUnit._rotate.z;
-                                }
-                                else if (ownerUnit == taro.client.selectedUnit) {
-                                    rotate = ownerUnit.angleToTarget; // angleToTarget is updated at 60fps
-                                }
-                                entity._rotate.z = rotate; // update the item's rotation immediately for more accurate aiming (instead of 20fps)
+
+                            if (entity._stats.currentBody && entity._stats.currentBody.jointType == 'weldJoint') {
+                                rotate = ownerUnit._rotate.z;
+                            } else if (ownerUnit == taro.client.selectedUnit) { // use angleToTarget for my unit
+                                rotate = ownerUnit.angleToTarget;
                             }
+                            entity._rotate.z = rotate; // update the item's rotation immediately for more accurate aiming (instead of 20fps)
+                            
                             entity.anchoredOffset = entity.getAnchoredOffset(rotate);
                             if (entity.anchoredOffset) {
                                 x = ownerUnit._translate.x + entity.anchoredOffset.x;
@@ -88,21 +91,24 @@ var EntitiesToRender = /** @class */ (function () {
                         y += entity.tween.offset.y;
                         rotate += entity.tween.offset.rotate;
                     }
+                    
                     entity.transformTexture(x, y, rotate);
                 }
             }
         }
-        taro.triggersQueued = [];
+        // taro.triggersQueued = [];
         taro.lastTickTime = currentTime;
         if (taro.gameLoopTickHasExecuted) {
             taro.gameLoopTickHasExecuted = false;
         }
     };
     EntitiesToRender.prototype.frameTick = function () {
-        taro.engineStep();
-        taro.input.processInputOnEveryFps();
-        taro._renderFrames++;
-        this.updateAllEntities();
+        if (taro.game.hasStarted) {
+            taro.input.processInputOnEveryFps();
+            taro._renderFrames++;
+            this.updateAllEntities();
+            taro.engineStep();
+        }
     };
     return EntitiesToRender;
 }());

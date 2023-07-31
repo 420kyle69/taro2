@@ -116,7 +116,7 @@ class EntitiesToRender {
 			}
 		}
 
-		taro.triggersQueued = [];
+		// taro.triggersQueued = [];
 		taro.lastTickTime = currentTime;
 
 		if (taro.gameLoopTickHasExecuted) {

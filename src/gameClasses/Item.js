@@ -367,7 +367,7 @@ var Item = TaroEntityPhysics.extend({
 												},
 												streamMode: this._stats.projectileStreamMode
 											});
-									 	var projectile = new Projectile(projectileData);
+										var projectile = new Projectile(projectileData);
 										projectile.script.trigger('entityCreated');
 										taro.game.lastCreatedProjectileId = projectile.id();
 									}
@@ -1137,7 +1137,7 @@ var Item = TaroEntityPhysics.extend({
 	 */
 	_behaviour: function (ctx) {
 		var self = this;
-
+		
 		_.forEach(taro.triggersQueued, function (trigger) {
 			trigger.params['thisEntityId'] = self.id();
 			self.script.trigger(trigger.name, trigger.params);
@@ -1175,17 +1175,10 @@ var Item = TaroEntityPhysics.extend({
 				}
 			}
 
-			// run both server & client.
-			// it's important that this runs on client side, because it prepares this item's position when it's dropped
-			self.translateTo(x, y);
-			self.rotateTo(0, 0, rotate);
-
-			// if (this.getOwnerUnit() != taro.client.selectedUnit)	 {
-			// 	console.log(x, y, rotate, ownerUnit.angleToTarget, this._rotate.z)
-			// }
-
-			if (taro.game.cspEnabled && taro.isClient) {
-				self.latestKeyFrame[1] = [x, y, rotate]; // prepare position for when this item's dropped. without this, item will appear at an incorrect position
+			// this is necessary for games that has sprite-only item with no joint. (e.g. team elimination)
+			if (taro.isServer) {
+				self.translateTo(x, y);
+				self.rotateTo(0, 0, rotate);
 			}
 		}
 

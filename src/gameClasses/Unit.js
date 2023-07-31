@@ -1277,7 +1277,7 @@ var Unit = TaroEntityPhysics.extend({
 						x: this._translate.x + item.anchoredOffset.x,
 						y: this._translate.y + item.anchoredOffset.y
 					},
-					rotate: item._rotate.z
+					rotate: item.anchoredOffset.rotate,
 				};
 
 				if (taro.physics.engine === 'CRASH') {
@@ -1854,7 +1854,7 @@ var Unit = TaroEntityPhysics.extend({
 	 */
 	_behaviour: function (ctx) {
 		var self = this;
-
+		
 		_.forEach(taro.triggersQueued, function (trigger) {
 			trigger.params['thisEntityId'] = self.id();
 			self.script.trigger(trigger.name, trigger.params);
@@ -1936,6 +1936,7 @@ var Unit = TaroEntityPhysics.extend({
 				taro.unitBehaviourCount++; // for debugging
 				// apply movement if it's either human-controlled unit, or ai unit that's currently moving
 				if (self.body && vector && (vector.x != 0 || vector.y != 0)) {
+
 					// console.log('unit movement 2', vector, self._stats.controls.movementMethod);
 					if (self._stats.controls) {
 						switch (self._stats.controls.movementMethod) { // velocity-based movement

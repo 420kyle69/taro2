@@ -135,7 +135,7 @@ var PlayerUiComponent = TaroEntity.extend({
 		var self = this;
 		config.isDismissible = config.isDismissible === undefined ? true : !!(config.isDismissible);
 		self.isDismissibleInputModalShown = config.isDismissible;
-		$('#player-input-field-label').html(window.DOMPurify.sanitize(config.fieldLabel || 'Field'));
+		$('#player-input-field-label').html(window.DOMPurify?.sanitize(config.fieldLabel || 'Field'));
 
 		$('#player-input-field').val('');
 		$('#player-input-modal').addClass('d-flex');
