@@ -460,6 +460,7 @@ NetIo.Socket = NetIo.EventingClass.extend({
 				reason: self._disconnect?.reason || reason.toString(),
 				code: self._disconnect?.code || code,
 				at: self._disconnect?.at || new Date(),
+				source: self._disconnect?.source || 'closeEvent',
 			};
 			
 			self.emit('disconnect', {
@@ -519,6 +520,8 @@ NetIo.Socket = NetIo.EventingClass.extend({
 				reasonCode = 'Invalid security token';
 			} else if (reason.startsWith('Lost connection to the server, and grace period for reconnect')) {
 				reasonCode = 'Reconnect grace period over';
+			} else if (reason.startsWith('server lifespan expired')) {
+				reasonCode = 'Server lifespan expired';
 			}
 		}
 		return reasonCode;
@@ -549,6 +552,7 @@ NetIo.Socket = NetIo.EventingClass.extend({
 			reason: this._disconnect?.reason || reason,
 			code: this._disconnect?.code || code,
 			at: this._disconnect?.at || new Date(),
+			source: this._disconnect?.source || 'closeFn',
 		};
 		
 		this._socket.close(code);

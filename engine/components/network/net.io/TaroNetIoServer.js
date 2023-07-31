@@ -325,6 +325,7 @@ var TaroNetIoServer = {
 				reason,
 				code,
 				at: new Date(),
+				source: 'disconnectFn',
 			};
 			
 			socket.close(reason);
@@ -792,6 +793,7 @@ var TaroNetIoServer = {
 		const code = _disconnect.code || data?.code; //https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent/code
 		let reasonCode = _disconnect.reasonCode || '';
 		let reason = _disconnect.reason || data?.reason.toString();
+		let source = _disconnect.source || '';
 		
 		if (!reason && !reasonCode) {
 			switch (code) {
@@ -862,6 +864,7 @@ var TaroNetIoServer = {
 				'tier': process.env.WORKER_TIER || process.env.TIER,
 				'previousDisconnects': socket._previousDisconnects || [],
 				'reconnectCount': socket._previousDisconnects?.length || 0,
+				'source': source,
 			});
 		}
 
@@ -881,6 +884,7 @@ var TaroNetIoServer = {
 					'tier': process.env.WORKER_TIER || process.env.TIER,
 					'previousDisconnects': socket._previousDisconnects || [],
 					'reconnectCount': socket._previousDisconnects?.length || 0,
+					'source': source,
 				}
 			});
 		}
