@@ -590,6 +590,10 @@ var PhysicsComponent = TaroEventingClass.extend({
 				self._world.step(timeElapsedSinceLastStep);
 			} else {
 				self._world.step(timeElapsedSinceLastStep / 1000, 8, 3); // Call the world step; frame-rate, velocity iterations, position iterations
+				if(self.ctx) {
+					self.ctx.clear();
+					self._world.DebugDraw();
+				}
 				let nextFrameTime = taro._currentTime + (1000 / taro._gameLoopTickRate) - 10; // 10ms is to give extra buffer to prepare for the next frame
 				var tempBod = self._world.getBodyList();
 

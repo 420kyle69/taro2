@@ -126,31 +126,25 @@ var box2dwasmWrapper = {
                         // component.b2Vec2.prototype.setV = component.b2Vec2.prototype.SetV;
                         component.b2Joint.prototype.getNext = component.b2Joint.prototype.GetNext;
                         component.createWorld = function (id, options) {
-                            var _this = this;
                             component._world = new component.b2World(this._gravity);
                             var ctx;
-                            setInterval(function () {
-                                if (taro.isClient) {
-                                    if (!component.renderer) {
-                                        var canvas = taro.renderer.scene.getScene('Game');
-                                        ctx = canvas.add.graphics().setDepth(9999);
-                                        ctx.setScale(30);
-                                        var newRenderer = new Box2dDebugDraw(_this.box2D, new Box2dHelpers(_this.box2D), ctx, 32).constructJSDraw();
-                                        newRenderer.SetFlags(_this.box2D.b2Draw.e_shapeBit |
-                                            _this.box2D.b2Draw.e_jointBit |
-                                            _this.box2D.b2Draw.e_pairBit |
-                                            _this.box2D.b2Draw.e_aabbBit
-                                        // this.box2D.b2Draw.e_centerOfMassBit
-                                        );
-                                        component.renderer = newRenderer;
-                                        component._world.SetDebugDraw(newRenderer);
-                                    }
-                                    if (ctx) {
-                                        ctx.clear();
-                                        component._world.DebugDraw();
-                                    }
+                            if (taro.isClient) {
+                                if (!component.renderer) {
+                                    var canvas = taro.renderer.scene.getScene('Game');
+                                    ctx = canvas.add.graphics().setDepth(9999);
+                                    ctx.setScale(30);
+                                    var newRenderer = new Box2dDebugDraw(this.box2D, new Box2dHelpers(this.box2D), ctx, 32).constructJSDraw();
+                                    newRenderer.SetFlags(this.box2D.b2Draw.e_shapeBit |
+                                        this.box2D.b2Draw.e_jointBit |
+                                        this.box2D.b2Draw.e_pairBit |
+                                        this.box2D.b2Draw.e_aabbBit
+                                    // this.box2D.b2Draw.e_centerOfMassBit
+                                    );
+                                    component.renderer = newRenderer;
+                                    component._world.SetDebugDraw(newRenderer);
+                                    component.ctx = ctx;
                                 }
-                            }, 1);
+                            }
                             component._world.SetContinuousPhysics(this._continuousPhysics);
                         };
                         /**

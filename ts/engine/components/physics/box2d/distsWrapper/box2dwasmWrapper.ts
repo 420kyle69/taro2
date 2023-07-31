@@ -91,29 +91,24 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 		component.createWorld = function (id, options) {
 			component._world = new component.b2World(this._gravity);
 			let ctx: Phaser.GameObjects.Graphics;
-			setInterval(() => {
-				if (taro.isClient) {
-					if (!component.renderer) {
-						const canvas = taro.renderer.scene.getScene('Game');
-						ctx = canvas.add.graphics().setDepth(9999);
-						ctx.setScale(30);
-						const newRenderer = new Box2dDebugDraw(this.box2D, new Box2dHelpers(this.box2D), ctx, 32).constructJSDraw();
-						newRenderer.SetFlags(
-							this.box2D.b2Draw.e_shapeBit |
+			if (taro.isClient) {
+				if (!component.renderer) {
+					const canvas = taro.renderer.scene.getScene('Game');
+					ctx = canvas.add.graphics().setDepth(9999);
+					ctx.setScale(30);
+					const newRenderer = new Box2dDebugDraw(this.box2D, new Box2dHelpers(this.box2D), ctx, 32).constructJSDraw();
+					newRenderer.SetFlags(
+						this.box2D.b2Draw.e_shapeBit |
 							this.box2D.b2Draw.e_jointBit |
 							this.box2D.b2Draw.e_pairBit |
 							this.box2D.b2Draw.e_aabbBit
 							// this.box2D.b2Draw.e_centerOfMassBit
-						);
-						component.renderer = newRenderer;
-						component._world.SetDebugDraw(newRenderer);
-					}
-					if (ctx) {
-						ctx.clear();
-						component._world.DebugDraw();
-					}
+					);
+					component.renderer = newRenderer;
+					component._world.SetDebugDraw(newRenderer);
+					component.ctx = ctx;
 				}
-			}, 1);
+			}
 
 
 			component._world.SetContinuousPhysics(this._continuousPhysics);
