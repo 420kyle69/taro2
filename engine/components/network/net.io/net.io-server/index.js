@@ -520,6 +520,8 @@ NetIo.Socket = NetIo.EventingClass.extend({
 				reasonCode = 'Invalid security token';
 			} else if (reason.startsWith('Lost connection to the server, and grace period for reconnect')) {
 				reasonCode = 'Reconnect grace period over';
+			} else if (reason.startsWith('server lifespan expired')) {
+				reasonCode = 'Server lifespan expired';
 			}
 		}
 		return reasonCode;
