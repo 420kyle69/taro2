@@ -288,20 +288,20 @@ var ActionComponent = TaroEntity.extend({
 					case 'setPlayerAttribute':
 						var attrId = self._script.variable.getValue(action.attribute, vars);
 						var player = self._script.variable.getValue(action.entity, vars);
-						if (player && player._category == 'player' && player._stats.attributes) {							
+						if (player && player._category == 'player' && player._stats.attributes) {
 							var attribute = player._stats.attributes[attrId];
 							if (attribute != undefined) {
 								var decimalPlace = parseInt(attribute.decimalPlaces) || 0;
 								var value = parseFloat(self._script.variable.getValue(action.value, vars)).toFixed(decimalPlace);
 								player.attribute.update(attrId, value, true); // update attribute, and check for attribute becoming 0
-										
+
 								// track guided tutorial progress
 								var parentGameId = taro?.game?.data?.defaultData?.parentGameId;
 								if (parentGameId == '646d39f8d9317a8253b8a143' && attribute.name == 'progress') {
 									// for tracking user progress in tutorials
 									var client = taro.server.clients[player._stats.clientId];
 									var socket = client.socket;
-		
+
 									if (value !== this.lastProgressTrackedValue) {
 										global.trackServerEvent && global.trackServerEvent({
 											eventName: 'Tutorial Progress Updated',
@@ -314,8 +314,8 @@ var ActionComponent = TaroEntity.extend({
 												'tutorialVersion': 'v2'
 											}
 										}, socket);
-									}	
-		
+									}
+
 									this.lastProgressTrackedValue = newValue;
 								}
 							}
@@ -1263,7 +1263,17 @@ var ActionComponent = TaroEntity.extend({
 						var position = self._script.variable.getValue(action.position, vars);
 						var text = self._script.variable.getValue(action.text, vars);
 						var color = self._script.variable.getValue(action.color, vars);
-						taro.network.send('createFloatingText', { position: position, text: text, color: color });
+
+						if (taro.isServer) {
+							taro.network.send('createFloatingText', {position: position, text: text, color: color});
+						} else {
+							taro.client.emit('floating-text', {
+								text: text,
+								x: position.x,
+								y: position.y,
+								color: color || 'white'
+							});
+						}
 						break;
 
 					/* Item */
@@ -1457,7 +1467,7 @@ var ActionComponent = TaroEntity.extend({
 						var particleTypeId = self._script.variable.getValue(action.particleType, vars);
 						var angle = self._script.variable.getValue(action.angle, vars);
 						if (particleTypeId && position) {
-							taro.network.send('particle', { particleId: particleTypeId, position: position, angle: angle || 0});     
+							taro.network.send('particle', { particleId: particleTypeId, position: position, angle: angle || 0});
 						}
 						break;
 
