@@ -160,7 +160,7 @@ NetIo.Client = NetIo.EventingClass.extend({
 				// resolve if connection is open for about a second
 				self.connectionOpenTimeout = setTimeout(() => {
 					clearTimeout(self.fallbackTimeout);
-					resolve({status: 'open'});
+					resolve({status: 'open', code: 0, reason: '', state: self._state});
 				}, 1000);
 			};
 			
@@ -178,19 +178,21 @@ NetIo.Client = NetIo.EventingClass.extend({
 				resolve({status: 'closed', code: event.code, reason, state});
 			};
 			
-			this._socket.onerror = function () {
+			this._socket.onerror = function (event) {
+				const reason = self._disconnectReason || event?.reason;
+				const state = self._state;
 				self._onError.apply(self, arguments);
 				
 				clearTimeout(self.fallbackTimeout);
 				clearTimeout(self.connectionOpenTimeout);
-				resolve({status: 'error'});
+				resolve({status: 'error', code: event?.code, reason, state});
 			};
 			
 			// fallback - timeout if none of the above events are triggerred 
 			this.fallbackTimeout = setTimeout(() => {
 				clearTimeout(self.connectionOpenTimeout);
-				resolve({status: 'timeout'});
-			}, 5000);
+				resolve({status: 'timeout', code: 0, reason: self._disconnectReason, state: self._state});
+			}, 10000);
 		});
 	},
 
