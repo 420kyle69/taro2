@@ -81,15 +81,13 @@ class EntitiesToRender {
 							ownerUnit._processTransform();
 
 							// immediately rotate items for my own unit
-							if (ownerUnit == taro.client.selectedUnit) {
-								if (entity._stats.currentBody && entity._stats.currentBody.jointType == 'weldJoint') {
-									rotate = ownerUnit._rotate.z;
-
-								} else if (ownerUnit == taro.client.selectedUnit) {
-									rotate = ownerUnit.angleToTarget; // angleToTarget is updated at 60fps
-								}
-								entity._rotate.z = rotate // update the item's rotation immediately for more accurate aiming (instead of 20fps)
+							if (entity._stats.currentBody && entity._stats.currentBody.jointType == 'weldJoint') {
+								rotate = ownerUnit._rotate.z;
 							}
+							if (ownerUnit == taro.client.selectedUnit) {
+								rotate = ownerUnit.angleToTarget; // angleToTarget is updated at 60fps								
+							}
+							entity._rotate.z = rotate // update the item's rotation immediately for more accurate aiming (instead of 20fps)
 
 							entity.anchoredOffset = entity.getAnchoredOffset(rotate);
 
