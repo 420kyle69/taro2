@@ -464,7 +464,7 @@ var TaroNetIoClient = {
 					var ciDecoded = snapshot[i][0].charCodeAt(0);
 					var commandName = this._networkCommandsIndex[ciDecoded];
 					var entityData = snapshot[i][1];
-					
+					// console.log("sub", commandName, data);
 					switch (commandName) {
 						case '_taroStreamData':
 							var entityData = snapshot[i].slice(1).split('&');
@@ -515,6 +515,7 @@ var TaroNetIoClient = {
 				}
 			}
 		} else {
+			console.log("commandName wasn't _snapshot!", commandName, data);		
 			if (this._networkCommands[commandName]) {
 				if (this.debug()) {
 					console.log(`Received "${commandName}" (index ${ciDecoded}) with data:`, data[1]);
