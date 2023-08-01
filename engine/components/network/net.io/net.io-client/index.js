@@ -136,32 +136,62 @@ NetIo.Client = NetIo.EventingClass.extend({
 
 	reconnect: function() {
 		var self = this;
-		this.reconnectedAt = Date.now();
-		this.trackLatency('gs-websocket-connect', 'onreconnect');
-		this.reconnectedAt = null;
-
-		// Set the state to connecting
-		this._state = 1;
-
-		// Create new websocket to the url
-		this.wsStartTime = Date.now();
-		this.startTimeSinceLoad = performance.now();
-
-		this._socket = new WebSocket(this.wsUrl, ['netio1', 'reconnect']);
-
-		// Setup event listeners
-		this._socket.onopen = function () {
-			self._onOpen.apply(self, arguments);
-		};
-		this._socket.onmessage = function () {
-			self._onData.apply(self, arguments);
-		};
-		this._socket.onclose = function () {
-			self._onClose.apply(self, arguments);
-		};
-		this._socket.onerror = function () {
-			self._onError.apply(self, arguments);
-		};
+		return new Promise((resolve) => {
+			
+			this.reconnectedAt = Date.now();
+			this.trackLatency('gs-websocket-connect', 'onreconnect');
+			this.reconnectedAt = null;
+			this.fallbackTimeout = null;
+			this.connectionOpenTimeout = null;
+			
+			// Set the state to connecting
+			this._state = 1;
+			
+			// Create new websocket to the url
+			this.wsStartTime = Date.now();
+			this.startTimeSinceLoad = performance.now();
+			
+			this._socket = new WebSocket(this.wsUrl, ['netio1', 'reconnect']);
+			
+			// Setup event listeners
+			this._socket.onopen = function () {
+				self._onOpen.apply(self, arguments);
+				
+				// resolve if connection is open for about a second
+				self.connectionOpenTimeout = setTimeout(() => {
+					clearTimeout(self.fallbackTimeout);
+					resolve({status: 'open'});
+				}, 1000);
+			};
+			
+			this._socket.onmessage = function () {
+				self._onData.apply(self, arguments);
+			};
+			
+			this._socket.onclose = function (event) {
+				const reason = self._disconnectReason || event.reason;
+				const state = self._state;
+				self._onClose.apply(self, arguments);
+				
+				clearTimeout(self.fallbackTimeout);
+				clearTimeout(self.connectionOpenTimeout);
+				resolve({status: 'closed', code: event.code, reason, state});
+			};
+			
+			this._socket.onerror = function () {
+				self._onError.apply(self, arguments);
+				
+				clearTimeout(self.fallbackTimeout);
+				clearTimeout(self.connectionOpenTimeout);
+				resolve({status: 'error'});
+			};
+			
+			// fallback - timeout if none of the above events are triggerred 
+			this.fallbackTimeout = setTimeout(() => {
+				clearTimeout(self.connectionOpenTimeout);
+				resolve({status: 'timeout'});
+			}, 5000);
+		});
 	},
 
 	disconnect: function (reason) {
@@ -210,18 +240,21 @@ NetIo.Client = NetIo.EventingClass.extend({
 		if (actionName === 'gs-websocket-ping') {
 			const endTime = Date.now();
 			if (window.newrelic) {
-				window.newrelic.addPageAction(actionName, {
-					wsUrl: this.wsUrl,
-					wsAction: actionEvent,
-					wsState: this._socket.readyState,
-					wsUserId: userId,
-					wsGameSlug: gameSlug,
-					wsServerName: taro.client.server.name,
-					wsServerUrl: taro.client.server.url,
-					wsLatency: endTime - data.clientSentAt,
-					wsStartTime: data.clientSentAt,
-					wsEndTime: endTime,
-				});
+				// track only if document is in focus to avoid tracking inaccurate latencies
+				if (document.hasFocus()) {
+					window.newrelic.addPageAction(actionName, {
+						wsUrl: this.wsUrl,
+						wsAction: actionEvent,
+						wsState: this._socket.readyState,
+						wsUserId: userId,
+						wsGameSlug: gameSlug,
+						wsServerName: taro.client.server.name,
+						wsServerUrl: taro.client.server.url,
+						wsLatency: endTime - data.clientSentAt,
+						wsStartTime: data.clientSentAt,
+						wsEndTime: endTime,
+					});
+				}
 			}
 		} else {
 			const endTimeSinceLoad = performance.now();
@@ -269,18 +302,6 @@ NetIo.Client = NetIo.EventingClass.extend({
 		var urlWithoutProtocol = url.split('://')[1];
 		var serverDomain = urlWithoutProtocol.split('/')[0];
 		var serverName = serverDomain.split(':')[0];
-
-		// $.ajax({
-		// 	url: '/socket-error-count',
-		// 	dataType: 'json',
-		// 	type: 'POST',
-		// 	data: {
-		// 		status: true,
-		// 		server: serverName,
-		// 		tier: window.tier
-		// 	}
-		// });
-
 		this._state = 2;
 	},
 
@@ -359,88 +380,66 @@ NetIo.Client = NetIo.EventingClass.extend({
 	_onClose: function (event) {
 
 		var wasClean = event.wasClean;
-		var reason = event.reason || this._disconnectReason;
+		var reason = this._disconnectReason || event.reason;
 		var code = event.code;
 		
 		this.trackLatency('gs-websocket-connect', 'onclose', { reason });
 
 		console.log('close event', event, { _disconnectReason: this._disconnectReason, state: this._state, reason });
-
+		
+		const disconnectData = {
+			wsUrl: this.wsUrl,
+			wsReadyState: this._socket.readyState,
+			wsUserId: userId,
+			wsGameSlug: gameSlug,
+			wsServerName: taro.client.server.name,
+			wsServerUrl: taro.client.server.url,
+			wsOnline: navigator.onLine,
+			wsDocInFocus: document.hasFocus(),
+			wsWasClean: wasClean,
+			wsState: this._state,
+			wsReason: reason,
+			wsCode: code,
+			wsWasReconnected: window.wasReconnected,
+		};
+		
 		// if we don't know why we disconnected and the server IS responding(!1)
-		if (!this._disconnectReason && this._state !== 1) {
+		if (!reason && this._state !== 1) {
+			
 			// wait 500ms before attempting reconnection
 			return setTimeout(() => {
-				this.reconnect(this.wsUrl);
+				window.wasReconnected = true;
+				this.reconnect(this.wsUrl)
+					.then(({status, reason, code, state}) => {
+						console.log('disconnectData', disconnectData);
+						
+						disconnectData.wsReconnectState = state;
+						disconnectData.wsReconnectStatus = status;
+						disconnectData.wsReconnectReason = reason;
+						disconnectData.wsReconnectCode = code;
+						
+						if (window.newrelic) {
+							window.newrelic.addPageAction('gs-websocket-disconnects', disconnectData);
+						}
+					});
 			}, 500);
 		}
-
-
-		if (code === 1006) {
-			var url = event.target.url;
-			var urlWithoutProtocol = url.split('://')[1];
-			var serverDomain = urlWithoutProtocol.split('/')[0];
-
-			// $.ajax({
-			// 	url: '/socket-error-count',
-			// 	dataType: 'json',
-			// 	type: 'POST',
-			// 	data: {
-			// 		status: false,
-			// 		server: serverDomain,
-			// 		tier: window.tier
-			// 	}
-			// });
+		
+		console.log('disconnectData', disconnectData);
+		if (window.newrelic) {
+			window.newrelic.addPageAction('gs-websocket-disconnects', disconnectData);
 		}
-		// if (code === 1006) {
-		// 	console.log('experienced issue 1006');
-		// 	var baseUrl = location.host + location.pathname;
-		// 	var queryString = '?serverId=' + window.connectedServer.id + '&joinGame=true&redirected=' + location.protocol;
-
-		// 	if (baseUrl[baseUrl.length - 1] === '/') {
-		// 		baseUrl += queryString;
-		// 	}
-		// 	else {
-		// 		baseUrl += '/' + queryString;
-		// 	}
-
-		// 	if (location.protocol === 'https:') {
-		// 		var newUrl = 'http://' + baseUrl;
-		// 		console.log('redirecting from https to http', newUrl);
-
-		// 		// was already redirected from http version
-		// 		// if (location.search.indexOf('redirected=http:') > -1) {
-		// 		// }
-		// 		// Rollbar.critical("socket error 1006 over https", { data: { code: code, reason: reason, wasClean: wasClean } });
-
-		// 		location.href = newUrl;
-		// 	}
-		// 	else if (location.protocol === 'http:') {
-		// 		var newUrl = 'https://' + baseUrl;
-		// 		console.log('redirecting from http to https', newUrl);
-
-		// 		// was already redirected from https version
-		// 		// if (location.search.indexOf('redirected=https:') > -1) {
-		// 		// 	Rollbar.critical("socket error 1006 over http", { data: { code: code, reason: reason, wasClean: wasClean } });
-		// 		// }
-
-		// 		// Rollbar.critical("socket error 1006 over http", { data: { code: code, reason: reason, wasClean: wasClean } });
-		// 		if (location.hostname !== 'localhost') {
-		// 			location.href = newUrl;
-		// 		}
-		// 	}
-		// }
-		// console.log(this._state, 'this._state with code 1006');
-
+		
 		// If we are already connected and have an id...
 		if (this._state === 3) {
 			this._state = 0;
-			this.emit('disconnect', { reason: this._disconnectReason, wasClean: wasClean, code: code });
+			this.emit('disconnect', { reason, wasClean, code });
 		}
 
 		// If we are connected but have no id...
 		if (this._state === 2) {
 			this._state = 0;
-			this.emit('disconnect', { reason: this._disconnectReason, wasClean: wasClean, code: code });
+			this.emit('disconnect', { reason, wasClean, code });
 		}
 
 		// If we were trying to connect...
