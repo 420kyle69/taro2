@@ -411,9 +411,10 @@ NetIo.Client = NetIo.EventingClass.extend({
 			// wait 500ms before attempting reconnection
 			return setTimeout(() => {
 				window.wasReconnected = true;
+				window.reconnectInProgress = true;
 				this.reconnect(this.wsUrl)
 					.then(({status, reason, code, state}) => {
-						console.log('disconnectData', disconnectData);
+						console.log('disconnected', disconnectData);
 						
 						disconnectData.wsReconnectState = state;
 						disconnectData.wsReconnectStatus = status;
@@ -423,12 +424,13 @@ NetIo.Client = NetIo.EventingClass.extend({
 						if (window.newrelic) {
 							window.newrelic.addPageAction('gs-websocket-disconnects', disconnectData);
 						}
+						window.reconnectInProgress = false;
 					});
 			}, 500);
 		}
 		
-		console.log('disconnectData', disconnectData);
-		if (window.newrelic) {
+		console.log('disconnected', disconnectData);
+		if (!window.reconnectInProgress && window.newrelic) {
 			window.newrelic.addPageAction('gs-websocket-disconnects', disconnectData);
 		}
 		
