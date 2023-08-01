@@ -25,6 +25,8 @@ var TaroNetIoClient = {
 	 * network has started.
 	 */
 	start: function (server, callback) {
+
+		
 		if (this._state === 3) {
 			// We're already connected
 			if (typeof (callback) === 'function') {
@@ -35,13 +37,9 @@ var TaroNetIoClient = {
 			this._discrepancySamples = [];
 			var self = this;
 
-			var gameId = taro.client.servers[0].gameId;
-
 			self._startCallback = callback;
-
 			var sortedServers = [server];
-			var ignoreServerIds = [server.id];
-
+			
 			// let's not try to connect to multiple servers at the same time, only connect with user's selected server
 			// while (server = taro.client.getBestServer(ignoreServerIds)) {
 			// 	ignoreServerIds.push(server.id);
@@ -453,12 +451,11 @@ var TaroNetIoClient = {
 	_onMessageFromServer: function (data) {
 		var ciDecoded = data[0].charCodeAt(0);
 		var commandName = this._networkCommandsIndex[ciDecoded];
-		var now = Date.now();
+		var now = taro._currentTime
 		
 		if (commandName === '_snapshot') {
 			var snapshot = _.cloneDeep(data)[1];
 			var newSnapshotTimestamp = snapshot[snapshot.length - 1][1];
-
 			// see how far apart the newly received snapshot is from currentTime
 			if (snapshot.length) {
 				var obj = {};
@@ -498,9 +495,8 @@ var TaroNetIoClient = {
 								) {
 									// console.log(entity._category, newPosition)
 									// extra 20ms of buffer removes jitter
-									if (newSnapshotTimestamp > entity.lastSnapshotTimestamp) {
+									if (newSnapshotTimestamp > this.lastSnapshotTimestamp) {
 										entity.nextKeyFrame = [now + taro.client.renderBuffer, newPosition];
-										entity.lastSnapshotTimestamp = newSnapshotTimestamp;
 									}									
 								}
 							}
@@ -511,6 +507,11 @@ var TaroNetIoClient = {
 							this._networkCommands[commandName](entityData);
 							break;
 					}
+				}
+
+				if (!isNaN(newSnapshotTimestamp))
+				{ 
+					this.lastSnapshotTimestamp = newSnapshotTimestamp;
 				}
 			}
 		} else {

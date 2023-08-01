@@ -1696,7 +1696,6 @@ var TaroEngine = TaroEntity.extend({
 			if (self._enableRenders) {
 				if (!self._useManualRender) {
 					if (taroConfig.debug._timing) {
-						renderStart = Date.now();
 						self.renderSceneGraph(ctx);
 					} else {
 						self.renderSceneGraph(ctx);
@@ -1704,7 +1703,6 @@ var TaroEngine = TaroEntity.extend({
 				} else {
 					if (self._manualRender) {
 						if (taroConfig.debug._timing) {
-							renderStart = Date.now();
 							self.renderSceneGraph(ctx);
 						} else {
 							self.renderSceneGraph(ctx);
