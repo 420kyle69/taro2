@@ -1377,7 +1377,6 @@ var TaroEngine = TaroEntity.extend({
 			if (!lastVal) { lastVal = val; }
 			this._currentTime += ((val - lastVal) * this._timeScale);
 		}
-		
 		return this._currentTime;
 	},
 

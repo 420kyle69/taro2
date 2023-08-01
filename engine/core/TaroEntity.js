@@ -5135,7 +5135,7 @@ var TaroEntity = TaroObject.extend({
 			// if (this == taro.client.selectedUnit) console.log(taro._currentTime, x, tickDelta, timeRemaining)
 			
 			// don't lerp is time remaining is less than 5ms
-			if (timeRemaining > 5) {
+			if (timeRemaining > tickDelta) {
 
 				xDiff = nextTransform[0] - x;
 				yDiff = nextTransform[1] - y;	
@@ -5147,8 +5147,8 @@ var TaroEntity = TaroObject.extend({
 				y += ySpeed * tickDelta;
 
 			} else {
-				x = nextTransform[0];
-				y = nextTransform[1];
+				x += xDiff/2;
+				y += yDiff/2;
 			}	
 
 			rotateStart = rotate;
