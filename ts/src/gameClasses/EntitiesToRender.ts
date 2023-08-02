@@ -80,11 +80,11 @@ class EntitiesToRender {
 							// if ownerUnit's transformation hasn't been processed yet, then it'll cause item to drag behind. so we're running it now
 							ownerUnit._processTransform();
 
-							// immediately rotate items for my own unit
+							// rotate weldjoint items to the owner unit's rotation
 							if (entity._stats.currentBody && entity._stats.currentBody.jointType == 'weldJoint') {
 								rotate = ownerUnit._rotate.z;
-							}
-							if (ownerUnit == taro.client.selectedUnit) {
+							// immediately rotate my unit's items to the angleToTarget
+							} else if (ownerUnit == taro.client.selectedUnit && entity._stats.controls?.mouseBehaviour?.rotateToFaceMouseCursor) {
 								rotate = ownerUnit.angleToTarget; // angleToTarget is updated at 60fps								
 							}
 							entity._rotate.z = rotate // update the item's rotation immediately for more accurate aiming (instead of 20fps)

@@ -4,6 +4,7 @@ var EntitiesToRender = /** @class */ (function () {
         taro.client.on('tick', this.frameTick, this);
     }
     EntitiesToRender.prototype.updateAllEntities = function ( /*timeStamp*/) {
+        var _a, _b;
         var currentTime = Date.now();
         for (var entityId in this.trackEntityById) {
             var entity = taro.$(entityId);
@@ -62,11 +63,12 @@ var EntitiesToRender = /** @class */ (function () {
                         if (ownerUnit) {
                             // if ownerUnit's transformation hasn't been processed yet, then it'll cause item to drag behind. so we're running it now
                             ownerUnit._processTransform();
-                            // immediately rotate items for my own unit
+                            // rotate weldjoint items to the owner unit's rotation
                             if (entity._stats.currentBody && entity._stats.currentBody.jointType == 'weldJoint') {
                                 rotate = ownerUnit._rotate.z;
+                                // immediately rotate my unit's items to the angleToTarget
                             }
-                            if (ownerUnit == taro.client.selectedUnit) {
+                            else if (ownerUnit == taro.client.selectedUnit && ((_b = (_a = entity._stats.controls) === null || _a === void 0 ? void 0 : _a.mouseBehaviour) === null || _b === void 0 ? void 0 : _b.rotateToFaceMouseCursor)) {
                                 rotate = ownerUnit.angleToTarget; // angleToTarget is updated at 60fps								
                             }
                             entity._rotate.z = rotate; // update the item's rotation immediately for more accurate aiming (instead of 20fps)
