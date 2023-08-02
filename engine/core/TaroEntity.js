@@ -4223,7 +4223,7 @@ var TaroEntity = TaroObject.extend({
 
 									}
 
-									const bodyId = this._stats.states[stateId].body;
+									const bodyId = this._stats.states[stateId]?.body;
 									// make sure item always has proper size defined by state
 									if (
 										// accommodate legacy 'unSelected'
