@@ -9,9 +9,6 @@ class EntitiesToRender {
 
 	updateAllEntities (/*timeStamp*/): void {
 		var currentTime = Date.now();
-
-		if (!taro.lastTickTime) taro.lastTickTime = currentTime;
-
 		for (var entityId in this.trackEntityById) {
 			var entity = taro.$(entityId);
 			if (entity) {
@@ -83,16 +80,14 @@ class EntitiesToRender {
 							// if ownerUnit's transformation hasn't been processed yet, then it'll cause item to drag behind. so we're running it now
 							ownerUnit._processTransform();
 
-							// immediately rotate items for my own unit
-							if (ownerUnit == taro.client.selectedUnit) {
-								if (entity._stats.currentBody && entity._stats.currentBody.jointType == 'weldJoint') {
-									rotate = ownerUnit._rotate.z;
-
-								} else if (ownerUnit == taro.client.selectedUnit) {
-									rotate = ownerUnit.angleToTarget; // angleToTarget is updated at 60fps
-								}
-								entity._rotate.z = rotate // update the item's rotation immediately for more accurate aiming (instead of 20fps)
+							// rotate weldjoint items to the owner unit's rotation
+							if (entity._stats.currentBody && entity._stats.currentBody.jointType == 'weldJoint') {
+								rotate = ownerUnit._rotate.z;
+							// immediately rotate my unit's items to the angleToTarget
+							} else if (ownerUnit == taro.client.selectedUnit && entity._stats.controls?.mouseBehaviour?.rotateToFaceMouseCursor) {
+								rotate = ownerUnit.angleToTarget; // angleToTarget is updated at 60fps								
 							}
+							entity._rotate.z = rotate // update the item's rotation immediately for more accurate aiming (instead of 20fps)
 
 							entity.anchoredOffset = entity.getAnchoredOffset(rotate);
 
@@ -117,15 +112,13 @@ class EntitiesToRender {
 		}
 
 		// taro.triggersQueued = [];
-		taro.lastTickTime = currentTime;
-
 		if (taro.gameLoopTickHasExecuted) {
 			taro.gameLoopTickHasExecuted = false;
 		}
 	}
 
 	frameTick(): void {
-		taro.engineStep();
+		taro.engineStep(Date.now(), 1000/60);
 		taro.input.processInputOnEveryFps();
 
 		taro._renderFrames++;

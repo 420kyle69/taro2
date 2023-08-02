@@ -211,10 +211,6 @@ var Player = TaroEntity.extend({
 					unit.unitUi.updateAllAttributeBars();
 				}
 
-				if (unit && unit.inventory) {
-					unit.inventory.updateBackpackButton();
-				}
-
 				unit.renderMobileControl();
 				taro.client.selectedUnit = unit;
 				taro.client.eventLog.push([taro._currentTime, `my unit selected ${unitId}`]);

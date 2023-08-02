@@ -68,7 +68,6 @@ var TaroEntity = TaroObject.extend({
 
 		this._keyFrames = [];
 		this.nextKeyFrame = [taro._currentTime, [this._translate.x, this._translate.y, this._rotate.z]];
-		this.lastSnapshotTimestamp = 0;
 		this.lastTransformedAt = 0;
 		this.latestTimeStamp = 0;
 		this.lastTeleportedAt = 0;
@@ -4361,7 +4360,7 @@ var TaroEntity = TaroObject.extend({
 					var angle = ((this._rotate.z % (2 * Math.PI)) * 1000).toFixed(0);
 
 					if (this._hasMoved) {
-						this._oldTranform = [x, y, angle];
+						this._oldTranform = [this._translate.x, this._translate.y, this._rotate.z];
 
 						// var distanceTravelled = x - taro.lastX;
 						// console.log(this.id(), taro._currentTime - taro.lastSnapshotTime, taro._currentTime, x,  distanceTravelled / (taro._currentTime - taro.lastSnapshotTime))
@@ -5113,7 +5112,6 @@ var TaroEntity = TaroObject.extend({
 		) {
 			return;
 		}
-		let now = Date.now();
 
 		let xDiff = null;
 		let yDiff = null;
@@ -5127,26 +5125,29 @@ var TaroEntity = TaroObject.extend({
 		
 		var nextTransform = this.nextKeyFrame[1];
 		
+		
 		if (nextTransform) {
 			
 			var nextTime = this.nextKeyFrame[0];
-			var timeRemaining = nextTime - now;
+			var timeRemaining = nextTime - taro._currentTime;
+			
+			// if (this == taro.client.selectedUnit) console.log(taro._currentTime, x, tickDelta, timeRemaining)
 			
 			// don't lerp is time remaining is less than 5ms
-			if (timeRemaining > 5) {
+			if (timeRemaining > tickDelta) {
 
 				xDiff = nextTransform[0] - x;
 				yDiff = nextTransform[1] - y;	
 				
 				var xSpeed = xDiff / timeRemaining;
 				var ySpeed = yDiff / timeRemaining;
-				
+
 				x += xSpeed * tickDelta;
 				y += ySpeed * tickDelta;
-			
+
 			} else {
-				x = nextTransform[0];
-				y = nextTransform[1];
+				x += xDiff/2;
+				y += yDiff/2;
 			}	
 
 			rotateStart = rotate;

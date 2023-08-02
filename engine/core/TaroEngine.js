@@ -1366,21 +1366,17 @@ var TaroEngine = TaroEntity.extend({
 	},
 
 	/**
-	 * Increments the engine's internal time by the passed number of milliseconds.
+	 * Increments the engine's interal time by the passed number of milliseconds.
 	 * @param {Number} val The number of milliseconds to increment time by.
 	 * @param {Number=} lastVal The last internal time value, used to calculate
 	 * delta internally in the method.
 	 * @returns {Number}
 	 */
-	incrementTime: function () {
-		const now = new Date().getTime();
-
+	incrementTime: function (val, lastVal) {
 		if (!this._pause) {
-			this._currentTime = now * this._timeScale;
-			this.renderTime = this._currentTime;
+			if (!lastVal) { lastVal = val; }
+			this._currentTime += ((val - lastVal) * this._timeScale);
 		}
-
-		this._lastTimeStamp = now;
 		return this._currentTime;
 	},
 
@@ -1520,7 +1516,8 @@ var TaroEngine = TaroEntity.extend({
 		var unbornIndex;
 		var unbornEntity;
 
-		self.incrementTime();
+		self.incrementTime(timeStamp, self._timeScaleLastTimestamp);
+		self._timeScaleLastTimestamp = timeStamp;
 		timeStamp = Math.floor(self._currentTime);
 
 		if (timeStamp - self.lastSecond >= 1000) {
@@ -1661,7 +1658,7 @@ var TaroEngine = TaroEntity.extend({
 			}
 			
 			// triggersQueued is executed in the entities first (entity-script) then it runs for the world
-			while (taro.triggersQueued.length > 0) {
+			while (taro.script && taro.triggersQueued.length > 0) {
 				const trigger = taro.triggersQueued.shift();
 				taro.script.trigger(trigger.name, trigger.params);
 			}
@@ -1698,7 +1695,6 @@ var TaroEngine = TaroEntity.extend({
 			if (self._enableRenders) {
 				if (!self._useManualRender) {
 					if (taroConfig.debug._timing) {
-						renderStart = Date.now();
 						self.renderSceneGraph(ctx);
 					} else {
 						self.renderSceneGraph(ctx);
@@ -1706,7 +1702,6 @@ var TaroEngine = TaroEntity.extend({
 				} else {
 					if (self._manualRender) {
 						if (taroConfig.debug._timing) {
-							renderStart = Date.now();
 							self.renderSceneGraph(ctx);
 						} else {
 							self.renderSceneGraph(ctx);
