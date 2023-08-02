@@ -62,7 +62,8 @@ declare class TaroEngine extends TaroClass {
 		staticsFromMap(walls: any): unknown;
 		destroyWalls(): unknown;
 		world(): any;
-		engine: string;
+		engine: 'BOX2DWASM' | 'BOX2DWEB' | 'PLANCK';
+		box2D?: typeof Box2D & EmscriptenModule
 		_scaleRatio: number;
 	};
 

@@ -35,7 +35,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 // FIXME: add more types to the physics part of taro2
-// @ts-nocheck
 var box2dwasmWrapper = {
     init: function (component) {
         return __awaiter(this, void 0, void 0, function () {
@@ -89,7 +88,9 @@ var box2dwasmWrapper = {
                         component.b2World.prototype.getJointList = component.b2World.prototype.GetJointList;
                         component.b2World.prototype.getFixtureList = component.b2World.prototype.GetFixtureList;
                         component.b2World.prototype.step = component.b2World.prototype.Step;
-                        component.b2World.prototype.rayCast = component.b2World.prototype.RayCast;
+                        component.b2World.prototype.rayCast = function (start, end, callback) {
+                            component._world.RayCast(callback, start, end);
+                        };
                         // signature is backwards!
                         /*
                             component.b2World.prototype.queryAABB = function(aabb, queryCallback){

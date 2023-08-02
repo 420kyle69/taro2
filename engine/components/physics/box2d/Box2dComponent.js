@@ -237,7 +237,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 	getBodiesInRegion: function (region) {
 		var self = this;
 
-		if (taro.physics.engine == 'crash') {
+		if (taro.physics.engine === 'crash') {
 			var collider = new self.crash.Box(new self.crash.Vector(region.x + (region.width / 2), region.y + (region.height / 2)), region.width, region.height);
 			return taro.physics.crash.search(collider);
 		} else {
@@ -248,22 +248,12 @@ var PhysicsComponent = TaroEventingClass.extend({
 
 			var entities = [];
 			if (self.engine === 'BOX2DWASM') {
-				function getBodyCallback(fixture) {
-					if (fixture && fixture.m_body && fixture.m_body.m_fixtureList) {
-						entityId = fixture.m_body.m_fixtureList.taroId;
-						var entity = taro.$(entityId);
-						if (entity) {
-							// taro.devLog("found", entity._category, entity._translate.x, entity._translate.y)
-							var entity = taro.$(entityId);
-							entities.push(taro.$(entityId));
-						}
-					}
-					return true;
-				}
+
 				const callback = Object.assign(new self.JSQueryCallback(), {
 					ReportFixture: (fixture_p) => {
 						const fixture = self.wrapPointer(fixture_p, self.b2Fixture);
 						entityId = fixture.GetBody().GetFixtureList().taroId;
+						console.log(fixture)
 						var entity = taro.$(entityId);
 						if (entity) {
 							// taro.devLog("found", entity._category, entity._translate.x, entity._translate.y)
