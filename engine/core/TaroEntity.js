@@ -4361,7 +4361,7 @@ var TaroEntity = TaroObject.extend({
 					var angle = ((this._rotate.z % (2 * Math.PI)) * 1000).toFixed(0);
 
 					if (this._hasMoved) {
-						this._oldTranform = [x, y, angle];
+						this._oldTranform = [this._translate.x, this._translate.y, this._rotate.z];
 
 						// var distanceTravelled = x - taro.lastX;
 						// console.log(this.id(), taro._currentTime - taro.lastSnapshotTime, taro._currentTime, x,  distanceTravelled / (taro._currentTime - taro.lastSnapshotTime))
