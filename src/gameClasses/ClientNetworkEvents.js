@@ -494,19 +494,12 @@ var ClientNetworkEvents = {
 			var log = logs[actionName];
 			element.innerHTML += `<li style='font-size:12px;'>${log}</li>`;
 			taro.client.errorLogs.push(log);
-			$("#dev-error-button").text(`Errors (${taro.client.errorLogs.length})`);
-			$("#report-tab-counter").text(
-				`${taro.client.errorLogs.length > 99 ? "99+" : taro.client.errorLogs.length}`
-			);
-			$("#serverconsolelogscounter").text(
-				`${taro.client.errorLogs.length > 99 ? "99+" : taro.client.errorLogs.length}`
-			);
-			$("#server-console").prepend(`<div
-              class="server-logs-element"
-            >
-              <span>${log}</span>
-            </div>`);
+			$("#dev-error-button").text(`Errors (${taro.client.errorLogs.length})`);	
+			
+			window.addToLogs && window.addToLogs(log)
 		}
+
+	
 
 		window.reactApp.showErrorToast(logs[Object.keys(logs)[Object.keys(logs).length - 1]]);
 	},
