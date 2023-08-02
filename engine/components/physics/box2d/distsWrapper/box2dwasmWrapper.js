@@ -45,6 +45,7 @@ var box2dwasmWrapper = {
                     case 1:
                         box2D = _b.sent();
                         _a = new box2D.LeakMitigator(), freeLeaked = _a.freeLeaked, recordLeak = _a.recordLeak;
+                        component.box2D = box2D;
                         component.freeLeaked = freeLeaked;
                         component.recordLeak = recordLeak;
                         component.freeFromCache = box2D.LeakMitigator.freeFromCache;

@@ -3,6 +3,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 	init: async function (component) {
 		const box2D = await box2dwasm();
 		const { freeLeaked, recordLeak } = new box2D.LeakMitigator();
+		component.box2D = box2D;
 		component.freeLeaked = freeLeaked;
 		component.recordLeak = recordLeak;
 		component.freeFromCache = box2D.LeakMitigator.freeFromCache;
