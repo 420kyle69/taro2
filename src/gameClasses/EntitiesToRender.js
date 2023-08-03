@@ -6,9 +6,12 @@ var EntitiesToRender = /** @class */ (function () {
     EntitiesToRender.prototype.updateAllEntities = function ( /*timeStamp*/) {
         var _a, _b;
         var currentTime = Date.now();
+        taro.transformCount = 0;
+        this.updateCount = 0;
         for (var entityId in this.trackEntityById) {
             var entity = taro.$(entityId);
             if (entity) {
+                this.updateCount++;
                 // handle entity behaviour and transformation offsets
                 if (taro.gameLoopTickHasExecuted) {
                     if (entity._deathTime !== undefined && entity._deathTime <= taro._tickStart) {
@@ -94,6 +97,7 @@ var EntitiesToRender = /** @class */ (function () {
         if (taro.gameLoopTickHasExecuted) {
             taro.gameLoopTickHasExecuted = false;
         }
+        console.log(taro._currentTime, "processTransform count", taro.transformCount, "updateAllEntities count", this.updateCount);
     };
     EntitiesToRender.prototype.frameTick = function () {
         taro.engineStep(Date.now(), 1000 / 60);
