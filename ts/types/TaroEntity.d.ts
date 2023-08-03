@@ -18,6 +18,7 @@ declare class TaroEntity extends TaroObject {
 
 	_deathCallBack?: () => void;
 	_behaviour?: () => void;
+    isCulled: boolean;
 
 	_processTransform (): void
 

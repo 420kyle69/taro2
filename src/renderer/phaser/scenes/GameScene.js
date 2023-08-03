@@ -408,9 +408,11 @@ var GameScene = /** @class */ (function (_super) {
             }]);
         this.renderedEntities.forEach(function (element) {
             element.setVisible(false);
+            element.taroEntity.isCulled = true;
         });
         if (!taro.developerMode.active || (taro.developerMode.active && taro.developerMode.activeTab !== 'map')) {
             this.cameras.main.cull(this.renderedEntities).forEach(function (element) {
+                element.taroEntity.isCulled = false;
                 if (!element.hidden) {
                     element.setVisible(true);
                     if (element.dynamic) {

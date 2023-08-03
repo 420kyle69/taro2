@@ -1,6 +1,7 @@
 class EntitiesToRender {
 	trackEntityById: {[key: string]: TaroEntity};
 	timeStamp: number;
+    updateCount: number;
 
 	constructor() {
 		this.trackEntityById = {};
@@ -67,6 +68,15 @@ class EntitiesToRender {
 						}
 					}
 				}
+
+                if (entity.isCulled) {
+                    entity.emit('transform', {
+                        x: entity.nextKeyFrame[1][0],
+                        y: entity.nextKeyFrame[1][1],
+                        rotation: entity.nextKeyFrame[1][2],
+                    });
+                    continue;
+                }
 
 				// update transformation using incoming network stream
 				if (taro.network.stream) {
