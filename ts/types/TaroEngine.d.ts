@@ -1,7 +1,5 @@
 declare class TaroEngine extends TaroClass {
 	newIdHex(): any;
-	enableDebug(flags: number): void;
-	disableDebug(): void;
 	tiled: any;
 	regionManager: any;
 	showRegionList: any;
@@ -65,6 +63,8 @@ declare class TaroEngine extends TaroClass {
 		destroyWalls(): unknown;
 		world(): any;
 		engine: string;
+		enableDebug(flags: number): void;
+		disableDebug(): void;
 		_scaleRatio: number;
 	};
 

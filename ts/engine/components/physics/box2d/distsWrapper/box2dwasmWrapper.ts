@@ -89,7 +89,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 
 		let ctx: Phaser.GameObjects.Graphics;
 		if (taro.isClient) {
-			window.taro.enableDebug = (flags = 1) => {
+			component.enableDebug = (flags = 1) => {
 				console.log('please make sure clientPhyscisEngine is not "", and enabled csp');
 				if (!component.renderer) {
 					const canvas = taro.renderer.scene.getScene('Game');
@@ -104,7 +104,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 				}
 				component.renderer.SetFlags(flags);
 			};
-			window.taro.disableDebug = () => {
+			component.disableDebug = () => {
 				component.ctx.destroy();
 				component.renderer = undefined;
 			};
