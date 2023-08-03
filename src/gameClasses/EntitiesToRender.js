@@ -55,7 +55,16 @@ var EntitiesToRender = /** @class */ (function () {
                 }
                 // handle entity culling
                 if (entity.isCulled) {
-                    entity.emit('cull');
+                    if (entity._category === 'item') {
+                        var ownerUnit = entity.getOwnerUnit();
+                        if (ownerUnit) {
+                            entity.emit('transform', {
+                                x: ownerUnit.nextKeyFrame[1][0],
+                                y: ownerUnit.nextKeyFrame[1][1],
+                                rotation: ownerUnit.nextKeyFrame[1][2],
+                            });
+                        }
+                    }
                     continue;
                 }
                 entity.emit('cull');
