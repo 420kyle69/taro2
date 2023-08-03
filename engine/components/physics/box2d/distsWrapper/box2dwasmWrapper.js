@@ -131,8 +131,9 @@ var box2dwasmWrapper = {
                                 if (!component.renderer) {
                                     var canvas = taro.renderer.scene.getScene('Game');
                                     ctx = canvas.add.graphics().setDepth(9999);
-                                    ctx.setScale(30);
-                                    var newRenderer = new Box2dDebugDraw(box2D, new Box2dHelpers(box2D), ctx, 32).constructJSDraw();
+                                    var scale = 30;
+                                    ctx.setScale(scale);
+                                    var newRenderer = new Box2dDebugDraw(box2D, new Box2dHelpers(box2D), ctx, scale).constructJSDraw();
                                     newRenderer.SetFlags(flags);
                                     component.renderer = newRenderer;
                                     component._world.SetDebugDraw(newRenderer);

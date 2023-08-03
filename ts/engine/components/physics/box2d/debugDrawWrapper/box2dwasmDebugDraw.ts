@@ -16,12 +16,12 @@ class Box2dDebugDraw {
 	}
 
 	static drawAxes(ctx: Phaser.GameObjects.Graphics): void {
-		ctx.lineStyle(1, 0xff0000, 0.5);
+		ctx.lineStyle(1 / 30, 0xff0000, 0.5);
 		ctx.beginPath();
 		ctx.moveTo(0, 0);
 		ctx.lineTo(1, 0);
 		ctx.stroke();
-		ctx.lineStyle(1, 0x00ff00, 0.5);
+		ctx.lineStyle(1 / 30, 0x00ff00, 0.5);
 		ctx.beginPath();
 		ctx.moveTo(0, 0);
 		ctx.lineTo(0, 1);
@@ -35,6 +35,7 @@ class Box2dDebugDraw {
 		const green = (col.get_g() * 255) | 0;
 		const blue = (col.get_b() * 255) | 0;
 		const colNum = red << 16 | green << 8 | blue;
+		this.context.lineStyle(1 / 30, 0x000, 0.5);
 		this.context.fillStyle(colNum, 0.5);
 	};
 

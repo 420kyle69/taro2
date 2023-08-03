@@ -94,8 +94,9 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 				if (!component.renderer) {
 					const canvas = taro.renderer.scene.getScene('Game');
 					ctx = canvas.add.graphics().setDepth(9999);
-					ctx.setScale(30);
-					const newRenderer = new Box2dDebugDraw(box2D, new Box2dHelpers(box2D), ctx, 32).constructJSDraw();
+					const scale = 30;
+					ctx.setScale(scale);
+					const newRenderer = new Box2dDebugDraw(box2D, new Box2dHelpers(box2D), ctx, scale).constructJSDraw();
 					newRenderer.SetFlags(flags);
 					component.renderer = newRenderer;
 					component._world.SetDebugDraw(newRenderer);

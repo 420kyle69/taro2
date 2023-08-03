@@ -20,6 +20,7 @@ var Box2dDebugDraw = /** @class */ (function () {
             var green = (col.get_g() * 255) | 0;
             var blue = (col.get_b() * 255) | 0;
             var colNum = red << 16 | green << 8 | blue;
+            _this.context.lineStyle(1 / 30, 0x000, 0.5);
             _this.context.fillStyle(colNum, 0.5);
         };
         this.drawPoint = function (vec_p, sizeMetres, color_p) {
@@ -126,12 +127,12 @@ var Box2dDebugDraw = /** @class */ (function () {
         };
     }
     Box2dDebugDraw.drawAxes = function (ctx) {
-        ctx.lineStyle(1, 0xff0000, 0.5);
+        ctx.lineStyle(1 / 30, 0xff0000, 0.5);
         ctx.beginPath();
         ctx.moveTo(0, 0);
         ctx.lineTo(1, 0);
         ctx.stroke();
-        ctx.lineStyle(1, 0x00ff00, 0.5);
+        ctx.lineStyle(1 / 30, 0x00ff00, 0.5);
         ctx.beginPath();
         ctx.moveTo(0, 0);
         ctx.lineTo(0, 1);
