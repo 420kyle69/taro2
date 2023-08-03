@@ -39,12 +39,12 @@ var PhaserRenderer = /** @class */ (function (_super) {
             type: forceCanvas[gameId] || forceCanvas[0] ?
                 Phaser.CANVAS : Phaser.AUTO,
             scale: {
-                width: 600,
-                height: 400,
+                width: 15,
+                height: 10,
                 parent: 'game-div',
                 mode: Phaser.Scale.ScaleModes.RESIZE,
                 autoRound: true,
-                resizeInterval: 100
+                resizeInterval: 100,
             },
             render: {
                 pixelArt: false,

@@ -139,7 +139,7 @@ var AbilityComponent = TaroEntity.extend({
 			ability = taro.game.data.abilities[handle];
 		}
 
-		switch (ability.event) {
+		switch (ability.eventScripts) {
 			// skip switch for old abilities
 			case undefined:
 				break;
@@ -197,7 +197,7 @@ var AbilityComponent = TaroEntity.extend({
 
 	canAffordCost: function(ability, player) {
 		let canAffordCost = true;
-
+		console.log(ability);
 		if (ability.cost && ability.cost.unitAttributes) {
 			// AbilityComponent.prototype.log("ability cost", ability.cost.cast)
 			for (attrName in ability.cost.unitAttributes) {
@@ -248,9 +248,10 @@ var AbilityComponent = TaroEntity.extend({
 	},
 
 	startCasting: function (abilityId) {
+		console.log(abilityId);
 		const player = this._entity.getOwner();
 		const ability = taro.game.data.abilities[abilityId];
-
+		console.log(ability);
 		if (!this.canAffordCost(ability, player)) {
 			return;
 		}
@@ -268,8 +269,9 @@ var AbilityComponent = TaroEntity.extend({
 			}
 		}
 
-		if (ability.events.castDuration) {
-			
+		if (ability.castDuration) {
+			this.activeAbilities[abilityId] = ability.castDuration;
+			console.log(ability.castDuration);
 		}
 
 	},
