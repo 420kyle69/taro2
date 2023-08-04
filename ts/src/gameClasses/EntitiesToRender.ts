@@ -32,23 +32,6 @@ class EntitiesToRender {
 
 					if (entity._behaviour && !entity.isHidden()) {
 						entity._behaviour();
-
-						// handle entity culling
-						if (entity.isCulled) {
-							if (entity._category === 'item') {
-								var ownerUnit = entity.getOwnerUnit();  
-								if (ownerUnit) {
-									entity.emit('transform', {
-										x: ownerUnit.nextKeyFrame[1][0],
-										y: ownerUnit.nextKeyFrame[1][1],
-										rotation: ownerUnit.nextKeyFrame[1][2],
-									});
-								}   
-							}
-							continue;
-						}
-		
-						entity.emit('cull');
 					}
 
 					// handle streamUpdateData
@@ -86,7 +69,22 @@ class EntitiesToRender {
 					}
 				}
 
-                
+                // handle entity culling
+                if (entity.isCulled) {
+                    if (entity._category === 'item') {
+                        var ownerUnit = entity.getOwnerUnit();  
+                        if (ownerUnit) {
+                            entity.emit('transform', {
+                                x: ownerUnit.nextKeyFrame[1][0],
+                                y: ownerUnit.nextKeyFrame[1][1],
+                                rotation: ownerUnit.nextKeyFrame[1][2],
+                            });
+                        }   
+                    }
+                    continue;
+                }
+
+                entity.emit('cull');
 
 				// update transformation using incoming network stream
 				if (taro.network.stream) {
