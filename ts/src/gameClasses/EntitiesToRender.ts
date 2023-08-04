@@ -1,6 +1,7 @@
 class EntitiesToRender {
 	trackEntityById: {[key: string]: TaroEntity};
 	timeStamp: number;
+    //updateCount: number;
 
 	constructor() {
 		this.trackEntityById = {};
@@ -9,9 +10,14 @@ class EntitiesToRender {
 
 	updateAllEntities (/*timeStamp*/): void {
 		var currentTime = Date.now();
+
+		//taro.transformCount = 0;
+		//this.updateCount = 0;
+
 		for (var entityId in this.trackEntityById) {
 			var entity = taro.$(entityId);
 			if (entity) {
+				//this.updateCount++;
 				// handle entity behaviour and transformation offsets
 				if (taro.gameLoopTickHasExecuted) {
 					if (entity._deathTime !== undefined && entity._deathTime <= taro._tickStart) {
@@ -62,6 +68,23 @@ class EntitiesToRender {
 						}
 					}
 				}
+
+                // handle entity culling
+                if (entity.isCulled) {
+                    if (entity._category === 'item') {
+                        var ownerUnit = entity.getOwnerUnit();  
+                        if (ownerUnit) {
+                            entity.emit('transform', {
+                                x: ownerUnit.nextKeyFrame[1][0],
+                                y: ownerUnit.nextKeyFrame[1][1],
+                                rotation: ownerUnit.nextKeyFrame[1][2],
+                            });
+                        }   
+                    }
+                    continue;
+                }
+
+                entity.emit('cull');
 
 				// update transformation using incoming network stream
 				if (taro.network.stream) {
@@ -115,6 +138,8 @@ class EntitiesToRender {
 		if (taro.gameLoopTickHasExecuted) {
 			taro.gameLoopTickHasExecuted = false;
 		}
+
+		//console.log(taro._currentTime, "processTransform count", taro.transformCount, "updateAllEntities count", this.updateCount);
 	}
 
 	frameTick(): void {

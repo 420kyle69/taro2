@@ -1,4 +1,5 @@
 declare class TaroEngine extends TaroClass {
+    transformCount: number;
 	newIdHex(): any;
 
 	tiled: any;
