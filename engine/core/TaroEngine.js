@@ -107,7 +107,7 @@ var TaroEngine = TaroEntity.extend({
 		this._tickDelta = 0; // The time between the last tick and the current one
 		this._lastTimeStamp = new Date().getTime();
 
-		this.transformCount = 0
+		//this.transformCount = 0
 
 		this._fpsRate = 60; // Sets the frames per second to execute engine tick's at
 		this._gameLoopTickRate = 20; // "frameTick", input, and streaming
