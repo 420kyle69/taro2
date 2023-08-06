@@ -53,6 +53,10 @@ class GameScene extends PhaserScene {
 			taro.client.emit('scale', { ratio: ratio });
 		});
 
+        taro.client.on('set-resolution', (resolution) => {
+            this.scale.setGameSize(window.innerWidth/resolution, window.innerHeight/resolution);
+		});
+
 		taro.client.on('change-filter', (data: {filter: renderingFilter}) => {
 			this.changeTextureFilter(data.filter);
 		});

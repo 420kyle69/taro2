@@ -55,6 +55,9 @@ var GameScene = /** @class */ (function (_super) {
             camera.zoomTo(ratio, 1000, Phaser.Math.Easing.Quadratic.Out, true);
             taro.client.emit('scale', { ratio: ratio });
         });
+        taro.client.on('set-resolution', function (resolution) {
+            _this.scale.setGameSize(window.innerWidth / resolution, window.innerHeight / resolution);
+        });
         taro.client.on('change-filter', function (data) {
             _this.changeTextureFilter(data.filter);
         });
