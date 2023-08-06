@@ -42,7 +42,8 @@ var PhaserRenderer = /** @class */ (function (_super) {
                 width: 600,
                 height: 400,
                 parent: 'game-div',
-                mode: Phaser.Scale.ScaleModes.RESIZE,
+                mode: Phaser.Scale.ScaleModes.ENVELOP,
+                autoCenter: Phaser.Scale.Center.CENTER_BOTH,
                 autoRound: true,
                 resizeInterval: 100
             },
