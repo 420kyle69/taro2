@@ -14,6 +14,7 @@ class GameScene extends PhaserScene {
 	tileset: Phaser.Tilemaps.Tileset;
 	cameraTarget: Phaser.GameObjects.Container & IRenderProps;
 	filter: Phaser.Textures.FilterMode;
+    resolutionCoef: number;
 
 	constructor() {
 		super({ key: 'Game' });
@@ -27,11 +28,12 @@ class GameScene extends PhaserScene {
 
 		const camera = this.cameras.main;
 		camera.setBackgroundColor(taro.game.data.defaultData.mapBackgroundColor);
+        this.resolutionCoef = 1;
 
 		this.scale.on(Phaser.Scale.Events.RESIZE, () => {
 			if (this.zoomSize) {
 				camera.zoom = this.calculateZoom();
-				taro.client.emit('scale', { ratio: camera.zoom });
+				taro.client.emit('scale', { ratio: camera.zoom * this.resolutionCoef });
 			}
 		});
 
@@ -50,11 +52,11 @@ class GameScene extends PhaserScene {
 				true
 			);
 
-			taro.client.emit('scale', { ratio: ratio });
+			taro.client.emit('scale', { ratio: ratio * this.resolutionCoef });
 		});
 
         taro.client.on('set-resolution', (resolution) => {
-            this.scale.setGameSize(window.innerWidth/resolution, window.innerHeight/resolution);
+            this.setResolution(resolution, true);
 		});
 
 		taro.client.on('change-filter', (data: {filter: renderingFilter}) => {
@@ -574,6 +576,15 @@ class GameScene extends PhaserScene {
 			}
 		);
 	}
+
+    setResolution (resolution: number, setResolutionCoef: boolean): void {
+        if (setResolutionCoef) {
+            this.resolutionCoef = resolution;
+        }
+        if (taro.developerMode.activeTab !== 'map') {
+            this.scale.setGameSize(window.innerWidth/resolution, window.innerHeight/resolution);
+        }
+    }
 
 	update (): void {
 		const worldPoint = this.cameras.main.getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
