@@ -218,6 +218,7 @@ var GameScene = /** @class */ (function (_super) {
         this.events.once('render', function () {
             _this.scene.launch('DevMode');
             taro.client.rendererLoaded.resolve();
+            document.dispatchEvent(new Event('taro rendered'));
         });
         BitmapFontManager.create(this);
         var map = this.tilemap = this.make.tilemap({ key: 'map' });
