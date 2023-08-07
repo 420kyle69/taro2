@@ -14,7 +14,6 @@ class PhaserItem extends PhaserAnimatedEntity {
 		this.sprite.visible = false;
 
 		this.gameObject = this.sprite;
-        this.gameObject.taroEntity = entity;
 
 		const { x, y } = entity._translate;
 		this.gameObject.setPosition(x, y);

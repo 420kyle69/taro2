@@ -1,19 +1,18 @@
 var EntitiesToRender = /** @class */ (function () {
-    //updateCount: number;
     function EntitiesToRender() {
         this.trackEntityById = {};
         taro.client.on('tick', this.frameTick, this);
     }
     EntitiesToRender.prototype.updateAllEntities = function ( /*timeStamp*/) {
         var _a, _b;
-        var currentTime = Date.now();
-        //taro.transformCount = 0;
-        //this.updateCount = 0;
         for (var entityId in this.trackEntityById) {
-            var entity = taro.$(entityId);
+            // var timeStart = performance.now();
+            // var entity = taro.$(entityId);	
+            var entity = this.trackEntityById[entityId];
+            // taro.profiler.logTimeElapsed('findEntity', timeStart);
             if (entity) {
-                //this.updateCount++;
                 // handle entity behaviour and transformation offsets
+                // var timeStart = performance.now();
                 if (taro.gameLoopTickHasExecuted) {
                     if (entity._deathTime !== undefined && entity._deathTime <= taro._tickStart) {
                         // Check if the deathCallBack was set
@@ -54,24 +53,12 @@ var EntitiesToRender = /** @class */ (function () {
                         }
                     }
                 }
-                // handle entity culling
-                if (entity.isCulled) {
-                    if (entity._category === 'item') {
-                        var ownerUnit = entity.getOwnerUnit();
-                        if (ownerUnit) {
-                            entity.emit('transform', {
-                                x: ownerUnit.nextKeyFrame[1][0],
-                                y: ownerUnit.nextKeyFrame[1][1],
-                                rotation: ownerUnit.nextKeyFrame[1][2],
-                            });
-                        }
-                    }
-                    continue;
-                }
-                entity.emit('cull');
+                // taro.profiler.logTimeElapsed('entity._behaviour()', timeStart);
                 // update transformation using incoming network stream
-                if (taro.network.stream) {
+                if (entity.isTransforming()) {
+                    // var timeStart = performance.now();
                     entity._processTransform();
+                    // taro.profiler.logTimeElapsed('first _processTransform', timeStart);
                 }
                 if (entity._translate && !entity.isHidden()) {
                     var x = entity._translate.x;
@@ -80,6 +67,7 @@ var EntitiesToRender = /** @class */ (function () {
                     if (entity._category == 'item') {
                         var ownerUnit = entity.getOwnerUnit();
                         if (ownerUnit) {
+                            // var timeStart = performance.now();
                             // if ownerUnit's transformation hasn't been processed yet, then it'll cause item to drag behind. so we're running it now
                             ownerUnit._processTransform();
                             // rotate weldjoint items to the owner unit's rotation
@@ -97,6 +85,7 @@ var EntitiesToRender = /** @class */ (function () {
                                 y = ownerUnit._translate.y + entity.anchoredOffset.y;
                                 rotate = entity.anchoredOffset.rotate;
                             }
+                            // taro.profiler.logTimeElapsed('second _processTransform', timeStart);
                         }
                     }
                     if (entity.tween && entity.tween.isTweening) {
@@ -105,7 +94,11 @@ var EntitiesToRender = /** @class */ (function () {
                         y += entity.tween.offset.y;
                         rotate += entity.tween.offset.rotate;
                     }
-                    entity.transformTexture(x, y, rotate);
+                    if (entity.isTransforming()) {
+                        // var timeStart = performance.now();
+                        entity.transformTexture(x, y, rotate);
+                        // taro.profiler.logTimeElapsed('transformTexture', timeStart);
+                    }
                 }
             }
         }
@@ -113,7 +106,6 @@ var EntitiesToRender = /** @class */ (function () {
         if (taro.gameLoopTickHasExecuted) {
             taro.gameLoopTickHasExecuted = false;
         }
-        //console.log(taro._currentTime, "processTransform count", taro.transformCount, "updateAllEntities count", this.updateCount);
     };
     EntitiesToRender.prototype.frameTick = function () {
         taro.engineStep(Date.now(), 1000 / 60);

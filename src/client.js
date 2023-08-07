@@ -124,7 +124,7 @@ const Client = TaroEventingClass.extend({
 		});
 
 		//go fetch
-
+		taro.addComponent(ProfilerComponent);
 		taro.addComponent(GameComponent);
 		taro.addComponent(MenuUiComponent);
 		// we're going to try and insert the fetch here
@@ -538,7 +538,7 @@ const Client = TaroEventingClass.extend({
 			taro.network.send('taroChatJoinRoom', '1');
 
 			taro.addComponent(TaroChatComponent);
-			taro.addComponent(VideoChatComponent); // shall we talk about the elephant in the room?
+			// taro.addComponent(VideoChatComponent); // shall we talk about the elephant in the room?
 
 			// old comment => 'check for all of the existing entities in the game
 			taro.network.addComponent(TaroStreamComponent);

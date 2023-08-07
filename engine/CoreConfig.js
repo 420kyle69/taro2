@@ -35,6 +35,7 @@ var taroCoreConfig = {
 		['csap', 'TaroInputComponent', 'components/TaroInputComponent.js'],
 		['csap', 'TaroTiledComponent', 'components/TaroTiledComponent.js'],
 		['csap', 'TaroUiManagerComponent', 'components/TaroUiManagerComponent.js'],
+		['csap', 'ProfilerComponent', 'components/ProfilerComponent.js'],
 		/* Network Stream */
 		['csap', 'TaroTimeSyncExtension', 'components/network/TaroTimeSyncExtension.js'],
 		['csap', 'TaroStreamComponent', 'components/network/TaroStreamComponent.js'],
@@ -64,7 +65,7 @@ var taroCoreConfig = {
 		['csap', 'TaroCamera', 'core/TaroCamera.js'],
 		['csap', 'TaroViewport', 'core/TaroViewport.js'],
 		['csap', 'TaroScene2d', 'core/TaroScene2d.js'],
-		['csap', 'TaroArray', 'core/TaroArray.js'],
+		['csap', 'TaroArray', 'core/TaroArray.js'],		
 		/* Engine Actual */
 		['csap', 'TaroEngine', 'core/TaroEngine.js'],
 		/* Physics Libraries */

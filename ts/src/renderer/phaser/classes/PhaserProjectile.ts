@@ -11,7 +11,6 @@ class PhaserProjectile extends PhaserAnimatedEntity {
 		this.sprite.visible = false;
 		this.scene.renderedEntities.push(this.sprite);
 		this.gameObject = this.sprite;
-        this.gameObject.taroEntity = entity;
 
 		const { x, y } = entity._translate;
 		this.gameObject.setPosition(x, y);
