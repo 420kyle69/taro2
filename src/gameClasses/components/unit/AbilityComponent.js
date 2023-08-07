@@ -6,7 +6,8 @@ var AbilityComponent = TaroEntity.extend({
 		var self = this;
 		self._entity = entity;
 
-		this.activeAbilities = [];
+		this.activeAbilities = {};
+		this.abilityCooldowns = {};
 	},
 
 	moveUp: function () {
@@ -139,16 +140,16 @@ var AbilityComponent = TaroEntity.extend({
 			ability = taro.game.data.abilities[handle];
 		}
 
-		switch (ability.eventScripts) {
+		switch (ability.event) {
 			// skip switch for old abilities
 			case undefined:
 				break;
 
 			case 'startCasting':
-				return this.startCasting(ability.id);
+				return this.startCasting(ability.abilityId);
 
 			case 'stopCasting':
-				return this.stopCasting(ability.id);
+				return this.stopCasting(ability.abilityId);
 		}
 
 		// new abilities should have returned by now. following is for old system (backwards comp.)
@@ -250,7 +251,7 @@ var AbilityComponent = TaroEntity.extend({
 	startCasting: function (abilityId) {
 		console.log(abilityId);
 		const player = this._entity.getOwner();
-		const ability = taro.game.data.abilities[abilityId];
+		const ability = this._entity._stats.controls.unitAbilities[abilityId];
 		console.log(ability);
 		if (!this.canAffordCost(ability, player)) {
 			return;
@@ -258,42 +259,37 @@ var AbilityComponent = TaroEntity.extend({
 
 		this.payCost(ability, player);
 
-		for (let obj in this._entity.script.scripts) {
+		this._entity.script.runScript(
+			ability.eventScripts.startCasting,
+			{ triggeredBy: { unitId: this._entity.id()} }
+		);
 
-			if (
-				this._entity.script.scripts[obj].name &&
-				this._entity.script.scripts[obj].name === ability.events.startCasting
-			) {
-				console.log(obj);
-				this._entity.script.runScript(obj, { triggeredBy: { unitId: this._entity.id()} });
-			}
-		}
+		this.activeAbilities[abilityId] = true;
 
 		if (ability.castDuration) {
-			this.activeAbilities[abilityId] = ability.castDuration;
-			console.log(ability.castDuration);
+			this.activeAbilities[abilityId] = Date.now() + ability.castDuration;
 		}
 
 	},
 
 	stopCasting: function (abilityId) {
-		const ability = taro.game.data.abilities[abilityId];
+		// if (this.activeAbilities[abilityId])
+		const ability = this._entity._stats.controls.unitAbilities[abilityId];
 
-		for (let obj in this._entity.script.scripts) {
-
-			if (
-				this._entity.script.scripts[obj].name &&
-				this._entity.script.scripts[obj].name === ability.events.stopCasting
-			) {
-				console.log(obj);
-				this._entity.script.runScript(obj, { triggeredBy: { unitId: this._entity.id()} });
-			}
-		}
+		this._entity.script.runScript(
+			ability.eventScripts.stopCasting,
+			{ triggeredBy: { unitId: this._entity.id()} }
+		);
 	},
 	_behaviour: function (ctx) {
 
-		if (true) {
-			console.log(Date.now());
+		if (Object.keys(this.abilityCooldowns).length > 0) {
+			for (let id in this.abilityCooldowns) {
+				if (this.abilityCooldowns[id] <= Date.now()) {
+					delete this.abilityCooldowns[id];
+					this.stopCasting(id);
+				}
+			}
 		}
 	}
 });
