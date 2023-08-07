@@ -858,11 +858,7 @@ const Client = TaroEventingClass.extend({
 			this.emit('stop-follow');
 			this.emit('position-camera', [x, y]);
 		}
-	},
-
-    setResolution: function (resolution) {
-        this.emit('set-resolution', resolution);
-    }
+	}
 });
 
 if (typeof (module) != 'undefined' && typeof (module.exports) != 'undefined') {
