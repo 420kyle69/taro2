@@ -700,8 +700,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 										y = entity.nextKeyFrame[1][1];
 										angle = entity.nextKeyFrame[1][2];
 									}
-									
-									
+									entity.isTransforming(true);						
 								}
 							}
 

@@ -124,8 +124,6 @@ class EntitiesToRender {
 						y += entity.tween.offset.y;
 						rotate += entity.tween.offset.rotate;
 					}
-					
-
 					if (entity.isTransforming()) {
 						// var timeStart = performance.now();
 						entity.transformTexture(x, y, rotate);

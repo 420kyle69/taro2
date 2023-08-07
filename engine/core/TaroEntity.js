@@ -3142,7 +3142,7 @@ var TaroEntity = TaroObject.extend({
 	},
 
 	teleportTo: function (x, y, rotate, teleportCamera) {
-		// console.log("teleportTo", x, y, rotate)
+		// console.log("teleportTo", x, y, rotate, this._stats.type)
 		this.teleported = true;
         this.teleportCamera = teleportCamera;
 		this.teleportDestination = [x, y, rotate]
@@ -3159,15 +3159,15 @@ var TaroEntity = TaroObject.extend({
 				this.translateColliderTo(x, y);
 			}
 		} else if (taro.isClient) {
-			this.nextKeyFrame[1] = [x, y, rotate];
+			this.nextKeyFrame = [taro._currentTime, [x, y, rotate]];
+			this.isTransforming(true);
 			if (taro.physics && this.prevPhysicsFrame && this.nextPhysicsFrame) {
-				this.nextPhysicsFrame = [taro._currentTime, [x, y, rotate]];
+				this.nextPhysicsFrame = [taro._currentTime, [x, y, rotate]];				
 			}
             //instantly move to camera the new position
             if (teleportCamera && taro.client.myPlayer?.cameraTrackedUnit === this.id()) {
                 taro.client.emit('instant-move-camera', [x, y]);
             }
-
 		}
 
 		this.discrepancyCount = 0;
@@ -5176,8 +5176,6 @@ var TaroEntity = TaroObject.extend({
 		this._translate.y = y;
 		this._rotate.z = rotate;
 
-		this.transformTexture(x, y, rotate);
-
 		this.teleported = false;
 		this.lastTransformedAt = taro._currentTime;
 	},
@@ -5191,7 +5189,7 @@ var TaroEntity = TaroObject.extend({
 		if (this._category == 'item') {
 			var ownerUnit = this.getOwnerUnit();
 			if (ownerUnit) {
-				return ownerUnit.isTransforming || this._isTransforming;
+				return ownerUnit._isTransforming || this._isTransforming;
 			}
 		}
 
