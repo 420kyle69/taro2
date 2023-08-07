@@ -68,6 +68,7 @@ var TaroEntity = TaroObject.extend({
 
 		this._keyFrames = [];
 		this.nextKeyFrame = [taro._currentTime, [this._translate.x, this._translate.y, this._rotate.z]];
+		this._isTransforming = true;
 		this.lastTransformedAt = 0;
 		this.latestTimeStamp = 0;
 		this.lastTeleportedAt = 0;
@@ -5096,24 +5097,17 @@ var TaroEntity = TaroObject.extend({
      * Update the position of the entities using the interpolation. This results smooth motion of the entities.
      */
 	_processTransform: function () {
-		
 		var tickDelta = taro._currentTime - this.lastTransformedAt;
 
 		if (
-			// prevent entity from transforming multiple times
-			this.lastTransformedAt == taro._currentTime ||
-			// entity has no body
+			tickDelta == 0 || // prevent entity from transforming multiple times			
 			this._translate == undefined ||
-			this._stats.currentBody == undefined ||
-			(
-				// ignore server stream of my own unit's sprite-only item
-				this._stats.currentBody && this._stats.currentBody.type == 'spriteOnly' &&
-				(this.getOwnerUnit && this.getOwnerUnit() == taro.client.selectedUnit)
-			)
+			this._stats.currentBody == undefined || // entity has no body
+			!this.isTransforming() // entity is not transforming
 		) {
 			return;
 		}
-
+		
 		let xDiff = null;
 		let yDiff = null;
 		
@@ -5125,7 +5119,6 @@ var TaroEntity = TaroObject.extend({
 		let rotate = this._rotate.z;
 		
 		var nextTransform = this.nextKeyFrame[1];
-		
 		
 		if (nextTransform) {
 			
@@ -5149,6 +5142,10 @@ var TaroEntity = TaroObject.extend({
 			} else {
 				x += xDiff/2;
 				y += yDiff/2;
+
+				if (taro._currentTime > nextTime + 100) {
+					this.isTransforming(false);
+				}
 			}	
 
 			rotateStart = rotate;
@@ -5165,7 +5162,7 @@ var TaroEntity = TaroObject.extend({
 			
 			rotate = this.interpolateValue(rotateStart, rotateEnd, taro._currentTime - 16, taro._currentTime, taro._currentTime + 16);
 		}
-		
+
 		// for my own unit, ignore streamed angle if this unit control is set to face mouse cursor instantly.
 		if (this == taro.client.selectedUnit &&
 			this.angleToTarget != undefined && !isNaN(this.angleToTarget) &&
@@ -5179,9 +5176,26 @@ var TaroEntity = TaroObject.extend({
 		this._translate.y = y;
 		this._rotate.z = rotate;
 
-		
+		this.transformTexture(x, y, rotate);
+
 		this.teleported = false;
 		this.lastTransformedAt = taro._currentTime;
+	},
+
+	isTransforming: function(bool) {
+		if (bool != undefined) {
+			this._isTransforming = bool;
+		}
+
+		// for items, if its owner is transforming, then it is considered to be transforming
+		if (this._category == 'item') {
+			var ownerUnit = this.getOwnerUnit();
+			if (ownerUnit) {
+				return ownerUnit.isTransforming || this._isTransforming;
+			}
+		}
+
+		return this._isTransforming;
 	},
 
 	getAttributeBarContainer: function () {
