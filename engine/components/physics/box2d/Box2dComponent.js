@@ -253,7 +253,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 					ReportFixture: (fixture_p) => {
 						const fixture = self.wrapPointer(fixture_p, self.b2Fixture);
 						entityId = fixture.GetBody().GetFixtureList().taroId;
-						console.log(fixture)
 						var entity = taro.$(entityId);
 						if (entity) {
 							// taro.devLog("found", entity._category, entity._translate.x, entity._translate.y)
@@ -585,7 +584,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 
 				self._world.step(timeElapsedSinceLastStep/1000, 8, 3); // Call the world step; frame-rate, velocity iterations, position iterations
 
-				
+
 				var tempBod = self._world.getBodyList();
 
 				// iterate through every physics body
@@ -690,7 +689,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 										y = entity.nextKeyFrame[1][1];
 										angle = entity.nextKeyFrame[1][2];
 									}
-									entity.isTransforming(true);						
+									entity.isTransforming(true);
 								}
 							}
 
@@ -714,7 +713,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 					tempBod = tempBod.getNext();
 				}
 
-				
+
 				taro._physicsFrames++;
 
 				// Clear forces because we have ended our physics simulation frame
