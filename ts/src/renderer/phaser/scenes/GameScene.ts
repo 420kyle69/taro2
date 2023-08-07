@@ -28,6 +28,7 @@ class GameScene extends PhaserScene {
 
 		const camera = this.cameras.main;
 		camera.setBackgroundColor(taro.game.data.defaultData.mapBackgroundColor);
+        
         this.resolutionCoef = 1;
 
 		this.scale.on(Phaser.Scale.Events.RESIZE, () => {
