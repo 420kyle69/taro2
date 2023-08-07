@@ -184,14 +184,25 @@ var ClientNetworkEvents = {
 	},
 
 	_onUpdateUiText: function (data) {
-		// console.log("updating UI text", data)
+		if (!data.target) {
+			return;
+		}
+		const key = `ui-text-${data.target}-id`
+
+		if (!taro.uiTextElementsObj[key]) {
+			taro.uiTextElementsObj[key] = document.getElementById(key);
+		}
+		if (!taro.uiTextElementsObj[key]) {
+			return;
+		}
 
 		if (data.action == "show") {
-			$(`.ui-text-${data.target}`).show();
+			// $(`.ui-text-${data.target}`).show();
+			taro.uiTextElementsObj[key].style.display = "block";
 		} else if (data.action == "hide") {
-			$(`.ui-text-${data.target}`).hide();
+			taro.uiTextElementsObj[key].style.display = "none";
 		} else {
-			$(`.ui-text-${data.target}`).html(data.value);
+			taro.uiTextElementsObj[key].innerHTML = data.value;
 		}
 	},
 

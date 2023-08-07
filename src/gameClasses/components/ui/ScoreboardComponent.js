@@ -9,6 +9,9 @@ var ScoreboardComponent = TaroEntity.extend({
 		self.scoreAttributeId = taro.game.data.settings.scoreAttributeId;
 		self._hidden = false;
 
+		self.scoreboardElement = null;
+		self.leaderboardToggleElement = null;
+
 		self.setUI();
 	},
 
@@ -142,9 +145,9 @@ var ScoreboardComponent = TaroEntity.extend({
 
 			players.forEach(function (player) {
 				if (player._stats && (
-						 	// only display human players on scoreboard
-							player._stats.controlledBy == 'human'
-						)
+					// only display human players on scoreboard
+					player._stats.controlledBy == 'human'
+				)
 				) {
 					var playerId = player.id();
 					var score = 0;
@@ -203,14 +206,35 @@ var ScoreboardComponent = TaroEntity.extend({
 
 			taro.client.clientCount = sortedScores.length;
 
-			$('#player-count').html(players.length);
+			// $('#player-count').html(players.length);
+			// const playerCount = document.getElementById('player-count');
+
+			// if (playerCount) {
+			// 	playerCount.innerHTML = players.length;
+			// }
+
+			if (!self.scoreboardElement) {
+				self.scoreboardElement = document.getElementById('scoreboard');
+			}
+
+			if (!self.leaderboardToggleElement) {
+				self.leaderboardToggleElement = document.getElementById('leaderboard-toggle');
+			}
 
 			if (self._hidden) {
-				$('#scoreboard').html('');
-				$('#leaderboard-toggle').html('&nbsp;<i class="far fa-caret-square-down" aria-hidden="true" onclick="taro.scoreboard.toggleScores()" style="cursor:pointer;"></i>');
+				if (self.scoreboardElement) {
+					self.scoreboardElement.innerHTML = '';
+				}
+				if (self.leaderboardToggleElement) {
+					self.leaderboardToggleElement.innerHTML = '&nbsp;<i class="far fa-caret-square-down" aria-hidden="true" onclick="taro.scoreboard.toggleScores()" style="cursor:pointer;"></i>';
+				}
 			} else {
-				$('#scoreboard').html(scoreboard);
-				$('#leaderboard-toggle').html('&nbsp;<i class="far fa-caret-square-up" aria-hidden="true" onclick="taro.scoreboard.toggleScores()" style="cursor:pointer;"></i>');
+				if (self.scoreboardElement) {
+					self.scoreboardElement.innerHTML = scoreboard;
+				} 
+				if (self.leaderboardToggleElement) {
+					self.leaderboardToggleElement.innerHTML = '&nbsp;<i class="far fa-caret-square-up" aria-hidden="true" onclick="taro.scoreboard.toggleScores()" style="cursor:pointer;"></i>';
+				}
 			}
 		}
 	},
