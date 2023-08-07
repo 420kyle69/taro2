@@ -40,11 +40,10 @@ var GameScene = /** @class */ (function (_super) {
         }
         var camera = this.cameras.main;
         camera.setBackgroundColor(taro.game.data.defaultData.mapBackgroundColor);
-        this.resolutionCoef = 1;
         this.scale.on(Phaser.Scale.Events.RESIZE, function () {
             if (_this.zoomSize) {
                 camera.zoom = _this.calculateZoom();
-                taro.client.emit('scale', { ratio: camera.zoom * _this.resolutionCoef });
+                taro.client.emit('scale', { ratio: camera.zoom });
             }
         });
         taro.client.on('zoom', function (height) {
@@ -54,10 +53,7 @@ var GameScene = /** @class */ (function (_super) {
             _this.setZoomSize(height);
             var ratio = _this.calculateZoom();
             camera.zoomTo(ratio, 1000, Phaser.Math.Easing.Quadratic.Out, true);
-            taro.client.emit('scale', { ratio: ratio * _this.resolutionCoef });
-        });
-        taro.client.on('set-resolution', function (resolution) {
-            _this.setResolution(resolution, true);
+            taro.client.emit('scale', { ratio: ratio });
         });
         taro.client.on('change-filter', function (data) {
             _this.changeTextureFilter(data.filter);
@@ -218,7 +214,6 @@ var GameScene = /** @class */ (function (_super) {
         this.events.once('render', function () {
             _this.scene.launch('DevMode');
             taro.client.rendererLoaded.resolve();
-            document.dispatchEvent(new Event('taro rendered'));
         });
         BitmapFontManager.create(this);
         var map = this.tilemap = this.make.tilemap({ key: 'map' });
@@ -403,14 +398,6 @@ var GameScene = /** @class */ (function (_super) {
         return __spreadArray(__spreadArray(__spreadArray([], this.unitsList, true), this.itemList, true), this.projectilesList, true).find(function (entity) {
             return entity.entity._id === entityId;
         });
-    };
-    GameScene.prototype.setResolution = function (resolution, setResolutionCoef) {
-        if (setResolutionCoef) {
-            this.resolutionCoef = resolution;
-        }
-        if (taro.developerMode.activeTab !== 'map') {
-            this.scale.setGameSize(window.innerWidth / resolution, window.innerHeight / resolution);
-        }
     };
     GameScene.prototype.update = function () {
         var _this = this;
