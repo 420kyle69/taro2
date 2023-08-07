@@ -1338,8 +1338,14 @@ var TaroEngine = TaroEntity.extend({
 		// Store draws per second
 		self._dps = self._dpf * self._renderFPS;
 
-		if (taro.isClient)
+
+		if (taro.isClient) {
 			$('#updatefps').html(self._renderFPS);
+			window.updateNextStatsEverySecond && window.updateNextStatsEverySecond({ fps: self._renderFPS });
+
+			// taro.profiler.printResults();
+			
+		}
 
 		// Zero out counters
 		self._renderFrames = 0;
