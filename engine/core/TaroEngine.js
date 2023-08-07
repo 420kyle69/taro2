@@ -19,6 +19,11 @@ var TaroEngine = TaroEntity.extend({
 
 		this._id = 'taro';
 		this.basePath = '';
+		this.fpsStatsElement = null;
+		this.pingElement = null;
+
+		this.uiTextElementsObj = {};
+
 		// Determine the environment we are executing in
 		this.isServer = (typeof (module) !== 'undefined' && typeof (module.exports) !== 'undefined');
 		this.isClient = !this.isServer;
@@ -1343,7 +1348,13 @@ var TaroEngine = TaroEntity.extend({
 
 
 		if (taro.isClient) {
-			$('#updatefps').html(self._renderFPS);
+			if (!self.fpsStatsElement) {
+				self.fpsStatsElement = document.getElementById('updatefps');
+			}
+
+			if (self.fpsStatsElement) {
+				self.fpsStatsElement.innerHTML = self._renderFPS;
+			}
 			window.updateNextStatsEverySecond && window.updateNextStatsEverySecond({ fps: self._renderFPS });
 		}
 
