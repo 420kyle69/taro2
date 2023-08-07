@@ -66,8 +66,7 @@ const planckWrapper: PhysicsDistProps = {
 			self.destroyBody(entity);
 		}
 
-
-		var tempDef: any = {};
+		var tempDef:any = {};
 		var param;
 		var tempBod;
 		var fixtureDef;
@@ -97,12 +96,8 @@ const planckWrapper: PhysicsDistProps = {
 			}
 		}
 
+		tempDef.type = body.type;
 
-		if (entity._category === 'region') {
-			tempDef.type = 'dynamic';
-		} else {
-			tempDef.type = body.type;
-		}
 		// set rotation
 		tempDef.angle = entity._rotate.z;
 		// Set the position
@@ -187,7 +182,8 @@ const planckWrapper: PhysicsDistProps = {
 									}
 
 									if (tempShape && fixtureDef.filter) {
-										var fd: any = {};
+										var fd:any = {};
+
 										fd.friction = fixtureDef.friction;
 										fd.restitution = fixtureDef.restitution;
 										fd.density = fixtureDef.density;

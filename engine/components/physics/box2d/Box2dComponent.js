@@ -236,6 +236,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 	// get entities within a region
 	getBodiesInRegion: function (region) {
 		var self = this;
+
 		if (taro.physics.engine == 'crash') {
 			var collider = new self.crash.Box(new self.crash.Vector(region.x + (region.width / 2), region.y + (region.height / 2)), region.width, region.height);
 			return taro.physics.crash.search(collider);
@@ -247,9 +248,20 @@ var PhysicsComponent = TaroEventingClass.extend({
 
 			var entities = [];
 			if (self.engine === 'BOX2DWASM') {
+				function getBodyCallback(fixture) {
+					if (fixture && fixture.m_body && fixture.m_body.m_fixtureList) {
+						entityId = fixture.m_body.m_fixtureList.taroId;
+						var entity = taro.$(entityId);
+						if (entity) {
+							// taro.devLog("found", entity._category, entity._translate.x, entity._translate.y)
+							var entity = taro.$(entityId);
+							entities.push(taro.$(entityId));
+						}
+					}
+					return true;
+				}
 				const callback = Object.assign(new self.JSQueryCallback(), {
 					ReportFixture: (fixture_p) => {
-						console.log('report')
 						const fixture = self.wrapPointer(fixture_p, self.b2Fixture);
 						entityId = fixture.GetBody().GetFixtureList().taroId;
 						var entity = taro.$(entityId);
@@ -592,9 +604,9 @@ var PhysicsComponent = TaroEventingClass.extend({
 				// iterate through every physics body
 				while (tempBod && typeof tempBod.getNext === 'function' && (!self.getPointer || self.getPointer(tempBod) !== self.getPointer(self.nullPtr))) {
 					// Check if the body is awake && not static
-
-					if ((!tempBod._entity || tempBod._entity._category !== 'region') && tempBod.m_type !== 'static' && tempBod.isAwake() && (!tempBod.GetType || tempBod.GetType() !== 0)) {
+					if (tempBod.m_type !== 'static' && tempBod.isAwake() && (!tempBod.GetType || tempBod.GetType() !== 0)) {
 						entity = tempBod._entity;
+
 						if (entity) {
 
 							var mxfp = dists[taro.physics.engine].getmxfp(tempBod);
@@ -883,6 +895,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 			var entityB = nowContact.GetFixtureB().GetBody()._entity;
 			if (!entityA || !entityB)
 				return;
+
 			taro.physics._triggerContactEvent(entityA, entityB);
 			taro.physics._triggerContactEvent(entityB, entityA);
 		} else {
