@@ -8,11 +8,17 @@ class EntitiesToRender {
 	}
 
 	updateAllEntities (/*timeStamp*/): void {
-		var currentTime = Date.now();
 		for (var entityId in this.trackEntityById) {
-			var entity = taro.$(entityId);
+			// var timeStart = performance.now();
+
+			// var entity = taro.$(entityId);	
+			var entity = this.trackEntityById[entityId];
+
+			// taro.profiler.logTimeElapsed('findEntity', timeStart);
 			if (entity) {
 				// handle entity behaviour and transformation offsets
+				// var timeStart = performance.now();
+
 				if (taro.gameLoopTickHasExecuted) {
 					if (entity._deathTime !== undefined && entity._deathTime <= taro._tickStart) {
 						// Check if the deathCallBack was set
@@ -63,12 +69,22 @@ class EntitiesToRender {
 					}
 				}
 
+				// taro.profiler.logTimeElapsed('entity._behaviour()', timeStart);
+
+				
 				// update transformation using incoming network stream
-				if (taro.network.stream) {
+				if (entity.isTransforming()) {
+					// var timeStart = performance.now();
 					entity._processTransform();
+					// taro.profiler.logTimeElapsed('first _processTransform', timeStart);
 				}
 
+				
+				
+				
+
 				if (entity._translate && !entity.isHidden()) {
+					
 					var x = entity._translate.x;
 					var y = entity._translate.y;
 					var rotate = entity._rotate.z;
@@ -77,6 +93,7 @@ class EntitiesToRender {
 						var ownerUnit = entity.getOwnerUnit();
 
 						if (ownerUnit) {
+							// var timeStart = performance.now();
 							// if ownerUnit's transformation hasn't been processed yet, then it'll cause item to drag behind. so we're running it now
 							ownerUnit._processTransform();
 
@@ -96,6 +113,8 @@ class EntitiesToRender {
 								y = ownerUnit._translate.y + entity.anchoredOffset.y;
 								rotate = entity.anchoredOffset.rotate;
 							}
+							// taro.profiler.logTimeElapsed('second _processTransform', timeStart);
+					
 						}
 					}
 
@@ -105,9 +124,17 @@ class EntitiesToRender {
 						y += entity.tween.offset.y;
 						rotate += entity.tween.offset.rotate;
 					}
+					if (entity.isTransforming()) {
+						// var timeStart = performance.now();
+						entity.transformTexture(x, y, rotate);
+						// taro.profiler.logTimeElapsed('transformTexture', timeStart);
+					}
 					
-					entity.transformTexture(x, y, rotate);
+					
+					
 				}
+				
+
 			}
 		}
 
@@ -125,5 +152,6 @@ class EntitiesToRender {
 
 		this.updateAllEntities();
 
+			
 	}
 }

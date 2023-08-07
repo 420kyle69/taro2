@@ -194,10 +194,10 @@ class TilePalette extends Phaser.GameObjects.Container {
 		else if (targetZoom > maxZoom) targetZoom = maxZoom;
 		this.camera.setZoom(targetZoom);
 
-		this.scrollBarBottom.getElement('slider.thumb').width = (this.camera.width - 60) / (targetZoom * 2);
+		this.scrollBarBottom.getElement('slider.thumb').width = (this.camera.width - 60) / (targetZoom / 16 * this.tileset.tileWidth * 2);
 		this.scrollBarBottom.layout();
 
-		this.scrollBarRight.getElement('slider.thumb').height = (this.camera.height - 60) / (targetZoom * 2);
+		this.scrollBarRight.getElement('slider.thumb').height = (this.camera.height - 60) / (targetZoom / 16 * this.tileset.tileWidth * 2);
 		this.scrollBarRight.layout();
 	}
 
