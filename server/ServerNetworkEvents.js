@@ -233,7 +233,7 @@ var ServerNetworkEvents = {
 				} 
 
 				if (!isAllowedToJoinGame) {
-					taro.network.disconnect(clientId, 'You do not have permission to join this game.');
+					taro.network.disconnect(clientId, 'Guest players not allowed to join this game.');
 					return;
 				}
 
