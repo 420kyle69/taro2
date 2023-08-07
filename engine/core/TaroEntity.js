@@ -2231,7 +2231,6 @@ var TaroEntity = TaroObject.extend({
 						ctx.fill();
 						taro._drawCount++;
 					}
-
 					ctx.restore();
 				}
 			}

@@ -81,7 +81,7 @@ class GameScene extends PhaserScene {
 			new PhaserRay(this, data.start, data.end, data.config);
 		});
 
-		
+
 		taro.client.on('create-particle', (particle: Particle) => {
 			new PhaserParticle(this, particle);
 		});
@@ -106,11 +106,13 @@ class GameScene extends PhaserScene {
 			camera.setScroll(x, y);
 		});
 
-        taro.client.on('instant-move-camera', (x: number, y: number) => {
-            if (!taro.developerMode.active || taro.developerMode.activeTab === 'play') {
+		taro.client.on('instant-move-camera', (x: number, y: number) => {
+			if (!taro.developerMode.active || taro.developerMode.activeTab === 'play') {
 			    camera.centerOn(x, y);
-            }
+			}
 		});
+
+		
 	}
 
 	preload (): void {
@@ -184,15 +186,15 @@ class GameScene extends PhaserScene {
 			}
 		});
 
-        //to be sure every map not contain null or -1 tiles
-        data.map.layers.forEach((layer) => {
-            if (layer && layer.data) {
-                layer.data.forEach((tile, index) => {
-                    if (tile === -1 || tile === null) {
-                        layer.data[index] = 0;
-                    }
-                });
-            }
+		//to be sure every map not contain null or -1 tiles
+		data.map.layers.forEach((layer) => {
+			if (layer && layer.data) {
+				layer.data.forEach((tile, index) => {
+					if (tile === -1 || tile === null) {
+						layer.data[index] = 0;
+					}
+				});
+			}
 		});
 
 		this.load.tilemapTiledJSON('map', this.patchMapData(data.map));
@@ -579,7 +581,7 @@ class GameScene extends PhaserScene {
 			x: worldPoint.x,
 			y: worldPoint.y,
 		}]);
-		
+
 		this.renderedEntities.forEach(element => {
 			element.setVisible(false);
 		});

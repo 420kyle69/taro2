@@ -1,9 +1,10 @@
 // FIXME: add more types to the physics part of taro2
-// @ts-nocheck
+
 const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing memory leak bug
 	init: async function (component) {
-		const box2D = await box2dwasm();
+		const box2D = await box2dwasm() as typeof Box2D & EmscriptenModule;
 		const { freeLeaked, recordLeak } = new box2D.LeakMitigator();
+		component.box2D = box2D;
 		component.freeLeaked = freeLeaked;
 		component.recordLeak = recordLeak;
 		component.freeFromCache = box2D.LeakMitigator.freeFromCache;
@@ -27,21 +28,20 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 		component.b2MassData = box2D.b2MassData;
 		component.b2PolygonShape = box2D.b2PolygonShape;
 		component.b2CircleShape = box2D.b2CircleShape;
-		component.b2DebugDraw = box2D.DebugDraw;
+		component.b2DebugDraw = box2D.b2Draw;
 		component.b2ContactListener = box2D.JSContactListener;
 		component.b2RevoluteJointDef = box2D.b2RevoluteJointDef;
 		component.b2WeldJointDef = box2D.b2WeldJointDef;
 		component.b2Contact = box2D.b2Contact;
-		component.b2Distance = box2D.b2Distance;
+		component.b2Distance = box2D.b2DistanceJoint;
 		component.b2FilterData = box2D.b2Filter;
 		component.b2DistanceJointDef = box2D.b2DistanceJointDef;
 		// aliases for camelcase
 		component.b2World.prototype.isLocked = component.b2World.prototype.IsLocked;
 		component.b2World.prototype.createBody = component.b2World.prototype.CreateBody;
 		component.b2World.prototype.destroyBody = component.b2World.prototype.DestroyBody;
-		// component.b2World.prototype.createJoint = component.b2World.prototype.CreateJoint;
+		component.b2World.prototype.createJoint = component.b2World.prototype.CreateJoint;
 		component.b2World.prototype.destroyJoint = component.b2World.prototype.DestroyJoint;
-		component.b2World.prototype.createFixture = component.b2World.prototype.CreateFixture;
 		component.b2World.prototype.clearForces = component.b2World.prototype.ClearForces;
 		component.b2World.prototype.getBodyList = component.b2World.prototype.GetBodyList;
 		component.b2World.prototype.getJointList = component.b2World.prototype.GetJointList;
@@ -57,7 +57,6 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 			*/
 
 		component.b2Transform = box2D.b2Transform;
-		component.b2Transform.prototype.R = { col1: new box2D.b2Vec2(), col2: new box2D.b2Vec2() };
 		component.b2Body.prototype.getNext = component.b2Body.prototype.GetNext;
 		component.b2Body.prototype.getAngle = component.b2Body.prototype.GetAngle;
 		component.b2Body.prototype.setPosition = function (position) {
@@ -88,6 +87,30 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 
 		component.b2Joint.prototype.getNext = component.b2Joint.prototype.GetNext;
 
+		let ctx: Phaser.GameObjects.Graphics;
+		if (taro.isClient) {
+			component.enableDebug = (flags = 1) => {
+				console.log('please make sure clientPhyscisEngine is not "", and enabled csp');
+				if (!component.renderer) {
+					const canvas = taro.renderer.scene.getScene('Game');
+					ctx = canvas.add.graphics().setDepth(9999);
+					const scale = 30;
+					ctx.setScale(scale);
+					const newRenderer = new Box2dDebugDraw(box2D, new Box2dHelpers(box2D), ctx, scale).constructJSDraw();
+					newRenderer.SetFlags(flags);
+					component.renderer = newRenderer;
+					component._world.SetDebugDraw(newRenderer);
+					component.ctx = ctx;
+				}
+				component.renderer.SetFlags(flags);
+			};
+			component.disableDebug = () => {
+				component.ctx.destroy();
+				component.renderer = undefined;
+			};
+		}
+
+
 		component.createWorld = function (id, options) {
 			component._world = new component.b2World(this._gravity);
 			component._world.SetContinuousPhysics(this._continuousPhysics);
@@ -116,6 +139,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 		component._gravity = component.recordLeak(new component.b2Vec2(0, 0));
 
 	},
+
 	contactListener: function (self, beginContactCallback, endContactCallback, preSolve, postSolve) {
 		var contactListener = new self.b2ContactListener();
 		if (beginContactCallback !== undefined) {
@@ -149,6 +173,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 	},
 
 	createBody: function (self, entity, body, isLossTolerant) {
+		const box2D = self.box2D as typeof Box2D & EmscriptenModule;
 		PhysicsComponent.prototype.log(`createBody of ${entity._stats.name}`);
 		// immediately destroy body if entity already has box2dBody
 		if (!entity) {
@@ -174,15 +199,15 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 		// Process body definition and create a box2d body for it
 		switch (body.type) {
 			case 'static':
-				tempDef.set_type(0);
+				tempDef.set_type(box2D.b2_staticBody);
 				break;
 
 			case 'dynamic':
-				tempDef.set_type(self.b2_dynamicBody);
+				tempDef.set_type(box2D.b2_dynamicBody);
 				break;
 
 			case 'kinematic':
-				tempDef.set_type(1);
+				tempDef.set_type(box2D.b2_kinematicBody);
 				break;
 		}
 
@@ -199,7 +224,12 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 						break;
 
 					default:
-						tempDef[param] = body[param];
+						const funcName = `set_${param}`;
+						if (typeof tempDef[funcName] === 'function') {
+							tempDef[funcName](body[param]);
+						} else {
+							tempDef[param] = body[param];
+						}
 						break;
 				}
 			}
@@ -211,9 +241,9 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 		let nowPoint = self.recordLeak(new self.b2Vec2(entity._translate.x / self._scaleRatio, entity._translate.y / self._scaleRatio));
 		tempDef.set_position(nowPoint);
 		self.destroyB2dObj(nowPoint);
-		self.destroyB2dObj(tempDef);
 		// Create the new body
 		tempBod = self._world.CreateBody(tempDef);
+
 		// Now apply any post-creation attributes we need to
 		for (param in body) {
 			if (body.hasOwnProperty(param)) {
@@ -235,11 +265,9 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 							for (i = 0; i < body.fixtures.length; i++) {
 								// Grab the fixture definition
 								fixtureDef = body.fixtures[i];
-
 								// Create the fixture
 								tempFixture = self.createFixture(fixtureDef);
 								tempFixture.taroId = fixtureDef.taroId;
-
 								// Check for a shape definition for the fixture
 								if (fixtureDef.shape) {
 									// Create based on the shape type
@@ -253,11 +281,9 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 											}
 
 											if (fixtureDef.shape.data) {
-												finalX = fixtureDef.shape.data.x !== undefined ? fixtureDef.shape.data.x : 0;
-												finalY = fixtureDef.shape.data.y !== undefined ? fixtureDef.shape.data.y : 0;
-												if (finalX !== 0 && finalY !== 0) {
-													tempShape.set_m_p(new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio));
-												}
+												finalX = fixtureDef.shape.data.x ?? 0;
+												finalY = fixtureDef.shape.data.y ?? 0;
+												tempShape.set_m_p(new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio));
 											}
 											break;
 
@@ -270,17 +296,17 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 											tempShape = self.recordLeak(new self.b2PolygonShape());
 
 											if (fixtureDef.shape.data) {
-												finalX = fixtureDef.shape.data.x !== undefined ? fixtureDef.shape.data.x : 0;
-												finalY = fixtureDef.shape.data.y !== undefined ? fixtureDef.shape.data.y : 0;
-												finalWidth = fixtureDef.shape.data.width !== undefined ? fixtureDef.shape.data.width : (entity._bounds2d.x / 2);
-												finalHeight = fixtureDef.shape.data.height !== undefined ? fixtureDef.shape.data.height : (entity._bounds2d.y / 2);
+												finalX = fixtureDef.shape.data.x ?? 0;
+												finalY = fixtureDef.shape.data.y ?? 0;
+												finalWidth = fixtureDef.shape.data.width ?? (entity._bounds2d.x / 2);
+												finalHeight = fixtureDef.shape.data.height ?? (entity._bounds2d.y / 2);
 											} else {
 												finalX = 0;
 												finalY = 0;
 												finalWidth = (entity._bounds2d.x / 2);
 												finalHeight = (entity._bounds2d.y / 2);
 											}
-											const pos = self.recordLeak(new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio))
+											const pos = self.recordLeak(new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio));
 											// Set the polygon as a box
 											tempShape.SetAsBox(
 												(finalWidth / self._scaleRatio),
@@ -318,6 +344,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 								}
 
 								if (fixtureDef.friction !== undefined && finalFixture) {
+
 									finalFixture.SetFriction(fixtureDef.friction);
 								}
 								if (fixtureDef.restitution !== undefined && finalFixture) {
@@ -340,7 +367,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 
 		// Store the entity that is linked to self body
 		tempBod._entity = entity;
-
+		tempBod.SetEnabled(true);
 		// Add the body to the world with the passed fixture
 		entity.body = tempBod;
 
@@ -349,6 +376,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 		// console.log('box2dweb',entity._rotate.z)
 		entity.rotateTo(0, 0, entity._rotate.z);
 		// Add the body to the world with the passed fixture
+		self.destroyB2dObj(tempDef);
 		self.freeLeaked();
 		return tempBod;
 	},

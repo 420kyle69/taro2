@@ -1890,9 +1890,9 @@ var TaroEngine = TaroEntity.extend({
 					}
 				}
 			}
-
 			ctx.restore();
 		}
+
 		// Depth-sort the viewports
 	},
 

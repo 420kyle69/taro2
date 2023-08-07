@@ -1,7 +1,6 @@
 declare class TaroEngine extends TaroClass {
 	profiler: any;
 	newIdHex(): any;
-
 	tiled: any;
 	regionManager: any;
 	showRegionList: any;
@@ -60,10 +59,13 @@ declare class TaroEngine extends TaroClass {
 	engineStep(currentTime: number, ctx: number): void;
 
 	physics: {
+		_box2dDebug: any;
 		staticsFromMap(walls: any): unknown;
 		destroyWalls(): unknown;
 		world(): any;
 		engine: string;
+		enableDebug(flags: number): void;
+		disableDebug(): void;
 		_scaleRatio: number;
 	};
 

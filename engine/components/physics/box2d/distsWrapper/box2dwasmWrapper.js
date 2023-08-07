@@ -1,3 +1,4 @@
+// FIXME: add more types to the physics part of taro2
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -34,18 +35,17 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-// FIXME: add more types to the physics part of taro2
-// @ts-nocheck
 var box2dwasmWrapper = {
     init: function (component) {
         return __awaiter(this, void 0, void 0, function () {
-            var box2D, _a, freeLeaked, recordLeak;
+            var box2D, _a, freeLeaked, recordLeak, ctx;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0: return [4 /*yield*/, box2dwasm()];
                     case 1:
                         box2D = _b.sent();
                         _a = new box2D.LeakMitigator(), freeLeaked = _a.freeLeaked, recordLeak = _a.recordLeak;
+                        component.box2D = box2D;
                         component.freeLeaked = freeLeaked;
                         component.recordLeak = recordLeak;
                         component.freeFromCache = box2D.LeakMitigator.freeFromCache;
@@ -69,21 +69,20 @@ var box2dwasmWrapper = {
                         component.b2MassData = box2D.b2MassData;
                         component.b2PolygonShape = box2D.b2PolygonShape;
                         component.b2CircleShape = box2D.b2CircleShape;
-                        component.b2DebugDraw = box2D.DebugDraw;
+                        component.b2DebugDraw = box2D.b2Draw;
                         component.b2ContactListener = box2D.JSContactListener;
                         component.b2RevoluteJointDef = box2D.b2RevoluteJointDef;
                         component.b2WeldJointDef = box2D.b2WeldJointDef;
                         component.b2Contact = box2D.b2Contact;
-                        component.b2Distance = box2D.b2Distance;
+                        component.b2Distance = box2D.b2DistanceJoint;
                         component.b2FilterData = box2D.b2Filter;
                         component.b2DistanceJointDef = box2D.b2DistanceJointDef;
                         // aliases for camelcase
                         component.b2World.prototype.isLocked = component.b2World.prototype.IsLocked;
                         component.b2World.prototype.createBody = component.b2World.prototype.CreateBody;
                         component.b2World.prototype.destroyBody = component.b2World.prototype.DestroyBody;
-                        // component.b2World.prototype.createJoint = component.b2World.prototype.CreateJoint;
+                        component.b2World.prototype.createJoint = component.b2World.prototype.CreateJoint;
                         component.b2World.prototype.destroyJoint = component.b2World.prototype.DestroyJoint;
-                        component.b2World.prototype.createFixture = component.b2World.prototype.CreateFixture;
                         component.b2World.prototype.clearForces = component.b2World.prototype.ClearForces;
                         component.b2World.prototype.getBodyList = component.b2World.prototype.GetBodyList;
                         component.b2World.prototype.getJointList = component.b2World.prototype.GetJointList;
@@ -97,7 +96,6 @@ var box2dwasmWrapper = {
                             }
                             */
                         component.b2Transform = box2D.b2Transform;
-                        component.b2Transform.prototype.R = { col1: new box2D.b2Vec2(), col2: new box2D.b2Vec2() };
                         component.b2Body.prototype.getNext = component.b2Body.prototype.GetNext;
                         component.b2Body.prototype.getAngle = component.b2Body.prototype.GetAngle;
                         component.b2Body.prototype.setPosition = function (position) {
@@ -126,6 +124,28 @@ var box2dwasmWrapper = {
                         component.b2Vec2.prototype.set = component.b2Vec2.prototype.Set;
                         // component.b2Vec2.prototype.setV = component.b2Vec2.prototype.SetV;
                         component.b2Joint.prototype.getNext = component.b2Joint.prototype.GetNext;
+                        if (taro.isClient) {
+                            component.enableDebug = function (flags) {
+                                if (flags === void 0) { flags = 1; }
+                                console.log('please make sure clientPhyscisEngine is not "", and enabled csp');
+                                if (!component.renderer) {
+                                    var canvas = taro.renderer.scene.getScene('Game');
+                                    ctx = canvas.add.graphics().setDepth(9999);
+                                    var scale = 30;
+                                    ctx.setScale(scale);
+                                    var newRenderer = new Box2dDebugDraw(box2D, new Box2dHelpers(box2D), ctx, scale).constructJSDraw();
+                                    newRenderer.SetFlags(flags);
+                                    component.renderer = newRenderer;
+                                    component._world.SetDebugDraw(newRenderer);
+                                    component.ctx = ctx;
+                                }
+                                component.renderer.SetFlags(flags);
+                            };
+                            component.disableDebug = function () {
+                                component.ctx.destroy();
+                                component.renderer = undefined;
+                            };
+                        }
                         component.createWorld = function (id, options) {
                             component._world = new component.b2World(this._gravity);
                             component._world.SetContinuousPhysics(this._continuousPhysics);
@@ -183,6 +203,8 @@ var box2dwasmWrapper = {
         self.world().QueryAABB(callback, aabb);
     },
     createBody: function (self, entity, body, isLossTolerant) {
+        var _a, _b, _c, _d, _e, _f;
+        var box2D = self.box2D;
         PhysicsComponent.prototype.log("createBody of ".concat(entity._stats.name));
         // immediately destroy body if entity already has box2dBody
         if (!entity) {
@@ -209,13 +231,13 @@ var box2dwasmWrapper = {
         // Process body definition and create a box2d body for it
         switch (body.type) {
             case 'static':
-                tempDef.set_type(0);
+                tempDef.set_type(box2D.b2_staticBody);
                 break;
             case 'dynamic':
-                tempDef.set_type(self.b2_dynamicBody);
+                tempDef.set_type(box2D.b2_dynamicBody);
                 break;
             case 'kinematic':
-                tempDef.set_type(1);
+                tempDef.set_type(box2D.b2_kinematicBody);
                 break;
         }
         // Add the parameters of the body to the new body instance
@@ -230,7 +252,13 @@ var box2dwasmWrapper = {
                         // below as post-creation attributes
                         break;
                     default:
-                        tempDef[param] = body[param];
+                        var funcName = "set_".concat(param);
+                        if (typeof tempDef[funcName] === 'function') {
+                            tempDef[funcName](body[param]);
+                        }
+                        else {
+                            tempDef[param] = body[param];
+                        }
                         break;
                 }
             }
@@ -241,7 +269,6 @@ var box2dwasmWrapper = {
         var nowPoint = self.recordLeak(new self.b2Vec2(entity._translate.x / self._scaleRatio, entity._translate.y / self._scaleRatio));
         tempDef.set_position(nowPoint);
         self.destroyB2dObj(nowPoint);
-        self.destroyB2dObj(tempDef);
         // Create the new body
         tempBod = self._world.CreateBody(tempDef);
         // Now apply any post-creation attributes we need to
@@ -279,11 +306,9 @@ var box2dwasmWrapper = {
                                                 tempShape.set_m_radius(entity._bounds2d.x / self._scaleRatio / 2);
                                             }
                                             if (fixtureDef.shape.data) {
-                                                finalX = fixtureDef.shape.data.x !== undefined ? fixtureDef.shape.data.x : 0;
-                                                finalY = fixtureDef.shape.data.y !== undefined ? fixtureDef.shape.data.y : 0;
-                                                if (finalX !== 0 && finalY !== 0) {
-                                                    tempShape.set_m_p(new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio));
-                                                }
+                                                finalX = (_a = fixtureDef.shape.data.x) !== null && _a !== void 0 ? _a : 0;
+                                                finalY = (_b = fixtureDef.shape.data.y) !== null && _b !== void 0 ? _b : 0;
+                                                tempShape.set_m_p(new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio));
                                             }
                                             break;
                                         case 'polygon':
@@ -293,10 +318,10 @@ var box2dwasmWrapper = {
                                         case 'rectangle':
                                             tempShape = self.recordLeak(new self.b2PolygonShape());
                                             if (fixtureDef.shape.data) {
-                                                finalX = fixtureDef.shape.data.x !== undefined ? fixtureDef.shape.data.x : 0;
-                                                finalY = fixtureDef.shape.data.y !== undefined ? fixtureDef.shape.data.y : 0;
-                                                finalWidth = fixtureDef.shape.data.width !== undefined ? fixtureDef.shape.data.width : (entity._bounds2d.x / 2);
-                                                finalHeight = fixtureDef.shape.data.height !== undefined ? fixtureDef.shape.data.height : (entity._bounds2d.y / 2);
+                                                finalX = (_c = fixtureDef.shape.data.x) !== null && _c !== void 0 ? _c : 0;
+                                                finalY = (_d = fixtureDef.shape.data.y) !== null && _d !== void 0 ? _d : 0;
+                                                finalWidth = (_e = fixtureDef.shape.data.width) !== null && _e !== void 0 ? _e : (entity._bounds2d.x / 2);
+                                                finalHeight = (_f = fixtureDef.shape.data.height) !== null && _f !== void 0 ? _f : (entity._bounds2d.y / 2);
                                             }
                                             else {
                                                 finalX = 0;
@@ -354,6 +379,7 @@ var box2dwasmWrapper = {
         }
         // Store the entity that is linked to self body
         tempBod._entity = entity;
+        tempBod.SetEnabled(true);
         // Add the body to the world with the passed fixture
         entity.body = tempBod;
         entity.gravitic(!!body.affectedByGravity);
@@ -361,6 +387,7 @@ var box2dwasmWrapper = {
         // console.log('box2dweb',entity._rotate.z)
         entity.rotateTo(0, 0, entity._rotate.z);
         // Add the body to the world with the passed fixture
+        self.destroyB2dObj(tempDef);
         self.freeLeaked();
         return tempBod;
     },
