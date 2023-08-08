@@ -108,13 +108,13 @@ var Player = TaroEntity.extend({
 						{ receivedJoinGame: receivedJoinGame }
 					];
 				}
-
-				// console.log(`Player.joinGame(): sending ACK to client ${self._stats.clientId} ${self._stats.name} (time elapsed: ${Date.now() - client.lastEventAt})`, playerJoinStreamData);
-
+				
 				self.streamUpdateData(playerJoinStreamData);
+			}
+			
+			if (self._stats.userId) {
 				taro.clusterClient && taro.clusterClient.playerJoined(self._stats.userId);
 			}
-
 		} else {
 			console.log(`player joined again (menu closed?) ${self._stats.clientId} (${self._stats.name})`);
 			self.streamUpdateData([{ playerJoinedAgain: true }]);
