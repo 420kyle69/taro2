@@ -458,7 +458,6 @@ var TaroNetIoClient = {
 			var newSnapshotTimestamp = snapshot[snapshot.length - 1][1];
 			// see how far apart the newly received snapshot is from currentTime
 			if (snapshot.length) {
-				var obj = {};
 				// iterate through each entities
 				for (var i = 0; i < snapshot.length; i++) {
 					var ciDecoded = snapshot[i][0].charCodeAt(0);
@@ -469,7 +468,7 @@ var TaroNetIoClient = {
 						case '_taroStreamData':
 							var entityData = snapshot[i].slice(1).split('&');
 							var entityId = entityData[0];
-							entityData.splice(0, 1); // removing entityId
+							entityData.shift();
 							var x = parseInt(entityData[0], 16);
 							var y = parseInt(entityData[1], 16);
 							var rotate = parseInt(entityData[2], 16) / 1000;
@@ -477,9 +476,7 @@ var TaroNetIoClient = {
 							var isTeleportingCamera = Boolean(parseInt(entityData[4], 16)); // teleportedCamera boolean
 
 							var newPosition = [x, y, rotate];
-
-							obj[entityId] = entityData;
-
+							
 							// update each entities' final position, so player knows where everything are when returning from a different browser tab
 							// we are not executing this in taroEngine or taroEntity, becuase they don't execute when browser tab is inactive
 							var entity = taro.$(entityId);							
