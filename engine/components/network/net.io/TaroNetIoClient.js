@@ -458,6 +458,7 @@ var TaroNetIoClient = {
 			var newSnapshotTimestamp = snapshot[snapshot.length - 1][1];
 			// see how far apart the newly received snapshot is from currentTime
 			if (snapshot.length) {
+				var obj = {};
 				// iterate through each entities
 				for (var i = 0; i < snapshot.length; i++) {
 					var ciDecoded = snapshot[i][0].charCodeAt(0);
@@ -495,7 +496,6 @@ var TaroNetIoClient = {
 									if (newSnapshotTimestamp > this.lastSnapshotTimestamp) {
 										entity.nextKeyFrame = [now + taro.client.renderBuffer, newPosition];
 										entity.isTransforming(true);
-										console.log(entity._stats.type)
 									}									
 								}
 							}
