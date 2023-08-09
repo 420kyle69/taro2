@@ -1680,6 +1680,10 @@ var TaroEngine = TaroEntity.extend({
 				taro.script.trigger(trigger.name, trigger.params);
 			}
 
+			if (taro.gameLoopTickHasExecuted) {
+				taro.queueTrigger('frameTick');
+			}
+
 			if (taro.isClient) {
 				if (taro.client.myPlayer) {
 					taro.client.myPlayer.control._behaviour();
@@ -1689,10 +1693,6 @@ var TaroEngine = TaroEntity.extend({
 			
 			if (!taro.gameLoopTickHasExecuted) {
 				return;
-			}
-
-			if (taro.isServer) {
-				taro.queueTrigger('frameTick');
 			}
 
 			// Check for unborn entities that should be born now
@@ -1728,38 +1728,11 @@ var TaroEngine = TaroEntity.extend({
 				}
 			}
 
-			
-
-			// console.log(taro.updateCount, taro.tickCount, taro.updateTransform,"inView", taro.inViewCount);
 			// Record the lastTick value so we can
 			// calculate delta on the next tick
 			self.lastTick = self._tickStart;
 			self._dpf = self._drawCount;
 			self._drawCount = 0;
-
-			/// / for debugging
-			// if (taro.$$("unit")[0]) {
-
-			// 	var x = taro.$$("unit")[0]._translate.x
-			// 	// for debugging
-			// 	if (!taro.lastSnapshotTimeStamp) {
-			// 		taro.lastSnapshotTimeStamp = timeStamp
-			// 	}
-
-			// 	if (!taro.lastX) {
-			// 		taro.lastX = x
-			// 	}
-
-			// 	var timeElapsed = timeStamp - taro.lastSnapshotTimeStamp
-			// 	var distanceTravelled = x - taro.lastX;
-			// 	if (x) {
-			// 		console.log("unit speed", (distanceTravelled / timeElapsed * 100).toFixed(0), " (", distanceTravelled, "/", timeElapsed, ")")
-			// 	}
-
-			// 	taro.lastX = x
-			// 	taro.lastSnapshotTimeStamp = timeStamp;
-
-			// }
 
 			taro.network.stream._sendQueue(timeStamp);
 			taro.network.stream.updateEntityAttributes();
@@ -1769,7 +1742,6 @@ var TaroEngine = TaroEntity.extend({
 
 		et = new Date().getTime();
 		taro._tickTime = et - taro.now;
-		// console.log(taro._tickTime, taro._tickTime, 1000/self._fpsRate)
 
 		// slow engineTick restart only works on two houses (Braains.io)
 		if (taro.server && taro.server.gameId == '5a7fd59b1014dc000eeec3dd')
@@ -1786,11 +1758,6 @@ var TaroEngine = TaroEntity.extend({
 			} else {
 				self.lagOccurenceCount = 0;
 			}
-
-		// // reset lagOccurenceCount if no lag occured for 3s.
-		// if (et - self.lastLagOccurenceAt > 3000) {
-
-		// }
 
 		if (taro.isClient) {
 			if (statsPanels.ms) {
