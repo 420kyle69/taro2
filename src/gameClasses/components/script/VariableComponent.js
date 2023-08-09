@@ -1165,13 +1165,20 @@ var VariableComponent = TaroEntity.extend({
 
 				case 'getMapTileId':
 					var map = taro.map.data;
-					var x = self.getValue(text.x, vars);
-					var y = self.getValue(text.y, vars);
+					var tileX = self.getValue(text.x, vars);
+					var tileY = self.getValue(text.y, vars);
 					var layer = self.getValue(text.layer, vars);
-					if (map && x && y && layer && layer >= 0 && layer < 4) {
-						returnValue = map.layers[layer].data[x + y * map.width];
+					if (map && Number.isInteger(layer) && Number.isInteger(tileX) && Number.isInteger(tileY)) {
+						if (layer > 3 || layer < 0) {
+							break;
+						} else if (tileX < 0 || tileX >= taro.game.data.map.width) {
+							break;
+						} else if (tileY < 0 || tileY >= taro.game.data.map.height) {
+							break;
+						} else {
+							returnValue = map.layers[layer].data[tileX + tileY * map.width];
+						}
 					}
-					
 					break;
 
 				case 'entityWidth':
