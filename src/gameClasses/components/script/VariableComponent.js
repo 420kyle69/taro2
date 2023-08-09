@@ -1180,10 +1180,13 @@ var VariableComponent = TaroEntity.extend({
 					var layer = self.getValue(text.layer, vars);
 					if (map && Number.isInteger(layer) && Number.isInteger(tileX) && Number.isInteger(tileY)) {
 						if (layer > 3 || layer < 0) {
+							taro.script.errorLog(`Invalid Layer`);
 							break;
 						} else if (tileX < 0 || tileX >= taro.game.data.map.width) {
+							taro.script.errorLog(`invalid x position`);
 							break;
 						} else if (tileY < 0 || tileY >= taro.game.data.map.height) {
+							taro.script.errorLog(`invalid y position`);
 							break;
 						} else {
 							returnValue = map.layers[layer].data[tileX + tileY * map.width];
