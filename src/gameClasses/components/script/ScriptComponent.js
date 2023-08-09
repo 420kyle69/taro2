@@ -53,9 +53,9 @@ var ScriptComponent = TaroEntity.extend({
 		if (this.scripts && this.scripts[scriptId]) {
 			// var actions = JSON.parse(JSON.stringify(this.scripts[scriptId].actions));
 			var actions = self.getScriptActions(scriptId);
-			///
+			
 			// console.log(scriptId, ': ', actions, params);
-			///
+			
 			if (actions) {
 				var cmd = self.action.run(actions, params);
 				if (cmd == 'return') {
@@ -114,7 +114,7 @@ var ScriptComponent = TaroEntity.extend({
 		}
 
 		let scriptIds = this.triggeredScripts[triggerName];
-
+		
 		for (var i in scriptIds) {
 			let scriptId = scriptIds[i];
 			this.scriptLog(`\ntrigger: ${triggerName}`);
@@ -180,7 +180,7 @@ var ScriptComponent = TaroEntity.extend({
 	errorLog: function (message) {
 		if (this.scripts) {
 			var script = this.scripts[this.currentScriptId];
-			var log = `Script error '${(script) ? script.name : ''}' in Action '${this.currentActionName}' : ${message}`;
+			var log = `${this.currentScriptId} : Script error '${(script) ? script.name : ''}' in Action '${this.currentActionName}' : ${message}`;
 
 			this.errorLogs[this.currentActionName] = log;
 			taro.devLog('script errorLog', log, message);

@@ -7,6 +7,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	public entityEditor: EntityEditor;
 	public gameEditorWidgets: Array<DOMRect>;
 	public commandController: CommandController;
+
 	cursorButton: DevToolButton;
 	paletteButton: DevToolButton;
 	layerButtonsContainer: Phaser.GameObjects.Container;
@@ -28,9 +29,6 @@ class DevModeTools extends Phaser.GameObjects.Container {
 
 	altKey: Phaser.Input.Keyboard.Key;
 	shiftKey: Phaser.Input.Keyboard.Key;
-
-	outline: Phaser.GameObjects.Graphics;
-	activeEntityPlacement: boolean;
 
 	constructor(
 		public scene: DevModeScene,
@@ -65,8 +63,8 @@ class DevModeTools extends Phaser.GameObjects.Container {
 
 		this.scene.scale.on(Phaser.Scale.Events.RESIZE, () => {
 			toolButtonsContainer.height = (h + s) * 13;
-			if (toolButtonsContainer.height > this.scene.sys.game.canvas.height * 0.5) {
-				toolButtonsContainer.scale = (this.scene.sys.game.canvas.height * 0.5) / toolButtonsContainer.height;
+			if (toolButtonsContainer.height > window.innerHeight * 0.5) {
+				toolButtonsContainer.scale = (window.innerHeight * 0.5) / toolButtonsContainer.height;
 			}
 			toolButtonsContainer.x = palette.camera.x + palette.paletteWidth - ((h * 4) * toolButtonsContainer.scale) + 22;
 			toolButtonsContainer.y = palette.camera.y - (toolButtonsContainer.height * toolButtonsContainer.scale);
@@ -77,8 +75,8 @@ class DevModeTools extends Phaser.GameObjects.Container {
 
 		const toolButtonsContainer = this.toolButtonsContainer = new Phaser.GameObjects.Container(scene);
 		toolButtonsContainer.height = (h + s) * 13;
-		if (toolButtonsContainer.height > this.scene.sys.game.canvas.height * 0.5) {
-			toolButtonsContainer.scale = (this.scene.sys.game.canvas.height * 0.5) / toolButtonsContainer.height;
+		if (toolButtonsContainer.height > window.innerHeight * 0.5) {
+			toolButtonsContainer.scale = (window.innerHeight * 0.5) / toolButtonsContainer.height;
 		}
 		toolButtonsContainer.x = palette.camera.x + palette.paletteWidth - ((h * 4) * toolButtonsContainer.scale) + 22;
 		toolButtonsContainer.y = palette.camera.y - (toolButtonsContainer.height * toolButtonsContainer.scale);
@@ -95,17 +93,15 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.modeButtons.push(
 			new DevToolButton(this, '', 'Cursor Tool (C)', 'interact with regions and entities', 'cursor', 0, 0, h * 2 - s, toolButtonsContainer, this.cursor.bind(this)),
 			new DevToolButton(this, '', 'Region Tool (R)', 'draw new region', 'region', 0, (h + s) * 3, h * 2 - s, toolButtonsContainer, this.drawRegion.bind(this)),
-			new DevToolButton(this, '', 'Stamp Brush (B)', 'LMB: place selected tiles. RMB: copy tiles', 'stamp', 0, h + s, h * 2 - s, toolButtonsContainer, this.brush.bind(this), undefined, Object.values(this.brushButtons)),
+			new DevToolButton(this, '', 'Stamp Brush (B)', 'LMB: place selected tiles. RMB: copy tiles', 'stamp', 0, h + s, h * 2 - s, toolButtonsContainer, this.brush.bind(this)/*, undefined, Object.values(this.brushButtons)*/),
 			new DevToolButton(this, '', 'Eraser (E)', 'delete tiles from selected layer', 'eraser', h * 2, h + s, h * 2 - s, toolButtonsContainer, this.emptyTile.bind(this)),
 			new DevToolButton(this, '', 'Bucket Fill (F)', 'fill an area with the selected tile', 'fill', 0, (h + s) * 2, h * 2 - s, toolButtonsContainer, this.fill.bind(this)),
 			new DevToolButton(this, '', 'Clear Layer (L)', 'clear selected layer', 'clear', h * 2, (h + s) * 2, h * 2 - s, toolButtonsContainer, this.clear.bind(this)),
 			new DevToolButton(this, '', 'Save Map (S)', 'save all changes', 'save', h * 2, (h + s) * 3, h * 2 - s, toolButtonsContainer, this.save.bind(this)),
-			new DevToolButton(this, '', 'Entities Tool (A)', 'LMB: Place selected Entity on the Map RMB: copy entity', 'entity', h * 2, 0, h * 2 - s, toolButtonsContainer, this.addEntities.bind(this))
+			new DevToolButton(this, '', 'Entities Tool (A)', 'LMB: Place selected Entity on the Map', 'entity', h * 2, 0, h * 2 - s, toolButtonsContainer, this.addEntities.bind(this))
 		);
 		this.cursorButton = this.modeButtons[0];
 		this.highlightModeButton(0);
-
-
 
 		this.layerButtons = [];
 		this.layerButtons.push(
@@ -153,8 +149,6 @@ class DevModeTools extends Phaser.GameObjects.Container {
 				camera.scrollY -= scrollY;
 			}
 		});
-
-		this.outline = scene.gameScene.add.graphics();
 	}
 
 	updateBrushArea(): void {
@@ -226,16 +220,14 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		});
 		const plusKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.PLUS, false);
 		plusKey.on('down', () => {
-			if (!this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
-				const zoom = (gameScene.zoomSize / 2.15) / 1.1;
-				taro.client.emit('zoom', zoom);
+			if (!this.checkIfInputModalPresent()) {
+                this.tileEditor.tilePalette.changeBrushSize(-1);
 			}
 		});
 		const minusKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.MINUS, false);
 		minusKey.on('down', () => {
-			if (!this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
-				const zoom = (gameScene.zoomSize / 2.15) * 1.1;
-				taro.client.emit('zoom', zoom);
+			if (!this.checkIfInputModalPresent()) {
+                this.tileEditor.tilePalette.changeBrushSize(1);
 			}
 		});
 		const cKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C, false);
@@ -252,7 +244,6 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		});
 		const bKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.B, false);
 		bKey.on('down', (key) => {
-
 			if (!this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
 				this.brush();
 			}
@@ -279,6 +270,12 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		sKey.on('down', () => {
 			if (!this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
 				this.save();
+			}
+		});
+        const aKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A, false);
+		aKey.on('down', () => {
+			if (!this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
+				this.addEntities();
 			}
 		});
 		const oneKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE, false);
@@ -338,6 +335,17 @@ class DevModeTools extends Phaser.GameObjects.Container {
 			}
 		});
 
+		const deleteEntity = (event) => {
+			if (!this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
+                this.entityEditor.deleteInitEntity();
+            }
+		}
+
+        const deleteKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DELETE, false);
+        const backspaceKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.BACKSPACE, false);
+
+		deleteKey.on('down', deleteEntity);
+		backspaceKey.on('down', deleteEntity);
 	}
 
 	cursor(): void {
@@ -401,7 +409,13 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	clear(): void {
 		const gameMap = this.scene.gameScene.tilemap;
 		//this.tileEditor.clearLayer(gameMap.currentLayerIndex, false);
-		inGameEditor.showClearLayerConfirmation({ gid: 0, layer: gameMap.currentLayerIndex, layerName: this.layerButtons[gameMap.currentLayerIndex].name, x: 0, y: 0, tool: 'clear' });
+		const data: TileData<'clear'> = {
+			clear: {
+				layer: gameMap.currentLayerIndex,
+				layerName: this.layerButtons[gameMap.currentLayerIndex].name
+			}
+		};
+		inGameEditor.showClearLayerConfirmation(data);
 	}
 
 	save(): void {
@@ -420,6 +434,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 			this.brush();
 		}
 		this.tileEditor.brushArea.shape = shape;
+		this.updateBrushArea();
 		Object.values(this.brushButtons).map((btn) => {
 			btn.highlight('no');
 		});

@@ -43,7 +43,7 @@ var PhaserUnit = /** @class */ (function (_super) {
             if (taro.game.data.defaultData.contextMenuEnabled && (!taro.developerMode.active || (taro.developerMode.active && taro.developerMode.activeTab === 'play')) && p.rightButtonDown()) {
                 var ownerPlayer = taro.$(_this.entity._stats.ownerId);
                 if (ownerPlayer._stats.controlledBy === 'human') {
-                    showUnitOwnerDropdown(_this.entity._stats.ownerId, p);
+                    showUserDropdown({ ownerId: _this.entity._stats.ownerId, pointer: p });
                 }
             }
         });

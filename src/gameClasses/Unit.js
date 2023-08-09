@@ -512,25 +512,25 @@ var Unit = TaroEntityPhysics.extend({
 					// disable coin consuming due to some bug wrt coins
 					// add coin consuming code
 					if (taro.game.data.defaultData.tier >= 2) {
-						
+
 						try {
 							const jwt = require("jsonwebtoken");
-							
+
 							const isUsedToken = taro.server.usedCoinJwts[token];
 							if (isUsedToken) {
 								console.log('Token has been used already', token);
 								return;
 							}
-							
+
 							const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
 							const {type, userId, purchasableId, createdAt} = decodedToken;
-							
+
 							if (type === 'pinValidationToken' && userId && purchasableId && ownerPlayer._stats.userId === userId && purchasableId === itemTypeId) {
 								// allow coin transaction since token has been verified
-								
+
 								// store token for current client
 								taro.server.usedCoinJwts[token] = createdAt;
-								
+
 								// remove expired tokens
 								const filteredUsedCoinJwts = {};
 								const usedTokenEntries = Object.entries(taro.server.usedCoinJwts).filter(([token, tokenCreatedAt]) => (Date.now() - tokenCreatedAt) < taro.server.COIN_JWT_EXPIRES_IN);
@@ -540,7 +540,7 @@ var Unit = TaroEntityPhysics.extend({
 									}
 								}
 								taro.server.usedCoinJwts = filteredUsedCoinJwts;
-								
+
 							} else {
 								return;
 							}
@@ -548,9 +548,9 @@ var Unit = TaroEntityPhysics.extend({
 							console.log('invalid pinValidationToken', e.message, token);
 							return;
 						}
-						
+
 						taro.server.consumeCoinFromUser(ownerPlayer, shopData.price.coins, itemTypeId);
-														
+
 						ownerPlayer.streamUpdateData([{
 								coins: global.coinHelper.subtract(ownerPlayer._stats.coins, shopData.price.coins)
 						}])
@@ -742,7 +742,7 @@ var Unit = TaroEntityPhysics.extend({
 		self.previousState = null;
 
 		var data = taro.game.getAsset('unitTypes', type);
-
+		
 		delete data.type; // hotfix for dealing with corrupted game json that has unitData.type = "unitType". This is caused by bug in the game editor.
 
 		if (data == undefined) {
@@ -1146,6 +1146,9 @@ var Unit = TaroEntityPhysics.extend({
 		var ownerPlayer = self.getOwner();
 		var playerTypeData = ownerPlayer && taro.game.getAsset('playerTypes', ownerPlayer._stats.playerTypeId);
 
+		// const roles = taro.game.data.roles.filter(role => ownerPlayer._stats.roleIds.includes(role._id.toString()));
+		// var highestRole = roles.reduce((prev, current) => prev ? (current.order < prev.order ? current : prev) : current, null);
+
 		// label should be hidden
 		var hideLabel = (
 			ownerPlayer &&
@@ -1256,7 +1259,7 @@ var Unit = TaroEntityPhysics.extend({
 		var self = this;
 		var item = self.inventory.getItemBySlotNumber(itemIndex + 1);
 		if (item) {
-			
+
 			// check if item's undroppable
 			if (item._stats && item._stats.controls && item._stats.controls.undroppable) {
 				return;
@@ -1274,7 +1277,7 @@ var Unit = TaroEntityPhysics.extend({
 						x: this._translate.x + item.anchoredOffset.x,
 						y: this._translate.y + item.anchoredOffset.y
 					},
-					rotate: item._rotate.z
+					rotate: item.anchoredOffset.rotate,
 				};
 
 				if (taro.physics.engine === 'CRASH') {
@@ -1288,7 +1291,7 @@ var Unit = TaroEntityPhysics.extend({
 				}
 
 				item.setOwnerUnit(undefined);
-				item.setState('dropped', defaultData);				
+				item.setState('dropped', defaultData);
 
 				if (item._stats.hidden) {
 					item.streamUpdateData([{ hidden: false }]);
@@ -1450,7 +1453,7 @@ var Unit = TaroEntityPhysics.extend({
 
 	queueStreamData: function(streamData) {
 		if (taro.isServer) {
-			TaroEntity.prototype.queueStreamData.call(this, streamData);	
+			TaroEntity.prototype.queueStreamData.call(this, streamData);
 		}
 	},
 
@@ -1459,7 +1462,7 @@ var Unit = TaroEntityPhysics.extend({
 		var self = this;
 		// Unit.prototype.log("unit streamUpdateData", data)
 
-		// if (taro.isServer && taro.network.isPaused) 
+		// if (taro.isServer && taro.network.isPaused)
 		// 	return;
 
 		TaroEntity.prototype.streamUpdateData.call(this, queuedData);
@@ -1501,14 +1504,20 @@ var Unit = TaroEntityPhysics.extend({
 						}
 						break;
 
-					case 'currentItemIndex':
-						self._stats[attrName] = newValue;
-						// for tracking selected index of other units
-						if (taro.isClient && this !== taro.client.selectedUnit) {
-							// console.log('Unit.streamUpdateData(\'currentItemIndex\') on the client', newValue);
-							this.setCurrentItem(newValue);
-						}
-						break;
+                        case 'currentItemIndex':
+                            self._stats[attrName] = newValue;
+                            // for tracking selected index of other units
+                            if (taro.isClient) {
+                                if (this !== taro.client.selectedUnit) {
+                                    // console.log('Unit.streamUpdateData(\'currentItemIndex\') on the client', newValue);
+                                    this.setCurrentItem(newValue);
+                                } else {
+                                    this.inventory.highlightSlot(newValue + 1);
+                                    var item = this.inventory.getItemBySlotNumber(newValue + 1);
+                                    taro.itemUi.updateItemInfo(item);
+                                }
+                            }
+                            break;
 
 					case 'skin':
 					case 'isInvisible':
@@ -1845,7 +1854,7 @@ var Unit = TaroEntityPhysics.extend({
 	 */
 	_behaviour: function (ctx) {
 		var self = this;
-
+		
 		_.forEach(taro.triggersQueued, function (trigger) {
 			trigger.params['thisEntityId'] = self.id();
 			self.script.trigger(trigger.name, trigger.params);
@@ -1927,7 +1936,8 @@ var Unit = TaroEntityPhysics.extend({
 				taro.unitBehaviourCount++; // for debugging
 				// apply movement if it's either human-controlled unit, or ai unit that's currently moving
 				if (self.body && vector && (vector.x != 0 || vector.y != 0)) {
-					// console.log('unit movement 2', vector);
+
+					// console.log('unit movement 2', vector, self._stats.controls.movementMethod);
 					if (self._stats.controls) {
 						switch (self._stats.controls.movementMethod) { // velocity-based movement
 							case 'velocity':

@@ -42,6 +42,7 @@ interface ActionData {
 	width?: number;
 	height?: number;
     wasEdited?: boolean;
+    wasDeleted?: boolean;
 }
 
 interface MapData {
@@ -82,6 +83,7 @@ declare class GameComponent extends TaroEntity {
 		unitTypes: Record<string, EntityData>;
 		projectileTypes: Record<string, EntityData>;
 		itemTypes: Record<string, EntityData>;
+		particleTypes: Record<string, ParticleData>;
 		settings: {
 			addStrokeToNameAndAttributes: boolean;
 			camera: {
