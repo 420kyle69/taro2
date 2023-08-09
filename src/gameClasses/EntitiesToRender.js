@@ -4,7 +4,7 @@ var EntitiesToRender = /** @class */ (function () {
         taro.client.on('tick', this.frameTick, this);
     }
     EntitiesToRender.prototype.updateAllEntities = function ( /*timeStamp*/) {
-        var _a, _b;
+        var _a, _b, _c, _d;
         for (var entityId in this.trackEntityById) {
             // var timeStart = performance.now();
             // var entity = taro.$(entityId);	
@@ -55,7 +55,7 @@ var EntitiesToRender = /** @class */ (function () {
                 }
                 // taro.profiler.logTimeElapsed('entity._behaviour()', timeStart);
                 // update transformation using incoming network stream
-                if (entity.isTransforming()) {
+                if (entity.isTransforming() || ((_a = entity.tween) === null || _a === void 0 ? void 0 : _a.isTweening)) {
                     // var timeStart = performance.now();
                     entity._processTransform();
                     // taro.profiler.logTimeElapsed('first _processTransform', timeStart);
@@ -74,7 +74,7 @@ var EntitiesToRender = /** @class */ (function () {
                                     rotate = ownerUnit._rotate.z;
                                     // immediately rotate my unit's items to the angleToTarget
                                 }
-                                else if (ownerUnit == taro.client.selectedUnit && ((_b = (_a = entity._stats.controls) === null || _a === void 0 ? void 0 : _a.mouseBehaviour) === null || _b === void 0 ? void 0 : _b.rotateToFaceMouseCursor)) {
+                                else if (ownerUnit == taro.client.selectedUnit && ((_c = (_b = entity._stats.controls) === null || _b === void 0 ? void 0 : _b.mouseBehaviour) === null || _c === void 0 ? void 0 : _c.rotateToFaceMouseCursor)) {
                                     rotate = ownerUnit.angleToTarget; // angleToTarget is updated at 60fps								
                                 }
                                 entity._rotate.z = rotate; // update the item's rotation immediately for more accurate aiming (instead of 20fps)
@@ -87,12 +87,12 @@ var EntitiesToRender = /** @class */ (function () {
                                 // taro.profiler.logTimeElapsed('second _processTransform', timeStart);
                             }
                         }
-                        if (entity.tween && entity.tween.isTweening) {
-                            entity.tween.update();
-                            x += entity.tween.offset.x;
-                            y += entity.tween.offset.y;
-                            rotate += entity.tween.offset.rotate;
-                        }
+                    }
+                    if ((_d = entity.tween) === null || _d === void 0 ? void 0 : _d.isTweening) {
+                        entity.tween.update();
+                        x += entity.tween.offset.x;
+                        y += entity.tween.offset.y;
+                        rotate += entity.tween.offset.rotate;
                     }
                     // var timeStart = performance.now();
                     entity.transformTexture(x, y, rotate);

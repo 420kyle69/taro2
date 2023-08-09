@@ -742,7 +742,7 @@ var Unit = TaroEntityPhysics.extend({
 		self.previousState = null;
 
 		var data = taro.game.getAsset('unitTypes', type);
-
+		
 		delete data.type; // hotfix for dealing with corrupted game json that has unitData.type = "unitType". This is caused by bug in the game editor.
 
 		if (data == undefined) {

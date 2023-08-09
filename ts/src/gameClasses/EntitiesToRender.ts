@@ -72,12 +72,11 @@ class EntitiesToRender {
 				// taro.profiler.logTimeElapsed('entity._behaviour()', timeStart);
 
 				// update transformation using incoming network stream
-				if (entity.isTransforming()) {
+				if (entity.isTransforming() || entity.tween?.isTweening) {
 					// var timeStart = performance.now();
 					entity._processTransform();
 					// taro.profiler.logTimeElapsed('first _processTransform', timeStart);
 				
-
 					if (entity._translate && !entity.isHidden()) {
 						
 						var x = entity._translate.x;
@@ -112,15 +111,13 @@ class EntitiesToRender {
 						
 							}
 						}
-
-						if (entity.tween && entity.tween.isTweening) {
-							entity.tween.update();
-							x += entity.tween.offset.x;
-							y += entity.tween.offset.y;
-							rotate += entity.tween.offset.rotate;
-						}
-
-						
+					}
+					
+					if (entity.tween?.isTweening) {
+						entity.tween.update();
+						x += entity.tween.offset.x;
+						y += entity.tween.offset.y;
+						rotate += entity.tween.offset.rotate;
 					}
 
 					// var timeStart = performance.now();
