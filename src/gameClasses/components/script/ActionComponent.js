@@ -6,6 +6,7 @@ var ActionComponent = TaroEntity.extend({
 		this._entity = entity;
 		this._script = scriptComponent;
 		this.entityCategories = ['unit', 'item', 'projectile', 'region', 'wall'];
+		this.lastProgressTrackedValue = null;
 	},
 
 	// entity can be either trigger entity, or entity in loop
@@ -83,7 +84,6 @@ var ActionComponent = TaroEntity.extend({
 					}
 				}
 			}
-
 			self._script.recordLast50Action(action.type);
 			try {
 				switch (action.type) {
@@ -288,12 +288,36 @@ var ActionComponent = TaroEntity.extend({
 					case 'setPlayerAttribute':
 						var attrId = self._script.variable.getValue(action.attribute, vars);
 						var player = self._script.variable.getValue(action.entity, vars);
-						if (player && player._category == 'player' && player._stats.attributes) {							
+						if (player && player._category == 'player' && player._stats.attributes) {
 							var attribute = player._stats.attributes[attrId];
 							if (attribute != undefined) {
 								var decimalPlace = parseInt(attribute.decimalPlaces) || 0;
 								var value = parseFloat(self._script.variable.getValue(action.value, vars)).toFixed(decimalPlace);
 								player.attribute.update(attrId, value, true); // update attribute, and check for attribute becoming 0
+
+								// track guided tutorial progress
+								var parentGameId = taro?.game?.data?.defaultData?.parentGameId;
+								if (parentGameId == '646d39f8d9317a8253b8a143' && attribute.name == 'progress') {
+									// for tracking user progress in tutorials
+									var client = taro.server.clients[player._stats.clientId];
+									var socket = client.socket;
+
+									if (value !== this.lastProgressTrackedValue) {
+										global.trackServerEvent && global.trackServerEvent({
+											eventName: 'Tutorial Progress Updated',
+											properties: {
+												'$ip': socket._remoteAddress,
+												'gameSlug': taro?.game?.data?.defaultData?.gameSlug,
+												'gameId': taro?.game?.data?.defaultData?._id,
+												'parentGameId': parentGameId,
+												'progress': value,
+												'tutorialVersion': 'v2'
+											}
+										}, socket);
+									}
+
+									this.lastProgressTrackedValue = newValue;
+								}
 							}
 						}
 
@@ -1239,7 +1263,17 @@ var ActionComponent = TaroEntity.extend({
 						var position = self._script.variable.getValue(action.position, vars);
 						var text = self._script.variable.getValue(action.text, vars);
 						var color = self._script.variable.getValue(action.color, vars);
-						taro.network.send('createFloatingText', { position: position, text: text, color: color });
+
+						if (taro.isServer) {
+							taro.network.send('createFloatingText', {position: position, text: text, color: color});
+						} else {
+							taro.client.emit('floating-text', {
+								text: text,
+								x: position.x,
+								y: position.y,
+								color: color || 'white'
+							});
+						}
 						break;
 
 					/* Item */
@@ -1427,59 +1461,22 @@ var ActionComponent = TaroEntity.extend({
 						break;
 
 					/* particles */
-					case 'startItemParticle':
-						var item = self._script.variable.getValue(action.item, vars);
-						var particleTypeId = self._script.variable.getValue(action.particleType, vars);
-						if (item && item._category == 'item' && item._stats.particles && item._stats.particles[particleTypeId]) {
-							taro.network.send('particle', { eid: item.id(), pid: particleTypeId, action: 'start' });
-						}
-						break;
 
-					case 'stopItemParticle':
-						var item = self._script.variable.getValue(action.item, vars);
-						var particleTypeId = self._script.variable.getValue(action.particleType, vars);
-						if (item && item._category == 'item' && item._stats.particles && item._stats.particles[particleTypeId]) {
-							taro.network.send('particle', { eid: item.id(), pid: particleTypeId, action: 'stop' });
-						}
-						break;
-
-					case 'emitItemParticle':
-						var item = self._script.variable.getValue(action.item, vars);
-						var particleTypeId = self._script.variable.getValue(action.particleType, vars);
-						if (item && item._category == 'item' && item._stats.particles && item._stats.particles[particleTypeId]) {
-							taro.network.send('particle', { eid: item.id(), pid: particleTypeId, action: 'emitOnce' });
-						}
-						break;
-
-					case 'startUnitParticle':
-						var unit = self._script.variable.getValue(action.unit, vars);
-						var particleTypeId = self._script.variable.getValue(action.particleType, vars);
-						if (unit && unit._category == 'unit' && unit._stats.particles && unit._stats.particles[particleTypeId]) {
-							taro.network.send('particle', { eid: unit.id(), pid: particleTypeId, action: 'start' });
-						}
-						break;
-
-					case 'stopUnitParticle':
-						var unit = self._script.variable.getValue(action.unit, vars);
-						var particleTypeId = self._script.variable.getValue(action.particleType, vars);
-						if (unit && unit._category == 'unit' && unit._stats.particles && unit._stats.particles[particleTypeId]) {
-							taro.network.send('particle', { eid: unit.id(), pid: particleTypeId, action: 'stop' });
-						}
-						break;
-
-					case 'emitUnitParticle':
-						var unit = self._script.variable.getValue(action.unit, vars);
-						var particleTypeId = self._script.variable.getValue(action.particleType, vars);
-						if (unit && unit._category == 'unit' && unit._stats.particles && unit._stats.particles[particleTypeId]) {
-							taro.network.send('particle', { eid: unit.id(), pid: particleTypeId, action: 'emitOnce' });
-						}
-						break;
-
-					case 'emitParticleOnceAtPosition':
+					case 'emitParticlesAtPosition':
 						var position = self._script.variable.getValue(action.position, vars);
 						var particleTypeId = self._script.variable.getValue(action.particleType, vars);
+						var angle = self._script.variable.getValue(action.angle, vars);
 						if (particleTypeId && position) {
-							taro.network.send('particle', { pid: particleTypeId, action: 'emitOnce', position: position });
+							taro.network.send('particle', { particleId: particleTypeId, position: position, angle: angle || 0});
+						}
+						break;
+
+					case 'emitParticlesFromEntity':
+						var particleTypeId = self._script.variable.getValue(action.particleType, vars);
+						var angle = self._script.variable.getValue(action.angle, vars);
+						var entity = self._script.variable.getValue(action.entity, vars);
+						if (particleTypeId && entity) {
+							taro.network.send('particle', { particleId: particleTypeId, position: {x:0, y:0}, angle: angle || 0, entityId: entity.id()});
 						}
 						break;
 
@@ -1616,7 +1613,6 @@ var ActionComponent = TaroEntity.extend({
 						break;
 
 					/* projectile */
-
 					case 'createProjectileAtPosition':
 						var projectileTypeId = self._script.variable.getValue(action.projectileType, vars);
 						var position = self._script.variable.getValue(action.position, vars);
@@ -1652,13 +1648,14 @@ var ActionComponent = TaroEntity.extend({
 												x: Math.cos(angle) * force,
 												y: Math.sin(angle) * force
 											}
-										}
+										},
+										streamMode: 1
 									}
 								);
 
 								var projectile = new Projectile(data);
 								taro.game.lastCreatedProjectileId = projectile._id;
-								projectile.script.trigger("entityCreated");
+								projectile.script.trigger('entityCreated');
 							} else {
 								if (!projectileData) {
 									self._script.errorLog('invalid projectile data');
@@ -2356,6 +2353,17 @@ var ActionComponent = TaroEntity.extend({
 						}
 
 						break;
+
+                    case 'teleportEntity':
+                        var position = self._script.variable.getValue(action.position, vars);
+                        var entity = self._script.variable.getValue(action.entity, vars);
+
+                        if (position && entity && ['unit', 'item', 'projectile'].includes(entity._category)) {
+                            entity.teleportTo(position.x, position.y, entity._rotate.z, true);
+                        }
+
+                        break;
+
 					case 'destroyEntity':
 						var entity = self._script.variable.getValue(action.entity, vars);
 						if (entity && self.entityCategories.indexOf(entity._category) > -1) {
@@ -2746,6 +2754,45 @@ var ActionComponent = TaroEntity.extend({
 									edit: {
 										selectedTiles: { 0: { 0: tileGid } },
 										size: { x: 1, y: 1 },
+										shape: 'rectangle',
+										layer: tileLayer,
+										x: tileX,
+										y: tileY,
+									},
+								}, 'server');
+							}
+
+						}
+						break;
+
+					case 'editMapTiles':
+						var tileGid = self._script.variable.getValue(action.gid, vars);
+						var tileLayer = self._script.variable.getValue(action.layer, vars);
+						var tileX = self._script.variable.getValue(action.x, vars);
+						var tileY = self._script.variable.getValue(action.y, vars);
+						var width = self._script.variable.getValue(action.width, vars);
+						var height = self._script.variable.getValue(action.height, vars);
+						if (
+							Number.isInteger(tileGid)
+							&& Number.isInteger(tileLayer)
+							&& Number.isInteger(tileX)
+							&& Number.isInteger(tileY)
+							&& Number.isInteger(width)
+							&& Number.isInteger(height)
+						) {
+							if (tileGid < 0 || tileGid > taro.game.data.map.tilesets[0].tilecount) {
+								break;
+							} else if (tileLayer > 3 || tileLayer < 0) {
+								break;
+							} else if (tileX < 0 || tileX >= taro.game.data.map.width) {
+								break;
+							} else if (tileY < 0 || tileY >= taro.game.data.map.height) {
+								break;
+							} else {
+								taro.developerMode.editTile({
+									edit: {
+										selectedTiles: { 0: { 0: tileGid } },
+										size: { x: width, y: height },
 										shape: 'rectangle',
 										layer: tileLayer,
 										x: tileX,

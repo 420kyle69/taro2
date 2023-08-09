@@ -364,9 +364,10 @@ var Item = TaroEntityPhysics.extend({
 													sourcePlayerId: owner.getOwner().id(),
 													unitAttributes: this._stats.damage.unitAttributes,
 													playerAttributes: this._stats.damage.playerAttributes
-												}
+												},
+												streamMode: this._stats.projectileStreamMode
 											});
-									 	var projectile = new Projectile(projectileData);
+										var projectile = new Projectile(projectileData);
 										projectile.script.trigger('entityCreated');
 										taro.game.lastCreatedProjectileId = projectile.id();
 									}
@@ -723,7 +724,7 @@ var Item = TaroEntityPhysics.extend({
 
 	startUsing: function () {
 		var self = this;
-
+		
 		if (self._stats.isBeingUsed)
 			return;
 
@@ -1113,10 +1114,14 @@ var Item = TaroEntityPhysics.extend({
 
 					case 'isBeingUsed':
 						var owner = self.getOwnerUnit();
-						// ignore stream so my item use won't fire two bullets
-						if (taro.isClient && (owner != taro.client.selectedUnit || !this._stats.ignoreServerStream)) {
+						// if the item's CSP is enabled, ignore server-stream so my item use won't fire two bullets
+						if (taro.isClient) {
+							// ignore server-stream if client isn't running physics or if projectileStreamMode is 0
+							if (owner == taro.client.selectedUnit && taro.physics && this._stats.projectileStreamMode == 1) {
+								break;
+							}
 							this._stats.isBeingUsed = newValue;
-						}
+						}	
 						break;
 
 					case 'fireRate':
@@ -1136,7 +1141,7 @@ var Item = TaroEntityPhysics.extend({
 	 */
 	_behaviour: function (ctx) {
 		var self = this;
-
+		
 		_.forEach(taro.triggersQueued, function (trigger) {
 			trigger.params['thisEntityId'] = self.id();
 			self.script.trigger(trigger.name, trigger.params);
@@ -1166,29 +1171,18 @@ var Item = TaroEntityPhysics.extend({
 					self._stats.controls.mouseBehaviour &&
 					self._stats.controls.mouseBehaviour.flipSpriteHorizontallyWRTMouse
 				) {
-					if (self._stats.controls.mouseBehaviour.rotateToFaceMouseCursor) {
-						if (rotate > 0 && rotate < Math.PI) {
-							self.flip(0);
-						} else {
-							self.flip(1);
-						}
+					if (ownerUnit.angleToTarget > 0 && ownerUnit.angleToTarget < Math.PI) {
+						self.flip(0);
 					} else {
-						self.flip(ownerUnit._stats.flip);
-					}
+						self.flip(1);
+					}					
 				}
 			}
 
-			// run both server & client.
-			// it's important that this runs on client side, because it prepares this item's position when it's dropped
-			self.translateTo(x, y);
-			self.rotateTo(0, 0, rotate);
-
-			// if (this.getOwnerUnit() != taro.client.selectedUnit)	 {
-			// 	console.log(x, y, rotate, ownerUnit.angleToTarget, this._rotate.z)
-			// }
-
-			if (taro.game.cspEnabled && taro.isClient) {
-				self.finalKeyFrame[1] = [x, y, rotate]; // prepare position for when this item's dropped. without this, item will appear at an incorrect position
+			// this is necessary for games that has sprite-only item with no joint. (e.g. team elimination)
+			if (taro.isServer) {
+				self.translateTo(x, y);
+				self.rotateTo(0, 0, rotate);
 			}
 		}
 

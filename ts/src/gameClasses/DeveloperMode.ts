@@ -132,7 +132,7 @@ class DeveloperMode {
 				for (let y = 0; y < brushSize.y; y++) {
 					if (sample[x] && sample[x][y] !== undefined && this.pointerInsideMap(x + tileX, y + tileY, map)) {
 						let index = sample[x][y];
-                        if (index === -1) index = 0;
+						if (index === -1) index = 0;
 						map.layers[layer].data[x + tileX + (y + tileY) * width] = index;
 						taro.map.data.layers[layer].data[x + tileX + (y + tileY) * width] = index;
 					}
@@ -183,23 +183,39 @@ class DeveloperMode {
 	floodTiles(layer: number, oldTile: number, newTile: number, x: number, y: number, limits?: Record<number, Record<number, number>>): void {
 		const map = taro.game.data.map;
 		const width = map.width;
-		if (oldTile === newTile || map.layers[layer].data[y * width + x] !== oldTile || limits?.[x]?.[y]) {
-			return;
-		}
-		//save tile change to taro.game.data.map and taro.map.data
-		map.layers[layer].data[y * width + x] = newTile;
-		taro.map.data.layers[layer].data[y * width + x] = newTile;
-		if (x > 0) {
-			this.floodTiles(layer, oldTile, newTile, x - 1, y, limits);
-		}
-		if (x < (map.width - 1)) {
-			this.floodTiles(layer, oldTile, newTile, x + 1, y, limits);
-		}
-		if (y > 0) {
-			this.floodTiles(layer, oldTile, newTile, x, y - 1, limits);
-		}
-		if (y < (map.height - 1)) {
-			this.floodTiles(layer, oldTile, newTile, x, y + 1, limits);
+		const openQueue: Vector2D[] = [{ x, y }];
+		const closedQueue: Record<number, Record<number, number>> = {};
+		while (openQueue.length !== 0) {
+			const nowPos = openQueue[0];
+			openQueue.shift();
+
+			if (closedQueue[nowPos.x]?.[nowPos.y]) {
+				continue;
+			}
+			if (!closedQueue[nowPos.x]) {
+				closedQueue[nowPos.x] = {};
+			}
+			closedQueue[nowPos.x][nowPos.y] = 1;
+			if (oldTile === newTile
+				|| map.layers[layer].data[nowPos.y * width + nowPos.x] !== oldTile
+				|| limits?.[nowPos.x]?.[nowPos.y]) {
+				continue;
+			}
+			//save tile change to taro.game.data.map and taro.map.data
+			map.layers[layer].data[nowPos.y * width + nowPos.x] = newTile;
+			taro.map.data.layers[layer].data[nowPos.y * width + nowPos.x] = newTile;
+			if (nowPos.x > 0 && !closedQueue[nowPos.x - 1]?.[nowPos.y]) {
+				openQueue.push({ x: nowPos.x - 1, y: nowPos.y });
+			}
+			if (nowPos.x < (map.width - 1) && !closedQueue[nowPos.x + 1]?.[nowPos.y]) {
+				openQueue.push({ x: nowPos.x + 1, y: nowPos.y });
+			}
+			if (nowPos.y > 0 && !closedQueue[nowPos.x]?.[nowPos.y - 1]) {
+				openQueue.push({ x: nowPos.x, y: nowPos.y - 1 });
+			}
+			if (nowPos.y < (map.height - 1) && !closedQueue[nowPos.x]?.[nowPos.y + 1]) {
+				openQueue.push({ x: nowPos.x, y: nowPos.y + 1 });
+			}
 		}
 	}
 
@@ -291,32 +307,37 @@ class DeveloperMode {
 		if (taro.server.developerClientIds.includes(clientId)) {
 			// broadcast init entity change to all clients
 			taro.network.send('editInitEntity', data);
-            if (!this.initEntities) {
-                this.addInitEntities();
-            }
-            let found = false;
-            this.initEntities.forEach((action) => {
-                if (action.actionId === data.actionId) {
-                    found = true;
-                    if (data.wasEdited) action.wasEdited = true;
-                    if (data.position && data.position.x && data.position.y &&
-                        action.position && action.position.x && action.position.y) {
-                        action.position = data.position;
-                    }
-                    if (data.angle && action.angle) {
-                        action.angle = data.angle;
-                    }
-                    if (data.width && data.height && action.width && action.height) {
+			if (!this.initEntities) {
+				this.addInitEntities();
+			}
+			let found = false;
+			this.initEntities.forEach((action) => {
+				if (action.actionId === data.actionId) {
+					found = true;
+					if (data.wasEdited) action.wasEdited = true;
+					if (data.position && !isNaN(data.position.x) && !isNaN(data.position.y) &&
+						action.position && !isNaN(action.position.x) && !isNaN(action.position.y)) {
+						action.position = data.position;
+					}
+					if (!isNaN(data.angle) && !isNaN(action.angle)) {
+						action.angle = data.angle;
+					}
+                    if (!isNaN(data.width) && !isNaN(action.width)) {
                         action.width = data.width;
+                    }
+                    if (!isNaN(data.height) && !isNaN(action.height)) {
                         action.height = data.height;
                     }
-                }
-            });
-            if (!found) {
-                this.initEntities.push(data);
-            }
-        }
-    }
+                    if (data.wasDeleted) {
+                        action.wasDeleted = true;
+                    }
+				}
+			});
+			if (!found) {
+				this.initEntities.push(data);
+			}
+		}
+	}
 
 	createUnit(data) {
 		//const player = taro.game.getPlayerByClientId(clientId);
@@ -550,6 +571,7 @@ type MapEditTool = {
 
 	clear: {
 		layer: number;
+		layerName?: string;
 	}
 }
 

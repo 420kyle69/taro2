@@ -44,8 +44,8 @@ var DevModeTools = /** @class */ (function (_super) {
         var s = _this.BUTTON_INTERSPACE;
         _this.scene.scale.on(Phaser.Scale.Events.RESIZE, function () {
             toolButtonsContainer.height = (h + s) * 13;
-            if (toolButtonsContainer.height > _this.scene.sys.game.canvas.height * 0.5) {
-                toolButtonsContainer.scale = (_this.scene.sys.game.canvas.height * 0.5) / toolButtonsContainer.height;
+            if (toolButtonsContainer.height > window.innerHeight * 0.5) {
+                toolButtonsContainer.scale = (window.innerHeight * 0.5) / toolButtonsContainer.height;
             }
             toolButtonsContainer.x = palette.camera.x + palette.paletteWidth - ((h * 4) * toolButtonsContainer.scale) + 22;
             toolButtonsContainer.y = palette.camera.y - (toolButtonsContainer.height * toolButtonsContainer.scale);
@@ -54,8 +54,8 @@ var DevModeTools = /** @class */ (function (_super) {
         new DevToolButton(_this, '-', '-', 'Zoom out (-)', null, h + s, -(h + s), h, palette.scrollBarContainer, palette.zoom.bind(palette), 1);
         var toolButtonsContainer = _this.toolButtonsContainer = new Phaser.GameObjects.Container(scene);
         toolButtonsContainer.height = (h + s) * 13;
-        if (toolButtonsContainer.height > _this.scene.sys.game.canvas.height * 0.5) {
-            toolButtonsContainer.scale = (_this.scene.sys.game.canvas.height * 0.5) / toolButtonsContainer.height;
+        if (toolButtonsContainer.height > window.innerHeight * 0.5) {
+            toolButtonsContainer.scale = (window.innerHeight * 0.5) / toolButtonsContainer.height;
         }
         toolButtonsContainer.x = palette.camera.x + palette.paletteWidth - ((h * 4) * toolButtonsContainer.scale) + 22;
         toolButtonsContainer.y = palette.camera.y - (toolButtonsContainer.height * toolButtonsContainer.scale);
@@ -67,7 +67,7 @@ var DevModeTools = /** @class */ (function (_super) {
         };
         _this.brushButtons['rectangle'].highlight('active');
         _this.modeButtons = [];
-        _this.modeButtons.push(new DevToolButton(_this, '', 'Cursor Tool (C)', 'interact with regions and entities', 'cursor', 0, 0, h * 2 - s, toolButtonsContainer, _this.cursor.bind(_this)), new DevToolButton(_this, '', 'Region Tool (R)', 'draw new region', 'region', 0, (h + s) * 3, h * 2 - s, toolButtonsContainer, _this.drawRegion.bind(_this)), new DevToolButton(_this, '', 'Stamp Brush (B)', 'LMB: place selected tiles. RMB: copy tiles', 'stamp', 0, h + s, h * 2 - s, toolButtonsContainer, _this.brush.bind(_this), undefined, Object.values(_this.brushButtons)), new DevToolButton(_this, '', 'Eraser (E)', 'delete tiles from selected layer', 'eraser', h * 2, h + s, h * 2 - s, toolButtonsContainer, _this.emptyTile.bind(_this)), new DevToolButton(_this, '', 'Bucket Fill (F)', 'fill an area with the selected tile', 'fill', 0, (h + s) * 2, h * 2 - s, toolButtonsContainer, _this.fill.bind(_this)), new DevToolButton(_this, '', 'Clear Layer (L)', 'clear selected layer', 'clear', h * 2, (h + s) * 2, h * 2 - s, toolButtonsContainer, _this.clear.bind(_this)), new DevToolButton(_this, '', 'Save Map (S)', 'save all changes', 'save', h * 2, (h + s) * 3, h * 2 - s, toolButtonsContainer, _this.save.bind(_this)), new DevToolButton(_this, '', 'Entities Tool (A)', 'LMB: Place selected Entity on the Map RMB: copy entity', 'entity', h * 2, 0, h * 2 - s, toolButtonsContainer, _this.addEntities.bind(_this)));
+        _this.modeButtons.push(new DevToolButton(_this, '', 'Cursor Tool (C)', 'interact with regions and entities', 'cursor', 0, 0, h * 2 - s, toolButtonsContainer, _this.cursor.bind(_this)), new DevToolButton(_this, '', 'Region Tool (R)', 'draw new region', 'region', 0, (h + s) * 3, h * 2 - s, toolButtonsContainer, _this.drawRegion.bind(_this)), new DevToolButton(_this, '', 'Stamp Brush (B)', 'LMB: place selected tiles. RMB: copy tiles', 'stamp', 0, h + s, h * 2 - s, toolButtonsContainer, _this.brush.bind(_this) /*, undefined, Object.values(this.brushButtons)*/), new DevToolButton(_this, '', 'Eraser (E)', 'delete tiles from selected layer', 'eraser', h * 2, h + s, h * 2 - s, toolButtonsContainer, _this.emptyTile.bind(_this)), new DevToolButton(_this, '', 'Bucket Fill (F)', 'fill an area with the selected tile', 'fill', 0, (h + s) * 2, h * 2 - s, toolButtonsContainer, _this.fill.bind(_this)), new DevToolButton(_this, '', 'Clear Layer (L)', 'clear selected layer', 'clear', h * 2, (h + s) * 2, h * 2 - s, toolButtonsContainer, _this.clear.bind(_this)), new DevToolButton(_this, '', 'Save Map (S)', 'save all changes', 'save', h * 2, (h + s) * 3, h * 2 - s, toolButtonsContainer, _this.save.bind(_this)), new DevToolButton(_this, '', 'Entities Tool (A)', 'LMB: Place selected Entity on the Map', 'entity', h * 2, 0, h * 2 - s, toolButtonsContainer, _this.addEntities.bind(_this)));
         _this.cursorButton = _this.modeButtons[0];
         _this.highlightModeButton(0);
         _this.layerButtons = [];
@@ -96,7 +96,6 @@ var DevModeTools = /** @class */ (function (_super) {
                 camera.scrollY -= scrollY_1;
             }
         });
-        _this.outline = scene.gameScene.add.graphics();
         return _this;
     }
     DevModeTools.prototype.updateBrushArea = function () {
@@ -163,16 +162,14 @@ var DevModeTools = /** @class */ (function (_super) {
         });
         var plusKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.PLUS, false);
         plusKey.on('down', function () {
-            if (!_this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
-                var zoom = (gameScene.zoomSize / 2.15) / 1.1;
-                taro.client.emit('zoom', zoom);
+            if (!_this.checkIfInputModalPresent()) {
+                _this.tileEditor.tilePalette.changeBrushSize(-1);
             }
         });
         var minusKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.MINUS, false);
         minusKey.on('down', function () {
-            if (!_this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
-                var zoom = (gameScene.zoomSize / 2.15) * 1.1;
-                taro.client.emit('zoom', zoom);
+            if (!_this.checkIfInputModalPresent()) {
+                _this.tileEditor.tilePalette.changeBrushSize(1);
             }
         });
         var cKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C, false);
@@ -215,6 +212,12 @@ var DevModeTools = /** @class */ (function (_super) {
         sKey.on('down', function () {
             if (!_this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
                 _this.save();
+            }
+        });
+        var aKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A, false);
+        aKey.on('down', function () {
+            if (!_this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
+                _this.addEntities();
             }
         });
         var oneKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE, false);
@@ -278,6 +281,15 @@ var DevModeTools = /** @class */ (function (_super) {
                 _this.commandController.redo();
             }
         });
+        var deleteEntity = function (event) {
+            if (!_this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
+                _this.entityEditor.deleteInitEntity();
+            }
+        };
+        var deleteKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DELETE, false);
+        var backspaceKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.BACKSPACE, false);
+        deleteKey.on('down', deleteEntity);
+        backspaceKey.on('down', deleteEntity);
     };
     DevModeTools.prototype.cursor = function () {
         this.highlightModeButton(0);
@@ -334,7 +346,13 @@ var DevModeTools = /** @class */ (function (_super) {
     DevModeTools.prototype.clear = function () {
         var gameMap = this.scene.gameScene.tilemap;
         //this.tileEditor.clearLayer(gameMap.currentLayerIndex, false);
-        inGameEditor.showClearLayerConfirmation({ gid: 0, layer: gameMap.currentLayerIndex, layerName: this.layerButtons[gameMap.currentLayerIndex].name, x: 0, y: 0, tool: 'clear' });
+        var data = {
+            clear: {
+                layer: gameMap.currentLayerIndex,
+                layerName: this.layerButtons[gameMap.currentLayerIndex].name
+            }
+        };
+        inGameEditor.showClearLayerConfirmation(data);
     };
     DevModeTools.prototype.save = function () {
         inGameEditor.saveMap();
@@ -352,6 +370,7 @@ var DevModeTools = /** @class */ (function (_super) {
             this.brush();
         }
         this.tileEditor.brushArea.shape = shape;
+        this.updateBrushArea();
         Object.values(this.brushButtons).map(function (btn) {
             btn.highlight('no');
         });
