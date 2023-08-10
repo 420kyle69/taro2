@@ -61,6 +61,9 @@ class PhaserRenderer extends Phaser.Game {
 					plugin: rexvirtualjoystickplugin,
 					start: true
 				}]
+			},
+			audio: {
+				disableWebAudio: true
 			}
 		});
 

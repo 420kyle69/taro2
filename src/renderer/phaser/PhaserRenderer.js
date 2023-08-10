@@ -73,6 +73,9 @@ var PhaserRenderer = /** @class */ (function (_super) {
                         plugin: rexvirtualjoystickplugin,
                         start: true
                     }]
+            },
+            audio: {
+                disableWebAudio: true
             }
         }) || this;
         if (_this.isBooted) {
