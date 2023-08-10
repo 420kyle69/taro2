@@ -72,7 +72,7 @@ class EntitiesToRender {
 				// taro.profiler.logTimeElapsed('entity._behaviour()', timeStart);
 
 				// update transformation using incoming network stream
-				if (entity.isTransforming() || entity.tween?.isTweening) {
+				if (entity.phaserEntity?.gameObject?.visible && (entity.isTransforming() || entity.tween?.isTweening)) {
 					// var timeStart = performance.now();
 					entity._processTransform();
 					// taro.profiler.logTimeElapsed('first _processTransform', timeStart);
@@ -123,8 +123,24 @@ class EntitiesToRender {
 					// var timeStart = performance.now();
 					entity.transformTexture(x, y, rotate);
 					// taro.profiler.logTimeElapsed('transformTexture', timeStart);
-				}
-
+				} else if (!entity.phaserEntity?.gameObject?.visible && (entity.isTransforming() || entity.tween?.isTweening)) {
+                    entity.emit('transform', {
+                        x: entity.nextKeyFrame[1][0],
+                        y: entity.nextKeyFrame[1][1],
+                        rotation: entity.nextKeyFrame[1][2],
+                    });
+                    if (entity._category === 'item') {
+                        var ownerUnit = entity.getOwnerUnit();  
+                        if (ownerUnit) {
+                            entity.emit('transform', {
+                                x: ownerUnit.nextKeyFrame[1][0],
+                                y: ownerUnit.nextKeyFrame[1][1],
+                                rotation: ownerUnit.nextKeyFrame[1][2],
+                            });
+                        }   
+                    }
+                }
+                entity.phaserEntity?.gameObject?.setVisible(false);
 			}
 		}
 

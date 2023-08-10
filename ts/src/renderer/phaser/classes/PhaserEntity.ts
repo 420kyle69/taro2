@@ -17,6 +17,7 @@ class PhaserEntity {
 			dynamic: entity.on('dynamic', this.setDynamic, this),
 			destroy: entity.on('destroy', this.destroy, this)
 		});
+        entity.phaserEntity = this;
 	}
 
 	protected transform (data: {
