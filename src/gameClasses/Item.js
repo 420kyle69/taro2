@@ -11,13 +11,13 @@ var Item = TaroEntityPhysics.extend({
 		var itemData = {};
 
 		if (taro.isClient) {
-			itemData = taro.game.getAsset('itemTypes', data.itemTypeId);
+			itemData = taro.game.cloneAsset('itemTypes', data.itemTypeId);
 		}
 
 		self._stats = _.merge(itemData, data);
 
 		if (self._stats.projectileType) {
-			self.projectileData = taro.game.getAsset('projectileTypes', self._stats.projectileType);
+			self.projectileData = taro.game.cloneAsset('projectileTypes', self._stats.projectileType);
 		}
 
 		// so if cost is set as 0 it should be usable item
@@ -349,7 +349,7 @@ var Item = TaroEntityPhysics.extend({
 
 									// we don't create a Projectile entity for raycasts
 									if (this._stats.bulletType !== 'raycast') {
-										self.projectileData = taro.game.getAsset('projectileTypes', self._stats.projectileType);
+										self.projectileData = taro.game.cloneAsset('projectileTypes', self._stats.projectileType);
 										var projectileData = Object.assign(
 											JSON.parse(JSON.stringify(self.projectileData)),
 											{
@@ -770,7 +770,7 @@ var Item = TaroEntityPhysics.extend({
 		}
 	},
 	refillAmmo: function () {
-		var itemData = taro.game.getAsset('itemTypes', this._stats.itemTypeId);
+		var itemData = taro.game.cloneAsset('itemTypes', this._stats.itemTypeId);
 		this.streamUpdateData([
 			{ ammoTotal: itemData.ammoTotal },
 			{ ammo: itemData.ammoSize }
@@ -859,7 +859,7 @@ var Item = TaroEntityPhysics.extend({
 
 		self.previousState = null;
 
-		var data = taro.game.getAsset('itemTypes', type);
+		var data = taro.game.cloneAsset('itemTypes', type);
 		delete data.type; // hotfix for dealing with corrupted game json that has unitData.type = "unitType". This is caused by bug in the game editor.
 
 		if (data == undefined) {

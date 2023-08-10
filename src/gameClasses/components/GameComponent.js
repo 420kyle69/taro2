@@ -222,11 +222,23 @@ var GameComponent = TaroEntity.extend({
 		});
 	},
 
-	getAsset: function (assetType, assetId) {
+	cloneAsset: function (assetType, assetId) {
 		try {
 			var asset = this.data[assetType][assetId];
 			// return JSON.parse(JSON.stringify(asset));
 			return _.cloneDeep(asset);
+		} catch (e) {
+			GameComponent.prototype.log(
+				`getAsset ${assetType} ${assetId} ${e}`
+			);
+		}
+	},
+
+	getAsset: function (assetType, assetId) {
+		try {
+			var asset = this.data[assetType][assetId];
+			// return JSON.parse(JSON.stringify(asset));
+			return asset;
 		} catch (e) {
 			GameComponent.prototype.log(
 				`getAsset ${assetType} ${assetId} ${e}`

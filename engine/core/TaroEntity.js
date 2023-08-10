@@ -2020,7 +2020,7 @@ var TaroEntity = TaroObject.extend({
 
 				if (effect.projectileType) {
 					// these are never created on the server
-					var projectile = taro.game.getAsset('projectileTypes', effect.projectileType);
+					var projectile = taro.game.cloneAsset('projectileTypes', effect.projectileType);
 
 					if (projectile) {
 						var position = taro.game.lastProjectileHitPosition ||
@@ -3924,7 +3924,7 @@ var TaroEntity = TaroObject.extend({
 		var currentType = this._category === 'unit' ? 'unitTypes' : 'playerTypes';
 		var bonusType = this._category === 'unit' ? 'unitAttribute' : 'playerAttribute';
 		var currentEntityTypeId = this._category === 'unit' ? 'type' : 'playerTypeId';
-		var baseEntityStats = taro.game.getAsset(currentType, this._stats[currentEntityTypeId]);
+		var baseEntityStats = taro.game.cloneAsset(currentType, this._stats[currentEntityTypeId]);
 
 		if (!baseEntityStats) {
 			return;

@@ -1222,7 +1222,7 @@ var VariableComponent = TaroEntity.extend({
 
 				case 'defaultQuantityOfItemType':
 					var itemTypeId = self.getValue(text.itemType, vars);
-					var itemType = taro.game.getAsset('itemTypes', itemTypeId);
+					var itemType = taro.game.cloneAsset('itemTypes', itemTypeId);
 
 					if (itemType) {
 						returnValue = itemType.quantity;
@@ -1232,7 +1232,7 @@ var VariableComponent = TaroEntity.extend({
 
 				case 'maxValueOfItemType':
 					var itemTypeId = self.getValue(text.itemType, vars);
-					var itemType = taro.game.getAsset('itemTypes', itemTypeId);
+					var itemType = taro.game.cloneAsset('itemTypes', itemTypeId);
 
 					if (itemType) {
 						returnValue = itemType.maxQuantity;
@@ -1544,7 +1544,7 @@ var VariableComponent = TaroEntity.extend({
 
 				case 'getUnitTypeName':
 					var unitTypeId = self.getValue(text.unitType, vars);
-					var unitType = taro.game.getAsset('unitTypes', unitTypeId);
+					var unitType = taro.game.cloneAsset('unitTypes', unitTypeId);
 
 					if (unitType) {
 						returnValue = unitType.name;
@@ -1554,7 +1554,7 @@ var VariableComponent = TaroEntity.extend({
 
 				case 'getItemTypeName':
 					var itemTypeId = self.getValue(text.itemType, vars);
-					var itemType = taro.game.getAsset('itemTypes', itemTypeId);
+					var itemType = taro.game.cloneAsset('itemTypes', itemTypeId);
 
 					if (itemType) {
 						returnValue = itemType.name;
@@ -1691,7 +1691,7 @@ var VariableComponent = TaroEntity.extend({
 
 				case 'getItemTypeDamage':
 					var itemTypeId = self.getValue(text.itemType, vars);
-					var itemType = taro.game.getAsset('itemTypes', itemTypeId);
+					var itemType = taro.game.cloneAsset('itemTypes', itemTypeId);
 
 					if (itemType) {
 						returnValue = parseFloat(itemType.damage);
@@ -1796,7 +1796,7 @@ var VariableComponent = TaroEntity.extend({
 
 				case 'getRotateSpeed':
 					var unitTypeId = self.getValue(text.unitType, vars);
-					var unitType = taro.game.getAsset('unitTypes', unitTypeId);
+					var unitType = taro.game.cloneAsset('unitTypes', unitTypeId);
 
 					if (unitType && unitType.body && unitType.body.rotationSpeed) {
 						returnValue = unitType.body.rotationSpeed;

@@ -424,7 +424,7 @@ var ItemUiComponent = TaroEntity.extend({
 			for (var i = 0; i < itemStats.buffTypes.length; i++) {
 				var buffTypeName = itemStats.buffTypes[i];
 				var itemValue = itemStats[buffTypeName];
-				var itemType = taro.game.getAsset('itemTypes', itemStats.itemTypeId);
+				var itemType = taro.game.cloneAsset('itemTypes', itemStats.itemTypeId);
 
 				var defaultValue = 0;
 
@@ -432,7 +432,7 @@ var ItemUiComponent = TaroEntity.extend({
 					var defaultValue = itemType[buffTypeName] || 0;
 				}
 
-				var buffType = taro.game.getAsset('buffTypes', buffTypeName);
+				var buffType = taro.game.cloneAsset('buffTypes', buffTypeName);
 
 				if (buffType) {
 					var isPercentageBased = buffType.unit == 'percentage';

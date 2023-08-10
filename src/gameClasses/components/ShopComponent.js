@@ -391,7 +391,7 @@ var ShopComponent = TaroEntity.extend({
 						// var itemDetails = null;
 						$('#skins-list').append(skin);
 						// if (purchasable.target && purchasable.target.entityType == 'unit') {
-						// 	itemDetails = taro.game.getAsset('unitTypes', purchasable.target.key);
+						// 	itemDetails = taro.game.cloneAsset('unitTypes', purchasable.target.key);
 						// }
 						// self.renderShopImage(itemDetails, purchasable, 'menu_image');
 					});
@@ -826,7 +826,7 @@ var ShopComponent = TaroEntity.extend({
 			for (var i = 0; i < requiredItemTypesKeys.length; i++) {
 				var itemKey = requiredItemTypesKeys[i];
 				var requiredQty = shopItem.requirement.requiredItemTypes[itemKey];
-				var item = taro.game.getAsset('itemTypes', itemKey);
+				var item = taro.game.cloneAsset('itemTypes', itemKey);
 				var requirementsSatisfied = ownerUnit.inventory.hasRequiredQuantity(itemKey, requiredQty) && 'text-success' || 'text-danger';
 				requirements += `<p  class="mb-2 ml-2 no-selection ${requirementsSatisfied}">${requiredQty || ''} ${item.name}</p>`;
 			}
@@ -857,7 +857,7 @@ var ShopComponent = TaroEntity.extend({
 			for (var i = 0; i < requiredItemTypesKeys.length; i++) {
 				var itemKey = requiredItemTypesKeys[i];
 				var requiredQty = shopItem.price.requiredItemTypes[itemKey];
-				var item = taro.game.getAsset('itemTypes', itemKey);
+				var item = taro.game.cloneAsset('itemTypes', itemKey);
 				var requirementsSatisfied = ownerUnit?.inventory?.hasRequiredQuantity(itemKey, requiredQty) && 'text-success' || 'text-danger';
 				prices += `<p  class="mb-2 ml-2 no-selection ${requirementsSatisfied}">${requiredQty || ''} ${item.name}</p>`;
 			}
@@ -960,7 +960,7 @@ var ShopComponent = TaroEntity.extend({
 			});
 			$('[id=item]').addClass('active');
 			for (var i = 0; i < shopItemsKeys.length; i++) {
-				var item = taro.game.getAsset('itemTypes', shopItemsKeys[i]);
+				var item = taro.game.cloneAsset('itemTypes', shopItemsKeys[i]);
 				var shopItem = shopItems[shopItemsKeys[i]];
 
 				if (item && shopItem && shopItem.isPurchasable) {
@@ -1087,7 +1087,7 @@ var ShopComponent = TaroEntity.extend({
 			});
 			$('[id=unit]').addClass('active');
 			for (var i = 0; i < shopUnitsKeys.length; i++) {
-				var unit = taro.game.getAsset('unitTypes', shopUnitsKeys[i]);
+				var unit = taro.game.cloneAsset('unitTypes', shopUnitsKeys[i]);
 				var shopUnit = shopUnits[shopUnitsKeys[i]];
 
 				if (shopUnit && shopUnit.isPurchasable) {
@@ -1230,7 +1230,7 @@ var ShopComponent = TaroEntity.extend({
 		for (var i = 0; i < requiredItemTypesKeys.length; i++) {
 			var itemKey = requiredItemTypesKeys[i];
 			var requiredQty = itemsRequired[itemKey];
-			var item = taro.game.getAsset('itemTypes', itemKey);
+			var item = taro.game.cloneAsset('itemTypes', itemKey);
 			if (btnLabel == 'free') {
 				btnLabel = '';
 			}
@@ -1365,7 +1365,7 @@ var ShopComponent = TaroEntity.extend({
 			);
 
 			if (item.target && item.target.entityType == 'unit') {
-				itemDetails = taro.game.getAsset('unitTypes', item.target.key);
+				itemDetails = taro.game.cloneAsset('unitTypes', item.target.key);
 			}
 
 			this.renderShopImage(itemDetails, item, 'image');
@@ -1545,14 +1545,14 @@ var ShopComponent = TaroEntity.extend({
 	},
 
 	getItemById: function (itemTypeId) {
-		var itemData = taro.game.getAsset('itemTypes', itemTypeId);
+		var itemData = taro.game.cloneAsset('itemTypes', itemTypeId);
 		if (itemData) {
 			itemData.itemTypeId = itemTypeId;
 			return itemData;
 		}
 	},
 	getUnitById: function (unitId) {
-		var unitData = taro.game.getAsset('unitTypes', unitId);
+		var unitData = taro.game.cloneAsset('unitTypes', unitId);
 		if (unitData) {
 			unitData.unitTypeId = unitId;
 			return unitData;

@@ -73,7 +73,7 @@ var ItemComponent = TaroEntity.extend({
 				while (buffCount < maxBuffCount) {
 					for (var i = 0; i < availableBuffTypes.length; i++) {
 						buffTypeName = availableBuffTypes[i];
-						buffType = taro.game.getAsset('buffTypes', buffTypeName);
+						buffType = taro.game.cloneAsset('buffTypes', buffTypeName);
 						// console.log(buffTypeName, buffType)
 
 						if (buffType.unit == 'percentage') {

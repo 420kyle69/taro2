@@ -346,7 +346,7 @@ class DeveloperMode {
 			if (p.id() === data.playerId) player = p;
 		});
 		const unitTypeId = data.typeId;
-		const unitTypeData = taro.game.getAsset('unitTypes', unitTypeId);
+		const unitTypeData = taro.game.cloneAsset('unitTypes', unitTypeId);
 		const spawnPosition = data.position;
 		const facingAngle = data.angle;
 
@@ -398,7 +398,7 @@ class DeveloperMode {
 
 	createItem(data) {
 		const itemTypeId = data.typeId;
-		const itemData = taro.game.getAsset('itemTypes', itemTypeId);
+		const itemData = taro.game.cloneAsset('itemTypes', itemTypeId);
 		const position = data.position;
 		const facingAngle = data.angle;
 		let quantity = itemData.maxQuantity;

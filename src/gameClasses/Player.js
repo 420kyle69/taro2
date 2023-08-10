@@ -8,7 +8,7 @@ var Player = TaroEntity.extend({
 		var self = this;
 
 
-		var playerData = taro.game.getAsset('playerTypes', data.playerTypeId);
+		var playerData = taro.game.cloneAsset('playerTypes', data.playerTypeId);
 		this._stats = _.merge(playerData, data);
 
 		// dont save variables in _stats as _stats is stringified and synced
@@ -477,7 +477,7 @@ var Player = TaroEntity.extend({
 				// if player's type changed, then update all of its base stats (speed, stamina, etc..)
 				if (attrName === 'playerTypeId') {
 					self._stats[attrName] = newValue;
-					var playerTypeData = taro.game.getAsset('playerTypes', newValue);
+					var playerTypeData = taro.game.cloneAsset('playerTypes', newValue);
 					if (playerTypeData) {
 						playerTypeData.playerTypeId = newValue;
 
