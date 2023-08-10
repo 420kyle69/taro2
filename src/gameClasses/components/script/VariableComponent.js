@@ -1173,6 +1173,27 @@ var VariableComponent = TaroEntity.extend({
 
 					break;
 
+				case 'getMapTileId':
+					var map = taro.map.data;
+					var tileX = self.getValue(text.x, vars);
+					var tileY = self.getValue(text.y, vars);
+					var layer = self.getValue(text.layer, vars);
+					if (map && Number.isInteger(layer) && Number.isInteger(tileX) && Number.isInteger(tileY)) {
+						if (layer > 3 || layer < 0) {
+							taro.script.errorLog(`Invalid Layer`);
+							break;
+						} else if (tileX < 0 || tileX >= taro.game.data.map.width) {
+							taro.script.errorLog(`invalid x position`);
+							break;
+						} else if (tileY < 0 || tileY >= taro.game.data.map.height) {
+							taro.script.errorLog(`invalid y position`);
+							break;
+						} else {
+							returnValue = map.layers[layer].data[tileX + tileY * map.width];
+						}
+					}
+					break;
+
 				case 'entityWidth':
 					if (entity && self._entity.script.action.entityCategories.indexOf(entity._category) > -1) {
 						// returnValue = entity._aabb.width;
