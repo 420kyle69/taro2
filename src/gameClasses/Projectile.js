@@ -40,7 +40,8 @@ var Projectile = TaroEntityPhysics.extend({
 
 		if (self._stats.states) {
 			var currentState = self._stats.states[self._stats.stateId];
-			if (currentState) {
+			// width and height means created from script action with specific values
+			if (currentState && !this._stats.width && !this._stats.height) {
 				var body = self._stats.bodies && self._stats.bodies[currentState.body] || { type: 'none' };
 				if (body) {
 					self._stats.currentBody = body;
@@ -50,6 +51,10 @@ var Projectile = TaroEntityPhysics.extend({
 					// console.log('No body found for projectile', this._stats.name)
 					return;
 				}
+			// width and height means created from script action with specific values
+			} else if (this._stats.width && this._stats.height) {
+				this.width(this._stats.width);
+				this.height(this._stats.height);
 			}
 		}
 
