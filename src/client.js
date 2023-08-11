@@ -446,7 +446,7 @@ const Client = TaroEventingClass.extend({
 
 	getServersArray: function () {
 		const serversList = [];
-		let serverOptions = taro.client.getElement('#server-list > option').toArray(); // could this be const? idk jQ
+		let serverOptions = $('#server-list > option').toArray(); // could this be const? idk jQ
 
 		serverOptions.forEach((serverOption) => {
 			let server = {
