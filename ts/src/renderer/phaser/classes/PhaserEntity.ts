@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function,@typescript-eslint/no-unused-vars */
 class PhaserEntity {
 
-	public gameObject: TGameObject;
+	protected gameObject: TGameObject;
 	protected evtListeners: Record<string, EvtListener> = {};
 
 	protected constructor (
@@ -17,7 +17,6 @@ class PhaserEntity {
 			dynamic: entity.on('dynamic', this.setDynamic, this),
 			destroy: entity.on('destroy', this.destroy, this)
 		});
-        entity.phaserEntity = this;
 	}
 
 	protected transform (data: {
