@@ -103,15 +103,15 @@ const Client = TaroEventingClass.extend({
 		this.implement(ClientNetworkEvents);
 
 
-		this.getCachedElement('#dev-error-button').on('click', () => {
-			this.getCachedElement('#error-log-modal').modal('show');
+		$(this.getCachedElement('#dev-error-button')).on('click', () => {
+			$(this.getCachedElement('#error-log-modal')).modal('show');
 		});
 
-		this.getCachedElement('#bandwidth-usage').on('click', () => { // maybe we could rename 'bandwidth-usage'
-			this.getCachedElement('#dev-status-modal').modal('show');
+		$(this.getCachedElement('#bandwidth-usage')).on('click', () => { // maybe we could rename 'bandwidth-usage'
+			$(this.getCachedElement('#dev-status-modal')).modal('show');
 		});
 
-		this.getCachedElement('#leaderboard-link').on('click', (e) => {
+		$(this.getCachedElement('#leaderboard-link')).on('click', (e) => {
 			$('leaderboard-modal').modal('show');
 		});
 
@@ -200,13 +200,13 @@ const Client = TaroEventingClass.extend({
 
 		// these were under separate conditionals before. idk why.
 		if (mode == 'play') {
-			self.getCachedElement('#game-div canvas').click(() => {
-				self.getCachedElement('#more-games').removeClass('slideup-menu-animation').addClass('slidedown-menu-animation');
+			$(self.getCachedElement('#game-div canvas')).click(() => {
+				$(self.getCachedElement('#more-games')).removeClass('slideup-menu-animation').addClass('slidedown-menu-animation');
 			});
 
 			setTimeout(() => {
 				// console.log('loading removed'); // not necessary in production
-				self.getCachedElement('#loading-container').addClass('slider-out');
+				$(self.getCachedElement('#loading-container')).addClass('slider-out');
 			}, 2000);
 
 			// let's try getting our server here
@@ -253,7 +253,7 @@ const Client = TaroEventingClass.extend({
 					}
 				}
 
-				self.getCachedElement('#server-list').val(this.server.id);
+				$(self.getCachedElement('#server-list')).val(this.server.id);
 				// console.log(`best server selected: ${this.server, this.server.id}`);
 			});
 		}
@@ -326,7 +326,7 @@ const Client = TaroEventingClass.extend({
 		//this doesn't depend on physics config
 		if (gameData.isDeveloper) {
 
-			this.getCachedElement('#mod-this-game-menu-item').removeClass('d-none');
+			$(this.getCachedElement('#mod-this-game-menu-item')).removeClass('d-none');
 		}
 
 		//don't think these depend on physcis
@@ -382,7 +382,7 @@ const Client = TaroEventingClass.extend({
 
 			window.activatePlayGame = true; // is there a reason this line was repeated?
 
-			this.getCachedElement('#play-game-button-wrapper').removeClass('d-none-important');
+			$(this.getCachedElement('#play-game-button-wrapper')).removeClass('d-none-important');
 			$('.modal-videochat-backdrop, .modal-videochat').removeClass('d-none'); // hmmm
 			$('.modal-videochat').show(); // no...yes?
 
@@ -526,12 +526,12 @@ const Client = TaroEventingClass.extend({
 					const serverName = taro.client.server.name || serverIP.split('.')[0];
 
 					if (serverName) {
-						self.getCachedElement('#server-text').text(`to ${serverName}`);
+						$(self.getCachedElement('#server-text')).text(`to ${serverName}`);
 					}
 				}
 			}
 
-			self.getCachedElement('#loading-container').addClass('slider-out');
+			$(self.getCachedElement('#loading-container')).addClass('slider-out');
 
 			console.log('connected to ', taro.client.server.url, 'clientId ', taro.network.id()); // idk if this needs to be in production
 
@@ -634,7 +634,7 @@ const Client = TaroEventingClass.extend({
 
 			if (window.isStandalone) {
 
-				self.getCachedElement('#toggle-dev-panels').show();
+				$(self.getCachedElement('#toggle-dev-panels')).show();
 			}
 		});
 	},
@@ -741,7 +741,7 @@ const Client = TaroEventingClass.extend({
 					this.joinGame();
 
 				} else {
-					self.getCachedElement('#login-error-message').html(data.message).show().fadeOut(7000)
+					$(self.getCachedElement('#login-error-message')).html(data.message).show().fadeOut(7000)
 				}
 			}
 		});
@@ -761,7 +761,7 @@ const Client = TaroEventingClass.extend({
 		taro.client.removeOutsideEntities = undefined;
 		window.joinedGame = true;
 
-		self.getCachedElement('#dev-console').hide();
+		$(self.getCachedElement('#dev-console')).hide();
 
 		if (typeof (userId) != 'undefined' && typeof (sessionId) != 'undefined') {
 
@@ -788,7 +788,7 @@ const Client = TaroEventingClass.extend({
 
 					if (this.resolutionQuality != 'low' && taro._renderFPS < 40) { // do we still use this?
 
-						self.getCachedElement('#setting').popover('show');
+						$(self.getCachedElement('#setting')).popover('show');
 						clearInterval(this.lowFPSInterval);
 					}
 				}, 60000);
@@ -797,7 +797,7 @@ const Client = TaroEventingClass.extend({
 
 		document.addEventListener('click', () => {
 			// changed this to addEventListener so we capture the actual event
-			self.getCachedElement('#setting').popover('hide');
+			$(self.getCachedElement('#setting')).popover('hide');
 		});
 
 		data.isAdBlockEnabled = !!isAdBlockEnabled;
@@ -874,7 +874,7 @@ const Client = TaroEventingClass.extend({
 			this.domElements[id] = element;
 		}
 
-		return $(element);
+		return element;
 	}
 });
 
