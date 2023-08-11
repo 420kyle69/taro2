@@ -37,10 +37,12 @@ var PlayerUiComponent = TaroEntity.extend({
 
 		$('#custom-modal').on('hidden.bs.modal', function () {
 			$('#custom-modal').removeClass('d-flex');
+			taro.client.myPlayer.control.updatePlayerInputStatus();
 		});
 
 		$('#custom-modal').on('shown.bs.modal', function () {
 			$('#custom-modal-cancel').focus();
+			taro.client.myPlayer.control.updatePlayerInputStatus();
 		});
 
 		$('#player-input-modal').on('shown.bs.modal', function () {
@@ -49,18 +51,21 @@ var PlayerUiComponent = TaroEntity.extend({
 			} else {
 				$('#player-input-field').focus();
 			}
+			taro.client.myPlayer.control.updatePlayerInputStatus();
 		});
 
 		$('button#player-input-submit').on('click', function () {
 			self.lastInputValue = $('#player-input-field').val();
 			self.pressedButton = true;
 			$('#player-input-modal').modal('hide');
+			taro.client.myPlayer.control.updatePlayerInputStatus();
 		});
 
 		$('button#player-input-cancel').on('click', function () {
 			self.pressedButton = false;
 			taro.network.send('playerCustomInput', { status: 'cancelled' });
 			$('#player-input-modal').modal('hide');
+			taro.client.myPlayer.control.updatePlayerInputStatus();
 		});
 	},
 
@@ -168,7 +173,7 @@ var PlayerUiComponent = TaroEntity.extend({
 		}
 
 		$('#player-input-modal').modal('show');
-
+		taro.client.myPlayer.control.updatePlayerInputStatus();
 		self.pressedButton = false;
 	},
 

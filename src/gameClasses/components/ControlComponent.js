@@ -17,7 +17,7 @@ var ControlComponent = TaroEntity.extend({
 		this.mouseLocked = false;
 
 		// this.lastCommandSentAt = undefined;
-		this.isChatOpen = false;
+		this._isPlayerInputingText = false;
 		this.input = {
 			mouse: {
 				button1: false,
@@ -86,19 +86,11 @@ var ControlComponent = TaroEntity.extend({
 		if(taro.developerMode.shouldPreventKeybindings()) {
 			return;
 		}
-		// check for input modal is open
-		if (taro.isClient) {
-			this.isChatOpen = ($('#message').is(':focus') && !$('#player-input-field').is(':focus')) ||
-				$('#modd-dialogue-modal').hasClass('show') ||
-				$('#player-input-modal').hasClass('show') ||
-				$('#modd-item-shop-modal').hasClass('show') ||
-				$('#custom-modal').hasClass('show');
-		}
 
 		this.lastActionAt = Date.now();
 
 		if (this.input[device]) {
-			if ((taro.isClient && !this.isChatOpen) || taro.isServer) {
+			if ((taro.isClient && !this._isPlayerInputingText) || taro.isServer) {
 				this.input[device][key] = true;
 			}
 		}
@@ -110,7 +102,7 @@ var ControlComponent = TaroEntity.extend({
 
 		var unit = player.getSelectedUnit();
 		if (unit && unit._category == 'unit') {
-			if (taro.isServer || (taro.isClient && !this.isChatOpen)) {
+			if (taro.isServer || (taro.isClient && !this._isPlayerInputingText)) {
 				var unitAbility = null;
 				// execute movement command is AI is disabled
 				if (unit._stats.controls && !unit._stats.aiEnabled){
@@ -179,7 +171,7 @@ var ControlComponent = TaroEntity.extend({
 		// }
 
 		if (taro.isClient) {
-			if (!this.isChatOpen) {
+			if (!this._isPlayerInputingText) {
 				taro.network.send('playerKeyDown', { device: device, key: key });
 
 				// this.lastCommandSentAt = Date.now();
@@ -267,6 +259,18 @@ var ControlComponent = TaroEntity.extend({
 
 		if (this.input[device])
 			this.input[device][key] = false;
+	},
+
+
+	// check for input modal is open
+	updatePlayerInputStatus: function () {
+		if (taro.isClient) {
+			this._isPlayerInputingText = ($(taro.client.getCachedElement('#message')).is(':focus') && !$(taro.client.getCachedElement('#player-input-field')).is(':focus')) ||
+				$(taro.client.getCachedElement('#modd-dialogue-modal')).hasClass('show') ||
+				$(taro.client.getCachedElement('#player-input-modal')).hasClass('show') ||
+				$(taro.client.getCachedElement('#modd-item-shop-modal')).hasClass('show') ||
+				$(taro.client.getCachedElement('#custom-modal')).hasClass('show');
+		}
 	},
 
 	/**

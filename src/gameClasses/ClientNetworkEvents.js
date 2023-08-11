@@ -130,6 +130,7 @@ var ClientNetworkEvents = {
 
 			taro.shop.openItemShop(data.type);
 			$("#modd-item-shop-modal").modal("show");
+			taro.client.myPlayer.control.updatePlayerInputStatus();
 		}
 	},
 	_onCreateFloatingText: function (data) {

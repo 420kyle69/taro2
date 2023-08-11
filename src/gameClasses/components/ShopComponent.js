@@ -125,6 +125,7 @@ var ShopComponent = TaroEntity.extend({
 			// listen for item modal close
 			$('#modd-item-shop-modal').on('hidden.bs.modal', function () {
 				$('.popover').remove();
+				taro.client.myPlayer.control.updatePlayerInputStatus();
 			});
 			// purchase purchasable
 			$(document).on('click', '.btn-purchase-purchasable', function () {
@@ -1173,7 +1174,7 @@ var ShopComponent = TaroEntity.extend({
 			keyboard: isDismissible,
 			show: false
 		});
-
+		taro.client.myPlayer.control.updatePlayerInputStatus();
 		// reload shop ad as per adinplay request.
 		// aiptag.cmd.display.push(function () { aipDisplayTag.display('modd-io_728x90_shop'); });
 
@@ -1445,7 +1446,7 @@ var ShopComponent = TaroEntity.extend({
 		if (taro.isClient) {
 			// console.log("hide!")
 			$('#shop-modal').modal('hide');
-			this.closeModals();
+			taro.client.myPlayer.control.updatePlayerInputStatus();
 		} else if (taro.isServer) {
 			taro.network.send('ui', { command: 'closeShop' }, clientId);
 		}
