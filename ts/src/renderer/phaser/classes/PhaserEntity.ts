@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function,@typescript-eslint/no-unused-vars */
 class PhaserEntity {
 
-	protected gameObject: TGameObject;
+	public gameObject: TGameObject;
 	protected evtListeners: Record<string, EvtListener> = {};
 
 	protected constructor (
