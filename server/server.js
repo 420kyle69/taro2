@@ -636,7 +636,7 @@ var Server = TaroClass.extend({
 									taro.addComponent(VideoChatComponent);
 								}
 
-								let map = taro.scaleMap(_.cloneDeep(taro.game.data.map));
+								let map = taro.scaleMap(rfdc()(taro.game.data.map));
 								taro.map.load(map);
 
 								taro.game.start();

@@ -1667,7 +1667,7 @@ var Unit = TaroEntityPhysics.extend({
 			if (index > -1) {
 				owner._stats.purchasables.splice(index, 1);
 			}
-			var purchasables = _.cloneDeep(owner._stats.purchasables);
+			var purchasables = rfdc()(owner._stats.purchasables);
 			equipPurchasable = _.pick(equipPurchasable, ['_id', 'image', 'owner', 'target', 'type']);
 			purchasables.push(equipPurchasable);
 			owner.streamUpdateData([
@@ -1689,7 +1689,7 @@ var Unit = TaroEntityPhysics.extend({
 						return true;
 					}
 				});
-				var purchasables = _.cloneDeep(owner._stats.purchasables);
+				var purchasables = rfdc()(owner._stats.purchasables);
 				if (index > -1) {
 					purchasables.splice(index, 1);
 					owner.streamUpdateData([
@@ -1711,7 +1711,7 @@ var Unit = TaroEntityPhysics.extend({
 	loadPersistentData: function () {
 		var self = this;
 		var owner = self.getOwner();
-		var persistedData = _.cloneDeep(owner.persistedData);
+		var persistedData = rfdc()(owner.persistedData);
 		if (persistedData && persistedData.data && persistedData.data.unit) {
 			TaroEntity.prototype.loadPersistentData.call(this, persistedData.data.unit);
 
@@ -1739,7 +1739,7 @@ var Unit = TaroEntityPhysics.extend({
 	loadDataFromString: function (data) {
 		var self = this;
 		var owner = self.getOwner();
-		var persistedData = _.cloneDeep(data);
+		var persistedData = rfdc()(data);
 		if (persistedData) {
 			TaroEntity.prototype.loadPersistentData.call(this, persistedData);
 

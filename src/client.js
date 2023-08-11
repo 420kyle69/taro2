@@ -843,7 +843,7 @@ const Client = TaroEventingClass.extend({
 
 	applyInactiveTabEntityStream: function () {
 		for (let entityId in this.inactiveTabEntityStream) {
-			const entityData = _.cloneDeep(this.inactiveTabEntityStream[entityId]);
+			const entityData = rfdc()(this.inactiveTabEntityStream[entityId]);
 			this.inactiveTabEntityStream[entityId] = [];
 
 			const entity = taro.$(entityId);

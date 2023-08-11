@@ -226,7 +226,7 @@ var GameComponent = TaroEntity.extend({
 		try {
 			var asset = this.data[assetType][assetId];
 			// cloned = JSON.parse(JSON.stringify(asset));
-			// cloned = _.cloneDeep(asset);
+			// cloned = rfdc()(asset);
 			var cloned = rfdc()(asset);
 			return cloned;
 		} catch (e) {
@@ -487,7 +487,7 @@ var GameComponent = TaroEntity.extend({
 				taro.script.variable.prevServerTime = data.status.currentTime;
 				taro.script.variable.prevClientTime = Math.floor(taro._currentTime);
 
-				$('#dev-status-content').html(innerHtml);
+				$(taro.client.getCachedElement('#dev-status-content')).html(innerHtml);
 				self.secondCount++;
 			}
 		}

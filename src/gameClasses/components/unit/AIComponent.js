@@ -326,7 +326,7 @@ var AIComponent = TaroEntity.extend({
 		targetTilePosition.y = Math.min(Math.max(0, targetTilePosition.y), mapData.height - 1);
 		
 		if (!this.aStarIsPositionBlocked(x, y)) { // if there is no blocked, directly set the target to the end position
-			returnValue.path.push(_.cloneDeep(targetTilePosition));
+			returnValue.path.push(rfdc()(targetTilePosition));
 			returnValue.ok = true;
 			return returnValue;
 		}
@@ -338,24 +338,24 @@ var AIComponent = TaroEntity.extend({
 		if (wallMap[targetTilePosition.x + targetTilePosition.y * mapData.width] == 1) { // teminate if the target position is wall
 			return returnValue;
 		}
-		openList.push(_.cloneDeep({current: unitTilePosition, parent: {x: -1, y: -1}, totalHeuristic: 0})); // push start node to open List
+		openList.push(rfdc()({current: unitTilePosition, parent: {x: -1, y: -1}, totalHeuristic: 0})); // push start node to open List
 		while (openList.length > 0) {
-			let minNode = _.cloneDeep(openList[0]); // initialize for iteration
+			let minNode = rfdc()(openList[0]); // initialize for iteration
 			let minNodeIndex = 0;
 			for (let i = 1; i < openList.length; i++) {
 				if (openList[i].totalHeuristic < minNode.totalHeuristic) { // only update the minNode if the totalHeuristic is smaller
 					minNodeIndex = i;
-					minNode = _.cloneDeep(openList[i]);
+					minNode = rfdc()(openList[i]);
 				}
 			}
 			openList.splice(minNodeIndex, 1); // remove node with smallest distance from openList and add it to close list
-			closeList.push(_.cloneDeep(minNode));
+			closeList.push(rfdc()(minNode));
 			if (minNode.current.x == targetTilePosition.x && minNode.current.y == targetTilePosition.y) { // break when the goal is found, push it to tempPath for return
-				tempPath.push(_.cloneDeep(targetTilePosition));
+				tempPath.push(rfdc()(targetTilePosition));
 				break;
 			}
 			for (let i = 0; i < 4; i++) {
-				let newPosition = _.cloneDeep(minNode.current);
+				let newPosition = rfdc()(minNode.current);
 				switch (i) {
 					case 0: // right
 						newPosition.x += 1;
@@ -403,7 +403,7 @@ var AIComponent = TaroEntity.extend({
 									{
 										if (newPosition.x == openList[j].current.x && newPosition.y == openList[j].current.y) {
 											if (minNode.totalHeuristic + heuristic < openList[j].totalHeuristic) {
-												openList[j] = _.cloneDeep({current: newPosition, parent: minNode.current, totalHeuristic: minNode.totalHeuristic + heuristic});
+												openList[j] = rfdc()({current: newPosition, parent: minNode.current, totalHeuristic: minNode.totalHeuristic + heuristic});
 											}
 											nodeFound = true;
 											break;
@@ -420,7 +420,7 @@ var AIComponent = TaroEntity.extend({
 									}
 									break;
 								case 2: // finally push it to open list if it does not exist
-									openList.push(_.cloneDeep({current: newPosition, parent: minNode.current, totalHeuristic: minNode.totalHeuristic + heuristic}));
+									openList.push(rfdc()({current: newPosition, parent: minNode.current, totalHeuristic: minNode.totalHeuristic + heuristic}));
 									break;
 							}
 						} else break;
@@ -434,7 +434,7 @@ var AIComponent = TaroEntity.extend({
 			while (tempPath[tempPath.length - 1].x != unitTilePosition.x || tempPath[tempPath.length - 1].y != unitTilePosition.y) { // retrieve the path
 				for (let i = 0; i < closeList.length; i++) {
 					if (tempPath[tempPath.length - 1].x == closeList[i].current.x && tempPath[tempPath.length - 1].y == closeList[i].current.y) {
-						tempPath.push(_.cloneDeep(closeList[i].parent)); // keep pushing the parent node of the node, until it reach the start node from goal node
+						tempPath.push(rfdc()(closeList[i].parent)); // keep pushing the parent node of the node, until it reach the start node from goal node
 						break;
 					}
 				}

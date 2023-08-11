@@ -3845,7 +3845,7 @@ var TaroEntity = TaroObject.extend({
 		for (var variablesId in self.variables) {
 			var variable = self.variables[variablesId];
 			if (!variablesToBeIgnored.includes(variable.dataType)) {
-				variables[variablesId] = _.cloneDeep(variable);
+				variables[variablesId] = rfdc()(variable);
 			}
 		}
 
@@ -3866,7 +3866,7 @@ var TaroEntity = TaroObject.extend({
 		}
 
 		dataToBeSaved[type] = {
-			attributes: _.cloneDeep(self._stats.attributes),
+			attributes: rfdc()(self._stats.attributes),
 			variables: variables
 		};
 
@@ -3900,8 +3900,8 @@ var TaroEntity = TaroObject.extend({
 						}
 						var itemStatsToBeSaved = {
 							itemTypeId: item._stats.itemTypeId,
-							attributes: _.cloneDeep(item._stats.attributes),
-							variables: _.cloneDeep(itemVariable),
+							attributes: rfdc()(item._stats.attributes),
+							variables: rfdc()(itemVariable),
 							quantity: item._stats.quantity
 						};
 
@@ -3913,7 +3913,7 @@ var TaroEntity = TaroObject.extend({
 			dataToBeSaved[type].inventoryItems = inventoryItems;
 		}
 
-		return _.cloneDeep(dataToBeSaved[type]);
+		return rfdc()(dataToBeSaved[type]);
 	},
 
 	updateStats: function (itemId, removeAttributes) {
@@ -4036,9 +4036,9 @@ var TaroEntity = TaroObject.extend({
 
 	// use to apply max,min value before attributes value
 	// orderData: function (data) {
-	// 	var attributes = data.attributes && _.cloneDeep(data.attributes);
-	// 	var attributesMax = data.attributesMax && _.cloneDeep(data.attributesMax);
-	// 	var attributesMin = data.attributesMin && _.cloneDeep(data.attributesMin);
+	// 	var attributes = data.attributes && rfdc()(data.attributes);
+	// 	var attributesMax = data.attributesMax && rfdc()(data.attributesMax);
+	// 	var attributesMin = data.attributesMin && rfdc()(data.attributesMin);
 	// 	if (attributesMax) {
 	// 		delete data.attributesMax;
 	// 		data.attributesMax = attributesMax;
@@ -4066,7 +4066,7 @@ var TaroEntity = TaroObject.extend({
 						case 'attributes':
 							// only on client side to prevent circular recursion
 							if (taro.isClient) {
-								var attributesObject = _.cloneDeep(this._stats.attributes);
+								var attributesObject = rfdc()(this._stats.attributes);
 								if (attributesObject) {
 									for (var attributeTypeId in data.attributes) {
 										var attributeData = attributesObject[attributeTypeId];

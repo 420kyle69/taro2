@@ -509,7 +509,7 @@ var ServerNetworkEvents = {
 		if (player) {
 			var unit = player.getSelectedUnit();		
 			if (unit && unit._stats) {
-				var itemIds = _.cloneDeep(unit._stats.itemIds);
+				var itemIds = rfdc()(unit._stats.itemIds);
 				var fromItem = taro.$(itemIds[data.from]);
 				var toItem = taro.$(itemIds[data.to]);
 

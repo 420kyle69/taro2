@@ -733,7 +733,7 @@ var Player = TaroEntity.extend({
 	loadPersistentData: function () {
 		var self = this;
 
-		var persistData = _.cloneDeep(self.persistedData);
+		var persistData = rfdc()(self.persistedData);
 		if (persistData && persistData.data && persistData.data.player) {
 			TaroEntity.prototype.loadPersistentData.call(this, persistData.data.player);
 		}

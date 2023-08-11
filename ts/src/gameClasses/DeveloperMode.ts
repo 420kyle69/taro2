@@ -107,7 +107,7 @@ class DeveloperMode {
 			if (gameMap.layers[serverData.layer].name === 'walls') {
 				//if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
 				taro.physics.destroyWalls();
-				let map = taro.scaleMap(_.cloneDeep(gameMap));
+				let map = taro.scaleMap(rfdc()(gameMap));
 				taro.tiled.loadJson(map, function (layerArray, layersById) {
 					taro.physics.staticsFromMap(layersById.walls);
 				});
@@ -537,7 +537,7 @@ class DeveloperMode {
 			if (taro.physics) {
 				//if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
 				taro.physics.destroyWalls();
-				let map = taro.scaleMap(_.cloneDeep(taro.game.data.map));
+				let map = taro.scaleMap(rfdc()(taro.game.data.map));
 				taro.tiled.loadJson(map, function (layerArray, TaroLayersById) {
 					taro.physics.staticsFromMap(TaroLayersById.walls);
 				});

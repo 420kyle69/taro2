@@ -1145,7 +1145,7 @@ var TaroEngine = TaroEntity.extend({
 	},
 	scaleMap: function (map) {
 		// return map;
-		var gameMap = _.cloneDeep(map);
+		var gameMap = rfdc()(map);
 		// taro.game.data.defaultData.dontResize ||
 		if (taro.game.data.defaultData.dontResize) {
 			taro.scaleMapDetails = {

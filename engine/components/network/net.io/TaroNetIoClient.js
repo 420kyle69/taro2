@@ -454,7 +454,7 @@ var TaroNetIoClient = {
 		var now = taro._currentTime
 		
 		if (commandName === '_snapshot') {
-			var snapshot = _.cloneDeep(data)[1];
+			var snapshot = rfdc()(data)[1];
 			var newSnapshotTimestamp = snapshot[snapshot.length - 1][1];
 			// see how far apart the newly received snapshot is from currentTime
 			if (snapshot.length) {

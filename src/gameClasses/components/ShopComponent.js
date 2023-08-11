@@ -903,7 +903,7 @@ var ShopComponent = TaroEntity.extend({
 		var shopItemsKeys = self.getSortedShopItems({data: taro.game?.data?.shops[self.currentType], key: 'itemTypes' });
 		var shopUnitsKeys = self.getSortedShopItems({data: taro.game?.data?.shops[self.currentType], key: 'unitTypes' });
 		
-		var shopItems = taro.game.data.shops[self.currentType] ? _.cloneDeep(taro.game.data.shops[self.currentType].itemTypes) : [];
+		var shopItems = taro.game.data.shops[self.currentType] ? rfdc()(taro.game.data.shops[self.currentType].itemTypes) : [];
 		var shopUnits = taro.game.data.shops[self.currentType] ? taro.game.data.shops[self.currentType].unitTypes : [];
 		var isDismissible = taro.game.data.shops[self.currentType] && taro.game.data.shops[self.currentType].dismissible != undefined ? taro.game.data.shops[self.currentType].dismissible : true;
 		var shopItemsKeysUsingCoins = [];
@@ -1156,7 +1156,7 @@ var ShopComponent = TaroEntity.extend({
 		var modalUpdated = false;
 		if (self.oldModalHTMLBody != modalBody.html()) {
 			modalUpdated = true;
-			self.oldModalHTMLBody = _.cloneDeep(modalBody.html());
+			self.oldModalHTMLBody = rfdc()(modalBody.html());
 			$('#modd-item-shop-modal .items-shop').html(modalBody);
 			imgArray.forEach(function (data) {
 				data.wrapper.html(data.value);

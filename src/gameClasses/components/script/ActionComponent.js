@@ -119,7 +119,7 @@ var ActionComponent = TaroEntity.extend({
 
 						// const use for creating new instance of variable every time.
 						const setTimeOutActions = rfdc()(action.actions);
-						// const setTimeoutVars = _.cloneDeep(vars);
+						// const setTimeoutVars = rfdc()(vars);
 						var duration = self._script.variable.getValue(action.duration, vars);
 						setTimeout(function (actions, currentScriptId) {
 							let previousScriptId = currentScriptId;
@@ -2157,7 +2157,7 @@ var ActionComponent = TaroEntity.extend({
 								data.width = width;
 								data.scaleDimensions = true;
 
-								createdEntity = new Item(_.cloneDeep(data));
+								createdEntity = new Item(rfdc()(data));
 								taro.game.lastCreatedItemId = createdEntity._id;
 							} else if (entityType === 'projectileTypes') {
 								data = Object.assign(data, {
@@ -2175,7 +2175,7 @@ var ActionComponent = TaroEntity.extend({
 									streamMode: 1
 								});
 
-								createdEntity = new Projectile(_.cloneDeep(data));
+								createdEntity = new Projectile(rfdc()(data));
 								taro.game.lastCreatedProjectileId = createdEntity._id;
 							} else if (entityType === 'unitTypes') {
 								data = Object.assign(data, {
@@ -2192,7 +2192,7 @@ var ActionComponent = TaroEntity.extend({
 								var player = self._script.variable.getValue(action.player, vars);
 
 								if (player) {
-									createdEntity = player.createUnit(_.cloneDeep(data));
+									createdEntity = player.createUnit(rfdc()(data));
 								}
 
 								taro.game.lastCreatedUnitId = createdEntity._id;
@@ -2823,7 +2823,7 @@ var ActionComponent = TaroEntity.extend({
 							gameMap.wasEdited = true;
 
 							taro.physics.destroyWalls();
-							var map = taro.scaleMap(_.cloneDeep(gameMap));
+							var map = taro.scaleMap(rfdc()(gameMap));
 							taro.tiled.loadJson(map, function (layerArray, layersById) {
 								taro.physics.staticsFromMap(layersById.walls);
 							});
