@@ -1,7 +1,7 @@
 declare class TaroEntity extends TaroObject {
-	isTransforming: any;
-    phaserEntity: any;
-    nextKeyFrame: any;
+	isTransforming: boolean;
+    phaserEntity: PhaserEntity;
+    nextKeyFrame: {x: number, y: number, rotation: number};
 	getAnchoredOffset(rotate: number): any;
 
 	_alive: boolean;
