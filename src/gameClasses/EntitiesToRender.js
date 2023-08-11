@@ -4,7 +4,7 @@ var EntitiesToRender = /** @class */ (function () {
         taro.client.on('tick', this.frameTick, this);
     }
     EntitiesToRender.prototype.updateAllEntities = function ( /*timeStamp*/) {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
+        var _a, _b, _c, _d, _e, _f, _g, _h;
         for (var entityId in this.trackEntityById) {
             // var timeStart = performance.now();
             // var entity = taro.$(entityId);	
@@ -98,24 +98,7 @@ var EntitiesToRender = /** @class */ (function () {
                     entity.transformTexture(x, y, rotate);
                     // taro.profiler.logTimeElapsed('transformTexture', timeStart);
                 }
-                else if (!((_h = (_g = entity.phaserEntity) === null || _g === void 0 ? void 0 : _g.gameObject) === null || _h === void 0 ? void 0 : _h.visible) && (entity.isTransforming() || ((_j = entity.tween) === null || _j === void 0 ? void 0 : _j.isTweening))) {
-                    entity.emit('transform', {
-                        x: entity.nextKeyFrame[1][0],
-                        y: entity.nextKeyFrame[1][1],
-                        rotation: entity.nextKeyFrame[1][2],
-                    });
-                    if (entity._category === 'item') {
-                        var ownerUnit = entity.getOwnerUnit();
-                        if (ownerUnit) {
-                            entity.emit('transform', {
-                                x: ownerUnit.nextKeyFrame[1][0],
-                                y: ownerUnit.nextKeyFrame[1][1],
-                                rotation: ownerUnit.nextKeyFrame[1][2],
-                            });
-                        }
-                    }
-                }
-                (_l = (_k = entity.phaserEntity) === null || _k === void 0 ? void 0 : _k.gameObject) === null || _l === void 0 ? void 0 : _l.setVisible(false);
+                (_h = (_g = entity.phaserEntity) === null || _g === void 0 ? void 0 : _g.gameObject) === null || _h === void 0 ? void 0 : _h.setVisible(false);
             }
         }
         // taro.triggersQueued = [];
