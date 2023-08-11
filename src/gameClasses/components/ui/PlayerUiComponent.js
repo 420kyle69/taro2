@@ -279,7 +279,7 @@ var PlayerUiComponent = TaroEntity.extend({
 
 		function getDialogueInstance (dialogue) {
 			var playerName = extraData && extraData.playerName;
-			dialogue = JSON.parse(JSON.stringify(dialogue));
+			dialogue = rfdc()(dialogue);
 
 			if (dialogue.message.indexOf('%PLAYER_NAME%') > -1 && playerName) {
 				dialogue.message = dialogue.message.replace(/%PLAYER_NAME%/g, playerName);

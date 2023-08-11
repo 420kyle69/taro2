@@ -302,7 +302,7 @@ var Player = TaroEntity.extend({
 
 		// pass old attributes' values to new attributes (given that attributes have same ID)
 		if (self._stats.attributes != undefined) {
-			var oldAttributes = JSON.parse(JSON.stringify(self._stats.attributes));
+			var oldAttributes = rfdc()(self._stats.attributes);
 			for (attrId in data.attributes) {
 				if (oldAttributes[attrId] != undefined) {
 					data.attributes[attrId].value = oldAttributes[attrId].value;
@@ -467,7 +467,7 @@ var Player = TaroEntity.extend({
 	// update player's stats in the server side first, then update client side as well.
 	streamUpdateData: function (queuedData) {
 		var self = this;
-		var oldStats = JSON.parse(JSON.stringify(self._stats));
+		var oldStats = rfdc()(self._stats);
 		TaroEntity.prototype.streamUpdateData.call(this, queuedData);
 
 		for (var i = 0; i < queuedData.length; i++) {

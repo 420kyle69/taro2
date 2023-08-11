@@ -118,7 +118,7 @@ var ActionComponent = TaroEntity.extend({
 					case 'setTimeOut': // execute actions after timeout
 
 						// const use for creating new instance of variable every time.
-						const setTimeOutActions = JSON.parse(JSON.stringify(action.actions));
+						const setTimeOutActions = rfdc()(action.actions);
 						// const setTimeoutVars = _.cloneDeep(vars);
 						var duration = self._script.variable.getValue(action.duration, vars);
 						setTimeout(function (actions, currentScriptId) {

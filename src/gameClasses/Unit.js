@@ -174,7 +174,7 @@ var Unit = TaroEntityPhysics.extend({
 
 	redrawAttributeBars: function () {
 		var self = this;
-		var allAttributes = JSON.parse(JSON.stringify(self._stats.attributes || {}));
+		var allAttributes = rfdc()(self._stats.attributes || {})
 		var attributesToRender = [];
 		var ownerPlayer = self.getOwner();
 
@@ -1608,7 +1608,7 @@ var Unit = TaroEntityPhysics.extend({
 	// apply texture based on state
 	updateTexture: function () {
 		var self = this;
-		var defaultUnit = taro.game.cloneAsset('unitTypes', self._stats.type);
+		var defaultUnit = taro.game.getAsset('unitTypes', self._stats.type);
 		var changeTextureType;
 		if (self._stats.cellSheet.url !== defaultUnit.cellSheet.url) {
 			changeTextureType = 'using_skin'

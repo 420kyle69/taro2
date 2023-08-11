@@ -51,7 +51,6 @@ var ScriptComponent = TaroEntity.extend({
 		// for logging script history
 		self.currentScriptId = scriptId;
 		if (this.scripts && this.scripts[scriptId]) {
-			// var actions = JSON.parse(JSON.stringify(this.scripts[scriptId].actions));
 			var actions = self.getScriptActions(scriptId);
 			
 			// console.log(scriptId, ': ', actions, params);
@@ -84,7 +83,7 @@ var ScriptComponent = TaroEntity.extend({
 			var script = this.scripts[scriptId];
 			if (!script.actions) return null;
 			if (script) {
-				self.scriptCache[scriptId] = JSON.parse(JSON.stringify(script.actions));
+				self.scriptCache[scriptId] = rfdc()(script.actions);
 				return self.scriptCache[scriptId];
 			}
 		}

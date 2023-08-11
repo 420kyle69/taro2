@@ -351,7 +351,7 @@ var Item = TaroEntityPhysics.extend({
 									if (this._stats.bulletType !== 'raycast') {
 										self.projectileData = taro.game.cloneAsset('projectileTypes', self._stats.projectileType);
 										var projectileData = Object.assign(
-											JSON.parse(JSON.stringify(self.projectileData)),
+											rfdc()(self.projectileData),
 											{
 												type: self._stats.projectileType,
 												sourceItemId: self.id(),

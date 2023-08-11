@@ -3895,7 +3895,7 @@ var TaroEntity = TaroObject.extend({
 						for (var variablesId in item.variables) {
 							var variable = item.variables[variablesId];
 							if (!variablesToBeIgnored.includes(variable.dataType)) {
-								itemVariable[variablesId] = JSON.parse(JSON.stringify(variable));
+								itemVariable[variablesId] = rfdc()(variable);
 							}
 						}
 						var itemStatsToBeSaved = {

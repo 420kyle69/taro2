@@ -8,8 +8,10 @@ const bodyParser = require('body-parser');
 const fs = require('fs');
 const cluster = require('cluster');
 const { RateLimiterMemory } = require('rate-limiter-flexible');
-_ = require('lodash');
 const currency = require("currency.js");
+
+_ = require('lodash');
+rfdc = require('rfdc')
 
 const config = require('../config');
 const Console = console.constructor;

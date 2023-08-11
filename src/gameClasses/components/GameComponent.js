@@ -225,8 +225,10 @@ var GameComponent = TaroEntity.extend({
 	cloneAsset: function (assetType, assetId) {
 		try {
 			var asset = this.data[assetType][assetId];
-			// return JSON.parse(JSON.stringify(asset));
-			return _.cloneDeep(asset);
+			// cloned = JSON.parse(JSON.stringify(asset));
+			// cloned = _.cloneDeep(asset);
+			var cloned = rfdc()(asset);
+			return cloned;
 		} catch (e) {
 			GameComponent.prototype.log(
 				`getAsset ${assetType} ${assetId} ${e}`
