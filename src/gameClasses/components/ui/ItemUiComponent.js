@@ -47,7 +47,7 @@ var ItemUiComponent = TaroEntity.extend({
 
 	updateItemInfo: function (item) {
 		if (item && item._stats) {
-			$('#item-name').html(item._stats.name);
+			$(taro.client.getCachedElement('#item-name')).html(item._stats.name);
 
 			var ammoStr = '';
 			if (item._stats.ammo != undefined)
@@ -55,8 +55,8 @@ var ItemUiComponent = TaroEntity.extend({
 
 			// $("#item-ammo").html(ammoStr)
 		} else {
-			$('#item-name').html('');
-			$('#item-ammo').html('');
+			$(taro.client.getCachedElement('#item-name')).html('');
+			$(taro.client.getCachedElement('#item-ammo')).html('');
 		}
 	},
 
@@ -65,7 +65,7 @@ var ItemUiComponent = TaroEntity.extend({
 		var owner = item && item.getOwnerUnit();
 		var equipmentAllowed = (owner && owner._stats.equipmentAllowed);
 		// update item info on bottom-right corner if it's currently selected item
-		$(`#item-${slotIndex}`).html(
+		$(taro.client.getCachedElement(`#item-${slotIndex}`)).html(
 			self.getItemDiv(item, {
 				popover: 'top',
 				isDraggable: true,

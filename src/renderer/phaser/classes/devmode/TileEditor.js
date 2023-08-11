@@ -79,7 +79,7 @@ var TileEditor = /** @class */ (function () {
                 Math.abs(pointerPosition.y - gameScene.input.activePointer.y) < 50 &&
                 !devModeTools.modeButtons[3].active) {
                 var worldPoint = gameScene.cameras.main.getWorldPoint(gameScene.input.activePointer.x, gameScene.input.activePointer.y);
-                var nowBrushSize = rfdc()(_this.brushArea.size);
+                var nowBrushSize = JSON.parse(JSON.stringify(_this.brushArea.size));
                 if (_this.devModeTools.isForceTo1x1()) {
                     nowBrushSize.x = 1;
                     nowBrushSize.y = 1;
@@ -364,10 +364,10 @@ var TileEditor = /** @class */ (function () {
                     if (devModeScene.input.manager.activePointer.leftButtonDown()) {
                         if (this.devModeTools.modeButtons[2].active || this.devModeTools.modeButtons[3].active) {
                             var originTileArea_1 = {};
-                            var nowBrushSize_1 = rfdc()(this.brushArea.size);
-                            var nowBrushShape_1 = rfdc()(this.brushArea.shape);
-                            var sample = rfdc()(this.brushArea.sample);
-                            var selectedTiles_1 = rfdc()(this.selectedTileArea);
+                            var nowBrushSize_1 = JSON.parse(JSON.stringify(this.brushArea.size));
+                            var nowBrushShape_1 = JSON.parse(JSON.stringify(this.brushArea.shape));
+                            var sample = JSON.parse(JSON.stringify(this.brushArea.sample));
+                            var selectedTiles_1 = JSON.parse(JSON.stringify(this.selectedTileArea));
                             var nowLayer_1 = map_1.currentLayerIndex;
                             Object.entries(sample).map(function (_a) {
                                 var x = _a[0], obj = _a[1];

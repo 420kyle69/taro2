@@ -67,16 +67,10 @@ var PlayerUiComponent = TaroEntity.extend({
 	updatePlayerAttributesDiv: function (attributes) {
 		var self = this;
 
-		if (!self.playerAttributeDivElement) {
-			self.playerAttributeDivElement = taro.client.getCachedElement('#players-attribute-div');
-		}
+		self.playerAttributeDivElement = taro.client.getCachedElement('#players-attribute-div');
 
 		if (self.playerAttributeDivElement) {
-			// self.playerAttributeDivElement.innerHTML = '';
-			
-			// removeChild is 2x faster than innerHTML = ''
-			while(self.playerAttributeDivElement.firstChild) 
-				self.playerAttributeDivElement.removeChild(self.playerAttributeDivElement.firstChild)
+			self.playerAttributeDivElement.textContent = '';
 		}
 
 		var attributeTypes = taro.game.data.attributeTypes;
@@ -123,7 +117,8 @@ var PlayerUiComponent = TaroEntity.extend({
 					}
 				}
 
-				var value = attr.value && attr.value.toLocaleString('en-US') || 0;
+				// var value = attr.value && attr.value.toLocaleString('en-US') || 0; // commented out because toLocaleString is costly
+				var value = attr.value || 0;
 				attrValue.text(value);
 			}
 		}
