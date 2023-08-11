@@ -4717,7 +4717,7 @@ var TaroEntity = TaroObject.extend({
 					break;
 
 				case 'projectile':
-					keys = ['type', 'anim', 'stateId', 'flip', 'sourceItemId', 'streamMode'];
+					keys = ['type', 'anim', 'stateId', 'flip', 'sourceItemId', 'streamMode', 'width', 'height'];
 					data = {
 						attributes: {},
 						// variables: {}
