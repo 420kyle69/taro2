@@ -94,10 +94,10 @@ var PlayerUiComponent = TaroEntity.extend({
 				var name = attributeType ? attributeType.name : attr.name;
 
 				var attrName = $('<span/>', {
-					class: `pt-attribute-${attrKey}`
+					id: `pt-attribute-${attrKey}`
 				});
 				var attrValue = $('<span/>', {
-					class: `pt-attribute-value-${attrKey}`
+					id: `pt-attribute-value-${attrKey}`
 				});
 				$(self.playerAttributeDivElement).append(
 					attrName
@@ -105,6 +105,28 @@ var PlayerUiComponent = TaroEntity.extend({
 					attrValue
 				).append($('<br/>'));
 				attrName.text(`${name}: `);
+			}
+		}
+
+		self.updatePlayerAttributeValues(attributes);
+
+		// update shop as player points are changed and when shop modal is open
+
+		if (!self.moddItemShopModalElement) {
+			self.moddItemShopModalElement = taro.client.getCachedElement('#modd-item-shop-modal');
+		}
+
+		if (self.moddItemShopModalElement && self.moddItemShopModalElement.classList.contains('show')) {
+			taro.shop.openItemShop();
+		}
+	},
+
+	updatePlayerAttributeValues: function (attributes) {
+		for (var attrKey in attributes) {
+			var attr = attributes[attrKey];
+			
+			if (attr) {
+				if (!attr.isVisible) continue;
 
 				// if attr value is int, then do not show decimal points. otherwise, show up to 2 decimal points
 				if (attr.value % 1 === 0) {
@@ -124,18 +146,10 @@ var PlayerUiComponent = TaroEntity.extend({
 
 				// var value = attr.value && attr.value.toLocaleString('en-US') || 0; // commented out because toLocaleString is costly
 				var value = attr.value || 0;
-				attrValue.text(value);
+				
+				var selector = taro.client.getCachedElement(`#pt-attribute-value-${attrKey}`);
+				$(selector).text(attr.value)
 			}
-		}
-
-		// update shop as player points are changed and when shop modal is open
-
-		if (!self.moddItemShopModalElement) {
-			self.moddItemShopModalElement = taro.client.getCachedElement('#modd-item-shop-modal');
-		}
-
-		if (self.moddItemShopModalElement && self.moddItemShopModalElement.classList.contains('show')) {
-			taro.shop.openItemShop();
 		}
 	},
 

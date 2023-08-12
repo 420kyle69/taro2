@@ -565,7 +565,7 @@ var Player = TaroEntity.extend({
 							  break;
 						  
 							case 'attributes':
-							  taro.playerUi.updatePlayerAttributesDiv(self._stats.attributes);
+							  taro.playerUi.updatePlayerAttributeValues(self._stats.attributes);
 							  break;
 						  
 							case 'coins':

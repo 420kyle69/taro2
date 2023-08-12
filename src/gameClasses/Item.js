@@ -679,7 +679,7 @@ var Item = TaroEntityPhysics.extend({
 						owner.attribute.refresh();
 					}
 					if (playerAttributeChanged) {
-						taro.playerUi.updatePlayerAttributesDiv(player._stats.attributes);
+						taro.playerUi.updatePlayerAttributeValues(player._stats.attributes);
 					}
 				}
 			}
