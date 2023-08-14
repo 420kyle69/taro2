@@ -65,7 +65,7 @@ var ItemUiComponent = TaroEntity.extend({
 		var owner = item && item.getOwnerUnit();
 		var equipmentAllowed = (owner && owner._stats.equipmentAllowed);
 		// update item info on bottom-right corner if it's currently selected item
-		$(taro.client.getCachedElement(`#item-${slotIndex}`)).html(
+		$(`#item-${slotIndex}`).html(
 			self.getItemDiv(item, {
 				popover: 'top',
 				isDraggable: true,
