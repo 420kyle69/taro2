@@ -472,6 +472,20 @@ var AIComponent = TaroEntity.extend({
 		return false;
 	},
 
+	aStarTargetIsCloser: function (unit, targetUnit) {
+		let mapData = taro.map.data;
+
+		let a = targetUnit._translate.x - unit._translate.x;
+		let b = targetUnit._translate.y - unit._translate.y;
+		let distanceToTarget = Math.sqrt(a * a + b * b);
+		
+		let c = this.path[0].x * mapData.tilewidth + mapData.tilewidth / 2 - unit._translate.x;
+		let d = this.path[0].y * mapData.tilewidth + mapData.tilewidth / 2 - unit._translate.y;
+		let distanceToEndPath = Math.sqrt(c * c + d * d);
+		
+		return distanceToTarget < distanceToEndPath;
+	},
+
 	setTargetUnit: function (unit) {
 		// can't target self!
 		if (unit == this._entity)
@@ -626,10 +640,10 @@ var AIComponent = TaroEntity.extend({
 								}
 								// After the above decision, choose whether directly move to targetUnit or according to path
 								if (this.path.length > 0) { // select next node to go
-									if (wallMap[this.path[this.path.length - 1].x + this.path[this.path.length - 1].y * mapData.width] == 0) { // only keep going if the next move is still non blocked
+									if (wallMap[this.path[this.path.length - 1].x + this.path[this.path.length - 1].y * mapData.width] == 0 && !this.aStarTargetIsCloser(unit, targetUnit)) { // only keep going if the next move is still non blocked
 										this.setTargetPosition(this.path[this.path.length - 1].x * mapData.tilewidth + mapData.tilewidth / 2, this.path[this.path.length - 1].y * mapData.tilewidth + mapData.tilewidth / 2);
 									} else { 
-										let aStarResult = this.getAStarPath(this.path[0].x, this.path[0].y); // recalculate whole path once the next move is blocked
+										let aStarResult = this.getAStarPath(targetUnit._translate.x, targetUnit._translate.y); // recalculate whole path once the next move is blocked
 										this.path = aStarResult.path;
 										if (aStarResult.ok) {
 											if (this.path.length > 0) {
