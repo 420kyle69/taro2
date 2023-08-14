@@ -510,6 +510,7 @@ var AIComponent = TaroEntity.extend({
 			return;
 
 		let mapData = taro.map.data; // both pathfinding method need it to check
+		let wallMap = taro.map.wallMap;
 
 		var targetUnit = this.getTargetUnit();
 
@@ -554,7 +555,20 @@ var AIComponent = TaroEntity.extend({
 							this.path.pop(); // after moved to the closest A* node, pop the array and let ai move to next A* node
 						}
 						if (this.path.length > 0) { // Move to the highest index of path saved (closest node to start node)
-							this.setTargetPosition(this.path[this.path.length - 1].x * mapData.tilewidth + mapData.tilewidth / 2, this.path[this.path.length - 1].y * mapData.tilewidth + mapData.tilewidth / 2);
+							if (wallMap[this.path[this.path.length - 1].x + this.path[this.path.length - 1].y * mapData.width] == 0) { // only keep going if the next move is still non blocked
+								this.setTargetPosition(this.path[this.path.length - 1].x * mapData.tilewidth + mapData.tilewidth / 2, this.path[this.path.length - 1].y * mapData.tilewidth + mapData.tilewidth / 2);
+							} else { 
+								let aStarResult = this.getAStarPath(this.path[0].x, this.path[0].y); // recalculate whole path once the next move is blocked
+								this.path = aStarResult.path;
+								if (aStarResult.ok) {
+									if (this.path.length > 0) {
+										this.setTargetPosition(this.path[this.path.length - 1].x * taro.map.data.tilewidth + taro.map.data.tilewidth / 2, this.path[this.path.length - 1].y * taro.map.data.tilewidth + taro.map.data.tilewidth / 2);
+									}
+								} else {
+									this.onAStarFailedTrigger();
+									self.goIdle();
+								}
+							}
 						} else {
 							self.goIdle();
 						}
@@ -605,13 +619,26 @@ var AIComponent = TaroEntity.extend({
 									this.path = aStarResult.path; // try to create a new path if the path is empty (Arrived / old path outdated)
 									if (!aStarResult.ok) {
 										this.onAStarFailedTrigger();
+										this.goIdle();
 									}
 								} else if (this.getDistanceToClosestAStarNode() < mapData.tilewidth / 2) { // Euclidean distance is smaller than half of the tile
 									this.path.pop();
 								}
 								// After the above decision, choose whether directly move to targetUnit or according to path
 								if (this.path.length > 0) { // select next node to go
-									this.setTargetPosition(this.path[this.path.length - 1].x * mapData.tilewidth + mapData.tilewidth / 2, this.path[this.path.length - 1].y * mapData.tilewidth + mapData.tilewidth / 2); // path
+									if (wallMap[this.path[this.path.length - 1].x + this.path[this.path.length - 1].y * mapData.width] == 0) { // only keep going if the next move is still non blocked
+										this.setTargetPosition(this.path[this.path.length - 1].x * mapData.tilewidth + mapData.tilewidth / 2, this.path[this.path.length - 1].y * mapData.tilewidth + mapData.tilewidth / 2);
+									} else { 
+										let aStarResult = this.getAStarPath(this.path[0].x, this.path[0].y); // recalculate whole path once the next move is blocked
+										this.path = aStarResult.path;
+										if (aStarResult.ok) {
+											if (this.path.length > 0) {
+												this.setTargetPosition(this.path[this.path.length - 1].x * taro.map.data.tilewidth + taro.map.data.tilewidth / 2, this.path[this.path.length - 1].y * taro.map.data.tilewidth + taro.map.data.tilewidth / 2);
+											}
+										} else {
+											this.onAStarFailedTrigger();
+										}
+									}
 								} else {
 									this.setTargetPosition(targetUnit._translate.x, targetUnit._translate.y); // direct
 								}
