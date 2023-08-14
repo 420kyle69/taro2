@@ -112,10 +112,7 @@ var PlayerUiComponent = TaroEntity.extend({
 
 		// update shop as player points are changed and when shop modal is open
 
-		if (!self.moddItemShopModalElement) {
-			self.moddItemShopModalElement = taro.client.getCachedElement('#modd-item-shop-modal');
-		}
-
+		self.moddItemShopModalElement = taro.client.getCachedElement('#modd-item-shop-modal');
 		if (self.moddItemShopModalElement && self.moddItemShopModalElement.classList.contains('show')) {
 			taro.shop.openItemShop();
 		}

@@ -80,8 +80,7 @@ var ItemUiComponent = TaroEntity.extend({
 		// }
 	},
 	updateItemQuantity: function (item) {
-
-		var itemSlot = $(`#slotindex-${item._stats.slotIndex}`);
+		var itemSlot = $(taro.client.getCachedElement(`#slotindex-${item._stats.slotIndex}`));
 		quantitySpan = itemSlot.find('small');
 		if (quantitySpan) {
 			var qty = item._stats.quantity;
