@@ -87,8 +87,8 @@ var EntityEditor = /** @class */ (function () {
                                 break;
                         }
                         targetPoint.rotate(selectedEntityImage.image.rotation);
-                        var x = selectedEntityImage.x + targetPoint.x;
-                        var y = selectedEntityImage.y + targetPoint.y;
+                        var x = Math.floor(selectedEntityImage.x + targetPoint.x);
+                        var y = Math.floor(selectedEntityImage.y + targetPoint.y);
                         selectedEntityImage.image.x = x;
                         selectedEntityImage.image.y = y;
                         editedAction.position = { x: x, y: y };
@@ -101,9 +101,11 @@ var EntityEditor = /** @class */ (function () {
                     return;
                 var entity = entityImage.entity;
                 if (entity.dragMode === 'position') {
-                    gameObject.x = dragX;
-                    gameObject.y = dragY;
-                    entity.editedAction.position = { x: dragX, y: dragY };
+                    var x = Math.floor(dragX);
+                    var y = Math.floor(dragY);
+                    gameObject.x = x;
+                    gameObject.y = y;
+                    entity.editedAction.position = { x: x, y: y };
                 }
                 else if (entity.dragMode === 'angle' && !isNaN(entity.action.angle)) {
                     var target = Phaser.Math.Angle.BetweenPoints(gameObject, { x: dragX, y: dragY });

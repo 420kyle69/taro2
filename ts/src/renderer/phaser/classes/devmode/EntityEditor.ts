@@ -108,8 +108,8 @@ class EntityEditor {
                                 break;
                         }
                         targetPoint.rotate(selectedEntityImage.image.rotation);
-                        const x = selectedEntityImage.x + targetPoint.x;
-                        const y = selectedEntityImage.y + targetPoint.y;
+                        const x = Math.floor(selectedEntityImage.x + targetPoint.x);
+                        const y = Math.floor(selectedEntityImage.y + targetPoint.y);
                         selectedEntityImage.image.x = x;
                         selectedEntityImage.image.y = y;
                         editedAction.position = {x: x, y: y};
@@ -122,9 +122,11 @@ class EntityEditor {
                 if (!devModeTools.cursorButton.active || gameObject !== entityImage) return;
                 const entity = entityImage.entity;
                 if (entity.dragMode === 'position') {
-                    gameObject.x = dragX;
-                    gameObject.y = dragY;
-                    entity.editedAction.position = {x: dragX, y: dragY};
+                    const x = Math.floor(dragX);
+                    const y = Math.floor(dragY);
+                    gameObject.x = x;
+                    gameObject.y = y;
+                    entity.editedAction.position = {x: x, y: y};
                 } else if (entity.dragMode === 'angle' && !isNaN(entity.action.angle)) {
                     const target = Phaser.Math.Angle.BetweenPoints(gameObject, { x: dragX, y: dragY });
                     gameObject.rotation = target;
