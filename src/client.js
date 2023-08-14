@@ -36,7 +36,7 @@ const Client = TaroEventingClass.extend({
 	classId: 'Client',
 
 	init: function () {
-
+		var self = this;
 		this.data = [];
 		this.host = window.isStandalone ? 'https://www.modd.io' : '';
 
@@ -46,6 +46,7 @@ const Client = TaroEventingClass.extend({
 
 		this.entityUpdateQueue = {};
 		this.errorLogs = [];
+		this.domElements = {}; // this is a cached map of fetched dom elements
 
 		pathArray = window.location.href.split('/');
 
@@ -102,15 +103,15 @@ const Client = TaroEventingClass.extend({
 		this.implement(ClientNetworkEvents);
 
 
-		$('#dev-error-button').on('click', () => {
-			$('#error-log-modal').modal('show');
+		$(this.getCachedElement('#dev-error-button')).on('click', () => {
+			$(this.getCachedElement('#error-log-modal')).modal('show');
 		});
 
-		$('#bandwidth-usage').on('click', () => { // maybe we could rename 'bandwidth-usage'
-			$('#dev-status-modal').modal('show');
+		$(this.getCachedElement('#bandwidth-usage')).on('click', () => { // maybe we could rename 'bandwidth-usage'
+			$(this.getCachedElement('#dev-status-modal')).modal('show');
 		});
 
-		$('#leaderboard-link').on('click', (e) => {
+		$(this.getCachedElement('#leaderboard-link')).on('click', (e) => {
 			$('leaderboard-modal').modal('show');
 		});
 
@@ -199,13 +200,13 @@ const Client = TaroEventingClass.extend({
 
 		// these were under separate conditionals before. idk why.
 		if (mode == 'play') {
-			$('#game-div canvas').click(() => {
-				$('#more-games').removeClass('slideup-menu-animation').addClass('slidedown-menu-animation');
+			$(self.getCachedElement('#game-div canvas')).click(() => {
+				$(self.getCachedElement('#more-games')).removeClass('slideup-menu-animation').addClass('slidedown-menu-animation');
 			});
 
 			setTimeout(() => {
 				// console.log('loading removed'); // not necessary in production
-				$('#loading-container').addClass('slider-out');
+				$(self.getCachedElement('#loading-container')).addClass('slider-out');
 			}, 2000);
 
 			// let's try getting our server here
@@ -252,7 +253,7 @@ const Client = TaroEventingClass.extend({
 					}
 				}
 
-				$('#server-list').val(this.server.id);
+				$(self.getCachedElement('#server-list')).val(this.server.id);
 				// console.log(`best server selected: ${this.server, this.server.id}`);
 			});
 		}
@@ -325,7 +326,7 @@ const Client = TaroEventingClass.extend({
 		//this doesn't depend on physics config
 		if (gameData.isDeveloper) {
 
-			$('#mod-this-game-menu-item').removeClass('d-none');
+			$(this.getCachedElement('#mod-this-game-menu-item')).removeClass('d-none');
 		}
 
 		//don't think these depend on physcis
@@ -381,7 +382,7 @@ const Client = TaroEventingClass.extend({
 
 			window.activatePlayGame = true; // is there a reason this line was repeated?
 
-			$('#play-game-button-wrapper').removeClass('d-none-important');
+			$(this.getCachedElement('#play-game-button-wrapper')).removeClass('d-none-important');
 			$('.modal-videochat-backdrop, .modal-videochat').removeClass('d-none'); // hmmm
 			$('.modal-videochat').show(); // no...yes?
 
@@ -505,6 +506,7 @@ const Client = TaroEventingClass.extend({
 	},
 
 	connectToServer: function () {
+		var self = this;
 		// if typeof args[1] == 'function', callback(args[0])
 		taro.network.start(taro.client.server, (clientServer) => { // changed param from 'data' to clientServer
 
@@ -524,12 +526,12 @@ const Client = TaroEventingClass.extend({
 					const serverName = taro.client.server.name || serverIP.split('.')[0];
 
 					if (serverName) {
-						$('#server-text').text(`to ${serverName}`);
+						$(self.getCachedElement('#server-text')).text(`to ${serverName}`);
 					}
 				}
 			}
 
-			$('#loading-container').addClass('slider-out');
+			$(self.getCachedElement('#loading-container')).addClass('slider-out');
 
 			console.log('connected to ', taro.client.server.url, 'clientId ', taro.network.id()); // idk if this needs to be in production
 
@@ -632,7 +634,7 @@ const Client = TaroEventingClass.extend({
 
 			if (window.isStandalone) {
 
-				$('#toggle-dev-panels').show();
+				$(self.getCachedElement('#toggle-dev-panels')).show();
 			}
 		});
 	},
@@ -720,7 +722,7 @@ const Client = TaroEventingClass.extend({
 	},
 
 	login: function () {
-
+		var self = this;
 		console.log('attempting to login'); // no console logs in production.
 
 		$.ajax({
@@ -739,7 +741,7 @@ const Client = TaroEventingClass.extend({
 					this.joinGame();
 
 				} else {
-					$('#login-error-message').html(data.message).show().fadeOut(7000)
+					$(self.getCachedElement('#login-error-message')).html(data.message).show().fadeOut(7000)
 				}
 			}
 		});
@@ -749,7 +751,7 @@ const Client = TaroEventingClass.extend({
 	//i'm not going to change the join game function
 	//
 	joinGame: function (wasGamePaused = false) {
-
+		var self = this;
 		// if the AdInPlay player is initialised, means the ad blocker is not enabled
 		let isAdBlockEnabled = window.isAdBlockEnabled || typeof window?.aiptag?.adplayer === 'undefined';
 		const data = {
@@ -759,7 +761,7 @@ const Client = TaroEventingClass.extend({
 		taro.client.removeOutsideEntities = undefined;
 		window.joinedGame = true;
 
-		$('#dev-console').hide();
+		$(self.getCachedElement('#dev-console')).hide();
 
 		if (typeof (userId) != 'undefined' && typeof (sessionId) != 'undefined') {
 
@@ -786,7 +788,7 @@ const Client = TaroEventingClass.extend({
 
 					if (this.resolutionQuality != 'low' && taro._renderFPS < 40) { // do we still use this?
 
-						$('#setting').popover('show');
+						$(self.getCachedElement('#setting')).popover('show');
 						clearInterval(this.lowFPSInterval);
 					}
 				}, 60000);
@@ -795,7 +797,7 @@ const Client = TaroEventingClass.extend({
 
 		document.addEventListener('click', () => {
 			// changed this to addEventListener so we capture the actual event
-			$('#setting').popover('hide');
+			$(self.getCachedElement('#setting')).popover('hide');
 		});
 
 		data.isAdBlockEnabled = !!isAdBlockEnabled;
@@ -841,7 +843,7 @@ const Client = TaroEventingClass.extend({
 
 	applyInactiveTabEntityStream: function () {
 		for (let entityId in this.inactiveTabEntityStream) {
-			const entityData = _.cloneDeep(this.inactiveTabEntityStream[entityId]);
+			const entityData = rfdc()(this.inactiveTabEntityStream[entityId]);
 			this.inactiveTabEntityStream[entityId] = [];
 
 			const entity = taro.$(entityId);
@@ -858,6 +860,21 @@ const Client = TaroEventingClass.extend({
 			this.emit('stop-follow');
 			this.emit('position-camera', [x, y]);
 		}
+	},
+
+    setResolution: function (resolution) {
+        this.emit('set-resolution', resolution);
+    },
+	
+	// return dom element. cache it if it doesn't exist.
+	getCachedElement: function (id) {
+		var element = this.domElements[id];
+		if (element == undefined || element.parentNode == undefined) {
+			element = document.querySelector(id);
+			this.domElements[id] = element;
+		}
+
+		return element;
 	}
 });
 

@@ -38,7 +38,7 @@ var MapComponent = TaroEntity.extend({
 			return layerObject.name === 'walls';
 		});
 
-		self.wallMap = _.cloneDeep(wallLayer.data); // cache a copy of wall layer's data
+		self.wallMap = rfdc()(wallLayer.data); // cache a copy of wall layer's data
 
 		for (let i = 0; i < self.wallMap.length; i++) { // convert all non zero number to 1 (the index does not matter as long as it is not 0)
 			if (self.wallMap[i] != 0) {

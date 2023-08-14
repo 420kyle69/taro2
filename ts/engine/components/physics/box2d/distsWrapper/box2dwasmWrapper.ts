@@ -1,5 +1,4 @@
 // FIXME: add more types to the physics part of taro2
-
 const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing memory leak bug
 	init: async function (component) {
 		const box2D = await box2dwasm() as typeof Box2D & EmscriptenModule;
@@ -47,8 +46,9 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 		component.b2World.prototype.getJointList = component.b2World.prototype.GetJointList;
 		component.b2World.prototype.getFixtureList = component.b2World.prototype.GetFixtureList;
 		component.b2World.prototype.step = component.b2World.prototype.Step;
-		component.b2World.prototype.rayCast = component.b2World.prototype.RayCast;
-
+		component.b2World.prototype.rayCast = (start: Box2D.b2Vec2, end: Box2D.b2Vec2, callback: Box2D.b2RayCastCallback | number) => {
+			component._world.RayCast(callback, start, end);
+		};
 		// signature is backwards!
 		/*
 			component.b2World.prototype.queryAABB = function(aabb, queryCallback){

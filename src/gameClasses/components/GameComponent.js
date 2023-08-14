@@ -222,10 +222,25 @@ var GameComponent = TaroEntity.extend({
 		});
 	},
 
+	cloneAsset: function (assetType, assetId) {
+		try {
+			var asset = this.data[assetType][assetId];
+			// cloned = JSON.parse(JSON.stringify(asset));
+			// cloned = rfdc()(asset);
+			var cloned = rfdc()(asset);
+			return cloned;
+		} catch (e) {
+			GameComponent.prototype.log(
+				`getAsset ${assetType} ${assetId} ${e}`
+			);
+		}
+	},
+
 	getAsset: function (assetType, assetId) {
 		try {
 			var asset = this.data[assetType][assetId];
-			return JSON.parse(JSON.stringify(asset));
+			// return JSON.parse(JSON.stringify(asset));
+			return asset;
 		} catch (e) {
 			GameComponent.prototype.log(
 				`getAsset ${assetType} ${assetId} ${e}`
@@ -472,7 +487,7 @@ var GameComponent = TaroEntity.extend({
 				taro.script.variable.prevServerTime = data.status.currentTime;
 				taro.script.variable.prevClientTime = Math.floor(taro._currentTime);
 
-				$('#dev-status-content').html(innerHtml);
+				$(taro.client.getCachedElement('#dev-status-content')).html(innerHtml);
 				self.secondCount++;
 			}
 		}

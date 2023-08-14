@@ -177,7 +177,7 @@ var ScoreboardComponent = TaroEntity.extend({
 					var color = null; // color to indicate human, animal, or my player on scoreboard
 					let playerIsSelf = '';
 
-					var playerType = taro.game.getAsset('playerTypes', player._stats.playerTypeId);
+					var playerType = taro.game.cloneAsset('playerTypes', player._stats.playerTypeId);
 
 					if (playerType && playerType.color) {
 						color = playerType.color;

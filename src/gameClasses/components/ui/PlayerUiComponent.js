@@ -37,10 +37,12 @@ var PlayerUiComponent = TaroEntity.extend({
 
 		$('#custom-modal').on('hidden.bs.modal', function () {
 			$('#custom-modal').removeClass('d-flex');
+			taro.client.myPlayer.control.updatePlayerInputStatus();
 		});
 
 		$('#custom-modal').on('shown.bs.modal', function () {
 			$('#custom-modal-cancel').focus();
+			taro.client.myPlayer.control.updatePlayerInputStatus();
 		});
 
 		$('#player-input-modal').on('shown.bs.modal', function () {
@@ -49,30 +51,31 @@ var PlayerUiComponent = TaroEntity.extend({
 			} else {
 				$('#player-input-field').focus();
 			}
+			taro.client.myPlayer.control.updatePlayerInputStatus();
 		});
 
 		$('button#player-input-submit').on('click', function () {
 			self.lastInputValue = $('#player-input-field').val();
 			self.pressedButton = true;
 			$('#player-input-modal').modal('hide');
+			taro.client.myPlayer.control.updatePlayerInputStatus();
 		});
 
 		$('button#player-input-cancel').on('click', function () {
 			self.pressedButton = false;
 			taro.network.send('playerCustomInput', { status: 'cancelled' });
 			$('#player-input-modal').modal('hide');
+			taro.client.myPlayer.control.updatePlayerInputStatus();
 		});
 	},
 
 	updatePlayerAttributesDiv: function (attributes) {
 		var self = this;
 
-		if (!self.playerAttributeDivElement) {
-			self.playerAttributeDivElement = document.getElementById('players-attribute-div');
-		}
+		self.playerAttributeDivElement = taro.client.getCachedElement('#players-attribute-div');
 
 		if (self.playerAttributeDivElement) {
-			self.playerAttributeDivElement.innerHTML = '';
+			self.playerAttributeDivElement.textContent = '';
 		}
 
 		var attributeTypes = taro.game.data.attributeTypes;
@@ -91,10 +94,10 @@ var PlayerUiComponent = TaroEntity.extend({
 				var name = attributeType ? attributeType.name : attr.name;
 
 				var attrName = $('<span/>', {
-					class: `pt-attribute-${attrKey}`
+					id: `pt-attribute-${attrKey}`
 				});
 				var attrValue = $('<span/>', {
-					class: `pt-attribute-value-${attrKey}`
+					id: `pt-attribute-value-${attrKey}`
 				});
 				$(self.playerAttributeDivElement).append(
 					attrName
@@ -102,6 +105,28 @@ var PlayerUiComponent = TaroEntity.extend({
 					attrValue
 				).append($('<br/>'));
 				attrName.text(`${name}: `);
+			}
+		}
+
+		self.updatePlayerAttributeValues(attributes);
+
+		// update shop as player points are changed and when shop modal is open
+
+		if (!self.moddItemShopModalElement) {
+			self.moddItemShopModalElement = taro.client.getCachedElement('#modd-item-shop-modal');
+		}
+
+		if (self.moddItemShopModalElement && self.moddItemShopModalElement.classList.contains('show')) {
+			taro.shop.openItemShop();
+		}
+	},
+
+	updatePlayerAttributeValues: function (attributes) {
+		for (var attrKey in attributes) {
+			var attr = attributes[attrKey];
+			
+			if (attr) {
+				if (!attr.isVisible) continue;
 
 				// if attr value is int, then do not show decimal points. otherwise, show up to 2 decimal points
 				if (attr.value % 1 === 0) {
@@ -119,19 +144,12 @@ var PlayerUiComponent = TaroEntity.extend({
 					}
 				}
 
-				var value = attr.value && attr.value.toLocaleString('en-US') || 0;
-				attrValue.text(value);
+				// var value = attr.value && attr.value.toLocaleString('en-US') || 0; // commented out because toLocaleString is costly
+				var value = attr.value || 0;
+				
+				var selector = taro.client.getCachedElement(`#pt-attribute-value-${attrKey}`);
+				$(selector).text(attr.value)
 			}
-		}
-
-		// update shop as player points are changed and when shop modal is open
-
-		if (!self.moddItemShopModalElement) {
-			self.moddItemShopModalElement = document.getElementById('modd-item-shop-modal');
-		}
-
-		if (self.moddItemShopModalElement && self.moddItemShopModalElement.classList.contains('show')) {
-			taro.shop.openItemShop();
 		}
 	},
 
@@ -169,7 +187,7 @@ var PlayerUiComponent = TaroEntity.extend({
 		}
 
 		$('#player-input-modal').modal('show');
-
+		taro.client.myPlayer.control.updatePlayerInputStatus();
 		self.pressedButton = false;
 	},
 
@@ -279,7 +297,7 @@ var PlayerUiComponent = TaroEntity.extend({
 
 		function getDialogueInstance (dialogue) {
 			var playerName = extraData && extraData.playerName;
-			dialogue = JSON.parse(JSON.stringify(dialogue));
+			dialogue = rfdc()(dialogue);
 
 			if (dialogue.message.indexOf('%PLAYER_NAME%') > -1 && playerName) {
 				dialogue.message = dialogue.message.replace(/%PLAYER_NAME%/g, playerName);

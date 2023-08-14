@@ -39,11 +39,11 @@ var PhaserRenderer = /** @class */ (function (_super) {
             type: forceCanvas[gameId] || forceCanvas[0] ?
                 Phaser.CANVAS : Phaser.AUTO,
             scale: {
-                width: 600,
-                height: 400,
+                width: window.innerWidth,
+                height: window.innerHeight,
                 parent: 'game-div',
-                mode: Phaser.Scale.ScaleModes.RESIZE,
-                // autoCenter: Phaser.Scale.CENTER_BOTH,
+                mode: Phaser.Scale.ScaleModes.ENVELOP,
+                autoCenter: Phaser.Scale.Center.CENTER_BOTH,
                 autoRound: true,
                 resizeInterval: 100
             },
@@ -73,6 +73,9 @@ var PhaserRenderer = /** @class */ (function (_super) {
                         plugin: rexvirtualjoystickplugin,
                         start: true
                     }]
+            },
+            audio: {
+                disableWebAudio: true
             }
         }) || this;
         if (_this.isBooted) {

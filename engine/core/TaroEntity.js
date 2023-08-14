@@ -2020,7 +2020,7 @@ var TaroEntity = TaroObject.extend({
 
 				if (effect.projectileType) {
 					// these are never created on the server
-					var projectile = taro.game.getAsset('projectileTypes', effect.projectileType);
+					var projectile = taro.game.cloneAsset('projectileTypes', effect.projectileType);
 
 					if (projectile) {
 						var position = taro.game.lastProjectileHitPosition ||
@@ -2231,6 +2231,7 @@ var TaroEntity = TaroObject.extend({
 						ctx.fill();
 						taro._drawCount++;
 					}
+
 					ctx.restore();
 				}
 			}
@@ -3844,7 +3845,7 @@ var TaroEntity = TaroObject.extend({
 		for (var variablesId in self.variables) {
 			var variable = self.variables[variablesId];
 			if (!variablesToBeIgnored.includes(variable.dataType)) {
-				variables[variablesId] = _.cloneDeep(variable);
+				variables[variablesId] = rfdc()(variable);
 			}
 		}
 
@@ -3865,7 +3866,7 @@ var TaroEntity = TaroObject.extend({
 		}
 
 		dataToBeSaved[type] = {
-			attributes: _.cloneDeep(self._stats.attributes),
+			attributes: rfdc()(self._stats.attributes),
 			variables: variables
 		};
 
@@ -3894,13 +3895,13 @@ var TaroEntity = TaroObject.extend({
 						for (var variablesId in item.variables) {
 							var variable = item.variables[variablesId];
 							if (!variablesToBeIgnored.includes(variable.dataType)) {
-								itemVariable[variablesId] = JSON.parse(JSON.stringify(variable));
+								itemVariable[variablesId] = rfdc()(variable);
 							}
 						}
 						var itemStatsToBeSaved = {
 							itemTypeId: item._stats.itemTypeId,
-							attributes: _.cloneDeep(item._stats.attributes),
-							variables: _.cloneDeep(itemVariable),
+							attributes: rfdc()(item._stats.attributes),
+							variables: rfdc()(itemVariable),
 							quantity: item._stats.quantity
 						};
 
@@ -3912,7 +3913,7 @@ var TaroEntity = TaroObject.extend({
 			dataToBeSaved[type].inventoryItems = inventoryItems;
 		}
 
-		return _.cloneDeep(dataToBeSaved[type]);
+		return rfdc()(dataToBeSaved[type]);
 	},
 
 	updateStats: function (itemId, removeAttributes) {
@@ -3923,7 +3924,7 @@ var TaroEntity = TaroObject.extend({
 		var currentType = this._category === 'unit' ? 'unitTypes' : 'playerTypes';
 		var bonusType = this._category === 'unit' ? 'unitAttribute' : 'playerAttribute';
 		var currentEntityTypeId = this._category === 'unit' ? 'type' : 'playerTypeId';
-		var baseEntityStats = taro.game.getAsset(currentType, this._stats[currentEntityTypeId]);
+		var baseEntityStats = taro.game.cloneAsset(currentType, this._stats[currentEntityTypeId]);
 
 		if (!baseEntityStats) {
 			return;
@@ -4035,9 +4036,9 @@ var TaroEntity = TaroObject.extend({
 
 	// use to apply max,min value before attributes value
 	// orderData: function (data) {
-	// 	var attributes = data.attributes && _.cloneDeep(data.attributes);
-	// 	var attributesMax = data.attributesMax && _.cloneDeep(data.attributesMax);
-	// 	var attributesMin = data.attributesMin && _.cloneDeep(data.attributesMin);
+	// 	var attributes = data.attributes && rfdc()(data.attributes);
+	// 	var attributesMax = data.attributesMax && rfdc()(data.attributesMax);
+	// 	var attributesMin = data.attributesMin && rfdc()(data.attributesMin);
 	// 	if (attributesMax) {
 	// 		delete data.attributesMax;
 	// 		data.attributesMax = attributesMax;
@@ -4065,7 +4066,7 @@ var TaroEntity = TaroObject.extend({
 						case 'attributes':
 							// only on client side to prevent circular recursion
 							if (taro.isClient) {
-								var attributesObject = _.cloneDeep(this._stats.attributes);
+								var attributesObject = rfdc()(this._stats.attributes);
 								if (attributesObject) {
 									for (var attributeTypeId in data.attributes) {
 										var attributeData = attributesObject[attributeTypeId];

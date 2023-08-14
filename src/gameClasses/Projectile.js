@@ -8,7 +8,7 @@ var Projectile = TaroEntityPhysics.extend({
 		self.category('projectile');
 		var projectileData = {};
 		if (taro.isClient) {
-			projectileData = taro.game.getAsset('projectileTypes', data.type);
+			projectileData = taro.game.cloneAsset('projectileTypes', data.type);
 		}
 
 		self.entityId = this._id;
@@ -135,7 +135,7 @@ var Projectile = TaroEntityPhysics.extend({
 
 		self.previousState = null;
 
-		var data = taro.game.getAsset('projectileTypes', type);
+		var data = taro.game.cloneAsset('projectileTypes', type);
 		delete data.type; // hotfix for dealing with corrupted game json that has unitData.type = "unitType". This is caused by bug in the game editor.
 
 		if (data == undefined) {

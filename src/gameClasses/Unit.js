@@ -22,7 +22,7 @@ var Unit = TaroEntityPhysics.extend({
 		if (!data.hasOwnProperty('equipmentAllowed')) {
 			data.equipmentAllowed = 9;
 		}
-		unitData = taro.game.getAsset('unitTypes', data.type);
+		unitData = taro.game.cloneAsset('unitTypes', data.type);
 
 		self._stats = _.merge(unitData, data);
 
@@ -174,7 +174,7 @@ var Unit = TaroEntityPhysics.extend({
 
 	redrawAttributeBars: function () {
 		var self = this;
-		var allAttributes = JSON.parse(JSON.stringify(self._stats.attributes || {}));
+		var allAttributes = rfdc()(self._stats.attributes || {})
 		var attributesToRender = [];
 		var ownerPlayer = self.getOwner();
 
@@ -741,8 +741,8 @@ var Unit = TaroEntityPhysics.extend({
 		var self = this;
 		self.previousState = null;
 
-		var data = taro.game.getAsset('unitTypes', type);
-
+		var data = taro.game.cloneAsset('unitTypes', type);
+		
 		delete data.type; // hotfix for dealing with corrupted game json that has unitData.type = "unitType". This is caused by bug in the game editor.
 
 		if (data == undefined) {
@@ -858,7 +858,7 @@ var Unit = TaroEntityPhysics.extend({
 				for (var i = 0; i < data.defaultItems.length; i++) {
 					var item = data.defaultItems[i];
 
-					var itemData = taro.game.getAsset('itemTypes', item.key);
+					var itemData = taro.game.cloneAsset('itemTypes', item.key);
 					if (itemData) {
 						itemData.itemTypeId = item.key;
 						self.pickUpItem(itemData);
@@ -918,7 +918,7 @@ var Unit = TaroEntityPhysics.extend({
 		// 1. store the unit's current attribute values. let's say we had 500/600 HP (base max 100hp)
 		var currentType = this._category === 'unit' ? 'unitTypes' : 'playerTypes';
 		var currentEntityTypeId = this._category === 'unit' ? 'type' : 'playerTypeId';
-		var baseEntityStats = taro.game.getAsset(currentType, this._stats[currentEntityTypeId]);
+		var baseEntityStats = taro.game.cloneAsset(currentType, this._stats[currentEntityTypeId]);
 		if (!baseEntityStats) {
 			return;
 		}
@@ -959,7 +959,7 @@ var Unit = TaroEntityPhysics.extend({
 		// 1. store the unit's current attribute values. let's say we had 500/600 HP (base max 100hp)
 		var currentType = this._category === 'unit' ? 'unitTypes' : 'playerTypes';
 		var currentEntityTypeId = this._category === 'unit' ? 'type' : 'playerTypeId';
-		var baseEntityStats = taro.game.getAsset(currentType, this._stats[currentEntityTypeId]);
+		var baseEntityStats = taro.game.cloneAsset(currentType, this._stats[currentEntityTypeId]);
 		if (!baseEntityStats) {
 			return;
 		}
@@ -1144,7 +1144,7 @@ var Unit = TaroEntityPhysics.extend({
 	updateNameLabel: function () {
 		var self = this;
 		var ownerPlayer = self.getOwner();
-		var playerTypeData = ownerPlayer && taro.game.getAsset('playerTypes', ownerPlayer._stats.playerTypeId);
+		var playerTypeData = ownerPlayer && taro.game.cloneAsset('playerTypes', ownerPlayer._stats.playerTypeId);
 
 		// const roles = taro.game.data.roles.filter(role => ownerPlayer._stats.roleIds.includes(role._id.toString()));
 		// var highestRole = roles.reduce((prev, current) => prev ? (current.order < prev.order ? current : prev) : current, null);
@@ -1199,7 +1199,7 @@ var Unit = TaroEntityPhysics.extend({
 	updateFadingText: function (text, color) {
 		var self = this;
 		var ownerPlayer = self.getOwner();
-		var playerTypeData = ownerPlayer && taro.game.getAsset('playerTypes', ownerPlayer._stats.playerTypeId);
+		var playerTypeData = ownerPlayer && taro.game.cloneAsset('playerTypes', ownerPlayer._stats.playerTypeId);
 
 		// label should be hidden
 		var hideLabel = (
@@ -1636,7 +1636,7 @@ var Unit = TaroEntityPhysics.extend({
 			if (owner && owner._stats && owner._stats.purchasables && owner._stats.purchasables.length > 0) {
 				owner._stats.purchasables.forEach(function (purchasable) {
 					if (purchasable && purchasable.target && purchasable.target.entityType === 'unit' && purchasable.target.key === (self._stats.type)) {
-						var defaultUnit = taro.game.getAsset('unitTypes', self._stats.type);
+						var defaultUnit = taro.game.cloneAsset('unitTypes', self._stats.type);
 
 						if (self._stats.clientId === taro.network.id() && window.adBlockEnabled && defaultUnit.cellSheet.url !== purchasable.image) {
 							notifyAboutAdblocker(2);
@@ -1667,7 +1667,7 @@ var Unit = TaroEntityPhysics.extend({
 			if (index > -1) {
 				owner._stats.purchasables.splice(index, 1);
 			}
-			var purchasables = _.cloneDeep(owner._stats.purchasables);
+			var purchasables = rfdc()(owner._stats.purchasables);
 			equipPurchasable = _.pick(equipPurchasable, ['_id', 'image', 'owner', 'target', 'type']);
 			purchasables.push(equipPurchasable);
 			owner.streamUpdateData([
@@ -1679,7 +1679,7 @@ var Unit = TaroEntityPhysics.extend({
 
 	unEquipSkin: function (unEquipedId, forceFullyUnequip, cellSheetUrl) {
 		var self = this;
-		var defaultUnit = taro.game.getAsset('unitTypes', self._stats.type);
+		var defaultUnit = taro.game.cloneAsset('unitTypes', self._stats.type);
 		var owner = this.getOwner();
 		if (taro.isServer) {
 			if (owner && owner._stats && owner._stats.purchasables && owner._stats.purchasables.length > 0) {
@@ -1689,7 +1689,7 @@ var Unit = TaroEntityPhysics.extend({
 						return true;
 					}
 				});
-				var purchasables = _.cloneDeep(owner._stats.purchasables);
+				var purchasables = rfdc()(owner._stats.purchasables);
 				if (index > -1) {
 					purchasables.splice(index, 1);
 					owner.streamUpdateData([
@@ -1711,7 +1711,7 @@ var Unit = TaroEntityPhysics.extend({
 	loadPersistentData: function () {
 		var self = this;
 		var owner = self.getOwner();
-		var persistedData = _.cloneDeep(owner.persistedData);
+		var persistedData = rfdc()(owner.persistedData);
 		if (persistedData && persistedData.data && persistedData.data.unit) {
 			TaroEntity.prototype.loadPersistentData.call(this, persistedData.data.unit);
 
@@ -1719,7 +1719,7 @@ var Unit = TaroEntityPhysics.extend({
 			for (var i = 0; i < persistedInventoryItems.length; i++) {
 				var persistedItem = persistedInventoryItems[i];
 				if (persistedItem) {
-					var itemData = taro.game.getAsset('itemTypes', persistedItem.itemTypeId);
+					var itemData = taro.game.cloneAsset('itemTypes', persistedItem.itemTypeId);
 					if (itemData) {
 						itemData.quantity = persistedItem.quantity;
 						itemData.itemTypeId = persistedItem.itemTypeId;
@@ -1739,7 +1739,7 @@ var Unit = TaroEntityPhysics.extend({
 	loadDataFromString: function (data) {
 		var self = this;
 		var owner = self.getOwner();
-		var persistedData = _.cloneDeep(data);
+		var persistedData = rfdc()(data);
 		if (persistedData) {
 			TaroEntity.prototype.loadPersistentData.call(this, persistedData);
 
@@ -1747,7 +1747,7 @@ var Unit = TaroEntityPhysics.extend({
 			for (var i = 0; i < persistedInventoryItems.length; i++) {
 				var persistedItem = persistedInventoryItems[i];
 				if (persistedItem) {
-					var itemData = taro.game.getAsset('itemTypes', persistedItem.itemTypeId);
+					var itemData = taro.game.cloneAsset('itemTypes', persistedItem.itemTypeId);
 					if (itemData) {
 						itemData.quantity = persistedItem.quantity;
 						itemData.itemTypeId = persistedItem.itemTypeId;

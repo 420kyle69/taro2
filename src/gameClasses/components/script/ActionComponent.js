@@ -118,8 +118,8 @@ var ActionComponent = TaroEntity.extend({
 					case 'setTimeOut': // execute actions after timeout
 
 						// const use for creating new instance of variable every time.
-						const setTimeOutActions = JSON.parse(JSON.stringify(action.actions));
-						// const setTimeoutVars = _.cloneDeep(vars);
+						const setTimeOutActions = rfdc()(action.actions);
+						// const setTimeoutVars = rfdc()(vars);
 						var duration = self._script.variable.getValue(action.duration, vars);
 						setTimeout(function (actions, currentScriptId) {
 							let previousScriptId = currentScriptId;
@@ -963,7 +963,7 @@ var ActionComponent = TaroEntity.extend({
 							// sorting items before they are used. which solves issue of getting first item in slot
 							itemTypes = Object.keys(itemTypes);
 							var itemsArr = _.map(itemTypes, (itemId) => {
-								var item = taro.game.getAsset('itemTypes', itemId);
+								var item = taro.game.cloneAsset('itemTypes', itemId);
 								if (item) {
 									return {
 										name: item.name,
@@ -1086,7 +1086,7 @@ var ActionComponent = TaroEntity.extend({
 						var player = self._script.variable.getValue(action.entity, vars);
 
 						var unitTypeId = self._script.variable.getValue(action.unitType, vars);
-						var unitTypeData = taro.game.getAsset('unitTypes', unitTypeId);
+						var unitTypeData = taro.game.cloneAsset('unitTypes', unitTypeId);
 
 						var spawnPosition = self._script.variable.getValue(action.position, vars);
 						var facingAngle = self._script.variable.getValue(action.angle, vars) || 0;
@@ -1628,7 +1628,7 @@ var ActionComponent = TaroEntity.extend({
 						}
 
 						if (projectileTypeId) {
-							var projectileData = taro.game.getAsset('projectileTypes', projectileTypeId);
+							var projectileData = taro.game.cloneAsset('projectileTypes', projectileTypeId);
 
 							if (projectileData != undefined && position != undefined && position.x != undefined && position.y != undefined && force != undefined && angle != undefined) {
 								var facingAngleInRadians = angle + facingAngleDelta;
@@ -1703,7 +1703,7 @@ var ActionComponent = TaroEntity.extend({
 						var itemTypeId = self._script.variable.getValue(action.itemType, vars);
 						var position = self._script.variable.getValue(action.position, vars);
 						var quantity = self._script.variable.getValue(action.quantity, vars);
-						var itemData = taro.game.getAsset('itemTypes', itemTypeId);
+						var itemData = taro.game.cloneAsset('itemTypes', itemTypeId);
 						if (quantity == -1 || !quantity) {
 							quantity = null;
 						}
@@ -1727,7 +1727,7 @@ var ActionComponent = TaroEntity.extend({
 					/* depreciated and can be removed */
 					case 'createItemWithMaxQuantityAtPosition':
 						var itemTypeId = self._script.variable.getValue(action.itemType, vars);
-						var itemData = taro.game.getAsset('itemTypes', itemTypeId);
+						var itemData = taro.game.cloneAsset('itemTypes', itemTypeId);
 						var position = self._script.variable.getValue(action.position, vars);
 						var quantity = itemData.maxQuantity;
 
@@ -1756,7 +1756,7 @@ var ActionComponent = TaroEntity.extend({
 					case 'spawnItem':
 
 						var itemTypeId = self._script.variable.getValue(action.itemType, vars);
-						var itemData = taro.game.getAsset('itemTypes', itemTypeId);
+						var itemData = taro.game.cloneAsset('itemTypes', itemTypeId);
 						var position = self._script.variable.getValue(action.position, vars);
 
 						if (itemData) {
@@ -1777,7 +1777,7 @@ var ActionComponent = TaroEntity.extend({
 
 					case 'giveNewItemToUnit':
 						var itemTypeId = self._script.variable.getValue(action.itemType, vars);
-						var itemData = taro.game.getAsset('itemTypes', itemTypeId);
+						var itemData = taro.game.cloneAsset('itemTypes', itemTypeId);
 						var unit = self._script.variable.getValue(action.unit, vars);
 
 						if (itemData && unit && unit._category == 'unit') {
@@ -1793,7 +1793,7 @@ var ActionComponent = TaroEntity.extend({
 
 					case 'giveNewItemWithQuantityToUnit':
 						var itemTypeId = self._script.variable.getValue(action.itemType, vars);
-						var itemData = taro.game.getAsset('itemTypes', itemTypeId);
+						var itemData = taro.game.cloneAsset('itemTypes', itemTypeId);
 						var unit = null;
 
 						if (itemData) {
@@ -2157,7 +2157,7 @@ var ActionComponent = TaroEntity.extend({
 								data.width = width;
 								data.scaleDimensions = true;
 
-								createdEntity = new Item(_.cloneDeep(data));
+								createdEntity = new Item(rfdc()(data));
 								taro.game.lastCreatedItemId = createdEntity._id;
 							} else if (entityType === 'projectileTypes') {
 								data = Object.assign(data, {
@@ -2175,7 +2175,7 @@ var ActionComponent = TaroEntity.extend({
 									streamMode: 1
 								});
 
-								createdEntity = new Projectile(_.cloneDeep(data));
+								createdEntity = new Projectile(rfdc()(data));
 								taro.game.lastCreatedProjectileId = createdEntity._id;
 							} else if (entityType === 'unitTypes') {
 								data = Object.assign(data, {
@@ -2192,7 +2192,7 @@ var ActionComponent = TaroEntity.extend({
 								var player = self._script.variable.getValue(action.player, vars);
 
 								if (player) {
-									createdEntity = player.createUnit(_.cloneDeep(data));
+									createdEntity = player.createUnit(rfdc()(data));
 								}
 
 								taro.game.lastCreatedUnitId = createdEntity._id;
@@ -2823,7 +2823,7 @@ var ActionComponent = TaroEntity.extend({
 							gameMap.wasEdited = true;
 
 							taro.physics.destroyWalls();
-							var map = taro.scaleMap(_.cloneDeep(gameMap));
+							var map = taro.scaleMap(rfdc()(gameMap));
 							taro.tiled.loadJson(map, function (layerArray, layersById) {
 								taro.physics.staticsFromMap(layersById.walls);
 							});

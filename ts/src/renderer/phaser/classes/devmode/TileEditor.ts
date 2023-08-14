@@ -204,7 +204,7 @@ class TileEditor {
 		if (taro.physics && map.layers[tempLayer].name === 'walls') {
 			//if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
 			taro.physics.destroyWalls();
-			let mapCopy = taro.scaleMap(_.cloneDeep(map));
+			let mapCopy = taro.scaleMap(rfdc()(map));
 			taro.tiled.loadJson(mapCopy, function (layerArray, TaroLayersById) {
 				taro.physics.staticsFromMap(TaroLayersById.walls);
 			});
