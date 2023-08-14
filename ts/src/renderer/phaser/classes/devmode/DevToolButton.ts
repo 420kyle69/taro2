@@ -78,22 +78,23 @@ class DevToolButton {
 			clearTimeout(this.timer);
 		});
 		button.on('pointerout', () => {
-			this.hideHoverChildren(350);
+			//this.hideHoverChildren(350);
 			scene.pointerInsideButtons = false;
 			devModeTools.tooltip.fadeOut();
 		});
 
 		this.hoverChildren?.map((btn) => {
 			btn.button.on('pointerout', () => {
-				this.hideHoverChildren(350);
+				//this.hideHoverChildren(350);
 			});
 			btn.button.on('pointerdown', () => {
-				this.hideHoverChildren(0);
+				//this.hideHoverChildren(0);
 			});
 		});
 	}
 
-	hideHoverChildren(delay) {
+    //not using currently
+	/*hideHoverChildren(delay) {
 		this.isHover = false;
 		clearTimeout(this.timer);
 		this.timer = setTimeout(() => {
@@ -105,7 +106,7 @@ class DevToolButton {
 
 			}
 		}, delay);
-	}
+	}*/
 
 	highlight(mode: 'no' | 'active' | 'hidden'): void {
 		switch (mode) {

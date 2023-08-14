@@ -42,11 +42,11 @@ class TileEditor {
 		}
 
 		gameScene.input.on('pointerdown', (p) => {
-			if (!devModeScene.pointerInsideButtons) {
+			/*if (!devModeScene.pointerInsideButtons) {
 				this.devModeTools.modeButtons.map((btn) => {
 					btn.hideHoverChildren(0);
 				});
-			}
+			}*/
 
 			if (!devModeScene.pointerInsideButtons &&
 				!devModeScene.pointerInsideWidgets() &&
@@ -60,11 +60,11 @@ class TileEditor {
 		});
 
 		devModeScene.input.on('pointerdown', (p) => {
-			if (!devModeScene.pointerInsideButtons) {
+			/*if (!devModeScene.pointerInsideButtons) {
 				this.devModeTools.modeButtons.map((btn) => {
 					btn.hideHoverChildren(0);
 				});
-			}
+			}*/
 			if (!devModeScene.pointerInsideButtons &&
 				!devModeScene.pointerInsideWidgets() &&
 				palette.visible && devModeScene.pointerInsidePalette()) {

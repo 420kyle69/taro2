@@ -19,11 +19,11 @@ var TileEditor = /** @class */ (function () {
             this.tileSize = gameMap.tileWidth;
         }
         gameScene.input.on('pointerdown', function (p) {
-            if (!devModeScene.pointerInsideButtons) {
-                _this.devModeTools.modeButtons.map(function (btn) {
+            /*if (!devModeScene.pointerInsideButtons) {
+                this.devModeTools.modeButtons.map((btn) => {
                     btn.hideHoverChildren(0);
                 });
-            }
+            }*/
             if (!devModeScene.pointerInsideButtons &&
                 !devModeScene.pointerInsideWidgets() &&
                 (!palette.visible || !devModeScene.pointerInsidePalette()) &&
@@ -35,11 +35,11 @@ var TileEditor = /** @class */ (function () {
             }
         });
         devModeScene.input.on('pointerdown', function (p) {
-            if (!devModeScene.pointerInsideButtons) {
-                _this.devModeTools.modeButtons.map(function (btn) {
+            /*if (!devModeScene.pointerInsideButtons) {
+                this.devModeTools.modeButtons.map((btn) => {
                     btn.hideHoverChildren(0);
                 });
-            }
+            }*/
             if (!devModeScene.pointerInsideButtons &&
                 !devModeScene.pointerInsideWidgets() &&
                 palette.visible && devModeScene.pointerInsidePalette()) {
