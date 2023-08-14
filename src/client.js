@@ -795,10 +795,10 @@ const Client = TaroEventingClass.extend({
 			}, 60000);
 		}
 
-		document.addEventListener('click', () => {
-			// changed this to addEventListener so we capture the actual event
-			$(self.getCachedElement('#setting')).popover('hide');
-		});
+		// document.addEventListener('click', () => {
+		// 	// changed this to addEventListener so we capture the actual event
+		// 	$(self.getCachedElement('#setting')).popover('hide');
+		// });
 
 		data.isAdBlockEnabled = !!isAdBlockEnabled;
 
@@ -869,7 +869,7 @@ const Client = TaroEventingClass.extend({
 	// return dom element. cache it if it doesn't exist.
 	getCachedElement: function (id) {
 		var element = this.domElements[id];
-		if (element == undefined || element.parentNode == undefined) {
+		if (element == undefined) {
 			element = document.querySelector(id);
 			this.domElements[id] = element;
 		}

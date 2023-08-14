@@ -379,27 +379,8 @@ var InventoryComponent = TaroEntity.extend({
 				for (var slotIndex = 0; slotIndex < totalInventorySize + 5; slotIndex++) { // +5 for trade slots?
 					var itemId = this._entity._stats.itemIds[slotIndex];
 					var item = taro.$(itemId);
-					// if (item) {
-					// 	item._stats.slotIndex = slotIndex;
-					// 	if (slotIndex == this._entity._stats.currentItemIndex) {
-					// 		item.setState('selected');
-					// 	} else {
-					// 		item.setState('unselected');
-					// 	}
-					// }
-					if (item && item._stats && item._stats.inventorySlotColor) {
-						$(taro.client.getCachedElement(`#item-${slotIndex}`)).css('background-image', `radial-gradient(rgba(0, 0, 0, 0),${  item._stats.inventorySlotColor  })`);
-					} else {
-						$(taro.client.getCachedElement(`#item-${slotIndex}`)).css('background-image', 'none');
-					}
+					
 					taro.itemUi.updateItemSlot(item, slotIndex);
-
-					// highlight currently selected inventory item (using currentItemIndex)
-					if (this._entity._stats.currentItemIndex != undefined && this._entity._stats.currentItemIndex == slotIndex) {
-						$(taro.client.getCachedElement(`#item-${slotIndex}`)).addClass('active');
-					} else {
-						$(taro.client.getCachedElement(`#item-${slotIndex}`)).removeClass('active');
-					}
 				}
 
 				// this.updateBackpackButton()
