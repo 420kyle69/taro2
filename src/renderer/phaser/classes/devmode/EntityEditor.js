@@ -115,8 +115,8 @@ var EntityEditor = /** @class */ (function () {
                 else if (entity.dragMode === 'scale' && !isNaN(entity.action.width) && !isNaN(entity.action.height)) {
                     var dragScale = Math.min(500, Math.max(-250, (entity.startDragY - dragY)));
                     gameObject.scale = entity.scale + entity.scale * dragScale / 500;
-                    entity.editedAction.width = entityImage.displayWidth;
-                    entity.editedAction.height = entityImage.displayHeight;
+                    entity.editedAction.width = Math.floor(entityImage.displayWidth);
+                    entity.editedAction.height = Math.floor(entityImage.displayHeight);
                 }
                 entity.updateOutline();
             });
@@ -232,8 +232,8 @@ var EntityEditor = /** @class */ (function () {
                     entityType: entityData.entityType,
                     position: {
                         function: 'xyCoordinate',
-                        x: worldPoint.x,
-                        y: worldPoint.y
+                        x: Math.floor(worldPoint.x),
+                        y: Math.floor(worldPoint.y)
                     },
                     width: width,
                     height: height,
@@ -369,11 +369,11 @@ var EntityEditor = /** @class */ (function () {
         var distanceToCurrent = Phaser.Math.Distance.Between(imagePoint.x, imagePoint.y, worldPoint.x, worldPoint.y);
         if (width) {
             selectedEntityImage.image.scaleX = selectedEntityImage.scaleX * (distanceToCurrent / distanceToStart);
-            editedAction.width = selectedEntityImage.image.displayWidth;
+            editedAction.width = Math.floor(selectedEntityImage.image.displayWidth);
         }
         if (height) {
             selectedEntityImage.image.scaleY = selectedEntityImage.scaleY * (distanceToCurrent / distanceToStart);
-            editedAction.height = selectedEntityImage.image.displayHeight;
+            editedAction.height = Math.floor(selectedEntityImage.image.displayHeight);
         }
     };
     EntityEditor.prototype.deleteInitEntity = function () {
