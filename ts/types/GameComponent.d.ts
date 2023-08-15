@@ -41,6 +41,7 @@ interface ActionData {
 	angle?: number;
 	width?: number;
 	height?: number;
+    wasCreated?: boolean;
     wasEdited?: boolean;
     wasDeleted?: boolean;
 }
