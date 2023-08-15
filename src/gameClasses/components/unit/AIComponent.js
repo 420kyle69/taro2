@@ -539,8 +539,7 @@ var AIComponent = TaroEntity.extend({
 			return;
 
 		let mapData = taro.map.data; // both pathfinding method need it to check
-		let wallMap = taro.map.wallMap;
-
+		
 		var targetUnit = this.getTargetUnit();
 
 		// update unit's direction toward its target
