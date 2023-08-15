@@ -169,7 +169,7 @@ var PhaserUnit = /** @class */ (function (_super) {
         if (!taro.developerMode.active || taro.developerMode.activeTab === 'play') {
             var trackingDelay = ((_d = (_c = (_b = (_a = taro === null || taro === void 0 ? void 0 : taro.game) === null || _a === void 0 ? void 0 : _a.data) === null || _b === void 0 ? void 0 : _b.settings) === null || _c === void 0 ? void 0 : _c.camera) === null || _d === void 0 ? void 0 : _d.trackingDelay) || 3;
             trackingDelay = trackingDelay / taro.fps();
-            camera.startFollow(this.gameObject, false, 0, 0);
+            camera.startFollow(this.gameObject, false, trackingDelay, trackingDelay);
         }
     };
     PhaserUnit.prototype.getLabel = function () {
