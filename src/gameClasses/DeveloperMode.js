@@ -112,6 +112,7 @@ var DeveloperMode = /** @class */ (function () {
                 taro.tiled.loadJson(map, function (layerArray, layersById) {
                     taro.physics.staticsFromMap(layersById.walls);
                 });
+                taro.map.updateWallMapData(); // for A* pathfinding
             }
         }
     };

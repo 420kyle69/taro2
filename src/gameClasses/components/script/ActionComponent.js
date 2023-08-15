@@ -2760,7 +2760,6 @@ var ActionComponent = TaroEntity.extend({
 										y: tileY,
 									},
 								}, 'server');
-								taro.map.updateWallMapData();
 							}
 
 						}
@@ -2800,7 +2799,6 @@ var ActionComponent = TaroEntity.extend({
 										y: tileY,
 									},
 								}, 'server');
-								taro.map.updateWallMapData();
 							}
 
 						}
