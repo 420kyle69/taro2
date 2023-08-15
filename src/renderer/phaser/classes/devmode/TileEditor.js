@@ -361,6 +361,9 @@ var TileEditor = /** @class */ (function () {
                     marker.graphics.y = map_1.tileToWorldY(pointerTileY_1);
                     marker.preview.x = map_1.tileToWorldX(pointerTileX_1);
                     marker.preview.y = map_1.tileToWorldY(pointerTileY_1);
+                    this.devModeTools.tooltip.showMessage('Position', "X: ".concat(Math.floor(worldPoint.x).toString(), ", Y: ").concat(Math.floor(worldPoint.y).toString(), "  |  ")
+                        + "Tile X: ".concat(Math.floor(worldPoint.x / taro.scaleMapDetails.tileWidth).toString(), ", Tile Y: ").concat(Math.floor(worldPoint.y / taro.scaleMapDetails.tileHeight).toString(), "  |  ")
+                        + "Tile id: ".concat(map_1.getTileAt(pointerTileX_1, pointerTileY_1).index));
                     if (devModeScene.input.manager.activePointer.leftButtonDown()) {
                         if (this.devModeTools.modeButtons[2].active || this.devModeTools.modeButtons[3].active) {
                             var originTileArea_1 = {};
