@@ -72,10 +72,11 @@ var PlayerUiComponent = TaroEntity.extend({
 	updatePlayerAttributesDiv: function (attributes) {
 		var self = this;
 
-		self.playerAttributeDivElement = taro.client.getCachedElement('#players-attribute-div');
+		// self.playerAttributeDivElement = taro.client.getCachedElement('#players-attribute-div');
+		self.playerAttributeDivElement = $('#players-attribute-div');
 
 		if (self.playerAttributeDivElement) {
-			self.playerAttributeDivElement.textContent = '';
+			self.playerAttributeDivElement.html('');
 		}
 
 		var attributeTypes = taro.game.data.attributeTypes;
@@ -91,20 +92,16 @@ var PlayerUiComponent = TaroEntity.extend({
 
 				var attributeType = attributeTypes[attrKey];
 				
-				var name = attributeType ? attributeType.name : attr.name;
-
-				var attrName = $('<span/>', {
-					id: `pt-attribute-${attrKey}`
-				});
-				var attrValue = $('<span/>', {
-					id: `pt-attribute-value-${attrKey}`
-				});
 				$(self.playerAttributeDivElement).append(
-					attrName
+					$('<span/>', {
+						text: attributeType ? attributeType.name + ": ": attr.name,
+						id: `pt-attribute-${attrKey}`
+					})
 				).append(
-					attrValue
+					$('<span/>', {
+						id: `pt-attribute-value-${attrKey}`
+					})
 				).append($('<br/>'));
-				attrName.text(`${name}: `);
 			}
 		}
 
@@ -144,7 +141,7 @@ var PlayerUiComponent = TaroEntity.extend({
 				// var value = attr.value && attr.value.toLocaleString('en-US') || 0; // commented out because toLocaleString is costly
 				var value = attr.value || 0;
 				
-				var selector = taro.client.getCachedElement(`#pt-attribute-value-${attrKey}`);
+				var selector = $(`#pt-attribute-value-${attrKey}`);
 				$(selector).text(attr.value)
 			}
 		}

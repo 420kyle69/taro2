@@ -57,6 +57,12 @@ const Client = TaroEventingClass.extend({
 				height: 32
 			})
 		);
+		
+		// this.html = jQuery.html;
+		// jQuery.html = function (content) {
+		// 	console.log("modified jquery html", content)
+		// 	self.html(content);
+		// }
 
 		this.taroEngineStarted = $.Deferred();
 		this.physicsConfigLoaded = $.Deferred();
@@ -867,13 +873,19 @@ const Client = TaroEventingClass.extend({
     },
 	
 	// return dom element. cache it if it doesn't exist.
-	getCachedElement: function (id) {
-		var element = this.domElements[id];
-		if (element == undefined) {
-			element = document.querySelector(id);
-			this.domElements[id] = element;
+	getCachedElement: function (ref) {
+		var element = this.domElements[ref];
+		
+		// Check if the cached element exists and is valid
+		if (element) {
+			return element; // Return the cached element
 		}
 
+		// Element is not cached or is invalid, query the DOM
+		var element = document.querySelector(ref);
+		if (element) {
+			this.domElements[ref] = element; // Cache the element
+		}
 		return element;
 	}
 });
