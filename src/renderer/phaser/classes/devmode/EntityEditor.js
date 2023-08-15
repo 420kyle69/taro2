@@ -238,7 +238,8 @@ var EntityEditor = /** @class */ (function () {
                     width: width,
                     height: height,
                     angle: 0,
-                    actionId: taro.newIdHex()
+                    actionId: taro.newIdHex(),
+                    wasCreated: true
                 };
                 if (entityData.entityType === 'unitTypes') {
                     action.player = {
