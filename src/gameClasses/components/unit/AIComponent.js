@@ -472,6 +472,21 @@ var AIComponent = TaroEntity.extend({
 		return false;
 	},
 
+	aStarPathIsBlocked: function() {
+		let mapData = taro.map.data;
+		let wallMap = taro.map.wallMap;
+		let result = false;
+
+		for (let i = 0; i < this.path.length; i++) {
+			if (wallMap[this.path[i].x + this.path[i].y * mapData.width] != 0) {
+				result = true;
+				break;
+			}
+		}
+
+		return result;
+	},
+
 	aStarTargetIsCloser: function (unit, targetUnit) {
 		let mapData = taro.map.data;
 
@@ -569,7 +584,7 @@ var AIComponent = TaroEntity.extend({
 							this.path.pop(); // after moved to the closest A* node, pop the array and let ai move to next A* node
 						}
 						if (this.path.length > 0) { // Move to the highest index of path saved (closest node to start node)
-							if (wallMap[this.path[this.path.length - 1].x + this.path[this.path.length - 1].y * mapData.width] == 0) { // only keep going if the next move is still non blocked
+							if (!this.aStarPathIsBlocked()) { // only keep going if the path is still non blocked
 								this.setTargetPosition(this.path[this.path.length - 1].x * mapData.tilewidth + mapData.tilewidth / 2, this.path[this.path.length - 1].y * mapData.tilewidth + mapData.tilewidth / 2);
 							} else { 
 								let aStarResult = this.getAStarPath(this.path[0].x, this.path[0].y); // recalculate whole path once the next move is blocked
@@ -640,7 +655,7 @@ var AIComponent = TaroEntity.extend({
 								}
 								// After the above decision, choose whether directly move to targetUnit or according to path
 								if (this.path.length > 0) { // select next node to go
-									if (wallMap[this.path[this.path.length - 1].x + this.path[this.path.length - 1].y * mapData.width] == 0 && !this.aStarTargetIsCloser(unit, targetUnit)) { // keep going if the next move is still non blocked OR target is actually closer than end node
+									if (!this.aStarPathIsBlocked() && !this.aStarTargetIsCloser(unit, targetUnit)) { // keep going if the path is still non blocked OR target is actually closer than end node
 										this.setTargetPosition(this.path[this.path.length - 1].x * mapData.tilewidth + mapData.tilewidth / 2, this.path[this.path.length - 1].y * mapData.tilewidth + mapData.tilewidth / 2);
 									} else { 
 										let aStarResult = this.getAStarPath(targetUnit._translate.x, targetUnit._translate.y); // recalculate whole path once the next move is blocked
