@@ -72,11 +72,11 @@ var PlayerUiComponent = TaroEntity.extend({
 	updatePlayerAttributesDiv: function (attributes) {
 		var self = this;
 
-		// self.playerAttributeDivElement = taro.client.getCachedElement('#players-attribute-div');
-		self.playerAttributeDivElement = $('#players-attribute-div');
+		self.playerAttributeDivElement = taro.client.getCachedElementById('players-attribute-div');
+		// self.playerAttributeDivElement = $('#players-attribute-div');
 
 		if (self.playerAttributeDivElement) {
-			self.playerAttributeDivElement.html('');
+			self.playerAttributeDivElement.innerHTML = '';
 		}
 
 		var attributeTypes = taro.game.data.attributeTypes;
@@ -109,7 +109,7 @@ var PlayerUiComponent = TaroEntity.extend({
 
 		// update shop as player points are changed and when shop modal is open
 
-		self.moddItemShopModalElement = taro.client.getCachedElement('#modd-item-shop-modal');
+		self.moddItemShopModalElement = taro.client.getCachedElementById('modd-item-shop-modal');
 		if (self.moddItemShopModalElement && self.moddItemShopModalElement.classList.contains('show')) {
 			taro.shop.openItemShop();
 		}

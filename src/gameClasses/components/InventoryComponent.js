@@ -332,7 +332,7 @@ var InventoryComponent = TaroEntity.extend({
 			unit.streamUpdateData([{ itemIds: unit._stats.itemIds }]);
 		} else if (taro.isClient) {
 			if (taro.client.myPlayer && taro.client.myPlayer._stats.selectedUnitId == unit.id() && itemExistInItemIds) {
-				$(taro.client.getCachedElement(`#item-${slotIndex}`)).html('');
+				$(taro.client.getCachedElementById(`item-${slotIndex}`)).html('');
 				taro.itemUi.updateItemSlot(item, slotIndex);
 			}
 		}
@@ -370,7 +370,7 @@ var InventoryComponent = TaroEntity.extend({
 		if (taro.isClient && this._entity._stats.clientId === taro.network.id()) {
 			var ownerPlayer = this._entity.getOwner();
 			if (ownerPlayer && ownerPlayer._stats.selectedUnitId == this._entity.id()) {
-				$(taro.client.getCachedElement('.popover')).popover('hide');
+				$('.popover').popover('hide');
 
 				// highlight currently selected item slots
 				// 5 for trading items
@@ -393,9 +393,9 @@ var InventoryComponent = TaroEntity.extend({
 		for (var i = 0; i < this._entity._stats.inventorySize; i++) {
 			// highlight currently selected inventory item (using currentItemIndex)
 			if (slotIndex > 0 && slotIndex - 1 == i) {
-				$(taro.client.getCachedElement(`#item-${i}`)).addClass('active');
+				$(taro.client.getCachedElementById(`item-${i}`)).addClass('active');
 			} else {
-				$(taro.client.getCachedElement(`#item-${i}`)).removeClass('active');
+				$(taro.client.getCachedElementById(`item-${i}`)).removeClass('active');
 			}
 		}
 	},

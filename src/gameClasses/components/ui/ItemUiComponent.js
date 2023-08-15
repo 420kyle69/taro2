@@ -47,7 +47,7 @@ var ItemUiComponent = TaroEntity.extend({
 
 	updateItemInfo: function (item) {
 		if (item && item._stats) {
-			$(taro.client.getCachedElement('#item-name')).html(item._stats.name);
+			$(taro.client.getCachedElementById('item-name')).html(item._stats.name);
 
 			var ammoStr = '';
 			if (item._stats.ammo != undefined)
@@ -55,8 +55,8 @@ var ItemUiComponent = TaroEntity.extend({
 
 			// $("#item-ammo").html(ammoStr)
 		} else {
-			$(taro.client.getCachedElement('#item-name')).html('');
-			$(taro.client.getCachedElement('#item-ammo')).html('');
+			$(taro.client.getCachedElementById('item-name')).html('');
+			$(taro.client.getCachedElementById('item-ammo')).html('');
 		}
 	},
 
@@ -72,8 +72,8 @@ var ItemUiComponent = TaroEntity.extend({
 			var color = 'background-image: none';
 		}		
 
-		// var element = $(taro.client.getCachedElement(`#item-${slotIndex}`));
-		var element = $(`#item-${slotIndex}`);
+		var element = $(taro.client.getCachedElementById(`item-${slotIndex}`));
+		// var element = $(`#item-${slotIndex}`);
 		element.html(
 			self.getItemDiv(item, {
 				popover: 'top',
@@ -98,8 +98,8 @@ var ItemUiComponent = TaroEntity.extend({
 	},
 	updateItemQuantity: function (item) {
 
-		// var itemSlot = $(taro.client.getCachedElement(`#slotindex-${item._stats.slotIndex}`));
-		var itemSlot = $(`#slotindex-${item._stats.slotIndex}`);
+		var itemSlot = $(taro.client.getCachedElementById(`slotindex-${item._stats.slotIndex}`));
+		// var itemSlot = $(`#slotindex-${item._stats.slotIndex}`);
 		
 		quantitySpan = itemSlot.find('small');
 		if (quantitySpan) {
