@@ -12,7 +12,7 @@ class TileEditor {
 	commandController: CommandController;
 	startDragIn: string;
 
-    tileSize: number;
+	tileSize: number;
 
 	constructor(
 		private gameScene: GameScene,
@@ -36,7 +36,7 @@ class TileEditor {
 
 		this.startDragIn = 'none';
 
-        this.tileSize = Constants.TILE_SIZE;
+		this.tileSize = Constants.TILE_SIZE;
 		if (taro.game.data.defaultData.dontResize) {
 			this.tileSize = gameMap.tileWidth;
 		}
@@ -117,11 +117,12 @@ class TileEditor {
 				for (let i = 0; i < nowBrushSize.x; i++) {
 					for (let j = 0; j < nowBrushSize.y; j++) {
 						const tile = this.getTile(pointerTileX + i, pointerTileY + j, gameMap);
-						if (!this.selectedTileArea[pointerTileX + i]) {
-							this.selectedTileArea[pointerTileX + i] = {};
+						if (tile !== -1) {
+							if (!this.selectedTileArea[pointerTileX + i]) {
+								this.selectedTileArea[pointerTileX + i] = {};
+							}
+							this.selectedTileArea[pointerTileX + i][pointerTileY + j] = tile;
 						}
-						this.selectedTileArea[pointerTileX + i][pointerTileY + j] = tile;
-
 					}
 				}
 				this.marker.changePreview();
@@ -409,14 +410,14 @@ class TileEditor {
 					marker.preview.x = map.tileToWorldX(pointerTileX);
 					marker.preview.y = map.tileToWorldY(pointerTileY);
 
-                    if (map?.getTileAt(pointerTileX, pointerTileY)?.index && map?.getTileAt(pointerTileX, pointerTileY)?.index !== -1 && map?.getTileAt(pointerTileX, pointerTileY)?.index !== 0) {
-                        this.devModeTools.tooltip.showMessage(
-                            'Position',
-                            `X: ${Math.floor(worldPoint.x).toString()}, Y: ${Math.floor(worldPoint.y).toString()}  |  `
-                            + `Tile X: ${Math.floor(worldPoint.x / taro.scaleMapDetails.tileWidth).toString()}, Tile Y: ${Math.floor(worldPoint.y / taro.scaleMapDetails.tileHeight).toString()}  |  ` 
-                            + `Tile id: ${map.getTileAt(pointerTileX, pointerTileY).index}`
-                        );
-                    }
+					if (map?.getTileAt(pointerTileX, pointerTileY)?.index && map?.getTileAt(pointerTileX, pointerTileY)?.index !== -1 && map?.getTileAt(pointerTileX, pointerTileY)?.index !== 0) {
+						this.devModeTools.tooltip.showMessage(
+							'Position',
+							`X: ${Math.floor(worldPoint.x).toString()}, Y: ${Math.floor(worldPoint.y).toString()}  |  `
+							+ `Tile X: ${Math.floor(worldPoint.x / taro.scaleMapDetails.tileWidth).toString()}, Tile Y: ${Math.floor(worldPoint.y / taro.scaleMapDetails.tileHeight).toString()}  |  `
+							+ `Tile id: ${map.getTileAt(pointerTileX, pointerTileY).index}`
+						);
+					}
 
 					if (devModeScene.input.manager.activePointer.leftButtonDown()) {
 						if (this.devModeTools.modeButtons[2].active || this.devModeTools.modeButtons[3].active) {
