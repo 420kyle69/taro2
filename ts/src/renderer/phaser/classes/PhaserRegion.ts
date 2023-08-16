@@ -26,7 +26,7 @@ class PhaserRegion extends PhaserEntity {
 		gameObject.setPosition(stats.x + stats.width/2, stats.y + stats.height/2);
 		gameObject.setInteractive();
         gameObject.on('pointerover', (p) => {
-            if (taro.developerMode.active && taro.developerMode.activeTab === 'map' && this.devModeScene.devModeTools.cursorButton.active && !p.isDown) {
+            if (!p.isDown) {
                 this.scene.input.setTopOnly(false);
             }
         });

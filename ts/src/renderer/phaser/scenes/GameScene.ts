@@ -15,6 +15,7 @@ class GameScene extends PhaserScene {
 	cameraTarget: Phaser.GameObjects.Container & IRenderProps;
 	filter: Phaser.Textures.FilterMode;
     resolutionCoef: number;
+	trackingDelay: number;
 
 	constructor() {
 		super({ key: 'Game' });
@@ -28,8 +29,10 @@ class GameScene extends PhaserScene {
 
 		const camera = this.cameras.main;
 		camera.setBackgroundColor(taro.game.data.defaultData.mapBackgroundColor);
-        
+
         this.resolutionCoef = 1;
+
+		this.trackingDelay = taro?.game?.data?.settings?.camera?.trackingDelay || 3;
 
 		this.scale.on(Phaser.Scale.Events.RESIZE, () => {
 			if (this.zoomSize) {
@@ -591,6 +594,9 @@ class GameScene extends PhaserScene {
     }
 
 	update (): void {
+
+		let trackingDelay = this.trackingDelay / taro.fps();
+		this.cameras.main.setLerp(trackingDelay, trackingDelay);
 
 		const worldPoint = this.cameras.main.getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
 

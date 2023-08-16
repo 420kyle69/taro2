@@ -27,7 +27,7 @@ var PhaserRegion = /** @class */ (function (_super) {
         gameObject.setPosition(stats.x + stats.width / 2, stats.y + stats.height / 2);
         gameObject.setInteractive();
         gameObject.on('pointerover', function (p) {
-            if (taro.developerMode.active && taro.developerMode.activeTab === 'map' && _this.devModeScene.devModeTools.cursorButton.active && !p.isDown) {
+            if (!p.isDown) {
                 _this.scene.input.setTopOnly(false);
             }
         });
