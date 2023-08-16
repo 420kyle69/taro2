@@ -265,11 +265,11 @@ var ControlComponent = TaroEntity.extend({
 	// check for input modal is open
 	updatePlayerInputStatus: function () {
 		if (taro.isClient) {
-			this._isPlayerInputingText = ($(taro.client.getCachedElement('#message')).is(':focus') && !$(taro.client.getCachedElement('#player-input-field')).is(':focus')) ||
-				$(taro.client.getCachedElement('#modd-dialogue-modal')).hasClass('show') ||
-				$(taro.client.getCachedElement('#player-input-modal')).hasClass('show') ||
-				$(taro.client.getCachedElement('#modd-item-shop-modal')).hasClass('show') ||
-				$(taro.client.getCachedElement('#custom-modal')).hasClass('show');
+			this._isPlayerInputingText = ($(taro.client.getCachedElementById('message')).is(':focus') && !$(taro.client.getCachedElementById('player-input-field')).is(':focus')) ||
+				$(taro.client.getCachedElementById('modd-dialogue-modal')).hasClass('show') ||
+				$(taro.client.getCachedElementById('player-input-modal')).hasClass('show') ||
+				$(taro.client.getCachedElementById('modd-item-shop-modal')).hasClass('show') ||
+				$(taro.client.getCachedElementById('custom-modal')).hasClass('show');
 		}
 	},
 

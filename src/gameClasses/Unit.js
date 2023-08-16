@@ -1029,16 +1029,17 @@ var Unit = TaroEntityPhysics.extend({
 				var availableSlot = self.inventory.getFirstAvailableSlotForItem(itemData);
 
 				// Check if the item can merge
-				if (itemData.controls == undefined || (itemData.controls.canMerge || itemData.controls.canMerge == undefined || itemData.controls.canMerge == null)) {
+				if (itemData.controls?.canMerge) {
 					// insert/merge itemData's quantity into matching items in the inventory
 					var totalInventorySize = this.inventory.getTotalInventorySize();
 					for (var i = 0; i < totalInventorySize; i++) {
-						var matchingItemId = self._stats.itemIds[i];
-						if (matchingItemId) {
-							var matchingItem = taro.$(matchingItemId);
+						var selectedItemId = self._stats.itemIds[i];
+						if (selectedItemId) {
+							var selectedItem = taro.$(selectedItemId);
 
 							// if a matching item found in the inventory, try merging them
-							if (matchingItem && matchingItem._stats.itemTypeId == itemTypeId) {
+							if (selectedItem && selectedItem._stats.itemTypeId == itemTypeId) {
+								var matchingItem = selectedItem;
 								taro.game.lastCreatedItemId = matchingItem.id(); // this is necessary in case item isn't a new instance, but an existing item getting quantity updated
 
 								// matching item has infinite quantity. merge item unless new item is also infinite
@@ -1067,7 +1068,7 @@ var Unit = TaroEntityPhysics.extend({
 							}
 
 							// if the new item no longer has any quantity left, destroy it (if it's an instance).
-							if (itemData.maxQuantity != 0 && itemData.quantity == 0) {
+							if (itemData.quantity == 0) {
 								if (isItemInstance) {
 									item.remove();
 								}
@@ -1090,8 +1091,8 @@ var Unit = TaroEntityPhysics.extend({
 					// Item
 					item.streamUpdateData([
 						{ ownerUnitId: self.id() },
-						{ quantity: itemData.quantity },
-						{ slotIndex: slotIndex }
+						{ slotIndex: slotIndex }, // slotIndex must come before quantity (next line), otherwise, quantity won't update properly as itemUiComponent won't know which slot to apply quantity to
+						{ quantity: itemData.quantity }						
 					]);
 
 					self.inventory.insertItem(item, availableSlot - 1);

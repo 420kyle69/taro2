@@ -8,7 +8,9 @@ declare class TaroEngine extends TaroClass {
 	map: any;
 	scaleMap(data: any): void;
 
+	fps(): number;
 	_renderFrames: number;
+	_renderFPS: number;
 	_tickStart: number;
 
 	_currentTime: number;

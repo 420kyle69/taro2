@@ -42,11 +42,11 @@ class TileEditor {
 		}
 
 		gameScene.input.on('pointerdown', (p) => {
-			if (!devModeScene.pointerInsideButtons) {
+			/*if (!devModeScene.pointerInsideButtons) {
 				this.devModeTools.modeButtons.map((btn) => {
 					btn.hideHoverChildren(0);
 				});
-			}
+			}*/
 
 			if (!devModeScene.pointerInsideButtons &&
 				!devModeScene.pointerInsideWidgets() &&
@@ -60,11 +60,11 @@ class TileEditor {
 		});
 
 		devModeScene.input.on('pointerdown', (p) => {
-			if (!devModeScene.pointerInsideButtons) {
+			/*if (!devModeScene.pointerInsideButtons) {
 				this.devModeTools.modeButtons.map((btn) => {
 					btn.hideHoverChildren(0);
 				});
-			}
+			}*/
 			if (!devModeScene.pointerInsideButtons &&
 				!devModeScene.pointerInsideWidgets() &&
 				palette.visible && devModeScene.pointerInsidePalette()) {
@@ -408,6 +408,15 @@ class TileEditor {
 					marker.graphics.y = map.tileToWorldY(pointerTileY);
 					marker.preview.x = map.tileToWorldX(pointerTileX);
 					marker.preview.y = map.tileToWorldY(pointerTileY);
+
+                    if (map?.getTileAt(pointerTileX, pointerTileY)?.index && map?.getTileAt(pointerTileX, pointerTileY)?.index !== -1 && map?.getTileAt(pointerTileX, pointerTileY)?.index !== 0) {
+                        this.devModeTools.tooltip.showMessage(
+                            'Position',
+                            `X: ${Math.floor(worldPoint.x).toString()}, Y: ${Math.floor(worldPoint.y).toString()}  |  `
+                            + `Tile X: ${Math.floor(worldPoint.x / taro.scaleMapDetails.tileWidth).toString()}, Tile Y: ${Math.floor(worldPoint.y / taro.scaleMapDetails.tileHeight).toString()}  |  ` 
+                            + `Tile id: ${map.getTileAt(pointerTileX, pointerTileY).index}`
+                        );
+                    }
 
 					if (devModeScene.input.manager.activePointer.leftButtonDown()) {
 						if (this.devModeTools.modeButtons[2].active || this.devModeTools.modeButtons[3].active) {

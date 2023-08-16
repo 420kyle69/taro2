@@ -23,3 +23,4 @@ declare const USE_LOCAL_STORAGE: boolean;
 declare const storage: any;
 
 declare const showUserDropdown: any;
+declare const rfdc: any;
