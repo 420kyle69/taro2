@@ -680,9 +680,9 @@ var PhysicsComponent = TaroEventingClass.extend({
 
 									// if CSP is enabled, client-side physics will dictate:
 									// my unit's position and projectiles that are NOT server-streamed.
-									if (taro.game.cspEnabled && (
-										entity == taro.client.selectedUnit || (entity._category == 'projectile' && !entity._stats.streamMode)
-									)
+									if (
+										(taro.game.cspEnabled && entity == taro.client.selectedUnit) || 
+										(entity._category == 'projectile' && !entity._stats.streamMode)
 									) {
 										// if (entity._category == 'projectile') console.log(x, y, angle)
 										entity.nextKeyFrame = [taro._currentTime + taro.client.renderBuffer, [x, y, angle]];
