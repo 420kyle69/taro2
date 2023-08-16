@@ -610,7 +610,9 @@ var TaroNetIoServer = {
 
 					self.logCommandCount(socket._remoteAddress, commandName, data);
 
-					self.uploadPerSecond[socket._remoteAddress] += JSON.stringify(data).length;
+					if (!(commandName === 'editTile')) {
+						self.uploadPerSecond[socket._remoteAddress] += JSON.stringify(data).length;
+					}
 
 					if (data.type === 'ping') {
 						socket.send({
