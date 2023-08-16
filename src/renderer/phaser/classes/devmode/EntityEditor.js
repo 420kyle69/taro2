@@ -4,71 +4,167 @@ var EntityEditor = /** @class */ (function () {
         this.gameScene = gameScene;
         this.devModeTools = devModeTools;
         var COLOR_HANDLER = this.COLOR_HANDLER = 0x00fffb;
-        this.preview = gameScene.add.image(0, 0, null, 0);
+        this.preview = gameScene.add.image(0, 0, null, 0).setDepth(1000);
         this.preview.setAlpha(0.75).setVisible(false);
         this.outline = gameScene.add.graphics().setDepth(1000);
+        this.outlineHover = gameScene.add.graphics().setDepth(1000);
         var selectionContainer = this.selectionContainer = new Phaser.GameObjects.Container(gameScene);
+        var scaleArray = ['topLeft', 'topRight', 'bottomRight', 'bottomLeft', 'left', 'right', 'top', 'bottom'];
         var angleArray = ['topLeftRotate', 'topRightRotate', 'bottomRightRotate', 'bottomLeftRotate'];
-        var scaleArray = ['topLeft', 'topRight', 'bottomRight', 'bottomLeft'];
-        var widthArray = ['left', 'right'];
-        var heightArray = ['top', 'bottom'];
-        var dragPoints = this.dragPoints = {};
-        dragPoints['topLeft'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_HANDLER);
-        dragPoints['topLeft'].orientation = 'topLeft';
-        dragPoints['topLeftRotate'] = gameScene.add.rectangle(0, 0, 20, 20, COLOR_HANDLER, 0);
-        dragPoints['topLeftRotate'].orientation = 'topLeftRotate';
-        dragPoints['top'] = gameScene.add.rectangle(0, 0, 8, 8, COLOR_HANDLER);
-        dragPoints['top'].orientation = 'top';
-        dragPoints['topRight'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_HANDLER);
-        dragPoints['topRight'].orientation = 'topRight';
-        dragPoints['topRightRotate'] = gameScene.add.rectangle(0, 0, 20, 20, COLOR_HANDLER, 0);
-        dragPoints['topRightRotate'].orientation = 'topRightRotate';
-        dragPoints['right'] = gameScene.add.rectangle(0, 0, 8, 8, COLOR_HANDLER);
-        dragPoints['right'].orientation = 'right';
-        dragPoints['bottomRight'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_HANDLER);
-        dragPoints['bottomRight'].orientation = 'bottomRight';
-        dragPoints['bottomRightRotate'] = gameScene.add.rectangle(0, 0, 20, 20, COLOR_HANDLER, 0);
-        dragPoints['bottomRightRotate'].orientation = 'bottomRightRotate';
-        dragPoints['bottom'] = gameScene.add.rectangle(0, 0, 8, 8, COLOR_HANDLER);
-        dragPoints['bottom'].orientation = 'bottom';
-        dragPoints['bottomLeft'] = gameScene.add.rectangle(0, 0, 10, 10, COLOR_HANDLER);
-        dragPoints['bottomLeft'].orientation = 'bottomLeft';
-        dragPoints['bottomLeftRotate'] = gameScene.add.rectangle(0, 0, 20, 20, COLOR_HANDLER, 0);
-        dragPoints['bottomLeftRotate'].orientation = 'bottomLeftRotate';
-        dragPoints['left'] = gameScene.add.rectangle(0, 0, 8, 8, COLOR_HANDLER);
-        dragPoints['left'].orientation = 'left';
-        Object.values(dragPoints).forEach(function (point) { return selectionContainer.add(point); });
+        var handlers = this.handlers = {};
+        this.createHandler('topLeft', 10, 1);
+        this.createHandler('topRight', 10, 1);
+        this.createHandler('bottomRight', 10, 1);
+        this.createHandler('bottomLeft', 10, 1);
+        this.createHandler('left', 8, 1);
+        this.createHandler('right', 8, 1);
+        this.createHandler('top', 8, 1);
+        this.createHandler('bottom', 8, 1);
+        this.createHandler('topLeftRotate', 20, 0);
+        this.createHandler('topRightRotate', 20, 0);
+        this.createHandler('bottomRightRotate', 20, 0);
+        this.createHandler('bottomLeftRotate', 20, 0);
+        Object.values(handlers).forEach(function (handler) { return selectionContainer.add(handler); });
         selectionContainer.setPosition(10, 10).setAngle(0).setDepth(1000).setVisible(false);
         gameScene.add.existing(selectionContainer);
         taro.client.on('scale', function (data) {
-            Object.values(_this.dragPoints).forEach(function (point) { return point.setScale(1 / data.ratio); });
+            Object.values(_this.handlers).forEach(function (handler) { return handler.setScale(1 / data.ratio); });
             if (_this.selectedEntityImage)
                 _this.selectedEntityImage.updateOutline();
         });
-        Object.values(this.dragPoints).forEach(function (point) {
-            if (angleArray.includes(point.orientation)) {
-                point.setInteractive({ draggable: true, cursor: 'url(/assets/cursors/rotate.cur), pointer' });
-            }
-            else {
-                selectionContainer.bringToTop(point);
-                point.setInteractive({ draggable: true /* , cursor: 'url(assets/cursors/resize.cur), pointer'*/ });
-            }
-            point.on('pointerover', function () {
-                point.fillColor = devModeTools.COLOR_LIGHT;
-            });
-            point.on('pointerout', function () {
-                if (angleArray.includes(point.orientation)) {
-                    point.fillColor = COLOR_HANDLER;
+        gameScene.input.on('drag', function (pointer, gameObject, dragX, dragY) {
+            Object.values(_this.handlers).forEach(function (handler) {
+                var worldPoint = _this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
+                var selectedEntityImage = _this.selectedEntityImage;
+                if (!devModeTools.cursorButton.active || gameObject !== handler || !selectedEntityImage)
+                    return;
+                var action = selectedEntityImage.action;
+                var editedAction = selectedEntityImage.editedAction;
+                if (angleArray.includes(handler.orientation) && !isNaN(action.angle)) {
+                    var startingAngle = Phaser.Math.Angle.BetweenPoints(selectedEntityImage.image, { x: selectedEntityImage.startDragX, y: selectedEntityImage.startDragY });
+                    var lastAngle = Phaser.Math.Angle.BetweenPoints(selectedEntityImage.image, worldPoint);
+                    var targetAngle = lastAngle - startingAngle;
+                    selectedEntityImage.image.rotation = selectedEntityImage.rotation + targetAngle;
+                    editedAction.angle = selectedEntityImage.image.angle;
                 }
                 else {
-                    point.fillColor = COLOR_HANDLER;
+                    if (scaleArray.includes(handler.orientation) && !isNaN(action.width) && !isNaN(action.height)) {
+                        var targetPoint = void 0;
+                        switch (handler.orientation) {
+                            case 'topLeft':
+                                _this.rescaleInitEntity(true, true, worldPoint, selectedEntityImage.image.getBottomRight(), selectedEntityImage, editedAction);
+                                targetPoint = new Phaser.Math.Vector2((selectedEntityImage.displayWidth - selectedEntityImage.image.displayWidth) / 2, (selectedEntityImage.displayHeight - selectedEntityImage.image.displayHeight) / 2);
+                                break;
+                            case 'topRight':
+                                _this.rescaleInitEntity(true, true, worldPoint, selectedEntityImage.image.getBottomLeft(), selectedEntityImage, editedAction);
+                                targetPoint = new Phaser.Math.Vector2((selectedEntityImage.image.displayWidth - selectedEntityImage.displayWidth) / 2, (selectedEntityImage.displayHeight - selectedEntityImage.image.displayHeight) / 2);
+                                break;
+                            case 'bottomRight':
+                                _this.rescaleInitEntity(true, true, worldPoint, selectedEntityImage.image.getTopLeft(), selectedEntityImage, editedAction);
+                                targetPoint = new Phaser.Math.Vector2((selectedEntityImage.image.displayWidth - selectedEntityImage.displayWidth) / 2, (selectedEntityImage.image.displayHeight - selectedEntityImage.displayHeight) / 2);
+                                break;
+                            case 'bottomLeft':
+                                _this.rescaleInitEntity(true, true, worldPoint, selectedEntityImage.image.getTopRight(), selectedEntityImage, editedAction);
+                                targetPoint = new Phaser.Math.Vector2((selectedEntityImage.displayWidth - selectedEntityImage.image.displayWidth) / 2, (selectedEntityImage.image.displayHeight - selectedEntityImage.displayHeight) / 2);
+                                break;
+                            case 'left':
+                                _this.rescaleInitEntity(true, false, worldPoint, selectedEntityImage.image.getRightCenter(), selectedEntityImage, editedAction);
+                                targetPoint = new Phaser.Math.Vector2((selectedEntityImage.displayWidth - selectedEntityImage.image.displayWidth) / 2, 0);
+                                break;
+                            case 'right':
+                                _this.rescaleInitEntity(true, false, worldPoint, selectedEntityImage.image.getLeftCenter(), selectedEntityImage, editedAction);
+                                targetPoint = new Phaser.Math.Vector2((selectedEntityImage.image.displayWidth - selectedEntityImage.displayWidth) / 2, 0);
+                                break;
+                            case 'top':
+                                _this.rescaleInitEntity(false, true, worldPoint, selectedEntityImage.image.getBottomCenter(), selectedEntityImage, editedAction);
+                                targetPoint = new Phaser.Math.Vector2(0, (selectedEntityImage.displayHeight - selectedEntityImage.image.displayHeight) / 2);
+                                break;
+                            case 'bottom':
+                                _this.rescaleInitEntity(false, true, worldPoint, selectedEntityImage.image.getTopCenter(), selectedEntityImage, editedAction);
+                                targetPoint = new Phaser.Math.Vector2(0, (selectedEntityImage.image.displayHeight - selectedEntityImage.displayHeight) / 2);
+                                break;
+                            default:
+                                break;
+                        }
+                        targetPoint.rotate(selectedEntityImage.image.rotation);
+                        var x = Math.floor(selectedEntityImage.x + targetPoint.x);
+                        var y = Math.floor(selectedEntityImage.y + targetPoint.y);
+                        selectedEntityImage.image.x = x;
+                        selectedEntityImage.image.y = y;
+                        editedAction.position = { x: x, y: y };
+                    }
+                }
+                selectedEntityImage.updateOutline();
+            });
+            devModeScene.entityImages.forEach(function (entityImage) {
+                if (!devModeTools.cursorButton.active || gameObject !== entityImage)
+                    return;
+                var entity = entityImage.entity;
+                if (entity.dragMode === 'position') {
+                    var x = Math.floor(dragX);
+                    var y = Math.floor(dragY);
+                    gameObject.x = x;
+                    gameObject.y = y;
+                    entity.editedAction.position = { x: x, y: y };
+                }
+                else if (entity.dragMode === 'angle' && !isNaN(entity.action.angle)) {
+                    var target = Phaser.Math.Angle.BetweenPoints(gameObject, { x: dragX, y: dragY });
+                    gameObject.rotation = target;
+                    entity.editedAction.angle = gameObject.angle;
+                }
+                else if (entity.dragMode === 'scale' && !isNaN(entity.action.width) && !isNaN(entity.action.height)) {
+                    var dragScale = Math.min(500, Math.max(-250, (entity.startDragY - dragY)));
+                    gameObject.scale = entity.scale + entity.scale * dragScale / 500;
+                    entity.editedAction.width = Math.floor(entityImage.displayWidth);
+                    entity.editedAction.height = Math.floor(entityImage.displayHeight);
+                }
+                entity.updateOutline();
+            });
+        });
+        gameScene.input.on('dragend', function (pointer, gameObject) {
+            Object.values(_this.handlers).forEach(function (handler) {
+                var selectedEntityImage = _this.selectedEntityImage;
+                if (gameObject !== handler || !selectedEntityImage)
+                    return;
+                _this.activeHandler = false;
+                selectedEntityImage.dragMode = null;
+                selectedEntityImage.edit(selectedEntityImage.editedAction);
+                selectedEntityImage.editedAction = { actionId: selectedEntityImage.action.actionId };
+            });
+            devModeScene.entityImages.forEach(function (entityImage) {
+                if (gameObject !== entityImage)
+                    return;
+                var entity = entityImage.entity;
+                entity.dragMode = null;
+                entity.edit(entity.editedAction);
+                entity.editedAction = { actionId: entity.action.actionId };
+            });
+        });
+        Object.values(this.handlers).forEach(function (handler) {
+            if (angleArray.includes(handler.orientation)) {
+                handler.setInteractive({ draggable: true, cursor: 'url(/assets/cursors/rotate.cur), pointer' });
+            }
+            else {
+                selectionContainer.bringToTop(handler);
+                handler.setInteractive({ draggable: true /* , cursor: 'url(assets/cursors/resize.cur), pointer'*/ });
+            }
+            handler.on('pointerover', function () {
+                gameScene.input.setTopOnly(true);
+                handler.fillColor = devModeTools.COLOR_LIGHT;
+            });
+            handler.on('pointerout', function () {
+                if (angleArray.includes(handler.orientation)) {
+                    handler.fillColor = COLOR_HANDLER;
+                }
+                else {
+                    handler.fillColor = COLOR_HANDLER;
                 }
             });
-            point.on('pointerdown', function (pointer) {
+            handler.on('pointerdown', function (pointer) {
                 var selectedEntityImage = _this.selectedEntityImage;
                 if (!devModeTools.cursorButton.active || !selectedEntityImage)
                     return;
-                _this.activeDragPoint = true;
+                _this.activeHandler = true;
                 var worldPoint = _this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
                 selectedEntityImage.startDragX = worldPoint.x;
                 selectedEntityImage.startDragY = worldPoint.y;
@@ -76,50 +172,10 @@ var EntityEditor = /** @class */ (function () {
                 selectedEntityImage.scale = selectedEntityImage.image.scale;
                 selectedEntityImage.scaleX = selectedEntityImage.image.scaleX;
                 selectedEntityImage.scaleY = selectedEntityImage.image.scaleY;
-            });
-            gameScene.input.on('drag', function (pointer, gameObject, dragX, dragY) {
-                var worldPoint = _this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
-                var selectedEntityImage = _this.selectedEntityImage;
-                if (!devModeTools.cursorButton.active || gameObject !== point || !selectedEntityImage)
-                    return;
-                var action = selectedEntityImage.action;
-                var editedAction = selectedEntityImage.editedAction;
-                if (angleArray.includes(point.orientation) && !isNaN(action.angle)) {
-                    var startingAngle = Phaser.Math.Angle.BetweenPoints(selectedEntityImage.image, { x: selectedEntityImage.startDragX, y: selectedEntityImage.startDragY });
-                    var lastAngle = Phaser.Math.Angle.BetweenPoints(selectedEntityImage.image, worldPoint);
-                    var targetAngle = lastAngle - startingAngle;
-                    selectedEntityImage.image.rotation = selectedEntityImage.rotation + targetAngle;
-                    editedAction.angle = selectedEntityImage.image.angle;
-                }
-                else if (scaleArray.includes(point.orientation) && !isNaN(action.width) && !isNaN(action.height)) {
-                    var distanceToStart = Phaser.Math.Distance.Between(selectedEntityImage.image.x, selectedEntityImage.image.y, selectedEntityImage.startDragX, selectedEntityImage.startDragY);
-                    var distanceToCurrent = Phaser.Math.Distance.Between(selectedEntityImage.image.x, selectedEntityImage.image.y, worldPoint.x, worldPoint.y);
-                    selectedEntityImage.image.scale = selectedEntityImage.scale * (distanceToCurrent / distanceToStart);
-                    editedAction.width = selectedEntityImage.image.displayWidth;
-                    editedAction.height = selectedEntityImage.image.displayHeight;
-                }
-                else if (widthArray.includes(point.orientation) && !isNaN(action.width) && !isNaN(action.height)) {
-                    var distanceToStart = Phaser.Math.Distance.Between(selectedEntityImage.image.x, selectedEntityImage.image.y, selectedEntityImage.startDragX, selectedEntityImage.image.y);
-                    var distanceToCurrent = Phaser.Math.Distance.Between(selectedEntityImage.image.x, selectedEntityImage.image.y, worldPoint.x, selectedEntityImage.image.y);
-                    selectedEntityImage.image.scaleX = selectedEntityImage.scaleX * (distanceToCurrent / distanceToStart);
-                    editedAction.width = selectedEntityImage.image.displayWidth;
-                }
-                else if (heightArray.includes(point.orientation) && !isNaN(action.width) && !isNaN(action.height)) {
-                    var distanceToStart = Phaser.Math.Distance.Between(selectedEntityImage.image.x, selectedEntityImage.image.y, selectedEntityImage.image.x, selectedEntityImage.startDragY);
-                    var distanceToCurrent = Phaser.Math.Distance.Between(selectedEntityImage.image.x, selectedEntityImage.image.y, selectedEntityImage.image.x, worldPoint.y);
-                    selectedEntityImage.image.scaleY = selectedEntityImage.scaleY * (distanceToCurrent / distanceToStart);
-                    editedAction.height = selectedEntityImage.image.displayHeight;
-                }
-                selectedEntityImage.updateOutline();
-            });
-            gameScene.input.on('dragend', function (pointer, gameObject) {
-                var selectedEntityImage = _this.selectedEntityImage;
-                if (gameObject !== point || !selectedEntityImage)
-                    return;
-                _this.activeDragPoint = false;
-                selectedEntityImage.dragMode = null;
-                selectedEntityImage.edit(selectedEntityImage.editedAction);
-                selectedEntityImage.editedAction = { actionId: selectedEntityImage.action.actionId };
+                selectedEntityImage.displayWidth = selectedEntityImage.image.displayWidth;
+                selectedEntityImage.displayHeight = selectedEntityImage.image.displayHeight;
+                selectedEntityImage.x = selectedEntityImage.image.x;
+                selectedEntityImage.y = selectedEntityImage.image.y;
             });
         });
         taro.client.on('updateActiveEntity', function () {
@@ -176,13 +232,14 @@ var EntityEditor = /** @class */ (function () {
                     entityType: entityData.entityType,
                     position: {
                         function: 'xyCoordinate',
-                        x: worldPoint.x,
-                        y: worldPoint.y
+                        x: Math.floor(worldPoint.x),
+                        y: Math.floor(worldPoint.y)
                     },
                     width: width,
                     height: height,
                     angle: 0,
-                    actionId: taro.newIdHex()
+                    actionId: taro.newIdHex(),
+                    wasCreated: true
                 };
                 if (entityData.entityType === 'unitTypes') {
                     action.player = {
@@ -194,8 +251,39 @@ var EntityEditor = /** @class */ (function () {
                 taro.network.send('editInitEntity', action);
             }
         });
-        this.selectedEntityImage = null;
+        gameScene.input.on('pointerdown', function (pointer, gameObjects) {
+            if (!pointer.leftButtonDown() || !_this.selectedEntityImage)
+                return;
+            if (gameObjects.includes(_this.selectedEntityImage.image))
+                return;
+            var outside = false;
+            if (gameObjects.length === 0) {
+                outside = true;
+            }
+            gameObjects.forEach(function (gameObject) {
+                if (!gameObject.entity && !gameObject.orientation) {
+                    outside = true;
+                }
+            });
+            if (outside) {
+                _this.devModeTools.entityEditor.selectEntityImage(null);
+            }
+        });
+        devModeScene.input.on('pointerdown', function (pointer, gameObjects) {
+            if (!_this.selectedEntityImage)
+                return;
+            if (gameObjects.includes(_this.selectedEntityImage.image))
+                return;
+            if (gameObjects.length > 0) {
+                _this.devModeTools.entityEditor.selectEntityImage(null);
+            }
+        });
+        this.selectEntityImage(null);
     }
+    EntityEditor.prototype.createHandler = function (orientation, size, alpha) {
+        this.handlers[orientation] = this.gameScene.add.rectangle(0, 0, size, size, this.COLOR_HANDLER, alpha);
+        this.handlers[orientation].orientation = orientation;
+    };
     EntityEditor.prototype.activatePlacement = function (active) {
         if (active) {
             //show entities list
@@ -268,13 +356,31 @@ var EntityEditor = /** @class */ (function () {
         }
     };
     EntityEditor.prototype.selectEntityImage = function (entityImage) {
+        if (entityImage === null) {
+            if (this.selectedEntityImage)
+                this.selectedEntityImage.updateOutline(true);
+            this.selectedEntityImage = null;
+            return;
+        }
         this.selectedEntityImage = entityImage;
         entityImage.updateOutline();
+    };
+    EntityEditor.prototype.rescaleInitEntity = function (width, height, worldPoint, imagePoint, selectedEntityImage, editedAction) {
+        var distanceToStart = Phaser.Math.Distance.Between(imagePoint.x, imagePoint.y, selectedEntityImage.startDragX, selectedEntityImage.startDragY);
+        var distanceToCurrent = Phaser.Math.Distance.Between(imagePoint.x, imagePoint.y, worldPoint.x, worldPoint.y);
+        if (width) {
+            selectedEntityImage.image.scaleX = selectedEntityImage.scaleX * (distanceToCurrent / distanceToStart);
+            editedAction.width = Math.floor(selectedEntityImage.image.displayWidth);
+        }
+        if (height) {
+            selectedEntityImage.image.scaleY = selectedEntityImage.scaleY * (distanceToCurrent / distanceToStart);
+            editedAction.height = Math.floor(selectedEntityImage.image.displayHeight);
+        }
     };
     EntityEditor.prototype.deleteInitEntity = function () {
         if (this.selectedEntityImage) {
             this.selectedEntityImage.delete();
-            this.selectedEntityImage = null;
+            this.selectEntityImage(null);
         }
     };
     return EntityEditor;

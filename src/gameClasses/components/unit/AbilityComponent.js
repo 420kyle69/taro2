@@ -135,7 +135,6 @@ var AbilityComponent = TaroEntity.extend({
 		if ((handle.cost && handle.scriptName) || handle.event) {
 			ability = handle;
 		} else {
-			// abilities refactor will use this
 			ability = taro.game.data.abilities[handle];
 		}
 

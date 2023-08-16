@@ -107,7 +107,7 @@ class DeveloperMode {
 			if (gameMap.layers[serverData.layer].name === 'walls') {
 				//if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
 				taro.physics.destroyWalls();
-				let map = taro.scaleMap(_.cloneDeep(gameMap));
+				let map = taro.scaleMap(rfdc()(gameMap));
 				taro.tiled.loadJson(map, function (layerArray, layersById) {
 					taro.physics.staticsFromMap(layersById.walls);
 				});
@@ -315,17 +315,17 @@ class DeveloperMode {
 				if (action.actionId === data.actionId) {
 					found = true;
 					if (data.wasEdited) action.wasEdited = true;
-					if (data.position && data.position.x && data.position.y &&
-						action.position && action.position.x && action.position.y) {
+					if (data.position && !isNaN(data.position.x) && !isNaN(data.position.y) &&
+						action.position && !isNaN(action.position.x) && !isNaN(action.position.y)) {
 						action.position = data.position;
 					}
-					if (data.angle && action.angle) {
+					if (!isNaN(data.angle) && !isNaN(action.angle)) {
 						action.angle = data.angle;
 					}
-                    if (data.width && action.width) {
+                    if (!isNaN(data.width) && !isNaN(action.width)) {
                         action.width = data.width;
                     }
-                    if (data.height && action.height) {
+                    if (!isNaN(data.height) && !isNaN(action.height)) {
                         action.height = data.height;
                     }
                     if (data.wasDeleted) {
@@ -346,7 +346,7 @@ class DeveloperMode {
 			if (p.id() === data.playerId) player = p;
 		});
 		const unitTypeId = data.typeId;
-		const unitTypeData = taro.game.getAsset('unitTypes', unitTypeId);
+		const unitTypeData = taro.game.cloneAsset('unitTypes', unitTypeId);
 		const spawnPosition = data.position;
 		const facingAngle = data.angle;
 
@@ -398,7 +398,7 @@ class DeveloperMode {
 
 	createItem(data) {
 		const itemTypeId = data.typeId;
-		const itemData = taro.game.getAsset('itemTypes', itemTypeId);
+		const itemData = taro.game.cloneAsset('itemTypes', itemTypeId);
 		const position = data.position;
 		const facingAngle = data.angle;
 		let quantity = itemData.maxQuantity;
@@ -537,7 +537,7 @@ class DeveloperMode {
 			if (taro.physics) {
 				//if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
 				taro.physics.destroyWalls();
-				let map = taro.scaleMap(_.cloneDeep(taro.game.data.map));
+				let map = taro.scaleMap(rfdc()(taro.game.data.map));
 				taro.tiled.loadJson(map, function (layerArray, TaroLayersById) {
 					taro.physics.staticsFromMap(TaroLayersById.walls);
 				});
@@ -571,6 +571,7 @@ type MapEditTool = {
 
 	clear: {
 		layer: number;
+		layerName?: string;
 	}
 }
 

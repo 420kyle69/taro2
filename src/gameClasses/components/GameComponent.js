@@ -6,7 +6,7 @@ var GameComponent = TaroEntity.extend({
 		this.highlights = {};
 		this.createdEntities = [];
 		this.gameOverModalIsShowing = false;
-		this.isGameStarted = false;
+		this.hasStarted = false;
 		this.devLogs = {};
 
 	},
@@ -47,7 +47,7 @@ var GameComponent = TaroEntity.extend({
 		taro.script.load(taro.game.data.scripts);
 
 		taro.script.trigger('gameStart');
-		self.isGameStarted = true;
+		self.hasStarted = true;
 		taro.timer.startGameClock();
 	},
 
@@ -118,10 +118,8 @@ var GameComponent = TaroEntity.extend({
 			// taro.shopkeeper.updateShopInventory(taro.shopkeeper.inventory, data.clientId) // send latest ui information to the client
 
 			var isOwner = taro.server.owner == data._id && data.controlledBy == 'human';
-			var isInvitedUser = false;
-			if (taro.game.data.defaultData && taro.game.data.defaultData.invitedUsers) {
-				isInvitedUser = taro.game.data.defaultData.invitedUsers.some(e => e.user === data._id && e.role === 'contributor');
-			}
+			
+
 			var isUserAdmin = false;
 			var isUserMod = false;
 			if (data.permissions) {
@@ -134,6 +132,8 @@ var GameComponent = TaroEntity.extend({
 			player._stats.isUserAdmin = isUserAdmin;
 			player._stats.isUserMod = isUserMod;
 			player._stats.isModerationAllowed = isOwner || isUserAdmin || isUserMod || (data.roleIds && roles.find(role => role?.permissions?.moderator && data.roleIds.includes(role._id.toString())));
+			
+			var isInvitedUser = (data.roleIds && roles.find(role => role?.permissions?.contributor && data.roleIds.includes(role._id.toString())));
 
 			// if User/Admin has access to game then show developer logs
 			if (isOwner || isInvitedUser || isUserAdmin) {
@@ -222,10 +222,25 @@ var GameComponent = TaroEntity.extend({
 		});
 	},
 
+	cloneAsset: function (assetType, assetId) {
+		try {
+			var asset = this.data[assetType][assetId];
+			// cloned = JSON.parse(JSON.stringify(asset));
+			// cloned = rfdc()(asset);
+			var cloned = rfdc()(asset);
+			return cloned;
+		} catch (e) {
+			GameComponent.prototype.log(
+				`getAsset ${assetType} ${assetId} ${e}`
+			);
+		}
+	},
+
 	getAsset: function (assetType, assetId) {
 		try {
 			var asset = this.data[assetType][assetId];
-			return JSON.parse(JSON.stringify(asset));
+			// return JSON.parse(JSON.stringify(asset));
+			return asset;
 		} catch (e) {
 			GameComponent.prototype.log(
 				`getAsset ${assetType} ${assetId} ${e}`
@@ -472,7 +487,7 @@ var GameComponent = TaroEntity.extend({
 				taro.script.variable.prevServerTime = data.status.currentTime;
 				taro.script.variable.prevClientTime = Math.floor(taro._currentTime);
 
-				$('#dev-status-content').html(innerHtml);
+				$(taro.client.getCachedElementById('dev-status-content')).html(innerHtml);
 				self.secondCount++;
 			}
 		}

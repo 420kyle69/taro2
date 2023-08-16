@@ -11,13 +11,13 @@ var Item = TaroEntityPhysics.extend({
 		var itemData = {};
 
 		if (taro.isClient) {
-			itemData = taro.game.getAsset('itemTypes', data.itemTypeId);
+			itemData = taro.game.cloneAsset('itemTypes', data.itemTypeId);
 		}
 
 		self._stats = _.merge(itemData, data);
 
 		if (self._stats.projectileType) {
-			self.projectileData = taro.game.getAsset('projectileTypes', self._stats.projectileType);
+			self.projectileData = taro.game.cloneAsset('projectileTypes', self._stats.projectileType);
 		}
 
 		// so if cost is set as 0 it should be usable item
@@ -349,9 +349,9 @@ var Item = TaroEntityPhysics.extend({
 
 									// we don't create a Projectile entity for raycasts
 									if (this._stats.bulletType !== 'raycast') {
-										self.projectileData = taro.game.getAsset('projectileTypes', self._stats.projectileType);
+										self.projectileData = taro.game.cloneAsset('projectileTypes', self._stats.projectileType);
 										var projectileData = Object.assign(
-											JSON.parse(JSON.stringify(self.projectileData)),
+											rfdc()(self.projectileData),
 											{
 												type: self._stats.projectileType,
 												sourceItemId: self.id(),
@@ -367,7 +367,7 @@ var Item = TaroEntityPhysics.extend({
 												},
 												streamMode: this._stats.projectileStreamMode
 											});
-									 	var projectile = new Projectile(projectileData);
+										var projectile = new Projectile(projectileData);
 										projectile.script.trigger('entityCreated');
 										taro.game.lastCreatedProjectileId = projectile.id();
 									}
@@ -679,7 +679,7 @@ var Item = TaroEntityPhysics.extend({
 						owner.attribute.refresh();
 					}
 					if (playerAttributeChanged) {
-						taro.playerUi.updatePlayerAttributesDiv(player._stats.attributes);
+						taro.playerUi.updatePlayerAttributeValues(player._stats.attributes);
 					}
 				}
 			}
@@ -724,7 +724,7 @@ var Item = TaroEntityPhysics.extend({
 
 	startUsing: function () {
 		var self = this;
-
+		
 		if (self._stats.isBeingUsed)
 			return;
 
@@ -770,7 +770,7 @@ var Item = TaroEntityPhysics.extend({
 		}
 	},
 	refillAmmo: function () {
-		var itemData = taro.game.getAsset('itemTypes', this._stats.itemTypeId);
+		var itemData = taro.game.cloneAsset('itemTypes', this._stats.itemTypeId);
 		this.streamUpdateData([
 			{ ammoTotal: itemData.ammoTotal },
 			{ ammo: itemData.ammoSize }
@@ -859,7 +859,7 @@ var Item = TaroEntityPhysics.extend({
 
 		self.previousState = null;
 
-		var data = taro.game.getAsset('itemTypes', type);
+		var data = taro.game.cloneAsset('itemTypes', type);
 		delete data.type; // hotfix for dealing with corrupted game json that has unitData.type = "unitType". This is caused by bug in the game editor.
 
 		if (data == undefined) {
@@ -1069,10 +1069,6 @@ var Item = TaroEntityPhysics.extend({
 					case 'quantity':
 						this._stats[attrName] = newValue;
 						self.updateQuantity(newValue);
-						var owner = self.getOwnerUnit();
-						if (taro.isClient && taro.client.selectedUnit == owner) {
-							taro.itemUi.updateItemQuantity(self);
-						}
 						break;
 
 					case 'description':
@@ -1114,10 +1110,14 @@ var Item = TaroEntityPhysics.extend({
 
 					case 'isBeingUsed':
 						var owner = self.getOwnerUnit();
-						// ignore stream so my item use won't fire two bullets
-						if (taro.isClient && (owner != taro.client.selectedUnit || !this._stats.ignoreServerStream)) {
+						// if the item's CSP is enabled, ignore server-stream so my item use won't fire two bullets
+						if (taro.isClient) {
+							// ignore server-stream if client isn't running physics or if projectileStreamMode is 0
+							if (owner == taro.client.selectedUnit && taro.physics && this._stats.projectileStreamMode == 1) {
+								break;
+							}
 							this._stats.isBeingUsed = newValue;
-						}
+						}	
 						break;
 
 					case 'fireRate':
@@ -1137,7 +1137,7 @@ var Item = TaroEntityPhysics.extend({
 	 */
 	_behaviour: function (ctx) {
 		var self = this;
-
+		
 		_.forEach(taro.triggersQueued, function (trigger) {
 			trigger.params['thisEntityId'] = self.id();
 			self.script.trigger(trigger.name, trigger.params);
@@ -1167,29 +1167,18 @@ var Item = TaroEntityPhysics.extend({
 					self._stats.controls.mouseBehaviour &&
 					self._stats.controls.mouseBehaviour.flipSpriteHorizontallyWRTMouse
 				) {
-					if (self._stats.controls.mouseBehaviour.rotateToFaceMouseCursor) {
-						if (rotate > 0 && rotate < Math.PI) {
-							self.flip(0);
-						} else {
-							self.flip(1);
-						}
+					if (ownerUnit.angleToTarget > 0 && ownerUnit.angleToTarget < Math.PI) {
+						self.flip(0);
 					} else {
-						self.flip(ownerUnit._stats.flip);
-					}
+						self.flip(1);
+					}					
 				}
 			}
 
-			// run both server & client.
-			// it's important that this runs on client side, because it prepares this item's position when it's dropped
-			self.translateTo(x, y);
-			self.rotateTo(0, 0, rotate);
-
-			// if (this.getOwnerUnit() != taro.client.selectedUnit)	 {
-			// 	console.log(x, y, rotate, ownerUnit.angleToTarget, this._rotate.z)
-			// }
-
-			if (taro.game.cspEnabled && taro.isClient) {
-				self.latestKeyFrame[1] = [x, y, rotate]; // prepare position for when this item's dropped. without this, item will appear at an incorrect position
+			// this is necessary for games that has sprite-only item with no joint. (e.g. team elimination)
+			if (taro.isServer) {
+				self.translateTo(x, y);
+				self.rotateTo(0, 0, rotate);
 			}
 		}
 

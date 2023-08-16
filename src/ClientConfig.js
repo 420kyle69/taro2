@@ -3,6 +3,7 @@ var taroClientConfig = {
 		'/lib/stats.js',
 		'/lib/dat.gui.min.js',
 		'/lib/msgpack.min.js',
+		'/lib/rfdc.min.js',
 
 		'/gameClasses/Player.js',
 		'/gameClasses/Unit.js',
@@ -76,6 +77,7 @@ var taroClientConfig = {
 		'renderer/phaser/classes/PhaserChatBubble.js',
 		'renderer/phaser/classes/PhaserRegion.js',
 		'renderer/phaser/classes/PhaserRay.js',
+		'renderer/phaser/classes/PhaserParticle.js',
 		'renderer/phaser/scenes/PhaserScene.js',
 		'renderer/phaser/scenes/GameScene.js',
 		'renderer/phaser/classes/PhaserJoystick.js',
@@ -89,6 +91,7 @@ var taroClientConfig = {
         'renderer/phaser/classes/devmode/EntityEditor.js',
 		'renderer/phaser/classes/devmode/TilePalette.js',
 		'renderer/phaser/classes/devmode/TileMarker.js',
+        'renderer/phaser/classes/devmode/MarkerGraphics.js',
 		'renderer/phaser/classes/devmode/CommandsController.js',
 		'renderer/phaser/classes/devmode/Constants.js',
 		'renderer/phaser/classes/devmode/EntityImage.js',

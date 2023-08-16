@@ -1,52 +1,55 @@
 var EntityImage = /** @class */ (function () {
     function EntityImage(scene, devModeTools, entityImages, action, type) {
         var _this = this;
-        var _a, _b;
+        var _a, _b, _c, _d, _e, _f;
         this.scene = scene;
         this.devModeTools = devModeTools;
         var entityEditor = this.entityEditor = devModeTools.entityEditor;
         this.action = action;
         var key;
+        var entityTypeData;
         if (action.entityType === 'unitTypes') {
-            var entityTypeData = taro.game.data[action.entityType] && taro.game.data[action.entityType][action.entity];
+            entityTypeData = taro.game.data[action.entityType] && taro.game.data[action.entityType][action.entity];
             if (!entityTypeData)
                 return;
             key = "unit/".concat(entityTypeData.cellSheet.url);
         }
         else if (type === 'unit') {
-            var entityTypeData = taro.game.data['unitTypes'] && taro.game.data['unitTypes'][action.unitType];
+            entityTypeData = taro.game.data['unitTypes'] && taro.game.data['unitTypes'][action.unitType];
             if (!entityTypeData)
                 return;
             key = "unit/".concat(entityTypeData.cellSheet.url);
         }
         else if (action.entityType === 'itemTypes') {
-            var entityTypeData = taro.game.data[action.entityType] && taro.game.data[action.entityType][action.entity];
+            entityTypeData = taro.game.data[action.entityType] && taro.game.data[action.entityType][action.entity];
             if (!entityTypeData)
                 return;
             key = "item/".concat(entityTypeData.cellSheet.url);
         }
         else if (type === 'item') {
-            var entityTypeData = taro.game.data['itemTypes'] && taro.game.data['itemTypes'][action.itemType];
+            entityTypeData = taro.game.data['itemTypes'] && taro.game.data['itemTypes'][action.itemType];
             if (!entityTypeData)
                 return;
             key = "item/".concat(entityTypeData.cellSheet.url);
         }
         else if (action.entityType === 'projectileTypes') {
-            var entityTypeData = taro.game.data[action.entityType] && taro.game.data[action.entityType][action.entity];
+            entityTypeData = taro.game.data[action.entityType] && taro.game.data[action.entityType][action.entity];
             if (!entityTypeData)
                 return;
             key = "projectile/".concat(entityTypeData.cellSheet.url);
         }
         else if (type === 'projectile') {
-            var entityTypeData = taro.game.data['projectileTypes'] && taro.game.data['projectileTypes'][action.projectileType];
+            entityTypeData = taro.game.data['projectileTypes'] && taro.game.data['projectileTypes'][action.projectileType];
             if (!entityTypeData)
                 return;
             key = "projectile/".concat(entityTypeData.cellSheet.url);
         }
-        var image = this.image = scene.add.image((_a = action.position) === null || _a === void 0 ? void 0 : _a.x, (_b = action.position) === null || _b === void 0 ? void 0 : _b.y, key);
-        if (action.angle)
+        this.defaultWidth = (_b = (_a = entityTypeData.bodies) === null || _a === void 0 ? void 0 : _a.default) === null || _b === void 0 ? void 0 : _b.width;
+        this.defaultHeight = (_d = (_c = entityTypeData.bodies) === null || _c === void 0 ? void 0 : _c.default) === null || _d === void 0 ? void 0 : _d.height;
+        var image = this.image = scene.add.image((_e = action.position) === null || _e === void 0 ? void 0 : _e.x, (_f = action.position) === null || _f === void 0 ? void 0 : _f.y, key);
+        if (!isNaN(action.angle))
             image.angle = action.angle;
-        if (action.width && action.height)
+        if (!isNaN(action.width) && !isNaN(action.height))
             image.setDisplaySize(action.width, action.height);
         if (taro.developerMode.active && taro.developerMode.activeTab === 'map') {
             image.setVisible(true);
@@ -57,12 +60,21 @@ var EntityImage = /** @class */ (function () {
         image.setInteractive({ draggable: true });
         image.entity = this;
         entityImages.push(image);
+        var lastTime = 0;
+        var editedAction = this.editedAction = { actionId: action.actionId };
         image.on('pointerdown', function () {
-            //console.log('pointerdown', action);
             if (!devModeTools.cursorButton.active)
                 return;
             if (entityEditor.selectedEntityImage !== _this) {
                 entityEditor.selectEntityImage(_this);
+            }
+            //double click
+            var clickDelay = taro._currentTime - lastTime;
+            lastTime = taro._currentTime;
+            if (clickDelay < 350) {
+                if (inGameEditor && inGameEditor.showScriptForEntity) {
+                    inGameEditor.showScriptForEntity(action.actionId);
+                }
             }
             _this.startDragX = image.x;
             _this.startDragY = image.y;
@@ -72,57 +84,34 @@ var EntityImage = /** @class */ (function () {
             }
             else if (devModeTools.altKey.isDown) {
                 _this.dragMode = 'angle';
+                image.rotation = 0;
+                editedAction.angle = image.angle;
             }
             else if (devModeTools.shiftKey.isDown) {
                 _this.dragMode = 'scale';
+                if (!isNaN(_this.defaultWidth) && !isNaN(_this.defaultHeight)) {
+                    image.setDisplaySize(_this.defaultWidth, _this.defaultHeight);
+                    editedAction.width = _this.defaultWidth;
+                    editedAction.height = _this.defaultHeight;
+                }
             }
+            _this.updateOutline();
         });
-        var outline = entityEditor.outline;
+        var outlineHover = entityEditor.outlineHover;
         image.on('pointerover', function () {
-            //scene.input.setDefaultCursor('url(assets/cursors/resize.cur), pointer');
-            if (!devModeTools.cursorButton.active || entityEditor.activeDragPoint)
+            scene.input.setTopOnly(true);
+            if (!devModeTools.cursorButton.active || entityEditor.activeHandler)
                 return;
-            if (entityEditor.selectedEntityImage !== _this)
-                entityEditor.selectedEntityImage = null;
             _this.updateOutline();
         });
         image.on('pointerout', function () {
             if (entityEditor.selectedEntityImage === _this)
                 return;
-            outline.clear();
-        });
-        var editedAction = this.editedAction = { actionId: action.actionId };
-        scene.input.on('drag', function (pointer, gameObject, dragX, dragY) {
-            if (!devModeTools.cursorButton.active || gameObject !== image)
-                return;
-            if (_this.dragMode === 'position') {
-                gameObject.x = dragX;
-                gameObject.y = dragY;
-                editedAction.position = { x: dragX, y: dragY };
-            }
-            else if (_this.dragMode === 'angle' && !isNaN(action.angle)) {
-                var target = Phaser.Math.Angle.BetweenPoints(gameObject, { x: dragX, y: dragY });
-                gameObject.rotation = target;
-                editedAction.angle = gameObject.angle;
-            }
-            else if (_this.dragMode === 'scale' && !isNaN(action.width) && !isNaN(action.height)) {
-                var dragScale = Math.min(500, Math.max(-250, (_this.startDragY - dragY)));
-                gameObject.scale = _this.scale + _this.scale * dragScale / 500;
-                editedAction.width = image.displayWidth;
-                editedAction.height = image.displayHeight;
-            }
-            _this.updateOutline();
-        });
-        scene.input.on('dragend', function (pointer, gameObject) {
-            if (gameObject !== image)
-                return;
-            _this.dragMode = null;
-            _this.edit(editedAction);
-            editedAction = { actionId: action.actionId };
+            outlineHover.clear();
         });
     }
     EntityImage.prototype.edit = function (action) {
-        if (!this.action.wasEdited) {
+        if (!this.action.wasEdited || !action.wasEdited) {
             this.action.wasEdited = true;
             action.wasEdited = true;
         }
@@ -130,16 +119,19 @@ var EntityImage = /** @class */ (function () {
     };
     EntityImage.prototype.updateOutline = function (hide) {
         var outline = this.entityEditor.outline;
+        var outlineHover = this.entityEditor.outlineHover;
         var selectionContainer = this.entityEditor.selectionContainer;
         if (hide) {
             outline.clear();
+            outlineHover.clear();
             selectionContainer.setVisible(false);
             return;
         }
-        var dragPoints = this.entityEditor.dragPoints;
+        var handlers = this.entityEditor.handlers;
         var image = this.image;
-        outline.clear();
         if (this.devModeTools.entityEditor.selectedEntityImage === this) {
+            outline.clear();
+            outlineHover.clear();
             outline.lineStyle(6, 0x036ffc, 1);
             selectionContainer.setVisible(true);
             selectionContainer.x = image.x;
@@ -147,46 +139,54 @@ var EntityImage = /** @class */ (function () {
             selectionContainer.angle = image.angle;
             var smallDistance = 20 / this.scene.cameras.main.zoom;
             var largeDistance = 25 / this.scene.cameras.main.zoom;
-            dragPoints.topLeft.setPosition(-image.displayWidth / 2 - smallDistance, -image.displayHeight / 2 - smallDistance);
-            dragPoints.topLeftRotate.setPosition(-image.displayWidth / 2 - largeDistance, -image.displayHeight / 2 - largeDistance);
-            dragPoints.top.setPosition(0, -image.displayHeight / 2 - smallDistance);
-            dragPoints.topRight.setPosition(image.displayWidth / 2 + smallDistance, -image.displayHeight / 2 - smallDistance);
-            dragPoints.topRightRotate.setPosition(image.displayWidth / 2 + largeDistance, -image.displayHeight / 2 - largeDistance);
-            dragPoints.right.setPosition(image.displayWidth / 2 + smallDistance, 0);
-            dragPoints.bottomRight.setPosition(image.displayWidth / 2 + smallDistance, image.displayHeight / 2 + smallDistance);
-            dragPoints.bottomRightRotate.setPosition(image.displayWidth / 2 + largeDistance, image.displayHeight / 2 + largeDistance);
-            dragPoints.bottom.setPosition(0, image.displayHeight / 2 + smallDistance);
-            dragPoints.bottomLeft.setPosition(-image.displayWidth / 2 - smallDistance, image.displayHeight / 2 + smallDistance);
-            dragPoints.bottomLeftRotate.setPosition(-image.displayWidth / 2 - largeDistance, image.displayHeight / 2 + largeDistance);
-            dragPoints.left.setPosition(-image.displayWidth / 2 - smallDistance, 0);
+            handlers.topLeft.setPosition(-image.displayWidth / 2 - smallDistance, -image.displayHeight / 2 - smallDistance);
+            handlers.topLeftRotate.setPosition(-image.displayWidth / 2 - largeDistance, -image.displayHeight / 2 - largeDistance);
+            handlers.top.setPosition(0, -image.displayHeight / 2 - smallDistance);
+            handlers.topRight.setPosition(image.displayWidth / 2 + smallDistance, -image.displayHeight / 2 - smallDistance);
+            handlers.topRightRotate.setPosition(image.displayWidth / 2 + largeDistance, -image.displayHeight / 2 - largeDistance);
+            handlers.right.setPosition(image.displayWidth / 2 + smallDistance, 0);
+            handlers.bottomRight.setPosition(image.displayWidth / 2 + smallDistance, image.displayHeight / 2 + smallDistance);
+            handlers.bottomRightRotate.setPosition(image.displayWidth / 2 + largeDistance, image.displayHeight / 2 + largeDistance);
+            handlers.bottom.setPosition(0, image.displayHeight / 2 + smallDistance);
+            handlers.bottomLeft.setPosition(-image.displayWidth / 2 - smallDistance, image.displayHeight / 2 + smallDistance);
+            handlers.bottomLeftRotate.setPosition(-image.displayWidth / 2 - largeDistance, image.displayHeight / 2 + largeDistance);
+            handlers.left.setPosition(-image.displayWidth / 2 - smallDistance, 0);
+            outline.strokeRect(-image.displayWidth / 2, -image.displayHeight / 2, image.displayWidth, image.displayHeight);
+            outline.x = image.x;
+            outline.y = image.y;
+            outline.angle = image.angle;
         }
         else {
-            outline.lineStyle(2, 0x036ffc, 1);
-            selectionContainer.setVisible(false);
+            outlineHover.clear();
+            outlineHover.lineStyle(2, 0x036ffc, 1);
+            outlineHover.strokeRect(-image.displayWidth / 2, -image.displayHeight / 2, image.displayWidth, image.displayHeight);
+            outlineHover.x = image.x;
+            outlineHover.y = image.y;
+            outlineHover.angle = image.angle;
         }
-        outline.strokeRect(-image.displayWidth / 2, -image.displayHeight / 2, image.displayWidth, image.displayHeight);
-        outline.x = image.x;
-        outline.y = image.y;
-        outline.angle = image.angle;
     };
     EntityImage.prototype.update = function (action) {
+        //update action in editor
+        if (inGameEditor && inGameEditor.updateAction) {
+            inGameEditor.updateAction(action);
+        }
         if (action.wasEdited)
             this.action.wasEdited = true;
-        if (this.action.position && this.action.position.x && this.action.position.y &&
-            action.position && action.position.x && action.position.y) {
+        if (this.action.position && !isNaN(this.action.position.x) && !isNaN(this.action.position.y) &&
+            action.position && !isNaN(action.position.x) && !isNaN(action.position.y)) {
             this.action.position = action.position;
             this.image.x = action.position.x;
             this.image.y = action.position.y;
         }
-        if (this.action.angle && action.angle) {
+        if (!isNaN(this.action.angle) && !isNaN(action.angle)) {
             this.action.angle = action.angle;
             this.image.angle = action.angle;
         }
-        if (this.action.width && action.width) {
+        if (!isNaN(this.action.width) && !isNaN(action.width)) {
             this.action.width = action.width;
             this.image.setDisplaySize(action.width, this.image.displayHeight);
         }
-        if (this.action.height && action.height) {
+        if (!isNaN(this.action.height) && !isNaN(action.height)) {
             this.action.height = action.height;
             this.image.setDisplaySize(this.image.displayWidth, action.height);
         }

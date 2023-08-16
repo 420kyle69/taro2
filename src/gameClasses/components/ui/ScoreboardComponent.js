@@ -9,6 +9,9 @@ var ScoreboardComponent = TaroEntity.extend({
 		self.scoreAttributeId = taro.game.data.settings.scoreAttributeId;
 		self._hidden = false;
 
+		self.scoreboardElement = null;
+		self.leaderboardToggleElement = null;
+
 		self.setUI();
 	},
 
@@ -142,9 +145,9 @@ var ScoreboardComponent = TaroEntity.extend({
 
 			players.forEach(function (player) {
 				if (player._stats && (
-						 	// only display human players on scoreboard
-							player._stats.controlledBy == 'human'
-						)
+					// only display human players on scoreboard
+					player._stats.controlledBy == 'human'
+				)
 				) {
 					var playerId = player.id();
 					var score = 0;
@@ -172,8 +175,9 @@ var ScoreboardComponent = TaroEntity.extend({
 				var defaultFontWeight = 500;
 				if (player) {
 					var color = null; // color to indicate human, animal, or my player on scoreboard
+					let playerIsSelf = '';
 
-					var playerType = taro.game.getAsset('playerTypes', player._stats.playerTypeId);
+					var playerType = taro.game.cloneAsset('playerTypes', player._stats.playerTypeId);
 
 					if (playerType && playerType.color) {
 						color = playerType.color;
@@ -183,6 +187,7 @@ var ScoreboardComponent = TaroEntity.extend({
 					if (player._stats.controlledBy == 'human' && player._stats.clientId == taro.network.id()) {
 						defaultFontWeight = 800;
 						color = '#99FF00';
+						playerIsSelf = 'scoreboard-player-is-myself';
 					}
 
 					var readableName = player._stats.name || '';
@@ -191,20 +196,45 @@ var ScoreboardComponent = TaroEntity.extend({
 					readableName = readableName.replace(/>/g, '&gt;');
 
 					color = color || DEFAULT_COLOR;
-					scoreboard += `<div onContextMenu="window.showUserDropdown({ event, userId: '${player._stats.userId}' })" class='cursor-pointer scoreboard-user-entry' style='color: ${color};font-weight:${defaultFontWeight}'>${readableName} <small><span>${self.convertNumbersToKMB(sortedScores[i].value)}</span></small></div>`;
+					scoreboard += `
+						<div onContextMenu="window.showUserDropdown({ event, userId: '${player._stats.userId}' })" class='cursor-pointer scoreboard-user-entry scoreboard-player-rank-${i} ${playerIsSelf}' style='color: ${color};font-weight:${defaultFontWeight}'>
+							<span class='scoreboard-player-name'>${readableName}</span> <small class='scoreboard-player-score'><span>${self.convertNumbersToKMB(sortedScores[i].value)}</span></small>
+						</div>
+					`;
 				}
 			}
 
 			taro.client.clientCount = sortedScores.length;
 
-			$('#player-count').html(players.length);
+			// $('#player-count').html(players.length);
+			// const playerCount = document.getElementById('player-count');
+
+			// if (playerCount) {
+			// 	playerCount.innerHTML = players.length;
+			// }
+
+			if (!self.scoreboardElement) {
+				self.scoreboardElement = document.getElementById('scoreboard');
+			}
+
+			if (!self.leaderboardToggleElement) {
+				self.leaderboardToggleElement = document.getElementById('leaderboard-toggle');
+			}
 
 			if (self._hidden) {
-				$('#scoreboard').html('');
-				$('#leaderboard-toggle').html('&nbsp;<i class="far fa-caret-square-down" aria-hidden="true" onclick="taro.scoreboard.toggleScores()" style="cursor:pointer;"></i>');
+				if (self.scoreboardElement) {
+					self.scoreboardElement.innerHTML = '';
+				}
+				if (self.leaderboardToggleElement) {
+					self.leaderboardToggleElement.innerHTML = '&nbsp;<i class="far fa-caret-square-down" aria-hidden="true" onclick="taro.scoreboard.toggleScores()" style="cursor:pointer;"></i>';
+				}
 			} else {
-				$('#scoreboard').html(scoreboard);
-				$('#leaderboard-toggle').html('&nbsp;<i class="far fa-caret-square-up" aria-hidden="true" onclick="taro.scoreboard.toggleScores()" style="cursor:pointer;"></i>');
+				if (self.scoreboardElement) {
+					self.scoreboardElement.innerHTML = scoreboard;
+				} 
+				if (self.leaderboardToggleElement) {
+					self.leaderboardToggleElement.innerHTML = '&nbsp;<i class="far fa-caret-square-up" aria-hidden="true" onclick="taro.scoreboard.toggleScores()" style="cursor:pointer;"></i>';
+				}
 			}
 		}
 	},
