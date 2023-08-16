@@ -126,7 +126,6 @@ var AbilityComponent = TaroEntity.extend({
 	cast: function (handle) {
 		var self = this;
 
-		console.log(handle);
 		if (handle == undefined)
 			return;
 
@@ -198,7 +197,7 @@ var AbilityComponent = TaroEntity.extend({
 
 	canAffordCost: function(ability, player) {
 		let canAffordCost = true;
-		console.log(ability);
+
 		if (ability.cost && ability.cost.unitAttributes) {
 			// AbilityComponent.prototype.log("ability cost", ability.cost.cast)
 			for (attrName in ability.cost.unitAttributes) {
@@ -249,10 +248,13 @@ var AbilityComponent = TaroEntity.extend({
 	},
 
 	startCasting: function (abilityId) {
-		console.log(abilityId);
+		if (this.activeAbilities[abilityId]) {
+			return;
+		}
+
 		const player = this._entity.getOwner();
 		const ability = this._entity._stats.controls.unitAbilities[abilityId];
-		console.log(ability);
+
 		if (!this.canAffordCost(ability, player)) {
 			return;
 		}
@@ -267,14 +269,19 @@ var AbilityComponent = TaroEntity.extend({
 		this.activeAbilities[abilityId] = true;
 
 		if (ability.castDuration) {
-			this.activeAbilities[abilityId] = Date.now() + ability.castDuration;
+			this.abilityCooldowns[abilityId] = Date.now() + ability.castDuration;
 		}
 
 	},
 
 	stopCasting: function (abilityId) {
-		// if (this.activeAbilities[abilityId])
+		if (!this.activeAbilities[abilityId]) {
+			return;
+		}
+
 		const ability = this._entity._stats.controls.unitAbilities[abilityId];
+
+		this.activeAbilities[abilityId] = false;
 
 		this._entity.script.runScript(
 			ability.eventScripts.stopCasting,
@@ -285,6 +292,7 @@ var AbilityComponent = TaroEntity.extend({
 
 		if (Object.keys(this.abilityCooldowns).length > 0) {
 			for (let id in this.abilityCooldowns) {
+
 				if (this.abilityCooldowns[id] <= Date.now()) {
 					delete this.abilityCooldowns[id];
 					this.stopCasting(id);

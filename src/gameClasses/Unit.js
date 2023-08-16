@@ -1854,7 +1854,6 @@ var Unit = TaroEntityPhysics.extend({
 	 */
 	_behaviour: function (ctx) {
 		var self = this;
-		if (taro.isClient) { console.log('yo'); }
 
 		_.forEach(taro.triggersQueued, function (trigger) {
 			trigger.params['thisEntityId'] = self.id();
