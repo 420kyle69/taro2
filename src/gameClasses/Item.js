@@ -594,8 +594,10 @@ var Item = TaroEntityPhysics.extend({
 		}
 
 		if (self._stats.quantity != null || self._stats.quantity != undefined) {
-			// taro.devLog(isUsed, self._stats.quantity , self._stats.quantity > 0)
-			if (isUsed && self._stats.quantity > 0) {
+			// console.log(isUsed, self._stats.quantity , self._stats.quantity > 0)
+
+			// update quantity if quantity is changing
+			if (isUsed && self._stats.quantity > 0 && self.quantityCost > 0) {
 				self.updateQuantity(self._stats.quantity - self.quantityCost);
 			}
 		}
@@ -603,8 +605,13 @@ var Item = TaroEntityPhysics.extend({
 
 	updateQuantity: function (qty) {
 		this._stats.quantity = qty;
-
 		if (taro.isServer) {
+			// if server authoritative mode is enabled, then stream item quantity to the item's owner player only
+			if (taro.runMode == 0) {
+				var playerId = this.getOwnerUnit()?.getOwner()?._id;
+				this.streamUpdateData([{ quantity: qty }], playerId );
+			}
+
 			// item's set to be removed when empty
 			if (this._stats.quantity == 0 && this._stats.removeWhenEmpty === true) {
 				var ownerUnit = this.getOwnerUnit();
@@ -1068,7 +1075,10 @@ var Item = TaroEntityPhysics.extend({
 
 					case 'quantity':
 						this._stats[attrName] = newValue;
-						self.updateQuantity(newValue);
+						var owner = self.getOwnerUnit();
+						if (taro.isClient && taro.client.selectedUnit == owner) {
+							self.updateQuantity(newValue);
+						}
 						break;
 
 					case 'description':

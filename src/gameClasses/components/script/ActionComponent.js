@@ -20,15 +20,17 @@ var ActionComponent = TaroEntity.extend({
 			var action = actionList[i];
 
 			if (!action || action.disabled == true || // if action is disabled or
-				(taro.isClient && action.runMode == 0) || // don't run on client if runMode is 'server authoratative'
+				(taro.isClient && action.runMode == 0) || // don't run on client if runMode is 'server authoritative'
 				(taro.isServer && action.runMode == 1) || // don't run on server if runMode is 'client only'
 				(taro.isClient && (!action.runOnClient && !action.runMode)) // backward compatibility for older versions
 			) {
 				continue;
 			}
 
-			// if CSP is enabled, then server will pause streaming
-			// the server side is still running (e.g. creating entities), but it won't be streamed to the client
+			// assign runMode engine-widely, so functions like item.use() can reference to what the current runMode is
+			// for item.use(), if runMode == 0, then it will stream quantity change to its owner player
+			taro.runMode = (action.runMode)? 1 : 0;
+			
 			if (taro.isServer) {
 
 				var now = Date.now();
