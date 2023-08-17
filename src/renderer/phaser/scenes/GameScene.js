@@ -218,6 +218,7 @@ var GameScene = /** @class */ (function (_super) {
     GameScene.prototype.create = function () {
         var _this = this;
         this.events.once('render', function () {
+            //this.scene.launch('UI');
             _this.scene.launch('DevMode');
             taro.client.rendererLoaded.resolve();
             document.dispatchEvent(new Event('taro rendered'));

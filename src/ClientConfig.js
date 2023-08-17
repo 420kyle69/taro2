@@ -82,6 +82,7 @@ var taroClientConfig = {
 		'renderer/phaser/scenes/GameScene.js',
 		'renderer/phaser/classes/PhaserJoystick.js',
 		'renderer/phaser/scenes/MobileControlsScene.js',
+        'renderer/phaser/scenes/UIScene.js',
 		'renderer/phaser/scenes/DevModeScene.js',
 		'renderer/phaser/classes/devmode/DevModeTools.js',
 		'renderer/phaser/classes/devmode/DevToolButton.js',
