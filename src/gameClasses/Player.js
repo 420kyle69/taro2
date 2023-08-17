@@ -19,6 +19,7 @@ var Player = TaroEntity.extend({
 		}
 
 		self.lastCustomInput = '';
+		self.realtimeCSS = '';
 
 		Player.prototype.log(`player created ${this.id()}`);
 

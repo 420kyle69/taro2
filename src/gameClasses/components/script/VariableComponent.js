@@ -390,6 +390,13 @@ var VariableComponent = TaroEntity.extend({
 
 					break;
 
+				case 'realtimeCSSOfPlayer':
+					var player = self.getValue(text.player, vars);
+					if (player && player._category == 'player') {
+						returnValue = player.realtimeCSS;
+					}
+					break;
+
 				case 'entityExists':
 					returnValue = !!(entity && entity._id && taro.$(entity._id));
 

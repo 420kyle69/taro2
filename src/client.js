@@ -703,6 +703,8 @@ const Client = TaroEventingClass.extend({
 		taro.network.define('updateUiText', this._onUpdateUiText);
 		taro.network.define('updateUiTextForTime', this._onUpdateUiTextForTime);
 
+		taro.network.define('updateUiRealtimeCSS', this._onUpdateUIRealtimeCSS);
+
 		taro.network.define('alertHighscore', this._onAlertHighscore);
 
 		taro.network.define('item', this._onItem);
