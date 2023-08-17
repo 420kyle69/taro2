@@ -658,13 +658,7 @@ var Player = TaroEntity.extend({
 		if (taro.env == 'local') // don't mute users in dev env
 			return;
 
-		if (value) {
-			$('#message').attr('disabled', true);
-			$('#message').attr('placeholder', 'You are muted');
-		} else {
-			$('#message').attr('disabled', false);
-			$('#message').attr('placeholder', 'message');
-		}
+		window.setTempChatMute(value);
 	},
 
 	redrawUnits: function (filterFn, properties) {
