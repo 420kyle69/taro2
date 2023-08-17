@@ -220,7 +220,6 @@ var ClientNetworkEvents = {
 		} else if (data.action == 'append') {
 			taro.uiTextElementsObj[key].innerHTML += '\n' + data.style;
 		}
-		console.log(taro.uiTextElementsObj[key].innerHTML);
 	},
 
 	_onAlertHighscore: function (data) {
