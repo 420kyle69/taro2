@@ -658,7 +658,7 @@ var Player = TaroEntity.extend({
 		if (taro.env == 'local') // don't mute users in dev env
 			return;
 
-		window.setTempChatMute(value);
+		window.setTempChatMute && window.setTempChatMute(value);
 	},
 
 	redrawUnits: function (filterFn, properties) {
