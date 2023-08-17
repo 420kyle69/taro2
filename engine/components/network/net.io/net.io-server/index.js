@@ -808,16 +808,20 @@ NetIo.Server = NetIo.EventingClass.extend({
 			const token = searchParams.get('token');
 
 			try {
-				const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
-
-				// const isGuestUserAllowed = taro.game?.data?.defaultData?.isGuestPlayerAllowed;
-
-				// if (!isGuestUserAllowed && (!decodedToken.userId || !decodedToken.sessionId)) {
-				// 	socket.close('Guest user not allowed. Please login or signup.');
-				// 	console.log('Guest user not allowed', token);
-				// 	return;
-				// }
-
+				let decodedToken;
+				
+				if (process.env.ENV === 'standalone') {
+					// no token validation required for standalone server
+					decodedToken = {
+						userId: '',
+						sessionId: '',
+						createdAt: Date.now(),
+						gameSlug: taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.gameSlug
+					}
+				} else {
+					decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
+				}
+				
 				// extracting user from token and adding it in _token.
 				socket._token = {
 					userId: decodedToken.userId,
