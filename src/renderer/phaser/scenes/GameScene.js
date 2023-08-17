@@ -423,10 +423,11 @@ var GameScene = /** @class */ (function (_super) {
                 x: worldPoint.x,
                 y: worldPoint.y,
             }]);
-        this.renderedEntities.forEach(function (element) {
+        /*this.renderedEntities.forEach(element => {
             element.setVisible(false);
-        });
+        });*/
         if (!taro.developerMode.active || (taro.developerMode.active && taro.developerMode.activeTab !== 'map')) {
+            console.log('entities on screen', this.cameras.main.cull(this.renderedEntities).length);
             this.cameras.main.cull(this.renderedEntities).forEach(function (element) {
                 if (!element.hidden) {
                     element.setVisible(true);

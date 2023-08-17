@@ -71,7 +71,7 @@ class EntitiesToRender {
 
 				// taro.profiler.logTimeElapsed('entity._behaviour()', timeStart);
 
-				if (entity.isTransforming() || entity.tween?.isTweening || entity == taro.client.selectedUnit) {
+				if (entity.phaserEntity?.gameObject?.visible && (entity.isTransforming() || entity.tween?.isTweening || entity == taro.client.selectedUnit)) {
 
 					// update transformation using incoming network stream
 					// var timeStart = performance.now();
