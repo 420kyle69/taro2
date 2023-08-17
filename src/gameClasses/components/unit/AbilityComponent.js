@@ -138,7 +138,7 @@ var AbilityComponent = TaroEntity.extend({
 			ability = taro.game.data.abilities[handle];
 		}
 
-		switch (ability.event) {
+		switch (ability?.event) {
 			// skip switch for old abilities
 			case undefined:
 				break;
