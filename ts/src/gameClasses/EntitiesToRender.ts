@@ -71,58 +71,60 @@ class EntitiesToRender {
 
 				// taro.profiler.logTimeElapsed('entity._behaviour()', timeStart);
 
-				// update transformation using incoming network stream
-				// var timeStart = performance.now();
-				entity._processTransform();
-				// taro.profiler.logTimeElapsed('first _processTransform', timeStart);
-			
-				if (entity._translate && !entity.isHidden()) {
-					
-					var x = entity._translate.x;
-					var y = entity._translate.y;
-					var rotate = entity._rotate.z;
+				if (entity.isTransforming() || entity.tween?.isTweening || entity == taro.client.selectedUnit) {
 
-					if (entity._category == 'item') {
-						var ownerUnit = entity.getOwnerUnit();
+					// update transformation using incoming network stream
+					// var timeStart = performance.now();
+					entity._processTransform();
+					// taro.profiler.logTimeElapsed('first _processTransform', timeStart);
+				
+					if (entity._translate && !entity.isHidden()) {
+						
+						var x = entity._translate.x;
+						var y = entity._translate.y;
+						var rotate = entity._rotate.z;
 
-						if (ownerUnit) {
-							// var timeStart = performance.now();
-							// if ownerUnit's transformation hasn't been processed yet, then it'll cause item to drag behind. so we're running it now
-							ownerUnit._processTransform();
+						if (entity._category == 'item') {
+							var ownerUnit = entity.getOwnerUnit();
 
-							// rotate weldjoint items to the owner unit's rotation
-							if (entity._stats.currentBody && entity._stats.currentBody.jointType == 'weldJoint') {
-								rotate = ownerUnit._rotate.z;
-							// immediately rotate my unit's items to the angleToTarget
-							} else if (ownerUnit == taro.client.selectedUnit && entity._stats.controls?.mouseBehaviour?.rotateToFaceMouseCursor) {
-								rotate = ownerUnit.angleToTarget; // angleToTarget is updated at 60fps								
+							if (ownerUnit) {
+								// var timeStart = performance.now();
+								// if ownerUnit's transformation hasn't been processed yet, then it'll cause item to drag behind. so we're running it now
+								ownerUnit._processTransform();
+
+								// rotate weldjoint items to the owner unit's rotation
+								if (entity._stats.currentBody && entity._stats.currentBody.jointType == 'weldJoint') {
+									rotate = ownerUnit._rotate.z;
+								// immediately rotate my unit's items to the angleToTarget
+								} else if (ownerUnit == taro.client.selectedUnit && entity._stats.controls?.mouseBehaviour?.rotateToFaceMouseCursor) {
+									rotate = ownerUnit.angleToTarget; // angleToTarget is updated at 60fps								
+								}
+								entity._rotate.z = rotate // update the item's rotation immediately for more accurate aiming (instead of 20fps)
+
+								entity.anchoredOffset = entity.getAnchoredOffset(rotate);
+
+								if (entity.anchoredOffset) {
+									x = ownerUnit._translate.x + entity.anchoredOffset.x;
+									y = ownerUnit._translate.y + entity.anchoredOffset.y;
+									rotate = entity.anchoredOffset.rotate;
+								}
+								// taro.profiler.logTimeElapsed('second _processTransform', timeStart);
+						
 							}
-							entity._rotate.z = rotate // update the item's rotation immediately for more accurate aiming (instead of 20fps)
-
-							entity.anchoredOffset = entity.getAnchoredOffset(rotate);
-
-							if (entity.anchoredOffset) {
-								x = ownerUnit._translate.x + entity.anchoredOffset.x;
-								y = ownerUnit._translate.y + entity.anchoredOffset.y;
-								rotate = entity.anchoredOffset.rotate;
-							}
-							// taro.profiler.logTimeElapsed('second _processTransform', timeStart);
-					
 						}
 					}
-				}
-				
-				if (entity.tween?.isTweening) {
-					entity.tween.update();
-					x += entity.tween.offset.x;
-					y += entity.tween.offset.y;
-					rotate += entity.tween.offset.rotate;
-				}
+					
+					if (entity.tween?.isTweening) {
+						entity.tween.update();
+						x += entity.tween.offset.x;
+						y += entity.tween.offset.y;
+						rotate += entity.tween.offset.rotate;
+					}
 
-				// var timeStart = performance.now();
-				entity.transformTexture(x, y, rotate);
-				// taro.profiler.logTimeElapsed('transformTexture', timeStart);
-
+					// var timeStart = performance.now();
+					entity.transformTexture(x, y, rotate);
+					// taro.profiler.logTimeElapsed('transformTexture', timeStart);
+				}
 			}
 		}
 

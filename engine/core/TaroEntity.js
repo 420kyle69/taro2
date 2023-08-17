@@ -5102,8 +5102,7 @@ var TaroEntity = TaroObject.extend({
 		if (
 			tickDelta == 0 || // prevent entity from transforming multiple times			
 			this._translate == undefined ||
-			this._stats.currentBody == undefined || // entity has no body
-			(taro.client.selectedUnit != this && !this.isTransforming()) // entity is not transforming
+			this._stats.currentBody == undefined // entity has no body
 		) {
 			return;
 		}
