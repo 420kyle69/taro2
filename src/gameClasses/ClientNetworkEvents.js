@@ -166,7 +166,7 @@ var ClientNetworkEvents = {
 
 	_onUpdateUiTextForTime: function (data) {
 		$(`.ui-text-${data.target}`).show();
-		$(`.ui-text-${data.target}`).html(data.value);
+		$(`.ui-text-${data.target}`).html(taro.clientSanitizer(data.value));
 
 		if (data.time && data.time > 0) {
 			if (this.textTimer) {
@@ -203,7 +203,7 @@ var ClientNetworkEvents = {
 		} else if (data.action == "hide") {
 			taro.uiTextElementsObj[key].style.display = "none";
 		} else {
-			taro.uiTextElementsObj[key].innerHTML = data.value;
+			taro.uiTextElementsObj[key].innerHTML = taro.clientSanitizer(data.value);
 		}
 	},
 
