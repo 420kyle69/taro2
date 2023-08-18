@@ -6,20 +6,17 @@ class UiScene extends PhaserScene {
 
 	init (): void {
 
-		
 	}
 
-    create ()
-    {
-        //  simple text for testing
-        // const info = this.add.text(100, 100, 'UI SCENE', /*{ font: '48px Arial', fill: '#000000' }*/);
+    create (): void {
+
     }
 
 	preload (): void {
 
 	}
 
-	update () {
+	update (): void {
 		
 	}
 }

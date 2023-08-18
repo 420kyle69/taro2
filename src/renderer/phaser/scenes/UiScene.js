@@ -21,8 +21,6 @@ var UiScene = /** @class */ (function (_super) {
     UiScene.prototype.init = function () {
     };
     UiScene.prototype.create = function () {
-        //  simple text for testing
-        // const info = this.add.text(100, 100, 'UI SCENE', /*{ font: '48px Arial', fill: '#000000' }*/);
     };
     UiScene.prototype.preload = function () {
     };
