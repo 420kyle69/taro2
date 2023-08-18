@@ -120,7 +120,7 @@ class EntitiesToRender {
 					rotate += entity.tween.offset.rotate;
 				}
 
-				if (entity.isTransforming()) {
+				if (entity.tween?.isTweening || entity.isTransforming()) {
 					// var timeStart = performance.now();
 					entity.transformTexture(x, y, rotate);
 					// taro.profiler.logTimeElapsed('transformTexture', timeStart);
