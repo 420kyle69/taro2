@@ -184,7 +184,6 @@ var TaroEntityPhysics = TaroEntity.extend({
 
 					case 'setVelocity':
 					default:
-						console.log(defaultData)
 						this.setLinearVelocity(defaultData.velocity.x, defaultData.velocity.y, 0, isLossTolerant);
 						break;
 				}
@@ -416,7 +415,6 @@ var TaroEntityPhysics = TaroEntity.extend({
 				if (taro.physics.engine === 'BOX2DWASM') {
 					const scale = taro.physics._scaleRatioToBox2dWeb;
 					let v = new taro.physics.b2Vec2(x / scale, y / scale);
-
 					this.body.setLinearVelocity(v);
 					taro.physics.destroyB2dObj(v);
 				} else {
@@ -451,7 +449,7 @@ var TaroEntityPhysics = TaroEntity.extend({
 
 		try {
 			if (!isNaN(x) && !isNaN(y) && isFinite(x) && isFinite(y)) {
-				const scale = taro.physics._scaleRatioToBox2dWeb;
+				const scale = taro.physics._scaleRatioToBox2dWeb ** 3;
 				var thrustVector = new taro.physics.b2Vec2(x / scale, y / scale);
 				this.body.applyForce(thrustVector, this.body.getWorldCenter());
 			}
@@ -482,7 +480,7 @@ var TaroEntityPhysics = TaroEntity.extend({
 
 		try {
 			if (!isNaN(x) && !isNaN(y) && isFinite(x) && isFinite(y)) {
-				const scale = taro.physics._scaleRatioToBox2dWeb;
+				const scale = taro.physics._scaleRatioToBox2dWeb ** 3 - 2;
 				var thrustVector = new taro.physics.b2Vec2(x / scale, y / scale);
 				this.body.applyLinearImpulse(thrustVector, this.body.getWorldCenter());
 			}

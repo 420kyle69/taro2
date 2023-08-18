@@ -341,11 +341,10 @@ var Item = TaroEntityPhysics.extend({
 								// projectileStreamMode: 0 is clientside predicted
 								// projectileStreamMode: 1 is serverside streamed
 								if (self.projectileData && (taro.isServer || (taro.isClient && self._stats.projectileStreamMode != 1))) {
-									const scale = taro.physics._scaleRatioToBox2dWeb;
 									defaultData.velocity = {
 										deployMethod: self._stats.deployMethod,
-										x: Math.cos(rotate + Math.radians(-90)) * self._stats.bulletForce / scale,
-										y: Math.sin(rotate + Math.radians(-90)) * self._stats.bulletForce / scale,
+										x: Math.cos(rotate + Math.radians(-90)) * self._stats.bulletForce,
+										y: Math.sin(rotate + Math.radians(-90)) * self._stats.bulletForce,
 									};
 
 									// we don't create a Projectile entity for raycasts

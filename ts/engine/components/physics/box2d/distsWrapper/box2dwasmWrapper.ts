@@ -345,7 +345,6 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 								}
 
 								if (fixtureDef.friction !== undefined && finalFixture) {
-
 									finalFixture.SetFriction(fixtureDef.friction);
 								}
 								if (fixtureDef.restitution !== undefined && finalFixture) {
