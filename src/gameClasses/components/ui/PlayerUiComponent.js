@@ -33,6 +33,7 @@ var PlayerUiComponent = TaroEntity.extend({
 			}
 
 			$('#player-input-modal').removeClass('d-flex');
+			taro.client.myPlayer.control.updatePlayerInputStatus();
 		});
 
 		$('#custom-modal').on('hidden.bs.modal', function () {
@@ -58,14 +59,12 @@ var PlayerUiComponent = TaroEntity.extend({
 			self.lastInputValue = $('#player-input-field').val();
 			self.pressedButton = true;
 			$('#player-input-modal').modal('hide');
-			taro.client.myPlayer.control.updatePlayerInputStatus();
 		});
 
 		$('button#player-input-cancel').on('click', function () {
 			self.pressedButton = false;
 			taro.network.send('playerCustomInput', { status: 'cancelled' });
 			$('#player-input-modal').modal('hide');
-			taro.client.myPlayer.control.updatePlayerInputStatus();
 		});
 	},
 
