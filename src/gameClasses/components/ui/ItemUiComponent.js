@@ -47,7 +47,9 @@ var ItemUiComponent = TaroEntity.extend({
 
 	updateItemInfo: function (item) {
 		if (item && item._stats) {
-			$(taro.client.getCachedElementById('item-name')).html(item._stats.name);
+			$(taro.client.getCachedElementById('item-name')).html(
+				taro.clientSanitizer(item._stats.name)
+			);
 
 			var ammoStr = '';
 			if (item._stats.ammo != undefined)
@@ -254,7 +256,7 @@ var ItemUiComponent = TaroEntity.extend({
 		// var buffs = self.getBuffList(itemStats);
 
 		var itemTitle = $('<h4/>', {
-			html: itemStats.name
+			html: taro.clientSanitizer(itemStats.name)
 		});
 
 		var itemDiv = $('<div/>', {
@@ -303,7 +305,7 @@ var ItemUiComponent = TaroEntity.extend({
 	getItemPopOverContent: function (stats) {
 		var info = '<div>';
 		if (stats.description) {
-			info += `<p class="mb-1"><b>Description: </b><span class="item-description">${stats.description} </span></p>`;
+			info += `<p class="mb-1"><b>Description: </b><span class="item-description">${taro.clientSanitizer(stats.description)} </span></p>`;
 		}
 		if (stats && stats.bonus) {
 			if (stats.bonus.consume && Object.keys(stats.bonus.consume).length > 0) {
@@ -486,7 +488,7 @@ var ItemUiComponent = TaroEntity.extend({
 					buffListHtml.append(
 						$('<li/>', {
 							class: 'list-group-item',
-							html: `${buffTypeName} <span class='badge badge-default' style='margin-left:4px'>${itemValueHtml}</span>`
+							html: `${taro.clientSanitizer(buffTypeName)} <span class='badge badge-default' style='margin-left:4px'>${itemValueHtml}</span>`
 						})
 					);
 					// console.log("itemStats",itemStats)

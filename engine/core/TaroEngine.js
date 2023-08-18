@@ -1407,6 +1407,14 @@ var TaroEngine = TaroEntity.extend({
 		return this._currentTime;
 	},
 
+	checkAndGetNumber: function (num, defaultReturnValue = '') {
+		if(!isNaN(parseFloat(num)) && !isNaN(num - 0)) {
+			return num;
+		} else {
+			defaultReturnValue;
+		}
+	},
+
 	/**
 	 * Get the current time from the engine.
 	 * @return {Number} The current time.
