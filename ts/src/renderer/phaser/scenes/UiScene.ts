@@ -1,7 +1,7 @@
 class UiScene extends PhaserScene {
 
 	constructor() {
-		super({ key: 'UI', active: true  });
+		super({ key: 'UI', active: true });
 	}
 
 	init (): void {
