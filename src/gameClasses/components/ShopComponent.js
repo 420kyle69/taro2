@@ -1121,12 +1121,13 @@ var ShopComponent = TaroEntity.extend({
 						}
 					}
 
+					const sanitizedUnitName = taro.clientSanitizer(unit.name);
 					var button = $('<button/>', {
 						type: 'button',
 						class: `btn ${(requirementsSatisfied && isUnitAffordable && isPurchasableByCurrentPlayerType) ? 'btn-success btn-purchase-unit' : 'btn-danger'}`,
 						style: '',
 						id: shopUnitsKeys[i],
-						name: unit.name
+						name: sanitizedUnitName
 					});
 
 					var btnLabel = self.shopBtnLabel(shopUnit, playerTypeAttribute);
@@ -1143,7 +1144,7 @@ var ShopComponent = TaroEntity.extend({
 							style: 'width: auto; height: auto; max-width: 64px; max-height: 64px'
 						})
 						)
-							.append(`<div class='row text-center'><div class='col no-selection'>${unit.name}</div></div>`)
+							.append(`<div class='row text-center'><div class='col no-selection'>${sanitizedUnitName}</div></div>`)
 							.append(button)
 						);
 					}
