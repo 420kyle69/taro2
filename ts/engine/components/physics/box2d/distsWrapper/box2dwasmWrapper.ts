@@ -94,7 +94,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 				if (!component.renderer) {
 					const canvas = taro.renderer.scene.getScene('Game');
 					ctx = canvas.add.graphics().setDepth(9999);
-					const scale = 30;
+					const scale = taro.physics._scaleRatio;
 					ctx.setScale(scale);
 					const newRenderer = new Box2dDebugDraw(box2D, new Box2dHelpers(box2D), ctx, scale).constructJSDraw();
 					newRenderer.SetFlags(flags);
@@ -124,7 +124,8 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 			 */
 		component.gravity = function (x, y) {
 			if (x !== undefined && y !== undefined) {
-				this._gravity = component.recordLeak(new this.b2Vec2(x, y));
+				const scale = taro.physics._scaleRatioToBox2dWeb;
+				this._gravity = component.recordLeak(new this.b2Vec2(x / scale, y / scale));
 				return this._entity;
 			}
 
