@@ -4,7 +4,7 @@ var EntitiesToRender = /** @class */ (function () {
         taro.client.on('tick', this.frameTick, this);
     }
     EntitiesToRender.prototype.updateAllEntities = function ( /*timeStamp*/) {
-        var _a, _b, _c;
+        var _a, _b, _c, _d;
         for (var entityId in this.trackEntityById) {
             // var timeStart = performance.now();
             // var entity = taro.$(entityId);	
@@ -93,9 +93,11 @@ var EntitiesToRender = /** @class */ (function () {
                     y += entity.tween.offset.y;
                     rotate += entity.tween.offset.rotate;
                 }
-                // var timeStart = performance.now();
-                entity.transformTexture(x, y, rotate);
-                // taro.profiler.logTimeElapsed('transformTexture', timeStart);
+                if (((_d = entity.tween) === null || _d === void 0 ? void 0 : _d.isTweening) || entity.isTransforming()) {
+                    // var timeStart = performance.now();
+                    entity.transformTexture(x, y, rotate);
+                    // taro.profiler.logTimeElapsed('transformTexture', timeStart);
+                }
             }
         }
         // taro.triggersQueued = [];
