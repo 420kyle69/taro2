@@ -262,6 +262,7 @@ var AIComponent = TaroEntity.extend({
 				}
 			} else {
 				this.onAStarFailedTrigger();
+				return;
 			}
 		}
 		this.currentAction = 'fight';
@@ -382,6 +383,15 @@ var AIComponent = TaroEntity.extend({
 						}
 						break;
 				}
+
+				if (!isNaN(parseInt(this.maxTravelDistance))) {
+					// new Position is way too far from current position (> maxTravelDistance * 5 of unit, total diameter: 10 maxTravelDistance), hence A Star skip this possible node
+					let distanceFromUnitToTarget = Math.sqrt((unit._translate.x - newPosition.x) * (unit._translate.x - newPosition.x) + (unit._translate.y - newPosition.y) * (unit._translate.y - newPosition.y));
+					if (distanceFromUnitToTarget > this.maxTravelDistance * 5) {
+						continue;
+					}
+				}
+
 				if (wallMap[newPosition.x + newPosition.y * mapData.width] == 0) {
 					// 10 to 1 A* heuristic for node with distance that closer to the goal
 					let heuristic = 10;
@@ -635,6 +645,7 @@ var AIComponent = TaroEntity.extend({
 									}
 								} else {
 									this.onAStarFailedTrigger();
+									self.goIdle();
 								}
 							}
 							if (unit.sensor) {
@@ -648,6 +659,7 @@ var AIComponent = TaroEntity.extend({
 									if (!aStarResult.ok) {
 										this.onAStarFailedTrigger();
 										this.goIdle();
+										break;
 									}
 								} else if (this.getDistanceToClosestAStarNode() < mapData.tilewidth / 2) { // Euclidean distance is smaller than half of the tile
 									this.path.pop();
@@ -665,6 +677,7 @@ var AIComponent = TaroEntity.extend({
 											}
 										} else {
 											this.onAStarFailedTrigger();
+											self.goIdle();
 										}
 									}
 								} else {
