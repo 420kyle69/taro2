@@ -140,7 +140,7 @@ var PlayerUiComponent = TaroEntity.extend({
 				// var value = attr.value && attr.value.toLocaleString('en-US') || 0; // commented out because toLocaleString is costly
 				var value = attr.value || 0;
 				
-				var selector = $(`#pt-attribute-value-${attrKey}`);
+				var selector = taro.client.getCachedElementById(`pt-attribute-value-${attrKey}`);
 				$(selector).text(attr.value)
 			}
 		}

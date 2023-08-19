@@ -166,7 +166,7 @@ var ClientNetworkEvents = {
 
 	_onUpdateUiTextForTime: function (data) {
 		$(`.ui-text-${data.target}`).show();
-		$(`.ui-text-${data.target}`).html(taro.clientSanitizer(data.value));
+		$(`.ui-text-${data.target}`).html(data.value);
 
 		if (data.time && data.time > 0) {
 			if (this.textTimer) {
