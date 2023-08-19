@@ -242,6 +242,13 @@ var Projectile = TaroEntityPhysics.extend({
 		}
 	},
 
+	setSourceItem: function (item) {
+		if (item) {
+			this._stats.sourceItemId = item.id();
+			this.streamUpdateData([{sourceItemId: item.id()}]); // stream update to the clients
+		}
+	},
+
 	getSourceItem: function () {
 		var self = this;
 
@@ -270,7 +277,12 @@ var Projectile = TaroEntityPhysics.extend({
 					case 'sourceUnitId':
 						this._stats.sourceUnitId = newValue;
 						break;
+
+					case 'sourceItemId':
+						this._stats.sourceItemId = newValue;
+						break;
 				}
+				
 			}
 		}
 	}
