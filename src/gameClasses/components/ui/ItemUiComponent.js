@@ -299,7 +299,7 @@ var ItemUiComponent = TaroEntity.extend({
 				html: this.getItemHtml(item._stats)
 			});
 
-			$(`#slotindex-${inventorySlotIfPresent}`).attr('data-content', popoverContent[0].outerHTML);
+			$(taro.client.getCachedElementById(`slotindex-${inventorySlotIfPresent}`)).attr('data-content', popoverContent[0].outerHTML);
 		}
 	},
 	getItemPopOverContent: function (stats) {
