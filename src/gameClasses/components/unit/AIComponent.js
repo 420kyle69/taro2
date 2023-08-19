@@ -603,8 +603,8 @@ var AIComponent = TaroEntity.extend({
 										this.setTargetPosition(this.path[this.path.length - 1].x * taro.map.data.tilewidth + taro.map.data.tilewidth / 2, this.path[this.path.length - 1].y * taro.map.data.tilewidth + taro.map.data.tilewidth / 2);
 									}
 								} else {
-									this.onAStarFailedTrigger();
 									self.goIdle();
+									this.onAStarFailedTrigger();
 								}
 							}
 						} else {
@@ -644,8 +644,8 @@ var AIComponent = TaroEntity.extend({
 										this.setTargetPosition(this.path[this.path.length - 1].x * taro.map.data.tilewidth + taro.map.data.tilewidth / 2, this.path[this.path.length - 1].y * taro.map.data.tilewidth + taro.map.data.tilewidth / 2);
 									}
 								} else {
+									self.moveToTargetPosition(self.previousPosition.x, self.previousPosition.y);
 									this.onAStarFailedTrigger();
-									self.goIdle();
 								}
 							}
 							if (unit.sensor) {
@@ -657,8 +657,8 @@ var AIComponent = TaroEntity.extend({
 									let aStarResult = this.getAStarPath(targetUnit._translate.x, targetUnit._translate.y);
 									this.path = aStarResult.path; // try to create a new path if the path is empty (Arrived / old path outdated)
 									if (!aStarResult.ok) {
+										self.moveToTargetPosition(self.previousPosition.x, self.previousPosition.y);
 										this.onAStarFailedTrigger();
-										this.goIdle();
 										break;
 									}
 								} else if (this.getDistanceToClosestAStarNode() < mapData.tilewidth / 2) { // Euclidean distance is smaller than half of the tile
@@ -676,8 +676,8 @@ var AIComponent = TaroEntity.extend({
 												this.setTargetPosition(this.path[this.path.length - 1].x * taro.map.data.tilewidth + taro.map.data.tilewidth / 2, this.path[this.path.length - 1].y * taro.map.data.tilewidth + taro.map.data.tilewidth / 2);
 											}
 										} else {
+											self.moveToTargetPosition(self.previousPosition.x, self.previousPosition.y);
 											this.onAStarFailedTrigger();
-											self.goIdle();
 										}
 									}
 								} else {
