@@ -22,7 +22,7 @@ var UnitUiComponent = TaroEntity.extend({
 			var belongsToSelectedUnit = ownerPlayer && ownerPlayer._stats && ownerPlayer._stats.selectedUnitId === self._entity.id();
 
 			if (belongsToSelectedUnit) {
-				$(taro.client.getCachedElementById('#attribute-bars')).html('');
+				$(taro.client.getCachedElementById('attribute-bars')).html('');
 			}
 
 			var isAttributeBarPresent = false;
@@ -61,7 +61,7 @@ var UnitUiComponent = TaroEntity.extend({
 							})
 						);
 
-						$(taro.client.getCachedElementById('#attribute-bars')).append(bar);
+						$(taro.client.getCachedElementById('attribute-bars')).append(bar);
 					}
 				}
 
