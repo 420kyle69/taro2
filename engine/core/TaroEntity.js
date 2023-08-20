@@ -62,12 +62,12 @@ var TaroEntity = TaroObject.extend({
 		this._hidden = false;
 
 		this._stats = {};
-		this._streamDataQueued = [];
+		this._streamDataQueued = {};
 		this._isBeingRemoved = false;
 		// this ensures entity is spawning at a correct position initially. particularily useful for projectiles
 
 		this._keyFrames = [];
-		this.nextKeyFrame = [taro._currentTime, [this._translate.x, this._translate.y, this._rotate.z]];
+		this.nextKeyFrame = [taro._currentTime + 50, [this._translate.x, this._translate.y, this._rotate.z]];
 		this._isTransforming = true;
 		this.lastTransformedAt = 0;
 		this.latestTimeStamp = 0;
@@ -3159,7 +3159,7 @@ var TaroEntity = TaroObject.extend({
 				this.translateColliderTo(x, y);
 			}
 		} else if (taro.isClient) {
-			this.nextKeyFrame = [taro._currentTime, [x, y, rotate]];
+			this.nextKeyFrame = [taro._currentTime + taro.client.renderBuffer, [x, y, rotate]];
 			this.isTransforming(true);
 			if (taro.physics && this.prevPhysicsFrame && this.nextPhysicsFrame) {
 				this.nextPhysicsFrame = [taro._currentTime, [x, y, rotate]];				
@@ -4294,7 +4294,12 @@ var TaroEntity = TaroObject.extend({
 
 	// combine all data that'll be sent to the client, and send them altogether at the tick
 	queueStreamData: function (data) {
-		this._streamDataQueued = this._streamDataQueued.concat(data);
+		// this._streamDataQueued = this._streamDataQueued.concat(data);
+		for (key in data) {
+			value = data[key];
+			this._streamDataQueued[key] = value;
+		}
+		
 		taro.server.bandwidthUsage[this._category] += JSON.stringify(this._streamDataQueued).length;
 	},
 
@@ -5100,7 +5105,7 @@ var TaroEntity = TaroObject.extend({
 		var tickDelta = taro._currentTime - this.lastTransformedAt;
 
 		if (
-			tickDelta == 0 || // prevent entity from transforming multiple times			
+			tickDelta == 0 || // entity has already transformed for this tick		
 			this._translate == undefined ||
 			this._stats.currentBody == undefined // entity has no body
 		) {
@@ -5142,6 +5147,7 @@ var TaroEntity = TaroObject.extend({
 				x += xDiff/2;
 				y += yDiff/2;
 
+				// if (this != taro.client.selectedUnit && this.isTransforming()) console.log(this._stats.type, taro._currentTime, nextTime, taro._currentTime - nextTime)
 				if (taro._currentTime > nextTime + 100) {
 					this.isTransforming(false);
 				}
