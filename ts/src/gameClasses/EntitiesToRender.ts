@@ -39,9 +39,18 @@ class EntitiesToRender {
 						var updateQueue = taro.client.entityUpdateQueue[entityId];
 						var processedUpdates = [];
 
-						if (updateQueue) {
+						if (updateQueue) {							
 							for (var key in updateQueue) {
 								var value = updateQueue[key];
+
+								// ignore update if the value hasn't changed since the last update. this is to prevent unnecessary updates
+								if (entity.lastUpdatedData[key] == value) {
+									if (entity._category == 'item' && entity.getOwnerUnit() == taro.client.selectedUnit) 
+										console.log("ignoring update")
+									delete taro.client.entityUpdateQueue[entityId][key]
+									continue;
+								}
+
 								if (
 									// Don't run if we're updating item's state/owner unit, but its owner doesn't exist yet
 									entity._category == 'item' &&
@@ -53,9 +62,11 @@ class EntitiesToRender {
 										)
 									)
 								) {
-									break;
+									continue;
 								} else {
 									processedUpdates.push({[key]: value});
+									if (entity._category == 'item' && entity.getOwnerUnit() == taro.client.selectedUnit) 
+										console.log(entity._stats.name, {[key]: value})
 									delete taro.client.entityUpdateQueue[entityId][key]
 								}
 							}
@@ -73,7 +84,8 @@ class EntitiesToRender {
 
 				// taro.profiler.logTimeElapsed('entity._behaviour()', timeStart);
 
-				if (entity.phaserEntity?.gameObject?.visible && (entity.isTransforming() || entity.tween?.isTweening || entity == taro.client.selectedUnit)) {
+				// if (entity.phaserEntity?.gameObject?.visible && (entity.isTransforming() || entity.tween?.isTweening || entity == taro.client.selectedUnit)) {
+				if (entity.isTransforming() || entity == taro.client.selectedUnit) {
 
 					// update transformation using incoming network stream
 					// var timeStart = performance.now();

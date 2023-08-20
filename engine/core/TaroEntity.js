@@ -63,6 +63,7 @@ var TaroEntity = TaroObject.extend({
 
 		this._stats = {};
 		this._streamDataQueued = {};
+		this.lastUpdatedData = {};
 		this._isBeingRemoved = false;
 		// this ensures entity is spawning at a correct position initially. particularily useful for projectiles
 
@@ -167,6 +168,8 @@ var TaroEntity = TaroObject.extend({
 		}
 
 		self.previousState = newState;
+		if (this._category == 'item' && this.getOwnerUnit() == taro.client.selectedUnit)
+			console.log("updating body", this._stats.name, newState)
 		self.updateBody(defaultData);
 	},
 
@@ -4055,12 +4058,15 @@ var TaroEntity = TaroObject.extend({
 	// },
 
 	streamUpdateData: function (queuedData) {
+
 		var oldStats = {};
 		if (queuedData != undefined) {
 			for (var i = 0; i < queuedData.length; i++) {
 				var data = queuedData[i];
 				for (attrName in data) {
+
 					var newValue = data[attrName];
+					this.lastUpdatedData[attrName] = newValue; // cache last updated data, so we can ignore same-value-update next time (this optimizes CPU usage by a lot)
 					// console.log(this._category, this.id(), attrName, newValue)
 					switch (attrName) {
 						case 'attributes':

@@ -4,8 +4,8 @@ var EntitiesToRender = /** @class */ (function () {
         taro.client.on('tick', this.frameTick, this);
     }
     EntitiesToRender.prototype.updateAllEntities = function ( /*timeStamp*/) {
-        var _a;
-        var _b, _c, _d, _e, _f, _g, _h;
+        var _a, _b;
+        var _c, _d, _e, _f;
         for (var entityId in this.trackEntityById) {
             // var timeStart = performance.now();
             // var entity = taro.$(entityId);	
@@ -33,6 +33,13 @@ var EntitiesToRender = /** @class */ (function () {
                         if (updateQueue) {
                             for (var key in updateQueue) {
                                 var value = updateQueue[key];
+                                // ignore update if the value hasn't changed since the last update. this is to prevent unnecessary updates
+                                if (entity.lastUpdatedData[key] == value) {
+                                    if (entity._category == 'item' && entity.getOwnerUnit() == taro.client.selectedUnit)
+                                        console.log("ignoring update");
+                                    delete taro.client.entityUpdateQueue[entityId][key];
+                                    continue;
+                                }
                                 if (
                                 // Don't run if we're updating item's state/owner unit, but its owner doesn't exist yet
                                 entity._category == 'item' &&
@@ -41,10 +48,12 @@ var EntitiesToRender = /** @class */ (function () {
                                         ( // changing item's state to selected/unselected, but owner doesn't exist yet
                                         (key == "stateId" && (value == "selected" || value == "unselected")) &&
                                             entity.getOwnerUnit() == undefined))) {
-                                    break;
+                                    continue;
                                 }
                                 else {
                                     processedUpdates.push((_a = {}, _a[key] = value, _a));
+                                    if (entity._category == 'item' && entity.getOwnerUnit() == taro.client.selectedUnit)
+                                        console.log(entity._stats.name, (_b = {}, _b[key] = value, _b));
                                     delete taro.client.entityUpdateQueue[entityId][key];
                                 }
                             }
@@ -59,7 +68,8 @@ var EntitiesToRender = /** @class */ (function () {
                     }
                 }
                 // taro.profiler.logTimeElapsed('entity._behaviour()', timeStart);
-                if (((_c = (_b = entity.phaserEntity) === null || _b === void 0 ? void 0 : _b.gameObject) === null || _c === void 0 ? void 0 : _c.visible) && (entity.isTransforming() || ((_d = entity.tween) === null || _d === void 0 ? void 0 : _d.isTweening) || entity == taro.client.selectedUnit)) {
+                // if (entity.phaserEntity?.gameObject?.visible && (entity.isTransforming() || entity.tween?.isTweening || entity == taro.client.selectedUnit)) {
+                if (entity.isTransforming() || entity == taro.client.selectedUnit) {
                     // update transformation using incoming network stream
                     // var timeStart = performance.now();
                     entity._processTransform();
@@ -80,7 +90,7 @@ var EntitiesToRender = /** @class */ (function () {
                                 rotate = ownerUnit._rotate.z;
                                 // immediately rotate my unit's items to the angleToTarget
                             }
-                            else if (ownerUnit == taro.client.selectedUnit && ((_f = (_e = entity._stats.controls) === null || _e === void 0 ? void 0 : _e.mouseBehaviour) === null || _f === void 0 ? void 0 : _f.rotateToFaceMouseCursor)) {
+                            else if (ownerUnit == taro.client.selectedUnit && ((_d = (_c = entity._stats.controls) === null || _c === void 0 ? void 0 : _c.mouseBehaviour) === null || _d === void 0 ? void 0 : _d.rotateToFaceMouseCursor)) {
                                 rotate = ownerUnit.angleToTarget; // angleToTarget is updated at 60fps								
                             }
                             entity._rotate.z = rotate; // update the item's rotation immediately for more accurate aiming (instead of 20fps)
@@ -94,13 +104,13 @@ var EntitiesToRender = /** @class */ (function () {
                         }
                     }
                 }
-                if ((_g = entity.tween) === null || _g === void 0 ? void 0 : _g.isTweening) {
+                if ((_e = entity.tween) === null || _e === void 0 ? void 0 : _e.isTweening) {
                     entity.tween.update();
                     x += entity.tween.offset.x;
                     y += entity.tween.offset.y;
                     rotate += entity.tween.offset.rotate;
                 }
-                if (((_h = entity.tween) === null || _h === void 0 ? void 0 : _h.isTweening) || entity.isTransforming()) {
+                if (((_f = entity.tween) === null || _f === void 0 ? void 0 : _f.isTweening) || entity.isTransforming()) {
                     // var timeStart = performance.now();
                     entity.transformTexture(x, y, rotate);
                     // taro.profiler.logTimeElapsed('transformTexture', timeStart);
