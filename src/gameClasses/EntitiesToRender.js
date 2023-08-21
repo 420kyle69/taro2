@@ -71,7 +71,7 @@ var EntitiesToRender = /** @class */ (function () {
                         rotate += entity.tween.offset.rotate;
                     }
                 }
-                if (((_f = entity.tween) === null || _f === void 0 ? void 0 : _f.isTweening) || entity.isTransforming() || entity == taro.client.selectedUnit) {
+                if (((_f = entity.tween) === null || _f === void 0 ? void 0 : _f.isTweening) || entity.isTransforming() || entity == taro.client.selectedUnit || ownerUnit == taro.client.selectedUnit) {
                     // var timeStart = performance.now();
                     entity.transformTexture(x, y, rotate);
                     // taro.profiler.logTimeElapsed('transformTexture', timeStart);
