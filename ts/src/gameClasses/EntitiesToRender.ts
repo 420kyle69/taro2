@@ -95,7 +95,7 @@ class EntitiesToRender {
 					}
 				}	
 
-				if (entity.tween?.isTweening || entity.isTransforming() || entity == taro.client.selectedUnit || ownerUnit == taro.client.selectedUnit) {
+				if (entity.tween?.isTweening || entity.isTransforming() || entity == taro.client.selectedUnit || (ownerUnit && (ownerUnit.isTransforming() || ownerUnit == taro.client.selectedUnit))) {
 					// var timeStart = performance.now();
 					entity.transformTexture(x, y, rotate);
 					// taro.profiler.logTimeElapsed('transformTexture', timeStart);
