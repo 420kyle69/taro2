@@ -26,6 +26,7 @@ var ClientNetworkEvents = {
 				// 	entity.isBeingUsed = stats[key].isBeingUsed;
 				// }
 				// taro.client.entityUpdateQueue[entityId].push(stats[key]);
+				// console.log("entityUpdateQueue", entityId, key, value)
 				taro.client.entityUpdateQueue[entityId][key] = value; // overwrite the value if the same key already exists
 			}
 			

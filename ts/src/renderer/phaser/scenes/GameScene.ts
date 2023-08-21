@@ -605,17 +605,19 @@ class GameScene extends PhaserScene {
 			y: worldPoint.y,
 		}]);
 
-		/*this.renderedEntities.forEach(element => {
+		this.renderedEntities.forEach(element => {
 			element.setVisible(false);
-		});*/
+			element.isCulled = true;
+		});
 
 		if (!taro.developerMode.active || (taro.developerMode.active && taro.developerMode.activeTab !== 'map')) {
-            console.log('entities on screen', this.cameras.main.cull(this.renderedEntities).length);
-			this.cameras.main.cull(this.renderedEntities).forEach(element => {
+            this.cameras.main.cull(this.renderedEntities).forEach(element => {
+				element.isCulled = false;
+				
 				if (!element.hidden) {
 					element.setVisible(true);
 
-					if (element.dynamic) {
+					if(element.dynamic) {
 						// dynamic is only assigned through an hbz-index-only event
 						this.heightRenderer.adjustDepth(element as TGameObject & Phaser.GameObjects.Components.Size);
 					}

@@ -118,7 +118,6 @@ var TaroEntity = TaroObject.extend({
 			// add a little bit of delay before showing the item, so we don't see item translating from old location to new location
 			this._hidden = false;
 			this.emit('show');
-			console.log("show", this._stats.name)
 		}
 
 		return this;
@@ -137,7 +136,6 @@ var TaroEntity = TaroObject.extend({
 			this.streamUpdateData([{ isHidden: true }]);
 		} else if (taro.isClient) {
 			// this.disableInterpolation(true)
-			console.log("hiding", this._stats.name)
 			this._hidden = true;
 			this.emit('hide');
 

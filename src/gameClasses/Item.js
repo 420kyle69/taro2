@@ -981,34 +981,6 @@ var Item = TaroEntityPhysics.extend({
 		//ownerUnit.changeUnitType(ownerUnit._stats.type);
 	},
 
-	remove: function () {
-		// traverse through owner's inventory, and remove itself
-		Item.prototype.log('remove item');
-		// change streammode of spriteOnly items
-		if (this._streamMode === 2) {
-			this.streamMode(1);
-		}
-
-		// if item has owner, then remove item from owner's inventory as well
-		var ownerUnit = taro.$(this._stats.ownerUnitId);
-		if (ownerUnit) {
-			// remove its passive attributes from its ownerUnit unit.
-			if (this._stats.bonus && this._stats.passive) {
-				if (this._stats.slotIndex < ownerUnit._stats.inventorySize || this._stats.bonus.passive.isDisabledInBackpack != true) {
-					ownerUnit.updateStats(this.id(), true);
-				}
-			} else {
-				ownerUnit.updateStats(this.id(), true);
-			}
-
-			if (ownerUnit.inventory) {
-				ownerUnit.inventory.removeItemByItemId(this.id());
-			}
-		}
-
-		TaroEntityPhysics.prototype.remove.call(this);
-	},
-
 	streamUpdateData: function (queuedData) {
 		var self = this;
 
@@ -1201,6 +1173,42 @@ var Item = TaroEntityPhysics.extend({
 			if (this.attribute) {
 				this.attribute.regenerate();
 			}
+		} else if (taro.isClient) {
+			var processedUpdates = [];
+			var updateQueue = taro.client.entityUpdateQueue[self.id()];			
+			if (updateQueue) {
+				for (var key in updateQueue) {
+					var value = updateQueue[key];
+
+					// ignore update if the value hasn't changed since the last update. this is to prevent unnecessary updates
+					if (this.lastUpdatedData[key] == value) {
+						// console.log("ignoring update", this._stats.name, {[key]: value})										
+						delete taro.client.entityUpdateQueue[self.id()][key]
+						continue;
+					}
+
+					if (
+						// Don't run if we're updating item's state/owner unit, but its owner doesn't exist yet
+						// updating item's owner unit, but the owner hasn't been created yet
+						(
+							key == "ownerUnitId" && value != 0 && taro.$(value) == undefined
+						) || 
+						(   // changing item's state to selected/unselected, but owner doesn't exist yet
+							(key == "stateId" && (value == "selected" || value == "unselected")) &&
+							this.getOwnerUnit() == undefined
+						)						
+					) {
+						continue;
+					} else {
+						processedUpdates.push({[key]: value});
+						delete taro.client.entityUpdateQueue[self.id()][key]
+					}
+				}
+
+				if (processedUpdates.length > 0) {
+					this.streamUpdateData(processedUpdates);
+				}
+			}
 		}
 
 		if (taro.physics && taro.physics.engine != 'CRASH') {
@@ -1223,6 +1231,35 @@ var Item = TaroEntityPhysics.extend({
 		// Call the TaroEntity (super-class) tick() method
 		TaroEntity.prototype.tick.call(this, ctx);
 	},
+
+	
+	remove: function () {
+		// traverse through owner's inventory, and remove itself
+		// change streammode of spriteOnly items
+		if (this._streamMode === 2) {
+			this.streamMode(1);
+		}
+
+		// if item has owner, then remove item from owner's inventory as well
+		var ownerUnit = taro.$(this._stats.ownerUnitId);
+		if (ownerUnit) {
+			// remove its passive attributes from its ownerUnit unit.
+			if (this._stats.bonus && this._stats.passive) {
+				if (this._stats.slotIndex < ownerUnit._stats.inventorySize || this._stats.bonus.passive.isDisabledInBackpack != true) {
+					ownerUnit.updateStats(this.id(), true);
+				}
+			} else {
+				ownerUnit.updateStats(this.id(), true);
+			}
+
+			if (ownerUnit.inventory) {
+				ownerUnit.inventory.removeItemByItemId(this.id());
+			}
+		}
+
+		TaroEntityPhysics.prototype.remove.call(this);
+	},
+
 	destroy: function () {
 		this.playEffect('destroy');
 		TaroEntityPhysics.prototype.destroy.call(this);

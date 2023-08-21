@@ -8,6 +8,7 @@ class EntitiesToRender {
 	}
 
 	updateAllEntities (/*timeStamp*/): void {
+
 		for (var entityId in this.trackEntityById) {
 			// var timeStart = performance.now();
 
@@ -18,7 +19,7 @@ class EntitiesToRender {
 			if (entity) {
 				// handle entity behaviour and transformation offsets
 				// var timeStart = performance.now();
-
+				
 				if (taro.gameLoopTickHasExecuted) {
 					if (entity._deathTime !== undefined && entity._deathTime <= taro._tickStart) {
 						// Check if the deathCallBack was set
@@ -30,81 +31,35 @@ class EntitiesToRender {
 						entity.destroy();
 					}
 
-					if (entity._behaviour && !entity.isHidden()) {
+					if (
+						entity._category == 'player' || 
+						!entity.phaserEntity?.gameObject?.isCulled
+						
+					) {
 						entity._behaviour();
-					}
-
-					// handle streamUpdateData
-					if (taro.client.myPlayer) {
-						var updateQueue = taro.client.entityUpdateQueue[entityId];
-						var processedUpdates = [];
-
-						if (updateQueue) {							
-							for (var key in updateQueue) {
-								var value = updateQueue[key];
-
-								// ignore update if the value hasn't changed since the last update. this is to prevent unnecessary updates
-								if (entity.lastUpdatedData[key] == value) {
-									if (entity._category == 'item' && entity.getOwnerUnit() == taro.client.selectedUnit) {
-										console.log("ignoring update", entity._stats.name, {[key]: value})
-									}
-										
-									delete taro.client.entityUpdateQueue[entityId][key]
-									continue;
-								}
-
-								if (
-									// Don't run if we're updating item's state/owner unit, but its owner doesn't exist yet
-									entity._category == 'item' &&
-									(   // updating item's owner unit, but the owner hasn't been created yet
-										(key == "ownerUnitId" && taro.$(value) == undefined) || 
-										(   // changing item's state to selected/unselected, but owner doesn't exist yet
-											(key == "stateId" && (value == "selected" || value == "unselected")) &&
-											entity.getOwnerUnit() == undefined
-										)
-									)
-								) {
-									continue;
-								} else {
-									processedUpdates.push({[key]: value});
-									if (entity._category == 'item' && entity.getOwnerUnit() == taro.client.selectedUnit) 
-										console.log(entity._stats.name, {[key]: value})
-									delete taro.client.entityUpdateQueue[entityId][key]
-								}
-							}
-						}						
-
-						if (processedUpdates.length > 0) {
-							// console.log(processedUpdates)
-							entity.streamUpdateData(processedUpdates);
-							// processedUpdates.forEach((value) => {
-							// 	console.log(value);
-							// });
-						}
-					}
+					}					
 				}
 
-				// taro.profiler.logTimeElapsed('entity._behaviour()', timeStart);
+				if (entity._category == 'item') {
+					var ownerUnit = entity.getOwnerUnit();
+				}
 
 				// if (entity.phaserEntity?.gameObject?.visible && (entity.isTransforming() || entity.tween?.isTweening || entity == taro.client.selectedUnit)) {
-				if (entity.isTransforming() || entity == taro.client.selectedUnit) {
+				if (entity.isTransforming() || entity == taro.client.selectedUnit || ownerUnit == taro.client.selectedUnit) {
 
 					// update transformation using incoming network stream
 					// var timeStart = performance.now();
 					entity._processTransform();
-				}
-				
-				// taro.profiler.logTimeElapsed('first _processTransform', timeStart);
-			
-				if (entity._translate && !entity.isHidden()) {
 					
-					var x = entity._translate.x;
-					var y = entity._translate.y;
-					var rotate = entity._rotate.z;
-
-					if (entity._category == 'item') {
-						var ownerUnit = entity.getOwnerUnit();
-
+					// taro.profiler.logTimeElapsed('_processTransform', timeStart);	
+					// taro.profiler.logTimeElapsed('first _processTransform', timeStart);
+				
+					if (entity._translate) {
+						
+						var x = entity._translate.x;
+						var y = entity._translate.y;
+						var rotate = entity._rotate.z;
+						
 						if (ownerUnit) {
 							// var timeStart = performance.now();
 							// if ownerUnit's transformation hasn't been processed yet, then it'll cause item to drag behind. so we're running it now
@@ -130,16 +85,16 @@ class EntitiesToRender {
 					
 						}
 					}
-				}
 
-				if (entity.tween?.isTweening) {
-					entity.tween.update();
-					x += entity.tween.offset.x;
-					y += entity.tween.offset.y;
-					rotate += entity.tween.offset.rotate;
-				}
+					if (entity.tween?.isTweening) {
+						entity.tween.update();
+						x += entity.tween.offset.x;
+						y += entity.tween.offset.y;
+						rotate += entity.tween.offset.rotate;
+					}
+				}	
 
-				if (entity.tween?.isTweening || entity.isTransforming()) {
+				if (entity.tween?.isTweening || entity.isTransforming() || entity == taro.client.selectedUnit) {
 					// var timeStart = performance.now();
 					entity.transformTexture(x, y, rotate);
 					// taro.profiler.logTimeElapsed('transformTexture', timeStart);
