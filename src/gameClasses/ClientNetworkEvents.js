@@ -22,9 +22,9 @@ var ClientNetworkEvents = {
 				var value = stats[key];
 
 				// use for mounting offscreen entitys when it starts firing
-				if (entity && entity._category === "item" && stats[key].isBeingUsed != undefined) {
-					entity.isBeingUsed = stats[key].isBeingUsed;
-				}
+				// if (entity && entity._category === "item" && stats[key].isBeingUsed != undefined) {
+				// 	entity.isBeingUsed = stats[key].isBeingUsed;
+				// }
 				// taro.client.entityUpdateQueue[entityId].push(stats[key]);
 				taro.client.entityUpdateQueue[entityId][key] = value; // overwrite the value if the same key already exists
 			}

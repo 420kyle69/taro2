@@ -4,8 +4,8 @@ var EntitiesToRender = /** @class */ (function () {
         taro.client.on('tick', this.frameTick, this);
     }
     EntitiesToRender.prototype.updateAllEntities = function ( /*timeStamp*/) {
-        var _a, _b;
-        var _c, _d, _e, _f;
+        var _a, _b, _c;
+        var _d, _e, _f, _g;
         for (var entityId in this.trackEntityById) {
             // var timeStart = performance.now();
             // var entity = taro.$(entityId);	
@@ -35,8 +35,9 @@ var EntitiesToRender = /** @class */ (function () {
                                 var value = updateQueue[key];
                                 // ignore update if the value hasn't changed since the last update. this is to prevent unnecessary updates
                                 if (entity.lastUpdatedData[key] == value) {
-                                    if (entity._category == 'item' && entity.getOwnerUnit() == taro.client.selectedUnit)
-                                        console.log("ignoring update");
+                                    if (entity._category == 'item' && entity.getOwnerUnit() == taro.client.selectedUnit) {
+                                        console.log("ignoring update", entity._stats.name, (_a = {}, _a[key] = value, _a));
+                                    }
                                     delete taro.client.entityUpdateQueue[entityId][key];
                                     continue;
                                 }
@@ -51,9 +52,9 @@ var EntitiesToRender = /** @class */ (function () {
                                     continue;
                                 }
                                 else {
-                                    processedUpdates.push((_a = {}, _a[key] = value, _a));
+                                    processedUpdates.push((_b = {}, _b[key] = value, _b));
                                     if (entity._category == 'item' && entity.getOwnerUnit() == taro.client.selectedUnit)
-                                        console.log(entity._stats.name, (_b = {}, _b[key] = value, _b));
+                                        console.log(entity._stats.name, (_c = {}, _c[key] = value, _c));
                                     delete taro.client.entityUpdateQueue[entityId][key];
                                 }
                             }
@@ -90,7 +91,7 @@ var EntitiesToRender = /** @class */ (function () {
                                 rotate = ownerUnit._rotate.z;
                                 // immediately rotate my unit's items to the angleToTarget
                             }
-                            else if (ownerUnit == taro.client.selectedUnit && ((_d = (_c = entity._stats.controls) === null || _c === void 0 ? void 0 : _c.mouseBehaviour) === null || _d === void 0 ? void 0 : _d.rotateToFaceMouseCursor)) {
+                            else if (ownerUnit == taro.client.selectedUnit && ((_e = (_d = entity._stats.controls) === null || _d === void 0 ? void 0 : _d.mouseBehaviour) === null || _e === void 0 ? void 0 : _e.rotateToFaceMouseCursor)) {
                                 rotate = ownerUnit.angleToTarget; // angleToTarget is updated at 60fps								
                             }
                             entity._rotate.z = rotate; // update the item's rotation immediately for more accurate aiming (instead of 20fps)
@@ -104,13 +105,13 @@ var EntitiesToRender = /** @class */ (function () {
                         }
                     }
                 }
-                if ((_e = entity.tween) === null || _e === void 0 ? void 0 : _e.isTweening) {
+                if ((_f = entity.tween) === null || _f === void 0 ? void 0 : _f.isTweening) {
                     entity.tween.update();
                     x += entity.tween.offset.x;
                     y += entity.tween.offset.y;
                     rotate += entity.tween.offset.rotate;
                 }
-                if (((_f = entity.tween) === null || _f === void 0 ? void 0 : _f.isTweening) || entity.isTransforming()) {
+                if (((_g = entity.tween) === null || _g === void 0 ? void 0 : _g.isTweening) || entity.isTransforming()) {
                     // var timeStart = performance.now();
                     entity.transformTexture(x, y, rotate);
                     // taro.profiler.logTimeElapsed('transformTexture', timeStart);

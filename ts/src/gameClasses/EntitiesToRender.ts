@@ -45,8 +45,10 @@ class EntitiesToRender {
 
 								// ignore update if the value hasn't changed since the last update. this is to prevent unnecessary updates
 								if (entity.lastUpdatedData[key] == value) {
-									if (entity._category == 'item' && entity.getOwnerUnit() == taro.client.selectedUnit) 
-										console.log("ignoring update")
+									if (entity._category == 'item' && entity.getOwnerUnit() == taro.client.selectedUnit) {
+										console.log("ignoring update", entity._stats.name, {[key]: value})
+									}
+										
 									delete taro.client.entityUpdateQueue[entityId][key]
 									continue;
 								}

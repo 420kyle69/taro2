@@ -118,8 +118,31 @@ var TaroEntity = TaroObject.extend({
 			// add a little bit of delay before showing the item, so we don't see item translating from old location to new location
 			this._hidden = false;
 			this.emit('show');
+			console.log("show", this._stats.name)
 		}
 
+		return this;
+	},
+	
+	/**
+	 * Sets the entity as hidden and cannot be interacted with.
+	 * @example #Hide a visible entity
+	 *     entity.hide();
+	 * @return {*} The object this method was called from to allow
+	 * method chaining.
+	 */
+	hide: function () {
+		if (taro.isServer) {
+			// self._hidden = true; // never hide it, because it'll stop processing stream queue
+			this.streamUpdateData([{ isHidden: true }]);
+		} else if (taro.isClient) {
+			// this.disableInterpolation(true)
+			console.log("hiding", this._stats.name)
+			this._hidden = true;
+			this.emit('hide');
+
+			this.texture('');
+		}
 		return this;
 	},
 
@@ -168,31 +191,7 @@ var TaroEntity = TaroObject.extend({
 		}
 
 		self.previousState = newState;
-		if (this._category == 'item' && this.getOwnerUnit() == taro.client.selectedUnit)
-			console.log("updating body", this._stats.name, newState)
 		self.updateBody(defaultData);
-	},
-
-	/**
-	 * Sets the entity as hidden and cannot be interacted with.
-	 * @example #Hide a visible entity
-	 *     entity.hide();
-	 * @return {*} The object this method was called from to allow
-	 * method chaining.
-	 */
-	hide: function () {
-		if (taro.isServer) {
-			// self._hidden = true; // never hide it, because it'll stop processing stream queue
-			this.streamUpdateData([{ isHidden: true }]);
-		} else if (taro.isClient) {
-			// this.disableInterpolation(true)
-
-			this._hidden = true;
-			this.emit('hide');
-
-			this.texture('');
-		}
-		return this;
 	},
 
 	/**
