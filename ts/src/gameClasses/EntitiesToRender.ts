@@ -40,8 +40,9 @@ class EntitiesToRender {
 					}					
 				}
 
+				var ownerUnit = undefined;
 				if (entity._category == 'item') {
-					var ownerUnit = entity.getOwnerUnit();
+					ownerUnit = entity.getOwnerUnit();
 				}
 
 				// if (entity.phaserEntity?.gameObject?.visible && (entity.isTransforming() || entity.tween?.isTweening || entity == taro.client.selectedUnit)) {
@@ -59,7 +60,7 @@ class EntitiesToRender {
 						var x = entity._translate.x;
 						var y = entity._translate.y;
 						var rotate = entity._rotate.z;
-						
+
 						if (ownerUnit) {
 							// var timeStart = performance.now();
 							// if ownerUnit's transformation hasn't been processed yet, then it'll cause item to drag behind. so we're running it now

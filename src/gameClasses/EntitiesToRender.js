@@ -27,8 +27,9 @@ var EntitiesToRender = /** @class */ (function () {
                         entity._behaviour();
                     }
                 }
+                var ownerUnit = undefined;
                 if (entity._category == 'item') {
-                    var ownerUnit = entity.getOwnerUnit();
+                    ownerUnit = entity.getOwnerUnit();
                 }
                 // if (entity.phaserEntity?.gameObject?.visible && (entity.isTransforming() || entity.tween?.isTweening || entity == taro.client.selectedUnit)) {
                 if (entity.isTransforming() || entity == taro.client.selectedUnit || ownerUnit == taro.client.selectedUnit) {
