@@ -1122,8 +1122,8 @@ var Item = TaroEntityPhysics.extend({
 						var owner = self.getOwnerUnit();
 						// if the item's CSP is enabled, ignore server-stream so my item use won't fire two bullets
 						if (taro.isClient) {
-							// ignore server-stream if client isn't running physics or if projectileStreamMode is 0
-							if (owner == taro.client.selectedUnit && taro.physics && this._stats.projectileStreamMode == 1) {
+							// ignore server-stream if client isn't running physics or if projectileStreamMode is 0 (client-side projectile)
+							if (owner == taro.client.selectedUnit && taro.physics && this._stats.projectileStreamMode == 0) {
 								break;
 							}
 							this._stats.isBeingUsed = newValue;
