@@ -124,23 +124,20 @@ var UnitUiComponent = TaroEntity.extend({
 				value = attr.value;
 			}
 
-// 			let displayText;
-// 			if (attr.displayValue) {
-// 				displayText = `
-// 					<span class='unit-attribute-name'>${name}: </span>
-// 					<span class='unit-attribute-value'>
-// 						<span class='unit-attribute-current'>${value}</span><span class='unit-attribute-divisor-sign'> / </span><span class='unit-attribute-max'>${parseFloat(attr.max).toFixed(0)}</span>
-// 					</span>
-// 				`;
-// 			} else {
-// 				displayText = `
-// 					<span class='unit-attribute-name'>${name}</span>
-// 				`;
-// 			}
-// 			$(`.player-${attr.type}`).html(displayText);
-
-
-			$(taro.client.getCachedElementById(`player-${attr.type}`)).text(attr.displayValue ? `${name}: ${value}/${parseFloat(attr.max).toFixed(0)}` : name);
+			let displayText;
+			if (attr.displayValue) {
+				displayText = `
+					<span class='unit-attribute-name'>${name}: </span>
+					<span class='unit-attribute-value'>
+						<span class='unit-attribute-current'>${value}</span><span class='unit-attribute-divisor-sign'> / </span><span class='unit-attribute-max'>${parseFloat(attr.max).toFixed(0)}</span>
+					</span>
+				`;
+			} else {
+				displayText = `
+					<span class='unit-attribute-name'>${name}</span>
+				`;
+			}
+			$(taro.client.getCachedElementById(`player-${attr.type}`)).html(displayText);
 
 			var widthInPercent = (attr.value / attr.max) * 100;
 
