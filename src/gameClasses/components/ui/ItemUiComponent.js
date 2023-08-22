@@ -66,15 +66,6 @@ var ItemUiComponent = TaroEntity.extend({
 		var self = this;
 		var owner = item && item.getOwnerUnit();
 		var equipmentAllowed = (owner && owner._stats.equipmentAllowed);
-		// update item info on bottom-right corner if it's currently selected item
-// 		$(`#item-${slotIndex}`).html(
-// 			self.getItemCooldownOverlay(slotIndex).add(
-// 				self.getItemDiv(item, {
-// 					popover: 'top',
-// 					isDraggable: true,
-// 					isPurchasable: false
-// 				}, slotIndex)
-// 			)
 
 		if (item && item._stats && item._stats.inventorySlotColor) {
 			var color = `background-image: radial-gradient(rgba(0, 0, 0, 0),${  item._stats.inventorySlotColor  })`;
@@ -85,12 +76,14 @@ var ItemUiComponent = TaroEntity.extend({
 		var element = $(taro.client.getCachedElementById(`item-${slotIndex}`));
 		// var element = $(`#item-${slotIndex}`);
 		element.html(
-			self.getItemDiv(item, {
-				popover: 'top',
-				isDraggable: true,
-				isPurchasable: false,
-				bgColor: color
-			}, slotIndex)
+			self.getItemCooldownOverlay(slotIndex).add(
+				self.getItemDiv(item, {
+					popover: 'top',
+					isDraggable: true,
+					isPurchasable: false,
+					bgColor: color
+				}, slotIndex)
+			)
 		);
 
 		// highlight currently selected inventory item (using currentItemIndex)
@@ -312,6 +305,7 @@ var ItemUiComponent = TaroEntity.extend({
 	updateItemCooldownOverlay: function (item) {
 		let itemStats = item._stats;
 		let cdPercent = Math.trunc((1 - Math.min((taro.now - itemStats.lastUsed) / itemStats.fireRate, 1)) * 100);
+		// $(taro.client.getCachedElementById(`item-cooldown-overlay-${itemStats.slotIndex}`)).css('height', `${cdPercent}%`);
 		$(`#item-cooldown-overlay-${itemStats.slotIndex}`).css('height', `${cdPercent}%`);
 	},
 
