@@ -4,7 +4,7 @@ var EntitiesToRender = /** @class */ (function () {
         taro.client.on('tick', this.frameTick, this);
     }
     EntitiesToRender.prototype.updateAllEntities = function ( /*timeStamp*/) {
-        var _a, _b, _c, _d, _e, _f;
+        var _a, _b, _c, _d, _e;
         for (var entityId in this.trackEntityById) {
             // var timeStart = performance.now();
             // var entity = taro.$(entityId);	
@@ -13,6 +13,7 @@ var EntitiesToRender = /** @class */ (function () {
             if (entity) {
                 // handle entity behaviour and transformation offsets
                 // var timeStart = performance.now();
+                var phaserEntity = (_a = entity.phaserEntity) === null || _a === void 0 ? void 0 : _a.gameObject;
                 if (taro.gameLoopTickHasExecuted) {
                     if (entity._deathTime !== undefined && entity._deathTime <= taro._tickStart) {
                         // Check if the deathCallBack was set
@@ -22,16 +23,12 @@ var EntitiesToRender = /** @class */ (function () {
                         }
                         entity.destroy();
                     }
-                    if (entity._category == 'player' ||
-                        !((_b = (_a = entity.phaserEntity) === null || _a === void 0 ? void 0 : _a.gameObject) === null || _b === void 0 ? void 0 : _b.isCulled)) {
-                        entity._behaviour();
-                    }
+                    entity._behaviour();
                 }
                 var ownerUnit = undefined;
                 if (entity._category == 'item') {
                     ownerUnit = entity.getOwnerUnit();
                 }
-                // if (entity.phaserEntity?.gameObject?.visible && (entity.isTransforming() || entity.tween?.isTweening || entity == taro.client.selectedUnit)) {
                 if (entity.isTransforming() || entity == taro.client.selectedUnit || ownerUnit == taro.client.selectedUnit) {
                     // update transformation using incoming network stream
                     // var timeStart = performance.now();
@@ -51,7 +48,7 @@ var EntitiesToRender = /** @class */ (function () {
                                 rotate = ownerUnit._rotate.z;
                                 // immediately rotate my unit's items to the angleToTarget
                             }
-                            else if (ownerUnit == taro.client.selectedUnit && ((_d = (_c = entity._stats.controls) === null || _c === void 0 ? void 0 : _c.mouseBehaviour) === null || _d === void 0 ? void 0 : _d.rotateToFaceMouseCursor)) {
+                            else if (ownerUnit == taro.client.selectedUnit && ((_c = (_b = entity._stats.controls) === null || _b === void 0 ? void 0 : _b.mouseBehaviour) === null || _c === void 0 ? void 0 : _c.rotateToFaceMouseCursor)) {
                                 rotate = ownerUnit.angleToTarget; // angleToTarget is updated at 60fps								
                             }
                             entity._rotate.z = rotate; // update the item's rotation immediately for more accurate aiming (instead of 20fps)
@@ -64,17 +61,20 @@ var EntitiesToRender = /** @class */ (function () {
                             // taro.profiler.logTimeElapsed('second _processTransform', timeStart);
                         }
                     }
-                    if ((_e = entity.tween) === null || _e === void 0 ? void 0 : _e.isTweening) {
+                    if ((_d = entity.tween) === null || _d === void 0 ? void 0 : _d.isTweening) {
                         entity.tween.update();
                         x += entity.tween.offset.x;
                         y += entity.tween.offset.y;
                         rotate += entity.tween.offset.rotate;
                     }
                 }
-                if (((_f = entity.tween) === null || _f === void 0 ? void 0 : _f.isTweening) || entity.isTransforming() || entity == taro.client.selectedUnit || (ownerUnit && (ownerUnit.isTransforming() || ownerUnit == taro.client.selectedUnit))) {
+                if (((_e = entity.tween) === null || _e === void 0 ? void 0 : _e.isTweening) || entity.isTransforming() || entity == taro.client.selectedUnit || (ownerUnit && (ownerUnit.isTransforming() || ownerUnit == taro.client.selectedUnit))) {
                     // var timeStart = performance.now();
                     entity.transformTexture(x, y, rotate);
                     // taro.profiler.logTimeElapsed('transformTexture', timeStart);
+                }
+                if (phaserEntity) {
+                    phaserEntity.setVisible(false);
                 }
             }
         }

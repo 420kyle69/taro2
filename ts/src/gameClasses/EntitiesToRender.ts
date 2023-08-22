@@ -20,6 +20,8 @@ class EntitiesToRender {
 				// handle entity behaviour and transformation offsets
 				// var timeStart = performance.now();
 				
+				var phaserEntity = entity.phaserEntity?.gameObject
+				
 				if (taro.gameLoopTickHasExecuted) {
 					if (entity._deathTime !== undefined && entity._deathTime <= taro._tickStart) {
 						// Check if the deathCallBack was set
@@ -31,13 +33,7 @@ class EntitiesToRender {
 						entity.destroy();
 					}
 
-					if (
-						entity._category == 'player' || 
-						!entity.phaserEntity?.gameObject?.isCulled
-						
-					) {
-						entity._behaviour();
-					}					
+					entity._behaviour();
 				}
 
 				var ownerUnit = undefined;
@@ -45,7 +41,6 @@ class EntitiesToRender {
 					ownerUnit = entity.getOwnerUnit();
 				}
 
-				// if (entity.phaserEntity?.gameObject?.visible && (entity.isTransforming() || entity.tween?.isTweening || entity == taro.client.selectedUnit)) {
 				if (entity.isTransforming() || entity == taro.client.selectedUnit || ownerUnit == taro.client.selectedUnit) {
 
 					// update transformation using incoming network stream
@@ -93,12 +88,16 @@ class EntitiesToRender {
 						y += entity.tween.offset.y;
 						rotate += entity.tween.offset.rotate;
 					}
-				}	
+				}
 
 				if (entity.tween?.isTweening || entity.isTransforming() || entity == taro.client.selectedUnit || (ownerUnit && (ownerUnit.isTransforming() || ownerUnit == taro.client.selectedUnit))) {
 					// var timeStart = performance.now();
 					entity.transformTexture(x, y, rotate);
 					// taro.profiler.logTimeElapsed('transformTexture', timeStart);
+				}
+
+				if (phaserEntity) {
+					phaserEntity.setVisible(false);
 				}
 			}
 		}

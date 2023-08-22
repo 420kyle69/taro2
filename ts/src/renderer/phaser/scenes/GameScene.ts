@@ -604,16 +604,10 @@ class GameScene extends PhaserScene {
 			x: worldPoint.x,
 			y: worldPoint.y,
 		}]);
-
-		this.renderedEntities.forEach(element => {
-			element.setVisible(false);
-			element.isCulled = true;
-		});
-
+		
 		if (!taro.developerMode.active || (taro.developerMode.active && taro.developerMode.activeTab !== 'map')) {
-            this.cameras.main.cull(this.renderedEntities).forEach(element => {
-				element.isCulled = false;
-				
+			var visibleEntities = this.cameras.main.cull(this.renderedEntities);
+			visibleEntities.forEach(element => {
 				if (!element.hidden) {
 					element.setVisible(true);
 
