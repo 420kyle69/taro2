@@ -59,16 +59,6 @@ var ClientNetworkEvents = {
 		}
 	},
 
-	_onMakePlayerSelectUnit: function (data) {
-		if (data.unitId) {
-			if (taro.client.entityUpdateQueue[data.unitId] == undefined) {
-				taro.client.entityUpdateQueue[data.unitId] = [];
-			}
-			// in case the unit doesn't exist when player tries to select it, we're pushing the command into entityUpdateQueue
-			taro.client.entityUpdateQueue[data.unitId].push({ makePlayerSelectUnit: true });
-		}
-	},
-
 	_onMakePlayerCameraTrackUnit: function (data) {
 		if (data.unitId) {
 			if (taro.client.entityUpdateQueue[data.unitId] == undefined) {
@@ -129,7 +119,7 @@ var ClientNetworkEvents = {
 	_onOpenShop: function (data) {
 		if (data.type) {
 			var shopName = taro.game.data.shops[data.type] ? taro.game.data.shops[data.type].name : "Item shop";
-			var shopDescription = taro.game.data.shops[data.type] ? taro.game.data.shops[data.type].description : "";
+			var shopDescription = taro.game.data.shops[data.type] ? taro.clientSanitizer(taro.game.data.shops[data.type].description) : "";
 			$("#modd-item-shop-header").text(shopName);
 
 			if (shopDescription?.length) {
@@ -140,6 +130,9 @@ var ClientNetworkEvents = {
 
 			taro.shop.openItemShop(data.type);
 			$("#modd-item-shop-modal").modal("show");
+			if (taro.client.myPlayer?.control) {
+				taro.client.myPlayer.control.updatePlayerInputStatus();
+			}
 		}
 	},
 	_onCreateFloatingText: function (data) {
@@ -194,14 +187,25 @@ var ClientNetworkEvents = {
 	},
 
 	_onUpdateUiText: function (data) {
-		// console.log("updating UI text", data)
+		if (!data.target) {
+			return;
+		}
+		const key = `ui-text-${data.target}-id`
+
+		if (!taro.uiTextElementsObj[key]) {
+			taro.uiTextElementsObj[key] = document.getElementById(key);
+		}
+		if (!taro.uiTextElementsObj[key]) {
+			return;
+		}
 
 		if (data.action == "show") {
-			$(`.ui-text-${data.target}`).show();
+			// $(`.ui-text-${data.target}`).show();
+			taro.uiTextElementsObj[key].style.display = "block";
 		} else if (data.action == "hide") {
-			$(`.ui-text-${data.target}`).hide();
+			taro.uiTextElementsObj[key].style.display = "none";
 		} else {
-			$(`.ui-text-${data.target}`).html(data.value);
+			taro.uiTextElementsObj[key].innerHTML = taro.clientSanitizer(data.value);
 		}
 	},
 
@@ -504,19 +508,12 @@ var ClientNetworkEvents = {
 			var log = logs[actionName];
 			element.innerHTML += `<li style='font-size:12px;'>${log}</li>`;
 			taro.client.errorLogs.push(log);
-			$("#dev-error-button").text(`Errors (${taro.client.errorLogs.length})`);
-			$("#report-tab-counter").text(
-				`${taro.client.errorLogs.length > 99 ? "99+" : taro.client.errorLogs.length}`
-			);
-			$("#serverconsolelogscounter").text(
-				`${taro.client.errorLogs.length > 99 ? "99+" : taro.client.errorLogs.length}`
-			);
-			$("#server-console").prepend(`<div
-              class="server-logs-element"
-            >
-              <span>${log}</span>
-            </div>`);
+			$("#dev-error-button").text(`Errors (${taro.client.errorLogs.length})`);	
+			
+			window.addToLogs && window.addToLogs(log)
 		}
+
+	
 
 		window.reactApp.showErrorToast(logs[Object.keys(logs)[Object.keys(logs).length - 1]]);
 	},
@@ -563,15 +560,17 @@ var ClientNetworkEvents = {
 	},
 
 	_onParticle: function (data) {
-		var particleData = taro.game.data.particleTypes[data.particleId];
-		if (particleData) {
-			if (data.entityId) {
-				if (taro.client.entityUpdateQueue[data.entityId] == undefined) {
-					taro.client.entityUpdateQueue[data.entityId] = [];
+		if (taro.client.isActiveTab) {
+			var particleData = taro.game.data.particleTypes[data.particleId];
+			if (particleData) {
+				if (data.entityId) {
+					if (taro.client.entityUpdateQueue[data.entityId] == undefined) {
+						taro.client.entityUpdateQueue[data.entityId] = [];
+					}
+					taro.client.entityUpdateQueue[data.entityId].push({ particle: data });
+				} else {
+					taro.client.emit("create-particle", data);
 				}
-				taro.client.entityUpdateQueue[data.entityId].push({ particle: data });
-			} else {
-				taro.client.emit("create-particle", data);
 			}
 		}
 	},

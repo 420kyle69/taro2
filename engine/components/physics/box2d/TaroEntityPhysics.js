@@ -73,11 +73,11 @@ var TaroEntityPhysics = TaroEntity.extend({
 		var shapeData = (body.fixtures && body.fixtures[0] && body.fixtures[0].shape && body.fixtures[0].shape.data) ? body.fixtures[0].shape.data : undefined;
 
 		// override body bounds
-		var sizeX = body?.fixtures[0].size?.width;
-		var sizeY = body?.fixtures[0].size?.height;
-		var offsetX = body?.fixtures[0].offset?.x;
-		var offsetY = body?.fixtures[0].offset?.y;
-		if (sizeX || sizeY || offsetX || offsetY) {
+		if (body?.fixtures) {
+			var sizeX = body?.fixtures[0].size?.width;
+			var sizeY = body?.fixtures[0].size?.height;
+			var offsetX = body?.fixtures[0].offset?.x;
+			var offsetY = body?.fixtures[0].offset?.y;
 			if (shapeData === undefined) {
 				shapeData = {};
 			}
@@ -141,7 +141,6 @@ var TaroEntityPhysics = TaroEntity.extend({
 				taroId: this.id() // in box2dbody, add reference to this entity
 			}]
 		};
-
 		// console.log("collidesWith", this._category, filterCategoryBits, collidesWith, body)
 
 		this.physicsBody(body, isLossTolerant);
@@ -149,6 +148,7 @@ var TaroEntityPhysics = TaroEntity.extend({
 		//     this.previousState = this._stats && this._stats.states && this._stats.states[this._stats.stateId] || {};
 		//     console.log('setting previous sate', this.previousState);
 		// }
+
 		// if initialTranform variable's provided, then transform this entity immediately after body creation
 		if (defaultData) {
 			var rotate = defaultData.rotate;
@@ -165,18 +165,11 @@ var TaroEntityPhysics = TaroEntity.extend({
 				this.rotateTo(0, 0, rotate);
 			}
 
+			// console.log("defaultData", defaultData)
 			if (defaultData.translate) {
 				var x = defaultData.translate.x;
 				var y = defaultData.translate.y;
-
-				// immediately translate entity if position is assigned
-
-				// if (isLossTolerant)
-				//     this.translateToLT(x, y, 0)
-				// else
-
-				this.latestKeyFrame = [taro.now, [x, y, rotate]];
-				this.translateTo(x, y, 0);
+				this.teleportTo(x, y, rotate);
 			}
 
 			// immediately apply speed if assigned
@@ -269,17 +262,24 @@ var TaroEntityPhysics = TaroEntity.extend({
 	 */
 	gravitic: function (val) {
 		if (this.body) {
-			if (val !== undefined) {
-				this.body.m_nonGravitic = !val;
-				this.body.m_gravityScale = !val ? 0 : 1;
-				// this.bodyDef.gravitic = val;
+			switch (taro.physics.engine) {
+				case 'BOX2DWASM': {
+					this.body.SetGravityScale(!val ? 0 : 1);
+					return !!val;
+				}
+				default: {
+					if (val !== undefined) {
+						this.body.m_nonGravitic = !val;
+						this.body.m_gravityScale = !val ? 0 : 1;
+						// this.bodyDef.gravitic = val;
 
-				// Wake up the body
-				this.body.setAwake(true);
-				return this;
+						// Wake up the body
+						this.body.setAwake(true);
+						return this;
+					}
+					return !this.body.m_nonGravitic;
+				}
 			}
-
-			return !this.body.m_nonGravitic;
 		}
 	},
 

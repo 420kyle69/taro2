@@ -15,7 +15,7 @@ var __extends = (this && this.__extends) || (function () {
 })();
 var MarkerGraphics = /** @class */ (function (_super) {
     __extends(MarkerGraphics, _super);
-    function MarkerGraphics(scene, map, w) {
+    function MarkerGraphics(scene, map, w, palette) {
         var _this = _super.call(this, scene) || this;
         _this.scene = scene;
         scene.add.existing(_this);
@@ -28,7 +28,7 @@ var MarkerGraphics = /** @class */ (function (_super) {
             side.lineStyle(w, 0x000000, 1);
             _this.add(side);
         });
-        if (taro.game.data.defaultData.dontResize) {
+        if (taro.game.data.defaultData.dontResize || palette) {
             _this.sideLength = map.tileWidth;
         }
         else {

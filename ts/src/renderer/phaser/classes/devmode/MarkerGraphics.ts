@@ -5,7 +5,7 @@ class MarkerGraphics extends Phaser.GameObjects.Container {
     scaleSidesX: number;
     scaleSidesY: number;
 
-    constructor(scene: Phaser.Scene, map: Phaser.Tilemaps.Tilemap, w: number) {
+    constructor(scene: Phaser.Scene, map: Phaser.Tilemaps.Tilemap, w: number, palette: boolean) {
         super(scene);
         this.scene = scene;
 
@@ -22,7 +22,7 @@ class MarkerGraphics extends Phaser.GameObjects.Container {
             this.add(side);
         });
 
-        if (taro.game.data.defaultData.dontResize) {
+        if (taro.game.data.defaultData.dontResize || palette) {
             this.sideLength = map.tileWidth;
         } else {
             this.sideLength = Constants.TILE_SIZE;

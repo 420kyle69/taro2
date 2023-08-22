@@ -35,6 +35,7 @@ var taroCoreConfig = {
 		['csap', 'TaroInputComponent', 'components/TaroInputComponent.js'],
 		['csap', 'TaroTiledComponent', 'components/TaroTiledComponent.js'],
 		['csap', 'TaroUiManagerComponent', 'components/TaroUiManagerComponent.js'],
+		['csap', 'ProfilerComponent', 'components/ProfilerComponent.js'],
 		/* Network Stream */
 		['csap', 'TaroTimeSyncExtension', 'components/network/TaroTimeSyncExtension.js'],
 		['csap', 'TaroStreamComponent', 'components/network/TaroStreamComponent.js'],
@@ -64,13 +65,15 @@ var taroCoreConfig = {
 		['csap', 'TaroCamera', 'core/TaroCamera.js'],
 		['csap', 'TaroViewport', 'core/TaroViewport.js'],
 		['csap', 'TaroScene2d', 'core/TaroScene2d.js'],
-		['csap', 'TaroArray', 'core/TaroArray.js'],
+		['csap', 'TaroArray', 'core/TaroArray.js'],		
 		/* Engine Actual */
 		['csap', 'TaroEngine', 'core/TaroEngine.js'],
 		/* Physics Libraries */
 		['csap', 'PhysicsComponent', './components/physics/box2d/Box2dComponent.js'],
 		['csap', 'TaroEntityPhysics', './components/physics/box2d/TaroEntityPhysics.js'],
 		['csap', 'TaroBox2dWorld', './components/physics/box2d/TaroBox2dDebugPainter.js'],
+		['csap', 'Box2dHelpers', './components/physics/box2d/debugDrawWrapper/box2dwasmHelper.js'],
+		['csap', 'Box2dDebugDraw', './components/physics/box2d/debugDrawWrapper/box2dwasmDebugDraw.js'],
 		...arrays,
 		['csap', 'dists', './components/physics/box2d/dists.js'],
 		['csap', 'planck', './components/physics/box2d/dists/planck/planck.js'],

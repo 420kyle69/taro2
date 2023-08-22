@@ -1173,6 +1173,27 @@ var VariableComponent = TaroEntity.extend({
 
 					break;
 
+				case 'getMapTileId':
+					var map = taro.map.data;
+					var tileX = self.getValue(text.x, vars);
+					var tileY = self.getValue(text.y, vars);
+					var layer = self.getValue(text.layer, vars);
+					if (map && Number.isInteger(layer) && Number.isInteger(tileX) && Number.isInteger(tileY)) {
+						if (layer > 3 || layer < 0) {
+							taro.script.errorLog(`Invalid Layer`);
+							break;
+						} else if (tileX < 0 || tileX >= taro.game.data.map.width) {
+							taro.script.errorLog(`invalid x position`);
+							break;
+						} else if (tileY < 0 || tileY >= taro.game.data.map.height) {
+							taro.script.errorLog(`invalid y position`);
+							break;
+						} else {
+							returnValue = map.layers[layer].data[tileX + tileY * map.width];
+						}
+					}
+					break;
+
 				case 'entityWidth':
 					if (entity && self._entity.script.action.entityCategories.indexOf(entity._category) > -1) {
 						// returnValue = entity._aabb.width;
@@ -1201,7 +1222,7 @@ var VariableComponent = TaroEntity.extend({
 
 				case 'defaultQuantityOfItemType':
 					var itemTypeId = self.getValue(text.itemType, vars);
-					var itemType = taro.game.getAsset('itemTypes', itemTypeId);
+					var itemType = taro.game.cloneAsset('itemTypes', itemTypeId);
 
 					if (itemType) {
 						returnValue = itemType.quantity;
@@ -1211,7 +1232,7 @@ var VariableComponent = TaroEntity.extend({
 
 				case 'maxValueOfItemType':
 					var itemTypeId = self.getValue(text.itemType, vars);
-					var itemType = taro.game.getAsset('itemTypes', itemTypeId);
+					var itemType = taro.game.cloneAsset('itemTypes', itemTypeId);
 
 					if (itemType) {
 						returnValue = itemType.maxQuantity;
@@ -1363,7 +1384,7 @@ var VariableComponent = TaroEntity.extend({
 					if (entity) {
 						if (entity._category === 'item' && entity._stats && entity._stats.currentBody && entity._stats.currentBody.type === 'spriteOnly') {
 							var ownerUnit = entity.getOwnerUnit();
-							var unitPosition = _.cloneDeep(ownerUnit._translate);
+							var unitPosition = rfdc()(ownerUnit._translate);
 
 							unitPosition.x = (ownerUnit._translate.x) + (entity._stats.currentBody.unitAnchor.y * Math.cos(ownerUnit._rotate.z + Math.radians(-90))) + (entity._stats.currentBody.unitAnchor.x * Math.cos(ownerUnit._rotate.z));
 							unitPosition.y = (ownerUnit._translate.y) + (entity._stats.currentBody.unitAnchor.y * Math.sin(ownerUnit._rotate.z + Math.radians(-90))) + (entity._stats.currentBody.unitAnchor.x * Math.sin(ownerUnit._rotate.z));
@@ -1372,7 +1393,7 @@ var VariableComponent = TaroEntity.extend({
 							if (entity.x != undefined && entity.y != undefined) {
 								returnValue = JSON.parse(JSON.stringify(entity));
 							} else if (entity._translate) {
-								returnValue = _.cloneDeep(entity._translate);
+								returnValue = rfdc()(entity._translate);
 							} else {
 								returnValue = { x: 0, y: 0 };
 							}
@@ -1523,7 +1544,7 @@ var VariableComponent = TaroEntity.extend({
 
 				case 'getUnitTypeName':
 					var unitTypeId = self.getValue(text.unitType, vars);
-					var unitType = taro.game.getAsset('unitTypes', unitTypeId);
+					var unitType = taro.game.cloneAsset('unitTypes', unitTypeId);
 
 					if (unitType) {
 						returnValue = unitType.name;
@@ -1533,7 +1554,7 @@ var VariableComponent = TaroEntity.extend({
 
 				case 'getItemTypeName':
 					var itemTypeId = self.getValue(text.itemType, vars);
-					var itemType = taro.game.getAsset('itemTypes', itemTypeId);
+					var itemType = taro.game.cloneAsset('itemTypes', itemTypeId);
 
 					if (itemType) {
 						returnValue = itemType.name;
@@ -1670,7 +1691,7 @@ var VariableComponent = TaroEntity.extend({
 
 				case 'getItemTypeDamage':
 					var itemTypeId = self.getValue(text.itemType, vars);
-					var itemType = taro.game.getAsset('itemTypes', itemTypeId);
+					var itemType = taro.game.cloneAsset('itemTypes', itemTypeId);
 
 					if (itemType) {
 						returnValue = parseFloat(itemType.damage);
@@ -1775,7 +1796,7 @@ var VariableComponent = TaroEntity.extend({
 
 				case 'getRotateSpeed':
 					var unitTypeId = self.getValue(text.unitType, vars);
-					var unitType = taro.game.getAsset('unitTypes', unitTypeId);
+					var unitType = taro.game.cloneAsset('unitTypes', unitTypeId);
 
 					if (unitType && unitType.body && unitType.body.rotationSpeed) {
 						returnValue = unitType.body.rotationSpeed;
@@ -2233,6 +2254,15 @@ var VariableComponent = TaroEntity.extend({
 						returnValue = entity._category || 'wall';
 					}
 
+					break;
+
+				case 'stringIsANumber':
+					var string = self.getValue(text.string, vars);
+					if (string) {
+						returnValue = !isNaN(parseFloat(string)) && !isNaN(string - 0);
+					} else {
+						returnValue = false;
+					}
 					break;
 
 				case 'getTimeString':
