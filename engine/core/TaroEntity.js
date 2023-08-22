@@ -4056,14 +4056,11 @@ var TaroEntity = TaroObject.extend({
 
 	streamUpdateData: function (queuedData) {
 
-		var oldStats = {};
 		if (queuedData != undefined) {
 			for (var i = 0; i < queuedData.length; i++) {
 				var data = queuedData[i];
 				for (attrName in data) {
-
 					var newValue = data[attrName];
-					this.lastUpdatedData[attrName] = newValue; // cache last updated data, so we can ignore same-value-update next time (this optimizes CPU usage by a lot)
 					// console.log(this._category, this.id(), attrName, newValue)
 					switch (attrName) {
 						case 'attributes':
@@ -4190,13 +4187,21 @@ var TaroEntity = TaroObject.extend({
 
 					if (taro.isServer) {
 						// keys that will stream even if its new value is same as the previous value
-						var forceStreamKeys = ['anim', 'coin', 'stateId', 'ownerId', 'name', 'slotIndex', 'newItemId', 'quantity', 'spriteOnly', 'setFadingText', 'playerJoinedAgain', 'use', 'hidden'];
+						// var forceStreamKeys = ['anim', 'coin', 'stateId', 'ownerId', 'name', 'slotIndex', 'newItemId', 'quantity', 'spriteOnly', 'setFadingText', 'playerJoinedAgain', 'use', 'hidden'];
+						var forceStreamKeys = ['anim', 'coin', 'setFadingText', 'playerJoinedAgain', 'use', 'hidden'];
 						if (typeof this.queueStreamData === 'function') {
-							if (data[attrName] != oldStats[attrName] || forceStreamKeys.includes(attrName)) {
+							if (data[attrName] === this.lastUpdatedData[attrName]) {
+								console.log(attrName, "is the same! previous", this.lastUpdatedData[attrName], "new", newValue)
+							}
+
+							if (data[attrName] !== this.lastUpdatedData[attrName] || forceStreamKeys.includes(attrName)) {
 								// console.log("queueStreamData", attrName, data[attrName])
 								var streamData = {};
 								streamData[attrName] = data[attrName];
 								this.queueStreamData(streamData);
+
+								// for server-side only: cache last updated data, so we dont stream same data again (this optimizes CPU usage by a lot)
+								this.lastUpdatedData[attrName] = rfdc()(newValue); 
 							}
 						}
 					} else if (taro.isClient) {
@@ -4289,6 +4294,9 @@ var TaroEntity = TaroObject.extend({
 								taro.client.emit('create-particle', newValue);
 								break;
 						}
+
+						// for client-side: cache last updated data, so we can ignore same-value-update next time (this optimizes CPU usage by a lot)
+						this.lastUpdatedData[attrName] = newValue; 
 					}
 				}
 			}
