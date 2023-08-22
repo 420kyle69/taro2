@@ -4190,10 +4190,10 @@ var TaroEntity = TaroObject.extend({
 						// var forceStreamKeys = ['anim', 'coin', 'stateId', 'ownerId', 'name', 'slotIndex', 'newItemId', 'quantity', 'spriteOnly', 'setFadingText', 'playerJoinedAgain', 'use', 'hidden'];
 						var forceStreamKeys = ['anim', 'coin', 'setFadingText', 'playerJoinedAgain', 'use', 'hidden'];
 						if (typeof this.queueStreamData === 'function') {
-							// if (data[attrName] === this.lastUpdatedData[attrName]) {
-							// 	// console.log(this._category, this._stats.name, attrName, "is the same! previous", this.lastUpdatedData[attrName], "new", newValue)
-							// 	console.log("not sending repeat data", attrName)
-							// }
+							if (data[attrName] === this.lastUpdatedData[attrName]) {
+								// console.log(this._category, this._stats.name, attrName, "is the same! previous", this.lastUpdatedData[attrName], "new", newValue)
+								// console.log("not sending repeat data", attrName)
+							}
 
 							if (data[attrName] !== this.lastUpdatedData[attrName] || forceStreamKeys.includes(attrName)) {
 								// console.log("queueStreamData", attrName, data[attrName])
@@ -4306,7 +4306,17 @@ var TaroEntity = TaroObject.extend({
 		// this._streamDataQueued = this._streamDataQueued.concat(data);
 		for (key in data) {
 			value = data[key];
-			this._streamDataQueued[key] = value;
+
+			if (['attributes', 'attributesMin', 'attributesMax', 'attributesRegenerateRate'].includes(key)) {
+				// some data need to merge instead of overwriting they key. otherwise, we'll only be able to send the last attribute added.
+				// for example, if server calls queueStreamData for Speed and HP attributes, HP will overwrite Speed as they share same key ("attributes")			
+				// this._streamDataQueued[key] = {...this._streamDataQueued[key], ...value};
+				if (this._streamDataQueued[key] == undefined) this._streamDataQueued[key] = {};
+				this._streamDataQueued[key] = Object.assign(this._streamDataQueued[key], value);
+			} else {
+				this._streamDataQueued[key] = value;
+			}
+			
 		}
 		
 		taro.server.bandwidthUsage[this._category] += JSON.stringify(this._streamDataQueued).length;
