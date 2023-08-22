@@ -631,7 +631,7 @@ var TaroEntityPhysics = TaroEntity.extend({
 	// loss tolerant
 	translateByLT: function (x, y, z) {
 		const scale = taro.physics._scaleRatioToBox2dWeb;
-		this.translateToLT(this._translate.x + x / scale, this._translate.y + y / scale, this._translate.z + z / scale);
+		this.translateToLT(this._translate.x + x, this._translate.y + y, this._translate.z + z / scale);
 	},
 	/**
 	 * Takes over translateTo calls and processes box2d movement as well.
