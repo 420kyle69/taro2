@@ -237,7 +237,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 	getBodiesInRegion: function (region) {
 		var self = this;
 
-		if (taro.physics.engine == 'crash') {
+		if (taro.physics.engine === 'crash') {
 			var collider = new self.crash.Box(new self.crash.Vector(region.x + (region.width / 2), region.y + (region.height / 2)), region.width, region.height);
 			return taro.physics.crash.search(collider);
 		} else {
@@ -248,18 +248,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 
 			var entities = [];
 			if (self.engine === 'BOX2DWASM') {
-				function getBodyCallback(fixture) {
-					if (fixture && fixture.m_body && fixture.m_body.m_fixtureList) {
-						entityId = fixture.m_body.m_fixtureList.taroId;
-						var entity = taro.$(entityId);
-						if (entity) {
-							// taro.devLog("found", entity._category, entity._translate.x, entity._translate.y)
-							var entity = taro.$(entityId);
-							entities.push(taro.$(entityId));
-						}
-					}
-					return true;
-				}
+
 				const callback = Object.assign(new self.JSQueryCallback(), {
 					ReportFixture: (fixture_p) => {
 						const fixture = self.wrapPointer(fixture_p, self.b2Fixture);
@@ -447,7 +436,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 	 */
 	enableDebug: function (mountScene) {
 		if (this.engine == 'PLANCK' || this.engine == 'CRASH') return; // planck doesn't support debugdraw
-
 		if (mountScene) {
 			// Define the debug drawing instance
 			var debugDraw = new this.b2DebugDraw();
@@ -553,6 +541,8 @@ var PhysicsComponent = TaroEventingClass.extend({
 		var self = this;
 		var tempBod;
 		var entity;
+		let now = Date.now();
+
 		if (self && self._active && self._world) {
 			var queueSize = 0;
 			if (!self._world.isLocked()) {
@@ -584,26 +574,31 @@ var PhysicsComponent = TaroEventingClass.extend({
 				}
 			}
 
-			let timeStart = taro.now;
+			let timeStart = now;
 
 			// Loop the physics objects and move the entities they are assigned to
 			if (self.engine == 'crash') { // crash's engine step happens in dist.js
 				self._world.step(timeElapsedSinceLastStep);
 			} else {
 				self._world.step(timeElapsedSinceLastStep / 1000, 8, 3); // Call the world step; frame-rate, velocity iterations, position iterations
-				let nextFrameTime = taro._currentTime + (1000 / taro._gameLoopTickRate) - 10; // 10ms is to give extra buffer to prepare for the next frame
+				if (self.ctx) {
+					self.ctx.clear();
+					self._world.DebugDraw();
+				}
 				var tempBod = self._world.getBodyList();
 
 				// iterate through every physics body
 				while (tempBod && typeof tempBod.getNext === 'function' && (!self.getPointer || self.getPointer(tempBod) !== self.getPointer(self.nullPtr))) {
 					// Check if the body is awake && not static
-					if (tempBod.m_type !== 'static' && tempBod.isAwake()) {
+					if (tempBod.m_type !== 'static' && tempBod.isAwake() && (!tempBod.GetType || tempBod.GetType() !== 0)) {
 						entity = tempBod._entity;
-						if (entity) {
-							var mxfp = dists[taro.physics.engine].getmxfp(tempBod);
 
+						if (entity) {
+
+							var mxfp = dists[taro.physics.engine].getmxfp(tempBod);
 							var x = mxfp.x * taro.physics._scaleRatio;
 							var y = mxfp.y * taro.physics._scaleRatio;
+
 							// make projectile auto-rotate toward its path. ideal for arrows or rockets that should point toward its direction
 							// if (entity._category == 'projectile' &&
 							// 	entity._stats.currentBody && !entity._stats.currentBody.fixedRotation &&
@@ -622,7 +617,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 
 							// keep entities within the boundaries
 							if (
-								(entity._category == 'unit' || entity._category == 'item' || entity._category == 'projectile') &&
+								(entity._category === 'unit' || entity._category === 'item' || entity._category === 'projectile') &&
 								!skipBoundaryCheck &&
 								(
 									x < padding || x > (taro.map.data.width * tileWidth) - padding ||
@@ -631,16 +626,16 @@ var PhysicsComponent = TaroEventingClass.extend({
 							) {
 								// fire 'touchesWall' trigger when unit goes out of bounds for the first time
 								if (!entity.isOutOfBounds) {
-									if (entity._category == 'unit' || entity._category == 'item' || entity._category == 'projectile') {
+									if (entity._category === 'unit' || entity._category === 'item' || entity._category === 'projectile') {
 										entity.script.trigger('entityTouchesWall');
 									}
 
-									if (entity._category == 'unit') {
+									if (entity._category === 'unit') {
 										// console.log("unitTouchesWall", entity.id());
 										taro.script.trigger('unitTouchesWall', { unitId: entity.id() });
-									} else if (entity._category == 'item') {
+									} else if (entity._category === 'item') {
 										taro.script.trigger('itemTouchesWall', { itemId: entity.id() });
-									} else if (entity._category == 'projectile') {
+									} else if (entity._category === 'projectile') {
 										taro.script.trigger('projectileTouchesWall', { projectileId: entity.id() });
 									}
 
@@ -654,9 +649,11 @@ var PhysicsComponent = TaroEventingClass.extend({
 									entity.isOutOfBounds = false;
 								}
 							}
+
 							// entity just has teleported
+
 							if (entity.teleportDestination != undefined && entity.teleported) {
-								entity.latestKeyFrame[1] = entity.teleportDestination;
+								entity.nextKeyFrame[1] = entity.teleportDestination;
 								x = entity.teleportDestination[0];
 								y = entity.teleportDestination[1];
 								angle = entity.teleportDestination[2];
@@ -674,27 +671,32 @@ var PhysicsComponent = TaroEventingClass.extend({
 										x += xDiff / 2;
 										y += yDiff / 2;
 									}
+
 									entity.translateTo(x, y, 0);
 									entity.rotateTo(0, 0, angle);
+
+									this.lastX = x;
 								} else if (taro.isClient) {
-									// my unit's position is dictated by clientside physics
-									if (entity == taro.client.selectedUnit) {
-										entity.latestKeyFrame = [taro._currentTime, [x, y, angle]];
-									}
-									// projectiles don't use server-streamed position
-									else if (entity._category == 'projectile' && !entity._stats.streamMode
+
+									// if CSP is enabled, client-side physics will dictate:
+									// my unit's position and projectiles that are NOT server-streamed.
+									if (
+										(taro.game.cspEnabled && entity == taro.client.selectedUnit) || 
+										(entity._category == 'projectile' && !entity._stats.streamMode)
 									) {
-										entity.prevPhysicsFrame = entity.nextPhysicsFrame;
-										entity.nextPhysicsFrame = [nextFrameTime, [x, y, angle]];
+										// if (entity._category == 'projectile') console.log(x, y, angle)
+										entity.nextKeyFrame = [taro._currentTime + taro.client.renderBuffer, [x, y, angle]];
 									} else { // update server-streamed entities' body position
-										x = entity.latestKeyFrame[1][0];
-										y = entity.latestKeyFrame[1][1];
-										angle = entity.latestKeyFrame[1][2];
+										x = entity.nextKeyFrame[1][0];
+										y = entity.nextKeyFrame[1][1];
+										angle = entity.nextKeyFrame[1][2];
 									}
+									entity.isTransforming(true);
 								}
 							}
 
 							if (!isNaN(x) && !isNaN(y)) {
+
 								entity.body.setPosition({ x: x / entity._b2dRef._scaleRatio, y: y / entity._b2dRef._scaleRatio });
 								entity.body.setAngle(angle);
 							}
@@ -712,11 +714,16 @@ var PhysicsComponent = TaroEventingClass.extend({
 							}
 						}
 					}
+
 					tempBod = tempBod.getNext();
 				}
+
+
 				taro._physicsFrames++;
+
 				// Clear forces because we have ended our physics simulation frame
 				self._world.clearForces();
+
 				// get stats for dev panel
 				var timeEnd = Date.now();
 				self.physicsTickDuration += timeEnd - timeStart;
@@ -872,7 +879,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 			const nowContact = taro.physics.wrapPointer(contact, taro.physics.b2Contact);
 			var entityA = nowContact.GetFixtureA().GetBody()._entity;
 			var entityB = nowContact.GetFixtureB().GetBody()._entity;
-
 			if (!entityA || !entityB)
 				return;
 

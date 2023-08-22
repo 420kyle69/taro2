@@ -27,7 +27,7 @@ class TilePalette extends Phaser.GameObjects.Container {
 
 	constructor(
 		public scene: DevModeScene,
-		tileset: Phaser.Tilemaps.Tileset,
+		private tileset: Phaser.Tilemaps.Tileset,
 		rexUI: any,
 		private commandController: CommandController
 	) {
@@ -44,7 +44,7 @@ class TilePalette extends Phaser.GameObjects.Container {
 		}
 
 		// When loading from an array, make sure to specify the tileWidth and tileHeight
-		const map = this.map = this.scene.make.tilemap({ key: 'palette', data: paletteMap, tileWidth: 16, tileHeight: 16 });
+		const map = this.map = this.scene.make.tilemap({ key: 'palette', data: paletteMap, tileWidth: tileset.tileWidth, tileHeight: tileset.tileHeight});
 		const texturesLayer = this.texturesLayer = map.createLayer(0, tileset, 0, 0).setOrigin(0, 0).setInteractive();
 		this.x = -texturesLayer.width;
 		this.y = 0;
@@ -57,7 +57,7 @@ class TilePalette extends Phaser.GameObjects.Container {
 			this.scene.sys.game.canvas.height - paletteHeight - 40, paletteWidth, paletteHeight)
 			.setBounds(texturesLayer.x - (texturesLayer.width / 2), texturesLayer.y - (texturesLayer.height / 2),
 				texturesLayer.width * 2, texturesLayer.height * 2, true)
-			.setZoom(1).setName('palette');
+			.setZoom(16 / tileset.tileWidth).setName('palette');
 
 		camera.setBackgroundColor(0x000000);
 
@@ -185,17 +185,19 @@ class TilePalette extends Phaser.GameObjects.Container {
 	}
 
 	zoom(deltaY: number): void {
+        const maxZoom = 20 * 16 / this.tileset.tileWidth;
+        const minZoom = 0.5 * 16 / this.tileset.tileWidth;
 		let targetZoom;
 		if (deltaY < 0) targetZoom = this.camera.zoom * 1.2;
 		else targetZoom = this.camera.zoom / 1.2;
-		if (targetZoom < 0.5) targetZoom = 0.5;
-		else if (targetZoom > 20) targetZoom = 20;
+		if (targetZoom < minZoom) targetZoom = minZoom;
+		else if (targetZoom > maxZoom) targetZoom = maxZoom;
 		this.camera.setZoom(targetZoom);
 
-		this.scrollBarBottom.getElement('slider.thumb').width = (this.camera.width - 60) / (targetZoom * 2);
+		this.scrollBarBottom.getElement('slider.thumb').width = (this.camera.width - 60) / (targetZoom / 16 * this.tileset.tileWidth * 2);
 		this.scrollBarBottom.layout();
 
-		this.scrollBarRight.getElement('slider.thumb').height = (this.camera.height - 60) / (targetZoom * 2);
+		this.scrollBarRight.getElement('slider.thumb').height = (this.camera.height - 60) / (targetZoom / 16 * this.tileset.tileWidth * 2);
 		this.scrollBarRight.layout();
 	}
 

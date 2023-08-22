@@ -85,6 +85,7 @@ var TaroChatComponent = TaroEventingClass.extend({
 			$('#message').blur();
 			$('#message').val('');
 			$('#chat-message-input').hide();
+			player.control.updatePlayerInputStatus();
 		}
 	},
 

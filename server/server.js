@@ -8,8 +8,10 @@ const bodyParser = require('body-parser');
 const fs = require('fs');
 const cluster = require('cluster');
 const { RateLimiterMemory } = require('rate-limiter-flexible');
-_ = require('lodash');
 const currency = require("currency.js");
+
+_ = require('lodash');
+rfdc = require('rfdc')
 
 const config = require('../config');
 const Console = console.constructor;
@@ -634,7 +636,7 @@ var Server = TaroClass.extend({
 									taro.addComponent(VideoChatComponent);
 								}
 
-								let map = taro.scaleMap(_.cloneDeep(taro.game.data.map));
+								let map = taro.scaleMap(rfdc()(taro.game.data.map));
 								taro.map.load(map);
 
 								taro.game.start();
@@ -698,7 +700,6 @@ var Server = TaroClass.extend({
 		taro.network.define('joinGame', self._onJoinGameWrapper);
 		taro.network.define('gameOver', self._onGameOver);
 
-		taro.network.define('makePlayerSelectUnit', self._onPlayerSelectUnit);
 		taro.network.define('playerUnitMoved', self._onPlayerUnitMoved);
 		taro.network.define('playerKeyDown', self._onPlayerKeyDown);
 		taro.network.define('playerKeyUp', self._onPlayerKeyUp);

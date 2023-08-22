@@ -333,7 +333,7 @@ var InventoryComponent = TaroEntity.extend({
 			unit.streamUpdateData([{ itemIds: unit._stats.itemIds }]);
 		} else if (taro.isClient) {
 			if (taro.client.myPlayer && taro.client.myPlayer._stats.selectedUnitId == unit.id() && itemExistInItemIds) {
-				$(`#item-${slotIndex}`).html('');
+				$(taro.client.getCachedElementById(`item-${slotIndex}`)).html('');
 				taro.itemUi.updateItemSlot(item, slotIndex);
 			}
 		}
@@ -380,27 +380,8 @@ var InventoryComponent = TaroEntity.extend({
 				for (var slotIndex = 0; slotIndex < totalInventorySize + 5; slotIndex++) { // +5 for trade slots?
 					var itemId = this._entity._stats.itemIds[slotIndex];
 					var item = taro.$(itemId);
-					// if (item) {
-					// 	item._stats.slotIndex = slotIndex;
-					// 	if (slotIndex == this._entity._stats.currentItemIndex) {
-					// 		item.setState('selected');
-					// 	} else {
-					// 		item.setState('unselected');
-					// 	}
-					// }
-					if (item && item._stats && item._stats.inventorySlotColor) {
-						$(`#item-${slotIndex}`).css('background-image', `radial-gradient(rgba(0, 0, 0, 0),${  item._stats.inventorySlotColor  })`);
-					} else {
-						$(`#item-${slotIndex}`).css('background-image', 'none');
-					}
+					
 					taro.itemUi.updateItemSlot(item, slotIndex);
-
-					// highlight currently selected inventory item (using currentItemIndex)
-					if (this._entity._stats.currentItemIndex != undefined && this._entity._stats.currentItemIndex == slotIndex) {
-						$(`#item-${slotIndex}`).addClass('active');
-					} else {
-						$(`#item-${slotIndex}`).removeClass('active');
-					}
 				}
 
 				// this.updateBackpackButton()
@@ -413,9 +394,9 @@ var InventoryComponent = TaroEntity.extend({
 		for (var i = 0; i < this._entity._stats.inventorySize; i++) {
 			// highlight currently selected inventory item (using currentItemIndex)
 			if (slotIndex > 0 && slotIndex - 1 == i) {
-				$(`#item-${i}`).addClass('active');
+				$(taro.client.getCachedElementById(`item-${i}`)).addClass('active');
 			} else {
-				$(`#item-${i}`).removeClass('active');
+				$(taro.client.getCachedElementById(`item-${i}`)).removeClass('active');
 			}
 		}
 	},

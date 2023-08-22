@@ -14,12 +14,16 @@ var TileEditor = /** @class */ (function () {
         var pointerPosition = { x: 0, y: 0 };
         this.activateMarkers(false);
         this.startDragIn = 'none';
+        this.tileSize = Constants.TILE_SIZE;
+        if (taro.game.data.defaultData.dontResize) {
+            this.tileSize = gameMap.tileWidth;
+        }
         gameScene.input.on('pointerdown', function (p) {
-            if (!devModeScene.pointerInsideButtons) {
-                _this.devModeTools.modeButtons.map(function (btn) {
+            /*if (!devModeScene.pointerInsideButtons) {
+                this.devModeTools.modeButtons.map((btn) => {
                     btn.hideHoverChildren(0);
                 });
-            }
+            }*/
             if (!devModeScene.pointerInsideButtons &&
                 !devModeScene.pointerInsideWidgets() &&
                 (!palette.visible || !devModeScene.pointerInsidePalette()) &&
@@ -31,11 +35,11 @@ var TileEditor = /** @class */ (function () {
             }
         });
         devModeScene.input.on('pointerdown', function (p) {
-            if (!devModeScene.pointerInsideButtons) {
-                _this.devModeTools.modeButtons.map(function (btn) {
+            /*if (!devModeScene.pointerInsideButtons) {
+                this.devModeTools.modeButtons.map((btn) => {
                     btn.hideHoverChildren(0);
                 });
-            }
+            }*/
             if (!devModeScene.pointerInsideButtons &&
                 !devModeScene.pointerInsideWidgets() &&
                 palette.visible && devModeScene.pointerInsidePalette()) {
@@ -80,17 +84,19 @@ var TileEditor = /** @class */ (function () {
                     nowBrushSize.x = 1;
                     nowBrushSize.y = 1;
                 }
-                var pointerTileX = gameMap.worldToTileX(worldPoint.x - (nowBrushSize.x - 1) * Constants.TILE_SIZE / 2, true);
-                var pointerTileY = gameMap.worldToTileY(worldPoint.y - (nowBrushSize.y - 1) * Constants.TILE_SIZE / 2, true);
+                var pointerTileX = gameMap.worldToTileX(worldPoint.x - (nowBrushSize.x - 1) * _this.tileSize / 2, true);
+                var pointerTileY = gameMap.worldToTileY(worldPoint.y - (nowBrushSize.y - 1) * _this.tileSize / 2, true);
                 _this.clearTint();
                 _this.selectedTileArea = {};
                 for (var i = 0; i < nowBrushSize.x; i++) {
                     for (var j = 0; j < nowBrushSize.y; j++) {
                         var tile = _this.getTile(pointerTileX + i, pointerTileY + j, gameMap);
-                        if (!_this.selectedTileArea[pointerTileX + i]) {
-                            _this.selectedTileArea[pointerTileX + i] = {};
+                        if (tile !== -1) {
+                            if (!_this.selectedTileArea[pointerTileX + i]) {
+                                _this.selectedTileArea[pointerTileX + i] = {};
+                            }
+                            _this.selectedTileArea[pointerTileX + i][pointerTileY + j] = tile;
                         }
-                        _this.selectedTileArea[pointerTileX + i][pointerTileY + j] = tile;
                     }
                 }
                 _this.marker.changePreview();
@@ -168,7 +174,7 @@ var TileEditor = /** @class */ (function () {
         if (taro.physics && map.layers[tempLayer].name === 'walls') {
             //if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
             taro.physics.destroyWalls();
-            var mapCopy = taro.scaleMap(_.cloneDeep(map));
+            var mapCopy = taro.scaleMap(rfdc()(map));
             taro.tiled.loadJson(mapCopy, function (layerArray, TaroLayersById) {
                 taro.physics.staticsFromMap(TaroLayersById.walls);
             });
@@ -319,7 +325,7 @@ var TileEditor = /** @class */ (function () {
     };
     TileEditor.prototype.update = function () {
         var _this = this;
-        var _a, _b;
+        var _a, _b, _c, _d, _e;
         if (taro.developerMode.active && taro.developerMode.activeTab === 'map') {
             var devModeScene = this.devModeTools.scene;
             var palette = this.tilePalette;
@@ -329,8 +335,6 @@ var TileEditor = /** @class */ (function () {
             var palettePoint = devModeScene.cameras.getCamera('palette').getWorldPoint(devModeScene.input.activePointer.x, devModeScene.input.activePointer.y);
             var marker = this.marker;
             var paletteMarker = this.paletteMarker;
-            paletteMarker.graphics.clear();
-            paletteMarker.graphics.strokeRect(0, 0, paletteMap.tileWidth * palette.texturesLayer.scaleX, paletteMap.tileHeight * palette.texturesLayer.scaleY);
             paletteMarker.graphics.setVisible(true);
             // Rounds down to nearest tile
             var palettePointerTileX = paletteMap.worldToTileX(palettePoint.x);
@@ -352,13 +356,18 @@ var TileEditor = /** @class */ (function () {
                     marker.graphics.setVisible(true);
                     marker.showPreview(true);
                     // Rounds down to nearest tile
-                    var pointerTileX_1 = map_1.worldToTileX(worldPoint.x - (marker.graphics.scaleX - 1) * Constants.TILE_SIZE / 2, true);
-                    var pointerTileY_1 = map_1.worldToTileY(worldPoint.y - (marker.graphics.scaleY - 1) * Constants.TILE_SIZE / 2, true);
+                    var pointerTileX_1 = map_1.worldToTileX(worldPoint.x - (marker.graphics.scaleSidesX - 1) * this.tileSize / 2, true);
+                    var pointerTileY_1 = map_1.worldToTileY(worldPoint.y - (marker.graphics.scaleSidesY - 1) * this.tileSize / 2, true);
                     // Snap to tile coordinates, but in world space
                     marker.graphics.x = map_1.tileToWorldX(pointerTileX_1);
                     marker.graphics.y = map_1.tileToWorldY(pointerTileY_1);
                     marker.preview.x = map_1.tileToWorldX(pointerTileX_1);
                     marker.preview.y = map_1.tileToWorldY(pointerTileY_1);
+                    if (((_a = map_1 === null || map_1 === void 0 ? void 0 : map_1.getTileAt(pointerTileX_1, pointerTileY_1)) === null || _a === void 0 ? void 0 : _a.index) && ((_b = map_1 === null || map_1 === void 0 ? void 0 : map_1.getTileAt(pointerTileX_1, pointerTileY_1)) === null || _b === void 0 ? void 0 : _b.index) !== -1 && ((_c = map_1 === null || map_1 === void 0 ? void 0 : map_1.getTileAt(pointerTileX_1, pointerTileY_1)) === null || _c === void 0 ? void 0 : _c.index) !== 0) {
+                        this.devModeTools.tooltip.showMessage('Position', "X: ".concat(Math.floor(worldPoint.x).toString(), ", Y: ").concat(Math.floor(worldPoint.y).toString(), "  |  ")
+                            + "Tile X: ".concat(Math.floor(worldPoint.x / taro.scaleMapDetails.tileWidth).toString(), ", Tile Y: ").concat(Math.floor(worldPoint.y / taro.scaleMapDetails.tileHeight).toString(), "  |  ")
+                            + "Tile id: ".concat(map_1.getTileAt(pointerTileX_1, pointerTileY_1).index));
+                    }
                     if (devModeScene.input.manager.activePointer.leftButtonDown()) {
                         if (this.devModeTools.modeButtons[2].active || this.devModeTools.modeButtons[3].active) {
                             var originTileArea_1 = {};
@@ -388,7 +397,7 @@ var TileEditor = /** @class */ (function () {
                         }
                         else if (this.devModeTools.modeButtons[4].active) {
                             var targetTile_1 = this.getTile(pointerTileX_1, pointerTileY_1, map_1);
-                            var selectedTile_1 = (_b = Object.values(((_a = Object.values(this.selectedTileArea)) === null || _a === void 0 ? void 0 : _a[0]) || {})) === null || _b === void 0 ? void 0 : _b[0];
+                            var selectedTile_1 = (_e = Object.values(((_d = Object.values(this.selectedTileArea)) === null || _d === void 0 ? void 0 : _d[0]) || {})) === null || _e === void 0 ? void 0 : _e[0];
                             if (selectedTile_1 && targetTile_1 !== selectedTile_1 && (targetTile_1 || map_1.currentLayerIndex === 0 || map_1.currentLayerIndex === 1)) {
                                 var nowCommandCount_1 = this.commandController.nowInsertIndex;
                                 var addToLimits_1 = function (v2d) {

@@ -1,5 +1,5 @@
 
-// @ts-nocheck
+//
 // https://www.npmjs.com/package/base64-arraybuffer
 const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 

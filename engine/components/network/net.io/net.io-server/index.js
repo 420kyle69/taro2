@@ -452,12 +452,21 @@ NetIo.Socket = NetIo.EventingClass.extend({
 			self.emit('message', [self._decode(message)]);
 		});
 
-		this._socket.on('close', function (reasonCode, description) {
+		this._socket.on('close', function (code, reason) {
 			// first step in the propagation of the disconnect event.
+			// store socket's disconnect reason, if not set already
+			self._disconnect = {
+				reasonCode: self._disconnect?.reasonCode || self.getReasonCode(reason.toString()),
+				reason: self._disconnect?.reason || reason.toString(),
+				code: self._disconnect?.code || code,
+				at: self._disconnect?.at || new Date(),
+				source: self._disconnect?.source || 'closeEvent',
+			};
+			
 			self.emit('disconnect', {
 				socket: self._socket,
-				reason: description,
-				code: reasonCode
+				reason,
+				code,
 			});
 		});
 
@@ -496,6 +505,27 @@ NetIo.Socket = NetIo.EventingClass.extend({
 			console.log('err occured in netio-server/index.js _send()');
 		}
 	},
+	
+	getReasonCode: function (reason) {
+		let reasonCode = reason;
+		if (reason) {
+			reason = reason.toString();
+			if (reason.startsWith('You were kicked by')) {
+				reasonCode = 'Kicked by Mod';
+			} else if (reason.startsWith('Duplicate IP detected')) {
+				reasonCode = 'Duplicate IP detected';
+			} else if (reason.startsWith('Server has closed connection.')) {
+				reasonCode = 'Server closed connection.';
+			} else if (reason.startsWith('Security token could not be validated')) {
+				reasonCode = 'Invalid security token';
+			} else if (reason.startsWith('Lost connection to the server, and grace period for reconnect')) {
+				reasonCode = 'Reconnect grace period over';
+			} else if (reason.startsWith('server lifespan expired')) {
+				reasonCode = 'Server lifespan expired';
+			}
+		}
+		return reasonCode;
+	},
 
 	/**
      * Closes the socket.
@@ -515,7 +545,16 @@ NetIo.Socket = NetIo.EventingClass.extend({
 		if (!isNaN(parseInt(reason)) && !code) {
 			code = reason;
 		}
-
+		
+		// store socket's disconnect reason, if not set already
+		this._disconnect = {
+			reasonCode: this._disconnect?.reasonCode || this.getReasonCode(reason),
+			reason: this._disconnect?.reason || reason,
+			code: this._disconnect?.code || code,
+			at: this._disconnect?.at || new Date(),
+			source: this._disconnect?.source || 'closeFn',
+		};
+		
 		this._socket.close(code);
 	}
 });
@@ -769,16 +808,20 @@ NetIo.Server = NetIo.EventingClass.extend({
 			const token = searchParams.get('token');
 
 			try {
-				const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
-
-				// const isGuestUserAllowed = taro.game?.data?.defaultData?.isGuestPlayerAllowed;
-
-				// if (!isGuestUserAllowed && (!decodedToken.userId || !decodedToken.sessionId)) {
-				// 	socket.close('Guest user not allowed. Please login or signup.');
-				// 	console.log('Guest user not allowed', token);
-				// 	return;
-				// }
-
+				let decodedToken;
+				
+				if (process.env.ENV === 'standalone') {
+					// no token validation required for standalone server
+					decodedToken = {
+						userId: '',
+						sessionId: '',
+						createdAt: Date.now(),
+						gameSlug: taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.gameSlug
+					}
+				} else {
+					decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
+				}
+				
 				// extracting user from token and adding it in _token.
 				socket._token = {
 					userId: decodedToken.userId,
@@ -801,17 +844,25 @@ NetIo.Server = NetIo.EventingClass.extend({
 						// TODO: check whether _sockets still has a reference? It should not because of the disconnect listener just below
 						return oldSocket._token.token == socket._token.token;
 					});
-
+					
 					if (matchedTokens.length === 0) {
-						console.log('Token has been used already', token);
-						socket.close('Security token could not be validated, please refresh the page.');
+						console.log('Reconnect failed, grace period over', token);
+						socket.close('Lost connection to the server, and grace period for reconnect is over.<br/>Please refresh your browser to join again');
 						return;
 					}
 					// else if matchedTokens.length > 1?
-					assignedId = matchedTokens[0][1].id;
-					clearTimeout(matchedTokens[0][1].gracePeriod);
+					const oldSocket = matchedTokens[0][1];
+					assignedId = oldSocket.id;
+					clearTimeout(oldSocket.gracePeriod);
 					console.log('grace period cancelled');
 					matchedTokens = [];
+					
+					// store previous disconnects and send to MP for analytics
+					socket._previousDisconnects = oldSocket._previousDisconnects || [];
+					socket._previousDisconnects.push(oldSocket._disconnect);
+					
+					// persist original start time, so we can track correct session duration
+					socket.start = oldSocket.start || socket.start;
 				}
 
 				// store token for current client
@@ -849,6 +900,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 			// Register a listener so that if the socket disconnects,
 			// we can remove it from the active socket lookups
 			socket.on('disconnect', function (data) {
+				
 				var index = self._sockets.indexOf(socket);
 				if (index > -1) {
 					// Remove the socket from the array
@@ -856,13 +908,22 @@ NetIo.Server = NetIo.EventingClass.extend({
 				}
 
 				if (self._socketsById[socket.id]) {
-					self._socketsById[socket.id].gracePeriod = setTimeout(() => {
+					if (!!socket._disconnect?.reason) {
+						// if a disconnect reason is provided, disconnect socket immediately as no reconnects are expected
 						delete self._socketsById[socket.id];
-
+						
 						// moved from .on('disconnect') in TaroNetIoServer.js:~588
 						// data contains {WebSocket socket, <Buffer > reason, Number code}
-						taro.network._onClientDisconnect(data, socket);
-					}, 5000);
+						taro.network._onSocketDisconnect(data, socket);
+					} else {
+						self._socketsById[socket.id].gracePeriod = setTimeout(() => {
+							delete self._socketsById[socket.id];
+							
+							// moved from .on('disconnect') in TaroNetIoServer.js:~588
+							// data contains {WebSocket socket, <Buffer > reason, Number code}
+							taro.network._onSocketDisconnect(data, socket);
+						}, 5000);
+					}
 				}
 			});
 			// Tell the client their new ID - triggers this._io.on('connect', ...) on client
@@ -944,7 +1005,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 
 							// moved from .on('disconnect') in TaroNetIoServer.js:~588
 							// data contains {WebSocket socket, <Buffer > reason, Number code}
-							taro.network._onClientDisconnect(data, socket);
+							taro.network._onSocketDisconnect(data, socket);
 						}, 5000);
 					}
 				});
@@ -953,7 +1014,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 			}
 		}
 	},
-
+	
 	/**
      * Sends a message. If the client id is not specified
      * the message will be sent to all connected clients.
