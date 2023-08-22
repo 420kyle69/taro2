@@ -211,7 +211,8 @@ var ScoreboardComponent = TaroEntity.extend({
 
 						$(scoreboardElement).append(
 							$('<div/>', {
-								class: `cursor-pointer scoreboard-user-entry scoreboard-player-rank-${i} ${playerIsSelf}`,
+								id: `scoreboard-player-rank-${i}`,
+								class: `cursor-pointer scoreboard-user-entry ${playerIsSelf}`,
 								style: `color: ${color};font-weight:${defaultFontWeight}`,
 								onContextMenu: `window.showUserDropdown({ event, userId: '${player._stats.userId}' })`
 							}).append(
@@ -227,17 +228,6 @@ var ScoreboardComponent = TaroEntity.extend({
 							)
 						);
 					}
-					var readableName = player._stats.name || '';
-
-					readableName = readableName.replace(/</g, '&lt;');
-					readableName = readableName.replace(/>/g, '&gt;');
-
-					color = color || DEFAULT_COLOR;
-					scoreboard += `
-						<div onContextMenu="window.showUserDropdown({ event, userId: '${player._stats.userId}' })" class='cursor-pointer scoreboard-user-entry ${playerIsSelf}' id='scoreboard-player-rank-${i}' style='color: ${color};font-weight:${defaultFontWeight}'>
-							<span class='scoreboard-player-name'>${readableName}</span> <small class='scoreboard-player-score'><span>${self.convertNumbersToKMB(sortedScores[i].value)}</span></small>
-						</div>
-					`;
 				}
 			}
 		}
