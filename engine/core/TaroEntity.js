@@ -4190,9 +4190,9 @@ var TaroEntity = TaroObject.extend({
 						// var forceStreamKeys = ['anim', 'coin', 'stateId', 'ownerId', 'name', 'slotIndex', 'newItemId', 'quantity', 'spriteOnly', 'setFadingText', 'playerJoinedAgain', 'use', 'hidden'];
 						var forceStreamKeys = ['anim', 'coin', 'setFadingText', 'playerJoinedAgain', 'use', 'hidden'];
 						if (typeof this.queueStreamData === 'function') {
-							if (data[attrName] === this.lastUpdatedData[attrName]) {
-								console.log(attrName, "is the same! previous", this.lastUpdatedData[attrName], "new", newValue)
-							}
+							// if (data[attrName] === this.lastUpdatedData[attrName]) {
+							// 	console.log(attrName, "is the same! previous", this.lastUpdatedData[attrName], "new", newValue)
+							// }
 
 							if (data[attrName] !== this.lastUpdatedData[attrName] || forceStreamKeys.includes(attrName)) {
 								// console.log("queueStreamData", attrName, data[attrName])
