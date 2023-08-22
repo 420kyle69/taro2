@@ -1995,7 +1995,7 @@ var Unit = TaroEntityPhysics.extend({
 			for (let i = 0; i < self._stats.itemIds.length; i++) {
 				var itemId = self._stats.itemIds[i];
 				var item = taro.$(itemId);
-				if (item) {
+				if (item && item._stats.showCDOverlay) {
 					taro.itemUi.updateItemCooldownOverlay(item);
 				}
 			}
