@@ -732,12 +732,6 @@ var Player = TaroEntity.extend({
 			if (updateQueue) {
 				for (var key in updateQueue) {
 					var value = updateQueue[key];
-					// ignore update if the value hasn't changed since the last update. this is to prevent unnecessary updates
-					if (this.lastUpdatedData[key] == value) {
-						// console.log("ignoring update", this._stats.name, {[key]: value})										
-						delete taro.client.entityUpdateQueue[this.id()][key]
-						continue;
-					}
 				
 					processedUpdates.push({[key]: value});
 					delete taro.client.entityUpdateQueue[this.id()][key]

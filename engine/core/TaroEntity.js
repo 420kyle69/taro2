@@ -4191,7 +4191,8 @@ var TaroEntity = TaroObject.extend({
 						var forceStreamKeys = ['anim', 'coin', 'setFadingText', 'playerJoinedAgain', 'use', 'hidden'];
 						if (typeof this.queueStreamData === 'function') {
 							// if (data[attrName] === this.lastUpdatedData[attrName]) {
-							// 	console.log(attrName, "is the same! previous", this.lastUpdatedData[attrName], "new", newValue)
+							// 	// console.log(this._category, this._stats.name, attrName, "is the same! previous", this.lastUpdatedData[attrName], "new", newValue)
+							// 	console.log("not sending repeat data", attrName)
 							// }
 
 							if (data[attrName] !== this.lastUpdatedData[attrName] || forceStreamKeys.includes(attrName)) {
@@ -4294,9 +4295,6 @@ var TaroEntity = TaroObject.extend({
 								taro.client.emit('create-particle', newValue);
 								break;
 						}
-
-						// for client-side: cache last updated data, so we can ignore same-value-update next time (this optimizes CPU usage by a lot)
-						this.lastUpdatedData[attrName] = newValue; 
 					}
 				}
 			}

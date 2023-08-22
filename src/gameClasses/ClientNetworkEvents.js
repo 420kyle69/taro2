@@ -555,9 +555,7 @@ var ClientNetworkEvents = {
 
 				if (data.entityId) {
 					var entity = taro.$(data.entityId)
-					if (entity) {
-						entity.queueStreamUpdateData(data.entityId, "particle", data)	
-					}
+					taro.client.queueStreamUpdateData(data.entityId, "particle", data)
 				} else {
 					taro.client.emit("create-particle", data);
 				}

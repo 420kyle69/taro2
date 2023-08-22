@@ -1985,12 +1985,6 @@ var Unit = TaroEntityPhysics.extend({
 				for (var key in updateQueue) {
 					var value = updateQueue[key];
 
-					// ignore update if the value hasn't changed since the last update. this is to prevent unnecessary updates
-					if (this.lastUpdatedData[key] == value) {
-						delete taro.client.entityUpdateQueue[this.id()][key]
-						continue;
-					}
-				
 					processedUpdates.push({[key]: value});
 					delete taro.client.entityUpdateQueue[this.id()][key]
 				}

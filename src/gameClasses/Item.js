@@ -1065,7 +1065,7 @@ var Item = TaroEntityPhysics.extend({
 						if (taro.isClient) {
 							newValue = taro.clientSanitizer(newValue);
 						}
-						
+
 						this._stats[attrName] = newValue;
 						var owner = self.getOwnerUnit();
 						if (taro.isClient && taro.client.selectedUnit == owner) {
@@ -1183,13 +1183,6 @@ var Item = TaroEntityPhysics.extend({
 			if (updateQueue) {
 				for (var key in updateQueue) {
 					var value = updateQueue[key];
-
-					// ignore update if the value hasn't changed since the last update. this is to prevent unnecessary updates
-					if (this.lastUpdatedData[key] == value) {
-						// console.log("ignoring update", this._stats.name, {[key]: value})										
-						delete taro.client.entityUpdateQueue[self.id()][key]
-						continue;
-					}
 
 					if (
 						// Don't run if we're updating item's state/owner unit, but its owner doesn't exist yet
