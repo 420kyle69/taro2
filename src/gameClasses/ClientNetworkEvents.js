@@ -119,7 +119,7 @@ var ClientNetworkEvents = {
 	_onOpenShop: function (data) {
 		if (data.type) {
 			var shopName = taro.game.data.shops[data.type] ? taro.game.data.shops[data.type].name : "Item shop";
-			var shopDescription = taro.game.data.shops[data.type] ? taro.game.data.shops[data.type].description : "";
+			var shopDescription = taro.game.data.shops[data.type] ? taro.clientSanitizer(taro.game.data.shops[data.type].description) : "";
 			$("#modd-item-shop-header").text(shopName);
 
 			if (shopDescription?.length) {
@@ -130,7 +130,9 @@ var ClientNetworkEvents = {
 
 			taro.shop.openItemShop(data.type);
 			$("#modd-item-shop-modal").modal("show");
-			taro.client.myPlayer.control.updatePlayerInputStatus();
+			if (taro.client.myPlayer?.control) {
+				taro.client.myPlayer.control.updatePlayerInputStatus();
+			}
 		}
 	},
 	_onCreateFloatingText: function (data) {
@@ -203,7 +205,7 @@ var ClientNetworkEvents = {
 		} else if (data.action == "hide") {
 			taro.uiTextElementsObj[key].style.display = "none";
 		} else {
-			taro.uiTextElementsObj[key].innerHTML = data.value;
+			taro.uiTextElementsObj[key].innerHTML = taro.clientSanitizer(data.value);
 		}
 	},
 

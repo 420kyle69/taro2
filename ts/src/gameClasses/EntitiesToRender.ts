@@ -74,7 +74,10 @@ class EntitiesToRender {
 			
 				// update transformation using incoming network stream
 				// var timeStart = performance.now();
-				entity._processTransform();
+				if (entity.isTransforming() || entity == taro.client.selectedUnit) {
+					entity._processTransform();
+				}
+				
 				// taro.profiler.logTimeElapsed('first _processTransform', timeStart);
 			
 				if (entity._translate && !entity.isHidden()) {
