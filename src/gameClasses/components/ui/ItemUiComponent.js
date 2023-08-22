@@ -243,11 +243,6 @@ var ItemUiComponent = TaroEntity.extend({
 			});
 		}
 		return itemDiv;
-
-		return $('<div/>', {
-			style: 'font-size: 16px; width: 250px;',
-			html: ''
-		});
 	},
 
 	getItemHtml: function (itemStats) {
@@ -256,7 +251,7 @@ var ItemUiComponent = TaroEntity.extend({
 		// var buffs = self.getBuffList(itemStats);
 
 		var itemTitle = $('<h4/>', {
-			html: taro.clientSanitizer(itemStats.name)
+			html: itemStats.name
 		});
 
 		var itemDiv = $('<div/>', {

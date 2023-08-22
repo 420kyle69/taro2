@@ -1062,6 +1062,10 @@ var Item = TaroEntityPhysics.extend({
 						break;
 
 					case 'name':
+						if (taro.isClient) {
+							newValue = taro.clientSanitizer(newValue);
+						}
+						
 						this._stats[attrName] = newValue;
 						var owner = self.getOwnerUnit();
 						if (taro.isClient && taro.client.selectedUnit == owner) {
