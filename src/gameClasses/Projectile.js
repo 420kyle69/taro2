@@ -121,6 +121,21 @@ var Projectile = TaroEntityPhysics.extend({
 			if (this.attribute) {
 				this.attribute.regenerate();
 			}
+		} else if (taro.isClient) {
+			var processedUpdates = [];
+			var updateQueue = taro.client.entityUpdateQueue[this.id()];			
+			if (updateQueue) {
+				for (var key in updateQueue) {
+					var value = updateQueue[key];
+
+					processedUpdates.push({[key]: value});
+					delete taro.client.entityUpdateQueue[this.id()][key]
+				}
+
+				if (processedUpdates.length > 0) {
+					this.streamUpdateData(processedUpdates);
+				}
+			}
 		}
 
 		if (taro.physics && taro.physics.engine != 'CRASH') {

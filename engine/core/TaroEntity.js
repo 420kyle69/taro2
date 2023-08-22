@@ -62,7 +62,8 @@ var TaroEntity = TaroObject.extend({
 		this._hidden = false;
 
 		this._stats = {};
-		this._streamDataQueued = [];
+		this._streamDataQueued = {};
+		this.lastUpdatedData = {};
 		this._isBeingRemoved = false;
 		// this ensures entity is spawning at a correct position initially. particularily useful for projectiles
 
@@ -121,6 +122,27 @@ var TaroEntity = TaroObject.extend({
 
 		return this;
 	},
+	
+	/**
+	 * Sets the entity as hidden and cannot be interacted with.
+	 * @example #Hide a visible entity
+	 *     entity.hide();
+	 * @return {*} The object this method was called from to allow
+	 * method chaining.
+	 */
+	hide: function () {
+		if (taro.isServer) {
+			// self._hidden = true; // never hide it, because it'll stop processing stream queue
+			this.streamUpdateData([{ isHidden: true }]);
+		} else if (taro.isClient) {
+			// this.disableInterpolation(true)
+			this._hidden = true;
+			this.emit('hide');
+
+			this.texture('');
+		}
+		return this;
+	},
 
 	// update item's body & texture based on stateId given
 	setState: function (stateId, defaultData) {
@@ -168,28 +190,6 @@ var TaroEntity = TaroObject.extend({
 
 		self.previousState = newState;
 		self.updateBody(defaultData);
-	},
-
-	/**
-	 * Sets the entity as hidden and cannot be interacted with.
-	 * @example #Hide a visible entity
-	 *     entity.hide();
-	 * @return {*} The object this method was called from to allow
-	 * method chaining.
-	 */
-	hide: function () {
-		if (taro.isServer) {
-			// self._hidden = true; // never hide it, because it'll stop processing stream queue
-			this.streamUpdateData([{ isHidden: true }]);
-		} else if (taro.isClient) {
-			// this.disableInterpolation(true)
-
-			this._hidden = true;
-			this.emit('hide');
-
-			this.texture('');
-		}
-		return this;
 	},
 
 	/**
@@ -4055,7 +4055,7 @@ var TaroEntity = TaroObject.extend({
 	// },
 
 	streamUpdateData: function (queuedData) {
-		var oldStats = {};
+
 		if (queuedData != undefined) {
 			for (var i = 0; i < queuedData.length; i++) {
 				var data = queuedData[i];
@@ -4187,13 +4187,22 @@ var TaroEntity = TaroObject.extend({
 
 					if (taro.isServer) {
 						// keys that will stream even if its new value is same as the previous value
-						var forceStreamKeys = ['anim', 'coin', 'stateId', 'ownerId', 'name', 'slotIndex', 'newItemId', 'quantity', 'spriteOnly', 'setFadingText', 'playerJoinedAgain', 'use', 'hidden'];
+						// var forceStreamKeys = ['anim', 'coin', 'stateId', 'ownerId', 'name', 'slotIndex', 'newItemId', 'quantity', 'spriteOnly', 'setFadingText', 'playerJoinedAgain', 'use', 'hidden'];
+						var forceStreamKeys = ['anim', 'coin', 'setFadingText', 'playerJoinedAgain', 'use', 'hidden'];
 						if (typeof this.queueStreamData === 'function') {
-							if (data[attrName] != oldStats[attrName] || forceStreamKeys.includes(attrName)) {
+							// if (data[attrName] === this.lastUpdatedData[attrName]) {
+							// 	// console.log(this._category, this._stats.name, attrName, "is the same! previous", this.lastUpdatedData[attrName], "new", newValue)
+							// 	console.log("not sending repeat data", attrName)
+							// }
+
+							if (data[attrName] !== this.lastUpdatedData[attrName] || forceStreamKeys.includes(attrName)) {
 								// console.log("queueStreamData", attrName, data[attrName])
 								var streamData = {};
 								streamData[attrName] = data[attrName];
 								this.queueStreamData(streamData);
+
+								// for server-side only: cache last updated data, so we dont stream same data again (this optimizes CPU usage by a lot)
+								this.lastUpdatedData[attrName] = rfdc()(newValue); 
 							}
 						}
 					} else if (taro.isClient) {
@@ -4294,7 +4303,12 @@ var TaroEntity = TaroObject.extend({
 
 	// combine all data that'll be sent to the client, and send them altogether at the tick
 	queueStreamData: function (data) {
-		this._streamDataQueued = this._streamDataQueued.concat(data);
+		// this._streamDataQueued = this._streamDataQueued.concat(data);
+		for (key in data) {
+			value = data[key];
+			this._streamDataQueued[key] = value;
+		}
+		
 		taro.server.bandwidthUsage[this._category] += JSON.stringify(this._streamDataQueued).length;
 	},
 
@@ -5183,6 +5197,13 @@ var TaroEntity = TaroObject.extend({
 	isTransforming: function(bool) {
 		if (bool != undefined) {
 			this._isTransforming = bool;
+            if (this._isTransforming) {
+                this.emit('transform', {
+                    x: this.nextKeyFrame[1][0],
+                    y: this.nextKeyFrame[1][1],
+                    rotation: this.nextKeyFrame[1][2],
+                });
+            }
 		}
 
 		// for items, if its owner is transforming, then it is considered to be transforming

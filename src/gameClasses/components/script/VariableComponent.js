@@ -89,8 +89,6 @@ var VariableComponent = TaroEntity.extend({
 	getValue: function (text, vars) {
 		var self = this;
 
-		var arr = [];
-
 		var returnValue = undefined;
 
 		// just return raw numbers
