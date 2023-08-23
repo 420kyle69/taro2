@@ -745,7 +745,7 @@ var ActionComponent = TaroEntity.extend({
 						var unit = self._script.variable.getValue(action.unit, vars);
 						var color = self._script.variable.getValue(action.color, vars);
 
-						if (player && unit && unit._category === 'unit' && player._stats && player._stats.clientId) {
+						if (unit?._category === 'unit' && player?._stats?.clientId && typeof color == 'string') {
 							var clientId = player._stats.clientId;
 
 							unit._stats.minimapUnitVisibleToClients[clientId] = color;
