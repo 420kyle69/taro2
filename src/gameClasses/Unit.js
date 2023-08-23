@@ -1497,7 +1497,7 @@ var Unit = TaroEntityPhysics.extend({
 					case 'itemIds':
 						self._stats[attrName] = newValue;
 						// update shop as player points are changed and when shop modal is open
-						if (taro.isClient) {
+						if (taro.isClient && this.inventory) {
 							this.inventory.update();
 
 							if ($('#modd-item-shop-modal').hasClass('show')) {
@@ -1516,7 +1516,7 @@ var Unit = TaroEntityPhysics.extend({
                                 if (this !== taro.client.selectedUnit) {
                                     // console.log('Unit.streamUpdateData(\'currentItemIndex\') on the client', newValue);
                                     this.setCurrentItem(newValue);
-                                } else {
+                                } else if (this.inventory) {
                                     this.inventory.highlightSlot(newValue + 1);
                                     var item = this.inventory.getItemBySlotNumber(newValue + 1);
                                     taro.itemUi.updateItemInfo(item);
