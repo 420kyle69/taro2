@@ -96,7 +96,7 @@ class EntitiesToRender {
 					// taro.profiler.logTimeElapsed('transformTexture', timeStart);
 				}
 
-				if (phaserEntity) {
+				if (phaserEntity && entity._category != 'region') {
 					phaserEntity.setVisible(false);
 				}
 			}

@@ -73,7 +73,7 @@ var EntitiesToRender = /** @class */ (function () {
                     entity.transformTexture(x, y, rotate);
                     // taro.profiler.logTimeElapsed('transformTexture', timeStart);
                 }
-                if (phaserEntity) {
+                if (phaserEntity && entity._category != 'region') {
                     phaserEntity.setVisible(false);
                 }
             }
