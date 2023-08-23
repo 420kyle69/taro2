@@ -41,16 +41,13 @@ class EntitiesToRender {
 					ownerUnit = entity.getOwnerUnit();
 				}
 
-				if (entity.isTransforming() || entity == taro.client.selectedUnit || ownerUnit == taro.client.selectedUnit) {
+				if (entity.isTransforming()) {
 
 					// update transformation using incoming network stream
 					// var timeStart = performance.now();
 					entity._processTransform();
-					
-					// taro.profiler.logTimeElapsed('_processTransform', timeStart);	
-					// taro.profiler.logTimeElapsed('first _processTransform', timeStart);
 				}
-
+				
 				if (entity._translate) {
 						
 					var x = entity._translate.x;
@@ -58,10 +55,9 @@ class EntitiesToRender {
 					var rotate = entity._rotate.z;
 				}
 
-				if (ownerUnit) {
+				// transform unit-owned item
+				if (ownerUnit?.phaserEntity?.gameObject?.visible) {
 					// var timeStart = performance.now();
-					// if ownerUnit's transformation hasn't been processed yet, then it'll cause item to drag behind. so we're running it now
-					ownerUnit._processTransform();
 
 					// rotate weldjoint items to the owner unit's rotation
 					if (entity._stats.currentBody && entity._stats.currentBody.jointType == 'weldJoint') {
@@ -83,21 +79,21 @@ class EntitiesToRender {
 			
 				}
 
-				if (entity.tween?.isTweening) {
+				if (entity.tween?.isTweening && phaserEntity?.visible) {
 					entity.tween.update();
 					x += entity.tween.offset.x;
 					y += entity.tween.offset.y;
 					rotate += entity.tween.offset.rotate;
 				}
 
-				if (entity.tween?.isTweening || entity.isTransforming() || entity == taro.client.selectedUnit || (ownerUnit && (ownerUnit.isTransforming() || ownerUnit == taro.client.selectedUnit))) {
+				if (entity.tween?.isTweening || 
+					entity.isTransforming() || 
+					entity == taro.client.selectedUnit || 
+					ownerUnit?.phaserEntity?.gameObject?.visible
+				) {
 					// var timeStart = performance.now();
 					entity.transformTexture(x, y, rotate);
 					// taro.profiler.logTimeElapsed('transformTexture', timeStart);
-				}
-
-				if (phaserEntity && entity._category != 'region') {
-					phaserEntity.setVisible(false);
 				}
 			}
 		}

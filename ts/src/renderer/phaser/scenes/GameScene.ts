@@ -604,12 +604,16 @@ class GameScene extends PhaserScene {
 			x: worldPoint.x,
 			y: worldPoint.y,
 		}]);
+
+		this.renderedEntities.forEach(element => {
+			element.setVisible(false);
+		});
 		
 		if (!taro.developerMode.active || (taro.developerMode.active && taro.developerMode.activeTab !== 'map')) {
 			var visibleEntities = this.cameras.main.cull(this.renderedEntities);
 			visibleEntities.forEach(element => {
 				if (!element.hidden) {
-					element.setVisible(true);
+					element.setVisible(true);					
 
 					if(element.dynamic) {
 						// dynamic is only assigned through an hbz-index-only event
