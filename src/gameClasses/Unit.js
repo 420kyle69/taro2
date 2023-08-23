@@ -1029,7 +1029,7 @@ var Unit = TaroEntityPhysics.extend({
 				var availableSlot = self.inventory.getFirstAvailableSlotForItem(itemData);
 
 				// Check if the item can merge
-				if (itemData.controls?.canMerge) {
+				if (itemData.controls?.canMerge != false) {
 
 					// insert/merge itemData's quantity into matching items in the inventory
 					var totalInventorySize = this.inventory.getTotalInventorySize();
