@@ -4034,6 +4034,15 @@ var TaroEntity = TaroObject.extend({
 		}
 	},
 
+	isAttributeChanged: function(attrName, newUpdate) {
+		var hasChanged = false;
+		for (key in newUpdate) {
+			if (newUpdate[key] !== this.lastUpdatedData[attrName][key]) {
+				hasChanged = true;
+			}
+		}		
+	},
+
 	// use to apply max,min value before attributes value
 	// orderData: function (data) {
 	// 	var attributes = data.attributes && rfdc()(data.attributes);
@@ -4187,23 +4196,20 @@ var TaroEntity = TaroObject.extend({
 
 					if (taro.isServer) {
 						// keys that will stream even if its new value is same as the previous value
-						// var forceStreamKeys = ['anim', 'coin', 'stateId', 'ownerId', 'name', 'slotIndex', 'newItemId', 'quantity', 'spriteOnly', 'setFadingText', 'playerJoinedAgain', 'use', 'hidden'];
-						var forceStreamKeys = ['anim', 'coin', 'setFadingText', 'playerJoinedAgain', 'use', 'hidden'];
 						if (typeof this.queueStreamData === 'function') {
-							if (data[attrName] === this.lastUpdatedData[attrName]) {
-								// console.log(this._category, this._stats.name, attrName, "is the same! previous", this.lastUpdatedData[attrName], "new", newValue)
-								// console.log("not sending repeat data", attrName)
-							}
 
-							if (data[attrName] !== this.lastUpdatedData[attrName] || forceStreamKeys.includes(attrName)) {
-								// console.log("queueStreamData", attrName, data[attrName])
+							// var forceStreamKeys = ['anim', 'coin', 'stateId', 'ownerId', 'name', 'slotIndex', 'newItemId', 'quantity', 'spriteOnly', 'setFadingText', 'playerJoinedAgain', 'use', 'hidden'];						
+							var forceStreamKeys = ['anim', 'coin', 'setFadingText', 'playerJoinedAgain', 'use', 'hidden'];
+							var dataIsAttributeRelated = ['attributes', 'attributesMin', 'attributesMax', 'attributesRegenerateRate'].includes(key)							
+							if (newValue !== this.lastUpdatedData[attrName] || dataIsAttributeRelated || forceStreamKeys.includes(attrName)) {
 								var streamData = {};
 								streamData[attrName] = data[attrName];
 								this.queueStreamData(streamData);
 
 								// for server-side only: cache last updated data, so we dont stream same data again (this optimizes CPU usage by a lot)
 								this.lastUpdatedData[attrName] = rfdc()(newValue); 
-							}
+							} 
+							// else console.log(this._category, this._stats.name, attrName, "is the same as previous", this.lastUpdatedData[attrName], "new", newValue)
 						}
 					} else if (taro.isClient) {
 						switch (attrName) {
@@ -4311,7 +4317,10 @@ var TaroEntity = TaroObject.extend({
 				// some data need to merge instead of overwriting they key. otherwise, we'll only be able to send the last attribute added.
 				// for example, if server calls queueStreamData for Speed and HP attributes, HP will overwrite Speed as they share same key ("attributes")			
 				// this._streamDataQueued[key] = {...this._streamDataQueued[key], ...value};
-				if (this._streamDataQueued[key] == undefined) this._streamDataQueued[key] = {};
+				if (this._streamDataQueued[key] == undefined) 
+				{
+					this._streamDataQueued[key] = {};
+				}					
 				this._streamDataQueued[key] = Object.assign(this._streamDataQueued[key], value);
 			} else {
 				this._streamDataQueued[key] = value;
