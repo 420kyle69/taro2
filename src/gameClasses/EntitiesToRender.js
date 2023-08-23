@@ -23,6 +23,7 @@ var EntitiesToRender = /** @class */ (function () {
                         }
                         entity.destroy();
                     }
+                    // if (typeof entity._behaviour == 'function')
                     entity._behaviour();
                 }
                 var ownerUnit = undefined;

@@ -33,7 +33,8 @@ class EntitiesToRender {
 						entity.destroy();
 					}
 
-					entity._behaviour();
+					// if (typeof entity._behaviour == 'function')
+						entity._behaviour();
 				}
 
 				var ownerUnit = undefined;
