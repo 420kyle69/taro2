@@ -37,9 +37,11 @@ class EntitiesToRender {
 						entity._behaviour();
 				}
 
-				var ownerUnit = undefined;
-				if (entity._category == 'item') {
-					ownerUnit = entity.getOwnerUnit();
+				if (entity._translate) {
+						
+					var x = entity._translate.x;
+					var y = entity._translate.y;
+					var rotate = entity._rotate.z;
 				}
 
 				if (entity.isTransforming()) {
@@ -49,35 +51,28 @@ class EntitiesToRender {
 					entity._processTransform();
 				}
 				
-				if (entity._translate) {
-						
-					var x = entity._translate.x;
-					var y = entity._translate.y;
-					var rotate = entity._rotate.z;
-				}
-
-				// transform unit-owned item
-				if (ownerUnit?.phaserEntity?.gameObject?.visible) {
-					// var timeStart = performance.now();
-
-					// rotate weldjoint items to the owner unit's rotation
-					if (entity._stats.currentBody && entity._stats.currentBody.jointType == 'weldJoint') {
-						rotate = ownerUnit._rotate.z;
-					// immediately rotate my unit's items to the angleToTarget
-					} else if (ownerUnit == taro.client.selectedUnit && entity._stats.controls?.mouseBehaviour?.rotateToFaceMouseCursor) {
-						rotate = ownerUnit.angleToTarget; // angleToTarget is updated at 60fps								
+				var ownerUnit = undefined;
+				if (entity._category == 'item') {
+					ownerUnit = entity.getOwnerUnit();
+					if (ownerUnit) {
+						// var timeStart = performance.now();
+						// rotate weldjoint items to the owner unit's rotation
+						if (entity._stats.currentBody && entity._stats.currentBody.jointType == 'weldJoint') {
+							rotate = ownerUnit._rotate.z;
+						// immediately rotate my unit's items to the angleToTarget
+						} else if (ownerUnit == taro.client.selectedUnit && entity._stats.controls?.mouseBehaviour?.rotateToFaceMouseCursor) {
+							rotate = ownerUnit.angleToTarget; // angleToTarget is updated at 60fps								
+						}
+						entity._rotate.z = rotate // update the item's rotation immediately for more accurate aiming (instead of 20fps)
+	
+						entity.anchoredOffset = entity.getAnchoredOffset(rotate);
+	
+						if (entity.anchoredOffset) {
+							x = ownerUnit._translate.x + entity.anchoredOffset.x;
+							y = ownerUnit._translate.y + entity.anchoredOffset.y;
+							rotate = entity.anchoredOffset.rotate;
+						}
 					}
-					entity._rotate.z = rotate // update the item's rotation immediately for more accurate aiming (instead of 20fps)
-
-					entity.anchoredOffset = entity.getAnchoredOffset(rotate);
-
-					if (entity.anchoredOffset) {
-						x = ownerUnit._translate.x + entity.anchoredOffset.x;
-						y = ownerUnit._translate.y + entity.anchoredOffset.y;
-						rotate = entity.anchoredOffset.rotate;
-					}
-					// taro.profiler.logTimeElapsed('second _processTransform', timeStart);
-			
 				}
 
 				if (entity.tween?.isTweening && phaserEntity?.visible) {
@@ -90,7 +85,7 @@ class EntitiesToRender {
 				if (entity.tween?.isTweening || 
 					entity.isTransforming() || 
 					entity == taro.client.selectedUnit || 
-					ownerUnit?.phaserEntity?.gameObject?.visible
+					ownerUnit
 				) {
 					// var timeStart = performance.now();
 					entity.transformTexture(x, y, rotate);
