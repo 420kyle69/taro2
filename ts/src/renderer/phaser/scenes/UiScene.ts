@@ -5,7 +5,11 @@ class UiScene extends PhaserScene {
 	}
 
 	init (): void {
-		this.abilityIconsContainer = new Phaser.GameObjects.Container(this, 64, 64);
+		this.abilityIconsContainer = new Phaser.GameObjects.Container(this);
+		const x = this.sys.game.canvas.width * 0.5;
+		const y = this.sys.game.canvas.height - this.sys.game.canvas.height * 0.17;
+
+		this.abilityIconsContainer.setPosition(x, y);
 
 		taro.client.on('ability-icons', (abilities: Record<string, any>) => {
 			this.generateAbilityIcons(abilities);
@@ -19,10 +23,14 @@ class UiScene extends PhaserScene {
 	}
 
 	preload (): void {
-		const abilities = taro.game.data.abilities;
+		const unitTypes = taro.game.data.unitTypes;
 
-		for (let abilityId in abilities) {
-			this.load.image(`ability/${abilityId}`, this.patchAssetUrl(abilities[abilityId].iconUrl));
+		for (let unitType in unitTypes) {
+			let unitAbilities = unitTypes[unitType].controls.unitAbilities;
+
+			for (let abilityId in unitAbilities) {
+				this.load.image(`ability/${abilityId}`, this.patchAssetUrl(unitAbilities[abilityId].iconUrl));
+			}
 		}
 	}
 
@@ -68,6 +76,8 @@ class PhaserAbilityIcon extends Phaser.GameObjects.Sprite {
 		);
 
 		this.abilityId = abilityId;
+		
+		this.setDisplaySize(32, 32);
 		this.setVisible(true);
 	}
 }

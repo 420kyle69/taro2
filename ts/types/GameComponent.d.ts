@@ -21,9 +21,9 @@ interface ScriptData {
 }
 
 interface ActionData {
-    player?: { 
-        variableName: string; 
-        function: string; 
+    player?: {
+        variableName: string;
+        function: string;
     };
     disabled?: boolean;
     unitType?: string;
@@ -35,7 +35,7 @@ interface ActionData {
 	entityType?: string;
 	position?: {
         function?: string,
-        x: number, 
+        x: number,
         y: number
     };
 	angle?: number;

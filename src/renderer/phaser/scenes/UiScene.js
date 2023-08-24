@@ -20,7 +20,10 @@ var UiScene = /** @class */ (function (_super) {
     }
     UiScene.prototype.init = function () {
         var _this = this;
-        this.abilityIconsContainer = new Phaser.GameObjects.Container(this, 64, 64);
+        this.abilityIconsContainer = new Phaser.GameObjects.Container(this);
+        var x = this.sys.game.canvas.width * 0.5;
+        var y = this.sys.game.canvas.height - this.sys.game.canvas.height * 0.17;
+        this.abilityIconsContainer.setPosition(x, y);
         taro.client.on('ability-icons', function (abilities) {
             _this.generateAbilityIcons(abilities);
         });
@@ -30,9 +33,12 @@ var UiScene = /** @class */ (function (_super) {
         return;
     };
     UiScene.prototype.preload = function () {
-        var abilities = taro.game.data.abilities;
-        for (var abilityId in abilities) {
-            this.load.image("ability/".concat(abilityId), this.patchAssetUrl(abilities[abilityId].iconUrl));
+        var unitTypes = taro.game.data.unitTypes;
+        for (var unitType in unitTypes) {
+            var unitAbilities = unitTypes[unitType].controls.unitAbilities;
+            for (var abilityId in unitAbilities) {
+                this.load.image("ability/".concat(abilityId), this.patchAssetUrl(unitAbilities[abilityId].iconUrl));
+            }
         }
     };
     UiScene.prototype.update = function () {
@@ -55,6 +61,7 @@ var PhaserAbilityIcon = /** @class */ (function (_super) {
     function PhaserAbilityIcon(scene, x, y, texture, abilityId) {
         var _this = _super.call(this, scene, x, y, texture) || this;
         _this.abilityId = abilityId;
+        _this.setDisplaySize(32, 32);
         _this.setVisible(true);
         return _this;
     }
