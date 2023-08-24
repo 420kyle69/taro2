@@ -299,7 +299,7 @@ var Item = TaroEntityPhysics.extend({
 
 				self._stats.lastUsed = taro.now;
 
-				let triggerParams = {unitId: ownerId, itemId: self.id()};
+				let triggerParams = { unitId: ownerId, itemId: self.id() };
 
 				self.script.trigger('itemIsUsed', triggerParams);
 				taro.script.trigger('unitUsesItem', triggerParams);
@@ -344,7 +344,7 @@ var Item = TaroEntityPhysics.extend({
 									defaultData.velocity = {
 										deployMethod: self._stats.deployMethod,
 										x: Math.cos(rotate + Math.radians(-90)) * self._stats.bulletForce,
-										y: Math.sin(rotate + Math.radians(-90)) * self._stats.bulletForce
+										y: Math.sin(rotate + Math.radians(-90)) * self._stats.bulletForce,
 									};
 
 									// we don't create a Projectile entity for raycasts
@@ -415,7 +415,7 @@ var Item = TaroEntityPhysics.extend({
 									pos.x += offset.x;
 									pos.y += offset.y;
 
-									const raycastStart = {x, y} = pos;
+									const raycastStart = { x, y } = pos;
 									const raycastEnd = {
 										x: pos.x + (this._stats.bulletDistance * Math.cos(owner._rotate.z + Math.radians(-90))),
 										y: pos.y + (this._stats.bulletDistance * Math.sin(owner._rotate.z + Math.radians(-90)))
@@ -609,7 +609,7 @@ var Item = TaroEntityPhysics.extend({
 			// if server authoritative mode is enabled, then stream item quantity to the item's owner player only
 			if (taro.runMode == 0) {
 				var playerId = this.getOwnerUnit()?.getOwner()?._id;
-				this.streamUpdateData([{ quantity: qty }], playerId );
+				this.streamUpdateData([{ quantity: qty }], playerId);
 			}
 
 			// item's set to be removed when empty
@@ -731,7 +731,7 @@ var Item = TaroEntityPhysics.extend({
 
 	startUsing: function () {
 		var self = this;
-		
+
 		if (self._stats.isBeingUsed)
 			return;
 
@@ -810,20 +810,20 @@ var Item = TaroEntityPhysics.extend({
 					// console.log(itemAngle, unitAnchoredPosition)
 					// }
 
-					var unitAnchorOffsetRotate = Math.radians(self._stats.currentBody.unitAnchor.rotation || 0);					
-					var unitAnchorOffsetY = self._stats.currentBody.unitAnchor.y || 0;					
+					var unitAnchorOffsetRotate = Math.radians(self._stats.currentBody.unitAnchor.rotation || 0);
+					var unitAnchorOffsetY = self._stats.currentBody.unitAnchor.y || 0;
 					var itemAnchorOffsetY = self._stats.currentBody.itemAnchor?.y || 0; // get translation offset based on itemAnchor
 
 					// item is flipped, then mirror the rotation
 					if (ownerUnit._stats.flip == 1) {
 						var unitAnchorOffsetX = -self._stats.currentBody.unitAnchor.x || 0;
 						var itemAnchorOffsetX = -self._stats.currentBody.itemAnchor?.x || 0;
-					
+
 						rotate -= unitAnchorOffsetRotate;
 					} else {
 						var unitAnchorOffsetX = self._stats.currentBody.unitAnchor.x || 0;
 						var itemAnchorOffsetX = self._stats.currentBody.itemAnchor?.x || 0;
-					
+
 						rotate += unitAnchorOffsetRotate;
 					}
 
@@ -833,10 +833,10 @@ var Item = TaroEntityPhysics.extend({
 						y: (unitAnchorOffsetX * Math.sin(unitRotate)) - (unitAnchorOffsetY * Math.cos(unitRotate))
 					};
 
-					
+
 					offset.x = (unitAnchoredPosition.x) + (itemAnchorOffsetX * Math.cos(rotate)) + (itemAnchorOffsetY * Math.sin(rotate)),
-					offset.y = (unitAnchoredPosition.y) + (itemAnchorOffsetX * Math.sin(rotate)) - (itemAnchorOffsetY * Math.cos(rotate));
-					
+						offset.y = (unitAnchoredPosition.y) + (itemAnchorOffsetX * Math.sin(rotate)) - (itemAnchorOffsetY * Math.cos(rotate));
+
 					if (self._stats.controls && self._stats.controls.mouseBehaviour) {
 						if (self._stats.controls.mouseBehaviour.rotateToFaceMouseCursor || (self._stats.currentBody && (self._stats.currentBody.jointType == 'weldJoint'))) {
 							offset.rotate = rotate;
@@ -1103,7 +1103,7 @@ var Item = TaroEntityPhysics.extend({
 								break;
 							}
 							this._stats.isBeingUsed = newValue;
-						}	
+						}
 						break;
 
 					case 'fireRate':
@@ -1123,7 +1123,7 @@ var Item = TaroEntityPhysics.extend({
 	 */
 	_behaviour: function (ctx) {
 		var self = this;
-		
+
 		_.forEach(taro.triggersQueued, function (trigger) {
 			trigger.params['thisEntityId'] = self.id();
 			self.script.trigger(trigger.name, trigger.params);
@@ -1163,7 +1163,7 @@ var Item = TaroEntityPhysics.extend({
 						self.flip(0);
 					} else {
 						self.flip(1);
-					}					
+					}
 				}
 			}
 
