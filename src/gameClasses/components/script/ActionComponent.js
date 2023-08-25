@@ -2361,6 +2361,8 @@ var ActionComponent = TaroEntity.extend({
 
 						if (position && entity && ['unit', 'item', 'projectile'].includes(entity._category)) {
 							entity.teleportTo(position.x, position.y, entity._rotate.z);
+						} else if (entity._category == 'region' && !isNaN(position.x) && !isNaN(position.y)) {
+							entity.streamUpdateData([{ x: position.x }, { y: position.y }]);
 						}
 
 						break;
