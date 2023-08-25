@@ -34,7 +34,24 @@ class EntitiesToRender {
 					}
 
 					// if (typeof entity._behaviour == 'function')
-						entity._behaviour();
+					entity._behaviour();
+				}
+				
+				var ownerUnit = undefined;
+				if (entity._category == 'item') {
+					ownerUnit = entity.getOwnerUnit();
+
+					// dont render item carried by invisible unit
+					if (!ownerUnit?.phaserEntity?.gameObject?.visible) {
+						continue;
+					}
+				}
+
+				if (entity.isTransforming()) {
+
+					// update transformation using incoming network stream
+					// var timeStart = performance.now();
+					entity._processTransform();
 				}
 
 				if (entity._translate) {
@@ -44,34 +61,23 @@ class EntitiesToRender {
 					var rotate = entity._rotate.z;
 				}
 
-				if (entity.isTransforming()) {
-
-					// update transformation using incoming network stream
-					// var timeStart = performance.now();
-					entity._processTransform();
-				}
-				
-				var ownerUnit = undefined;
 				if (entity._category == 'item') {
-					ownerUnit = entity.getOwnerUnit();
-					if (ownerUnit) {
-						// var timeStart = performance.now();
-						// rotate weldjoint items to the owner unit's rotation
-						if (entity._stats.currentBody && entity._stats.currentBody.jointType == 'weldJoint') {
-							rotate = ownerUnit._rotate.z;
-						// immediately rotate my unit's items to the angleToTarget
-						} else if (ownerUnit == taro.client.selectedUnit && entity._stats.controls?.mouseBehaviour?.rotateToFaceMouseCursor) {
-							rotate = ownerUnit.angleToTarget; // angleToTarget is updated at 60fps								
-						}
-						entity._rotate.z = rotate // update the item's rotation immediately for more accurate aiming (instead of 20fps)
-	
-						entity.anchoredOffset = entity.getAnchoredOffset(rotate);
-	
-						if (entity.anchoredOffset) {
-							x = ownerUnit._translate.x + entity.anchoredOffset.x;
-							y = ownerUnit._translate.y + entity.anchoredOffset.y;
-							rotate = entity.anchoredOffset.rotate;
-						}
+					// var timeStart = performance.now();
+					// rotate weldjoint items to the owner unit's rotation
+					if (entity._stats.currentBody && entity._stats.currentBody.jointType == 'weldJoint') {
+						rotate = ownerUnit._rotate.z;
+					// immediately rotate my unit's items to the angleToTarget
+					} else if (ownerUnit == taro.client.selectedUnit && entity._stats.controls?.mouseBehaviour?.rotateToFaceMouseCursor) {
+						rotate = ownerUnit.angleToTarget; // angleToTarget is updated at 60fps								
+					}
+					entity._rotate.z = rotate // update the item's rotation immediately for more accurate aiming (instead of 20fps)
+
+					entity.anchoredOffset = entity.getAnchoredOffset(rotate);
+
+					if (entity.anchoredOffset) {
+						x = ownerUnit._translate.x + entity.anchoredOffset.x;
+						y = ownerUnit._translate.y + entity.anchoredOffset.y;
+						rotate = entity.anchoredOffset.rotate;
 					}
 				}
 
