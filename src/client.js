@@ -57,29 +57,29 @@ const Client = TaroEventingClass.extend({
 				height: 32
 			})
 		);
-		
+
 		// modifying jquery.append(), so the cached DOM elements are updated
 		this.append = jQuery.fn.append;
-		$.fn.append = function(content) {
+		$.fn.append = function (content) {
 			// if the newly added element has id, then cache it. (and overwrite if it already exists)
 			if (content != undefined && content != '' && typeof content.attr == 'function' && content.attr('id') != undefined) {
 				self.domElements[content.attr('id')] = content;
 			}
-			
-			return  self.append.apply(this, arguments);
-		}; 
+
+			return self.append.apply(this, arguments);
+		};
 
 		// modifying jquery.html(), so the cached DOM elements are updated
 		this.html = jQuery.fn.html;
-		$.fn.html = function(content) {
+		$.fn.html = function (content) {
 			// if the newly added element has id, then cache it. (and overwrite if it already exists)
 			if (this != undefined && this != '' && typeof this.attr == 'function' && this.attr('id') != undefined) {
 				self.domElements[this.attr('id')] = this;
-			}		
-			
+			}
+
 			return self.html.apply(this, arguments);
-		}; 
-		
+		};
+
 
 		this.taroEngineStarted = $.Deferred();
 		this.physicsConfigLoaded = $.Deferred();
@@ -192,8 +192,9 @@ const Client = TaroEventingClass.extend({
 			}
 		});
 
-		promise.then((game) => {
+		promise.then(async (game) => {
 			taro.game.data = game.data;
+			await this.configureEngine();
 			taro.addComponent(TaroInputComponent);
 
 			taro.entitiesToRender = new EntitiesToRender();
@@ -214,7 +215,6 @@ const Client = TaroEventingClass.extend({
 				taro.addComponent(MobileControlsComponent);
 			}
 
-			this.configureEngine();
 
 		})
 			.catch((err) => {
@@ -317,7 +317,7 @@ const Client = TaroEventingClass.extend({
 
 	// new language for old 'initEngine' method
 	//
-	configureEngine: function () {
+	configureEngine: async function () {
 		// let's make it easier by assigning the game data to a variable
 		const gameData = taro.game.data;
 
@@ -328,23 +328,24 @@ const Client = TaroEventingClass.extend({
 
 		this.loadPhysics();
 
-		$.when(this.physicsConfigLoaded).done(() => {
-			this.startTaroEngine();
-			this.loadMap();
+		await new Promise((resolve) => {
+			$.when(this.physicsConfigLoaded).done(() => {
+				this.startTaroEngine();
+				this.loadMap();
 
 
-			if (taro.physics) {
-				// old comment => 'always enable CSP'
-				this.loadCSP();
-			}
+				if (taro.physics) {
+					// old comment => 'always enable CSP'
+					this.loadCSP();
+				}
 
-			if (gameData.isDeveloper) {
+				if (gameData.isDeveloper) {
 
-				taro.addComponent(DevConsoleComponent);
-			}
-
-
-		});
+					taro.addComponent(DevConsoleComponent);
+				}
+				resolve();
+			});
+		})
 
 		//this doesn't depend on physics config
 		if (gameData.isDeveloper) {
@@ -893,14 +894,14 @@ const Client = TaroEventingClass.extend({
 		}
 	},
 
-    setResolution: function (resolution) {
-        this.emit('set-resolution', resolution);
-    },
-	
+	setResolution: function (resolution) {
+		this.emit('set-resolution', resolution);
+	},
+
 	// return dom element. cache it if it doesn't exist.
 	getCachedElementById: function (id) {
 		var element = this.domElements[id];
-		
+
 		// Check if the cached element exists and is valid
 		if (element && element != '') {
 			// console.log("returning cached element", id, element)
