@@ -19,52 +19,17 @@ var UiScene = /** @class */ (function (_super) {
         return _super.call(this, { key: 'UI', active: true }) || this;
     }
     UiScene.prototype.init = function () {
-        var _this = this;
-        this.abilityIconsContainer = new Phaser.GameObjects.Container(this);
-        var x = this.sys.game.canvas.width * 0.5;
-        var y = this.sys.game.canvas.height - this.sys.game.canvas.height * 0.17;
-        this.abilityIconsContainer.setPosition(x, y);
-        taro.client.on('ability-icons', function (abilities) {
-            _this.generateAbilityIcons(abilities);
-        });
-        this.add.existing(this.abilityIconsContainer);
+        return;
     };
     UiScene.prototype.create = function () {
         return;
     };
     UiScene.prototype.preload = function () {
-        var unitTypes = taro.game.data.unitTypes;
-        for (var unitType in unitTypes) {
-            var unitAbilities = unitTypes[unitType].controls.unitAbilities;
-            for (var abilityId in unitAbilities) {
-                this.load.image("ability/".concat(abilityId), this.patchAssetUrl(unitAbilities[abilityId].iconUrl));
-            }
-        }
+        return;
     };
     UiScene.prototype.update = function () {
         return;
     };
-    UiScene.prototype.generateAbilityIcons = function (abilities) {
-        console.log(abilities);
-        var x = 0;
-        var y = 0;
-        var spacer = 16;
-        for (var abilityId in abilities) {
-            this.abilityIconsContainer.add(new PhaserAbilityIcon(this, x, y, "ability/".concat(abilityId), abilityId));
-            x += spacer;
-        }
-    };
     return UiScene;
 }(PhaserScene));
-var PhaserAbilityIcon = /** @class */ (function (_super) {
-    __extends(PhaserAbilityIcon, _super);
-    function PhaserAbilityIcon(scene, x, y, texture, abilityId) {
-        var _this = _super.call(this, scene, x, y, texture) || this;
-        _this.abilityId = abilityId;
-        _this.setDisplaySize(32, 32);
-        _this.setVisible(true);
-        return _this;
-    }
-    return PhaserAbilityIcon;
-}(Phaser.GameObjects.Sprite));
 //# sourceMappingURL=UiScene.js.map

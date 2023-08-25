@@ -270,7 +270,6 @@ var AbilityComponent = TaroEntity.extend({
 		if (ability.castDuration) {
 			this.abilityCooldowns[abilityId] = Date.now() + ability.castDuration;
 		}
-
 	},
 
 	stopCasting: function (abilityId) {
