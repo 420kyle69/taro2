@@ -2487,7 +2487,7 @@ var TaroEntity = TaroObject.extend({
 		this._alive = false;
 		/* CEXCLUDE */
 		// Check if the entity is streaming
-		if (taro.isServer && !taro.network.isPaused) {
+		if (taro.isServer) {
 			if (this._streamMode === 1 || this._streamMode === 2) {
 				delete this._streamDataCache;
 				this.streamDestroy();
@@ -4570,7 +4570,7 @@ var TaroEntity = TaroObject.extend({
 	 *     entity.streamMode(0);
 	 * @example #Set the entity to automatic streaming
 	 *     entity.streamMode(1);
-	 * @example #Set the entity to manual (advanced mode) streaming
+	 * @example #Set the entity to stream only when the entity is created/removed
 	 *     entity.streamMode(2);
 	 * @return {*} "this" when arguments are passed to allow method
 	 * chaining or the current value if no arguments are specified.

@@ -68,11 +68,11 @@ var Item = TaroEntityPhysics.extend({
 
 		self.scaleRatio = taro.physics && taro.physics.scaleRatio();
 		if (taro.isServer) {
-			if (taro.network.isPaused) {
-				self.streamMode(0);
+			if (self._stats.streamMode == 1 || self._stats.streamMode == undefined) {
+				this.streamMode(1);
+				// self.streamCreate(); // do we need this?
 			} else {
-				self.streamMode(1);
-				self.streamCreate(); // do we need this?
+				this.streamMode(self._stats.streamMode);				
 			}
 
 			taro.server.totalItemsCreated++;
@@ -245,7 +245,11 @@ var Item = TaroEntityPhysics.extend({
 
 			if (taro.isServer) {
 				this.streamUpdateData([{ ownerUnitId: 0 }]);
-				this.streamMode(1);
+				if (self._stats.streamMode == 1 || self._stats.streamMode == undefined) {
+					this.streamMode(1);
+				} else {
+					this.streamMode(self._stats.streamMode);				
+				}
 			}
 		}
 
@@ -983,10 +987,6 @@ var Item = TaroEntityPhysics.extend({
 
 	streamUpdateData: function (queuedData) {
 		var self = this;
-
-		// this was preventing isBeingUsed from streaming hence preventing other players' projectiles from showing
-		// if (taro.isServer && taro.network.isPaused)
-		// 	return;
 
 		TaroEntity.prototype.streamUpdateData.call(this, queuedData);
 		// taro.devLog("Item streamUpdateData ", data)

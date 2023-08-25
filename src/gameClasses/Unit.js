@@ -85,11 +85,12 @@ var Unit = TaroEntityPhysics.extend({
 			// and their respective color because sometimes it may happen that unit is not yet created on client
 			// hence while making its minimap unit we will get null as unit
 			self._stats.minimapUnitVisibleToClients = {};
+
 			self.mount(taro.$('baseScene'));
-			if (taro.network.isPaused) {
-				this.streamMode(0);
-			} else {
+			if (self._stats.streamMode == 1 || self._stats.streamMode == undefined) {
 				this.streamMode(1);
+			} else {
+				this.streamMode(self._stats.streamMode);				
 			}
 
 			taro.server.totalUnitsCreated++;
@@ -1466,10 +1467,7 @@ var Unit = TaroEntityPhysics.extend({
 	streamUpdateData: function (queuedData) {
 		var self = this;
 		// Unit.prototype.log("unit streamUpdateData", data)
-
-		// if (taro.isServer && taro.network.isPaused)
-		// 	return;
-
+		
 		TaroEntity.prototype.streamUpdateData.call(this, queuedData);
 
 		for (var i = 0; i < queuedData.length; i++) {
