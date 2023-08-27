@@ -216,9 +216,9 @@ var ClientNetworkEvents = {
 			return;
 		}
 		if (data.action == 'update') {
-			taro.uiTextElementsObj[key].innerHTML = data.style;
+			taro.uiTextElementsObj[key].innerText = data.style;
 		} else if (data.action == 'append') {
-			taro.uiTextElementsObj[key].innerHTML += '\n' + data.style;
+			taro.uiTextElementsObj[key].innerText += '\n' + data.style;
 		}
 	},
 
