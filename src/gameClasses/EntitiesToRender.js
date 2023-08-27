@@ -44,7 +44,10 @@ var EntitiesToRender = /** @class */ (function () {
                     var y = entity._translate.y;
                     var rotate = entity._rotate.z;
                 }
-                if (entity._category == 'item') {
+                // if item is being carried by a unit
+                if (ownerUnit) {
+                    // update ownerUnit's transform, so the item can be positioned relative to the ownerUnit's transform
+                    ownerUnit._processTransform();
                     // var timeStart = performance.now();
                     // rotate weldjoint items to the owner unit's rotation
                     if (entity._stats.currentBody && entity._stats.currentBody.jointType == 'weldJoint') {

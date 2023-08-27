@@ -230,7 +230,6 @@ var Player = TaroEntity.extend({
 					{ unitId: unit.id() },
 					this._stats.clientId
 				);
-
 			} else if (
 				taro.isClient &&
 				this._stats.clientId == taro.network.id()
