@@ -36,7 +36,7 @@ const Client = TaroEventingClass.extend({
 	classId: 'Client',
 
 	init: function () {
-
+		var self = this;
 		this.data = [];
 		this.host = window.isStandalone ? 'https://www.modd.io' : '';
 
@@ -46,6 +46,7 @@ const Client = TaroEventingClass.extend({
 
 		this.entityUpdateQueue = {};
 		this.errorLogs = [];
+		this.domElements = {}; // this is a cached map of fetched dom elements
 
 		pathArray = window.location.href.split('/');
 
@@ -56,6 +57,29 @@ const Client = TaroEventingClass.extend({
 				height: 32
 			})
 		);
+
+		// modifying jquery.append(), so the cached DOM elements are updated
+		this.append = jQuery.fn.append;
+		$.fn.append = function (content) {
+			// if the newly added element has id, then cache it. (and overwrite if it already exists)
+			if (content != undefined && content != '' && typeof content.attr == 'function' && content.attr('id') != undefined) {
+				self.domElements[content.attr('id')] = content;
+			}
+
+			return self.append.apply(this, arguments);
+		};
+
+		// modifying jquery.html(), so the cached DOM elements are updated
+		this.html = jQuery.fn.html;
+		$.fn.html = function (content) {
+			// if the newly added element has id, then cache it. (and overwrite if it already exists)
+			if (this != undefined && this != '' && typeof this.attr == 'function' && this.attr('id') != undefined) {
+				self.domElements[this.attr('id')] = this;
+			}
+
+			return self.html.apply(this, arguments);
+		};
+
 
 		this.taroEngineStarted = $.Deferred();
 		this.physicsConfigLoaded = $.Deferred();
@@ -80,7 +104,7 @@ const Client = TaroEventingClass.extend({
 		this.isZooming = false;
 
 		this._trackTranslateSmoothing = 15;
-		this.inactiveTabEntityStream = [];
+		// this.inactiveTabEntityStream = [];
 		this.eventLog = [];
 
 		this.servers = [
@@ -102,29 +126,29 @@ const Client = TaroEventingClass.extend({
 		this.implement(ClientNetworkEvents);
 
 
-		$('#dev-error-button').on('click', () => {
-			$('#error-log-modal').modal('show');
+		$(this.getCachedElementById('dev-error-button')).on('click', () => {
+			$(this.getCachedElementById('error-log-modal')).modal('show');
 		});
 
-		$('#bandwidth-usage').on('click', () => { // maybe we could rename 'bandwidth-usage'
-			$('#dev-status-modal').modal('show');
+		$(this.getCachedElementById('bandwidth-usage')).on('click', () => { // maybe we could rename 'bandwidth-usage'
+			$(this.getCachedElementById('dev-status-modal')).modal('show');
 		});
 
-		$('#leaderboard-link').on('click', (e) => {
+		$(this.getCachedElementById('leaderboard-link')).on('click', (e) => {
 			$('leaderboard-modal').modal('show');
 		});
 
 		document.addEventListener('visibilitychange', () => { //this should not be changed to jQ.on()
 			//old comment => 'apply entities' merged stats saved during inactive tab
 			if (!document.hidden) {
-				this.applyInactiveTabEntityStream();
+				// this.applyInactiveTabEntityStream();
 			}
 
 			this.isActiveTab = !document.hidden;
 		});
 
 		//go fetch
-
+		taro.addComponent(ProfilerComponent);
 		taro.addComponent(GameComponent);
 		taro.addComponent(MenuUiComponent);
 		// we're going to try and insert the fetch here
@@ -168,8 +192,9 @@ const Client = TaroEventingClass.extend({
 			}
 		});
 
-		promise.then((game) => {
+		promise.then(async (game) => {
 			taro.game.data = game.data;
+			await this.configureEngine();
 			taro.addComponent(TaroInputComponent);
 
 			taro.entitiesToRender = new EntitiesToRender();
@@ -190,7 +215,6 @@ const Client = TaroEventingClass.extend({
 				taro.addComponent(MobileControlsComponent);
 			}
 
-			this.configureEngine();
 
 		})
 			.catch((err) => {
@@ -199,13 +223,13 @@ const Client = TaroEventingClass.extend({
 
 		// these were under separate conditionals before. idk why.
 		if (mode == 'play') {
-			$('#game-div canvas').click(() => {
-				$('#more-games').removeClass('slideup-menu-animation').addClass('slidedown-menu-animation');
+			$(self.getCachedElementById('game-div canvas')).click(() => {
+				$(self.getCachedElementById('more-games')).removeClass('slideup-menu-animation').addClass('slidedown-menu-animation');
 			});
 
 			setTimeout(() => {
 				// console.log('loading removed'); // not necessary in production
-				$('#loading-container').addClass('slider-out');
+				$(self.getCachedElementById('loading-container')).addClass('slider-out');
 			}, 2000);
 
 			// let's try getting our server here
@@ -252,7 +276,7 @@ const Client = TaroEventingClass.extend({
 					}
 				}
 
-				$('#server-list').val(this.server.id);
+				$(self.getCachedElementById('server-list')).val(this.server.id);
 				// console.log(`best server selected: ${this.server, this.server.id}`);
 			});
 		}
@@ -293,7 +317,7 @@ const Client = TaroEventingClass.extend({
 
 	// new language for old 'initEngine' method
 	//
-	configureEngine: function () {
+	configureEngine: async function () {
 		// let's make it easier by assigning the game data to a variable
 		const gameData = taro.game.data;
 
@@ -304,28 +328,29 @@ const Client = TaroEventingClass.extend({
 
 		this.loadPhysics();
 
-		$.when(this.physicsConfigLoaded).done(() => {
-			this.startTaroEngine();
-			this.loadMap();
+		await new Promise((resolve) => {
+			$.when(this.physicsConfigLoaded).done(() => {
+				this.startTaroEngine();
+				this.loadMap();
 
 
-			if (taro.physics) {
-				// old comment => 'always enable CSP'
-				this.loadCSP();
-			}
+				if (taro.physics) {
+					// old comment => 'always enable CSP'
+					this.loadCSP();
+				}
 
-			if (gameData.isDeveloper) {
+				if (gameData.isDeveloper) {
 
-				taro.addComponent(DevConsoleComponent);
-			}
-
-
-		});
+					taro.addComponent(DevConsoleComponent);
+				}
+				resolve();
+			});
+		})
 
 		//this doesn't depend on physics config
 		if (gameData.isDeveloper) {
 
-			$('#mod-this-game-menu-item').removeClass('d-none');
+			$(this.getCachedElementById('mod-this-game-menu-item')).removeClass('d-none');
 		}
 
 		//don't think these depend on physcis
@@ -381,7 +406,7 @@ const Client = TaroEventingClass.extend({
 
 			window.activatePlayGame = true; // is there a reason this line was repeated?
 
-			$('#play-game-button-wrapper').removeClass('d-none-important');
+			$(this.getCachedElementById('play-game-button-wrapper')).removeClass('d-none-important');
 			$('.modal-videochat-backdrop, .modal-videochat').removeClass('d-none'); // hmmm
 			$('.modal-videochat').show(); // no...yes?
 
@@ -505,6 +530,7 @@ const Client = TaroEventingClass.extend({
 	},
 
 	connectToServer: function () {
+		var self = this;
 		// if typeof args[1] == 'function', callback(args[0])
 		taro.network.start(taro.client.server, (clientServer) => { // changed param from 'data' to clientServer
 
@@ -524,12 +550,12 @@ const Client = TaroEventingClass.extend({
 					const serverName = taro.client.server.name || serverIP.split('.')[0];
 
 					if (serverName) {
-						$('#server-text').text(`to ${serverName}`);
+						$(self.getCachedElementById('server-text')).text(`to ${serverName}`);
 					}
 				}
 			}
 
-			$('#loading-container').addClass('slider-out');
+			$(self.getCachedElementById('loading-container')).addClass('slider-out');
 
 			console.log('connected to ', taro.client.server.url, 'clientId ', taro.network.id()); // idk if this needs to be in production
 
@@ -538,7 +564,7 @@ const Client = TaroEventingClass.extend({
 			taro.network.send('taroChatJoinRoom', '1');
 
 			taro.addComponent(TaroChatComponent);
-			taro.addComponent(VideoChatComponent); // shall we talk about the elephant in the room?
+			// taro.addComponent(VideoChatComponent); // shall we talk about the elephant in the room?
 
 			// old comment => 'check for all of the existing entities in the game
 			taro.network.addComponent(TaroStreamComponent);
@@ -632,7 +658,7 @@ const Client = TaroEventingClass.extend({
 
 			if (window.isStandalone) {
 
-				$('#toggle-dev-panels').show();
+				$(self.getCachedElementById('toggle-dev-panels')).show();
 			}
 		});
 	},
@@ -720,7 +746,7 @@ const Client = TaroEventingClass.extend({
 	},
 
 	login: function () {
-
+		var self = this;
 		console.log('attempting to login'); // no console logs in production.
 
 		$.ajax({
@@ -739,7 +765,7 @@ const Client = TaroEventingClass.extend({
 					this.joinGame();
 
 				} else {
-					$('#login-error-message').html(data.message).show().fadeOut(7000)
+					$(self.getCachedElementById('login-error-message')).html(data.message).show().fadeOut(7000)
 				}
 			}
 		});
@@ -749,7 +775,7 @@ const Client = TaroEventingClass.extend({
 	//i'm not going to change the join game function
 	//
 	joinGame: function (wasGamePaused = false) {
-
+		var self = this;
 		// if the AdInPlay player is initialised, means the ad blocker is not enabled
 		let isAdBlockEnabled = window.isAdBlockEnabled || typeof window?.aiptag?.adplayer === 'undefined';
 		const data = {
@@ -759,7 +785,7 @@ const Client = TaroEventingClass.extend({
 		taro.client.removeOutsideEntities = undefined;
 		window.joinedGame = true;
 
-		$('#dev-console').hide();
+		$(self.getCachedElementById('dev-console')).hide();
 
 		if (typeof (userId) != 'undefined' && typeof (sessionId) != 'undefined') {
 
@@ -786,17 +812,17 @@ const Client = TaroEventingClass.extend({
 
 					if (this.resolutionQuality != 'low' && taro._renderFPS < 40) { // do we still use this?
 
-						$('#setting').popover('show');
+						$(self.getCachedElementById('setting')).popover('show');
 						clearInterval(this.lowFPSInterval);
 					}
 				}, 60000);
 			}, 60000);
 		}
 
-		document.addEventListener('click', () => {
-			// changed this to addEventListener so we capture the actual event
-			$('#setting').popover('hide');
-		});
+		// document.addEventListener('click', () => {
+		// 	// changed this to addEventListener so we capture the actual event
+		// 	$(self.getCachedElementById('setting')).popover('hide');
+		// });
 
 		data.isAdBlockEnabled = !!isAdBlockEnabled;
 
@@ -839,17 +865,25 @@ const Client = TaroEventingClass.extend({
 
 	},
 
-	applyInactiveTabEntityStream: function () {
-		for (let entityId in this.inactiveTabEntityStream) {
-			const entityData = _.cloneDeep(this.inactiveTabEntityStream[entityId]);
-			this.inactiveTabEntityStream[entityId] = [];
+	// applyInactiveTabEntityStream: function () {
+	// 	for (let entityId in this.inactiveTabEntityStream) {
+	// 		const entityData = rfdc()(this.inactiveTabEntityStream[entityId]);
+	// 		this.inactiveTabEntityStream[entityId] = [];
 
-			const entity = taro.$(entityId);
+	// 		const entity = taro.$(entityId);
 
-			if (entity && entityData) {
-				entity.streamUpdateData(entityData);
-			}
+	// 		if (entity && entityData) {
+	// 			entity.streamUpdateData(entityData);
+	// 		}
+	// 	}
+	// },
+	
+	queueStreamUpdateData: function(entityId, key, value) {
+		if (taro.client.entityUpdateQueue[entityId] == undefined) {
+			taro.client.entityUpdateQueue[entityId] = {};
 		}
+
+		taro.client.entityUpdateQueue[entityId][key] = value;
 	},
 
 	positionCamera: function (x, y) {
@@ -858,6 +892,30 @@ const Client = TaroEventingClass.extend({
 			this.emit('stop-follow');
 			this.emit('position-camera', [x, y]);
 		}
+	},
+
+	setResolution: function (resolution) {
+		this.emit('set-resolution', resolution);
+	},
+
+	// return dom element. cache it if it doesn't exist.
+	getCachedElementById: function (id) {
+		var element = this.domElements[id];
+
+		// Check if the cached element exists and is valid
+		if (element && element != '') {
+			// console.log("returning cached element", id, element)
+			return element; // Return the cached element
+		}
+
+		// Element is not cached or is invalid, query the DOM
+		var element = document.getElementById(id);
+		if (element) {
+			this.domElements[id] = element; // Cache the element
+		}
+
+		// console.log("returning newly found element", ref, element)
+		return element;
 	}
 });
 

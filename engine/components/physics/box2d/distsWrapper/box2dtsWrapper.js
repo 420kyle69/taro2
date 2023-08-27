@@ -1,5 +1,4 @@
 // FIXME: add more types to the physics part of taro2
-// @ts-nocheck
 var box2dtsWrapper = {
     init: function (component) {
         component.b2AABB = box2dts.b2AABB; // added by Jaeyun for world collision detection for raycast bullets

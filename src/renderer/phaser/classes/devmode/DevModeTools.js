@@ -44,8 +44,8 @@ var DevModeTools = /** @class */ (function (_super) {
         var s = _this.BUTTON_INTERSPACE;
         _this.scene.scale.on(Phaser.Scale.Events.RESIZE, function () {
             toolButtonsContainer.height = (h + s) * 13;
-            if (toolButtonsContainer.height > _this.scene.sys.game.canvas.height * 0.5) {
-                toolButtonsContainer.scale = (_this.scene.sys.game.canvas.height * 0.5) / toolButtonsContainer.height;
+            if (toolButtonsContainer.height > window.innerHeight * 0.5) {
+                toolButtonsContainer.scale = (window.innerHeight * 0.5) / toolButtonsContainer.height;
             }
             toolButtonsContainer.x = palette.camera.x + palette.paletteWidth - ((h * 4) * toolButtonsContainer.scale) + 22;
             toolButtonsContainer.y = palette.camera.y - (toolButtonsContainer.height * toolButtonsContainer.scale);
@@ -54,8 +54,8 @@ var DevModeTools = /** @class */ (function (_super) {
         new DevToolButton(_this, '-', '-', 'Zoom out (-)', null, h + s, -(h + s), h, palette.scrollBarContainer, palette.zoom.bind(palette), 1);
         var toolButtonsContainer = _this.toolButtonsContainer = new Phaser.GameObjects.Container(scene);
         toolButtonsContainer.height = (h + s) * 13;
-        if (toolButtonsContainer.height > _this.scene.sys.game.canvas.height * 0.5) {
-            toolButtonsContainer.scale = (_this.scene.sys.game.canvas.height * 0.5) / toolButtonsContainer.height;
+        if (toolButtonsContainer.height > window.innerHeight * 0.5) {
+            toolButtonsContainer.scale = (window.innerHeight * 0.5) / toolButtonsContainer.height;
         }
         toolButtonsContainer.x = palette.camera.x + palette.paletteWidth - ((h * 4) * toolButtonsContainer.scale) + 22;
         toolButtonsContainer.y = palette.camera.y - (toolButtonsContainer.height * toolButtonsContainer.scale);
@@ -82,6 +82,7 @@ var DevModeTools = /** @class */ (function (_super) {
         toolButton.push(new DevToolButton(_this, 'undo', 'undo', 'undo(ctrl-z)', 'undo', 0, (h + s) * 5, h * 2 - s, toolButtonsContainer, _this.commandController.undo.bind(_this.commandController)), new DevToolButton(_this, 'redo', 'redo', 'redo(ctrl-shift-z | ctrl-y', 'redo', h * 2, (h + s) * 5, h * 2 - s, toolButtonsContainer, _this.commandController.redo.bind(_this.commandController)));
         _this.paletteButton = new DevToolButton(_this, 'palette', 'Palette', 'show/hide palette', null, 0, (h + s) * 12, h * 4, toolButtonsContainer, palette.toggle.bind(palette));
         _this.tooltip = new DevTooltip(_this.scene);
+        _this.scene.cameras.getCamera('palette').ignore([_this.tooltip, _this.toolButtonsContainer]);
         _this.palette.hide();
         _this.toolButtonsContainer.setVisible(false);
         _this.regionEditor.hideRegions();

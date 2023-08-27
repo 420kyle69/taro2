@@ -460,6 +460,7 @@ NetIo.Socket = NetIo.EventingClass.extend({
 				reason: self._disconnect?.reason || reason.toString(),
 				code: self._disconnect?.code || code,
 				at: self._disconnect?.at || new Date(),
+				source: self._disconnect?.source || 'closeEvent',
 			};
 			
 			self.emit('disconnect', {
@@ -519,6 +520,8 @@ NetIo.Socket = NetIo.EventingClass.extend({
 				reasonCode = 'Invalid security token';
 			} else if (reason.startsWith('Lost connection to the server, and grace period for reconnect')) {
 				reasonCode = 'Reconnect grace period over';
+			} else if (reason.startsWith('server lifespan expired')) {
+				reasonCode = 'Server lifespan expired';
 			}
 		}
 		return reasonCode;
@@ -549,6 +552,7 @@ NetIo.Socket = NetIo.EventingClass.extend({
 			reason: this._disconnect?.reason || reason,
 			code: this._disconnect?.code || code,
 			at: this._disconnect?.at || new Date(),
+			source: this._disconnect?.source || 'closeFn',
 		};
 		
 		this._socket.close(code);
@@ -804,16 +808,20 @@ NetIo.Server = NetIo.EventingClass.extend({
 			const token = searchParams.get('token');
 
 			try {
-				const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
-
-				// const isGuestUserAllowed = taro.game?.data?.defaultData?.isGuestPlayerAllowed;
-
-				// if (!isGuestUserAllowed && (!decodedToken.userId || !decodedToken.sessionId)) {
-				// 	socket.close('Guest user not allowed. Please login or signup.');
-				// 	console.log('Guest user not allowed', token);
-				// 	return;
-				// }
-
+				let decodedToken;
+				
+				if (process.env.ENV === 'standalone') {
+					// no token validation required for standalone server
+					decodedToken = {
+						userId: '',
+						sessionId: '',
+						createdAt: Date.now(),
+						gameSlug: taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.gameSlug
+					}
+				} else {
+					decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
+				}
+				
 				// extracting user from token and adding it in _token.
 				socket._token = {
 					userId: decodedToken.userId,
@@ -1093,6 +1101,7 @@ NetIo.Server = NetIo.EventingClass.extend({
      */
 	_encode: function (data) {
 		try {
+			// var json = JSON.stringify(data);
 			var json = JSON.stringify(data);
 			// var obj = JSON.parse(json);
 			// var jsonLength = json.length;

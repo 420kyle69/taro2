@@ -11,6 +11,8 @@ var TaroNetIoServer = {
 	start: function (data, callback) {
 		var self = this;
 
+		this.artificialDelay = 0; // simulated lag (ms)
+		
 		this._socketById = {};
 		this._socketByIp = {};
 		this._socketsByRoomId = {};
@@ -325,6 +327,7 @@ var TaroNetIoServer = {
 				reason,
 				code,
 				at: new Date(),
+				source: 'disconnectFn',
 			};
 			
 			socket.close(reason);
@@ -395,10 +398,21 @@ var TaroNetIoServer = {
 			// send sendQueue
 			if (self.sendQueue) {
 				for (var clientId in self.sendQueue) {
-					self._io.send(
-						[ciEncoded, self.sendQueue[clientId]],
-						clientId === 'undefined' ? undefined : clientId
-					);
+					// simulate lag for dev environment
+					if (global.isDev) {
+						setTimeout(function (data, id, ci) {
+							self._io.send(
+								[ci, data],
+								id === 'undefined' ? undefined : id
+							);
+						}, self.artificialDelay, self.sendQueue[clientId], clientId, ciEncoded);
+					} else {
+						// production we don't simulate lag
+						self._io.send(
+							[ciEncoded, self.sendQueue[clientId]],
+							clientId === 'undefined' ? undefined : clientId
+						);
+					}
 				}
 				self.sendQueue = {};
 			}
@@ -410,10 +424,17 @@ var TaroNetIoServer = {
 
 			// append serverTime timestamp to the snapshot
 			self.snapshot.push([String.fromCharCode(this._networkCommandsLookup._taroStreamTime), timestamp]);
-			self._io.send([ciEncoded, self.snapshot]);
-
+			if (global.isDev) {
+				// generate artificial lag in dev environment
+				setTimeout(function (data, ci) {
+					self._io.send([ci, data]);
+				}, self.artificialDelay, self.snapshot, ciEncoded);
+			} else {
+				self._io.send([ciEncoded, self.snapshot]);
+			}
 			taro.server.lastSnapshot = self.snapshot;
 			this.snapshot = [];
+
 		} else {
 			this.log('_snapshot error @ flush');
 		}
@@ -609,7 +630,9 @@ var TaroNetIoServer = {
 
 					self.logCommandCount(socket._remoteAddress, commandName, data);
 
-					self.uploadPerSecond[socket._remoteAddress] += JSON.stringify(data).length;
+					if (!(commandName === 'editTile')) {
+						self.uploadPerSecond[socket._remoteAddress] += JSON.stringify(data).length;
+					}
 
 					if (data.type === 'ping') {
 						socket.send({
@@ -792,6 +815,7 @@ var TaroNetIoServer = {
 		const code = _disconnect.code || data?.code; //https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent/code
 		let reasonCode = _disconnect.reasonCode || '';
 		let reason = _disconnect.reason || data?.reason.toString();
+		let source = _disconnect.source || '';
 		
 		if (!reason && !reasonCode) {
 			switch (code) {
@@ -862,6 +886,7 @@ var TaroNetIoServer = {
 				'tier': process.env.WORKER_TIER || process.env.TIER,
 				'previousDisconnects': socket._previousDisconnects || [],
 				'reconnectCount': socket._previousDisconnects?.length || 0,
+				'source': source,
 			});
 		}
 
@@ -881,6 +906,7 @@ var TaroNetIoServer = {
 					'tier': process.env.WORKER_TIER || process.env.TIER,
 					'previousDisconnects': socket._previousDisconnects || [],
 					'reconnectCount': socket._previousDisconnects?.length || 0,
+					'source': source,
 				}
 			});
 		}

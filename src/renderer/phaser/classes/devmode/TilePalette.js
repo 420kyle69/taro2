@@ -18,6 +18,7 @@ var TilePalette = /** @class */ (function (_super) {
     function TilePalette(scene, tileset, rexUI, commandController) {
         var _this = _super.call(this, scene) || this;
         _this.scene = scene;
+        _this.tileset = tileset;
         _this.commandController = commandController;
         _this.devModeScene = scene;
         _this.rexUI = rexUI;
@@ -30,7 +31,7 @@ var TilePalette = /** @class */ (function (_super) {
             paletteMap[Math.floor(i / tileset.columns)].push(i + 1);
         }
         // When loading from an array, make sure to specify the tileWidth and tileHeight
-        var map = _this.map = _this.scene.make.tilemap({ key: 'palette', data: paletteMap, tileWidth: 16, tileHeight: 16 });
+        var map = _this.map = _this.scene.make.tilemap({ key: 'palette', data: paletteMap, tileWidth: tileset.tileWidth, tileHeight: tileset.tileHeight });
         var texturesLayer = _this.texturesLayer = map.createLayer(0, tileset, 0, 0).setOrigin(0, 0).setInteractive();
         _this.x = -texturesLayer.width;
         _this.y = 0;
@@ -40,7 +41,7 @@ var TilePalette = /** @class */ (function (_super) {
         var paletteHeight = _this.paletteHeight = _this.scene.sys.game.canvas.height * 0.25;
         var camera = _this.camera = _this.scene.cameras.add(_this.scene.sys.game.canvas.width - paletteWidth - 40, _this.scene.sys.game.canvas.height - paletteHeight - 40, paletteWidth, paletteHeight)
             .setBounds(texturesLayer.x - (texturesLayer.width / 2), texturesLayer.y - (texturesLayer.height / 2), texturesLayer.width * 2, texturesLayer.height * 2, true)
-            .setZoom(1).setName('palette');
+            .setZoom(16 / tileset.tileWidth).setName('palette');
         camera.setBackgroundColor(0x000000);
         texturesLayer.on('pointermove', function (p) {
             var devModeScene = taro.renderer.scene.getScene('DevMode');
@@ -73,6 +74,7 @@ var TilePalette = /** @class */ (function (_super) {
         _this.COLOR_WHITE = 0xffffff;
         _this.COLOR_GRAY = 0xbababa;
         var scrollBarContainer = _this.scrollBarContainer = new Phaser.GameObjects.Container(scene);
+        camera.ignore(scrollBarContainer);
         scene.add.existing(scrollBarContainer);
         scrollBarContainer.x = camera.x;
         scrollBarContainer.y = camera.y;
@@ -159,19 +161,21 @@ var TilePalette = /** @class */ (function (_super) {
         this.scrollBarContainer.setVisible(true);
     };
     TilePalette.prototype.zoom = function (deltaY) {
+        var maxZoom = 20 * 16 / this.tileset.tileWidth;
+        var minZoom = 0.5 * 16 / this.tileset.tileWidth;
         var targetZoom;
         if (deltaY < 0)
             targetZoom = this.camera.zoom * 1.2;
         else
             targetZoom = this.camera.zoom / 1.2;
-        if (targetZoom < 0.5)
-            targetZoom = 0.5;
-        else if (targetZoom > 20)
-            targetZoom = 20;
+        if (targetZoom < minZoom)
+            targetZoom = minZoom;
+        else if (targetZoom > maxZoom)
+            targetZoom = maxZoom;
         this.camera.setZoom(targetZoom);
-        this.scrollBarBottom.getElement('slider.thumb').width = (this.camera.width - 60) / (targetZoom * 2);
+        this.scrollBarBottom.getElement('slider.thumb').width = (this.camera.width - 60) / (targetZoom / 16 * this.tileset.tileWidth * 2);
         this.scrollBarBottom.layout();
-        this.scrollBarRight.getElement('slider.thumb').height = (this.camera.height - 60) / (targetZoom * 2);
+        this.scrollBarRight.getElement('slider.thumb').height = (this.camera.height - 60) / (targetZoom / 16 * this.tileset.tileWidth * 2);
         this.scrollBarRight.layout();
     };
     TilePalette.prototype.addScrollBar = function (orient) {

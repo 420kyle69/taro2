@@ -8,7 +8,7 @@ var Player = TaroEntity.extend({
 		var self = this;
 
 
-		var playerData = taro.game.getAsset('playerTypes', data.playerTypeId);
+		var playerData = taro.game.cloneAsset('playerTypes', data.playerTypeId);
 		this._stats = _.merge(playerData, data);
 
 		// dont save variables in _stats as _stats is stringified and synced
@@ -108,13 +108,13 @@ var Player = TaroEntity.extend({
 						{ receivedJoinGame: receivedJoinGame }
 					];
 				}
-
-				// console.log(`Player.joinGame(): sending ACK to client ${self._stats.clientId} ${self._stats.name} (time elapsed: ${Date.now() - client.lastEventAt})`, playerJoinStreamData);
-
+				
 				self.streamUpdateData(playerJoinStreamData);
+			}
+			
+			if (self._stats.userId) {
 				taro.clusterClient && taro.clusterClient.playerJoined(self._stats.userId);
 			}
-
 		} else {
 			console.log(`player joined again (menu closed?) ${self._stats.clientId} (${self._stats.name})`);
 			self.streamUpdateData([{ playerJoinedAgain: true }]);
@@ -211,10 +211,6 @@ var Player = TaroEntity.extend({
 					unit.unitUi.updateAllAttributeBars();
 				}
 
-				if (unit && unit.inventory) {
-					unit.inventory.updateBackpackButton();
-				}
-
 				unit.renderMobileControl();
 				taro.client.selectedUnit = unit;
 				taro.client.eventLog.push([taro._currentTime, `my unit selected ${unitId}`]);
@@ -234,7 +230,6 @@ var Player = TaroEntity.extend({
 					{ unitId: unit.id() },
 					this._stats.clientId
 				);
-
 			} else if (
 				taro.isClient &&
 				this._stats.clientId == taro.network.id()
@@ -306,7 +301,7 @@ var Player = TaroEntity.extend({
 
 		// pass old attributes' values to new attributes (given that attributes have same ID)
 		if (self._stats.attributes != undefined) {
-			var oldAttributes = JSON.parse(JSON.stringify(self._stats.attributes));
+			var oldAttributes = rfdc()(self._stats.attributes);
 			for (attrId in data.attributes) {
 				if (oldAttributes[attrId] != undefined) {
 					data.attributes[attrId].value = oldAttributes[attrId].value;
@@ -471,7 +466,7 @@ var Player = TaroEntity.extend({
 	// update player's stats in the server side first, then update client side as well.
 	streamUpdateData: function (queuedData) {
 		var self = this;
-		var oldStats = JSON.parse(JSON.stringify(self._stats));
+		var oldStats = rfdc()(self._stats);
 		TaroEntity.prototype.streamUpdateData.call(this, queuedData);
 
 		for (var i = 0; i < queuedData.length; i++) {
@@ -481,7 +476,7 @@ var Player = TaroEntity.extend({
 				// if player's type changed, then update all of its base stats (speed, stamina, etc..)
 				if (attrName === 'playerTypeId') {
 					self._stats[attrName] = newValue;
-					var playerTypeData = taro.game.getAsset('playerTypes', newValue);
+					var playerTypeData = taro.game.cloneAsset('playerTypes', newValue);
 					if (playerTypeData) {
 						playerTypeData.playerTypeId = newValue;
 
@@ -569,7 +564,7 @@ var Player = TaroEntity.extend({
 							  break;
 						  
 							case 'attributes':
-							  taro.playerUi.updatePlayerAttributesDiv(self._stats.attributes);
+							  taro.playerUi.updatePlayerAttributeValues(self._stats.attributes);
 							  break;
 						  
 							case 'coins':
@@ -662,13 +657,7 @@ var Player = TaroEntity.extend({
 		if (taro.env == 'local') // don't mute users in dev env
 			return;
 
-		if (value) {
-			$('#message').attr('disabled', true);
-			$('#message').attr('placeholder', 'You are muted');
-		} else {
-			$('#message').attr('disabled', false);
-			$('#message').attr('placeholder', 'message');
-		}
+		window.setTempChatMute && window.setTempChatMute(value);
 	},
 
 	redrawUnits: function (filterFn, properties) {
@@ -734,10 +723,30 @@ var Player = TaroEntity.extend({
 		TaroEntity.prototype.tick.call(this, ctx);
 	},
 
+	_behaviour: function() {
+		if (taro.isClient) {
+			var processedUpdates = [];
+			var updateQueue = taro.client.entityUpdateQueue[this.id()];
+			
+			if (updateQueue) {
+				for (var key in updateQueue) {
+					var value = updateQueue[key];
+				
+					processedUpdates.push({[key]: value});
+					delete taro.client.entityUpdateQueue[this.id()][key]
+				}
+
+				if (processedUpdates.length > 0) {
+					this.streamUpdateData(processedUpdates);
+				}
+			}
+		}
+	},
+
 	loadPersistentData: function () {
 		var self = this;
 
-		var persistData = _.cloneDeep(self.persistedData);
+		var persistData = rfdc()(self.persistedData);
 		if (persistData && persistData.data && persistData.data.player) {
 			TaroEntity.prototype.loadPersistentData.call(this, persistData.data.player);
 		}

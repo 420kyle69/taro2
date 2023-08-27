@@ -3,6 +3,7 @@ var taroClientConfig = {
 		'/lib/stats.js',
 		'/lib/dat.gui.min.js',
 		'/lib/msgpack.min.js',
+		'/lib/rfdc.min.js',
 
 		'/gameClasses/Player.js',
 		'/gameClasses/Unit.js',
@@ -81,6 +82,7 @@ var taroClientConfig = {
 		'renderer/phaser/scenes/GameScene.js',
 		'renderer/phaser/classes/PhaserJoystick.js',
 		'renderer/phaser/scenes/MobileControlsScene.js',
+        'renderer/phaser/scenes/UiScene.js',
 		'renderer/phaser/scenes/DevModeScene.js',
 		'renderer/phaser/classes/devmode/DevModeTools.js',
 		'renderer/phaser/classes/devmode/DevToolButton.js',

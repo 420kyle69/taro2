@@ -1,5 +1,4 @@
 // FIXME: add more types to the physics part of taro2
-// @ts-nocheck
 
 const planckWrapper: PhysicsDistProps = {
 	init: function (component) {
@@ -67,7 +66,7 @@ const planckWrapper: PhysicsDistProps = {
 			self.destroyBody(entity);
 		}
 
-		var tempDef = {};
+		var tempDef:any = {};
 		var param;
 		var tempBod;
 		var fixtureDef;
@@ -183,7 +182,7 @@ const planckWrapper: PhysicsDistProps = {
 									}
 
 									if (tempShape && fixtureDef.filter) {
-										var fd = {};
+										var fd:any = {};
 
 										fd.friction = fixtureDef.friction;
 										fd.restitution = fixtureDef.restitution;

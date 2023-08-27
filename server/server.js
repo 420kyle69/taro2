@@ -8,8 +8,10 @@ const bodyParser = require('body-parser');
 const fs = require('fs');
 const cluster = require('cluster');
 const { RateLimiterMemory } = require('rate-limiter-flexible');
-_ = require('lodash');
 const currency = require("currency.js");
+
+_ = require('lodash');
+rfdc = require('rfdc')
 
 const config = require('../config');
 const Console = console.constructor;
@@ -45,25 +47,25 @@ global.rollbar = {
 
 // override console.log and error to print additional data
 console.basicLog = console.log;
-console.log = function () {
+// console.log = function () {
 
-	const log = [];
+// 	const log = [];
 
-	log.push(new Date());
-	log.push(cluster.isMaster ? 'master' : 'worker');
+// 	log.push(new Date());
+// 	log.push(cluster.isMaster ? 'master' : 'worker');
 
-	if (taro?.server?.httpsPort) {
-		log.push(taro?.server?.httpsPort);
-	}
+// 	if (taro?.server?.httpsPort) {
+// 		log.push(taro?.server?.httpsPort);
+// 	}
 
-	if (taro?.game?.data?.defaultData?.gameSlug) {
-		log.push(taro?.game?.data?.defaultData?.gameSlug);
-	}
+// 	if (taro?.game?.data?.defaultData?.gameSlug) {
+// 		log.push(taro?.game?.data?.defaultData?.gameSlug);
+// 	}
 
-	log.push(...arguments);
+// 	log.push(...arguments);
 
-	console.basicLog(...log);
-};
+// 	console.basicLog(...log);
+// };
 
 console.basicError = console.error;
 console.error = function () {
@@ -634,7 +636,7 @@ var Server = TaroClass.extend({
 									taro.addComponent(VideoChatComponent);
 								}
 
-								let map = taro.scaleMap(_.cloneDeep(taro.game.data.map));
+								let map = taro.scaleMap(rfdc()(taro.game.data.map));
 								taro.map.load(map);
 
 								taro.game.start();

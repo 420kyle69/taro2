@@ -108,10 +108,11 @@ var DeveloperMode = /** @class */ (function () {
             if (gameMap.layers[serverData.layer].name === 'walls') {
                 //if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
                 taro.physics.destroyWalls();
-                var map = taro.scaleMap(_.cloneDeep(gameMap));
+                var map = taro.scaleMap(rfdc()(gameMap));
                 taro.tiled.loadJson(map, function (layerArray, layersById) {
                     taro.physics.staticsFromMap(layersById.walls);
                 });
+                taro.map.updateWallMapData(); // for A* pathfinding
             }
         }
     };
@@ -342,7 +343,7 @@ var DeveloperMode = /** @class */ (function () {
                 player = p;
         });
         var unitTypeId = data.typeId;
-        var unitTypeData = taro.game.getAsset('unitTypes', unitTypeId);
+        var unitTypeData = taro.game.cloneAsset('unitTypes', unitTypeId);
         var spawnPosition = data.position;
         var facingAngle = data.angle;
         if (player && spawnPosition && unitTypeId && unitTypeData) {
@@ -387,7 +388,7 @@ var DeveloperMode = /** @class */ (function () {
     };
     DeveloperMode.prototype.createItem = function (data) {
         var itemTypeId = data.typeId;
-        var itemData = taro.game.getAsset('itemTypes', itemTypeId);
+        var itemData = taro.game.cloneAsset('itemTypes', itemTypeId);
         var position = data.position;
         var facingAngle = data.angle;
         var quantity = itemData.maxQuantity;
@@ -512,7 +513,7 @@ var DeveloperMode = /** @class */ (function () {
             if (taro.physics) {
                 //if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
                 taro.physics.destroyWalls();
-                var map = taro.scaleMap(_.cloneDeep(taro.game.data.map));
+                var map = taro.scaleMap(rfdc()(taro.game.data.map));
                 taro.tiled.loadJson(map, function (layerArray, TaroLayersById) {
                     taro.physics.staticsFromMap(TaroLayersById.walls);
                 });

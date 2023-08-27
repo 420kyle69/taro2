@@ -76,7 +76,14 @@ var TaroTimeSyncExtension = {
 		if (statsPanels.latency) {
 			statsPanels.latency._latencyPanel.update(latency, 1000);
 		}
-		$('#updateping').html(Math.floor(latency)); // round trip time
+
+		if (!taro.pingElement) {
+			taro.pingElement = document.getElementById('updateping');
+		}
+
+		if (taro.pingElement) {
+			taro.pingElement.innerHTML = Math.floor(latency);
+		}
 	},
 
 	getMedian: function (arr) {
