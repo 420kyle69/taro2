@@ -5215,22 +5215,7 @@ var TaroEntity = TaroObject.extend({
 
 	isTransforming: function(bool) {
 		if (bool != undefined) {
-			this._isTransforming = bool;
-            if (this._isTransforming) {
-                this.emit('transform', {
-                    x: this.nextKeyFrame[1][0],
-                    y: this.nextKeyFrame[1][1],
-                    rotation: this.nextKeyFrame[1][2],
-                });
-            }
-		}
-
-		// for items, if its owner is transforming, then it is considered to be transforming
-		if (this._category == 'item') {
-			var ownerUnit = this.getOwnerUnit();
-			if (ownerUnit) {
-				return ownerUnit._isTransforming || this._isTransforming;
-			}
+			this._isTransforming = bool;            
 		}
 
 		return this._isTransforming;
