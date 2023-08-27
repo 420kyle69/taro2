@@ -401,7 +401,6 @@ var PlayerUiComponent = TaroEntity.extend({
 
 		function keyboardListener (e) {
 			if (e.keyCode === 32) {
-				e.stopPropagation();
 				skipText();
 			}
 		}
