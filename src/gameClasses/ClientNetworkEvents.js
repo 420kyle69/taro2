@@ -206,10 +206,12 @@ var ClientNetworkEvents = {
 		if (!taro.uiTextElementsObj[key]) {
 			return;
 		}
+		
+		let sanitizedStyle = taro.clientSanitizer(data.style);
 		if (data.action == 'update') {
-			taro.uiTextElementsObj[key].innerText = data.style;
+			taro.uiTextElementsObj[key].innerText = sanitizedStyle;
 		} else if (data.action == 'append') {
-			taro.uiTextElementsObj[key].innerText += '\n' + data.style;
+			taro.uiTextElementsObj[key].innerText += '\n' + sanitizedStyle;
 		}
 	},
 
