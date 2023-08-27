@@ -211,7 +211,7 @@ var ClientNetworkEvents = {
 		if (data.action == 'update') {
 			taro.uiTextElementsObj[key].innerText = sanitizedStyle;
 		} else if (data.action == 'append') {
-			taro.uiTextElementsObj[key].innerText += '\n' + sanitizedStyle;
+			taro.uiTextElementsObj[key].innerText += '\t' + sanitizedStyle;
 		}
 	},
 
