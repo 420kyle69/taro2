@@ -357,7 +357,13 @@ var MobileControlsComponent = TaroEntity.extend({
             taro.network.send('playerMouseMoved', [mx, my]);
             taro.network.send('playerAbsoluteAngle', compassAngle);
         }
-    }
+    },
+
+	_behaviour: function () {
+		// necessary to prevent the game from crashing when EntitiesToRender.updateAllEntities() tries to call ._behaviour() for all entities that are rendered
+	}
+
+
 
 });
 

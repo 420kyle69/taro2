@@ -85,11 +85,12 @@ var Unit = TaroEntityPhysics.extend({
 			// and their respective color because sometimes it may happen that unit is not yet created on client
 			// hence while making its minimap unit we will get null as unit
 			self._stats.minimapUnitVisibleToClients = {};
+
 			self.mount(taro.$('baseScene'));
-			if (taro.network.isPaused) {
-				this.streamMode(0);
-			} else {
+			if (self._stats.streamMode == 1 || self._stats.streamMode == undefined) {
 				this.streamMode(1);
+			} else {
+				this.streamMode(self._stats.streamMode);				
 			}
 
 			taro.server.totalUnitsCreated++;
@@ -1029,18 +1030,22 @@ var Unit = TaroEntityPhysics.extend({
 				var availableSlot = self.inventory.getFirstAvailableSlotForItem(itemData);
 
 				// Check if the item can merge
-				if (itemData.controls?.canMerge) {
+				if (itemData.controls?.canMerge != false) {
+
 					// insert/merge itemData's quantity into matching items in the inventory
 					var totalInventorySize = this.inventory.getTotalInventorySize();
 					for (var i = 0; i < totalInventorySize; i++) {
-						var selectedItemId = self._stats.itemIds[i];
-						if (selectedItemId) {
-							var selectedItem = taro.$(selectedItemId);
+						var currentItemId = self._stats.itemIds[i];
+						if (currentItemId) {
+							var currentItem = taro.$(currentItemId);
 
 							// if a matching item found in the inventory, try merging them
-							if (selectedItem && selectedItem._stats.itemTypeId == itemTypeId) {
-								var matchingItem = selectedItem;
-								taro.game.lastCreatedItemId = matchingItem.id(); // this is necessary in case item isn't a new instance, but an existing item getting quantity updated
+							if (currentItem && currentItem._stats.itemTypeId == itemTypeId) {
+								var matchingItem = currentItem;
+
+								// lastCreatedItem is used to track the last item created by the server. 
+								// This is necessary in case item isn't a new instance, but an existing item getting quantity updated
+								taro.game.lastCreatedItemId = matchingItem.id(); 
 
 								// matching item has infinite quantity. merge item unless new item is also infinite
 								if (matchingItem._stats.quantity == undefined && itemData.quantity != undefined) {
@@ -1462,10 +1467,7 @@ var Unit = TaroEntityPhysics.extend({
 	streamUpdateData: function (queuedData) {
 		var self = this;
 		// Unit.prototype.log("unit streamUpdateData", data)
-
-		// if (taro.isServer && taro.network.isPaused)
-		// 	return;
-
+		
 		TaroEntity.prototype.streamUpdateData.call(this, queuedData);
 
 		for (var i = 0; i < queuedData.length; i++) {
@@ -1493,7 +1495,7 @@ var Unit = TaroEntityPhysics.extend({
 					case 'itemIds':
 						self._stats[attrName] = newValue;
 						// update shop as player points are changed and when shop modal is open
-						if (taro.isClient) {
+						if (taro.isClient && this.inventory) {
 							this.inventory.update();
 
 							if ($('#modd-item-shop-modal').hasClass('show')) {
@@ -1512,7 +1514,7 @@ var Unit = TaroEntityPhysics.extend({
                                 if (this !== taro.client.selectedUnit) {
                                     // console.log('Unit.streamUpdateData(\'currentItemIndex\') on the client', newValue);
                                     this.setCurrentItem(newValue);
-                                } else {
+                                } else if (this.inventory) {
                                     this.inventory.highlightSlot(newValue + 1);
                                     var item = this.inventory.getItemBySlotNumber(newValue + 1);
                                     taro.itemUi.updateItemInfo(item);
@@ -1973,6 +1975,21 @@ var Unit = TaroEntityPhysics.extend({
 
 			if (this.isPlayingSound) {
 				this.isPlayingSound.volume = taro.sound.getVolume(this._translate, this.isPlayingSound.effect.volume);
+			}
+			
+			var processedUpdates = [];
+			var updateQueue = taro.client.entityUpdateQueue[this.id()];			
+			if (updateQueue) {
+				for (var key in updateQueue) {
+					var value = updateQueue[key];
+
+					processedUpdates.push({[key]: value});
+					delete taro.client.entityUpdateQueue[this.id()][key]
+				}
+
+				if (processedUpdates.length > 0) {
+					this.streamUpdateData(processedUpdates);
+				}
 			}
 		}
 

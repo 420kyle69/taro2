@@ -35,12 +35,14 @@ var GameScene = /** @class */ (function (_super) {
     }
     GameScene.prototype.init = function () {
         var _this = this;
+        var _a, _b, _c, _d;
         if (taro.isMobile) {
             this.scene.launch('MobileControls');
         }
         var camera = this.cameras.main;
         camera.setBackgroundColor(taro.game.data.defaultData.mapBackgroundColor);
         this.resolutionCoef = 1;
+        this.trackingDelay = ((_d = (_c = (_b = (_a = taro === null || taro === void 0 ? void 0 : taro.game) === null || _a === void 0 ? void 0 : _a.data) === null || _b === void 0 ? void 0 : _b.settings) === null || _c === void 0 ? void 0 : _c.camera) === null || _d === void 0 ? void 0 : _d.trackingDelay) || 3;
         this.scale.on(Phaser.Scale.Events.RESIZE, function () {
             if (_this.zoomSize) {
                 camera.zoom = _this.calculateZoom();
@@ -414,6 +416,8 @@ var GameScene = /** @class */ (function (_super) {
     };
     GameScene.prototype.update = function () {
         var _this = this;
+        var trackingDelay = this.trackingDelay / taro.fps();
+        this.cameras.main.setLerp(trackingDelay, trackingDelay);
         var worldPoint = this.cameras.main.getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
         taro.input.emit('pointermove', [{
                 x: worldPoint.x,
@@ -423,7 +427,8 @@ var GameScene = /** @class */ (function (_super) {
             element.setVisible(false);
         });
         if (!taro.developerMode.active || (taro.developerMode.active && taro.developerMode.activeTab !== 'map')) {
-            this.cameras.main.cull(this.renderedEntities).forEach(function (element) {
+            var visibleEntities = this.cameras.main.cull(this.renderedEntities);
+            visibleEntities.forEach(function (element) {
                 if (!element.hidden) {
                     element.setVisible(true);
                     if (element.dynamic) {

@@ -15,6 +15,7 @@ class GameScene extends PhaserScene {
 	cameraTarget: Phaser.GameObjects.Container & IRenderProps;
 	filter: Phaser.Textures.FilterMode;
     resolutionCoef: number;
+	trackingDelay: number;
 
 	constructor() {
 		super({ key: 'Game' });
@@ -28,8 +29,10 @@ class GameScene extends PhaserScene {
 
 		const camera = this.cameras.main;
 		camera.setBackgroundColor(taro.game.data.defaultData.mapBackgroundColor);
-        
+
         this.resolutionCoef = 1;
+
+		this.trackingDelay = taro?.game?.data?.settings?.camera?.trackingDelay || 3;
 
 		this.scale.on(Phaser.Scale.Events.RESIZE, () => {
 			if (this.zoomSize) {
@@ -592,6 +595,9 @@ class GameScene extends PhaserScene {
 
 	update (): void {
 
+		let trackingDelay = this.trackingDelay / taro.fps();
+		this.cameras.main.setLerp(trackingDelay, trackingDelay);
+
 		const worldPoint = this.cameras.main.getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
 
 		taro.input.emit('pointermove', [{
@@ -602,13 +608,14 @@ class GameScene extends PhaserScene {
 		this.renderedEntities.forEach(element => {
 			element.setVisible(false);
 		});
-
+		
 		if (!taro.developerMode.active || (taro.developerMode.active && taro.developerMode.activeTab !== 'map')) {
-			this.cameras.main.cull(this.renderedEntities).forEach(element => {
+			var visibleEntities = this.cameras.main.cull(this.renderedEntities);
+			visibleEntities.forEach(element => {
 				if (!element.hidden) {
-					element.setVisible(true);
+					element.setVisible(true);					
 
-					if (element.dynamic) {
+					if(element.dynamic) {
 						// dynamic is only assigned through an hbz-index-only event
 						this.heightRenderer.adjustDepth(element as TGameObject & Phaser.GameObjects.Components.Size);
 					}

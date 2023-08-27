@@ -20,15 +20,17 @@ var ActionComponent = TaroEntity.extend({
 			var action = actionList[i];
 
 			if (!action || action.disabled == true || // if action is disabled or
-				(taro.isClient && action.runMode == 0) || // don't run on client if runMode is 'server authoratative'
+				(taro.isClient && action.runMode == 0) || // don't run on client if runMode is 'server authoritative'
 				(taro.isServer && action.runMode == 1) || // don't run on server if runMode is 'client only'
 				(taro.isClient && (!action.runOnClient && !action.runMode)) // backward compatibility for older versions
 			) {
 				continue;
 			}
 
-			// if CSP is enabled, then server will pause streaming
-			// the server side is still running (e.g. creating entities), but it won't be streamed to the client
+			// assign runMode engine-widely, so functions like item.use() can reference to what the current runMode is
+			// for item.use(), if runMode == 0, then it will stream quantity change to its owner player
+			taro.runMode = (action.runMode)? 1 : 0;
+			
 			if (taro.isServer) {
 
 				var now = Date.now();
@@ -761,7 +763,7 @@ var ActionComponent = TaroEntity.extend({
 						var unit = self._script.variable.getValue(action.unit, vars);
 						var color = self._script.variable.getValue(action.color, vars);
 
-						if (player && unit && unit._category === 'unit' && player._stats && player._stats.clientId) {
+						if (unit?._category === 'unit' && player?._stats?.clientId && typeof color == 'string') {
 							var clientId = player._stats.clientId;
 
 							unit._stats.minimapUnitVisibleToClients[clientId] = color;
@@ -1875,6 +1877,15 @@ var ActionComponent = TaroEntity.extend({
 
 						break;
 
+					case 'setSourceItemOfProjectile':
+						var item = self._script.variable.getValue(action.item, vars);
+						var projectile = self._script.variable.getValue(action.projectile, vars);
+						if (projectile && item) {
+							projectile.setSourceItem(item);
+						}
+
+						break;						
+
 					/* Ads */
 
 					case 'playAdForEveryone':
@@ -2211,6 +2222,8 @@ var ActionComponent = TaroEntity.extend({
 
 								if (player) {
 									createdEntity = player.createUnit(rfdc()(data));
+								} else {
+									taro.script.errorLog("failed to create new unit because player doesn't exist");	
 								}
 
 								taro.game.lastCreatedUnitId = createdEntity._id;
@@ -2369,6 +2382,10 @@ var ActionComponent = TaroEntity.extend({
 						if (position && entity && ['unit', 'item', 'projectile'].includes(entity._category)) {
 							entity.teleportTo(position.x, position.y, entity._rotate.z);
 						}
+						// if we ever decide to allow region to be moved using moveEntity, this is how you do it
+						// else if (entity._category == 'region' && !isNaN(position.x) && !isNaN(position.y)) {
+						// 	entity.streamUpdateData([{ x: position.x }, { y: position.y }]);
+						// }
 
 						break;
 
@@ -2540,10 +2557,10 @@ var ActionComponent = TaroEntity.extend({
 								entity.applyTorque(torque);
 								// entity.body.applyTorque(torque);
 							} else {
-								// self._script.errorLog( action.type + " - invalid position")
+								self._script.errorLog( action.type + " - invalid position")
 							}
 						} else {
-							// self._script.errorLog( action.type + " - invalid unit")
+							self._script.errorLog( action.type + " - invalid unit")
 						}
 						break;
 

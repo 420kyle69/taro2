@@ -781,6 +781,11 @@ var MenuUiComponent = TaroEntity.extend({
 	onDisconnectFromServer: function (src, message) {
 		console.log('modal shown from', src, message);
 
+		if('Guest players not allowed to join this game.' === message) {
+			window.setShowRegister(true);
+			return;
+		}
+
 		if (taro.isMobile) return;
 
 		taro.client.disconnected = true;

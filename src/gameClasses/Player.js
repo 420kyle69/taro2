@@ -231,7 +231,6 @@ var Player = TaroEntity.extend({
 					{ unitId: unit.id() },
 					this._stats.clientId
 				);
-
 			} else if (
 				taro.isClient &&
 				this._stats.clientId == taro.network.id()
@@ -659,13 +658,7 @@ var Player = TaroEntity.extend({
 		if (taro.env == 'local') // don't mute users in dev env
 			return;
 
-		if (value) {
-			$('#message').attr('disabled', true);
-			$('#message').attr('placeholder', 'You are muted');
-		} else {
-			$('#message').attr('disabled', false);
-			$('#message').attr('placeholder', 'message');
-		}
+		window.setTempChatMute && window.setTempChatMute(value);
 	},
 
 	redrawUnits: function (filterFn, properties) {
@@ -729,6 +722,26 @@ var Player = TaroEntity.extend({
 		}
 
 		TaroEntity.prototype.tick.call(this, ctx);
+	},
+
+	_behaviour: function() {
+		if (taro.isClient) {
+			var processedUpdates = [];
+			var updateQueue = taro.client.entityUpdateQueue[this.id()];
+			
+			if (updateQueue) {
+				for (var key in updateQueue) {
+					var value = updateQueue[key];
+				
+					processedUpdates.push({[key]: value});
+					delete taro.client.entityUpdateQueue[this.id()][key]
+				}
+
+				if (processedUpdates.length > 0) {
+					this.streamUpdateData(processedUpdates);
+				}
+			}
+		}
 	},
 
 	loadPersistentData: function () {

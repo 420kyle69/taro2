@@ -8,7 +8,9 @@ declare class TaroEngine extends TaroClass {
 	map: any;
 	scaleMap(data: any): void;
 
+	fps(): number;
 	_renderFrames: number;
+	_renderFPS: number;
 	_tickStart: number;
 
 	_currentTime: number;
@@ -65,6 +67,7 @@ declare class TaroEngine extends TaroClass {
 		world(): any;
 		enableDebug(flags: number): void;
 		disableDebug(): void;
+		_scaleRatioToBox2dWeb: number;
 		engine: 'BOX2DWASM' | 'BOX2DWEB' | 'PLANCK';
 		box2D?: typeof Box2D & EmscriptenModule
 		_scaleRatio: number;

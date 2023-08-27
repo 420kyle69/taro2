@@ -87,6 +87,15 @@ var TaroEngine = TaroEntity.extend({
 		this.addComponent(TaroTimeComponent);
 
 		if (this.isClient) {
+			this.clientSanitizer = (str) => {
+				if (window.sanitizeString) {
+					return window.sanitizeString(str);
+				} else if (taro.env === 'local') {
+					return str;
+				} else {
+					return '';
+				}
+			}
 			// Enable UI element (virtual DOM) support
 			this.addComponent(TaroUiManagerComponent);
 			this.delayedStreamCount = 0;
@@ -161,7 +170,8 @@ var TaroEngine = TaroEntity.extend({
 		this.tempSnapshot = [0, {}];
 		this.nextSnapshot = [0, {}];
 		this.renderTime = 0;
-		
+		this._renderFPS = 60;
+		this._renderFrames = 0;
 		this.remainderFromLastStep = 0;
 
 		this.lagOccurenceCount = 0;
@@ -1337,7 +1347,7 @@ var TaroEngine = TaroEntity.extend({
 		var self = taro;
 
 		// Store frames per second
-		self._renderFPS = self._renderFrames;
+		self._renderFPS = Math.min(240, Math.max(5, self._renderFrames));
 		self._physicsFPS = self._physicsFrames;
 
 		// Store draws per second
@@ -1395,6 +1405,14 @@ var TaroEngine = TaroEntity.extend({
 			this._currentTime += ((val - lastVal) * this._timeScale);
 		}
 		return this._currentTime;
+	},
+
+	checkAndGetNumber: function (num, defaultReturnValue = '') {
+		if(!isNaN(parseFloat(num)) && !isNaN(num - 0)) {
+			return num;
+		} else {
+			defaultReturnValue;
+		}
 	},
 
 	/**

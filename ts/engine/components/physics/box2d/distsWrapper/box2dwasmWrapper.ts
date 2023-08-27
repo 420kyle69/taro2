@@ -94,7 +94,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 				if (!component.renderer) {
 					const canvas = taro.renderer.scene.getScene('Game');
 					ctx = canvas.add.graphics().setDepth(9999);
-					const scale = 30;
+					const scale = taro.physics._scaleRatio;
 					ctx.setScale(scale);
 					const newRenderer = new Box2dDebugDraw(box2D, new Box2dHelpers(box2D), ctx, scale).constructJSDraw();
 					newRenderer.SetFlags(flags);
@@ -124,7 +124,8 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 			 */
 		component.gravity = function (x, y) {
 			if (x !== undefined && y !== undefined) {
-				this._gravity = component.recordLeak(new this.b2Vec2(x, y));
+				const scale = taro.physics._scaleRatioToBox2dWeb;
+				this._gravity = component.recordLeak(new this.b2Vec2(x / scale, y / scale));
 				return this._entity;
 			}
 
@@ -187,7 +188,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 		}
 		var tempDef = self.recordLeak(new self.b2BodyDef());
 		var param;
-		var tempBod;
+		let tempBod: Box2D.b2Body & { [key: string]: any };
 		var fixtureDef;
 		var tempFixture;
 		var finalFixture;
@@ -250,7 +251,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 				switch (param) {
 					case 'gravitic':
 						if (!body.gravitic) {
-							tempBod.m_nonGravitic = true;
+							tempBod.SetGravityScale(0);
 						}
 						break;
 
@@ -344,7 +345,6 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 								}
 
 								if (fixtureDef.friction !== undefined && finalFixture) {
-
 									finalFixture.SetFriction(fixtureDef.friction);
 								}
 								if (fixtureDef.restitution !== undefined && finalFixture) {
@@ -370,10 +370,8 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 		tempBod.SetEnabled(true);
 		// Add the body to the world with the passed fixture
 		entity.body = tempBod;
-
 		entity.gravitic(!!body.affectedByGravity);
 		// rotate body to its previous value
-		// console.log('box2dweb',entity._rotate.z)
 		entity.rotateTo(0, 0, entity._rotate.z);
 		// Add the body to the world with the passed fixture
 		self.destroyB2dObj(tempDef);
