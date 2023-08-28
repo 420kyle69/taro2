@@ -7,7 +7,7 @@ var EntitiesToRender = /** @class */ (function () {
         var _a, _b, _c, _d, _e, _f, _g;
         for (var entityId in this.trackEntityById) {
             // var timeStart = performance.now();
-            // var entity = taro.$(entityId);	
+            // var entity = taro.$(entityId);
             var entity = this.trackEntityById[entityId];
             // taro.profiler.logTimeElapsed('findEntity', timeStart);
             if (entity) {
@@ -30,7 +30,7 @@ var EntitiesToRender = /** @class */ (function () {
                 if (entity._category == 'item') {
                     ownerUnit = entity.getOwnerUnit();
                     // dont render item carried by invisible unit
-                    if (!((_c = (_b = ownerUnit === null || ownerUnit === void 0 ? void 0 : ownerUnit.phaserEntity) === null || _b === void 0 ? void 0 : _b.gameObject) === null || _c === void 0 ? void 0 : _c.visible)) {
+                    if (ownerUnit && !((_c = (_b = ownerUnit === null || ownerUnit === void 0 ? void 0 : ownerUnit.phaserEntity) === null || _b === void 0 ? void 0 : _b.gameObject) === null || _c === void 0 ? void 0 : _c.visible)) {
                         continue;
                     }
                 }
@@ -55,7 +55,7 @@ var EntitiesToRender = /** @class */ (function () {
                         // immediately rotate my unit's items to the angleToTarget
                     }
                     else if (ownerUnit == taro.client.selectedUnit && ((_e = (_d = entity._stats.controls) === null || _d === void 0 ? void 0 : _d.mouseBehaviour) === null || _e === void 0 ? void 0 : _e.rotateToFaceMouseCursor)) {
-                        rotate = ownerUnit.angleToTarget; // angleToTarget is updated at 60fps								
+                        rotate = ownerUnit.angleToTarget; // angleToTarget is updated at 60fps
                     }
                     entity._rotate.z = rotate; // update the item's rotation immediately for more accurate aiming (instead of 20fps)
                     entity.anchoredOffset = entity.getAnchoredOffset(rotate);

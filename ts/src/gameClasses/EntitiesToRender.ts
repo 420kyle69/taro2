@@ -12,16 +12,16 @@ class EntitiesToRender {
 		for (var entityId in this.trackEntityById) {
 			// var timeStart = performance.now();
 
-			// var entity = taro.$(entityId);	
+			// var entity = taro.$(entityId);
 			var entity = this.trackEntityById[entityId];
 
 			// taro.profiler.logTimeElapsed('findEntity', timeStart);
 			if (entity) {
 				// handle entity behaviour and transformation offsets
 				// var timeStart = performance.now();
-				
+
 				var phaserEntity = entity.phaserEntity?.gameObject
-				
+
 				if (taro.gameLoopTickHasExecuted) {
 					if (entity._deathTime !== undefined && entity._deathTime <= taro._tickStart) {
 						// Check if the deathCallBack was set
@@ -36,13 +36,13 @@ class EntitiesToRender {
 					// if (typeof entity._behaviour == 'function')
 					entity._behaviour();
 				}
-				
+
 				var ownerUnit = undefined;
 				if (entity._category == 'item') {
 					ownerUnit = entity.getOwnerUnit();
 
 					// dont render item carried by invisible unit
-					if (!ownerUnit?.phaserEntity?.gameObject?.visible) {
+					if (ownerUnit && !ownerUnit?.phaserEntity?.gameObject?.visible) {
 						continue;
 					}
 				}
@@ -55,7 +55,7 @@ class EntitiesToRender {
 				}
 
 				if (entity._translate) {
-						
+
 					var x = entity._translate.x;
 					var y = entity._translate.y;
 					var rotate = entity._rotate.z;
@@ -73,7 +73,7 @@ class EntitiesToRender {
 						rotate = ownerUnit._rotate.z;
 					// immediately rotate my unit's items to the angleToTarget
 					} else if (ownerUnit == taro.client.selectedUnit && entity._stats.controls?.mouseBehaviour?.rotateToFaceMouseCursor) {
-						rotate = ownerUnit.angleToTarget; // angleToTarget is updated at 60fps								
+						rotate = ownerUnit.angleToTarget; // angleToTarget is updated at 60fps
 					}
 					entity._rotate.z = rotate // update the item's rotation immediately for more accurate aiming (instead of 20fps)
 
@@ -93,9 +93,9 @@ class EntitiesToRender {
 					rotate += entity.tween.offset.rotate;
 				}
 
-				if (entity.tween?.isTweening || 
-					entity.isTransforming() || 
-					entity == taro.client.selectedUnit || 
+				if (entity.tween?.isTweening ||
+					entity.isTransforming() ||
+					entity == taro.client.selectedUnit ||
 					ownerUnit
 				) {
 					// var timeStart = performance.now();
@@ -119,6 +119,6 @@ class EntitiesToRender {
 
 		this.updateAllEntities();
 
-			
+
 	}
 }
