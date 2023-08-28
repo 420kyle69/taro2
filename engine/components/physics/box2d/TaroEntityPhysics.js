@@ -477,12 +477,10 @@ var TaroEntityPhysics = TaroEntity.extend({
 	// loss tolerant applyForce
 	applyImpulseLT: function (x, y) {
 		// taro.devLog("applyForce", x, y)
-		console.log(x,y)
 		try {
 			if (!isNaN(x) && !isNaN(y) && isFinite(x) && isFinite(y)) {
 				const scale = taro.physics.engine !== 'BOX2DWASM' ? 1 : taro.physics._scaleRatioToBox2dWeb ** 3 - 2;
 				var thrustVector = new taro.physics.b2Vec2(x / scale, y / scale);
-				console.log(scale)
 				this.body.applyLinearImpulse(thrustVector, this.body.getWorldCenter());
 			}
 		} catch (e) {
