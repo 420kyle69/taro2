@@ -271,8 +271,9 @@ var ActionComponent = TaroEntity.extend({
 
 					case 'kickPlayer':
 						var player = self._script.variable.getValue(action.entity, vars);
+						var message = self._script.variable.getValue(action.message, vars);
 						if (player && player._category == 'player') {
-							taro.game.kickPlayer(player.id());
+							taro.game.kickPlayer(player.id(), message);
 						}
 
 						break;

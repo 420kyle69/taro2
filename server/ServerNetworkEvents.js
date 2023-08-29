@@ -611,15 +611,22 @@ var ServerNetworkEvents = {
 	_onKick: function (kickedClientId, modClientId) {
 		var modPlayer = taro.game.getPlayerByClientId(modClientId);
 		var kickedPlayer = taro.game.getPlayerByClientId(kickedClientId);
+		var message = "You were kicked";
 
 		if (!modPlayer) {
 			return;
+		} else {
+			var modPlayer = taro.$(modPlayerId);
+			modPlayerName = modPlayer?._stats?.name;
+			if (modPlayerName) {
+				message = 'You were kicked by ' + modPlayerName;
+			}
 		}
 
 		var isUserDeveloper = modPlayer.isDeveloper();
 			
 		if (isUserDeveloper && kickedPlayer) {
-			taro.game.kickPlayer(kickedPlayer.id(), modPlayer.id());
+			taro.game.kickPlayer(kickedPlayer.id(), message);
 		}
 	},
 	

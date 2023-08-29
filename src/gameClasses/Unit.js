@@ -2004,7 +2004,7 @@ var Unit = TaroEntityPhysics.extend({
 				}
 			}
 			if (this.attribute) {
-				this.attribute.regenerate();
+				this.attribute._behaviour();
 			}
 		}
 
