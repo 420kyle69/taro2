@@ -1240,7 +1240,7 @@ var VariableComponent = TaroEntity.extend({
 
 					case 'lerp':
 						var valueA = self.getValue(text.valueA, vars);
-						var valueB = self.getValue(text.valueA, vars);
+						var valueB = self.getValue(text.valueB, vars);
 						var alpha = self.getValue(text.alpha, vars);
 
 						if (!isNaN(valueA) && !isNaN(valueB) && !isNaN(alpha)) {
