@@ -70,7 +70,7 @@ var Item = TaroEntityPhysics.extend({
 		if (taro.isServer) {
 			if (self._stats.streamMode == 1 || self._stats.streamMode == undefined) {
 				this.streamMode(1);
-				// self.streamCreate(); // do we need this?
+				self.streamCreate(); // without this, newly purchased item wont' show on unit
 			} else {
 				this.streamMode(self._stats.streamMode);				
 			}
@@ -245,10 +245,10 @@ var Item = TaroEntityPhysics.extend({
 
 			if (taro.isServer) {
 				this.streamUpdateData([{ ownerUnitId: 0 }]);
-				if (self._stats.streamMode == 1 || self._stats.streamMode == undefined) {
+				if (this._stats.streamMode == 1 || this._stats.streamMode == undefined) {
 					this.streamMode(1);
 				} else {
-					this.streamMode(self._stats.streamMode);				
+					this.streamMode(this._stats.streamMode);				
 				}
 			}
 		}
