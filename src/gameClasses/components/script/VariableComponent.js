@@ -1238,6 +1238,31 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
+					case 'lerp':
+						var valueA = self.getValue(text.valueA, vars);
+						var valueB = self.getValue(text.valueA, vars);
+						var alpha = self.getValue(text.alpha, vars);
+
+						if (!isNaN(valueA) && !isNaN(valueB) && !isNaN(alpha)) {
+							returnValue = (valueB - valueA) * alpha + valueA;
+						}
+						
+						break;
+
+					case 'getLerpPosition':
+						var positionA = self.getValue(text.positionA, vars);
+						var positionB = self.getValue(text.positionB, vars);
+						var alpha = self.getValue(text.alpha, vars);
+
+						if (positionA && positionB && !isNaN(positionA.x) && !isNaN(positionA.y) && !isNaN(positionB.x) && !isNaN(positionB.y) && !isNaN(alpha)) {
+							returnValue = {
+								x: (positionB.x - positionA.x) * alpha + positionA.x,
+								y: (positionB.y - positionA.y) * alpha + positionA.y
+							}
+						}
+
+						break;
+
 					case 'getEntityPosition':
 						entity = self.getValue(text.entity, vars);
 
