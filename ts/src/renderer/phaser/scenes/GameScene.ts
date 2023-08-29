@@ -33,6 +33,9 @@ class GameScene extends PhaserScene {
         this.resolutionCoef = 1;
 
 		this.trackingDelay = taro?.game?.data?.settings?.camera?.trackingDelay || 3;
+        if (this.trackingDelay > 60) {
+            this.trackingDelay = 60;
+        }
 
 		this.scale.on(Phaser.Scale.Events.RESIZE, () => {
 			if (this.zoomSize) {
