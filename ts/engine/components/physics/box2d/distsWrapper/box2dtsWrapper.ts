@@ -4,6 +4,12 @@ const box2dtsWrapper: PhysicsDistProps = {
 		component.b2AABB = box2dts.b2AABB; // added by Jaeyun for world collision detection for raycast bullets
 		component.b2Color = box2dts.b2Color;
 		component.b2Vec2 = box2dts.b2Vec2;
+		component.b2Vec2.prototype.get_x = function () {
+			return this.x;
+		};
+		component.b2Vec2.prototype.get_y = function () {
+			return this.y;
+		};
 		// component.b2Math = box2dts.Common.Math.b2Math;
 		component.b2Shape = box2dts.b2Shape;
 		component.b2BodyDef = box2dts.b2BodyDef;
