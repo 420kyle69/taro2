@@ -9,6 +9,12 @@ const box2dWrapper: PhysicsDistProps = {
 		box2DJS().then(function (box2D) {
 			component.b2Color = box2D.b2Color;
 			component.b2Vec2 = box2D.b2Vec2;
+			component.b2Vec2.prototype.get_x = function () {
+				return this.x;
+			};
+			component.b2Vec2.prototype.get_y = function () {
+				return this.y;
+			};
 			component.b2Math = box2D.b2Math;
 			component.b2Shape = box2D.b2Shape;
 			component.b2BodyDef = box2D.b2BodyDef;

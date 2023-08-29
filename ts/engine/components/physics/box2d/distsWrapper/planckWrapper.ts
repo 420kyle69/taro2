@@ -4,6 +4,12 @@ const planckWrapper: PhysicsDistProps = {
 	init: function (component) {
 		// component.b2Color = planck.Common.b2Color;
 		component.b2Vec2 = planck.Vec2;
+		component.b2Vec2.prototype.get_x = function () {
+			return this.x;
+		};
+		component.b2Vec2.prototype.get_y = function () {
+			return this.y;
+		};
 		component.b2AABB = planck.AABB; // added by Jaeyun for world collision detection for raycast bullets
 		component.b2Math = planck.Math;
 		component.b2Shape = planck.Shape;

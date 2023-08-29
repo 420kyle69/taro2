@@ -728,28 +728,16 @@ var VariableComponent = TaroEntity.extend({
 
 					case 'getEntityVelocityX':
 						if (entity && entity.body) {
-							if (taro.physics.engine === 'BOX2DWASM') {
-								var velocity = entity.body.GetLinearVelocity();
-								returnValue = parseFloat(velocity.get_x() * taro.physics._scaleRatioToBox2dWeb).toFixed(2);
-							} else {
-								var velocity = entity.body.m_linearVelocity && entity.body.m_linearVelocity.x;
-								velocity = velocity && velocity.toFixed(2) || 0;
-								returnValue = parseFloat(velocity);
-							}
+							var velocity = entity.body.getLinearVelocity();
+							returnValue = parseFloat(velocity.get_x() * taro.physics._scaleRatioToBox2dWeb).toFixed(2) || 0;
 						}
 
 						break;
 
 					case 'getEntityVelocityY':
 						if (entity && entity.body) {
-							if (taro.physics.engine === 'BOX2DWASM') {
-								var velocity = entity.body.GetLinearVelocity();
-								returnValue = parseFloat(velocity.get_y() * taro.physics._scaleRatioToBox2dWeb).toFixed(2);
-							} else {
-								var velocity = entity.body.m_linearVelocity && entity.body.m_linearVelocity.y;
-								velocity = velocity && velocity.toFixed(2) || 0;
-								returnValue = parseFloat(velocity);
-							}
+							var velocity = entity.body.getLinearVelocity();
+							returnValue = parseFloat(velocity.get_y() * taro.physics._scaleRatioToBox2dWeb).toFixed(2) || 0;
 						}
 
 						break;
