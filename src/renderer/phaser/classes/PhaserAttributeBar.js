@@ -80,7 +80,8 @@ var PhaserAttributeBar = /** @class */ (function (_super) {
         bar.fillStyle(Phaser.Display.Color
             .HexStringToColor(color)
             .color);
-        if (value !== 0) {
+        // add max as a patch to renderer freezing when max is 0
+        if (value !== 0 && max !== 0) {
             bar.fillRoundedRect(-w / 2, -h / 2, 
             // we should not clamp here because it will mask whether or not there is a fault elsewhere in the attribute logic
             // because of this, changed from Math.max(w * Math.min(value, max)/ max...)
