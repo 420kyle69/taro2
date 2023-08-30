@@ -5,6 +5,9 @@ var AbilityComponent = TaroEntity.extend({
 	init: function (entity, options) {
 		var self = this;
 		self._entity = entity;
+
+		this.activeAbilities = {};
+		this.abilityCooldowns = {};
 	},
 
 	moveUp: function () {
@@ -128,60 +131,33 @@ var AbilityComponent = TaroEntity.extend({
 
 		var ability = null;
 
-		if (handle.cost && handle.scriptName) {
+
+		if ((handle.cost && handle.scriptName) || handle.event) {
 			ability = handle;
 		} else {
 			ability = taro.game.data.abilities[handle];
 		}
 
+		switch (ability?.event) {
+			// skip switch for old abilities
+			case undefined:
+				break;
+
+			case 'startCasting':
+				return this.startCasting(ability.abilityId);
+
+			case 'stopCasting':
+				return this.stopCasting(ability.abilityId);
+		}
+
+		// new abilities should have returned by now. following is for old system (backwards comp.)
 		var player = self._entity.getOwner();
+
 		if (ability != undefined) {
-			var canAffordCost = true;
-
-			if (ability.cost && ability.cost.unitAttributes) {
-				// AbilityComponent.prototype.log("ability cost", ability.cost.cast)
-				for (attrName in ability.cost.unitAttributes) {
-					var cost = ability.cost.unitAttributes[attrName];
-
-					if (cost && (self._entity._stats.attributes[attrName] == undefined || self._entity._stats.attributes[attrName].value < cost)) {
-						canAffordCost = false;
-						break;
-					}
-				}
-			}
-			if (ability.cost && ability.cost.playerAttributes && canAffordCost && player && player._stats) {
-				// AbilityComponent.prototype.log("ability cost", ability.cost.cast)
-				for (attrName in ability.cost.playerAttributes) {
-					var cost = ability.cost.playerAttributes[attrName];
-					// AbilityComponent.prototype.log("attribute value", attrName, self._entity._stats.attributes[attrName])
-					if (cost && (player._stats.attributes[attrName] == undefined ||
-						player._stats.attributes[attrName].value < cost)
-					) {
-						canAffordCost = false;
-						break;
-					}
-				}
-			}
-			if (canAffordCost) {
-				// process cost
-				var unitAttr = { attributes: {} };
-				if (ability.cost && ability.cost.unitAttributes) {
-					for (attrName in ability.cost.unitAttributes) {
-						if (self._entity._stats.attributes[attrName]) {
-							var newValue = self._entity._stats.attributes[attrName].value - ability.cost.unitAttributes[attrName];
-							self._entity.attribute.update(attrName, newValue, true);						
-						}
-					}
-				}
-				var playerAttr = { attributes: {} };
-				if (ability.cost && ability.cost.playerAttributes && player && player._stats) {
-					for (attrName in ability.cost.playerAttributes) {
-						if (player._stats.attributes[attrName]) {
-							var newValue = player._stats.attributes[attrName].value - ability.cost.playerAttributes[attrName];
-							player.attribute.update(attrName, newValue, true);
-						}
-					}
-				}
+			// moved check for canAffordCost to its own method
+			if (this.canAffordCost(ability, player)) {
+				// moved attribute cost processing to its own method
+				this.payCost(ability, player);
 
 				if (taro.isServer || taro.isClient && taro.physics) {
 
@@ -190,7 +166,11 @@ var AbilityComponent = TaroEntity.extend({
 							AbilityComponent.prototype.log(`ability cast: running script ${taro.game.data.scripts[ability.scriptName].name} ${ability.scriptName}`);
 						}
 
+						// not actually sending data within unitAttr or playerAttr. looks like this is just forcing update
 						if (taro.isServer) {
+
+							var playerAttr = { attributes: {} };
+							var unitAttr = { attributes: {} };
 							// calling stream for unit because there is delay in transferring attributes data
 							if (Object.keys(unitAttr.attributes || []).length > 0) {
 								self._entity.streamUpdateData(unitAttr);
@@ -211,6 +191,111 @@ var AbilityComponent = TaroEntity.extend({
 			}
 		} else {
 			AbilityComponent.prototype.log(`undefined ability ${handle}`);
+		}
+	},
+
+	canAffordCost: function(ability, player) {
+		let canAffordCost = true;
+
+		if (ability.cost && ability.cost.unitAttributes) {
+			// AbilityComponent.prototype.log("ability cost", ability.cost.cast)
+			for (attrName in ability.cost.unitAttributes) {
+				const cost = ability.cost.unitAttributes[attrName];
+
+				if (cost && (this._entity._stats.attributes[attrName] == undefined || this._entity._stats.attributes[attrName].value < cost)) {
+					canAffordCost = false;
+					break;
+				}
+			}
+		}
+		if (ability.cost && ability.cost.playerAttributes && canAffordCost && player && player._stats) {
+			// AbilityComponent.prototype.log("ability cost", ability.cost.cast)
+			for (attrName in ability.cost.playerAttributes) {
+				const cost = ability.cost.playerAttributes[attrName];
+				// AbilityComponent.prototype.log("attribute value", attrName, this._entity._stats.attributes[attrName])
+				if (cost && (player._stats.attributes[attrName] == undefined ||
+					player._stats.attributes[attrName].value < cost)
+				) {
+					canAffordCost = false;
+					break;
+				}
+			}
+		}
+
+		return canAffordCost;
+	},
+
+	payCost: function(ability, player) {
+		// process cost
+		if (ability.cost && ability.cost.unitAttributes) {
+			for (attrName in ability.cost.unitAttributes) {
+				if (this._entity._stats.attributes[attrName]) {
+					var newValue = this._entity._stats.attributes[attrName].value - ability.cost.unitAttributes[attrName];
+					this._entity.attribute.update(attrName, newValue, true);
+				}
+			}
+		}
+
+		if (ability.cost && ability.cost.playerAttributes && player && player._stats) {
+			for (attrName in ability.cost.playerAttributes) {
+				if (player._stats.attributes[attrName]) {
+					var newValue = player._stats.attributes[attrName].value - ability.cost.playerAttributes[attrName];
+					player.attribute.update(attrName, newValue, true);
+				}
+			}
+		}
+	},
+
+	startCasting: function (abilityId) {
+		if (this.activeAbilities[abilityId]) {
+			return;
+		}
+
+		const player = this._entity.getOwner();
+		const ability = this._entity._stats.controls.unitAbilities[abilityId];
+
+		if (!this.canAffordCost(ability, player)) {
+			return;
+		}
+
+		this.payCost(ability, player);
+
+		this._entity.script.runScript(
+			ability.eventScripts.startCasting,
+			{ triggeredBy: { unitId: this._entity.id()} }
+		);
+
+		this.activeAbilities[abilityId] = true;
+
+		if (ability.castDuration) {
+			this.abilityCooldowns[abilityId] = Date.now() + ability.castDuration;
+		}
+	},
+
+	stopCasting: function (abilityId) {
+		if (!this.activeAbilities[abilityId]) {
+			return;
+		}
+
+		const ability = this._entity._stats.controls.unitAbilities[abilityId];
+
+		this.activeAbilities[abilityId] = false;
+
+		this._entity.script.runScript(
+			ability.eventScripts.stopCasting,
+			{ triggeredBy: { unitId: this._entity.id()} }
+		);
+	},
+	_behaviour: function (ctx) {
+
+		if (Object.keys(this.abilityCooldowns).length > 0) {
+			for (let id in this.abilityCooldowns) {
+
+				if (this.abilityCooldowns[id] <= Date.now()) {
+					delete this.abilityCooldowns[id];
+					this.stopCasting(id);
+				}
+			}
 		}
 	}
 });

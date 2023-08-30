@@ -743,7 +743,7 @@ var Unit = TaroEntityPhysics.extend({
 		self.previousState = null;
 
 		var data = taro.game.cloneAsset('unitTypes', type);
-		
+
 		delete data.type; // hotfix for dealing with corrupted game json that has unitData.type = "unitType". This is caused by bug in the game editor.
 
 		if (data == undefined) {
@@ -1507,20 +1507,20 @@ var Unit = TaroEntityPhysics.extend({
 						}
 						break;
 
-                        case 'currentItemIndex':
-                            self._stats[attrName] = newValue;
-                            // for tracking selected index of other units
-                            if (taro.isClient) {
-                                if (this !== taro.client.selectedUnit) {
-                                    // console.log('Unit.streamUpdateData(\'currentItemIndex\') on the client', newValue);
-                                    this.setCurrentItem(newValue);
-                                } else if (this.inventory) {
-                                    this.inventory.highlightSlot(newValue + 1);
-                                    var item = this.inventory.getItemBySlotNumber(newValue + 1);
-                                    taro.itemUi.updateItemInfo(item);
-                                }
-                            }
-                            break;
+					case 'currentItemIndex':
+						self._stats[attrName] = newValue;
+						// for tracking selected index of other units
+						if (taro.isClient) {
+							if (this !== taro.client.selectedUnit) {
+								// console.log('Unit.streamUpdateData(\'currentItemIndex\') on the client', newValue);
+								this.setCurrentItem(newValue);
+							} else {
+								this.inventory.highlightSlot(newValue + 1);
+								var item = this.inventory.getItemBySlotNumber(newValue + 1);
+								taro.itemUi.updateItemInfo(item);
+							}
+						}
+						break;
 
 					case 'skin':
 					case 'isInvisible':
@@ -1857,13 +1857,15 @@ var Unit = TaroEntityPhysics.extend({
 	 */
 	_behaviour: function (ctx) {
 		var self = this;
-		
+
 		_.forEach(taro.triggersQueued, function (trigger) {
 			trigger.params['thisEntityId'] = self.id();
 			self.script.trigger(trigger.name, trigger.params);
 		});
 
 		if (taro.isServer || (taro.isClient && taro.client.selectedUnit == this)) {
+			// ability component behaviour method call
+			this.ability._behaviour();
 
 			// translate unit
 			var speed = (this._stats.attributes && this._stats.attributes.speed && this._stats.attributes.speed.value) || 0;

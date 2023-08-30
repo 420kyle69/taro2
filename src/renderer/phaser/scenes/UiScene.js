@@ -19,12 +19,16 @@ var UiScene = /** @class */ (function (_super) {
         return _super.call(this, { key: 'UI', active: true }) || this;
     }
     UiScene.prototype.init = function () {
+        return;
     };
     UiScene.prototype.create = function () {
+        return;
     };
     UiScene.prototype.preload = function () {
+        return;
     };
     UiScene.prototype.update = function () {
+        return;
     };
     return UiScene;
 }(PhaserScene));

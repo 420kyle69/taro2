@@ -244,6 +244,7 @@ var ItemUiComponent = TaroEntity.extend({
 				}
 			});
 		}
+
 		return itemDiv;
 	},
 

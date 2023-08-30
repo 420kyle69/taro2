@@ -33,7 +33,7 @@ class PhaserRenderer extends Phaser.Game {
 				mode: Phaser.Scale.ScaleModes.ENVELOP,
 				autoCenter: Phaser.Scale.Center.CENTER_BOTH,
 				autoRound: true,
-				resizeInterval: 100
+				resizeInterval: 100,
 			},
 			render: {
 				pixelArt: false,
@@ -44,7 +44,7 @@ class PhaserRenderer extends Phaser.Game {
 			},
 			scene: [
 				GameScene,
-                UiScene,
+				UiScene,
 				DevModeScene,
 				MobileControlsScene
 			],
