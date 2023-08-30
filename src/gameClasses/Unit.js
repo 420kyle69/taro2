@@ -2007,6 +2007,16 @@ var Unit = TaroEntityPhysics.extend({
 				this.attribute._behaviour();
 			}
 		}
+		
+		if (taro.isClient && taro.client.selectedUnit == this) { // never run on server, pure UI
+			for (let i = 0; i < self._stats.itemIds.length; i++) {
+				var itemId = self._stats.itemIds[i];
+				var item = taro.$(itemId);
+				if (item && item._stats.showCDOverlay) {
+					taro.itemUi.updateItemCooldownOverlay(item);
+				}
+			}
+		}
 
 		if (taro.physics && taro.physics.engine != 'CRASH') {
 			this.processBox2dQueue();
