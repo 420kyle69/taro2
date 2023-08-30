@@ -17,7 +17,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 		this._options = options;
 		this._mode = 0;
 		this._actionQueue = [];
-		this._scaleRatio = 30;
 		this.physicsTickDuration = 0;
 		this.avgPhysicsTickDuration = 0;
 		this.totalBodiesCreated = 0;
@@ -42,7 +41,9 @@ var PhysicsComponent = TaroEventingClass.extend({
 		}
 
 		this.engine = this.engine.toUpperCase();
-
+		const box2dwebScaleRatio = 30;
+		this._scaleRatio = this.engine === 'BOX2DWASM' ? 60 : box2dwebScaleRatio;
+		this._scaleRatioToBox2dWeb = this._scaleRatio / box2dwebScaleRatio;
 		// this.engine = 'crash';
 		console.log('Physics engine: ', this.engine);
 
@@ -681,7 +682,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 									// if CSP is enabled, client-side physics will dictate:
 									// my unit's position and projectiles that are NOT server-streamed.
 									if (
-										(taro.game.cspEnabled && entity == taro.client.selectedUnit) || 
+										(taro.game.cspEnabled && entity == taro.client.selectedUnit) ||
 										(entity._category == 'projectile' && !entity._stats.streamMode)
 									) {
 										// if (entity._category == 'projectile') console.log(x, y, angle)

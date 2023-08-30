@@ -132,6 +132,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.paletteButton = new DevToolButton(this, 'palette', 'Palette', 'show/hide palette', null, 0, (h + s) * 12, h * 4, toolButtonsContainer, palette.toggle.bind(palette));
 
 		this.tooltip = new DevTooltip(this.scene);
+        this.scene.cameras.getCamera('palette').ignore([this.tooltip, this.toolButtonsContainer]);
 
 		this.palette.hide();
 		this.toolButtonsContainer.setVisible(false);
@@ -167,6 +168,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.palette.hide();
 		this.toolButtonsContainer.setVisible(false);
 		this.regionEditor.hideRegions();
+        this.showAllLayers();
 	}
 
 	queryWidgets(): void {
@@ -487,4 +489,14 @@ class DevModeTools extends Phaser.GameObjects.Container {
 			tilemapLayers[value].setVisible(true);
 		}
 	}
+
+    showAllLayers(): void {
+        const scene = this.scene as any;
+        const tilemapLayers = scene.gameScene.tilemapLayers;
+        for (let i = 0; i < tilemapLayers.length; i++) {
+            if (tilemapLayers[i].visible === false) {
+                this.hideLayer(i);
+            }
+        }
+    }
 }

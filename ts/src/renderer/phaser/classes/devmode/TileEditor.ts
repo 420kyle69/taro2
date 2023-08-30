@@ -486,7 +486,12 @@ class TileEditor {
 
 						}
 					}
-				}
+				} else if (this.devModeTools.entityEditor.selectedEntityImage){
+					this.devModeTools.tooltip.showMessage(
+						'Entity Position',
+						`X: ${this.devModeTools.entityEditor.selectedEntityImage.image.x.toString()}, Y: ${this.devModeTools.entityEditor.selectedEntityImage.image.y.toString()}`
+					);
+                }
 			} else {
 				this.showMarkers(false);
 			}

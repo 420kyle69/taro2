@@ -271,8 +271,9 @@ var ActionComponent = TaroEntity.extend({
 
 					case 'kickPlayer':
 						var player = self._script.variable.getValue(action.entity, vars);
+						var message = self._script.variable.getValue(action.message, vars);
 						if (player && player._category == 'player') {
-							taro.game.kickPlayer(player.id());
+							taro.game.kickPlayer(player.id(), message);
 						}
 
 						break;
@@ -745,7 +746,7 @@ var ActionComponent = TaroEntity.extend({
 						var unit = self._script.variable.getValue(action.unit, vars);
 						var color = self._script.variable.getValue(action.color, vars);
 
-						if (player && unit && unit._category === 'unit' && player._stats && player._stats.clientId) {
+						if (unit?._category === 'unit' && player?._stats?.clientId && typeof color == 'string') {
 							var clientId = player._stats.clientId;
 
 							unit._stats.minimapUnitVisibleToClients[clientId] = color;
@@ -2204,6 +2205,8 @@ var ActionComponent = TaroEntity.extend({
 
 								if (player) {
 									createdEntity = player.createUnit(rfdc()(data));
+								} else {
+									taro.script.errorLog("failed to create new unit because player doesn't exist");	
 								}
 
 								taro.game.lastCreatedUnitId = createdEntity._id;
@@ -2362,6 +2365,10 @@ var ActionComponent = TaroEntity.extend({
 						if (position && entity && ['unit', 'item', 'projectile'].includes(entity._category)) {
 							entity.teleportTo(position.x, position.y, entity._rotate.z);
 						}
+						// if we ever decide to allow region to be moved using moveEntity, this is how you do it
+						// else if (entity._category == 'region' && !isNaN(position.x) && !isNaN(position.y)) {
+						// 	entity.streamUpdateData([{ x: position.x }, { y: position.y }]);
+						// }
 
 						break;
 
@@ -2533,10 +2540,10 @@ var ActionComponent = TaroEntity.extend({
 								entity.applyTorque(torque);
 								// entity.body.applyTorque(torque);
 							} else {
-								// self._script.errorLog( action.type + " - invalid position")
+								self._script.errorLog( action.type + " - invalid position")
 							}
 						} else {
-							// self._script.errorLog( action.type + " - invalid unit")
+							self._script.errorLog( action.type + " - invalid unit")
 						}
 						break;
 

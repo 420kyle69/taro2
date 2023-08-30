@@ -33,6 +33,9 @@ class GameScene extends PhaserScene {
         this.resolutionCoef = 1;
 
 		this.trackingDelay = taro?.game?.data?.settings?.camera?.trackingDelay || 3;
+        if (this.trackingDelay > 60) {
+            this.trackingDelay = 60;
+        }
 
 		this.scale.on(Phaser.Scale.Events.RESIZE, () => {
 			if (this.zoomSize) {
@@ -608,13 +611,14 @@ class GameScene extends PhaserScene {
 		this.renderedEntities.forEach(element => {
 			element.setVisible(false);
 		});
-
+		
 		if (!taro.developerMode.active || (taro.developerMode.active && taro.developerMode.activeTab !== 'map')) {
-			this.cameras.main.cull(this.renderedEntities).forEach(element => {
+			var visibleEntities = this.cameras.main.cull(this.renderedEntities);
+			visibleEntities.forEach(element => {
 				if (!element.hidden) {
-					element.setVisible(true);
+					element.setVisible(true);					
 
-					if (element.dynamic) {
+					if(element.dynamic) {
 						// dynamic is only assigned through an hbz-index-only event
 						this.heightRenderer.adjustDepth(element as TGameObject & Phaser.GameObjects.Components.Size);
 					}

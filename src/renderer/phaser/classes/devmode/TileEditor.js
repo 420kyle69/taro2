@@ -433,6 +433,9 @@ var TileEditor = /** @class */ (function () {
                         }
                     }
                 }
+                else if (this.devModeTools.entityEditor.selectedEntityImage) {
+                    this.devModeTools.tooltip.showMessage('Entity Position', "X: ".concat(this.devModeTools.entityEditor.selectedEntityImage.image.x.toString(), ", Y: ").concat(this.devModeTools.entityEditor.selectedEntityImage.image.y.toString()));
+                }
             }
             else {
                 this.showMarkers(false);

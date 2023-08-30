@@ -111,6 +111,7 @@ class DeveloperMode {
 				taro.tiled.loadJson(map, function (layerArray, layersById) {
 					taro.physics.staticsFromMap(layersById.walls);
 				});
+				taro.map.updateWallMapData(); // for A* pathfinding
 			}
 		}
 	}

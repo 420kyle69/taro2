@@ -70,15 +70,15 @@ var Projectile = TaroEntityPhysics.extend({
 
 		if (taro.isServer) {
 			// stream projectile data if
-			if (!taro.network.isPaused &&
-				(
-					!taro.game.data.defaultData.clientPhysicsEngine || // client side isn't running physics (csp requires physics) OR
-					this._stats.streamMode // item is set to stream its projectiles from server
-				)
+
+			if (
+				!taro.game.data.defaultData.clientPhysicsEngine || // always stream if there's no client-side physics
+				self._stats.streamMode == 1 || self._stats.streamMode == undefined
 			) {
 				this.streamMode(1);
+				// self.streamCreate(); // do we need this?
 			} else {
-				this.streamMode(0);
+				this.streamMode(self._stats.streamMode);				
 			}
 
 			taro.server.totalProjectilesCreated++;
@@ -120,6 +120,21 @@ var Projectile = TaroEntityPhysics.extend({
 		if (taro.isServer) {
 			if (this.attribute) {
 				this.attribute.regenerate();
+			}
+		} else if (taro.isClient) {
+			var processedUpdates = [];
+			var updateQueue = taro.client.entityUpdateQueue[this.id()];			
+			if (updateQueue) {
+				for (var key in updateQueue) {
+					var value = updateQueue[key];
+
+					processedUpdates.push({[key]: value});
+					delete taro.client.entityUpdateQueue[this.id()][key]
+				}
+
+				if (processedUpdates.length > 0) {
+					this.streamUpdateData(processedUpdates);
+				}
 			}
 		}
 
@@ -195,9 +210,6 @@ var Projectile = TaroEntityPhysics.extend({
 	},
 
 	streamUpdateData: function (queuedData) {
-
-		// if (taro.isServer && taro.network.isPaused)
-		// 	return;
 
 		TaroEntity.prototype.streamUpdateData.call(this, data);
 		for (var i = 0; i < queuedData.length; i++) {

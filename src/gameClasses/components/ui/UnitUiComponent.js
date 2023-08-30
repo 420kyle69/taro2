@@ -127,7 +127,7 @@ var UnitUiComponent = TaroEntity.extend({
 			$(taro.client.getCachedElementById(`player-${attr.type}`)).text(attr.displayValue ? `${name}: ${value}/${parseFloat(attr.max).toFixed(0)}` : name);
 			var widthInPercent = (attr.value / attr.max) * 100;
 
-			$(taro.client.getCachedElementById(`player-max-${attr.type}`)).stop().animate({
+			$(taro.client.getCachedElementById(`player-max-${attr.type}`)).stop().css({
 				width: `${widthInPercent}%`
 			});
 		}

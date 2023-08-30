@@ -68,11 +68,11 @@ var Item = TaroEntityPhysics.extend({
 
 		self.scaleRatio = taro.physics && taro.physics.scaleRatio();
 		if (taro.isServer) {
-			if (taro.network.isPaused) {
-				self.streamMode(0);
+			if (self._stats.streamMode == 1 || self._stats.streamMode == undefined) {
+				this.streamMode(1);
+				self.streamCreate(); // without this, newly purchased item wont' show on unit
 			} else {
-				self.streamMode(1);
-				self.streamCreate(); // do we need this?
+				this.streamMode(self._stats.streamMode);				
 			}
 
 			taro.server.totalItemsCreated++;
@@ -245,7 +245,11 @@ var Item = TaroEntityPhysics.extend({
 
 			if (taro.isServer) {
 				this.streamUpdateData([{ ownerUnitId: 0 }]);
-				this.streamMode(1);
+				if (this._stats.streamMode == 1 || this._stats.streamMode == undefined) {
+					this.streamMode(1);
+				} else {
+					this.streamMode(this._stats.streamMode);				
+				}
 			}
 		}
 
@@ -299,7 +303,7 @@ var Item = TaroEntityPhysics.extend({
 
 				self._stats.lastUsed = taro.now;
 
-				let triggerParams = {unitId: ownerId, itemId: self.id()};
+				let triggerParams = { unitId: ownerId, itemId: self.id() };
 
 				self.script.trigger('itemIsUsed', triggerParams);
 				taro.script.trigger('unitUsesItem', triggerParams);
@@ -309,7 +313,7 @@ var Item = TaroEntityPhysics.extend({
 						if (self._stats.bulletStartPosition) {
 							var rotate = this._rotate.z;
 							let bulletY = self._stats.bulletStartPosition.y || 0;
-
+							
 							if (owner && self._stats.currentBody && self._stats.currentBody.jointType == 'weldJoint') {
 								rotate = owner._rotate.z;
 								// if we are welded to owner unit, we have to invert the start position when the item is flipped
@@ -344,7 +348,7 @@ var Item = TaroEntityPhysics.extend({
 									defaultData.velocity = {
 										deployMethod: self._stats.deployMethod,
 										x: Math.cos(rotate + Math.radians(-90)) * self._stats.bulletForce,
-										y: Math.sin(rotate + Math.radians(-90)) * self._stats.bulletForce
+										y: Math.sin(rotate + Math.radians(-90)) * self._stats.bulletForce,
 									};
 
 									// we don't create a Projectile entity for raycasts
@@ -415,7 +419,7 @@ var Item = TaroEntityPhysics.extend({
 									pos.x += offset.x;
 									pos.y += offset.y;
 
-									const raycastStart = {x, y} = pos;
+									const raycastStart = { x, y } = pos;
 									const raycastEnd = {
 										x: pos.x + (this._stats.bulletDistance * Math.cos(owner._rotate.z + Math.radians(-90))),
 										y: pos.y + (this._stats.bulletDistance * Math.sin(owner._rotate.z + Math.radians(-90)))
@@ -609,7 +613,7 @@ var Item = TaroEntityPhysics.extend({
 			// if server authoritative mode is enabled, then stream item quantity to the item's owner player only
 			if (taro.runMode == 0) {
 				var playerId = this.getOwnerUnit()?.getOwner()?._id;
-				this.streamUpdateData([{ quantity: qty }], playerId );
+				this.streamUpdateData([{ quantity: qty }], playerId);
 			}
 
 			// item's set to be removed when empty
@@ -731,7 +735,7 @@ var Item = TaroEntityPhysics.extend({
 
 	startUsing: function () {
 		var self = this;
-		
+
 		if (self._stats.isBeingUsed)
 			return;
 
@@ -810,20 +814,20 @@ var Item = TaroEntityPhysics.extend({
 					// console.log(itemAngle, unitAnchoredPosition)
 					// }
 
-					var unitAnchorOffsetRotate = Math.radians(self._stats.currentBody.unitAnchor.rotation || 0);					
-					var unitAnchorOffsetY = self._stats.currentBody.unitAnchor.y || 0;					
+					var unitAnchorOffsetRotate = Math.radians(self._stats.currentBody.unitAnchor.rotation || 0);
+					var unitAnchorOffsetY = self._stats.currentBody.unitAnchor.y || 0;
 					var itemAnchorOffsetY = self._stats.currentBody.itemAnchor?.y || 0; // get translation offset based on itemAnchor
 
 					// item is flipped, then mirror the rotation
 					if (ownerUnit._stats.flip == 1) {
 						var unitAnchorOffsetX = -self._stats.currentBody.unitAnchor.x || 0;
 						var itemAnchorOffsetX = -self._stats.currentBody.itemAnchor?.x || 0;
-					
+
 						rotate -= unitAnchorOffsetRotate;
 					} else {
 						var unitAnchorOffsetX = self._stats.currentBody.unitAnchor.x || 0;
 						var itemAnchorOffsetX = self._stats.currentBody.itemAnchor?.x || 0;
-					
+
 						rotate += unitAnchorOffsetRotate;
 					}
 
@@ -833,10 +837,10 @@ var Item = TaroEntityPhysics.extend({
 						y: (unitAnchorOffsetX * Math.sin(unitRotate)) - (unitAnchorOffsetY * Math.cos(unitRotate))
 					};
 
-					
+
 					offset.x = (unitAnchoredPosition.x) + (itemAnchorOffsetX * Math.cos(rotate)) + (itemAnchorOffsetY * Math.sin(rotate)),
-					offset.y = (unitAnchoredPosition.y) + (itemAnchorOffsetX * Math.sin(rotate)) - (itemAnchorOffsetY * Math.cos(rotate));
-					
+						offset.y = (unitAnchoredPosition.y) + (itemAnchorOffsetX * Math.sin(rotate)) - (itemAnchorOffsetY * Math.cos(rotate));
+
 					if (self._stats.controls && self._stats.controls.mouseBehaviour) {
 						if (self._stats.controls.mouseBehaviour.rotateToFaceMouseCursor || (self._stats.currentBody && (self._stats.currentBody.jointType == 'weldJoint'))) {
 							offset.rotate = rotate;
@@ -981,40 +985,8 @@ var Item = TaroEntityPhysics.extend({
 		//ownerUnit.changeUnitType(ownerUnit._stats.type);
 	},
 
-	remove: function () {
-		// traverse through owner's inventory, and remove itself
-		Item.prototype.log('remove item');
-		// change streammode of spriteOnly items
-		if (this._streamMode === 2) {
-			this.streamMode(1);
-		}
-
-		// if item has owner, then remove item from owner's inventory as well
-		var ownerUnit = taro.$(this._stats.ownerUnitId);
-		if (ownerUnit) {
-			// remove its passive attributes from its ownerUnit unit.
-			if (this._stats.bonus && this._stats.passive) {
-				if (this._stats.slotIndex < ownerUnit._stats.inventorySize || this._stats.bonus.passive.isDisabledInBackpack != true) {
-					ownerUnit.updateStats(this.id(), true);
-				}
-			} else {
-				ownerUnit.updateStats(this.id(), true);
-			}
-
-			if (ownerUnit.inventory) {
-				ownerUnit.inventory.removeItemByItemId(this.id());
-			}
-		}
-
-		TaroEntityPhysics.prototype.remove.call(this);
-	},
-
 	streamUpdateData: function (queuedData) {
 		var self = this;
-
-		// this was preventing isBeingUsed from streaming hence preventing other players' projectiles from showing
-		// if (taro.isServer && taro.network.isPaused)
-		// 	return;
 
 		TaroEntity.prototype.streamUpdateData.call(this, queuedData);
 		// taro.devLog("Item streamUpdateData ", data)
@@ -1090,6 +1062,10 @@ var Item = TaroEntityPhysics.extend({
 						break;
 
 					case 'name':
+						if (taro.isClient) {
+							newValue = taro.clientSanitizer(newValue);
+						}
+
 						this._stats[attrName] = newValue;
 						var owner = self.getOwnerUnit();
 						if (taro.isClient && taro.client.selectedUnit == owner) {
@@ -1127,7 +1103,7 @@ var Item = TaroEntityPhysics.extend({
 								break;
 							}
 							this._stats.isBeingUsed = newValue;
-						}	
+						}
 						break;
 
 					case 'fireRate':
@@ -1147,29 +1123,35 @@ var Item = TaroEntityPhysics.extend({
 	 */
 	_behaviour: function (ctx) {
 		var self = this;
-		
+
 		_.forEach(taro.triggersQueued, function (trigger) {
 			trigger.params['thisEntityId'] = self.id();
 			self.script.trigger(trigger.name, trigger.params);
 		});
 
-		var ownerUnit = this.getOwnerUnit();
-		var rotate = this._rotate.z;
-
+		var ownerUnit = this.getOwnerUnit();		
 		if (ownerUnit && this._stats.stateId != 'dropped') {
+			
+			// this is necessary for games that has sprite-only item with no joint. (e.g. team elimination)
+			if (taro.isServer) {
+				var rotate = this._rotate.z;
 
-			// angleToTarget is only available in server
-			if (taro.isServer && ownerUnit.angleToTarget) {
-				rotate = ownerUnit.angleToTarget;
+				// angleToTarget is only available in server
+				if (taro.isServer && ownerUnit.angleToTarget) {
+					rotate = ownerUnit.angleToTarget;
+				}
+
+				if (self._stats.currentBody && self._stats.currentBody.jointType == 'weldJoint') {
+					rotate = ownerUnit._rotate.z;
+				}
+
+				self.anchoredOffset = self.getAnchoredOffset(rotate);
+				var x = ownerUnit._translate.x + self.anchoredOffset.x;
+				var y = ownerUnit._translate.y + self.anchoredOffset.y;
+			
+				self.translateTo(x, y);
+				self.rotateTo(0, 0, rotate);
 			}
-
-			if (self._stats.currentBody && self._stats.currentBody.jointType == 'weldJoint') {
-				rotate = ownerUnit._rotate.z;
-			}
-
-			self.anchoredOffset = self.getAnchoredOffset(rotate);
-			var x = ownerUnit._translate.x + self.anchoredOffset.x;
-			var y = ownerUnit._translate.y + self.anchoredOffset.y;
 
 			if (taro.isServer || (taro.isClient && taro.client.selectedUnit == ownerUnit)) {
 				if (
@@ -1181,15 +1163,10 @@ var Item = TaroEntityPhysics.extend({
 						self.flip(0);
 					} else {
 						self.flip(1);
-					}					
+					}
 				}
 			}
 
-			// this is necessary for games that has sprite-only item with no joint. (e.g. team elimination)
-			if (taro.isServer) {
-				self.translateTo(x, y);
-				self.rotateTo(0, 0, rotate);
-			}
 		}
 
 		if (this._stats.isBeingUsed) {
@@ -1200,6 +1177,35 @@ var Item = TaroEntityPhysics.extend({
 		if (taro.isServer) {
 			if (this.attribute) {
 				this.attribute.regenerate();
+			}
+		} else if (taro.isClient) {
+			var processedUpdates = [];
+			var updateQueue = taro.client.entityUpdateQueue[self.id()];			
+			if (updateQueue) {
+				for (var key in updateQueue) {
+					var value = updateQueue[key];
+
+					if (
+						// Don't run if we're updating item's state/owner unit, but its owner doesn't exist yet
+						// updating item's owner unit, but the owner hasn't been created yet
+						(
+							key == "ownerUnitId" && value != 0 && taro.$(value) == undefined
+						) || 
+						(   // changing item's state to selected/unselected, but owner doesn't exist yet
+							(key == "stateId" && (value == "selected" || value == "unselected")) &&
+							this.getOwnerUnit() == undefined
+						)						
+					) {
+						continue;
+					} else {
+						processedUpdates.push({[key]: value});
+						delete taro.client.entityUpdateQueue[self.id()][key]
+					}
+				}
+
+				if (processedUpdates.length > 0) {
+					this.streamUpdateData(processedUpdates);
+				}
 			}
 		}
 
@@ -1223,6 +1229,35 @@ var Item = TaroEntityPhysics.extend({
 		// Call the TaroEntity (super-class) tick() method
 		TaroEntity.prototype.tick.call(this, ctx);
 	},
+
+	
+	remove: function () {
+		// traverse through owner's inventory, and remove itself
+		// change streammode of spriteOnly items
+		if (this._streamMode === 2) {
+			this.streamMode(1);
+		}
+
+		// if item has owner, then remove item from owner's inventory as well
+		var ownerUnit = taro.$(this._stats.ownerUnitId);
+		if (ownerUnit) {
+			// remove its passive attributes from its ownerUnit unit.
+			if (this._stats.bonus && this._stats.passive) {
+				if (this._stats.slotIndex < ownerUnit._stats.inventorySize || this._stats.bonus.passive.isDisabledInBackpack != true) {
+					ownerUnit.updateStats(this.id(), true);
+				}
+			} else {
+				ownerUnit.updateStats(this.id(), true);
+			}
+
+			if (ownerUnit.inventory) {
+				ownerUnit.inventory.removeItemByItemId(this.id());
+			}
+		}
+
+		TaroEntityPhysics.prototype.remove.call(this);
+	},
+
 	destroy: function () {
 		this.playEffect('destroy');
 		TaroEntityPhysics.prototype.destroy.call(this);

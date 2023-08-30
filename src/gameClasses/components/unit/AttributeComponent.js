@@ -185,6 +185,11 @@ var AttributeComponent = TaroEntity.extend({
 			}
 		}
 	},
+
+	setValue(attributeTypeId, newValue) {
+
+	},
+
 	// change attribute's value manually
 	update: function (attributeTypeId, newValue, forceUpdate) {
 		var self = this;
@@ -221,9 +226,12 @@ var AttributeComponent = TaroEntity.extend({
 							self._entity._stats.attributes[attributeTypeId].lastSyncedValue = newValue;
 							let attrData = { attributes: {} };
 							attrData.attributes[attributeTypeId] = newValue;
+
+							console.log("update Attribute Value")
+
 							self._entity.streamUpdateData([attrData]);
 
-
+							
 
 						}
 
@@ -335,6 +343,9 @@ var AttributeComponent = TaroEntity.extend({
 						attributesMax: {}
 					};
 					attribute.attributesMax[attrId] = value;
+
+					console.log("update Attribute Max")
+
 					this._entity.streamUpdateData([attribute]);
 					// taro.network.send('updateEntityAttribute', {
 					// 	"e": this._entity._id,
@@ -397,6 +408,14 @@ var AttributeComponent = TaroEntity.extend({
 		clearInterval(this.regenTick);
 
 		TaroEntity.prototype.destroy.call(this);
+	},
+
+	_behaviour() {
+		this.regenerate();
+		if (this.updateQueued) {
+			this.update();
+			this.updateQueued = false;
+		}
 	}
 });
 

@@ -133,7 +133,7 @@ class DevModeScene extends PhaserScene {
 
 		this.load.scenePlugin(
 			'rexuiplugin',
-			'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js',
+			'/assets/js/rexuiplugin.min.js',
 			//'src/renderer/phaser/rexuiplugin.min.js',
 			'rexUI',
 			'rexUI'
