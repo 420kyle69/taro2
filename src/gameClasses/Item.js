@@ -996,6 +996,15 @@ var Item = TaroEntityPhysics.extend({
 			for (attrName in data) {
 				var newValue = data[attrName];
 
+				// if nothing changed, then skip.
+				// if (newValue == this._stats[attrName]) {
+				// 	console.log("nothing changed. skipping...")
+				// 	continue;
+				// } else {
+				// 	console.log(newValue, this._stats[attrName])
+				// }
+					
+
 				switch (attrName) {
 					case 'type':
 						//self._stats[attrName] = newValue;

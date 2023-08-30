@@ -4212,7 +4212,7 @@ var TaroEntity = TaroObject.extend({
 							} 
 							// else console.log(this._category, this._stats.name, attrName, "is the same as previous", this.lastUpdatedData[attrName], "new", newValue)
 						}
-					} else if (taro.isClient) {
+					} else if (taro.isClient && newValue !== this.lastUpdatedData[attrName]) {
 						switch (attrName) {
 							case 'anim':
 								var animationId = newValue;
@@ -4302,6 +4302,9 @@ var TaroEntity = TaroObject.extend({
 								taro.client.emit('create-particle', newValue);
 								break;
 						}
+
+						this.lastUpdatedData[attrName] = rfdc()(newValue);
+
 					}
 				}
 			}
