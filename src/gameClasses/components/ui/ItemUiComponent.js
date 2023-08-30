@@ -242,7 +242,7 @@ var ItemUiComponent = TaroEntity.extend({
 				}
 			});
 		}
-		console.log(itemDiv);
+
 		return itemDiv;
 
 		return $('<div/>', {
@@ -296,7 +296,7 @@ var ItemUiComponent = TaroEntity.extend({
 		var inventorySlotIfPresent = item._stats.slotIndex;
 		if (item && item._stats && (inventorySlotIfPresent === 0 || inventorySlotIfPresent)) {
 			var popoverContent = $('<div/>', {
-				style: 'font-size: 16px; width: 250px; z-index: 999999;',
+				style: 'font-size: 16px; width: 250px;',
 				html: this.getItemHtml(item._stats)
 			});
 
