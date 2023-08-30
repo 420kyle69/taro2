@@ -2,10 +2,11 @@ var Projectile = TaroEntityPhysics.extend({
 	classId: 'Projectile',
 
 	init: function (data, entityIdFromServer) {
-		TaroEntityPhysics.prototype.init.call(this, data.defaultData);
-		this.id(entityIdFromServer);
 		var self = this;
 		self.category('projectile');
+		
+		TaroEntityPhysics.prototype.init.call(this, data.defaultData);
+		this.id(entityIdFromServer);
 		var projectileData = {};
 		if (taro.isClient) {
 			projectileData = taro.game.cloneAsset('projectileTypes', data.type);

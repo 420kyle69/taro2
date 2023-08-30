@@ -2,10 +2,12 @@ var Item = TaroEntityPhysics.extend({
 	classId: 'Item',
 
 	init: function (data, entityIdFromServer) {
+		var self = this;
+		self.category('item'); // necessary for box2d contact listener (it only cares about 'unit' categories touching)
+		
 		TaroEntityPhysics.prototype.init.call(this, data.defaultData);
 		this.id(entityIdFromServer); // ensure that entityId is consistent between server & client
 
-		var self = this;
 		self._stats = {};
 		self.anchorOffset = { x: 0, y: 0, rotate: 0 };
 		var itemData = {};
@@ -50,7 +52,6 @@ var Item = TaroEntityPhysics.extend({
 		self._stats.lastUsed = 0;
 		self.anchoredOffset = { x: 0, y: 0, rotate: 0 };
 
-		self.category('item'); // necessary for box2d contact listener (it only cares about 'unit' categories touching)
 		// convert numbers stored as string in database to int
 		self.parseEntityObject(self._stats);
 		self.addComponent(AttributeComponent); // every item gets one

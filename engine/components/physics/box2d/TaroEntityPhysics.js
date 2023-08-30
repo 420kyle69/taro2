@@ -5,6 +5,7 @@ var TaroEntityPhysics = TaroEntity.extend({
 	classId: 'TaroEntityPhysics',
 
 	init: function (defaultData = {}) {
+
 		TaroEntity.prototype.init.call(this, defaultData);
 		var self = this;
 

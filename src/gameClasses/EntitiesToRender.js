@@ -35,9 +35,12 @@ var EntitiesToRender = /** @class */ (function () {
                     }
                 }
                 if (entity.isTransforming()) {
-                    // update transformation using incoming network stream
-                    // var timeStart = performance.now();
                     entity._processTransform();
+                }
+                else {
+                    entity._translate.x = entity.nextKeyFrame[1][0];
+                    entity._translate.y = entity.nextKeyFrame[1][1];
+                    entity._rotate.z = entity.nextKeyFrame[1][2];
                 }
                 if (entity._translate) {
                     var x = entity._translate.x;

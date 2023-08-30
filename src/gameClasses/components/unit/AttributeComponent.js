@@ -227,7 +227,7 @@ var AttributeComponent = TaroEntity.extend({
 							let attrData = { attributes: {} };
 							attrData.attributes[attributeTypeId] = newValue;
 
-							console.log("update Attribute Value")
+							// console.log("update Attribute Value")
 
 							self._entity.streamUpdateData([attrData]);
 
@@ -344,7 +344,7 @@ var AttributeComponent = TaroEntity.extend({
 					};
 					attribute.attributesMax[attrId] = value;
 
-					console.log("update Attribute Max")
+					// console.log("update Attribute Max")
 
 					this._entity.streamUpdateData([attribute]);
 					// taro.network.send('updateEntityAttribute', {

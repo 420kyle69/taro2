@@ -2,10 +2,12 @@ var Unit = TaroEntityPhysics.extend({
 	classId: 'Unit',
 
 	init: function (data, entityIdFromServer) {
-		TaroEntityPhysics.prototype.init.call(this, data.defaultData);
-
-		this.id(entityIdFromServer);
 		var self = this;
+		this.category('unit');
+
+		TaroEntityPhysics.prototype.init.call(this, data.defaultData);
+		this.id(entityIdFromServer);
+		
 		self.dob = Date.now();
 
 		self.direction = {
@@ -15,8 +17,7 @@ var Unit = TaroEntityPhysics.extend({
 
 		self.isMoving = false;
 		self.angleToTarget = undefined;
-		this.category('unit');
-
+		
 		// merge various data into one _stats variable
 		var unitData = {};
 		if (!data.hasOwnProperty('equipmentAllowed')) {

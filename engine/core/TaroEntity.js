@@ -7,13 +7,13 @@ var TaroEntity = TaroObject.extend({
 
 	init: function (defaultData = {}) {
 		TaroObject.prototype.init.call(this);
-
+		
 		// Register the TaroEntity special properties handler for
 		// serialise and de-serialise support
 		var translateX = defaultData.translate && defaultData.translate.x ? defaultData.translate.x : 0;
 		var translateY = defaultData.translate && defaultData.translate.y ? defaultData.translate.y : 0;
 		var rotate = defaultData.rotate || 0;
-
+		
 		this.prevPhysicsFrame = [taro._currentTime, [translateX, translateY, rotate]];
 
 		this._specialProp.push('_texture');
@@ -69,6 +69,7 @@ var TaroEntity = TaroObject.extend({
 
 		this._keyFrames = [];
 		this.nextKeyFrame = [taro._currentTime + 50, [this._translate.x, this._translate.y, this._rotate.z]];
+		
 		this._isTransforming = true;
 		this.lastTransformedAt = 0;
 		this.latestTimeStamp = 0;
@@ -5215,7 +5216,12 @@ var TaroEntity = TaroObject.extend({
 
 	isTransforming: function(bool) {
 		if (bool != undefined) {
-			this._isTransforming = bool;            
+			this._isTransforming = bool;
+
+			// when set as true, force transformTexture
+            if (bool == true) {
+                this.transformTexture(this.nextKeyFrame[1][0], this.nextKeyFrame[1][1], this.nextKeyFrame[1][2]);
+            }
 		}
 
 		return this._isTransforming;
