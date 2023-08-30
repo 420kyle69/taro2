@@ -84,7 +84,7 @@ var EntitiesToRender = /** @class */ (function () {
                     entity.isTransforming() ||
                     entity == taro.client.selectedUnit ||
                     (entity._category == 'item' && (ownerUnit == taro.client.selectedUnit ||
-                        ownerUnit.isTransforming()))) {
+                        (ownerUnit === null || ownerUnit === void 0 ? void 0 : ownerUnit.isTransforming())))) {
                     // var timeStart = performance.now();
                     entity.transformTexture(x, y, rotate);
                     // taro.profiler.logTimeElapsed('transformTexture', timeStart);

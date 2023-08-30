@@ -107,7 +107,7 @@ class EntitiesToRender {
 					(
 						entity._category == 'item' && (
 							ownerUnit == taro.client.selectedUnit ||					
-							ownerUnit.isTransforming()					
+							ownerUnit?.isTransforming()					
 						)
 					)					
 				) {
