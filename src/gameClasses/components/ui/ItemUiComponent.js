@@ -77,12 +77,14 @@ var ItemUiComponent = TaroEntity.extend({
 		var element = $(taro.client.getCachedElementById(`item-${slotIndex}`));
 		// var element = $(`#item-${slotIndex}`);
 		element.html(
-			self.getItemDiv(item, {
-				popover: 'top',
-				isDraggable: true,
-				isPurchasable: false,
-				bgColor: color
-			}, slotIndex)
+			self.getItemCooldownOverlay(slotIndex).add(
+				self.getItemDiv(item, {
+					popover: 'top',
+					isDraggable: true,
+					isPurchasable: false,
+					bgColor: color
+				}, slotIndex)
+			)
 		);
 
 		// highlight currently selected inventory item (using currentItemIndex)
@@ -242,6 +244,7 @@ var ItemUiComponent = TaroEntity.extend({
 				}
 			});
 		}
+
 		return itemDiv;
 	},
 
@@ -286,6 +289,22 @@ var ItemUiComponent = TaroEntity.extend({
 
 		return itemDiv;
 	},
+
+	getItemCooldownOverlay: function (slotIndex) {
+		let itemCDDiv = $('<div/>', {
+			id: `item-cooldown-overlay-${slotIndex}`,
+			class: 'item-cooldown-overlay ',
+			style: 'position: absolute; bottom: 0; width: 100%; height: 0; background-color: #101010aa; z-index: 10001; pointer-events: none', /* higher than item-div */
+		});
+		return itemCDDiv;
+	},
+
+	updateItemCooldownOverlay: function (item) {
+		let itemStats = item._stats;
+		let cdPercent = Math.trunc((1 - Math.min((taro.now - itemStats.lastUsed) / itemStats.fireRate, 1)) * 100);
+		taro.client.getCachedElementById(`item-cooldown-overlay-${itemStats.slotIndex}`)[0].style.height = `${cdPercent}%`;
+	},
+
 	updateItemDescription: function (item) {
 		var inventorySlotIfPresent = item._stats.slotIndex;
 		if (item && item._stats && (inventorySlotIfPresent === 0 || inventorySlotIfPresent)) {

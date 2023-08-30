@@ -24,6 +24,7 @@ var InventoryComponent = TaroEntity.extend({
 					id: `item-${i}`,
 					name: i,
 					class: `btn inventory-item-button p-0 ${mobileClass}`,
+					style: 'position: relative;',
 					role: 'button'
 				}).on('click', function () {
 					var slotIndex = parseInt($(this).attr('name')) + 1;

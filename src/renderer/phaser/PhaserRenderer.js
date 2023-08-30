@@ -45,7 +45,7 @@ var PhaserRenderer = /** @class */ (function (_super) {
                 mode: Phaser.Scale.ScaleModes.ENVELOP,
                 autoCenter: Phaser.Scale.Center.CENTER_BOTH,
                 autoRound: true,
-                resizeInterval: 100
+                resizeInterval: 100,
             },
             render: {
                 pixelArt: false,
