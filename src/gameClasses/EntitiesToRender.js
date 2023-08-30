@@ -48,11 +48,6 @@ var EntitiesToRender = /** @class */ (function () {
                 if (entity.isTransforming()) {
                     entity._processTransform();
                 }
-                else {
-                    entity._translate.x = entity.nextKeyFrame[1][0];
-                    entity._translate.y = entity.nextKeyFrame[1][1];
-                    entity._rotate.z = entity.nextKeyFrame[1][2];
-                }
                 if (entity._translate) {
                     var x = entity._translate.x;
                     var y = entity._translate.y;
@@ -88,7 +83,8 @@ var EntitiesToRender = /** @class */ (function () {
                 if (((_g = entity.tween) === null || _g === void 0 ? void 0 : _g.isTweening) ||
                     entity.isTransforming() ||
                     entity == taro.client.selectedUnit ||
-                    (phaserEntity === null || phaserEntity === void 0 ? void 0 : phaserEntity.visible)) {
+                    (entity._category == 'item' && (ownerUnit == taro.client.selectedUnit ||
+                        ownerUnit.isTransforming()))) {
                     // var timeStart = performance.now();
                     entity.transformTexture(x, y, rotate);
                     // taro.profiler.logTimeElapsed('transformTexture', timeStart);
