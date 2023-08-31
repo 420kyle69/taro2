@@ -4212,7 +4212,7 @@ var TaroEntity = TaroObject.extend({
 							} 
 							// else console.log(this._category, this._stats.name, attrName, "is the same as previous", this.lastUpdatedData[attrName], "new", newValue)
 						}
-					} else if (taro.isClient && newValue !== this.lastUpdatedData[attrName]) {
+					} else if (taro.isClient) {
 						switch (attrName) {
 							case 'anim':
 								var animationId = newValue;
