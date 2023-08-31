@@ -70,19 +70,22 @@ class DeveloperMode {
 		return this.activeTab && this.activeTab !== 'play';
 	}
 
-	editTile<T extends MapEditToolEnum>(data: TileData<T>, clientId: string): void {
+	editTile<T extends MapEditToolEnum>(data: TileData<T>, clientId: string, lastLoop: boolean): void {
 		// only allow developers to modify the tiles
 		if (taro.server.developerClientIds.includes(clientId) || clientId === 'server') {
 			if (JSON.stringify(data) === '{}') {
 				throw 'receive: {}';
 			}
 			const gameMap = taro.game.data.map;
-			gameMap.wasEdited = true;
+			if (lastLoop || lastLoop === undefined) {
+				gameMap.wasEdited = true;
+			}
+			data.lastLoop = lastLoop;
 			taro.network.send('editTile', data);
 			const { dataType, dataValue } = Object.entries(data).map(([k, dataValue]) => {
 				const dataType = k as MapEditToolEnum; return { dataType, dataValue };
 			})[0];
-			const serverData = _.clone(dataValue);
+			const serverData = rfdc()(dataValue);
 			if (gameMap.layers.length > 4 && serverData.layer >= 2) serverData.layer++;
 			const width = gameMap.width;
 			switch (dataType) {
@@ -96,6 +99,14 @@ class DeveloperMode {
 					//save tile change to taro.game.data.map and taro.map.data
 					const nowValue = serverData as TileData<'edit'>['edit'];
 					this.putTiles(nowValue.x, nowValue.y, nowValue.selectedTiles, nowValue.size, nowValue.shape, nowValue.layer);
+					if (lastLoop || lastLoop === undefined && gameMap.layers[serverData.layer].name === 'walls') {
+						taro.physics.destroyWalls();
+						let map = taro.scaleMap(rfdc()(gameMap));
+						taro.tiled.loadJson(map, function (layerArray, layersById) {
+							taro.physics.staticsFromMap(layersById.walls);
+						});
+						taro.map.updateWallMapData(); // for A* pathfinding
+					}
 					break;
 				}
 				case 'clear': {
@@ -104,7 +115,7 @@ class DeveloperMode {
 				}
 			}
 
-			if (gameMap.layers[serverData.layer].name === 'walls') {
+			if (dataType !== 'edit' && gameMap.layers[serverData.layer].name === 'walls') {
 				//if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
 				taro.physics.destroyWalls();
 				let map = taro.scaleMap(rfdc()(gameMap));
@@ -323,15 +334,15 @@ class DeveloperMode {
 					if (!isNaN(data.angle) && !isNaN(action.angle)) {
 						action.angle = data.angle;
 					}
-                    if (!isNaN(data.width) && !isNaN(action.width)) {
-                        action.width = data.width;
-                    }
-                    if (!isNaN(data.height) && !isNaN(action.height)) {
-                        action.height = data.height;
-                    }
-                    if (data.wasDeleted) {
-                        action.wasDeleted = true;
-                    }
+					if (!isNaN(data.width) && !isNaN(action.width)) {
+						action.width = data.width;
+					}
+					if (!isNaN(data.height) && !isNaN(action.height)) {
+						action.height = data.height;
+					}
+					if (data.wasDeleted) {
+						action.wasDeleted = true;
+					}
 				}
 			});
 			if (!found) {
@@ -530,7 +541,7 @@ class DeveloperMode {
 	}
 
 	updateClientMap(data: { mapData: MapData }): void {
-		//console.log ('map data was edited', data.mapData.wasEdited);
+		// console.log('map data was edited', data.mapData.wasEdited);
 		if (data.mapData.wasEdited) {
 			data.mapData.wasEdited = false;
 			data.mapData.haveUnsavedChanges = true;
@@ -578,7 +589,7 @@ type MapEditTool = {
 
 type MapEditToolEnum = keyof MapEditTool;
 
-type TileData<T extends MapEditToolEnum> = Pick<MapEditTool, T>
+type TileData<T extends MapEditToolEnum> = Pick<MapEditTool, T> & { lastLoop?: boolean }
 
 interface RegionData {
 	userId?: string,

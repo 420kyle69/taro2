@@ -69,21 +69,24 @@ var DeveloperMode = /** @class */ (function () {
     DeveloperMode.prototype.shouldPreventKeybindings = function () {
         return this.activeTab && this.activeTab !== 'play';
     };
-    DeveloperMode.prototype.editTile = function (data, clientId) {
+    DeveloperMode.prototype.editTile = function (data, clientId, lastLoop) {
         // only allow developers to modify the tiles
         if (taro.server.developerClientIds.includes(clientId) || clientId === 'server') {
             if (JSON.stringify(data) === '{}') {
                 throw 'receive: {}';
             }
             var gameMap = taro.game.data.map;
-            gameMap.wasEdited = true;
+            if (lastLoop || lastLoop === undefined) {
+                gameMap.wasEdited = true;
+            }
+            data.lastLoop = lastLoop;
             taro.network.send('editTile', data);
             var _a = Object.entries(data).map(function (_a) {
                 var k = _a[0], dataValue = _a[1];
                 var dataType = k;
                 return { dataType: dataType, dataValue: dataValue };
             })[0], dataType = _a.dataType, dataValue = _a.dataValue;
-            var serverData = _.clone(dataValue);
+            var serverData = rfdc()(dataValue);
             if (gameMap.layers.length > 4 && serverData.layer >= 2)
                 serverData.layer++;
             var width = gameMap.width;
@@ -98,6 +101,14 @@ var DeveloperMode = /** @class */ (function () {
                     //save tile change to taro.game.data.map and taro.map.data
                     var nowValue = serverData;
                     this.putTiles(nowValue.x, nowValue.y, nowValue.selectedTiles, nowValue.size, nowValue.shape, nowValue.layer);
+                    if (lastLoop || lastLoop === undefined && gameMap.layers[serverData.layer].name === 'walls') {
+                        taro.physics.destroyWalls();
+                        var map = taro.scaleMap(rfdc()(gameMap));
+                        taro.tiled.loadJson(map, function (layerArray, layersById) {
+                            taro.physics.staticsFromMap(layersById.walls);
+                        });
+                        taro.map.updateWallMapData(); // for A* pathfinding
+                    }
                     break;
                 }
                 case 'clear': {
@@ -105,7 +116,7 @@ var DeveloperMode = /** @class */ (function () {
                     this.clearLayer(nowValue.layer);
                 }
             }
-            if (gameMap.layers[serverData.layer].name === 'walls') {
+            if (dataType !== 'edit' && gameMap.layers[serverData.layer].name === 'walls') {
                 //if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
                 taro.physics.destroyWalls();
                 var map = taro.scaleMap(rfdc()(gameMap));
@@ -505,7 +516,7 @@ var DeveloperMode = /** @class */ (function () {
         }
     };
     DeveloperMode.prototype.updateClientMap = function (data) {
-        //console.log ('map data was edited', data.mapData.wasEdited);
+        // console.log('map data was edited', data.mapData.wasEdited);
         if (data.mapData.wasEdited) {
             data.mapData.wasEdited = false;
             data.mapData.haveUnsavedChanges = true;

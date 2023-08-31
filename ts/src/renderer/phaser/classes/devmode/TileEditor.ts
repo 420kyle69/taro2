@@ -195,6 +195,13 @@ class TileEditor {
 				//save tile change to taro.game.data.map and taro.map.data
 				const nowValue = dataValue as TileData<'edit'>['edit'];
 				this.putTiles(nowValue.x, nowValue.y, nowValue.selectedTiles, nowValue.size, nowValue.shape, nowValue.layer, true);
+				if (data.lastLoop || data.lastLoop === undefined && map.layers[tempLayer].name === 'walls') {
+					taro.physics.destroyWalls();
+					let mapCopy = taro.scaleMap(rfdc()(map));
+					taro.tiled.loadJson(mapCopy, function (layerArray, TaroLayersById) {
+						taro.physics.staticsFromMap(TaroLayersById.walls);
+					});
+				}
 				break;
 			}
 			case 'clear': {
@@ -202,7 +209,7 @@ class TileEditor {
 				this.clearLayer(nowValue.layer);
 			}
 		}
-		if (taro.physics && map.layers[tempLayer].name === 'walls') {
+		if (dataType !== 'edit' && taro.physics && map.layers[tempLayer].name === 'walls') {
 			//if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
 			taro.physics.destroyWalls();
 			let mapCopy = taro.scaleMap(rfdc()(map));
@@ -486,12 +493,12 @@ class TileEditor {
 
 						}
 					}
-				} else if (this.devModeTools.entityEditor.selectedEntityImage){
+				} else if (this.devModeTools.entityEditor.selectedEntityImage) {
 					this.devModeTools.tooltip.showMessage(
 						'Entity Position',
 						`X: ${this.devModeTools.entityEditor.selectedEntityImage.image.x.toString()}, Y: ${this.devModeTools.entityEditor.selectedEntityImage.image.y.toString()}`
 					);
-                }
+				}
 			} else {
 				this.showMarkers(false);
 			}
