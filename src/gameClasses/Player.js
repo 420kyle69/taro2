@@ -468,7 +468,7 @@ var Player = TaroEntity.extend({
 	},
 
 	// update player's stats in the server side first, then update client side as well.
-	streamUpdateData: function (queuedData) {
+	streamUpdateData: function (queuedData, clientId) {
 		var self = this;
 		var oldStats = rfdc()(self._stats);
 		TaroEntity.prototype.streamUpdateData.call(this, queuedData);

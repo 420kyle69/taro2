@@ -986,7 +986,7 @@ var Item = TaroEntityPhysics.extend({
 		//ownerUnit.changeUnitType(ownerUnit._stats.type);
 	},
 
-	streamUpdateData: function (queuedData) {
+	streamUpdateData: function (queuedData, clientId) {
 		var self = this;
 
 		TaroEntity.prototype.streamUpdateData.call(this, queuedData);

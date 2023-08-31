@@ -210,8 +210,8 @@ var Projectile = TaroEntityPhysics.extend({
 
 	},
 
-	streamUpdateData: function (queuedData) {
-
+	streamUpdateData: function (queuedData, clientId) {
+		
 		TaroEntity.prototype.streamUpdateData.call(this, data);
 		for (var i = 0; i < queuedData.length; i++) {
 			var data = queuedData[i];
@@ -238,6 +238,14 @@ var Projectile = TaroEntityPhysics.extend({
 							this._stats.scale = newValue;
 							this._scaleTexture();
 						}
+						break;
+
+					case 'sourceUnitId':
+						this._stats.sourceUnitId = newValue;
+						break;
+
+					case 'sourceItemId':
+						this._stats.sourceItemId = newValue;
 						break;
 				}
 			}
@@ -273,30 +281,6 @@ var Projectile = TaroEntityPhysics.extend({
 		TaroEntityPhysics.prototype.destroy.call(this);
 		if (taro.physics && taro.physics.engine == 'CRASH') {
 			this.destroyBody();
-		}
-	},
-
-	// update this projectile's stats in the client side
-	streamUpdateData: function (queuedData) {
-		var self = this;
-		TaroEntity.prototype.streamUpdateData.call(this, queuedData);
-
-		for (var i = 0; i < queuedData.length; i++) {
-			var data = queuedData[i];
-			for (attrName in data) {
-				var newValue = data[attrName];
-
-				switch (attrName) {
-					case 'sourceUnitId':
-						this._stats.sourceUnitId = newValue;
-						break;
-
-					case 'sourceItemId':
-						this._stats.sourceItemId = newValue;
-						break;
-				}
-				
-			}
 		}
 	}
 

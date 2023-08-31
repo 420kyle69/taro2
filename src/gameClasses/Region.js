@@ -89,7 +89,7 @@ var Region = TaroEntityPhysics.extend({
 		}
 	},
 
-	streamUpdateData: function (queuedData) {
+	streamUpdateData: function (queuedData, clientId) {
 		TaroEntity.prototype.streamUpdateData.call(this, queuedData);
 
 		for (var i = 0; i < queuedData.length; i++) {

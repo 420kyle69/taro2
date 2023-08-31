@@ -4064,7 +4064,7 @@ var TaroEntity = TaroObject.extend({
 	// 	return data;
 	// },
 
-	streamUpdateData: function (queuedData) {
+	streamUpdateData: function (queuedData, clientId) {
 
 		if (queuedData != undefined) {
 			for (var i = 0; i < queuedData.length; i++) {
