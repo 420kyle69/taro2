@@ -70,6 +70,31 @@ var PhaserUnit = /** @class */ (function (_super) {
                 var bounds = this.entity._bounds2d;
                 this.sprite.setDisplaySize(bounds.x, bounds.y);
             }
+            for (var animationsKey in this.entity._stats.animations) {
+                var animation = this.entity._stats.animations[animationsKey];
+                var frames_1 = animation.frames;
+                var animationFrames = [];
+                for (var i = 0; i < frames_1.length; i++) {
+                    // correction for 0-based indexing
+                    animationFrames.push(frames_1[i] - 1);
+                }
+                if (animationFrames.length === 0) {
+                    // avoid crash by giving it frame 0 if no frame data provided
+                    animationFrames.push(0);
+                }
+                var anims = this.scene.anims;
+                if (anims.exists("".concat(this.key, "/").concat(animationsKey))) {
+                    anims.remove("".concat(this.key, "/").concat(animationsKey));
+                }
+                anims.create({
+                    key: "".concat(this.key, "/").concat(animationsKey),
+                    frames: anims.generateFrameNumbers(this.key, {
+                        frames: animationFrames
+                    }),
+                    frameRate: animation.framesPerSecond || 15,
+                    repeat: (animation.loopCount - 1) // correction for loop/repeat values
+                });
+            }
         }
         else if (data === 'using_skin') {
             this.sprite.anims.stop();
