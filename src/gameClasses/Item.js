@@ -989,7 +989,7 @@ var Item = TaroEntityPhysics.extend({
 	streamUpdateData: function (queuedData, clientId) {
 		var self = this;
 
-		TaroEntity.prototype.streamUpdateData.call(this, queuedData);
+		TaroEntity.prototype.streamUpdateData.call(this, queuedData, clientId);
 		// taro.devLog("Item streamUpdateData ", data)
 		for (var i = 0; i < queuedData.length; i++) {
 			var data = queuedData[i];

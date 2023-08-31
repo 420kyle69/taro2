@@ -4205,7 +4205,15 @@ var TaroEntity = TaroObject.extend({
 							if (newValue !== this.lastUpdatedData[attrName] || dataIsAttributeRelated || forceStreamKeys.includes(attrName)) {
 								var streamData = {};
 								streamData[attrName] = data[attrName];
-								this.queueStreamData(streamData);
+
+								if (clientId) {
+									var data = {}
+									data[this.id()] = streamData;
+									taro.network.send('streamUpdateData', data, clientId); // send update to a specific client
+								} else {
+									this.queueStreamData(streamData); // broadcast update to all clients
+								}
+								
 
 								// for server-side only: cache last updated data, so we dont stream same data again (this optimizes CPU usage by a lot)
 								this.lastUpdatedData[attrName] = rfdc()(newValue); 

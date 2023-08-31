@@ -231,7 +231,7 @@ var Player = TaroEntity.extend({
 		// self._stats.selectedUnitId = unit.id()
 		if (taro.isServer) {
 			if (this._stats.clientId) {
-				this.streamUpdateData([{ cameraTrackedUnitId: unitId }]);
+				this.streamUpdateData([{ cameraTrackedUnitId: unitId }], this._stats.clientId);
 				// taro.network.send(
 				// 	'makePlayerCameraTrackUnit',
 				// 	{ unitId: unit.id() },
@@ -471,7 +471,7 @@ var Player = TaroEntity.extend({
 	streamUpdateData: function (queuedData, clientId) {
 		var self = this;
 		var oldStats = rfdc()(self._stats);
-		TaroEntity.prototype.streamUpdateData.call(this, queuedData);
+		TaroEntity.prototype.streamUpdateData.call(this, queuedData, clientId);
 
 		for (var i = 0; i < queuedData.length; i++) {
 			var data = queuedData[i];
