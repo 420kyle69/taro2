@@ -255,6 +255,10 @@ class GameScene extends PhaserScene {
 						animationFrames.push(0);
 					}
 
+                    if (this.anims.exists(`${key}/${animationsKey}`)) {
+                        this.anims.remove(`${key}/${animationsKey}`);
+                    }
+
 					this.anims.create({
 						key: `${key}/${animationsKey}`,
 						frames: this.anims.generateFrameNumbers(key, {

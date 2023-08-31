@@ -205,6 +205,9 @@ var GameScene = /** @class */ (function (_super) {
                         // avoid crash by giving it frame 0 if no frame data provided
                         animationFrames.push(0);
                     }
+                    if (_this.anims.exists("".concat(key, "/").concat(animationsKey))) {
+                        _this.anims.remove("".concat(key, "/").concat(animationsKey));
+                    }
                     _this.anims.create({
                         key: "".concat(key, "/").concat(animationsKey),
                         frames: _this.anims.generateFrameNumbers(key, {
