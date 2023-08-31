@@ -214,9 +214,7 @@ var Player = TaroEntity.extend({
 				// abilities
 				const abilitiesData = taro.game.data.unitTypes[unit._stats.type].controls.unitAbilities;
 				taro.client.emit('ability-icons', abilitiesData);
-				console.log(abilitiesData);
-
-
+				
 				unit.renderMobileControl();
 				taro.client.selectedUnit = unit;
 				taro.client.eventLog.push([taro._currentTime, `my unit selected ${unitId}`]);
@@ -227,22 +225,22 @@ var Player = TaroEntity.extend({
 		}
 	},
 
-	cameraTrackUnit: function (unit) {
-		if (unit) {
-			// self._stats.selectedUnitId = unit.id()
-			if (taro.isServer && this._stats.clientId) {
-				taro.network.send(
-					'makePlayerCameraTrackUnit',
-					{ unitId: unit.id() },
-					this._stats.clientId
-				);
-			} else if (
-				taro.isClient &&
-				this._stats.clientId == taro.network.id()
-				&& unit
-				&& unit._category == 'unit'
-			) {
-				taro.client.myPlayer.cameraTrackedUnit = unit._id;
+	cameraTrackUnit: function (unitId) {
+		this._stats.cameraTrackedUnitId = unitId;
+
+		// self._stats.selectedUnitId = unit.id()
+		if (taro.isServer) {
+			if (this._stats.clientId) {
+				this.streamUpdateData([{ cameraTrackedUnitId: unitId }]);
+				// taro.network.send(
+				// 	'makePlayerCameraTrackUnit',
+				// 	{ unitId: unit.id() },
+				// 	this._stats.clientId
+				// );
+			}
+		} else if (taro.isClient) {
+			var unit = taro.$(unitId);
+			if (unit) {
 				unit.emit('follow');
 			}
 		}
@@ -564,6 +562,11 @@ var Player = TaroEntity.extend({
 
 					if (self._stats.clientId == taro.network.id()) {
 						switch (attrName) {
+							case 'cameraTrackedUnitId':
+								// this unit was queued to be tracked by a player's camera
+								self.cameraTrackUnit(newValue);
+								break;
+							
 							case 'mapData':
 							  self._stats[attrName] = newValue;
 							  taro.developerMode.updateClientMap(data);

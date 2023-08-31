@@ -11,7 +11,6 @@ var ClientNetworkEvents = {
 
 	_onUpdateAllEntities: function (data) {
 		for (entityId in data) {
-			var entity = taro.$(entityId);
 			if (taro.client.entityUpdateQueue[entityId] == undefined) {
 				taro.client.entityUpdateQueue[entityId] = {};
 			}
@@ -20,38 +19,8 @@ var ClientNetworkEvents = {
 
 			for (key in stats) {
 				var value = stats[key];
-
-				// use for mounting offscreen entitys when it starts firing
-				// if (entity && entity._category === "item" && stats[key].isBeingUsed != undefined) {
-				// 	entity.isBeingUsed = stats[key].isBeingUsed;
-				// }
-				// taro.client.entityUpdateQueue[entityId].push(stats[key]);
-				// console.log("entityUpdateQueue", entityId, key, value)
 				taro.client.entityUpdateQueue[entityId][key] = value; // overwrite the value if the same key already exists
 			}
-			
-
-			// if (taro.client.isActiveTab) {
-				
-			// } else {
-			// 	// if user's current browser tab isn't this game.
-
-			// 	// merging data
-			// 	if (taro.client.inactiveTabEntityStream[entityId] === undefined) {
-			// 		taro.client.inactiveTabEntityStream[entityId] = [{}];
-			// 	}
-
-			// 	const objectsArr = data[entityId]; //Array of single prop objects for THIS tick
-
-			// 	const packet = Object.assign({}, ...objectsArr); //condense to ONE object
-
-			// 	taro.client.inactiveTabEntityStream[entityId][0] =
-			// 		// merge each packet into the first, overwriting older values
-			// 		{
-			// 			...taro.client.inactiveTabEntityStream[entityId][0],
-			// 			...packet,
-			// 		};
-			// }
 		}
 	},
 
@@ -70,12 +39,6 @@ var ClientNetworkEvents = {
 			if (entity) {
 				entity.queueStreamUpdateData(data.entityId, data.key, data.value)	
 			}
-		}
-	},
-
-	_onMakePlayerCameraTrackUnit: function (data) {
-		if (data.unitId) {
-			taro.client.queueStreamUpdateData(data.unitId, "makePlayerCameraTrackUnit", true);
 		}
 	},
 

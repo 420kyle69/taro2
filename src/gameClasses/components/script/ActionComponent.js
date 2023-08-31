@@ -1216,6 +1216,7 @@ var ActionComponent = TaroEntity.extend({
 							if (velocityY == undefined || isNaN(velocityY)) {
 								velocityY = 0;
 							}
+
 							entity.setLinearVelocity(velocityX, velocityY);
 						} else {
 							self._script.errorLog('invalid entity');
@@ -1681,7 +1682,7 @@ var ActionComponent = TaroEntity.extend({
 						var unit = self._script.variable.getValue(action.unit, vars);
 						var player = self._script.variable.getValue(action.player, vars);
 						if (unit && player && player._stats.clientId) {
-							player.cameraTrackUnit(unit);
+							player.cameraTrackUnit(unit.id());
 						}
 						break;
 

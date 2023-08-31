@@ -2511,7 +2511,7 @@ var TaroEntity = TaroObject.extend({
 		if (taro.isClient) {
 			var entityId = this.entityId || this.id();
 			if (taro.entitiesToRender.trackEntityById[entityId]) {
-				if (taro.client.myPlayer?.cameraTrackedUnit == this.id()) {
+				if (taro.client.myPlayer?._stats.cameraTrackedUnitId == this.id()) {
 					taro.client.emit('stop-follow');
 				}
 
@@ -3166,7 +3166,7 @@ var TaroEntity = TaroObject.extend({
 				this.nextPhysicsFrame = [taro._currentTime, [x, y, rotate]];				
 			}
             //instantly move to camera the new position
-            if (teleportCamera && taro.client.myPlayer?.cameraTrackedUnit === this.id()) {
+            if (teleportCamera && taro.client.myPlayer?._stats.cameraTrackedUnitId === this.id()) {
                 taro.client.emit('instant-move-camera', [x, y]);
             }
 		}
@@ -4282,10 +4282,6 @@ var TaroEntity = TaroObject.extend({
 								}
 								this.playEffect(newValue.type, newValue.data ? newValue.data : {});
 								break;
-							case 'makePlayerCameraTrackUnit':
-								// this unit was queued to be tracked by a player's camera
-								taro.client.myPlayer.cameraTrackUnit(this);
-								break;
 							case 'hideUnit':
 								this.hide();
 								break;
@@ -4763,7 +4759,7 @@ var TaroEntity = TaroObject.extend({
 
 				case 'player':
 					// purchasables is required for rendering this player's owned skin to the other players
-					keys = ['name', 'clientId', 'playerTypeId', 'controlledBy', 'playerJoined', 'unitIds', 'selectedUnitId', 'userId', 'banChat', 'purchasables', 'username', 'profilePicture', 'roleIds'];
+					keys = ['name', 'clientId', 'playerTypeId', 'controlledBy', 'playerJoined', 'unitIds', 'selectedUnitId', 'cameraTrackedUnitId', 'userId', 'banChat', 'purchasables', 'username', 'profilePicture', 'roleIds'];
 					data = {
 						attributes: {},
 						// variables: {}

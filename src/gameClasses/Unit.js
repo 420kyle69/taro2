@@ -105,6 +105,11 @@ var Unit = TaroEntityPhysics.extend({
 				if (ownerPlayer) {
 					this.setOwnerPlayer(this._stats.ownerId);
 					this.equipSkin();
+
+					// player was already set to camera-track this unit
+					if (ownerPlayer._stats.cameraTrackedUnitId == this.id()) {
+						this.emit('follow');
+					}
 				}
 			}
 
@@ -1431,8 +1436,8 @@ var Unit = TaroEntityPhysics.extend({
 
 		if (taro.isClient) {
 
-			if (taro.client.cameraTrackUnitId == self.id()) {
-				taro.client.cameraTrackUnitId = undefined;
+			if (taro.client.myPlayer?._stats?.cameraTrackedUnitId == self.id()) {
+				taro.client.myPlayer._stats.cameraTrackedUnitId = undefined;
 			}
 
 			if (self.minimapUnit) {
