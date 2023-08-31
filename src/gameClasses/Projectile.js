@@ -212,7 +212,7 @@ var Projectile = TaroEntityPhysics.extend({
 
 	streamUpdateData: function (queuedData, clientId) {
 		
-		TaroEntity.prototype.streamUpdateData.call(this, data);
+		TaroEntity.prototype.streamUpdateData.call(this, queuedData);
 		for (var i = 0; i < queuedData.length; i++) {
 			var data = queuedData[i];
 			for (attrName in data) {
