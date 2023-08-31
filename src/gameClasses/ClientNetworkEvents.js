@@ -9,7 +9,7 @@ var ClientNetworkEvents = {
 		}
 	},
 
-	_onUpdateAllEntities: function (data) {
+	_onStreamUpdateData: function (data) {
 		for (entityId in data) {
 			if (taro.client.entityUpdateQueue[entityId] == undefined) {
 				taro.client.entityUpdateQueue[entityId] = {};

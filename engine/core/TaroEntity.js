@@ -4308,7 +4308,7 @@ var TaroEntity = TaroObject.extend({
 	},
 
 	// combine all data that'll be sent to the client, and send them altogether at the tick
-	queueStreamData: function (data) {
+	queueStreamData: function (data, clientId) {
 		// this._streamDataQueued = this._streamDataQueued.concat(data);
 		for (key in data) {
 			value = data[key];
@@ -4320,7 +4320,8 @@ var TaroEntity = TaroObject.extend({
 				if (this._streamDataQueued[key] == undefined) 
 				{
 					this._streamDataQueued[key] = {};
-				}					
+				}
+				
 				this._streamDataQueued[key] = Object.assign(this._streamDataQueued[key], value);
 			} else {
 				this._streamDataQueued[key] = value;

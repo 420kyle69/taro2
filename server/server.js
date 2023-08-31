@@ -738,7 +738,7 @@ var Server = TaroClass.extend({
 
 		// taro.network.define('updateEntity', self._onSomeBullshit);
 		taro.network.define('updateEntityAttribute', self._onSomeBullshit);
-		taro.network.define('updateAllEntities', self._onSomeBullshit);
+		taro.network.define('streamUpdateData', self._onSomeBullshit);
 		taro.network.define('itemHold', self._onSomeBullshit);
 		taro.network.define('item', self._onSomeBullshit);
 		taro.network.define('clientConnect', self._onSomeBullshit);

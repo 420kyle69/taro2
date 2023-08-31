@@ -698,7 +698,7 @@ const Client = TaroEventingClass.extend({
 		taro.network.define('hideUnitNameLabelFromPlayer', this._onHideUnitNameLabelFromPlayer);
 		taro.network.define('showUnitNameLabelFromPlayer', this._onShowUnitNameLabelFromPlayer);
 
-		taro.network.define('updateAllEntities', this._onUpdateAllEntities);
+		taro.network.define('streamUpdateData', this._onStreamUpdateData);
 		taro.network.define('updateEntityAttribute', this._onUpdateEntityAttribute);
 
 		taro.network.define('updateUiText', this._onUpdateUiText);

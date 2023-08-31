@@ -1753,7 +1753,7 @@ var TaroEngine = TaroEntity.extend({
 			self._drawCount = 0;
 
 			taro.network.stream._sendQueue(timeStamp);
-			taro.network.stream.updateEntityAttributes();
+			taro.network.stream._sendQueuedStreamData();
 		}
 
 		taro.gameLoopTickHasExecuted = false;
