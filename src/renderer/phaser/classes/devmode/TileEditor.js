@@ -164,13 +164,6 @@ var TileEditor = /** @class */ (function () {
                 //save tile change to taro.game.data.map and taro.map.data
                 var nowValue = dataValue;
                 this.putTiles(nowValue.x, nowValue.y, nowValue.selectedTiles, nowValue.size, nowValue.shape, nowValue.layer, true);
-                if (data.lastLoop || data.lastLoop === undefined && map.layers[tempLayer].name === 'walls') {
-                    taro.physics.destroyWalls();
-                    var mapCopy = taro.scaleMap(rfdc()(map));
-                    taro.tiled.loadJson(mapCopy, function (layerArray, TaroLayersById) {
-                        taro.physics.staticsFromMap(TaroLayersById.walls);
-                    });
-                }
                 break;
             }
             case 'clear': {
@@ -180,11 +173,7 @@ var TileEditor = /** @class */ (function () {
         }
         if (dataType !== 'edit' && taro.physics && map.layers[tempLayer].name === 'walls') {
             //if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
-            taro.physics.destroyWalls();
-            var mapCopy = taro.scaleMap(rfdc()(map));
-            taro.tiled.loadJson(mapCopy, function (layerArray, TaroLayersById) {
-                taro.physics.staticsFromMap(TaroLayersById.walls);
-            });
+            debounceRecalcPhysics(map, false);
         }
     };
     /**

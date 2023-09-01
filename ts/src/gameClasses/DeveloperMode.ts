@@ -1,3 +1,30 @@
+function debounce<Params extends any[]>(
+	func: (...args: Params) => any,
+	timeout: number,
+): (...args: Params) => void {
+	let timer: NodeJS.Timeout;
+	return (...args: Params) => {
+		clearTimeout(timer);
+		timer = setTimeout(() => {
+			func(...args);
+		}, timeout);
+	};
+}
+
+function recalcWallsPhysics(gameMap: MapData, forPathFinding: boolean) {
+	taro.physics.destroyWalls();
+	let map = taro.scaleMap(rfdc()(gameMap));
+	gameMap.wasEdited = true;
+	taro.tiled.loadJson(map, function (layerArray, layersById) {
+		taro.physics.staticsFromMap(layersById.walls);
+	});
+	if (forPathFinding) {
+		taro.map.updateWallMapData(); // for A* pathfinding
+	}
+}
+
+const debounceRecalcPhysics = debounce(recalcWallsPhysics, 0);
+
 class DeveloperMode {
 	active: boolean;
 	activeTab: devModeTab;
@@ -70,17 +97,13 @@ class DeveloperMode {
 		return this.activeTab && this.activeTab !== 'play';
 	}
 
-	editTile<T extends MapEditToolEnum>(data: TileData<T>, clientId: string, lastLoop: boolean): void {
+	editTile<T extends MapEditToolEnum>(data: TileData<T>, clientId: string): void {
 		// only allow developers to modify the tiles
 		if (taro.server.developerClientIds.includes(clientId) || clientId === 'server') {
 			if (JSON.stringify(data) === '{}') {
 				throw 'receive: {}';
 			}
 			const gameMap = taro.game.data.map;
-			if (lastLoop || lastLoop === undefined) {
-				gameMap.wasEdited = true;
-			}
-			data.lastLoop = lastLoop;
 			taro.network.send('editTile', data);
 			const { dataType, dataValue } = Object.entries(data).map(([k, dataValue]) => {
 				const dataType = k as MapEditToolEnum; return { dataType, dataValue };
@@ -99,14 +122,6 @@ class DeveloperMode {
 					//save tile change to taro.game.data.map and taro.map.data
 					const nowValue = serverData as TileData<'edit'>['edit'];
 					this.putTiles(nowValue.x, nowValue.y, nowValue.selectedTiles, nowValue.size, nowValue.shape, nowValue.layer);
-					if (lastLoop || lastLoop === undefined && gameMap.layers[serverData.layer].name === 'walls') {
-						taro.physics.destroyWalls();
-						let map = taro.scaleMap(rfdc()(gameMap));
-						taro.tiled.loadJson(map, function (layerArray, layersById) {
-							taro.physics.staticsFromMap(layersById.walls);
-						});
-						taro.map.updateWallMapData(); // for A* pathfinding
-					}
 					break;
 				}
 				case 'clear': {
@@ -115,14 +130,9 @@ class DeveloperMode {
 				}
 			}
 
-			if (dataType !== 'edit' && gameMap.layers[serverData.layer].name === 'walls') {
+			if (gameMap.layers[serverData.layer].name === 'walls') {
 				//if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
-				taro.physics.destroyWalls();
-				let map = taro.scaleMap(rfdc()(gameMap));
-				taro.tiled.loadJson(map, function (layerArray, layersById) {
-					taro.physics.staticsFromMap(layersById.walls);
-				});
-				taro.map.updateWallMapData(); // for A* pathfinding
+				debounceRecalcPhysics(gameMap, true);
 			}
 		}
 	}
@@ -589,7 +599,7 @@ type MapEditTool = {
 
 type MapEditToolEnum = keyof MapEditTool;
 
-type TileData<T extends MapEditToolEnum> = Pick<MapEditTool, T> & { lastLoop?: boolean }
+type TileData<T extends MapEditToolEnum> = Pick<MapEditTool, T>
 
 interface RegionData {
 	userId?: string,

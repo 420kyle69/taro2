@@ -10,7 +10,7 @@ var ActionComponent = TaroEntity.extend({
 	},
 
 	// entity can be either trigger entity, or entity in loop
-	run: function (actionList, vars, lastLoop) {
+	run: function (actionList, vars) {
 		var self = this;
 
 		if (actionList == undefined || actionList.length <= 0)
@@ -138,7 +138,7 @@ var ActionComponent = TaroEntity.extend({
 
 							if (!isNaN(count) && count > 0) {
 								for (let i = 0; i < count; i++) {
-									returnValue = self.run(repeatActions, vars, i !== count - 1);
+									returnValue = self.run(repeatActions, vars);
 
 									if (returnValue == 'break' || vars.break) {
 										// we dont have to return a value in case of break otherwise
@@ -1048,7 +1048,7 @@ var ActionComponent = TaroEntity.extend({
 								variables[variableName].value <= stop;
 								variables[variableName].value += 1 // post iteration operation
 							) {
-								var brk = self.run(action.actions, vars, variables[variableName].value === stop);
+								var brk = self.run(action.actions, vars);
 								// TODO: handle break;
 								if (brk == 'break' || vars.break) {
 									// we dont have to return a value in case of break otherwise
@@ -2777,7 +2777,7 @@ var ActionComponent = TaroEntity.extend({
 										x: tileX,
 										y: tileY,
 									},
-								}, 'server', lastLoop);
+								}, 'server');
 							}
 
 						}
