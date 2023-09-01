@@ -648,17 +648,13 @@ var Server = TaroClass.extend({
 								var logInterval = setInterval(function () {
 									// send only if developer client is connect
 
-									console.log("yoyo1");
-												
 									if (taro.isServer && self.developerClientIds.length) {
-										console.log("yoyo2");
 										taro.game.devLogs.status = taro.server.getStatus();
 										const sendErrors = Object.keys(taro.script.errorLogs).length;
 										self.developerClientIds.forEach(
 											id => {
 												taro.network.send('devLogs', taro.game.devLogs, id);
-
-												console.log("yoyo3");
+			
 												if (taro.profiler.isEnabled) {
 													taro.network.send('profile', taro.profiler.getProfile(), id);
 												}
