@@ -1445,8 +1445,7 @@ var ShopComponent = TaroEntity.extend({
 
 	closeShop: function (clientId) {
 		if (taro.isClient) {
-			// console.log("hide!")
-			$('#shop-modal').modal('hide');
+			$('#modd-item-shop-modal').modal('hide');
 			taro.client.myPlayer.control.updatePlayerInputStatus();
 		} else if (taro.isServer) {
 			taro.network.send('ui', { command: 'closeShop' }, clientId);
