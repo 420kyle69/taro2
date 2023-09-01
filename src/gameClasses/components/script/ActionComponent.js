@@ -30,7 +30,8 @@ var ActionComponent = TaroEntity.extend({
 
 			if (taro.profiler.isEnabled) {
 				var startTime = performance.now();				
-				var actionPath = path + "/" + i + "("+action.type+")";
+				// var actionPath = path + "/" + i + "("+action.type+")";
+				var actionPath = path + "/" + i;
 			}
 	
 			// assign runMode engine-widely, so functions like item.use() can reference to what the current runMode is

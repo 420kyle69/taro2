@@ -716,6 +716,7 @@ const Client = TaroEventingClass.extend({
 		taro.network.define('videoChat', this._onVideoChat);
 
 		taro.network.define('devLogs', this._onDevLogs);
+		taro.network.define('profile', this._onProfile);
 		taro.network.define('errorLogs', this._onErrorLogs);
 
 		taro.network.define('sound', this._onSound);

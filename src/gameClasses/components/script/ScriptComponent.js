@@ -57,7 +57,7 @@ var ScriptComponent = TaroEntity.extend({
 			
 			
 			if (actions) {
-				var path = (this._entity._id || "world") + "/" + scriptId;
+				var path = this._entity._id + "/" + scriptId;
 				var cmd = self.action.run(actions, params, path); // path is passed for profiling purpose
 				if (cmd == 'return') {
 					taro.log('script return called');

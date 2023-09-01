@@ -608,26 +608,21 @@ var ServerNetworkEvents = {
 		}
 	},
 
+	_onToggleProfiler: function ({}, modClientId) {
+		var modPlayer = taro.game.getPlayerByClientId(modClientId);
+
+		if (modPlayer && modPlayer.isDeveloper()) {			
+			taro.profiler.toggle();
+		}		
+	},
+
 	_onKick: function (kickedClientId, modClientId) {
 		var modPlayer = taro.game.getPlayerByClientId(modClientId);
 		var kickedPlayer = taro.game.getPlayerByClientId(kickedClientId);
-		var message = "You were kicked";
 
-		if (!modPlayer) {
-			return;
-		} else {
-			var modPlayer = taro.$(modPlayerId);
-			modPlayerName = modPlayer?._stats?.name;
-			if (modPlayerName) {
-				message = 'You were kicked by ' + modPlayerName;
-			}
-		}
-
-		var isUserDeveloper = modPlayer.isDeveloper();
-
-		if (isUserDeveloper && kickedPlayer) {
-			taro.game.kickPlayer(kickedPlayer.id(), message);
-		}
+		if (modPlayer && modPlayer.isDeveloper() && kickedPlayer) {			
+			taro.game.kickPlayer(kickedPlayer.id(), 'You were kicked by ' + modPlayer._stats?.name);
+		}		
 	},
 
 	_onBanUser: function ({ userId, kickuserId }, clientId) {
