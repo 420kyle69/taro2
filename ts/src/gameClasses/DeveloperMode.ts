@@ -1,14 +1,57 @@
 function debounce<Params extends any[]>(
 	func: (...args: Params) => any,
 	timeout: number,
+	merge = false,
 ): (...args: Params) => void {
 	let timer: NodeJS.Timeout;
-	return (...args: Params) => {
+	let mergedData: any = [{}];
+	return function (...args: Params) {
 		clearTimeout(timer);
+		if (merge) {
+			const keys = Object.keys(mergedData);
+			args.map((v, idx) => {
+				switch (typeof v) {
+					case 'object': {
+						Object.keys(v).map((key) => {
+							if (!mergedData[0][key]) {
+								switch (typeof v[key]) {
+									case 'string': {
+										mergedData[0][key] = '';
+										break;
+									}
+									case 'number': {
+										mergedData[0][key] = 0;
+										break;
+									}
+									case 'object': {
+										mergedData[0][key] = {};
+										break;
+									}
+								}
+							}
+
+							mergedData[0][key] += v[key];
+						});
+						break;
+					}
+					default: {
+						mergedData[0][keys[idx]] += v;
+					}
+				}
+
+			});
+		} else {
+			mergedData[0] = args;
+		}
+
 		timer = setTimeout(() => {
-			func(...args);
+			func(...mergedData);
 		}, timeout);
 	};
+}
+
+function mergeEditTileActions(data: TileData<'edit'>) {
+	taro.network.send('editTile', data);
 }
 
 function recalcWallsPhysics(gameMap: MapData, forPathFinding: boolean) {

@@ -1,15 +1,55 @@
-function debounce(func, timeout) {
+function debounce(func, timeout, merge) {
+    if (merge === void 0) { merge = false; }
     var timer;
+    var mergedData = [{}];
     return function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             args[_i] = arguments[_i];
         }
         clearTimeout(timer);
+        if (merge) {
+            var keys_1 = Object.keys(mergedData);
+            args.map(function (v, idx) {
+                switch (typeof v) {
+                    case 'object': {
+                        Object.keys(v).map(function (key) {
+                            if (!mergedData[0][key]) {
+                                switch (typeof v[key]) {
+                                    case 'string': {
+                                        mergedData[0][key] = '';
+                                        break;
+                                    }
+                                    case 'number': {
+                                        mergedData[0][key] = 0;
+                                        break;
+                                    }
+                                    case 'object': {
+                                        mergedData[0][key] = {};
+                                        break;
+                                    }
+                                }
+                            }
+                            mergedData[0][key] += v[key];
+                        });
+                        break;
+                    }
+                    default: {
+                        mergedData[0][keys_1[idx]] += v;
+                    }
+                }
+            });
+        }
+        else {
+            mergedData[0] = args;
+        }
         timer = setTimeout(function () {
-            func.apply(void 0, args);
+            func.apply(void 0, mergedData);
         }, timeout);
     };
+}
+function mergeEditTileActions(data) {
+    taro.network.send('editTile', data);
 }
 function recalcWallsPhysics(gameMap, forPathFinding) {
     taro.physics.destroyWalls();
