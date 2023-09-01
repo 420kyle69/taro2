@@ -608,11 +608,16 @@ var ServerNetworkEvents = {
 		}
 	},
 
-	_onToggleProfiler: function ({}, modClientId) {
+	_onRunProfiler: function ({ run }, modClientId) {
 		var modPlayer = taro.game.getPlayerByClientId(modClientId);
 
 		if (modPlayer && modPlayer.isDeveloper()) {			
-			taro.profiler.toggle();
+			if (run) {
+				taro.profiler.start();
+			} else {
+				taro.profiler.stop();
+			}
+			
 		}		
 	},
 

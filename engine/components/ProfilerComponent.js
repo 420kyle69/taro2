@@ -3,15 +3,20 @@ var ProfilerComponent = TaroEventingClass.extend({
 	componentId: 'profiler',
 
 	init: function () {
-		this.isEnabled = true;
+		this.isEnabled = false;
 		this.timeElapsed = {};
 		this.tickCount = 0;
 		this.avgTotalTime = 0;
 		this.avgEngineTickTime = 0;
 	},
 
-	toggle: function() {
-		this.isEnabled = !this.isEnabled;
+	start: function() {
+		this.timeElapsed = {};
+		this.isEnabled = true;
+	},
+
+	stop: function() {
+		this.isEnabled = false;
 	},
 
 	logTimeElapsed: function(path, startTime) {

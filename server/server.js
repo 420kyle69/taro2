@@ -775,7 +775,7 @@ var Server = TaroClass.extend({
 		taro.network.define('closeDialogue', self._onSomeBullshit);
 		taro.network.define('userJoinedGame', self._onSomeBullshit);
 
-		taro.network.define('toggleProfiler', self._onToggleProfiler);
+		taro.network.define('runProfiler', self._onRunProfiler);
 		taro.network.define('kick', self._onKick);
 		taro.network.define('ban-user', self._onBanUser);
 		taro.network.define('ban-ip', self._onBanIp);
