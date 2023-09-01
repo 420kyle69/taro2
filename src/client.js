@@ -148,8 +148,8 @@ const Client = TaroEventingClass.extend({
 		});
 
 		//go fetch
-		taro.addComponent(ProfilerComponent);
 		taro.addComponent(GameComponent);
+		taro.addComponent(ProfilerComponent);
 		taro.addComponent(MenuUiComponent);
 		// we're going to try and insert the fetch here
 		let promise = new Promise((resolve, reject) => {

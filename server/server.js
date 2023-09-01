@@ -545,6 +545,7 @@ var Server = TaroClass.extend({
 
 			promise.then((game) => {
 				taro.addComponent(GameComponent);
+				taro.addComponent(ProfilerComponent);
 				self.gameStartedAt = new Date();
 
 				taro.game.data = game.data;

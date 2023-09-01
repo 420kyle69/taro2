@@ -3,34 +3,36 @@ var ProfilerComponent = TaroEventingClass.extend({
 	componentId: 'profiler',
 
 	init: function () {
+		this.isEnabled = true;
 		this.timeElapsed = {}		
 	},
 
-	logTimeElapsed: function(name, startTime) {
-		if (this.timeElapsed[name] == undefined) {
-			this.timeElapsed[name] = {
+	logTimeElapsed: function(path, startTime) {
+		if (this.timeElapsed[path] == undefined) {
+			this.timeElapsed[path] = {
 				count: 0,
 				avgTimeElapsed: 0
 			}
 		}
 		
 		var timeElapsed = performance.now() - startTime;
-		var element = this.timeElapsed[name];
-		// this.timeElapsed[name].avgTimeElapsed = ((element.avgTimeElapsed * element.count) + timeElapsed) / (element.count + 1);
-		this.timeElapsed[name].avgTimeElapsed += timeElapsed;
-		this.timeElapsed[name].count++;
+		var element = this.timeElapsed[path];
+		this.timeElapsed[path].avgTimeElapsed = ((element.avgTimeElapsed * element.count) + timeElapsed) / (element.count + 1);
+		// this.timeElapsed[path].avgTimeElapsed += timeElapsed;
+		this.timeElapsed[path].count++;
 	},
 
 	printResults: function() {
 		var output = []
-		for (var i in this.timeElapsed) {
-			output.push(i)
-			output.push(this.timeElapsed[i].avgTimeElapsed.toFixed(2))
-			output.push(this.timeElapsed[i].count)
+		for (var path in this.timeElapsed) {
+			output.push(path)
+			output.push(this.timeElapsed[path].avgTimeElapsed.toFixed(2))
+			output.push(this.timeElapsed[path].count)
 		}
-		console.log(output.join(', '))
+		// console.log(output.join(', '))
 
-		this.timeElapsed = {};
+		console.log(this.timeElapsed)
+		// this.timeElapsed = {};
 	}
 
 });
