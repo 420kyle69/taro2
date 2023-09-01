@@ -1080,11 +1080,12 @@ var ShopComponent = TaroEntity.extend({
 						}).on("mouseleave", function () {
 							var _this = this;
 							if (!$(".popover:hover").length) {
-								setTimeout(function () {
-									if (!$(".popover:hover").length) {
-										$(_this).popover("hide");
-									}
-								}, 50);
+								// setTimeout(function () {
+								// 	if (!$(".popover:hover").length) {
+								// 		$(_this).popover("hide");
+								// 	}
+								// }, 50);
+								$(_this).popover("hide");
 							}
 							else {
 								$('.popover').mouseleave(function() {
