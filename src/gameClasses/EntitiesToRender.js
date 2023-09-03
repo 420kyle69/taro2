@@ -4,7 +4,7 @@ var EntitiesToRender = /** @class */ (function () {
         taro.client.on('tick', this.frameTick, this);
     }
     EntitiesToRender.prototype.updateAllEntities = function ( /*timeStamp*/) {
-        var _a, _b, _c, _d, _e, _f, _g;
+        var _a, _b, _c, _d, _e;
         for (var entityId in this.trackEntityById) {
             // var timeStart = performance.now();
             // var entity = taro.$(entityId);
@@ -29,21 +29,6 @@ var EntitiesToRender = /** @class */ (function () {
                 var ownerUnit = undefined;
                 if (entity._category == 'item') {
                     ownerUnit = entity.getOwnerUnit();
-                    // dont render item carried by culled unit
-                    if (ownerUnit) {
-                        // if ownerUnit is invisible, hide the item
-                        if (!((_c = (_b = ownerUnit === null || ownerUnit === void 0 ? void 0 : ownerUnit.phaserEntity) === null || _b === void 0 ? void 0 : _b.gameObject) === null || _c === void 0 ? void 0 : _c.visible)) {
-                            if (phaserEntity === null || phaserEntity === void 0 ? void 0 : phaserEntity.visible) {
-                                phaserEntity.setVisible(false);
-                            }
-                            continue;
-                        }
-                        else { // ownerUnit is visible. make this item visible as well
-                            if (!(phaserEntity === null || phaserEntity === void 0 ? void 0 : phaserEntity.visible)) {
-                                phaserEntity.setVisible(true);
-                            }
-                        }
-                    }
                 }
                 if (entity.isTransforming()) {
                     entity._processTransform();
@@ -63,7 +48,7 @@ var EntitiesToRender = /** @class */ (function () {
                         rotate = ownerUnit._rotate.z;
                         // immediately rotate my unit's items to the angleToTarget
                     }
-                    else if (ownerUnit == taro.client.selectedUnit && ((_e = (_d = entity._stats.controls) === null || _d === void 0 ? void 0 : _d.mouseBehaviour) === null || _e === void 0 ? void 0 : _e.rotateToFaceMouseCursor)) {
+                    else if (ownerUnit == taro.client.selectedUnit && ((_c = (_b = entity._stats.controls) === null || _b === void 0 ? void 0 : _b.mouseBehaviour) === null || _c === void 0 ? void 0 : _c.rotateToFaceMouseCursor)) {
                         rotate = ownerUnit.angleToTarget; // angleToTarget is updated at 60fps
                     }
                     entity._rotate.z = rotate; // update the item's rotation immediately for more accurate aiming (instead of 20fps)
@@ -74,13 +59,13 @@ var EntitiesToRender = /** @class */ (function () {
                         rotate = entity.anchoredOffset.rotate;
                     }
                 }
-                if (((_f = entity.tween) === null || _f === void 0 ? void 0 : _f.isTweening) && (phaserEntity === null || phaserEntity === void 0 ? void 0 : phaserEntity.visible)) {
+                if (((_d = entity.tween) === null || _d === void 0 ? void 0 : _d.isTweening) && (phaserEntity === null || phaserEntity === void 0 ? void 0 : phaserEntity.visible)) {
                     entity.tween.update();
                     x += entity.tween.offset.x;
                     y += entity.tween.offset.y;
                     rotate += entity.tween.offset.rotate;
                 }
-                if (((_g = entity.tween) === null || _g === void 0 ? void 0 : _g.isTweening) ||
+                if (((_e = entity.tween) === null || _e === void 0 ? void 0 : _e.isTweening) ||
                     entity.isTransforming() ||
                     entity == taro.client.selectedUnit ||
                     (entity._category == 'item' && (ownerUnit == taro.client.selectedUnit ||

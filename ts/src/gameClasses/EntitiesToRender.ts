@@ -40,23 +40,6 @@ class EntitiesToRender {
 				var ownerUnit = undefined;
 				if (entity._category == 'item') {
 					ownerUnit = entity.getOwnerUnit();
-
-					// dont render item carried by culled unit
-					if (ownerUnit) {
-
-						// if ownerUnit is invisible, hide the item
-						if (!ownerUnit?.phaserEntity?.gameObject?.visible) {
-							if (phaserEntity?.visible) {
-								phaserEntity.setVisible(false);
-							}
-							continue;
-						} else { // ownerUnit is visible. make this item visible as well
-							if (!phaserEntity?.visible) {
-								phaserEntity.setVisible(true);
-							}
-						}
-						
-					}
 				}
 				
 				if (entity.isTransforming()) {
