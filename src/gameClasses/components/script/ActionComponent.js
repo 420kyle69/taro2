@@ -221,15 +221,15 @@ var ActionComponent = TaroEntity.extend({
 						break;
 
 					case 'sendPostRequest':
-						var obj = self._script.variable.getValue(action.string, vars);
+						var string = self._script.variable.getValue(action.string, vars);
 						var url = self._script.variable.getValue(action.url, vars);
 						var varName = self._script.variable.getValue(action.varName, vars);
 
+						var obj = {};
 						try {
-							obj = JSON.parse(obj);
+							obj = JSON.parse(string);
 						} catch (err) {
-							console.error(err);
-							return;
+							obj = {msg: string};
 						}
 
 						// ensure we aren't sending more than 30 POST requests within 10 seconds
@@ -268,7 +268,7 @@ var ActionComponent = TaroEntity.extend({
 									vars = { [key]: self._entity.id() }
 								}
 
-								this._entity.script.trigger('onPostResponse', vars);
+								taro.script.trigger('onPostResponse', vars);
 
 							} catch (err) {
 								console.error('sendPostRequest', taro.game.data.defaultData.title, url, err);
