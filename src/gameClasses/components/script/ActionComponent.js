@@ -1021,7 +1021,7 @@ var ActionComponent = TaroEntity.extend({
 					case 'while':
 						var loopCounter = 0;
 
-						while (self._script.condition.run(action.conditions, vars), actionPath) {
+						while (self._script.condition.run(action.conditions, vars, actionPath)) {
 							var brk = self.run(action.actions, vars, actionPath);
 							if (brk == 'break' || vars.break) {
 								// we dont have to return a value in case of break otherwise
