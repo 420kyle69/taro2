@@ -545,6 +545,7 @@ var Server = TaroClass.extend({
 
 			promise.then((game) => {
 				taro.addComponent(GameComponent);
+				taro.addComponent(ProfilerComponent);
 				self.gameStartedAt = new Date();
 
 				taro.game.data = game.data;
@@ -646,14 +647,18 @@ var Server = TaroClass.extend({
 								// send dev logs to developer every second
 								var logInterval = setInterval(function () {
 									// send only if developer client is connect
-									if (taro.isServer && self.developerClientIds.length) {
 
+									if (taro.isServer && self.developerClientIds.length) {
 										taro.game.devLogs.status = taro.server.getStatus();
 										const sendErrors = Object.keys(taro.script.errorLogs).length;
 										self.developerClientIds.forEach(
 											id => {
 												taro.network.send('devLogs', taro.game.devLogs, id);
-
+			
+												if (taro.profiler.isEnabled) {
+													taro.network.send('profile', taro.profiler.getProfile(), id);
+												}
+												
 												if (sendErrors) {
 													taro.network.send('errorLogs', taro.script.errorLogs, id);
 												}
@@ -750,6 +755,7 @@ var Server = TaroClass.extend({
 		taro.network.define('updateShopInventory', self._onSomeBullshit);
 		taro.network.define('errorLogs', self._onSomeBullshit);
 		taro.network.define('devLogs', self._onSomeBullshit);
+		taro.network.define('profile', self._onSomeBullshit);
 		taro.network.define('sound', self._onSomeBullshit);
 		taro.network.define('particle', self._onSomeBullshit);
 		taro.network.define('camera', self._onSomeBullshit);
@@ -765,6 +771,7 @@ var Server = TaroClass.extend({
 		taro.network.define('closeDialogue', self._onSomeBullshit);
 		taro.network.define('userJoinedGame', self._onSomeBullshit);
 
+		taro.network.define('runProfiler', self._onRunProfiler);
 		taro.network.define('kick', self._onKick);
 		taro.network.define('ban-user', self._onBanUser);
 		taro.network.define('ban-ip', self._onBanIp);
