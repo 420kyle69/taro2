@@ -95,6 +95,7 @@ var ActionComponent = TaroEntity.extend({
 						var newValue = self._script.variable.getValue(action.value, vars);
 						params.newValue = newValue;
 						if (taro.game.data.variables.hasOwnProperty(action.variableName)) {
+							taro.game.lastUpdatedVariableName = action.variableName;
 							taro.game.data.variables[action.variableName].value = newValue;
 							// if variable has default field then it will be returned when variable's value is undefined
 							if (
@@ -257,6 +258,18 @@ var ActionComponent = TaroEntity.extend({
 								if (taro.game.data.variables.hasOwnProperty(varName)) {
 									taro.game.data.variables[varName].value = newValue;
 								}
+
+								taro.game.lastReceivedPostResponse = res;
+								taro.game.lastUpdatedVariableName = varName;
+
+								var vars = {}
+								if (["unit", "item", "projectile"].includes(self._entity._category)) {
+									var key = self._entity._category + 'Id';
+									vars = { [key]: self._entity.id() }
+								}
+
+								this._entity.script.trigger('onPostResponse', vars);
+
 							} catch (err) {
 								console.error('sendPostRequest', taro.game.data.defaultData.title, url, err);
 								if (taro.game.data.variables.hasOwnProperty(varName)) {

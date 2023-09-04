@@ -175,6 +175,7 @@ var VariableComponent = TaroEntity.extend({
 			// empty
 		}
 	},
+
 	getAllVariables: function (selectedTypes) {
 		var returnObj = {};
 
@@ -2088,13 +2089,8 @@ var VariableComponent = TaroEntity.extend({
 	populateFunctions: function () {
 		var self = this;
 
-		/* boolean */
 		this._functions = {
 			/* general */
-
-			'getVariable': function (text, vars) {
-				return self.getVariable(text.variableName);
-			},
 
 			/* general - number */
 
@@ -2110,6 +2106,14 @@ var VariableComponent = TaroEntity.extend({
 			},
 
 			/* general - string */
+
+			'lastReceivedPostResponse': function (text, vars) {
+				return taro.game.lastReceivedPostResponse;
+			},
+			
+			'lastUpdatedVariableName': function (text, vars) {
+				return taro.game.lastUpdatedVariableName;
+			},
 
 			'subString': function (text, vars) {
 				var sourceString = self.getValue(text.sourceString, vars);
@@ -2404,7 +2408,19 @@ var VariableComponent = TaroEntity.extend({
 					return regionA.intersects(regionB);
 				}
 			},
+			/* variable */
+			
+			'getVariable': function (text, vars) {
+				var name = self.getValue(text.variableName, vars);				
+				return self.getVariable(name);
+			},
 
+			'getTriggeringVariableName': function (text, vars) {
+				if (vars && vars.triggeredBy && vars.triggeredBy.variableName) {
+					return vars.triggeredBy.variableName;
+				}
+			},
+		
 			/* attribute */
 
 			'getTriggeringAttribute': function (text, vars) {
