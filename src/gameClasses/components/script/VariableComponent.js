@@ -2106,6 +2106,14 @@ var VariableComponent = TaroEntity.extend({
 			},
 
 			/* general - string */
+			
+			'objectToString': function (text, vars) {
+				var object = self.getValue(text.object, vars);
+
+				if (object) {
+					return JSON.stringify(object);
+				}
+			},
 
 			'lastReceivedPostResponse': function (text, vars) {
 				return taro.game.lastReceivedPostResponse;
@@ -2518,6 +2526,32 @@ var VariableComponent = TaroEntity.extend({
 				}
 
 			},
+
+			/* object */
+
+			'elementFromObject': function (text, vars) {
+				var object = self.getValue(text.object, vars);
+				var key = self.getValue(text.key, vars);
+
+				if (object && key != undefined) {
+					return object[key];
+				}
+			},
+
+			'stringToObject': function (text, vars) {
+				var string = self.getValue(text.string, vars);
+
+				if (string) {
+					try {
+						return JSON.parse(string);
+					} catch (err) {
+						if (err instanceof SyntaxError) {
+							this._script.errorLog(`error parsing JSON within stringToObject:  ${typeof string} ${string} is not a valid JSON string`);
+						}
+					}
+				}
+			},
+
 		}
 	}
 });
