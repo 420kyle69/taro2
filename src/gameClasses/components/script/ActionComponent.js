@@ -261,14 +261,14 @@ var ActionComponent = TaroEntity.extend({
 
 								taro.game.lastReceivedPostResponse = res;
 								taro.game.lastUpdatedVariableName = varName;
-
+								
 								var vars = {}
 								if (["unit", "item", "projectile"].includes(self._entity._category)) {
 									var key = self._entity._category + 'Id';
 									vars = { [key]: self._entity.id() }
 								}
 
-								taro.script.trigger('onPostResponse', vars);
+								self._entity.script.trigger('onPostResponse', vars);
 
 							} catch (err) {
 								console.error('sendPostRequest', taro.game.data.defaultData.title, url, err);
