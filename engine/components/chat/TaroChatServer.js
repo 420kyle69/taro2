@@ -111,9 +111,9 @@ var TaroChatServer = {
 			if (message !== undefined) {
 
 
-				if (msg.text && msg.text.length > 80) {
-					msg.text = msg.text.substr(0, 80);
-				}
+				// if (msg.text && msg.text.length > 80) {
+				// 	msg.text = msg.text.substr(0, 80);
+				// }
 
 				if (to) {
 					// Send message to individual user
