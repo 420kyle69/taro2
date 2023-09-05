@@ -260,7 +260,6 @@ var ActionComponent = TaroEntity.extend({
 							try {
 								var res = JSON.parse(body);
 
-								console.log(res)
 								var newValue = res.response;
 								params['newValue'] = newValue;
 

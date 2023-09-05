@@ -211,7 +211,7 @@ var GameComponent = TaroEntity.extend({
 
 	getPlayerByClientId: function (clientId) {
 		return taro.$$('player').find(function (player) {
-			return player._stats && player._stats.controlledBy != 'computer' && player._stats.clientId && player._stats.clientId == clientId;
+			return player._stats?.clientId == clientId;
 		});
 	},
 
