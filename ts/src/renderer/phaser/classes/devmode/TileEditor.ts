@@ -179,8 +179,8 @@ class TileEditor {
 			const dataValue = v as any;
 			return { dataType, dataValue };
 		})[0];
-		let tempLayer = dataValue.layer;
-		if (map.layers.length > 4 && dataValue.layer >= 2) {
+		let tempLayer = dataType === 'edit' ? dataValue.layer[0] : dataValue.layer;
+		if (map.layers.length > 4 && tempLayer >= 2) {
 			tempLayer++;
 		}
 
@@ -194,7 +194,10 @@ class TileEditor {
 			case 'edit': {
 				//save tile change to taro.game.data.map and taro.map.data
 				const nowValue = dataValue as TileData<'edit'>['edit'];
-				this.putTiles(nowValue.x, nowValue.y, nowValue.selectedTiles, nowValue.size, nowValue.shape, nowValue.layer, true);
+				nowValue.selectedTiles.map((v, idx) => {
+					this.putTiles(nowValue.x, nowValue.y, v, nowValue.size, nowValue.shape, nowValue.layer[idx], true);
+				});
+
 				break;
 			}
 			case 'clear': {
@@ -218,9 +221,11 @@ class TileEditor {
 	 * @param layer layer
 	 * @param local is not, it will send command to other client
 	 */
-	putTiles(tileX: number, tileY: number, selectedTiles: Record<number, Record<number, number>>, brushSize: Vector2D, shape: Shape, layer: number, local?: boolean): void {
+	putTiles(tileX: number, tileY: number, selectedTiles: Record<number, Record<number, number>>, brushSize: Vector2D | 'fitContent', shape: Shape, layer: number, local?: boolean): void {
 		const map = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
-		const sample = this.brushArea.calcSample(selectedTiles, brushSize, shape, true);
+		const calcData = this.brushArea.calcSample(selectedTiles, brushSize, shape, true);
+		const sample = calcData.sample;
+		const size = brushSize === 'fitContent' ? { x: calcData.xLength, y: calcData.yLength } : brushSize;
 		const taroMap = taro.game.data.map;
 		const width = taroMap.width;
 		let tempLayer = layer;
@@ -228,8 +233,8 @@ class TileEditor {
 			tempLayer++;
 		}
 		if (this.gameScene.tilemapLayers[layer].visible && selectedTiles) {
-			for (let x = 0; x < brushSize.x; x++) {
-				for (let y = 0; y < brushSize.y; y++) {
+			for (let x = 0; x < size.x; x++) {
+				for (let y = 0; y < size.y; y++) {
 					if (sample[x] && sample[x][y] !== undefined && DevModeScene.pointerInsideMap(tileX + x, tileY + y, map)) {
 						let index = sample[x][y];
 						if (index !== (map.getTileAt(tileX + x, tileY + y, true, layer)).index &&
@@ -248,8 +253,8 @@ class TileEditor {
 			taro.network.send<'edit'>('editTile', {
 				edit: {
 					size: brushSize,
-					layer,
-					selectedTiles,
+					layer: [layer],
+					selectedTiles: [selectedTiles],
 					x: tileX,
 					y: tileY,
 					shape,

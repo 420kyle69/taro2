@@ -2768,12 +2768,15 @@ var ActionComponent = TaroEntity.extend({
 							} else if (tileY < 0 || tileY >= taro.game.data.map.height) {
 								break;
 							} else {
+								const obj = {};
+								obj[tileX] = {};
+								obj[tileX][tileY] = tileGid;
 								taro.developerMode.editTile({
 									edit: {
-										selectedTiles: { 0: { 0: tileGid } },
-										size: { x: 1, y: 1 },
+										selectedTiles: [obj],
+										size: 'fitContent',
 										shape: 'rectangle',
-										layer: tileLayer,
+										layer: [tileLayer],
 										x: tileX,
 										y: tileY,
 									},
@@ -2809,10 +2812,10 @@ var ActionComponent = TaroEntity.extend({
 							} else {
 								taro.developerMode.editTile({
 									edit: {
-										selectedTiles: { 0: { 0: tileGid } },
+										selectedTiles: [{ 0: { 0: tileGid } }],
 										size: { x: width, y: height },
 										shape: 'rectangle',
-										layer: tileLayer,
+										layer: [tileLayer],
 										x: tileX,
 										y: tileY,
 									},

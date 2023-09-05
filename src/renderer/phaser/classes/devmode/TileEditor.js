@@ -137,6 +137,7 @@ var TileEditor = /** @class */ (function () {
         });
     };
     TileEditor.prototype.edit = function (data) {
+        var _this = this;
         if (JSON.stringify(data) === '{}') {
             throw 'receive: {}';
         }
@@ -149,8 +150,8 @@ var TileEditor = /** @class */ (function () {
             var dataValue = v;
             return { dataType: dataType, dataValue: dataValue };
         })[0], dataType = _a.dataType, dataValue = _a.dataValue;
-        var tempLayer = dataValue.layer;
-        if (map.layers.length > 4 && dataValue.layer >= 2) {
+        var tempLayer = dataType === 'edit' ? dataValue.layer[0] : dataValue.layer;
+        if (map.layers.length > 4 && tempLayer >= 2) {
             tempLayer++;
         }
         switch (dataType) {
@@ -162,8 +163,10 @@ var TileEditor = /** @class */ (function () {
             }
             case 'edit': {
                 //save tile change to taro.game.data.map and taro.map.data
-                var nowValue = dataValue;
-                this.putTiles(nowValue.x, nowValue.y, nowValue.selectedTiles, nowValue.size, nowValue.shape, nowValue.layer, true);
+                var nowValue_1 = dataValue;
+                nowValue_1.selectedTiles.map(function (v, idx) {
+                    _this.putTiles(nowValue_1.x, nowValue_1.y, v, nowValue_1.size, nowValue_1.shape, nowValue_1.layer[idx], true);
+                });
                 break;
             }
             case 'clear': {
@@ -187,7 +190,9 @@ var TileEditor = /** @class */ (function () {
      */
     TileEditor.prototype.putTiles = function (tileX, tileY, selectedTiles, brushSize, shape, layer, local) {
         var map = this.gameScene.tilemap;
-        var sample = this.brushArea.calcSample(selectedTiles, brushSize, shape, true);
+        var calcData = this.brushArea.calcSample(selectedTiles, brushSize, shape, true);
+        var sample = calcData.sample;
+        var size = brushSize === 'fitContent' ? { x: calcData.xLength, y: calcData.yLength } : brushSize;
         var taroMap = taro.game.data.map;
         var width = taroMap.width;
         var tempLayer = layer;
@@ -195,8 +200,8 @@ var TileEditor = /** @class */ (function () {
             tempLayer++;
         }
         if (this.gameScene.tilemapLayers[layer].visible && selectedTiles) {
-            for (var x = 0; x < brushSize.x; x++) {
-                for (var y = 0; y < brushSize.y; y++) {
+            for (var x = 0; x < size.x; x++) {
+                for (var y = 0; y < size.y; y++) {
                     if (sample[x] && sample[x][y] !== undefined && DevModeScene.pointerInsideMap(tileX + x, tileY + y, map)) {
                         var index = sample[x][y];
                         if (index !== (map.getTileAt(tileX + x, tileY + y, true, layer)).index &&
@@ -217,8 +222,8 @@ var TileEditor = /** @class */ (function () {
             taro.network.send('editTile', {
                 edit: {
                     size: brushSize,
-                    layer: layer,
-                    selectedTiles: selectedTiles,
+                    layer: [layer],
+                    selectedTiles: [selectedTiles],
                     x: tileX,
                     y: tileY,
                     shape: shape,

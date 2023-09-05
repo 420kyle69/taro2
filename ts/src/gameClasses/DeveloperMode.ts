@@ -152,6 +152,9 @@ class DeveloperMode {
 				const dataType = k as MapEditToolEnum; return { dataType, dataValue };
 			})[0];
 			const serverData = rfdc()(dataValue);
+			if (dataType === 'edit') {
+				serverData.layer = serverData.layer[0];
+			}
 			if (gameMap.layers.length > 4 && serverData.layer >= 2) serverData.layer++;
 			const width = gameMap.width;
 			switch (dataType) {
@@ -163,8 +166,10 @@ class DeveloperMode {
 				}
 				case 'edit': {
 					//save tile change to taro.game.data.map and taro.map.data
-					const nowValue = serverData as TileData<'edit'>['edit'];
-					this.putTiles(nowValue.x, nowValue.y, nowValue.selectedTiles, nowValue.size, nowValue.shape, nowValue.layer);
+					const nowValue = serverData as Omit<TileData<'edit'>['edit'], 'layer'> & { layer: number };
+					nowValue.selectedTiles.map((v, idx) => {
+						this.putTiles(nowValue.x, nowValue.y, v, nowValue.size, nowValue.shape, nowValue.layer);
+					});
 					break;
 				}
 				case 'clear': {
@@ -188,18 +193,23 @@ class DeveloperMode {
 	 * @param brushSize brush's size
 	 * @param layer map's layer
 	 */
-	putTiles(tileX: number, tileY: number, selectedTiles: Record<number, Record<number, number>>, brushSize: Vector2D, shape: Shape, layer: number): void {
+	putTiles(tileX: number, tileY: number, selectedTiles: Record<number, Record<number, number>>, brushSize: Vector2D | 'fitContent', shape: Shape, layer: number): void {
 		const map = taro.game.data.map;
 		const width = map.width;
-		const sample = this.calcSample(selectedTiles, brushSize, shape);
+		const calcData = this.calcSample(selectedTiles, brushSize, shape);
+		const sample = calcData.sample;
+		let size = brushSize === 'fitContent' ? { x: calcData.xLength, y: calcData.yLength } : brushSize;
+		tileX = brushSize === 'fitContent' ? calcData.minX : tileX;
+		tileY = brushSize === 'fitContent' ? calcData.minY : tileY;
 		if (map.layers[layer]) {
-			for (let x = 0; x < brushSize.x; x++) {
-				for (let y = 0; y < brushSize.y; y++) {
+			for (let x = 0; x < size.x; x++) {
+				for (let y = 0; y < size.y; y++) {
 					if (sample[x] && sample[x][y] !== undefined && this.pointerInsideMap(x + tileX, y + tileY, map)) {
 						let index = sample[x][y];
 						if (index === -1) index = 0;
-						map.layers[layer].data[x + tileX + (y + tileY) * width] = index;
-						taro.map.data.layers[layer].data[x + tileX + (y + tileY) * width] = index;
+						// console.log(x + tileX + (y + tileY) * width, index, layer, map.height, map.width)
+						// map.layers[layer].data[x + tileX + (y + tileY) * width] = index;
+						// taro.map.data.layers[layer].data[x + tileX + (y + tileY) * width] = index;
 					}
 				}
 			}
@@ -217,15 +227,22 @@ class DeveloperMode {
 	 * @param size brush's size
 	 * @returns sample to print
 	 */
-	calcSample(selectedTileArea: Record<number, Record<number, number>>, size: Vector2D, shape?: Shape): Record<number, Record<number, number>> {
+	calcSample(selectedTileArea: Record<number, Record<number, number>>, size: Vector2D | 'fitContent', shape?: Shape): { sample: Record<number, Record<number, number>>, xLength: number, yLength: number, minX: number, minY: number } {
 		const xArray = Object.keys(selectedTileArea);
 		const yArray = Object.values(selectedTileArea).map((object) => Object.keys(object)).flat().sort((a, b) => parseInt(a) - parseInt(b));
 		const minX = parseInt(xArray[0]);
 		const minY = parseInt(yArray[0]);
 		const maxX = parseInt(xArray[xArray.length - 1]);
 		const maxY = parseInt(yArray[yArray.length - 1]);
+		// console.log(selectedTileArea, minX, maxX, minY, maxY);
 		const xLength = maxX - minX + 1;
 		const yLength = maxY - minY + 1;
+		if (size === 'fitContent') {
+			size = {
+				x: xLength,
+				y: yLength
+			};
+		}
 		let tempSample: Record<number, Record<number, number>> = {};
 		switch (shape) {
 			case 'rectangle': {
@@ -241,7 +258,7 @@ class DeveloperMode {
 				break;
 			}
 		}
-		return tempSample;
+		return { sample: tempSample, xLength, yLength, minX, minY };
 	}
 
 
@@ -629,16 +646,22 @@ type MapEditTool = {
 	} & BasicEditProps,
 
 	edit: {
-		size: Vector2D,
-		selectedTiles: Record<number, Record<number, number>>,
+		size: Vector2D | 'fitContent',
+		selectedTiles: Record<number, Record<number, number>>[],
 		shape: Shape,
-	} & BasicEditProps
+		layer: number[]
+	} & Omit<BasicEditProps, 'layer'>
 
 	clear: {
 		layer: number;
 		layerName?: string;
 	}
 }
+
+type MergedType<T> = { [K in keyof T]: T[K] extends object ? MergedType<T[K]> | MergedOperation : MergedOperation; };
+type MergedMethod = 'direct'
+type MergedCalc = 'sum' | 'sub' | 'mul' | 'div' | 'custom'
+type MergedOperation = { method: MergedMethod, calc: MergedCalc }
 
 type MapEditToolEnum = keyof MapEditTool;
 

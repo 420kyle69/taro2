@@ -135,6 +135,7 @@ var DeveloperMode = /** @class */ (function () {
         return this.activeTab && this.activeTab !== 'play';
     };
     DeveloperMode.prototype.editTile = function (data, clientId) {
+        var _this = this;
         // only allow developers to modify the tiles
         if (taro.server.developerClientIds.includes(clientId) || clientId === 'server') {
             if (JSON.stringify(data) === '{}') {
@@ -148,6 +149,9 @@ var DeveloperMode = /** @class */ (function () {
                 return { dataType: dataType, dataValue: dataValue };
             })[0], dataType = _a.dataType, dataValue = _a.dataValue;
             var serverData = rfdc()(dataValue);
+            if (dataType === 'edit') {
+                serverData.layer = serverData.layer[0];
+            }
             if (gameMap.layers.length > 4 && serverData.layer >= 2)
                 serverData.layer++;
             var width = gameMap.width;
@@ -160,8 +164,10 @@ var DeveloperMode = /** @class */ (function () {
                 }
                 case 'edit': {
                     //save tile change to taro.game.data.map and taro.map.data
-                    var nowValue = serverData;
-                    this.putTiles(nowValue.x, nowValue.y, nowValue.selectedTiles, nowValue.size, nowValue.shape, nowValue.layer);
+                    var nowValue_1 = serverData;
+                    nowValue_1.selectedTiles.map(function (v, idx) {
+                        _this.putTiles(nowValue_1.x, nowValue_1.y, v, nowValue_1.size, nowValue_1.shape, nowValue_1.layer);
+                    });
                     break;
                 }
                 case 'clear': {
@@ -186,16 +192,21 @@ var DeveloperMode = /** @class */ (function () {
     DeveloperMode.prototype.putTiles = function (tileX, tileY, selectedTiles, brushSize, shape, layer) {
         var map = taro.game.data.map;
         var width = map.width;
-        var sample = this.calcSample(selectedTiles, brushSize, shape);
+        var calcData = this.calcSample(selectedTiles, brushSize, shape);
+        var sample = calcData.sample;
+        var size = brushSize === 'fitContent' ? { x: calcData.xLength, y: calcData.yLength } : brushSize;
+        tileX = brushSize === 'fitContent' ? calcData.minX : tileX;
+        tileY = brushSize === 'fitContent' ? calcData.minY : tileY;
         if (map.layers[layer]) {
-            for (var x = 0; x < brushSize.x; x++) {
-                for (var y = 0; y < brushSize.y; y++) {
+            for (var x = 0; x < size.x; x++) {
+                for (var y = 0; y < size.y; y++) {
                     if (sample[x] && sample[x][y] !== undefined && this.pointerInsideMap(x + tileX, y + tileY, map)) {
                         var index = sample[x][y];
                         if (index === -1)
                             index = 0;
-                        map.layers[layer].data[x + tileX + (y + tileY) * width] = index;
-                        taro.map.data.layers[layer].data[x + tileX + (y + tileY) * width] = index;
+                        // console.log(x + tileX + (y + tileY) * width, index, layer, map.height, map.width)
+                        // map.layers[layer].data[x + tileX + (y + tileY) * width] = index;
+                        // taro.map.data.layers[layer].data[x + tileX + (y + tileY) * width] = index;
                     }
                 }
             }
@@ -218,8 +229,15 @@ var DeveloperMode = /** @class */ (function () {
         var minY = parseInt(yArray[0]);
         var maxX = parseInt(xArray[xArray.length - 1]);
         var maxY = parseInt(yArray[yArray.length - 1]);
+        // console.log(selectedTileArea, minX, maxX, minY, maxY);
         var xLength = maxX - minX + 1;
         var yLength = maxY - minY + 1;
+        if (size === 'fitContent') {
+            size = {
+                x: xLength,
+                y: yLength
+            };
+        }
         var tempSample = {};
         switch (shape) {
             case 'rectangle': {
@@ -235,7 +253,7 @@ var DeveloperMode = /** @class */ (function () {
                 break;
             }
         }
-        return tempSample;
+        return { sample: tempSample, xLength: xLength, yLength: yLength, minX: minX, minY: minY };
     };
     DeveloperMode.prototype.floodTiles = function (layer, oldTile, newTile, x, y, limits) {
         var _a, _b, _c, _d, _e, _f;
