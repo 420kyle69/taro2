@@ -232,11 +232,11 @@ var ActionComponent = TaroEntity.extend({
 						var url = self._script.variable.getValue(action.url, vars);
 						var varName = self._script.variable.getValue(action.varName, vars);
 
-						var obj = {};
+						var data = {};
 						try {
-							obj = JSON.parse(string);
+							data = JSON.parse(string);
 						} catch (err) {
-							obj = {msg: string};
+							data = {msg: string};
 						}
 
 						// ensure we aren't sending more than 30 POST requests within 10 seconds
@@ -251,14 +251,15 @@ var ActionComponent = TaroEntity.extend({
 
 						taro.server.request.post({
 							url: url,
-							form: obj
+							form: data
 						}, function optionalCallback(err, httpResponse, body) {
 							if (err) {
-								return console.error('upload failed:', err);
+								return self._script.errorLog('upload failed:', err);
 							}
 
 							try {
 								var res = JSON.parse(body);
+
 								var newValue = res.response;
 								params['newValue'] = newValue;
 
@@ -278,7 +279,7 @@ var ActionComponent = TaroEntity.extend({
 								self._entity.script.trigger('onPostResponse', vars);
 
 							} catch (err) {
-								console.error('sendPostRequest', taro.game.data.defaultData.title, url, err);
+								self._script.errorLog('sendPostRequest', taro.game.data.defaultData.title, url, err);
 								if (taro.game.data.variables.hasOwnProperty(varName)) {
 									taro.game.data.variables[varName].value = 'error';
 								}
@@ -715,6 +716,15 @@ var ActionComponent = TaroEntity.extend({
 						if (player && player._stats) {
 							taro.network.send('ui', { command: 'showMenu' }, player._stats.clientId);
 						}
+						break;
+
+					case 'makePlayerSendChatMessage':
+						var player = self._script.variable.getValue(action.player, vars);
+						var message = self._script.variable.getValue(action.message, vars);
+						if (player && player._stats && player._stats.clientId) {
+							taro.chat.sendToRoom('1', message, undefined, player._stats.clientId);
+						}
+						
 						break;
 
 					case 'sendChatMessage':
@@ -2746,7 +2756,7 @@ var ActionComponent = TaroEntity.extend({
 						try {
 							var data = JSON.parse(self._script.variable.getValue(action.string, vars));
 						} catch (err) {
-							console.error(err);
+							self._script.errorLog(err);
 							return;
 						}
 						if (unit && data) {
@@ -2759,7 +2769,7 @@ var ActionComponent = TaroEntity.extend({
 						try {
 							var data = JSON.parse(self._script.variable.getValue(action.string, vars));
 						} catch (err) {
-							console.error(err);
+							self._script.errorLog(err);
 							return;
 						}
 						if (player && data) {
