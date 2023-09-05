@@ -2869,6 +2869,25 @@ var ActionComponent = TaroEntity.extend({
 						}
 						break;
 
+					case 'addElement':
+						var element = self._script.variable.getValue(action.element, vars);
+						var object = self._script.variable.getValue(action.object, vars);
+						var key = self._script.variable.getValue(action.key, vars);
+						if (element && object && key) {
+							object[key] = element;
+						}
+
+						break;
+
+					case 'removeElement': 
+						var object = self._script.variable.getValue(action.object, vars);
+						var key = self._script.variable.getValue(action.key, vars);
+						if (object && key) {
+							delete object[key];
+						}
+
+						break;
+
 					case 'comment':
 						break;
 					default:
