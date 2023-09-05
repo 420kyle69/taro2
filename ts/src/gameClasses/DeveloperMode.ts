@@ -41,7 +41,11 @@ function debounce<Params extends any[]>(
 
 			});
 		} else {
-			mergedData[0] = args;
+			if (Array.isArray(args)) {
+				mergedData = args;
+			} else {
+				mergedData[0] = args;
+			}
 		}
 
 		timer = setTimeout(() => {

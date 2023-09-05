@@ -205,7 +205,7 @@ class TileEditor {
 				this.clearLayer(nowValue.layer);
 			}
 		}
-		if (dataType !== 'edit' && taro.physics && map.layers[tempLayer].name === 'walls') {
+		if (taro.physics && map.layers[tempLayer].name === 'walls') {
 			//if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
 			debounceRecalcPhysics(map, false);
 		}

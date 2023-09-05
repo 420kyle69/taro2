@@ -41,7 +41,12 @@ function debounce(func, timeout, merge) {
             });
         }
         else {
-            mergedData[0] = args;
+            if (Array.isArray(args)) {
+                mergedData = args;
+            }
+            else {
+                mergedData[0] = args;
+            }
         }
         timer = setTimeout(function () {
             func.apply(void 0, mergedData);
