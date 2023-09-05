@@ -27,7 +27,8 @@ var GameComponent = TaroEntity.extend({
 				this[`computer${i}`] = this.createPlayer({
 					name: `AI ${i}`,
 					controlledBy: 'computer',
-					unitIds: [] // all units owned by player
+					unitIds: [], // all units owned by player
+					clientId: i
 				});
 			}
 		} else if (taro.isClient) {
