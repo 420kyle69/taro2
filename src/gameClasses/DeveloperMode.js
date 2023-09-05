@@ -1,5 +1,125 @@
-function debounce(func, timeout, merge) {
-    if (merge === void 0) { merge = false; }
+function setOjbect(oldOjbect, newObject) {
+    Object.keys(newObject).map(function (k) {
+        if (!oldOjbect[k]) {
+            oldOjbect[k] = {};
+        }
+        if (typeof newObject[k] === 'object') {
+            setOjbect(oldOjbect[k], newObject[k]);
+        }
+        else {
+            oldOjbect[k] = newObject[k];
+        }
+    });
+}
+function merge(oldData, newData, templete) {
+    Object.entries(templete).map(function (_a) {
+        var k = _a[0], v = _a[1];
+        if (!v.calc && typeof v === 'object') {
+            if (!oldData[k]) {
+                oldData[k] = {};
+            }
+            // console.log(oldData[k], newData[k], templete[k] as MergedTemplete<any>)
+            merge(oldData[k], newData[k], templete[k]);
+            return;
+        }
+        if (!oldData[k] && v.calc !== 'init') {
+            switch (typeof newData[k]) {
+                case 'string': {
+                    oldData[k] = '';
+                    break;
+                }
+                case 'number': {
+                    oldData[k] = 0;
+                    break;
+                }
+                case 'object': {
+                    oldData[k] = Array.isArray(newData[k]) ? [] : {};
+                    break;
+                }
+            }
+        }
+        if (typeof v.calc === 'function') {
+            v.calc(oldData, newData, oldData[k]);
+        }
+        else {
+            switch (v.calc) {
+                case 'init': {
+                    if (oldData[k] === undefined) {
+                        oldData[k] = newData[k];
+                    }
+                    break;
+                }
+                case 'set': {
+                    oldData[k] = newData[k];
+                    break;
+                }
+                case 'smartSet': {
+                    if (typeof newData[k] === 'object') {
+                        setOjbect(oldData[k], newData[k]);
+                    }
+                    else {
+                        oldData[k] = newData[k];
+                    }
+                    break;
+                }
+                case 'sum': {
+                    switch (v.method) {
+                        case 'direct': {
+                            oldData[k] += newData[k];
+                            break;
+                        }
+                        case 'array': {
+                            // console.log('oldData', oldData[k], k)
+                            newData[k].map(function (v) {
+                                if (!oldData[k].includes(v)) {
+                                    oldData[k].push(v);
+                                }
+                            });
+                        }
+                    }
+                    break;
+                }
+                case 'div': {
+                    oldData[k] /= newData[k];
+                    break;
+                }
+                case 'sub': {
+                    oldData[k] -= newData[k];
+                    break;
+                }
+                case 'mul': {
+                    oldData[k] *= newData[k];
+                    break;
+                }
+            }
+        }
+        return oldData;
+    });
+}
+var mergedTemplete = {
+    edit: {
+        size: { calc: 'set', method: 'direct' },
+        selectedTiles: {
+            calc: function (oldData, newData, nowData) {
+                var _a;
+                // console.log(oldData, newData, nowData);
+                var newLayer = newData.layer[0];
+                if (!((_a = oldData.layer) === null || _a === void 0 ? void 0 : _a.includes(newLayer))) {
+                    nowData.push.apply(nowData, newData.selectedTiles);
+                }
+                else {
+                    var idx = oldData.layer.findIndex(function (v) { return v === newLayer; });
+                    setOjbect(nowData[idx], newData.selectedTiles[0]);
+                }
+            }, method: 'direct'
+        },
+        shape: { calc: 'set', method: 'direct' },
+        layer: { calc: 'sum', method: 'array' },
+        x: { calc: 'init', method: 'direct' },
+        y: { calc: 'init', method: 'direct' },
+    }
+};
+function debounce(func, timeout, mergedTemplete) {
     var timer;
     var mergedData = [{}];
     return function () {
@@ -8,36 +128,9 @@ function debounce(func, timeout, merge) {
             args[_i] = arguments[_i];
         }
         clearTimeout(timer);
-        if (merge) {
-            var keys_1 = Object.keys(mergedData);
+        if (mergedTemplete) {
             args.map(function (v, idx) {
-                switch (typeof v) {
-                    case 'object': {
-                        Object.keys(v).map(function (key) {
-                            if (!mergedData[0][key]) {
-                                switch (typeof v[key]) {
-                                    case 'string': {
-                                        mergedData[0][key] = '';
-                                        break;
-                                    }
-                                    case 'number': {
-                                        mergedData[0][key] = 0;
-                                        break;
-                                    }
-                                    case 'object': {
-                                        mergedData[0][key] = {};
-                                        break;
-                                    }
-                                }
-                            }
-                            mergedData[0][key] += v[key];
-                        });
-                        break;
-                    }
-                    default: {
-                        mergedData[0][keys_1[idx]] += v;
-                    }
-                }
+                merge(mergedData[0], v, mergedTemplete);
             });
         }
         else {
@@ -50,12 +143,14 @@ function debounce(func, timeout, merge) {
         }
         timer = setTimeout(function () {
             func.apply(void 0, mergedData);
+            mergedData = [{}];
         }, timeout);
     };
 }
 function mergeEditTileActions(data) {
     taro.network.send('editTile', data);
 }
+var debounceEditTileSend = debounce(mergeEditTileActions, 0, mergedTemplete);
 function recalcWallsPhysics(gameMap, forPathFinding) {
     taro.physics.destroyWalls();
     var map = taro.scaleMap(rfdc()(gameMap));
@@ -147,7 +242,6 @@ var DeveloperMode = /** @class */ (function () {
                 throw 'receive: {}';
             }
             var gameMap = taro.game.data.map;
-            taro.network.send('editTile', data);
             var _a = Object.entries(data).map(function (_a) {
                 var k = _a[0], dataValue = _a[1];
                 var dataType = k;
@@ -156,6 +250,10 @@ var DeveloperMode = /** @class */ (function () {
             var serverData = rfdc()(dataValue);
             if (dataType === 'edit') {
                 serverData.layer = serverData.layer[0];
+                debounceEditTileSend(data);
+            }
+            else {
+                taro.network.send('editTile', data);
             }
             if (gameMap.layers.length > 4 && serverData.layer >= 2)
                 serverData.layer++;

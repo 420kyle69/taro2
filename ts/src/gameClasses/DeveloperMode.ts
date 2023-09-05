@@ -1,44 +1,136 @@
+function setOjbect(oldOjbect: { [key: string]: any }, newObject: { [key: string]: any }) {
+	Object.keys(newObject).map((k) => {
+		if (!oldOjbect[k]) {
+			oldOjbect[k] = {};
+		}
+		if (typeof newObject[k] === 'object') {
+			setOjbect(oldOjbect[k], newObject[k]);
+		} else {
+			oldOjbect[k] = newObject[k];
+		}
+	});
+}
+
+function merge(oldData: any, newData: any, templete: MergedTemplete<any>) {
+	Object.entries(templete).map(([k, v]) => {
+		if (!v.calc && typeof v === 'object') {
+			if (!oldData[k]) {
+				oldData[k] = {};
+			}
+			// console.log(oldData[k], newData[k], templete[k] as MergedTemplete<any>)
+			merge(oldData[k], newData[k], templete[k] as MergedTemplete<any>);
+			return;
+		}
+		if (!oldData[k] && v.calc !== 'init') {
+			switch (typeof newData[k]) {
+				case 'string': {
+					oldData[k] = '';
+					break;
+				}
+				case 'number': {
+					oldData[k] = 0;
+					break;
+				}
+				case 'object': {
+					oldData[k] = Array.isArray(newData[k]) ? [] : {};
+					break;
+				}
+			}
+		}
+		if (typeof v.calc === 'function') {
+			v.calc(oldData, newData, oldData[k]);
+		} else {
+			switch (v.calc) {
+				case 'init': {
+					if (oldData[k] === undefined) {
+						oldData[k] = newData[k];
+					}
+					break;
+				}
+				case 'set': {
+					oldData[k] = newData[k];
+					break;
+				}
+				case 'smartSet': {
+					if (typeof newData[k] === 'object') {
+						setOjbect(oldData[k], newData[k]);
+					} else {
+						oldData[k] = newData[k];
+					}
+					break;
+				}
+				case 'sum': {
+					switch (v.method) {
+						case 'direct': {
+							oldData[k] += newData[k];
+							break;
+						}
+						case 'array': {
+							// console.log('oldData', oldData[k], k)
+							newData[k].map((v: any) => {
+								if (!oldData[k].includes(v)) {
+									oldData[k].push(v);
+								}
+							});
+
+						}
+					}
+					break;
+				}
+				case 'div': {
+					oldData[k] /= newData[k];
+					break;
+				}
+				case 'sub': {
+					oldData[k] -= newData[k];
+					break;
+				}
+				case 'mul': {
+					oldData[k] *= newData[k];
+					break;
+				}
+			}
+		}
+
+
+		return oldData;
+	});
+}
+
+const mergedTemplete: MergedTemplete<TileData<'edit'>> = {
+	edit: {
+		size: { calc: 'set', method: 'direct' },
+		selectedTiles: {
+			calc: (oldData: TileData<'edit'>['edit'], newData: TileData<'edit'>['edit'], nowData: [Record<number, Record<number, number>>]) => {
+				// console.log(oldData, newData, nowData);
+				const newLayer = newData.layer[0]
+				if (!oldData.layer?.includes(newLayer)) {
+					nowData.push(...newData.selectedTiles)
+				} else {
+					const idx = oldData.layer.findIndex((v) => v === newLayer)
+					setOjbect(nowData[idx], newData.selectedTiles[0])
+				}
+			}, method: 'direct'
+		},
+		shape: { calc: 'set', method: 'direct' },
+		layer: { calc: 'sum', method: 'array' },
+		x: { calc: 'init', method: 'direct' },
+		y: { calc: 'init', method: 'direct' },
+	}
+}
+
 function debounce<Params extends any[]>(
 	func: (...args: Params) => any,
 	timeout: number,
-	merge = false,
+	mergedTemplete?: MergedTemplete<any>,
 ): (...args: Params) => void {
 	let timer: NodeJS.Timeout;
 	let mergedData: any = [{}];
 	return function (...args: Params) {
 		clearTimeout(timer);
-		if (merge) {
-			const keys = Object.keys(mergedData);
+		if (mergedTemplete) {
 			args.map((v, idx) => {
-				switch (typeof v) {
-					case 'object': {
-						Object.keys(v).map((key) => {
-							if (!mergedData[0][key]) {
-								switch (typeof v[key]) {
-									case 'string': {
-										mergedData[0][key] = '';
-										break;
-									}
-									case 'number': {
-										mergedData[0][key] = 0;
-										break;
-									}
-									case 'object': {
-										mergedData[0][key] = {};
-										break;
-									}
-								}
-							}
-
-							mergedData[0][key] += v[key];
-						});
-						break;
-					}
-					default: {
-						mergedData[0][keys[idx]] += v;
-					}
-				}
-
+				merge(mergedData[0], v, mergedTemplete);
 			});
 		} else {
 			if (Array.isArray(args)) {
@@ -50,6 +142,7 @@ function debounce<Params extends any[]>(
 
 		timer = setTimeout(() => {
 			func(...mergedData);
+			mergedData = [{}];
 		}, timeout);
 	};
 }
@@ -57,6 +150,8 @@ function debounce<Params extends any[]>(
 function mergeEditTileActions(data: TileData<'edit'>) {
 	taro.network.send('editTile', data);
 }
+
+const debounceEditTileSend = debounce(mergeEditTileActions, 0, mergedTemplete);
 
 function recalcWallsPhysics(gameMap: MapData, forPathFinding: boolean) {
 	taro.physics.destroyWalls();
@@ -144,6 +239,7 @@ class DeveloperMode {
 		return this.activeTab && this.activeTab !== 'play';
 	}
 
+
 	editTile<T extends MapEditToolEnum>(data: TileData<T>, clientId: string): void {
 		// only allow developers to modify the tiles
 		if (taro.server.developerClientIds.includes(clientId) || clientId === 'server') {
@@ -151,13 +247,16 @@ class DeveloperMode {
 				throw 'receive: {}';
 			}
 			const gameMap = taro.game.data.map;
-			taro.network.send('editTile', data);
+
 			const { dataType, dataValue } = Object.entries(data).map(([k, dataValue]) => {
 				const dataType = k as MapEditToolEnum; return { dataType, dataValue };
 			})[0];
 			const serverData = rfdc()(dataValue);
 			if (dataType === 'edit') {
 				serverData.layer = serverData.layer[0];
+				debounceEditTileSend(data as TileData<'edit'>);
+			} else {
+				taro.network.send('editTile', data);
 			}
 			if (gameMap.layers.length > 4 && serverData.layer >= 2) serverData.layer++;
 			const width = gameMap.width;
@@ -662,9 +761,9 @@ type MapEditTool = {
 	}
 }
 
-type MergedType<T> = { [K in keyof T]: T[K] extends object ? MergedType<T[K]> | MergedOperation : MergedOperation; };
-type MergedMethod = 'direct'
-type MergedCalc = 'sum' | 'sub' | 'mul' | 'div' | 'custom'
+type MergedTemplete<T> = { [K in keyof T]: T[K] extends object ? MergedTemplete<T[K]> | MergedOperation : MergedOperation; };
+type MergedMethod = 'direct' | 'array'
+type MergedCalc = 'set' | 'sum' | 'sub' | 'mul' | 'div' | 'smartSet' | 'init' | ((oldData: any, newData: any, nowData: any) => any)
 type MergedOperation = { method: MergedMethod, calc: MergedCalc }
 
 type MapEditToolEnum = keyof MapEditTool;
