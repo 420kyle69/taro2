@@ -158,7 +158,7 @@ var ItemUiComponent = TaroEntity.extend({
 				}
 
 				var img = itemStats.inventoryImage || (itemStats.cellSheet ? itemStats.cellSheet.url : '');
-				var mobileClass = taro.isMobile ? 'height:17px;max-width:20px;object-fit:contain' : 'height:30px;max-width:27px;object-fit:contain';
+				var mobileClass = taro.isMobile ? 'height:30px;max-width:27px;object-fit:contain' : 'height:30px;max-width:27px;object-fit:contain';
 				var isTrading = options.isTrading;
 				if (img) {
 					var itemDiv = $('<div/>', {
