@@ -2144,6 +2144,16 @@ var VariableComponent = TaroEntity.extend({
 				return `${stringA}${stringB}`;
 			},
 
+			/* number */
+
+			'elementCount': function (text, vars) {
+				var object = self.getValue(text.object, vars);
+				if (object) {
+					return Object.keys(object).length;
+				}
+				return undefined;
+			},
+
 			/* player */
 
 			'getTriggeringPlayer': function (text, vars) {
