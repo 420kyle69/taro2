@@ -11,14 +11,13 @@ function setOjbect(oldOjbect: { [key: string]: any }, newObject: { [key: string]
 	});
 }
 
-function merge(oldData: any, newData: any, templete: MergedTemplete<any>) {
-	Object.entries(templete).map(([k, v]) => {
+function merge(oldData: any, newData: any, template: MergedTemplate<any>) {
+	Object.entries(template).map(([k, v]) => {
 		if (!v.calc && typeof v === 'object') {
 			if (!oldData[k]) {
 				oldData[k] = {};
 			}
-			// console.log(oldData[k], newData[k], templete[k] as MergedTemplete<any>)
-			merge(oldData[k], newData[k], templete[k] as MergedTemplete<any>);
+			merge(oldData[k], newData[k], template[k] as MergedTemplate<any>);
 			return;
 		}
 		if (!oldData[k] && v.calc !== 'init') {
@@ -97,7 +96,7 @@ function merge(oldData: any, newData: any, templete: MergedTemplete<any>) {
 	});
 }
 
-const mergedTemplete: MergedTemplete<TileData<'edit'>> = {
+const mergedTemplate: MergedTemplate<TileData<'edit'>> = {
 	edit: {
 		size: { calc: 'set', method: 'direct' },
 		selectedTiles: {
@@ -122,15 +121,15 @@ const mergedTemplete: MergedTemplete<TileData<'edit'>> = {
 function debounce<Params extends any[]>(
 	func: (...args: Params) => any,
 	timeout: number,
-	mergedTemplete?: MergedTemplete<any>,
+	mergedTemplate?: MergedTemplate<any>,
 ): (...args: Params) => void {
 	let timer: NodeJS.Timeout;
 	let mergedData: any = [{}];
 	return function (...args: Params) {
 		clearTimeout(timer);
-		if (mergedTemplete) {
+		if (mergedTemplate) {
 			args.map((v, idx) => {
-				merge(mergedData[0], v, mergedTemplete);
+				merge(mergedData[0], v, mergedTemplate);
 			});
 		} else {
 			if (Array.isArray(args)) {
@@ -151,7 +150,7 @@ function mergeEditTileActions(data: TileData<'edit'>) {
 	taro.network.send('editTile', data);
 }
 
-const debounceEditTileSend = debounce(mergeEditTileActions, 0, mergedTemplete);
+const debounceEditTileSend = debounce(mergeEditTileActions, 0, mergedTemplate);
 
 function recalcWallsPhysics(gameMap: MapData, forPathFinding: boolean) {
 	taro.physics.destroyWalls();
@@ -761,7 +760,12 @@ type MapEditTool = {
 	}
 }
 
-type MergedTemplete<T> = { [K in keyof T]: T[K] extends object ? MergedTemplete<T[K]> | MergedOperation : MergedOperation; };
+/**
+ * MergedTemplate
+ * a
+ * @experimental
+ */
+type MergedTemplate<T> = { [K in keyof T]: T[K] extends object ? MergedTemplate<T[K]> | MergedOperation : MergedOperation; };
 type MergedMethod = 'direct' | 'array'
 type MergedCalc = 'set' | 'sum' | 'sub' | 'mul' | 'div' | 'smartSet' | 'init' | ((oldData: any, newData: any, nowData: any) => any)
 type MergedOperation = { method: MergedMethod, calc: MergedCalc }

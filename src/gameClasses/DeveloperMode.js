@@ -11,15 +11,14 @@ function setOjbect(oldOjbect, newObject) {
         }
     });
 }
-function merge(oldData, newData, templete) {
-    Object.entries(templete).map(function (_a) {
+function merge(oldData, newData, template) {
+    Object.entries(template).map(function (_a) {
         var k = _a[0], v = _a[1];
         if (!v.calc && typeof v === 'object') {
             if (!oldData[k]) {
                 oldData[k] = {};
             }
-            // console.log(oldData[k], newData[k], templete[k] as MergedTemplete<any>)
-            merge(oldData[k], newData[k], templete[k]);
+            merge(oldData[k], newData[k], template[k]);
             return;
         }
         if (!oldData[k] && v.calc !== 'init') {
@@ -96,7 +95,7 @@ function merge(oldData, newData, templete) {
         return oldData;
     });
 }
-var mergedTemplete = {
+var mergedTemplate = {
     edit: {
         size: { calc: 'set', method: 'direct' },
         selectedTiles: {
@@ -119,7 +118,7 @@ var mergedTemplete = {
         y: { calc: 'init', method: 'direct' },
     }
 };
-function debounce(func, timeout, mergedTemplete) {
+function debounce(func, timeout, mergedTemplate) {
     var timer;
     var mergedData = [{}];
     return function () {
@@ -128,9 +127,9 @@ function debounce(func, timeout, mergedTemplete) {
             args[_i] = arguments[_i];
         }
         clearTimeout(timer);
-        if (mergedTemplete) {
+        if (mergedTemplate) {
             args.map(function (v, idx) {
-                merge(mergedData[0], v, mergedTemplete);
+                merge(mergedData[0], v, mergedTemplate);
             });
         }
         else {
@@ -150,7 +149,7 @@ function debounce(func, timeout, mergedTemplete) {
 function mergeEditTileActions(data) {
     taro.network.send('editTile', data);
 }
-var debounceEditTileSend = debounce(mergeEditTileActions, 0, mergedTemplete);
+var debounceEditTileSend = debounce(mergeEditTileActions, 0, mergedTemplate);
 function recalcWallsPhysics(gameMap, forPathFinding) {
     taro.physics.destroyWalls();
     var map = taro.scaleMap(rfdc()(gameMap));
