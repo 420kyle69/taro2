@@ -56,8 +56,8 @@ class EntitiesToRender {
 				if (ownerUnit) {
 
 					// if the ownerUnit is not visible, then hide the item
-					if (ownerUnit.phaserEntity && ownerUnit.phaserEntity.gameObject.visible == false) {
-						ownerUnit.phaserEntity.setVisible(false);
+					if (ownerUnit.phaserEntity?.gameObject?.visible == false) {
+						ownerUnit.phaserEntity.gameObject.setVisible(false);
 						continue;
 					}
 					
