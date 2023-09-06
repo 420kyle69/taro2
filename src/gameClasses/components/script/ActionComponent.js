@@ -232,13 +232,6 @@ var ActionComponent = TaroEntity.extend({
 						var url = self._script.variable.getValue(action.url, vars);
 						var varName = self._script.variable.getValue(action.varName, vars);
 
-						var data = {};
-						try {
-							data = JSON.parse(string);
-						} catch (err) {
-							data = {msg: string};
-						}
-
 						// ensure we aren't sending more than 30 POST requests within 10 seconds
 						taro.server.postReqTimestamps.push(taro.currentTime());
 						var oldestReqTimestamp = taro.server.postReqTimestamps[0]
@@ -251,14 +244,14 @@ var ActionComponent = TaroEntity.extend({
 
 						taro.server.request.post({
 							url: url,
-							form: data
+							form: string
 						}, function optionalCallback(err, httpResponse, body) {
 							if (err) {
-								return self._script.errorLog('upload failed:', err);
+								return self._script.errorLog('sending POST failed:', err);
 							}
 
 							try {
-								var res = JSON.parse(body);
+								var res = JSON.parse(body.replace(/\\"|""/g, '"'));
 
 								var newValue = res.response;
 								params['newValue'] = newValue;
@@ -278,8 +271,8 @@ var ActionComponent = TaroEntity.extend({
 
 								self._entity.script.trigger('onPostResponse', vars);
 
-							} catch (err) {
-								self._script.errorLog('sendPostRequest', taro.game.data.defaultData.title, url, err);
+							} catch (errorMsg) {
+								self._script.errorLog('sendPostRequest', taro.game.data.defaultData.title, url, errorMsg);
 								if (taro.game.data.variables.hasOwnProperty(varName)) {
 									taro.game.data.variables[varName].value = 'error';
 								}
@@ -2879,12 +2872,13 @@ var ActionComponent = TaroEntity.extend({
 						}
 						break;
 
-					case 'addElement':
-						var element = self._script.variable.getValue(action.element, vars);
-						var object = self._script.variable.getValue(action.object, vars);
+					case 'addStringElement':
 						var key = self._script.variable.getValue(action.key, vars);
-						if (element && object && key) {
-							object[key] = element;
+						var value = self._script.variable.getValue(action.value, vars);
+						var object = self._script.variable.getValue(action.object, vars);
+						
+						if (value && object && key) {
+							object[key] = value;
 						}
 
 						break;

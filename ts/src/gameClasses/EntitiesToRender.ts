@@ -55,6 +55,12 @@ class EntitiesToRender {
 				// if item is being carried by a unit
 				if (ownerUnit) {
 
+					// if the ownerUnit is not visible, then hide the item
+					if (ownerUnit.phaserEntity && ownerUnit.phaserEntity.gameObject.visible == false) {
+						ownerUnit.phaserEntity.setVisible(false);
+						continue;
+					}
+					
 					// update ownerUnit's transform, so the item can be positioned relative to the ownerUnit's transform
 					ownerUnit._processTransform();
 
@@ -87,12 +93,7 @@ class EntitiesToRender {
 				if (entity.tween?.isTweening ||
 					entity.isTransforming() ||
 					entity == taro.client.selectedUnit ||
-					(
-						entity._category == 'item' && (
-							ownerUnit == taro.client.selectedUnit ||					
-							ownerUnit?.isTransforming()					
-						)
-					)					
+					entity._category == 'item'	
 				) {
 					// var timeStart = performance.now();
 					entity.transformTexture(x, y, rotate);
