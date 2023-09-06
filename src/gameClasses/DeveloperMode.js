@@ -1,3 +1,8 @@
+/**
+ * recursively set object parameters
+ * @param oldOjbect
+ * @param newObject
+ */
 function setOjbect(oldOjbect, newObject) {
     Object.keys(newObject).map(function (k) {
         if (!oldOjbect[k]) {
@@ -11,6 +16,12 @@ function setOjbect(oldOjbect, newObject) {
         }
     });
 }
+/**
+ * merge the oldData with newData using template
+ * @param oldData
+ * @param newData
+ * @param template
+ */
 function merge(oldData, newData, template) {
     Object.entries(template).map(function (_a) {
         var k = _a[0], v = _a[1];

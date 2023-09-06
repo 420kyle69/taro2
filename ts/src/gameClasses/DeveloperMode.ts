@@ -1,3 +1,8 @@
+/**
+ * recursively set object parameters
+ * @param oldOjbect
+ * @param newObject
+ */
 function setOjbect(oldOjbect: { [key: string]: any }, newObject: { [key: string]: any }) {
 	Object.keys(newObject).map((k) => {
 		if (!oldOjbect[k]) {
@@ -11,6 +16,12 @@ function setOjbect(oldOjbect: { [key: string]: any }, newObject: { [key: string]
 	});
 }
 
+/**
+ * merge the oldData with newData using template
+ * @param oldData
+ * @param newData
+ * @param template
+ */
 function merge(oldData: any, newData: any, template: MergedTemplate<any>) {
 	Object.entries(template).map(([k, v]) => {
 		if (!v.calc && typeof v === 'object') {
@@ -102,12 +113,12 @@ const mergedTemplate: MergedTemplate<TileData<'edit'>> = {
 		selectedTiles: {
 			calc: (oldData: TileData<'edit'>['edit'], newData: TileData<'edit'>['edit'], nowData: [Record<number, Record<number, number>>]) => {
 				// console.log(oldData, newData, nowData);
-				const newLayer = newData.layer[0]
+				const newLayer = newData.layer[0];
 				if (!oldData.layer?.includes(newLayer)) {
-					nowData.push(...newData.selectedTiles)
+					nowData.push(...newData.selectedTiles);
 				} else {
-					const idx = oldData.layer.findIndex((v) => v === newLayer)
-					setOjbect(nowData[idx], newData.selectedTiles[0])
+					const idx = oldData.layer.findIndex((v) => v === newLayer);
+					setOjbect(nowData[idx], newData.selectedTiles[0]);
 				}
 			}, method: 'direct'
 		},
@@ -116,7 +127,7 @@ const mergedTemplate: MergedTemplate<TileData<'edit'>> = {
 		x: { calc: 'init', method: 'direct' },
 		y: { calc: 'init', method: 'direct' },
 	}
-}
+};
 
 function debounce<Params extends any[]>(
 	func: (...args: Params) => any,
@@ -762,11 +773,58 @@ type MapEditTool = {
 
 /**
  * MergedTemplate
- * a
+ * a template for merging data in debounce func to improve performance
+ *
  * @experimental
+ *
+ * @example
+ * if u want to let debounce func auto merged input data, u need to give it a template to tell it how to handle it.
+ *
+ * const mergedTemplate: MergedTemplate<TileData<'edit'>> = {
+	edit: {
+		size: { calc: 'set', method: 'direct' },
+		selectedTiles: {
+			calc: (oldData: TileData<'edit'>['edit'], newData: TileData<'edit'>['edit'], nowData: [Record<number, Record<number, number>>]) => {
+				// console.log(oldData, newData, nowData);
+				const newLayer = newData.layer[0]
+				if (!oldData.layer?.includes(newLayer)) {
+					nowData.push(...newData.selectedTiles)
+				} else {
+					const idx = oldData.layer.findIndex((v) => v === newLayer)
+					setOjbect(nowData[idx], newData.selectedTiles[0])
+				}
+			}, method: 'direct'
+		},
+		shape: { calc: 'set', method: 'direct' },
+		layer: { calc: 'sum', method: 'array' },
+		x: { calc: 'init', method: 'direct' },
+		y: { calc: 'init', method: 'direct' },
+	}
+};
+ * @see debounce
+ *
  */
 type MergedTemplate<T> = { [K in keyof T]: T[K] extends object ? MergedTemplate<T[K]> | MergedOperation : MergedOperation; };
+
+/**
+ * if 'direct', then it will direct do something to the original object
+ *
+ * if 'array', then it will handle it as array to push or do other things
+ * @see debounce
+ */
 type MergedMethod = 'direct' | 'array'
+
+/**
+ * 'set' will auto set the value
+ *
+ * 'sum' will add the old value with new value
+ *
+ * ...
+ *
+ * 'smartSet' is for object, if a = {0: {0: 1 }}, b = {1: {0: 1}}, the mergedObj will be {0: {0: 1 }, 1: {0: 1}}, not {1: {0: 1}} directly
+ *
+ * 'init' will only set it once
+ */
 type MergedCalc = 'set' | 'sum' | 'sub' | 'mul' | 'div' | 'smartSet' | 'init' | ((oldData: any, newData: any, nowData: any) => any)
 type MergedOperation = { method: MergedMethod, calc: MergedCalc }
 
