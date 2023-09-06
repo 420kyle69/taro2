@@ -246,30 +246,35 @@ var ActionComponent = TaroEntity.extend({
 							url: url,
 							form: string
 						}, function optionalCallback(err, httpResponse, body) {
-
-							if (err) {
-								throw new Error('sending POST failed:' + err);
+							// try+catch must be redeclared inside callback otherwise an error will crash the process
+							try {
+								if (err) {
+									throw new Error('sending POST failed:' + err);
+								}
+								
+								var res = JSON.parse(body.replace(/\\"|""/g, '"'));
+	
+								var newValue = res.response;
+								params['newValue'] = newValue;
+	
+								if (taro.game.data.variables.hasOwnProperty(varName)) {
+									taro.game.data.variables[varName].value = newValue;
+								}
+	
+								taro.game.lastReceivedPostResponse = res;
+								taro.game.lastUpdatedVariableName = varName;
+								
+								var vars = {}
+								if (["unit", "item", "projectile"].includes(self._entity._category)) {
+									var key = self._entity._category + 'Id';
+									vars = { [key]: self._entity.id() }
+								}
+	
+								self._entity.script.trigger('onPostResponse', vars);
+							} catch (e) {
+								throw new Error(e);
 							}
 							
-							var res = JSON.parse(body.replace(/\\"|""/g, '"'));
-
-							var newValue = res.response;
-							params['newValue'] = newValue;
-
-							if (taro.game.data.variables.hasOwnProperty(varName)) {
-								taro.game.data.variables[varName].value = newValue;
-							}
-
-							taro.game.lastReceivedPostResponse = res;
-							taro.game.lastUpdatedVariableName = varName;
-							
-							var vars = {}
-							if (["unit", "item", "projectile"].includes(self._entity._category)) {
-								var key = self._entity._category + 'Id';
-								vars = { [key]: self._entity.id() }
-							}
-
-							self._entity.script.trigger('onPostResponse', vars);
 						});
 
 						break;
