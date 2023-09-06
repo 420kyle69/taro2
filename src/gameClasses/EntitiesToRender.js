@@ -29,21 +29,6 @@ var EntitiesToRender = /** @class */ (function () {
                 var ownerUnit = undefined;
                 if (entity._category == 'item') {
                     ownerUnit = entity.getOwnerUnit();
-                    // dont render item carried by culled unit
-                    if (ownerUnit) {
-                        // if ownerUnit is invisible, hide the item
-                        if (!((_c = (_b = ownerUnit === null || ownerUnit === void 0 ? void 0 : ownerUnit.phaserEntity) === null || _b === void 0 ? void 0 : _b.gameObject) === null || _c === void 0 ? void 0 : _c.visible)) {
-                            if (phaserEntity === null || phaserEntity === void 0 ? void 0 : phaserEntity.visible) {
-                                phaserEntity.setVisible(false);
-                            }
-                            continue;
-                        }
-                        else { // ownerUnit is visible. make this item visible as well
-                            if (!(phaserEntity === null || phaserEntity === void 0 ? void 0 : phaserEntity.visible)) {
-                                phaserEntity.setVisible(true);
-                            }
-                        }
-                    }
                 }
                 if (entity.isTransforming()) {
                     entity._processTransform();
@@ -55,6 +40,11 @@ var EntitiesToRender = /** @class */ (function () {
                 }
                 // if item is being carried by a unit
                 if (ownerUnit) {
+                    // if the ownerUnit is not visible, then hide the item
+                    if (((_c = (_b = ownerUnit.phaserEntity) === null || _b === void 0 ? void 0 : _b.gameObject) === null || _c === void 0 ? void 0 : _c.visible) == false) {
+                        ownerUnit.phaserEntity.gameObject.setVisible(false);
+                        continue;
+                    }
                     // update ownerUnit's transform, so the item can be positioned relative to the ownerUnit's transform
                     ownerUnit._processTransform();
                     // var timeStart = performance.now();
@@ -83,8 +73,7 @@ var EntitiesToRender = /** @class */ (function () {
                 if (((_g = entity.tween) === null || _g === void 0 ? void 0 : _g.isTweening) ||
                     entity.isTransforming() ||
                     entity == taro.client.selectedUnit ||
-                    (entity._category == 'item' && (ownerUnit == taro.client.selectedUnit ||
-                        (ownerUnit === null || ownerUnit === void 0 ? void 0 : ownerUnit.isTransforming())))) {
+                    entity._category == 'item') {
                     // var timeStart = performance.now();
                     entity.transformTexture(x, y, rotate);
                     // taro.profiler.logTimeElapsed('transformTexture', timeStart);

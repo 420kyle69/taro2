@@ -1364,8 +1364,6 @@ var TaroEngine = TaroEntity.extend({
 			}
 			window.updateNextStatsEverySecond && window.updateNextStatsEverySecond({ fps: self._renderFPS });
 
-			// taro.profiler.printResults();
-			
 		}
 
 		// Zero out counters
@@ -1746,12 +1744,18 @@ var TaroEngine = TaroEntity.extend({
 				}
 			}
 
+			if (taro.profiler.isEnabled) {
+				taro.profiler.logTick(self._tickDelta);
+			}
+
+
 			// Record the lastTick value so we can
 			// calculate delta on the next tick
 			self.lastTick = self._tickStart;
 			self._dpf = self._drawCount;
 			self._drawCount = 0;
 
+			
 			taro.network.stream._sendQueue(timeStamp);
 			taro.network.stream._sendQueuedStreamData();
 		}

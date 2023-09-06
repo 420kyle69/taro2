@@ -351,7 +351,6 @@ var Item = TaroEntityPhysics.extend({
 										x: Math.cos(rotate + Math.radians(-90)) * self._stats.bulletForce,
 										y: Math.sin(rotate + Math.radians(-90)) * self._stats.bulletForce,
 									};
-
 									// we don't create a Projectile entity for raycasts
 									if (this._stats.bulletType !== 'raycast') {
 										self.projectileData = taro.game.cloneAsset('projectileTypes', self._stats.projectileType);
@@ -370,7 +369,7 @@ var Item = TaroEntityPhysics.extend({
 													unitAttributes: this._stats.damage.unitAttributes,
 													playerAttributes: this._stats.damage.playerAttributes
 												},
-												streamMode: this._stats.projectileStreamMode
+												streamMode: this._stats.projectileStreamMode || 0 // editor incorrectly sets streamMode to undefined when item CSP is on
 											});
 										var projectile = new Projectile(projectileData);
 										projectile.script.trigger('entityCreated');
@@ -1109,7 +1108,7 @@ var Item = TaroEntityPhysics.extend({
 						// if the item's CSP is enabled, ignore server-stream so my item use won't fire two bullets
 						if (taro.isClient) {
 							// ignore server-stream if client isn't running physics or if projectileStreamMode is 0 (client-side projectile)
-							if (owner == taro.client.selectedUnit && taro.physics && this._stats.projectileStreamMode == 0) {
+							if (owner == taro.client.selectedUnit && taro.physics && !this._stats.projectileStreamMode) {
 								break;
 							}
 							this._stats.isBeingUsed = newValue;

@@ -110,7 +110,7 @@ var TaroChatComponent = TaroEventingClass.extend({
 					$(msgDiv).find('.author').text(player._stats.name + ": ");
 					$(msgDiv).find('.msg').text(msgData.text);
 
-					window.reactApp?.pushMessageToChat && window.reactApp.pushMessageToChat({ author: player._stats.name, username: player._stats.username, message: msgData.text, from: 'user', userId: player._stats.userId });
+					window?.pushMessageToChat && window.pushMessageToChat({ author: player._stats.name, username: player._stats.username, message: msgData.text, from: 'user', userId: player._stats.userId, controlledBy: player._stats.controlledBy });
 				}
 			} else // system message
 			{

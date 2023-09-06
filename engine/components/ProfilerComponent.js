@@ -3,34 +3,84 @@ var ProfilerComponent = TaroEventingClass.extend({
 	componentId: 'profiler',
 
 	init: function () {
-		this.timeElapsed = {}		
+		this.isEnabled = false;
+		this.timeElapsed = {};
+		this.tickCount = 0;
+		this.avgTotalTime = 0;
+		this.avgEngineTickTime = 0;
 	},
 
-	logTimeElapsed: function(name, startTime) {
-		if (this.timeElapsed[name] == undefined) {
-			this.timeElapsed[name] = {
+	start: function() {
+		this.timeElapsed = {};
+		this.isEnabled = true;
+	},
+
+	stop: function() {
+		this.isEnabled = false;
+	},
+
+	logTimeElapsed: function(path, startTime) {
+		if (this.timeElapsed[path] == undefined) {
+			this.timeElapsed[path] = {
 				count: 0,
-				avgTimeElapsed: 0
+				avgTime: 0,
+				countPerTick: 0,
+				avgTimePerTick: 0,
+				tickCount: 0,
+				cpu: 0,
+				avgCpu: 0
 			}
 		}
 		
 		var timeElapsed = performance.now() - startTime;
-		var element = this.timeElapsed[name];
-		// this.timeElapsed[name].avgTimeElapsed = ((element.avgTimeElapsed * element.count) + timeElapsed) / (element.count + 1);
-		this.timeElapsed[name].avgTimeElapsed += timeElapsed;
-		this.timeElapsed[name].count++;
+		var element = this.timeElapsed[path];
+		this.timeElapsed[path].avgTime = ((element.avgTime * element.count) + timeElapsed) / (element.count + 1);
+		// this.timeElapsed[path].avgTime += timeElapsed;,
+		this.timeElapsed[path].count++;
+		this.timeElapsed[path].countPerTick++;
 	},
 
-	printResults: function() {
-		var output = []
-		for (var i in this.timeElapsed) {
-			output.push(i)
-			output.push(this.timeElapsed[i].avgTimeElapsed.toFixed(2))
-			output.push(this.timeElapsed[i].count)
-		}
-		console.log(output.join(', '))
+	logTick: function(engineTickTime) {
+		if (!engineTickTime) 
+			return;
 
-		this.timeElapsed = {};
+		var totalTime = 0;
+		for (var path in this.timeElapsed) {			
+			if (this.timeElapsed[path].countPerTick > 0) {
+				var element = this.timeElapsed[path];
+				var timeElapsed = element.avgTime * element.countPerTick
+				totalTime += timeElapsed;
+				this.timeElapsed[path].avgTimePerTick = ((element.avgTimePerTick * element.tickCount) + timeElapsed) / (element.tickCount + 1);
+				this.timeElapsed[path].cpu = (timeElapsed / engineTickTime) * 100;
+				this.timeElapsed[path].avgCpu = ((element.avgCpu * element.tickCount) + this.timeElapsed[path].cpu) / (element.tickCount + 1);
+				this.timeElapsed[path].countPerTick = 0;
+				this.timeElapsed[path].tickCount++;
+			}
+		}
+		
+		this.avgTotalTime = ((this.avgTotalTime * this.tickCount) + totalTime) / (this.tickCount + 1);
+		this.avgEngineTickTime = ((this.avgEngineTickTime * this.tickCount) + engineTickTime) / (this.tickCount + 1);
+		
+		this.tickCount++;
+		
+	},
+
+	getProfile: function() {
+		var output = {}
+		for (var path in this.timeElapsed) {
+			output[path] = {
+				avgTime: parseFloat(this.timeElapsed[path].avgTime.toFixed(2)),
+				count: this.timeElapsed[path].count,
+				cpu: parseFloat(this.timeElapsed[path].avgCpu.toFixed(2)),
+			}
+		}
+
+		// console.log(output)
+		return output;
+
+		// console.log(this.timeElapsed)
+		// console.log('CPU usage: ' + this.avgTotalTime.toFixed(2), this.avgEngineTickTime.toFixed(2))
+		// this.timeElapsed = {};
 	}
 
 });

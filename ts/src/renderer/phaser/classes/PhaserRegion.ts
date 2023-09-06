@@ -144,6 +144,7 @@ class PhaserRegion extends PhaserEntity {
 				stats.width,
 				stats.height
 			);
+            graphics.setDepth(1000);
 		} else {
 			graphics.fillStyle(
 				Number(`0x${stats.inside.substring(1)}`),

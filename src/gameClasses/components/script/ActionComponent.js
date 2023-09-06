@@ -10,8 +10,9 @@ var ActionComponent = TaroEntity.extend({
 	},
 
 	// entity can be either trigger entity, or entity in loop
-	run: function (actionList, vars) {
+	run: function (actionList, vars, path) {
 		var self = this;
+
 
 		if (actionList == undefined || actionList.length <= 0)
 			return;
@@ -25,6 +26,12 @@ var ActionComponent = TaroEntity.extend({
 				(taro.isClient && (!action.runOnClient && !action.runMode)) // backward compatibility for older versions
 			) {
 				continue;
+			}
+
+			if (taro.profiler.isEnabled) {
+				var startTime = performance.now();
+				// var actionPath = path + "/" + i + "("+action.type+")";
+				var actionPath = path + "/" + i;
 			}
 
 			// assign runMode engine-widely, so functions like item.use() can reference to what the current runMode is
@@ -95,6 +102,7 @@ var ActionComponent = TaroEntity.extend({
 						var newValue = self._script.variable.getValue(action.value, vars);
 						params.newValue = newValue;
 						if (taro.game.data.variables.hasOwnProperty(action.variableName)) {
+							taro.game.lastUpdatedVariableName = action.variableName;
 							taro.game.data.variables[action.variableName].value = newValue;
 							// if variable has default field then it will be returned when variable's value is undefined
 							if (
@@ -126,7 +134,7 @@ var ActionComponent = TaroEntity.extend({
 						setTimeout(function (actions, currentScriptId) {
 							let previousScriptId = currentScriptId;
 							self._script.currentScriptId = currentScriptId;
-							self.run(actions, vars);
+							self.run(actions, vars, actionPath);
 							self._script.currentScriptId = previousScriptId;
 						}, duration, setTimeOutActions, self._script.currentScriptId);
 						break;
@@ -138,7 +146,7 @@ var ActionComponent = TaroEntity.extend({
 
 							if (!isNaN(count) && count > 0) {
 								for (let i = 0; i < count; i++) {
-									returnValue = self.run(repeatActions, vars);
+									returnValue = self.run(repeatActions, vars, actionPath);
 
 									if (returnValue == 'break' || vars.break) {
 										// we dont have to return a value in case of break otherwise
@@ -161,10 +169,10 @@ var ActionComponent = TaroEntity.extend({
 						break;
 
 					case 'condition':
-						if (self._script.condition.run(action.conditions, vars)) {
-							var brk = self.run(action.then, vars);
+						if (self._script.condition.run(action.conditions, vars, actionPath)) {
+							var brk = self.run(action.then, vars, actionPath);
 						} else {
-							var brk = self.run(action.else, vars);
+							var brk = self.run(action.else, vars, actionPath);
 						}
 
 						if (brk == 'break') {
@@ -220,16 +228,9 @@ var ActionComponent = TaroEntity.extend({
 						break;
 
 					case 'sendPostRequest':
-						var obj = self._script.variable.getValue(action.string, vars);
+						var string = self._script.variable.getValue(action.string, vars);
 						var url = self._script.variable.getValue(action.url, vars);
 						var varName = self._script.variable.getValue(action.varName, vars);
-
-						try {
-							obj = JSON.parse(obj);
-						} catch (err) {
-							console.error(err);
-							return;
-						}
 
 						// ensure we aren't sending more than 30 POST requests within 10 seconds
 						taro.server.postReqTimestamps.push(taro.currentTime());
@@ -243,22 +244,35 @@ var ActionComponent = TaroEntity.extend({
 
 						taro.server.request.post({
 							url: url,
-							form: obj
+							form: string
 						}, function optionalCallback(err, httpResponse, body) {
 							if (err) {
-								return console.error('upload failed:', err);
+								return self._script.errorLog('sending POST failed:', err);
 							}
 
 							try {
-								var res = JSON.parse(body);
+								var res = JSON.parse(body.replace(/\\"|""/g, '"'));
+
 								var newValue = res.response;
 								params['newValue'] = newValue;
 
 								if (taro.game.data.variables.hasOwnProperty(varName)) {
 									taro.game.data.variables[varName].value = newValue;
 								}
-							} catch (err) {
-								console.error('sendPostRequest', taro.game.data.defaultData.title, url, err);
+
+								taro.game.lastReceivedPostResponse = res;
+								taro.game.lastUpdatedVariableName = varName;
+
+								var vars = {}
+								if (["unit", "item", "projectile"].includes(self._entity._category)) {
+									var key = self._entity._category + 'Id';
+									vars = { [key]: self._entity.id() }
+								}
+
+								self._entity.script.trigger('onPostResponse', vars);
+
+							} catch (errorMsg) {
+								self._script.errorLog('sendPostRequest', taro.game.data.defaultData.title, url, errorMsg);
 								if (taro.game.data.variables.hasOwnProperty(varName)) {
 									taro.game.data.variables[varName].value = 'error';
 								}
@@ -697,6 +711,15 @@ var ActionComponent = TaroEntity.extend({
 						}
 						break;
 
+					case 'makePlayerSendChatMessage':
+						var player = self._script.variable.getValue(action.player, vars);
+						var message = self._script.variable.getValue(action.message, vars);
+						if (player && player._stats && player._stats.clientId) {
+							taro.chat.sendToRoom('1', message, undefined, player._stats.clientId);
+						}
+
+						break;
+
 					case 'sendChatMessage':
 						var message = self._script.variable.getValue(action.message, vars);
 						taro.chat.sendToRoom('1', message, undefined, undefined);
@@ -787,7 +810,7 @@ var ActionComponent = TaroEntity.extend({
 							var units = self._script.variable.getValue(action.unitGroup, vars) || [];
 							for (var l = 0; l < units.length; l++) {
 								var unit = units[l];
-								var brk = self.run(action.actions, Object.assign(vars, { selectedUnit: unit }));
+								var brk = self.run(action.actions, Object.assign(vars, { selectedUnit: unit }), actionPath);
 
 								if (brk == 'break' || vars.break) {
 									vars.break = false;
@@ -811,7 +834,7 @@ var ActionComponent = TaroEntity.extend({
 							var players = self._script.variable.getValue(action.playerGroup, vars) || [];
 							for (var l = 0; l < players.length; l++) {
 								var player = players[l];
-								var brk = self.run(action.actions, Object.assign(vars, { selectedPlayer: player }));
+								var brk = self.run(action.actions, Object.assign(vars, { selectedPlayer: player }), actionPath);
 
 								if (brk == 'break' || vars.break) {
 									vars.break = false;
@@ -835,7 +858,7 @@ var ActionComponent = TaroEntity.extend({
 							var items = self._script.variable.getValue(action.itemGroup, vars) || [];
 							for (var l = 0; l < items.length; l++) {
 								var item = items[l];
-								var brk = self.run(action.actions, Object.assign(vars, { selectedItem: item }));
+								var brk = self.run(action.actions, Object.assign(vars, { selectedItem: item }), actionPath);
 
 								if (brk == 'break' || vars.break) {
 									vars.break = false;
@@ -859,7 +882,7 @@ var ActionComponent = TaroEntity.extend({
 							var projectiles = self._script.variable.getValue(action.projectileGroup, vars) || [];
 							for (var l = 0; l < projectiles.length; l++) {
 								var projectile = projectiles[l];
-								var brk = self.run(action.actions, Object.assign(vars, { selectedProjectile: projectile }));
+								var brk = self.run(action.actions, Object.assign(vars, { selectedProjectile: projectile }), actionPath);
 
 								if (brk == 'break' || vars.break) {
 									vars.break = false;
@@ -885,7 +908,7 @@ var ActionComponent = TaroEntity.extend({
 								var entity = entities[l];
 								// if (['unit', 'item', 'projectile', 'wall'].includes(entity._category)) {
 								if (self.entityCategories.indexOf(entity._category) > -1) {
-									var brk = self.run(action.actions, Object.assign(vars, { selectedEntity: entity }));
+									var brk = self.run(action.actions, Object.assign(vars, { selectedEntity: entity }), actionPath);
 
 									if (brk == 'break' || vars.break) {
 										vars.break = false;
@@ -910,7 +933,7 @@ var ActionComponent = TaroEntity.extend({
 							var regions = self._script.variable.getValue(action.regionGroup, vars) || [];
 							for (var l = 0; l < regions.length; l++) {
 								var region = regions[l];
-								var brk = self.run(action.actions, Object.assign(vars, { selectedRegion: region }));
+								var brk = self.run(action.actions, Object.assign(vars, { selectedRegion: region }), actionPath);
 
 								if (brk == 'break' || vars.break) {
 									vars.break = false;
@@ -937,7 +960,7 @@ var ActionComponent = TaroEntity.extend({
 							var unitTypes = self._script.variable.getValue(action.unitTypeGroup, vars) || {};
 
 							for (var unitTypeKey in unitTypes) {
-								var brk = self.run(action.actions, Object.assign(vars, { selectedUnitType: unitTypeKey }));
+								var brk = self.run(action.actions, Object.assign(vars, { selectedUnitType: unitTypeKey }), actionPath);
 
 								if (brk == 'break' || vars.break) {
 									vars.break = false;
@@ -981,7 +1004,7 @@ var ActionComponent = TaroEntity.extend({
 							for (let i = 0; i < sortedItems.length; i++) {
 								if (sortedItems[i]) {
 									var itemTypeKey = sortedItems[i].itemId;
-									var brk = self.run(action.actions, Object.assign(vars, { selectedItemType: itemTypeKey }));
+									var brk = self.run(action.actions, Object.assign(vars, { selectedItemType: itemTypeKey }), actionPath);
 
 									if (brk == 'break' || vars.break) {
 										vars.break = false;
@@ -1001,8 +1024,8 @@ var ActionComponent = TaroEntity.extend({
 					case 'while':
 						var loopCounter = 0;
 
-						while (self._script.condition.run(action.conditions, vars)) {
-							var brk = self.run(action.actions, vars);
+						while (self._script.condition.run(action.conditions, vars, actionPath)) {
+							var brk = self.run(action.actions, vars, actionPath);
 							if (brk == 'break' || vars.break) {
 								// we dont have to return a value in case of break otherwise
 								// control will exit from for loop of actions as well
@@ -1048,8 +1071,8 @@ var ActionComponent = TaroEntity.extend({
 								variables[variableName].value <= stop;
 								variables[variableName].value += 1 // post iteration operation
 							) {
-								var brk = self.run(action.actions, vars);
-								// TODO: handle break;
+								var brk = self.run(action.actions, vars, actionPath);
+
 								if (brk == 'break' || vars.break) {
 									// we dont have to return a value in case of break otherwise
 									// control will exit from for loop of actions as well
@@ -2725,7 +2748,7 @@ var ActionComponent = TaroEntity.extend({
 						try {
 							var data = JSON.parse(self._script.variable.getValue(action.string, vars));
 						} catch (err) {
-							console.error(err);
+							self._script.errorLog(err);
 							return;
 						}
 						if (unit && data) {
@@ -2738,7 +2761,7 @@ var ActionComponent = TaroEntity.extend({
 						try {
 							var data = JSON.parse(self._script.variable.getValue(action.string, vars));
 						} catch (err) {
-							console.error(err);
+							self._script.errorLog(err);
 							return;
 						}
 						if (player && data) {
@@ -2851,6 +2874,26 @@ var ActionComponent = TaroEntity.extend({
 						}
 						break;
 
+					case 'addStringElement':
+						var key = self._script.variable.getValue(action.key, vars);
+						var value = self._script.variable.getValue(action.value, vars);
+						var object = self._script.variable.getValue(action.object, vars);
+
+						if (value && object && key) {
+							object[key] = value;
+						}
+
+						break;
+
+					case 'removeElement':
+						var object = self._script.variable.getValue(action.object, vars);
+						var key = self._script.variable.getValue(action.key, vars);
+						if (object && key) {
+							delete object[key];
+						}
+
+						break;
+
 					case 'comment':
 						break;
 					default:
@@ -2860,11 +2903,17 @@ var ActionComponent = TaroEntity.extend({
 
 				taro.network.resume();
 
+				if (taro.profiler.isEnabled) {
+					taro.profiler.logTimeElapsed(actionPath, startTime);
+				}
+
 			} catch (e) {
 				console.log(e);
 				self._script.errorLog(e); // send error msg to client
 			}
 		}
+
+
 	}
 
 });

@@ -372,6 +372,10 @@ var ClientNetworkEvents = {
 		taro.game.updateDevConsole(data);
 	},
 
+	_onProfile: function (data) {
+		window.reactApp.profiler(data)
+	},
+
 	_onTrade: function (msg, clientId) {
 		switch (msg.type) {
 			case "init": {

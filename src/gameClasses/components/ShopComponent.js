@@ -807,7 +807,7 @@ var ShopComponent = TaroEntity.extend({
 		var ownerPlayer = taro.client.myPlayer;
 		var ownerUnit = taro.$(ownerPlayer._stats.selectedUnitId);
 		if (item.description) {
-			html += `<p>${taro.clientSanitizer(item.description)}</P>`;
+			html += `<p style="overflow-y: auto; max-height: 200px;">${taro.clientSanitizer(item.description)}</P>`;
 		}
 		if (shopItem && typeof shopItem.requirement === 'object') {
 			var requirements = '';
@@ -1073,7 +1073,26 @@ var ShopComponent = TaroEntity.extend({
 
 						combine.popover({
 							html: true,
-							trigger: 'hover'
+							trigger: 'manual'
+						})
+						.on("mouseenter", function () {
+							$(this).popover("show");
+						}).on("mouseleave", function () {
+							var _this = this;
+							if (!$(".popover:hover").length) {
+								// setTimeout(function () {
+								// 	if (!$(".popover:hover").length) {
+								// 		$(_this).popover("hide");
+								// 	}
+								// }, 50);
+								$(_this).popover("hide");
+							}
+							else {
+								$('.popover').mouseleave(function() {
+									$(_this).popover("hide");
+									$(this).off('mouseleave');
+								});
+							}
 						});
 
 						modalBody.append(

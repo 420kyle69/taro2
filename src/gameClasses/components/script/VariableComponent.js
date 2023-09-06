@@ -175,6 +175,7 @@ var VariableComponent = TaroEntity.extend({
 			// empty
 		}
 	},
+
 	getAllVariables: function (selectedTypes) {
 		var returnObj = {};
 
@@ -579,7 +580,6 @@ var VariableComponent = TaroEntity.extend({
 						if (text.itemTypeGroup && text.itemType) {
 							var variableObj = self.getVariable(text.itemTypeGroup.variableName);
 							var itemType = self.getValue(text.itemType, vars);
-							console.log(text.itemType, itemType, variableObj);
 							if (variableObj && variableObj[itemType]) {
 								returnValue = variableObj[itemType].quantity;
 							}
@@ -1682,7 +1682,7 @@ var VariableComponent = TaroEntity.extend({
 								}
 							} catch (err) {
 								if (err instanceof SyntaxError) {
-									this._script.errorLog(`error parsing JSON within getStringArrayLength:  ${typeof string} ${string} is not a valid JSON string`);
+									self._script.errorLog(`error parsing JSON within getStringArrayLength:  ${typeof string} ${string} is not a valid JSON string`);
 								}
 							}
 						}
@@ -1701,7 +1701,7 @@ var VariableComponent = TaroEntity.extend({
 
 							} catch (err) {
 								if (err instanceof SyntaxError) {
-									this._script.errorLog(`error parsing JSON within getStringArrayElement:  ${typeof string} ${string} is not a valid JSON string`);
+									self._script.errorLog(`error parsing JSON within getStringArrayElement:  ${typeof string} ${string} is not a valid JSON string`);
 								}
 							}
 						}
@@ -1723,9 +1723,9 @@ var VariableComponent = TaroEntity.extend({
 								}
 							} catch (err) {
 								if (err instanceof SyntaxError) {
-									this._script.errorLog(`error parsing JSON within insertStringArrayElement:  ${typeof string} ${string} is not a valid JSON string`);
+									self._script.errorLog(`error parsing JSON within insertStringArrayElement:  ${typeof string} ${string} is not a valid JSON string`);
 								} else {
-									this._script.errorLog('error modifying array within insertStringArrayElement');
+									self._script.errorLog('error modifying array within insertStringArrayElement');
 								}
 							}
 						}
@@ -1748,9 +1748,9 @@ var VariableComponent = TaroEntity.extend({
 								}
 							} catch (err) {
 								if (err instanceof SyntaxError) {
-									this._script.errorLog(`error parsing JSON within updateStringArrayElement:  ${typeof string} ${string} is not a valid JSON string`);
+									self._script.errorLog(`error parsing JSON within updateStringArrayElement:  ${typeof string} ${string} is not a valid JSON string`);
 								} else {
-									this._script.errorLog('error modifying array within updateStringArrayElement');
+									self._script.errorLog('error modifying array within updateStringArrayElement');
 								}
 							}
 						}
@@ -1772,9 +1772,9 @@ var VariableComponent = TaroEntity.extend({
 								}
 							} catch (err) {
 								if (err instanceof SyntaxError) {
-									this._script.errorLog(`error parsing JSON within removeStringArrayElement:  ${typeof string} ${string} is not a valid JSON string`);
+									self._script.errorLog(`error parsing JSON within removeStringArrayElement:  ${typeof string} ${string} is not a valid JSON string`);
 								} else {
-									this._script.errorLog('error modifying array within removeStringArrayElement');
+									self._script.errorLog('error modifying array within removeStringArrayElement');
 								}
 							}
 						}
@@ -2050,6 +2050,11 @@ var VariableComponent = TaroEntity.extend({
 						returnValue = undefined;
 
 						break;
+					
+					case 'emptyObject':
+						returnValue = {};
+
+					break;
 
 					default:
 						if (text.function) {
@@ -2088,13 +2093,8 @@ var VariableComponent = TaroEntity.extend({
 	populateFunctions: function () {
 		var self = this;
 
-		/* boolean */
 		this._functions = {
 			/* general */
-
-			'getVariable': function (text, vars) {
-				return self.getVariable(text.variableName);
-			},
 
 			/* general - number */
 
@@ -2110,6 +2110,23 @@ var VariableComponent = TaroEntity.extend({
 			},
 
 			/* general - string */
+			
+			'objectToString': function (text, vars) {
+				var object = self.getValue(text.object, vars);
+				var str = JSON.stringify(object).replace(/^"(.*)"$/, '$1') // remove opening & ending quotes
+				str.replace(/\\"|""/g, '"') // replace \" and "" with "
+				if (object) {
+					return str;
+				}
+			},
+
+			'lastReceivedPostResponse': function (text, vars) {
+				return taro.game.lastReceivedPostResponse;
+			},
+			
+			'lastUpdatedVariableName': function (text, vars) {
+				return taro.game.lastUpdatedVariableName;
+			},
 
 			'subString': function (text, vars) {
 				var sourceString = self.getValue(text.sourceString, vars);
@@ -2125,6 +2142,16 @@ var VariableComponent = TaroEntity.extend({
 				var stringB = self.getValue(text.textB, vars);
 
 				return `${stringA}${stringB}`;
+			},
+
+			/* number */
+
+			'elementCount': function (text, vars) {
+				var object = self.getValue(text.object, vars);
+				if (object) {
+					return Object.keys(object).length;
+				}
+				return undefined;
 			},
 
 			/* player */
@@ -2404,7 +2431,19 @@ var VariableComponent = TaroEntity.extend({
 					return regionA.intersects(regionB);
 				}
 			},
+			/* variable */
+			
+			'getVariable': function (text, vars) {
+				var name = self.getValue(text.variableName, vars);				
+				return self.getVariable(name);
+			},
 
+			'getTriggeringVariableName': function (text, vars) {
+				if (vars && vars.triggeredBy && vars.triggeredBy.variableName) {
+					return vars.triggeredBy.variableName;
+				}
+			},
+		
 			/* attribute */
 
 			'getTriggeringAttribute': function (text, vars) {
@@ -2502,6 +2541,32 @@ var VariableComponent = TaroEntity.extend({
 				}
 
 			},
+
+			/* object */
+
+			'elementFromObject': function (text, vars) {
+				var object = self.getValue(text.object, vars);
+				var key = self.getValue(text.key, vars);
+
+				if (object && key != undefined) {
+					return object[key];
+				}
+			},
+
+			'stringToObject': function (text, vars) {
+				var string = self.getValue(text.string, vars);
+
+				if (string) {
+					try {
+						return JSON.parse(string);
+					} catch (err) {
+						if (err instanceof SyntaxError) {
+							self._script.errorLog(`error parsing JSON within stringToObject:  ${typeof string} ${string} is not a valid JSON string`);
+						}
+					}
+				}
+			},
+
 		}
 	}
 });

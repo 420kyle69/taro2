@@ -106,6 +106,7 @@ var PhaserRegion = /** @class */ (function (_super) {
             // between 0 and 1 or we default
             (stats.alpha && stats.alpha >= 0 && stats.alpha <= 1) ? stats.alpha : 1);
             graphics.strokeRect(0, 0, stats.width, stats.height);
+            graphics.setDepth(1000);
         }
         else {
             graphics.fillStyle(Number("0x".concat(stats.inside.substring(1))), 
