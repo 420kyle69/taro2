@@ -249,7 +249,7 @@ var ActionComponent = TaroEntity.extend({
 							// try+catch must be redeclared inside callback otherwise an error will crash the process
 							try {
 								if (err) {
-									throw new Error('sending POST failed:' + err);
+									self._script.errorLog(err, path)
 								}
 								
 								var res = JSON.parse(body.replace(/\\"|""/g, '"'));
@@ -272,7 +272,7 @@ var ActionComponent = TaroEntity.extend({
 	
 								self._entity.script.trigger('onPostResponse', vars);
 							} catch (e) {
-								throw new Error(e);
+								self._script.errorLog(e, path)
 							}
 							
 						});
