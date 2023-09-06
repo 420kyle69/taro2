@@ -1,3 +1,178 @@
+/**
+ * recursively set object parameters
+ * @param oldOjbect
+ * @param newObject
+ */
+function setOjbect(oldOjbect, newObject) {
+    Object.keys(newObject).map(function (k) {
+        if (!oldOjbect[k]) {
+            oldOjbect[k] = {};
+        }
+        if (typeof newObject[k] === 'object') {
+            setOjbect(oldOjbect[k], newObject[k]);
+        }
+        else {
+            oldOjbect[k] = newObject[k];
+        }
+    });
+}
+/**
+ * merge the oldData with newData using template
+ * @param oldData
+ * @param newData
+ * @param template
+ */
+function merge(oldData, newData, template) {
+    Object.entries(template).map(function (_a) {
+        var k = _a[0], v = _a[1];
+        if (!v.calc && typeof v === 'object') {
+            if (!oldData[k]) {
+                oldData[k] = {};
+            }
+            merge(oldData[k], newData[k], template[k]);
+            return;
+        }
+        if (!oldData[k] && v.calc !== 'init') {
+            switch (typeof newData[k]) {
+                case 'string': {
+                    oldData[k] = '';
+                    break;
+                }
+                case 'number': {
+                    oldData[k] = 0;
+                    break;
+                }
+                case 'object': {
+                    oldData[k] = Array.isArray(newData[k]) ? [] : {};
+                    break;
+                }
+            }
+        }
+        if (typeof v.calc === 'function') {
+            v.calc(oldData, newData, oldData[k]);
+        }
+        else {
+            switch (v.calc) {
+                case 'init': {
+                    if (oldData[k] === undefined) {
+                        oldData[k] = newData[k];
+                    }
+                    break;
+                }
+                case 'set': {
+                    oldData[k] = newData[k];
+                    break;
+                }
+                case 'smartSet': {
+                    if (typeof newData[k] === 'object') {
+                        setOjbect(oldData[k], newData[k]);
+                    }
+                    else {
+                        oldData[k] = newData[k];
+                    }
+                    break;
+                }
+                case 'sum': {
+                    switch (v.method) {
+                        case 'direct': {
+                            oldData[k] += newData[k];
+                            break;
+                        }
+                        case 'array': {
+                            // console.log('oldData', oldData[k], k)
+                            newData[k].map(function (v) {
+                                if (!oldData[k].includes(v)) {
+                                    oldData[k].push(v);
+                                }
+                            });
+                        }
+                    }
+                    break;
+                }
+                case 'div': {
+                    oldData[k] /= newData[k];
+                    break;
+                }
+                case 'sub': {
+                    oldData[k] -= newData[k];
+                    break;
+                }
+                case 'mul': {
+                    oldData[k] *= newData[k];
+                    break;
+                }
+            }
+        }
+        return oldData;
+    });
+}
+var mergedTemplate = {
+    edit: {
+        size: { calc: 'set', method: 'direct' },
+        selectedTiles: {
+            calc: function (oldData, newData, nowData) {
+                var _a;
+                // console.log(oldData, newData, nowData);
+                var newLayer = newData.layer[0];
+                if (!((_a = oldData.layer) === null || _a === void 0 ? void 0 : _a.includes(newLayer))) {
+                    nowData.push.apply(nowData, newData.selectedTiles);
+                }
+                else {
+                    var idx = oldData.layer.findIndex(function (v) { return v === newLayer; });
+                    setOjbect(nowData[idx], newData.selectedTiles[0]);
+                }
+            }, method: 'direct'
+        },
+        shape: { calc: 'set', method: 'direct' },
+        layer: { calc: 'sum', method: 'array' },
+        x: { calc: 'init', method: 'direct' },
+        y: { calc: 'init', method: 'direct' },
+    }
+};
+function debounce(func, timeout, mergedTemplate) {
+    var timer;
+    var mergedData = [{}];
+    return function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        clearTimeout(timer);
+        if (mergedTemplate) {
+            args.map(function (v, idx) {
+                merge(mergedData[0], v, mergedTemplate);
+            });
+        }
+        else {
+            if (Array.isArray(args)) {
+                mergedData = args;
+            }
+            else {
+                mergedData[0] = args;
+            }
+        }
+        timer = setTimeout(function () {
+            func.apply(void 0, mergedData);
+            mergedData = [{}];
+        }, timeout);
+    };
+}
+function mergeEditTileActions(data) {
+    taro.network.send('editTile', data);
+}
+var debounceEditTileSend = debounce(mergeEditTileActions, 0, mergedTemplate);
+function recalcWallsPhysics(gameMap, forPathFinding) {
+    taro.physics.destroyWalls();
+    var map = taro.scaleMap(rfdc()(gameMap));
+    gameMap.wasEdited = true;
+    taro.tiled.loadJson(map, function (layerArray, layersById) {
+        taro.physics.staticsFromMap(layersById.walls);
+    });
+    if (forPathFinding) {
+        taro.map.updateWallMapData(); // for A* pathfinding
+    }
+}
+var debounceRecalcPhysics = debounce(recalcWallsPhysics, 0);
 var DeveloperMode = /** @class */ (function () {
     function DeveloperMode() {
         if (taro.isClient)
@@ -70,20 +245,26 @@ var DeveloperMode = /** @class */ (function () {
         return this.activeTab && this.activeTab !== 'play';
     };
     DeveloperMode.prototype.editTile = function (data, clientId) {
+        var _this = this;
         // only allow developers to modify the tiles
         if (taro.server.developerClientIds.includes(clientId) || clientId === 'server') {
             if (JSON.stringify(data) === '{}') {
                 throw 'receive: {}';
             }
             var gameMap = taro.game.data.map;
-            gameMap.wasEdited = true;
-            taro.network.send('editTile', data);
             var _a = Object.entries(data).map(function (_a) {
                 var k = _a[0], dataValue = _a[1];
                 var dataType = k;
                 return { dataType: dataType, dataValue: dataValue };
             })[0], dataType = _a.dataType, dataValue = _a.dataValue;
-            var serverData = _.clone(dataValue);
+            var serverData = rfdc()(dataValue);
+            if (dataType === 'edit') {
+                serverData.layer = serverData.layer[0];
+                debounceEditTileSend(data);
+            }
+            else {
+                taro.network.send('editTile', data);
+            }
             if (gameMap.layers.length > 4 && serverData.layer >= 2)
                 serverData.layer++;
             var width = gameMap.width;
@@ -96,8 +277,10 @@ var DeveloperMode = /** @class */ (function () {
                 }
                 case 'edit': {
                     //save tile change to taro.game.data.map and taro.map.data
-                    var nowValue = serverData;
-                    this.putTiles(nowValue.x, nowValue.y, nowValue.selectedTiles, nowValue.size, nowValue.shape, nowValue.layer);
+                    var nowValue_1 = serverData;
+                    nowValue_1.selectedTiles.map(function (v, idx) {
+                        _this.putTiles(nowValue_1.x, nowValue_1.y, v, nowValue_1.size, nowValue_1.shape, nowValue_1.layer);
+                    });
                     break;
                 }
                 case 'clear': {
@@ -107,12 +290,7 @@ var DeveloperMode = /** @class */ (function () {
             }
             if (gameMap.layers[serverData.layer].name === 'walls') {
                 //if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
-                taro.physics.destroyWalls();
-                var map = taro.scaleMap(rfdc()(gameMap));
-                taro.tiled.loadJson(map, function (layerArray, layersById) {
-                    taro.physics.staticsFromMap(layersById.walls);
-                });
-                taro.map.updateWallMapData(); // for A* pathfinding
+                debounceRecalcPhysics(gameMap, true);
             }
         }
     };
@@ -127,10 +305,14 @@ var DeveloperMode = /** @class */ (function () {
     DeveloperMode.prototype.putTiles = function (tileX, tileY, selectedTiles, brushSize, shape, layer) {
         var map = taro.game.data.map;
         var width = map.width;
-        var sample = this.calcSample(selectedTiles, brushSize, shape);
+        var calcData = this.calcSample(selectedTiles, brushSize, shape);
+        var sample = calcData.sample;
+        var size = brushSize === 'fitContent' ? { x: calcData.xLength, y: calcData.yLength } : brushSize;
+        tileX = brushSize === 'fitContent' ? calcData.minX : tileX;
+        tileY = brushSize === 'fitContent' ? calcData.minY : tileY;
         if (map.layers[layer]) {
-            for (var x = 0; x < brushSize.x; x++) {
-                for (var y = 0; y < brushSize.y; y++) {
+            for (var x = 0; x < size.x; x++) {
+                for (var y = 0; y < size.y; y++) {
                     if (sample[x] && sample[x][y] !== undefined && this.pointerInsideMap(x + tileX, y + tileY, map)) {
                         var index = sample[x][y];
                         if (index === -1)
@@ -159,8 +341,15 @@ var DeveloperMode = /** @class */ (function () {
         var minY = parseInt(yArray[0]);
         var maxX = parseInt(xArray[xArray.length - 1]);
         var maxY = parseInt(yArray[yArray.length - 1]);
+        // console.log(selectedTileArea, minX, maxX, minY, maxY);
         var xLength = maxX - minX + 1;
         var yLength = maxY - minY + 1;
+        if (size === 'fitContent') {
+            size = {
+                x: xLength,
+                y: yLength
+            };
+        }
         var tempSample = {};
         switch (shape) {
             case 'rectangle': {
@@ -176,7 +365,7 @@ var DeveloperMode = /** @class */ (function () {
                 break;
             }
         }
-        return tempSample;
+        return { sample: tempSample, xLength: xLength, yLength: yLength, minX: minX, minY: minY };
     };
     DeveloperMode.prototype.floodTiles = function (layer, oldTile, newTile, x, y, limits) {
         var _a, _b, _c, _d, _e, _f;
@@ -505,7 +694,7 @@ var DeveloperMode = /** @class */ (function () {
         }
     };
     DeveloperMode.prototype.updateClientMap = function (data) {
-        //console.log ('map data was edited', data.mapData.wasEdited);
+        // console.log('map data was edited', data.mapData.wasEdited);
         if (data.mapData.wasEdited) {
             data.mapData.wasEdited = false;
             data.mapData.haveUnsavedChanges = true;

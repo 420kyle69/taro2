@@ -10,7 +10,7 @@ var TileShape = /** @class */ (function () {
      * calc the sample to print
      * @param selectedTileArea selectedTiles
      * @param size brush's size
-     * @param temp if true, it won't change this.sample, but return it instead.
+     * @param temp if true, it won't change this.sample, but only return it instead.
      * @returns sample to print
      */
     TileShape.prototype.calcSample = function (selectedTileArea, size, shape, temp) {
@@ -24,6 +24,12 @@ var TileShape = /** @class */ (function () {
         var xLength = maxX - minX + 1;
         var yLength = maxY - minY + 1;
         var tempSample = {};
+        if (size === 'fitContent') {
+            size = {
+                x: xLength,
+                y: yLength
+            };
+        }
         switch (shape || this.shape) {
             case 'rectangle': {
                 tempSample = TileShape.calcRect(minX, xLength, minY, yLength, selectedTileArea, size);
@@ -41,7 +47,7 @@ var TileShape = /** @class */ (function () {
         if (!temp) {
             this.sample = tempSample;
         }
-        return tempSample;
+        return { sample: tempSample, xLength: xLength, yLength: yLength };
     };
     TileShape.calcCircle = function (minX, xLength, minY, yLength, selectedTileArea, size) {
         var circleGenerator = Combinator.circle(Math.floor(Math.max(size.x, size.y) / 2) + 1);
