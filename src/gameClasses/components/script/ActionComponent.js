@@ -246,30 +246,35 @@ var ActionComponent = TaroEntity.extend({
 							url: url,
 							form: string
 						}, function optionalCallback(err, httpResponse, body) {
-
-							if (err) {
-								throw new Error('sending POST failed:' + err);
+							// try+catch must be redeclared inside callback otherwise an error will crash the process
+							try {
+								if (err) {
+									self._script.errorLog(err, path)
+								}
+								
+								var res = JSON.parse(body.replace(/\\"|""/g, '"'));
+	
+								var newValue = res.response;
+								params['newValue'] = newValue;
+	
+								if (taro.game.data.variables.hasOwnProperty(varName)) {
+									taro.game.data.variables[varName].value = newValue;
+								}
+	
+								taro.game.lastReceivedPostResponse = res;
+								taro.game.lastUpdatedVariableName = varName;
+								
+								var vars = {}
+								if (["unit", "item", "projectile"].includes(self._entity._category)) {
+									var key = self._entity._category + 'Id';
+									vars = { [key]: self._entity.id() }
+								}
+	
+								self._entity.script.trigger('onPostResponse', vars);
+							} catch (e) {
+								self._script.errorLog(e, path)
 							}
 							
-							var res = JSON.parse(body.replace(/\\"|""/g, '"'));
-
-							var newValue = res.response;
-							params['newValue'] = newValue;
-
-							if (taro.game.data.variables.hasOwnProperty(varName)) {
-								taro.game.data.variables[varName].value = newValue;
-							}
-
-							taro.game.lastReceivedPostResponse = res;
-							taro.game.lastUpdatedVariableName = varName;
-							
-							var vars = {}
-							if (["unit", "item", "projectile"].includes(self._entity._category)) {
-								var key = self._entity._category + 'Id';
-								vars = { [key]: self._entity.id() }
-							}
-
-							self._entity.script.trigger('onPostResponse', vars);
 						});
 
 						break;
@@ -2736,12 +2741,7 @@ var ActionComponent = TaroEntity.extend({
 
 					case 'loadUnitDataFromString':
 						var unit = self._script.variable.getValue(action.unit, vars);
-						try {
-							var data = JSON.parse(self._script.variable.getValue(action.string, vars));
-						} catch (err) {
-							throw new Error(err);
-							return;
-						}
+						var data = JSON.parse(self._script.variable.getValue(action.string, vars));							
 						if (unit && data) {
 							unit.loadDataFromString(data);
 						}
@@ -2749,12 +2749,7 @@ var ActionComponent = TaroEntity.extend({
 
 					case 'loadPlayerDataFromString':
 						var player = self._script.variable.getValue(action.player, vars);
-						try {
-							var data = JSON.parse(self._script.variable.getValue(action.string, vars));
-						} catch (err) {
-							throw new Error(err);
-							return;
-						}
+						var data = JSON.parse(self._script.variable.getValue(action.string, vars));
 						if (player && data) {
 							player.loadDataFromString(data);
 						}
