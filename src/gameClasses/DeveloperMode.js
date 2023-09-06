@@ -317,9 +317,8 @@ var DeveloperMode = /** @class */ (function () {
                         var index = sample[x][y];
                         if (index === -1)
                             index = 0;
-                        // console.log(x + tileX + (y + tileY) * width, index, layer, map.height, map.width)
-                        // map.layers[layer].data[x + tileX + (y + tileY) * width] = index;
-                        // taro.map.data.layers[layer].data[x + tileX + (y + tileY) * width] = index;
+                        map.layers[layer].data[x + tileX + (y + tileY) * width] = index;
+                        taro.map.data.layers[layer].data[x + tileX + (y + tileY) * width] = index;
                     }
                 }
             }

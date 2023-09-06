@@ -320,9 +320,8 @@ class DeveloperMode {
 					if (sample[x] && sample[x][y] !== undefined && this.pointerInsideMap(x + tileX, y + tileY, map)) {
 						let index = sample[x][y];
 						if (index === -1) index = 0;
-						// console.log(x + tileX + (y + tileY) * width, index, layer, map.height, map.width)
-						// map.layers[layer].data[x + tileX + (y + tileY) * width] = index;
-						// taro.map.data.layers[layer].data[x + tileX + (y + tileY) * width] = index;
+						map.layers[layer].data[x + tileX + (y + tileY) * width] = index;
+						taro.map.data.layers[layer].data[x + tileX + (y + tileY) * width] = index;
 					}
 				}
 			}
