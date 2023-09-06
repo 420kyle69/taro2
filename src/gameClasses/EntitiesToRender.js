@@ -59,10 +59,11 @@ var EntitiesToRender = /** @class */ (function () {
                     entity._rotate.z = rotate; // update the item's rotation immediately for more accurate aiming (instead of 20fps)
                     entity.anchoredOffset = entity.getAnchoredOffset(rotate);
                     if (entity.anchoredOffset) {
-                        x = ownerUnit._translate.x + entity.anchoredOffset.x;
-                        y = ownerUnit._translate.y + entity.anchoredOffset.y;
+                        x = ownerUnit.phaserEntity.gameObject.x + entity.anchoredOffset.x;
+                        y = ownerUnit.phaserEntity.gameObject.y + entity.anchoredOffset.y;
                         rotate = entity.anchoredOffset.rotate;
                     }
+                    //if (entity._stats.name === 'potato gun small') console.log('owner unit pos', ownerUnit.phaserEntity.gameObject.x, ownerUnit.phaserEntity.gameObject.y, 'item pos', entity.phaserEntity.gameObject.x, entity.phaserEntity.gameObject.y)
                 }
                 if (((_f = entity.tween) === null || _f === void 0 ? void 0 : _f.isTweening) && (phaserGameObject === null || phaserGameObject === void 0 ? void 0 : phaserGameObject.visible)) {
                     entity.tween.update();

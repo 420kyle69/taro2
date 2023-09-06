@@ -77,10 +77,12 @@ class EntitiesToRender {
 					entity.anchoredOffset = entity.getAnchoredOffset(rotate);
 
 					if (entity.anchoredOffset) {
-						x = ownerUnit._translate.x + entity.anchoredOffset.x;
-						y = ownerUnit._translate.y + entity.anchoredOffset.y;
+                        x = ownerUnit.phaserEntity.gameObject.x + entity.anchoredOffset.x;
+						y = ownerUnit.phaserEntity.gameObject.y + entity.anchoredOffset.y;
 						rotate = entity.anchoredOffset.rotate;
 					}
+
+                    //if (entity._stats.name === 'potato gun small') console.log('owner unit pos', ownerUnit.phaserEntity.gameObject.x, ownerUnit.phaserEntity.gameObject.y, 'item pos', entity.phaserEntity.gameObject.x, entity.phaserEntity.gameObject.y)
 				}
 
 				if (entity.tween?.isTweening && phaserGameObject?.visible) {
