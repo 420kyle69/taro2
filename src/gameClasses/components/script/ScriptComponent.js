@@ -180,15 +180,21 @@ var ScriptComponent = TaroEntity.extend({
 		self.last50Actions.push(record);
 	},
 
-	errorLog: function (message) {
+	errorLog: function (message, path) {
+		if (path == undefined) {
+			path = this._entity._id + "/" + this.currentScriptId + "/" + this.currentActionName;
+		}
+		
 		if (this.scripts) {
-			var script = this.scripts[this.currentScriptId];
-			var log = `${this.currentScriptId} : Script error '${(script) ? script.name : ''}' in Action '${this.currentActionName}' : ${message}`;
-
-			this.errorLogs[this.currentActionName] = log;
-			console.log('script errorLog', log, message);
-			taro.devLog('script errorLog', log, message);
-			ScriptComponent.prototype.log(log);
+			if (this.errorLogs[path] == undefined) {
+				this.errorLogs[path] = {message, count: 1};
+			} else {
+				this.errorLogs[path].count++;
+			}
+			
+			console.log('errorLog', path, message);
+			// taro.devLog('errorLog', message);
+			// ScriptComponent.prototype.log(log);
 
 			return log;
 		}
