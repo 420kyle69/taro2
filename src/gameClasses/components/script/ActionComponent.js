@@ -442,7 +442,7 @@ var ActionComponent = TaroEntity.extend({
 									variableObj.default = undefined;
 								}
 							} else {
-								taro.devLog('datatype of value does not match datatype of variable');
+								throw new Error('datatype of value does not match datatype of variable');
 							}
 						}
 
@@ -480,9 +480,9 @@ var ActionComponent = TaroEntity.extend({
 							taro.clusterClient.saveUserData(userId, data, 'unit');
 						} else {
 							if (!unit.persistentDataLoaded) {
-								taro.devLog('Fail saving unit data bcz persisted data not set correctly');
+								throw new Error('Fail saving unit data bcz persisted data not set correctly');
 							} else {
-								taro.devLog('Fail saving unit data');
+								throw new Error('Fail saving unit data');
 							}
 						}
 						break;
@@ -502,16 +502,16 @@ var ActionComponent = TaroEntity.extend({
 								taro.clusterClient.saveUserData(userId, data, 'unit');
 							} else {
 								if (!unit.persistentDataLoaded) {
-									taro.devLog('Fail saving unit data bcz persisted data not set correctly');
+									throw new Error('Fail saving unit data bcz persisted data not set correctly');
 								} else {
-									taro.devLog('Fail saving unit data');
+									throw new Error('Fail saving unit data');
 								}
 							}
 						} else {
 							if (player && !player.persistentDataLoaded) {
-								taro.devLog('Fail saving unit data bcz persisted data not set correctly');
+								throw new Error('Fail saving unit data bcz persisted data not set correctly');
 							} else {
-								taro.devLog('Fail saving player data');
+								throw new Error('Fail saving player data');
 							}
 						}
 
@@ -811,13 +811,11 @@ var ActionComponent = TaroEntity.extend({
 								var brk = self.run(action.actions, Object.assign(vars, { selectedUnit: unit }), actionPath);
 
 								if (brk == 'break' || vars.break) {
-									vars.break = false;
-									taro.devLog('break called');
+									vars.break = false;									
 									break;
 								} else if (brk == 'continue') {
 									continue;
 								} else if (brk == 'return') {
-									taro.devLog('return without executing script');
 									return 'return';
 								}
 							}
@@ -836,12 +834,10 @@ var ActionComponent = TaroEntity.extend({
 
 								if (brk == 'break' || vars.break) {
 									vars.break = false;
-									taro.devLog('break called');
 									break;
 								} else if (brk == 'continue') {
 									continue;
 								} else if (brk == 'return') {
-									taro.devLog('return without executing script');
 									return 'return';
 								}
 							}
@@ -860,12 +856,10 @@ var ActionComponent = TaroEntity.extend({
 
 								if (brk == 'break' || vars.break) {
 									vars.break = false;
-									taro.devLog('break called');
 									break;
 								} else if (brk == 'continue') {
 									continue;
 								} else if (brk == 'return') {
-									taro.devLog('return without executing script');
 									return 'return';
 								}
 							}
@@ -884,12 +878,10 @@ var ActionComponent = TaroEntity.extend({
 
 								if (brk == 'break' || vars.break) {
 									vars.break = false;
-									taro.devLog('break called');
 									break;
 								} else if (brk == 'continue') {
 									continue;
 								} else if (brk == 'return') {
-									taro.devLog('return without executing script');
 									return 'return';
 								}
 							}
@@ -910,12 +902,10 @@ var ActionComponent = TaroEntity.extend({
 
 									if (brk == 'break' || vars.break) {
 										vars.break = false;
-										taro.devLog('break called');
 										break;
 									} else if (brk == 'continue') {
 										continue;
 									} else if (brk == 'return') {
-										taro.devLog('return without executing script');
 										return 'return';
 									}
 								}
@@ -935,12 +925,10 @@ var ActionComponent = TaroEntity.extend({
 
 								if (brk == 'break' || vars.break) {
 									vars.break = false;
-									taro.devLog('break called');
 									break;
 								} else if (brk == 'continue') {
 									continue;
 								} else if (brk == 'return') {
-									taro.devLog('return without executing script');
 									return 'return';
 								}
 							}
@@ -962,12 +950,10 @@ var ActionComponent = TaroEntity.extend({
 
 								if (brk == 'break' || vars.break) {
 									vars.break = false;
-									taro.devLog('break called');
 									break;
 								} else if (brk == 'continue') {
 									continue;
 								} else if (brk == 'return') {
-									taro.devLog('return without executing script');
 									return 'return';
 								}
 							}
@@ -1006,12 +992,10 @@ var ActionComponent = TaroEntity.extend({
 
 									if (brk == 'break' || vars.break) {
 										vars.break = false;
-										taro.devLog('break called');
 										break;
 									} else if (brk == 'continue') {
 										continue;
 									} else if (brk == 'return') {
-										taro.devLog('return without executing script');
 										return 'return';
 									}
 								}
@@ -2459,7 +2443,7 @@ var ActionComponent = TaroEntity.extend({
 									variableObj.default = undefined;
 								}
 							} else {
-								taro.devLog('datatype of value does not match datatype of variable');
+								throw new Error('datatype of value does not match datatype of variable');
 							}
 						}
 
