@@ -344,10 +344,6 @@ class GameScene extends PhaserScene {
 			map.height * map.tileHeight / 2 * scaleFactor.y
 		);
 
-		this.events.on('update', () => {
-			taro.client.emit('tick');
-		});
-
 		if (data.defaultData.heightBasedZIndex) {
 			this.heightRenderer = new HeightRenderComponent(this, map.height * map.tileHeight);
 		}
@@ -629,6 +625,8 @@ class GameScene extends PhaserScene {
 				}
 			});
 		}
+        
+        taro.client.emit('tick');
 	}
 }
 

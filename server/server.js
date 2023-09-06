@@ -650,7 +650,7 @@ var Server = TaroClass.extend({
 
 									if (taro.isServer && self.developerClientIds.length) {
 										taro.game.devLogs.status = taro.server.getStatus();
-										console.log(taro.game.devLogs)
+
 										const sendErrors = Object.keys(taro.script.errorLogs).length;
 										self.developerClientIds.forEach(
 											id => {

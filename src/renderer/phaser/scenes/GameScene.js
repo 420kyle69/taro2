@@ -270,9 +270,6 @@ var GameScene = /** @class */ (function (_super) {
         }
         var camera = this.cameras.main;
         camera.centerOn(map.width * map.tileWidth / 2 * scaleFactor.x, map.height * map.tileHeight / 2 * scaleFactor.y);
-        this.events.on('update', function () {
-            taro.client.emit('tick');
-        });
         if (data.defaultData.heightBasedZIndex) {
             this.heightRenderer = new HeightRenderComponent(this, map.height * map.tileHeight);
         }
@@ -444,6 +441,7 @@ var GameScene = /** @class */ (function (_super) {
                 }
             });
         }
+        taro.client.emit('tick');
     };
     return GameScene;
 }(PhaserScene));

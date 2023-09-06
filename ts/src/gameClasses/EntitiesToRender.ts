@@ -116,7 +116,5 @@ class EntitiesToRender {
 		taro._renderFrames++;
 
 		this.updateAllEntities();
-
-
 	}
 }
