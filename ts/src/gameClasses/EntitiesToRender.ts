@@ -20,7 +20,7 @@ class EntitiesToRender {
 				// handle entity behaviour and transformation offsets
 				// var timeStart = performance.now();
 
-				var phaserEntity = entity.phaserEntity?.gameObject
+				var phaserGameObject = entity.phaserEntity?.gameObject
 
 				if (taro.gameLoopTickHasExecuted) {
 					if (entity._deathTime !== undefined && entity._deathTime <= taro._tickStart) {
@@ -56,8 +56,9 @@ class EntitiesToRender {
 				if (ownerUnit) {
 
 					// if the ownerUnit is not visible, then hide the item
-					if (ownerUnit.phaserEntity?.visible == false) {
-						ownerUnit.phaserEntity.gameObject.setVisible(false);
+					if (ownerUnit.phaserEntity?.gameObject?.visible == false) {
+						console.log("hide item", phaserGameObject.visible)
+						phaserGameObject.setVisible(false);
 						continue;
 					}
 					
@@ -83,7 +84,7 @@ class EntitiesToRender {
 					}
 				}
 
-				if (entity.tween?.isTweening && phaserEntity?.visible) {
+				if (entity.tween?.isTweening && phaserGameObject?.visible) {
 					entity.tween.update();
 					x += entity.tween.offset.x;
 					y += entity.tween.offset.y;
