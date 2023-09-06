@@ -2741,12 +2741,7 @@ var ActionComponent = TaroEntity.extend({
 
 					case 'loadUnitDataFromString':
 						var unit = self._script.variable.getValue(action.unit, vars);
-						try {
-							var data = JSON.parse(self._script.variable.getValue(action.string, vars));
-						} catch (err) {
-							throw new Error(err);
-							return;
-						}
+						var data = JSON.parse(self._script.variable.getValue(action.string, vars));							
 						if (unit && data) {
 							unit.loadDataFromString(data);
 						}
@@ -2754,12 +2749,7 @@ var ActionComponent = TaroEntity.extend({
 
 					case 'loadPlayerDataFromString':
 						var player = self._script.variable.getValue(action.player, vars);
-						try {
-							var data = JSON.parse(self._script.variable.getValue(action.string, vars));
-						} catch (err) {
-							throw new Error(err);
-							return;
-						}
+						var data = JSON.parse(self._script.variable.getValue(action.string, vars));
 						if (player && data) {
 							player.loadDataFromString(data);
 						}

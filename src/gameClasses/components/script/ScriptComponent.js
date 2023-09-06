@@ -184,7 +184,7 @@ var ScriptComponent = TaroEntity.extend({
 		if (path == undefined) {
 			path = this._entity._id + "/" + this.currentScriptId + "/" + this.currentActionName;
 		}
-		
+
 		if (this.scripts) {
 			if (this.errorLogs[path] == undefined) {
 				this.errorLogs[path] = {message, count: 1};
@@ -195,8 +195,6 @@ var ScriptComponent = TaroEntity.extend({
 			console.log('errorLog', path, message);
 			// taro.devLog('errorLog', message);
 			// ScriptComponent.prototype.log(log);
-
-			return log;
 		}
 	}
 
