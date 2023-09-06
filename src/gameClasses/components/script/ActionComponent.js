@@ -13,7 +13,7 @@ var ActionComponent = TaroEntity.extend({
 	run: function (actionList, vars, path) {
 		var self = this;
 
-		
+
 		if (actionList == undefined || actionList.length <= 0)
 			return;
 
@@ -29,15 +29,15 @@ var ActionComponent = TaroEntity.extend({
 			}
 
 			if (taro.profiler.isEnabled) {
-				var startTime = performance.now();				
+				var startTime = performance.now();
 				// var actionPath = path + "/" + i + "("+action.type+")";
 				var actionPath = path + "/" + i;
 			}
-	
+
 			// assign runMode engine-widely, so functions like item.use() can reference to what the current runMode is
 			// for item.use(), if runMode == 0, then it will stream quantity change to its owner player
 			taro.runMode = (action.runMode)? 1 : 0;
-			
+
 			if (taro.isServer) {
 
 				var now = Date.now();
@@ -251,30 +251,30 @@ var ActionComponent = TaroEntity.extend({
 								if (err) {
 									self._script.errorLog(err, path)
 								}
-								
+
 								var res = JSON.parse(body.replace(/\\"|""/g, '"'));
-	
+
 								var newValue = res.response;
 								params['newValue'] = newValue;
-	
+
 								if (taro.game.data.variables.hasOwnProperty(varName)) {
 									taro.game.data.variables[varName].value = newValue;
 								}
-	
+
 								taro.game.lastReceivedPostResponse = res;
 								taro.game.lastUpdatedVariableName = varName;
-								
+
 								var vars = {}
 								if (["unit", "item", "projectile"].includes(self._entity._category)) {
 									var key = self._entity._category + 'Id';
 									vars = { [key]: self._entity.id() }
 								}
-	
+
 								self._entity.script.trigger('onPostResponse', vars);
 							} catch (e) {
 								self._script.errorLog(e, path)
 							}
-							
+
 						});
 
 						break;
@@ -715,7 +715,7 @@ var ActionComponent = TaroEntity.extend({
 						if (player && player._stats && player._stats.clientId) {
 							taro.chat.sendToRoom('1', message, undefined, player._stats.clientId);
 						}
-						
+
 						break;
 
 					case 'sendChatMessage':
@@ -1037,7 +1037,7 @@ var ActionComponent = TaroEntity.extend({
 							loopCounter++;
 							if (loopCounter > 10000) {
 								taro.server.unpublish(errorMsg);
-								throw new Error("infinite loop detected"); // break infinite loop								
+								throw new Error("infinite loop detected"); // break infinite loop
 							}
 						}
 						break;
@@ -1886,7 +1886,7 @@ var ActionComponent = TaroEntity.extend({
 							projectile.setSourceItem(item);
 						}
 
-						break;						
+						break;
 
 					/* Ads */
 
@@ -2225,7 +2225,7 @@ var ActionComponent = TaroEntity.extend({
 								if (player) {
 									createdEntity = player.createUnit(rfdc()(data));
 								} else {
-									throw new Error("failed to create new unit because player doesn't exist");	
+									throw new Error("failed to create new unit because player doesn't exist");
 								}
 
 								taro.game.lastCreatedUnitId = createdEntity._id;
@@ -2741,7 +2741,7 @@ var ActionComponent = TaroEntity.extend({
 
 					case 'loadUnitDataFromString':
 						var unit = self._script.variable.getValue(action.unit, vars);
-						var data = JSON.parse(self._script.variable.getValue(action.string, vars));							
+						var data = JSON.parse(self._script.variable.getValue(action.string, vars));
 						if (unit && data) {
 							unit.loadDataFromString(data);
 						}
@@ -2777,12 +2777,15 @@ var ActionComponent = TaroEntity.extend({
 							} else if (tileY < 0 || tileY >= taro.game.data.map.height) {
 								break;
 							} else {
+								const obj = {};
+								obj[tileX] = {};
+								obj[tileX][tileY] = tileGid;
 								taro.developerMode.editTile({
 									edit: {
-										selectedTiles: { 0: { 0: tileGid } },
-										size: { x: 1, y: 1 },
+										selectedTiles: [obj],
+										size: 'fitContent',
 										shape: 'rectangle',
-										layer: tileLayer,
+										layer: [tileLayer],
 										x: tileX,
 										y: tileY,
 									},
@@ -2818,10 +2821,10 @@ var ActionComponent = TaroEntity.extend({
 							} else {
 								taro.developerMode.editTile({
 									edit: {
-										selectedTiles: { 0: { 0: tileGid } },
+										selectedTiles: [{ 0: { 0: tileGid } }],
 										size: { x: width, y: height },
 										shape: 'rectangle',
-										layer: tileLayer,
+										layer: [tileLayer],
 										x: tileX,
 										y: tileY,
 									},
@@ -2861,14 +2864,14 @@ var ActionComponent = TaroEntity.extend({
 						var key = self._script.variable.getValue(action.key, vars);
 						var value = self._script.variable.getValue(action.value, vars);
 						var object = self._script.variable.getValue(action.object, vars);
-						
+
 						if (value && object && key) {
 							object[key] = value;
 						}
 
 						break;
 
-					case 'removeElement': 
+					case 'removeElement':
 						var object = self._script.variable.getValue(action.object, vars);
 						var key = self._script.variable.getValue(action.key, vars);
 						if (object && key) {
@@ -2885,7 +2888,7 @@ var ActionComponent = TaroEntity.extend({
 				}
 
 				taro.network.resume();
-				
+
 				if (taro.profiler.isEnabled) {
 					taro.profiler.logTimeElapsed(actionPath, startTime);
 				}
@@ -2896,7 +2899,7 @@ var ActionComponent = TaroEntity.extend({
 			}
 		}
 
-		
+
 	}
 
 });
