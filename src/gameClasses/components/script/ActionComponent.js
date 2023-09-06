@@ -13,7 +13,7 @@ var ActionComponent = TaroEntity.extend({
 	run: function (actionList, vars, path) {
 		var self = this;
 
-
+		
 		if (actionList == undefined || actionList.length <= 0)
 			return;
 
@@ -29,15 +29,15 @@ var ActionComponent = TaroEntity.extend({
 			}
 
 			if (taro.profiler.isEnabled) {
-				var startTime = performance.now();
+				var startTime = performance.now();				
 				// var actionPath = path + "/" + i + "("+action.type+")";
 				var actionPath = path + "/" + i;
 			}
-
+	
 			// assign runMode engine-widely, so functions like item.use() can reference to what the current runMode is
 			// for item.use(), if runMode == 0, then it will stream quantity change to its owner player
-			taro.runMode = (action.runMode) ? 1 : 0;
-
+			taro.runMode = (action.runMode)? 1 : 0;
+			
 			if (taro.isServer) {
 
 				var now = Date.now();
@@ -59,7 +59,7 @@ var ActionComponent = TaroEntity.extend({
 
 					global.rollbar.log("engineStep is taking longer than 1000ms", rollbarData);
 
-					var errorMsg = taro.script.errorLog("engineTick is taking longer than 1000ms (took" + engineTickDelta + "ms)");
+					var errorMsg = taro.script.errorLog("engineTick is taking longer than 1000ms (took" + engineTickDelta + "ms)", path);
 					console.log(errorMsg, rollbarData);
 					taro.engineLagReported = true;
 					// taro.server.unpublish(errorMsg); // not publishing yet cuz TwoHouses will get unpub. loggin instead.
@@ -169,10 +169,10 @@ var ActionComponent = TaroEntity.extend({
 						break;
 
 					case 'condition':
-						if (self._script.condition.run(action.conditions, vars, actionPath)) {
-							var brk = self.run(action.then, vars, actionPath);
+						if (self._script.condition.run(action.conditions, vars, actionPath + '/condition')) {
+							var brk = self.run(action.then, vars, actionPath + '/then');
 						} else {
-							var brk = self.run(action.else, vars, actionPath);
+							var brk = self.run(action.else, vars, actionPath + '/else');
 						}
 
 						if (brk == 'break') {
@@ -246,37 +246,35 @@ var ActionComponent = TaroEntity.extend({
 							url: url,
 							form: string
 						}, function optionalCallback(err, httpResponse, body) {
-							if (err) {
-								return self._script.errorLog('sending POST failed:', err);
-							}
-
+							// try+catch must be redeclared inside callback otherwise an error will crash the process
 							try {
+								if (err) {
+									self._script.errorLog(err, path)
+								}
+								
 								var res = JSON.parse(body.replace(/\\"|""/g, '"'));
-
+	
 								var newValue = res.response;
 								params['newValue'] = newValue;
-
+	
 								if (taro.game.data.variables.hasOwnProperty(varName)) {
 									taro.game.data.variables[varName].value = newValue;
 								}
-
+	
 								taro.game.lastReceivedPostResponse = res;
 								taro.game.lastUpdatedVariableName = varName;
-
+								
 								var vars = {}
 								if (["unit", "item", "projectile"].includes(self._entity._category)) {
 									var key = self._entity._category + 'Id';
 									vars = { [key]: self._entity.id() }
 								}
-
+	
 								self._entity.script.trigger('onPostResponse', vars);
-
-							} catch (errorMsg) {
-								self._script.errorLog('sendPostRequest', taro.game.data.defaultData.title, url, errorMsg);
-								if (taro.game.data.variables.hasOwnProperty(varName)) {
-									taro.game.data.variables[varName].value = 'error';
-								}
+							} catch (e) {
+								self._script.errorLog(e, path)
 							}
+							
 						});
 
 						break;
@@ -717,7 +715,7 @@ var ActionComponent = TaroEntity.extend({
 						if (player && player._stats && player._stats.clientId) {
 							taro.chat.sendToRoom('1', message, undefined, player._stats.clientId);
 						}
-
+						
 						break;
 
 					case 'sendChatMessage':
@@ -1038,9 +1036,8 @@ var ActionComponent = TaroEntity.extend({
 
 							loopCounter++;
 							if (loopCounter > 10000) {
-								var errorMsg = self._script.errorLog('infinite loop detected');
-								console.log(errorMsg);
 								taro.server.unpublish(errorMsg);
+								throw new Error("infinite loop detected"); // break infinite loop								
 							}
 						}
 						break;
@@ -1055,6 +1052,7 @@ var ActionComponent = TaroEntity.extend({
 
 							var start = self._script.variable.getValue(action.start, vars);
 							var stop = self._script.variable.getValue(action.stop, vars);
+
 							// var incrementBy = stop >= start ? 1 : -1;
 							// var checkCondition = function (value) {
 							//     if (incrementBy === 1) {
@@ -1132,7 +1130,6 @@ var ActionComponent = TaroEntity.extend({
 							var unit = player.createUnit(data);
 							taro.game.lastCreatedUnitId = unit.id();
 						} else {
-							self._script.errorLog('cannot create unit. parameters are spawnPosition:', spawnPosition, ' player:', !!player, ' unitTypeId:', unitTypeId);
 							if (!player) invalidParameters.push('player');
 							if (!spawnPosition) invalidParameters.push('spawn position');
 							if (!unitTypeId) invalidParameters.push('unit type');
@@ -1147,7 +1144,6 @@ var ActionComponent = TaroEntity.extend({
 						if (entity && entity._category == 'unit' && unitTypeId != null) {
 							entity.streamUpdateData([{ type: unitTypeId }]);
 						} else {
-							self._script.errorLog('invalid unit / unitTypeId');
 							if (!entity) invalidParameters.push('unit');
 							if (!unitTypeId) invalidParameters.push('unit type');
 							throw new Error(`cannot change unit type. invalid parameter(s) given: ${invalidParameters.toString()}`);
@@ -1241,7 +1237,7 @@ var ActionComponent = TaroEntity.extend({
 
 							entity.setLinearVelocity(velocityX, velocityY);
 						} else {
-							self._script.errorLog('invalid entity');
+							throw new Error(`invalid entity`);
 						}
 
 						break;
@@ -1291,7 +1287,7 @@ var ActionComponent = TaroEntity.extend({
 						var color = self._script.variable.getValue(action.color, vars);
 
 						if (taro.isServer) {
-							taro.network.send('createFloatingText', { position: position, text: text, color: color });
+							taro.network.send('createFloatingText', {position: position, text: text, color: color});
 						} else {
 							taro.client.emit('floating-text', {
 								text: text,
@@ -1493,7 +1489,7 @@ var ActionComponent = TaroEntity.extend({
 						var particleTypeId = self._script.variable.getValue(action.particleType, vars);
 						var angle = self._script.variable.getValue(action.angle, vars);
 						if (particleTypeId && position) {
-							taro.network.send('particle', { particleId: particleTypeId, position: position, angle: angle || 0 });
+							taro.network.send('particle', { particleId: particleTypeId, position: position, angle: angle || 0});
 						}
 						break;
 
@@ -1502,7 +1498,7 @@ var ActionComponent = TaroEntity.extend({
 						var angle = self._script.variable.getValue(action.angle, vars);
 						var entity = self._script.variable.getValue(action.entity, vars);
 						if (particleTypeId && entity) {
-							taro.network.send('particle', { particleId: particleTypeId, position: { x: 0, y: 0 }, angle: angle || 0, entityId: entity.id() });
+							taro.network.send('particle', { particleId: particleTypeId, position: {x:0, y:0}, angle: angle || 0, entityId: entity.id()});
 						}
 						break;
 
@@ -1512,7 +1508,7 @@ var ActionComponent = TaroEntity.extend({
 							// entity.body.m_torque = entity._stats.body.rotationSpeed
 							entity.body.m_torque = torque;
 						} else {
-							// self._script.errorLog( action.type + " - invalid unit")
+							// throw new Error( action.type + " - invalid unit")
 						}
 						break;
 
@@ -1523,7 +1519,7 @@ var ActionComponent = TaroEntity.extend({
 							// entity.body.m_torque = -1 * entity._stats.body.rotationSpeed
 							entity.body.m_torque = -1 * torque;
 						} else {
-							// self._script.errorLog( action.type + " - invalid unit")
+							// throw new Error( action.type + " - invalid unit")
 						}
 						break;
 
@@ -1684,16 +1680,16 @@ var ActionComponent = TaroEntity.extend({
 								projectile.script.trigger('entityCreated');
 							} else {
 								if (!projectileData) {
-									self._script.errorLog('invalid projectile data');
+									throw new Error('invalid projectile data');
 								}
 								if (!position || position.x == undefined || position.y == undefined) {
-									self._script.errorLog('invalid position data');
+									throw new Error('invalid position data');
 								}
 								if (force == undefined) {
-									self._script.errorLog('invalid force value');
+									throw new Error('invalid force value');
 								}
 								if (angle == undefined) {
-									self._script.errorLog('invalid angle value');
+									throw new Error('invalid angle value');
 								}
 							}
 						}
@@ -1747,7 +1743,7 @@ var ActionComponent = TaroEntity.extend({
 							taro.game.lastCreatedItemId = item._id;
 							item.script.trigger("entityCreated");
 						} else {
-							self._script.errorLog('invalid item type data');
+							throw new Error('invalid item type data');
 						}
 						break;
 					/* depreciated and can be removed */
@@ -1775,7 +1771,7 @@ var ActionComponent = TaroEntity.extend({
 							taro.game.lastCreatedItemId = item._id;
 							item.script.trigger("entityCreated");
 						} else {
-							self._script.errorLog('invalid item type data');
+							throw new Error('invalid item type data');
 						}
 						break;
 
@@ -1797,7 +1793,7 @@ var ActionComponent = TaroEntity.extend({
 							taro.game.lastCreatedItemId = item._id;
 							item.script.trigger("entityCreated");
 						} else {
-							self._script.errorLog('invalid item type data');
+							throw new Error('invalid item type data');
 						}
 						break;
 
@@ -1853,9 +1849,9 @@ var ActionComponent = TaroEntity.extend({
 							} else // error log
 							{
 								if (unit == undefined || unit._category != 'unit')
-									self._script.errorLog('unit doesn\'t exist');
+									throw new Error('unit doesn\'t exist');
 								// else
-								//  self._script.errorLog("giveNewItemToUnit: cannot add item to unit's inventory")
+								//  throw new Error("giveNewItemToUnit: cannot add item to unit's inventory")
 							}
 						}
 						break;
@@ -1869,7 +1865,7 @@ var ActionComponent = TaroEntity.extend({
 						} else // error log
 						{
 							if (unit == undefined || unit._category != 'unit')
-								self._script.errorLog('unit doesn\'t exist');
+								throw new Error('unit doesn\'t exist');
 						}
 
 						break;
@@ -1890,7 +1886,7 @@ var ActionComponent = TaroEntity.extend({
 							projectile.setSourceItem(item);
 						}
 
-						break;
+						break;						
 
 					/* Ads */
 
@@ -1926,7 +1922,7 @@ var ActionComponent = TaroEntity.extend({
 						} else // error log
 						{
 							if (unit == undefined || unit._category != 'unit')
-								self._script.errorLog('unit doesn\'t exist');
+								throw new Error('unit doesn\'t exist');
 						}
 
 						break;
@@ -2066,7 +2062,7 @@ var ActionComponent = TaroEntity.extend({
 
 							entity.applyForce(forceX, forceY);
 						} else {
-							self._script.errorLog('invalid entity');
+							throw new Error('invalid entity');
 						}
 
 						break;
@@ -2089,7 +2085,7 @@ var ActionComponent = TaroEntity.extend({
 
 							entity.applyImpulse(impulseX, impulseY);
 						} else {
-							self._script.errorLog('invalid entity');
+							throw new Error('invalid entity');
 						}
 
 						break;
@@ -2229,7 +2225,7 @@ var ActionComponent = TaroEntity.extend({
 								if (player) {
 									createdEntity = player.createUnit(rfdc()(data));
 								} else {
-									taro.script.errorLog("failed to create new unit because player doesn't exist");
+									throw new Error("failed to create new unit because player doesn't exist");	
 								}
 
 								taro.game.lastCreatedUnitId = createdEntity._id;
@@ -2395,22 +2391,22 @@ var ActionComponent = TaroEntity.extend({
 
 						break;
 
-					case 'teleportEntity':
-						var position = self._script.variable.getValue(action.position, vars);
-						var entity = self._script.variable.getValue(action.entity, vars);
+                    case 'teleportEntity':
+                        var position = self._script.variable.getValue(action.position, vars);
+                        var entity = self._script.variable.getValue(action.entity, vars);
 
-						if (position && entity && ['unit', 'item', 'projectile'].includes(entity._category)) {
-							entity.teleportTo(position.x, position.y, entity._rotate.z, true);
-						}
+                        if (position && entity && ['unit', 'item', 'projectile'].includes(entity._category)) {
+                            entity.teleportTo(position.x, position.y, entity._rotate.z, true);
+                        }
 
-						break;
+                        break;
 
 					case 'destroyEntity':
 						var entity = self._script.variable.getValue(action.entity, vars);
 						if (entity && self.entityCategories.indexOf(entity._category) > -1) {
 							entity.remove();
 						} else {
-							self._script.errorLog('invalid unit');
+							throw new Error('invalid unit');
 						}
 
 						break;
@@ -2563,10 +2559,10 @@ var ActionComponent = TaroEntity.extend({
 								entity.applyTorque(torque);
 								// entity.body.applyTorque(torque);
 							} else {
-								self._script.errorLog(action.type + " - invalid position")
+								throw new Error( action.type + " - invalid position")
 							}
 						} else {
-							self._script.errorLog(action.type + " - invalid unit")
+							throw new Error( action.type + " - invalid unit")
 						}
 						break;
 
@@ -2745,12 +2741,7 @@ var ActionComponent = TaroEntity.extend({
 
 					case 'loadUnitDataFromString':
 						var unit = self._script.variable.getValue(action.unit, vars);
-						try {
-							var data = JSON.parse(self._script.variable.getValue(action.string, vars));
-						} catch (err) {
-							self._script.errorLog(err);
-							return;
-						}
+						var data = JSON.parse(self._script.variable.getValue(action.string, vars));							
 						if (unit && data) {
 							unit.loadDataFromString(data);
 						}
@@ -2758,12 +2749,7 @@ var ActionComponent = TaroEntity.extend({
 
 					case 'loadPlayerDataFromString':
 						var player = self._script.variable.getValue(action.player, vars);
-						try {
-							var data = JSON.parse(self._script.variable.getValue(action.string, vars));
-						} catch (err) {
-							self._script.errorLog(err);
-							return;
-						}
+						var data = JSON.parse(self._script.variable.getValue(action.string, vars));
 						if (player && data) {
 							player.loadDataFromString(data);
 						}
@@ -2791,15 +2777,12 @@ var ActionComponent = TaroEntity.extend({
 							} else if (tileY < 0 || tileY >= taro.game.data.map.height) {
 								break;
 							} else {
-								const obj = {};
-								obj[tileX] = {};
-								obj[tileX][tileY] = tileGid;
 								taro.developerMode.editTile({
 									edit: {
-										selectedTiles: [obj],
-										size: 'fitContent',
+										selectedTiles: { 0: { 0: tileGid } },
+										size: { x: 1, y: 1 },
 										shape: 'rectangle',
-										layer: [tileLayer],
+										layer: tileLayer,
 										x: tileX,
 										y: tileY,
 									},
@@ -2835,10 +2818,10 @@ var ActionComponent = TaroEntity.extend({
 							} else {
 								taro.developerMode.editTile({
 									edit: {
-										selectedTiles: [{ 0: { 0: tileGid } }],
+										selectedTiles: { 0: { 0: tileGid } },
 										size: { x: width, y: height },
 										shape: 'rectangle',
-										layer: [tileLayer],
+										layer: tileLayer,
 										x: tileX,
 										y: tileY,
 									},
@@ -2878,14 +2861,14 @@ var ActionComponent = TaroEntity.extend({
 						var key = self._script.variable.getValue(action.key, vars);
 						var value = self._script.variable.getValue(action.value, vars);
 						var object = self._script.variable.getValue(action.object, vars);
-
+						
 						if (value && object && key) {
 							object[key] = value;
 						}
 
 						break;
 
-					case 'removeElement':
+					case 'removeElement': 
 						var object = self._script.variable.getValue(action.object, vars);
 						var key = self._script.variable.getValue(action.key, vars);
 						if (object && key) {
@@ -2902,18 +2885,18 @@ var ActionComponent = TaroEntity.extend({
 				}
 
 				taro.network.resume();
-
+				
 				if (taro.profiler.isEnabled) {
 					taro.profiler.logTimeElapsed(actionPath, startTime);
 				}
 
 			} catch (e) {
 				console.log(e);
-				self._script.errorLog(e); // send error msg to client
+				self._script.errorLog(e, path); // send error msg to client
 			}
 		}
 
-
+		
 	}
 
 });

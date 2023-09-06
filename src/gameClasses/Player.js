@@ -794,20 +794,12 @@ var Player = TaroEntity.extend({
 			if ((typeof (userId) !== 'undefined' && typeof (sessionId) !== 'undefined') || window.isStandalone) {
 
 				if ((taro.game.data.isGameDeveloper && ['1', '4', '5'].includes(taro.game.data.defaultData.tier)) || window.isStandalone) {
-					// dont show dev menu by default
-					// if (!taro.isMobile) {
-					// 	$("#dev-console").show() // if user has access of this game, show dev console
-					// }
-					// $('#game-suggestions-card').removeClass('d-xl-block');
-					// $("#invite-players-card").show();
-					// $('#toggle-dev-panels').show();
-					// for edge case handling
 					if(window.isStandalone) {
 						$('#toggle-dev-panels').click();
 					}
 				} else {
 					if (taro.game.data.isDeveloper) {
-						$('#toggle-dev-panels').show();
+						// $('#toggle-dev-panels').show();
 					}
 				}
 				if (taro.game.data.isDeveloper) {
