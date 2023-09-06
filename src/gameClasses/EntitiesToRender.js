@@ -42,7 +42,6 @@ var EntitiesToRender = /** @class */ (function () {
                 if (ownerUnit) {
                     // if the ownerUnit is not visible, then hide the item
                     if (((_c = (_b = ownerUnit.phaserEntity) === null || _b === void 0 ? void 0 : _b.gameObject) === null || _c === void 0 ? void 0 : _c.visible) == false) {
-                        console.log("hide item", phaserGameObject.visible);
                         phaserGameObject.setVisible(false);
                         continue;
                     }
