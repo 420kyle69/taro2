@@ -52,13 +52,6 @@ var GameScene = /** @class */ (function (_super) {
                 taro.client.emit('scale', { ratio: camera.zoom * _this.resolutionCoef });
             }
         });
-        this.input.on('pointermove', function (p) {
-            var worldPoint = _this.cameras.main.getWorldPoint(_this.input.activePointer.x, _this.input.activePointer.y);
-            taro.input.emit('pointermove', [{
-                    x: worldPoint.x,
-                    y: worldPoint.y,
-                }]);
-        });
         taro.client.on('zoom', function (height) {
             if (_this.zoomSize === height * 2.15) {
                 return;
@@ -425,10 +418,15 @@ var GameScene = /** @class */ (function (_super) {
         }
     };
     GameScene.prototype.update = function () {
+        var _this = this;
         //cause black screen and camera jittering when change tab
         /*let trackingDelay = this.trackingDelay / taro.fps();
         this.cameras.main.setLerp(trackingDelay, trackingDelay);*/
-        var _this = this;
+        var worldPoint = this.cameras.main.getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
+        taro.input.emit('pointermove', [{
+                x: worldPoint.x,
+                y: worldPoint.y,
+            }]);
         this.renderedEntities.forEach(function (element) {
             element.setVisible(false);
         });
