@@ -13,7 +13,6 @@ var ControlComponent = TaroEntity.extend({
 		this._options = options;
 		this.lastActionAt = Date.now();
 
-		this.lastMousePosition = [undefined, undefined];
 		this.mouseLocked = false;
 
 		// this.lastCommandSentAt = undefined;
@@ -323,7 +322,7 @@ var ControlComponent = TaroEntity.extend({
 					}
 				}
 
-				if (self.newMousePosition && (self.newMousePosition[0] != self.lastMousePosition[0] || self.newMousePosition[1] != self.lastMousePosition[1])) {
+				if (self.newMousePosition) {
 					// if we are using mobile controls don't send mouse moves to server here as we will do so from a look touch stick
 					if (!taro.isMobile) {
 						// absolute mouse position wrt window
@@ -351,9 +350,10 @@ var ControlComponent = TaroEntity.extend({
 						}
 					}
 					if (self.sendPlayerInput) {
+                        //console.log('SEND MOUSE POS', self.newMousePosition[0], self.newMousePosition[1]);
 						taro.network.send('playerMouseMoved', self.newMousePosition);
+                        self.newMousePosition = null;
 					}
-					self.lastMousePosition = self.newMousePosition;
 				}
 
 				// send unit position to server (client-authoritative movement)
