@@ -44,11 +44,14 @@ class EntitiesToRender {
 				
 				if (entity.isTransforming()) {
 					entity._processTransform();
-				} else {
-                    entity._translate.x = entity.nextKeyFrame[1][0]
-                    entity._translate.y = entity.nextKeyFrame[1][1]
-                    entity._rotate.z = entity.nextKeyFrame[1][2]
-                }				
+				}
+				// sometimes, entities' _translate & _rotate aren't updated, because processTransform doesn't run when tab isn't focused
+				// hence, we're forcing the update here
+				else if (entity != taro.client.selectedUnit) {
+					entity._translate.x = entity.nextKeyFrame[1][0]
+					entity._translate.y = entity.nextKeyFrame[1][1]
+					entity._rotate.z = entity.nextKeyFrame[1][2]					
+				}				
 
 				if (entity._translate) {
 					var x = entity._translate.x;
