@@ -228,7 +228,7 @@ var ActionComponent = TaroEntity.extend({
 						break;
 
 					case 'sendPostRequest':
-						var string = self._script.variable.getValue(action.string, vars);
+						var obj = self._script.variable.getValue(action.object, vars);
 						var url = self._script.variable.getValue(action.url, vars);
 						var varName = self._script.variable.getValue(action.varName, vars);
 
@@ -244,7 +244,7 @@ var ActionComponent = TaroEntity.extend({
 
 						taro.server.request.post({
 							url: url,
-							form: string
+							form: obj
 						}, function optionalCallback(err, httpResponse, body) {
 							// try+catch must be redeclared inside callback otherwise an error will crash the process
 							try {
