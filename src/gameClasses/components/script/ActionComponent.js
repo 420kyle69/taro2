@@ -521,7 +521,9 @@ var ActionComponent = TaroEntity.extend({
 					case 'makePlayerSelectUnit':
 						var player = self._script.variable.getValue(action.player, vars);
 						var unit = self._script.variable.getValue(action.unit, vars);
-						if (player && unit) {
+
+						// only computer player can be forced to say stuff
+						if (player && unit && player._stats.controlledBy == 'computer') {
 							player.selectUnit(unit.id());
 						}
 
