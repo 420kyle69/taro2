@@ -598,8 +598,9 @@ class GameScene extends PhaserScene {
 
 	update (): void {
 
-		let trackingDelay = this.trackingDelay / taro.fps();
-		this.cameras.main.setLerp(trackingDelay, trackingDelay);
+        //cause black screen and camera jittering when change tab
+		/*let trackingDelay = this.trackingDelay / taro.fps();
+		this.cameras.main.setLerp(trackingDelay, trackingDelay);*/
 
 		const worldPoint = this.cameras.main.getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
 
