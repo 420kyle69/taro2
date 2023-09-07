@@ -20,7 +20,7 @@ class EntitiesToRender {
 				// handle entity behaviour and transformation offsets
 				// var timeStart = performance.now();
 
-				var phaserEntity = entity.phaserEntity?.gameObject
+				var phaserGameObject = entity.phaserEntity?.gameObject
 
 				if (taro.gameLoopTickHasExecuted) {
 					if (entity._deathTime !== undefined && entity._deathTime <= taro._tickStart) {
@@ -44,6 +44,13 @@ class EntitiesToRender {
 				
 				if (entity.isTransforming()) {
 					entity._processTransform();
+				}
+				// sometimes, entities' _translate & _rotate aren't updated, because processTransform doesn't run when tab isn't focused
+				// hence, we're forcing the update here
+				else if (entity != taro.client.selectedUnit) {
+					entity._translate.x = entity.nextKeyFrame[1][0]
+					entity._translate.y = entity.nextKeyFrame[1][1]
+					entity._rotate.z = entity.nextKeyFrame[1][2]					
 				}				
 
 				if (entity._translate) {
@@ -57,7 +64,7 @@ class EntitiesToRender {
 
 					// if the ownerUnit is not visible, then hide the item
 					if (ownerUnit.phaserEntity?.gameObject?.visible == false) {
-						ownerUnit.phaserEntity.gameObject.setVisible(false);
+						phaserGameObject.setVisible(false);
 						continue;
 					}
 					
@@ -81,9 +88,10 @@ class EntitiesToRender {
 						y = ownerUnit._translate.y + entity.anchoredOffset.y;
 						rotate = entity.anchoredOffset.rotate;
 					}
+                    //if (entity._stats.name === 'potato gun small') console.log('owner unit translate',ownerUnit._translate.x, ownerUnit._translate.y, '\nphaser unit pos', ownerUnit.phaserEntity.gameObject.x, ownerUnit.phaserEntity.gameObject.y, '\nitem translate', x, y, '\nphaser item pos', entity.phaserEntity.gameObject.x, entity.phaserEntity.gameObject.y)
 				}
 
-				if (entity.tween?.isTweening && phaserEntity?.visible) {
+				if (entity.tween?.isTweening && phaserGameObject?.visible) {
 					entity.tween.update();
 					x += entity.tween.offset.x;
 					y += entity.tween.offset.y;
@@ -115,7 +123,5 @@ class EntitiesToRender {
 		taro._renderFrames++;
 
 		this.updateAllEntities();
-
-
 	}
 }

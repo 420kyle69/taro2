@@ -13,7 +13,7 @@ var EntitiesToRender = /** @class */ (function () {
             if (entity) {
                 // handle entity behaviour and transformation offsets
                 // var timeStart = performance.now();
-                var phaserEntity = (_a = entity.phaserEntity) === null || _a === void 0 ? void 0 : _a.gameObject;
+                var phaserGameObject = (_a = entity.phaserEntity) === null || _a === void 0 ? void 0 : _a.gameObject;
                 if (taro.gameLoopTickHasExecuted) {
                     if (entity._deathTime !== undefined && entity._deathTime <= taro._tickStart) {
                         // Check if the deathCallBack was set
@@ -33,6 +33,13 @@ var EntitiesToRender = /** @class */ (function () {
                 if (entity.isTransforming()) {
                     entity._processTransform();
                 }
+                // sometimes, entities' _translate & _rotate aren't updated, because processTransform doesn't run when tab isn't focused
+                // hence, we're forcing the update here
+                else if (entity != taro.client.selectedUnit) {
+                    entity._translate.x = entity.nextKeyFrame[1][0];
+                    entity._translate.y = entity.nextKeyFrame[1][1];
+                    entity._rotate.z = entity.nextKeyFrame[1][2];
+                }
                 if (entity._translate) {
                     var x = entity._translate.x;
                     var y = entity._translate.y;
@@ -42,7 +49,7 @@ var EntitiesToRender = /** @class */ (function () {
                 if (ownerUnit) {
                     // if the ownerUnit is not visible, then hide the item
                     if (((_c = (_b = ownerUnit.phaserEntity) === null || _b === void 0 ? void 0 : _b.gameObject) === null || _c === void 0 ? void 0 : _c.visible) == false) {
-                        ownerUnit.phaserEntity.gameObject.setVisible(false);
+                        phaserGameObject.setVisible(false);
                         continue;
                     }
                     // update ownerUnit's transform, so the item can be positioned relative to the ownerUnit's transform
@@ -63,8 +70,9 @@ var EntitiesToRender = /** @class */ (function () {
                         y = ownerUnit._translate.y + entity.anchoredOffset.y;
                         rotate = entity.anchoredOffset.rotate;
                     }
+                    //if (entity._stats.name === 'potato gun small') console.log('owner unit translate',ownerUnit._translate.x, ownerUnit._translate.y, '\nphaser unit pos', ownerUnit.phaserEntity.gameObject.x, ownerUnit.phaserEntity.gameObject.y, '\nitem translate', x, y, '\nphaser item pos', entity.phaserEntity.gameObject.x, entity.phaserEntity.gameObject.y)
                 }
-                if (((_f = entity.tween) === null || _f === void 0 ? void 0 : _f.isTweening) && (phaserEntity === null || phaserEntity === void 0 ? void 0 : phaserEntity.visible)) {
+                if (((_f = entity.tween) === null || _f === void 0 ? void 0 : _f.isTweening) && (phaserGameObject === null || phaserGameObject === void 0 ? void 0 : phaserGameObject.visible)) {
                     entity.tween.update();
                     x += entity.tween.offset.x;
                     y += entity.tween.offset.y;

@@ -464,13 +464,13 @@ var ClientNetworkEvents = {
 		for (actionName in logs) {
 			var log = logs[actionName];
 			element.innerHTML += `<li style='font-size:12px;'>${log}</li>`;
-			taro.client.errorLogs.push(log);
+			taro.client.errorLogs.push({...log, path: actionName});
 			$("#dev-error-button").text(`Errors (${taro.client.errorLogs.length})`);	
 			
-			window.addToLogs && window.addToLogs(log)
+			if (window.addToLogs && typeof log.message === 'string') {
+				window.addToLogs({...log, path: actionName})
+			}
 		}
-
-	
 
 		window.reactApp.showErrorToast(logs[Object.keys(logs)[Object.keys(logs).length - 1]]);
 	},

@@ -24,7 +24,7 @@ var ProfilerComponent = TaroEventingClass.extend({
 			this.timeElapsed[path] = {
 				count: 0,
 				avgTime: 0,
-				countPerTick: 0,
+				countSinceLastTick: 0,
 				avgTimePerTick: 0,
 				tickCount: 0,
 				cpu: 0,
@@ -37,7 +37,7 @@ var ProfilerComponent = TaroEventingClass.extend({
 		this.timeElapsed[path].avgTime = ((element.avgTime * element.count) + timeElapsed) / (element.count + 1);
 		// this.timeElapsed[path].avgTime += timeElapsed;,
 		this.timeElapsed[path].count++;
-		this.timeElapsed[path].countPerTick++;
+		this.timeElapsed[path].countSinceLastTick++;
 	},
 
 	logTick: function(engineTickTime) {
@@ -46,14 +46,14 @@ var ProfilerComponent = TaroEventingClass.extend({
 
 		var totalTime = 0;
 		for (var path in this.timeElapsed) {			
-			if (this.timeElapsed[path].countPerTick > 0) {
+			if (this.timeElapsed[path].countSinceLastTick > 0) {
 				var element = this.timeElapsed[path];
-				var timeElapsed = element.avgTime * element.countPerTick
+				var timeElapsed = element.avgTime * element.countSinceLastTick
 				totalTime += timeElapsed;
 				this.timeElapsed[path].avgTimePerTick = ((element.avgTimePerTick * element.tickCount) + timeElapsed) / (element.tickCount + 1);
-				this.timeElapsed[path].cpu = (timeElapsed / engineTickTime) * 100;
+				this.timeElapsed[path].cpu = (this.timeElapsed[path].avgTimePerTick / engineTickTime) * 100;
 				this.timeElapsed[path].avgCpu = ((element.avgCpu * element.tickCount) + this.timeElapsed[path].cpu) / (element.tickCount + 1);
-				this.timeElapsed[path].countPerTick = 0;
+				this.timeElapsed[path].countSinceLastTick = 0;
 				this.timeElapsed[path].tickCount++;
 			}
 		}
