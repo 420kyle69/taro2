@@ -196,6 +196,10 @@ var ScriptComponent = TaroEntity.extend({
 			// taro.devLog('errorLog', message);
 			// ScriptComponent.prototype.log(log);
 		}
+
+		if (taro.server.unpublishQueued) {
+			taro.server.unpublish(message + " " + path);	
+		}
 	}
 
 });

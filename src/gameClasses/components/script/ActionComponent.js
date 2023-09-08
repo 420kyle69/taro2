@@ -240,7 +240,8 @@ var ActionComponent = TaroEntity.extend({
 							oldestReqTimestamp = taro.server.postReqTimestamps.shift();
 						}
 						if (taro.server.postReqTimestamps.length > 30) {
-							taro.server.unpublish('Game server is sending too many POST requests. You cannot send more than 30 req per every 10s.');
+							taro.server.unpublishQueued = true;
+							throw new Error('Game server is sending too many POST requests. You cannot send more than 30 req per every 10s.');
 						}
 
 						try {
@@ -1035,8 +1036,8 @@ var ActionComponent = TaroEntity.extend({
 
 							loopCounter++;
 							if (loopCounter > 10000) {
-								var errorMsg = self._script.errorLog('infinite loop detected')
-								taro.server.unpublish(errorMsg);
+								
+								taro.server.unpublishQueued = true;
 								throw new Error("infinite loop detected"); // break infinite loop
 							}
 						}
@@ -2894,7 +2895,7 @@ var ActionComponent = TaroEntity.extend({
 				}
 
 			} catch (e) {
-				console.log(e);
+				// console.log(e);
 				self._script.errorLog(e, path); // send error msg to client
 			}
 		}
