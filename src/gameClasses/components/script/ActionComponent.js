@@ -228,8 +228,8 @@ var ActionComponent = TaroEntity.extend({
 						break;
 
 					case 'sendPostRequest':
-						var form = self._script.variable.getValue(action.string, vars);
-						var headers = self._script.variable.getValue(action.string, vars);
+						var form = self._script.variable.getValue(action.form, vars);
+						var headers = self._script.variable.getValue(action.headers, vars);
 						var url = self._script.variable.getValue(action.url, vars);
 						var varName = self._script.variable.getValue(action.varName, vars);
 
@@ -243,40 +243,52 @@ var ActionComponent = TaroEntity.extend({
 							taro.server.unpublish('Game server is sending too many POST requests. You cannot send more than 30 req per every 10s.');
 						}
 
+						try {
+							JSON.parse(headers);
+							headers = JSON.parse(headers);
+						} catch (e) {
+							// headers is not JSON
+						}
+
+						try {
+							JSON.parse(form);
+							form = JSON.parse(form);
+						} catch (e) {
+							// form is not JSON
+						}
+
 						// use closure to store globalVariableName
-						(function(globalVariableName) {
-							taro.server.request.post({
-								url: url,
-								form: form,
-								headers: headers
-							}, function optionalCallback(err, httpResponse, body) {
-								// try+catch must be redeclared inside callback otherwise an error will crash the process
-								try {
-									if (err) {
-										self._script.errorLog(err, path)
-									}
-
-									if (taro.game.data.variables.hasOwnProperty(globalVariableName)) {
-										taro.game.data.variables[globalVariableName].value = body;
-									}
-
-									taro.game.lastReceivedPostResponse = body;
-									taro.game.lastUpdatedVariableName = globalVariableName;
-
-									// if sendPostRequest was called from a unit/item/projectile, then pass the triggering entity's id onPostResponse
-									var vars = {}
-									if (["unit", "item", "projectile"].includes(self._entity._category)) {
-										var key = self._entity._category + 'Id';
-										vars = { [key]: self._entity.id() }
-									}
-
-									self._entity.script.trigger('onPostResponse', vars);
-								} catch (e) {
-									self._script.errorLog(e, path)
+						taro.server.request.post({
+							url: url,
+							headers:  headers,
+							form: form							
+						}, function optionalCallback(err, httpResponse, body) {
+							// try+catch must be redeclared inside callback otherwise an error will crash the process
+							try {
+								if (err) {
+									self._script.errorLog(err, path)
 								}
 
-							})
-						})(varName);
+								if (taro.game.data.variables.hasOwnProperty(varName)) {
+									taro.game.data.variables[varName].value = body;
+								}
+
+								taro.game.lastReceivedPostResponse = body;
+								taro.game.lastUpdatedVariableName = varName;
+
+								// if sendPostRequest was called from a unit/item/projectile, then pass the triggering entity's id onPostResponse
+								var vars = {}
+								if (["unit", "item", "projectile"].includes(self._entity._category)) {
+									var key = self._entity._category + 'Id';
+									vars = { [key]: self._entity.id() }
+								}
+
+								self._entity.script.trigger('onPostResponse', vars);
+							} catch (e) {
+								self._script.errorLog(e, path)
+							}
+
+						});
 
 						break;
 
@@ -1023,6 +1035,7 @@ var ActionComponent = TaroEntity.extend({
 
 							loopCounter++;
 							if (loopCounter > 10000) {
+								var errorMsg = self._script.errorLog('infinite loop detected')
 								taro.server.unpublish(errorMsg);
 								throw new Error("infinite loop detected"); // break infinite loop
 							}
@@ -2852,7 +2865,7 @@ var ActionComponent = TaroEntity.extend({
 						var value = self._script.variable.getValue(action.value, vars);
 						var object = self._script.variable.getValue(action.object, vars);
 
-						if (value && object && key) {
+						if (object && key && value) {
 							object[key] = value;
 						}
 

@@ -2113,8 +2113,7 @@ var VariableComponent = TaroEntity.extend({
 			
 			'objectToString': function (text, vars) {
 				var object = self.getValue(text.object, vars);
-				var str = JSON.stringify(object).replace(/^"(.*)"$/, '$1') // remove opening & ending quotes
-				str.replace(/\\"|""/g, '"') // replace \" and "" with "
+				var str = JSON.stringify(object) // remove opening & ending quotes
 				if (object) {
 					return str;
 				}
