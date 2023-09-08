@@ -226,8 +226,57 @@ var ActionComponent = TaroEntity.extend({
 						taro.game.lastAttackingItemId = item.id();
 
 						break;
-
+					
 					case 'sendPostRequest':
+						var obj = self._script.variable.getValue(action.string, vars);
+						var url = self._script.variable.getValue(action.url, vars);
+						var varName = self._script.variable.getValue(action.varName, vars);
+
+						try {
+							obj = JSON.parse(obj);
+						} catch (err) {
+							console.error(err);
+							return;
+						}
+
+						// ensure we aren't sending more than 30 POST requests within 10 seconds
+						taro.server.postReqTimestamps.push(taro.currentTime());
+						var oldestReqTimestamp = taro.server.postReqTimestamps[0]
+						while (Date.now() - oldestReqTimestamp > 10000 && taro.server.postReqTimestamps.length > 0) {
+							oldestReqTimestamp = taro.server.postReqTimestamps.shift();
+						}
+						if (taro.server.postReqTimestamps.length > 30) {
+							taro.server.unpublish('Game server is sending too many POST requests. You cannot send more than 30 req per every 10s.');
+						}
+
+						taro.server.request.post({
+							url: url,
+							form: obj
+						}, function optionalCallback(err, httpResponse, body) {
+							if (err) {
+								return console.error('upload failed:', err);
+							}
+
+							try {
+								var res = JSON.parse(body);
+								var newValue = res.response;
+								params['newValue'] = newValue;
+
+								if (taro.game.data.variables.hasOwnProperty(varName)) {
+									taro.game.data.variables[varName].value = newValue;
+								}
+							} catch (err) {
+								console.error('sendPostRequest', taro.game.data.defaultData.title, url, err);
+								if (taro.game.data.variables.hasOwnProperty(varName)) {
+									taro.game.data.variables[varName].value = 'error';
+								}
+							}
+						});
+
+						break;
+
+						
+					case 'sendPostRequest2':
 						var form = self._script.variable.getValue(action.form, vars);
 						var headers = self._script.variable.getValue(action.headers, vars);
 						var url = self._script.variable.getValue(action.url, vars);
