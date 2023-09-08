@@ -585,7 +585,7 @@ var ActionComponent = TaroEntity.extend({
 						var unit = self._script.variable.getValue(action.unit, vars);
 
 						// only computer player can be forced to say stuff
-						if (player && unit && player._stats.controlledBy == 'computer') {
+						if (player && unit) {
 							player.selectUnit(unit.id());
 						}
 
@@ -777,7 +777,7 @@ var ActionComponent = TaroEntity.extend({
 					case 'makePlayerSendChatMessage':
 						var player = self._script.variable.getValue(action.player, vars);
 						var message = self._script.variable.getValue(action.message, vars);
-						if (player && player._stats && player._stats.clientId) {
+						if (player && player._stats && player._stats.clientId && player._stats.controlledBy == 'computer') {
 							taro.chat.sendToRoom('1', message, undefined, player._stats.clientId);
 						}
 
