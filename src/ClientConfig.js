@@ -84,6 +84,8 @@ var taroClientConfig = {
 		'renderer/phaser/scenes/MobileControlsScene.js',
         'renderer/phaser/scenes/UiScene.js',
 		'renderer/phaser/scenes/DevModeScene.js',
+        'renderer/phaser/classes/Ui/AbilityBar.js',
+        'renderer/phaser/classes/Ui/AbilityButton.js',
 		'renderer/phaser/classes/devmode/DevModeTools.js',
 		'renderer/phaser/classes/devmode/DevToolButton.js',
 		'renderer/phaser/classes/devmode/DevTooltip.js',

@@ -64,11 +64,6 @@ var PhaserRenderer = /** @class */ (function (_super) {
                 crossOrigin: 'anonymous'
             },
             plugins: {
-                /*scene: [{
-                      key: 'rexUI',
-                      plugin: UIPlugin,
-                      mapping: 'rexUI',
-                }],*/
                 global: [{
                         key: 'virtual-joystick',
                         plugin: rexvirtualjoystickplugin,
