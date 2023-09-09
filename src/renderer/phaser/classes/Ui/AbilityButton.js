@@ -58,6 +58,7 @@ var AbilityButton = /** @class */ (function (_super) {
         scene.add.existing(_this);
         button.on('pointerdown', function () {
             //console.log('ability pointerdown');
+            taro.client.isPressingAbility = true;
             if (key) {
                 taro.network.send('playerKeyDown', {
                     // @ts-ignore
@@ -69,6 +70,7 @@ var AbilityButton = /** @class */ (function (_super) {
             else func();*/
         });
         button.on('pointerup', function () {
+            taro.client.isPressingAbility = false;
             if (key) {
                 taro.network.send('playerKeyUp', {
                     // @ts-ignore
@@ -90,6 +92,7 @@ var AbilityButton = /** @class */ (function (_super) {
             });
             button.on('pointerout', function () {
                 scene.tooltip.fadeOut();
+                _this.activate(false);
             });
         }
         return _this;

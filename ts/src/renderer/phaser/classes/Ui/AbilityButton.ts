@@ -74,23 +74,26 @@ class AbilityButton extends Phaser.GameObjects.Container {
         scene.add.existing(this);
 
 		button.on('pointerdown', () => {
-            //console.log('ability pointerdown');
+            taro.client.isPressingAbility = true;
             if (key) {
                 taro.network.send('playerKeyDown', {
                     // @ts-ignore
                     device: 'key', key: key.toLowerCase()
                 });
+            } else {
+                // ability have no keybinding
             }
             this.activate(true);
-			/*if (value || value === 0) func(value);
-			else func();*/
 		});
         button.on('pointerup', () => {
+            taro.client.isPressingAbility = false;
             if (key) {
                 taro.network.send('playerKeyUp', {
                     // @ts-ignore
                     device: 'key', key: key.toLowerCase()
                 });
+            } else {
+                // ability have no keybinding
             }
             this.activate(false);
         });
@@ -105,6 +108,7 @@ class AbilityButton extends Phaser.GameObjects.Container {
 		    });
 		    button.on('pointerout', () => {
 		    	scene.tooltip.fadeOut();
+                this.activate(false);
 		    });
         }
 	}

@@ -9,6 +9,7 @@ declare class Client extends TaroEventingClass {
 	isZooming: boolean;
 	developerClientIds: any;
 	zoom: number;
+    isPressingAbility: boolean;
 
 	constructor(options?: object);
 }

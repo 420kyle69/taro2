@@ -83,7 +83,7 @@ var ControlComponent = TaroEntity.extend({
 	},
 
 	keyDown: function (device, key) {
-		if(taro.developerMode.shouldPreventKeybindings()) {
+		if(taro.developerMode.shouldPreventKeybindings() || (taro.isClient && this._entity._stats.clientId === taro.network.id() && taro.client.isPressingAbility)) {
 			return;
 		}
 
