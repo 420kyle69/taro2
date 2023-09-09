@@ -1,7 +1,8 @@
 class UiScene extends PhaserScene {
     tooltip: DevTooltip;
+    abilityBar: AbilityBar;
 	constructor() {
-		super({ key: 'UI', active: true });
+		super({ key: 'Ui', active: true });
 	}
 
 	init (): void {
@@ -9,8 +10,10 @@ class UiScene extends PhaserScene {
 	}
 
 	create (): void {
-        this.tooltip = new DevTooltip(this);
-        const abilityBar = new AbilityBar(this);
+        if (!taro.isMobile) {
+            this.tooltip = new DevTooltip(this);
+        }
+        const abilityBar = this.abilityBar = new AbilityBar(this);
 
         taro.client.on('create-ability-bar', (data: {keybindings: Record<string, ControlAbility>, abilities: Record<string, UnitAbility>}) => {
             const keybindings = data.keybindings;
@@ -27,24 +30,25 @@ class UiScene extends PhaserScene {
             });
 		});
 
-        taro.client.on('start-casting', (abilityId: string) => {
+        taro.client.on('start-press-key', (abilityId: string) => {
             abilityBar.buttons[abilityId].activate(true);
         });
 
-        taro.client.on('stop-casting', (abilityId: string) => {
+        taro.client.on('stop-press-key', (abilityId: string) => {
             abilityBar.buttons[abilityId].activate(false);
+            //abilityBar.buttons[abilityId].customize(abilityBar.buttons[abilityId].size, abilityBar.buttons[abilityId].size/2);
         });
 	}
 
 	preload (): void {
         this.load.plugin('rexroundrectangleplugin', '/assets/js/rexroundrectangleplugin.min.js', true);
         Object.values(taro.game.data.abilities).forEach(ability => {
-            this.load.image(ability.iconUrl, ability.iconUrl);
+            if (ability.iconUrl) this.load.image(ability.iconUrl, ability.iconUrl);
         });
         Object.values(taro.game.data.unitTypes).forEach(unitType => {
             if (unitType.controls.unitAbilities) {
                 Object.values(unitType.controls.unitAbilities).forEach(ability => {
-                    this.load.image(ability.iconUrl, ability.iconUrl);
+                    if (ability.iconUrl) this.load.image(ability.iconUrl, ability.iconUrl);
                 });
             }
         });

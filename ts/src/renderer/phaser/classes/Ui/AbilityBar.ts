@@ -7,6 +7,11 @@ class AbilityBar extends Phaser.GameObjects.Container{
 
     constructor(public scene: UiScene) {
 		super(scene);
+        if (taro.isMobile) {
+            this.buttonSize = 70;
+            this.buttonInterval = 4;
+            this.buttonRadius = 35;
+        }
         this.x = this.scene.sys.game.canvas.width / 2;
         this.y = this.scene.sys.game.canvas.height * 0.5 + 200;
         scene.add.existing(this);

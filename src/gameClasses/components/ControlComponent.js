@@ -158,6 +158,9 @@ var ControlComponent = TaroEntity.extend({
 						// console.log(key, Date.now());
 						unit.ability.cast(unitAbility.keyDown);
 					}
+                    if (taro.isClient && this._entity._stats.clientId === taro.network.id() && unitAbility?.keyDown?.abilityId) {
+                        taro.client.emit('start-press-key', unitAbility.keyDown.abilityId);
+                    }
 				} else if (
 					key == '1' || key == '2' || key == '3' || key == '4' ||
 					key == '5' || key == '6' || key == '7' || key == '8' || key == '9'
@@ -248,6 +251,10 @@ var ControlComponent = TaroEntity.extend({
 						unit.ability.cast(unitAbility.keyUp);
 					}
 				}
+
+                if (taro.isClient && this._entity._stats.clientId === taro.network.id() && unitAbility?.keyDown?.abilityId) {
+                    taro.client.emit('stop-press-key', unitAbility.keyDown.abilityId);
+                }
 			}
 		}
 

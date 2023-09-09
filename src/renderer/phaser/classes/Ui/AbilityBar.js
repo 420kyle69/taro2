@@ -22,6 +22,11 @@ var AbilityBar = /** @class */ (function (_super) {
         _this.buttonSize = 45;
         _this.buttonInterval = 3;
         _this.buttonRadius = 3;
+        if (taro.isMobile) {
+            _this.buttonSize = 70;
+            _this.buttonInterval = 4;
+            _this.buttonRadius = 35;
+        }
         _this.x = _this.scene.sys.game.canvas.width / 2;
         _this.y = _this.scene.sys.game.canvas.height * 0.5 + 200;
         scene.add.existing(_this);

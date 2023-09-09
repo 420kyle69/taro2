@@ -28,6 +28,7 @@ var MobileControlsScene = /** @class */ (function (_super) {
         var controls = this.controls = this.add.container();
         var joysticks = this.joysticks;
         taro.mobileControls.on('add-control', function (key, x, y, w, h, settings) {
+            var _a;
             switch (key) {
                 case 'movementWheel':
                 case 'lookWheel':
@@ -35,21 +36,34 @@ var MobileControlsScene = /** @class */ (function (_super) {
                     new PhaserJoystick(_this, x, y, settings);
                     break;
                 default:
-                    var relativeX = Math.trunc((x + w / 2) / 960 * window.innerWidth - w / 2);
-                    var relativeY = Math.trunc((y + h / 2) / 540 * window.innerHeight - h / 2);
+                    var relativeX_1 = Math.trunc((x + w / 2) / 960 * window.innerWidth - w / 2);
+                    var relativeY_1 = Math.trunc((y + h / 2) / 540 * window.innerHeight - h / 2);
+                    if (key !== 'button1') {
+                        var uiScene_1 = taro.renderer.scene.getScene('Ui');
+                        var buttonExist_1 = false;
+                        Object.values((_a = uiScene_1 === null || uiScene_1 === void 0 ? void 0 : uiScene_1.abilityBar) === null || _a === void 0 ? void 0 : _a.buttons).forEach(function (button) {
+                            if (button.key === key) {
+                                button.x = relativeX_1 - uiScene_1.abilityBar.x + button.size / 2;
+                                button.y = relativeY_1 - uiScene_1.abilityBar.y + button.size / 2;
+                                buttonExist_1 = true;
+                            }
+                        });
+                        if (buttonExist_1)
+                            return;
+                    }
                     var text = key.toUpperCase();
-                    var button_1 = _this.add.image(relativeX, relativeY, 'mobile-button-up')
+                    var button_1 = _this.add.image(relativeX_1, relativeY_1, 'mobile-button-up')
                         .setDisplaySize(w, h)
                         .setOrigin(0)
                         .setAlpha(0.6);
                     controls.add(button_1);
                     if (text === 'BUTTON1') {
-                        var icon = _this.add.image(relativeX + w / 2, relativeY + h / 2, 'mobile-button-icon');
+                        var icon = _this.add.image(relativeX_1 + w / 2, relativeY_1 + h / 2, 'mobile-button-icon');
                         icon.setScale(0.5);
                         controls.add(icon);
                     }
                     else {
-                        var label = _this.add.bitmapText(relativeX + w / 2, relativeY + h / 2, BitmapFontManager.font(_this, 'Arial', true, false, '#FFFFFF'));
+                        var label = _this.add.bitmapText(relativeX_1 + w / 2, relativeY_1 + h / 2, BitmapFontManager.font(_this, 'Arial', true, false, '#FFFFFF'));
                         label.setText(BitmapFontManager.sanitize(label.fontData, text));
                         label.setCenterAlign();
                         label.setFontSize(24);

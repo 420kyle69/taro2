@@ -17,6 +17,9 @@ var AbilityButton = /** @class */ (function (_super) {
     __extends(AbilityButton, _super);
     function AbilityButton(scene, name, key, tooltipText, texture, x, y, size, radius) {
         var _this = _super.call(this, scene) || this;
+        _this.key = key;
+        _this.size = size;
+        _this.radius = radius;
         _this.name = name;
         var backgroundColor = _this.backgroundColor = 0x000000;
         var activeColor = _this.activeColor = 0xFFFF00;
@@ -27,7 +30,7 @@ var AbilityButton = /** @class */ (function (_super) {
         button.setInteractive();
         _this.add(button);
         //button.setVisible(defaultVisible);
-        if (texture) {
+        if (texture && scene.textures.exists(texture)) {
             var image = _this.image = scene.add.image(0, 0, texture).setDisplaySize(size * 0.8, size * 0.8);
             _this.add(image);
         } /*else {
@@ -75,16 +78,31 @@ var AbilityButton = /** @class */ (function (_super) {
             _this.activate(false);
         });
         //const gameScene = taro.renderer.scene.getScene('Game');
-        button.on('pointerover', function () {
-            //gameScene.input.setTopOnly(true);
-            scene.tooltip.showMessage(name, tooltipText);
-            clearTimeout(_this.timer);
-        });
-        button.on('pointerout', function () {
-            scene.tooltip.fadeOut();
-        });
+        if (taro.isMobile) {
+            if (_this.image)
+                label.visible = false;
+        }
+        else {
+            button.on('pointerover', function () {
+                //gameScene.input.setTopOnly(true);
+                scene.tooltip.showMessage(name, tooltipText);
+                clearTimeout(_this.timer);
+            });
+            button.on('pointerout', function () {
+                scene.tooltip.fadeOut();
+            });
+        }
         return _this;
     }
+    AbilityButton.prototype.customize = function (size, radius) {
+        var _a;
+        this.size = size;
+        this.radius = radius;
+        this.button.setSize(size, size);
+        this.button.setRadius(radius);
+        (_a = this.image) === null || _a === void 0 ? void 0 : _a.setDisplaySize(size * 0.8, size * 0.8);
+        this.label.setPosition(-7 + size / 2, +7 - size / 2);
+    };
     AbilityButton.prototype.activate = function (bool) {
         if (bool) {
             this.button.setFillStyle(this.activeColor, 1);

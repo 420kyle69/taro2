@@ -271,9 +271,9 @@ var AbilityComponent = TaroEntity.extend({
 			this.abilityCooldowns[abilityId] = Date.now() + ability.castDuration;
 		}
 
-        if (taro.isClient && this._entity._stats.clientId === taro.network.id()) {
+        /*if (taro.isClient && this._entity._stats.clientId === taro.network.id()) {
             taro.client.emit('start-casting', abilityId);
-        }
+        }*/
 	},
 
 	stopCasting: function (abilityId) {
@@ -290,9 +290,9 @@ var AbilityComponent = TaroEntity.extend({
 			{ triggeredBy: { unitId: this._entity.id()} }
 		);
 
-        if (taro.isClient && this._entity._stats.clientId === taro.network.id()) {
+        /*if (taro.isClient && this._entity._stats.clientId === taro.network.id()) {
             taro.client.emit('stop-casting', abilityId);
-        }
+        }*/
 	},
 	_behaviour: function (ctx) {
 

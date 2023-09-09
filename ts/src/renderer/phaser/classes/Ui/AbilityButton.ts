@@ -15,13 +15,13 @@ class AbilityButton extends Phaser.GameObjects.Container {
 	constructor(
         scene: UiScene,
 		name: string,
-		key: string,
+		public key: string,
 		tooltipText: string,
 		texture: string | null,
 		x: number,
 		y: number,
-        size: number,
-        radius: number,
+        public size: number,
+        public radius: number,
 		//w: number,
 		//container: Phaser.GameObjects.Container,
 		//func: (...args: any[]) => void,
@@ -41,7 +41,7 @@ class AbilityButton extends Phaser.GameObjects.Container {
         this.add(button);
 
 		//button.setVisible(defaultVisible);
-		if (texture) {
+		if (texture && scene.textures.exists(texture)) {
 			const image = this.image = scene.add.image(0, 0, texture).setDisplaySize(size * 0.8, size * 0.8);
             this.add(image);
 		} /*else {
@@ -61,11 +61,8 @@ class AbilityButton extends Phaser.GameObjects.Container {
 		}*/
         const label = scene.add.bitmapText(
             - 7 + size / 2, + 7 - size / 2,
-            BitmapFontManager.font(scene,
-                'Verdana', true, false, '#FFFFFF'
-            ),
-            key,
-            18
+            BitmapFontManager.font(scene, 'Verdana', true, false, '#FFFFFF'),
+            key, 18
         );
         label.setOrigin(0.5);
         label.letterSpacing = 1.3;
@@ -73,7 +70,9 @@ class AbilityButton extends Phaser.GameObjects.Container {
         //label.setVisible(defaultVisible);
         //container.add(label);
         this.label = label;
+
         scene.add.existing(this);
+
 		button.on('pointerdown', () => {
             //console.log('ability pointerdown');
             if (key) {
@@ -96,15 +95,28 @@ class AbilityButton extends Phaser.GameObjects.Container {
             this.activate(false);
         });
         //const gameScene = taro.renderer.scene.getScene('Game');
-		button.on('pointerover', () => {
-            //gameScene.input.setTopOnly(true);
-			scene.tooltip.showMessage(name, tooltipText);
-			clearTimeout(this.timer);
-		});
-		button.on('pointerout', () => {
-			scene.tooltip.fadeOut();
-		});
+        if (taro.isMobile) {
+            if (this.image) label.visible = false;
+        } else {
+		    button.on('pointerover', () => {
+                //gameScene.input.setTopOnly(true);
+		    	scene.tooltip.showMessage(name, tooltipText);
+		    	clearTimeout(this.timer);
+		    });
+		    button.on('pointerout', () => {
+		    	scene.tooltip.fadeOut();
+		    });
+        }
 	}
+
+    customize (size: number, radius: number): void {
+        this.size = size;
+        this.radius = radius;
+        this.button.setSize(size, size);
+        this.button.setRadius(radius);
+        this.image?.setDisplaySize(size * 0.8, size * 0.8);
+        this.label.setPosition(- 7 + size / 2, + 7 - size / 2);
+    }
 
     activate(bool: boolean): void {
         if (bool) {

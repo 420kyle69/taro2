@@ -16,14 +16,16 @@ var __extends = (this && this.__extends) || (function () {
 var UiScene = /** @class */ (function (_super) {
     __extends(UiScene, _super);
     function UiScene() {
-        return _super.call(this, { key: 'UI', active: true }) || this;
+        return _super.call(this, { key: 'Ui', active: true }) || this;
     }
     UiScene.prototype.init = function () {
         return;
     };
     UiScene.prototype.create = function () {
-        this.tooltip = new DevTooltip(this);
-        var abilityBar = new AbilityBar(this);
+        if (!taro.isMobile) {
+            this.tooltip = new DevTooltip(this);
+        }
+        var abilityBar = this.abilityBar = new AbilityBar(this);
         taro.client.on('create-ability-bar', function (data) {
             var keybindings = data.keybindings;
             var abilities = data.abilities;
@@ -41,23 +43,26 @@ var UiScene = /** @class */ (function (_super) {
                 abilityBar.addButton(abilityId, ability, key);
             });
         });
-        taro.client.on('start-casting', function (abilityId) {
+        taro.client.on('start-press-key', function (abilityId) {
             abilityBar.buttons[abilityId].activate(true);
         });
-        taro.client.on('stop-casting', function (abilityId) {
+        taro.client.on('stop-press-key', function (abilityId) {
             abilityBar.buttons[abilityId].activate(false);
+            //abilityBar.buttons[abilityId].customize(abilityBar.buttons[abilityId].size, abilityBar.buttons[abilityId].size/2);
         });
     };
     UiScene.prototype.preload = function () {
         var _this = this;
         this.load.plugin('rexroundrectangleplugin', '/assets/js/rexroundrectangleplugin.min.js', true);
         Object.values(taro.game.data.abilities).forEach(function (ability) {
-            _this.load.image(ability.iconUrl, ability.iconUrl);
+            if (ability.iconUrl)
+                _this.load.image(ability.iconUrl, ability.iconUrl);
         });
         Object.values(taro.game.data.unitTypes).forEach(function (unitType) {
             if (unitType.controls.unitAbilities) {
                 Object.values(unitType.controls.unitAbilities).forEach(function (ability) {
-                    _this.load.image(ability.iconUrl, ability.iconUrl);
+                    if (ability.iconUrl)
+                        _this.load.image(ability.iconUrl, ability.iconUrl);
                 });
             }
         });
