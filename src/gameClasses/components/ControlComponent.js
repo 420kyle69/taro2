@@ -80,7 +80,7 @@ var ControlComponent = TaroEntity.extend({
 				taro.input.mapAction(key, taro.input[device][key]);
 			}
 		}
-	},
+	},  
 
 	keyDown: function (device, key) {
 		if(taro.developerMode.shouldPreventKeybindings() || (taro.isClient && this._entity._stats.clientId === taro.network.id() && taro.client.isPressingAbility)) {
@@ -150,17 +150,7 @@ var ControlComponent = TaroEntity.extend({
 				}
 
 				if (unitAbility && unitAbility.keyDown && unit.ability) {
-					if (taro.client && taro.client.inputDelay && taro.client.inputDelay > 0) {
-						setTimeout(function () {
-							unit.ability.cast(unitAbility.keyDown);
-						}, taro.client.inputDelay);
-					} else {
-						// console.log(key, Date.now());
-						unit.ability.cast(unitAbility.keyDown);
-					}
-                    if (taro.isClient && this._entity._stats.clientId === taro.network.id() && unitAbility?.keyDown?.abilityId) {
-                        taro.client.emit('start-press-key', unitAbility.keyDown.abilityId);
-                    }
+                    this.keyDownAbility(unit, unitAbility.keyDown);
 				} else if (
 					key == '1' || key == '2' || key == '3' || key == '4' ||
 					key == '5' || key == '6' || key == '7' || key == '8' || key == '9'
@@ -242,19 +232,7 @@ var ControlComponent = TaroEntity.extend({
 					unitAbility = unit._stats.controls.abilities[key];
 				}
 
-				if (unitAbility && unitAbility.keyUp && unit.ability) {
-					if (taro.client && taro.client.inputDelay && taro.client.inputDelay > 0) {
-						setTimeout(function () {
-							unit.ability.cast(unitAbility.keyUp);
-						}, taro.client.inputDelay);
-					} else {
-						unit.ability.cast(unitAbility.keyUp);
-					}
-				}
-
-                if (taro.isClient && this._entity._stats.clientId === taro.network.id() && unitAbility?.keyDown?.abilityId) {
-                    taro.client.emit('stop-press-key', unitAbility.keyDown.abilityId);
-                }
+                this.keyUpAbility(unit, unitAbility);
 			}
 		}
 
@@ -268,6 +246,34 @@ var ControlComponent = TaroEntity.extend({
 			this.input[device][key] = false;
 		}
 	},
+
+    keyDownAbility: function (unit, keyDown) {
+        if (taro.client && taro.client.inputDelay && taro.client.inputDelay > 0) {
+            setTimeout(function () {
+                unit.ability.cast(keyDown);
+            }, taro.client.inputDelay);
+        } else {
+            unit.ability.cast(keyDown);
+        }
+        if (taro.isClient && this._entity._stats.clientId === taro.network.id() && keyDown.abilityId) {
+            taro.client.emit('start-press-key', keyDown.abilityId);
+        }
+    },
+
+    keyUpAbility: function (unit, unitAbility) {
+        if (unitAbility && unitAbility.keyUp && unit.ability) {
+            if (taro.client && taro.client.inputDelay && taro.client.inputDelay > 0) {
+                setTimeout(function () {
+                    unit.ability.cast(unitAbility.keyUp);
+                }, taro.client.inputDelay);
+            } else {
+                unit.ability.cast(unitAbility.keyUp);
+            }
+        }
+        if (taro.isClient && this._entity._stats.clientId === taro.network.id() && unitAbility?.keyDown?.abilityId) {
+            taro.client.emit('stop-press-key', unitAbility.keyDown.abilityId);
+        }
+    },
 
 
 	// check for input modal is open

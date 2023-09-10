@@ -1,13 +1,8 @@
 class AbilityButton extends Phaser.GameObjects.Container {
     name: string;
 	button: any;
-	//active: boolean;
-	//hidden: boolean;
-	//isHover = false;
 	image: Phaser.GameObjects.Image;
-	label: Phaser.GameObjects.BitmapText;
-    //width: number;
-    //height: number;
+	label: Phaser.GameObjects.BitmapText;//Phaser.GameObjects.Text;//Phaser.GameObjects.BitmapText;
 	timer: number | NodeJS.Timeout;
     backgroundColor: number;
     activeColor: number;
@@ -15,6 +10,7 @@ class AbilityButton extends Phaser.GameObjects.Container {
 	constructor(
         scene: UiScene,
 		name: string,
+        public id: string,
 		public key: string,
 		tooltipText: string,
 		texture: string | null,
@@ -32,7 +28,7 @@ class AbilityButton extends Phaser.GameObjects.Container {
         super(scene);
 		this.name = name;
         const backgroundColor = this.backgroundColor = 0x000000;
-        const activeColor = this.activeColor = 0xFFFF00;
+        this.activeColor = 0xFFFF00;
         this.x = x;
         this.y = y;
         // @ts-ignore
@@ -40,26 +36,13 @@ class AbilityButton extends Phaser.GameObjects.Container {
 		button.setInteractive();
         this.add(button);
 
-		//button.setVisible(defaultVisible);
+        // image
 		if (texture && scene.textures.exists(texture)) {
 			const image = this.image = scene.add.image(0, 0, texture).setDisplaySize(size * 0.8, size * 0.8);
             this.add(image);
-		} /*else {
-			const label = scene.add.bitmapText(
-				x + w / 2, y + h / 2,
-				BitmapFontManager.font(scene,
-					'Verdana', false, false, '#000000'
-				),
-				text,
-				22
-			);
-			label.setOrigin(0.5);
-			label.letterSpacing = 1.3;
-            //label.setVisible(defaultVisible);
-			//container.add(label);
-			this.label = label;
-		}*/
-        const label = scene.add.bitmapText(
+		}
+        // label
+        const label = this.label = scene.add.bitmapText(
             - 7 + size / 2, + 7 - size / 2,
             BitmapFontManager.font(scene, 'Verdana', true, false, '#FFFFFF'),
             key, 18
@@ -67,40 +50,81 @@ class AbilityButton extends Phaser.GameObjects.Container {
         label.setOrigin(0.5);
         label.letterSpacing = 1.3;
         this.add(label);
-        //label.setVisible(defaultVisible);
-        //container.add(label);
-        this.label = label;
+
+        // Label
+        /*const label = this.label = scene.add.text( - 7 + size / 2, + 7 - size / 2, key, {
+            fontFamily: 'Verdana',
+            fontSize: 18,
+            color: '#FFFFFF',
+            align: 'center'
+        });
+        label.setResolution(2);
+        label.setOrigin(0.5);  
+        this.add(label);*/
 
         scene.add.existing(this);
 
-		button.on('pointerdown', () => {
-            taro.client.isPressingAbility = true;
-            if (key) {
-                taro.network.send('playerKeyDown', {
-                    // @ts-ignore
-                    device: 'key', key: key.toLowerCase()
-                });
-            } else {
-                // ability have no keybinding
-            }
-            this.activate(true);
-		});
-        button.on('pointerup', () => {
-            taro.client.isPressingAbility = false;
-            if (key) {
-                taro.network.send('playerKeyUp', {
-                    // @ts-ignore
-                    device: 'key', key: key.toLowerCase()
-                });
-            } else {
-                // ability have no keybinding
-            }
-            this.activate(false);
-        });
-        //const gameScene = taro.renderer.scene.getScene('Game');
         if (taro.isMobile) {
             if (this.image) label.visible = false;
+            const mobileControlScene = taro.renderer.scene.getScene('MobileControls') as MobileControlsScene;
+            let clicked = false;
+            button.on('pointerdown', () => {
+                mobileControlScene.disablePointerEvents = true;
+                this.activate(true);
+                if (clicked) return;
+                clicked = true;
+
+                if (key) {
+                    taro.network.send('playerKeyDown', {
+                        // @ts-ignore
+                        device: 'key', key: key.toLowerCase()
+                    });
+                } else {
+                    // ability have no keybinding
+                }
+            });
+            const onPointerEnd = () => {
+                mobileControlScene.enablePointerNextUpdate = true;
+                this.activate(false);
+                if (!clicked) return;
+                clicked = false;
+                
+                if (key) {
+                    taro.network.send('playerKeyUp', {
+                        // @ts-ignore
+                        device: 'key', key: key.toLowerCase()
+                    });
+                } else {
+                    // ability have no keybinding
+                }
+            };
+            button.on('pointerup', onPointerEnd);
+            button.on('pointerout', onPointerEnd);
         } else {
+            button.on('pointerdown', () => {
+                taro.client.isPressingAbility = true;
+                if (key) {
+                    taro.network.send('playerKeyDown', {
+                        // @ts-ignore
+                        device: 'key', key: key.toLowerCase()
+                    });
+                } else {
+                    // ability have no keybinding
+                }
+                this.activate(true);
+            });
+            button.on('pointerup', () => {
+                taro.client.isPressingAbility = false;
+                if (key) {
+                    taro.network.send('playerKeyUp', {
+                        // @ts-ignore
+                        device: 'key', key: key.toLowerCase()
+                    });
+                } else {
+                    // ability have no keybinding
+                }
+                this.activate(false);
+            });
 		    button.on('pointerover', () => {
                 //gameScene.input.setTopOnly(true);
 		    	scene.tooltip.showMessage(name, tooltipText);
@@ -129,37 +153,4 @@ class AbilityButton extends Phaser.GameObjects.Container {
             this.button.setFillStyle(this.backgroundColor, 0.7);
         }
     }
-
-	/*highlight(mode: 'no' | 'active' | 'hidden'): void {
-		switch (mode) {
-			case 'hidden':
-				this.hidden = true;
-				this.active = false;
-				this.button.setFillStyle(this.devModeTools['COLOR_GRAY'], 1);
-				break;
-
-			case 'active':
-				this.active = true;
-				this.hidden = false;
-				this.button.setFillStyle(this.devModeTools['COLOR_LIGHT'], 1);
-				break;
-
-			case 'no':
-				if (!this.hidden) {
-					this.active = false;
-					this.button.setFillStyle(this.devModeTools['COLOR_WHITE'], 1);
-				}
-				break;
-		}
-	}*/
-
-	increaseSize(value: boolean): void {
-		this.button.setScale(1 + (Number(value) * 0.2), 1 + (Number(value) * 0.10));
-		/*if (value) {
-			this.button.setStrokeStyle(2, 0x000000, 1);
-		}
-		else {
-			this.button.setStrokeStyle();
-		}*/
-	}
 }

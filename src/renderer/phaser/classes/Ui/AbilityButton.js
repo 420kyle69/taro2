@@ -15,76 +15,109 @@ var __extends = (this && this.__extends) || (function () {
 })();
 var AbilityButton = /** @class */ (function (_super) {
     __extends(AbilityButton, _super);
-    function AbilityButton(scene, name, key, tooltipText, texture, x, y, size, radius) {
+    function AbilityButton(scene, name, id, key, tooltipText, texture, x, y, size, radius) {
         var _this = _super.call(this, scene) || this;
+        _this.id = id;
         _this.key = key;
         _this.size = size;
         _this.radius = radius;
         _this.name = name;
         var backgroundColor = _this.backgroundColor = 0x000000;
-        var activeColor = _this.activeColor = 0xFFFF00;
+        _this.activeColor = 0xFFFF00;
         _this.x = x;
         _this.y = y;
         // @ts-ignore
         var button = _this.button = scene.add.rexRoundRectangle(0, 0, size, size, radius, backgroundColor, 0.7);
         button.setInteractive();
         _this.add(button);
-        //button.setVisible(defaultVisible);
+        // image
         if (texture && scene.textures.exists(texture)) {
             var image = _this.image = scene.add.image(0, 0, texture).setDisplaySize(size * 0.8, size * 0.8);
             _this.add(image);
-        } /*else {
-            const label = scene.add.bitmapText(
-                x + w / 2, y + h / 2,
-                BitmapFontManager.font(scene,
-                    'Verdana', false, false, '#000000'
-                ),
-                text,
-                22
-            );
-            label.setOrigin(0.5);
-            label.letterSpacing = 1.3;
-            //label.setVisible(defaultVisible);
-            //container.add(label);
-            this.label = label;
-        }*/
-        var label = scene.add.bitmapText(-7 + size / 2, +7 - size / 2, BitmapFontManager.font(scene, 'Verdana', true, false, '#FFFFFF'), key, 18);
+        }
+        // label
+        var label = _this.label = scene.add.bitmapText(-7 + size / 2, +7 - size / 2, BitmapFontManager.font(scene, 'Verdana', true, false, '#FFFFFF'), key, 18);
         label.setOrigin(0.5);
         label.letterSpacing = 1.3;
         _this.add(label);
-        //label.setVisible(defaultVisible);
-        //container.add(label);
-        _this.label = label;
+        // Label
+        /*const label = this.label = scene.add.text( - 7 + size / 2, + 7 - size / 2, key, {
+            fontFamily: 'Verdana',
+            fontSize: 18,
+            color: '#FFFFFF',
+            align: 'center'
+        });
+        label.setResolution(2);
+        label.setOrigin(0.5);
+        this.add(label);*/
         scene.add.existing(_this);
-        button.on('pointerdown', function () {
-            //console.log('ability pointerdown');
-            taro.client.isPressingAbility = true;
-            if (key) {
-                taro.network.send('playerKeyDown', {
-                    // @ts-ignore
-                    device: 'key', key: key.toLowerCase()
-                });
-            }
-            _this.activate(true);
-            /*if (value || value === 0) func(value);
-            else func();*/
-        });
-        button.on('pointerup', function () {
-            taro.client.isPressingAbility = false;
-            if (key) {
-                taro.network.send('playerKeyUp', {
-                    // @ts-ignore
-                    device: 'key', key: key.toLowerCase()
-                });
-            }
-            _this.activate(false);
-        });
-        //const gameScene = taro.renderer.scene.getScene('Game');
         if (taro.isMobile) {
             if (_this.image)
                 label.visible = false;
+            var mobileControlScene_1 = taro.renderer.scene.getScene('MobileControls');
+            var clicked_1 = false;
+            button.on('pointerdown', function () {
+                mobileControlScene_1.disablePointerEvents = true;
+                _this.activate(true);
+                if (clicked_1)
+                    return;
+                clicked_1 = true;
+                if (key) {
+                    taro.network.send('playerKeyDown', {
+                        // @ts-ignore
+                        device: 'key', key: key.toLowerCase()
+                    });
+                }
+                else {
+                    // ability have no keybinding
+                }
+            });
+            var onPointerEnd = function () {
+                mobileControlScene_1.enablePointerNextUpdate = true;
+                _this.activate(false);
+                if (!clicked_1)
+                    return;
+                clicked_1 = false;
+                if (key) {
+                    taro.network.send('playerKeyUp', {
+                        // @ts-ignore
+                        device: 'key', key: key.toLowerCase()
+                    });
+                }
+                else {
+                    // ability have no keybinding
+                }
+            };
+            button.on('pointerup', onPointerEnd);
+            button.on('pointerout', onPointerEnd);
         }
         else {
+            button.on('pointerdown', function () {
+                taro.client.isPressingAbility = true;
+                if (key) {
+                    taro.network.send('playerKeyDown', {
+                        // @ts-ignore
+                        device: 'key', key: key.toLowerCase()
+                    });
+                }
+                else {
+                    // ability have no keybinding
+                }
+                _this.activate(true);
+            });
+            button.on('pointerup', function () {
+                taro.client.isPressingAbility = false;
+                if (key) {
+                    taro.network.send('playerKeyUp', {
+                        // @ts-ignore
+                        device: 'key', key: key.toLowerCase()
+                    });
+                }
+                else {
+                    // ability have no keybinding
+                }
+                _this.activate(false);
+            });
             button.on('pointerover', function () {
                 //gameScene.input.setTopOnly(true);
                 scene.tooltip.showMessage(name, tooltipText);
@@ -113,37 +146,6 @@ var AbilityButton = /** @class */ (function (_super) {
         else {
             this.button.setFillStyle(this.backgroundColor, 0.7);
         }
-    };
-    /*highlight(mode: 'no' | 'active' | 'hidden'): void {
-        switch (mode) {
-            case 'hidden':
-                this.hidden = true;
-                this.active = false;
-                this.button.setFillStyle(this.devModeTools['COLOR_GRAY'], 1);
-                break;
-
-            case 'active':
-                this.active = true;
-                this.hidden = false;
-                this.button.setFillStyle(this.devModeTools['COLOR_LIGHT'], 1);
-                break;
-
-            case 'no':
-                if (!this.hidden) {
-                    this.active = false;
-                    this.button.setFillStyle(this.devModeTools['COLOR_WHITE'], 1);
-                }
-                break;
-        }
-    }*/
-    AbilityButton.prototype.increaseSize = function (value) {
-        this.button.setScale(1 + (Number(value) * 0.2), 1 + (Number(value) * 0.10));
-        /*if (value) {
-            this.button.setStrokeStyle(2, 0x000000, 1);
-        }
-        else {
-            this.button.setStrokeStyle();
-        }*/
     };
     return AbilityButton;
 }(Phaser.GameObjects.Container));

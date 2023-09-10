@@ -1,4 +1,5 @@
 declare class Client extends TaroEventingClass {
+    getCachedElementById: any;
 
 	myPlayer: TaroEntity;
 	selectedUnit: TaroEntity;

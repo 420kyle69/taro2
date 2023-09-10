@@ -20,23 +20,30 @@ var AbilityBar = /** @class */ (function (_super) {
         _this.scene = scene;
         _this.buttons = {};
         _this.buttonSize = 45;
-        _this.buttonInterval = 3;
+        _this.buttonInterval = 4;
         _this.buttonRadius = 3;
         if (taro.isMobile) {
             _this.buttonSize = 70;
-            _this.buttonInterval = 4;
+            _this.buttonInterval = 6;
             _this.buttonRadius = 35;
         }
-        _this.x = _this.scene.sys.game.canvas.width / 2;
-        _this.y = _this.scene.sys.game.canvas.height * 0.5 + 200;
+        _this.updatePosition();
         scene.add.existing(_this);
+        taro.client.on('update-abilities-position', function () {
+            _this.updatePosition();
+        });
         return _this;
     }
     AbilityBar.prototype.addButton = function (abilityId, ability, key) {
-        var button = new AbilityButton(this.scene, ability.name, key, 'description', ability.iconUrl, Object.values(this.buttons).length * (this.buttonSize + this.buttonInterval), 0, this.buttonSize, this.buttonRadius);
+        var button = new AbilityButton(this.scene, ability.name, abilityId, key, 'description', ability.iconUrl, Object.values(this.buttons).length * (this.buttonSize + this.buttonInterval), 0, this.buttonSize, this.buttonRadius);
         this.buttons[abilityId] = button;
         this.add(button);
-        this.x = this.scene.sys.game.canvas.width / 2 - Object.values(this.buttons).length * (this.buttonSize + this.buttonInterval) / 2;
+        this.updatePosition();
+    };
+    AbilityBar.prototype.updatePosition = function () {
+        this.x = this.scene.sys.game.canvas.width / 2 + 35 - Object.values(this.buttons).length * (this.buttonSize + this.buttonInterval) / 2;
+        this.y = this.scene.sys.game.canvas.height - 20 - (this.buttonSize / 2) - $(taro.client.getCachedElementById('unit-status')).height();
+        console.log('update position', this.x, this.y);
     };
     AbilityBar.prototype.clear = function () {
         Object.values(this.buttons).forEach(function (button) { return button.destroy(); });

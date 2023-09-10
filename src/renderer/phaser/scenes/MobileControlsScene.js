@@ -22,6 +22,7 @@ var MobileControlsScene = /** @class */ (function (_super) {
     }
     MobileControlsScene.prototype.init = function () {
         var _this = this;
+        this.scene.swapPosition('MobileControls', 'Ui');
         // enabling four mobile pointers
         this.input.addPointer(3);
         var scale = this.scale;

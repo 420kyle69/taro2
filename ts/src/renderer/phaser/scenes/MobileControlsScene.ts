@@ -18,6 +18,8 @@ class MobileControlsScene extends PhaserScene {
 
 	init (): void {
 
+        this.scene.swapPosition('MobileControls', 'Ui');
+
 		// enabling four mobile pointers
 		this.input.addPointer(3);
 

@@ -42,6 +42,7 @@ class GameScene extends PhaserScene {
 				camera.zoom = this.calculateZoom();
 				taro.client.emit('scale', { ratio: camera.zoom * this.resolutionCoef });
 			}
+            taro.client.emit('update-abilities-position');
 		});
 
 		taro.client.on('zoom', (height: number) => {
