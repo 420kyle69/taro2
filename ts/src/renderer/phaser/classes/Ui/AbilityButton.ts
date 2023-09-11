@@ -27,7 +27,8 @@ class AbilityButton extends Phaser.GameObjects.Container {
 	) {
         super(scene);
 		this.name = name;
-        const backgroundColor = this.backgroundColor = 0x000000;
+        let backgroundColor = this.backgroundColor = 0x000000;
+        if (taro.isMobile) backgroundColor = this.backgroundColor = 0x333333;
         this.activeColor = 0xFFFF00;
         this.x = x;
         this.y = y;
@@ -65,7 +66,8 @@ class AbilityButton extends Phaser.GameObjects.Container {
         scene.add.existing(this);
 
         if (taro.isMobile) {
-            if (this.image) label.visible = false;
+            //hide key on mobile
+            //if (this.image) label.visible = false;
             const mobileControlScene = taro.renderer.scene.getScene('MobileControls') as MobileControlsScene;
             let clicked = false;
             button.on('pointerdown', () => {

@@ -23,6 +23,8 @@ var AbilityButton = /** @class */ (function (_super) {
         _this.radius = radius;
         _this.name = name;
         var backgroundColor = _this.backgroundColor = 0x000000;
+        if (taro.isMobile)
+            backgroundColor = _this.backgroundColor = 0x333333;
         _this.activeColor = 0xFFFF00;
         _this.x = x;
         _this.y = y;
@@ -52,8 +54,8 @@ var AbilityButton = /** @class */ (function (_super) {
         this.add(label);*/
         scene.add.existing(_this);
         if (taro.isMobile) {
-            if (_this.image)
-                label.visible = false;
+            //hide key on mobile
+            //if (this.image) label.visible = false;
             var mobileControlScene_1 = taro.renderer.scene.getScene('MobileControls');
             var clicked_1 = false;
             button.on('pointerdown', function () {
