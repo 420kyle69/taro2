@@ -72,6 +72,7 @@ var UnitUiComponent = TaroEntity.extend({
 					minWidth: '200px'
 				});
 			}
+            taro.client.emit('update-abilities-position');
 		}
 	},
 	removeAllAttributeBars: function () {

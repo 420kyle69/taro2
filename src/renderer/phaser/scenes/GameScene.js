@@ -51,6 +51,7 @@ var GameScene = /** @class */ (function (_super) {
                 camera.zoom = _this.calculateZoom();
                 taro.client.emit('scale', { ratio: camera.zoom * _this.resolutionCoef });
             }
+            taro.client.emit('update-abilities-position');
         });
         taro.client.on('zoom', function (height) {
             if (_this.zoomSize === height * 2.15) {

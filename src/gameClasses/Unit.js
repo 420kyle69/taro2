@@ -343,6 +343,9 @@ var Unit = TaroEntityPhysics.extend({
 					if (self.unitUi) {
 						self.unitUi.updateAllAttributeBars();
 					}
+                    if (self._stats.clientId === taro.network.id() && self._stats.controls.unitAbilities) {
+                        taro.client.emit('create-ability-bar', {keybindings: self._stats.controls.abilities, abilities: self._stats.controls.unitAbilities});
+                    }
 				}
 			}
 		}
@@ -908,6 +911,10 @@ var Unit = TaroEntityPhysics.extend({
 				self.unitUi.updateAllAttributeBars();
 			}
 			self.inventory.update();
+
+            if (self._stats.clientId === taro.network.id() && data.controls.unitAbilities) {
+                taro.client.emit('create-ability-bar', {keybindings: data.controls.abilities, abilities: data.controls.unitAbilities});
+            }
 		}
 
 		if (self.ai && self._stats.ai) {

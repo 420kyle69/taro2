@@ -213,8 +213,10 @@ var Player = TaroEntity.extend({
 
 				// abilities
 				const abilitiesData = taro.game.data.unitTypes[unit._stats.type].controls.unitAbilities;
-				taro.client.emit('ability-icons', abilitiesData);
+				//taro.client.emit('ability-icons', abilitiesData);
 
+                taro.client.emit('create-ability-bar', {keybindings: taro.game.data.unitTypes[unit._stats.type].controls.abilities, abilities: abilitiesData});
+				
 				unit.renderMobileControl();
 				taro.client.selectedUnit = unit;
 				taro.client.eventLog.push([taro._currentTime, `my unit selected ${unitId}`]);
