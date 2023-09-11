@@ -299,35 +299,37 @@ var ActionComponent = TaroEntity.extend({
 						console.log("requestPost data", data);
 
 						// use closure to store globalVariableName
-						taro.server.request.post(data, function optionalCallback(err, httpResponse, body) {
-							// try+catch must be redeclared inside callback otherwise an error will crash the process
-							try {
+						(function(targetVarName) {
+							taro.server.request.post(data, function optionalCallback(err, httpResponse, body) {
+								// try+catch must be redeclared inside callback otherwise an error will crash the process
+								try {
 
-								console.log("body", body)
-								if (err) {
-									throw new Error(err);
+									console.log("body", body)
+									if (err) {
+										throw new Error(err);
+									}
+
+									if (taro.game.data.variables.hasOwnProperty(targetVarName)) {
+										taro.game.data.variables[targetVarName].value = body;
+									}
+
+									taro.game.lastReceivedPostResponse = body;
+									taro.game.lastUpdatedVariableName = targetVarName;
+
+									// if sendPostRequest was called from a unit/item/projectile, then pass the triggering entity's id onPostResponse
+									var vars = {}
+									if (["unit", "item", "projectile"].includes(self._entity._category)) {
+										var key = self._entity._category + 'Id';
+										vars = { [key]: self._entity.id() }
+									}
+
+									self._entity.script.trigger('onPostResponse', vars);
+								} catch (e) {
+									throw new Error(e);
 								}
 
-								if (taro.game.data.variables.hasOwnProperty(varName)) {
-									taro.game.data.variables[varName].value = body;
-								}
-
-								taro.game.lastReceivedPostResponse = body;
-								taro.game.lastUpdatedVariableName = varName;
-
-								// if sendPostRequest was called from a unit/item/projectile, then pass the triggering entity's id onPostResponse
-								var vars = {}
-								if (["unit", "item", "projectile"].includes(self._entity._category)) {
-									var key = self._entity._category + 'Id';
-									vars = { [key]: self._entity.id() }
-								}
-
-								self._entity.script.trigger('onPostResponse', vars);
-							} catch (e) {
-								throw new Error(e);
-							}
-
-						});
+							})
+					})(varName);
 
 						break;
 
