@@ -321,6 +321,15 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
+					case 'unitIsCarryingItemType':
+						var unit = self.getValue(text.unit, vars);
+						var itemType = self.getValue(text.itemType, vars);
+						if (unit && unit._category == 'unit' && unit.inventory && itemType) {
+							return unit.inventory.hasItem(itemType)
+						}
+
+						break;
+
 					case 'isPositionInWall':
 						var positionX = self.getValue(text.position.x, vars);
 						var positionY = self.getValue(text.position.y, vars);

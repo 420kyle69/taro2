@@ -232,10 +232,12 @@ var ActionComponent = TaroEntity.extend({
 						var url = self._script.variable.getValue(action.url, vars);
 						var varName = self._script.variable.getValue(action.varName, vars);
 
+						console.log("sendPostRequest obj", obj)
+
 						try {
 							obj = JSON.parse(obj);
 						} catch (err) {
-							console.error(err);
+							throw new Error(err);
 							return;
 						}
 
@@ -254,7 +256,7 @@ var ActionComponent = TaroEntity.extend({
 							form: obj
 						}, function optionalCallback(err, httpResponse, body) {
 							if (err) {
-								return console.error('upload failed:', err);
+								throw new Error('upload failed:', err);
 							}
 
 							try {
@@ -266,7 +268,7 @@ var ActionComponent = TaroEntity.extend({
 									taro.game.data.variables[varName].value = newValue;
 								}
 							} catch (err) {
-								console.error('sendPostRequest', taro.game.data.defaultData.title, url, err);
+								throw new Error('sendPostRequest' + taro.game.data.defaultData.title + url + err);
 								if (taro.game.data.variables.hasOwnProperty(varName)) {
 									taro.game.data.variables[varName].value = 'error';
 								}
@@ -276,9 +278,8 @@ var ActionComponent = TaroEntity.extend({
 						break;
 
 						
-					case 'sendPostRequest2':
-						var form = self._script.variable.getValue(action.form, vars);
-						var headers = self._script.variable.getValue(action.headers, vars);
+					case 'requestPost':
+						var data = self._script.variable.getValue(action.data, vars) || {};
 						var url = self._script.variable.getValue(action.url, vars);
 						var varName = self._script.variable.getValue(action.varName, vars);
 
@@ -293,52 +294,42 @@ var ActionComponent = TaroEntity.extend({
 							throw new Error('Game server is sending too many POST requests. You cannot send more than 30 req per every 10s.');
 						}
 
-						try {
-							JSON.parse(headers);
-							headers = JSON.parse(headers);
-						} catch (e) {
-							// headers is not JSON
-						}
-
-						try {
-							JSON.parse(form);
-							form = JSON.parse(form);
-						} catch (e) {
-							// form is not JSON
-						}
+						data.url = url;
+						
+						console.log("requestPost data", data);
 
 						// use closure to store globalVariableName
-						taro.server.request.post({
-							url: url,
-							headers:  headers,
-							form: form							
-						}, function optionalCallback(err, httpResponse, body) {
-							// try+catch must be redeclared inside callback otherwise an error will crash the process
-							try {
-								if (err) {
-									self._script.errorLog(err, path)
+						(function(targetVarName) {
+							taro.server.request.post(data, function optionalCallback(err, httpResponse, body) {
+								// try+catch must be redeclared inside callback otherwise an error will crash the process
+								try {
+
+									console.log("body", body)
+									if (err) {
+										throw new Error(err);
+									}
+
+									if (taro.game.data.variables.hasOwnProperty(targetVarName)) {
+										taro.game.data.variables[targetVarName].value = body;
+									}
+
+									taro.game.lastReceivedPostResponse = body;
+									taro.game.lastUpdatedVariableName = targetVarName;
+
+									// if sendPostRequest was called from a unit/item/projectile, then pass the triggering entity's id onPostResponse
+									var vars = {}
+									if (["unit", "item", "projectile"].includes(self._entity._category)) {
+										var key = self._entity._category + 'Id';
+										vars = { [key]: self._entity.id() }
+									}
+
+									self._entity.script.trigger('onPostResponse', vars);
+								} catch (e) {
+									throw new Error(e);
 								}
 
-								if (taro.game.data.variables.hasOwnProperty(varName)) {
-									taro.game.data.variables[varName].value = body;
-								}
-
-								taro.game.lastReceivedPostResponse = body;
-								taro.game.lastUpdatedVariableName = varName;
-
-								// if sendPostRequest was called from a unit/item/projectile, then pass the triggering entity's id onPostResponse
-								var vars = {}
-								if (["unit", "item", "projectile"].includes(self._entity._category)) {
-									var key = self._entity._category + 'Id';
-									vars = { [key]: self._entity.id() }
-								}
-
-								self._entity.script.trigger('onPostResponse', vars);
-							} catch (e) {
-								self._script.errorLog(e, path)
-							}
-
-						});
+							})
+					})(varName);
 
 						break;
 
@@ -1359,7 +1350,8 @@ var ActionComponent = TaroEntity.extend({
 					case 'useItemOnce':
 						var item = self._script.variable.getValue(action.item, vars);
 						if (item && item._category == 'item') {
-							item.use();
+							// item.use();
+							item.streamUpdateData([{ useQueued: true }]);
 						}
 						break;
 
@@ -2920,6 +2912,17 @@ var ActionComponent = TaroEntity.extend({
 						}
 
 						break;
+					
+					case 'addObjectElement':
+						var key = self._script.variable.getValue(action.key, vars);
+						var value = self._script.variable.getValue(action.value, vars);
+						var object = self._script.variable.getValue(action.object, vars);
+
+						if (object && key && value) {
+							object[key] = value;
+						}
+
+						break;
 
 					case 'removeElement':
 						var object = self._script.variable.getValue(action.object, vars);
@@ -2944,7 +2947,7 @@ var ActionComponent = TaroEntity.extend({
 				}
 
 			} catch (e) {
-				// console.log(e);
+				console.log(e);
 				self._script.errorLog(e, path); // send error msg to client
 			}
 		}

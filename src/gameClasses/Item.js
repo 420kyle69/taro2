@@ -995,15 +995,6 @@ var Item = TaroEntityPhysics.extend({
 			for (attrName in data) {
 				var newValue = data[attrName];
 
-				// if nothing changed, then skip.
-				// if (newValue == this._stats[attrName]) {
-				// 	console.log("nothing changed. skipping...")
-				// 	continue;
-				// } else {
-				// 	console.log(newValue, this._stats[attrName])
-				// }
-					
-
 				switch (attrName) {
 					case 'type':
 						//self._stats[attrName] = newValue;
@@ -1103,6 +1094,13 @@ var Item = TaroEntityPhysics.extend({
 						this._stats[attrName] = newValue;
 						break;
 
+					case 'useQueued':
+						// use item once
+						if (taro.isClient) {
+							this._stats.useQueued = newValue;
+						}
+						break;
+
 					case 'isBeingUsed':
 						var owner = self.getOwnerUnit();
 						// if the item's CSP is enabled, ignore server-stream so my item use won't fire two bullets
@@ -1178,8 +1176,9 @@ var Item = TaroEntityPhysics.extend({
 
 		}
 
-		if (this._stats.isBeingUsed) {
+		if (this._stats.isBeingUsed || this._stats.useQueued) {
 			this.use();
+			this._stats.useQueued = false;
 		}
 
 		// if entity (unit/item/player/projectile) has attribute, run regenerate
