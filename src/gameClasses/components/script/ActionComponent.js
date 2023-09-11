@@ -1348,7 +1348,8 @@ var ActionComponent = TaroEntity.extend({
 					case 'useItemOnce':
 						var item = self._script.variable.getValue(action.item, vars);
 						if (item && item._category == 'item') {
-							item.use();
+							// item.use();
+							item.streamUpdateData([{ useQueued: true }]);
 						}
 						break;
 

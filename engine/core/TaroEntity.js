@@ -4200,8 +4200,8 @@ var TaroEntity = TaroObject.extend({
 						if (typeof this.queueStreamData === 'function') {
 
 							// var forceStreamKeys = ['anim', 'coin', 'stateId', 'ownerId', 'name', 'slotIndex', 'newItemId', 'quantity', 'spriteOnly', 'setFadingText', 'playerJoinedAgain', 'use', 'hidden'];						
-							var forceStreamKeys = ['anim', 'coin', 'setFadingText', 'playerJoinedAgain', 'use', 'hidden'];
-							var dataIsAttributeRelated = ['attributes', 'attributesMin', 'attributesMax', 'attributesRegenerateRate'].includes(key)							
+							var forceStreamKeys = ['anim', 'coin', 'setFadingText', 'playerJoinedAgain', 'useQueued', 'hidden'];
+							var dataIsAttributeRelated = ['attributes', 'attributesMin', 'attributesMax', 'attributesRegenerateRate'].includes(attrName)							
 							if (newValue !== this.lastUpdatedData[attrName] || dataIsAttributeRelated || forceStreamKeys.includes(attrName)) {
 								var streamData = {};
 								streamData[attrName] = data[attrName];
@@ -4216,7 +4216,7 @@ var TaroEntity = TaroObject.extend({
 								
 
 								// for server-side only: cache last updated data, so we dont stream same data again (this optimizes CPU usage by a lot)
-								this.lastUpdatedData[attrName] = rfdc()(newValue); 
+								this.lastUpdatedData[attrName] = rfdc()(newValue);
 							} 
 							// else console.log(this._category, this._stats.name, attrName, "is the same as previous", this.lastUpdatedData[attrName], "new", newValue)
 						}
