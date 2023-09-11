@@ -2,7 +2,7 @@ class AbilityButton extends Phaser.GameObjects.Container {
     name: string;
 	button: any;
 	image: Phaser.GameObjects.Image;
-	label: Phaser.GameObjects.BitmapText;//Phaser.GameObjects.Text;//Phaser.GameObjects.BitmapText;
+	label: Phaser.GameObjects.BitmapText;
 	timer: number | NodeJS.Timeout;
     backgroundColor: number;
     activeColor: number;
@@ -51,17 +51,6 @@ class AbilityButton extends Phaser.GameObjects.Container {
         label.setOrigin(0.5);
         label.letterSpacing = 1.3;
         this.add(label);
-
-        // Label
-        /*const label = this.label = scene.add.text( - 7 + size / 2, + 7 - size / 2, key, {
-            fontFamily: 'Verdana',
-            fontSize: 18,
-            color: '#FFFFFF',
-            align: 'center'
-        });
-        label.setResolution(2);
-        label.setOrigin(0.5);  
-        this.add(label);*/
 
         scene.add.existing(this);
 

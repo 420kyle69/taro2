@@ -42,16 +42,6 @@ var AbilityButton = /** @class */ (function (_super) {
         label.setOrigin(0.5);
         label.letterSpacing = 1.3;
         _this.add(label);
-        // Label
-        /*const label = this.label = scene.add.text( - 7 + size / 2, + 7 - size / 2, key, {
-            fontFamily: 'Verdana',
-            fontSize: 18,
-            color: '#FFFFFF',
-            align: 'center'
-        });
-        label.setResolution(2);
-        label.setOrigin(0.5);
-        this.add(label);*/
         scene.add.existing(_this);
         if (taro.isMobile) {
             //hide key on mobile
