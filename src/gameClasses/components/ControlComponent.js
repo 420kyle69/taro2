@@ -12,8 +12,7 @@ var ControlComponent = TaroEntity.extend({
 		// Store any options that were passed to us
 		this._options = options;
 		this.lastActionAt = Date.now();
-
-		this.lastMousePosition = [undefined, undefined];
+        this.lastMousePosition = [undefined, undefined];
 		this.mouseLocked = false;
 
 		// this.lastCommandSentAt = undefined;
@@ -351,9 +350,10 @@ var ControlComponent = TaroEntity.extend({
 						}
 					}
 					if (self.sendPlayerInput) {
+                        //console.log('SEND MOUSE POS', self.newMousePosition[0], self.newMousePosition[1]);
 						taro.network.send('playerMouseMoved', self.newMousePosition);
+                        self.lastMousePosition = self.newMousePosition;
 					}
-					self.lastMousePosition = self.newMousePosition;
 				}
 
 				// send unit position to server (client-authoritative movement)

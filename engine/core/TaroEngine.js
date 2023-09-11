@@ -1601,7 +1601,16 @@ var TaroEngine = TaroEntity.extend({
 				taro._gameLoopTickRemainder = Math.min(timeElapsed - ((1000 / taro._gameLoopTickRate) - taro._gameLoopTickRemainder), (1000 / taro._gameLoopTickRate));
 				taro.gameLoopTickHasExecuted = true;
 				if (taro.physics) {
+					if (taro.profiler.isEnabled) {
+						var startTime = performance.now();
+					}
+
 					taro.physics.update(timeElapsed);
+
+					// log how long it took to update physics world step
+					if (taro.profiler.isEnabled) {
+						taro.profiler.logTimeElapsed("physicsStep", startTime);
+					}
 				}
 			}
 
@@ -1744,9 +1753,7 @@ var TaroEngine = TaroEntity.extend({
 				}
 			}
 
-			if (taro.profiler.isEnabled) {
-				taro.profiler.logTick(self._tickDelta);
-			}
+
 
 
 			// Record the lastTick value so we can
@@ -1755,9 +1762,20 @@ var TaroEngine = TaroEntity.extend({
 			self._dpf = self._drawCount;
 			self._drawCount = 0;
 
-			
+			// log how long it took to update physics world step
+			if (taro.profiler.isEnabled) {
+				var startTime = performance.now();
+			}
+
 			taro.network.stream._sendQueue(timeStamp);
 			taro.network.stream._sendQueuedStreamData();
+
+			// log how long it took to update physics world step
+			if (taro.profiler.isEnabled) {
+				taro.profiler.logTimeElapsed("networkStep", startTime);
+			
+				taro.profiler.logTick(50);
+			}
 		}
 
 		taro.gameLoopTickHasExecuted = false;

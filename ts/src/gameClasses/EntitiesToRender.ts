@@ -44,6 +44,13 @@ class EntitiesToRender {
 				
 				if (entity.isTransforming()) {
 					entity._processTransform();
+				}
+				// sometimes, entities' _translate & _rotate aren't updated, because processTransform doesn't run when tab isn't focused
+				// hence, we're forcing the update here
+				else if (entity != taro.client.selectedUnit) {
+					entity._translate.x = entity.nextKeyFrame[1][0]
+					entity._translate.y = entity.nextKeyFrame[1][1]
+					entity._rotate.z = entity.nextKeyFrame[1][2]					
 				}				
 
 				if (entity._translate) {
@@ -81,6 +88,7 @@ class EntitiesToRender {
 						y = ownerUnit._translate.y + entity.anchoredOffset.y;
 						rotate = entity.anchoredOffset.rotate;
 					}
+                    //if (entity._stats.name === 'potato gun small') console.log('owner unit translate',ownerUnit._translate.x, ownerUnit._translate.y, '\nphaser unit pos', ownerUnit.phaserEntity.gameObject.x, ownerUnit.phaserEntity.gameObject.y, '\nitem translate', x, y, '\nphaser item pos', entity.phaserEntity.gameObject.x, entity.phaserEntity.gameObject.y)
 				}
 
 				if (entity.tween?.isTweening && phaserGameObject?.visible) {

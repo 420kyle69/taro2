@@ -192,9 +192,13 @@ var ScriptComponent = TaroEntity.extend({
 				this.errorLogs[path].count++;
 			}
 			
-			console.log('errorLog', path, message);
+			// console.log('errorLog', path, message);
 			// taro.devLog('errorLog', message);
 			// ScriptComponent.prototype.log(log);
+		}
+
+		if (taro.server.unpublishQueued) {
+			taro.server.unpublish(message + " " + path);	
 		}
 	}
 

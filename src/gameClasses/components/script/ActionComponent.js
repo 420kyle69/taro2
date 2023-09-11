@@ -226,11 +226,20 @@ var ActionComponent = TaroEntity.extend({
 						taro.game.lastAttackingItemId = item.id();
 
 						break;
-
+					
 					case 'sendPostRequest':
-						var string = self._script.variable.getValue(action.string, vars);
+						var obj = self._script.variable.getValue(action.string, vars);
 						var url = self._script.variable.getValue(action.url, vars);
 						var varName = self._script.variable.getValue(action.varName, vars);
+
+						console.log("sendPostRequest obj", obj)
+
+						try {
+							obj = JSON.parse(obj);
+						} catch (err) {
+							throw new Error(err);
+							return;
+						}
 
 						// ensure we aren't sending more than 30 POST requests within 10 seconds
 						taro.server.postReqTimestamps.push(taro.currentTime());
@@ -244,38 +253,83 @@ var ActionComponent = TaroEntity.extend({
 
 						taro.server.request.post({
 							url: url,
-							form: string
+							form: obj
 						}, function optionalCallback(err, httpResponse, body) {
-							// try+catch must be redeclared inside callback otherwise an error will crash the process
+							if (err) {
+								throw new Error('upload failed:', err);
+							}
+
 							try {
-								if (err) {
-									self._script.errorLog(err, path)
-								}
-
-								var res = JSON.parse(body.replace(/\\"|""/g, '"'));
-
+								var res = JSON.parse(body);
 								var newValue = res.response;
 								params['newValue'] = newValue;
 
 								if (taro.game.data.variables.hasOwnProperty(varName)) {
 									taro.game.data.variables[varName].value = newValue;
 								}
+							} catch (err) {
+								throw new Error('sendPostRequest' + taro.game.data.defaultData.title + url + err);
+								if (taro.game.data.variables.hasOwnProperty(varName)) {
+									taro.game.data.variables[varName].value = 'error';
+								}
+							}
+						});
 
-								taro.game.lastReceivedPostResponse = res;
-								taro.game.lastUpdatedVariableName = varName;
+						break;
 
-								var vars = {}
-								if (["unit", "item", "projectile"].includes(self._entity._category)) {
-									var key = self._entity._category + 'Id';
-									vars = { [key]: self._entity.id() }
+						
+					case 'requestPost':
+						var data = self._script.variable.getValue(action.data, vars) || {};
+						var url = self._script.variable.getValue(action.url, vars);
+						var varName = self._script.variable.getValue(action.varName, vars);
+
+						// ensure we aren't sending more than 30 POST requests within 10 seconds
+						taro.server.postReqTimestamps.push(taro.currentTime());
+						var oldestReqTimestamp = taro.server.postReqTimestamps[0]
+						while (Date.now() - oldestReqTimestamp > 10000 && taro.server.postReqTimestamps.length > 0) {
+							oldestReqTimestamp = taro.server.postReqTimestamps.shift();
+						}
+						if (taro.server.postReqTimestamps.length > 30) {
+							taro.server.unpublishQueued = true;
+							throw new Error('Game server is sending too many POST requests. You cannot send more than 30 req per every 10s.');
+						}
+
+						data.url = url;
+						
+						console.log("requestPost data", data);
+
+						// use closure to store globalVariableName
+						(function(targetVarName) {
+							taro.server.request.post(data, function optionalCallback(err, httpResponse, body) {
+								// try+catch must be redeclared inside callback otherwise an error will crash the process
+								try {
+
+									console.log("body", body)
+									if (err) {
+										throw new Error(err);
+									}
+
+									if (taro.game.data.variables.hasOwnProperty(targetVarName)) {
+										taro.game.data.variables[targetVarName].value = body;
+									}
+
+									taro.game.lastReceivedPostResponse = body;
+									taro.game.lastUpdatedVariableName = targetVarName;
+
+									// if sendPostRequest was called from a unit/item/projectile, then pass the triggering entity's id onPostResponse
+									var vars = {}
+									if (["unit", "item", "projectile"].includes(self._entity._category)) {
+										var key = self._entity._category + 'Id';
+										vars = { [key]: self._entity.id() }
+									}
+
+									self._entity.script.trigger('onPostResponse', vars);
+								} catch (e) {
+									throw new Error(e);
 								}
 
-								self._entity.script.trigger('onPostResponse', vars);
-							} catch (e) {
-								self._script.errorLog(e, path)
-							}
-
-						});
+							})
+					})(varName);
 
 						break;
 
@@ -442,7 +496,7 @@ var ActionComponent = TaroEntity.extend({
 									variableObj.default = undefined;
 								}
 							} else {
-								taro.devLog('datatype of value does not match datatype of variable');
+								throw new Error('datatype of value does not match datatype of variable');
 							}
 						}
 
@@ -480,9 +534,9 @@ var ActionComponent = TaroEntity.extend({
 							taro.clusterClient.saveUserData(userId, data, 'unit');
 						} else {
 							if (!unit.persistentDataLoaded) {
-								taro.devLog('Fail saving unit data bcz persisted data not set correctly');
+								throw new Error('Fail saving unit data bcz persisted data not set correctly');
 							} else {
-								taro.devLog('Fail saving unit data');
+								throw new Error('Fail saving unit data');
 							}
 						}
 						break;
@@ -502,16 +556,16 @@ var ActionComponent = TaroEntity.extend({
 								taro.clusterClient.saveUserData(userId, data, 'unit');
 							} else {
 								if (!unit.persistentDataLoaded) {
-									taro.devLog('Fail saving unit data bcz persisted data not set correctly');
+									throw new Error('Fail saving unit data bcz persisted data not set correctly');
 								} else {
-									taro.devLog('Fail saving unit data');
+									throw new Error('Fail saving unit data');
 								}
 							}
 						} else {
 							if (player && !player.persistentDataLoaded) {
-								taro.devLog('Fail saving unit data bcz persisted data not set correctly');
+								throw new Error('Fail saving unit data bcz persisted data not set correctly');
 							} else {
-								taro.devLog('Fail saving player data');
+								throw new Error('Fail saving player data');
 							}
 						}
 
@@ -520,6 +574,8 @@ var ActionComponent = TaroEntity.extend({
 					case 'makePlayerSelectUnit':
 						var player = self._script.variable.getValue(action.player, vars);
 						var unit = self._script.variable.getValue(action.unit, vars);
+
+						// only computer player can be forced to say stuff
 						if (player && unit) {
 							player.selectUnit(unit.id());
 						}
@@ -712,7 +768,7 @@ var ActionComponent = TaroEntity.extend({
 					case 'makePlayerSendChatMessage':
 						var player = self._script.variable.getValue(action.player, vars);
 						var message = self._script.variable.getValue(action.message, vars);
-						if (player && player._stats && player._stats.clientId) {
+						if (player && player._stats && player._stats.clientId && player._stats.controlledBy == 'computer') {
 							taro.chat.sendToRoom('1', message, undefined, player._stats.clientId);
 						}
 
@@ -811,13 +867,11 @@ var ActionComponent = TaroEntity.extend({
 								var brk = self.run(action.actions, Object.assign(vars, { selectedUnit: unit }), actionPath);
 
 								if (brk == 'break' || vars.break) {
-									vars.break = false;
-									taro.devLog('break called');
+									vars.break = false;									
 									break;
 								} else if (brk == 'continue') {
 									continue;
 								} else if (brk == 'return') {
-									taro.devLog('return without executing script');
 									return 'return';
 								}
 							}
@@ -836,12 +890,10 @@ var ActionComponent = TaroEntity.extend({
 
 								if (brk == 'break' || vars.break) {
 									vars.break = false;
-									taro.devLog('break called');
 									break;
 								} else if (brk == 'continue') {
 									continue;
 								} else if (brk == 'return') {
-									taro.devLog('return without executing script');
 									return 'return';
 								}
 							}
@@ -860,12 +912,10 @@ var ActionComponent = TaroEntity.extend({
 
 								if (brk == 'break' || vars.break) {
 									vars.break = false;
-									taro.devLog('break called');
 									break;
 								} else if (brk == 'continue') {
 									continue;
 								} else if (brk == 'return') {
-									taro.devLog('return without executing script');
 									return 'return';
 								}
 							}
@@ -884,12 +934,10 @@ var ActionComponent = TaroEntity.extend({
 
 								if (brk == 'break' || vars.break) {
 									vars.break = false;
-									taro.devLog('break called');
 									break;
 								} else if (brk == 'continue') {
 									continue;
 								} else if (brk == 'return') {
-									taro.devLog('return without executing script');
 									return 'return';
 								}
 							}
@@ -910,12 +958,10 @@ var ActionComponent = TaroEntity.extend({
 
 									if (brk == 'break' || vars.break) {
 										vars.break = false;
-										taro.devLog('break called');
 										break;
 									} else if (brk == 'continue') {
 										continue;
 									} else if (brk == 'return') {
-										taro.devLog('return without executing script');
 										return 'return';
 									}
 								}
@@ -935,12 +981,10 @@ var ActionComponent = TaroEntity.extend({
 
 								if (brk == 'break' || vars.break) {
 									vars.break = false;
-									taro.devLog('break called');
 									break;
 								} else if (brk == 'continue') {
 									continue;
 								} else if (brk == 'return') {
-									taro.devLog('return without executing script');
 									return 'return';
 								}
 							}
@@ -962,12 +1006,10 @@ var ActionComponent = TaroEntity.extend({
 
 								if (brk == 'break' || vars.break) {
 									vars.break = false;
-									taro.devLog('break called');
 									break;
 								} else if (brk == 'continue') {
 									continue;
 								} else if (brk == 'return') {
-									taro.devLog('return without executing script');
 									return 'return';
 								}
 							}
@@ -1006,12 +1048,10 @@ var ActionComponent = TaroEntity.extend({
 
 									if (brk == 'break' || vars.break) {
 										vars.break = false;
-										taro.devLog('break called');
 										break;
 									} else if (brk == 'continue') {
 										continue;
 									} else if (brk == 'return') {
-										taro.devLog('return without executing script');
 										return 'return';
 									}
 								}
@@ -1036,7 +1076,8 @@ var ActionComponent = TaroEntity.extend({
 
 							loopCounter++;
 							if (loopCounter > 10000) {
-								taro.server.unpublish(errorMsg);
+								
+								taro.server.unpublishQueued = true;
 								throw new Error("infinite loop detected"); // break infinite loop
 							}
 						}
@@ -1309,7 +1350,8 @@ var ActionComponent = TaroEntity.extend({
 					case 'useItemOnce':
 						var item = self._script.variable.getValue(action.item, vars);
 						if (item && item._category == 'item') {
-							item.use();
+							// item.use();
+							item.streamUpdateData([{ useQueued: true }]);
 						}
 						break;
 
@@ -2459,7 +2501,7 @@ var ActionComponent = TaroEntity.extend({
 									variableObj.default = undefined;
 								}
 							} else {
-								taro.devLog('datatype of value does not match datatype of variable');
+								throw new Error('datatype of value does not match datatype of variable');
 							}
 						}
 
@@ -2865,7 +2907,18 @@ var ActionComponent = TaroEntity.extend({
 						var value = self._script.variable.getValue(action.value, vars);
 						var object = self._script.variable.getValue(action.object, vars);
 
-						if (value && object && key) {
+						if (object && key && value) {
+							object[key] = value;
+						}
+
+						break;
+					
+					case 'addObjectElement':
+						var key = self._script.variable.getValue(action.key, vars);
+						var value = self._script.variable.getValue(action.value, vars);
+						var object = self._script.variable.getValue(action.object, vars);
+
+						if (object && key && value) {
 							object[key] = value;
 						}
 

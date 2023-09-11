@@ -157,10 +157,15 @@ function debounce<Params extends any[]>(
 	};
 }
 
+function mergeSetWasEdited(gameMap: MapData) {
+	gameMap.wasEdited = true;
+}
+
 function mergeEditTileActions(data: TileData<'edit'>) {
 	taro.network.send('editTile', data);
 }
 
+const debounceSetWasEdited = debounce(mergeSetWasEdited, 0);
 const debounceEditTileSend = debounce(mergeEditTileActions, 0, mergedTemplate);
 
 function recalcWallsPhysics(gameMap: MapData, forPathFinding: boolean) {
@@ -264,8 +269,10 @@ class DeveloperMode {
 			const serverData = rfdc()(dataValue);
 			if (dataType === 'edit') {
 				serverData.layer = serverData.layer[0];
+				debounceSetWasEdited(gameMap);
 				debounceEditTileSend(data as TileData<'edit'>);
 			} else {
+				gameMap.wasEdited = true;
 				taro.network.send('editTile', data);
 			}
 			if (gameMap.layers.length > 4 && serverData.layer >= 2) serverData.layer++;
