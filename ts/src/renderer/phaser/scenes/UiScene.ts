@@ -19,15 +19,20 @@ class UiScene extends PhaserScene {
             const keybindings = data.keybindings;
             const abilities = data.abilities;
             abilityBar.clear();
-            Object.entries(abilities).forEach(([abilityId, ability]) => {
-                let key;
-                Object.entries(keybindings).forEach(([keybindingKey, keybinding]) => {
-                    if (keybinding.keyDown?.abilityId === abilityId || keybinding.keyUp?.abilityId === abilityId) {
-                        key = keybindingKey;
+            if (abilities) {
+                Object.entries(abilities).forEach(([abilityId, ability]) => {
+                    let key;
+                    if (keybindings) {
+                        Object.entries(keybindings).forEach(([keybindingKey, keybinding]) => {
+                            if (keybinding.keyDown?.abilityId === abilityId || keybinding.keyUp?.abilityId === abilityId) {
+                                key = keybindingKey;
+                            }
+                        });
+                        abilityBar.addButton(abilityId, ability, key);
                     }
                 });
-                abilityBar.addButton(abilityId, ability, key);
-            });
+            }
+                
 		});
 
         taro.client.on('start-press-key', (abilityId: string) => {

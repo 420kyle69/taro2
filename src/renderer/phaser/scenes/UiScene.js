@@ -30,18 +30,22 @@ var UiScene = /** @class */ (function (_super) {
             var keybindings = data.keybindings;
             var abilities = data.abilities;
             abilityBar.clear();
-            Object.entries(abilities).forEach(function (_a) {
-                var abilityId = _a[0], ability = _a[1];
-                var key;
-                Object.entries(keybindings).forEach(function (_a) {
-                    var _b, _c;
-                    var keybindingKey = _a[0], keybinding = _a[1];
-                    if (((_b = keybinding.keyDown) === null || _b === void 0 ? void 0 : _b.abilityId) === abilityId || ((_c = keybinding.keyUp) === null || _c === void 0 ? void 0 : _c.abilityId) === abilityId) {
-                        key = keybindingKey;
+            if (abilities) {
+                Object.entries(abilities).forEach(function (_a) {
+                    var abilityId = _a[0], ability = _a[1];
+                    var key;
+                    if (keybindings) {
+                        Object.entries(keybindings).forEach(function (_a) {
+                            var _b, _c;
+                            var keybindingKey = _a[0], keybinding = _a[1];
+                            if (((_b = keybinding.keyDown) === null || _b === void 0 ? void 0 : _b.abilityId) === abilityId || ((_c = keybinding.keyUp) === null || _c === void 0 ? void 0 : _c.abilityId) === abilityId) {
+                                key = keybindingKey;
+                            }
+                        });
+                        abilityBar.addButton(abilityId, ability, key);
                     }
                 });
-                abilityBar.addButton(abilityId, ability, key);
-            });
+            }
         });
         taro.client.on('start-press-key', function (abilityId) {
             abilityBar.buttons[abilityId].activate(true);
