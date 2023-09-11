@@ -11,7 +11,7 @@ class UiScene extends PhaserScene {
 
 	create (): void {
         if (!taro.isMobile) {
-            this.tooltip = new DevTooltip(this);
+            //this.tooltip = new DevTooltip(this);
         }
         const abilityBar = this.abilityBar = new AbilityBar(this);
 

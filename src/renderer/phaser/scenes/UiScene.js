@@ -23,7 +23,7 @@ var UiScene = /** @class */ (function (_super) {
     };
     UiScene.prototype.create = function () {
         if (!taro.isMobile) {
-            this.tooltip = new DevTooltip(this);
+            //this.tooltip = new DevTooltip(this);
         }
         var abilityBar = this.abilityBar = new AbilityBar(this);
         taro.client.on('create-ability-bar', function (data) {

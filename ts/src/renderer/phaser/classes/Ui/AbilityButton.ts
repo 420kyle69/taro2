@@ -127,11 +127,11 @@ class AbilityButton extends Phaser.GameObjects.Container {
             });
 		    button.on('pointerover', () => {
                 //gameScene.input.setTopOnly(true);
-		    	scene.tooltip.showMessage(name, tooltipText);
+		    	//scene.tooltip.showMessage(name, tooltipText);
 		    	clearTimeout(this.timer);
 		    });
 		    button.on('pointerout', () => {
-		    	scene.tooltip.fadeOut();
+		    	//scene.tooltip.fadeOut();
                 this.activate(false);
 		    });
         }

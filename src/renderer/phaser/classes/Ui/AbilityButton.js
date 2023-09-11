@@ -120,11 +120,11 @@ var AbilityButton = /** @class */ (function (_super) {
             });
             button.on('pointerover', function () {
                 //gameScene.input.setTopOnly(true);
-                scene.tooltip.showMessage(name, tooltipText);
+                //scene.tooltip.showMessage(name, tooltipText);
                 clearTimeout(_this.timer);
             });
             button.on('pointerout', function () {
-                scene.tooltip.fadeOut();
+                //scene.tooltip.fadeOut();
                 _this.activate(false);
             });
         }
