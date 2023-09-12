@@ -6,6 +6,7 @@ class AbilityButton extends Phaser.GameObjects.Container {
 	timer: number | NodeJS.Timeout;
     backgroundColor: number;
     activeColor: number;
+    fx: Phaser.FX.Bloom;
 
 	constructor(
         scene: UiScene,
@@ -18,12 +19,8 @@ class AbilityButton extends Phaser.GameObjects.Container {
 		y: number,
         public size: number,
         public radius: number,
-		//w: number,
-		//container: Phaser.GameObjects.Container,
-		//func: (...args: any[]) => void,
-		//value?: number | string,
 
-		//defaultVisible = true,
+		//bar: Phaser.GameObjects.Container,
 	) {
         super(scene);
 		this.name = name;
@@ -41,6 +38,7 @@ class AbilityButton extends Phaser.GameObjects.Container {
 		if (texture && scene.textures.exists(texture)) {
 			const image = this.image = scene.add.image(0, 0, texture).setDisplaySize(size * 0.8, size * 0.8);
             this.add(image);
+            this.fx = image.preFX.addBloom(0xffffff, 1, 1, 2, 1.2).setActive(false);
 		}
         // label
         const label = this.label = scene.add.bitmapText(
@@ -66,8 +64,7 @@ class AbilityButton extends Phaser.GameObjects.Container {
                 clicked = true;
 
                 if (key) {
-                    taro.network.send('playerKeyDown', {
-                        // @ts-ignore
+                    taro.client.emit('key-down', {
                         device: 'key', key: key.toLowerCase()
                     });
                 } else {
@@ -81,8 +78,7 @@ class AbilityButton extends Phaser.GameObjects.Container {
                 clicked = false;
                 
                 if (key) {
-                    taro.network.send('playerKeyUp', {
-                        // @ts-ignore
+                    taro.client.emit('key-up', {
                         device: 'key', key: key.toLowerCase()
                     });
                 } else {
@@ -95,29 +91,24 @@ class AbilityButton extends Phaser.GameObjects.Container {
             button.on('pointerdown', () => {
                 taro.client.isPressingAbility = true;
                 if (key) {
-                    taro.network.send('playerKeyDown', {
-                        // @ts-ignore
+                    taro.client.emit('key-down', {
                         device: 'key', key: key.toLowerCase()
                     });
                 } else {
                     // ability have no keybinding
                 }
-                this.activate(true);
             });
             button.on('pointerup', () => {
                 taro.client.isPressingAbility = false;
                 if (key) {
-                    taro.network.send('playerKeyUp', {
-                        // @ts-ignore
+                    taro.client.emit('key-up', {
                         device: 'key', key: key.toLowerCase()
                     });
                 } else {
                     // ability have no keybinding
                 }
-                this.activate(false);
             });
 		    button.on('pointerover', () => {
-                //gameScene.input.setTopOnly(true);
 		    	//scene.tooltip.showMessage(name, tooltipText);
 		    	clearTimeout(this.timer);
 		    });
@@ -142,6 +133,14 @@ class AbilityButton extends Phaser.GameObjects.Container {
             this.button.setFillStyle(this.activeColor, 1);
         } else {
             this.button.setFillStyle(this.backgroundColor, 0.7);
+        }
+    }
+
+    casting(bool: boolean): void {
+        if (bool) {
+            if (this.image) this.fx.setActive(true);
+        } else {
+            if (this.image) this.fx.setActive(false)
         }
     }
 }

@@ -24,7 +24,7 @@ interface UnitAbility {
         unitAttributes: Record<string, number>,
         playerAttributes: Record<string, number>
     },
-    hidden: boolean;
+    visibility: string,//'always' | 'mobile' | ' desktop' | 'none';
     iconUrl: string,
 }
 
