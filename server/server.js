@@ -358,7 +358,6 @@ var Server = TaroClass.extend({
 	},
 	startWebServer: function () {
 		const app = express();
-		global.app = app;
 		const port = 80;
 
 		app.use(bodyParser.urlencoded({ extended: false }));
@@ -378,6 +377,9 @@ var Server = TaroClass.extend({
 			'msgpack.min.js'
 		];
 		const SECONDS_IN_A_WEEK = 7 * 24 * 60 * 60;
+		app.get('/src/game.json', (req, res, next)=> {
+			res.send(global.gameJson);
+		});
 		app.use('/src', express.static(path.resolve('./src/'), {
 			setHeaders: (res, path, stat) => {
 				let shouldCache = FILES_TO_CACHE.some((filename) => path.endsWith(filename));
@@ -558,13 +560,7 @@ var Server = TaroClass.extend({
 									});
 							}
 						});
-						if (global.app) {
-							global.app.use((req, res, next) => {
-								if (req.url === '/src/game.json') {
-									res.redirect(`/src/${taro.gameName}`);
-								}
-							});
-						}
+						global.gameJson = game;
 						game = JSON.parse(game);
 						game.defaultData = game;
 						var data = { data: {} };
