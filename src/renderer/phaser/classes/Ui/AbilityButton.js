@@ -38,7 +38,7 @@ var AbilityButton = /** @class */ (function (_super) {
             _this.add(image);
         }
         // label
-        var label = _this.label = scene.add.bitmapText(-7 + size / 2, +7 - size / 2, BitmapFontManager.font(scene, 'Verdana', true, false, '#FFFFFF'), key, 18);
+        var label = _this.label = scene.add.bitmapText(-7 + size / 2, +7 - size / 2, BitmapFontManager.font(scene, 'Verdana', true, false, '#FFFFFF'), key.toUpperCase(), 16);
         label.setOrigin(0.5);
         label.letterSpacing = 1.3;
         _this.add(label);

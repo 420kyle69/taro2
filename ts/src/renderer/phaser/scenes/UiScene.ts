@@ -22,7 +22,7 @@ class UiScene extends PhaserScene {
             if (abilities) {
                 Object.entries(abilities).forEach(([abilityId, ability]) => {
                     let key;
-                    if (keybindings) {
+                    if (!ability.hidden && keybindings) {
                         Object.entries(keybindings).forEach(([keybindingKey, keybinding]) => {
                             if (keybinding.keyDown?.abilityId === abilityId || keybinding.keyUp?.abilityId === abilityId) {
                                 key = keybindingKey;
