@@ -197,7 +197,7 @@ var ScriptComponent = TaroEntity.extend({
 			// ScriptComponent.prototype.log(log);
 		}
 
-		if (tar.isServer && taro.server.unpublishQueued) {
+		if (taro.isServer && taro.server.unpublishQueued) {
 			taro.server.unpublish(message + " " + path);	
 		}
 	}
