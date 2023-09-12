@@ -72,7 +72,6 @@ var ControlComponent = TaroEntity.extend({
 				space: false,
 				escape: false
 			}
-
 		};
 
 		for (device in this.input) {
@@ -80,6 +79,21 @@ var ControlComponent = TaroEntity.extend({
 				taro.input.mapAction(key, taro.input[device][key]);
 			}
 		}
+
+        if (taro.isClient) {
+            taro.client.on('key-down', (data) => {
+                const unit = this._entity.getSelectedUnit();
+                const unitAbility = unit._stats.controls.abilities[data.key];
+                this.keyDownAbility(unit, unitAbility.keyDown);
+                taro.network.send('playerKeyDown', { device: data.device, key: data.key });
+            });
+            taro.client.on('key-up', (data) => { 
+                const unit = this._entity.getSelectedUnit();
+                const unitAbility = unit._stats.controls.abilities[data.key];
+                this.keyUpAbility(unit, unitAbility);
+                taro.network.send('playerKeyDown', { device: data.device, key: data.key });
+            });
+        }
 	},  
 
 	keyDown: function (device, key) {

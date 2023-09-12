@@ -36,6 +36,7 @@ var AbilityButton = /** @class */ (function (_super) {
         if (texture && scene.textures.exists(texture)) {
             var image = _this.image = scene.add.image(0, 0, texture).setDisplaySize(size * 0.8, size * 0.8);
             _this.add(image);
+            _this.fx = image.preFX.addBloom(0xffffff, 1, 1, 2, 1.2).setActive(false);
         }
         // label
         var label = _this.label = scene.add.bitmapText(-7 + size / 2, +7 - size / 2, BitmapFontManager.font(scene, 'Verdana', true, false, '#FFFFFF'), key.toUpperCase(), 16);
@@ -55,8 +56,7 @@ var AbilityButton = /** @class */ (function (_super) {
                     return;
                 clicked_1 = true;
                 if (key) {
-                    taro.network.send('playerKeyDown', {
-                        // @ts-ignore
+                    taro.client.emit('key-down', {
                         device: 'key', key: key.toLowerCase()
                     });
                 }
@@ -71,8 +71,7 @@ var AbilityButton = /** @class */ (function (_super) {
                     return;
                 clicked_1 = false;
                 if (key) {
-                    taro.network.send('playerKeyUp', {
-                        // @ts-ignore
+                    taro.client.emit('key-up', {
                         device: 'key', key: key.toLowerCase()
                     });
                 }
@@ -87,31 +86,26 @@ var AbilityButton = /** @class */ (function (_super) {
             button.on('pointerdown', function () {
                 taro.client.isPressingAbility = true;
                 if (key) {
-                    taro.network.send('playerKeyDown', {
-                        // @ts-ignore
+                    taro.client.emit('key-down', {
                         device: 'key', key: key.toLowerCase()
                     });
                 }
                 else {
                     // ability have no keybinding
                 }
-                _this.activate(true);
             });
             button.on('pointerup', function () {
                 taro.client.isPressingAbility = false;
                 if (key) {
-                    taro.network.send('playerKeyUp', {
-                        // @ts-ignore
+                    taro.client.emit('key-up', {
                         device: 'key', key: key.toLowerCase()
                     });
                 }
                 else {
                     // ability have no keybinding
                 }
-                _this.activate(false);
             });
             button.on('pointerover', function () {
-                //gameScene.input.setTopOnly(true);
                 //scene.tooltip.showMessage(name, tooltipText);
                 clearTimeout(_this.timer);
             });
@@ -137,6 +131,16 @@ var AbilityButton = /** @class */ (function (_super) {
         }
         else {
             this.button.setFillStyle(this.backgroundColor, 0.7);
+        }
+    };
+    AbilityButton.prototype.casting = function (bool) {
+        if (bool) {
+            if (this.image)
+                this.fx.setActive(true);
+        }
+        else {
+            if (this.image)
+                this.fx.setActive(false);
         }
     };
     return AbilityButton;

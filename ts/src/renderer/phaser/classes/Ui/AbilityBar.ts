@@ -30,7 +30,6 @@ class AbilityBar extends Phaser.GameObjects.Container{
     updatePosition() {
         this.x = this.scene.sys.game.canvas.width / 2 + 35 - Object.values(this.buttons).length * (this.buttonSize + this.buttonInterval) / 2;
         this.y = this.scene.sys.game.canvas.height - 20 - (this.buttonSize/2) - $(taro.client.getCachedElementById('unit-status')).height();
-        console.log('update position', this.x, this.y)
     }
 
     clear() {

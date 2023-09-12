@@ -34,7 +34,8 @@ var UiScene = /** @class */ (function (_super) {
                 Object.entries(abilities).forEach(function (_a) {
                     var abilityId = _a[0], ability = _a[1];
                     var key;
-                    if (!ability.hidden && keybindings) {
+                    if (keybindings && (taro.isMobile && ability.visibility !== 'desktop' && ability.visibility !== 'none') ||
+                        (!taro.isMobile && ability.visibility !== 'mobile' && ability.visibility !== 'none')) {
                         Object.entries(keybindings).forEach(function (_a) {
                             var _b, _c;
                             var keybindingKey = _a[0], keybinding = _a[1];
@@ -52,7 +53,12 @@ var UiScene = /** @class */ (function (_super) {
         });
         taro.client.on('stop-press-key', function (abilityId) {
             abilityBar.buttons[abilityId].activate(false);
-            //abilityBar.buttons[abilityId].customize(abilityBar.buttons[abilityId].size, abilityBar.buttons[abilityId].size/2);
+        });
+        taro.client.on('start-casting', function (abilityId) {
+            abilityBar.buttons[abilityId].casting(true);
+        });
+        taro.client.on('stop-casting', function (abilityId) {
+            abilityBar.buttons[abilityId].casting(false);
         });
     };
     UiScene.prototype.preload = function () {
