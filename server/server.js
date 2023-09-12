@@ -358,6 +358,7 @@ var Server = TaroClass.extend({
 	},
 	startWebServer: function () {
 		const app = express();
+		global.app = app;
 		const port = 80;
 
 		app.use(bodyParser.urlencoded({ extended: false }));
@@ -534,13 +535,14 @@ var Server = TaroClass.extend({
 						}
 
 						const jsonFiles = files.filter(file => file.endsWith('.json'));
-						var game = await new Promise((resolve) => {
+						var game = await new Promise((resolveGame) => {
 							if (jsonFiles.length === 1) {
-								resolve(fs.readFileSync(jsonPath + jsonFiles[0]));
+								taro.gameName = jsonFiles[0];
+								resolveGame(fs.readFileSync(jsonPath + jsonFiles[0]));
 							} else {
 								const choices = jsonFiles.map(file => ({
 									name: file,
-									value: `${jsonPath}/${file}`
+									value: file
 								}));
 								inquirer
 									.prompt([
@@ -551,11 +553,18 @@ var Server = TaroClass.extend({
 											choices: choices
 										}
 									]).then((answers) => {
-										resolve(fs.readFileSync(answers.selectedFile));
+										taro.gameName = answers.selectedFile;
+										resolveGame(fs.readFileSync(jsonPath + answers.selectedFile));
 									});
 							}
 						});
-
+						if (global.app) {
+							global.app.use((req, res, next) => {
+								if (req.url === '/src/game.json') {
+									res.redirect(`/src/${taro.gameName}`);
+								}
+							});
+						}
 						game = JSON.parse(game);
 						game.defaultData = game;
 						var data = { data: {} };

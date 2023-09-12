@@ -877,7 +877,7 @@ const Client = TaroEventingClass.extend({
 	// 		}
 	// 	}
 	// },
-	
+
 	queueStreamUpdateData: function(entityId, key, value) {
 		if (taro.client.entityUpdateQueue[entityId] == undefined) {
 			taro.client.entityUpdateQueue[entityId] = {};
