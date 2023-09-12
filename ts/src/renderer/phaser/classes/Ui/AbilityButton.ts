@@ -46,7 +46,7 @@ class AbilityButton extends Phaser.GameObjects.Container {
         const label = this.label = scene.add.bitmapText(
             - 7 + size / 2, + 7 - size / 2,
             BitmapFontManager.font(scene, 'Verdana', true, false, '#FFFFFF'),
-            key, 18
+            key.toUpperCase(), 16
         );
         label.setOrigin(0.5);
         label.letterSpacing = 1.3;
