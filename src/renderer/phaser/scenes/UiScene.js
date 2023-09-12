@@ -34,7 +34,7 @@ var UiScene = /** @class */ (function (_super) {
                 Object.entries(abilities).forEach(function (_a) {
                     var abilityId = _a[0], ability = _a[1];
                     var key;
-                    if (keybindings) {
+                    if (!ability.hidden && keybindings) {
                         Object.entries(keybindings).forEach(function (_a) {
                             var _b, _c;
                             var keybindingKey = _a[0], keybinding = _a[1];

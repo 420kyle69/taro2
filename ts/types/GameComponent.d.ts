@@ -24,6 +24,7 @@ interface UnitAbility {
         unitAttributes: Record<string, number>,
         playerAttributes: Record<string, number>
     },
+    hidden: boolean;
     iconUrl: string,
 }
 
