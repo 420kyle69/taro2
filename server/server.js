@@ -8,10 +8,10 @@ const bodyParser = require('body-parser');
 const fs = require('fs');
 const cluster = require('cluster');
 const { RateLimiterMemory } = require('rate-limiter-flexible');
-const currency = require("currency.js");
+const currency = require('currency.js');
 
 _ = require('lodash');
-rfdc = require('rfdc')
+rfdc = require('rfdc');
 
 const config = require('../config');
 const Console = console.constructor;
@@ -107,9 +107,9 @@ global.posthog = {
 	capture: function () {
 		// do nothing
 	},
-}
+};
 
-console.log("process.env.ENV = ", process.env.ENV)
+console.log('process.env.ENV = ', process.env.ENV);
 if (process.env.ENV == 'production') {
 	var Rollbar = require('rollbar');
 	global.rollbar = new Rollbar({
@@ -127,7 +127,7 @@ if (process.env.ENV == 'production') {
 
 // initialize mixpanel.
 var Mixpanel = require('mixpanel');
-var { PostHog } = require('posthog-node')
+var { PostHog } = require('posthog-node');
 // create an instance of the mixpanel client
 if (process.env.MIXPANEL_TOKEN) {
 	global.mixpanel = Mixpanel.init(process.env.MIXPANEL_TOKEN);
@@ -137,23 +137,23 @@ if (process.env.POSTHOG_TOKEN) {
 	global.posthog = new PostHog(process.env.POSTHOG_TOKEN, { host: 'https://app.posthog.com' });
 }
 
-global.trackServerEvent = function ({ eventName, properties, target = "all" }, socket) {
+global.trackServerEvent = function ({ eventName, properties, target = 'all' }, socket) {
 	var posthogDistinctId = socket?._token.posthogDistinctId;
 	var mixpanelDistinctId = socket?._token?.distinctId;
-	if (global.mixpanel && mixpanelDistinctId && (target === "all" || target === "mixpanel")) {
+	if (global.mixpanel && mixpanelDistinctId && (target === 'all' || target === 'mixpanel')) {
 		global.mixpanel.track(eventName, {
 			'distinct_id': mixpanelDistinctId,
 			...properties
 		});
 	}
-	if (global.posthog && posthogDistinctId && (target === "all" || target === "posthog")) {
+	if (global.posthog && posthogDistinctId && (target === 'all' || target === 'posthog')) {
 		global.posthog.capture({
 			distinctId: posthogDistinctId,
 			'event': eventName,
 			properties: properties
 		});
 	}
-}
+};
 
 process.on('exit', function () {
 	console.log('process exit called.');
@@ -524,22 +524,52 @@ var Server = TaroClass.extend({
 				console.log('gameUrl', gameUrl);
 				promise = self.loadGameJSON(gameUrl);
 			} else {
+				const inquirer = require('inquirer');
+				const jsonPath = `${__dirname}/../src/`;
 				promise = new Promise(function (resolve, reject) {
-					console.log('gameUrl', `${__dirname}/../src/game.json`);
-					var game = fs.readFileSync(`${__dirname}/../src/game.json`);
-					game = JSON.parse(game);
-					game.defaultData = game;
-					var data = { data: {} };
-					for (let [key, value] of Object.entries(game)) {
-						data.data[key] = value;
-					}
-					for (let [key, value] of Object.entries(game.data)) {
-						data.data[key] = value;
-					}
-					if (game && game.data && game.data.defaultData && game.data.defaultData._id) {
-						self.gameId = game.data.defaultData._id;
-					}
-					resolve(data);
+					fs.readdir(jsonPath, async (err, files) => {
+						if (err) {
+							console.error('Error reading directory:', err);
+							return;
+						}
+
+						const jsonFiles = files.filter(file => file.endsWith('.json'));
+						var game = await new Promise((resolve) => {
+							if (jsonFiles.length === 1) {
+								resolve(fs.readFileSync(jsonPath + jsonFiles[0]));
+							} else {
+								const choices = jsonFiles.map(file => ({
+									name: file,
+									value: `${jsonPath}/${file}`
+								}));
+								inquirer
+									.prompt([
+										{
+											type: 'list',
+											name: 'selectedFile',
+											message: 'Select a JSON file:',
+											choices: choices
+										}
+									]).then((answers) => {
+										resolve(fs.readFileSync(answers.selectedFile));
+									});
+							}
+						});
+
+						game = JSON.parse(game);
+						game.defaultData = game;
+						var data = { data: {} };
+						for (let [key, value] of Object.entries(game)) {
+							data.data[key] = value;
+						}
+						for (let [key, value] of Object.entries(game.data)) {
+							data.data[key] = value;
+						}
+						if (game && game.data && game.data.defaultData && game.data.defaultData._id) {
+							self.gameId = game.data.defaultData._id;
+						}
+						resolve(data);
+					});
 				});
 			}
 
@@ -554,7 +584,7 @@ var Server = TaroClass.extend({
 					taro.game.data = {
 						...taro.game.data,
 						...additionalData
-					}
+					};
 				}
 
 				taro.game.cspEnabled = !!taro.game.data.defaultData.clientSidePredictionEnabled;
@@ -655,11 +685,11 @@ var Server = TaroClass.extend({
 										self.developerClientIds.forEach(
 											id => {
 												taro.network.send('devLogs', taro.game.devLogs, id);
-			
+
 												if (taro.profiler.isEnabled) {
 													taro.network.send('profile', taro.profiler.getProfile(), id);
 												}
-												
+
 												if (sendErrors) {
 													taro.network.send('errorLogs', taro.script.errorLogs, id);
 												}
@@ -876,7 +906,7 @@ var Server = TaroClass.extend({
 				}
 			}
 			if (body.status === 'error') {
-				console.log('error in sending coins')
+				console.log('error in sending coins');
 
 				if (!body.reason || !body.message) {
 					return;
@@ -961,7 +991,7 @@ var Server = TaroClass.extend({
 				}
 			}
 			if (body.status === 'error') {
-				console.log('error in buying item')
+				console.log('error in buying item');
 			}
 		}
 	},
@@ -1002,7 +1032,7 @@ var Server = TaroClass.extend({
 				}
 			}
 			if (body.status === 'error') {
-				console.log('error in crediting ad-reward coins')
+				console.log('error in crediting ad-reward coins');
 			}
 		}
 	},
