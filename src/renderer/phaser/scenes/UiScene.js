@@ -16,16 +16,60 @@ var __extends = (this && this.__extends) || (function () {
 var UiScene = /** @class */ (function (_super) {
     __extends(UiScene, _super);
     function UiScene() {
-        return _super.call(this, { key: 'UI', active: true }) || this;
+        return _super.call(this, { key: 'Ui', active: true }) || this;
     }
     UiScene.prototype.init = function () {
         return;
     };
     UiScene.prototype.create = function () {
-        return;
+        if (!taro.isMobile) {
+            //this.tooltip = new DevTooltip(this);
+        }
+        var abilityBar = this.abilityBar = new AbilityBar(this);
+        taro.client.on('create-ability-bar', function (data) {
+            var keybindings = data.keybindings;
+            var abilities = data.abilities;
+            abilityBar.clear();
+            if (abilities) {
+                Object.entries(abilities).forEach(function (_a) {
+                    var abilityId = _a[0], ability = _a[1];
+                    var key;
+                    if (keybindings) {
+                        Object.entries(keybindings).forEach(function (_a) {
+                            var _b, _c;
+                            var keybindingKey = _a[0], keybinding = _a[1];
+                            if (((_b = keybinding.keyDown) === null || _b === void 0 ? void 0 : _b.abilityId) === abilityId || ((_c = keybinding.keyUp) === null || _c === void 0 ? void 0 : _c.abilityId) === abilityId) {
+                                key = keybindingKey;
+                            }
+                        });
+                        abilityBar.addButton(abilityId, ability, key);
+                    }
+                });
+            }
+        });
+        taro.client.on('start-press-key', function (abilityId) {
+            abilityBar.buttons[abilityId].activate(true);
+        });
+        taro.client.on('stop-press-key', function (abilityId) {
+            abilityBar.buttons[abilityId].activate(false);
+            //abilityBar.buttons[abilityId].customize(abilityBar.buttons[abilityId].size, abilityBar.buttons[abilityId].size/2);
+        });
     };
     UiScene.prototype.preload = function () {
-        return;
+        var _this = this;
+        this.load.plugin('rexroundrectangleplugin', '/assets/js/rexroundrectangleplugin.min.js', true);
+        Object.values(taro.game.data.abilities).forEach(function (ability) {
+            if (ability.iconUrl)
+                _this.load.image(ability.iconUrl, ability.iconUrl);
+        });
+        Object.values(taro.game.data.unitTypes).forEach(function (unitType) {
+            if (unitType.controls.unitAbilities) {
+                Object.values(unitType.controls.unitAbilities).forEach(function (ability) {
+                    if (ability.iconUrl)
+                        _this.load.image(ability.iconUrl, ability.iconUrl);
+                });
+            }
+        });
     };
     UiScene.prototype.update = function () {
         return;
