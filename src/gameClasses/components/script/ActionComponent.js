@@ -238,9 +238,9 @@ var ActionComponent = TaroEntity.extend({
 							obj = JSON.parse(obj);
 						} catch (err) {
 							throw new Error(err);
-							return;
 						}
 
+						
 						// ensure we aren't sending more than 30 POST requests within 10 seconds
 						taro.server.postReqTimestamps.push(taro.currentTime());
 						var oldestReqTimestamp = taro.server.postReqTimestamps[0]
@@ -252,15 +252,20 @@ var ActionComponent = TaroEntity.extend({
 						}
 
 						taro.server.request.post({
-							url: url,
+        					url: url,
 							form: obj
 						}, function optionalCallback(err, httpResponse, body) {
 							if (err) {
-								throw new Error('upload failed:', err);
+								// don't throw new Error here, because it's inside callback and it won't get caught
+								self._script.errorLog(err, path);	
 							}
 
 							try {
 								var res = JSON.parse(body);
+
+								console.log("res JSON", res)
+
+
 								var newValue = res.response;
 								params['newValue'] = newValue;
 
@@ -268,10 +273,8 @@ var ActionComponent = TaroEntity.extend({
 									taro.game.data.variables[varName].value = newValue;
 								}
 							} catch (err) {
-								throw new Error('sendPostRequest' + taro.game.data.defaultData.title + url + err);
-								if (taro.game.data.variables.hasOwnProperty(varName)) {
-									taro.game.data.variables[varName].value = 'error';
-								}
+								// don't throw new Error here, because it's inside callback and it won't get caught
+								self._script.errorLog(err, path);	
 							}
 						});
 
@@ -306,7 +309,8 @@ var ActionComponent = TaroEntity.extend({
 
 									console.log("body", body)
 									if (err) {
-										throw new Error(err);
+										// don't throw new Error here, because it's inside callback and it won't get caught
+										self._script.errorLog(err, path);	
 									}
 
 									if (taro.game.data.variables.hasOwnProperty(targetVarName)) {
@@ -325,7 +329,8 @@ var ActionComponent = TaroEntity.extend({
 
 									self._entity.script.trigger('onPostResponse', vars);
 								} catch (e) {
-									throw new Error(e);
+									// don't throw new Error here, because it's inside callback and it won't get caught
+									self._script.errorLog(e, path);	
 								}
 
 							})
