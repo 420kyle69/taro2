@@ -69,7 +69,9 @@ var UiScene = /** @class */ (function (_super) {
                 _this.load.image(ability.iconUrl, ability.iconUrl);
         });
         Object.values(taro.game.data.unitTypes).forEach(function (unitType) {
-            if (unitType.controls.unitAbilities) {
+            var _a;
+            // temp fix for undefined crash
+            if (((_a = unitType === null || unitType === void 0 ? void 0 : unitType.controls) === null || _a === void 0 ? void 0 : _a.unitAbilities) && Object.keys(unitType.controls.unitAbilities).length > 0) {
                 Object.values(unitType.controls.unitAbilities).forEach(function (ability) {
                     if (ability.iconUrl)
                         _this.load.image(ability.iconUrl, ability.iconUrl);

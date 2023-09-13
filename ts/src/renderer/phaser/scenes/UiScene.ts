@@ -59,7 +59,8 @@ class UiScene extends PhaserScene {
             if (ability.iconUrl) this.load.image(ability.iconUrl, ability.iconUrl);
         });
         Object.values(taro.game.data.unitTypes).forEach(unitType => {
-            if (unitType.controls.unitAbilities) {
+            // temp fix for undefined crash
+            if (unitType?.controls?.unitAbilities && Object.keys(unitType.controls.unitAbilities).length > 0) {
                 Object.values(unitType.controls.unitAbilities).forEach(ability => {
                     if (ability.iconUrl) this.load.image(ability.iconUrl, ability.iconUrl);
                 });
