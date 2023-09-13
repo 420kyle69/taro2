@@ -817,7 +817,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 				if (sensoringUnit && sensoringUnit.script) {
 					sensoringUnit.script.trigger(entityA._category + 'EntersSensor', triggeredBy);
 
-					if (entityA._category == 'unit') {
+					if (entityA._category == 'unit' && sensoringUnit.ai) {
 						sensoringUnit.ai.registerSensorDetection(entityA);
 					}
 				}

@@ -1,3 +1,187 @@
+/**
+ * recursively set object parameters
+ * @param oldOjbect
+ * @param newObject
+ */
+function setOjbect(oldOjbect: { [key: string]: any }, newObject: { [key: string]: any }) {
+	Object.keys(newObject).map((k) => {
+		if (!oldOjbect[k]) {
+			oldOjbect[k] = {};
+		}
+		if (typeof newObject[k] === 'object') {
+			setOjbect(oldOjbect[k], newObject[k]);
+		} else {
+			oldOjbect[k] = newObject[k];
+		}
+	});
+}
+
+/**
+ * merge the oldData with newData using template
+ * @param oldData
+ * @param newData
+ * @param template
+ */
+function merge(oldData: any, newData: any, template: MergedTemplate<any>) {
+	Object.entries(template).map(([k, v]) => {
+		if (!v.calc && typeof v === 'object') {
+			if (!oldData[k]) {
+				oldData[k] = {};
+			}
+			merge(oldData[k], newData[k], template[k] as MergedTemplate<any>);
+			return;
+		}
+		if (!oldData[k] && v.calc !== 'init') {
+			switch (typeof newData[k]) {
+				case 'string': {
+					oldData[k] = '';
+					break;
+				}
+				case 'number': {
+					oldData[k] = 0;
+					break;
+				}
+				case 'object': {
+					oldData[k] = Array.isArray(newData[k]) ? [] : {};
+					break;
+				}
+			}
+		}
+		if (typeof v.calc === 'function') {
+			v.calc(oldData, newData, oldData[k]);
+		} else {
+			switch (v.calc) {
+				case 'init': {
+					if (oldData[k] === undefined) {
+						oldData[k] = newData[k];
+					}
+					break;
+				}
+				case 'set': {
+					oldData[k] = newData[k];
+					break;
+				}
+				case 'smartSet': {
+					if (typeof newData[k] === 'object') {
+						setOjbect(oldData[k], newData[k]);
+					} else {
+						oldData[k] = newData[k];
+					}
+					break;
+				}
+				case 'sum': {
+					switch (v.method) {
+						case 'direct': {
+							oldData[k] += newData[k];
+							break;
+						}
+						case 'array': {
+							// console.log('oldData', oldData[k], k)
+							newData[k].map((v: any) => {
+								if (!oldData[k].includes(v)) {
+									oldData[k].push(v);
+								}
+							});
+
+						}
+					}
+					break;
+				}
+				case 'div': {
+					oldData[k] /= newData[k];
+					break;
+				}
+				case 'sub': {
+					oldData[k] -= newData[k];
+					break;
+				}
+				case 'mul': {
+					oldData[k] *= newData[k];
+					break;
+				}
+			}
+		}
+
+
+		return oldData;
+	});
+}
+
+const mergedTemplate: MergedTemplate<TileData<'edit'>> = {
+	edit: {
+		size: { calc: 'set', method: 'direct' },
+		selectedTiles: {
+			calc: (oldData: TileData<'edit'>['edit'], newData: TileData<'edit'>['edit'], nowData: [Record<number, Record<number, number>>]) => {
+				// console.log(oldData, newData, nowData);
+				const newLayer = newData.layer[0];
+				if (!oldData.layer?.includes(newLayer)) {
+					nowData.push(...newData.selectedTiles);
+				} else {
+					const idx = oldData.layer.findIndex((v) => v === newLayer);
+					setOjbect(nowData[idx], newData.selectedTiles[0]);
+				}
+			}, method: 'direct'
+		},
+		shape: { calc: 'set', method: 'direct' },
+		layer: { calc: 'sum', method: 'array' },
+		x: { calc: 'init', method: 'direct' },
+		y: { calc: 'init', method: 'direct' },
+	}
+};
+
+function debounce<Params extends any[]>(
+	func: (...args: Params) => any,
+	timeout: number,
+	mergedTemplate?: MergedTemplate<any>,
+): (...args: Params) => void {
+	let timer: NodeJS.Timeout;
+	let mergedData: any = [{}];
+	return function (...args: Params) {
+		clearTimeout(timer);
+		if (mergedTemplate) {
+			args.map((v, idx) => {
+				merge(mergedData[0], v, mergedTemplate);
+			});
+		} else {
+			if (Array.isArray(args)) {
+				mergedData = args;
+			} else {
+				mergedData[0] = args;
+			}
+		}
+
+		timer = setTimeout(() => {
+			func(...mergedData);
+			mergedData = [{}];
+		}, timeout);
+	};
+}
+
+function mergeSetWasEdited(gameMap: MapData) {
+	gameMap.wasEdited = true;
+}
+
+function mergeEditTileActions(data: TileData<'edit'>) {
+	taro.network.send('editTile', data);
+}
+
+const debounceSetWasEdited = debounce(mergeSetWasEdited, 0);
+const debounceEditTileSend = debounce(mergeEditTileActions, 0, mergedTemplate);
+
+function recalcWallsPhysics(gameMap: MapData, forPathFinding: boolean) {
+	taro.physics.destroyWalls();
+	let map = taro.scaleMap(rfdc()(gameMap));
+	gameMap.wasEdited = true;
+	taro.tiled.loadJson(map, function (layerArray, layersById) {
+		taro.physics.staticsFromMap(layersById.walls);
+	});
+	if (forPathFinding) {
+		taro.map.updateWallMapData(); // for A* pathfinding
+	}
+}
+
+const debounceRecalcPhysics = debounce(recalcWallsPhysics, 0);
+
 class DeveloperMode {
 	active: boolean;
 	activeTab: devModeTab;
@@ -70,6 +254,7 @@ class DeveloperMode {
 		return this.activeTab && this.activeTab !== 'play';
 	}
 
+
 	editTile<T extends MapEditToolEnum>(data: TileData<T>, clientId: string): void {
 		// only allow developers to modify the tiles
 		if (taro.server.developerClientIds.includes(clientId) || clientId === 'server') {
@@ -77,12 +262,19 @@ class DeveloperMode {
 				throw 'receive: {}';
 			}
 			const gameMap = taro.game.data.map;
-			gameMap.wasEdited = true;
-			taro.network.send('editTile', data);
+
 			const { dataType, dataValue } = Object.entries(data).map(([k, dataValue]) => {
 				const dataType = k as MapEditToolEnum; return { dataType, dataValue };
 			})[0];
-			const serverData = _.clone(dataValue);
+			const serverData = rfdc()(dataValue);
+			if (dataType === 'edit') {
+				serverData.layer = serverData.layer[0];
+				debounceSetWasEdited(gameMap);
+				debounceEditTileSend(data as TileData<'edit'>);
+			} else {
+				gameMap.wasEdited = true;
+				taro.network.send('editTile', data);
+			}
 			if (gameMap.layers.length > 4 && serverData.layer >= 2) serverData.layer++;
 			const width = gameMap.width;
 			switch (dataType) {
@@ -94,8 +286,10 @@ class DeveloperMode {
 				}
 				case 'edit': {
 					//save tile change to taro.game.data.map and taro.map.data
-					const nowValue = serverData as TileData<'edit'>['edit'];
-					this.putTiles(nowValue.x, nowValue.y, nowValue.selectedTiles, nowValue.size, nowValue.shape, nowValue.layer);
+					const nowValue = serverData as Omit<TileData<'edit'>['edit'], 'layer'> & { layer: number };
+					nowValue.selectedTiles.map((v, idx) => {
+						this.putTiles(nowValue.x, nowValue.y, v, nowValue.size, nowValue.shape, nowValue.layer);
+					});
 					break;
 				}
 				case 'clear': {
@@ -106,12 +300,7 @@ class DeveloperMode {
 
 			if (gameMap.layers[serverData.layer].name === 'walls') {
 				//if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
-				taro.physics.destroyWalls();
-				let map = taro.scaleMap(rfdc()(gameMap));
-				taro.tiled.loadJson(map, function (layerArray, layersById) {
-					taro.physics.staticsFromMap(layersById.walls);
-				});
-				taro.map.updateWallMapData(); // for A* pathfinding
+				debounceRecalcPhysics(gameMap, true);
 			}
 		}
 	}
@@ -124,13 +313,17 @@ class DeveloperMode {
 	 * @param brushSize brush's size
 	 * @param layer map's layer
 	 */
-	putTiles(tileX: number, tileY: number, selectedTiles: Record<number, Record<number, number>>, brushSize: Vector2D, shape: Shape, layer: number): void {
+	putTiles(tileX: number, tileY: number, selectedTiles: Record<number, Record<number, number>>, brushSize: Vector2D | 'fitContent', shape: Shape, layer: number): void {
 		const map = taro.game.data.map;
 		const width = map.width;
-		const sample = this.calcSample(selectedTiles, brushSize, shape);
+		const calcData = this.calcSample(selectedTiles, brushSize, shape);
+		const sample = calcData.sample;
+		let size = brushSize === 'fitContent' ? { x: calcData.xLength, y: calcData.yLength } : brushSize;
+		tileX = brushSize === 'fitContent' ? calcData.minX : tileX;
+		tileY = brushSize === 'fitContent' ? calcData.minY : tileY;
 		if (map.layers[layer]) {
-			for (let x = 0; x < brushSize.x; x++) {
-				for (let y = 0; y < brushSize.y; y++) {
+			for (let x = 0; x < size.x; x++) {
+				for (let y = 0; y < size.y; y++) {
 					if (sample[x] && sample[x][y] !== undefined && this.pointerInsideMap(x + tileX, y + tileY, map)) {
 						let index = sample[x][y];
 						if (index === -1) index = 0;
@@ -153,15 +346,22 @@ class DeveloperMode {
 	 * @param size brush's size
 	 * @returns sample to print
 	 */
-	calcSample(selectedTileArea: Record<number, Record<number, number>>, size: Vector2D, shape?: Shape): Record<number, Record<number, number>> {
+	calcSample(selectedTileArea: Record<number, Record<number, number>>, size: Vector2D | 'fitContent', shape?: Shape): { sample: Record<number, Record<number, number>>, xLength: number, yLength: number, minX: number, minY: number } {
 		const xArray = Object.keys(selectedTileArea);
 		const yArray = Object.values(selectedTileArea).map((object) => Object.keys(object)).flat().sort((a, b) => parseInt(a) - parseInt(b));
 		const minX = parseInt(xArray[0]);
 		const minY = parseInt(yArray[0]);
 		const maxX = parseInt(xArray[xArray.length - 1]);
 		const maxY = parseInt(yArray[yArray.length - 1]);
+		// console.log(selectedTileArea, minX, maxX, minY, maxY);
 		const xLength = maxX - minX + 1;
 		const yLength = maxY - minY + 1;
+		if (size === 'fitContent') {
+			size = {
+				x: xLength,
+				y: yLength
+			};
+		}
 		let tempSample: Record<number, Record<number, number>> = {};
 		switch (shape) {
 			case 'rectangle': {
@@ -177,7 +377,7 @@ class DeveloperMode {
 				break;
 			}
 		}
-		return tempSample;
+		return { sample: tempSample, xLength, yLength, minX, minY };
 	}
 
 
@@ -323,15 +523,15 @@ class DeveloperMode {
 					if (!isNaN(data.angle) && !isNaN(action.angle)) {
 						action.angle = data.angle;
 					}
-                    if (!isNaN(data.width) && !isNaN(action.width)) {
-                        action.width = data.width;
-                    }
-                    if (!isNaN(data.height) && !isNaN(action.height)) {
-                        action.height = data.height;
-                    }
-                    if (data.wasDeleted) {
-                        action.wasDeleted = true;
-                    }
+					if (!isNaN(data.width) && !isNaN(action.width)) {
+						action.width = data.width;
+					}
+					if (!isNaN(data.height) && !isNaN(action.height)) {
+						action.height = data.height;
+					}
+					if (data.wasDeleted) {
+						action.wasDeleted = true;
+					}
 				}
 			});
 			if (!found) {
@@ -530,7 +730,7 @@ class DeveloperMode {
 	}
 
 	updateClientMap(data: { mapData: MapData }): void {
-		//console.log ('map data was edited', data.mapData.wasEdited);
+		// console.log('map data was edited', data.mapData.wasEdited);
 		if (data.mapData.wasEdited) {
 			data.mapData.wasEdited = false;
 			data.mapData.haveUnsavedChanges = true;
@@ -565,16 +765,74 @@ type MapEditTool = {
 	} & BasicEditProps,
 
 	edit: {
-		size: Vector2D,
-		selectedTiles: Record<number, Record<number, number>>,
+		size: Vector2D | 'fitContent',
+		selectedTiles: Record<number, Record<number, number>>[],
 		shape: Shape,
-	} & BasicEditProps
+		layer: number[]
+	} & Omit<BasicEditProps, 'layer'>
 
 	clear: {
 		layer: number;
 		layerName?: string;
 	}
 }
+
+/**
+ * MergedTemplate
+ * a template for merging data in debounce func to improve performance
+ *
+ * @experimental
+ *
+ * @example
+ * if u want to let debounce func auto merged input data, u need to give it a template to tell it how to handle it.
+ *
+ * const mergedTemplate: MergedTemplate<TileData<'edit'>> = {
+	edit: {
+		size: { calc: 'set', method: 'direct' },
+		selectedTiles: {
+			calc: (oldData: TileData<'edit'>['edit'], newData: TileData<'edit'>['edit'], nowData: [Record<number, Record<number, number>>]) => {
+				// console.log(oldData, newData, nowData);
+				const newLayer = newData.layer[0]
+				if (!oldData.layer?.includes(newLayer)) {
+					nowData.push(...newData.selectedTiles)
+				} else {
+					const idx = oldData.layer.findIndex((v) => v === newLayer)
+					setOjbect(nowData[idx], newData.selectedTiles[0])
+				}
+			}, method: 'direct'
+		},
+		shape: { calc: 'set', method: 'direct' },
+		layer: { calc: 'sum', method: 'array' },
+		x: { calc: 'init', method: 'direct' },
+		y: { calc: 'init', method: 'direct' },
+	}
+};
+ * @see debounce
+ *
+ */
+type MergedTemplate<T> = { [K in keyof T]: T[K] extends object ? MergedTemplate<T[K]> | MergedOperation : MergedOperation; };
+
+/**
+ * if 'direct', then it will direct do something to the original object
+ *
+ * if 'array', then it will handle it as array to push or do other things
+ * @see debounce
+ */
+type MergedMethod = 'direct' | 'array'
+
+/**
+ * 'set' will auto set the value
+ *
+ * 'sum' will add the old value with new value
+ *
+ * ...
+ *
+ * 'smartSet' is for object, if a = {0: {0: 1 }}, b = {1: {0: 1}}, the mergedObj will be {0: {0: 1 }, 1: {0: 1}}, not {1: {0: 1}} directly
+ *
+ * 'init' will only set it once
+ */
+type MergedCalc = 'set' | 'sum' | 'sub' | 'mul' | 'div' | 'smartSet' | 'init' | ((oldData: any, newData: any, nowData: any) => any)
+type MergedOperation = { method: MergedMethod, calc: MergedCalc }
 
 type MapEditToolEnum = keyof MapEditTool;
 

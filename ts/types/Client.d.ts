@@ -1,4 +1,5 @@
 declare class Client extends TaroEventingClass {
+    getCachedElementById: any;
 
 	myPlayer: TaroEntity;
 	selectedUnit: TaroEntity;
@@ -9,6 +10,7 @@ declare class Client extends TaroEventingClass {
 	isZooming: boolean;
 	developerClientIds: any;
 	zoom: number;
+    isPressingAbility: boolean;
 
 	constructor(options?: object);
 }

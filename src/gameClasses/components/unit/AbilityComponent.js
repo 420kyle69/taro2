@@ -278,6 +278,10 @@ var AbilityComponent = TaroEntity.extend({
 		if (ability.castDuration) {
 			this.abilityDurations[abilityId] = Date.now() + ability.castDuration;
 		}
+
+        if (taro.isClient && this._entity._stats.clientId === taro.network.id()) {
+            taro.client.emit('start-casting', abilityId);
+        }
 	},
 
 	stopCasting: function (abilityId) {
@@ -293,6 +297,10 @@ var AbilityComponent = TaroEntity.extend({
 			ability.eventScripts.stopCasting,
 			{ triggeredBy: { unitId: this._entity.id()} }
 		);
+
+        if (taro.isClient && this._entity._stats.clientId === taro.network.id()) {
+            taro.client.emit('stop-casting', abilityId);
+        }
 	},
 	_behaviour: function (ctx) {
 

@@ -42,6 +42,7 @@ class GameScene extends PhaserScene {
 				camera.zoom = this.calculateZoom();
 				taro.client.emit('scale', { ratio: camera.zoom * this.resolutionCoef });
 			}
+            taro.client.emit('update-abilities-position');
 		});
 
 		taro.client.on('zoom', (height: number) => {
@@ -344,10 +345,6 @@ class GameScene extends PhaserScene {
 			map.height * map.tileHeight / 2 * scaleFactor.y
 		);
 
-		this.events.on('update', () => {
-			taro.client.emit('tick');
-		});
-
 		if (data.defaultData.heightBasedZIndex) {
 			this.heightRenderer = new HeightRenderComponent(this, map.height * map.tileHeight);
 		}
@@ -602,11 +599,10 @@ class GameScene extends PhaserScene {
 
 	update (): void {
 
-		let trackingDelay = this.trackingDelay / taro.fps();
-		this.cameras.main.setLerp(trackingDelay, trackingDelay);
-
-		const worldPoint = this.cameras.main.getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
-
+        //cause black screen and camera jittering when change tab
+		/*let trackingDelay = this.trackingDelay / taro.fps();
+		this.cameras.main.setLerp(trackingDelay, trackingDelay);*/
+        const worldPoint = this.cameras.main.getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
 		taro.input.emit('pointermove', [{
 			x: worldPoint.x,
 			y: worldPoint.y,
@@ -629,6 +625,8 @@ class GameScene extends PhaserScene {
 				}
 			});
 		}
+        
+        taro.client.emit('tick');
 	}
 }
 

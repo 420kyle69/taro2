@@ -657,8 +657,7 @@ const Client = TaroEventingClass.extend({
 			}
 
 			if (window.isStandalone) {
-
-				$(self.getCachedElementById('toggle-dev-panels')).show();
+				// $(self.getCachedElementById('toggle-dev-panels')).show();
 			}
 		});
 	},

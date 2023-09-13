@@ -18,6 +18,8 @@ class MobileControlsScene extends PhaserScene {
 
 	init (): void {
 
+        this.scene.swapPosition('MobileControls', 'Ui');
+
 		// enabling four mobile pointers
 		this.input.addPointer(3);
 
@@ -48,6 +50,19 @@ class MobileControlsScene extends PhaserScene {
 				default:
 					const relativeX = Math.trunc((x + w / 2) / 960 * window.innerWidth - w / 2);
 					const relativeY = Math.trunc((y + h / 2) / 540 * window.innerHeight - h / 2);
+
+                    if (key !== 'button1') {
+                        const uiScene = taro.renderer.scene.getScene('Ui') as UiScene;
+                        let buttonExist = false;
+                        Object.values(uiScene?.abilityBar?.buttons).forEach((button) => {
+                            if (button.key === key) {
+                                button.x = relativeX - uiScene.abilityBar.x + button.size/2;
+                                button.y = relativeY - uiScene.abilityBar.y + button.size/2;
+                                buttonExist = true;
+                            }
+                        });
+                        if (buttonExist) return;
+                    }
 
 					const text = key.toUpperCase();
 

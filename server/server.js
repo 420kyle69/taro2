@@ -47,25 +47,25 @@ global.rollbar = {
 
 // override console.log and error to print additional data
 console.basicLog = console.log;
-// console.log = function () {
+console.log = function () {
 
-// 	const log = [];
+	const log = [];
 
-// 	log.push(new Date());
-// 	log.push(cluster.isMaster ? 'master' : 'worker');
+	log.push(new Date());
+	log.push(cluster.isMaster ? 'master' : 'worker');
 
-// 	if (taro?.server?.httpsPort) {
-// 		log.push(taro?.server?.httpsPort);
-// 	}
+	if (taro?.server?.httpsPort) {
+		log.push(taro?.server?.httpsPort);
+	}
 
-// 	if (taro?.game?.data?.defaultData?.gameSlug) {
-// 		log.push(taro?.game?.data?.defaultData?.gameSlug);
-// 	}
+	if (taro?.game?.data?.defaultData?.gameSlug) {
+		log.push(taro?.game?.data?.defaultData?.gameSlug);
+	}
 
-// 	log.push(...arguments);
+	log.push(...arguments);
 
-// 	console.basicLog(...log);
-// };
+	console.basicLog(...log);
+};
 
 console.basicError = console.error;
 console.error = function () {
@@ -650,6 +650,7 @@ var Server = TaroClass.extend({
 
 									if (taro.isServer && self.developerClientIds.length) {
 										taro.game.devLogs.status = taro.server.getStatus();
+
 										const sendErrors = Object.keys(taro.script.errorLogs).length;
 										self.developerClientIds.forEach(
 											id => {
@@ -968,38 +969,6 @@ var Server = TaroClass.extend({
 	creditAdRewardToOwner: function (status, clientId) {
 		if (status && clientId) {
 			try {
-				const isUsedToken = taro.server.usedAdRewardJwts[token];
-				if (isUsedToken) {
-					console.log('creditAdRewardToOwner - Token has been used already', token);
-					return;
-				}
-
-				const jwt = require("jsonwebtoken");
-
-				const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
-
-				const { type, clientId: decodedClientId, createdAt } = decodedToken;
-
-				if (type === 'creditAdRewardToken' && decodedClientId === clientId) {
-					// allow transaction since token has been verified
-
-					// store token for current client
-					taro.server.usedAdRewardJwts[token] = createdAt;
-
-					// remove expired tokens
-					const filteredUsedAdRewardJwts = {};
-					const usedTokenEntries = Object.entries(taro.server.usedAdRewardJwts).filter(([token, tokenCreatedAt]) => (Date.now() - tokenCreatedAt) < taro.server.AD_REWARD_JWT_EXPIRES_IN);
-					for (const [key, value] of usedTokenEntries) {
-						if (typeof value === 'number') {
-							filteredUsedAdRewardJwts[key] = value;
-						}
-					}
-					taro.server.usedAdRewardJwts = filteredUsedAdRewardJwts;
-
-				} else {
-					return;
-				}
-
 				var player = taro.game.getPlayerByClientId(clientId);
 
 				taro.clusterClient && taro.clusterClient.creditAdRewardToOwner({

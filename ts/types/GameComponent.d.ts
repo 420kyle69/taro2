@@ -10,6 +10,22 @@ interface EntityData {
 		loopCount: number;
 		name: string;
 	}>
+    controls: {
+        mouseBehaviour: any;
+        abilities: Record<string, ControlAbility>;
+        unitAbilities: Record<string, UnitAbility>;
+    }
+}
+
+interface UnitAbility {
+    name: string,
+    castDuration: number,
+    cost: {
+        unitAttributes: Record<string, number>,
+        playerAttributes: Record<string, number>
+    },
+    visibility: string,//'always' | 'mobile' | ' desktop' | 'none';
+    iconUrl: string,
 }
 
 interface ScriptData {
@@ -85,7 +101,7 @@ declare class GameComponent extends TaroEntity {
 		projectileTypes: Record<string, EntityData>;
 		itemTypes: Record<string, EntityData>;
 		particleTypes: Record<string, ParticleData>;
-		abilities: Record<string, any>
+		abilities: Record<string, UnitAbility>
 		settings: {
 			addStrokeToNameAndAttributes: boolean;
 			camera: {
