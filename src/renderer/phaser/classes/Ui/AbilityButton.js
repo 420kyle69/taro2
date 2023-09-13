@@ -16,6 +16,7 @@ var __extends = (this && this.__extends) || (function () {
 var AbilityButton = /** @class */ (function (_super) {
     __extends(AbilityButton, _super);
     function AbilityButton(scene, name, id, key, tooltipText, texture, x, y, size, radius) {
+        if (key === void 0) { key = ''; }
         var _this = _super.call(this, scene) || this;
         _this.id = id;
         _this.key = key;

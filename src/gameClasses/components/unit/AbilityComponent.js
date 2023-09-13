@@ -258,6 +258,11 @@ var AbilityComponent = TaroEntity.extend({
 		const player = this._entity.getOwner();
 		const ability = this._entity._stats.controls.unitAbilities[abilityId];
 
+		if (!ability) {
+			// script error log here
+			return;
+		}
+
 		if (!this.canAffordCost(ability, player)) {
 			return;
 		}
@@ -293,6 +298,11 @@ var AbilityComponent = TaroEntity.extend({
 		}
 
 		const ability = this._entity._stats.controls.unitAbilities[abilityId];
+
+		if (!ability) {
+			// script error log here
+			return;
+		}
 
 		this.activeAbilities[abilityId] = false;
 

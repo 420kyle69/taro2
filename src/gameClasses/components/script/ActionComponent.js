@@ -1449,24 +1449,16 @@ var ActionComponent = TaroEntity.extend({
 						break;
 
 					case 'startCastingAbility':
-						var unit = self._script.variable.getValue(action.unit);
+						var unit = self._script.variable.getValue(action.entity);
 						var ability = self._script.variable.getValue(action.ability);
 
-						if (!unit.hasAbility(ability)) {
-							return;
-						}
-
-						unit.ability.startCasting(ability);
+						unit.ability.startCasting('ability');
 
 						break;
 
 					case 'stopCastingAbility':
-						var unit = self._script.variable.getValue(action.unit);
+						var unit = self._script.variable.getValue(action.entity);
 						var ability = self._script.variable.getValue(action.ability);
-
-						if (!unit.hasAbility(ability)) {
-							return;
-						}
 
 						unit.ability.stopCasting(ability);
 

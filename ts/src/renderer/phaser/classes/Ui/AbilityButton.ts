@@ -12,7 +12,7 @@ class AbilityButton extends Phaser.GameObjects.Container {
         scene: UiScene,
 		name: string,
         public id: string,
-		public key: string,
+		public key: string = '',
 		tooltipText: string,
 		texture: string | null,
 		x: number,
