@@ -227,6 +227,7 @@ var TileEditor = /** @class */ (function () {
                     x: tileX,
                     y: tileY,
                     shape: shape,
+                    noMerge: true,
                 }
             });
         }
@@ -269,7 +270,7 @@ var TileEditor = /** @class */ (function () {
                     continue;
                 }
                 if (map.layers[tempLayer].data[nowPos.y * width + nowPos.x] !== oldTile) {
-                    addToLimits === null || addToLimits === void 0 ? void 0 : addToLimits({ x: nowPos.x, y: nowPos.y });
+                    // addToLimits?.({ x: nowPos.x, y: nowPos.y });
                     continue;
                 }
                 tileMap.putTileAt(newTile, nowPos.x, nowPos.y, false, layer);
@@ -278,13 +279,11 @@ var TileEditor = /** @class */ (function () {
             }
             else {
                 map = this.gameScene.tilemap;
-                if (!map.getTileAt(nowPos.x, nowPos.y, true, layer) ||
-                    ((_c = limits === null || limits === void 0 ? void 0 : limits[nowPos.x]) === null || _c === void 0 ? void 0 : _c[nowPos.y]) ||
-                    map.getTileAt(nowPos.x, nowPos.y, true, layer).index === 0 ||
-                    map.getTileAt(nowPos.x, nowPos.y, true, layer).index === -1) {
+                var nowTile = map.getTileAt(nowPos.x, nowPos.y, true, layer);
+                if ((_c = limits === null || limits === void 0 ? void 0 : limits[nowPos.x]) === null || _c === void 0 ? void 0 : _c[nowPos.y]) {
                     continue;
                 }
-                if (map.getTileAt(nowPos.x, nowPos.y, true, layer).index !== oldTile) {
+                if (nowTile && nowTile.index !== oldTile) {
                     addToLimits === null || addToLimits === void 0 ? void 0 : addToLimits({ x: nowPos.x, y: nowPos.y });
                     continue;
                 }
@@ -299,7 +298,7 @@ var TileEditor = /** @class */ (function () {
             if (nowPos.y > 0 && !((_f = closedQueue[nowPos.x]) === null || _f === void 0 ? void 0 : _f[nowPos.y - 1])) {
                 openQueue.push({ x: nowPos.x, y: nowPos.y - 1 });
             }
-            if (nowPos.x < map.height - 1 && !((_g = closedQueue[nowPos.x]) === null || _g === void 0 ? void 0 : _g[nowPos.y + 1])) {
+            if (nowPos.y < map.height - 1 && !((_g = closedQueue[nowPos.x]) === null || _g === void 0 ? void 0 : _g[nowPos.y + 1])) {
                 openQueue.push({ x: nowPos.x, y: nowPos.y + 1 });
             }
         }

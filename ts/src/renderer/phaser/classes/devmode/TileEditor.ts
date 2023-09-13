@@ -258,6 +258,7 @@ class TileEditor {
 					x: tileX,
 					y: tileY,
 					shape,
+					noMerge: true,
 				}
 			});
 		}
@@ -303,7 +304,7 @@ class TileEditor {
 					continue;
 				}
 				if (map.layers[tempLayer].data[nowPos.y * width + nowPos.x] !== oldTile) {
-					addToLimits?.({ x: nowPos.x, y: nowPos.y });
+					// addToLimits?.({ x: nowPos.x, y: nowPos.y });
 					continue;
 				}
 				tileMap.putTileAt(newTile, nowPos.x, nowPos.y, false, layer);
@@ -311,14 +312,12 @@ class TileEditor {
 				map.layers[tempLayer].data[nowPos.y * width + nowPos.x] = newTile;
 			} else {
 				map = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
-				if (!map.getTileAt(nowPos.x, nowPos.y, true, layer) ||
-					limits?.[nowPos.x]?.[nowPos.y] ||
-					map.getTileAt(nowPos.x, nowPos.y, true, layer).index === 0 ||
-					map.getTileAt(nowPos.x, nowPos.y, true, layer).index === -1) {
+				const nowTile = map.getTileAt(nowPos.x, nowPos.y, true, layer);
+				if (limits?.[nowPos.x]?.[nowPos.y]) {
 					continue;
 				}
 				if (
-					map.getTileAt(nowPos.x, nowPos.y, true, layer).index !== oldTile
+					nowTile && nowTile.index !== oldTile
 				) {
 					addToLimits?.({ x: nowPos.x, y: nowPos.y });
 					continue;
@@ -334,7 +333,7 @@ class TileEditor {
 			if (nowPos.y > 0 && !closedQueue[nowPos.x]?.[nowPos.y - 1]) {
 				openQueue.push({ x: nowPos.x, y: nowPos.y - 1 });
 			}
-			if (nowPos.x < map.height - 1 && !closedQueue[nowPos.x]?.[nowPos.y + 1]) {
+			if (nowPos.y < map.height - 1 && !closedQueue[nowPos.x]?.[nowPos.y + 1]) {
 				openQueue.push({ x: nowPos.x, y: nowPos.y + 1 });
 			}
 

@@ -168,7 +168,6 @@ var debounceEditTileSend = debounce(mergeEditTileActions, 0, mergedTemplate);
 function recalcWallsPhysics(gameMap, forPathFinding) {
     taro.physics.destroyWalls();
     var map = taro.scaleMap(rfdc()(gameMap));
-    gameMap.wasEdited = true;
     taro.tiled.loadJson(map, function (layerArray, layersById) {
         taro.physics.staticsFromMap(layersById.walls);
     });
@@ -262,8 +261,7 @@ var DeveloperMode = /** @class */ (function () {
                 return { dataType: dataType, dataValue: dataValue };
             })[0], dataType = _a.dataType, dataValue = _a.dataValue;
             var serverData = rfdc()(dataValue);
-            if (dataType === 'edit') {
-                serverData.layer = serverData.layer[0];
+            if (dataType === 'edit' && !serverData.noMerge) {
                 debounceSetWasEdited(gameMap);
                 debounceEditTileSend(data);
             }
@@ -296,7 +294,12 @@ var DeveloperMode = /** @class */ (function () {
             }
             if (gameMap.layers[serverData.layer].name === 'walls') {
                 //if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
-                debounceRecalcPhysics(gameMap, true);
+                if (serverData.noMerge) {
+                    recalcWallsPhysics(gameMap, true);
+                }
+                else {
+                    debounceRecalcPhysics(gameMap, true);
+                }
             }
         }
     };
