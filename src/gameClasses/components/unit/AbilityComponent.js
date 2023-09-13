@@ -7,6 +7,7 @@ var AbilityComponent = TaroEntity.extend({
 		self._entity = entity;
 
 		this.activeAbilities = {};
+		this.abilityDurations = {};
 		this.abilityCooldowns = {};
 	},
 
@@ -247,7 +248,10 @@ var AbilityComponent = TaroEntity.extend({
 	},
 
 	startCasting: function (abilityId) {
-		if (this.activeAbilities[abilityId]) {
+		if (
+			this.activeAbilities[abilityId]
+			|| this.abilityCooldowns[abilityId]
+		) {
 			return;
 		}
 
@@ -267,8 +271,12 @@ var AbilityComponent = TaroEntity.extend({
 
 		this.activeAbilities[abilityId] = true;
 
+		if (ability.cooldown) {
+			this.abilityCooldowns[abilityId] = Date.now() + ability.cooldown;
+		}
+
 		if (ability.castDuration) {
-			this.abilityCooldowns[abilityId] = Date.now() + ability.castDuration;
+			this.abilityDurations[abilityId] = Date.now() + ability.castDuration;
 		}
 	},
 
@@ -288,12 +296,20 @@ var AbilityComponent = TaroEntity.extend({
 	},
 	_behaviour: function (ctx) {
 
+		if (Object.keys(this.abilityDurations).length > 0) {
+			for (let id in this.abilityDurations) {
+
+				if (this.abilityDurations[id] <= Date.now()) {
+					delete this.abilityDurations[id];
+					this.stopCasting(id);
+				}
+			}
+		}
+
 		if (Object.keys(this.abilityCooldowns).length > 0) {
 			for (let id in this.abilityCooldowns) {
-
 				if (this.abilityCooldowns[id] <= Date.now()) {
 					delete this.abilityCooldowns[id];
-					this.stopCasting(id);
 				}
 			}
 		}
