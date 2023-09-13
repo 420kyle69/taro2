@@ -39,10 +39,12 @@ var AbilityButton = /** @class */ (function (_super) {
             _this.fx = image.preFX.addBloom(0xffffff, 1, 1, 2, 1.2).setActive(false);
         }
         // label
-        var label = _this.label = scene.add.bitmapText(-7 + size / 2, +7 - size / 2, BitmapFontManager.font(scene, 'Verdana', true, false, '#FFFFFF'), key.toUpperCase(), 16);
-        label.setOrigin(0.5);
-        label.letterSpacing = 1.3;
-        _this.add(label);
+        if (key) {
+            var label = _this.label = scene.add.bitmapText(-7 + size / 2, +7 - size / 2, BitmapFontManager.font(scene, 'Verdana', true, false, '#FFFFFF'), key.toUpperCase(), 16);
+            label.setOrigin(0.5);
+            label.letterSpacing = 1.3;
+            _this.add(label);
+        }
         scene.add.existing(_this);
         if (taro.isMobile) {
             //hide key on mobile
@@ -117,13 +119,13 @@ var AbilityButton = /** @class */ (function (_super) {
         return _this;
     }
     AbilityButton.prototype.customize = function (size, radius) {
-        var _a;
+        var _a, _b;
         this.size = size;
         this.radius = radius;
         this.button.setSize(size, size);
         this.button.setRadius(radius);
         (_a = this.image) === null || _a === void 0 ? void 0 : _a.setDisplaySize(size * 0.8, size * 0.8);
-        this.label.setPosition(-7 + size / 2, +7 - size / 2);
+        (_b = this.label) === null || _b === void 0 ? void 0 : _b.setPosition(-7 + size / 2, +7 - size / 2);
     };
     AbilityButton.prototype.activate = function (bool) {
         if (bool) {

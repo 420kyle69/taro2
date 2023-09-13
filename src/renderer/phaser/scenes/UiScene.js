@@ -49,16 +49,20 @@ var UiScene = /** @class */ (function (_super) {
             }
         });
         taro.client.on('start-press-key', function (abilityId) {
-            abilityBar.buttons[abilityId].activate(true);
+            var _a;
+            (_a = abilityBar.buttons[abilityId]) === null || _a === void 0 ? void 0 : _a.activate(true);
         });
         taro.client.on('stop-press-key', function (abilityId) {
-            abilityBar.buttons[abilityId].activate(false);
+            var _a;
+            (_a = abilityBar.buttons[abilityId]) === null || _a === void 0 ? void 0 : _a.activate(false);
         });
         taro.client.on('start-casting', function (abilityId) {
-            abilityBar.buttons[abilityId].casting(true);
+            var _a;
+            (_a = abilityBar.buttons[abilityId]) === null || _a === void 0 ? void 0 : _a.casting(true);
         });
         taro.client.on('stop-casting', function (abilityId) {
-            abilityBar.buttons[abilityId].casting(false);
+            var _a;
+            (_a = abilityBar.buttons[abilityId]) === null || _a === void 0 ? void 0 : _a.casting(false);
         });
     };
     UiScene.prototype.preload = function () {

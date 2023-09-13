@@ -37,19 +37,19 @@ class UiScene extends PhaserScene {
 		});
 
         taro.client.on('start-press-key', (abilityId: string) => {
-            abilityBar.buttons[abilityId].activate(true);
+            abilityBar.buttons[abilityId]?.activate(true);
         });
 
         taro.client.on('stop-press-key', (abilityId: string) => {
-            abilityBar.buttons[abilityId].activate(false);
+            abilityBar.buttons[abilityId]?.activate(false);
         });
 
         taro.client.on('start-casting', (abilityId: string) => {
-            abilityBar.buttons[abilityId].casting(true);
+            abilityBar.buttons[abilityId]?.casting(true);
         });
 
         taro.client.on('stop-casting', (abilityId: string) => {
-            abilityBar.buttons[abilityId].casting(false);
+            abilityBar.buttons[abilityId]?.casting(false);
         });
 	}
 
