@@ -60,6 +60,12 @@ var UiScene = /** @class */ (function (_super) {
         taro.client.on('stop-casting', function (abilityId) {
             abilityBar.buttons[abilityId].casting(false);
         });
+        taro.client.on('start-ability-cooldown', function (abilityId) {
+            // console.log('start cooldown: ', abilityId);
+        });
+        taro.client.on('stop-ability-cooldown', function (abilityId) {
+            // console.log('stop cooldown: ', abilityId);
+        });
     };
     UiScene.prototype.preload = function () {
         var _this = this;
