@@ -22,7 +22,7 @@ class UiScene extends PhaserScene {
 			if (abilities) {
 				Object.entries(abilities).forEach(([abilityId, ability]) => {
 					let key;
-					if (keybindings && (taro.isMobile && ability.visibility !== 'desktop' && ability.visibility !== 'none') || 
+					if (keybindings && (taro.isMobile && ability.visibility !== 'desktop' && ability.visibility !== 'none') ||
 					(!taro.isMobile && ability.visibility !== 'mobile' && ability.visibility !== 'none')) {
 						Object.entries(keybindings).forEach(([keybindingKey, keybinding]) => {
 							if (keybinding.keyDown?.abilityId === abilityId || keybinding.keyUp?.abilityId === abilityId) {
