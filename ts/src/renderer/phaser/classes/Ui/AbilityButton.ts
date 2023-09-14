@@ -41,14 +41,16 @@ class AbilityButton extends Phaser.GameObjects.Container {
             this.fx = image.preFX.addBloom(0xffffff, 1, 1, 2, 1.2).setActive(false);
 		}
         // label
-        const label = this.label = scene.add.bitmapText(
-            - 7 + size / 2, + 7 - size / 2,
-            BitmapFontManager.font(scene, 'Verdana', true, false, '#FFFFFF'),
-            key.toUpperCase(), 16
-        );
-        label.setOrigin(0.5);
-        label.letterSpacing = 1.3;
-        this.add(label);
+        if (key && key.length < 2) {
+            const label = this.label = scene.add.bitmapText(
+                - 7 + size / 2, + 7 - size / 2,
+                BitmapFontManager.font(scene, 'Verdana', true, false, '#FFFFFF'),
+                key.toUpperCase(), 16
+            );
+            label.setOrigin(0.5);
+            label.letterSpacing = 1.3;
+            this.add(label);
+        }
 
         scene.add.existing(this);
 
@@ -125,7 +127,7 @@ class AbilityButton extends Phaser.GameObjects.Container {
         this.button.setSize(size, size);
         this.button.setRadius(radius);
         this.image?.setDisplaySize(size * 0.8, size * 0.8);
-        this.label.setPosition(- 7 + size / 2, + 7 - size / 2);
+        this.label?.setPosition(- 7 + size / 2, + 7 - size / 2);
     }
 
     activate(bool: boolean): void {
