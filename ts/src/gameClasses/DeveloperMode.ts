@@ -270,7 +270,6 @@ class DeveloperMode {
 				debounceSetWasEdited(gameMap);
 				debounceEditTileSend(data as TileData<'edit'>);
 			} else {
-				console.log('no merge')
 				gameMap.wasEdited = true;
 				taro.network.send('editTile', data);
 			}
@@ -331,7 +330,6 @@ class DeveloperMode {
 					if (sample[x] && sample[x][y] !== undefined && this.pointerInsideMap(x + tileX, y + tileY, map)) {
 						let index = sample[x][y];
 						if (index === -1) index = 0;
-						console.log(taro.map.data.layers[layer].data[x + tileX + (y + tileY) * width], map.layers[layer].data[x + tileX + (y + tileY) * width])
 						map.layers[layer].data[x + tileX + (y + tileY) * width] = index;
 						taro.map.data.layers[layer].data[x + tileX + (y + tileY) * width] = index;
 					}

@@ -278,7 +278,6 @@ var TileEditor = /** @class */ (function () {
                     continue;
                 }
                 if (map.layers[tempLayer].data[nowPos.y * width + nowPos.x] !== oldTile) {
-                    console.log(map.layers[tempLayer].data[nowPos.y * width + nowPos.x], oldTile, nowPos);
                     addToLimits === null || addToLimits === void 0 ? void 0 : addToLimits({ x: nowPos.x, y: nowPos.y });
                     continue;
                 }

@@ -310,7 +310,6 @@ class TileEditor {
 					continue;
 				}
 				if (map.layers[tempLayer].data[nowPos.y * width + nowPos.x] !== oldTile) {
-					console.log(map.layers[tempLayer].data[nowPos.y * width + nowPos.x], oldTile, nowPos)
 					addToLimits?.({ x: nowPos.x, y: nowPos.y });
 					continue;
 				}

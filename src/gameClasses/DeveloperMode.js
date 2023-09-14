@@ -266,7 +266,6 @@ var DeveloperMode = /** @class */ (function () {
                 debounceEditTileSend(data);
             }
             else {
-                console.log('no merge');
                 gameMap.wasEdited = true;
                 taro.network.send('editTile', data);
             }
@@ -327,7 +326,6 @@ var DeveloperMode = /** @class */ (function () {
                         var index = sample[x][y];
                         if (index === -1)
                             index = 0;
-                        console.log(taro.map.data.layers[layer].data[x + tileX + (y + tileY) * width], map.layers[layer].data[x + tileX + (y + tileY) * width]);
                         map.layers[layer].data[x + tileX + (y + tileY) * width] = index;
                         taro.map.data.layers[layer].data[x + tileX + (y + tileY) * width] = index;
                     }
