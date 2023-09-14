@@ -39,7 +39,8 @@ var AbilityButton = /** @class */ (function (_super) {
             _this.fx = image.preFX.addBloom(0xffffff, 1, 1, 2, 1.2).setActive(false);
         }
         // label
-        if (key && key.length > 1) {
+        if (key && key.length < 2) {
+            console.log('key', key.length);
             var label = _this.label = scene.add.bitmapText(-7 + size / 2, +7 - size / 2, BitmapFontManager.font(scene, 'Verdana', true, false, '#FFFFFF'), key.toUpperCase(), 16);
             label.setOrigin(0.5);
             label.letterSpacing = 1.3;
