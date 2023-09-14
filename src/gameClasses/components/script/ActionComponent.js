@@ -1444,6 +1444,7 @@ var ActionComponent = TaroEntity.extend({
 						}
 						break;
 
+					// very old
 					case 'castAbility':
 						if (entity && entity._category == 'unit' && entity.ability && action.abilityName) {
 							entity.ability.cast(action.abilityName);
@@ -1451,6 +1452,23 @@ var ActionComponent = TaroEntity.extend({
 						// else
 						// entity.ability.cast()
 						break;
+
+					case 'startCastingAbility':
+						var unit = self._script.variable.getValue(action.entity);
+						var ability = self._script.variable.getValue(action.ability);
+
+						unit.ability.startCasting('ability');
+
+						break;
+
+					case 'stopCastingAbility':
+						var unit = self._script.variable.getValue(action.entity);
+						var ability = self._script.variable.getValue(action.ability);
+
+						unit.ability.stopCasting(ability);
+
+						break;
+
 					case 'dropAllItems':
 						if (entity && entity._category == 'unit') {
 							for (let i = 0; i < entity._stats.itemIds.length; i++) {

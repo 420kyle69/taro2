@@ -64,6 +64,12 @@ var UiScene = /** @class */ (function (_super) {
             var _a;
             (_a = abilityBar.buttons[abilityId]) === null || _a === void 0 ? void 0 : _a.casting(false);
         });
+        taro.client.on('start-ability-cooldown', function (abilityId) {
+            // console.log('start cooldown: ', abilityId);
+        });
+        taro.client.on('stop-ability-cooldown', function (abilityId) {
+            // console.log('stop cooldown: ', abilityId);
+        });
     };
     UiScene.prototype.preload = function () {
         var _this = this;
