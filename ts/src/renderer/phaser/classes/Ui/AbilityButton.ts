@@ -42,7 +42,6 @@ class AbilityButton extends Phaser.GameObjects.Container {
 		}
         // label
         if (key && key.length < 2) {
-            console.log('key', key.length)
             const label = this.label = scene.add.bitmapText(
                 - 7 + size / 2, + 7 - size / 2,
                 BitmapFontManager.font(scene, 'Verdana', true, false, '#FFFFFF'),

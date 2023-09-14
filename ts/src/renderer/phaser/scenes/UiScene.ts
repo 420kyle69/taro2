@@ -32,8 +32,7 @@ class UiScene extends PhaserScene {
                         abilityBar.addButton(abilityId, ability, key);
                     }
                 });
-            }
-                
+            } 
 		});
 
         taro.client.on('start-press-key', (abilityId: string) => {

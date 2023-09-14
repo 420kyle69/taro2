@@ -904,8 +904,6 @@ var Unit = TaroEntityPhysics.extend({
 			// redraw for units which are not having attributebars too
 			self.redrawAttributeBars();
 			self.equipSkin(undefined);
-			// if mobile controls are in use configure for this unit
-			self.renderMobileControl();
 
 			if (self.unitUi) {
 				self.unitUi.updateAllAttributeBars();
@@ -915,6 +913,8 @@ var Unit = TaroEntityPhysics.extend({
             if (self._stats.clientId === taro.network.id() && data.controls.unitAbilities) {
                 taro.client.emit('create-ability-bar', {keybindings: data.controls.abilities, abilities: data.controls.unitAbilities});
             }
+            // if mobile controls are in use configure for this unit
+			self.renderMobileControl();
 		}
 
 		if (self.ai && self._stats.ai) {
