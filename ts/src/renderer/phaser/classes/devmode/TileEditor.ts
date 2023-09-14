@@ -207,7 +207,11 @@ class TileEditor {
 		}
 		if (taro.physics && map.layers[tempLayer].name === 'walls') {
 			//if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
-			debounceRecalcPhysics(map, false);
+			if (dataValue.noMerge) {
+				recalcWallsPhysics(map, true);
+			} else {
+				debounceRecalcPhysics(map, true);
+			}
 		}
 
 	}
@@ -289,7 +293,9 @@ class TileEditor {
 				closedQueue[nowPos.x] = {};
 			}
 			closedQueue[nowPos.x][nowPos.y] = 1;
-
+			if (newTile === 0 || newTile === null) {
+				newTile = -1;
+			}
 			if (fromServer) {
 				map = taro.game.data.map;
 				inGameEditor.mapWasEdited && inGameEditor.mapWasEdited();
@@ -304,11 +310,15 @@ class TileEditor {
 					continue;
 				}
 				if (map.layers[tempLayer].data[nowPos.y * width + nowPos.x] !== oldTile) {
-					// addToLimits?.({ x: nowPos.x, y: nowPos.y });
+					console.log(map.layers[tempLayer].data[nowPos.y * width + nowPos.x], oldTile, nowPos)
+					addToLimits?.({ x: nowPos.x, y: nowPos.y });
 					continue;
 				}
 				tileMap.putTileAt(newTile, nowPos.x, nowPos.y, false, layer);
 				//save tile change to taro.game.map.data
+				if(newTile === -1) {
+					newTile = 0;
+				}
 				map.layers[tempLayer].data[nowPos.y * width + nowPos.x] = newTile;
 			} else {
 				map = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
@@ -317,11 +327,12 @@ class TileEditor {
 					continue;
 				}
 				if (
-					nowTile && nowTile.index !== oldTile
+					(nowTile !== undefined && nowTile !== null) && nowTile.index !== oldTile
 				) {
 					addToLimits?.({ x: nowPos.x, y: nowPos.y });
 					continue;
 				}
+
 				map.putTileAt(newTile, nowPos.x, nowPos.y, false, layer);
 			}
 			if (nowPos.x > 0 && !closedQueue[nowPos.x - 1]?.[nowPos.y]) {

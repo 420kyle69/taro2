@@ -266,6 +266,7 @@ var DeveloperMode = /** @class */ (function () {
                 debounceEditTileSend(data);
             }
             else {
+                console.log('no merge');
                 gameMap.wasEdited = true;
                 taro.network.send('editTile', data);
             }
@@ -326,6 +327,7 @@ var DeveloperMode = /** @class */ (function () {
                         var index = sample[x][y];
                         if (index === -1)
                             index = 0;
+                        console.log(taro.map.data.layers[layer].data[x + tileX + (y + tileY) * width], map.layers[layer].data[x + tileX + (y + tileY) * width]);
                         map.layers[layer].data[x + tileX + (y + tileY) * width] = index;
                         taro.map.data.layers[layer].data[x + tileX + (y + tileY) * width] = index;
                     }
@@ -398,6 +400,9 @@ var DeveloperMode = /** @class */ (function () {
                 continue;
             }
             //save tile change to taro.game.data.map and taro.map.data
+            if (newTile === -1) {
+                newTile = 0;
+            }
             map.layers[layer].data[nowPos.y * width + nowPos.x] = newTile;
             taro.map.data.layers[layer].data[nowPos.y * width + nowPos.x] = newTile;
             if (nowPos.x > 0 && !((_c = closedQueue[nowPos.x - 1]) === null || _c === void 0 ? void 0 : _c[nowPos.y])) {
