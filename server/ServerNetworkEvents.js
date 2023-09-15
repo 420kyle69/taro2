@@ -109,7 +109,15 @@ var ServerNetworkEvents = {
 			return;
 		}
 		// check joining user is same as token user.
-		else if ((socket._token.userId && socket._token.userId !== data._id) || (socket._token.sessionId && socket._token.sessionId !== data.sessionId)) {
+		else if (
+			data == undefined || 
+			(
+				data && (
+					(socket._token.userId && socket._token.userId !== data._id) || 
+					(socket._token.sessionId && socket._token.sessionId !== data.sessionId)
+				)
+			)		
+		) {
 			console.log('Unauthenticated user joining the game (ServerNetworkEvent.js)');
 			socket.close('Unauthenticated user joining the game');
 			return;

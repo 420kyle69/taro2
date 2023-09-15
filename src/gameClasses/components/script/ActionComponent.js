@@ -232,7 +232,7 @@ var ActionComponent = TaroEntity.extend({
 						var url = self._script.variable.getValue(action.url, vars);
 						var varName = self._script.variable.getValue(action.varName, vars);
 
-						console.log("sendPostRequest obj", obj)
+						// console.log("sendPostRequest obj", obj)
 
 						try {
 							obj = JSON.parse(obj);
@@ -263,8 +263,7 @@ var ActionComponent = TaroEntity.extend({
 							try {
 								var res = JSON.parse(body);
 
-								console.log("res JSON", res)
-
+								// console.log("res JSON", res)
 
 								var newValue = res.response;
 								params['newValue'] = newValue;
@@ -299,7 +298,7 @@ var ActionComponent = TaroEntity.extend({
 
 						data.url = url;
 						
-						console.log("requestPost data", data);
+						// console.log("requestPost data", data);
 
 						// use closure to store globalVariableName
 						(function(targetVarName) {
@@ -307,7 +306,7 @@ var ActionComponent = TaroEntity.extend({
 								// try+catch must be redeclared inside callback otherwise an error will crash the process
 								try {
 
-									console.log("body", body)
+									// console.log("body", body)
 									if (err) {
 										// don't throw new Error here, because it's inside callback and it won't get caught
 										self._script.errorLog(err, path);	
