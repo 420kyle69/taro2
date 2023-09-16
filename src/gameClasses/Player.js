@@ -185,17 +185,7 @@ var Player = TaroEntity.extend({
 			if (unit && unit._category == 'unit' && unit.getOwner() == this || unitId === null) {
 				self._stats.selectedUnitId = unitId;
 				self.streamUpdateData([{ selectedUnitId: unitId }]);
-			} else {
-				// someone's attempting exploit by trying to assign a unit to a player that's not the unit's owner
-				var client = taro.server.clients[self._stats.clientId];
-				var logData = {
-					query: 'exploitSelectUnit',
-					gameTitle: taro.game.data.defaultData.title,
-					playerName: this._stats.name,
-					ip: client.ip,
-					userId: client.userId
-				};
-				global.rollbar.log("selectUnit exploit", logData);
+				unit.streamUpdateData([{ itemIds: unit._stats.itemIds }]); // send item inventory data for the newly selected unit
 			}
 		}
 

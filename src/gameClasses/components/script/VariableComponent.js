@@ -2006,6 +2006,41 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
+						case 'regionInFrontOfEntityAtDistance':
+							var entity = self.getValue(text.entity, vars);
+							var distance = self.getValue(text.distance, vars);
+							var width = self.getValue(text.width, vars);
+							var height = self.getValue(text.height, vars);
+	
+							if (
+								entity != undefined &&
+								self._entity.script.action.entityCategories.indexOf(entity._category) > -1 &&
+								height != undefined &&
+								width != undefined &&
+								distance != undefined
+							) {
+								// console.log(entity._translate.x, distance * Math.cos(entity._rotate.z + Math.radians(-90)));
+								// console.log(entity._translate.y, distance * Math.sin(entity._rotate.z + Math.radians(-90)));
+								var region = {
+									x: entity._translate.x + (distance * Math.cos(entity._rotate.z + Math.radians(-90))),
+									y: entity._translate.y + (distance * Math.sin(entity._rotate.z + Math.radians(-90))),
+									width: width,
+									height: height
+								};
+	
+								region.x -= region.width / 2;
+								region.y -= region.height / 2;
+	
+								if (region.x && !isNaN(region.x) && region.y && !isNaN(region.y) && region.width && !isNaN(region.width) && region.height && !isNaN(region.height)) {
+									returnValue = region
+								} else {
+									taro.script.errorLog(`region ${JSON.stringify(region)} is not a valid region`);
+									returnValue = undefined;
+								}
+							}
+	
+							break;
+
 					case 'entitiesInRegion':
 						var region = self.getValue(text.region, vars);
 						var id = taro.game.lastCastingUnitId;
