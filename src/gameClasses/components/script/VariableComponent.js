@@ -121,7 +121,7 @@ var VariableComponent = TaroEntity.extend({
 		}
 
 		if (isNaN(result)) {
-			taro.script.errorLog('\'Calculate\' detected NaN value. Returning undefined');
+			taro.script.errorLog(`Calculate error: ${left} ${op.operator} ${right} => NaN. Returning undefined`);
 			return undefined;
 		}
 

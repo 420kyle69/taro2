@@ -192,7 +192,8 @@ var ScriptComponent = TaroEntity.extend({
 				this.errorLogs[path].count++;
 			}
 			
-			// console.log('errorLog', path, message);
+			if (taro.env === 'standalone')
+				console.log('errorLog', path, message);
 			// taro.devLog('errorLog', message);
 			// ScriptComponent.prototype.log(log);
 		}
