@@ -603,10 +603,12 @@ class GameScene extends PhaserScene {
 		/*let trackingDelay = this.trackingDelay / taro.fps();
 		this.cameras.main.setLerp(trackingDelay, trackingDelay);*/
         const worldPoint = this.cameras.main.getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
-		taro.input.emit('pointermove', [{
-			x: worldPoint.x,
-			y: worldPoint.y,
-		}]);
+        if (!taro.isMobile) {
+		    taro.input.emit('pointermove', [{
+		    	x: worldPoint.x,
+		    	y: worldPoint.y,
+		    }]);
+        }
 
 		this.renderedEntities.forEach(element => {
 			element.setVisible(false);

@@ -38,14 +38,14 @@ var Player = TaroEntity.extend({
 				self.addComponent(ControlComponent);
 
 				// mouse move listener
-				taro.input.on('pointermove', function (point) {
-					if (taro.client.myPlayer) {
-						self.control.newMousePosition = [
-							point.x.toFixed(0),
-							point.y.toFixed(0)
-						];
-					}
-				});
+                taro.input.on('pointermove', function (point) {
+                    if (taro.client.myPlayer) {
+                        self.control.newMousePosition = [
+                            point.x.toFixed(0),
+                            point.y.toFixed(0)
+                        ];
+                    }
+                });
 
 				this.setChatMute(this._stats.banChat);
 			}

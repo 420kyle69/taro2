@@ -424,10 +424,12 @@ var GameScene = /** @class */ (function (_super) {
         /*let trackingDelay = this.trackingDelay / taro.fps();
         this.cameras.main.setLerp(trackingDelay, trackingDelay);*/
         var worldPoint = this.cameras.main.getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
-        taro.input.emit('pointermove', [{
-                x: worldPoint.x,
-                y: worldPoint.y,
-            }]);
+        if (!taro.isMobile) {
+            taro.input.emit('pointermove', [{
+                    x: worldPoint.x,
+                    y: worldPoint.y,
+                }]);
+        }
         this.renderedEntities.forEach(function (element) {
             element.setVisible(false);
         });
