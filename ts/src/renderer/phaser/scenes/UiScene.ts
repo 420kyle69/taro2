@@ -63,7 +63,7 @@ class UiScene extends PhaserScene {
 
 	preload (): void {
 		this.load.plugin('rexroundrectangleplugin', '/assets/js/rexroundrectangleplugin.min.js', true);
-        this.load.plugin('rexcirclemaskimageplugin', '/assets/js/rexcirclemaskimageplugin.min.js', true);
+        this.load.plugin('rexcirclemaskimageplugin', '/assets/js/rexcirclemaskimageplugin.min.js?v=1.1', true);
 		Object.values(taro.game.data.abilities).forEach(ability => {
 			if (ability.iconUrl) this.load.image(ability.iconUrl, ability.iconUrl);
 		});
