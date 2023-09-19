@@ -91,7 +91,7 @@ var ControlComponent = TaroEntity.extend({
 				const unit = this._entity.getSelectedUnit();
 				const unitAbility = unit._stats.controls.abilities[data.key];
 				this.keyUpAbility(unit, unitAbility);
-				taro.network.send('playerKeyDown', { device: data.device, key: data.key });
+				taro.network.send('playerKeyUp', { device: data.device, key: data.key });
 			});
 		}
 	},  
