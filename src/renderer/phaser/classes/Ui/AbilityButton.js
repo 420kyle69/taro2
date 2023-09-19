@@ -35,9 +35,16 @@ var AbilityButton = /** @class */ (function (_super) {
         _this.add(button);
         // image
         if (texture && scene.textures.exists(texture)) {
-            var image = _this.image = scene.add.image(0, 0, texture).setDisplaySize(size * 0.8, size * 0.8);
-            _this.add(image);
-            _this.fx = image.preFX.addBloom(0xffffff, 1, 1, 2, 1.2).setActive(false);
+            if (taro.isMobile) {
+                // @ts-ignore
+                var image = _this.image = scene.add.rexCircleMaskImage(0, 0, texture).setDisplaySize(size * 0.8, size * 0.8);
+                _this.add(image);
+            }
+            else {
+                var image = _this.image = scene.add.image(0, 0, texture).setDisplaySize(size * 0.8, size * 0.8);
+                _this.add(image);
+            }
+            _this.fx = _this.image.preFX.addBloom(0xffffff, 1, 1, 2, 1.2).setActive(false);
         }
         // label
         if (key && key.length < 2) {

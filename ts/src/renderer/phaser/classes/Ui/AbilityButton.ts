@@ -36,9 +36,15 @@ class AbilityButton extends Phaser.GameObjects.Container {
 
         // image
 		if (texture && scene.textures.exists(texture)) {
-			const image = this.image = scene.add.image(0, 0, texture).setDisplaySize(size * 0.8, size * 0.8);
-            this.add(image);
-            this.fx = image.preFX.addBloom(0xffffff, 1, 1, 2, 1.2).setActive(false);
+            if (taro.isMobile) {
+                // @ts-ignore
+                const image = this.image =  scene.add.rexCircleMaskImage(0, 0, texture).setDisplaySize(size * 0.8, size * 0.8);
+                this.add(image);
+            } else {
+			    const image = this.image = scene.add.image(0, 0, texture).setDisplaySize(size * 0.8, size * 0.8);
+                this.add(image);
+            }
+            this.fx = this.image.preFX.addBloom(0xffffff, 1, 1, 2, 1.2).setActive(false);
 		}
         // label
         if (key && key.length < 2) {
