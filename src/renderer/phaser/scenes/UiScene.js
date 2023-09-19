@@ -74,7 +74,7 @@ var UiScene = /** @class */ (function (_super) {
     UiScene.prototype.preload = function () {
         var _this = this;
         this.load.plugin('rexroundrectangleplugin', '/assets/js/rexroundrectangleplugin.min.js', true);
-        this.load.plugin('rexcirclemaskimageplugin', '/assets/js/rexcirclemaskimageplugin.min.js', true);
+        this.load.plugin('rexcirclemaskimageplugin', '/assets/js/rexcirclemaskimageplugin.min.js?v=1.1', true);
         Object.values(taro.game.data.abilities).forEach(function (ability) {
             if (ability.iconUrl)
                 _this.load.image(ability.iconUrl, ability.iconUrl);
