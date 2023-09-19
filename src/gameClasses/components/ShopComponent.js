@@ -1307,6 +1307,11 @@ var ShopComponent = TaroEntity.extend({
 			// console.log(item)
 
 			if (item.status == 'not_purchased') {
+
+				if(window.isInMobileApp()) {
+					continue;
+				}
+
 				if (item.soldForSocialShare) {
 					var button = self.buttonForSocialShare(item);
 				} else {
