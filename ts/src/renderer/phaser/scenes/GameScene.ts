@@ -289,8 +289,6 @@ class GameScene extends PhaserScene {
 		const data = taro.game.data;
 		const scaleFactor = taro.scaleMapDetails.scaleFactor;
 
-		console.log('map data', data.map);
-
 		data.map.tilesets.forEach((tileset) => {
 			const key = `tiles/${tileset.name}`;
 			const extrudedKey = `extruded-${key}`;

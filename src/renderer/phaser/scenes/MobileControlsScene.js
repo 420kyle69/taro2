@@ -102,6 +102,32 @@ var MobileControlsScene = /** @class */ (function (_super) {
                     break;
             }
         });
+        var resized = false;
+        taro.mobileControls.on('orientationchange', function (e) {
+            switch (e) {
+                case 'portrait-primary':
+                    _this.game.scale.setGameSize(window.innerWidth, window.innerHeight);
+                    if (resized) {
+                        resized = false;
+                    }
+                    else {
+                        resized = true;
+                        window.dispatchEvent(new Event('resize'));
+                    }
+                    break;
+                case 'landscape-primary':
+                    _this.game.scale.setGameSize(window.innerWidth, window.innerHeight);
+                    if (resized) {
+                        resized = false;
+                    }
+                    else {
+                        resized = true;
+                        window.dispatchEvent(new Event('resize'));
+                    }
+                    break;
+                default:
+            }
+        });
         taro.mobileControls.on('clear-controls', function () {
             joysticks.forEach(function (j) {
                 j.destroy();

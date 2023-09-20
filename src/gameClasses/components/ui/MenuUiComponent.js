@@ -12,7 +12,7 @@ var MenuUiComponent = TaroEntity.extend({
 		var playButtonClick = document.querySelector('#play-game-button');
 
 		if (taro.isClient) {
-			console.log('initializing UI elements...');
+			//console.log('initializing UI elements...');
 			self.shopType = '';
 			self.shopKey = '';
 			self.shopPage = 1;

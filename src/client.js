@@ -671,8 +671,6 @@ const Client = TaroEventingClass.extend({
 		const gravity = taro.game.data.settings.gravity;
 
 		if (gravity) {
-
-			console.log('setting gravity: ', gravity); // not in prod please
 			taro.physics.gravity(gravity.x, gravity.y);
 		}
 		taro.physics.setContinuousPhysics(!!taro?.game?.data?.settings?.continuousPhysics);

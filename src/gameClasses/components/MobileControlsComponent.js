@@ -16,6 +16,8 @@ var MobileControlsComponent = TaroEntity.extend({
 
 		this.controls = {};
 
+        var self = this;
+
 		// mouse move listener
 		taro.input.on('touchpointermove', function (point) {
             taro.client.myPlayer.control.newMousePosition = [
@@ -32,6 +34,7 @@ var MobileControlsComponent = TaroEntity.extend({
 				if (taro.client && taro.client.myPlayer && taro.network.id() == taro.client.myPlayer._stats.clientId) {
 					var unit = taro.$(taro.client.myPlayer._stats.selectedUnitId);
 					if (unit && unit._stats.controls) {
+                        self.emit('orientationchange', screen.orientation.type);
 						var unitAbilities = unit._stats.controls.abilities;
 						if (unitAbilities) {
 							// update mobile controls

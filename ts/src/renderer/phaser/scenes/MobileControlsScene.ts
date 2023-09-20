@@ -135,6 +135,32 @@ class MobileControlsScene extends PhaserScene {
 			}
 		});
 
+		let resized = false;
+
+        taro.mobileControls.on('orientationchange', (e: string) => {
+            switch(e) {
+                case 'portrait-primary':
+                    this.game.scale.setGameSize(window.innerWidth, window.innerHeight);
+					if (resized) {
+						resized = false;
+					} else {
+						resized = true;
+                		window.dispatchEvent(new Event('resize'));
+					}
+                    break;
+                case 'landscape-primary':
+                    this.game.scale.setGameSize(window.innerWidth, window.innerHeight);
+					if (resized) {
+						resized = false;
+					} else {
+						resized = true;
+                		window.dispatchEvent(new Event('resize'));
+					}
+                    break;
+                default:  
+            }
+        });
+
 		taro.mobileControls.on('clear-controls', () => {
 
 			joysticks.forEach((j) => {
