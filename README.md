@@ -89,4 +89,11 @@ Performance optimization is a hard problem that takes aeons to solve. We are alw
 
 Moddio is completely free and open source under the MIT license.
 
-Moddio was originally forked from [Isogenic Game Engine](https://www.isogenicengine.com/) back in 2016.
+## Credits ##
+[Isogenic Game Engine](https://www.isogenicengine.com/)
+[Phaser](https://phaser.io/)
+[PlanckJS](https://github.com/piqnt/planck.js)
+[uWebsocket](https://github.com/uNetworking/uWebSockets)
+[Box2D](https://github.com/erincatto/box2d)
+[Kenney Assets](https://www.kenney.nl/)
+[Hero Icons](https://github.com/tailwindlabs/heroicons)
