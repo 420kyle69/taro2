@@ -28,9 +28,6 @@
 - Mobile controls
 - and more!
 
-## Node Version
-Node Versions below [14](https://nodejs.org) are not supported due to package incompatibility and degraded performance.
-
 ## Running a game server
 Moddio will run games made using [modd.io game editor](https://www.modd.io).
 
@@ -52,7 +49,7 @@ Next, rename the downloaded Game JSON as `game.json` and move it to the `./src` 
 
 ## Quick start example - Run "Two Houses" locally
 
-Install [Node 14](https://nodejs.org) or later and then...
+Install [Node 18](https://nodejs.org) or later and then...
 
 ```
 git clone https://github.com/moddio/moddio2.git
@@ -64,30 +61,14 @@ npm run server
 ## Connecting to the game server
 Visit http://localhost:80 to start testing game.
 
-## Compiling game.js for faster loading
-Once you  make changes, run 
-```
-npm run build
-```
-and edit /src/index.ejs file, and comment
-```
-<script type="text/javascript" src="/engine/loader.js"></script>
-```
-and uncomment
-```
-<script type="text/javascript" src="./game.js"></script>
-```
+## How to create & edit games on modd.io
+You must use Moddio Game Editor which is available at [https://www.modd.io](https://www.modd.io).
+To learn how to use the game editor, visit here: https://learn.modd.io
 
-## How to customize game client UI
-Game client's user interface is rendered by [/src/index.ejs](https://github.com/moddio/moddio2/blob/master/src/index.ejs) file and the theme files in [/src/templates/](https://github.com/moddio/moddio2/tree/master/src/templates)
+## How to contribute
+Moddio is completely free and open source under the MIT license, and we are always looking for more contributors.
+To learn about how to become a contributor, please visit [how to contribute page](https://docs.modd.io/how-to-contribute)
 
-## How to make games on modd.io
-Please visit https://www.modd.io/tutorials for more information.
-
-## We need contributors, and we are also hiring
-Performance optimization is a hard problem that takes aeons to solve. We are always looking for more developers to help us. To be a contributor, please contact m0dE in our [Discord](https://discord.gg/XRe8T7K) If you find yourself enjoying working with us, then we should seriously consider working together.
-
-Moddio is completely free and open source under the MIT license.
 
 ## Credits ##
 [Isogenic Game Engine](https://www.isogenicengine.com/)
