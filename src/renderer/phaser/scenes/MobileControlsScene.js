@@ -39,19 +39,17 @@ var MobileControlsScene = /** @class */ (function (_super) {
                 default:
                     var relativeX_1 = Math.trunc((x + w / 2) / 960 * window.innerWidth - w / 2);
                     var relativeY_1 = Math.trunc((y + h / 2) / 540 * window.innerHeight - h / 2);
-                    if (key !== 'button1') {
-                        var uiScene_1 = taro.renderer.scene.getScene('Ui');
-                        var buttonExist_1 = false;
-                        Object.values((_a = uiScene_1 === null || uiScene_1 === void 0 ? void 0 : uiScene_1.abilityBar) === null || _a === void 0 ? void 0 : _a.buttons).forEach(function (button) {
-                            if (button.key === key) {
-                                button.x = relativeX_1 - uiScene_1.abilityBar.x + button.size / 2;
-                                button.y = relativeY_1 - uiScene_1.abilityBar.y + button.size / 2;
-                                buttonExist_1 = true;
-                            }
-                        });
-                        if (buttonExist_1)
-                            return;
-                    }
+                    var uiScene_1 = taro.renderer.scene.getScene('Ui');
+                    var buttonExist_1 = false;
+                    Object.values((_a = uiScene_1 === null || uiScene_1 === void 0 ? void 0 : uiScene_1.abilityBar) === null || _a === void 0 ? void 0 : _a.buttons).forEach(function (button) {
+                        if (button.key === key) {
+                            button.x = relativeX_1 - uiScene_1.abilityBar.x + button.size / 2;
+                            button.y = relativeY_1 - uiScene_1.abilityBar.y + button.size / 2;
+                            buttonExist_1 = true;
+                        }
+                    });
+                    if (buttonExist_1)
+                        return;
                     var text = key.toUpperCase();
                     var button_1 = _this.add.image(relativeX_1, relativeY_1, 'mobile-button-up')
                         .setDisplaySize(w, h)
