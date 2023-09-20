@@ -72,7 +72,7 @@ var PhaserUnit = /** @class */ (function (_super) {
             }
             // GameScene's load entity doesn't create sprite sheets so we have horrible
             // errors when we try to create animations
-            if (this.sprite.texture.frameTotal === 1) {
+            if (this.sprite.texture.frameTotal === 1 || this.sprite.texture.key === 'pack-result') {
                 return;
             }
             for (var animationsKey in this.entity._stats.animations) {
