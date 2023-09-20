@@ -91,9 +91,15 @@ Moddio is completely free and open source under the MIT license.
 
 ## Credits ##
 [Isogenic Game Engine](https://www.isogenicengine.com/)
+
 [Phaser](https://phaser.io/)
+
 [PlanckJS](https://github.com/piqnt/planck.js)
+
 [uWebsocket](https://github.com/uNetworking/uWebSockets)
+
 [Box2D](https://github.com/erincatto/box2d)
+
 [Kenney Assets](https://www.kenney.nl/)
+
 [Hero Icons](https://github.com/tailwindlabs/heroicons)
