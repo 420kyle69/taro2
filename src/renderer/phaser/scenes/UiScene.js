@@ -65,11 +65,13 @@ var UiScene = /** @class */ (function (_super) {
             (_a = abilityBar.buttons[abilityId]) === null || _a === void 0 ? void 0 : _a.casting(false);
         });
         taro.client.on('start-ability-cooldown', function (abilityId) {
-            //abilityBar.buttons[abilityId]?.cooldown(true);
+            var _a;
+            (_a = abilityBar.buttons[abilityId]) === null || _a === void 0 ? void 0 : _a.cooldown(true);
             // console.log('start cooldown: ', abilityId);
         });
         taro.client.on('stop-ability-cooldown', function (abilityId) {
-            //abilityBar.buttons[abilityId]?.cooldown(false);
+            var _a;
+            (_a = abilityBar.buttons[abilityId]) === null || _a === void 0 ? void 0 : _a.cooldown(false);
             // console.log('stop cooldown: ', abilityId);
         });
     };

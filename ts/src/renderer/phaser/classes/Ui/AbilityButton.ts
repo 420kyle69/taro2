@@ -3,14 +3,19 @@ class AbilityButton extends Phaser.GameObjects.Container {
 	button: any;
 	image: Phaser.GameObjects.Image;
 	label: Phaser.GameObjects.BitmapText;
-	timer: number | NodeJS.Timeout;
+	timer: NodeJS.Timeout;
     backgroundColor: number;
     activeColor: number;
     fx: Phaser.FX.Bloom;
 
+	onCooldown: boolean;
+	cooldownLabel: Phaser.GameObjects.BitmapText;
+	cooldownTimeLeft: number;
+	cooldownTimer: NodeJS.Timer;
+
 	constructor(
         scene: UiScene,
-		name: string,
+		private ability: UnitAbility,
         public id: string,
 		public key: string = '',
 		tooltipText: string,
@@ -23,7 +28,7 @@ class AbilityButton extends Phaser.GameObjects.Container {
 		//bar: Phaser.GameObjects.Container,
 	) {
         super(scene);
-		this.name = name;
+		this.name = ability.name;
         let backgroundColor = this.backgroundColor = 0x000000;
         if (taro.isMobile) backgroundColor = this.backgroundColor = 0x333333;
         this.activeColor = 0xFFFF00;
@@ -56,6 +61,17 @@ class AbilityButton extends Phaser.GameObjects.Container {
             label.setOrigin(0.5);
             label.letterSpacing = 1.3;
             this.add(label);
+        }
+		// cooldown label
+        if (ability.cooldown > 0) {
+            const cooldownLabel = this.cooldownLabel = scene.add.bitmapText(
+                0, 0,
+                BitmapFontManager.font(scene, 'Verdana', false, true, '#FFFF00'),
+                '', 24
+            );
+            cooldownLabel.setOrigin(0.5);
+			cooldownLabel.letterSpacing = 1.3;
+            this.add(cooldownLabel);
         }
 
         scene.add.existing(this);
@@ -136,7 +152,7 @@ class AbilityButton extends Phaser.GameObjects.Container {
         this.label?.setPosition(- 7 + size / 2, + 7 - size / 2);
     }
 
-    activate(bool: boolean): void {
+    activate (bool: boolean): void {
         if (bool) {
             this.button.setFillStyle(this.activeColor, 1);
         } else {
@@ -144,11 +160,50 @@ class AbilityButton extends Phaser.GameObjects.Container {
         }
     }
 
-    casting(bool: boolean): void {
+    casting (bool: boolean): void {
         if (bool) {
-            if (this.image) this.fx.setActive(true);
+            if (this.image) {
+				this.fx.setActive(true);
+				//this.image.clearTint();
+			}
         } else {
-            if (this.image) this.fx.setActive(false)
+            if (this.image) {
+				this.fx.setActive(false);
+				if (this.onCooldown) {
+					this.image.setTint(0x707070);
+					this.startCooldownTimer();
+				}
+			}
         }
     }
+
+	cooldown (bool: boolean): void {
+		if (bool) {
+			this.onCooldown = true;
+			/*if (this.image) {
+				this.image.setTint(0x707070);
+			}*/
+		} else {
+			this.onCooldown = false;
+			if (this.image) this.image.clearTint();
+			clearInterval(this.cooldownTimer);
+			this.cooldownTimeLeft = 0;
+			this.cooldownLabel.text = '';
+		}
+	}
+
+	startCooldownTimer (): void {
+		this.cooldownTimeLeft = Math.floor((this.ability.cooldown - this.ability.castDuration) / 1000);
+		this.cooldownLabel.text = this.getCooldownText();
+		this.cooldownTimer = setInterval(() => {
+			this.cooldownTimeLeft--;
+			this.cooldownLabel.text = this.getCooldownText();
+		}, 1000);
+	}
+
+	getCooldownText (): string {
+		let cooldownText = this.cooldownTimeLeft.toString();
+		if (this.cooldownTimeLeft > 99) cooldownText = (Math.floor(this.cooldownTimeLeft / 60)).toString() + 'm'
+		return cooldownText;
+	}
 }

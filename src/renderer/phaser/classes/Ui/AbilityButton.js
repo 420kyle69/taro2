@@ -15,14 +15,15 @@ var __extends = (this && this.__extends) || (function () {
 })();
 var AbilityButton = /** @class */ (function (_super) {
     __extends(AbilityButton, _super);
-    function AbilityButton(scene, name, id, key, tooltipText, texture, x, y, size, radius) {
+    function AbilityButton(scene, ability, id, key, tooltipText, texture, x, y, size, radius) {
         if (key === void 0) { key = ''; }
         var _this = _super.call(this, scene) || this;
+        _this.ability = ability;
         _this.id = id;
         _this.key = key;
         _this.size = size;
         _this.radius = radius;
-        _this.name = name;
+        _this.name = ability.name;
         var backgroundColor = _this.backgroundColor = 0x000000;
         if (taro.isMobile)
             backgroundColor = _this.backgroundColor = 0x333333;
@@ -52,6 +53,13 @@ var AbilityButton = /** @class */ (function (_super) {
             label.setOrigin(0.5);
             label.letterSpacing = 1.3;
             _this.add(label);
+        }
+        // cooldown label
+        if (ability.cooldown > 0) {
+            var cooldownLabel = _this.cooldownLabel = scene.add.bitmapText(0, 0, BitmapFontManager.font(scene, 'Verdana', false, true, '#FFFF00'), '', 24);
+            cooldownLabel.setOrigin(0.5);
+            cooldownLabel.letterSpacing = 1.3;
+            _this.add(cooldownLabel);
         }
         scene.add.existing(_this);
         if (taro.isMobile) {
@@ -145,13 +153,51 @@ var AbilityButton = /** @class */ (function (_super) {
     };
     AbilityButton.prototype.casting = function (bool) {
         if (bool) {
-            if (this.image)
+            if (this.image) {
                 this.fx.setActive(true);
+                //this.image.clearTint();
+            }
         }
         else {
-            if (this.image)
+            if (this.image) {
                 this.fx.setActive(false);
+                if (this.onCooldown) {
+                    this.image.setTint(0x707070);
+                    this.startCooldownTimer();
+                }
+            }
         }
+    };
+    AbilityButton.prototype.cooldown = function (bool) {
+        if (bool) {
+            this.onCooldown = true;
+            /*if (this.image) {
+                this.image.setTint(0x707070);
+            }*/
+        }
+        else {
+            this.onCooldown = false;
+            if (this.image)
+                this.image.clearTint();
+            clearInterval(this.cooldownTimer);
+            this.cooldownTimeLeft = 0;
+            this.cooldownLabel.text = '';
+        }
+    };
+    AbilityButton.prototype.startCooldownTimer = function () {
+        var _this = this;
+        this.cooldownTimeLeft = Math.floor((this.ability.cooldown - this.ability.castDuration) / 1000);
+        this.cooldownLabel.text = this.getCooldownText();
+        this.cooldownTimer = setInterval(function () {
+            _this.cooldownTimeLeft--;
+            _this.cooldownLabel.text = _this.getCooldownText();
+        }, 1000);
+    };
+    AbilityButton.prototype.getCooldownText = function () {
+        var cooldownText = this.cooldownTimeLeft.toString();
+        if (this.cooldownTimeLeft > 99)
+            cooldownText = (Math.floor(this.cooldownTimeLeft / 60)).toString() + 'm';
+        return cooldownText;
     };
     return AbilityButton;
 }(Phaser.GameObjects.Container));

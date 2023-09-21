@@ -21,7 +21,7 @@ class AbilityBar extends Phaser.GameObjects.Container{
 	}
 
     addButton(abilityId: string, ability: UnitAbility, key: string) {
-        const button = new AbilityButton(this.scene, ability.name, abilityId, key, 'description', ability.iconUrl, Object.values(this.buttons).length * (this.buttonSize + this.buttonInterval), 0, this.buttonSize, this.buttonRadius);
+        const button = new AbilityButton(this.scene, ability, abilityId, key, 'description', ability.iconUrl, Object.values(this.buttons).length * (this.buttonSize + this.buttonInterval), 0, this.buttonSize, this.buttonRadius);
         this.buttons[abilityId] = button;
         this.add(button);
         this.updatePosition();
