@@ -276,14 +276,14 @@ var AbilityComponent = TaroEntity.extend({
 
 		this.activeAbilities[abilityId] = true;
 
-		if (ability.cooldown) {
+		if (!(ability.cooldown === null || ability.cooldown === undefined || isNaN(ability.cooldown))) {
 			this.abilityCooldowns[abilityId] = Date.now() + ability.cooldown;
 			if (taro.isClient && this._entity._stats.clientId === taro.network.id()) {
 				taro.client.emit('start-ability-cooldown', abilityId);
 			}
 		}
 
-		if (ability.castDuration) {
+		if (!(ability.castDuration === null || ability.castDuration === undefined || isNaN(ability.castDuration))) {
 			this.abilityDurations[abilityId] = Date.now() + ability.castDuration;
 		}
 
