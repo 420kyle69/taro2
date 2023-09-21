@@ -65,9 +65,11 @@ var UiScene = /** @class */ (function (_super) {
             (_a = abilityBar.buttons[abilityId]) === null || _a === void 0 ? void 0 : _a.casting(false);
         });
         taro.client.on('start-ability-cooldown', function (abilityId) {
+            //abilityBar.buttons[abilityId]?.cooldown(true);
             // console.log('start cooldown: ', abilityId);
         });
         taro.client.on('stop-ability-cooldown', function (abilityId) {
+            //abilityBar.buttons[abilityId]?.cooldown(false);
             // console.log('stop cooldown: ', abilityId);
         });
     };
@@ -77,7 +79,7 @@ var UiScene = /** @class */ (function (_super) {
         this.load.plugin('rexcirclemaskimageplugin', '/assets/js/rexcirclemaskimageplugin.min.js?v=1.1', true);
         Object.values(taro.game.data.abilities).forEach(function (ability) {
             if (ability.iconUrl)
-                _this.load.image(ability.iconUrl, ability.iconUrl);
+                _this.load.image(ability.iconUrl, _this.patchAssetUrl(ability.iconUrl));
         });
         Object.values(taro.game.data.unitTypes).forEach(function (unitType) {
             var _a;
@@ -85,7 +87,7 @@ var UiScene = /** @class */ (function (_super) {
             if (((_a = unitType === null || unitType === void 0 ? void 0 : unitType.controls) === null || _a === void 0 ? void 0 : _a.unitAbilities) && Object.keys(unitType.controls.unitAbilities).length > 0) {
                 Object.values(unitType.controls.unitAbilities).forEach(function (ability) {
                     if (ability.iconUrl)
-                        _this.load.image(ability.iconUrl, ability.iconUrl);
+                        _this.load.image(ability.iconUrl, _this.patchAssetUrl(ability.iconUrl));
                 });
             }
         });
