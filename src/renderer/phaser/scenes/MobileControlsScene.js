@@ -220,6 +220,9 @@ var MobileControlsScene = /** @class */ (function (_super) {
     };
     MobileControlsScene.prototype.update = function () {
         if (this.enablePointerNextUpdate) {
+            this.joysticks.forEach(function (j) {
+                j.settings.onEnd && j.settings.onEnd();
+            });
             this.enablePointerNextUpdate = false;
             this.disablePointerEvents = false;
         }

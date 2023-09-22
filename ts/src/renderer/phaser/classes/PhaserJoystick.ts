@@ -10,7 +10,7 @@ interface MobileControlSettings {
 
 class PhaserJoystick {
 
-	private readonly virtualJoystick: {
+	public readonly virtualJoystick: {
 		scene: MobileControlsScene,
 		radius: number;
 		base: Phaser.GameObjects.Graphics;
@@ -28,7 +28,7 @@ class PhaserJoystick {
 		scene: MobileControlsScene,
 		private x: number,
 		private y: number,
-		settings: MobileControlSettings
+		public settings: MobileControlSettings
 	) {
 		const radius = this.radius = scene.cameras.main.displayWidth * 0.05;
 
@@ -72,6 +72,7 @@ class PhaserJoystick {
 				settings.onEnd && settings.onEnd();
 			}
 		});
+		
 
 		scene.joysticks.push(this);
 

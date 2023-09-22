@@ -255,6 +255,9 @@ class MobileControlsScene extends PhaserScene {
 
 	update () {
 		if (this.enablePointerNextUpdate) {
+			this.joysticks.forEach((j) => {
+				j.settings.onEnd && j.settings.onEnd();
+			});
 			this.enablePointerNextUpdate = false;
 			this.disablePointerEvents = false;
 		}
