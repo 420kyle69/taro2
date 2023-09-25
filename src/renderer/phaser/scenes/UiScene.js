@@ -22,6 +22,7 @@ var UiScene = /** @class */ (function (_super) {
         return;
     };
     UiScene.prototype.create = function () {
+        var _this = this;
         if (!taro.isMobile) {
             //this.tooltip = new DevTooltip(this);
         }
@@ -48,6 +49,12 @@ var UiScene = /** @class */ (function (_super) {
                 });
             }
         });
+        taro.client.on('enterMapTab', function () {
+            _this.scene.setVisible(false);
+        });
+        taro.client.on('leaveMapTab', function () {
+            _this.scene.setVisible(true);
+        });
         taro.client.on('start-press-key', function (abilityId) {
             var _a;
             (_a = abilityBar.buttons[abilityId]) === null || _a === void 0 ? void 0 : _a.activate(true);
@@ -67,12 +74,10 @@ var UiScene = /** @class */ (function (_super) {
         taro.client.on('start-ability-cooldown', function (abilityId) {
             var _a;
             (_a = abilityBar.buttons[abilityId]) === null || _a === void 0 ? void 0 : _a.cooldown(true);
-            // console.log('start cooldown: ', abilityId);
         });
         taro.client.on('stop-ability-cooldown', function (abilityId) {
             var _a;
             (_a = abilityBar.buttons[abilityId]) === null || _a === void 0 ? void 0 : _a.cooldown(false);
-            // console.log('stop cooldown: ', abilityId);
         });
     };
     UiScene.prototype.preload = function () {

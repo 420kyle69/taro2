@@ -33,7 +33,14 @@ class UiScene extends PhaserScene {
 					}
 				});
 			}
-				
+		});
+
+		taro.client.on('enterMapTab', () => {
+			this.scene.setVisible(false);
+		});
+
+		taro.client.on('leaveMapTab', () => {
+			this.scene.setVisible(true);
 		});
 
 		taro.client.on('start-press-key', (abilityId: string) => {
@@ -54,12 +61,10 @@ class UiScene extends PhaserScene {
 
 		taro.client.on('start-ability-cooldown', (abilityId: string) => {
 			abilityBar.buttons[abilityId]?.cooldown(true);
-			// console.log('start cooldown: ', abilityId);
 		});
 
 		taro.client.on('stop-ability-cooldown', (abilityId: string) => {
 			abilityBar.buttons[abilityId]?.cooldown(false);
-			// console.log('stop cooldown: ', abilityId);
 		});
 	}
 
