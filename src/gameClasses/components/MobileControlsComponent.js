@@ -51,12 +51,26 @@ var MobileControlsComponent = TaroEntity.extend({
 	},
 
 	clearControls: function () {
-
 		for (var key in this.controls) {
 			delete this.controls[key];
 		}
-
 		this.emit('clear-controls');
+	},
+
+	updateButtonPos: function () {
+		if (taro.mobileControls) {
+			// and this unit is our player
+			if (taro.client && taro.client.myPlayer && taro.network.id() == taro.client.myPlayer._stats.clientId) {
+				var unit = taro.$(taro.client.myPlayer._stats.selectedUnitId);
+				if (unit && unit._stats.controls) {
+					var unitAbilities = unit._stats.controls.abilities;
+					if (unitAbilities) {
+						// update mobile controls
+						taro.mobileControls.configure(unitAbilities);
+					}
+				}
+			}
+		}
 	},
 
 	configure: function (abilities) {
