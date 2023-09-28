@@ -21,6 +21,8 @@ var ControlComponent = TaroEntity.extend({
 			mouse: {
 				button1: false,
 				button3: false,
+				wheelUp: false,
+				wheelDown: false,
 				x: undefined,
 				y: undefined
 			},
@@ -316,7 +318,6 @@ var ControlComponent = TaroEntity.extend({
 		var unit = player.getSelectedUnit();
 
 		if (taro.isClient) {
-
 			if (unit) {
 				// check if sending player input is due (every 100ms)
 				if (taro._currentTime - self.lastInputSent > 100) {
@@ -335,6 +336,10 @@ var ControlComponent = TaroEntity.extend({
 									self.sendMobileInput = false;
 								} else if (!taro.isMobile) {
 									self.keyDown(device, key);
+									if (key === 'wheelUp' || key === 'wheelDown') {
+										taro.input._state[taro.input._controlMap[key]] = false;
+										self.input[device][key] = false;
+									}
 								}
 							}
 						} else {
