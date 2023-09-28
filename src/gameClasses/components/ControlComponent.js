@@ -99,7 +99,6 @@ var ControlComponent = TaroEntity.extend({
 	},  
 
 	keyDown: function (device, key) {
-		//console.log('keyDown', device, key)
 		if(taro.developerMode.shouldPreventKeybindings() || (taro.isClient && this._entity._stats.clientId === taro.network.id() && taro.client.isPressingAbility)) {
 			return;
 		}
@@ -337,7 +336,10 @@ var ControlComponent = TaroEntity.extend({
 									self.sendMobileInput = false;
 								} else if (!taro.isMobile) {
 									self.keyDown(device, key);
-									if (key === 'wheelUp' || key === 'wheelDown') taro.input._state[taro.input._controlMap[key]] = false;
+									if (key === 'wheelUp' || key === 'wheelDown') {
+										taro.input._state[taro.input._controlMap[key]] = false;
+										self.input[device][key] = false;
+									}
 								}
 							}
 						} else {
@@ -348,7 +350,6 @@ var ControlComponent = TaroEntity.extend({
 									self.sendMobileInput = false;
 								} else if (!taro.isMobile) {
 									self.keyUp(device, key);
-									if (key === 'wheelUp' || key === 'wheelDown') taro.input._state[taro.input._controlMap[key]] = false;
 								}
 							}
 						}

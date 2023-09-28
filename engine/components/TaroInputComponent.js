@@ -597,7 +597,7 @@ var TaroInputComponent = TaroEventingClass.extend({
 	_keyDown: function (event) {
 		var self = this;
 		this._updateMouseData(event);
-		if(!this.shouldPreventChat()) {
+		if (!this.shouldPreventChat()) {
 			this._chatHandler(event);
 		}
 		if (this._state[event.keyCode] == false) {
