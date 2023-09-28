@@ -1487,6 +1487,12 @@ var ShopComponent = TaroEntity.extend({
 		const serverId = taro.client.server.id;
 
 		if (typeof window.validateUserPin === 'function') {
+			const VERIFICATION_UNLOCKED_FOR = 30 * 60 * 1000; // 30 mins
+			if (window.pinVerifiedAt && window.pinVerifiedAt + VERIFICATION_UNLOCKED_FOR > Date.now()) {
+				taro.network.send('buyItem', { id });
+				return;
+			}
+			
 			window.validateUserPin('taro.shop.purchase', id, serverId);
 		} else {
 			taro.network.send('buyItem', { id });
