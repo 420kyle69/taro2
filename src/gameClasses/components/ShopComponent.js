@@ -880,7 +880,7 @@ var ShopComponent = TaroEntity.extend({
 		if (!data || !key || !data[key]) return [];
 		var resultKeys = Object.keys(data[key]);
 
-		resultKeys = resultKeys.sort();
+		// resultKeys = resultKeys.sort();
 
 		resultKeys = resultKeys.sort(function (a, b) {
 			const aOrder = data[key][a].order;
