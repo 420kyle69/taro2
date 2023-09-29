@@ -46,8 +46,10 @@ var PhaserRegion = /** @class */ (function (_super) {
         if (_this.devModeOnly && !taro.developerMode.active && taro.developerMode.activeTab !== 'play') {
             _this.hide();
         }
+        _this.zoomEvtListener = taro.client.on('scale', _this.scaleElements, _this);
         return _this;
     }
+    ;
     PhaserRegion.prototype.getLabel = function () {
         if (!this.label) {
             var scene = this.scene;
@@ -133,10 +135,30 @@ var PhaserRegion = /** @class */ (function (_super) {
         label && (label.visible = false);
         rt && (rt.visible = false);
     };
+    PhaserRegion.prototype.scaleElements = function (data) {
+        var _this = this;
+        if (this.scaleTween) {
+            this.scaleTween.stop();
+            this.scaleTween = null;
+        }
+        var ratio = data.ratio;
+        var targetScale = 1 / ratio;
+        this.scaleTween = this.scene.tweens.add({
+            targets: this.getLabel(),
+            duration: 1000,
+            ease: Phaser.Math.Easing.Quadratic.Out,
+            scale: targetScale,
+            onComplete: function () {
+                _this.scaleTween = null;
+            }
+        });
+    };
     PhaserRegion.prototype.destroy = function () {
         var _this = this;
         this.devModeScene.regions = this.devModeScene.regions.filter(function (item) { return item !== _this; });
         this.scene.renderedEntities = this.scene.renderedEntities.filter(function (item) { return item !== _this.gameObject; });
+        taro.client.off('scale', this.zoomEvtListener);
+        this.zoomEvtListener = null;
         _super.prototype.destroy.call(this);
     };
     return PhaserRegion;

@@ -20,6 +20,7 @@ interface EntityData {
 interface UnitAbility {
     name: string,
     castDuration: number,
+	cooldown: number,
     cost: {
         unitAttributes: Record<string, number>,
         playerAttributes: Record<string, number>

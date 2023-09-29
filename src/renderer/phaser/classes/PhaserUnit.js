@@ -70,6 +70,11 @@ var PhaserUnit = /** @class */ (function (_super) {
                 var bounds = this.entity._bounds2d;
                 this.sprite.setDisplaySize(bounds.x, bounds.y);
             }
+            // GameScene's load entity doesn't create sprite sheets so we have horrible
+            // errors when we try to create animations
+            if (this.sprite.texture.frameTotal === 1 || this.sprite.texture.key === 'pack-result') {
+                return;
+            }
             for (var animationsKey in this.entity._stats.animations) {
                 var animation = this.entity._stats.animations[animationsKey];
                 var frames_1 = animation.frames;

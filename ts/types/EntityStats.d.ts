@@ -1,4 +1,5 @@
 declare interface EntityStats {
+	clientId: string;
 	controlledBy: string;
 	ownerId: string;
 	selectedUnitId: string | number | object;

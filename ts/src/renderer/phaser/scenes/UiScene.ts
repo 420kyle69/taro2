@@ -33,7 +33,14 @@ class UiScene extends PhaserScene {
 					}
 				});
 			}
-				
+		});
+
+		taro.client.on('enterMapTab', () => {
+			this.scene.setVisible(false);
+		});
+
+		taro.client.on('leaveMapTab', () => {
+			this.scene.setVisible(true);
 		});
 
 		taro.client.on('start-press-key', (abilityId: string) => {
@@ -53,11 +60,11 @@ class UiScene extends PhaserScene {
 		});
 
 		taro.client.on('start-ability-cooldown', (abilityId: string) => {
-			// console.log('start cooldown: ', abilityId);
+			abilityBar.buttons[abilityId]?.cooldown(true);
 		});
 
 		taro.client.on('stop-ability-cooldown', (abilityId: string) => {
-			// console.log('stop cooldown: ', abilityId);
+			abilityBar.buttons[abilityId]?.cooldown(false);
 		});
 	}
 
@@ -65,13 +72,13 @@ class UiScene extends PhaserScene {
 		this.load.plugin('rexroundrectangleplugin', '/assets/js/rexroundrectangleplugin.min.js', true);
         this.load.plugin('rexcirclemaskimageplugin', '/assets/js/rexcirclemaskimageplugin.min.js?v=1.1', true);
 		Object.values(taro.game.data.abilities).forEach(ability => {
-			if (ability.iconUrl) this.load.image(ability.iconUrl, ability.iconUrl);
+			if (ability.iconUrl) this.load.image(ability.iconUrl, this.patchAssetUrl(ability.iconUrl));
 		});
 		Object.values(taro.game.data.unitTypes).forEach(unitType => {
 			// temp fix for undefined crash
 			if (unitType?.controls?.unitAbilities && Object.keys(unitType.controls.unitAbilities).length > 0) {
 				Object.values(unitType.controls.unitAbilities).forEach(ability => {
-					if (ability.iconUrl) this.load.image(ability.iconUrl, ability.iconUrl);
+					if (ability.iconUrl) this.load.image(ability.iconUrl, this.patchAssetUrl(ability.iconUrl));
 				});
 			}
 		});

@@ -35,7 +35,7 @@ var AbilityBar = /** @class */ (function (_super) {
         return _this;
     }
     AbilityBar.prototype.addButton = function (abilityId, ability, key) {
-        var button = new AbilityButton(this.scene, ability.name, abilityId, key, 'description', ability.iconUrl, Object.values(this.buttons).length * (this.buttonSize + this.buttonInterval), 0, this.buttonSize, this.buttonRadius);
+        var button = new AbilityButton(this.scene, ability, abilityId, key, 'description', ability.iconUrl, Object.values(this.buttons).length * (this.buttonSize + this.buttonInterval), 0, this.buttonSize, this.buttonRadius);
         this.buttons[abilityId] = button;
         this.add(button);
         this.updatePosition();
@@ -43,6 +43,9 @@ var AbilityBar = /** @class */ (function (_super) {
     AbilityBar.prototype.updatePosition = function () {
         this.x = this.scene.sys.game.canvas.width / 2 + 35 - Object.values(this.buttons).length * (this.buttonSize + this.buttonInterval) / 2;
         this.y = this.scene.sys.game.canvas.height - 20 - (this.buttonSize / 2) - $(taro.client.getCachedElementById('unit-status')).height();
+        if (taro.isMobile) {
+            taro.mobileControls.updateButtonPos();
+        }
     };
     AbilityBar.prototype.clear = function () {
         Object.values(this.buttons).forEach(function (button) { return button.destroy(); });

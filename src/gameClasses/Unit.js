@@ -522,37 +522,45 @@ var Unit = TaroEntityPhysics.extend({
 					// disable coin consuming due to some bug wrt coins
 					// add coin consuming code
 					if (taro.game.data.defaultData.tier >= 2) {
-
 						try {
-							const jwt = require("jsonwebtoken");
-
-							const isUsedToken = taro.server.usedCoinJwts[token];
-							if (isUsedToken) {
-								console.log('Token has been used already', token);
-								return;
-							}
-
-							const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
-							const {type, userId, purchasableId, createdAt} = decodedToken;
-
-							if (type === 'pinValidationToken' && userId && purchasableId && ownerPlayer._stats.userId === userId && purchasableId === itemTypeId) {
-								// allow coin transaction since token has been verified
-
-								// store token for current client
-								taro.server.usedCoinJwts[token] = createdAt;
-
-								// remove expired tokens
-								const filteredUsedCoinJwts = {};
-								const usedTokenEntries = Object.entries(taro.server.usedCoinJwts).filter(([token, tokenCreatedAt]) => (Date.now() - tokenCreatedAt) < taro.server.COIN_JWT_EXPIRES_IN);
-								for (const [key, value] of usedTokenEntries) {
-									if (typeof value === 'number') {
-										filteredUsedCoinJwts[key] = value;
-									}
-								}
-								taro.server.usedCoinJwts = filteredUsedCoinJwts;
-
+							var socket = taro.network._socketById[ownerPlayer._stats.clientId];
+							const VERIFICATION_UNLOCKED_FOR = 35 * 60 * 1000; // 35 mins - 5 mins more than what is configured on client side to avoid race conditions
+							if (!token && socket?._token?.pinVerifiedAt && socket?._token?.pinVerifiedAt + VERIFICATION_UNLOCKED_FOR > Date.now()) {
+								
+								// if token is not provided then check for last verification if done in 30mins. if yes, allow transaction
+								
 							} else {
-								return;
+								const jwt = require("jsonwebtoken");
+								
+								const isUsedToken = taro.server.usedCoinJwts[token];
+								if (isUsedToken) {
+									console.log('Token has been used already', token);
+									return;
+								}
+								
+								const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
+								const {type, userId, purchasableId, createdAt} = decodedToken;
+								
+								if (type === 'pinValidationToken' && userId && purchasableId && ownerPlayer._stats.userId === userId && purchasableId === itemTypeId) {
+									// allow coin transaction since token has been verified
+									
+									// store token for current client
+									taro.server.usedCoinJwts[token] = createdAt;
+									socket._token.pinVerifiedAt = Date.now();
+									
+									// remove expired tokens
+									const filteredUsedCoinJwts = {};
+									const usedTokenEntries = Object.entries(taro.server.usedCoinJwts).filter(([token, tokenCreatedAt]) => (Date.now() - tokenCreatedAt) < taro.server.COIN_JWT_EXPIRES_IN);
+									for (const [key, value] of usedTokenEntries) {
+										if (typeof value === 'number') {
+											filteredUsedCoinJwts[key] = value;
+										}
+									}
+									taro.server.usedCoinJwts = filteredUsedCoinJwts;
+									
+								} else {
+									return;
+								}
 							}
 						} catch (e) {
 							console.log('invalid pinValidationToken', e.message, token);
