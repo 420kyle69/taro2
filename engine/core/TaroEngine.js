@@ -1772,6 +1772,12 @@ var TaroEngine = TaroEntity.extend({
 			}
 		}
 
+		// triggersQueued is executed in the entities first (entity-script) then it runs for the world
+		while (taro.script && taro.triggersQueued.length > 0) {
+			const trigger = taro.triggersQueued.shift();
+			taro.script.trigger(trigger.name, trigger.params);
+		}
+		
 		taro.gameLoopTickHasExecuted = false;
 
 		et = new Date().getTime();
