@@ -96,7 +96,6 @@ var ScriptComponent = TaroEntity.extend({
 
 	/* trigger and run all of the corresponding script(s) */
 	trigger: function (triggerName, triggeredBy) {
-
 		if (taro.isServer) {
 			var now = Date.now();
 			var lastTriggerRunTime = now - taro.lastTriggerRanAt;

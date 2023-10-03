@@ -4103,9 +4103,8 @@ var TaroEntity = TaroObject.extend({
 									if (this._stats.attributes && this._stats.attributes[attributeTypeId]) {
 										var attribute = this._stats.attributes[attributeTypeId];
 										if (
-											((attribute.isVisible && typeof attribute.isVisible === 'boolean' && attribute.isVisible == false) || // will be deprecated.
-												(attribute.isVisible && attribute.isVisible.constructor === Array && attribute.isVisible.length == 0)) &&
-											attributeTypeId !== taro.game.data.settings.scoreAttributeId
+											(attribute.streamMode != null && attribute.streamMode != 1) && // don't stream if streamMode isn't sync'ed (1). Also added != null for legacy support.
+											attributeTypeId !== taro.game.data.settings.scoreAttributeId // always stream attribute that's used for scoreboard
 										) {
 											delete data[attrName];
 										}

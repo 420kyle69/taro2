@@ -1,5 +1,6 @@
 declare class TaroEngine extends TaroClass {
 	profiler: any;
+	script: any;
 	newIdHex(): any;
 	tiled: any;
 	regionManager: any;

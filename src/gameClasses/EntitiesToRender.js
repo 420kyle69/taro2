@@ -98,6 +98,11 @@ var EntitiesToRender = /** @class */ (function () {
         taro.input.processInputOnEveryFps();
         taro._renderFrames++;
         this.updateAllEntities();
+        // triggersQueued is executed in the entities first (entity-script) then it runs for the world
+        while (taro.script && taro.triggersQueued.length > 0) {
+            var trigger = taro.triggersQueued.shift();
+            taro.script.trigger(trigger.name, trigger.params);
+        }
     };
     return EntitiesToRender;
 }());

@@ -8,8 +8,7 @@ var AttributeComponent = TaroEntity.extend({
 
 		self.now = Date.now();
 		self.lastRegenerated = self.now;
-		self.lastSynced = self.now;
-
+		
 		// attributes is an object
 		if (entity._stats.attributes) {
 			const attributes = entity._stats.attributes;
@@ -212,17 +211,8 @@ var AttributeComponent = TaroEntity.extend({
 
 				if (taro.isServer) {
 					if (newValue != oldValue) {
-						// force sync with client every 5 seconds
-						if (
-							self._entity && self._entity._stats && self._entity._stats.attributes && self._entity._stats.attributes[attributeTypeId] &&
-							self._entity._stats.attributes[attributeTypeId].lastSyncedValue != newValue && // value is different from last sync'ed value and...
-							(
-								forceUpdate || // forceUpdate triggered
-								self._entity._stats.attributes[attributeTypeId].lastSynced == undefined || // it's never been sync'ed with client's attributes before or..
-								(self.now - self._entity._stats.attributes[attributeTypeId].lastSynced > 5000) // it's been over 5 seconds since we last sync'ed
-							)
-						) {
-							self._entity._stats.attributes[attributeTypeId].lastSynced = self.now;
+						// value is different from last sync'ed value and...
+						if (self._entity?._stats?.attributes[attributeTypeId] && self._entity._stats.attributes[attributeTypeId].lastSyncedValue != newValue) {
 							self._entity._stats.attributes[attributeTypeId].lastSyncedValue = newValue;
 							let attrData = { attributes: {} };
 							attrData.attributes[attributeTypeId] = newValue;
@@ -230,9 +220,6 @@ var AttributeComponent = TaroEntity.extend({
 							// console.log("update Attribute Value")
 
 							self._entity.streamUpdateData([attrData]);
-
-							
-
 						}
 
 						var triggeredBy = { attribute: attribute };

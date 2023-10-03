@@ -19,7 +19,6 @@ var ActionComponent = TaroEntity.extend({
 
 		for (var i = 0; i < actionList.length; i++) {
 			var action = actionList[i];
-
 			if (!action || action.disabled == true || // if action is disabled or
 				(taro.isClient && action.runMode == 0) || // don't run on client if runMode is 'server authoritative'
 				(taro.isServer && action.runMode == 1) || // don't run on server if runMode is 'client only'
@@ -1330,10 +1329,9 @@ var ActionComponent = TaroEntity.extend({
 						var position = self._script.variable.getValue(action.position, vars);
 						var text = self._script.variable.getValue(action.text, vars);
 						var color = self._script.variable.getValue(action.color, vars);
-
 						if (taro.isServer) {
 							taro.network.send('createFloatingText', {position: position, text: text, color: color});
-						} else {
+						} else if (taro.isClient) {
 							taro.client.emit('floating-text', {
 								text: text,
 								x: position.x,
