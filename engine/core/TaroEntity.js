@@ -4080,8 +4080,18 @@ var TaroEntity = TaroObject.extend({
 								if (attributesObject) {
 									for (var attributeTypeId in data.attributes) {
 										var attributeData = attributesObject[attributeTypeId];
-
-										if (attributeData) {
+										// streamMode 4 ignores
+										if (this._category == 'unit') {
+											var ownerPlayer = this.getOwner();
+										} else if (this._category == 'item') {
+											var ownerPlayer = this.getOwnerUnit()?.getOwner();
+										}
+										
+										if (
+											attributeData && 
+											// ignore update if streamMode = 4 and it's for my own unit
+											!(ownerPlayer?._stats?.clientId == taro.network.id() && attributeData.streamMode == 4) 
+										) {
 											var newAttributeValue = data.attributes[attributeTypeId];
 											var oldAttributeValue = attributeData.value;
 
@@ -4097,20 +4107,21 @@ var TaroEntity = TaroObject.extend({
 										// update attribute if entity has such attribute
 									}
 								}
-							} else if (taro.isServer) {
-								for (var attributeTypeId in data.attributes) {
-									// prevent attribute being passed to client if it is invisible
-									if (this._stats.attributes && this._stats.attributes[attributeTypeId]) {
-										var attribute = this._stats.attributes[attributeTypeId];
-										if (
-											(attribute.streamMode != null && attribute.streamMode != 1) && // don't stream if streamMode isn't sync'ed (1). Also added != null for legacy support.
-											attributeTypeId !== taro.game.data.settings.scoreAttributeId // always stream attribute that's used for scoreboard
-										) {
-											delete data[attrName];
-										}
-									}
-								}
 							}
+							// else if (taro.isServer) {
+							// 	for (var attributeTypeId in data.attributes) {
+							// 		// prevent attribute being passed to client if it is invisible
+							// 		if (this._stats.attributes && this._stats.attributes[attributeTypeId]) {
+							// 			var attribute = this._stats.attributes[attributeTypeId];
+							// 			if (
+							// 				(attribute.streamMode != null && attribute.streamMode != 1) && // don't stream if streamMode isn't sync'ed (1). Also added != null for legacy support.
+							// 				attributeTypeId !== taro.game.data.settings.scoreAttributeId // always stream attribute that's used for scoreboard
+							// 			) {
+							// 				delete data[attrName];
+							// 			}
+							// 		}
+							// 	}
+							// }
 							break;
 
 						case 'attributesMax':

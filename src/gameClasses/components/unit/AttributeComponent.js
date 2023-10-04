@@ -219,7 +219,16 @@ var AttributeComponent = TaroEntity.extend({
 
 							// console.log("update Attribute Value")
 
-							self._entity.streamUpdateData([attrData]);
+							if (
+								attribute.streamMode == null || attribute.streamMode == 1 ||  // don't stream if streamMode isn't sync'ed (1). Also added != null for legacy support.
+								attribute.streamMode == 4 || // streamMode 4 also sends to everyone. the ignoring part is done on client-side.
+								attributeTypeId == taro.game.data.settings.scoreAttributeId // always stream attribute that's used for scoreboard
+							) {
+								self._entity.streamUpdateData([attrData]);
+							} else if (attribute.streamMode == 3) {
+								self._entity.streamUpdateData([attrData], this._entity?.getOwner()?._stats?.clientId);
+							}
+							
 						}
 
 						var triggeredBy = { attribute: attribute };
