@@ -103,18 +103,18 @@ var DevModeScene = /** @class */ (function (_super) {
             });
             this.load.image(key, this.patchAssetUrl(tileset.image));
         });*/
-        this.load.image('cursor', 'https://cache.modd.io/asset/spriteImage/1666276041347_cursor.png');
-        this.load.image('entity', 'https://cache.modd.io/asset/spriteImage/1686840222943_cube.png');
-        this.load.image('region', 'https://cache.modd.io/asset/spriteImage/1666882309997_region.png');
-        this.load.image('stamp', 'https://cache.modd.io/asset/spriteImage/1666724706664_stamp.png');
-        this.load.image('eraser', 'https://cache.modd.io/asset/spriteImage/1666276083246_erasergap.png');
-        this.load.image('eyeopen', 'https://cache.modd.io/asset/spriteImage/1669820752914_eyeopen.png');
-        this.load.image('eyeclosed', 'https://cache.modd.io/asset/spriteImage/1669821066279_eyeclosed.png');
-        this.load.image('fill', 'https://cache.modd.io/asset/spriteImage/1675428550006_fill_(1).png');
-        this.load.image('clear', 'https://cache.modd.io/asset/spriteImage/1681917489086_layerClear.png');
-        this.load.image('save', 'https://cache.modd.io/asset/spriteImage/1681916834218_saveIcon.png');
-        this.load.image('redo', 'https://cache.modd.io/asset/spriteImage/1686899810953_redo.png');
-        this.load.image('undo', 'https://cache.modd.io/asset/spriteImage/1686899853748_undo.png');
+        this.load.image('cursor', this.patchAssetUrl('https://cache.modd.io/asset/spriteImage/1666276041347_cursor.png'));
+        this.load.image('entity', this.patchAssetUrl('https://cache.modd.io/asset/spriteImage/1686840222943_cube.png'));
+        this.load.image('region', this.patchAssetUrl('https://cache.modd.io/asset/spriteImage/1666882309997_region.png'));
+        this.load.image('stamp', this.patchAssetUrl('https://cache.modd.io/asset/spriteImage/1666724706664_stamp.png'));
+        this.load.image('eraser', this.patchAssetUrl('https://cache.modd.io/asset/spriteImage/1666276083246_erasergap.png'));
+        this.load.image('eyeopen', this.patchAssetUrl('https://cache.modd.io/asset/spriteImage/1669820752914_eyeopen.png'));
+        this.load.image('eyeclosed', this.patchAssetUrl('https://cache.modd.io/asset/spriteImage/1669821066279_eyeclosed.png'));
+        this.load.image('fill', this.patchAssetUrl('https://cache.modd.io/asset/spriteImage/1675428550006_fill_(1).png'));
+        this.load.image('clear', this.patchAssetUrl('https://cache.modd.io/asset/spriteImage/1681917489086_layerClear.png'));
+        this.load.image('save', this.patchAssetUrl('https://cache.modd.io/asset/spriteImage/1681916834218_saveIcon.png'));
+        this.load.image('redo', this.patchAssetUrl('https://cache.modd.io/asset/spriteImage/1686899810953_redo.png'));
+        this.load.image('undo', this.patchAssetUrl('https://cache.modd.io/asset/spriteImage/1686899853748_undo.png'));
         this.load.scenePlugin('rexuiplugin', '/assets/js/rexuiplugin.min.js', 
         //'src/renderer/phaser/rexuiplugin.min.js',
         'rexUI', 'rexUI');
