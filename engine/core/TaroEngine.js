@@ -1599,7 +1599,10 @@ var TaroEngine = TaroEntity.extend({
 			if (timeElapsed >= (1000 / taro._gameLoopTickRate) - taro._gameLoopTickRemainder) {
 				taro._lastGameLoopTickAt = taro.now;
 				taro._gameLoopTickRemainder = Math.min(timeElapsed - ((1000 / taro._gameLoopTickRate) - taro._gameLoopTickRemainder), (1000 / taro._gameLoopTickRate));
-				taro.gameLoopTickHasExecuted = true;
+				taro.gameLoopTickHasExecuted = true;				
+				
+				taro.queueTrigger('frameTick');
+				
 				if (taro.physics) {
 					if (taro.profiler.isEnabled) {
 						var startTime = performance.now();
@@ -1698,10 +1701,6 @@ var TaroEngine = TaroEntity.extend({
 					}
 				}
 			}
-			
-			if (taro.gameLoopTickHasExecuted) {
-				taro.queueTrigger('frameTick');
-			}
 
 			if (taro.isClient) {
 				if (taro.client.myPlayer) {
@@ -1772,12 +1771,15 @@ var TaroEngine = TaroEntity.extend({
 			}
 		}
 
-		// triggersQueued is executed in the entities first (entity-script) then it runs for the world
-		while (taro.script && taro.triggersQueued.length > 0) {
-			const trigger = taro.triggersQueued.shift();
-			taro.script.trigger(trigger.name, trigger.params);
-		}
 		
+		if (taro.gameLoopTickHasExecuted) {
+			// triggersQueued is executed in the entities first (entity-script) then it runs for the world
+			while (taro.script && taro.triggersQueued.length > 0) {
+				const trigger = taro.triggersQueued.shift();
+				taro.script.trigger(trigger.name, trigger.params);
+			}
+			
+		}
 		taro.gameLoopTickHasExecuted = false;
 
 		et = new Date().getTime();
