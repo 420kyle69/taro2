@@ -7,6 +7,14 @@ class PhaserScene extends Phaser.Scene {
 			url = url.replace('https://modd.s3.amazonaws.com', 'https://old-cache.modd.io');
 		}
 
+		if (url?.indexOf('.png') !== -1 || url?.indexOf('.jpg') !== -1) {
+			// load images via Image tag, helps CF optimize and convert(to webp) images via Polish - https://newdocs.phaser.io/docs/3.60.0/focus/Phaser.Loader.LoaderPlugin-image
+			this.load.imageLoadType = 'HTMLImageElement';
+		} else {
+			// default loader type
+			this.load.imageLoadType = 'XHR';
+		}
+		
 		// https://stackoverflow.com/a/37455118
 		return `${url}?v=1`;
 	}
