@@ -47,7 +47,7 @@ var TileShape = /** @class */ (function () {
         if (!temp) {
             this.sample = tempSample;
         }
-        return { sample: tempSample, xLength: xLength, yLength: yLength };
+        return { sample: tempSample, xLength: xLength, yLength: yLength, minX: minX, minY: minY };
     };
     TileShape.calcCircle = function (minX, xLength, minY, yLength, selectedTileArea, size) {
         var circleGenerator = Combinator.circle(Math.floor(Math.max(size.x, size.y) / 2) + 1);
