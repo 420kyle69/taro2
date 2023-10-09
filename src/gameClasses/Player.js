@@ -157,18 +157,18 @@ var Player = TaroEntity.extend({
 	},
 
 	// remove unit from the array of units owned by this player
-	disownUnit: function (unit) {
+	disownUnit: function (unit, deselectUnit) {
 		var index = this._stats.unitIds.indexOf(unit.id());
 		if (index !== -1) {
 			this._stats.unitIds.splice(index, 1);
-			if (this._stats.selectedUnitId === unit.id()) {
+			if (deselectUnit && this._stats.selectedUnitId === unit.id()) {
 				var unit = taro.$(unit.id());
 				/*if (unit) {
 					unit.ability.stopMovingX();
 					unit.ability.stopMovingY();
 					unit.ability.stopUsingItem();
 				}*/
-				//this.selectUnit(null);
+				this.selectUnit(null);
 			}
 		}
 	},
@@ -182,10 +182,13 @@ var Player = TaroEntity.extend({
 
 		var unit = taro.$(unitId);
 		if (taro.isServer && self._stats.clientId) {
-			if (unit && unit._category == 'unit' && unit.getOwner() == this || unitId === null) {
+			if (unit && unit._category == 'unit' && unit.getOwner() == this) {
 				self._stats.selectedUnitId = unitId;
 				self.streamUpdateData([{ selectedUnitId: unitId }]);
 				unit.streamUpdateData([{ itemIds: unit._stats.itemIds }]); // send item inventory data for the newly selected unit
+			} else if (unitId === null) {
+				self._stats.selectedUnitId = null;
+				self.streamUpdateData([{ selectedUnitId: null }]);
 			}
 		}
 

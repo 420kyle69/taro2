@@ -302,7 +302,7 @@ var Unit = TaroEntityPhysics.extend({
 		var previousOwnerPlayer = self.getOwner();
 		self.ownerPlayer = undefined;
 		if (previousOwnerPlayer && previousOwnerPlayer.id() !== newOwnerPlayerId) {
-			previousOwnerPlayer.disownUnit(self);
+			previousOwnerPlayer.disownUnit(self, true);
 		}
 		// add this unit to the new owner
 		var newOwnerPlayer = newOwnerPlayerId ? taro.$(newOwnerPlayerId) : undefined;
@@ -1446,7 +1446,7 @@ var Unit = TaroEntityPhysics.extend({
 
 		// remove this unit from its owner player's unitIds
 		if (ownerPlayer) {
-			ownerPlayer.disownUnit(self);
+			ownerPlayer.disownUnit(self, false);
 		}
 
 		if (taro.isClient) {
