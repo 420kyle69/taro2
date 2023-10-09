@@ -139,6 +139,12 @@ var GameScene = /** @class */ (function (_super) {
                     _this.textures.remove(texture);
                     _this.textures.addCanvas("extruded-".concat(key), canvas);
                 }
+                else {
+                    console.warn("Tileset \"".concat(tileset.name, "\" image doesn't match the specified parameters. ") +
+                        'Double check your margin, spacing, tilewidth and tileheight.');
+                    _this.scene.stop();
+                    return;
+                }
                 var extrudedTexture = _this.textures.get("extruded-".concat(key));
                 Phaser.Textures.Parsers.SpriteSheet(extrudedTexture, 0, 0, 0, extrudedTexture.source[0].width, extrudedTexture.source[0].height, {
                     frameWidth: tileset.tilewidth,

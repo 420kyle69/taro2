@@ -169,6 +169,11 @@ class GameScene extends PhaserScene {
 				if (canvas) {
 					this.textures.remove(texture);
 					this.textures.addCanvas(`extruded-${key}`, canvas);
+				} else {
+					console.warn(`Tileset "${tileset.name}" image doesn't match the specified parameters. ` +
+						'Double check your margin, spacing, tilewidth and tileheight.');
+					this.scene.stop();
+					return;
 				}
 				const extrudedTexture = this.textures.get(`extruded-${key}`);
 				Phaser.Textures.Parsers.SpriteSheet(
