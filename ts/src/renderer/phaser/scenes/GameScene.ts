@@ -170,6 +170,10 @@ class GameScene extends PhaserScene {
 					this.textures.remove(texture);
 					this.textures.addCanvas(`extruded-${key}`, canvas);
 				} else {
+
+					window.toastErrorMessage(`Tileset "${tileset.name}" image doesn't match the specified parameters. ` +
+					`Double check your margin, spacing, tilewidth and tileheight.`);
+
 					console.warn(`Tileset "${tileset.name}" image doesn't match the specified parameters. ` +
 						'Double check your margin, spacing, tilewidth and tileheight.');
 					this.scene.stop();
