@@ -144,6 +144,20 @@ var GameScene = /** @class */ (function (_super) {
                         window.toastErrorMessage("Tileset \"".concat(tileset.name, "\" image doesn't match the specified parameters. ") +
                             "Double check your margin, spacing, tilewidth and tileheight.");
                     }
+                    else {
+                        // WAITING TILL EDITOR IS LOADED
+                        setTimeout(function () {
+                            if (window.toastErrorMessage) {
+                                window.toastErrorMessage("Tileset \"".concat(tileset.name, "\" image doesn't match the specified parameters. ") +
+                                    "Double check your margin, spacing, tilewidth and tileheight.");
+                            }
+                            else {
+                                // IF editor is not loaded, show alert
+                                alert("Tileset \"".concat(tileset.name, "\" image doesn't match the specified parameters. ") +
+                                    "Double check your margin, spacing, tilewidth and tileheight.");
+                            }
+                        }, 5000);
+                    }
                     console.warn("Tileset \"".concat(tileset.name, "\" image doesn't match the specified parameters. ") +
                         'Double check your margin, spacing, tilewidth and tileheight.');
                     _this.scene.stop();

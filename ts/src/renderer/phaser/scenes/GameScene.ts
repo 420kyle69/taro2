@@ -174,6 +174,18 @@ class GameScene extends PhaserScene {
 					if(window.toastErrorMessage){
 						window.toastErrorMessage(`Tileset "${tileset.name}" image doesn't match the specified parameters. ` +
 						`Double check your margin, spacing, tilewidth and tileheight.`);						
+					}else{
+						// WAITING TILL EDITOR IS LOADED
+						setTimeout(() => {
+							if(window.toastErrorMessage){
+								window.toastErrorMessage(`Tileset "${tileset.name}" image doesn't match the specified parameters. ` +
+								`Double check your margin, spacing, tilewidth and tileheight.`);
+							}else{
+								// IF editor is not loaded, show alert
+								alert(`Tileset "${tileset.name}" image doesn't match the specified parameters. ` +
+								`Double check your margin, spacing, tilewidth and tileheight.`);
+							}
+						}, 5000);
 					}
 
 
