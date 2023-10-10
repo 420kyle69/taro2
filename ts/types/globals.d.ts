@@ -13,7 +13,7 @@ declare const UIPlugin: any;
 declare const rexvirtualjoystickplugin: any;
 declare const RoundRectanglePlugin: any;
 
-interface Window { taro: TaroEngine }
+interface Window { taro: TaroEngine , toastErrorMessage : Function}
 type ArrayElement<ArrayType extends readonly unknown[]> =
 	ArrayType extends readonly (infer ElementType)[] ? ElementType : never;
 
