@@ -140,6 +140,8 @@ var GameScene = /** @class */ (function (_super) {
                     _this.textures.addCanvas("extruded-".concat(key), canvas);
                 }
                 else {
+                    window.toastErrorMessage("Tileset \"".concat(tileset.name, "\" image doesn't match the specified parameters. ") +
+                        "Double check your margin, spacing, tilewidth and tileheight.");
                     console.warn("Tileset \"".concat(tileset.name, "\" image doesn't match the specified parameters. ") +
                         'Double check your margin, spacing, tilewidth and tileheight.');
                     _this.scene.stop();
