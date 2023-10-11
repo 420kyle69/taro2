@@ -443,6 +443,10 @@ var ClientNetworkEvents = {
 		taro.client.emit("editInitEntity", data);
 	},
 
+	_onEditGlobalScripts: function (data) {
+		taro.client.emit("editGlobalScripts", data);
+	},
+
 	_updateClientInitEntities: function (data) {
 		taro.developerMode.updateClientInitEntities(data);
 	},

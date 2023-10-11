@@ -530,6 +530,13 @@ var DeveloperMode = /** @class */ (function () {
             }
         }
     };
+    DeveloperMode.prototype.editGlobalScripts = function (data, clientId) {
+        // only allow developers to modify global scripts
+        if (taro.server.developerClientIds.includes(clientId)) {
+            taro.network.send('editGlobalScripts', data);
+            taro.script.load(data);
+        }
+    };
     DeveloperMode.prototype.createUnit = function (data) {
         //const player = taro.game.getPlayerByClientId(clientId);
         var player;

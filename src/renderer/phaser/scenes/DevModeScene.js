@@ -60,6 +60,12 @@ var DevModeScene = /** @class */ (function (_super) {
                 _this.createEntityImage(data);
             }
         });
+        taro.client.on('applyScriptChanges', function (data) {
+            taro.network.send('editGlobalScripts', data);
+        });
+        taro.client.on('editGlobalScripts', function (data) {
+            taro.script.load(data);
+        });
         taro.client.on('updateInitEntities', function () {
             _this.updateInitEntities();
         });

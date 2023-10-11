@@ -540,6 +540,14 @@ class DeveloperMode {
 		}
 	}
 
+	editGlobalScripts(data, clientId: string): void {
+		// only allow developers to modify global scripts
+		if (taro.server.developerClientIds.includes(clientId)) {
+			taro.network.send('editGlobalScripts', data);
+			taro.script.load(data);
+		}
+	}
+
 	createUnit(data) {
 		//const player = taro.game.getPlayerByClientId(clientId);
 		let player;
