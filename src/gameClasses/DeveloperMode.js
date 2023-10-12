@@ -265,7 +265,12 @@ var DeveloperMode = /** @class */ (function () {
             if (dataType === 'edit') {
                 serverData.layer = serverData.layer[0];
                 debounceSetWasEdited(gameMap);
-                debounceEditTileSend(data);
+                if (data.edit.size !== 'fitContent') {
+                    taro.network.send('editTile', data);
+                }
+                else {
+                    debounceEditTileSend(data);
+                }
             }
             else {
                 gameMap.wasEdited = true;

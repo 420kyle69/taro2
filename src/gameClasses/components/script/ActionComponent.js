@@ -225,7 +225,7 @@ var ActionComponent = TaroEntity.extend({
 						taro.game.lastAttackingItemId = item.id();
 
 						break;
-					
+
 					case 'sendPostRequest':
 						var obj = self._script.variable.getValue(action.string, vars);
 						var url = self._script.variable.getValue(action.url, vars);
@@ -239,7 +239,7 @@ var ActionComponent = TaroEntity.extend({
 							throw new Error(err);
 						}
 
-						
+
 						// ensure we aren't sending more than 30 POST requests within 10 seconds
 						taro.server.postReqTimestamps.push(taro.currentTime());
 						var oldestReqTimestamp = taro.server.postReqTimestamps[0]
@@ -256,7 +256,7 @@ var ActionComponent = TaroEntity.extend({
 						}, function optionalCallback(err, httpResponse, body) {
 							if (err) {
 								// don't throw new Error here, because it's inside callback and it won't get caught
-								self._script.errorLog(err, path);	
+								self._script.errorLog(err, path);
 							}
 
 							try {
@@ -272,13 +272,13 @@ var ActionComponent = TaroEntity.extend({
 								}
 							} catch (err) {
 								// don't throw new Error here, because it's inside callback and it won't get caught
-								self._script.errorLog(err, path);	
+								self._script.errorLog(err, path);
 							}
 						});
 
 						break;
 
-						
+
 					case 'requestPost':
 						var data = self._script.variable.getValue(action.data, vars) || {};
 						var url = self._script.variable.getValue(action.url, vars);
@@ -296,7 +296,7 @@ var ActionComponent = TaroEntity.extend({
 						}
 
 						data.url = url;
-						
+
 						// console.log("requestPost data", data);
 
 						// use closure to store globalVariableName
@@ -308,7 +308,7 @@ var ActionComponent = TaroEntity.extend({
 									// console.log("body", body)
 									if (err) {
 										// don't throw new Error here, because it's inside callback and it won't get caught
-										self._script.errorLog(err, path);	
+										self._script.errorLog(err, path);
 									}
 
 									if (taro.game.data.variables.hasOwnProperty(targetVarName)) {
@@ -328,7 +328,7 @@ var ActionComponent = TaroEntity.extend({
 									self._entity.script.trigger('onPostResponse', vars);
 								} catch (e) {
 									// don't throw new Error here, because it's inside callback and it won't get caught
-									self._script.errorLog(e, path);	
+									self._script.errorLog(e, path);
 								}
 
 							})
@@ -870,7 +870,7 @@ var ActionComponent = TaroEntity.extend({
 								var brk = self.run(action.actions, Object.assign(vars, { selectedUnit: unit }), actionPath);
 
 								if (brk == 'break' || vars.break) {
-									vars.break = false;									
+									vars.break = false;
 									break;
 								} else if (brk == 'continue') {
 									continue;
@@ -1079,7 +1079,7 @@ var ActionComponent = TaroEntity.extend({
 
 							loopCounter++;
 							if (loopCounter > 10000) {
-								
+
 								taro.server.unpublishQueued = true;
 								throw new Error("infinite loop detected"); // break infinite loop
 							}
@@ -2932,7 +2932,7 @@ var ActionComponent = TaroEntity.extend({
 						}
 
 						break;
-					
+
 					case 'addObjectElement':
 						var key = self._script.variable.getValue(action.key, vars);
 						var value = self._script.variable.getValue(action.value, vars);

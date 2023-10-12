@@ -424,14 +424,25 @@ NetIo.Client = NetIo.EventingClass.extend({
 						if (window.newrelic) {
 							window.newrelic.addPageAction('gs-websocket-disconnects', disconnectData);
 						}
+						
+						if (window.trackEvent) {
+							window.trackEvent('Socket Disconnect', disconnectData);
+						}
+						
 						window.reconnectInProgress = false;
 					});
 			}, 500);
 		}
 		
 		console.log('disconnected', disconnectData);
-		if (!window.reconnectInProgress && window.newrelic) {
-			window.newrelic.addPageAction('gs-websocket-disconnects', disconnectData);
+		if (!window.reconnectInProgress) {
+			if (window.newrelic) {
+				window.newrelic.addPageAction('gs-websocket-disconnects', disconnectData);
+			}
+			
+			if (window.trackEvent) {
+				window.trackEvent('Socket Disconnect', disconnectData);
+			}
 		}
 		
 		// If we are already connected and have an id...

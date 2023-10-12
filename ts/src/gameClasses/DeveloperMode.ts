@@ -270,7 +270,11 @@ class DeveloperMode {
 			if (dataType === 'edit') {
 				serverData.layer = serverData.layer[0];
 				debounceSetWasEdited(gameMap);
-				debounceEditTileSend(data as TileData<'edit'>);
+				if ((data as TileData<'edit'>).edit.size !== 'fitContent') {
+					taro.network.send('editTile', data);
+				} else {
+					debounceEditTileSend(data as TileData<'edit'>);
+				}
 			} else {
 				gameMap.wasEdited = true;
 				taro.network.send('editTile', data);
