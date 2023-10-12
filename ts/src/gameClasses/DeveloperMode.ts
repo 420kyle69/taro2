@@ -545,6 +545,7 @@ class DeveloperMode {
 		if (taro.server.developerClientIds.includes(clientId)) {
 			taro.network.send('editGlobalScripts', data);
 			taro.script.load(data);
+			taro.script.scriptCache = {};
 		}
 	}
 

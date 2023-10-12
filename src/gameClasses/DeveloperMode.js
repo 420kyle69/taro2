@@ -535,6 +535,7 @@ var DeveloperMode = /** @class */ (function () {
         if (taro.server.developerClientIds.includes(clientId)) {
             taro.network.send('editGlobalScripts', data);
             taro.script.load(data);
+            taro.script.scriptCache = {};
         }
     };
     DeveloperMode.prototype.createUnit = function (data) {
