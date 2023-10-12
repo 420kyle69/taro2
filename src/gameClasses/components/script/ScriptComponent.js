@@ -26,11 +26,9 @@ var ScriptComponent = TaroEntity.extend({
 
 	load: function(scripts) {
 		this.scripts = scripts;
-		//console.log('load scripts', this.scripts);
 		// map trigger events, so we don't have to iterate through all scripts to find corresponding scripts
 		this.triggeredScripts = {};
 		for (var scriptId in this.scripts) {
-			//console.log('scriptId', scriptId, this.scripts[scriptId]);
 			var script = this.scripts[scriptId];
 
 			// look for matching trigger within the script's triggers
