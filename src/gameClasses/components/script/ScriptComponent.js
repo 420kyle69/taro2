@@ -27,7 +27,11 @@ var ScriptComponent = TaroEntity.extend({
 	load: function(scripts, modify = false) {
 		if (modify) {
 			Object.entries(scripts).forEach(([scriptId, script]) => {
-				this.scripts[scriptId] = script;
+				if (!script.deleted) {
+					this.scripts[scriptId] = script;
+				} else {
+					delete this.scripts[scriptId];
+				}
 			});
 		} else {
 			this.scripts = scripts;
