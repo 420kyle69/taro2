@@ -24,8 +24,14 @@ var ScriptComponent = TaroEntity.extend({
 		ScriptComponent.prototype.log('initializing Script Component');
 	},
 
-	load: function(scripts) {
-		this.scripts = scripts;
+	load: function(scripts, modify = false) {
+		if (modify) {
+			Object.entries(scripts).forEach(([scriptId, script]) => {
+				this.scripts[scriptId] = script;
+			});
+		} else {
+			this.scripts = scripts;
+		}
 		// map trigger events, so we don't have to iterate through all scripts to find corresponding scripts
 		this.triggeredScripts = {};
 		for (var scriptId in this.scripts) {

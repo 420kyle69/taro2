@@ -64,7 +64,7 @@ var DevModeScene = /** @class */ (function (_super) {
             taro.network.send('editGlobalScripts', data);
         });
         taro.client.on('editGlobalScripts', function (data) {
-            taro.script.load(data);
+            taro.script.load(data, true);
             taro.script.scriptCache = {};
         });
         taro.client.on('updateInitEntities', function () {

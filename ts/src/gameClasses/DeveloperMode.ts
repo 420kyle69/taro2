@@ -548,7 +548,7 @@ class DeveloperMode {
 		// only allow developers to modify global scripts
 		if (taro.server.developerClientIds.includes(clientId)) {
 			taro.network.send('editGlobalScripts', data);
-			taro.script.load(data);
+			taro.script.load(data, true);
 			taro.script.scriptCache = {};
 		}
 	}
