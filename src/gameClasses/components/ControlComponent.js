@@ -294,10 +294,8 @@ var ControlComponent = TaroEntity.extend({
 	},
 
 	releaseAllKeys: function () {
-		const pressedKeys = Object.entries(this.input.key).filter((element) => element[1] === true);
-		const pressedMouseButtons = Object.entries(this.input.mouse).filter((element) => element[1] === true);
-		pressedKeys.forEach((key) => this.keyUp('key', key[0]));
-		pressedMouseButtons.forEach((key) => this.keyUp('mouse', key[0]));
+		Object.entries(this.input.key).forEach((key) => this.keyUp('key', key[0]));
+		Object.entries(this.input.mouse).forEach((key) => this.keyUp('mouse', key[0]));
 	},
 
 	// check for input modal is open

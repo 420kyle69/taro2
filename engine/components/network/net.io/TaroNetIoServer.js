@@ -628,7 +628,7 @@ var TaroNetIoServer = {
 
 					self.logCommandCount(socket._remoteAddress, commandName, data);
 
-					if (!(commandName === 'editTile')) {
+					if (!(commandName === 'editTile' || commandName === 'editGlobalScripts')) {
 						self.uploadPerSecond[socket._remoteAddress] += JSON.stringify(data).length;
 					}
 
