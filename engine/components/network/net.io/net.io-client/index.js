@@ -447,11 +447,11 @@ NetIo.Client = NetIo.EventingClass.extend({
 			}
 		}
 		
-		if (!window.reconnectInProgress && window.postHog?.getFeatureFlag('skip_error_modals') === 'yes') {
+		if (!window.reconnectInProgress && window.postHog?.getFeatureFlag('skip_error_modal') === 'yes') {
 			// user is disconnected and we no longer trying to reconnect them silently
 			// let's reload the page and try autojoining them instead
 			const reason = disconnectData.wsReason;
-			const whitelistReasons = [
+			const whitelistedReasons = [
 				'Game has been unpublished',
 				'You have been banned',
 				'Restricted IP detected',
@@ -462,7 +462,7 @@ NetIo.Client = NetIo.EventingClass.extend({
 				'Guest players not allowed to join this game',
 			];
 			
-			if (whitelistReasons.findIndex((m) => m.includes(reason)) === -1) {
+			if (whitelistedReasons.findIndex((m) => m.includes(reason)) === -1) {
 				const autojoinAttempted = window.sessionStorage.getItem('autojoinAttempted');
 				if (!autojoinAttempted) {
 					// store in sessionStorage
