@@ -470,6 +470,10 @@ var ServerNetworkEvents = {
 		taro.developerMode.editInitEntity(data, clientId);
 	},
 
+	_onEditGlobalScripts: function(data, clientId) {
+		taro.developerMode.editGlobalScripts(data, clientId);
+	},
+
 	_onRequestInitEntities: function(data, clientId) {
 		taro.developerMode.requestInitEntities(data, clientId);
 	},

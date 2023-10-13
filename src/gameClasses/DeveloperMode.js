@@ -265,7 +265,12 @@ var DeveloperMode = /** @class */ (function () {
             if (dataType === 'edit') {
                 serverData.layer = serverData.layer[0];
                 debounceSetWasEdited(gameMap);
-                debounceEditTileSend(data);
+                if (data.edit.size !== 'fitContent') {
+                    taro.network.send('editTile', data);
+                }
+                else {
+                    debounceEditTileSend(data);
+                }
             }
             else {
                 gameMap.wasEdited = true;
@@ -528,6 +533,14 @@ var DeveloperMode = /** @class */ (function () {
             if (!found_1) {
                 this.initEntities.push(data);
             }
+        }
+    };
+    DeveloperMode.prototype.editGlobalScripts = function (data, clientId) {
+        // only allow developers to modify global scripts
+        if (taro.server.developerClientIds.includes(clientId)) {
+            taro.network.send('editGlobalScripts', data);
+            taro.script.load(data);
+            taro.script.scriptCache = {};
         }
     };
     DeveloperMode.prototype.createUnit = function (data) {
