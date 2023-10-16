@@ -116,6 +116,10 @@ class PhaserRegion extends PhaserEntity {
 
 			rt.setPosition(label.x, label.y);
 		}
+
+		if (this.devModeOnly && !taro.developerMode.active && taro.developerMode.activeTab !== 'play') {
+			this.hide();
+        }
 	}
 
 	protected transform (): void {
