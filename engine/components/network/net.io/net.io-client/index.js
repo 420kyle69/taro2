@@ -299,7 +299,9 @@ NetIo.Client = NetIo.EventingClass.extend({
 
 	_onOpen: function (event) {
 		this.trackLatency('gs-websocket-connect', 'onopen');
-
+		
+		window.sessionStorage.removeItem('autojoinAttempted');
+		
 		var url = event.target.url;
 		var urlWithoutProtocol = url.split('://')[1];
 		var serverDomain = urlWithoutProtocol.split('/')[0];
@@ -442,6 +444,34 @@ NetIo.Client = NetIo.EventingClass.extend({
 			
 			if (window.trackEvent) {
 				window.trackEvent('Socket Disconnect', disconnectData);
+			}
+		}
+		
+		if (!window.reconnectInProgress && window.postHog?.getFeatureFlag('skip_error_modal') === 'yes') {
+			// user is disconnected and we no longer trying to reconnect them silently
+			// let's reload the page and try autojoining them instead
+			const reason = disconnectData.wsReason;
+			const whitelistedReasons = [
+				'Game has been unpublished',
+				'You have been banned',
+				'Restricted IP detected',
+				'Duplicate IP detected',
+				'Client already exists',
+				'User connected to another server',
+				'You do not have permission to join this game',
+				'Guest players not allowed to join this game',
+			];
+			
+			if (whitelistedReasons.findIndex((m) => m.includes(reason)) === -1) {
+				const autojoinAttempted = window.sessionStorage.getItem('autojoinAttempted');
+				if (!autojoinAttempted) {
+					// store in sessionStorage
+					window.sessionStorage.setItem('autojoinAttempted', 1);
+					window.location.href = `${window.location.href}?autojoin=true`;
+					return;
+				} else {
+					window.sessionStorage.removeItem('autojoinAttempted');
+				}
 			}
 		}
 		
