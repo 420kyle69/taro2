@@ -78,6 +78,15 @@ class DevModeScene extends PhaserScene {
 
 		taro.client.on('editGlobalScripts', (data: ScriptData) => {
 			taro.script.load(data, true);
+
+			Object.entries(taro.developerMode.serverScriptData).forEach(([scriptId, script]) => {
+				if (!script.deleted) {
+					this.scripts[scriptId] = script;
+				} else {
+					delete this.scripts[scriptId];
+				}
+			});
+			
 			taro.script.scriptCache = {};
 		});
 
