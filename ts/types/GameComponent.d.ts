@@ -35,6 +35,7 @@ interface ScriptData {
 		type: string;
 	}>;
 	actions: Record<string, ActionData>;
+	deleted?: boolean;
 }
 
 interface ActionData {

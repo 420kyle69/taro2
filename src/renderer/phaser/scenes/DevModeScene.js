@@ -64,7 +64,16 @@ var DevModeScene = /** @class */ (function (_super) {
             taro.network.send('editGlobalScripts', data);
         });
         taro.client.on('editGlobalScripts', function (data) {
-            taro.script.load(data);
+            Object.entries(data).forEach(function (_a) {
+                var scriptId = _a[0], script = _a[1];
+                if (!script.deleted) {
+                    taro.developerMode.serverScriptData[scriptId] = script;
+                }
+                else {
+                    delete taro.developerMode.serverScriptData[scriptId];
+                }
+            });
+            taro.script.load(data, true);
             taro.script.scriptCache = {};
         });
         taro.client.on('updateInitEntities', function () {
