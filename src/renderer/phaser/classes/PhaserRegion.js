@@ -88,6 +88,9 @@ var PhaserRegion = /** @class */ (function (_super) {
             label.setScale(tempScale);
             rt.setPosition(label.x, label.y);
         }
+        if (this.devModeOnly && !taro.developerMode.active && taro.developerMode.activeTab !== 'play') {
+            this.hide();
+        }
     };
     PhaserRegion.prototype.transform = function () {
         var gameObject = this.gameObject;
