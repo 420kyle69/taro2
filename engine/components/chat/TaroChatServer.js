@@ -77,7 +77,7 @@ var TaroChatServer = {
 			return;
 		} else if (sender && sender._stats) {
 			// prevent sending messages from banned/unverified users
-			if (!global.isDev && sender._stats.banChat) {
+			if (!global.isDev && (sender._stats.banChat) || !sender._stats.userId) {
 				return;
 			} else if (this.isSpamming(from, message)) { // mute spammers
 				sender._stats.banChat = true;
