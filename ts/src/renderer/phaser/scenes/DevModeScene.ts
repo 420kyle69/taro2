@@ -59,6 +59,10 @@ class DevModeScene extends PhaserScene {
 			this.regionEditor.edit(data);
 		});
 
+		taro.client.on('editVariable', (data: VariableData) => {
+			console.log('editVariable', data);
+		});
+
         taro.client.on('editInitEntity', (data: ActionData) => {
             let found = false;
             this.entityImages.forEach((image) => {

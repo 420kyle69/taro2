@@ -509,6 +509,14 @@ class DeveloperMode {
 		}
 	}
 
+	editVariable(data: VariableData, clientId: string): void {
+		// only allow developers to modify initial entities
+		if (taro.server.developerClientIds.includes(clientId)) {
+			// broadcast region change to all clients
+			taro.network.send<any>('editVariable', data);
+		}
+	}
+
 	editInitEntity(data, clientId: string): void {
 		// only allow developers to modify initial entities
 		if (taro.server.developerClientIds.includes(clientId)) {
@@ -863,6 +871,13 @@ interface RegionData {
 	height?: number,
 	delete?: boolean,
 	showModal?: boolean
+}
+
+interface VariableData {
+	name: string,
+	newName?: string,
+	value?: any,
+	delete?: boolean
 }
 
 interface EditEntityData {

@@ -48,6 +48,9 @@ var DevModeScene = /** @class */ (function (_super) {
         taro.client.on('editRegion', function (data) {
             _this.regionEditor.edit(data);
         });
+        taro.client.on('editVariable', function (data) {
+            console.log('editVariable', data);
+        });
         taro.client.on('editInitEntity', function (data) {
             var found = false;
             _this.entityImages.forEach(function (image) {

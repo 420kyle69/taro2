@@ -498,6 +498,13 @@ var DeveloperMode = /** @class */ (function () {
             taro.network.send('editRegion', data);
         }
     };
+    DeveloperMode.prototype.editVariable = function (data, clientId) {
+        // only allow developers to modify initial entities
+        if (taro.server.developerClientIds.includes(clientId)) {
+            // broadcast region change to all clients
+            taro.network.send('editVariable', data);
+        }
+    };
     DeveloperMode.prototype.editInitEntity = function (data, clientId) {
         // only allow developers to modify initial entities
         if (taro.server.developerClientIds.includes(clientId)) {
