@@ -1,18 +1,18 @@
 /**
  * recursively set object parameters
- * @param oldOjbect
+ * @param oldObject
  * @param newObject
  */
-function setOjbect(oldOjbect, newObject) {
+function setObject(oldObject, newObject) {
     Object.keys(newObject).map(function (k) {
-        if (!oldOjbect[k]) {
-            oldOjbect[k] = {};
+        if (!oldObject[k]) {
+            oldObject[k] = {};
         }
         if (typeof newObject[k] === 'object') {
-            setOjbect(oldOjbect[k], newObject[k]);
+            setObject(oldObject[k], newObject[k]);
         }
         else {
-            oldOjbect[k] = newObject[k];
+            oldObject[k] = newObject[k];
         }
     });
 }
@@ -65,7 +65,7 @@ function merge(oldData, newData, template) {
                 }
                 case 'smartSet': {
                     if (typeof newData[k] === 'object') {
-                        setOjbect(oldData[k], newData[k]);
+                        setObject(oldData[k], newData[k]);
                     }
                     else {
                         oldData[k] = newData[k];
@@ -119,7 +119,7 @@ var mergedTemplate = {
                 }
                 else {
                     var idx = oldData.layer.findIndex(function (v) { return v === newLayer; });
-                    setOjbect(nowData[idx], newData.selectedTiles[0]);
+                    setObject(nowData[idx], newData.selectedTiles[0]);
                 }
             }, method: 'direct'
         },
