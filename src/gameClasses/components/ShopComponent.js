@@ -322,7 +322,7 @@ var ShopComponent = TaroEntity.extend({
 	loadUserPurchases: function () {
 		let self = this;
 		$.ajax({
-			url: `/api/user/${gameId}/purchases`,
+			url: `/api/user/${gameId}/purchases/`,
 			type: 'GET',
 			success: function (response) {
 				if (response.status == 'success') {

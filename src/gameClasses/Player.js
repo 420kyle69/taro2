@@ -108,6 +108,9 @@ var Player = TaroEntity.extend({
 						{ receivedJoinGame: receivedJoinGame }
 					];
 				}
+				if (taro.server.developerClientIds.includes(clientId)) {
+					playerJoinStreamData.push({ scriptData: taro.game.data.scripts });
+				}
 
 				self.streamUpdateData(playerJoinStreamData);
 			}
@@ -555,6 +558,10 @@ var Player = TaroEntity.extend({
 							case 'cameraTrackedUnitId':
 								// this unit was queued to be tracked by a player's camera
 								self.cameraTrackUnit(newValue);
+								break;
+
+							case 'scriptData':
+								taro.developerMode.serverScriptData = newValue;
 								break;
 
 							case 'mapData':

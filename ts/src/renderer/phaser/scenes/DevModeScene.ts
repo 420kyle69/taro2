@@ -72,6 +72,23 @@ class DevModeScene extends PhaserScene {
             }
 		});
 
+		taro.client.on('applyScriptChanges', (data: ScriptData) => {
+			taro.network.send<any>('editGlobalScripts', data);
+		});
+
+		taro.client.on('editGlobalScripts', (data: ScriptData) => {
+			Object.entries(data).forEach(([scriptId, script]) => {
+				if (!script.deleted) {
+					taro.developerMode.serverScriptData[scriptId] = script;
+				} else {
+					delete taro.developerMode.serverScriptData[scriptId];
+				}
+			});
+
+			taro.script.load(data, true);
+			taro.script.scriptCache = {};
+		});
+
         taro.client.on('updateInitEntities', () => {
 			this.updateInitEntities();
 		});

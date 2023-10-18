@@ -188,6 +188,8 @@ class DeveloperMode {
 
 	initEntities: ActionData[];
 
+	serverScriptData: Record<string, ScriptData>;
+
 	constructor() {
 		if (taro.isClient) this.active = false;
 	}
@@ -270,7 +272,11 @@ class DeveloperMode {
 			if (dataType === 'edit') {
 				serverData.layer = serverData.layer[0];
 				debounceSetWasEdited(gameMap);
-				debounceEditTileSend(data as TileData<'edit'>);
+				if ((data as TileData<'edit'>).edit.size !== 'fitContent') {
+					taro.network.send('editTile', data);
+				} else {
+					debounceEditTileSend(data as TileData<'edit'>);
+				}
 			} else {
 				gameMap.wasEdited = true;
 				taro.network.send('editTile', data);
@@ -537,6 +543,15 @@ class DeveloperMode {
 			if (!found) {
 				this.initEntities.push(data);
 			}
+		}
+	}
+
+	editGlobalScripts(data, clientId: string): void {
+		// only allow developers to modify global scripts
+		if (taro.server.developerClientIds.includes(clientId)) {
+			taro.network.send('editGlobalScripts', data);
+			taro.script.load(data, true);
+			taro.script.scriptCache = {};
 		}
 	}
 

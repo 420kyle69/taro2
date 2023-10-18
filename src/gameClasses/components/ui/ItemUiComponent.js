@@ -302,7 +302,10 @@ var ItemUiComponent = TaroEntity.extend({
 	updateItemCooldownOverlay: function (item) {
 		let itemStats = item._stats;
 		let cdPercent = Math.trunc((1 - Math.min((taro.now - itemStats.lastUsed) / itemStats.fireRate, 1)) * 100);
-		taro.client.getCachedElementById(`item-cooldown-overlay-${itemStats.slotIndex}`)[0].style.height = `${cdPercent}%`;
+		let overlay = taro.client.getCachedElementById(`item-cooldown-overlay-${itemStats.slotIndex}`);
+		if (overlay) {
+			overlay[0].style.height = `${cdPercent}%`;
+		}
 	},
 
 	updateItemDescription: function (item) {
