@@ -65,9 +65,8 @@ interface ActionData {
 }
 
 interface VariableData {
-	name?: string,
 	dataType?: string,
-	newName?: string,
+	newKey?: string,
 	value?: any,
 	delete?: boolean
 }
