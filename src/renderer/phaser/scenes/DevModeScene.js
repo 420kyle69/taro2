@@ -49,13 +49,22 @@ var DevModeScene = /** @class */ (function (_super) {
             _this.regionEditor.edit(data);
         });
         taro.client.on('editVariable', function (data) {
+            //editing existing variable
             if (taro.game.data.variables[data.name]) {
+                //deleting variable
                 if (data.delete) {
                     delete taro.game.data.variables[data.name];
+                    //renaming variable
+                }
+                else if (data.newName) {
+                    taro.game.data.variables[data.newName] = taro.game.data.variables[data.name];
+                    delete taro.game.data.variables[data.name];
+                    //editing variable
                 }
                 else {
                     taro.game.data.variables[data.name].value = data.value;
                 }
+                //creating new variable
             }
             else {
                 taro.game.data.variables[data.name] = {

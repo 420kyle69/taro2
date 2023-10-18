@@ -501,13 +501,22 @@ var DeveloperMode = /** @class */ (function () {
     DeveloperMode.prototype.editVariable = function (data, clientId) {
         // only allow developers to modify initial entities
         if (taro.server.developerClientIds.includes(clientId)) {
+            //editing existing variable
             if (taro.game.data.variables[data.name]) {
+                //deleting variable
                 if (data.delete) {
                     delete taro.game.data.variables[data.name];
+                    //renaming variable
+                }
+                else if (data.newName) {
+                    taro.game.data.variables[data.newName] = taro.game.data.variables[data.name];
+                    delete taro.game.data.variables[data.name];
+                    //editing variable
                 }
                 else {
                     taro.game.data.variables[data.name].value = data.value;
                 }
+                //creating new variable
             }
             else {
                 taro.game.data.variables[data.name] = {
