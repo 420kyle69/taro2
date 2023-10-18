@@ -60,7 +60,18 @@ class DevModeScene extends PhaserScene {
 		});
 
 		taro.client.on('editVariable', (data: VariableData) => {
-			console.log('editVariable', data);
+			if (taro.game.data.variables[data.name]) {
+				if (data.delete) {
+					delete taro.game.data.variables[data.name];
+				} else {
+					taro.game.data.variables[data.name].value = data.value;
+				}
+			} else {
+				taro.game.data.variables[data.name] = {
+					dataType: data.dataType,
+					value: data.value
+				};
+			}
 		});
 
         taro.client.on('editInitEntity', (data: ActionData) => {
@@ -78,6 +89,10 @@ class DevModeScene extends PhaserScene {
 
 		taro.client.on('applyScriptChanges', (data: ScriptData) => {
 			taro.network.send<any>('editGlobalScripts', data);
+		});
+
+		taro.client.on('applyVariableChanges', (data: VariableData) => {
+			taro.network.send<any>('editVariable', data);
 		});
 
 		taro.client.on('editGlobalScripts', (data: ScriptData) => {

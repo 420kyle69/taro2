@@ -64,6 +64,14 @@ interface ActionData {
     wasDeleted?: boolean;
 }
 
+interface VariableData {
+	name?: string,
+	dataType: string,
+	newName?: string,
+	value?: any,
+	delete?: boolean
+}
+
 interface MapData {
 	wasEdited: boolean;
 	haveUnsavedChanges: boolean;
@@ -96,6 +104,7 @@ declare class GameComponent extends TaroEntity {
 	getPlayerByClientId(clientId: string): Player;
 
 	data: {
+		variables: Record<string, VariableData>;
 		scripts: Record<string, ScriptData>;
 		defaultData: any;
 		map: MapData;
