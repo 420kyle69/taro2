@@ -1,17 +1,17 @@
 /**
  * recursively set object parameters
- * @param oldOjbect
+ * @param oldObject
  * @param newObject
  */
-function setOjbect(oldOjbect: { [key: string]: any }, newObject: { [key: string]: any }) {
+function setObject(oldObject: { [key: string]: any }, newObject: { [key: string]: any }) {
 	Object.keys(newObject).map((k) => {
-		if (!oldOjbect[k]) {
-			oldOjbect[k] = {};
+		if (!oldObject[k]) {
+			oldObject[k] = {};
 		}
 		if (typeof newObject[k] === 'object') {
-			setOjbect(oldOjbect[k], newObject[k]);
+			setObject(oldObject[k], newObject[k]);
 		} else {
-			oldOjbect[k] = newObject[k];
+			oldObject[k] = newObject[k];
 		}
 	});
 }
@@ -63,7 +63,7 @@ function merge(oldData: any, newData: any, template: MergedTemplate<any>) {
 				}
 				case 'smartSet': {
 					if (typeof newData[k] === 'object') {
-						setOjbect(oldData[k], newData[k]);
+						setObject(oldData[k], newData[k]);
 					} else {
 						oldData[k] = newData[k];
 					}
@@ -118,7 +118,7 @@ const mergedTemplate: MergedTemplate<TileData<'edit'>> = {
 					nowData.push(...newData.selectedTiles);
 				} else {
 					const idx = oldData.layer.findIndex((v) => v === newLayer);
-					setOjbect(nowData[idx], newData.selectedTiles[0]);
+					setObject(nowData[idx], newData.selectedTiles[0]);
 				}
 			}, method: 'direct'
 		},
@@ -842,7 +842,7 @@ type MapEditTool = {
 					nowData.push(...newData.selectedTiles)
 				} else {
 					const idx = oldData.layer.findIndex((v) => v === newLayer)
-					setOjbect(nowData[idx], newData.selectedTiles[0])
+					setObject(nowData[idx], newData.selectedTiles[0])
 				}
 			}, method: 'direct'
 		},
