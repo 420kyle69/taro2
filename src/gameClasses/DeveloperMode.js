@@ -511,13 +511,13 @@ var DeveloperMode = /** @class */ (function () {
                     var regionData = { name: key };
                     if (variable.newKey)
                         regionData.newKey = variable.newKey;
-                    if ((_b = variable.value) === null || _b === void 0 ? void 0 : _b.x)
+                    if (!isNaN((_b = variable.value) === null || _b === void 0 ? void 0 : _b.x))
                         regionData.x = variable.value.x;
-                    if ((_c = variable.value) === null || _c === void 0 ? void 0 : _c.y)
+                    if (!isNaN((_c = variable.value) === null || _c === void 0 ? void 0 : _c.y))
                         regionData.y = variable.value.y;
-                    if ((_d = variable.value) === null || _d === void 0 ? void 0 : _d.width)
+                    if (!isNaN((_d = variable.value) === null || _d === void 0 ? void 0 : _d.width))
                         regionData.width = variable.value.width;
-                    if ((_e = variable.value) === null || _e === void 0 ? void 0 : _e.height)
+                    if (!isNaN((_e = variable.value) === null || _e === void 0 ? void 0 : _e.height))
                         regionData.height = variable.value.height;
                     if ((_f = variable.value) === null || _f === void 0 ? void 0 : _f.create)
                         regionData.create = variable.value.create;
