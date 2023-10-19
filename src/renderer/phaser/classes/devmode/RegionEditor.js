@@ -67,13 +67,13 @@ var RegionEditor = /** @class */ (function () {
         this.clickedList = [];
     }
     RegionEditor.prototype.edit = function (data) {
-        if (data.newName && data.name !== data.newName) {
+        if (data.newKey && data.name !== data.newKey) {
             var region = taro.regionManager.getRegionById(data.name);
             if (region)
-                region._stats.id = data.newName;
+                region._stats.id = data.newKey;
             this.devModeScene.regions.forEach(function (region) {
                 if (region.name === data.name) {
-                    region.name = data.newName;
+                    region.name = data.newKey;
                     region.updateLabel();
                 }
             });

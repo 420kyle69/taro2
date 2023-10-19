@@ -486,11 +486,11 @@ class DeveloperMode {
 					if (data.delete) {
 						region.destroy();
 					} else {
-						if (data.name !== data.newName) {
-							if (taro.regionManager.getRegionById(data.newName)) {
+						if (data.name !== data.newKey) {
+							if (taro.regionManager.getRegionById(data.newKey)) {
 								console.log('This name is unavailable');
 							} else {
-								region._stats.id = data.newName;
+								region._stats.id = data.newKey;
 							}
 						}
 						let statsData = [
@@ -516,7 +516,7 @@ class DeveloperMode {
 				if (variable.dataType === 'region')	{
 					const regionData: RegionData = {name: key};
 					
-					if (variable.value.newName) regionData.newName = variable.value.newName;
+					if (variable.newKey) regionData.newKey = variable.newKey;
 					if (variable.value.x) regionData.x = variable.value.x;
 					if (variable.value.y) regionData.y = variable.value.y;
 					if (variable.value.width) regionData.width = variable.value.width;
@@ -899,7 +899,7 @@ type TileData<T extends MapEditToolEnum> = Pick<MapEditTool, T>
 interface RegionData {
 	userId?: string,
 	name: string,
-	newName?: string,
+	newKey?: string,
 	x?: number,
 	y?: number,
 	width?: number,

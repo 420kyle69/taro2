@@ -475,12 +475,12 @@ var DeveloperMode = /** @class */ (function () {
                         region.destroy();
                     }
                     else {
-                        if (data.name !== data.newName) {
-                            if (taro.regionManager.getRegionById(data.newName)) {
+                        if (data.name !== data.newKey) {
+                            if (taro.regionManager.getRegionById(data.newKey)) {
                                 console.log('This name is unavailable');
                             }
                             else {
-                                region._stats.id = data.newName;
+                                region._stats.id = data.newKey;
                             }
                         }
                         var statsData = [
@@ -506,8 +506,8 @@ var DeveloperMode = /** @class */ (function () {
                 var key = _a[0], variable = _a[1];
                 if (variable.dataType === 'region') {
                     var regionData = { name: key };
-                    if (variable.value.newName)
-                        regionData.newName = variable.value.newName;
+                    if (variable.newKey)
+                        regionData.newKey = variable.newKey;
                     if (variable.value.x)
                         regionData.x = variable.value.x;
                     if (variable.value.y)
