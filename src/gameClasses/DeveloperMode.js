@@ -516,8 +516,8 @@ var DeveloperMode = /** @class */ (function () {
                         regionData.width = variable.value.width;
                     if (variable.value.height)
                         regionData.height = variable.value.height;
-                    if (variable.value.delete)
-                        regionData.delete = variable.value.delete;
+                    if (variable.delete)
+                        regionData.delete = variable.delete;
                     _this.editRegion(regionData, clientId);
                 }
                 else {
