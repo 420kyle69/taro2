@@ -513,25 +513,38 @@ class DeveloperMode {
 		// only allow developers to modify initial entities
 		if (taro.server.developerClientIds.includes(clientId)) {
 			Object.entries(data).forEach(([key, variable]) => {
-				//editing existing variable
-				if (taro.game.data.variables[key]) {
-					//deleting variable
-					if (variable.delete) {
-						delete taro.game.data.variables[key];
-					//renaming variable
-					} else if (variable.newKey) {
-						taro.game.data.variables[variable.newKey] = taro.game.data.variables[key];
-						delete taro.game.data.variables[key];
-					//editing variable
-					} else {
-						taro.game.data.variables[key].value = variable.value;
-					}
-				//creating new variable
+				if (variable.dataType === 'region')	{
+					const regionData: RegionData = {name: key};
+					
+					if (variable.value.newName) regionData.newName = variable.value.newName;
+					if (variable.value.x) regionData.x = variable.value.x;
+					if (variable.value.y) regionData.y = variable.value.y;
+					if (variable.value.width) regionData.width = variable.value.width;
+					if (variable.value.height) regionData.height = variable.value.height;
+					if (variable.value.delete) regionData.delete = variable.value.delete;
+
+					this.editRegion(regionData, clientId)
 				} else {
-					taro.game.data.variables[key] = {
-						dataType: variable.dataType,
-						value: variable.value
-					};
+					//editing existing variable
+					if (taro.game.data.variables[key]) {
+						//deleting variable
+						if (variable.delete) {
+							delete taro.game.data.variables[key];
+						//renaming variable
+						} else if (variable.newKey) {
+							taro.game.data.variables[variable.newKey] = taro.game.data.variables[key];
+							delete taro.game.data.variables[key];
+						//editing variable
+						} else {
+							taro.game.data.variables[key].value = variable.value;
+						}
+					//creating new variable
+					} else {
+						taro.game.data.variables[key] = {
+							dataType: variable.dataType,
+							value: variable.value
+						};
+					}
 				}
 			});
 			// broadcast region change to all clients
