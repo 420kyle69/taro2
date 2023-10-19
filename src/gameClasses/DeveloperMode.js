@@ -498,6 +498,39 @@ var DeveloperMode = /** @class */ (function () {
             taro.network.send('editRegion', data);
         }
     };
+    DeveloperMode.prototype.editVariable = function (data, clientId) {
+        // only allow developers to modify initial entities
+        if (taro.server.developerClientIds.includes(clientId)) {
+            Object.entries(data).forEach(function (_a) {
+                var key = _a[0], variable = _a[1];
+                //editing existing variable
+                if (taro.game.data.variables[key]) {
+                    //deleting variable
+                    if (variable.delete) {
+                        delete taro.game.data.variables[key];
+                        //renaming variable
+                    }
+                    else if (variable.newKey) {
+                        taro.game.data.variables[variable.newKey] = taro.game.data.variables[key];
+                        delete taro.game.data.variables[key];
+                        //editing variable
+                    }
+                    else {
+                        taro.game.data.variables[key].value = variable.value;
+                    }
+                    //creating new variable
+                }
+                else {
+                    taro.game.data.variables[key] = {
+                        dataType: variable.dataType,
+                        value: variable.value
+                    };
+                }
+            });
+            // broadcast region change to all clients
+            taro.network.send('editVariable', data);
+        }
+    };
     DeveloperMode.prototype.editInitEntity = function (data, clientId) {
         // only allow developers to modify initial entities
         if (taro.server.developerClientIds.includes(clientId)) {

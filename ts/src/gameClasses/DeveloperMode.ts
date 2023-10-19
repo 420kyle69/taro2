@@ -509,6 +509,36 @@ class DeveloperMode {
 		}
 	}
 
+	editVariable(data: Record<string, VariableData>, clientId: string): void {
+		// only allow developers to modify initial entities
+		if (taro.server.developerClientIds.includes(clientId)) {
+			Object.entries(data).forEach(([key, variable]) => {
+				//editing existing variable
+				if (taro.game.data.variables[key]) {
+					//deleting variable
+					if (variable.delete) {
+						delete taro.game.data.variables[key];
+					//renaming variable
+					} else if (variable.newKey) {
+						taro.game.data.variables[variable.newKey] = taro.game.data.variables[key];
+						delete taro.game.data.variables[key];
+					//editing variable
+					} else {
+						taro.game.data.variables[key].value = variable.value;
+					}
+				//creating new variable
+				} else {
+					taro.game.data.variables[key] = {
+						dataType: variable.dataType,
+						value: variable.value
+					};
+				}
+			});
+			// broadcast region change to all clients
+			taro.network.send<any>('editVariable', data);
+		}
+	}
+
 	editInitEntity(data, clientId: string): void {
 		// only allow developers to modify initial entities
 		if (taro.server.developerClientIds.includes(clientId)) {

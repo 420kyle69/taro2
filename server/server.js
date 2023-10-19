@@ -781,6 +781,7 @@ var Server = TaroClass.extend({
 		taro.network.define('trade', self._onTrade);
 		taro.network.define('editTile', self._onEditTile);
 		taro.network.define('editRegion', self._onEditRegion);
+		taro.network.define('editVariable', self._onEditVariable);
 		taro.network.define('editInitEntity', self._onEditInitEntity);
 		taro.network.define('editGlobalScripts', self._onEditGlobalScripts);
 		taro.network.define('updateClientInitEntities', self._onRequestInitEntities);

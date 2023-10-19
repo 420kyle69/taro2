@@ -48,6 +48,34 @@ var DevModeScene = /** @class */ (function (_super) {
         taro.client.on('editRegion', function (data) {
             _this.regionEditor.edit(data);
         });
+        taro.client.on('editVariable', function (data) {
+            Object.entries(data).forEach(function (_a) {
+                var key = _a[0], variable = _a[1];
+                //editing existing variable
+                if (taro.game.data.variables[key]) {
+                    //deleting variable
+                    if (variable.delete) {
+                        delete taro.game.data.variables[key];
+                        //renaming variable
+                    }
+                    else if (variable.newKey) {
+                        taro.game.data.variables[variable.newKey] = taro.game.data.variables[key];
+                        delete taro.game.data.variables[key];
+                        //editing variable
+                    }
+                    else {
+                        taro.game.data.variables[key].value = variable.value;
+                    }
+                    //creating new variable
+                }
+                else {
+                    taro.game.data.variables[key] = {
+                        dataType: variable.dataType,
+                        value: variable.value
+                    };
+                }
+            });
+        });
         taro.client.on('editInitEntity', function (data) {
             var found = false;
             _this.entityImages.forEach(function (image) {
@@ -62,6 +90,9 @@ var DevModeScene = /** @class */ (function (_super) {
         });
         taro.client.on('applyScriptChanges', function (data) {
             taro.network.send('editGlobalScripts', data);
+        });
+        taro.client.on('applyVariableChanges', function (data) {
+            taro.network.send('editVariable', data);
         });
         taro.client.on('editGlobalScripts', function (data) {
             Object.entries(data).forEach(function (_a) {

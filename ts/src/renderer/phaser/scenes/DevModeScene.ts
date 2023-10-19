@@ -59,6 +59,31 @@ class DevModeScene extends PhaserScene {
 			this.regionEditor.edit(data);
 		});
 
+		taro.client.on('editVariable', (data: Record<string, VariableData>) => {
+			Object.entries(data).forEach(([key, variable]) => {
+				//editing existing variable
+				if (taro.game.data.variables[key]) {
+					//deleting variable
+					if (variable.delete) {
+						delete taro.game.data.variables[key];
+					//renaming variable
+					} else if (variable.newKey) {
+						taro.game.data.variables[variable.newKey] = taro.game.data.variables[key];
+						delete taro.game.data.variables[key];
+					//editing variable
+					} else {
+						taro.game.data.variables[key].value = variable.value;
+					}
+				//creating new variable
+				} else {
+					taro.game.data.variables[key] = {
+						dataType: variable.dataType,
+						value: variable.value
+					};
+				}
+			});
+		});
+
         taro.client.on('editInitEntity', (data: ActionData) => {
             let found = false;
             this.entityImages.forEach((image) => {
@@ -74,6 +99,10 @@ class DevModeScene extends PhaserScene {
 
 		taro.client.on('applyScriptChanges', (data: ScriptData) => {
 			taro.network.send<any>('editGlobalScripts', data);
+		});
+
+		taro.client.on('applyVariableChanges', (data: Record<string, VariableData>) => {
+			taro.network.send<any>('editVariable', data);
 		});
 
 		taro.client.on('editGlobalScripts', (data: ScriptData) => {
