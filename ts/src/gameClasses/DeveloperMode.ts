@@ -517,10 +517,10 @@ class DeveloperMode {
 					const regionData: RegionData = {name: key};
 					
 					if (variable.newKey) regionData.newKey = variable.newKey;
-					if (variable.value.x) regionData.x = variable.value.x;
-					if (variable.value.y) regionData.y = variable.value.y;
-					if (variable.value.width) regionData.width = variable.value.width;
-					if (variable.value.height) regionData.height = variable.value.height;
+					if (variable.value?.x) regionData.x = variable.value.x;
+					if (variable.value?.y) regionData.y = variable.value.y;
+					if (variable.value?.width) regionData.width = variable.value.width;
+					if (variable.value?.height) regionData.height = variable.value.height;
 					if (variable.delete) regionData.delete = variable.delete;
 
 					this.editRegion(regionData, clientId)

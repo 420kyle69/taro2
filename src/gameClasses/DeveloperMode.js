@@ -503,18 +503,19 @@ var DeveloperMode = /** @class */ (function () {
         // only allow developers to modify initial entities
         if (taro.server.developerClientIds.includes(clientId)) {
             Object.entries(data).forEach(function (_a) {
+                var _b, _c, _d, _e;
                 var key = _a[0], variable = _a[1];
                 if (variable.dataType === 'region') {
                     var regionData = { name: key };
                     if (variable.newKey)
                         regionData.newKey = variable.newKey;
-                    if (variable.value.x)
+                    if ((_b = variable.value) === null || _b === void 0 ? void 0 : _b.x)
                         regionData.x = variable.value.x;
-                    if (variable.value.y)
+                    if ((_c = variable.value) === null || _c === void 0 ? void 0 : _c.y)
                         regionData.y = variable.value.y;
-                    if (variable.value.width)
+                    if ((_d = variable.value) === null || _d === void 0 ? void 0 : _d.width)
                         regionData.width = variable.value.width;
-                    if (variable.value.height)
+                    if ((_e = variable.value) === null || _e === void 0 ? void 0 : _e.height)
                         regionData.height = variable.value.height;
                     if (variable.delete)
                         regionData.delete = variable.delete;
