@@ -434,7 +434,7 @@ var DeveloperMode = /** @class */ (function () {
             if (data.name === '' || data.width <= 0 || data.height <= 0) {
                 console.log('empty name, negative or 0 size is not allowed');
             }
-            else if (data.name === undefined || data.created) { // create new region
+            else if (data.name === undefined || data.create) { // create new region
                 if (!data.name) {
                     // create new region name (smallest available number)
                     var regionNameNumber = 0;
@@ -505,7 +505,7 @@ var DeveloperMode = /** @class */ (function () {
         // only allow developers to modify initial entities
         if (taro.server.developerClientIds.includes(clientId)) {
             Object.entries(data).forEach(function (_a) {
-                var _b, _c, _d, _e;
+                var _b, _c, _d, _e, _f;
                 var key = _a[0], variable = _a[1];
                 if (variable.dataType === 'region') {
                     var regionData = { name: key };
@@ -519,6 +519,8 @@ var DeveloperMode = /** @class */ (function () {
                         regionData.width = variable.value.width;
                     if ((_e = variable.value) === null || _e === void 0 ? void 0 : _e.height)
                         regionData.height = variable.value.height;
+                    if ((_f = variable.value) === null || _f === void 0 ? void 0 : _f.create)
+                        regionData.create = variable.value.create;
                     if (variable.delete)
                         regionData.delete = variable.delete;
                     _this.editRegion(regionData, clientId);

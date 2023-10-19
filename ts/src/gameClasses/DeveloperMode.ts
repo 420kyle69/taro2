@@ -444,7 +444,7 @@ class DeveloperMode {
 		if (taro.server.developerClientIds.includes(clientId)) {
 			if (data.name === '' || data.width <= 0 || data.height <= 0) {
 				console.log('empty name, negative or 0 size is not allowed');
-			} else if (data.name === undefined || data.created) { // create new region
+			} else if (data.name === undefined || data.create) { // create new region
 				if (!data.name) {
 					// create new region name (smallest available number)
 					let regionNameNumber = 0;
@@ -523,6 +523,7 @@ class DeveloperMode {
 					if (variable.value?.y) regionData.y = variable.value.y;
 					if (variable.value?.width) regionData.width = variable.value.width;
 					if (variable.value?.height) regionData.height = variable.value.height;
+					if (variable.value?.create) regionData.create = variable.value.create;
 					if (variable.delete) regionData.delete = variable.delete;
 
 					this.editRegion(regionData, clientId)
@@ -906,7 +907,7 @@ interface RegionData {
 	y?: number,
 	width?: number,
 	height?: number,
-	created?: boolean,
+	create?: boolean,
 	delete?: boolean,
 	showModal?: boolean
 }
