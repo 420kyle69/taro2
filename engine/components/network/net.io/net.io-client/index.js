@@ -447,7 +447,7 @@ NetIo.Client = NetIo.EventingClass.extend({
 			}
 		}
 		
-		if (!window.reconnectInProgress && window.postHog?.getFeatureFlag('skip_error_modal') === 'yes') {
+		if (!window.reconnectInProgress) {
 			// user is disconnected and we no longer trying to reconnect them silently
 			// let's reload the page and try autojoining them instead
 			const reason = disconnectData.wsReason;
