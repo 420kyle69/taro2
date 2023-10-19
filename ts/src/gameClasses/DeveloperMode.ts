@@ -444,16 +444,18 @@ class DeveloperMode {
 		if (taro.server.developerClientIds.includes(clientId)) {
 			if (data.name === '' || data.width <= 0 || data.height <= 0) {
 				console.log('empty name, negative or 0 size is not allowed');
-			} else if (data.name === undefined) { // create new region
-				// create new region name (smallest available number)
-				let regionNameNumber = 0;
-				let newRegionName = `region${regionNameNumber}`;
-				do {
-					regionNameNumber++;
-					newRegionName = `region${regionNameNumber}`;
-				} while (taro.regionManager.getRegionById(newRegionName));
-
-				data.name = newRegionName;
+			} else if (data.name === undefined || data.created) { // create new region
+				if (!data.name) {
+					// create new region name (smallest available number)
+					let regionNameNumber = 0;
+					let newRegionName = `region${regionNameNumber}`;
+					do {
+						regionNameNumber++;
+						newRegionName = `region${regionNameNumber}`;
+					} while (taro.regionManager.getRegionById(newRegionName));
+					data.name = newRegionName;
+				}
+	
 				data.showModal = true;
 				data.userId = taro.game.getPlayerByClientId(clientId)._stats.userId;
 				// changed to Region from RegionUi
@@ -464,15 +466,15 @@ class DeveloperMode {
 						y: data.y,
 						width: data.width,
 						height: data.height,
-						key: newRegionName
+						key: data.name
 					},
-					id: newRegionName,
+					id: data.name,
 					value: {
 						x: data.x,
 						y: data.y,
 						width: data.width,
 						height: data.height,
-						key: newRegionName
+						key: data.name
 					}
 				};
 				const region = new Region(regionData);
@@ -904,6 +906,7 @@ interface RegionData {
 	y?: number,
 	width?: number,
 	height?: number,
+	created?: boolean,
 	delete?: boolean,
 	showModal?: boolean
 }

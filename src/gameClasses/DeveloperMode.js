@@ -434,15 +434,17 @@ var DeveloperMode = /** @class */ (function () {
             if (data.name === '' || data.width <= 0 || data.height <= 0) {
                 console.log('empty name, negative or 0 size is not allowed');
             }
-            else if (data.name === undefined) { // create new region
-                // create new region name (smallest available number)
-                var regionNameNumber = 0;
-                var newRegionName = "region".concat(regionNameNumber);
-                do {
-                    regionNameNumber++;
-                    newRegionName = "region".concat(regionNameNumber);
-                } while (taro.regionManager.getRegionById(newRegionName));
-                data.name = newRegionName;
+            else if (data.name === undefined || data.created) { // create new region
+                if (!data.name) {
+                    // create new region name (smallest available number)
+                    var regionNameNumber = 0;
+                    var newRegionName = "region".concat(regionNameNumber);
+                    do {
+                        regionNameNumber++;
+                        newRegionName = "region".concat(regionNameNumber);
+                    } while (taro.regionManager.getRegionById(newRegionName));
+                    data.name = newRegionName;
+                }
                 data.showModal = true;
                 data.userId = taro.game.getPlayerByClientId(clientId)._stats.userId;
                 // changed to Region from RegionUi
@@ -453,15 +455,15 @@ var DeveloperMode = /** @class */ (function () {
                         y: data.y,
                         width: data.width,
                         height: data.height,
-                        key: newRegionName
+                        key: data.name
                     },
-                    id: newRegionName,
+                    id: data.name,
                     value: {
                         x: data.x,
                         y: data.y,
                         width: data.width,
                         height: data.height,
-                        key: newRegionName
+                        key: data.name
                     }
                 };
                 var region = new Region(regionData);
