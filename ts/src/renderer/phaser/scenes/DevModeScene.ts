@@ -59,6 +59,40 @@ class DevModeScene extends PhaserScene {
 			this.regionEditor.edit(data);
 		});
 
+        taro.client.on('editInitEntity', (data: ActionData) => {
+            let found = false;
+            this.entityImages.forEach((image) => {
+                if (image.entity.action.actionId === data.actionId) {
+                    found = true;
+                    image.entity.update(data);
+                }
+            });
+            if (!found) {
+                this.createEntityImage(data);
+            }
+		});
+
+		taro.client.on('applyScriptChanges', (data: ScriptData) => {
+			taro.network.send<any>('editGlobalScripts', data);
+		});
+
+		taro.client.on('editGlobalScripts', (data: ScriptData) => {
+			Object.entries(data).forEach(([scriptId, script]) => {
+				if (!script.deleted) {
+					taro.developerMode.serverScriptData[scriptId] = script;
+				} else {
+					delete taro.developerMode.serverScriptData[scriptId];
+				}
+			});
+
+			taro.script.load(data, true);
+			taro.script.scriptCache = {};
+		});
+
+		taro.client.on('applyVariableChanges', (data: Record<string, VariableData>) => {
+			taro.network.send<any>('editVariable', data);
+		});
+
 		taro.client.on('editVariable', (data: Record<string, VariableData>) => {
 			Object.entries(data).forEach(([key, variable]) => {
 				//editing existing variable
@@ -82,40 +116,6 @@ class DevModeScene extends PhaserScene {
 					};
 				}
 			});
-		});
-
-        taro.client.on('editInitEntity', (data: ActionData) => {
-            let found = false;
-            this.entityImages.forEach((image) => {
-                if (image.entity.action.actionId === data.actionId) {
-                    found = true;
-                    image.entity.update(data);
-                }
-            });
-            if (!found) {
-                this.createEntityImage(data);
-            }
-		});
-
-		taro.client.on('applyScriptChanges', (data: ScriptData) => {
-			taro.network.send<any>('editGlobalScripts', data);
-		});
-
-		taro.client.on('applyVariableChanges', (data: Record<string, VariableData>) => {
-			taro.network.send<any>('editVariable', data);
-		});
-
-		taro.client.on('editGlobalScripts', (data: ScriptData) => {
-			Object.entries(data).forEach(([scriptId, script]) => {
-				if (!script.deleted) {
-					taro.developerMode.serverScriptData[scriptId] = script;
-				} else {
-					delete taro.developerMode.serverScriptData[scriptId];
-				}
-			});
-
-			taro.script.load(data, true);
-			taro.script.scriptCache = {};
 		});
 
         taro.client.on('updateInitEntities', () => {

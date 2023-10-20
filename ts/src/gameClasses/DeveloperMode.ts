@@ -189,6 +189,7 @@ class DeveloperMode {
 	initEntities: ActionData[];
 
 	serverScriptData: Record<string, ScriptData>;
+	serverVariableData: Record<string, VariableData>;
 
 	constructor() {
 		if (taro.isClient) this.active = false;
