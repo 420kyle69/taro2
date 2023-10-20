@@ -83,12 +83,12 @@ class RegionEditor {
 	}
 
 	edit(data: RegionData): void {
-		if (data.newName && data.name !== data.newName) {
+		if (data.newKey && data.name !== data.newKey) {
 			const region = taro.regionManager.getRegionById(data.name);
-			if (region) region._stats.id = data.newName;
+			if (region) region._stats.id = data.newKey;
 			this.devModeScene.regions.forEach(region => {
 				if (region.name === data.name) {
-					region.name = data.newName;
+					region.name = data.newKey;
 					region.updateLabel();
 				}
 			});

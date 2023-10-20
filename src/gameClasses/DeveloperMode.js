@@ -434,16 +434,18 @@ var DeveloperMode = /** @class */ (function () {
             if (data.name === '' || data.width <= 0 || data.height <= 0) {
                 console.log('empty name, negative or 0 size is not allowed');
             }
-            else if (data.name === undefined) { // create new region
-                // create new region name (smallest available number)
-                var regionNameNumber = 0;
-                var newRegionName = "region".concat(regionNameNumber);
-                do {
-                    regionNameNumber++;
-                    newRegionName = "region".concat(regionNameNumber);
-                } while (taro.regionManager.getRegionById(newRegionName));
-                data.name = newRegionName;
-                data.showModal = true;
+            else if (data.name === undefined || data.create) { // create new region
+                if (!data.name) {
+                    // create new region name (smallest available number)
+                    var regionNameNumber = 0;
+                    var newRegionName = "region".concat(regionNameNumber);
+                    do {
+                        regionNameNumber++;
+                        newRegionName = "region".concat(regionNameNumber);
+                    } while (taro.regionManager.getRegionById(newRegionName));
+                    data.name = newRegionName;
+                    data.showModal = true;
+                }
                 data.userId = taro.game.getPlayerByClientId(clientId)._stats.userId;
                 // changed to Region from RegionUi
                 var regionData = {
@@ -453,15 +455,15 @@ var DeveloperMode = /** @class */ (function () {
                         y: data.y,
                         width: data.width,
                         height: data.height,
-                        key: newRegionName
+                        key: data.name
                     },
-                    id: newRegionName,
+                    id: data.name,
                     value: {
                         x: data.x,
                         y: data.y,
                         width: data.width,
                         height: data.height,
-                        key: newRegionName
+                        key: data.name
                     }
                 };
                 var region = new Region(regionData);
@@ -475,12 +477,12 @@ var DeveloperMode = /** @class */ (function () {
                         region.destroy();
                     }
                     else {
-                        if (data.name !== data.newName) {
-                            if (taro.regionManager.getRegionById(data.newName)) {
+                        if (data.name !== data.newKey) {
+                            if (taro.regionManager.getRegionById(data.newKey)) {
                                 console.log('This name is unavailable');
                             }
                             else {
-                                region._stats.id = data.newName;
+                                region._stats.id = data.newKey;
                             }
                         }
                         var statsData = [
@@ -499,32 +501,54 @@ var DeveloperMode = /** @class */ (function () {
         }
     };
     DeveloperMode.prototype.editVariable = function (data, clientId) {
+        var _this = this;
         // only allow developers to modify initial entities
         if (taro.server.developerClientIds.includes(clientId)) {
             Object.entries(data).forEach(function (_a) {
+                var _b, _c, _d, _e, _f;
                 var key = _a[0], variable = _a[1];
-                //editing existing variable
-                if (taro.game.data.variables[key]) {
-                    //deleting variable
-                    if (variable.delete) {
-                        delete taro.game.data.variables[key];
-                        //renaming variable
-                    }
-                    else if (variable.newKey) {
-                        taro.game.data.variables[variable.newKey] = taro.game.data.variables[key];
-                        delete taro.game.data.variables[key];
-                        //editing variable
-                    }
-                    else {
-                        taro.game.data.variables[key].value = variable.value;
-                    }
-                    //creating new variable
+                if (variable.dataType === 'region') {
+                    var regionData = { name: key };
+                    if (variable.newKey)
+                        regionData.newKey = variable.newKey;
+                    if (!isNaN((_b = variable.value) === null || _b === void 0 ? void 0 : _b.x))
+                        regionData.x = variable.value.x;
+                    if (!isNaN((_c = variable.value) === null || _c === void 0 ? void 0 : _c.y))
+                        regionData.y = variable.value.y;
+                    if (!isNaN((_d = variable.value) === null || _d === void 0 ? void 0 : _d.width))
+                        regionData.width = variable.value.width;
+                    if (!isNaN((_e = variable.value) === null || _e === void 0 ? void 0 : _e.height))
+                        regionData.height = variable.value.height;
+                    if ((_f = variable.value) === null || _f === void 0 ? void 0 : _f.create)
+                        regionData.create = variable.value.create;
+                    if (variable.delete)
+                        regionData.delete = variable.delete;
+                    _this.editRegion(regionData, clientId);
                 }
                 else {
-                    taro.game.data.variables[key] = {
-                        dataType: variable.dataType,
-                        value: variable.value
-                    };
+                    //editing existing variable
+                    if (taro.game.data.variables[key]) {
+                        //deleting variable
+                        if (variable.delete) {
+                            delete taro.game.data.variables[key];
+                            //renaming variable
+                        }
+                        else if (variable.newKey) {
+                            taro.game.data.variables[variable.newKey] = taro.game.data.variables[key];
+                            delete taro.game.data.variables[key];
+                            //editing variable
+                        }
+                        else {
+                            taro.game.data.variables[key].value = variable.value;
+                        }
+                        //creating new variable
+                    }
+                    else {
+                        taro.game.data.variables[key] = {
+                            dataType: variable.dataType,
+                            value: variable.value
+                        };
+                    }
                 }
             });
             // broadcast region change to all clients

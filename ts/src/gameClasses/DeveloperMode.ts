@@ -444,17 +444,20 @@ class DeveloperMode {
 		if (taro.server.developerClientIds.includes(clientId)) {
 			if (data.name === '' || data.width <= 0 || data.height <= 0) {
 				console.log('empty name, negative or 0 size is not allowed');
-			} else if (data.name === undefined) { // create new region
-				// create new region name (smallest available number)
-				let regionNameNumber = 0;
-				let newRegionName = `region${regionNameNumber}`;
-				do {
-					regionNameNumber++;
-					newRegionName = `region${regionNameNumber}`;
-				} while (taro.regionManager.getRegionById(newRegionName));
+			} else if (data.name === undefined || data.create) { // create new region
+				if (!data.name) {
+					// create new region name (smallest available number)
+					let regionNameNumber = 0;
+					let newRegionName = `region${regionNameNumber}`;
+					do {
+						regionNameNumber++;
+						newRegionName = `region${regionNameNumber}`;
+					} while (taro.regionManager.getRegionById(newRegionName));
+					data.name = newRegionName;
 
-				data.name = newRegionName;
-				data.showModal = true;
+					data.showModal = true;
+				}
+	
 				data.userId = taro.game.getPlayerByClientId(clientId)._stats.userId;
 				// changed to Region from RegionUi
 				const regionData = {
@@ -464,15 +467,15 @@ class DeveloperMode {
 						y: data.y,
 						width: data.width,
 						height: data.height,
-						key: newRegionName
+						key: data.name
 					},
-					id: newRegionName,
+					id: data.name,
 					value: {
 						x: data.x,
 						y: data.y,
 						width: data.width,
 						height: data.height,
-						key: newRegionName
+						key: data.name
 					}
 				};
 				const region = new Region(regionData);
@@ -486,11 +489,11 @@ class DeveloperMode {
 					if (data.delete) {
 						region.destroy();
 					} else {
-						if (data.name !== data.newName) {
-							if (taro.regionManager.getRegionById(data.newName)) {
+						if (data.name !== data.newKey) {
+							if (taro.regionManager.getRegionById(data.newKey)) {
 								console.log('This name is unavailable');
 							} else {
-								region._stats.id = data.newName;
+								region._stats.id = data.newKey;
 							}
 						}
 						let statsData = [
@@ -513,25 +516,39 @@ class DeveloperMode {
 		// only allow developers to modify initial entities
 		if (taro.server.developerClientIds.includes(clientId)) {
 			Object.entries(data).forEach(([key, variable]) => {
-				//editing existing variable
-				if (taro.game.data.variables[key]) {
-					//deleting variable
-					if (variable.delete) {
-						delete taro.game.data.variables[key];
-					//renaming variable
-					} else if (variable.newKey) {
-						taro.game.data.variables[variable.newKey] = taro.game.data.variables[key];
-						delete taro.game.data.variables[key];
-					//editing variable
-					} else {
-						taro.game.data.variables[key].value = variable.value;
-					}
-				//creating new variable
+				if (variable.dataType === 'region')	{
+					const regionData: RegionData = {name: key};
+					
+					if (variable.newKey) regionData.newKey = variable.newKey;
+					if (!isNaN(variable.value?.x)) regionData.x = variable.value.x;
+					if (!isNaN(variable.value?.y)) regionData.y = variable.value.y;
+					if (!isNaN(variable.value?.width)) regionData.width = variable.value.width;
+					if (!isNaN(variable.value?.height)) regionData.height = variable.value.height;
+					if (variable.value?.create) regionData.create = variable.value.create;
+					if (variable.delete) regionData.delete = variable.delete;
+
+					this.editRegion(regionData, clientId)
 				} else {
-					taro.game.data.variables[key] = {
-						dataType: variable.dataType,
-						value: variable.value
-					};
+					//editing existing variable
+					if (taro.game.data.variables[key]) {
+						//deleting variable
+						if (variable.delete) {
+							delete taro.game.data.variables[key];
+						//renaming variable
+						} else if (variable.newKey) {
+							taro.game.data.variables[variable.newKey] = taro.game.data.variables[key];
+							delete taro.game.data.variables[key];
+						//editing variable
+						} else {
+							taro.game.data.variables[key].value = variable.value;
+						}
+					//creating new variable
+					} else {
+						taro.game.data.variables[key] = {
+							dataType: variable.dataType,
+							value: variable.value
+						};
+					}
 				}
 			});
 			// broadcast region change to all clients
@@ -886,11 +903,12 @@ type TileData<T extends MapEditToolEnum> = Pick<MapEditTool, T>
 interface RegionData {
 	userId?: string,
 	name: string,
-	newName?: string,
+	newKey?: string,
 	x?: number,
 	y?: number,
 	width?: number,
 	height?: number,
+	create?: boolean,
 	delete?: boolean,
 	showModal?: boolean
 }
