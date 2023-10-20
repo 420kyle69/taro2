@@ -454,9 +454,10 @@ class DeveloperMode {
 						newRegionName = `region${regionNameNumber}`;
 					} while (taro.regionManager.getRegionById(newRegionName));
 					data.name = newRegionName;
+
+					data.showModal = true;
 				}
 	
-				data.showModal = true;
 				data.userId = taro.game.getPlayerByClientId(clientId)._stats.userId;
 				// changed to Region from RegionUi
 				const regionData = {

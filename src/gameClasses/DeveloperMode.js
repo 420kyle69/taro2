@@ -444,8 +444,8 @@ var DeveloperMode = /** @class */ (function () {
                         newRegionName = "region".concat(regionNameNumber);
                     } while (taro.regionManager.getRegionById(newRegionName));
                     data.name = newRegionName;
+                    data.showModal = true;
                 }
-                data.showModal = true;
                 data.userId = taro.game.getPlayerByClientId(clientId)._stats.userId;
                 // changed to Region from RegionUi
                 var regionData = {
