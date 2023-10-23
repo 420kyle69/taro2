@@ -108,9 +108,10 @@ var Player = TaroEntity.extend({
 						{ receivedJoinGame: receivedJoinGame }
 					];
 				}
+
 				if (taro.server.developerClientIds.includes(clientId)) {
 					playerJoinStreamData.push({ scriptData: taro.game.data.scripts });
-					playerJoinStreamData.push({ variableData: taro.game.data.variables });
+					playerJoinStreamData.push({ variableData: taro.defaultVariables });
 				}
 
 				self.streamUpdateData(playerJoinStreamData);
