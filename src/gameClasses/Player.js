@@ -568,7 +568,7 @@ var Player = TaroEntity.extend({
 
 							case 'variableData':
 								taro.developerMode.serverVariableData = newValue;
-								window.inGameEditor && window.inGameEditor.compareAndUpdateVariablesData(newValue);
+								window.inGameEditor?.compareAndUpdateVariablesData && window.inGameEditor.compareAndUpdateVariablesData(newValue);
 								break;
 
 							case 'mapData':
