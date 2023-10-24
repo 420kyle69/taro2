@@ -501,7 +501,9 @@ class DeveloperMode {
 							{ x: data.x !== region._stats.default.x ? data.x : null },
 							{ y: data.y !== region._stats.default.y ? data.y : null },
 							{ width: data.width !== region._stats.default.width ? data.width : null },
-							{ height: data.height !== region._stats.default.height ? data.height : null }
+							{ height: data.height !== region._stats.default.height ? data.height : null },
+							{ alpha: data.alpha !== region._stats.default.alpha ? data.alpha : null },
+							{ inside: data.inside !== region._stats.default.inside ? data.inside : null }
 						];
 						statsData = statsData.filter(obj => obj[Object.keys(obj)[0]] !== null);
 						region.streamUpdateData(statsData);
@@ -525,6 +527,8 @@ class DeveloperMode {
 					if (!isNaN(variable.value?.y)) regionData.y = variable.value.y;
 					if (!isNaN(variable.value?.width)) regionData.width = variable.value.width;
 					if (!isNaN(variable.value?.height)) regionData.height = variable.value.height;
+					if (variable.value.inside) regionData.inside = variable.value.inside;
+					if (variable.value.alpha) regionData.alpha = variable.value.alpha;
 					if (variable.value?.create) regionData.create = variable.value.create;
 					if (variable.delete) regionData.delete = variable.delete;
 
@@ -909,6 +913,8 @@ interface RegionData {
 	y?: number,
 	width?: number,
 	height?: number,
+	inside?: string,
+	alpha?: number,
 	create?: boolean,
 	delete?: boolean,
 	showModal?: boolean

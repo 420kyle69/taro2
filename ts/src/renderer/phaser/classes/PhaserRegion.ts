@@ -5,7 +5,7 @@ class PhaserRegion extends PhaserEntity {
 	private rtLabel: Phaser.GameObjects.RenderTexture;
 	private readonly graphics: Phaser.GameObjects.Graphics;
 	gameObject: Phaser.GameObjects.Container & IRenderProps & {phaserRegion: PhaserRegion};
-	private readonly devModeOnly: boolean;
+	private devModeOnly: boolean;
 	private devModeScene: DevModeScene;
     stats: { x: number; y: number; width: number; height: number; inside?: string; alpha?: number; };
 	scaleTween: Phaser.Tweens.Tween;;
@@ -55,6 +55,10 @@ class PhaserRegion extends PhaserEntity {
         }
 
 		this.zoomEvtListener = taro.client.on('scale', this.scaleElements, this);
+
+		Object.assign(this.evtListeners, {
+			removeColor: entity.on('removeColor', this.removeColor, this),
+		});
 	}
 
 	private getLabel (): Phaser.GameObjects.BitmapText {
@@ -122,12 +126,25 @@ class PhaserRegion extends PhaserEntity {
         }
 	}
 
+	removeColor (): void {
+		this.devModeOnly = true;
+	}
+
 	protected transform (): void {
 		const gameObject =  this.gameObject;
 		const graphics = this.graphics;
 		const label = this.label;
 		const rtLabel = this.rtLabel;
 		const stats = this.entity._stats.default;
+
+		if (stats.inside) {
+			this.devModeOnly = false;
+		}
+		if (this.devModeOnly && !taro.developerMode.active && taro.developerMode.activeTab !== 'play') {
+			this.hide();
+        } else {
+			this.show();
+		}
 
 		gameObject.setSize(stats.width, stats.height);
 		gameObject.setPosition(stats.x + stats.width/2, stats.y + stats.height/2);
