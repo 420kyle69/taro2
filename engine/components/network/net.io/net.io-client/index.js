@@ -472,7 +472,9 @@ NetIo.Client = NetIo.EventingClass.extend({
 					}
 					// store in sessionStorage
 					window.sessionStorage.setItem('autojoinAttempted', Date.now());
-					window.location.href = `${window.location.href}?autojoin=true`;
+					// push to history ?autojoin=true
+					window.history.pushState({}, '', window.location.href + '?autojoin=true');
+					window.location.reload();
 					return;
 				}
 			}
