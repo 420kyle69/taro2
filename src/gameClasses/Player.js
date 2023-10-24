@@ -108,8 +108,10 @@ var Player = TaroEntity.extend({
 						{ receivedJoinGame: receivedJoinGame }
 					];
 				}
+
 				if (taro.server.developerClientIds.includes(clientId)) {
 					playerJoinStreamData.push({ scriptData: taro.game.data.scripts });
+					playerJoinStreamData.push({ variableData: taro.defaultVariables });
 				}
 
 				self.streamUpdateData(playerJoinStreamData);
@@ -562,6 +564,11 @@ var Player = TaroEntity.extend({
 
 							case 'scriptData':
 								taro.developerMode.serverScriptData = newValue;
+								break;
+
+							case 'variableData':
+								taro.developerMode.serverVariableData = newValue;
+								window.inGameEditor?.compareAndUpdateVariablesData && window.inGameEditor.compareAndUpdateVariablesData(newValue);
 								break;
 
 							case 'mapData':

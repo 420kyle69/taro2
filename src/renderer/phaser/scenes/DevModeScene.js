@@ -48,6 +48,37 @@ var DevModeScene = /** @class */ (function (_super) {
         taro.client.on('editRegion', function (data) {
             _this.regionEditor.edit(data);
         });
+        taro.client.on('editInitEntity', function (data) {
+            var found = false;
+            _this.entityImages.forEach(function (image) {
+                if (image.entity.action.actionId === data.actionId) {
+                    found = true;
+                    image.entity.update(data);
+                }
+            });
+            if (!found) {
+                _this.createEntityImage(data);
+            }
+        });
+        taro.client.on('applyScriptChanges', function (data) {
+            taro.network.send('editGlobalScripts', data);
+        });
+        taro.client.on('editGlobalScripts', function (data) {
+            Object.entries(data).forEach(function (_a) {
+                var scriptId = _a[0], script = _a[1];
+                if (!script.deleted) {
+                    taro.developerMode.serverScriptData[scriptId] = script;
+                }
+                else {
+                    delete taro.developerMode.serverScriptData[scriptId];
+                }
+            });
+            taro.script.load(data, true);
+            taro.script.scriptCache = {};
+        });
+        taro.client.on('applyVariableChanges', function (data) {
+            taro.network.send('editVariable', data);
+        });
         taro.client.on('editVariable', function (data) {
             Object.entries(data).forEach(function (_a) {
                 var key = _a[0], variable = _a[1];
@@ -75,37 +106,6 @@ var DevModeScene = /** @class */ (function (_super) {
                     };
                 }
             });
-        });
-        taro.client.on('editInitEntity', function (data) {
-            var found = false;
-            _this.entityImages.forEach(function (image) {
-                if (image.entity.action.actionId === data.actionId) {
-                    found = true;
-                    image.entity.update(data);
-                }
-            });
-            if (!found) {
-                _this.createEntityImage(data);
-            }
-        });
-        taro.client.on('applyScriptChanges', function (data) {
-            taro.network.send('editGlobalScripts', data);
-        });
-        taro.client.on('applyVariableChanges', function (data) {
-            taro.network.send('editVariable', data);
-        });
-        taro.client.on('editGlobalScripts', function (data) {
-            Object.entries(data).forEach(function (_a) {
-                var scriptId = _a[0], script = _a[1];
-                if (!script.deleted) {
-                    taro.developerMode.serverScriptData[scriptId] = script;
-                }
-                else {
-                    delete taro.developerMode.serverScriptData[scriptId];
-                }
-            });
-            taro.script.load(data, true);
-            taro.script.scriptCache = {};
         });
         taro.client.on('updateInitEntities', function () {
             _this.updateInitEntities();

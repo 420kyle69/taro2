@@ -548,6 +548,7 @@ var Server = TaroClass.extend({
 				taro.addComponent(ProfilerComponent);
 				self.gameStartedAt = new Date();
 
+				taro.defaultVariables = rfdc()(game.data.variables);
 				taro.game.data = game.data;
 
 				if (additionalData) {
