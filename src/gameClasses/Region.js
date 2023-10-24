@@ -91,22 +91,16 @@ var Region = TaroEntityPhysics.extend({
 
 	streamUpdateData: function (queuedData, clientId) {
 		TaroEntity.prototype.streamUpdateData.call(this, queuedData, clientId);
-		let removeColor = false;
 
 		for (var i = 0; i < queuedData.length; i++) {
 			var data = queuedData[i];
 
 			for (attrName in data) {
-				if (attrName === 'inside' && data[attrName] === 'none') {
-					removeColor = true;
-					data[attrName] = undefined;
-				}
 				var newValue = data[attrName];
 				this._stats.default[attrName] = newValue;
 			}
 		}
 
-		if (taro.isClient && removeColor) this.emit('removeColor');
 		this.updateDimension();
 	},
 

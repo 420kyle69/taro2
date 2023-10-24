@@ -506,6 +506,7 @@ class DeveloperMode {
 							{ inside: data.inside !== region._stats.default.inside ? data.inside : null }
 						];
 						statsData = statsData.filter(obj => obj[Object.keys(obj)[0]] !== null);
+						if (data.inside === '') statsData.push({ inside: '' });
 						region.streamUpdateData(statsData);
 					}
 				}
@@ -527,7 +528,7 @@ class DeveloperMode {
 					if (!isNaN(variable.value?.y)) regionData.y = variable.value.y;
 					if (!isNaN(variable.value?.width)) regionData.width = variable.value.width;
 					if (!isNaN(variable.value?.height)) regionData.height = variable.value.height;
-					if (variable.value.inside) regionData.inside = variable.value.inside;
+					if (variable.value.inside || variable.value.inside === '') regionData.inside = variable.value.inside;
 					if (variable.value.alpha) regionData.alpha = variable.value.alpha;
 					if (variable.value?.create) regionData.create = variable.value.create;
 					if (variable.delete) regionData.delete = variable.delete;

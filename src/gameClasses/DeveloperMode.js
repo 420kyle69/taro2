@@ -494,6 +494,8 @@ var DeveloperMode = /** @class */ (function () {
                             { inside: data.inside !== region._stats.default.inside ? data.inside : null }
                         ];
                         statsData = statsData.filter(function (obj) { return obj[Object.keys(obj)[0]] !== null; });
+                        if (data.inside === '')
+                            statsData.push({ inside: '' });
                         region.streamUpdateData(statsData);
                     }
                 }
@@ -521,7 +523,7 @@ var DeveloperMode = /** @class */ (function () {
                         regionData.width = variable.value.width;
                     if (!isNaN((_e = variable.value) === null || _e === void 0 ? void 0 : _e.height))
                         regionData.height = variable.value.height;
-                    if (variable.value.inside)
+                    if (variable.value.inside || variable.value.inside === '')
                         regionData.inside = variable.value.inside;
                     if (variable.value.alpha)
                         regionData.alpha = variable.value.alpha;

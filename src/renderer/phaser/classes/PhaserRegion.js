@@ -47,9 +47,6 @@ var PhaserRegion = /** @class */ (function (_super) {
             _this.hide();
         }
         _this.zoomEvtListener = taro.client.on('scale', _this.scaleElements, _this);
-        Object.assign(_this.evtListeners, {
-            removeColor: entity.on('removeColor', _this.removeColor, _this),
-        });
         return _this;
     }
     ;
@@ -95,16 +92,16 @@ var PhaserRegion = /** @class */ (function (_super) {
             this.hide();
         }
     };
-    PhaserRegion.prototype.removeColor = function () {
-        this.devModeOnly = true;
-    };
     PhaserRegion.prototype.transform = function () {
         var gameObject = this.gameObject;
         var graphics = this.graphics;
         var label = this.label;
         var rtLabel = this.rtLabel;
         var stats = this.entity._stats.default;
-        if (stats.inside) {
+        if (stats.inside === '') {
+            this.devModeOnly = true;
+        }
+        else if (stats.inside) {
             this.devModeOnly = false;
         }
         if (this.devModeOnly && !taro.developerMode.active && taro.developerMode.activeTab !== 'play') {

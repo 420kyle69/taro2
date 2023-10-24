@@ -55,10 +55,6 @@ class PhaserRegion extends PhaserEntity {
         }
 
 		this.zoomEvtListener = taro.client.on('scale', this.scaleElements, this);
-
-		Object.assign(this.evtListeners, {
-			removeColor: entity.on('removeColor', this.removeColor, this),
-		});
 	}
 
 	private getLabel (): Phaser.GameObjects.BitmapText {
@@ -126,10 +122,6 @@ class PhaserRegion extends PhaserEntity {
         }
 	}
 
-	removeColor (): void {
-		this.devModeOnly = true;
-	}
-
 	protected transform (): void {
 		const gameObject =  this.gameObject;
 		const graphics = this.graphics;
@@ -137,7 +129,9 @@ class PhaserRegion extends PhaserEntity {
 		const rtLabel = this.rtLabel;
 		const stats = this.entity._stats.default;
 
-		if (stats.inside) {
+		if (stats.inside === '') {
+			this.devModeOnly = true;
+		} else if (stats.inside) {
 			this.devModeOnly = false;
 		}
 		if (this.devModeOnly && !taro.developerMode.active && taro.developerMode.activeTab !== 'play') {
