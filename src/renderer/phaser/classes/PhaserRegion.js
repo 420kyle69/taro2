@@ -109,6 +109,14 @@ var PhaserRegion = /** @class */ (function (_super) {
         }
         else {
             this.show();
+            if (taro.developerMode.activeTab === 'play') {
+                label && (label.visible = false);
+                rtLabel && (rtLabel.visible = false);
+            }
+            else {
+                label && (label.visible = true);
+                rtLabel && (rtLabel.visible = true);
+            }
         }
         gameObject.setSize(stats.width, stats.height);
         gameObject.setPosition(stats.x + stats.width / 2, stats.y + stats.height / 2);
