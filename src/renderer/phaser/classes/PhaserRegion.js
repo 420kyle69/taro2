@@ -98,6 +98,26 @@ var PhaserRegion = /** @class */ (function (_super) {
         var label = this.label;
         var rtLabel = this.rtLabel;
         var stats = this.entity._stats.default;
+        if (stats.inside === '') {
+            this.devModeOnly = true;
+        }
+        else if (stats.inside) {
+            this.devModeOnly = false;
+        }
+        if (this.devModeOnly && !taro.developerMode.active && taro.developerMode.activeTab !== 'play') {
+            this.hide();
+        }
+        else {
+            this.show();
+            if (taro.developerMode.activeTab === 'play') {
+                label && (label.visible = false);
+                rtLabel && (rtLabel.visible = false);
+            }
+            else {
+                label && (label.visible = true);
+                rtLabel && (rtLabel.visible = true);
+            }
+        }
         gameObject.setSize(stats.width, stats.height);
         gameObject.setPosition(stats.x + stats.width / 2, stats.y + stats.height / 2);
         graphics.setPosition(-stats.width / 2, -stats.height / 2);

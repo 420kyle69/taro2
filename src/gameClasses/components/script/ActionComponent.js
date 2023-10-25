@@ -208,6 +208,21 @@ var ActionComponent = TaroEntity.extend({
 
 						break;
 
+					case 'changeRegionColor':
+						var region = self._script.variable.getValue(action.region, vars);
+						if (region) {
+							const insideColor = self._script.variable.getValue(action.inside, vars);
+							const alpha = self._script.variable.getValue(action.alpha, vars);
+							var data = [
+								{ inside: insideColor },
+								{ alpha: alpha }
+							];
+							data = data.filter(obj => obj[Object.keys(obj)[0]] !== null);
+							region.streamUpdateData(data);
+						}
+
+						break;
+
 					case 'setLastAttackingUnit':
 						var unit = self._script.variable.getValue(action.unit, vars);
 						taro.game.lastAttackingUnitId = unit.id();

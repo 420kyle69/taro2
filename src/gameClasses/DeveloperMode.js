@@ -489,9 +489,13 @@ var DeveloperMode = /** @class */ (function () {
                             { x: data.x !== region._stats.default.x ? data.x : null },
                             { y: data.y !== region._stats.default.y ? data.y : null },
                             { width: data.width !== region._stats.default.width ? data.width : null },
-                            { height: data.height !== region._stats.default.height ? data.height : null }
+                            { height: data.height !== region._stats.default.height ? data.height : null },
+                            { alpha: data.alpha !== region._stats.default.alpha ? data.alpha : null },
+                            { inside: data.inside !== region._stats.default.inside ? data.inside : null }
                         ];
                         statsData = statsData.filter(function (obj) { return obj[Object.keys(obj)[0]] !== null; });
+                        if (data.inside === '')
+                            statsData.push({ inside: '' });
                         region.streamUpdateData(statsData);
                     }
                 }
@@ -505,7 +509,7 @@ var DeveloperMode = /** @class */ (function () {
         // only allow developers to modify initial entities
         if (taro.server.developerClientIds.includes(clientId)) {
             Object.entries(data).forEach(function (_a) {
-                var _b, _c, _d, _e, _f;
+                var _b, _c, _d, _e, _f, _g, _h, _j;
                 var key = _a[0], variable = _a[1];
                 if (variable.dataType === 'region') {
                     var regionData = { name: key };
@@ -519,7 +523,11 @@ var DeveloperMode = /** @class */ (function () {
                         regionData.width = variable.value.width;
                     if (!isNaN((_e = variable.value) === null || _e === void 0 ? void 0 : _e.height))
                         regionData.height = variable.value.height;
-                    if ((_f = variable.value) === null || _f === void 0 ? void 0 : _f.create)
+                    if (((_f = variable.value) === null || _f === void 0 ? void 0 : _f.inside) || ((_g = variable.value) === null || _g === void 0 ? void 0 : _g.inside) === '')
+                        regionData.inside = variable.value.inside;
+                    if ((_h = variable.value) === null || _h === void 0 ? void 0 : _h.alpha)
+                        regionData.alpha = variable.value.alpha;
+                    if ((_j = variable.value) === null || _j === void 0 ? void 0 : _j.create)
                         regionData.create = variable.value.create;
                     if (variable.delete)
                         regionData.delete = variable.delete;

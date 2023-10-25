@@ -5,7 +5,7 @@ class PhaserRegion extends PhaserEntity {
 	private rtLabel: Phaser.GameObjects.RenderTexture;
 	private readonly graphics: Phaser.GameObjects.Graphics;
 	gameObject: Phaser.GameObjects.Container & IRenderProps & {phaserRegion: PhaserRegion};
-	private readonly devModeOnly: boolean;
+	private devModeOnly: boolean;
 	private devModeScene: DevModeScene;
     stats: { x: number; y: number; width: number; height: number; inside?: string; alpha?: number; };
 	scaleTween: Phaser.Tweens.Tween;;
@@ -128,6 +128,24 @@ class PhaserRegion extends PhaserEntity {
 		const label = this.label;
 		const rtLabel = this.rtLabel;
 		const stats = this.entity._stats.default;
+
+		if (stats.inside === '') {
+			this.devModeOnly = true;
+		} else if (stats.inside) {
+			this.devModeOnly = false;
+		}
+		if (this.devModeOnly && !taro.developerMode.active && taro.developerMode.activeTab !== 'play') {
+			this.hide();
+        } else {
+			this.show();
+			if (taro.developerMode.activeTab === 'play') {
+				label && (label.visible = false);
+				rtLabel && (rtLabel.visible = false);
+			} else {
+				label && (label.visible = true);
+				rtLabel && (rtLabel.visible = true);
+			}
+		}
 
 		gameObject.setSize(stats.width, stats.height);
 		gameObject.setPosition(stats.x + stats.width/2, stats.y + stats.height/2);
