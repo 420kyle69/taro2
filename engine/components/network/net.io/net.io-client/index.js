@@ -300,8 +300,6 @@ NetIo.Client = NetIo.EventingClass.extend({
 	_onOpen: function (event) {
 		this.trackLatency('gs-websocket-connect', 'onopen');
 		
-		window.sessionStorage.removeItem('autojoinAttempted');
-		
 		var url = event.target.url;
 		var urlWithoutProtocol = url.split('://')[1];
 		var serverDomain = urlWithoutProtocol.split('/')[0];
@@ -464,13 +462,20 @@ NetIo.Client = NetIo.EventingClass.extend({
 			
 			if (whitelistedReasons.findIndex((m) => m.includes(reason)) === -1) {
 				const autojoinAttempted = window.sessionStorage.getItem('autojoinAttempted');
-				if (!autojoinAttempted) {
+				if (!autojoinAttempted || Date.now() - autojoinAttempted > 15 * 60 * 1000) {
+					if (window.trackEvent) {
+						window.trackEvent('Auto Refresh', {
+							reason,
+							code,
+							gameSlug: window.gameSlug,
+						});
+					}
 					// store in sessionStorage
-					window.sessionStorage.setItem('autojoinAttempted', 1);
-					window.location.href = `${window.location.href}?autojoin=true`;
+					window.sessionStorage.setItem('autojoinAttempted', Date.now());
+					// push to history ?autojoin=true
+					window.history.pushState({}, '', window.location.href + '?autojoin=true');
+					window.location.reload();
 					return;
-				} else {
-					window.sessionStorage.removeItem('autojoinAttempted');
 				}
 			}
 		}
