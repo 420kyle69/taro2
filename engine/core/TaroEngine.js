@@ -121,12 +121,16 @@ var TaroEngine = TaroEntity.extend({
 		this._lastTimeStamp = new Date().getTime();
 
 		this._fpsRate = 60; // Sets the frames per second to execute engine tick's at
-		this._gameLoopTickRate = 20; // "frameTick", input, and streaming
-
+		
+		this._gameLoopTickRate = 20; // gameLoop tick rate is hard-coded at 20
 		this._lastGameLoopTickAt = 0;
 		this._gameLoopTickRemainder = 0;
 		this.gameLoopTickHasExecuted = true;
 
+		this._physicsTickRate = 20; // physics tick rate is updated inside gameComponent.js
+		this._lastphysicsTickAt = 0;
+		this._physicsTickRemainder = 0;
+		
 		this._aSecondAgo = 0;
 
 		this._state = 0; // Currently stopped
@@ -1602,8 +1606,15 @@ var TaroEngine = TaroEntity.extend({
 				taro.gameLoopTickHasExecuted = true;				
 				
 				taro.queueTrigger('frameTick');
+			}
+
+			if (taro.physics) {
+				timeElapsed = taro.now - taro._lastphysicsTickAt;
+				if (timeElapsed >= (1000 / taro._physicsTickRate) - taro._physicsTickRemainder) {
+					console.log(timeElapsed)
+					taro._lastphysicsTickAt = taro.now;
+					taro._physicsTickRemainder = Math.min(timeElapsed - ((1000 / taro._physicsTickRate) - taro._physicsTickRemainder), (1000 / taro._physicsTickRate));
 				
-				if (taro.physics) {
 					if (taro.profiler.isEnabled) {
 						var startTime = performance.now();
 					}
