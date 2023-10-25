@@ -639,12 +639,13 @@ class DeveloperMode {
 		// 1. broadcast update to all players
 		// 2. force update its dimension/scale/layer/image
 		if (data.newData.scripts) {
-			taro.game.data.unitTypes[data.typeId].scripts = data.newData.scripts;
+			taro.game.data.unitTypes[data.typeId].scripts = rfdc()(data.newData.scripts);
 		} else {
-			const oldScritps = taro.game.data.unitTypes[data.typeId].scripts;
-			taro.game.data.unitTypes[data.typeId] = data.newData;
+			const oldScritps = rfdc()(taro.game.data.unitTypes[data.typeId].scripts);
+			taro.game.data.unitTypes[data.typeId] = rfdc()(data.newData);
 			taro.game.data.unitTypes[data.typeId].scripts = oldScritps;
 		}
+
 		taro.$$('unit').forEach(unit => {
 			if (unit._stats.type === data.typeId) {
 				for (let i = 0; i < unit._stats.itemIds.length; i++) {

@@ -635,11 +635,11 @@ var DeveloperMode = /** @class */ (function () {
         // 1. broadcast update to all players
         // 2. force update its dimension/scale/layer/image
         if (data.newData.scripts) {
-            taro.game.data.unitTypes[data.typeId].scripts = data.newData.scripts;
+            taro.game.data.unitTypes[data.typeId].scripts = rfdc()(data.newData.scripts);
         }
         else {
-            var oldScritps = taro.game.data.unitTypes[data.typeId].scripts;
-            taro.game.data.unitTypes[data.typeId] = data.newData;
+            var oldScritps = rfdc()(taro.game.data.unitTypes[data.typeId].scripts);
+            taro.game.data.unitTypes[data.typeId] = rfdc()(data.newData);
             taro.game.data.unitTypes[data.typeId].scripts = oldScritps;
         }
         taro.$$('unit').forEach(function (unit) {
