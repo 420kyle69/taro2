@@ -27,7 +27,7 @@ class RegionEditor {
 			} else if (taro.developerMode.active && taro.developerMode.activeTab === 'map' && this.devModeScene.devModeTools.cursorButton.active && pointer.leftButtonDown()) {
                 gameObjects = gameObjects.filter(gameObject => gameObject.phaserRegion);
                 gameObjects.forEach(gameObject => {
-                    this.devModeScene.regionEditor.addClickedList({name: gameObject.phaserRegion.entity._stats.id, x: gameObject.phaserRegion.stats.x, y: gameObject.phaserRegion.stats.y, width: gameObject.phaserRegion.stats.width, height: gameObject.phaserRegion.stats.height});
+                    this.devModeScene.regionEditor.addClickedList({name: gameObject.phaserRegion.entity._stats.id, x: gameObject.phaserRegion.stats.x, y: gameObject.phaserRegion.stats.y, width: gameObject.phaserRegion.stats.width, height: gameObject.phaserRegion.stats.height, alpha: gameObject.phaserRegion.stats.alpha, inside: gameObject.phaserRegion.stats.inside});
                 });
                 if (gameObjects.length > 0) {
                     this.devModeScene.regionEditor.showClickedList();
@@ -93,7 +93,7 @@ class RegionEditor {
 				}
 			});
 		} else if (data.showModal) {
-			inGameEditor.addNewRegion && inGameEditor.addNewRegion({ name: data.name, x: data.x, y: data.y, width: data.width, height: data.height, userId: data.userId });
+			inGameEditor.addNewRegion && inGameEditor.addNewRegion({ name: data.name, x: data.x, y: data.y, width: data.width, height: data.height, userId: data.userId, alpha: data.alpha, inside: data.inside });
 		}
 
 		inGameEditor.updateRegionInReact && inGameEditor.updateRegionInReact(data);
