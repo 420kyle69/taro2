@@ -434,7 +434,7 @@ var DeveloperMode = /** @class */ (function () {
             if (data.name === '' || data.width <= 0 || data.height <= 0) {
                 console.log('empty name, negative or 0 size is not allowed');
             }
-            else if (data.name === undefined || data.create) { // create new region
+            else if (data.name === undefined || (data.create && !taro.regionManager.getRegionById(data.name))) { // create new region
                 if (!data.name) {
                     // create new region name (smallest available number)
                     var regionNameNumber = 0;
