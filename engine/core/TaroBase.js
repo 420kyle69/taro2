@@ -576,13 +576,37 @@ if (typeof (window) !== 'undefined') {
 	}());
 } else {
 	/**
-	 * A cross-browser/platform requestAnimationFrame method.
+	 * server requestAnimationFrame method.
+	 * https://github.com/nodejs/help/issues/2483
 	 */
-	requestAnimFrame = (function () {
-		return function (callback, element) {
-			setTimeout(function () { callback(new Date().getTime()); }, 1000 / 60);
-		};
-	}());
+	const fps = 60;
+	const funcs = [];
+
+	const skip = Symbol('skip');
+	const start = Date.now();
+	let time = start;
+
+	const animFrame = () => {
+		const fns = funcs.slice();
+		funcs.length = 0;
+
+		const t = Date.now();
+		const dt = t - start;
+		const t1 = 1e3 / fps;
+
+		for(const f of fns)
+			if(f !== skip) f(dt);
+
+		while(time <= t + t1 / 4) time += t1;
+		setTimeout(animFrame, time - t);
+	};
+
+	requestAnimFrame = func => {
+		funcs.push(func);
+		return funcs.length - 1;
+	};
+
+	animFrame();
 }
 
 // Check console method existence
