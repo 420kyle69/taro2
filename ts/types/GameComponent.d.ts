@@ -1,4 +1,5 @@
 interface EntityData {
+	scripts?: any;
 	cellSheet: {
 		columnCount: number;
 		rowCount: number;
