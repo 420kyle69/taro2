@@ -879,6 +879,8 @@ var Item = TaroEntityPhysics.extend({
 		}
 
 		self.script.load(data.scripts);
+		self.script.scriptCache = {};
+		
 		self._stats.itemTypeId = type;
 
 		for (var i in data) {
