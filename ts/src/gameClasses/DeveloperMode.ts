@@ -641,9 +641,9 @@ class DeveloperMode {
 		if (data.newData.scripts) {
 			taro.game.data.unitTypes[data.typeId].scripts = rfdc()(data.newData.scripts);
 		} else {
-			const oldScritps = rfdc()(taro.game.data.unitTypes[data.typeId].scripts);
+			const oldScripts = rfdc()(taro.game.data.unitTypes[data.typeId].scripts);
 			taro.game.data.unitTypes[data.typeId] = rfdc()(data.newData);
-			taro.game.data.unitTypes[data.typeId].scripts = oldScritps;
+			taro.game.data.unitTypes[data.typeId].scripts = oldScripts;
 		}
 
 		taro.$$('unit').forEach(unit => {
@@ -704,12 +704,13 @@ class DeveloperMode {
 		// 2. force update its dimension/scale/layer/image
 		// 3. we may need to re-mount the item on unit
 		if (data.newData.scripts) {
-			taro.game.data.unitTypes[data.typeId].scripts = data.newData.scripts;
+			taro.game.data.unitTypes[data.typeId].scripts = rfdc()(data.newData.scripts);
 		} else {
-			const oldScritps = taro.game.data.unitTypes[data.typeId].scripts;
-			taro.game.data.unitTypes[data.typeId] = data.newData;
-			taro.game.data.unitTypes[data.typeId].scripts = oldScritps;
+			const oldScripts = rfdc()(taro.game.data.unitTypes[data.typeId].scripts);
+			taro.game.data.unitTypes[data.typeId] = rfdc()(data.newData);
+			taro.game.data.unitTypes[data.typeId].scripts = oldScripts;
 		}
+
 		taro.$$('item').forEach(item => {
 			if (item._stats.itemTypeId === data.typeId) {
 				item.changeItemType(data.typeId, {}, false);
@@ -737,12 +738,13 @@ class DeveloperMode {
 		// 1. broadcast update to all players
 		// 2. force update its dimension/scale/layer/image
 		if (data.newData.scripts) {
-			taro.game.data.unitTypes[data.typeId].scripts = data.newData.scripts;
+			taro.game.data.unitTypes[data.typeId].scripts = rfdc()(data.newData.scripts);
 		} else {
-			const oldScritps = taro.game.data.unitTypes[data.typeId].scripts;
-			taro.game.data.unitTypes[data.typeId] = data.newData;
-			taro.game.data.unitTypes[data.typeId].scripts = oldScritps;
+			const oldScripts = rfdc()(taro.game.data.unitTypes[data.typeId].scripts);
+			taro.game.data.unitTypes[data.typeId] = rfdc()(data.newData);
+			taro.game.data.unitTypes[data.typeId].scripts = oldScripts;
 		}
+		
 		taro.$$('projectile').forEach(projectile => {
 			if (projectile._stats.type === data.typeId) {
 				projectile.changeProjectileType(data.typeId, {}, false);
