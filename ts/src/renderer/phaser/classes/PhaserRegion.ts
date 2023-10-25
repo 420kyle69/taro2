@@ -39,7 +39,7 @@ class PhaserRegion extends PhaserEntity {
 		scene.entityLayers[EntityLayer.TREES].add(this.gameObject);
 
 		this.name = this.entity._stats.id;
-
+		
 		if (!stats.inside) {
 			this.devModeOnly = true;
 		}
@@ -50,7 +50,7 @@ class PhaserRegion extends PhaserEntity {
 		this.updateLabel();
 		this.transform();
 
-        if (this.devModeOnly && !taro.developerMode.active && taro.developerMode.activeTab !== 'play') {
+        if (this.devModeOnly && (!taro.developerMode.activeTab || taro.developerMode.activeTab === 'play')) {
 			this.hide();
         }
 
@@ -117,7 +117,7 @@ class PhaserRegion extends PhaserEntity {
 			rt.setPosition(label.x, label.y);
 		}
 
-		if (this.devModeOnly && !taro.developerMode.active && taro.developerMode.activeTab !== 'play') {
+		if (this.devModeOnly && (!taro.developerMode.activeTab || taro.developerMode.activeTab === 'play')) {
 			this.hide();
         }
 	}
@@ -134,7 +134,7 @@ class PhaserRegion extends PhaserEntity {
 		} else if (stats.inside) {
 			this.devModeOnly = false;
 		}
-		if (this.devModeOnly && !taro.developerMode.active && taro.developerMode.activeTab !== 'play') {
+		if (this.devModeOnly && (!taro.developerMode.activeTab || taro.developerMode.activeTab === 'play')) {
 			this.hide();
         } else {
 			this.show();
