@@ -509,7 +509,7 @@ var DeveloperMode = /** @class */ (function () {
         // only allow developers to modify initial entities
         if (taro.server.developerClientIds.includes(clientId)) {
             Object.entries(data).forEach(function (_a) {
-                var _b, _c, _d, _e, _f;
+                var _b, _c, _d, _e, _f, _g, _h, _j;
                 var key = _a[0], variable = _a[1];
                 if (variable.dataType === 'region') {
                     var regionData = { name: key };
@@ -523,11 +523,11 @@ var DeveloperMode = /** @class */ (function () {
                         regionData.width = variable.value.width;
                     if (!isNaN((_e = variable.value) === null || _e === void 0 ? void 0 : _e.height))
                         regionData.height = variable.value.height;
-                    if (variable.value.inside || variable.value.inside === '')
+                    if (((_f = variable.value) === null || _f === void 0 ? void 0 : _f.inside) || ((_g = variable.value) === null || _g === void 0 ? void 0 : _g.inside) === '')
                         regionData.inside = variable.value.inside;
-                    if (variable.value.alpha)
+                    if ((_h = variable.value) === null || _h === void 0 ? void 0 : _h.alpha)
                         regionData.alpha = variable.value.alpha;
-                    if ((_f = variable.value) === null || _f === void 0 ? void 0 : _f.create)
+                    if ((_j = variable.value) === null || _j === void 0 ? void 0 : _j.create)
                         regionData.create = variable.value.create;
                     if (variable.delete)
                         regionData.delete = variable.delete;
