@@ -50,7 +50,7 @@ class PhaserRegion extends PhaserEntity {
 		this.updateLabel();
 		this.transform();
 
-        if (this.devModeOnly && (!taro.developerMode.activeTab || taro.developerMode.activeTab === 'play')) {
+        if (this.devModeOnly && taro.developerMode.activeTab !== 'map') {
 			this.hide();
         }
 
@@ -117,7 +117,7 @@ class PhaserRegion extends PhaserEntity {
 			rt.setPosition(label.x, label.y);
 		}
 
-		if (this.devModeOnly && (!taro.developerMode.activeTab || taro.developerMode.activeTab === 'play')) {
+		if (this.devModeOnly && taro.developerMode.activeTab !== 'map') {
 			this.hide();
         }
 	}
@@ -134,11 +134,11 @@ class PhaserRegion extends PhaserEntity {
 		} else if (stats.inside) {
 			this.devModeOnly = false;
 		}
-		if (this.devModeOnly && (!taro.developerMode.activeTab || taro.developerMode.activeTab === 'play')) {
+		if (this.devModeOnly && taro.developerMode.activeTab !== 'map') {
 			this.hide();
         } else {
 			this.show();
-			if (taro.developerMode.activeTab === 'play') {
+			if (taro.developerMode.activeTab !== 'map') {
 				label && (label.visible = false);
 				rtLabel && (rtLabel.visible = false);
 			} else {

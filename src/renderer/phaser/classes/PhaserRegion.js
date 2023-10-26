@@ -43,7 +43,7 @@ var PhaserRegion = /** @class */ (function (_super) {
         devModeScene.regions.push(_this);
         _this.updateLabel();
         _this.transform();
-        if (_this.devModeOnly && (!taro.developerMode.activeTab || taro.developerMode.activeTab === 'play')) {
+        if (_this.devModeOnly && taro.developerMode.activeTab !== 'map') {
             _this.hide();
         }
         _this.zoomEvtListener = taro.client.on('scale', _this.scaleElements, _this);
@@ -88,7 +88,7 @@ var PhaserRegion = /** @class */ (function (_super) {
             label.setScale(tempScale);
             rt.setPosition(label.x, label.y);
         }
-        if (this.devModeOnly && (!taro.developerMode.activeTab || taro.developerMode.activeTab === 'play')) {
+        if (this.devModeOnly && taro.developerMode.activeTab !== 'map') {
             this.hide();
         }
     };
@@ -104,12 +104,12 @@ var PhaserRegion = /** @class */ (function (_super) {
         else if (stats.inside) {
             this.devModeOnly = false;
         }
-        if (this.devModeOnly && (!taro.developerMode.activeTab || taro.developerMode.activeTab === 'play')) {
+        if (this.devModeOnly && taro.developerMode.activeTab !== 'map') {
             this.hide();
         }
         else {
             this.show();
-            if (taro.developerMode.activeTab === 'play') {
+            if (taro.developerMode.activeTab !== 'map') {
                 label && (label.visible = false);
                 rtLabel && (rtLabel.visible = false);
             }
