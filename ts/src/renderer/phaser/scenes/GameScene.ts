@@ -16,6 +16,7 @@ class GameScene extends PhaserScene {
 	filter: Phaser.Textures.FilterMode;
     resolutionCoef: number;
 	trackingDelay: number;
+	useBounds: boolean;
 
 	constructor() {
 		super({ key: 'Game' });
@@ -27,11 +28,18 @@ class GameScene extends PhaserScene {
 			this.scene.launch('MobileControls');
 		}
 
+		this.resolutionCoef = 1;
+		this.useBounds = taro?.game?.data?.settings?.camera?.useBounds;
+
 		const camera = this.cameras.main;
 		camera.setBackgroundColor(taro.game.data.defaultData.mapBackgroundColor);
 
-        this.resolutionCoef = 1;
+		// set camera bounds
+		if (this.useBounds) {
+			camera.setBounds(0, 0, taro.game.data.map.width * taro.game.data.map.tilewidth, taro.game.data.map.height * taro.game.data.map.tileheight, true);
+		}
 
+		// set camera tracking delay
 		this.trackingDelay = taro?.game?.data?.settings?.camera?.trackingDelay || 3;
         if (this.trackingDelay > 60) {
             this.trackingDelay = 60;
