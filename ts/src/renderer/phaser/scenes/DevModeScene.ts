@@ -33,14 +33,18 @@ class DevModeScene extends PhaserScene {
 		this.showRepublishWarning = false;
 
 		taro.client.on('unlockCamera', () => {
-			this.gameScene.cameras.main.stopFollow();
+			const camera = this.gameScene.cameras.main;
+			camera.stopFollow();
+			if (this.gameScene.useBounds) camera.useBounds = false;
 		});
 
 		taro.client.on('lockCamera', () => {
 			taro.client.emit('zoom', taro.client.zoom);
 			let trackingDelay = taro?.game?.data?.settings?.camera?.trackingDelay || 3;
 			trackingDelay = trackingDelay / 60;
-			if (this.gameScene.cameraTarget) this.gameScene.cameras.main.startFollow(this.gameScene.cameraTarget, false, trackingDelay, trackingDelay);
+			const camera = this.gameScene.cameras.main;
+			if (this.gameScene.cameraTarget) camera.startFollow(this.gameScene.cameraTarget, false, trackingDelay, trackingDelay);
+			if (this.gameScene.useBounds) camera.useBounds = true;
 		});
 
 		taro.client.on('enterMapTab', () => {
