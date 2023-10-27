@@ -45,7 +45,12 @@ var GameScene = /** @class */ (function (_super) {
         camera.setBackgroundColor(taro.game.data.defaultData.mapBackgroundColor);
         // set camera bounds
         if (this.useBounds) {
-            camera.setBounds(0, 0, taro.game.data.map.width * taro.game.data.map.tilewidth, taro.game.data.map.height * taro.game.data.map.tileheight, true);
+            if (taro.game.data.defaultData.dontResize) {
+                camera.setBounds(0, 0, taro.game.data.map.width * taro.game.data.map.tilewidth, taro.game.data.map.height * taro.game.data.map.tileheight, true);
+            }
+            else {
+                camera.setBounds(0, 0, taro.game.data.map.width * 64, taro.game.data.map.height * 64, true);
+            }
         }
         // set camera tracking delay
         this.trackingDelay = ((_h = (_g = (_f = (_e = taro === null || taro === void 0 ? void 0 : taro.game) === null || _e === void 0 ? void 0 : _e.data) === null || _f === void 0 ? void 0 : _f.settings) === null || _g === void 0 ? void 0 : _g.camera) === null || _h === void 0 ? void 0 : _h.trackingDelay) || 3;

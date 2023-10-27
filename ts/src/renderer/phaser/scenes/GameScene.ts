@@ -36,7 +36,11 @@ class GameScene extends PhaserScene {
 
 		// set camera bounds
 		if (this.useBounds) {
-			camera.setBounds(0, 0, taro.game.data.map.width * taro.game.data.map.tilewidth, taro.game.data.map.height * taro.game.data.map.tileheight, true);
+			if (taro.game.data.defaultData.dontResize) {
+				camera.setBounds(0, 0, taro.game.data.map.width * taro.game.data.map.tilewidth, taro.game.data.map.height * taro.game.data.map.tileheight, true);
+			} else {
+				camera.setBounds(0, 0, taro.game.data.map.width * 64, taro.game.data.map.height * 64, true);
+			}
 		}
 
 		// set camera tracking delay
