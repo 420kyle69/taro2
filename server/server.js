@@ -229,7 +229,7 @@ var Server = TaroClass.extend({
 		self.serverStartTime = new Date();// record start time
 		global.isDev = taro.env == 'dev' || taro.env == 'local' || taro.env === 'standalone' || taro.env === 'standalone-remote';
 		global.myIp = process.env.IP;
-		global.beUrl = self.config.BE_URL;
+		global.beUrl = process.env.BE_URL || self.config.BE_URL;
 
 		console.log('environment', taro.env, self.config);
 		console.log('isDev =', global.isDev);
