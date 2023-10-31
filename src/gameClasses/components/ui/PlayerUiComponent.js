@@ -465,6 +465,23 @@ var PlayerUiComponent = TaroEntity.extend({
 				option: optionId
 			});
 		}
+	},
+
+	updateBackpack: function (data) {
+		try {
+			switch (data.action) {
+				case 'open':
+					$(taro.client.getCachedElementById('backpack')).show();
+					break;
+				case 'close':
+					$(taro.client.getCachedElementById('backpack')).hide();
+					break;
+				default:
+					break;
+			}
+		} catch (err) {
+			console.log("playerUi - updateBackpack error: ", err);
+		}
 	}
 });
 
