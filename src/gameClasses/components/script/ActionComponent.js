@@ -1164,6 +1164,42 @@ var ActionComponent = TaroEntity.extend({
 
 					/* Unit */
 
+					case 'startMovingUnitUp':
+						if (entity && entity._category === 'unit' && entity.ability) {
+							entity.ability.moveUp();
+						}
+						break;
+					
+					case 'startMovingUnitDown':
+						if (entity && entity._category === 'unit' && entity.ability) {
+							entity.ability.moveDown();
+						}
+						break;
+
+					case 'startMovingUnitLeft':
+						if (entity && entity._category === 'unit' && entity.ability) {
+							entity.ability.moveLeft();
+						}
+						break;
+					
+					case 'startMovingUnitRight':
+						if (entity && entity._category === 'unit' && entity.ability) {
+							entity.ability.moveRight();
+						}
+						break;
+
+					case 'stopMovingUnitX':
+						if (entity && entity._category === 'unit' && entity.ability) {
+							entity.ability.stopMovingX();
+						}
+						break;
+
+					case 'stopMovingUnitY':
+						if (entity && entity._category === 'unit' && entity.ability) {
+							entity.ability.stopMovingY();
+						}
+						break;
+
 					case 'createUnitAtPosition':
 						var player = self._script.variable.getValue(action.entity, vars);
 
