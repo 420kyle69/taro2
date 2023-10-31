@@ -253,6 +253,13 @@ var MobileControlsScene = /** @class */ (function (_super) {
             if (rightJoystick)
                 rightJoystick.hide();
         }
+        else {
+            var worldPoint = gameScene.cameras.main.getWorldPoint(gameScene.input.activePointer.x, gameScene.input.activePointer.y);
+            taro.input.emit('pointermove', [{
+                    x: worldPoint.x,
+                    y: worldPoint.y,
+                }]);
+        }
     };
     MobileControlsScene.prototype.enterFullscreen = function () {
         if (!this.scale.isFullscreen) {
