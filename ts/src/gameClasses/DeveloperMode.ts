@@ -641,9 +641,13 @@ class DeveloperMode {
 		if (data.newData.scripts) {
 			taro.game.data.unitTypes[data.typeId].scripts = rfdc()(data.newData.scripts);
 		} else {
-			const oldScripts = rfdc()(taro.game.data.unitTypes[data.typeId].scripts);
-			taro.game.data.unitTypes[data.typeId] = rfdc()(data.newData);
-			taro.game.data.unitTypes[data.typeId].scripts = oldScripts;
+			if (taro.game.data.unitTypes[data.typeId]) {
+				const oldScripts = rfdc()(taro.game.data.unitTypes[data.typeId].scripts);
+				taro.game.data.unitTypes[data.typeId] = rfdc()(data.newData);
+				taro.game.data.unitTypes[data.typeId].scripts = oldScripts;
+			} else {
+				taro.game.data.unitTypes[data.typeId] = rfdc()(data.newData);
+			}
 		}
 
 		taro.$$('unit').forEach(unit => {
@@ -706,9 +710,14 @@ class DeveloperMode {
 		if (data.newData.scripts) {
 			taro.game.data.itemTypes[data.typeId].scripts = rfdc()(data.newData.scripts);
 		} else {
-			const oldScripts = rfdc()(taro.game.data.itemTypes[data.typeId].scripts);
-			taro.game.data.itemTypes[data.typeId] = rfdc()(data.newData);
-			taro.game.data.itemTypes[data.typeId].scripts = oldScripts;
+			if (taro.game.data.itemTypes[data.typeId]) {
+				const oldScripts = rfdc()(taro.game.data.itemTypes[data.typeId].scripts);
+				taro.game.data.itemTypes[data.typeId] = rfdc()(data.newData);
+				taro.game.data.itemTypes[data.typeId].scripts = oldScripts;
+			} else {
+				taro.game.data.itemTypes[data.typeId] = rfdc()(data.newData);
+			}
+			
 		}
 
 		taro.$$('item').forEach(item => {
@@ -740,9 +749,13 @@ class DeveloperMode {
 		if (data.newData.scripts) {
 			taro.game.data.projectileTypes[data.typeId].scripts = rfdc()(data.newData.scripts);
 		} else {
-			const oldScripts = rfdc()(taro.game.data.projectileTypes[data.typeId].scripts);
-			taro.game.data.projectileTypes[data.typeId] = rfdc()(data.newData);
-			taro.game.data.projectileTypes[data.typeId].scripts = oldScripts;
+			if (taro.game.data.projectileTypes[data.typeId]) {
+				const oldScripts = rfdc()(taro.game.data.projectileTypes[data.typeId].scripts);
+				taro.game.data.projectileTypes[data.typeId] = rfdc()(data.newData);
+				taro.game.data.projectileTypes[data.typeId].scripts = oldScripts;
+			} else {
+				taro.game.data.projectileTypes[data.typeId] = rfdc()(data.newData);
+			}
 		}
 
 		taro.$$('projectile').forEach(projectile => {
