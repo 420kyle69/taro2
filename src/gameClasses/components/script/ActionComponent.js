@@ -30,7 +30,7 @@ var ActionComponent = TaroEntity.extend({
 			if (taro.profiler.isEnabled) {
 				var startTime = performance.now();
 				// var actionPath = path + "/" + i + "("+action.type+")";
-				var actionPath = path + "/" + i;
+				var actionPath = `${path}/${i}`;
 			}
 
 			// assign runMode engine-widely, so functions like item.use() can reference to what the current runMode is
@@ -49,16 +49,16 @@ var ActionComponent = TaroEntity.extend({
 						query: 'engineFreeze',
 						engineTickDelta: engineTickDelta,
 						masterServer: global.myIp,
-						gameTitle: taro.game.data.defaultData.title,
+						gameInfo: taro.gameInfo,
 						clientCommands: taro.network.commandCount,
 						actionProfiler: taro.actionProfiler,
 						lastAction: action.type,
 						triggerProfiler: taro.triggerProfiler
 					};
 
-					global.rollbar.log("engineStep is taking longer than 1000ms", rollbarData);
+					global.rollbar.log('engineStep is taking longer than 1000ms', rollbarData);
 
-					var errorMsg = taro.script.errorLog("engineTick is taking longer than 1000ms (took" + engineTickDelta + "ms)", path);
+					var errorMsg = taro.script.errorLog(`engineTick is taking longer than 1000ms (took ${engineTickDelta} ms)`, path);
 					console.log(errorMsg, rollbarData);
 					taro.engineLagReported = true;
 					// taro.server.unpublish(errorMsg); // not publishing yet cuz TwoHouses will get unpub. loggin instead.

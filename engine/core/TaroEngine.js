@@ -186,6 +186,7 @@ var TaroEngine = TaroEntity.extend({
 		this.lastActionRanAt = 0;
 		this.lastTriggerRanAt = 0;
 
+		this.gameInfo = {};
 	},
 
 	getLifeSpan: function () {

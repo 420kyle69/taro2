@@ -555,8 +555,18 @@ var Server = TaroClass.extend({
 					taro.game.data = {
 						...taro.game.data,
 						...additionalData
-					}
+					};
 				}
+
+				taro.gameInfo = {
+					title: taro.game.data.defaultData.title,
+					_id: taro.game.data.defaultData._id,
+					tier: taro.game.data.defaultData.tier,
+					ownerId: taro.game.data.defaultData.owner._id,
+					ownerName: taro.game.data.defaultData.owner.local.username,
+					physicsEngine: taro.game.data.defaultData.physicsEngine,
+					gameSlug: taro.game.data.defaultData.gameSlug
+				};
 
 				taro.game.cspEnabled = !!taro.game.data.defaultData.clientSidePredictionEnabled;
 
