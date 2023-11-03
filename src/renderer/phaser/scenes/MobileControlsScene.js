@@ -153,30 +153,41 @@ var MobileControlsScene = /** @class */ (function (_super) {
                     }]);
             }
             if (!this.disablePointerEvents) {
-                var touchX = pointer.x;
-                var touchY = pointer.y;
-                if (touchX < this.cameras.main.displayWidth / 2.4) {
-                    var leftJoystick = this.joysticks.find(function (_a) {
-                        var side = _a.side;
-                        return side === 'left';
-                    });
-                    if (leftJoystick) {
-                        leftJoystick.show();
-                        leftJoystick.x = touchX;
-                        leftJoystick.y = touchY;
-                        leftJoystick.updateTransform();
-                    }
+                if (this.joysticks.length === 0)
+                    return;
+                else if (this.joysticks.length === 1) {
+                    var joystick = this.joysticks[0];
+                    joystick.show();
+                    joystick.x = pointer.x;
+                    joystick.y = pointer.y;
+                    joystick.updateTransform();
                 }
-                else if (touchX > this.cameras.main.displayWidth - (this.cameras.main.displayWidth / 2.4)) {
-                    var rightJoystick = this.joysticks.find(function (_a) {
-                        var side = _a.side;
-                        return side === 'right';
-                    });
-                    if (rightJoystick) {
-                        rightJoystick.show();
-                        rightJoystick.x = touchX;
-                        rightJoystick.y = touchY;
-                        rightJoystick.updateTransform();
+                else {
+                    var touchX = pointer.x;
+                    var touchY = pointer.y;
+                    if (touchX < this.cameras.main.displayWidth / 2.4) {
+                        var leftJoystick = this.joysticks.find(function (_a) {
+                            var side = _a.side;
+                            return side === 'left';
+                        });
+                        if (leftJoystick) {
+                            leftJoystick.show();
+                            leftJoystick.x = touchX;
+                            leftJoystick.y = touchY;
+                            leftJoystick.updateTransform();
+                        }
+                    }
+                    else if (touchX > this.cameras.main.displayWidth - (this.cameras.main.displayWidth / 2.4)) {
+                        var rightJoystick = this.joysticks.find(function (_a) {
+                            var side = _a.side;
+                            return side === 'right';
+                        });
+                        if (rightJoystick) {
+                            rightJoystick.show();
+                            rightJoystick.x = touchX;
+                            rightJoystick.y = touchY;
+                            rightJoystick.updateTransform();
+                        }
                     }
                 }
             }

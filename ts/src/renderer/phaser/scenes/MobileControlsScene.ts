@@ -192,23 +192,32 @@ class MobileControlsScene extends PhaserScene {
 			}
 
 			if (!this.disablePointerEvents) {
-				var touchX = pointer.x;
-				var touchY = pointer.y;
-				if (touchX < this.cameras.main.displayWidth / 2.4) {
-					const leftJoystick = this.joysticks.find(({ side }) => side === 'left');
-					if (leftJoystick) {
-						leftJoystick.show();
-						leftJoystick.x = touchX;
-						leftJoystick.y = touchY;
-						leftJoystick.updateTransform();
-					}
-				} else if (touchX > this.cameras.main.displayWidth - (this.cameras.main.displayWidth / 2.4)) {
-					const rightJoystick = this.joysticks.find(({ side }) => side === 'right');
-					if (rightJoystick) {
-						rightJoystick.show();
-						rightJoystick.x = touchX;
-						rightJoystick.y = touchY;
-						rightJoystick.updateTransform();
+				if (this.joysticks.length === 0) return;
+				else if (this.joysticks.length === 1) {
+					const joystick = this.joysticks[0];
+					joystick.show();
+					joystick.x = pointer.x;
+					joystick.y = pointer.y;
+					joystick.updateTransform();
+				} else {
+					var touchX = pointer.x;
+					var touchY = pointer.y;
+					if (touchX < this.cameras.main.displayWidth / 2.4) {
+						const leftJoystick = this.joysticks.find(({ side }) => side === 'left');
+						if (leftJoystick) {
+							leftJoystick.show();
+							leftJoystick.x = touchX;
+							leftJoystick.y = touchY;
+							leftJoystick.updateTransform();
+						}
+					} else if (touchX > this.cameras.main.displayWidth - (this.cameras.main.displayWidth / 2.4)) {
+						const rightJoystick = this.joysticks.find(({ side }) => side === 'right');
+						if (rightJoystick) {
+							rightJoystick.show();
+							rightJoystick.x = touchX;
+							rightJoystick.y = touchY;
+							rightJoystick.updateTransform();
+						}
 					}
 				}
 			}
