@@ -657,9 +657,7 @@ var Server = TaroClass.extend({
 								taro.map.load(map);
 
 								taro.game.start();
-
-								self.gameLoaded = true;
-
+								
 								// send dev logs to developer every second
 								var logInterval = setInterval(function () {
 									// send only if developer client is connect
