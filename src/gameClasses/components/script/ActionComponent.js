@@ -35,7 +35,7 @@ var ActionComponent = TaroEntity.extend({
 
 			// assign runMode engine-widely, so functions like item.use() can reference to what the current runMode is
 			// for item.use(), if runMode == 0, then it will stream quantity change to its owner player
-			taro.runMode = (action.runMode)? 1 : 0;
+			taro.runMode = (action.runMode) ? 1 : 0;
 
 			if (taro.isServer) {
 
@@ -266,7 +266,7 @@ var ActionComponent = TaroEntity.extend({
 						}
 
 						taro.server.request.post({
-        					url: url,
+							url: url,
 							form: obj
 						}, function optionalCallback(err, httpResponse, body) {
 							if (err) {
@@ -315,7 +315,7 @@ var ActionComponent = TaroEntity.extend({
 						// console.log("requestPost data", data);
 
 						// use closure to store globalVariableName
-						(function(targetVarName) {
+						(function (targetVarName) {
 							taro.server.request.post(data, function optionalCallback(err, httpResponse, body) {
 								// try+catch must be redeclared inside callback otherwise an error will crash the process
 								try {
@@ -347,7 +347,7 @@ var ActionComponent = TaroEntity.extend({
 								}
 
 							})
-					})(varName);
+						})(varName);
 
 						break;
 
@@ -816,16 +816,19 @@ var ActionComponent = TaroEntity.extend({
 
 					case 'banPlayerFromChat':
 						var player = self._script.variable.getValue(action.player, vars);
-						if (player) {
-							player.streamUpdateData([{ banChat: true }]);
-						}
+						taro.server.updateTempMute({
+							player,
+							banChat: true
+						});
 						break;
 
 					case 'unbanPlayerFromChat':
 						var player = self._script.variable.getValue(action.player, vars);
-						if (player) {
-							player.streamUpdateData([{ banChat: false }]);
-						}
+						taro.server.updateTempMute({
+							player,
+							banChat: false
+						});
+
 						break;
 
 					case 'playerCameraSetZoom':
@@ -1169,7 +1172,7 @@ var ActionComponent = TaroEntity.extend({
 							entity.ability.moveUp();
 						}
 						break;
-					
+
 					case 'startMovingUnitDown':
 						if (entity && entity._category === 'unit' && entity.ability) {
 							entity.ability.moveDown();
@@ -1181,7 +1184,7 @@ var ActionComponent = TaroEntity.extend({
 							entity.ability.moveLeft();
 						}
 						break;
-					
+
 					case 'startMovingUnitRight':
 						if (entity && entity._category === 'unit' && entity.ability) {
 							entity.ability.moveRight();
@@ -1381,7 +1384,7 @@ var ActionComponent = TaroEntity.extend({
 						var text = self._script.variable.getValue(action.text, vars);
 						var color = self._script.variable.getValue(action.color, vars);
 						if (taro.isServer) {
-							taro.network.send('createFloatingText', {position: position, text: text, color: color});
+							taro.network.send('createFloatingText', { position: position, text: text, color: color });
 						} else if (taro.isClient) {
 							taro.client.emit('floating-text', {
 								text: text,
@@ -1602,7 +1605,7 @@ var ActionComponent = TaroEntity.extend({
 						var particleTypeId = self._script.variable.getValue(action.particleType, vars);
 						var angle = self._script.variable.getValue(action.angle, vars);
 						if (particleTypeId && position) {
-							taro.network.send('particle', { particleId: particleTypeId, position: position, angle: angle || 0});
+							taro.network.send('particle', { particleId: particleTypeId, position: position, angle: angle || 0 });
 						}
 						break;
 
@@ -1611,7 +1614,7 @@ var ActionComponent = TaroEntity.extend({
 						var angle = self._script.variable.getValue(action.angle, vars);
 						var entity = self._script.variable.getValue(action.entity, vars);
 						if (particleTypeId && entity) {
-							taro.network.send('particle', { particleId: particleTypeId, position: {x:0, y:0}, angle: angle || 0, entityId: entity.id()});
+							taro.network.send('particle', { particleId: particleTypeId, position: { x: 0, y: 0 }, angle: angle || 0, entityId: entity.id() });
 						}
 						break;
 
@@ -2504,15 +2507,15 @@ var ActionComponent = TaroEntity.extend({
 
 						break;
 
-                    case 'teleportEntity':
-                        var position = self._script.variable.getValue(action.position, vars);
-                        var entity = self._script.variable.getValue(action.entity, vars);
+					case 'teleportEntity':
+						var position = self._script.variable.getValue(action.position, vars);
+						var entity = self._script.variable.getValue(action.entity, vars);
 
-                        if (position && entity && ['unit', 'item', 'projectile'].includes(entity._category)) {
-                            entity.teleportTo(position.x, position.y, entity._rotate.z, true);
-                        }
+						if (position && entity && ['unit', 'item', 'projectile'].includes(entity._category)) {
+							entity.teleportTo(position.x, position.y, entity._rotate.z, true);
+						}
 
-                        break;
+						break;
 
 					case 'destroyEntity':
 						var entity = self._script.variable.getValue(action.entity, vars);
@@ -2672,10 +2675,10 @@ var ActionComponent = TaroEntity.extend({
 								entity.applyTorque(torque);
 								// entity.body.applyTorque(torque);
 							} else {
-								throw new Error( action.type + " - invalid position")
+								throw new Error(action.type + " - invalid position")
 							}
 						} else {
-							throw new Error( action.type + " - invalid unit")
+							throw new Error(action.type + " - invalid unit")
 						}
 						break;
 
@@ -3006,7 +3009,7 @@ var ActionComponent = TaroEntity.extend({
 
 					case 'openBackpackForPlayer':
 						var player = self._script.variable.getValue(action.player, vars);
-						
+
 						if (player && player._stats && player._stats.clientId) {
 							taro.network.send('ui', {
 								command: 'updateBackpack',
@@ -3014,10 +3017,10 @@ var ActionComponent = TaroEntity.extend({
 							}, player._stats.clientId);
 						}
 						break;
-					
+
 					case 'closeBackpackForPlayer':
 						var player = self._script.variable.getValue(action.player, vars);
-						
+
 						if (player && player._stats && player._stats.clientId) {
 							taro.network.send('ui', {
 								command: 'updateBackpack',

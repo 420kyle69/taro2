@@ -669,11 +669,11 @@ var Server = TaroClass.extend({
 										self.developerClientIds.forEach(
 											id => {
 												taro.network.send('devLogs', taro.game.devLogs, id);
-			
+
 												if (taro.profiler.isEnabled) {
 													taro.network.send('profile', taro.profiler.getProfile(), id);
 												}
-												
+
 												if (sendErrors) {
 													taro.network.send('errorLogs', taro.script.errorLogs, id);
 												}
@@ -1019,6 +1019,19 @@ var Server = TaroClass.extend({
 			}
 			if (body.status === 'error') {
 				console.log('error in crediting ad-reward coins')
+			}
+		}
+	},
+
+	updateTempMute: function ({ player, banChat }) {
+		if (player && player._stats.banChat !== banChat) {
+			player.streamUpdateData([{ banChat: banChat }]);
+
+			if (player._stats.userId && taro.clusterClient) {
+				taro.clusterClient.updateTempMute({
+					banChat: banChat,
+					userId: player._stats.userId,
+				});
 			}
 		}
 	},
