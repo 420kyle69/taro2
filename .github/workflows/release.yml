@@ -18,17 +18,6 @@ jobs:
       - name: Determine release version
         id: version
         run: echo ::set-output name=VERSION::${{ github.event.release.tag_name }}
-      - name: Set release type
-        id: set_event_type
-        run: |
-          if [[ "${{ steps.version.outputs.VERSION }}" == *"-staging" ]]; then
-            echo "Updating event type to moddio2_staging_post_release"
-            event_type="moddio2_staging_post_release"
-          else
-            echo "Updating event type to moddio2_post_release"
-            event_type="moddio2_post_release"
-          fi
-          echo "::set-output name=EVENT_TYPE::$event_type"
       - name: Dispatch to moddio/gs
         run: |
             curl -H "Accept: application/vnd.github.everest-preview+json" \
@@ -37,7 +26,20 @@ jobs:
             --data '{"event_type": "moddio2_post_release", "client_payload": { "version": "${{ steps.version.outputs.VERSION }}" }}' https://api.github.com/repos/moddio/gs/dispatches
       - name: Dispatch to moddio/be
         run: |
+          if [[ "${{ steps.version.outputs.VERSION }}" == *"-staging" ]]; then
             curl -H "Accept: application/vnd.github.everest-preview+json" \
             -H "Authorization: token ${{ secrets.MODDIO2_DISPATCH_TOKEN }}" \
             --request POST \
-            --data '{"event_type": "${{ steps.set_event_type.outputs.EVENT_TYPE }}", "client_payload": { "version": "${{ steps.version.outputs.VERSION }}" }}' https://api.github.com/repos/moddio/be/dispatches
+            --data '{"event_type": "moddio2_staging_post_release", "client_payload": { "version": "${{ steps.version.outputs.VERSION }}" }}' https://api.github.com/repos/moddio/be/dispatches
+          else
+            curl -H "Accept: application/vnd.github.everest-preview+json" \
+            -H "Authorization: token ${{ secrets.MODDIO2_DISPATCH_TOKEN }}" \
+            --request POST \
+            --data '{"event_type": "moddio2_post_release", "client_payload": { "version": "${{ steps.version.outputs.VERSION }}" }}' https://api.github.com/repos/moddio/be/dispatches
+          
+            curl -H "Accept: application/vnd.github.everest-preview+json" \
+            -H "Authorization: token ${{ secrets.MODDIO2_DISPATCH_TOKEN }}" \
+            --request POST \
+            --data '{"event_type": "moddio2_staging_post_release", "client_payload": { "version": "${{ steps.version.outputs.VERSION }}" }}' https://api.github.com/repos/moddio/be/dispatches
+          fi
+          
