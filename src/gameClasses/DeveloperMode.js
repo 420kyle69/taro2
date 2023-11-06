@@ -638,9 +638,14 @@ var DeveloperMode = /** @class */ (function () {
             taro.game.data.unitTypes[data.typeId].scripts = rfdc()(data.newData.scripts);
         }
         else {
-            var oldScripts = rfdc()(taro.game.data.unitTypes[data.typeId].scripts);
-            taro.game.data.unitTypes[data.typeId] = rfdc()(data.newData);
-            taro.game.data.unitTypes[data.typeId].scripts = oldScripts;
+            if (taro.game.data.unitTypes[data.typeId]) {
+                var oldScripts = rfdc()(taro.game.data.unitTypes[data.typeId].scripts);
+                taro.game.data.unitTypes[data.typeId] = rfdc()(data.newData);
+                taro.game.data.unitTypes[data.typeId].scripts = oldScripts;
+            }
+            else {
+                taro.game.data.unitTypes[data.typeId] = rfdc()(data.newData);
+            }
         }
         taro.$$('unit').forEach(function (unit) {
             if (unit._stats.type === data.typeId) {
@@ -698,9 +703,14 @@ var DeveloperMode = /** @class */ (function () {
             taro.game.data.itemTypes[data.typeId].scripts = rfdc()(data.newData.scripts);
         }
         else {
-            var oldScripts = rfdc()(taro.game.data.itemTypes[data.typeId].scripts);
-            taro.game.data.itemTypes[data.typeId] = rfdc()(data.newData);
-            taro.game.data.itemTypes[data.typeId].scripts = oldScripts;
+            if (taro.game.data.itemTypes[data.typeId]) {
+                var oldScripts = rfdc()(taro.game.data.itemTypes[data.typeId].scripts);
+                taro.game.data.itemTypes[data.typeId] = rfdc()(data.newData);
+                taro.game.data.itemTypes[data.typeId].scripts = oldScripts;
+            }
+            else {
+                taro.game.data.itemTypes[data.typeId] = rfdc()(data.newData);
+            }
         }
         taro.$$('item').forEach(function (item) {
             if (item._stats.itemTypeId === data.typeId) {
@@ -728,9 +738,14 @@ var DeveloperMode = /** @class */ (function () {
             taro.game.data.projectileTypes[data.typeId].scripts = rfdc()(data.newData.scripts);
         }
         else {
-            var oldScripts = rfdc()(taro.game.data.projectileTypes[data.typeId].scripts);
-            taro.game.data.projectileTypes[data.typeId] = rfdc()(data.newData);
-            taro.game.data.projectileTypes[data.typeId].scripts = oldScripts;
+            if (taro.game.data.projectileTypes[data.typeId]) {
+                var oldScripts = rfdc()(taro.game.data.projectileTypes[data.typeId].scripts);
+                taro.game.data.projectileTypes[data.typeId] = rfdc()(data.newData);
+                taro.game.data.projectileTypes[data.typeId].scripts = oldScripts;
+            }
+            else {
+                taro.game.data.projectileTypes[data.typeId] = rfdc()(data.newData);
+            }
         }
         taro.$$('projectile').forEach(function (projectile) {
             if (projectile._stats.type === data.typeId) {

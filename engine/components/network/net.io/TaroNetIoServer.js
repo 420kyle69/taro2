@@ -292,8 +292,10 @@ var TaroNetIoServer = {
 		if (typeof val !== 'undefined') {
 			this._acceptConnections = val;
 			if (val) {
+				console.log('Server now accepting connections!');
 				this.log('Server now accepting connections!');
 			} else {
+				console.log('Server no longer accepting connections!');
 				this.log('Server no longer accepting connections!');
 			}
 
