@@ -50,6 +50,8 @@ var GameComponent = TaroEntity.extend({
 		taro.script.trigger('gameStart');
 		self.hasStarted = true;
 		taro.timer.startGameClock();
+		
+		taro.clusterClient && taro.clusterClient.gameStarted();
 	},
 
 	// this applies to logged in players only
