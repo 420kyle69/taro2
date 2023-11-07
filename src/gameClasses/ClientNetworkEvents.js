@@ -563,7 +563,7 @@ var ClientNetworkEvents = {
 
 	_onUpdateUnitNameLabel: function (data) {
 		const unit = taro.$(data.id);
-		console.warn(data, unit);
+
 		if (
 			unit &&
 			typeof data.color === 'string' &&

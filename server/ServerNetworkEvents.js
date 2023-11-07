@@ -770,8 +770,6 @@ var ServerNetworkEvents = {
 		}
 	},
 	_onPlayerDialogueSubmit: function (data, clientId) {
-		console.warn('player submits dialogue\n');
-		console.warn(data, '\n', clientId);
 		var player = taro.game.getPlayerByClientId(clientId);
 
 		if (player) {

@@ -1358,6 +1358,7 @@ var ActionComponent = TaroEntity.extend({
 					case 'setUnitNameLabelColor':
 						var unit = self._script.variable.getValue(action.unit, vars);
 						var color = self._script.variable.getValue(action.color, vars);
+
 						try {
 							if (
 								unit &&
@@ -1365,7 +1366,6 @@ var ActionComponent = TaroEntity.extend({
 								!isNaN(Number(`0x${color.toLowerCase()}`))
 							) {
 								if (taro.isClient) {
-									console.warn(color);
 									unit.emit(
 										'update-label',
 										{
@@ -1374,19 +1374,19 @@ var ActionComponent = TaroEntity.extend({
 											color: color,
 										}
 									);
+
 								} else if (taro.isServer) {
 									let data = {
 										id: unit.id(),
 										color: color,
 									};
+
 									taro.network.send('updateUnitNameLabel', data);
-									console.warn(data);
 								}
 							} else {
-								console.warn('something isn\'t right\n', unit, '\n', color, '\n');
+								throw new Error('something isn\'t right\n', `is ${color} a hex color?`);
 							}
 						} catch (err) {
-							console.error(err);
 							self._script.errorLog(err, path);
 						}
 
