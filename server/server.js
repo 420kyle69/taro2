@@ -562,8 +562,8 @@ var Server = TaroClass.extend({
 					title: taro.game.data.defaultData.title,
 					_id: taro.game.data.defaultData._id,
 					tier: taro.game.data.defaultData.tier,
-					ownerId: taro.game.data.defaultData.owner._id,
-					ownerName: taro.game.data.defaultData.owner.local.username,
+					ownerId: taro.game.data.defaultData.owner?._id || taro.game.data.defaultData.owner,
+					ownerName: taro.game.data.defaultData.owner?.local?.username,
 					physicsEngine: taro.game.data.defaultData.physicsEngine,
 					gameSlug: taro.game.data.defaultData.gameSlug
 				};
