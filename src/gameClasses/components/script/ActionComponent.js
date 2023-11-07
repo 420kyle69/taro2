@@ -266,7 +266,7 @@ var ActionComponent = TaroEntity.extend({
 						}
 
 						taro.server.request.post({
-        					url: url,
+							url: url,
 							form: obj
 						}, function optionalCallback(err, httpResponse, body) {
 							if (err) {
@@ -1355,6 +1355,43 @@ var ActionComponent = TaroEntity.extend({
 
 						break;
 
+					case 'setUnitNameLabelColor':
+						var unit = self._script.variable.getValue(action.unit, vars);
+						var color = self._script.variable.getValue(action.color, vars);
+						try {
+							if (
+								unit &&
+								typeof color === 'string' &&
+								!isNaN(Number(`0x${color.toLowerCase()}`))
+							) {
+								if (taro.isClient) {
+									console.warn(color);
+									unit.emit(
+										'update-label',
+										{
+											text: unit._stats.name,
+											bold: (unit == taro.client.selectedUnit),
+											color: color,
+										}
+									);
+								} else if (taro.isServer) {
+									let data = {
+										id: unit.id(),
+										color: color,
+									};
+									taro.network.send('updateUnitNameLabel', data);
+									console.warn(data);
+								}
+							} else {
+								console.warn('something isn\'t right\n', unit, '\n', color, '\n');
+							}
+						} catch (err) {
+							console.error(err);
+							self._script.errorLog(err, path);
+						}
+
+						break;
+
 					case 'setItemName':
 						var item = self._script.variable.getValue(action.item, vars);
 						var name = self._script.variable.getValue(action.name, vars);
@@ -1376,6 +1413,7 @@ var ActionComponent = TaroEntity.extend({
 						}
 
 						break;
+
 					case 'createFloatingText':
 						var position = self._script.variable.getValue(action.position, vars);
 						var text = self._script.variable.getValue(action.text, vars);
@@ -1392,7 +1430,7 @@ var ActionComponent = TaroEntity.extend({
 						}
 						break;
 
-					/* Item */
+						/* Item */
 
 					case 'startUsingItem':
 						if (entity && entity._category == 'item') {
@@ -2504,15 +2542,15 @@ var ActionComponent = TaroEntity.extend({
 
 						break;
 
-                    case 'teleportEntity':
-                        var position = self._script.variable.getValue(action.position, vars);
-                        var entity = self._script.variable.getValue(action.entity, vars);
+					case 'teleportEntity':
+						var position = self._script.variable.getValue(action.position, vars);
+						var entity = self._script.variable.getValue(action.entity, vars);
 
-                        if (position && entity && ['unit', 'item', 'projectile'].includes(entity._category)) {
-                            entity.teleportTo(position.x, position.y, entity._rotate.z, true);
-                        }
+						if (position && entity && ['unit', 'item', 'projectile'].includes(entity._category)) {
+							entity.teleportTo(position.x, position.y, entity._rotate.z, true);
+						}
 
-                        break;
+						break;
 
 					case 'destroyEntity':
 						var entity = self._script.variable.getValue(action.entity, vars);

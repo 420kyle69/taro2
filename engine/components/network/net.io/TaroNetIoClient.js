@@ -451,8 +451,8 @@ var TaroNetIoClient = {
 	_onMessageFromServer: function (data) {
 		var ciDecoded = data[0].charCodeAt(0);
 		var commandName = this._networkCommandsIndex[ciDecoded];
-		var now = taro._currentTime
-		
+		var now = taro._currentTime;
+
 		if (commandName === '_snapshot') {
 			var snapshot = rfdc()(data)[1];
 			var newSnapshotTimestamp = snapshot[snapshot.length - 1][1];
@@ -464,7 +464,7 @@ var TaroNetIoClient = {
 					var ciDecoded = snapshot[i][0].charCodeAt(0);
 					var commandName = this._networkCommandsIndex[ciDecoded];
 					var entityData = snapshot[i][1];
-					// console.log("sub", commandName, data);
+					console.warn(commandName);
 					switch (commandName) {
 						case '_taroStreamData':
 							var entityData = snapshot[i].slice(1).split('&');
@@ -477,10 +477,10 @@ var TaroNetIoClient = {
 							var isTeleportingCamera = Boolean(parseInt(entityData[4], 16)); // teleportedCamera boolean
 
 							var newPosition = [x, y, rotate];
-							
+
 							// update each entities' final position, so player knows where everything are when returning from a different browser tab
 							// we are not executing this in taroEngine or taroEntity, becuase they don't execute when browser tab is inactive
-							var entity = taro.$(entityId);							
+							var entity = taro.$(entityId);
 
 							// console.log(entity != undefined, isTeleporting)
 							if (entity) {
@@ -489,35 +489,35 @@ var TaroNetIoClient = {
 									entity.teleportTo(x, y, rotate, isTeleportingCamera);
 								} else if (
 									// if csp movement is enabled, don't use server-streamed position for my unit. (it's updated in box2dcomponent.js)
-									!(taro.physics && taro.game.cspEnabled && entity == taro.client.selectedUnit) 
+									!(taro.physics && taro.game.cspEnabled && entity == taro.client.selectedUnit)
 								) {
 									// console.log(entity._category, newPosition)
 									// extra 20ms of buffer removes jitter
 									if (newSnapshotTimestamp > this.lastSnapshotTimestamp) {
 										entity.nextKeyFrame = [now + taro.client.renderBuffer, newPosition];
 										entity.isTransforming(true);
-									}									
+									}
 								}
 							}
-							
+
 							break;
 
-						default: 
+						default:
 							this._networkCommands[commandName](entityData);
 							break;
 					}
 				}
 
 				if (!isNaN(newSnapshotTimestamp))
-				{ 
+				{
 					this.lastSnapshotTimestamp = newSnapshotTimestamp;
 				}
 			}
 		} else {
-			console.log("commandName wasn't _snapshot!", commandName, data);		
+			console.warn("commandName wasn't _snapshot!", commandName, data);
 			if (this._networkCommands[commandName]) {
 				if (this.debug()) {
-					console.log(`Received "${commandName}" (index ${ciDecoded}) with data:`, data[1]);
+					console.warn(`Received "${commandName}" (index ${ciDecoded}) with data:`, data[1]);
 					this._debugCounter++;
 				}
 
