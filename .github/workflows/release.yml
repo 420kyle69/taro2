@@ -21,6 +21,13 @@ jobs:
       - name: Get branch name
         id: branch_name
         run: echo ::set-output name=BRANCH_NAME::${{ github.ref }}
+      - name: Extract branch name
+        run: |
+          branch_name=${{ github.ref }}
+          if [[ $branch_name == refs/heads/* ]]; then
+            branch_name=${branch_name#refs/heads/}
+          fi
+          echo "Branch Name: $branch_name"
       - name: Dispatch to moddio/gs
         run: |
             curl -H "Accept: application/vnd.github.everest-preview+json" \
