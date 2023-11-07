@@ -1579,7 +1579,7 @@ var ActionComponent = TaroEntity.extend({
 						var player = self._script.variable.getValue(action.player, vars);
 
 						if (player && player._category === 'player' && player._stats.clientId) {
-							taro.network.send('closeDialogue', player._stats.clientId);
+							taro.network.send('closeDialogue', {}, player._stats.clientId);
 						}
 						break;
 
