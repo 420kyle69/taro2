@@ -1283,7 +1283,7 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
-					case 'getCameraWidth':
+					case 'getCameraHeight':
 						if (taro.isClient) {
 							returnValue = taro.renderer.getCameraHeight();
 						}
