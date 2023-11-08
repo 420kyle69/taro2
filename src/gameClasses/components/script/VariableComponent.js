@@ -1271,7 +1271,7 @@ var VariableComponent = TaroEntity.extend({
 
 					case 'getCameraPosition':
 						if (taro.isClient) {
-							returnValue = taro.renderer.getCameraPosition();
+							returnValue = taro.renderer.getViewportBounds();
 						}
 
 						break;
