@@ -80,4 +80,12 @@ class PhaserRenderer extends Phaser.Game {
 	getViewportBounds (): Phaser.Geom.Rectangle {
 		return this.scene.getScene('Game').cameras.main.worldView;
 	}
+
+	getCameraPosition (): {x: number, y: number} {
+		const camera = this.scene.getScene('Game').cameras.main;
+		return {
+			x: camera.centerX,
+			y: camera.centerY
+		};
+	}
 }

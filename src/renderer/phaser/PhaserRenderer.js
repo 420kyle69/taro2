@@ -89,6 +89,13 @@ var PhaserRenderer = /** @class */ (function (_super) {
     PhaserRenderer.prototype.getViewportBounds = function () {
         return this.scene.getScene('Game').cameras.main.worldView;
     };
+    PhaserRenderer.prototype.getCameraPosition = function () {
+        var camera = this.scene.getScene('Game').cameras.main;
+        return {
+            x: camera.centerX,
+            y: camera.centerY
+        };
+    };
     return PhaserRenderer;
 }(Phaser.Game));
 //# sourceMappingURL=PhaserRenderer.js.map
