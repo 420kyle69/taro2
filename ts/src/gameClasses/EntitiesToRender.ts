@@ -17,6 +17,8 @@ class EntitiesToRender {
 
 			// taro.profiler.logTimeElapsed('findEntity', timeStart);
 			if (entity) {
+				entity.script?.trigger("renderTick");
+
 				// handle entity behaviour and transformation offsets
 				// var timeStart = performance.now();
 
@@ -126,6 +128,7 @@ class EntitiesToRender {
 	}
 
 	frameTick(): void {
+		taro.script?.trigger("renderTick");
 		taro.engineStep(Date.now(), 1000/60);
 		taro.input.processInputOnEveryFps();
 
