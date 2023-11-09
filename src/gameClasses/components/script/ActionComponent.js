@@ -1358,7 +1358,7 @@ var ActionComponent = TaroEntity.extend({
 					case 'setUnitNameLabelColor':
 						var unit = self._script.variable.getValue(action.unit, vars);
 						var color = self._script.variable.getValue(action.color, vars);
-
+						console.warn('yo');
 						try {
 							if (
 								unit &&
@@ -1376,12 +1376,8 @@ var ActionComponent = TaroEntity.extend({
 									);
 
 								} else if (taro.isServer) {
-									let data = {
-										id: unit.id(),
-										color: color,
-									};
 
-									taro.network.send('updateUnitNameLabel', data);
+									unit.streamUpdateData([{ nameLabelColor: color }]);
 								}
 							} else {
 								throw new Error('something isn\'t right\n', `is ${color} a hex color?`);

@@ -1618,9 +1618,25 @@ var Unit = TaroEntityPhysics.extend({
 							self.setOwnerPlayer(newValue);
 						}
 						break;
+
+					case 'nameLabelColor':
+						console.warn('yo');
+						if (
+							taro.isClient &&
+							typeof newValue === 'string' &&
+							!isNaN(Number(`0x${newValue.toLowerCase()}`))
+						) {
+							console.warn('yo2');
+							this.emit(
+								'update-label',
+								{
+									text: this._stats.name,
+									bold: (this == taro.client.selectedUnit),
+									color: newValue,
+								}
+							);
+						}
 				}
-
-
 			}
 		}
 	},
