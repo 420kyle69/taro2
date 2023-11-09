@@ -233,6 +233,7 @@ var PhaserUnit = /** @class */ (function (_super) {
     };
     PhaserUnit.prototype.updateLabel = function (data) {
         var label = this.getLabel();
+        console.warn(data.color);
         //const rt = this.rtLabel;
         //label.visible = !rt;
         /*label.setFont(BitmapFontManager.font(this.scene,
@@ -248,7 +249,7 @@ var PhaserUnit = /** @class */ (function (_super) {
         label.setFontFamily('Verdana');
         label.setFontSize(16);
         label.setFontStyle(data.bold ? 'bold' : 'normal');
-        label.setFill(data.color || '#fff');
+        label.setFill("".concat(data.color) || '#fff');
         if (this.scene.renderer.type !== Phaser.CANVAS)
             label.setResolution(4);
         var strokeThickness = taro.game.data.settings
@@ -268,6 +269,7 @@ var PhaserUnit = /** @class */ (function (_super) {
         }*/
         this.updateLabelOffset();
         this.updateGameObjectSize();
+        console.warn(label);
     };
     PhaserUnit.prototype.showLabel = function () {
         /*const label = this.getLabel();

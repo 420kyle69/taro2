@@ -1363,7 +1363,7 @@ var ActionComponent = TaroEntity.extend({
 							if (
 								unit &&
 								typeof color === 'string' &&
-								!isNaN(Number(`0x${color.toLowerCase()}`))
+								Colors.isValidColor(color)
 							) {
 								if (taro.isClient) {
 									unit.emit(
@@ -1380,7 +1380,7 @@ var ActionComponent = TaroEntity.extend({
 									unit.streamUpdateData([{ nameLabelColor: color }]);
 								}
 							} else {
-								throw new Error('something isn\'t right\n', `is ${color} a hex color?`);
+								throw new Error(`Is '${color}' a valid hex code or extended color string?`);
 							}
 						} catch (err) {
 							self._script.errorLog(err, path);

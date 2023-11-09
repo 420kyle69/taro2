@@ -275,6 +275,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		color?: string;
 	}): void {
 		const label = this.getLabel();
+		console.warn(data.color);
 		//const rt = this.rtLabel;
 
 		//label.visible = !rt;
@@ -293,7 +294,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		label.setFontFamily('Verdana');
 		label.setFontSize(16);
 		label.setFontStyle(data.bold ? 'bold' : 'normal');
-		label.setFill(data.color || '#fff');
+		label.setFill(`${data.color}` || '#fff');
 		if (this.scene.renderer.type !== Phaser.CANVAS) label.setResolution(4);
 
 		const strokeThickness = taro.game.data.settings
@@ -315,6 +316,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 
 		this.updateLabelOffset();
 		this.updateGameObjectSize();
+		console.warn(label);
 	}
 
 	private showLabel(): void {
