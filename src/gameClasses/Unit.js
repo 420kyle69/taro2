@@ -1620,13 +1620,11 @@ var Unit = TaroEntityPhysics.extend({
 						break;
 
 					case 'nameLabelColor':
-						console.warn('yo');
 						if (
 							taro.isClient &&
 							typeof newValue === 'string' &&
 							!isNaN(Number(`0x${newValue.toLowerCase()}`))
 						) {
-							console.warn('yo2');
 							this.emit(
 								'update-label',
 								{

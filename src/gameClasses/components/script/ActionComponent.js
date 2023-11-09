@@ -1358,7 +1358,7 @@ var ActionComponent = TaroEntity.extend({
 					case 'setUnitNameLabelColor':
 						var unit = self._script.variable.getValue(action.unit, vars);
 						var color = self._script.variable.getValue(action.color, vars);
-						console.warn('yo');
+
 						try {
 							if (
 								unit &&
