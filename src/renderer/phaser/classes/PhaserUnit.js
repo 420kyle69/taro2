@@ -233,7 +233,6 @@ var PhaserUnit = /** @class */ (function (_super) {
     };
     PhaserUnit.prototype.updateLabel = function (data) {
         var label = this.getLabel();
-        console.warn(data.color);
         //const rt = this.rtLabel;
         //label.visible = !rt;
         /*label.setFont(BitmapFontManager.font(this.scene,
@@ -269,7 +268,6 @@ var PhaserUnit = /** @class */ (function (_super) {
         }*/
         this.updateLabelOffset();
         this.updateGameObjectSize();
-        console.warn(label);
     };
     PhaserUnit.prototype.showLabel = function () {
         /*const label = this.getLabel();

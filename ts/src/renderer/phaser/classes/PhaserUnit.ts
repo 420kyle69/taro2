@@ -275,7 +275,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		color?: string;
 	}): void {
 		const label = this.getLabel();
-		console.warn(data.color);
+
 		//const rt = this.rtLabel;
 
 		//label.visible = !rt;
@@ -316,7 +316,6 @@ class PhaserUnit extends PhaserAnimatedEntity {
 
 		this.updateLabelOffset();
 		this.updateGameObjectSize();
-		console.warn(label);
 	}
 
 	private showLabel(): void {
