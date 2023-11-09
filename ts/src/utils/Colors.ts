@@ -144,7 +144,7 @@ const colors = {
 	yellowgreen: '#9acd32'
 };
 
-class Colors {
+abstract class Colors {
 	static textToHexColor(color: string): string | null {
 		return colors[color] || null;
 	}
