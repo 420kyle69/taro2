@@ -743,8 +743,6 @@ const Client = TaroEventingClass.extend({
 		taro.network.define('updateItem', this._onUpdateItem);
 		taro.network.define('updateProjectile', this._onUpdateProjectile);
 
-		taro.network.define('updateUnitNameLabel', this._onUpdateUnitNameLabel);
-
 		taro.network.define('renderSocketLogs', this._onRenderSocketLogs);
 	},
 

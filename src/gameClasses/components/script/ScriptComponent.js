@@ -106,9 +106,6 @@ var ScriptComponent = TaroEntity.extend({
 
 	/* trigger and run all of the corresponding script(s) */
 	trigger: function (triggerName, triggeredBy) {
-		if (taro.isClient && !['frameTick', 'secondTick'].includes(triggerName)) {
-			console.warn(triggerName, triggeredBy);
-		}
 		if (taro.isServer) {
 			var now = Date.now();
 			var lastTriggerRunTime = now - taro.lastTriggerRanAt;
@@ -211,7 +208,7 @@ var ScriptComponent = TaroEntity.extend({
 		}
 
 		if (taro.isServer && taro.server.unpublishQueued) {
-			taro.server.unpublish(message + " " + path);	
+			taro.server.unpublish(message + " " + path);
 		}
 	}
 

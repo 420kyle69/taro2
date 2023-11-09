@@ -561,25 +561,6 @@ var ClientNetworkEvents = {
 		}
 	},
 
-	_onUpdateUnitNameLabel: function (data) {
-		const unit = taro.$(data.id);
-
-		if (
-			unit &&
-			typeof data.color === 'string' &&
-			!isNaN(Number(`0x${data.color.toLowerCase()}`))
-		) {
-			unit.emit(
-				'update-label',
-				{
-					text: unit._stats.name,
-					bold: (unit == taro.client.selectedUnit),
-					color: data.color,
-				}
-			);
-		}
-	},
-
 	_onGameSuggestion: function (data) {
 		if (data && data.type == "show") {
 			$("#more-games").removeClass("slidedown-menu-animation").addClass("slideup-menu-animation");
