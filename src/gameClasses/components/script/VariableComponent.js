@@ -1916,6 +1916,15 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
+					case 'allUnitsOfUnitType':
+						var type = self.getValue(text.type, vars);
+
+						returnValue = _.filter(taro.$$('unit'), (unit) => {
+							return unit._stats.type == type;
+						});
+
+						break;
+
 					case 'allRegions':
 						returnValue = taro.$$('region');
 

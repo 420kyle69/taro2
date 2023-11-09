@@ -1489,7 +1489,7 @@ var Unit = TaroEntityPhysics.extend({
 	streamUpdateData: function (queuedData, clientId) {
 		var self = this;
 		// Unit.prototype.log("unit streamUpdateData", data)
-		
+
 		TaroEntity.prototype.streamUpdateData.call(this, queuedData, clientId);
 
 		for (var i = 0; i < queuedData.length; i++) {
