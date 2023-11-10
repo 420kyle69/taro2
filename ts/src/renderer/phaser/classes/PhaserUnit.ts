@@ -294,7 +294,8 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		label.setFontFamily('Verdana');
 		label.setFontSize(16);
 		label.setFontStyle(data.bold ? 'bold' : 'normal');
-		label.setFill(`${data.color}` || '#fff');
+		console.warn('yo');
+		label.setFill(`${data.color}` || this.entity._stats.nameLabelColor || '#fff');
 		if (this.scene.renderer.type !== Phaser.CANVAS) label.setResolution(4);
 
 		const strokeThickness = taro.game.data.settings

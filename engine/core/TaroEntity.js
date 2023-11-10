@@ -4752,7 +4752,7 @@ var TaroEntity = TaroObject.extend({
 				// these data are used in the class constructor for the specific entity in TaroStreamComponent._onStreamCreate() [data[4]]
 				case 'unit':
 					// cellsheet is used for purchasable-skins
-					keys = ['name', 'type', 'stateId', 'ownerId', 'currentItemIndex', 'currentItemId', 'flip', 'skin', 'anim', 'scale', 'cellSheet', 'width', 'height', 'scaleDimensions'];
+					keys = ['name', 'type', 'stateId', 'ownerId', 'currentItemIndex', 'currentItemId', 'flip', 'skin', 'anim', 'scale', 'cellSheet', 'width', 'height', 'scaleDimensions', 'nameLabelColor'];
 					data = {
 						attributes: {},
 						// variables: {}

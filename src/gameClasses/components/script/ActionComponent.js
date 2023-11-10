@@ -1365,22 +1365,31 @@ var ActionComponent = TaroEntity.extend({
 								typeof color === 'string' &&
 								Colors.isValidColor(color)
 							) {
-								if (taro.isClient) {
-									unit.emit(
-										'update-label',
-										{
-											text: unit._stats.name,
-											bold: (unit == taro.client.selectedUnit),
-											color: color,
-										}
-									);
-
-								} else if (taro.isServer) {
-
-									unit.streamUpdateData([{ nameLabelColor: color }]);
-								}
+								unit.setNameLabelColor(color);
 							} else {
-								throw new Error(`Is '${color}' a valid hex code or extended color string?`);
+								throw new Error(`Is '${color}' a valid hex code or extended color string? Correct unit?`);
+							}
+						} catch (err) {
+							self._script.errorLog(err, path);
+						}
+
+						break;
+
+					case 'setUnitNameLabelColorForPlayer':
+						var unit = self._script.variable.getValue(action.unit, vars);
+						var color = self._script.variable.getValue(action.color, vars);
+						var player = self._script.variable.getValue(action.player, vars);
+
+						try {
+							if (
+								unit &&
+								player &&
+								typeof color === 'string' &&
+								Colors.isValidColor(color)
+							) {
+								unit.setNameLabelColor(color, player);
+							} else {
+								throw new Error(`Is '${color}' a valid hex code or extended color string? Correct unit, player?`);
 							}
 						} catch (err) {
 							self._script.errorLog(err, path);

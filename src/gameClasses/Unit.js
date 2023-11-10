@@ -1841,6 +1841,30 @@ var Unit = TaroEntityPhysics.extend({
 		// );
 	},
 
+	setNameLabelColor: function(color, player) {
+		if (taro.isClient) {
+			this.emit(
+				'update-label',
+				{
+					text: unit._stats.name,
+					bold: (unit == taro.client.selectedUnit),
+					color: color,
+				}
+			);
+
+		} else if (taro.isServer) {
+			if (player) {
+				const clientId = player._stats.clientId;
+
+				this.streamUpdateData([{ nameLabelColor: color }], clientId);
+
+				return;
+			}
+
+			this.streamUpdateData([{ nameLabelColor: color }]);
+		}
+	},
+
 	startMoving: function () {
 		if (!this.isMoving) {
 			this.playEffect('move');
