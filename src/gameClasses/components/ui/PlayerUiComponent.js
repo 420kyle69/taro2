@@ -101,7 +101,7 @@ var PlayerUiComponent = TaroEntity.extend({
 			var attr = attributes[attrKey];
 
 			if (attr) {
-				if (!attr.isVisible) continue;
+				if (!this.shouldRenderAttribute(attr)) continue;
 
 				var attributeType = attributeTypes[attrKey];
 
@@ -118,7 +118,7 @@ var PlayerUiComponent = TaroEntity.extend({
 			}
 		}
 
-		self.updatePlayerAttributeValues(attributes);
+		self.updatePlayerAttributeValues(attributes, true);
 
 		// update shop as player points are changed and when shop modal is open
 
@@ -128,12 +128,17 @@ var PlayerUiComponent = TaroEntity.extend({
 		}
 	},
 
-	updatePlayerAttributeValues: function (attributes) {
+	updatePlayerAttributeValues: function (attributes, isUpdatedDiv = false) {
+		let needUpdateDiv = false;
 		for (var attrKey in attributes) {
 			var attr = attributes[attrKey];
 
 			if (attr) {
-				if (!attr.isVisible) continue;
+				if (!this.shouldRenderAttribute(attr)) {
+					// remove the attribute from the div
+					if (!isUpdatedDiv) needUpdateDiv = true;
+					continue;
+				}
 
 				// if attr value is int, then do not show decimal points. otherwise, show up to 2 decimal points
 				if (attr.value % 1 === 0) {
@@ -158,6 +163,28 @@ var PlayerUiComponent = TaroEntity.extend({
 				$(selector).text(attr.value)
 			}
 		}
+		if (needUpdateDiv) {
+			this.updatePlayerAttributesDiv(attributes);
+		}
+	},
+
+	shouldRenderAttribute: function (attribute) {
+		if (attribute.isVisible === undefined || attribute.isVisible === false) {
+			return false;
+		}
+
+		let shouldRender = true;
+
+		if (shouldRender) {
+			var showOnlyWhenIsGreaterThanMin = attribute.showWhen == 'whenIsGreaterThanMin';
+			shouldRender = showOnlyWhenIsGreaterThanMin ? attribute.value > attribute.min : true;
+		}
+		if (shouldRender) {
+			var showOnlyWhenIsLessThanMax = attribute.showWhen == 'whenIsLessThanMax';
+			shouldRender = showOnlyWhenIsLessThanMax ? attribute.value < attribute.max : true;
+		}
+
+		return shouldRender;
 	},
 
 	updatePlayerCoin: function (newValue) {
