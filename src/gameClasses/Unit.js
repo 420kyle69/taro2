@@ -1618,9 +1618,19 @@ var Unit = TaroEntityPhysics.extend({
 							self.setOwnerPlayer(newValue);
 						}
 						break;
+
+					case 'nameLabelColor':
+						if (taro.isClient) {
+							this.emit(
+								'update-label',
+								{
+									text: this._stats.name,
+									bold: (this == taro.client.selectedUnit),
+									color: newValue,
+								}
+							);
+						}
 				}
-
-
 			}
 		}
 	},
@@ -1829,6 +1839,30 @@ var Unit = TaroEntityPhysics.extend({
 		// 	'\n',
 		// 	debugMap
 		// );
+	},
+
+	setNameLabelColor: function(color, player) {
+		if (taro.isClient) {
+			this.emit(
+				'update-label',
+				{
+					text: unit._stats.name,
+					bold: (unit == taro.client.selectedUnit),
+					color: color,
+				}
+			);
+
+		} else if (taro.isServer) {
+			if (player) {
+				const clientId = player._stats.clientId;
+
+				this.streamUpdateData([{ nameLabelColor: color }], clientId);
+
+				return;
+			}
+
+			this.streamUpdateData([{ nameLabelColor: color }]);
+		}
 	},
 
 	startMoving: function () {

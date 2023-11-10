@@ -65,7 +65,7 @@ var taroCoreConfig = {
 		['csap', 'TaroCamera', 'core/TaroCamera.js'],
 		['csap', 'TaroViewport', 'core/TaroViewport.js'],
 		['csap', 'TaroScene2d', 'core/TaroScene2d.js'],
-		['csap', 'TaroArray', 'core/TaroArray.js'],		
+		['csap', 'TaroArray', 'core/TaroArray.js'],
 		/* Engine Actual */
 		['csap', 'TaroEngine', 'core/TaroEngine.js'],
 		/* Physics Libraries */
@@ -81,7 +81,6 @@ var taroCoreConfig = {
 		['csap', 'box2dninja', './components/physics/box2d/dists/box2dweb/box2d_ninja.js', 'box2dninja'],
 		['csap', 'box2dts', './components/physics/box2d/dists/flyoverbox2dts/bundle.js'],
 		['casp', 'box2dwasm', './components/physics/box2d/dists/box2dwasm/Box2D.simd.js', 'box2dwasm']
-		// No crash for now
 	]
 };
 
