@@ -1981,7 +1981,7 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
-					case 'allItemsOfType':
+					case 'allItemsOfItemsType':
 						var type = self.getValue(text.type, vars);
 
 						returnValue = _.filter(taro.$$('item'), (item) => {
@@ -1995,7 +1995,7 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
-					case 'allProjectilesOfType':
+					case 'allProjectilesOfProjectileType':
 						var type = self.getValue(text.type, vars);
 
 						returnValue = _.filter(taro.$$('projectile'), (projectile) => {
