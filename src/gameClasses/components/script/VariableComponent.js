@@ -1916,6 +1916,15 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
+					case 'allUnitsOfUnitType':
+						var type = self.getValue(text.type, vars);
+
+						returnValue = _.filter(taro.$$('unit'), (unit) => {
+							return unit._stats.type == type;
+						});
+
+						break;
+
 					case 'allRegions':
 						returnValue = taro.$$('region');
 
@@ -1972,8 +1981,26 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
+					case 'allItemsOfItemsType':
+						var type = self.getValue(text.type, vars);
+
+						returnValue = _.filter(taro.$$('item'), (item) => {
+							return item._stats.type == type;
+						});
+
+						break;
+
 					case 'allProjectiles':
 						returnValue = taro.$$('projectile');
+
+						break;
+
+					case 'allProjectilesOfProjectileType':
+						var type = self.getValue(text.type, vars);
+
+						returnValue = _.filter(taro.$$('projectile'), (projectile) => {
+							return projectile._stats.type == type;
+						});
 
 						break;
 
