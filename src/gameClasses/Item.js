@@ -1271,6 +1271,7 @@ var Item = TaroEntityPhysics.extend({
 	},
 
 	destroy: function () {
+		this.script.trigger('entityDestroyed');
 		this.playEffect('destroy');
 		TaroEntityPhysics.prototype.destroy.call(this);
 	}

@@ -280,6 +280,7 @@ var Projectile = TaroEntityPhysics.extend({
 	},
 
 	destroy: function () {
+		this.script.trigger('entityDestroyed');
 		this.playEffect('destroy');
 		TaroEntityPhysics.prototype.destroy.call(this);
 		if (taro.physics && taro.physics.engine == 'CRASH') {
