@@ -306,6 +306,7 @@ var Item = TaroEntityPhysics.extend({
 
 				let triggerParams = { unitId: ownerId, itemId: self.id() };
 
+				owner.script.trigger('thisUnitUsesItem', { itemId: self.id() });
 				self.script.trigger('itemIsUsed', triggerParams);
 				taro.script.trigger('unitUsesItem', triggerParams);
 
@@ -747,6 +748,8 @@ var Item = TaroEntityPhysics.extend({
 		}
 
 		if (owner && taro.trigger) {
+			owner.script.trigger('thisUnitStartsUsingAnItem', { itemId: this.id() });
+			this.script.trigger('itemStartsUsing', { itemId: this.id() });
 			taro.queueTrigger('unitStartsUsingAnItem', {
 				unitId: owner.id(),
 				itemId: this.id()
@@ -764,6 +767,8 @@ var Item = TaroEntityPhysics.extend({
 		var owner = self.getOwnerUnit();
 
 		if (owner && taro.trigger) {
+			owner.script.trigger('thisUnitStopsUsingAnItem', { itemId: self.id() });
+			this.script.trigger('itemStopsUsing', { itemId: self.id() });
 			taro.queueTrigger('unitStopsUsingAnItem', {
 				unitId: owner.id(),
 				itemId: self.id()

@@ -287,10 +287,14 @@ var InventoryComponent = TaroEntity.extend({
 				}
 			}
 
+			item.script.trigger('itemIsPickedUp', {
+				unitId: unit.id(),
+			});
 			taro.queueTrigger('unitPickedAnItem', {
 				unitId: unit.id(),
 				itemId: item.id()
 			});
+
 		}
 
 		return slotIndex;
