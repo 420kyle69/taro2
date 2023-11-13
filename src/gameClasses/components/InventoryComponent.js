@@ -294,7 +294,6 @@ var InventoryComponent = TaroEntity.extend({
 				unitId: unit.id(),
 				itemId: item.id()
 			});
-
 		}
 
 		return slotIndex;
