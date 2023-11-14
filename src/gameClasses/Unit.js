@@ -717,9 +717,6 @@ var Unit = TaroEntityPhysics.extend({
 				itemId: newItem.id(),
 				unitId: this.id()
 			};
-			newItem.script.trigger('itemIsSelected', {
-				unitId: this.id(),
-			});
 			taro.queueTrigger('unitSelectsItem', triggeredBy);
 
 			// whip-out the new item using tween
@@ -1342,9 +1339,6 @@ var Unit = TaroEntityPhysics.extend({
 
 				self.detachEntity(item.id()); // taroEntityPhysics comment: not working right now
 
-				item.script.trigger('itemIsDropped', {
-					unitId: self.id(),
-				});
 				taro.queueTrigger('unitDroppedAnItem', {
 					itemId: item.id(),
 					unitId: self.id()
