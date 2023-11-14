@@ -770,7 +770,7 @@ var Item = TaroEntityPhysics.extend({
 
 		if (owner) {
 			owner.script.trigger('thisUnitStopsUsingAnItem', { itemId: self.id() });
-			this.script.trigger('itemStopsUsing', { unitId: owner.id() });
+			self.script.trigger('itemStopsUsing', { unitId: owner.id() });
 			if (taro.trigger) {
 				taro.queueTrigger('unitStopsUsingAnItem', {
 					unitId: owner.id(),
