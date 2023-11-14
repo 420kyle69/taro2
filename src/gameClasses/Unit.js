@@ -1343,7 +1343,7 @@ var Unit = TaroEntityPhysics.extend({
 				self.detachEntity(item.id()); // taroEntityPhysics comment: not working right now
 
 				item.script.trigger('itemIsDropped', {
-					unitId: unit.id(),
+					unitId: self.id(),
 				});
 				taro.queueTrigger('unitDroppedAnItem', {
 					itemId: item.id(),
