@@ -750,12 +750,10 @@ var Item = TaroEntityPhysics.extend({
 		if (owner) {
 			owner.script.trigger('thisUnitStartsUsingAnItem', { itemId: this.id() });
 			this.script.trigger('itemStartsUsing', { unitId: owner.id() });
-			if (taro.trigger) {
-				taro.queueTrigger('unitStartsUsingAnItem', {
-					unitId: owner.id(),
-					itemId: this.id()
-				});
-			}
+			taro.queueTrigger('unitStartsUsingAnItem', {
+				unitId: owner.id(),
+				itemId: this.id()
+			});
 		}
 	},
 
@@ -771,12 +769,10 @@ var Item = TaroEntityPhysics.extend({
 		if (owner) {
 			owner.script.trigger('thisUnitStopsUsingAnItem', { itemId: self.id() });
 			self.script.trigger('itemStopsUsing', { unitId: owner.id() });
-			if (taro.trigger) {
-				taro.queueTrigger('unitStopsUsingAnItem', {
-					unitId: owner.id(),
-					itemId: self.id()
-				});
-			}
+			taro.queueTrigger('unitStopsUsingAnItem', {
+				unitId: owner.id(),
+				itemId: self.id()
+			});
 		}
 
 		if (taro.isClient) {
