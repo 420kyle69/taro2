@@ -747,13 +747,15 @@ var Item = TaroEntityPhysics.extend({
 			this.streamUpdateData([{ isBeingUsed: true }]);
 		}
 
-		if (owner && taro.trigger) {
+		if (owner) {
 			owner.script.trigger('thisUnitStartsUsingAnItem', { itemId: this.id() });
-			this.script.trigger('itemStartsUsing', { itemId: this.id() });
-			taro.queueTrigger('unitStartsUsingAnItem', {
-				unitId: owner.id(),
-				itemId: this.id()
-			});
+			this.script.trigger('itemStartsUsing', { unitId: owner.id() });
+			if (taro.trigger) {
+				taro.queueTrigger('unitStartsUsingAnItem', {
+					unitId: owner.id(),
+					itemId: this.id()
+				});
+			}
 		}
 	},
 
@@ -766,13 +768,15 @@ var Item = TaroEntityPhysics.extend({
 		self._stats.isBeingUsed = false;
 		var owner = self.getOwnerUnit();
 
-		if (owner && taro.trigger) {
+		if (owner) {
 			owner.script.trigger('thisUnitStopsUsingAnItem', { itemId: self.id() });
-			this.script.trigger('itemStopsUsing', { itemId: self.id() });
-			taro.queueTrigger('unitStopsUsingAnItem', {
-				unitId: owner.id(),
-				itemId: self.id()
-			});
+			this.script.trigger('itemStopsUsing', { unitId: owner.id() });
+			if (taro.trigger) {
+				taro.queueTrigger('unitStopsUsingAnItem', {
+					unitId: owner.id(),
+					itemId: self.id()
+				});
+			}
 		}
 
 		if (taro.isClient) {
