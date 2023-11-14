@@ -2093,6 +2093,7 @@ var Unit = TaroEntityPhysics.extend({
 			this.attributeBars.length = 0;
 			this.attributeBars = null;
 		}
+		this.script.trigger('initEntityDestroy');
 		this.playEffect('destroy');
 		TaroEntityPhysics.prototype.destroy.call(this);
 	}

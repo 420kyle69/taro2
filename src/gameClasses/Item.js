@@ -746,7 +746,7 @@ var Item = TaroEntityPhysics.extend({
 			this.streamUpdateData([{ isBeingUsed: true }]);
 		}
 
-		if (owner && taro.trigger) {
+		if (owner) {
 			taro.queueTrigger('unitStartsUsingAnItem', {
 				unitId: owner.id(),
 				itemId: this.id()
@@ -763,7 +763,7 @@ var Item = TaroEntityPhysics.extend({
 		self._stats.isBeingUsed = false;
 		var owner = self.getOwnerUnit();
 
-		if (owner && taro.trigger) {
+		if (owner) {
 			taro.queueTrigger('unitStopsUsingAnItem', {
 				unitId: owner.id(),
 				itemId: self.id()
@@ -1271,6 +1271,7 @@ var Item = TaroEntityPhysics.extend({
 	},
 
 	destroy: function () {
+		this.script.trigger('initEntityDestroy');
 		this.playEffect('destroy');
 		TaroEntityPhysics.prototype.destroy.call(this);
 	}
