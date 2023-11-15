@@ -27,6 +27,7 @@ class PhaserRegion extends PhaserEntity {
 		gameObject.setSize(stats.width, stats.height);
 		gameObject.setPosition(stats.x + stats.width/2, stats.y + stats.height/2);
 		gameObject.setInteractive();
+		gameObject.setDepth(1000);
         gameObject.on('pointerover', (p) => {
             if (!p.isDown) {
                 this.scene.input.setTopOnly(false);
@@ -170,7 +171,6 @@ class PhaserRegion extends PhaserEntity {
 				stats.width,
 				stats.height
 			);
-            graphics.setDepth(1000);
 		} else {
 			graphics.fillStyle(
 				Number(`0x${stats.inside.substring(1)}`),
