@@ -7,6 +7,7 @@ declare interface EntityStats {
 	defaultData: any;
 
 	name: string;
+	nameLabelColor?: string;
 	currentBody: {
 		jointType: string;
 		width: number;

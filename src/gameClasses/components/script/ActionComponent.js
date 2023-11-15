@@ -1358,6 +1358,50 @@ var ActionComponent = TaroEntity.extend({
 
 						break;
 
+					// PAUSED
+
+					// case 'setUnitNameLabelColor':
+					// 	var unit = self._script.variable.getValue(action.unit, vars);
+					// 	var color = self._script.variable.getValue(action.color, vars);
+
+					// 	try {
+					// 		if (
+					// 			unit &&
+					// 			typeof color === 'string' &&
+					// 			Colors.isValidColor(color)
+					// 		) {
+					// 			unit.setNameLabelColor(color);
+					// 		} else {
+					// 			throw new Error(`Is '${color}' a valid hex code or extended color string? Correct unit?`);
+					// 		}
+					// 	} catch (err) {
+					// 		self._script.errorLog(err, path);
+					// 	}
+
+					// 	break;
+
+					case 'setUnitNameLabelColorForPlayer':
+						var unit = self._script.variable.getValue(action.unit, vars);
+						var color = self._script.variable.getValue(action.color, vars);
+						var player = self._script.variable.getValue(action.player, vars);
+
+						try {
+							if (
+								unit &&
+								player &&
+								typeof color === 'string' &&
+								Colors.isValidColor(color)
+							) {
+								unit.setNameLabelColor(color, player);
+							} else {
+								throw new Error(`Is '${color}' a valid hex code or extended color string? Correct unit, player?`);
+							}
+						} catch (err) {
+							self._script.errorLog(err, path);
+						}
+
+						break;
+
 					case 'setItemName':
 						var item = self._script.variable.getValue(action.item, vars);
 						var name = self._script.variable.getValue(action.name, vars);
@@ -1379,6 +1423,7 @@ var ActionComponent = TaroEntity.extend({
 						}
 
 						break;
+
 					case 'createFloatingText':
 						var position = self._script.variable.getValue(action.position, vars);
 						var text = self._script.variable.getValue(action.text, vars);
@@ -1395,7 +1440,7 @@ var ActionComponent = TaroEntity.extend({
 						}
 						break;
 
-					/* Item */
+						/* Item */
 
 					case 'startUsingItem':
 						if (entity && entity._category == 'item') {
