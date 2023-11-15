@@ -466,6 +466,7 @@ var PlayerUiComponent = TaroEntity.extend({
 	clearListeners: function () {
 		console.log('clearing all keydown listeners on document');
 		$(document).off('click.modd-dialogue keydown.modd-dialogue');
+		taro.client.myPlayer.control.updatePlayerInputStatus();
 	},
 
 	submitDialogueModal: function (dialogueId, optionId) {
