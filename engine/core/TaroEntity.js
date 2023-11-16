@@ -4074,6 +4074,7 @@ var TaroEntity = TaroObject.extend({
 					// console.log(this._category, this.id(), attrName, newValue)
 					switch (attrName) {
 						case 'attributes':
+							console.warn(newValue);
 							// only on client side to prevent circular recursion
 							if (taro.isClient) {
 								var attributesObject = rfdc()(this._stats.attributes);
@@ -4086,23 +4087,37 @@ var TaroEntity = TaroObject.extend({
 										} else if (this._category == 'item') {
 											var ownerPlayer = this.getOwnerUnit()?.getOwner();
 										}
-										
+
 										if (
-											attributeData && 
+											attributeData &&
 											// ignore update if streamMode = 4 and it's for my own unit
-											!(ownerPlayer?._stats?.clientId == taro.network.id() && attributeData.streamMode == 4) 
+											!(ownerPlayer?._stats?.clientId == taro.network.id() && attributeData.streamMode == 4)
 										) {
-											var newAttributeValue = data.attributes[attributeTypeId];
-											var oldAttributeValue = attributeData.value;
-
-											attributeData.hasChanged = newAttributeValue !== oldAttributeValue;
-											attributeData.value = newAttributeValue;
-											attributeData.type = attributeTypeId;
-											this.attribute.update(attributeTypeId, attributeData.value);
-
-											if (this._category === 'unit') {
-												this.updateAttributeBar(attributeData);
+											
+											// package MIN update with VALUE
+											let min = null;
+											if (
+												!(
+													data.attributes[attributeTypeId].min === null ||
+													data.attributes[attributeTypeId].min === undefined
+												)
+											) {
+												min = attributeData.min = data.attributes[attributeTypeId].min;
 											}
+
+											// package MAX update with VALUE
+											let max = null;
+											if (
+												!(
+													data.attributes[attributeTypeId].max === null ||
+													data.attributes[attributeTypeId].max === undefined
+												)
+											) {
+												max = attributeData.max = data.attributes[attributeTypeId].max;
+											}
+
+											this.attribute.update(attributeTypeId, data.attributes[attributeTypeId].value, min, max);
+
 										}
 										// update attribute if entity has such attribute
 									}
@@ -4223,11 +4238,10 @@ var TaroEntity = TaroObject.extend({
 								} else {
 									this.queueStreamData(streamData); // broadcast update to all clients
 								}
-								
 
 								// for server-side only: cache last updated data, so we dont stream same data again (this optimizes CPU usage by a lot)
 								this.lastUpdatedData[attrName] = rfdc()(newValue);
-							} 
+							}
 							// else console.log(this._category, this._stats.name, attrName, "is the same as previous", this.lastUpdatedData[attrName], "new", newValue)
 						}
 					} else if (taro.isClient) {
@@ -4339,14 +4353,13 @@ var TaroEntity = TaroObject.extend({
 				{
 					this._streamDataQueued[key] = {};
 				}
-				
-				this._streamDataQueued[key] = Object.assign(this._streamDataQueued[key], value);
+				// Object.assign was breaking new attribute logic that needs recursive merging
+				this._streamDataQueued[key] = _.merge(this._streamDataQueued[key], value);
 			} else {
 				this._streamDataQueued[key] = value;
 			}
-			
 		}
-		
+
 		taro.server.bandwidthUsage[this._category] += JSON.stringify(this._streamDataQueued).length;
 	},
 

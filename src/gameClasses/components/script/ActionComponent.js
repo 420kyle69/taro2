@@ -2431,6 +2431,8 @@ var ActionComponent = TaroEntity.extend({
 						var value = self._script.variable.getValue(action.value, vars);
 						var entity = self._script.variable.getValue(action.entity, vars);
 						if (entity && self.entityCategories.indexOf(entity._category) > -1 && entity._stats.attributes && entity._stats.attributes[attrId] != undefined && value != undefined) {
+
+							// not sure we need this code
 							var isAttributeVisible = false;
 							var attribute = entity._stats.attributes[attrId];
 
@@ -2440,7 +2442,7 @@ var ActionComponent = TaroEntity.extend({
 								isAttributeVisible = attribute.isVisible instanceof Array && attribute.isVisible.length > 0;
 							}
 
-							entity.attribute.update(attrId, value, isAttributeVisible); // update attribute, and check for attribute becoming 0
+							entity.attribute.update(attrId, value); // update attribute, and check for attribute becoming 0
 						}
 						break;
 
@@ -2451,11 +2453,8 @@ var ActionComponent = TaroEntity.extend({
 						var minValue = self._script.variable.getValue(action.value, vars);
 
 						if (entity && self.entityCategories.indexOf(entity._category) > -1 && entity._stats.attributes[attrId] != undefined && !isNaN(minValue)) {
-							// entity.attribute.setMin(attrId, minValue);
-							var min = {};
-							min[attrId] = minValue;
 
-							entity.streamUpdateData([{ attributesMin: min }]);
+							entity.update(attrId, null, minValue, null);
 						}
 						break;
 
@@ -2466,11 +2465,8 @@ var ActionComponent = TaroEntity.extend({
 						var maxValue = self._script.variable.getValue(action.value, vars);
 
 						if (entity && self.entityCategories.indexOf(entity._category) > -1 && entity._stats.attributes[attrId] != undefined && !isNaN(maxValue)) {
-							// entity.attribute.setMax(attrId, maxValue);
-							var max = {};
-							max[attrId] = maxValue;
 
-							entity.streamUpdateData([{ attributesMax: max }]);
+							entity.attribute.update(attrId, null, null, maxValue);
 						}
 						break;
 
