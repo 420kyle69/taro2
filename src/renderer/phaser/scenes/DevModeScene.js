@@ -26,15 +26,21 @@ var DevModeScene = /** @class */ (function (_super) {
         this.entityImages = [];
         this.showRepublishWarning = false;
         taro.client.on('unlockCamera', function () {
-            _this.gameScene.cameras.main.stopFollow();
+            var camera = _this.gameScene.cameras.main;
+            camera.stopFollow();
+            if (_this.gameScene.useBounds)
+                camera.useBounds = false;
         });
         taro.client.on('lockCamera', function () {
             var _a, _b, _c, _d;
             taro.client.emit('zoom', taro.client.zoom);
             var trackingDelay = ((_d = (_c = (_b = (_a = taro === null || taro === void 0 ? void 0 : taro.game) === null || _a === void 0 ? void 0 : _a.data) === null || _b === void 0 ? void 0 : _b.settings) === null || _c === void 0 ? void 0 : _c.camera) === null || _d === void 0 ? void 0 : _d.trackingDelay) || 3;
             trackingDelay = trackingDelay / 60;
+            var camera = _this.gameScene.cameras.main;
             if (_this.gameScene.cameraTarget)
-                _this.gameScene.cameras.main.startFollow(_this.gameScene.cameraTarget, false, trackingDelay, trackingDelay);
+                camera.startFollow(_this.gameScene.cameraTarget, false, trackingDelay, trackingDelay);
+            if (_this.gameScene.useBounds)
+                camera.useBounds = true;
         });
         taro.client.on('enterMapTab', function () {
             _this.enterMapTab();
@@ -59,6 +65,53 @@ var DevModeScene = /** @class */ (function (_super) {
             if (!found) {
                 _this.createEntityImage(data);
             }
+        });
+        taro.client.on('applyScriptChanges', function (data) {
+            taro.network.send('editGlobalScripts', data);
+        });
+        taro.client.on('editGlobalScripts', function (data) {
+            Object.entries(data).forEach(function (_a) {
+                var scriptId = _a[0], script = _a[1];
+                if (!script.deleted) {
+                    taro.developerMode.serverScriptData[scriptId] = script;
+                }
+                else {
+                    delete taro.developerMode.serverScriptData[scriptId];
+                }
+            });
+            taro.script.load(data, true);
+            taro.script.scriptCache = {};
+        });
+        taro.client.on('applyVariableChanges', function (data) {
+            taro.network.send('editVariable', data);
+        });
+        taro.client.on('editVariable', function (data) {
+            Object.entries(data).forEach(function (_a) {
+                var key = _a[0], variable = _a[1];
+                //editing existing variable
+                if (taro.game.data.variables[key]) {
+                    //deleting variable
+                    if (variable.delete) {
+                        delete taro.game.data.variables[key];
+                        //renaming variable
+                    }
+                    else if (variable.newKey) {
+                        taro.game.data.variables[variable.newKey] = taro.game.data.variables[key];
+                        delete taro.game.data.variables[key];
+                        //editing variable
+                    }
+                    else {
+                        taro.game.data.variables[key].value = variable.value;
+                    }
+                    //creating new variable
+                }
+                else {
+                    taro.game.data.variables[key] = {
+                        dataType: variable.dataType,
+                        value: variable.value
+                    };
+                }
+            });
         });
         taro.client.on('updateInitEntities', function () {
             _this.updateInitEntities();
@@ -103,18 +156,18 @@ var DevModeScene = /** @class */ (function (_super) {
             });
             this.load.image(key, this.patchAssetUrl(tileset.image));
         });*/
-        this.load.image('cursor', 'https://cache.modd.io/asset/spriteImage/1666276041347_cursor.png');
-        this.load.image('entity', 'https://cache.modd.io/asset/spriteImage/1686840222943_cube.png');
-        this.load.image('region', 'https://cache.modd.io/asset/spriteImage/1666882309997_region.png');
-        this.load.image('stamp', 'https://cache.modd.io/asset/spriteImage/1666724706664_stamp.png');
-        this.load.image('eraser', 'https://cache.modd.io/asset/spriteImage/1666276083246_erasergap.png');
-        this.load.image('eyeopen', 'https://cache.modd.io/asset/spriteImage/1669820752914_eyeopen.png');
-        this.load.image('eyeclosed', 'https://cache.modd.io/asset/spriteImage/1669821066279_eyeclosed.png');
-        this.load.image('fill', 'https://cache.modd.io/asset/spriteImage/1675428550006_fill_(1).png');
-        this.load.image('clear', 'https://cache.modd.io/asset/spriteImage/1681917489086_layerClear.png');
-        this.load.image('save', 'https://cache.modd.io/asset/spriteImage/1681916834218_saveIcon.png');
-        this.load.image('redo', 'https://cache.modd.io/asset/spriteImage/1686899810953_redo.png');
-        this.load.image('undo', 'https://cache.modd.io/asset/spriteImage/1686899853748_undo.png');
+        this.load.image('cursor', this.patchAssetUrl('https://cache.modd.io/asset/spriteImage/1666276041347_cursor.png'));
+        this.load.image('entity', this.patchAssetUrl('https://cache.modd.io/asset/spriteImage/1686840222943_cube.png'));
+        this.load.image('region', this.patchAssetUrl('https://cache.modd.io/asset/spriteImage/1666882309997_region.png'));
+        this.load.image('stamp', this.patchAssetUrl('https://cache.modd.io/asset/spriteImage/1666724706664_stamp.png'));
+        this.load.image('eraser', this.patchAssetUrl('https://cache.modd.io/asset/spriteImage/1666276083246_erasergap.png'));
+        this.load.image('eyeopen', this.patchAssetUrl('https://cache.modd.io/asset/spriteImage/1669820752914_eyeopen.png'));
+        this.load.image('eyeclosed', this.patchAssetUrl('https://cache.modd.io/asset/spriteImage/1669821066279_eyeclosed.png'));
+        this.load.image('fill', this.patchAssetUrl('https://cache.modd.io/asset/spriteImage/1675428550006_fill_(1).png'));
+        this.load.image('clear', this.patchAssetUrl('https://cache.modd.io/asset/spriteImage/1681917489086_layerClear.png'));
+        this.load.image('save', this.patchAssetUrl('https://cache.modd.io/asset/spriteImage/1681916834218_saveIcon.png'));
+        this.load.image('redo', this.patchAssetUrl('https://cache.modd.io/asset/spriteImage/1686899810953_redo.png'));
+        this.load.image('undo', this.patchAssetUrl('https://cache.modd.io/asset/spriteImage/1686899853748_undo.png'));
         this.load.scenePlugin('rexuiplugin', '/assets/js/rexuiplugin.min.js', 
         //'src/renderer/phaser/rexuiplugin.min.js',
         'rexUI', 'rexUI');

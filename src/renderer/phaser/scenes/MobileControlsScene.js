@@ -39,19 +39,17 @@ var MobileControlsScene = /** @class */ (function (_super) {
                 default:
                     var relativeX_1 = Math.trunc((x + w / 2) / 960 * window.innerWidth - w / 2);
                     var relativeY_1 = Math.trunc((y + h / 2) / 540 * window.innerHeight - h / 2);
-                    if (key !== 'button1') {
-                        var uiScene_1 = taro.renderer.scene.getScene('Ui');
-                        var buttonExist_1 = false;
-                        Object.values((_a = uiScene_1 === null || uiScene_1 === void 0 ? void 0 : uiScene_1.abilityBar) === null || _a === void 0 ? void 0 : _a.buttons).forEach(function (button) {
-                            if (button.key === key) {
-                                button.x = relativeX_1 - uiScene_1.abilityBar.x + button.size / 2;
-                                button.y = relativeY_1 - uiScene_1.abilityBar.y + button.size / 2;
-                                buttonExist_1 = true;
-                            }
-                        });
-                        if (buttonExist_1)
-                            return;
-                    }
+                    var uiScene_1 = taro.renderer.scene.getScene('Ui');
+                    var buttonExist_1 = false;
+                    Object.values((_a = uiScene_1 === null || uiScene_1 === void 0 ? void 0 : uiScene_1.abilityBar) === null || _a === void 0 ? void 0 : _a.buttons).forEach(function (button) {
+                        if (button.key === key) {
+                            button.x = relativeX_1 - uiScene_1.abilityBar.x + button.size / 2;
+                            button.y = relativeY_1 - uiScene_1.abilityBar.y + button.size / 2;
+                            buttonExist_1 = true;
+                        }
+                    });
+                    if (buttonExist_1)
+                        return;
                     var text = key.toUpperCase();
                     var button_1 = _this.add.image(relativeX_1, relativeY_1, 'mobile-button-up')
                         .setDisplaySize(w, h)
@@ -102,6 +100,32 @@ var MobileControlsScene = /** @class */ (function (_super) {
                     break;
             }
         });
+        var resized = false;
+        taro.mobileControls.on('orientationchange', function (e) {
+            switch (e) {
+                case 'portrait-primary':
+                    _this.game.scale.setGameSize(window.innerWidth, window.innerHeight);
+                    if (resized) {
+                        resized = false;
+                    }
+                    else {
+                        resized = true;
+                        window.dispatchEvent(new Event('resize'));
+                    }
+                    break;
+                case 'landscape-primary':
+                    _this.game.scale.setGameSize(window.innerWidth, window.innerHeight);
+                    if (resized) {
+                        resized = false;
+                    }
+                    else {
+                        resized = true;
+                        window.dispatchEvent(new Event('resize'));
+                    }
+                    break;
+                default:
+            }
+        });
         taro.mobileControls.on('clear-controls', function () {
             joysticks.forEach(function (j) {
                 j.destroy();
@@ -129,30 +153,41 @@ var MobileControlsScene = /** @class */ (function (_super) {
                     }]);
             }
             if (!this.disablePointerEvents) {
-                var touchX = pointer.x;
-                var touchY = pointer.y;
-                if (touchX < this.cameras.main.displayWidth / 2.4) {
-                    var leftJoystick = this.joysticks.find(function (_a) {
-                        var side = _a.side;
-                        return side === 'left';
-                    });
-                    if (leftJoystick) {
-                        leftJoystick.show();
-                        leftJoystick.x = touchX;
-                        leftJoystick.y = touchY;
-                        leftJoystick.updateTransform();
-                    }
+                if (this.joysticks.length === 0)
+                    return;
+                else if (this.joysticks.length === 1) {
+                    var joystick = this.joysticks[0];
+                    joystick.show();
+                    joystick.x = pointer.x;
+                    joystick.y = pointer.y;
+                    joystick.updateTransform();
                 }
-                else if (touchX > this.cameras.main.displayWidth - (this.cameras.main.displayWidth / 2.4)) {
-                    var rightJoystick = this.joysticks.find(function (_a) {
-                        var side = _a.side;
-                        return side === 'right';
-                    });
-                    if (rightJoystick) {
-                        rightJoystick.show();
-                        rightJoystick.x = touchX;
-                        rightJoystick.y = touchY;
-                        rightJoystick.updateTransform();
+                else {
+                    var touchX = pointer.x;
+                    var touchY = pointer.y;
+                    if (touchX < this.cameras.main.displayWidth / 2.4) {
+                        var leftJoystick = this.joysticks.find(function (_a) {
+                            var side = _a.side;
+                            return side === 'left';
+                        });
+                        if (leftJoystick) {
+                            leftJoystick.show();
+                            leftJoystick.x = touchX;
+                            leftJoystick.y = touchY;
+                            leftJoystick.updateTransform();
+                        }
+                    }
+                    else if (touchX > this.cameras.main.displayWidth - (this.cameras.main.displayWidth / 2.4)) {
+                        var rightJoystick = this.joysticks.find(function (_a) {
+                            var side = _a.side;
+                            return side === 'right';
+                        });
+                        if (rightJoystick) {
+                            rightJoystick.show();
+                            rightJoystick.x = touchX;
+                            rightJoystick.y = touchY;
+                            rightJoystick.updateTransform();
+                        }
                     }
                 }
             }
@@ -196,6 +231,9 @@ var MobileControlsScene = /** @class */ (function (_super) {
     };
     MobileControlsScene.prototype.update = function () {
         if (this.enablePointerNextUpdate) {
+            this.joysticks.forEach(function (j) {
+                j.settings.onEnd && j.settings.onEnd();
+            });
             this.enablePointerNextUpdate = false;
             this.disablePointerEvents = false;
         }
@@ -225,6 +263,13 @@ var MobileControlsScene = /** @class */ (function (_super) {
             });
             if (rightJoystick)
                 rightJoystick.hide();
+        }
+        else {
+            var worldPoint = gameScene.cameras.main.getWorldPoint(gameScene.input.activePointer.x, gameScene.input.activePointer.y);
+            taro.input.emit('pointermove', [{
+                    x: worldPoint.x,
+                    y: worldPoint.y,
+                }]);
         }
     };
     MobileControlsScene.prototype.enterFullscreen = function () {

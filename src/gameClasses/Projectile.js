@@ -112,10 +112,12 @@ var Projectile = TaroEntityPhysics.extend({
 	_behaviour: function (ctx) {
 		var self = this;
 		
-		_.forEach(taro.triggersQueued, function (trigger) {
-			trigger.params['thisEntityId'] = self.id();
-			self.script.trigger(trigger.name, trigger.params);
-		});
+		if (taro.gameLoopTickHasExecuted) {
+			_.forEach(taro.triggersQueued, function (trigger) {
+				trigger.params['thisEntityId'] = self.id();
+				self.script.trigger(trigger.name, trigger.params);
+			});
+		}
 
 		// if entity (unit/item/player/projectile) has attribute, run regenerate
 		if (taro.isServer) {
@@ -160,6 +162,7 @@ var Projectile = TaroEntityPhysics.extend({
 		}
 
 		self.script.load(data.scripts);
+		self.script.scriptCache = {};
 
 		self._stats.type = type;
 
@@ -277,6 +280,7 @@ var Projectile = TaroEntityPhysics.extend({
 	},
 
 	destroy: function () {
+		this.script.trigger('initEntityDestroy');
 		this.playEffect('destroy');
 		TaroEntityPhysics.prototype.destroy.call(this);
 		if (taro.physics && taro.physics.engine == 'CRASH') {

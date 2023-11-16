@@ -7,6 +7,7 @@ var AbilityComponent = TaroEntity.extend({
 		self._entity = entity;
 
 		this.activeAbilities = {};
+		this.abilityDurations = {};
 		this.abilityCooldowns = {};
 	},
 
@@ -247,12 +248,20 @@ var AbilityComponent = TaroEntity.extend({
 	},
 
 	startCasting: function (abilityId) {
-		if (this.activeAbilities[abilityId]) {
+		if (
+			this.activeAbilities[abilityId]
+			|| this.abilityCooldowns[abilityId]
+		) {
 			return;
 		}
 
 		const player = this._entity.getOwner();
 		const ability = this._entity._stats.controls.unitAbilities[abilityId];
+
+		if (!ability) {
+			// script error log here
+			return;
+		}
 
 		if (!this.canAffordCost(ability, player)) {
 			return;
@@ -267,13 +276,20 @@ var AbilityComponent = TaroEntity.extend({
 
 		this.activeAbilities[abilityId] = true;
 
-		if (ability.castDuration) {
-			this.abilityCooldowns[abilityId] = Date.now() + ability.castDuration;
+		if (!(ability.cooldown === null || ability.cooldown === undefined || isNaN(ability.cooldown))) {
+			this.abilityCooldowns[abilityId] = Date.now() + ability.cooldown;
+			if (taro.isClient && this._entity._stats.clientId === taro.network.id()) {
+				taro.client.emit('start-ability-cooldown', abilityId);
+			}
 		}
 
-        if (taro.isClient && this._entity._stats.clientId === taro.network.id()) {
-            taro.client.emit('start-casting', abilityId);
-        }
+		if (!(ability.castDuration === null || ability.castDuration === undefined || isNaN(ability.castDuration))) {
+			this.abilityDurations[abilityId] = Date.now() + ability.castDuration;
+		}
+
+		if (taro.isClient && this._entity._stats.clientId === taro.network.id()) {
+			taro.client.emit('start-casting', abilityId);
+		}
 	},
 
 	stopCasting: function (abilityId) {
@@ -283,6 +299,11 @@ var AbilityComponent = TaroEntity.extend({
 
 		const ability = this._entity._stats.controls.unitAbilities[abilityId];
 
+		if (!ability) {
+			// script error log here
+			return;
+		}
+
 		this.activeAbilities[abilityId] = false;
 
 		this._entity.script.runScript(
@@ -290,18 +311,31 @@ var AbilityComponent = TaroEntity.extend({
 			{ triggeredBy: { unitId: this._entity.id()} }
 		);
 
-        if (taro.isClient && this._entity._stats.clientId === taro.network.id()) {
-            taro.client.emit('stop-casting', abilityId);
-        }
+		if (taro.isClient && this._entity._stats.clientId === taro.network.id()) {
+			taro.client.emit('stop-casting', abilityId);
+		}
 	},
 	_behaviour: function (ctx) {
 
+		if (Object.keys(this.abilityDurations).length > 0) {
+			for (let id in this.abilityDurations) {
+
+				if (this.abilityDurations[id] <= Date.now()) {
+					delete this.abilityDurations[id];
+					this.stopCasting(id);
+				}
+			}
+		}
+
 		if (Object.keys(this.abilityCooldowns).length > 0) {
 			for (let id in this.abilityCooldowns) {
-
 				if (this.abilityCooldowns[id] <= Date.now()) {
+
+					if (taro.isClient && this._entity._stats.clientId === taro.network.id()) {
+						taro.client.emit('stop-ability-cooldown', id);
+					}
+
 					delete this.abilityCooldowns[id];
-					this.stopCasting(id);
 				}
 			}
 		}

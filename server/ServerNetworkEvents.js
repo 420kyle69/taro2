@@ -109,7 +109,15 @@ var ServerNetworkEvents = {
 			return;
 		}
 		// check joining user is same as token user.
-		else if ((socket._token.userId && socket._token.userId !== data._id) || (socket._token.sessionId && socket._token.sessionId !== data.sessionId)) {
+		else if (
+			data == undefined || 
+			(
+				data && (
+					(socket._token.userId && socket._token.userId !== data._id) || 
+					(socket._token.sessionId && socket._token.sessionId !== data.sessionId)
+				)
+			)		
+		) {
 			console.log('Unauthenticated user joining the game (ServerNetworkEvent.js)');
 			socket.close('Unauthenticated user joining the game');
 			return;
@@ -458,8 +466,16 @@ var ServerNetworkEvents = {
 		taro.developerMode.editRegion(data, clientId);
 	},
 
+	_onEditVariable: function(data, clientId) {
+		taro.developerMode.editVariable(data, clientId);
+	},
+
 	_onEditInitEntity: function(data, clientId) {
 		taro.developerMode.editInitEntity(data, clientId);
+	},
+
+	_onEditGlobalScripts: function(data, clientId) {
+		taro.developerMode.editGlobalScripts(data, clientId);
 	},
 
 	_onRequestInitEntities: function(data, clientId) {

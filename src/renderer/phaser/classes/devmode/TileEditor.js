@@ -204,6 +204,8 @@ var TileEditor = /** @class */ (function () {
         if (taroMap.layers.length > 4 && layer >= 2) {
             tempLayer++;
         }
+        tileX = brushSize === 'fitContent' ? calcData.minX : tileX;
+        tileY = brushSize === 'fitContent' ? calcData.minY : tileY;
         if (this.gameScene.tilemapLayers[layer].visible && selectedTiles) {
             for (var x = 0; x < size.x; x++) {
                 for (var y = 0; y < size.y; y++) {

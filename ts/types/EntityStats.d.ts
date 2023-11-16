@@ -1,4 +1,5 @@
 declare interface EntityStats {
+	clientId: string;
 	controlledBy: string;
 	ownerId: string;
 	selectedUnitId: string | number | object;
@@ -6,6 +7,7 @@ declare interface EntityStats {
 	defaultData: any;
 
 	name: string;
+	nameLabelColor?: string;
 	currentBody: {
 		jointType: string;
 		width: number;

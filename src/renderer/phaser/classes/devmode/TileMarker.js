@@ -48,10 +48,10 @@ var TileMarker = /** @class */ (function () {
             this.graphics.scaleSides(x, y);
             this.hideImages();
             var previewTarget = this.devModeScene.tileEditor.selectedTileArea;
-            var sample = this.devModeScene.tileEditor.brushArea.calcSample(previewTarget, { x: x, y: y });
+            var sample = this.devModeScene.tileEditor.brushArea.calcSample(previewTarget, { x: x, y: y }).sample;
             for (var i = 0; i < x; i++) {
                 for (var j = 0; j < y; j++) {
-                    if (sample[i] && sample[i][j]) {
+                    if (sample[i] && sample[i][j] !== undefined) {
                         this.changeImage(sample[i][j], i, j);
                     }
                 }

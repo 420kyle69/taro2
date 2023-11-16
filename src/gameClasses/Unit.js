@@ -302,7 +302,7 @@ var Unit = TaroEntityPhysics.extend({
 		var previousOwnerPlayer = self.getOwner();
 		self.ownerPlayer = undefined;
 		if (previousOwnerPlayer && previousOwnerPlayer.id() !== newOwnerPlayerId) {
-			previousOwnerPlayer.disownUnit(self);
+			previousOwnerPlayer.disownUnit(self, true);
 		}
 		// add this unit to the new owner
 		var newOwnerPlayer = newOwnerPlayerId ? taro.$(newOwnerPlayerId) : undefined;
@@ -522,37 +522,45 @@ var Unit = TaroEntityPhysics.extend({
 					// disable coin consuming due to some bug wrt coins
 					// add coin consuming code
 					if (taro.game.data.defaultData.tier >= 2) {
-
 						try {
-							const jwt = require("jsonwebtoken");
-
-							const isUsedToken = taro.server.usedCoinJwts[token];
-							if (isUsedToken) {
-								console.log('Token has been used already', token);
-								return;
-							}
-
-							const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
-							const {type, userId, purchasableId, createdAt} = decodedToken;
-
-							if (type === 'pinValidationToken' && userId && purchasableId && ownerPlayer._stats.userId === userId && purchasableId === itemTypeId) {
-								// allow coin transaction since token has been verified
-
-								// store token for current client
-								taro.server.usedCoinJwts[token] = createdAt;
-
-								// remove expired tokens
-								const filteredUsedCoinJwts = {};
-								const usedTokenEntries = Object.entries(taro.server.usedCoinJwts).filter(([token, tokenCreatedAt]) => (Date.now() - tokenCreatedAt) < taro.server.COIN_JWT_EXPIRES_IN);
-								for (const [key, value] of usedTokenEntries) {
-									if (typeof value === 'number') {
-										filteredUsedCoinJwts[key] = value;
-									}
-								}
-								taro.server.usedCoinJwts = filteredUsedCoinJwts;
-
+							var socket = taro.network._socketById[ownerPlayer._stats.clientId];
+							const VERIFICATION_UNLOCKED_FOR = 35 * 60 * 1000; // 35 mins - 5 mins more than what is configured on client side to avoid race conditions
+							if (!token && socket?._token?.pinVerifiedAt && socket?._token?.pinVerifiedAt + VERIFICATION_UNLOCKED_FOR > Date.now()) {
+								
+								// if token is not provided then check for last verification if done in 30mins. if yes, allow transaction
+								
 							} else {
-								return;
+								const jwt = require("jsonwebtoken");
+								
+								const isUsedToken = taro.server.usedCoinJwts[token];
+								if (isUsedToken) {
+									console.log('Token has been used already', token);
+									return;
+								}
+								
+								const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
+								const {type, userId, purchasableId, createdAt} = decodedToken;
+								
+								if (type === 'pinValidationToken' && userId && purchasableId && ownerPlayer._stats.userId === userId && purchasableId === itemTypeId) {
+									// allow coin transaction since token has been verified
+									
+									// store token for current client
+									taro.server.usedCoinJwts[token] = createdAt;
+									socket._token.pinVerifiedAt = Date.now();
+									
+									// remove expired tokens
+									const filteredUsedCoinJwts = {};
+									const usedTokenEntries = Object.entries(taro.server.usedCoinJwts).filter(([token, tokenCreatedAt]) => (Date.now() - tokenCreatedAt) < taro.server.COIN_JWT_EXPIRES_IN);
+									for (const [key, value] of usedTokenEntries) {
+										if (typeof value === 'number') {
+											filteredUsedCoinJwts[key] = value;
+										}
+									}
+									taro.server.usedCoinJwts = filteredUsedCoinJwts;
+									
+								} else {
+									return;
+								}
 							}
 						} catch (e) {
 							console.log('invalid pinValidationToken', e.message, token);
@@ -761,6 +769,7 @@ var Unit = TaroEntityPhysics.extend({
 		}
 
 		self.script.load(data.scripts);
+		self.script.scriptCache = {};
 
 		self._stats.type = type;
 
@@ -904,8 +913,6 @@ var Unit = TaroEntityPhysics.extend({
 			// redraw for units which are not having attributebars too
 			self.redrawAttributeBars();
 			self.equipSkin(undefined);
-			// if mobile controls are in use configure for this unit
-			self.renderMobileControl();
 
 			if (self.unitUi) {
 				self.unitUi.updateAllAttributeBars();
@@ -915,6 +922,8 @@ var Unit = TaroEntityPhysics.extend({
             if (self._stats.clientId === taro.network.id() && data.controls.unitAbilities) {
                 taro.client.emit('create-ability-bar', {keybindings: data.controls.abilities, abilities: data.controls.unitAbilities});
             }
+            // if mobile controls are in use configure for this unit
+			self.renderMobileControl();
 		}
 
 		if (self.ai && self._stats.ai) {
@@ -1438,7 +1447,7 @@ var Unit = TaroEntityPhysics.extend({
 
 		// remove this unit from its owner player's unitIds
 		if (ownerPlayer) {
-			ownerPlayer.disownUnit(self);
+			ownerPlayer.disownUnit(self, false);
 		}
 
 		if (taro.isClient) {
@@ -1480,7 +1489,7 @@ var Unit = TaroEntityPhysics.extend({
 	streamUpdateData: function (queuedData, clientId) {
 		var self = this;
 		// Unit.prototype.log("unit streamUpdateData", data)
-		
+
 		TaroEntity.prototype.streamUpdateData.call(this, queuedData, clientId);
 
 		for (var i = 0; i < queuedData.length; i++) {
@@ -1609,9 +1618,19 @@ var Unit = TaroEntityPhysics.extend({
 							self.setOwnerPlayer(newValue);
 						}
 						break;
+
+					case 'nameLabelColor':
+						if (taro.isClient) {
+							this.emit(
+								'update-label',
+								{
+									text: this._stats.name,
+									bold: (this == taro.client.selectedUnit),
+									color: newValue,
+								}
+							);
+						}
 				}
-
-
 			}
 		}
 	},
@@ -1822,6 +1841,30 @@ var Unit = TaroEntityPhysics.extend({
 		// );
 	},
 
+	setNameLabelColor: function(color, player) {
+		if (taro.isClient) {
+			this.emit(
+				'update-label',
+				{
+					text: unit._stats.name,
+					bold: (unit == taro.client.selectedUnit),
+					color: color,
+				}
+			);
+
+		} else if (taro.isServer) {
+			if (player) {
+				const clientId = player._stats.clientId;
+
+				this.streamUpdateData([{ nameLabelColor: color }], clientId);
+
+				return;
+			}
+
+			this.streamUpdateData([{ nameLabelColor: color }]);
+		}
+	},
+
 	startMoving: function () {
 		if (!this.isMoving) {
 			this.playEffect('move');
@@ -1871,10 +1914,12 @@ var Unit = TaroEntityPhysics.extend({
 	_behaviour: function (ctx) {
 		var self = this;
 
-		_.forEach(taro.triggersQueued, function (trigger) {
-			trigger.params['thisEntityId'] = self.id();
-			self.script.trigger(trigger.name, trigger.params);
-		});
+		if (taro.gameLoopTickHasExecuted) {
+			_.forEach(taro.triggersQueued, function (trigger) {
+				trigger.params['thisEntityId'] = self.id();
+				self.script.trigger(trigger.name, trigger.params);
+			});
+		}
 
 		if (taro.isServer || (taro.isClient && taro.client.selectedUnit == this)) {
 			// ability component behaviour method call
@@ -2048,6 +2093,7 @@ var Unit = TaroEntityPhysics.extend({
 			this.attributeBars.length = 0;
 			this.attributeBars = null;
 		}
+		this.script.trigger('initEntityDestroy');
 		this.playEffect('destroy');
 		TaroEntityPhysics.prototype.destroy.call(this);
 	}

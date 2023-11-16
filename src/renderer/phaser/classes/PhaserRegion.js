@@ -26,6 +26,7 @@ var PhaserRegion = /** @class */ (function (_super) {
         gameObject.setSize(stats.width, stats.height);
         gameObject.setPosition(stats.x + stats.width / 2, stats.y + stats.height / 2);
         gameObject.setInteractive();
+        gameObject.setDepth(1000);
         gameObject.on('pointerover', function (p) {
             if (!p.isDown) {
                 _this.scene.input.setTopOnly(false);
@@ -43,11 +44,13 @@ var PhaserRegion = /** @class */ (function (_super) {
         devModeScene.regions.push(_this);
         _this.updateLabel();
         _this.transform();
-        if (_this.devModeOnly && !taro.developerMode.active && taro.developerMode.activeTab !== 'play') {
+        if (_this.devModeOnly && taro.developerMode.activeTab !== 'map') {
             _this.hide();
         }
+        _this.zoomEvtListener = taro.client.on('scale', _this.scaleElements, _this);
         return _this;
     }
+    ;
     PhaserRegion.prototype.getLabel = function () {
         if (!this.label) {
             var scene = this.scene;
@@ -86,6 +89,9 @@ var PhaserRegion = /** @class */ (function (_super) {
             label.setScale(tempScale);
             rt.setPosition(label.x, label.y);
         }
+        if (this.devModeOnly && taro.developerMode.activeTab !== 'map') {
+            this.hide();
+        }
     };
     PhaserRegion.prototype.transform = function () {
         var gameObject = this.gameObject;
@@ -93,6 +99,26 @@ var PhaserRegion = /** @class */ (function (_super) {
         var label = this.label;
         var rtLabel = this.rtLabel;
         var stats = this.entity._stats.default;
+        if (stats.inside === '') {
+            this.devModeOnly = true;
+        }
+        else if (stats.inside) {
+            this.devModeOnly = false;
+        }
+        if (this.devModeOnly && taro.developerMode.activeTab !== 'map') {
+            this.hide();
+        }
+        else {
+            this.show();
+            if (taro.developerMode.activeTab !== 'map') {
+                label && (label.visible = false);
+                rtLabel && (rtLabel.visible = false);
+            }
+            else {
+                label && (label.visible = true);
+                rtLabel && (rtLabel.visible = true);
+            }
+        }
         gameObject.setSize(stats.width, stats.height);
         gameObject.setPosition(stats.x + stats.width / 2, stats.y + stats.height / 2);
         graphics.setPosition(-stats.width / 2, -stats.height / 2);
@@ -106,7 +132,6 @@ var PhaserRegion = /** @class */ (function (_super) {
             // between 0 and 1 or we default
             (stats.alpha && stats.alpha >= 0 && stats.alpha <= 1) ? stats.alpha : 1);
             graphics.strokeRect(0, 0, stats.width, stats.height);
-            graphics.setDepth(1000);
         }
         else {
             graphics.fillStyle(Number("0x".concat(stats.inside.substring(1))), 
@@ -133,10 +158,30 @@ var PhaserRegion = /** @class */ (function (_super) {
         label && (label.visible = false);
         rt && (rt.visible = false);
     };
+    PhaserRegion.prototype.scaleElements = function (data) {
+        var _this = this;
+        if (this.scaleTween) {
+            this.scaleTween.stop();
+            this.scaleTween = null;
+        }
+        var ratio = data.ratio;
+        var targetScale = 1 / ratio;
+        this.scaleTween = this.scene.tweens.add({
+            targets: this.getLabel(),
+            duration: 1000,
+            ease: Phaser.Math.Easing.Quadratic.Out,
+            scale: targetScale,
+            onComplete: function () {
+                _this.scaleTween = null;
+            }
+        });
+    };
     PhaserRegion.prototype.destroy = function () {
         var _this = this;
         this.devModeScene.regions = this.devModeScene.regions.filter(function (item) { return item !== _this; });
         this.scene.renderedEntities = this.scene.renderedEntities.filter(function (item) { return item !== _this.gameObject; });
+        taro.client.off('scale', this.zoomEvtListener);
+        this.zoomEvtListener = null;
         _super.prototype.destroy.call(this);
     };
     return PhaserRegion;

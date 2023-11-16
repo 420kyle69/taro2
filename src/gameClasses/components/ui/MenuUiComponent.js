@@ -12,7 +12,7 @@ var MenuUiComponent = TaroEntity.extend({
 		var playButtonClick = document.querySelector('#play-game-button');
 
 		if (taro.isClient) {
-			console.log('initializing UI elements...');
+			//console.log('initializing UI elements...');
 			self.shopType = '';
 			self.shopKey = '';
 			self.shopPage = 1;
@@ -813,16 +813,11 @@ var MenuUiComponent = TaroEntity.extend({
 		// 	}, 200);
 		// } else {
 		// window.preventFurtherAutoJoin = true;
-
-		if (typeof message == 'object' && message.type === 'SERVER_FULL') {
-			$('#server-disconnect-modal .modal-body').html(message.message || defaultContent);
-			$('#return-to-homepage-server').hide();
-			$('#join-another-server').show();
-		} else {
-			$('#server-disconnect-modal .modal-body').html(message || defaultContent);
-			$('#return-to-homepage-server').show();
-			$('#join-another-server').hide();
-		}
+		
+		$('#server-disconnect-modal .modal-body').html(message || defaultContent);
+		$('#return-to-homepage-server').show();
+		$('#join-another-server').hide();
+		
 		$('#server-disconnect-modal').modal('show');
 		// }
 

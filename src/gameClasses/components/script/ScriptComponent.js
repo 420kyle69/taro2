@@ -24,8 +24,18 @@ var ScriptComponent = TaroEntity.extend({
 		ScriptComponent.prototype.log('initializing Script Component');
 	},
 
-	load: function(scripts) {
-		this.scripts = scripts;
+	load: function(scripts, modify = false) {
+		if (modify) {
+			Object.entries(scripts).forEach(([scriptId, script]) => {
+				if (!script.deleted) {
+					this.scripts[scriptId] = script;
+				} else {
+					delete this.scripts[scriptId];
+				}
+			});
+		} else {
+			this.scripts = scripts;
+		}
 		// map trigger events, so we don't have to iterate through all scripts to find corresponding scripts
 		this.triggeredScripts = {};
 		for (var scriptId in this.scripts) {
@@ -96,7 +106,6 @@ var ScriptComponent = TaroEntity.extend({
 
 	/* trigger and run all of the corresponding script(s) */
 	trigger: function (triggerName, triggeredBy) {
-
 		if (taro.isServer) {
 			var now = Date.now();
 			var lastTriggerRunTime = now - taro.lastTriggerRanAt;
@@ -192,13 +201,14 @@ var ScriptComponent = TaroEntity.extend({
 				this.errorLogs[path].count++;
 			}
 			
-			// console.log('errorLog', path, message);
+			if (taro.env === 'standalone')
+				console.log('errorLog', path, message);
 			// taro.devLog('errorLog', message);
 			// ScriptComponent.prototype.log(log);
 		}
 
 		if (taro.isServer && taro.server.unpublishQueued) {
-			taro.server.unpublish(message + " " + path);	
+			taro.server.unpublish(message + " " + path);
 		}
 	}
 

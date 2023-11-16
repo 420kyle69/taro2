@@ -17,6 +17,8 @@ class EntitiesToRender {
 
 			// taro.profiler.logTimeElapsed('findEntity', timeStart);
 			if (entity) {
+				entity.script?.trigger("renderTick");
+
 				// handle entity behaviour and transformation offsets
 				// var timeStart = performance.now();
 
@@ -113,10 +115,20 @@ class EntitiesToRender {
 		// taro.triggersQueued = [];
 		if (taro.gameLoopTickHasExecuted) {
 			taro.gameLoopTickHasExecuted = false;
+
+			// triggersQueued must run for entity-scripts first then run for the world script.
+			// hence, this runs after the above's entity._behaviour() is executed.
+			// this is for client-only. for server, it runs in taroEngine.engineStep 
+			// because we run entity._behaviour in EntitiesToRender.ts for client, and taroEngine for server.
+			while (taro.script && taro.triggersQueued.length > 0) {
+				const trigger = taro.triggersQueued.shift();
+				taro.script.trigger(trigger.name, trigger.params);
+			}
 		}
 	}
 
 	frameTick(): void {
+		taro.script?.trigger("renderTick");
 		taro.engineStep(Date.now(), 1000/60);
 		taro.input.processInputOnEveryFps();
 

@@ -229,7 +229,7 @@ var Server = TaroClass.extend({
 		self.serverStartTime = new Date();// record start time
 		global.isDev = taro.env == 'dev' || taro.env == 'local' || taro.env === 'standalone' || taro.env === 'standalone-remote';
 		global.myIp = process.env.IP;
-		global.beUrl = self.config.BE_URL;
+		global.beUrl = process.env.BE_URL || self.config.BE_URL;
 
 		console.log('environment', taro.env, self.config);
 		console.log('isDev =', global.isDev);
@@ -286,11 +286,16 @@ var Server = TaroClass.extend({
 
 			// if production, then get ip first, and then start
 			if (['production', 'staging', 'standalone-remote'].includes(taro.env)) {
-				console.log('getting IP address');
-				publicIp.v4().then(ip => { // get public ip of server
-					self.ip = ip;
+				console.log('getting IP address', process.env.IP, process.env.IPV4);
+				if (process.env.IPV4) {
+					self.ip = process.env.IPV4;
 					self.start();
-				});
+				} else {
+					publicIp.v4().then(ip => { // get public ip of server
+						self.ip = ip;
+						self.start();
+					});
+				}
 			} else // use 127.0.0.1 if dev env
 			{
 				self.ip = '127.0.0.1';
@@ -548,14 +553,25 @@ var Server = TaroClass.extend({
 				taro.addComponent(ProfilerComponent);
 				self.gameStartedAt = new Date();
 
+				taro.defaultVariables = rfdc()(game.data.variables);
 				taro.game.data = game.data;
 
 				if (additionalData) {
 					taro.game.data = {
 						...taro.game.data,
 						...additionalData
-					}
+					};
 				}
+
+				taro.gameInfo = {
+					title: taro.game.data.defaultData.title,
+					_id: taro.game.data.defaultData._id,
+					tier: taro.game.data.defaultData.tier,
+					ownerId: taro.game.data.defaultData.owner?._id || taro.game.data.defaultData.owner,
+					ownerName: taro.game.data.defaultData.owner?.local?.username,
+					physicsEngine: taro.game.data.defaultData.physicsEngine,
+					gameSlug: taro.game.data.defaultData.gameSlug
+				};
 
 				taro.game.cspEnabled = !!taro.game.data.defaultData.clientSidePredictionEnabled;
 
@@ -641,9 +657,7 @@ var Server = TaroClass.extend({
 								taro.map.load(map);
 
 								taro.game.start();
-
-								self.gameLoaded = true;
-
+								
 								// send dev logs to developer every second
 								var logInterval = setInterval(function () {
 									// send only if developer client is connect
@@ -655,11 +669,11 @@ var Server = TaroClass.extend({
 										self.developerClientIds.forEach(
 											id => {
 												taro.network.send('devLogs', taro.game.devLogs, id);
-			
+
 												if (taro.profiler.isEnabled) {
 													taro.network.send('profile', taro.profiler.getProfile(), id);
 												}
-												
+
 												if (sendErrors) {
 													taro.network.send('errorLogs', taro.script.errorLogs, id);
 												}
@@ -781,7 +795,9 @@ var Server = TaroClass.extend({
 		taro.network.define('trade', self._onTrade);
 		taro.network.define('editTile', self._onEditTile);
 		taro.network.define('editRegion', self._onEditRegion);
+		taro.network.define('editVariable', self._onEditVariable);
 		taro.network.define('editInitEntity', self._onEditInitEntity);
+		taro.network.define('editGlobalScripts', self._onEditGlobalScripts);
 		taro.network.define('updateClientInitEntities', self._onRequestInitEntities);
 		taro.network.define('editEntity', self._onEditEntity);
 		taro.network.define('updateUnit', self._onUpdateUnit);
@@ -1003,6 +1019,19 @@ var Server = TaroClass.extend({
 			}
 			if (body.status === 'error') {
 				console.log('error in crediting ad-reward coins')
+			}
+		}
+	},
+
+	updateTempMute: function ({ player, banChat }) {
+		if (player && player._stats.banChat !== banChat) {
+			player.streamUpdateData([{ banChat: banChat }]);
+
+			if (player._stats.userId && taro.clusterClient) {
+				taro.clusterClient.updateTempMute({
+					banChat: banChat,
+					userId: player._stats.userId,
+				});
 			}
 		}
 	},

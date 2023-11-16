@@ -89,6 +89,19 @@ var PhaserRenderer = /** @class */ (function (_super) {
     PhaserRenderer.prototype.getViewportBounds = function () {
         return this.scene.getScene('Game').cameras.main.worldView;
     };
+    PhaserRenderer.prototype.getCameraPosition = function () {
+        var camera = this.scene.getScene('Game').cameras.main;
+        return {
+            x: camera.centerX,
+            y: camera.centerY
+        };
+    };
+    PhaserRenderer.prototype.getCameraWidth = function () {
+        return this.scene.getScene('Game').cameras.main.displayWidth;
+    };
+    PhaserRenderer.prototype.getCameraHeight = function () {
+        return this.scene.getScene('Game').cameras.main.displayHeight;
+    };
     return PhaserRenderer;
 }(Phaser.Game));
 //# sourceMappingURL=PhaserRenderer.js.map

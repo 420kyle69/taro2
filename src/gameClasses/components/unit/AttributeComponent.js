@@ -8,8 +8,7 @@ var AttributeComponent = TaroEntity.extend({
 
 		self.now = Date.now();
 		self.lastRegenerated = self.now;
-		self.lastSynced = self.now;
-
+		
 		// attributes is an object
 		if (entity._stats.attributes) {
 			const attributes = entity._stats.attributes;
@@ -212,27 +211,25 @@ var AttributeComponent = TaroEntity.extend({
 
 				if (taro.isServer) {
 					if (newValue != oldValue) {
-						// force sync with client every 5 seconds
-						if (
-							self._entity && self._entity._stats && self._entity._stats.attributes && self._entity._stats.attributes[attributeTypeId] &&
-							self._entity._stats.attributes[attributeTypeId].lastSyncedValue != newValue && // value is different from last sync'ed value and...
-							(
-								forceUpdate || // forceUpdate triggered
-								self._entity._stats.attributes[attributeTypeId].lastSynced == undefined || // it's never been sync'ed with client's attributes before or..
-								(self.now - self._entity._stats.attributes[attributeTypeId].lastSynced > 5000) // it's been over 5 seconds since we last sync'ed
-							)
-						) {
-							self._entity._stats.attributes[attributeTypeId].lastSynced = self.now;
+						// value is different from last sync'ed value and...
+						if (self._entity?._stats?.attributes[attributeTypeId] && self._entity._stats.attributes[attributeTypeId].lastSyncedValue != newValue) {
 							self._entity._stats.attributes[attributeTypeId].lastSyncedValue = newValue;
 							let attrData = { attributes: {} };
 							attrData.attributes[attributeTypeId] = newValue;
 
 							// console.log("update Attribute Value")
 
-							self._entity.streamUpdateData([attrData]);
-
+							if (
+								attribute.streamMode == null || attribute.streamMode == 1 ||  // don't stream if streamMode isn't sync'ed (1). Also added != null for legacy support.
+								attribute.streamMode == 4 || // streamMode 4 also sends to everyone. the ignoring part is done on client-side.
+								attributeTypeId == taro.game.data.settings.scoreAttributeId // always stream attribute that's used for scoreboard
+								|| attributeTypeId === taro.game.data.settings.persistentScoreAttributeId
+							) {
+								self._entity.streamUpdateData([attrData]);
+							} else if (attribute.streamMode == 3) {
+								self._entity.streamUpdateData([attrData], this._entity?.getOwner()?._stats?.clientId);
+							}
 							
-
 						}
 
 						var triggeredBy = { attribute: attribute };
@@ -261,7 +258,7 @@ var AttributeComponent = TaroEntity.extend({
 						}
 
 						// check if user breaks his highscore then assign it to new highscore
-						if (attributeTypeId == taro.game.data.settings.scoreAttributeId && self._entity._stats.highscore < newValue) {
+						if ((attributeTypeId == taro.game.data.settings.persistentScoreAttributeId) && self._entity._stats.highscore < newValue) {
 							if (!self._entity._stats.newHighscore) {
 								taro.gameText.alertHighscore(self._entity._stats.clientId);
 							}

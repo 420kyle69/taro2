@@ -16,6 +16,7 @@ class GameScene extends PhaserScene {
 	filter: Phaser.Textures.FilterMode;
     resolutionCoef: number;
 	trackingDelay: number;
+	useBounds: boolean;
 
 	constructor() {
 		super({ key: 'Game' });
@@ -27,11 +28,22 @@ class GameScene extends PhaserScene {
 			this.scene.launch('MobileControls');
 		}
 
+		this.resolutionCoef = 1;
+		this.useBounds = taro?.game?.data?.settings?.camera?.useBounds;
+
 		const camera = this.cameras.main;
 		camera.setBackgroundColor(taro.game.data.defaultData.mapBackgroundColor);
 
-        this.resolutionCoef = 1;
+		// set camera bounds
+		if (this.useBounds) {
+			if (taro.game.data.defaultData.dontResize) {
+				camera.setBounds(0, 0, taro.game.data.map.width * taro.game.data.map.tilewidth, taro.game.data.map.height * taro.game.data.map.tileheight, true);
+			} else {
+				camera.setBounds(0, 0, taro.game.data.map.width * 64, taro.game.data.map.height * 64, true);
+			}
+		}
 
+		// set camera tracking delay
 		this.trackingDelay = taro?.game?.data?.settings?.camera?.trackingDelay || 3;
         if (this.trackingDelay > 60) {
             this.trackingDelay = 60;
@@ -169,6 +181,30 @@ class GameScene extends PhaserScene {
 				if (canvas) {
 					this.textures.remove(texture);
 					this.textures.addCanvas(`extruded-${key}`, canvas);
+				} else {
+
+					if(window.toastErrorMessage){
+						window.toastErrorMessage(`Tileset "${tileset.name}" image doesn't match the specified parameters. ` +
+						`Double check your margin, spacing, tilewidth and tileheight.`);						
+					}else{
+						// WAITING TILL EDITOR IS LOADED
+						setTimeout(() => {
+							if(window.toastErrorMessage){
+								window.toastErrorMessage(`Tileset "${tileset.name}" image doesn't match the specified parameters. ` +
+								`Double check your margin, spacing, tilewidth and tileheight.`);
+							}else{
+								// IF editor is not loaded, show alert
+								alert(`Tileset "${tileset.name}" image doesn't match the specified parameters. ` +
+								`Double check your margin, spacing, tilewidth and tileheight.`);
+							}
+						}, 5000);
+					}
+
+
+					console.warn(`Tileset "${tileset.name}" image doesn't match the specified parameters. ` +
+						'Double check your margin, spacing, tilewidth and tileheight.');
+					this.scene.stop();
+					return;
 				}
 				const extrudedTexture = this.textures.get(`extruded-${key}`);
 				Phaser.Textures.Parsers.SpriteSheet(
@@ -288,8 +324,6 @@ class GameScene extends PhaserScene {
 
 		const data = taro.game.data;
 		const scaleFactor = taro.scaleMapDetails.scaleFactor;
-
-		console.log('map data', data.map);
 
 		data.map.tilesets.forEach((tileset) => {
 			const key = `tiles/${tileset.name}`;
@@ -603,10 +637,12 @@ class GameScene extends PhaserScene {
 		/*let trackingDelay = this.trackingDelay / taro.fps();
 		this.cameras.main.setLerp(trackingDelay, trackingDelay);*/
         const worldPoint = this.cameras.main.getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
-		taro.input.emit('pointermove', [{
-			x: worldPoint.x,
-			y: worldPoint.y,
-		}]);
+        if (!taro.isMobile) {
+		    taro.input.emit('pointermove', [{
+		    	x: worldPoint.x,
+		    	y: worldPoint.y,
+		    }]);
+        }
 
 		this.renderedEntities.forEach(element => {
 			element.setVisible(false);

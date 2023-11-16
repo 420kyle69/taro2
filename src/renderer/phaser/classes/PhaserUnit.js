@@ -70,6 +70,11 @@ var PhaserUnit = /** @class */ (function (_super) {
                 var bounds = this.entity._bounds2d;
                 this.sprite.setDisplaySize(bounds.x, bounds.y);
             }
+            // GameScene's load entity doesn't create sprite sheets so we have horrible
+            // errors when we try to create animations
+            if (this.sprite.texture.frameTotal === 1 || this.sprite.texture.key === 'pack-result') {
+                return;
+            }
             for (var animationsKey in this.entity._stats.animations) {
                 var animation = this.entity._stats.animations[animationsKey];
                 var frames_1 = animation.frames;
@@ -194,7 +199,7 @@ var PhaserUnit = /** @class */ (function (_super) {
         if (!taro.developerMode.active || taro.developerMode.activeTab === 'play') {
             var trackingDelay = ((_d = (_c = (_b = (_a = taro === null || taro === void 0 ? void 0 : taro.game) === null || _a === void 0 ? void 0 : _a.data) === null || _b === void 0 ? void 0 : _b.settings) === null || _c === void 0 ? void 0 : _c.camera) === null || _d === void 0 ? void 0 : _d.trackingDelay) || 3;
             trackingDelay = trackingDelay / taro.fps();
-            camera.startFollow(this.gameObject, false, trackingDelay, trackingDelay);
+            camera.startFollow(this.gameObject, true, trackingDelay, trackingDelay);
         }
     };
     PhaserUnit.prototype.getLabel = function () {
@@ -243,7 +248,7 @@ var PhaserUnit = /** @class */ (function (_super) {
         label.setFontFamily('Verdana');
         label.setFontSize(16);
         label.setFontStyle(data.bold ? 'bold' : 'normal');
-        label.setFill(data.color || '#fff');
+        label.setFill("".concat(data.color) || '#fff');
         if (this.scene.renderer.type !== Phaser.CANVAS)
             label.setResolution(4);
         var strokeThickness = taro.game.data.settings

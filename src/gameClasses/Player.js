@@ -109,6 +109,11 @@ var Player = TaroEntity.extend({
 					];
 				}
 
+				if (taro.server.developerClientIds.includes(clientId)) {
+					playerJoinStreamData.push({ scriptData: taro.game.data.scripts });
+					playerJoinStreamData.push({ variableData: taro.defaultVariables });
+				}
+
 				self.streamUpdateData(playerJoinStreamData);
 			}
 
@@ -157,18 +162,12 @@ var Player = TaroEntity.extend({
 	},
 
 	// remove unit from the array of units owned by this player
-	disownUnit: function (unit) {
+	disownUnit: function (unit, deselectUnit) {
 		var index = this._stats.unitIds.indexOf(unit.id());
 		if (index !== -1) {
 			this._stats.unitIds.splice(index, 1);
-			if (this._stats.selectedUnitId === unit.id()) {
-				var unit = taro.$(unit.id());
-				/*if (unit) {
-					unit.ability.stopMovingX();
-					unit.ability.stopMovingY();
-					unit.ability.stopUsingItem();
-				}*/
-				//this.selectUnit(null);
+			if (deselectUnit && this._stats.selectedUnitId === unit.id()) {
+				this.selectUnit(null);
 			}
 		}
 	},
@@ -182,20 +181,14 @@ var Player = TaroEntity.extend({
 
 		var unit = taro.$(unitId);
 		if (taro.isServer && self._stats.clientId) {
-			if (unit && unit._category == 'unit' && unit.getOwner() == this || unitId === null) {
+			if (unit && unit._category == 'unit' && unit.getOwner() == this) {
 				self._stats.selectedUnitId = unitId;
 				self.streamUpdateData([{ selectedUnitId: unitId }]);
-			} else {
-				// someone's attempting exploit by trying to assign a unit to a player that's not the unit's owner
-				var client = taro.server.clients[self._stats.clientId];
-				var logData = {
-					query: 'exploitSelectUnit',
-					gameTitle: taro.game.data.defaultData.title,
-					playerName: this._stats.name,
-					ip: client.ip,
-					userId: client.userId
-				};
-				global.rollbar.log("selectUnit exploit", logData);
+				unit.streamUpdateData([{ itemIds: unit._stats.itemIds }]); // send item inventory data for the newly selected unit
+			} else if (unitId === null) {
+				self.control.releaseAllKeys();
+				self._stats.selectedUnitId = null;
+				self.streamUpdateData([{ selectedUnitId: null }]);
 			}
 		}
 
@@ -213,16 +206,16 @@ var Player = TaroEntity.extend({
 
 				// abilities
 				const abilitiesData = taro.game.data.unitTypes[unit._stats.type].controls.unitAbilities;
-				//taro.client.emit('ability-icons', abilitiesData);
-
-                taro.client.emit('create-ability-bar', {keybindings: taro.game.data.unitTypes[unit._stats.type].controls.abilities, abilities: abilitiesData});
-				
+				taro.client.emit('create-ability-bar', { keybindings: taro.game.data.unitTypes[unit._stats.type].controls.abilities, abilities: abilitiesData });
 				unit.renderMobileControl();
+
+
 				taro.client.selectedUnit = unit;
 				taro.client.eventLog.push([taro._currentTime, `my unit selected ${unitId}`]);
-			} else if (unitId === null) {
-				self._stats.selectedUnitId = null;
+			} else if (self._stats.clientId == taro.network.id() && unitId === null) {
 				taro.client.selectedUnit = null;
+				self._stats.selectedUnitId = null;
+				self.control.releaseAllKeys();
 			}
 		}
 	},
@@ -569,6 +562,15 @@ var Player = TaroEntity.extend({
 								self.cameraTrackUnit(newValue);
 								break;
 
+							case 'scriptData':
+								taro.developerMode.serverScriptData = newValue;
+								break;
+
+							case 'variableData':
+								taro.developerMode.serverVariableData = newValue;
+								window.inGameEditor?.compareAndUpdateVariablesData && window.inGameEditor.compareAndUpdateVariablesData(newValue);
+								break;
+
 							case 'mapData':
 								self._stats[attrName] = newValue;
 								taro.developerMode.updateClientMap(data);
@@ -703,11 +705,11 @@ var Player = TaroEntity.extend({
 
 	updatePlayerHighscore: function () {
 		var self = this;
-		var scoreId = taro.game.data.settings.scoreAttributeId;
+		var scoreId = taro.game.data.settings.persistentScoreAttributeId;
 		try {
 			// comparing player highscore with current highscore. if current highscore is greter then request it to update server
 			if (scoreId && self._stats && self._stats.attributes && self._stats.attributes[scoreId] && (self._stats.highscore < self._stats.newHighscore || self._stats.highscore < self._stats.attributes[scoreId].value)) {
-				var score = Math.max(self._stats.newHighscore || 0, self._stats.attributes[taro.game.data.settings.scoreAttributeId].value || 0);
+				var score = Math.max(self._stats.newHighscore || 0, self._stats.attributes[scoreId].value || 0);
 
 				if (score > self._stats.highscore) {
 					// highscore updated

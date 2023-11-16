@@ -23,7 +23,7 @@ class TileShape {
 	 * @param temp if true, it won't change this.sample, but only return it instead.
 	 * @returns sample to print
 	 */
-	calcSample(selectedTileArea: Record<number, Record<number, number>>, size: Vector2D | 'fitContent', shape?: Shape, temp = false): { sample: Record<number, Record<number, number>>, xLength: number, yLength: number } {
+	calcSample(selectedTileArea: Record<number, Record<number, number>>, size: Vector2D | 'fitContent', shape?: Shape, temp = false): { sample: Record<number, Record<number, number>>, xLength: number, yLength: number, minX: number, minY: number } {
 		const xArray = Object.keys(selectedTileArea);
 		const yArray = Object.values(selectedTileArea).map((object) => Object.keys(object)).flat().sort((a, b) => parseInt(a) - parseInt(b));
 		const minX = parseInt(xArray[0]);
@@ -56,7 +56,7 @@ class TileShape {
 		if (!temp) {
 			this.sample = tempSample;
 		}
-		return { sample: tempSample, xLength, yLength };
+		return { sample: tempSample, xLength, yLength, minX, minY };
 	}
 
 	static calcCircle(minX: number, xLength: number, minY: number, yLength: number, selectedTileArea: Record<number, Record<number, number>>, size: Vector2D) {

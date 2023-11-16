@@ -2,6 +2,7 @@ var PhaserJoystick = /** @class */ (function () {
     function PhaserJoystick(scene, x, y, settings) {
         this.x = x;
         this.y = y;
+        this.settings = settings;
         var radius = this.radius = scene.cameras.main.displayWidth * 0.05;
         var base = scene.add.graphics();
         base.fillStyle(0x18181B, 0.9);

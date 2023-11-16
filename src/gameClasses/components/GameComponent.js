@@ -50,6 +50,8 @@ var GameComponent = TaroEntity.extend({
 		taro.script.trigger('gameStart');
 		self.hasStarted = true;
 		taro.timer.startGameClock();
+		
+		taro.clusterClient && taro.clusterClient.gameStarted();
 	},
 
 	// this applies to logged in players only
@@ -71,7 +73,7 @@ var GameComponent = TaroEntity.extend({
 			points: data.points || 0,
 			clientId: data.clientId,
 			purchasables: purchases, // purchasables are currently equipped purchasables of the player for current game
-			allPurchasables: data.allPurchasables, // allPurchasables includes equipped and purchased items of the player for current game			
+			allPurchasables: data.allPurchasables, // allPurchasables includes equipped and purchased items of the player for current game
 			attributes: data.attributes,
 			highscore: data.highscore,
 			lastPlayed: data.lastPlayed,
@@ -119,7 +121,6 @@ var GameComponent = TaroEntity.extend({
 			// taro.shopkeeper.updateShopInventory(taro.shopkeeper.inventory, data.clientId) // send latest ui information to the client
 
 			var isOwner = taro.server.owner == data._id && data.controlledBy == 'human';
-			
 
 			var isUserAdmin = false;
 			var isUserMod = false;
@@ -133,7 +134,7 @@ var GameComponent = TaroEntity.extend({
 			player._stats.isUserAdmin = isUserAdmin;
 			player._stats.isUserMod = isUserMod;
 			player._stats.isModerationAllowed = isOwner || isUserAdmin || isUserMod || (data.roleIds && roles.find(role => role?.permissions?.moderator && data.roleIds.includes(role._id.toString())));
-			
+
 			var isInvitedUser = (data.roleIds && roles.find(role => role?.permissions?.contributor && data.roleIds.includes(role._id.toString())));
 
 			// if User/Admin has access to game then show developer logs
@@ -156,7 +157,7 @@ var GameComponent = TaroEntity.extend({
 	},
 
 	kickPlayer: function(playerId, message) {
-		// var player = this.getPlayerByClientId(clientId);		
+		// var player = this.getPlayerByClientId(clientId);
 		// if (player) {
 		// 	player.streamUpdateData([{ playerJoined: false }]);
 		// }
@@ -172,7 +173,7 @@ var GameComponent = TaroEntity.extend({
 				// bot players don't have clientId
 				player.remove();
 			}
-		}		
+		}
 	},
 
 	// get client with ip

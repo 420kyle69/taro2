@@ -81,35 +81,42 @@ class PhaserUnit extends PhaserAnimatedEntity {
 				const bounds = this.entity._bounds2d;
 				this.sprite.setDisplaySize(bounds.x, bounds.y);
 			}
-            for (let animationsKey in this.entity._stats.animations) {
 
-                const animation = this.entity._stats.animations[animationsKey];
-                const frames = animation.frames;
-                const animationFrames: number[] = [];
+			// GameScene's load entity doesn't create sprite sheets so we have horrible
+			// errors when we try to create animations
+			if (this.sprite.texture.frameTotal === 1 || this.sprite.texture.key === 'pack-result') {
+				return;
+			}
 
-                for (let i = 0; i < frames.length; i++) {
-                    // correction for 0-based indexing
-                    animationFrames.push(frames[i] - 1);
-                }
+			for (let animationsKey in this.entity._stats.animations) {
 
-                if (animationFrames.length === 0) {
-                    // avoid crash by giving it frame 0 if no frame data provided
-                    animationFrames.push(0);
-                }
-                const anims = this.scene.anims;
-                if (anims.exists(`${this.key}/${animationsKey}`)) {
-                    anims.remove(`${this.key}/${animationsKey}`);
-                }
+				const animation = this.entity._stats.animations[animationsKey];
+				const frames = animation.frames;
+				const animationFrames: number[] = [];
 
-                anims.create({
-                    key: `${this.key}/${animationsKey}`,
-                    frames: anims.generateFrameNumbers(this.key, {
-                        frames: animationFrames
-                    }),
-                    frameRate: animation.framesPerSecond || 15,
-                    repeat: (animation.loopCount - 1) // correction for loop/repeat values
-                });
-            }
+				for (let i = 0; i < frames.length; i++) {
+					// correction for 0-based indexing
+					animationFrames.push(frames[i] - 1);
+				}
+
+				if (animationFrames.length === 0) {
+					// avoid crash by giving it frame 0 if no frame data provided
+					animationFrames.push(0);
+				}
+				const anims = this.scene.anims;
+				if (anims.exists(`${this.key}/${animationsKey}`)) {
+					anims.remove(`${this.key}/${animationsKey}`);
+				}
+
+				anims.create({
+					key: `${this.key}/${animationsKey}`,
+					frames: anims.generateFrameNumbers(this.key, {
+						frames: animationFrames
+					}),
+					frameRate: animation.framesPerSecond || 15,
+					repeat: (animation.loopCount - 1) // correction for loop/repeat values
+				});
+			}
 		} else if (data === 'using_skin') {
 			this.sprite.anims.stop();
 			this.key = `unit/${this.entity._stats.cellSheet.url}`;
@@ -223,7 +230,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		if (!taro.developerMode.active || taro.developerMode.activeTab === 'play') {
 			let trackingDelay = taro?.game?.data?.settings?.camera?.trackingDelay || 3;
 			trackingDelay = trackingDelay / taro.fps();
-			camera.startFollow(this.gameObject, false, trackingDelay, trackingDelay);
+			camera.startFollow(this.gameObject, true, trackingDelay, trackingDelay);
 		}
 	}
 
@@ -268,6 +275,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		color?: string;
 	}): void {
 		const label = this.getLabel();
+
 		//const rt = this.rtLabel;
 
 		//label.visible = !rt;
@@ -286,7 +294,8 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		label.setFontFamily('Verdana');
 		label.setFontSize(16);
 		label.setFontStyle(data.bold ? 'bold' : 'normal');
-		label.setFill(data.color || '#fff');
+
+		label.setFill(`${data.color}` || '#fff');
 		if (this.scene.renderer.type !== Phaser.CANVAS) label.setResolution(4);
 
 		const strokeThickness = taro.game.data.settings

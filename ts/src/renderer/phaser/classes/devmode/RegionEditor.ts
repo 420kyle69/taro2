@@ -27,7 +27,7 @@ class RegionEditor {
 			} else if (taro.developerMode.active && taro.developerMode.activeTab === 'map' && this.devModeScene.devModeTools.cursorButton.active && pointer.leftButtonDown()) {
                 gameObjects = gameObjects.filter(gameObject => gameObject.phaserRegion);
                 gameObjects.forEach(gameObject => {
-                    this.devModeScene.regionEditor.addClickedList({name: gameObject.phaserRegion.entity._stats.id, x: gameObject.phaserRegion.stats.x, y: gameObject.phaserRegion.stats.y, width: gameObject.phaserRegion.stats.width, height: gameObject.phaserRegion.stats.height});
+                    this.devModeScene.regionEditor.addClickedList({name: gameObject.phaserRegion.entity._stats.id, x: gameObject.phaserRegion.stats.x, y: gameObject.phaserRegion.stats.y, width: gameObject.phaserRegion.stats.width, height: gameObject.phaserRegion.stats.height, alpha: gameObject.phaserRegion.stats.alpha, inside: gameObject.phaserRegion.stats.inside});
                 });
                 if (gameObjects.length > 0) {
                     this.devModeScene.regionEditor.showClickedList();
@@ -83,17 +83,17 @@ class RegionEditor {
 	}
 
 	edit(data: RegionData): void {
-		if (data.newName && data.name !== data.newName) {
+		if (data.newKey && data.name !== data.newKey) {
 			const region = taro.regionManager.getRegionById(data.name);
-			if (region) region._stats.id = data.newName;
+			if (region) region._stats.id = data.newKey;
 			this.devModeScene.regions.forEach(region => {
 				if (region.name === data.name) {
-					region.name = data.newName;
+					region.name = data.newKey;
 					region.updateLabel();
 				}
 			});
 		} else if (data.showModal) {
-			inGameEditor.addNewRegion && inGameEditor.addNewRegion({ name: data.name, x: data.x, y: data.y, width: data.width, height: data.height, userId: data.userId });
+			inGameEditor.addNewRegion && inGameEditor.addNewRegion({ name: data.name, x: data.x, y: data.y, width: data.width, height: data.height, userId: data.userId, alpha: data.alpha, inside: data.inside });
 		}
 
 		inGameEditor.updateRegionInReact && inGameEditor.updateRegionInReact(data);

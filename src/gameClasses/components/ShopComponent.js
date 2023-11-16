@@ -322,7 +322,7 @@ var ShopComponent = TaroEntity.extend({
 	loadUserPurchases: function () {
 		let self = this;
 		$.ajax({
-			url: `/api/user/${gameId}/purchases`,
+			url: `/api/user/${gameId}/purchases/`,
 			type: 'GET',
 			success: function (response) {
 				if (response.status == 'success') {
@@ -880,7 +880,7 @@ var ShopComponent = TaroEntity.extend({
 		if (!data || !key || !data[key]) return [];
 		var resultKeys = Object.keys(data[key]);
 
-		resultKeys = resultKeys.sort();
+		// resultKeys = resultKeys.sort();
 
 		resultKeys = resultKeys.sort(function (a, b) {
 			const aOrder = data[key][a].order;
@@ -1307,6 +1307,11 @@ var ShopComponent = TaroEntity.extend({
 			// console.log(item)
 
 			if (item.status == 'not_purchased') {
+
+				if(window.isInMobileApp()) {
+					continue;
+				}
+
 				if (item.soldForSocialShare) {
 					var button = self.buttonForSocialShare(item);
 				} else {
@@ -1482,6 +1487,12 @@ var ShopComponent = TaroEntity.extend({
 		const serverId = taro.client.server.id;
 
 		if (typeof window.validateUserPin === 'function') {
+			const VERIFICATION_UNLOCKED_FOR = 30 * 60 * 1000; // 30 mins
+			if (window.pinVerifiedAt && window.pinVerifiedAt + VERIFICATION_UNLOCKED_FOR > Date.now()) {
+				taro.network.send('buyItem', { id });
+				return;
+			}
+			
 			window.validateUserPin('taro.shop.purchase', id, serverId);
 		} else {
 			taro.network.send('buyItem', { id });

@@ -19,7 +19,6 @@ var ActionComponent = TaroEntity.extend({
 
 		for (var i = 0; i < actionList.length; i++) {
 			var action = actionList[i];
-
 			if (!action || action.disabled == true || // if action is disabled or
 				(taro.isClient && action.runMode == 0) || // don't run on client if runMode is 'server authoritative'
 				(taro.isServer && action.runMode == 1) || // don't run on server if runMode is 'client only'
@@ -31,12 +30,12 @@ var ActionComponent = TaroEntity.extend({
 			if (taro.profiler.isEnabled) {
 				var startTime = performance.now();
 				// var actionPath = path + "/" + i + "("+action.type+")";
-				var actionPath = path + "/" + i;
+				var actionPath = `${path}/${i}`;
 			}
 
 			// assign runMode engine-widely, so functions like item.use() can reference to what the current runMode is
 			// for item.use(), if runMode == 0, then it will stream quantity change to its owner player
-			taro.runMode = (action.runMode)? 1 : 0;
+			taro.runMode = (action.runMode) ? 1 : 0;
 
 			if (taro.isServer) {
 
@@ -50,16 +49,16 @@ var ActionComponent = TaroEntity.extend({
 						query: 'engineFreeze',
 						engineTickDelta: engineTickDelta,
 						masterServer: global.myIp,
-						gameTitle: taro.game.data.defaultData.title,
+						gameInfo: taro.gameInfo,
 						clientCommands: taro.network.commandCount,
 						actionProfiler: taro.actionProfiler,
 						lastAction: action.type,
 						triggerProfiler: taro.triggerProfiler
 					};
 
-					global.rollbar.log("engineStep is taking longer than 1000ms", rollbarData);
+					global.rollbar.log('engineStep is taking longer than 1000ms', rollbarData);
 
-					var errorMsg = taro.script.errorLog("engineTick is taking longer than 1000ms (took" + engineTickDelta + "ms)", path);
+					var errorMsg = taro.script.errorLog(`engineTick is taking longer than 1000ms (took ${engineTickDelta} ms)`, path);
 					console.log(errorMsg, rollbarData);
 					taro.engineLagReported = true;
 					// taro.server.unpublish(errorMsg); // not publishing yet cuz TwoHouses will get unpub. loggin instead.
@@ -209,6 +208,21 @@ var ActionComponent = TaroEntity.extend({
 
 						break;
 
+					case 'changeRegionColor':
+						var region = self._script.variable.getValue(action.region, vars);
+						if (region) {
+							const insideColor = self._script.variable.getValue(action.inside, vars);
+							const alpha = self._script.variable.getValue(action.alpha, vars);
+							var data = [
+								{ inside: insideColor },
+								{ alpha: alpha }
+							];
+							data = data.filter(obj => obj[Object.keys(obj)[0]] !== null);
+							region.streamUpdateData(data);
+						}
+
+						break;
+
 					case 'setLastAttackingUnit':
 						var unit = self._script.variable.getValue(action.unit, vars);
 						taro.game.lastAttackingUnitId = unit.id();
@@ -226,20 +240,20 @@ var ActionComponent = TaroEntity.extend({
 						taro.game.lastAttackingItemId = item.id();
 
 						break;
-					
+
 					case 'sendPostRequest':
 						var obj = self._script.variable.getValue(action.string, vars);
 						var url = self._script.variable.getValue(action.url, vars);
 						var varName = self._script.variable.getValue(action.varName, vars);
 
-						console.log("sendPostRequest obj", obj)
+						// console.log("sendPostRequest obj", obj)
 
 						try {
 							obj = JSON.parse(obj);
 						} catch (err) {
 							throw new Error(err);
-							return;
 						}
+
 
 						// ensure we aren't sending more than 30 POST requests within 10 seconds
 						taro.server.postReqTimestamps.push(taro.currentTime());
@@ -256,11 +270,15 @@ var ActionComponent = TaroEntity.extend({
 							form: obj
 						}, function optionalCallback(err, httpResponse, body) {
 							if (err) {
-								throw new Error('upload failed:', err);
+								// don't throw new Error here, because it's inside callback and it won't get caught
+								self._script.errorLog(err, path);
 							}
 
 							try {
 								var res = JSON.parse(body);
+
+								// console.log("res JSON", res)
+
 								var newValue = res.response;
 								params['newValue'] = newValue;
 
@@ -268,16 +286,14 @@ var ActionComponent = TaroEntity.extend({
 									taro.game.data.variables[varName].value = newValue;
 								}
 							} catch (err) {
-								throw new Error('sendPostRequest' + taro.game.data.defaultData.title + url + err);
-								if (taro.game.data.variables.hasOwnProperty(varName)) {
-									taro.game.data.variables[varName].value = 'error';
-								}
+								// don't throw new Error here, because it's inside callback and it won't get caught
+								self._script.errorLog(err, path);
 							}
 						});
 
 						break;
 
-						
+
 					case 'requestPost':
 						var data = self._script.variable.getValue(action.data, vars) || {};
 						var url = self._script.variable.getValue(action.url, vars);
@@ -295,18 +311,19 @@ var ActionComponent = TaroEntity.extend({
 						}
 
 						data.url = url;
-						
-						console.log("requestPost data", data);
+
+						// console.log("requestPost data", data);
 
 						// use closure to store globalVariableName
-						(function(targetVarName) {
+						(function (targetVarName) {
 							taro.server.request.post(data, function optionalCallback(err, httpResponse, body) {
 								// try+catch must be redeclared inside callback otherwise an error will crash the process
 								try {
 
-									console.log("body", body)
+									// console.log("body", body)
 									if (err) {
-										throw new Error(err);
+										// don't throw new Error here, because it's inside callback and it won't get caught
+										self._script.errorLog(err, path);
 									}
 
 									if (taro.game.data.variables.hasOwnProperty(targetVarName)) {
@@ -325,11 +342,12 @@ var ActionComponent = TaroEntity.extend({
 
 									self._entity.script.trigger('onPostResponse', vars);
 								} catch (e) {
-									throw new Error(e);
+									// don't throw new Error here, because it's inside callback and it won't get caught
+									self._script.errorLog(e, path);
 								}
 
 							})
-					})(varName);
+						})(varName);
 
 						break;
 
@@ -798,16 +816,19 @@ var ActionComponent = TaroEntity.extend({
 
 					case 'banPlayerFromChat':
 						var player = self._script.variable.getValue(action.player, vars);
-						if (player) {
-							player.streamUpdateData([{ banChat: true }]);
-						}
+						taro.server.updateTempMute({
+							player,
+							banChat: true
+						});
 						break;
 
 					case 'unbanPlayerFromChat':
 						var player = self._script.variable.getValue(action.player, vars);
-						if (player) {
-							player.streamUpdateData([{ banChat: false }]);
-						}
+						taro.server.updateTempMute({
+							player,
+							banChat: false
+						});
+
 						break;
 
 					case 'playerCameraSetZoom':
@@ -867,7 +888,7 @@ var ActionComponent = TaroEntity.extend({
 								var brk = self.run(action.actions, Object.assign(vars, { selectedUnit: unit }), actionPath);
 
 								if (brk == 'break' || vars.break) {
-									vars.break = false;									
+									vars.break = false;
 									break;
 								} else if (brk == 'continue') {
 									continue;
@@ -1076,7 +1097,7 @@ var ActionComponent = TaroEntity.extend({
 
 							loopCounter++;
 							if (loopCounter > 10000) {
-								
+
 								taro.server.unpublishQueued = true;
 								throw new Error("infinite loop detected"); // break infinite loop
 							}
@@ -1145,6 +1166,42 @@ var ActionComponent = TaroEntity.extend({
 						break;
 
 					/* Unit */
+
+					case 'startMovingUnitUp':
+						if (entity && entity._category === 'unit' && entity.ability) {
+							entity.ability.moveUp();
+						}
+						break;
+
+					case 'startMovingUnitDown':
+						if (entity && entity._category === 'unit' && entity.ability) {
+							entity.ability.moveDown();
+						}
+						break;
+
+					case 'startMovingUnitLeft':
+						if (entity && entity._category === 'unit' && entity.ability) {
+							entity.ability.moveLeft();
+						}
+						break;
+
+					case 'startMovingUnitRight':
+						if (entity && entity._category === 'unit' && entity.ability) {
+							entity.ability.moveRight();
+						}
+						break;
+
+					case 'stopMovingUnitX':
+						if (entity && entity._category === 'unit' && entity.ability) {
+							entity.ability.stopMovingX();
+						}
+						break;
+
+					case 'stopMovingUnitY':
+						if (entity && entity._category === 'unit' && entity.ability) {
+							entity.ability.stopMovingY();
+						}
+						break;
 
 					case 'createUnitAtPosition':
 						var player = self._script.variable.getValue(action.entity, vars);
@@ -1301,6 +1358,50 @@ var ActionComponent = TaroEntity.extend({
 
 						break;
 
+					// PAUSED
+
+					// case 'setUnitNameLabelColor':
+					// 	var unit = self._script.variable.getValue(action.unit, vars);
+					// 	var color = self._script.variable.getValue(action.color, vars);
+
+					// 	try {
+					// 		if (
+					// 			unit &&
+					// 			typeof color === 'string' &&
+					// 			Colors.isValidColor(color)
+					// 		) {
+					// 			unit.setNameLabelColor(color);
+					// 		} else {
+					// 			throw new Error(`Is '${color}' a valid hex code or extended color string? Correct unit?`);
+					// 		}
+					// 	} catch (err) {
+					// 		self._script.errorLog(err, path);
+					// 	}
+
+					// 	break;
+
+					case 'setUnitNameLabelColorForPlayer':
+						var unit = self._script.variable.getValue(action.unit, vars);
+						var color = self._script.variable.getValue(action.color, vars);
+						var player = self._script.variable.getValue(action.player, vars);
+
+						try {
+							if (
+								unit &&
+								player &&
+								typeof color === 'string' &&
+								Colors.isValidColor(color)
+							) {
+								unit.setNameLabelColor(color, player);
+							} else {
+								throw new Error(`Is '${color}' a valid hex code or extended color string? Correct unit, player?`);
+							}
+						} catch (err) {
+							self._script.errorLog(err, path);
+						}
+
+						break;
+
 					case 'setItemName':
 						var item = self._script.variable.getValue(action.item, vars);
 						var name = self._script.variable.getValue(action.name, vars);
@@ -1322,14 +1423,14 @@ var ActionComponent = TaroEntity.extend({
 						}
 
 						break;
+
 					case 'createFloatingText':
 						var position = self._script.variable.getValue(action.position, vars);
 						var text = self._script.variable.getValue(action.text, vars);
 						var color = self._script.variable.getValue(action.color, vars);
-
 						if (taro.isServer) {
-							taro.network.send('createFloatingText', {position: position, text: text, color: color});
-						} else {
+							taro.network.send('createFloatingText', { position: position, text: text, color: color });
+						} else if (taro.isClient) {
 							taro.client.emit('floating-text', {
 								text: text,
 								x: position.x,
@@ -1339,7 +1440,7 @@ var ActionComponent = TaroEntity.extend({
 						}
 						break;
 
-					/* Item */
+						/* Item */
 
 					case 'startUsingItem':
 						if (entity && entity._category == 'item') {
@@ -1439,6 +1540,7 @@ var ActionComponent = TaroEntity.extend({
 						}
 						break;
 
+					// very old
 					case 'castAbility':
 						if (entity && entity._category == 'unit' && entity.ability && action.abilityName) {
 							entity.ability.cast(action.abilityName);
@@ -1446,6 +1548,23 @@ var ActionComponent = TaroEntity.extend({
 						// else
 						// entity.ability.cast()
 						break;
+
+					case 'startCastingAbility':
+						var unit = self._script.variable.getValue(action.entity);
+						var ability = self._script.variable.getValue(action.ability);
+
+						unit.ability.startCasting('ability');
+
+						break;
+
+					case 'stopCastingAbility':
+						var unit = self._script.variable.getValue(action.entity);
+						var ability = self._script.variable.getValue(action.ability);
+
+						unit.ability.stopCasting(ability);
+
+						break;
+
 					case 'dropAllItems':
 						if (entity && entity._category == 'unit') {
 							for (let i = 0; i < entity._stats.itemIds.length; i++) {
@@ -1505,7 +1624,7 @@ var ActionComponent = TaroEntity.extend({
 						var player = self._script.variable.getValue(action.player, vars);
 
 						if (player && player._category === 'player' && player._stats.clientId) {
-							taro.network.send('closeDialogue', player._stats.clientId);
+							taro.network.send('closeDialogue', {}, player._stats.clientId);
 						}
 						break;
 
@@ -1531,7 +1650,7 @@ var ActionComponent = TaroEntity.extend({
 						var particleTypeId = self._script.variable.getValue(action.particleType, vars);
 						var angle = self._script.variable.getValue(action.angle, vars);
 						if (particleTypeId && position) {
-							taro.network.send('particle', { particleId: particleTypeId, position: position, angle: angle || 0});
+							taro.network.send('particle', { particleId: particleTypeId, position: position, angle: angle || 0 });
 						}
 						break;
 
@@ -1540,7 +1659,7 @@ var ActionComponent = TaroEntity.extend({
 						var angle = self._script.variable.getValue(action.angle, vars);
 						var entity = self._script.variable.getValue(action.entity, vars);
 						if (particleTypeId && entity) {
-							taro.network.send('particle', { particleId: particleTypeId, position: {x:0, y:0}, angle: angle || 0, entityId: entity.id()});
+							taro.network.send('particle', { particleId: particleTypeId, position: { x: 0, y: 0 }, angle: angle || 0, entityId: entity.id() });
 						}
 						break;
 
@@ -2433,15 +2552,15 @@ var ActionComponent = TaroEntity.extend({
 
 						break;
 
-                    case 'teleportEntity':
-                        var position = self._script.variable.getValue(action.position, vars);
-                        var entity = self._script.variable.getValue(action.entity, vars);
+					case 'teleportEntity':
+						var position = self._script.variable.getValue(action.position, vars);
+						var entity = self._script.variable.getValue(action.entity, vars);
 
-                        if (position && entity && ['unit', 'item', 'projectile'].includes(entity._category)) {
-                            entity.teleportTo(position.x, position.y, entity._rotate.z, true);
-                        }
+						if (position && entity && ['unit', 'item', 'projectile'].includes(entity._category)) {
+							entity.teleportTo(position.x, position.y, entity._rotate.z, true);
+						}
 
-                        break;
+						break;
 
 					case 'destroyEntity':
 						var entity = self._script.variable.getValue(action.entity, vars);
@@ -2601,10 +2720,10 @@ var ActionComponent = TaroEntity.extend({
 								entity.applyTorque(torque);
 								// entity.body.applyTorque(torque);
 							} else {
-								throw new Error( action.type + " - invalid position")
+								throw new Error(action.type + " - invalid position")
 							}
 						} else {
-							throw new Error( action.type + " - invalid unit")
+							throw new Error(action.type + " - invalid unit")
 						}
 						break;
 
@@ -2912,7 +3031,7 @@ var ActionComponent = TaroEntity.extend({
 						}
 
 						break;
-					
+
 					case 'addObjectElement':
 						var key = self._script.variable.getValue(action.key, vars);
 						var value = self._script.variable.getValue(action.value, vars);
@@ -2931,6 +3050,28 @@ var ActionComponent = TaroEntity.extend({
 							delete object[key];
 						}
 
+						break;
+
+					case 'openBackpackForPlayer':
+						var player = self._script.variable.getValue(action.player, vars);
+
+						if (player && player._stats && player._stats.clientId) {
+							taro.network.send('ui', {
+								command: 'updateBackpack',
+								action: 'open'
+							}, player._stats.clientId);
+						}
+						break;
+
+					case 'closeBackpackForPlayer':
+						var player = self._script.variable.getValue(action.player, vars);
+
+						if (player && player._stats && player._stats.clientId) {
+							taro.network.send('ui', {
+								command: 'updateBackpack',
+								action: 'close'
+							}, player._stats.clientId);
+						}
 						break;
 
 					case 'comment':

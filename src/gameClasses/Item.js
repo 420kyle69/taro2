@@ -746,7 +746,7 @@ var Item = TaroEntityPhysics.extend({
 			this.streamUpdateData([{ isBeingUsed: true }]);
 		}
 
-		if (owner && taro.trigger) {
+		if (owner) {
 			taro.queueTrigger('unitStartsUsingAnItem', {
 				unitId: owner.id(),
 				itemId: this.id()
@@ -763,7 +763,7 @@ var Item = TaroEntityPhysics.extend({
 		self._stats.isBeingUsed = false;
 		var owner = self.getOwnerUnit();
 
-		if (owner && taro.trigger) {
+		if (owner) {
 			taro.queueTrigger('unitStopsUsingAnItem', {
 				unitId: owner.id(),
 				itemId: self.id()
@@ -879,6 +879,8 @@ var Item = TaroEntityPhysics.extend({
 		}
 
 		self.script.load(data.scripts);
+		self.script.scriptCache = {};
+		
 		self._stats.itemTypeId = type;
 
 		for (var i in data) {
@@ -1131,10 +1133,12 @@ var Item = TaroEntityPhysics.extend({
 	_behaviour: function (ctx) {
 		var self = this;
 
-		_.forEach(taro.triggersQueued, function (trigger) {
-			trigger.params['thisEntityId'] = self.id();
-			self.script.trigger(trigger.name, trigger.params);
-		});
+		if (taro.gameLoopTickHasExecuted) {
+			_.forEach(taro.triggersQueued, function (trigger) {
+				trigger.params['thisEntityId'] = self.id();
+				self.script.trigger(trigger.name, trigger.params);
+			});
+		}
 
 		var ownerUnit = this.getOwnerUnit();		
 		if (ownerUnit && this._stats.stateId != 'dropped') {
@@ -1267,6 +1271,7 @@ var Item = TaroEntityPhysics.extend({
 	},
 
 	destroy: function () {
+		this.script.trigger('initEntityDestroy');
 		this.playEffect('destroy');
 		TaroEntityPhysics.prototype.destroy.call(this);
 	}

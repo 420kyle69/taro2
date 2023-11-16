@@ -98,7 +98,7 @@ const Client = TaroEventingClass.extend({
 		this.extrapolation = false; //old comment => 'disabling due to item bug'
 		this.resolution = 0; //old comment => 'autosize'
 		this.scaleMode = 0; //old comment => 'none'
-		this.renderBuffer = 80;
+		this.renderBuffer = 100;
 		this.isActiveTab = true;
 
 		this.isZooming = false;
@@ -480,7 +480,8 @@ const Client = TaroEventingClass.extend({
 				url: $(serverOption).attr('data-url'),
 				gameId: gameId,
 				id: $(serverOption).attr('value'),
-				name: $(serverOption).attr('data-name')
+				name: $(serverOption).attr('data-name'),
+				wsPort: $(serverOption).data('ws-port')
 			};
 
 			serversList.push(server);
@@ -671,8 +672,6 @@ const Client = TaroEventingClass.extend({
 		const gravity = taro.game.data.settings.gravity;
 
 		if (gravity) {
-
-			console.log('setting gravity: ', gravity); // not in prod please
 			taro.physics.gravity(gravity.x, gravity.y);
 		}
 		taro.physics.setContinuousPhysics(!!taro?.game?.data?.settings?.continuousPhysics);
@@ -736,7 +735,9 @@ const Client = TaroEventingClass.extend({
 
 		taro.network.define('editTile', this._onEditTile);
 		taro.network.define('editRegion', this._onEditRegion);
+		taro.network.define('editVariable', this._onEditVariable);
 		taro.network.define('editInitEntity', this._onEditInitEntity);
+		taro.network.define('editGlobalScripts', this._onEditGlobalScripts);
 		taro.network.define('updateClientInitEntities', this._updateClientInitEntities);
 		taro.network.define('updateUnit', this._onUpdateUnit);
 		taro.network.define('updateItem', this._onUpdateItem);

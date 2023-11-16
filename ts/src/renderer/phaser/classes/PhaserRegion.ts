@@ -5,9 +5,11 @@ class PhaserRegion extends PhaserEntity {
 	private rtLabel: Phaser.GameObjects.RenderTexture;
 	private readonly graphics: Phaser.GameObjects.Graphics;
 	gameObject: Phaser.GameObjects.Container & IRenderProps & {phaserRegion: PhaserRegion};
-	private readonly devModeOnly: boolean;
+	private devModeOnly: boolean;
 	private devModeScene: DevModeScene;
     stats: { x: number; y: number; width: number; height: number; inside?: string; alpha?: number; };
+	scaleTween: Phaser.Tweens.Tween;;
+	zoomEvtListener: EvtListener;
 
 	constructor (
 		private scene: GameScene,
@@ -25,6 +27,7 @@ class PhaserRegion extends PhaserEntity {
 		gameObject.setSize(stats.width, stats.height);
 		gameObject.setPosition(stats.x + stats.width/2, stats.y + stats.height/2);
 		gameObject.setInteractive();
+		gameObject.setDepth(1000);
         gameObject.on('pointerover', (p) => {
             if (!p.isDown) {
                 this.scene.input.setTopOnly(false);
@@ -37,7 +40,7 @@ class PhaserRegion extends PhaserEntity {
 		scene.entityLayers[EntityLayer.TREES].add(this.gameObject);
 
 		this.name = this.entity._stats.id;
-
+		
 		if (!stats.inside) {
 			this.devModeOnly = true;
 		}
@@ -48,9 +51,11 @@ class PhaserRegion extends PhaserEntity {
 		this.updateLabel();
 		this.transform();
 
-        if (this.devModeOnly && !taro.developerMode.active && taro.developerMode.activeTab !== 'play') {
+        if (this.devModeOnly && taro.developerMode.activeTab !== 'map') {
 			this.hide();
         }
+
+		this.zoomEvtListener = taro.client.on('scale', this.scaleElements, this);
 	}
 
 	private getLabel (): Phaser.GameObjects.BitmapText {
@@ -112,6 +117,10 @@ class PhaserRegion extends PhaserEntity {
 
 			rt.setPosition(label.x, label.y);
 		}
+
+		if (this.devModeOnly && taro.developerMode.activeTab !== 'map') {
+			this.hide();
+        }
 	}
 
 	protected transform (): void {
@@ -120,6 +129,24 @@ class PhaserRegion extends PhaserEntity {
 		const label = this.label;
 		const rtLabel = this.rtLabel;
 		const stats = this.entity._stats.default;
+
+		if (stats.inside === '') {
+			this.devModeOnly = true;
+		} else if (stats.inside) {
+			this.devModeOnly = false;
+		}
+		if (this.devModeOnly && taro.developerMode.activeTab !== 'map') {
+			this.hide();
+        } else {
+			this.show();
+			if (taro.developerMode.activeTab !== 'map') {
+				label && (label.visible = false);
+				rtLabel && (rtLabel.visible = false);
+			} else {
+				label && (label.visible = true);
+				rtLabel && (rtLabel.visible = true);
+			}
+		}
 
 		gameObject.setSize(stats.width, stats.height);
 		gameObject.setPosition(stats.x + stats.width/2, stats.y + stats.height/2);
@@ -144,7 +171,6 @@ class PhaserRegion extends PhaserEntity {
 				stats.width,
 				stats.height
 			);
-            graphics.setDepth(1000);
 		} else {
 			graphics.fillStyle(
 				Number(`0x${stats.inside.substring(1)}`),
@@ -183,9 +209,34 @@ class PhaserRegion extends PhaserEntity {
 		rt && (rt.visible = false);
 	}
 
+	private scaleElements(data: {
+		ratio: number;
+	}): void {
+
+		if (this.scaleTween) {
+			this.scaleTween.stop();
+			this.scaleTween = null;
+		}
+
+		const { ratio } = data;
+		const targetScale = 1 / ratio;
+
+		this.scaleTween = this.scene.tweens.add({
+			targets: this.getLabel(),
+			duration: 1000,
+			ease: Phaser.Math.Easing.Quadratic.Out,
+			scale: targetScale,
+			onComplete: () => {
+				this.scaleTween = null;
+			}
+		});
+	}
+
 	protected destroy (): void {
 		this.devModeScene.regions = this.devModeScene.regions.filter(item => item !== this);
 		this.scene.renderedEntities = this.scene.renderedEntities.filter(item => item !== this.gameObject);
+		taro.client.off('scale', this.zoomEvtListener);
+		this.zoomEvtListener = null;
 		super.destroy();
 	}
 }
