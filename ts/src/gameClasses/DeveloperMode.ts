@@ -171,7 +171,6 @@ const debounceEditTileSend = debounce(mergeEditTileActions, 0, mergedTemplate);
 function recalcWallsPhysics(gameMap: MapData, forPathFinding: boolean) {
 	taro.physics.destroyWalls();
 	let map = taro.scaleMap(rfdc()(gameMap));
-	gameMap.wasEdited = true;
 	taro.tiled.loadJson(map, function (layerArray, layersById) {
 		taro.physics.staticsFromMap(layersById.walls);
 	});
@@ -270,8 +269,7 @@ class DeveloperMode {
 				const dataType = k as MapEditToolEnum; return { dataType, dataValue };
 			})[0];
 			const serverData = rfdc()(dataValue);
-			if (dataType === 'edit') {
-				serverData.layer = serverData.layer[0];
+			if (dataType === 'edit' && !serverData.noMerge) {
 				debounceSetWasEdited(gameMap);
 				if ((data as TileData<'edit'>).edit.size !== 'fitContent') {
 					taro.network.send('editTile', data);
@@ -307,7 +305,12 @@ class DeveloperMode {
 
 			if (gameMap.layers[serverData.layer].name === 'walls') {
 				//if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
-				debounceRecalcPhysics(gameMap, true);
+				if (serverData.noMerge) {
+					recalcWallsPhysics(gameMap, true);
+				} else {
+					debounceRecalcPhysics(gameMap, true);
+				}
+
 			}
 		}
 	}
@@ -410,6 +413,9 @@ class DeveloperMode {
 				continue;
 			}
 			//save tile change to taro.game.data.map and taro.map.data
+			if (newTile === -1) {
+				newTile = 0;
+			}
 			map.layers[layer].data[nowPos.y * width + nowPos.x] = newTile;
 			taro.map.data.layers[layer].data[nowPos.y * width + nowPos.x] = newTile;
 			if (nowPos.x > 0 && !closedQueue[nowPos.x - 1]?.[nowPos.y]) {
@@ -858,6 +864,7 @@ type BasicEditProps = {
 	layer: number,
 	x: number,
 	y: number,
+	noMerge?: boolean,
 }
 type MapEditTool = {
 	fill: {
@@ -869,7 +876,7 @@ type MapEditTool = {
 		size: Vector2D | 'fitContent',
 		selectedTiles: Record<number, Record<number, number>>[],
 		shape: Shape,
-		layer: number[]
+		layer: number[],
 	} & Omit<BasicEditProps, 'layer'>
 
 	clear: {
