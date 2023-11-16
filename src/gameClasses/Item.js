@@ -307,7 +307,7 @@ var Item = TaroEntityPhysics.extend({
 				let triggerParams = { unitId: ownerId, itemId: self.id() };
 
 				//we cant use queueTrigger here because it will be called after entity scripts and item or unit probably no longer exists
-				self.script.trigger('itemIsUsed', triggerParams); // this entity (item)
+				self.script.trigger('itemIsUsed', triggerParams); // this entity (item) (need to rename rename 'itemIsUsed' -> 'thisItemIsUsed')
                 unit.script.trigger('thisUnitUsesItem', triggerParams); // this entity (unit)
                 taro.script.trigger('unitUsesItem', triggerParams); // unit uses item
 
