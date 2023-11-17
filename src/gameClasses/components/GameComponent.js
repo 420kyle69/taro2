@@ -33,15 +33,15 @@ var GameComponent = TaroEntity.extend({
 			}
 		} else if (taro.isClient) {
 			// determine which attribute will be used for scoreboard
-			var attr = 'points';
-			if (
-				taro.game.data.settings &&
-				taro.game.data.settings.constants &&
-				taro.game.data.settings.constants.currency != undefined
-			) {
-				attr = taro.game.data.settings.constants.currency;
-			}
-			$('.game-currency').html(attr);
+			// var attr = 'points';
+			// if (
+			// 	taro.game.data.settings &&
+			// 	taro.game.data.settings.constants &&
+			// 	taro.game.data.settings.constants.currency != undefined
+			// ) {
+			// 	attr = taro.game.data.settings.constants.currency;
+			// }
+			// $('.game-currency').html(attr);
 		}
 
 		taro.addComponent(ScriptComponent);

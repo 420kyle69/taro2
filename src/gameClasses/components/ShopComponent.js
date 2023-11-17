@@ -818,8 +818,8 @@ var ShopComponent = TaroEntity.extend({
 				requirements += req.value;
 				requirements += ' ';
 				requirements += taro.game.data.attributeTypes[priceAttr] &&
-					taro.game.data.attributeTypes[priceAttr].name ||
-					ownerPlayer._stats.attributes[priceAttr] && ownerPlayer._stats.attributes[priceAttr].name;
+					taro.clientSanitizer(taro.game.data.attributeTypes[priceAttr].name || '') ||
+					ownerPlayer._stats.attributes[priceAttr] && taro.clientSanitizer(ownerPlayer._stats.attributes[priceAttr].name || '');
 				requirements += '</p>';
 			}
 
@@ -848,8 +848,8 @@ var ShopComponent = TaroEntity.extend({
 				prices += shopItem.price.playerAttributes[priceAttr];
 				prices += ' ';
 				prices += taro.game.data.attributeTypes[priceAttr] &&
-					taro.game.data.attributeTypes[priceAttr].name ||
-					ownerPlayer._stats.attributes[priceAttr] && ownerPlayer._stats.attributes[priceAttr].name;
+				 taro.clientSanitizer(taro.game.data.attributeTypes[priceAttr].name || '') ||
+				ownerPlayer._stats.attributes[priceAttr] && taro.clientSanitizer(ownerPlayer._stats.attributes[priceAttr].name || '');
 				prices += '</p>';
 			}
 			html += '<div>';
