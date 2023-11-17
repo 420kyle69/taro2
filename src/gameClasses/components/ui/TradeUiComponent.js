@@ -94,7 +94,7 @@ var TradeUiComponent = TaroEntity.extend({
 					popover: 'top',
 					isTrading: true
 				});
-				$(`#offer-${index}`).html(itemDiv);
+				// $(`#offer-${index}`).html(itemDiv);
 			}
 		}
 	},

@@ -166,7 +166,7 @@ var ItemUiComponent = TaroEntity.extend({
 						class: 'item-div draggable-item ' + options.isActive,
 						style: 'height:100%; ' + options.bgColor,
 						role: 'button',
-						html: `<div class='${!isTrading ? 'absolute-center' : ''}'><img src='${img}' style='${mobileClass}'/></div><small class='quantity'>${!isNaN(parseFloat(itemQuantity)) && parseFloat(itemQuantity) || itemQuantity}</small>`,
+						html: `<div class='${!isTrading ? 'absolute-center' : ''}'><img src='${img}' style='${mobileClass}'/></div><small class='quantity'>${!isNaN(parseFloat(itemQuantity)) && parseFloat(itemQuantity) || ''}</small>`,
 						'data-container': 'body',
 						'data-toggle': 'popover',
 						'data-placement': options.popover || 'left',
