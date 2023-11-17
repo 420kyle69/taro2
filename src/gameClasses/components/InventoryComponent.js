@@ -286,11 +286,11 @@ var InventoryComponent = TaroEntity.extend({
 					}
 				}
 			}
-
-			taro.queueTrigger('unitPickedAnItem', {
-				unitId: unit.id(),
-				itemId: item.id()
-			});
+			const triggerParams = { unitId: unit.id(), itemId: item.id() };
+			//we cant use queueTrigger here because it will be called after entity scripts and item or unit probably no longer exists
+			item.script.trigger('thisItemIsPickedUp', triggerParams); // this entity (item)
+			unit.script.trigger('thisUnitPickedUpAnItem', triggerParams); // this entity (unit)
+			taro.script.trigger('unitPickedAnItem', triggerParams); // unit picked item (need to rename rename 'unitPickedAnItem' -> 'unitPickedUpAnItem')
 		}
 
 		return slotIndex;

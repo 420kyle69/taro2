@@ -306,8 +306,10 @@ var Item = TaroEntityPhysics.extend({
 
 				let triggerParams = { unitId: ownerId, itemId: self.id() };
 
-				self.script.trigger('itemIsUsed', triggerParams);
-				taro.script.trigger('unitUsesItem', triggerParams);
+				//we cant use queueTrigger here because it will be called after entity scripts and item or unit probably no longer exists
+				self.script.trigger('itemIsUsed', triggerParams); // this entity (item) (need to rename rename 'itemIsUsed' -> 'thisItemIsUsed')
+                unit.script.trigger('thisUnitUsesItem', triggerParams); // this entity (unit)
+                taro.script.trigger('unitUsesItem', triggerParams); // unit uses item
 
 				if (taro.physics && self._stats.type == 'weapon') {
 					if (self._stats.isGun) {
@@ -747,10 +749,11 @@ var Item = TaroEntityPhysics.extend({
 		}
 
 		if (owner) {
-			taro.queueTrigger('unitStartsUsingAnItem', {
-				unitId: owner.id(),
-				itemId: this.id()
-			});
+			const triggerParams = { unitId: owner.id(), itemId: this.id() };
+			//we cant use queueTrigger here because it will be called after entity scripts and item or unit probably no longer exists
+			this.script.trigger('thisItemStartsBeingUsed', triggerParams); // this entity (item)
+			owner.script.trigger('thisUnitStartsUsingAnItem', triggerParams); // this entity (unit)
+			taro.script.trigger('unitStartsUsingAnItem', triggerParams); // unit starts using item
 		}
 	},
 
@@ -764,10 +767,11 @@ var Item = TaroEntityPhysics.extend({
 		var owner = self.getOwnerUnit();
 
 		if (owner) {
-			taro.queueTrigger('unitStopsUsingAnItem', {
-				unitId: owner.id(),
-				itemId: self.id()
-			});
+			const triggerParams = { unitId: owner.id(), itemId: self.id() };
+			//we cant use queueTrigger here because it will be called after entity scripts and item or unit probably no longer exists
+			self.script.trigger('thisItemStopsBeingUsed', triggerParams); // this entity (item)
+			owner.script.trigger('thisUnitStopsUsingAnItem', triggerParams); // this entity (unit)
+			taro.script.trigger('unitStopsUsingAnItem', triggerParams); // unit stops using item
 		}
 
 		if (taro.isClient) {
