@@ -717,7 +717,10 @@ var Unit = TaroEntityPhysics.extend({
 				itemId: newItem.id(),
 				unitId: this.id()
 			};
-			taro.queueTrigger('unitSelectsItem', triggeredBy);
+			//we cant use queueTrigger here because it will be called after entity scripts and item or unit probably no longer exists
+			newItem.script.trigger('thisItemIsSelected', triggeredBy); // this entity (item)
+			this.script.trigger('thisUnitSelectsItem', triggeredBy); // this entity (unit)
+			taro.script.trigger('unitSelectsItem', triggeredBy); // unit selects item
 
 			// whip-out the new item using tween
 			if (taro.isClient) {
@@ -1339,10 +1342,11 @@ var Unit = TaroEntityPhysics.extend({
 
 				self.detachEntity(item.id()); // taroEntityPhysics comment: not working right now
 
-				taro.queueTrigger('unitDroppedAnItem', {
-					itemId: item.id(),
-					unitId: self.id()
-				});
+				const triggerParams = { itemId: item.id(), unitId: self.id()};
+				//we cant use queueTrigger here because it will be called after entity scripts and item or unit probably no longer exists
+				item.script.trigger('thisItemIsDropped', triggerParams); // this entity (item)
+				self.script.trigger('thisUnitDroppedAnItem', triggerParams); // this entity (unit)
+				taro.script.trigger('unitDroppedAnItem', triggerParams); // unit dropped item
 			}
 		}
 

@@ -176,7 +176,12 @@ var TileEditor = /** @class */ (function () {
         }
         if (taro.physics && map.layers[tempLayer].name === 'walls') {
             //if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
-            debounceRecalcPhysics(map, false);
+            if (dataValue.noMerge) {
+                recalcWallsPhysics(map, true);
+            }
+            else {
+                debounceRecalcPhysics(map, true);
+            }
         }
     };
     /**
@@ -229,6 +234,7 @@ var TileEditor = /** @class */ (function () {
                     x: tileX,
                     y: tileY,
                     shape: shape,
+                    noMerge: true,
                 }
             });
         }
@@ -257,6 +263,9 @@ var TileEditor = /** @class */ (function () {
                 closedQueue[nowPos.x] = {};
             }
             closedQueue[nowPos.x][nowPos.y] = 1;
+            if (newTile === 0 || newTile === null) {
+                newTile = -1;
+            }
             if (fromServer) {
                 map = taro.game.data.map;
                 inGameEditor.mapWasEdited && inGameEditor.mapWasEdited();
@@ -276,17 +285,18 @@ var TileEditor = /** @class */ (function () {
                 }
                 tileMap.putTileAt(newTile, nowPos.x, nowPos.y, false, layer);
                 //save tile change to taro.game.map.data
+                if (newTile === -1) {
+                    newTile = 0;
+                }
                 map.layers[tempLayer].data[nowPos.y * width + nowPos.x] = newTile;
             }
             else {
                 map = this.gameScene.tilemap;
-                if (!map.getTileAt(nowPos.x, nowPos.y, true, layer) ||
-                    ((_c = limits === null || limits === void 0 ? void 0 : limits[nowPos.x]) === null || _c === void 0 ? void 0 : _c[nowPos.y]) ||
-                    map.getTileAt(nowPos.x, nowPos.y, true, layer).index === 0 ||
-                    map.getTileAt(nowPos.x, nowPos.y, true, layer).index === -1) {
+                var nowTile = map.getTileAt(nowPos.x, nowPos.y, true, layer);
+                if ((_c = limits === null || limits === void 0 ? void 0 : limits[nowPos.x]) === null || _c === void 0 ? void 0 : _c[nowPos.y]) {
                     continue;
                 }
-                if (map.getTileAt(nowPos.x, nowPos.y, true, layer).index !== oldTile) {
+                if ((nowTile !== undefined && nowTile !== null) && nowTile.index !== oldTile) {
                     addToLimits === null || addToLimits === void 0 ? void 0 : addToLimits({ x: nowPos.x, y: nowPos.y });
                     continue;
                 }
@@ -301,7 +311,7 @@ var TileEditor = /** @class */ (function () {
             if (nowPos.y > 0 && !((_f = closedQueue[nowPos.x]) === null || _f === void 0 ? void 0 : _f[nowPos.y - 1])) {
                 openQueue.push({ x: nowPos.x, y: nowPos.y - 1 });
             }
-            if (nowPos.x < map.height - 1 && !((_g = closedQueue[nowPos.x]) === null || _g === void 0 ? void 0 : _g[nowPos.y + 1])) {
+            if (nowPos.y < map.height - 1 && !((_g = closedQueue[nowPos.x]) === null || _g === void 0 ? void 0 : _g[nowPos.y + 1])) {
                 openQueue.push({ x: nowPos.x, y: nowPos.y + 1 });
             }
         }
