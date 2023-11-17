@@ -240,6 +240,9 @@ var Unit = TaroEntityPhysics.extend({
 		var self = this;
 		console.warn(attr);
 
+		if (taro.client.selectedUnit !== this) {
+			console.log(self.attributeBars);
+		}
 		if (attr && self.attributeBars) {
 			var unitBarId = null;
 

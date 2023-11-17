@@ -347,7 +347,7 @@ var AttributeComponent = TaroEntity.extend({
 								// even if we call attribute.value = parseFloat(attribute.value)
 								// or other variations of this
 								console.warn('client updates attribute bar', {...self._entity._stats.attributes[attributeTypeId]});
-								self._entity.updateAttributeBar({...self._entity._stats.attributes[attributeTypeId]});
+								self._entity.updateAttributeBar({...self._entity._stats.attributes[attributeTypeId], type: attributeTypeId });
 								break;
 							}
 							case 'item': {
