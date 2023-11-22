@@ -809,7 +809,6 @@ var ShopComponent = TaroEntity.extend({
 		if (item.description) {
 			html += `<p style="overflow-y: auto; max-height: 200px;">${taro.clientSanitizer(item.description)}</P>`;
 		}
-		debugger;
 		if (shopItem && typeof shopItem.requirement === 'object') {
 			var requirements = '';
 			for (var priceAttr in shopItem.requirement.playerAttributes) {
