@@ -137,21 +137,27 @@ var ScoreboardComponent = TaroEntity.extend({
 
 
 		if (taro.isClient) {
-			
+
 			scoreboardElement.innerHTML = ''
 
 			if (self._hidden) {
 				if (leaderboardToggleElement) {
-					leaderboardToggleElement.innerHTML = '&nbsp;<i class="far fa-caret-square-down" aria-hidden="true" onclick="taro.scoreboard.toggleScores()" style="cursor:pointer;"></i>';
+					leaderboardToggleElement.innerHTML = 
+					`<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="leaderboard-arrow">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+				 	</svg>`;
 				}
 			} else {
 				if (leaderboardToggleElement) {
-					leaderboardToggleElement.innerHTML = '&nbsp;<i class="far fa-caret-square-up" aria-hidden="true" onclick="taro.scoreboard.toggleScores()" style="cursor:pointer;"></i>';
-				}				
+					leaderboardToggleElement.innerHTML =
+					`<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="leaderboard-arrow">>
+						<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+					</svg>`;
+				}
 
 				var sortedScores = [];
 				var players = taro.$$('player');
-				
+
 				players.forEach(function (player) {
 					if (player._stats && (
 						// only display human players on scoreboard
@@ -177,7 +183,7 @@ var ScoreboardComponent = TaroEntity.extend({
 				sortedScores.sort(function (a, b) {
 					return a.value - b.value;
 				});
-				
+
 				for (var i = sortedScores.length - 1; i >= 0; i--) {
 					var playerId = sortedScores[i].key;
 					var player = taro.$(playerId);
