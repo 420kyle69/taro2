@@ -445,7 +445,7 @@ var MenuUiComponent = TaroEntity.extend({
 		html += '</tr>';
 		players.forEach(function (player) {
 			html += '<tr class="border-bottom">';
-			html += `<td class="border-top-0">${player._stats.name}`;
+			html += `<td class="border-top-0">${taro.clientSanitizer(player._stats.name)}`;
 			if (taro.client.myPlayer && player.id() === taro.client.myPlayer.id()) {
 				html += ' (you)';
 			}

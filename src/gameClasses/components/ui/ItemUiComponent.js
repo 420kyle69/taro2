@@ -262,8 +262,8 @@ var ItemUiComponent = TaroEntity.extend({
 		});
 
 		// console.log(itemStats)
-
-		var itemHtml = self.getItemPopOverContent(itemStats);
+		console.log("Get Item Html is called");
+		var itemHtml = taro.clientSanitizer(self.getItemPopOverContent(itemStats));
 		// for (attr in itemStats)
 		// {
 		// 	var itemValue = itemStats[attr];
