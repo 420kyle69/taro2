@@ -445,41 +445,6 @@ NetIo.Client = NetIo.EventingClass.extend({
 			}
 		}
 		
-		if (!window.reconnectInProgress) {
-			// user is disconnected and we no longer trying to reconnect them silently
-			// let's reload the page and try autojoining them instead
-			const reason = disconnectData.wsReason;
-			const whitelistedReasons = [
-				'Game has been unpublished',
-				'You have been banned',
-				'Restricted IP detected',
-				'Duplicate IP detected',
-				'Client already exists',
-				'User connected to another server',
-				'You do not have permission to join this game',
-				'Guest players not allowed to join this game',
-			];
-			
-			if (whitelistedReasons.findIndex((m) => m.includes(reason)) === -1) {
-				const autojoinAttempted = window.sessionStorage.getItem('autojoinAttempted');
-				if (!autojoinAttempted || Date.now() - autojoinAttempted > 15 * 60 * 1000) {
-					if (window.trackEvent) {
-						window.trackEvent('Auto Refresh', {
-							reason,
-							code,
-							gameSlug: window.gameSlug,
-						});
-					}
-					// store in sessionStorage
-					window.sessionStorage.setItem('autojoinAttempted', Date.now());
-					// push to history ?autojoin=true
-					window.history.pushState({}, '', window.location.href + '?autojoin=true');
-					window.location.reload();
-					return;
-				}
-			}
-		}
-		
 		// If we are already connected and have an id...
 		if (this._state === 3) {
 			this._state = 0;
