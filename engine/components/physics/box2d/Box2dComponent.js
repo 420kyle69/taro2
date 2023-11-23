@@ -352,7 +352,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 					angularDamping: 0,
 					allowSleep: true,
 					fixtures: [{
-						friction: 0,
+						friction: 0.1,
 						restitution: 0,
 						shape: {
 							type: 'rectangle'

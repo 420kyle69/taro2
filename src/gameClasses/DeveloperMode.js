@@ -168,7 +168,6 @@ var debounceEditTileSend = debounce(mergeEditTileActions, 0, mergedTemplate);
 function recalcWallsPhysics(gameMap, forPathFinding) {
     taro.physics.destroyWalls();
     var map = taro.scaleMap(rfdc()(gameMap));
-    gameMap.wasEdited = true;
     taro.tiled.loadJson(map, function (layerArray, layersById) {
         taro.physics.staticsFromMap(layersById.walls);
     });
@@ -250,20 +249,20 @@ var DeveloperMode = /** @class */ (function () {
     };
     DeveloperMode.prototype.editTile = function (data, clientId) {
         var _this = this;
+        var _a;
         // only allow developers to modify the tiles
         if (taro.server.developerClientIds.includes(clientId) || clientId === 'server') {
             if (JSON.stringify(data) === '{}') {
                 throw 'receive: {}';
             }
             var gameMap = taro.game.data.map;
-            var _a = Object.entries(data).map(function (_a) {
+            var _b = Object.entries(data).map(function (_a) {
                 var k = _a[0], dataValue = _a[1];
                 var dataType = k;
                 return { dataType: dataType, dataValue: dataValue };
-            })[0], dataType = _a.dataType, dataValue = _a.dataValue;
+            })[0], dataType = _b.dataType, dataValue = _b.dataValue;
             var serverData = rfdc()(dataValue);
-            if (dataType === 'edit') {
-                serverData.layer = serverData.layer[0];
+            if (dataType === 'edit' && !serverData.noMerge) {
                 debounceSetWasEdited(gameMap);
                 if (data.edit.size !== 'fitContent') {
                     taro.network.send('editTile', data);
@@ -299,9 +298,14 @@ var DeveloperMode = /** @class */ (function () {
                     this.clearLayer(nowValue.layer);
                 }
             }
-            if (gameMap.layers[serverData.layer].name === 'walls') {
+            if (((_a = gameMap.layers[serverData.layer]) === null || _a === void 0 ? void 0 : _a.name) === 'walls') {
                 //if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
-                debounceRecalcPhysics(gameMap, true);
+                if (serverData.noMerge) {
+                    recalcWallsPhysics(gameMap, true);
+                }
+                else {
+                    debounceRecalcPhysics(gameMap, true);
+                }
             }
         }
     };
@@ -400,6 +404,9 @@ var DeveloperMode = /** @class */ (function () {
                 continue;
             }
             //save tile change to taro.game.data.map and taro.map.data
+            if (newTile === -1) {
+                newTile = 0;
+            }
             map.layers[layer].data[nowPos.y * width + nowPos.x] = newTile;
             taro.map.data.layers[layer].data[nowPos.y * width + nowPos.x] = newTile;
             if (nowPos.x > 0 && !((_c = closedQueue[nowPos.x - 1]) === null || _c === void 0 ? void 0 : _c[nowPos.y])) {
@@ -634,13 +641,18 @@ var DeveloperMode = /** @class */ (function () {
     DeveloperMode.prototype.updateUnit = function (data) {
         // 1. broadcast update to all players
         // 2. force update its dimension/scale/layer/image
-        if (data.newData.scripts) {
-            taro.game.data.unitTypes[data.typeId].scripts = rfdc()(data.newData.scripts);
+        if (taro.game.data.unitTypes[data.typeId]) {
+            if (data.newData.scripts) {
+                taro.game.data.unitTypes[data.typeId].scripts = rfdc()(data.newData.scripts);
+            }
+            else {
+                var oldScripts = rfdc()(taro.game.data.unitTypes[data.typeId].scripts);
+                taro.game.data.unitTypes[data.typeId] = rfdc()(data.newData);
+                taro.game.data.unitTypes[data.typeId].scripts = oldScripts;
+            }
         }
         else {
-            var oldScripts = rfdc()(taro.game.data.unitTypes[data.typeId].scripts);
             taro.game.data.unitTypes[data.typeId] = rfdc()(data.newData);
-            taro.game.data.unitTypes[data.typeId].scripts = oldScripts;
         }
         taro.$$('unit').forEach(function (unit) {
             if (unit._stats.type === data.typeId) {
@@ -694,13 +706,18 @@ var DeveloperMode = /** @class */ (function () {
         // 1. broadcast update to all players
         // 2. force update its dimension/scale/layer/image
         // 3. we may need to re-mount the item on unit
-        if (data.newData.scripts) {
-            taro.game.data.itemTypes[data.typeId].scripts = rfdc()(data.newData.scripts);
+        if (taro.game.data.itemTypes[data.typeId]) {
+            if (data.newData.scripts) {
+                taro.game.data.itemTypes[data.typeId].scripts = rfdc()(data.newData.scripts);
+            }
+            else {
+                var oldScripts = rfdc()(taro.game.data.itemTypes[data.typeId].scripts);
+                taro.game.data.itemTypes[data.typeId] = rfdc()(data.newData);
+                taro.game.data.itemTypes[data.typeId].scripts = oldScripts;
+            }
         }
         else {
-            var oldScripts = rfdc()(taro.game.data.itemTypes[data.typeId].scripts);
             taro.game.data.itemTypes[data.typeId] = rfdc()(data.newData);
-            taro.game.data.itemTypes[data.typeId].scripts = oldScripts;
         }
         taro.$$('item').forEach(function (item) {
             if (item._stats.itemTypeId === data.typeId) {
@@ -724,13 +741,18 @@ var DeveloperMode = /** @class */ (function () {
     DeveloperMode.prototype.updateProjectile = function (data) {
         // 1. broadcast update to all players
         // 2. force update its dimension/scale/layer/image
-        if (data.newData.scripts) {
-            taro.game.data.projectileTypes[data.typeId].scripts = rfdc()(data.newData.scripts);
+        if (taro.game.data.projectileTypes[data.typeId]) {
+            if (data.newData.scripts) {
+                taro.game.data.projectileTypes[data.typeId].scripts = rfdc()(data.newData.scripts);
+            }
+            else {
+                var oldScripts = rfdc()(taro.game.data.projectileTypes[data.typeId].scripts);
+                taro.game.data.projectileTypes[data.typeId] = rfdc()(data.newData);
+                taro.game.data.projectileTypes[data.typeId].scripts = oldScripts;
+            }
         }
         else {
-            var oldScripts = rfdc()(taro.game.data.projectileTypes[data.typeId].scripts);
             taro.game.data.projectileTypes[data.typeId] = rfdc()(data.newData);
-            taro.game.data.projectileTypes[data.typeId].scripts = oldScripts;
         }
         taro.$$('projectile').forEach(function (projectile) {
             if (projectile._stats.type === data.typeId) {

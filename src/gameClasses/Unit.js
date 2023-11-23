@@ -717,7 +717,10 @@ var Unit = TaroEntityPhysics.extend({
 				itemId: newItem.id(),
 				unitId: this.id()
 			};
-			taro.queueTrigger('unitSelectsItem', triggeredBy);
+			//we cant use queueTrigger here because it will be called after entity scripts and item or unit probably no longer exists
+			newItem.script.trigger('thisItemIsSelected', triggeredBy); // this entity (item)
+			this.script.trigger('thisUnitSelectsItem', triggeredBy); // this entity (unit)
+			taro.script.trigger('unitSelectsItem', triggeredBy); // unit selects item
 
 			// whip-out the new item using tween
 			if (taro.isClient) {
@@ -1339,10 +1342,11 @@ var Unit = TaroEntityPhysics.extend({
 
 				self.detachEntity(item.id()); // taroEntityPhysics comment: not working right now
 
-				taro.queueTrigger('unitDroppedAnItem', {
-					itemId: item.id(),
-					unitId: self.id()
-				});
+				const triggerParams = { itemId: item.id(), unitId: self.id()};
+				//we cant use queueTrigger here because it will be called after entity scripts and item or unit probably no longer exists
+				item.script.trigger('thisItemIsDropped', triggerParams); // this entity (item)
+				self.script.trigger('thisUnitDroppedAnItem', triggerParams); // this entity (unit)
+				taro.script.trigger('unitDroppedAnItem', triggerParams); // unit dropped item
 			}
 		}
 
@@ -1489,7 +1493,7 @@ var Unit = TaroEntityPhysics.extend({
 	streamUpdateData: function (queuedData, clientId) {
 		var self = this;
 		// Unit.prototype.log("unit streamUpdateData", data)
-		
+
 		TaroEntity.prototype.streamUpdateData.call(this, queuedData, clientId);
 
 		for (var i = 0; i < queuedData.length; i++) {
@@ -1618,9 +1622,19 @@ var Unit = TaroEntityPhysics.extend({
 							self.setOwnerPlayer(newValue);
 						}
 						break;
+
+					case 'nameLabelColor':
+						if (taro.isClient) {
+							this.emit(
+								'update-label',
+								{
+									text: this._stats.name,
+									bold: (this == taro.client.selectedUnit),
+									color: newValue,
+								}
+							);
+						}
 				}
-
-
 			}
 		}
 	},
@@ -1831,6 +1845,30 @@ var Unit = TaroEntityPhysics.extend({
 		// );
 	},
 
+	setNameLabelColor: function(color, player) {
+		if (taro.isClient) {
+			this.emit(
+				'update-label',
+				{
+					text: unit._stats.name,
+					bold: (unit == taro.client.selectedUnit),
+					color: color,
+				}
+			);
+
+		} else if (taro.isServer) {
+			if (player) {
+				const clientId = player._stats.clientId;
+
+				this.streamUpdateData([{ nameLabelColor: color }], clientId);
+
+				return;
+			}
+
+			this.streamUpdateData([{ nameLabelColor: color }]);
+		}
+	},
+
 	startMoving: function () {
 		if (!this.isMoving) {
 			this.playEffect('move');
@@ -1880,10 +1918,12 @@ var Unit = TaroEntityPhysics.extend({
 	_behaviour: function (ctx) {
 		var self = this;
 
-		_.forEach(taro.triggersQueued, function (trigger) {
-			trigger.params['thisEntityId'] = self.id();
-			self.script.trigger(trigger.name, trigger.params);
-		});
+		if (taro.gameLoopTickHasExecuted) {
+			_.forEach(taro.triggersQueued, function (trigger) {
+				trigger.params['thisEntityId'] = self.id();
+				self.script.trigger(trigger.name, trigger.params);
+			});
+		}
 
 		if (taro.isServer || (taro.isClient && taro.client.selectedUnit == this)) {
 			// ability component behaviour method call
@@ -2057,6 +2097,7 @@ var Unit = TaroEntityPhysics.extend({
 			this.attributeBars.length = 0;
 			this.attributeBars = null;
 		}
+		this.script.trigger('initEntityDestroy');
 		this.playEffect('destroy');
 		TaroEntityPhysics.prototype.destroy.call(this);
 	}

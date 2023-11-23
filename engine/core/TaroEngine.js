@@ -78,7 +78,12 @@ var TaroEngine = TaroEntity.extend({
 		// use small numbers on the serverside for ids
 		if (this.isServer) {
 			// this._idCounter = 0
-			this.sanitizer = require('sanitizer').sanitize;
+			this.sanitizer = function (str) {
+				return require("isomorphic-dompurify").sanitize(str, {
+				  FORCE_BODY: true
+				});
+			};
+
 			this.emptyTimeLimit = 10 * 60 * 1000; // in ms - kill t1/t2 if empty for 10 mins
 		}
 
@@ -190,6 +195,7 @@ var TaroEngine = TaroEntity.extend({
 		this.lastActionRanAt = 0;
 		this.lastTriggerRanAt = 0;
 
+		this.gameInfo = {};
 	},
 
 	getLifeSpan: function () {

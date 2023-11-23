@@ -223,6 +223,7 @@ var AttributeComponent = TaroEntity.extend({
 								attribute.streamMode == null || attribute.streamMode == 1 ||  // don't stream if streamMode isn't sync'ed (1). Also added != null for legacy support.
 								attribute.streamMode == 4 || // streamMode 4 also sends to everyone. the ignoring part is done on client-side.
 								attributeTypeId == taro.game.data.settings.scoreAttributeId // always stream attribute that's used for scoreboard
+								|| attributeTypeId === taro.game.data.settings.persistentScoreAttributeId
 							) {
 								self._entity.streamUpdateData([attrData]);
 							} else if (attribute.streamMode == 3) {
@@ -257,7 +258,7 @@ var AttributeComponent = TaroEntity.extend({
 						}
 
 						// check if user breaks his highscore then assign it to new highscore
-						if (attributeTypeId == taro.game.data.settings.scoreAttributeId && self._entity._stats.highscore < newValue) {
+						if ((attributeTypeId == taro.game.data.settings.persistentScoreAttributeId) && self._entity._stats.highscore < newValue) {
 							if (!self._entity._stats.newHighscore) {
 								taro.gameText.alertHighscore(self._entity._stats.clientId);
 							}

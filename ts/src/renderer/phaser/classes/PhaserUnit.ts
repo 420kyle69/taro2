@@ -230,7 +230,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		if (!taro.developerMode.active || taro.developerMode.activeTab === 'play') {
 			let trackingDelay = taro?.game?.data?.settings?.camera?.trackingDelay || 3;
 			trackingDelay = trackingDelay / taro.fps();
-			camera.startFollow(this.gameObject, false, trackingDelay, trackingDelay);
+			camera.startFollow(this.gameObject, true, trackingDelay, trackingDelay);
 		}
 	}
 
@@ -275,6 +275,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		color?: string;
 	}): void {
 		const label = this.getLabel();
+
 		//const rt = this.rtLabel;
 
 		//label.visible = !rt;
@@ -293,7 +294,8 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		label.setFontFamily('Verdana');
 		label.setFontSize(16);
 		label.setFontStyle(data.bold ? 'bold' : 'normal');
-		label.setFill(data.color || '#fff');
+
+		label.setFill(`${data.color}` || '#fff');
 		if (this.scene.renderer.type !== Phaser.CANVAS) label.setResolution(4);
 
 		const strokeThickness = taro.game.data.settings

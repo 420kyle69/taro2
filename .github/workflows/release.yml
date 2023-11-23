@@ -18,9 +18,28 @@ jobs:
       - name: Determine release version
         id: version
         run: echo ::set-output name=VERSION::${{ github.event.release.tag_name }}
-      - name: Dispatch to workflows
+      - name: Dispatch to moddio/gs
         run: |
             curl -H "Accept: application/vnd.github.everest-preview+json" \
             -H "Authorization: token ${{ secrets.MODDIO2_DISPATCH_TOKEN }}" \
             --request POST \
-            --data '{"event_type": "moddio2_post_release", "client_payload": { "version": "${{ steps.version.outputs.VERSION }}" }}' https://api.github.com/repos/${{ matrix.repo }}/dispatches
+            --data '{"event_type": "moddio2_post_release", "client_payload": { "version": "${{ steps.version.outputs.VERSION }}" }}' https://api.github.com/repos/moddio/gs/dispatches
+      - name: Dispatch to moddio/be
+        run: |
+          if [[ "${{ steps.version.outputs.VERSION }}" == *"-staging" ]]; then
+            curl -H "Accept: application/vnd.github.everest-preview+json" \
+            -H "Authorization: token ${{ secrets.MODDIO2_DISPATCH_TOKEN }}" \
+            --request POST \
+            --data '{"event_type": "moddio2_staging_post_release", "client_payload": { "version": "${{ steps.version.outputs.VERSION }}" }}' https://api.github.com/repos/moddio/be/dispatches
+          else
+            curl -H "Accept: application/vnd.github.everest-preview+json" \
+            -H "Authorization: token ${{ secrets.MODDIO2_DISPATCH_TOKEN }}" \
+            --request POST \
+            --data '{"event_type": "moddio2_post_release", "client_payload": { "version": "${{ steps.version.outputs.VERSION }}" }}' https://api.github.com/repos/moddio/be/dispatches
+          
+            curl -H "Accept: application/vnd.github.everest-preview+json" \
+            -H "Authorization: token ${{ secrets.MODDIO2_DISPATCH_TOKEN }}" \
+            --request POST \
+            --data '{"event_type": "moddio2_staging_post_release", "client_payload": { "version": "${{ steps.version.outputs.VERSION }}" }}' https://api.github.com/repos/moddio/be/dispatches
+          fi
+          

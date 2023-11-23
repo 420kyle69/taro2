@@ -35,14 +35,25 @@ var GameScene = /** @class */ (function (_super) {
     }
     GameScene.prototype.init = function () {
         var _this = this;
-        var _a, _b, _c, _d;
+        var _a, _b, _c, _d, _e, _f, _g, _h;
         if (taro.isMobile) {
             this.scene.launch('MobileControls');
         }
+        this.resolutionCoef = 1;
+        this.useBounds = (_d = (_c = (_b = (_a = taro === null || taro === void 0 ? void 0 : taro.game) === null || _a === void 0 ? void 0 : _a.data) === null || _b === void 0 ? void 0 : _b.settings) === null || _c === void 0 ? void 0 : _c.camera) === null || _d === void 0 ? void 0 : _d.useBounds;
         var camera = this.cameras.main;
         camera.setBackgroundColor(taro.game.data.defaultData.mapBackgroundColor);
-        this.resolutionCoef = 1;
-        this.trackingDelay = ((_d = (_c = (_b = (_a = taro === null || taro === void 0 ? void 0 : taro.game) === null || _a === void 0 ? void 0 : _a.data) === null || _b === void 0 ? void 0 : _b.settings) === null || _c === void 0 ? void 0 : _c.camera) === null || _d === void 0 ? void 0 : _d.trackingDelay) || 3;
+        // set camera bounds
+        if (this.useBounds) {
+            if (taro.game.data.defaultData.dontResize) {
+                camera.setBounds(0, 0, taro.game.data.map.width * taro.game.data.map.tilewidth, taro.game.data.map.height * taro.game.data.map.tileheight, true);
+            }
+            else {
+                camera.setBounds(0, 0, taro.game.data.map.width * 64, taro.game.data.map.height * 64, true);
+            }
+        }
+        // set camera tracking delay
+        this.trackingDelay = ((_h = (_g = (_f = (_e = taro === null || taro === void 0 ? void 0 : taro.game) === null || _e === void 0 ? void 0 : _e.data) === null || _f === void 0 ? void 0 : _f.settings) === null || _g === void 0 ? void 0 : _g.camera) === null || _h === void 0 ? void 0 : _h.trackingDelay) || 3;
         if (this.trackingDelay > 60) {
             this.trackingDelay = 60;
         }

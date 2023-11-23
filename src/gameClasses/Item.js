@@ -306,8 +306,10 @@ var Item = TaroEntityPhysics.extend({
 
 				let triggerParams = { unitId: ownerId, itemId: self.id() };
 
-				self.script.trigger('itemIsUsed', triggerParams);
-				taro.script.trigger('unitUsesItem', triggerParams);
+				//we cant use queueTrigger here because it will be called after entity scripts and item or unit probably no longer exists
+				self.script.trigger('itemIsUsed', triggerParams); // this entity (item) (need to rename rename 'itemIsUsed' -> 'thisItemIsUsed')
+                owner.script.trigger('thisUnitUsesItem', triggerParams); // this entity (unit)
+                taro.script.trigger('unitUsesItem', triggerParams); // unit uses item
 
 				if (taro.physics && self._stats.type == 'weapon') {
 					if (self._stats.isGun) {
@@ -746,11 +748,12 @@ var Item = TaroEntityPhysics.extend({
 			this.streamUpdateData([{ isBeingUsed: true }]);
 		}
 
-		if (owner && taro.trigger) {
-			taro.queueTrigger('unitStartsUsingAnItem', {
-				unitId: owner.id(),
-				itemId: this.id()
-			});
+		if (owner) {
+			const triggerParams = { unitId: owner.id(), itemId: this.id() };
+			//we cant use queueTrigger here because it will be called after entity scripts and item or unit probably no longer exists
+			this.script.trigger('thisItemStartsBeingUsed', triggerParams); // this entity (item)
+			owner.script.trigger('thisUnitStartsUsingAnItem', triggerParams); // this entity (unit)
+			taro.script.trigger('unitStartsUsingAnItem', triggerParams); // unit starts using item
 		}
 	},
 
@@ -763,11 +766,12 @@ var Item = TaroEntityPhysics.extend({
 		self._stats.isBeingUsed = false;
 		var owner = self.getOwnerUnit();
 
-		if (owner && taro.trigger) {
-			taro.queueTrigger('unitStopsUsingAnItem', {
-				unitId: owner.id(),
-				itemId: self.id()
-			});
+		if (owner) {
+			const triggerParams = { unitId: owner.id(), itemId: self.id() };
+			//we cant use queueTrigger here because it will be called after entity scripts and item or unit probably no longer exists
+			self.script.trigger('thisItemStopsBeingUsed', triggerParams); // this entity (item)
+			owner.script.trigger('thisUnitStopsUsingAnItem', triggerParams); // this entity (unit)
+			taro.script.trigger('unitStopsUsingAnItem', triggerParams); // unit stops using item
 		}
 
 		if (taro.isClient) {
@@ -1133,10 +1137,12 @@ var Item = TaroEntityPhysics.extend({
 	_behaviour: function (ctx) {
 		var self = this;
 
-		_.forEach(taro.triggersQueued, function (trigger) {
-			trigger.params['thisEntityId'] = self.id();
-			self.script.trigger(trigger.name, trigger.params);
-		});
+		if (taro.gameLoopTickHasExecuted) {
+			_.forEach(taro.triggersQueued, function (trigger) {
+				trigger.params['thisEntityId'] = self.id();
+				self.script.trigger(trigger.name, trigger.params);
+			});
+		}
 
 		var ownerUnit = this.getOwnerUnit();		
 		if (ownerUnit && this._stats.stateId != 'dropped') {
@@ -1269,6 +1275,7 @@ var Item = TaroEntityPhysics.extend({
 	},
 
 	destroy: function () {
+		this.script.trigger('initEntityDestroy');
 		this.playEffect('destroy');
 		TaroEntityPhysics.prototype.destroy.call(this);
 	}

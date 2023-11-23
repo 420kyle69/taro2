@@ -220,6 +220,9 @@ var ClientNetworkEvents = {
 			case "showCustomModal":
 				taro.playerUi.showCustomModal(data);
 				break;
+			
+			case "updateBackpack":
+				taro.playerUi.updateBackpack(data);
 
 			case "openWebsite":
 				taro.playerUi.openWebsite(data);

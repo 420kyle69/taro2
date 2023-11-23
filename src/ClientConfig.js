@@ -54,6 +54,8 @@ var taroClientConfig = {
 		'/gameClasses/EntitiesToRender.js',
 		'/gameClasses/Raycaster.js',
 		'/gameClasses/HeightRenderComponent.js',
+		/* color helpers */
+		'utils/Colors.js',
 
 		/* tile calc */
 		'/gameClasses/Combinator.js',

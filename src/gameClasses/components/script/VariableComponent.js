@@ -1269,6 +1269,27 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
+					case 'getCameraPosition':
+						if (taro.isClient) {
+							returnValue = taro.renderer.getViewportBounds();
+						}
+
+						break;
+
+					case 'getCameraWidth':
+						if (taro.isClient) {
+							returnValue = taro.renderer.getCameraWidth();
+						}
+
+						break;
+
+					case 'getCameraHeight':
+						if (taro.isClient) {
+							returnValue = taro.renderer.getCameraHeight();
+						}
+
+						break;
+
 					case 'getPositionX':
 						var position = self.getValue(text.position, vars);
 
@@ -1895,6 +1916,15 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
+					case 'allUnitsOfUnitType':
+						var type = self.getValue(text.type, vars);
+
+						returnValue = _.filter(taro.$$('unit'), (unit) => {
+							return unit._stats.type == type;
+						});
+
+						break;
+
 					case 'allRegions':
 						returnValue = taro.$$('region');
 
@@ -1951,8 +1981,26 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
+					case 'allItemsOfItemsType':
+						var type = self.getValue(text.type, vars);
+
+						returnValue = _.filter(taro.$$('item'), (item) => {
+							return item._stats.type == type;
+						});
+
+						break;
+
 					case 'allProjectiles':
 						returnValue = taro.$$('projectile');
+
+						break;
+
+					case 'allProjectilesOfProjectileType':
+						var type = self.getValue(text.type, vars);
+
+						returnValue = _.filter(taro.$$('projectile'), (projectile) => {
+							return projectile._stats.type == type;
+						});
 
 						break;
 

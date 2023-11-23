@@ -38,14 +38,14 @@ var Player = TaroEntity.extend({
 				self.addComponent(ControlComponent);
 
 				// mouse move listener
-                taro.input.on('pointermove', function (point) {
-                    if (taro.client.myPlayer) {
-                        self.control.newMousePosition = [
-                            point.x.toFixed(0),
-                            point.y.toFixed(0)
-                        ];
-                    }
-                });
+				taro.input.on('pointermove', function (point) {
+					if (taro.client.myPlayer) {
+						self.control.newMousePosition = [
+							point.x.toFixed(0),
+							point.y.toFixed(0)
+						];
+					}
+				});
 
 				this.setChatMute(this._stats.banChat);
 			}
@@ -206,9 +206,9 @@ var Player = TaroEntity.extend({
 
 				// abilities
 				const abilitiesData = taro.game.data.unitTypes[unit._stats.type].controls.unitAbilities;
-                taro.client.emit('create-ability-bar', {keybindings: taro.game.data.unitTypes[unit._stats.type].controls.abilities, abilities: abilitiesData});
+				taro.client.emit('create-ability-bar', { keybindings: taro.game.data.unitTypes[unit._stats.type].controls.abilities, abilities: abilitiesData });
 				unit.renderMobileControl();
-                
+
 
 				taro.client.selectedUnit = unit;
 				taro.client.eventLog.push([taro._currentTime, `my unit selected ${unitId}`]);
@@ -465,7 +465,7 @@ var Player = TaroEntity.extend({
 	// update player's stats in the server side first, then update client side as well.
 	streamUpdateData: function (queuedData, clientId) {
 		var self = this;
-		var oldStats = rfdc()(self._stats);
+		var oldStatsName = self._stats.name;
 		TaroEntity.prototype.streamUpdateData.call(this, queuedData, clientId);
 
 		for (var i = 0; i < queuedData.length; i++) {
@@ -497,7 +497,7 @@ var Player = TaroEntity.extend({
 				}
 
 				if (taro.isServer) {
-					if (attrName === 'name' && oldStats.name !== newValue) {
+					if (attrName === 'name' && oldStatsName !== newValue) {
 						self._stats[attrName] = newValue;
 						// update all units
 						self._stats.unitIds.forEach(function (unitId) {
@@ -705,11 +705,11 @@ var Player = TaroEntity.extend({
 
 	updatePlayerHighscore: function () {
 		var self = this;
-		var scoreId = taro.game.data.settings.scoreAttributeId;
+		var scoreId = taro.game.data.settings.persistentScoreAttributeId;
 		try {
 			// comparing player highscore with current highscore. if current highscore is greter then request it to update server
 			if (scoreId && self._stats && self._stats.attributes && self._stats.attributes[scoreId] && (self._stats.highscore < self._stats.newHighscore || self._stats.highscore < self._stats.attributes[scoreId].value)) {
-				var score = Math.max(self._stats.newHighscore || 0, self._stats.attributes[taro.game.data.settings.scoreAttributeId].value || 0);
+				var score = Math.max(self._stats.newHighscore || 0, self._stats.attributes[scoreId].value || 0);
 
 				if (score > self._stats.highscore) {
 					// highscore updated

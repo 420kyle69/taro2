@@ -207,7 +207,11 @@ class TileEditor {
 		}
 		if (taro.physics && map.layers[tempLayer].name === 'walls') {
 			//if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
-			debounceRecalcPhysics(map, false);
+			if (dataValue.noMerge) {
+				recalcWallsPhysics(map, true);
+			} else {
+				debounceRecalcPhysics(map, true);
+			}
 		}
 
 	}
@@ -260,6 +264,7 @@ class TileEditor {
 					x: tileX,
 					y: tileY,
 					shape,
+					noMerge: true,
 				}
 			});
 		}
@@ -290,7 +295,9 @@ class TileEditor {
 				closedQueue[nowPos.x] = {};
 			}
 			closedQueue[nowPos.x][nowPos.y] = 1;
-
+			if (newTile === 0 || newTile === null) {
+				newTile = -1;
+			}
 			if (fromServer) {
 				map = taro.game.data.map;
 				inGameEditor.mapWasEdited && inGameEditor.mapWasEdited();
@@ -310,21 +317,23 @@ class TileEditor {
 				}
 				tileMap.putTileAt(newTile, nowPos.x, nowPos.y, false, layer);
 				//save tile change to taro.game.map.data
+				if(newTile === -1) {
+					newTile = 0;
+				}
 				map.layers[tempLayer].data[nowPos.y * width + nowPos.x] = newTile;
 			} else {
 				map = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
-				if (!map.getTileAt(nowPos.x, nowPos.y, true, layer) ||
-					limits?.[nowPos.x]?.[nowPos.y] ||
-					map.getTileAt(nowPos.x, nowPos.y, true, layer).index === 0 ||
-					map.getTileAt(nowPos.x, nowPos.y, true, layer).index === -1) {
+				const nowTile = map.getTileAt(nowPos.x, nowPos.y, true, layer);
+				if (limits?.[nowPos.x]?.[nowPos.y]) {
 					continue;
 				}
 				if (
-					map.getTileAt(nowPos.x, nowPos.y, true, layer).index !== oldTile
+					(nowTile !== undefined && nowTile !== null) && nowTile.index !== oldTile
 				) {
 					addToLimits?.({ x: nowPos.x, y: nowPos.y });
 					continue;
 				}
+
 				map.putTileAt(newTile, nowPos.x, nowPos.y, false, layer);
 			}
 			if (nowPos.x > 0 && !closedQueue[nowPos.x - 1]?.[nowPos.y]) {
@@ -336,7 +345,7 @@ class TileEditor {
 			if (nowPos.y > 0 && !closedQueue[nowPos.x]?.[nowPos.y - 1]) {
 				openQueue.push({ x: nowPos.x, y: nowPos.y - 1 });
 			}
-			if (nowPos.x < map.height - 1 && !closedQueue[nowPos.x]?.[nowPos.y + 1]) {
+			if (nowPos.y < map.height - 1 && !closedQueue[nowPos.x]?.[nowPos.y + 1]) {
 				openQueue.push({ x: nowPos.x, y: nowPos.y + 1 });
 			}
 
