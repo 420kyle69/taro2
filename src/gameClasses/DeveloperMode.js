@@ -249,17 +249,18 @@ var DeveloperMode = /** @class */ (function () {
     };
     DeveloperMode.prototype.editTile = function (data, clientId) {
         var _this = this;
+        var _a;
         // only allow developers to modify the tiles
         if (taro.server.developerClientIds.includes(clientId) || clientId === 'server') {
             if (JSON.stringify(data) === '{}') {
                 throw 'receive: {}';
             }
             var gameMap = taro.game.data.map;
-            var _a = Object.entries(data).map(function (_a) {
+            var _b = Object.entries(data).map(function (_a) {
                 var k = _a[0], dataValue = _a[1];
                 var dataType = k;
                 return { dataType: dataType, dataValue: dataValue };
-            })[0], dataType = _a.dataType, dataValue = _a.dataValue;
+            })[0], dataType = _b.dataType, dataValue = _b.dataValue;
             var serverData = rfdc()(dataValue);
             if (dataType === 'edit' && !serverData.noMerge) {
                 debounceSetWasEdited(gameMap);
@@ -297,7 +298,7 @@ var DeveloperMode = /** @class */ (function () {
                     this.clearLayer(nowValue.layer);
                 }
             }
-            if (gameMap.layers[serverData.layer].name === 'walls') {
+            if (((_a = gameMap.layers[serverData.layer]) === null || _a === void 0 ? void 0 : _a.name) === 'walls') {
                 //if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
                 if (serverData.noMerge) {
                     recalcWallsPhysics(gameMap, true);

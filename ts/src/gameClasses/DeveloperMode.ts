@@ -303,7 +303,7 @@ class DeveloperMode {
 				}
 			}
 
-			if (gameMap.layers[serverData.layer].name === 'walls') {
+			if (gameMap.layers[serverData.layer]?.name === 'walls') {
 				//if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
 				if (serverData.noMerge) {
 					recalcWallsPhysics(gameMap, true);
