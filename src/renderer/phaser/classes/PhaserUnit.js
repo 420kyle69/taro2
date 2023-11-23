@@ -233,7 +233,6 @@ var PhaserUnit = /** @class */ (function (_super) {
     };
     PhaserUnit.prototype.updateLabel = function (data) {
         var label = this.getLabel();
-        console.trace(data);
         //const rt = this.rtLabel;
         //label.visible = !rt;
         /*label.setFont(BitmapFontManager.font(this.scene,

@@ -1211,7 +1211,6 @@ var Unit = TaroEntityPhysics.extend({
 		var color = '#FFFFFF';
 		var isMyUnit = taro.network.id() == self._stats.clientId;
 
-		console.log(this._stats);
 		if (this._stats.nameLabelColor) {
 			color = this._stats.nameLabelColor;
 		}else if (ownerPlayer) {
