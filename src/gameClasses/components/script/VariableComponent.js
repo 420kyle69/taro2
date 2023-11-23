@@ -234,14 +234,17 @@ var VariableComponent = TaroEntity.extend({
 
 		if (text && typeof text === 'object') {
 
-			if (this.profiler[text.function] == undefined) {
-				this.profiler[text.function] = {
-					counter: 0,
-					avgTime: 0,
-					totalTime: 0
+			//if profiler is enabled, start profiling
+			if (taro.profiler.isEnabled) {
+				if (this.profiler[text.function] == undefined) {
+					this.profiler[text.function] = {
+						counter: 0,
+						avgTime: 0,
+						totalTime: 0
+					}
 				}
+				var profileStart = Date.now();
 			}
-			var profileStart = Date.now();
 
 			if (text.function == undefined) {
 				return text;
@@ -2159,10 +2162,8 @@ var VariableComponent = TaroEntity.extend({
 				}
 			}
 
-
-
-
-			if (this.profiler[text.function]) {
+			//if profiler is enabled, record the time elapsed
+			if (taro.profiler.isEnabled && this.profiler[text.function]) {
 				var timeElapsed = Date.now() - profileStart;
 				this.profiler[text.function].counter++;
 				this.profiler[text.function].totalTime += timeElapsed;
