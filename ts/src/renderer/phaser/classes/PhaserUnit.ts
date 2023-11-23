@@ -275,7 +275,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		color?: string;
 	}): void {
 		const label = this.getLabel();
-
+console.trace(data);
 		//const rt = this.rtLabel;
 
 		//label.visible = !rt;
