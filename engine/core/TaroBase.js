@@ -575,38 +575,41 @@ if (typeof (window) !== 'undefined') {
 		};
 	}());
 } else {
-	/**
-	 * server requestAnimationFrame method.
-	 * https://github.com/nodejs/help/issues/2483
-	 */
-	const fps = 60;
-	const funcs = [];
+	// /**
+	//  * server requestAnimationFrame method.
+	//  * https://github.com/nodejs/help/issues/2483
+	//  */
+	// const fps = 60;
+	// const funcs = [];
 
-	const skip = Symbol('skip');
-	const start = Date.now();
-	let time = start;
+	// const skip = Symbol('skip');
+	// const start = Date.now();
+	// let time = start;
 
-	const animFrame = () => {
-		const fns = funcs.slice();
-		funcs.length = 0;
+	// const animFrame = () => {
+	// 	const fns = funcs.slice();
+	// 	funcs.length = 0;
 
-		const t = Date.now();
-		const dt = t - start;
-		const t1 = 1e3 / fps;
+	// 	const t = Date.now();
+	// 	const dt = t - start;
+	// 	const t1 = 1e3 / fps;
 
-		for(const f of fns)
-			if(f !== skip) f(dt);
+	// 	for(const f of fns)
+	// 		if(f !== skip) f(dt);
 
-		while(time <= t + t1 / 4) time += t1;
-		setTimeout(animFrame, time - t);
-	};
+	// 	while(time <= t + t1 / 4) {
+	// 		console.trace('ERROR');
+	// 		time += t1;
+	// 	}
+	// 	setTimeout(animFrame, time - t);
+	// };
 
-	requestAnimFrame = func => {
-		funcs.push(func);
-		return funcs.length - 1;
-	};
+	// requestAnimFrame = func => {
+	// 	funcs.push(func);
+	// 	return funcs.length - 1;
+	// };
 
-	animFrame();
+	// animFrame();
 }
 
 // Check console method existence
