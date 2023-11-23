@@ -50,7 +50,10 @@ var GameComponent = TaroEntity.extend({
 		taro.script.trigger('gameStart');
 		self.hasStarted = true;
 		taro.timer.startGameClock();
-		
+
+		taro._physicsTickRate = Math.max(20, Math.min(60, self.data.frameRate || 20));
+		taro._physicsTickRate = 60;
+
 		taro.clusterClient && taro.clusterClient.gameStarted();
 	},
 

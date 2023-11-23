@@ -126,12 +126,16 @@ var TaroEngine = TaroEntity.extend({
 		this._lastTimeStamp = new Date().getTime();
 
 		this._fpsRate = 60; // Sets the frames per second to execute engine tick's at
-		this._gameLoopTickRate = 20; // "frameTick", input, and streaming
-
+		
+		this._gameLoopTickRate = 20; // gameLoop tick rate is hard-coded at 20
 		this._lastGameLoopTickAt = 0;
 		this._gameLoopTickRemainder = 0;
 		this.gameLoopTickHasExecuted = true;
 
+		this._physicsTickRate = 60; // physics tick rate is updated inside gameComponent.js
+		this._lastphysicsTickAt = 0;
+		this._physicsTickRemainder = 0;
+		
 		this._aSecondAgo = 0;
 
 		this._state = 0; // Currently stopped
@@ -883,6 +887,40 @@ var TaroEngine = TaroEntity.extend({
 
 				if (taro.isServer) {
 					this.emptyTimeLimit = this.getIdleTimeoutMs();
+					/**
+					 * server requestAnimationFrame method.
+					 * https://github.com/nodejs/help/issues/2483
+					 */
+					const fps = 60;
+					const funcs = [];
+
+					const skip = Symbol('skip');
+					const start = Date.now();
+					let time = start;
+
+					const animFrame = () => {
+						const fns = funcs.slice();
+						funcs.length = 0;
+
+						const t = Date.now();
+						const dt = t - start;
+						const t1 = 1e3 / fps;
+
+						for(const f of fns)
+							if(f !== skip) f(dt);
+
+						while(time <= t + t1 / 4) {
+							time += t1;
+						}
+						setTimeout(animFrame, time - t);
+					};
+
+					requestAnimFrame = func => {
+						funcs.push(func);
+						return funcs.length - 1;
+					};
+
+					animFrame();
 					requestAnimFrame(taro.engineStep);
 				}
 
@@ -1605,11 +1643,18 @@ var TaroEngine = TaroEntity.extend({
 			if (timeElapsed >= (1000 / taro._gameLoopTickRate) - taro._gameLoopTickRemainder) {
 				taro._lastGameLoopTickAt = taro.now;
 				taro._gameLoopTickRemainder = Math.min(timeElapsed - ((1000 / taro._gameLoopTickRate) - taro._gameLoopTickRemainder), (1000 / taro._gameLoopTickRate));
-				taro.gameLoopTickHasExecuted = true;				
-				
+				taro.gameLoopTickHasExecuted = true;
+
 				taro.queueTrigger('frameTick');
-				
-				if (taro.physics) {
+			}
+
+			if (taro.physics) {
+				timeElapsed = taro.now - taro._lastphysicsTickAt;
+				if (timeElapsed >= (1000 / taro._physicsTickRate) - taro._physicsTickRemainder) {
+
+					taro._lastphysicsTickAt = taro.now;
+					taro._physicsTickRemainder = Math.min(timeElapsed - ((1000 / taro._physicsTickRate) - taro._physicsTickRemainder), (1000 / taro._physicsTickRate));
+
 					if (taro.profiler.isEnabled) {
 						var startTime = performance.now();
 					}

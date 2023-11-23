@@ -574,15 +574,6 @@ if (typeof (window) !== 'undefined') {
 			setTimeout(function () { callback(new Date().getTime()); }, 1000 / 60);
 		};
 	}());
-} else {
-	/**
-	 * A cross-browser/platform requestAnimationFrame method.
-	 */
-	requestAnimFrame = (function () {
-		return function (callback, element) {
-			setTimeout(function () { callback(new Date().getTime()); }, 1000 / 60);
-		};
-	}());
 }
 
 // Check console method existence
