@@ -151,8 +151,6 @@ var Projectile = TaroEntityPhysics.extend({
 		var sourceUnit = taro.$(this._stats.sourceUnitId);
 		var sourceItem = taro.$(this._stats.sourceItemId);
 
-		self.previousState = null;
-
 		var data = taro.game.cloneAsset('projectileTypes', type);
 		delete data.type; // hotfix for dealing with corrupted game json that has unitData.type = "unitType". This is caused by bug in the game editor.
 
@@ -169,11 +167,13 @@ var Projectile = TaroEntityPhysics.extend({
 		// adding this flag so that clients receiving entity data from onStreamCreate don't overwrite values with default data
 		// when they are created by a client that has just joined.
 		for (var i in data) {
-			if (i == 'name') { // don't overwrite projectile's name with projectile type name
+			if (i === 'name' || i === 'streamMode') { // don't overwrite projectile's name with projectile type name
 				continue;
 			}
+			if (self._stats[i] !== data[i]) console.log(i, self._stats[i], data[i])
 			self._stats[i] = data[i];
 		}
+
 		// if the new projectile type has the same entity variables as the old projectile type, then pass the values
 		var variables = {};
 		if (data.variables) {
@@ -205,7 +205,6 @@ var Projectile = TaroEntityPhysics.extend({
 
 		if (taro.isClient) {
 			self.updateTexture();
-			//self._scaleTexture();
 		}
 
 		this._stats.sourceUnitId = sourceUnit?.id();
