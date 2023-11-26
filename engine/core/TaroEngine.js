@@ -1649,6 +1649,7 @@ var TaroEngine = TaroEntity.extend({
 			}
 
 			if (taro.physics) {
+				taro.now = Date.now();
 				timeElapsed = taro.now - taro._lastphysicsTickAt;
 				if (timeElapsed >= (1000 / taro._physicsTickRate) - taro._physicsTickRemainder) {
 
