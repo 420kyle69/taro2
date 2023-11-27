@@ -380,7 +380,7 @@ var ActionComponent = TaroEntity.extend({
 							if (attribute != undefined) {
 								var decimalPlace = parseInt(attribute.decimalPlaces) || 0;
 								var value = parseFloat(self._script.variable.getValue(action.value, vars)).toFixed(decimalPlace);
-								player.attribute.update(attrId, value, true); // update attribute, and check for attribute becoming 0
+								player.attribute.update(attrId, value); // update attribute, and check for attribute becoming 0
 
 								// track guided tutorial progress
 								var parentGameId = taro?.game?.data?.defaultData?.parentGameId;
@@ -415,10 +415,8 @@ var ActionComponent = TaroEntity.extend({
 						var player = self._script.variable.getValue(action.player, vars);
 						var maxValue = self._script.variable.getValue(action.number, vars);
 						if (player && player._category == 'player' && player._stats.attributes && player._stats.attributes[attrId] != undefined) {
-							var max = {};
-							max[attrId] = maxValue;
 
-							player.streamUpdateData([{ attributesMax: max }]);
+							player.update(attrId, null, null, maxValue);
 						}
 
 						break;
@@ -427,10 +425,8 @@ var ActionComponent = TaroEntity.extend({
 						var player = self._script.variable.getValue(action.player, vars);
 						var minValue = self._script.variable.getValue(action.number, vars);
 						if (player && player._category == 'player' && player._stats.attributes && player._stats.attributes[attrId] != undefined) {
-							var min = {};
-							min[attrId] = minValue;
 
-							player.streamUpdateData([{ attributesMin: min }]);
+							player.update(attrId, null, minValue, null);
 						}
 
 						break;
@@ -2443,6 +2439,8 @@ var ActionComponent = TaroEntity.extend({
 						var value = self._script.variable.getValue(action.value, vars);
 						var entity = self._script.variable.getValue(action.entity, vars);
 						if (entity && self.entityCategories.indexOf(entity._category) > -1 && entity._stats.attributes && entity._stats.attributes[attrId] != undefined && value != undefined) {
+
+							// not sure we need this code
 							var isAttributeVisible = false;
 							var attribute = entity._stats.attributes[attrId];
 
@@ -2452,7 +2450,7 @@ var ActionComponent = TaroEntity.extend({
 								isAttributeVisible = attribute.isVisible instanceof Array && attribute.isVisible.length > 0;
 							}
 
-							entity.attribute.update(attrId, value, isAttributeVisible); // update attribute, and check for attribute becoming 0
+							entity.attribute.update(attrId, value); // update attribute, and check for attribute becoming 0
 						}
 						break;
 
@@ -2463,11 +2461,8 @@ var ActionComponent = TaroEntity.extend({
 						var minValue = self._script.variable.getValue(action.value, vars);
 
 						if (entity && self.entityCategories.indexOf(entity._category) > -1 && entity._stats.attributes[attrId] != undefined && !isNaN(minValue)) {
-							// entity.attribute.setMin(attrId, minValue);
-							var min = {};
-							min[attrId] = minValue;
 
-							entity.streamUpdateData([{ attributesMin: min }]);
+							entity.update(attrId, null, minValue, null);
 						}
 						break;
 
@@ -2478,11 +2473,8 @@ var ActionComponent = TaroEntity.extend({
 						var maxValue = self._script.variable.getValue(action.value, vars);
 
 						if (entity && self.entityCategories.indexOf(entity._category) > -1 && entity._stats.attributes[attrId] != undefined && !isNaN(maxValue)) {
-							// entity.attribute.setMax(attrId, maxValue);
-							var max = {};
-							max[attrId] = maxValue;
 
-							entity.streamUpdateData([{ attributesMax: max }]);
+							entity.attribute.update(attrId, null, null, maxValue);
 						}
 						break;
 

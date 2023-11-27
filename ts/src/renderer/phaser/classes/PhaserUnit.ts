@@ -407,6 +407,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			a = PhaserAttributeBar.get(this);
 			attributes.push(a);
 		}
+
 		a.render(data.attr);
 	}
 
