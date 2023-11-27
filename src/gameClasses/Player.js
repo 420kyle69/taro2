@@ -195,6 +195,7 @@ var Player = TaroEntity.extend({
 		if (taro.isClient) {
 
 			if (self._stats.clientId == taro.network.id() && unit && unit._category == 'unit') {
+				self.control.releaseAllKeys();
 				self._stats.selectedUnitId = unitId;
 
 				if (unit.inventory) {
