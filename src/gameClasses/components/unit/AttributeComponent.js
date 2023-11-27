@@ -190,17 +190,18 @@ var AttributeComponent = TaroEntity.extend({
 	},
 
 	// change attribute's value manually
-	update: function (attributeTypeId, newValue, newMin = null, newMax = null) { // adding params newMin/Max to combine update value with min/max
+	// adding params newMin/Max to combine update value with min/max
+	update: function (attributeTypeId, newValue, newMin = null, newMax = null) {
 		var self = this;
-		console.warn(attributeTypeId, newValue, newMin, newMax);
+
 		if (!self._entity._stats || !self._entity._stats.attributes) {
 			return;
 		}
 
 		var attributes = JSON.parse(JSON.stringify(self._entity._stats.attributes)); // clone units existing attribute values
 		if (attributes) {
-			console.warn(attributes);
 			var attribute = attributes[attributeTypeId];
+
 			if (attribute) {
 				attribute.type = attributeTypeId; // tracking what "triggering attributeType" is in variableComponent.
 
@@ -287,13 +288,10 @@ var AttributeComponent = TaroEntity.extend({
 							attributeTypeId == taro.game.data.settings.scoreAttributeId // always stream attribute that's used for scoreboard
 							|| attributeTypeId === taro.game.data.settings.persistentScoreAttributeId
 						) {
-							console.log('hit');
 							self._entity.streamUpdateData([attrData]);
 						} else if (attribute.streamMode == 3) {
 							self._entity.streamUpdateData([attrData], this._entity?.getOwner()?._stats?.clientId);
 						}
-
-						console.warn([attrData]);
 
 						var triggeredBy = { attribute: attribute };
 						triggeredBy[`${this._entity._category}Id`] = this._entity.id();
@@ -346,7 +344,8 @@ var AttributeComponent = TaroEntity.extend({
 								// all of the old implementations pass a value as a string here
 								// even if we call attribute.value = parseFloat(attribute.value)
 								// or other variations of this
-								console.warn('client updates attribute bar', {...self._entity._stats.attributes[attributeTypeId]});
+
+								// need to patch in `type` so that other clients know which attribute bar and don't create an additional, new one
 								self._entity.updateAttributeBar({...self._entity._stats.attributes[attributeTypeId], type: attributeTypeId });
 								break;
 							}
@@ -391,6 +390,7 @@ var AttributeComponent = TaroEntity.extend({
 		}
 	},
 
+	// deprecated
 	setMax: function (attrId, value) {
 		var attributes = this._entity._stats.attributes;
 		if (attributes) {
@@ -418,6 +418,7 @@ var AttributeComponent = TaroEntity.extend({
 		}
 	},
 
+	// deprecated
 	setMin: function (attrId, value) {
 		var self = this;
 		var attributes = this._entity._stats.attributes;

@@ -4074,7 +4074,6 @@ var TaroEntity = TaroObject.extend({
 					// console.log(this._category, this.id(), attrName, newValue)
 					switch (attrName) {
 						case 'attributes':
-							console.warn(newValue);
 							// only on client side to prevent circular recursion
 							if (taro.isClient) {
 								var attributesObject = rfdc()(this._stats.attributes);
@@ -4093,7 +4092,6 @@ var TaroEntity = TaroObject.extend({
 											// ignore update if streamMode = 4 and it's for my own unit
 											!(ownerPlayer?._stats?.clientId == taro.network.id() && attributeData.streamMode == 4)
 										) {
-											
 											// package MIN update with VALUE
 											let min = null;
 											if (
@@ -4139,6 +4137,7 @@ var TaroEntity = TaroObject.extend({
 							// }
 							break;
 
+						// deprecated
 						case 'attributesMax':
 							if (this._stats.attributes) {
 								// only on client side to prevent circular recursion
@@ -4158,6 +4157,7 @@ var TaroEntity = TaroObject.extend({
 							}
 							break;
 
+						// deprecated
 						case 'attributesMin':
 							// only on client side to prevent circular recursion
 							for (var attributeTypeId in data.attributesMin) {

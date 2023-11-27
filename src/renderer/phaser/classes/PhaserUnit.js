@@ -343,7 +343,6 @@ var PhaserUnit = /** @class */ (function (_super) {
             a = PhaserAttributeBar.get(this);
             attributes.push(a);
         }
-        console.warn(data);
         a.render(data.attr);
     };
     PhaserUnit.prototype.renderChat = function (text) {
