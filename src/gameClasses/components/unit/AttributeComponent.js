@@ -38,7 +38,7 @@ var AttributeComponent = TaroEntity.extend({
 					var newValue = oldValue + parseFloat(attr.regenerateSpeed);
 					newValue = Math.max(attr.min, Math.min(attr.max, parseFloat(newValue)));
 					if (oldValue != newValue) {
-						self.update(attributeTypeId, newValue, newValue === attr.max);
+						self.update(attributeTypeId, newValue);
 					}
 				}
 			}
@@ -311,7 +311,7 @@ var AttributeComponent = TaroEntity.extend({
 				}
 				var triggeredBy = { attribute: attribute };
 				triggeredBy[`${this._entity._category}Id`] = this._entity.id();
-				console.log(triggeredBy);
+
 				if (newValue <= 0 && oldValue > 0) { // when attribute becomes zero, trigger attributeBecomesZero event
 					// necessary as self._entity can be 'player' which doesn't have scriptComponent
 					if (self._entity._category == 'unit' || self._entity._category == 'item' || self._entity._category == 'projectile') {
