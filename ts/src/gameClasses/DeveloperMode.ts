@@ -474,7 +474,9 @@ class DeveloperMode {
 						y: data.y,
 						width: data.width,
 						height: data.height,
-						key: data.name
+						key: data.name,
+						alpha: data.alpha,
+						inside: data.inside
 					},
 					id: data.name,
 					value: {
@@ -482,7 +484,9 @@ class DeveloperMode {
 						y: data.y,
 						width: data.width,
 						height: data.height,
-						key: data.name
+						key: data.name,
+						alpha: data.alpha,
+						inside: data.inside
 					}
 				};
 				const region = new Region(regionData);

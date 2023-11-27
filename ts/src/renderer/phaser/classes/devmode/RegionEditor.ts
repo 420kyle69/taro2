@@ -68,12 +68,8 @@ class RegionEditor {
 					y = this.regionDrawStart.y + height;
 					height *= -1;
 				}
-				taro.network.send<any>('editRegion', {
-					x: Math.trunc(x),
-					y: Math.trunc(y),
-					width: Math.trunc(width),
-					height: Math.trunc(height)
-				});
+
+				inGameEditor.addNewRegion && inGameEditor.addNewRegion({ name: '', x: Math.trunc(x), y: Math.trunc(y), width: Math.trunc(width), height: Math.trunc(height) });	
 
 				this.regionDrawStart = null;
 			}

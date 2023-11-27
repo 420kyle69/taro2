@@ -55,12 +55,7 @@ var RegionEditor = /** @class */ (function () {
                     y = _this.regionDrawStart.y + height;
                     height *= -1;
                 }
-                taro.network.send('editRegion', {
-                    x: Math.trunc(x),
-                    y: Math.trunc(y),
-                    width: Math.trunc(width),
-                    height: Math.trunc(height)
-                });
+                inGameEditor.addNewRegion && inGameEditor.addNewRegion({ name: '', x: Math.trunc(x), y: Math.trunc(y), width: Math.trunc(width), height: Math.trunc(height) });
                 _this.regionDrawStart = null;
             }
         }, this);

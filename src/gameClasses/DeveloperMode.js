@@ -462,7 +462,9 @@ var DeveloperMode = /** @class */ (function () {
                         y: data.y,
                         width: data.width,
                         height: data.height,
-                        key: data.name
+                        key: data.name,
+                        alpha: data.alpha,
+                        inside: data.inside
                     },
                     id: data.name,
                     value: {
@@ -470,7 +472,9 @@ var DeveloperMode = /** @class */ (function () {
                         y: data.y,
                         width: data.width,
                         height: data.height,
-                        key: data.name
+                        key: data.name,
+                        alpha: data.alpha,
+                        inside: data.inside
                     }
                 };
                 var region = new Region(regionData);
