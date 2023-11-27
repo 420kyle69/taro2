@@ -196,7 +196,7 @@ var AttributeComponent = TaroEntity.extend({
 			return;
 		}
 
-		var attributes = JSON.parse(JSON.stringify(self._entity._stats.attributes)); // clone units existing attribute values
+		var attributes = rfdc()(self._entity._stats.attributes); // clone units existing attribute values
 		if (attributes) {
 			var attribute = attributes[attributeTypeId];
 			if (attribute) {

@@ -918,9 +918,7 @@ var Item = TaroEntityPhysics.extend({
 					}
 				}
 			}
-		}
-
-		self.setState(this._stats.stateId, defaultData);
+		}	
 
 		if (taro.isClient) {
 			self.updateTexture();
@@ -954,10 +952,11 @@ var Item = TaroEntityPhysics.extend({
 			}
 		}
 
+		self.setState(this._stats.stateId, defaultData);
+
 		if (taro.isServer) {
 			if (ownerUnit) {
 				var index = ownerUnit._stats.currentItemIndex;
-				//ownerUnit.changeItem(1);
 				ownerUnit.changeItem(index); // this will call change item on client for all units*/
 			}
 		} else if (taro.isClient) {
@@ -969,11 +968,6 @@ var Item = TaroEntityPhysics.extend({
 			}
 
 			self.updateLayer();
-
-			/*var ownerPlayer = self.getOwner();
-			if (ownerPlayer && ownerPlayer._stats.selectedUnitId == self.id() && this._stats.clientId == taro.network.id()) {
-				self.inventory.createInventorySlots();
-			}*/
 
 			// destroy existing particle emitters first
 			for (var particleId in self.particleEmitters) {
@@ -987,8 +981,6 @@ var Item = TaroEntityPhysics.extend({
 				ownerUnit.inventory.update();
 			}
 		}
-
-		//ownerUnit.changeUnitType(ownerUnit._stats.type);
 	},
 
 	streamUpdateData: function (queuedData, clientId) {

@@ -81,14 +81,6 @@ class PhaserRenderer extends Phaser.Game {
 		return this.scene.getScene('Game').cameras.main.worldView;
 	}
 
-	getCameraPosition (): {x: number, y: number} {
-		const camera = this.scene.getScene('Game').cameras.main;
-		return {
-			x: camera.centerX,
-			y: camera.centerY
-		};
-	}
-
 	getCameraWidth (): number {
 		return this.scene.getScene('Game').cameras.main.displayWidth;
 	}
