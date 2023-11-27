@@ -266,6 +266,25 @@ var AttributeComponent = TaroEntity.extend({
 						}
 					}
 				} else if (taro.isClient) {
+					const triggeredBy = { attribute: attribute };
+					triggeredBy[`${this._entity._category}Id`] = this._entity.id();
+					if (newValue <= 0 && oldValue > 0) // when attribute becomes zero, trigger attributeBecomesZero event
+						{
+							// necessary as self._entity can be 'player' which doesn't have scriptComponent
+							if (self._entity._category == 'unit' || self._entity._category == 'item' || self._entity._category == 'projectile') {
+								self._entity.script.trigger('entityAttributeBecomesZero', triggeredBy);
+							}
+
+							taro.queueTrigger(`${this._entity._category}AttributeBecomesZero`, triggeredBy);
+					} else if (newValue >= attribute.max) // when attribute becomes full, trigger attributeBecomesFull event
+						{
+							// necessary as self._entity can be 'player' which doesn't have scriptComponent
+							if (self._entity._category == 'unit' || self._entity._category == 'item' || self._entity._category == 'projectile') {
+								self._entity.script.trigger('entityAttributeBecomesFull', triggeredBy);
+							}
+
+							taro.queueTrigger(`${this._entity._category}AttributeBecomesFull`, triggeredBy);
+						}
 					if (taro.client.myPlayer) {
 						var unit = null;
 
