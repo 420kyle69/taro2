@@ -53,6 +53,8 @@ var GameComponent = TaroEntity.extend({
 
 		taro._physicsTickRate = Math.max(20, Math.min(60, self.data.frameRate || 20));
 
+		console.log('taro.physics._physicsTickRate', taro._physicsTickRate);
+
 		taro.clusterClient && taro.clusterClient.gameStarted();
 	},
 
