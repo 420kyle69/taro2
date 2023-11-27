@@ -1869,6 +1869,13 @@ var ActionComponent = TaroEntity.extend({
 							player.cameraTrackUnit(unit.id());
 						}
 						break;
+					
+					case 'playerCameraStopTracking':
+						var player = self._script.variable.getValue(action.player, vars);
+						if (player && player._stats.clientId) {
+							player.cameraStopTracking();
+						}
+						break;
 
 					case 'changePlayerCameraPanSpeed':
 						var panSpeed = self._script.variable.getValue(action.panSpeed, vars);

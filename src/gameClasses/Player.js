@@ -242,6 +242,17 @@ var Player = TaroEntity.extend({
 		}
 	},
 
+	cameraStopTracking: function () {
+		this._stats.cameraTrackedUnitId = undefined;
+		if (taro.isServer) {
+			if (this._stats.clientId) {
+				this.streamUpdateData([{ cameraTrackedUnitId: 'no_unit' }], this._stats.clientId);
+			}
+		} else if (taro.isClient) {
+			taro.client.emit('stop-follow');
+		}
+	},
+
 	changeCameraPanSpeed: function (panSpeed) {
 		var self = this;
 
@@ -559,8 +570,13 @@ var Player = TaroEntity.extend({
 					if (self._stats.clientId == taro.network.id()) {
 						switch (attrName) {
 							case 'cameraTrackedUnitId':
-								// this unit was queued to be tracked by a player's camera
-								self.cameraTrackUnit(newValue);
+								if (newValue === 'no_unit') {
+									// this unit was queued to be stop tracked by a player's camera
+									self.cameraStopTracking();
+								} else {
+									// this unit was queued to be tracked by a player's camera
+									self.cameraTrackUnit(newValue);
+								}
 								break;
 
 							case 'scriptData':
