@@ -3971,7 +3971,7 @@ var TaroEntity = TaroObject.extend({
 							// updatedAttributes[attrId] = newValue;
 							// updatedAttributes[attrId] = newMax;
 							this.attribute.setMax(attrId, newMax);
-							this.attribute.update(attrId, newValue, true);
+							this.attribute.update(attrId, newValue);
 						}
 					}
 				}
@@ -4017,7 +4017,7 @@ var TaroEntity = TaroObject.extend({
 								break;
 							case 'value':
 								var newValue = Math.max(playerAttribute.min, Math.min(persistAttribute[key], playerAttribute.max));
-								self.attribute.update(attrKey, newValue, true);
+								self.attribute.update(attrKey, newValue);
 								break;
 						}
 					}

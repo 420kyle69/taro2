@@ -473,8 +473,8 @@ var Unit = TaroEntityPhysics.extend({
 				// pay attributes
 				for (var attributeTypeId in shopData.price.playerAttributes) {
 					var newValue = ownerPlayer.attribute.getValue(attributeTypeId) - shopData.price.playerAttributes[attributeTypeId];
-					attrData.attributes[attributeTypeId] = ownerPlayer.attribute.update(attributeTypeId, newValue, true); // pay the price
-					ownerPlayer.attribute.update(attributeTypeId, attrData.attributes[attributeTypeId], true);
+					attrData.attributes[attributeTypeId] = ownerPlayer.attribute.update(attributeTypeId, newValue); // pay the price
+					ownerPlayer.attribute.update(attributeTypeId, attrData.attributes[attributeTypeId]);
 				}
 
 				// pay recipes
@@ -650,7 +650,7 @@ var Unit = TaroEntityPhysics.extend({
 							for (var attributeTypeId in selectedUnitShop.price.playerAttributes) {
 								var unitPrice = selectedUnitShop.price.playerAttributes[attributeTypeId];
 								attributes[attributeTypeId] = ownerPlayer._stats.attributes[attributeTypeId].value - unitPrice;
-								ownerPlayer.attribute.update(attributeTypeId, attributes[attributeTypeId], true);
+								ownerPlayer.attribute.update(attributeTypeId, attributes[attributeTypeId]);
 							}
 						}
 						// self.streamUpdateData([{
@@ -973,7 +973,7 @@ var Unit = TaroEntityPhysics.extend({
 					}
 
 					this.attribute.setMax(attributeId, newMax);
-					this.attribute.update(attributeId, newValue, true);
+					this.attribute.update(attributeId, newValue);
 				}
 			}
 		}
@@ -1002,7 +1002,7 @@ var Unit = TaroEntityPhysics.extend({
 					var newValue = Math.min(newMax, Math.max(selectedAttribute.min, currentAttributeValue));
 
 					this.attribute.setMax(attributeId, newMax);
-					this.attribute.update(attributeId, newValue, true);
+					this.attribute.update(attributeId, newValue);
 					this._stats.buffs.splice(index, 1);
 				}
 			}
@@ -1418,7 +1418,7 @@ var Unit = TaroEntityPhysics.extend({
 							}
 							damageValue *= 1 - damageReduction;
 							var newValue = (attribute.value || 0) - (damageValue || 0);
-							self.attribute.update(damageAttrKey, newValue, true);
+							self.attribute.update(damageAttrKey, newValue);
 						}
 					});
 				}
@@ -1430,7 +1430,7 @@ var Unit = TaroEntityPhysics.extend({
 						if (attribute) {
 							damageValue *= 1 - damageReduction;
 							var newValue = (attribute.value || 0) - (damageValue || 0);
-							targetPlayer.attribute.update(damageAttrKey, newValue, true);
+							targetPlayer.attribute.update(damageAttrKey, newValue);
 						}
 					});
 				}
