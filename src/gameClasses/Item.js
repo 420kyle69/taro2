@@ -560,7 +560,7 @@ var Item = TaroEntityPhysics.extend({
 						if (unitAttributeBonuses) {
 							for (var attrId in unitAttributeBonuses) {
 								var newValue = owner.attribute.getValue(attrId) + parseFloat(unitAttributeBonuses[attrId]);
-								attrData.attributes[attrId] = owner.attribute.update(attrId, newValue, true);
+								attrData.attributes[attrId] = owner.attribute.update(attrId, newValue);
 							}
 						}
 
@@ -570,7 +570,7 @@ var Item = TaroEntityPhysics.extend({
 							if (playerAttributeBonuses) {
 								for (attrId in playerAttributeBonuses) {
 									var newValue = player.attribute.getValue(attrId) + parseFloat(playerAttributeBonuses[attrId]);
-									attrData.attributes[attrId] = player.attribute.update(attrId, newValue, true);
+									attrData.attributes[attrId] = player.attribute.update(attrId, newValue);
 								}
 							}
 
@@ -673,7 +673,7 @@ var Item = TaroEntityPhysics.extend({
 					if (owner._stats.attributes[attrName]) {
 						var newValue = owner._stats.attributes[attrName].value - ability.cost.unitAttributes[attrName];
 						// owner._stats.attributes[attrName].value -= ability.cost.unitAttributes[attrName];
-						owner.attribute.update(attrName, newValue, true);
+						owner.attribute.update(attrName, newValue);
 						unitAttributeChanged = true;
 					}
 				}
@@ -681,7 +681,7 @@ var Item = TaroEntityPhysics.extend({
 					if (player._stats.attributes[attrName]) {
 						var newValue = player._stats.attributes[attrName].value - ability.cost.playerAttributes[attrName];
 						// player._stats.attributes[attrName].value -= ability.cost.playerAttributes[attrName];
-						player.attribute.update(attrName, newValue, true);
+						player.attribute.update(attrName, newValue);
 						playerAttributeChanged = true;
 					}
 				}

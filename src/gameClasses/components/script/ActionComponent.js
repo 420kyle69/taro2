@@ -416,7 +416,7 @@ var ActionComponent = TaroEntity.extend({
 						var maxValue = self._script.variable.getValue(action.number, vars);
 						if (player && player._category == 'player' && player._stats.attributes && player._stats.attributes[attrId] != undefined) {
 
-							player.update(attrId, null, null, maxValue);
+							player.attribute.update(attrId, null, null, maxValue);
 						}
 
 						break;
@@ -426,7 +426,7 @@ var ActionComponent = TaroEntity.extend({
 						var minValue = self._script.variable.getValue(action.number, vars);
 						if (player && player._category == 'player' && player._stats.attributes && player._stats.attributes[attrId] != undefined) {
 
-							player.update(attrId, null, minValue, null);
+							player.attribute.update(attrId, null, minValue, null);
 						}
 
 						break;
@@ -2465,7 +2465,7 @@ var ActionComponent = TaroEntity.extend({
 
 						if (entity && self.entityCategories.indexOf(entity._category) > -1 && entity._stats.attributes[attrId] != undefined && !isNaN(minValue)) {
 
-							entity.update(attrId, null, minValue, null);
+							entity.attribute.update(attrId, null, minValue, null);
 						}
 						break;
 
