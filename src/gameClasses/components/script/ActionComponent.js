@@ -1122,12 +1122,15 @@ var ActionComponent = TaroEntity.extend({
 							// }
 
 							// checkCondition(variables[variableName].value); // condition
+							console.log("for loop start");
 							for (
 								variables[variableName].value = start; // initial value
 								variables[variableName].value <= stop;
 								variables[variableName].value += 1 // post iteration operation
 							) {
 								var brk = self.run(action.actions, vars, actionPath);
+
+								console.log("iteration ", variables[variableName].value, { brk, varsBreak: vars.break, varsReturn: vars.return, varsContinue: vars.continue });
 
 								if (brk == 'break' || vars.break) {
 									// we dont have to return a value in case of break otherwise
@@ -1441,7 +1444,7 @@ var ActionComponent = TaroEntity.extend({
 						}
 						break;
 
-						/* Item */
+					/* Item */
 
 					case 'startUsingItem':
 						if (entity && entity._category == 'item') {
@@ -1865,7 +1868,7 @@ var ActionComponent = TaroEntity.extend({
 							player.cameraTrackUnit(unit.id());
 						}
 						break;
-					
+
 					case 'playerCameraStopTracking':
 						var player = self._script.variable.getValue(action.player, vars);
 						if (player && player._stats.clientId) {
@@ -3074,6 +3077,50 @@ var ActionComponent = TaroEntity.extend({
 							taro.network.send('ui', {
 								command: 'updateBackpack',
 								action: 'close'
+							}, player._stats.clientId);
+						}
+						break;
+
+					case 'showUiElementForPlayer':
+						var player = self._script.variable.getValue(action.player, vars);
+						var elementId = self._script.variable.getValue(action.elementId, vars);
+
+						if (player && player._stats && player._stats.clientId && elementId) {
+							taro.network.send('ui', {
+								command: 'updateUiElement',
+								elementId: elementId,
+								action: 'show'
+							}, player._stats.clientId);
+						}
+
+						break;
+
+					case 'hideUiElementForPlayer':
+						var player = self._script.variable.getValue(action.player, vars);
+						var elementId = self._script.variable.getValue(action.elementId, vars);
+
+						if (player && player._stats && player._stats.clientId && elementId) {
+							taro.network.send('ui', {
+								command: 'updateUiElement',
+								elementId: elementId,
+								action: 'hide'
+							}, player._stats.clientId);
+						}
+
+						break;
+
+					case 'setUIElementHtml':
+						var elementId = self._script.variable.getValue(action.elementId, vars);
+						var htmlStr = taro.sanitizer(self._script.variable.getValue(action.htmlStr, vars));
+						var player = self._script.variable.getValue(action.player, vars);
+
+						console.log("set up element html: ", { htmlStr, elementId, player });
+						if (elementId && player && player._stats && player._stats.clientId) {
+							taro.network.send('ui', {
+								command: 'updateUiElement',
+								elementId: elementId,
+								action: 'setHtml',
+								htmlStr: htmlStr || ''
 							}, player._stats.clientId);
 						}
 						break;

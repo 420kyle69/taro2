@@ -224,6 +224,9 @@ var ClientNetworkEvents = {
 			case "updateBackpack":
 				taro.playerUi.updateBackpack(data);
 
+			case "updateUiElement":
+				taro.playerUi.updateUiElement(data);
+
 			case "openWebsite":
 				taro.playerUi.openWebsite(data);
 				break;
