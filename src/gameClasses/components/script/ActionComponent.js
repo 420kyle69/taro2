@@ -1122,15 +1122,12 @@ var ActionComponent = TaroEntity.extend({
 							// }
 
 							// checkCondition(variables[variableName].value); // condition
-							console.log("for loop start");
 							for (
 								variables[variableName].value = start; // initial value
 								variables[variableName].value <= stop;
 								variables[variableName].value += 1 // post iteration operation
 							) {
 								var brk = self.run(action.actions, vars, actionPath);
-
-								console.log("iteration ", variables[variableName].value, { brk, varsBreak: vars.break, varsReturn: vars.return, varsContinue: vars.continue });
 
 								if (brk == 'break' || vars.break) {
 									// we dont have to return a value in case of break otherwise
@@ -3114,7 +3111,6 @@ var ActionComponent = TaroEntity.extend({
 						var htmlStr = taro.sanitizer(self._script.variable.getValue(action.htmlStr, vars));
 						var player = self._script.variable.getValue(action.player, vars);
 
-						console.log("set up element html: ", { htmlStr, elementId, player });
 						if (elementId && player && player._stats && player._stats.clientId) {
 							taro.network.send('ui', {
 								command: 'updateUiElement',
