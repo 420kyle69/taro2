@@ -317,7 +317,7 @@ var AttributeComponent = TaroEntity.extend({
 					if (self._entity._category == 'unit' || self._entity._category == 'item' || self._entity._category == 'projectile') {
 						self._entity.script.trigger('entityAttributeBecomesZero', triggeredBy);
 					}
-					taro.queueTrigger(`${this._entity._category}AttributeBecomesZero`, triggeredBy)
+					taro.queueTrigger(`${this._entity._category}AttributeBecomesZero`, triggeredBy);
 				} else if (newValue >= attribute.max) { // when attribute becomes full, trigger attributeBecomesFull event
 					// necessary as self._entity can be 'player' which doesn't have scriptComponent
 					if (self._entity._category == 'unit' || self._entity._category == 'item' || self._entity._category == 'projectile') {
@@ -345,7 +345,7 @@ var AttributeComponent = TaroEntity.extend({
 								// or other variations of this
 
 								// need to patch in `type` so that other clients know which attribute bar and don't create an additional, new one
-								self._entity.updateAttributeBar({...self._entity._stats.attributes[attributeTypeId], type: attributeTypeId });
+								self._entity.updateAttributeBar({...self._entity._stats.attributes[attributeTypeId], type: attributeTypeId, hasChanged: attribute.hasChanged });
 								break;
 							}
 							case 'item': {
