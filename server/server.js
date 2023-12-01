@@ -727,6 +727,7 @@ var Server = TaroClass.extend({
 		taro.network.define('playerCustomInput', self._onPlayerCustomInput);
 		taro.network.define('playerAbsoluteAngle', self._onPlayerAbsoluteAngle);
 		taro.network.define('playerDialogueSubmit', self._onPlayerDialogueSubmit);
+		taro.network.define('htmlUiClick', self._onHtmlUiClick);
 
 		taro.network.define('buyItem', self._onBuyItem);
 		taro.network.define('buyUnit', self._onBuyUnit);
