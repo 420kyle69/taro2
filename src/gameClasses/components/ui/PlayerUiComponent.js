@@ -518,7 +518,6 @@ var PlayerUiComponent = TaroEntity.extend({
 
 	updateUiElement: function (data) {
 		try {
-			console.log("playerUi - updateUiElement: ", data);
 			switch (data.action) {
 				case 'show':
 					$(taro.client.getCachedElementById(data.elementId)).show();
