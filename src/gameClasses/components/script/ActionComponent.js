@@ -1441,7 +1441,7 @@ var ActionComponent = TaroEntity.extend({
 						}
 						break;
 
-						/* Item */
+					/* Item */
 
 					case 'startUsingItem':
 						if (entity && entity._category == 'item') {
@@ -1865,7 +1865,7 @@ var ActionComponent = TaroEntity.extend({
 							player.cameraTrackUnit(unit.id());
 						}
 						break;
-					
+
 					case 'playerCameraStopTracking':
 						var player = self._script.variable.getValue(action.player, vars);
 						if (player && player._stats.clientId) {
@@ -3074,6 +3074,49 @@ var ActionComponent = TaroEntity.extend({
 							taro.network.send('ui', {
 								command: 'updateBackpack',
 								action: 'close'
+							}, player._stats.clientId);
+						}
+						break;
+
+					case 'showUiElementForPlayer':
+						var player = self._script.variable.getValue(action.player, vars);
+						var elementId = self._script.variable.getValue(action.elementId, vars);
+
+						if (player && player._stats && player._stats.clientId && elementId) {
+							taro.network.send('ui', {
+								command: 'updateUiElement',
+								elementId: elementId,
+								action: 'show'
+							}, player._stats.clientId);
+						}
+
+						break;
+
+					case 'hideUiElementForPlayer':
+						var player = self._script.variable.getValue(action.player, vars);
+						var elementId = self._script.variable.getValue(action.elementId, vars);
+
+						if (player && player._stats && player._stats.clientId && elementId) {
+							taro.network.send('ui', {
+								command: 'updateUiElement',
+								elementId: elementId,
+								action: 'hide'
+							}, player._stats.clientId);
+						}
+
+						break;
+
+					case 'setUIElementHtml':
+						var elementId = self._script.variable.getValue(action.elementId, vars);
+						var htmlStr = taro.sanitizer(self._script.variable.getValue(action.htmlStr, vars));
+						var player = self._script.variable.getValue(action.player, vars);
+
+						if (elementId && player && player._stats && player._stats.clientId) {
+							taro.network.send('ui', {
+								command: 'updateUiElement',
+								elementId: elementId,
+								action: 'setHtml',
+								htmlStr: htmlStr || ''
 							}, player._stats.clientId);
 						}
 						break;

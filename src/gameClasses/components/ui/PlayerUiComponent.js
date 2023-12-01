@@ -66,6 +66,10 @@ var PlayerUiComponent = TaroEntity.extend({
 			taro.network.send('playerCustomInput', { status: 'cancelled' });
 			$('#player-input-modal').modal('hide');
 		});
+
+		$(document).on('click', '.trigger', function () {
+			taro.network.send('htmlUiClick', { id: $(this).attr('id') });	
+		});
 	},
 
 	updatePlayerAttributesDiv: function (attributes) {
@@ -509,6 +513,26 @@ var PlayerUiComponent = TaroEntity.extend({
 			}
 		} catch (err) {
 			console.log("playerUi - updateBackpack error: ", err);
+		}
+	},
+
+	updateUiElement: function (data) {
+		try {
+			switch (data.action) {
+				case 'show':
+					$(taro.client.getCachedElementById(data.elementId)).show();
+					break;
+				case 'hide':
+					$(taro.client.getCachedElementById(data.elementId)).hide();
+					break;
+				case 'setHtml':
+					$(taro.client.getCachedElementById(data.elementId)).html(data.htmlStr);
+					break;
+				default:
+					break;
+			}
+		} catch (err) {
+			console.log("playerUi - updateUiElement error: ", err);
 		}
 	}
 });

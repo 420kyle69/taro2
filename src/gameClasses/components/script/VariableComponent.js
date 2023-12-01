@@ -489,6 +489,14 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
+					case 'lastClickedUiElementId':
+						var player = self.getValue(text.player, vars);
+						if (player && player._category == 'player') {
+							returnValue = player.lastHtmlUiClickData.id;
+						}
+
+						break;
+
 					case 'lastPlayerMessage':
 						var player = self.getValue(text.player, vars);
 						if (player && player._category == 'player') {

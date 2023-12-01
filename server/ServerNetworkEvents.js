@@ -807,6 +807,13 @@ var ServerNetworkEvents = {
 			}
 		}
 	},
+	_onHtmlUiClick: function (data, clientId) {
+		var player = taro.game.getPlayerByClientId(clientId);
+		if (player) {
+			player.lastHtmlUiClickData = data;
+			taro.script.trigger('htmlUiClick', { playerId: player.id() });
+		}
+	},
 
 	_onPlayerKeyDown: function (data, clientId) {
 		var player = taro.game.getPlayerByClientId(clientId);
