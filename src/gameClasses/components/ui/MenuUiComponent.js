@@ -645,7 +645,7 @@ var MenuUiComponent = TaroEntity.extend({
 			};
 
 			socket.onmessage = function (event) {
-				var jsonString = LZString.decompressFromUTF16(event.data);
+				var jsonString = LZUTF8.decompress(data.data, {inputEncoding: "StorageBinaryString"});
 				var json = JSON.parse(jsonString);
 
 				if (json.type === 'pong') {

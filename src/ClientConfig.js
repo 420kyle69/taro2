@@ -4,6 +4,7 @@ var taroClientConfig = {
 		'/lib/dat.gui.min.js',
 		'/lib/msgpack.min.js',
 		'/lib/rfdc.min.js',
+		'/lib/lzutf8.min.js',
 
 		'/gameClasses/Player.js',
 		'/gameClasses/Unit.js',
