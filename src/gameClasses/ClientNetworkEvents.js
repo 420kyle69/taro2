@@ -158,7 +158,7 @@ var ClientNetworkEvents = {
 		} else if (data.action == "hide") {
 			taro.uiTextElementsObj[key].style.display = "none";
 		} else {
-			taro.uiTextElementsObj[key].innerHTML = taro.clientSanitizer(data.value);
+			taro.uiTextElementsObj[key].innerHTML = data.value;
 		}
 	},
 
