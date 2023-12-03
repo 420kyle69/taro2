@@ -573,8 +573,10 @@ NetIo.Server = NetIo.EventingClass.extend({
 		this._https = require('https');
 		this._msgpack = require('msgpack-lite');
 		const { compressToUTF16 } = require('lz-string');
+		const LZUTF8 = require('lzutf8');
 
-		this._compress = compressToUTF16;
+		// this._compress = compressToUTF16;
+		this._compress = LZUTF8.compress;
 		this.COMPRESSION_THRESHOLD = 10000;
 
 		this._sockets = [];
@@ -1114,8 +1116,8 @@ NetIo.Server = NetIo.EventingClass.extend({
 			//     timeStart = Date.now();
 			// }
 
-			json = taro.network._io._compress(json);
-
+			json = taro.network._io._compress(json, {outputEncoding: "StorageBinaryString"});
+			
 			// NOTE: make sure than COMPRESSION_THRESHOLD is same on both client and server
 			// LOGIC:
 			//     1. if json string has less than COMPRESSION_THRESHOLD chars (e.g. 9999)
