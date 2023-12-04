@@ -68,7 +68,6 @@
 		"@typescript-eslint/parser": "^5.59.0",
 		"babel-plugin-transform-remove-console": "^6.9.4",
 		"bufferutil": "^4.0.8",
-		"canvas": "^2.11.2",
 		"cross-env": "^7.0.3",
 		"encoding": "^0.1.13",
 		"eslint": "^8.38.0",
