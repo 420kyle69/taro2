@@ -42,7 +42,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 
 		this.engine = this.engine.toUpperCase();
 		const box2dwebScaleRatio = 30;
-		this._scaleRatio = this.engine === 'BOX2DWASM' ? 60 : box2dwebScaleRatio;
+		this._scaleRatio = this.engine === 'BOX2DWASM' ? 30 : box2dwebScaleRatio;
 		this._scaleRatioToBox2dWeb = this._scaleRatio / box2dwebScaleRatio;
 		// this.engine = 'crash';
 		console.log('Physics engine: ', this.engine);
@@ -150,7 +150,19 @@ var PhysicsComponent = TaroEventingClass.extend({
 		for (param in params) {
 			if (params.hasOwnProperty(param)) {
 				if (param !== 'shape' && param !== 'filter') {
-					tempDef[param] = params[param];
+					if (taro.physics.engine !== 'BOX2DWASM') {
+						tempDef[param] = params[param];
+					} else {
+						if (tempDef[`set_${param}`]) {
+							// call the setter, so it will update the box2d wasm runtime
+							tempDef[`set_${param}`](params[param]);
+						} else {
+							// this for something like taroId (which is only useful in js, and won't do anything in box2d)
+							tempDef[param] = params[param];
+						}
+
+					}
+
 				}
 			}
 		}

@@ -186,13 +186,13 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 		if (entity.body) {
 			self.destroyBody(entity);
 		}
-		var tempDef = self.recordLeak(new self.b2BodyDef());
+		var tempDef: Box2D.b2BodyDef = self.recordLeak(new self.b2BodyDef());
 		var param;
 		let tempBod: Box2D.b2Body & { [key: string]: any };
 		var fixtureDef;
-		var tempFixture;
-		var finalFixture;
-		var tempShape;
+		var tempFixture: Box2D.b2FixtureDef & {taroId: string};
+		var finalFixture: Box2D.b2Fixture & { [key: string]: any };
+		var tempShape: Box2D.b2Shape;
 		var tempFilterData;
 		var i;
 		var finalX; var finalY;
@@ -268,6 +268,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 								fixtureDef = body.fixtures[i];
 								// Create the fixture
 								tempFixture = self.createFixture(fixtureDef);
+								// console.log(tempFixture.get_density());
 								tempFixture.taroId = fixtureDef.taroId;
 								// Check for a shape definition for the fixture
 								if (fixtureDef.shape) {
@@ -284,13 +285,8 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 											if (fixtureDef.shape.data) {
 												finalX = fixtureDef.shape.data.x ?? 0;
 												finalY = fixtureDef.shape.data.y ?? 0;
-												tempShape.set_m_p(new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio));
+												(tempShape as Box2D.b2CircleShape).set_m_p(new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio));
 											}
-											break;
-
-										case 'polygon':
-											tempShape = self.recordLeak(new self.b2PolygonShape());
-											tempShape.SetAsArray(fixtureDef.shape.data._poly, fixtureDef.shape.data.length());
 											break;
 
 										case 'rectangle':
@@ -309,7 +305,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 											}
 											const pos = self.recordLeak(new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio));
 											// Set the polygon as a box
-											tempShape.SetAsBox(
+											(tempShape as Box2D.b2PolygonShape).SetAsBox(
 												(finalWidth / self._scaleRatio),
 												(finalHeight / self._scaleRatio),
 												pos,

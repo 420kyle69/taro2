@@ -295,6 +295,7 @@ var box2dwasmWrapper = {
                                 fixtureDef = body.fixtures[i];
                                 // Create the fixture
                                 tempFixture = self.createFixture(fixtureDef);
+                                // console.log(tempFixture.get_density());
                                 tempFixture.taroId = fixtureDef.taroId;
                                 // Check for a shape definition for the fixture
                                 if (fixtureDef.shape) {
@@ -313,10 +314,6 @@ var box2dwasmWrapper = {
                                                 finalY = (_b = fixtureDef.shape.data.y) !== null && _b !== void 0 ? _b : 0;
                                                 tempShape.set_m_p(new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio));
                                             }
-                                            break;
-                                        case 'polygon':
-                                            tempShape = self.recordLeak(new self.b2PolygonShape());
-                                            tempShape.SetAsArray(fixtureDef.shape.data._poly, fixtureDef.shape.data.length());
                                             break;
                                         case 'rectangle':
                                             tempShape = self.recordLeak(new self.b2PolygonShape());
