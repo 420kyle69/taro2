@@ -104,7 +104,7 @@ var MobileControlsScene = /** @class */ (function (_super) {
         taro.mobileControls.on('orientationchange', function (e) {
             switch (e) {
                 case 'portrait-primary':
-                    _this.game.scale.setGameSize(window.innerWidth, window.innerHeight);
+                    _this.game.scale.setGameSize(window.outerWidth * window.devicePixelRatio, window.outerHeight * window.devicePixelRatio);
                     if (resized) {
                         resized = false;
                     }
@@ -114,7 +114,7 @@ var MobileControlsScene = /** @class */ (function (_super) {
                     }
                     break;
                 case 'landscape-primary':
-                    _this.game.scale.setGameSize(window.innerWidth, window.innerHeight);
+                    _this.game.scale.setGameSize(window.outerWidth * window.devicePixelRatio, window.outerHeight * window.devicePixelRatio);
                     if (resized) {
                         resized = false;
                     }

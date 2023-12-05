@@ -135,29 +135,29 @@ class MobileControlsScene extends PhaserScene {
 
 		let resized = false;
 
-        taro.mobileControls.on('orientationchange', (e: string) => {
-            switch(e) {
-                case 'portrait-primary':
-                    this.game.scale.setGameSize(window.innerWidth, window.innerHeight);
+		taro.mobileControls.on('orientationchange', (e: string) => {
+			switch(e) {
+				case 'portrait-primary':
+					this.game.scale.setGameSize(window.outerWidth * window.devicePixelRatio, window.outerHeight * window.devicePixelRatio);
 					if (resized) {
 						resized = false;
 					} else {
 						resized = true;
-                		window.dispatchEvent(new Event('resize'));
+						window.dispatchEvent(new Event('resize'));
 					}
-                    break;
-                case 'landscape-primary':
-                    this.game.scale.setGameSize(window.innerWidth, window.innerHeight);
+					break;
+				case 'landscape-primary':
+					this.game.scale.setGameSize(window.outerWidth * window.devicePixelRatio, window.outerHeight * window.devicePixelRatio);
 					if (resized) {
 						resized = false;
 					} else {
 						resized = true;
-                		window.dispatchEvent(new Event('resize'));
+						window.dispatchEvent(new Event('resize'));
 					}
-                    break;
-                default:  
-            }
-        });
+					break;
+				default:
+			}
+		});
 
 		taro.mobileControls.on('clear-controls', () => {
 
