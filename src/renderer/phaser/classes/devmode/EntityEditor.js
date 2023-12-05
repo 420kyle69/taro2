@@ -87,8 +87,8 @@ var EntityEditor = /** @class */ (function () {
                                 break;
                         }
                         targetPoint.rotate(selectedEntityImage.image.rotation);
-                        var x = Math.floor(selectedEntityImage.x + targetPoint.x);
-                        var y = Math.floor(selectedEntityImage.y + targetPoint.y);
+                        var x = Math.floor(Number(selectedEntityImage.x) + Number(targetPoint.x));
+                        var y = Math.floor(Number(selectedEntityImage.y) + Number(targetPoint.y));
                         selectedEntityImage.image.x = x;
                         selectedEntityImage.image.y = y;
                         editedAction.position = { x: x, y: y };
