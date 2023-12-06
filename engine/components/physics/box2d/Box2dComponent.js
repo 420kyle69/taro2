@@ -42,7 +42,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 
 		this.engine = this.engine.toUpperCase();
 		const box2dwebScaleRatio = 30;
-		this._scaleRatio = this.engine === 'BOX2DWASM' ? 30 : box2dwebScaleRatio;
+		this._scaleRatio = this.engine === 'BOX2DWASM' ? 90 : box2dwebScaleRatio;
 		this._scaleRatioToBox2dWeb = this._scaleRatio / box2dwebScaleRatio;
 		// this.engine = 'crash';
 		console.log('Physics engine: ', this.engine);
@@ -593,7 +593,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 			if (self.engine == 'crash') { // crash's engine step happens in dist.js
 				self._world.step(timeElapsedSinceLastStep);
 			} else {
-				self._world.step(timeElapsedSinceLastStep / 1000, 8, 3); // Call the world step; frame-rate, velocity iterations, position iterations
+				self._world.step(timeElapsedSinceLastStep / 1000, 8, 6); // Call the world step; frame-rate, velocity iterations, position iterations
 				if (self.ctx) {
 					self.ctx.clear();
 					self._world.DebugDraw();

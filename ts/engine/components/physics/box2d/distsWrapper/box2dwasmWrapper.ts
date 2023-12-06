@@ -124,7 +124,8 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 			 */
 		component.gravity = function (x, y) {
 			if (x !== undefined && y !== undefined) {
-				this._gravity = component.recordLeak(new this.b2Vec2(x, y));
+				let scale = taro.physics._scaleRatioToBox2dWeb;
+				this._gravity = component.recordLeak(new this.b2Vec2(x / scale, y / scale));
 				return this._entity;
 			}
 
@@ -225,7 +226,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 					default:
 						const funcName = `set_${param}`;
 						if (typeof tempDef[funcName] === 'function') {
-							// tempDef[funcName](body[param]);
+							tempDef[funcName](body[param]);
 						} else {
 							tempDef[param] = body[param];
 						}

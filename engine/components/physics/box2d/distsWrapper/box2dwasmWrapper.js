@@ -336,7 +336,7 @@ var box2dwasmWrapper = {
                                             break;
                                     }
                                     if (tempShape && fixtureDef.filter) {
-                                        tempFixture.shape = tempShape;
+                                        tempFixture.set_shape(tempShape);
                                         finalFixture = tempBod.CreateFixture(tempFixture);
                                         self.destroyB2dObj(tempShape);
                                         finalFixture.taroId = tempFixture.taroId;
@@ -360,7 +360,7 @@ var box2dwasmWrapper = {
                                     finalFixture.SetFriction(fixtureDef.friction);
                                 }
                                 if (fixtureDef.restitution !== undefined && finalFixture) {
-                                    finalFixture.SetRestitution(fixtureDef.restitution);
+                                    finalFixture.SetRestitutionThreshold(fixtureDef.restitution);
                                 }
                                 if (fixtureDef.density !== undefined && finalFixture) {
                                     finalFixture.SetDensity(fixtureDef.density);
@@ -401,20 +401,21 @@ var box2dwasmWrapper = {
         if (entityA && entityA.body && entityB && entityB.body &&
             entityA.id() != entityB.id() // im not creating joint to myself!
         ) {
+            var joint_def = void 0;
             if (aBody.jointType == 'revoluteJoint') {
-                var joint_def = self.recordLeak(new self.b2RevoluteJointDef());
-                joint_def.Initialize(entityA.body, entityB.body, entityB.body.GetWorldCenter());
+                var joint_def_1 = self.recordLeak(new self.b2RevoluteJointDef());
+                joint_def_1.Initialize(entityA.body, entityB.body, entityB.body.GetWorldCenter());
                 // joint_def.enableLimit = true;
                 // joint_def.lowerAngle = aBody.itemAnchor.lowerAngle * 0.0174533; // degree to rad
                 // joint_def.upperAngle = aBody.itemAnchor.upperAngle * 0.0174533; // degree to rad
-                joint_def.GetLocalAnchorA().Set(anchorA.x / self._scaleRatio, anchorA.y / self._scaleRatio); // item anchor
-                joint_def.GetLocalAnchorB().Set(anchorB.x / self._scaleRatio, -anchorB.y / self._scaleRatio); // unit anchor
+                joint_def_1.get_localAnchorA().Set(anchorA.x / self._scaleRatio, anchorA.y / self._scaleRatio); // item anchor
+                joint_def_1.get_localAnchorB().Set(anchorB.x / self._scaleRatio, -anchorB.y / self._scaleRatio); // unit anchor
             }
             else // weld joint
              {
-                var joint_def = self.recordLeak(new self.b2WeldJointDef());
+                var joint_def_2 = self.recordLeak(new self.b2WeldJointDef());
                 var pos = self.recordLeak(entityA.body.GetWorldCenter());
-                joint_def.Initialize(entityA.body, entityB.body, pos);
+                joint_def_2.Initialize(entityA.body, entityB.body, pos);
                 self.destroyB2dObj(pos);
             }
             var joint = self._world.CreateJoint(joint_def); // joint between two pieces
