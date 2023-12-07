@@ -124,8 +124,10 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 			 */
 		component.gravity = function (x, y) {
 			if (x !== undefined && y !== undefined) {
-				let scale = taro.physics._scaleRatioToBox2dWeb;
-				this._gravity = component.recordLeak(new this.b2Vec2(x / scale, y / scale));
+				if (this._gravity) {
+					this.destroyB2dObj(this._gravity);
+				}
+				this._gravity = new this.b2Vec2(x, y);
 				return this._entity;
 			}
 

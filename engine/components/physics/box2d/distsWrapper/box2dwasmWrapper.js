@@ -160,8 +160,10 @@ var box2dwasmWrapper = {
                              */
                         component.gravity = function (x, y) {
                             if (x !== undefined && y !== undefined) {
-                                var scale = taro.physics._scaleRatioToBox2dWeb;
-                                this._gravity = component.recordLeak(new this.b2Vec2(x / scale, y / scale));
+                                if (this._gravity) {
+                                    this.destroyB2dObj(this._gravity);
+                                }
+                                this._gravity = new this.b2Vec2(x, y);
                                 return this._entity;
                             }
                             return this._gravity;
@@ -406,7 +408,7 @@ var box2dwasmWrapper = {
             var joint_def = void 0;
             if (aBody.jointType == 'revoluteJoint') {
                 var joint_def_1 = self.recordLeak(new self.b2RevoluteJointDef());
-                joint_def_1.Initialize(entityA.body, entityB.body, entityB.body.GetWorldCenter());
+                joint_def_1.Initialize(entityA.body, entityB.body, self.recordLeak(entityB.body.GetWorldCenter()));
                 // joint_def.enableLimit = true;
                 // joint_def.lowerAngle = aBody.itemAnchor.lowerAngle * 0.0174533; // degree to rad
                 // joint_def.upperAngle = aBody.itemAnchor.upperAngle * 0.0174533; // degree to rad

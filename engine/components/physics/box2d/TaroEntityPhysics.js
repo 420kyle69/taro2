@@ -414,8 +414,7 @@ var TaroEntityPhysics = TaroEntity.extend({
 				//     y *= 1.2737
 				// }
 				if (taro.physics.engine === 'BOX2DWASM') {
-					const scale = taro.physics._scaleRatioToBox2dWeb;
-					let v = new taro.physics.b2Vec2(x / scale, y / scale);
+					let v = new taro.physics.b2Vec2(x, y);
 					this.body.setLinearVelocity(v);
 					taro.physics.destroyB2dObj(v);
 				} else {
@@ -450,9 +449,11 @@ var TaroEntityPhysics = TaroEntity.extend({
 
 		try {
 			if (!isNaN(x) && !isNaN(y) && isFinite(x) && isFinite(y)) {
-				const scale = taro.physics.engine !== 'BOX2DWASM' ? 1 : taro.physics._scaleRatioToBox2dWeb ** 3;
-				var thrustVector = new taro.physics.b2Vec2(x / scale, y / scale);
+				var thrustVector = new taro.physics.b2Vec2(x, y);
 				this.body.applyForce(thrustVector, this.body.getWorldCenter());
+				if (taro.physics.engine !== 'BOX2DWASM') {
+					taro.physics.destroyB2dObj(thrustVector);
+				}
 			}
 		} catch (e) {
 			console.log(e);
@@ -480,9 +481,11 @@ var TaroEntityPhysics = TaroEntity.extend({
 		// taro.devLog("applyForce", x, y)
 		try {
 			if (!isNaN(x) && !isNaN(y) && isFinite(x) && isFinite(y)) {
-				const scale = taro.physics.engine !== 'BOX2DWASM' ? 1 : taro.physics._scaleRatioToBox2dWeb ** 3 - 2;
-				var thrustVector = new taro.physics.b2Vec2(x / scale, y / scale);
+				var thrustVector = new taro.physics.b2Vec2(x, y);
 				this.body.applyLinearImpulse(thrustVector, this.body.getWorldCenter());
+				if (taro.physics.engine !== 'BOX2DWASM') {
+					taro.physics.destroyB2dObj(thrustVector);
+				}
 			}
 		} catch (e) {
 			console.log(e);
@@ -493,8 +496,7 @@ var TaroEntityPhysics = TaroEntity.extend({
 	applyTorqueLT: function (torque) {
 		try {
 			if (!isNaN(torque)) {
-				const scale = taro.physics._scaleRatioToBox2dWeb;
-				this.body.applyTorque(torque / scale);
+				this.body.applyTorque(torque);
 			}
 		} catch (e) {
 			TaroEntityPhysics.prototype.log(`taroEntityBox2d.js: applyTorque ${e}`);
