@@ -82,13 +82,16 @@ var UnitUiComponent = TaroEntity.extend({
 		}
 	},
 	// update one attribute bar
-	updateAttributeBar: function (attr) {
+	updateAttributeBar: function (attributeTypeId) {
 		var self = this;
 
 		// only update attributes for this unit
 		if (self._entity && self._entity._stats.clientId != taro.network.id()) {
 			return;
 		}
+
+		attr = this._entity._stats.attributes[attributeTypeId];
+
 		var attributeTypes = taro.game.data.attributeTypes;
 		if (attributeTypes == undefined || attr == undefined)
 			return;

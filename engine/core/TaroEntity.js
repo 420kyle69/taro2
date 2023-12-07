@@ -4150,7 +4150,7 @@ var TaroEntity = TaroObject.extend({
 									if (taro.isClient) {
 										if (this._category === 'unit') {
 											// this.updateAttributeBar(this._stats.attributes[attributeTypeId]);
-											this.unitUi && this.unitUi.updateAttributeBar(this._stats.attributes[attributeTypeId]);
+											this.unitUi && this.unitUi.updateAttributeBar(attributeTypeId);
 										}
 									}
 								}
@@ -4168,7 +4168,7 @@ var TaroEntity = TaroObject.extend({
 									if (taro.isClient) {
 										if (this._category === 'unit') {
 											this.updateAttributeBar(this._stats.attributes[attributeTypeId]);
-											this.unitUi && this.unitUi.updateAttributeBar(this._stats.attributes[attributeTypeId]);
+											this.unitUi && this.unitUi.updateAttributeBar(attributeTypeId);
 										}
 									}
 								}
