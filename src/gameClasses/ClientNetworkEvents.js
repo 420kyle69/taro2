@@ -9,9 +9,9 @@ var ClientNetworkEvents = {
 		}
 	},
 
-	_onUpdateAllEntities: function (data) {
+	_onStreamUpdateData: function (data) {
 		for (entityId in data) {
-			var entity = taro.$(entityId);
+
 			if (taro.client.entityUpdateQueue[entityId] == undefined) {
 				taro.client.entityUpdateQueue[entityId] = {};
 			}
@@ -20,38 +20,8 @@ var ClientNetworkEvents = {
 
 			for (key in stats) {
 				var value = stats[key];
-
-				// use for mounting offscreen entitys when it starts firing
-				// if (entity && entity._category === "item" && stats[key].isBeingUsed != undefined) {
-				// 	entity.isBeingUsed = stats[key].isBeingUsed;
-				// }
-				// taro.client.entityUpdateQueue[entityId].push(stats[key]);
-				// console.log("entityUpdateQueue", entityId, key, value)
 				taro.client.entityUpdateQueue[entityId][key] = value; // overwrite the value if the same key already exists
 			}
-			
-
-			// if (taro.client.isActiveTab) {
-				
-			// } else {
-			// 	// if user's current browser tab isn't this game.
-
-			// 	// merging data
-			// 	if (taro.client.inactiveTabEntityStream[entityId] === undefined) {
-			// 		taro.client.inactiveTabEntityStream[entityId] = [{}];
-			// 	}
-
-			// 	const objectsArr = data[entityId]; //Array of single prop objects for THIS tick
-
-			// 	const packet = Object.assign({}, ...objectsArr); //condense to ONE object
-
-			// 	taro.client.inactiveTabEntityStream[entityId][0] =
-			// 		// merge each packet into the first, overwriting older values
-			// 		{
-			// 			...taro.client.inactiveTabEntityStream[entityId][0],
-			// 			...packet,
-			// 		};
-			// }
 		}
 	},
 
@@ -70,12 +40,6 @@ var ClientNetworkEvents = {
 			if (entity) {
 				entity.queueStreamUpdateData(data.entityId, data.key, data.value)	
 			}
-		}
-	},
-
-	_onMakePlayerCameraTrackUnit: function (data) {
-		if (data.unitId) {
-			taro.client.queueStreamUpdateData(data.unitId, "makePlayerCameraTrackUnit", true);
 		}
 	},
 
@@ -194,7 +158,7 @@ var ClientNetworkEvents = {
 		} else if (data.action == "hide") {
 			taro.uiTextElementsObj[key].style.display = "none";
 		} else {
-			taro.uiTextElementsObj[key].innerHTML = taro.clientSanitizer(data.value);
+			taro.uiTextElementsObj[key].innerHTML = data.value;
 		}
 	},
 
@@ -272,6 +236,14 @@ var ClientNetworkEvents = {
 
 			case "showCustomModal":
 				taro.playerUi.showCustomModal(data);
+				break;
+			
+			case "updateBackpack":
+				taro.playerUi.updateBackpack(data);
+				break;
+
+			case "updateUiElement":
+				taro.playerUi.updateUiElement(data);
 				break;
 
 			case "openWebsite":
@@ -425,6 +397,10 @@ var ClientNetworkEvents = {
 		taro.game.updateDevConsole(data);
 	},
 
+	_onProfile: function (data) {
+		window.reactApp.profiler(data)
+	},
+
 	_onTrade: function (msg, clientId) {
 		switch (msg.type) {
 			case "init": {
@@ -488,8 +464,17 @@ var ClientNetworkEvents = {
 		taro.client.emit("editRegion", data);
 	},
 
+	// when other players' update variables, apply the change to my local
+	_onEditVariable: function (data) {
+		taro.client.emit("editVariable", data);
+	},
+
 	_onEditInitEntity: function (data) {
 		taro.client.emit("editInitEntity", data);
+	},
+
+	_onEditGlobalScripts: function (data) {
+		taro.client.emit("editGlobalScripts", data);
 	},
 
 	_updateClientInitEntities: function (data) {
@@ -513,13 +498,13 @@ var ClientNetworkEvents = {
 		for (actionName in logs) {
 			var log = logs[actionName];
 			element.innerHTML += `<li style='font-size:12px;'>${log}</li>`;
-			taro.client.errorLogs.push(log);
+			taro.client.errorLogs.push({...log, path: actionName});
 			$("#dev-error-button").text(`Errors (${taro.client.errorLogs.length})`);	
 			
-			window.addToLogs && window.addToLogs(log)
+			if (window.addToLogs && typeof log.message === 'string') {
+				window.addToLogs({...log, path: actionName})
+			}
 		}
-
-	
 
 		window.reactApp.showErrorToast(logs[Object.keys(logs)[Object.keys(logs).length - 1]]);
 	},

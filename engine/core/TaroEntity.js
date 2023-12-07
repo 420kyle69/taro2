@@ -7,13 +7,13 @@ var TaroEntity = TaroObject.extend({
 
 	init: function (defaultData = {}) {
 		TaroObject.prototype.init.call(this);
-
+		
 		// Register the TaroEntity special properties handler for
 		// serialise and de-serialise support
 		var translateX = defaultData.translate && defaultData.translate.x ? defaultData.translate.x : 0;
 		var translateY = defaultData.translate && defaultData.translate.y ? defaultData.translate.y : 0;
 		var rotate = defaultData.rotate || 0;
-
+		
 		this.prevPhysicsFrame = [taro._currentTime, [translateX, translateY, rotate]];
 
 		this._specialProp.push('_texture');
@@ -69,6 +69,7 @@ var TaroEntity = TaroObject.extend({
 
 		this._keyFrames = [];
 		this.nextKeyFrame = [taro._currentTime + 50, [this._translate.x, this._translate.y, this._rotate.z]];
+		
 		this._isTransforming = true;
 		this.lastTransformedAt = 0;
 		this.latestTimeStamp = 0;
@@ -2510,7 +2511,7 @@ var TaroEntity = TaroObject.extend({
 		if (taro.isClient) {
 			var entityId = this.entityId || this.id();
 			if (taro.entitiesToRender.trackEntityById[entityId]) {
-				if (taro.client.myPlayer?.cameraTrackedUnit == this.id()) {
+				if (taro.client.myPlayer?._stats.cameraTrackedUnitId == this.id()) {
 					taro.client.emit('stop-follow');
 				}
 
@@ -3165,7 +3166,7 @@ var TaroEntity = TaroObject.extend({
 				this.nextPhysicsFrame = [taro._currentTime, [x, y, rotate]];				
 			}
             //instantly move to camera the new position
-            if (teleportCamera && taro.client.myPlayer?.cameraTrackedUnit === this.id()) {
+            if (teleportCamera && taro.client.myPlayer?._stats.cameraTrackedUnitId === this.id()) {
                 taro.client.emit('instant-move-camera', [x, y]);
             }
 		}
@@ -3970,7 +3971,7 @@ var TaroEntity = TaroObject.extend({
 							// updatedAttributes[attrId] = newValue;
 							// updatedAttributes[attrId] = newMax;
 							this.attribute.setMax(attrId, newMax);
-							this.attribute.update(attrId, newValue, true);
+							this.attribute.update(attrId, newValue);
 						}
 					}
 				}
@@ -4016,7 +4017,7 @@ var TaroEntity = TaroObject.extend({
 								break;
 							case 'value':
 								var newValue = Math.max(playerAttribute.min, Math.min(persistAttribute[key], playerAttribute.max));
-								self.attribute.update(attrKey, newValue, true);
+								self.attribute.update(attrKey, newValue);
 								break;
 						}
 					}
@@ -4063,7 +4064,7 @@ var TaroEntity = TaroObject.extend({
 	// 	return data;
 	// },
 
-	streamUpdateData: function (queuedData) {
+	streamUpdateData: function (queuedData, clientId) {
 
 		if (queuedData != undefined) {
 			for (var i = 0; i < queuedData.length; i++) {
@@ -4079,40 +4080,64 @@ var TaroEntity = TaroObject.extend({
 								if (attributesObject) {
 									for (var attributeTypeId in data.attributes) {
 										var attributeData = attributesObject[attributeTypeId];
+										// streamMode 4 ignores
+										if (this._category == 'unit') {
+											var ownerPlayer = this.getOwner();
+										} else if (this._category == 'item') {
+											var ownerPlayer = this.getOwnerUnit()?.getOwner();
+										}
 
-										if (attributeData) {
-											var newAttributeValue = data.attributes[attributeTypeId];
-											var oldAttributeValue = attributeData.value;
-
-											attributeData.hasChanged = newAttributeValue !== oldAttributeValue;
-											attributeData.value = newAttributeValue;
-											attributeData.type = attributeTypeId;
-											this.attribute.update(attributeTypeId, attributeData.value);
-
-											if (this._category === 'unit') {
-												this.updateAttributeBar(attributeData);
+										if (
+											attributeData &&
+											// ignore update if streamMode = 4 and it's for my own unit
+											!(ownerPlayer?._stats?.clientId == taro.network.id() && attributeData.streamMode == 4)
+										) {
+											// package MIN update with VALUE
+											let min = null;
+											if (
+												!(
+													data.attributes[attributeTypeId].min === null ||
+													data.attributes[attributeTypeId].min === undefined
+												)
+											) {
+												min = attributeData.min = data.attributes[attributeTypeId].min;
 											}
+
+											// package MAX update with VALUE
+											let max = null;
+											if (
+												!(
+													data.attributes[attributeTypeId].max === null ||
+													data.attributes[attributeTypeId].max === undefined
+												)
+											) {
+												max = attributeData.max = data.attributes[attributeTypeId].max;
+											}
+
+											this.attribute.update(attributeTypeId, data.attributes[attributeTypeId].value, min, max);
+
 										}
 										// update attribute if entity has such attribute
 									}
 								}
-							} else if (taro.isServer) {
-								for (var attributeTypeId in data.attributes) {
-									// prevent attribute being passed to client if it is invisible
-									if (this._stats.attributes && this._stats.attributes[attributeTypeId]) {
-										var attribute = this._stats.attributes[attributeTypeId];
-										if (
-											((attribute.isVisible && typeof attribute.isVisible === 'boolean' && attribute.isVisible == false) || // will be deprecated.
-												(attribute.isVisible && attribute.isVisible.constructor === Array && attribute.isVisible.length == 0)) &&
-											attributeTypeId !== taro.game.data.settings.scoreAttributeId
-										) {
-											delete data[attrName];
-										}
-									}
-								}
 							}
+							// else if (taro.isServer) {
+							// 	for (var attributeTypeId in data.attributes) {
+							// 		// prevent attribute being passed to client if it is invisible
+							// 		if (this._stats.attributes && this._stats.attributes[attributeTypeId]) {
+							// 			var attribute = this._stats.attributes[attributeTypeId];
+							// 			if (
+							// 				(attribute.streamMode != null && attribute.streamMode != 1) && // don't stream if streamMode isn't sync'ed (1). Also added != null for legacy support.
+							// 				attributeTypeId !== taro.game.data.settings.scoreAttributeId // always stream attribute that's used for scoreboard
+							// 			) {
+							// 				delete data[attrName];
+							// 			}
+							// 		}
+							// 	}
+							// }
 							break;
 
+						// deprecated
 						case 'attributesMax':
 							if (this._stats.attributes) {
 								// only on client side to prevent circular recursion
@@ -4132,6 +4157,7 @@ var TaroEntity = TaroObject.extend({
 							}
 							break;
 
+						// deprecated
 						case 'attributesMin':
 							// only on client side to prevent circular recursion
 							for (var attributeTypeId in data.attributesMin) {
@@ -4199,16 +4225,23 @@ var TaroEntity = TaroObject.extend({
 						if (typeof this.queueStreamData === 'function') {
 
 							// var forceStreamKeys = ['anim', 'coin', 'stateId', 'ownerId', 'name', 'slotIndex', 'newItemId', 'quantity', 'spriteOnly', 'setFadingText', 'playerJoinedAgain', 'use', 'hidden'];						
-							var forceStreamKeys = ['anim', 'coin', 'setFadingText', 'playerJoinedAgain', 'use', 'hidden'];
-							var dataIsAttributeRelated = ['attributes', 'attributesMin', 'attributesMax', 'attributesRegenerateRate'].includes(key)							
+							var forceStreamKeys = ['anim', 'coin', 'setFadingText', 'playerJoinedAgain', 'useQueued', 'hidden', 'cameraTrackedUnitId'];
+							var dataIsAttributeRelated = ['attributes', 'attributesMin', 'attributesMax', 'attributesRegenerateRate'].includes(attrName)							
 							if (newValue !== this.lastUpdatedData[attrName] || dataIsAttributeRelated || forceStreamKeys.includes(attrName)) {
 								var streamData = {};
 								streamData[attrName] = data[attrName];
-								this.queueStreamData(streamData);
+
+								if (clientId) {
+									var data = {}
+									data[this.id()] = streamData;
+									taro.network.send('streamUpdateData', data, clientId); // send update to a specific client
+								} else {
+									this.queueStreamData(streamData); // broadcast update to all clients
+								}
 
 								// for server-side only: cache last updated data, so we dont stream same data again (this optimizes CPU usage by a lot)
-								this.lastUpdatedData[attrName] = rfdc()(newValue); 
-							} 
+								this.lastUpdatedData[attrName] = rfdc()(newValue);
+							}
 							// else console.log(this._category, this._stats.name, attrName, "is the same as previous", this.lastUpdatedData[attrName], "new", newValue)
 						}
 					} else if (taro.isClient) {
@@ -4281,10 +4314,6 @@ var TaroEntity = TaroObject.extend({
 								}
 								this.playEffect(newValue.type, newValue.data ? newValue.data : {});
 								break;
-							case 'makePlayerCameraTrackUnit':
-								// this unit was queued to be tracked by a player's camera
-								taro.client.myPlayer.cameraTrackUnit(this);
-								break;
 							case 'hideUnit':
 								this.hide();
 								break;
@@ -4301,6 +4330,9 @@ var TaroEntity = TaroObject.extend({
 								taro.client.emit('create-particle', newValue);
 								break;
 						}
+
+						this.lastUpdatedData[attrName] = rfdc()(newValue);
+
 					}
 				}
 			}
@@ -4308,7 +4340,7 @@ var TaroEntity = TaroObject.extend({
 	},
 
 	// combine all data that'll be sent to the client, and send them altogether at the tick
-	queueStreamData: function (data) {
+	queueStreamData: function (data, clientId) {
 		// this._streamDataQueued = this._streamDataQueued.concat(data);
 		for (key in data) {
 			value = data[key];
@@ -4320,14 +4352,14 @@ var TaroEntity = TaroObject.extend({
 				if (this._streamDataQueued[key] == undefined) 
 				{
 					this._streamDataQueued[key] = {};
-				}					
-				this._streamDataQueued[key] = Object.assign(this._streamDataQueued[key], value);
+				}
+				// Object.assign was breaking new attribute logic that needs recursive merging
+				this._streamDataQueued[key] = _.merge(this._streamDataQueued[key], value);
 			} else {
 				this._streamDataQueued[key] = value;
 			}
-			
 		}
-		
+
 		taro.server.bandwidthUsage[this._category] += JSON.stringify(this._streamDataQueued).length;
 	},
 
@@ -4750,7 +4782,7 @@ var TaroEntity = TaroObject.extend({
 					break;
 
 				case 'projectile':
-					keys = ['type', 'anim', 'stateId', 'flip', 'sourceItemId', 'streamMode'];
+					keys = ['type', 'anim', 'stateId', 'flip', 'width', 'height', 'scaleDimensions', 'sourceItemId', 'streamMode'];
 					data = {
 						attributes: {},
 						// variables: {}
@@ -4759,7 +4791,7 @@ var TaroEntity = TaroObject.extend({
 
 				case 'player':
 					// purchasables is required for rendering this player's owned skin to the other players
-					keys = ['name', 'clientId', 'playerTypeId', 'controlledBy', 'playerJoined', 'unitIds', 'selectedUnitId', 'userId', 'banChat', 'purchasables', 'username', 'profilePicture', 'roleIds'];
+					keys = ['name', 'clientId', 'playerTypeId', 'controlledBy', 'playerJoined', 'unitIds', 'selectedUnitId', 'cameraTrackedUnitId', 'userId', 'banChat', 'purchasables', 'username', 'profilePicture', 'roleIds'];
 					data = {
 						attributes: {},
 						// variables: {}
@@ -5215,7 +5247,12 @@ var TaroEntity = TaroObject.extend({
 
 	isTransforming: function(bool) {
 		if (bool != undefined) {
-			this._isTransforming = bool;            
+			this._isTransforming = bool;
+
+			// when set as true, force transformTexture
+            if (bool == true) {
+                this.transformTexture(this.nextKeyFrame[1][0], this.nextKeyFrame[1][1], this.nextKeyFrame[1][2]);
+            }
 		}
 
 		return this._isTransforming;

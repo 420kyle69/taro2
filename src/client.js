@@ -98,7 +98,7 @@ const Client = TaroEventingClass.extend({
 		this.extrapolation = false; //old comment => 'disabling due to item bug'
 		this.resolution = 0; //old comment => 'autosize'
 		this.scaleMode = 0; //old comment => 'none'
-		this.renderBuffer = 80;
+		this.renderBuffer = 100;
 		this.isActiveTab = true;
 
 		this.isZooming = false;
@@ -148,8 +148,8 @@ const Client = TaroEventingClass.extend({
 		});
 
 		//go fetch
-		taro.addComponent(ProfilerComponent);
 		taro.addComponent(GameComponent);
+		taro.addComponent(ProfilerComponent);
 		taro.addComponent(MenuUiComponent);
 		// we're going to try and insert the fetch here
 		let promise = new Promise((resolve, reject) => {
@@ -480,7 +480,8 @@ const Client = TaroEventingClass.extend({
 				url: $(serverOption).attr('data-url'),
 				gameId: gameId,
 				id: $(serverOption).attr('value'),
-				name: $(serverOption).attr('data-name')
+				name: $(serverOption).attr('data-name'),
+				wsPort: $(serverOption).data('ws-port')
 			};
 
 			serversList.push(server);
@@ -657,8 +658,7 @@ const Client = TaroEventingClass.extend({
 			}
 
 			if (window.isStandalone) {
-
-				$(self.getCachedElementById('toggle-dev-panels')).show();
+				// $(self.getCachedElementById('toggle-dev-panels')).show();
 			}
 		});
 	},
@@ -672,8 +672,6 @@ const Client = TaroEventingClass.extend({
 		const gravity = taro.game.data.settings.gravity;
 
 		if (gravity) {
-
-			console.log('setting gravity: ', gravity); // not in prod please
 			taro.physics.gravity(gravity.x, gravity.y);
 		}
 		taro.physics.setContinuousPhysics(!!taro?.game?.data?.settings?.continuousPhysics);
@@ -698,7 +696,7 @@ const Client = TaroEventingClass.extend({
 		taro.network.define('hideUnitNameLabelFromPlayer', this._onHideUnitNameLabelFromPlayer);
 		taro.network.define('showUnitNameLabelFromPlayer', this._onShowUnitNameLabelFromPlayer);
 
-		taro.network.define('updateAllEntities', this._onUpdateAllEntities);
+		taro.network.define('streamUpdateData', this._onStreamUpdateData);
 		taro.network.define('updateEntityAttribute', this._onUpdateEntityAttribute);
 
 		taro.network.define('updateUiText', this._onUpdateUiText);
@@ -718,6 +716,7 @@ const Client = TaroEventingClass.extend({
 		taro.network.define('videoChat', this._onVideoChat);
 
 		taro.network.define('devLogs', this._onDevLogs);
+		taro.network.define('profile', this._onProfile);
 		taro.network.define('errorLogs', this._onErrorLogs);
 
 		taro.network.define('sound', this._onSound);
@@ -738,7 +737,9 @@ const Client = TaroEventingClass.extend({
 
 		taro.network.define('editTile', this._onEditTile);
 		taro.network.define('editRegion', this._onEditRegion);
+		taro.network.define('editVariable', this._onEditVariable);
 		taro.network.define('editInitEntity', this._onEditInitEntity);
+		taro.network.define('editGlobalScripts', this._onEditGlobalScripts);
 		taro.network.define('updateClientInitEntities', this._updateClientInitEntities);
 		taro.network.define('updateUnit', this._onUpdateUnit);
 		taro.network.define('updateItem', this._onUpdateItem);

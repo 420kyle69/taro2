@@ -113,7 +113,7 @@ NetIo.Client = NetIo.EventingClass.extend({
 		var posthogDistinctId = window.posthogDistinctId || (window.posthog && window.posthog.get_distinct_id ? window.posthog.get_distinct_id() : '');	
 		const workerPortQuery = (new URL(window.location.href).searchParams.get('proxy') === 'master') ? '' : `&cfwp=${(parseInt(taro.client.server?.name?.split('.')[1] || 0) + 2000)}`;
 		
-		this.wsUrl = `${url}?token=${gsAuthToken}&sid=${taro.client.server.id}${workerPortQuery}&distinctId=${distinctId}&posthogDistinctId=${posthogDistinctId}`;
+		this.wsUrl = `${url}?token=${gsAuthToken}&sid=${taro.client.server.id}${workerPortQuery}&distinctId=${distinctId}&posthogDistinctId=${posthogDistinctId}&ws_port=${taro.client.server.wsPort}`;
 		this.wsStartTime = Date.now();
 		this.startTimeSinceLoad = performance.now();
 
@@ -299,7 +299,7 @@ NetIo.Client = NetIo.EventingClass.extend({
 
 	_onOpen: function (event) {
 		this.trackLatency('gs-websocket-connect', 'onopen');
-
+		
 		var url = event.target.url;
 		var urlWithoutProtocol = url.split('://')[1];
 		var serverDomain = urlWithoutProtocol.split('/')[0];
@@ -424,14 +424,25 @@ NetIo.Client = NetIo.EventingClass.extend({
 						if (window.newrelic) {
 							window.newrelic.addPageAction('gs-websocket-disconnects', disconnectData);
 						}
+						
+						if (window.trackEvent) {
+							window.trackEvent('Socket Disconnect', disconnectData);
+						}
+						
 						window.reconnectInProgress = false;
 					});
 			}, 500);
 		}
 		
 		console.log('disconnected', disconnectData);
-		if (!window.reconnectInProgress && window.newrelic) {
-			window.newrelic.addPageAction('gs-websocket-disconnects', disconnectData);
+		if (!window.reconnectInProgress) {
+			if (window.newrelic) {
+				window.newrelic.addPageAction('gs-websocket-disconnects', disconnectData);
+			}
+			
+			if (window.trackEvent) {
+				window.trackEvent('Socket Disconnect', disconnectData);
+			}
 		}
 		
 		// If we are already connected and have an id...
@@ -472,7 +483,8 @@ NetIo.Client = NetIo.EventingClass.extend({
 	_decode: function (data) {
 		var self = this;
 
-		var jsonString = LZString.decompressFromUTF16(data.data);
+		// var jsonString = LZString.decompressFromUTF16(data.data);
+		var jsonString = LZUTF8.decompress(data.data, {inputEncoding: "StorageBinaryString"});
 		// var jsonString = data.data;
 
 		// NOTE: make sure than COMPRESSION_THRESHOLD is same on both client and server

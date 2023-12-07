@@ -95,7 +95,7 @@ var ServerNetworkEvents = {
 		// assign _id and sessionID to the new client
 		var client = taro.server.clients[clientId];
 		var socket = taro.network._socketById[clientId];
-		
+
 		if (!socket) {
 			try {
 				global.rollbar.log('No socket found with this clientId',
@@ -109,7 +109,15 @@ var ServerNetworkEvents = {
 			return;
 		}
 		// check joining user is same as token user.
-		else if ((socket._token.userId && socket._token.userId !== data._id) || (socket._token.sessionId && socket._token.sessionId !== data.sessionId)) {
+		else if (
+			data == undefined || 
+			(
+				data && (
+					(socket._token.userId && socket._token.userId !== data._id) || 
+					(socket._token.sessionId && socket._token.sessionId !== data.sessionId)
+				)
+			)		
+		) {
 			console.log('Unauthenticated user joining the game (ServerNetworkEvent.js)');
 			socket.close('Unauthenticated user joining the game');
 			return;
@@ -458,13 +466,21 @@ var ServerNetworkEvents = {
 		taro.developerMode.editRegion(data, clientId);
 	},
 
-    _onEditInitEntity: function(data, clientId) {
-        taro.developerMode.editInitEntity(data, clientId);
-    },
+	_onEditVariable: function(data, clientId) {
+		taro.developerMode.editVariable(data, clientId);
+	},
 
-    _onRequestInitEntities: function(data, clientId) {
-        taro.developerMode.requestInitEntities(data, clientId);
-    },
+	_onEditInitEntity: function(data, clientId) {
+		taro.developerMode.editInitEntity(data, clientId);
+	},
+
+	_onEditGlobalScripts: function(data, clientId) {
+		taro.developerMode.editGlobalScripts(data, clientId);
+	},
+
+	_onRequestInitEntities: function(data, clientId) {
+		taro.developerMode.requestInitEntities(data, clientId);
+	},
 
 	_onEditEntity: function(data, clientId) {
 		taro.developerMode.editEntity(data, clientId);
@@ -482,7 +498,7 @@ var ServerNetworkEvents = {
 			}
 		}
 	},
-	
+
 	_onBuyUnit: function (id, clientId) {
 		taro.devLog('player ' + clientId + ' wants to purchase item' + id);
 		var player = taro.game.getPlayerByClientId(clientId);
@@ -507,7 +523,7 @@ var ServerNetworkEvents = {
 	_onSwapInventory: function (data, clientId) {
 		var player = taro.game.getPlayerByClientId(clientId);
 		if (player) {
-			var unit = player.getSelectedUnit();		
+			var unit = player.getSelectedUnit();
 			if (unit && unit._stats) {
 				var itemIds = rfdc()(unit._stats.itemIds);
 				var fromItem = taro.$(itemIds[data.from]);
@@ -608,21 +624,28 @@ var ServerNetworkEvents = {
 		}
 	},
 
+	_onRunProfiler: function ({ run }, modClientId) {
+		var modPlayer = taro.game.getPlayerByClientId(modClientId);
+
+		if (modPlayer && modPlayer.isDeveloper()) {			
+			if (run) {
+				taro.profiler.start();
+			} else {
+				taro.profiler.stop();
+			}
+			
+		}		
+	},
+
 	_onKick: function (kickedClientId, modClientId) {
 		var modPlayer = taro.game.getPlayerByClientId(modClientId);
 		var kickedPlayer = taro.game.getPlayerByClientId(kickedClientId);
 
-		if (!modPlayer) {
-			return;
-		}
-
-		var isUserDeveloper = modPlayer.isDeveloper();
-			
-		if (isUserDeveloper && kickedPlayer) {
-			taro.game.kickPlayer(kickedPlayer.id(), modPlayer.id());
-		}
+		if (modPlayer && modPlayer.isDeveloper() && kickedPlayer) {			
+			taro.game.kickPlayer(kickedPlayer.id(), 'You were kicked by ' + modPlayer._stats?.name);
+		}		
 	},
-	
+
 	_onBanUser: function ({ userId, kickuserId }, clientId) {
 		var player = taro.game.getPlayerByClientId(clientId);
 
@@ -784,6 +807,13 @@ var ServerNetworkEvents = {
 			}
 		}
 	},
+	_onHtmlUiClick: function (data, clientId) {
+		var player = taro.game.getPlayerByClientId(clientId);
+		if (player) {
+			player.lastHtmlUiClickData = data;
+			taro.script.trigger('htmlUiClick', { playerId: player.id() });
+		}
+	},
 
 	_onPlayerKeyDown: function (data, clientId) {
 		var player = taro.game.getPlayerByClientId(clientId);
@@ -791,7 +821,6 @@ var ServerNetworkEvents = {
 			player.control.keyDown(data.device, data.key);
 		}
 	},
-
 
 	_onPlayerKeyUp: function (data, clientId) {
 		var player = taro.game.getPlayerByClientId(clientId);
@@ -845,11 +874,11 @@ var ServerNetworkEvents = {
 			taro.clusterClient.stopRecordLogs(data);
 		}
 	},
-	
+
 	_onPlayAdCallback: function (data, clientId) {
 		taro.ad.playCallback(data, clientId);
 	},
-	
+
 	_onSomeBullshit: function () {
 		//bullshit
 	}

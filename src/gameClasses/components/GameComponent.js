@@ -27,20 +27,21 @@ var GameComponent = TaroEntity.extend({
 				this[`computer${i}`] = this.createPlayer({
 					name: `AI ${i}`,
 					controlledBy: 'computer',
-					unitIds: [] // all units owned by player
+					unitIds: [], // all units owned by player
+					clientId: i
 				});
 			}
 		} else if (taro.isClient) {
 			// determine which attribute will be used for scoreboard
-			var attr = 'points';
-			if (
-				taro.game.data.settings &&
-				taro.game.data.settings.constants &&
-				taro.game.data.settings.constants.currency != undefined
-			) {
-				attr = taro.game.data.settings.constants.currency;
-			}
-			$('.game-currency').html(attr);
+			// var attr = 'points';
+			// if (
+			// 	taro.game.data.settings &&
+			// 	taro.game.data.settings.constants &&
+			// 	taro.game.data.settings.constants.currency != undefined
+			// ) {
+			// 	attr = taro.game.data.settings.constants.currency;
+			// }
+			// $('.game-currency').html(attr);
 		}
 
 		taro.addComponent(ScriptComponent);
@@ -49,6 +50,12 @@ var GameComponent = TaroEntity.extend({
 		taro.script.trigger('gameStart');
 		self.hasStarted = true;
 		taro.timer.startGameClock();
+
+		taro._physicsTickRate = Math.max(20, Math.min(60, self.data.frameRate || 20));
+
+		console.log('taro.physics._physicsTickRate', taro._physicsTickRate);
+
+		taro.clusterClient && taro.clusterClient.gameStarted();
 	},
 
 	// this applies to logged in players only
@@ -70,7 +77,7 @@ var GameComponent = TaroEntity.extend({
 			points: data.points || 0,
 			clientId: data.clientId,
 			purchasables: purchases, // purchasables are currently equipped purchasables of the player for current game
-			allPurchasables: data.allPurchasables, // allPurchasables includes equipped and purchased items of the player for current game			
+			allPurchasables: data.allPurchasables, // allPurchasables includes equipped and purchased items of the player for current game
 			attributes: data.attributes,
 			highscore: data.highscore,
 			lastPlayed: data.lastPlayed,
@@ -118,7 +125,6 @@ var GameComponent = TaroEntity.extend({
 			// taro.shopkeeper.updateShopInventory(taro.shopkeeper.inventory, data.clientId) // send latest ui information to the client
 
 			var isOwner = taro.server.owner == data._id && data.controlledBy == 'human';
-			
 
 			var isUserAdmin = false;
 			var isUserMod = false;
@@ -132,7 +138,7 @@ var GameComponent = TaroEntity.extend({
 			player._stats.isUserAdmin = isUserAdmin;
 			player._stats.isUserMod = isUserMod;
 			player._stats.isModerationAllowed = isOwner || isUserAdmin || isUserMod || (data.roleIds && roles.find(role => role?.permissions?.moderator && data.roleIds.includes(role._id.toString())));
-			
+
 			var isInvitedUser = (data.roleIds && roles.find(role => role?.permissions?.contributor && data.roleIds.includes(role._id.toString())));
 
 			// if User/Admin has access to game then show developer logs
@@ -154,32 +160,24 @@ var GameComponent = TaroEntity.extend({
 		// get existing players to re-join
 	},
 
-	kickPlayer: function(playerId, modPlayerId) {
-		// var player = this.getPlayerByClientId(clientId);		
+	kickPlayer: function(playerId, message) {
+		// var player = this.getPlayerByClientId(clientId);
 		// if (player) {
 		// 	player.streamUpdateData([{ playerJoined: false }]);
 		// }
-		console.log("kicking player")
 		var player = taro.$(playerId);
 
 		if (player) {
 			if (player._stats.clientId) {
 				var client = taro.server.clients[player._stats.clientId];
 				if (client) {
-					var modPlayerName = 'a moderator';
-
-					if (modPlayerId) {
-						var modPlayer = taro.$(modPlayerId);
-						modPlayerName = modPlayer && modPlayer._stats && modPlayer._stats.name;
-					}
-
-					client.socket.close('You were kicked by ' + modPlayerName)
+					client.socket.close(message)
 				}
 			} else {
 				// bot players don't have clientId
 				player.remove();
 			}
-		}		
+		}
 	},
 
 	// get client with ip
@@ -218,7 +216,7 @@ var GameComponent = TaroEntity.extend({
 
 	getPlayerByClientId: function (clientId) {
 		return taro.$$('player').find(function (player) {
-			return player._stats && player._stats.controlledBy != 'computer' && player._stats.clientId && player._stats.clientId == clientId;
+			return player._stats?.clientId == clientId;
 		});
 	},
 

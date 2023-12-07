@@ -2,10 +2,11 @@ var Projectile = TaroEntityPhysics.extend({
 	classId: 'Projectile',
 
 	init: function (data, entityIdFromServer) {
-		TaroEntityPhysics.prototype.init.call(this, data.defaultData);
-		this.id(entityIdFromServer);
 		var self = this;
 		self.category('projectile');
+		
+		TaroEntityPhysics.prototype.init.call(this, data.defaultData);
+		this.id(entityIdFromServer);
 		var projectileData = {};
 		if (taro.isClient) {
 			projectileData = taro.game.cloneAsset('projectileTypes', data.type);
@@ -111,10 +112,12 @@ var Projectile = TaroEntityPhysics.extend({
 	_behaviour: function (ctx) {
 		var self = this;
 		
-		_.forEach(taro.triggersQueued, function (trigger) {
-			trigger.params['thisEntityId'] = self.id();
-			self.script.trigger(trigger.name, trigger.params);
-		});
+		if (taro.gameLoopTickHasExecuted) {
+			_.forEach(taro.triggersQueued, function (trigger) {
+				trigger.params['thisEntityId'] = self.id();
+				self.script.trigger(trigger.name, trigger.params);
+			});
+		}
 
 		// if entity (unit/item/player/projectile) has attribute, run regenerate
 		if (taro.isServer) {
@@ -130,6 +133,11 @@ var Projectile = TaroEntityPhysics.extend({
 
 					processedUpdates.push({[key]: value});
 					delete taro.client.entityUpdateQueue[this.id()][key]
+					
+					// remove queue object for this entity is there's no queue remaining in order to prevent memory leak
+					if (Object.keys(taro.client.entityUpdateQueue[this.id()]).length == 0) {
+						delete taro.client.entityUpdateQueue[this.id()];
+					}
 				}
 
 				if (processedUpdates.length > 0) {
@@ -148,8 +156,6 @@ var Projectile = TaroEntityPhysics.extend({
 		var sourceUnit = taro.$(this._stats.sourceUnitId);
 		var sourceItem = taro.$(this._stats.sourceItemId);
 
-		self.previousState = null;
-
 		var data = taro.game.cloneAsset('projectileTypes', type);
 		delete data.type; // hotfix for dealing with corrupted game json that has unitData.type = "unitType". This is caused by bug in the game editor.
 
@@ -159,17 +165,20 @@ var Projectile = TaroEntityPhysics.extend({
 		}
 
 		self.script.load(data.scripts);
+		self.script.scriptCache = {};
 
 		self._stats.type = type;
 
 		// adding this flag so that clients receiving entity data from onStreamCreate don't overwrite values with default data
 		// when they are created by a client that has just joined.
 		for (var i in data) {
-			if (i == 'name') { // don't overwrite projectile's name with projectile type name
+			if (i === 'name' || i === 'streamMode') { // don't overwrite projectile's name with projectile type name
 				continue;
 			}
+			if (self._stats[i] !== data[i]) console.log(i, self._stats[i], data[i])
 			self._stats[i] = data[i];
 		}
+
 		// if the new projectile type has the same entity variables as the old projectile type, then pass the values
 		var variables = {};
 		if (data.variables) {
@@ -201,7 +210,6 @@ var Projectile = TaroEntityPhysics.extend({
 
 		if (taro.isClient) {
 			self.updateTexture();
-			//self._scaleTexture();
 		}
 
 		this._stats.sourceUnitId = sourceUnit?.id();
@@ -209,9 +217,9 @@ var Projectile = TaroEntityPhysics.extend({
 
 	},
 
-	streamUpdateData: function (queuedData) {
-
-		TaroEntity.prototype.streamUpdateData.call(this, data);
+	streamUpdateData: function (queuedData, clientId) {
+		
+		TaroEntity.prototype.streamUpdateData.call(this, queuedData, clientId);
 		for (var i = 0; i < queuedData.length; i++) {
 			var data = queuedData[i];
 			for (attrName in data) {
@@ -237,6 +245,14 @@ var Projectile = TaroEntityPhysics.extend({
 							this._stats.scale = newValue;
 							this._scaleTexture();
 						}
+						break;
+
+					case 'sourceUnitId':
+						this._stats.sourceUnitId = newValue;
+						break;
+
+					case 'sourceItemId':
+						this._stats.sourceItemId = newValue;
 						break;
 				}
 			}
@@ -268,34 +284,11 @@ var Projectile = TaroEntityPhysics.extend({
 	},
 
 	destroy: function () {
+		this.script.trigger('initEntityDestroy');
 		this.playEffect('destroy');
 		TaroEntityPhysics.prototype.destroy.call(this);
 		if (taro.physics && taro.physics.engine == 'CRASH') {
 			this.destroyBody();
-		}
-	},
-
-	// update this projectile's stats in the client side
-	streamUpdateData: function (queuedData) {
-		var self = this;
-		TaroEntity.prototype.streamUpdateData.call(this, queuedData);
-
-		for (var i = 0; i < queuedData.length; i++) {
-			var data = queuedData[i];
-			for (attrName in data) {
-				var newValue = data[attrName];
-
-				switch (attrName) {
-					case 'sourceUnitId':
-						this._stats.sourceUnitId = newValue;
-						break;
-
-					case 'sourceItemId':
-						this._stats.sourceItemId = newValue;
-						break;
-				}
-				
-			}
 		}
 	}
 

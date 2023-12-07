@@ -573,8 +573,10 @@ NetIo.Server = NetIo.EventingClass.extend({
 		this._https = require('https');
 		this._msgpack = require('msgpack-lite');
 		const { compressToUTF16 } = require('lz-string');
+		const LZUTF8 = require('lzutf8');
 
-		this._compress = compressToUTF16;
+		// this._compress = compressToUTF16;
+		this._compress = LZUTF8.compress;
 		this.COMPRESSION_THRESHOLD = 10000;
 
 		this._sockets = [];
@@ -591,7 +593,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 
 		// Cloudflare SSL flexible mode only encrypt traffic between browser and cloudflare. All the https/wss traffic is diverted to http/ws from Cloudflare to server hence https proxy server is not needed.
 		// Https/wss server is not being used currently on production
-		var secure = true; // to turn on/off https
+		var secure = false; // to turn on/off https
 
 		if (process.env.ENV == 'local' || process.env.ENV == 'standalone' || process.env.ENV == 'standalone-remote') {
 			secure = false;
@@ -603,48 +605,50 @@ NetIo.Server = NetIo.EventingClass.extend({
 		// http - local, standalone, standalone-remote env
 
 		this._httpServer = this._http.createServer(function (request, response) {
-			if (request.url === '/heapdump') {
-				// Handle heapdump request
-				if (request.method === 'GET') {
-					const fs = require('fs');
-					const path = require('path');
-					const heapdump = require('heapdump');
-
-					// Generate a unique filename for the heap dump
-					const _filename = `worker_heapdump_${Date.now()}.heapsnapshot`;
-
-					// Start recording the heap dump
-					heapdump.writeSnapshot(path.join(__dirname, _filename), (err, filename) => {
-						if (err) {
-							console.error('Error while generating heap dump:', err);
-							response.writeHead(500);
-							response.end('Error while generating heap dump');
-						} else {
-							// Send the heap dump file as a response
-							response.setHeader('Content-disposition', `attachment; filename=${_filename}`);
-							response.setHeader('Content-type', 'application/octet-stream');
-							const fileStream = fs.createReadStream(filename);
-
-							fileStream.on('end', () => {
-								// Delete the heap dump file after it's downloaded
-								fs.unlink(filename, (err) => {
-									if (err) {
-										console.error('Error while deleting heap dump:', err);
-									}
-								});
-							});
-
-							fileStream.pipe(response);
-						}
-					});
-				} else {
-					response.writeHead(405);
-					response.end('Method Not Allowed');
-				}
-			} else {
-				response.writeHead(404);
-				response.end();
-			}
+			// if (request.url === '/heapdump') {
+			// 	// Handle heapdump request
+			// 	if (request.method === 'GET') {
+			// 		const fs = require('fs');
+			// 		const path = require('path');
+			// 		const heapdump = require('heapdump');
+			//
+			// 		// Generate a unique filename for the heap dump
+			// 		const _filename = `worker_heapdump_${Date.now()}.heapsnapshot`;
+			//
+			// 		// Start recording the heap dump
+			// 		heapdump.writeSnapshot(path.join(__dirname, _filename), (err, filename) => {
+			// 			if (err) {
+			// 				console.error('Error while generating heap dump:', err);
+			// 				response.writeHead(500);
+			// 				response.end('Error while generating heap dump');
+			// 			} else {
+			// 				// Send the heap dump file as a response
+			// 				response.setHeader('Content-disposition', `attachment; filename=${_filename}`);
+			// 				response.setHeader('Content-type', 'application/octet-stream');
+			// 				const fileStream = fs.createReadStream(filename);
+			//
+			// 				fileStream.on('end', () => {
+			// 					// Delete the heap dump file after it's downloaded
+			// 					fs.unlink(filename, (err) => {
+			// 						if (err) {
+			// 							console.error('Error while deleting heap dump:', err);
+			// 						}
+			// 					});
+			// 				});
+			//
+			// 				fileStream.pipe(response);
+			// 			}
+			// 		});
+			// 	} else {
+			// 		response.writeHead(405);
+			// 		response.end('Method Not Allowed');
+			// 	}
+			// } else {
+			// 	response.writeHead(404);
+			// 	response.end();
+			// }
+			response.writeHead(404);
+			response.end();
 		});
 		this._socketServerHttp = new this._websocket.Server({
 			server: this._httpServer,
@@ -692,49 +696,51 @@ NetIo.Server = NetIo.EventingClass.extend({
 
 			var options = { key: privateKey, cert: certificate };
 			this._httpsServer = this._https.createServer(options, function (request, response) {
-				if (request.url === '/heapdump') {
-					// Handle heapdump request
-					if (request.method === 'GET') {
-						const fs = require('fs');
-						const path = require('path');
-						const heapdump = require('heapdump');
-
-						// Generate a unique filename for the heap dump
-						const _filename = `worker_heapdump_${Date.now()}.heapsnapshot`;
-
-						// Start recording the heap dump
-						heapdump.writeSnapshot(path.join(__dirname, _filename), (err, filename) => {
-							if (err) {
-								console.error('Error while generating heap dump:', err);
-								response.writeHead(500);
-								response.end('Error while generating heap dump');
-							} else {
-								// Send the heap dump file as a response
-								response.setHeader('Content-disposition', `attachment; filename=${_filename}`);
-								response.setHeader('Content-type', 'application/octet-stream');
-
-								const fileStream = fs.createReadStream(filename);
-
-								fileStream.on('end', () => {
-									// Delete the heap dump file after it's downloaded
-									fs.unlink(filename, (err) => {
-										if (err) {
-											console.error('Error while deleting heap dump:', err);
-										}
-									});
-								});
-
-								fileStream.pipe(response);
-							}
-						});
-					} else {
-						response.writeHead(405);
-						response.end('Method Not Allowed');
-					}
-				} else {
-					response.writeHead(404);
-					response.end();
-				}
+				// if (request.url === '/heapdump') {
+				// 	// Handle heapdump request
+				// 	if (request.method === 'GET') {
+				// 		const fs = require('fs');
+				// 		const path = require('path');
+				// 		const heapdump = require('heapdump');
+				//
+				// 		// Generate a unique filename for the heap dump
+				// 		const _filename = `worker_heapdump_${Date.now()}.heapsnapshot`;
+				//
+				// 		// Start recording the heap dump
+				// 		heapdump.writeSnapshot(path.join(__dirname, _filename), (err, filename) => {
+				// 			if (err) {
+				// 				console.error('Error while generating heap dump:', err);
+				// 				response.writeHead(500);
+				// 				response.end('Error while generating heap dump');
+				// 			} else {
+				// 				// Send the heap dump file as a response
+				// 				response.setHeader('Content-disposition', `attachment; filename=${_filename}`);
+				// 				response.setHeader('Content-type', 'application/octet-stream');
+				//
+				// 				const fileStream = fs.createReadStream(filename);
+				//
+				// 				fileStream.on('end', () => {
+				// 					// Delete the heap dump file after it's downloaded
+				// 					fs.unlink(filename, (err) => {
+				// 						if (err) {
+				// 							console.error('Error while deleting heap dump:', err);
+				// 						}
+				// 					});
+				// 				});
+				//
+				// 				fileStream.pipe(response);
+				// 			}
+				// 		});
+				// 	} else {
+				// 		response.writeHead(405);
+				// 		response.end('Method Not Allowed');
+				// 	}
+				// } else {
+				// 	response.writeHead(404);
+				// 	response.end();
+				// }
+				response.writeHead(404);
+				response.end();
 			});
 			this._socketServerHttps = new this._websocket.Server({
 			    server: this._httpsServer,
@@ -1110,8 +1116,8 @@ NetIo.Server = NetIo.EventingClass.extend({
 			//     timeStart = Date.now();
 			// }
 
-			json = taro.network._io._compress(json);
-
+			json = taro.network._io._compress(json, {outputEncoding: "StorageBinaryString"});
+			
 			// NOTE: make sure than COMPRESSION_THRESHOLD is same on both client and server
 			// LOGIC:
 			//     1. if json string has less than COMPRESSION_THRESHOLD chars (e.g. 9999)

@@ -88,7 +88,7 @@ var VariableComponent = TaroEntity.extend({
 		return returnValue;
 	},
 
-	
+
 	calculate: function (items, vars) {
 		var self = this;
 
@@ -121,7 +121,7 @@ var VariableComponent = TaroEntity.extend({
 		}
 
 		if (isNaN(result)) {
-			taro.script.errorLog('\'Calculate\' detected NaN value. Returning undefined');
+			taro.script.errorLog(`Calculate error: ${left} ${op.operator} ${right} => NaN. Returning undefined`);
 			return undefined;
 		}
 
@@ -175,6 +175,7 @@ var VariableComponent = TaroEntity.extend({
 			// empty
 		}
 	},
+
 	getAllVariables: function (selectedTypes) {
 		var returnObj = {};
 
@@ -207,7 +208,7 @@ var VariableComponent = TaroEntity.extend({
 		return returnObj;
 	},
 
-	
+
 
 	getValue: function (text, vars) {
 		var self = this;
@@ -223,7 +224,7 @@ var VariableComponent = TaroEntity.extend({
 		if (typeof text !== 'object') {
 			returnValue = text;
 
-		// if point! (x, y)
+			// if point! (x, y)
 		} else if (text && text.function == undefined && text.x != undefined && text.y != undefined) {
 			returnValue = {
 				x: self.getValue(text.x, vars),
@@ -232,20 +233,23 @@ var VariableComponent = TaroEntity.extend({
 		}
 
 		if (text && typeof text === 'object') {
-			
-			if (this.profiler[text.function] == undefined) {
-				this.profiler[text.function] = {
-					counter: 0,
-					avgTime: 0,
-					totalTime: 0
+
+			//if profiler is enabled, start profiling
+			if (taro.profiler.isEnabled) {
+				if (this.profiler[text.function] == undefined) {
+					this.profiler[text.function] = {
+						counter: 0,
+						avgTime: 0,
+						totalTime: 0
+					}
 				}
+				var profileStart = Date.now();
 			}
-			var profileStart = Date.now();
 
 			if (text.function == undefined) {
 				return text;
 			}
-			
+
 			// gradual migration from using switch (below) to functions to accomplish O(1) function lookup
 			if (typeof this._functions[text.function] == 'function') {
 				returnValue = this._functions[text.function](text, vars);
@@ -320,6 +324,15 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
+					case 'unitIsCarryingItemType':
+						var unit = self.getValue(text.unit, vars);
+						var itemType = self.getValue(text.itemType, vars);
+						if (unit && unit._category == 'unit' && unit.inventory && itemType) {
+							return unit.inventory.hasItem(itemType)
+						}
+
+						break;
+
 					case 'isPositionInWall':
 						var positionX = self.getValue(text.position.x, vars);
 						var positionY = self.getValue(text.position.y, vars);
@@ -382,17 +395,17 @@ var VariableComponent = TaroEntity.extend({
 					case 'playerHasAdblockEnabled':
 						var player = self.getValue(text.player, vars);
 						returnValue = !!(player && player._stats.isAdBlockEnabled);
-						break;	
-				
+						break;
+
 					case 'roleExistsForPlayer':
 						var name = self._script.variable.getValue(text.name, vars);
 						var player = self._script.variable.getValue(text.player, vars);
 
 						var role = (taro.game.data.roles || []).find(role => role.name === name);
 						var roleId = role && role._id;
-						
-						returnValue = roleId && player && (player._stats.roleIds || []).includes(roleId);	
-						break;				
+
+						returnValue = roleId && player && (player._stats.roleIds || []).includes(roleId);
+						break;
 
 					case 'areEntitiesTouching':
 						var sourceEntity = self.getValue(text.sourceEntity, vars);
@@ -476,6 +489,14 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
+					case 'lastClickedUiElementId':
+						var player = self.getValue(text.player, vars);
+						if (player && player._category == 'player') {
+							returnValue = player.lastHtmlUiClickData.id;
+						}
+
+						break;
+
 					case 'lastPlayerMessage':
 						var player = self.getValue(text.player, vars);
 						if (player && player._category == 'player') {
@@ -496,7 +517,7 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
-					
+
 
 					case 'thisEntity':
 						returnValue = self._entity;
@@ -586,7 +607,6 @@ var VariableComponent = TaroEntity.extend({
 						if (text.itemTypeGroup && text.itemType) {
 							var variableObj = self.getVariable(text.itemTypeGroup.variableName);
 							var itemType = self.getValue(text.itemType, vars);
-							console.log(text.itemType, itemType, variableObj);
 							if (variableObj && variableObj[itemType]) {
 								returnValue = variableObj[itemType].quantity;
 							}
@@ -735,18 +755,16 @@ var VariableComponent = TaroEntity.extend({
 
 					case 'getEntityVelocityX':
 						if (entity && entity.body) {
-							var velocity = entity.body.m_linearVelocity && entity.body.m_linearVelocity.x;
-							velocity = velocity && velocity.toFixed(2) || 0;
-							returnValue = parseFloat(velocity);
+							var velocity = entity.body.getLinearVelocity();
+							returnValue = parseFloat(velocity.get_x() * taro.physics._scaleRatioToBox2dWeb).toFixed(2) || 0;
 						}
 
 						break;
 
 					case 'getEntityVelocityY':
 						if (entity && entity.body) {
-							var velocity = entity.body.m_linearVelocity && entity.body.m_linearVelocity.y;
-							velocity = velocity && velocity.toFixed(2) || 0;
-							returnValue = parseFloat(velocity);
+							var velocity = entity.body.getLinearVelocity();
+							returnValue = parseFloat(velocity.get_y() * taro.physics._scaleRatioToBox2dWeb).toFixed(2) || 0;
 						}
 
 						break;
@@ -966,27 +984,27 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
-						// case 'getUnitInFrontOfUnit':
-						// 	if (entity && entity._category == 'unit') {
-						// 		var entities = taro.physics.getBodiesInRegion({
-						// 			x: entity._translate.x - 7 + (35 * Math.cos(entity._rotate.z + Math.radians(-90))),
-						// 			y: entity._translate.y - 7 + (35 * Math.sin(entity._rotate.z + Math.radians(-90))),
-						// 			width: 14,
-						// 			height: 14
-						// 		},
-						// 			entity.id()
-						// 		)
-						// 		for (i = 0; i < entities.length; i++) {
-						// 			var entity = entities[i]
-						// 			if (entity && entity._category == 'unit') {
-						// 				return entity;
-						// 			}
-						// 		}
-						// 	}
+					// case 'getUnitInFrontOfUnit':
+					// 	if (entity && entity._category == 'unit') {
+					// 		var entities = taro.physics.getBodiesInRegion({
+					// 			x: entity._translate.x - 7 + (35 * Math.cos(entity._rotate.z + Math.radians(-90))),
+					// 			y: entity._translate.y - 7 + (35 * Math.sin(entity._rotate.z + Math.radians(-90))),
+					// 			width: 14,
+					// 			height: 14
+					// 		},
+					// 			entity.id()
+					// 		)
+					// 		for (i = 0; i < entities.length; i++) {
+					// 			var entity = entities[i]
+					// 			if (entity && entity._category == 'unit') {
+					// 				return entity;
+					// 			}
+					// 		}
+					// 	}
 
-						// 	break;
+					// 	break;
 
-					
+
 					case 'squareRoot':
 						var numberValue = self.getValue(text.number, vars);
 
@@ -1265,6 +1283,31 @@ var VariableComponent = TaroEntity.extend({
 									returnValue = { x: 0, y: 0 };
 								}
 							}
+						}
+
+						break;
+
+					case 'getCameraPosition':
+						if (taro.isClient) {
+							const bounds = taro.renderer.getViewportBounds();
+							returnValue = {
+								x: bounds.x + bounds.width / 2,
+								y: bounds.y + bounds.height / 2
+							}
+						}
+
+						break;
+
+					case 'getCameraWidth':
+						if (taro.isClient) {
+							returnValue = taro.renderer.getCameraWidth();
+						}
+
+						break;
+
+					case 'getCameraHeight':
+						if (taro.isClient) {
+							returnValue = taro.renderer.getCameraHeight();
 						}
 
 						break;
@@ -1691,7 +1734,7 @@ var VariableComponent = TaroEntity.extend({
 								}
 							} catch (err) {
 								if (err instanceof SyntaxError) {
-									this._script.errorLog(`error parsing JSON within getStringArrayLength:  ${typeof string} ${string} is not a valid JSON string`);
+									self._script.errorLog(`error parsing JSON within getStringArrayLength:  ${typeof string} ${string} is not a valid JSON string`);
 								}
 							}
 						}
@@ -1710,7 +1753,7 @@ var VariableComponent = TaroEntity.extend({
 
 							} catch (err) {
 								if (err instanceof SyntaxError) {
-									this._script.errorLog(`error parsing JSON within getStringArrayElement:  ${typeof string} ${string} is not a valid JSON string`);
+									self._script.errorLog(`error parsing JSON within getStringArrayElement:  ${typeof string} ${string} is not a valid JSON string`);
 								}
 							}
 						}
@@ -1732,9 +1775,9 @@ var VariableComponent = TaroEntity.extend({
 								}
 							} catch (err) {
 								if (err instanceof SyntaxError) {
-									this._script.errorLog(`error parsing JSON within insertStringArrayElement:  ${typeof string} ${string} is not a valid JSON string`);
+									self._script.errorLog(`error parsing JSON within insertStringArrayElement:  ${typeof string} ${string} is not a valid JSON string`);
 								} else {
-									this._script.errorLog('error modifying array within insertStringArrayElement');
+									self._script.errorLog('error modifying array within insertStringArrayElement');
 								}
 							}
 						}
@@ -1757,9 +1800,9 @@ var VariableComponent = TaroEntity.extend({
 								}
 							} catch (err) {
 								if (err instanceof SyntaxError) {
-									this._script.errorLog(`error parsing JSON within updateStringArrayElement:  ${typeof string} ${string} is not a valid JSON string`);
+									self._script.errorLog(`error parsing JSON within updateStringArrayElement:  ${typeof string} ${string} is not a valid JSON string`);
 								} else {
-									this._script.errorLog('error modifying array within updateStringArrayElement');
+									self._script.errorLog('error modifying array within updateStringArrayElement');
 								}
 							}
 						}
@@ -1776,14 +1819,14 @@ var VariableComponent = TaroEntity.extend({
 								var array = JSON.parse(string);
 
 								if (Array.isArray(array)) {
-									array.splice(index,1);
+									array.splice(index, 1);
 									returnValue = JSON.stringify(array);
 								}
 							} catch (err) {
 								if (err instanceof SyntaxError) {
-									this._script.errorLog(`error parsing JSON within removeStringArrayElement:  ${typeof string} ${string} is not a valid JSON string`);
+									self._script.errorLog(`error parsing JSON within removeStringArrayElement:  ${typeof string} ${string} is not a valid JSON string`);
 								} else {
-									this._script.errorLog('error modifying array within removeStringArrayElement');
+									self._script.errorLog('error modifying array within removeStringArrayElement');
 								}
 							}
 						}
@@ -1853,7 +1896,7 @@ var VariableComponent = TaroEntity.extend({
 
 					case 'filterString':
 						var string = self.getValue(text.string, vars);
-						if (taro.chat && taro.chat.filter){
+						if (taro.chat && taro.chat.filter) {
 							returnValue = taro.chat.filter.cleanHacked(string);
 						}
 
@@ -1888,10 +1931,19 @@ var VariableComponent = TaroEntity.extend({
 						}
 
 						break;
-						/* Groups */
+					/* Groups */
 
 					case 'allUnits':
 						returnValue = taro.$$('unit');
+
+						break;
+
+					case 'allUnitsOfUnitType':
+						var type = self.getValue(text.type, vars);
+
+						returnValue = _.filter(taro.$$('unit'), (unit) => {
+							return unit._stats.type == type;
+						});
 
 						break;
 
@@ -1951,13 +2003,31 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
+					case 'allItemsOfItemsType':
+						var type = self.getValue(text.type, vars);
+
+						returnValue = _.filter(taro.$$('item'), (item) => {
+							return item._stats.type == type;
+						});
+
+						break;
+
 					case 'allProjectiles':
 						returnValue = taro.$$('projectile');
 
 						break;
 
+					case 'allProjectilesOfProjectileType':
+						var type = self.getValue(text.type, vars);
+
+						returnValue = _.filter(taro.$$('projectile'), (projectile) => {
+							return projectile._stats.type == type;
+						});
+
+						break;
+
 					/* entity */
-					
+
 					case 'allEntities':
 						var taroRegister = taro.register();
 						returnValue = _.values(taroRegister)
@@ -2005,6 +2075,41 @@ var VariableComponent = TaroEntity.extend({
 						}
 
 						break;
+
+						case 'regionInFrontOfEntityAtDistance':
+							var entity = self.getValue(text.entity, vars);
+							var distance = self.getValue(text.distance, vars);
+							var width = self.getValue(text.width, vars);
+							var height = self.getValue(text.height, vars);
+	
+							if (
+								entity != undefined &&
+								self._entity.script.action.entityCategories.indexOf(entity._category) > -1 &&
+								height != undefined &&
+								width != undefined &&
+								distance != undefined
+							) {
+								// console.log(entity._translate.x, distance * Math.cos(entity._rotate.z + Math.radians(-90)));
+								// console.log(entity._translate.y, distance * Math.sin(entity._rotate.z + Math.radians(-90)));
+								var region = {
+									x: entity._translate.x + (distance * Math.cos(entity._rotate.z + Math.radians(-90))),
+									y: entity._translate.y + (distance * Math.sin(entity._rotate.z + Math.radians(-90))),
+									width: width,
+									height: height
+								};
+	
+								region.x -= region.width / 2;
+								region.y -= region.height / 2;
+	
+								if (region.x && !isNaN(region.x) && region.y && !isNaN(region.y) && region.width && !isNaN(region.width) && region.height && !isNaN(region.height)) {
+									returnValue = region
+								} else {
+									taro.script.errorLog(`region ${JSON.stringify(region)} is not a valid region`);
+									returnValue = undefined;
+								}
+							}
+	
+							break;
 
 					case 'entitiesInRegion':
 						var region = self.getValue(text.region, vars);
@@ -2059,6 +2164,11 @@ var VariableComponent = TaroEntity.extend({
 						returnValue = undefined;
 
 						break;
+					
+					case 'emptyObject':
+						returnValue = {};
+
+					break;
 
 					default:
 						if (text.function) {
@@ -2070,17 +2180,15 @@ var VariableComponent = TaroEntity.extend({
 						break;
 				}
 			}
-			
-			
 
-			
-			if (this.profiler[text.function]) {
+			//if profiler is enabled, record the time elapsed
+			if (taro.profiler.isEnabled && this.profiler[text.function]) {
 				var timeElapsed = Date.now() - profileStart;
 				this.profiler[text.function].counter++;
 				this.profiler[text.function].totalTime += timeElapsed;
 				this.profiler[text.function].avgTime = (this.profiler[text.function].avgTime * (this.profiler[text.function].counter - 1) + (timeElapsed)) / this.profiler[text.function].counter;
 			}
-			
+
 		}
 
 		// For debugging purpose. if type of returnValue is object, it can sometimes cause TypeError: Converting circular structure to JSON
@@ -2094,18 +2202,13 @@ var VariableComponent = TaroEntity.extend({
 		return returnValue;
 	},
 
-	populateFunctions: function() {
+	populateFunctions: function () {
 		var self = this;
 
-		/* boolean */
 		this._functions = {
 			/* general */
 
-			'getVariable': function (text, vars) {
-				return self.getVariable(text.variableName);				
-			},
-
-			/* general - number */		
+			/* general - number */
 
 			'calculate': function (text, vars) {
 				return self.calculate(text.items, vars);
@@ -2119,6 +2222,22 @@ var VariableComponent = TaroEntity.extend({
 			},
 
 			/* general - string */
+			
+			'objectToString': function (text, vars) {
+				var object = self.getValue(text.object, vars);
+				var str = JSON.stringify(object) // remove opening & ending quotes
+				if (object) {
+					return str;
+				}
+			},
+
+			'lastReceivedPostResponse': function (text, vars) {
+				return taro.game.lastReceivedPostResponse;
+			},
+			
+			'lastUpdatedVariableName': function (text, vars) {
+				return taro.game.lastUpdatedVariableName;
+			},
 
 			'subString': function (text, vars) {
 				var sourceString = self.getValue(text.sourceString, vars);
@@ -2136,6 +2255,16 @@ var VariableComponent = TaroEntity.extend({
 				return `${stringA}${stringB}`;
 			},
 
+			/* number */
+
+			'elementCount': function (text, vars) {
+				var object = self.getValue(text.object, vars);
+				if (object) {
+					return Object.keys(object).length;
+				}
+				return undefined;
+			},
+
 			/* player */
 
 			'getTriggeringPlayer': function (text, vars) {
@@ -2143,7 +2272,7 @@ var VariableComponent = TaroEntity.extend({
 					var id = vars.triggeredBy.playerId;
 					return taro.$(id);
 				}
-			
+
 			},
 
 			'playerTypeOfPlayer': function (text, vars) {
@@ -2151,7 +2280,7 @@ var VariableComponent = TaroEntity.extend({
 				if (player && player._category == 'player') {
 					return player._stats.playerTypeId;
 				}
-			},					
+			},
 
 			'getOwner': function (text, vars) {
 				var entity = self.getValue(text.entity, vars);
@@ -2171,7 +2300,7 @@ var VariableComponent = TaroEntity.extend({
 				return text.variable;
 			},
 
-			'getValueOfEntityVariable': function(text, vars) {
+			'getValueOfEntityVariable': function (text, vars) {
 				var variableData = self.getValue(text.variable, vars);
 				var entity = self.getValue(text.entity, vars);
 
@@ -2197,7 +2326,7 @@ var VariableComponent = TaroEntity.extend({
 
 			},
 
-			'entityBounds': function(text, vars) {
+			'entityBounds': function (text, vars) {
 				var entity = self.getValue(text.entity, vars);
 				if (entity && self._entity.script.action.entityCategories.indexOf(entity._category) > -1) {
 					// for sprite-only items that are carried by units
@@ -2205,8 +2334,8 @@ var VariableComponent = TaroEntity.extend({
 				}
 			},
 
-			/* unit */			
-			
+			/* unit */
+
 			'getTriggeringUnit': function (text, vars) {
 				if (vars && vars.triggeredBy && vars.triggeredBy.unitId) {
 					var id = vars.triggeredBy.unitId;
@@ -2217,11 +2346,11 @@ var VariableComponent = TaroEntity.extend({
 			'getLastCreatedUnit': function (text, vars) {
 				var id = taro.game.lastCreatedUnitId;
 				return taro.$(id);
-			},				
+			},
 
 			'getUnitTypeOfUnit': function (text, vars) {
 				var unit = self.getValue(text.entity, vars);
-				
+
 				if (unit && unit._category == 'unit') {
 					return unit._stats.type;
 				} else if (typeof unit == 'string') {
@@ -2283,7 +2412,7 @@ var VariableComponent = TaroEntity.extend({
 					}
 				}
 			},
-			
+
 			'getTriggeringItem': function (text, vars) {
 				if (vars && vars.triggeredBy && vars.triggeredBy.itemId) {
 					var id = vars.triggeredBy.itemId;
@@ -2302,7 +2431,7 @@ var VariableComponent = TaroEntity.extend({
 				}
 			},
 
-			
+
 			'getItemCurrentlyHeldByUnit': function (text, vars) {
 				var entity = self.getValue(text.entity, vars);
 				if (entity && entity._category == 'unit') {
@@ -2310,7 +2439,7 @@ var VariableComponent = TaroEntity.extend({
 				}
 			},
 
-			
+
 			'allItemsOwnedByUnit': function (text, vars) {
 				var unit = self.getValue(text.entity, vars);
 				if (unit && unit._category == 'unit') {
@@ -2333,7 +2462,7 @@ var VariableComponent = TaroEntity.extend({
 				}
 			},
 
-			
+
 			'getItemTypeName': function (text, vars) {
 				var itemTypeId = self.getValue(text.itemType, vars);
 				var itemType = taro.game.cloneAsset('itemTypes', itemTypeId);
@@ -2343,8 +2472,8 @@ var VariableComponent = TaroEntity.extend({
 				}
 			},
 
-			/* projectile */				
-			
+			/* projectile */
+
 			'getLastTouchedProjectile': function (text, vars) {
 				var id = taro.game.lastTouchedProjectileId;
 				projectile = taro.$(id);
@@ -2352,10 +2481,10 @@ var VariableComponent = TaroEntity.extend({
 				if (projectile && projectile._category == 'projectile') {
 					return projectile;
 				}
-			},			
-			
+			},
+
 			'getProjectileType': function (text, vars) { // get projectile type from env
-					return self.getValue(text.projectileType, vars);
+				return self.getValue(text.projectileType, vars);
 
 			},
 
@@ -2369,17 +2498,17 @@ var VariableComponent = TaroEntity.extend({
 
 			},
 
-			
-				
+
+
 			/* sensor */
-			
+
 			'getTriggeringSensor': function (text, vars) {
 				if (vars && vars.triggeredBy && vars.triggeredBy.sensorId) {
 					var id = vars.triggeredBy.sensorId;
 					return taro.$(id);
 				}
 			},
-			
+
 			'getTriggeringProjectile': function (text, vars) {
 				if (vars && vars.triggeredBy && vars.triggeredBy.projectileId) {
 					var id = vars.triggeredBy.projectileId;
@@ -2399,7 +2528,7 @@ var VariableComponent = TaroEntity.extend({
 				var regionA = self.getValue(text.regionA, vars);
 				var regionB = self.getValue(text.regionB, vars);
 				if (!regionA || !regionB) {
-					return false;					
+					return false;
 				}
 				if (regionA._category == 'region') {
 					regionA = regionA.getBounds();
@@ -2413,7 +2542,19 @@ var VariableComponent = TaroEntity.extend({
 					return regionA.intersects(regionB);
 				}
 			},
+			/* variable */
+			
+			'getVariable': function (text, vars) {
+				var name = self.getValue(text.variableName, vars);				
+				return self.getVariable(name);
+			},
 
+			'getTriggeringVariableName': function (text, vars) {
+				if (vars && vars.triggeredBy && vars.triggeredBy.variableName) {
+					return vars.triggeredBy.variableName;
+				}
+			},
+		
 			/* attribute */
 
 			'getTriggeringAttribute': function (text, vars) {
@@ -2442,19 +2583,19 @@ var VariableComponent = TaroEntity.extend({
 				if (entity && entity._category == 'unit') {
 					return entity.getOwner();
 				}
-			
+
 			},
-			
+
 			'selectedPlayer': function (text, vars, entity) {
 				return this.getSelectedPlayer(text, vars);
-			},			
+			},
 			'getSelectedPlayer': function (text, vars, entity) {
 				if (vars && vars.selectedPlayer) {
 					return vars.selectedPlayer;
 				}
-			
+
 			},
-			
+
 			'selectedUnit': function (text, vars, entity) {
 				return this.getSelectedUnit(text, vars);
 			},
@@ -2463,7 +2604,7 @@ var VariableComponent = TaroEntity.extend({
 					return vars.selectedUnit;
 				}
 			},
-			
+
 			'selectedItem': function (text, vars, entity) {
 				return this.getSelectedItem(text, vars);
 			},
@@ -2472,7 +2613,7 @@ var VariableComponent = TaroEntity.extend({
 					return vars.selectedItem;
 				}
 			},
-			
+
 			'selectedProjectile': function (text, vars, entity) {
 				return this.getSelectedProjectile(text, vars);
 			},
@@ -2481,7 +2622,7 @@ var VariableComponent = TaroEntity.extend({
 					return vars.selectedProjectile;
 				}
 			},
-			
+
 			'selectedEntity': function (text, vars, entity) {
 				return this.getSelectedEntity(text, vars);
 			},
@@ -2490,27 +2631,53 @@ var VariableComponent = TaroEntity.extend({
 					return vars.selectedEntity;
 				}
 			},
-			
+
 			'selectedRegion': function (text, vars, entity) {
 				if (vars && vars.selectedRegion) {
 					return vars.selectedRegion;
 				}
-			
+
 			},
-			
+
 			'selectedItemType': function (text, vars, entity) {
 				if (vars && vars.selectedItemType) {
 					return vars.selectedItemType;
 				}
-			
+
 			},
-			
+
 			'selectedUnitType': function (text, vars, entity) {
 				if (vars && vars.selectedUnitType) {
 					return vars.selectedUnitType;
 				}
-			
+
 			},
+
+			/* object */
+
+			'elementFromObject': function (text, vars) {
+				var object = self.getValue(text.object, vars);
+				var key = self.getValue(text.key, vars);
+
+				if (object && key != undefined) {
+					return object[key];
+				}
+			},
+
+			'stringToObject': function (text, vars) {
+				var string = self.getValue(text.string, vars);
+
+				if (string) {
+					try {
+						return JSON.parse(string);
+					} catch (err) {
+						if (err instanceof SyntaxError) {
+							self._script.errorLog(`error parsing JSON within stringToObject:  ${typeof string} ${string} is not a valid JSON string`);
+						}
+					}
+				}
+			},
+
 		}
 	}
 });

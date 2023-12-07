@@ -168,6 +168,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.palette.hide();
 		this.toolButtonsContainer.setVisible(false);
 		this.regionEditor.hideRegions();
+        this.showAllLayers();
 	}
 
 	queryWidgets(): void {
@@ -488,4 +489,14 @@ class DevModeTools extends Phaser.GameObjects.Container {
 			tilemapLayers[value].setVisible(true);
 		}
 	}
+
+    showAllLayers(): void {
+        const scene = this.scene as any;
+        const tilemapLayers = scene.gameScene.tilemapLayers;
+        for (let i = 0; i < tilemapLayers.length; i++) {
+            if (tilemapLayers[i].visible === false) {
+                this.hideLayer(i);
+            }
+        }
+    }
 }

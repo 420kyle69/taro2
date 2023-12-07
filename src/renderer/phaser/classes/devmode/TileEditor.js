@@ -137,6 +137,7 @@ var TileEditor = /** @class */ (function () {
         });
     };
     TileEditor.prototype.edit = function (data) {
+        var _this = this;
         if (JSON.stringify(data) === '{}') {
             throw 'receive: {}';
         }
@@ -149,8 +150,8 @@ var TileEditor = /** @class */ (function () {
             var dataValue = v;
             return { dataType: dataType, dataValue: dataValue };
         })[0], dataType = _a.dataType, dataValue = _a.dataValue;
-        var tempLayer = dataValue.layer;
-        if (map.layers.length > 4 && dataValue.layer >= 2) {
+        var tempLayer = dataType === 'edit' ? dataValue.layer[0] : dataValue.layer;
+        if (map.layers.length > 4 && tempLayer >= 2) {
             tempLayer++;
         }
         switch (dataType) {
@@ -162,8 +163,10 @@ var TileEditor = /** @class */ (function () {
             }
             case 'edit': {
                 //save tile change to taro.game.data.map and taro.map.data
-                var nowValue = dataValue;
-                this.putTiles(nowValue.x, nowValue.y, nowValue.selectedTiles, nowValue.size, nowValue.shape, nowValue.layer, true);
+                var nowValue_1 = dataValue;
+                nowValue_1.selectedTiles.map(function (v, idx) {
+                    _this.putTiles(nowValue_1.x, nowValue_1.y, v, nowValue_1.size, nowValue_1.shape, nowValue_1.layer[idx], true);
+                });
                 break;
             }
             case 'clear': {
@@ -173,11 +176,12 @@ var TileEditor = /** @class */ (function () {
         }
         if (taro.physics && map.layers[tempLayer].name === 'walls') {
             //if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
-            taro.physics.destroyWalls();
-            var mapCopy = taro.scaleMap(rfdc()(map));
-            taro.tiled.loadJson(mapCopy, function (layerArray, TaroLayersById) {
-                taro.physics.staticsFromMap(TaroLayersById.walls);
-            });
+            if (dataValue.noMerge) {
+                recalcWallsPhysics(map, true);
+            }
+            else {
+                debounceRecalcPhysics(map, true);
+            }
         }
     };
     /**
@@ -191,16 +195,20 @@ var TileEditor = /** @class */ (function () {
      */
     TileEditor.prototype.putTiles = function (tileX, tileY, selectedTiles, brushSize, shape, layer, local) {
         var map = this.gameScene.tilemap;
-        var sample = this.brushArea.calcSample(selectedTiles, brushSize, shape, true);
+        var calcData = this.brushArea.calcSample(selectedTiles, brushSize, shape, true);
+        var sample = calcData.sample;
+        var size = brushSize === 'fitContent' ? { x: calcData.xLength, y: calcData.yLength } : brushSize;
         var taroMap = taro.game.data.map;
         var width = taroMap.width;
         var tempLayer = layer;
         if (taroMap.layers.length > 4 && layer >= 2) {
             tempLayer++;
         }
+        tileX = brushSize === 'fitContent' ? calcData.minX : tileX;
+        tileY = brushSize === 'fitContent' ? calcData.minY : tileY;
         if (this.gameScene.tilemapLayers[layer].visible && selectedTiles) {
-            for (var x = 0; x < brushSize.x; x++) {
-                for (var y = 0; y < brushSize.y; y++) {
+            for (var x = 0; x < size.x; x++) {
+                for (var y = 0; y < size.y; y++) {
                     if (sample[x] && sample[x][y] !== undefined && DevModeScene.pointerInsideMap(tileX + x, tileY + y, map)) {
                         var index = sample[x][y];
                         if (index !== (map.getTileAt(tileX + x, tileY + y, true, layer)).index &&
@@ -221,11 +229,12 @@ var TileEditor = /** @class */ (function () {
             taro.network.send('editTile', {
                 edit: {
                     size: brushSize,
-                    layer: layer,
-                    selectedTiles: selectedTiles,
+                    layer: [layer],
+                    selectedTiles: [selectedTiles],
                     x: tileX,
                     y: tileY,
                     shape: shape,
+                    noMerge: true,
                 }
             });
         }
@@ -254,6 +263,9 @@ var TileEditor = /** @class */ (function () {
                 closedQueue[nowPos.x] = {};
             }
             closedQueue[nowPos.x][nowPos.y] = 1;
+            if (newTile === 0 || newTile === null) {
+                newTile = -1;
+            }
             if (fromServer) {
                 map = taro.game.data.map;
                 inGameEditor.mapWasEdited && inGameEditor.mapWasEdited();
@@ -273,17 +285,18 @@ var TileEditor = /** @class */ (function () {
                 }
                 tileMap.putTileAt(newTile, nowPos.x, nowPos.y, false, layer);
                 //save tile change to taro.game.map.data
+                if (newTile === -1) {
+                    newTile = 0;
+                }
                 map.layers[tempLayer].data[nowPos.y * width + nowPos.x] = newTile;
             }
             else {
                 map = this.gameScene.tilemap;
-                if (!map.getTileAt(nowPos.x, nowPos.y, true, layer) ||
-                    ((_c = limits === null || limits === void 0 ? void 0 : limits[nowPos.x]) === null || _c === void 0 ? void 0 : _c[nowPos.y]) ||
-                    map.getTileAt(nowPos.x, nowPos.y, true, layer).index === 0 ||
-                    map.getTileAt(nowPos.x, nowPos.y, true, layer).index === -1) {
+                var nowTile = map.getTileAt(nowPos.x, nowPos.y, true, layer);
+                if ((_c = limits === null || limits === void 0 ? void 0 : limits[nowPos.x]) === null || _c === void 0 ? void 0 : _c[nowPos.y]) {
                     continue;
                 }
-                if (map.getTileAt(nowPos.x, nowPos.y, true, layer).index !== oldTile) {
+                if ((nowTile !== undefined && nowTile !== null) && nowTile.index !== oldTile) {
                     addToLimits === null || addToLimits === void 0 ? void 0 : addToLimits({ x: nowPos.x, y: nowPos.y });
                     continue;
                 }
@@ -298,7 +311,7 @@ var TileEditor = /** @class */ (function () {
             if (nowPos.y > 0 && !((_f = closedQueue[nowPos.x]) === null || _f === void 0 ? void 0 : _f[nowPos.y - 1])) {
                 openQueue.push({ x: nowPos.x, y: nowPos.y - 1 });
             }
-            if (nowPos.x < map.height - 1 && !((_g = closedQueue[nowPos.x]) === null || _g === void 0 ? void 0 : _g[nowPos.y + 1])) {
+            if (nowPos.y < map.height - 1 && !((_g = closedQueue[nowPos.x]) === null || _g === void 0 ? void 0 : _g[nowPos.y + 1])) {
                 openQueue.push({ x: nowPos.x, y: nowPos.y + 1 });
             }
         }
@@ -432,6 +445,9 @@ var TileEditor = /** @class */ (function () {
                             }
                         }
                     }
+                }
+                else if (this.devModeTools.entityEditor.selectedEntityImage) {
+                    this.devModeTools.tooltip.showMessage('Entity Position', "X: ".concat(this.devModeTools.entityEditor.selectedEntityImage.image.x.toString(), ", Y: ").concat(this.devModeTools.entityEditor.selectedEntityImage.image.y.toString()));
                 }
             }
             else {

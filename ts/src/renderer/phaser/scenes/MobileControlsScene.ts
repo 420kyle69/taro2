@@ -18,6 +18,8 @@ class MobileControlsScene extends PhaserScene {
 
 	init (): void {
 
+        this.scene.swapPosition('MobileControls', 'Ui');
+
 		// enabling four mobile pointers
 		this.input.addPointer(3);
 
@@ -48,6 +50,17 @@ class MobileControlsScene extends PhaserScene {
 				default:
 					const relativeX = Math.trunc((x + w / 2) / 960 * window.innerWidth - w / 2);
 					const relativeY = Math.trunc((y + h / 2) / 540 * window.innerHeight - h / 2);
+
+                    const uiScene = taro.renderer.scene.getScene('Ui') as UiScene;
+                    let buttonExist = false;
+                    Object.values(uiScene?.abilityBar?.buttons).forEach((button) => {
+                        if (button.key === key) {
+                            button.x = relativeX - uiScene.abilityBar.x + button.size/2;
+                            button.y = relativeY - uiScene.abilityBar.y + button.size/2;
+                            buttonExist = true;
+                        }
+                    });
+                    if (buttonExist) return;
 
 					const text = key.toUpperCase();
 
@@ -120,6 +133,32 @@ class MobileControlsScene extends PhaserScene {
 			}
 		});
 
+		let resized = false;
+
+        taro.mobileControls.on('orientationchange', (e: string) => {
+            switch(e) {
+                case 'portrait-primary':
+                    this.game.scale.setGameSize(window.innerWidth, window.innerHeight);
+					if (resized) {
+						resized = false;
+					} else {
+						resized = true;
+                		window.dispatchEvent(new Event('resize'));
+					}
+                    break;
+                case 'landscape-primary':
+                    this.game.scale.setGameSize(window.innerWidth, window.innerHeight);
+					if (resized) {
+						resized = false;
+					} else {
+						resized = true;
+                		window.dispatchEvent(new Event('resize'));
+					}
+                    break;
+                default:  
+            }
+        });
+
 		taro.mobileControls.on('clear-controls', () => {
 
 			joysticks.forEach((j) => {
@@ -153,23 +192,32 @@ class MobileControlsScene extends PhaserScene {
 			}
 
 			if (!this.disablePointerEvents) {
-				var touchX = pointer.x;
-				var touchY = pointer.y;
-				if (touchX < this.cameras.main.displayWidth / 2.4) {
-					const leftJoystick = this.joysticks.find(({ side }) => side === 'left');
-					if (leftJoystick) {
-						leftJoystick.show();
-						leftJoystick.x = touchX;
-						leftJoystick.y = touchY;
-						leftJoystick.updateTransform();
-					}
-				} else if (touchX > this.cameras.main.displayWidth - (this.cameras.main.displayWidth / 2.4)) {
-					const rightJoystick = this.joysticks.find(({ side }) => side === 'right');
-					if (rightJoystick) {
-						rightJoystick.show();
-						rightJoystick.x = touchX;
-						rightJoystick.y = touchY;
-						rightJoystick.updateTransform();
+				if (this.joysticks.length === 0) return;
+				else if (this.joysticks.length === 1) {
+					const joystick = this.joysticks[0];
+					joystick.show();
+					joystick.x = pointer.x;
+					joystick.y = pointer.y;
+					joystick.updateTransform();
+				} else {
+					var touchX = pointer.x;
+					var touchY = pointer.y;
+					if (touchX < this.cameras.main.displayWidth / 2.4) {
+						const leftJoystick = this.joysticks.find(({ side }) => side === 'left');
+						if (leftJoystick) {
+							leftJoystick.show();
+							leftJoystick.x = touchX;
+							leftJoystick.y = touchY;
+							leftJoystick.updateTransform();
+						}
+					} else if (touchX > this.cameras.main.displayWidth - (this.cameras.main.displayWidth / 2.4)) {
+						const rightJoystick = this.joysticks.find(({ side }) => side === 'right');
+						if (rightJoystick) {
+							rightJoystick.show();
+							rightJoystick.x = touchX;
+							rightJoystick.y = touchY;
+							rightJoystick.updateTransform();
+						}
 					}
 				}
 			}
@@ -216,6 +264,9 @@ class MobileControlsScene extends PhaserScene {
 
 	update () {
 		if (this.enablePointerNextUpdate) {
+			this.joysticks.forEach((j) => {
+				j.settings.onEnd && j.settings.onEnd();
+			});
 			this.enablePointerNextUpdate = false;
 			this.disablePointerEvents = false;
 		}
@@ -235,6 +286,12 @@ class MobileControlsScene extends PhaserScene {
 			if (leftJoystick) leftJoystick.hide();
 			const rightJoystick = this.joysticks.find(({ side }) => side === 'right');
 			if (rightJoystick) rightJoystick.hide();
+		} else {
+			const worldPoint = gameScene.cameras.main.getWorldPoint(gameScene.input.activePointer.x, gameScene.input.activePointer.y);
+			taro.input.emit('pointermove', [{
+		    	x: worldPoint.x,
+		    	y: worldPoint.y,
+		    }]);
 		}
 	}
 

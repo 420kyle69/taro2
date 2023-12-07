@@ -12,7 +12,6 @@ var ControlComponent = TaroEntity.extend({
 		// Store any options that were passed to us
 		this._options = options;
 		this.lastActionAt = Date.now();
-		
 		this.lastMousePosition = [undefined, undefined];
 		this.mouseLocked = false;
 
@@ -22,6 +21,8 @@ var ControlComponent = TaroEntity.extend({
 			mouse: {
 				button1: false,
 				button3: false,
+				wheelUp: false,
+				wheelDown: false,
 				x: undefined,
 				y: undefined
 			},
@@ -73,7 +74,6 @@ var ControlComponent = TaroEntity.extend({
 				space: false,
 				escape: false
 			}
-
 		};
 
 		for (device in this.input) {
@@ -81,9 +81,25 @@ var ControlComponent = TaroEntity.extend({
 				taro.input.mapAction(key, taro.input[device][key]);
 			}
 		}
-	},
+
+		if (taro.isClient) {
+			taro.client.on('key-down', (data) => {
+				const unit = this._entity.getSelectedUnit();
+				const unitAbility = unit._stats.controls.abilities[data.key];
+				this.keyDownAbility(unit, unitAbility.keyDown);
+				taro.network.send('playerKeyDown', { device: data.device, key: data.key });
+			});
+			taro.client.on('key-up', (data) => { 
+				const unit = this._entity.getSelectedUnit();
+				const unitAbility = unit._stats.controls.abilities[data.key];
+				this.keyUpAbility(unit, unitAbility);
+				taro.network.send('playerKeyUp', { device: data.device, key: data.key });
+			});
+		}
+	},  
+
 	keyDown: function (device, key) {
-		if(taro.developerMode.shouldPreventKeybindings()) {
+		if(taro.developerMode.shouldPreventKeybindings() || (taro.isClient && this._entity._stats.clientId === taro.network.id() && taro.client.isPressingAbility)) {
 			return;
 		}
 
@@ -101,6 +117,7 @@ var ControlComponent = TaroEntity.extend({
 		}
 
 		var unit = player.getSelectedUnit();
+
 		if (unit && unit._category == 'unit') {
 			if (taro.isServer || (taro.isClient && !this._isPlayerInputingText)) {
 				var unitAbility = null;
@@ -149,14 +166,7 @@ var ControlComponent = TaroEntity.extend({
 				}
 
 				if (unitAbility && unitAbility.keyDown && unit.ability) {
-					if (taro.client && taro.client.inputDelay && taro.client.inputDelay > 0) {
-						setTimeout(function () {
-							unit.ability.cast(unitAbility.keyDown);
-						}, taro.client.inputDelay);
-					} else {
-						// console.log(key, Date.now());
-						unit.ability.cast(unitAbility.keyDown);
-					}
+					this.keyDownAbility(unit, unitAbility.keyDown);
 				} else if (
 					key == '1' || key == '2' || key == '3' || key == '4' ||
 					key == '5' || key == '6' || key == '7' || key == '8' || key == '9'
@@ -168,7 +178,6 @@ var ControlComponent = TaroEntity.extend({
 				}
 			}
 		}
-		// }
 
 		if (taro.isClient) {
 			if (!this._isPlayerInputingText) {
@@ -191,9 +200,9 @@ var ControlComponent = TaroEntity.extend({
 	keyUp: function (device, key) {
 		this.lastActionAt = Date.now();
 
-		var player = this._entity;		
+		var player = this._entity;
 		if (!player) return;
-		
+
 		var unit = player.getSelectedUnit();
 		// for (i in units) {
 		// 	var unit = units[i]
@@ -239,15 +248,7 @@ var ControlComponent = TaroEntity.extend({
 					unitAbility = unit._stats.controls.abilities[key];
 				}
 
-				if (unitAbility && unitAbility.keyUp && unit.ability) {
-					if (taro.client && taro.client.inputDelay && taro.client.inputDelay > 0) {
-						setTimeout(function () {
-							unit.ability.cast(unitAbility.keyUp);
-						}, taro.client.inputDelay);
-					} else {
-						unit.ability.cast(unitAbility.keyUp);
-					}
-				}
+				this.keyUpAbility(unit, unitAbility);
 			}
 		}
 
@@ -257,10 +258,47 @@ var ControlComponent = TaroEntity.extend({
 			}
 		}
 
-		if (this.input[device])
+		if (this.input[device]) {
 			this.input[device][key] = false;
+		}
 	},
 
+	keyDownAbility: function (unit, keyDown) {
+		if (taro.client && taro.client.inputDelay && taro.client.inputDelay > 0) {
+			setTimeout(function () {
+				unit.ability.cast(keyDown);
+			}, taro.client.inputDelay);
+		} else {
+			unit.ability.cast(keyDown);
+		}
+
+		if (taro.isClient && this._entity._stats.clientId === taro.network.id() && keyDown.abilityId) {
+			taro.client.emit('start-press-key', keyDown.abilityId);
+		}
+	},
+
+	keyUpAbility: function (unit, unitAbility) {
+		if (unitAbility && unitAbility.keyUp && unit.ability) {
+			if (taro.client && taro.client.inputDelay && taro.client.inputDelay > 0) {
+				setTimeout(function () {
+					unit.ability.cast(unitAbility.keyUp);
+				}, taro.client.inputDelay);
+			} else {
+				unit.ability.cast(unitAbility.keyUp);
+			}
+		}
+
+		if (taro.isClient && this._entity._stats.clientId === taro.network.id() && unitAbility?.keyDown?.abilityId) {
+			taro.client.emit('stop-press-key', unitAbility.keyDown.abilityId);
+		}
+	},
+
+	releaseAllKeys: function () {
+		const pressedKeys = Object.entries(this.input.key).filter((element) => element[1] === true);
+		const pressedMouseButtons = Object.entries(this.input.mouse).filter((element) => element[1] === true);
+		pressedKeys.forEach((key) => this.keyUp('key', key[0]));
+		pressedMouseButtons.forEach((key) => this.keyUp('mouse', key[0]));
+	},
 
 	// check for input modal is open
 	updatePlayerInputStatus: function () {
@@ -280,12 +318,12 @@ var ControlComponent = TaroEntity.extend({
 	 */
 	_behaviour: function (ctx) {
 		var self = this;
-		var player = this._entity;		
-		if (!player) return;		
+
+		var player = this._entity;
+		if (!player) return;
 		var unit = player.getSelectedUnit();
-		
+
 		if (taro.isClient) {
-			
 			if (unit) {
 				// check if sending player input is due (every 100ms)
 				if (taro._currentTime - self.lastInputSent > 100) {
@@ -304,6 +342,10 @@ var ControlComponent = TaroEntity.extend({
 									self.sendMobileInput = false;
 								} else if (!taro.isMobile) {
 									self.keyDown(device, key);
+									if (key === 'wheelUp' || key === 'wheelDown') {
+										taro.input._state[taro.input._controlMap[key]] = false;
+										self.input[device][key] = false;
+									}
 								}
 							}
 						} else {
@@ -319,7 +361,7 @@ var ControlComponent = TaroEntity.extend({
 						}
 					}
 				}
-	
+
 				if (self.newMousePosition && (self.newMousePosition[0] != self.lastMousePosition[0] || self.newMousePosition[1] != self.lastMousePosition[1])) {
 					// if we are using mobile controls don't send mouse moves to server here as we will do so from a look touch stick
 					if (!taro.isMobile) {
@@ -336,7 +378,7 @@ var ControlComponent = TaroEntity.extend({
 							angle = parseFloat(angle.toPrecision(5));
 							if (self.sendPlayerInput)
 								taro.network.send('playerAbsoluteAngle', angle);
-	
+
 							if (taro.client.myPlayer) {
 								taro.client.myPlayer.absoluteAngle = angle;
 							}
@@ -348,11 +390,12 @@ var ControlComponent = TaroEntity.extend({
 						}
 					}
 					if (self.sendPlayerInput) {
+						//console.log('SEND MOUSE POS', self.newMousePosition[0], self.newMousePosition[1]);
 						taro.network.send('playerMouseMoved', self.newMousePosition);
+						self.lastMousePosition = self.newMousePosition;
 					}
-					self.lastMousePosition = self.newMousePosition;
 				}
-	
+
 				// send unit position to server (client-authoritative movement)
 				if (taro.physics && taro.game.cspEnabled && !unit._stats.aiEnabled && !unit.teleported) {
 					var x = unit._translate.x.toFixed(0);
@@ -363,16 +406,15 @@ var ControlComponent = TaroEntity.extend({
 						self.lastPositionSent = pos;
 					}
 				}
-				
+
 				self.sendPlayerInput = false;
 			}
 		}
 
 		// unit rotation for human player. this runs on client-side only
 		if (unit && !unit._stats.aiEnabled) {
-			unit.updateAngleToTarget();			
+			unit.updateAngleToTarget();
 		}
-		
 	}
 
 });

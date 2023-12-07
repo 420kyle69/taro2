@@ -33,7 +33,7 @@ class PhaserRenderer extends Phaser.Game {
 				mode: Phaser.Scale.ScaleModes.ENVELOP,
 				autoCenter: Phaser.Scale.Center.CENTER_BOTH,
 				autoRound: true,
-				resizeInterval: 100
+				resizeInterval: 100,
 			},
 			render: {
 				pixelArt: false,
@@ -44,7 +44,7 @@ class PhaserRenderer extends Phaser.Game {
 			},
 			scene: [
 				GameScene,
-                UiScene,
+				UiScene,
 				DevModeScene,
 				MobileControlsScene
 			],
@@ -52,11 +52,6 @@ class PhaserRenderer extends Phaser.Game {
 				crossOrigin: 'anonymous'
 			},
 			plugins: {
-				/*scene: [{
-					  key: 'rexUI',
-					  plugin: UIPlugin,
-					  mapping: 'rexUI',
-				}],*/
 				global: [{
 					key: 'virtual-joystick',
 					plugin: rexvirtualjoystickplugin,
@@ -84,5 +79,13 @@ class PhaserRenderer extends Phaser.Game {
 
 	getViewportBounds (): Phaser.Geom.Rectangle {
 		return this.scene.getScene('Game').cameras.main.worldView;
+	}
+
+	getCameraWidth (): number {
+		return this.scene.getScene('Game').cameras.main.displayWidth;
+	}
+
+	getCameraHeight (): number {
+		return this.scene.getScene('Game').cameras.main.displayHeight;
 	}
 }

@@ -1,7 +1,7 @@
 <!-- leader board -->
 <div id="leaderboard" class="position-absolute text-white d-none user-select-none" style="padding: 10; right: 0">
     <!-- Server ID: <span id="server-id"></span> -->
-    <div class="shop ui-text-scoreboard"></div>
+    <div class="shop ui-text-scoreboard" id="ui-text-scoreboard-id"></div>
 
     <span id="scoreboard-header">
         <u id="leaderboard-title" class="cursor-pointer" onclick="taro.scoreboard && taro.scoreboard.toggleScores()">Leaderboard</u>
@@ -22,7 +22,7 @@
 
 <!-- top and center text -->
 <div id="counter" class="position-absolute w-100 p-0 d-flex align-items-center justify-content-center mt-10">
-    <div class="ui-text-top dark-bg text-center"></div>
+    <div class="ui-text-top dark-bg text-center" id="ui-text-top-id"></div>
     <div class="highscore-text" style="z-index: 9000; font-size: 4rem"></div>
 </div>
 
@@ -33,7 +33,8 @@
     </small>
 </div>
 
+
 <!-- realtime css styling -->
 <style id='realtime-css'></style>
 
-<span class="pointer-events-none ui-text-center-lg"></span>
+<span class="pointer-events-none ui-text-center-lg" id="ui-text-center-lg-id"></span>

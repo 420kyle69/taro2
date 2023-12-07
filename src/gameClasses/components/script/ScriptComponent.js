@@ -24,8 +24,18 @@ var ScriptComponent = TaroEntity.extend({
 		ScriptComponent.prototype.log('initializing Script Component');
 	},
 
-	load: function(scripts) {
-		this.scripts = scripts;
+	load: function(scripts, modify = false) {
+		if (modify) {
+			Object.entries(scripts).forEach(([scriptId, script]) => {
+				if (!script.deleted) {
+					this.scripts[scriptId] = script;
+				} else {
+					delete this.scripts[scriptId];
+				}
+			});
+		} else {
+			this.scripts = scripts;
+		}
 		// map trigger events, so we don't have to iterate through all scripts to find corresponding scripts
 		this.triggeredScripts = {};
 		for (var scriptId in this.scripts) {
@@ -55,8 +65,10 @@ var ScriptComponent = TaroEntity.extend({
 			
 			// console.log(scriptId, ': ', actions, params);
 			
+			
 			if (actions) {
-				var cmd = self.action.run(actions, params);
+				var path = this._entity._id + "/" + scriptId;
+				var cmd = self.action.run(actions, params, path); // path is passed for profiling purpose
 				if (cmd == 'return') {
 					taro.log('script return called');
 					return;
@@ -73,6 +85,8 @@ var ScriptComponent = TaroEntity.extend({
 		) {
 			taro.script.runScript(scriptId, params);
 		}
+
+		
 	},
 
 	getScriptActions: function (scriptId) {
@@ -92,7 +106,6 @@ var ScriptComponent = TaroEntity.extend({
 
 	/* trigger and run all of the corresponding script(s) */
 	trigger: function (triggerName, triggeredBy) {
-
 		if (taro.isServer) {
 			var now = Date.now();
 			var lastTriggerRunTime = now - taro.lastTriggerRanAt;
@@ -176,16 +189,26 @@ var ScriptComponent = TaroEntity.extend({
 		self.last50Actions.push(record);
 	},
 
-	errorLog: function (message) {
+	errorLog: function (message, path) {
+		if (path == undefined) {
+			path = this._entity._id + "/" + this.currentScriptId + "/" + this.currentActionName;
+		}
+
 		if (this.scripts) {
-			var script = this.scripts[this.currentScriptId];
-			var log = `${this.currentScriptId} : Script error '${(script) ? script.name : ''}' in Action '${this.currentActionName}' : ${message}`;
+			if (this.errorLogs[path] == undefined) {
+				this.errorLogs[path] = {message, count: 1};
+			} else {
+				this.errorLogs[path].count++;
+			}
+			
+			if (taro.env === 'standalone')
+				console.log('errorLog', path, message);
+			// taro.devLog('errorLog', message);
+			// ScriptComponent.prototype.log(log);
+		}
 
-			this.errorLogs[this.currentActionName] = log;
-			taro.devLog('script errorLog', log, message);
-			ScriptComponent.prototype.log(log);
-
-			return log;
+		if (taro.isServer && taro.server.unpublishQueued) {
+			taro.server.unpublish(message + " " + path);
 		}
 	}
 

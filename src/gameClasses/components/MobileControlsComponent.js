@@ -16,10 +16,16 @@ var MobileControlsComponent = TaroEntity.extend({
 
 		this.controls = {};
 
+        var self = this;
+
 		// mouse move listener
 		taro.input.on('touchpointermove', function (point) {
-			taro.client.myPlayer.control.newMousePosition[0] = point.x;
-			taro.client.myPlayer.control.newMousePosition[1] = point.y;
+            taro.client.myPlayer.control.newMousePosition = [
+                point.x.toFixed(0),
+                point.y.toFixed(0)
+            ];
+            taro.network.send('playerMouseMoved', taro.client.myPlayer.control.newMousePosition);
+            taro.client.myPlayer.control.lastMousePosition = taro.client.myPlayer.control.newMousePosition;
 		});
 
 		$(window).on('orientationchange load resize', function () {
@@ -28,6 +34,7 @@ var MobileControlsComponent = TaroEntity.extend({
 				if (taro.client && taro.client.myPlayer && taro.network.id() == taro.client.myPlayer._stats.clientId) {
 					var unit = taro.$(taro.client.myPlayer._stats.selectedUnitId);
 					if (unit && unit._stats.controls) {
+                        self.emit('orientationchange', screen.orientation.type);
 						var unitAbilities = unit._stats.controls.abilities;
 						if (unitAbilities) {
 							// update mobile controls
@@ -44,12 +51,26 @@ var MobileControlsComponent = TaroEntity.extend({
 	},
 
 	clearControls: function () {
-
 		for (var key in this.controls) {
 			delete this.controls[key];
 		}
-
 		this.emit('clear-controls');
+	},
+
+	updateButtonPos: function () {
+		if (taro.mobileControls) {
+			// and this unit is our player
+			if (taro.client && taro.client.myPlayer && taro.network.id() == taro.client.myPlayer._stats.clientId) {
+				var unit = taro.$(taro.client.myPlayer._stats.selectedUnitId);
+				if (unit && unit._stats.controls) {
+					var unitAbilities = unit._stats.controls.abilities;
+					if (unitAbilities) {
+						// update mobile controls
+						taro.mobileControls.configure(unitAbilities);
+					}
+				}
+			}
+		}
 	},
 
 	configure: function (abilities) {

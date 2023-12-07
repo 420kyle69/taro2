@@ -113,6 +113,7 @@ var DevModeTools = /** @class */ (function (_super) {
         this.palette.hide();
         this.toolButtonsContainer.setVisible(false);
         this.regionEditor.hideRegions();
+        this.showAllLayers();
     };
     DevModeTools.prototype.queryWidgets = function () {
         this.gameEditorWidgets = Array.from(document.querySelectorAll('.game-editor-widget'))
@@ -420,6 +421,15 @@ var DevModeTools = /** @class */ (function (_super) {
             this.layerHideButtons[value].hidden = false;
             this.layerHideButtons[value].highlight('no');
             tilemapLayers[value].setVisible(true);
+        }
+    };
+    DevModeTools.prototype.showAllLayers = function () {
+        var scene = this.scene;
+        var tilemapLayers = scene.gameScene.tilemapLayers;
+        for (var i = 0; i < tilemapLayers.length; i++) {
+            if (tilemapLayers[i].visible === false) {
+                this.hideLayer(i);
+            }
         }
     };
     return DevModeTools;

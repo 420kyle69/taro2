@@ -8,6 +8,12 @@ const nativeWrapper: PhysicsDistProps = {
 		component.b2AABB = component.native.b2AABB; // added by Jaeyun for world collision detection for raycast bullets
 		component.b2Color = component.native.b2Color;
 		component.b2Vec2 = component.native.b2Vec2;
+		component.b2Vec2.prototype.get_x = function () {
+			return this.x;
+		};
+		component.b2Vec2.prototype.get_y = function () {
+			return this.y;
+		};
 		// component.b2Math = component.native.Common.Math.b2Math;
 		component.b2Shape = component.native.b2Shape;
 		component.b2BodyDef = component.native.b2BodyDef;

@@ -12,7 +12,7 @@ var MenuUiComponent = TaroEntity.extend({
 		var playButtonClick = document.querySelector('#play-game-button');
 
 		if (taro.isClient) {
-			console.log('initializing UI elements...');
+			//console.log('initializing UI elements...');
 			self.shopType = '';
 			self.shopKey = '';
 			self.shopPage = 1;
@@ -445,7 +445,7 @@ var MenuUiComponent = TaroEntity.extend({
 		html += '</tr>';
 		players.forEach(function (player) {
 			html += '<tr class="border-bottom">';
-			html += `<td class="border-top-0">${player._stats.name}`;
+			html += `<td class="border-top-0">${taro.clientSanitizer(player._stats.name)}`;
 			if (taro.client.myPlayer && player.id() === taro.client.myPlayer.id()) {
 				html += ' (you)';
 			}
@@ -491,6 +491,7 @@ var MenuUiComponent = TaroEntity.extend({
 			this.toggleScoreBoard(false);
 			this.toggleLeaderBoard(false);
 			this.toggleGameSuggestionCard(false);
+			this.toggleCustomIngameUi(false);
 
 			$.ajax({
 				type: 'GET',
@@ -644,7 +645,7 @@ var MenuUiComponent = TaroEntity.extend({
 			};
 
 			socket.onmessage = function (event) {
-				var jsonString = LZString.decompressFromUTF16(event.data);
+				var jsonString = LZUTF8.decompress(data.data, {inputEncoding: "StorageBinaryString"});
 				var json = JSON.parse(jsonString);
 
 				if (json.type === 'pong') {
@@ -725,6 +726,15 @@ var MenuUiComponent = TaroEntity.extend({
 		this.toggleScoreBoard(true);
 		this.toggleLeaderBoard(true);
 		this.toggleGameSuggestionCard(true);
+		this.toggleCustomIngameUi(true);
+	},
+
+	toggleCustomIngameUi: function (show) {
+		if (show) {
+		    window.renderHBSTemplate && window.renderHBSTemplate({}, taro.game.data?.ui?.inGameUiFull?.htmlData, "custom-ingame-ui-container");
+		} else {
+			$('#custom-ingame-ui-container').html('');
+		}
 	},
 
 	toggleMenu: function () {
@@ -790,48 +800,76 @@ var MenuUiComponent = TaroEntity.extend({
 
 		taro.client.disconnected = true;
 		var defaultContent = 'Lost connection to the game server. Please refresh this page or visit our homepage.';
-
-		// if (['1', '4', '5'].includes(window.gameDetails?.tier) && !src.includes('clientNetworkEvents') && !window.preventFurtherAutoJoin) {
-		// 	defaultContent = 'Republish action triggered. Refreshing page...';
-		// 	if (taro.developerMode.active) {
-		// 		window.history.replaceState({}, '', `/play/${gameSlug}?enterDevMode=true`);
-		// 	} else {
-		// 		window.history.replaceState({}, '', `/play/${gameSlug}?enterDevMode=false`);
-		// 	}
-
-		// 	window.swal.fire({
-		// 		type: 'info',
-		// 		title: 'About',
-		// 		html: defaultContent,
-		// 		showConfirmButton: false,
-		// 		allowOutsideClick: false,
-		// 		allowEscapeKey: false
-		// 	});
-
-		// 	setTimeout(function () {
-		// 		window.location.reload();
-		// 	}, 200);
-		// } else {
-		// window.preventFurtherAutoJoin = true;
-
-		if (typeof message == 'object' && message.type === 'SERVER_FULL') {
-			$('#server-disconnect-modal .modal-body').html(message.message || defaultContent);
-			$('#return-to-homepage-server').hide();
-			$('#join-another-server').show();
-		} else {
-			$('#server-disconnect-modal .modal-body').html(message || defaultContent);
-			$('#return-to-homepage-server').show();
-			$('#join-another-server').hide();
+		
+		if (window.selfRepublishing && message.includes('Game has been republished')) {
+			return;
 		}
+		
+		$('#server-disconnect-modal .modal-body').html(message || defaultContent);
+		$('#return-to-homepage-server').show();
+		$('#join-another-server').hide();
+		
 		$('#server-disconnect-modal').modal('show');
-		// }
-
-		// refreshIn("connection-lost-refresh", 5);
-
-		// $('#more-games')
-		// 	.removeClass('slidedown-menu-animation')
-		// 	.addClass('slideup-menu-animation');
+		
+		// user is disconnected and we no longer trying to reconnect them silently
+		// let's reload the page and try autojoining them instead
+		if (!window.reconnectInProgress) {
+			const reason = message;
+			const whitelistedReasons = [
+				'Game has been unpublished',
+				'You have been banned',
+				'Restricted IP detected',
+				'Duplicate IP detected',
+				'Client already exists',
+				'User connected to another server',
+				'You do not have permission to join this game',
+				'Guest players not allowed to join this game',
+			];
+			
+			if (whitelistedReasons.findIndex((m) => m.includes(reason)) === -1) {
+				const autojoinAttempted = window.sessionStorage.getItem('autojoinAttempted');
+				const isTabActive = !document.hidden;
+				if ((!autojoinAttempted || Date.now() - autojoinAttempted > 15 * 60 * 1000 || message.includes('Game has been republished')) && isTabActive) {
+					if (window.trackEvent) {
+						window.trackEvent('Auto Refresh', {
+							reason,
+							gameSlug: window.gameSlug,
+						});
+					}
+					// store in sessionStorage
+					window.sessionStorage.setItem('autojoinAttempted', Date.now());
+					
+					// autojoin in 5 seconds
+					this.refreshIn("connection-lost-refresh", 5);
+				}
+			}
+		}
 	},
+	
+	refreshIn: function (id, seconds) {
+		let second = seconds;
+		
+		$('.return-to-homepage-cta').remove();
+		$('.refresh-page-cta').removeClass('col-md-6');
+		
+		$('#' + id).text(" Reconnecting in " + second + "...");
+		
+		const interval = setInterval(() => {
+			second--;
+			if (second <= 0) {
+				$('#' + id).text(" Reconnecting...");
+				
+				clearInterval(interval);
+				let currentUrl = window.location.href;
+				currentUrl = currentUrl.endsWith('#') ? currentUrl.slice(0, -1) : currentUrl;
+				window.history.pushState({}, '', currentUrl + '?autojoin=true');
+				window.location.reload();
+			} else {
+				$('#' + id).text(" Reconnecting in " + second + "...");
+			}
+		}, 1000);
+	},
+	
 	setResolution: function () {
 		if (taro.isMobile) return;
 		var self = this;

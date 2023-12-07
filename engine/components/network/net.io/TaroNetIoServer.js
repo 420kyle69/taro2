@@ -292,8 +292,10 @@ var TaroNetIoServer = {
 		if (typeof val !== 'undefined') {
 			this._acceptConnections = val;
 			if (val) {
+				console.log('Server now accepting connections!');
 				this.log('Server now accepting connections!');
 			} else {
+				console.log('Server no longer accepting connections!');
 				this.log('Server no longer accepting connections!');
 			}
 
@@ -564,12 +566,10 @@ var TaroNetIoServer = {
 			clientRejectReason = 'player ' + socket._remoteAddress + ' is banned';
 		} else if (this._acceptConnections != true) {
 			clientRejectReason = 'server not accepting connections';
-		} else if (playerCount > taro.server.maxPlayers)
-			clientRejectReason = {
-				message: 'Sorry, the server you are trying to join is currently full. Please try again later or join a different server to play this game.',
-				type: 'SERVER_FULL'
-		};
-
+		} else if (playerCount > taro.server.maxPlayers) {
+			clientRejectReason = 'Sorry, the server you are trying to join is currently full. Please try again later or join a different server to play this game.';
+		}
+		
 		if (clientRejectReason === null) {
 			// Check if any listener cancels this
 			if (!this.emit('connect', socket)) {
@@ -630,7 +630,7 @@ var TaroNetIoServer = {
 
 					self.logCommandCount(socket._remoteAddress, commandName, data);
 
-					if (!(commandName === 'editTile')) {
+					if (!(commandName === 'editTile' || commandName === 'editGlobalScripts')) {
 						self.uploadPerSecond[socket._remoteAddress] += JSON.stringify(data).length;
 					}
 

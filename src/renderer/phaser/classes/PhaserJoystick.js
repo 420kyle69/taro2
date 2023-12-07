@@ -2,6 +2,7 @@ var PhaserJoystick = /** @class */ (function () {
     function PhaserJoystick(scene, x, y, settings) {
         this.x = x;
         this.y = y;
+        this.settings = settings;
         var radius = this.radius = scene.cameras.main.displayWidth * 0.05;
         var base = scene.add.graphics();
         base.fillStyle(0x18181B, 0.9);
@@ -49,6 +50,14 @@ var PhaserJoystick = /** @class */ (function () {
             else {
                 scene.joysticks[0].side = 'right';
                 scene.joysticks[1].side = 'left';
+            }
+        }
+        else if (scene.joysticks.length === 1) {
+            if (scene.joysticks[0].x > scene.cameras.main.displayWidth / 2) {
+                scene.joysticks[0].side = 'right';
+            }
+            else {
+                scene.joysticks[0].side = 'left';
             }
         }
     }

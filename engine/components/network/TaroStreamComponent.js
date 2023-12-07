@@ -58,7 +58,7 @@ var TaroStreamComponent = TaroEventingClass.extend({
 	/**
 	 * update entity-attributes (unit, player, and projectiles)
 	 */
-	updateEntityAttributes: function () {
+	_sendQueuedStreamData: function () {
 		var data = {};
 		var entities = taro.$('baseScene')._children;
 
@@ -80,7 +80,7 @@ var TaroStreamComponent = TaroEventingClass.extend({
 		}
 
 		if (sendData) {
-			taro.network.send('updateAllEntities', data);
+			taro.network.send('streamUpdateData', data);
 		}
 
 		data = null;

@@ -4,6 +4,7 @@ var taroClientConfig = {
 		'/lib/dat.gui.min.js',
 		'/lib/msgpack.min.js',
 		'/lib/rfdc.min.js',
+		'/lib/lzutf8.min.js',
 
 		'/gameClasses/Player.js',
 		'/gameClasses/Unit.js',
@@ -54,6 +55,8 @@ var taroClientConfig = {
 		'/gameClasses/EntitiesToRender.js',
 		'/gameClasses/Raycaster.js',
 		'/gameClasses/HeightRenderComponent.js',
+		/* color helpers */
+		'utils/Colors.js',
 
 		/* tile calc */
 		'/gameClasses/Combinator.js',
@@ -84,6 +87,8 @@ var taroClientConfig = {
 		'renderer/phaser/scenes/MobileControlsScene.js',
         'renderer/phaser/scenes/UiScene.js',
 		'renderer/phaser/scenes/DevModeScene.js',
+        'renderer/phaser/classes/Ui/AbilityBar.js',
+        'renderer/phaser/classes/Ui/AbilityButton.js',
 		'renderer/phaser/classes/devmode/DevModeTools.js',
 		'renderer/phaser/classes/devmode/DevToolButton.js',
 		'renderer/phaser/classes/devmode/DevTooltip.js',

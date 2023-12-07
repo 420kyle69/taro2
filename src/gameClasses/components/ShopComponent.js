@@ -322,7 +322,7 @@ var ShopComponent = TaroEntity.extend({
 	loadUserPurchases: function () {
 		let self = this;
 		$.ajax({
-			url: `/api/user/${gameId}/purchases`,
+			url: `/api/user/${gameId}/purchases/`,
 			type: 'GET',
 			success: function (response) {
 				if (response.status == 'success') {
@@ -807,7 +807,7 @@ var ShopComponent = TaroEntity.extend({
 		var ownerPlayer = taro.client.myPlayer;
 		var ownerUnit = taro.$(ownerPlayer._stats.selectedUnitId);
 		if (item.description) {
-			html += `<p>${taro.clientSanitizer(item.description)}</P>`;
+			html += `<p style="overflow-y: auto; max-height: 200px;">${taro.clientSanitizer(item.description)}</P>`;
 		}
 		if (shopItem && typeof shopItem.requirement === 'object') {
 			var requirements = '';
@@ -818,8 +818,8 @@ var ShopComponent = TaroEntity.extend({
 				requirements += req.value;
 				requirements += ' ';
 				requirements += taro.game.data.attributeTypes[priceAttr] &&
-					taro.game.data.attributeTypes[priceAttr].name ||
-					ownerPlayer._stats.attributes[priceAttr] && ownerPlayer._stats.attributes[priceAttr].name;
+					taro.clientSanitizer(taro.game.data.attributeTypes[priceAttr].name || '') ||
+					ownerPlayer._stats.attributes[priceAttr] && taro.clientSanitizer(ownerPlayer._stats.attributes[priceAttr].name || '');
 				requirements += '</p>';
 			}
 
@@ -848,8 +848,8 @@ var ShopComponent = TaroEntity.extend({
 				prices += shopItem.price.playerAttributes[priceAttr];
 				prices += ' ';
 				prices += taro.game.data.attributeTypes[priceAttr] &&
-					taro.game.data.attributeTypes[priceAttr].name ||
-					ownerPlayer._stats.attributes[priceAttr] && ownerPlayer._stats.attributes[priceAttr].name;
+				 taro.clientSanitizer(taro.game.data.attributeTypes[priceAttr].name || '') ||
+				ownerPlayer._stats.attributes[priceAttr] && taro.clientSanitizer(ownerPlayer._stats.attributes[priceAttr].name || '');
 				prices += '</p>';
 			}
 			html += '<div>';
@@ -880,7 +880,7 @@ var ShopComponent = TaroEntity.extend({
 		if (!data || !key || !data[key]) return [];
 		var resultKeys = Object.keys(data[key]);
 
-		resultKeys = resultKeys.sort();
+		// resultKeys = resultKeys.sort();
 
 		resultKeys = resultKeys.sort(function (a, b) {
 			const aOrder = data[key][a].order;
@@ -1073,7 +1073,26 @@ var ShopComponent = TaroEntity.extend({
 
 						combine.popover({
 							html: true,
-							trigger: 'hover'
+							trigger: 'manual'
+						})
+						.on("mouseenter", function () {
+							$(this).popover("show");
+						}).on("mouseleave", function () {
+							var _this = this;
+							if (!$(".popover:hover").length) {
+								// setTimeout(function () {
+								// 	if (!$(".popover:hover").length) {
+								// 		$(_this).popover("hide");
+								// 	}
+								// }, 50);
+								$(_this).popover("hide");
+							}
+							else {
+								$('.popover').mouseleave(function() {
+									$(_this).popover("hide");
+									$(this).off('mouseleave');
+								});
+							}
 						});
 
 						modalBody.append(
@@ -1288,6 +1307,11 @@ var ShopComponent = TaroEntity.extend({
 			// console.log(item)
 
 			if (item.status == 'not_purchased') {
+
+				if(window.isInMobileApp()) {
+					continue;
+				}
+
 				if (item.soldForSocialShare) {
 					var button = self.buttonForSocialShare(item);
 				} else {
@@ -1322,7 +1346,7 @@ var ShopComponent = TaroEntity.extend({
 					class: 'btn btn-success align-middle btn-unequip',
 					id: item._id,
 					name: item.name || item.title
-				}).append('Equiped');
+				}).append('Equipped');
 			} else if (item.status == undefined) {
 				if (item.soldForSocialShare) {
 					var button = self.buttonForSocialShare(item, true);
@@ -1445,8 +1469,7 @@ var ShopComponent = TaroEntity.extend({
 
 	closeShop: function (clientId) {
 		if (taro.isClient) {
-			// console.log("hide!")
-			$('#shop-modal').modal('hide');
+			$('#modd-item-shop-modal').modal('hide');
 			taro.client.myPlayer.control.updatePlayerInputStatus();
 		} else if (taro.isServer) {
 			taro.network.send('ui', { command: 'closeShop' }, clientId);
@@ -1464,6 +1487,12 @@ var ShopComponent = TaroEntity.extend({
 		const serverId = taro.client.server.id;
 
 		if (typeof window.validateUserPin === 'function') {
+			const VERIFICATION_UNLOCKED_FOR = 30 * 60 * 1000; // 30 mins
+			if (window.pinVerifiedAt && window.pinVerifiedAt + VERIFICATION_UNLOCKED_FOR > Date.now()) {
+				taro.network.send('buyItem', { id });
+				return;
+			}
+			
 			window.validateUserPin('taro.shop.purchase', id, serverId);
 		} else {
 			taro.network.send('buyItem', { id });

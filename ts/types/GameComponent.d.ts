@@ -1,4 +1,5 @@
 interface EntityData {
+	scripts?: any;
 	cellSheet: {
 		columnCount: number;
 		rowCount: number;
@@ -10,6 +11,23 @@ interface EntityData {
 		loopCount: number;
 		name: string;
 	}>
+    controls: {
+        mouseBehaviour: any;
+        abilities: Record<string, ControlAbility>;
+        unitAbilities: Record<string, UnitAbility>;
+    }
+}
+
+interface UnitAbility {
+    name: string,
+    castDuration: number,
+	cooldown: number,
+    cost: {
+        unitAttributes: Record<string, number>,
+        playerAttributes: Record<string, number>
+    },
+    visibility: 'always' | 'mobile' | 'desktop' | 'none';
+    iconUrl: string,
 }
 
 interface ScriptData {
@@ -18,12 +36,13 @@ interface ScriptData {
 		type: string;
 	}>;
 	actions: Record<string, ActionData>;
+	deleted?: boolean;
 }
 
 interface ActionData {
-    player?: { 
-        variableName: string; 
-        function: string; 
+    player?: {
+        variableName: string;
+        function: string;
     };
     disabled?: boolean;
     unitType?: string;
@@ -35,7 +54,7 @@ interface ActionData {
 	entityType?: string;
 	position?: {
         function?: string,
-        x: number, 
+        x: number,
         y: number
     };
 	angle?: number;
@@ -44,6 +63,13 @@ interface ActionData {
     wasCreated?: boolean;
     wasEdited?: boolean;
     wasDeleted?: boolean;
+}
+
+interface VariableData {
+	dataType?: string,
+	newKey?: string,
+	value?: any,
+	delete?: boolean
 }
 
 interface MapData {
@@ -78,6 +104,7 @@ declare class GameComponent extends TaroEntity {
 	getPlayerByClientId(clientId: string): Player;
 
 	data: {
+		variables: Record<string, VariableData>;
 		scripts: Record<string, ScriptData>;
 		defaultData: any;
 		map: MapData;
@@ -85,9 +112,11 @@ declare class GameComponent extends TaroEntity {
 		projectileTypes: Record<string, EntityData>;
 		itemTypes: Record<string, EntityData>;
 		particleTypes: Record<string, ParticleData>;
+		abilities: Record<string, UnitAbility>
 		settings: {
 			addStrokeToNameAndAttributes: boolean;
 			camera: {
+				useBounds: boolean;
 				trackingDelay: number;
 				zoom : {
 					default:number;

@@ -1,3 +1,181 @@
+/**
+ * recursively set object parameters
+ * @param oldObject
+ * @param newObject
+ */
+function setObject(oldObject, newObject) {
+    Object.keys(newObject).map(function (k) {
+        if (!oldObject[k]) {
+            oldObject[k] = {};
+        }
+        if (typeof newObject[k] === 'object') {
+            setObject(oldObject[k], newObject[k]);
+        }
+        else {
+            oldObject[k] = newObject[k];
+        }
+    });
+}
+/**
+ * merge the oldData with newData using template
+ * @param oldData
+ * @param newData
+ * @param template
+ */
+function merge(oldData, newData, template) {
+    Object.entries(template).map(function (_a) {
+        var k = _a[0], v = _a[1];
+        if (!v.calc && typeof v === 'object') {
+            if (!oldData[k]) {
+                oldData[k] = {};
+            }
+            merge(oldData[k], newData[k], template[k]);
+            return;
+        }
+        if (!oldData[k] && v.calc !== 'init') {
+            switch (typeof newData[k]) {
+                case 'string': {
+                    oldData[k] = '';
+                    break;
+                }
+                case 'number': {
+                    oldData[k] = 0;
+                    break;
+                }
+                case 'object': {
+                    oldData[k] = Array.isArray(newData[k]) ? [] : {};
+                    break;
+                }
+            }
+        }
+        if (typeof v.calc === 'function') {
+            v.calc(oldData, newData, oldData[k]);
+        }
+        else {
+            switch (v.calc) {
+                case 'init': {
+                    if (oldData[k] === undefined) {
+                        oldData[k] = newData[k];
+                    }
+                    break;
+                }
+                case 'set': {
+                    oldData[k] = newData[k];
+                    break;
+                }
+                case 'smartSet': {
+                    if (typeof newData[k] === 'object') {
+                        setObject(oldData[k], newData[k]);
+                    }
+                    else {
+                        oldData[k] = newData[k];
+                    }
+                    break;
+                }
+                case 'sum': {
+                    switch (v.method) {
+                        case 'direct': {
+                            oldData[k] += newData[k];
+                            break;
+                        }
+                        case 'array': {
+                            // console.log('oldData', oldData[k], k)
+                            newData[k].map(function (v) {
+                                if (!oldData[k].includes(v)) {
+                                    oldData[k].push(v);
+                                }
+                            });
+                        }
+                    }
+                    break;
+                }
+                case 'div': {
+                    oldData[k] /= newData[k];
+                    break;
+                }
+                case 'sub': {
+                    oldData[k] -= newData[k];
+                    break;
+                }
+                case 'mul': {
+                    oldData[k] *= newData[k];
+                    break;
+                }
+            }
+        }
+        return oldData;
+    });
+}
+var mergedTemplate = {
+    edit: {
+        size: { calc: 'set', method: 'direct' },
+        selectedTiles: {
+            calc: function (oldData, newData, nowData) {
+                var _a;
+                // console.log(oldData, newData, nowData);
+                var newLayer = newData.layer[0];
+                if (!((_a = oldData.layer) === null || _a === void 0 ? void 0 : _a.includes(newLayer))) {
+                    nowData.push.apply(nowData, newData.selectedTiles);
+                }
+                else {
+                    var idx = oldData.layer.findIndex(function (v) { return v === newLayer; });
+                    setObject(nowData[idx], newData.selectedTiles[0]);
+                }
+            }, method: 'direct'
+        },
+        shape: { calc: 'set', method: 'direct' },
+        layer: { calc: 'sum', method: 'array' },
+        x: { calc: 'init', method: 'direct' },
+        y: { calc: 'init', method: 'direct' },
+    }
+};
+function debounce(func, timeout, mergedTemplate) {
+    var timer;
+    var mergedData = [{}];
+    return function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        clearTimeout(timer);
+        if (mergedTemplate) {
+            args.map(function (v, idx) {
+                merge(mergedData[0], v, mergedTemplate);
+            });
+        }
+        else {
+            if (Array.isArray(args)) {
+                mergedData = args;
+            }
+            else {
+                mergedData[0] = args;
+            }
+        }
+        timer = setTimeout(function () {
+            func.apply(void 0, mergedData);
+            mergedData = [{}];
+        }, timeout);
+    };
+}
+function mergeSetWasEdited(gameMap) {
+    gameMap.wasEdited = true;
+}
+function mergeEditTileActions(data) {
+    taro.network.send('editTile', data);
+}
+var debounceSetWasEdited = debounce(mergeSetWasEdited, 0);
+var debounceEditTileSend = debounce(mergeEditTileActions, 0, mergedTemplate);
+function recalcWallsPhysics(gameMap, forPathFinding) {
+    taro.physics.destroyWalls();
+    var map = taro.scaleMap(rfdc()(gameMap));
+    taro.tiled.loadJson(map, function (layerArray, layersById) {
+        taro.physics.staticsFromMap(layersById.walls);
+    });
+    if (forPathFinding) {
+        taro.map.updateWallMapData(); // for A* pathfinding
+    }
+}
+var debounceRecalcPhysics = debounce(recalcWallsPhysics, 0);
 var DeveloperMode = /** @class */ (function () {
     function DeveloperMode() {
         if (taro.isClient)
@@ -70,20 +248,33 @@ var DeveloperMode = /** @class */ (function () {
         return this.activeTab && this.activeTab !== 'play';
     };
     DeveloperMode.prototype.editTile = function (data, clientId) {
+        var _this = this;
+        var _a;
         // only allow developers to modify the tiles
         if (taro.server.developerClientIds.includes(clientId) || clientId === 'server') {
             if (JSON.stringify(data) === '{}') {
                 throw 'receive: {}';
             }
             var gameMap = taro.game.data.map;
-            gameMap.wasEdited = true;
-            taro.network.send('editTile', data);
-            var _a = Object.entries(data).map(function (_a) {
+            var _b = Object.entries(data).map(function (_a) {
                 var k = _a[0], dataValue = _a[1];
                 var dataType = k;
                 return { dataType: dataType, dataValue: dataValue };
-            })[0], dataType = _a.dataType, dataValue = _a.dataValue;
-            var serverData = _.clone(dataValue);
+            })[0], dataType = _b.dataType, dataValue = _b.dataValue;
+            var serverData = rfdc()(dataValue);
+            if (dataType === 'edit' && !serverData.noMerge) {
+                debounceSetWasEdited(gameMap);
+                if (data.edit.size !== 'fitContent') {
+                    taro.network.send('editTile', data);
+                }
+                else {
+                    debounceEditTileSend(data);
+                }
+            }
+            else {
+                gameMap.wasEdited = true;
+                taro.network.send('editTile', data);
+            }
             if (gameMap.layers.length > 4 && serverData.layer >= 2)
                 serverData.layer++;
             var width = gameMap.width;
@@ -96,8 +287,10 @@ var DeveloperMode = /** @class */ (function () {
                 }
                 case 'edit': {
                     //save tile change to taro.game.data.map and taro.map.data
-                    var nowValue = serverData;
-                    this.putTiles(nowValue.x, nowValue.y, nowValue.selectedTiles, nowValue.size, nowValue.shape, nowValue.layer);
+                    var nowValue_1 = serverData;
+                    nowValue_1.selectedTiles.map(function (v, idx) {
+                        _this.putTiles(nowValue_1.x, nowValue_1.y, v, nowValue_1.size, nowValue_1.shape, nowValue_1.layer);
+                    });
                     break;
                 }
                 case 'clear': {
@@ -105,14 +298,14 @@ var DeveloperMode = /** @class */ (function () {
                     this.clearLayer(nowValue.layer);
                 }
             }
-            if (gameMap.layers[serverData.layer].name === 'walls') {
+            if (((_a = gameMap.layers[serverData.layer]) === null || _a === void 0 ? void 0 : _a.name) === 'walls') {
                 //if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
-                taro.physics.destroyWalls();
-                var map = taro.scaleMap(rfdc()(gameMap));
-                taro.tiled.loadJson(map, function (layerArray, layersById) {
-                    taro.physics.staticsFromMap(layersById.walls);
-                });
-                taro.map.updateWallMapData(); // for A* pathfinding
+                if (serverData.noMerge) {
+                    recalcWallsPhysics(gameMap, true);
+                }
+                else {
+                    debounceRecalcPhysics(gameMap, true);
+                }
             }
         }
     };
@@ -127,10 +320,14 @@ var DeveloperMode = /** @class */ (function () {
     DeveloperMode.prototype.putTiles = function (tileX, tileY, selectedTiles, brushSize, shape, layer) {
         var map = taro.game.data.map;
         var width = map.width;
-        var sample = this.calcSample(selectedTiles, brushSize, shape);
+        var calcData = this.calcSample(selectedTiles, brushSize, shape);
+        var sample = calcData.sample;
+        var size = brushSize === 'fitContent' ? { x: calcData.xLength, y: calcData.yLength } : brushSize;
+        tileX = brushSize === 'fitContent' ? calcData.minX : tileX;
+        tileY = brushSize === 'fitContent' ? calcData.minY : tileY;
         if (map.layers[layer]) {
-            for (var x = 0; x < brushSize.x; x++) {
-                for (var y = 0; y < brushSize.y; y++) {
+            for (var x = 0; x < size.x; x++) {
+                for (var y = 0; y < size.y; y++) {
                     if (sample[x] && sample[x][y] !== undefined && this.pointerInsideMap(x + tileX, y + tileY, map)) {
                         var index = sample[x][y];
                         if (index === -1)
@@ -159,8 +356,15 @@ var DeveloperMode = /** @class */ (function () {
         var minY = parseInt(yArray[0]);
         var maxX = parseInt(xArray[xArray.length - 1]);
         var maxY = parseInt(yArray[yArray.length - 1]);
+        // console.log(selectedTileArea, minX, maxX, minY, maxY);
         var xLength = maxX - minX + 1;
         var yLength = maxY - minY + 1;
+        if (size === 'fitContent') {
+            size = {
+                x: xLength,
+                y: yLength
+            };
+        }
         var tempSample = {};
         switch (shape) {
             case 'rectangle': {
@@ -176,7 +380,7 @@ var DeveloperMode = /** @class */ (function () {
                 break;
             }
         }
-        return tempSample;
+        return { sample: tempSample, xLength: xLength, yLength: yLength, minX: minX, minY: minY };
     };
     DeveloperMode.prototype.floodTiles = function (layer, oldTile, newTile, x, y, limits) {
         var _a, _b, _c, _d, _e, _f;
@@ -200,6 +404,9 @@ var DeveloperMode = /** @class */ (function () {
                 continue;
             }
             //save tile change to taro.game.data.map and taro.map.data
+            if (newTile === -1) {
+                newTile = 0;
+            }
             map.layers[layer].data[nowPos.y * width + nowPos.x] = newTile;
             taro.map.data.layers[layer].data[nowPos.y * width + nowPos.x] = newTile;
             if (nowPos.x > 0 && !((_c = closedQueue[nowPos.x - 1]) === null || _c === void 0 ? void 0 : _c[nowPos.y])) {
@@ -234,16 +441,18 @@ var DeveloperMode = /** @class */ (function () {
             if (data.name === '' || data.width <= 0 || data.height <= 0) {
                 console.log('empty name, negative or 0 size is not allowed');
             }
-            else if (data.name === undefined) { // create new region
-                // create new region name (smallest available number)
-                var regionNameNumber = 0;
-                var newRegionName = "region".concat(regionNameNumber);
-                do {
-                    regionNameNumber++;
-                    newRegionName = "region".concat(regionNameNumber);
-                } while (taro.regionManager.getRegionById(newRegionName));
-                data.name = newRegionName;
-                data.showModal = true;
+            else if (data.name === undefined || (data.create && !taro.regionManager.getRegionById(data.name))) { // create new region
+                if (!data.name) {
+                    // create new region name (smallest available number)
+                    var regionNameNumber = 0;
+                    var newRegionName = "region".concat(regionNameNumber);
+                    do {
+                        regionNameNumber++;
+                        newRegionName = "region".concat(regionNameNumber);
+                    } while (taro.regionManager.getRegionById(newRegionName));
+                    data.name = newRegionName;
+                    data.showModal = true;
+                }
                 data.userId = taro.game.getPlayerByClientId(clientId)._stats.userId;
                 // changed to Region from RegionUi
                 var regionData = {
@@ -253,15 +462,19 @@ var DeveloperMode = /** @class */ (function () {
                         y: data.y,
                         width: data.width,
                         height: data.height,
-                        key: newRegionName
+                        key: data.name,
+                        alpha: data.alpha,
+                        inside: data.inside
                     },
-                    id: newRegionName,
+                    id: data.name,
                     value: {
                         x: data.x,
                         y: data.y,
                         width: data.width,
                         height: data.height,
-                        key: newRegionName
+                        key: data.name,
+                        alpha: data.alpha,
+                        inside: data.inside
                     }
                 };
                 var region = new Region(regionData);
@@ -275,27 +488,90 @@ var DeveloperMode = /** @class */ (function () {
                         region.destroy();
                     }
                     else {
-                        if (data.name !== data.newName) {
-                            if (taro.regionManager.getRegionById(data.newName)) {
+                        if (data.name !== data.newKey) {
+                            if (taro.regionManager.getRegionById(data.newKey)) {
                                 console.log('This name is unavailable');
                             }
                             else {
-                                region._stats.id = data.newName;
+                                region._stats.id = data.newKey;
                             }
                         }
                         var statsData = [
                             { x: data.x !== region._stats.default.x ? data.x : null },
                             { y: data.y !== region._stats.default.y ? data.y : null },
                             { width: data.width !== region._stats.default.width ? data.width : null },
-                            { height: data.height !== region._stats.default.height ? data.height : null }
+                            { height: data.height !== region._stats.default.height ? data.height : null },
+                            { alpha: data.alpha !== region._stats.default.alpha ? data.alpha : null },
+                            { inside: data.inside !== region._stats.default.inside ? data.inside : null }
                         ];
                         statsData = statsData.filter(function (obj) { return obj[Object.keys(obj)[0]] !== null; });
+                        if (data.inside === '')
+                            statsData.push({ inside: '' });
                         region.streamUpdateData(statsData);
                     }
                 }
             }
             // broadcast region change to all clients
             taro.network.send('editRegion', data);
+        }
+    };
+    DeveloperMode.prototype.editVariable = function (data, clientId) {
+        var _this = this;
+        // only allow developers to modify initial entities
+        if (taro.server.developerClientIds.includes(clientId)) {
+            Object.entries(data).forEach(function (_a) {
+                var _b, _c, _d, _e, _f, _g, _h, _j;
+                var key = _a[0], variable = _a[1];
+                if (variable.dataType === 'region') {
+                    var regionData = { name: key };
+                    if (variable.newKey)
+                        regionData.newKey = variable.newKey;
+                    if (!isNaN((_b = variable.value) === null || _b === void 0 ? void 0 : _b.x))
+                        regionData.x = variable.value.x;
+                    if (!isNaN((_c = variable.value) === null || _c === void 0 ? void 0 : _c.y))
+                        regionData.y = variable.value.y;
+                    if (!isNaN((_d = variable.value) === null || _d === void 0 ? void 0 : _d.width))
+                        regionData.width = variable.value.width;
+                    if (!isNaN((_e = variable.value) === null || _e === void 0 ? void 0 : _e.height))
+                        regionData.height = variable.value.height;
+                    if (((_f = variable.value) === null || _f === void 0 ? void 0 : _f.inside) || ((_g = variable.value) === null || _g === void 0 ? void 0 : _g.inside) === '')
+                        regionData.inside = variable.value.inside;
+                    if ((_h = variable.value) === null || _h === void 0 ? void 0 : _h.alpha)
+                        regionData.alpha = variable.value.alpha;
+                    if ((_j = variable.value) === null || _j === void 0 ? void 0 : _j.create)
+                        regionData.create = variable.value.create;
+                    if (variable.delete)
+                        regionData.delete = variable.delete;
+                    _this.editRegion(regionData, clientId);
+                }
+                else {
+                    //editing existing variable
+                    if (taro.game.data.variables[key]) {
+                        //deleting variable
+                        if (variable.delete) {
+                            delete taro.game.data.variables[key];
+                            //renaming variable
+                        }
+                        else if (variable.newKey) {
+                            taro.game.data.variables[variable.newKey] = taro.game.data.variables[key];
+                            delete taro.game.data.variables[key];
+                            //editing variable
+                        }
+                        else {
+                            taro.game.data.variables[key].value = variable.value;
+                        }
+                        //creating new variable
+                    }
+                    else {
+                        taro.game.data.variables[key] = {
+                            dataType: variable.dataType,
+                            value: variable.value
+                        };
+                    }
+                }
+            });
+            // broadcast region change to all clients
+            taro.network.send('editVariable', data);
         }
     };
     DeveloperMode.prototype.editInitEntity = function (data, clientId) {
@@ -335,6 +611,14 @@ var DeveloperMode = /** @class */ (function () {
             }
         }
     };
+    DeveloperMode.prototype.editGlobalScripts = function (data, clientId) {
+        // only allow developers to modify global scripts
+        if (taro.server.developerClientIds.includes(clientId)) {
+            taro.network.send('editGlobalScripts', data);
+            taro.script.load(data, true);
+            taro.script.scriptCache = {};
+        }
+    };
     DeveloperMode.prototype.createUnit = function (data) {
         //const player = taro.game.getPlayerByClientId(clientId);
         var player;
@@ -361,16 +645,29 @@ var DeveloperMode = /** @class */ (function () {
     DeveloperMode.prototype.updateUnit = function (data) {
         // 1. broadcast update to all players
         // 2. force update its dimension/scale/layer/image
-        taro.game.data.unitTypes[data.typeId] = data.newData;
+        if (taro.game.data.unitTypes[data.typeId]) {
+            if (data.newData.scripts) {
+                taro.game.data.unitTypes[data.typeId].scripts = rfdc()(data.newData.scripts);
+            }
+            else {
+                var oldScripts = rfdc()(taro.game.data.unitTypes[data.typeId].scripts);
+                taro.game.data.unitTypes[data.typeId] = rfdc()(data.newData);
+                taro.game.data.unitTypes[data.typeId].scripts = oldScripts;
+            }
+        }
+        else {
+            taro.game.data.unitTypes[data.typeId] = rfdc()(data.newData);
+        }
         taro.$$('unit').forEach(function (unit) {
             if (unit._stats.type === data.typeId) {
-                for (var i = 0; i < unit._stats.itemIds.length; i++) {
+                //removing clearing all items from unit for now, later we will add a way to reset items
+                /*for (let i = 0; i < unit._stats.itemIds.length; i++) {
                     var itemId = unit._stats.itemIds[i];
                     var item = taro.$(itemId);
                     if (item) {
                         item.remove();
                     }
-                }
+                }*/
                 unit.changeUnitType(data.typeId, {}, false);
                 unit.emit('update-texture', 'basic_texture_change');
             }
@@ -414,7 +711,19 @@ var DeveloperMode = /** @class */ (function () {
         // 1. broadcast update to all players
         // 2. force update its dimension/scale/layer/image
         // 3. we may need to re-mount the item on unit
-        taro.game.data.itemTypes[data.typeId] = data.newData;
+        if (taro.game.data.itemTypes[data.typeId]) {
+            if (data.newData.scripts) {
+                taro.game.data.itemTypes[data.typeId].scripts = rfdc()(data.newData.scripts);
+            }
+            else {
+                var oldScripts = rfdc()(taro.game.data.itemTypes[data.typeId].scripts);
+                taro.game.data.itemTypes[data.typeId] = rfdc()(data.newData);
+                taro.game.data.itemTypes[data.typeId].scripts = oldScripts;
+            }
+        }
+        else {
+            taro.game.data.itemTypes[data.typeId] = rfdc()(data.newData);
+        }
         taro.$$('item').forEach(function (item) {
             if (item._stats.itemTypeId === data.typeId) {
                 item.changeItemType(data.typeId, {}, false);
@@ -437,7 +746,19 @@ var DeveloperMode = /** @class */ (function () {
     DeveloperMode.prototype.updateProjectile = function (data) {
         // 1. broadcast update to all players
         // 2. force update its dimension/scale/layer/image
-        taro.game.data.projectileTypes[data.typeId] = data.newData;
+        if (taro.game.data.projectileTypes[data.typeId]) {
+            if (data.newData.scripts) {
+                taro.game.data.projectileTypes[data.typeId].scripts = rfdc()(data.newData.scripts);
+            }
+            else {
+                var oldScripts = rfdc()(taro.game.data.projectileTypes[data.typeId].scripts);
+                taro.game.data.projectileTypes[data.typeId] = rfdc()(data.newData);
+                taro.game.data.projectileTypes[data.typeId].scripts = oldScripts;
+            }
+        }
+        else {
+            taro.game.data.projectileTypes[data.typeId] = rfdc()(data.newData);
+        }
         taro.$$('projectile').forEach(function (projectile) {
             if (projectile._stats.type === data.typeId) {
                 projectile.changeProjectileType(data.typeId, {}, false);
@@ -505,7 +826,7 @@ var DeveloperMode = /** @class */ (function () {
         }
     };
     DeveloperMode.prototype.updateClientMap = function (data) {
-        //console.log ('map data was edited', data.mapData.wasEdited);
+        // console.log('map data was edited', data.mapData.wasEdited);
         if (data.mapData.wasEdited) {
             data.mapData.wasEdited = false;
             data.mapData.haveUnsavedChanges = true;

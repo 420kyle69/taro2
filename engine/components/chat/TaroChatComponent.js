@@ -110,7 +110,8 @@ var TaroChatComponent = TaroEventingClass.extend({
 					$(msgDiv).find('.author').text(player._stats.name + ": ");
 					$(msgDiv).find('.msg').text(msgData.text);
 
-					window.reactApp?.pushMessageToChat && window.reactApp.pushMessageToChat({ author: player._stats.name, username: player._stats.username, message: msgData.text, from: 'user', userId: player._stats.userId });
+					window?.reactApp?.pushMessageToChat && window?.reactApp?.pushMessageToChat({ author: player._stats.name, username: player._stats.username, message: msgData.text, from: 'user', userId: player._stats.userId, controlledBy: player._stats.controlledBy });
+					window?.pushMessageToChat && window.pushMessageToChat({ author: player._stats.name, username: player._stats.username, message: msgData.text, from: 'user', userId: player._stats.userId, controlledBy: player._stats.controlledBy });
 				}
 			} else // system message
 			{
@@ -124,8 +125,8 @@ var TaroChatComponent = TaroEventingClass.extend({
 					msgDiv.text(`* ${msgData.text} *`);
 				}
 
-				window.reactApp?.pushMessageToChat && window.reactApp.pushMessageToChat({ message: msgData.text, isHtml: msgData.isHtml, from: 'system' });
-				window.pushMessageToChat && window.pushMessageToChat({ message: msgData.text, isHtml: msgData.isHtml, from: 'system' });
+				window.reactApp?.pushMessageToChat && window.reactApp.pushMessageToChat({ message: msgData.text, isHtml: msgData.isHtml, from: 'system', bmToAll: msgData.bmToAll });
+				window.pushMessageToChat && window.pushMessageToChat({ message: msgData.text, isHtml: msgData.isHtml, from: 'system', bmToAll: msgData.bmToAll });
 			}
 
 			// append new message mobile

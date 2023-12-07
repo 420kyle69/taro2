@@ -15,7 +15,7 @@ var RegionEditor = /** @class */ (function () {
             else if (taro.developerMode.active && taro.developerMode.activeTab === 'map' && _this.devModeScene.devModeTools.cursorButton.active && pointer.leftButtonDown()) {
                 gameObjects = gameObjects.filter(function (gameObject) { return gameObject.phaserRegion; });
                 gameObjects.forEach(function (gameObject) {
-                    _this.devModeScene.regionEditor.addClickedList({ name: gameObject.phaserRegion.entity._stats.id, x: gameObject.phaserRegion.stats.x, y: gameObject.phaserRegion.stats.y, width: gameObject.phaserRegion.stats.width, height: gameObject.phaserRegion.stats.height });
+                    _this.devModeScene.regionEditor.addClickedList({ name: gameObject.phaserRegion.entity._stats.id, x: gameObject.phaserRegion.stats.x, y: gameObject.phaserRegion.stats.y, width: gameObject.phaserRegion.stats.width, height: gameObject.phaserRegion.stats.height, alpha: gameObject.phaserRegion.stats.alpha, inside: gameObject.phaserRegion.stats.inside });
                 });
                 if (gameObjects.length > 0) {
                     _this.devModeScene.regionEditor.showClickedList();
@@ -55,31 +55,26 @@ var RegionEditor = /** @class */ (function () {
                     y = _this.regionDrawStart.y + height;
                     height *= -1;
                 }
-                taro.network.send('editRegion', {
-                    x: Math.trunc(x),
-                    y: Math.trunc(y),
-                    width: Math.trunc(width),
-                    height: Math.trunc(height)
-                });
+                inGameEditor.addNewRegion && inGameEditor.addNewRegion({ name: '', x: Math.trunc(x), y: Math.trunc(y), width: Math.trunc(width), height: Math.trunc(height) });
                 _this.regionDrawStart = null;
             }
         }, this);
         this.clickedList = [];
     }
     RegionEditor.prototype.edit = function (data) {
-        if (data.newName && data.name !== data.newName) {
+        if (data.newKey && data.name !== data.newKey) {
             var region = taro.regionManager.getRegionById(data.name);
             if (region)
-                region._stats.id = data.newName;
+                region._stats.id = data.newKey;
             this.devModeScene.regions.forEach(function (region) {
                 if (region.name === data.name) {
-                    region.name = data.newName;
+                    region.name = data.newKey;
                     region.updateLabel();
                 }
             });
         }
         else if (data.showModal) {
-            inGameEditor.addNewRegion && inGameEditor.addNewRegion({ name: data.name, x: data.x, y: data.y, width: data.width, height: data.height, userId: data.userId });
+            inGameEditor.addNewRegion && inGameEditor.addNewRegion({ name: data.name, x: data.x, y: data.y, width: data.width, height: data.height, userId: data.userId, alpha: data.alpha, inside: data.inside });
         }
         inGameEditor.updateRegionInReact && inGameEditor.updateRegionInReact(data);
     };

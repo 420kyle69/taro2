@@ -108,8 +108,8 @@ class EntityEditor {
                                 break;
                         }
                         targetPoint.rotate(selectedEntityImage.image.rotation);
-                        const x = Math.floor(selectedEntityImage.x + targetPoint.x);
-                        const y = Math.floor(selectedEntityImage.y + targetPoint.y);
+                        const x = Math.floor(Number(selectedEntityImage.x) + Number(targetPoint.x));
+                        const y = Math.floor(Number(selectedEntityImage.y) + Number(targetPoint.y));
                         selectedEntityImage.image.x = x;
                         selectedEntityImage.image.y = y;
                         editedAction.position = {x: x, y: y};

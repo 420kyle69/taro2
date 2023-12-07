@@ -45,7 +45,7 @@ var PhaserRenderer = /** @class */ (function (_super) {
                 mode: Phaser.Scale.ScaleModes.ENVELOP,
                 autoCenter: Phaser.Scale.Center.CENTER_BOTH,
                 autoRound: true,
-                resizeInterval: 100
+                resizeInterval: 100,
             },
             render: {
                 pixelArt: false,
@@ -64,11 +64,6 @@ var PhaserRenderer = /** @class */ (function (_super) {
                 crossOrigin: 'anonymous'
             },
             plugins: {
-                /*scene: [{
-                      key: 'rexUI',
-                      plugin: UIPlugin,
-                      mapping: 'rexUI',
-                }],*/
                 global: [{
                         key: 'virtual-joystick',
                         plugin: rexvirtualjoystickplugin,
@@ -93,6 +88,12 @@ var PhaserRenderer = /** @class */ (function (_super) {
     };
     PhaserRenderer.prototype.getViewportBounds = function () {
         return this.scene.getScene('Game').cameras.main.worldView;
+    };
+    PhaserRenderer.prototype.getCameraWidth = function () {
+        return this.scene.getScene('Game').cameras.main.displayWidth;
+    };
+    PhaserRenderer.prototype.getCameraHeight = function () {
+        return this.scene.getScene('Game').cameras.main.displayHeight;
     };
     return PhaserRenderer;
 }(Phaser.Game));

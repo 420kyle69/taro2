@@ -268,11 +268,11 @@ var TaroInputComponent = TaroEventingClass.extend({
 		};
 
 		// Listen for mouse events
-		window.addEventListener('mousedown', this._evRef.mousedown, false);
+		canvas.addEventListener('mousedown', this._evRef.mousedown, false);
 		window.addEventListener('mouseup', this._evRef.mouseup, false);
 
 		canvas.addEventListener('mousemove', this._evRef.mousemove, false);
-		canvas.addEventListener('mousewheel', this._evRef.mousewheel, false);
+		canvas.addEventListener('wheel', this._evRef.mousewheel, false);
 
 		// Touch events
 		canvas.addEventListener('touchmove', this._evRef.touchmove, false);
@@ -297,7 +297,7 @@ var TaroInputComponent = TaroEventingClass.extend({
 		canvas.removeEventListener('mousedown', this._evRef.mousedown, false);
 		canvas.removeEventListener('mouseup', this._evRef.mouseup, false);
 		canvas.removeEventListener('mousemove', this._evRef.mousemove, false);
-		canvas.removeEventListener('mousewheel', this._evRef.mousewheel, false);
+		canvas.removeEventListener('wheel', this._evRef.mousewheel, false);
 
 		// Touch events
 		canvas.removeEventListener('touchmove', this._evRef.touchmove, false);
@@ -597,7 +597,7 @@ var TaroInputComponent = TaroEventingClass.extend({
 	_keyDown: function (event) {
 		var self = this;
 		this._updateMouseData(event);
-		if(!this.shouldPreventChat()) {
+		if (!this.shouldPreventChat()) {
 			this._chatHandler(event);
 		}
 		if (this._state[event.keyCode] == false) {
