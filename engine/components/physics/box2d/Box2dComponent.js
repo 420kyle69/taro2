@@ -784,6 +784,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 				triggeredBy.itemId = triggeredBy.itemId || entityB.id();
 				taro.script.trigger(entityA._category + 'TouchesItem', triggeredBy);
 				triggeredBy.itemId = entityB.id();
+				taro.game.lastTouchedItemId = entityB.id();
 				entityA.script.trigger("entityTouchesItem", triggeredBy);
 				break;
 			case 'projectile':
