@@ -397,7 +397,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 				joint_def.Initialize(
 					entityA.body,
 					entityB.body,
-					entityB.body.GetWorldCenter());
+					self.recordLeak(entityB.body.GetWorldCenter()));
 
 				// joint_def.enableLimit = true;
 				// joint_def.lowerAngle = aBody.itemAnchor.lowerAngle * 0.0174533; // degree to rad

@@ -237,6 +237,9 @@ var PhysicsComponent = TaroEventingClass.extend({
 			var joint = entityA.jointsAttached[entityB.id()];
 			if (joint) {
 				this._world.destroyJoint(joint);
+				if (this.engine === 'BOX2DWASM') {
+					this.freeFromCache(joint);
+				}
 				// console.log("joint destroyed")
 				delete entityA.jointsAttached[entityB.id()];
 				delete entityB.jointsAttached[entityA.id()];
