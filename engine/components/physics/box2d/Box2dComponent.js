@@ -42,7 +42,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 
 		this.engine = this.engine.toUpperCase();
 		const box2dwebScaleRatio = 30;
-		this._scaleRatio = this.engine === 'BOX2DWASM' ? 90 : box2dwebScaleRatio;
+		this._scaleRatio = this.engine === 'BOX2DWASM' ? 30 : box2dwebScaleRatio;
 		this._scaleRatioToBox2dWeb = this._scaleRatio / box2dwebScaleRatio;
 		// this.engine = 'crash';
 		console.log('Physics engine: ', this.engine);
@@ -51,7 +51,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 			try {
 				dists[this.engine].init(this);
 			} catch (err) {
-				console.log(err, "error: ")
+				console.log(err, 'error: ');
 			}
 
 		} else {
@@ -593,7 +593,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 			if (self.engine == 'crash') { // crash's engine step happens in dist.js
 				self._world.step(timeElapsedSinceLastStep);
 			} else {
-				self._world.step(timeElapsedSinceLastStep / 1000, 8, 6); // Call the world step; frame-rate, velocity iterations, position iterations
+				self._world.step(timeElapsedSinceLastStep / 1000, 8, 3); // Call the world step; frame-rate, velocity iterations, position iterations
 				if (self.ctx) {
 					self.ctx.clear();
 					self._world.DebugDraw();
@@ -608,10 +608,9 @@ var PhysicsComponent = TaroEventingClass.extend({
 
 						if (entity) {
 
-							var mxfp = dists[taro.physics.engine].getmxfp(tempBod);
+							var mxfp = dists[taro.physics.engine].getmxfp(tempBod, self);
 							var x = mxfp.x * taro.physics._scaleRatio;
 							var y = mxfp.y * taro.physics._scaleRatio;
-
 							// make projectile auto-rotate toward its path. ideal for arrows or rockets that should point toward its direction
 							// if (entity._category == 'projectile' &&
 							// 	entity._stats.currentBody && !entity._stats.currentBody.fixedRotation &&
@@ -619,7 +618,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 							// ) {
 							// 	var angle = Math.atan2(tempBod.m_linearVelocity.y, tempBod.m_linearVelocity.x) + Math.PI / 2;
 							// } else {
-							var angle = tempBod.getAngle();
+							var angle = this.engine === 'BOX2DWASM' ? self.recordLeak(tempBod.getAngle()) : tempBod.getAngle();
 							// }
 
 							var tileWidth = taro.scaleMapDetails.tileWidth;
@@ -733,13 +732,15 @@ var PhysicsComponent = TaroEventingClass.extend({
 
 
 				taro._physicsFrames++;
-
 				// Clear forces because we have ended our physics simulation frame
 				self._world.clearForces();
 
 				// get stats for dev panel
 				var timeEnd = Date.now();
 				self.physicsTickDuration += timeEnd - timeStart;
+				if (self.engine === 'BOX2DWASM') {
+					self.freeLeaked();
+				}
 				if (timeEnd - self.lastSecondAt > 1000) {
 					self.lastSecondAt = timeEnd;
 					self.avgPhysicsTickDuration = self.physicsTickDuration / taro._fpsRate;
@@ -765,7 +766,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 	},
 
 	_triggerContactEvent: function (entityA, entityB) {
-		var triggeredBy = {}
+		var triggeredBy = {};
 
 		if (!['unit', 'projectile', 'item'].includes(entityA._category)) {
 			return;
@@ -787,16 +788,16 @@ var PhysicsComponent = TaroEventingClass.extend({
 		switch (entityB._category) {
 			case 'unit':
 				taro.game.lastTouchedUnitId = entityB.id();
-				taro.script.trigger(entityA._category + 'TouchesUnit', triggeredBy); // handle unitA touching unitB
+				taro.script.trigger(`${entityA._category}TouchesUnit`, triggeredBy); // handle unitA touching unitB
 				triggeredBy.unitId = entityB.id();
-				entityA.script.trigger("entityTouchesUnit", triggeredBy);
+				entityA.script.trigger('entityTouchesUnit', triggeredBy);
 				break;
 
 			case 'item':
 				triggeredBy.itemId = triggeredBy.itemId || entityB.id();
-				taro.script.trigger(entityA._category + 'TouchesItem', triggeredBy);
+				taro.script.trigger(`${entityA._category}TouchesItem`, triggeredBy);
 				triggeredBy.itemId = entityB.id();
-				entityA.script.trigger("entityTouchesItem", triggeredBy);
+				entityA.script.trigger('entityTouchesItem', triggeredBy);
 				break;
 			case 'projectile':
 				triggeredBy.projectileId = triggeredBy.projectileId || entityB.id();
@@ -808,9 +809,9 @@ var PhysicsComponent = TaroEventingClass.extend({
 					entityA.inflictDamage(entityB._stats.damageData);
 				}
 
-				taro.script.trigger(entityA._category + 'TouchesProjectile', triggeredBy);
+				taro.script.trigger(`${entityA._category}TouchesProjectile`, triggeredBy);
 				triggeredBy.projectileId = entityB.id();
-				entityA.script.trigger("entityTouchesProjectile", triggeredBy);
+				entityA.script.trigger('entityTouchesProjectile', triggeredBy);
 				break;
 
 			case 'region':
@@ -819,15 +820,15 @@ var PhysicsComponent = TaroEventingClass.extend({
 					variableName: entityB._stats.id
 				});
 				triggeredBy.region = region;
-				entityA.script.trigger("entityEntersRegion", triggeredBy);
-				taro.script.trigger(entityA._category + 'EntersRegion', triggeredBy);
+				entityA.script.trigger('entityEntersRegion', triggeredBy);
+				taro.script.trigger(`${entityA._category}EntersRegion`, triggeredBy);
 				break;
 
 			case 'sensor':
 				triggeredBy.sensorId = entityB.id();
 				var sensoringUnit = entityB.getOwnerUnit();
 				if (sensoringUnit && sensoringUnit.script) {
-					sensoringUnit.script.trigger(entityA._category + 'EntersSensor', triggeredBy);
+					sensoringUnit.script.trigger(`${entityA._category}EntersSensor`, triggeredBy);
 
 					if (entityA._category == 'unit' && sensoringUnit.ai) {
 						sensoringUnit.ai.registerSensorDetection(entityA);
@@ -838,8 +839,8 @@ var PhysicsComponent = TaroEventingClass.extend({
 
 			case undefined:
 			case 'wall':
-				taro.script.trigger(entityA._category + 'TouchesWall', triggeredBy);
-				entityA.script.trigger("entityTouchesWall");
+				taro.script.trigger(`${entityA._category}TouchesWall`, triggeredBy);
+				entityA.script.trigger('entityTouchesWall');
 				break;
 		}
 	},
@@ -849,7 +850,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 
 		if (!['unit', 'projectile', 'item'].includes(entityA._category)) {
 			return;
-		};
+		}
 
 		switch (entityA._category) {
 			case 'unit':
@@ -861,7 +862,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 			case 'projectile':
 				triggeredBy.projectileId = entityA.id();
 				break;
-		};
+		}
 
 		switch (entityB._category) {
 			case 'region':
@@ -870,20 +871,20 @@ var PhysicsComponent = TaroEventingClass.extend({
 					variableName: entityB._stats.id
 				});
 				triggeredBy.region = region;
-				entityA.script.trigger("entityLeavesRegion", triggeredBy);
-				taro.script.trigger(entityA._category + 'LeavesRegion', triggeredBy);
+				entityA.script.trigger('entityLeavesRegion', triggeredBy);
+				taro.script.trigger(`${entityA._category}LeavesRegion`, triggeredBy);
 				break;
 
 			case 'sensor':
 				triggeredBy.sensorId = entityB.id();
 				var sensoringUnit = entityB.getOwnerUnit();
 				if (sensoringUnit && sensoringUnit.script) {
-					sensoringUnit.script.trigger(entityA._category + 'LeavesSensor', triggeredBy);
-				};
+					sensoringUnit.script.trigger(`${entityA._category}LeavesSensor`, triggeredBy);
+				}
 				break;
 
 			case undefined:
-		};
+		}
 	},
 
 	// Listen for when contact's begin
@@ -940,4 +941,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 	}
 });
 
-if (typeof (module) !== 'undefined' && typeof (module.exports) !== 'undefined') { module.exports = PhysicsComponent; }
+if (typeof (module) !== 'undefined' && typeof (module.exports) !== 'undefined') {
+	module.exports = PhysicsComponent;
+}

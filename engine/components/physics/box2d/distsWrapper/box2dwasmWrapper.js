@@ -101,7 +101,7 @@ var box2dwasmWrapper = {
                         component.b2Body.prototype.getNext = component.b2Body.prototype.GetNext;
                         component.b2Body.prototype.getAngle = component.b2Body.prototype.GetAngle;
                         component.b2Body.prototype.setPosition = function (position) {
-                            var angle = this.GetAngle();
+                            var angle = component.recordLeak(this.GetAngle());
                             var pos = new box2D.b2Vec2(position.x, position.y);
                             this.SetTransform(pos, angle);
                             component.destroyB2dObj(pos);
@@ -109,7 +109,7 @@ var box2dwasmWrapper = {
                         component.b2Body.prototype.getPosition = component.b2Body.prototype.GetPosition;
                         component.b2Body.prototype.setGravityScale = component.b2Body.prototype.SetGravityScale;
                         component.b2Body.prototype.setAngle = function (angle) {
-                            var pos = this.GetPosition();
+                            var pos = component.recordLeak(this.GetPosition());
                             this.SetTransform(pos, angle);
                         };
                         component.b2Body.prototype.setTransform = component.b2Body.prototype.SetTransform;
@@ -199,8 +199,8 @@ var box2dwasmWrapper = {
         }
         self._world.SetContactListener(contactListener);
     },
-    getmxfp: function (body) {
-        return body.GetPosition();
+    getmxfp: function (body, self) {
+        return self.recordLeak(body.GetPosition());
     },
     queryAABB: function (self, aabb, callback) {
         self.world().QueryAABB(callback, aabb);
@@ -312,7 +312,9 @@ var box2dwasmWrapper = {
                                             if (fixtureDef.shape.data) {
                                                 finalX = (_a = fixtureDef.shape.data.x) !== null && _a !== void 0 ? _a : 0;
                                                 finalY = (_b = fixtureDef.shape.data.y) !== null && _b !== void 0 ? _b : 0;
-                                                tempShape.set_m_p(new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio));
+                                                var pos_1 = self.recordLeak(new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio));
+                                                tempShape.set_m_p(pos_1);
+                                                self.destroyB2dObj(pos_1);
                                             }
                                             break;
                                         case 'rectangle':

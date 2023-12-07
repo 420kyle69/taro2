@@ -60,7 +60,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 		component.b2Body.prototype.getNext = component.b2Body.prototype.GetNext;
 		component.b2Body.prototype.getAngle = component.b2Body.prototype.GetAngle;
 		component.b2Body.prototype.setPosition = function (position) {
-			let angle = this.GetAngle();
+			let angle = component.recordLeak(this.GetAngle());
 			let pos = new box2D.b2Vec2(position.x, position.y);
 			this.SetTransform(pos, angle);
 			component.destroyB2dObj(pos);
@@ -68,7 +68,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 		component.b2Body.prototype.getPosition = component.b2Body.prototype.GetPosition;
 		component.b2Body.prototype.setGravityScale = component.b2Body.prototype.SetGravityScale;
 		component.b2Body.prototype.setAngle = function (angle) {
-			let pos = this.GetPosition();
+			let pos = component.recordLeak(this.GetPosition());
 			this.SetTransform(pos, angle);
 		};
 		component.b2Body.prototype.setTransform = component.b2Body.prototype.SetTransform;
@@ -165,8 +165,8 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 		self._world.SetContactListener(contactListener);
 	},
 
-	getmxfp: function (body: Box2D.b2Body) {
-		return body.GetPosition();
+	getmxfp: function (body: Box2D.b2Body, self: any) {
+		return self.recordLeak(body.GetPosition());
 	},
 
 	queryAABB: function (self, aabb, callback) {
@@ -284,7 +284,9 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 											if (fixtureDef.shape.data) {
 												finalX = fixtureDef.shape.data.x ?? 0;
 												finalY = fixtureDef.shape.data.y ?? 0;
-												(tempShape as Box2D.b2CircleShape).set_m_p(new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio));
+												const pos = self.recordLeak(new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio));
+												(tempShape as Box2D.b2CircleShape).set_m_p(pos);
+												self.destroyB2dObj(pos);
 											}
 											break;
 
