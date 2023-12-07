@@ -35,7 +35,6 @@ var PhaserRenderer = /** @class */ (function (_super) {
                 }
             }
         }
-        console.log('isMobile', taro.isMobile, 'innerWidth', window.innerWidth, 'outerWidth', window.outerWidth, 'devicePixelRatio', window.devicePixelRatio);
         _this = _super.call(this, {
             type: forceCanvas[gameId] || forceCanvas[0] ?
                 Phaser.CANVAS : Phaser.AUTO,

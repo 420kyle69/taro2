@@ -23,8 +23,6 @@ class PhaserRenderer extends Phaser.Game {
 			}
 		}
 
-		console.log('isMobile', taro.isMobile, 'innerWidth', window.innerWidth, 'outerWidth', window.outerWidth, 'devicePixelRatio', window.devicePixelRatio);
-
 		super({
 			type: forceCanvas[gameId] || forceCanvas[0] ?
 				Phaser.CANVAS : Phaser.AUTO,
