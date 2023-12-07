@@ -622,27 +622,31 @@ class GameScene extends PhaserScene {
 		);
 	}
 
-    setResolution (resolution: number, setResolutionCoef: boolean): void {
-        if (setResolutionCoef) {
-            this.resolutionCoef = resolution;
-        }
-        if (taro.developerMode.activeTab !== 'map') {
-            this.scale.setGameSize(window.innerWidth/resolution, window.innerHeight/resolution);
-        }
-    }
+	setResolution (resolution: number, setResolutionCoef: boolean): void {
+		if (setResolutionCoef) {
+			this.resolutionCoef = resolution;
+		}
+
+		const width = !taro.isMobile ? window.innerWidth : window.outerWidth * window.devicePixelRatio;
+		const height = !taro.isMobile ? window.innerHeight : window.outerHeight * window.devicePixelRatio;
+
+		if (taro.developerMode.activeTab !== 'map') {
+			this.scale.setGameSize(width/resolution, height/resolution);
+		}
+	}
 
 	update (): void {
 
-        //cause black screen and camera jittering when change tab
+		//cause black screen and camera jittering when change tab
 		/*let trackingDelay = this.trackingDelay / taro.fps();
 		this.cameras.main.setLerp(trackingDelay, trackingDelay);*/
-        const worldPoint = this.cameras.main.getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
-        if (!taro.isMobile) {
-		    taro.input.emit('pointermove', [{
-		    	x: worldPoint.x,
-		    	y: worldPoint.y,
-		    }]);
-        }
+		const worldPoint = this.cameras.main.getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
+		if (!taro.isMobile) {
+			taro.input.emit('pointermove', [{
+				x: worldPoint.x,
+				y: worldPoint.y,
+			}]);
+		}
 
 		this.renderedEntities.forEach(element => {
 			element.setVisible(false);

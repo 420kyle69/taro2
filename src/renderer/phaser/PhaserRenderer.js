@@ -39,8 +39,8 @@ var PhaserRenderer = /** @class */ (function (_super) {
             type: forceCanvas[gameId] || forceCanvas[0] ?
                 Phaser.CANVAS : Phaser.AUTO,
             scale: {
-                width: window.innerWidth,
-                height: window.innerHeight,
+                width: (!taro.isMobile ? window.innerWidth : window.outerWidth * window.devicePixelRatio),
+                height: (!taro.isMobile ? window.innerHeight : window.outerHeight * window.devicePixelRatio),
                 parent: 'game-div',
                 mode: Phaser.Scale.ScaleModes.ENVELOP,
                 autoCenter: Phaser.Scale.Center.CENTER_BOTH,
