@@ -448,8 +448,10 @@ var GameScene = /** @class */ (function (_super) {
         if (setResolutionCoef) {
             this.resolutionCoef = resolution;
         }
+        var width = !taro.isMobile ? window.innerWidth : window.outerWidth * window.devicePixelRatio;
+        var height = !taro.isMobile ? window.innerHeight : window.outerHeight * window.devicePixelRatio;
         if (taro.developerMode.activeTab !== 'map') {
-            this.scale.setGameSize(window.innerWidth / resolution, window.innerHeight / resolution);
+            this.scale.setGameSize(width / resolution, height / resolution);
         }
     };
     GameScene.prototype.update = function () {
