@@ -2010,7 +2010,6 @@ var Unit = TaroEntityPhysics.extend({
 				// apply movement if it's either human-controlled unit, or ai unit that's currently moving
 				if (self.body && vector && (vector.x != 0 || vector.y != 0)) {
 
-					// console.log('unit movement 2', vector, self._stats.controls.movementMethod);
 					if (self._stats.controls) {
 						switch (self._stats.controls.movementMethod) { // velocity-based movement
 							case 'velocity':
