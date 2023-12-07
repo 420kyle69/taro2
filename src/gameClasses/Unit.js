@@ -872,23 +872,26 @@ var Unit = TaroEntityPhysics.extend({
 		}
 
 		if (taro.isServer) {
-			self._stats.currentItemIndex = 0;
-			self._stats.currentItemId = null;
+			//only give default items if this is a new unit
+			if (isUnitCreation) {
+				self._stats.currentItemIndex = 0;
+				self._stats.currentItemId = null;
 
-			// give default items to the unit
-			if (data.defaultItems) {
-				for (var i = 0; i < data.defaultItems.length; i++) {
-					var item = data.defaultItems[i];
+				// give default items to the unit
+				if (data.defaultItems) {
+					for (var i = 0; i < data.defaultItems.length; i++) {
+						var item = data.defaultItems[i];
 
-					var itemData = taro.game.cloneAsset('itemTypes', item.key);
-					if (itemData) {
-						itemData.itemTypeId = item.key;
-						self.pickUpItem(itemData);
+						var itemData = taro.game.cloneAsset('itemTypes', item.key);
+						if (itemData) {
+							itemData.itemTypeId = item.key;
+							self.pickUpItem(itemData);
+						}
 					}
 				}
-			}
 
-			self.changeItem(self._stats.currentItemIndex); // this will call change item on client for all units
+				self.changeItem(self._stats.currentItemIndex); // this will call change item on client for all units
+			}
 		} else if (taro.isClient) {
 			var zIndex = self._stats.currentBody && self._stats.currentBody['z-index'] || { layer: 3, depth: 3 };
 
@@ -2052,6 +2055,11 @@ var Unit = TaroEntityPhysics.extend({
 
 					processedUpdates.push({[key]: value});
 					delete taro.client.entityUpdateQueue[this.id()][key]
+					
+					// remove queue object for this entity is there's no queue remaining in order to prevent memory leak
+					if (Object.keys(taro.client.entityUpdateQueue[this.id()]).length == 0) {
+						delete taro.client.entityUpdateQueue[this.id()];
+					}
 				}
 
 				if (processedUpdates.length > 0) {
