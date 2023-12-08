@@ -451,7 +451,7 @@ var TaroEntityPhysics = TaroEntity.extend({
 			if (!isNaN(x) && !isNaN(y) && isFinite(x) && isFinite(y)) {
 				var thrustVector = new taro.physics.b2Vec2(x, y);
 				this.body.applyForce(thrustVector, this.body.getWorldCenter());
-				if (taro.physics.engine !== 'BOX2DWASM') {
+				if (taro.physics.engine === 'BOX2DWASM') {
 					taro.physics.destroyB2dObj(thrustVector);
 				}
 			}
@@ -483,7 +483,7 @@ var TaroEntityPhysics = TaroEntity.extend({
 			if (!isNaN(x) && !isNaN(y) && isFinite(x) && isFinite(y)) {
 				var thrustVector = new taro.physics.b2Vec2(x, y);
 				this.body.applyLinearImpulse(thrustVector, this.body.getWorldCenter());
-				if (taro.physics.engine !== 'BOX2DWASM') {
+				if (taro.physics.engine === 'BOX2DWASM') {
 					taro.physics.destroyB2dObj(thrustVector);
 				}
 			}
