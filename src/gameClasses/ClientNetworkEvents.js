@@ -162,6 +162,23 @@ var ClientNetworkEvents = {
 		}
 	},
 
+	_onUpdateUIRealtimeCSS: function (data) {
+		const key = 'realtime-css';
+		if (!taro.uiTextElementsObj[key]) {
+			taro.uiTextElementsObj[key] = document.getElementById(key);
+		}
+		if (!taro.uiTextElementsObj[key]) {
+			return;
+		}
+		
+		let sanitizedStyle = taro.clientSanitizer(data.style);
+		if (data.action == 'update') {
+			taro.uiTextElementsObj[key].innerText = sanitizedStyle;
+		} else if (data.action == 'append') {
+			taro.uiTextElementsObj[key].innerText += '\t' + sanitizedStyle;
+		}
+	},
+
 	_onAlertHighscore: function (data) {
 		// $('.highscore-text').html('You set a new personal highscore!').show();
 		// setTimeout(function () {

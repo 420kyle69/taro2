@@ -752,6 +752,7 @@ var Server = TaroClass.extend({
 		taro.network.define('createPlayer', self._onSomeBullshit);
 		taro.network.define('updateUiText', self._onSomeBullshit);
 		taro.network.define('updateUiTextForTime', self._onSomeBullshit);
+		taro.network.define('updateUiRealtimeCSS', self._onSomeBullshit);
 		taro.network.define('alertHighscore', self._onSomeBullshit);
 		taro.network.define('addShopItem', self._onSomeBullshit);
 		taro.network.define('removeShopItem', self._onSomeBullshit);
