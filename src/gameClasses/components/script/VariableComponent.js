@@ -1230,6 +1230,24 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
+					case 'mathCeiling':
+						var value = self.getValue(text.value, vars);
+						if (!isNaN(value)) {
+							returnValue = Math.ceil(value);
+						}
+						break;
+
+					case 'Factorial':
+						var value = self.getValue(text.value, vars);
+						if (!isNaN(value)) {
+							let result = 1;
+						    for (let i = value; i > 0; i--) {
+						        result = result * i;
+						    }
+							returnValue = result
+						}
+						break;
+
 					case 'log10':
 						var value = self.getValue(text.value, vars);
 
