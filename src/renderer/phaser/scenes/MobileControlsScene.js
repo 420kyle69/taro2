@@ -37,8 +37,8 @@ var MobileControlsScene = /** @class */ (function (_super) {
                     new PhaserJoystick(_this, x, y, settings);
                     break;
                 default:
-                    var relativeX_1 = Math.trunc((x + w / 2) / 960 * window.innerWidth - w / 2);
-                    var relativeY_1 = Math.trunc((y + h / 2) / 540 * window.innerHeight - h / 2);
+                    var relativeX_1 = Math.trunc((x + w / 2) / 960 * window.outerWidth * window.devicePixelRatio - w / 2);
+                    var relativeY_1 = Math.trunc((y + h / 2) / 540 * window.outerHeight * window.devicePixelRatio);
                     var uiScene_1 = taro.renderer.scene.getScene('Ui');
                     var buttonExist_1 = false;
                     Object.values((_a = uiScene_1 === null || uiScene_1 === void 0 ? void 0 : uiScene_1.abilityBar) === null || _a === void 0 ? void 0 : _a.buttons).forEach(function (button) {
@@ -102,28 +102,13 @@ var MobileControlsScene = /** @class */ (function (_super) {
         });
         var resized = false;
         taro.mobileControls.on('orientationchange', function (e) {
-            switch (e) {
-                case 'portrait-primary':
-                    _this.game.scale.setGameSize(window.innerWidth, window.innerHeight);
-                    if (resized) {
-                        resized = false;
-                    }
-                    else {
-                        resized = true;
-                        window.dispatchEvent(new Event('resize'));
-                    }
-                    break;
-                case 'landscape-primary':
-                    _this.game.scale.setGameSize(window.innerWidth, window.innerHeight);
-                    if (resized) {
-                        resized = false;
-                    }
-                    else {
-                        resized = true;
-                        window.dispatchEvent(new Event('resize'));
-                    }
-                    break;
-                default:
+            _this.game.scale.setGameSize(window.outerWidth * window.devicePixelRatio, window.outerHeight * window.devicePixelRatio);
+            if (resized) {
+                resized = false;
+            }
+            else {
+                resized = true;
+                window.dispatchEvent(new Event('resize'));
             }
         });
         taro.mobileControls.on('clear-controls', function () {

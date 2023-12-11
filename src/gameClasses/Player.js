@@ -19,6 +19,8 @@ var Player = TaroEntity.extend({
 		}
 
 		self.lastCustomInput = '';
+
+		self.realtimeCSS = '';
 		self.lastHtmlUiClickData = {};
 
 		Player.prototype.log(`player created ${this.id()}`);
@@ -765,6 +767,11 @@ var Player = TaroEntity.extend({
 
 					processedUpdates.push({ [key]: value });
 					delete taro.client.entityUpdateQueue[this.id()][key]
+					
+					// remove queue object for this entity is there's no queue remaining in order to prevent memory leak
+					if (Object.keys(taro.client.entityUpdateQueue[this.id()]).length == 0) {
+						delete taro.client.entityUpdateQueue[this.id()];
+					}
 				}
 
 				if (processedUpdates.length > 0) {

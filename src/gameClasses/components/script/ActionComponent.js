@@ -667,6 +667,24 @@ var ActionComponent = TaroEntity.extend({
 						}
 						break;
 
+					case 'appendRealtimeCSSForPlayer':
+						var player = self._script.variable.getValue(action.player, vars);
+						var text = self._script.variable.getValue(action.value, vars);
+						if (player && player._stats && player._stats.controlledBy == 'human') {
+							taro.network.send('updateUiRealtimeCSS', { action: 'append', style: text });
+							player.realtimeCSS += '\n' + text;
+						}
+						break;
+					
+					case 'updateRealtimeCSSForPlayer':
+						var player = self._script.variable.getValue(action.player, vars);
+						var text = self._script.variable.getValue(action.value, vars);
+						if (player && player._stats && player._stats.controlledBy == 'human') {
+							taro.network.send('updateUiRealtimeCSS', { action: 'update', style: text });
+							player.realtimeCSS = text;
+						}
+						break;
+
 					case 'showGameSuggestionsForPlayer':
 
 						var player = self._script.variable.getValue(action.player, vars);

@@ -1346,7 +1346,7 @@ var ShopComponent = TaroEntity.extend({
 					class: 'btn btn-success align-middle btn-unequip',
 					id: item._id,
 					name: item.name || item.title
-				}).append('Equiped');
+				}).append('Equipped');
 			} else if (item.status == undefined) {
 				if (item.soldForSocialShare) {
 					var button = self.buttonForSocialShare(item, true);

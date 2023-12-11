@@ -8,10 +8,10 @@ var Sensor = TaroEntityPhysics.extend({
 		TaroEntityPhysics.prototype.init.call(this, {});
 		this.updateRadius(radius);
 		if (taro.isServer) {
-			self.mount(taro.$('baseScene'));
 			this.streamMode(0);
-			this.addBehaviour('sensorBehaviour', this._behaviour);
 		}
+		self.mount(taro.$('baseScene'));
+		this.addBehaviour('sensorBehaviour', this._behaviour);
 	},
 
 	getOwnerUnit: function () {

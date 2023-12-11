@@ -55,7 +55,7 @@ var AttributeComponent = TaroEntity.extend({
 			// if unit is my unit, update UI
 			if (taro.isClient && taro.network.id() == self._entity._stats.clientId) {
 				if (attr.isVisible) {
-					self._entity.unitUi.updateAttributeBar(attr);
+					self._entity.unitUi.updateAttributeBar(attr.type);
 				}
 			}
 		}
@@ -336,7 +336,7 @@ var AttributeComponent = TaroEntity.extend({
 								unit = self._entity;
 
 								if (taro.client.myPlayer._stats.selectedUnitId == unit.id()) {
-									self._entity.unitUi.updateAttributeBar({ ...attribute, ...{ value: parseFloat(newValue) } });
+									self._entity.unitUi.updateAttributeBar(attributeTypeId);
 								}
 
 								// this is the only way to convert to number i guess??

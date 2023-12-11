@@ -662,13 +662,14 @@ class DeveloperMode {
 
 		taro.$$('unit').forEach(unit => {
 			if (unit._stats.type === data.typeId) {
-				for (let i = 0; i < unit._stats.itemIds.length; i++) {
+				//removing clearing all items from unit for now, later we will add a way to reset items
+				/*for (let i = 0; i < unit._stats.itemIds.length; i++) {
 					var itemId = unit._stats.itemIds[i];
 					var item = taro.$(itemId);
 					if (item) {
 						item.remove();
 					}
-				}
+				}*/
 				unit.changeUnitType(data.typeId, {}, false);
 				unit.emit('update-texture', 'basic_texture_change');
 			}

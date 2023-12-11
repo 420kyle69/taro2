@@ -256,7 +256,7 @@ class DevModeScene extends PhaserScene {
         this.gameScene.setResolution(this.gameScene.resolutionCoef, false);
 		if (this.devModeTools) this.devModeTools.leaveMapTab();
 
-        if (this.devModeTools.entityEditor.selectedEntityImage) {
+        if (this.devModeTools?.entityEditor.selectedEntityImage) {
             this.devModeTools.entityEditor.selectEntityImage(null);
         }
 
