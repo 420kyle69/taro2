@@ -1694,6 +1694,13 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
+					case 'lastPlayedTime':
+						var player = self.getValue(text.player, vars);
+
+						returnValue = player._stats.lastPlayed;
+
+						break;
+
 					case 'getUnitId':
 						var unit = self.getValue(text.unit, vars);
 
