@@ -6,8 +6,8 @@ class PhaserUnit extends PhaserAnimatedEntity {
 	private chat: PhaserChatBubble;
 	label: Phaser.GameObjects.Text;
 
-
 	gameObject: Phaser.GameObjects.Container & IRenderProps;
+	debugGameObject: Phaser.GameObjects.Sprite & IRenderProps;
 	attributes: PhaserAttributeBar[] = [];
 	attributesContainer: Phaser.GameObjects.Container;
 
@@ -43,6 +43,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			'render-attributes': entity.on('render-attributes', this.renderAttributes, this),
 			'update-attribute': entity.on('update-attribute', this.updateAttribute, this),
 			'render-chat-bubble': entity.on('render-chat-bubble', this.renderChat, this),
+			'transform-debug': entity.on('transform-debug', this.transformDebug, this),
 		});
 
 		this.scene.unitsList.push(this);
@@ -459,6 +460,27 @@ class PhaserUnit extends PhaserAnimatedEntity {
 				this.scaleTween = null;
 			}
 		});
+	}
+
+	protected transformDebug (data: {
+		x: number;
+		y: number;
+		rotation: number
+	}): void {
+		console.log('transformDebug', data);
+		if (!this.debugGameObject) {
+			const bounds = this.entity._bounds2d;
+
+			this.debugGameObject = this.addSprite('debug') as Phaser.GameObjects.Sprite & IRenderProps;
+			this.debugGameObject.setDisplaySize(bounds.x, bounds.y);
+			this.debugGameObject.rotation = this.entity._rotate.z;
+			//this.debugGameObject = this.scene.add.sprite(0, 0, 'debug');
+			this.debugGameObject.setOrigin(0.5);
+			//this.gameObject.add(this.debugGameObject);
+		}
+		this.debugGameObject.setPosition(data.x, data.y);
+		this.debugGameObject.rotation = data.rotation;
+		//this.flip(this.entity._stats.flip);
 	}
 
 	protected destroy(): void {

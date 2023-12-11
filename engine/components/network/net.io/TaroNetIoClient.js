@@ -497,6 +497,13 @@ var TaroNetIoClient = {
 										entity.nextKeyFrame = [now + taro.client.renderBuffer, newPosition];
 										entity.isTransforming(true);
 									}
+								} else {
+									// emit position for entity debug image
+									entity.emit('transform-debug', {
+										x: x,
+										y: y,
+										rotation: rotate,
+									});
 								}
 							}
 
