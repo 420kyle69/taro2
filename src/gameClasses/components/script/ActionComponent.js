@@ -1217,6 +1217,13 @@ var ActionComponent = TaroEntity.extend({
 						}
 						break;
 
+					case 'stopMovingUnit':
+						if (entity && entity._category === 'unit' && entity.ability) {
+							entity.ability.stopMovingX();
+							entity.ability.stopMovingY();
+						}
+						break;
+
 					case 'createUnitAtPosition':
 						var player = self._script.variable.getValue(action.entity, vars);
 
