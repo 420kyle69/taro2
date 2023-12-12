@@ -626,10 +626,10 @@ var MenuUiComponent = TaroEntity.extend({
 			var ping = Number.MAX_VALUE;
 
 			socket.onopen = function (event) {
-				socket.send(JSON.stringify({
-					type: 'ping',
-					sentAt: Date.now()
-				}));
+				// socket.send(JSON.stringify({
+				// 	type: 'ping',
+				// 	sentAt: Date.now()
+				// }));
 
 				setTimeout(function () {
 					if (socket.readyState !== WebSocket.CLOSED && socket.readyState !== WebSocket.CLOSING) {

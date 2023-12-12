@@ -584,24 +584,6 @@ const Client = TaroEventingClass.extend({
 					}
 
 					if (player._stats.controlledBy == 'human') {
-						// old comment => 'if the player is me'
-						if (player._stats.clientId == taro.network.id()) {
-							taro.client.playerJoinedAt = taro._currentTime;
-							taro.client.eventLog.push([
-								taro._currentTime - taro.client.playerJoinedAt,
-								'My player created'
-							]);
-							// old comment => 'declare my player'
-							taro.client.myPlayer = player;
-
-							if (typeof startVideoChat == 'function') {
-								// the elephant is back
-								startVideoChat(player.id());
-							}
-
-							player.redrawUnits(['nameLabel']);
-						}
-
 
 						if (player._stats && player._stats.selectedUnitId) {
 							const unit = taro.$(player._stats.selectedUnitId);
@@ -686,7 +668,9 @@ const Client = TaroEventingClass.extend({
 
 	// not much here except definitions
 	defineNetworkEvents: function () {
-		//
+
+		taro.network.define('ping', this._onPing);
+
 		taro.network.define('makePlayerSelectUnit', this._onMakePlayerSelectUnit);
 		taro.network.define('makePlayerCameraTrackUnit', this._onMakePlayerCameraTrackUnit);
 		taro.network.define('changePlayerCameraPanSpeed', this._onChangePlayerCameraPanSpeed);

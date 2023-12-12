@@ -34,6 +34,7 @@ var PhaserUnit = /** @class */ (function (_super) {
             'render-attributes': entity.on('render-attributes', _this.renderAttributes, _this),
             'update-attribute': entity.on('update-attribute', _this.updateAttribute, _this),
             'render-chat-bubble': entity.on('render-chat-bubble', _this.renderChat, _this),
+            'transform-debug': entity.on('transform-debug', _this.transformDebug, _this),
         });
         _this.scene.unitsList.push(_this);
         _this.scene.renderedEntities.push(_this.gameObject);
@@ -385,6 +386,20 @@ var PhaserUnit = /** @class */ (function (_super) {
                 _this.scaleTween = null;
             }
         });
+    };
+    PhaserUnit.prototype.transformDebug = function (data) {
+        if (!this.debugGameObject) {
+            var bounds = this.entity._bounds2d;
+            this.debugGameObject = this.addSprite('debug');
+            this.debugGameObject.setDisplaySize(bounds.x, bounds.y);
+            this.debugGameObject.rotation = this.entity._rotate.z;
+            //this.debugGameObject = this.scene.add.sprite(0, 0, 'debug');
+            this.debugGameObject.setOrigin(0.5);
+            //this.gameObject.add(this.debugGameObject);
+        }
+        this.debugGameObject.setPosition(data.x, data.y);
+        this.debugGameObject.rotation = data.rotation;
+        //this.flip(this.entity._stats.flip);
     };
     PhaserUnit.prototype.destroy = function () {
         var _this = this;

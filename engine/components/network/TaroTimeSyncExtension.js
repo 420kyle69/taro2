@@ -54,11 +54,11 @@ var TaroTimeSyncExtension = {
 		this.lastTimeSyncSentAt = taro._currentTime;
 	},
 
-	_onTimeSync: function (serverTime, clientId) {
+	_onTimeSync: function (clientId) {
 		if (taro.isClient) {
 			// update ping
 			if (this.lastTimeSyncSentAt) {
-				this.timeSync(serverTime);
+				this.timeSync();
 			}
 		}
 
@@ -69,7 +69,7 @@ var TaroTimeSyncExtension = {
 	},
 
 	// // speed up or slow down taro.timeScale depending on discrepancy between client & server's time.
-	timeSync: function (serverTime) {
+	timeSync: function () {
 
 		var latency = Math.floor(taro._currentTime - this.lastTimeSyncSentAt); // ping (round trip)
 
@@ -84,12 +84,6 @@ var TaroTimeSyncExtension = {
 		if (taro.pingElement) {
 			taro.pingElement.innerHTML = Math.floor(latency);
 		}
-	},
-
-	getMedian: function (arr) {
-		const mid = Math.floor(arr.length / 2);
-		  const nums = [...arr].sort((a, b) => a - b);
-		return arr.length % 2 !== 0 ? nums[mid] : (nums[mid - 1] + nums[mid]) / 2;
 	}
 };
 

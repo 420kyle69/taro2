@@ -264,6 +264,31 @@ var ClientNetworkEvents = {
 		}
 	},
 
+	_onPing: function(data) {
+		const latency = Date.now() - data.sentAt;
+
+		// start reconciliation based on discrepancy between 
+		// where my unit when ping was sent and where unit is when ping is received
+		if (taro.client.selectedUnit && taro.client.myUnitPositionWhenPingSent && taro.client.myUnitStreamedPosition) {
+			// console.log(latency, taro.client.myUnitPositionWhenPingSent.x, taro.client.myUnitStreamedPosition.x, taro.client.myUnitPositionWhenPingSent.x - taro.client.myUnitStreamedPosition.x);
+			taro.client.reconcileDiff = {
+				x: taro.client.myUnitStreamedPosition.x - taro.client.myUnitPositionWhenPingSent.x,
+				y: taro.client.myUnitStreamedPosition.y - taro.client.myUnitPositionWhenPingSent.y
+			}
+		}
+
+		taro.client.isWaitingForPong = false;
+
+		if (!taro.pingElement) {
+			taro.pingElement = document.getElementById('updateping');
+		}
+
+		if (taro.pingElement) {
+			taro.pingElement.innerHTML = Math.floor(latency);
+		}
+
+	},
+
 	_onPlayAd: function (data) {
 		taro.ad.play(data);
 	},
