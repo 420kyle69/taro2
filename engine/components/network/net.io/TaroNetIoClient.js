@@ -497,16 +497,16 @@ var TaroNetIoClient = {
 										entity.nextKeyFrame = [now + taro.client.renderBuffer, newPosition];
 										entity.isTransforming(true);
 									}
-								} else {
-									if (taro.env === 'local') {
-										// emit position for entity debug image
-										entity.emit('transform-debug', {
-											x: x,
-											y: y,
-											rotation: rotate,
-										});
-									}
-								}
+								} 
+								
+								if (taro.env === 'local') {
+									// emit position for entity debug image
+									entity.emit('transform-debug', {
+										x: x,
+										y: y,
+										rotation: rotate,
+									});
+								}	
 							}
 
 							break;

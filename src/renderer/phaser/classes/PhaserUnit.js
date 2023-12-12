@@ -388,7 +388,6 @@ var PhaserUnit = /** @class */ (function (_super) {
         });
     };
     PhaserUnit.prototype.transformDebug = function (data) {
-        console.log('transformDebug', data);
         if (!this.debugGameObject) {
             var bounds = this.entity._bounds2d;
             this.debugGameObject = this.addSprite('debug');

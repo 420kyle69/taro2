@@ -271,6 +271,9 @@ var ServerNetworkEvents = {
 		}
 	},
 
+	_onPing: function(data, clientId) {
+		taro.network.send('ping', data, clientId)
+	},
 
 	_onBuySkin: function (skinHandle, clientId) {
 		var player = taro.game.getPlayerByClientId(clientId);

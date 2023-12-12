@@ -264,6 +264,19 @@ var ClientNetworkEvents = {
 		}
 	},
 
+	_onPing: function(data) {
+		const latency = Date.now() - data.sentAt;
+
+		if (!taro.pingElement) {
+			taro.pingElement = document.getElementById('updateping');
+		}
+
+		if (taro.pingElement) {
+			taro.pingElement.innerHTML = Math.floor(latency);
+		}
+
+	},
+
 	_onPlayAd: function (data) {
 		taro.ad.play(data);
 	},

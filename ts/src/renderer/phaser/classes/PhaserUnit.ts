@@ -467,7 +467,6 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		y: number;
 		rotation: number
 	}): void {
-		console.log('transformDebug', data);
 		if (!this.debugGameObject) {
 			const bounds = this.entity._bounds2d;
 

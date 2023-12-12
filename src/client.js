@@ -594,6 +594,12 @@ const Client = TaroEventingClass.extend({
 							// old comment => 'declare my player'
 							taro.client.myPlayer = player;
 
+							// get latency data every 1s
+							setInterval(() => {
+								taro.network.send('ping', {sentAt: Date.now()});
+							}, 1000);
+							
+
 							if (typeof startVideoChat == 'function') {
 								// the elephant is back
 								startVideoChat(player.id());
@@ -686,7 +692,9 @@ const Client = TaroEventingClass.extend({
 
 	// not much here except definitions
 	defineNetworkEvents: function () {
-		//
+
+		taro.network.define('ping', this._onPing);
+
 		taro.network.define('makePlayerSelectUnit', this._onMakePlayerSelectUnit);
 		taro.network.define('makePlayerCameraTrackUnit', this._onMakePlayerCameraTrackUnit);
 		taro.network.define('changePlayerCameraPanSpeed', this._onChangePlayerCameraPanSpeed);
