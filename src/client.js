@@ -584,30 +584,6 @@ const Client = TaroEventingClass.extend({
 					}
 
 					if (player._stats.controlledBy == 'human') {
-						// old comment => 'if the player is me'
-						if (player._stats.clientId == taro.network.id()) {
-							taro.client.playerJoinedAt = taro._currentTime;
-							taro.client.eventLog.push([
-								taro._currentTime - taro.client.playerJoinedAt,
-								'My player created'
-							]);
-							// old comment => 'declare my player'
-							taro.client.myPlayer = player;
-
-							// get latency data every 1s
-							setInterval(() => {
-								taro.network.send('ping', {sentAt: Date.now()});
-							}, 1000);
-							
-
-							if (typeof startVideoChat == 'function') {
-								// the elephant is back
-								startVideoChat(player.id());
-							}
-
-							player.redrawUnits(['nameLabel']);
-						}
-
 
 						if (player._stats && player._stats.selectedUnitId) {
 							const unit = taro.$(player._stats.selectedUnitId);

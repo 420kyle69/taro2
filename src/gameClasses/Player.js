@@ -38,6 +38,22 @@ var Player = TaroEntity.extend({
 		} else if (taro.isClient) {
 			// if this player is "me"
 			if (self._stats.clientId == taro.network.id()) {
+
+				taro.client.playerJoinedAt = taro._currentTime;
+				taro.client.eventLog.push([
+					taro._currentTime - taro.client.playerJoinedAt,
+					'My player created'
+				]);
+				// old comment => 'declare my player'
+				taro.client.myPlayer = self;
+
+				if (typeof startVideoChat == 'function') {
+					// the elephant is back
+					startVideoChat(self.id());
+				}
+
+				self.redrawUnits(['nameLabel']);
+					
 				self.addComponent(ControlComponent);
 
 				// mouse move listener
@@ -51,6 +67,12 @@ var Player = TaroEntity.extend({
 				});
 
 				this.setChatMute(this._stats.banChat);
+
+				// get latency data every 1s
+				setInterval(() => {
+					taro.network.send('ping', {sentAt: Date.now()});
+				}, 1000);
+				
 			}
 
 			// apply skin to the selected unit if the unit already exists on the client side
