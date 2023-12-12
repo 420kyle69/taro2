@@ -940,6 +940,42 @@ var Unit = TaroEntityPhysics.extend({
 			}
 		}
 	},
+	
+	resetUnitType: function () {
+		//removing all items from unit
+		for (let i = 0; i < unit._stats.itemIds.length; i++) {
+			var itemId = unit._stats.itemIds[i];
+			var item = taro.$(itemId);
+			if (item) {
+				item.remove();
+			}
+		}
+
+		self._stats.currentItemIndex = 0;
+		self._stats.currentItemId = null;
+
+		// give default items to the unit
+		if (data.defaultItems) {
+			for (var i = 0; i < data.defaultItems.length; i++) {
+				var item = data.defaultItems[i];
+
+				var itemData = taro.game.cloneAsset('itemTypes', item.key);
+				if (itemData) {
+					itemData.itemTypeId = item.key;
+					self.pickUpItem(itemData);
+				}
+			}
+		}
+
+		self.changeItem(self._stats.currentItemIndex); // this will call change item on client for all units
+
+		//reset unit attributes
+		for (var attrId in this._stats.attributes) {
+			if (this._stats.attributes[attrId]) {
+				this._stats.attributes[attrId].value = Math.max(data.attributes[attrId].min, Math.min(data.attributes[attrId].max, parseFloat(attributeValue)));
+			}
+		}
+	},
 
 	addAttributeBuff: function (attributeId, value, time, percentage) {
 		var self = this;

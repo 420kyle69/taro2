@@ -679,6 +679,17 @@ class DeveloperMode {
 		}
 	}
 
+	resetUnit(data) {
+		taro.$$('unit').forEach(unit => {
+			if (unit._stats.type === data.typeId) {
+				unit.resetUnitType(data.typeId, {}, false);
+			}
+		});
+		if (taro.isServer) {
+			taro.network.send('resetUnit', data);
+		}
+	}
+
 	deleteUnit(data) {
 		taro.$$('unit').forEach(unit => {
 			if (unit._stats.type === data.typeId) {
@@ -802,6 +813,10 @@ class DeveloperMode {
 
 						case 'update':
 							this.updateUnit(data);
+							break;
+
+						case 'reset':
+							this.resetUnit(data);
 							break;
 
 						case 'delete':

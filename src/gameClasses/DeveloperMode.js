@@ -676,6 +676,16 @@ var DeveloperMode = /** @class */ (function () {
             taro.network.send('updateUnit', data);
         }
     };
+    DeveloperMode.prototype.resetUnit = function (data) {
+        taro.$$('unit').forEach(function (unit) {
+            if (unit._stats.type === data.typeId) {
+                unit.resetUnitType(data.typeId, {}, false);
+            }
+        });
+        if (taro.isServer) {
+            taro.network.send('resetUnit', data);
+        }
+    };
     DeveloperMode.prototype.deleteUnit = function (data) {
         taro.$$('unit').forEach(function (unit) {
             if (unit._stats.type === data.typeId) {
