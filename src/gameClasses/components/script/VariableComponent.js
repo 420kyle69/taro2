@@ -1287,6 +1287,36 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
+					case 'getEntityPositionOnScreen':
+						if (taro.isClient) {
+							entity = self.getValue(text.entity, vars);
+
+							if (entity) {
+								if (entity._category === 'item' && entity._stats && entity._stats.currentBody && entity._stats.currentBody.type === 'spriteOnly') {
+									var ownerUnit = entity.getOwnerUnit();
+									var unitPosition = rfdc()(ownerUnit._translate);
+
+									unitPosition.x = (ownerUnit._translate.x) + (entity._stats.currentBody.unitAnchor.y * Math.cos(ownerUnit._rotate.z + Math.radians(-90))) + (entity._stats.currentBody.unitAnchor.x * Math.cos(ownerUnit._rotate.z));
+									unitPosition.y = (ownerUnit._translate.y) + (entity._stats.currentBody.unitAnchor.y * Math.sin(ownerUnit._rotate.z + Math.radians(-90))) + (entity._stats.currentBody.unitAnchor.x * Math.sin(ownerUnit._rotate.z));
+									returnValue = JSON.parse(JSON.stringify(unitPosition));
+								} else {
+									if (entity.x != undefined && entity.y != undefined) {
+										returnValue = JSON.parse(JSON.stringify(entity));
+									} else if (entity._translate) {
+										returnValue = rfdc()(entity._translate);
+									} else {
+										returnValue = { x: 0, y: 0 };
+									}
+								}
+							}
+
+							const bounds = taro.renderer.getViewportBounds();
+							returnValue.x -= bounds.x;
+							returnValue.y -= bounds.y;
+						}
+
+						break;
+
 					case 'getCameraPosition':
 						if (taro.isClient) {
 							const bounds = taro.renderer.getViewportBounds();
