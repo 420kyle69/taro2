@@ -5188,15 +5188,11 @@ var TaroEntity = TaroObject.extend({
 
 			var nextTime = this.nextKeyFrame[0];
 			var timeRemaining = nextTime - taro._currentTime;
-
-			// if (this == taro.client.selectedUnit) console.log(taro._currentTime, x, tickDelta, timeRemaining)
-
+			xDiff = nextTransform[0] - x;
+			yDiff = nextTransform[1] - y;
+			
 			// don't lerp is time remaining is less than 5ms
 			if (timeRemaining > tickDelta) {
-
-				xDiff = nextTransform[0] - x;
-				yDiff = nextTransform[1] - y;
-
 				var xSpeed = xDiff / timeRemaining;
 				var ySpeed = yDiff / timeRemaining;
 
