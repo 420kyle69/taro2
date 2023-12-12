@@ -942,6 +942,7 @@ var Unit = TaroEntityPhysics.extend({
 	},
 	
 	resetUnitType: function () {
+		const self = this;
 		//removing all items from unit
 		for (let i = 0; i < this._stats.itemIds.length; i++) {
 			var itemId = this._stats.itemIds[i];
