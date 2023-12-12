@@ -225,10 +225,11 @@ var DevModeScene = /** @class */ (function (_super) {
         });
     };
     DevModeScene.prototype.leaveMapTab = function () {
+        var _a;
         this.gameScene.setResolution(this.gameScene.resolutionCoef, false);
         if (this.devModeTools)
             this.devModeTools.leaveMapTab();
-        if (this.devModeTools.entityEditor.selectedEntityImage) {
+        if ((_a = this.devModeTools) === null || _a === void 0 ? void 0 : _a.entityEditor.selectedEntityImage) {
             this.devModeTools.entityEditor.selectEntityImage(null);
         }
         this.entityImages.forEach(function (image) {
