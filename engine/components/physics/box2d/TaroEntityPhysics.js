@@ -408,11 +408,6 @@ var TaroEntityPhysics = TaroEntity.extend({
 		try {
 			taro.physicsTickCount++;
 			if (!isNaN(x) && !isNaN(y) && isFinite(x) && isFinite(y)) {
-				// client side's predicted physics is weaker than the server's, so buff it up!
-				// if (taro.isClient && this == taro.client.selectedUnit) {
-				//     x *= 1.2737
-				//     y *= 1.2737
-				// }
 				if (taro.physics.engine === 'BOX2DWASM') {
 					const scale = taro.physics._scaleRatioToBox2dWeb;
 					let v = new taro.physics.b2Vec2(x / scale, y / scale);

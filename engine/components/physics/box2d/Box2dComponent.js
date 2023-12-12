@@ -686,6 +686,15 @@ var PhysicsComponent = TaroEventingClass.extend({
 										(entity._category == 'projectile' && !entity._stats.streamMode)
 									) {
 										// if (entity._category == 'projectile') console.log(x, y, angle)
+
+										if (entity == taro.client.selectedUnit && taro.client.reconcileDiff && !isNaN(taro.client.reconcileDiff.x) && !isNaN(taro.client.reconcileDiff.x)) {
+											// console.log(taro._currentTime, x, tickDelta, timeRemaining)
+											taro.client.reconcileDiff.x = taro.client.reconcileDiff.x/(taro._physicsTickRate/2);
+											taro.client.reconcileDiff.y = taro.client.reconcileDiff.y/(taro._physicsTickRate/2);
+											x += taro.client.reconcileDiff.x
+											y += taro.client.reconcileDiff.y
+										} 
+
 										entity.nextKeyFrame = [taro._currentTime + taro.client.renderBuffer, [x, y, angle]];
 									} else { // update server-streamed entities' body position
 										x = entity.nextKeyFrame[1][0];

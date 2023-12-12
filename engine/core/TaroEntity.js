@@ -5192,11 +5192,6 @@ var TaroEntity = TaroObject.extend({
 			xDiff = nextTransform[0] - x;
 			yDiff = nextTransform[1] - y;
 			
-			if (this == taro.client.selectedUnit && taro.client.reconcileDiff && !isNaN(taro.client.reconcileDiff.x) && !isNaN(taro.client.reconcileDiff.x)) {
-				// console.log(taro._currentTime, x, tickDelta, timeRemaining)
-				xDiff += taro.client.reconcileDiff.x/10
-				yDiff += taro.client.reconcileDiff.y/10
-			} 
 			// don't lerp is time remaining is less than 5ms
 			if (timeRemaining > tickDelta) {
 
@@ -5215,7 +5210,7 @@ var TaroEntity = TaroObject.extend({
 				if (taro._currentTime > nextTime + 100) {
 					this.isTransforming(false);
 				}
-			}	
+			}
 
 			rotateStart = rotate;
 			rotateEnd = nextTransform[2];
