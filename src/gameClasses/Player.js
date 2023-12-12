@@ -38,6 +38,22 @@ var Player = TaroEntity.extend({
 		} else if (taro.isClient) {
 			// if this player is "me"
 			if (self._stats.clientId == taro.network.id()) {
+
+				taro.client.playerJoinedAt = taro._currentTime;
+				taro.client.eventLog.push([
+					taro._currentTime - taro.client.playerJoinedAt,
+					'My player created'
+				]);
+				// old comment => 'declare my player'
+				taro.client.myPlayer = self;
+
+				if (typeof startVideoChat == 'function') {
+					// the elephant is back
+					startVideoChat(self.id());
+				}
+
+				self.redrawUnits(['nameLabel']);
+					
 				self.addComponent(ControlComponent);
 
 				// mouse move listener
@@ -777,6 +793,12 @@ var Player = TaroEntity.extend({
 				if (processedUpdates.length > 0) {
 					this.streamUpdateData(processedUpdates);
 				}
+			}
+
+			if (this._stats.clientId == taro.network.id() && !taro.client.isWaitingForPong) {
+				taro.client.myUnitPositionWhenPingSent = {x: taro.client.selectedUnit?._translate.x, y: taro.client.selectedUnit?._translate.y};
+				taro.network.send('ping', {sentAt: Date.now()});
+				taro.client.isWaitingForPong = true;
 			}
 		}
 	},

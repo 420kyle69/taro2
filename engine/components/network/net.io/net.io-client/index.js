@@ -283,17 +283,17 @@ NetIo.Client = NetIo.EventingClass.extend({
 				clearInterval(this.pingInterval);
 			}
 
-			if (actionEvent === 'onopen') {
-				// start ping interval
-				const pingIntervalTimeout = 10000; // every 10s
+			// if (actionEvent === 'onopen') {
+			// 	// start ping interval
+			// 	const pingIntervalTimeout = 1000; // every 1s
 
-				this.pingInterval = setInterval(() => {
-					self._socket.send(JSON.stringify({
-						type: 'ping',
-						sentAt: Date.now()
-					}));
-				}, pingIntervalTimeout);
-			}
+			// 	this.pingInterval = setInterval(() => {
+			// 		self._socket.send(JSON.stringify({
+			// 			type: 'ping',
+			// 			sentAt: Date.now()
+			// 		}));
+			// 	}, pingIntervalTimeout);
+			// }
 		}
 	},
 
@@ -316,6 +316,7 @@ NetIo.Client = NetIo.EventingClass.extend({
 
 		if (packet && packet.type === 'pong') {
 			const latency = Date.now() - packet.clientSentAt;
+			console.log(latency)
 			this.trackLatency('gs-websocket-ping', 'pong', packet);
 			return;
 		}
