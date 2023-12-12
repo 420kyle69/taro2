@@ -661,17 +661,17 @@ var PhysicsComponent = TaroEventingClass.extend({
 								entity.teleportDestination = undefined;
 							} else {
 								if (taro.isServer) {
-									/* server-side reconciliation */
-									// hard-correct client entity's position (teleport) if the distance between server & client is greater than 100px
-									// continuously for 10 frames in a row
-									if (taro.game.cspEnabled && !entity._stats.aiEnabled && entity.clientStreamedPosition) {
-										var targetX = parseInt(entity.clientStreamedPosition[0]);
-										var targetY = parseInt(entity.clientStreamedPosition[1]);
-										var xDiff = targetX - x;
-										var yDiff = targetY - y;
-										x += xDiff / 2;
-										y += yDiff / 2;
-									}
+									// /* server-side reconciliation */
+									// // hard-correct client entity's position (teleport) if the distance between server & client is greater than 100px
+									// // continuously for 10 frames in a row
+									// if (taro.game.cspEnabled && !entity._stats.aiEnabled && entity.clientStreamedPosition) {
+									// 	var targetX = parseInt(entity.clientStreamedPosition[0]);
+									// 	var targetY = parseInt(entity.clientStreamedPosition[1]);
+									// 	var xDiff = targetX - x;
+									// 	var yDiff = targetY - y;
+									// 	x += xDiff / 2;
+									// 	y += yDiff / 2;
+									// }
 
 									entity.translateTo(x, y, 0);
 									entity.rotateTo(0, 0, angle);

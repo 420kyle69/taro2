@@ -498,12 +498,14 @@ var TaroNetIoClient = {
 										entity.isTransforming(true);
 									}
 								} else {
-									// emit position for entity debug image
-									entity.emit('transform-debug', {
-										x: x,
-										y: y,
-										rotation: rotate,
-									});
+									if (taro.env === 'local') {
+										// emit position for entity debug image
+										entity.emit('transform-debug', {
+											x: x,
+											y: y,
+											rotation: rotate,
+										});
+									}
 								}
 							}
 
