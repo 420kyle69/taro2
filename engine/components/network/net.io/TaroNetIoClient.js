@@ -487,10 +487,22 @@ var TaroNetIoClient = {
 								if (isTeleporting) {
 									// console.log("wtf")
 									entity.teleportTo(x, y, rotate, isTeleportingCamera);
-								} else if (
-									// if csp movement is enabled, don't use server-streamed position for my unit. (it's updated in box2dcomponent.js)
-									!(taro.physics && taro.game.cspEnabled && entity == taro.client.selectedUnit)
-								) {
+								} else if (taro.physics && taro.game.cspEnabled && entity == taro.client.selectedUnit) {
+									if (taro.env === 'local') {
+										// emit position for entity debug image
+										entity.emit('transform-debug', {
+											x: x,
+											y: y,
+											rotation: rotate,
+										});
+									}
+									
+									taro.client.myUnitStreamedPosition = {
+										x: x,
+										y: y,
+										rotation: rotate,
+									}
+								} else {
 									// console.log(entity._category, newPosition)
 									// extra 20ms of buffer removes jitter
 									if (newSnapshotTimestamp > this.lastSnapshotTimestamp) {
@@ -499,14 +511,7 @@ var TaroNetIoClient = {
 									}
 								} 
 								
-								if (taro.env === 'local') {
-									// emit position for entity debug image
-									entity.emit('transform-debug', {
-										x: x,
-										y: y,
-										rotation: rotate,
-									});
-								}	
+								
 							}
 
 							break;

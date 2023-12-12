@@ -127,7 +127,7 @@ var TaroEngine = TaroEntity.extend({
 
 		this._fpsRate = 60; // Sets the frames per second to execute engine tick's at
 		
-		this._gameLoopTickRate = 20; // gameLoop tick rate is hard-coded at 20
+		this._gameLoopTickRate = 60; // gameLoop tick rate is hard-coded at 20
 		this._lastGameLoopTickAt = 0;
 		this._gameLoopTickRemainder = 0;
 		this.gameLoopTickHasExecuted = true;

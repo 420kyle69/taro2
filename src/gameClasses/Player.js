@@ -67,12 +67,6 @@ var Player = TaroEntity.extend({
 				});
 
 				this.setChatMute(this._stats.banChat);
-
-				// get latency data every 1s
-				setInterval(() => {
-					taro.network.send('ping', {sentAt: Date.now()});
-				}, 1000);
-				
 			}
 
 			// apply skin to the selected unit if the unit already exists on the client side
@@ -799,6 +793,12 @@ var Player = TaroEntity.extend({
 				if (processedUpdates.length > 0) {
 					this.streamUpdateData(processedUpdates);
 				}
+			}
+
+			if (this._stats.clientId == taro.network.id() && !taro.client.isWaitingForPong) {
+				taro.client.myUnitPositionWhenPingSent = {x: taro.client.selectedUnit?._translate.x, y: taro.client.selectedUnit?._translate.y};
+				taro.network.send('ping', {sentAt: Date.now()});
+				taro.client.isWaitingForPong = true;
 			}
 		}
 	},
