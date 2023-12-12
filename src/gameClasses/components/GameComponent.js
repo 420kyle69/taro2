@@ -52,7 +52,7 @@ var GameComponent = TaroEntity.extend({
 		taro.timer.startGameClock();
 
 		taro._physicsTickRate = Math.max(20, Math.min(60, taro.game?.data?.defaultData?.frameRate || 20));
-		taro._gameLoopTickRate = Math.max(20, taro.game.data?.defaultData?.engineTickRate || 20);
+		taro._gameLoopTickRate = Math.max(20, taro.game?.data?.defaultData?.engineTickRate || 20);
 
 		console.log('taro.physics._physicsTickRate', taro._physicsTickRate);
 
