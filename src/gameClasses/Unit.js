@@ -974,6 +974,7 @@ var Unit = TaroEntityPhysics.extend({
 		//reset unit attributes
 		for (var attrId in this._stats.attributes) {
 			if (this._stats.attributes[attrId]) {
+				var attributeValue = data.attributes[attrId].value; // default attribute value from new unit type
 				this._stats.attributes[attrId].value = Math.max(data.attributes[attrId].min, Math.min(data.attributes[attrId].max, parseFloat(attributeValue)));
 			}
 		}
