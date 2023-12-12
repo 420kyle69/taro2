@@ -801,6 +801,9 @@ var DeveloperMode = /** @class */ (function () {
                         case 'update':
                             this.updateUnit(data);
                             break;
+                        case 'reset':
+                            this.resetUnit(data);
+                            break;
                         case 'delete':
                             //this.deleteUnit(data);
                             break;
