@@ -665,6 +665,13 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
+					case 'isUnitMoving':
+						var unit = self.getValue(text.unit, vars);
+
+						returnValue = unit.isMoving;
+
+						break;
+
 					case 'getUnitBody':
 						var unit = self.getValue(text.unit, vars);
 						if (unit && unit._category == 'unit') {
