@@ -984,7 +984,7 @@ var Item = TaroEntityPhysics.extend({
 	},
 
 	resetItemType: function () {
-		const data = taro.game.cloneAsset('itemTypes', this._stats.type);
+		const data = taro.game.cloneAsset('itemTypes', this._stats.itemTypeId);
 
 		//reset attributes
 		for (var attrId in this._stats.attributes) {
