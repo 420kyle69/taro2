@@ -1880,7 +1880,7 @@ var Unit = TaroEntityPhysics.extend({
 			this.playEffect('move');
 			this.isMoving = true;
 			var triggeredBy = {
-				unitId: taro.game
+				unitId: this.id()
 			};
 
 			this.script.trigger('unitStartsMoving', triggeredBy);
@@ -1892,7 +1892,7 @@ var Unit = TaroEntityPhysics.extend({
 			this.playEffect('idle');
 			this.isMoving = false;
 			var triggeredBy = {
-				unitId: taro.game
+				unitId: this.id()
 			};
 
 			this.script.trigger('unitStopsMoving', triggeredBy);
