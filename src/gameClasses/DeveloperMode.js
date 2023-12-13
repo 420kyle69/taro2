@@ -660,14 +660,6 @@ var DeveloperMode = /** @class */ (function () {
         }
         taro.$$('unit').forEach(function (unit) {
             if (unit._stats.type === data.typeId) {
-                //removing clearing all items from unit for now, later we will add a way to reset items
-                /*for (let i = 0; i < unit._stats.itemIds.length; i++) {
-                    var itemId = unit._stats.itemIds[i];
-                    var item = taro.$(itemId);
-                    if (item) {
-                        item.remove();
-                    }
-                }*/
                 unit.changeUnitType(data.typeId, {}, false);
                 unit.emit('update-texture', 'basic_texture_change');
             }
@@ -679,12 +671,9 @@ var DeveloperMode = /** @class */ (function () {
     DeveloperMode.prototype.resetUnit = function (data) {
         taro.$$('unit').forEach(function (unit) {
             if (unit._stats.type === data.typeId) {
-                unit.resetUnitType(data.typeId, {}, false);
+                unit.resetUnitType();
             }
         });
-        if (taro.isServer) {
-            taro.network.send('resetUnit', data);
-        }
     };
     DeveloperMode.prototype.deleteUnit = function (data) {
         taro.$$('unit').forEach(function (unit) {
@@ -744,6 +733,13 @@ var DeveloperMode = /** @class */ (function () {
             taro.network.send('updateItem', data);
         }
     };
+    DeveloperMode.prototype.resetItem = function (data) {
+        taro.$$('item').forEach(function (item) {
+            if (item._stats.itemTypeId === data.typeId) {
+                item.resetItemType();
+            }
+        });
+    };
     DeveloperMode.prototype.deleteItem = function (data) {
         taro.$$('item').forEach(function (item) {
             if (item._stats.type === data.typeId) {
@@ -778,6 +774,13 @@ var DeveloperMode = /** @class */ (function () {
         if (taro.isServer) {
             taro.network.send('updateProjectile', data);
         }
+    };
+    DeveloperMode.prototype.resetProjectile = function (data) {
+        taro.$$('projectile').forEach(function (projectile) {
+            if (projectile._stats.type === data.typeId) {
+                projectile.resetProjectileType();
+            }
+        });
     };
     DeveloperMode.prototype.deleteProjectile = function (data) {
         taro.$$('projectile').forEach(function (projectile) {
@@ -817,6 +820,9 @@ var DeveloperMode = /** @class */ (function () {
                         case 'update':
                             this.updateItem(data);
                             break;
+                        case 'reset':
+                            this.resetItem(data);
+                            break;
                         case 'delete':
                             //this.deleteItem(data);
                             break;
@@ -829,6 +835,9 @@ var DeveloperMode = /** @class */ (function () {
                             break;
                         case 'update':
                             this.updateProjectile(data);
+                            break;
+                        case 'reset':
+                            this.resetProjectile(data);
                             break;
                         case 'delete':
                             //this.deleteProjectile(data);
