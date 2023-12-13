@@ -218,7 +218,7 @@ var Projectile = TaroEntityPhysics.extend({
 	},
 
 	resetProjectileType: function () {
-		const data = taro.game.cloneAsset('projectileTypes', self._stats.type);
+		const data = taro.game.cloneAsset('projectileTypes', this._stats.type);
 
 		//reset attributes
 		for (var attrId in this._stats.attributes) {
