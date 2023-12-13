@@ -1117,7 +1117,6 @@ var ActionComponent = TaroEntity.extend({
 							}
 						}
 						break;
-
 					case 'for':
 						var variables = taro.game.data.variables;
 						var variableName = action.variableName;
