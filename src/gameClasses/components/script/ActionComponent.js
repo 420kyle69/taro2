@@ -1192,6 +1192,7 @@ var ActionComponent = TaroEntity.extend({
 						}
 
 						break;
+						
 					case 'break':
 						if (!vars) vars = {};
 						vars.break = true;
