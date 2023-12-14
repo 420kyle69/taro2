@@ -453,17 +453,6 @@ var ActionComponent = TaroEntity.extend({
 
 						break;
 
-					case 'resetPlayerName':
-
-						var player = self._script.variable.getValue(action.player, vars);
-						var username = player._stats.username
-
-						if (player && player._category == 'player') {
-							player.streamUpdateData([{ name: username }]);
-						}
-
-						break;
-
 					case 'assignPlayerType':
 						var playerTypeId = self._script.variable.getValue(action.playerType, vars);
 
