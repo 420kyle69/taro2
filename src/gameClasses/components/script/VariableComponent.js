@@ -2282,9 +2282,7 @@ var VariableComponent = TaroEntity.extend({
 			'objectToString': function (text, vars) {
 				var object = self.getValue(text.object, vars);
 				var str = typeof object === 'string' ? object : JSON.stringify(object) // remove opening & ending quotes
-				if (object) {
-					return str;
-				}
+				return str;
 			},
 
 			'lastReceivedPostResponse': function (text, vars) {
