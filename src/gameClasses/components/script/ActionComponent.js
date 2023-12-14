@@ -1161,6 +1161,37 @@ var ActionComponent = TaroEntity.extend({
 
 						break;
 
+					case 'forIn':
+						var variables = taro.game.data.variables;
+						var variableNameMain = action.variableNameMain;
+						var variableNameSource = action.variableNameSource;
+
+						if (variables[variableNameMain] !== undefined || variables[variableNameSource] !== undefined) {
+							if (!( (variables[variableNameMain].dataType === 'number' && variables[variableNameSource].dataType === 'string') ||
+								(variables[variableNameMain].dataType === 'string' && variables[variableNameSource].dataType === 'object') )) {
+								throw new Error('`for in` action only supports number-string and string-object');
+							}
+						
+							var variableValue = (!variables[variableNameSource].value) ? variables[variableNameSource].default : variables[variableNameSource].value;
+							if(variables[variableNameSource].dataType === 'string') {
+								if(variableValue.at(0) === '[' && variableValue.at(-1) === ']') {
+									variableValue = JSON.parse(variableValue);
+								}
+							}
+
+							for (variables[variableNameMain].value in variableValue) {
+								var brk = self.run(action.actions, vars, actionPath);
+
+								if (brk == 'break' || vars.break) {
+									vars.break = false;
+									break;
+								} else if (brk == 'return') {
+									throw new Error('return without executing script');
+								}
+							}
+						}
+
+						break;
 					case 'break':
 						if (!vars) vars = {};
 						vars.break = true;
