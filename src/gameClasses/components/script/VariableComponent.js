@@ -665,6 +665,13 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
+					case 'isUnitMoving':
+						var unit = self.getValue(text.unit, vars);
+
+						returnValue = unit.isMoving;
+
+						break;
+
 					case 'getUnitBody':
 						var unit = self.getValue(text.unit, vars);
 						if (unit && unit._category == 'unit') {
@@ -1230,6 +1237,13 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
+					case 'mathCeiling':
+						var value = self.getValue(text.value, vars);
+						if (!isNaN(value)) {
+							returnValue = Math.ceil(value);
+						}
+						break;
+
 					case 'log10':
 						var value = self.getValue(text.value, vars);
 
@@ -1724,6 +1738,13 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
+					case 'getHighScoreOfPlayer':
+						var player = self.getValue(text.player, vars);
+
+						returnValue = player._stats.highscore;
+
+						break;	
+
 					case 'getUnitId':
 						var unit = self.getValue(text.unit, vars);
 
@@ -1871,6 +1892,15 @@ var VariableComponent = TaroEntity.extend({
 						}
 
 						break;
+
+					case 'toUpperCase':
+						var string = self.getValue(text.string, vars);
+
+						if (string && !isNaN(string.length)) {
+							returnValue = string.toUpperCase();
+						}
+
+						break;	
 
 					case 'substringOf':
 						var string = self.getValue(text.string, vars);
