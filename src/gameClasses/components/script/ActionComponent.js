@@ -1625,8 +1625,16 @@ var ActionComponent = TaroEntity.extend({
 							'boolean'
 						]);
 						var dialogueId = self._script.variable.getValue(action.dialogue, vars);
-
+						
 						if (dialogueId != undefined && player && player._category === 'player' && player._stats.clientId) {
+							// filter out primitive variables using typeof
+							primitiveVariables = Object.entries(primitiveVariables).reduce((acc, [key, value]) => {
+								if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+									acc[key] = value;
+								}
+								return acc;
+							}, {});
+
 							player._stats.lastOpenedDialogue = action.dialogue;
 							taro.network.send('openDialogue', {
 								dialogueId: dialogueId,
