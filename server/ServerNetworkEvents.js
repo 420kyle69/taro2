@@ -499,7 +499,7 @@ var ServerNetworkEvents = {
 			if (unit) {
 				unit.buyItem(id, token);
 				taro.script.trigger('playerPurchasesItem', {
-					itemId: id
+					itemId: id,
 					playerId: player.id()
 				})
 			}
