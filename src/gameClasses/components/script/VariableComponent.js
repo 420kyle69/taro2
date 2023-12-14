@@ -1908,15 +1908,11 @@ var VariableComponent = TaroEntity.extend({
 						var toIndex = self.getValue(text.toIndex, vars);
 
 						if (string && string.length) {
-							// index for game devs is from 1 to n as they might not be familiar with
-							// string starting from index 0
-							fromIndex -= 1;
-
-							fromIndex = Math.max(Math.min(fromIndex, string.length), 0);
+							fromIndex = Math.max(Math.min(fromIndex, string.length - 1), 0);
 							toIndex = Math.max(Math.min(toIndex, string.length), 0);
 
 							// This looks like trying to force a start index from [0, +inf], but actually puts it in [-1, +inf]. Why is it subtracted two times? (once before, now the second time here)
-							returnValue = string.substring(fromIndex - 1, toIndex);
+							returnValue = string.substring(fromIndex, toIndex);
 						} else {
 							returnValue = '';
 						}
@@ -2285,7 +2281,7 @@ var VariableComponent = TaroEntity.extend({
 			
 			'objectToString': function (text, vars) {
 				var object = self.getValue(text.object, vars);
-				var str = JSON.stringify(object) // remove opening & ending quotes
+				var str = typeof object === 'string' ? object : JSON.stringify(object) // remove opening & ending quotes
 				if (object) {
 					return str;
 				}

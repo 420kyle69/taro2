@@ -675,7 +675,7 @@ var ActionComponent = TaroEntity.extend({
 							player.realtimeCSS += '\n' + text;
 						}
 						break;
-					
+
 					case 'updateRealtimeCSSForPlayer':
 						var player = self._script.variable.getValue(action.player, vars);
 						var text = self._script.variable.getValue(action.value, vars);
@@ -1167,14 +1167,14 @@ var ActionComponent = TaroEntity.extend({
 						var variableNameSource = action.variableNameSource;
 
 						if (variables[variableNameMain] !== undefined || variables[variableNameSource] !== undefined) {
-							if (!( (variables[variableNameMain].dataType === 'number' && variables[variableNameSource].dataType === 'string') ||
-								(variables[variableNameMain].dataType === 'string' && variables[variableNameSource].dataType === 'object') )) {
+							if (!((variables[variableNameMain].dataType === 'number' && variables[variableNameSource].dataType === 'string') ||
+								(variables[variableNameMain].dataType === 'string' && variables[variableNameSource].dataType === 'object'))) {
 								throw new Error('`for in` action only supports number-string and string-object');
 							}
-						
-							var variableValue = (!variables[variableNameSource].value) ? variables[variableNameSource].default : variables[variableNameSource].value;
-							if(variables[variableNameSource].dataType === 'string') {
-								if(variableValue.at(0) === '[' && variableValue.at(-1) === ']') {
+
+							var variableValue = variables[variableNameSource].value ? variables[variableNameSource].value : variables[variableNameSource].default;
+							if (variables[variableNameSource].dataType === 'string') {
+								if (variableValue.at(0) === '[' && variableValue.at(-1) === ']') {
 									variableValue = JSON.parse(variableValue);
 								}
 							}
@@ -1192,7 +1192,7 @@ var ActionComponent = TaroEntity.extend({
 						}
 
 						break;
-						
+
 					case 'break':
 						if (!vars) vars = {};
 						vars.break = true;
@@ -1664,7 +1664,7 @@ var ActionComponent = TaroEntity.extend({
 							'boolean'
 						]);
 						var dialogueId = self._script.variable.getValue(action.dialogue, vars);
-						
+
 						if (dialogueId != undefined && player && player._category === 'player' && player._stats.clientId) {
 							// filter out primitive variables using typeof
 							primitiveVariables = Object.entries(primitiveVariables).reduce((acc, [key, value]) => {
