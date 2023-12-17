@@ -3145,7 +3145,7 @@ var TaroEntity = TaroObject.extend({
         this.teleportCamera = teleportCamera;
 		this.teleportDestination = [x, y, rotate]
 		this.reconRemaining = undefined; // when a unit is teleported, end reconciliation
-		this.setLinearVelocityLT(0, 0);
+		// this.setLinearVelocityLT(0, 0);
 
 		this.translateTo(x, y);
 		if (rotate != undefined) {
