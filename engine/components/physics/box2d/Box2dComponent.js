@@ -661,18 +661,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 								entity.teleportDestination = undefined;
 							} else {
 								if (taro.isServer) {
-									// /* server-side reconciliation */
-									// // hard-correct client entity's position (teleport) if the distance between server & client is greater than 100px
-									// // continuously for 10 frames in a row
-									// if (taro.game.cspEnabled && !entity._stats.aiEnabled && entity.clientStreamedPosition) {
-									// 	var targetX = parseInt(entity.clientStreamedPosition[0]);
-									// 	var targetY = parseInt(entity.clientStreamedPosition[1]);
-									// 	var xDiff = targetX - x;
-									// 	var yDiff = targetY - y;
-									// 	x += xDiff / 2;
-									// 	y += yDiff / 2;
-									// }
-
 									entity.translateTo(x, y, 0);
 									entity.rotateTo(0, 0, angle);
 									
@@ -687,10 +675,16 @@ var PhysicsComponent = TaroEventingClass.extend({
 									) {
 										// if (entity._category == 'projectile') console.log(x, y, angle)
 
-										if (entity == taro.client.selectedUnit && taro.client.reconcileDiff && !isNaN(taro.client.reconcileDiff.x) && !isNaN(taro.client.reconcileDiff.x)) {
+										// CSP reconciliation
+										if (entity == taro.client.selectedUnit && (
+												taro.client.reconcileDiff && 
+												!isNaN(taro.client.reconcileDiff.x) && 
+												!isNaN(taro.client.reconcileDiff.y)
+											)
+										) {
 											// console.log(taro._currentTime, x, tickDelta, timeRemaining)
-											taro.client.reconcileDiff.x = taro.client.reconcileDiff.x/(taro._physicsTickRate/2);
-											taro.client.reconcileDiff.y = taro.client.reconcileDiff.y/(taro._physicsTickRate/2);
+											taro.client.reconcileDiff.x = taro.client.reconcileDiff.x/(taro._physicsTickRate/8);
+											taro.client.reconcileDiff.y = taro.client.reconcileDiff.y/(taro._physicsTickRate/8);
 											x += taro.client.reconcileDiff.x
 											y += taro.client.reconcileDiff.y
 										} 

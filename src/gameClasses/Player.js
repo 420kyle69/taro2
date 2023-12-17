@@ -795,10 +795,11 @@ var Player = TaroEntity.extend({
 				}
 			}
 
-			if (this._stats.clientId == taro.network.id() && !taro.client.isWaitingForPong) {
+			if (this._stats.clientId == taro.network.id() && taro.now > taro.client.sendNextPingAt) {
 				taro.client.myUnitPositionWhenPingSent = {x: taro.client.selectedUnit?._translate.x, y: taro.client.selectedUnit?._translate.y};
 				taro.network.send('ping', {sentAt: Date.now()});
-				taro.client.isWaitingForPong = true;
+				// allow up to 1s before sending another ping. chances are, we'll hear back sooner from the server
+				taro.client.sendNextPingAt = taro.now + 1000; 
 			}
 		}
 	},

@@ -264,8 +264,10 @@ var ClientNetworkEvents = {
 		}
 	},
 
+	// when client receives a ping response back from the server
 	_onPing: function(data) {
-		const latency = Date.now() - data.sentAt;
+		const now = Date.now();
+		const latency = now - data.sentAt;
 
 		// start reconciliation based on discrepancy between 
 		// where my unit when ping was sent and where unit is when ping is received
@@ -278,6 +280,7 @@ var ClientNetworkEvents = {
 		}
 
 		taro.client.isWaitingForPong = false;
+		taro.client.sendNextPingAt = taro.now + 200 // allow some time to reconcile before sending another ping
 
 		if (!taro.pingElement) {
 			taro.pingElement = document.getElementById('updateping');
