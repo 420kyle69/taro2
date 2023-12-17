@@ -271,9 +271,12 @@ var ClientNetworkEvents = {
 
 		// start reconciliation based on discrepancy between 
 		// where my unit when ping was sent and where unit is when ping is received
-		if (taro.client.selectedUnit && taro.client.myUnitPositionWhenPingSent && taro.client.myUnitStreamedPosition) {
+		if (taro.client.selectedUnit && 
+			taro.client.myUnitPositionWhenPingSent && 
+			taro.client.myUnitStreamedPosition && !taro.client.selectedUnit.isTeleporting
+		) {
 			// console.log(latency, taro.client.myUnitPositionWhenPingSent.x, taro.client.myUnitStreamedPosition.x, taro.client.myUnitPositionWhenPingSent.x - taro.client.myUnitStreamedPosition.x);
-			taro.client.reconcileDiff = {
+			taro.client.selectedUnit.reconRemaining = {
 				x: taro.client.myUnitStreamedPosition.x - taro.client.myUnitPositionWhenPingSent.x,
 				y: taro.client.myUnitStreamedPosition.y - taro.client.myUnitPositionWhenPingSent.y
 			}

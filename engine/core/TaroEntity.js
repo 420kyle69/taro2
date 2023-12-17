@@ -71,8 +71,7 @@ var TaroEntity = TaroObject.extend({
 		this._isTransforming = true;
 		this.lastTransformedAt = 0;
 		this.latestTimeStamp = 0;
-		this.lastTeleportedAt = 0;
-		this.teleported = false;
+		this.isTeleporting = false;
         this.teleportCamera = false;
 		this.teleportDestination = this.nextKeyFrame[1];
 
@@ -3142,9 +3141,11 @@ var TaroEntity = TaroObject.extend({
 
 	teleportTo: function (x, y, rotate, teleportCamera) {
 		// console.log("teleportTo", x, y, rotate, this._stats.type)
-		this.teleported = true;
+		this.isTeleporting = true;
         this.teleportCamera = teleportCamera;
 		this.teleportDestination = [x, y, rotate]
+		this.reconRemaining = undefined; // when a unit is teleported, end reconciliation
+		this.setLinearVelocityLT(0, 0);
 
 		this.translateTo(x, y);
 		if (rotate != undefined) {
@@ -3164,9 +3165,6 @@ var TaroEntity = TaroObject.extend({
                 taro.client.emit('instant-move-camera', [x, y]);
             }
 		}
-
-		this.discrepancyCount = 0;
-		this.lastTeleportedAt = taro._currentTime;
 
 		if (this._category == 'unit') {
 			// teleport unit's attached items as well. otherwise, the attached bodies (using joint) can cause a drag and
@@ -4434,10 +4432,10 @@ var TaroEntity = TaroObject.extend({
 						buffArr.push(Number(y));
 						buffArr.push(Number(angle));
 
-						if (this.teleported) {
-							buffArr.push(Number(this.teleported));
+						if (this.isTeleporting) {
+							buffArr.push(Number(this.isTeleporting));
                             buffArr.push(Number(this.teleportCamera));
-							this.teleported = false;
+							this.isTeleporting = false;
                             this.teleportCamera = false;
 						}
 
@@ -5234,7 +5232,7 @@ var TaroEntity = TaroObject.extend({
 		this._translate.y = y;
 		this._rotate.z = rotate;
 
-		this.teleported = false;
+		this.isTeleporting = false;
 		this.lastTransformedAt = taro._currentTime;
 	},
 
