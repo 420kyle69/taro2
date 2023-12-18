@@ -397,7 +397,7 @@ var ControlComponent = TaroEntity.extend({
 				}
 
 				// send unit position to server (client-authoritative movement)
-				// if (taro.physics && taro.game.cspEnabled && !unit._stats.aiEnabled && !unit.teleported) {
+				// if (taro.physics && taro.game.cspEnabled && !unit._stats.aiEnabled && !unit.isTeleporting) {
 				// 	var x = unit._translate.x.toFixed(0);
 				// 	var y = unit._translate.y.toFixed(0);
 				// 	if (self.sendPlayerInput && (self.lastPositionSent == undefined || self.lastPositionSent[0] != x || self.lastPositionSent[1] != y)) {

@@ -1026,6 +1026,16 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
+					case 'getPlayerUsername':
+						var player = self.getValue(text.player, vars);
+						var username = player._stats.username;
+
+						if (player) {
+							returnValue = username;
+						}
+
+						break;
+
 					case 'getNumberOfItemsPresent':
 						returnValue = taro.$$('item').length;
 
@@ -1488,6 +1498,13 @@ var VariableComponent = TaroEntity.extend({
 							returnValue = Math.atan2(positionB.y - positionA.y, positionB.x - positionA.x);
 							returnValue += Math.radians(90);
 						}
+
+						break;
+
+					case 'getPlayTimeOfPlayer':
+						var player = self.getValue(text.player, vars);
+
+						returnValue = player && (player._stats.receivedJoinGame - taro.now);
 
 						break;
 

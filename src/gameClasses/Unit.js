@@ -332,7 +332,7 @@ var Unit = TaroEntityPhysics.extend({
 				}
 
 				if (taro.scoreboard && newOwnerPlayer._stats.clientId == taro.network.id()) {
-					taro.scoreboard.update();
+					taro.scoreboard.queueUpdate();
 				}
 
 				// execute only for myplayer
@@ -1976,7 +1976,7 @@ var Unit = TaroEntityPhysics.extend({
 
 			// translate unit
 			var speed = (this._stats.attributes && this._stats.attributes.speed && this._stats.attributes.speed.value) || 0;
-			var vector = {x: 0, y: 0};
+			self.vector = {x: 0, y: 0};
 
 			// update rotation on server
 			var ownerPlayer = self.getOwner();
@@ -1996,6 +1996,19 @@ var Unit = TaroEntityPhysics.extend({
 					) {
 						self.rotateTo(0, 0, self.angleToTarget);
 					}
+				} else if (taro.isClient) {
+
+					// send ping for CSP reconciliation purpose
+					if (taro.now > taro.client.sendNextPingAt) {
+						taro.client.myUnitPositionWhenPingSent = {
+							x: taro.client.selectedUnit?.nextKeyFrame[1][0], 
+							y: taro.client.selectedUnit?.nextKeyFrame[1][1]
+						};
+
+						taro.network.send('ping', {sentAt: Date.now()});
+						taro.client.sendNextPingAt = taro.now + 1000; // allow up to 1s before sending another ping. chances are, we'll hear back sooner from the server
+						// this.reconRemaining = undefined; // stop reconciling
+					}
 				}
 
 				if (
@@ -2009,7 +2022,7 @@ var Unit = TaroEntityPhysics.extend({
 					)
 				) {
 					if (self.angleToTarget != undefined && !isNaN(self.angleToTarget)) {
-						vector = {
+						self.vector = {
 							x: (speed * Math.sin(self.angleToTarget)),
 							y: -(speed * Math.cos(self.angleToTarget))
 						};
@@ -2024,7 +2037,7 @@ var Unit = TaroEntityPhysics.extend({
 						speed = speed / 1.41421356237;
 					}
 
-					vector = {
+					self.vector = {
 						x: self.direction.x * speed,
 						y: self.direction.y * speed
 					};
@@ -2042,27 +2055,6 @@ var Unit = TaroEntityPhysics.extend({
 						this.startMoving();
 					} else if (this.isMoving && self.direction.x === 0 && self.direction.y ===0) {
 						this.stopMoving();
-					}
-				}
-
-				taro.unitBehaviourCount++; // for debugging
-				// apply movement if it's either human-controlled unit, or ai unit that's currently moving
-				if (self.body && vector && (vector.x != 0 || vector.y != 0)) {
-
-					if (self._stats.controls) {
-						switch (self._stats.controls.movementMethod) { // velocity-based movement
-							case 'velocity':
-								self.setLinearVelocity(vector.x, vector.y);
-								break;
-							case 'force':
-								self.applyForce(vector.x, vector.y);
-								this.lastBehaviourAt = Date.now()
-								
-								break;
-							case 'impulse':
-								self.applyImpulse(vector.x, vector.y);
-								break;
-						}
 					}
 				}
 			}

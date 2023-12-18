@@ -264,20 +264,26 @@ var ClientNetworkEvents = {
 		}
 	},
 
+	// when client receives a ping response back from the server
 	_onPing: function(data) {
-		const latency = Date.now() - data.sentAt;
+		const now = Date.now();
+		const latency = now - data.sentAt;
 
 		// start reconciliation based on discrepancy between 
 		// where my unit when ping was sent and where unit is when ping is received
-		if (taro.client.selectedUnit && taro.client.myUnitPositionWhenPingSent && taro.client.myUnitStreamedPosition) {
+		if (taro.client.selectedUnit && 
+			taro.client.myUnitPositionWhenPingSent && 
+			taro.client.myUnitStreamedPosition && !taro.client.selectedUnit.isTeleporting
+		) {
 			// console.log(latency, taro.client.myUnitPositionWhenPingSent.x, taro.client.myUnitStreamedPosition.x, taro.client.myUnitPositionWhenPingSent.x - taro.client.myUnitStreamedPosition.x);
-			taro.client.reconcileDiff = {
+			taro.client.selectedUnit.reconRemaining = {
 				x: taro.client.myUnitStreamedPosition.x - taro.client.myUnitPositionWhenPingSent.x,
 				y: taro.client.myUnitStreamedPosition.y - taro.client.myUnitPositionWhenPingSent.y
 			}
 		}
 
 		taro.client.isWaitingForPong = false;
+		taro.client.sendNextPingAt = taro.now + 200 // allow some time to reconcile before sending another ping
 
 		if (!taro.pingElement) {
 			taro.pingElement = document.getElementById('updateping');

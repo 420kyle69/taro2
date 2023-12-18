@@ -685,7 +685,6 @@ var Server = TaroClass.extend({
 										}
 									}
 									taro.physicsTickCount = 0;
-									taro.unitBehaviourCount = 0;
 								}, 1000);
 
 								setInterval(function () {

@@ -269,6 +269,8 @@ var AbilityComponent = TaroEntity.extend({
 
 		this.payCost(ability, player);
 
+		taro.game.lastCastingUnitId = this._entity.id();
+		
 		this._entity.script.runScript(
 			ability.eventScripts.startCasting,
 			{ triggeredBy: { unitId: this._entity.id()} }
@@ -290,6 +292,7 @@ var AbilityComponent = TaroEntity.extend({
 		if (taro.isClient && this._entity._stats.clientId === taro.network.id()) {
 			taro.client.emit('start-casting', abilityId);
 		}
+		
 	},
 
 	stopCasting: function (abilityId) {

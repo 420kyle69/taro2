@@ -1390,6 +1390,8 @@ var TaroEngine = TaroEntity.extend({
 	_secondTick: function () {
 		var self = taro;
 
+		taro.queueTrigger('secondTick');
+		
 		// Store frames per second
 		self._renderFPS = Math.min(240, Math.max(5, self._renderFrames));
 		self._physicsFPS = self._physicsFrames;
@@ -1397,8 +1399,11 @@ var TaroEngine = TaroEntity.extend({
 		// Store draws per second
 		self._dps = self._dpf * self._renderFPS;
 
-
 		if (taro.isClient) {
+			if (taro.scoreboard?.isUpdateQueued) {
+				taro.scoreboard.update();
+			}
+			
 			if (!self.fpsStatsElement) {
 				self.fpsStatsElement = document.getElementById('updatefps');
 			}
@@ -1432,21 +1437,6 @@ var TaroEngine = TaroEntity.extend({
 		}
 
 		return this._timeScale;
-	},
-
-	/**
-	 * Increments the engine's interal time by the passed number of milliseconds.
-	 * @param {Number} val The number of milliseconds to increment time by.
-	 * @param {Number=} lastVal The last internal time value, used to calculate
-	 * delta internally in the method.
-	 * @returns {Number}
-	 */
-	incrementTime: function (val, lastVal) {
-		if (!this._pause) {
-			if (!lastVal) { lastVal = val; }
-			this._currentTime += ((val - lastVal) * this._timeScale);
-		}
-		return this._currentTime;
 	},
 
 	checkAndGetNumber: function (num, defaultReturnValue = '') {
@@ -1593,13 +1583,12 @@ var TaroEngine = TaroEntity.extend({
 		var unbornIndex;
 		var unbornEntity;
 
-		self.incrementTime(timeStamp, self._timeScaleLastTimestamp);
+		self._currentTime = Date.now();
 		self._timeScaleLastTimestamp = timeStamp;
 		timeStamp = Math.floor(self._currentTime);
 
 		if (timeStamp - self.lastSecond >= 1000) {
 			self._secondTick();
-			taro.queueTrigger('secondTick');
 			self.lastSecond = timeStamp;
 		}
 
@@ -1644,7 +1633,6 @@ var TaroEngine = TaroEntity.extend({
 				taro._lastGameLoopTickAt = taro.now;
 				taro._gameLoopTickRemainder = Math.min(timeElapsed - ((1000 / taro._gameLoopTickRate) - taro._gameLoopTickRemainder), (1000 / taro._gameLoopTickRate));
 				taro.gameLoopTickHasExecuted = true;
-
 				taro.queueTrigger('frameTick');
 			}
 
@@ -1666,25 +1654,30 @@ var TaroEngine = TaroEntity.extend({
 						taro.profiler.logTimeElapsed("physicsStep", startTime);
 					}
 				}
-			}
 
-			taro.tickCount = 0;
-			taro.updateTransform = 0;
-			taro.inViewCount = 0;
-			taro.totalChildren = 0;
-			taro.totalOrphans = 0;
+				taro.tickCount = 0;
+				taro.updateTransform = 0;
+				taro.inViewCount = 0;
+				taro.totalChildren = 0;
+				taro.totalOrphans = 0;
 
-			// Update the scenegraph - this is where entity _behaviour() is called
-			if (self._enableUpdates && taro.gameLoopTickHasExecuted) {
-				// taro.updateCount = {}
-				// taro.tickCount = {}
+				// Update the scenegraph - this is where entity _behaviour() is called
+				if (self._enableUpdates) {
+					// taro.updateCount = {}
+					// taro.tickCount = {}
 
-				if (taroConfig.debug._timing) {
-					updateStart = Date.now();
-					self.updateSceneGraph(ctx);
-					taro._updateTime = Date.now() - updateStart;
-				} else {
-					self.updateSceneGraph(ctx);
+					if (taroConfig.debug._timing) {
+						updateStart = Date.now();
+						self.updateSceneGraph(ctx);
+						taro._updateTime = Date.now() - updateStart;
+					} else {
+						self.updateSceneGraph(ctx);
+					}
+				}
+
+				if (taro.isServer) {
+					taro.network.stream._sendQueue(timeStamp);
+					taro.network.stream._sendQueuedStreamData();
 				}
 			}
 
@@ -1811,9 +1804,7 @@ var TaroEngine = TaroEntity.extend({
 				var startTime = performance.now();
 			}
 
-			taro.network.stream._sendQueue(timeStamp);
-			taro.network.stream._sendQueuedStreamData();
-
+			
 			// log how long it took to update physics world step
 			if (taro.profiler.isEnabled) {
 				taro.profiler.logTimeElapsed("networkStep", startTime);

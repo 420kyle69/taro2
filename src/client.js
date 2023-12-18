@@ -100,6 +100,7 @@ const Client = TaroEventingClass.extend({
 		this.scaleMode = 0; //old comment => 'none'
 		this.renderBuffer = 100;
 		this.isActiveTab = true;
+		this.sendNextPingAt = 0;
 
 		this.isZooming = false;
 
