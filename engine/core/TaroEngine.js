@@ -1400,9 +1400,8 @@ var TaroEngine = TaroEntity.extend({
 		self._dps = self._dpf * self._renderFPS;
 
 		if (taro.isClient) {
-			if (taro.client.isScoreboardUpdateQueued) {
+			if (taro.scoreboard?.isUpdateQueued) {
 				taro.scoreboard.update();
-				taro.client.isScoreboardUpdateQueued = false;
 			}
 			
 			if (!self.fpsStatsElement) {

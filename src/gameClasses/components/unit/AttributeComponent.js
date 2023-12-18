@@ -326,6 +326,12 @@ var AttributeComponent = TaroEntity.extend({
 					taro.queueTrigger(`${this._entity._category}AttributeBecomesFull`, triggeredBy);
 				}
 				if (taro.isClient) {
+
+					// scoreboard attribute has been changed. queue update.
+					if (attributeTypeId == taro.game.data.settings.scoreAttributeId) {
+						taro.scoreboard.queueUpdate();
+					}
+
 					if (taro.client.myPlayer) {
 						var unit = null;
 

@@ -332,7 +332,7 @@ var Unit = TaroEntityPhysics.extend({
 				}
 
 				if (taro.scoreboard && newOwnerPlayer._stats.clientId == taro.network.id()) {
-					taro.client.isScoreboardUpdateQueued = true;
+					taro.scoreboard.queueUpdate();
 				}
 
 				// execute only for myplayer

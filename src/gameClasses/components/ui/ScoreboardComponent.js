@@ -5,6 +5,7 @@ var ScoreboardComponent = TaroEntity.extend({
 	init: function () {
 		var self = this;
 		self.scoreAttributeId = taro.game.data.settings.scoreAttributeId;
+		self.isUpdateQueued = false;
 		self._hidden = false;
 
 		self.setUI();
@@ -106,6 +107,10 @@ var ScoreboardComponent = TaroEntity.extend({
 		// 		}
 		// 	});
 		// });
+	},
+
+	queueUpdate: function() {
+		this.isUpdateQueued = true;
 	},
 
 	convertNumbersToKMB: function (labelValue) {
@@ -236,6 +241,8 @@ var ScoreboardComponent = TaroEntity.extend({
 				}
 			}
 		}
+
+		this.isUpdateQueued = false;
 	},
 
 	hideScores: function () {
