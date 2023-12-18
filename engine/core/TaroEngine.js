@@ -1439,21 +1439,6 @@ var TaroEngine = TaroEntity.extend({
 		return this._timeScale;
 	},
 
-	/**
-	 * Increments the engine's interal time by the passed number of milliseconds.
-	 * @param {Number} val The number of milliseconds to increment time by.
-	 * @param {Number=} lastVal The last internal time value, used to calculate
-	 * delta internally in the method.
-	 * @returns {Number}
-	 */
-	incrementTime: function (val, lastVal) {
-		if (!this._pause) {
-			if (!lastVal) { lastVal = val; }
-			this._currentTime += ((val - lastVal) * this._timeScale);
-		}
-		return this._currentTime;
-	},
-
 	checkAndGetNumber: function (num, defaultReturnValue = '') {
 		if(!isNaN(parseFloat(num)) && !isNaN(num - 0)) {
 			return num;
@@ -1598,7 +1583,7 @@ var TaroEngine = TaroEntity.extend({
 		var unbornIndex;
 		var unbornEntity;
 
-		self.incrementTime(timeStamp, self._timeScaleLastTimestamp);
+		self._currentTime = Date.now();
 		self._timeScaleLastTimestamp = timeStamp;
 		timeStamp = Math.floor(self._currentTime);
 
