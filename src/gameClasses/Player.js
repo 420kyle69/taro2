@@ -379,7 +379,7 @@ var Player = TaroEntity.extend({
 			}
 
 			if (taro.scoreboard) {
-				taro.scoreboard.update();
+				taro.client.isScoreboardUpdateQueued = true;
 			}
 		}
 	},

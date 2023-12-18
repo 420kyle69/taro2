@@ -1390,6 +1390,8 @@ var TaroEngine = TaroEntity.extend({
 	_secondTick: function () {
 		var self = taro;
 
+		taro.queueTrigger('secondTick');
+		
 		// Store frames per second
 		self._renderFPS = Math.min(240, Math.max(5, self._renderFrames));
 		self._physicsFPS = self._physicsFrames;
@@ -1397,8 +1399,12 @@ var TaroEngine = TaroEntity.extend({
 		// Store draws per second
 		self._dps = self._dpf * self._renderFPS;
 
-
 		if (taro.isClient) {
+			if (taro.client.isScoreboardUpdateQueued) {
+				taro.scoreboard.update();
+				taro.client.isScoreboardUpdateQueued = false;
+			}
+			
 			if (!self.fpsStatsElement) {
 				self.fpsStatsElement = document.getElementById('updatefps');
 			}
@@ -1599,7 +1605,6 @@ var TaroEngine = TaroEntity.extend({
 
 		if (timeStamp - self.lastSecond >= 1000) {
 			self._secondTick();
-			taro.queueTrigger('secondTick');
 			self.lastSecond = timeStamp;
 		}
 

@@ -128,7 +128,6 @@ var DevConsoleComponent = TaroEntity.extend({
 				statsPanels.tarott._tarottPanel.update(taro._tickTime, 100);
 
 				taro.physicsTickCount = 0;
-				taro.unitBehaviourCount = 0;
 			}, 1000);
 
 			graphsDiv.append(connectionDiv);

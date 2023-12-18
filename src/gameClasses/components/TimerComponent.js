@@ -81,20 +81,6 @@ var TimerComponent = TaroEntity.extend({
 
 			if (taro.isServer) {
 				self.lastTick = self.now;
-				// var shouldLog = taro.server.logTriggers && taro.server.logTriggers.timerLogs;
-
-				
-				// kill tier 1 servers that has been empty for over 15 minutes
-				// var playerCount = taro.$$('player').filter(function (player) { return player._stats.controlledBy == 'human' }).length;
-
-				// if (playerCount <= 0) {
-				// 	if (self.now - self.serverEmptySince > self.emptyTimeLimit) {
-				// 		taro.server.kill("game's been empty for too long (15 min)");
-				// 	}
-				// }
-				// else {
-				// 	self.serverEmptySince = self.now;
-				// }
 
 				var lifeSpan = self.getLifeSpan();
 
@@ -113,16 +99,6 @@ var TimerComponent = TaroEntity.extend({
 					taro.chat.sendToRoom('1', message, undefined, undefined);
 				}
 
-				// console.log(taro.script.variable.profiler)
-
-				// if (shouldLog) {
-				// 	console.log(self.now, self.startedAt, age, lifeSpan, age > lifeSpan);
-				// }
-				// if (age > lifeSpan) {
-				// 	taro.server.kill("server lifespan expired");
-				// }
-			} else if (taro.isClient) {
-				taro.scoreboard.update();
 			}
 		}, 1000);
 	}

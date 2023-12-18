@@ -488,7 +488,7 @@ var TaroNetIoClient = {
 									// console.log("wtf")
 									entity.teleportTo(x, y, rotate, isTeleportingCamera);
 								} else if (taro.physics && taro.game.cspEnabled && entity == taro.client.selectedUnit) {
-									if (taro.env === 'local') {
+									if (taro.env === 'local' || taro.debugCSP) {
 										// emit position for entity debug image
 										entity.emit('transform-debug', {
 											x: x,

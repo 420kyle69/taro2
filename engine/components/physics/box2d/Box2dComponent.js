@@ -591,6 +591,26 @@ var PhysicsComponent = TaroEventingClass.extend({
 
 						if (entity) {
 
+							// apply movement if it's either human-controlled unit, or ai unit that's currently moving
+							if (entity.body && entity.vector && (entity.vector.x != 0 || entity.vector.y != 0)) {
+
+								if (entity._stats.controls) {
+									switch (entity._stats.controls.movementMethod) { // velocity-based movement
+										case 'velocity':
+											entity.setLinearVelocity(entity.vector.x, entity.vector.y);
+											break;
+										case 'force':
+											entity.applyForce(entity.vector.x, entity.vector.y);
+											this.lastBehaviourAt = Date.now()
+											
+											break;
+										case 'impulse':
+											entity.applyImpulse(entity.vector.x, entity.vector.y);
+											break;
+									}
+								}
+							}
+
 							var mxfp = dists[taro.physics.engine].getmxfp(tempBod);
 							var x = mxfp.x * taro.physics._scaleRatio;
 							var y = mxfp.y * taro.physics._scaleRatio;
@@ -697,8 +717,8 @@ var PhysicsComponent = TaroEventingClass.extend({
 												// console.log("instant reconciliation to ", x, y, taro.client.myUnitPositionWhenPingSent)
 												// entity._translate = {x: x, y: y}
 											} else {
-												entity.reconRemaining.x = xRemaining/(taro._physicsTickRate/15);
-												entity.reconRemaining.y = yRemaining/(taro._physicsTickRate/15);
+												entity.reconRemaining.x = xRemaining/(taro._physicsTickRate/10);
+												entity.reconRemaining.y = yRemaining/(taro._physicsTickRate/10);
 
 												x += entity.reconRemaining.x
 												y += entity.reconRemaining.y
@@ -741,8 +761,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 
 				taro._physicsFrames++;
 
-				// Clear forces because we have ended our physics simulation frame
-				self._world.clearForces();
+
 
 				// Call the world step; frame-rate, velocity iterations, position iterations
 				self._world.step(timeElapsedSinceLastStep / 1000, 8, 3); 
@@ -750,8 +769,9 @@ var PhysicsComponent = TaroEventingClass.extend({
 					self.ctx.clear();
 					self._world.DebugDraw();
 				}
-
 				
+				// Clear forces because we have ended our physics simulation frame
+				self._world.clearForces();
 				
 				// get stats for dev panel
 				var timeEnd = Date.now();
