@@ -136,7 +136,7 @@ var ScoreboardComponent = TaroEntity.extend({
 		var leaderboardToggleElement = taro.client.getCachedElementById('leaderboard-toggle');
 
 
-		if (taro.isClient) {
+		if (taro.isClient && scoreboardElement && leaderboardToggleElement) {
 
 			scoreboardElement.innerHTML = ''
 
