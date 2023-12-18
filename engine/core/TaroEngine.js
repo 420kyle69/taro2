@@ -1649,7 +1649,6 @@ var TaroEngine = TaroEntity.extend({
 				taro._lastGameLoopTickAt = taro.now;
 				taro._gameLoopTickRemainder = Math.min(timeElapsed - ((1000 / taro._gameLoopTickRate) - taro._gameLoopTickRemainder), (1000 / taro._gameLoopTickRate));
 				taro.gameLoopTickHasExecuted = true;
-
 				taro.queueTrigger('frameTick');
 			}
 
@@ -1671,25 +1670,30 @@ var TaroEngine = TaroEntity.extend({
 						taro.profiler.logTimeElapsed("physicsStep", startTime);
 					}
 				}
-			}
 
-			taro.tickCount = 0;
-			taro.updateTransform = 0;
-			taro.inViewCount = 0;
-			taro.totalChildren = 0;
-			taro.totalOrphans = 0;
+				taro.tickCount = 0;
+				taro.updateTransform = 0;
+				taro.inViewCount = 0;
+				taro.totalChildren = 0;
+				taro.totalOrphans = 0;
 
-			// Update the scenegraph - this is where entity _behaviour() is called
-			if (self._enableUpdates && taro.gameLoopTickHasExecuted) {
-				// taro.updateCount = {}
-				// taro.tickCount = {}
+				// Update the scenegraph - this is where entity _behaviour() is called
+				if (self._enableUpdates) {
+					// taro.updateCount = {}
+					// taro.tickCount = {}
 
-				if (taroConfig.debug._timing) {
-					updateStart = Date.now();
-					self.updateSceneGraph(ctx);
-					taro._updateTime = Date.now() - updateStart;
-				} else {
-					self.updateSceneGraph(ctx);
+					if (taroConfig.debug._timing) {
+						updateStart = Date.now();
+						self.updateSceneGraph(ctx);
+						taro._updateTime = Date.now() - updateStart;
+					} else {
+						self.updateSceneGraph(ctx);
+					}
+				}
+
+				if (taro.isServer) {
+					taro.network.stream._sendQueue(timeStamp);
+					taro.network.stream._sendQueuedStreamData();
 				}
 			}
 
@@ -1816,9 +1820,7 @@ var TaroEngine = TaroEntity.extend({
 				var startTime = performance.now();
 			}
 
-			taro.network.stream._sendQueue(timeStamp);
-			taro.network.stream._sendQueuedStreamData();
-
+			
 			// log how long it took to update physics world step
 			if (taro.profiler.isEnabled) {
 				taro.profiler.logTimeElapsed("networkStep", startTime);
