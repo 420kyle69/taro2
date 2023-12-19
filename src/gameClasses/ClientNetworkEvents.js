@@ -280,10 +280,12 @@ var ClientNetworkEvents = {
 				x: taro.client.myUnitStreamedPosition.x - taro.client.myUnitPositionWhenPingSent.x,
 				y: taro.client.myUnitStreamedPosition.y - taro.client.myUnitPositionWhenPingSent.y
 			}
+
+			// console.log("reconRemaining", taro.client.selectedUnit.reconRemaining);
 		}
 
 		taro.client.isWaitingForPong = false;
-		taro.client.sendNextPingAt = taro.now + 200 // allow some time to reconcile before sending another ping
+		taro.client.sendNextPingAt = taro.now + 50 // allow some time to reconcile before sending another ping
 
 		if (!taro.pingElement) {
 			taro.pingElement = document.getElementById('updateping');

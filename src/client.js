@@ -98,7 +98,7 @@ const Client = TaroEventingClass.extend({
 		this.extrapolation = false; //old comment => 'disabling due to item bug'
 		this.resolution = 0; //old comment => 'autosize'
 		this.scaleMode = 0; //old comment => 'none'
-		this.renderBuffer = 100;
+		this.renderBuffer = 30;
 		this.isActiveTab = true;
 		this.sendNextPingAt = 0;
 

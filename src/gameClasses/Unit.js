@@ -2001,8 +2001,10 @@ var Unit = TaroEntityPhysics.extend({
 					// send ping for CSP reconciliation purpose
 					if (taro.now > taro.client.sendNextPingAt) {
 						taro.client.myUnitPositionWhenPingSent = {
-							x: taro.client.selectedUnit?.nextKeyFrame[1][0], 
-							y: taro.client.selectedUnit?.nextKeyFrame[1][1]
+							// x: taro.client.selectedUnit?.nextKeyFrame[1][0], 
+							// y: taro.client.selectedUnit?.nextKeyFrame[1][1]
+							x: taro.client.selectedUnit?._translate.x,
+							y: taro.client.selectedUnit?._translate.y
 						};
 
 						taro.network.send('ping', {sentAt: Date.now()});
