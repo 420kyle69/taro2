@@ -141,7 +141,7 @@ var ScoreboardComponent = TaroEntity.extend({
 		var leaderboardToggleElement = taro.client.getCachedElementById('leaderboard-toggle');
 
 
-		if (taro.isClient) {
+		if (taro.isClient && scoreboardElement && leaderboardToggleElement) {
 
 			scoreboardElement.innerHTML = ''
 
@@ -255,6 +255,7 @@ var ScoreboardComponent = TaroEntity.extend({
 
 	toggleScores: function () {
 		this._hidden = !this._hidden;
+		this.update();
 	}
 
 });
