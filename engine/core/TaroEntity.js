@@ -5167,12 +5167,12 @@ var TaroEntity = TaroObject.extend({
 		
 		var prevTransform = this.prevKeyFrame[1];
 		var nextTransform = this.nextKeyFrame[1];
-		
-		if (nextTransform) {
-			
-			var prevTime = this.prevKeyFrame[0];
-			var nextTime = this.nextKeyFrame[0];
 
+		var prevTime = this.prevKeyFrame[0];
+		var nextTime = this.nextKeyFrame[0];
+
+		if (prevTime < nextTime && nextTransform) {
+		
 			x = this.interpolateValue(prevTransform[0], nextTransform[0], prevTime, taro._currentTime, nextTime)
 			y = this.interpolateValue(prevTransform[1], nextTransform[1], prevTime, taro._currentTime, nextTime)
 
