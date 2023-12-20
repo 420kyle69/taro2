@@ -1,5 +1,5 @@
-class AbilityBar extends Phaser.GameObjects.Container{
-    buttons: Record<string, AbilityButton> = {};
+class PhaserButtonBar extends Phaser.GameObjects.Container{
+    buttons: Record<string, PhaserButton> = {};
 
     buttonSize = 45;
     buttonInterval = 4;
@@ -21,10 +21,11 @@ class AbilityBar extends Phaser.GameObjects.Container{
 	}
 
     addButton(abilityId: string, ability: UnitAbility, key: string) {
-        const button = new AbilityButton(this.scene, ability, abilityId, key, 'description', ability.iconUrl, Object.values(this.buttons).length * (this.buttonSize + this.buttonInterval), 0, this.buttonSize, this.buttonRadius);
-        this.buttons[abilityId] = button;
+        const button = new PhaserButton(this.scene, ability, abilityId, key, 'description', ability?.iconUrl, Object.values(this.buttons).length * (this.buttonSize + this.buttonInterval), 0, this.buttonSize, this.buttonRadius);
+        this.buttons[key] = button;
         this.add(button);
         this.updatePosition();
+		return button;
     }
 
     updatePosition() {

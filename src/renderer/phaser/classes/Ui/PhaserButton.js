@@ -13,9 +13,9 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var AbilityButton = /** @class */ (function (_super) {
-    __extends(AbilityButton, _super);
-    function AbilityButton(scene, ability, id, key, tooltipText, texture, x, y, size, radius) {
+var PhaserButton = /** @class */ (function (_super) {
+    __extends(PhaserButton, _super);
+    function PhaserButton(scene, ability, id, key, tooltipText, texture, x, y, size, radius) {
         if (key === void 0) { key = ''; }
         var _this = _super.call(this, scene) || this;
         _this.ability = ability;
@@ -23,7 +23,7 @@ var AbilityButton = /** @class */ (function (_super) {
         _this.key = key;
         _this.size = size;
         _this.radius = radius;
-        _this.name = ability.name;
+        //this.name = key;
         var backgroundColor = _this.backgroundColor = 0x000000;
         if (taro.isMobile)
             backgroundColor = _this.backgroundColor = 0x333333;
@@ -55,7 +55,7 @@ var AbilityButton = /** @class */ (function (_super) {
             _this.add(label);
         }
         // cooldown label
-        if (ability.cooldown > 0) {
+        if (ability && ability.cooldown > 0) {
             var cooldownLabel = _this.cooldownLabel = scene.add.bitmapText(0, 0, BitmapFontManager.font(scene, 'Verdana', false, true, '#FFFF00'), '', 24);
             cooldownLabel.setOrigin(0.5);
             cooldownLabel.letterSpacing = 1.3;
@@ -134,7 +134,7 @@ var AbilityButton = /** @class */ (function (_super) {
         }
         return _this;
     }
-    AbilityButton.prototype.customize = function (size, radius) {
+    PhaserButton.prototype.customize = function (size, radius) {
         var _a, _b;
         this.size = size;
         this.radius = radius;
@@ -143,7 +143,7 @@ var AbilityButton = /** @class */ (function (_super) {
         (_a = this.image) === null || _a === void 0 ? void 0 : _a.setDisplaySize(size * 0.8, size * 0.8);
         (_b = this.label) === null || _b === void 0 ? void 0 : _b.setPosition(-7 + size / 2, +7 - size / 2);
     };
-    AbilityButton.prototype.activate = function (bool) {
+    PhaserButton.prototype.activate = function (bool) {
         if (bool) {
             this.button.setFillStyle(this.activeColor, 1);
         }
@@ -151,7 +151,7 @@ var AbilityButton = /** @class */ (function (_super) {
             this.button.setFillStyle(this.backgroundColor, 0.7);
         }
     };
-    AbilityButton.prototype.casting = function (bool) {
+    PhaserButton.prototype.casting = function (bool) {
         if (bool) {
             if (this.image) {
                 this.fx.setActive(true);
@@ -168,7 +168,7 @@ var AbilityButton = /** @class */ (function (_super) {
             }
         }
     };
-    AbilityButton.prototype.cooldown = function (bool) {
+    PhaserButton.prototype.cooldown = function (bool) {
         if (bool) {
             this.onCooldown = true;
             /*if (this.image) {
@@ -184,7 +184,7 @@ var AbilityButton = /** @class */ (function (_super) {
             this.cooldownLabel.text = '';
         }
     };
-    AbilityButton.prototype.startCooldownTimer = function () {
+    PhaserButton.prototype.startCooldownTimer = function () {
         var _this = this;
         this.cooldownTimeLeft = Math.floor((this.ability.cooldown - this.ability.castDuration) / 1000);
         this.cooldownLabel.text = this.getCooldownText();
@@ -193,12 +193,12 @@ var AbilityButton = /** @class */ (function (_super) {
             _this.cooldownLabel.text = _this.getCooldownText();
         }, 1000);
     };
-    AbilityButton.prototype.getCooldownText = function () {
+    PhaserButton.prototype.getCooldownText = function () {
         var cooldownText = this.cooldownTimeLeft.toString();
         if (this.cooldownTimeLeft > 99)
             cooldownText = (Math.floor(this.cooldownTimeLeft / 60)).toString() + 'm';
         return cooldownText;
     };
-    return AbilityButton;
+    return PhaserButton;
 }(Phaser.GameObjects.Container));
-//# sourceMappingURL=AbilityButton.js.map
+//# sourceMappingURL=PhaserButton.js.map

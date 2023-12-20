@@ -73,8 +73,11 @@ var MobileControlsComponent = TaroEntity.extend({
 		}
 	},
 
-	configure: function (abilities) {
-		if (!taro.isMobile || !abilities) return;
+	configure: function (controls) {
+		const keybindings = controls.abilities;
+		if (!taro.isMobile || !keybindings) return;
+
+		const abilities = controls.unitAbilities;
 
 		// $("#show-chat").show();
 		$('#show-chat').hide(); // completely disable chat on mobile (app review)
@@ -93,16 +96,16 @@ var MobileControlsComponent = TaroEntity.extend({
 
 		this.clearControls();
 
-		Object.keys(abilities).forEach(function (key) {
-			var ability = abilities[key];
+		Object.keys(keybindings).forEach(function (key) {
+			var keybinding = keybindings[key];
 
-			if (ability.mobilePosition && !self.controls[key]) {
+			if (keybinding.mobilePosition && !self.controls[key]) {
 				// mobile control layout editor is 480x270
 				// rescale to 960x540
-				var x = ability.mobilePosition.x * 2;
-				var y = ability.mobilePosition.y * 2;
+				var x = keybinding.mobilePosition.x * 2;
+				var y = keybinding.mobilePosition.y * 2;
 
-				self.addControl(key, x, y, 75, 64, ability);
+				self.addControl(key, x, y, 75, 64, keybinding, abilities);
 			}
 		});
 	},
@@ -180,7 +183,7 @@ var MobileControlsComponent = TaroEntity.extend({
 	},
 
 	// add a button or stick to the virtual controller
-	addControl: function (key, x, y, w, h, ability) {
+	addControl: function (key, x, y, w, h, keybinding, abilities) {
 		w = w || 128;
 		h = h || 128;
 
@@ -348,9 +351,14 @@ var MobileControlsComponent = TaroEntity.extend({
 				break;
 		}
 
-		this.emit('add-control', [
-			key, x, y, w, h, settings
-		]);
+		const abilityId = keybinding.keyDown?.abilityId || keybinding.keyUp?.abilityId;
+		let ability = null;
+		if (abilityId) {
+			ability = abilities[abilityId];
+			this.emit('add-control', [ key, x, y, w, h, settings, abilityId, ability ]);
+		} else {
+			this.emit('add-control', [ key, x, y, w, h, settings ]);
+		}
 	},
 
 	setVisible: function (value) {

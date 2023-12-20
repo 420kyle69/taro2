@@ -24,13 +24,13 @@ var UiScene = /** @class */ (function (_super) {
     UiScene.prototype.create = function () {
         var _this = this;
         if (!taro.isMobile) {
-            //this.tooltip = new DevTooltip(this);
+            return;
         }
-        var abilityBar = this.abilityBar = new AbilityBar(this);
+        var phaserButtonBar = this.phaserButtonBar = new PhaserButtonBar(this);
         taro.client.on('create-ability-bar', function (data) {
             var keybindings = data.keybindings;
             var abilities = data.abilities;
-            abilityBar.clear();
+            phaserButtonBar.clear();
             if (abilities) {
                 Object.entries(abilities).forEach(function (_a) {
                     var abilityId = _a[0], ability = _a[1];
@@ -44,7 +44,7 @@ var UiScene = /** @class */ (function (_super) {
                                 key = keybindingKey;
                             }
                         });
-                        abilityBar.addButton(abilityId, ability, key);
+                        phaserButtonBar.addButton(abilityId, ability, key);
                     }
                 });
             }
@@ -55,29 +55,29 @@ var UiScene = /** @class */ (function (_super) {
         taro.client.on('leaveMapTab', function () {
             _this.scene.setVisible(true);
         });
-        taro.client.on('start-press-key', function (abilityId) {
+        taro.client.on('start-press-key', function (key) {
             var _a;
-            (_a = abilityBar.buttons[abilityId]) === null || _a === void 0 ? void 0 : _a.activate(true);
+            (_a = phaserButtonBar.buttons[key]) === null || _a === void 0 ? void 0 : _a.activate(true);
         });
-        taro.client.on('stop-press-key', function (abilityId) {
+        taro.client.on('stop-press-key', function (key) {
             var _a;
-            (_a = abilityBar.buttons[abilityId]) === null || _a === void 0 ? void 0 : _a.activate(false);
+            (_a = phaserButtonBar.buttons[key]) === null || _a === void 0 ? void 0 : _a.activate(false);
         });
-        taro.client.on('start-casting', function (abilityId) {
+        taro.client.on('start-casting', function (key) {
             var _a;
-            (_a = abilityBar.buttons[abilityId]) === null || _a === void 0 ? void 0 : _a.casting(true);
+            (_a = phaserButtonBar.buttons[key]) === null || _a === void 0 ? void 0 : _a.casting(true);
         });
-        taro.client.on('stop-casting', function (abilityId) {
+        taro.client.on('stop-casting', function (key) {
             var _a;
-            (_a = abilityBar.buttons[abilityId]) === null || _a === void 0 ? void 0 : _a.casting(false);
+            (_a = phaserButtonBar.buttons[key]) === null || _a === void 0 ? void 0 : _a.casting(false);
         });
-        taro.client.on('start-ability-cooldown', function (abilityId) {
+        taro.client.on('start-ability-cooldown', function (key) {
             var _a;
-            (_a = abilityBar.buttons[abilityId]) === null || _a === void 0 ? void 0 : _a.cooldown(true);
+            (_a = phaserButtonBar.buttons[key]) === null || _a === void 0 ? void 0 : _a.cooldown(true);
         });
-        taro.client.on('stop-ability-cooldown', function (abilityId) {
+        taro.client.on('stop-ability-cooldown', function (key) {
             var _a;
-            (_a = abilityBar.buttons[abilityId]) === null || _a === void 0 ? void 0 : _a.cooldown(false);
+            (_a = phaserButtonBar.buttons[key]) === null || _a === void 0 ? void 0 : _a.cooldown(false);
         });
     };
     UiScene.prototype.preload = function () {

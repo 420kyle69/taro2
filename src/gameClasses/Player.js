@@ -225,8 +225,8 @@ var Player = TaroEntity.extend({
 				}
 
 				// abilities
-				const abilitiesData = taro.game.data.unitTypes[unit._stats.type].controls.unitAbilities;
-				taro.client.emit('create-ability-bar', { keybindings: taro.game.data.unitTypes[unit._stats.type].controls.abilities, abilities: abilitiesData });
+				//const abilitiesData = taro.game.data.unitTypes[unit._stats.type].controls.unitAbilities;
+				//taro.client.emit('create-ability-bar', { keybindings: taro.game.data.unitTypes[unit._stats.type].controls.abilities, abilities: abilitiesData });
 				unit.renderMobileControl();
 
 

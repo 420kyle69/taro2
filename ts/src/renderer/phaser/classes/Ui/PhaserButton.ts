@@ -1,5 +1,5 @@
-class AbilityButton extends Phaser.GameObjects.Container {
-    name: string;
+class PhaserButton extends Phaser.GameObjects.Container {
+    //name: string;
 	button: any;
 	image: Phaser.GameObjects.Image;
 	label: Phaser.GameObjects.BitmapText;
@@ -28,7 +28,7 @@ class AbilityButton extends Phaser.GameObjects.Container {
 		//bar: Phaser.GameObjects.Container,
 	) {
         super(scene);
-		this.name = ability.name;
+		//this.name = key;
         let backgroundColor = this.backgroundColor = 0x000000;
         if (taro.isMobile) backgroundColor = this.backgroundColor = 0x333333;
         this.activeColor = 0xFFFF00;
@@ -63,7 +63,7 @@ class AbilityButton extends Phaser.GameObjects.Container {
             this.add(label);
         }
 		// cooldown label
-        if (ability.cooldown > 0) {
+        if (ability && ability.cooldown > 0) {
             const cooldownLabel = this.cooldownLabel = scene.add.bitmapText(
                 0, 0,
                 BitmapFontManager.font(scene, 'Verdana', false, true, '#FFFF00'),

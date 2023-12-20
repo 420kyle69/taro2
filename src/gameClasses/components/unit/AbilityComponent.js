@@ -124,7 +124,7 @@ var AbilityComponent = TaroEntity.extend({
 		}
 	},
 
-	cast: function (handle) {
+	cast: function (handle, key) {
 		var self = this;
 
 		if (handle == undefined)
@@ -145,10 +145,10 @@ var AbilityComponent = TaroEntity.extend({
 				break;
 
 			case 'startCasting':
-				return this.startCasting(ability.abilityId);
+				return this.startCasting(ability.abilityId, key);
 
 			case 'stopCasting':
-				return this.stopCasting(ability.abilityId);
+				return this.stopCasting(ability.abilityId, key);
 		}
 
 		// new abilities should have returned by now. following is for old system (backwards comp.)
@@ -247,7 +247,7 @@ var AbilityComponent = TaroEntity.extend({
 		}
 	},
 
-	startCasting: function (abilityId) {
+	startCasting: function (abilityId, key) {
 		if (
 			this.activeAbilities[abilityId]
 			|| this.abilityCooldowns[abilityId]
@@ -281,7 +281,7 @@ var AbilityComponent = TaroEntity.extend({
 		if (!(ability.cooldown === null || ability.cooldown === undefined || isNaN(ability.cooldown))) {
 			this.abilityCooldowns[abilityId] = Date.now() + ability.cooldown;
 			if (taro.isClient && this._entity._stats.clientId === taro.network.id()) {
-				taro.client.emit('start-ability-cooldown', abilityId);
+				taro.client.emit('start-ability-cooldown', key);
 			}
 		}
 
@@ -290,12 +290,12 @@ var AbilityComponent = TaroEntity.extend({
 		}
 
 		if (taro.isClient && this._entity._stats.clientId === taro.network.id()) {
-			taro.client.emit('start-casting', abilityId);
+			taro.client.emit('start-casting', key);
 		}
 		
 	},
 
-	stopCasting: function (abilityId) {
+	stopCasting: function (abilityId, key) {
 		if (!this.activeAbilities[abilityId]) {
 			return;
 		}
@@ -315,7 +315,7 @@ var AbilityComponent = TaroEntity.extend({
 		);
 
 		if (taro.isClient && this._entity._stats.clientId === taro.network.id()) {
-			taro.client.emit('stop-casting', abilityId);
+			taro.client.emit('stop-casting', key);
 		}
 	},
 	_behaviour: function (ctx) {
@@ -335,7 +335,7 @@ var AbilityComponent = TaroEntity.extend({
 				if (this.abilityCooldowns[id] <= Date.now()) {
 
 					if (taro.isClient && this._entity._stats.clientId === taro.network.id()) {
-						taro.client.emit('stop-ability-cooldown', id);
+						taro.client.emit('stop-ability-cooldown', key);
 					}
 
 					delete this.abilityCooldowns[id];

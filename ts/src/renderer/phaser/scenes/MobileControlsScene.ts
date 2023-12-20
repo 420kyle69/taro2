@@ -34,7 +34,9 @@ class MobileControlsScene extends PhaserScene {
 			y: number,
 			w: number,
 			h: number,
-			settings: MobileControlSettings
+			settings: MobileControlSettings,
+			abilityId: string,
+			ability: any
 		) => {
 
 			switch (key) {
@@ -52,11 +54,26 @@ class MobileControlsScene extends PhaserScene {
 					const relativeY = Math.trunc((y + h / 2) / 540 * window.outerHeight * window.devicePixelRatio);
 
                     const uiScene = taro.renderer.scene.getScene('Ui') as UiScene;
-                    let buttonExist = false;
-                    Object.values(uiScene?.abilityBar?.buttons).forEach((button) => {
+					let buttonExist = false;
+                    Object.values(uiScene?.phaserButtonBar?.buttons).forEach((button) => {
                         if (button.key === key) {
-                            button.x = relativeX - uiScene.abilityBar.x + button.size/2;
-                            button.y = relativeY - uiScene.abilityBar.y + button.size/2;
+							console.log('changing button position')
+                            button.x = relativeX - uiScene.phaserButtonBar.x + button.size/2;
+                            button.y = relativeY - uiScene.phaserButtonBar.y + button.size/2;
+                            buttonExist = true;
+                        }
+                    });
+                    if (!buttonExist) {
+						console.log('creating new button')
+						const button = uiScene.phaserButtonBar.addButton(abilityId, ability, key);
+						button.x = relativeX - uiScene.phaserButtonBar.x + button.size/2;
+                        button.y = relativeY - uiScene.phaserButtonBar.y + button.size/2;
+					};
+                    /*let buttonExist = false;
+                    Object.values(uiScene?.phaserButtonBar?.buttons).forEach((button) => {
+                        if (button.key === key) {
+                            button.x = relativeX - uiScene.phaserButtonBar.x + button.size/2;
+                            button.y = relativeY - uiScene.phaserButtonBar.y + button.size/2;
                             buttonExist = true;
                         }
                     });
@@ -127,7 +144,7 @@ class MobileControlsScene extends PhaserScene {
 						settings.onEnd && settings.onEnd();
 					};
 					button.on('pointerup', onPointerEnd);
-					button.on('pointerout', onPointerEnd);
+					button.on('pointerout', onPointerEnd);*/
 
 					break;
 			}
