@@ -73,6 +73,7 @@ var ClientNetworkEvents = {
 		if (data.type) {
 			var shopName = taro.game.data.shops[data.type] ? taro.game.data.shops[data.type].name : "Item shop";
 			var shopDescription = taro.game.data.shops[data.type] ? taro.clientSanitizer(taro.game.data.shops[data.type].description) : "";
+			var shopClass = taro.game.data.shops[data.type] ? (taro.game.data.shops[data.type].shopClass || '') : "";
 			$("#modd-item-shop-header").text(shopName);
 
 			if (shopDescription?.length) {
@@ -82,6 +83,10 @@ var ClientNetworkEvents = {
 			}
 
 			taro.shop.openItemShop(data.type);
+
+			// remove all previous class and add shopClass
+			$("#modd-item-shop-modal").removeClass().addClass(`modal ${shopClass}`);
+
 			$("#modd-item-shop-modal").modal("show");
 			if (taro.client.myPlayer?.control) {
 				taro.client.myPlayer.control.updatePlayerInputStatus();
