@@ -2316,7 +2316,6 @@ var ActionComponent = TaroEntity.extend({
 							if (impulseY == undefined || isNaN(impulseY)) {
 								impulseY = 0;
 							}
-
 							entity.applyImpulse(impulseX, impulseY);
 						} else {
 							throw new Error('invalid entity');

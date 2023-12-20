@@ -129,9 +129,9 @@ class EntitiesToRender {
 
 	frameTick(): void {
 		taro.script?.trigger("renderTick");
-		taro.engineStep(Date.now(), 1000/60);
 		taro.input.processInputOnEveryFps();
 
+		taro.engineStep(Date.now(), 1000/60);
 		taro._renderFrames++;
 
 		this.updateAllEntities();

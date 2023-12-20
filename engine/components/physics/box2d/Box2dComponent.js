@@ -697,35 +697,32 @@ var PhysicsComponent = TaroEventingClass.extend({
 											)
 										) {
 
-											var xRemaining = entity.reconRemaining.x
-											var yRemaining = entity.reconRemaining.y
-
-											
 											// if the current reconcilie distance is greater than my unit's body dimention, 
 											// instantly move unit (teleport) to the last streamed position. Otherwise, gradually reconcile
-											if (Math.abs(xRemaining) > entity._stats.currentBody.width * 1.5 || 
-												Math.abs(yRemaining) > entity._stats.currentBody.height * 1.5
+											if (Math.abs(entity.reconRemaining.x) > entity._stats.currentBody.width * 1.5 || 
+												Math.abs(entity.reconRemaining.y) > entity._stats.currentBody.height * 1.5
 											) {
 												x = taro.client.myUnitStreamedPosition.x
 												y = taro.client.myUnitStreamedPosition.y
 												
 												// x += xRemaining;
 												// y += yRemaining;
-												
 												entity.reconRemaining = undefined;
 												// taro.client.sendNextPingAt = taro.now + 200;
 												// console.log("instant reconciliation to ", x, y, taro.client.myUnitPositionWhenPingSent)
 												// entity._translate = {x: x, y: y}
 											} else {
-												entity.reconRemaining.x = xRemaining/(taro._physicsTickRate/10);
-												entity.reconRemaining.y = yRemaining/(taro._physicsTickRate/10);
+
+												entity.reconRemaining.x /= taro._physicsTickRate/5;
+												entity.reconRemaining.y /= taro._physicsTickRate/5;
 
 												x += entity.reconRemaining.x
 												y += entity.reconRemaining.y
 											}
 										} 
-
+										entity.prevKeyFrame = entity.nextKeyFrame;
 										entity.nextKeyFrame = [taro._currentTime + taro.client.renderBuffer, [x, y, angle]];
+										
 									} else { // update server-streamed entities' body position
 										x = entity.nextKeyFrame[1][0];
 										y = entity.nextKeyFrame[1][1];

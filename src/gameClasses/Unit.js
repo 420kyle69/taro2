@@ -316,8 +316,8 @@ var Unit = TaroEntityPhysics.extend({
 			self._stats.clientId = newOwnerPlayer && newOwnerPlayer._stats ? newOwnerPlayer._stats.clientId : undefined;
 			if (taro.isServer) {
 				self.streamUpdateData([{ ownerPlayerId: newOwnerPlayerId }]);
-				newOwnerPlayer.ownUnit(self);
 			}
+			newOwnerPlayer.ownUnit(self);
 		}
 
 		if (taro.isClient) {
@@ -343,9 +343,9 @@ var Unit = TaroEntityPhysics.extend({
 					if (self.unitUi) {
 						self.unitUi.updateAllAttributeBars();
 					}
-                    if (self._stats.clientId === taro.network.id() && self._stats.controls.unitAbilities) {
-                        taro.client.emit('create-ability-bar', {keybindings: self._stats.controls.abilities, abilities: self._stats.controls.unitAbilities});
-                    }
+					if (self._stats.clientId === taro.network.id() && self._stats.controls.unitAbilities) {
+						taro.client.emit('create-ability-bar', {keybindings: self._stats.controls.abilities, abilities: self._stats.controls.unitAbilities});
+					}
 				}
 			}
 		}
@@ -925,10 +925,10 @@ var Unit = TaroEntityPhysics.extend({
 			}
 			self.inventory.update();
 
-            if (self._stats.clientId === taro.network.id() && data.controls.unitAbilities) {
-                taro.client.emit('create-ability-bar', {keybindings: data.controls.abilities, abilities: data.controls.unitAbilities});
-            }
-            // if mobile controls are in use configure for this unit
+			if (self._stats.clientId === taro.network.id() && data.controls.unitAbilities) {
+				taro.client.emit('create-ability-bar', {keybindings: data.controls.abilities, abilities: data.controls.unitAbilities});
+			}
+			// if mobile controls are in use configure for this unit
 			self.renderMobileControl();
 		}
 
@@ -1065,10 +1065,10 @@ var Unit = TaroEntityPhysics.extend({
 	},
 
 	/**
-        give an item to a unit whether it's an existing item instance (item object) or a new item to be created from itemData (json).
-        @param item can be both item instance or itemData json. This is to handle both new items being created from itemData, or when unit picks up an existing item instance.
-        @param slotIndex force-assign item into this inventory slot. usually assigned from when buying a shop item with replaceItemInTargetSlot (optional)
-        @return {boolean} return true if unit was able to pickup/use item. return false otherwise.
+		give an item to a unit whether it's an existing item instance (item object) or a new item to be created from itemData (json).
+		@param item can be both item instance or itemData json. This is to handle both new items being created from itemData, or when unit picks up an existing item instance.
+		@param slotIndex force-assign item into this inventory slot. usually assigned from when buying a shop item with replaceItemInTargetSlot (optional)
+		@return {boolean} return true if unit was able to pickup/use item. return false otherwise.
 	 */
 	pickUpItem: function (item) {
 		var self = this;
@@ -1495,7 +1495,7 @@ var Unit = TaroEntityPhysics.extend({
 
 		// remove this unit from its owner player's unitIds
 		if (ownerPlayer) {
-			ownerPlayer.disownUnit(self, false);
+			ownerPlayer.disownUnit(self, true);
 		}
 
 		if (taro.isClient) {
@@ -1662,7 +1662,7 @@ var Unit = TaroEntityPhysics.extend({
 						break;
 					case 'ownerPlayerId':
 						self._stats[attrName] = newValue;
-						if (taro.isClient) {
+						if (taro.isClient && taro.client.myPlayer.id() !== newValue) {
 							self.setOwnerPlayer(newValue);
 						}
 						break;
@@ -2001,8 +2001,10 @@ var Unit = TaroEntityPhysics.extend({
 					// send ping for CSP reconciliation purpose
 					if (taro.now > taro.client.sendNextPingAt) {
 						taro.client.myUnitPositionWhenPingSent = {
-							x: taro.client.selectedUnit?.nextKeyFrame[1][0], 
-							y: taro.client.selectedUnit?.nextKeyFrame[1][1]
+							// x: taro.client.selectedUnit?.nextKeyFrame[1][0], 
+							// y: taro.client.selectedUnit?.nextKeyFrame[1][1]
+							x: taro.client.selectedUnit?._translate.x,
+							y: taro.client.selectedUnit?._translate.y
 						};
 
 						taro.network.send('ping', {sentAt: Date.now()});
