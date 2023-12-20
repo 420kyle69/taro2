@@ -3143,6 +3143,8 @@ var TaroEntity = TaroObject.extend({
 	teleportTo: function (x, y, rotate, teleportCamera) {
 		// console.log("teleportTo", x, y, rotate, this._stats.type)
 		this.isTeleporting = true;
+		this.prevKeyFrame[1] = [x, y, rotate];
+		this.nextKeyFrame[1] = [x, y, rotate];
         this.teleportCamera = teleportCamera;
 		this.teleportDestination = [x, y, rotate]
 		this.reconRemaining = undefined; // when a unit is teleported, end reconciliation
