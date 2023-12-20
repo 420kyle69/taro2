@@ -2316,7 +2316,6 @@ var ActionComponent = TaroEntity.extend({
 							if (impulseY == undefined || isNaN(impulseY)) {
 								impulseY = 0;
 							}
-
 							entity.applyImpulse(impulseX, impulseY);
 						} else {
 							throw new Error('invalid entity');
@@ -3182,6 +3181,36 @@ var ActionComponent = TaroEntity.extend({
 								elementId: elementId,
 								action: 'setHtml',
 								htmlStr: htmlStr || ''
+							}, player._stats.clientId);
+						}
+						break;
+					
+					case 'addClassToUIElement':
+						var elementId = self._script.variable.getValue(action.elementId, vars);
+						var className = self._script.variable.getValue(action.className, vars);
+						var player = self._script.variable.getValue(action.player, vars);
+
+						if (elementId && player && player._stats && player._stats.clientId) {
+							taro.network.send('ui', {
+								command: 'updateUiElement',
+								elementId: elementId,
+								action: 'addClass',
+								className: className || ''
+							}, player._stats.clientId);
+						}
+						break;
+						
+					case 'removeClassFromUIElement':
+						var elementId = self._script.variable.getValue(action.elementId, vars);
+						var className = self._script.variable.getValue(action.className, vars);
+						var player = self._script.variable.getValue(action.player, vars);
+
+						if (elementId && player && player._stats && player._stats.clientId) {
+							taro.network.send('ui', {
+								command: 'updateUiElement',
+								elementId: elementId,
+								action: 'removeClass',
+								className: className || ''
 							}, player._stats.clientId);
 						}
 						break;

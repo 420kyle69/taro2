@@ -528,6 +528,12 @@ var PlayerUiComponent = TaroEntity.extend({
 				case 'setHtml':
 					$(taro.client.getCachedElementById(data.elementId)).html(data.htmlStr);
 					break;
+				case 'addClass':
+					taro.client.getCachedElementById(data.elementId).classList.add(data.className);
+					break;
+				case 'removeClass':
+					taro.client.getCachedElementById(data.elementId).classList.remove(data.className);
+					break;
 				default:
 					break;
 			}

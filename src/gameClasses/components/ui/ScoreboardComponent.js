@@ -255,6 +255,7 @@ var ScoreboardComponent = TaroEntity.extend({
 
 	toggleScores: function () {
 		this._hidden = !this._hidden;
+		this.update();
 	}
 
 });

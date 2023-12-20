@@ -492,6 +492,7 @@ var MenuUiComponent = TaroEntity.extend({
 			this.toggleLeaderBoard(false);
 			this.toggleGameSuggestionCard(false);
 			this.toggleCustomIngameUi(false);
+			this.toggleDefaultIngameUi(false);
 
 			$.ajax({
 				type: 'GET',
@@ -727,6 +728,7 @@ var MenuUiComponent = TaroEntity.extend({
 		this.toggleLeaderBoard(true);
 		this.toggleGameSuggestionCard(true);
 		this.toggleCustomIngameUi(true);
+		this.toggleDefaultIngameUi(true);
 	},
 
 	toggleCustomIngameUi: function (show) {
@@ -734,6 +736,14 @@ var MenuUiComponent = TaroEntity.extend({
 		    window.renderHBSTemplate && window.renderHBSTemplate({}, taro.game.data?.ui?.inGameUiFull?.htmlData, "custom-ingame-ui-container");
 		} else {
 			$('#custom-ingame-ui-container').html('');
+		}
+	},
+
+	toggleDefaultIngameUi: function (show) {
+		if (show) {
+			$('#default-ingame-ui-container').show();
+		} else {
+			$('#default-ingame-ui-container').hide();
 		}
 	},
 

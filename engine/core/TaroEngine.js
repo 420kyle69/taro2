@@ -1637,23 +1637,6 @@ var TaroEngine = TaroEntity.extend({
 			}
 
 			if (taro.physics) {
-				taro.now = Date.now();
-				timeElapsed = taro.now - taro._lastphysicsTickAt;
-				if (timeElapsed >= (1000 / taro._physicsTickRate) - taro._physicsTickRemainder) {
-
-					taro._lastphysicsTickAt = taro.now;
-					taro._physicsTickRemainder = Math.min(timeElapsed - ((1000 / taro._physicsTickRate) - taro._physicsTickRemainder), (1000 / taro._physicsTickRate));
-
-					if (taro.profiler.isEnabled) {
-						var startTime = performance.now();
-					}
-					taro.physics.update(timeElapsed);
-					taro.physicsTimeElapsed = timeElapsed;
-					// log how long it took to update physics world step
-					if (taro.profiler.isEnabled) {
-						taro.profiler.logTimeElapsed("physicsStep", startTime);
-					}
-				}
 
 				taro.tickCount = 0;
 				taro.updateTransform = 0;
@@ -1675,6 +1658,24 @@ var TaroEngine = TaroEntity.extend({
 					}
 				}
 
+				taro.now = Date.now();
+				timeElapsed = taro.now - taro._lastphysicsTickAt;
+				if (timeElapsed >= (1000 / taro._physicsTickRate) - taro._physicsTickRemainder) {
+
+					taro._lastphysicsTickAt = taro.now;
+					taro._physicsTickRemainder = Math.min(timeElapsed - ((1000 / taro._physicsTickRate) - taro._physicsTickRemainder), (1000 / taro._physicsTickRate));
+
+					if (taro.profiler.isEnabled) {
+						var startTime = performance.now();
+					}
+					taro.physics.update(timeElapsed);
+					taro.physicsTimeElapsed = timeElapsed;
+					// log how long it took to update physics world step
+					if (taro.profiler.isEnabled) {
+						taro.profiler.logTimeElapsed("physicsStep", startTime);
+					}
+				}
+				
 				if (taro.isServer) {
 					taro.network.stream._sendQueue(timeStamp);
 					taro.network.stream._sendQueuedStreamData();

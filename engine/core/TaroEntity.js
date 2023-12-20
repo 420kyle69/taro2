@@ -66,6 +66,7 @@ var TaroEntity = TaroObject.extend({
 		// this ensures entity is spawning at a correct position initially. particularily useful for projectiles
 
 		this._keyFrames = [];
+		this.prevKeyFrame = [taro._currentTime, [this._translate.x, this._translate.y, this._rotate.z]];
 		this.nextKeyFrame = [taro._currentTime + 50, [this._translate.x, this._translate.y, this._rotate.z]];
 		
 		this._isTransforming = true;
@@ -3142,6 +3143,8 @@ var TaroEntity = TaroObject.extend({
 	teleportTo: function (x, y, rotate, teleportCamera) {
 		// console.log("teleportTo", x, y, rotate, this._stats.type)
 		this.isTeleporting = true;
+		this.prevKeyFrame[1] = [x, y, rotate];
+		this.nextKeyFrame[1] = [x, y, rotate];
         this.teleportCamera = teleportCamera;
 		this.teleportDestination = [x, y, rotate]
 		this.reconRemaining = undefined; // when a unit is teleported, end reconciliation
@@ -5132,11 +5135,6 @@ var TaroEntity = TaroObject.extend({
 		var offsetDelta = currentTime - startTime;
 		var deltaTime = offsetDelta / dataDelta;
 
-		// Clamp the current time from 0
-		if (deltaTime < 0) {
-			deltaTime = 0;
-		}
-
 		return totalValue * deltaTime + startValue;
 	},
 
@@ -5154,18 +5152,13 @@ var TaroEntity = TaroObject.extend({
      * Update the position of the entities using the interpolation. This results smooth motion of the entities.
      */
 	_processTransform: function () {
-		var tickDelta = taro._currentTime - this.lastTransformedAt;
-
 		if (
-			tickDelta == 0 || // entity has already transformed for this tick		
+			taro._currentTime - this.lastTransformedAt == 0 || // entity has already transformed for this tick		
 			this._translate == undefined ||
 			this._stats.currentBody == undefined // entity has no body
 		) {
 			return;
 		}
-		
-		let xDiff = null;
-		let yDiff = null;
 		
 		let rotateStart = null;
 		let rotateEnd = null;
@@ -5174,36 +5167,30 @@ var TaroEntity = TaroObject.extend({
 		let y = this._translate.y;
 		let rotate = this._rotate.z;
 		
+		var prevTransform = this.prevKeyFrame[1];
 		var nextTransform = this.nextKeyFrame[1];
+
+		var prevTime = this.prevKeyFrame[0];
+		var nextTime = this.nextKeyFrame[0];
+
+		if (prevTime < nextTime && nextTransform) {
 		
-		if (nextTransform) {
+			x = this.interpolateValue(prevTransform[0], nextTransform[0], prevTime, taro._currentTime, nextTime)
+			y = this.interpolateValue(prevTransform[1], nextTransform[1], prevTime, taro._currentTime, nextTime)
+
+			// var xDiff = nextTransform[0] - x;
+			// var yDiff = nextTransform[1] - y;
+
+			// x += xDiff/2
+			// y += yDiff/2
 			
-			var nextTime = this.nextKeyFrame[0];
-			var timeRemaining = nextTime - taro._currentTime;
+			// if (this == taro.client.selectedUnit && this.isTransforming()) 
+			// 	console.log(prevTransform[0], x, nextTransform[0], prevTime, taro._currentTime, nextTime)
 			
-			xDiff = nextTransform[0] - x;
-			yDiff = nextTransform[1] - y;
-			
-			// don't lerp is time remaining is less than 5ms
-			if (timeRemaining > tickDelta) {
-
-				
-				var xSpeed = xDiff / timeRemaining;
-				var ySpeed = yDiff / timeRemaining;
-
-				x += xSpeed * tickDelta;
-				y += ySpeed * tickDelta;
-
-			} else {
-				x += xDiff/2;
-				y += yDiff/2;
-
-				// if (this != taro.client.selectedUnit && this.isTransforming()) console.log(this._stats.type, taro._currentTime, nextTime, taro._currentTime - nextTime)
-				if (taro._currentTime > nextTime + 100) {
-					this.isTransforming(false);
-				}
+			if (taro._currentTime > nextTime + 100) {
+				this.isTransforming(false);
 			}
-
+		
 			rotateStart = rotate;
 			rotateEnd = nextTransform[2];
 

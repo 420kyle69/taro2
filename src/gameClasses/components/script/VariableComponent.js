@@ -2188,7 +2188,6 @@ var VariableComponent = TaroEntity.extend({
 						var region = self.getValue(text.region, vars);
 						var id = taro.game.lastCastingUnitId;
 						var unit = taro.$(id);
-
 						if (region) {
 							// region represent some instance of TaroRegion
 							if (region._stats) {
