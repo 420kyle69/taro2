@@ -35,15 +35,15 @@ var PhaserButtonBar = /** @class */ (function (_super) {
         return _this;
     }
     PhaserButtonBar.prototype.addButton = function (abilityId, ability, key) {
-        var button = new PhaserButton(this.scene, ability, abilityId, key, 'description', ability === null || ability === void 0 ? void 0 : ability.iconUrl, Object.values(this.buttons).length * (this.buttonSize + this.buttonInterval), 0, this.buttonSize, this.buttonRadius);
+        var button = new PhaserButton(this.scene, ability, abilityId, key, 'description', ability === null || ability === void 0 ? void 0 : ability.iconUrl, Object.values(this.buttons).length * (this.buttonSize + this.buttonInterval), 0, this.buttonSize * window.devicePixelRatio, this.buttonRadius * window.devicePixelRatio);
         this.buttons[key] = button;
         this.add(button);
         this.updatePosition();
         return button;
     };
     PhaserButtonBar.prototype.updatePosition = function () {
-        this.x = this.scene.sys.game.canvas.width / 2 + 35 - Object.values(this.buttons).length * (this.buttonSize + this.buttonInterval) / 2;
-        this.y = this.scene.sys.game.canvas.height - 20 - (this.buttonSize / 2) - $(taro.client.getCachedElementById('unit-status')).height();
+        this.x = 0; //this.scene.sys.game.canvas.width / 2 + 35 - Object.values(this.buttons).length * (this.buttonSize + this.buttonInterval) / 2;
+        this.y = 0; //this.scene.sys.game.canvas.height - 20 - (this.buttonSize/2) - $(taro.client.getCachedElementById('unit-status')).height();
         if (taro.isMobile) {
             taro.mobileControls.updateButtonPos();
         }

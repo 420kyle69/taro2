@@ -15,26 +15,6 @@ class UiScene extends PhaserScene {
 		}
 		const phaserButtonBar = this.phaserButtonBar = new PhaserButtonBar(this);
 
-		taro.client.on('create-ability-bar', (data: {keybindings: Record<string, ControlAbility>, abilities: Record<string, UnitAbility>}) => {
-			const keybindings = data.keybindings;
-			const abilities = data.abilities;
-			phaserButtonBar.clear();
-			if (abilities) {
-				Object.entries(abilities).forEach(([abilityId, ability]) => {
-					let key;
-					if (keybindings && (taro.isMobile && ability.visibility !== 'desktop' && ability.visibility !== 'none') ||
-					(!taro.isMobile && ability.visibility !== 'mobile' && ability.visibility !== 'none')) {
-						Object.entries(keybindings).forEach(([keybindingKey, keybinding]) => {
-							if (keybinding.keyDown?.abilityId === abilityId || keybinding.keyUp?.abilityId === abilityId) {
-								key = keybindingKey;
-							}
-						});
-						phaserButtonBar.addButton(abilityId, ability, key);
-					}
-				});
-			}
-		});
-
 		taro.client.on('enterMapTab', () => {
 			this.scene.setVisible(false);
 		});

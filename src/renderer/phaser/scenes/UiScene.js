@@ -27,28 +27,6 @@ var UiScene = /** @class */ (function (_super) {
             return;
         }
         var phaserButtonBar = this.phaserButtonBar = new PhaserButtonBar(this);
-        taro.client.on('create-ability-bar', function (data) {
-            var keybindings = data.keybindings;
-            var abilities = data.abilities;
-            phaserButtonBar.clear();
-            if (abilities) {
-                Object.entries(abilities).forEach(function (_a) {
-                    var abilityId = _a[0], ability = _a[1];
-                    var key;
-                    if (keybindings && (taro.isMobile && ability.visibility !== 'desktop' && ability.visibility !== 'none') ||
-                        (!taro.isMobile && ability.visibility !== 'mobile' && ability.visibility !== 'none')) {
-                        Object.entries(keybindings).forEach(function (_a) {
-                            var _b, _c;
-                            var keybindingKey = _a[0], keybinding = _a[1];
-                            if (((_b = keybinding.keyDown) === null || _b === void 0 ? void 0 : _b.abilityId) === abilityId || ((_c = keybinding.keyUp) === null || _c === void 0 ? void 0 : _c.abilityId) === abilityId) {
-                                key = keybindingKey;
-                            }
-                        });
-                        phaserButtonBar.addButton(abilityId, ability, key);
-                    }
-                });
-            }
-        });
         taro.client.on('enterMapTab', function () {
             _this.scene.setVisible(false);
         });

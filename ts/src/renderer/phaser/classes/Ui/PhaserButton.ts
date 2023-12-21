@@ -1,5 +1,4 @@
 class PhaserButton extends Phaser.GameObjects.Container {
-    //name: string;
 	button: any;
 	image: Phaser.GameObjects.Image;
 	label: Phaser.GameObjects.BitmapText;
@@ -23,12 +22,10 @@ class PhaserButton extends Phaser.GameObjects.Container {
 		x: number,
 		y: number,
         public size: number,
-        public radius: number,
-
+        public radius: number
 		//bar: Phaser.GameObjects.Container,
 	) {
         super(scene);
-		//this.name = key;
         let backgroundColor = this.backgroundColor = 0x000000;
         if (taro.isMobile) backgroundColor = this.backgroundColor = 0x333333;
         this.activeColor = 0xFFFF00;
@@ -86,51 +83,34 @@ class PhaserButton extends Phaser.GameObjects.Container {
                 this.activate(true);
                 if (clicked) return;
                 clicked = true;
-
-                if (key) {
-                    taro.client.emit('key-down', {
-                        device: 'key', key: key.toLowerCase()
-                    });
-                } else {
-                    // ability have no keybinding
-                }
+                taro.client.emit('key-down', {
+                    device: 'key', key: key.toLowerCase()
+                });
             });
             const onPointerEnd = () => {
                 mobileControlScene.enablePointerNextUpdate = true;
                 this.activate(false);
                 if (!clicked) return;
                 clicked = false;
-                
-                if (key) {
-                    taro.client.emit('key-up', {
-                        device: 'key', key: key.toLowerCase()
-                    });
-                } else {
-                    // ability have no keybinding
-                }
+                taro.client.emit('key-up', {
+                    device: 'key', key: key.toLowerCase()
+                });
             };
             button.on('pointerup', onPointerEnd);
             button.on('pointerout', onPointerEnd);
         } else {
             button.on('pointerdown', () => {
-                taro.client.isPressingAbility = true;
-                if (key) {
-                    taro.client.emit('key-down', {
-                        device: 'key', key: key.toLowerCase()
-                    });
-                } else {
-                    // ability have no keybinding
-                }
+                taro.client.isPressingPhaserButton = true;
+                taro.client.emit('key-down', {
+                    device: 'key', key: key.toLowerCase()
+                });
+                
             });
             button.on('pointerup', () => {
-                taro.client.isPressingAbility = false;
-                if (key) {
-                    taro.client.emit('key-up', {
-                        device: 'key', key: key.toLowerCase()
-                    });
-                } else {
-                    // ability have no keybinding
-                }
+                taro.client.isPressingPhaserButton = false;
+                taro.client.emit('key-up', {
+                    device: 'key', key: key.toLowerCase()
+                });
             });
 		    button.on('pointerover', () => {
 		    	//scene.tooltip.showMessage(name, tooltipText);

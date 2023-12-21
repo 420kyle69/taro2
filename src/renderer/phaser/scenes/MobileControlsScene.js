@@ -37,101 +37,25 @@ var MobileControlsScene = /** @class */ (function (_super) {
                     new PhaserJoystick(_this, x, y, settings);
                     break;
                 default:
-                    var relativeX_1 = Math.trunc((x + w / 2) / 960 * window.outerWidth * window.devicePixelRatio - w / 2);
-                    var relativeY_1 = Math.trunc((y + h / 2) / 540 * window.outerHeight * window.devicePixelRatio);
-                    var uiScene_1 = taro.renderer.scene.getScene('Ui');
+                    var relativeX_1 = Math.trunc((x /*+ w / 2*/) / 960 * window.outerWidth * window.devicePixelRatio);
+                    var relativeY_1 = Math.trunc((y /*+ h / 2*/) / 540 * window.outerHeight * window.devicePixelRatio);
+                    var uiScene = taro.renderer.scene.getScene('Ui');
                     var buttonExist_1 = false;
-                    Object.values((_a = uiScene_1 === null || uiScene_1 === void 0 ? void 0 : uiScene_1.phaserButtonBar) === null || _a === void 0 ? void 0 : _a.buttons).forEach(function (button) {
+                    Object.values((_a = uiScene === null || uiScene === void 0 ? void 0 : uiScene.phaserButtonBar) === null || _a === void 0 ? void 0 : _a.buttons).forEach(function (button) {
                         if (button.key === key) {
                             console.log('changing button position');
-                            button.x = relativeX_1 - uiScene_1.phaserButtonBar.x + button.size / 2;
-                            button.y = relativeY_1 - uiScene_1.phaserButtonBar.y + button.size / 2;
+                            button.x = relativeX_1 + button.size / 2;
+                            button.y = relativeY_1 + button.size / 2;
                             buttonExist_1 = true;
                         }
                     });
                     if (!buttonExist_1) {
                         console.log('creating new button');
-                        var button = uiScene_1.phaserButtonBar.addButton(abilityId, ability, key);
-                        button.x = relativeX_1 - uiScene_1.phaserButtonBar.x + button.size / 2;
-                        button.y = relativeY_1 - uiScene_1.phaserButtonBar.y + button.size / 2;
+                        var button = uiScene.phaserButtonBar.addButton(abilityId, ability, key);
+                        button.x = relativeX_1 + button.size / 2;
+                        button.y = relativeY_1 + button.size / 2;
                     }
                     ;
-                    /*let buttonExist = false;
-                    Object.values(uiScene?.phaserButtonBar?.buttons).forEach((button) => {
-                        if (button.key === key) {
-                            button.x = relativeX - uiScene.phaserButtonBar.x + button.size/2;
-                            button.y = relativeY - uiScene.phaserButtonBar.y + button.size/2;
-                            buttonExist = true;
-                        }
-                    });
-                    if (buttonExist) return;
-
-                    const text = key.toUpperCase();
-
-                    const button = this.add.image(relativeX, relativeY, 'mobile-button-up')
-                        .setDisplaySize(w, h)
-                        .setOrigin(0)
-                        .setAlpha(0.6);
-                    controls.add(button);
-
-                    if (text === 'BUTTON1') {
-                        const icon = this.add.image(
-                            relativeX + w/2, relativeY + h/2,
-                            'mobile-button-icon'
-                        );
-                        icon.setScale(0.5);
-                        controls.add(icon);
-                    } else {
-                        const label = this.add.bitmapText(
-                            relativeX + w/2, relativeY + h/2,
-                            BitmapFontManager.font(this,
-                                'Arial', true, false, '#FFFFFF'
-                            )
-                        );
-                        label.setText(BitmapFontManager.sanitize(
-                            label.fontData, text
-                        ));
-                        label.setCenterAlign();
-                        label.setFontSize(24);
-                        label.setOrigin(0.5);
-                        label.letterSpacing = -0.4;
-                        controls.add(label);
-                        if (this.renderer.type === Phaser.CANVAS) {
-                            const rt = this.add.renderTexture(
-                                label.x, label.y, label.width, label.height
-                            );
-                            rt.draw(label, label.width/2, label.height/2);
-                            rt.setOrigin(0.5);
-                            controls.add(rt);
-
-                            label.visible = false;
-                        }
-                    }
-
-                    button.setInteractive();
-
-                    let clicked = false;
-
-                    button.on('pointerdown', () => {
-                        this.disablePointerEvents = true;
-
-                        if (clicked) return;
-                        clicked = true;
-                        button.setTexture('mobile-button-down');
-
-                        settings.onStart && settings.onStart();
-                    });
-                    const onPointerEnd = () => {
-                        this.enablePointerNextUpdate = true;
-
-                        if (!clicked) return;
-                        clicked = false;
-                        button.setTexture('mobile-button-up');
-
-                        settings.onEnd && settings.onEnd();
-                    };
-                    button.on('pointerup', onPointerEnd);
-                    button.on('pointerout', onPointerEnd);*/
                     break;
             }
         });
