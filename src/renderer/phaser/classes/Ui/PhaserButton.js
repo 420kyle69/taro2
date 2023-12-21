@@ -50,14 +50,14 @@ var PhaserButton = /** @class */ (function (_super) {
         }
         // label
         if (key && key.length < 2) {
-            var label = _this.label = scene.add.bitmapText(-7 + size / 2, +7 - size / 2, BitmapFontManager.font(scene, 'Verdana', true, false, '#FFFFFF'), key.toUpperCase(), 16);
+            var label = _this.label = scene.add.bitmapText(-size / 10 + size / 2, +size / 10 - size / 2, BitmapFontManager.font(scene, 'Verdana', true, false, '#FFFFFF'), key.toUpperCase(), 14 * window.devicePixelRatio);
             label.setOrigin(0.5);
             label.letterSpacing = 1.3;
             _this.add(label);
         }
         // cooldown label
         if (ability && ability.cooldown > 0) {
-            var cooldownLabel = _this.cooldownLabel = scene.add.bitmapText(0, 0, BitmapFontManager.font(scene, 'Verdana', false, true, '#FFFF00'), '', 24);
+            var cooldownLabel = _this.cooldownLabel = scene.add.bitmapText(0, 0, BitmapFontManager.font(scene, 'Verdana', false, true, '#FFFF00'), '', 24 * window.devicePixelRatio);
             cooldownLabel.setOrigin(0.5);
             cooldownLabel.letterSpacing = 1.3;
             _this.add(cooldownLabel);

@@ -32,8 +32,6 @@ class MobileControlsScene extends PhaserScene {
 			key: MobileControlKey,
 			x: number,
 			y: number,
-			w: number,
-			h: number,
 			settings: MobileControlSettings,
 			abilityId: string,
 			ability: any
@@ -50,24 +48,22 @@ class MobileControlsScene extends PhaserScene {
 					break;
 
 				default:
-					const relativeX = Math.trunc((x /*+ w / 2*/) / 960 * window.outerWidth * window.devicePixelRatio);
-					const relativeY = Math.trunc((y /*+ h / 2*/) / 540 * window.outerHeight * window.devicePixelRatio);
+					const relativeX = Math.trunc(x / 960 * window.outerWidth * window.devicePixelRatio);
+					const relativeY = Math.trunc(y / 540 * window.outerHeight * window.devicePixelRatio);
 
                     const uiScene = taro.renderer.scene.getScene('Ui') as UiScene;
 					let buttonExist = false;
                     Object.values(uiScene?.phaserButtonBar?.buttons).forEach((button) => {
                         if (button.key === key) {
-							console.log('changing button position')
-                            button.x = relativeX + button.size/2;
-                            button.y = relativeY + button.size/2;
+                            button.x = relativeX;
+                            button.y = relativeY;
                             buttonExist = true;
                         }
                     });
                     if (!buttonExist) {
-						console.log('creating new button')
 						const button = uiScene.phaserButtonBar.addButton(abilityId, ability, key);
-						button.x = relativeX + button.size/2;
-                        button.y = relativeY + button.size/2;
+						button.x = relativeX;
+                        button.y = relativeY;
 					};
 
 					break;

@@ -8,9 +8,9 @@ class PhaserButtonBar extends Phaser.GameObjects.Container{
     constructor(public scene: UiScene) {
 		super(scene);
         if (taro.isMobile) {
-            this.buttonSize = 70;
+            this.buttonSize = 50;
             this.buttonInterval = 6;
-            this.buttonRadius = 35;
+            this.buttonRadius = 25;
         }
         this.updatePosition();
         scene.add.existing(this);

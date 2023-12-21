@@ -28,7 +28,7 @@ var MobileControlsScene = /** @class */ (function (_super) {
         var scale = this.scale;
         var controls = this.controls = this.add.container();
         var joysticks = this.joysticks;
-        taro.mobileControls.on('add-control', function (key, x, y, w, h, settings, abilityId, ability) {
+        taro.mobileControls.on('add-control', function (key, x, y, settings, abilityId, ability) {
             var _a;
             switch (key) {
                 case 'movementWheel':
@@ -37,23 +37,21 @@ var MobileControlsScene = /** @class */ (function (_super) {
                     new PhaserJoystick(_this, x, y, settings);
                     break;
                 default:
-                    var relativeX_1 = Math.trunc((x /*+ w / 2*/) / 960 * window.outerWidth * window.devicePixelRatio);
-                    var relativeY_1 = Math.trunc((y /*+ h / 2*/) / 540 * window.outerHeight * window.devicePixelRatio);
+                    var relativeX_1 = Math.trunc(x / 960 * window.outerWidth * window.devicePixelRatio);
+                    var relativeY_1 = Math.trunc(y / 540 * window.outerHeight * window.devicePixelRatio);
                     var uiScene = taro.renderer.scene.getScene('Ui');
                     var buttonExist_1 = false;
                     Object.values((_a = uiScene === null || uiScene === void 0 ? void 0 : uiScene.phaserButtonBar) === null || _a === void 0 ? void 0 : _a.buttons).forEach(function (button) {
                         if (button.key === key) {
-                            console.log('changing button position');
-                            button.x = relativeX_1 + button.size / 2;
-                            button.y = relativeY_1 + button.size / 2;
+                            button.x = relativeX_1;
+                            button.y = relativeY_1;
                             buttonExist_1 = true;
                         }
                     });
                     if (!buttonExist_1) {
-                        console.log('creating new button');
                         var button = uiScene.phaserButtonBar.addButton(abilityId, ability, key);
-                        button.x = relativeX_1 + button.size / 2;
-                        button.y = relativeY_1 + button.size / 2;
+                        button.x = relativeX_1;
+                        button.y = relativeY_1;
                     }
                     ;
                     break;

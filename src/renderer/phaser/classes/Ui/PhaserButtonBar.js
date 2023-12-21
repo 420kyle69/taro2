@@ -23,9 +23,9 @@ var PhaserButtonBar = /** @class */ (function (_super) {
         _this.buttonInterval = 4;
         _this.buttonRadius = 3;
         if (taro.isMobile) {
-            _this.buttonSize = 70;
+            _this.buttonSize = 50;
             _this.buttonInterval = 6;
-            _this.buttonRadius = 35;
+            _this.buttonRadius = 25;
         }
         _this.updatePosition();
         scene.add.existing(_this);

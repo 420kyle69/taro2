@@ -105,7 +105,7 @@ var MobileControlsComponent = TaroEntity.extend({
 				var x = keybinding.mobilePosition.x * 2;
 				var y = keybinding.mobilePosition.y * 2;
 
-				self.addControl(key, x, y, 75, 64, keybinding, abilities);
+				self.addControl(key, x, y, keybinding, abilities);
 			}
 		});
 	},
@@ -183,9 +183,7 @@ var MobileControlsComponent = TaroEntity.extend({
 	},
 
 	// add a button or stick to the virtual controller
-	addControl: function (key, x, y, w, h, keybinding, abilities) {
-		w = w || 128;
-		h = h || 128;
+	addControl: function (key, x, y, keybinding, abilities) {
 
 		var self = this;
 
@@ -355,9 +353,9 @@ var MobileControlsComponent = TaroEntity.extend({
 		let ability = null;
 		if (abilityId) {
 			ability = abilities[abilityId];
-			this.emit('add-control', [ key, x, y, w, h, settings, abilityId, ability ]);
+			this.emit('add-control', [ key, x, y, settings, abilityId, ability ]);
 		} else {
-			this.emit('add-control', [ key, x, y, w, h, settings ]);
+			this.emit('add-control', [ key, x, y, settings ]);
 		}
 	},
 
