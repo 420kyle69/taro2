@@ -28,42 +28,34 @@
 - Mobile controls
 - and more!
 
-## Running a game server
-Moddio will run games made using [modd.io game editor](https://www.modd.io).
+## Running the game
 
-To run the game server, execute the following command:
-```
-npm run server
-```
-*The engine will use game.json stored in `/src` directory.
-
-You can download Game JSON from your modd.io's game's in-game editor. Go to `Editor` -> Click `Export JSON`.
-
-<img src="./assets/images/gamejson2.png" width="600" alt="How to get game json in game's in-game editor">
-
-Alternatively, you can download Game JSON from your modd.io's game's sandbox. ([example](https://modd.io/edit/two-houses)). Go to `Menu` -> Click `Export JSON`.
-
-<img src="./assets/images/gamejson.png" width="600" alt="How to get game json in game's sandbox">
-
-Next, rename the downloaded Game JSON as `game.json` and move it to the `./src` directory.
-
-## Quick start example - Run "Two Houses" locally
-
-Install [Node 18](https://nodejs.org) or later and then...
-
+Make sure you have [Node 18](https://nodejs.org) or later.
+First, setup the repo
 ```
 git clone https://github.com/moddio/moddio2.git
 cd moddio2
 npm install
+```
+
+Then, go to /src directory, and rename game-sample.json to game.json.
+Go back to the root directory and run the command below:
+```
 npm run server
 ```
 
-## Connecting to the game server
-Visit http://localhost:80 to start testing game.
+You can now play the game at http://localhost:80
 
-## How to create & edit games on modd.io
-You must use Moddio Game Editor which is available at [https://www.modd.io](https://www.modd.io).
-To learn how to use the game editor, visit here: https://learn.modd.io
+## How do I create a new game from scratch?
+Moddio games are created & edited using Moddio Game Editor available at [https://www.modd.io](https://www.modd.io).
+To learn how to use the game editor, visit [https://learn.modd.io](https://learn.modd.io).
+
+Once you create the game, you can export the game.json which you can use in your local installation.
+Inside the Moddio Game Editor, Go to `Menu` -> Click `Export Game`.
+
+<img src="./assets/images/gamejson2.png" width="600" alt="How to get game json in game's in-game editor">
+Next, rename the downloaded Game JSON as `game.json` and move it to the `./src` directory.
+
 
 ## How to contribute
 Moddio is completely free and open source under the MIT license, and we are always looking for more contributors.
