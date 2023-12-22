@@ -42,8 +42,6 @@ var PhaserButtonBar = /** @class */ (function (_super) {
         return button;
     };
     PhaserButtonBar.prototype.updatePosition = function () {
-        this.x = 0; //this.scene.sys.game.canvas.width / 2 + 35 - Object.values(this.buttons).length * (this.buttonSize + this.buttonInterval) / 2;
-        this.y = 0; //this.scene.sys.game.canvas.height - 20 - (this.buttonSize/2) - $(taro.client.getCachedElementById('unit-status')).height();
         if (taro.isMobile) {
             taro.mobileControls.updateButtonPos();
         }
