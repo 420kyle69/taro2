@@ -5152,8 +5152,11 @@ var TaroEntity = TaroObject.extend({
      * Update the position of the entities using the interpolation. This results smooth motion of the entities.
      */
 	_processTransform: function () {
+		const now = Date.now();
+		var tickDelta = now - this.lastTransformedAt;
+
 		if (
-			taro._currentTime - this.lastTransformedAt == 0 || // entity has already transformed for this tick		
+			tickDelta == 0 || // entity has already transformed for this tick		
 			this._translate == undefined ||
 			this._stats.currentBody == undefined // entity has no body
 		) {
@@ -5166,31 +5169,20 @@ var TaroEntity = TaroObject.extend({
 		let x = this._translate.x;
 		let y = this._translate.y;
 		let rotate = this._rotate.z;
-		
-		var prevTransform = this.prevKeyFrame[1];
 		var nextTransform = this.nextKeyFrame[1];
 
-		var prevTime = this.prevKeyFrame[0];
-		var nextTime = this.nextKeyFrame[0];
-
-		if (prevTime < nextTime && nextTransform) {
-		
-			x = this.interpolateValue(prevTransform[0], nextTransform[0], prevTime, taro._currentTime, nextTime)
-			y = this.interpolateValue(prevTransform[1], nextTransform[1], prevTime, taro._currentTime, nextTime)
-
-			// var xDiff = nextTransform[0] - x;
-			// var yDiff = nextTransform[1] - y;
-
-			// x += xDiff/2
-			// y += yDiff/2
+		// don't lerp is time remaining is less than 5ms
+		if (nextTransform) {
+			xDiff = nextTransform[0] - x;
+			yDiff = nextTransform[1] - y;
 			
-			// if (this == taro.client.selectedUnit && this.isTransforming()) 
-			// 	console.log(prevTransform[0], x, nextTransform[0], prevTime, taro._currentTime, nextTime)
+			// var previousX = x;
+			x += xDiff * tickDelta/taro.client.renderBuffer;
+			y += yDiff * tickDelta/taro.client.renderBuffer;
+
+			// if (this == taro.client.selectedUnit) 
+			// 	console.log(parseFloat(x).toFixed(0), parseFloat(x - previousX).toFixed(1), parseFloat(nextTransform[0]).toFixed(1), parseFloat(nextTime - prevTime).toFixed(0), timeRemaining)
 			
-			if (taro._currentTime > nextTime + 100) {
-				this.isTransforming(false);
-			}
-		
 			rotateStart = rotate;
 			rotateEnd = nextTransform[2];
 
