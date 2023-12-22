@@ -1,7 +1,7 @@
 
 <div align="center">
   <h2><a href="https://modd.io">Moddio Game Engine 2</a></h2>
-  <p>Moddio is a multiplayer-first game engine. It can support up to 64 concurrent players hosted on a $5 / month VM while running Box2D physics. Join us on <a href="https://discord.gg/XRe8T7K">Discord</a>
+  <p>Moddio is a Multiplayer-First Game Engine. It has a built-in server-authoritative netcode, including snapshot interpolation and client-side reconciliation. It can support 50+ concurrent players or 300+ moving entities hosted on a $5/month VM. Join us on <a href="https://discord.gg/XRe8T7K">Discord</a>
 </div>
 
 <div align="center">
@@ -16,12 +16,12 @@
 
 ## What's included in the box.
 - Box2D Physics
-- Netcode using UWS and LZ-string compression
-- Inventory & item system
-- Unit attributes (HP, Energy, etc)
-- Weapon system (melee & projectile)
-- Dialogues
-- Shops
+- Server-authoritative netcode using Websocket, Snapshot interpolation, Client-side reconciliation, and LZ-string compression
+- Inventory & Item system
+- Built-in Attributes (e.g. HP, Energy, etc) with regeneration rates
+- Built-in Item system (melee & projectile)
+- Dialogues (ideal for visual novel-style games)
+- Shops (for selling items)
 - Unit control (top-down WASD or platformer)
 - Client-side predicted projectile + unit movement (optional)
 - Unit AI including A* pathfinding
