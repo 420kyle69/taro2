@@ -3143,6 +3143,8 @@ var TaroEntity = TaroObject.extend({
 	teleportTo: function (x, y, rotate, teleportCamera) {
 		// console.log("teleportTo", x, y, rotate, this._stats.type)
 		this.isTeleporting = true;
+		this.prevKeyFrame[1] = [x, y, rotate];
+		this.nextKeyFrame[1] = [x, y, rotate];
         this.teleportCamera = teleportCamera;
 		this.teleportDestination = [x, y, rotate]
 		this.reconRemaining = undefined; // when a unit is teleported, end reconciliation
@@ -5150,8 +5152,11 @@ var TaroEntity = TaroObject.extend({
      * Update the position of the entities using the interpolation. This results smooth motion of the entities.
      */
 	_processTransform: function () {
+		const now = Date.now();
+		var tickDelta = now - this.lastTransformedAt;
+
 		if (
-			taro._currentTime - this.lastTransformedAt == 0 || // entity has already transformed for this tick		
+			tickDelta == 0 || // entity has already transformed for this tick		
 			this._translate == undefined ||
 			this._stats.currentBody == undefined // entity has no body
 		) {
@@ -5164,31 +5169,35 @@ var TaroEntity = TaroObject.extend({
 		let x = this._translate.x;
 		let y = this._translate.y;
 		let rotate = this._rotate.z;
-		
-		var prevTransform = this.prevKeyFrame[1];
 		var nextTransform = this.nextKeyFrame[1];
-
-		var prevTime = this.prevKeyFrame[0];
-		var nextTime = this.nextKeyFrame[0];
-
-		if (prevTime < nextTime && nextTransform) {
 		
-			x = this.interpolateValue(prevTransform[0], nextTransform[0], prevTime, taro._currentTime, nextTime)
-			y = this.interpolateValue(prevTransform[1], nextTransform[1], prevTime, taro._currentTime, nextTime)
+		// don't lerp is time remaining is less than 5ms
+		if (nextTransform) {
+			let nextTime = this.nextKeyFrame[0]
+			let timeRemaining = nextTime - now;
+			let xDiff = nextTransform[0] - x;
+			let yDiff = nextTransform[1] - y;
+			let keyFrameGap = nextTime - this.prevKeyFrame[0];
+			// don't lerp if time remaining is less than a tick
+			if (timeRemaining > tickDelta) {
+				// var previousX = x;
+				x += xDiff * tickDelta/taro.client.renderBuffer;
+				y += yDiff * tickDelta/taro.client.renderBuffer;
 
-			// var xDiff = nextTransform[0] - x;
-			// var yDiff = nextTransform[1] - y;
+				// if (this == taro.client.selectedUnit)
+				// 	console.log(parseFloat(x).toFixed(0), parseFloat(x - previousX).toFixed(1), parseFloat(nextTransform[0]).toFixed(1), parseFloat(nextTime - prevTime).toFixed(0), timeRemaining)
 
-			// x += xDiff/2
-			// y += yDiff/2
-			
-			// if (this == taro.client.selectedUnit && this.isTransforming()) 
-			// 	console.log(prevTransform[0], x, nextTransform[0], prevTime, taro._currentTime, nextTime)
-			
-			if (taro._currentTime > nextTime + 100) {
-				this.isTransforming(false);
+			} else { 
+				// if there's no more keyframe, rubberband to the target position and prevent further iteration in entitiesToRender
+				x += xDiff/2;
+				y += yDiff/2;
+
+				// if (this != taro.client.selectedUnit && this.isTransforming()) console.log(this._stats.type, taro._currentTime, nextTime, taro._currentTime - nextTime)
+				if (taro._currentTime > nextTime + 100) {
+					this.isTransforming(false);
+				}
 			}
-		
+
 			rotateStart = rotate;
 			rotateEnd = nextTransform[2];
 
