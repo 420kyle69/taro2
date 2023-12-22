@@ -12,7 +12,7 @@ var ShopComponent = TaroEntity.extend({
 
 			if (isLoggedIn) {
 				self.loadUserPurchases();
-			}else{
+			} else {
 				self.loadShopItems();
 			}
 
@@ -85,18 +85,19 @@ var ShopComponent = TaroEntity.extend({
 				// }
 				// else {
 				var isItemRequirementSetisfied = $(this).attr('requirementsSatisfied') == 'true';
-				var isItemAffordable = $(this).attr('isItemAffordable') == 'true';
+				// var isItemAffordable = $(this).attr('isItemAffordable') == 'true';
 				var isCoinTxRequired = $(this).attr('isCoinTxRequired') == 'true';
 				var itemPrice = $(this).attr('itemPrice');
+				var itemQuantity = $(this).attr('itemQuantity');
 				var name = $(this).attr('name');
 				if (!isItemRequirementSetisfied) {
 					self.purchaseWarning('requirement', name);
 					return;
 				}
-				if (!isItemAffordable) {
-					self.purchaseWarning('price', name);
-					return;
-				}
+				// if (!isItemAffordable) {
+				// 	self.purchaseWarning('price', name);
+				// 	return;
+				// }
 
 				if (itemPrice && (parseFloat(itemPrice) > 0) && window.userId && window.userId.toString() !== window.gameJson?.data?.defaultData?.owner?.toString()) {
 					window.userId && window.trackEvent && window.trackEvent('Coin Purchase', {
@@ -111,7 +112,15 @@ var ShopComponent = TaroEntity.extend({
 				}
 
 				if (isCoinTxRequired) {
-					self.verifyUserPinForPurchase($(this).attr('id'));
+					$('#purchasable-purchase-modal').removeData();
+					$('#purchasable-purchase-modal').data('purchasable', $(this).attr('id'));
+					$('#purchasable-purchase-modal').data('price', itemPrice);
+					$('#purchasable-purchase-modal').data('itemQuantity', itemQuantity);
+					$('#purchasable-purchase-modal').data('type', 'shop-item');
+					// quantity
+					$('#purchasable-purchase-modal').data('quantity', $(this).attr('quantity'));
+					$('#purchasable-purchase-modal').modal('show');
+					// self.verifyUserPinForPurchase($(this).attr('id'));
 				} else {
 					self.purchase($(this).attr('id'));
 				}
@@ -196,6 +205,7 @@ var ShopComponent = TaroEntity.extend({
 									// this event is handled by template.js twitter.bind('tweet') listener
 								}
 							} else {
+								$('#purchasable-purchase-modal').removeData();
 								$('#purchasable-purchase-modal').data('purchasable', itemId);
 								$('#purchasable-purchase-modal').data('price', price);
 								$('#purchasable-purchase-modal').modal('show');
@@ -267,51 +277,51 @@ var ShopComponent = TaroEntity.extend({
 	loadShopItems: function () {
 		let self = this;
 		$.ajax({
-			url:`/api/game/${gameId}/shopCount/`,
+			url: `/api/game/${gameId}/shopCount/`,
 			type: 'GET',
 			success: function (response) {
-				if(response.status == 'success') {
+				if (response.status == 'success') {
 					try {
 						let shopItems = response.message || [];
 
-					// check if shop item is object or array
-					let purchasableItems = [];
-					if (shopItems instanceof Array) {
-						purchasableItems = shopItems;
-					}
-					 else {
-						// get first key of object
-						purchasableItems = shopItems[Object.keys(shopItems)[0]];
-					}
-
-					purchasableItems = purchasableItems.slice(0, 4);
-
-					purchasableItems.forEach(function (purchasable, index) {
-						let html = `<div id="${purchasable._id}-locked" class="border rounded bg-light p-2 mx-2 ${index < 2 ? 'mb-3' : ''} col-5 d-flex flex-column justify-content-between">` +
-							'  <div class="my-2 text-center">' +
-							`	<img src=" ${purchasable.image} " style="height: 45px; width: 45px;" />` +
-							'	 </div>' +
-							'	 <div class="d-flex justify-content-center action-button-container">';
-						if (purchasable.soldForSocialShare) {
-							html += self.getTwitterBtnHtml(purchasable);
-						} else {
-							html += `<button class="btn btn-sm btn-outline-success" id="${purchasable._id}-locked-button"` +
-								`			 onClick="openLoginOptionFrameModal()">` +
-								'			 <div class="d-flex align-items-center">' +
-								'				 <img src="/assets/images/coin.svg" height="20" alt="Modd Coins" class="mr-1" />' +
-								`				 ${purchasable.price}` +
-								'			 </div>' +
-								'		 </button>';
+						// check if shop item is object or array
+						let purchasableItems = [];
+						if (shopItems instanceof Array) {
+							purchasableItems = shopItems;
+						}
+						else {
+							// get first key of object
+							purchasableItems = shopItems[Object.keys(shopItems)[0]];
 						}
 
-						html += '	 </div>' +
-							'</div>';
-						var skin = $(html);
-						$('#skins-list').append(skin);
-					});
-					$('#loading-skins').addClass('d-none');
-					$('#skins-list').removeClass('d-none').addClass('row');
-					}catch{
+						purchasableItems = purchasableItems.slice(0, 4);
+
+						purchasableItems.forEach(function (purchasable, index) {
+							let html = `<div id="${purchasable._id}-locked" class="border rounded bg-light p-2 mx-2 ${index < 2 ? 'mb-3' : ''} col-5 d-flex flex-column justify-content-between">` +
+								'  <div class="my-2 text-center">' +
+								`	<img src=" ${purchasable.image} " style="height: 45px; width: 45px;" />` +
+								'	 </div>' +
+								'	 <div class="d-flex justify-content-center action-button-container">';
+							if (purchasable.soldForSocialShare) {
+								html += self.getTwitterBtnHtml(purchasable);
+							} else {
+								html += `<button class="btn btn-sm btn-outline-success" id="${purchasable._id}-locked-button"` +
+									`			 onClick="openLoginOptionFrameModal()">` +
+									'			 <div class="d-flex align-items-center">' +
+									'				 <img src="/assets/images/coin.svg" height="20" alt="Modd Coins" class="mr-1" />' +
+									`				 ${purchasable.price}` +
+									'			 </div>' +
+									'		 </button>';
+							}
+
+							html += '	 </div>' +
+								'</div>';
+							var skin = $(html);
+							$('#skins-list').append(skin);
+						});
+						$('#loading-skins').addClass('d-none');
+						$('#skins-list').removeClass('d-none').addClass('row');
+					} catch {
 						$('#loading-skins').addClass('d-none');
 						$('#error-loading-shop').removeClass('d-none');
 					}
@@ -419,6 +429,7 @@ var ShopComponent = TaroEntity.extend({
 				text = '<strong>No room in inventory.</strong>';
 				break;
 			case 'purchase':
+				$('#purchasable-purchase-modal').modal('hide');
 				text = '<strong>Item purchased.</strong>';
 				break;
 		}
@@ -848,8 +859,8 @@ var ShopComponent = TaroEntity.extend({
 				prices += shopItem.price.playerAttributes[priceAttr];
 				prices += ' ';
 				prices += taro.game.data.attributeTypes[priceAttr] &&
-				 taro.clientSanitizer(taro.game.data.attributeTypes[priceAttr].name || '') ||
-				ownerPlayer._stats.attributes[priceAttr] && taro.clientSanitizer(ownerPlayer._stats.attributes[priceAttr].name || '');
+					taro.clientSanitizer(taro.game.data.attributeTypes[priceAttr].name || '') ||
+					ownerPlayer._stats.attributes[priceAttr] && taro.clientSanitizer(ownerPlayer._stats.attributes[priceAttr].name || '');
 				prices += '</p>';
 			}
 			html += '<div>';
@@ -898,12 +909,12 @@ var ShopComponent = TaroEntity.extend({
 		if (!taro.game.data.shops) return;
 		self.currentType = type || self.currentType;
 		if (!self.currentType) return;
-		
+
 		var shopItems = {};
 
-		var shopItemsKeys = self.getSortedShopItems({data: taro.game?.data?.shops[self.currentType], key: 'itemTypes' });
-		var shopUnitsKeys = self.getSortedShopItems({data: taro.game?.data?.shops[self.currentType], key: 'unitTypes' });
-		
+		var shopItemsKeys = self.getSortedShopItems({ data: taro.game?.data?.shops[self.currentType], key: 'itemTypes' });
+		var shopUnitsKeys = self.getSortedShopItems({ data: taro.game?.data?.shops[self.currentType], key: 'unitTypes' });
+
 		var shopItems = taro.game.data.shops[self.currentType] ? rfdc()(taro.game.data.shops[self.currentType].itemTypes) : [];
 		var shopUnits = taro.game.data.shops[self.currentType] ? taro.game.data.shops[self.currentType].unitTypes : [];
 		var isDismissible = taro.game.data.shops[self.currentType] && taro.game.data.shops[self.currentType].dismissible != undefined ? taro.game.data.shops[self.currentType].dismissible : true;
@@ -1026,6 +1037,9 @@ var ShopComponent = TaroEntity.extend({
 						style: 'font-size: 16px; width: 250px;',
 						html: self.getItemPopoverHtml(item, shopItem)
 					});
+
+					var itemQuantity = window.$.isNumeric(shopItem.quantity) ? parseInt(shopItem.quantity || 1) : 1;
+
 					var bgColor = requirementsSatisfied && isItemAffordable ? 'bg-light-green' : 'bg-light-red';
 					var itemImage = $('<div/>', {
 						id: shopItemsKeys[i],
@@ -1037,6 +1051,7 @@ var ShopComponent = TaroEntity.extend({
 						isItemAffordable: !!isItemAffordable,
 						isCoinTxRequired: !!shopItem.price.coins,
 						itemPrice: shopItem.price.coins || 0,
+						itemQuantity
 					});
 
 					if (
@@ -1060,6 +1075,9 @@ var ShopComponent = TaroEntity.extend({
 						}
 
 						var itemName = '<div class=\'mx-2 mt-2 mb-0 no-selection\' style=\'line-height:0.7  !important; overflow-wrap: break-word;\'><small>';
+						if (itemQuantity > 1) {
+							itemName += `${itemQuantity}x `;
+						}
 						itemName += taro.clientSanitizer(item.name);
 						itemName += '</small></div>';
 
@@ -1075,25 +1093,25 @@ var ShopComponent = TaroEntity.extend({
 							html: true,
 							trigger: 'manual'
 						})
-						.on("mouseenter", function () {
-							$(this).popover("show");
-						}).on("mouseleave", function () {
-							var _this = this;
-							if (!$(".popover:hover").length) {
-								// setTimeout(function () {
-								// 	if (!$(".popover:hover").length) {
-								// 		$(_this).popover("hide");
-								// 	}
-								// }, 50);
-								$(_this).popover("hide");
-							}
-							else {
-								$('.popover').mouseleave(function() {
+							.on("mouseenter", function () {
+								$(this).popover("show");
+							}).on("mouseleave", function () {
+								var _this = this;
+								if (!$(".popover:hover").length) {
+									// setTimeout(function () {
+									// 	if (!$(".popover:hover").length) {
+									// 		$(_this).popover("hide");
+									// 	}
+									// }, 50);
 									$(_this).popover("hide");
-									$(this).off('mouseleave');
-								});
-							}
-						});
+								}
+								else {
+									$('.popover').mouseleave(function () {
+										$(_this).popover("hide");
+										$(this).off('mouseleave');
+									});
+								}
+							});
 
 						modalBody.append(
 							itemImage.append(combine)
@@ -1308,7 +1326,7 @@ var ShopComponent = TaroEntity.extend({
 
 			if (item.status == 'not_purchased') {
 
-				if(window.isInMobileApp()) {
+				if (window.isInMobileApp()) {
 					continue;
 				}
 
@@ -1416,13 +1434,13 @@ var ShopComponent = TaroEntity.extend({
 				let originalHeight = `${image.height / itemDetails.cellSheet.rowCount}px`;
 				let originalWidth = `${image.width / itemDetails.cellSheet.columnCount}px`;
 				// clipping = "height:" + originalHeight + "px;width:" + originalWidth + "px;background:url('" + item.image + "') 0px 0px no-repeat;";
-				
+
 				img.style = `height:${originalHeight};width:${originalWidth};background:url('${image.src}');src:'';`;
 				// img.style.height = originalHeight;
 				// img.style.width = originalWidth;
 				// img.style.background = `url('${image.src}')`;
 				// img.src = '';
-			
+
 				if (itemDetails.cellSheet.rowCount <= 1 && itemDetails.cellSheet.columnCount <= 1) {
 					img.style.backgroundRepeat = 'no-repeat';
 					img.style.backgroundPosition = 'center center';
@@ -1492,7 +1510,7 @@ var ShopComponent = TaroEntity.extend({
 				taro.network.send('buyItem', { id });
 				return;
 			}
-			
+
 			window.validateUserPin('taro.shop.purchase', id, serverId);
 		} else {
 			taro.network.send('buyItem', { id });
