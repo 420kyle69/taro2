@@ -5170,19 +5170,34 @@ var TaroEntity = TaroObject.extend({
 		let y = this._translate.y;
 		let rotate = this._rotate.z;
 		var nextTransform = this.nextKeyFrame[1];
-
+		
 		// don't lerp is time remaining is less than 5ms
 		if (nextTransform) {
-			xDiff = nextTransform[0] - x;
-			yDiff = nextTransform[1] - y;
-			
-			// var previousX = x;
-			x += xDiff * tickDelta/taro.client.renderBuffer;
-			y += yDiff * tickDelta/taro.client.renderBuffer;
+			let nextTime = this.nextKeyFrame[0]
+			let timeRemaining = nextTime - now;
+			let xDiff = nextTransform[0] - x;
+			let yDiff = nextTransform[1] - y;
+			let keyFrameGap = nextTime - this.prevKeyFrame[0];
+			// don't lerp if time remaining is less than a tick
+			if (timeRemaining > tickDelta) {
+				// var previousX = x;
+				x += xDiff * tickDelta/taro.client.renderBuffer;
+				y += yDiff * tickDelta/taro.client.renderBuffer;
 
-			// if (this == taro.client.selectedUnit) 
-			// 	console.log(parseFloat(x).toFixed(0), parseFloat(x - previousX).toFixed(1), parseFloat(nextTransform[0]).toFixed(1), parseFloat(nextTime - prevTime).toFixed(0), timeRemaining)
-			
+				// if (this == taro.client.selectedUnit)
+				// 	console.log(parseFloat(x).toFixed(0), parseFloat(x - previousX).toFixed(1), parseFloat(nextTransform[0]).toFixed(1), parseFloat(nextTime - prevTime).toFixed(0), timeRemaining)
+
+			} else { 
+				// if there's no more keyframe, rubberband to the target position and prevent further iteration in entitiesToRender
+				x += xDiff/2;
+				y += yDiff/2;
+
+				// if (this != taro.client.selectedUnit && this.isTransforming()) console.log(this._stats.type, taro._currentTime, nextTime, taro._currentTime - nextTime)
+				if (taro._currentTime > nextTime + 100) {
+					this.isTransforming(false);
+				}
+			}
+
 			rotateStart = rotate;
 			rotateEnd = nextTransform[2];
 
