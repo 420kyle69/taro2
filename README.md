@@ -30,7 +30,7 @@
 
 ## Running the game
 
-Make sure you have [Node 18](https://nodejs.org) or later.
+Make sure you have [Node 16](https://nodejs.org) or later.
 First, setup the repo
 ```
 git clone https://github.com/moddio/moddio2.git
