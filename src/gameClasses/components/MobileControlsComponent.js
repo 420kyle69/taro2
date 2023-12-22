@@ -35,10 +35,9 @@ var MobileControlsComponent = TaroEntity.extend({
 					var unit = taro.$(taro.client.myPlayer._stats.selectedUnitId);
 					if (unit && unit._stats.controls) {
                         self.emit('orientationchange', screen.orientation.type);
-						var unitAbilities = unit._stats.controls.abilities;
-						if (unitAbilities) {
+						if (unit._stats.controls.abilities) {
 							// update mobile controls
-							taro.mobileControls.configure(unitAbilities);
+							taro.mobileControls.configure(unit._stats.controls);
 						}
 					}
 				}
@@ -63,7 +62,7 @@ var MobileControlsComponent = TaroEntity.extend({
 			if (taro.client && taro.client.myPlayer && taro.network.id() == taro.client.myPlayer._stats.clientId) {
 				var unit = taro.$(taro.client.myPlayer._stats.selectedUnitId);
 				if (unit && unit._stats.controls) {
-					if (unit._stats.controls.abilities) {
+					if (unit._stats.controls.keybindings) {
 						// update mobile controls
 						taro.mobileControls.configure(unit._stats.controls);
 					}
