@@ -161,6 +161,37 @@ var ActionComponent = TaroEntity.extend({
 							break;
 						}
 
+					case 'repeatWithDelay':
+						{
+							var count = self._script.variable.getValue(action.count, vars);
+							var repeatActions = self._script.variable.getValue(action.actions, vars);
+							var delay = self._script.variable.getValue(action.number, vars);
+						
+							const runWithDelay = (i) => {
+								console.log("hello world");
+								returnValue = self.run(repeatActions, vars, actionPath);
+					
+								if (returnValue == 'break' || vars.break) {
+									vars.break = false;
+								} else if (returnValue == 'return') {
+										throw new Error('return without executing script');
+								}
+					
+								// Continue to the next iteration if not reached the count
+								if (i < count - 1) {
+									setTimeout(() => runWithDelay(i + 1), delay);
+								}
+							};
+					
+							if (!isNaN(count) && count > 0) {
+								// Start the loop immediately with the first iteration
+								runWithDelay(0);
+							}
+					
+							break;
+						}
+						
+
 					case 'runScript':
 						let previousScriptId = self._script.currentScriptId;
 						self._script.runScript(action.scriptName, vars);
