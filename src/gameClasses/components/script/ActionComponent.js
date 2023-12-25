@@ -168,7 +168,6 @@ var ActionComponent = TaroEntity.extend({
 							var delay = self._script.variable.getValue(action.number, vars);
 						
 							const runWithDelay = (i) => {
-								console.log("hello world");
 								returnValue = self.run(repeatActions, vars, actionPath);
 					
 								if (returnValue == 'break' || vars.break) {
