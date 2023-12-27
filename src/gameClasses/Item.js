@@ -559,7 +559,7 @@ var Item = TaroEntityPhysics.extend({
 						var unitAttributeBonuses = self._stats.bonus.consume.unitAttribute;
 						if (unitAttributeBonuses) {
 							for (var attrId in unitAttributeBonuses) {
-								var newValue = owner.attribute.getValue(attrId) + parseFloat(unitAttributeBonuses[attrId]);
+								var newValue = parseFloat(owner.attribute.getValue(attrId)) + parseFloat(unitAttributeBonuses[attrId]);
 								attrData.attributes[attrId] = owner.attribute.update(attrId, newValue);
 							}
 						}
