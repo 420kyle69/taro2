@@ -201,6 +201,10 @@ var PlayerUiComponent = TaroEntity.extend({
 			updateCoins(newValue);
 		}
 
+		if ($('#modd-item-shop-modal').hasClass('show') && $('[id=item]').hasClass('active')) {
+			// update the shop based on the new coin value
+			taro.shop.openItemShop(taro.shop.currentType, 'items');
+		}
 	},
 
 	showFriendsModal: function (config) {
