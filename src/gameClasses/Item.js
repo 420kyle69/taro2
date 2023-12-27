@@ -316,6 +316,7 @@ var Item = TaroEntityPhysics.extend({
 						if (self._stats.bulletStartPosition) {
 							var rotate = this._rotate.z;
 							let bulletY = self._stats.bulletStartPosition.y || 0;
+							let bulletX = (owner._stats.flip === 1 ? -1 : 1);
 							
 							if (owner && self._stats.currentBody && self._stats.currentBody.jointType == 'weldJoint') {
 								rotate = owner._rotate.z;
@@ -330,10 +331,9 @@ var Item = TaroEntityPhysics.extend({
 
 							// item is flipped, then mirror the rotation
 
-
 							var bulletStartPosition = {
-								x: (owner._translate.x + self.anchoredOffset.x) + (self._stats.bulletStartPosition.x * Math.cos(rotate)) + (bulletY * Math.sin(rotate)),
-								y: (owner._translate.y + self.anchoredOffset.y) + (self._stats.bulletStartPosition.x * Math.sin(rotate)) - (bulletY * Math.cos(rotate))
+								x: (owner._translate.x + self.anchoredOffset.x) + (self._stats.bulletStartPosition.x * bulletX * Math.cos(rotate)) + (bulletY * Math.sin(rotate)),
+								y: (owner._translate.y + self.anchoredOffset.y) + ((self._stats.bulletStartPosition.x * bulletX * Math.sin(rotate)) - (bulletY * Math.cos(rotate))) //* bulletX
 							};
 
 							if (
