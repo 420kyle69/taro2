@@ -1,6 +1,6 @@
 class UiScene extends PhaserScene {
 	tooltip: DevTooltip;
-	abilityBar: AbilityBar;
+	phaserButtonBar: PhaserButtonBar;
 	constructor() {
 		super({ key: 'Ui', active: true });
 	}
@@ -11,29 +11,9 @@ class UiScene extends PhaserScene {
 
 	create (): void {
 		if (!taro.isMobile) {
-			//this.tooltip = new DevTooltip(this);
+			return;
 		}
-		const abilityBar = this.abilityBar = new AbilityBar(this);
-
-		taro.client.on('create-ability-bar', (data: {keybindings: Record<string, ControlAbility>, abilities: Record<string, UnitAbility>}) => {
-			const keybindings = data.keybindings;
-			const abilities = data.abilities;
-			abilityBar.clear();
-			if (abilities) {
-				Object.entries(abilities).forEach(([abilityId, ability]) => {
-					let key;
-					if (keybindings && (taro.isMobile && ability.visibility !== 'desktop' && ability.visibility !== 'none') ||
-					(!taro.isMobile && ability.visibility !== 'mobile' && ability.visibility !== 'none')) {
-						Object.entries(keybindings).forEach(([keybindingKey, keybinding]) => {
-							if (keybinding.keyDown?.abilityId === abilityId || keybinding.keyUp?.abilityId === abilityId) {
-								key = keybindingKey;
-							}
-						});
-						abilityBar.addButton(abilityId, ability, key);
-					}
-				});
-			}
-		});
+		const phaserButtonBar = this.phaserButtonBar = new PhaserButtonBar(this);
 
 		taro.client.on('enterMapTab', () => {
 			this.scene.setVisible(false);
@@ -43,28 +23,28 @@ class UiScene extends PhaserScene {
 			this.scene.setVisible(true);
 		});
 
-		taro.client.on('start-press-key', (abilityId: string) => {
-			abilityBar.buttons[abilityId]?.activate(true);
+		taro.client.on('start-press-key', (key: string) => {
+			phaserButtonBar.buttons[key]?.activate(true);
 		});
 
-		taro.client.on('stop-press-key', (abilityId: string) => {
-			abilityBar.buttons[abilityId]?.activate(false);
+		taro.client.on('stop-press-key', (key: string) => {
+			phaserButtonBar.buttons[key]?.activate(false);
 		});
 
-		taro.client.on('start-casting', (abilityId: string) => {
-			abilityBar.buttons[abilityId]?.casting(true);
+		taro.client.on('start-casting', (key: string) => {
+			phaserButtonBar.buttons[key]?.casting(true);
 		});
 
-		taro.client.on('stop-casting', (abilityId: string) => {
-			abilityBar.buttons[abilityId]?.casting(false);
+		taro.client.on('stop-casting', (key: string) => {
+			phaserButtonBar.buttons[key]?.casting(false);
 		});
 
-		taro.client.on('start-ability-cooldown', (abilityId: string) => {
-			abilityBar.buttons[abilityId]?.cooldown(true);
+		taro.client.on('start-ability-cooldown', (key: string) => {
+			phaserButtonBar.buttons[key]?.cooldown(true);
 		});
 
-		taro.client.on('stop-ability-cooldown', (abilityId: string) => {
-			abilityBar.buttons[abilityId]?.cooldown(false);
+		taro.client.on('stop-ability-cooldown', (key: string) => {
+			phaserButtonBar.buttons[key]?.cooldown(false);
 		});
 	}
 
