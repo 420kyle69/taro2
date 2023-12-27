@@ -1,5 +1,4 @@
-class AbilityButton extends Phaser.GameObjects.Container {
-    name: string;
+class PhaserButton extends Phaser.GameObjects.Container {
 	button: any;
 	image: Phaser.GameObjects.Image;
 	label: Phaser.GameObjects.BitmapText;
@@ -23,12 +22,10 @@ class AbilityButton extends Phaser.GameObjects.Container {
 		x: number,
 		y: number,
         public size: number,
-        public radius: number,
-
+        public radius: number
 		//bar: Phaser.GameObjects.Container,
 	) {
         super(scene);
-		this.name = ability.name;
         let backgroundColor = this.backgroundColor = 0x000000;
         if (taro.isMobile) backgroundColor = this.backgroundColor = 0x333333;
         this.activeColor = 0xFFFF00;
@@ -54,20 +51,20 @@ class AbilityButton extends Phaser.GameObjects.Container {
         // label
         if (key && key.length < 2) {
             const label = this.label = scene.add.bitmapText(
-                - 7 + size / 2, + 7 - size / 2,
+                - size / 10 + size / 2, + size / 10 - size / 2,
                 BitmapFontManager.font(scene, 'Verdana', true, false, '#FFFFFF'),
-                key.toUpperCase(), 16
+                key.toUpperCase(), 14 * window.devicePixelRatio
             );
             label.setOrigin(0.5);
             label.letterSpacing = 1.3;
             this.add(label);
         }
 		// cooldown label
-        if (ability.cooldown > 0) {
+        if (ability && ability.cooldown > 0) {
             const cooldownLabel = this.cooldownLabel = scene.add.bitmapText(
                 0, 0,
                 BitmapFontManager.font(scene, 'Verdana', false, true, '#FFFF00'),
-                '', 24
+                '', 24 * window.devicePixelRatio
             );
             cooldownLabel.setOrigin(0.5);
 			cooldownLabel.letterSpacing = 1.3;
@@ -86,51 +83,34 @@ class AbilityButton extends Phaser.GameObjects.Container {
                 this.activate(true);
                 if (clicked) return;
                 clicked = true;
-
-                if (key) {
-                    taro.client.emit('key-down', {
-                        device: 'key', key: key.toLowerCase()
-                    });
-                } else {
-                    // ability have no keybinding
-                }
+                taro.client.emit('key-down', {
+                    device: 'key', key: key.toLowerCase()
+                });
             });
             const onPointerEnd = () => {
                 mobileControlScene.enablePointerNextUpdate = true;
                 this.activate(false);
                 if (!clicked) return;
                 clicked = false;
-                
-                if (key) {
-                    taro.client.emit('key-up', {
-                        device: 'key', key: key.toLowerCase()
-                    });
-                } else {
-                    // ability have no keybinding
-                }
+                taro.client.emit('key-up', {
+                    device: 'key', key: key.toLowerCase()
+                });
             };
             button.on('pointerup', onPointerEnd);
             button.on('pointerout', onPointerEnd);
         } else {
             button.on('pointerdown', () => {
-                taro.client.isPressingAbility = true;
-                if (key) {
-                    taro.client.emit('key-down', {
-                        device: 'key', key: key.toLowerCase()
-                    });
-                } else {
-                    // ability have no keybinding
-                }
+                taro.client.isPressingPhaserButton = true;
+                taro.client.emit('key-down', {
+                    device: 'key', key: key.toLowerCase()
+                });
+                
             });
             button.on('pointerup', () => {
-                taro.client.isPressingAbility = false;
-                if (key) {
-                    taro.client.emit('key-up', {
-                        device: 'key', key: key.toLowerCase()
-                    });
-                } else {
-                    // ability have no keybinding
-                }
+                taro.client.isPressingPhaserButton = false;
+                taro.client.emit('key-up', {
+                    device: 'key', key: key.toLowerCase()
+                });
             });
 		    button.on('pointerover', () => {
 		    	//scene.tooltip.showMessage(name, tooltipText);

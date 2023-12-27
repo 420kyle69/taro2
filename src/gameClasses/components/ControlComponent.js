@@ -86,20 +86,20 @@ var ControlComponent = TaroEntity.extend({
 			taro.client.on('key-down', (data) => {
 				const unit = this._entity.getSelectedUnit();
 				const unitAbility = unit._stats.controls.abilities[data.key];
-				this.keyDownAbility(unit, unitAbility.keyDown);
+				this.keyDownAbility(unit, unitAbility.keyDown, data.key);
 				taro.network.send('playerKeyDown', { device: data.device, key: data.key });
 			});
 			taro.client.on('key-up', (data) => { 
 				const unit = this._entity.getSelectedUnit();
 				const unitAbility = unit._stats.controls.abilities[data.key];
-				this.keyUpAbility(unit, unitAbility);
+				this.keyUpAbility(unit, unitAbility, data.key);
 				taro.network.send('playerKeyUp', { device: data.device, key: data.key });
 			});
 		}
 	},  
 
 	keyDown: function (device, key) {
-		if(taro.developerMode.shouldPreventKeybindings() || (taro.isClient && this._entity._stats.clientId === taro.network.id() && taro.client.isPressingAbility)) {
+		if(taro.developerMode.shouldPreventKeybindings() || (taro.isClient && this._entity._stats.clientId === taro.network.id() && taro.client.isPressingPhaserButton)) {
 			return;
 		}
 
@@ -166,7 +166,7 @@ var ControlComponent = TaroEntity.extend({
 				}
 
 				if (unitAbility && unitAbility.keyDown && unit.ability) {
-					this.keyDownAbility(unit, unitAbility.keyDown);
+					this.keyDownAbility(unit, unitAbility.keyDown, key);
 				} else if (
 					key == '1' || key == '2' || key == '3' || key == '4' ||
 					key == '5' || key == '6' || key == '7' || key == '8' || key == '9'
@@ -248,7 +248,7 @@ var ControlComponent = TaroEntity.extend({
 					unitAbility = unit._stats.controls.abilities[key];
 				}
 
-				this.keyUpAbility(unit, unitAbility);
+				this.keyUpAbility(unit, unitAbility, key);
 			}
 		}
 
@@ -263,33 +263,33 @@ var ControlComponent = TaroEntity.extend({
 		}
 	},
 
-	keyDownAbility: function (unit, keyDown) {
+	keyDownAbility: function (unit, keyDown, key) {
 		if (taro.client && taro.client.inputDelay && taro.client.inputDelay > 0) {
 			setTimeout(function () {
-				unit.ability.cast(keyDown);
+				unit.ability.cast(keyDown, key);
 			}, taro.client.inputDelay);
 		} else {
-			unit.ability.cast(keyDown);
+			unit.ability.cast(keyDown, key);
 		}
 
 		if (taro.isClient && this._entity._stats.clientId === taro.network.id() && keyDown.abilityId) {
-			taro.client.emit('start-press-key', keyDown.abilityId);
+			taro.client.emit('start-press-key', key);
 		}
 	},
 
-	keyUpAbility: function (unit, unitAbility) {
+	keyUpAbility: function (unit, unitAbility, key) {
 		if (unitAbility && unitAbility.keyUp && unit.ability) {
 			if (taro.client && taro.client.inputDelay && taro.client.inputDelay > 0) {
 				setTimeout(function () {
-					unit.ability.cast(unitAbility.keyUp);
+					unit.ability.cast(unitAbility.keyUp, key);
 				}, taro.client.inputDelay);
 			} else {
-				unit.ability.cast(unitAbility.keyUp);
+				unit.ability.cast(unitAbility.keyUp, key);
 			}
 		}
 
 		if (taro.isClient && this._entity._stats.clientId === taro.network.id() && unitAbility?.keyDown?.abilityId) {
-			taro.client.emit('stop-press-key', unitAbility.keyDown.abilityId);
+			taro.client.emit('stop-press-key', key);
 		}
 	},
 

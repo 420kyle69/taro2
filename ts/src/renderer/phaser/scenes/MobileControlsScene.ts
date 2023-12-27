@@ -32,9 +32,9 @@ class MobileControlsScene extends PhaserScene {
 			key: MobileControlKey,
 			x: number,
 			y: number,
-			w: number,
-			h: number,
-			settings: MobileControlSettings
+			settings: MobileControlSettings,
+			abilityId: string,
+			ability: any
 		) => {
 
 			switch (key) {
@@ -48,86 +48,23 @@ class MobileControlsScene extends PhaserScene {
 					break;
 
 				default:
-					const relativeX = Math.trunc((x + w / 2) / 960 * window.outerWidth * window.devicePixelRatio - w / 2);
-					const relativeY = Math.trunc((y + h / 2) / 540 * window.outerHeight * window.devicePixelRatio);
+					const relativeX = Math.trunc(x / 960 * window.outerWidth * window.devicePixelRatio);
+					const relativeY = Math.trunc(y / 540 * window.outerHeight * window.devicePixelRatio);
 
                     const uiScene = taro.renderer.scene.getScene('Ui') as UiScene;
-                    let buttonExist = false;
-                    Object.values(uiScene?.abilityBar?.buttons).forEach((button) => {
+					let buttonExist = false;
+                    Object.values(uiScene?.phaserButtonBar?.buttons).forEach((button) => {
                         if (button.key === key) {
-                            button.x = relativeX - uiScene.abilityBar.x + button.size/2;
-                            button.y = relativeY - uiScene.abilityBar.y + button.size/2;
+                            button.x = relativeX;
+                            button.y = relativeY;
                             buttonExist = true;
                         }
                     });
-                    if (buttonExist) return;
-
-					const text = key.toUpperCase();
-
-					const button = this.add.image(relativeX, relativeY, 'mobile-button-up')
-						.setDisplaySize(w, h)
-						.setOrigin(0)
-						.setAlpha(0.6);
-					controls.add(button);
-
-					if (text === 'BUTTON1') {
-						const icon = this.add.image(
-							relativeX + w/2, relativeY + h/2,
-							'mobile-button-icon'
-						);
-						icon.setScale(0.5);
-						controls.add(icon);
-					} else {
-						const label = this.add.bitmapText(
-							relativeX + w/2, relativeY + h/2,
-							BitmapFontManager.font(this,
-								'Arial', true, false, '#FFFFFF'
-							)
-						);
-						label.setText(BitmapFontManager.sanitize(
-							label.fontData, text
-						));
-						label.setCenterAlign();
-						label.setFontSize(24);
-						label.setOrigin(0.5);
-						label.letterSpacing = -0.4;
-						controls.add(label);
-						if (this.renderer.type === Phaser.CANVAS) {
-							const rt = this.add.renderTexture(
-								label.x, label.y, label.width, label.height
-							);
-							rt.draw(label, label.width/2, label.height/2);
-							rt.setOrigin(0.5);
-							controls.add(rt);
-
-							label.visible = false;
-						}
-					}
-
-					button.setInteractive();
-
-					let clicked = false;
-
-					button.on('pointerdown', () => {
-						this.disablePointerEvents = true;
-
-						if (clicked) return;
-						clicked = true;
-						button.setTexture('mobile-button-down');
-
-						settings.onStart && settings.onStart();
-					});
-					const onPointerEnd = () => {
-						this.enablePointerNextUpdate = true;
-
-						if (!clicked) return;
-						clicked = false;
-						button.setTexture('mobile-button-up');
-
-						settings.onEnd && settings.onEnd();
+                    if (!buttonExist) {
+						const button = uiScene.phaserButtonBar.addButton(abilityId, ability, key);
+						button.x = relativeX;
+                        button.y = relativeY;
 					};
-					button.on('pointerup', onPointerEnd);
-					button.on('pointerout', onPointerEnd);
 
 					break;
 			}
