@@ -570,8 +570,8 @@ var Unit = TaroEntityPhysics.extend({
 						taro.server.consumeCoinFromUser(ownerPlayer, shopData.price.coins, itemTypeId);
 
 						ownerPlayer.streamUpdateData([{
-								coins: global.coinHelper.subtract(ownerPlayer._stats.coins, shopData.price.coins)
-						}])
+							coins: global.coinHelper.subtract(ownerPlayer._stats.coins, shopData.price.coins)
+						}]);
 					}
 				}
 

@@ -196,6 +196,11 @@ var PlayerUiComponent = TaroEntity.extend({
 		if (coin != NaN) {
 			$('.player-coins').html(parseFloat(newValue));
 		}
+
+		if (typeof updateCoins === 'function') {
+			updateCoins(newValue);
+		}
+
 	},
 
 	showFriendsModal: function (config) {
