@@ -614,8 +614,11 @@ var Player = TaroEntity.extend({
 								break;
 
 							case 'coins':
+								const isCoinsChanged = self._stats[attrName] !== newValue;
 								self._stats[attrName] = newValue;
-								taro.playerUi.updatePlayerCoin(newValue);
+								if (isCoinsChanged) {
+									taro.playerUi.updatePlayerCoin(newValue);
+								}
 								break;
 
 							case 'roleIds':

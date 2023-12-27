@@ -1038,7 +1038,8 @@ var ShopComponent = TaroEntity.extend({
 						html: self.getItemPopoverHtml(item, shopItem)
 					});
 
-					var itemQuantity = window.$.isNumeric(shopItem.quantity) ? parseInt(shopItem.quantity || 1) : 1;
+					// check if item quantity is set for shop else use default item quantity
+					var itemQuantity = window.$.isNumeric(shopItem.quantity) ? parseInt(shopItem.quantity || 1) : (item.quantity || 1);
 
 					var bgColor = requirementsSatisfied && isItemAffordable ? 'bg-light-green' : 'bg-light-red';
 					var itemImage = $('<div/>', {
