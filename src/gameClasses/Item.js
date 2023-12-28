@@ -614,8 +614,8 @@ var Item = TaroEntityPhysics.extend({
 		if (taro.isServer) {
 			// if server authoritative mode is enabled, then stream item quantity to the item's owner player only
 			if (taro.runMode == 0) {
-				var playerId = this.getOwnerUnit()?.getOwner()?._id;
-				this.streamUpdateData([{ quantity: qty }], playerId);
+				var clientId = this.getOwnerUnit()?.getOwner()?._stats.clientId;
+				this.streamUpdateData([{ quantity: qty }], clientId);
 			}
 
 			// item's set to be removed when empty
