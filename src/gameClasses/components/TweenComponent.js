@@ -18,7 +18,7 @@ var TweenComponent = TaroEntity.extend({
 			},
 			wobble: {
 				type: 'swing',
-				loopCount: -1,
+				loopCount: 1,
 				keyFrames: [[0, [0, 0, 0]], [50, [0, 0, 0.1]], [100, [0, 0, -0.1]], [50, [0, 0, 0]]]
 			},
 			poke: {
