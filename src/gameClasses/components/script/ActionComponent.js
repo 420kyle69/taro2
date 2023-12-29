@@ -1956,7 +1956,7 @@ var ActionComponent = TaroEntity.extend({
 						if (position && player && player._stats.clientId) {
 							if (taro.isServer) {
 								taro.network.send('camera', { cmd: 'positionCamera', position: position }, player._stats.clientId);
-							} else {
+							} else if (player._stats.clientId === taro.network.id()) {
 								taro.client.emit('stop-follow');
 								taro.client.emit('position-camera', [position.x, position.y]);
 							}
