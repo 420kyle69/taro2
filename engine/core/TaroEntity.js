@@ -5152,7 +5152,7 @@ var TaroEntity = TaroObject.extend({
      * Update the position of the entities using the interpolation. This results smooth motion of the entities.
      */
 	_processTransform: function () {
-		const now = Date.now();
+		const now = taro._currentTime;
 		var tickDelta = now - this.lastTransformedAt;
 
 		if (
@@ -5169,35 +5169,25 @@ var TaroEntity = TaroObject.extend({
 		let x = this._translate.x;
 		let y = this._translate.y;
 		let rotate = this._rotate.z;
+		var prevTransform = this.prevKeyFrame[1];
 		var nextTransform = this.nextKeyFrame[1];
 		
 		// don't lerp is time remaining is less than 5ms
-		if (nextTransform) {
+		if (prevTransform && nextTransform) {
+			let prevTime = this.prevKeyFrame[0]
 			let nextTime = this.nextKeyFrame[0]
-			let timeRemaining = nextTime - now;
-			let xDiff = nextTransform[0] - x;
-			let yDiff = nextTransform[1] - y;
-			let keyFrameGap = nextTime - this.prevKeyFrame[0];
-			// don't lerp if time remaining is less than a tick
-			if (timeRemaining > tickDelta) {
-				// var previousX = x;
-				x += xDiff * tickDelta/taro.client.renderBuffer;
-				y += yDiff * tickDelta/taro.client.renderBuffer;
-
-				// if (this == taro.client.selectedUnit)
-				// 	console.log(parseFloat(x).toFixed(0), parseFloat(x - previousX).toFixed(1), parseFloat(nextTransform[0]).toFixed(1), parseFloat(nextTime - prevTime).toFixed(0), timeRemaining)
-
-			} else { 
-				// if there's no more keyframe, rubberband to the target position and prevent further iteration in entitiesToRender
-				x += xDiff/2;
-				y += yDiff/2;
-
-				// if (this != taro.client.selectedUnit && this.isTransforming()) console.log(this._stats.type, taro._currentTime, nextTime, taro._currentTime - nextTime)
-				if (taro._currentTime > nextTime + 100) {
-					this.isTransforming(false);
-				}
+			var previousX = x;
+			
+			if (prevTime < nextTime) {				
+				x = this.interpolateValue(prevTransform[0], nextTransform[0], prevTime, now, nextTime);
+				y = this.interpolateValue(prevTransform[1], nextTransform[1], prevTime, now, nextTime);
 			}
 
+			let timeRemaining = nextTime - now;
+			xSpeed = (nextTransform[0] - prevTransform[0]) / (nextTime - prevTime);				
+			if (this == taro.client.selectedUnit)
+				console.log(parseFloat(x).toFixed(0), "xSpeed", xSpeed, "distance travelled", parseFloat(x - previousX).toFixed(1), "nextTransformX", parseFloat(nextTransform[0]).toFixed(1), "timeGapBtwnKeyframes", parseFloat(nextTime - prevTime).toFixed(0), "timeRemaining", timeRemaining)
+		
 			rotateStart = rotate;
 			rotateEnd = nextTransform[2];
 

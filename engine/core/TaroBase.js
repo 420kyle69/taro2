@@ -571,7 +571,7 @@ if (typeof (window) !== 'undefined') {
 				window.oRequestAnimationFrame ||
 				window.msRequestAnimationFrame ||
 		function (callback, element) {
-			setTimeout(function () { callback(new Date().getTime()); }, 1000 / 60);
+			setTimeout(function () { callback(new Date.now()); }, 1000 / 60);
 		};
 	}());
 }

@@ -11,7 +11,7 @@ var TaroNetIoServer = {
 	start: function (data, callback) {
 		var self = this;
 
-		this.artificialDelay = 0; // simulated lag (ms)
+		this.artificialDelay = 300; // simulated lag (ms)
 		
 		this._socketById = {};
 		this._socketByIp = {};
@@ -45,9 +45,9 @@ var TaroNetIoServer = {
 		this.define('_taroResponse', function () {
 			self._onResponse.apply(self, arguments);
 		});
-		this.define('_taroNetTimeSync', function () {
-			self._onTimeSync.apply(self, arguments);
-		});
+		// this.define('_taroNetTimeSync', function () {
+		// 	self._onTimeSync.apply(self, arguments);
+		// });
 
 		this.define('_snapshot', function () {
 			self._snapshot(self, arguments);
@@ -425,6 +425,8 @@ var TaroNetIoServer = {
 			}
 
 			// append serverTime timestamp to the snapshot
+			console.log(timestamp)
+			
 			self.snapshot.push([String.fromCharCode(this._networkCommandsLookup._taroStreamTime), timestamp]);
 			if (global.isDev) {
 				// generate artificial lag in dev environment
@@ -667,7 +669,7 @@ var TaroNetIoServer = {
 				});
 
 				// Send a clock sync command
-				this._sendTimeSync(socket.id);
+				// this._sendTimeSync(socket.id);
 			} else {
 				// Reject the connection
 				var reason = 'cannot connect to socket this.emit("connect", socket)';
