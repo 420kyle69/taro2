@@ -424,9 +424,6 @@ var TaroNetIoServer = {
 				return;
 			}
 
-			// append serverTime timestamp to the snapshot
-			console.log(timestamp)
-			
 			self.snapshot.push([String.fromCharCode(this._networkCommandsLookup._taroStreamTime), timestamp]);
 			if (global.isDev) {
 				// generate artificial lag in dev environment

@@ -720,7 +720,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 												y += entity.reconRemaining.y
 											}
 										} 
-										entity.prevKeyFrame = entity.nextKeyFrame;
 										entity.nextKeyFrame = [taro._currentTime + taro.client.renderBuffer, [x, y, angle]];
 										
 									} else { // update server-streamed entities' body position

@@ -66,7 +66,6 @@ var TaroEntity = TaroObject.extend({
 		// this ensures entity is spawning at a correct position initially. particularily useful for projectiles
 
 		this._keyFrames = [];
-		this.prevKeyFrame = [taro._currentTime, [this._translate.x, this._translate.y, this._rotate.z]];
 		this.nextKeyFrame = [taro._currentTime + 50, [this._translate.x, this._translate.y, this._rotate.z]];
 		
 		this._isTransforming = true;
@@ -3143,7 +3142,6 @@ var TaroEntity = TaroObject.extend({
 	teleportTo: function (x, y, rotate, teleportCamera) {
 		// console.log("teleportTo", x, y, rotate, this._stats.type)
 		this.isTeleporting = true;
-		this.prevKeyFrame[1] = [x, y, rotate];
 		this.nextKeyFrame[1] = [x, y, rotate];
         this.teleportCamera = teleportCamera;
 		this.teleportDestination = [x, y, rotate]
@@ -5169,24 +5167,23 @@ var TaroEntity = TaroObject.extend({
 		let x = this._translate.x;
 		let y = this._translate.y;
 		let rotate = this._rotate.z;
-		var prevTransform = this.prevKeyFrame[1];
 		var nextTransform = this.nextKeyFrame[1];
 		
 		// don't lerp is time remaining is less than 5ms
-		if (prevTransform && nextTransform) {
-			let prevTime = this.prevKeyFrame[0]
+		if (nextTransform) {
 			let nextTime = this.nextKeyFrame[0]
 			var previousX = x;
-			
-			if (prevTime < nextTime) {				
-				x = this.interpolateValue(prevTransform[0], nextTransform[0], prevTime, now, nextTime);
-				y = this.interpolateValue(prevTransform[1], nextTransform[1], prevTime, now, nextTime);
-			}
-
 			let timeRemaining = nextTime - now;
-			xSpeed = (nextTransform[0] - prevTransform[0]) / (nextTime - prevTime);				
-			if (this == taro.client.selectedUnit)
-				console.log(parseFloat(x).toFixed(0), "xSpeed", xSpeed, "distance travelled", parseFloat(x - previousX).toFixed(1), "nextTransformX", parseFloat(nextTransform[0]).toFixed(1), "timeGapBtwnKeyframes", parseFloat(nextTime - prevTime).toFixed(0), "timeRemaining", timeRemaining)
+
+			if (timeRemaining > tickDelta) {
+				// lerp between current position and nextTransform
+				x = this.interpolateValue(x, nextTransform[0], now, now + tickDelta, nextTime);
+				y = this.interpolateValue(y, nextTransform[1], now, now + tickDelta, nextTime);
+			}
+			
+			// xSpeed = (nextTransform[0] - prevTransform[0]) / (nextTime - prevTime);				
+			// if (this == taro.client.selectedUnit)
+			// 	console.log(parseFloat(x).toFixed(0), "xSpeed", xSpeed, "distance travelled", parseFloat(x - previousX).toFixed(1), "nextTransformX", parseFloat(nextTransform[0]).toFixed(1), "timeGapBtwnKeyframes", parseFloat(nextTime - prevTime).toFixed(0), "timeRemaining", timeRemaining)
 		
 			rotateStart = rotate;
 			rotateEnd = nextTransform[2];
