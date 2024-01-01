@@ -536,17 +536,17 @@ var TaroNetIoClient = {
 					if (this._diffSamples.length >= 5) {
 						// this._diffSamples.shift();
 						let medianDiff = this.getMedian(this._diffSamples);
-						taro._currentTime += medianDiff;
-						console.log(medianDiff, this._diffSamples)
+						if (-300 < diff && diff < 300) {
+							taro._currentTime += medianDiff;
+						} else {
+							taro._currentTime = newSnapshotTimestamp;
+						}
+						
+						// console.log(medianDiff, now, newSnapshotTimestamp, this._diffSamples)
 
 						this._diffSamples = [];
 
-						// if (-300 < diff && diff < 300) {
-						// 	let timeDiff = (medianDiff - timeDiff) / 2;	
-						// } else {
-						// 	medianDiff = diff;
-						// 	let timeDiff = medianDiff;
-						// }
+						
 					}
 				}
 			}

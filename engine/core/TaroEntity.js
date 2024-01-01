@@ -5172,18 +5172,16 @@ var TaroEntity = TaroObject.extend({
 		// don't lerp is time remaining is less than 5ms
 		if (nextTransform) {
 			let nextTime = this.nextKeyFrame[0]
-			var previousX = x;
 			let timeRemaining = nextTime - now;
 
-			if (timeRemaining > tickDelta) {
+			if (timeRemaining > 0) {
 				// lerp between current position and nextTransform
-				x = this.interpolateValue(x, nextTransform[0], now, now + tickDelta, nextTime);
-				y = this.interpolateValue(y, nextTransform[1], now, now + tickDelta, nextTime);
+				x = this.interpolateValue(x, nextTransform[0], now - tickDelta, now, nextTime);
+				y = this.interpolateValue(y, nextTransform[1], now - tickDelta, now, nextTime);
 			}
 			
-			// xSpeed = (nextTransform[0] - prevTransform[0]) / (nextTime - prevTime);				
-			// if (this == taro.client.selectedUnit)
-			// 	console.log(parseFloat(x).toFixed(0), "xSpeed", xSpeed, "distance travelled", parseFloat(x - previousX).toFixed(1), "nextTransformX", parseFloat(nextTransform[0]).toFixed(1), "timeGapBtwnKeyframes", parseFloat(nextTime - prevTime).toFixed(0), "timeRemaining", timeRemaining)
+			if (this == taro.client.selectedUnit)
+				console.log(parseFloat(x).toFixed(0), "nextX", parseFloat(nextTransform[0]).toFixed(1), "speedReq", parseFloat((nextTransform[0] - x)/timeRemaining) , "timeRemaining", timeRemaining)
 		
 			rotateStart = rotate;
 			rotateEnd = nextTransform[2];
