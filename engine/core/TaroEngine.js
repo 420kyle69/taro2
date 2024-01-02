@@ -123,7 +123,7 @@ var TaroEngine = TaroEntity.extend({
 		this._updateTime = 'NA'; // The time the tick update section took to process
 
 		this._tickDelta = 0; // The time between the last tick and the current one
-		this._lastTimeStamp = Date.now();
+		this._lastTimeStamp = 0;
 
 		this._fpsRate = 60; // Sets the frames per second to execute engine tick's at
 		
@@ -887,40 +887,37 @@ var TaroEngine = TaroEntity.extend({
 
 				if (taro.isServer) {
 					this.emptyTimeLimit = this.getIdleTimeoutMs();
-					/**
-					 * server requestAnimationFrame method.
-					 * https://github.com/nodejs/help/issues/2483
-					 */
+					// Server requestAnimationFrame method.
+					// Reference: https://github.com/nodejs/help/issues/2483
 					const fps = 60;
-					const funcs = [];
+					const callbackFunctions = [];
+					const skipSymbol = Symbol('skip');
+					const startTime = Date.now();
+					let currentTime = startTime;
 
-					const skip = Symbol('skip');
-					const start = Date.now();
-					let time = start;
+					const executeAnimationFrame = () => {
+						const currentFunctions = callbackFunctions.slice();
+						callbackFunctions.length = 0;
 
-					const animFrame = () => {
-						const fns = funcs.slice();
-						funcs.length = 0;
+						const now = Date.now();
+						const deltaTime = now - startTime;
+						const frameTime = 1000 / fps;
 
-						const t = Date.now();
-						const dt = t - start;
-						const t1 = 1e3 / fps;
+						for(const func of currentFunctions)
+							if(func !== skipSymbol) func(deltaTime);
 
-						for(const f of fns)
-							if(f !== skip) f(dt);
-
-						while(time <= t + t1 / 4) {
-							time += t1;
+						while(currentTime <= now + frameTime / 4) {
+							currentTime += frameTime;
 						}
-						setTimeout(animFrame, time - t);
+						setTimeout(executeAnimationFrame, currentTime - now);
 					};
 
-					requestAnimFrame = func => {
-						funcs.push(func);
-						return funcs.length - 1;
+					requestAnimFrame = callback => {
+						callbackFunctions.push(callback);
+						return callbackFunctions.length - 1;
 					};
 
-					animFrame();
+					executeAnimationFrame();
 					requestAnimFrame(taro.engineStep);
 				}
 
@@ -1632,7 +1629,7 @@ var TaroEngine = TaroEntity.extend({
 			}
 
 			// Get the current time in milliseconds
-			self._tickStart = timeStamp;
+			self._tickStart = this._currentTime;
 
 			if (!self.lastTick) {
 				// This is the first time we've run so set some
@@ -1653,6 +1650,9 @@ var TaroEngine = TaroEntity.extend({
 				taro.queueTrigger('frameTick');
 			}
 
+			// Update the scenegraph - this is where entity _behaviour() is called which dictates things like attr regen speed also this cache-busts streamDataCache.
+			self.updateSceneGraph(ctx);
+
 			if (taro.physics) {
 
 				taro.tickCount = 0;
@@ -1661,24 +1661,10 @@ var TaroEngine = TaroEntity.extend({
 				taro.totalChildren = 0;
 				taro.totalOrphans = 0;
 
-				// Update the scenegraph - this is where entity _behaviour() is called
-				if (self._enableUpdates) {
-					// taro.updateCount = {}
-					// taro.tickCount = {}
-
-					if (taroConfig.debug._timing) {
-						updateStart = Date.now();
-						self.updateSceneGraph(ctx);
-						taro._updateTime = Date.now() - updateStart;
-					} else {
-						self.updateSceneGraph(ctx);
-					}
-				}
-
 				taro.now = Date.now();
 				timeElapsed = taro.now - taro._lastphysicsTickAt;
 				if (timeElapsed >= (1000 / taro._physicsTickRate) - taro._physicsTickRemainder) {
-
+					
 					taro._lastphysicsTickAt = taro.now;
 					taro._physicsTickRemainder = Math.min(timeElapsed - ((1000 / taro._physicsTickRate) - taro._physicsTickRemainder), (1000 / taro._physicsTickRate));
 
@@ -1689,35 +1675,17 @@ var TaroEngine = TaroEntity.extend({
 					
 					taro.physics.update(timeElapsed);
 					taro.physicsTimeElapsed = timeElapsed;
-					
+					taro.physicsLoopTickHasExecuted = true;
+				
 					// log how long it took to update physics world step
 					if (taro.profiler.isEnabled) {
 						taro.profiler.logTimeElapsed("physicsStep", startTime);
 					}
 
-
-					if (taro.isServer) {
-						if (taro.profiler.isEnabled) {
-							var startTime = performance.now();
-						}
-			
-						taro.network.stream._sendQueue(timeStamp);
-						taro.network.stream._sendQueuedStreamData();
-
-						// log how long it took to update physics world step
-						if (taro.profiler.isEnabled) {
-							taro.profiler.logTimeElapsed("networkStep", startTime);
-						
-							taro.profiler.logTick(50);
-						}
-					}
-
-	
-					
 				}
 			}
-
-
+			
+			
 			taro.engineLagReported = false;
 			taro.actionProfiler = {};
 			taro.triggerProfiler = {};
@@ -1788,11 +1756,6 @@ var TaroEngine = TaroEntity.extend({
 				}
 				return;
 			}
-			
-			if (!taro.gameLoopTickHasExecuted) {
-				return;
-			}
-
 			// Check for unborn entities that should be born now
 			unbornQueue = taro._spawnQueue;
 			unbornCount = unbornQueue.length;
@@ -1806,31 +1769,32 @@ var TaroEngine = TaroEntity.extend({
 				}
 			}
 
-			// Render the scenegraph
-			if (self._enableRenders) {
-				if (!self._useManualRender) {
-					if (taroConfig.debug._timing) {
-						self.renderSceneGraph(ctx);
-					} else {
-						self.renderSceneGraph(ctx);
-					}
-				} else {
-					if (self._manualRender) {
-						if (taroConfig.debug._timing) {
-							self.renderSceneGraph(ctx);
-						} else {
-							self.renderSceneGraph(ctx);
-						}
-						self._manualRender = false;
-					}
-				}
-			}
-
 			// Record the lastTick value so we can
 			// calculate delta on the next tick
 			self.lastTick = self._tickStart;
 			self._dpf = self._drawCount;
-			self._drawCount = 0;
+			self._drawCount = 0;	
+			if (taro.physicsLoopTickHasExecuted) {
+				if (taro.isServer) {
+
+					// executes entities' tick() which queues transform streamData to the clients
+					self.renderSceneGraph(ctx);
+
+					if (taro.profiler.isEnabled) {
+						var startTime = performance.now();
+					}
+					
+					taro.network.stream._sendQueue(timeStamp);
+					taro.network.stream._sendQueuedStreamData();
+		
+					// log how long it took to update physics world step
+					if (taro.profiler.isEnabled) {
+						taro.profiler.logTimeElapsed("networkStep", startTime);
+					
+						taro.profiler.logTick(50);
+					}
+				}		
+			}
 		}
 
 		
@@ -1842,7 +1806,9 @@ var TaroEngine = TaroEntity.extend({
 			}
 			
 		}
+
 		taro.gameLoopTickHasExecuted = false;
+		taro.physicsLoopTickHasExecuted = false;
 
 		et = Date.now();
 		taro._tickTime = et - taro.now;
@@ -1882,31 +1848,8 @@ var TaroEngine = TaroEntity.extend({
 
 		if (arr) {
 			arrCount = arr.length;
-
-			// Loop our viewports and call their update methods
-			if (taroConfig.debug._timing) {
-				while (arrCount--) {
-					us = Date.now();
-					arr[arrCount].update(ctx, tickDelta);
-					ud = Date.now() - us;
-
-					if (arr[arrCount]) {
-						if (!taro._timeSpentInUpdate[arr[arrCount].id()]) {
-							taro._timeSpentInUpdate[arr[arrCount].id()] = 0;
-						}
-
-						if (!taro._timeSpentLastUpdate[arr[arrCount].id()]) {
-							taro._timeSpentLastUpdate[arr[arrCount].id()] = {};
-						}
-
-						taro._timeSpentInUpdate[arr[arrCount].id()] += ud;
-						taro._timeSpentLastUpdate[arr[arrCount].id()].ms = ud;
-					}
-				}
-			} else {
-				while (arrCount--) {
-					arr[arrCount].update(ctx, tickDelta);
-				}
+			while (arrCount--) {
+				arr[arrCount].update(ctx, tickDelta);
 			}
 		}
 	},
@@ -1940,7 +1883,7 @@ var TaroEngine = TaroEntity.extend({
 			// Process the current engine tick for all child objects
 			var arr = this._children;
 			var arrCount;
-
+			
 			if (arr) {
 				arrCount = arr.length;
 				// Loop our viewports and call their tick methods

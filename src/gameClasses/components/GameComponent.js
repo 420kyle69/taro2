@@ -55,7 +55,8 @@ var GameComponent = TaroEntity.extend({
 		console.log('physicsTickRate', taro._physicsTickRate);
 		
 		if (taro.isClient) {
-			taro.client.renderBuffer = 1500 / taro._physicsTickRate // physicsTickRate dictates streaming fps, and renderBuffer is the wait time before next keyframe is sent to client.
+			// physicsTickRate dictates streaming fps, and renderBuffer is the wait time before next keyframe is sent to client.
+			// taro.client.renderBuffer = 1500 / taro._physicsTickRate // 20 fps = 75ms, 60 fps = 25ms
 			console.log('renderBuffer', taro.client.renderBuffer);
 		}
 

@@ -581,6 +581,14 @@ var PhysicsComponent = TaroEventingClass.extend({
 			if (self.engine == 'crash') { // crash's engine step happens in dist.js
 				self._world.step(timeElapsedSinceLastStep);
 			} else {
+
+				// Call the world step; frame-rate, velocity iterations, position iterations
+				self._world.step(timeElapsedSinceLastStep / 1000, 8, 3); 
+				if (self.ctx) {
+					self.ctx.clear();
+					self._world.DebugDraw();
+				}
+				
 				var tempBod = self._world.getBodyList();
 
 				// iterate through every physics body
@@ -678,8 +686,13 @@ var PhysicsComponent = TaroEventingClass.extend({
 								if (taro.isServer) {
 									entity.translateTo(x, y, 0);
 									entity.rotateTo(0, 0, angle);
+
+									// if (entity._category == 'unit') {
+									// 	console.log (taro._currentTime, parseFloat(x - entity.lastX).toFixed(2), "/", timeElapsedSinceLastStep, "speed", parseFloat((x - entity.lastX)/timeElapsedSinceLastStep).toFixed(2),
+									// 				x, entity.lastX, taro._currentTime, taro._currentTime - timeElapsedSinceLastStep)
+									// }
 									
-									this.lastX = x;
+									entity.lastX = x;
 								} else if (taro.isClient) {
 
 									// if CSP is enabled, client-side physics will dictate:
@@ -719,7 +732,8 @@ var PhysicsComponent = TaroEventingClass.extend({
 												x += entity.reconRemaining.x
 												y += entity.reconRemaining.y
 											}
-										} 
+										}
+
 										entity.nextKeyFrame = [taro._currentTime + taro.client.renderBuffer, [x, y, angle]];
 										
 									} else { // update server-streamed entities' body position
@@ -754,18 +768,8 @@ var PhysicsComponent = TaroEventingClass.extend({
 					tempBod = tempBod.getNext();
 				}
 
-
 				taro._physicsFrames++;
 
-
-
-				// Call the world step; frame-rate, velocity iterations, position iterations
-				self._world.step(timeElapsedSinceLastStep / 1000, 8, 3); 
-				if (self.ctx) {
-					self.ctx.clear();
-					self._world.DebugDraw();
-				}
-				
 				// Clear forces because we have ended our physics simulation frame
 				self._world.clearForces();
 				

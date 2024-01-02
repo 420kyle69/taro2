@@ -1815,7 +1815,7 @@ var TaroEntity = TaroObject.extend({
 		// if (taro.physics.engine === 'CRASH' && this.body) {
 		// 	this._behaviourCrash();
 		// }
-
+		
 		if (this._deathTime !== undefined && this._deathTime <= taro._tickStart) {
 			// Check if the deathCallBack was set
 			if (this._deathCallBack) {
@@ -1827,9 +1827,9 @@ var TaroEntity = TaroObject.extend({
 		} else {
 			// Check that the entity has been born
 			if (this._bornTime === undefined || taro._currentTime >= this._bornTime) {
-				// Remove the stream data cache
+				
 				delete this._streamDataCache;
-
+		
 				if (!isForOrphans) {
 					// Process any behaviours assigned to the entity
 					this._processUpdateBehaviours();
@@ -1954,6 +1954,9 @@ var TaroEntity = TaroObject.extend({
 			if (this._streamMode === 1 || this._streamMode === 2) {
 				this.streamSync();
 			}
+
+			// if (taro._currentTime > taro.server.lastSnapshotSentAt)
+				
 
 			if (this._compositeCache) {
 				if (this._cacheDirty) {
@@ -5045,6 +5048,10 @@ var TaroEntity = TaroObject.extend({
 	_streamData: function () {
 		// Check if we already have a cached version of the streamData
 		if (this._streamDataCache) {
+			if (this._category == 'unit') {
+				console.log("?. _streamDataCache exists. returning", taro._currentTime, this.id(), this._parent._category, this._parent.id(), "_streamDataCache")				
+			}
+				
 			return this._streamDataCache;
 		} else {
 			// Let's generate our stream data
@@ -5167,21 +5174,19 @@ var TaroEntity = TaroObject.extend({
 		let x = this._translate.x;
 		let y = this._translate.y;
 		let rotate = this._rotate.z;
-		var nextTransform = this.nextKeyFrame[1];
-		
-		// don't lerp is time remaining is less than 5ms
-		if (nextTransform) {
-			let nextTime = this.nextKeyFrame[0]
-			let timeRemaining = nextTime - now;
-
-			if (timeRemaining > 0) {
-				// lerp between current position and nextTransform
-				x = this.interpolateValue(x, nextTransform[0], now - tickDelta, now, nextTime);
-				y = this.interpolateValue(y, nextTransform[1], now - tickDelta, now, nextTime);
-			}
+		let nextTransform = this.nextKeyFrame[1];
+		let nextTime = this.nextKeyFrame[0]
+		let timeRemaining = nextTime - now;
 			
-			if (this == taro.client.selectedUnit)
-				console.log(parseFloat(x).toFixed(0), "nextX", parseFloat(nextTransform[0]).toFixed(1), "speedReq", parseFloat((nextTransform[0] - x)/timeRemaining) , "timeRemaining", timeRemaining)
+		// don't lerp is time remaining is less than 5ms
+		if (nextTransform && timeRemaining > -tickDelta) {
+			
+			// lerp between current position and nextTransform
+			x = this.interpolateValue(x, nextTransform[0], now - tickDelta, now, nextTime);
+			y = this.interpolateValue(y, nextTransform[1], now - tickDelta, now, nextTime);
+			
+			// if (this == taro.client.selectedUnit)
+			// 	console.log(parseFloat(x).toFixed(0), "nextX", parseFloat(nextTransform[0]), "speedReq", parseFloat((nextTransform[0] - x)/timeRemaining).toFixed(2) , "timeRemaining", timeRemaining)
 		
 			rotateStart = rotate;
 			rotateEnd = nextTransform[2];

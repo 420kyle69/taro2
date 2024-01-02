@@ -390,7 +390,6 @@ var TaroNetIoServer = {
 	},
 
 	flush: function (timestamp) {
-		// console.log('SNAPSHOT CONTAINS', this.snapshot)
 		var self = this;
 
 		var commandIndex = this._networkCommandsLookup._snapshot;
@@ -434,6 +433,7 @@ var TaroNetIoServer = {
 				self._io.send([ciEncoded, self.snapshot]);
 			}
 			taro.server.lastSnapshot = self.snapshot;
+			taro.server.lastSnapshotSentAt = taro._currentTime;
 			this.snapshot = [];
 
 		} else {
