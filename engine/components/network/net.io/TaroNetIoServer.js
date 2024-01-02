@@ -833,11 +833,6 @@ var TaroNetIoServer = {
 		delete this._socketById[socket.id];
 		delete this._socketByIp[socket._remoteAddress];
 		
-		if (taro.clusterClient) {
-			delete taro.clusterClient.uploadPerSecond[socket._remoteAddress];
-			delete taro.clusterClient.clientCommandCount[socket._remoteAddress];
-		}
-		
 		let indexToRemove = this.clientIds.findIndex(function (id) {
 			if (id === socket.id) return true;
 		});
