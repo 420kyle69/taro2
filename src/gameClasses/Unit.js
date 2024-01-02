@@ -343,9 +343,6 @@ var Unit = TaroEntityPhysics.extend({
 					if (self.unitUi) {
 						self.unitUi.updateAllAttributeBars();
 					}
-					if (self._stats.clientId === taro.network.id() && self._stats.controls.unitAbilities) {
-						taro.client.emit('create-ability-bar', {keybindings: self._stats.controls.abilities, abilities: self._stats.controls.unitAbilities});
-					}
 				}
 			}
 		}
@@ -570,8 +567,8 @@ var Unit = TaroEntityPhysics.extend({
 						taro.server.consumeCoinFromUser(ownerPlayer, shopData.price.coins, itemTypeId);
 
 						ownerPlayer.streamUpdateData([{
-								coins: global.coinHelper.subtract(ownerPlayer._stats.coins, shopData.price.coins)
-						}])
+							coins: global.coinHelper.subtract(ownerPlayer._stats.coins, shopData.price.coins)
+						}]);
 					}
 				}
 
@@ -924,11 +921,7 @@ var Unit = TaroEntityPhysics.extend({
 				self.unitUi.updateAllAttributeBars();
 			}
 			self.inventory.update();
-
-			if (self._stats.clientId === taro.network.id() && data.controls.unitAbilities) {
-				taro.client.emit('create-ability-bar', {keybindings: data.controls.abilities, abilities: data.controls.unitAbilities});
-			}
-			// if mobile controls are in use configure for this unit
+            // if mobile controls are in use configure for this unit
 			self.renderMobileControl();
 		}
 
@@ -1060,7 +1053,7 @@ var Unit = TaroEntityPhysics.extend({
 			taro.client.myPlayer &&
 			taro.client.myPlayer._stats.selectedUnitId == this.id() &&
 			this._stats.controls) {
-			taro.mobileControls.configure(this._stats.controls.abilities);
+			taro.mobileControls.configure(this._stats.controls);
 		}
 	},
 

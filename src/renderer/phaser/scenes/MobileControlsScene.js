@@ -28,7 +28,7 @@ var MobileControlsScene = /** @class */ (function (_super) {
         var scale = this.scale;
         var controls = this.controls = this.add.container();
         var joysticks = this.joysticks;
-        taro.mobileControls.on('add-control', function (key, x, y, w, h, settings) {
+        taro.mobileControls.on('add-control', function (key, x, y, settings, abilityId, ability) {
             var _a;
             switch (key) {
                 case 'movementWheel':
@@ -37,66 +37,23 @@ var MobileControlsScene = /** @class */ (function (_super) {
                     new PhaserJoystick(_this, x, y, settings);
                     break;
                 default:
-                    var relativeX_1 = Math.trunc((x + w / 2) / 960 * window.outerWidth * window.devicePixelRatio - w / 2);
-                    var relativeY_1 = Math.trunc((y + h / 2) / 540 * window.outerHeight * window.devicePixelRatio);
-                    var uiScene_1 = taro.renderer.scene.getScene('Ui');
+                    var relativeX_1 = Math.trunc(x / 960 * window.outerWidth * window.devicePixelRatio);
+                    var relativeY_1 = Math.trunc(y / 540 * window.outerHeight * window.devicePixelRatio);
+                    var uiScene = taro.renderer.scene.getScene('Ui');
                     var buttonExist_1 = false;
-                    Object.values((_a = uiScene_1 === null || uiScene_1 === void 0 ? void 0 : uiScene_1.abilityBar) === null || _a === void 0 ? void 0 : _a.buttons).forEach(function (button) {
+                    Object.values((_a = uiScene === null || uiScene === void 0 ? void 0 : uiScene.phaserButtonBar) === null || _a === void 0 ? void 0 : _a.buttons).forEach(function (button) {
                         if (button.key === key) {
-                            button.x = relativeX_1 - uiScene_1.abilityBar.x + button.size / 2;
-                            button.y = relativeY_1 - uiScene_1.abilityBar.y + button.size / 2;
+                            button.x = relativeX_1;
+                            button.y = relativeY_1;
                             buttonExist_1 = true;
                         }
                     });
-                    if (buttonExist_1)
-                        return;
-                    var text = key.toUpperCase();
-                    var button_1 = _this.add.image(relativeX_1, relativeY_1, 'mobile-button-up')
-                        .setDisplaySize(w, h)
-                        .setOrigin(0)
-                        .setAlpha(0.6);
-                    controls.add(button_1);
-                    if (text === 'BUTTON1') {
-                        var icon = _this.add.image(relativeX_1 + w / 2, relativeY_1 + h / 2, 'mobile-button-icon');
-                        icon.setScale(0.5);
-                        controls.add(icon);
+                    if (!buttonExist_1) {
+                        var button = uiScene.phaserButtonBar.addButton(abilityId, ability, key);
+                        button.x = relativeX_1;
+                        button.y = relativeY_1;
                     }
-                    else {
-                        var label = _this.add.bitmapText(relativeX_1 + w / 2, relativeY_1 + h / 2, BitmapFontManager.font(_this, 'Arial', true, false, '#FFFFFF'));
-                        label.setText(BitmapFontManager.sanitize(label.fontData, text));
-                        label.setCenterAlign();
-                        label.setFontSize(24);
-                        label.setOrigin(0.5);
-                        label.letterSpacing = -0.4;
-                        controls.add(label);
-                        if (_this.renderer.type === Phaser.CANVAS) {
-                            var rt = _this.add.renderTexture(label.x, label.y, label.width, label.height);
-                            rt.draw(label, label.width / 2, label.height / 2);
-                            rt.setOrigin(0.5);
-                            controls.add(rt);
-                            label.visible = false;
-                        }
-                    }
-                    button_1.setInteractive();
-                    var clicked_1 = false;
-                    button_1.on('pointerdown', function () {
-                        _this.disablePointerEvents = true;
-                        if (clicked_1)
-                            return;
-                        clicked_1 = true;
-                        button_1.setTexture('mobile-button-down');
-                        settings.onStart && settings.onStart();
-                    });
-                    var onPointerEnd = function () {
-                        _this.enablePointerNextUpdate = true;
-                        if (!clicked_1)
-                            return;
-                        clicked_1 = false;
-                        button_1.setTexture('mobile-button-up');
-                        settings.onEnd && settings.onEnd();
-                    };
-                    button_1.on('pointerup', onPointerEnd);
-                    button_1.on('pointerout', onPointerEnd);
+                    ;
                     break;
             }
         });

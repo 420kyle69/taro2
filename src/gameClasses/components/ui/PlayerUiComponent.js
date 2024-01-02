@@ -196,6 +196,15 @@ var PlayerUiComponent = TaroEntity.extend({
 		if (coin != NaN) {
 			$('.player-coins').html(parseFloat(newValue));
 		}
+
+		if (typeof updateCoins === 'function') {
+			updateCoins(newValue);
+		}
+
+		if ($('#modd-item-shop-modal').hasClass('show') && $('[id=item]').hasClass('active')) {
+			// update the shop based on the new coin value
+			taro.shop.openItemShop(taro.shop.currentType, 'items');
+		}
 	},
 
 	showFriendsModal: function (config) {
@@ -520,19 +529,19 @@ var PlayerUiComponent = TaroEntity.extend({
 		try {
 			switch (data.action) {
 				case 'show':
-					$(taro.client.getCachedElementById(data.elementId)).show();
+					$(`#${data.elementId}`).show();
 					break;
 				case 'hide':
-					$(taro.client.getCachedElementById(data.elementId)).hide();
+					$(`#${data.elementId}`).hide();
 					break;
 				case 'setHtml':
-					$(taro.client.getCachedElementById(data.elementId)).html(data.htmlStr);
+					$(`#${data.elementId}`).html(data.htmlStr);
 					break;
 				case 'addClass':
-					taro.client.getCachedElementById(data.elementId).classList.add(data.className);
+					document.getElementById(data.elementId).classList.add(data.className);
 					break;
 				case 'removeClass':
-					taro.client.getCachedElementById(data.elementId).classList.remove(data.className);
+					document.getElementById(data.elementId).classList.remove(data.className);
 					break;
 				default:
 					break;

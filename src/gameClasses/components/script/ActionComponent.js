@@ -1954,7 +1954,12 @@ var ActionComponent = TaroEntity.extend({
 						var player = self._script.variable.getValue(action.player, vars);
 
 						if (position && player && player._stats.clientId) {
-							taro.network.send('camera', { cmd: 'positionCamera', position: position }, player._stats.clientId);
+							if (taro.isServer) {
+								taro.network.send('camera', { cmd: 'positionCamera', position: position }, player._stats.clientId);
+							} else if (player._stats.clientId === taro.network.id()) {
+								taro.client.emit('stop-follow');
+								taro.client.emit('position-camera', [position.x, position.y]);
+							}
 						}
 						break;
 
@@ -2637,6 +2642,18 @@ var ActionComponent = TaroEntity.extend({
 						var entity = self._script.variable.getValue(action.entity, vars);
 						if (entity && self.entityCategories.indexOf(entity._category) > -1) {
 							entity.remove();
+						} else {
+							throw new Error('invalid unit');
+						}
+
+						break;
+
+					case 'resetEntity':
+						var entity = self._script.variable.getValue(action.entity, vars);
+						if (entity && ['unit', 'item', 'projectile'].includes(entity._category)) {
+							if (entity._category === 'unit') entity.resetUnitType();
+							else if (entity._category === 'item') entity.resetItemType();
+							else if (entity._category === 'projectile') entity.resetProjectileType();
 						} else {
 							throw new Error('invalid unit');
 						}

@@ -124,7 +124,7 @@ var AbilityComponent = TaroEntity.extend({
 		}
 	},
 
-	cast: function (handle) {
+	cast: function (handle, key) {
 		var self = this;
 
 		if (handle == undefined)
@@ -144,10 +144,10 @@ var AbilityComponent = TaroEntity.extend({
 				break;
 
 			case 'startCasting':
-				return this.startCasting(ability.abilityId);
+				return this.startCasting(ability.abilityId, key);
 
 			case 'stopCasting':
-				return this.stopCasting(ability.abilityId);
+				return this.stopCasting(ability.abilityId, key);
 		}
 
 		// new abilities should have returned by now. following is for old system (backwards comp.)
@@ -246,7 +246,7 @@ var AbilityComponent = TaroEntity.extend({
 		}
 	},
 
-	startCasting: function (abilityId) {
+	startCasting: function (abilityId, key) {
 		if (
 			this.activeAbilities[abilityId]
 			|| this.abilityCooldowns[abilityId]
@@ -278,23 +278,23 @@ var AbilityComponent = TaroEntity.extend({
 		this.activeAbilities[abilityId] = true;
 
 		if (!(ability.cooldown === null || ability.cooldown === undefined || isNaN(ability.cooldown))) {
-			this.abilityCooldowns[abilityId] = Date.now() + ability.cooldown;
+			this.abilityCooldowns[abilityId] = { time: Date.now() + ability.cooldown, key: key };
 			if (taro.isClient && this._entity._stats.clientId === taro.network.id()) {
-				taro.client.emit('start-ability-cooldown', abilityId);
+				taro.client.emit('start-ability-cooldown', key);
 			}
 		}
 
 		if (!(ability.castDuration === null || ability.castDuration === undefined || isNaN(ability.castDuration))) {
-			this.abilityDurations[abilityId] = Date.now() + ability.castDuration;
+			this.abilityDurations[abilityId] = {time: Date.now() + ability.castDuration, key: key};
 		}
 
 		if (taro.isClient && this._entity._stats.clientId === taro.network.id()) {
-			taro.client.emit('start-casting', abilityId);
+			taro.client.emit('start-casting', key);
 		}
 		
 	},
 
-	stopCasting: function (abilityId) {
+	stopCasting: function (abilityId, key) {
 		if (!this.activeAbilities[abilityId]) {
 			return;
 		}
@@ -314,7 +314,17 @@ var AbilityComponent = TaroEntity.extend({
 		);
 
 		if (taro.isClient && this._entity._stats.clientId === taro.network.id()) {
-			taro.client.emit('stop-casting', abilityId);
+			// find key if not provided
+			/*if (!key) {
+				Object.keys(this._entity._stats.controls.abilities).forEach((k) => {
+					if (this._entity._stats.controls.abilities[k].keyDown === abilityId) {
+						key = k;
+					} else if (this._entity._stats.controls.abilities[k].keyUp === abilityId) {
+						key = k;
+					}
+				});
+			}*/
+			taro.client.emit('stop-casting', key);
 		}
 	},
 	_behaviour: function (ctx) {
@@ -322,19 +332,19 @@ var AbilityComponent = TaroEntity.extend({
 		if (Object.keys(this.abilityDurations).length > 0) {
 			for (let id in this.abilityDurations) {
 
-				if (this.abilityDurations[id] <= Date.now()) {
+				if (this.abilityDurations[id].time <= Date.now()) {
+					this.stopCasting(id, this.abilityDurations[id].key);
 					delete this.abilityDurations[id];
-					this.stopCasting(id);
 				}
 			}
 		}
 
 		if (Object.keys(this.abilityCooldowns).length > 0) {
 			for (let id in this.abilityCooldowns) {
-				if (this.abilityCooldowns[id] <= Date.now()) {
+				if (this.abilityCooldowns[id].time <= Date.now()) {
 
 					if (taro.isClient && this._entity._stats.clientId === taro.network.id()) {
-						taro.client.emit('stop-ability-cooldown', id);
+						taro.client.emit('stop-ability-cooldown', this.abilityCooldowns[id].key);
 					}
 
 					delete this.abilityCooldowns[id];

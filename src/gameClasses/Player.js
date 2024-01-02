@@ -224,9 +224,6 @@ var Player = TaroEntity.extend({
 					unit.unitUi.updateAllAttributeBars();
 				}
 
-				// abilities
-				const abilitiesData = taro.game.data.unitTypes[unit._stats.type].controls.unitAbilities;
-				taro.client.emit('create-ability-bar', { keybindings: taro.game.data.unitTypes[unit._stats.type].controls.abilities, abilities: abilitiesData });
 				unit.renderMobileControl();
 
 
@@ -617,8 +614,11 @@ var Player = TaroEntity.extend({
 								break;
 
 							case 'coins':
+								const isCoinsChanged = self._stats[attrName] !== newValue;
 								self._stats[attrName] = newValue;
-								taro.playerUi.updatePlayerCoin(newValue);
+								if (isCoinsChanged) {
+									taro.playerUi.updatePlayerCoin(newValue);
+								}
 								break;
 
 							case 'roleIds':
