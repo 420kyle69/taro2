@@ -266,6 +266,15 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
+					case 'isPlayerClient':
+						if (taro.isClient) {
+							var player = self.getValue(text.player, vars);
+							if (player) {
+								returnValue = player._stats?.clientId == taro.network.id();
+							}
+						}
+						break;
+
 					case 'playersAreHostile':
 						var playerA = self.getValue(text.playerA, vars);
 						var playerB = self.getValue(text.playerB, vars);
