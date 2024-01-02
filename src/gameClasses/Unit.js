@@ -1934,7 +1934,7 @@ var Unit = TaroEntityPhysics.extend({
 			if (this._stats.controls && this._stats.controls.absoluteRotation) {
 				if (taro.isMobile) this.angleToTarget = ownerPlayer.absoluteAngle * 0.017453;
 				else this.angleToTarget = ownerPlayer.absoluteAngle;
-
+					
 			// desktop control: if this unit's not under a command, rotate to mouse xy coordinate
 			} else {
 				var mouse = ownerPlayer.control?.input?.mouse;
@@ -1956,12 +1956,14 @@ var Unit = TaroEntityPhysics.extend({
 	_behaviour: function (ctx) {
 		var self = this;
 
-		if (taro.gameLoopTickHasExecuted) {
-			_.forEach(taro.triggersQueued, function (trigger) {
-				trigger.params['thisEntityId'] = self.id();
-				self.script.trigger(trigger.name, trigger.params);
-			});
+		if (!taro.gameLoopTickHasExecuted) {
+			return;
 		}
+
+		_.forEach(taro.triggersQueued, function (trigger) {
+			trigger.params['thisEntityId'] = self.id();
+			self.script.trigger(trigger.name, trigger.params);
+		});
 
 		if (taro.isServer || (taro.isClient && taro.client.selectedUnit == this)) {
 			// ability component behaviour method call
@@ -1977,7 +1979,6 @@ var Unit = TaroEntityPhysics.extend({
 
 				// server-side unit rotation update
 				if (taro.isServer) {
-
 					if (!self._stats.aiEnabled && ownerPlayer._stats.controlledBy == 'human' && ownerPlayer.getSelectedUnit() == this) {
 						self.updateAngleToTarget();
 					}

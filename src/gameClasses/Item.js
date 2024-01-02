@@ -1141,12 +1141,13 @@ var Item = TaroEntityPhysics.extend({
 	_behaviour: function (ctx) {
 		var self = this;
 
-		if (taro.gameLoopTickHasExecuted) {
-			_.forEach(taro.triggersQueued, function (trigger) {
-				trigger.params['thisEntityId'] = self.id();
-				self.script.trigger(trigger.name, trigger.params);
-			});
+		if (!taro.gameLoopTickHasExecuted) {
+			return;
 		}
+		_.forEach(taro.triggersQueued, function (trigger) {
+			trigger.params['thisEntityId'] = self.id();
+			self.script.trigger(trigger.name, trigger.params);
+		});
 
 		var ownerUnit = this.getOwnerUnit();		
 		if (ownerUnit && this._stats.stateId != 'dropped') {
