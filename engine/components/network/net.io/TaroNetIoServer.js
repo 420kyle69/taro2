@@ -627,6 +627,10 @@ var TaroNetIoServer = {
 						}
 					}
 
+					if (commandName == 'unknown') {
+						console.log("asdfsafdsafdsa")
+					}
+
 					self.logCommandCount(socket._remoteAddress, commandName, data);
 
 					if (!(commandName === 'editTile' || commandName === 'editGlobalScripts')) {

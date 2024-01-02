@@ -726,8 +726,8 @@ var PhysicsComponent = TaroEventingClass.extend({
 												// entity._translate = {x: x, y: y}
 											} else {
 
-												entity.reconRemaining.x /= 8;
-												entity.reconRemaining.y /= 8;
+												entity.reconRemaining.x /= 2;
+												entity.reconRemaining.y /= 2;
 
 												x += entity.reconRemaining.x
 												y += entity.reconRemaining.y

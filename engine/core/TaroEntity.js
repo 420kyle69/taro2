@@ -5201,6 +5201,10 @@ var TaroEntity = TaroObject.extend({
 			}			
 			
 			rotate = this.interpolateValue(rotateStart, rotateEnd, taro._currentTime - 16, taro._currentTime, taro._currentTime + 16);
+		} else {
+			x = nextTransform[0];
+			y = nextTransform[1];
+			rotate = nextTransform[2];
 		}
 
 		// for my own unit, ignore streamed angle if this unit control is set to face mouse cursor instantly.
