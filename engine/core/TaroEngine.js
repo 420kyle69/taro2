@@ -123,7 +123,7 @@ var TaroEngine = TaroEntity.extend({
 		this._updateTime = 'NA'; // The time the tick update section took to process
 
 		this._tickDelta = 0; // The time between the last tick and the current one
-		this._lastTimeStamp = 0;
+		this._lastTimeStamp = undefined;
 
 		this._fpsRate = 60; // Sets the frames per second to execute engine tick's at
 		
@@ -1452,12 +1452,15 @@ var TaroEngine = TaroEntity.extend({
 	 * @returns {Number}
 	 */
 	incrementTime: function (timeStamp) {
-		let timeElapsed = timeStamp - this._lastTimeStamp;
-		
-		if (!this._pause) {			
-			this._currentTime = (this._currentTime + timeElapsed) * this._timeScale;			
-		}
 
+		if (this._lastTimeStamp != undefined) {
+			let timeElapsed = timeStamp - this._lastTimeStamp;
+			
+			if (!this._pause) {			
+				this._currentTime = (this._currentTime + timeElapsed) * this._timeScale;			
+			}
+		}
+		
 		this._lastTimeStamp = timeStamp;
 		return this._currentTime;
 	},
