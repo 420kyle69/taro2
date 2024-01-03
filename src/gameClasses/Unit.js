@@ -2001,6 +2001,13 @@ var Unit = TaroEntityPhysics.extend({
 							y: taro.client.selectedUnit?._translate.y
 						};
 
+						this.emit('transform-debug', {
+							debug: 'red-square',
+							x: taro.client.selectedUnit?._translate.x,
+							y: taro.client.selectedUnit?._translate.y,
+							rotation: 0,
+						});
+
 						taro.network.send('ping', {sentAt: Date.now()});
 						taro.client.sendNextPingAt = taro.now + 1000; // allow up to 1s before sending another ping. chances are, we'll hear back sooner from the server
 						// this.reconRemaining = undefined; // stop reconciling

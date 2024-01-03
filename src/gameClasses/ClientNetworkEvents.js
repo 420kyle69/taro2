@@ -287,6 +287,12 @@ var ClientNetworkEvents = {
 			}
 
 			// console.log("reconRemaining", taro.client.selectedUnit.reconRemaining);
+			taro.client.selectedUnit.emit('transform-debug', {
+				debug: 'blue-square',
+				x: taro.client.myUnitStreamedPosition.x,
+				y: taro.client.myUnitStreamedPosition.y,
+				rotation: 0,
+			});
 		}
 
 		taro.client.isWaitingForPong = false;

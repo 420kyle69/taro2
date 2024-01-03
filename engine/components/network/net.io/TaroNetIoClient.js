@@ -494,6 +494,7 @@ var TaroNetIoClient = {
 									if (taro.env === 'local' || taro.debugCSP) {
 										// emit position for entity debug image
 										entity.emit('transform-debug', {
+											debug: 'green-square',
 											x: x,
 											y: y,
 											rotation: rotate,

@@ -388,18 +388,33 @@ var PhaserUnit = /** @class */ (function (_super) {
         });
     };
     PhaserUnit.prototype.transformDebug = function (data) {
-        if (!this.debugGameObject) {
-            var bounds = this.entity._bounds2d;
-            this.debugGameObject = this.addSprite('debug');
-            this.debugGameObject.setDisplaySize(bounds.x, bounds.y);
-            this.debugGameObject.rotation = this.entity._rotate.z;
-            //this.debugGameObject = this.scene.add.sprite(0, 0, 'debug');
-            this.debugGameObject.setOrigin(0.5);
-            //this.gameObject.add(this.debugGameObject);
+        if (data.debug === 'green-square') {
+            if (!this.debugGameObject) {
+                var bounds = this.entity._bounds2d;
+                this.debugGameObject = this.scene.add.rectangle(0, 0, bounds.x, bounds.y);
+                this.debugGameObject.setStrokeStyle(2, 0x008000);
+            }
+            this.debugGameObject.setPosition(data.x, data.y);
+            this.debugGameObject.rotation = data.rotation;
         }
-        this.debugGameObject.setPosition(data.x, data.y);
-        this.debugGameObject.rotation = data.rotation;
-        //this.flip(this.entity._stats.flip);
+        else if (data.debug === 'blue-square') {
+            if (!this.debugGameObjectBlue) {
+                var bounds = this.entity._bounds2d;
+                this.debugGameObjectBlue = this.scene.add.rectangle(0, 0, bounds.x, bounds.y);
+                this.debugGameObjectBlue.setStrokeStyle(2, 0x0000FF);
+            }
+            this.debugGameObjectBlue.setPosition(data.x, data.y);
+            this.debugGameObjectBlue.rotation = data.rotation;
+        }
+        else if (data.debug === 'red-square') {
+            if (!this.debugGameObjectRed) {
+                var bounds = this.entity._bounds2d;
+                this.debugGameObjectRed = this.scene.add.rectangle(0, 0, bounds.x, bounds.y);
+                this.debugGameObjectRed.setStrokeStyle(2, 0xFF0000);
+            }
+            this.debugGameObjectRed.setPosition(data.x, data.y);
+            this.debugGameObjectRed.rotation = data.rotation;
+        }
     };
     PhaserUnit.prototype.destroy = function () {
         var _this = this;
