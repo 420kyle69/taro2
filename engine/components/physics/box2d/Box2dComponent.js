@@ -721,13 +721,10 @@ var PhysicsComponent = TaroEventingClass.extend({
 												// x += xRemaining;
 												// y += yRemaining;
 												entity.reconRemaining = undefined;
-												// taro.client.sendNextPingAt = taro.now + 200;
-												// console.log("instant reconciliation to ", x, y, taro.client.myUnitPositionWhenPingSent)
-												// entity._translate = {x: x, y: y}
 											} else {
 
-												entity.reconRemaining.x /= 2;
-												entity.reconRemaining.y /= 2;
+												entity.reconRemaining.x /= 5;
+												entity.reconRemaining.y /= 5;
 
 												x += entity.reconRemaining.x
 												y += entity.reconRemaining.y
@@ -735,6 +732,14 @@ var PhysicsComponent = TaroEventingClass.extend({
 										}
 
 										entity.nextKeyFrame = [taro._currentTime + taro.client.renderBuffer, [x, y, angle]];
+
+										// keep track of units' position history for CSP reconciliation
+										if (entity == taro.client.selectedUnit) {
+											entity.posHistory.push([taro._currentTime, [x, y, angle]]);
+											if (entity.posHistory.length > taro._physicsTickRate) {
+												entity.posHistory.shift();
+											}
+										}
 										
 									} else { // update server-streamed entities' body position
 										x = entity.nextKeyFrame[1][0];

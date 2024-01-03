@@ -1993,24 +1993,10 @@ var Unit = TaroEntityPhysics.extend({
 				} else if (taro.isClient) {
 
 					// send ping for CSP reconciliation purpose
-					if (taro.now > taro.client.sendNextPingAt) {
-						taro.client.myUnitPositionWhenPingSent = {
-							// x: taro.client.selectedUnit?.nextKeyFrame[1][0], 
-							// y: taro.client.selectedUnit?.nextKeyFrame[1][1]
-							x: taro.client.selectedUnit?._translate.x,
-							y: taro.client.selectedUnit?._translate.y
-						};
-
-						this.emit('transform-debug', {
-							debug: 'red-square',
-							x: taro.client.selectedUnit?._translate.x,
-							y: taro.client.selectedUnit?._translate.y,
-							rotation: 0,
-						});
-
-						taro.network.send('ping', {sentAt: Date.now()});
-						taro.client.sendNextPingAt = taro.now + 1000; // allow up to 1s before sending another ping. chances are, we'll hear back sooner from the server
-						// this.reconRemaining = undefined; // stop reconciling
+					if (taro.now > taro.client.sendNextPingAt || !taro.client.isWaitingForPong) {
+						taro.network.send('ping', {sentAt: taro._currentTime});
+						taro.client.sendNextPingAt = taro.now + 1000; // allow up to 1
+						taro.client.isWaitingForPong = true;
 					}
 				}
 
