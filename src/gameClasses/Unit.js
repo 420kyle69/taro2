@@ -1655,7 +1655,7 @@ var Unit = TaroEntityPhysics.extend({
 						break;
 					case 'ownerPlayerId':
 						self._stats[attrName] = newValue;
-						if (taro.isClient && taro.client.myPlayer.id() !== newValue) {
+						if (taro.isClient && taro.client.myPlayer?.id() !== newValue) {
 							self.setOwnerPlayer(newValue);
 						}
 						break;
@@ -1993,10 +1993,9 @@ var Unit = TaroEntityPhysics.extend({
 				} else if (taro.isClient) {
 
 					// send ping for CSP reconciliation purpose
-					if (taro.now > taro.client.sendNextPingAt || !taro.client.isWaitingForPong) {
+					if (taro.now > taro.client.sendNextPingAt) {
 						taro.network.send('ping', {sentAt: taro._currentTime});
-						taro.client.sendNextPingAt = taro.now + 1000; // allow up to 1
-						taro.client.isWaitingForPong = true;
+						taro.client.sendNextPingAt = taro.now + 1500; // allow up to a 1.5 second before sending another ping
 					}
 				}
 

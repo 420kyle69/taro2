@@ -321,7 +321,7 @@ var ClientNetworkEvents = {
 			}
 		}
 
-		taro.client.isWaitingForPong = false;
+		taro.client.sendNextPingAt = taro.now;
 
 		if (!taro.pingElement) {
 			taro.pingElement = document.getElementById('updateping');

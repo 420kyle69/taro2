@@ -530,15 +530,14 @@ var TaroNetIoClient = {
 					this.lastSnapshotTimestamp = newSnapshotTimestamp;
 
 					// synchronize client's time with server's time
-					// if client's timestamp more than 100ms behind the server's timestamp, immediately update it to be 50ms behind the server's
-					// otherwise, apply rubberbanding
+					// find a median of the difference between server's time and client's time and rubberband client's time to that
 					let diff = newSnapshotTimestamp - now;
 					this._diffSamples.push(diff);
 					if (this._diffSamples.length >= 5) {
 						// this._diffSamples.shift();
 						let medianDiff = this.getMedian(this._diffSamples);
 						if (-300 < diff && diff < 300) {
-							taro._currentTime += medianDiff;
+							taro._currentTime += medianDiff/4;
 						} else {
 							taro._currentTime = newSnapshotTimestamp;
 						}
