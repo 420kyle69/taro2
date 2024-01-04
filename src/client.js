@@ -650,8 +650,6 @@ const Client = TaroEventingClass.extend({
 	//
 	loadCSP: function () {
 
-		taro.game.cspEnabled = !!taro.game.data.defaultData.clientSidePredictionEnabled;
-
 		const gravity = taro.game.data.settings.gravity;
 
 		if (gravity) {

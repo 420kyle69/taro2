@@ -575,8 +575,6 @@ var Server = TaroClass.extend({
 					gameSlug: taro.game.data.defaultData.gameSlug
 				};
 
-				taro.game.cspEnabled = !!taro.game.data.defaultData.clientSidePredictionEnabled;
-
 				global.standaloneGame = game.data;
 				var baseTilesize = 64;
 

@@ -2089,7 +2089,7 @@ var Unit = TaroEntityPhysics.extend({
 		}
 
 		// if entity (unit/item/player/projectile) has attribute, run regenerate
-		if (taro.isServer || (taro.physics && taro.isClient && taro.client.selectedUnit == this && taro.game.cspEnabled)) {
+		if (taro.isServer || (taro.physics && taro.isClient && taro.client.selectedUnit == this && this._stats.controls?.clientPredictedMovement)) {
 			if (this._stats.buffs && this._stats.buffs.length > 0) {
 				for (let i = 0; i < this._stats.buffs.length; i++) {
 					var buff = this._stats.buffs[i];
