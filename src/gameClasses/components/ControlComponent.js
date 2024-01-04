@@ -325,11 +325,12 @@ var ControlComponent = TaroEntity.extend({
 
 		if (taro.isClient) {
 			if (unit) {
+				var now = Date.now();
 				// check if sending player input is due (every 100ms)
-				if (taro._currentTime - self.lastInputSent > 100) {
+				if (now - self.lastInputSent > 100) {
 					self.sendMobileInput = true;
-					self.sendPlayerInput = true;
-					self.lastInputSent = taro._currentTime;
+					self.sendMouseMovement = true;
+					self.lastInputSent = now;
 				}
 
 				for (device in self.input) {
@@ -376,7 +377,7 @@ var ControlComponent = TaroEntity.extend({
 							}
 							// angle = angle % Math.PI;
 							angle = parseFloat(angle.toPrecision(5));
-							if (self.sendPlayerInput)
+							if (self.sendMouseMovement)
 								taro.network.send('playerAbsoluteAngle', angle);
 
 							if (taro.client.myPlayer) {
@@ -389,7 +390,7 @@ var ControlComponent = TaroEntity.extend({
 							taro.client.myPlayer.control.input.mouse.y = self.newMousePosition[1];
 						}
 					}
-					if (self.sendPlayerInput) {
+					if (self.sendMouseMovement) {
 						//console.log('SEND MOUSE POS', self.newMousePosition[0], self.newMousePosition[1]);
 						taro.network.send('playerMouseMoved', self.newMousePosition);
 						self.lastMousePosition = self.newMousePosition;
@@ -400,14 +401,14 @@ var ControlComponent = TaroEntity.extend({
 				// if (taro.physics && taro.game.cspEnabled && !unit._stats.aiEnabled && !unit.isTeleporting) {
 				// 	var x = unit._translate.x.toFixed(0);
 				// 	var y = unit._translate.y.toFixed(0);
-				// 	if (self.sendPlayerInput && (self.lastPositionSent == undefined || self.lastPositionSent[0] != x || self.lastPositionSent[1] != y)) {
+				// 	if (self.sendMouseMovement && (self.lastPositionSent == undefined || self.lastPositionSent[0] != x || self.lastPositionSent[1] != y)) {
 				// 		var pos = [x, y];
 				// 		taro.network.send('playerUnitMoved', pos);
 				// 		self.lastPositionSent = pos;
 				// 	}
 				// }
 
-				self.sendPlayerInput = false;
+				self.sendMouseMovement = false;
 			}
 		}
 
