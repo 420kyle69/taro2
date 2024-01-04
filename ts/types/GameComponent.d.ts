@@ -120,6 +120,10 @@ declare class GameComponent extends TaroEntity {
 				zoom : {
 					default:number;
 				}
+				deadzone: {
+					width: number;
+					height: number;
+				}
 			}
 		}
 		heightBasedZIndex: boolean;
