@@ -631,7 +631,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 								}
 							}
 
-							var mxfp = dists[taro.physics.engine].getmxfp(tempBod);
+							var mxfp = dists[taro.physics.engine].getmxfp(tempBod, self);
 							var x = mxfp.x * taro.physics._scaleRatio;
 							var y = mxfp.y * taro.physics._scaleRatio;
 							// make projectile auto-rotate toward its path. ideal for arrows or rockets that should point toward its direction
