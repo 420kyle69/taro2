@@ -5,6 +5,7 @@ var ScoreboardComponent = TaroEntity.extend({
 	init: function () {
 		var self = this;
 		self.scoreAttributeId = taro.game.data.settings.scoreAttributeId;
+		self.isUpdateQueued = false;
 		self._hidden = false;
 
 		self.setUI();
@@ -108,6 +109,10 @@ var ScoreboardComponent = TaroEntity.extend({
 		// });
 	},
 
+	queueUpdate: function() {
+		this.isUpdateQueued = true;
+	},
+
 	convertNumbersToKMB: function (labelValue) {
 		if (taro.game.data.settings.prettifyingScoreboard) {
 			// Nine Zeroes for Billions
@@ -136,7 +141,7 @@ var ScoreboardComponent = TaroEntity.extend({
 		var leaderboardToggleElement = taro.client.getCachedElementById('leaderboard-toggle');
 
 
-		if (taro.isClient) {
+		if (taro.isClient && scoreboardElement && leaderboardToggleElement) {
 
 			scoreboardElement.innerHTML = ''
 
@@ -236,6 +241,8 @@ var ScoreboardComponent = TaroEntity.extend({
 				}
 			}
 		}
+
+		this.isUpdateQueued = false;
 	},
 
 	hideScores: function () {
@@ -248,6 +255,7 @@ var ScoreboardComponent = TaroEntity.extend({
 
 	toggleScores: function () {
 		this._hidden = !this._hidden;
+		this.update();
 	}
 
 });

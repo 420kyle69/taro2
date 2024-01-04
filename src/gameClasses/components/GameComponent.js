@@ -52,9 +52,15 @@ var GameComponent = TaroEntity.extend({
 		taro.timer.startGameClock();
 
 		taro._physicsTickRate = Math.max(20, Math.min(60, taro.game?.data?.defaultData?.frameRate || 20));
-		taro._gameLoopTickRate = Math.max(20, taro.game?.data?.defaultData?.engineTickRate || 20);
+		console.log('physicsTickRate', taro._physicsTickRate);
+		
+		if (taro.isClient) {
+			// physicsTickRate dictates streaming fps, and renderBuffer is the wait time before next keyframe is sent to client.
+			// taro.client.renderBuffer = 1500 / taro._physicsTickRate // 20 fps = 75ms, 60 fps = 25ms
+			console.log('renderBuffer', taro.client.renderBuffer);
+		}
 
-		console.log('taro.physics._physicsTickRate', taro._physicsTickRate);
+		taro._gameLoopTickRate = Math.max(20, Math.min(60, taro.game?.data?.defaultData?.engineTickRate || 20));		
 
 		taro.clusterClient && taro.clusterClient.gameStarted();
 	},

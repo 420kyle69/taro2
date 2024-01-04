@@ -594,11 +594,14 @@ var PhysicsComponent = TaroEventingClass.extend({
 			if (self.engine == 'crash') { // crash's engine step happens in dist.js
 				self._world.step(timeElapsedSinceLastStep);
 			} else {
-				self._world.step(timeElapsedSinceLastStep / 1000, 8, 3); // Call the world step; frame-rate, velocity iterations, position iterations
+
+				// Call the world step; frame-rate, velocity iterations, position iterations
+				self._world.step(timeElapsedSinceLastStep / 1000, 8, 3);
 				if (self.ctx) {
 					self.ctx.clear();
 					self._world.DebugDraw();
 				}
+
 				var tempBod = self._world.getBodyList();
 
 				// iterate through every physics body
@@ -608,8 +611,27 @@ var PhysicsComponent = TaroEventingClass.extend({
 						entity = tempBod._entity;
 
 						if (entity) {
+							// apply movement if it's either human-controlled unit, or ai unit that's currently moving
+							if (entity.body && entity.vector && (entity.vector.x != 0 || entity.vector.y != 0)) {
 
-							var mxfp = dists[taro.physics.engine].getmxfp(tempBod, self);
+								if (entity._stats.controls) {
+									switch (entity._stats.controls.movementMethod) { // velocity-based movement
+										case 'velocity':
+											entity.setLinearVelocity(entity.vector.x, entity.vector.y);
+											break;
+										case 'force':
+											entity.applyForce(entity.vector.x, entity.vector.y);
+											this.lastBehaviourAt = Date.now()
+
+											break;
+										case 'impulse':
+											entity.applyImpulse(entity.vector.x, entity.vector.y);
+											break;
+									}
+								}
+							}
+
+							var mxfp = dists[taro.physics.engine].getmxfp(tempBod);
 							var x = mxfp.x * taro.physics._scaleRatio;
 							var y = mxfp.y * taro.physics._scaleRatio;
 							// make projectile auto-rotate toward its path. ideal for arrows or rockets that should point toward its direction
@@ -662,10 +684,10 @@ var PhysicsComponent = TaroEventingClass.extend({
 									entity.isOutOfBounds = false;
 								}
 							}
-							
+
 							// entity just has teleported
 
-							if (entity.teleportDestination != undefined && entity.teleported) {
+							if (entity.teleportDestination != undefined && entity.isTeleporting) {
 								entity.nextKeyFrame[1] = entity.teleportDestination;
 								x = entity.teleportDestination[0];
 								y = entity.teleportDestination[1];
@@ -673,22 +695,15 @@ var PhysicsComponent = TaroEventingClass.extend({
 								entity.teleportDestination = undefined;
 							} else {
 								if (taro.isServer) {
-									// /* server-side reconciliation */
-									// // hard-correct client entity's position (teleport) if the distance between server & client is greater than 100px
-									// // continuously for 10 frames in a row
-									// if (taro.game.cspEnabled && !entity._stats.aiEnabled && entity.clientStreamedPosition) {
-									// 	var targetX = parseInt(entity.clientStreamedPosition[0]);
-									// 	var targetY = parseInt(entity.clientStreamedPosition[1]);
-									// 	var xDiff = targetX - x;
-									// 	var yDiff = targetY - y;
-									// 	x += xDiff / 2;
-									// 	y += yDiff / 2;
-									// }
-
 									entity.translateTo(x, y, 0);
 									entity.rotateTo(0, 0, angle);
-									
-									this.lastX = x;
+
+									// if (entity._category == 'unit') {
+									// 	console.log (taro._currentTime, parseFloat(x - entity.lastX).toFixed(2), "/", timeElapsedSinceLastStep, "speed", parseFloat((x - entity.lastX)/timeElapsedSinceLastStep).toFixed(2),
+									// 				x, entity.lastX, taro._currentTime, taro._currentTime - timeElapsedSinceLastStep)
+									// }
+
+									entity.lastX = x;
 								} else if (taro.isClient) {
 
 									// if CSP is enabled, client-side physics will dictate:
@@ -697,29 +712,57 @@ var PhysicsComponent = TaroEventingClass.extend({
 										(taro.game.cspEnabled && entity == taro.client.selectedUnit) ||
 										(entity._category == 'projectile' && !entity._stats.streamMode)
 									) {
-										// if (entity._category == 'projectile') console.log(x, y, angle)
+										// CSP reconciliation
+										if (entity == taro.client.selectedUnit && (
+											!entity.isTeleporting &&
+											entity.reconRemaining &&
+												!isNaN(entity.reconRemaining.x) &&
+												!isNaN(entity.reconRemaining.y)
+											)
+										) {
 
-										if (entity == taro.client.selectedUnit && taro.client.reconcileDiff && !isNaN(taro.client.reconcileDiff.x) && !isNaN(taro.client.reconcileDiff.x)) {
-											// console.log(taro._currentTime, x, tickDelta, timeRemaining)
-											taro.client.reconcileDiff.x = taro.client.reconcileDiff.x/(taro._physicsTickRate/2);
-											taro.client.reconcileDiff.y = taro.client.reconcileDiff.y/(taro._physicsTickRate/2);
-											x += taro.client.reconcileDiff.x
-											y += taro.client.reconcileDiff.y
-										} 
+											// if the current reconcilie distance is greater than my unit's body dimention,
+											// instantly move unit (teleport) to the last streamed position. Otherwise, gradually reconcile
+											if (Math.abs(entity.reconRemaining.x) > entity._stats.currentBody.width * 1.5 ||
+												Math.abs(entity.reconRemaining.y) > entity._stats.currentBody.height * 1.5
+											) {
+												x = taro.client.myUnitStreamedPosition.x
+												y = taro.client.myUnitStreamedPosition.y
+
+												// x += xRemaining;
+												// y += yRemaining;
+												entity.reconRemaining = undefined;
+											} else {
+
+												entity.reconRemaining.x /= 5;
+												entity.reconRemaining.y /= 5;
+
+												x += entity.reconRemaining.x
+												y += entity.reconRemaining.y
+											}
+										}
 
 										entity.nextKeyFrame = [taro._currentTime + taro.client.renderBuffer, [x, y, angle]];
+
+										// keep track of units' position history for CSP reconciliation
+										if (entity == taro.client.selectedUnit) {
+											entity.posHistory.push([taro._currentTime, [x, y, angle]]);
+											if (entity.posHistory.length > taro._physicsTickRate) {
+												entity.posHistory.shift();
+											}
+										}
+
 									} else { // update server-streamed entities' body position
 										x = entity.nextKeyFrame[1][0];
 										y = entity.nextKeyFrame[1][1];
 										angle = entity.nextKeyFrame[1][2];
 									}
-									
+
 									entity.isTransforming(true);
 								}
 							}
 
 							if (!isNaN(x) && !isNaN(y)) {
-
 								entity.body.setPosition({ x: x / entity._b2dRef._scaleRatio, y: y / entity._b2dRef._scaleRatio });
 								entity.body.setAngle(angle);
 							}
@@ -740,7 +783,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 
 					tempBod = tempBod.getNext();
 				}
-
 
 				taro._physicsFrames++;
 				// Clear forces because we have ended our physics simulation frame

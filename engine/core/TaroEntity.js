@@ -13,9 +13,6 @@ var TaroEntity = TaroObject.extend({
 		var translateX = defaultData.translate && defaultData.translate.x ? defaultData.translate.x : 0;
 		var translateY = defaultData.translate && defaultData.translate.y ? defaultData.translate.y : 0;
 		var rotate = defaultData.rotate || 0;
-
-		this.prevPhysicsFrame = [taro._currentTime, [translateX, translateY, rotate]];
-
 		this._specialProp.push('_texture');
 		this._specialProp.push('_eventListeners');
 		this._specialProp.push('_aabb');
@@ -73,9 +70,8 @@ var TaroEntity = TaroObject.extend({
 		this._isTransforming = true;
 		this.lastTransformedAt = 0;
 		this.latestTimeStamp = 0;
-		this.lastTeleportedAt = 0;
-		this.teleported = false;
-		this.teleportCamera = false;
+		this.isTeleporting = false;
+        this.teleportCamera = false;
 		this.teleportDestination = this.nextKeyFrame[1];
 
 		this.queuedTriggers = [];
@@ -1830,7 +1826,7 @@ var TaroEntity = TaroObject.extend({
 		} else {
 			// Check that the entity has been born
 			if (this._bornTime === undefined || taro._currentTime >= this._bornTime) {
-				// Remove the stream data cache
+
 				delete this._streamDataCache;
 
 				if (!isForOrphans) {
@@ -1957,6 +1953,9 @@ var TaroEntity = TaroObject.extend({
 			if (this._streamMode === 1 || this._streamMode === 2) {
 				this.streamSync();
 			}
+
+			// if (taro._currentTime > taro.server.lastSnapshotSentAt)
+
 
 			if (this._compositeCache) {
 				if (this._cacheDirty) {
@@ -3144,9 +3143,12 @@ var TaroEntity = TaroObject.extend({
 
 	teleportTo: function (x, y, rotate, teleportCamera) {
 		// console.log("teleportTo", x, y, rotate, this._stats.type)
-		this.teleported = true;
-		this.teleportCamera = teleportCamera;
+		this.isTeleporting = true;
+		this.nextKeyFrame[1] = [x, y, rotate];
+        this.teleportCamera = teleportCamera;
 		this.teleportDestination = [x, y, rotate]
+		this.reconRemaining = undefined; // when a unit is teleported, end reconciliation
+		// this.setLinearVelocityLT(0, 0);
 
 		this.translateTo(x, y);
 		if (rotate != undefined) {
@@ -3160,19 +3162,12 @@ var TaroEntity = TaroObject.extend({
 				this.translateColliderTo(x, y);
 			}
 		} else if (taro.isClient) {
-			this.nextKeyFrame = [taro._currentTime + taro.client.renderBuffer, [x, y, rotate]];
 			this.isTransforming(true);
-			if (taro.physics && this.prevPhysicsFrame && this.nextPhysicsFrame) {
-				this.nextPhysicsFrame = [taro._currentTime, [x, y, rotate]];
-			}
-			//instantly move to camera the new position
-			if (teleportCamera && taro.client.myPlayer?._stats.cameraTrackedUnitId === this.id()) {
-				taro.client.emit('instant-move-camera', [x, y]);
-			}
+            //instantly move to camera the new position
+            if (teleportCamera && taro.client.myPlayer?._stats.cameraTrackedUnitId === this.id()) {
+                taro.client.emit('instant-move-camera', [x, y]);
+            }
 		}
-
-		this.discrepancyCount = 0;
-		this.lastTeleportedAt = taro._currentTime;
 
 		if (this._category == 'unit') {
 			// teleport unit's attached items as well. otherwise, the attached bodies (using joint) can cause a drag and
@@ -4439,11 +4434,11 @@ var TaroEntity = TaroObject.extend({
 						buffArr.push(Number(y));
 						buffArr.push(Number(angle));
 
-						if (this.teleported) {
-							buffArr.push(Number(this.teleported));
-							buffArr.push(Number(this.teleportCamera));
-							this.teleported = false;
-							this.teleportCamera = false;
+						if (this.isTeleporting) {
+							buffArr.push(Number(this.isTeleporting));
+                            buffArr.push(Number(this.teleportCamera));
+							this.isTeleporting = false;
+                            this.teleportCamera = false;
 						}
 
 						// TaroEntity.prototype.log(this._size, this._translate, this._rotate)
@@ -5052,6 +5047,10 @@ var TaroEntity = TaroObject.extend({
 	_streamData: function () {
 		// Check if we already have a cached version of the streamData
 		if (this._streamDataCache) {
+			if (this._category == 'unit') {
+				console.log("?. _streamDataCache exists. returning", taro._currentTime, this.id(), this._parent._category, this._parent.id(), "_streamDataCache")
+			}
+
 			return this._streamDataCache;
 		} else {
 			// Let's generate our stream data
@@ -5140,11 +5139,6 @@ var TaroEntity = TaroObject.extend({
 		var offsetDelta = currentTime - startTime;
 		var deltaTime = offsetDelta / dataDelta;
 
-		// Clamp the current time from 0
-		if (deltaTime < 0) {
-			deltaTime = 0;
-		}
-
 		return totalValue * deltaTime + startValue;
 	},
 
@@ -5162,7 +5156,8 @@ var TaroEntity = TaroObject.extend({
 	 * Update the position of the entities using the interpolation. This results smooth motion of the entities.
 	 */
 	_processTransform: function () {
-		var tickDelta = taro._currentTime - this.lastTransformedAt;
+		const now = taro._currentTime;
+		var tickDelta = now - this.lastTransformedAt;
 
 		if (
 			tickDelta == 0 || // entity has already transformed for this tick
@@ -5171,44 +5166,25 @@ var TaroEntity = TaroObject.extend({
 		) {
 			return;
 		}
-
-		let xDiff = null;
-		let yDiff = null;
-
 		let rotateStart = null;
 		let rotateEnd = null;
 
 		let x = this._translate.x;
 		let y = this._translate.y;
 		let rotate = this._rotate.z;
+		let nextTransform = this.nextKeyFrame[1];
+		let nextTime = this.nextKeyFrame[0]
+		let timeRemaining = nextTime - now;
 
-		var nextTransform = this.nextKeyFrame[1];
+		// don't lerp is time remaining is less than 5ms
+		if (nextTransform && timeRemaining > -tickDelta) {
 
-		if (nextTransform) {
+			// lerp between current position and nextTransform
+			x = this.interpolateValue(x, nextTransform[0], now - tickDelta, now, nextTime);
+			y = this.interpolateValue(y, nextTransform[1], now - tickDelta, now, nextTime);
 
-			var nextTime = this.nextKeyFrame[0];
-			var timeRemaining = nextTime - taro._currentTime;
-			xDiff = nextTransform[0] - x;
-			yDiff = nextTransform[1] - y;
-			
-			// don't lerp is time remaining is less than 5ms
-			if (timeRemaining > tickDelta) {
-				var xSpeed = xDiff / timeRemaining;
-				var ySpeed = yDiff / timeRemaining;
-
-				x += xSpeed * tickDelta;
-				y += ySpeed * tickDelta;
-
-			} else {
-				x += xDiff / 2;
-				y += yDiff / 2;
-
-				// if (this != taro.client.selectedUnit && this.isTransforming()) console.log(this._stats.type, taro._currentTime, nextTime, taro._currentTime - nextTime)
-				if (taro._currentTime > nextTime + 100) {
-					this.isTransforming(false);
-				}
-			}
-
+			// if (this == taro.client.selectedUnit)
+			// 	console.log(parseFloat(x).toFixed(0), "nextX", parseFloat(nextTransform[0]), "speedReq", parseFloat((nextTransform[0] - x)/timeRemaining).toFixed(2) , "timeRemaining", timeRemaining)
 			rotateStart = rotate;
 			rotateEnd = nextTransform[2];
 
@@ -5222,6 +5198,10 @@ var TaroEntity = TaroObject.extend({
 			}
 
 			rotate = this.interpolateValue(rotateStart, rotateEnd, taro._currentTime - 16, taro._currentTime, taro._currentTime + 16);
+		} else {
+			x = nextTransform[0];
+			y = nextTransform[1];
+			rotate = nextTransform[2];
 		}
 
 		// for my own unit, ignore streamed angle if this unit control is set to face mouse cursor instantly.
@@ -5237,7 +5217,7 @@ var TaroEntity = TaroObject.extend({
 		this._translate.y = y;
 		this._rotate.z = rotate;
 
-		this.teleported = false;
+		this.isTeleporting = false;
 		this.lastTransformedAt = taro._currentTime;
 	},
 

@@ -50,6 +50,7 @@ var TaroEntityPhysics = TaroEntity.extend({
 		}
 
 		this._actionQueue = [];
+		this.posHistory = [];
 	},
 
 	updateBody: function (defaultData, isLossTolerant) {

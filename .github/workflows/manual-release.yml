@@ -1,0 +1,78 @@
+name: Create Release
+on:
+  workflow_dispatch:
+    inputs:
+      releaseVersion:
+        description: "Version"
+        required: true
+        default: '0.0.0'
+        type: string
+      taroBranch:
+        description: "Engine branch"
+        required: true
+        default: 'master'
+        type: string
+      gsBranch:
+        description: "GS branch"
+        required: true
+        default: 'master'
+        type: string
+      editorBranch:
+        description: "Editor branch"
+        required: true
+        default: 'master'
+        type: string
+      regenerateApiFrom:
+        description: "Retain actions/triggers from release (Leave empty to generate fresh api from database)"
+        required: false
+        default: ""
+        type: string
+
+
+jobs:
+  dispatch:
+    name: Dispatch
+    env:
+      PACKAGES_TO_UPGRADE: ${{ needs.run_publish.outputs.packages }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with: 
+          tag_name: ${{ github.event.inputs.releaseVersion }}
+          target_commitish: ${{ github.event.inputs.taroBranch }}
+          generate_release_notes: true
+      - name: Determine release variables
+        id: version
+        run: |
+          echo ::set-output name=VERSION::${{ github.event.inputs.releaseVersion || github.event.release.tag_name }}
+          echo ::set-output name=TARO_BRANCH::${{ github.event.inputs.taroBranch || 'master' }}
+          echo ::set-output name=GS_BRANCH::${{ github.event.inputs.gsBranch || 'master' }}
+          echo ::set-output name=EDITOR_BRANCH::${{ github.event.inputs.editorBranch || 'master' }}
+          echo ::set-output name=REGENERATE_API_FROM::${{ github.event.inputs.regenerateApiFrom }}
+      - name: Dispatch to moddio/gs
+        run: |
+            curl -H "Accept: application/vnd.github.everest-preview+json" \
+            -H "Authorization: token ${{ secrets.MODDIO2_DISPATCH_TOKEN }}" \
+            --request POST \
+            --data '{"event_type": "moddio2_post_release", "client_payload": { "version": "${{ steps.version.outputs.VERSION }}", "gsBranch": "${{ steps.version.outputs.GS_BRANCH }}", "editorBranch": "${{ steps.version.outputs.EDITOR_BRANCH }}", "regenerateApiFrom": "${{ steps.version.outputs.REGENERATE_API_FROM }}" }}' https://api.github.com/repos/moddio/gs/dispatches
+      - name: Dispatch to moddio/be
+        run: |
+          if [[ "${{ steps.version.outputs.VERSION }}" == *"-staging" ]]; then
+            curl -H "Accept: application/vnd.github.everest-preview+json" \
+            -H "Authorization: token ${{ secrets.MODDIO2_DISPATCH_TOKEN }}" \
+            --request POST \
+            --data '{"event_type": "moddio2_staging_post_release", "client_payload": { "version": "${{ steps.version.outputs.VERSION }}", "gsBranch": "${{ steps.version.outputs.GS_BRANCH }}", "editorBranch": "${{ steps.version.outputs.EDITOR_BRANCH }}", "regenerateApiFrom": "${{ steps.version.outputs.REGENERATE_API_FROM }}" }}' https://api.github.com/repos/moddio/be/dispatches
+          else
+            curl -H "Accept: application/vnd.github.everest-preview+json" \
+            -H "Authorization: token ${{ secrets.MODDIO2_DISPATCH_TOKEN }}" \
+            --request POST \
+            --data '{"event_type": "moddio2_post_release", "client_payload": { "version": "${{ steps.version.outputs.VERSION }}", "gsBranch": "${{ steps.version.outputs.GS_BRANCH }}", "editorBranch": "${{ steps.version.outputs.EDITOR_BRANCH }}", "regenerateApiFrom": "${{ steps.version.outputs.REGENERATE_API_FROM }}" }}' https://api.github.com/repos/moddio/be/dispatches
+          
+            curl -H "Accept: application/vnd.github.everest-preview+json" \
+            -H "Authorization: token ${{ secrets.MODDIO2_DISPATCH_TOKEN }}" \
+            --request POST \
+            --data '{"event_type": "moddio2_staging_post_release", "client_payload": { "version": "${{ steps.version.outputs.VERSION }}", "gsBranch": "${{ steps.version.outputs.GS_BRANCH }}", "editorBranch": "${{ steps.version.outputs.EDITOR_BRANCH }}", "regenerateApiFrom": "${{ steps.version.outputs.REGENERATE_API_FROM }}" }}' https://api.github.com/repos/moddio/be/dispatches
+          fi
+          

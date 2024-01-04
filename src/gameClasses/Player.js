@@ -63,6 +63,8 @@ var Player = TaroEntity.extend({
 							point.x.toFixed(0),
 							point.y.toFixed(0)
 						];
+						self.control.input.mouse.x = point.x.toFixed(0);
+            			self.control.input.mouse.y = point.y.toFixed(0);
 					}
 				});
 
@@ -224,9 +226,6 @@ var Player = TaroEntity.extend({
 					unit.unitUi.updateAllAttributeBars();
 				}
 
-				// abilities
-				const abilitiesData = taro.game.data.unitTypes[unit._stats.type].controls.unitAbilities;
-				taro.client.emit('create-ability-bar', { keybindings: taro.game.data.unitTypes[unit._stats.type].controls.abilities, abilities: abilitiesData });
 				unit.renderMobileControl();
 
 
@@ -379,7 +378,7 @@ var Player = TaroEntity.extend({
 			}
 
 			if (taro.scoreboard) {
-				taro.scoreboard.update();
+				taro.scoreboard.queueUpdate();
 			}
 		}
 	},
@@ -617,8 +616,11 @@ var Player = TaroEntity.extend({
 								break;
 
 							case 'coins':
+								const isCoinsChanged = self._stats[attrName] !== newValue;
 								self._stats[attrName] = newValue;
-								taro.playerUi.updatePlayerCoin(newValue);
+								if (isCoinsChanged) {
+									taro.playerUi.updatePlayerCoin(newValue);
+								}
 								break;
 
 							case 'roleIds':
@@ -793,12 +795,6 @@ var Player = TaroEntity.extend({
 				if (processedUpdates.length > 0) {
 					this.streamUpdateData(processedUpdates);
 				}
-			}
-
-			if (this._stats.clientId == taro.network.id() && !taro.client.isWaitingForPong) {
-				taro.client.myUnitPositionWhenPingSent = {x: taro.client.selectedUnit?._translate.x, y: taro.client.selectedUnit?._translate.y};
-				taro.network.send('ping', {sentAt: Date.now()});
-				taro.client.isWaitingForPong = true;
 			}
 		}
 	},

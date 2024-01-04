@@ -112,12 +112,15 @@ var Projectile = TaroEntityPhysics.extend({
 	_behaviour: function (ctx) {
 		var self = this;
 		
-		if (taro.gameLoopTickHasExecuted) {
-			_.forEach(taro.triggersQueued, function (trigger) {
-				trigger.params['thisEntityId'] = self.id();
-				self.script.trigger(trigger.name, trigger.params);
-			});
+		if (!taro.gameLoopTickHasExecuted) {
+			return;
 		}
+		
+		_.forEach(taro.triggersQueued, function (trigger) {
+			trigger.params['thisEntityId'] = self.id();
+			self.script.trigger(trigger.name, trigger.params);
+		});
+		
 
 		// if entity (unit/item/player/projectile) has attribute, run regenerate
 		if (taro.isServer) {
@@ -215,6 +218,18 @@ var Projectile = TaroEntityPhysics.extend({
 		this._stats.sourceUnitId = sourceUnit?.id();
 		this._stats.sourceItemId = sourceItem?.id();
 
+	},
+
+	resetProjectileType: function () {
+		const data = taro.game.cloneAsset('projectileTypes', this._stats.type);
+
+		//reset attributes
+		for (var attrId in this._stats.attributes) {
+			if (this._stats.attributes[attrId]) {
+				var attributeValue = data.attributes[attrId].value; // default attribute value from new unit type
+				this._stats.attributes[attrId].value = Math.max(data.attributes[attrId].min, Math.min(data.attributes[attrId].max, parseFloat(attributeValue)));
+			}
+		}
 	},
 
 	streamUpdateData: function (queuedData, clientId) {

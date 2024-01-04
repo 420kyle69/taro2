@@ -266,6 +266,15 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
+					case 'isPlayerClient':
+						if (taro.isClient) {
+							var player = self.getValue(text.player, vars);
+							if (player) {
+								returnValue = player._stats?.clientId == taro.network.id();
+							}
+						}
+						break;
+
 					case 'playersAreHostile':
 						var playerA = self.getValue(text.playerA, vars);
 						var playerB = self.getValue(text.playerB, vars);
@@ -665,6 +674,13 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
+					case 'isUnitMoving':
+						var unit = self.getValue(text.unit, vars);
+
+						returnValue = unit.isMoving;
+
+						break;
+
 					case 'getUnitBody':
 						var unit = self.getValue(text.unit, vars);
 						if (unit && unit._category == 'unit') {
@@ -1019,6 +1035,16 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
+					case 'getPlayerUsername':
+						var player = self.getValue(text.player, vars);
+						var username = player._stats.username;
+
+						if (player) {
+							returnValue = username;
+						}
+
+						break;
+
 					case 'getNumberOfItemsPresent':
 						returnValue = taro.$$('item').length;
 
@@ -1230,6 +1256,13 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
+					case 'mathCeiling':
+						var value = self.getValue(text.value, vars);
+						if (!isNaN(value)) {
+							returnValue = Math.ceil(value);
+						}
+						break;
+
 					case 'log10':
 						var value = self.getValue(text.value, vars);
 
@@ -1283,6 +1316,36 @@ var VariableComponent = TaroEntity.extend({
 									returnValue = { x: 0, y: 0 };
 								}
 							}
+						}
+
+						break;
+
+					case 'getEntityPositionOnScreen':
+						if (taro.isClient) {
+							entity = self.getValue(text.entity, vars);
+
+							if (entity) {
+								if (entity._category === 'item' && entity._stats && entity._stats.currentBody && entity._stats.currentBody.type === 'spriteOnly') {
+									var ownerUnit = entity.getOwnerUnit();
+									var unitPosition = rfdc()(ownerUnit._translate);
+
+									unitPosition.x = (ownerUnit._translate.x) + (entity._stats.currentBody.unitAnchor.y * Math.cos(ownerUnit._rotate.z + Math.radians(-90))) + (entity._stats.currentBody.unitAnchor.x * Math.cos(ownerUnit._rotate.z));
+									unitPosition.y = (ownerUnit._translate.y) + (entity._stats.currentBody.unitAnchor.y * Math.sin(ownerUnit._rotate.z + Math.radians(-90))) + (entity._stats.currentBody.unitAnchor.x * Math.sin(ownerUnit._rotate.z));
+									returnValue = JSON.parse(JSON.stringify(unitPosition));
+								} else {
+									if (entity.x != undefined && entity.y != undefined) {
+										returnValue = JSON.parse(JSON.stringify(entity));
+									} else if (entity._translate) {
+										returnValue = rfdc()(entity._translate);
+									} else {
+										returnValue = { x: 0, y: 0 };
+									}
+								}
+							}
+
+							const bounds = taro.renderer.getViewportBounds();
+							returnValue.x -= bounds.x;
+							returnValue.y -= bounds.y;
 						}
 
 						break;
@@ -1444,6 +1507,13 @@ var VariableComponent = TaroEntity.extend({
 							returnValue = Math.atan2(positionB.y - positionA.y, positionB.x - positionA.x);
 							returnValue += Math.radians(90);
 						}
+
+						break;
+
+					case 'getPlayTimeOfPlayer':
+						var player = self.getValue(text.player, vars);
+
+						returnValue = player && (player._stats.receivedJoinGame - taro.now);
 
 						break;
 
@@ -1694,6 +1764,13 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
+					case 'getHighScoreOfPlayer':
+						var player = self.getValue(text.player, vars);
+
+						returnValue = player._stats.highscore;
+
+						break;	
+
 					case 'getUnitId':
 						var unit = self.getValue(text.unit, vars);
 
@@ -1842,21 +1919,26 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
+					case 'toUpperCase':
+						var string = self.getValue(text.string, vars);
+
+						if (string && !isNaN(string.length)) {
+							returnValue = string.toUpperCase();
+						}
+
+						break;	
+
 					case 'substringOf':
 						var string = self.getValue(text.string, vars);
 						var fromIndex = self.getValue(text.fromIndex, vars);
 						var toIndex = self.getValue(text.toIndex, vars);
 
 						if (string && string.length) {
-							// index for game devs is from 1 to n as they might not be familiar with
-							// string starting from index 0
-							fromIndex -= 1;
-
-							fromIndex = Math.max(Math.min(fromIndex, string.length), 0);
+							fromIndex = Math.max(Math.min(fromIndex, string.length - 1), 0);
 							toIndex = Math.max(Math.min(toIndex, string.length), 0);
 
 							// This looks like trying to force a start index from [0, +inf], but actually puts it in [-1, +inf]. Why is it subtracted two times? (once before, now the second time here)
-							returnValue = string.substring(fromIndex - 1, toIndex);
+							returnValue = string.substring(fromIndex, toIndex);
 						} else {
 							returnValue = '';
 						}
@@ -2115,7 +2197,6 @@ var VariableComponent = TaroEntity.extend({
 						var region = self.getValue(text.region, vars);
 						var id = taro.game.lastCastingUnitId;
 						var unit = taro.$(id);
-
 						if (region) {
 							// region represent some instance of TaroRegion
 							if (region._stats) {
@@ -2225,10 +2306,8 @@ var VariableComponent = TaroEntity.extend({
 
 			'objectToString': function (text, vars) {
 				var object = self.getValue(text.object, vars);
-				var str = JSON.stringify(object) // remove opening & ending quotes
-				if (object) {
-					return str;
-				}
+				var str = typeof object === 'string' ? object : JSON.stringify(object) // remove opening & ending quotes
+				return str;
 			},
 
 			'lastReceivedPostResponse': function (text, vars) {

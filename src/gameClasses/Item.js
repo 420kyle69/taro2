@@ -316,6 +316,7 @@ var Item = TaroEntityPhysics.extend({
 						if (self._stats.bulletStartPosition) {
 							var rotate = this._rotate.z;
 							let bulletY = self._stats.bulletStartPosition.y || 0;
+							let bulletX = (owner._stats.flip === 1 ? -1 : 1);
 							
 							if (owner && self._stats.currentBody && self._stats.currentBody.jointType == 'weldJoint') {
 								rotate = owner._rotate.z;
@@ -330,10 +331,9 @@ var Item = TaroEntityPhysics.extend({
 
 							// item is flipped, then mirror the rotation
 
-
 							var bulletStartPosition = {
-								x: (owner._translate.x + self.anchoredOffset.x) + (self._stats.bulletStartPosition.x * Math.cos(rotate)) + (bulletY * Math.sin(rotate)),
-								y: (owner._translate.y + self.anchoredOffset.y) + (self._stats.bulletStartPosition.x * Math.sin(rotate)) - (bulletY * Math.cos(rotate))
+								x: (owner._translate.x + self.anchoredOffset.x) + (self._stats.bulletStartPosition.x * bulletX * Math.cos(rotate)) + (bulletY * Math.sin(rotate)),
+								y: (owner._translate.y + self.anchoredOffset.y) + ((self._stats.bulletStartPosition.x * bulletX * Math.sin(rotate)) - (bulletY * Math.cos(rotate))) //* bulletX
 							};
 
 							if (
@@ -559,7 +559,7 @@ var Item = TaroEntityPhysics.extend({
 						var unitAttributeBonuses = self._stats.bonus.consume.unitAttribute;
 						if (unitAttributeBonuses) {
 							for (var attrId in unitAttributeBonuses) {
-								var newValue = owner.attribute.getValue(attrId) + parseFloat(unitAttributeBonuses[attrId]);
+								var newValue = parseFloat(owner.attribute.getValue(attrId)) + parseFloat(unitAttributeBonuses[attrId]);
 								attrData.attributes[attrId] = owner.attribute.update(attrId, newValue);
 							}
 						}
@@ -614,8 +614,8 @@ var Item = TaroEntityPhysics.extend({
 		if (taro.isServer) {
 			// if server authoritative mode is enabled, then stream item quantity to the item's owner player only
 			if (taro.runMode == 0) {
-				var playerId = this.getOwnerUnit()?.getOwner()?._id;
-				this.streamUpdateData([{ quantity: qty }], playerId);
+				var clientId = this.getOwnerUnit()?.getOwner()?._stats.clientId;
+				this.streamUpdateData([{ quantity: qty }], clientId);
 			}
 
 			// item's set to be removed when empty
@@ -983,6 +983,18 @@ var Item = TaroEntityPhysics.extend({
 		}
 	},
 
+	resetItemType: function () {
+		const data = taro.game.cloneAsset('itemTypes', this._stats.itemTypeId);
+
+		//reset attributes
+		for (var attrId in this._stats.attributes) {
+			if (this._stats.attributes[attrId]) {
+				var attributeValue = data.attributes[attrId].value; // default attribute value from new unit type
+				this._stats.attributes[attrId].value = Math.max(data.attributes[attrId].min, Math.min(data.attributes[attrId].max, parseFloat(attributeValue)));
+			}
+		}
+	},
+
 	streamUpdateData: function (queuedData, clientId) {
 		var self = this;
 
@@ -1129,12 +1141,13 @@ var Item = TaroEntityPhysics.extend({
 	_behaviour: function (ctx) {
 		var self = this;
 
-		if (taro.gameLoopTickHasExecuted) {
-			_.forEach(taro.triggersQueued, function (trigger) {
-				trigger.params['thisEntityId'] = self.id();
-				self.script.trigger(trigger.name, trigger.params);
-			});
+		if (!taro.gameLoopTickHasExecuted) {
+			return;
 		}
+		_.forEach(taro.triggersQueued, function (trigger) {
+			trigger.params['thisEntityId'] = self.id();
+			self.script.trigger(trigger.name, trigger.params);
+		});
 
 		var ownerUnit = this.getOwnerUnit();		
 		if (ownerUnit && this._stats.stateId != 'dropped') {
