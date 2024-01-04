@@ -271,7 +271,7 @@ var GameComponent = TaroEntity.extend({
 		if (taro.isServer && (taro.server.developerClientIds.length || process.env.ENV === 'standalone' || process.env.ENV == 'standalone-remote')) {
 			// only show 'object' string if env variable is object
 			if (typeof data.params.newValue == 'object') {
-				if (data.params.newValue._stats) {
+				if (data.params.newValue?._stats) {
 					taro.game.devLogs[data.params.variableName] = `object (${data.params.newValue._category}): ${data.params.newValue._stats.name}`;
 				} else {
 					taro.game.devLogs[data.params.variableName] = 'object';

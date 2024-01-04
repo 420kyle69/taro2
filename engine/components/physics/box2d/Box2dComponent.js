@@ -582,13 +582,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 				self._world.step(timeElapsedSinceLastStep);
 			} else {
 
-				// Call the world step; frame-rate, velocity iterations, position iterations
-				self._world.step(timeElapsedSinceLastStep / 1000, 8, 3); 
-				if (self.ctx) {
-					self.ctx.clear();
-					self._world.DebugDraw();
-				}
-				
 				var tempBod = self._world.getBodyList();
 
 				// iterate through every physics body
@@ -609,8 +602,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 											break;
 										case 'force':
 											entity.applyForce(entity.vector.x, entity.vector.y);
-											this.lastBehaviourAt = Date.now()
-											
 											break;
 										case 'impulse':
 											entity.applyImpulse(entity.vector.x, entity.vector.y);
@@ -694,7 +685,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 									
 									entity.lastX = x;
 								} else if (taro.isClient) {
-
 									// if CSP is enabled, client-side physics will dictate:
 									// my unit's position and projectiles that are NOT server-streamed.
 									if (
@@ -709,7 +699,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 												!isNaN(entity.reconRemaining.y)
 											)
 										) {
-
 											// if the current reconcilie distance is greater than my unit's body dimention, 
 											// instantly move unit (teleport) to the last streamed position. Otherwise, gradually reconcile
 											if (Math.abs(entity.reconRemaining.x) > entity._stats.currentBody.width * 1.5 || 
@@ -779,6 +768,13 @@ var PhysicsComponent = TaroEventingClass.extend({
 					}
 
 					tempBod = tempBod.getNext();
+				}
+
+				// Call the world step; frame-rate, velocity iterations, position iterations
+				self._world.step(timeElapsedSinceLastStep / 1000, 8, 3); 
+				if (self.ctx) {
+					self.ctx.clear();
+					self._world.DebugDraw();
 				}
 
 				taro._physicsFrames++;
