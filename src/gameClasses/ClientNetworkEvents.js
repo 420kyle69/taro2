@@ -266,6 +266,10 @@ var ClientNetworkEvents = {
 			case "shopResponse":
 				taro.shop.purchaseWarning(data.type);
 				break;
+
+			case 'shopPurchase':
+				taro.shop.openEntityPurchaseModal(data);
+				break;
 		}
 	},
 

@@ -112,14 +112,8 @@ var ShopComponent = TaroEntity.extend({
 				}
 
 				if (isCoinTxRequired) {
-					$('#purchasable-purchase-modal').removeData();
-					$('#purchasable-purchase-modal').data('purchasable', $(this).attr('id'));
-					$('#purchasable-purchase-modal').data('price', itemPrice);
-					$('#purchasable-purchase-modal').data('itemQuantity', itemQuantity);
-					$('#purchasable-purchase-modal').data('type', 'shop-item');
-					// quantity
-					$('#purchasable-purchase-modal').data('quantity', $(this).attr('quantity'));
-					$('#purchasable-purchase-modal').modal('show');
+					self.openItemPurchaseModal({ itemId: $(this).attr('id'), itemPrice, itemQuantity });
+
 					// self.verifyUserPinForPurchase($(this).attr('id'));
 				} else {
 					self.purchase($(this).attr('id'));
@@ -1039,7 +1033,7 @@ var ShopComponent = TaroEntity.extend({
 					});
 
 					// check if item quantity is set for shop else use default item quantity
-					var itemQuantity = window.$.isNumeric(shopItem.quantity) ? parseInt(shopItem.quantity || 1) : (item.quantity || 1);
+					var itemQuantity = this.getShopItemQuantity(shopItem, item);
 
 					var bgColor = requirementsSatisfied && isItemAffordable ? 'bg-light-green' : 'bg-light-red';
 					var itemImage = $('<div/>', {
@@ -1607,8 +1601,59 @@ var ShopComponent = TaroEntity.extend({
 			unitData.unitTypeId = unitId;
 			return unitData;
 		}
-	}
+	},
+	openEntityPurchaseModal: function (data) {
+		switch (data.action) {
+			case 'openEntityPurchaseModal': {
+				const entityId = data.entityId;
+				const shopId = data.shopId;
+				// currently we only support item purchase
+				const entityType = 'item';
 
+				const entityData = taro.game.cloneAsset(`${entityType}Types`, entityId);
+				if (!entityData) {
+					return;
+				}
+
+				const shopData = taro.game.cloneAsset('shops', shopId);
+
+				if (!shopData) {
+					return;
+				}
+
+				const shopItem = shopData.itemTypes[entityId];
+
+				if (!shopItem) {
+					return;
+				}
+
+				const isCoinTxRequired = !!shopItem.price.coins;
+
+				if (isCoinTxRequired) {
+					const itemPrice = shopItem.price.coins || 0;
+					const itemQuantity = this.getShopItemQuantity(shopItem, entityData);
+					const itemId = entityId;
+
+					this.openItemPurchaseModal({ itemId, itemPrice: itemPrice.toString(), itemQuantity: itemQuantity.toString() });
+				}
+				break;
+			}
+			default: {
+				return;
+			}
+		}
+	},
+	openItemPurchaseModal: function ({ itemId, itemPrice, itemQuantity }) {
+		$('#purchasable-purchase-modal').removeData();
+		$('#purchasable-purchase-modal').data('purchasable', itemId);
+		$('#purchasable-purchase-modal').data('price', itemPrice);
+		$('#purchasable-purchase-modal').data('itemQuantity', itemQuantity);
+		$('#purchasable-purchase-modal').data('type', 'shop-item');
+		$('#purchasable-purchase-modal').modal('show');
+	},
+	getShopItemQuantity: function (shopItem, item) {
+		return window.$.isNumeric(shopItem.quantity) ? parseInt(shopItem.quantity || 1) : (item.quantity || 1);
+	}
 });
 
 if (typeof (module) !== 'undefined' && typeof (module.exports) !== 'undefined') {
