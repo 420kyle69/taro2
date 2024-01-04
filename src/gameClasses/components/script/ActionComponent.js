@@ -159,8 +159,8 @@ var ActionComponent = TaroEntity.extend({
 								}
 							}
 							break;
-						}					
-					
+						}
+
 					case 'runScript':
 						let previousScriptId = self._script.currentScriptId;
 						self._script.runScript(action.scriptName, vars);
