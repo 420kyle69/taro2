@@ -36,6 +36,12 @@ var GameScene = /** @class */ (function (_super) {
     GameScene.prototype.init = function () {
         var _this = this;
         var _a, _b, _c, _d, _e, _f, _g, _h;
+        // BEGIN RAYCAST SHADOW TEST AREA
+        this.shadows = new RaycastShadows(this);
+        taro.client.on('get-walls', function () {
+            _this.shadows.getWalls();
+        });
+        // END RAYCAST SHADOW TEST AREA
         if (taro.isMobile) {
             this.scene.launch('MobileControls');
         }
@@ -153,19 +159,19 @@ var GameScene = /** @class */ (function (_super) {
                 else {
                     if (window.toastErrorMessage) {
                         window.toastErrorMessage("Tileset \"".concat(tileset.name, "\" image doesn't match the specified parameters. ") +
-                            "Double check your margin, spacing, tilewidth and tileheight.");
+                            'Double check your margin, spacing, tilewidth and tileheight.');
                     }
                     else {
                         // WAITING TILL EDITOR IS LOADED
                         setTimeout(function () {
                             if (window.toastErrorMessage) {
                                 window.toastErrorMessage("Tileset \"".concat(tileset.name, "\" image doesn't match the specified parameters. ") +
-                                    "Double check your margin, spacing, tilewidth and tileheight.");
+                                    'Double check your margin, spacing, tilewidth and tileheight.');
                             }
                             else {
                                 // IF editor is not loaded, show alert
                                 alert("Tileset \"".concat(tileset.name, "\" image doesn't match the specified parameters. ") +
-                                    "Double check your margin, spacing, tilewidth and tileheight.");
+                                    'Double check your margin, spacing, tilewidth and tileheight.');
                             }
                         }, 5000);
                     }
@@ -485,4 +491,7 @@ var GameScene = /** @class */ (function (_super) {
     };
     return GameScene;
 }(PhaserScene));
+if (typeof (module) !== 'undefined' && typeof (module.exports) !== 'undefined') {
+    module.exports = GameScene;
+}
 //# sourceMappingURL=GameScene.js.map
