@@ -5205,6 +5205,9 @@ var TaroEntity = TaroObject.extend({
 			x = nextTransform[0];
 			y = nextTransform[1];
 			rotate = nextTransform[2];
+
+			// entity isn't moving anymore. prevent rendering to conserve cpu
+			this.isTransforming(false);
 		}
 
 		// for my own unit, ignore streamed angle if this unit control is set to face mouse cursor instantly.

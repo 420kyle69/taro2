@@ -23,7 +23,6 @@ var TaroNetIoComponent = TaroEventingClass.extend([
 		// Time sync defaults
 		// this._timeSyncInterval = 1000; // Sync the client/server clocks every ten seconds by default
 		// this._timeSyncLog = {};
-		this._latency = 0;
 		this.latency = 0;
 		this.latencyHistory = [];
 		this.rttSamples = [];

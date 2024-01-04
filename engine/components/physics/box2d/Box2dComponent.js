@@ -731,6 +731,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 											}
 										}
 
+										entity.prevKeyFrame = entity.nextKeyFrame;
 										entity.nextKeyFrame = [taro._currentTime + taro.client.renderBuffer, [x, y, angle]];
 
 										// keep track of units' position history for CSP reconciliation
@@ -747,7 +748,9 @@ var PhysicsComponent = TaroEventingClass.extend({
 										angle = entity.nextKeyFrame[1][2];
 									}
 									
-									entity.isTransforming(true);
+									if (entity.prevKeyFrame[1][0] != entity.nextKeyFrame[1][0] || entity.prevKeyFrame[1][1] != entity.nextKeyFrame[1][1] || entity.prevKeyFrame[1][2] != entity.nextKeyFrame[1][2]) {
+										entity.isTransforming(true);									
+									}
 								}
 							}
 
