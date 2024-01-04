@@ -1632,7 +1632,7 @@ var TaroEngine = TaroEntity.extend({
 			}
 
 			// Get the current time in milliseconds
-			self._tickStart = this._currentTime;
+			self._tickStart = taro._currentTime;			
 
 			if (!self.lastTick) {
 				// This is the first time we've run so set some
