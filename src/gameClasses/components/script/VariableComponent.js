@@ -2094,11 +2094,11 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
-					case 'allItemsOfItemsType':
+					case 'allItemsOfItemType':
 						var type = self.getValue(text.itemType, vars);
-
+						
 						returnValue = _.filter(taro.$$('item'), (item) => {
-							return item._stats.type == type;
+							return item._stats.itemTypeId == type;
 						});
 
 						break;

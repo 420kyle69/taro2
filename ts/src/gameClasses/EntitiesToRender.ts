@@ -93,10 +93,6 @@ class EntitiesToRender {
                     //if (entity._stats.name === 'potato gun small') console.log('owner unit translate',ownerUnit._translate.x, ownerUnit._translate.y, '\nphaser unit pos', ownerUnit.phaserEntity.gameObject.x, ownerUnit.phaserEntity.gameObject.y, '\nitem translate', x, y, '\nphaser item pos', entity.phaserEntity.gameObject.x, entity.phaserEntity.gameObject.y)
 				}
 
-				if (entity._category == 'item') { 
-					console.log(entity.tween?.isTweening, phaserGameObject?.visible)
-				}
-
 				if (entity.tween?.isTweening && phaserGameObject?.visible) {
 					entity.tween.update();
 					x += entity.tween.offset.x;

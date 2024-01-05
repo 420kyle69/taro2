@@ -4,7 +4,7 @@ var EntitiesToRender = /** @class */ (function () {
         taro.client.on('tick', this.frameTick, this);
     }
     EntitiesToRender.prototype.updateAllEntities = function ( /*timeStamp*/) {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+        var _a, _b, _c, _d, _e, _f, _g, _h;
         for (var entityId in this.trackEntityById) {
             // var timeStart = performance.now();
             // var entity = taro.$(entityId);
@@ -73,16 +73,13 @@ var EntitiesToRender = /** @class */ (function () {
                     }
                     //if (entity._stats.name === 'potato gun small') console.log('owner unit translate',ownerUnit._translate.x, ownerUnit._translate.y, '\nphaser unit pos', ownerUnit.phaserEntity.gameObject.x, ownerUnit.phaserEntity.gameObject.y, '\nitem translate', x, y, '\nphaser item pos', entity.phaserEntity.gameObject.x, entity.phaserEntity.gameObject.y)
                 }
-                if (entity._category == 'item') {
-                    console.log((_g = entity.tween) === null || _g === void 0 ? void 0 : _g.isTweening, phaserGameObject === null || phaserGameObject === void 0 ? void 0 : phaserGameObject.visible);
-                }
-                if (((_h = entity.tween) === null || _h === void 0 ? void 0 : _h.isTweening) && (phaserGameObject === null || phaserGameObject === void 0 ? void 0 : phaserGameObject.visible)) {
+                if (((_g = entity.tween) === null || _g === void 0 ? void 0 : _g.isTweening) && (phaserGameObject === null || phaserGameObject === void 0 ? void 0 : phaserGameObject.visible)) {
                     entity.tween.update();
                     x += entity.tween.offset.x;
                     y += entity.tween.offset.y;
                     rotate += entity.tween.offset.rotate;
                 }
-                if (((_j = entity.tween) === null || _j === void 0 ? void 0 : _j.isTweening) ||
+                if (((_h = entity.tween) === null || _h === void 0 ? void 0 : _h.isTweening) ||
                     entity.isTransforming() ||
                     entity == taro.client.selectedUnit ||
                     entity._category == 'item') {
