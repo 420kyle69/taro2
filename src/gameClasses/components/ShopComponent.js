@@ -84,20 +84,20 @@ var ShopComponent = TaroEntity.extend({
 				// 	});
 				// }
 				// else {
-				var isItemRequirementSetisfied = $(this).attr('requirementsSatisfied') == 'true';
-				// var isItemAffordable = $(this).attr('isItemAffordable') == 'true';
+				var isItemRequirementSatisfied = $(this).attr('requirementsSatisfied') == 'true';
+				var isItemAffordable = $(this).attr('isItemAffordable') == 'true';
 				var isCoinTxRequired = $(this).attr('isCoinTxRequired') == 'true';
 				var itemPrice = $(this).attr('itemPrice');
 				var itemQuantity = $(this).attr('itemQuantity');
 				var name = $(this).attr('name');
-				if (!isItemRequirementSetisfied) {
+				if (!isItemRequirementSatisfied) {
 					self.purchaseWarning('requirement', name);
 					return;
 				}
-				// if (!isItemAffordable) {
-				// 	self.purchaseWarning('price', name);
-				// 	return;
-				// }
+				if (!isItemAffordable) {
+					self.purchaseWarning('price', name);
+					return;
+				}
 
 				if (itemPrice && (parseFloat(itemPrice) > 0) && window.userId && window.userId.toString() !== window.gameJson?.data?.defaultData?.owner?.toString()) {
 					window.userId && window.trackEvent && window.trackEvent('Coin Purchase', {
@@ -112,6 +112,11 @@ var ShopComponent = TaroEntity.extend({
 				}
 
 				if (isCoinTxRequired) {
+					if (taro.game.data.defaultData.tier === '1') {
+						self.purchaseWarning('advanced-tier', name);
+						return;
+					}
+
 					self.openItemPurchaseModal({ itemId: $(this).attr('id'), itemPrice, itemQuantity });
 
 					// self.verifyUserPinForPurchase($(this).attr('id'));
@@ -425,6 +430,9 @@ var ShopComponent = TaroEntity.extend({
 			case 'purchase':
 				$('#purchasable-purchase-modal').modal('hide');
 				text = '<strong>Item purchased.</strong>';
+				break;
+			case 'advanced-tier':
+				text = '<strong>Advanced tier required to make coin purchases.</strong>';
 				break;
 		}
 
@@ -780,7 +788,7 @@ var ShopComponent = TaroEntity.extend({
 			});
 		}
 	},
-	isItemRequirementSetisfied: function (req, priceAttr) {
+	isPlayerAttrRequirementSatisfied: function (req, priceAttr) {
 		var ownerPlayer = taro.client.myPlayer;
 		var playerTypeAttribute = ownerPlayer._stats.attributes;
 		if (playerTypeAttribute[priceAttr]) {
@@ -818,7 +826,7 @@ var ShopComponent = TaroEntity.extend({
 			var requirements = '';
 			for (var priceAttr in shopItem.requirement.playerAttributes) {
 				var req = shopItem.requirement.playerAttributes[priceAttr];
-				var requirementsSatisfied = self.isItemRequirementSetisfied(req, priceAttr) && 'text-success' || 'text-danger';
+				var requirementsSatisfied = self.isPlayerAttrRequirementSatisfied(req, priceAttr) && 'text-success' || 'text-danger';
 				requirements += `<p class='mb-2 ml-2 no-selection ${requirementsSatisfied}'>`;
 				requirements += req.value;
 				requirements += ' ';
@@ -976,56 +984,13 @@ var ShopComponent = TaroEntity.extend({
 						isPurchasableByCurrentPlayerType = item.canBePurchasedBy.includes(ownerPlayer._stats.playerTypeId);
 					}
 
-					var isItemAffordable = true;
-					var requirementsSatisfied = true;
-					if (typeof shopItem.requirement === 'object') {
-						for (var priceAttr in shopItem.requirement.playerAttributes) {
-							if (playerTypeAttribute && playerTypeAttribute[priceAttr]) {
-								var req = shopItem.requirement.playerAttributes[priceAttr];
-								var requirementsSatisfied = self.isItemRequirementSetisfied(req, priceAttr);
-								if (!requirementsSatisfied) {
-									break;
-								}
-							}
-						}
-						// checking items to be removed present in selected unit inventory
-						if (requirementsSatisfied) {
-							var requiredItemTypesKeys = Object.keys(shopItem.requirement.requiredItemTypes || {});
-							for (var j = 0; j < requiredItemTypesKeys.length; j++) {
-								var itemKey = requiredItemTypesKeys[j];
-								var requiredQuantity = shopItem.requirement.requiredItemTypes[itemKey];
-								requirementsSatisfied = ownerUnit.inventory.hasRequiredQuantity(itemKey, requiredQuantity);
-								if (!requiredItemTypesKeys) {
-									break;
-								}
-							}
-						}
-					}
-					if (typeof shopItem.price === 'object') {
-						if (shopItem.price.coins && ownerPlayer._stats.coins < shopItem.price.coins) {
-							isItemAffordable = false;
-						}
-
-						for (var priceAttr in shopItem.price.playerAttributes) {
-							if (playerTypeAttribute && playerTypeAttribute[priceAttr] && parseFloat(playerTypeAttribute[priceAttr].value) < parseFloat(shopItem.price.playerAttributes[priceAttr])) {
-								isItemAffordable = false;
-								break;
-							}
-						}
-
-						// checking items to be removed present in selected unit inventory
-						if (isItemAffordable) {
-							var requiredItemTypesKeys = Object.keys(shopItem.price.requiredItemTypes || {});
-							for (var j = 0; j < requiredItemTypesKeys.length; j++) {
-								var itemKey = requiredItemTypesKeys[j];
-								var requiredQuantity = shopItem.price.requiredItemTypes[itemKey];
-								isItemAffordable = ownerUnit?.inventory?.hasRequiredQuantity(itemKey, requiredQuantity);
-								if (!isItemAffordable) {
-									break;
-								}
-							}
-						}
-					}
+					var isItemAffordable = self.checkIsItemAffordable({ shopItemPrice: shopItem.price, playerTypeAttribute, ownerUnit });
+					var isItemCoinsAffordable = self.checkItemCoinsAffordable({ shopItemPrice: shopItem.price, ownerPlayer });
+					var requirementsSatisfied = self.checkIsItemRequirementSatisfied({
+						shopItemRequirement: shopItem.requirement,
+						playerTypeAttribute,
+						ownerUnit
+					});
 
 					var itemDetail = $('<div/>', {
 						style: 'font-size: 16px; width: 250px;',
@@ -1035,7 +1000,7 @@ var ShopComponent = TaroEntity.extend({
 					// check if item quantity is set for shop else use default item quantity
 					var itemQuantity = this.getShopItemQuantity(shopItem, item);
 
-					var bgColor = requirementsSatisfied && isItemAffordable ? 'bg-light-green' : 'bg-light-red';
+					var bgColor = requirementsSatisfied && isItemAffordable && isItemCoinsAffordable ? 'bg-light-green' : 'bg-light-red';
 					var itemImage = $('<div/>', {
 						id: shopItemsKeys[i],
 						isadblockenabled: isAdBlockEnabled,
@@ -1134,7 +1099,7 @@ var ShopComponent = TaroEntity.extend({
 						for (var priceAttr in shopUnit.requirement.playerAttributes) {
 							if (playerTypeAttribute && playerTypeAttribute[priceAttr]) {
 								var req = shopUnit.requirement.playerAttributes[priceAttr];
-								var requirementsSatisfied = self.isItemRequirementSetisfied(req, priceAttr);
+								var requirementsSatisfied = self.isPlayerAttrRequirementSatisfied(req, priceAttr);
 								if (!requirementsSatisfied) {
 									break;
 								}
@@ -1609,9 +1574,14 @@ var ShopComponent = TaroEntity.extend({
 				const shopId = data.shopId;
 				// currently we only support item purchase
 				const entityType = 'item';
+				const self = this;
 
 				const entityData = taro.game.cloneAsset(`${entityType}Types`, entityId);
 				if (!entityData) {
+					return;
+				}
+
+				if (taro.game.data.defaultData.tier.toString() === '1') {
 					return;
 				}
 
@@ -1629,14 +1599,35 @@ var ShopComponent = TaroEntity.extend({
 
 				const isCoinTxRequired = !!shopItem.price.coins;
 
-				if (isCoinTxRequired) {
+				if (!isCoinTxRequired) {
+					return;
+				}
+
+				let ownerPlayer = taro.client.myPlayer;
+				let ownerUnit = taro.$(ownerPlayer._stats.selectedUnitId);
+				let playerTypeAttribute = ownerPlayer._stats.attributes;
+
+				const isItemAffordable = self.checkIsItemAffordable({
+					shopItemPrice: shopItem.price,
+					playerTypeAttribute,
+					ownerUnit
+				});
+
+				const requirementsSatisfied = self.checkIsItemRequirementSatisfied({
+					shopItemRequirement: shopItem.requirement,
+					playerTypeAttribute,
+					ownerUnit
+				});
+
+				if (isItemAffordable && requirementsSatisfied) {
 					const itemPrice = shopItem.price.coins || 0;
-					const itemQuantity = this.getShopItemQuantity(shopItem, entityData);
+					const itemQuantity = self.getShopItemQuantity(shopItem, entityData);
 					const itemId = entityId;
 
-					this.openItemPurchaseModal({ itemId, itemPrice: itemPrice.toString(), itemQuantity: itemQuantity.toString() });
+					self.openItemPurchaseModal({ itemId, itemPrice: itemPrice.toString(), itemQuantity: itemQuantity.toString() });
+					break;
 				}
-				break;
+
 			}
 			default: {
 				return;
@@ -1653,6 +1644,69 @@ var ShopComponent = TaroEntity.extend({
 	},
 	getShopItemQuantity: function (shopItem, item) {
 		return window.$.isNumeric(shopItem.quantity) ? parseInt(shopItem.quantity || 1) : (item.quantity || 1);
+	},
+	checkIsItemRequirementSatisfied: function ({ shopItemRequirement, playerTypeAttribute, ownerUnit }) {
+		let self = this;
+		let requirementsSatisfied = true;
+		if (typeof shopItemRequirement === 'object') {
+			for (var priceAttr in shopItemRequirement.playerAttributes) {
+				if (playerTypeAttribute && playerTypeAttribute[priceAttr]) {
+					var req = shopItemRequirement.playerAttributes[priceAttr];
+					requirementsSatisfied = self.isPlayerAttrRequirementSatisfied(req, priceAttr);
+					if (!requirementsSatisfied) {
+						break;
+					}
+				}
+			};
+
+			// checking items to be removed present in selected unit inventory
+			if (requirementsSatisfied) {
+				var requiredItemTypesKeys = Object.keys(shopItemRequirement.requiredItemTypes || {});
+				for (var j = 0; j < requiredItemTypesKeys.length; j++) {
+					var itemKey = requiredItemTypesKeys[j];
+					var requiredQuantity = shopItemRequirement.requiredItemTypes[itemKey];
+					requirementsSatisfied = ownerUnit?.inventory?.hasRequiredQuantity(itemKey, requiredQuantity);
+					if (!requiredItemTypesKeys) {
+						break;
+					}
+				}
+			}
+		}
+
+		return !!requirementsSatisfied;
+	},
+	checkIsItemAffordable: function ({ shopItemPrice, playerTypeAttribute, ownerUnit }) {
+		let isItemAffordable = true;
+		if (typeof shopItemPrice === 'object') {
+			for (var priceAttr in shopItemPrice.playerAttributes) {
+				if (playerTypeAttribute && playerTypeAttribute[priceAttr] && parseFloat(playerTypeAttribute[priceAttr].value) < parseFloat(shopItemPrice.playerAttributes[priceAttr])) {
+					isItemAffordable = false;
+					break;
+				}
+			}
+
+			// checking items to be removed present in selected unit inventory
+			if (isItemAffordable) {
+				var requiredItemTypesKeys = Object.keys(shopItemPrice.requiredItemTypes || {});
+				for (var j = 0; j < requiredItemTypesKeys.length; j++) {
+					var itemKey = requiredItemTypesKeys[j];
+					var requiredQuantity = shopItemPrice.requiredItemTypes[itemKey];
+					isItemAffordable = ownerUnit?.inventory?.hasRequiredQuantity(itemKey, requiredQuantity);
+					if (!isItemAffordable) {
+						break;
+					}
+				}
+			}
+		}
+
+		return !!isItemAffordable;
+	},
+	checkItemCoinsAffordable: function ({ shopItemPrice, ownerPlayer }) {
+		if (shopItemPrice?.coins && ownerPlayer._stats.coins < shopItemPrice.coins) {
+			return false;
+		}
+
+		return true;
 	}
 });
 
