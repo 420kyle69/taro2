@@ -139,7 +139,6 @@ NetIo.Client = NetIo.EventingClass.extend({
 		return new Promise((resolve) => {
 			
 			this.reconnectedAt = Date.now();
-			this.trackLatency('gs-websocket-connect', 'onreconnect');
 			this.reconnectedAt = null;
 			this.fallbackTimeout = null;
 			this.connectionOpenTimeout = null;
@@ -278,28 +277,10 @@ NetIo.Client = NetIo.EventingClass.extend({
 					wsReason: data?.reason,
 				});
 			}
-
-			if (this.pingInterval) {
-				clearInterval(this.pingInterval);
-			}
-
-			// if (actionEvent === 'onopen') {
-			// 	// start ping interval
-			// 	const pingIntervalTimeout = 1000; // every 1s
-
-			// 	this.pingInterval = setInterval(() => {
-			// 		self._socket.send(JSON.stringify({
-			// 			type: 'ping',
-			// 			sentAt: Date.now()
-			// 		}));
-			// 	}, pingIntervalTimeout);
-			// }
 		}
 	},
 
 	_onOpen: function (event) {
-		this.trackLatency('gs-websocket-connect', 'onopen');
-		
 		var url = event.target.url;
 		var urlWithoutProtocol = url.split('://')[1];
 		var serverDomain = urlWithoutProtocol.split('/')[0];
@@ -313,13 +294,6 @@ NetIo.Client = NetIo.EventingClass.extend({
 	},
 
 	_onDecode: function (packet, data) {
-
-		if (packet && packet.type === 'pong') {
-			const latency = Date.now() - packet.clientSentAt;
-			console.log(latency)
-			this.trackLatency('gs-websocket-ping', 'pong', packet);
-			return;
-		}
 
 		// how many UTF8 characters did we receive (assume 1 byte per char and mostly ascii)
 		// var receivedBytes = data.data.size;
@@ -386,8 +360,6 @@ NetIo.Client = NetIo.EventingClass.extend({
 		var reason = this._disconnectReason || event.reason;
 		var code = event.code;
 		
-		this.trackLatency('gs-websocket-connect', 'onclose', { reason });
-
 		console.log('close event', event, { _disconnectReason: this._disconnectReason, state: this._state, reason });
 		
 		const disconnectData = {
@@ -470,8 +442,6 @@ NetIo.Client = NetIo.EventingClass.extend({
 	},
 
 	_onError: function () {
-		this.trackLatency('gs-websocket-connect', 'onerror');
-
 		this.log('An error occurred with the net.io socket!', 'error', arguments);
 		console.log('An error occurred with the net.io socket!', 'error', arguments);
 		this.emit('error', arguments);

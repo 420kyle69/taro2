@@ -47,25 +47,27 @@ global.rollbar = {
 
 // override console.log and error to print additional data
 console.basicLog = console.log;
-console.log = function () {
+if (process.env.ENV != 'dev' && process.env.ENV != 'standalone') {
+	console.log = function () {
 
-	const log = [];
-
-	log.push(new Date());
-	log.push(cluster.isMaster ? 'master' : 'worker');
-
-	if (taro?.server?.httpsPort) {
-		log.push(taro?.server?.httpsPort);
-	}
-
-	if (taro?.game?.data?.defaultData?.gameSlug) {
-		log.push(taro?.game?.data?.defaultData?.gameSlug);
-	}
-
-	log.push(...arguments);
-
-	console.basicLog(...log);
-};
+		const log = [];
+	
+		log.push(new Date());
+		log.push(cluster.isMaster ? 'master' : 'worker');
+	
+		if (taro?.server?.httpsPort) {
+			log.push(taro?.server?.httpsPort);
+		}
+	
+		if (taro?.game?.data?.defaultData?.gameSlug) {
+			log.push(taro?.game?.data?.defaultData?.gameSlug);
+		}
+	
+		log.push(...arguments);
+	
+		console.basicLog(...log);
+	};
+}
 
 console.basicError = console.error;
 console.error = function () {
@@ -572,8 +574,6 @@ var Server = TaroClass.extend({
 					physicsEngine: taro.game.data.defaultData.physicsEngine,
 					gameSlug: taro.game.data.defaultData.gameSlug
 				};
-
-				taro.game.cspEnabled = !!taro.game.data.defaultData.clientSidePredictionEnabled;
 
 				global.standaloneGame = game.data;
 				var baseTilesize = 64;

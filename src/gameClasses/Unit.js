@@ -1655,7 +1655,7 @@ var Unit = TaroEntityPhysics.extend({
 						break;
 					case 'ownerPlayerId':
 						self._stats[attrName] = newValue;
-						if (taro.isClient && taro.client.myPlayer.id() !== newValue) {
+						if (taro.isClient && taro.client.myPlayer?.id() !== newValue) {
 							self.setOwnerPlayer(newValue);
 						}
 						break;
@@ -1934,7 +1934,7 @@ var Unit = TaroEntityPhysics.extend({
 			if (this._stats.controls && this._stats.controls.absoluteRotation) {
 				if (taro.isMobile) this.angleToTarget = ownerPlayer.absoluteAngle * 0.017453;
 				else this.angleToTarget = ownerPlayer.absoluteAngle;
-
+					
 			// desktop control: if this unit's not under a command, rotate to mouse xy coordinate
 			} else {
 				var mouse = ownerPlayer.control?.input?.mouse;
@@ -1956,12 +1956,14 @@ var Unit = TaroEntityPhysics.extend({
 	_behaviour: function (ctx) {
 		var self = this;
 
-		if (taro.gameLoopTickHasExecuted) {
-			_.forEach(taro.triggersQueued, function (trigger) {
-				trigger.params['thisEntityId'] = self.id();
-				self.script.trigger(trigger.name, trigger.params);
-			});
+		if (!taro.gameLoopTickHasExecuted) {
+			return;
 		}
+
+		_.forEach(taro.triggersQueued, function (trigger) {
+			trigger.params['thisEntityId'] = self.id();
+			self.script.trigger(trigger.name, trigger.params);
+		});
 
 		if (taro.isServer || (taro.isClient && taro.client.selectedUnit == this)) {
 			// ability component behaviour method call
@@ -1977,7 +1979,6 @@ var Unit = TaroEntityPhysics.extend({
 
 				// server-side unit rotation update
 				if (taro.isServer) {
-
 					if (!self._stats.aiEnabled && ownerPlayer._stats.controlledBy == 'human' && ownerPlayer.getSelectedUnit() == this) {
 						self.updateAngleToTarget();
 					}
@@ -1993,16 +1994,8 @@ var Unit = TaroEntityPhysics.extend({
 
 					// send ping for CSP reconciliation purpose
 					if (taro.now > taro.client.sendNextPingAt) {
-						taro.client.myUnitPositionWhenPingSent = {
-							// x: taro.client.selectedUnit?.nextKeyFrame[1][0], 
-							// y: taro.client.selectedUnit?.nextKeyFrame[1][1]
-							x: taro.client.selectedUnit?._translate.x,
-							y: taro.client.selectedUnit?._translate.y
-						};
-
-						taro.network.send('ping', {sentAt: Date.now()});
-						taro.client.sendNextPingAt = taro.now + 1000; // allow up to 1s before sending another ping. chances are, we'll hear back sooner from the server
-						// this.reconRemaining = undefined; // stop reconciling
+						taro.network.send('ping', {sentAt: taro._currentTime});
+						taro.client.sendNextPingAt = taro.now + 1500; // allow up to a 1.5 second before sending another ping
 					}
 				}
 
@@ -2096,7 +2089,7 @@ var Unit = TaroEntityPhysics.extend({
 		}
 
 		// if entity (unit/item/player/projectile) has attribute, run regenerate
-		if (taro.isServer || (taro.physics && taro.isClient && taro.client.selectedUnit == this && taro.game.cspEnabled)) {
+		if (taro.isServer || (taro.physics && taro.isClient && taro.client.selectedUnit == this && this._stats.controls?.clientPredictedMovement)) {
 			if (this._stats.buffs && this._stats.buffs.length > 0) {
 				for (let i = 0; i < this._stats.buffs.length; i++) {
 					var buff = this._stats.buffs[i];

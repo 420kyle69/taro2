@@ -581,6 +581,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 			if (self.engine == 'crash') { // crash's engine step happens in dist.js
 				self._world.step(timeElapsedSinceLastStep);
 			} else {
+
 				var tempBod = self._world.getBodyList();
 
 				// iterate through every physics body
@@ -601,8 +602,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 											break;
 										case 'force':
 											entity.applyForce(entity.vector.x, entity.vector.y);
-											this.lastBehaviourAt = Date.now()
-											
 											break;
 										case 'impulse':
 											entity.applyImpulse(entity.vector.x, entity.vector.y);
@@ -678,14 +677,18 @@ var PhysicsComponent = TaroEventingClass.extend({
 								if (taro.isServer) {
 									entity.translateTo(x, y, 0);
 									entity.rotateTo(0, 0, angle);
-									
-									this.lastX = x;
-								} else if (taro.isClient) {
 
+									// if (entity._category == 'unit') {
+									// 	console.log (taro._currentTime, parseFloat(x - entity.lastX).toFixed(2), "/", timeElapsedSinceLastStep, "speed", parseFloat((x - entity.lastX)/timeElapsedSinceLastStep).toFixed(2),
+									// 				x, entity.lastX, taro._currentTime, taro._currentTime - timeElapsedSinceLastStep)
+									// }
+									
+									entity.lastX = x;
+								} else if (taro.isClient) {
 									// if CSP is enabled, client-side physics will dictate:
 									// my unit's position and projectiles that are NOT server-streamed.
 									if (
-										(taro.game.cspEnabled && entity == taro.client.selectedUnit) ||
+										(entity == taro.client.selectedUnit && entity._stats.controls?.clientPredictedMovement) ||
 										(entity._category == 'projectile' && !entity._stats.streamMode)
 									) {
 										// CSP reconciliation
@@ -696,7 +699,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 												!isNaN(entity.reconRemaining.y)
 											)
 										) {
-
 											// if the current reconcilie distance is greater than my unit's body dimention, 
 											// instantly move unit (teleport) to the last streamed position. Otherwise, gradually reconcile
 											if (Math.abs(entity.reconRemaining.x) > entity._stats.currentBody.width * 1.5 || 
@@ -708,20 +710,26 @@ var PhysicsComponent = TaroEventingClass.extend({
 												// x += xRemaining;
 												// y += yRemaining;
 												entity.reconRemaining = undefined;
-												// taro.client.sendNextPingAt = taro.now + 200;
-												// console.log("instant reconciliation to ", x, y, taro.client.myUnitPositionWhenPingSent)
-												// entity._translate = {x: x, y: y}
 											} else {
 
-												entity.reconRemaining.x /= 8;
-												entity.reconRemaining.y /= 8;
+												entity.reconRemaining.x /= 5;
+												entity.reconRemaining.y /= 5;
 
 												x += entity.reconRemaining.x
 												y += entity.reconRemaining.y
 											}
-										} 
+										}
+
 										entity.prevKeyFrame = entity.nextKeyFrame;
 										entity.nextKeyFrame = [taro._currentTime + taro.client.renderBuffer, [x, y, angle]];
+
+										// keep track of units' position history for CSP reconciliation
+										if (entity == taro.client.selectedUnit) {
+											entity.posHistory.push([taro._currentTime, [x, y, angle]]);
+											if (entity.posHistory.length > taro._physicsTickRate) {
+												entity.posHistory.shift();
+											}
+										}
 										
 									} else { // update server-streamed entities' body position
 										x = entity.nextKeyFrame[1][0];
@@ -729,7 +737,14 @@ var PhysicsComponent = TaroEventingClass.extend({
 										angle = entity.nextKeyFrame[1][2];
 									}
 									
-									entity.isTransforming(true);
+									if (entity.prevKeyFrame && entity.nextKeyFrame &&
+										entity.prevKeyFrame[1] && entity.nextKeyFrame[1] && (
+											entity.prevKeyFrame[1][0] != entity.nextKeyFrame[1][0] || 
+											entity.prevKeyFrame[1][1] != entity.nextKeyFrame[1][1] || 
+											entity.prevKeyFrame[1][2] != entity.nextKeyFrame[1][2]) 
+									) {
+										entity.isTransforming(true);									
+									}
 								}
 							}
 
@@ -755,18 +770,15 @@ var PhysicsComponent = TaroEventingClass.extend({
 					tempBod = tempBod.getNext();
 				}
 
-
-				taro._physicsFrames++;
-
-
-
 				// Call the world step; frame-rate, velocity iterations, position iterations
 				self._world.step(timeElapsedSinceLastStep / 1000, 8, 3); 
 				if (self.ctx) {
 					self.ctx.clear();
 					self._world.DebugDraw();
 				}
-				
+
+				taro._physicsFrames++;
+
 				// Clear forces because we have ended our physics simulation frame
 				self._world.clearForces();
 				

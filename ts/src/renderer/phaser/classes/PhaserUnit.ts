@@ -7,7 +7,9 @@ class PhaserUnit extends PhaserAnimatedEntity {
 	label: Phaser.GameObjects.Text;
 
 	gameObject: Phaser.GameObjects.Container & IRenderProps;
-	debugGameObject: Phaser.GameObjects.Sprite & IRenderProps;
+	debugGameObject: Phaser.GameObjects.Rectangle & IRenderProps;
+	debugGameObjectBlue: Phaser.GameObjects.Rectangle & IRenderProps;
+	debugGameObjectRed: Phaser.GameObjects.Rectangle & IRenderProps;
 	attributes: PhaserAttributeBar[] = [];
 	attributesContainer: Phaser.GameObjects.Container;
 
@@ -463,23 +465,36 @@ class PhaserUnit extends PhaserAnimatedEntity {
 	}
 
 	protected transformDebug (data: {
+		debug: string;
 		x: number;
 		y: number;
 		rotation: number
 	}): void {
-		if (!this.debugGameObject) {
-			const bounds = this.entity._bounds2d;
-
-			this.debugGameObject = this.addSprite('debug') as Phaser.GameObjects.Sprite & IRenderProps;
-			this.debugGameObject.setDisplaySize(bounds.x, bounds.y);
-			this.debugGameObject.rotation = this.entity._rotate.z;
-			//this.debugGameObject = this.scene.add.sprite(0, 0, 'debug');
-			this.debugGameObject.setOrigin(0.5);
-			//this.gameObject.add(this.debugGameObject);
+		if (data.debug === 'green-square') {
+			if (!this.debugGameObject) {
+				const bounds = this.entity._bounds2d;
+				this.debugGameObject = this.scene.add.rectangle(0, 0, bounds.x, bounds.y) as Phaser.GameObjects.Rectangle & IRenderProps;
+				this.debugGameObject.setStrokeStyle(2, 0x008000);
+			}
+			this.debugGameObject.setPosition(data.x, data.y);
+			this.debugGameObject.rotation = data.rotation;
+		} else if (data.debug === 'blue-square') {
+			if (!this.debugGameObjectBlue) {
+				const bounds = this.entity._bounds2d;
+				this.debugGameObjectBlue = this.scene.add.rectangle(0, 0, bounds.x, bounds.y) as Phaser.GameObjects.Rectangle & IRenderProps;
+				this.debugGameObjectBlue.setStrokeStyle(2, 0x0000FF);
+			}
+			this.debugGameObjectBlue.setPosition(data.x, data.y);
+			this.debugGameObjectBlue.rotation = data.rotation;
+		} else if (data.debug === 'red-square') {
+			if (!this.debugGameObjectRed) {
+				const bounds = this.entity._bounds2d;
+				this.debugGameObjectRed = this.scene.add.rectangle(0, 0, bounds.x, bounds.y) as Phaser.GameObjects.Rectangle & IRenderProps;
+				this.debugGameObjectRed.setStrokeStyle(2, 0xFF0000);
+			}
+			this.debugGameObjectRed.setPosition(data.x, data.y);
+			this.debugGameObjectRed.rotation = data.rotation;
 		}
-		this.debugGameObject.setPosition(data.x, data.y);
-		this.debugGameObject.rotation = data.rotation;
-		//this.flip(this.entity._stats.flip);
 	}
 
 	protected destroy(): void {

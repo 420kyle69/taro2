@@ -98,7 +98,7 @@ const Client = TaroEventingClass.extend({
 		this.extrapolation = false; //old comment => 'disabling due to item bug'
 		this.resolution = 0; //old comment => 'autosize'
 		this.scaleMode = 0; //old comment => 'none'
-		this.renderBuffer = 50;
+		this.renderBuffer = 100; // this is later updated again in gameComponent.js
 		this.isActiveTab = true;
 		this.sendNextPingAt = 0;
 
@@ -649,8 +649,6 @@ const Client = TaroEventingClass.extend({
 	//This method should be looked at...
 	//
 	loadCSP: function () {
-
-		taro.game.cspEnabled = !!taro.game.data.defaultData.clientSidePredictionEnabled;
 
 		const gravity = taro.game.data.settings.gravity;
 

@@ -1949,6 +1949,7 @@ var ActionComponent = TaroEntity.extend({
 							player.changeCameraPanSpeed(panSpeed);
 						}
 						break;
+
 					case 'positionCamera':
 						var position = self._script.variable.getValue(action.position, vars);
 						var player = self._script.variable.getValue(action.player, vars);
@@ -1960,6 +1961,15 @@ var ActionComponent = TaroEntity.extend({
 								taro.client.emit('stop-follow');
 								taro.client.emit('position-camera', [position.x, position.y]);
 							}
+						}
+						break;
+					
+					case 'setCameraDeadzone':
+						var width = self._script.variable.getValue(action.width, vars);
+						var height = self._script.variable.getValue(action.height, vars);
+
+						if (taro.isClient && width && height) {
+							taro.client.emit('deadzone-camera', [width, height]);
 						}
 						break;
 
