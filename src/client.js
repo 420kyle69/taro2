@@ -619,6 +619,9 @@ const Client = TaroEventingClass.extend({
 					entityBeingDestroyed._category == 'player'
 				) {
 					taro.menuUi.kickPlayerFromGame(entityBeingDestroyed.id()); // this is inside the 'Moderate' menu
+					if (taro.scoreboard) {
+						taro.scoreboard.isUpdateQueued = true; // update scoreboard
+					}
 				} else {
 					try {
 						entityBeingDestroyed.remove();

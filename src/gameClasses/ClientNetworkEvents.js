@@ -7,6 +7,8 @@ var ClientNetworkEvents = {
 			taro.menuUi.onDisconnectFromServer("clientNetworkEvents #10", data.reason);
 			taro.network._io._disconnectReason = data.reason;
 		}
+
+		console.log("somebody else disconnected")
 	},
 
 	_onStreamUpdateData: function (data) {

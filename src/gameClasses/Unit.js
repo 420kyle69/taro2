@@ -2029,6 +2029,7 @@ var Unit = TaroEntityPhysics.extend({
 						x: self.direction.x * speed,
 						y: self.direction.y * speed
 					};
+					
 				}
 
 				// update AI
@@ -2041,6 +2042,7 @@ var Unit = TaroEntityPhysics.extend({
 					// toggle effects when unit starts/stops moving
 					if (!this.isMoving && (self.direction.x != 0 || self.direction.y != 0)) {
 						this.startMoving();
+
 					} else if (this.isMoving && self.direction.x === 0 && self.direction.y ===0) {
 						this.stopMoving();
 					}
