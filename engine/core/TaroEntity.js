@@ -4265,7 +4265,6 @@ var TaroEntity = TaroObject.extend({
 											keyFrames: [[0, [0, 0, -1.57]], [100, [0, 0, 0]]]
 										};
 										this.tween.start(null, this._rotate.z, customTween);
-
 									}
 
 									const bodyId = this._stats.states[stateId]?.body;
