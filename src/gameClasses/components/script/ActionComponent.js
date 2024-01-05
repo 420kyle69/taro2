@@ -3244,6 +3244,21 @@ var ActionComponent = TaroEntity.extend({
 							}, player._stats.clientId);
 						}
 						break;
+					
+					case 'purchaseItemFromShop':
+						var player = self._script.variable.getValue(action.player, vars);
+						var shopId = action.shop;
+						var entityId = action.itemType;
+
+						if (entityId && player && shopId && taro.game.data?.defaultData?.tier !== '1') {
+							taro.network.send('ui', {
+								command: 'shopPurchase',
+								shopId,
+								entityId,
+								action: 'openEntityPurchaseModal'
+							}, player._stats.clientId);
+						}
+						break;
 
 					case 'comment':
 						break;
