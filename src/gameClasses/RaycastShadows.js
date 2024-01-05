@@ -16,9 +16,9 @@ var RaycastShadows = /** @class */ (function () {
             var y = wall._translate.y - wall._bounds2d.y2;
             var w = wall._bounds2d.x;
             var h = wall._bounds2d.y;
-            vertices.push([x, y], [x + w, y], [x + w, y + h], [x, y + h]);
-            hEdges.push([[x, x + w], y], [[x, x + w], y + h]);
-            vEdges.push([[y, y + h], x], [[y, y + h], x + w]);
+            vertices.push(new Phaser.Math.Vector2(x, y), new Phaser.Math.Vector2(x + w, y), new Phaser.Math.Vector2(x + w, y + h), new Phaser.Math.Vector2(x, y + h));
+            hEdges.push(new Phaser.Geom.Line(x, y, x + w, y), new Phaser.Geom.Line(x, y + h, x + w, y + h));
+            vEdges.push(new Phaser.Geom.Line(x, y, x, y + h), new Phaser.Geom.Line(x + w, y, x + w, y + h));
         });
         graph.lineStyle(2, 0x00FF66, 1);
         hEdges.forEach(function (e) {
@@ -42,6 +42,11 @@ var RaycastShadows = /** @class */ (function () {
             v = vertices_1[_i];
             graph.lineBetween(play.x, play.y, v[0], v[1]);
         }
+    };
+    RaycastShadows.prototype.createFieldOfView = function () {
+        // for now hard code range
+        // TODO: extract range from config
+        var fov = Phaser.Geom.Rectangle.FromXY(Math.max(0, player.x - LIMIT), Math.max(0, player.y - LIMIT), Math.min(MAPWIDTH, player.x + LIMIT), Math.min(MAPHEIGHT, player.y + LIMIT));
     };
     return RaycastShadows;
 }());

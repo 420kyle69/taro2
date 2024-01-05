@@ -1,5 +1,3 @@
-type vertex = [number, number];
-type edge = [vertex, number];
 class RaycastShadows {
 	polygons = [];
 	scene: GameScene;
@@ -14,9 +12,9 @@ class RaycastShadows {
 		graph.setDepth(41000);
 		graph.lineStyle(3, 0x000, 1);
 
-		let vertices: vertex[] = [];
-		const hEdges: edge[] = [];
-		const vEdges: edge[] = [];
+		let vertices: Phaser.Math.Vector2[] = [];
+		const hEdges: Phaser.Geom.Line[] = [];
+		const vEdges: Phaser.Geom.Line[] = [];
 
 		taro.$$('wall').forEach((wall) => {
 
@@ -25,18 +23,18 @@ class RaycastShadows {
 			const w = wall._bounds2d.x;
 			const h = wall._bounds2d.y;
 			vertices.push(
-				[x, y],
-				[x + w, y],
-				[x + w, y + h],
-				[x, y + h]
+				new Phaser.Math.Vector2(x, y),
+				new Phaser.Math.Vector2(x + w, y),
+				new Phaser.Math.Vector2(x + w, y + h),
+				new Phaser.Math.Vector2(x, y + h)
 			);
 			hEdges.push(
-				[[x, x + w], y],
-				[[x, x + w], y + h]
+				new Phaser.Geom.Line(x, y, x + w, y),
+				new Phaser.Geom.Line(x, y + h, x + w, y + h)
 			);
 			vEdges.push(
-				[[y, y + h], x],
-				[[y, y + h], x + w]
+				new Phaser.Geom.Line(x, y, x, y + h),
+				new Phaser.Geom.Line(x + w, y, x + w, y + h)
 			);
 		});
 
@@ -66,6 +64,18 @@ class RaycastShadows {
 		for (v of vertices) {
 			graph.lineBetween(play.x, play.y, v[0], v[1]);
 		}
+	}
+
+	createFieldOfView(): void {
+		// for now hard code range
+		// TODO: extract range from config
+		const fov = Phaser.Geom.Rectangle.FromXY(
+			Math.max(0, player.x - LIMIT),
+			Math.max(0, player.y - LIMIT),
+			Math.min(MAPWIDTH, player.x + LIMIT),
+			Math.min(MAPHEIGHT, player.y + LIMIT)
+		);
+
 	}
 }
 
