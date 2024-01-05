@@ -2031,8 +2031,7 @@ var VariableComponent = TaroEntity.extend({
 						break;
 
 					case 'allUnitsOfUnitType':
-						var type = self.getValue(text.type, vars);
-
+						var type = self.getValue(text.unitType, vars);
 						returnValue = _.filter(taro.$$('unit'), (unit) => {
 							return unit._stats.type == type;
 						});
