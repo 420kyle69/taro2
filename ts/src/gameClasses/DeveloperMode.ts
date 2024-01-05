@@ -664,6 +664,7 @@ class DeveloperMode {
 			if (unit._stats.type === data.typeId) {
 				unit.changeUnitType(data.typeId, {}, false);
 				unit.emit('update-texture', 'basic_texture_change');
+				if (data.shouldReset) unit.resetUnitType();
 			}
 		});
 		if (taro.isServer) {
@@ -734,6 +735,7 @@ class DeveloperMode {
 			if (item._stats.itemTypeId === data.typeId) {
 				item.changeItemType(data.typeId, {}, false);
 				item.emit('update-texture', 'basic_texture_change');
+				if (data.shouldReset) item.resetItemType();
 			}
 		});
 		if (taro.isServer) {
@@ -780,6 +782,7 @@ class DeveloperMode {
 			if (projectile._stats.type === data.typeId) {
 				projectile.changeProjectileType(data.typeId, {}, false);
 				projectile.emit('update-texture', 'basic_texture_change');
+				if (data.shouldReset) projectile.resetProjectileType();
 			}
 		});
 		if (taro.isServer) {
