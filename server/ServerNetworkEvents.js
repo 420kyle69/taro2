@@ -155,11 +155,12 @@ var ServerNetworkEvents = {
 		}
 
 		// var ip = socket._remoteAddress;
-		var playerWithDuplicateIP = taro.game.getPlayerByIp(currentClientIp, data._id);
+		var getAllPlayers = !data._id; // fetch all players if user is not logged in 
+		var playersWithDuplicateIP = taro.game.getPlayerByIp(currentClientIp, data._id, getAllPlayers);
 		var maximumDuplicateIpsAllowed = 5;
-		// if (playerWithDuplicateIP && playerWithDuplicateIP.getUnitCount() >= 1 && !(taro.game.data && taro.game.data.settings.allowDuplicateIPs)) {
-		if (playerWithDuplicateIP && playerWithDuplicateIP.getUnitCount() >= maximumDuplicateIpsAllowed) {
-			var reason = 'Duplicate IP detected. <br/>Please login to play the game <br/><a href="/?login=true" class="btn btn-primary">Login</a>';
+		
+		if (playersWithDuplicateIP && (playersWithDuplicateIP.length >= maximumDuplicateIpsAllowed || (data._id && playersWithDuplicateIP.getUnitCount() >= maximumDuplicateIpsAllowed))) {
+			var reason = `Duplicate IP detected. <br/>Please login to play the game <br/><a href="/login/?redirect=/play/${taro.game?.data?.defaultData?.gameSlug}" class="btn btn-primary">Login</a>`;
 			console.log('Duplicate IP ' + currentClientIp + ' detected for ' + clientId);
 			taro.network.disconnect(clientId, reason);
 			return;
