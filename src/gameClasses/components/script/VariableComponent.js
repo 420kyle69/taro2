@@ -1460,6 +1460,16 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
+					case 'getSecondaryTouchPosition':
+						if (taro.isClient && taro.isMobile) {
+							returnValue = {
+								x: parseInt(taro.mobileControls.secondaryTouchPosition.x),
+								y: parseInt(taro.mobileControls.secondaryTouchPosition.y)
+							};
+						}
+					
+					break;
+
 					case 'xyCoordinate':
 						var x = self.getValue(text.x, vars);
 						var y = self.getValue(text.y, vars);
