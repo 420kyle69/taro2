@@ -144,6 +144,10 @@ class GameScene extends PhaserScene {
 			}
 		});
 
+		taro.client.on('unit-position', (x: number, y: number) => {
+			this.shadows.moveCenter(x, y);
+		});
+
 
 	}
 
@@ -671,6 +675,8 @@ class GameScene extends PhaserScene {
 				}
 			});
 		}
+
+		this.shadows.update();
 
 		taro.client.emit('tick');
 	}

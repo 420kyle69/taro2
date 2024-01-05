@@ -2102,7 +2102,7 @@ var Unit = TaroEntityPhysics.extend({
 				this.attribute._behaviour();
 			}
 		}
-		
+
 		if (taro.isClient && taro.client.selectedUnit == this) { // never run on server, pure UI
 			for (let i = 0; i < self._stats.itemIds.length; i++) {
 				var itemId = self._stats.itemIds[i];
@@ -2111,6 +2111,10 @@ var Unit = TaroEntityPhysics.extend({
 					taro.itemUi.updateItemCooldownOverlay(item);
 				}
 			}
+
+			// probably don't need to emit this every tick
+			taro.client.emit('unit-position', [this._translate.x, this._translate.y]);
+
 		}
 
 		if (taro.physics && taro.physics.engine != 'CRASH') {

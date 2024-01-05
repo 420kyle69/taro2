@@ -122,6 +122,9 @@ var GameScene = /** @class */ (function (_super) {
                 camera.centerOn(x, y);
             }
         });
+        taro.client.on('unit-position', function (x, y) {
+            _this.shadows.moveCenter(x, y);
+        });
     };
     GameScene.prototype.preload = function () {
         var _this = this;
@@ -487,6 +490,7 @@ var GameScene = /** @class */ (function (_super) {
                 }
             });
         }
+        this.shadows.update();
         taro.client.emit('tick');
     };
     return GameScene;
