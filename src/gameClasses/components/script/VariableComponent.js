@@ -2095,7 +2095,7 @@ var VariableComponent = TaroEntity.extend({
 						break;
 
 					case 'allItemsOfItemsType':
-						var type = self.getValue(text.type, vars);
+						var type = self.getValue(text.itemType, vars);
 
 						returnValue = _.filter(taro.$$('item'), (item) => {
 							return item._stats.type == type;
@@ -2109,7 +2109,7 @@ var VariableComponent = TaroEntity.extend({
 						break;
 
 					case 'allProjectilesOfProjectileType':
-						var type = self.getValue(text.type, vars);
+						var type = self.getValue(text.projectileType, vars);
 
 						returnValue = _.filter(taro.$$('projectile'), (projectile) => {
 							return projectile._stats.type == type;
