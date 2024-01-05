@@ -34,16 +34,7 @@ var MobileControlsComponent = TaroEntity.extend({
 
 		// second touch listener
 		taro.input.on('secondarytouchpointermove', function (point) {
-			//console.log('secondarytouchpointermove', point.x, point.y);
 			self.secondaryTouchPosition = {x: point.x.toFixed(0), y: point.y.toFixed(0)};
-			//console.log('secondaryTouchPosition', this.secondaryTouchPosition.x, this.secondaryTouchPosition.y);
-			
-            /*taro.client.myPlayer.control.newMousePosition = [
-                point.x.toFixed(0),
-                point.y.toFixed(0)
-            ];
-            taro.network.send('playerMouseMoved', taro.client.myPlayer.control.newMousePosition);
-            taro.client.myPlayer.control.lastMousePosition = taro.client.myPlayer.control.newMousePosition;*/
 		});
 
 		$(window).on('orientationchange load resize', function () {
