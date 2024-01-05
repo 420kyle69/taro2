@@ -156,7 +156,8 @@ var ServerNetworkEvents = {
 
 		// var ip = socket._remoteAddress;
 		var getAllPlayers = !data._id; // fetch all players if user is not logged in 
-		var playersWithDuplicateIP = taro.game.getPlayerByIp(currentClientIp, data._id, getAllPlayers);
+		var guestPlayersOnly = !data._id; // fetch all players if user is not logged in 
+		var playersWithDuplicateIP = taro.game.getPlayerByIp(currentClientIp, data._id, getAllPlayers, guestPlayersOnly);
 		var maximumDuplicateIpsAllowed = 5;
 		
 		if (playersWithDuplicateIP && (playersWithDuplicateIP.length >= maximumDuplicateIpsAllowed || (data._id && playersWithDuplicateIP.getUnitCount() >= maximumDuplicateIpsAllowed))) {

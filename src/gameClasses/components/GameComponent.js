@@ -188,7 +188,7 @@ var GameComponent = TaroEntity.extend({
 	},
 
 	// get client with ip
-	getPlayerByIp: function (ip, currentUserId, all = false) {
+	getPlayerByIp: function (ip, currentUserId, all = false, guestPlayersOnly = false) {
 		var clientIds = [];
 		for (let clientId in taro.server.clients) {
 			const clientObj = taro.server.clients[clientId];
@@ -209,7 +209,7 @@ var GameComponent = TaroEntity.extend({
 				return (
 					player._stats &&
           clientIds.includes(player._stats.clientId) &&
-          (all || (currentUserId && player._stats.userId != currentUserId))
+          ((all && (!guestPlayersOnly || !player._stats.userId)) || (currentUserId && player._stats.userId != currentUserId))
 				);
 			});
 		}
