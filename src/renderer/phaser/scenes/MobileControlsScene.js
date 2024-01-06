@@ -228,7 +228,7 @@ var MobileControlsScene = /** @class */ (function (_super) {
             if (rightJoystick)
                 rightJoystick.hide();
         }
-        else {
+        else if (this.joysticks.length === 0) {
             var worldPoint = gameScene.cameras.main.getWorldPoint(gameScene.input.pointer1.x, gameScene.input.pointer1.y);
             taro.input.emit('pointermove', [{
                     x: worldPoint.x,
