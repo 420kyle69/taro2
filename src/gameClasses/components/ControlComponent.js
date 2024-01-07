@@ -269,7 +269,7 @@ var ControlComponent = TaroEntity.extend({
 				unit.ability.cast(keyDown, key);
 			}, taro.client.inputDelay);
 		} else {
-			unit.ability.cast(keyDown, key);
+			unit.ability.queueCast(keyDown, key);
 		}
 
 		if (taro.isClient && this._entity._stats.clientId === taro.network.id() && keyDown.abilityId) {
@@ -284,7 +284,7 @@ var ControlComponent = TaroEntity.extend({
 					unit.ability.cast(unitAbility.keyUp, key);
 				}, taro.client.inputDelay);
 			} else {
-				unit.ability.cast(unitAbility.keyUp, key);
+				unit.ability.queueCast(unitAbility.keyUp, key);
 			}
 		}
 
