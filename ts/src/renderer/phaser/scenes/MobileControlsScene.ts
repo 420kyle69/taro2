@@ -231,7 +231,7 @@ class MobileControlsScene extends PhaserScene {
 			if (leftJoystick) leftJoystick.hide();
 			const rightJoystick = this.joysticks.find(({ side }) => side === 'right');
 			if (rightJoystick) rightJoystick.hide();
-		} else {
+		} else if (this.joysticks.length === 0) {
 			const worldPoint = gameScene.cameras.main.getWorldPoint(gameScene.input.pointer1.x, gameScene.input.pointer1.y);
 			taro.input.emit('pointermove', [{
 				x: worldPoint.x,
