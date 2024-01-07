@@ -62,7 +62,9 @@ var GameComponent = TaroEntity.extend({
 
 		taro._gameLoopTickRate = Math.max(20, Math.min(60, taro.game?.data?.defaultData?.engineTickRate || 20));		
 
-		taro.clusterClient && taro.clusterClient.gameStarted();
+		if (process.env.ENV !== 'standalone') {
+			taro.clusterClient && taro.clusterClient.gameStarted();
+		}
 	},
 
 	// this applies to logged in players only

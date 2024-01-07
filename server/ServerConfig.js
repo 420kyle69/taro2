@@ -1,6 +1,6 @@
 var moddioConfig =
 	process.env.ENV === 'standalone'
-		? []
+		? [{ name: 'ClusterClientComponent', path: '../../ClusterClientComponent' }]
 		: [
 			{ name: 'ClusterClientComponent', path: '../../ClusterClientComponent' },
 			{ name: 'ClusterServerComponent', path: '../../ClusterServerComponent' },

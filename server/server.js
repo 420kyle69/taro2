@@ -267,9 +267,9 @@ var Server = TaroClass.extend({
 		if (typeof HttpComponent != 'undefined') {
 			taro.addComponent(HttpComponent);
 		}
-		console.log('cluster.isMaster', cluster.isMaster);
 		if (cluster.isMaster) {
 			if (process.env.ENV === 'standalone') {
+				taro.addComponent(ClusterClientComponent); // backend component will retrieve "start" command from BE
 				self.ip = '127.0.0.1';
 				self.startWebServer();
 				self.start();
@@ -283,6 +283,7 @@ var Server = TaroClass.extend({
 			}
 		} else {
 			if (typeof ClusterClientComponent != 'undefined') {
+				
 				taro.addComponent(ClusterClientComponent); // backend component will retrieve "start" command from BE
 			}
 
