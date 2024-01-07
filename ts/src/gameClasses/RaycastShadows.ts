@@ -74,7 +74,8 @@ class RaycastShadows {
 
 		});
 
-		const toBBox = ({
+		this.edgesTree = new RBush();
+		this.edgesTree.toBBox = ({
 			x1,
 			y1,
 			x2,
@@ -88,15 +89,18 @@ class RaycastShadows {
 			maxX: Math.max(x1, x2),
 			maxY: Math.max(y1, y2)
 		});
-		this.edgesTree = new RBush();
-		this.edgesTree.toBBox = toBBox;
 		this.edgesTree.load(this.hEdges);
 		this.edgesTree.load(this.vEdges);
 
 		// remove duplicate vertices
 		this.vertices = _.uniqWith(this.vertices, _.isEqual);
 		this.verticesTree = new RBush();
-		this.verticesTree.toBBox = toBBox;
+		this.verticesTree.toBBox = ({x , y}) => ({
+			minX: x,
+			minY: y,
+			maxX: x,
+			maxY: y
+		});
 		this.verticesTree.load(this.vertices);
 	}
 
@@ -172,6 +176,13 @@ class RaycastShadows {
 			Math.min(this.mapExtents.y, this.player.y + limit)
 		);
 
+		const edgeVertices = [
+			new Phaser.Math.Vector2(fov.left, fov.top),
+			new Phaser.Math.Vector2(fov.right, fov.top),
+			new Phaser.Math.Vector2(fov.right, fov.bottom),
+			new Phaser.Math.Vector2(fov.left, fov.bottom)
+		];
+
 		// edge lines of fov
 		const edges = [
 			fov.getLineA(),
@@ -205,7 +216,7 @@ class RaycastShadows {
 		});
 
 		this.allVertices = [
-			...this.vertices,
+			...edgeVertices,
 			...this.wallIntersections,
 			...this.verticesTree.search(fovMinMax)
 		];
@@ -242,6 +253,7 @@ class RaycastShadows {
 			}
 		});
 
+		
 		local = this.sortClockwise(local, this.player);
 		this.getCulledRays(local);
 

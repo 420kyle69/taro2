@@ -46,7 +46,8 @@ var RaycastShadows = /** @class */ (function () {
             _this.hEdges.push(new Phaser.Geom.Line(x, y, x + w, y), new Phaser.Geom.Line(x, y + h, x + w, y + h));
             _this.vEdges.push(new Phaser.Geom.Line(x, y, x, y + h), new Phaser.Geom.Line(x + w, y, x + w, y + h));
         });
-        var toBBox = function (_a) {
+        this.edgesTree = new RBush();
+        this.edgesTree.toBBox = function (_a) {
             var x1 = _a.x1, y1 = _a.y1, x2 = _a.x2, y2 = _a.y2;
             return ({
                 // there has to be a better way...
@@ -58,14 +59,20 @@ var RaycastShadows = /** @class */ (function () {
                 maxY: Math.max(y1, y2)
             });
         };
-        this.edgesTree = new RBush();
-        this.edgesTree.toBBox = toBBox;
         this.edgesTree.load(this.hEdges);
         this.edgesTree.load(this.vEdges);
         // remove duplicate vertices
         this.vertices = _.uniqWith(this.vertices, _.isEqual);
         this.verticesTree = new RBush();
-        this.verticesTree.toBBox = toBBox;
+        this.verticesTree.toBBox = function (_a) {
+            var x = _a.x, y = _a.y;
+            return ({
+                minX: x,
+                minY: y,
+                maxX: x,
+                maxY: y
+            });
+        };
         this.verticesTree.load(this.vertices);
     };
     RaycastShadows.prototype.drawWallEdges = function () {
@@ -126,6 +133,12 @@ var RaycastShadows = /** @class */ (function () {
         // TODO: extract range from config
         // TODO: include map data necessary in event emission for constructor
         var fov = Phaser.Geom.Rectangle.FromXY(Math.max(0, this.player.x - limit), Math.max(0, this.player.y - limit), Math.min(this.mapExtents.x, this.player.x + limit), Math.min(this.mapExtents.y, this.player.y + limit));
+        var edgeVertices = [
+            new Phaser.Math.Vector2(fov.left, fov.top),
+            new Phaser.Math.Vector2(fov.right, fov.top),
+            new Phaser.Math.Vector2(fov.right, fov.bottom),
+            new Phaser.Math.Vector2(fov.left, fov.bottom)
+        ];
         // edge lines of fov
         var edges = [
             fov.getLineA(),
@@ -151,7 +164,7 @@ var RaycastShadows = /** @class */ (function () {
                 }
             });
         });
-        this.allVertices = __spreadArray(__spreadArray(__spreadArray([], this.vertices, true), this.wallIntersections, true), this.verticesTree.search(fovMinMax), true);
+        this.allVertices = __spreadArray(__spreadArray(__spreadArray([], edgeVertices, true), this.wallIntersections, true), this.verticesTree.search(fovMinMax), true);
         this.graph.fillStyle(0x99FF99, 0.8);
         this.verticesTree.search(fovMinMax).forEach(function (x) {
             _this.graph.fillCircle(x.x, x.y, 4);
