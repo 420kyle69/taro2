@@ -257,7 +257,6 @@ var AbilityComponent = TaroEntity.extend({
 	},
 
 	stopCasting: function (abilityId, key) {
-		console.log("stopCasting", handle, key)
 		
 		if (!this.activeAbilities[abilityId]) {
 			return;
