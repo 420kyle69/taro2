@@ -482,134 +482,49 @@ var TaroNetIoServer = {
 	_onClientConnect: function (socket) {
 		var self = this;
 		
+		let clientRejectReason = null;
+		
 		if (taro.clusterClient) {
 			taro.clusterClient.logCommand(socket.id, 'connection');
-		}
-		
-		var remoteAddress = socket._remoteAddress;
-		console.log('client is attempting to connect', remoteAddress);
-		var reason = '';
-
-		var bannedIps = taro.server.bannedIps;
-		// ip is banned
-		var playerIsBanned = false;
-		for (i in bannedIps) {
-			if (bannedIps[i] == remoteAddress) {
-				console.log(`banned player detected! IP ${remoteAddress}`);
-				playerIsBanned = true;
-				reason += ' player is banned.';
-			}
-		}
-
-		const playerCount = taro.getPlayerCount();
-
-		var clientRejectReason = null;
-
-		if (playerIsBanned) {
-			clientRejectReason = 'player ' + socket._remoteAddress + ' is banned';
-		} else if (this._acceptConnections != true) {
-			clientRejectReason = 'server not accepting connections';
-		} else if (playerCount > taro.server.maxPlayers) {
-			clientRejectReason = 'Sorry, the server you are trying to join is currently full. Please try again later or join a different server to play this game.';
+			clientRejectReason = taro.clusterClient.validateClientConnection(socket);
 		}
 		
 		if (clientRejectReason === null) {
-			// Check if any listener cancels this
-			if (!this.emit('connect', socket)) {
-				this.log(
-					`Accepted connection with socket id ${socket.id
-					} ip ${remoteAddress}`
-				);
-				this._socketById[socket.id] = socket;
-				this._socketByIp[socket._remoteAddress] = socket;
-
-				this.clientIds.push(socket.id);
-				self._socketById[socket.id].start = Date.now();
-
-				taro.server.socketConnectionCount.connected++;
-
-				// Store a rooms array for this client
-				this._clientRooms[socket.id] = this._clientRooms[socket.id] || [];
-
-				if (self._socketById[socket.id]._token) {
-					// Mixpanel Event to Track user game successfully started.
-					if (self._socketById[socket.id]._token.distinctId) {
-						global.mixpanel.track('User Connected to Game Server', {
-							'distinct_id': self._socketById[socket.id]._token.distinctId,
-							'$ip': socket._remoteAddress,
-							'gameSlug': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.gameSlug,
-							'gameId': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData._id,
-							'tier': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.tier,
-							'playCount': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.playCount,
-							'totalPlayCount': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.totalPlayCount,
-						});
-					}
-
-					if (self._socketById[socket.id]._token.posthogDistinctId) {
-						global.posthog.capture({
-							distinctId: self._socketById[socket.id]._token.posthogDistinctId,
-							'event': 'User Connected to Game Server',
-							properties: {
-								'$ip': socket._remoteAddress,
-								'gameSlug': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.gameSlug,
-								'gameId': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData._id,
-								'tier': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.tier,
-								'playCount': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.playCount,
-								'totalPlayCount': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.totalPlayCount
-							}
-						});
+			socket.on('message', function (data) {
+				// track all commands being sent from client
+				var commandName = 'unknown';
+				if (typeof data[0] === 'string') {
+					var code = data[0];
+					if (code.charCodeAt(0) != undefined) {
+						commandName = taro.network._networkCommandsIndex[code.charCodeAt(0)];
 					}
 				}
-
-				socket.on('message', function (data) {
-					// track all commands being sent from client
-					var commandName = 'unknown';
-					if (typeof data[0] === 'string') {
-						var code = data[0];
-						if (code.charCodeAt(0) != undefined) {
-							commandName = taro.network._networkCommandsIndex[code.charCodeAt(0)];
-						}
-					}
+				
+				if (taro.clusterClient) {
+					taro.clusterClient.logCommand(socket.id, commandName, data);
+				}
+				
+				self._onClientMessage.apply(self, [data, socket.id]);
+			});
+			
+			socket.on('disconnect', function (data) {
+				if (self.clientIds.includes(socket.id)) {
+					var end = Date.now();
+					taro.server.socketConnectionCount.disconnected++;
 					
-					if (taro.clusterClient) {
-						taro.clusterClient.logCommand(socket.id, commandName, data);
+					if (self._socketById[socket.id]?.start && end - self._socketById[socket.id].start < 3000) {
+						taro.server.socketConnectionCount.immediatelyDisconnected++;
 					}
-
-					self._onClientMessage.apply(self, [data, socket.id]);
-				});
-
-				socket.on('disconnect', function (data) {
-					if (self.clientIds.includes(socket.id)) {
-						var end = Date.now();
-						taro.server.socketConnectionCount.disconnected++;
-
-						if (self._socketById[socket.id]?.start && end - self._socketById[socket.id].start < 3000) {
-							taro.server.socketConnectionCount.immediatelyDisconnected++;
-						}
-					}
-				});
-
-				// Send an init message to the client
-				socket.send({
-					cmd: 'init',
-					ncmds: this._networkCommandsLookup,
-					ts: taro._timeScale,
-					ct: taro._currentTime
-				});
-
-				// Send a clock sync command
-				// this._sendTimeSync(socket.id);
-			} else {
-				// Reject the connection
-				var reason = 'cannot connect to socket this.emit("connect", socket)';
-				console.log(reason);
-				socket.close(reason);
-			}
-		} else {
-			// console.log('Rejecting connection with id ' + socket.id + ' ' + reason);
-			// taro.network.send('playerDisconnect', {reason: reason, clientId: socket.id});
-			console.log('rejecting connection', clientRejectReason);
-			socket.close(clientRejectReason);
+				}
+			});
+			
+			// Send an init message to the client
+			socket.send({
+				cmd: 'init',
+				ncmds: this._networkCommandsLookup,
+				ts: taro._timeScale,
+				ct: taro._currentTime
+			});
 		}
 	},
 	

@@ -504,7 +504,6 @@ var Server = TaroClass.extend({
 		self.url = `http://${self.ip}:${port}`;
 
 		this.duplicateIpCount = {};
-		this.bannedIps = [];
 
 		self.maxPlayers = self.maxPlayers || 32;
 		this.maxPlayersAllowed = self.maxPlayers || 32;
