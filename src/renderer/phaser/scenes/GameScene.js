@@ -37,9 +37,8 @@ var GameScene = /** @class */ (function (_super) {
         var _this = this;
         var _a, _b, _c, _d, _e, _f, _g, _h;
         // BEGIN RAYCAST SHADOW TEST AREA
-        this.shadows = new RaycastShadows(this);
         taro.client.on('get-walls', function () {
-            _this.shadows.getWalls();
+            _this.shadows = new RaycastShadows(_this);
         });
         // END RAYCAST SHADOW TEST AREA
         if (taro.isMobile) {
@@ -465,6 +464,7 @@ var GameScene = /** @class */ (function (_super) {
     };
     GameScene.prototype.update = function () {
         var _this = this;
+        var _a;
         //cause black screen and camera jittering when change tab
         /*let trackingDelay = this.trackingDelay / taro.fps();
         this.cameras.main.setLerp(trackingDelay, trackingDelay);*/
@@ -490,7 +490,7 @@ var GameScene = /** @class */ (function (_super) {
                 }
             });
         }
-        this.shadows.update();
+        (_a = this.shadows) === null || _a === void 0 ? void 0 : _a.update();
         taro.client.emit('tick');
     };
     return GameScene;

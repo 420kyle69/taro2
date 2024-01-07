@@ -25,9 +25,8 @@ class GameScene extends PhaserScene {
 
 	init (): void {
 		// BEGIN RAYCAST SHADOW TEST AREA
-		this.shadows = new RaycastShadows(this);
 		taro.client.on('get-walls', () => {
-			this.shadows.getWalls();
+			this.shadows = new RaycastShadows(this);
 		});
 		// END RAYCAST SHADOW TEST AREA
 		if (taro.isMobile) {
@@ -676,7 +675,7 @@ class GameScene extends PhaserScene {
 			});
 		}
 
-		this.shadows.update();
+		this.shadows?.update();
 
 		taro.client.emit('tick');
 	}
