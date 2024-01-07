@@ -483,7 +483,7 @@ var TaroNetIoServer = {
 		var self = this;
 		
 		if (taro.clusterClient) {
-			taro.clusterClient.logMessage(socket.id, 'connection');
+			taro.clusterClient.logCommand(socket.id, 'connection');
 		}
 		
 		var remoteAddress = socket._remoteAddress;
@@ -572,7 +572,7 @@ var TaroNetIoServer = {
 					}
 					
 					if (taro.clusterClient) {
-						taro.clusterClient.logMessage(socket.id, commandName, data);
+						taro.clusterClient.logCommand(socket.id, commandName, data);
 					}
 
 					self._onClientMessage.apply(self, [data, socket.id]);
