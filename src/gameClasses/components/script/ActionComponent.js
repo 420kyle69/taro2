@@ -51,9 +51,9 @@ var ActionComponent = TaroEntity.extend({
 						engineTickDelta: engineTickDelta,
 						masterServer: global.myIp,
 						gameInfo: taro.gameInfo,
-						actionProfiler: taro.actionProfiler,
-						lastAction: action.type,
-						triggerProfiler: taro.triggerProfiler
+						// lastAction: action.type,
+						// actionProfiler: taro.actionProfiler,
+						// triggerProfiler: taro.triggerProfiler
 					})
 					
 					taro.engineLagReported = true;

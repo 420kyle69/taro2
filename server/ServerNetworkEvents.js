@@ -60,36 +60,6 @@ var ServerNetworkEvents = {
 		}
 	},
 
-	_onJoinGameWrapper: function (data, clientId) {
-
-		var reason = 'IP banned.';
-		var client = taro.server.clients[clientId];
-		var socket = taro.network._socketById[clientId];
-		if (client) {
-			var ipAddress = client.ip;
-
-			var removeAllConnectedPlayerWithSameIp = function () {
-				var getAllPlayers = true;
-				var players = taro.game.getPlayerByIp(ipAddress, undefined, getAllPlayers);
-				players.forEach((player) => {
-					if (player) {
-						player.remove();
-						var ps = taro.network._socketById[player._stats.clientId];
-						ps && ps.close(reason);
-					}
-				});
-			}
-
-			if (taro.banIpsList.includes(ipAddress)) {
-				removeAllConnectedPlayerWithSameIp();
-				socket.close(reason);
-				return;
-			}
-
-			taro.server._onJoinGame(data, clientId);
-		}
-	},
-
 	_onJoinGame: function (data, clientId) {
 		if (taro.clusterClient) { // this is used for hosted version of moddio
 			let clientData = taro.clusterClient.authenticateClient(data, clientId) // will return data if user is authenticated. otherwise, will return undefined

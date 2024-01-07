@@ -717,7 +717,7 @@ var Server = TaroClass.extend({
 		var self = this;
 
 		console.log('server.js: defineNetworkEvents');
-		taro.network.define('joinGame', self._onJoinGameWrapper);
+		taro.network.define('joinGame', self._onJoinGame);
 		taro.network.define('gameOver', self._onGameOver);
 		taro.network.define('ping', self._onPing);
 

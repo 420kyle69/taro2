@@ -58,13 +58,13 @@ var GameComponent = TaroEntity.extend({
 			// physicsTickRate dictates streaming fps, and renderBuffer is the wait time before next keyframe is sent to client.
 			// taro.client.renderBuffer = 1500 / taro._physicsTickRate // 20 fps = 75ms, 60 fps = 25ms
 			console.log('renderBuffer', taro.client.renderBuffer);
+		} else if (taro.isServer) {
+			if (process.env.ENV !== 'standalone') {
+				taro.clusterClient && taro.clusterClient.gameStarted();
+			}
 		}
 
 		taro._gameLoopTickRate = Math.max(20, Math.min(60, taro.game?.data?.defaultData?.engineTickRate || 20));		
-
-		if (process.env.ENV !== 'standalone') {
-			taro.clusterClient && taro.clusterClient.gameStarted();
-		}
 	},
 
 	// this applies to logged in players only
