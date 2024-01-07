@@ -110,19 +110,6 @@ var GameComponent = TaroEntity.extend({
 
 		var player = new Player(playerData);
 
-		if (taro.isServer) {
-			var logInfo = {
-				name: playerData.name,
-				clientId: playerData.clientId
-			};
-
-			if (playerData.userId) {
-				logInfo.userId = playerData.userId;
-			}
-
-			// console.log(playerData.clientId + ': creating player for ', logInfo)
-		}
-
 		if (persistedData) {
 			player.persistedData = persistedData;
 		}

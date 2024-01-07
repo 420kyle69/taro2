@@ -91,185 +91,25 @@ var ServerNetworkEvents = {
 	},
 
 	_onJoinGame: function (data, clientId) {
-
-		// assign _id and sessionID to the new client
-		var client = taro.server.clients[clientId];
-		var socket = taro.network._socketById[clientId];
-
-		if (!socket) {
-			try {
-				global.rollbar.log('No socket found with this clientId',
-					{
-						data: data,
-						clientId: clientId
-					});
-			} catch (error) {
-				console.log(error);
+		if (taro.clusterClient) { // this is used for hosted version of moddio
+			let clientData = taro.clusterClient.authenticateClient(data, clientId) // will return data if user is authenticated. otherwise, will return undefined
+			let playerId = clientData._id;
+			if (clientData && playerId) { // authenticate logged-in player
+				taro.clusterClient.authenticatePlayer(playerId, clientId, data)
+			} else { // authenticate guest player
+				taro.clusterClient.authenticateGuest(clientId, data)
 			}
-			return;
-		}
-		// check joining user is same as token user.
-		else if (
-			data == undefined || 
-			(
-				data && (
-					(socket._token.userId && socket._token.userId !== data._id) || 
-					(socket._token.sessionId && socket._token.sessionId !== data.sessionId)
-				)
-			)		
-		) {
-			console.log('Unauthenticated user joining the game (ServerNetworkEvent.js)');
-			socket.close('Unauthenticated user joining the game');
-			return;
-		}
-
-		if (process.env.ENV === 'standalone' || process.env.ENV == 'standalone-remote') {
-			delete data._id;
-		}
-
-		var logInfo = {};
-
-		if (data._id) {
-			logInfo._id = data._id;
-		}
-
-		if (client) {
-			console.log('4. _onJoinGame ' + clientId + ' time elapsed: ' + (Date.now() - client.lastEventAt), '(ServerNetworkEvent.js)');
-			client.lastEventAt = Date.now();
-			client.receivedJoinGame = Date.now();
-		}
-
-		// assigning ip address to player stats
-		data.ipAddress = client && client.ip;
-
-		var currentClientIp = data.ipAddress;
-		var isIpRestricted = taro.game.data.defaultData.banIps.find(function (obj) {
-			if (obj.ip == currentClientIp) return true;
-		});
-
-		if (isIpRestricted) {
-			console.log('IP is banned for ', clientId);
-			var reason = 'Restricted IP detected.';
-			taro.network.disconnect(clientId, reason);
-			return;
-		}
-
-		// var ip = socket._remoteAddress;
-		var getAllPlayers = !data._id; // fetch all players if user is not logged in 
-		var guestPlayersOnly = !data._id; // fetch all players if user is not logged in 
-		var playersWithDuplicateIP = taro.game.getPlayerByIp(currentClientIp, data._id, getAllPlayers, guestPlayersOnly);
-		var maximumDuplicateIpsAllowed = 5;
-		
-		if (playersWithDuplicateIP && (playersWithDuplicateIP.length >= maximumDuplicateIpsAllowed || (data._id && playersWithDuplicateIP.getUnitCount() >= maximumDuplicateIpsAllowed))) {
-			var reason = `Duplicate IP detected. <br/>Please login to play the game <br/><a href="/login/?redirect=/play/${taro.game?.data?.defaultData?.gameSlug}" class="btn btn-primary">Login</a>`;
-			console.log('Duplicate IP ' + currentClientIp + ' detected for ' + clientId);
-			taro.network.disconnect(clientId, reason);
-			return;
-		}
-
-		// if user is logged-in
-		if (data && data._id) {
-			// if player already exists in the game
-			var player = taro.game.getPlayerByUserId(data._id);
-
-			//condition for menu open and click for play game button durring current play game.
-			if (player && player._stats && clientId != player._stats.clientId) {
-				console.log('Client already exists. Kicking the existing player ' + player._stats.clientId + ' (' + player._stats.name + ')');
-				player.updatePlayerHighscore();
-				var oldPlayerClientId = player._stats.clientId;
-				
-				taro.network.disconnect(oldPlayerClientId, 'User connected to another server.');
-
-				delete taro.server.clients[oldPlayerClientId];
-
-				//kicking player out of the game.
-				player.remove();
-			}
-
-			//if player open menu during game play
-			if (player && clientId == player._stats.clientId) {
-				console.log('Player requested to join game ' + clientId + ' (' + player._stats.name + ')');
-				player._stats.isAdBlockEnabled = data.isAdBlockEnabled;
-				player.joinGame();
-			}
-			else {
-				if (client) {
-					client._id = data._id;
-
-					if (data.sessionId) {
-						client.sessionId = data.sessionId;
-					}
-				}
-
-				console.log('request-user-data for ' + clientId + ' (user._id:' + data._id + ')');
-				taro.clusterClient && taro.clusterClient.emit('request-user-data', data);
-				if (process.env.ENV === 'standalone') {
-					if (player == undefined) {
-						var userData = {
-							controlledBy: 'human',
-							name: 'user' + (Math.floor(Math.random() * 999) + 100),
-							points: 0,
-							coins: 0,
-							clientId: client._id,
-							purchasables: {}
-						};
-						// console.log("createPlayer (logged-in user)")
-						var player = taro.game.createPlayer();
-						for (key in userData) {
-							var obj = {};
-							obj[key] = userData[key];
-							data.push(obj);
-						}
-						player.joinGame();
-						player.streamUpdateData(data);
-					}
-				}
-			}
-
-		}
-		else // guest player
-		{
-			console.log('5. joining as a guest player (ServerNetworkEvents.js)');
-
-			var socket = taro.network._socketById[clientId];
-			if (socket) {
-				let isAllowedToJoinGame = false;
-				const roles = taro.game.data.roles || [];
-
-				if (roles.length === 0 || roles.length === 1) {
-					isAllowedToJoinGame = true;
-				} else if (roles && roles.find((role) => role.type === 5 && role.permissions?.playGame)) {
-					isAllowedToJoinGame = true;
-				} 
-
-				if (!isAllowedToJoinGame) {
-					taro.network.disconnect(clientId, 'Guest players not allowed to join this game.');
-					return;
-				}
-
-				// if this guest hasn't created player yet (hasn't joined the game yet)
-				var player = taro.game.getPlayerByClientId(socket.id);
-
-				if (player) {
-					player._stats.isAdBlockEnabled = data.isAdBlockEnabled;
-				} else {
-					if (typeof data.number != 'number') {
-						data.number = ' lol';
-					}
-
-					// console.log("createPlayer (guest user)")
-					var player = taro.game.createPlayer({
-						controlledBy: 'human',
-						name: 'user' + data.number,
-						coins: 0,
-						points: 0,
-						clientId: clientId,
-						isAdBlockEnabled: data.isAdBlockEnabled
-					});
-				}
-
-				player.joinGame();
-			}
+		} else { // this is for the standalone version of moddio
+			var player = taro.game.createPlayer({
+				controlledBy: 'human',
+				name: 'user' + data.number,
+				coins: 0,
+				points: 0,
+				clientId: clientId,
+				isAdBlockEnabled: data.isAdBlockEnabled
+			});
+	
+			player.joinGame(data);
 		}
 	},
 
