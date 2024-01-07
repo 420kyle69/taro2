@@ -66,7 +66,6 @@ var TaroEntity = TaroObject.extend({
 		// this ensures entity is spawning at a correct position initially. particularily useful for projectiles
 
 		this._keyFrames = [];
-		this.prevKeyFrame = [taro._currentTime, [this._translate.x, this._translate.y, this._rotate.z]];
 		this.nextKeyFrame = [taro._currentTime + 50, [this._translate.x, this._translate.y, this._rotate.z]];
 		
 		this._isTransforming = true;
@@ -1816,7 +1815,7 @@ var TaroEntity = TaroObject.extend({
 		// if (taro.physics.engine === 'CRASH' && this.body) {
 		// 	this._behaviourCrash();
 		// }
-
+		
 		if (this._deathTime !== undefined && this._deathTime <= taro._tickStart) {
 			// Check if the deathCallBack was set
 			if (this._deathCallBack) {
@@ -1828,9 +1827,9 @@ var TaroEntity = TaroObject.extend({
 		} else {
 			// Check that the entity has been born
 			if (this._bornTime === undefined || taro._currentTime >= this._bornTime) {
-				// Remove the stream data cache
+				
 				delete this._streamDataCache;
-
+		
 				if (!isForOrphans) {
 					// Process any behaviours assigned to the entity
 					this._processUpdateBehaviours();
@@ -1955,6 +1954,9 @@ var TaroEntity = TaroObject.extend({
 			if (this._streamMode === 1 || this._streamMode === 2) {
 				this.streamSync();
 			}
+
+			// if (taro._currentTime > taro.server.lastSnapshotSentAt)
+				
 
 			if (this._compositeCache) {
 				if (this._cacheDirty) {
@@ -3143,7 +3145,6 @@ var TaroEntity = TaroObject.extend({
 	teleportTo: function (x, y, rotate, teleportCamera) {
 		// console.log("teleportTo", x, y, rotate, this._stats.type)
 		this.isTeleporting = true;
-		this.prevKeyFrame[1] = [x, y, rotate];
 		this.nextKeyFrame[1] = [x, y, rotate];
         this.teleportCamera = teleportCamera;
 		this.teleportDestination = [x, y, rotate]
@@ -4264,7 +4265,6 @@ var TaroEntity = TaroObject.extend({
 											keyFrames: [[0, [0, 0, -1.57]], [100, [0, 0, 0]]]
 										};
 										this.tween.start(null, this._rotate.z, customTween);
-
 									}
 
 									const bodyId = this._stats.states[stateId]?.body;
@@ -5047,6 +5047,10 @@ var TaroEntity = TaroObject.extend({
 	_streamData: function () {
 		// Check if we already have a cached version of the streamData
 		if (this._streamDataCache) {
+			if (this._category == 'unit') {
+				console.log("?. _streamDataCache exists. returning", taro._currentTime, this.id(), this._parent._category, this._parent.id(), "_streamDataCache")				
+			}
+				
 			return this._streamDataCache;
 		} else {
 			// Let's generate our stream data
@@ -5152,7 +5156,7 @@ var TaroEntity = TaroObject.extend({
      * Update the position of the entities using the interpolation. This results smooth motion of the entities.
      */
 	_processTransform: function () {
-		const now = Date.now();
+		const now = taro._currentTime;
 		var tickDelta = now - this.lastTransformedAt;
 
 		if (
@@ -5169,35 +5173,20 @@ var TaroEntity = TaroObject.extend({
 		let x = this._translate.x;
 		let y = this._translate.y;
 		let rotate = this._rotate.z;
-		var nextTransform = this.nextKeyFrame[1];
-		
+		let nextTransform = this.nextKeyFrame[1];
+		let nextTime = this.nextKeyFrame[0]
+		let timeRemaining = nextTime - now;
+			
 		// don't lerp is time remaining is less than 5ms
-		if (nextTransform) {
-			let nextTime = this.nextKeyFrame[0]
-			let timeRemaining = nextTime - now;
-			let xDiff = nextTransform[0] - x;
-			let yDiff = nextTransform[1] - y;
-			let keyFrameGap = nextTime - this.prevKeyFrame[0];
-			// don't lerp if time remaining is less than a tick
-			if (timeRemaining > tickDelta) {
-				// var previousX = x;
-				x += xDiff * tickDelta/taro.client.renderBuffer;
-				y += yDiff * tickDelta/taro.client.renderBuffer;
-
-				// if (this == taro.client.selectedUnit)
-				// 	console.log(parseFloat(x).toFixed(0), parseFloat(x - previousX).toFixed(1), parseFloat(nextTransform[0]).toFixed(1), parseFloat(nextTime - prevTime).toFixed(0), timeRemaining)
-
-			} else { 
-				// if there's no more keyframe, rubberband to the target position and prevent further iteration in entitiesToRender
-				x += xDiff/2;
-				y += yDiff/2;
-
-				// if (this != taro.client.selectedUnit && this.isTransforming()) console.log(this._stats.type, taro._currentTime, nextTime, taro._currentTime - nextTime)
-				if (taro._currentTime > nextTime + 100) {
-					this.isTransforming(false);
-				}
-			}
-
+		if (nextTransform && timeRemaining > -tickDelta) {
+			
+			// lerp between current position and nextTransform
+			x = this.interpolateValue(x, nextTransform[0], now - tickDelta, now, nextTime);
+			y = this.interpolateValue(y, nextTransform[1], now - tickDelta, now, nextTime);
+			
+			// if (this == taro.client.selectedUnit)
+			// 	console.log(parseFloat(x).toFixed(0), "nextX", parseFloat(nextTransform[0]), "speedReq", parseFloat((nextTransform[0] - x)/timeRemaining).toFixed(2) , "timeRemaining", timeRemaining)
+		
 			rotateStart = rotate;
 			rotateEnd = nextTransform[2];
 
@@ -5211,6 +5200,13 @@ var TaroEntity = TaroObject.extend({
 			}			
 			
 			rotate = this.interpolateValue(rotateStart, rotateEnd, taro._currentTime - 16, taro._currentTime, taro._currentTime + 16);
+		} else {
+			x = nextTransform[0];
+			y = nextTransform[1];
+			rotate = nextTransform[2];
+
+			// entity isn't moving anymore. prevent rendering to conserve cpu
+			this.isTransforming(false);
 		}
 
 		// for my own unit, ignore streamed angle if this unit control is set to face mouse cursor instantly.

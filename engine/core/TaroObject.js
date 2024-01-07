@@ -1555,30 +1555,10 @@ var TaroObject = TaroEventingClass.extend({
 
 			if (arr) {
 				arrCount = arr.length;
-
-				// Loop our children and call their update methods
-				if (taroConfig.debug._timing) {
-					while (arrCount--) {
-						ts = new Date().getTime();
-						arr[arrCount].update(ctx, tickDelta);
-						td = new Date().getTime() - ts;
-						if (arr[arrCount]) {
-							if (!taro._timeSpentInTick[arr[arrCount].id()]) {
-								taro._timeSpentInTick[arr[arrCount].id()] = 0;
-							}
-
-							if (!taro._timeSpentLastTick[arr[arrCount].id()]) {
-								taro._timeSpentLastTick[arr[arrCount].id()] = {};
-							}
-
-							taro._timeSpentInTick[arr[arrCount].id()] += td;
-							taro._timeSpentLastTick[arr[arrCount].id()].tick = td;
-						}
-					}
-				} else {
-					while (arrCount--) {
-						arr[arrCount]?.update(ctx, tickDelta);
-					}
+				while (arrCount--) {
+					var obj = arr[arrCount];
+					if (obj)
+						obj.update(ctx, tickDelta);
 				}
 			}
 		}

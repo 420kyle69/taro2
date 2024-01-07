@@ -47,25 +47,27 @@ global.rollbar = {
 
 // override console.log and error to print additional data
 console.basicLog = console.log;
-console.log = function () {
+if (process.env.ENV != 'dev' && process.env.ENV != 'standalone') {
+	console.log = function () {
 
-	const log = [];
-
-	log.push(new Date());
-	log.push(cluster.isMaster ? 'master' : 'worker');
-
-	if (taro?.server?.httpsPort) {
-		log.push(taro?.server?.httpsPort);
-	}
-
-	if (taro?.game?.data?.defaultData?.gameSlug) {
-		log.push(taro?.game?.data?.defaultData?.gameSlug);
-	}
-
-	log.push(...arguments);
-
-	console.basicLog(...log);
-};
+		const log = [];
+	
+		log.push(new Date());
+		log.push(cluster.isMaster ? 'master' : 'worker');
+	
+		if (taro?.server?.httpsPort) {
+			log.push(taro?.server?.httpsPort);
+		}
+	
+		if (taro?.game?.data?.defaultData?.gameSlug) {
+			log.push(taro?.game?.data?.defaultData?.gameSlug);
+		}
+	
+		log.push(...arguments);
+	
+		console.basicLog(...log);
+	};
+}
 
 console.basicError = console.error;
 console.error = function () {
@@ -265,9 +267,9 @@ var Server = TaroClass.extend({
 		if (typeof HttpComponent != 'undefined') {
 			taro.addComponent(HttpComponent);
 		}
-		console.log('cluster.isMaster', cluster.isMaster);
 		if (cluster.isMaster) {
 			if (process.env.ENV === 'standalone') {
+				taro.addComponent(ClusterClientComponent); // backend component will retrieve "start" command from BE
 				self.ip = '127.0.0.1';
 				self.startWebServer();
 				self.start();
@@ -281,6 +283,7 @@ var Server = TaroClass.extend({
 			}
 		} else {
 			if (typeof ClusterClientComponent != 'undefined') {
+				
 				taro.addComponent(ClusterClientComponent); // backend component will retrieve "start" command from BE
 			}
 
@@ -501,7 +504,6 @@ var Server = TaroClass.extend({
 		self.url = `http://${self.ip}:${port}`;
 
 		this.duplicateIpCount = {};
-		this.bannedIps = [];
 
 		self.maxPlayers = self.maxPlayers || 32;
 		this.maxPlayersAllowed = self.maxPlayers || 32;
@@ -572,8 +574,6 @@ var Server = TaroClass.extend({
 					physicsEngine: taro.game.data.defaultData.physicsEngine,
 					gameSlug: taro.game.data.defaultData.gameSlug
 				};
-
-				taro.game.cspEnabled = !!taro.game.data.defaultData.clientSidePredictionEnabled;
 
 				global.standaloneGame = game.data;
 				var baseTilesize = 64;
@@ -716,7 +716,7 @@ var Server = TaroClass.extend({
 		var self = this;
 
 		console.log('server.js: defineNetworkEvents');
-		taro.network.define('joinGame', self._onJoinGameWrapper);
+		taro.network.define('joinGame', self._onJoinGame);
 		taro.network.define('gameOver', self._onGameOver);
 		taro.network.define('ping', self._onPing);
 

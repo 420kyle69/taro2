@@ -266,6 +266,15 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
+					case 'isPlayerClient':
+						if (taro.isClient) {
+							var player = self.getValue(text.player, vars);
+							if (player) {
+								returnValue = player._stats?.clientId == taro.network.id();
+							}
+						}
+						break;
+
 					case 'playersAreHostile':
 						var playerA = self.getValue(text.playerA, vars);
 						var playerB = self.getValue(text.playerB, vars);
@@ -1451,6 +1460,16 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
+					case 'getSecondaryTouchPosition':
+						if (taro.isClient && taro.isMobile) {
+							returnValue = {
+								x: parseInt(taro.mobileControls.secondaryTouchPosition.x),
+								y: parseInt(taro.mobileControls.secondaryTouchPosition.y)
+							};
+						}
+					
+					break;
+
 					case 'xyCoordinate':
 						var x = self.getValue(text.x, vars);
 						var y = self.getValue(text.y, vars);
@@ -2012,8 +2031,7 @@ var VariableComponent = TaroEntity.extend({
 						break;
 
 					case 'allUnitsOfUnitType':
-						var type = self.getValue(text.type, vars);
-
+						var type = self.getValue(text.unitType, vars);
 						returnValue = _.filter(taro.$$('unit'), (unit) => {
 							return unit._stats.type == type;
 						});
@@ -2076,11 +2094,11 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
-					case 'allItemsOfItemsType':
-						var type = self.getValue(text.type, vars);
-
+					case 'allItemsOfItemType':
+						var type = self.getValue(text.itemType, vars);
+						
 						returnValue = _.filter(taro.$$('item'), (item) => {
-							return item._stats.type == type;
+							return item._stats.itemTypeId == type;
 						});
 
 						break;
@@ -2091,7 +2109,7 @@ var VariableComponent = TaroEntity.extend({
 						break;
 
 					case 'allProjectilesOfProjectileType':
-						var type = self.getValue(text.type, vars);
+						var type = self.getValue(text.projectileType, vars);
 
 						returnValue = _.filter(taro.$$('projectile'), (projectile) => {
 							return projectile._stats.type == type;

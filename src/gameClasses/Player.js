@@ -63,6 +63,8 @@ var Player = TaroEntity.extend({
 							point.x.toFixed(0),
 							point.y.toFixed(0)
 						];
+						self.control.input.mouse.x = point.x.toFixed(0);
+            			self.control.input.mouse.y = point.y.toFixed(0);
 					}
 				});
 
@@ -316,7 +318,7 @@ var Player = TaroEntity.extend({
 				if (unitType && unitType.abilities) {
 					var ability = unitType.abilities[command];
 					if (ability) {
-						unit.ability.cast(ability);
+						unit.ability.queueCast(ability);
 					}
 				}
 			}

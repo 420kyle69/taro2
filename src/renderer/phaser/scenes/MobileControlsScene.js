@@ -88,11 +88,19 @@ var MobileControlsScene = /** @class */ (function (_super) {
             });
             if (emitPointerPosition) {
                 var gameScene = taro.renderer.scene.getScene('Game');
-                var worldPoint = gameScene.cameras.main.getWorldPoint(gameScene.input.activePointer.x, gameScene.input.activePointer.y);
-                taro.input.emit('touchpointermove', [{
-                        x: worldPoint.x,
-                        y: worldPoint.y,
-                    }]);
+                var worldPoint = gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
+                if (pointer === gameScene.input.pointer1) {
+                    taro.input.emit('touchpointermove', [{
+                            x: worldPoint.x,
+                            y: worldPoint.y,
+                        }]);
+                }
+                else if (pointer === gameScene.input.pointer2) {
+                    taro.input.emit('secondarytouchpointermove', [{
+                            x: worldPoint.x,
+                            y: worldPoint.y,
+                        }]);
+                }
             }
             if (!this.disablePointerEvents) {
                 if (this.joysticks.length === 0)
@@ -135,6 +143,20 @@ var MobileControlsScene = /** @class */ (function (_super) {
             }
         }, this);
         this.input.on('pointerup', function (pointer) {
+            var gameScene = taro.renderer.scene.getScene('Game');
+            var emitPointerPosition = true;
+            Object.keys(taro.mobileControls.controls).forEach(function (control) {
+                if (control === 'lookWheel' || control === 'lookAndFireWheel')
+                    emitPointerPosition = false;
+            });
+            if (emitPointerPosition) {
+                if (pointer === gameScene.input.pointer2) {
+                    taro.input.emit('secondarytouchpointermove', [{
+                            x: NaN,
+                            y: NaN,
+                        }]);
+                }
+            }
             if (!this.disablePointerEvents) {
                 var touchX = pointer.x;
                 if (touchX < this.cameras.main.displayWidth / 2.4) {
@@ -206,12 +228,19 @@ var MobileControlsScene = /** @class */ (function (_super) {
             if (rightJoystick)
                 rightJoystick.hide();
         }
-        else {
-            var worldPoint = gameScene.cameras.main.getWorldPoint(gameScene.input.activePointer.x, gameScene.input.activePointer.y);
+        else if (this.joysticks.length === 0) {
+            var worldPoint = gameScene.cameras.main.getWorldPoint(gameScene.input.pointer1.x, gameScene.input.pointer1.y);
             taro.input.emit('pointermove', [{
                     x: worldPoint.x,
                     y: worldPoint.y,
                 }]);
+            if (gameScene.input.pointer2.primaryDown) {
+                var worldPointSecondary = gameScene.cameras.main.getWorldPoint(gameScene.input.pointer2.x, gameScene.input.pointer2.y);
+                taro.input.emit('secondarytouchpointermove', [{
+                        x: worldPointSecondary.x,
+                        y: worldPointSecondary.y,
+                    }]);
+            }
         }
     };
     MobileControlsScene.prototype.enterFullscreen = function () {
