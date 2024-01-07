@@ -363,6 +363,7 @@ var ControlComponent = TaroEntity.extend({
 					}
 				}
 
+				// if mouse has moved
 				if (self.newMousePosition && (self.newMousePosition[0] != self.lastMousePosition[0] || self.newMousePosition[1] != self.lastMousePosition[1])) {
 					// if we are using mobile controls don't send mouse moves to server here as we will do so from a look touch stick
 					if (!taro.isMobile) {
