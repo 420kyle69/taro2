@@ -208,8 +208,6 @@ var AbilityComponent = TaroEntity.extend({
 	},
 
 	startCasting: function (abilityId, key) {
-		console.log("startCasting", handle, key)
-
 		if (
 			this.activeAbilities[abilityId]
 			|| this.abilityCooldowns[abilityId]
