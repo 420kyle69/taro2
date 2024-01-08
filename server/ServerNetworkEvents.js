@@ -12,6 +12,7 @@ var ServerNetworkEvents = {
 	_onClientConnect: function (socket) {
 		// Tell the client to track their player entity
 		// Don't reject the client connection
+
 		var clientId = socket.id;
 		console.log('3. _onClientConnect ' + clientId + ' (ip: ' + socket._remoteAddress + ') client count: ' + Object.keys(taro.server.clients).length, '(ServerNetworkEvents.js)');
 
@@ -22,7 +23,6 @@ var ServerNetworkEvents = {
 		};
 
 		taro.server.clients[clientId].lastEventAt = Date.now();
-
 		taro.server.testerId = clientId;
 	},
 
@@ -78,7 +78,7 @@ var ServerNetworkEvents = {
 				clientId: clientId,
 				isAdBlockEnabled: data.isAdBlockEnabled
 			});
-	
+
 			player.joinGame(data);
 		}
 	},

@@ -551,6 +551,7 @@ var Server = TaroClass.extend({
 			}
 
 			promise.then((game) => {
+				taro.addComponent(GameTextComponent);
 				taro.addComponent(GameComponent);
 				taro.addComponent(ProfilerComponent);
 				self.gameStartedAt = new Date();
@@ -643,7 +644,6 @@ var Server = TaroClass.extend({
 								taro.addComponent(TaroChatComponent);
 								taro.addComponent(ItemComponent);
 								taro.addComponent(TimerComponent);
-								taro.addComponent(GameTextComponent);
 
 								taro.addComponent(AdComponent);
 								taro.addComponent(SoundComponent);

@@ -481,13 +481,44 @@ var TaroNetIoServer = {
    */
 	_onClientConnect: function (socket) {
 		var self = this;
-		
+		var remoteAddress = socket._remoteAddress;
 		let clientRejectReason = null;
 		
 		if (taro.clusterClient) {
 			taro.clusterClient.logCommand(socket.id, 'connection');
 			clientRejectReason = taro.clusterClient.validateClientConnection(socket);
 		}
+				
+		if (clientRejectReason === null) {
+			// Check if any listener cancels this
+			if (!taro.network.emit('connect', socket)) {
+				taro.network.log(
+					`Accepted connection with socket id ${socket.id
+					} ip ${remoteAddress}`
+				);
+				taro.network._socketById[socket.id] = socket;
+				taro.network._socketByIp[socket._remoteAddress] = socket;
+				
+				taro.network.clientIds.push(socket.id);
+				taro.network._socketById[socket.id].start = Date.now();
+				
+				taro.server.socketConnectionCount.connected++;
+				
+				// Store a rooms array for this client
+				taro.network._clientRooms[socket.id] = taro.network._clientRooms[socket.id] || [];
+
+				if (taro.clusterClient)
+					taro.clusterClient.logClientConnect(socket.id);
+			} else {
+				var reason = 'cannot connect to socket this.emit("connect", socket)';
+				console.log(reason);
+				socket.close(reason);
+			}
+		} else {
+			console.log('rejecting connection', clientRejectReason);
+			socket.close(clientRejectReason);
+		}
+	
 		
 		if (clientRejectReason === null) {
 			socket.on('message', function (data) {
