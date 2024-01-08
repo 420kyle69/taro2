@@ -834,7 +834,9 @@ var MenuUiComponent = TaroEntity.extend({
 				'User connected to another server',
 				'You do not have permission to join this game',
 				'Guest players not allowed to join this game',
-				'User kicked for spamming network commands'
+				'User kicked for spamming network commands',
+				'Your IP has been banned for command spamming',
+				'Your IP has been blacklisted',
 			];
 			
 			if (whitelistedReasons.findIndex((m) => m.includes(reason)) === -1) {

@@ -267,9 +267,9 @@ var Server = TaroClass.extend({
 		if (typeof HttpComponent != 'undefined') {
 			taro.addComponent(HttpComponent);
 		}
-		console.log('cluster.isMaster', cluster.isMaster);
 		if (cluster.isMaster) {
 			if (process.env.ENV === 'standalone') {
+				taro.addComponent(ClusterClientComponent); // backend component will retrieve "start" command from BE
 				self.ip = '127.0.0.1';
 				self.startWebServer();
 				self.start();
@@ -283,6 +283,7 @@ var Server = TaroClass.extend({
 			}
 		} else {
 			if (typeof ClusterClientComponent != 'undefined') {
+				
 				taro.addComponent(ClusterClientComponent); // backend component will retrieve "start" command from BE
 			}
 
@@ -503,7 +504,6 @@ var Server = TaroClass.extend({
 		self.url = `http://${self.ip}:${port}`;
 
 		this.duplicateIpCount = {};
-		this.bannedIps = [];
 
 		self.maxPlayers = self.maxPlayers || 32;
 		this.maxPlayersAllowed = self.maxPlayers || 32;
@@ -716,7 +716,7 @@ var Server = TaroClass.extend({
 		var self = this;
 
 		console.log('server.js: defineNetworkEvents');
-		taro.network.define('joinGame', self._onJoinGameWrapper);
+		taro.network.define('joinGame', self._onJoinGame);
 		taro.network.define('gameOver', self._onGameOver);
 		taro.network.define('ping', self._onPing);
 

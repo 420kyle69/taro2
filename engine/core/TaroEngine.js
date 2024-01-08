@@ -1409,7 +1409,6 @@ var TaroEngine = TaroEntity.extend({
 				self.fpsStatsElement.innerHTML = self._renderFPS;
 			}
 			window.updateNextStatsEverySecond && window.updateNextStatsEverySecond({ fps: self._renderFPS });
-
 		}
 
 		// Zero out counters

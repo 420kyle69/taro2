@@ -269,7 +269,7 @@ var ControlComponent = TaroEntity.extend({
 				unit.ability.cast(keyDown, key);
 			}, taro.client.inputDelay);
 		} else {
-			unit.ability.cast(keyDown, key);
+			unit.ability.queueCast(keyDown, key);
 		}
 
 		if (taro.isClient && this._entity._stats.clientId === taro.network.id() && keyDown.abilityId) {
@@ -284,7 +284,7 @@ var ControlComponent = TaroEntity.extend({
 					unit.ability.cast(unitAbility.keyUp, key);
 				}, taro.client.inputDelay);
 			} else {
-				unit.ability.cast(unitAbility.keyUp, key);
+				unit.ability.queueCast(unitAbility.keyUp, key);
 			}
 		}
 
@@ -363,6 +363,7 @@ var ControlComponent = TaroEntity.extend({
 					}
 				}
 
+				// if mouse has moved
 				if (self.newMousePosition && (self.newMousePosition[0] != self.lastMousePosition[0] || self.newMousePosition[1] != self.lastMousePosition[1])) {
 					// if we are using mobile controls don't send mouse moves to server here as we will do so from a look touch stick
 					if (!taro.isMobile) {

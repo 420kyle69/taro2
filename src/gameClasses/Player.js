@@ -318,7 +318,7 @@ var Player = TaroEntity.extend({
 				if (unitType && unitType.abilities) {
 					var ability = unitType.abilities[command];
 					if (ability) {
-						unit.ability.cast(ability);
+						unit.ability.queueCast(ability);
 					}
 				}
 			}
