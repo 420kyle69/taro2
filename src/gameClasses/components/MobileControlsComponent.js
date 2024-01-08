@@ -386,8 +386,10 @@ var MobileControlsComponent = TaroEntity.extend({
             taro.client.myPlayer.control.input.mouse.y = my;
 
             taro.client.myPlayer.absoluteAngle = compassAngle;
-            taro.network.send('playerMouseMoved', [mx, my]);
-            taro.network.send('playerAbsoluteAngle', compassAngle);
+			taro.client.myPlayer.control.newMousePosition = [
+				mx.toFixed(0),
+				my.toFixed(0)
+			];
         }
     },
 
