@@ -1122,6 +1122,24 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
+					case 'unitTypeWidth':
+						var unitTypeId = self.getValue(text.unitType, vars);
+						var unitType = taro.game.getAsset('unitTypes', unitTypeId)
+						if (unitType) {
+							returnValue = unitType.bodies?.default?.width
+						}
+
+						break;
+
+					case 'unitTypeHeight':
+						var unitTypeId = self.getValue(text.unitType, vars);
+						var unitType = taro.game.getAsset('unitTypes', unitTypeId)
+						if (unitType) {
+							returnValue = unitType.bodies?.default?.height
+						}
+
+						break;
+
 					case 'unitSensorRadius':
 						var unit = self.getValue(text.unit, vars);
 
