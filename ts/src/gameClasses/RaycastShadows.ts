@@ -1,4 +1,6 @@
 declare var RBush: any;
+declare var simplify: any;
+declare var VisibilityPolygon: any;
 
 class RaycastShadows {
 	polygons = [];
@@ -12,17 +14,22 @@ class RaycastShadows {
 	tilewidth: number;
 	tileheight: number;
 	mapExtents: Phaser.Math.Vector2;
+	segments: number[][][];
 
 	// wall data
 	vertices: Phaser.Math.Vector2[] = [];
 	allVertices: Phaser.Math.Vector2[] = [];
 	hEdges: Phaser.Geom.Line[] = [];
 	vEdges: Phaser.Geom.Line[] = [];
+	fov: Phaser.Geom.Rectangle;
+	fovEdges: Phaser.Geom.Line[] =[];
 	edgesTree: any;
 	verticesTree: any;
-	wallIntersections: Phaser.Math.Vector3[];
+	wallIntersections: Phaser.Math.Vector2[];
 	rays: Phaser.Geom.Line[];
 	culledRays: Phaser.Geom.Line[];
+
+	visibility: any;
 
 	constructor(scene: GameScene) {
 		this.scene = scene;
@@ -51,6 +58,8 @@ class RaycastShadows {
 		this.graph.setDepth(41000);
 		this.graph.lineStyle(3, 0x000, 1);
 
+		this.segments = [];
+
 		taro.$$('wall').forEach((wall) => {
 
 			const x = wall._translate.x - wall._bounds2d.x2;
@@ -70,6 +79,12 @@ class RaycastShadows {
 			this.vEdges.push(
 				new Phaser.Geom.Line(x, y, x, y + h),
 				new Phaser.Geom.Line(x + w, y, x + w, y + h)
+			);
+			this.segments.push(
+				[[x, y], [x+w, y]],
+				[[x, y+h], [x+w, y+h]],
+				[[x, y], [x, y+h]],
+				[[x+w, y], [x+w, y+h]]
 			);
 
 		});
@@ -126,7 +141,7 @@ class RaycastShadows {
 	}
 
 	drawWalls(): void {
-		this.drawWallEdges();
+		// this.drawWallEdges();
 		this.drawWallVertices();
 	}
 
@@ -145,6 +160,8 @@ class RaycastShadows {
 
 		this.allVertices.forEach((vertex) => {
 			this.rays.push(new Phaser.Geom.Line(this.player.x, this.player.y, vertex.x, vertex.y));
+			// scale the ray based on distance to fov limit
+
 		});
 	}
 
@@ -169,7 +186,7 @@ class RaycastShadows {
 		// TODO: extract range from config
 
 		// TODO: include map data necessary in event emission for constructor
-		const fov = Phaser.Geom.Rectangle.FromXY(
+		this.fov = Phaser.Geom.Rectangle.FromXY(
 			Math.max(0, this.player.x - limit),
 			Math.max(0, this.player.y - limit),
 			Math.min(this.mapExtents.x, this.player.x + limit),
@@ -177,62 +194,64 @@ class RaycastShadows {
 		);
 
 		const edgeVertices = [
-			new Phaser.Math.Vector2(fov.left, fov.top),
-			new Phaser.Math.Vector2(fov.right, fov.top),
-			new Phaser.Math.Vector2(fov.right, fov.bottom),
-			new Phaser.Math.Vector2(fov.left, fov.bottom)
+			new Phaser.Math.Vector2(this.fov.left, this.fov.top),
+			new Phaser.Math.Vector2(this.fov.right, this.fov.top),
+			new Phaser.Math.Vector2(this.fov.right, this.fov.bottom),
+			new Phaser.Math.Vector2(this.fov.left, this.fov.bottom)
 		];
 
+		this.fovEdges = [];
 		// edge lines of fov
-		const edges = [
-			fov.getLineA(),
-			fov.getLineB(),
-			fov.getLineC(),
-			fov.getLineD()
+		this.fovEdges = [
+			this.fov.getLineA(), // 3PI/4 >> PI/4
+			this.fov.getLineB(), // PI/4 >> 0 || -PI/4 >> PI
+			this.fov.getLineC(), // -PI/4 >> -3PI/4
+			this.fov.getLineD()  // PI >> 3PI/4 || -3PI/4 >> -PI
 		];
 
 		const fovMinMax = {
-			minX: fov.left,
-			minY: fov.top,
-			maxX: fov.right,
-			maxY: fov.bottom
+			minX: this.fov.left,
+			minY: this.fov.top,
+			maxX: this.fov.right,
+			maxY: this.fov.bottom
 		};
 
-		this.graph.lineStyle(2, 0xFF3333, 1);
+		// this.graph.lineStyle(2, 0xFF3333, 1);
 
-		this.wallIntersections = [];
+		// this.wallIntersections = [];
 
-		edges.forEach((edge) => {
-			this.graph.strokeLineShape(edge);
+		// this.fovEdges.forEach((edge) => {
+		// 	this.graph.strokeLineShape(edge);
 
-			this.edgesTree.search(this.edgesTree.toBBox(edge))
-				.forEach((wall) => {
+		// 	this.edgesTree.search(this.edgesTree.toBBox(edge))
+		// 		.forEach((wall) => {
 
-					const fovIntersectsWall = Phaser.Geom.Intersects.GetLineToLine(edge, wall);
-					if (fovIntersectsWall) {
-						this.wallIntersections.push(fovIntersectsWall);
-					}
-				});
-		});
+		// 			const fovIntersectsWall = Phaser.Geom.Intersects.GetLineToLine(edge, wall);
+		// 			if (fovIntersectsWall) {
+		// 				this.wallIntersections.push(new Phaser.Math.Vector2(fovIntersectsWall.x, fovIntersectsWall.y));
+		// 			}
+		// 		});
+		// });
 
-		this.allVertices = [
-			...edgeVertices,
-			...this.wallIntersections,
-			...this.verticesTree.search(fovMinMax)
-		];
+		// this.allVertices = [
+		// 	...edgeVertices,
+		// 	...this.wallIntersections,
+		// 	...this.verticesTree.search(fovMinMax)
+		// ];
 
-		this.graph.fillStyle(0x99FF99, 0.8);
-		this.verticesTree.search(fovMinMax).forEach((x) => {
-			this.graph.fillCircle(x.x, x.y, 4);
-		});
+		// this.graph.fillStyle(0x99FF99, 0.8);
+		// this.verticesTree.search(fovMinMax).forEach((x) => {
+		// 	this.graph.fillCircle(x.x, x.y, 4);
+		// });
 
-		this.getRays();
-		this.cullRays();
+		// this.getRays();
+		// this.cullRays();
 	}
 
 	cullRays(): void {
 		let local: Phaser.Math.Vector2[] = [];
-
+		let secondRound: Phaser.Math.Vector2[] = [];
+		let bo = true;
 		this.rays.forEach((ray) => {
 			const hits: Phaser.Math.Vector3[] = [];
 
@@ -246,23 +265,87 @@ class RaycastShadows {
 				});
 
 			if (hits.length > 0) {
+
 				const closest = hits.sort(this.sortZ)[0];
-				local.push(new Phaser.Math.Vector2(closest.x, closest.y));
+				const closestV2 = new Phaser.Math.Vector2(closest.x, closest.y);
+				local.push(closestV2);
+
+				if (closest.z === 1) {
+					secondRound.push(closestV2);
+					this.graph.fillStyle(0x00FFFF, 0.8);
+
+					this.graph.fillCircle(closestV2.x, closestV2.y, 4);
+
+				}
 			} else {
 				local.push(ray.getPointB());
 			}
+
+
 		});
 
-		
+		this.graph.fillStyle(0xFF0000, 0.8);
+		const rays: Phaser.Geom.Line[] = [];
+		secondRound.forEach((vertex) => {
+			const point = Phaser.Geom.Intersects.GetLineToRectangle(
+				Phaser.Geom.Line.Extend(new Phaser.Geom.Line(this.player.x, this.player.y, vertex.x, vertex.y), 0, 600),
+				this.fov
+			) as Phaser.Math.Vector3[];
+
+			if (point[0]) {
+				this.graph.fillCircle(point[0].x, point[0].y, 4);
+				rays.push(new Phaser.Geom.Line(this.player.x, this.player.y, point[0].x, point[0].y));
+			}
+		});
+
+		rays.forEach((ray) => {
+			const hits: Phaser.Math.Vector3[] = [];
+			this.edgesTree.search(this.edgesTree.toBBox(ray))
+				.forEach((edge) => {
+					const hit = Phaser.Geom.Intersects.GetLineToLine(ray, edge);
+
+					if (hit) {
+						hits.push(hit);
+					}
+				});
+
+			this.graph.fillStyle(0x00FFFF, 0.8);
+			if (hits.length === 2) {
+				hits.forEach((hit) => {
+					local.push(new Phaser.Math.Vector2(hit.x, hit.y));
+				});
+			} else if (hits.length > 0) {
+				const closest = hits.sort(this.sortZ)[0];
+				local.push(new Phaser.Math.Vector2(closest.x, closest.y));
+			}
+			// hits.forEach((hit) => {
+
+			// 	this.graph.fillCircle(hit.x, hit.y, 4);
+			// });
+
+		});
 		local = this.sortClockwise(local, this.player);
+		// console.log(local);
+		// console.log(simplify(local));
 		this.getCulledRays(local);
 
-		this.culledRays.forEach((ray) => {
+		this.graph.lineStyle(2, 0xFF9999, 1);
+
+		// this.culledRays.forEach((ray) => {
+		// 	this.graph.strokeLineShape(ray);
+		// });
+
+		rays.forEach((ray) => {
 			this.graph.strokeLineShape(ray);
 		});
 
 		this.graph.fillStyle(0xFF9999, 0.5)
-			.fillPoints(local, true);
+			.fillPoints(simplify(local), true);
+
+	}
+
+	scaleVectorToLimit(vertex: Phaser.Math.Vector2): Phaser.Math.Vector2 {
+		return new Phaser.Math.Vector2();
 	}
 
 	sortZ(a: Phaser.Math.Vector3, b: Phaser.Math.Vector3): number {
@@ -319,11 +402,23 @@ class RaycastShadows {
 		this.player.set(x, y);
 	}
 
+	visibilityPoly(): any {
+
+		const data = VisibilityPolygon.computeViewport([this.player.x, this.player.y], this.segments, [this.fov.left, this.fov.top], [this.fov.right, this.fov.bottom]);
+		const poly: Phaser.Geom.Point[] = [];
+
+		data.forEach((point) => {
+			poly.push(new Phaser.Geom.Point(point[0], point[1]));
+		});
+		this.graph.fillStyle(0xFF9999, 0.5)
+			.fillPoints(poly, true);
+	}
+
 	update(): void {
 		this.graph.clear();
 		this.drawWalls();
 		this.generateFieldOfView();
-		this.drawFovWallIntersections();
+		this.visibilityPoly();
 	}
 }
 
