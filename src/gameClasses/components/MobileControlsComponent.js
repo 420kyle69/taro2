@@ -26,7 +26,6 @@ var MobileControlsComponent = TaroEntity.extend({
                 point.x.toFixed(0),
                 point.y.toFixed(0)
             ];
-            taro.network.send('playerMouseMoved', taro.client.myPlayer.control.newMousePosition);
             taro.client.myPlayer.control.lastMousePosition = taro.client.myPlayer.control.newMousePosition;
 		});
 
