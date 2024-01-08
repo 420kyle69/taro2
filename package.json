@@ -6,6 +6,7 @@
 	"scripts": {
 		"server": "cross-env ENV=standalone JWT_SECRET_KEY='change-this' node server/taro.js -g ./src",
 		"server:prod": "node server/taro.js -g ./src",
+		"server:cc": "cross-env ENV=standalone LOAD_CC=true JWT_SECRET_KEY='change-this' node server/taro.js -g ./src",
 		"tsc": "tsc",
 		"tsc-watch": "tsc -w",
 		"build": "node server/taro.js -deploy ./src -to ./src",
