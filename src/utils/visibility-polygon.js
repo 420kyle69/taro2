@@ -16,24 +16,24 @@ The following functions should be useful:
 1) VisibilityPolygon.compute(position, segments)
   Computes a visibility polygon. O(N log N) time complexity (where N is the number of line segments).
   Arguments:
-    position - The location of the observer. If the observer is not completely surrounded by line segments, an outer bounding-box will be automatically created (so that the visibility polygon does not extend to infinity).
-    segments - A list of line segments. Each line segment should be a list of two points. Each point should be a list of two coordinates. Line segments can not intersect each other. Overlapping vertices are OK, but it is not OK if a vertex is touching the middle of a line segment. Use the "breakIntersections" function to fix intersecting line segments.
+	position - The location of the observer. If the observer is not completely surrounded by line segments, an outer bounding-box will be automatically created (so that the visibility polygon does not extend to infinity).
+	segments - A list of line segments. Each line segment should be a list of two points. Each point should be a list of two coordinates. Line segments can not intersect each other. Overlapping vertices are OK, but it is not OK if a vertex is touching the middle of a line segment. Use the "breakIntersections" function to fix intersecting line segments.
   Returns: The visibility polygon (in clockwise vertex order).
 
 2) VisibilityPolygon.computeViewport(position, segments, viewportMinCorner, viewportMaxCorner)
   Computes a visibility polygon within the given viewport. This can be faster than the "compute" function if there are many segments outside of the viewport.
   Arguments:
-    position - The location of the observer. Must be within the viewport.
-    segments - A list of line segments. Line segments can not intersect each other. It is OK if line segments intersect the viewport.
-    viewportMinCorner - The minimum X and Y coordinates of the viewport.
-    viewportMaxCorner - The maximum X and Y coordinates of the viewport.
+	position - The location of the observer. Must be within the viewport.
+	segments - A list of line segments. Line segments can not intersect each other. It is OK if line segments intersect the viewport.
+	viewportMinCorner - The minimum X and Y coordinates of the viewport.
+	viewportMaxCorner - The maximum X and Y coordinates of the viewport.
   Returns: The visibility polygon within the viewport (in clockwise vertex order).
 
 3) VisibilityPolygon.inPolygon(position, polygon)
   Calculates whether a point is within a polygon. O(N) time complexity (where N is the number of points in the polygon).
   Arguments:
-    position - The point to check: a list of two coordinates.
-    polygon - The polygon to check: a list of points. The polygon can be specified in either clockwise or counterclockwise vertex order.
+	position - The point to check: a list of two coordinates.
+	polygon - The polygon to check: a list of points. The polygon can be specified in either clockwise or counterclockwise vertex order.
   Returns: True if "position" is within the polygon.
 
 4) VisibilityPolygon.convertToSegments(polygons)
@@ -421,7 +421,7 @@ VisibilityPolygon.distance = function(a, b) {
 
 VisibilityPolygon.isOnSegment = function(xi, yi, xj, yj, xk, yk) {
   return (xi <= xk || xj <= xk) && (xk <= xi || xk <= xj) &&
-         (yi <= yk || yj <= yk) && (yk <= yi || yk <= yj);
+		 (yi <= yk || yj <= yk) && (yk <= yi || yk <= yj);
 };
 
 VisibilityPolygon.computeDirection = function(xi, yi, xj, yj, xk, yk) {
@@ -436,11 +436,11 @@ VisibilityPolygon.doLineSegmentsIntersect = function(x1, y1, x2, y2, x3, y3, x4,
   d3 = VisibilityPolygon.computeDirection(x1, y1, x2, y2, x3, y3);
   d4 = VisibilityPolygon.computeDirection(x1, y1, x2, y2, x4, y4);
   return (((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0)) &&
-          ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0))) ||
-         (d1 == 0 && VisibilityPolygon.isOnSegment(x3, y3, x4, y4, x1, y1)) ||
-         (d2 == 0 && VisibilityPolygon.isOnSegment(x3, y3, x4, y4, x2, y2)) ||
-         (d3 == 0 && VisibilityPolygon.isOnSegment(x1, y1, x2, y2, x3, y3)) ||
-         (d4 == 0 && VisibilityPolygon.isOnSegment(x1, y1, x2, y2, x4, y4));
+		  ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0))) ||
+		 (d1 == 0 && VisibilityPolygon.isOnSegment(x3, y3, x4, y4, x1, y1)) ||
+		 (d2 == 0 && VisibilityPolygon.isOnSegment(x3, y3, x4, y4, x2, y2)) ||
+		 (d3 == 0 && VisibilityPolygon.isOnSegment(x1, y1, x2, y2, x3, y3)) ||
+		 (d4 == 0 && VisibilityPolygon.isOnSegment(x1, y1, x2, y2, x4, y4));
 };
 
 if (typeof (module) !== 'undefined' && typeof (module.exports) !== 'undefined') {
