@@ -111,7 +111,9 @@ declare class GameComponent extends TaroEntity {
 		projectileTypes: Record<string, EntityData>;
 		itemTypes: Record<string, EntityData>;
 		particleTypes: Record<string, ParticleData>;
-		abilities: Record<string, UnitAbility>
+		abilities: Record<string, UnitAbility>;
+		// TODO: add type of value for shop Record.
+		shops: Record<string, any>;
 		settings: {
 			addStrokeToNameAndAttributes: boolean;
 			camera: {
