@@ -4264,7 +4264,6 @@ var TaroEntity = TaroObject.extend({
 											keyFrames: [[0, [0, 0, -1.57]], [100, [0, 0, 0]]]
 										};
 										this.tween.start(null, this._rotate.z, customTween);
-
 									}
 
 									const bodyId = this._stats.states[stateId]?.body;
@@ -5202,6 +5201,9 @@ var TaroEntity = TaroObject.extend({
 			x = nextTransform[0];
 			y = nextTransform[1];
 			rotate = nextTransform[2];
+
+			// entity isn't moving anymore. prevent rendering to conserve cpu
+			this.isTransforming(false);
 		}
 
 		// for my own unit, ignore streamed angle if this unit control is set to face mouse cursor instantly.

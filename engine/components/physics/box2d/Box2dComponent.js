@@ -595,13 +595,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 				self._world.step(timeElapsedSinceLastStep);
 			} else {
 
-				// Call the world step; frame-rate, velocity iterations, position iterations
-				self._world.step(timeElapsedSinceLastStep / 1000, 8, 3);
-				if (self.ctx) {
-					self.ctx.clear();
-					self._world.DebugDraw();
-				}
-
 				var tempBod = self._world.getBodyList();
 
 				// iterate through every physics body
@@ -621,8 +614,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 											break;
 										case 'force':
 											entity.applyForce(entity.vector.x, entity.vector.y);
-											this.lastBehaviourAt = Date.now()
-
 											break;
 										case 'impulse':
 											entity.applyImpulse(entity.vector.x, entity.vector.y);
@@ -705,29 +696,28 @@ var PhysicsComponent = TaroEventingClass.extend({
 
 									entity.lastX = x;
 								} else if (taro.isClient) {
-
 									// if CSP is enabled, client-side physics will dictate:
 									// my unit's position and projectiles that are NOT server-streamed.
 									if (
-										(taro.game.cspEnabled && entity == taro.client.selectedUnit) ||
+										(entity == taro.client.selectedUnit && entity._stats.controls?.clientPredictedMovement) ||
 										(entity._category == 'projectile' && !entity._stats.streamMode)
 									) {
 										// CSP reconciliation
 										if (entity == taro.client.selectedUnit && (
 											!entity.isTeleporting &&
 											entity.reconRemaining &&
-												!isNaN(entity.reconRemaining.x) &&
-												!isNaN(entity.reconRemaining.y)
-											)
+											!isNaN(entity.reconRemaining.x) &&
+											!isNaN(entity.reconRemaining.y)
+										)
 										) {
-
 											// if the current reconcilie distance is greater than my unit's body dimention,
+
 											// instantly move unit (teleport) to the last streamed position. Otherwise, gradually reconcile
 											if (Math.abs(entity.reconRemaining.x) > entity._stats.currentBody.width * 1.5 ||
 												Math.abs(entity.reconRemaining.y) > entity._stats.currentBody.height * 1.5
 											) {
-												x = taro.client.myUnitStreamedPosition.x
-												y = taro.client.myUnitStreamedPosition.y
+												x = taro.client.myUnitStreamedPosition.x;
+												y = taro.client.myUnitStreamedPosition.y;
 
 												// x += xRemaining;
 												// y += yRemaining;
@@ -737,11 +727,12 @@ var PhysicsComponent = TaroEventingClass.extend({
 												entity.reconRemaining.x /= 5;
 												entity.reconRemaining.y /= 5;
 
-												x += entity.reconRemaining.x
-												y += entity.reconRemaining.y
+												x += entity.reconRemaining.x;
+												y += entity.reconRemaining.y;
 											}
 										}
 
+										entity.prevKeyFrame = entity.nextKeyFrame;
 										entity.nextKeyFrame = [taro._currentTime + taro.client.renderBuffer, [x, y, angle]];
 
 										// keep track of units' position history for CSP reconciliation
@@ -758,7 +749,15 @@ var PhysicsComponent = TaroEventingClass.extend({
 										angle = entity.nextKeyFrame[1][2];
 									}
 
-									entity.isTransforming(true);
+
+									if (entity.prevKeyFrame && entity.nextKeyFrame &&
+										entity.prevKeyFrame[1] && entity.nextKeyFrame[1] && (
+										entity.prevKeyFrame[1][0] != entity.nextKeyFrame[1][0] ||
+											entity.prevKeyFrame[1][1] != entity.nextKeyFrame[1][1] ||
+											entity.prevKeyFrame[1][2] != entity.nextKeyFrame[1][2])
+									) {
+										entity.isTransforming(true);
+									}
 								}
 							}
 
@@ -782,6 +781,14 @@ var PhysicsComponent = TaroEventingClass.extend({
 					}
 
 					tempBod = tempBod.getNext();
+				}
+
+				// Call the world step; frame-rate, velocity iterations, position iterations
+				self._world.step(timeElapsedSinceLastStep / 1000, 8, 3);
+
+				if (self.ctx) {
+					self.ctx.clear();
+					self._world.DebugDraw();
 				}
 
 				taro._physicsFrames++;
@@ -851,7 +858,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 				taro.script.trigger(`${entityA._category}TouchesItem`, triggeredBy);
 				triggeredBy.itemId = entityB.id();
 				taro.game.lastTouchedItemId = entityB.id();
-				entityA.script.trigger("entityTouchesItem", triggeredBy);
+				entityA.script.trigger('entityTouchesItem', triggeredBy);
 				break;
 			case 'projectile':
 				triggeredBy.projectileId = triggeredBy.projectileId || entityB.id();

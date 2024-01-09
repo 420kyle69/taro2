@@ -17,6 +17,7 @@ class GameScene extends PhaserScene {
     resolutionCoef: number;
 	trackingDelay: number;
 	useBounds: boolean;
+	cameraDeadzone: { width: number; height: number; };
 
 	constructor() {
 		super({ key: 'Game' });
@@ -30,6 +31,7 @@ class GameScene extends PhaserScene {
 
 		this.resolutionCoef = 1;
 		this.useBounds = taro?.game?.data?.settings?.camera?.useBounds;
+		this.cameraDeadzone = taro?.game?.data?.settings?.camera?.deadzone;
 
 		const camera = this.cameras.main;
 		camera.setBackgroundColor(taro.game.data.defaultData.mapBackgroundColor);
@@ -41,6 +43,11 @@ class GameScene extends PhaserScene {
 			} else {
 				camera.setBounds(0, 0, taro.game.data.map.width * 64, taro.game.data.map.height * 64, true);
 			}
+		}
+
+		//set camera deadzone
+		if (this.cameraDeadzone) {
+			camera.setDeadzone(this.cameraDeadzone.width, this.cameraDeadzone.height);
 		}
 
 		// set camera tracking delay
@@ -130,6 +137,10 @@ class GameScene extends PhaserScene {
 			x -= camera.width / 2;
 			y -= camera.height / 2;
 			camera.setScroll(x, y);
+		});
+
+		taro.client.on('deadzone-camera', (width: number, heigth: number) => {
+			camera.setDeadzone(width, heigth);
 		});
 
 		taro.client.on('instant-move-camera', (x: number, y: number) => {

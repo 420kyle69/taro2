@@ -1556,7 +1556,9 @@ var TaroObject = TaroEventingClass.extend({
 			if (arr) {
 				arrCount = arr.length;
 				while (arrCount--) {
-					arr[arrCount].update(ctx, tickDelta);
+					var obj = arr[arrCount];
+					if (obj)
+						obj.update(ctx, tickDelta);
 				}
 			}
 		}

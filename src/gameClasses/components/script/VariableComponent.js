@@ -1122,6 +1122,24 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
+					case 'unitTypeWidth':
+						var unitTypeId = self.getValue(text.unitType, vars);
+						var unitType = taro.game.getAsset('unitTypes', unitTypeId)
+						if (unitType) {
+							returnValue = unitType.bodies?.default?.width
+						}
+
+						break;
+
+					case 'unitTypeHeight':
+						var unitTypeId = self.getValue(text.unitType, vars);
+						var unitType = taro.game.getAsset('unitTypes', unitTypeId)
+						if (unitType) {
+							returnValue = unitType.bodies?.default?.height
+						}
+
+						break;
+
 					case 'unitSensorRadius':
 						var unit = self.getValue(text.unit, vars);
 
@@ -1459,6 +1477,16 @@ var VariableComponent = TaroEntity.extend({
 						}
 
 						break;
+
+					case 'getSecondaryTouchPosition':
+						if (taro.isClient && taro.isMobile) {
+							returnValue = {
+								x: parseInt(taro.mobileControls.secondaryTouchPosition.x),
+								y: parseInt(taro.mobileControls.secondaryTouchPosition.y)
+							};
+						}
+					
+					break;
 
 					case 'xyCoordinate':
 						var x = self.getValue(text.x, vars);
@@ -2021,8 +2049,7 @@ var VariableComponent = TaroEntity.extend({
 						break;
 
 					case 'allUnitsOfUnitType':
-						var type = self.getValue(text.type, vars);
-
+						var type = self.getValue(text.unitType, vars);
 						returnValue = _.filter(taro.$$('unit'), (unit) => {
 							return unit._stats.type == type;
 						});
@@ -2085,11 +2112,11 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
-					case 'allItemsOfItemsType':
-						var type = self.getValue(text.type, vars);
-
+					case 'allItemsOfItemType':
+						var type = self.getValue(text.itemType, vars);
+						
 						returnValue = _.filter(taro.$$('item'), (item) => {
-							return item._stats.type == type;
+							return item._stats.itemTypeId == type;
 						});
 
 						break;
@@ -2100,7 +2127,7 @@ var VariableComponent = TaroEntity.extend({
 						break;
 
 					case 'allProjectilesOfProjectileType':
-						var type = self.getValue(text.type, vars);
+						var type = self.getValue(text.projectileType, vars);
 
 						returnValue = _.filter(taro.$$('projectile'), (projectile) => {
 							return projectile._stats.type == type;

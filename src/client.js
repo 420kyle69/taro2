@@ -619,6 +619,9 @@ const Client = TaroEventingClass.extend({
 					entityBeingDestroyed._category == 'player'
 				) {
 					taro.menuUi.kickPlayerFromGame(entityBeingDestroyed.id()); // this is inside the 'Moderate' menu
+					if (taro.scoreboard) {
+						taro.scoreboard.isUpdateQueued = true; // update scoreboard
+					}
 				} else {
 					try {
 						entityBeingDestroyed.remove();
@@ -649,8 +652,6 @@ const Client = TaroEventingClass.extend({
 	//This method should be looked at...
 	//
 	loadCSP: function () {
-
-		taro.game.cspEnabled = !!taro.game.data.defaultData.clientSidePredictionEnabled;
 
 		const gravity = taro.game.data.settings.gravity;
 
@@ -729,6 +730,7 @@ const Client = TaroEventingClass.extend({
 		taro.network.define('updateUnit', this._onUpdateUnit);
 		taro.network.define('updateItem', this._onUpdateItem);
 		taro.network.define('updateProjectile', this._onUpdateProjectile);
+		taro.network.define('updateShop', this._onUpdateShop);
 
 		taro.network.define('renderSocketLogs', this._onRenderSocketLogs);
 	},

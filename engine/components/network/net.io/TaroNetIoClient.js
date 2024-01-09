@@ -490,7 +490,7 @@ var TaroNetIoClient = {
 								if (isTeleporting) {
 									// console.log("wtf")
 									entity.teleportTo(x, y, rotate, isTeleportingCamera);
-								} else if (taro.physics && taro.game.cspEnabled && entity == taro.client.selectedUnit) {
+								} else if (entity == taro.client.selectedUnit && taro.physics && entity._stats.controls?.clientPredictedMovement) {
 									if (taro.env === 'local' || taro.debugCSP) {
 										// emit position for entity debug image
 										entity.emit('transform-debug', {
@@ -505,7 +505,8 @@ var TaroNetIoClient = {
 										x: x,
 										y: y,
 										rotation: rotate,
-									}
+									}									
+								
 								} else {
 									// console.log(entity._category, newPosition)
 									// extra 20ms of buffer removes jitter

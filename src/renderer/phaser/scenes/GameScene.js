@@ -35,12 +35,13 @@ var GameScene = /** @class */ (function (_super) {
     }
     GameScene.prototype.init = function () {
         var _this = this;
-        var _a, _b, _c, _d, _e, _f, _g, _h;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
         if (taro.isMobile) {
             this.scene.launch('MobileControls');
         }
         this.resolutionCoef = 1;
         this.useBounds = (_d = (_c = (_b = (_a = taro === null || taro === void 0 ? void 0 : taro.game) === null || _a === void 0 ? void 0 : _a.data) === null || _b === void 0 ? void 0 : _b.settings) === null || _c === void 0 ? void 0 : _c.camera) === null || _d === void 0 ? void 0 : _d.useBounds;
+        this.cameraDeadzone = (_h = (_g = (_f = (_e = taro === null || taro === void 0 ? void 0 : taro.game) === null || _e === void 0 ? void 0 : _e.data) === null || _f === void 0 ? void 0 : _f.settings) === null || _g === void 0 ? void 0 : _g.camera) === null || _h === void 0 ? void 0 : _h.deadzone;
         var camera = this.cameras.main;
         camera.setBackgroundColor(taro.game.data.defaultData.mapBackgroundColor);
         // set camera bounds
@@ -52,8 +53,12 @@ var GameScene = /** @class */ (function (_super) {
                 camera.setBounds(0, 0, taro.game.data.map.width * 64, taro.game.data.map.height * 64, true);
             }
         }
+        //set camera deadzone
+        if (this.cameraDeadzone) {
+            camera.setDeadzone(this.cameraDeadzone.width, this.cameraDeadzone.height);
+        }
         // set camera tracking delay
-        this.trackingDelay = ((_h = (_g = (_f = (_e = taro === null || taro === void 0 ? void 0 : taro.game) === null || _e === void 0 ? void 0 : _e.data) === null || _f === void 0 ? void 0 : _f.settings) === null || _g === void 0 ? void 0 : _g.camera) === null || _h === void 0 ? void 0 : _h.trackingDelay) || 3;
+        this.trackingDelay = ((_m = (_l = (_k = (_j = taro === null || taro === void 0 ? void 0 : taro.game) === null || _j === void 0 ? void 0 : _j.data) === null || _k === void 0 ? void 0 : _k.settings) === null || _l === void 0 ? void 0 : _l.camera) === null || _m === void 0 ? void 0 : _m.trackingDelay) || 3;
         if (this.trackingDelay > 60) {
             this.trackingDelay = 60;
         }
@@ -110,6 +115,9 @@ var GameScene = /** @class */ (function (_super) {
             x -= camera.width / 2;
             y -= camera.height / 2;
             camera.setScroll(x, y);
+        });
+        taro.client.on('deadzone-camera', function (width, heigth) {
+            camera.setDeadzone(width, heigth);
         });
         taro.client.on('instant-move-camera', function (x, y) {
             if (!taro.developerMode.active || taro.developerMode.activeTab === 'play') {
