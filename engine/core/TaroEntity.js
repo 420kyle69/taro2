@@ -1907,42 +1907,39 @@ var TaroEntity = TaroObject.extend({
 					}
 				}
 			}
-
-			// _dontRender doesn't exist anywhere! ??? - jaeyun
-			if (!this._dontRender) {
-				// Check for cached version
-				if (this._cache || this._compositeCache) {
-					// Caching is enabled
-					if (this._cacheDirty) {
-						// The cache is dirty, redraw it
-						this._refreshCache(dontTransform);
-					}
-
-					// Now render the cached image data to the main canvas
-					this._renderCache(ctx);
-				} else {
-					// Non-cached output
-					// Transform the context by the current transform settings
-					if (!dontTransform) {
-						this._transformContext(ctx);
-					}
-
-					// Render item below unit currently disabled
-					// if (this._category === 'unit') {
-					// 	if (this._compositeCache) {
-					// 		if (this._cacheDirty) {
-					// 			// Process children
-					// 			TaroObject.prototype.tick.call(this, this._cacheCtx, true);
-					// 			this._renderCache(ctx);
-					// 			this._cacheDirty = false;
-					// 		}
-					// 	} else {
-					// 		// Process children
-					// 		TaroObject.prototype.tick.call(this, ctx, true);
-					// 	}
-					// }
-					this._renderEntity(ctx, dontTransform);
+		
+			// Check for cached version
+			if (this._cache || this._compositeCache) {
+				// Caching is enabled
+				if (this._cacheDirty) {
+					// The cache is dirty, redraw it
+					this._refreshCache(dontTransform);
 				}
+
+				// Now render the cached image data to the main canvas
+				this._renderCache(ctx);
+			} else {
+				// Non-cached output
+				// Transform the context by the current transform settings
+				if (!dontTransform) {
+					this._transformContext(ctx);
+				}
+
+				// Render item below unit currently disabled
+				// if (this._category === 'unit') {
+				// 	if (this._compositeCache) {
+				// 		if (this._cacheDirty) {
+				// 			// Process children
+				// 			TaroObject.prototype.tick.call(this, this._cacheCtx, true);
+				// 			this._renderCache(ctx);
+				// 			this._cacheDirty = false;
+				// 		}
+				// 	} else {
+				// 		// Process children
+				// 		TaroObject.prototype.tick.call(this, ctx, true);
+				// 	}
+				// }
+				this._renderEntity(ctx, dontTransform);
 			}
 
 			if (this._translate.x != this._oldTranform[0] || this._translate.y != this._oldTranform[1] || this._rotate.z != this._oldTranform[2]) {
@@ -2024,7 +2021,7 @@ var TaroEntity = TaroObject.extend({
 
 					if (projectile) {
 						var position = taro.game.lastProjectileHitPosition ||
-							(this.body && taro.physics.engine === 'BOX2DWASM' ? taro.physics.recordLeak(this.body.getPosition()) : this.body.getPosition()) ||
+							// (this.body && taro.physics.engine === 'BOX2DWASM' ? taro.physics.recordLeak(this.body.getPosition()) : this.body.getPosition()) || // this was causing client to crash
 							this._translate;
 						if (this.body) {
 							position.x *= this._b2dRef._scaleRatio;
