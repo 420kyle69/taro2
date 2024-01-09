@@ -64,7 +64,6 @@
 		"@types/google.analytics": "^0.0.42",
 		"@types/jquery": "^3.5.16",
 		"@types/node": "^18.15.11",
-		"@types/rbush": "^3.0.3",
 		"@typescript-eslint/eslint-plugin": "^5.59.0",
 		"@typescript-eslint/parser": "^5.59.0",
 		"babel-plugin-transform-remove-console": "^6.9.4",
@@ -78,7 +77,6 @@
 		"eslint-plugin-node": "^11.1.0",
 		"eslint-plugin-promise": "^6.0.0",
 		"node-arguments": "^0.0.1",
-		"rbush": "^3.0.1",
 		"rollbar": "^2.25.0",
 		"typescript": "^5.0.4",
 		"utf-8-validate": "^6.0.3"
