@@ -865,6 +865,9 @@ var DeveloperMode = /** @class */ (function () {
                     switch (data.action) {
                         case 'update':
                             this.updateShop(data);
+                            break;
+                        default:
+                            break;
                     }
                 }
             }
