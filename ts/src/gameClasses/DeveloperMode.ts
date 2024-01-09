@@ -806,6 +806,19 @@ class DeveloperMode {
 		});
 	}
 
+	updateShop (data) {
+        if (data.typeId && data.newData) {
+            if (!taro.game.data.shops) {
+                taro.game.data.shops = {};
+            }
+            taro.game.data.shops[data.typeId] = data.newData;
+        }
+
+		if (taro.isServer) {
+			taro.network.send('updateShop', data);
+		}
+    }
+
 	editEntity(data: EditEntityData, clientId: string) {
 		if (taro.isClient) {
 			taro.network.send<any>('editEntity', data);
@@ -865,6 +878,11 @@ class DeveloperMode {
 						case 'delete':
 							//this.deleteProjectile(data);
 							break;
+					}
+				} else if (data.entityType === 'shop') {
+					switch (data.action) {
+						case 'update':
+							this.updateShop(data);
 					}
 				}
 			}
