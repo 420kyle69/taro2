@@ -883,6 +883,9 @@ class DeveloperMode {
 					switch (data.action) {
 						case 'update':
 							this.updateShop(data);
+							break;
+						default:
+							break;
 					}
 				}
 			}
