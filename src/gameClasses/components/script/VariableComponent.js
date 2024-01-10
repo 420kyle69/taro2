@@ -2765,7 +2765,7 @@ var VariableComponent = TaroEntity.extend({
 				var object = self.getValue(text.object, vars);
 				var key = self.getValue(text.key, vars);
 
-				if (object && key != undefined) {
+				if (object && Object.hasOwn(object, key)) {
 					return object[key];
 				}
 			},
