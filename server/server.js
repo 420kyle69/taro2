@@ -125,6 +125,12 @@ if (process.env.ENV == 'production') {
 			global.lastRollbarUuid = payload.uuid;
 		}
 	});
+	
+	global.rollbar.configure({
+		payload: {
+			containerName: process.env.CONTAINER_NAME,
+		}
+	});
 }
 
 // initialize mixpanel.
