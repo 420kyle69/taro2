@@ -485,7 +485,6 @@ var TaroNetIoServer = {
 		let clientRejectReason = null;
 		
 		if (taro.clusterClient) {
-			taro.clusterClient.logCommand(socket.id, 'connection');
 			clientRejectReason = taro.clusterClient.validateClientConnection(socket);
 		}
 				
@@ -514,25 +513,13 @@ var TaroNetIoServer = {
 				console.log(reason);
 				socket.close(reason);
 			}
-		} else {
-			console.log('rejecting connection', clientRejectReason);
-			socket.close(clientRejectReason);
-		}
-	
 		
-		if (clientRejectReason === null) {
 			socket.on('message', function (data) {
-				// track all commands being sent from client
-				var commandName = 'unknown';
-				if (typeof data[0] === 'string') {
-					var code = data[0];
-					if (code.charCodeAt(0) != undefined) {
-						commandName = taro.network._networkCommandsIndex[code.charCodeAt(0)];
-					}
-				}
-				
 				if (taro.clusterClient) {
-					taro.clusterClient.logCommand(socket.id, commandName, data);
+					const isCommandValid = taro.clusterClient.validateCommand(socket.id, data);
+					if (!isCommandValid) {
+						return;
+					}
 				}
 				
 				self._onClientMessage.apply(self, [data, socket.id]);
@@ -556,6 +543,10 @@ var TaroNetIoServer = {
 				ts: taro._timeScale,
 				ct: taro._currentTime
 			});
+			
+		} else {
+			console.log('rejecting connection', clientRejectReason);
+			socket.close(clientRejectReason);
 		}
 	},
 	
