@@ -1,10 +1,15 @@
 declare var VisibilityPolygon: any;
 
+type config = {
+	fovRange: number,
+	includeWalls: boolean,
+}
+
 class RaycastShadows {
 	scene: GameScene;
 	player: Phaser.Math.Vector2;
 	graph: Phaser.GameObjects.Graphics;
-	mask: Phaser.Display.Masks.GeometryMask;
+	mask: Phaser.Display.Masks.BitmapMask;
 
 	// map data
 	width: number;
@@ -38,13 +43,13 @@ class RaycastShadows {
 		);
 		this.getWalls();
 
-		this.mask = new Phaser.Display.Masks.GeometryMask(scene, this.graph);
+		this.mask = new Phaser.Display.Masks.BitmapMask(scene, this.graph);
 	}
 
 	unMaskWalls(): void {
 		this.walls.forEach((wall) => {
-			this.graph.fillRectShape(wall, )
-		})
+			this.graph.fillRectShape(wall);
+		});
 	}
 
 	getWalls(): void {
@@ -97,7 +102,7 @@ class RaycastShadows {
 		data.forEach((point) => {
 			poly.push(new Phaser.Geom.Point(point[0], point[1]));
 		});
-		this.graph.fillStyle(0xFF9999, 0)
+		this.graph.fillStyle(0xFF9999, 1)
 			.fillPoints(poly, true);
 
 		// if include walls

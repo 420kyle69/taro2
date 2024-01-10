@@ -16,7 +16,7 @@ var RaycastShadows = /** @class */ (function () {
         // y
         this.height * this.tileheight);
         this.getWalls();
-        this.mask = new Phaser.Display.Masks.GeometryMask(scene, this.graph);
+        this.mask = new Phaser.Display.Masks.BitmapMask(scene, this.graph);
     }
     RaycastShadows.prototype.unMaskWalls = function () {
         var _this = this;
@@ -55,7 +55,7 @@ var RaycastShadows = /** @class */ (function () {
         data.forEach(function (point) {
             poly.push(new Phaser.Geom.Point(point[0], point[1]));
         });
-        this.graph.fillStyle(0xFF9999, 0)
+        this.graph.fillStyle(0xFF9999, 1)
             .fillPoints(poly, true);
         // if include walls
         this.walls.forEach(function (wall) {
