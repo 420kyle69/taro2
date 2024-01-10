@@ -4,6 +4,7 @@ class RaycastShadows {
 	scene: GameScene;
 	player: Phaser.Math.Vector2;
 	graph: Phaser.GameObjects.Graphics;
+	mask: Phaser.Display.Masks.GeometryMask;
 
 	// map data
 	width: number;
@@ -12,6 +13,7 @@ class RaycastShadows {
 	tileheight: number;
 	mapExtents: Phaser.Math.Vector2;
 	segments: number[][][];
+	walls: Phaser.Geom.Rectangle[];
 
 	// wall data
 	fov: Phaser.Geom.Rectangle;
@@ -35,11 +37,20 @@ class RaycastShadows {
 			this.height * this.tileheight
 		);
 		this.getWalls();
+
+		this.mask = new Phaser.Display.Masks.GeometryMask(scene, this.graph);
+	}
+
+	unMaskWalls(): void {
+		this.walls.forEach((wall) => {
+			this.graph.fillRectShape(wall, )
+		})
 	}
 
 	getWalls(): void {
 
 		this.segments = [];
+		this.walls = [];
 
 		taro.$$('wall').forEach((wall) => {
 
@@ -47,6 +58,8 @@ class RaycastShadows {
 			const y = wall._translate.y - wall._bounds2d.y2;
 			const w = wall._bounds2d.x;
 			const h = wall._bounds2d.y;
+
+			this.walls.push(Phaser.Geom.Rectangle.FromXY(x, y, x+w, y+h));
 
 			this.segments.push(
 				[[x, y], [x+w, y]],
@@ -76,16 +89,25 @@ class RaycastShadows {
 		this.player.set(x, y);
 	}
 
-	visibilityPoly(): any {
-
+	visibilityPoly(): void {
+		// console.time('VISIBILITY POLYGON');
 		const data = VisibilityPolygon.computeViewport([this.player.x, this.player.y], this.segments, [this.fov.left, this.fov.top], [this.fov.right, this.fov.bottom]);
 		const poly: Phaser.Geom.Point[] = [];
 
 		data.forEach((point) => {
 			poly.push(new Phaser.Geom.Point(point[0], point[1]));
 		});
-		this.graph.fillStyle(0xFF9999, 0.5)
+		this.graph.fillStyle(0xFF9999, 0)
 			.fillPoints(poly, true);
+
+		// if include walls
+		this.walls.forEach((wall) => {
+			this.graph.fillRectShape(wall);
+		});
+
+		// console.timeEnd('VISIBILITY POLYGON');
+		this.scene.cameras.main.setMask(this.mask, false);
+
 	}
 
 	update(): void {

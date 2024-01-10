@@ -16,15 +16,24 @@ var RaycastShadows = /** @class */ (function () {
         // y
         this.height * this.tileheight);
         this.getWalls();
+        this.mask = new Phaser.Display.Masks.GeometryMask(scene, this.graph);
     }
+    RaycastShadows.prototype.unMaskWalls = function () {
+        var _this = this;
+        this.walls.forEach(function (wall) {
+            _this.graph.fillRectShape(wall);
+        });
+    };
     RaycastShadows.prototype.getWalls = function () {
         var _this = this;
         this.segments = [];
+        this.walls = [];
         taro.$$('wall').forEach(function (wall) {
             var x = wall._translate.x - wall._bounds2d.x2;
             var y = wall._translate.y - wall._bounds2d.y2;
             var w = wall._bounds2d.x;
             var h = wall._bounds2d.y;
+            _this.walls.push(Phaser.Geom.Rectangle.FromXY(x, y, x + w, y + h));
             _this.segments.push([[x, y], [x + w, y]], [[x, y + h], [x + w, y + h]], [[x, y], [x, y + h]], [[x + w, y], [x + w, y + h]]);
         });
     };
@@ -39,13 +48,21 @@ var RaycastShadows = /** @class */ (function () {
         this.player.set(x, y);
     };
     RaycastShadows.prototype.visibilityPoly = function () {
+        var _this = this;
+        // console.time('VISIBILITY POLYGON');
         var data = VisibilityPolygon.computeViewport([this.player.x, this.player.y], this.segments, [this.fov.left, this.fov.top], [this.fov.right, this.fov.bottom]);
         var poly = [];
         data.forEach(function (point) {
             poly.push(new Phaser.Geom.Point(point[0], point[1]));
         });
-        this.graph.fillStyle(0xFF9999, 0.5)
+        this.graph.fillStyle(0xFF9999, 0)
             .fillPoints(poly, true);
+        // if include walls
+        this.walls.forEach(function (wall) {
+            _this.graph.fillRectShape(wall);
+        });
+        // console.timeEnd('VISIBILITY POLYGON');
+        this.scene.cameras.main.setMask(this.mask, false);
     };
     RaycastShadows.prototype.update = function () {
         this.graph.clear();
