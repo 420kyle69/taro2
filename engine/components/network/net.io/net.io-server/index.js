@@ -1171,7 +1171,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 				return null;
 			}
 		} catch (e) {
-			console.log('Warning: client sending malicious JSON data ', e, data);
+			console.log('Warning: client sending malicious JSON data ', e.message, data);
 		}
 	}
 });

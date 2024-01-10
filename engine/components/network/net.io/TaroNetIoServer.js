@@ -546,7 +546,7 @@ var TaroNetIoServer = {
 			
 		} else {
 			console.log('rejecting connection', clientRejectReason);
-			socket.close(clientRejectReason);
+			socket.close(clientRejectReason, null, true);
 		}
 	},
 	
