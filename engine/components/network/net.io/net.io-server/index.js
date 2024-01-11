@@ -583,8 +583,8 @@ NetIo.Server = NetIo.EventingClass.extend({
 		const { compressToUTF16 } = require('lz-string');
 		const LZUTF8 = require('lzutf8');
 
-		// this._compress = compressToUTF16;
-		this._compress = LZUTF8.compress;
+		this._compress = compressToUTF16;
+		// this._compress = LZUTF8.compress;
 		this.COMPRESSION_THRESHOLD = 10000;
 
 		this._sockets = [];
