@@ -268,7 +268,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 					ReportFixture: (fixture_p) => {
 						const fixture = self.wrapPointer(fixture_p, self.b2Fixture);
 						entityId = self.metaData[self.getPointer(fixture.GetBody())].taroId;
-						console.log(entityId)
 						var entity = taro.$(entityId);
 						if (entity) {
 							// taro.devLog("found", entity._category, entity._translate.x, entity._translate.y)
