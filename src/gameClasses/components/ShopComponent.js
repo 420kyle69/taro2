@@ -475,6 +475,14 @@ var ShopComponent = TaroEntity.extend({
 						details.removeClass('btn-purchase-purchasable');
 						purchasableInfo.html('<span class=\'fas fa-check text-success\'></span>');
 					}
+
+					window.purchased({
+						type: "ingame-skin",
+						value: itemId,
+						status: "success",
+						...purchasableInfo,
+					});
+
 				} else if (response.status == 'error') {
 					if (!response.message.includes('No matching document found')) {
 						var error = `<div class="alert alert-danger text-center">${response.message}</div>`;
@@ -1316,14 +1324,16 @@ var ShopComponent = TaroEntity.extend({
 					type: 'button',
 					class: 'btn btn-outline-success align-middle btn-equip',
 					id: item._id,
-					name: item.title || item.name
+					name: item.title || item.name,
+					owner: item.owner || ""
 				}).append('Equip');
 			} else if (item.status == 'equipped') {
 				var button = $('<button/>', {
 					type: 'button',
 					class: 'btn btn-success align-middle btn-unequip',
 					id: item._id,
-					name: item.name || item.title
+					name: item.name || item.title,
+					owner: item.owner || ""
 				}).append('Equipped');
 			} else if (item.status == undefined) {
 				if (item.soldForSocialShare) {
@@ -1713,3 +1723,4 @@ var ShopComponent = TaroEntity.extend({
 if (typeof (module) !== 'undefined' && typeof (module.exports) !== 'undefined') {
 	module.exports = ShopComponent;
 }
+
