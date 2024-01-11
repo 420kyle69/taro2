@@ -1,3 +1,12 @@
+const createMetaData = (obj: { [key: string]: any }, body: Box2D.b2Body) => {
+	const metaData: any = {};
+	// @author Moe'Thun, it's safe, trust me
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
+	metaData[body] = Object.setPrototypeOf(obj, body);
+	return metaData;
+};
+
 // FIXME: add more types to the physics part of taro2
 const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing memory leak bug
 	init: async function (component) {
@@ -187,13 +196,14 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 		// if there's already a body, destroy it first
 		if (entity.body) {
 			self.destroyBody(entity);
+			delete self.metaData[box2D.getPointer(entity.body)];
 		}
 		var tempDef: Box2D.b2BodyDef = self.recordLeak(new self.b2BodyDef());
 		var param;
-		let tempBod: Box2D.b2Body & { [key: string]: any };
+		let tempBod: Box2D.b2Body;
 		var fixtureDef;
-		var tempFixture: Box2D.b2FixtureDef & { taroId: string };
-		var finalFixture: Box2D.b2Fixture & { [key: string]: any };
+		var tempFixture: Box2D.b2FixtureDef;
+		var finalFixture: Box2D.b2Fixture;
 		var tempShape: Box2D.b2Shape;
 		var tempFilterData;
 		var i;
@@ -230,7 +240,8 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 						if (typeof tempDef[funcName] === 'function') {
 							tempDef[funcName](body[param]);
 						} else {
-							tempDef[param] = body[param];
+							console.log(param, body[param]);
+							// tempDef[param] = body[param];
 						}
 						break;
 				}
@@ -245,7 +256,8 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 		self.destroyB2dObj(nowPoint);
 		// Create the new body
 		tempBod = self._world.CreateBody(tempDef);
-
+		let bodyId = box2D.getPointer(tempBod);
+		self.metaData[bodyId] = {};
 		// Now apply any post-creation attributes we need to
 		for (param in body) {
 			if (body.hasOwnProperty(param)) {
@@ -270,7 +282,6 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 								// Create the fixture
 								tempFixture = self.createFixture(fixtureDef);
 								// console.log(tempFixture.get_density());
-								tempFixture.taroId = fixtureDef.taroId;
 								// Check for a shape definition for the fixture
 								if (fixtureDef.shape) {
 									// Create based on the shape type
@@ -322,7 +333,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 										tempFixture.set_shape(tempShape);
 										finalFixture = tempBod.CreateFixture(tempFixture);
 										self.destroyB2dObj(tempShape);
-										finalFixture.taroId = tempFixture.taroId;
+										self.metaData[bodyId].taroId = fixtureDef.taroId;
 									}
 								}
 
@@ -365,7 +376,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 		}
 
 		// Store the entity that is linked to self body
-		tempBod._entity = entity;
+		self.metaData[bodyId]._entity = entity;
 		tempBod.SetEnabled(true);
 		// Add the body to the world with the passed fixture
 		entity.body = tempBod;

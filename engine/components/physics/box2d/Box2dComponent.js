@@ -25,6 +25,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 		this.totalTimeElapsed = 0;
 		this.exponent = 2;
 		this.divisor = 80;
+		this.metaData = {};
 
 		this.walls = [];
 		this.nullPtr = undefined;
@@ -156,7 +157,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 							tempDef[`set_${param}`](params[param]);
 						} else {
 							// this for something like taroId (which is only useful in js, and won't do anything in box2d)
-							tempDef[param] = params[param];
+							// tempDef[param] = params[param];
 						}
 
 					}
