@@ -15,6 +15,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 		component.box2D = box2D;
 		component.freeLeaked = freeLeaked;
 		component.recordLeak = recordLeak;
+		component.tryRecordLeak = (p: Box2D.b2Vec2) => recordLeak(p);
 		component.freeFromCache = box2D.LeakMitigator.freeFromCache;
 		component.wrapPointer = box2D.wrapPointer;
 		component.getPointer = box2D.getPointer;
@@ -182,6 +183,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 
 	queryAABB: function (self, aabb, callback) {
 		self.world().QueryAABB(callback, aabb);
+		taro.physics.destroyB2dObj?.(callback);
 	},
 
 	createBody: function (self, entity, body, isLossTolerant) {

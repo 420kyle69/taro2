@@ -23,7 +23,7 @@ var Raycaster = /** @class */ (function () {
         // reverse
         var raycast = this.multiple;
         raycast.reset();
-        this.world.rayCast(taro.physics.box2D ? new taro.physics.box2D.b2Vec2(end.x, end.y) : end, taro.physics.box2D ? new taro.physics.box2D.b2Vec2(start.x, start.y) : start, raycast.callback);
+        this.world.rayCast(taro.physics.box2D ? taro.physics.tryRecordLeak(new taro.physics.box2D.b2Vec2(end.x, end.y)) : end, taro.physics.box2D ? taro.physics.tryRecordLeak(new taro.physics.box2D.b2Vec2(start.x, start.y)) : start, raycast.callback);
         taro.game.entitiesCollidingWithLastRaycast = _.clone(raycast.entities);
         // forward
         raycast.reset();
@@ -87,11 +87,13 @@ var RayCastClosest = (function () {
     var def;
     def = {};
     def.reset = function () {
+        var _a, _b;
         def.hit = false;
         def.point = null;
         def.normal = null;
         def.entity = null;
         def.fraction = 1;
+        (_b = (_a = taro.physics).destroyB2dObj) === null || _b === void 0 ? void 0 : _b.call(_a, def.callback);
     };
     switch (taro.physics.engine) {
         case 'BOX2DWASM':
@@ -172,9 +174,11 @@ var RayCastMultiple = (function () {
     def.normals = [];
     def.entities = [];
     def.reset = function () {
+        var _a, _b;
         def.points = [];
         def.normals = [];
         def.entities = [];
+        (_b = (_a = taro.physics).destroyB2dObj) === null || _b === void 0 ? void 0 : _b.call(_a, def.callback);
     };
     switch (taro.physics.engine) {
         case 'BOX2DWASM':
@@ -189,11 +193,11 @@ var RayCastMultiple = (function () {
                  * @returns {number} -1 to filter, 0 to terminate, fraction to clip the ray for closest hit, 1 to continue
                  */
                 ReportFixture: function (fixture_p, point_p, normal_p, fraction) {
-                    var fixture = wrapPointer_2(fixture_p, b2Fixture_2);
-                    var point = wrapPointer_2(point_p, b2Vec2_2);
-                    var normal = wrapPointer_2(normal_p, b2Vec2_2);
-                    var fixtureList = fixture.GetBody().GetFixtureList();
-                    var entity = fixtureList && fixtureList.taroId && taro.$(fixtureList.taroId);
+                    var fixture = taro.physics.recordLeak(wrapPointer_2(fixture_p, b2Fixture_2));
+                    var point = taro.physics.recordLeak(wrapPointer_2(point_p, b2Vec2_2));
+                    var normal = taro.physics.recordLeak(wrapPointer_2(normal_p, b2Vec2_2));
+                    var taroId = taro.physics.metaData[taro.physics.getPointer(fixture.GetBody())].taroId;
+                    var entity = taro.$(taroId);
                     if (entity &&
                         (entity._category === 'unit' ||
                             entity._category === 'wall')) {
@@ -240,9 +244,11 @@ var RaycastAny = (function () {
     var def;
     def = {};
     def.reset = function () {
+        var _a, _b;
         def.hit = false;
         def.point = null;
         def.normal = null;
+        (_b = (_a = taro.physics).destroyB2dObj) === null || _b === void 0 ? void 0 : _b.call(_a, def.callback);
     };
     switch (taro.physics.engine) {
         case 'BOX2DWASM':
@@ -257,11 +263,11 @@ var RaycastAny = (function () {
                  * @returns {number} -1 to filter, 0 to terminate, fraction to clip the ray for closest hit, 1 to continue
                  */
                 ReportFixture: function (fixture_p, point_p, normal_p, fraction) {
-                    var fixture = wrapPointer_3(fixture_p, b2Fixture_3);
-                    var point = wrapPointer_3(point_p, b2Vec2_3);
-                    var normal = wrapPointer_3(normal_p, b2Vec2_3);
-                    var fixtureList = fixture.GetBody().GetFixtureList();
-                    var entity = fixtureList && fixtureList.taroId && taro.$(fixtureList.taroId);
+                    var fixture = taro.physics.recordLeak(wrapPointer_3(fixture_p, b2Fixture_3));
+                    var point = taro.physics.recordLeak(wrapPointer_3(point_p, b2Vec2_3));
+                    var normal = taro.physics.recordLeak(wrapPointer_3(normal_p, b2Vec2_3));
+                    var taroId = taro.physics.metaData[taro.physics.getPointer(fixture.GetBody())].taroId;
+                    var entity = taro.$(taroId);
                     if (entity &&
                         (entity._category === 'unit' ||
                             entity._category === 'wall')) {

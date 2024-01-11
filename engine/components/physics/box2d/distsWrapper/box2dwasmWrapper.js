@@ -56,6 +56,7 @@ var box2dwasmWrapper = {
                         component.box2D = box2D;
                         component.freeLeaked = freeLeaked;
                         component.recordLeak = recordLeak;
+                        component.tryRecordLeak = function (p) { return recordLeak(p); };
                         component.freeFromCache = box2D.LeakMitigator.freeFromCache;
                         component.wrapPointer = box2D.wrapPointer;
                         component.getPointer = box2D.getPointer;
@@ -213,7 +214,9 @@ var box2dwasmWrapper = {
         return self.recordLeak(body.GetPosition());
     },
     queryAABB: function (self, aabb, callback) {
+        var _a, _b;
         self.world().QueryAABB(callback, aabb);
+        (_b = (_a = taro.physics).destroyB2dObj) === null || _b === void 0 ? void 0 : _b.call(_a, callback);
     },
     createBody: function (self, entity, body, isLossTolerant) {
         var _a, _b, _c, _d, _e, _f;

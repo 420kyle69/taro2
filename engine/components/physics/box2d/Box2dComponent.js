@@ -26,7 +26,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 		this.exponent = 2;
 		this.divisor = 80;
 		this.metaData = {};
-
+		this.tryRecordLeak = (p) => p;
 		this.walls = [];
 		this.nullPtr = undefined;
 		this.getPointer = undefined;
