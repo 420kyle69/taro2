@@ -271,7 +271,6 @@ var box2dwasmWrapper = {
                             tempDef[funcName](body[param]);
                         }
                         else {
-                            console.log(param, body[param]);
                             // tempDef[param] = body[param];
                         }
                         break;
@@ -354,6 +353,7 @@ var box2dwasmWrapper = {
                                         tempFixture.set_shape(tempShape);
                                         finalFixture = tempBod.CreateFixture(tempFixture);
                                         self.destroyB2dObj(tempShape);
+                                        self.destroyB2dObj(tempFixture);
                                         self.metaData[bodyId].taroId = fixtureDef.taroId;
                                     }
                                 }

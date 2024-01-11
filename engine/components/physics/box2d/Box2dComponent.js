@@ -267,7 +267,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 				const callback = Object.assign(new self.JSQueryCallback(), {
 					ReportFixture: (fixture_p) => {
 						const fixture = self.wrapPointer(fixture_p, self.b2Fixture);
-						entityId = fixture.GetBody().GetFixtureList().taroId;
+						entityId = self.metaData[self.getPointer(fixture.GetBody())].taroId;
 						var entity = taro.$(entityId);
 						if (entity) {
 							// taro.devLog("found", entity._category, entity._translate.x, entity._translate.y)
@@ -602,7 +602,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 				while (tempBod && typeof tempBod.getNext === 'function' && (!self.getPointer || self.getPointer(tempBod) !== self.getPointer(self.nullPtr))) {
 					// Check if the body is awake && not static
 					if (tempBod.m_type !== 'static' && tempBod.isAwake() && (!tempBod.GetType || tempBod.GetType() !== 0)) {
-						entity = tempBod._entity;
+						entity = self.getPointer !== undefined ? self.metaData[self.getPointer(tempBod)]._entity : tempBod._entity;
 
 						if (entity) {
 							// apply movement if it's either human-controlled unit, or ai unit that's currently moving
@@ -753,7 +753,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 
 									if (entity.prevKeyFrame && entity.nextKeyFrame &&
 										entity.prevKeyFrame[1] && entity.nextKeyFrame[1] && (
-										entity.prevKeyFrame[1][0] != entity.nextKeyFrame[1][0] ||
+											entity.prevKeyFrame[1][0] != entity.nextKeyFrame[1][0] ||
 											entity.prevKeyFrame[1][1] != entity.nextKeyFrame[1][1] ||
 											entity.prevKeyFrame[1][2] != entity.nextKeyFrame[1][2])
 									) {
@@ -953,11 +953,11 @@ var PhysicsComponent = TaroEventingClass.extend({
 	_beginContactCallback: function (contact) {
 		if (taro.physics.engine === 'BOX2DWASM') {
 			const nowContact = taro.physics.wrapPointer(contact, taro.physics.b2Contact);
-			var entityA = nowContact.GetFixtureA().GetBody()._entity;
-			var entityB = nowContact.GetFixtureB().GetBody()._entity;
+			var entityA = taro.physics.metaData[taro.physics.getPointer(nowContact.GetFixtureA().GetBody())];
+			var entityB = taro.physics.metaData[taro.physics.getPointer(nowContact.GetFixtureB().GetBody())];
 			if (!entityA || !entityB)
 				return;
-
+			taro.physics.freeFromCache(contact);
 			taro.physics._triggerContactEvent(entityA, entityB);
 			taro.physics._triggerContactEvent(entityB, entityA);
 		} else {
@@ -976,12 +976,12 @@ var PhysicsComponent = TaroEventingClass.extend({
 	_endContactCallback: function (contact) {
 		if (taro.physics.engine === 'BOX2DWASM') {
 			const nowContact = taro.physics.wrapPointer(contact, taro.physics.b2Contact);
-			var entityA = nowContact.GetFixtureA().GetBody()._entity;
-			var entityB = nowContact.GetFixtureB().GetBody()._entity;
+			var entityA = taro.physics.metaData[taro.physics.getPointer(nowContact.GetFixtureA().GetBody())];
+			var entityB = taro.physics.metaData[taro.physics.getPointer(nowContact.GetFixtureB().GetBody())];
 
 			if (!entityA || !entityB)
 				return;
-
+			taro.physics.freeFromCache(contact);
 			taro.physics._triggerLeaveEvent(entityA, entityB);
 			taro.physics._triggerLeaveEvent(entityB, entityA);
 		} else {

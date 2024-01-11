@@ -80,7 +80,7 @@ class Raycaster {
 		const forwardRaycast = this.closest;
 		forwardRaycast.reset();
 		this.world.rayCast(
-			taro.physics.box2D ? new taro.physics.box2D.b2Vec2(start.x , start.y) : start,
+			taro.physics.box2D ? new taro.physics.box2D.b2Vec2(start.x, start.y) : start,
 			taro.physics.box2D ? new taro.physics.box2D.b2Vec2(end.x, end.y) : end,
 			forwardRaycast.callback // though it is currently hard-coded for 'Closest'
 		);
@@ -169,8 +169,8 @@ const RayCastClosest = (function () {
 					const fixture = wrapPointer(fixture_p, b2Fixture);
 					const point = wrapPointer(point_p, b2Vec2);
 					const normal = wrapPointer(normal_p, b2Vec2);
-					const fixtureList: Box2D.b2Fixture & { taroId?: number } = fixture.GetBody().GetFixtureList();
-					const entity = fixtureList && fixtureList.taroId && taro.$(fixtureList.taroId);
+					const taroId: Box2D.b2Fixture = taro.physics.metaData[taro.physics.getPointer(fixture.GetBody())].taroId;
+					const entity = taro.$(taroId);
 					if (
 						entity &&
 						(

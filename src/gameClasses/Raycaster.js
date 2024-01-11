@@ -109,8 +109,8 @@ var RayCastClosest = (function () {
                     var fixture = wrapPointer_1(fixture_p, b2Fixture_1);
                     var point = wrapPointer_1(point_p, b2Vec2_1);
                     var normal = wrapPointer_1(normal_p, b2Vec2_1);
-                    var fixtureList = fixture.GetBody().GetFixtureList();
-                    var entity = fixtureList && fixtureList.taroId && taro.$(fixtureList.taroId);
+                    var taroId = taro.physics.metaData[taro.physics.getPointer(fixture.GetBody())].taroId;
+                    var entity = taro.$(taroId);
                     if (entity &&
                         (entity._category === 'unit' ||
                             entity._category === 'wall')) {
