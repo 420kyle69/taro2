@@ -343,6 +343,10 @@ var Unit = TaroEntityPhysics.extend({
 					if (self.unitUi) {
 						self.unitUi.updateAllAttributeBars();
 					}
+					// visibility mask
+					if (this._stats.visibilityMask.enabled) {
+						this.updateVisibilityMask();
+					}
 				}
 			}
 		}
@@ -1946,6 +1950,13 @@ var Unit = TaroEntityPhysics.extend({
 				}
 			}
 		}
+	},
+
+	updateVisibilityMask: function () {
+		taro.client.emit('update-visibility-mask', {
+			enabled: this._stats.visibilityMask.enabled,
+			range: this._stats.visibilityMask.range,
+		});
 	},
 
 	/**

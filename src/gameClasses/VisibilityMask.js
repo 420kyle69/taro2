@@ -1,5 +1,5 @@
-var RaycastShadows = /** @class */ (function () {
-    function RaycastShadows(scene) {
+var VisibilityMask = /** @class */ (function () {
+    function VisibilityMask(scene) {
         console.time('CONSTRUCTOR');
         this.scene = scene;
         this.player = Phaser.Math.Vector2.ZERO;
@@ -20,13 +20,13 @@ var RaycastShadows = /** @class */ (function () {
         this.mask = new Phaser.Display.Masks.GeometryMask(scene, this.graph);
         console.timeEnd('CONSTRUCTOR');
     }
-    RaycastShadows.prototype.unMaskWalls = function () {
+    VisibilityMask.prototype.unMaskWalls = function () {
         var _this = this;
         this.walls.forEach(function (wall) {
             _this.graph.fillRectShape(wall);
         });
     };
-    RaycastShadows.prototype.getWalls = function () {
+    VisibilityMask.prototype.getWalls = function () {
         var _this = this;
         console.time('GET WALLS');
         this.segments = [];
@@ -41,17 +41,15 @@ var RaycastShadows = /** @class */ (function () {
         });
         console.timeEnd('GET WALLS');
     };
-    RaycastShadows.prototype.generateFieldOfView = function () {
-        // for now hard code range
-        var limit = 700;
-        // TODO: extract range from config
+    VisibilityMask.prototype.generateFieldOfView = function (range) {
+        this.range = range;
         // TODO: include map data necessary in event emission for constructor
-        this.fov = Phaser.Geom.Rectangle.FromXY(Math.max(0, this.player.x - limit), Math.max(0, this.player.y - limit), Math.min(this.mapExtents.x, this.player.x + limit), Math.min(this.mapExtents.y, this.player.y + limit));
+        this.fov = Phaser.Geom.Rectangle.FromXY(Math.max(0, this.player.x - range), Math.max(0, this.player.y - range), Math.min(this.mapExtents.x, this.player.x + range), Math.min(this.mapExtents.y, this.player.y + range));
     };
-    RaycastShadows.prototype.moveCenter = function (x, y) {
+    VisibilityMask.prototype.moveCenter = function (x, y) {
         this.player.set(x, y);
     };
-    RaycastShadows.prototype.visibilityPoly = function () {
+    VisibilityMask.prototype.visibilityPoly = function () {
         var _this = this;
         // console.time('VISIBILITY POLYGON');
         var data = VisibilityPolygon.computeViewport([this.player.x, this.player.y], this.segments, [this.fov.left, this.fov.top], [this.fov.right, this.fov.bottom]);
@@ -68,14 +66,19 @@ var RaycastShadows = /** @class */ (function () {
         // console.timeEnd('VISIBILITY POLYGON');
         this.scene.cameras.main.setMask(this.mask, false);
     };
-    RaycastShadows.prototype.update = function () {
+    VisibilityMask.prototype.destroyVisibilityMask = function () {
         this.graph.clear();
-        this.generateFieldOfView();
+        delete this.mask;
+        delete this.graph;
+    };
+    VisibilityMask.prototype.update = function () {
+        this.graph.clear();
+        this.generateFieldOfView(this.range);
         this.visibilityPoly();
     };
-    return RaycastShadows;
+    return VisibilityMask;
 }());
 if (typeof (module) !== 'undefined' && typeof (module.exports) !== 'undefined') {
-    module.exports = RaycastShadows;
+    module.exports = VisibilityMask;
 }
-//# sourceMappingURL=RaycastShadows.js.map
+//# sourceMappingURL=VisibilityMask.js.map

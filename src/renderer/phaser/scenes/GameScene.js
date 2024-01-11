@@ -37,8 +37,18 @@ var GameScene = /** @class */ (function (_super) {
         var _this = this;
         var _a, _b, _c, _d, _e, _f, _g, _h;
         // BEGIN RAYCAST SHADOW TEST AREA
-        taro.client.on('get-walls', function () {
-            _this.shadows = new RaycastShadows(_this);
+        taro.client.on('update-visibility-mask', function (data) {
+            if (!_this.visibility && data.enabled) {
+                _this.visibility = new VisibilityMask(_this);
+                _this.visibility.generateFieldOfView(data.range);
+            }
+            else if (data.enabled) {
+                _this.visibility.generateFieldOfView(data.range);
+            }
+            else if (_this.visibility && !data.enabled) {
+                _this.visibility.destroyVisibilityMask();
+                delete _this.visibility;
+            }
         });
         // END RAYCAST SHADOW TEST AREA
         if (taro.isMobile) {
@@ -122,7 +132,7 @@ var GameScene = /** @class */ (function (_super) {
             }
         });
         taro.client.on('unit-position', function (x, y) {
-            _this.shadows.moveCenter(x, y);
+            _this.visibility.moveCenter(x, y);
         });
     };
     GameScene.prototype.preload = function () {
@@ -465,6 +475,7 @@ var GameScene = /** @class */ (function (_super) {
     GameScene.prototype.update = function () {
         var _this = this;
         var _a;
+        (_a = this.visibility) === null || _a === void 0 ? void 0 : _a.update();
         //cause black screen and camera jittering when change tab
         /*let trackingDelay = this.trackingDelay / taro.fps();
         this.cameras.main.setLerp(trackingDelay, trackingDelay);*/
@@ -490,7 +501,6 @@ var GameScene = /** @class */ (function (_super) {
                 }
             });
         }
-        (_a = this.shadows) === null || _a === void 0 ? void 0 : _a.update();
         taro.client.emit('tick');
     };
     return GameScene;

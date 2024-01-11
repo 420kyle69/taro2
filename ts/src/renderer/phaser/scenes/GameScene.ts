@@ -17,7 +17,7 @@ class GameScene extends PhaserScene {
 	resolutionCoef: number;
 	trackingDelay: number;
 	useBounds: boolean;
-	shadows: RaycastShadows;
+	visibility: VisibilityMask;
 
 	constructor() {
 		super({ key: 'Game' });
@@ -25,8 +25,19 @@ class GameScene extends PhaserScene {
 
 	init (): void {
 		// BEGIN RAYCAST SHADOW TEST AREA
-		taro.client.on('get-walls', () => {
-			this.shadows = new RaycastShadows(this);
+		taro.client.on('update-visibility-mask', (data: {
+			enabled: boolean,
+			range: number,
+		}) => {
+			if (!this.visibility && data.enabled) {
+				this.visibility = new VisibilityMask(this);
+				this.visibility.generateFieldOfView(data.range);
+			} else if (data.enabled) {
+				this.visibility.generateFieldOfView(data.range);
+			} else if (this.visibility && !data.enabled) {
+				this.visibility.destroyVisibilityMask();
+				delete this.visibility;
+			}
 		});
 		// END RAYCAST SHADOW TEST AREA
 		if (taro.isMobile) {
@@ -144,7 +155,7 @@ class GameScene extends PhaserScene {
 		});
 
 		taro.client.on('unit-position', (x: number, y: number) => {
-			this.shadows.moveCenter(x, y);
+			this.visibility.moveCenter(x, y);
 		});
 
 
@@ -646,6 +657,8 @@ class GameScene extends PhaserScene {
 
 	update (): void {
 
+		this.visibility?.update();
+
 		//cause black screen and camera jittering when change tab
 		/*let trackingDelay = this.trackingDelay / taro.fps();
 		this.cameras.main.setLerp(trackingDelay, trackingDelay);*/
@@ -674,8 +687,6 @@ class GameScene extends PhaserScene {
 				}
 			});
 		}
-
-		this.shadows?.update();
 
 		taro.client.emit('tick');
 	}

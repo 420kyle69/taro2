@@ -830,8 +830,6 @@ const Client = TaroEventingClass.extend({
 				`joinGame sent. userId: ${userId}`
 			]);
 		}
-
-		this.emit('get-walls');
 	},
 
 	getUrlVars: function () {
