@@ -125,6 +125,12 @@ if (process.env.ENV == 'production') {
 			global.lastRollbarUuid = payload.uuid;
 		}
 	});
+	
+	global.rollbar.configure({
+		payload: {
+			containerName: process.env.CONTAINER_NAME,
+		}
+	});
 }
 
 // initialize mixpanel.
@@ -808,6 +814,7 @@ var Server = TaroClass.extend({
 		taro.network.define('updateUnit', self._onUpdateUnit);
 		taro.network.define('updateItem', this._onUpdateItem);
 		taro.network.define('updateProjectile', this._onUpdateProjectile);
+		taro.network.define('updateShop', this._onUpdateShop);
 
 		taro.network.define('recordSocketMsgs', this._onRecordSocketMsgs);
 		taro.network.define('getSocketMsgs', this._onGetSocketMsgs);

@@ -795,6 +795,17 @@ var DeveloperMode = /** @class */ (function () {
             }
         });
     };
+    DeveloperMode.prototype.updateShop = function (data) {
+        if (data.typeId && data.newData) {
+            if (!taro.game.data.shops) {
+                taro.game.data.shops = {};
+            }
+            taro.game.data.shops[data.typeId] = data.newData;
+        }
+        if (taro.isServer) {
+            taro.network.send('updateShop', data);
+        }
+    };
     DeveloperMode.prototype.editEntity = function (data, clientId) {
         if (taro.isClient) {
             taro.network.send('editEntity', data);
@@ -847,6 +858,15 @@ var DeveloperMode = /** @class */ (function () {
                             break;
                         case 'delete':
                             //this.deleteProjectile(data);
+                            break;
+                    }
+                }
+                else if (data.entityType === 'shop') {
+                    switch (data.action) {
+                        case 'update':
+                            this.updateShop(data);
+                            break;
+                        default:
                             break;
                     }
                 }

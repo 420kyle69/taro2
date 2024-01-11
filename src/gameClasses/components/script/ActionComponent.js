@@ -848,7 +848,11 @@ var ActionComponent = TaroEntity.extend({
 						var player = self._script.variable.getValue(action.player, vars);
 						var zoom = self._script.variable.getValue(action.zoom, vars);
 						if (player && player._category == 'player' && zoom != undefined && player._stats.clientId) {
-							taro.network.send('camera', { cmd: 'zoom', zoom: zoom }, player._stats.clientId);
+							if (taro.isServer) {
+								taro.network.send('camera', { cmd: 'zoom', zoom: zoom }, player._stats.clientId);
+							} else if (player._stats.clientId === taro.network.id()) {
+								taro.client.setZoom(zoom);
+							}
 						}
 						break;
 

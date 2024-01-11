@@ -568,6 +568,10 @@ var ClientNetworkEvents = {
 		taro.developerMode.updateProjectile(data);
 	},
 
+	_onUpdateShop: function (data) {
+		taro.developerMode.updateShop(data);
+	},
+
 	_onErrorLogs: function (logs) {
 		var element = document.getElementById("error-log-content");
 		for (actionName in logs) {

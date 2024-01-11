@@ -772,7 +772,7 @@ var VariableComponent = TaroEntity.extend({
 					case 'getEntityVelocityX':
 						if (entity && entity.body) {
 							var velocity = entity.body.getLinearVelocity();
-							returnValue = parseFloat(velocity.get_x() * taro.physics._scaleRatioToBox2dWeb).toFixed(2) || 0;
+							returnValue = parseFloat(velocity.get_x()).toFixed(2) || 0;
 						}
 
 						break;
@@ -780,7 +780,7 @@ var VariableComponent = TaroEntity.extend({
 					case 'getEntityVelocityY':
 						if (entity && entity.body) {
 							var velocity = entity.body.getLinearVelocity();
-							returnValue = parseFloat(velocity.get_y() * taro.physics._scaleRatioToBox2dWeb).toFixed(2) || 0;
+							returnValue = parseFloat(velocity.get_y()).toFixed(2) || 0;
 						}
 
 						break;
@@ -2190,7 +2190,7 @@ var VariableComponent = TaroEntity.extend({
 							var distance = self.getValue(text.distance, vars);
 							var width = self.getValue(text.width, vars);
 							var height = self.getValue(text.height, vars);
-	
+
 							if (
 								entity != undefined &&
 								self._entity.script.action.entityCategories.indexOf(entity._category) > -1 &&
@@ -2206,10 +2206,10 @@ var VariableComponent = TaroEntity.extend({
 									width: width,
 									height: height
 								};
-	
+
 								region.x -= region.width / 2;
 								region.y -= region.height / 2;
-	
+
 								if (region.x && !isNaN(region.x) && region.y && !isNaN(region.y) && region.width && !isNaN(region.width) && region.height && !isNaN(region.height)) {
 									returnValue = region
 								} else {
@@ -2217,7 +2217,7 @@ var VariableComponent = TaroEntity.extend({
 									returnValue = undefined;
 								}
 							}
-	
+
 							break;
 
 					case 'entitiesInRegion':
@@ -2272,7 +2272,7 @@ var VariableComponent = TaroEntity.extend({
 						returnValue = undefined;
 
 						break;
-					
+
 					case 'emptyObject':
 						returnValue = {};
 
@@ -2330,7 +2330,7 @@ var VariableComponent = TaroEntity.extend({
 			},
 
 			/* general - string */
-			
+
 			'objectToString': function (text, vars) {
 				var object = self.getValue(text.object, vars);
 				var str = typeof object === 'string' ? object : JSON.stringify(object) // remove opening & ending quotes
@@ -2340,7 +2340,7 @@ var VariableComponent = TaroEntity.extend({
 			'lastReceivedPostResponse': function (text, vars) {
 				return taro.game.lastReceivedPostResponse;
 			},
-			
+
 			'lastUpdatedVariableName': function (text, vars) {
 				return taro.game.lastUpdatedVariableName;
 			},
@@ -2649,9 +2649,9 @@ var VariableComponent = TaroEntity.extend({
 				}
 			},
 			/* variable */
-			
+
 			'getVariable': function (text, vars) {
-				var name = self.getValue(text.variableName, vars);				
+				var name = self.getValue(text.variableName, vars);
 				return self.getVariable(name);
 			},
 
@@ -2660,7 +2660,7 @@ var VariableComponent = TaroEntity.extend({
 					return vars.triggeredBy.variableName;
 				}
 			},
-		
+
 			/* attribute */
 
 			'getTriggeringAttribute': function (text, vars) {
@@ -2765,7 +2765,7 @@ var VariableComponent = TaroEntity.extend({
 				var object = self.getValue(text.object, vars);
 				var key = self.getValue(text.key, vars);
 
-				if (object && key != undefined) {
+				if (object && Object.hasOwn(object, key)) {
 					return object[key];
 				}
 			},
