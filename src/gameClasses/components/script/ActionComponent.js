@@ -3247,6 +3247,7 @@ var ActionComponent = TaroEntity.extend({
 						var entityId = action.itemType;
 
 						if (entityId && player && shopId && taro.game.data?.defaultData?.tier !== '1') {
+							player._stats.lastOpenedShop = action.shop;
 							taro.network.send('ui', {
 								command: 'shopPurchase',
 								shopId,
