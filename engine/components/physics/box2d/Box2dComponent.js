@@ -952,7 +952,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 	// Listen for when contact's begin
 	_beginContactCallback: function (contact) {
 		if (taro.physics.engine === 'BOX2DWASM') {
-			const nowContact = taro.physics.wrapPointer(contact, taro.physics.b2Contact);
+			const nowContact = taro.physics.recordLeak(taro.physics.wrapPointer(contact, taro.physics.b2Contact));
 			var entityA = taro.physics.metaData[taro.physics.getPointer(nowContact.GetFixtureA().GetBody())];
 			var entityB = taro.physics.metaData[taro.physics.getPointer(nowContact.GetFixtureB().GetBody())];
 			if (!entityA || !entityB)
@@ -975,7 +975,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 
 	_endContactCallback: function (contact) {
 		if (taro.physics.engine === 'BOX2DWASM') {
-			const nowContact = taro.physics.wrapPointer(contact, taro.physics.b2Contact);
+			const nowContact = taro.physics.recordLeak(taro.physics.wrapPointer(contact, taro.physics.b2Contact));
 			var entityA = taro.physics.metaData[taro.physics.getPointer(nowContact.GetFixtureA().GetBody())];
 			var entityB = taro.physics.metaData[taro.physics.getPointer(nowContact.GetFixtureB().GetBody())];
 
