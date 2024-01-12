@@ -454,8 +454,8 @@ NetIo.Client = NetIo.EventingClass.extend({
 	_decode: function (data) {
 		var self = this;
 
-		// var jsonString = LZString.decompressFromUTF16(data.data);
-		var jsonString = LZUTF8.decompress(data.data, {inputEncoding: "StorageBinaryString"});
+		var jsonString = LZString.decompressFromUTF16(data.data);
+		// var jsonString = LZUTF8.decompress(data.data, {inputEncoding: "StorageBinaryString"});
 		// var jsonString = data.data;
 
 		// NOTE: make sure than COMPRESSION_THRESHOLD is same on both client and server
