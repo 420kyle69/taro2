@@ -214,9 +214,10 @@ var box2dwasmWrapper = {
         return self.recordLeak(body.GetPosition());
     },
     queryAABB: function (self, aabb, callback) {
-        var _a, _b;
+        var _a, _b, _c, _d;
         self.world().QueryAABB(callback, aabb);
         (_b = (_a = taro.physics).destroyB2dObj) === null || _b === void 0 ? void 0 : _b.call(_a, callback);
+        (_d = (_c = taro.physics).destroyB2dObj) === null || _d === void 0 ? void 0 : _d.call(_c, aabb);
     },
     createBody: function (self, entity, body, isLossTolerant) {
         var _a, _b, _c, _d, _e, _f;

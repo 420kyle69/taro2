@@ -184,6 +184,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 	queryAABB: function (self, aabb, callback) {
 		self.world().QueryAABB(callback, aabb);
 		taro.physics.destroyB2dObj?.(callback);
+		taro.physics.destroyB2dObj?.(aabb);
 	},
 
 	createBody: function (self, entity, body, isLossTolerant) {

@@ -189,6 +189,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 			destroyBody = this._world.destroyBody;
 			var isBodyDestroyed = destroyBody.apply(this._world, [body]);
 			if (this.engine === 'BOX2DWASM') {
+				delete this.metaData[this.getPointer(body)];
 				this.freeFromCache(body);
 			}
 			// clear references to prevent memory leak
