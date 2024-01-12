@@ -1409,6 +1409,7 @@ var TaroEngine = TaroEntity.extend({
 				self.fpsStatsElement.innerHTML = self._renderFPS;
 			}
 			window.updateNextStatsEverySecond && window.updateNextStatsEverySecond({ fps: self._renderFPS });
+
 		}
 
 		// Zero out counters
@@ -1631,7 +1632,7 @@ var TaroEngine = TaroEntity.extend({
 			}
 
 			// Get the current time in milliseconds
-			self._tickStart = taro._currentTime;			
+			self._tickStart = this._currentTime;
 
 			if (!self.lastTick) {
 				// This is the first time we've run so set some

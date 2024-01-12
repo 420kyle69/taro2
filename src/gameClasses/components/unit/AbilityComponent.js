@@ -9,7 +9,6 @@ var AbilityComponent = TaroEntity.extend({
 		this.activeAbilities = {};
 		this.abilityDurations = {};
 		this.abilityCooldowns = {};
-		this._abilityQueue = [];
 	},
 
 	moveUp: function () {
@@ -62,7 +61,6 @@ var AbilityComponent = TaroEntity.extend({
 		}
 	},
 
-	// this is used by AI. It should be deprecated though
 	startUsingItem: function () {
 		var item = this._entity.getCurrentItem();
 		if (item) {
@@ -77,15 +75,53 @@ var AbilityComponent = TaroEntity.extend({
 		}
 	},
 
-	queueCast: function (abilityId, key) {
-		if (taro.isServer && taro.clusterClient) {
-			var socketId = this._entity.getOwner()?._stats.clientId;
-			const isCommandValid = taro.clusterClient.validateCommand(socketId, null, 'queueCast');
-			if (!isCommandValid) {
-				return;
+	pickupItem: function () {
+		var self = this;
+		if (taro.isServer) {
+			var region = {
+				x: self._entity._translate.x - self._entity._bounds2d.x / 2,
+				y: self._entity._translate.y - self._entity._bounds2d.y / 2,
+				width: self._entity._bounds2d.x,
+				height: self._entity._bounds2d.y
+			};
+
+			var entities = taro.physics.getBodiesInRegion(region).filter(({ _category }) => _category === 'item');
+			// pickup ownerLess items
+			var unit = self._entity;
+			unit.reasonForFailingToPickUpItem = undefined;
+
+			if (unit && unit._category == 'unit') {
+				for (var i = 0; i < entities.length; i++) {
+					var item = entities[i];
+					if (item && item._category === 'item' && !item.getOwnerUnit()) {
+						// only pick 1 item up at a time
+						if (unit.pickUpItem(item)) {
+							return;
+						}
+					}
+				}
+				if (unit.reasonForFailingToPickUpItem) {
+					unit.streamUpdateData([{ setFadingText: unit.reasonForFailingToPickUpItem, color: 'red' }]);
+				}
 			}
 		}
-		this._abilityQueue.push({ abilityId: abilityId, key: key });		
+	},
+
+	dropItem: function () {
+		var self = this;
+
+		if (self._entity && !isNaN(self._entity._stats.currentItemIndex)) {
+			var item = self._entity.dropItem(self._entity._stats.currentItemIndex);
+			if (item) {
+				// slightly push item in front of the unit
+				var rotate = self._entity.angleToTarget;
+				var vector = {
+					x: (20 * Math.sin(rotate)),
+					y: -(20 * Math.cos(rotate))
+				};
+				item.applyForce(vector.x, vector.y);
+			}
+		}
 	},
 
 	cast: function (handle, key) {
@@ -234,7 +270,6 @@ var AbilityComponent = TaroEntity.extend({
 
 		taro.game.lastCastingUnitId = this._entity.id();
 
-		// run script associated with this ability
 		this._entity.script.runScript(
 			ability.eventScripts.startCasting,
 			{ triggeredBy: { unitId: this._entity.id()} }
@@ -260,7 +295,6 @@ var AbilityComponent = TaroEntity.extend({
 	},
 
 	stopCasting: function (abilityId, key) {
-		
 		if (!this.activeAbilities[abilityId]) {
 			return;
 		}
@@ -274,7 +308,6 @@ var AbilityComponent = TaroEntity.extend({
 
 		this.activeAbilities[abilityId] = false;
 
-		// run script associated with this ability
 		this._entity.script.runScript(
 			ability.eventScripts.stopCasting,
 			{ triggeredBy: { unitId: this._entity.id()} }
@@ -294,29 +327,8 @@ var AbilityComponent = TaroEntity.extend({
 			taro.client.emit('stop-casting', key);
 		}
 	},
-
-	// This function makes an array unique by removing duplicate elements
-	makeArrayUnique: function (array) {
-		var uniqueArray = [];
-		array.forEach(function(item) {
-			// Perform deep comparison to check if item already exists in uniqueArray
-			if (!uniqueArray.some(existingItem => JSON.stringify(existingItem) === JSON.stringify(item))) {
-				uniqueArray.push(item);
-			}
-		});
-		return uniqueArray;
-	},
-
 	_behaviour: function (ctx) {
-		var self = this;
-		
-		self._abilityQueue = self.makeArrayUnique(self._abilityQueue); // remove duplicates ability casts
-		
-		while (self._abilityQueue.length > 0) {	
-			const ability = self._abilityQueue.shift();
-			self.cast(ability.abilityId, ability.key);
-		}
-		
+
 		if (Object.keys(this.abilityDurations).length > 0) {
 			for (let id in this.abilityDurations) {
 

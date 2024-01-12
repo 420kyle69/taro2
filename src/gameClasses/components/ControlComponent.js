@@ -269,7 +269,7 @@ var ControlComponent = TaroEntity.extend({
 				unit.ability.cast(keyDown, key);
 			}, taro.client.inputDelay);
 		} else {
-			unit.ability.queueCast(keyDown, key);
+			unit.ability.cast(keyDown, key);
 		}
 
 		if (taro.isClient && this._entity._stats.clientId === taro.network.id() && keyDown.abilityId) {
@@ -284,7 +284,7 @@ var ControlComponent = TaroEntity.extend({
 					unit.ability.cast(unitAbility.keyUp, key);
 				}, taro.client.inputDelay);
 			} else {
-				unit.ability.queueCast(unitAbility.keyUp, key);
+				unit.ability.cast(unitAbility.keyUp, key);
 			}
 		}
 
@@ -325,12 +325,11 @@ var ControlComponent = TaroEntity.extend({
 
 		if (taro.isClient) {
 			if (unit) {
-				var now = Date.now();
 				// check if sending player input is due (every 100ms)
-				if (now - self.lastInputSent > 100) {
+				if (taro._currentTime - self.lastInputSent > 100) {
 					self.sendMobileInput = true;
-					self.sendMouseMovement = true;
-					self.lastInputSent = now;
+					self.sendPlayerInput = true;
+					self.lastInputSent = taro._currentTime;
 				}
 
 				for (device in self.input) {
@@ -363,7 +362,6 @@ var ControlComponent = TaroEntity.extend({
 					}
 				}
 
-				// if mouse has moved
 				if (self.newMousePosition && (self.newMousePosition[0] != self.lastMousePosition[0] || self.newMousePosition[1] != self.lastMousePosition[1])) {
 					// if we are using mobile controls don't send mouse moves to server here as we will do so from a look touch stick
 					if (!taro.isMobile) {
@@ -378,7 +376,7 @@ var ControlComponent = TaroEntity.extend({
 							}
 							// angle = angle % Math.PI;
 							angle = parseFloat(angle.toPrecision(5));
-							if (self.sendMouseMovement)
+							if (self.sendPlayerInput)
 								taro.network.send('playerAbsoluteAngle', angle);
 
 							if (taro.client.myPlayer) {
@@ -391,14 +389,25 @@ var ControlComponent = TaroEntity.extend({
 							taro.client.myPlayer.control.input.mouse.y = self.newMousePosition[1];
 						}
 					}
-					if (self.sendMouseMovement) {
+					if (self.sendPlayerInput) {
 						//console.log('SEND MOUSE POS', self.newMousePosition[0], self.newMousePosition[1]);
 						taro.network.send('playerMouseMoved', self.newMousePosition);
 						self.lastMousePosition = self.newMousePosition;
 					}
 				}
 
-				self.sendMouseMovement = false;
+				// send unit position to server (client-authoritative movement)
+				// if (taro.physics && taro.game.cspEnabled && !unit._stats.aiEnabled && !unit.isTeleporting) {
+				// 	var x = unit._translate.x.toFixed(0);
+				// 	var y = unit._translate.y.toFixed(0);
+				// 	if (self.sendPlayerInput && (self.lastPositionSent == undefined || self.lastPositionSent[0] != x || self.lastPositionSent[1] != y)) {
+				// 		var pos = [x, y];
+				// 		taro.network.send('playerUnitMoved', pos);
+				// 		self.lastPositionSent = pos;
+				// 	}
+				// }
+
+				self.sendPlayerInput = false;
 			}
 		}
 

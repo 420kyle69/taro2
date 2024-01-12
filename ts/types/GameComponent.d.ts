@@ -111,9 +111,7 @@ declare class GameComponent extends TaroEntity {
 		projectileTypes: Record<string, EntityData>;
 		itemTypes: Record<string, EntityData>;
 		particleTypes: Record<string, ParticleData>;
-		abilities: Record<string, UnitAbility>;
-		// TODO: add type of value for shop Record.
-		shops: Record<string, any>;
+		abilities: Record<string, UnitAbility>
 		settings: {
 			addStrokeToNameAndAttributes: boolean;
 			camera: {
@@ -121,10 +119,6 @@ declare class GameComponent extends TaroEntity {
 				trackingDelay: number;
 				zoom : {
 					default:number;
-				}
-				deadzone: {
-					width: number;
-					height: number;
 				}
 			}
 		}

@@ -125,12 +125,6 @@ if (process.env.ENV == 'production') {
 			global.lastRollbarUuid = payload.uuid;
 		}
 	});
-	
-	global.rollbar.configure({
-		payload: {
-			containerName: process.env.CONTAINER_NAME,
-		}
-	});
 }
 
 // initialize mixpanel.
@@ -273,12 +267,9 @@ var Server = TaroClass.extend({
 		if (typeof HttpComponent != 'undefined') {
 			taro.addComponent(HttpComponent);
 		}
+		console.log('cluster.isMaster', cluster.isMaster);
 		if (cluster.isMaster) {
 			if (process.env.ENV === 'standalone') {
-				if (process.env.LOAD_CC === 'true') {
-					taro.addComponent(ClusterClientComponent); // backend component will retrieve "start" command from BE
-				}
-				
 				self.ip = '127.0.0.1';
 				self.startWebServer();
 				self.start();
@@ -292,7 +283,6 @@ var Server = TaroClass.extend({
 			}
 		} else {
 			if (typeof ClusterClientComponent != 'undefined') {
-				
 				taro.addComponent(ClusterClientComponent); // backend component will retrieve "start" command from BE
 			}
 
@@ -513,6 +503,7 @@ var Server = TaroClass.extend({
 		self.url = `http://${self.ip}:${port}`;
 
 		this.duplicateIpCount = {};
+		this.bannedIps = [];
 
 		self.maxPlayers = self.maxPlayers || 32;
 		this.maxPlayersAllowed = self.maxPlayers || 32;
@@ -560,7 +551,6 @@ var Server = TaroClass.extend({
 			}
 
 			promise.then((game) => {
-				taro.addComponent(GameTextComponent);
 				taro.addComponent(GameComponent);
 				taro.addComponent(ProfilerComponent);
 				self.gameStartedAt = new Date();
@@ -584,6 +574,8 @@ var Server = TaroClass.extend({
 					physicsEngine: taro.game.data.defaultData.physicsEngine,
 					gameSlug: taro.game.data.defaultData.gameSlug
 				};
+
+				taro.game.cspEnabled = !!taro.game.data.defaultData.clientSidePredictionEnabled;
 
 				global.standaloneGame = game.data;
 				var baseTilesize = 64;
@@ -653,6 +645,7 @@ var Server = TaroClass.extend({
 								taro.addComponent(TaroChatComponent);
 								taro.addComponent(ItemComponent);
 								taro.addComponent(TimerComponent);
+								taro.addComponent(GameTextComponent);
 
 								taro.addComponent(AdComponent);
 								taro.addComponent(SoundComponent);
@@ -725,7 +718,7 @@ var Server = TaroClass.extend({
 		var self = this;
 
 		console.log('server.js: defineNetworkEvents');
-		taro.network.define('joinGame', self._onJoinGame);
+		taro.network.define('joinGame', self._onJoinGameWrapper);
 		taro.network.define('gameOver', self._onGameOver);
 		taro.network.define('ping', self._onPing);
 
@@ -814,7 +807,6 @@ var Server = TaroClass.extend({
 		taro.network.define('updateUnit', self._onUpdateUnit);
 		taro.network.define('updateItem', this._onUpdateItem);
 		taro.network.define('updateProjectile', this._onUpdateProjectile);
-		taro.network.define('updateShop', this._onUpdateShop);
 
 		taro.network.define('recordSocketMsgs', this._onRecordSocketMsgs);
 		taro.network.define('getSocketMsgs', this._onGetSocketMsgs);

@@ -12,7 +12,7 @@ type PhysicsDistsEnum = keyof PhysicsDists;
 
 type PhysicsDistProps = {
 	init: (component: any) => void;
-	getmxfp: (body: any, self: any) => any;
+	getmxfp: (body: any) => any;
 	queryAABB: (self: any, aabb: any, callback: (...args: any) => any) => void;
 	createBody: (self: any, entity: any, body: any, isLossTolerant: boolean) => any;
 	createJoint: (self: any, entityA: any, entityB: any, anchorA: any, anchorB: any) => void;

@@ -39,7 +39,7 @@ var MapComponent = TaroEntity.extend({
 		var regions = {};
 		for (var i in taro.game.data.variables) {
 			var variable = taro.game.data.variables[i];
-			if (variable?.dataType == 'region') regions[i] = variable;
+			if (variable.dataType == 'region') regions[i] = variable;
 		}
 		taro.$$('region').forEach((region) => {
 			region.deleteRegion();
@@ -58,13 +58,13 @@ var MapComponent = TaroEntity.extend({
 	updateWallMapData: function() { // call this after in-game map tile editing
 		var self = this;
 
-		let wallLayer = self.data.layers?.find(layerObject => {
+		let wallLayer = self.data.layers.find(layerObject => {
 			return layerObject.name === 'walls';
 		});
 
-		self.wallMap = rfdc()(wallLayer?.data); // cache a copy of wall layer's data
+		self.wallMap = rfdc()(wallLayer.data); // cache a copy of wall layer's data
 
-		for (let i = 0; i < self.wallMap?.length; i++) { // convert all non zero number to 1 (the index does not matter as long as it is not 0)
+		for (let i = 0; i < self.wallMap.length; i++) { // convert all non zero number to 1 (the index does not matter as long as it is not 0)
 			if (self.wallMap[i] != 0) {
 				self.wallMap[i] = 1;
 			}

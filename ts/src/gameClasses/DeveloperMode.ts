@@ -664,7 +664,6 @@ class DeveloperMode {
 			if (unit._stats.type === data.typeId) {
 				unit.changeUnitType(data.typeId, {}, false);
 				unit.emit('update-texture', 'basic_texture_change');
-				if (data.shouldReset) unit.resetUnitType();
 			}
 		});
 		if (taro.isServer) {
@@ -735,7 +734,6 @@ class DeveloperMode {
 			if (item._stats.itemTypeId === data.typeId) {
 				item.changeItemType(data.typeId, {}, false);
 				item.emit('update-texture', 'basic_texture_change');
-				if (data.shouldReset) item.resetItemType();
 			}
 		});
 		if (taro.isServer) {
@@ -782,7 +780,6 @@ class DeveloperMode {
 			if (projectile._stats.type === data.typeId) {
 				projectile.changeProjectileType(data.typeId, {}, false);
 				projectile.emit('update-texture', 'basic_texture_change');
-				if (data.shouldReset) projectile.resetProjectileType();
 			}
 		});
 		if (taro.isServer) {
@@ -805,19 +802,6 @@ class DeveloperMode {
 			}
 		});
 	}
-
-	updateShop (data) {
-        if (data.typeId && data.newData) {
-            if (!taro.game.data.shops) {
-                taro.game.data.shops = {};
-            }
-            taro.game.data.shops[data.typeId] = data.newData;
-        }
-
-		if (taro.isServer) {
-			taro.network.send('updateShop', data);
-		}
-    }
 
 	editEntity(data: EditEntityData, clientId: string) {
 		if (taro.isClient) {
@@ -877,14 +861,6 @@ class DeveloperMode {
 
 						case 'delete':
 							//this.deleteProjectile(data);
-							break;
-					}
-				} else if (data.entityType === 'shop') {
-					switch (data.action) {
-						case 'update':
-							this.updateShop(data);
-							break;
-						default:
 							break;
 					}
 				}

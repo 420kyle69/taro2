@@ -34,14 +34,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var createMetaData = function (obj, body) {
-    var metaData = {};
-    // @author Moe'Thun, it's safe, trust me
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    metaData[body] = Object.setPrototypeOf(obj, body);
-    return metaData;
-};
 // FIXME: add more types to the physics part of taro2
 var box2dwasmWrapper = {
     init: function (component) {
@@ -56,7 +48,6 @@ var box2dwasmWrapper = {
                         component.box2D = box2D;
                         component.freeLeaked = freeLeaked;
                         component.recordLeak = recordLeak;
-                        component.tryRecordLeak = function (p) { return recordLeak(p); };
                         component.freeFromCache = box2D.LeakMitigator.freeFromCache;
                         component.wrapPointer = box2D.wrapPointer;
                         component.getPointer = box2D.getPointer;
@@ -110,7 +101,7 @@ var box2dwasmWrapper = {
                         component.b2Body.prototype.getNext = component.b2Body.prototype.GetNext;
                         component.b2Body.prototype.getAngle = component.b2Body.prototype.GetAngle;
                         component.b2Body.prototype.setPosition = function (position) {
-                            var angle = component.recordLeak(this.GetAngle());
+                            var angle = this.GetAngle();
                             var pos = new box2D.b2Vec2(position.x, position.y);
                             this.SetTransform(pos, angle);
                             component.destroyB2dObj(pos);
@@ -118,7 +109,7 @@ var box2dwasmWrapper = {
                         component.b2Body.prototype.getPosition = component.b2Body.prototype.GetPosition;
                         component.b2Body.prototype.setGravityScale = component.b2Body.prototype.SetGravityScale;
                         component.b2Body.prototype.setAngle = function (angle) {
-                            var pos = component.recordLeak(this.GetPosition());
+                            var pos = this.GetPosition();
                             this.SetTransform(pos, angle);
                         };
                         component.b2Body.prototype.setTransform = component.b2Body.prototype.SetTransform;
@@ -169,10 +160,8 @@ var box2dwasmWrapper = {
                              */
                         component.gravity = function (x, y) {
                             if (x !== undefined && y !== undefined) {
-                                if (this._gravity) {
-                                    this.destroyB2dObj(this._gravity);
-                                }
-                                this._gravity = new this.b2Vec2(x, y);
+                                var scale = taro.physics._scaleRatioToBox2dWeb;
+                                this._gravity = component.recordLeak(new this.b2Vec2(x / scale, y / scale));
                                 return this._entity;
                             }
                             return this._gravity;
@@ -210,14 +199,11 @@ var box2dwasmWrapper = {
         }
         self._world.SetContactListener(contactListener);
     },
-    getmxfp: function (body, self) {
-        return self.recordLeak(body.GetPosition());
+    getmxfp: function (body) {
+        return body.GetPosition();
     },
     queryAABB: function (self, aabb, callback) {
-        var _a, _b, _c, _d;
         self.world().QueryAABB(callback, aabb);
-        (_b = (_a = taro.physics).destroyB2dObj) === null || _b === void 0 ? void 0 : _b.call(_a, callback);
-        (_d = (_c = taro.physics).destroyB2dObj) === null || _d === void 0 ? void 0 : _d.call(_c, aabb);
     },
     createBody: function (self, entity, body, isLossTolerant) {
         var _a, _b, _c, _d, _e, _f;
@@ -231,7 +217,6 @@ var box2dwasmWrapper = {
         // if there's already a body, destroy it first
         if (entity.body) {
             self.destroyBody(entity);
-            delete self.metaData[box2D.getPointer(entity.body)];
         }
         var tempDef = self.recordLeak(new self.b2BodyDef());
         var param;
@@ -275,7 +260,7 @@ var box2dwasmWrapper = {
                             tempDef[funcName](body[param]);
                         }
                         else {
-                            // tempDef[param] = body[param];
+                            tempDef[param] = body[param];
                         }
                         break;
                 }
@@ -289,8 +274,6 @@ var box2dwasmWrapper = {
         self.destroyB2dObj(nowPoint);
         // Create the new body
         tempBod = self._world.CreateBody(tempDef);
-        var bodyId = box2D.getPointer(tempBod);
-        self.metaData[bodyId] = {};
         // Now apply any post-creation attributes we need to
         for (param in body) {
             if (body.hasOwnProperty(param)) {
@@ -312,7 +295,7 @@ var box2dwasmWrapper = {
                                 fixtureDef = body.fixtures[i];
                                 // Create the fixture
                                 tempFixture = self.createFixture(fixtureDef);
-                                // console.log(tempFixture.get_density());
+                                tempFixture.taroId = fixtureDef.taroId;
                                 // Check for a shape definition for the fixture
                                 if (fixtureDef.shape) {
                                     // Create based on the shape type
@@ -328,10 +311,12 @@ var box2dwasmWrapper = {
                                             if (fixtureDef.shape.data) {
                                                 finalX = (_a = fixtureDef.shape.data.x) !== null && _a !== void 0 ? _a : 0;
                                                 finalY = (_b = fixtureDef.shape.data.y) !== null && _b !== void 0 ? _b : 0;
-                                                var pos_1 = self.recordLeak(new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio));
-                                                tempShape.set_m_p(pos_1);
-                                                self.destroyB2dObj(pos_1);
+                                                tempShape.set_m_p(new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio));
                                             }
+                                            break;
+                                        case 'polygon':
+                                            tempShape = self.recordLeak(new self.b2PolygonShape());
+                                            tempShape.SetAsArray(fixtureDef.shape.data._poly, fixtureDef.shape.data.length());
                                             break;
                                         case 'rectangle':
                                             tempShape = self.recordLeak(new self.b2PolygonShape());
@@ -354,11 +339,10 @@ var box2dwasmWrapper = {
                                             break;
                                     }
                                     if (tempShape && fixtureDef.filter) {
-                                        tempFixture.set_shape(tempShape);
+                                        tempFixture.shape = tempShape;
                                         finalFixture = tempBod.CreateFixture(tempFixture);
                                         self.destroyB2dObj(tempShape);
-                                        self.destroyB2dObj(tempFixture);
-                                        self.metaData[bodyId].taroId = fixtureDef.taroId;
+                                        finalFixture.taroId = tempFixture.taroId;
                                     }
                                 }
                                 if (fixtureDef.filter && finalFixture) {
@@ -379,7 +363,7 @@ var box2dwasmWrapper = {
                                     finalFixture.SetFriction(fixtureDef.friction);
                                 }
                                 if (fixtureDef.restitution !== undefined && finalFixture) {
-                                    finalFixture.SetRestitutionThreshold(fixtureDef.restitution);
+                                    finalFixture.SetRestitution(fixtureDef.restitution);
                                 }
                                 if (fixtureDef.density !== undefined && finalFixture) {
                                     finalFixture.SetDensity(fixtureDef.density);
@@ -397,7 +381,7 @@ var box2dwasmWrapper = {
             }
         }
         // Store the entity that is linked to self body
-        self.metaData[bodyId]._entity = entity;
+        tempBod._entity = entity;
         tempBod.SetEnabled(true);
         // Add the body to the world with the passed fixture
         entity.body = tempBod;
@@ -420,21 +404,20 @@ var box2dwasmWrapper = {
         if (entityA && entityA.body && entityB && entityB.body &&
             entityA.id() != entityB.id() // im not creating joint to myself!
         ) {
-            var joint_def = void 0;
             if (aBody.jointType == 'revoluteJoint') {
-                var joint_def_1 = self.recordLeak(new self.b2RevoluteJointDef());
-                joint_def_1.Initialize(entityA.body, entityB.body, self.recordLeak(entityB.body.GetWorldCenter()));
+                var joint_def = self.recordLeak(new self.b2RevoluteJointDef());
+                joint_def.Initialize(entityA.body, entityB.body, entityB.body.GetWorldCenter());
                 // joint_def.enableLimit = true;
                 // joint_def.lowerAngle = aBody.itemAnchor.lowerAngle * 0.0174533; // degree to rad
                 // joint_def.upperAngle = aBody.itemAnchor.upperAngle * 0.0174533; // degree to rad
-                joint_def_1.get_localAnchorA().Set(anchorA.x / self._scaleRatio, anchorA.y / self._scaleRatio); // item anchor
-                joint_def_1.get_localAnchorB().Set(anchorB.x / self._scaleRatio, -anchorB.y / self._scaleRatio); // unit anchor
+                joint_def.GetLocalAnchorA().Set(anchorA.x / self._scaleRatio, anchorA.y / self._scaleRatio); // item anchor
+                joint_def.GetLocalAnchorB().Set(anchorB.x / self._scaleRatio, -anchorB.y / self._scaleRatio); // unit anchor
             }
             else // weld joint
              {
-                var joint_def_2 = self.recordLeak(new self.b2WeldJointDef());
+                var joint_def = self.recordLeak(new self.b2WeldJointDef());
                 var pos = self.recordLeak(entityA.body.GetWorldCenter());
-                joint_def_2.Initialize(entityA.body, entityB.body, pos);
+                joint_def.Initialize(entityA.body, entityB.body, pos);
                 self.destroyB2dObj(pos);
             }
             var joint = self._world.CreateJoint(joint_def); // joint between two pieces

@@ -83,7 +83,7 @@ var TweenComponent = TaroEntity.extend({
 		this.loopCount = tween.loopCount;
 		this.angle = angle;
 
-		this.startTime = Date.now();
+		this.startTime = taro._currentTime;
 		this.offset = { x: 0, y: 0, rotate: 0 };
 		this.lastFrame = this.keyFrames.shift();
 		this.nextFrame = this.keyFrames[0];
@@ -98,14 +98,13 @@ var TweenComponent = TaroEntity.extend({
 	// traverse through all queued tweens, and compute combined offset values (x, y, angle)
 	update: function () {
 		var angle = this.angle;
-		var now = Date.now();
 		if (angle == undefined) {
 			angle = this._entity._rotate.z;
 		}
 
 		if (this.keyFrames.length > 0) {
 			var nextFrameEndsAt = this.startTime + this.nextFrame[0];
-			if (now < nextFrameEndsAt) {
+			if (taro._currentTime < nextFrameEndsAt) {
 				var x = this.lastFrame[1][0];
 				var y = this.lastFrame[1][1];
 				var rotate = this.lastFrame[1][2];
@@ -121,9 +120,9 @@ var TweenComponent = TaroEntity.extend({
 					targetRotate = -this.nextFrame[1][2];
 				}
 
-				var interpolatedX = this._entity.interpolateValue(x, targetX, this.startTime, now, nextFrameEndsAt);
-				var interpolatedY = this._entity.interpolateValue(y, targetY, this.startTime, now, nextFrameEndsAt);
-				var interpolatedRotate = this.interpolateValue(rotate, targetRotate, this.startTime, now, nextFrameEndsAt);
+				var interpolatedX = this._entity.interpolateValue(x, targetX, this.startTime, taro._currentTime, nextFrameEndsAt);
+				var interpolatedY = this._entity.interpolateValue(y, targetY, this.startTime, taro._currentTime, nextFrameEndsAt);
+				var interpolatedRotate = this.interpolateValue(rotate, targetRotate, this.startTime, taro._currentTime, nextFrameEndsAt);
 
 				// for smooth transitioning from 3.14 to -3.14
 				if (Math.abs(targetRotate - rotate) > Math.PI) {
@@ -158,7 +157,7 @@ var TweenComponent = TaroEntity.extend({
 			} else {
 				this.lastFrame = this.keyFrames.shift();
 				this.nextFrame = this.keyFrames[0];
-				this.startTime = now;
+				this.startTime = taro._currentTime;
 			}
 		} else {
 			// repeat infinite tween

@@ -58,13 +58,11 @@ var GameComponent = TaroEntity.extend({
 			// physicsTickRate dictates streaming fps, and renderBuffer is the wait time before next keyframe is sent to client.
 			// taro.client.renderBuffer = 1500 / taro._physicsTickRate // 20 fps = 75ms, 60 fps = 25ms
 			console.log('renderBuffer', taro.client.renderBuffer);
-		} else if (taro.isServer) {
-			if (process.env.ENV !== 'standalone') {
-				taro.clusterClient && taro.clusterClient.gameStarted();
-			}
 		}
 
 		taro._gameLoopTickRate = Math.max(20, Math.min(60, taro.game?.data?.defaultData?.engineTickRate || 20));		
+
+		taro.clusterClient && taro.clusterClient.gameStarted();
 	},
 
 	// this applies to logged in players only
@@ -109,6 +107,19 @@ var GameComponent = TaroEntity.extend({
 		};
 
 		var player = new Player(playerData);
+
+		if (taro.isServer) {
+			var logInfo = {
+				name: playerData.name,
+				clientId: playerData.clientId
+			};
+
+			if (playerData.userId) {
+				logInfo.userId = playerData.userId;
+			}
+
+			// console.log(playerData.clientId + ': creating player for ', logInfo)
+		}
 
 		if (persistedData) {
 			player.persistedData = persistedData;
@@ -177,7 +188,7 @@ var GameComponent = TaroEntity.extend({
 	},
 
 	// get client with ip
-	getPlayerByIp: function (ip, currentUserId, all = false, guestPlayersOnly = false) {
+	getPlayerByIp: function (ip, currentUserId, all = false) {
 		var clientIds = [];
 		for (let clientId in taro.server.clients) {
 			const clientObj = taro.server.clients[clientId];
@@ -198,7 +209,7 @@ var GameComponent = TaroEntity.extend({
 				return (
 					player._stats &&
           clientIds.includes(player._stats.clientId) &&
-          ((all && (!guestPlayersOnly || !player._stats.userId)) || (currentUserId && player._stats.userId != currentUserId))
+          (all || (currentUserId && player._stats.userId != currentUserId))
 				);
 			});
 		}
@@ -260,7 +271,7 @@ var GameComponent = TaroEntity.extend({
 		if (taro.isServer && (taro.server.developerClientIds.length || process.env.ENV === 'standalone' || process.env.ENV == 'standalone-remote')) {
 			// only show 'object' string if env variable is object
 			if (typeof data.params.newValue == 'object') {
-				if (data.params.newValue?._stats) {
+				if (data.params.newValue._stats) {
 					taro.game.devLogs[data.params.variableName] = `object (${data.params.newValue._category}): ${data.params.newValue._stats.name}`;
 				} else {
 					taro.game.devLogs[data.params.variableName] = 'object';

@@ -451,7 +451,7 @@ NetIo.Socket = NetIo.EventingClass.extend({
 		this._socket.on('message', function (message) {
 			self.emit('message', [self._decode(message)]);
 		});
-		
+
 		this._socket.on('close', function (code, reason) {
 			// first step in the propagation of the disconnect event.
 			// store socket's disconnect reason, if not set already
@@ -528,22 +528,14 @@ NetIo.Socket = NetIo.EventingClass.extend({
 	},
 
 	/**
-	 * Closes the socket.
-	 * @param reason
-	 * @param code
-	 * @param terminateInstantly
-	 */
-	close: function (reason, code, terminateInstantly = false) {
-		
+     * Closes the socket.
+     * @param reason
+     */
+	close: function (reason, code) {
 		this.send({
 			_netioCmd: 'close',
 			data: reason
 		});
-		
-		if (terminateInstantly) {
-			this._socket.terminate();
-		}
-		
 		// to trace unexpected close events.
 		// console.trace();
 		console.log('socket.close (code:', code, '):', reason);
@@ -583,8 +575,8 @@ NetIo.Server = NetIo.EventingClass.extend({
 		const { compressToUTF16 } = require('lz-string');
 		const LZUTF8 = require('lzutf8');
 
-		this._compress = compressToUTF16;
-		// this._compress = LZUTF8.compress;
+		// this._compress = compressToUTF16;
+		this._compress = LZUTF8.compress;
 		this.COMPRESSION_THRESHOLD = 10000;
 
 		this._sockets = [];
@@ -1171,7 +1163,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 				return null;
 			}
 		} catch (e) {
-			console.log('Warning: client sending malicious JSON data ', e.message, data);
+			console.log('Warning: client sending malicious JSON data ', e, data);
 		}
 	}
 });
