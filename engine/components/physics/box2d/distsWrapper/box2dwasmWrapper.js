@@ -34,6 +34,14 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var createMetaData = function (obj, body) {
+    var metaData = {};
+    // @author Moe'Thun, it's safe, trust me
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    metaData[body] = Object.setPrototypeOf(obj, body);
+    return metaData;
+};
 // FIXME: add more types to the physics part of taro2
 var box2dwasmWrapper = {
     init: function (component) {
@@ -48,6 +56,7 @@ var box2dwasmWrapper = {
                         component.box2D = box2D;
                         component.freeLeaked = freeLeaked;
                         component.recordLeak = recordLeak;
+                        component.tryRecordLeak = function (p) { return recordLeak(p); };
                         component.freeFromCache = box2D.LeakMitigator.freeFromCache;
                         component.wrapPointer = box2D.wrapPointer;
                         component.getPointer = box2D.getPointer;
@@ -205,7 +214,10 @@ var box2dwasmWrapper = {
         return self.recordLeak(body.GetPosition());
     },
     queryAABB: function (self, aabb, callback) {
+        var _a, _b, _c, _d;
         self.world().QueryAABB(callback, aabb);
+        (_b = (_a = taro.physics).destroyB2dObj) === null || _b === void 0 ? void 0 : _b.call(_a, callback);
+        (_d = (_c = taro.physics).destroyB2dObj) === null || _d === void 0 ? void 0 : _d.call(_c, aabb);
     },
     createBody: function (self, entity, body, isLossTolerant) {
         var _a, _b, _c, _d, _e, _f;
@@ -219,6 +231,7 @@ var box2dwasmWrapper = {
         // if there's already a body, destroy it first
         if (entity.body) {
             self.destroyBody(entity);
+            delete self.metaData[box2D.getPointer(entity.body)];
         }
         var tempDef = self.recordLeak(new self.b2BodyDef());
         var param;
@@ -262,7 +275,7 @@ var box2dwasmWrapper = {
                             tempDef[funcName](body[param]);
                         }
                         else {
-                            tempDef[param] = body[param];
+                            // tempDef[param] = body[param];
                         }
                         break;
                 }
@@ -276,6 +289,8 @@ var box2dwasmWrapper = {
         self.destroyB2dObj(nowPoint);
         // Create the new body
         tempBod = self._world.CreateBody(tempDef);
+        var bodyId = box2D.getPointer(tempBod);
+        self.metaData[bodyId] = {};
         // Now apply any post-creation attributes we need to
         for (param in body) {
             if (body.hasOwnProperty(param)) {
@@ -298,7 +313,6 @@ var box2dwasmWrapper = {
                                 // Create the fixture
                                 tempFixture = self.createFixture(fixtureDef);
                                 // console.log(tempFixture.get_density());
-                                tempFixture.taroId = fixtureDef.taroId;
                                 // Check for a shape definition for the fixture
                                 if (fixtureDef.shape) {
                                     // Create based on the shape type
@@ -343,7 +357,8 @@ var box2dwasmWrapper = {
                                         tempFixture.set_shape(tempShape);
                                         finalFixture = tempBod.CreateFixture(tempFixture);
                                         self.destroyB2dObj(tempShape);
-                                        finalFixture.taroId = tempFixture.taroId;
+                                        self.destroyB2dObj(tempFixture);
+                                        self.metaData[bodyId].taroId = fixtureDef.taroId;
                                     }
                                 }
                                 if (fixtureDef.filter && finalFixture) {
@@ -382,7 +397,7 @@ var box2dwasmWrapper = {
             }
         }
         // Store the entity that is linked to self body
-        tempBod._entity = entity;
+        self.metaData[bodyId]._entity = entity;
         tempBod.SetEnabled(true);
         // Add the body to the world with the passed fixture
         entity.body = tempBod;
