@@ -482,7 +482,7 @@ var TaroNetIoServer = {
 	_onClientConnect: function (socket) {
 		var self = this;
 		
-		if (taro.clusterClient) {
+		if (taro.clusterClient && typeof taro.clusterClient.logMessage === 'function') {
 			taro.clusterClient.logMessage(socket._remoteAddress, 'connection');
 		}
 		

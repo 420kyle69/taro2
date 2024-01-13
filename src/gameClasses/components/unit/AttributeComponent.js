@@ -300,7 +300,7 @@ var AttributeComponent = TaroEntity.extend({
 							}
 						}
 						// check if user breaks his highscore then assign it to new highscore
-						if ((attributeTypeId == taro.game.data.settings.persistentScoreAttributeId) && self._entity._stats.highscore < newValue) {
+						if ((attributeTypeId == taro.game.data.settings?.persistentScoreAttributeId) && self._entity._stats.highscore < newValue) {
 							if (!self._entity._stats.newHighscore) {
 								taro.gameText.alertHighscore(self._entity._stats.clientId);
 							}
