@@ -91,8 +91,8 @@ var Player = TaroEntity.extend({
 	// move to UI
 	joinGame: function () {
 		var self = this;
-
 		if (self._stats.playerJoined != true) {
+
 			// notify GS manager that a user has joined, do not notify if player joins again after pausing the game
 			if (self._stats.userId) {
 				taro.clusterClient.userJoined(self._stats.userId);
@@ -318,7 +318,7 @@ var Player = TaroEntity.extend({
 				if (unitType && unitType.abilities) {
 					var ability = unitType.abilities[command];
 					if (ability) {
-						unit.ability.cast(ability);
+						unit.ability.queueCast(ability);
 					}
 				}
 			}

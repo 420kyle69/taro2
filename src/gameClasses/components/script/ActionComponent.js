@@ -45,21 +45,17 @@ var ActionComponent = TaroEntity.extend({
 
 				// prevent recursive/infinite action calls consuming CPU
 				if (engineTickDelta > 1000 && !taro.engineLagReported) {
-					var rollbarData = {
+
+					taro.clusterClient.logEngineFreeze({
 						query: 'engineFreeze',
 						engineTickDelta: engineTickDelta,
 						masterServer: global.myIp,
 						gameInfo: taro.gameInfo,
-						clientCommands: taro.network.commandCount,
-						actionProfiler: taro.actionProfiler,
-						lastAction: action.type,
-						triggerProfiler: taro.triggerProfiler
-					};
-
-					global.rollbar.log('engineStep is taking longer than 1000ms', rollbarData);
-
-					var errorMsg = taro.script.errorLog(`engineTick is taking longer than 1000ms (took ${engineTickDelta} ms)`, path);
-					console.log(errorMsg, rollbarData);
+						// lastAction: action.type,
+						// actionProfiler: taro.actionProfiler,
+						// triggerProfiler: taro.triggerProfiler
+					})
+					
 					taro.engineLagReported = true;
 					// taro.server.unpublish(errorMsg); // not publishing yet cuz TwoHouses will get unpub. loggin instead.
 				}
@@ -852,7 +848,11 @@ var ActionComponent = TaroEntity.extend({
 						var player = self._script.variable.getValue(action.player, vars);
 						var zoom = self._script.variable.getValue(action.zoom, vars);
 						if (player && player._category == 'player' && zoom != undefined && player._stats.clientId) {
-							taro.network.send('camera', { cmd: 'zoom', zoom: zoom }, player._stats.clientId);
+							if (taro.isServer) {
+								taro.network.send('camera', { cmd: 'zoom', zoom: zoom }, player._stats.clientId);
+							} else if (player._stats.clientId === taro.network.id()) {
+								taro.client.setZoom(zoom);
+							}
 						}
 						break;
 
@@ -1949,6 +1949,7 @@ var ActionComponent = TaroEntity.extend({
 							player.changeCameraPanSpeed(panSpeed);
 						}
 						break;
+
 					case 'positionCamera':
 						var position = self._script.variable.getValue(action.position, vars);
 						var player = self._script.variable.getValue(action.player, vars);
@@ -1960,6 +1961,15 @@ var ActionComponent = TaroEntity.extend({
 								taro.client.emit('stop-follow');
 								taro.client.emit('position-camera', [position.x, position.y]);
 							}
+						}
+						break;
+					
+					case 'setCameraDeadzone':
+						var width = self._script.variable.getValue(action.width, vars);
+						var height = self._script.variable.getValue(action.height, vars);
+
+						if (taro.isClient && width && height) {
+							taro.client.emit('deadzone-camera', [width, height]);
 						}
 						break;
 
@@ -3231,6 +3241,22 @@ var ActionComponent = TaroEntity.extend({
 								elementId: elementId,
 								action: 'removeClass',
 								className: className || ''
+							}, player._stats.clientId);
+						}
+						break;
+					
+					case 'purchaseItemFromShop':
+						var player = self._script.variable.getValue(action.player, vars);
+						var shopId = action.shop;
+						var entityId = action.itemType;
+
+						if (entityId && player && shopId && taro.game.data?.defaultData?.tier !== '1') {
+							player._stats.lastOpenedShop = action.shop;
+							taro.network.send('ui', {
+								command: 'shopPurchase',
+								shopId,
+								entityId,
+								action: 'openEntityPurchaseModal'
 							}, player._stats.clientId);
 						}
 						break;

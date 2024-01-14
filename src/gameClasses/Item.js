@@ -272,7 +272,6 @@ var Item = TaroEntityPhysics.extend({
 	// when player presses Mouse1
 	use: function () {
 		var self = this;
-		var now = taro.now;
 		var owner = self.getOwnerUnit();
 		var ownerId = (owner) ? owner.id() : undefined;
 		var player = owner && owner.getOwner();
@@ -289,7 +288,7 @@ var Item = TaroEntityPhysics.extend({
 		if (self.hasQuantityRemaining()) {
 			taro.game.lastUsedItemId = self.id();
 
-			if ((self._stats.lastUsed + self._stats.fireRate < now) || self._stats.type == 'consumable') {
+			if ((self._stats.lastUsed + self._stats.fireRate < taro._currentTime) || self._stats.type == 'consumable') {
 				if (!self.canAffordItemCost()) {
 					taro.devLog('cannot afford item cost');
 					return;
@@ -302,7 +301,7 @@ var Item = TaroEntityPhysics.extend({
 					self.applyAnimationById(self._stats.effects.use.animation);
 				}
 
-				self._stats.lastUsed = taro.now;
+				self._stats.lastUsed = taro._currentTime;
 
 				let triggerParams = { unitId: ownerId, itemId: self.id() };
 

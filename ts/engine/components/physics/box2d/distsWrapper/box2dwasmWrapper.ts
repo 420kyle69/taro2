@@ -1,3 +1,12 @@
+const createMetaData = (obj: { [key: string]: any }, body: Box2D.b2Body) => {
+	const metaData: any = {};
+	// @author Moe'Thun, it's safe, trust me
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
+	metaData[body] = Object.setPrototypeOf(obj, body);
+	return metaData;
+};
+
 // FIXME: add more types to the physics part of taro2
 const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing memory leak bug
 	init: async function (component) {
@@ -6,6 +15,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 		component.box2D = box2D;
 		component.freeLeaked = freeLeaked;
 		component.recordLeak = recordLeak;
+		component.tryRecordLeak = (p: Box2D.b2Vec2) => recordLeak(p);
 		component.freeFromCache = box2D.LeakMitigator.freeFromCache;
 		component.wrapPointer = box2D.wrapPointer;
 		component.getPointer = box2D.getPointer;
@@ -60,7 +70,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 		component.b2Body.prototype.getNext = component.b2Body.prototype.GetNext;
 		component.b2Body.prototype.getAngle = component.b2Body.prototype.GetAngle;
 		component.b2Body.prototype.setPosition = function (position) {
-			let angle = this.GetAngle();
+			let angle = component.recordLeak(this.GetAngle());
 			let pos = new box2D.b2Vec2(position.x, position.y);
 			this.SetTransform(pos, angle);
 			component.destroyB2dObj(pos);
@@ -68,7 +78,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 		component.b2Body.prototype.getPosition = component.b2Body.prototype.GetPosition;
 		component.b2Body.prototype.setGravityScale = component.b2Body.prototype.SetGravityScale;
 		component.b2Body.prototype.setAngle = function (angle) {
-			let pos = this.GetPosition();
+			let pos = component.recordLeak(this.GetPosition());
 			this.SetTransform(pos, angle);
 		};
 		component.b2Body.prototype.setTransform = component.b2Body.prototype.SetTransform;
@@ -124,8 +134,10 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 			 */
 		component.gravity = function (x, y) {
 			if (x !== undefined && y !== undefined) {
-				const scale = taro.physics._scaleRatioToBox2dWeb;
-				this._gravity = component.recordLeak(new this.b2Vec2(x / scale, y / scale));
+				if (this._gravity) {
+					this.destroyB2dObj(this._gravity);
+				}
+				this._gravity = new this.b2Vec2(x, y);
 				return this._entity;
 			}
 
@@ -165,12 +177,14 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 		self._world.SetContactListener(contactListener);
 	},
 
-	getmxfp: function (body) {
-		return body.GetPosition();
+	getmxfp: function (body: Box2D.b2Body, self: any) {
+		return self.recordLeak(body.GetPosition());
 	},
 
 	queryAABB: function (self, aabb, callback) {
 		self.world().QueryAABB(callback, aabb);
+		taro.physics.destroyB2dObj?.(callback);
+		taro.physics.destroyB2dObj?.(aabb);
 	},
 
 	createBody: function (self, entity, body, isLossTolerant) {
@@ -185,14 +199,15 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 		// if there's already a body, destroy it first
 		if (entity.body) {
 			self.destroyBody(entity);
+			delete self.metaData[box2D.getPointer(entity.body)];
 		}
-		var tempDef = self.recordLeak(new self.b2BodyDef());
+		var tempDef: Box2D.b2BodyDef = self.recordLeak(new self.b2BodyDef());
 		var param;
-		let tempBod: Box2D.b2Body & { [key: string]: any };
+		let tempBod: Box2D.b2Body;
 		var fixtureDef;
-		var tempFixture;
-		var finalFixture;
-		var tempShape;
+		var tempFixture: Box2D.b2FixtureDef;
+		var finalFixture: Box2D.b2Fixture;
+		var tempShape: Box2D.b2Shape;
 		var tempFilterData;
 		var i;
 		var finalX; var finalY;
@@ -211,7 +226,6 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 				tempDef.set_type(box2D.b2_kinematicBody);
 				break;
 		}
-
 		// Add the parameters of the body to the new body instance
 		for (param in body) {
 			if (body.hasOwnProperty(param)) {
@@ -229,7 +243,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 						if (typeof tempDef[funcName] === 'function') {
 							tempDef[funcName](body[param]);
 						} else {
-							tempDef[param] = body[param];
+							// tempDef[param] = body[param];
 						}
 						break;
 				}
@@ -244,7 +258,8 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 		self.destroyB2dObj(nowPoint);
 		// Create the new body
 		tempBod = self._world.CreateBody(tempDef);
-
+		let bodyId = box2D.getPointer(tempBod);
+		self.metaData[bodyId] = {};
 		// Now apply any post-creation attributes we need to
 		for (param in body) {
 			if (body.hasOwnProperty(param)) {
@@ -268,7 +283,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 								fixtureDef = body.fixtures[i];
 								// Create the fixture
 								tempFixture = self.createFixture(fixtureDef);
-								tempFixture.taroId = fixtureDef.taroId;
+								// console.log(tempFixture.get_density());
 								// Check for a shape definition for the fixture
 								if (fixtureDef.shape) {
 									// Create based on the shape type
@@ -284,13 +299,10 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 											if (fixtureDef.shape.data) {
 												finalX = fixtureDef.shape.data.x ?? 0;
 												finalY = fixtureDef.shape.data.y ?? 0;
-												tempShape.set_m_p(new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio));
+												const pos = self.recordLeak(new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio));
+												(tempShape as Box2D.b2CircleShape).set_m_p(pos);
+												self.destroyB2dObj(pos);
 											}
-											break;
-
-										case 'polygon':
-											tempShape = self.recordLeak(new self.b2PolygonShape());
-											tempShape.SetAsArray(fixtureDef.shape.data._poly, fixtureDef.shape.data.length());
 											break;
 
 										case 'rectangle':
@@ -309,7 +321,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 											}
 											const pos = self.recordLeak(new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio));
 											// Set the polygon as a box
-											tempShape.SetAsBox(
+											(tempShape as Box2D.b2PolygonShape).SetAsBox(
 												(finalWidth / self._scaleRatio),
 												(finalHeight / self._scaleRatio),
 												pos,
@@ -320,10 +332,11 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 											break;
 									}
 									if (tempShape && fixtureDef.filter) {
-										tempFixture.shape = tempShape;
+										tempFixture.set_shape(tempShape);
 										finalFixture = tempBod.CreateFixture(tempFixture);
 										self.destroyB2dObj(tempShape);
-										finalFixture.taroId = tempFixture.taroId;
+										self.destroyB2dObj(tempFixture);
+										self.metaData[bodyId].taroId = fixtureDef.taroId;
 									}
 								}
 
@@ -348,7 +361,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 									finalFixture.SetFriction(fixtureDef.friction);
 								}
 								if (fixtureDef.restitution !== undefined && finalFixture) {
-									finalFixture.SetRestitution(fixtureDef.restitution);
+									finalFixture.SetRestitutionThreshold(fixtureDef.restitution);
 								}
 								if (fixtureDef.density !== undefined && finalFixture) {
 									finalFixture.SetDensity(fixtureDef.density);
@@ -366,7 +379,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 		}
 
 		// Store the entity that is linked to self body
-		tempBod._entity = entity;
+		self.metaData[bodyId]._entity = entity;
 		tempBod.SetEnabled(true);
 		// Add the body to the world with the passed fixture
 		entity.body = tempBod;
@@ -393,29 +406,31 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 			entityA && entityA.body && entityB && entityB.body &&
 			entityA.id() != entityB.id() // im not creating joint to myself!
 		) {
+			let joint_def: Box2D.b2RevoluteJointDef | Box2D.b2WeldJointDef;
 			if (aBody.jointType == 'revoluteJoint') {
-				var joint_def = self.recordLeak(new self.b2RevoluteJointDef());
+				let joint_def: Box2D.b2RevoluteJointDef = self.recordLeak(new self.b2RevoluteJointDef());
 
 				joint_def.Initialize(
 					entityA.body,
 					entityB.body,
-					entityB.body.GetWorldCenter());
+					self.recordLeak(entityB.body.GetWorldCenter()));
 
 				// joint_def.enableLimit = true;
 				// joint_def.lowerAngle = aBody.itemAnchor.lowerAngle * 0.0174533; // degree to rad
 				// joint_def.upperAngle = aBody.itemAnchor.upperAngle * 0.0174533; // degree to rad
 
-				joint_def.GetLocalAnchorA().Set(anchorA.x / self._scaleRatio, anchorA.y / self._scaleRatio); // item anchor
-				joint_def.GetLocalAnchorB().Set(anchorB.x / self._scaleRatio, -anchorB.y / self._scaleRatio); // unit anchor
+				joint_def.get_localAnchorA().Set(anchorA.x / self._scaleRatio, anchorA.y / self._scaleRatio); // item anchor
+				joint_def.get_localAnchorB().Set(anchorB.x / self._scaleRatio, -anchorB.y / self._scaleRatio); // unit anchor
 			} else // weld joint
 			{
-				var joint_def = self.recordLeak(new self.b2WeldJointDef());
+				let joint_def: Box2D.b2WeldJointDef = self.recordLeak(new self.b2WeldJointDef());
 				const pos = self.recordLeak(entityA.body.GetWorldCenter());
 				joint_def.Initialize(
 					entityA.body,
 					entityB.body,
 					pos
 				);
+
 				self.destroyB2dObj(pos);
 			}
 

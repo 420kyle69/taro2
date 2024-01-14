@@ -36,21 +36,6 @@ var GameScene = /** @class */ (function (_super) {
     GameScene.prototype.init = function () {
         var _this = this;
         var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
-        // BEGIN RAYCAST SHADOW TEST AREA
-        taro.client.on('update-visibility-mask', function (data) {
-            if (!_this.visibility && data.enabled) {
-                _this.visibility = new VisibilityMask(_this);
-                _this.visibility.generateFieldOfView(data.range);
-            }
-            else if (data.enabled) {
-                _this.visibility.generateFieldOfView(data.range);
-            }
-            else if (_this.visibility && !data.enabled) {
-                _this.visibility.destroyVisibilityMask();
-                delete _this.visibility;
-            }
-        });
-        // END RAYCAST SHADOW TEST AREA
         if (taro.isMobile) {
             this.scene.launch('MobileControls');
         }
@@ -139,9 +124,6 @@ var GameScene = /** @class */ (function (_super) {
                 camera.centerOn(x, y);
             }
         });
-        taro.client.on('unit-position', function (x, y) {
-            _this.visibility.moveCenter(x, y);
-        });
     };
     GameScene.prototype.preload = function () {
         var _this = this;
@@ -179,19 +161,19 @@ var GameScene = /** @class */ (function (_super) {
                 else {
                     if (window.toastErrorMessage) {
                         window.toastErrorMessage("Tileset \"".concat(tileset.name, "\" image doesn't match the specified parameters. ") +
-                            'Double check your margin, spacing, tilewidth and tileheight.');
+                            "Double check your margin, spacing, tilewidth and tileheight.");
                     }
                     else {
                         // WAITING TILL EDITOR IS LOADED
                         setTimeout(function () {
                             if (window.toastErrorMessage) {
                                 window.toastErrorMessage("Tileset \"".concat(tileset.name, "\" image doesn't match the specified parameters. ") +
-                                    'Double check your margin, spacing, tilewidth and tileheight.');
+                                    "Double check your margin, spacing, tilewidth and tileheight.");
                             }
                             else {
                                 // IF editor is not loaded, show alert
                                 alert("Tileset \"".concat(tileset.name, "\" image doesn't match the specified parameters. ") +
-                                    'Double check your margin, spacing, tilewidth and tileheight.');
+                                    "Double check your margin, spacing, tilewidth and tileheight.");
                             }
                         }, 5000);
                     }
@@ -482,8 +464,6 @@ var GameScene = /** @class */ (function (_super) {
     };
     GameScene.prototype.update = function () {
         var _this = this;
-        var _a;
-        (_a = this.visibility) === null || _a === void 0 ? void 0 : _a.update();
         //cause black screen and camera jittering when change tab
         /*let trackingDelay = this.trackingDelay / taro.fps();
         this.cameras.main.setLerp(trackingDelay, trackingDelay);*/
@@ -513,7 +493,4 @@ var GameScene = /** @class */ (function (_super) {
     };
     return GameScene;
 }(PhaserScene));
-if (typeof (module) !== 'undefined' && typeof (module.exports) !== 'undefined') {
-    module.exports = GameScene;
-}
 //# sourceMappingURL=GameScene.js.map

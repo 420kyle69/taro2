@@ -343,10 +343,6 @@ var Unit = TaroEntityPhysics.extend({
 					if (self.unitUi) {
 						self.unitUi.updateAllAttributeBars();
 					}
-					// visibility mask
-					if (this._stats.visibilityMask.enabled) {
-						this.updateVisibilityMask();
-					}
 				}
 			}
 		}
@@ -1952,13 +1948,6 @@ var Unit = TaroEntityPhysics.extend({
 		}
 	},
 
-	updateVisibilityMask: function () {
-		taro.client.emit('update-visibility-mask', {
-			enabled: this._stats.visibilityMask.enabled,
-			range: this._stats.visibilityMask.range,
-		});
-	},
-
 	/**
 	 * Called every frame by the engine when this entity is mounted to the
 	 * scenegraph.
@@ -2040,6 +2029,7 @@ var Unit = TaroEntityPhysics.extend({
 						x: self.direction.x * speed,
 						y: self.direction.y * speed
 					};
+					
 				}
 
 				// update AI
@@ -2052,6 +2042,7 @@ var Unit = TaroEntityPhysics.extend({
 					// toggle effects when unit starts/stops moving
 					if (!this.isMoving && (self.direction.x != 0 || self.direction.y != 0)) {
 						this.startMoving();
+
 					} else if (this.isMoving && self.direction.x === 0 && self.direction.y ===0) {
 						this.stopMoving();
 					}
@@ -2100,7 +2091,7 @@ var Unit = TaroEntityPhysics.extend({
 		}
 
 		// if entity (unit/item/player/projectile) has attribute, run regenerate
-		if (taro.isServer || (taro.physics && taro.isClient && taro.client.selectedUnit == this && taro.game.cspEnabled)) {
+		if (taro.isServer || (taro.physics && taro.isClient && taro.client.selectedUnit == this && this._stats.controls?.clientPredictedMovement)) {
 			if (this._stats.buffs && this._stats.buffs.length > 0) {
 				for (let i = 0; i < this._stats.buffs.length; i++) {
 					var buff = this._stats.buffs[i];
@@ -2113,7 +2104,7 @@ var Unit = TaroEntityPhysics.extend({
 				this.attribute._behaviour();
 			}
 		}
-
+		
 		if (taro.isClient && taro.client.selectedUnit == this) { // never run on server, pure UI
 			for (let i = 0; i < self._stats.itemIds.length; i++) {
 				var itemId = self._stats.itemIds[i];
@@ -2122,10 +2113,6 @@ var Unit = TaroEntityPhysics.extend({
 					taro.itemUi.updateItemCooldownOverlay(item);
 				}
 			}
-
-			// probably don't need to emit this every tick
-			taro.client.emit('unit-position', [this._translate.x, this._translate.y]);
-
 		}
 
 		if (taro.physics && taro.physics.engine != 'CRASH') {
