@@ -14,7 +14,8 @@
 
     <!-- CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.9.2/jquery.contextMenu.min.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.9.2/jquery.contextMenu.min.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
     <link rel="stylesheet" href="/assets/css/custom.css">
     <link rel="stylesheet" href="/assets/css/common.css">
@@ -107,24 +108,25 @@
             //     return;
             // }
 
-            axios.get('https://staging.modd.io/client/')
+            const rootUrl = 'https://www.modd.io';
+            const engineVersion = '2.0.11';
+
+            axios.get(`${rootUrl}/client/${engineVersion}?loadAll=true`)
                 .then((res) => {
                     const { styles, scripts } = res.data;
 
                     styles.forEach((style) => {
-                        const linkEl = document.createElement('link');
+                        const linkEl = window.document.createElement('link');
                         linkEl.rel = 'stylesheet';
-                        linkEl.href = `https://staging.modd.io/static/css/${style}`;
-
-                        document.head.appendChild(linkEl);
+                        linkEl.href = `${rootUrl}/${engineVersion}/static/css/` + style;
+                        window.document.head.appendChild(linkEl);
                     });
-
                     scripts.forEach((script) => {
-                        const scriptEl = document.createElement('script');
-                        scriptEl.src = `https://staging.modd.io/static/js/${script}`;
-
-                        document.body.appendChild(scriptEl);
+                        const scriptEl = window.document.createElement('script');
+                        scriptEl.src = `${rootUrl}/${engineVersion}/static/js/` + script;
+                        window.document.body.appendChild(scriptEl);
                     });
+                    window.initEditor = true;
                 })
                 .catch((err) => {
                     console.log(err);
@@ -136,91 +138,91 @@
 </head>
 
 <body>
-<div id="game-div" style="overflow: hidden">
-    <%- include('templates/dev-console'); -%>
-    <%- include('templates/game-editor'); -%>
-    <%- include('templates/menu'); -%>
-    <%- include('templates/shop'); -%>
-    <%- include('templates/gui'); -%>
-    <%- include('templates/chat'); -%>
-    <%- include('templates/inventory'); -%>
-    <%- include('templates/dialogue'); -%>
-    <%- include('templates/trade'); -%>
-</div>
-<%- include('templates/videochat.ejs'); -%>
+    <div id="game-div" style="overflow: hidden">
+        <%- include('templates/dev-console'); -%>
+            <%- include('templates/game-editor'); -%>
+                <%- include('templates/menu'); -%>
+                    <%- include('templates/shop'); -%>
+                        <%- include('templates/gui'); -%>
+                            <%- include('templates/chat'); -%>
+                                <%- include('templates/inventory'); -%>
+                                    <%- include('templates/dialogue'); -%>
+                                        <%- include('templates/trade'); -%>
+    </div>
+    <%- include('templates/videochat.ejs'); -%>
 
-<div class="modal fade" tabindex="-1" id="server-disconnect-modal" role="dialog" style=" top: 15%">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header d-flex hide-on-mobile">
-                <h5 class="modal-title">Connection Lost</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                Lost connection to the game server. Please refresh this page or visit our homepage.
+        <div class="modal fade" tabindex="-1" id="server-disconnect-modal" role="dialog" style=" top: 15%">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header d-flex hide-on-mobile">
+                        <h5 class="modal-title">Connection Lost</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        Lost connection to the game server. Please refresh this page or visit our homepage.
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
 
-<!-- load engine -->
-<script type="text/javascript">
-	var taroRoot = './engine/';
-	window.isStandalone = true;
-	gameStarted = false;
-</script>
-<script>
-	(function ($) {
-		$.fn.writeText = function (content, duration, callback) {
-			content = content || '';
+        <!-- load engine -->
+        <script type="text/javascript">
+            var taroRoot = './engine/';
+            window.isStandalone = true;
+            gameStarted = false;
+        </script>
+        <script>
+            (function ($) {
+                $.fn.writeText = function (content, duration, callback) {
+                    content = content || '';
 
-			var contentArray = content.split(''),
-				current = 0,
-				elem = this;
+                    var contentArray = content.split(''),
+                        current = 0,
+                        elem = this;
 
-			if (isNaN(duration)) {
-				duration = 20;
-			}
+                    if (isNaN(duration)) {
+                        duration = 20;
+                    }
 
-			if (duration <= 0) {
-				elem.html(content);
-				callback();
-				return;
-			}
+                    if (duration <= 0) {
+                        elem.html(content);
+                        callback();
+                        return;
+                    }
 
-			var handle = setInterval(function () {
-				if (current < contentArray.length) {
-					var text = elem.html();
-					var newText = contentArray[current];
+                    var handle = setInterval(function () {
+                        if (current < contentArray.length) {
+                            var text = elem.html();
+                            var newText = contentArray[current];
 
-					if (newText === '<' && /\w/.test(contentArray[current + 1])) {
-						do {
-							current++;
-							var nextChar = contentArray[current];
-							newText += nextChar;
-						} while (nextChar !== '>');
-					}
+                            if (newText === '<' && /\w/.test(contentArray[current + 1])) {
+                                do {
+                                    current++;
+                                    var nextChar = contentArray[current];
+                                    newText += nextChar;
+                                } while (nextChar !== '>');
+                            }
 
-					elem.html(text + newText);
-					current++;
-				} else {
-					clearInterval(handle);
-					callback();
-				}
-			}, duration);
+                            elem.html(text + newText);
+                            current++;
+                        } else {
+                            clearInterval(handle);
+                            callback();
+                        }
+                    }, duration);
 
-			return handle;
-		};
-	})(jQuery);
-</script>
+                    return handle;
+                };
+            })(jQuery);
+        </script>
 
-<!-- below loads all uncompiled game files (your source code changes will reflect) -->
-<script type="text/javascript" src="/engine/loader.js"></script>
+        <!-- below loads all uncompiled game files (your source code changes will reflect) -->
+        <script type="text/javascript" src="/engine/loader.js"></script>
 
-<!-- below loads the compiled game file (much faster, your source code changes won't reflect until you compile again)-->
-<!-- <script type="text/javascript" src="./src/game.js"></script> -->
+        <!-- below loads the compiled game file (much faster, your source code changes won't reflect until you compile again)-->
+        <!-- <script type="text/javascript" src="./src/game.js"></script> -->
 </body>
 
 </html>

@@ -7,6 +7,8 @@ var ClientNetworkEvents = {
 			taro.menuUi.onDisconnectFromServer("clientNetworkEvents #10", data.reason);
 			taro.network._io._disconnectReason = data.reason;
 		}
+
+		console.log("somebody else disconnected")
 	},
 
 	_onStreamUpdateData: function (data) {
@@ -265,6 +267,10 @@ var ClientNetworkEvents = {
 				break;
 			case "shopResponse":
 				taro.shop.purchaseWarning(data.type);
+				break;
+
+			case 'shopPurchase':
+				taro.shop.openEntityPurchaseModal(data);
 				break;
 		}
 	},
@@ -560,6 +566,10 @@ var ClientNetworkEvents = {
 
 	_onUpdateProjectile: function (data) {
 		taro.developerMode.updateProjectile(data);
+	},
+
+	_onUpdateShop: function (data) {
+		taro.developerMode.updateShop(data);
 	},
 
 	_onErrorLogs: function (logs) {

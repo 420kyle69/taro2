@@ -662,6 +662,8 @@ var DeveloperMode = /** @class */ (function () {
             if (unit._stats.type === data.typeId) {
                 unit.changeUnitType(data.typeId, {}, false);
                 unit.emit('update-texture', 'basic_texture_change');
+                if (data.shouldReset)
+                    unit.resetUnitType();
             }
         });
         if (taro.isServer) {
@@ -727,6 +729,8 @@ var DeveloperMode = /** @class */ (function () {
             if (item._stats.itemTypeId === data.typeId) {
                 item.changeItemType(data.typeId, {}, false);
                 item.emit('update-texture', 'basic_texture_change');
+                if (data.shouldReset)
+                    item.resetItemType();
             }
         });
         if (taro.isServer) {
@@ -769,6 +773,8 @@ var DeveloperMode = /** @class */ (function () {
             if (projectile._stats.type === data.typeId) {
                 projectile.changeProjectileType(data.typeId, {}, false);
                 projectile.emit('update-texture', 'basic_texture_change');
+                if (data.shouldReset)
+                    projectile.resetProjectileType();
             }
         });
         if (taro.isServer) {
@@ -788,6 +794,17 @@ var DeveloperMode = /** @class */ (function () {
                 projectile.destroy();
             }
         });
+    };
+    DeveloperMode.prototype.updateShop = function (data) {
+        if (data.typeId && data.newData) {
+            if (!taro.game.data.shops) {
+                taro.game.data.shops = {};
+            }
+            taro.game.data.shops[data.typeId] = data.newData;
+        }
+        if (taro.isServer) {
+            taro.network.send('updateShop', data);
+        }
     };
     DeveloperMode.prototype.editEntity = function (data, clientId) {
         if (taro.isClient) {
@@ -841,6 +858,15 @@ var DeveloperMode = /** @class */ (function () {
                             break;
                         case 'delete':
                             //this.deleteProjectile(data);
+                            break;
+                    }
+                }
+                else if (data.entityType === 'shop') {
+                    switch (data.action) {
+                        case 'update':
+                            this.updateShop(data);
+                            break;
+                        default:
                             break;
                     }
                 }
