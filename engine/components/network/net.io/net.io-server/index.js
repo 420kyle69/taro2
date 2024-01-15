@@ -952,18 +952,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 
 			// add socket message listeners, send 'init' message to client
 			self.emit('connection', [socket]);
-
-			// trigger joinGame command as part of socket connection, no need for client to send joinGame anymore
-			// joinGame takes care of disconnecting unauthenticated users, banned ips, duplicate IPs, creates a new player and request user data from gs manager and make sure the user exists on moddio
-			const joinGameData = {
-				number: (Math.floor(Math.random() * 999) + 100),
-				_id: socket._token.userId,
-				sessionId: socket._token.sessionId,
-				isAdBlockEnabled: false
-			};
-			const clientId = socket.id;
-
-			taro.server._onJoinGame(joinGameData, clientId);
+			
 		} else {
 			// PING service only
 			// Tell the client their new ID
