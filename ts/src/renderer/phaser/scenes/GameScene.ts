@@ -14,10 +14,11 @@ class GameScene extends PhaserScene {
 	tileset: Phaser.Tilemaps.Tileset;
 	cameraTarget: Phaser.GameObjects.Container & IRenderProps;
 	filter: Phaser.Textures.FilterMode;
-    resolutionCoef: number;
+	resolutionCoef: number;
 	trackingDelay: number;
 	useBounds: boolean;
 	cameraDeadzone: { width: number; height: number; };
+	visibility: VisibilityMask;
 
 	constructor() {
 		super({ key: 'Game' });
@@ -52,16 +53,16 @@ class GameScene extends PhaserScene {
 
 		// set camera tracking delay
 		this.trackingDelay = taro?.game?.data?.settings?.camera?.trackingDelay || 3;
-        if (this.trackingDelay > 60) {
-            this.trackingDelay = 60;
-        }
+		if (this.trackingDelay > 60) {
+			this.trackingDelay = 60;
+		}
 
 		this.scale.on(Phaser.Scale.Events.RESIZE, () => {
 			if (this.zoomSize) {
 				camera.zoom = this.calculateZoom();
 				taro.client.emit('scale', { ratio: camera.zoom * this.resolutionCoef });
 			}
-            taro.client.emit('update-abilities-position');
+			taro.client.emit('update-abilities-position');
 		});
 
 		taro.client.on('zoom', (height: number) => {
@@ -82,8 +83,8 @@ class GameScene extends PhaserScene {
 			taro.client.emit('scale', { ratio: ratio * this.resolutionCoef });
 		});
 
-        taro.client.on('set-resolution', (resolution) => {
-            this.setResolution(resolution, true);
+		taro.client.on('set-resolution', (resolution) => {
+			this.setResolution(resolution, true);
 		});
 
 		taro.client.on('change-filter', (data: {filter: renderingFilter}) => {
@@ -148,8 +149,6 @@ class GameScene extends PhaserScene {
 			    camera.centerOn(x, y);
 			}
 		});
-
-		
 	}
 
 	preload (): void {
@@ -196,17 +195,17 @@ class GameScene extends PhaserScene {
 
 					if(window.toastErrorMessage){
 						window.toastErrorMessage(`Tileset "${tileset.name}" image doesn't match the specified parameters. ` +
-						`Double check your margin, spacing, tilewidth and tileheight.`);						
+						'Double check your margin, spacing, tilewidth and tileheight.');
 					}else{
 						// WAITING TILL EDITOR IS LOADED
 						setTimeout(() => {
 							if(window.toastErrorMessage){
 								window.toastErrorMessage(`Tileset "${tileset.name}" image doesn't match the specified parameters. ` +
-								`Double check your margin, spacing, tilewidth and tileheight.`);
+								'Double check your margin, spacing, tilewidth and tileheight.');
 							}else{
 								// IF editor is not loaded, show alert
 								alert(`Tileset "${tileset.name}" image doesn't match the specified parameters. ` +
-								`Double check your margin, spacing, tilewidth and tileheight.`);
+								'Double check your margin, spacing, tilewidth and tileheight.');
 							}
 						}, 5000);
 					}
@@ -303,9 +302,9 @@ class GameScene extends PhaserScene {
 						animationFrames.push(0);
 					}
 
-                    if (this.anims.exists(`${key}/${animationsKey}`)) {
-                        this.anims.remove(`${key}/${animationsKey}`);
-                    }
+					if (this.anims.exists(`${key}/${animationsKey}`)) {
+						this.anims.remove(`${key}/${animationsKey}`);
+					}
 
 					this.anims.create({
 						key: `${key}/${animationsKey}`,
@@ -662,12 +661,12 @@ class GameScene extends PhaserScene {
 		this.renderedEntities.forEach(element => {
 			element.setVisible(false);
 		});
-		
+
 		if (!taro.developerMode.active || (taro.developerMode.active && taro.developerMode.activeTab !== 'map')) {
 			var visibleEntities = this.cameras.main.cull(this.renderedEntities);
 			visibleEntities.forEach(element => {
 				if (!element.hidden) {
-					element.setVisible(true);					
+					element.setVisible(true);
 
 					if(element.dynamic) {
 						// dynamic is only assigned through an hbz-index-only event
@@ -676,9 +675,13 @@ class GameScene extends PhaserScene {
 				}
 			});
 		}
-        
-        taro.client.emit('tick');
+
+		taro.client.emit('tick');
 	}
 }
 
 type renderingFilter = 'pixelArt' | 'smooth';
+
+if (typeof (module) !== 'undefined' && typeof (module.exports) !== 'undefined') {
+	module.exports = GameScene;
+}
