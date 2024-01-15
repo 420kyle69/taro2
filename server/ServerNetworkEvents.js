@@ -63,11 +63,16 @@ var ServerNetworkEvents = {
 	_onJoinGame: function (data, clientId) {
 		if (taro.clusterClient) { // this is used for hosted version of moddio
 			let clientData = taro.clusterClient.authenticateClient(data, clientId) // will return data if user is authenticated. otherwise, will return undefined
-			let playerId = clientData?._id;
-			if (clientData && playerId) { // authenticate logged-in player
-				taro.clusterClient.authenticatePlayer(playerId, clientId, data)
-			} else { // authenticate guest player
-				taro.clusterClient.authenticateGuest(clientId, data)
+			
+			if (clientData) {
+				let playerId = clientData?._id;
+				if (clientData && playerId) { // authenticate logged-in player
+					taro.clusterClient.authenticatePlayer(playerId, clientId, data)
+				} else { // authenticate guest player
+					taro.clusterClient.authenticateGuest(clientId, data)
+				}
+			} else {
+				// client authentication failed
 			}
 		} else { // this is for the standalone version of moddio
 			var player = taro.game.createPlayer({
