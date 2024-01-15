@@ -149,6 +149,21 @@ class GameScene extends PhaserScene {
 			    camera.centerOn(x, y);
 			}
 		});
+
+		taro.client.on('update-visibility-mask', (data: {
+			enabled: boolean,
+			range: number,
+		}) => {
+			if (!this.visibility && data.enabled) {
+				this.visibility = new VisibilityMask(this);
+				this.visibility.generateFieldOfView(data.range);
+			} else if (data.enabled) {
+				this.visibility.generateFieldOfView(data.range);
+			} else if (this.visibility && !data.enabled) {
+				this.visibility.destroyVisibilityMask();
+				delete this.visibility;
+			}
+		});
 	}
 
 	preload (): void {
@@ -646,6 +661,8 @@ class GameScene extends PhaserScene {
 	}
 
 	update (): void {
+
+		this.visibility?.update();
 
 		//cause black screen and camera jittering when change tab
 		/*let trackingDelay = this.trackingDelay / taro.fps();

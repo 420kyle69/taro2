@@ -55,6 +55,7 @@ var taroClientConfig = {
 		'/gameClasses/EntitiesToRender.js',
 		'/gameClasses/Raycaster.js',
 		'/gameClasses/HeightRenderComponent.js',
+		'/gameClasses/VisibilityMask.js',
 		/* color helpers */
 		'utils/Colors.js',
 
@@ -67,6 +68,7 @@ var taroClientConfig = {
 		'renderer/phaser/rexvirtualjoystickplugin.min.js',
 		// '../node_modules/phaser3-rex-plugins/dist/rexvirtualjoystickplugin.min.js',
 		//'../node_modules/phaser3-rex-plugins/templates/ui/ui-components.js',
+		'utils/visibility-polygon.js',
 		'renderer/phaser/enums/FlipMode.js',
 		'renderer/phaser/enums/TileLayer.js',
 		'renderer/phaser/enums/EntityLayer.js',
