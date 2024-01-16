@@ -2040,7 +2040,7 @@ var Unit = TaroEntityPhysics.extend({
 						x: self.direction.x * speed,
 						y: self.direction.y * speed
 					};
-					
+
 				}
 
 				// update AI
@@ -2079,16 +2079,16 @@ var Unit = TaroEntityPhysics.extend({
 			if (this.isPlayingSound) {
 				this.isPlayingSound.volume = taro.sound.getVolume(this._translate, this.isPlayingSound.effect.volume);
 			}
-			
+
 			var processedUpdates = [];
-			var updateQueue = taro.client.entityUpdateQueue[this.id()];			
+			var updateQueue = taro.client.entityUpdateQueue[this.id()];
 			if (updateQueue) {
 				for (var key in updateQueue) {
 					var value = updateQueue[key];
 
 					processedUpdates.push({[key]: value});
-					delete taro.client.entityUpdateQueue[this.id()][key]
-					
+					delete taro.client.entityUpdateQueue[this.id()][key];
+
 					// remove queue object for this entity is there's no queue remaining in order to prevent memory leak
 					if (Object.keys(taro.client.entityUpdateQueue[this.id()]).length == 0) {
 						delete taro.client.entityUpdateQueue[this.id()];
@@ -2115,7 +2115,7 @@ var Unit = TaroEntityPhysics.extend({
 				this.attribute._behaviour();
 			}
 		}
-		
+
 		if (taro.isClient && taro.client.selectedUnit == this) { // never run on server, pure UI
 			for (let i = 0; i < self._stats.itemIds.length; i++) {
 				var itemId = self._stats.itemIds[i];
@@ -2124,6 +2124,9 @@ var Unit = TaroEntityPhysics.extend({
 					taro.itemUi.updateItemCooldownOverlay(item);
 				}
 			}
+
+			// probably don't need to emit this every tick
+			taro.client.emit('unit-position', [this._translate.x, this._translate.y]);
 		}
 
 		if (taro.physics && taro.physics.engine != 'CRASH') {

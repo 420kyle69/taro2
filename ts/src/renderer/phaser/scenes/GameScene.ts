@@ -150,6 +150,7 @@ class GameScene extends PhaserScene {
 			}
 		});
 
+		// visibility mask graphics update
 		taro.client.on('update-visibility-mask', (data: {
 			enabled: boolean,
 			range: number,
@@ -163,6 +164,11 @@ class GameScene extends PhaserScene {
 				this.visibility.destroyVisibilityMask();
 				delete this.visibility;
 			}
+		});
+
+		// visibility mask position update
+		taro.client.on('unit-position', (x: number, y: number) => {
+			this.visibility.moveCenter(x, y);
 		});
 	}
 
