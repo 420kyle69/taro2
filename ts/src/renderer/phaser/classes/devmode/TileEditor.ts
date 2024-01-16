@@ -13,6 +13,7 @@ class TileEditor {
 	startDragIn: string;
 
 	tileSize: number;
+	prevData: any;
 
 	constructor(
 		private gameScene: GameScene,
@@ -35,7 +36,7 @@ class TileEditor {
 		this.activateMarkers(false);
 
 		this.startDragIn = 'none';
-
+		this.prevData = {};
 		this.tileSize = Constants.TILE_SIZE;
 		if (taro.game.data.defaultData.dontResize) {
 			this.tileSize = gameMap.tileWidth;
@@ -256,7 +257,7 @@ class TileEditor {
 			}
 		}
 		if (!local) {
-			taro.network.send<'edit'>('editTile', {
+			const data: { edit: MapEditTool['edit'] } = {
 				edit: {
 					size: brushSize,
 					layer: [layer],
@@ -266,7 +267,12 @@ class TileEditor {
 					shape,
 					noMerge: true,
 				}
-			});
+			}
+			if (JSON.stringify(this.prevData) !== JSON.stringify(data)) {
+				taro.network.send<'edit'>('editTile', data);
+				this.prevData = data;
+			}
+
 		}
 
 	}
@@ -317,7 +323,7 @@ class TileEditor {
 				}
 				tileMap.putTileAt(newTile, nowPos.x, nowPos.y, false, layer);
 				//save tile change to taro.game.map.data
-				if(newTile === -1) {
+				if (newTile === -1) {
 					newTile = 0;
 				}
 				map.layers[tempLayer].data[nowPos.y * width + nowPos.x] = newTile;
