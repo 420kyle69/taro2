@@ -140,7 +140,8 @@ var GameScene = /** @class */ (function (_super) {
         });
         // visibility mask position update
         taro.client.on('unit-position', function (x, y) {
-            _this.visibility.moveCenter(x, y);
+            var _a;
+            (_a = _this.visibility) === null || _a === void 0 ? void 0 : _a.moveCenter(x, y);
         });
     };
     GameScene.prototype.preload = function () {
