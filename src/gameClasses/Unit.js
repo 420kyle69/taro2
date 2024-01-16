@@ -344,7 +344,7 @@ var Unit = TaroEntityPhysics.extend({
 						self.unitUi.updateAllAttributeBars();
 					}
 					// visibility mask
-					if (this._stats.visibilityMask.enabled) {
+					if (this._stats.visibilityMask?.enabled) {
 						this.updateVisibilityMask();
 					}
 				}
