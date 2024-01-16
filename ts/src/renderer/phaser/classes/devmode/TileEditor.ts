@@ -13,7 +13,7 @@ class TileEditor {
 	startDragIn: string;
 
 	tileSize: number;
-	prevData: any;
+	prevData: { edit: MapEditTool['edit'] } | undefined;
 
 	constructor(
 		private gameScene: GameScene,
@@ -36,7 +36,7 @@ class TileEditor {
 		this.activateMarkers(false);
 
 		this.startDragIn = 'none';
-		this.prevData = {};
+		this.prevData = undefined;
 		this.tileSize = Constants.TILE_SIZE;
 		if (taro.game.data.defaultData.dontResize) {
 			this.tileSize = gameMap.tileWidth;
@@ -267,8 +267,8 @@ class TileEditor {
 					shape,
 					noMerge: true,
 				}
-			}
-			if (JSON.stringify(this.prevData) !== JSON.stringify(data)) {
+			};
+			if (this.prevData === undefined || JSON.stringify(this.prevData) !== JSON.stringify(data)) {
 				taro.network.send<'edit'>('editTile', data);
 				this.prevData = data;
 			}

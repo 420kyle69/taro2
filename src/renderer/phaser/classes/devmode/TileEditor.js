@@ -14,7 +14,7 @@ var TileEditor = /** @class */ (function () {
         var pointerPosition = { x: 0, y: 0 };
         this.activateMarkers(false);
         this.startDragIn = 'none';
-        this.prevData = {};
+        this.prevData = undefined;
         this.tileSize = Constants.TILE_SIZE;
         if (taro.game.data.defaultData.dontResize) {
             this.tileSize = gameMap.tileWidth;
@@ -238,7 +238,7 @@ var TileEditor = /** @class */ (function () {
                     noMerge: true,
                 }
             };
-            if (JSON.stringify(this.prevData) !== JSON.stringify(data)) {
+            if (this.prevData === undefined || JSON.stringify(this.prevData) !== JSON.stringify(data)) {
                 taro.network.send('editTile', data);
                 this.prevData = data;
             }
