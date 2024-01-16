@@ -168,7 +168,7 @@ class GameScene extends PhaserScene {
 
 		// visibility mask position update
 		taro.client.on('unit-position', (x: number, y: number) => {
-			this.visibility.moveCenter(x, y);
+			this.visibility?.moveCenter(x, y);
 		});
 	}
 
