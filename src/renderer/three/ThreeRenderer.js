@@ -14,8 +14,17 @@ var ThreeRenderer = /** @class */ (function () {
         this.controls.enableDamping = true;
         this.scene = new THREE.Scene();
         var geometry = new THREE.BoxGeometry(1, 1, 1);
-        var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        var material = new THREE.MeshBasicMaterial({});
         var cube = new THREE.Mesh(geometry, material);
+        var textureLoader = new THREE.TextureLoader();
+        textureLoader.crossOrigin = 'Anonymous';
+        taro.game.data.map.tilesets.forEach(function (tileset) {
+            var url = Utils.patchAssetUrl(tileset.image);
+            textureLoader.load(url, function (tex) {
+                cube.material.map = tex;
+                cube.material.needsUpdate = true;
+            });
+        });
         var map = new THREE.Group();
         map.translateX(-taro.game.data.map.width / 2);
         map.translateZ(-taro.game.data.map.height / 2);

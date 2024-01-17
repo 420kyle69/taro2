@@ -96,6 +96,8 @@
         "no-case-declarations": 0,
         "use-isnan": 0,
 
-        "@typescript-eslint/no-var-requires": "off"
+        "@typescript-eslint/no-var-requires": "off",
+        "@typescript-eslint/no-namespace": "off"
+
     }
 }

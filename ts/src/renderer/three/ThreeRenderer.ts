@@ -23,8 +23,19 @@ class ThreeRenderer {
 		this.scene = new THREE.Scene();
 
 		const geometry = new THREE.BoxGeometry(1, 1, 1);
-		const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+		const material = new THREE.MeshBasicMaterial({});
 		const cube = new THREE.Mesh(geometry, material);
+
+		const textureLoader = new THREE.TextureLoader();
+		textureLoader.crossOrigin = 'Anonymous';
+
+		taro.game.data.map.tilesets.forEach((tileset) => {
+			const url = Utils.patchAssetUrl(tileset.image);
+			textureLoader.load(url, (tex) => {
+				cube.material.map = tex;
+				cube.material.needsUpdate = true;
+			});
+		});
 
 		const map = new THREE.Group();
 		map.translateX(-taro.game.data.map.width / 2);
