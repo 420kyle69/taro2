@@ -66,6 +66,8 @@ var taroClientConfig = {
 		'renderer/phaser/phaser.min.js',
 		'renderer/phaser/rexuiplugin.min.js',
 		'renderer/phaser/rexvirtualjoystickplugin.min.js',
+		/* Three.js */
+		'renderer/three/three.min.js',
 		// '../node_modules/phaser3-rex-plugins/dist/rexvirtualjoystickplugin.min.js',
 		//'../node_modules/phaser3-rex-plugins/templates/ui/ui-components.js',
 		'utils/visibility-polygon.js',

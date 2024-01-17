@@ -1,29 +1,26 @@
 /// <reference types="@types/google.analytics" />
 var ThreeRenderer = /** @class */ (function () {
     function ThreeRenderer() {
-        var _this = this;
-        this.units = [];
-        this.canvas = document.createElement("canvas");
-        this.ctx = this.canvas.getContext("2d");
-        document.querySelector("#game-div").appendChild(this.canvas);
-        this.canvas.width = window.innerWidth;
-        this.canvas.height = window.innerHeight;
-        this.canvas.style.backgroundColor = "gray";
+        var _a;
+        var renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        (_a = document.querySelector('#game-div')) === null || _a === void 0 ? void 0 : _a.appendChild(renderer.domElement);
+        this.renderer = renderer;
+        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        this.camera.position.z = 5;
+        this.scene = new THREE.Scene();
+        var geometry = new THREE.BoxGeometry(1, 1, 1);
+        var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        var cube = new THREE.Mesh(geometry, material);
+        this.scene.add(cube);
+        this.cube = cube;
         taro.client.rendererLoaded.resolve();
-        taro.client.on("create-unit", function (unit) {
-            unit.on("transform", function (data) {
-                unit._translate.x = data.x;
-                unit._translate.y = data.y;
-            }, _this);
-            _this.units.push(unit);
-            _this;
-        });
         requestAnimationFrame(this.render.bind(this));
         this.setupInputListeners();
     }
     ThreeRenderer.prototype.setupInputListeners = function () {
         // Ask the input component to set up any listeners it has
-        taro.input.setupListeners(this.canvas);
+        taro.input.setupListeners(this.renderer.domElement);
     };
     ThreeRenderer.prototype.getViewportBounds = function () {
         // return this.scene.getScene('Game').cameras.main.worldView;
@@ -39,16 +36,10 @@ var ThreeRenderer = /** @class */ (function () {
     };
     ThreeRenderer.prototype.render = function () {
         requestAnimationFrame(this.render.bind(this));
-        this.ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-        if (this.units.length > 0) {
-            for (var _i = 0, _a = this.units; _i < _a.length; _i++) {
-                var u = _a[_i];
-                this.ctx.beginPath();
-                this.ctx.arc(u._translate.x, u._translate.y, 50, 0, 2 * Math.PI);
-                this.ctx.stroke();
-            }
-        }
-        taro.client.emit("tick");
+        this.cube.rotation.x += 0.01;
+        this.cube.rotation.y += 0.01;
+        this.renderer.render(this.scene, this.camera);
+        taro.client.emit('tick');
     };
     return ThreeRenderer;
 }());

@@ -23,8 +23,8 @@ var PhaserItem = /** @class */ (function (_super) {
         _this.gameObject.setPosition(x, y);
         Object.assign(_this.evtListeners, {
             // this event is only emitted by height-based-zindex games
-            setOwnerUnit: entity.on('setOwnerUnit', _this.setOwnerUnit, _this),
-            'update-texture': entity.on('update-texture', _this.updateTexture, _this),
+            setOwnerUnit: entity.on("setOwnerUnit", _this.setOwnerUnit, _this),
+            "update-texture": entity.on("update-texture", _this.updateTexture, _this),
         });
         if (scene.heightRenderer) {
             // don't waste cpu tracking owner of items on renderer
@@ -40,7 +40,7 @@ var PhaserItem = /** @class */ (function (_super) {
         return _this;
     }
     PhaserItem.prototype.updateTexture = function (data) {
-        if (data === 'basic_texture_change') {
+        if (data === "basic_texture_change") {
             this.sprite.anims.stop();
             this.key = "item/".concat(this.entity._stats.cellSheet.url);
             if (!this.scene.textures.exists(this.key)) {

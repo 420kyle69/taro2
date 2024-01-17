@@ -1,37 +1,29 @@
 /// <reference types="@types/google.analytics" />
 
 class ThreeRenderer {
-	private canvas: HTMLCanvasElement;
-	private ctx: CanvasRenderingContext2D;
-	private units: Unit[] = [];
+	private renderer: THREE.WebGLRenderer;
+	private camera: THREE.PerspectiveCamera;
+	private scene: THREE.Scene;
+	private cube: THREE.Mesh;
 
 	constructor() {
-		this.canvas = document.createElement('canvas');
+		const renderer = new THREE.WebGLRenderer();
+		renderer.setSize(window.innerWidth, window.innerHeight);
+		document.querySelector('#game-div')?.appendChild(renderer.domElement);
+		this.renderer = renderer;
 
-		this.ctx = this.canvas.getContext('2d');
+		this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+		this.camera.position.z = 5;
 
-		document.querySelector('#game-div')?.appendChild(this.canvas);
+		this.scene = new THREE.Scene();
 
-		this.canvas.width = window.innerWidth;
-		this.canvas.height = window.innerHeight;
-		this.canvas.style.backgroundColor = 'gray';
+		const geometry = new THREE.BoxGeometry(1, 1, 1);
+		const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+		const cube = new THREE.Mesh(geometry, material);
+		this.scene.add(cube);
+		this.cube = cube;
 
 		taro.client.rendererLoaded.resolve();
-
-		taro.client.on('create-unit', (unit: Unit) => {
-			unit.on(
-				'transform',
-				(data: { x: number; y: number; rotation: number }) => {
-					unit._translate.x = data.x;
-					unit._translate.y = data.y;
-				},
-				this
-			);
-
-			this.units.push(unit);
-
-			this;
-		});
 
 		requestAnimationFrame(this.render.bind(this));
 
@@ -40,7 +32,7 @@ class ThreeRenderer {
 
 	private setupInputListeners(): void {
 		// Ask the input component to set up any listeners it has
-		taro.input.setupListeners(this.canvas);
+		taro.input.setupListeners(this.renderer.domElement);
 	}
 
 	getViewportBounds() {
@@ -61,15 +53,10 @@ class ThreeRenderer {
 	render() {
 		requestAnimationFrame(this.render.bind(this));
 
-		this.ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+		this.cube.rotation.x += 0.01;
+		this.cube.rotation.y += 0.01;
 
-		if (this.units.length > 0) {
-			for (const u of this.units) {
-				this.ctx.beginPath();
-				this.ctx.arc(u._translate.x, u._translate.y, 50, 0, 2 * Math.PI);
-				this.ctx.stroke();
-			}
-		}
+		this.renderer.render(this.scene, this.camera);
 
 		taro.client.emit('tick');
 	}

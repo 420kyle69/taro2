@@ -24,12 +24,12 @@ var PhaserProjectile = /** @class */ (function (_super) {
         _this.gameObject.setPosition(x, y);
         scene.projectilesList.push(_this);
         Object.assign(_this.evtListeners, {
-            'update-texture': entity.on('update-texture', _this.updateTexture, _this),
+            "update-texture": entity.on("update-texture", _this.updateTexture, _this),
         });
         return _this;
     }
     PhaserProjectile.prototype.updateTexture = function (data) {
-        if (data === 'basic_texture_change') {
+        if (data === "basic_texture_change") {
             this.sprite.anims.stop();
             this.key = "projectile/".concat(this.entity._stats.cellSheet.url);
             if (!this.scene.textures.exists(this.key)) {
