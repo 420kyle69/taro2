@@ -15,10 +15,10 @@ class ThreeRenderer {
 		this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 		this.camera.position.y = 20;
 		this.camera.position.z = 20;
-		this.camera.lookAt(new THREE.Vector3());
 
 		this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 		this.controls.enableDamping = true;
+		this.controls.target = new THREE.Vector3(0, 0, 10);
 
 		this.scene = new THREE.Scene();
 
