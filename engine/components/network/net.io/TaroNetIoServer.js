@@ -484,6 +484,10 @@ var TaroNetIoServer = {
 		var remoteAddress = socket._remoteAddress;
 		let clientRejectReason = null;
 		
+		taro.network._socketById[socket.id] = socket;
+		taro.network._socketByIp[socket._remoteAddress] = socket;
+		taro.network._socketById[socket.id].start = Date.now();
+		
 		if (taro.clusterClient) {
 			clientRejectReason = taro.clusterClient.validateClientConnection(socket);
 		}
@@ -495,20 +499,15 @@ var TaroNetIoServer = {
 					`Accepted connection with socket id ${socket.id
 					} ip ${remoteAddress}`
 				);
-				taro.network._socketById[socket.id] = socket;
-				taro.network._socketByIp[socket._remoteAddress] = socket;
 				
-				taro.network.clientIds.push(socket.id);
-				taro.network._socketById[socket.id].start = Date.now();
-				
+				taro.network.clientIds.push(socket.id);				
 				taro.server.socketConnectionCount.connected++;
 				
 				// Store a rooms array for this client
 				taro.network._clientRooms[socket.id] = taro.network._clientRooms[socket.id] || [];
 
 				if (taro.clusterClient)
-					taro.clusterClient.logClientConnect(socket.id);
-				
+					taro.clusterClient.logClientConnect(socket.id);				
 				
 				// trigger joinGame command as part of socket connection, no need for client to send joinGame anymore
 				// joinGame takes care of disconnecting unauthenticated users, banned ips, duplicate IPs, creates a new player and request user data from gs manager and make sure the user exists on moddio
