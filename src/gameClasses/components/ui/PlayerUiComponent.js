@@ -68,7 +68,10 @@ var PlayerUiComponent = TaroEntity.extend({
 		});
 
 		$(document).on('click', '.trigger', function () {
-			taro.network.send('htmlUiClick', { id: $(this).attr('id') });	
+			taro.network.send('htmlUiClick', { id: $(this).attr('id') });
+			//support for local htmlUiClick trigger
+			taro.client.myPlayer.lastHtmlUiClickData = { id: $(this).attr('id') };
+			taro.script.trigger('htmlUiClick', { playerId: taro.client.myPlayer.id() });	
 		});
 	},
 
@@ -500,11 +503,39 @@ var PlayerUiComponent = TaroEntity.extend({
 		}
 
 		if (dialogueId && optionId) {
-			taro.network.send('playerDialogueSubmit', {
+			const data = {
 				status: 'submitted',
 				dialogue: dialogueId,
 				option: optionId
-			});
+			}
+			taro.network.send('playerDialogueSubmit', data);
+
+			var player = taro.client.myPlayer;
+
+			if (player) {
+				var selectedOption = null;
+
+				for (var dialogId in taro.game.data.dialogues) {
+					var dialog = taro.game.data.dialogues[dialogId];
+
+					if (dialogId === data.dialogue) {
+						for (var optionId in dialog.options) {
+							var option = dialog.options[optionId];
+
+							if (optionId === data.option) {
+								selectedOption = option;
+								break;
+							}
+						}
+					}
+				}
+
+				if (selectedOption) {
+					if (selectedOption.scriptName) {
+						taro.script.runScript(selectedOption.scriptName, {});
+					}
+				}
+			}
 		}
 	},
 
