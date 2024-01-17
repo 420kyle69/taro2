@@ -81,7 +81,8 @@ var ServerNetworkEvents = {
 				coins: 0,
 				points: 0,
 				clientId: clientId,
-				isAdBlockEnabled: data.isAdBlockEnabled
+				isAdBlockEnabled: data.isAdBlockEnabled,
+				isMobile: data.isMobile
 			});
 
 			player.joinGame(data);
