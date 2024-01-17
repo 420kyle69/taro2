@@ -2400,6 +2400,11 @@ var VariableComponent = TaroEntity.extend({
 				return player && player._stats.controlledBy == 'human';
 			},
 
+			'isPlayerOnMobile': function(text, vars) {
+				var player = self.getValue(text.player, vars);
+				return !!(player && player._stats.isMobile);
+			},
+
 			/* entity */
 
 			'getEntityVariable': function (text, vars) {

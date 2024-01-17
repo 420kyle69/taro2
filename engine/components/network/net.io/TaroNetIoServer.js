@@ -477,9 +477,10 @@ var TaroNetIoServer = {
    * networking data required to allow network commands to operate
    * correctly over the connection.
    * @param {Object} socket The client socket object.
+   * @param {Object} request The socket's originating HTTP request.
    * @private
    */
-	_onClientConnect: function (socket) {
+	_onClientConnect: function (socket, request) {
 		var self = this;
 		var remoteAddress = socket._remoteAddress;
 		let clientRejectReason = null;
@@ -518,6 +519,8 @@ var TaroNetIoServer = {
 					sessionId: socket._token.sessionId,
 					isAdBlockEnabled: false
 				};
+				const isMobile = !!request.headers['user-agent']?.match(/Android|BlackBerry|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop|moddioapp/i);
+				joinGameData.isMobile = isMobile;
 				const clientId = socket.id;
 				
 				taro.server._onJoinGame(joinGameData, clientId);

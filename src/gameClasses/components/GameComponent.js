@@ -106,6 +106,7 @@ var GameComponent = TaroEntity.extend({
 			username: data.name,
 			profilePicture: data.profilePicture,
 			roleIds: data.roleIds || [],
+			isMobile: data.isMobile,
 		};
 
 		var player = new Player(playerData);

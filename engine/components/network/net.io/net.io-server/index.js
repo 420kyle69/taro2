@@ -951,7 +951,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 			}
 
 			// add socket message listeners, send 'init' message to client
-			self.emit('connection', [socket]);
+			self.emit('connection', [socket, request]);
 			
 		} else {
 			// PING service only
@@ -966,7 +966,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 				});
 
 				// add socket message listeners, send 'init' message to client
-				self.emit('connection', [socket]);
+				self.emit('connection', [socket, request]);
 
 				socket._token = {
 					userId: '',
@@ -990,6 +990,8 @@ NetIo.Server = NetIo.EventingClass.extend({
 					sessionId: socket._token.sessionId,
 					isAdBlockEnabled: false
 				};
+				const isMobile = !!request.headers['user-agent']?.match(/Android|BlackBerry|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop|moddioapp/i);
+				joinGameData.isMobile = isMobile;
 
 				const clientId = socket.id;
 
