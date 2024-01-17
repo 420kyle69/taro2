@@ -10,10 +10,6 @@ class ThreeRenderer {
 
 		this.ctx = this.canvas.getContext('2d');
 
-
-
-
-
 		document.querySelector('#game-div')?.appendChild(this.canvas);
 
 		this.canvas.width = window.innerWidth;
@@ -29,7 +25,7 @@ class ThreeRenderer {
 					unit._translate.x = data.x;
 					unit._translate.y = data.y;
 				},
-				this,
+				this
 			);
 
 			this.units.push(unit);
@@ -78,4 +74,3 @@ class ThreeRenderer {
 		taro.client.emit('tick');
 	}
 }
-

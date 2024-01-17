@@ -8,7 +8,8 @@
     },
     "extends": [
         "eslint:recommended",
-        "plugin:@typescript-eslint/recommended"
+        "plugin:@typescript-eslint/recommended",
+        "plugin:prettier/recommended"
     ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
@@ -48,23 +49,12 @@
         "TaroViewport": "writable"
     },
     "plugins": [
-        "@typescript-eslint"
+        "@typescript-eslint",
+        "prettier"
     ],
     "rules": {
         // Alternatives to eval should be used.
         "no-eval": 1,
-
-        // } else {}
-        "brace-style": 1,
-
-        // Indents should be tabs.
-        // Hint: Ctrl + Shift + Z will atuomatically change your indentation in VSCode.
-        "indent": [1, "tab", { "SwitchCase": 1 }],
-
-        // Semicolons and singlequotes should always be used.
-        "semi": [2, "always"],
-        "quotes": [2, "single"], // Backticks preferrably?
-
 
         // Use templating strings with backticks whenever possible.
         "prefer-template": 1,
@@ -106,7 +96,6 @@
         "no-case-declarations": 0,
         "use-isnan": 0,
 
-        "no-trailing-spaces": "error",
         "@typescript-eslint/no-var-requires": "off"
     }
 }
