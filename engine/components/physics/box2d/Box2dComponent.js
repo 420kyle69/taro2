@@ -391,7 +391,9 @@ var PhysicsComponent = TaroEventingClass.extend({
 	destroyWalls: function () {
 		this.walls.forEach(wall => {
 			this.destroyBody(wall);
+			wall.destroy();
 		});
+		this.walls = [];
 	},
 
 	/**

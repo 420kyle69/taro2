@@ -477,12 +477,17 @@ var TaroNetIoServer = {
    * networking data required to allow network commands to operate
    * correctly over the connection.
    * @param {Object} socket The client socket object.
+   * @param {Object} request The socket's originating HTTP request.
    * @private
    */
-	_onClientConnect: function (socket) {
+	_onClientConnect: function (socket, request) {
 		var self = this;
 		var remoteAddress = socket._remoteAddress;
 		let clientRejectReason = null;
+		
+		taro.network._socketById[socket.id] = socket;
+		taro.network._socketByIp[socket._remoteAddress] = socket;
+		taro.network._socketById[socket.id].start = Date.now();
 		
 		if (taro.clusterClient) {
 			clientRejectReason = taro.clusterClient.validateClientConnection(socket);
@@ -495,19 +500,29 @@ var TaroNetIoServer = {
 					`Accepted connection with socket id ${socket.id
 					} ip ${remoteAddress}`
 				);
-				taro.network._socketById[socket.id] = socket;
-				taro.network._socketByIp[socket._remoteAddress] = socket;
 				
-				taro.network.clientIds.push(socket.id);
-				taro.network._socketById[socket.id].start = Date.now();
-				
+				taro.network.clientIds.push(socket.id);				
 				taro.server.socketConnectionCount.connected++;
 				
 				// Store a rooms array for this client
 				taro.network._clientRooms[socket.id] = taro.network._clientRooms[socket.id] || [];
 
 				if (taro.clusterClient)
-					taro.clusterClient.logClientConnect(socket.id);
+					taro.clusterClient.logClientConnect(socket.id);				
+				
+				// trigger joinGame command as part of socket connection, no need for client to send joinGame anymore
+				// joinGame takes care of disconnecting unauthenticated users, banned ips, duplicate IPs, creates a new player and request user data from gs manager and make sure the user exists on moddio
+				const joinGameData = {
+					number: (Math.floor(Math.random() * 999) + 100),
+					_id: socket._token.userId,
+					sessionId: socket._token.sessionId,
+					isAdBlockEnabled: false
+				};
+				const isMobile = !!request.headers['user-agent']?.match(/Android|BlackBerry|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop|moddioapp/i);
+				joinGameData.isMobile = isMobile;
+				const clientId = socket.id;
+				
+				taro.server._onJoinGame(joinGameData, clientId);
 			} else {
 				var reason = 'cannot connect to socket this.emit("connect", socket)';
 				console.log(reason);
