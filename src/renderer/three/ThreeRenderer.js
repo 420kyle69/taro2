@@ -1,6 +1,7 @@
 /// <reference types="@types/google.analytics" />
 var ThreeRenderer = /** @class */ (function () {
     function ThreeRenderer() {
+        var _this = this;
         var _a;
         var renderer = new THREE.WebGLRenderer();
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -14,46 +15,68 @@ var ThreeRenderer = /** @class */ (function () {
         this.controls.enableDamping = true;
         this.scene = new THREE.Scene();
         var geometry = new THREE.BoxGeometry(1, 1, 1);
-        var material = new THREE.MeshBasicMaterial({});
+        var material = new THREE.MeshBasicMaterial({ transparent: true });
         var cube = new THREE.Mesh(geometry, material);
         var textureLoader = new THREE.TextureLoader();
         textureLoader.crossOrigin = 'Anonymous';
         taro.game.data.map.tilesets.forEach(function (tileset) {
             var url = Utils.patchAssetUrl(tileset.image);
+            console.log(url);
             textureLoader.load(url, function (tex) {
+                tex.minFilter = THREE.NearestFilter;
+                tex.magFilter = THREE.NearestFilter;
+                tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
                 cube.material.map = tex;
                 cube.material.needsUpdate = true;
-            });
-        });
-        var map = new THREE.Group();
-        map.translateX(-taro.game.data.map.width / 2);
-        map.translateZ(-taro.game.data.map.height / 2);
-        this.scene.add(map);
-        taro.game.data.map.layers.forEach(function (layer) {
-            if (layer.name === 'floor') {
-                for (var x = 0; x < layer.width; x++) {
-                    for (var z = 0; z < layer.height; z++) {
-                        var newCube = cube.clone();
-                        newCube.position.set(x, 0, z);
-                        newCube.material = newCube.material.clone();
-                        newCube.material.color.setScalar(layer.data[z * layer.width + x] / 300);
-                        map.add(newCube);
-                    }
-                }
-            }
-            if (layer.name === 'walls') {
-                for (var x = 0; x < layer.width; x++) {
-                    for (var z = 0; z < layer.height; z++) {
-                        if (layer.data[z * layer.width + x] !== 0) {
-                            var newCube = cube.clone();
-                            newCube.position.set(x, 1, z);
-                            newCube.material = newCube.material.clone();
-                            newCube.material.color.setScalar(layer.data[z * layer.width + x] / 300);
-                            map.add(newCube);
+                var map = new THREE.Group();
+                map.translateX(-taro.game.data.map.width / 2);
+                map.translateZ(-taro.game.data.map.height / 2);
+                _this.scene.add(map);
+                var tileSize = 64;
+                var texWidth = tex.image.width;
+                var texHeight = tex.image.height;
+                var tilesInRow = texWidth / tileSize;
+                var xStep = tileSize / texWidth;
+                var yStep = tileSize / texHeight;
+                taro.game.data.map.layers.forEach(function (layer) {
+                    if (layer.name === 'floor') {
+                        for (var z = 0; z < layer.height; z++) {
+                            for (var x = 0; x < layer.width; x++) {
+                                var newCube = cube.clone();
+                                newCube.position.set(x, 0, z);
+                                newCube.material = newCube.material.clone();
+                                var tileIdx = layer.data[z * layer.width + x];
+                                var xIdx = (tileIdx % tilesInRow) - 1;
+                                var yIdx = Math.floor(tileIdx / tilesInRow);
+                                newCube.material.map = newCube.material.map.clone();
+                                newCube.material.map.repeat.set(tileSize / texWidth, tileSize / texHeight);
+                                newCube.material.map.offset.x = xStep * xIdx;
+                                newCube.material.map.offset.y = 1 - yStep * yIdx - yStep;
+                                map.add(newCube);
+                            }
                         }
                     }
-                }
-            }
+                    if (layer.name === 'walls') {
+                        for (var z = 0; z < layer.height; z++) {
+                            for (var x = 0; x < layer.width; x++) {
+                                if (layer.data[z * layer.width + x] !== 0) {
+                                    var newCube = cube.clone();
+                                    newCube.position.set(x, 1, z);
+                                    newCube.material = newCube.material.clone();
+                                    var tileIdx = layer.data[z * layer.width + x];
+                                    var xIdx = (tileIdx % tilesInRow) - 1;
+                                    var yIdx = Math.floor(tileIdx / tilesInRow);
+                                    newCube.material.map = newCube.material.map.clone();
+                                    newCube.material.map.repeat.set(tileSize / texWidth, tileSize / texHeight);
+                                    newCube.material.map.offset.x = xStep * xIdx;
+                                    newCube.material.map.offset.y = 1 - yStep * yIdx - yStep;
+                                    map.add(newCube);
+                                }
+                            }
+                        }
+                    }
+                });
+            });
         });
         this.setupInputListeners();
         requestAnimationFrame(this.render.bind(this));
