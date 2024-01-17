@@ -927,3 +927,7 @@ div#dev-console-table {
   right: 15px !important;
   top: 10px;
 }
+
+:where(#custom-ingame-ui-container) > * {
+  pointer-events: auto;
+}
