@@ -13,11 +13,18 @@ class VisibilityMask {
 	tileWidth: number;
 	tileHeight: number;
 	mapExtents: Phaser.Math.Vector2;
-	segments: number[][][];
+	wallSegments: number[][][];
 	walls: Phaser.Geom.Rectangle[];
 
-	// wall data
+	// (static) unit data
+	unitSegments: number[][][];
+	units: Phaser.Geom.Rectangle[];
+
+	// visibility polygon data
 	fov: Phaser.Geom.Rectangle;
+	segments: number[][][];
+	wallsDirty = false;
+	unitsDirty = false;
 
 	constructor(scene: GameScene) {
 		// console.time('CONSTRUCTOR');
@@ -54,7 +61,7 @@ class VisibilityMask {
 
 	getWalls(): void {
 		// console.time('GET WALLS');
-		this.segments = [];
+		this.wallSegments = [];
 		this.walls = [];
 
 		taro.$$('wall').forEach((wall) => {
@@ -66,7 +73,7 @@ class VisibilityMask {
 
 			this.walls.push(Phaser.Geom.Rectangle.FromXY(x, y, x+w, y+h));
 
-			this.segments.push(
+			this.wallSegments.push(
 				[[x, y], [x+w, y]],
 				[[x, y+h], [x+w, y+h]],
 				[[x, y], [x, y+h]],
@@ -74,7 +81,42 @@ class VisibilityMask {
 			);
 
 		});
+
+		this.wallsDirty = true;
 		// console.timeEnd('GET WALLS');
+	}
+
+	getUnits(): void {
+		this.unitSegments = [];
+		this.units = [];
+
+		taro.$$('unit').forEach((unit) => {
+			if (unit._stats.currentBody.type === 'static') {
+				const x = unit._translate.x - unit._bounds2d.x2;
+				const y = unit._translate.y - unit._bounds2d.y2;
+				const w = unit._bounds2d.x;
+				const h = unit._bounds2d.y;
+
+				this.units.push(Phaser.Geom.Rectangle.FromXY(x, y, x+w, y+h));
+
+				this.unitSegments.push(
+					[[x, y], [x+w, y]],
+					[[x, y+h], [x+w, y+h]],
+					[[x, y], [x, y+h]],
+					[[x+w, y], [x+w, y+h]]
+				);
+			}
+		});
+
+		this.unitsDirty = true;
+	}
+
+	rebuildSegments(): void {
+		if (this.wallsDirty || this.unitsDirty) {
+			this.segments = [...this.unitSegments, ...this.wallSegments];
+			this.wallsDirty = false;
+			this.unitsDirty = false;
+		}
 	}
 
 	generateFieldOfView(range: number): void {
@@ -108,6 +150,10 @@ class VisibilityMask {
 		this.walls.forEach((wall) => {
 			this.graph.fillRectShape(wall);
 		});
+		// if include (static) units
+		this.units.forEach((unit) => {
+			this.graph.fillRectShape(unit);
+		});
 
 		// console.timeEnd('VISIBILITY POLYGON');
 		this.scene.cameras.main.setMask(this.mask, false);
@@ -123,6 +169,8 @@ class VisibilityMask {
 	update(): void {
 		this.graph.clear();
 		this.generateFieldOfView(this.range);
+		this.getUnits();
+		this.rebuildSegments();
 		this.visibilityPoly();
 	}
 }
