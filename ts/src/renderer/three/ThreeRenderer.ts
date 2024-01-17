@@ -3,6 +3,7 @@
 class ThreeRenderer {
 	private renderer: THREE.WebGLRenderer;
 	private camera: THREE.PerspectiveCamera;
+	private controls: OrbitControls;
 	private scene: THREE.Scene;
 	private cube: THREE.Mesh;
 
@@ -15,6 +16,9 @@ class ThreeRenderer {
 		this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 		this.camera.position.z = 5;
 
+		this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+		this.controls.enableDamping = true;
+
 		this.scene = new THREE.Scene();
 
 		const geometry = new THREE.BoxGeometry(1, 1, 1);
@@ -23,11 +27,11 @@ class ThreeRenderer {
 		this.scene.add(cube);
 		this.cube = cube;
 
-		taro.client.rendererLoaded.resolve();
+		this.setupInputListeners();
 
 		requestAnimationFrame(this.render.bind(this));
 
-		this.setupInputListeners();
+		taro.client.rendererLoaded.resolve();
 	}
 
 	private setupInputListeners(): void {
@@ -56,6 +60,7 @@ class ThreeRenderer {
 		this.cube.rotation.x += 0.01;
 		this.cube.rotation.y += 0.01;
 
+		this.controls.update();
 		this.renderer.render(this.scene, this.camera);
 
 		taro.client.emit('tick');
