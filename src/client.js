@@ -199,7 +199,8 @@ const Client = TaroEventingClass.extend({
 			taro.addComponent(TaroInputComponent);
 
 			taro.entitiesToRender = new EntitiesToRender();
-			taro.renderer = new PhaserRenderer();
+			// taro.renderer = new PhaserRenderer();
+      taro.renderer = new ThreeRenderer();
 			taro.developerMode = new DeveloperMode();
 
 			if (!window.isStandalone) {
@@ -867,7 +868,7 @@ const Client = TaroEventingClass.extend({
 	// 		}
 	// 	}
 	// },
-	
+
 	queueStreamUpdateData: function(entityId, key, value) {
 		if (taro.client.entityUpdateQueue[entityId] == undefined) {
 			taro.client.entityUpdateQueue[entityId] = {};

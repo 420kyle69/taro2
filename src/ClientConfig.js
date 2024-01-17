@@ -105,6 +105,7 @@ var taroClientConfig = {
 		'renderer/phaser/classes/devmode/Constants.js',
 		'renderer/phaser/classes/devmode/EntityImage.js',
 		'renderer/phaser/PhaserRenderer.js',
+    'renderer/three/ThreeRenderer.js',
 		'/client.js',
 		'/index.js'
 	]
