@@ -13,7 +13,8 @@
 		"types": [
 			"node",
 			"jquery",
-			"phaser"
+			"phaser",
+      "three",
 		]
 	},
 	"include": [
