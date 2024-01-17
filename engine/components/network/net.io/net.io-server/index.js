@@ -936,7 +936,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 							// moved from .on('disconnect') in TaroNetIoServer.js:~588
 							// data contains {WebSocket socket, <Buffer > reason, Number code}
 							taro.network._onSocketDisconnect(data, socket);
-						}, 5000);
+						}, taro.game.data.settings.reconnectGracePeriod);
 					}
 				}
 			});

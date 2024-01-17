@@ -69,6 +69,11 @@ declare class TaroEngine extends TaroClass {
 		enableDebug(flags: number): void;
 		disableDebug(): void;
 		engine: 'BOX2DWASM' | 'BOX2DWEB' | 'PLANCK';
+		metaData: any;
+		getPointer?: (...args: any) => any;
+		recordLeak?: (...args: any) => any;
+		tryRecordLeak?: (...args: any) => any;
+		destroyB2dObj?: (...args: any) => any;
 		box2D?: typeof Box2D & EmscriptenModule
 		_scaleRatio: number;
 	};
