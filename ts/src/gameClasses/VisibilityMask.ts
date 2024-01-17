@@ -10,8 +10,8 @@ class VisibilityMask {
 	// map data
 	width: number;
 	height: number;
-	tilewidth: number;
-	tileheight: number;
+	tileWidth: number;
+	tileHeight: number;
 	mapExtents: Phaser.Math.Vector2;
 	segments: number[][][];
 	walls: Phaser.Geom.Rectangle[];
@@ -20,28 +20,30 @@ class VisibilityMask {
 	fov: Phaser.Geom.Rectangle;
 
 	constructor(scene: GameScene) {
-		console.time('CONSTRUCTOR');
+		// console.time('CONSTRUCTOR');
 		this.scene = scene;
 		this.player = Phaser.Math.Vector2.ZERO;
 		this.graph = this.scene.add.graphics();
 
 		// definitely some redundancy here
-		const { width, height, tilewidth, tileheight } = taro.map.data;
+		const { width, height } = taro.game.data.map;
+		const { tileWidth, tileHeight } = taro.scaleMapDetails;
+
 		this.width = width;
 		this.height = height;
-		this.tilewidth = tilewidth;
-		this.tileheight = tileheight;
+		this.tileWidth = tileWidth;
+		this.tileHeight = tileHeight;
 		// vector to store the bottom right boundary of the map
 		this.mapExtents = new Phaser.Math.Vector2(
 			// x
-			this.width * this.tilewidth,
+			this.width * this.tileWidth,
 			// y
-			this.height * this.tileheight
+			this.height * this.tileHeight
 		);
 		this.getWalls();
 
 		this.mask = new Phaser.Display.Masks.GeometryMask(scene, this.graph);
-		console.timeEnd('CONSTRUCTOR');
+		// console.timeEnd('CONSTRUCTOR');
 	}
 
 	unMaskWalls(): void {
@@ -51,7 +53,7 @@ class VisibilityMask {
 	}
 
 	getWalls(): void {
-		console.time('GET WALLS');
+		// console.time('GET WALLS');
 		this.segments = [];
 		this.walls = [];
 
@@ -72,7 +74,7 @@ class VisibilityMask {
 			);
 
 		});
-		console.timeEnd('GET WALLS');
+		// console.timeEnd('GET WALLS');
 	}
 
 	generateFieldOfView(range: number): void {
@@ -98,6 +100,7 @@ class VisibilityMask {
 		data.forEach((point) => {
 			poly.push(new Phaser.Geom.Point(point[0], point[1]));
 		});
+
 		this.graph.fillStyle(0xFF9999, 0)
 			.fillPoints(poly, true);
 

@@ -1,24 +1,25 @@
 var VisibilityMask = /** @class */ (function () {
     function VisibilityMask(scene) {
-        console.time('CONSTRUCTOR');
+        // console.time('CONSTRUCTOR');
         this.scene = scene;
         this.player = Phaser.Math.Vector2.ZERO;
         this.graph = this.scene.add.graphics();
         // definitely some redundancy here
-        var _a = taro.map.data, width = _a.width, height = _a.height, tilewidth = _a.tilewidth, tileheight = _a.tileheight;
+        var _a = taro.game.data.map, width = _a.width, height = _a.height;
+        var _b = taro.scaleMapDetails, tileWidth = _b.tileWidth, tileHeight = _b.tileHeight;
         this.width = width;
         this.height = height;
-        this.tilewidth = tilewidth;
-        this.tileheight = tileheight;
+        this.tileWidth = tileWidth;
+        this.tileHeight = tileHeight;
         // vector to store the bottom right boundary of the map
         this.mapExtents = new Phaser.Math.Vector2(
         // x
-        this.width * this.tilewidth, 
+        this.width * this.tileWidth, 
         // y
-        this.height * this.tileheight);
+        this.height * this.tileHeight);
         this.getWalls();
         this.mask = new Phaser.Display.Masks.GeometryMask(scene, this.graph);
-        console.timeEnd('CONSTRUCTOR');
+        // console.timeEnd('CONSTRUCTOR');
     }
     VisibilityMask.prototype.unMaskWalls = function () {
         var _this = this;
@@ -28,7 +29,7 @@ var VisibilityMask = /** @class */ (function () {
     };
     VisibilityMask.prototype.getWalls = function () {
         var _this = this;
-        console.time('GET WALLS');
+        // console.time('GET WALLS');
         this.segments = [];
         this.walls = [];
         taro.$$('wall').forEach(function (wall) {
@@ -39,7 +40,7 @@ var VisibilityMask = /** @class */ (function () {
             _this.walls.push(Phaser.Geom.Rectangle.FromXY(x, y, x + w, y + h));
             _this.segments.push([[x, y], [x + w, y]], [[x, y + h], [x + w, y + h]], [[x, y], [x, y + h]], [[x + w, y], [x + w, y + h]]);
         });
-        console.timeEnd('GET WALLS');
+        // console.timeEnd('GET WALLS');
     };
     VisibilityMask.prototype.generateFieldOfView = function (range) {
         this.range = range;
