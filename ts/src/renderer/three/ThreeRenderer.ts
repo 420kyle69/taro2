@@ -163,6 +163,7 @@ class ThreeRenderer {
 				(data: { x: number; y: number; rotation: number }) => {
 					unit._translate.x = data.x;
 					unit._translate.y = data.y;
+					unit._rotate.z = data.rotation;
 				},
 				this
 			);
@@ -211,6 +212,7 @@ class ThreeRenderer {
 			for (let i = 0; i < this.units.length; i++) {
 				const u = this.units[i];
 				this.entities[i].position.set(u._translate.x / 64 - 0.5, 2, u._translate.y / 64 - 0.5);
+				this.entities[i].rotation.y = -u._rotate.z;
 			}
 		}
 

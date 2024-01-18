@@ -140,6 +140,7 @@ var ThreeRenderer = /** @class */ (function () {
             unit.on('transform', function (data) {
                 unit._translate.x = data.x;
                 unit._translate.y = data.y;
+                unit._rotate.z = data.rotation;
             }, _this);
             _this.units.push(unit);
             var tex = _this.textures.get(unit._stats.cellSheet.url);
@@ -176,6 +177,7 @@ var ThreeRenderer = /** @class */ (function () {
             for (var i = 0; i < this.units.length; i++) {
                 var u = this.units[i];
                 this.entities[i].position.set(u._translate.x / 64 - 0.5, 2, u._translate.y / 64 - 0.5);
+                this.entities[i].rotation.y = -u._rotate.z;
             }
         }
         this.controls.update();
