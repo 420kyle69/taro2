@@ -6,6 +6,8 @@ class ThreeRenderer {
 	private controls: OrbitControls;
 	private scene: THREE.Scene;
 
+	private textures: Map<string, THREE.Texture> = new Map();
+
 	private units: Unit[] = [];
 	private entities: THREE.Mesh[] = [];
 
@@ -29,43 +31,105 @@ class ThreeRenderer {
 
 		this.scene = new THREE.Scene();
 
+		THREE.DefaultLoadingManager.onLoad = () => {
+			console.log(this.textures);
+			this.init();
+			this.setupInputListeners();
+			taro.client.rendererLoaded.resolve();
+			requestAnimationFrame(this.render.bind(this));
+		};
+
+		this.loadTextures();
+	}
+
+	private loadTextures() {
+		const textureLoader = new THREE.TextureLoader();
+		const data = taro.game.data;
+
+		data.map.tilesets.forEach((tileset) => {
+			const key = tileset.image;
+			const url = Utils.patchAssetUrl(key);
+			textureLoader.load(url, (tex) => this.textures.set(key, tex));
+		});
+
+		for (let type in data.unitTypes) {
+			const cellSheet = data.unitTypes[type].cellSheet;
+			if (!cellSheet) continue;
+			const key = cellSheet.url;
+			const url = Utils.patchAssetUrl(key);
+			textureLoader.load(url, (tex) => this.textures.set(cellSheet.url, tex));
+		}
+
+		for (let type in data.projectileTypes) {
+			const cellSheet = data.projectileTypes[type].cellSheet;
+			if (!cellSheet) continue;
+			const key = cellSheet.url;
+			const url = Utils.patchAssetUrl(key);
+			textureLoader.load(url, (tex) => this.textures.set(cellSheet.url, tex));
+		}
+
+		for (let type in data.particleTypes) {
+			const key = data.particleTypes[type].url;
+			const url = Utils.patchAssetUrl(key);
+			textureLoader.load(url, (tex) => this.textures.set(key, tex));
+		}
+	}
+
+	private init() {
 		const geometry = new THREE.BoxGeometry(1, 1, 1);
 		const material = new THREE.MeshBasicMaterial({ transparent: true });
 		const cube = new THREE.Mesh(geometry, material);
 
-		const textureLoader = new THREE.TextureLoader();
-		textureLoader.crossOrigin = 'Anonymous';
-
 		taro.game.data.map.tilesets.forEach((tileset) => {
-			const url = Utils.patchAssetUrl(tileset.image);
-			console.log(url);
-			textureLoader.load(url, (tex) => {
-				tex.minFilter = THREE.NearestFilter;
-				tex.magFilter = THREE.NearestFilter;
-				tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+			const tex = this.textures.get(tileset.image);
+			tex.minFilter = THREE.NearestFilter;
+			tex.magFilter = THREE.NearestFilter;
+			tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
 
-				cube.material.map = tex;
-				cube.material.needsUpdate = true;
+			cube.material.map = tex;
+			cube.material.needsUpdate = true;
 
-				const map = new THREE.Group();
-				map.translateX(-taro.game.data.map.width / 2);
-				map.translateZ(-taro.game.data.map.height / 2);
-				this.scene.add(map);
+			const map = new THREE.Group();
+			map.translateX(-taro.game.data.map.width / 2);
+			map.translateZ(-taro.game.data.map.height / 2);
+			this.scene.add(map);
 
-				const tileSize = 64;
-				const texWidth = tex.image.width;
-				const texHeight = tex.image.height;
-				const tilesInRow = texWidth / tileSize;
+			const tileSize = 64;
+			const texWidth = tex.image.width;
+			const texHeight = tex.image.height;
+			const tilesInRow = texWidth / tileSize;
 
-				const xStep = tileSize / texWidth;
-				const yStep = tileSize / texHeight;
+			const xStep = tileSize / texWidth;
+			const yStep = tileSize / texHeight;
 
-				taro.game.data.map.layers.forEach((layer) => {
-					if (layer.name === 'floor') {
-						for (let z = 0; z < layer.height; z++) {
-							for (let x = 0; x < layer.width; x++) {
+			taro.game.data.map.layers.forEach((layer) => {
+				if (layer.name === 'floor') {
+					for (let z = 0; z < layer.height; z++) {
+						for (let x = 0; x < layer.width; x++) {
+							const newCube = cube.clone();
+							newCube.position.set(x, 0, z);
+							newCube.material = newCube.material.clone();
+
+							const tileIdx = layer.data[z * layer.width + x];
+							const xIdx = (tileIdx % tilesInRow) - 1;
+							const yIdx = Math.floor(tileIdx / tilesInRow);
+
+							newCube.material.map = newCube.material.map.clone();
+							newCube.material.map.repeat.set(tileSize / texWidth, tileSize / texHeight);
+							newCube.material.map.offset.x = xStep * xIdx;
+							newCube.material.map.offset.y = 1 - yStep * yIdx - yStep;
+
+							map.add(newCube);
+						}
+					}
+				}
+
+				if (layer.name === 'walls') {
+					for (let z = 0; z < layer.height; z++) {
+						for (let x = 0; x < layer.width; x++) {
+							if (layer.data[z * layer.width + x] !== 0) {
 								const newCube = cube.clone();
-								newCube.position.set(x, 0, z);
+								newCube.position.set(x, 1, z);
 								newCube.material = newCube.material.clone();
 
 								const tileIdx = layer.data[z * layer.width + x];
@@ -81,36 +145,9 @@ class ThreeRenderer {
 							}
 						}
 					}
-
-					if (layer.name === 'walls') {
-						for (let z = 0; z < layer.height; z++) {
-							for (let x = 0; x < layer.width; x++) {
-								if (layer.data[z * layer.width + x] !== 0) {
-									const newCube = cube.clone();
-									newCube.position.set(x, 1, z);
-									newCube.material = newCube.material.clone();
-
-									const tileIdx = layer.data[z * layer.width + x];
-									const xIdx = (tileIdx % tilesInRow) - 1;
-									const yIdx = Math.floor(tileIdx / tilesInRow);
-
-									newCube.material.map = newCube.material.map.clone();
-									newCube.material.map.repeat.set(tileSize / texWidth, tileSize / texHeight);
-									newCube.material.map.offset.x = xStep * xIdx;
-									newCube.material.map.offset.y = 1 - yStep * yIdx - yStep;
-
-									map.add(newCube);
-								}
-							}
-						}
-					}
-				});
+				}
 			});
 		});
-
-		// get tileset for entities
-		// spawn entities
-		// update entities transforms
 
 		const entities = new THREE.Group();
 		entities.translateX(-taro.game.data.map.width / 2);
@@ -118,6 +155,9 @@ class ThreeRenderer {
 		this.scene.add(entities);
 
 		taro.client.on('create-unit', (unit: Unit) => {
+			console.log(unit);
+			console.log(unit._stats.cellSheet.url);
+
 			unit.on(
 				'transform',
 				(data: { x: number; y: number; rotation: number }) => {
@@ -140,12 +180,6 @@ class ThreeRenderer {
 
 			this;
 		});
-
-		this.setupInputListeners();
-
-		requestAnimationFrame(this.render.bind(this));
-
-		taro.client.rendererLoaded.resolve();
 	}
 
 	private setupInputListeners(): void {
