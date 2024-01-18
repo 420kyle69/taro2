@@ -6,17 +6,20 @@ class ThreeRenderer {
 	private controls: OrbitControls;
 	private scene: THREE.Scene;
 
+	private units: Unit[] = [];
+	private entities: THREE.Mesh[] = [];
+
 	constructor() {
 		const renderer = new THREE.WebGLRenderer();
 		renderer.setSize(window.innerWidth, window.innerHeight);
 		document.querySelector('#game-div')?.appendChild(renderer.domElement);
 		this.renderer = renderer;
 
-		// const width = window.innerHeight;
-		// const height = window.innerHeight;
-		// this.camera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 1, 1000);
+		const width = window.innerWidth;
+		const height = window.innerHeight;
+		this.camera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 1, 1000);
 
-		this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+		// this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 		this.camera.position.y = 20;
 		this.camera.position.z = 20;
 
@@ -29,10 +32,6 @@ class ThreeRenderer {
 		const geometry = new THREE.BoxGeometry(1, 1, 1);
 		const material = new THREE.MeshBasicMaterial({ transparent: true });
 		const cube = new THREE.Mesh(geometry, material);
-
-		// get tileset for entities
-		// spawn entities
-		// update entities transforms
 
 		const textureLoader = new THREE.TextureLoader();
 		textureLoader.crossOrigin = 'Anonymous';
@@ -109,6 +108,39 @@ class ThreeRenderer {
 			});
 		});
 
+		// get tileset for entities
+		// spawn entities
+		// update entities transforms
+
+		const entities = new THREE.Group();
+		entities.translateX(-taro.game.data.map.width / 2);
+		entities.translateZ(-taro.game.data.map.height / 2);
+		this.scene.add(entities);
+
+		taro.client.on('create-unit', (unit: Unit) => {
+			unit.on(
+				'transform',
+				(data: { x: number; y: number; rotation: number }) => {
+					unit._translate.x = data.x;
+					unit._translate.y = data.y;
+				},
+				this
+			);
+
+			this.units.push(unit);
+
+			const newCube = cube.clone();
+			newCube.scale.set(0.5, 0.5, 0.5);
+			newCube.position.set(unit._translate.x / 64, 2, unit._translate.y / 64);
+			newCube.material = newCube.material.clone();
+			newCube.material.map = null;
+			entities.add(newCube);
+
+			this.entities.push(newCube);
+
+			this;
+		});
+
 		this.setupInputListeners();
 
 		requestAnimationFrame(this.render.bind(this));
@@ -138,6 +170,13 @@ class ThreeRenderer {
 
 	render() {
 		requestAnimationFrame(this.render.bind(this));
+
+		if (this.units.length > 0) {
+			for (let i = 0; i < this.units.length; i++) {
+				const u = this.units[i];
+				this.entities[i].position.set(u._translate.x / 64 - 0.5, 2, u._translate.y / 64 - 0.5);
+			}
+		}
 
 		this.controls.update();
 		this.renderer.render(this.scene, this.camera);

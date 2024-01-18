@@ -3,14 +3,16 @@ var ThreeRenderer = /** @class */ (function () {
     function ThreeRenderer() {
         var _this = this;
         var _a;
+        this.units = [];
+        this.entities = [];
         var renderer = new THREE.WebGLRenderer();
         renderer.setSize(window.innerWidth, window.innerHeight);
         (_a = document.querySelector('#game-div')) === null || _a === void 0 ? void 0 : _a.appendChild(renderer.domElement);
         this.renderer = renderer;
-        // const width = window.innerHeight;
-        // const height = window.innerHeight;
-        // this.camera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 1, 1000);
-        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        var width = window.innerWidth;
+        var height = window.innerHeight;
+        this.camera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 1, 1000);
+        // this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.camera.position.y = 20;
         this.camera.position.z = 20;
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
@@ -20,9 +22,6 @@ var ThreeRenderer = /** @class */ (function () {
         var geometry = new THREE.BoxGeometry(1, 1, 1);
         var material = new THREE.MeshBasicMaterial({ transparent: true });
         var cube = new THREE.Mesh(geometry, material);
-        // get tileset for entities
-        // spawn entities
-        // update entities transforms
         var textureLoader = new THREE.TextureLoader();
         textureLoader.crossOrigin = 'Anonymous';
         taro.game.data.map.tilesets.forEach(function (tileset) {
@@ -84,6 +83,28 @@ var ThreeRenderer = /** @class */ (function () {
                 });
             });
         });
+        // get tileset for entities
+        // spawn entities
+        // update entities transforms
+        var entities = new THREE.Group();
+        entities.translateX(-taro.game.data.map.width / 2);
+        entities.translateZ(-taro.game.data.map.height / 2);
+        this.scene.add(entities);
+        taro.client.on('create-unit', function (unit) {
+            unit.on('transform', function (data) {
+                unit._translate.x = data.x;
+                unit._translate.y = data.y;
+            }, _this);
+            _this.units.push(unit);
+            var newCube = cube.clone();
+            newCube.scale.set(0.5, 0.5, 0.5);
+            newCube.position.set(unit._translate.x / 64, 2, unit._translate.y / 64);
+            newCube.material = newCube.material.clone();
+            newCube.material.map = null;
+            entities.add(newCube);
+            _this.entities.push(newCube);
+            _this;
+        });
         this.setupInputListeners();
         requestAnimationFrame(this.render.bind(this));
         taro.client.rendererLoaded.resolve();
@@ -106,6 +127,12 @@ var ThreeRenderer = /** @class */ (function () {
     };
     ThreeRenderer.prototype.render = function () {
         requestAnimationFrame(this.render.bind(this));
+        if (this.units.length > 0) {
+            for (var i = 0; i < this.units.length; i++) {
+                var u = this.units[i];
+                this.entities[i].position.set(u._translate.x / 64 - 0.5, 2, u._translate.y / 64 - 0.5);
+            }
+        }
         this.controls.update();
         this.renderer.render(this.scene, this.camera);
         taro.client.emit('tick');
