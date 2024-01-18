@@ -474,21 +474,25 @@ var ShopComponent = TaroEntity.extend({
 					}
 
 					$('#purchasable-purchase-modal').modal('hide');
+
+					let backgroundImage = document.getElementById(itemId + "_image")?.style?.backgroundImage;
+					let link = backgroundImage?.slice(4, backgroundImage.length - 1);
+
 					self.updateModdShop();
 					self.updateSkinList(itemId);
 
-					// update skin menu on game page
 					var details = $(`.btn-purchase-purchasable#${itemId}`);
 					var purchasableInfo = details.find('.purchasable-details');
 					if (purchasableInfo && purchasableInfo.html) {
 						details.removeClass('btn-purchase-purchasable');
 						purchasableInfo.html('<span class=\'fas fa-check text-success\'></span>');
-					}
+					}					
 
 					window.purchased({
 						type: "ingame-skin",
 						value: itemId,
 						status: "success",
+						backgroundImage: link,
 						...purchasableInfo,
 					});
 
@@ -675,8 +679,9 @@ var ShopComponent = TaroEntity.extend({
 			unitKeys = unitKeys.sort();
 
 			// If logged in, add purchased skins to user skin count
-			if (isLoggedIn) 
-			unitKeys = ['Purchased', ...unitKeys]
+			if (isLoggedIn) {
+				unitKeys = ['Purchased', ...unitKeys]
+			}
 
 			// generating li column for unit type selection
 			for (var p = 0; p < unitKeys.length; p++) {
