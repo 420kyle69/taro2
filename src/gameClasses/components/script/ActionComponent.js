@@ -473,7 +473,7 @@ var ActionComponent = TaroEntity.extend({
 						break;
 					case 'setPlayerName':
 
-						var name = self._script.variable.getValue(action.name, vars);
+						var name = taro.chat.filter.cleanHacked(self._script.variable.getValue(action.name, vars));
 						var player = self._script.variable.getValue(action.player, vars);
 
 						if (player && player._category == 'player') {
@@ -1442,7 +1442,7 @@ var ActionComponent = TaroEntity.extend({
 
 					case 'setUnitNameLabel':
 						var unit = self._script.variable.getValue(action.unit, vars);
-						var name = self._script.variable.getValue(action.name, vars);
+						var name = taro.chat.filter.cleanHacked(self._script.variable.getValue(action.name, vars));
 						if (unit) {
 							unit.streamUpdateData([{ name: name }]);
 						}
