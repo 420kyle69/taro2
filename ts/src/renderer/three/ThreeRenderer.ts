@@ -167,8 +167,17 @@ class ThreeRenderer {
 		this.scene.add(entities);
 
 		taro.client.on('create-unit', (unit: Unit) => {
-			console.log(unit);
-			console.log(unit._stats.cellSheet.url);
+			this.units.push(unit);
+
+			const tex = this.textures.get(unit._stats.cellSheet.url);
+			const newCube = cube.clone();
+			newCube.scale.set(tex.image.width / 64, 1, tex.image.height / 64);
+			newCube.position.set(unit._translate.x / 64, 2, unit._translate.y / 64);
+			newCube.material = newCube.material.clone();
+			newCube.material.map = this.textures.get(unit._stats.cellSheet.url);
+			entities.add(newCube);
+
+			this.entities.push(newCube);
 
 			unit.on(
 				'transform',
@@ -180,18 +189,15 @@ class ThreeRenderer {
 				this
 			);
 
-			this.units.push(unit);
-
-			const tex = this.textures.get(unit._stats.cellSheet.url);
-			const newCube = cube.clone();
-			newCube.scale.set(tex.image.width / 64, 1, tex.image.height / 64);
-			newCube.position.set(unit._translate.x / 64, 2, unit._translate.y / 64);
-			newCube.rotateY(-unit._rotate.z);
-			newCube.material = newCube.material.clone();
-			newCube.material.map = this.textures.get(unit._stats.cellSheet.url);
-			entities.add(newCube);
-
-			this.entities.push(newCube);
+			unit.on(
+				'size',
+				(data: { width: number; height: number }) => {
+					unit._scale.x = data.width / 64;
+					unit._scale.y = data.height / 64;
+					newCube.scale.set(unit._scale.x, 1, unit._scale.y);
+				},
+				this
+			);
 
 			this;
 		});

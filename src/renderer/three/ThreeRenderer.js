@@ -147,23 +147,25 @@ var ThreeRenderer = /** @class */ (function () {
         entities.translateZ(-taro.game.data.map.height / 2);
         this.scene.add(entities);
         taro.client.on('create-unit', function (unit) {
-            console.log(unit);
-            console.log(unit._stats.cellSheet.url);
-            unit.on('transform', function (data) {
-                unit._translate.x = data.x;
-                unit._translate.y = data.y;
-                unit._rotate.z = data.rotation;
-            }, _this);
             _this.units.push(unit);
             var tex = _this.textures.get(unit._stats.cellSheet.url);
             var newCube = cube.clone();
             newCube.scale.set(tex.image.width / 64, 1, tex.image.height / 64);
             newCube.position.set(unit._translate.x / 64, 2, unit._translate.y / 64);
-            newCube.rotateY(-unit._rotate.z);
             newCube.material = newCube.material.clone();
             newCube.material.map = _this.textures.get(unit._stats.cellSheet.url);
             entities.add(newCube);
             _this.entities.push(newCube);
+            unit.on('transform', function (data) {
+                unit._translate.x = data.x;
+                unit._translate.y = data.y;
+                unit._rotate.z = data.rotation;
+            }, _this);
+            unit.on('size', function (data) {
+                unit._scale.x = data.width / 64;
+                unit._scale.y = data.height / 64;
+                newCube.scale.set(unit._scale.x, 1, unit._scale.y);
+            }, _this);
             _this;
         });
     };
