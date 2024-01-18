@@ -36,7 +36,10 @@ var ThreeRenderer = /** @class */ (function () {
         data.map.tilesets.forEach(function (tileset) {
             var key = tileset.image;
             var url = Utils.patchAssetUrl(key);
-            textureLoader.load(url, function (tex) { return _this.textures.set(key, tex); });
+            textureLoader.load(url, function (tex) {
+                tex.colorSpace = THREE.SRGBColorSpace;
+                _this.textures.set(key, tex);
+            });
         });
         var _loop_1 = function (type) {
             var cellSheet = data.unitTypes[type].cellSheet;
@@ -44,7 +47,10 @@ var ThreeRenderer = /** @class */ (function () {
                 return "continue";
             var key = cellSheet.url;
             var url = Utils.patchAssetUrl(key);
-            textureLoader.load(url, function (tex) { return _this.textures.set(cellSheet.url, tex); });
+            textureLoader.load(url, function (tex) {
+                tex.colorSpace = THREE.SRGBColorSpace;
+                _this.textures.set(key, tex);
+            });
         };
         for (var type in data.unitTypes) {
             _loop_1(type);
@@ -55,7 +61,10 @@ var ThreeRenderer = /** @class */ (function () {
                 return "continue";
             var key = cellSheet.url;
             var url = Utils.patchAssetUrl(key);
-            textureLoader.load(url, function (tex) { return _this.textures.set(cellSheet.url, tex); });
+            textureLoader.load(url, function (tex) {
+                tex.colorSpace = THREE.SRGBColorSpace;
+                _this.textures.set(key, tex);
+            });
         };
         for (var type in data.projectileTypes) {
             _loop_2(type);
@@ -63,7 +72,10 @@ var ThreeRenderer = /** @class */ (function () {
         var _loop_3 = function (type) {
             var key = data.particleTypes[type].url;
             var url = Utils.patchAssetUrl(key);
-            textureLoader.load(url, function (tex) { return _this.textures.set(key, tex); });
+            textureLoader.load(url, function (tex) {
+                tex.colorSpace = THREE.SRGBColorSpace;
+                _this.textures.set(key, tex);
+            });
         };
         for (var type in data.particleTypes) {
             _loop_3(type);

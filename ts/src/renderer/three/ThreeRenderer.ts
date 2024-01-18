@@ -49,7 +49,10 @@ class ThreeRenderer {
 		data.map.tilesets.forEach((tileset) => {
 			const key = tileset.image;
 			const url = Utils.patchAssetUrl(key);
-			textureLoader.load(url, (tex) => this.textures.set(key, tex));
+			textureLoader.load(url, (tex) => {
+				tex.colorSpace = THREE.SRGBColorSpace;
+				this.textures.set(key, tex);
+			});
 		});
 
 		for (let type in data.unitTypes) {
@@ -57,7 +60,10 @@ class ThreeRenderer {
 			if (!cellSheet) continue;
 			const key = cellSheet.url;
 			const url = Utils.patchAssetUrl(key);
-			textureLoader.load(url, (tex) => this.textures.set(cellSheet.url, tex));
+			textureLoader.load(url, (tex) => {
+				tex.colorSpace = THREE.SRGBColorSpace;
+				this.textures.set(key, tex);
+			});
 		}
 
 		for (let type in data.projectileTypes) {
@@ -65,13 +71,19 @@ class ThreeRenderer {
 			if (!cellSheet) continue;
 			const key = cellSheet.url;
 			const url = Utils.patchAssetUrl(key);
-			textureLoader.load(url, (tex) => this.textures.set(cellSheet.url, tex));
+			textureLoader.load(url, (tex) => {
+				tex.colorSpace = THREE.SRGBColorSpace;
+				this.textures.set(key, tex);
+			});
 		}
 
 		for (let type in data.particleTypes) {
 			const key = data.particleTypes[type].url;
 			const url = Utils.patchAssetUrl(key);
-			textureLoader.load(url, (tex) => this.textures.set(key, tex));
+			textureLoader.load(url, (tex) => {
+				tex.colorSpace = THREE.SRGBColorSpace;
+				this.textures.set(key, tex);
+			});
 		}
 	}
 
