@@ -10,10 +10,10 @@ var ThreeRenderer = /** @class */ (function () {
         renderer.setSize(window.innerWidth, window.innerHeight);
         (_a = document.querySelector('#game-div')) === null || _a === void 0 ? void 0 : _a.appendChild(renderer.domElement);
         this.renderer = renderer;
-        var width = window.innerWidth;
-        var height = window.innerHeight;
-        this.camera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 1, 1000);
-        // this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        // const width = window.innerWidth;
+        // const height = window.innerHeight;
+        // this.camera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 1, 1000);
+        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.camera.position.y = 20;
         this.camera.position.z = 20;
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
