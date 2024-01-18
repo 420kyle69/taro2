@@ -172,7 +172,7 @@ class ThreeRenderer {
 			const tex = this.textures.get(unit._stats.cellSheet.url);
 			const newCube = cube.clone();
 			newCube.scale.set(tex.image.width / 64, 1, tex.image.height / 64);
-			newCube.position.set(unit._translate.x / 64, 2, unit._translate.y / 64);
+			newCube.position.set(unit._translate.x / 64, 1, unit._translate.y / 64);
 			newCube.material = newCube.material.clone();
 			newCube.material.map = this.textures.get(unit._stats.cellSheet.url);
 			entities.add(newCube);
@@ -229,7 +229,7 @@ class ThreeRenderer {
 		if (this.units.length > 0) {
 			for (let i = 0; i < this.units.length; i++) {
 				const u = this.units[i];
-				this.entities[i].position.set(u._translate.x / 64 - 0.5, 2, u._translate.y / 64 - 0.5);
+				this.entities[i].position.set(u._translate.x / 64 - 0.5, 1, u._translate.y / 64 - 0.5);
 				this.entities[i].rotation.y = -u._rotate.z;
 			}
 		}
