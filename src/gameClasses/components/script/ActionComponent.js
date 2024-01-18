@@ -1968,7 +1968,7 @@ var ActionComponent = TaroEntity.extend({
 						var width = self._script.variable.getValue(action.width, vars);
 						var height = self._script.variable.getValue(action.height, vars);
 
-						if (taro.isClient && width && height) {
+						if (taro.isClient && !isNaN(width) && !isNaN(height)) {
 							taro.client.emit('deadzone-camera', [width, height]);
 						}
 						break;

@@ -76,6 +76,8 @@ interface MapData {
 	haveUnsavedChanges: boolean;
 	tilewidth: number;
 	tileheight: number;
+	originalTileWidth: number;
+	originalTileHeight: number;
 	width: number,
 	height: number,
 	tilesets: {

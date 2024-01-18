@@ -464,7 +464,7 @@ class DeveloperMode {
 
 					data.showModal = true;
 				}
-	
+
 				data.userId = taro.game.getPlayerByClientId(clientId)._stats.userId;
 				// changed to Region from RegionUi
 				const regionData = {
@@ -532,7 +532,7 @@ class DeveloperMode {
 			Object.entries(data).forEach(([key, variable]) => {
 				if (variable.dataType === 'region')	{
 					const regionData: RegionData = {name: key};
-					
+
 					if (variable.newKey) regionData.newKey = variable.newKey;
 					if (!isNaN(variable.value?.x)) regionData.x = variable.value.x;
 					if (!isNaN(variable.value?.y)) regionData.y = variable.value.y;
@@ -852,7 +852,7 @@ class DeveloperMode {
 						case 'update':
 							this.updateItem(data);
 							break;
-						
+
 						case 'reset':
 							this.resetItem(data);
 							break;

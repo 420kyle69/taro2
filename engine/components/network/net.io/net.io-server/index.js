@@ -936,7 +936,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 							// moved from .on('disconnect') in TaroNetIoServer.js:~588
 							// data contains {WebSocket socket, <Buffer > reason, Number code}
 							taro.network._onSocketDisconnect(data, socket);
-						}, taro.game.data.settings.reconnectGracePeriod);
+						}, 5000);
 					}
 				}
 			});
@@ -951,19 +951,8 @@ NetIo.Server = NetIo.EventingClass.extend({
 			}
 
 			// add socket message listeners, send 'init' message to client
-			self.emit('connection', [socket]);
-
-			// trigger joinGame command as part of socket connection, no need for client to send joinGame anymore
-			// joinGame takes care of disconnecting unauthenticated users, banned ips, duplicate IPs, creates a new player and request user data from gs manager and make sure the user exists on moddio
-			const joinGameData = {
-				number: (Math.floor(Math.random() * 999) + 100),
-				_id: socket._token.userId,
-				sessionId: socket._token.sessionId,
-				isAdBlockEnabled: false
-			};
-			const clientId = socket.id;
-
-			taro.server._onJoinGame(joinGameData, clientId);
+			self.emit('connection', [socket, request]);
+			
 		} else {
 			// PING service only
 			// Tell the client their new ID
@@ -977,7 +966,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 				});
 
 				// add socket message listeners, send 'init' message to client
-				self.emit('connection', [socket]);
+				self.emit('connection', [socket, request]);
 
 				socket._token = {
 					userId: '',
@@ -1001,6 +990,8 @@ NetIo.Server = NetIo.EventingClass.extend({
 					sessionId: socket._token.sessionId,
 					isAdBlockEnabled: false
 				};
+				const isMobile = !!request.headers['user-agent']?.match(/Android|BlackBerry|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop|moddioapp/i);
+				joinGameData.isMobile = isMobile;
 
 				const clientId = socket.id;
 
