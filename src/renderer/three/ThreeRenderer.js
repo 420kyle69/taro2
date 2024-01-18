@@ -146,7 +146,7 @@ var ThreeRenderer = /** @class */ (function () {
             newCube.scale.set(0.5, 0.5, 0.5);
             newCube.position.set(unit._translate.x / 64, 2, unit._translate.y / 64);
             newCube.material = newCube.material.clone();
-            newCube.material.map = null;
+            newCube.material.map = _this.textures.get(unit._stats.cellSheet.url);
             entities.add(newCube);
             _this.entities.push(newCube);
             _this;
