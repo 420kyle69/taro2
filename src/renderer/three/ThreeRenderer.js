@@ -142,9 +142,11 @@ var ThreeRenderer = /** @class */ (function () {
                 unit._translate.y = data.y;
             }, _this);
             _this.units.push(unit);
+            var tex = _this.textures.get(unit._stats.cellSheet.url);
             var newCube = cube.clone();
-            newCube.scale.set(0.5, 0.5, 0.5);
+            newCube.scale.set(tex.image.width / 64, 1, tex.image.height / 64);
             newCube.position.set(unit._translate.x / 64, 2, unit._translate.y / 64);
+            newCube.rotateY(-unit._rotate.z);
             newCube.material = newCube.material.clone();
             newCube.material.map = _this.textures.get(unit._stats.cellSheet.url);
             entities.add(newCube);
