@@ -2,7 +2,7 @@
 
 class ThreeRenderer {
 	private renderer: THREE.WebGLRenderer;
-	private camera: THREE.PerspectiveCamera;
+	private camera: THREE.Camera;
 	private controls: OrbitControls;
 	private scene: THREE.Scene;
 
@@ -11,6 +11,10 @@ class ThreeRenderer {
 		renderer.setSize(window.innerWidth, window.innerHeight);
 		document.querySelector('#game-div')?.appendChild(renderer.domElement);
 		this.renderer = renderer;
+
+		// const width = window.innerHeight;
+		// const height = window.innerHeight;
+		// this.camera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 1, 1000);
 
 		this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 		this.camera.position.y = 20;
@@ -25,6 +29,10 @@ class ThreeRenderer {
 		const geometry = new THREE.BoxGeometry(1, 1, 1);
 		const material = new THREE.MeshBasicMaterial({ transparent: true });
 		const cube = new THREE.Mesh(geometry, material);
+
+		// get tileset for entities
+		// spawn entities
+		// update entities transforms
 
 		const textureLoader = new THREE.TextureLoader();
 		textureLoader.crossOrigin = 'Anonymous';
