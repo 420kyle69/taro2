@@ -6,15 +6,16 @@ var ThreeRenderer = /** @class */ (function () {
         this.textures = new Map();
         this.units = [];
         this.entities = [];
+        this.pointer = new THREE.Vector2();
         this.followedUnit = null;
         var renderer = new THREE.WebGLRenderer();
         renderer.setSize(window.innerWidth, window.innerHeight);
         (_a = document.querySelector('#game-div')) === null || _a === void 0 ? void 0 : _a.appendChild(renderer.domElement);
         this.renderer = renderer;
-        // const width = window.innerWidth;
-        // const height = window.innerHeight;
-        // this.camera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 1, 1000);
-        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        var width = window.innerWidth;
+        var height = window.innerHeight;
+        this.camera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 1, 1000);
+        // this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.camera.position.y = 20;
         this.camera.position.z = 20;
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
@@ -232,6 +233,9 @@ var ThreeRenderer = /** @class */ (function () {
             }, _this);
             _this;
         });
+        this.renderer.domElement.addEventListener('mousemove', function (evt) {
+            _this.pointer.set((evt.clientX / window.innerWidth) * 2 - 1, -(evt.clientY / window.innerHeight) * 2 + 1);
+        });
     };
     ThreeRenderer.prototype.setupInputListeners = function () {
         // Ask the input component to set up any listeners it has
@@ -251,6 +255,16 @@ var ThreeRenderer = /** @class */ (function () {
     };
     ThreeRenderer.prototype.render = function () {
         requestAnimationFrame(this.render.bind(this));
+        if (this.followedUnit) {
+            var pointer = new THREE.Vector3(this.pointer.x, this.pointer.y, 0.5);
+            pointer.unproject(this.camera);
+            taro.input.emit('pointermove', [
+                {
+                    x: (pointer.x + taro.game.data.map.width / 2 + 0.5) * 64,
+                    y: (pointer.z + taro.game.data.map.height / 2 + 0.5) * 64,
+                },
+            ]);
+        }
         if (this.followedUnit) {
             this.camera.position.set(this.followedUnit._translate.x / 64 - 0.5 - taro.game.data.map.width / 2, this.camera.position.y, this.followedUnit._translate.y / 64 - 0.5 - taro.game.data.map.height / 2);
             this.controls.target.set(this.followedUnit._translate.x / 64 - 0.5 - taro.game.data.map.width / 2, this.controls.target.y, this.followedUnit._translate.y / 64 - 0.5 - taro.game.data.map.height / 2);

@@ -11,6 +11,7 @@ class ThreeRenderer {
 	private units: Unit[] = [];
 	private entities: THREE.Mesh[] = [];
 
+	private pointer = new THREE.Vector2();
 	private followedUnit: Unit | null = null;
 
 	constructor() {
@@ -19,11 +20,11 @@ class ThreeRenderer {
 		document.querySelector('#game-div')?.appendChild(renderer.domElement);
 		this.renderer = renderer;
 
-		// const width = window.innerWidth;
-		// const height = window.innerHeight;
-		// this.camera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 1, 1000);
+		const width = window.innerWidth;
+		const height = window.innerHeight;
+		this.camera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 1, 1000);
 
-		this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+		// this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 		this.camera.position.y = 20;
 		this.camera.position.z = 20;
 
@@ -295,6 +296,10 @@ class ThreeRenderer {
 
 			this;
 		});
+
+		this.renderer.domElement.addEventListener('mousemove', (evt: MouseEvent) => {
+			this.pointer.set((evt.clientX / window.innerWidth) * 2 - 1, -(evt.clientY / window.innerHeight) * 2 + 1);
+		});
 	}
 
 	private setupInputListeners(): void {
@@ -319,6 +324,17 @@ class ThreeRenderer {
 
 	render() {
 		requestAnimationFrame(this.render.bind(this));
+
+		if (this.followedUnit) {
+			const pointer = new THREE.Vector3(this.pointer.x, this.pointer.y, 0.5);
+			pointer.unproject(this.camera);
+			taro.input.emit('pointermove', [
+				{
+					x: (pointer.x + taro.game.data.map.width / 2 + 0.5) * 64,
+					y: (pointer.z + taro.game.data.map.height / 2 + 0.5) * 64,
+				},
+			]);
+		}
 
 		if (this.followedUnit) {
 			this.camera.position.set(
