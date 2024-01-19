@@ -1,4 +1,4 @@
-var dists = {
+const dists = {
     defaultEngine: 'PLANCK',
     /**
      * NOTE:

@@ -8,8 +8,7 @@ class ThreeRenderer {
 
 	private textures: Map<string, THREE.Texture> = new Map();
 
-	private units: Unit[] = [];
-	private entities: THREE.Mesh[] = [];
+	private entities: Entity[] = [];
 
 	private pointer = new THREE.Vector2();
 	private followedUnit: Unit | null = null;
@@ -180,122 +179,43 @@ class ThreeRenderer {
 		entities.translateZ(-taro.game.data.map.height / 2);
 		this.scene.add(entities);
 
-		taro.client.on('create-unit', (unit: Unit) => {
-			this.units.push(unit);
+		const createEntity = (entity: Unit | Item | Projectile) => {
+			const tex = this.textures.get(entity._stats.cellSheet.url);
+			const ent = new Entity(tex, entity);
+			entities.add(ent);
+			this.entities.push(ent);
 
-			const tex = this.textures.get(unit._stats.cellSheet.url);
-			const newCube = cube.clone();
-			newCube.scale.set(tex.image.width / 64, 1, tex.image.height / 64);
-			newCube.position.set(unit._translate.x / 64, 1, unit._translate.y / 64);
-			newCube.material = newCube.material.clone();
-			newCube.material.map = this.textures.get(unit._stats.cellSheet.url);
-			entities.add(newCube);
-
-			this.entities.push(newCube);
-
-			unit.on(
+			entity.on(
 				'transform',
 				(data: { x: number; y: number; rotation: number }) => {
-					unit._translate.x = data.x;
-					unit._translate.y = data.y;
-					unit._rotate.z = data.rotation;
+					entity._translate.x = data.x;
+					entity._translate.y = data.y;
+					entity._rotate.z = data.rotation;
 				},
 				this
 			);
 
-			unit.on(
+			entity.on(
 				'size',
 				(data: { width: number; height: number }) => {
-					unit._scale.x = data.width / 64;
-					unit._scale.y = data.height / 64;
-					newCube.scale.set(unit._scale.x, 1, unit._scale.y);
+					entity._scale.x = data.width / 64;
+					entity._scale.y = data.height / 64;
 				},
 				this
 			);
 
-			unit.on(
+			entity.on(
 				'follow',
 				() => {
-					// console.log('follow ', unit);
-					// newCube.add(this.camera);
-					this.followedUnit = unit;
-				},
-				this
-			),
-				this;
-		});
-
-		taro.client.on('create-item', (item: Item) => {
-			this.units.push(item);
-
-			const tex = this.textures.get(item._stats.cellSheet.url);
-			const newCube = cube.clone();
-			newCube.scale.set(tex.image.width / 64, 1, tex.image.height / 64);
-			newCube.position.set(item._translate.x / 64, 1, item._translate.y / 64);
-			newCube.material = newCube.material.clone();
-			newCube.material.map = this.textures.get(item._stats.cellSheet.url);
-			entities.add(newCube);
-
-			this.entities.push(newCube);
-
-			item.on(
-				'transform',
-				(data: { x: number; y: number; rotation: number }) => {
-					item._translate.x = data.x;
-					item._translate.y = data.y;
-					item._rotate.z = data.rotation;
+					this.followedUnit = entity;
 				},
 				this
 			);
+		};
 
-			item.on(
-				'size',
-				(data: { width: number; height: number }) => {
-					item._scale.x = data.width / 64;
-					item._scale.y = data.height / 64;
-					newCube.scale.set(item._scale.x, 1, item._scale.y);
-				},
-				this
-			);
-
-			this;
-		});
-
-		taro.client.on('create-projectile', (projectile: Item) => {
-			this.units.push(projectile);
-
-			const tex = this.textures.get(projectile._stats.cellSheet.url);
-			const newCube = cube.clone();
-			newCube.scale.set(tex.image.width / 64, 1, tex.image.height / 64);
-			newCube.position.set(projectile._translate.x / 64, 1, projectile._translate.y / 64);
-			newCube.material = newCube.material.clone();
-			newCube.material.map = this.textures.get(projectile._stats.cellSheet.url);
-			entities.add(newCube);
-
-			this.entities.push(newCube);
-
-			projectile.on(
-				'transform',
-				(data: { x: number; y: number; rotation: number }) => {
-					projectile._translate.x = data.x;
-					projectile._translate.y = data.y;
-					projectile._rotate.z = data.rotation;
-				},
-				this
-			);
-
-			projectile.on(
-				'size',
-				(data: { width: number; height: number }) => {
-					projectile._scale.x = data.width / 64;
-					projectile._scale.y = data.height / 64;
-					newCube.scale.set(projectile._scale.x, 1, projectile._scale.y);
-				},
-				this
-			);
-
-			this;
-		});
+		taro.client.on('create-unit', (u: Unit) => createEntity(u), this);
+		taro.client.on('create-item', (i: Item) => createEntity(i), this);
+		taro.client.on('create-projectile', (p: Projectile) => createEntity(p), this);
 
 		this.renderer.domElement.addEventListener('mousemove', (evt: MouseEvent) => {
 			this.pointer.set((evt.clientX / window.innerWidth) * 2 - 1, -(evt.clientY / window.innerHeight) * 2 + 1);
@@ -351,12 +271,8 @@ class ThreeRenderer {
 			this.controls.update();
 		}
 
-		if (this.units.length > 0) {
-			for (let i = 0; i < this.units.length; i++) {
-				const u = this.units[i];
-				this.entities[i].position.set(u._translate.x / 64 - 0.5, 1, u._translate.y / 64 - 0.5);
-				this.entities[i].rotation.y = -u._rotate.z;
-			}
+		for (const ent of this.entities) {
+			ent.render();
 		}
 
 		this.controls.update();

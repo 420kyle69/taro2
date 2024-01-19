@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-empty-function,@typescript-eslint/no-unused-vars */
-var PhaserEntity = /** @class */ (function () {
-    function PhaserEntity(entity) {
+class PhaserEntity {
+    constructor(entity) {
         this.entity = entity;
         this.evtListeners = {};
         Object.assign(this.evtListeners, {
@@ -15,39 +15,37 @@ var PhaserEntity = /** @class */ (function () {
         });
         entity.phaserEntity = this;
     }
-    PhaserEntity.prototype.transform = function (data) { };
-    PhaserEntity.prototype.scale = function (data) { };
-    PhaserEntity.prototype.hide = function () {
+    transform(data) { }
+    scale(data) { }
+    hide() {
         this.gameObject.hidden = true;
-    };
-    PhaserEntity.prototype.show = function () {
+    }
+    show() {
         this.gameObject.hidden = false;
-    };
-    PhaserEntity.prototype.layer = function (value) {
+    }
+    layer(value) {
         // use index - 1 because taro layers are indexed at 1
-        var scene = this.gameObject.scene;
+        const scene = this.gameObject.scene;
         scene.entityLayers[value - 1].add(this.gameObject);
-    };
-    PhaserEntity.prototype.depth = function (value) {
-        var scene = this.gameObject.scene;
+    }
+    depth(value) {
+        const scene = this.gameObject.scene;
         this.gameObject.taroDepth = value;
         this.gameObject.setDepth(value);
-    };
+    }
     //height-based renderer
-    PhaserEntity.prototype.setDynamic = function (isDynamic) {
+    setDynamic(isDynamic) {
         this.gameObject.dynamic = isDynamic;
-    };
-    PhaserEntity.prototype.destroy = function () {
-        var _this = this;
-        Object.keys(this.evtListeners).forEach(function (key) {
-            _this.entity.off(key, _this.evtListeners[key]);
-            delete _this.evtListeners[key];
+    }
+    destroy() {
+        Object.keys(this.evtListeners).forEach((key) => {
+            this.entity.off(key, this.evtListeners[key]);
+            delete this.evtListeners[key];
         });
         this.gameObject.destroy();
         this.gameObject = null;
         this.evtListeners = null;
         this.entity = null;
-    };
-    return PhaserEntity;
-}());
+    }
+}
 //# sourceMappingURL=PhaserEntity.js.map

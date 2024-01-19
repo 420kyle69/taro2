@@ -14,7 +14,7 @@ var Utils;
             // this.load.imageLoadType = 'XHR';
         }
         // https://stackoverflow.com/a/37455118
-        return "".concat(url, "?v=1");
+        return `${url}?v=1`;
     }
     Utils.patchAssetUrl = patchAssetUrl;
 })(Utils || (Utils = {}));

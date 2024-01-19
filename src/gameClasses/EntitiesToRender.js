@@ -1,9 +1,9 @@
-var EntitiesToRender = /** @class */ (function () {
-    function EntitiesToRender() {
+class EntitiesToRender {
+    constructor() {
         this.trackEntityById = {};
         taro.client.on('tick', this.frameTick, this);
     }
-    EntitiesToRender.prototype.updateAllEntities = function ( /*timeStamp*/) {
+    updateAllEntities( /*timeStamp*/) {
         var _a, _b, _c, _d, _e, _f, _g, _h;
         for (var entityId in this.trackEntityById) {
             // var timeStart = performance.now();
@@ -97,19 +97,18 @@ var EntitiesToRender = /** @class */ (function () {
             // this is for client-only. for server, it runs in taroEngine.engineStep 
             // because we run entity._behaviour in EntitiesToRender.ts for client, and taroEngine for server.
             while (taro.script && taro.triggersQueued.length > 0) {
-                var trigger = taro.triggersQueued.shift();
+                const trigger = taro.triggersQueued.shift();
                 taro.script.trigger(trigger.name, trigger.params);
             }
         }
-    };
-    EntitiesToRender.prototype.frameTick = function () {
+    }
+    frameTick() {
         var _a;
         (_a = taro.script) === null || _a === void 0 ? void 0 : _a.trigger("renderTick");
         taro.input.processInputOnEveryFps();
         taro.engineStep(Date.now(), 1000 / 60);
         taro._renderFrames++;
         this.updateAllEntities();
-    };
-    return EntitiesToRender;
-}());
+    }
+}
 //# sourceMappingURL=EntitiesToRender.js.map

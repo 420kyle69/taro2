@@ -112,6 +112,7 @@ var taroClientConfig = {
 		// Three.js Renderer
 		'renderer/three/utils.js',
 		'renderer/three/ThreeRenderer.js',
+    'renderer/three/entity.js',
 
 		'/client.js',
 		'/index.js'

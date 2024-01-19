@@ -1,19 +1,17 @@
 /// <reference types="@types/google.analytics" />
-var ThreeRenderer = /** @class */ (function () {
-    function ThreeRenderer() {
-        var _this = this;
+class ThreeRenderer {
+    constructor() {
         var _a;
         this.textures = new Map();
-        this.units = [];
         this.entities = [];
         this.pointer = new THREE.Vector2();
         this.followedUnit = null;
-        var renderer = new THREE.WebGLRenderer();
+        const renderer = new THREE.WebGLRenderer();
         renderer.setSize(window.innerWidth, window.innerHeight);
         (_a = document.querySelector('#game-div')) === null || _a === void 0 ? void 0 : _a.appendChild(renderer.domElement);
         this.renderer = renderer;
-        var width = window.innerWidth;
-        var height = window.innerHeight;
+        const width = window.innerWidth;
+        const height = window.innerHeight;
         this.camera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 1, 1000);
         // this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.camera.position.y = 20;
@@ -22,113 +20,99 @@ var ThreeRenderer = /** @class */ (function () {
         this.controls.enableDamping = true;
         this.controls.target = new THREE.Vector3(0, 0, 10);
         this.scene = new THREE.Scene();
-        THREE.DefaultLoadingManager.onLoad = function () {
-            console.log(_this.textures);
-            _this.init();
-            _this.setupInputListeners();
+        THREE.DefaultLoadingManager.onLoad = () => {
+            console.log(this.textures);
+            this.init();
+            this.setupInputListeners();
             taro.client.rendererLoaded.resolve();
-            requestAnimationFrame(_this.render.bind(_this));
+            requestAnimationFrame(this.render.bind(this));
         };
         this.loadTextures();
     }
-    ThreeRenderer.prototype.loadTextures = function () {
-        var _this = this;
-        var textureLoader = new THREE.TextureLoader();
-        var data = taro.game.data;
-        data.map.tilesets.forEach(function (tileset) {
-            var key = tileset.image;
-            var url = Utils.patchAssetUrl(key);
-            textureLoader.load(url, function (tex) {
+    loadTextures() {
+        const textureLoader = new THREE.TextureLoader();
+        const data = taro.game.data;
+        data.map.tilesets.forEach((tileset) => {
+            const key = tileset.image;
+            const url = Utils.patchAssetUrl(key);
+            textureLoader.load(url, (tex) => {
                 tex.colorSpace = THREE.SRGBColorSpace;
-                _this.textures.set(key, tex);
+                this.textures.set(key, tex);
             });
         });
-        var _loop_1 = function (type) {
-            var cellSheet = data.unitTypes[type].cellSheet;
+        for (let type in data.unitTypes) {
+            const cellSheet = data.unitTypes[type].cellSheet;
             if (!cellSheet)
-                return "continue";
-            var key = cellSheet.url;
-            var url = Utils.patchAssetUrl(key);
-            textureLoader.load(url, function (tex) {
+                continue;
+            const key = cellSheet.url;
+            const url = Utils.patchAssetUrl(key);
+            textureLoader.load(url, (tex) => {
                 tex.colorSpace = THREE.SRGBColorSpace;
-                _this.textures.set(key, tex);
+                this.textures.set(key, tex);
             });
-        };
-        for (var type in data.unitTypes) {
-            _loop_1(type);
         }
-        var _loop_2 = function (type) {
-            var cellSheet = data.projectileTypes[type].cellSheet;
+        for (let type in data.projectileTypes) {
+            const cellSheet = data.projectileTypes[type].cellSheet;
             if (!cellSheet)
-                return "continue";
-            var key = cellSheet.url;
-            var url = Utils.patchAssetUrl(key);
-            textureLoader.load(url, function (tex) {
+                continue;
+            const key = cellSheet.url;
+            const url = Utils.patchAssetUrl(key);
+            textureLoader.load(url, (tex) => {
                 tex.colorSpace = THREE.SRGBColorSpace;
-                _this.textures.set(key, tex);
+                this.textures.set(key, tex);
             });
-        };
-        for (var type in data.projectileTypes) {
-            _loop_2(type);
         }
-        var _loop_3 = function (type) {
-            var cellSheet = data.itemTypes[type].cellSheet;
+        for (let type in data.itemTypes) {
+            const cellSheet = data.itemTypes[type].cellSheet;
             if (!cellSheet)
-                return "continue";
-            var key = cellSheet.url;
-            var url = Utils.patchAssetUrl(key);
-            textureLoader.load(url, function (tex) {
+                continue;
+            const key = cellSheet.url;
+            const url = Utils.patchAssetUrl(key);
+            textureLoader.load(url, (tex) => {
                 tex.colorSpace = THREE.SRGBColorSpace;
-                _this.textures.set(key, tex);
+                this.textures.set(key, tex);
             });
-        };
-        for (var type in data.itemTypes) {
-            _loop_3(type);
         }
-        var _loop_4 = function (type) {
-            var key = data.particleTypes[type].url;
-            var url = Utils.patchAssetUrl(key);
-            textureLoader.load(url, function (tex) {
+        for (let type in data.particleTypes) {
+            const key = data.particleTypes[type].url;
+            const url = Utils.patchAssetUrl(key);
+            textureLoader.load(url, (tex) => {
                 tex.colorSpace = THREE.SRGBColorSpace;
-                _this.textures.set(key, tex);
+                this.textures.set(key, tex);
             });
-        };
-        for (var type in data.particleTypes) {
-            _loop_4(type);
         }
-    };
-    ThreeRenderer.prototype.init = function () {
-        var _this = this;
-        var geometry = new THREE.BoxGeometry(1, 1, 1);
-        var material = new THREE.MeshBasicMaterial({ transparent: true });
-        var cube = new THREE.Mesh(geometry, material);
-        taro.game.data.map.tilesets.forEach(function (tileset) {
-            var tex = _this.textures.get(tileset.image);
+    }
+    init() {
+        const geometry = new THREE.BoxGeometry(1, 1, 1);
+        const material = new THREE.MeshBasicMaterial({ transparent: true });
+        const cube = new THREE.Mesh(geometry, material);
+        taro.game.data.map.tilesets.forEach((tileset) => {
+            const tex = this.textures.get(tileset.image);
             tex.minFilter = THREE.NearestFilter;
             tex.magFilter = THREE.NearestFilter;
             tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
             cube.material.map = tex;
             cube.material.needsUpdate = true;
-            var map = new THREE.Group();
+            const map = new THREE.Group();
             map.translateX(-taro.game.data.map.width / 2);
             map.translateZ(-taro.game.data.map.height / 2);
-            _this.scene.add(map);
-            var tileSize = 64;
-            var texWidth = tex.image.width;
-            var texHeight = tex.image.height;
-            var tilesInRow = texWidth / tileSize;
-            var xStep = tileSize / texWidth;
-            var yStep = tileSize / texHeight;
-            taro.game.data.map.layers.forEach(function (layer) {
+            this.scene.add(map);
+            const tileSize = 64;
+            const texWidth = tex.image.width;
+            const texHeight = tex.image.height;
+            const tilesInRow = texWidth / tileSize;
+            const xStep = tileSize / texWidth;
+            const yStep = tileSize / texHeight;
+            taro.game.data.map.layers.forEach((layer) => {
                 if (layer.name === 'floor') {
-                    for (var z = 0; z < layer.height; z++) {
-                        for (var x = 0; x < layer.width; x++) {
-                            var newCube = cube.clone();
+                    for (let z = 0; z < layer.height; z++) {
+                        for (let x = 0; x < layer.width; x++) {
+                            const newCube = cube.clone();
                             newCube.position.set(x, 0, z);
                             newCube.material = newCube.material.clone();
-                            var tileIdx = layer.data[z * layer.width + x];
-                            var xIdx = (tileIdx % tilesInRow) - 1;
-                            var yIdx = Math.floor(tileIdx / tilesInRow);
+                            const tileIdx = layer.data[z * layer.width + x];
+                            const xIdx = (tileIdx % tilesInRow) - 1;
+                            const yIdx = Math.floor(tileIdx / tilesInRow);
                             newCube.material.map = newCube.material.map.clone();
                             newCube.material.map.repeat.set(tileSize / texWidth, tileSize / texHeight);
                             newCube.material.map.offset.x = xStep * xIdx;
@@ -138,15 +122,15 @@ var ThreeRenderer = /** @class */ (function () {
                     }
                 }
                 if (layer.name === 'walls') {
-                    for (var z = 0; z < layer.height; z++) {
-                        for (var x = 0; x < layer.width; x++) {
+                    for (let z = 0; z < layer.height; z++) {
+                        for (let x = 0; x < layer.width; x++) {
                             if (layer.data[z * layer.width + x] !== 0) {
-                                var newCube = cube.clone();
+                                const newCube = cube.clone();
                                 newCube.position.set(x, 1, z);
                                 newCube.material = newCube.material.clone();
-                                var tileIdx = layer.data[z * layer.width + x];
-                                var xIdx = (tileIdx % tilesInRow) - 1;
-                                var yIdx = Math.floor(tileIdx / tilesInRow);
+                                const tileIdx = layer.data[z * layer.width + x];
+                                const xIdx = (tileIdx % tilesInRow) - 1;
+                                const yIdx = Math.floor(tileIdx / tilesInRow);
                                 newCube.material.map = newCube.material.map.clone();
                                 newCube.material.map.repeat.set(tileSize / texWidth, tileSize / texHeight);
                                 newCube.material.map.offset.x = xStep * xIdx;
@@ -158,105 +142,55 @@ var ThreeRenderer = /** @class */ (function () {
                 }
             });
         });
-        var entities = new THREE.Group();
+        const entities = new THREE.Group();
         entities.translateX(-taro.game.data.map.width / 2);
         entities.translateZ(-taro.game.data.map.height / 2);
         this.scene.add(entities);
-        taro.client.on('create-unit', function (unit) {
-            _this.units.push(unit);
-            var tex = _this.textures.get(unit._stats.cellSheet.url);
-            var newCube = cube.clone();
-            newCube.scale.set(tex.image.width / 64, 1, tex.image.height / 64);
-            newCube.position.set(unit._translate.x / 64, 1, unit._translate.y / 64);
-            newCube.material = newCube.material.clone();
-            newCube.material.map = _this.textures.get(unit._stats.cellSheet.url);
-            entities.add(newCube);
-            _this.entities.push(newCube);
-            unit.on('transform', function (data) {
-                unit._translate.x = data.x;
-                unit._translate.y = data.y;
-                unit._rotate.z = data.rotation;
-            }, _this);
-            unit.on('size', function (data) {
-                unit._scale.x = data.width / 64;
-                unit._scale.y = data.height / 64;
-                newCube.scale.set(unit._scale.x, 1, unit._scale.y);
-            }, _this);
-            unit.on('follow', function () {
-                // console.log('follow ', unit);
-                // newCube.add(this.camera);
-                _this.followedUnit = unit;
-            }, _this),
-                _this;
+        const createEntity = (entity) => {
+            const tex = this.textures.get(entity._stats.cellSheet.url);
+            const ent = new Entity(tex, entity);
+            entities.add(ent);
+            this.entities.push(ent);
+            entity.on('transform', (data) => {
+                entity._translate.x = data.x;
+                entity._translate.y = data.y;
+                entity._rotate.z = data.rotation;
+            }, this);
+            entity.on('size', (data) => {
+                entity._scale.x = data.width / 64;
+                entity._scale.y = data.height / 64;
+            }, this);
+            entity.on('follow', () => {
+                this.followedUnit = entity;
+            }, this);
+        };
+        taro.client.on('create-unit', (u) => createEntity(u), this);
+        taro.client.on('create-item', (i) => createEntity(i), this);
+        taro.client.on('create-projectile', (p) => createEntity(p), this);
+        this.renderer.domElement.addEventListener('mousemove', (evt) => {
+            this.pointer.set((evt.clientX / window.innerWidth) * 2 - 1, -(evt.clientY / window.innerHeight) * 2 + 1);
         });
-        taro.client.on('create-item', function (item) {
-            _this.units.push(item);
-            var tex = _this.textures.get(item._stats.cellSheet.url);
-            var newCube = cube.clone();
-            newCube.scale.set(tex.image.width / 64, 1, tex.image.height / 64);
-            newCube.position.set(item._translate.x / 64, 1, item._translate.y / 64);
-            newCube.material = newCube.material.clone();
-            newCube.material.map = _this.textures.get(item._stats.cellSheet.url);
-            entities.add(newCube);
-            _this.entities.push(newCube);
-            item.on('transform', function (data) {
-                item._translate.x = data.x;
-                item._translate.y = data.y;
-                item._rotate.z = data.rotation;
-            }, _this);
-            item.on('size', function (data) {
-                item._scale.x = data.width / 64;
-                item._scale.y = data.height / 64;
-                newCube.scale.set(item._scale.x, 1, item._scale.y);
-            }, _this);
-            _this;
-        });
-        taro.client.on('create-projectile', function (projectile) {
-            _this.units.push(projectile);
-            var tex = _this.textures.get(projectile._stats.cellSheet.url);
-            var newCube = cube.clone();
-            newCube.scale.set(tex.image.width / 64, 1, tex.image.height / 64);
-            newCube.position.set(projectile._translate.x / 64, 1, projectile._translate.y / 64);
-            newCube.material = newCube.material.clone();
-            newCube.material.map = _this.textures.get(projectile._stats.cellSheet.url);
-            entities.add(newCube);
-            _this.entities.push(newCube);
-            projectile.on('transform', function (data) {
-                projectile._translate.x = data.x;
-                projectile._translate.y = data.y;
-                projectile._rotate.z = data.rotation;
-            }, _this);
-            projectile.on('size', function (data) {
-                projectile._scale.x = data.width / 64;
-                projectile._scale.y = data.height / 64;
-                newCube.scale.set(projectile._scale.x, 1, projectile._scale.y);
-            }, _this);
-            _this;
-        });
-        this.renderer.domElement.addEventListener('mousemove', function (evt) {
-            _this.pointer.set((evt.clientX / window.innerWidth) * 2 - 1, -(evt.clientY / window.innerHeight) * 2 + 1);
-        });
-    };
-    ThreeRenderer.prototype.setupInputListeners = function () {
+    }
+    setupInputListeners() {
         // Ask the input component to set up any listeners it has
         taro.input.setupListeners(this.renderer.domElement);
-    };
-    ThreeRenderer.prototype.getViewportBounds = function () {
+    }
+    getViewportBounds() {
         // return this.scene.getScene('Game').cameras.main.worldView;
         return { x: 0, y: 0, width: window.innerWidth, height: window.innerHeight };
-    };
-    ThreeRenderer.prototype.getCameraWidth = function () {
+    }
+    getCameraWidth() {
         // return this.scene.getScene('Game').cameras.main.displayWidth;
         return window.innerWidth;
-    };
-    ThreeRenderer.prototype.getCameraHeight = function () {
+    }
+    getCameraHeight() {
         // return this.scene.getScene('Game').cameras.main.displayHeight;
         return window.innerHeight;
-    };
-    ThreeRenderer.prototype.render = function () {
+    }
+    render() {
         requestAnimationFrame(this.render.bind(this));
         if (this.followedUnit) {
-            var pointer = new THREE.Vector3(this.pointer.x, this.pointer.y, 0.5);
+            const pointer = new THREE.Vector3(this.pointer.x, this.pointer.y, 0.5);
             pointer.unproject(this.camera);
             taro.input.emit('pointermove', [
                 {
@@ -270,17 +204,12 @@ var ThreeRenderer = /** @class */ (function () {
             this.controls.target.set(this.followedUnit._translate.x / 64 - 0.5 - taro.game.data.map.width / 2, this.controls.target.y, this.followedUnit._translate.y / 64 - 0.5 - taro.game.data.map.height / 2);
             this.controls.update();
         }
-        if (this.units.length > 0) {
-            for (var i = 0; i < this.units.length; i++) {
-                var u = this.units[i];
-                this.entities[i].position.set(u._translate.x / 64 - 0.5, 1, u._translate.y / 64 - 0.5);
-                this.entities[i].rotation.y = -u._rotate.z;
-            }
+        for (const ent of this.entities) {
+            ent.render();
         }
         this.controls.update();
         this.renderer.render(this.scene, this.camera);
         taro.client.emit('tick');
-    };
-    return ThreeRenderer;
-}());
+    }
+}
 //# sourceMappingURL=ThreeRenderer.js.map

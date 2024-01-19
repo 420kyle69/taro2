@@ -1,4 +1,4 @@
-var colors = {
+const colors = {
     aliceblue: '#f0f8ff',
     antiquewhite: '#faebd7',
     aqua: '#00ffff',
@@ -143,23 +143,20 @@ var colors = {
     yellow: '#ffff00',
     yellowgreen: '#9acd32'
 };
-var Colors = /** @class */ (function () {
-    function Colors() {
-    }
-    Colors.textToHexColor = function (color) {
+class Colors {
+    static textToHexColor(color) {
         return colors[color] || null;
-    };
-    Colors.isExtendedColor = function (color) {
+    }
+    static isExtendedColor(color) {
         return Object.keys(colors).includes(color);
-    };
-    Colors.isValidColor = function (color) {
+    }
+    static isValidColor(color) {
         return (color[0] === '#' &&
             (color.length === 4 || color.length === 7) &&
-            !isNaN(Number("0x".concat(color.split('#')[1].toLowerCase())))) ||
+            !isNaN(Number(`0x${color.split('#')[1].toLowerCase()}`))) ||
             Colors.isExtendedColor(color);
-    };
-    return Colors;
-}());
+    }
+}
 if (typeof (module) !== 'undefined' && typeof (module.exports) !== 'undefined') {
     module.exports = Colors;
 }

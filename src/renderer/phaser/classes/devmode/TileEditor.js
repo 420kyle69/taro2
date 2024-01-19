@@ -1,17 +1,16 @@
-var TileEditor = /** @class */ (function () {
-    function TileEditor(gameScene, devModeScene, devModeTools, commandController) {
-        var _this = this;
+class TileEditor {
+    constructor(gameScene, devModeScene, devModeTools, commandController) {
         this.gameScene = gameScene;
         this.devModeTools = devModeTools;
-        var palette = this.tilePalette = this.devModeTools.palette;
-        var gameMap = this.gameScene.tilemap;
+        const palette = this.tilePalette = this.devModeTools.palette;
+        const gameMap = this.gameScene.tilemap;
         this.marker = new TileMarker(this.gameScene, devModeScene, gameMap, false, 2, commandController);
         this.paletteMarker = new TileMarker(this.devModeTools.scene, devModeScene, this.tilePalette.map, true, 1, commandController);
         this.commandController = commandController;
         this.paletteArea = { x: 1, y: 1 };
         this.brushArea = new TileShape();
         this.selectedTileArea = {};
-        var pointerPosition = { x: 0, y: 0 };
+        const pointerPosition = { x: 0, y: 0 };
         this.activateMarkers(false);
         this.startDragIn = 'none';
         this.prevData = undefined;
@@ -19,7 +18,7 @@ var TileEditor = /** @class */ (function () {
         if (taro.game.data.defaultData.dontResize) {
             this.tileSize = gameMap.tileWidth;
         }
-        gameScene.input.on('pointerdown', function (p) {
+        gameScene.input.on('pointerdown', (p) => {
             /*if (!devModeScene.pointerInsideButtons) {
                 this.devModeTools.modeButtons.map((btn) => {
                     btn.hideHoverChildren(0);
@@ -28,14 +27,14 @@ var TileEditor = /** @class */ (function () {
             if (!devModeScene.pointerInsideButtons &&
                 !devModeScene.pointerInsideWidgets() &&
                 (!palette.visible || !devModeScene.pointerInsidePalette()) &&
-                _this.gameScene.tilemap.currentLayerIndex >= 0 &&
+                this.gameScene.tilemap.currentLayerIndex >= 0 &&
                 devModeScene.input.manager.activePointer.rightButtonDown()) {
-                _this.startDragIn = 'map';
+                this.startDragIn = 'map';
                 pointerPosition.x = gameScene.input.activePointer.x;
                 pointerPosition.y = gameScene.input.activePointer.y;
             }
         });
-        devModeScene.input.on('pointerdown', function (p) {
+        devModeScene.input.on('pointerdown', (p) => {
             /*if (!devModeScene.pointerInsideButtons) {
                 this.devModeTools.modeButtons.map((btn) => {
                     btn.hideHoverChildren(0);
@@ -44,134 +43,132 @@ var TileEditor = /** @class */ (function () {
             if (!devModeScene.pointerInsideButtons &&
                 !devModeScene.pointerInsideWidgets() &&
                 palette.visible && devModeScene.pointerInsidePalette()) {
-                _this.startDragIn = 'palette';
+                this.startDragIn = 'palette';
                 pointerPosition.x = devModeScene.input.activePointer.x;
                 pointerPosition.y = devModeScene.input.activePointer.y;
                 if (!devModeTools.modeButtons[4].active)
-                    _this.devModeTools.brush();
-                if (_this.devModeTools.shiftKey.isDown) {
+                    this.devModeTools.brush();
+                if (this.devModeTools.shiftKey.isDown) {
                     //pass
                 }
                 else {
                     if (p.button === 0) {
-                        _this.selectedTileArea = {};
-                        _this.clearTint();
+                        this.selectedTileArea = {};
+                        this.clearTint();
                     }
                 }
             }
         });
-        devModeScene.input.on('pointermove', function (p) {
+        devModeScene.input.on('pointermove', (p) => {
             if (devModeTools.modeButtons[2].active && p.isDown && p.button === 0 &&
-                _this.startDragIn === 'palette') {
-                _this.updateSelectedTiles(devModeScene);
+                this.startDragIn === 'palette') {
+                this.updateSelectedTiles(devModeScene);
             }
         });
-        devModeScene.input.on('pointerup', function (p) {
-            if (_this.startDragIn === 'palette' && p.button === 0) {
-                _this.updateSelectedTiles(devModeScene);
+        devModeScene.input.on('pointerup', (p) => {
+            if (this.startDragIn === 'palette' && p.button === 0) {
+                this.updateSelectedTiles(devModeScene);
             }
-            if (_this.startDragIn === 'palette') {
-                _this.startDragIn = 'none';
+            if (this.startDragIn === 'palette') {
+                this.startDragIn = 'none';
             }
         });
-        gameScene.input.on('pointerup', function (p) {
-            if (_this.startDragIn === 'map' &&
+        gameScene.input.on('pointerup', (p) => {
+            if (this.startDragIn === 'map' &&
                 Math.abs(pointerPosition.x - gameScene.input.activePointer.x) < 50 &&
                 Math.abs(pointerPosition.y - gameScene.input.activePointer.y) < 50 &&
                 !devModeTools.modeButtons[3].active) {
-                var worldPoint = gameScene.cameras.main.getWorldPoint(gameScene.input.activePointer.x, gameScene.input.activePointer.y);
-                var nowBrushSize = JSON.parse(JSON.stringify(_this.brushArea.size));
-                if (_this.devModeTools.isForceTo1x1()) {
+                const worldPoint = gameScene.cameras.main.getWorldPoint(gameScene.input.activePointer.x, gameScene.input.activePointer.y);
+                const nowBrushSize = JSON.parse(JSON.stringify(this.brushArea.size));
+                if (this.devModeTools.isForceTo1x1()) {
                     nowBrushSize.x = 1;
                     nowBrushSize.y = 1;
                 }
-                var pointerTileX = gameMap.worldToTileX(worldPoint.x - (nowBrushSize.x - 1) * _this.tileSize / 2, true);
-                var pointerTileY = gameMap.worldToTileY(worldPoint.y - (nowBrushSize.y - 1) * _this.tileSize / 2, true);
-                _this.clearTint();
-                _this.selectedTileArea = {};
-                for (var i = 0; i < nowBrushSize.x; i++) {
-                    for (var j = 0; j < nowBrushSize.y; j++) {
-                        var tile = _this.getTile(pointerTileX + i, pointerTileY + j, gameMap);
+                const pointerTileX = gameMap.worldToTileX(worldPoint.x - (nowBrushSize.x - 1) * this.tileSize / 2, true);
+                const pointerTileY = gameMap.worldToTileY(worldPoint.y - (nowBrushSize.y - 1) * this.tileSize / 2, true);
+                this.clearTint();
+                this.selectedTileArea = {};
+                for (let i = 0; i < nowBrushSize.x; i++) {
+                    for (let j = 0; j < nowBrushSize.y; j++) {
+                        const tile = this.getTile(pointerTileX + i, pointerTileY + j, gameMap);
                         if (tile !== -1) {
-                            if (!_this.selectedTileArea[pointerTileX + i]) {
-                                _this.selectedTileArea[pointerTileX + i] = {};
+                            if (!this.selectedTileArea[pointerTileX + i]) {
+                                this.selectedTileArea[pointerTileX + i] = {};
                             }
-                            _this.selectedTileArea[pointerTileX + i][pointerTileY + j] = tile;
+                            this.selectedTileArea[pointerTileX + i][pointerTileY + j] = tile;
                         }
                     }
                 }
-                _this.marker.changePreview();
+                this.marker.changePreview();
             }
-            if (_this.startDragIn === 'map') {
-                _this.startDragIn = 'none';
+            if (this.startDragIn === 'map') {
+                this.startDragIn = 'none';
             }
         });
     }
-    TileEditor.prototype.updateSelectedTiles = function (devModeScene) {
-        var palettePoint = devModeScene.cameras.getCamera('palette').getWorldPoint(devModeScene.input.activePointer.x, devModeScene.input.activePointer.y);
-        var palettePointerTileX = this.tilePalette.map.worldToTileX(palettePoint.x);
-        var palettePointerTileY = this.tilePalette.map.worldToTileY(palettePoint.y);
+    updateSelectedTiles(devModeScene) {
+        const palettePoint = devModeScene.cameras.getCamera('palette').getWorldPoint(devModeScene.input.activePointer.x, devModeScene.input.activePointer.y);
+        const palettePointerTileX = this.tilePalette.map.worldToTileX(palettePoint.x);
+        const palettePointerTileY = this.tilePalette.map.worldToTileY(palettePoint.y);
         if (!this.selectedTileArea[palettePointerTileX]) {
             this.selectedTileArea[palettePointerTileX] = {};
         }
-        var tile = this.getTile(palettePointerTileX, palettePointerTileY, this.tilePalette.map);
+        const tile = this.getTile(palettePointerTileX, palettePointerTileY, this.tilePalette.map);
         this.selectedTileArea[palettePointerTileX][palettePointerTileY] = tile;
         this.marker.changePreview();
-    };
-    TileEditor.prototype.activateMarkers = function (active) {
+    }
+    activateMarkers(active) {
         this.marker.active = active;
         this.paletteMarker.active = active;
         if (active)
             this.devModeTools.regionEditor.regionTool = false;
-    };
-    TileEditor.prototype.showMarkers = function (value) {
+    }
+    showMarkers(value) {
         this.marker.graphics.setVisible(value);
         this.marker.showPreview(value);
         this.paletteMarker.graphics.setVisible(value);
-    };
-    TileEditor.prototype.clearTint = function () {
-        this.tilePalette.map.layers[0].data.forEach(function (tilearray) {
-            tilearray.forEach(function (tile) {
+    }
+    clearTint() {
+        this.tilePalette.map.layers[0].data.forEach((tilearray) => {
+            tilearray.forEach((tile) => {
                 if (tile)
                     tile.tint = 0xffffff;
             });
         });
-    };
-    TileEditor.prototype.edit = function (data) {
-        var _this = this;
+    }
+    edit(data) {
         if (JSON.stringify(data) === '{}') {
             throw 'receive: {}';
         }
-        var map = taro.game.data.map;
+        const map = taro.game.data.map;
         inGameEditor.mapWasEdited && inGameEditor.mapWasEdited();
-        var width = map.width;
-        var _a = Object.entries(data).map(function (_a) {
-            var k = _a[0], v = _a[1];
-            var dataType = k;
-            var dataValue = v;
-            return { dataType: dataType, dataValue: dataValue };
-        })[0], dataType = _a.dataType, dataValue = _a.dataValue;
-        var tempLayer = dataType === 'edit' ? dataValue.layer[0] : dataValue.layer;
+        const width = map.width;
+        const { dataType, dataValue } = Object.entries(data).map(([k, v]) => {
+            const dataType = k;
+            const dataValue = v;
+            return { dataType, dataValue };
+        })[0];
+        let tempLayer = dataType === 'edit' ? dataValue.layer[0] : dataValue.layer;
         if (map.layers.length > 4 && tempLayer >= 2) {
             tempLayer++;
         }
         switch (dataType) {
             case 'fill': {
-                var nowValue = dataValue;
-                var oldTile = map.layers[tempLayer].data[nowValue.y * width + nowValue.x];
+                const nowValue = dataValue;
+                const oldTile = map.layers[tempLayer].data[nowValue.y * width + nowValue.x];
                 this.floodFill(nowValue.layer, oldTile, nowValue.gid, nowValue.x, nowValue.y, true, nowValue.limits);
                 break;
             }
             case 'edit': {
                 //save tile change to taro.game.data.map and taro.map.data
-                var nowValue_1 = dataValue;
-                nowValue_1.selectedTiles.map(function (v, idx) {
-                    _this.putTiles(nowValue_1.x, nowValue_1.y, v, nowValue_1.size, nowValue_1.shape, nowValue_1.layer[idx], true);
+                const nowValue = dataValue;
+                nowValue.selectedTiles.map((v, idx) => {
+                    this.putTiles(nowValue.x, nowValue.y, v, nowValue.size, nowValue.shape, nowValue.layer[idx], true);
                 });
                 break;
             }
             case 'clear': {
-                var nowValue = dataValue;
+                const nowValue = dataValue;
                 this.clearLayer(nowValue.layer);
             }
         }
@@ -184,7 +181,7 @@ var TileEditor = /** @class */ (function () {
                 debounceRecalcPhysics(map, true);
             }
         }
-    };
+    }
     /**
      * put tiles
      * @param tileX pointerTileX
@@ -194,24 +191,24 @@ var TileEditor = /** @class */ (function () {
      * @param layer layer
      * @param local is not, it will send command to other client
      */
-    TileEditor.prototype.putTiles = function (tileX, tileY, selectedTiles, brushSize, shape, layer, local) {
-        var map = this.gameScene.tilemap;
-        var calcData = this.brushArea.calcSample(selectedTiles, brushSize, shape, true);
-        var sample = calcData.sample;
-        var size = brushSize === 'fitContent' ? { x: calcData.xLength, y: calcData.yLength } : brushSize;
-        var taroMap = taro.game.data.map;
-        var width = taroMap.width;
-        var tempLayer = layer;
+    putTiles(tileX, tileY, selectedTiles, brushSize, shape, layer, local) {
+        const map = this.gameScene.tilemap;
+        const calcData = this.brushArea.calcSample(selectedTiles, brushSize, shape, true);
+        const sample = calcData.sample;
+        const size = brushSize === 'fitContent' ? { x: calcData.xLength, y: calcData.yLength } : brushSize;
+        const taroMap = taro.game.data.map;
+        const width = taroMap.width;
+        let tempLayer = layer;
         if (taroMap.layers.length > 4 && layer >= 2) {
             tempLayer++;
         }
         tileX = brushSize === 'fitContent' ? calcData.minX : tileX;
         tileY = brushSize === 'fitContent' ? calcData.minY : tileY;
         if (this.gameScene.tilemapLayers[layer].visible && selectedTiles) {
-            for (var x = 0; x < size.x; x++) {
-                for (var y = 0; y < size.y; y++) {
+            for (let x = 0; x < size.x; x++) {
+                for (let y = 0; y < size.y; y++) {
                     if (sample[x] && sample[x][y] !== undefined && DevModeScene.pointerInsideMap(tileX + x, tileY + y, map)) {
-                        var index = sample[x][y];
+                        let index = sample[x][y];
                         if (index !== (map.getTileAt(tileX + x, tileY + y, true, layer)).index &&
                             !(index === 0 && map.getTileAt(tileX + x, tileY + y, true, layer).index === -1)) {
                             if (index === 0)
@@ -227,14 +224,14 @@ var TileEditor = /** @class */ (function () {
             }
         }
         if (!local) {
-            var data = {
+            const data = {
                 edit: {
                     size: brushSize,
                     layer: [layer],
                     selectedTiles: [selectedTiles],
                     x: tileX,
                     y: tileY,
-                    shape: shape,
+                    shape,
                     noMerge: true,
                 }
             };
@@ -243,23 +240,23 @@ var TileEditor = /** @class */ (function () {
                 this.prevData = data;
             }
         }
-    };
-    TileEditor.prototype.getTile = function (tileX, tileY, map) {
+    }
+    getTile(tileX, tileY, map) {
         if (DevModeScene.pointerInsideMap(tileX, tileY, map)) {
             if (map.getTileAt(tileX, tileY) && map.getTileAt(tileX, tileY).index !== 0) {
-                var selectedTile = map.getTileAt(tileX, tileY);
+                let selectedTile = map.getTileAt(tileX, tileY);
                 return selectedTile.index;
             }
         }
         return -1;
-    };
-    TileEditor.prototype.floodFill = function (layer, oldTile, newTile, x, y, fromServer, limits, addToLimits) {
+    }
+    floodFill(layer, oldTile, newTile, x, y, fromServer, limits, addToLimits) {
         var _a, _b, _c, _d, _e, _f, _g;
-        var map;
-        var openQueue = [{ x: x, y: y }];
-        var closedQueue = {};
+        let map;
+        const openQueue = [{ x, y }];
+        const closedQueue = {};
         while (openQueue.length !== 0) {
-            var nowPos = openQueue[0];
+            const nowPos = openQueue[0];
             openQueue.shift();
             if ((_a = closedQueue[nowPos.x]) === null || _a === void 0 ? void 0 : _a[nowPos.y]) {
                 continue;
@@ -274,10 +271,10 @@ var TileEditor = /** @class */ (function () {
             if (fromServer) {
                 map = taro.game.data.map;
                 inGameEditor.mapWasEdited && inGameEditor.mapWasEdited();
-                var tileMap = this.gameScene.tilemap;
-                var width = map.width;
+                const tileMap = this.gameScene.tilemap;
+                const width = map.width;
                 //fix for debris layer
-                var tempLayer = layer;
+                let tempLayer = layer;
                 if (map.layers.length > 4 && layer >= 2) {
                     tempLayer++;
                 }
@@ -297,7 +294,7 @@ var TileEditor = /** @class */ (function () {
             }
             else {
                 map = this.gameScene.tilemap;
-                var nowTile = map.getTileAt(nowPos.x, nowPos.y, true, layer);
+                const nowTile = map.getTileAt(nowPos.x, nowPos.y, true, layer);
                 if ((_c = limits === null || limits === void 0 ? void 0 : limits[nowPos.x]) === null || _c === void 0 ? void 0 : _c[nowPos.y]) {
                     continue;
                 }
@@ -320,19 +317,19 @@ var TileEditor = /** @class */ (function () {
                 openQueue.push({ x: nowPos.x, y: nowPos.y + 1 });
             }
         }
-    };
-    TileEditor.prototype.clearLayer = function (layer) {
-        var map = taro.game.data.map;
+    }
+    clearLayer(layer) {
+        const map = taro.game.data.map;
         inGameEditor.mapWasEdited && inGameEditor.mapWasEdited();
-        var tileMap = this.gameScene.tilemap;
-        var width = map.width;
+        const tileMap = this.gameScene.tilemap;
+        const width = map.width;
         //fix for debris layer
-        var tempLayer = layer;
+        let tempLayer = layer;
         if (map.layers.length > 4 && layer >= 2) {
             tempLayer++;
         }
-        for (var i = 0; i < map.width; i++) {
-            for (var j = 0; j < map.height; j++) {
+        for (let i = 0; i < map.width; i++) {
+            for (let j = 0; j < map.height; j++) {
                 if (map.layers[tempLayer].data[j * width + i] !== 0) {
                     tileMap.putTileAt(-1, i, j, false, layer);
                     //save tile change to taro.game.map.data
@@ -340,23 +337,22 @@ var TileEditor = /** @class */ (function () {
                 }
             }
         }
-    };
-    TileEditor.prototype.update = function () {
-        var _this = this;
+    }
+    update() {
         var _a, _b, _c, _d, _e;
         if (taro.developerMode.active && taro.developerMode.activeTab === 'map') {
-            var devModeScene = this.devModeTools.scene;
-            var palette = this.tilePalette;
-            var map_1 = this.gameScene.tilemap;
-            var paletteMap = palette.map;
-            var worldPoint = this.gameScene.cameras.main.getWorldPoint(this.gameScene.input.activePointer.x, this.gameScene.input.activePointer.y);
-            var palettePoint = devModeScene.cameras.getCamera('palette').getWorldPoint(devModeScene.input.activePointer.x, devModeScene.input.activePointer.y);
-            var marker = this.marker;
-            var paletteMarker = this.paletteMarker;
+            const devModeScene = this.devModeTools.scene;
+            const palette = this.tilePalette;
+            const map = this.gameScene.tilemap;
+            const paletteMap = palette.map;
+            const worldPoint = this.gameScene.cameras.main.getWorldPoint(this.gameScene.input.activePointer.x, this.gameScene.input.activePointer.y);
+            const palettePoint = devModeScene.cameras.getCamera('palette').getWorldPoint(devModeScene.input.activePointer.x, devModeScene.input.activePointer.y);
+            const marker = this.marker;
+            const paletteMarker = this.paletteMarker;
             paletteMarker.graphics.setVisible(true);
             // Rounds down to nearest tile
-            var palettePointerTileX = paletteMap.worldToTileX(palettePoint.x);
-            var palettePointerTileY = paletteMap.worldToTileY(palettePoint.y);
+            const palettePointerTileX = paletteMap.worldToTileX(palettePoint.x);
+            const palettePointerTileY = paletteMap.worldToTileY(palettePoint.y);
             if (palette.visible && devModeScene.pointerInsidePalette()) {
                 devModeScene.regionEditor.cancelDrawRegion();
                 marker.graphics.setVisible(false);
@@ -366,82 +362,80 @@ var TileEditor = /** @class */ (function () {
                 paletteMarker.graphics.y = paletteMap.tileToWorldY(palettePointerTileY);
             }
             else if ((!devModeScene.pointerInsidePalette() || !palette.visible) &&
-                !devModeScene.pointerInsideButtons && !devModeScene.pointerInsideWidgets() && map_1.currentLayerIndex >= 0) {
-                this.devModeTools.tooltip.showMessage('Position', "X: ".concat(Math.floor(worldPoint.x).toString(), ", Y: ").concat(Math.floor(worldPoint.y).toString(), "  |  ")
-                    + "Tile X: ".concat(Math.floor(worldPoint.x / taro.scaleMapDetails.tileWidth).toString(), ", Tile Y: ").concat(Math.floor(worldPoint.y / taro.scaleMapDetails.tileHeight).toString()));
+                !devModeScene.pointerInsideButtons && !devModeScene.pointerInsideWidgets() && map.currentLayerIndex >= 0) {
+                this.devModeTools.tooltip.showMessage('Position', `X: ${Math.floor(worldPoint.x).toString()}, Y: ${Math.floor(worldPoint.y).toString()}  |  `
+                    + `Tile X: ${Math.floor(worldPoint.x / taro.scaleMapDetails.tileWidth).toString()}, Tile Y: ${Math.floor(worldPoint.y / taro.scaleMapDetails.tileHeight).toString()}`);
                 if (marker.active) {
                     paletteMarker.graphics.setVisible(false);
                     marker.graphics.setVisible(true);
                     marker.showPreview(true);
                     // Rounds down to nearest tile
-                    var pointerTileX_1 = map_1.worldToTileX(worldPoint.x - (marker.graphics.scaleSidesX - 1) * this.tileSize / 2, true);
-                    var pointerTileY_1 = map_1.worldToTileY(worldPoint.y - (marker.graphics.scaleSidesY - 1) * this.tileSize / 2, true);
+                    const pointerTileX = map.worldToTileX(worldPoint.x - (marker.graphics.scaleSidesX - 1) * this.tileSize / 2, true);
+                    const pointerTileY = map.worldToTileY(worldPoint.y - (marker.graphics.scaleSidesY - 1) * this.tileSize / 2, true);
                     // Snap to tile coordinates, but in world space
-                    marker.graphics.x = map_1.tileToWorldX(pointerTileX_1);
-                    marker.graphics.y = map_1.tileToWorldY(pointerTileY_1);
-                    marker.preview.x = map_1.tileToWorldX(pointerTileX_1);
-                    marker.preview.y = map_1.tileToWorldY(pointerTileY_1);
-                    if (((_a = map_1 === null || map_1 === void 0 ? void 0 : map_1.getTileAt(pointerTileX_1, pointerTileY_1)) === null || _a === void 0 ? void 0 : _a.index) && ((_b = map_1 === null || map_1 === void 0 ? void 0 : map_1.getTileAt(pointerTileX_1, pointerTileY_1)) === null || _b === void 0 ? void 0 : _b.index) !== -1 && ((_c = map_1 === null || map_1 === void 0 ? void 0 : map_1.getTileAt(pointerTileX_1, pointerTileY_1)) === null || _c === void 0 ? void 0 : _c.index) !== 0) {
-                        this.devModeTools.tooltip.showMessage('Position', "X: ".concat(Math.floor(worldPoint.x).toString(), ", Y: ").concat(Math.floor(worldPoint.y).toString(), "  |  ")
-                            + "Tile X: ".concat(Math.floor(worldPoint.x / taro.scaleMapDetails.tileWidth).toString(), ", Tile Y: ").concat(Math.floor(worldPoint.y / taro.scaleMapDetails.tileHeight).toString(), "  |  ")
-                            + "Tile id: ".concat(map_1.getTileAt(pointerTileX_1, pointerTileY_1).index));
+                    marker.graphics.x = map.tileToWorldX(pointerTileX);
+                    marker.graphics.y = map.tileToWorldY(pointerTileY);
+                    marker.preview.x = map.tileToWorldX(pointerTileX);
+                    marker.preview.y = map.tileToWorldY(pointerTileY);
+                    if (((_a = map === null || map === void 0 ? void 0 : map.getTileAt(pointerTileX, pointerTileY)) === null || _a === void 0 ? void 0 : _a.index) && ((_b = map === null || map === void 0 ? void 0 : map.getTileAt(pointerTileX, pointerTileY)) === null || _b === void 0 ? void 0 : _b.index) !== -1 && ((_c = map === null || map === void 0 ? void 0 : map.getTileAt(pointerTileX, pointerTileY)) === null || _c === void 0 ? void 0 : _c.index) !== 0) {
+                        this.devModeTools.tooltip.showMessage('Position', `X: ${Math.floor(worldPoint.x).toString()}, Y: ${Math.floor(worldPoint.y).toString()}  |  `
+                            + `Tile X: ${Math.floor(worldPoint.x / taro.scaleMapDetails.tileWidth).toString()}, Tile Y: ${Math.floor(worldPoint.y / taro.scaleMapDetails.tileHeight).toString()}  |  `
+                            + `Tile id: ${map.getTileAt(pointerTileX, pointerTileY).index}`);
                     }
                     if (devModeScene.input.manager.activePointer.leftButtonDown()) {
                         if (this.devModeTools.modeButtons[2].active || this.devModeTools.modeButtons[3].active) {
-                            var originTileArea_1 = {};
-                            var nowBrushSize_1 = JSON.parse(JSON.stringify(this.brushArea.size));
-                            var nowBrushShape_1 = JSON.parse(JSON.stringify(this.brushArea.shape));
-                            var sample = JSON.parse(JSON.stringify(this.brushArea.sample));
-                            var selectedTiles_1 = JSON.parse(JSON.stringify(this.selectedTileArea));
-                            var nowLayer_1 = map_1.currentLayerIndex;
-                            Object.entries(sample).map(function (_a) {
-                                var x = _a[0], obj = _a[1];
-                                Object.entries(obj).map(function (_a) {
-                                    var y = _a[0], value = _a[1];
-                                    if (!originTileArea_1[x]) {
-                                        originTileArea_1[x] = {};
+                            const originTileArea = {};
+                            const nowBrushSize = JSON.parse(JSON.stringify(this.brushArea.size));
+                            const nowBrushShape = JSON.parse(JSON.stringify(this.brushArea.shape));
+                            const sample = JSON.parse(JSON.stringify(this.brushArea.sample));
+                            const selectedTiles = JSON.parse(JSON.stringify(this.selectedTileArea));
+                            const nowLayer = map.currentLayerIndex;
+                            Object.entries(sample).map(([x, obj]) => {
+                                Object.entries(obj).map(([y, value]) => {
+                                    if (!originTileArea[x]) {
+                                        originTileArea[x] = {};
                                     }
-                                    originTileArea_1[x][y] = _this.getTile(pointerTileX_1 + parseInt(x), pointerTileY_1 + parseInt(y), map_1);
+                                    originTileArea[x][y] = this.getTile(pointerTileX + parseInt(x), pointerTileY + parseInt(y), map);
                                 });
                             });
                             this.commandController.addCommand({
-                                func: function () {
-                                    _this.putTiles(pointerTileX_1, pointerTileY_1, selectedTiles_1, nowBrushSize_1, nowBrushShape_1, nowLayer_1, false);
+                                func: () => {
+                                    this.putTiles(pointerTileX, pointerTileY, selectedTiles, nowBrushSize, nowBrushShape, nowLayer, false);
                                 },
-                                undo: function () {
-                                    _this.putTiles(pointerTileX_1, pointerTileY_1, originTileArea_1, nowBrushSize_1, nowBrushShape_1, nowLayer_1, false);
+                                undo: () => {
+                                    this.putTiles(pointerTileX, pointerTileY, originTileArea, nowBrushSize, nowBrushShape, nowLayer, false);
                                 },
                             });
                         }
                         else if (this.devModeTools.modeButtons[4].active) {
-                            var targetTile_1 = this.getTile(pointerTileX_1, pointerTileY_1, map_1);
-                            var selectedTile_1 = (_e = Object.values(((_d = Object.values(this.selectedTileArea)) === null || _d === void 0 ? void 0 : _d[0]) || {})) === null || _e === void 0 ? void 0 : _e[0];
-                            if (selectedTile_1 && targetTile_1 !== selectedTile_1 && (targetTile_1 || map_1.currentLayerIndex === 0 || map_1.currentLayerIndex === 1)) {
-                                var nowCommandCount_1 = this.commandController.nowInsertIndex;
-                                var addToLimits_1 = function (v2d) {
-                                    setTimeout(function () {
-                                        var cache = _this.commandController.commands[nowCommandCount_1 - _this.commandController.offset].cache;
+                            const targetTile = this.getTile(pointerTileX, pointerTileY, map);
+                            const selectedTile = (_e = Object.values(((_d = Object.values(this.selectedTileArea)) === null || _d === void 0 ? void 0 : _d[0]) || {})) === null || _e === void 0 ? void 0 : _e[0];
+                            if (selectedTile && targetTile !== selectedTile && (targetTile || map.currentLayerIndex === 0 || map.currentLayerIndex === 1)) {
+                                const nowCommandCount = this.commandController.nowInsertIndex;
+                                const addToLimits = (v2d) => {
+                                    setTimeout(() => {
+                                        const cache = this.commandController.commands[nowCommandCount - this.commandController.offset].cache;
                                         if (!cache[v2d.x]) {
                                             cache[v2d.x] = {};
                                         }
                                         cache[v2d.x][v2d.y] = 1;
                                     }, 0);
                                 };
-                                var nowLayer_2 = map_1.currentLayerIndex;
+                                const nowLayer = map.currentLayerIndex;
                                 this.commandController.addCommand({
-                                    func: function () {
-                                        _this.floodFill(nowLayer_2, targetTile_1, selectedTile_1, pointerTileX_1, pointerTileY_1, false, {}, addToLimits_1);
+                                    func: () => {
+                                        this.floodFill(nowLayer, targetTile, selectedTile, pointerTileX, pointerTileY, false, {}, addToLimits);
                                         taro.network.send('editTile', {
                                             fill: {
-                                                gid: selectedTile_1, layer: nowLayer_2, x: pointerTileX_1, y: pointerTileY_1
+                                                gid: selectedTile, layer: nowLayer, x: pointerTileX, y: pointerTileY
                                             }
                                         });
                                     },
-                                    undo: function () {
-                                        _this.floodFill(nowLayer_2, selectedTile_1, targetTile_1, pointerTileX_1, pointerTileY_1, false, _this.commandController.commands[nowCommandCount_1 - _this.commandController.offset].cache);
+                                    undo: () => {
+                                        this.floodFill(nowLayer, selectedTile, targetTile, pointerTileX, pointerTileY, false, this.commandController.commands[nowCommandCount - this.commandController.offset].cache);
                                         taro.network.send('editTile', {
                                             fill: {
-                                                gid: targetTile_1, layer: nowLayer_2, x: pointerTileX_1, y: pointerTileY_1, limits: _this.commandController.commands[nowCommandCount_1 - _this.commandController.offset].cache
+                                                gid: targetTile, layer: nowLayer, x: pointerTileX, y: pointerTileY, limits: this.commandController.commands[nowCommandCount - this.commandController.offset].cache
                                             }
                                         });
                                     },
@@ -452,7 +446,7 @@ var TileEditor = /** @class */ (function () {
                     }
                 }
                 else if (this.devModeTools.entityEditor.selectedEntityImage) {
-                    this.devModeTools.tooltip.showMessage('Entity Position', "X: ".concat(this.devModeTools.entityEditor.selectedEntityImage.image.x.toString(), ", Y: ").concat(this.devModeTools.entityEditor.selectedEntityImage.image.y.toString()));
+                    this.devModeTools.tooltip.showMessage('Entity Position', `X: ${this.devModeTools.entityEditor.selectedEntityImage.image.x.toString()}, Y: ${this.devModeTools.entityEditor.selectedEntityImage.image.y.toString()}`);
                 }
             }
             else {
@@ -462,7 +456,6 @@ var TileEditor = /** @class */ (function () {
         else {
             this.showMarkers(false);
         }
-    };
-    return TileEditor;
-}());
+    }
+}
 //# sourceMappingURL=TileEditor.js.map

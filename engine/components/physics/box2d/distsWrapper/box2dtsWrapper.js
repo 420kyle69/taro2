@@ -1,5 +1,5 @@
 // FIXME: add more types to the physics part of taro2
-var box2dtsWrapper = {
+const box2dtsWrapper = {
     init: function (component) {
         component.b2AABB = box2dts.b2AABB; // added by Jaeyun for world collision detection for raycast bullets
         component.b2Color = box2dts.b2Color;
@@ -121,7 +121,7 @@ var box2dtsWrapper = {
         return body.m_xf.p;
     },
     queryAABB: function (self, aabb, callback) {
-        var foundBodies = [];
+        const foundBodies = [];
         var cb = {
             ReportFixture: function (fixture) {
                 return callback(fixture);
@@ -130,7 +130,7 @@ var box2dtsWrapper = {
         self.world().QueryAABB(cb, aabb);
     },
     createBody: function (self, entity, body) {
-        PhysicsComponent.prototype.log("createBody of ".concat(entity._stats.name));
+        PhysicsComponent.prototype.log(`createBody of ${entity._stats.name}`);
         // immediately destroy body if entity already has box2dBody
         if (!entity) {
             PhysicsComponent.prototype.log('warning: creating body for non-existent entity');
@@ -331,7 +331,7 @@ var box2dtsWrapper = {
         if (!aBody || aBody.jointType == 'none' || aBody.type == 'none')
             return;
         // create a joint only if there isn't pre-existing joint
-        PhysicsComponent.prototype.log("creating ".concat(aBody.jointType, " joint between ").concat(entityA._stats.name, " and ").concat(entityB._stats.name));
+        PhysicsComponent.prototype.log(`creating ${aBody.jointType} joint between ${entityA._stats.name} and ${entityB._stats.name}`);
         if (entityA && entityA.body && entityB && entityB.body &&
             entityA.id() != entityB.id() // im not creating joint to myself!
         ) {

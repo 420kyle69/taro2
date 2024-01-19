@@ -1,77 +1,59 @@
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        if (typeof b !== "function" && b !== null)
-            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-var DevModeScene = /** @class */ (function (_super) {
-    __extends(DevModeScene, _super);
-    function DevModeScene() {
-        return _super.call(this, { key: 'DevMode' }) || this;
+class DevModeScene extends PhaserScene {
+    constructor() {
+        super({ key: 'DevMode' });
     }
-    DevModeScene.prototype.init = function () {
-        var _this = this;
+    init() {
         this.gameScene = taro.renderer.scene.getScene('Game');
         this.pointerInsideButtons = false;
         this.regions = [];
         this.entityImages = [];
         this.showRepublishWarning = false;
-        taro.client.on('unlockCamera', function () {
-            var camera = _this.gameScene.cameras.main;
+        taro.client.on('unlockCamera', () => {
+            const camera = this.gameScene.cameras.main;
             camera.stopFollow();
-            if (_this.gameScene.useBounds)
+            if (this.gameScene.useBounds)
                 camera.useBounds = false;
         });
-        taro.client.on('lockCamera', function () {
+        taro.client.on('lockCamera', () => {
             var _a, _b, _c, _d;
             taro.client.emit('zoom', taro.client.zoom);
-            var trackingDelay = ((_d = (_c = (_b = (_a = taro === null || taro === void 0 ? void 0 : taro.game) === null || _a === void 0 ? void 0 : _a.data) === null || _b === void 0 ? void 0 : _b.settings) === null || _c === void 0 ? void 0 : _c.camera) === null || _d === void 0 ? void 0 : _d.trackingDelay) || 3;
+            let trackingDelay = ((_d = (_c = (_b = (_a = taro === null || taro === void 0 ? void 0 : taro.game) === null || _a === void 0 ? void 0 : _a.data) === null || _b === void 0 ? void 0 : _b.settings) === null || _c === void 0 ? void 0 : _c.camera) === null || _d === void 0 ? void 0 : _d.trackingDelay) || 3;
             trackingDelay = trackingDelay / 60;
-            var camera = _this.gameScene.cameras.main;
-            if (_this.gameScene.cameraTarget)
-                camera.startFollow(_this.gameScene.cameraTarget, false, trackingDelay, trackingDelay);
-            if (_this.gameScene.useBounds)
+            const camera = this.gameScene.cameras.main;
+            if (this.gameScene.cameraTarget)
+                camera.startFollow(this.gameScene.cameraTarget, false, trackingDelay, trackingDelay);
+            if (this.gameScene.useBounds)
                 camera.useBounds = true;
         });
-        taro.client.on('enterMapTab', function () {
-            _this.enterMapTab();
+        taro.client.on('enterMapTab', () => {
+            this.enterMapTab();
         });
-        taro.client.on('leaveMapTab', function () {
-            _this.leaveMapTab();
+        taro.client.on('leaveMapTab', () => {
+            this.leaveMapTab();
         });
-        taro.client.on('editTile', function (data) {
-            _this.tileEditor.edit(data);
+        taro.client.on('editTile', (data) => {
+            this.tileEditor.edit(data);
         });
-        taro.client.on('editRegion', function (data) {
-            _this.regionEditor.edit(data);
+        taro.client.on('editRegion', (data) => {
+            this.regionEditor.edit(data);
         });
-        taro.client.on('editInitEntity', function (data) {
-            var found = false;
-            _this.entityImages.forEach(function (image) {
+        taro.client.on('editInitEntity', (data) => {
+            let found = false;
+            this.entityImages.forEach((image) => {
                 if (image.entity.action.actionId === data.actionId) {
                     found = true;
                     image.entity.update(data);
                 }
             });
             if (!found) {
-                _this.createEntityImage(data);
+                this.createEntityImage(data);
             }
         });
-        taro.client.on('applyScriptChanges', function (data) {
+        taro.client.on('applyScriptChanges', (data) => {
             taro.network.send('editGlobalScripts', data);
         });
-        taro.client.on('editGlobalScripts', function (data) {
-            Object.entries(data).forEach(function (_a) {
-                var scriptId = _a[0], script = _a[1];
+        taro.client.on('editGlobalScripts', (data) => {
+            Object.entries(data).forEach(([scriptId, script]) => {
                 if (!script.deleted) {
                     taro.developerMode.serverScriptData[scriptId] = script;
                 }
@@ -82,12 +64,11 @@ var DevModeScene = /** @class */ (function (_super) {
             taro.script.load(data, true);
             taro.script.scriptCache = {};
         });
-        taro.client.on('applyVariableChanges', function (data) {
+        taro.client.on('applyVariableChanges', (data) => {
             taro.network.send('editVariable', data);
         });
-        taro.client.on('editVariable', function (data) {
-            Object.entries(data).forEach(function (_a) {
-                var key = _a[0], variable = _a[1];
+        taro.client.on('editVariable', (data) => {
+            Object.entries(data).forEach(([key, variable]) => {
                 //editing existing variable
                 if (taro.game.data.variables[key]) {
                     //deleting variable
@@ -113,17 +94,17 @@ var DevModeScene = /** @class */ (function (_super) {
                 }
             });
         });
-        taro.client.on('updateInitEntities', function () {
-            _this.updateInitEntities();
+        taro.client.on('updateInitEntities', () => {
+            this.updateInitEntities();
         });
-        this.gameScene.input.on('pointerup', function (p) {
-            var draggedEntity = taro.unitBeingDragged;
+        this.gameScene.input.on('pointerup', (p) => {
+            const draggedEntity = taro.unitBeingDragged;
             // taro.unitBeingDragged = {typeId: 'unit id', playerId: 'xyz', angle: 0, entityType: 'unit'}
             if (draggedEntity) {
                 // find position and call editEntity function.
-                var worldPoint = _this.gameScene.cameras.main.getWorldPoint(p.x, p.y);
-                var playerId = taro.game.getPlayerByClientId(taro.network.id()).id();
-                var data = {
+                const worldPoint = this.gameScene.cameras.main.getWorldPoint(p.x, p.y);
+                const playerId = taro.game.getPlayerByClientId(taro.network.id()).id();
+                const data = {
                     action: 'create',
                     entityType: draggedEntity.entityType,
                     typeId: draggedEntity.typeId,
@@ -138,8 +119,8 @@ var DevModeScene = /** @class */ (function (_super) {
                 taro.unitBeingDragged = null;
             }
         });
-    };
-    DevModeScene.prototype.preload = function () {
+    }
+    preload() {
         /*const data = taro.game.data;
 
         data.map.tilesets.forEach((tileset) => {
@@ -171,47 +152,45 @@ var DevModeScene = /** @class */ (function (_super) {
         this.load.scenePlugin('rexuiplugin', '/assets/js/rexuiplugin.min.js', 
         //'src/renderer/phaser/rexuiplugin.min.js',
         'rexUI', 'rexUI');
-    };
-    DevModeScene.prototype.create = function () {
-        var _this = this;
-        var data = taro.game.data;
-        var map = this.tilemap = this.make.tilemap({ key: 'map' });
-        data.map.tilesets.forEach(function (tileset) {
-            var key = "tiles/".concat(tileset.name);
-            var extrudedKey = "extruded-".concat(key);
-            if (_this.textures.exists(extrudedKey)) {
-                _this.tileset = map.addTilesetImage(tileset.name, extrudedKey, tileset.tilewidth, tileset.tileheight, (tileset.margin || 0) + 2, (tileset.spacing || 0) + 4);
+    }
+    create() {
+        const data = taro.game.data;
+        const map = this.tilemap = this.make.tilemap({ key: 'map' });
+        data.map.tilesets.forEach((tileset) => {
+            const key = `tiles/${tileset.name}`;
+            const extrudedKey = `extruded-${key}`;
+            if (this.textures.exists(extrudedKey)) {
+                this.tileset = map.addTilesetImage(tileset.name, extrudedKey, tileset.tilewidth, tileset.tileheight, (tileset.margin || 0) + 2, (tileset.spacing || 0) + 4);
             }
             else {
-                _this.tileset = map.addTilesetImage(tileset.name, key);
+                this.tileset = map.addTilesetImage(tileset.name, key);
             }
         });
-        var gameMap = this.gameScene.tilemap;
+        const gameMap = this.gameScene.tilemap;
         gameMap.currentLayerIndex = 0;
         this.devModeTools = new DevModeTools(this);
         this.tileEditor = this.devModeTools.tileEditor;
         this.tilePalette = this.devModeTools.palette;
         this.regionEditor = this.devModeTools.regionEditor;
         this.gameEditorWidgets = this.devModeTools.gameEditorWidgets;
-    };
-    DevModeScene.prototype.enterMapTab = function () {
-        var _this = this;
+    }
+    enterMapTab() {
         this.gameScene.setResolution(1, false);
         if (this.gameEditorWidgets.length === 0) {
             this.devModeTools.queryWidgets();
             this.gameEditorWidgets = this.devModeTools.gameEditorWidgets;
         }
         this.devModeTools.enterMapTab();
-        this.gameScene.renderedEntities.forEach(function (element) {
+        this.gameScene.renderedEntities.forEach(element => {
             element.setVisible(false);
         });
         if (this.entityImages.length === 0) {
             // create images for entities created in initialize script
-            Object.values(taro.game.data.scripts).forEach(function (script) {
+            Object.values(taro.game.data.scripts).forEach((script) => {
                 var _a, _b;
                 if (((_b = (_a = script.triggers) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.type) === 'gameStart') {
-                    Object.values(script.actions).forEach(function (action) {
-                        _this.createEntityImage(action);
+                    Object.values(script.actions).forEach((action) => {
+                        this.createEntityImage(action);
                     });
                 }
             });
@@ -220,11 +199,11 @@ var DevModeScene = /** @class */ (function (_super) {
             }
         }
         taro.network.send('updateClientInitEntities', true);
-        this.entityImages.forEach(function (image) {
+        this.entityImages.forEach((image) => {
             image.setVisible(true);
         });
-    };
-    DevModeScene.prototype.leaveMapTab = function () {
+    }
+    leaveMapTab() {
         var _a;
         this.gameScene.setResolution(this.gameScene.resolutionCoef, false);
         if (this.devModeTools)
@@ -232,14 +211,14 @@ var DevModeScene = /** @class */ (function (_super) {
         if ((_a = this.devModeTools) === null || _a === void 0 ? void 0 : _a.entityEditor.selectedEntityImage) {
             this.devModeTools.entityEditor.selectEntityImage(null);
         }
-        this.entityImages.forEach(function (image) {
+        this.entityImages.forEach((image) => {
             image.setVisible(false);
         });
-        this.gameScene.renderedEntities.forEach(function (element) {
+        this.gameScene.renderedEntities.forEach(element => {
             element.setVisible(true);
         });
-    };
-    DevModeScene.prototype.createEntityImage = function (action) {
+    }
+    createEntityImage(action) {
         var _a, _b, _c;
         if (!action.disabled && ((_a = action.position) === null || _a === void 0 ? void 0 : _a.function) === 'xyCoordinate'
             && !isNaN((_b = action.position) === null || _b === void 0 ? void 0 : _b.x) && !isNaN((_c = action.position) === null || _c === void 0 ? void 0 : _c.y)) {
@@ -281,52 +260,49 @@ var DevModeScene = /** @class */ (function (_super) {
                 }
             }
         }
-    };
-    DevModeScene.pointerInsideMap = function (pointerX, pointerY, map) {
+    }
+    static pointerInsideMap(pointerX, pointerY, map) {
         return (0 <= pointerX && pointerX < map.width
             && 0 <= pointerY && pointerY < map.height);
-    };
-    DevModeScene.prototype.pointerInsideWidgets = function () {
-        var _this = this;
-        var inside = false;
-        this.gameEditorWidgets.forEach(function (widget) {
-            if (_this.input.activePointer.x >= widget.left
-                && _this.input.activePointer.x <= widget.right
-                && _this.input.activePointer.y >= widget.top
-                && _this.input.activePointer.y <= widget.bottom) {
+    }
+    pointerInsideWidgets() {
+        let inside = false;
+        this.gameEditorWidgets.forEach((widget) => {
+            if (this.input.activePointer.x >= widget.left
+                && this.input.activePointer.x <= widget.right
+                && this.input.activePointer.y >= widget.top
+                && this.input.activePointer.y <= widget.bottom) {
                 inside = true;
                 return;
             }
         });
         return inside;
-    };
-    DevModeScene.prototype.pointerInsidePalette = function () {
+    }
+    pointerInsidePalette() {
         return (this.input.activePointer.x > this.tilePalette.scrollBarContainer.x
             && this.input.activePointer.x < this.tilePalette.scrollBarContainer.x + this.tilePalette.scrollBarContainer.width
             && this.input.activePointer.y > this.tilePalette.scrollBarContainer.y - 30
             && this.input.activePointer.y < this.tilePalette.scrollBarContainer.y + this.tilePalette.scrollBarContainer.height);
-    };
-    DevModeScene.prototype.update = function () {
+    }
+    update() {
         if (this.tileEditor)
             this.tileEditor.update();
         if (this.devModeTools.entityEditor)
             this.devModeTools.entityEditor.update();
-    };
-    DevModeScene.prototype.updateInitEntities = function () {
-        var _this = this;
-        taro.developerMode.initEntities.forEach(function (action) {
-            var found = false;
-            _this.entityImages.forEach(function (image) {
+    }
+    updateInitEntities() {
+        taro.developerMode.initEntities.forEach((action) => {
+            let found = false;
+            this.entityImages.forEach((image) => {
                 if (image.entity.action.actionId === action.actionId) {
                     found = true;
                     image.entity.update(action);
                 }
             });
             if (!found) {
-                _this.createEntityImage(action);
+                this.createEntityImage(action);
             }
         });
-    };
-    return DevModeScene;
-}(PhaserScene));
+    }
+}
 //# sourceMappingURL=DevModeScene.js.map

@@ -1,85 +1,66 @@
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        if (typeof b !== "function" && b !== null)
-            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-var UiScene = /** @class */ (function (_super) {
-    __extends(UiScene, _super);
-    function UiScene() {
-        return _super.call(this, { key: 'Ui', active: true }) || this;
+class UiScene extends PhaserScene {
+    constructor() {
+        super({ key: 'Ui', active: true });
     }
-    UiScene.prototype.init = function () {
+    init() {
         return;
-    };
-    UiScene.prototype.create = function () {
-        var _this = this;
+    }
+    create() {
         if (!taro.isMobile) {
             return;
         }
-        var phaserButtonBar = this.phaserButtonBar = new PhaserButtonBar(this);
-        taro.client.on('enterMapTab', function () {
-            _this.scene.setVisible(false);
+        const phaserButtonBar = this.phaserButtonBar = new PhaserButtonBar(this);
+        taro.client.on('enterMapTab', () => {
+            this.scene.setVisible(false);
         });
-        taro.client.on('leaveMapTab', function () {
-            _this.scene.setVisible(true);
+        taro.client.on('leaveMapTab', () => {
+            this.scene.setVisible(true);
         });
-        taro.client.on('start-press-key', function (key) {
+        taro.client.on('start-press-key', (key) => {
             var _a;
             (_a = phaserButtonBar.buttons[key]) === null || _a === void 0 ? void 0 : _a.activate(true);
         });
-        taro.client.on('stop-press-key', function (key) {
+        taro.client.on('stop-press-key', (key) => {
             var _a;
             (_a = phaserButtonBar.buttons[key]) === null || _a === void 0 ? void 0 : _a.activate(false);
         });
-        taro.client.on('start-casting', function (key) {
+        taro.client.on('start-casting', (key) => {
             var _a;
             (_a = phaserButtonBar.buttons[key]) === null || _a === void 0 ? void 0 : _a.casting(true);
         });
-        taro.client.on('stop-casting', function (key) {
+        taro.client.on('stop-casting', (key) => {
             var _a;
             (_a = phaserButtonBar.buttons[key]) === null || _a === void 0 ? void 0 : _a.casting(false);
         });
-        taro.client.on('start-ability-cooldown', function (key) {
+        taro.client.on('start-ability-cooldown', (key) => {
             var _a;
             (_a = phaserButtonBar.buttons[key]) === null || _a === void 0 ? void 0 : _a.cooldown(true);
         });
-        taro.client.on('stop-ability-cooldown', function (key) {
+        taro.client.on('stop-ability-cooldown', (key) => {
             var _a;
             (_a = phaserButtonBar.buttons[key]) === null || _a === void 0 ? void 0 : _a.cooldown(false);
         });
-    };
-    UiScene.prototype.preload = function () {
-        var _this = this;
+    }
+    preload() {
         this.load.plugin('rexroundrectangleplugin', '/assets/js/rexroundrectangleplugin.min.js', true);
         this.load.plugin('rexcirclemaskimageplugin', '/assets/js/rexcirclemaskimageplugin.min.js?v=1.1', true);
-        Object.values(taro.game.data.abilities).forEach(function (ability) {
+        Object.values(taro.game.data.abilities).forEach(ability => {
             if (ability.iconUrl)
-                _this.load.image(ability.iconUrl, _this.patchAssetUrl(ability.iconUrl));
+                this.load.image(ability.iconUrl, this.patchAssetUrl(ability.iconUrl));
         });
-        Object.values(taro.game.data.unitTypes).forEach(function (unitType) {
+        Object.values(taro.game.data.unitTypes).forEach(unitType => {
             var _a;
             // temp fix for undefined crash
             if (((_a = unitType === null || unitType === void 0 ? void 0 : unitType.controls) === null || _a === void 0 ? void 0 : _a.unitAbilities) && Object.keys(unitType.controls.unitAbilities).length > 0) {
-                Object.values(unitType.controls.unitAbilities).forEach(function (ability) {
+                Object.values(unitType.controls.unitAbilities).forEach(ability => {
                     if (ability.iconUrl)
-                        _this.load.image(ability.iconUrl, _this.patchAssetUrl(ability.iconUrl));
+                        this.load.image(ability.iconUrl, this.patchAssetUrl(ability.iconUrl));
                 });
             }
         });
-    };
-    UiScene.prototype.update = function () {
+    }
+    update() {
         return;
-    };
-    return UiScene;
-}(PhaserScene));
+    }
+}
 //# sourceMappingURL=UiScene.js.map
