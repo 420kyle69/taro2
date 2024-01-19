@@ -5,7 +5,7 @@ class ThreeRenderer {
         this.textures = new Map();
         this.entities = [];
         this.pointer = new THREE.Vector2();
-        this.followedUnit = null;
+        this.followedEntity = null;
         const renderer = new THREE.WebGLRenderer();
         renderer.setSize(window.innerWidth, window.innerHeight);
         (_a = document.querySelector('#game-div')) === null || _a === void 0 ? void 0 : _a.appendChild(renderer.domElement);
@@ -161,7 +161,7 @@ class ThreeRenderer {
                 entity._scale.y = data.height / 64;
             }, this);
             entity.on('follow', () => {
-                this.followedUnit = entity;
+                this.followedEntity = ent;
             }, this);
         };
         taro.client.on('create-unit', (u) => createEntity(u), this);
@@ -189,7 +189,10 @@ class ThreeRenderer {
     }
     render() {
         requestAnimationFrame(this.render.bind(this));
-        if (this.followedUnit) {
+        for (const ent of this.entities) {
+            ent.render();
+        }
+        if (this.followedEntity) {
             const pointer = new THREE.Vector3(this.pointer.x, this.pointer.y, 0.5);
             pointer.unproject(this.camera);
             taro.input.emit('pointermove', [
@@ -198,14 +201,9 @@ class ThreeRenderer {
                     y: (pointer.z + taro.game.data.map.height / 2 + 0.5) * 64,
                 },
             ]);
-        }
-        if (this.followedUnit) {
-            this.camera.position.set(this.followedUnit._translate.x / 64 - 0.5 - taro.game.data.map.width / 2, this.camera.position.y, this.followedUnit._translate.y / 64 - 0.5 - taro.game.data.map.height / 2);
-            this.controls.target.set(this.followedUnit._translate.x / 64 - 0.5 - taro.game.data.map.width / 2, this.controls.target.y, this.followedUnit._translate.y / 64 - 0.5 - taro.game.data.map.height / 2);
+            this.camera.position.set(this.followedEntity.position.x - taro.game.data.map.width / 2, this.camera.position.y, this.followedEntity.position.z - taro.game.data.map.height / 2);
+            this.controls.target.set(this.followedEntity.position.x - taro.game.data.map.width / 2, this.controls.target.y, this.followedEntity.position.z - taro.game.data.map.height / 2);
             this.controls.update();
-        }
-        for (const ent of this.entities) {
-            ent.render();
         }
         this.controls.update();
         this.renderer.render(this.scene, this.camera);

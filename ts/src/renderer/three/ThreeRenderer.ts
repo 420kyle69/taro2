@@ -7,11 +7,10 @@ class ThreeRenderer {
 	private scene: THREE.Scene;
 
 	private textures: Map<string, THREE.Texture> = new Map();
-
 	private entities: Entity[] = [];
 
 	private pointer = new THREE.Vector2();
-	private followedUnit: Unit | null = null;
+	private followedEntity: Entity | null = null;
 
 	constructor() {
 		const renderer = new THREE.WebGLRenderer();
@@ -207,7 +206,7 @@ class ThreeRenderer {
 			entity.on(
 				'follow',
 				() => {
-					this.followedUnit = entity;
+					this.followedEntity = ent;
 				},
 				this
 			);
@@ -245,7 +244,11 @@ class ThreeRenderer {
 	render() {
 		requestAnimationFrame(this.render.bind(this));
 
-		if (this.followedUnit) {
+		for (const ent of this.entities) {
+			ent.render();
+		}
+
+		if (this.followedEntity) {
 			const pointer = new THREE.Vector3(this.pointer.x, this.pointer.y, 0.5);
 			pointer.unproject(this.camera);
 			taro.input.emit('pointermove', [
@@ -254,25 +257,19 @@ class ThreeRenderer {
 					y: (pointer.z + taro.game.data.map.height / 2 + 0.5) * 64,
 				},
 			]);
-		}
 
-		if (this.followedUnit) {
 			this.camera.position.set(
-				this.followedUnit._translate.x / 64 - 0.5 - taro.game.data.map.width / 2,
+				this.followedEntity.position.x - taro.game.data.map.width / 2,
 				this.camera.position.y,
-				this.followedUnit._translate.y / 64 - 0.5 - taro.game.data.map.height / 2
+				this.followedEntity.position.z - taro.game.data.map.height / 2
 			);
 
 			this.controls.target.set(
-				this.followedUnit._translate.x / 64 - 0.5 - taro.game.data.map.width / 2,
+				this.followedEntity.position.x - taro.game.data.map.width / 2,
 				this.controls.target.y,
-				this.followedUnit._translate.y / 64 - 0.5 - taro.game.data.map.height / 2
+				this.followedEntity.position.z - taro.game.data.map.height / 2
 			);
 			this.controls.update();
-		}
-
-		for (const ent of this.entities) {
-			ent.render();
 		}
 
 		this.controls.update();
