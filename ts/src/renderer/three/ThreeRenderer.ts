@@ -77,6 +77,17 @@ class ThreeRenderer {
 			});
 		}
 
+		for (let type in data.itemTypes) {
+			const cellSheet = data.itemTypes[type].cellSheet;
+			if (!cellSheet) continue;
+			const key = cellSheet.url;
+			const url = Utils.patchAssetUrl(key);
+			textureLoader.load(url, (tex) => {
+				tex.colorSpace = THREE.SRGBColorSpace;
+				this.textures.set(key, tex);
+			});
+		}
+
 		for (let type in data.particleTypes) {
 			const key = data.particleTypes[type].url;
 			const url = Utils.patchAssetUrl(key);

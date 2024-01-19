@@ -70,6 +70,20 @@ var ThreeRenderer = /** @class */ (function () {
             _loop_2(type);
         }
         var _loop_3 = function (type) {
+            var cellSheet = data.itemTypes[type].cellSheet;
+            if (!cellSheet)
+                return "continue";
+            var key = cellSheet.url;
+            var url = Utils.patchAssetUrl(key);
+            textureLoader.load(url, function (tex) {
+                tex.colorSpace = THREE.SRGBColorSpace;
+                _this.textures.set(key, tex);
+            });
+        };
+        for (var type in data.itemTypes) {
+            _loop_3(type);
+        }
+        var _loop_4 = function (type) {
             var key = data.particleTypes[type].url;
             var url = Utils.patchAssetUrl(key);
             textureLoader.load(url, function (tex) {
@@ -78,7 +92,7 @@ var ThreeRenderer = /** @class */ (function () {
             });
         };
         for (var type in data.particleTypes) {
-            _loop_3(type);
+            _loop_4(type);
         }
     };
     ThreeRenderer.prototype.init = function () {
