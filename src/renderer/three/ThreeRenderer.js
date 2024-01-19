@@ -6,6 +6,7 @@ var ThreeRenderer = /** @class */ (function () {
         this.textures = new Map();
         this.units = [];
         this.entities = [];
+        this.followedUnit = null;
         var renderer = new THREE.WebGLRenderer();
         renderer.setSize(window.innerWidth, window.innerHeight);
         (_a = document.querySelector('#game-div')) === null || _a === void 0 ? void 0 : _a.appendChild(renderer.domElement);
@@ -180,7 +181,12 @@ var ThreeRenderer = /** @class */ (function () {
                 unit._scale.y = data.height / 64;
                 newCube.scale.set(unit._scale.x, 1, unit._scale.y);
             }, _this);
-            _this;
+            unit.on('follow', function () {
+                // console.log('follow ', unit);
+                // newCube.add(this.camera);
+                _this.followedUnit = unit;
+            }, _this),
+                _this;
         });
         taro.client.on('create-item', function (item) {
             _this.units.push(item);
@@ -245,6 +251,11 @@ var ThreeRenderer = /** @class */ (function () {
     };
     ThreeRenderer.prototype.render = function () {
         requestAnimationFrame(this.render.bind(this));
+        if (this.followedUnit) {
+            this.camera.position.set(this.followedUnit._translate.x / 64 - 0.5 - taro.game.data.map.width / 2, this.camera.position.y, this.followedUnit._translate.y / 64 - 0.5 - taro.game.data.map.height / 2);
+            this.controls.target.set(this.followedUnit._translate.x / 64 - 0.5 - taro.game.data.map.width / 2, this.controls.target.y, this.followedUnit._translate.y / 64 - 0.5 - taro.game.data.map.height / 2);
+            this.controls.update();
+        }
         if (this.units.length > 0) {
             for (var i = 0; i < this.units.length; i++) {
                 var u = this.units[i];

@@ -11,6 +11,8 @@ class ThreeRenderer {
 	private units: Unit[] = [];
 	private entities: THREE.Mesh[] = [];
 
+	private followedUnit: Unit | null = null;
+
 	constructor() {
 		const renderer = new THREE.WebGLRenderer();
 		renderer.setSize(window.innerWidth, window.innerHeight);
@@ -210,7 +212,16 @@ class ThreeRenderer {
 				this
 			);
 
-			this;
+			unit.on(
+				'follow',
+				() => {
+					// console.log('follow ', unit);
+					// newCube.add(this.camera);
+					this.followedUnit = unit;
+				},
+				this
+			),
+				this;
 		});
 
 		taro.client.on('create-item', (item: Item) => {
@@ -308,6 +319,21 @@ class ThreeRenderer {
 
 	render() {
 		requestAnimationFrame(this.render.bind(this));
+
+		if (this.followedUnit) {
+			this.camera.position.set(
+				this.followedUnit._translate.x / 64 - 0.5 - taro.game.data.map.width / 2,
+				this.camera.position.y,
+				this.followedUnit._translate.y / 64 - 0.5 - taro.game.data.map.height / 2
+			);
+
+			this.controls.target.set(
+				this.followedUnit._translate.x / 64 - 0.5 - taro.game.data.map.width / 2,
+				this.controls.target.y,
+				this.followedUnit._translate.y / 64 - 0.5 - taro.game.data.map.height / 2
+			);
+			this.controls.update();
+		}
 
 		if (this.units.length > 0) {
 			for (let i = 0; i < this.units.length; i++) {
