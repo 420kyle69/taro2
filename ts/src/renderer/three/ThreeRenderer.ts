@@ -217,7 +217,6 @@ class ThreeRenderer {
 			this.units.push(item);
 
 			const tex = this.textures.get(item._stats.cellSheet.url);
-			console.log(tex);
 			const newCube = cube.clone();
 			newCube.scale.set(tex.image.width / 64, 1, tex.image.height / 64);
 			newCube.position.set(item._translate.x / 64, 1, item._translate.y / 64);

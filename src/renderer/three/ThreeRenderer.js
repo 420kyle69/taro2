@@ -185,7 +185,6 @@ var ThreeRenderer = /** @class */ (function () {
         taro.client.on('create-item', function (item) {
             _this.units.push(item);
             var tex = _this.textures.get(item._stats.cellSheet.url);
-            console.log(tex);
             var newCube = cube.clone();
             newCube.scale.set(tex.image.width / 64, 1, tex.image.height / 64);
             newCube.position.set(item._translate.x / 64, 1, item._translate.y / 64);
