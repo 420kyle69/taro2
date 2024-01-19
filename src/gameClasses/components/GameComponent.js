@@ -275,11 +275,11 @@ var GameComponent = TaroEntity.extend({
 			if (data.status && data.status.cpu) {
 				// cpu time spent in user code (ms) since last dev console update - may end up being greater than actual elapsed time if multiple CPU cores are performing work for this process
 				if (data.status.cpu.user) {
-					statsPanels.serverCpuUser._serverCpuUserPanel.update(data.status.cpu.user * 0.001, 1000);
+					statsPanels.serverCpuUser?._serverCpuUserPanel?.update(data.status.cpu.user * 0.001, 1000);
 				}
 				// cpu time spent in system code (ms) since last dev console update
 				if (data.status.cpu.system) {
-					statsPanels.serverCpuSystem._serverCpuSystemPanel.update(data.status.cpu.system * 0.001, 1000);
+					statsPanels.serverCpuSystem?._serverCpuSystemPanel?.update(data.status.cpu.system * 0.001, 1000);
 				}
 			}
 
