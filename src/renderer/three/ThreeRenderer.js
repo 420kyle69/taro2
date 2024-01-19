@@ -204,6 +204,28 @@ var ThreeRenderer = /** @class */ (function () {
             }, _this);
             _this;
         });
+        taro.client.on('create-projectile', function (projectile) {
+            _this.units.push(projectile);
+            var tex = _this.textures.get(projectile._stats.cellSheet.url);
+            var newCube = cube.clone();
+            newCube.scale.set(tex.image.width / 64, 1, tex.image.height / 64);
+            newCube.position.set(projectile._translate.x / 64, 1, projectile._translate.y / 64);
+            newCube.material = newCube.material.clone();
+            newCube.material.map = _this.textures.get(projectile._stats.cellSheet.url);
+            entities.add(newCube);
+            _this.entities.push(newCube);
+            projectile.on('transform', function (data) {
+                projectile._translate.x = data.x;
+                projectile._translate.y = data.y;
+                projectile._rotate.z = data.rotation;
+            }, _this);
+            projectile.on('size', function (data) {
+                projectile._scale.x = data.width / 64;
+                projectile._scale.y = data.height / 64;
+                newCube.scale.set(projectile._scale.x, 1, projectile._scale.y);
+            }, _this);
+            _this;
+        });
     };
     ThreeRenderer.prototype.setupInputListeners = function () {
         // Ask the input component to set up any listeners it has

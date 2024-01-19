@@ -248,6 +248,42 @@ class ThreeRenderer {
 
 			this;
 		});
+
+		taro.client.on('create-projectile', (projectile: Item) => {
+			this.units.push(projectile);
+
+			const tex = this.textures.get(projectile._stats.cellSheet.url);
+			const newCube = cube.clone();
+			newCube.scale.set(tex.image.width / 64, 1, tex.image.height / 64);
+			newCube.position.set(projectile._translate.x / 64, 1, projectile._translate.y / 64);
+			newCube.material = newCube.material.clone();
+			newCube.material.map = this.textures.get(projectile._stats.cellSheet.url);
+			entities.add(newCube);
+
+			this.entities.push(newCube);
+
+			projectile.on(
+				'transform',
+				(data: { x: number; y: number; rotation: number }) => {
+					projectile._translate.x = data.x;
+					projectile._translate.y = data.y;
+					projectile._rotate.z = data.rotation;
+				},
+				this
+			);
+
+			projectile.on(
+				'size',
+				(data: { width: number; height: number }) => {
+					projectile._scale.x = data.width / 64;
+					projectile._scale.y = data.height / 64;
+					newCube.scale.set(projectile._scale.x, 1, projectile._scale.y);
+				},
+				this
+			);
+
+			this;
+		});
 	}
 
 	private setupInputListeners(): void {
