@@ -130,24 +130,28 @@ class ThreeRenderer {
 			// Use function (like I do with entities) to create blocks
 			// Create map class
 
+			const createCube = (tile: number) => {
+				const newCube = cube.clone();
+				newCube.material = newCube.material.clone();
+
+				const xIdx = (tile % tilesInRow) - 1;
+				const yIdx = Math.floor(tile / tilesInRow);
+
+				newCube.material.map = newCube.material.map.clone();
+				newCube.material.map.repeat.set(tileSize / texWidth, tileSize / texHeight);
+				newCube.material.map.offset.x = xStep * xIdx;
+				newCube.material.map.offset.y = 1 - yStep * yIdx - yStep;
+
+				return newCube;
+			};
+
 			taro.game.data.map.layers.forEach((layer) => {
 				if (layer.name === 'floor') {
 					for (let z = 0; z < layer.height; z++) {
 						for (let x = 0; x < layer.width; x++) {
-							const newCube = cube.clone();
-							newCube.position.set(x, 0, z);
-							newCube.material = newCube.material.clone();
-
-							const tileIdx = layer.data[z * layer.width + x];
-							const xIdx = (tileIdx % tilesInRow) - 1;
-							const yIdx = Math.floor(tileIdx / tilesInRow);
-
-							newCube.material.map = newCube.material.map.clone();
-							newCube.material.map.repeat.set(tileSize / texWidth, tileSize / texHeight);
-							newCube.material.map.offset.x = xStep * xIdx;
-							newCube.material.map.offset.y = 1 - yStep * yIdx - yStep;
-
-							map.add(newCube);
+							const cube = createCube(layer.data[z * layer.width + x]);
+							cube.position.set(x, 0, z);
+							map.add(cube);
 						}
 					}
 				}
@@ -156,20 +160,9 @@ class ThreeRenderer {
 					for (let z = 0; z < layer.height; z++) {
 						for (let x = 0; x < layer.width; x++) {
 							if (layer.data[z * layer.width + x] !== 0) {
-								const newCube = cube.clone();
-								newCube.position.set(x, 1, z);
-								newCube.material = newCube.material.clone();
-
-								const tileIdx = layer.data[z * layer.width + x];
-								const xIdx = (tileIdx % tilesInRow) - 1;
-								const yIdx = Math.floor(tileIdx / tilesInRow);
-
-								newCube.material.map = newCube.material.map.clone();
-								newCube.material.map.repeat.set(tileSize / texWidth, tileSize / texHeight);
-								newCube.material.map.offset.x = xStep * xIdx;
-								newCube.material.map.offset.y = 1 - yStep * yIdx - yStep;
-
-								map.add(newCube);
+								const cube = createCube(layer.data[z * layer.width + x]);
+								cube.position.set(x, 1, z);
+								map.add(cube);
 							}
 						}
 					}
