@@ -202,7 +202,15 @@ class ThreeRenderer {
 			entity.on(
 				'size',
 				(data: { width: number; height: number }) => {
-					ent.scale.set(data.width / 64, 1, data.height / 64);
+					ent.mesh.scale.set(data.width / 64, 1, data.height / 64);
+				},
+				this
+			);
+
+			entity.on(
+				'scale',
+				(data: { x: number; y: number }) => {
+					ent.scale.set(data.x, 1, data.y);
 				},
 				this
 			);

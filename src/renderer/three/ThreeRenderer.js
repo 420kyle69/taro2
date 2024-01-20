@@ -160,7 +160,10 @@ class ThreeRenderer {
                 ent.rotation.y = -data.rotation;
             }, this);
             entity.on('size', (data) => {
-                ent.scale.set(data.width / 64, 1, data.height / 64);
+                ent.mesh.scale.set(data.width / 64, 1, data.height / 64);
+            }, this);
+            entity.on('scale', (data) => {
+                ent.scale.set(data.x, 1, data.y);
             }, this);
             entity.on('follow', () => {
                 this.followedEntity = ent;
