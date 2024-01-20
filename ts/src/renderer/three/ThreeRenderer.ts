@@ -31,6 +31,8 @@ class ThreeRenderer {
 		this.controls.target = new THREE.Vector3(0, 0, 10);
 
 		this.scene = new THREE.Scene();
+		this.scene.translateX(-taro.game.data.map.width / 2);
+		this.scene.translateZ(-taro.game.data.map.height / 2);
 
 		THREE.DefaultLoadingManager.onLoad = () => {
 			console.log(this.textures);
@@ -100,6 +102,15 @@ class ThreeRenderer {
 	}
 
 	private init() {
+		const layers = {
+			floor: new THREE.Group(),
+			walls: new THREE.Group(),
+			entities: new THREE.Group(),
+		};
+
+		layers.walls.position.y = 1;
+		layers.entities.position.y = 1;
+
 		const geometry = new THREE.BoxGeometry(1, 1, 1);
 		const material = new THREE.MeshBasicMaterial({ transparent: true });
 		const cube = new THREE.Mesh(geometry, material);
@@ -113,10 +124,9 @@ class ThreeRenderer {
 			cube.material.map = tex;
 			cube.material.needsUpdate = true;
 
-			const map = new THREE.Group();
-			map.translateX(-taro.game.data.map.width / 2);
-			map.translateZ(-taro.game.data.map.height / 2);
-			this.scene.add(map);
+			for (const layer of Object.values(layers)) {
+				this.scene.add(layer);
+			}
 
 			const tileSize = 64;
 			const texWidth = tex.image.width;
@@ -126,8 +136,6 @@ class ThreeRenderer {
 			const xStep = tileSize / texWidth;
 			const yStep = tileSize / texHeight;
 
-			// Rewrite so as to make a THREE.Group for each layer, and set height on the group.
-			// Use function (like I do with entities) to create blocks
 			// Create map class
 
 			const createCube = (tile: number) => {
@@ -146,39 +154,22 @@ class ThreeRenderer {
 			};
 
 			taro.game.data.map.layers.forEach((layer) => {
-				if (layer.name === 'floor') {
+				if (['floor', 'walls'].includes(layer.name)) {
 					for (let z = 0; z < layer.height; z++) {
 						for (let x = 0; x < layer.width; x++) {
 							const cube = createCube(layer.data[z * layer.width + x]);
 							cube.position.set(x, 0, z);
-							map.add(cube);
-						}
-					}
-				}
-
-				if (layer.name === 'walls') {
-					for (let z = 0; z < layer.height; z++) {
-						for (let x = 0; x < layer.width; x++) {
-							if (layer.data[z * layer.width + x] !== 0) {
-								const cube = createCube(layer.data[z * layer.width + x]);
-								cube.position.set(x, 1, z);
-								map.add(cube);
-							}
+							layers[layer.name].add(cube);
 						}
 					}
 				}
 			});
 		});
 
-		const entities = new THREE.Group();
-		entities.translateX(-taro.game.data.map.width / 2);
-		entities.translateZ(-taro.game.data.map.height / 2);
-		this.scene.add(entities);
-
 		const createEntity = (entity: Unit | Item | Projectile) => {
 			const tex = this.textures.get(entity._stats.cellSheet.url);
 			const ent = new Entity(tex);
-			entities.add(ent);
+			layers.entities.add(ent);
 			this.entities.push(ent);
 
 			const transformEvtListener = entity.on(
@@ -219,7 +210,7 @@ class ThreeRenderer {
 				() => {
 					const idx = this.entities.indexOf(ent, 0);
 					if (idx > -1) {
-						entities.remove(ent);
+						layers.entities.remove(ent);
 						this.entities.splice(idx, 1);
 
 						// Why do I have to call this on the client on destroy?
@@ -278,18 +269,10 @@ class ThreeRenderer {
 				},
 			]);
 
-			this.camera.position.set(
-				this.followedEntity.position.x - taro.game.data.map.width / 2,
-				this.camera.position.y,
-				this.followedEntity.position.z - taro.game.data.map.height / 2
-			);
-
-			this.controls.target.set(
-				this.followedEntity.position.x - taro.game.data.map.width / 2,
-				this.controls.target.y,
-				this.followedEntity.position.z - taro.game.data.map.height / 2
-			);
-			this.controls.update();
+			const followedEntityWorldPos = new THREE.Vector3();
+			this.followedEntity.getWorldPosition(followedEntityWorldPos);
+			this.camera.position.set(followedEntityWorldPos.x, this.camera.position.y, followedEntityWorldPos.z);
+			this.controls.target.set(followedEntityWorldPos.x, this.controls.target.y, followedEntityWorldPos.z);
 		}
 
 		this.controls.update();
