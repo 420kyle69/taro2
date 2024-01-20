@@ -126,6 +126,10 @@ class ThreeRenderer {
 			const xStep = tileSize / texWidth;
 			const yStep = tileSize / texHeight;
 
+			// Rewrite so as to make a THREE.Group for each layer, and set height on the group.
+			// Use function (like I do with entities) to create blocks
+			// Create map class
+
 			taro.game.data.map.layers.forEach((layer) => {
 				if (layer.name === 'floor') {
 					for (let z = 0; z < layer.height; z++) {
@@ -178,18 +182,19 @@ class ThreeRenderer {
 		entities.translateZ(-taro.game.data.map.height / 2);
 		this.scene.add(entities);
 
+		// Add entity destroy
+
 		const createEntity = (entity: Unit | Item | Projectile) => {
 			const tex = this.textures.get(entity._stats.cellSheet.url);
-			const ent = new Entity(tex, entity);
+			const ent = new Entity(tex);
 			entities.add(ent);
 			this.entities.push(ent);
 
 			entity.on(
 				'transform',
 				(data: { x: number; y: number; rotation: number }) => {
-					entity._translate.x = data.x;
-					entity._translate.y = data.y;
-					entity._rotate.z = data.rotation;
+					ent.position.set(data.x / 64 - 0.5, 1, data.y / 64 - 0.5);
+					ent.rotation.y = -data.rotation;
 				},
 				this
 			);
@@ -197,8 +202,7 @@ class ThreeRenderer {
 			entity.on(
 				'size',
 				(data: { width: number; height: number }) => {
-					entity._scale.x = data.width / 64;
-					entity._scale.y = data.height / 64;
+					ent.scale.set(data.width / 64, 1, data.height / 64);
 				},
 				this
 			);
@@ -243,10 +247,7 @@ class ThreeRenderer {
 
 	render() {
 		requestAnimationFrame(this.render.bind(this));
-
-		for (const ent of this.entities) {
-			ent.render();
-		}
+		taro.client.emit('tick');
 
 		if (this.followedEntity) {
 			const pointer = new THREE.Vector3(this.pointer.x, this.pointer.y, 0.5);
@@ -274,7 +275,5 @@ class ThreeRenderer {
 
 		this.controls.update();
 		this.renderer.render(this.scene, this.camera);
-
-		taro.client.emit('tick');
 	}
 }
