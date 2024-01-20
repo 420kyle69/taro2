@@ -6,6 +6,7 @@ class ThreeRenderer {
         this.entities = [];
         this.pointer = new THREE.Vector2();
         this.followedEntity = null;
+        this.label = null;
         const renderer = new THREE.WebGLRenderer();
         renderer.setSize(window.innerWidth, window.innerHeight);
         (_a = document.querySelector('#game-div')) === null || _a === void 0 ? void 0 : _a.appendChild(renderer.domElement);
@@ -174,6 +175,32 @@ class ThreeRenderer {
         this.renderer.domElement.addEventListener('mousemove', (evt) => {
             this.pointer.set((evt.clientX / window.innerWidth) * 2 - 1, -(evt.clientY / window.innerHeight) * 2 + 1);
         });
+        this.label = this.createCharacterLabel('Nick');
+        this.scene.add(this.label);
+    }
+    createCharacterLabel(text) {
+        const textCanvas = document.createElement('canvas');
+        textCanvas.height = 34;
+        const ctx = textCanvas.getContext('2d');
+        const font = '24px grobold';
+        ctx.font = font;
+        textCanvas.width = Math.ceil(ctx.measureText(text).width + 16);
+        ctx.font = font;
+        ctx.strokeStyle = '#222';
+        ctx.lineWidth = 8;
+        ctx.lineJoin = 'miter';
+        ctx.miterLimit = 3;
+        ctx.strokeText(text, 8, 26);
+        ctx.fillStyle = 'white';
+        ctx.fillText(text, 8, 26);
+        const spriteMap = new THREE.Texture(ctx.getImageData(0, 0, textCanvas.width, textCanvas.height));
+        spriteMap.minFilter = THREE.LinearFilter;
+        spriteMap.generateMipmaps = false;
+        spriteMap.needsUpdate = true;
+        const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: spriteMap }));
+        sprite.scale.set((0.4 * textCanvas.width) / textCanvas.height, 0.4, 1);
+        sprite.position.y = 2;
+        return sprite;
     }
     setupInputListeners() {
         // Ask the input component to set up any listeners it has
@@ -207,6 +234,8 @@ class ThreeRenderer {
             this.followedEntity.getWorldPosition(followedEntityWorldPos);
             this.camera.position.set(followedEntityWorldPos.x, this.camera.position.y, followedEntityWorldPos.z);
             this.controls.target.set(followedEntityWorldPos.x, this.controls.target.y, followedEntityWorldPos.z);
+            this.label.position.x = this.followedEntity.position.x;
+            this.label.position.z = this.followedEntity.position.z - 0.5;
         }
         this.controls.update();
         this.renderer.render(this.scene, this.camera);
