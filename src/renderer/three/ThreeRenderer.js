@@ -149,24 +149,37 @@ class ThreeRenderer {
         entities.translateX(-taro.game.data.map.width / 2);
         entities.translateZ(-taro.game.data.map.height / 2);
         this.scene.add(entities);
-        // Add entity destroy
         const createEntity = (entity) => {
             const tex = this.textures.get(entity._stats.cellSheet.url);
             const ent = new Entity(tex);
             entities.add(ent);
             this.entities.push(ent);
-            entity.on('transform', (data) => {
+            const transformEvtListener = entity.on('transform', (data) => {
                 ent.position.set(data.x / 64 - 0.5, 1, data.y / 64 - 0.5);
                 ent.rotation.y = -data.rotation;
             }, this);
-            entity.on('size', (data) => {
+            const sizeEvtListener = entity.on('size', (data) => {
                 ent.mesh.scale.set(data.width / 64, 1, data.height / 64);
             }, this);
-            entity.on('scale', (data) => {
+            const scaleEvtListener = entity.on('scale', (data) => {
                 ent.scale.set(data.x, 1, data.y);
             }, this);
-            entity.on('follow', () => {
+            const followEvtListener = entity.on('follow', () => {
                 this.followedEntity = ent;
+            }, this);
+            const destroyEvtListener = entity.on('destroy', () => {
+                const idx = this.entities.indexOf(ent, 0);
+                if (idx > -1) {
+                    entities.remove(ent);
+                    this.entities.splice(idx, 1);
+                    // Why do I have to call this on the client on destroy?
+                    // Does the server not auto cleanup event emitters?
+                    entity.off('transform', transformEvtListener);
+                    entity.off('size', sizeEvtListener);
+                    entity.off('scale', scaleEvtListener);
+                    entity.off('follow', followEvtListener);
+                    entity.off('destroy', destroyEvtListener);
+                }
             }, this);
         };
         taro.client.on('create-unit', (u) => createEntity(u), this);

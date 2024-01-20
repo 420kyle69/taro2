@@ -182,15 +182,13 @@ class ThreeRenderer {
 		entities.translateZ(-taro.game.data.map.height / 2);
 		this.scene.add(entities);
 
-		// Add entity destroy
-
 		const createEntity = (entity: Unit | Item | Projectile) => {
 			const tex = this.textures.get(entity._stats.cellSheet.url);
 			const ent = new Entity(tex);
 			entities.add(ent);
 			this.entities.push(ent);
 
-			entity.on(
+			const transformEvtListener = entity.on(
 				'transform',
 				(data: { x: number; y: number; rotation: number }) => {
 					ent.position.set(data.x / 64 - 0.5, 1, data.y / 64 - 0.5);
@@ -199,7 +197,7 @@ class ThreeRenderer {
 				this
 			);
 
-			entity.on(
+			const sizeEvtListener = entity.on(
 				'size',
 				(data: { width: number; height: number }) => {
 					ent.mesh.scale.set(data.width / 64, 1, data.height / 64);
@@ -207,7 +205,7 @@ class ThreeRenderer {
 				this
 			);
 
-			entity.on(
+			const scaleEvtListener = entity.on(
 				'scale',
 				(data: { x: number; y: number }) => {
 					ent.scale.set(data.x, 1, data.y);
@@ -215,10 +213,30 @@ class ThreeRenderer {
 				this
 			);
 
-			entity.on(
+			const followEvtListener = entity.on(
 				'follow',
 				() => {
 					this.followedEntity = ent;
+				},
+				this
+			);
+
+			const destroyEvtListener = entity.on(
+				'destroy',
+				() => {
+					const idx = this.entities.indexOf(ent, 0);
+					if (idx > -1) {
+						entities.remove(ent);
+						this.entities.splice(idx, 1);
+
+						// Why do I have to call this on the client on destroy?
+						// Does the server not auto cleanup event emitters?
+						entity.off('transform', transformEvtListener);
+						entity.off('size', sizeEvtListener);
+						entity.off('scale', scaleEvtListener);
+						entity.off('follow', followEvtListener);
+						entity.off('destroy', destroyEvtListener);
+					}
 				},
 				this
 			);
