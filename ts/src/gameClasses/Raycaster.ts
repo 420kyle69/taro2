@@ -39,11 +39,11 @@ class Raycaster {
 		// reverse
 		const raycast = this.multiple;
 		raycast.reset();
-		let pEnd = new taro.physics.box2D.b2Vec2(end.x, end.y);
-		let pStart = new taro.physics.box2D.b2Vec2(start.x, start.y);
+		const pStart = taro.physics.box2D ? new taro.physics.box2D.b2Vec2(start.x, start.y) : start;
+		const pEnd = taro.physics.box2D ? new taro.physics.box2D.b2Vec2(end.x, end.y) : end;
 		this.world.rayCast(
-			taro.physics.box2D ? pEnd : end,
-			taro.physics.box2D ? pStart : start,
+			pEnd,
+			pStart,
 			raycast.callback
 		);
 
@@ -52,8 +52,8 @@ class Raycaster {
 		// forward
 		raycast.reset();
 		this.world.rayCast(
-			taro.physics.box2D ? pStart : start,
-			taro.physics.box2D ? pEnd : end,
+			pStart,
+			pEnd,
 			raycast.callback
 		);
 
@@ -82,18 +82,18 @@ class Raycaster {
 		// forward
 		const forwardRaycast = this.closest;
 		forwardRaycast.reset();
-		const pStart = new taro.physics.box2D.b2Vec2(start.x, start.y);
-		const pEnd = new taro.physics.box2D.b2Vec2(end.x, end.y);
+		const pStart = taro.physics.box2D ? new taro.physics.box2D.b2Vec2(start.x, start.y) : start;
+		const pEnd = taro.physics.box2D ? new taro.physics.box2D.b2Vec2(end.x, end.y) : end;
 		this.world.rayCast(
-			taro.physics.box2D ? pStart : start,
-			taro.physics.box2D ? pEnd : end,
+			pStart,
+			pEnd,
 			forwardRaycast.callback // though it is currently hard-coded for 'Closest'
 		);
 		taro.game.entitiesCollidingWithLastRaycast = forwardRaycast.entity ? [forwardRaycast.entity] : [];
 		this.forwardHit = true;
 
 		const point = forwardRaycast.point ?? end;
-		const pPoint = new taro.physics.box2D.b2Vec2(point.x, point.y);
+		const pPoint = taro.physics.box2D ? new taro.physics.box2D.b2Vec2(point.x, point.y) : point;
 		const fraction = forwardRaycast.fraction;
 
 		// reverse
@@ -101,8 +101,8 @@ class Raycaster {
 
 		reverseRaycast.reset();
 		this.world.rayCast(
-			taro.physics.box2D ? pPoint : point,
-			taro.physics.box2D ? pStart : start,
+			pPoint,
+			pStart,
 			reverseRaycast.callback
 		);
 

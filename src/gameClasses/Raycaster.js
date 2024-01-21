@@ -24,13 +24,13 @@ var Raycaster = /** @class */ (function () {
         // reverse
         var raycast = this.multiple;
         raycast.reset();
-        var pEnd = new taro.physics.box2D.b2Vec2(end.x, end.y);
-        var pStart = new taro.physics.box2D.b2Vec2(start.x, start.y);
-        this.world.rayCast(taro.physics.box2D ? pEnd : end, taro.physics.box2D ? pStart : start, raycast.callback);
+        var pStart = taro.physics.box2D ? new taro.physics.box2D.b2Vec2(start.x, start.y) : start;
+        var pEnd = taro.physics.box2D ? new taro.physics.box2D.b2Vec2(end.x, end.y) : end;
+        this.world.rayCast(pEnd, pStart, raycast.callback);
         taro.game.entitiesCollidingWithLastRaycast = _.clone(raycast.entities);
         // forward
         raycast.reset();
-        this.world.rayCast(taro.physics.box2D ? pStart : start, taro.physics.box2D ? pEnd : end, raycast.callback);
+        this.world.rayCast(pStart, pEnd, raycast.callback);
         var missedEntities = _.difference(taro.game.entitiesCollidingWithLastRaycast, raycast.entities);
         missedEntities.forEach(function (x) { return x.raycastFraction = 1 - x.raycastFraction; });
         taro.game.entitiesCollidingWithLastRaycast = __spreadArray(__spreadArray([], raycast.entities, true), missedEntities, true);
@@ -45,19 +45,19 @@ var Raycaster = /** @class */ (function () {
         // forward
         var forwardRaycast = this.closest;
         forwardRaycast.reset();
-        var pStart = new taro.physics.box2D.b2Vec2(start.x, start.y);
-        var pEnd = new taro.physics.box2D.b2Vec2(end.x, end.y);
-        this.world.rayCast(taro.physics.box2D ? pStart : start, taro.physics.box2D ? pEnd : end, forwardRaycast.callback // though it is currently hard-coded for 'Closest'
+        var pStart = taro.physics.box2D ? new taro.physics.box2D.b2Vec2(start.x, start.y) : start;
+        var pEnd = taro.physics.box2D ? new taro.physics.box2D.b2Vec2(end.x, end.y) : end;
+        this.world.rayCast(pStart, pEnd, forwardRaycast.callback // though it is currently hard-coded for 'Closest'
         );
         taro.game.entitiesCollidingWithLastRaycast = forwardRaycast.entity ? [forwardRaycast.entity] : [];
         this.forwardHit = true;
         var point = (_a = forwardRaycast.point) !== null && _a !== void 0 ? _a : end;
-        var pPoint = new taro.physics.box2D.b2Vec2(point.x, point.y);
+        var pPoint = taro.physics.box2D ? new taro.physics.box2D.b2Vec2(point.x, point.y) : point;
         var fraction = forwardRaycast.fraction;
         // reverse
         var reverseRaycast = this.any;
         reverseRaycast.reset();
-        this.world.rayCast(taro.physics.box2D ? pPoint : point, taro.physics.box2D ? pStart : start, reverseRaycast.callback);
+        this.world.rayCast(pPoint, pStart, reverseRaycast.callback);
         if (reverseRaycast.hit) {
             // we were obstructed when shooting
             this.reverseHit = true;
