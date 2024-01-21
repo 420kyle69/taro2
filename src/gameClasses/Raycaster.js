@@ -122,8 +122,10 @@ var RayCastClosest = (function () {
                     var fixture = taro.physics.recordLeak(wrapPointer_1(fixture_p, b2Fixture_1));
                     var point = taro.physics.recordLeak(wrapPointer_1(point_p, b2Vec2_1));
                     var normal = taro.physics.recordLeak(wrapPointer_1(normal_p, b2Vec2_1));
-                    var taroId = taro.physics.metaData[taro.physics.getPointer(fixture.GetBody())].taroId;
+                    var body = taro.physics.recordLeak(fixture.GetBody());
+                    var taroId = taro.physics.metaData[taro.physics.getPointer(body)].taroId;
                     var entity = taro.$(taroId);
+                    taro.physics.destroyB2dObj(fixture_p);
                     if (entity &&
                         (entity._category === 'unit' ||
                             entity._category === 'wall')) {
@@ -207,7 +209,8 @@ var RayCastMultiple = (function () {
                     var fixture = taro.physics.recordLeak(wrapPointer_2(fixture_p, b2Fixture_2));
                     var point = taro.physics.recordLeak(wrapPointer_2(point_p, b2Vec2_2));
                     var normal = taro.physics.recordLeak(wrapPointer_2(normal_p, b2Vec2_2));
-                    var taroId = taro.physics.metaData[taro.physics.getPointer(fixture.GetBody())].taroId;
+                    var body = taro.physics.recordLeak(fixture.GetBody());
+                    var taroId = taro.physics.metaData[taro.physics.getPointer(body)].taroId;
                     var entity = taro.$(taroId);
                     if (entity &&
                         (entity._category === 'unit' ||
@@ -223,6 +226,7 @@ var RayCastMultiple = (function () {
                     def.normals.push(normal);
                     // By returning 1, we instruct the caller to continue without clipping the
                     // ray.
+                    taro.physics.destroyB2dObj(fixture_p);
                     return 1.0;
                 }
             });
@@ -277,8 +281,10 @@ var RaycastAny = (function () {
                     var fixture = taro.physics.recordLeak(wrapPointer_3(fixture_p, b2Fixture_3));
                     var point = taro.physics.recordLeak(wrapPointer_3(point_p, b2Vec2_3));
                     var normal = taro.physics.recordLeak(wrapPointer_3(normal_p, b2Vec2_3));
-                    var taroId = taro.physics.metaData[taro.physics.getPointer(fixture.GetBody())].taroId;
+                    var body = taro.physics.recordLeak(fixture.GetBody());
+                    var taroId = taro.physics.metaData[taro.physics.getPointer(body)].taroId;
                     var entity = taro.$(taroId);
+                    taro.physics.destroyB2dObj(fixture_p);
                     if (entity &&
                         (entity._category === 'unit' ||
                             entity._category === 'wall')) {
