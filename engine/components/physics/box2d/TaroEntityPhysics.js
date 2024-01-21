@@ -58,12 +58,10 @@ var TaroEntityPhysics = TaroEntity.extend({
 
 		// console.log("updatebody", this._stats.name, defaultData, this._stats.currentBody.type)
 		// console.trace()
-
 		body = this._stats.currentBody;
 		if (!body) {
 			return;
 		}
-
 		if (body.type === 'none' || body.type === 'spriteOnly') {
 			self.destroyBody();
 			return;
@@ -144,7 +142,6 @@ var TaroEntityPhysics = TaroEntity.extend({
 			}]
 		};
 		// console.log("collidesWith", this._category, filterCategoryBits, collidesWith, body)
-
 		this.physicsBody(body, isLossTolerant);
 		// if (this._category === 'item') {
 		//     this.previousState = this._stats && this._stats.states && this._stats.states[this._stats.stateId] || {};
