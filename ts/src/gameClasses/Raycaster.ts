@@ -178,8 +178,10 @@ const RayCastClosest = (function () {
 					const fixture = taro.physics.recordLeak(wrapPointer(fixture_p, b2Fixture));
 					const point = taro.physics.recordLeak(wrapPointer(point_p, b2Vec2));
 					const normal = taro.physics.recordLeak(wrapPointer(normal_p, b2Vec2));
-					const taroId: Box2D.b2Fixture = taro.physics.metaData[taro.physics.getPointer(fixture.GetBody())].taroId;
+					const body = taro.physics.recordLeak(fixture.GetBody());
+					const taroId: Box2D.b2Fixture = taro.physics.metaData[taro.physics.getPointer(body)].taroId;
 					const entity = taro.$(taroId);
+					taro.physics.destroyB2dObj(fixture_p);
 					if (
 						entity &&
 						(
@@ -287,7 +289,8 @@ const RayCastMultiple = (function () {
 					const fixture = taro.physics.recordLeak(wrapPointer(fixture_p, b2Fixture));
 					const point = taro.physics.recordLeak(wrapPointer(point_p, b2Vec2));
 					const normal = taro.physics.recordLeak(wrapPointer(normal_p, b2Vec2));
-					const taroId: Box2D.b2Fixture = taro.physics.metaData[taro.physics.getPointer(fixture.GetBody())].taroId;
+					const body = taro.physics.recordLeak(fixture.GetBody());
+					const taroId: Box2D.b2Fixture = taro.physics.metaData[taro.physics.getPointer(body)].taroId;
 					const entity = taro.$(taroId);
 					if (
 						entity &&
@@ -309,6 +312,7 @@ const RayCastMultiple = (function () {
 					def.normals.push(normal);
 					// By returning 1, we instruct the caller to continue without clipping the
 					// ray.
+					taro.physics.destroyB2dObj(fixture_p);
 					return 1.0;
 				}
 			});
@@ -374,8 +378,10 @@ const RaycastAny = (function () {
 					const fixture = taro.physics.recordLeak(wrapPointer(fixture_p, b2Fixture));
 					const point = taro.physics.recordLeak(wrapPointer(point_p, b2Vec2));
 					const normal = taro.physics.recordLeak(wrapPointer(normal_p, b2Vec2));
-					const taroId: Box2D.b2Fixture = taro.physics.metaData[taro.physics.getPointer(fixture.GetBody())].taroId;
+					const body = taro.physics.recordLeak(fixture.GetBody());
+					const taroId: Box2D.b2Fixture = taro.physics.metaData[taro.physics.getPointer(body)].taroId;
 					const entity = taro.$(taroId);
+					taro.physics.destroyB2dObj(fixture_p);
 					if (
 						entity &&
 						(
