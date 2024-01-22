@@ -19,15 +19,15 @@ class Label extends THREE.Group {
 		textCanvas.height = 34;
 
 		const ctx = textCanvas.getContext('2d');
-		const font = '16px Verdana';
+		const font = `${bold ? 'bold' : 'normal'} 16px Verdana`;
 
 		ctx.font = font;
 		textCanvas.width = Math.ceil(ctx.measureText(text).width + 16);
 
-		if (bold) {
+		if (taro.game.data.settings.addStrokeToNameAndAttributes) {
 			ctx.font = font;
-			ctx.strokeStyle = '#222';
-			ctx.lineWidth = 8;
+			ctx.strokeStyle = '#000';
+			ctx.lineWidth = 4;
 			ctx.lineJoin = 'miter';
 			ctx.miterLimit = 3;
 			ctx.strokeText(text, 8, 26);
@@ -35,6 +35,7 @@ class Label extends THREE.Group {
 
 		ctx.fillStyle = color;
 		ctx.font = font;
+		ctx.font;
 		ctx.fillText(text, 8, 26);
 
 		const spriteMap = new THREE.Texture(ctx.getImageData(0, 0, textCanvas.width, textCanvas.height));
