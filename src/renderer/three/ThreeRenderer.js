@@ -6,7 +6,7 @@ class ThreeRenderer {
         this.entities = [];
         this.pointer = new THREE.Vector2();
         this.followedEntity = null;
-        const renderer = new THREE.WebGLRenderer();
+        const renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         (_a = document.querySelector('#game-div')) === null || _a === void 0 ? void 0 : _a.appendChild(renderer.domElement);
         this.renderer = renderer;

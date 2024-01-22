@@ -1,5 +1,9 @@
 class Label extends THREE.Group {
 	protected sprite;
+	private scaleScalar = 1;
+	private text = 'cccccc';
+	private color = 'white';
+	private bold = false;
 
 	constructor(text = 'cccccc') {
 		super();
@@ -9,6 +13,10 @@ class Label extends THREE.Group {
 	}
 
 	update(text: string, color = 'white', bold = false) {
+		this.text = text;
+		this.color = color;
+		this.bold = bold;
+
 		this.remove(this.sprite);
 		this.sprite = this.createLabel(text, color, bold);
 		this.add(this.sprite);
@@ -16,10 +24,15 @@ class Label extends THREE.Group {
 
 	setOffset(offset: THREE.Vector3) {
 		this.sprite.geometry.translate(
-			offset.x / 64 / 2,
-			offset.y / 64 + (this.sprite.material.map.image.height / 64 / 100) * 1.5,
-			offset.z / 64 / 2
+			offset.x / 64 / 2 / this.scaleScalar,
+			offset.y / 64 + ((this.sprite.material.map.image.height / 64 / 100) * 1.5) / this.scaleScalar,
+			offset.z / 64 / 2 / this.scaleScalar
 		);
+	}
+
+	setScale(scale: number) {
+		this.scaleScalar = scale;
+		this.sprite.scale.setScalar(scale);
 	}
 
 	private createLabel(text: string, color = 'white', bold = false) {
@@ -52,7 +65,7 @@ class Label extends THREE.Group {
 		spriteMap.needsUpdate = true;
 
 		const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: spriteMap }));
-		sprite.scale.set(textCanvas.width / textCanvas.height, 1, 1);
+		sprite.scale.set(this.scaleScalar * (textCanvas.width / textCanvas.height), this.scaleScalar, 1);
 
 		return sprite;
 	}

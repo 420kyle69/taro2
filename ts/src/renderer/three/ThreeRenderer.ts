@@ -13,7 +13,7 @@ class ThreeRenderer {
 	private followedEntity: Entity | null = null;
 
 	constructor() {
-		const renderer = new THREE.WebGLRenderer();
+		const renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true });
 		renderer.setSize(window.innerWidth, window.innerHeight);
 		document.querySelector('#game-div')?.appendChild(renderer.domElement);
 		this.renderer = renderer;

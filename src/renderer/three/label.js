@@ -1,16 +1,27 @@
 class Label extends THREE.Group {
     constructor(text = 'cccccc') {
         super();
+        this.scaleScalar = 1;
+        this.text = 'cccccc';
+        this.color = 'white';
+        this.bold = false;
         this.sprite = this.createLabel(text);
         this.add(this.sprite);
     }
     update(text, color = 'white', bold = false) {
+        this.text = text;
+        this.color = color;
+        this.bold = bold;
         this.remove(this.sprite);
         this.sprite = this.createLabel(text, color, bold);
         this.add(this.sprite);
     }
     setOffset(offset) {
-        this.sprite.geometry.translate(offset.x / 64 / 2, offset.y / 64 + (this.sprite.material.map.image.height / 64 / 100) * 1.5, offset.z / 64 / 2);
+        this.sprite.geometry.translate(offset.x / 64 / 2 / this.scaleScalar, offset.y / 64 + ((this.sprite.material.map.image.height / 64 / 100) * 1.5) / this.scaleScalar, offset.z / 64 / 2 / this.scaleScalar);
+    }
+    setScale(scale) {
+        this.scaleScalar = scale;
+        this.sprite.scale.setScalar(scale);
     }
     createLabel(text, color = 'white', bold = false) {
         const textCanvas = document.createElement('canvas');
@@ -36,7 +47,7 @@ class Label extends THREE.Group {
         spriteMap.generateMipmaps = false;
         spriteMap.needsUpdate = true;
         const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: spriteMap }));
-        sprite.scale.set(textCanvas.width / textCanvas.height, 1, 1);
+        sprite.scale.set(this.scaleScalar * (textCanvas.width / textCanvas.height), this.scaleScalar, 1);
         return sprite;
     }
 }
