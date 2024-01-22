@@ -46,7 +46,10 @@ class Label extends THREE.Group {
         spriteMap.minFilter = THREE.LinearFilter;
         spriteMap.generateMipmaps = false;
         spriteMap.needsUpdate = true;
-        const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: spriteMap }));
+        const spriteMaterial = new THREE.SpriteMaterial({ map: spriteMap });
+        spriteMaterial.depthTest = false;
+        const sprite = new THREE.Sprite(spriteMaterial);
+        sprite.renderOrder = 999;
         sprite.scale.set(this.scaleScalar * (textCanvas.width / textCanvas.height), this.scaleScalar, 1);
         return sprite;
     }
