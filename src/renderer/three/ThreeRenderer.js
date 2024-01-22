@@ -6,7 +6,6 @@ class ThreeRenderer {
         this.entities = [];
         this.pointer = new THREE.Vector2();
         this.followedEntity = null;
-        this.label = null;
         const renderer = new THREE.WebGLRenderer();
         renderer.setSize(window.innerWidth, window.innerHeight);
         (_a = document.querySelector('#game-div')) === null || _a === void 0 ? void 0 : _a.appendChild(renderer.domElement);
@@ -201,8 +200,6 @@ class ThreeRenderer {
         this.renderer.domElement.addEventListener('mousemove', (evt) => {
             this.pointer.set((evt.clientX / window.innerWidth) * 2 - 1, -(evt.clientY / window.innerHeight) * 2 + 1);
         });
-        this.label = new Label();
-        this.scene.add(this.label);
     }
     setupInputListeners() {
         // Ask the input component to set up any listeners it has
@@ -236,8 +233,6 @@ class ThreeRenderer {
             this.followedEntity.getWorldPosition(followedEntityWorldPos);
             this.camera.position.set(followedEntityWorldPos.x, this.camera.position.y, followedEntityWorldPos.z);
             this.controls.target.set(followedEntityWorldPos.x, this.controls.target.y, followedEntityWorldPos.z);
-            this.label.position.x = this.followedEntity.position.x;
-            this.label.position.z = this.followedEntity.position.z - 0.5;
         }
         this.controls.update();
         this.renderer.render(this.scene, this.camera);
