@@ -169,6 +169,7 @@ class ThreeRenderer {
             }, this);
             const updateLabelEvtListener = entity.on('update-label', (data) => {
                 ent.showLabel();
+                ent.updateLabel(data);
             });
             const showLabelEvtListener = entity.on('show-label', () => {
                 ent.showLabel();

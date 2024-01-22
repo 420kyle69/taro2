@@ -5,6 +5,9 @@ class ThreeUnit extends Entity {
         this.label = new Label();
         this.add(this.label);
     }
+    updateLabel(data) {
+        this.label.update(data.text, data.color, data.bold);
+    }
     showLabel() {
         this.label.visible = true;
     }

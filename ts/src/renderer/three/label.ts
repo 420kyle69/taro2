@@ -1,7 +1,20 @@
 class Label extends THREE.Group {
+	private sprite;
+
 	constructor(text = 'cccccc') {
 		super();
 
+		this.sprite = this.createLabel(text);
+		this.add(this.sprite);
+	}
+
+	update(text: string, color = 'white', bold = false) {
+		this.remove(this.sprite);
+		this.sprite = this.createLabel(text, color, bold);
+		this.add(this.sprite);
+	}
+
+	private createLabel(text: string, color = 'white', bold = false) {
 		const textCanvas = document.createElement('canvas');
 		textCanvas.height = 34;
 
@@ -11,13 +24,16 @@ class Label extends THREE.Group {
 		ctx.font = font;
 		textCanvas.width = Math.ceil(ctx.measureText(text).width + 16);
 
-		ctx.font = font;
-		ctx.strokeStyle = '#222';
-		ctx.lineWidth = 8;
-		ctx.lineJoin = 'miter';
-		ctx.miterLimit = 3;
-		ctx.strokeText(text, 8, 26);
-		ctx.fillStyle = 'white';
+		if (bold) {
+			ctx.font = font;
+			ctx.strokeStyle = '#222';
+			ctx.lineWidth = 8;
+			ctx.lineJoin = 'miter';
+			ctx.miterLimit = 3;
+			ctx.strokeText(text, 8, 26);
+		}
+
+		ctx.fillStyle = color;
 		ctx.font = font;
 		ctx.fillText(text, 8, 26);
 
@@ -30,6 +46,6 @@ class Label extends THREE.Group {
 		sprite.scale.set((0.4 * textCanvas.width) / textCanvas.height, 0.4, 1);
 		sprite.position.y = 2;
 
-		this.add(sprite);
+		return sprite;
 	}
 }
