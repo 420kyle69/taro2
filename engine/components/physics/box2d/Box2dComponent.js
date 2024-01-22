@@ -282,7 +282,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 							var entity = taro.$(entityId);
 							entities.push(taro.$(entityId));
 						}
-						self.destroyB2dObj(fixture_p);
 						return true;
 					}
 				});
