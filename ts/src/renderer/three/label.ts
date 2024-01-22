@@ -1,5 +1,5 @@
 class Label extends THREE.Group {
-	private sprite;
+	protected sprite;
 
 	constructor(text = 'cccccc') {
 		super();
@@ -12,6 +12,14 @@ class Label extends THREE.Group {
 		this.remove(this.sprite);
 		this.sprite = this.createLabel(text, color, bold);
 		this.add(this.sprite);
+	}
+
+	setOffset(offset: THREE.Vector3) {
+		this.sprite.geometry.translate(
+			offset.x / 64 / 2,
+			offset.y / 64 + (this.sprite.material.map.image.height / 64 / 100) * 1.5,
+			offset.z / 64 / 2
+		);
 	}
 
 	private createLabel(text: string, color = 'white', bold = false) {
@@ -44,8 +52,7 @@ class Label extends THREE.Group {
 		spriteMap.needsUpdate = true;
 
 		const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: spriteMap }));
-		sprite.scale.set((0.4 * textCanvas.width) / textCanvas.height, 0.4, 1);
-		sprite.position.y = 2;
+		sprite.scale.set(textCanvas.width / textCanvas.height, 1, 1);
 
 		return sprite;
 	}

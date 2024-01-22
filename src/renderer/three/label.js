@@ -9,6 +9,9 @@ class Label extends THREE.Group {
         this.sprite = this.createLabel(text, color, bold);
         this.add(this.sprite);
     }
+    setOffset(offset) {
+        this.sprite.geometry.translate(offset.x / 64 / 2, offset.y / 64 + (this.sprite.material.map.image.height / 64 / 100) * 1.5, offset.z / 64 / 2);
+    }
     createLabel(text, color = 'white', bold = false) {
         const textCanvas = document.createElement('canvas');
         textCanvas.height = 34;
@@ -33,8 +36,7 @@ class Label extends THREE.Group {
         spriteMap.generateMipmaps = false;
         spriteMap.needsUpdate = true;
         const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: spriteMap }));
-        sprite.scale.set((0.4 * textCanvas.width) / textCanvas.height, 0.4, 1);
-        sprite.position.y = 2;
+        sprite.scale.set(textCanvas.width / textCanvas.height, 1, 1);
         return sprite;
     }
 }
