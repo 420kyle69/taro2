@@ -98,13 +98,11 @@ var RayCastClosest = (function () {
     var def;
     def = {};
     def.reset = function () {
-        var _a, _b;
         def.hit = false;
         def.point = null;
         def.normal = null;
         def.entity = null;
         def.fraction = 1;
-        (_b = (_a = taro.physics).destroyB2dObj) === null || _b === void 0 ? void 0 : _b.call(_a, def.callback);
     };
     switch (taro.physics.engine) {
         case 'BOX2DWASM':
@@ -125,7 +123,6 @@ var RayCastClosest = (function () {
                     var body = taro.physics.recordLeak(fixture.GetBody());
                     var taroId = taro.physics.metaData[taro.physics.getPointer(body)].taroId;
                     var entity = taro.$(taroId);
-                    taro.physics.destroyB2dObj(fixture_p);
                     if (entity &&
                         (entity._category === 'unit' ||
                             entity._category === 'wall')) {
@@ -187,11 +184,9 @@ var RayCastMultiple = (function () {
     def.normals = [];
     def.entities = [];
     def.reset = function () {
-        var _a, _b;
         def.points = [];
         def.normals = [];
         def.entities = [];
-        (_b = (_a = taro.physics).destroyB2dObj) === null || _b === void 0 ? void 0 : _b.call(_a, def.callback);
     };
     switch (taro.physics.engine) {
         case 'BOX2DWASM':
@@ -226,7 +221,6 @@ var RayCastMultiple = (function () {
                     def.normals.push(normal);
                     // By returning 1, we instruct the caller to continue without clipping the
                     // ray.
-                    taro.physics.destroyB2dObj(fixture_p);
                     return 1.0;
                 }
             });
@@ -259,11 +253,9 @@ var RaycastAny = (function () {
     var def;
     def = {};
     def.reset = function () {
-        var _a, _b;
         def.hit = false;
         def.point = null;
         def.normal = null;
-        (_b = (_a = taro.physics).destroyB2dObj) === null || _b === void 0 ? void 0 : _b.call(_a, def.callback);
     };
     switch (taro.physics.engine) {
         case 'BOX2DWASM':
@@ -284,7 +276,6 @@ var RaycastAny = (function () {
                     var body = taro.physics.recordLeak(fixture.GetBody());
                     var taroId = taro.physics.metaData[taro.physics.getPointer(body)].taroId;
                     var entity = taro.$(taroId);
-                    taro.physics.destroyB2dObj(fixture_p);
                     if (entity &&
                         (entity._category === 'unit' ||
                             entity._category === 'wall')) {
