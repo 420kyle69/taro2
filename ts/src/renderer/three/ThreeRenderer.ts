@@ -181,7 +181,13 @@ class ThreeRenderer {
 
 		const createEntity = (entity: Unit | Item | Projectile) => {
 			const tex = this.textures.get(entity._stats.cellSheet.url);
-			const ent = new Entity(tex);
+
+			const createEntity = () => {
+				if (entity instanceof Unit) return new ThreeUnit(tex);
+				return new Entity(tex);
+			};
+
+			const ent = createEntity();
 			layers.entities.add(ent);
 			this.entities.push(ent);
 

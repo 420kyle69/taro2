@@ -147,7 +147,12 @@ class ThreeRenderer {
         });
         const createEntity = (entity) => {
             const tex = this.textures.get(entity._stats.cellSheet.url);
-            const ent = new Entity(tex);
+            const createEntity = () => {
+                if (entity instanceof Unit)
+                    return new ThreeUnit(tex);
+                return new Entity(tex);
+            };
+            const ent = createEntity();
             layers.entities.add(ent);
             this.entities.push(ent);
             const transformEvtListener = entity.on('transform', (data) => {
