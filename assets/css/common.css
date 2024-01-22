@@ -11,6 +11,27 @@ body {
     src: url('/assets/fonts/arcade.ttf');
 }
 
+@font-face {
+  font-family: 'Verdana';
+  src: url('/assets/fonts/verdana.ttf');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Verdana';
+  src: url('/assets/fonts/verdana-bold.ttf');
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Verdana';
+  src: url('/assets/fonts/verdana-bold-italic.ttf');
+  font-weight: bold;
+  font-style: italic;
+}
+
 .d-none-important {
     display: none !important;
 }

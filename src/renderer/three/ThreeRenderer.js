@@ -23,6 +23,9 @@ class ThreeRenderer {
         this.scene = new THREE.Scene();
         this.scene.translateX(-taro.game.data.map.width / 2);
         this.scene.translateZ(-taro.game.data.map.height / 2);
+        THREE.DefaultLoadingManager.onStart = () => {
+            this.forceLoadUnusedCSSFonts();
+        };
         THREE.DefaultLoadingManager.onLoad = () => {
             console.log(this.textures);
             this.init();
@@ -84,6 +87,12 @@ class ThreeRenderer {
                 this.textures.set(key, tex);
             });
         }
+    }
+    forceLoadUnusedCSSFonts() {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.font = '4px Verdana';
+        ctx.fillText('text', 0, 8);
     }
     init() {
         const layers = {
@@ -175,14 +184,14 @@ class ThreeRenderer {
         this.renderer.domElement.addEventListener('mousemove', (evt) => {
             this.pointer.set((evt.clientX / window.innerWidth) * 2 - 1, -(evt.clientY / window.innerHeight) * 2 + 1);
         });
-        this.label = this.createCharacterLabel('Nick');
+        this.label = this.createCharacterLabel('Verdana');
         this.scene.add(this.label);
     }
     createCharacterLabel(text) {
         const textCanvas = document.createElement('canvas');
         textCanvas.height = 34;
         const ctx = textCanvas.getContext('2d');
-        const font = '24px grobold';
+        const font = '16px Verdana';
         ctx.font = font;
         textCanvas.width = Math.ceil(ctx.measureText(text).width + 16);
         ctx.font = font;
@@ -192,6 +201,7 @@ class ThreeRenderer {
         ctx.miterLimit = 3;
         ctx.strokeText(text, 8, 26);
         ctx.fillStyle = 'white';
+        ctx.font = font;
         ctx.fillText(text, 8, 26);
         const spriteMap = new THREE.Texture(ctx.getImageData(0, 0, textCanvas.width, textCanvas.height));
         spriteMap.minFilter = THREE.LinearFilter;
