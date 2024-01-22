@@ -223,15 +223,15 @@ class ThreeRenderer {
 			);
 
 			const updateLabelEvtListener = entity.on('update-label', (data) => {
-				console.log(data);
+				(ent as ThreeUnit).showLabel();
 			});
 
 			const showLabelEvtListener = entity.on('show-label', () => {
-				console.log('show-label');
+				(ent as ThreeUnit).showLabel();
 			});
 
 			const hideLabelEvtListener = entity.on('hide-label', () => {
-				console.log('hide-label');
+				(ent as ThreeUnit).hideLabel();
 			});
 
 			const destroyEvtListener = entity.on(

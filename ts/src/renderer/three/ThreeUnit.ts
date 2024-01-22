@@ -7,4 +7,12 @@ class ThreeUnit extends Entity {
 
 		this.add(this.label);
 	}
+
+	showLabel() {
+		this.label.visible = true;
+	}
+
+	hideLabel() {
+		this.label.visible = false;
+	}
 }

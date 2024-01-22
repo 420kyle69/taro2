@@ -168,13 +168,13 @@ class ThreeRenderer {
                 this.followedEntity = ent;
             }, this);
             const updateLabelEvtListener = entity.on('update-label', (data) => {
-                console.log(data);
+                ent.showLabel();
             });
             const showLabelEvtListener = entity.on('show-label', () => {
-                console.log('show-label');
+                ent.showLabel();
             });
             const hideLabelEvtListener = entity.on('hide-label', () => {
-                console.log('hide-label');
+                ent.hideLabel();
             });
             const destroyEvtListener = entity.on('destroy', () => {
                 const idx = this.entities.indexOf(ent, 0);
