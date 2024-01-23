@@ -6,12 +6,10 @@ class ThreeUnit extends Entity {
 	constructor(tex: THREE.Texture) {
 		super(tex);
 
-		this.label.setScale(0.5);
-		this.label.setOffset(new THREE.Vector3(0, this.mesh.scale.y / 2, 0));
+		this.label.setOffset(new THREE.Vector2(0, 0.75 * 64), new THREE.Vector2(0.5, 0));
 		this.add(this.label);
 
-		this.attributeBar.setScale(0.5);
-		this.attributeBar.setOffset(new THREE.Vector3(0, -10, 0));
+		this.attributeBar.setOffset(new THREE.Vector2(0, -0.75 * 64), new THREE.Vector2(0.5, 1));
 		this.add(this.attributeBar);
 	}
 
