@@ -35,14 +35,16 @@ class Label extends THREE.Group {
 		const textCanvas = document.createElement('canvas');
 		textCanvas.height = 10;
 
+		const padding = 4;
+
 		const ctx = textCanvas.getContext('2d');
 		const font = `${bold ? 'bold' : 'normal'} 16px Verdana`;
 
 		ctx.font = font;
 		const metrics = ctx.measureText(text);
 		const textHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
-		textCanvas.width = Math.ceil(metrics.width);
-		textCanvas.height = Math.ceil(textHeight);
+		textCanvas.width = Math.ceil(metrics.width) + padding;
+		textCanvas.height = Math.ceil(textHeight) + padding;
 
 		if (taro.game.data.settings.addStrokeToNameAndAttributes) {
 			ctx.font = font;
@@ -56,7 +58,7 @@ class Label extends THREE.Group {
 		ctx.fillStyle = color;
 		ctx.font = font;
 		ctx.font;
-		ctx.fillText(text, 0, textHeight);
+		ctx.fillText(text, padding / 2, textHeight + padding / 2);
 
 		const spriteMap = new THREE.Texture(ctx.getImageData(0, 0, textCanvas.width, textCanvas.height));
 		spriteMap.minFilter = THREE.LinearFilter;
