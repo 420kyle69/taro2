@@ -1,6 +1,7 @@
 class ThreeUnit extends Entity {
 	// Why does every unit have a label?
 	private label = new Label();
+	private attributeBar = new ThreeAttributeBar();
 
 	constructor(tex: THREE.Texture) {
 		super(tex);
@@ -8,6 +9,10 @@ class ThreeUnit extends Entity {
 		this.label.setScale(0.5);
 		this.label.setOffset(new THREE.Vector3(0, this.mesh.scale.y / 2, 0));
 		this.add(this.label);
+
+		this.attributeBar.setScale(0.5);
+		this.attributeBar.setOffset(new THREE.Vector3(0, -10, 0));
+		this.add(this.attributeBar);
 	}
 
 	updateLabel(data: { text?: string; bold?: boolean; color?: string }) {
