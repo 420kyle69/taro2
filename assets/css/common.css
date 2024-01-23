@@ -14,15 +14,12 @@ body {
 @font-face {
   font-family: 'Verdana';
   src: url('/assets/fonts/verdana.ttf');
-  font-weight: normal;
-  font-style: normal;
 }
 
 @font-face {
   font-family: 'Verdana';
   src: url('/assets/fonts/verdana-bold.ttf');
   font-weight: bold;
-  font-style: normal;
 }
 
 @font-face {

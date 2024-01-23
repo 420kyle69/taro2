@@ -90,7 +90,9 @@ class ThreeRenderer {
     forceLoadUnusedCSSFonts() {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
-        ctx.font = '4px Verdana';
+        ctx.font = 'normal 4px Verdana';
+        ctx.fillText('text', 0, 8);
+        ctx.font = 'bold 4px Verdana';
         ctx.fillText('text', 0, 8);
     }
     init() {
