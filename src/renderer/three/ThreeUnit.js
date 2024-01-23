@@ -6,8 +6,6 @@ class ThreeUnit extends Entity {
         this.attributeBar = new ThreeAttributeBar();
         this.label.setOffset(new THREE.Vector2(0, 0.75 * 64), new THREE.Vector2(0.5, 0));
         this.add(this.label);
-        this.attributeBar.setOffset(new THREE.Vector2(0, -0.75 * 64), new THREE.Vector2(0.5, 1));
-        this.add(this.attributeBar);
     }
     updateLabel(data) {
         this.label.update(data.text, data.color, data.bold);
@@ -17,6 +15,19 @@ class ThreeUnit extends Entity {
     }
     hideLabel() {
         this.label.visible = false;
+    }
+    renderAttributes(data) {
+        let display = false;
+        data.attrs.forEach((ad) => {
+            if (ad.displayValue) {
+                display = true;
+                return;
+            }
+        });
+        if (display) {
+            this.attributeBar.setOffset(new THREE.Vector2(0, -0.75 * 64), new THREE.Vector2(0.5, 1));
+            this.add(this.attributeBar);
+        }
     }
 }
 //# sourceMappingURL=ThreeUnit.js.map

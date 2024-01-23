@@ -241,6 +241,7 @@ class ThreeRenderer {
 			// Attributes
 			const renderAttributesEvtListener = entity.on('render-attributes', (data) => {
 				console.log('render attribures', data);
+				(ent as ThreeUnit).renderAttributes(data);
 			});
 
 			const updateAttributesEvtListener = entity.on('update-attributes', (data) => {
