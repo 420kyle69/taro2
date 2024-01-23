@@ -167,6 +167,7 @@ class ThreeRenderer {
             const followEvtListener = entity.on('follow', () => {
                 this.followedEntity = ent;
             }, this);
+            // Label
             const updateLabelEvtListener = entity.on('update-label', (data) => {
                 ent.showLabel();
                 ent.updateLabel(data);
@@ -176,6 +177,13 @@ class ThreeRenderer {
             });
             const hideLabelEvtListener = entity.on('hide-label', () => {
                 ent.hideLabel();
+            });
+            // Attributes
+            const renderAttributesEvtListener = entity.on('render-attributes', (data) => {
+                console.log('render attribures', data);
+            });
+            const updateAttributesEvtListener = entity.on('update-attributes', (data) => {
+                console.log('update attributes', data);
             });
             const destroyEvtListener = entity.on('destroy', () => {
                 const idx = this.entities.indexOf(ent, 0);
@@ -192,6 +200,8 @@ class ThreeRenderer {
                     entity.off('update-label', updateLabelEvtListener);
                     entity.off('show-label', showLabelEvtListener);
                     entity.off('hide-label', hideLabelEvtListener);
+                    entity.off('render-attributes', renderAttributesEvtListener);
+                    entity.off('update-attributes', updateAttributesEvtListener);
                 }
             }, this);
         };

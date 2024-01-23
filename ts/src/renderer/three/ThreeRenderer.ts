@@ -222,6 +222,7 @@ class ThreeRenderer {
 				this
 			);
 
+			// Label
 			const updateLabelEvtListener = entity.on('update-label', (data) => {
 				(ent as ThreeUnit).showLabel();
 				(ent as ThreeUnit).updateLabel(data);
@@ -233,6 +234,15 @@ class ThreeRenderer {
 
 			const hideLabelEvtListener = entity.on('hide-label', () => {
 				(ent as ThreeUnit).hideLabel();
+			});
+
+			// Attributes
+			const renderAttributesEvtListener = entity.on('render-attributes', (data) => {
+				console.log('render attribures', data);
+			});
+
+			const updateAttributesEvtListener = entity.on('update-attributes', (data) => {
+				console.log('update attributes', data);
 			});
 
 			const destroyEvtListener = entity.on(
@@ -254,6 +264,9 @@ class ThreeRenderer {
 						entity.off('update-label', updateLabelEvtListener);
 						entity.off('show-label', showLabelEvtListener);
 						entity.off('hide-label', hideLabelEvtListener);
+
+						entity.off('render-attributes', renderAttributesEvtListener);
+						entity.off('update-attributes', updateAttributesEvtListener);
 					}
 				},
 				this
