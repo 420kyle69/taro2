@@ -277,9 +277,9 @@ var ClientNetworkEvents = {
 
 	// when client receives a ping response back from the server
 	_onPing: function(data) {
+		const self = this;
 		const now = taro._currentTime;
 		const latency = now - data.sentAt;
-		const self = this;
 		// console.log("onPing", taro._currentTime, data.sentAt, latency);
 		// start reconciliation based on discrepancy between 
 		// where my unit when ping was sent and where unit is when ping is received
@@ -289,7 +289,9 @@ var ClientNetworkEvents = {
 			let history = taro.client.selectedUnit.posHistory;
 			while (history.length > 0) {
 				var keyFrame = history.shift();
-				if (keyFrame[0] > data.sentAt) {
+				// console.log("keyFrame", parseFloat(keyFrame[0]).toFixed(0), parseFloat(data.sentAt).toFixed(0))
+				if (keyFrame[0] > data.sentAt - 20) {	
+					// console.log("found it!")				
 					taro.client.myUnitPositionWhenPingSent = {
 						x: keyFrame[1][0],
 						y: keyFrame[1][1]
@@ -329,13 +331,8 @@ var ClientNetworkEvents = {
 
 		taro.client.sendNextPingAt = taro.now;
 
-		if (!taro.pingElement) {
-			taro.pingElement = document.getElementById('updateping');
-		}
-
-		if (taro.pingElement) {
-			taro.pingElement.innerHTML = Math.floor(latency);
-		}
+		taro.pingElement = taro.pingElement || document.getElementById('updateping');
+		taro.pingElement.innerHTML = Math.floor(latency);
 
 	},
 
