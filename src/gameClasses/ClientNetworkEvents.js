@@ -12,177 +12,275 @@ var ClientNetworkEvents = {
 	},
 
 	_onStreamUpdateData: function (data) {
-		for (entityId in data) {
+		const runAction = functionalTryCatch(() => {
+			for (entityId in data) {
 
-			if (taro.client.entityUpdateQueue[entityId] == undefined) {
-				taro.client.entityUpdateQueue[entityId] = {};
-			}
+				if (taro.client.entityUpdateQueue[entityId] == undefined) {
+					taro.client.entityUpdateQueue[entityId] = {};
+				}
 
-			var stats = data[entityId];
+				var stats = data[entityId];
 
-			for (key in stats) {
-				var value = stats[key];
-				taro.client.entityUpdateQueue[entityId][key] = value; // overwrite the value if the same key already exists
+				for (key in stats) {
+					var value = stats[key];
+					taro.client.entityUpdateQueue[entityId][key] = value; // overwrite the value if the same key already exists
+				}
 			}
 		}
+		);
+		if (runAction[0] !== null) {
+			console.error(runAction[0]);
+		}
+
 	},
 
 	_onTeleport: function (data) {
-		var entity = taro.$(data.entityId);
-		if (entity && data.position) {
-			// console.log("teleporting",data.entityId , " to", data.position)
-			entity.teleportTo(data.position[0], data.position[1], data.position[2]);
+		const runAction = functionalTryCatch(() => {
+			var entity = taro.$(data.entityId);
+			if (entity && data.position) {
+				// console.log("teleporting",data.entityId , " to", data.position)
+				entity.teleportTo(data.position[0], data.position[1], data.position[2]);
+			}
+		}
+		);
+		if (runAction[0] !== null) {
+			console.error(runAction[0]);
 		}
 	},
 
 	// entity update data was sent to specific clients
-	_streamUpdateDataToClients: function(data) {
-		if (data.entityId) {
-			var entity = taro.$(data.entityId)
-			if (entity) {
-				entity.queueStreamUpdateData(data.entityId, data.key, data.value)	
+	_streamUpdateDataToClients: function (data) {
+		const runAction = functionalTryCatch(() => {
+			if (data.entityId) {
+				var entity = taro.$(data.entityId)
+				if (entity) {
+					entity.queueStreamUpdateData(data.entityId, data.key, data.value)
+				}
 			}
 		}
+		);
+		if (runAction[0] !== null) {
+			console.error(runAction[0]);
+		}
+
 	},
 
 	_onChangePlayerCameraPanSpeed: function (data) {
-		if (data.panSpeed !== undefined) {
-			taro.client.myPlayer.changeCameraPanSpeed(data.panSpeed);
+		const runAction = functionalTryCatch(() => {
+			if (data.panSpeed !== undefined) {
+				taro.client.myPlayer.changeCameraPanSpeed(data.panSpeed);
+			}
 		}
+		);
+		if (runAction[0] !== null) {
+			console.error(runAction[0]);
+		}
+
 	},
 
 	_onHideUnitFromPlayer: function (data) {
-		if (data.unitId) {
-			taro.client.queueStreamUpdateData(data.unitId, "hideUnit", true);
+		const runAction = functionalTryCatch(() => {
+			if (data.unitId) {
+				taro.client.queueStreamUpdateData(data.unitId, "hideUnit", true);
+			}
+		}
+		);
+		if (runAction[0] !== null) {
+			console.error(runAction[0]);
 		}
 	},
 	_onShowUnitFromPlayer: function (data) {
-		if (data.unitId) {
-			taro.client.queueStreamUpdateData(data.unitId, "showUnit", true);
+		const runAction = functionalTryCatch(() => {
+			if (data.unitId) {
+				taro.client.queueStreamUpdateData(data.unitId, "showUnit", true);
+			}
 		}
+		);
+		if (runAction[0] !== null) {
+			console.error(runAction[0]);
+		}
+
 	},
 	_onHideUnitNameLabelFromPlayer: function (data) {
-		if (data.unitId) {
-			taro.client.queueStreamUpdateData(data.unitId, "hideNameLabel", true);
+		const runAction = functionalTryCatch(() => {
+			if (data.unitId) {
+				taro.client.queueStreamUpdateData(data.unitId, "hideNameLabel", true);
+			}
+		}
+		);
+		if (runAction[0] !== null) {
+			console.error(runAction[0]);
 		}
 	},
 	_onShowUnitNameLabelFromPlayer: function (data) {
-		if (data.unitId) {
-			taro.client.queueStreamUpdateData(data.unitId, "showNameLabel", true);
+		const runAction = functionalTryCatch(() => {
+			if (data.unitId) {
+				taro.client.queueStreamUpdateData(data.unitId, "showNameLabel", true);
+			}
 		}
+		);
+		if (runAction[0] !== null) {
+			console.error(runAction[0]);
+		}
+
 	},
 	_onOpenShop: function (data) {
-		if (data.type) {
-			var shopName = taro.game.data.shops[data.type] ? taro.game.data.shops[data.type].name : "Item shop";
-			var shopDescription = taro.game.data.shops[data.type] ? taro.clientSanitizer(taro.game.data.shops[data.type].description) : "";
-			var shopClass = taro.game.data.shops[data.type] ? (taro.game.data.shops[data.type].shopClass || '') : "";
-			$("#modd-item-shop-header").text(shopName);
+		const runAction = functionalTryCatch(() => {
+			if (data.type) {
+				var shopName = taro.game.data.shops[data.type] ? taro.game.data.shops[data.type].name : "Item shop";
+				var shopDescription = taro.game.data.shops[data.type] ? taro.clientSanitizer(taro.game.data.shops[data.type].description) : "";
+				var shopClass = taro.game.data.shops[data.type] ? (taro.game.data.shops[data.type].shopClass || '') : "";
+				$("#modd-item-shop-header").text(shopName);
 
-			if (shopDescription?.length) {
-				$("#modd-item-shop-description").text(shopDescription);
-			} else {
-				$("#modd-item-shop-description").text("");
+				if (shopDescription?.length) {
+					$("#modd-item-shop-description").text(shopDescription);
+				} else {
+					$("#modd-item-shop-description").text("");
+				}
+
+				taro.shop.openItemShop(data.type);
+
+				// remove all previous class and add shopClass
+				$("#modd-item-shop-modal").removeClass().addClass(`modal ${shopClass}`);
+
+				$("#modd-item-shop-modal").modal("show");
+				if (taro.client.myPlayer?.control) {
+					taro.client.myPlayer.control.updatePlayerInputStatus();
+				}
 			}
-
-			taro.shop.openItemShop(data.type);
-
-			// remove all previous class and add shopClass
-			$("#modd-item-shop-modal").removeClass().addClass(`modal ${shopClass}`);
-
-			$("#modd-item-shop-modal").modal("show");
-			if (taro.client.myPlayer?.control) {
-				taro.client.myPlayer.control.updatePlayerInputStatus();
-			}
+		}
+		);
+		if (runAction[0] !== null) {
+			console.error(runAction[0]);
 		}
 	},
 	_onCreateFloatingText: function (data) {
-		taro.client.emit("floating-text", {
+		const runAction = functionalTryCatch(() => taro.client.emit("floating-text", {
 			text: data.text,
 			x: data.position.x,
 			y: data.position.y,
 			color: data.color || "white",
-		});
+		}));
+		if (runAction[0] !== null) {
+			console.error(runAction[0]);
+		}
 	},
 
 	_onOpenDialogue: function (data) {
-		if (data.dialogueId) {
-			taro.playerUi.openDialogueModal(data.dialogueId, data.extraData);
+		const runAction = functionalTryCatch(() => {
+			if (data.dialogueId) {
+				taro.playerUi.openDialogueModal(data.dialogueId, data.extraData);
+			}
+		}
+		);
+		if (runAction[0] !== null) {
+			console.error(runAction[0]);
 		}
 	},
 
 	_onCloseDialogue: function (data) {
-		taro.playerUi.closeDialogueModal();
+		const runAction = functionalTryCatch(() => {
+			taro.playerUi.closeDialogueModal();
+		}
+		);
+		if (runAction[0] !== null) {
+			console.error(runAction[0]);
+		}
 	},
 
 	_onUpdateEntityAttribute: function (data) {
-		var entityId = data.e;
-		var attrId = data.a;
-		var value = data.x;
-		var property = data.p;
+		const runAction = functionalTryCatch(() => {
+			var entityId = data.e;
+			var attrId = data.a;
+			var value = data.x;
+			var property = data.p;
 
-		var entity = taro.$(entityId);
-		if (entity && entity._stats && entity._stats.attributes && entity._stats.attributes[attrId]) {
-			entity._stats.attributes[attrId][property] = value;
+			var entity = taro.$(entityId);
+			if (entity && entity._stats && entity._stats.attributes && entity._stats.attributes[attrId]) {
+				entity._stats.attributes[attrId][property] = value;
+			}
+		}
+		);
+		if (runAction[0] !== null) {
+			console.error(runAction[0]);
 		}
 	},
 
 	_onUpdateUiTextForTime: function (data) {
-		$(`.ui-text-${data.target}`).show();
-		$(`.ui-text-${data.target}`).html(taro.clientSanitizer(data.value));
+		const runAction = functionalTryCatch(() => {
+			$(`.ui-text-${data.target}`).show();
+			$(`.ui-text-${data.target}`).html(taro.clientSanitizer(data.value));
 
-		if (data.time && data.time > 0) {
-			if (this.textTimer) {
-				clearTimeout(this.textTimer);
+			if (data.time && data.time > 0) {
+				if (this.textTimer) {
+					clearTimeout(this.textTimer);
+				}
+
+				var that = this;
+				this.textTimerData = {
+					target: data.target,
+				};
+
+				this.textTimer = setTimeout(function () {
+					$(`.ui-text-${that.textTimerData.target}`).hide();
+				}, data.time);
 			}
-
-			var that = this;
-			this.textTimerData = {
-				target: data.target,
-			};
-
-			this.textTimer = setTimeout(function () {
-				$(`.ui-text-${that.textTimerData.target}`).hide();
-			}, data.time);
+		}
+		);
+		if (runAction[0] !== null) {
+			console.error(runAction[0]);
 		}
 	},
 
 	_onUpdateUiText: function (data) {
-		if (!data.target) {
-			return;
-		}
-		const key = `ui-text-${data.target}-id`
+		const runAction = functionalTryCatch(() => {
+			if (!data.target) {
+				return;
+			}
+			const key = `ui-text-${data.target}-id`
 
-		if (!taro.uiTextElementsObj[key]) {
-			taro.uiTextElementsObj[key] = document.getElementById(key);
-		}
-		if (!taro.uiTextElementsObj[key]) {
-			return;
-		}
+			if (!taro.uiTextElementsObj[key]) {
+				taro.uiTextElementsObj[key] = document.getElementById(key);
+			}
+			if (!taro.uiTextElementsObj[key]) {
+				return;
+			}
 
-		if (data.action == "show") {
-			// $(`.ui-text-${data.target}`).show();
-			taro.uiTextElementsObj[key].style.display = "block";
-		} else if (data.action == "hide") {
-			taro.uiTextElementsObj[key].style.display = "none";
-		} else {
-			taro.uiTextElementsObj[key].innerHTML = data.value;
+			if (data.action == "show") {
+				// $(`.ui-text-${data.target}`).show();
+				taro.uiTextElementsObj[key].style.display = "block";
+			} else if (data.action == "hide") {
+				taro.uiTextElementsObj[key].style.display = "none";
+			} else {
+				taro.uiTextElementsObj[key].innerHTML = data.value;
+			}
+		}
+		);
+		if (runAction[0] !== null) {
+			console.error(runAction[0]);
 		}
 	},
 
 	_onUpdateUIRealtimeCSS: function (data) {
-		const key = 'realtime-css';
-		if (!taro.uiTextElementsObj[key]) {
-			taro.uiTextElementsObj[key] = document.getElementById(key);
+		const runAction = functionalTryCatch(() => {
+			const key = 'realtime-css';
+			if (!taro.uiTextElementsObj[key]) {
+				taro.uiTextElementsObj[key] = document.getElementById(key);
+			}
+			if (!taro.uiTextElementsObj[key]) {
+				return;
+			}
+
+			let sanitizedStyle = taro.clientSanitizer(data.style);
+			if (data.action == 'update') {
+				taro.uiTextElementsObj[key].innerText = sanitizedStyle;
+			} else if (data.action == 'append') {
+				taro.uiTextElementsObj[key].innerText += '\t' + sanitizedStyle;
+			}
 		}
-		if (!taro.uiTextElementsObj[key]) {
-			return;
-		}
-		
-		let sanitizedStyle = taro.clientSanitizer(data.style);
-		if (data.action == 'update') {
-			taro.uiTextElementsObj[key].innerText = sanitizedStyle;
-		} else if (data.action == 'append') {
-			taro.uiTextElementsObj[key].innerText += '\t' + sanitizedStyle;
+		);
+		if (runAction[0] !== null) {
+			console.error(runAction[0]);
 		}
 	},
 
@@ -195,83 +293,96 @@ var ClientNetworkEvents = {
 
 	// _onStartParticle: function(data)
 	_onItem: function (data) {
-		var item = taro.$(data.id);
-		if (item) {
-			if (item._category == "item") {
-				var ownerUnit = item.getOwnerUnit();
-				if (data.type == "use" && ownerUnit && ownerUnit != taro.client.selectedUnit) {
-					item.use();
-				} else if (data.type == "stop") {
-					item.stopUsing();
-				} else if (data.type == "reload") {
-					item.reload();
-				}
-			} else {
-				if (data.type == "hit") {
-					item.effect.start("bulletHit");
+
+		const runAction = functionalTryCatch(() => {
+			var item = taro.$(data.id);
+			if (item) {
+				if (item._category == "item") {
+					var ownerUnit = item.getOwnerUnit();
+					if (data.type == "use" && ownerUnit && ownerUnit != taro.client.selectedUnit) {
+						item.use();
+					} else if (data.type == "stop") {
+						item.stopUsing();
+					} else if (data.type == "reload") {
+						item.reload();
+					}
+				} else {
+					if (data.type == "hit") {
+						item.effect.start("bulletHit");
+					}
 				}
 			}
+		}
+		);
+		if (runAction[0] !== null) {
+			console.error(runAction[0]);
 		}
 	},
 
 	_onUi: function (data) {
-		switch (data.command) {
-			case "openItemShop":
-				taro.shop.openModdShop("item");
-				break;
+		const runAction = functionalTryCatch(() => {
+			switch (data.command) {
+				case "openItemShop":
+					taro.shop.openModdShop("item");
+					break;
 
-			case "openUnitShop":
-				taro.shop.openModdShop("unit");
-				break;
+				case "openUnitShop":
+					taro.shop.openModdShop("unit");
+					break;
 
-			case "closeShop":
-				taro.shop.closeShop();
-				break;
+				case "closeShop":
+					taro.shop.closeShop();
+					break;
 
-			case "showMenuAndSelectCurrentServer":
-			case "showMenu":
-				taro.menuUi.showMenu();
-				break;
+				case "showMenuAndSelectCurrentServer":
+				case "showMenu":
+					taro.menuUi.showMenu();
+					break;
 
-			case "showMenuAndSelectBestServer":
-				taro.menuUi.showMenu(true);
-				break;
+				case "showMenuAndSelectBestServer":
+					taro.menuUi.showMenu(true);
+					break;
 
-			case "showInputModal":
-				taro.playerUi.showInputModal(data);
-				break;
+				case "showInputModal":
+					taro.playerUi.showInputModal(data);
+					break;
 
-			case "showCustomModal":
-				taro.playerUi.showCustomModal(data);
-				break;
-			
-			case "updateBackpack":
-				taro.playerUi.updateBackpack(data);
-				break;
+				case "showCustomModal":
+					taro.playerUi.showCustomModal(data);
+					break;
 
-			case "updateUiElement":
-				taro.playerUi.updateUiElement(data);
-				break;
+				case "updateBackpack":
+					taro.playerUi.updateBackpack(data);
+					break;
 
-			case "openWebsite":
-				taro.playerUi.openWebsite(data);
-				break;
-			case "showWebsiteModal":
-				taro.playerUi.showWebsiteModal(data);
-				break;
-			case "showSocialShareModal":
-				taro.playerUi.showSocialShareModal(data);
-				break;
-			case "showFriendsModal":
-				taro.playerUi.showFriendsModal(data);
-				break;
-			case "shopResponse":
-				taro.shop.purchaseWarning(data.type);
-				break;
+				case "updateUiElement":
+					taro.playerUi.updateUiElement(data);
+					break;
 
-			case 'shopPurchase':
-				taro.shop.openEntityPurchaseModal(data);
-				break;
+				case "openWebsite":
+					taro.playerUi.openWebsite(data);
+					break;
+				case "showWebsiteModal":
+					taro.playerUi.showWebsiteModal(data);
+					break;
+				case "showSocialShareModal":
+					taro.playerUi.showSocialShareModal(data);
+					break;
+				case "showFriendsModal":
+					taro.playerUi.showFriendsModal(data);
+					break;
+				case "shopResponse":
+					taro.shop.purchaseWarning(data.type);
+					break;
+
+				case 'shopPurchase':
+					taro.shop.openEntityPurchaseModal(data);
+					break;
+			}
+		}
+		);
+		if (runAction[0] !== null) {
+			console.error(runAction[0]);
 		}
 	},
 
@@ -281,7 +392,7 @@ var ClientNetworkEvents = {
 		const now = taro._currentTime;
 		const latency = now - data.sentAt;
 		// console.log("onPing", taro._currentTime, data.sentAt, latency);
-		// start reconciliation based on discrepancy between 
+		// start reconciliation based on discrepancy between
 		// where my unit when ping was sent and where unit is when ping is received
 		if (taro.client.selectedUnit?.posHistory &&
 			taro.client.myUnitStreamedPosition && !taro.client.selectedUnit.isTeleporting
@@ -290,13 +401,13 @@ var ClientNetworkEvents = {
 			while (history.length > 0) {
 				var keyFrame = history.shift();
 				// console.log("keyFrame", parseFloat(keyFrame[0]).toFixed(0), parseFloat(data.sentAt).toFixed(0))
-				if (keyFrame[0] > data.sentAt - 20) {	
-					// console.log("found it!")				
+				if (keyFrame[0] > data.sentAt - 20) {
+					// console.log("found it!")
 					taro.client.myUnitPositionWhenPingSent = {
 						x: keyFrame[1][0],
 						y: keyFrame[1][1]
-					};				
-					
+					};
+
 					taro.client.selectedUnit.reconRemaining = {
 						x: taro.client.myUnitStreamedPosition.x - taro.client.myUnitPositionWhenPingSent.x,
 						y: taro.client.myUnitStreamedPosition.y - taro.client.myUnitPositionWhenPingSent.y
@@ -305,16 +416,16 @@ var ClientNetworkEvents = {
 					// console.log(latency, taro.client.myUnitPositionWhenPingSent.y, taro.client.myUnitStreamedPosition.y, taro.client.selectedUnit.reconRemaining.y);
 
 					taro.client.selectedUnit.posHistory = []
-					
+
 					if (taro.env === 'local' || taro.debugCSP) {
-						
+
 						taro.client.selectedUnit.emit('transform-debug', {
 							debug: 'red-square',
 							x: taro.client.myUnitPositionWhenPingSent?.x,
 							y: taro.client.myUnitPositionWhenPingSent?.y,
 							rotation: 0,
 						});
-									
+
 						// console.log("reconRemaining", taro.client.selectedUnit.reconRemaining);
 						taro.client.selectedUnit.emit('transform-debug', {
 							debug: 'blue-square',
@@ -337,84 +448,108 @@ var ClientNetworkEvents = {
 	},
 
 	_onPlayAd: function (data) {
-		taro.ad.play(data);
+		const runAction = functionalTryCatch(() => {
+			taro.ad.play(data);
+		}
+		);
+		if (runAction[0] !== null) {
+			console.error(runAction[0]);
+		}
 	},
 
 	_onVideoChat: function (data) {
-		if (data.command) {
-			switch (data.command) {
-				case "joinGroup":
-					switchRoom(data.groupId);
-					break;
-				case "leaveGroup":
-					switchRoom(myID);
-					break;
+		const runAction = functionalTryCatch(() => {
+			if (data.command) {
+				switch (data.command) {
+					case "joinGroup":
+						switchRoom(data.groupId);
+						break;
+					case "leaveGroup":
+						switchRoom(myID);
+						break;
+				}
 			}
+			console.log("videoChat", data);
 		}
-		console.log("videoChat", data);
+		);
+		if (runAction[0] !== null) {
+			console.error(runAction[0]);
+		}
 	},
 
 	_onUserJoinedGame: function (data) {
-		var user = data.user;
-		var server = data.server;
-		var game = data.game;
-		var gameName = data.gameName;
-		var gameSlug = data.gameSlug;
-		var friend = null;
+		const runAction = functionalTryCatch(() => {
+			var user = data.user;
+			var server = data.server;
+			var game = data.game;
+			var gameName = data.gameName;
+			var gameSlug = data.gameSlug;
+			var friend = null;
 
-		if (typeof allFriends != "undefined") {
-			for (var i in allFriends) {
-				var friendObj = allFriends[i];
+			if (typeof allFriends != "undefined") {
+				for (var i in allFriends) {
+					var friendObj = allFriends[i];
 
-				if (friendObj._id === user) {
-					friend = friendObj;
-					break;
+					if (friendObj._id === user) {
+						friend = friendObj;
+						break;
+					}
 				}
-			}
 
-			if (friend && friend.local) {
-				var gameLink = $(`.${friend._id}-game-list`);
-				var url = `/play/${gameSlug}?server=${server}&joinGame=true`;
+				if (friend && friend.local) {
+					var gameLink = $(`.${friend._id}-game-list`);
+					var url = `/play/${gameSlug}?server=${server}&joinGame=true`;
 
-				if (server) {
-					var friendName = friend.local.username;
-					// causing error player disconnect
-					// taro.chat.xssFilters.inHTMLData(friend.local.username);
-					var message = `${friendName} is now playing ${gameName}<a class="text-light ml-2 text-decoration" href="${url}" style="text-decoration: underline;">Join</a>`;
-					// add message in chat
-					taro.chat.postMessage({
-						text: message,
-						isHtml: true,
+					if (server) {
+						var friendName = friend.local.username;
+						// causing error player disconnect
+						// taro.chat.xssFilters.inHTMLData(friend.local.username);
+						var message = `${friendName} is now playing ${gameName}<a class="text-light ml-2 text-decoration" href="${url}" style="text-decoration: underline;">Join</a>`;
+						// add message in chat
+						taro.chat.postMessage({
+							text: message,
+							isHtml: true,
+						});
+
+						// update game link in friend list
+						if (gameLink) {
+							friend.currentServers = [
+								{
+									id: server,
+									gameSlug: gameSlug,
+									gameName: gameName,
+								},
+							];
+						}
+					} else {
+						// user left the server so all we have is userId so clear the game-list text
+						friend.currentServers = [];
+					}
+
+					// sort the friend array
+					allFriends.sort(function (a, b) {
+						return b.currentServers.length - a.currentServers.length;
 					});
 
-					// update game link in friend list
-					if (gameLink) {
-						friend.currentServers = [
-							{
-								id: server,
-								gameSlug: gameSlug,
-								gameName: gameName,
-							},
-						];
-					}
-				} else {
-					// user left the server so all we have is userId so clear the game-list text
-					friend.currentServers = [];
+					renderAllFriendsPanel();
+					renderFriendTabInGame();
 				}
-
-				// sort the friend array
-				allFriends.sort(function (a, b) {
-					return b.currentServers.length - a.currentServers.length;
-				});
-
-				renderAllFriendsPanel();
-				renderFriendTabInGame();
 			}
+		}
+		);
+		if (runAction[0] !== null) {
+			console.error(runAction[0]);
 		}
 	},
 
 	_onBuySkin: function (skinHandle) {
-		$(`.btn-buy-skin[name='${skinHandle}']`).html("Purchased");
+		const runAction = functionalTryCatch(() => {
+			$(`.btn-buy-skin[name='${skinHandle}']`).html("Purchased");
+		}
+		);
+		if (runAction[0] !== null) {
+			console.error(runAction[0]);
+		}
 	},
 
 	// _onTradeRequest: function (data) {
@@ -466,11 +601,23 @@ var ClientNetworkEvents = {
 	// },
 
 	_onDevLogs: function (data) {
-		taro.game.updateDevConsole(data);
+		const runAction = functionalTryCatch(() => {
+			taro.game.updateDevConsole(data);
+		}
+		);
+		if (runAction[0] !== null) {
+			console.error(runAction[0]);
+		}
 	},
 
 	_onProfile: function (data) {
-		window.reactApp.profiler(data)
+		const runAction = functionalTryCatch(() => {
+			taro.game.updateDevConsole(data);
+		}
+		);
+		if (runAction[0] !== null) {
+			console.error(runAction[0]);
+		}
 	},
 
 	_onTrade: function (msg, clientId) {
@@ -550,7 +697,14 @@ var ClientNetworkEvents = {
 	},
 
 	_updateClientInitEntities: function (data) {
-		taro.developerMode.updateClientInitEntities(data);
+		const runAction = functionalTryCatch(() => {
+			taro.developerMode.updateClientInitEntities(data);
+		}
+		);
+		if (runAction[0] !== null) {
+			console.error(runAction[0]);
+		}
+
 	},
 
 	_onUpdateUnit: function (data) {
@@ -574,11 +728,11 @@ var ClientNetworkEvents = {
 		for (actionName in logs) {
 			var log = logs[actionName];
 			element.innerHTML += `<li style='font-size:12px;'>${log}</li>`;
-			taro.client.errorLogs.push({...log, path: actionName});
-			$("#dev-error-button").text(`Errors (${taro.client.errorLogs.length})`);	
-			
+			taro.client.errorLogs.push({ ...log, path: actionName });
+			$("#dev-error-button").text(`Errors (${taro.client.errorLogs.length})`);
+
 			if (window.addToLogs && typeof log.message === 'string') {
-				window.addToLogs({...log, path: actionName})
+				window.addToLogs({ ...log, path: actionName })
 			}
 		}
 
@@ -586,84 +740,108 @@ var ClientNetworkEvents = {
 	},
 
 	_onSound: function (data) {
-		switch (data.cmd) {
-			case "playMusic":
-				var music = taro.game.data.music[data.id];
-				if (music) {
-					taro.sound.playMusic(music, undefined, undefined, data.id);
-				}
-				break;
-			case "stopMusicForPlayer":
-			case "stopMusic":
-				taro.sound.stopMusic();
-				break;
-			case "playMusicForPlayer":
-				var music = taro.game.data.music[data.music];
-				if (music) {
-					taro.sound.playMusic(music, undefined, undefined, data.music);
-				}
-				break;
-			case "playMusicForPlayerRepeatedly":
-				var music = taro.game.data.music[data.music];
+		const runAction = functionalTryCatch(() => {
+			switch (data.cmd) {
+				case "playMusic":
+					var music = taro.game.data.music[data.id];
+					if (music) {
+						taro.sound.playMusic(music, undefined, undefined, data.id);
+					}
+					break;
+				case "stopMusicForPlayer":
+				case "stopMusic":
+					taro.sound.stopMusic();
+					break;
+				case "playMusicForPlayer":
+					var music = taro.game.data.music[data.music];
+					if (music) {
+						taro.sound.playMusic(music, undefined, undefined, data.music);
+					}
+					break;
+				case "playMusicForPlayerRepeatedly":
+					var music = taro.game.data.music[data.music];
 
-				if (music) {
-					taro.sound.playMusic(music, undefined, true, data.music);
-				}
-				break;
-			case "playSoundForPlayer":
-				var sound = taro.game.data.sound[data.sound];
-				if (sound) {
-					var unit = taro.client.myPlayer && taro.client.myPlayer.getSelectedUnit();
-					taro.sound.playSound(sound, (unit && unit._translate) || null, data.sound);
-				}
-				break;
-			case "stopSoundForPlayer":
-				taro.sound.stopSound(sound, data.sound);
-				break;
-			default:
-				var soundData = taro.game.data.sound[data.id];
-				taro.sound.playSound(soundData, data.position, data.id);
+					if (music) {
+						taro.sound.playMusic(music, undefined, true, data.music);
+					}
+					break;
+				case "playSoundForPlayer":
+					var sound = taro.game.data.sound[data.sound];
+					if (sound) {
+						var unit = taro.client.myPlayer && taro.client.myPlayer.getSelectedUnit();
+						taro.sound.playSound(sound, (unit && unit._translate) || null, data.sound);
+					}
+					break;
+				case "stopSoundForPlayer":
+					taro.sound.stopSound(sound, data.sound);
+					break;
+				default:
+					var soundData = taro.game.data.sound[data.id];
+					taro.sound.playSound(soundData, data.position, data.id);
+			}
+		}
+		);
+		if (runAction[0] !== null) {
+			console.error(runAction[0]);
 		}
 	},
 
 	_onParticle: function (data) {
-		if (taro.client.isActiveTab) {
-			var particleData = taro.game.data.particleTypes[data.particleId];
-			if (particleData) {
+		const runAction = functionalTryCatch(() => {
+			if (taro.client.isActiveTab) {
+				var particleData = taro.game.data.particleTypes[data.particleId];
+				if (particleData) {
 
-				if (data.entityId) {
-					var entity = taro.$(data.entityId)
-					taro.client.queueStreamUpdateData(data.entityId, "particle", data)
-				} else {
-					taro.client.emit("create-particle", data);
+					if (data.entityId) {
+						var entity = taro.$(data.entityId)
+						taro.client.queueStreamUpdateData(data.entityId, "particle", data)
+					} else {
+						taro.client.emit("create-particle", data);
+					}
 				}
 			}
+		}
+		);
+		if (runAction[0] !== null) {
+			console.error(runAction[0]);
 		}
 	},
 
 	_onCamera: function (data) {
-		// camera zoom change
-		if (data.cmd == "zoom") {
-			taro.client.setZoom(data.zoom);
-		}
-		// track unit
-		if (data.cmd == "track") {
-			var unit = taro.$(data.unitId);
-			if (unit) {
-				taro.client.vp1.camera.trackTranslate(unit, taro.client._trackTranslateSmoothing);
+		const runAction = functionalTryCatch(() => {
+			// camera zoom change
+			if (data.cmd == "zoom") {
+				taro.client.setZoom(data.zoom);
+			}
+			// track unit
+			if (data.cmd == "track") {
+				var unit = taro.$(data.unitId);
+				if (unit) {
+					taro.client.vp1.camera.trackTranslate(unit, taro.client._trackTranslateSmoothing);
+				}
+			}
+
+			if (data.cmd === "positionCamera") {
+				taro.client.positionCamera(data.position.x, data.position.y);
 			}
 		}
-
-		if (data.cmd === "positionCamera") {
-			taro.client.positionCamera(data.position.x, data.position.y);
+		);
+		if (runAction[0] !== null) {
+			console.error(runAction[0]);
 		}
 	},
 
 	_onGameSuggestion: function (data) {
-		if (data && data.type == "show") {
-			$("#more-games").removeClass("slidedown-menu-animation").addClass("slideup-menu-animation");
-		} else if (data && data.type == "hide") {
-			$("#more-games").removeClass("slideup-menu-animation").addClass("slidedown-menu-animation");
+		const runAction = functionalTryCatch(() => {
+			if (data && data.type == "show") {
+				$("#more-games").removeClass("slidedown-menu-animation").addClass("slideup-menu-animation");
+			} else if (data && data.type == "hide") {
+				$("#more-games").removeClass("slideup-menu-animation").addClass("slidedown-menu-animation");
+			}
+		}
+		);
+		if (runAction[0] !== null) {
+			console.error(runAction[0]);
 		}
 	},
 
