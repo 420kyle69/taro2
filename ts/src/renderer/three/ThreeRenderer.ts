@@ -1,5 +1,18 @@
 /// <reference types="@types/google.analytics" />
 
+// Isn't it better for the renderer to have no concept of units, projectiles, etc?
+// The renderer only needs to know about things like map, sprites, labels, bars, models
+// in some hierarchical manner so labels stick to certain sprites.
+// And in the case of projectiles, those are just sprites with a lifetime.
+
+// And on the server side, they shouldn't send events on the entities themselves.
+// Instead send an entity ID on creation and refer to it in other events that
+// require certain entities (e.g. for updating them). This allows for a more
+// flat code architecture and makes it more flexible. For instance if you want
+// to delete 100 entites, you now need to send 100 destroy messages to those
+// entities. Instead you can send one message with 100 entity ID's. (a lot of
+// assumtions here, figure out how it actually works).
+
 class ThreeRenderer {
 	private renderer: THREE.WebGLRenderer;
 	private camera: THREE.Camera;
