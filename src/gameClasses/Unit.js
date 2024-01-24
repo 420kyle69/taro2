@@ -895,9 +895,7 @@ var Unit = TaroEntityPhysics.extend({
 
 			if (zIndex && taro.network.id() == self._stats.clientId && !taro.game.data.heightBasedZIndex) {
 				// depth of this player's units should have +1 depth to avoid flickering on overlap
-				if (zIndex && !taro.game.data.heightBasedZIndex) {
-					zIndex.depth++;
-				}
+				zIndex.depth++;
 			}
 
 			self.updateLayer();

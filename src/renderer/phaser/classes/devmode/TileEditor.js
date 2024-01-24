@@ -183,8 +183,6 @@ var TileEditor = /** @class */ (function () {
             else {
                 debounceRecalcPhysics(map, true);
             }
-            // // visibility mask
-            // taro.client.emit('update-walls');
         }
     };
     /**
