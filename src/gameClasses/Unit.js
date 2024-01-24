@@ -1961,8 +1961,8 @@ var Unit = TaroEntityPhysics.extend({
 
 	updateVisibilityMask: function () {
 		taro.client.emit('update-visibility-mask', {
-			enabled: !!this._stats?.visibilityMask.enabled,
-			range: this._stats?.visibilityMask.range || 700,
+			enabled: !!this._stats.visibilityMask?.enabled,
+			range: this._stats.visibilityMask?.range || 700,
 		});
 	},
 
