@@ -182,11 +182,10 @@ class ThreeRenderer {
             });
             // Attributes
             const renderAttributesEvtListener = entity.on('render-attributes', (data) => {
-                console.log('render attribures', data);
                 ent.renderAttributes(data);
             });
             const updateAttributesEvtListener = entity.on('update-attributes', (data) => {
-                console.log('update attributes', data);
+                //
             });
             const destroyEvtListener = entity.on('destroy', () => {
                 const idx = this.entities.indexOf(ent, 0);

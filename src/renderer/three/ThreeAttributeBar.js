@@ -1,49 +1,57 @@
 class ThreeAttributeBar extends THREE.Group {
-    constructor(text = '100') {
+    constructor(width = 97, height = 16, radius = 7) {
         super();
+        this.width = width;
+        this.height = height;
+        this.radius = radius;
         this.scaleScalar = 1;
         this.center = new THREE.Vector2(0.5, 0.5);
         this.offset = new THREE.Vector2();
-        this.sprite = this.createBar(text);
+        this.sprite = this.createBar(this.width, this.height, this.radius, 'yellow', 100, 100);
         this.add(this.sprite);
     }
-    update(text, color = 'white', bold = false) {
+    update(data) {
+        const { color, max, displayValue, showWhen, decimalPlaces, value } = data;
         this.remove(this.sprite);
-        this.sprite = this.createBar(text, color, bold);
+        this.sprite = this.createBar(this.width, this.height, this.radius, color, +value.toFixed(decimalPlaces), max, displayValue);
         this.add(this.sprite);
+        this.visible = !((showWhen instanceof Array && showWhen.indexOf('valueChanges') > -1) ||
+            showWhen === 'valueChanges');
     }
     setOffset(offset, center = new THREE.Vector2(0.5, 0.5)) {
         this.center.copy(center);
         this.offset.copy(offset);
-        const width = this.sprite.material.map.image.width;
-        const height = this.sprite.material.map.image.height;
-        this.sprite.center.set(center.x - offset.x / width, center.y - offset.y / height);
+        if (this.sprite) {
+            const width = this.sprite.material.map.image.width;
+            const height = this.sprite.material.map.image.height;
+            this.sprite.center.set(center.x - offset.x / width, center.y - offset.y / height);
+        }
     }
     setScale(scale) {
         this.scaleScalar = scale;
         this.sprite.scale.setScalar(scale);
     }
-    createBar(text, color = 'white', bold = false) {
+    createBar(width, height, radius, color, value, max, displayValue = true) {
         const textCanvas = document.createElement('canvas');
         const ctx = textCanvas.getContext('2d');
         const font = `bold 14px Verdana`;
         const padding = 4;
         var x = padding / 2;
         var y = padding / 2;
-        var w = 94;
-        var h = 16;
-        var radius = h / 2 - 1;
+        const text = value.toString();
         ctx.font = font;
         const metrics = ctx.measureText(text);
         const textWidth = metrics.width;
         const textHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
-        textCanvas.width = w + padding;
-        textCanvas.height = h + padding;
-        fillRoundedRect(ctx, x, y, w, h, radius);
-        strokeRoundedRect(ctx, x, y, w, h, radius);
-        ctx.font = font;
-        ctx.fillStyle = '#000';
-        ctx.fillText(text, textCanvas.width / 2 - textWidth / 2, textCanvas.height / 2 + textHeight / 2);
+        textCanvas.width = width + padding;
+        textCanvas.height = height + padding;
+        fillRoundedRect(ctx, x, y, Math.max((width * value) / max, radius * 1.5), height, radius, color);
+        strokeRoundedRect(ctx, x, y, width, height, radius, '#000000');
+        if (displayValue) {
+            ctx.font = font;
+            ctx.fillStyle = '#000';
+            ctx.fillText(text, textCanvas.width / 2 - textWidth / 2, textCanvas.height / 2 + textHeight / 2);
+        }
         const spriteMap = new THREE.Texture(ctx.getImageData(0, 0, textCanvas.width, textCanvas.height));
         spriteMap.minFilter = THREE.LinearFilter;
         spriteMap.magFilter = THREE.NearestFilter;
@@ -58,12 +66,12 @@ class ThreeAttributeBar extends THREE.Group {
         return sprite;
     }
 }
-function fillRoundedRect(ctx, x, y, width, height, radius) {
+function fillRoundedRect(ctx, x, y, width, height, radius, color) {
     var tl = radius;
     var tr = radius;
     var bl = radius;
     var br = radius;
-    const fillColor = 0xffff00;
+    const fillColor = new THREE.Color(color).getHex();
     const fillAlpha = 1;
     const red = (fillColor & 0xff0000) >>> 16;
     const green = (fillColor & 0xff00) >>> 8;
@@ -81,13 +89,13 @@ function fillRoundedRect(ctx, x, y, width, height, radius) {
     ctx.arc(x + tl, y + tl, tl, -Math.PI, -(Math.PI * 0.5));
     ctx.fill();
 }
-function strokeRoundedRect(ctx, x, y, width, height, radius) {
+function strokeRoundedRect(ctx, x, y, width, height, radius, color) {
     var tl = radius;
     var tr = radius;
     var bl = radius;
     var br = radius;
     const lineWidth = 2;
-    const lineColor = 0x000000;
+    const lineColor = new THREE.Color(color).getHex();
     const lineAlpha = 1;
     const red = (lineColor & 0xff0000) >>> 16;
     const green = (lineColor & 0xff00) >>> 8;
