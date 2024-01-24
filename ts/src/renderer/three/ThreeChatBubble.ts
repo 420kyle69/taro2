@@ -83,12 +83,12 @@ class ThreeChatBubble extends THREE.Group {
 		Utils.fillRoundedRect(ctx, x, y, width, height, 5, color, 0.5);
 		Utils.fillTriangle(
 			ctx,
-			halfSizeX,
-			halfSizeY * 2 + 7,
-			halfSizeX + 7,
-			halfSizeY * 2,
-			halfSizeX + -7,
-			halfSizeY * 2,
+			x + halfSizeX,
+			y + halfSizeY * 2 + 7,
+			x + halfSizeX + 7,
+			y + halfSizeY * 2,
+			x + halfSizeX + -7,
+			y + halfSizeY * 2,
 			color,
 			0.5
 		);
