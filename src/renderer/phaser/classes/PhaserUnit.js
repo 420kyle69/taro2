@@ -288,12 +288,13 @@ var PhaserUnit = /** @class */ (function (_super) {
     };
     PhaserUnit.prototype.fadingText = function (data) {
         var offset = -25 - Math.max(this.sprite.displayHeight, this.sprite.displayWidth) / 2;
-        new PhaserFloatingText(this.scene, {
+        var fadingText = new PhaserFloatingText(this.scene, {
             text: data.text || '',
-            x: this.gameObject.x,
-            y: this.gameObject.y + offset,
+            x: 0,
+            y: offset,
             color: data.color || '#fff'
         });
+        this.gameObject.add(fadingText);
     };
     PhaserUnit.prototype.getAttributesContainer = function () {
         if (!this.attributesContainer) {
