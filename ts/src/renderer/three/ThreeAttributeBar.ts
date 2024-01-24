@@ -5,6 +5,8 @@ class ThreeAttributeBar extends THREE.Group {
 	private center = new THREE.Vector2(0.5, 0.5);
 	private offset = new THREE.Vector2();
 
+	private timeout;
+
 	constructor(
 		public width = 97,
 		public height = 16,
@@ -33,10 +35,18 @@ class ThreeAttributeBar extends THREE.Group {
 		);
 		this.add(this.sprite);
 
-		this.visible = !(
-			(showWhen instanceof Array && showWhen.indexOf('valueChanges') > -1) ||
-			showWhen === 'valueChanges'
-		);
+		this.visible = true;
+
+		if (this.timeout) {
+			clearTimeout(this.timeout);
+			this.timeout = null;
+		}
+
+		if ((showWhen instanceof Array && showWhen.indexOf('valueChanges') > -1) || showWhen === 'valueChanges') {
+			this.timeout = setTimeout(() => {
+				this.visible = false;
+			}, 1000);
+		}
 	}
 
 	setOffset(offset: THREE.Vector2, center = new THREE.Vector2(0.5, 0.5)) {

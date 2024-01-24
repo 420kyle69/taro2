@@ -16,8 +16,16 @@ class ThreeAttributeBar extends THREE.Group {
         this.remove(this.sprite);
         this.sprite = this.createBar(this.width, this.height, this.radius, color, +(+value).toFixed(decimalPlaces), max, displayValue);
         this.add(this.sprite);
-        this.visible = !((showWhen instanceof Array && showWhen.indexOf('valueChanges') > -1) ||
-            showWhen === 'valueChanges');
+        this.visible = true;
+        if (this.timeout) {
+            clearTimeout(this.timeout);
+            this.timeout = null;
+        }
+        if ((showWhen instanceof Array && showWhen.indexOf('valueChanges') > -1) || showWhen === 'valueChanges') {
+            this.timeout = setTimeout(() => {
+                this.visible = false;
+            }, 1000);
+        }
     }
     setOffset(offset, center = new THREE.Vector2(0.5, 0.5)) {
         this.center.copy(center);
