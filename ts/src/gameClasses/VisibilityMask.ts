@@ -49,8 +49,17 @@ class VisibilityMask {
 			this.height * this.tileHeight
 		);
 		this.getWalls();
+		this.getUnits();
 
 		this.mask = new Phaser.Display.Masks.GeometryMask(scene, this.graph);
+
+		taro.client.on('update-walls', () => {
+			this.getWalls();
+		});
+
+		taro.client.on('update-static-units', () => {
+			this.getUnits();
+		});
 		// console.timeEnd('CONSTRUCTOR');
 	}
 
@@ -179,7 +188,7 @@ class VisibilityMask {
 
 		// if include (static) units > circles
 		this.unitsPoly.forEach((unit) => {
-			this.graph.fillPoints(unit.points);
+			this.graph.fillPoints(unit.points); // TODO: these can really just be circles
 		});
 
 		// console.timeEnd('VISIBILITY POLYGON');
@@ -188,15 +197,13 @@ class VisibilityMask {
 	}
 
 	destroyVisibilityMask(): void {
+		this.scene.cameras.main.clearMask(true);
 		this.graph.clear();
-		delete this.mask;
-		delete this.graph;
 	}
 
 	update(): void {
 		this.graph.clear();
 		this.generateFieldOfView(this.range);
-		this.getUnits();
 		this.rebuildSegments();
 		this.visibilityPoly();
 	}

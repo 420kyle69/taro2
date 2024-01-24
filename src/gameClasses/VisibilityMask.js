@@ -9,6 +9,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 };
 var VisibilityMask = /** @class */ (function () {
     function VisibilityMask(scene) {
+        var _this = this;
         this.wallsDirty = false;
         this.unitsDirty = false;
         // console.time('CONSTRUCTOR');
@@ -29,7 +30,14 @@ var VisibilityMask = /** @class */ (function () {
         // y
         this.height * this.tileHeight);
         this.getWalls();
+        this.getUnits();
         this.mask = new Phaser.Display.Masks.GeometryMask(scene, this.graph);
+        taro.client.on('update-walls', function () {
+            _this.getWalls();
+        });
+        taro.client.on('update-static-units', function () {
+            _this.getUnits();
+        });
         // console.timeEnd('CONSTRUCTOR');
     }
     VisibilityMask.prototype.unMaskWalls = function () {
@@ -126,20 +134,18 @@ var VisibilityMask = /** @class */ (function () {
         });
         // if include (static) units > circles
         this.unitsPoly.forEach(function (unit) {
-            _this.graph.fillPoints(unit.points);
+            _this.graph.fillPoints(unit.points); // TODO: these can really just be circles
         });
         // console.timeEnd('VISIBILITY POLYGON');
         this.scene.cameras.main.setMask(this.mask, false);
     };
     VisibilityMask.prototype.destroyVisibilityMask = function () {
+        this.scene.cameras.main.clearMask(true);
         this.graph.clear();
-        delete this.mask;
-        delete this.graph;
     };
     VisibilityMask.prototype.update = function () {
         this.graph.clear();
         this.generateFieldOfView(this.range);
-        this.getUnits();
         this.rebuildSegments();
         this.visibilityPoly();
     };

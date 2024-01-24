@@ -213,6 +213,9 @@ class TileEditor {
 			} else {
 				debounceRecalcPhysics(map, true);
 			}
+
+			// // visibility mask
+			// taro.client.emit('update-walls');
 		}
 
 	}
