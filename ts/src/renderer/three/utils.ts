@@ -24,7 +24,8 @@ namespace Utils {
 		width: number,
 		height: number,
 		radius: number,
-		color: string
+		color: string,
+		opacity = 1
 	) {
 		var tl = radius;
 		var tr = radius;
@@ -32,7 +33,7 @@ namespace Utils {
 		var br = radius;
 
 		const fillColor = new THREE.Color(color).getHex();
-		const fillAlpha = 1;
+		const fillAlpha = opacity;
 		const red = (fillColor & 0xff0000) >>> 16;
 		const green = (fillColor & 0xff00) >>> 8;
 		const blue = fillColor & 0xff;
@@ -58,7 +59,8 @@ namespace Utils {
 		width: number,
 		height: number,
 		radius: number,
-		color: string
+		color: string,
+		opacity = 1
 	) {
 		var tl = radius;
 		var tr = radius;
@@ -67,7 +69,7 @@ namespace Utils {
 
 		const lineWidth = 2;
 		const lineColor = new THREE.Color(color).getHex();
-		const lineAlpha = 1;
+		const lineAlpha = opacity;
 		const red = (lineColor & 0xff0000) >>> 16;
 		const green = (lineColor & 0xff00) >>> 8;
 		const blue = lineColor & 0xff;
@@ -99,10 +101,11 @@ namespace Utils {
 		y1: number,
 		x2: number,
 		y2: number,
-		color: string
+		color: string,
+		opacity = 1
 	) {
 		const fillColor = new THREE.Color(color).getHex();
-		const fillAlpha = 1;
+		const fillAlpha = opacity;
 		const red = (fillColor & 0xff0000) >>> 16;
 		const green = (fillColor & 0xff00) >>> 8;
 		const blue = fillColor & 0xff;

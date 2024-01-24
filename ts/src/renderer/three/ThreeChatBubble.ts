@@ -80,7 +80,7 @@ class ThreeChatBubble extends THREE.Group {
 		const halfSizeX = width / 2;
 		const halfSizeY = height / 2;
 
-		Utils.fillRoundedRect(ctx, x, y, width, height, 5, color);
+		Utils.fillRoundedRect(ctx, x, y, width, height, 5, color, 0.5);
 		Utils.fillTriangle(
 			ctx,
 			halfSizeX,
@@ -89,7 +89,8 @@ class ThreeChatBubble extends THREE.Group {
 			halfSizeY * 2,
 			halfSizeX + -7,
 			halfSizeY * 2,
-			color
+			color,
+			0.5
 		);
 
 		ctx.font = font;

@@ -17,13 +17,13 @@ var Utils;
         return `${url}?v=1`;
     }
     Utils.patchAssetUrl = patchAssetUrl;
-    function fillRoundedRect(ctx, x, y, width, height, radius, color) {
+    function fillRoundedRect(ctx, x, y, width, height, radius, color, opacity = 1) {
         var tl = radius;
         var tr = radius;
         var bl = radius;
         var br = radius;
         const fillColor = new THREE.Color(color).getHex();
-        const fillAlpha = 1;
+        const fillAlpha = opacity;
         const red = (fillColor & 0xff0000) >>> 16;
         const green = (fillColor & 0xff00) >>> 8;
         const blue = fillColor & 0xff;
@@ -41,14 +41,14 @@ var Utils;
         ctx.fill();
     }
     Utils.fillRoundedRect = fillRoundedRect;
-    function strokeRoundedRect(ctx, x, y, width, height, radius, color) {
+    function strokeRoundedRect(ctx, x, y, width, height, radius, color, opacity = 1) {
         var tl = radius;
         var tr = radius;
         var bl = radius;
         var br = radius;
         const lineWidth = 2;
         const lineColor = new THREE.Color(color).getHex();
-        const lineAlpha = 1;
+        const lineAlpha = opacity;
         const red = (lineColor & 0xff0000) >>> 16;
         const green = (lineColor & 0xff00) >>> 8;
         const blue = lineColor & 0xff;
@@ -71,9 +71,9 @@ var Utils;
         ctx.stroke();
     }
     Utils.strokeRoundedRect = strokeRoundedRect;
-    function fillTriangle(ctx, x0, y0, x1, y1, x2, y2, color) {
+    function fillTriangle(ctx, x0, y0, x1, y1, x2, y2, color, opacity = 1) {
         const fillColor = new THREE.Color(color).getHex();
-        const fillAlpha = 1;
+        const fillAlpha = opacity;
         const red = (fillColor & 0xff0000) >>> 16;
         const green = (fillColor & 0xff00) >>> 8;
         const blue = fillColor & 0xff;
