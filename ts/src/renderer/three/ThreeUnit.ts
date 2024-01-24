@@ -37,14 +37,11 @@ class ThreeUnit extends Entity {
 	}
 
 	updateAttribute(data: { attr: AttributeData; shouldRender: boolean }) {
-		console.log(data.shouldRender, data.attr);
-
 		let barToUpdate: ThreeAttributeBar;
 
 		// Refactor attributeBars into map (name -> bar)
 		for (const bar of this.attributeBars.children) {
 			if (bar.name === data.attr.type) {
-				console.log('FOUND NAME');
 				barToUpdate = bar as ThreeAttributeBar;
 				break;
 			}
