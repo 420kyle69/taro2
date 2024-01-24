@@ -3232,7 +3232,8 @@ var ActionComponent = TaroEntity.extend({
 
 					case 'setUIElementHtml':
 						var elementId = self._script.variable.getValue(action.elementId, vars);
-						var htmlStr = taro.sanitizer(self._script.variable.getValue(action.htmlStr, vars));
+						const sanitizerFunction = taro.isClient ? taro.clientSanitizer : taro.sanitizer;
+						var htmlStr = sanitizerFunction(self._script.variable.getValue(action.htmlStr, vars));
 						var player = self._script.variable.getValue(action.player, vars);
 
 						if (elementId && player && player._stats && player._stats.clientId) {
