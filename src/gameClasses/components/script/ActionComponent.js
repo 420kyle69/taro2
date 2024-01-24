@@ -3236,12 +3236,18 @@ var ActionComponent = TaroEntity.extend({
 						var player = self._script.variable.getValue(action.player, vars);
 
 						if (elementId && player && player._stats && player._stats.clientId) {
-							taro.network.send('ui', {
+							const data = {
 								command: 'updateUiElement',
 								elementId: elementId,
 								action: 'setHtml',
 								htmlStr: htmlStr || ''
-							}, player._stats.clientId);
+							};
+							if (taro.isServer) {
+								taro.network.send('ui', data, player._stats.clientId);
+							} else if (player._stats.clientId === taro.network.id()) {
+								taro.playerUi.updateUiElement(data);
+							}
+							
 						}
 						break;
 					
