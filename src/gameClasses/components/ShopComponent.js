@@ -1059,7 +1059,7 @@ var ShopComponent = TaroEntity.extend({
 					var itemImage = $('<div/>', {
 						id: shopItemsKeys[i],
 						isadblockenabled: isAdBlockEnabled,
-						class: 'col-sm-2-5 rounded align-bottom btn-purchase-item item-shop-button',
+						class: 'col-sm-2-5 mx-2 mb-2 rounded align-bottom btn-purchase-item item-shop-button grey-bordered',
 						style: 'position: relative;',
 						name: item.name,
 						requirementsSatisfied: !!requirementsSatisfied,
@@ -1097,8 +1097,8 @@ var ShopComponent = TaroEntity.extend({
 						itemName += '</small></div>';
 
 						var combine = $('<div/>', {
-							class: `mx-2 p-3 mb-3 rounded item-shop-button-div d-flex flex-column justify-content-end align-items-center`,
-							style: 'min-height:110px;max-height:110px;position:relative;',
+							class: `m-3 rounded item-shop-button-div d-flex flex-column justify-content-end align-items-center`,
+							style: 'min-height:110px;position:relative;',
 							'data-toggle': 'popover',
 							'data-placement': 'top',
 							'data-content': itemDetail.prop('outerHTML')
@@ -1795,5 +1795,6 @@ var ShopComponent = TaroEntity.extend({
 if (typeof (module) !== 'undefined' && typeof (module.exports) !== 'undefined') {
 	module.exports = ShopComponent;
 }
+
 
 
