@@ -19,13 +19,15 @@ class ThreeAttributeBar extends THREE.Group {
 	update(data: AttributeData) {
 		const { color, max, displayValue, showWhen, decimalPlaces, value } = data;
 
+		this.name = data.type || data.key;
+
 		this.remove(this.sprite);
 		this.sprite = this.createBar(
 			this.width,
 			this.height,
 			this.radius,
 			color,
-			+value.toFixed(decimalPlaces),
+			+(+value).toFixed(decimalPlaces),
 			max,
 			displayValue
 		);

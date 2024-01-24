@@ -12,8 +12,9 @@ class ThreeAttributeBar extends THREE.Group {
     }
     update(data) {
         const { color, max, displayValue, showWhen, decimalPlaces, value } = data;
+        this.name = data.type || data.key;
         this.remove(this.sprite);
-        this.sprite = this.createBar(this.width, this.height, this.radius, color, +value.toFixed(decimalPlaces), max, displayValue);
+        this.sprite = this.createBar(this.width, this.height, this.radius, color, +(+value).toFixed(decimalPlaces), max, displayValue);
         this.add(this.sprite);
         this.visible = !((showWhen instanceof Array && showWhen.indexOf('valueChanges') > -1) ||
             showWhen === 'valueChanges');

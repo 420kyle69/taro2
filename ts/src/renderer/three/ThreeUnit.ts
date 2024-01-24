@@ -35,4 +35,37 @@ class ThreeUnit extends Entity {
 			this.attributeBars.add(bar);
 		});
 	}
+
+	updateAttribute(data: { attr: AttributeData; shouldRender: boolean }) {
+		console.log(data.shouldRender, data.attr);
+
+		let barToUpdate: ThreeAttributeBar;
+
+		// Refactor attributeBars into map (name -> bar)
+		for (const bar of this.attributeBars.children) {
+			if (bar.name === data.attr.type) {
+				console.log('FOUND NAME');
+				barToUpdate = bar as ThreeAttributeBar;
+				break;
+			}
+		}
+
+		if (!data.shouldRender) {
+			if (barToUpdate) {
+				barToUpdate.visible = data.shouldRender;
+			}
+
+			return;
+		}
+
+		if (barToUpdate) {
+			barToUpdate.update(data.attr);
+		} else {
+			const bar = new ThreeAttributeBar();
+			bar.update(data.attr);
+			const yOffset = (data.attr.index - 1) * bar.height * 1.1;
+			bar.setOffset(new THREE.Vector2(0, -0.75 * 64 - yOffset), new THREE.Vector2(0.5, 1));
+			this.attributeBars.add(bar);
+		}
+	}
 }
