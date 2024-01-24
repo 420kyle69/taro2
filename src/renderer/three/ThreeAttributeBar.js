@@ -54,8 +54,8 @@ class ThreeAttributeBar extends THREE.Group {
         const textHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
         textCanvas.width = width + padding;
         textCanvas.height = height + padding;
-        fillRoundedRect(ctx, x, y, Math.max((width * value) / max, radius * 1.5), height, radius, color);
-        strokeRoundedRect(ctx, x, y, width, height, radius, '#000000');
+        Utils.fillRoundedRect(ctx, x, y, Math.max((width * value) / max, radius * 1.5), height, radius, color);
+        Utils.strokeRoundedRect(ctx, x, y, width, height, radius, '#000000');
         if (displayValue) {
             ctx.font = font;
             ctx.fillStyle = '#000';
@@ -74,57 +74,5 @@ class ThreeAttributeBar extends THREE.Group {
         sprite.center.set(this.center.x - this.offset.x / textCanvas.width, this.center.y - this.offset.y / textCanvas.height);
         return sprite;
     }
-}
-function fillRoundedRect(ctx, x, y, width, height, radius, color) {
-    var tl = radius;
-    var tr = radius;
-    var bl = radius;
-    var br = radius;
-    const fillColor = new THREE.Color(color).getHex();
-    const fillAlpha = 1;
-    const red = (fillColor & 0xff0000) >>> 16;
-    const green = (fillColor & 0xff00) >>> 8;
-    const blue = fillColor & 0xff;
-    ctx.fillStyle = `rgba(${red},${green},${blue},${fillAlpha})`;
-    ctx.beginPath();
-    ctx.moveTo(x + tl, y);
-    ctx.lineTo(x + width - tr, y);
-    ctx.arc(x + width - tr, y + tr, tr, -(Math.PI * 0.5), 0);
-    ctx.lineTo(x + width, y + height - br);
-    ctx.arc(x + width - br, y + height - br, br, 0, Math.PI * 0.5);
-    ctx.lineTo(x + bl, y + height);
-    ctx.arc(x + bl, y + height - bl, bl, Math.PI * 0.5, Math.PI);
-    ctx.lineTo(x, y + tl);
-    ctx.arc(x + tl, y + tl, tl, -Math.PI, -(Math.PI * 0.5));
-    ctx.fill();
-}
-function strokeRoundedRect(ctx, x, y, width, height, radius, color) {
-    var tl = radius;
-    var tr = radius;
-    var bl = radius;
-    var br = radius;
-    const lineWidth = 2;
-    const lineColor = new THREE.Color(color).getHex();
-    const lineAlpha = 1;
-    const red = (lineColor & 0xff0000) >>> 16;
-    const green = (lineColor & 0xff00) >>> 8;
-    const blue = lineColor & 0xff;
-    ctx.strokeStyle = `rgba(${red},${green},${blue},${lineAlpha})`;
-    ctx.lineWidth = lineWidth;
-    ctx.beginPath();
-    ctx.moveTo(x + tl, y);
-    ctx.lineTo(x + width - tr, y);
-    ctx.moveTo(x + width - tr, y);
-    ctx.arc(x + width - tr, y + tr, tr, -(Math.PI * 0.5), 0);
-    ctx.lineTo(x + width, y + height - br);
-    ctx.moveTo(x + width, y + height - br);
-    ctx.arc(x + width - br, y + height - br, br, 0, Math.PI * 0.5);
-    ctx.lineTo(x + bl, y + height);
-    ctx.moveTo(x + bl, y + height);
-    ctx.arc(x + bl, y + height - bl, bl, Math.PI * 0.5, Math.PI);
-    ctx.lineTo(x, y + tl);
-    ctx.moveTo(x, y + tl);
-    ctx.arc(x + tl, y + tl, tl, -Math.PI, -(Math.PI * 0.5));
-    ctx.stroke();
 }
 //# sourceMappingURL=ThreeAttributeBar.js.map

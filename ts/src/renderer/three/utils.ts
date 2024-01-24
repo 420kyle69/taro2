@@ -16,4 +16,78 @@ namespace Utils {
 		// https://stackoverflow.com/a/37455118
 		return `${url}?v=1`;
 	}
+
+	export function fillRoundedRect(
+		ctx: CanvasRenderingContext2D,
+		x: number,
+		y: number,
+		width: number,
+		height: number,
+		radius: number,
+		color: string
+	) {
+		var tl = radius;
+		var tr = radius;
+		var bl = radius;
+		var br = radius;
+
+		const fillColor = new THREE.Color(color).getHex();
+		const fillAlpha = 1;
+		const red = (fillColor & 0xff0000) >>> 16;
+		const green = (fillColor & 0xff00) >>> 8;
+		const blue = fillColor & 0xff;
+		ctx.fillStyle = `rgba(${red},${green},${blue},${fillAlpha})`;
+
+		ctx.beginPath();
+		ctx.moveTo(x + tl, y);
+		ctx.lineTo(x + width - tr, y);
+		ctx.arc(x + width - tr, y + tr, tr, -(Math.PI * 0.5), 0);
+		ctx.lineTo(x + width, y + height - br);
+		ctx.arc(x + width - br, y + height - br, br, 0, Math.PI * 0.5);
+		ctx.lineTo(x + bl, y + height);
+		ctx.arc(x + bl, y + height - bl, bl, Math.PI * 0.5, Math.PI);
+		ctx.lineTo(x, y + tl);
+		ctx.arc(x + tl, y + tl, tl, -Math.PI, -(Math.PI * 0.5));
+		ctx.fill();
+	}
+
+	export function strokeRoundedRect(
+		ctx: CanvasRenderingContext2D,
+		x: number,
+		y: number,
+		width: number,
+		height: number,
+		radius: number,
+		color: string
+	) {
+		var tl = radius;
+		var tr = radius;
+		var bl = radius;
+		var br = radius;
+
+		const lineWidth = 2;
+		const lineColor = new THREE.Color(color).getHex();
+		const lineAlpha = 1;
+		const red = (lineColor & 0xff0000) >>> 16;
+		const green = (lineColor & 0xff00) >>> 8;
+		const blue = lineColor & 0xff;
+		ctx.strokeStyle = `rgba(${red},${green},${blue},${lineAlpha})`;
+		ctx.lineWidth = lineWidth;
+
+		ctx.beginPath();
+		ctx.moveTo(x + tl, y);
+		ctx.lineTo(x + width - tr, y);
+		ctx.moveTo(x + width - tr, y);
+		ctx.arc(x + width - tr, y + tr, tr, -(Math.PI * 0.5), 0);
+		ctx.lineTo(x + width, y + height - br);
+		ctx.moveTo(x + width, y + height - br);
+		ctx.arc(x + width - br, y + height - br, br, 0, Math.PI * 0.5);
+		ctx.lineTo(x + bl, y + height);
+		ctx.moveTo(x + bl, y + height);
+		ctx.arc(x + bl, y + height - bl, bl, Math.PI * 0.5, Math.PI);
+		ctx.lineTo(x, y + tl);
+		ctx.moveTo(x, y + tl);
+		ctx.arc(x + tl, y + tl, tl, -Math.PI, -(Math.PI * 0.5));
+		ctx.stroke();
+	}
 }
