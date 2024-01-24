@@ -170,6 +170,10 @@ function recalcWallsPhysics(gameMap, forPathFinding) {
     var map = taro.scaleMap(rfdc()(gameMap));
     taro.tiled.loadJson(map, function (layerArray, layersById) {
         taro.physics.staticsFromMap(layersById.walls);
+        if (taro.isClient) {
+            // visibility mask
+            taro.client.emit('update-walls');
+        }
     });
     if (forPathFinding) {
         taro.map.updateWallMapData(); // for A* pathfinding
@@ -885,6 +889,7 @@ var DeveloperMode = /** @class */ (function () {
                 var map = taro.scaleMap(rfdc()(taro.game.data.map));
                 taro.tiled.loadJson(map, function (layerArray, TaroLayersById) {
                     taro.physics.staticsFromMap(TaroLayersById.walls);
+                    taro.client.emit('update-walls');
                 });
             }
             taro.client.emit('updateMap');
