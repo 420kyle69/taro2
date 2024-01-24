@@ -71,5 +71,20 @@ var Utils;
         ctx.stroke();
     }
     Utils.strokeRoundedRect = strokeRoundedRect;
+    function fillTriangle(ctx, x0, y0, x1, y1, x2, y2, color) {
+        const fillColor = new THREE.Color(color).getHex();
+        const fillAlpha = 1;
+        const red = (fillColor & 0xff0000) >>> 16;
+        const green = (fillColor & 0xff00) >>> 8;
+        const blue = fillColor & 0xff;
+        ctx.fillStyle = `rgba(${red},${green},${blue},${fillAlpha})`;
+        ctx.beginPath();
+        ctx.moveTo(x0, y0);
+        ctx.lineTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.closePath();
+        ctx.fill();
+    }
+    Utils.fillTriangle = fillTriangle;
 })(Utils || (Utils = {}));
 //# sourceMappingURL=utils.js.map

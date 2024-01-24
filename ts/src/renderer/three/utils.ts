@@ -90,4 +90,29 @@ namespace Utils {
 		ctx.arc(x + tl, y + tl, tl, -Math.PI, -(Math.PI * 0.5));
 		ctx.stroke();
 	}
+
+	export function fillTriangle(
+		ctx: CanvasRenderingContext2D,
+		x0: number,
+		y0: number,
+		x1: number,
+		y1: number,
+		x2: number,
+		y2: number,
+		color: string
+	) {
+		const fillColor = new THREE.Color(color).getHex();
+		const fillAlpha = 1;
+		const red = (fillColor & 0xff0000) >>> 16;
+		const green = (fillColor & 0xff00) >>> 8;
+		const blue = fillColor & 0xff;
+		ctx.fillStyle = `rgba(${red},${green},${blue},${fillAlpha})`;
+
+		ctx.beginPath();
+		ctx.moveTo(x0, y0);
+		ctx.lineTo(x1, y1);
+		ctx.lineTo(x2, y2);
+		ctx.closePath();
+		ctx.fill();
+	}
 }
