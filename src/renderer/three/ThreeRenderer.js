@@ -195,8 +195,11 @@ class ThreeRenderer {
             const renderAttributesEvtListener = entity.on('render-attributes', (data) => {
                 ent.renderAttributes(data);
             });
-            const updateAttributesEvtListener = entity.on('update-attribute', (data) => {
+            const updateAttributeEvtListener = entity.on('update-attribute', (data) => {
                 ent.updateAttribute(data);
+            });
+            const renderChatBubbleEvtListener = entity.on('render-chat-bubble', (text) => {
+                ent.renderChat(text);
             });
             const destroyEvtListener = entity.on('destroy', () => {
                 const idx = this.entities.indexOf(ent, 0);
@@ -214,7 +217,8 @@ class ThreeRenderer {
                     entity.off('show-label', showLabelEvtListener);
                     entity.off('hide-label', hideLabelEvtListener);
                     entity.off('render-attributes', renderAttributesEvtListener);
-                    entity.off('update-attributes', updateAttributesEvtListener);
+                    entity.off('update-attribute', updateAttributeEvtListener);
+                    entity.off('render-chat-bubble', renderChatBubbleEvtListener);
                 }
             }, this);
         };

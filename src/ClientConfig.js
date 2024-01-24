@@ -115,13 +115,14 @@ var taroClientConfig = {
 		'renderer/three/entity.js',
 		'renderer/three/label.js',
 		'renderer/three/ThreeUnit.js',
-    'renderer/three/ThreeAttributeBar.js',
+		'renderer/three/ThreeAttributeBar.js',
+		'renderer/three/ThreeChatBubble.js',
 
 		'/client.js',
-		'/index.js'
-	]
+		'/index.js',
+	],
 };
 
-if (typeof (module) !== 'undefined' && typeof (module.exports) !== 'undefined') {
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
 	module.exports = taroClientConfig;
 }

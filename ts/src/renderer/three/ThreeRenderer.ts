@@ -256,8 +256,12 @@ class ThreeRenderer {
 				(ent as ThreeUnit).renderAttributes(data);
 			});
 
-			const updateAttributesEvtListener = entity.on('update-attribute', (data) => {
+			const updateAttributeEvtListener = entity.on('update-attribute', (data) => {
 				(ent as ThreeUnit).updateAttribute(data);
+			});
+
+			const renderChatBubbleEvtListener = entity.on('render-chat-bubble', (text) => {
+				(ent as ThreeUnit).renderChat(text);
 			});
 
 			const destroyEvtListener = entity.on(
@@ -281,7 +285,9 @@ class ThreeRenderer {
 						entity.off('hide-label', hideLabelEvtListener);
 
 						entity.off('render-attributes', renderAttributesEvtListener);
-						entity.off('update-attributes', updateAttributesEvtListener);
+						entity.off('update-attribute', updateAttributeEvtListener);
+
+						entity.off('render-chat-bubble', renderChatBubbleEvtListener);
 					}
 				},
 				this

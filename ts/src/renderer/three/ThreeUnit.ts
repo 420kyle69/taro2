@@ -2,6 +2,7 @@ class ThreeUnit extends Entity {
 	// Why does every unit have a label?
 	private label = new Label();
 	private attributeBars = new THREE.Group();
+	private chat: ThreeChatBubble;
 
 	constructor(tex: THREE.Texture) {
 		super(tex);
@@ -22,6 +23,16 @@ class ThreeUnit extends Entity {
 
 	hideLabel() {
 		this.label.visible = false;
+	}
+
+	renderChat(text: string): void {
+		if (this.chat) {
+			this.chat.update(text);
+		} else {
+			this.chat = new ThreeChatBubble(text);
+			this.chat.setOffset(new THREE.Vector2(0, 1.5 * 64), new THREE.Vector2(0.5, 0));
+			this.add(this.chat);
+		}
 	}
 
 	renderAttributes(data) {
