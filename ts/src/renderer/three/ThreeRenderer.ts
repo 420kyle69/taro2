@@ -229,6 +229,22 @@ class ThreeRenderer {
 				this
 			);
 
+			const showEvtListener = entity.on(
+				'show',
+				() => {
+					ent.visible = true;
+				},
+				this
+			);
+
+			const hideEvtListener = entity.on(
+				'hide',
+				() => {
+					ent.visible = false;
+				},
+				this
+			);
+
 			const followEvtListener = entity.on(
 				'follow',
 				() => {
@@ -277,6 +293,8 @@ class ThreeRenderer {
 						entity.off('transform', transformEvtListener);
 						entity.off('size', sizeEvtListener);
 						entity.off('scale', scaleEvtListener);
+						entity.off('show', showEvtListener);
+						entity.off('hide', hideEvtListener);
 						entity.off('follow', followEvtListener);
 						entity.off('destroy', destroyEvtListener);
 
