@@ -52,7 +52,7 @@ class Label extends THREE.Group {
 			ctx.lineWidth = 4;
 			ctx.lineJoin = 'miter';
 			ctx.miterLimit = 3;
-			ctx.strokeText(text, 8, 26);
+			ctx.strokeText(text, padding / 2, textHeight + padding / 2);
 		}
 
 		ctx.fillStyle = color;
