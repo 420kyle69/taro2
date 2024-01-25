@@ -29,7 +29,7 @@ var ClientNetworkEvents = {
 		}
 		);
 		if (runAction[0] !== null) {
-			console.error(runAction[0]);
+			// console.error(runAction[0]);
 		}
 
 	},
@@ -44,7 +44,7 @@ var ClientNetworkEvents = {
 		}
 		);
 		if (runAction[0] !== null) {
-			console.error(runAction[0]);
+			// console.error(runAction[0]);
 		}
 	},
 
@@ -60,7 +60,7 @@ var ClientNetworkEvents = {
 		}
 		);
 		if (runAction[0] !== null) {
-			console.error(runAction[0]);
+			// console.error(runAction[0]);
 		}
 
 	},
@@ -73,7 +73,7 @@ var ClientNetworkEvents = {
 		}
 		);
 		if (runAction[0] !== null) {
-			console.error(runAction[0]);
+			// console.error(runAction[0]);
 		}
 
 	},
@@ -86,7 +86,7 @@ var ClientNetworkEvents = {
 		}
 		);
 		if (runAction[0] !== null) {
-			console.error(runAction[0]);
+			// console.error(runAction[0]);
 		}
 	},
 	_onShowUnitFromPlayer: function (data) {
@@ -97,7 +97,7 @@ var ClientNetworkEvents = {
 		}
 		);
 		if (runAction[0] !== null) {
-			console.error(runAction[0]);
+			// console.error(runAction[0]);
 		}
 
 	},
@@ -109,7 +109,7 @@ var ClientNetworkEvents = {
 		}
 		);
 		if (runAction[0] !== null) {
-			console.error(runAction[0]);
+			// console.error(runAction[0]);
 		}
 	},
 	_onShowUnitNameLabelFromPlayer: function (data) {
@@ -120,7 +120,7 @@ var ClientNetworkEvents = {
 		}
 		);
 		if (runAction[0] !== null) {
-			console.error(runAction[0]);
+			// console.error(runAction[0]);
 		}
 
 	},
@@ -151,7 +151,7 @@ var ClientNetworkEvents = {
 		}
 		);
 		if (runAction[0] !== null) {
-			console.error(runAction[0]);
+			// console.error(runAction[0]);
 		}
 	},
 	_onCreateFloatingText: function (data) {
@@ -162,7 +162,7 @@ var ClientNetworkEvents = {
 			color: data.color || "white",
 		}));
 		if (runAction[0] !== null) {
-			console.error(runAction[0]);
+			// console.error(runAction[0]);
 		}
 	},
 
@@ -174,7 +174,7 @@ var ClientNetworkEvents = {
 		}
 		);
 		if (runAction[0] !== null) {
-			console.error(runAction[0]);
+			// console.error(runAction[0]);
 		}
 	},
 
@@ -184,7 +184,7 @@ var ClientNetworkEvents = {
 		}
 		);
 		if (runAction[0] !== null) {
-			console.error(runAction[0]);
+			// console.error(runAction[0]);
 		}
 	},
 
@@ -202,7 +202,7 @@ var ClientNetworkEvents = {
 		}
 		);
 		if (runAction[0] !== null) {
-			console.error(runAction[0]);
+			// console.error(runAction[0]);
 		}
 	},
 
@@ -228,7 +228,7 @@ var ClientNetworkEvents = {
 		}
 		);
 		if (runAction[0] !== null) {
-			console.error(runAction[0]);
+			// console.error(runAction[0]);
 		}
 	},
 
@@ -257,7 +257,7 @@ var ClientNetworkEvents = {
 		}
 		);
 		if (runAction[0] !== null) {
-			console.error(runAction[0]);
+			// console.error(runAction[0]);
 		}
 	},
 
@@ -280,7 +280,7 @@ var ClientNetworkEvents = {
 		}
 		);
 		if (runAction[0] !== null) {
-			console.error(runAction[0]);
+			// console.error(runAction[0]);
 		}
 	},
 
@@ -315,7 +315,7 @@ var ClientNetworkEvents = {
 		}
 		);
 		if (runAction[0] !== null) {
-			console.error(runAction[0]);
+			// console.error(runAction[0]);
 		}
 	},
 
@@ -382,7 +382,7 @@ var ClientNetworkEvents = {
 		}
 		);
 		if (runAction[0] !== null) {
-			console.error(runAction[0]);
+			// console.error(runAction[0]);
 		}
 	},
 
@@ -453,7 +453,7 @@ var ClientNetworkEvents = {
 		}
 		);
 		if (runAction[0] !== null) {
-			console.error(runAction[0]);
+			// console.error(runAction[0]);
 		}
 	},
 
@@ -473,7 +473,7 @@ var ClientNetworkEvents = {
 		}
 		);
 		if (runAction[0] !== null) {
-			console.error(runAction[0]);
+			// console.error(runAction[0]);
 		}
 	},
 
@@ -538,7 +538,7 @@ var ClientNetworkEvents = {
 		}
 		);
 		if (runAction[0] !== null) {
-			console.error(runAction[0]);
+			// console.error(runAction[0]);
 		}
 	},
 
@@ -548,7 +548,7 @@ var ClientNetworkEvents = {
 		}
 		);
 		if (runAction[0] !== null) {
-			console.error(runAction[0]);
+			// console.error(runAction[0]);
 		}
 	},
 
@@ -606,7 +606,7 @@ var ClientNetworkEvents = {
 		}
 		);
 		if (runAction[0] !== null) {
-			console.error(runAction[0]);
+			// console.error(runAction[0]);
 		}
 	},
 
@@ -616,7 +616,7 @@ var ClientNetworkEvents = {
 		}
 		);
 		if (runAction[0] !== null) {
-			console.error(runAction[0]);
+			// console.error(runAction[0]);
 		}
 	},
 
@@ -702,7 +702,7 @@ var ClientNetworkEvents = {
 		}
 		);
 		if (runAction[0] !== null) {
-			console.error(runAction[0]);
+			// console.error(runAction[0]);
 		}
 
 	},
@@ -782,7 +782,7 @@ var ClientNetworkEvents = {
 		}
 		);
 		if (runAction[0] !== null) {
-			console.error(runAction[0]);
+			// console.error(runAction[0]);
 		}
 	},
 
@@ -803,7 +803,7 @@ var ClientNetworkEvents = {
 		}
 		);
 		if (runAction[0] !== null) {
-			console.error(runAction[0]);
+			// console.error(runAction[0]);
 		}
 	},
 
@@ -827,7 +827,7 @@ var ClientNetworkEvents = {
 		}
 		);
 		if (runAction[0] !== null) {
-			console.error(runAction[0]);
+			// console.error(runAction[0]);
 		}
 	},
 
@@ -841,7 +841,7 @@ var ClientNetworkEvents = {
 		}
 		);
 		if (runAction[0] !== null) {
-			console.error(runAction[0]);
+			// console.error(runAction[0]);
 		}
 	},
 
