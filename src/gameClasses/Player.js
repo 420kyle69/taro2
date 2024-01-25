@@ -756,6 +756,8 @@ var Player = TaroEntity.extend({
 						gameId: taro.game.data.defaultData._id,
 						highscore: score,
 					});
+					// trigger
+					taro.script.trigger('playerGetsNewHighscore', { playerId: this.id() });
 				}
 			}
 		} catch (e) {
