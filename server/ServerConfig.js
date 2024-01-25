@@ -8,6 +8,8 @@ var moddioConfig =
 			{ name: 'ProxyComponent', path: '../../ProxyComponent' },
 			{ name: 'betterFilter', path: '../../moderation/betterFilter' }
 		];
+
+
 var defaultConfig = [
 	{ name: 'ServerNetworkEvents', path: '../server/ServerNetworkEvents' },
 

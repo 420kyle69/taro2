@@ -4,7 +4,7 @@ var Projectile = TaroEntityPhysics.extend({
 	init: function (data, entityIdFromServer) {
 		var self = this;
 		self.category('projectile');
-		
+
 		TaroEntityPhysics.prototype.init.call(this, data.defaultData);
 		this.id(entityIdFromServer);
 		var projectileData = {};
@@ -79,7 +79,7 @@ var Projectile = TaroEntityPhysics.extend({
 				this.streamMode(1);
 				// self.streamCreate(); // do we need this?
 			} else {
-				this.streamMode(self._stats.streamMode);				
+				this.streamMode(self._stats.streamMode);
 			}
 
 			taro.server.totalProjectilesCreated++;
@@ -111,16 +111,16 @@ var Projectile = TaroEntityPhysics.extend({
 
 	_behaviour: function (ctx) {
 		var self = this;
-		
+
 		if (!taro.gameLoopTickHasExecuted) {
 			return;
 		}
-		
+
 		_.forEach(taro.triggersQueued, function (trigger) {
 			trigger.params['thisEntityId'] = self.id();
 			self.script.trigger(trigger.name, trigger.params);
 		});
-		
+
 
 		// if entity (unit/item/player/projectile) has attribute, run regenerate
 		if (taro.isServer) {
@@ -129,14 +129,14 @@ var Projectile = TaroEntityPhysics.extend({
 			}
 		} else if (taro.isClient) {
 			var processedUpdates = [];
-			var updateQueue = taro.client.entityUpdateQueue[this.id()];			
+			var updateQueue = taro.client.entityUpdateQueue[this.id()];
 			if (updateQueue) {
 				for (var key in updateQueue) {
 					var value = updateQueue[key];
 
 					processedUpdates.push({[key]: value});
 					delete taro.client.entityUpdateQueue[this.id()][key]
-					
+
 					// remove queue object for this entity is there's no queue remaining in order to prevent memory leak
 					if (Object.keys(taro.client.entityUpdateQueue[this.id()]).length == 0) {
 						delete taro.client.entityUpdateQueue[this.id()];
@@ -233,7 +233,7 @@ var Projectile = TaroEntityPhysics.extend({
 	},
 
 	streamUpdateData: function (queuedData, clientId) {
-		
+
 		TaroEntity.prototype.streamUpdateData.call(this, queuedData, clientId);
 		for (var i = 0; i < queuedData.length; i++) {
 			var data = queuedData[i];

@@ -23,6 +23,10 @@ var ShopComponent = TaroEntity.extend({
 			self.perPageItems = 20;
 			self.currentType = '';
 			self.oldModalHTMLBody = '';
+
+			self.userSkinCount = 0;
+			self.userSkinPurchases = [];
+
 			// if (!taro.isMobile) {
 			$('.open-modd-shop-button').on('click', function () {
 				self.openModdShop();
@@ -150,28 +154,29 @@ var ShopComponent = TaroEntity.extend({
 				}
 				var hasSharedDefer = $.Deferred();
 
-				if (price <= 0) {
-					promise = $.ajax({
-						url: `/api/user/has-shared/${taro.game.data.defaultData.parentGame || taro.client.server.gameId}`,
-						dataType: 'html',
-						type: 'GET',
-						success: function (data) {
-							var response = JSON.parse(data);
+				// if (price <= 0) {
+				// 	promise = $.ajax({
+				// 		url: `/api/user/has-shared/${taro.game.data.defaultData.parentGame || taro.client.server.gameId}`,
+				// 		dataType: 'html',
+				// 		type: 'GET',
+				// 		success: function (data) {
+				// 			var response = JSON.parse(data);
 
-							if (response.status === 'success') {
-								hasSharedDefer.resolve(response.message);
-							} else {
-								hasSharedDefer.reject(response.message);
-							}
-						},
-						error: function (req, status, err) {
-							hasSharedDefer.reject(err);
-						}
-					});
-				} else {
-					hasSharedDefer.resolve(true);
-				}
+				// 			if (response.status === 'success') {
+				// 				hasSharedDefer.resolve(response.message);
+				// 			} else {
+				// 				hasSharedDefer.reject(response.message);
+				// 			}
+				// 		},
+				// 		error: function (req, status, err) {
+				// 			hasSharedDefer.reject(err);
+				// 		}
+				// 	});
+				// } else {
+				// hasSharedDefer.resolve(true);
+				// }
 
+				hasSharedDefer.resolve(true);
 				hasSharedDefer.promise()
 					.then(function (hasShared) {
 						if (hasShared) {
@@ -335,6 +340,11 @@ var ShopComponent = TaroEntity.extend({
 			type: 'GET',
 			success: function (response) {
 				if (response.status == 'success') {
+
+					// Add purchased skins to user skin count
+					self.userSkinCount = response.message.length;
+					self.userSkinPurchases = response.message || [];
+
 					userPurchases = response.message || [];
 					var userPurchasedItemIds = userPurchases.reduce(function (partial, purchase) {
 						partial[purchase._id] = true;
@@ -465,16 +475,28 @@ var ShopComponent = TaroEntity.extend({
 					}
 
 					$('#purchasable-purchase-modal').modal('hide');
+
+					let backgroundImage = document.getElementById(itemId + "_image")?.style?.backgroundImage;
+					let link = backgroundImage?.slice(4, backgroundImage.length - 1);
+
 					self.updateModdShop();
 					self.updateSkinList(itemId);
 
-					// update skin menu on game page
 					var details = $(`.btn-purchase-purchasable#${itemId}`);
 					var purchasableInfo = details.find('.purchasable-details');
 					if (purchasableInfo && purchasableInfo.html) {
 						details.removeClass('btn-purchase-purchasable');
 						purchasableInfo.html('<span class=\'fas fa-check text-success\'></span>');
-					}
+					}					
+
+					window.purchased({
+						type: "ingame-skin",
+						value: itemId,
+						status: "success",
+						backgroundImage: link,
+						...purchasableInfo,
+					});
+
 				} else if (response.status == 'error') {
 					if (!response.message.includes('No matching document found')) {
 						var error = `<div class="alert alert-danger text-center">${response.message}</div>`;
@@ -657,15 +679,40 @@ var ShopComponent = TaroEntity.extend({
 			var unitKeys = Object.keys(taro.game.data.unitTypes);
 			unitKeys = unitKeys.sort();
 
+			// If logged in, add purchased skins to user skin count
+			if (isLoggedIn) {
+				unitKeys = ['Purchased', ...unitKeys]
+			}
+
 			// generating li column for unit type selection
 			for (var p = 0; p < unitKeys.length; p++) {
 				var key = unitKeys[p];
 				$('#modd-shop-modal .shop-items').html('');
-				if (self.unitSkinCount[key] > 0) {
+				if (self.unitSkinCount[key] > 0 || key == 'Purchased') {
 					// select first key by default
 					if (!self.shopKey && isFirstKey) {
 						self.shopKey = key;
 					}
+
+					if(key == 'Purchased'){
+						keyDiv = $('<li/>', {
+							class: `list-group-item list-group-item-action cursor-pointer ${(key == self.shopKey) ? 'active' : ''}`,
+							text: `Purchased (${self.userSkinCount})`,
+							name: key
+						}).on('click', function () {
+							self.shopKey = $(this).attr('name');
+							$('#modd-shop-modal .shop-items').html('');
+							$('.list-group.item').each(function () {
+								$(this).removeClass('active');
+							});
+							$(this).addClass('active');
+							self.updateModdShop();
+						});
+
+						keyList.append(keyDiv);	
+						continue;
+					}
+
 					keyDiv = $('<li/>', {
 						class: `list-group-item list-group-item-action cursor-pointer ${(key == self.shopKey) ? 'active' : ''}`,
 						text: `${taro.game.data.unitTypes[key].name} (${self.unitSkinCount[key]})`,
@@ -724,6 +771,15 @@ var ShopComponent = TaroEntity.extend({
 
 		if (self.shopType == 'unitSkins' || self.shopType == 'itemSkins') // skins
 		{
+
+			// Adding all Purchased skins tab
+			if(self.shopKey == 'Purchased'){
+				self.skinItems = self.userSkinPurchases;
+				self.currentPagination = 1;
+				self.paginationForSkins();
+				return;
+			}
+
 			$.ajax({
 				url: `/api/game/${taro.game.data.defaultData.parentGame || taro.client.server.gameId}/shop/`,
 				data: {
@@ -1280,6 +1336,7 @@ var ShopComponent = TaroEntity.extend({
 		var modalBody = $('<div/>', {
 			class: 'row text-center'
 		});
+
 		for (let i = 0; i < items.length; i++) {
 			var item = items[i];
 			// console.log(item)
@@ -1316,15 +1373,26 @@ var ShopComponent = TaroEntity.extend({
 					type: 'button',
 					class: 'btn btn-outline-success align-middle btn-equip',
 					id: item._id,
-					name: item.title || item.name
+					name: item.title || item.name,
+					owner: item.owner || ""
 				}).append('Equip');
 			} else if (item.status == 'equipped') {
 				var button = $('<button/>', {
 					type: 'button',
 					class: 'btn btn-success align-middle btn-unequip',
 					id: item._id,
-					name: item.name || item.title
+					name: item.name || item.title,
+					owner: item.owner || ""
 				}).append('Equipped');
+			} else if(self.shopKey === "Purchased"){
+				var button = $('<button/>', {
+					type: 'button',
+					class: 'btn btn-outline-success align-middle btn-equip',
+					id: item._id,
+					name: item.title || item.name,
+					owner: item.owner || "",
+					disabled: true
+				}).append('Purchased');
 			} else if (item.status == undefined) {
 				if (item.soldForSocialShare) {
 					var button = self.buttonForSocialShare(item, true);
@@ -1713,3 +1781,4 @@ var ShopComponent = TaroEntity.extend({
 if (typeof (module) !== 'undefined' && typeof (module.exports) !== 'undefined') {
 	module.exports = ShopComponent;
 }
+

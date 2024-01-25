@@ -145,7 +145,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 	createFixture: function (params) {
 		var tempDef = new this.b2FixtureDef();
 		var param;
-
 		for (param in params) {
 			if (params.hasOwnProperty(param)) {
 				if (param !== 'shape' && param !== 'filter') {
@@ -186,6 +185,14 @@ var PhysicsComponent = TaroEventingClass.extend({
 		// immediately destroy body if entity already has box2dBody
 		if (body || (entity && entity.body)) {
 			body = body || entity.body;
+			if (this.engine === 'BOX2DWASM') {
+				var fixture = taro.physics.recordLeak(body.GetFixtureList());
+				while (fixture !== undefined && taro.physics.getPointer(fixture) !== taro.physics.getPointer(taro.physics.nullPtr)) {
+					body.DestroyFixture(fixture)
+					var fixture = taro.physics.recordLeak(fixture.GetNext());
+				}
+
+			}
 			destroyBody = this._world.destroyBody;
 			var isBodyDestroyed = destroyBody.apply(this._world, [body]);
 			if (this.engine === 'BOX2DWASM') {
@@ -264,11 +271,11 @@ var PhysicsComponent = TaroEventingClass.extend({
 
 			var entities = [];
 			if (self.engine === 'BOX2DWASM') {
-
 				const callback = Object.assign(new self.JSQueryCallback(), {
 					ReportFixture: (fixture_p) => {
-						const fixture = self.wrapPointer(fixture_p, self.b2Fixture);
-						entityId = self.metaData[self.getPointer(fixture.GetBody())].taroId;
+						const fixture = self.recordLeak(self.wrapPointer(fixture_p, self.b2Fixture));
+						const body = self.recordLeak(fixture.GetBody());
+						entityId = self.metaData[self.getPointer(body)].taroId;
 						var entity = taro.$(entityId);
 						if (entity) {
 							// taro.devLog("found", entity._category, entity._translate.x, entity._translate.y)
@@ -575,6 +582,11 @@ var PhysicsComponent = TaroEventingClass.extend({
 					switch (action.type) {
 						case 'createBody':
 							self.createBody(action.entity, action.def);
+
+							// emit events for updating visibility mask
+							if (taro.isClient && action.entity._category === 'unit' && action.def.type === 'static') {
+								taro.client.emit('update-static-units');
+							}
 							break;
 
 						case 'destroyBody':
@@ -599,7 +611,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 				self._world.step(timeElapsedSinceLastStep);
 			} else {
 
-				var tempBod = self._world.getBodyList();
+				var tempBod = this.engine === 'BOX2DWASM' ? self.recordLeak(self._world.getBodyList()) : self._world.getBodyList();
 
 				// iterate through every physics body
 				while (tempBod && typeof tempBod.getNext === 'function' && (!self.getPointer || self.getPointer(tempBod) !== self.getPointer(self.nullPtr))) {
@@ -783,7 +795,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 						}
 					}
 
-					tempBod = tempBod.getNext();
+					tempBod = this.engine === 'BOX2DWASM' ? self.recordLeak(tempBod.getNext()) : tempBod.getNext();
 				}
 
 				// Call the world step; frame-rate, velocity iterations, position iterations
@@ -954,8 +966,12 @@ var PhysicsComponent = TaroEventingClass.extend({
 	_beginContactCallback: function (contact) {
 		if (taro.physics.engine === 'BOX2DWASM') {
 			const nowContact = taro.physics.recordLeak(taro.physics.wrapPointer(contact, taro.physics.b2Contact));
-			var entityA = taro.physics.metaData[taro.physics.getPointer(nowContact.GetFixtureA().GetBody())]._entity;
-			var entityB = taro.physics.metaData[taro.physics.getPointer(nowContact.GetFixtureB().GetBody())]._entity;
+			const fixtureA = taro.physics.recordLeak(nowContact.GetFixtureA());
+			const bodyA = taro.physics.recordLeak(fixtureA.GetBody());
+			const fixtureB = taro.physics.recordLeak(nowContact.GetFixtureB());
+			const bodyB = taro.physics.recordLeak(fixtureB.GetBody());
+			var entityA = taro.physics.metaData[taro.physics.getPointer(bodyA)]._entity;
+			var entityB = taro.physics.metaData[taro.physics.getPointer(bodyB)]._entity;
 			if (!entityA || !entityB)
 				return;
 
@@ -978,8 +994,12 @@ var PhysicsComponent = TaroEventingClass.extend({
 	_endContactCallback: function (contact) {
 		if (taro.physics.engine === 'BOX2DWASM') {
 			const nowContact = taro.physics.recordLeak(taro.physics.wrapPointer(contact, taro.physics.b2Contact));
-			var entityA = taro.physics.metaData[taro.physics.getPointer(nowContact.GetFixtureA().GetBody())]._entity;
-			var entityB = taro.physics.metaData[taro.physics.getPointer(nowContact.GetFixtureB().GetBody())]._entity;
+			const fixtureA = taro.physics.recordLeak(nowContact.GetFixtureA());
+			const bodyA = taro.physics.recordLeak(fixtureA.GetBody());
+			const fixtureB = taro.physics.recordLeak(nowContact.GetFixtureB());
+			const bodyB = taro.physics.recordLeak(fixtureB.GetBody());
+			var entityA = taro.physics.metaData[taro.physics.getPointer(bodyA)]._entity;
+			var entityB = taro.physics.metaData[taro.physics.getPointer(bodyB)]._entity;
 
 			if (!entityA || !entityB)
 				return;
