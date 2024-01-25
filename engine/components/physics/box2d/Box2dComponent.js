@@ -582,6 +582,11 @@ var PhysicsComponent = TaroEventingClass.extend({
 					switch (action.type) {
 						case 'createBody':
 							self.createBody(action.entity, action.def);
+
+							// emit events for updating visibility mask
+							if (taro.isClient && action.entity._category === 'unit' && action.def.type === 'static') {
+								taro.client.emit('update-static-units');
+							}
 							break;
 
 						case 'destroyBody':
