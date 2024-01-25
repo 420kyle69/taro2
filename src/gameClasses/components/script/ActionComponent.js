@@ -285,7 +285,7 @@ var ActionComponent = TaroEntity.extend({
 						// ensure we aren't sending more than 30 POST requests within 10 seconds
 						taro.server.postReqTimestamps.push(taro.currentTime());
 						var oldestReqTimestamp = taro.server.postReqTimestamps[0]
-						while (Date.now() - oldestReqTimestamp > 10000 && taro.server.postReqTimestamps.length > 0) {
+						while (taro.currentTime() - oldestReqTimestamp > 10000 && taro.server.postReqTimestamps.length > 0) {
 							oldestReqTimestamp = taro.server.postReqTimestamps.shift();
 						}
 						if (taro.server.postReqTimestamps.length > 30) {
@@ -331,7 +331,7 @@ var ActionComponent = TaroEntity.extend({
 						// ensure we aren't sending more than 30 POST requests within 10 seconds
 						taro.server.postReqTimestamps.push(taro.currentTime());
 						var oldestReqTimestamp = taro.server.postReqTimestamps[0]
-						while (Date.now() - oldestReqTimestamp > 10000 && taro.server.postReqTimestamps.length > 0) {
+						while (taro.currentTime() - oldestReqTimestamp > 10000 && taro.server.postReqTimestamps.length > 0) {
 							oldestReqTimestamp = taro.server.postReqTimestamps.shift();
 						}
 						if (taro.server.postReqTimestamps.length > 30) {
