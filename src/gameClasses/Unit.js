@@ -2015,7 +2015,10 @@ var Unit = TaroEntityPhysics.extend({
 					// send ping for CSP reconciliation purpose
 					if (taro.now > taro.client.sendNextPingAt) {
 						taro.network.send('ping', {sentAt: taro._currentTime});
-						taro.client.sendNextPingAt = taro.now + 1500; // allow up to a 1.5 second before sending another ping
+						
+						// allow up to a 1.5 second before sending another ping. generally we'll not wait 1.5s before sending another ping
+						// because we'll be sending ping immediately after receiving pong from server. this is just a safety measure
+						taro.client.sendNextPingAt = taro.now + 1500; 
 					}
 				}
 
