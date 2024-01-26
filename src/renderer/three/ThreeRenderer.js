@@ -14,6 +14,7 @@ class ThreeRenderer {
     constructor() {
         var _a;
         this.textures = new Map();
+        this.animations = new Map();
         this.entities = [];
         this.pointer = new THREE.Vector2();
         this.followedEntity = null;
@@ -78,7 +79,29 @@ class ThreeRenderer {
                 tex.colorSpace = THREE.SRGBColorSpace;
                 this.textures.set(key, tex);
             });
-            console.log(data.projectileTypes[type].animations);
+            // Add animations
+            for (let animationsKey in data.projectileTypes[type].animations) {
+                console.log(key);
+                const animation = data.projectileTypes[type].animations[animationsKey];
+                const frames = animation.frames;
+                const animationFrames = [];
+                // Correction for 0-based indexing
+                for (let i = 0; i < frames.length; i++) {
+                    animationFrames.push(frames[i] - 1);
+                }
+                // Avoid crash by giving it frame 0 if no frame data provided
+                if (animationFrames.length === 0) {
+                    animationFrames.push(0);
+                }
+                if (this.animations.has(animationsKey)) {
+                    this.animations.delete(animationsKey);
+                }
+                this.animations.set(animationsKey, {
+                    frames: animationFrames,
+                    fps: animation.framesPerSecond || 15,
+                    repeat: animation.loopCount - 1, // correction for loop/repeat values
+                });
+            }
         }
         for (let type in data.itemTypes) {
             const cellSheet = data.itemTypes[type].cellSheet;

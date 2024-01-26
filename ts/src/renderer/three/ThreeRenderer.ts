@@ -20,6 +20,8 @@ class ThreeRenderer {
 	private scene: THREE.Scene;
 
 	private textures: Map<string, THREE.Texture> = new Map();
+	private animations: Map<string, object> = new Map();
+
 	private entities: Entity[] = [];
 
 	private pointer = new THREE.Vector2();
@@ -98,7 +100,33 @@ class ThreeRenderer {
 				this.textures.set(key, tex);
 			});
 
-			console.log(data.projectileTypes[type].animations);
+			// Add animations
+			for (let animationsKey in data.projectileTypes[type].animations) {
+				console.log(key);
+				const animation = data.projectileTypes[type].animations[animationsKey];
+				const frames = animation.frames;
+				const animationFrames: number[] = [];
+
+				// Correction for 0-based indexing
+				for (let i = 0; i < frames.length; i++) {
+					animationFrames.push(frames[i] - 1);
+				}
+
+				// Avoid crash by giving it frame 0 if no frame data provided
+				if (animationFrames.length === 0) {
+					animationFrames.push(0);
+				}
+
+				if (this.animations.has(animationsKey)) {
+					this.animations.delete(animationsKey);
+				}
+
+				this.animations.set(animationsKey, {
+					frames: animationFrames,
+					fps: animation.framesPerSecond || 15,
+					repeat: animation.loopCount - 1, // correction for loop/repeat values
+				});
+			}
 		}
 
 		for (let type in data.itemTypes) {
