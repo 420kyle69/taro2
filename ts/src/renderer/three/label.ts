@@ -10,12 +10,16 @@ class Label extends THREE.Group {
 
 		this.sprite = this.createLabel(text);
 		this.add(this.sprite);
+
+		this.visible = false;
 	}
 
 	update(text: string, color = 'white', bold = false) {
 		this.remove(this.sprite);
 		this.sprite = this.createLabel(text, color, bold);
 		this.add(this.sprite);
+
+		this.visible = true;
 	}
 
 	setOffset(offset: THREE.Vector2, center = new THREE.Vector2(0.5, 0.5)) {
