@@ -4106,7 +4106,9 @@ var TaroEntity = TaroObject.extend({
 												max = attributeData.max = data.attributes[attributeTypeId].max;
 											}
 
-											this.attribute.update(attributeTypeId, data.attributes[attributeTypeId].value, min, max);
+											// pass OR null in cases where max value is updated twice in succession
+											// without this, client update call passes undefined as value
+											this.attribute.update(attributeTypeId, data.attributes[attributeTypeId].value || null, min, max);
 
 										}
 										// update attribute if entity has such attribute
