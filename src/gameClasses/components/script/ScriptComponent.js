@@ -12,6 +12,7 @@ var ScriptComponent = TaroEntity.extend({
 		self.showLog = false;
 		self.errorLogs = {};
 		self.currentActionName = '';
+		self.currentActionBlockId = 0;
 		self.scriptCache = {};
 		self.scriptTime = {};
 		self.scriptRuns = {};
@@ -24,7 +25,7 @@ var ScriptComponent = TaroEntity.extend({
 		ScriptComponent.prototype.log('initializing Script Component');
 	},
 
-	load: function(scripts, modify = false) {
+	load: function (scripts, modify = false) {
 		if (modify) {
 			Object.entries(scripts).forEach(([scriptId, script]) => {
 				if (!script.deleted) {
@@ -62,22 +63,22 @@ var ScriptComponent = TaroEntity.extend({
 		self.currentScriptId = scriptId;
 		if (this.scripts && this.scripts[scriptId]) {
 			var actions = self.getScriptActions(scriptId);
-			
+
 			// console.log(scriptId, ': ', actions, params);
-			
-			
+
+
 			if (actions) {
 				var path = this._entity._id + "/" + scriptId;
-				var cmd = self.action.run(actions, params, path); // path is passed for profiling purpose
+				var cmd = self.action.run(actions, params, path, 1); // path is passed for profiling purpose
 				if (cmd == 'return') {
 					taro.log('script return called');
 					return;
 				}
 			}
-		// check if we are trying to run a global script from inside entity scripts
+			// check if we are trying to run a global script from inside entity scripts
 
-		// if we are running from entity script and the script was not found
-		// then check for the script on the global script component
+			// if we are running from entity script and the script was not found
+			// then check for the script on the global script component
 		} else if (
 			this._entity &&
 			this._entity._id &&
@@ -86,7 +87,7 @@ var ScriptComponent = TaroEntity.extend({
 			taro.script.runScript(scriptId, params);
 		}
 
-		
+
 	},
 
 	getScriptActions: function (scriptId) {
@@ -114,10 +115,10 @@ var ScriptComponent = TaroEntity.extend({
 				if (taro.triggerProfiler[taro.lastTrigger]) {
 					var count = taro.triggerProfiler[taro.lastTrigger].count;
 					taro.triggerProfiler[taro.lastTrigger].count++;
-					taro.triggerProfiler[taro.lastTrigger].avgTime = ((taro.triggerProfiler[taro.lastTrigger].avgTime * count) + lastTriggerRunTime ) / (count + 1);
+					taro.triggerProfiler[taro.lastTrigger].avgTime = ((taro.triggerProfiler[taro.lastTrigger].avgTime * count) + lastTriggerRunTime) / (count + 1);
 					taro.triggerProfiler[taro.lastTrigger].totalTime += lastTriggerRunTime;
 				} else {
-					taro.triggerProfiler[taro.lastTrigger] = {count: 1, avgTime: lastTriggerRunTime, totalTime: lastTriggerRunTime};
+					taro.triggerProfiler[taro.lastTrigger] = { count: 1, avgTime: lastTriggerRunTime, totalTime: lastTriggerRunTime };
 				}
 			}
 
@@ -126,7 +127,7 @@ var ScriptComponent = TaroEntity.extend({
 		}
 
 		let scriptIds = this.triggeredScripts[triggerName];
-		
+
 		for (var i in scriptIds) {
 			let scriptId = scriptIds[i];
 			this.scriptLog(`\ntrigger: ${triggerName}`);
@@ -191,16 +192,16 @@ var ScriptComponent = TaroEntity.extend({
 
 	errorLog: function (message, path) {
 		if (path == undefined) {
-			path = this._entity._id + "/" + this.currentScriptId + "/" + this.currentActionName;
+			path = `${this._entity._id}/${this.currentScriptId}/${this.currentActionName}`
 		}
-
+		path += `/${this.currentActionBlockId}`;
 		if (this.scripts) {
 			if (this.errorLogs[path] == undefined) {
-				this.errorLogs[path] = {message, count: 1};
+				this.errorLogs[path] = { message, count: 1 };
 			} else {
 				this.errorLogs[path].count++;
 			}
-			
+
 			if (taro.env === 'standalone')
 				console.log('errorLog', path, message);
 			// taro.devLog('errorLog', message);

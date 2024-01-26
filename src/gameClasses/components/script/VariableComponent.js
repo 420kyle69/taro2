@@ -121,7 +121,8 @@ var VariableComponent = TaroEntity.extend({
 		}
 
 		if (isNaN(result)) {
-			taro.script.errorLog(`Calculate error: ${left} ${op.operator} ${right} => NaN. Returning undefined`);
+			//Wooden Wall2::UnitDeath::block#11::CalcError,  owner(thisEntity).$BuildCap  is undefined
+			taro.script.errorLog(`Calculate error: ${left} ${op.operator} ${right} => NaN. ${JSON.stringify(items[1])} Returning undefined`);
 			return undefined;
 		}
 
@@ -1485,7 +1486,7 @@ var VariableComponent = TaroEntity.extend({
 								y: parseInt(taro.mobileControls.secondaryTouchPosition.y)
 							};
 						}
-					
+
 					break;
 
 					case 'xyCoordinate':
@@ -1797,7 +1798,7 @@ var VariableComponent = TaroEntity.extend({
 
 						returnValue = player._stats.highscore;
 
-						break;	
+						break;
 
 					case 'getUnitId':
 						var unit = self.getValue(text.unit, vars);
@@ -1954,7 +1955,7 @@ var VariableComponent = TaroEntity.extend({
 							returnValue = string.toUpperCase();
 						}
 
-						break;	
+						break;
 
 					case 'substringOf':
 						var string = self.getValue(text.string, vars);
@@ -2114,7 +2115,7 @@ var VariableComponent = TaroEntity.extend({
 
 					case 'allItemsOfItemType':
 						var type = self.getValue(text.itemType, vars);
-						
+
 						returnValue = _.filter(taro.$$('item'), (item) => {
 							return item._stats.itemTypeId == type;
 						});
