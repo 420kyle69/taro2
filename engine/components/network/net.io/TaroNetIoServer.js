@@ -484,13 +484,13 @@ var TaroNetIoServer = {
 		var self = this;
 		var remoteAddress = socket._remoteAddress;
 		let clientRejectReason = null;
-		
+
 		taro.network._socketById[socket.id] = socket;
 		taro.network._socketByIp[socket._remoteAddress] = socket;
-		taro.network._socketById[socket.id].start = Date.now();
+		taro.network._socketById[socket.id].start = socket.start || Date.now();
 		
 		if (taro.clusterClient) {
-			clientRejectReason = taro.clusterClient.validateClientConnection(socket);
+			clientRejectReason = taro.clusterClient.validateClientConnection(socket, request);
 		}
 				
 		if (clientRejectReason === null) {
