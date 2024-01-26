@@ -154,7 +154,7 @@ NetIo.Client = NetIo.EventingClass.extend({
 			
 			// Setup event listeners
 			this._socket.onopen = function () {
-				console.warn('...reconnected at ' + Date.now());
+				console.warn('...reconnected at ' + new Date().toISOString().slice(0, 19).replace(/-/g, "/").replace("T", " "));
 				self._onOpen.apply(self, arguments);
 				
 				// resolve if connection is open for about a second
@@ -361,7 +361,7 @@ NetIo.Client = NetIo.EventingClass.extend({
 		var reason = this._disconnectReason || event.reason;
 		var code = event.code;
 		
-		console.warn('disconnected at ' + Date.now() + ' with reason', reason, 'and code', code, this._state, 'and start reconnecting...')
+		console.warn('disconnected at ' + new Date().toISOString().slice(0, 19).replace(/-/g, "/").replace("T", " ") + ' with code', code, this._state, 'and start reconnecting...');
 		console.log('close event', event, { _disconnectReason: this._disconnectReason, state: this._state, reason });
 		
 		const disconnectData = {
