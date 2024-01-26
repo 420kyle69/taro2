@@ -262,6 +262,10 @@ class ThreeRenderer {
                 if (idx > -1) {
                     layers.entities.remove(ent);
                     this.entities.splice(idx, 1);
+                    const animIdx = this.animatedSprites.indexOf(ent, 0);
+                    if (animIdx > -1) {
+                        this.animatedSprites.splice(animIdx, 1);
+                    }
                     // Why do I have to call this on the client on destroy?
                     // Does the server not auto cleanup event emitters?
                     entity.off('transform', transformEvtListener);
