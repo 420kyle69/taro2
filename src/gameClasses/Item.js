@@ -55,6 +55,7 @@ var Item = TaroEntityPhysics.extend({
 		// convert numbers stored as string in database to int
 		self.parseEntityObject(self._stats);
 		self.addComponent(AttributeComponent); // every item gets one
+		self.addComponent(VariableComponent);
 
 		self.addComponent(ScriptComponent); // entity-scripting
 		self.script.load(data.scripts);

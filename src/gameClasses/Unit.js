@@ -40,7 +40,8 @@ var Unit = TaroEntityPhysics.extend({
 		self.parseEntityObject(self._stats);
 		self.addComponent(InventoryComponent)
 			.addComponent(AbilityComponent)
-			.addComponent(AttributeComponent); // every units gets one
+			.addComponent(AttributeComponent) // every units gets one
+			.addComponent(VariableComponent);
 
 		self.addComponent(ScriptComponent); // entity-requireScriptLoading
 		if (unitData && unitData) {

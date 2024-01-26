@@ -2705,53 +2705,9 @@ var ActionComponent = TaroEntity.extend({
 						var variable = self._script.param.getValue(action.variable, vars);
 						var value = self._script.param.getValue(action.value, vars);
 
-						if (variable && entity && entity.variables && entity.variables[variable.key]) {
-							var isDataTypeSame = false;
-							var variableObj = entity.variables[variable.key];
-
-							entity.attribute.update(attrId, value); 
-
-							// variables can not set to undefined via action
-							switch (variableObj.dataType) {
-								case 'string':
-								case 'boolean':
-								case 'number': {
-									isDataTypeSame = typeof value === variableObj.dataType;
-									break;
-								}
-								case 'position': {
-									isDataTypeSame = typeof value === 'object' &&
-										value.x &&
-										value.y;
-									break;
-								}
-								case 'item':
-								case 'player':
-								case 'unit': {
-									isDataTypeSame = typeof value === 'object' &&
-										value._category === variableObj.dataType;
-									break;
-								}
-								default: {
-									// figure out how to validate for other types like itemType, unitType, ..., etc.
-									isDataTypeSame = true;
-									break;
-								}
-							}
-
-							if (isDataTypeSame) {
-								variableObj.value = value;
-							} else if (typeof value === 'undefined' && action.value && action.value.function === 'undefinedValue') {
-								// dev intentionally set value as undefined
-								variableObj.value = undefined;
-
-								// if variable has default field then it will be returned when variable's value is undefined
-								if (variableObj.default) {
-									variableObj.default = undefined;
-								}
-							} else {
-								throw new Error('datatype of value does not match datatype of variable');
-							}
+						if (entity && variable && entity.variables) {
+							var variableId = variable.key;
+							entity.variable.update(variableId, value);
 						}
 
 						break;

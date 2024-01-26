@@ -2423,6 +2423,7 @@ var ParameterComponent = TaroEntity.extend({
 					if (entityVariable) {
 						returnValue = entityVariable.value;
 
+						// if the variable is not defined, use the default value
 						if (returnValue === null || returnValue == undefined) {
 							returnValue = entityVariable.default;
 						}
