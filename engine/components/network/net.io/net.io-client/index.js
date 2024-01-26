@@ -154,6 +154,7 @@ NetIo.Client = NetIo.EventingClass.extend({
 			
 			// Setup event listeners
 			this._socket.onopen = function () {
+				console.log('Reconnected...');
 				self._onOpen.apply(self, arguments);
 				
 				// resolve if connection is open for about a second
