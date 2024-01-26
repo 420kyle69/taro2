@@ -63,7 +63,7 @@ var VariableComponent = TaroEntity.extend({
 						if (
 							variableObj.streamMode == null || variableObj.streamMode == 1 ||  // don't stream if streamMode isn't sync'ed (1). Also added != null for legacy support.
 							variableObj.streamMode == 4 // streamMode 4 also sends to everyone. the ignoring part is done on client-side.
-						) {						
+						) {
 							self._entity.streamUpdateData([{
 								variables: {
 									[variableId]: value

@@ -664,11 +664,19 @@ var ParameterComponent = TaroEntity.extend({
 						}
 
 						break;
-
+					
 					case 'unitsFacingAngle':
-						var unit = self.getValue(text.unit, vars);
-						if (unit && unit._category == 'unit') {
-							returnValue = unit._rotate && unit._rotate.z;
+						var unit = self.getValue(text.unit, vars);					
+					case 'entityFacingAngle':						
+						// if unit is defined, use unit's facing angle
+						if (unit) {
+							var entity = unit;
+						} else {
+							var entity = self.getValue(text.entity, vars);
+						}
+							
+						if (entity) {
+							returnValue = entity._rotate && entity._rotate.z;
 							returnValue = (returnValue != undefined) ? self.roundOff(returnValue, 3) : undefined;
 						}
 
@@ -1062,7 +1070,6 @@ var ParameterComponent = TaroEntity.extend({
 						});
 
 						returnValue = players.length;
-
 						break;
 
 					case 'getMapHeight':

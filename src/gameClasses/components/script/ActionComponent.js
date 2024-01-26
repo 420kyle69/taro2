@@ -45,16 +45,17 @@ var ActionComponent = TaroEntity.extend({
 
 				// prevent recursive/infinite action calls consuming CPU
 				if (engineTickDelta > 1000 && !taro.engineLagReported) {
-
-					taro.clusterClient.logEngineFreeze({
-						query: 'engineFreeze',
-						engineTickDelta: engineTickDelta,
-						masterServer: global.myIp,
-						gameInfo: taro.gameInfo,
-						// lastAction: action.type,
-						// actionProfiler: taro.actionProfiler,
-						// triggerProfiler: taro.triggerProfiler
-					})
+					if (taro.clusterClient) {
+						taro.clusterClient.logEngineFreeze({
+							query: 'engineFreeze',
+							engineTickDelta: engineTickDelta,
+							masterServer: global.myIp,
+							gameInfo: taro.gameInfo,
+							// lastAction: action.type,
+							// actionProfiler: taro.actionProfiler,
+							// triggerProfiler: taro.triggerProfiler
+						})
+					}					
 
 					taro.engineLagReported = true;
 					// taro.server.unpublish(errorMsg); // not publishing yet cuz TwoHouses will get unpub. loggin instead.
