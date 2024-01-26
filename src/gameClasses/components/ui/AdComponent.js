@@ -196,7 +196,7 @@ var AdComponent = TaroEntity.extend({
 						
 						// remove old failure records that didn't happen in the last one hour
 						let oldestSaveTimestamp = taro.server.userAdStats[distinctId].adFailAttempts[0];
-						while (Date.now() - oldestSaveTimestamp > 60 * 60 * 1000 && taro.server.userAdStats[distinctId].adFailAttempts.length > 0) {
+						while (taro.currentTime() - oldestSaveTimestamp > 60 * 60 * 1000 && taro.server.userAdStats[distinctId].adFailAttempts.length > 0) {
 							oldestSaveTimestamp = taro.server.userAdStats[distinctId].adFailAttempts.shift();
 						}
 						

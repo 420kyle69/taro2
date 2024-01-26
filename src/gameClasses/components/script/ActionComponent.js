@@ -55,7 +55,7 @@ var ActionComponent = TaroEntity.extend({
 						// actionProfiler: taro.actionProfiler,
 						// triggerProfiler: taro.triggerProfiler
 					})
-					
+
 					taro.engineLagReported = true;
 					// taro.server.unpublish(errorMsg); // not publishing yet cuz TwoHouses will get unpub. loggin instead.
 				}
@@ -162,30 +162,30 @@ var ActionComponent = TaroEntity.extend({
 							var count = self._script.variable.getValue(action.count, vars);
 							var repeatActions = self._script.variable.getValue(action.actions, vars);
 							var delay = self._script.variable.getValue(action.number, vars);
-						
+
 							const runWithDelay = (i) => {
 								returnValue = self.run(repeatActions, vars, actionPath);
-					
+
 								if (returnValue == 'break' || vars.break) {
 									vars.break = false;
 								} else if (returnValue == 'return') {
 										throw new Error('return without executing script');
 								}
-					
+
 								// Continue to the next iteration if not reached the count
 								if (i < count - 1) {
 									setTimeout(() => runWithDelay(i + 1), delay);
 								}
 							};
-					
+
 							if (!isNaN(count) && count > 0) {
 								// Start the loop immediately with the first iteration
 								runWithDelay(0);
 							}
-					
+
 							break;
 						}
-						
+
 
 					case 'runScript':
 						let previousScriptId = self._script.currentScriptId;
@@ -285,7 +285,7 @@ var ActionComponent = TaroEntity.extend({
 						// ensure we aren't sending more than 30 POST requests within 10 seconds
 						taro.server.postReqTimestamps.push(taro.currentTime());
 						var oldestReqTimestamp = taro.server.postReqTimestamps[0]
-						while (Date.now() - oldestReqTimestamp > 10000 && taro.server.postReqTimestamps.length > 0) {
+						while (taro.currentTime() - oldestReqTimestamp > 10000 && taro.server.postReqTimestamps.length > 0) {
 							oldestReqTimestamp = taro.server.postReqTimestamps.shift();
 						}
 						if (taro.server.postReqTimestamps.length > 30) {
@@ -327,11 +327,11 @@ var ActionComponent = TaroEntity.extend({
 						var varName = self._script.variable.getValue(action.varName, vars);
 						var proxyUrl = process.env.PROXY_URL || '';
 						var requestUrl = `${proxyUrl}${url}`;
-						
+
 						// ensure we aren't sending more than 30 POST requests within 10 seconds
 						taro.server.postReqTimestamps.push(taro.currentTime());
 						var oldestReqTimestamp = taro.server.postReqTimestamps[0]
-						while (Date.now() - oldestReqTimestamp > 10000 && taro.server.postReqTimestamps.length > 0) {
+						while (taro.currentTime() - oldestReqTimestamp > 10000 && taro.server.postReqTimestamps.length > 0) {
 							oldestReqTimestamp = taro.server.postReqTimestamps.shift();
 						}
 						if (taro.server.postReqTimestamps.length > 30) {
@@ -1993,7 +1993,7 @@ var ActionComponent = TaroEntity.extend({
 							}
 						}
 						break;
-					
+
 					case 'setCameraDeadzone':
 						var width = self._script.variable.getValue(action.width, vars);
 						var height = self._script.variable.getValue(action.height, vars);
@@ -3244,7 +3244,7 @@ var ActionComponent = TaroEntity.extend({
 							}, player._stats.clientId);
 						}
 						break;
-					
+
 					case 'addClassToUIElement':
 						var elementId = self._script.variable.getValue(action.elementId, vars);
 						var className = self._script.variable.getValue(action.className, vars);
@@ -3259,7 +3259,7 @@ var ActionComponent = TaroEntity.extend({
 							}, player._stats.clientId);
 						}
 						break;
-						
+
 					case 'removeClassFromUIElement':
 						var elementId = self._script.variable.getValue(action.elementId, vars);
 						var className = self._script.variable.getValue(action.className, vars);
@@ -3274,7 +3274,7 @@ var ActionComponent = TaroEntity.extend({
 							}, player._stats.clientId);
 						}
 						break;
-					
+
 					case 'purchaseItemFromShop':
 						var player = self._script.variable.getValue(action.player, vars);
 						var shopId = action.shop;
