@@ -47,6 +47,8 @@ class ThreeRenderer {
 		this.controls.enableDamping = true;
 		this.controls.target = new THREE.Vector3(0, 0, 10);
 
+		this.controls.enableRotate = false;
+
 		this.scene = new THREE.Scene();
 		this.scene.translateX(-taro.game.data.map.width / 2);
 		this.scene.translateZ(-taro.game.data.map.height / 2);
