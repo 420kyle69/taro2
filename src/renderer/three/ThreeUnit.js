@@ -1,4 +1,4 @@
-class ThreeUnit extends Entity {
+class ThreeUnit extends ThreeAnimatedSprite {
     constructor(tex) {
         super(tex);
         // Why does every unit have a label?

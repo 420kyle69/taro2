@@ -20,7 +20,7 @@ class ThreeRenderer {
 	private scene: THREE.Scene;
 
 	private textures: Map<string, THREE.Texture> = new Map();
-	private animations: Map<string, object> = new Map();
+	private animations: Map<string, { frames: number[]; fps: number; repeat: number }> = new Map();
 
 	private entities: Entity[] = [];
 
@@ -95,8 +95,12 @@ class ThreeRenderer {
 			if (!cellSheet) continue;
 			const key = cellSheet.url;
 			const url = Utils.patchAssetUrl(key);
+
 			textureLoader.load(url, (tex) => {
 				tex.colorSpace = THREE.SRGBColorSpace;
+				tex.userData.numColumns = cellSheet.columnCount || 1;
+				tex.userData.numRows = cellSheet.rowCount || 1;
+				tex.userData.key = key;
 				this.textures.set(key, tex);
 			});
 
@@ -117,11 +121,11 @@ class ThreeRenderer {
 					animationFrames.push(0);
 				}
 
-				if (this.animations.has(animationsKey)) {
-					this.animations.delete(animationsKey);
+				if (this.animations.has(`${key}/${animationsKey}`)) {
+					this.animations.delete(`${key}/${animationsKey}`);
 				}
 
-				this.animations.set(animationsKey, {
+				this.animations.set(`${key}/${animationsKey}`, {
 					frames: animationFrames,
 					fps: animation.framesPerSecond || 15,
 					repeat: animation.loopCount - 1, // correction for loop/repeat values
@@ -232,7 +236,18 @@ class ThreeRenderer {
 			const tex = this.textures.get(entity._stats.cellSheet.url);
 
 			const createEntity = () => {
-				if (entity instanceof Unit) return new ThreeUnit(tex);
+				// TODO: Make all entities sprites, not a 3D mesh. Only the map is 3D?
+				// Uhm what about furniture? They need to be 3D but we don't have proper
+				// models for them yet.
+				if (entity instanceof Unit) {
+					const e = new ThreeUnit(tex.clone());
+					this.animatedSprites.push(e);
+					return e;
+				} else if (entity instanceof Projectile) {
+					const e = new ThreeUnit(tex.clone());
+					this.animatedSprites.push(e);
+					return e;
+				}
 				return new Entity(tex);
 			};
 
@@ -253,6 +268,7 @@ class ThreeRenderer {
 				'size',
 				(data: { width: number; height: number }) => {
 					ent.mesh.scale.set(data.width / 64, 1, data.height / 64);
+					(ent as ThreeUnit).sprite?.scale.set(data.width / 64, data.height / 64);
 				},
 				this
 			);
@@ -316,6 +332,14 @@ class ThreeRenderer {
 				(ent as ThreeUnit).renderChat(text);
 			});
 
+			// Animation
+			const playAnimationEvtListener = entity.on('play-animation', (id) => {
+				if (entity instanceof Projectile) {
+					const animation = this.animations.get(`${tex.userData.key}/${id}`);
+					(ent as ThreeUnit).loop(animation.frames, animation.fps);
+				}
+			});
+
 			const destroyEvtListener = entity.on(
 				'destroy',
 				() => {
@@ -342,6 +366,8 @@ class ThreeRenderer {
 						entity.off('update-attribute', updateAttributeEvtListener);
 
 						entity.off('render-chat-bubble', renderChatBubbleEvtListener);
+
+						entity.off('play-animation', playAnimationEvtListener);
 					}
 				},
 				this
@@ -355,15 +381,6 @@ class ThreeRenderer {
 		this.renderer.domElement.addEventListener('mousemove', (evt: MouseEvent) => {
 			this.pointer.set((evt.clientX / window.innerWidth) * 2 - 1, -(evt.clientY / window.innerHeight) * 2 + 1);
 		});
-
-		const explosionTex = this.textures.get(
-			'https://cache.modd.io/asset/spriteImage/1588350110788_Explosion_(Animated).png'
-		);
-		const animSprite = new ThreeAnimatedSprite(explosionTex.clone(), 6, 1);
-		animSprite.loop([0, 1, 2, 3, 4, 5], 15);
-		this.scene.add(animSprite);
-
-		this.animatedSprites.push(animSprite);
 	}
 
 	private setupInputListeners(): void {

@@ -77,6 +77,9 @@ class ThreeRenderer {
             const url = Utils.patchAssetUrl(key);
             textureLoader.load(url, (tex) => {
                 tex.colorSpace = THREE.SRGBColorSpace;
+                tex.userData.numColumns = cellSheet.columnCount || 1;
+                tex.userData.numRows = cellSheet.rowCount || 1;
+                tex.userData.key = key;
                 this.textures.set(key, tex);
             });
             // Add animations
@@ -93,10 +96,10 @@ class ThreeRenderer {
                 if (animationFrames.length === 0) {
                     animationFrames.push(0);
                 }
-                if (this.animations.has(animationsKey)) {
-                    this.animations.delete(animationsKey);
+                if (this.animations.has(`${key}/${animationsKey}`)) {
+                    this.animations.delete(`${key}/${animationsKey}`);
                 }
-                this.animations.set(animationsKey, {
+                this.animations.set(`${key}/${animationsKey}`, {
                     frames: animationFrames,
                     fps: animation.framesPerSecond || 15,
                     repeat: animation.loopCount - 1, // correction for loop/repeat values
@@ -188,8 +191,19 @@ class ThreeRenderer {
             }
             const tex = this.textures.get(entity._stats.cellSheet.url);
             const createEntity = () => {
-                if (entity instanceof Unit)
-                    return new ThreeUnit(tex);
+                // TODO: Make all entities sprites, not a 3D mesh. Only the map is 3D?
+                // Uhm what about furniture? They need to be 3D but we don't have proper
+                // models for them yet.
+                if (entity instanceof Unit) {
+                    const e = new ThreeUnit(tex.clone());
+                    this.animatedSprites.push(e);
+                    return e;
+                }
+                else if (entity instanceof Projectile) {
+                    const e = new ThreeUnit(tex.clone());
+                    this.animatedSprites.push(e);
+                    return e;
+                }
                 return new Entity(tex);
             };
             const ent = createEntity();
@@ -200,7 +214,9 @@ class ThreeRenderer {
                 ent.rotation.y = -data.rotation;
             }, this);
             const sizeEvtListener = entity.on('size', (data) => {
+                var _a;
                 ent.mesh.scale.set(data.width / 64, 1, data.height / 64);
+                (_a = ent.sprite) === null || _a === void 0 ? void 0 : _a.scale.set(data.width / 64, data.height / 64);
             }, this);
             const scaleEvtListener = entity.on('scale', (data) => {
                 ent.scale.set(data.x, 1, data.y);
@@ -235,6 +251,13 @@ class ThreeRenderer {
             const renderChatBubbleEvtListener = entity.on('render-chat-bubble', (text) => {
                 ent.renderChat(text);
             });
+            // Animation
+            const playAnimationEvtListener = entity.on('play-animation', (id) => {
+                if (entity instanceof Projectile) {
+                    const animation = this.animations.get(`${tex.userData.key}/${id}`);
+                    ent.loop(animation.frames, animation.fps);
+                }
+            });
             const destroyEvtListener = entity.on('destroy', () => {
                 const idx = this.entities.indexOf(ent, 0);
                 if (idx > -1) {
@@ -255,6 +278,7 @@ class ThreeRenderer {
                     entity.off('render-attributes', renderAttributesEvtListener);
                     entity.off('update-attribute', updateAttributeEvtListener);
                     entity.off('render-chat-bubble', renderChatBubbleEvtListener);
+                    entity.off('play-animation', playAnimationEvtListener);
                 }
             }, this);
         };
@@ -264,11 +288,6 @@ class ThreeRenderer {
         this.renderer.domElement.addEventListener('mousemove', (evt) => {
             this.pointer.set((evt.clientX / window.innerWidth) * 2 - 1, -(evt.clientY / window.innerHeight) * 2 + 1);
         });
-        const explosionTex = this.textures.get('https://cache.modd.io/asset/spriteImage/1588350110788_Explosion_(Animated).png');
-        const animSprite = new ThreeAnimatedSprite(explosionTex.clone(), 6, 1);
-        animSprite.loop([0, 1, 2, 3, 4, 5], 15);
-        this.scene.add(animSprite);
-        this.animatedSprites.push(animSprite);
     }
     setupInputListeners() {
         // Ask the input component to set up any listeners it has

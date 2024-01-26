@@ -1,26 +1,32 @@
-class ThreeAnimatedSprite extends THREE.Group {
+class ThreeAnimatedSprite extends Entity {
+	sprite;
+
 	private playSpriteIndices: number[] = [];
 	private runningTileArrayIndex = 0;
 	private maxDisplayTime = 0;
 	private elapsedTime = 0;
 
-	constructor(
-		private tex: THREE.Texture,
-		private tileH: number,
-		private tileV: number,
-		private currentTile = 0
-	) {
-		super();
+	private tileH = 1;
+	private tileV = 1;
+	private currentTile = 0;
 
-		tex.repeat.set(1 / tileH, 1 / tileV);
-		const offsetX = (currentTile % tileH) / tileH;
-		const offsetY = 1 - 1 / tileV - (Math.floor(this.currentTile / tileH) % tileV) / tileV;
+	constructor(private tex: THREE.Texture) {
+		super(tex);
+
+		if (tex.userData.numColumns && tex.userData.numRows) {
+			this.tileH = tex.userData.numColumns;
+			this.tileV = tex.userData.numRows;
+		}
+
+		tex.repeat.set(1 / this.tileH, 1 / this.tileV);
+		const offsetX = (this.currentTile % this.tileH) / this.tileH;
+		const offsetY = 1 - 1 / this.tileV - (Math.floor(this.currentTile / this.tileH) % this.tileV) / this.tileV;
 		tex.offset.set(offsetX, offsetY);
 		const spriteMaterial = new THREE.SpriteMaterial({ map: tex });
 		spriteMaterial.depthTest = false;
 		const sprite = new THREE.Sprite(spriteMaterial);
 		sprite.renderOrder = 1001;
-		sprite.position.set(taro.game.data.map.width / 2, 1, taro.game.data.map.height / 2);
+		this.sprite = sprite;
 		this.add(sprite);
 	}
 

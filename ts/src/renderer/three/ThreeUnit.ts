@@ -1,4 +1,4 @@
-class ThreeUnit extends Entity {
+class ThreeUnit extends ThreeAnimatedSprite {
 	// Why does every unit have a label?
 	private label = new Label();
 	private attributeBars = new THREE.Group();
