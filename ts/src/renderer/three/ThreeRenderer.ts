@@ -267,7 +267,7 @@ class ThreeRenderer {
 			const sizeEvtListener = entity.on(
 				'size',
 				(data: { width: number; height: number }) => {
-					ent.mesh.scale.set(data.width / 64, 1, data.height / 64);
+					ent.mesh.scale.set(data.width / 64, data.height / 64, data.height / 64);
 					(ent as ThreeUnit).sprite?.scale.set(data.width / 64, data.height / 64);
 				},
 				this

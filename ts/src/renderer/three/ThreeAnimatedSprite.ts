@@ -27,7 +27,7 @@ class ThreeAnimatedSprite extends Entity {
 		const sprite = new THREE.Sprite(spriteMaterial);
 		sprite.renderOrder = 1001;
 		this.sprite = sprite;
-		this.add(sprite);
+		// this.add(sprite);
 	}
 
 	loop(playSpriteIndices: number[], fps: number) {
