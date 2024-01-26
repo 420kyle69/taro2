@@ -17,6 +17,7 @@ class ThreeRenderer {
         this.entities = [];
         this.pointer = new THREE.Vector2();
         this.followedEntity = null;
+        this.animatedSprites = [];
         const renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         (_a = document.querySelector('#game-div')) === null || _a === void 0 ? void 0 : _a.appendChild(renderer.domElement);
@@ -77,6 +78,7 @@ class ThreeRenderer {
                 tex.colorSpace = THREE.SRGBColorSpace;
                 this.textures.set(key, tex);
             });
+            console.log(data.projectileTypes[type].animations);
         }
         for (let type in data.itemTypes) {
             const cellSheet = data.itemTypes[type].cellSheet;
@@ -158,6 +160,9 @@ class ThreeRenderer {
             });
         });
         const createEntity = (entity) => {
+            if (entity instanceof Projectile) {
+                console.log(entity);
+            }
             const tex = this.textures.get(entity._stats.cellSheet.url);
             const createEntity = () => {
                 if (entity instanceof Unit)
@@ -236,6 +241,11 @@ class ThreeRenderer {
         this.renderer.domElement.addEventListener('mousemove', (evt) => {
             this.pointer.set((evt.clientX / window.innerWidth) * 2 - 1, -(evt.clientY / window.innerHeight) * 2 + 1);
         });
+        const explosionTex = this.textures.get('https://cache.modd.io/asset/spriteImage/1588350110788_Explosion_(Animated).png');
+        const animSprite = new ThreeAnimatedSprite(explosionTex.clone(), 6, 1);
+        animSprite.loop([0, 1, 2, 3, 4, 5], 15);
+        this.scene.add(animSprite);
+        this.animatedSprites.push(animSprite);
     }
     setupInputListeners() {
         // Ask the input component to set up any listeners it has
@@ -269,6 +279,9 @@ class ThreeRenderer {
             this.followedEntity.getWorldPosition(followedEntityWorldPos);
             this.camera.position.set(followedEntityWorldPos.x, this.camera.position.y, followedEntityWorldPos.z);
             this.controls.target.set(followedEntityWorldPos.x, this.controls.target.y, followedEntityWorldPos.z);
+        }
+        for (const sprite of this.animatedSprites) {
+            sprite.update(1 / 60);
         }
         this.controls.update();
         this.renderer.render(this.scene, this.camera);

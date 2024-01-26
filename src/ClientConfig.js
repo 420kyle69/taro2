@@ -117,6 +117,7 @@ var taroClientConfig = {
 		'renderer/three/ThreeUnit.js',
 		'renderer/three/ThreeAttributeBar.js',
 		'renderer/three/ThreeChatBubble.js',
+		'renderer/three/ThreeAnimatedSprite.js',
 
 		'/client.js',
 		'/index.js',

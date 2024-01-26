@@ -25,6 +25,8 @@ class ThreeRenderer {
 	private pointer = new THREE.Vector2();
 	private followedEntity: Entity | null = null;
 
+	private animatedSprites: ThreeAnimatedSprite[] = [];
+
 	constructor() {
 		const renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true });
 		renderer.setSize(window.innerWidth, window.innerHeight);
@@ -95,6 +97,8 @@ class ThreeRenderer {
 				tex.colorSpace = THREE.SRGBColorSpace;
 				this.textures.set(key, tex);
 			});
+
+			console.log(data.projectileTypes[type].animations);
 		}
 
 		for (let type in data.itemTypes) {
@@ -193,6 +197,10 @@ class ThreeRenderer {
 		});
 
 		const createEntity = (entity: Unit | Item | Projectile) => {
+			if (entity instanceof Projectile) {
+				console.log(entity);
+			}
+
 			const tex = this.textures.get(entity._stats.cellSheet.url);
 
 			const createEntity = () => {
@@ -319,6 +327,15 @@ class ThreeRenderer {
 		this.renderer.domElement.addEventListener('mousemove', (evt: MouseEvent) => {
 			this.pointer.set((evt.clientX / window.innerWidth) * 2 - 1, -(evt.clientY / window.innerHeight) * 2 + 1);
 		});
+
+		const explosionTex = this.textures.get(
+			'https://cache.modd.io/asset/spriteImage/1588350110788_Explosion_(Animated).png'
+		);
+		const animSprite = new ThreeAnimatedSprite(explosionTex.clone(), 6, 1);
+		animSprite.loop([0, 1, 2, 3, 4, 5], 15);
+		this.scene.add(animSprite);
+
+		this.animatedSprites.push(animSprite);
 	}
 
 	private setupInputListeners(): void {
@@ -359,6 +376,10 @@ class ThreeRenderer {
 			this.followedEntity.getWorldPosition(followedEntityWorldPos);
 			this.camera.position.set(followedEntityWorldPos.x, this.camera.position.y, followedEntityWorldPos.z);
 			this.controls.target.set(followedEntityWorldPos.x, this.controls.target.y, followedEntityWorldPos.z);
+		}
+
+		for (const sprite of this.animatedSprites) {
+			sprite.update(1 / 60);
 		}
 
 		this.controls.update();
