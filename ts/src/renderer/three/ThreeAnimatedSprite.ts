@@ -26,9 +26,9 @@ class ThreeAnimatedSprite extends Entity {
 		const offsetY = 1 - 1 / this.tileV - (Math.floor(this.currentTile / this.tileH) % this.tileV) / this.tileV;
 		tex.offset.set(offsetX, offsetY);
 		const spriteMaterial = new THREE.SpriteMaterial({ map: tex });
-		spriteMaterial.depthTest = false;
+		// spriteMaterial.depthTest = false;
 		const sprite = new THREE.Sprite(spriteMaterial);
-		sprite.renderOrder = 1001;
+		// sprite.renderOrder = 1001;
 		this.sprite = sprite;
 		// this.add(sprite);
 	}

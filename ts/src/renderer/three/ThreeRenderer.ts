@@ -170,8 +170,8 @@ class ThreeRenderer {
 			entities: new THREE.Group(),
 		};
 
-		layers.floor.renderOrder = -10;
-		layers.walls.position.y = 1;
+		layers.floor.position.y = -1;
+		layers.walls.position.y = 0;
 		layers.entities.position.y = 1;
 
 		const geometry = new THREE.BoxGeometry(1, 1, 1);
@@ -222,7 +222,6 @@ class ThreeRenderer {
 						for (let x = 0; x < layer.width; x++) {
 							const cube = createCube(layer.data[z * layer.width + x]);
 							cube.position.set(x, 0, z);
-							cube.renderOrder = 1;
 							layers[layer.name].add(cube);
 						}
 					}
@@ -415,10 +414,10 @@ class ThreeRenderer {
 				},
 			]);
 
-			// const followedEntityWorldPos = new THREE.Vector3();
-			// this.followedEntity.getWorldPosition(followedEntityWorldPos);
-			// this.camera.position.set(followedEntityWorldPos.x, this.camera.position.y, followedEntityWorldPos.z);
-			// this.controls.target.set(followedEntityWorldPos.x, this.controls.target.y, followedEntityWorldPos.z);
+			const followedEntityWorldPos = new THREE.Vector3();
+			this.followedEntity.getWorldPosition(followedEntityWorldPos);
+			this.camera.position.set(followedEntityWorldPos.x, this.camera.position.y, followedEntityWorldPos.z);
+			this.controls.target.set(followedEntityWorldPos.x, this.controls.target.y, followedEntityWorldPos.z);
 		}
 
 		for (const sprite of this.animatedSprites) {
