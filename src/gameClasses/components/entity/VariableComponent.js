@@ -5,6 +5,15 @@ var VariableComponent = TaroEntity.extend({
 	init: function (entity, options) {
 		var self = this;
 		self._entity = entity;
+
+		for (var variableId in self._entity.variables) {			
+			var entityVariable = self._entity.variables[variableId];
+			// if the variable is not defined, use the default value
+			if (entityVariable == undefined || entityVariable.value == undefined) {				
+				self._entity.variables[variableId].value = entityVariable.default;
+			}
+		}
+
 	},
 
 	update: function (variableId, value) {
@@ -48,25 +57,39 @@ var VariableComponent = TaroEntity.extend({
 			if (isDataTypeMatching) {
 
 				if (variableObj.value !== value) {					
-					variableObj.value = value;
+					self._entity.variables[variableId].value = value;
 
-					self._entity.streamUpdateData({
-											variables: {
-												[variableId]: value
-											}
-										});
-
+					if (taro.isServer) {
+						if (
+							variableObj.streamMode == null || variableObj.streamMode == 1 ||  // don't stream if streamMode isn't sync'ed (1). Also added != null for legacy support.
+							variableObj.streamMode == 4 // streamMode 4 also sends to everyone. the ignoring part is done on client-side.
+						) {						
+							self._entity.streamUpdateData([{
+								variables: {
+									[variableId]: value
+								}
+							}]);
+						}
+					}
 				}
 				
-			} else if (typeof value === 'undefined' && action.value && action.value.function === 'undefinedValue') {
-				// dev intentionally set value as undefined
-				variableObj.value = undefined;
+			} else if (typeof value === 'undefined' || value.function === 'undefinedValue') {
+				// creator is intentionally setting value as undefined
+				self._entity.variables[variableId].value = undefined;
 
-				// if variable has default field then it will be returned when variable's value is undefined
-				if (variableObj.default) {
-
-					variableObj.default = undefined;
+				if (taro.isServer) {
+					if (
+						variableObj.streamMode == null || variableObj.streamMode == 1 ||  // don't stream if streamMode isn't sync'ed (1). Also added != null for legacy support.
+						variableObj.streamMode == 4 // streamMode 4 also sends to everyone. the ignoring part is done on client-side.
+					) {					
+						self._entity.streamUpdateData([{
+							variables: {
+								[variableId]: {function: 'undefinedValue'}
+							}
+						}]);
+					}
 				}
+
 			} else {
 				throw new Error('datatype of value does not match datatype of variable');
 			}

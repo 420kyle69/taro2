@@ -4176,6 +4176,36 @@ var TaroEntity = TaroObject.extend({
 							}
 							break;
 
+
+						case 'variables':
+							// only on client side to prevent circular recursion
+							if (taro.isClient) {
+								var variablesObject = rfdc()(this.variables);
+								if (variablesObject) {
+									for (var variableId in data.variables) {										
+										var variableData = variablesObject[variableId];
+										// streamMode 4 ignores
+										if (this._category == 'unit') {
+											var ownerPlayer = this.getOwner();
+										} else if (this._category == 'item') {
+											var ownerPlayer = this.getOwnerUnit()?.getOwner();
+										}
+
+										if (
+											variableData &&
+											// ignore update if streamMode = 4 and it's for my own unit
+											!(ownerPlayer?._stats?.clientId == taro.network.id() && variableData.streamMode == 4)
+										) {
+											this.variable.update(variableId, data.variables[variableId]);
+										}
+										// update attribute if entity has such attribute
+									}
+								}
+							}
+							break;
+	
+
+
 						case 'depth':
 							this._stats[attrName] = newValue;
 							if (taro.isClient) {
