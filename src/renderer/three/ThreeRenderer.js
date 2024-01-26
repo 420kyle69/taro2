@@ -188,9 +188,6 @@ class ThreeRenderer {
             });
         });
         const createEntity = (entity) => {
-            if (entity instanceof Projectile) {
-                console.log(entity);
-            }
             const tex = this.textures.get(entity._stats.cellSheet.url);
             const createEntity = () => {
                 // TODO: Make all entities sprites, not a 3D mesh. Only the map is 3D?
@@ -257,7 +254,7 @@ class ThreeRenderer {
             const playAnimationEvtListener = entity.on('play-animation', (id) => {
                 if (entity instanceof Projectile) {
                     const animation = this.animations.get(`${tex.userData.key}/${id}`);
-                    ent.loop(animation.frames, animation.fps);
+                    ent.loop(animation.frames, animation.fps, animation.repeat);
                 }
             });
             const destroyEvtListener = entity.on('destroy', () => {

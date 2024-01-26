@@ -231,10 +231,6 @@ class ThreeRenderer {
 		});
 
 		const createEntity = (entity: Unit | Item | Projectile) => {
-			if (entity instanceof Projectile) {
-				console.log(entity);
-			}
-
 			const tex = this.textures.get(entity._stats.cellSheet.url);
 
 			const createEntity = () => {
@@ -338,7 +334,7 @@ class ThreeRenderer {
 			const playAnimationEvtListener = entity.on('play-animation', (id) => {
 				if (entity instanceof Projectile) {
 					const animation = this.animations.get(`${tex.userData.key}/${id}`);
-					(ent as ThreeUnit).loop(animation.frames, animation.fps);
+					(ent as ThreeUnit).loop(animation.frames, animation.fps, animation.repeat);
 				}
 			});
 
