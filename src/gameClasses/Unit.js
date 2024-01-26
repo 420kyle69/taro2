@@ -40,7 +40,8 @@ var Unit = TaroEntityPhysics.extend({
 		self.parseEntityObject(self._stats);
 		self.addComponent(InventoryComponent)
 			.addComponent(AbilityComponent)
-			.addComponent(AttributeComponent); // every units gets one
+			.addComponent(AttributeComponent) // every units gets one
+			.addComponent(VariableComponent);
 
 		self.addComponent(ScriptComponent); // entity-requireScriptLoading
 		if (unitData && unitData) {
@@ -91,7 +92,7 @@ var Unit = TaroEntityPhysics.extend({
 			if (self._stats.streamMode == 1 || self._stats.streamMode == undefined) {
 				this.streamMode(1);
 			} else {
-				this.streamMode(self._stats.streamMode);				
+				this.streamMode(self._stats.streamMode);
 			}
 
 			taro.server.totalUnitsCreated++;
@@ -133,8 +134,6 @@ var Unit = TaroEntityPhysics.extend({
 
 			self._scaleTexture();
 
-			var polygon = new TaroPoly2d();
-			self.triggerPolygon(polygon);
 			self.flip(self._stats.flip);
 
 		}
@@ -343,10 +342,9 @@ var Unit = TaroEntityPhysics.extend({
 					if (self.unitUi) {
 						self.unitUi.updateAllAttributeBars();
 					}
+
 					// visibility mask
-					if (this._stats.visibilityMask?.enabled) {
-						this.updateVisibilityMask();
-					}
+					this.updateVisibilityMask();
 				}
 			}
 		}
@@ -906,6 +904,7 @@ var Unit = TaroEntityPhysics.extend({
 			var ownerPlayer = self.getOwner();
 			if (ownerPlayer && ownerPlayer._stats.selectedUnitId == self.id() && this._stats.clientId == taro.network.id()) {
 				self.inventory.createInventorySlots();
+				this.updateVisibilityMask();
 			}
 
 			// destroy existing particle emitters first
@@ -925,7 +924,7 @@ var Unit = TaroEntityPhysics.extend({
 				self.unitUi.updateAllAttributeBars();
 			}
 			self.inventory.update();
-            // if mobile controls are in use configure for this unit
+			// if mobile controls are in use configure for this unit
 			self.renderMobileControl();
 		}
 
@@ -937,7 +936,7 @@ var Unit = TaroEntityPhysics.extend({
 			}
 		}
 	},
-	
+
 	resetUnitType: function () {
 		const self = this;
 		const data = taro.game.cloneAsset('unitTypes', self._stats.type);
@@ -1963,8 +1962,8 @@ var Unit = TaroEntityPhysics.extend({
 
 	updateVisibilityMask: function () {
 		taro.client.emit('update-visibility-mask', {
-			enabled: this._stats.visibilityMask.enabled,
-			range: this._stats.visibilityMask.range,
+			enabled: !!this._stats.visibilityMask?.enabled,
+			range: this._stats.visibilityMask?.range || 700,
 		});
 	},
 
@@ -2015,7 +2014,10 @@ var Unit = TaroEntityPhysics.extend({
 					// send ping for CSP reconciliation purpose
 					if (taro.now > taro.client.sendNextPingAt) {
 						taro.network.send('ping', {sentAt: taro._currentTime});
-						taro.client.sendNextPingAt = taro.now + 1500; // allow up to a 1.5 second before sending another ping
+						
+						// allow up to a 1.5 second before sending another ping. generally we'll not wait 1.5s before sending another ping
+						// because we'll be sending ping immediately after receiving pong from server. this is just a safety measure
+						taro.client.sendNextPingAt = taro.now + 1500; 
 					}
 				}
 

@@ -582,6 +582,11 @@ var PhysicsComponent = TaroEventingClass.extend({
 					switch (action.type) {
 						case 'createBody':
 							self.createBody(action.entity, action.def);
+
+							// emit events for updating visibility mask
+							if (taro.isClient && action.entity._category === 'unit' && action.def.type === 'static') {
+								taro.client.emit('update-static-units');
+							}
 							break;
 
 						case 'destroyBody':
@@ -885,7 +890,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 				break;
 
 			case 'region':
-				var region = taro.script.variable.getValue({
+				var region = taro.script.param.getValue({
 					function: 'getVariable',
 					variableName: entityB._stats.id
 				});
@@ -936,7 +941,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 
 		switch (entityB._category) {
 			case 'region':
-				var region = taro.script.variable.getValue({
+				var region = taro.script.param.getValue({
 					function: 'getVariable',
 					variableName: entityB._stats.id
 				});

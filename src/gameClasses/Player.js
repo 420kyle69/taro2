@@ -29,7 +29,8 @@ var Player = TaroEntity.extend({
 		this.mount(taro.$('baseScene'));
 
 		self.addComponent(AttributeComponent);
-
+		self.addComponent(VariableComponent);
+		
 		if (taro.isServer) {
 			this.streamMode(2);
 			// self._stats.unitId = self.getCurrentUnit().id()
@@ -756,6 +757,8 @@ var Player = TaroEntity.extend({
 						gameId: taro.game.data.defaultData._id,
 						highscore: score,
 					});
+					// trigger
+					taro.script.trigger('playerGetsNewHighscore', { playerId: this.id() });
 				}
 			}
 		} catch (e) {

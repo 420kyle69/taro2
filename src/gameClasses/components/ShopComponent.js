@@ -157,28 +157,29 @@ var ShopComponent = TaroEntity.extend({
 				}
 				var hasSharedDefer = $.Deferred();
 
-				if (price <= 0) {
-					promise = $.ajax({
-						url: `/api/user/has-shared/${taro.game.data.defaultData.parentGame || taro.client.server.gameId}`,
-						dataType: 'html',
-						type: 'GET',
-						success: function (data) {
-							var response = JSON.parse(data);
+				// if (price <= 0) {
+				// 	promise = $.ajax({
+				// 		url: `/api/user/has-shared/${taro.game.data.defaultData.parentGame || taro.client.server.gameId}`,
+				// 		dataType: 'html',
+				// 		type: 'GET',
+				// 		success: function (data) {
+				// 			var response = JSON.parse(data);
 
-							if (response.status === 'success') {
-								hasSharedDefer.resolve(response.message);
-							} else {
-								hasSharedDefer.reject(response.message);
-							}
-						},
-						error: function (req, status, err) {
-							hasSharedDefer.reject(err);
-						}
-					});
-				} else {
-					hasSharedDefer.resolve(true);
-				}
+				// 			if (response.status === 'success') {
+				// 				hasSharedDefer.resolve(response.message);
+				// 			} else {
+				// 				hasSharedDefer.reject(response.message);
+				// 			}
+				// 		},
+				// 		error: function (req, status, err) {
+				// 			hasSharedDefer.reject(err);
+				// 		}
+				// 	});
+				// } else {
+				// hasSharedDefer.resolve(true);
+				// }
 
+				hasSharedDefer.resolve(true);
 				hasSharedDefer.promise()
 					.then(function (hasShared) {
 						if (hasShared) {

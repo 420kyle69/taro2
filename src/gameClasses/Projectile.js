@@ -55,6 +55,7 @@ var Projectile = TaroEntityPhysics.extend({
 		}
 
 		self.addComponent(AttributeComponent); // every projectile gets one
+		self.addComponent(VariableComponent);
 
 		self.addComponent(ScriptComponent); // entity-scripting
 		self.script.load(data.scripts);

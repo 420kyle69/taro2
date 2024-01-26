@@ -1,5 +1,17 @@
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 var VisibilityMask = /** @class */ (function () {
     function VisibilityMask(scene) {
+        var _this = this;
+        this.wallsDirty = false;
+        this.unitsDirty = false;
         // console.time('CONSTRUCTOR');
         this.scene = scene;
         this.player = Phaser.Math.Vector2.ZERO;
@@ -18,7 +30,14 @@ var VisibilityMask = /** @class */ (function () {
         // y
         this.height * this.tileHeight);
         this.getWalls();
+        this.getUnits();
         this.mask = new Phaser.Display.Masks.GeometryMask(scene, this.graph);
+        taro.client.on('update-walls', function () {
+            _this.getWalls();
+        });
+        taro.client.on('update-static-units', function () {
+            _this.getUnits();
+        });
         // console.timeEnd('CONSTRUCTOR');
     }
     VisibilityMask.prototype.unMaskWalls = function () {
@@ -30,17 +49,62 @@ var VisibilityMask = /** @class */ (function () {
     VisibilityMask.prototype.getWalls = function () {
         var _this = this;
         // console.time('GET WALLS');
-        this.segments = [];
+        this.wallSegments = [];
         this.walls = [];
         taro.$$('wall').forEach(function (wall) {
-            var x = wall._translate.x - wall._bounds2d.x2;
-            var y = wall._translate.y - wall._bounds2d.y2;
-            var w = wall._bounds2d.x;
-            var h = wall._bounds2d.y;
-            _this.walls.push(Phaser.Geom.Rectangle.FromXY(x, y, x + w, y + h));
-            _this.segments.push([[x, y], [x + w, y]], [[x, y + h], [x + w, y + h]], [[x, y], [x, y + h]], [[x + w, y], [x + w, y + h]]);
+            _this.mapFromTaroRect(wall, _this.walls, _this.wallSegments);
         });
+        this.wallsDirty = true;
         // console.timeEnd('GET WALLS');
+    };
+    VisibilityMask.prototype.getUnits = function () {
+        var _this = this;
+        this.unitSegments = [];
+        this.units = [];
+        this.unitsPoly = [];
+        taro.$$('unit').forEach(function (unit) {
+            if (unit._stats.currentBody.type !== 'static') {
+                return;
+            }
+            var shape = unit._stats.currentBody.fixtures[0].shape.type;
+            if (shape === 'rectangle') {
+                _this.mapFromTaroRect(unit, _this.units, _this.unitSegments);
+            }
+            else if (shape === 'circle') {
+                _this.mapFromTaroCircle(unit, _this.unitsPoly, _this.unitSegments, 12);
+            }
+        });
+        this.unitsDirty = true;
+    };
+    VisibilityMask.prototype.mapFromTaroRect = function (entity, rectArray, segArray) {
+        var x = entity._translate.x - entity._bounds2d.x2;
+        var y = entity._translate.y - entity._bounds2d.y2;
+        var w = entity._bounds2d.x;
+        var h = entity._bounds2d.y;
+        rectArray.push(Phaser.Geom.Rectangle.FromXY(x, y, x + w, y + h));
+        segArray.push([[x, y], [x + w, y]], [[x, y + h], [x + w, y + h]], [[x, y], [x, y + h]], [[x + w, y], [x + w, y + h]]);
+    };
+    VisibilityMask.prototype.mapFromTaroCircle = function (entity, polygonArray, segArray, sides) {
+        var r = entity._bounds2d.x2 * (1 + 1 / sides); // x + x*sides^-1 = x * (1 + 1/sides)
+        var x = entity._translate.x;
+        var y = entity._translate.y;
+        var points = Phaser.Geom.Circle.GetPoints(new Phaser.Geom.Circle(x, y, r), sides);
+        polygonArray.push(new Phaser.Geom.Polygon(points));
+        var i = 0;
+        while (i < sides) {
+            if (i + 1 !== sides) {
+                segArray.push([[points[i].x, points[i].y], [points[i + 1].x, points[i + 1].y]]);
+            }
+            segArray.push([[points[i].x, points[i].y], [points[0].x, points[0].y]]);
+            i++;
+        }
+    };
+    VisibilityMask.prototype.rebuildSegments = function () {
+        if (this.wallsDirty || this.unitsDirty) {
+            this.segments = __spreadArray(__spreadArray([], this.unitSegments, true), this.wallSegments, true);
+            this.wallsDirty = false;
+            this.unitsDirty = false;
+        }
     };
     VisibilityMask.prototype.generateFieldOfView = function (range) {
         this.range = range;
@@ -64,17 +128,25 @@ var VisibilityMask = /** @class */ (function () {
         this.walls.forEach(function (wall) {
             _this.graph.fillRectShape(wall);
         });
+        // if include (static) units
+        this.units.forEach(function (unit) {
+            _this.graph.fillRectShape(unit);
+        });
+        // if include (static) units > circles
+        this.unitsPoly.forEach(function (unit) {
+            _this.graph.fillPoints(unit.points); // TODO: these can really just be circles
+        });
         // console.timeEnd('VISIBILITY POLYGON');
         this.scene.cameras.main.setMask(this.mask, false);
     };
     VisibilityMask.prototype.destroyVisibilityMask = function () {
+        this.scene.cameras.main.clearMask(true);
         this.graph.clear();
-        delete this.mask;
-        delete this.graph;
     };
     VisibilityMask.prototype.update = function () {
         this.graph.clear();
         this.generateFieldOfView(this.range);
+        this.rebuildSegments();
         this.visibilityPoly();
     };
     return VisibilityMask;

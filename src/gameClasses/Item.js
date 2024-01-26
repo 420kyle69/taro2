@@ -55,6 +55,7 @@ var Item = TaroEntityPhysics.extend({
 		// convert numbers stored as string in database to int
 		self.parseEntityObject(self._stats);
 		self.addComponent(AttributeComponent); // every item gets one
+		self.addComponent(VariableComponent);
 
 		self.addComponent(ScriptComponent); // entity-scripting
 		self.script.load(data.scripts);
@@ -288,7 +289,7 @@ var Item = TaroEntityPhysics.extend({
 		if (self.hasQuantityRemaining()) {
 			taro.game.lastUsedItemId = self.id();
 
-			if ((self._stats.lastUsed + self._stats.fireRate < taro._currentTime) || self._stats.type == 'consumable') {
+			if ((self._stats.lastUsed + self._stats.fireRate < taro.now) || self._stats.type == 'consumable') {
 				if (!self.canAffordItemCost()) {
 					taro.devLog('cannot afford item cost');
 					return;
@@ -301,7 +302,7 @@ var Item = TaroEntityPhysics.extend({
 					self.applyAnimationById(self._stats.effects.use.animation);
 				}
 
-				self._stats.lastUsed = taro._currentTime;
+				self._stats.lastUsed = taro.now;
 
 				let triggerParams = { unitId: ownerId, itemId: self.id() };
 
