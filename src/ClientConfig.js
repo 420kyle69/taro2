@@ -41,14 +41,16 @@ var taroClientConfig = {
 		'/gameClasses/components/ui/VideoChatComponent.js',
 		'/gameClasses/components/ui/TradeUiComponent.js',
 
-		'/gameClasses/components/script/ScriptComponent.js',
-		'/gameClasses/components/script/VariableComponent.js',
+		'/gameClasses/components/script/ScriptComponent.js',		
 		'/gameClasses/components/script/ActionComponent.js',
+		'/gameClasses/components/script/ParameterComponent.js',
 		'/gameClasses/components/script/ConditionComponent.js',
 
 		'/gameClasses/components/unit/AIComponent.js',
 		'/gameClasses/components/unit/AbilityComponent.js',
-		'/gameClasses/components/unit/AttributeComponent.js',
+
+		'/gameClasses/components/entity/AttributeComponent.js',
+		'/gameClasses/components/entity/VariableComponent.js',
 
 		/* Standard game scripts */
 		'/gameClasses/DeveloperMode.js',

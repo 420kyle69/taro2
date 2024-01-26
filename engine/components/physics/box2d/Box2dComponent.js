@@ -890,7 +890,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 				break;
 
 			case 'region':
-				var region = taro.script.variable.getValue({
+				var region = taro.script.param.getValue({
 					function: 'getVariable',
 					variableName: entityB._stats.id
 				});
@@ -941,7 +941,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 
 		switch (entityB._category) {
 			case 'region':
-				var region = taro.script.variable.getValue({
+				var region = taro.script.param.getValue({
 					function: 'getVariable',
 					variableName: entityB._stats.id
 				});
