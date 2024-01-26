@@ -1085,26 +1085,25 @@ var ShopComponent = TaroEntity.extend({
 						var img = $('<div/>').html(`img_index_${imgArray.length}`);
 						imgArray.push({
 							wrapper: img,
-							value: `<img src='${item.inventoryImage || item.cellSheet.url}' style='width: auto; height: auto; max-width: 55px; max-height: 55px'>`
+							value: `<img src='${item.inventoryImage || item.cellSheet.url}' style='width: 75px; height: 75px; background-color : #6b7280; padding : 8px; margin-top : 6px;  border-radius : 4px; object-fit:contain;'>`
 						});
 
 						if (shopItem.price.coins) {
 							var itemImageElement = $('<img/>', {
 								src: `${assetsProvider}/assets/images/coin_white.svg`,
-								style: 'width: 20px; height: 20px; position: absolute; top: 10px; right: 15px;'
+								style: 'width: 20px; height: 20px; position: absolute; top: 6px; right: 6px;'
 							});
 							itemImage.append(itemImageElement);
 						}
 
-						var itemName = '<div class=\'mx-2 mt-2 mb-0 page-link no-selection\' style=\'line-height:0.7  !important; overflow-wrap: break-word;\'><small>';
+						var itemName = '<div class=\'page-link no-selection\' style=\'line-height:1 !important; font-size: 12px; font-weight : 600; overflow-wrap: break-word;\'>';
 						if (itemQuantity > 1) {
-							itemName += `${itemQuantity}x `;
+							itemName += `${itemQuantity} x `;
 						}
 						itemName += taro.clientSanitizer(item.name);
-						itemName += '</small></div>';
-
+						itemName += '</div>';
 						var combine = $('<div/>', {
-							class: `m-3 rounded item-shop-button-div d-flex flex-column justify-content-end align-items-center`,
+							class: `rounded item-shop-button-div d-flex flex-column justify-content-end align-items-center`,
 							style: 'min-height:110px;position:relative;',
 						}).append(img).append(itemName);
 
