@@ -11,7 +11,7 @@ class EntitiesToRender {
             var entity = this.trackEntityById[entityId];
             // taro.profiler.logTimeElapsed('findEntity', timeStart);
             if (entity) {
-                (_a = entity.script) === null || _a === void 0 ? void 0 : _a.trigger("renderTick");
+                (_a = entity.script) === null || _a === void 0 ? void 0 : _a.trigger('renderTick');
                 // handle entity behaviour and transformation offsets
                 // var timeStart = performance.now();
                 var phaserGameObject = (_b = entity.phaserEntity) === null || _b === void 0 ? void 0 : _b.gameObject;
@@ -61,7 +61,8 @@ class EntitiesToRender {
                         rotate = ownerUnit._rotate.z;
                         // immediately rotate my unit's items to the angleToTarget
                     }
-                    else if (ownerUnit == taro.client.selectedUnit && ((_f = (_e = entity._stats.controls) === null || _e === void 0 ? void 0 : _e.mouseBehaviour) === null || _f === void 0 ? void 0 : _f.rotateToFaceMouseCursor)) {
+                    else if (ownerUnit == taro.client.selectedUnit &&
+                        ((_f = (_e = entity._stats.controls) === null || _e === void 0 ? void 0 : _e.mouseBehaviour) === null || _f === void 0 ? void 0 : _f.rotateToFaceMouseCursor)) {
                         rotate = ownerUnit.angleToTarget; // angleToTarget is updated at 60fps
                     }
                     entity._rotate.z = rotate; // update the item's rotation immediately for more accurate aiming (instead of 20fps)
@@ -73,7 +74,11 @@ class EntitiesToRender {
                     }
                     //if (entity._stats.name === 'potato gun small') console.log('owner unit translate',ownerUnit._translate.x, ownerUnit._translate.y, '\nphaser unit pos', ownerUnit.phaserEntity.gameObject.x, ownerUnit.phaserEntity.gameObject.y, '\nitem translate', x, y, '\nphaser item pos', entity.phaserEntity.gameObject.x, entity.phaserEntity.gameObject.y)
                 }
-                if (((_g = entity.tween) === null || _g === void 0 ? void 0 : _g.isTweening) && (phaserGameObject === null || phaserGameObject === void 0 ? void 0 : phaserGameObject.visible)) {
+                // Removed the phaser condition so that it works with ThreeRenderer.
+                // Probably should look into this, how rewrite this so that it works
+                // for both renderers.
+                // if (entity.tween?.isTweening && phaserGameObject?.visible) {
+                if ((_g = entity.tween) === null || _g === void 0 ? void 0 : _g.isTweening) {
                     entity.tween.update();
                     x += entity.tween.offset.x;
                     y += entity.tween.offset.y;
@@ -94,7 +99,7 @@ class EntitiesToRender {
             taro.gameLoopTickHasExecuted = false;
             // triggersQueued must run for entity-scripts first then run for the world script.
             // hence, this runs after the above's entity._behaviour() is executed.
-            // this is for client-only. for server, it runs in taroEngine.engineStep 
+            // this is for client-only. for server, it runs in taroEngine.engineStep
             // because we run entity._behaviour in EntitiesToRender.ts for client, and taroEngine for server.
             while (taro.script && taro.triggersQueued.length > 0) {
                 const trigger = taro.triggersQueued.shift();
@@ -104,7 +109,7 @@ class EntitiesToRender {
     }
     frameTick() {
         var _a;
-        (_a = taro.script) === null || _a === void 0 ? void 0 : _a.trigger("renderTick");
+        (_a = taro.script) === null || _a === void 0 ? void 0 : _a.trigger('renderTick');
         taro.input.processInputOnEveryFps();
         taro.engineStep(Date.now(), 1000 / 60);
         taro._renderFrames++;

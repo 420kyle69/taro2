@@ -1,5 +1,5 @@
 class EntitiesToRender {
-	trackEntityById: {[key: string]: TaroEntity};
+	trackEntityById: { [key: string]: TaroEntity };
 	timeStamp: number;
 
 	constructor() {
@@ -7,8 +7,7 @@ class EntitiesToRender {
 		taro.client.on('tick', this.frameTick, this);
 	}
 
-	updateAllEntities (/*timeStamp*/): void {
-
+	updateAllEntities(/*timeStamp*/): void {
 		for (var entityId in this.trackEntityById) {
 			// var timeStart = performance.now();
 
@@ -17,12 +16,12 @@ class EntitiesToRender {
 
 			// taro.profiler.logTimeElapsed('findEntity', timeStart);
 			if (entity) {
-				entity.script?.trigger("renderTick");
+				entity.script?.trigger('renderTick');
 
 				// handle entity behaviour and transformation offsets
 				// var timeStart = performance.now();
 
-				var phaserGameObject = entity.phaserEntity?.gameObject
+				var phaserGameObject = entity.phaserEntity?.gameObject;
 
 				if (taro.gameLoopTickHasExecuted) {
 					if (entity._deathTime !== undefined && entity._deathTime <= taro._tickStart) {
@@ -43,17 +42,17 @@ class EntitiesToRender {
 				if (entity._category == 'item') {
 					ownerUnit = entity.getOwnerUnit();
 				}
-				
+
 				if (entity.isTransforming()) {
 					entity._processTransform();
 				}
 				// sometimes, entities' _translate & _rotate aren't updated, because processTransform doesn't run when tab isn't focused
 				// hence, we're forcing the update here
 				else if (entity != taro.client.selectedUnit) {
-					entity._translate.x = entity.nextKeyFrame[1][0]
-					entity._translate.y = entity.nextKeyFrame[1][1]
-					entity._rotate.z = entity.nextKeyFrame[1][2]					
-				}				
+					entity._translate.x = entity.nextKeyFrame[1][0];
+					entity._translate.y = entity.nextKeyFrame[1][1];
+					entity._rotate.z = entity.nextKeyFrame[1][2];
+				}
 
 				if (entity._translate) {
 					var x = entity._translate.x;
@@ -63,13 +62,12 @@ class EntitiesToRender {
 
 				// if item is being carried by a unit
 				if (ownerUnit) {
-
 					// if the ownerUnit is not visible, then hide the item
 					if (ownerUnit.phaserEntity?.gameObject?.visible == false) {
 						phaserGameObject.setVisible(false);
 						continue;
 					}
-					
+
 					// update ownerUnit's transform, so the item can be positioned relative to the ownerUnit's transform
 					ownerUnit._processTransform();
 
@@ -77,11 +75,14 @@ class EntitiesToRender {
 					// rotate weldjoint items to the owner unit's rotation
 					if (entity._stats.currentBody && entity._stats.currentBody.jointType == 'weldJoint') {
 						rotate = ownerUnit._rotate.z;
-					// immediately rotate my unit's items to the angleToTarget
-					} else if (ownerUnit == taro.client.selectedUnit && entity._stats.controls?.mouseBehaviour?.rotateToFaceMouseCursor) {
+						// immediately rotate my unit's items to the angleToTarget
+					} else if (
+						ownerUnit == taro.client.selectedUnit &&
+						entity._stats.controls?.mouseBehaviour?.rotateToFaceMouseCursor
+					) {
 						rotate = ownerUnit.angleToTarget; // angleToTarget is updated at 60fps
 					}
-					entity._rotate.z = rotate // update the item's rotation immediately for more accurate aiming (instead of 20fps)
+					entity._rotate.z = rotate; // update the item's rotation immediately for more accurate aiming (instead of 20fps)
 
 					entity.anchoredOffset = entity.getAnchoredOffset(rotate);
 
@@ -90,20 +91,25 @@ class EntitiesToRender {
 						y = ownerUnit._translate.y + entity.anchoredOffset.y;
 						rotate = entity.anchoredOffset.rotate;
 					}
-                    //if (entity._stats.name === 'potato gun small') console.log('owner unit translate',ownerUnit._translate.x, ownerUnit._translate.y, '\nphaser unit pos', ownerUnit.phaserEntity.gameObject.x, ownerUnit.phaserEntity.gameObject.y, '\nitem translate', x, y, '\nphaser item pos', entity.phaserEntity.gameObject.x, entity.phaserEntity.gameObject.y)
+					//if (entity._stats.name === 'potato gun small') console.log('owner unit translate',ownerUnit._translate.x, ownerUnit._translate.y, '\nphaser unit pos', ownerUnit.phaserEntity.gameObject.x, ownerUnit.phaserEntity.gameObject.y, '\nitem translate', x, y, '\nphaser item pos', entity.phaserEntity.gameObject.x, entity.phaserEntity.gameObject.y)
 				}
 
-				if (entity.tween?.isTweening && phaserGameObject?.visible) {
+				// Removed the phaser condition so that it works with ThreeRenderer.
+				// Probably should look into this, how rewrite this so that it works
+				// for both renderers.
+				// if (entity.tween?.isTweening && phaserGameObject?.visible) {
+				if (entity.tween?.isTweening) {
 					entity.tween.update();
 					x += entity.tween.offset.x;
 					y += entity.tween.offset.y;
 					rotate += entity.tween.offset.rotate;
 				}
-				
-				if (entity.tween?.isTweening ||
+
+				if (
+					entity.tween?.isTweening ||
 					entity.isTransforming() ||
 					entity == taro.client.selectedUnit ||
-					entity._category == 'item'	
+					entity._category == 'item'
 				) {
 					// var timeStart = performance.now();
 					entity.transformTexture(x, y, rotate);
@@ -118,7 +124,7 @@ class EntitiesToRender {
 
 			// triggersQueued must run for entity-scripts first then run for the world script.
 			// hence, this runs after the above's entity._behaviour() is executed.
-			// this is for client-only. for server, it runs in taroEngine.engineStep 
+			// this is for client-only. for server, it runs in taroEngine.engineStep
 			// because we run entity._behaviour in EntitiesToRender.ts for client, and taroEngine for server.
 			while (taro.script && taro.triggersQueued.length > 0) {
 				const trigger = taro.triggersQueued.shift();
@@ -128,10 +134,10 @@ class EntitiesToRender {
 	}
 
 	frameTick(): void {
-		taro.script?.trigger("renderTick");
+		taro.script?.trigger('renderTick');
 		taro.input.processInputOnEveryFps();
 
-		taro.engineStep(Date.now(), 1000/60);
+		taro.engineStep(Date.now(), 1000 / 60);
 		taro._renderFrames++;
 
 		this.updateAllEntities();
