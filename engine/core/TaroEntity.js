@@ -4182,7 +4182,7 @@ var TaroEntity = TaroObject.extend({
 							if (taro.isClient) {
 								var variablesObject = rfdc()(this.variables);
 								if (variablesObject) {
-									for (var variableId in data.variables) {										
+									for (var variableId in data.variables) {			
 										var variableData = variablesObject[variableId];
 										// streamMode 4 ignores
 										if (this._category == 'unit') {
