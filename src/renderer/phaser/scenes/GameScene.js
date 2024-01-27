@@ -112,9 +112,11 @@ var GameScene = /** @class */ (function (_super) {
             camera.stopFollow();
         });
         taro.client.on('position-camera', function (x, y) {
-            x -= camera.width / 2;
-            y -= camera.height / 2;
-            camera.setScroll(x, y);
+            if (!taro.developerMode.active || taro.developerMode.activeTab === 'play') {
+                x -= camera.width / 2;
+                y -= camera.height / 2;
+                camera.setScroll(x, y);
+            }
         });
         taro.client.on('deadzone-camera', function (width, heigth) {
             camera.setDeadzone(width, heigth);
