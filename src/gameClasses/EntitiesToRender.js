@@ -85,6 +85,10 @@ var EntitiesToRender = /** @class */ (function () {
                     entity._category == 'item') {
                     // var timeStart = performance.now();
                     entity.transformTexture(x, y, rotate);
+                    // entity isn't moving anymore. prevent rendering to conserve cpu
+                    if (entity.nextKeyFrame[1][0] == x && entity.nextKeyFrame[1][1] == y && entity.nextKeyFrame[1][2] == rotate) {
+                        entity.isTransforming(false);
+                    }
                     // taro.profiler.logTimeElapsed('transformTexture', timeStart);
                 }
             }

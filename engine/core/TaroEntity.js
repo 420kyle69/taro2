@@ -5167,6 +5167,9 @@ var TaroEntity = TaroObject.extend({
 		var offsetDelta = currentTime - startTime;
 		var deltaTime = offsetDelta / dataDelta;
 
+		// clamp so currentTime stays after startTime
+		deltaTime = Math.max(0, deltaTime);
+
 		return totalValue * deltaTime + startValue;
 	},
 
@@ -5231,8 +5234,6 @@ var TaroEntity = TaroObject.extend({
 			y = nextTransform[1];
 			rotate = nextTransform[2];
 
-			// entity isn't moving anymore. prevent rendering to conserve cpu
-			this.isTransforming(false);
 		}
 
 		// for my own unit, ignore streamed angle if this unit control is set to face mouse cursor instantly.
