@@ -109,7 +109,11 @@ class EntitiesToRender {
 					entity.transformTexture(x, y, rotate);
 					
 					// entity isn't moving anymore. prevent rendering to conserve cpu
-					if (entity.nextKeyFrame[1][0] == x && entity.nextKeyFrame[1][1] == y && entity.nextKeyFrame[1][2] == rotate) {
+					if (entity.isTransforming() && (
+						entity.nextKeyFrame[1][0] == x && entity.nextKeyFrame[1][1] == y && entity.nextKeyFrame[1][2] == rotate
+						)
+					) {
+						// if (entity != taro.client.selectedUnit) console.log(entity._category, "not moving)")
 						entity.isTransforming(false);
 					}
 

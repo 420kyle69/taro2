@@ -513,6 +513,7 @@ var TaroNetIoClient = {
 									if (newSnapshotTimestamp > this.lastSnapshotTimestamp) {
 										entity.prevKeyFrame = entity.nextKeyFrame;
 										entity.nextKeyFrame = [newSnapshotTimestamp + taro.client.renderBuffer, newPosition];
+										// console.log(entity._category, entity._stats.name, newPosition)
 										entity.isTransforming(true);
 									}
 								}
