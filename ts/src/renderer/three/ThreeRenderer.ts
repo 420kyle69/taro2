@@ -13,6 +13,12 @@
 // entities. Instead you can send one message with 100 entity ID's. (a lot of
 // assumtions here, figure out how it actually works).
 
+// I want to spawn:
+// Sprite
+// Animated Sprite (in my case the texture is animated via offsets... Animated Texture?)
+// Mesh
+//  BoxMesh
+
 class ThreeRenderer {
 	private renderer: THREE.WebGLRenderer;
 	private camera: THREE.Camera;
@@ -28,6 +34,8 @@ class ThreeRenderer {
 	private followedEntity: Entity | null = null;
 
 	private animatedSprites: ThreeAnimatedSprite[] = [];
+
+	private item: Item | null = null;
 
 	constructor() {
 		const renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true });
@@ -246,6 +254,12 @@ class ThreeRenderer {
 					const e = new ThreeUnit(tex.clone());
 					this.animatedSprites.push(e);
 					return e;
+				} else if (entity instanceof Item) {
+					console.log(entity._stats.cellSheet.url);
+					if (entity._stats.cellSheet.url.includes('crow')) {
+						console.log(entity);
+						this.item = entity;
+					}
 				}
 				return new Entity(tex);
 			};
@@ -259,6 +273,10 @@ class ThreeRenderer {
 				(data: { x: number; y: number; rotation: number }) => {
 					ent.position.set(data.x / 64 - 0.5, 0, data.y / 64 - 0.5);
 					ent.rotation.y = -data.rotation;
+
+					if (entity._stats.cellSheet.url.includes('crow')) {
+						// console.log(data);
+					}
 				},
 				this
 			);
@@ -336,7 +354,25 @@ class ThreeRenderer {
 				if (entity instanceof Projectile) {
 					const animation = this.animations.get(`${tex.userData.key}/${id}`);
 					(ent as ThreeUnit).loop(animation.frames, animation.fps, animation.repeat);
+				} else {
+					console.log(entity._stats.cellSheet.url, id);
 				}
+			});
+
+			entity.on('layer', (data) => {
+				console.log('layer');
+			});
+
+			entity.on('depth', (data) => {
+				console.log('depth');
+			});
+
+			entity.on('dynamic', (data) => {
+				console.log('dynamic');
+			});
+
+			entity.on('flip', (data) => {
+				console.log('flip');
 			});
 
 			const destroyEvtListener = entity.on(
@@ -429,6 +465,10 @@ class ThreeRenderer {
 
 		for (const sprite of this.animatedSprites) {
 			sprite.update(1 / 60);
+		}
+
+		if (this.item) {
+			// console.log(this.item._bounds2d);
 		}
 
 		this.controls.update();

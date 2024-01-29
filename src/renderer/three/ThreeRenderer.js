@@ -19,6 +19,7 @@ class ThreeRenderer {
         this.pointer = new THREE.Vector2();
         this.followedEntity = null;
         this.animatedSprites = [];
+        this.item = null;
         const renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         (_a = document.querySelector('#game-div')) === null || _a === void 0 ? void 0 : _a.appendChild(renderer.domElement);
@@ -203,6 +204,13 @@ class ThreeRenderer {
                     this.animatedSprites.push(e);
                     return e;
                 }
+                else if (entity instanceof Item) {
+                    console.log(entity._stats.cellSheet.url);
+                    if (entity._stats.cellSheet.url.includes('crow')) {
+                        console.log(entity);
+                        this.item = entity;
+                    }
+                }
                 return new Entity(tex);
             };
             const ent = createEntity();
@@ -211,6 +219,9 @@ class ThreeRenderer {
             const transformEvtListener = entity.on('transform', (data) => {
                 ent.position.set(data.x / 64 - 0.5, 0, data.y / 64 - 0.5);
                 ent.rotation.y = -data.rotation;
+                if (entity._stats.cellSheet.url.includes('crow')) {
+                    // console.log(data);
+                }
             }, this);
             const sizeEvtListener = entity.on('size', (data) => {
                 var _a;
@@ -256,6 +267,21 @@ class ThreeRenderer {
                     const animation = this.animations.get(`${tex.userData.key}/${id}`);
                     ent.loop(animation.frames, animation.fps, animation.repeat);
                 }
+                else {
+                    console.log(entity._stats.cellSheet.url, id);
+                }
+            });
+            entity.on('layer', (data) => {
+                console.log('layer');
+            });
+            entity.on('depth', (data) => {
+                console.log('depth');
+            });
+            entity.on('dynamic', (data) => {
+                console.log('dynamic');
+            });
+            entity.on('flip', (data) => {
+                console.log('flip');
             });
             const destroyEvtListener = entity.on('destroy', () => {
                 const idx = this.entities.indexOf(ent, 0);
@@ -327,6 +353,9 @@ class ThreeRenderer {
         }
         for (const sprite of this.animatedSprites) {
             sprite.update(1 / 60);
+        }
+        if (this.item) {
+            // console.log(this.item._bounds2d);
         }
         this.controls.update();
         this.renderer.render(this.scene, this.camera);
