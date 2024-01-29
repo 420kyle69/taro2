@@ -4106,7 +4106,9 @@ var TaroEntity = TaroObject.extend({
 												max = attributeData.max = data.attributes[attributeTypeId].max;
 											}
 
-											this.attribute.update(attributeTypeId, data.attributes[attributeTypeId].value, min, max);
+											// pass OR null in cases where max value is updated twice in succession
+											// without this, client update call passes undefined as value
+											this.attribute.update(attributeTypeId, data.attributes[attributeTypeId].value || null, min, max);
 
 										}
 										// update attribute if entity has such attribute
@@ -4182,7 +4184,7 @@ var TaroEntity = TaroObject.extend({
 							if (taro.isClient) {
 								var variablesObject = rfdc()(this.variables);
 								if (variablesObject) {
-									for (var variableId in data.variables) {										
+									for (var variableId in data.variables) {			
 										var variableData = variablesObject[variableId];
 										// streamMode 4 ignores
 										if (this._category == 'unit') {
@@ -4447,6 +4449,7 @@ var TaroEntity = TaroObject.extend({
 					var angle = ((this._rotate.z % (2 * Math.PI)) * 1000).toFixed(0);
 
 					if (this._hasMoved) {
+						// console.log("streaming", this._category, this.id(), x, y, angle)
 						this._oldTranform = [this._translate.x, this._translate.y, this._rotate.z];
 
 						// var distanceTravelled = x - taro.lastX;
@@ -4961,7 +4964,6 @@ var TaroEntity = TaroObject.extend({
 		if (data && recipientArr.length && this._streamMode === 1 && this._hasMoved) {
 			taro.server.bandwidthUsage[this._category] += data.length;
 			taro.network.stream.queue(thisId, data, recipientArr);
-
 			this._hasMoved = false;
 		}
 	},
@@ -5165,6 +5167,9 @@ var TaroEntity = TaroObject.extend({
 		var offsetDelta = currentTime - startTime;
 		var deltaTime = offsetDelta / dataDelta;
 
+		// clamp so currentTime stays after startTime
+		deltaTime = Math.max(0, deltaTime);
+
 		return totalValue * deltaTime + startValue;
 	},
 
@@ -5229,8 +5234,6 @@ var TaroEntity = TaroObject.extend({
 			y = nextTransform[1];
 			rotate = nextTransform[2];
 
-			// entity isn't moving anymore. prevent rendering to conserve cpu
-			this.isTransforming(false);
 		}
 
 		// for my own unit, ignore streamed angle if this unit control is set to face mouse cursor instantly.

@@ -1324,7 +1324,7 @@ var Unit = TaroEntityPhysics.extend({
 		}
 	},
 
-	dropItem: function (itemIndex) {
+	dropItem: function (itemIndex, position) {
 		// Unit.prototype.log("dropItem " + itemIndex)
 		// console.log(`running Unit.dropItem(${itemIndex}) on ${taro.isClient ? 'Client' : 'Server'}`);
 		var self = this;
@@ -1363,6 +1363,11 @@ var Unit = TaroEntityPhysics.extend({
 
 				item.setOwnerUnit(undefined);
 				item.setState('dropped', defaultData);
+
+				// Move item if dropping item at a position
+				if (position) {
+					item.teleportTo(position.x, position.y, item._rotate.z);
+				}
 
 				if (item._stats.hidden) {
 					item.streamUpdateData([{ hidden: false }]);
