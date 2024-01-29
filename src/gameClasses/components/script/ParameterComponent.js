@@ -407,8 +407,8 @@ var ParameterComponent = TaroEntity.extend({
 						break;
 
 					case 'roleExistsForPlayer':
-						var name = self._script.param.getValue(text.name, vars);
-						var player = self._script.variable.getValue(text.player, vars);
+						var name = self.getValue(text.name, vars);
+						var player = self.getValue(text.player, vars);
 
 						var role = (taro.game.data.roles || []).find(role => role.name === name);
 						var roleId = role && role._id;
