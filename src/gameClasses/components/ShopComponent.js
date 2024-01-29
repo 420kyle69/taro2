@@ -1534,8 +1534,9 @@ var ShopComponent = TaroEntity.extend({
 					img.style.backgroundRepeat = 'no-repeat';
 					img.style.backgroundPosition = 'center center';
 					img.style.backgroundSize = 'contain';
-					img.style.minHeight = '64px';
-					img.style.minWidth = '64px';
+
+					img.style.height = '64px';
+					img.style.width = '64px';
 				}
 			};
 		}
