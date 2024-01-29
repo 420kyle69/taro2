@@ -25,7 +25,6 @@ class ThreeRenderer {
 	private controls: OrbitControls;
 	private scene: THREE.Scene;
 
-	private textures: Map<string, THREE.Texture> = new Map();
 	private animations: Map<string, { frames: number[]; fps: number; repeat: number }> = new Map();
 
 	private entities: Entity[] = [];
@@ -64,7 +63,7 @@ class ThreeRenderer {
 		};
 
 		THREE.DefaultLoadingManager.onLoad = () => {
-			console.log(this.textures);
+			console.log(ThreeTextureManager.instance().textureMap);
 			this.init();
 			this.setupInputListeners();
 			taro.client.rendererLoaded.resolve();
@@ -75,47 +74,79 @@ class ThreeRenderer {
 	}
 
 	private loadTextures() {
-		const textureLoader = new THREE.TextureLoader();
 		const data = taro.game.data;
 
 		data.map.tilesets.forEach((tileset) => {
 			const key = tileset.image;
-			const url = Utils.patchAssetUrl(key);
-			textureLoader.load(url, (tex) => {
-				tex.colorSpace = THREE.SRGBColorSpace;
-				this.textures.set(key, tex);
+			ThreeTextureManager.instance().loadFromUrl(key, Utils.patchAssetUrl(key));
+		});
+
+		const entityTypes = [
+			...Object.values(data.unitTypes),
+			...Object.values(data.projectileTypes),
+			...Object.values(data.itemTypes),
+		];
+
+		for (const type of entityTypes) {
+			const cellSheet = type.cellSheet;
+			if (!cellSheet) continue;
+			const key = cellSheet.url;
+			ThreeTextureManager.instance().loadFromUrl(key, Utils.patchAssetUrl(key));
+		}
+
+		for (const type of Object.values(data.particleTypes)) {
+			const key = type.url;
+			ThreeTextureManager.instance().loadFromUrl(key, Utils.patchAssetUrl(key));
+		}
+	}
+
+	private forceLoadUnusedCSSFonts() {
+		const canvas = document.createElement('canvas');
+		const ctx = canvas.getContext('2d');
+		ctx.font = 'normal 4px Verdana';
+		ctx.fillText('text', 0, 8);
+		ctx.font = 'bold 4px Verdana';
+		ctx.fillText('text', 0, 8);
+	}
+
+	private init() {
+		const layers = {
+			entities: new THREE.Group(),
+		};
+
+		layers.entities.position.y = 1;
+
+		for (const layer of Object.values(layers)) {
+			this.scene.add(layer);
+		}
+
+		taro.game.data.map.tilesets.forEach((tileset) => {
+			const tex = ThreeTextureManager.instance().textureMap.get(tileset.image);
+			tex.minFilter = THREE.NearestFilter;
+			tex.magFilter = THREE.NearestFilter;
+			tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+
+			taro.game.data.map.layers.forEach((layer) => {
+				if (['floor', 'walls'].includes(layer.name)) {
+					const voxelLayer = new ThreeVoxelLayer(tex, layer);
+					this.scene.add(voxelLayer);
+				}
 			});
 		});
 
-		for (let type in data.unitTypes) {
-			const cellSheet = data.unitTypes[type].cellSheet;
+		for (let type in taro.game.data.projectileTypes) {
+			const cellSheet = taro.game.data.projectileTypes[type].cellSheet;
 			if (!cellSheet) continue;
 			const key = cellSheet.url;
-			const url = Utils.patchAssetUrl(key);
-			textureLoader.load(url, (tex) => {
-				tex.colorSpace = THREE.SRGBColorSpace;
-				this.textures.set(key, tex);
-			});
-		}
-
-		for (let type in data.projectileTypes) {
-			const cellSheet = data.projectileTypes[type].cellSheet;
-			if (!cellSheet) continue;
-			const key = cellSheet.url;
-			const url = Utils.patchAssetUrl(key);
-
-			textureLoader.load(url, (tex) => {
-				tex.colorSpace = THREE.SRGBColorSpace;
-				tex.userData.numColumns = cellSheet.columnCount || 1;
-				tex.userData.numRows = cellSheet.rowCount || 1;
-				tex.userData.key = key;
-				this.textures.set(key, tex);
-			});
+			const tex = ThreeTextureManager.instance().textureMap.get(key);
+			tex.userData.numColumns = cellSheet.columnCount || 1;
+			tex.userData.numRows = cellSheet.rowCount || 1;
+			tex.userData.key = key;
 
 			// Add animations
-			for (let animationsKey in data.projectileTypes[type].animations) {
+			for (let animationsKey in taro.game.data.projectileTypes[type].animations) {
 				console.log(key);
-				const animation = data.projectileTypes[type].animations[animationsKey];
+				const animation = taro.game.data.projectileTypes[type].animations[animationsKey];
 				const frames = animation.frames;
 				const animationFrames: number[] = [];
 
@@ -141,63 +172,8 @@ class ThreeRenderer {
 			}
 		}
 
-		for (let type in data.itemTypes) {
-			const cellSheet = data.itemTypes[type].cellSheet;
-			if (!cellSheet) continue;
-			const key = cellSheet.url;
-			const url = Utils.patchAssetUrl(key);
-			textureLoader.load(url, (tex) => {
-				tex.colorSpace = THREE.SRGBColorSpace;
-				this.textures.set(key, tex);
-			});
-		}
-
-		for (let type in data.particleTypes) {
-			const key = data.particleTypes[type].url;
-			const url = Utils.patchAssetUrl(key);
-			textureLoader.load(url, (tex) => {
-				tex.colorSpace = THREE.SRGBColorSpace;
-				this.textures.set(key, tex);
-			});
-		}
-	}
-
-	private forceLoadUnusedCSSFonts() {
-		const canvas = document.createElement('canvas');
-		const ctx = canvas.getContext('2d');
-		ctx.font = 'normal 4px Verdana';
-		ctx.fillText('text', 0, 8);
-		ctx.font = 'bold 4px Verdana';
-		ctx.fillText('text', 0, 8);
-	}
-
-	private init() {
-		const layers = {
-			entities: new THREE.Group(),
-		};
-
-		layers.entities.position.y = 1;
-
-		for (const layer of Object.values(layers)) {
-			this.scene.add(layer);
-		}
-
-		taro.game.data.map.tilesets.forEach((tileset) => {
-			const tex = this.textures.get(tileset.image);
-			tex.minFilter = THREE.NearestFilter;
-			tex.magFilter = THREE.NearestFilter;
-			tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-
-			taro.game.data.map.layers.forEach((layer) => {
-				if (['floor', 'walls'].includes(layer.name)) {
-					const voxelLayer = new ThreeVoxelLayer(tex, layer);
-					this.scene.add(voxelLayer);
-				}
-			});
-		});
-
 		const createEntity = (entity: Unit | Item | Projectile) => {
-			const tex = this.textures.get(entity._stats.cellSheet.url);
+			const tex = ThreeTextureManager.instance().textureMap.get(entity._stats.cellSheet.url);
 
 			const createEntity = () => {
 				// TODO: Make all entities sprites, not a 3D mesh. Only the map is 3D?
