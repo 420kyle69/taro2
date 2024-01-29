@@ -40,11 +40,11 @@ class ThreeRenderer {
 		document.querySelector('#game-div')?.appendChild(renderer.domElement);
 		this.renderer = renderer;
 
-		const width = window.innerWidth;
-		const height = window.innerHeight;
-		this.camera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 1, 1000);
+		// const width = window.innerWidth;
+		// const height = window.innerHeight;
+		// this.camera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 1, 1000);
 
-		// this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+		this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 		this.camera.position.y = 20;
 		this.camera.position.z = 20;
 
@@ -52,7 +52,7 @@ class ThreeRenderer {
 		this.controls.enableDamping = true;
 		this.controls.target = new THREE.Vector3(0, 0, 10);
 
-		this.controls.enableRotate = false;
+		// this.controls.enableRotate = false;
 
 		this.scene = new THREE.Scene();
 		this.scene.translateX(-taro.game.data.map.width / 2);
@@ -127,7 +127,8 @@ class ThreeRenderer {
 			tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
 
 			taro.game.data.map.layers.forEach((layer) => {
-				if (['floor', 'walls'].includes(layer.name)) {
+				// if (['floor', 'walls'].includes(layer.name)) {
+				if (['floor'].includes(layer.name)) {
 					const voxelLayer = new ThreeVoxelLayer(tex, layer);
 					this.scene.add(voxelLayer);
 				}
@@ -378,10 +379,10 @@ class ThreeRenderer {
 				},
 			]);
 
-			const followedEntityWorldPos = new THREE.Vector3();
-			this.followedEntity.getWorldPosition(followedEntityWorldPos);
-			this.camera.position.set(followedEntityWorldPos.x, this.camera.position.y, followedEntityWorldPos.z);
-			this.controls.target.set(followedEntityWorldPos.x, this.controls.target.y, followedEntityWorldPos.z);
+			// const followedEntityWorldPos = new THREE.Vector3();
+			// this.followedEntity.getWorldPosition(followedEntityWorldPos);
+			// this.camera.position.set(followedEntityWorldPos.x, this.camera.position.y, followedEntityWorldPos.z);
+			// this.controls.target.set(followedEntityWorldPos.x, this.controls.target.y, followedEntityWorldPos.z);
 		}
 
 		for (const sprite of this.animatedSprites) {
