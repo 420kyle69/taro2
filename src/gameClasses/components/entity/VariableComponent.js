@@ -69,7 +69,7 @@ var VariableComponent = TaroEntity.extend({
 					}
 
 					self._entity.variables[variableId].value = newValue;
-					// console.log('VariableComponent.update', variableObj.dataType, variableId)
+					// console.log('VariableComponent.update', variableObj.dataType, variableId, value, newValue, self._entity.variables[variableId])
 					if (taro.isServer) {
 						if (
 							variableObj.streamMode == null || variableObj.streamMode == 1 ||  // don't stream if streamMode isn't sync'ed (1). Also added != null for legacy support.
@@ -87,7 +87,7 @@ var VariableComponent = TaroEntity.extend({
 			} else if (typeof value === 'undefined' || value.function === 'undefinedValue') {
 				// creator is intentionally setting value as undefined
 				self._entity.variables[variableId].value = undefined;
-
+					
 				if (taro.isServer) {
 					if (
 						variableObj.streamMode == null || variableObj.streamMode == 1 ||  // don't stream if streamMode isn't sync'ed (1). Also added != null for legacy support.
@@ -112,15 +112,10 @@ var VariableComponent = TaroEntity.extend({
 			var entityVariable = this._entity.variables && this._entity.variables[variableId];
 			if (entityVariable) {
 				returnValue = entityVariable.value;
-
 				if (['projectile', 'item', 'unit', 'player','region'].includes(entityVariable.dataType)) {
 					returnValue = taro.$(returnValue);
 				}
 				
-				if (entityVariable.dataType === 'region') {
-					returnValue.key = variableId;
-				}
-
 				return returnValue;
 			}
 		}

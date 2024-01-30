@@ -3977,7 +3977,6 @@ var TaroEntity = TaroObject.extend({
 
 		if (persistData) {
 			var attributes = persistData.attributes;
-			var variables = persistData.variables;
 			var max = {};
 			var min = {};
 			var regSpeed = {};
@@ -4013,6 +4012,7 @@ var TaroEntity = TaroObject.extend({
 			}
 			self.streamUpdateData([{ attributesMax: max }, { attributesMin: min }, { attributesRegenerateRate: regSpeed }]);
 
+			var variables = persistData.variables;
 			for (var variableKey in variables) {
 				var persistVariable = variables[variableKey];
 
@@ -4020,6 +4020,8 @@ var TaroEntity = TaroObject.extend({
 					self.variables[variableKey] = persistVariable;
 				}
 			}
+
+			self.variable.init(self)
 		}
 	},
 
