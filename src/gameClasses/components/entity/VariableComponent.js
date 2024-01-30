@@ -108,7 +108,7 @@ var VariableComponent = TaroEntity.extend({
 	},
 
 	getValue: function(variableId) {
-		if (variableId) {
+		if (variableId) {			
 			var entityVariable = this._entity.variables && this._entity.variables[variableId];
 			if (entityVariable) {
 				returnValue = entityVariable.value;

@@ -1597,7 +1597,7 @@ var ParameterComponent = TaroEntity.extend({
 
 					case 'getRandomItemTypeFromItemTypeGroup':
 						if (text.itemTypeGroup) {
-							var variableObj = self.getValue(text.itemTypeGroup);
+							var variableObj = self.getValue(text.itemTypeGroup, vars);
 
 							if (variableObj) {
 								var itemTypes = _.map(variableObj, (itemTypeInfo, itemType) => {
@@ -2113,6 +2113,15 @@ var ParameterComponent = TaroEntity.extend({
 
 						break;
 
+					case 'playersOfPlayerType': 
+						var playerType = self.getValue(text.playerType, vars);
+						var players = taro.$$('player').filter((player) => {
+							return player._stats.playerTypeId === playerType;
+						});
+
+						returnValue = players;
+						break;
+
 
 					case 'allItems':
 						returnValue = taro.$$('item');
@@ -2421,7 +2430,8 @@ var ParameterComponent = TaroEntity.extend({
 			'getValueOfEntityVariable': function (text, vars) {
 				var variableData = self.getValue(text.variable, vars);
 				var entity = self.getValue(text.entity, vars);
-				if (entity && variableData && variableData.key) {
+
+				if (entity && variableData?.key) {
 					return entity.variable.getValue(variableData.key);	
 				}
 			},
