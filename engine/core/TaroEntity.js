@@ -3830,7 +3830,7 @@ var TaroEntity = TaroObject.extend({
 
 		isUnitExists = !!(unit && unit._stats);
 
-		var variablesToBeIgnored = ['unit', 'item', 'player', 'playerGroup', 'itemGroup', 'unitGroup', 'projectile', 'region'];
+		var variablesToBeIgnored = ['playerGroup', 'itemGroup', 'unitGroup'];
 		for (var variablesId in self.variables) {
 			var variable = self.variables[variablesId];
 			if (!variablesToBeIgnored.includes(variable.dataType)) {

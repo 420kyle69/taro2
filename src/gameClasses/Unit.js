@@ -44,6 +44,7 @@ var Unit = TaroEntityPhysics.extend({
 			.addComponent(VariableComponent);
 
 		self.addComponent(ScriptComponent); // entity-requireScriptLoading
+
 		if (unitData && unitData) {
 			self.script.load(unitData.scripts);
 		}

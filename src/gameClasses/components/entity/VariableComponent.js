@@ -9,20 +9,19 @@ var VariableComponent = TaroEntity.extend({
 		for (var variableId in self._entity.variables) {			
 			var entityVariable = self._entity.variables[variableId];
 			// if the variable is not defined, use the default value
-			if (entityVariable == undefined || entityVariable.value == undefined) {				
+			
+			if (entityVariable?.value == undefined) {
 				// self._entity.variables[variableId].value = entityVariable.default;
 				self.update(variableId, entityVariable.default)
 			}
 		}
-
 	},
 
 	update: function (variableId, value) {
 		var self = this;
-		if (self._entity.variables[variableId] !== undefined) {
-		
+		var variableObj = self._entity.variables[variableId];
+		if (variableObj !== undefined) {		
 			var isDataTypeMatching = false; // flag to check if datatype of value matches datatype of variable
-			var variableObj = self._entity.variables[variableId];
 			var newValue = value;
 			
 			// variables can not set to undefined via action
@@ -35,8 +34,7 @@ var VariableComponent = TaroEntity.extend({
 				}
 				case 'position': {
 					isDataTypeMatching = typeof value === 'object' &&
-						value.x &&
-						value.y;
+						value.x != undefined &&	value.y != undefined;
 					break;
 				}
 				case 'projectile':
@@ -71,7 +69,6 @@ var VariableComponent = TaroEntity.extend({
 					}
 
 					self._entity.variables[variableId].value = newValue;
-
 					// console.log('VariableComponent.update', variableObj.dataType, variableId)
 					if (taro.isServer) {
 						if (
@@ -105,22 +102,22 @@ var VariableComponent = TaroEntity.extend({
 				}
 
 			} else {
-				throw new Error('datatype of value does not match datatype of variable');
+				console.log('ERROR: datatype of value', typeof value,' does not match datatype of variable', variableObj.dataType);
 			}
 		}
 	},
 
 	getValue: function(variableId) {
 		if (variableId) {
-			var variableObj = this._entity.variables && this._entity.variables[variableId];
-			if (variableObj) {
-				returnValue = variableObj.value;
+			var entityVariable = this._entity.variables && this._entity.variables[variableId];
+			if (entityVariable) {
+				returnValue = entityVariable.value;
 
-				if (['projectile', 'item', 'unit', 'player','region'].includes(variableObj.dataType)) {
+				if (['projectile', 'item', 'unit', 'player','region'].includes(entityVariable.dataType)) {
 					returnValue = taro.$(returnValue);
 				}
 				
-				if (variableObj.dataType === 'region') {
+				if (entityVariable.dataType === 'region') {
 					returnValue.key = variableId;
 				}
 
