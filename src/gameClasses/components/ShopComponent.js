@@ -10,9 +10,6 @@ var ShopComponent = TaroEntity.extend({
 			// 	self.purchase(self.itemToBePurchased.id)
 			// })
 
-			// add updateModdShop to taro.game
-			taro.game.updateModdShop = this.updateModdShop.bind(this);
-
 			if (isLoggedIn) {
 				self.loadUserPurchases();
 			} else {
@@ -138,10 +135,6 @@ var ShopComponent = TaroEntity.extend({
 				// self.confirmPurchase($(this).attr("id"))
 			});
 			// listen for item modal close
-			$('#modd-item-shop-modal').on('hidden.bs.modal', function () {
-				$('.popover').remove();
-				taro.client.myPlayer.control.updatePlayerInputStatus();
-			});
 			// purchase purchasable
 			$(document).on('click', '.btn-purchase-purchasable', function () {
 				if ($(this).hasClass('disabled')) return;
