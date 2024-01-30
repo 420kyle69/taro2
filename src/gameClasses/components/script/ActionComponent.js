@@ -3156,10 +3156,7 @@ var ActionComponent = TaroEntity.extend({
 						var htmlStr = taro.sanitizer(self._script.param.getValue(action.htmlStr, vars));
 						var player = self._script.param.getValue(action.player, vars);
 
-						console.log('setting html', htmlStr);
-
 						if (elementId && player && player._stats && player._stats.clientId) {
-							console.log('sending html');	
 							taro.network.send('ui', {
 								command: 'updateUiElement',
 								elementId: elementId,
