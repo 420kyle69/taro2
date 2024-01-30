@@ -566,6 +566,7 @@ var PlayerUiComponent = TaroEntity.extend({
 					$(`#${data.elementId}`).hide();
 					break;
 				case 'setHtml':
+					console.log("playerUi - updateUiElement setHtml: ", data.htmlStr);
 					$(`#${data.elementId}`).html(data.htmlStr);
 					break;
 				case 'addClass':
