@@ -61,8 +61,8 @@ var VariableComponent = TaroEntity.extend({
 			// if datatype of value matches datatype of variable then set value
 			// otherwise set value to undefined and throw error
 			if (isDataTypeMatching) {
+				if (variableObj.value !== value) {
 
-				if (variableObj.value !== value) {	
 					var newValue = value;				
 					if (['projectile', 'item', 'unit', 'player', 'region'].includes(variableObj.dataType)) {
 						newValue = value._id; // set value to id instead of object, because object causes circular JSON error

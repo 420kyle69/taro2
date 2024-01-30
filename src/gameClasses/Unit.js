@@ -802,6 +802,9 @@ var Unit = TaroEntityPhysics.extend({
 				self.variables = variables;
 			}
 
+			// re-initialize unit's variables
+			self.variable.init(self)
+
 			// deleting variables from stats bcz it causes json.stringify error due to variable of type unit,item,etc.
 			if (self._stats.variables) {
 				delete self._stats.variables;
