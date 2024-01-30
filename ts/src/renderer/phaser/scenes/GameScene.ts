@@ -135,9 +135,11 @@ class GameScene extends PhaserScene {
 		});
 
 		taro.client.on('position-camera', (x: number, y: number) => {
-			x -= camera.width / 2;
-			y -= camera.height / 2;
-			camera.setScroll(x, y);
+			if (!taro.developerMode.active || taro.developerMode.activeTab === 'play') {
+				x -= camera.width / 2;
+				y -= camera.height / 2;
+				camera.setScroll(x, y);
+			}
 		});
 
 		taro.client.on('deadzone-camera', (width: number, heigth: number) => {
