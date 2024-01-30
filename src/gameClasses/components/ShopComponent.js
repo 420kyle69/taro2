@@ -134,7 +134,13 @@ var ShopComponent = TaroEntity.extend({
 				self.purchaseUnit($(this).attr('id'));
 				// self.confirmPurchase($(this).attr("id"))
 			});
-			// listen for item modal close
+			
+			// listen for item modal close.
+			$('#modd-item-shop-modal').on('hidden.bs.modal', function () {
+				$('.popover').remove();
+				taro.client.myPlayer.control.updatePlayerInputStatus();
+			});
+			
 			// purchase purchasable
 			$(document).on('click', '.btn-purchase-purchasable', function () {
 				if ($(this).hasClass('disabled')) return;
