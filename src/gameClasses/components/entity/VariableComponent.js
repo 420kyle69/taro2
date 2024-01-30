@@ -84,7 +84,7 @@ var VariableComponent = TaroEntity.extend({
 					}
 				}
 				
-			} else if (typeof value === 'undefined' || value.function === 'undefinedValue') {
+			} else if (typeof value === 'undefined' || value?.function === 'undefinedValue') {
 				// creator is intentionally setting value as undefined
 				self._entity.variables[variableId].value = undefined;
 					
