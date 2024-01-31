@@ -32,10 +32,10 @@ class ThreeRenderer {
         this.camera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 1, 1000);
         // this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.camera.position.y = 20;
-        this.camera.position.z = 20;
+        // this.camera.position.z = 20;
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
         this.controls.enableDamping = true;
-        this.controls.target = new THREE.Vector3(0, 0, 10);
+        // this.controls.target = new THREE.Vector3(0, 0, 10);
         this.controls.enableRotate = false;
         this.scene = new THREE.Scene();
         this.scene.translateX(-taro.game.data.map.width / 2);
@@ -95,7 +95,15 @@ class ThreeRenderer {
             const tex = ThreeTextureManager.instance().textureMap.get(tileset.image);
             tex.minFilter = THREE.NearestFilter;
             tex.magFilter = THREE.NearestFilter;
-            tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+            tex.generateMipmaps = false;
+            console.log(tex);
+            var canvas = document.createElement('canvas');
+            var ctx = canvas.getContext('2d');
+            ctx.drawImage(tex.image, 0, 0, 300, 300);
+            // Show resized image in preview element
+            var dataurl = canvas.toDataURL();
+            console.log(dataurl);
+            // document.getElementById('preview').src = dataurl;
             this.voxelMap = new ThreeVoxelMap(tex);
             this.scene.add(this.voxelMap);
             taro.game.data.map.layers.forEach((layer) => {
@@ -293,7 +301,7 @@ class ThreeRenderer {
         for (const sprite of this.animatedSprites) {
             sprite.update(1 / 60);
         }
-        this.controls.update();
+        // this.controls.update();
         this.renderer.render(this.scene, this.camera);
     }
 }

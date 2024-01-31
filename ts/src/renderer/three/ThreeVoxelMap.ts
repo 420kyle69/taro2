@@ -6,8 +6,6 @@ class ThreeVoxelMap extends THREE.Group {
 	constructor(private tileset: THREE.Texture) {
 		super();
 
-		tileset.wrapS = tileset.wrapT = THREE.RepeatWrapping;
-
 		const mat = new THREE.MeshBasicMaterial({ transparent: true, map: tileset, side: THREE.DoubleSide });
 		const mesh = new THREE.Mesh(this.geometry, mat);
 		this.add(mesh);
@@ -140,19 +138,27 @@ function buildMeshDataFromCells(cells, tilesInRow, xStep, yStep) {
 			}
 			targetData.positions.push(...localPositions);
 
+			const tileSize = 64;
 			const xIdx = (curCell.type % tilesInRow) - 1;
 			const yIdx = Math.floor(curCell.type / tilesInRow);
-			const xOffset = xStep * xIdx;
-			const yOffset = 1 - yStep * yIdx - yStep;
+
+			const singlePixelOffset = xStep / tileSize;
+			const halfPixelOffset = singlePixelOffset / 2;
+
+			const xOffset = xStep * xIdx + halfPixelOffset;
+			const yOffset = 1 - yStep * yIdx - yStep - halfPixelOffset;
 
 			geometries[i].attributes.uv.array[0] = xOffset;
-			geometries[i].attributes.uv.array[1] = yOffset;
-			geometries[i].attributes.uv.array[2] = xOffset + xStep;
-			geometries[i].attributes.uv.array[3] = yOffset;
+			geometries[i].attributes.uv.array[1] = yOffset + yStep;
+
+			geometries[i].attributes.uv.array[2] = xOffset + xStep - singlePixelOffset;
+			geometries[i].attributes.uv.array[3] = yOffset + yStep;
+
 			geometries[i].attributes.uv.array[4] = xOffset;
-			geometries[i].attributes.uv.array[5] = yOffset + yStep;
-			geometries[i].attributes.uv.array[6] = xOffset + xStep;
-			geometries[i].attributes.uv.array[7] = yOffset + yStep;
+			geometries[i].attributes.uv.array[5] = yOffset + singlePixelOffset;
+
+			geometries[i].attributes.uv.array[6] = xOffset + xStep - singlePixelOffset;
+			geometries[i].attributes.uv.array[7] = yOffset + singlePixelOffset;
 
 			targetData.uvs.push(...geometries[i].attributes.uv.array);
 			targetData.normals.push(...geometries[i].attributes.normal.array);
