@@ -117,6 +117,7 @@ var TaroChatServer = {
 					// Send message to individual user
 					if (room.users.indexOf(to) > -1) {
 						taro.network.send('taroChatMsg', msg, to);
+						
 						// console.log('Sending to one user...', msg, to);
 					} else {
 						self.log(`Cannot send to user because specified user is not in room: ${to}`);
