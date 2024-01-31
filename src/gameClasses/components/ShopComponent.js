@@ -1484,7 +1484,7 @@ var ShopComponent = TaroEntity.extend({
 						},
 						function () {
 
-							if (item.status == 'not_purchased' || item.status == "equipped") {
+							if (items[i].status == 'not_purchased' || items[i].status == "equipped") {
 								return;
 							}
 							// On hover out
