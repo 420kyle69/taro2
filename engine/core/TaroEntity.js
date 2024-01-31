@@ -4452,7 +4452,7 @@ var TaroEntity = TaroObject.extend({
 					if (this._hasMoved) {
 						//exclude AI controlled players from streaming
 						if (this._category === 'player' && this._stats.controlledBy !== 'human') return;
-						console.log("streaming", this._category, this._stats.name, this.id(), x, y, angle)
+						//console.log("streaming", this._category, this._stats.name, this.id(), x, y, angle)
 						this._oldTranform = [this._translate.x, this._translate.y, this._rotate.z];
 
 						// var distanceTravelled = x - taro.lastX;
