@@ -1942,9 +1942,12 @@ var TaroEntity = TaroObject.extend({
 				this._renderEntity(ctx, dontTransform);
 			}
 
-			if (this._translate.x != this._oldTranform[0] || this._translate.y != this._oldTranform[1] || this._rotate.z != this._oldTranform[2]) {
-				this._hasMoved = true;
-			}
+			if (Math.round(this._translate.x) != Math.round(this._oldTranform[0]) || 
+                Math.round(this._translate.y) != Math.round(this._oldTranform[1]) || 
+                parseFloat(this._rotate.z).toFixed(3) != parseFloat(this._oldTranform[2]).toFixed(3)) {
+                this._hasMoved = true;
+                this._oldTranform = [this._translate.x, this._translate.y, this._rotate.z];
+            }
 
 			// Process any automatic-mode stream updating required
 			if (this._streamMode === 1 || this._streamMode === 2) {
@@ -4447,7 +4450,9 @@ var TaroEntity = TaroObject.extend({
 					var angle = ((this._rotate.z % (2 * Math.PI)) * 1000).toFixed(0);
 
 					if (this._hasMoved) {
-						// console.log("streaming", this._category, this.id(), x, y, angle)
+						//exclude AI controlled players from streaming
+						if (this._category === 'player' && this._stats.controlledBy !== 'human') return;
+						console.log("streaming", this._category, this._stats.name, this.id(), x, y, angle)
 						this._oldTranform = [this._translate.x, this._translate.y, this._rotate.z];
 
 						// var distanceTravelled = x - taro.lastX;
@@ -4962,6 +4967,9 @@ var TaroEntity = TaroObject.extend({
 		if (data && recipientArr.length && this._streamMode === 1 && this._hasMoved) {
 			taro.server.bandwidthUsage[this._category] += data.length;
 			taro.network.stream.queue(thisId, data, recipientArr);
+			this._hasMoved = false;
+		} else {
+			// still need to set this to false even if there's no data to send
 			this._hasMoved = false;
 		}
 	},
