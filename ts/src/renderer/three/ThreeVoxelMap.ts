@@ -6,7 +6,7 @@ class ThreeVoxelMap extends THREE.Group {
 	constructor(private tileset: THREE.Texture) {
 		super();
 
-		const mat = new THREE.MeshBasicMaterial({ transparent: true, map: tileset });
+		const mat = new THREE.MeshBasicMaterial({ transparent: true, map: tileset, side: THREE.DoubleSide });
 		const mesh = new THREE.Mesh(this.geometry, mat);
 		this.add(mesh);
 	}

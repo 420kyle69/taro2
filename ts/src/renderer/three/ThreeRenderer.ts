@@ -36,6 +36,8 @@ class ThreeRenderer {
 
 	private voxelMap: ThreeVoxelMap;
 
+	private topDownCamera = true;
+
 	constructor() {
 		const renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true });
 		renderer.setSize(window.innerWidth, window.innerHeight);
@@ -44,17 +46,29 @@ class ThreeRenderer {
 
 		const width = window.innerWidth;
 		const height = window.innerHeight;
-		this.camera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 1, 1000);
+		const orthoCamera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 1, 1000);
 
-		// this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+		// const persCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+		// persCamera.position.y = 20;
+
+		this.camera = orthoCamera;
 		this.camera.position.y = 20;
-		// this.camera.position.z = 20;
 
 		this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 		this.controls.enableDamping = true;
-		// this.controls.target = new THREE.Vector3(0, 0, 10);
-
 		this.controls.enableRotate = false;
+
+		window.addEventListener('keypress', (evt) => {
+			if (evt.key === 'c') {
+				this.topDownCamera = !this.topDownCamera;
+
+				if (this.topDownCamera) {
+					this.controls.enableRotate = false;
+				} else {
+					this.controls.enableRotate = true;
+				}
+			}
+		});
 
 		this.scene = new THREE.Scene();
 		this.scene.translateX(-taro.game.data.map.width / 2);
@@ -397,17 +411,19 @@ class ThreeRenderer {
 				},
 			]);
 
-			const followedEntityWorldPos = new THREE.Vector3();
-			this.followedEntity.getWorldPosition(followedEntityWorldPos);
-			this.camera.position.set(followedEntityWorldPos.x, this.camera.position.y, followedEntityWorldPos.z);
-			this.controls.target.set(followedEntityWorldPos.x, this.controls.target.y, followedEntityWorldPos.z);
+			if (this.topDownCamera) {
+				const followedEntityWorldPos = new THREE.Vector3();
+				this.followedEntity.getWorldPosition(followedEntityWorldPos);
+				this.camera.position.set(followedEntityWorldPos.x, this.camera.position.y, followedEntityWorldPos.z);
+				this.controls.target.set(followedEntityWorldPos.x, this.controls.target.y, followedEntityWorldPos.z);
+			}
 		}
 
 		for (const sprite of this.animatedSprites) {
 			sprite.update(1 / 60);
 		}
 
-		// this.controls.update();
+		this.controls.update();
 		this.renderer.render(this.scene, this.camera);
 	}
 }
