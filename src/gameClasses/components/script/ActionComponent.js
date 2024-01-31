@@ -1481,7 +1481,9 @@ var ActionComponent = TaroEntity.extend({
 						var text = self._script.param.getValue(action.text, vars);
 						var color = self._script.param.getValue(action.color, vars);
 						
-						text = text || 'undefined';						
+						if (text == undefined) {
+							text = 'undefined';						
+						}
 						
 						if (taro.isServer) {
 							taro.network.send('createFloatingText', { position: position, text: text, color: color });
