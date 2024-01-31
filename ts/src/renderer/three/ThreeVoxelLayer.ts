@@ -4,7 +4,7 @@ class ThreeVoxelLayer extends THREE.Group {
 	// Use this to store layers later...
 	static layers = [];
 
-	constructor(tileset: THREE.Texture, data: LayerData) {
+	constructor(tileset: THREE.Texture, data: LayerData, id: number) {
 		super();
 
 		tileset.wrapS = tileset.wrapT = THREE.RepeatWrapping;
@@ -21,8 +21,8 @@ class ThreeVoxelLayer extends THREE.Group {
 		const cells = new Map<string, VoxelCell>();
 		for (let z = 0; z < data.height; z++) {
 			for (let x = 0; x < data.width; x++) {
-				cells.set(getKeyFromPos(x, 0, z), {
-					position: [x, 0, z],
+				cells.set(getKeyFromPos(x, id, z), {
+					position: [x, id * id, z],
 					type: data.data[z * data.width + x],
 					visible: true,
 					// hiddenFaces: 0x000000,
@@ -42,7 +42,7 @@ class ThreeVoxelLayer extends THREE.Group {
 		geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(dat.positions), 3));
 		geo.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(dat.uvs), 2));
 		geo.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(dat.normals), 3));
-		const mat = new THREE.MeshBasicMaterial({ transparent: true, map: tileset });
+		const mat = new THREE.MeshBasicMaterial({ transparent: true, map: tileset, side: THREE.DoubleSide });
 		const mesh = new THREE.Mesh(geo, mat);
 		this.add(mesh);
 	}
