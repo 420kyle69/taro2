@@ -96,15 +96,14 @@ class ThreeRenderer {
             tex.minFilter = THREE.NearestFilter;
             tex.magFilter = THREE.NearestFilter;
             tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+            this.voxelMap = new ThreeVoxelMap(tex);
+            this.scene.add(this.voxelMap);
             taro.game.data.map.layers.forEach((layer) => {
-                // if (['floor', 'walls'].includes(layer.name)) {
                 if (['floor'].includes(layer.name)) {
-                    const voxelLayer = new ThreeVoxelLayer(tex, layer, 0);
-                    this.scene.add(voxelLayer);
+                    this.voxelMap.addLayer(layer, 0);
                 }
                 if (['walls'].includes(layer.name)) {
-                    const voxelLayer = new ThreeVoxelLayer(tex, layer, 1);
-                    this.scene.add(voxelLayer);
+                    this.voxelMap.addLayer(layer, 1);
                 }
             });
         });

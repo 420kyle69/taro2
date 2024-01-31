@@ -1,28 +1,26 @@
 class ThreeVoxelMap extends THREE.Group {
-	// Make a VoxelMap container class to store the layers?
-	// and later chunking etc.
-	// Use this to store layers later...
-	static layers = [];
+	private cells = new Map<string, VoxelCell>();
 
-	constructor(tileset: THREE.Texture, data: LayerData, id: number) {
+	private geometry = new THREE.BufferGeometry();
+
+	constructor(private tileset: THREE.Texture) {
 		super();
 
 		tileset.wrapS = tileset.wrapT = THREE.RepeatWrapping;
 
-		const tileSize = 64;
-		const texWidth = tileset.image.width;
-		const texHeight = tileset.image.height;
-		const tilesInRow = texWidth / tileSize;
+		const mat = new THREE.MeshBasicMaterial({ transparent: true, map: tileset, side: THREE.DoubleSide });
+		const mesh = new THREE.Mesh(this.geometry, mat);
+		this.add(mesh);
+	}
 
-		const xStep = tileSize / texWidth;
-		const yStep = tileSize / texHeight;
-
-		// Build cells
-		const cells = new Map<string, VoxelCell>();
+	addLayer(data: LayerData, id: number) {
 		for (let z = 0; z < data.height; z++) {
 			for (let x = 0; x < data.width; x++) {
-				cells.set(getKeyFromPos(x, id, z), {
-					position: [x, id * id, z],
+				const tileId = data.data[z * data.width + x];
+				if (tileId <= 0) continue;
+
+				this.cells.set(getKeyFromPos(x, id, z), {
+					position: [x, id, z],
 					type: data.data[z * data.width + x],
 					visible: true,
 					// hiddenFaces: 0x000000,
@@ -31,20 +29,21 @@ class ThreeVoxelMap extends THREE.Group {
 			}
 		}
 
-		// Prune cells
-		const prunedCells = pruneCells(cells);
+		const tileSize = 64;
+		const texWidth = this.tileset.image.width;
+		const texHeight = this.tileset.image.height;
+		const tilesInRow = texWidth / tileSize;
 
-		// Build mesh
-		const dat = buildMeshDataFromCells(prunedCells, tilesInRow, xStep, yStep);
+		const xStep = tileSize / texWidth;
+		const yStep = tileSize / texHeight;
 
-		const geo = new THREE.BufferGeometry();
-		geo.setIndex(dat.indices);
-		geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(dat.positions), 3));
-		geo.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(dat.uvs), 2));
-		geo.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(dat.normals), 3));
-		const mat = new THREE.MeshBasicMaterial({ transparent: true, map: tileset, side: THREE.DoubleSide });
-		const mesh = new THREE.Mesh(geo, mat);
-		this.add(mesh);
+		const prunedVoxels = pruneCells(this.cells);
+		const voxelData = buildMeshDataFromCells(prunedVoxels, tilesInRow, xStep, yStep);
+
+		this.geometry.setIndex(voxelData.indices);
+		this.geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(voxelData.positions), 3));
+		this.geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(voxelData.uvs), 2));
+		this.geometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(voxelData.normals), 3));
 	}
 }
 
@@ -54,7 +53,6 @@ function getKeyFromPos(x: number, y: number, z: number) {
 
 function pruneCells(cells) {
 	const prunedVoxels = new Map<string, VoxelCell>();
-	console.log('0.0.0' in cells.keys());
 	for (let k of cells.keys()) {
 		const curCell = cells.get(k);
 
@@ -137,7 +135,7 @@ function buildMeshDataFromCells(cells, tilesInRow, xStep, yStep) {
 			const localPositions = [...geometries[i].attributes.position.array];
 			for (let j = 0; j < 3; ++j) {
 				for (let v = 0; v < 4; ++v) {
-					localPositions[v * 3 + j] += curCell.position[j] + curCell.position[j];
+					localPositions[v * 3 + j] += curCell.position[j];
 				}
 			}
 			targetData.positions.push(...localPositions);
