@@ -1341,7 +1341,6 @@ var ShopComponent = TaroEntity.extend({
 
 		for (let i = 0; i < items.length; i++) {
 			var item = items[i];
-			// console.log(item)
 
 			if (item.status == 'not_purchased') {
 
@@ -1462,12 +1461,11 @@ var ShopComponent = TaroEntity.extend({
 								class: "is-mobile",
 							})
 						)
-					).append( item.status == "not_purchased" ? "<br/>" : "")
+					).append( item.status === "not_purchased" ? "<br/>" : "")
 					.append(button).hover(
 						function () {
 							// On hover
-
-							if (item.status == "not_purchased" || items[i].status == "equipped") {
+							if (items[i].status == "not_purchased" || items[i].status == "equipped") {
 								return;
 							}
 
@@ -1475,9 +1473,9 @@ var ShopComponent = TaroEntity.extend({
 								type: "button",
 								class:'btn btn-equip',
 								id:'floating-button-equip',
-								name: item.title || item.name,
-								skinId : item._id,
-								owner: item.owner || "",
+								name: items[i].title || items[i].name,
+								skinId : items[i]._id,
+								owner: items[i].owner || "",
 								style: "position: absolute; background-color: #254EDB;color: white; border: none;",
 							}).text("Equip");
 
