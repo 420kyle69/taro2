@@ -20,7 +20,7 @@ var VariableComponent = TaroEntity.extend({
 	update: function (variableId, value) {
 		var self = this;
 		var variableObj = self._entity.variables[variableId];
-		if (variableObj !== undefined) {		
+		if (variableObj !== undefined) {
 			var isDataTypeMatching = false; // flag to check if datatype of value matches datatype of variable
 			var newValue = value;
 			

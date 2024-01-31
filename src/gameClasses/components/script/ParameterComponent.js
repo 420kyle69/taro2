@@ -465,31 +465,6 @@ var ParameterComponent = TaroEntity.extend({
 
 						break;
 
-					case 'getPlayerVariable':
-						returnValue = text.variable;
-
-						break;
-
-					case 'getValueOfPlayerVariable':
-						var variableData = self.getValue(text.variable, vars);
-						var player = self.getValue(text.player, vars);
-
-						if (player && variableData) {
-							var playerVariable = player.variables &&
-								player.variables[variableData.key] &&
-								player.variables[variableData.key];
-
-							if (playerVariable) {
-								returnValue = playerVariable.value;
-
-								if (returnValue === null || returnValue == undefined) {
-									returnValue = playerVariable.default;
-								}
-							}
-						}
-
-						break;
-
 					case 'playerCustomInput':
 						var player = self.getValue(text.player, vars);
 						if (player && player._category == 'player') {
@@ -2433,6 +2408,19 @@ var ParameterComponent = TaroEntity.extend({
 
 				if (entity && variableData?.key) {
 					return entity.variable.getValue(variableData.key);	
+				}
+			},
+
+			'getPlayerVariable': function(text, vars) {
+				return text.variable;
+			},
+
+			'getValueOfPlayerVariable': function(text, vars) {
+				var variableData = self.getValue(text.variable, vars);
+				var player = self.getValue(text.player, vars);
+				
+				if (player && variableData?.key) {		
+					return player.variable.getValue(variableData.key);	
 				}
 			},
 

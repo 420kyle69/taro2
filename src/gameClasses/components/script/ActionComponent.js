@@ -497,13 +497,14 @@ var ActionComponent = TaroEntity.extend({
 						var player = self._script.param.getValue(action.player, vars);
 						var variable = self._script.param.getValue(action.variable, vars);
 						var value = self._script.param.getValue(action.value, vars);
-
-						if (player && variable && player.variables) {
+						
+						if (variable) {
 							var variableId = variable.key;
 							player.variable.update(variableId, value);
 						}
 
 						break;
+						
 					case 'changeDescriptionOfItem':
 						var item = self._script.param.getValue(action.item, vars);
 						var description = self._script.param.getValue(action.string, vars);

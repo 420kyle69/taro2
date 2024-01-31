@@ -42,6 +42,7 @@ var Item = TaroEntityPhysics.extend({
 		self.raycastTargets = [];
 		// dont save variables in _stats as _stats is stringified and synced
 		// and some variables of type unit, item, projectile may contain circular json objects
+		self.variables = {}		
 		if (self._stats.variables) {
 			self.variables = self._stats.variables;
 			delete self._stats.variables;
@@ -51,7 +52,7 @@ var Item = TaroEntityPhysics.extend({
 		// self._stats.handle = data.type
 		self._stats.lastUsed = 0;
 		self.anchoredOffset = { x: 0, y: 0, rotate: 0 };
-
+		
 		// convert numbers stored as string in database to int
 		self.parseEntityObject(self._stats);
 		self.addComponent(AttributeComponent); // every item gets one
