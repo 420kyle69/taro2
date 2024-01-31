@@ -727,6 +727,10 @@ var ClientNetworkEvents = {
 		taro.developerMode.updateShop(data);
 	},
 
+	_onUpdateDialogue: function (data) {
+		taro.developerMode.updateDialogue(data);
+	},
+
 	_onErrorLogs: function (logs) {
 		var element = document.getElementById("error-log-content");
 		for (actionName in logs) {
