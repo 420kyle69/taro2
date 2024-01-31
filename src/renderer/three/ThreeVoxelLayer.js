@@ -9,13 +9,10 @@ class ThreeVoxelLayer extends THREE.Group {
         const xStep = tileSize / texWidth;
         const yStep = tileSize / texHeight;
         // Build cells
-        const key = (x, y, z) => {
-            return `${x}.${y}.${z}`;
-        };
         const cells = new Map();
         for (let z = 0; z < data.height; z++) {
             for (let x = 0; x < data.width; x++) {
-                cells.set(key(x, 0, z), {
+                cells.set(getKeyFromPos(x, 0, z), {
                     position: [x, 0, z],
                     type: data.data[z * data.width + x],
                     visible: true,
@@ -24,8 +21,10 @@ class ThreeVoxelLayer extends THREE.Group {
                 });
             }
         }
+        // Prune cells
+        const prunedCells = pruneCells(cells);
         // Build mesh
-        const dat = buildMeshDataFromCells(cells, tilesInRow, xStep, yStep);
+        const dat = buildMeshDataFromCells(prunedCells, tilesInRow, xStep, yStep);
         const geo = new THREE.BufferGeometry();
         geo.setIndex(dat.indices);
         geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(dat.positions), 3));
@@ -40,6 +39,35 @@ class ThreeVoxelLayer extends THREE.Group {
 // and later chunking etc.
 // Use this to store layers later...
 ThreeVoxelLayer.layers = [];
+function getKeyFromPos(x, y, z) {
+    return `${x}.${y}.${z}`;
+}
+function pruneCells(cells) {
+    const prunedVoxels = new Map();
+    console.log('0.0.0' in cells.keys());
+    for (let k of cells.keys()) {
+        const curCell = cells.get(k);
+        const k1 = getKeyFromPos(curCell.position[0] + 1, curCell.position[1], curCell.position[2]);
+        const k2 = getKeyFromPos(curCell.position[0] - 1, curCell.position[1], curCell.position[2]);
+        const k3 = getKeyFromPos(curCell.position[0], curCell.position[1] + 1, curCell.position[2]);
+        const k4 = getKeyFromPos(curCell.position[0], curCell.position[1] - 1, curCell.position[2]);
+        const k5 = getKeyFromPos(curCell.position[0], curCell.position[1], curCell.position[2] + 1);
+        const k6 = getKeyFromPos(curCell.position[0], curCell.position[1], curCell.position[2] - 1);
+        const keys = [k1, k2, k3, k4, k5, k6];
+        let visible = false;
+        for (let i = 0; i < 6; ++i) {
+            const faceHidden = cells.has(keys[i]);
+            curCell.hiddenFaces[i] = faceHidden;
+            if (!faceHidden) {
+                visible = true;
+            }
+        }
+        if (visible) {
+            prunedVoxels.set(k, curCell);
+        }
+    }
+    return prunedVoxels;
+}
 function buildMeshDataFromCells(cells, tilesInRow, xStep, yStep) {
     const pxGeometry = new THREE.PlaneGeometry(1, 1);
     pxGeometry.rotateY(Math.PI / 2);
