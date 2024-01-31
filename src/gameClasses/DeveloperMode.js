@@ -810,6 +810,17 @@ var DeveloperMode = /** @class */ (function () {
             taro.network.send('updateShop', data);
         }
     };
+    DeveloperMode.prototype.updateDialogue = function (data) {
+        if (data.typeId && data.newData) {
+            if (!taro.game.data.dialogues) {
+                taro.game.data.dialogues = {};
+            }
+            taro.game.data.dialogues[data.typeId] = data.newData;
+        }
+        if (taro.isServer) {
+            taro.network.send('updateDialogue', data);
+        }
+    };
     DeveloperMode.prototype.editEntity = function (data, clientId) {
         if (taro.isClient) {
             taro.network.send('editEntity', data);
@@ -869,6 +880,15 @@ var DeveloperMode = /** @class */ (function () {
                     switch (data.action) {
                         case 'update':
                             this.updateShop(data);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                else if (data.entityType === 'dialogue') {
+                    switch (data.action) {
+                        case 'update':
+                            this.updateDialogue(data);
                             break;
                         default:
                             break;

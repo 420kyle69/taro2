@@ -823,6 +823,19 @@ class DeveloperMode {
 		}
     }
 
+	updateDialogue (data) {
+        if (data.typeId && data.newData) {
+            if (!taro.game.data.dialogues) {
+                taro.game.data.dialogues = {};
+            }
+            taro.game.data.dialogues[data.typeId] = data.newData;
+        }
+
+		if (taro.isServer) {
+			taro.network.send('updateDialogue', data);
+		}
+    }
+
 	editEntity(data: EditEntityData, clientId: string) {
 		if (taro.isClient) {
 			taro.network.send<any>('editEntity', data);
@@ -887,6 +900,14 @@ class DeveloperMode {
 					switch (data.action) {
 						case 'update':
 							this.updateShop(data);
+							break;
+						default:
+							break;
+					}
+				} else if (data.entityType === 'dialogue') {
+					switch (data.action) {
+						case 'update':
+							this.updateDialogue(data);
 							break;
 						default:
 							break;
