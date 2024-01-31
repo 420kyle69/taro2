@@ -1,4 +1,4 @@
-class ThreeVoxelLayer extends THREE.Group {
+class ThreeVoxelMap extends THREE.Group {
 	// Make a VoxelMap container class to store the layers?
 	// and later chunking etc.
 	// Use this to store layers later...
