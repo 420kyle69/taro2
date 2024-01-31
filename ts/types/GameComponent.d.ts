@@ -4,71 +4,77 @@ interface EntityData {
 		columnCount: number;
 		rowCount: number;
 		url: string;
-	},
-	animations: Record<string, {
-		frames: number[];
-		framesPerSecond: number;
-		loopCount: number;
-		name: string;
-	}>
-    controls: {
-        mouseBehaviour: any;
-        abilities: Record<string, ControlAbility>;
-        unitAbilities: Record<string, UnitAbility>;
-    }
+	};
+	animations: Record<
+		string,
+		{
+			frames: number[];
+			framesPerSecond: number;
+			loopCount: number;
+			name: string;
+		}
+	>;
+	controls: {
+		mouseBehaviour: any;
+		abilities: Record<string, ControlAbility>;
+		unitAbilities: Record<string, UnitAbility>;
+	};
 }
 
 interface UnitAbility {
-    name: string,
-    castDuration: number,
-	cooldown: number,
-    cost: {
-        unitAttributes: Record<string, number>,
-        playerAttributes: Record<string, number>
-    },
-    iconUrl: string,
+	name: string;
+	castDuration: number;
+	cooldown: number;
+	cost: {
+		unitAttributes: Record<string, number>;
+		playerAttributes: Record<string, number>;
+	};
+	iconUrl: string;
 }
 
 interface ScriptData {
 	name: string;
-	triggers: Record<string, {
-		type: string;
-	}>;
+	triggers: Record<
+		string,
+		{
+			type: string;
+		}
+	>;
 	actions: Record<string, ActionData>;
 	deleted?: boolean;
 }
 
 interface ActionData {
-    player?: {
-        variableName: string;
-        function: string;
-    };
-    disabled?: boolean;
-    unitType?: string;
-    itemType?: string;
-    projectileType?: string;
-    actionId?: string;
+	player?: {
+		variableName: string;
+		function: string;
+	};
+	disabled?: boolean;
+	unitType?: string;
+	itemType?: string;
+	projectileType?: string;
+	actionId?: string;
 	type?: string;
 	entity?: string;
 	entityType?: string;
 	position?: {
-        function?: string,
-        x: number,
-        y: number
-    };
+		function?: string;
+		x: number;
+		y: number;
+	};
 	angle?: number;
 	width?: number;
 	height?: number;
-    wasCreated?: boolean;
-    wasEdited?: boolean;
-    wasDeleted?: boolean;
+	wasCreated?: boolean;
+	wasEdited?: boolean;
+	wasDeleted?: boolean;
 }
 
 interface VariableData {
-	dataType?: string,
-	newKey?: string,
-	value?: any,
-	delete?: boolean
+	dataType?: string;
+	newKey?: string;
+	value?: any;
+	delete?: boolean;
 }
 
 interface MapData {
@@ -76,8 +82,8 @@ interface MapData {
 	haveUnsavedChanges: boolean;
 	tilewidth: number;
 	tileheight: number;
-	width: number,
-	height: number,
+	width: number;
+	height: number;
 	tilesets: {
 		image: string;
 		margin: number;
@@ -86,13 +92,14 @@ interface MapData {
 		tilecount: number;
 		tileheight: number;
 		tilewidth: number;
+		columns: number;
 	}[];
 	layers: {
 		data: number[];
 		name: string;
-		width: number,
-		height: number,
-		id: number,
+		width: number;
+		height: number;
+		id: number;
 		type: 'tilelayer' | 'objectgroup';
 	}[];
 }
@@ -119,19 +126,18 @@ declare class GameComponent extends TaroEntity {
 			camera: {
 				useBounds: boolean;
 				trackingDelay: number;
-				zoom : {
-					default:number;
-				}
+				zoom: {
+					default: number;
+				};
 				deadzone: {
 					width: number;
 					height: number;
-				}
-			}
-		}
+				};
+			};
+		};
 		heightBasedZIndex: boolean;
 		texturePack: any;
 	};
 
 	entitiesCollidingWithLastRaycast: TaroEntity[];
-
 }

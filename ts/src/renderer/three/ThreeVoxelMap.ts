@@ -3,7 +3,10 @@ class ThreeVoxelMap extends THREE.Group {
 
 	private geometry = new THREE.BufferGeometry();
 
-	constructor(private tileset: THREE.Texture) {
+	constructor(
+		private tileset: THREE.Texture,
+		private columns: number
+	) {
 		super();
 
 		const mat = new THREE.MeshBasicMaterial({ transparent: true, map: tileset, side: THREE.DoubleSide });
@@ -30,10 +33,13 @@ class ThreeVoxelMap extends THREE.Group {
 		const tileSize = 64;
 		const texWidth = this.tileset.image.width;
 		const texHeight = this.tileset.image.height;
-		const tilesInRow = texWidth / tileSize;
+		// const tilesInRow = texWidth / tileSize;
+		const tilesInRow = this.columns;
 
 		const xStep = tileSize / texWidth;
 		const yStep = tileSize / texHeight;
+
+		console.log(xStep, yStep);
 
 		const prunedVoxels = pruneCells(this.cells);
 		const voxelData = buildMeshDataFromCells(prunedVoxels, tilesInRow, xStep, yStep);

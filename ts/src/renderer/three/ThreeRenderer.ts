@@ -138,22 +138,10 @@ class ThreeRenderer {
 
 		taro.game.data.map.tilesets.forEach((tileset) => {
 			const tex = ThreeTextureManager.instance().textureMap.get(tileset.image);
-			tex.minFilter = THREE.NearestFilter;
-			tex.magFilter = THREE.NearestFilter;
+			tex.image = resizeImageToPowerOf2(tex.image);
 			tex.generateMipmaps = false;
 
-			console.log(tex);
-
-			var canvas = document.createElement('canvas');
-			var ctx = canvas.getContext('2d');
-			ctx.drawImage(tex.image, 0, 0, 300, 300);
-
-			// Show resized image in preview element
-			var dataurl = canvas.toDataURL();
-			console.log(dataurl);
-			// document.getElementById('preview').src = dataurl;
-
-			this.voxelMap = new ThreeVoxelMap(tex);
+			this.voxelMap = new ThreeVoxelMap(tex, tileset.columns);
 			this.scene.add(this.voxelMap);
 
 			taro.game.data.map.layers.forEach((layer) => {
@@ -426,4 +414,21 @@ class ThreeRenderer {
 		this.controls.update();
 		this.renderer.render(this.scene, this.camera);
 	}
+}
+
+function resizeImageToPowerOf2(image) {
+	const ceil = THREE.MathUtils.ceilPowerOfTwo;
+
+	const width = ceil(image.width);
+	const height = ceil(image.height);
+
+	const canvas = document.createElement('canvas');
+
+	canvas.width = width;
+	canvas.height = height;
+
+	const context = canvas.getContext('2d');
+	context.drawImage(image, 0, 0, width, height, 0, 0, width, height);
+
+	return canvas;
 }
