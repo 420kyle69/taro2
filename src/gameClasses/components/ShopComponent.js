@@ -134,13 +134,13 @@ var ShopComponent = TaroEntity.extend({
 				self.purchaseUnit($(this).attr('id'));
 				// self.confirmPurchase($(this).attr("id"))
 			});
-			
+
 			// listen for item modal close.
 			$('#modd-item-shop-modal').on('hidden.bs.modal', function () {
 				$('.popover').remove();
 				taro.client.myPlayer.control.updatePlayerInputStatus();
 			});
-			
+
 			// purchase purchasable
 			$(document).on('click', '.btn-purchase-purchasable', function () {
 				if ($(this).hasClass('disabled')) return;
@@ -489,7 +489,7 @@ var ShopComponent = TaroEntity.extend({
 					if (purchasableInfo && purchasableInfo.html) {
 						details.removeClass('btn-purchase-purchasable');
 						purchasableInfo.html('<span class=\'fas fa-check text-success\'></span>');
-					}					
+					}
 
 					window.purchased({
 						type: "ingame-skin",
@@ -696,7 +696,7 @@ var ShopComponent = TaroEntity.extend({
 						self.shopKey = key;
 					}
 
-					if(key == 'Purchased'){
+					if (key == 'Purchased') {
 						keyDiv = $('<li/>', {
 							class: `owned-skins cursor-pointer p-2 ${(key == self.shopKey) ? 'active' : ''}`,
 							html: `<strong> Owned Skins </strong> (${self.userSkinCount})`,
@@ -711,7 +711,7 @@ var ShopComponent = TaroEntity.extend({
 							self.updateModdShop();
 						});
 
-						keyList.append(keyDiv);	
+						keyList.append(keyDiv);
 						continue;
 					}
 
@@ -775,7 +775,7 @@ var ShopComponent = TaroEntity.extend({
 		{
 
 			// Adding all Purchased skins tab
-			if(self.shopKey == 'Purchased'){
+			if (self.shopKey == 'Purchased') {
 				self.skinItems = self.userSkinPurchases;
 				self.currentPagination = 1;
 				self.paginationForSkins();
@@ -1002,15 +1002,16 @@ var ShopComponent = TaroEntity.extend({
 		// display units tab iff there's item to be sold
 		if (shopUnitsKeys.length > 0) {
 			$('[id=unit]').show();
-			if (!selectedTab) // if default selectedTab wasn't assigned, assign it as items
-			{
+			if (!selectedTab) {
 				selectedTab = 'units';
 			}
 		} else {
 			$('[id=unit]').hide();
 		}
 
-		if (shopItemsKeys.length === 0 || shopUnitsKeys.length === 0) {
+		if (shopItemsKeys.length > 0 && shopUnitsKeys.length > 0) {
+			$('.item-shop-navbar').show();
+		} else {
 			$('.item-shop-navbar').hide();
 		}
 
@@ -1356,8 +1357,8 @@ var ShopComponent = TaroEntity.extend({
 						type: 'button',
 						class: 'btn align-middle modd-coin-bg',
 						id: item._id,
-										style: "padding: 3px 6px;",
-										style: "padding: 3px 6px;",
+						style: "padding: 3px 6px;",
+						style: "padding: 3px 6px;",
 
 						style: "padding: 3px 6px;",
 
@@ -1373,9 +1374,9 @@ var ShopComponent = TaroEntity.extend({
 								style: 'height: 20px'
 							})
 						).append(
-							$('<div>',{
-								type:'div',
-								html:`<b>${item.price}</b>`
+							$('<div>', {
+								type: 'div',
+								html: `<b>${item.price}</b>`
 							})
 						)
 					)
@@ -1389,24 +1390,24 @@ var ShopComponent = TaroEntity.extend({
 					type: "button",
 					class: "btn text-white align-middle btn-unequip modd-coin-bg",
 					id: item._id,
-															style: "padding: 3px 6px;",
-															style: "padding: 3px 6px;",
+					style: "padding: 3px 6px;",
+					style: "padding: 3px 6px;",
 
 					style: "padding: 3px 6px;",
 
 					name: item.name || item.title,
 					owner: item.owner || "",
-				}).append("Equipped").hover(function(){
+				}).append("Equipped").hover(function () {
 					$(this).css({
-					"background-color": "red",
+						"background-color": "red",
 					}).text("Unequip")
-				}, function(){
-				$(this).css({
-					"background-color": "",
+				}, function () {
+					$(this).css({
+						"background-color": "",
 					}).text('Equipped')
 				})
 
-			} else if(self.shopKey === "Purchased"){
+			} else if (self.shopKey === "Purchased") {
 
 				var button = $('<div/>', {
 					type: 'div',
@@ -1420,8 +1421,8 @@ var ShopComponent = TaroEntity.extend({
 						type: 'button',
 						class: 'btn btn-danger align-middle btn-purchase-purchasable modd-coin-bg',
 						id: item._id,
-										style: "padding: 3px 6px;",
-										style: "padding: 3px 6px;",
+						style: "padding: 3px 6px;",
+						style: "padding: 3px 6px;",
 
 						style: "padding: 3px 6px;",
 
@@ -1448,8 +1449,8 @@ var ShopComponent = TaroEntity.extend({
 
 			modalBody.append(
 				$("<div/>", {
-					class: `shop-grid-items blue-hover ${item.status != 'not_purchased' ? " blue-border justify-center" :" justify-end btn-purchase-purchasable"}`,
-					id:item._id,
+					class: `shop-grid-items blue-hover ${item.status != 'not_purchased' ? " blue-border justify-center" : " justify-end btn-purchase-purchasable"}`,
+					id: item._id,
 					'data-purchasable': item.title || item.name,
 					'data-price': item.price
 				})
@@ -1491,7 +1492,7 @@ var ShopComponent = TaroEntity.extend({
 							$('#floating-button-equip').remove();
 						}
 					)
-					
+
 			);
 
 			if (item.target && item.target.entityType == 'unit') {
@@ -1543,7 +1544,7 @@ var ShopComponent = TaroEntity.extend({
 
 		var totalPages = Math.ceil(self.skinItems.length / self.perPageItems);
 
-		if(totalPages == 0){
+		if (totalPages == 0) {
 			$('#mod-shop-pagination').html('');
 			return;
 		}
