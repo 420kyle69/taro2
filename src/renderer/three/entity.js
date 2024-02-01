@@ -7,5 +7,8 @@ class Entity extends THREE.Group {
         this.mesh.scale.set(tex.image.width / 64, 1, tex.image.height / 64);
         this.add(this.mesh);
     }
+    setScale(sx, sy, sz) {
+        this.mesh.scale.set(sx, sy, sz);
+    }
 }
 //# sourceMappingURL=entity.js.map

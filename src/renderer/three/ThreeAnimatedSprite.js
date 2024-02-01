@@ -53,5 +53,9 @@ class ThreeAnimatedSprite extends Entity {
             this.tex.offset.set(offsetX, offsetY);
         }
     }
+    setScale(sx, sy, sz) {
+        super.setScale(sx, sy, sz);
+        this.sprite.scale.set(sx, sz);
+    }
 }
 //# sourceMappingURL=ThreeAnimatedSprite.js.map

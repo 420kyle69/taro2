@@ -64,4 +64,9 @@ class ThreeAnimatedSprite extends Entity {
 			this.tex.offset.set(offsetX, offsetY);
 		}
 	}
+
+	setScale(sx: number, sy: number, sz: number) {
+		super.setScale(sx, sy, sz);
+		this.sprite.scale.set(sx, sz);
+	}
 }
