@@ -18,9 +18,7 @@ class ThreeSprite extends THREE.Group {
 		const offsetY = 1 - 1 / this.tileV - (Math.floor(currentTile / this.tileH) % this.tileV) / this.tileV;
 		tex.offset.set(offsetX, offsetY);
 		const spriteMaterial = new THREE.SpriteMaterial({ transparent: true, map: tex });
-		// spriteMaterial.depthTest = false;
 		const sprite = new THREE.Sprite(spriteMaterial);
-		// sprite.renderOrder = 1001;
 		this.sprite = sprite;
 		this.add(sprite);
 	}
