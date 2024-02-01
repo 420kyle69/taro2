@@ -1,4 +1,4 @@
-class Entity extends THREE.Group {
+class ThreeBoxMesh extends THREE.Group {
 	mesh: THREE.Mesh;
 
 	constructor(tex: THREE.Texture) {

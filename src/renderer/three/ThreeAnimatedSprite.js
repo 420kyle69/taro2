@@ -1,4 +1,4 @@
-class ThreeAnimatedSprite extends Entity {
+class ThreeAnimatedSprite extends ThreeBoxMesh {
     constructor(tex) {
         super(tex);
         this.tex = tex;

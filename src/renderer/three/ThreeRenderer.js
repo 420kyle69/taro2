@@ -174,7 +174,7 @@ class ThreeRenderer {
                     this.animatedSprites.push(e);
                     return e;
                 }
-                return new Entity(tex);
+                return new ThreeBoxMesh(tex);
             };
             const ent = createEntity();
             layers.entities.add(ent);

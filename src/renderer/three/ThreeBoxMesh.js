@@ -11,4 +11,4 @@ class ThreeBoxMesh extends THREE.Group {
         this.mesh.scale.set(sx, sy, sz);
     }
 }
-//# sourceMappingURL=entity.js.map
+//# sourceMappingURL=ThreeBoxMesh.js.map
