@@ -885,7 +885,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 				if (entityA._category == 'unit') {
 					entityA.inflictDamage(entityB._stats.damageData);
 				}
-
 				taro.script.trigger(`${entityA._category}TouchesProjectile`, triggeredBy);
 				triggeredBy.projectileId = entityB.id();
 				entityA.script.trigger('entityTouchesProjectile', triggeredBy);
@@ -904,6 +903,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 			case 'sensor':
 				triggeredBy.sensorId = entityB.id();
 				var sensoringUnit = entityB.getOwnerUnit();
+				
 				if (sensoringUnit && sensoringUnit.script) {
 					sensoringUnit.script.trigger(`${entityA._category}EntersSensor`, triggeredBy);
 

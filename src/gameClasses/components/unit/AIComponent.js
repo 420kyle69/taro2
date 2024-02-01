@@ -22,7 +22,7 @@ var AIComponent = TaroEntity.extend({
 
 			if (unit._stats.ai.sensorRadius > 0 && unit.sensor == undefined) {
 				unit.sensor = new Sensor(unit, unit._stats.ai.sensorRadius);
-		   }
+		   	}
 
 			unit._stats.aiEnabled = unit._stats.ai.enabled;
 			if (unit._stats.aiEnabled) {
