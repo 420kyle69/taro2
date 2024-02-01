@@ -136,7 +136,7 @@ var ShopComponent = TaroEntity.extend({
 			});
 
 			// listen for item modal close.
-			$('#modd-item-shop-modal').on('hidden.bs.modal', function () {
+			$(document).on("hidden.bs.modal", "#modd-item-shop-modal", function () {
 				$('.popover').remove();
 				taro.client.myPlayer.control.updatePlayerInputStatus();
 			});
