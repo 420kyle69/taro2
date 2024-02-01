@@ -14,4 +14,8 @@ class ThreeBoxMesh extends THREE.Group {
 	setScale(sx: number, sy: number, sz: number) {
 		this.mesh.scale.set(sx, sy, sz);
 	}
+
+	setRotationY(rad: number) {
+		this.rotation.y = rad;
+	}
 }

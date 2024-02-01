@@ -230,7 +230,7 @@ class ThreeRenderer {
 				'transform',
 				(data: { x: number; y: number; rotation: number }) => {
 					ent.position.set(data.x / 64 - 0.5, 0, data.y / 64 - 0.5);
-					ent.rotation.y = -data.rotation;
+					ent.setRotationY(-data.rotation);
 				},
 				this
 			);

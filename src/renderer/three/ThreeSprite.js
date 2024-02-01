@@ -22,5 +22,8 @@ class ThreeSprite extends THREE.Group {
     setScale(sx, sy, sz = 1) {
         this.sprite.scale.set(sx, sy, sz);
     }
+    setRotationY(rad) {
+        this.sprite.material.rotation = rad;
+    }
 }
 //# sourceMappingURL=ThreeSprite.js.map

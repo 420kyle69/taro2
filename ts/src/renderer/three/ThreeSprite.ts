@@ -28,4 +28,8 @@ class ThreeSprite extends THREE.Group {
 	setScale(sx: number, sy: number, sz = 1) {
 		this.sprite.scale.set(sx, sy, sz);
 	}
+
+	setRotationY(rad: number) {
+		this.sprite.material.rotation = rad;
+	}
 }

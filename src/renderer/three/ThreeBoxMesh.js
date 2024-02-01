@@ -10,5 +10,8 @@ class ThreeBoxMesh extends THREE.Group {
     setScale(sx, sy, sz) {
         this.mesh.scale.set(sx, sy, sz);
     }
+    setRotationY(rad) {
+        this.rotation.y = rad;
+    }
 }
 //# sourceMappingURL=ThreeBoxMesh.js.map
