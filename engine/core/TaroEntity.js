@@ -4450,8 +4450,6 @@ var TaroEntity = TaroObject.extend({
 					var angle = ((this._rotate.z % (2 * Math.PI)) * 1000).toFixed(0);
 
 					if (this._hasMoved) {
-						//exclude AI controlled players from streaming
-						//if (this._category === 'player' && this._stats.controlledBy !== 'human') return;
 						//console.log("streaming", this._category, this._stats.name, this.id(), x, y, angle)
 						this._oldTranform = [this._translate.x, this._translate.y, this._rotate.z];
 
