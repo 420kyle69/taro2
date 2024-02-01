@@ -117,6 +117,9 @@ class ThreeRenderer {
                 if (['walls'].includes(layer.name)) {
                     this.voxelMap.addLayer(layer, 1);
                 }
+                if (['trees'].includes(layer.name)) {
+                    this.voxelMap.addLayer(layer, 2);
+                }
             });
         });
         for (let type in taro.game.data.projectileTypes) {
