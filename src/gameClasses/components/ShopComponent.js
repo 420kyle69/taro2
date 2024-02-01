@@ -1209,7 +1209,7 @@ var ShopComponent = TaroEntity.extend({
 		}
 
 		if (modalBody.html() == '') {
-			modalBody.append('<div class=\'col text-center\'>There\'s nothing to be displayed here</div>');
+			modalBody.append('<div style="margin-top : -15px; position: absolute;" class=\'col text-center \'>There\'s nothing to be displayed here</div>');
 		}
 		var modalUpdated = false;
 		if (self.oldModalHTMLBody != modalBody.html()) {
