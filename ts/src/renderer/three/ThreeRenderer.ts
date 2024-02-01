@@ -27,10 +27,10 @@ class ThreeRenderer {
 
 	private animations: Map<string, { frames: number[]; fps: number; repeat: number }> = new Map();
 
-	private entities: ThreeBoxMesh[] = [];
+	private entities: ThreeSprite[] = [];
 
 	private pointer = new THREE.Vector2();
-	private followedEntity: ThreeBoxMesh | null = null;
+	private followedEntity: ThreeSprite | null = null;
 
 	private animatedSprites: ThreeAnimatedSprite[] = [];
 
@@ -219,7 +219,7 @@ class ThreeRenderer {
 					this.animatedSprites.push(e);
 					return e;
 				}
-				return new ThreeBoxMesh(tex);
+				return new ThreeSprite(tex);
 			};
 
 			const ent = createEntity();

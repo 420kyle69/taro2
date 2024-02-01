@@ -1,4 +1,4 @@
-class ThreeAnimatedSprite extends ThreeBoxMesh {
+class ThreeAnimatedSprite extends ThreeSprite {
     constructor(tex) {
         super(tex);
         this.tex = tex;
@@ -6,24 +6,24 @@ class ThreeAnimatedSprite extends ThreeBoxMesh {
         this.runningTileArrayIndex = 0;
         this.maxDisplayTime = 0;
         this.elapsedTime = 0;
-        this.tileH = 1;
-        this.tileV = 1;
+        // private tileH = 1;
+        // private tileV = 1;
         this.currentTile = 0;
         this.repeat = 0;
         this.cycle = 0;
-        if (tex.userData.numColumns && tex.userData.numRows) {
-            this.tileH = tex.userData.numColumns;
-            this.tileV = tex.userData.numRows;
-        }
-        tex.repeat.set(1 / this.tileH, 1 / this.tileV);
-        const offsetX = (this.currentTile % this.tileH) / this.tileH;
-        const offsetY = 1 - 1 / this.tileV - (Math.floor(this.currentTile / this.tileH) % this.tileV) / this.tileV;
-        tex.offset.set(offsetX, offsetY);
-        const spriteMaterial = new THREE.SpriteMaterial({ map: tex });
-        // spriteMaterial.depthTest = false;
-        const sprite = new THREE.Sprite(spriteMaterial);
-        // sprite.renderOrder = 1001;
-        this.sprite = sprite;
+        // if (tex.userData.numColumns && tex.userData.numRows) {
+        // 	this.tileH = tex.userData.numColumns;
+        // 	this.tileV = tex.userData.numRows;
+        // }
+        // tex.repeat.set(1 / this.tileH, 1 / this.tileV);
+        // const offsetX = (this.currentTile % this.tileH) / this.tileH;
+        // const offsetY = 1 - 1 / this.tileV - (Math.floor(this.currentTile / this.tileH) % this.tileV) / this.tileV;
+        // tex.offset.set(offsetX, offsetY);
+        // const spriteMaterial = new THREE.SpriteMaterial({ map: tex });
+        // // spriteMaterial.depthTest = false;
+        // const sprite = new THREE.Sprite(spriteMaterial);
+        // // sprite.renderOrder = 1001;
+        // this.sprite = sprite;
         // this.add(sprite);
     }
     loop(playSpriteIndices, fps, repeat = 0) {
@@ -52,10 +52,6 @@ class ThreeAnimatedSprite extends ThreeBoxMesh {
             const offsetY = 1 - 1 / this.tileV - (Math.floor(this.currentTile / this.tileH) % this.tileV) / this.tileV;
             this.tex.offset.set(offsetX, offsetY);
         }
-    }
-    setScale(sx, sy, sz) {
-        super.setScale(sx, sy, sz);
-        this.sprite.scale.set(sx, sz);
     }
 }
 //# sourceMappingURL=ThreeAnimatedSprite.js.map

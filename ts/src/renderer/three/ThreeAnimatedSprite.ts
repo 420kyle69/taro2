@@ -1,4 +1,4 @@
-class ThreeAnimatedSprite extends ThreeBoxMesh {
+class ThreeAnimatedSprite extends ThreeSprite {
 	sprite;
 
 	private playSpriteIndices: number[] = [];
@@ -6,8 +6,8 @@ class ThreeAnimatedSprite extends ThreeBoxMesh {
 	private maxDisplayTime = 0;
 	private elapsedTime = 0;
 
-	private tileH = 1;
-	private tileV = 1;
+	// private tileH = 1;
+	// private tileV = 1;
 	private currentTile = 0;
 
 	private repeat = 0;
@@ -16,20 +16,20 @@ class ThreeAnimatedSprite extends ThreeBoxMesh {
 	constructor(private tex: THREE.Texture) {
 		super(tex);
 
-		if (tex.userData.numColumns && tex.userData.numRows) {
-			this.tileH = tex.userData.numColumns;
-			this.tileV = tex.userData.numRows;
-		}
+		// if (tex.userData.numColumns && tex.userData.numRows) {
+		// 	this.tileH = tex.userData.numColumns;
+		// 	this.tileV = tex.userData.numRows;
+		// }
 
-		tex.repeat.set(1 / this.tileH, 1 / this.tileV);
-		const offsetX = (this.currentTile % this.tileH) / this.tileH;
-		const offsetY = 1 - 1 / this.tileV - (Math.floor(this.currentTile / this.tileH) % this.tileV) / this.tileV;
-		tex.offset.set(offsetX, offsetY);
-		const spriteMaterial = new THREE.SpriteMaterial({ map: tex });
-		// spriteMaterial.depthTest = false;
-		const sprite = new THREE.Sprite(spriteMaterial);
-		// sprite.renderOrder = 1001;
-		this.sprite = sprite;
+		// tex.repeat.set(1 / this.tileH, 1 / this.tileV);
+		// const offsetX = (this.currentTile % this.tileH) / this.tileH;
+		// const offsetY = 1 - 1 / this.tileV - (Math.floor(this.currentTile / this.tileH) % this.tileV) / this.tileV;
+		// tex.offset.set(offsetX, offsetY);
+		// const spriteMaterial = new THREE.SpriteMaterial({ map: tex });
+		// // spriteMaterial.depthTest = false;
+		// const sprite = new THREE.Sprite(spriteMaterial);
+		// // sprite.renderOrder = 1001;
+		// this.sprite = sprite;
 		// this.add(sprite);
 	}
 
@@ -63,10 +63,5 @@ class ThreeAnimatedSprite extends ThreeBoxMesh {
 			const offsetY = 1 - 1 / this.tileV - (Math.floor(this.currentTile / this.tileH) % this.tileV) / this.tileV;
 			this.tex.offset.set(offsetX, offsetY);
 		}
-	}
-
-	setScale(sx: number, sy: number, sz: number) {
-		super.setScale(sx, sy, sz);
-		this.sprite.scale.set(sx, sz);
 	}
 }
