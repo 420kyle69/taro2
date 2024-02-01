@@ -3108,10 +3108,15 @@ var ActionComponent = TaroEntity.extend({
 						var player = self._script.param.getValue(action.player, vars);
 
 						if (player && player._stats && player._stats.clientId) {
-							taro.network.send('ui', {
+							const data = {
 								command: 'updateBackpack',
 								action: 'open'
-							}, player._stats.clientId);
+							};
+							if (taro.isServer) {
+								taro.network.send('ui', data, player._stats.clientId);
+							} else if (player._stats.clientId === taro.network.id()) {
+								taro.playerUi.updateBackpack(data);
+							}
 						}
 						break;
 
@@ -3119,10 +3124,15 @@ var ActionComponent = TaroEntity.extend({
 						var player = self._script.param.getValue(action.player, vars);
 
 						if (player && player._stats && player._stats.clientId) {
-							taro.network.send('ui', {
+							const data = {
 								command: 'updateBackpack',
 								action: 'close'
-							}, player._stats.clientId);
+							};
+							if (taro.isServer) {
+								taro.network.send('ui', data, player._stats.clientId);
+							} else if (player._stats.clientId === taro.network.id()) {
+								taro.playerUi.updateBackpack(data);
+							}
 						}
 						break;
 
@@ -3131,11 +3141,16 @@ var ActionComponent = TaroEntity.extend({
 						var elementId = self._script.param.getValue(action.elementId, vars);
 
 						if (player && player._stats && player._stats.clientId && elementId) {
-							taro.network.send('ui', {
+							const data = {
 								command: 'updateUiElement',
 								elementId: elementId,
 								action: 'show'
-							}, player._stats.clientId);
+							};
+							if (taro.isServer) {
+								taro.network.send('ui', data, player._stats.clientId);
+							} else if (player._stats.clientId === taro.network.id()) {
+								taro.playerUi.updateUiElement(data);
+							}
 						}
 
 						break;
@@ -3145,27 +3160,38 @@ var ActionComponent = TaroEntity.extend({
 						var elementId = self._script.param.getValue(action.elementId, vars);
 
 						if (player && player._stats && player._stats.clientId && elementId) {
-							taro.network.send('ui', {
+							const data = {
 								command: 'updateUiElement',
 								elementId: elementId,
 								action: 'hide'
-							}, player._stats.clientId);
+							};
+							if (taro.isServer) {
+								taro.network.send('ui', data, player._stats.clientId);
+							} else if (player._stats.clientId === taro.network.id()) {
+								taro.playerUi.updateUiElement(data);
+							}
 						}
 
 						break;
 
 					case 'setUIElementHtml':
-						var elementId = self._script.param.getValue(action.elementId, vars);
-						var htmlStr = taro.sanitizer(self._script.param.getValue(action.htmlStr, vars));
-						var player = self._script.param.getValue(action.player, vars);
+						var elementId = self._script.variable.getValue(action.elementId, vars);
+						const sanitizerFunction = taro.isClient ? taro.clientSanitizer : taro.sanitizer;
+						var htmlStr = sanitizerFunction(self._script.variable.getValue(action.htmlStr, vars));
+						var player = self._script.variable.getValue(action.player, vars);
 
 						if (elementId && player && player._stats && player._stats.clientId) {
-							taro.network.send('ui', {
+							const data = {
 								command: 'updateUiElement',
 								elementId: elementId,
 								action: 'setHtml',
 								htmlStr: htmlStr || ''
-							}, player._stats.clientId);
+							};
+							if (taro.isServer) {
+								taro.network.send('ui', data, player._stats.clientId);
+							} else if (player._stats.clientId === taro.network.id()) {
+								taro.playerUi.updateUiElement(data);
+							}
 						}
 						break;
 
@@ -3175,12 +3201,17 @@ var ActionComponent = TaroEntity.extend({
 						var player = self._script.param.getValue(action.player, vars);
 
 						if (elementId && player && player._stats && player._stats.clientId) {
-							taro.network.send('ui', {
+							const data = {
 								command: 'updateUiElement',
 								elementId: elementId,
 								action: 'addClass',
 								className: className || ''
-							}, player._stats.clientId);
+							};
+							if (taro.isServer) {
+								taro.network.send('ui', data, player._stats.clientId);
+							} else if (player._stats.clientId === taro.network.id()) {
+								taro.playerUi.updateUiElement(data);
+							}
 						}
 						break;
 
@@ -3190,12 +3221,17 @@ var ActionComponent = TaroEntity.extend({
 						var player = self._script.param.getValue(action.player, vars);
 
 						if (elementId && player && player._stats && player._stats.clientId) {
-							taro.network.send('ui', {
+							const data = {
 								command: 'updateUiElement',
 								elementId: elementId,
 								action: 'removeClass',
 								className: className || ''
-							}, player._stats.clientId);
+							};
+							if (taro.isServer) {
+								taro.network.send('ui', data, player._stats.clientId);
+							} else if (player._stats.clientId === taro.network.id()) {
+								taro.playerUi.updateUiElement(data);
+							}
 						}
 						break;
 
