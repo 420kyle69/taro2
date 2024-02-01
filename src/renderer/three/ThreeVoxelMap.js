@@ -84,12 +84,7 @@ function buildMeshDataFromCells(cells, tilesetCols, xStep, yStep, tileWidth, til
     const nzGeometry = new THREE.PlaneGeometry(1, 1);
     nzGeometry.rotateY(Math.PI);
     nzGeometry.translate(0, 0, -0.5);
-    const invertUvs = [pxGeometry, nxGeometry, pzGeometry, nzGeometry];
-    for (let geo of invertUvs) {
-        for (let i = 0; i < geo.attributes.uv.array.length; i += 2) {
-            geo.attributes.uv.array[i + 1] = 1.0 - geo.attributes.uv.array[i + 1];
-        }
-    }
+    const invertUvs = [nyGeometry];
     const geometries = [pxGeometry, nxGeometry, pyGeometry, nyGeometry, pzGeometry, nzGeometry];
     const meshes = {
         positions: [],
@@ -118,14 +113,26 @@ function buildMeshDataFromCells(cells, tilesetCols, xStep, yStep, tileWidth, til
             const halfPixelOffset = { x: singlePixelOffset.x / 2, y: singlePixelOffset.y / 2 };
             const xOffset = xStep * xIdx + halfPixelOffset.x;
             const yOffset = 1 - yStep * yIdx - yStep - halfPixelOffset.y;
-            geometries[i].attributes.uv.array[0] = xOffset;
-            geometries[i].attributes.uv.array[1] = yOffset + yStep;
-            geometries[i].attributes.uv.array[2] = xOffset + xStep - singlePixelOffset.x;
-            geometries[i].attributes.uv.array[3] = yOffset + yStep;
-            geometries[i].attributes.uv.array[4] = xOffset;
-            geometries[i].attributes.uv.array[5] = yOffset + singlePixelOffset.y;
-            geometries[i].attributes.uv.array[6] = xOffset + xStep - singlePixelOffset.x;
-            geometries[i].attributes.uv.array[7] = yOffset + singlePixelOffset.y;
+            if (invertUvs.includes(geometries[i])) {
+                geometries[i].attributes.uv.array[4] = xOffset;
+                geometries[i].attributes.uv.array[5] = yOffset + yStep;
+                geometries[i].attributes.uv.array[6] = xOffset + xStep - singlePixelOffset.x;
+                geometries[i].attributes.uv.array[7] = yOffset + yStep;
+                geometries[i].attributes.uv.array[0] = xOffset;
+                geometries[i].attributes.uv.array[1] = yOffset + singlePixelOffset.y;
+                geometries[i].attributes.uv.array[2] = xOffset + xStep - singlePixelOffset.x;
+                geometries[i].attributes.uv.array[3] = yOffset + singlePixelOffset.y;
+            }
+            else {
+                geometries[i].attributes.uv.array[0] = xOffset;
+                geometries[i].attributes.uv.array[1] = yOffset + yStep;
+                geometries[i].attributes.uv.array[2] = xOffset + xStep - singlePixelOffset.x;
+                geometries[i].attributes.uv.array[3] = yOffset + yStep;
+                geometries[i].attributes.uv.array[4] = xOffset;
+                geometries[i].attributes.uv.array[5] = yOffset + singlePixelOffset.y;
+                geometries[i].attributes.uv.array[6] = xOffset + xStep - singlePixelOffset.x;
+                geometries[i].attributes.uv.array[7] = yOffset + singlePixelOffset.y;
+            }
             targetData.uvs.push(...geometries[i].attributes.uv.array);
             targetData.normals.push(...geometries[i].attributes.normal.array);
             const localIndices = [...geometries[i].index.array];
