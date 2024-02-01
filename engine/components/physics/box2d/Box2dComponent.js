@@ -582,6 +582,11 @@ var PhysicsComponent = TaroEventingClass.extend({
 					switch (action.type) {
 						case 'createBody':
 							self.createBody(action.entity, action.def);
+
+							// emit events for updating visibility mask
+							if (taro.isClient && action.entity._category === 'unit' && action.def.type === 'static') {
+								taro.client.emit('update-static-units');
+							}
 							break;
 
 						case 'destroyBody':
@@ -762,10 +767,12 @@ var PhysicsComponent = TaroEventingClass.extend({
 
 									if (entity.prevKeyFrame && entity.nextKeyFrame &&
 										entity.prevKeyFrame[1] && entity.nextKeyFrame[1] && (
-											entity.prevKeyFrame[1][0] != entity.nextKeyFrame[1][0] ||
-											entity.prevKeyFrame[1][1] != entity.nextKeyFrame[1][1] ||
-											entity.prevKeyFrame[1][2] != entity.nextKeyFrame[1][2])
+											parseFloat(entity.prevKeyFrame[1][0]).toFixed(1) != parseFloat(entity.nextKeyFrame[1][0]).toFixed(1) ||
+											parseFloat(entity.prevKeyFrame[1][1]).toFixed(1) != parseFloat(entity.nextKeyFrame[1][1]).toFixed(1) ||
+											parseFloat(entity.prevKeyFrame[1][2]).toFixed(2) != parseFloat(entity.nextKeyFrame[1][2]).toFixed(2)
+										)
 									) {
+										// console.log("is moving", entity.prevKeyFrame[1][0], entity.nextKeyFrame[1][0], entity.prevKeyFrame[1][1], entity.nextKeyFrame[1][1], entity.prevKeyFrame[1][2], entity.nextKeyFrame[1][2])
 										entity.isTransforming(true);
 									}
 								}
@@ -878,14 +885,13 @@ var PhysicsComponent = TaroEventingClass.extend({
 				if (entityA._category == 'unit') {
 					entityA.inflictDamage(entityB._stats.damageData);
 				}
-
 				taro.script.trigger(`${entityA._category}TouchesProjectile`, triggeredBy);
 				triggeredBy.projectileId = entityB.id();
 				entityA.script.trigger('entityTouchesProjectile', triggeredBy);
 				break;
 
 			case 'region':
-				var region = taro.script.variable.getValue({
+				var region = taro.script.param.getValue({
 					function: 'getVariable',
 					variableName: entityB._stats.id
 				});
@@ -897,6 +903,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 			case 'sensor':
 				triggeredBy.sensorId = entityB.id();
 				var sensoringUnit = entityB.getOwnerUnit();
+				
 				if (sensoringUnit && sensoringUnit.script) {
 					sensoringUnit.script.trigger(`${entityA._category}EntersSensor`, triggeredBy);
 
@@ -936,7 +943,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 
 		switch (entityB._category) {
 			case 'region':
-				var region = taro.script.variable.getValue({
+				var region = taro.script.param.getValue({
 					function: 'getVariable',
 					variableName: entityB._stats.id
 				});

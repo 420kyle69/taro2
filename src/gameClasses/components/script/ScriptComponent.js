@@ -17,7 +17,7 @@ var ScriptComponent = TaroEntity.extend({
 		self.scriptRuns = {};
 		self.last50Actions = [];
 
-		self.addComponent(VariableComponent, entity);
+		self.addComponent(ParameterComponent, entity);
 		self.addComponent(ActionComponent, entity);
 		self.addComponent(ConditionComponent, entity);
 

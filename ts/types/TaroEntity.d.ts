@@ -1,5 +1,5 @@
 declare class TaroEntity extends TaroObject {
-	isTransforming: () => boolean;
+	isTransforming (bool?: boolean): boolean;
     phaserEntity: PhaserEntity;
     nextKeyFrame: {x: number, y: number, rotation: number};
 	lastUpdatedData: any;

@@ -57,7 +57,17 @@ class GameScene extends PhaserScene {
 			this.trackingDelay = 60;
 		}
 
+		let resized = false;
+
 		this.scale.on(Phaser.Scale.Events.RESIZE, () => {
+			console.log('resize')
+			if (resized) {
+				resized = false;
+			} else {
+				resized = true;
+				this.game.scale.setGameSize(window.outerWidth * window.devicePixelRatio, window.outerHeight * window.devicePixelRatio);
+				//window.dispatchEvent(new Event('resize'));
+			}
 			if (this.zoomSize) {
 				camera.zoom = this.calculateZoom();
 				taro.client.emit('scale', { ratio: camera.zoom * this.resolutionCoef });
@@ -135,9 +145,11 @@ class GameScene extends PhaserScene {
 		});
 
 		taro.client.on('position-camera', (x: number, y: number) => {
-			x -= camera.width / 2;
-			y -= camera.height / 2;
-			camera.setScroll(x, y);
+			if (!taro.developerMode.active || taro.developerMode.activeTab === 'play') {
+				x -= camera.width / 2;
+				y -= camera.height / 2;
+				camera.setScroll(x, y);
+			}
 		});
 
 		taro.client.on('deadzone-camera', (width: number, heigth: number) => {

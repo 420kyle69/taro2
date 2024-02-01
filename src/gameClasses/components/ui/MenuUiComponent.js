@@ -733,9 +733,9 @@ var MenuUiComponent = TaroEntity.extend({
 
 	toggleCustomIngameUi: function (show) {
 		if (show) {
-		    window.renderHBSTemplate && window.renderHBSTemplate({}, taro.game.data?.ui?.inGameUiFull?.htmlData, "custom-ingame-ui-container");
+			$('#custom-ingame-ui-container').show();
 		} else {
-			$('#custom-ingame-ui-container').html('');
+			$('#custom-ingame-ui-container').hide();
 		}
 	},
 

@@ -18,6 +18,9 @@ var PlayerUiComponent = TaroEntity.extend({
 		self.playerAttributeDivElement = null;
 
 		self.moddItemShopModalElement = null;
+
+		$("#custom-ingame-ui-container").hide();
+		window.renderHBSTemplate && window.renderHBSTemplate({}, taro.game.data?.ui?.inGameUiFull?.htmlData, "custom-ingame-ui-container");
 	},
 
 	setupListeners: function () {

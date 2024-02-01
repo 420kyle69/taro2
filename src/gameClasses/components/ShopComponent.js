@@ -134,11 +134,13 @@ var ShopComponent = TaroEntity.extend({
 				self.purchaseUnit($(this).attr('id'));
 				// self.confirmPurchase($(this).attr("id"))
 			});
-			// listen for item modal close
+
+			// listen for item modal close.
 			$('#modd-item-shop-modal').on('hidden.bs.modal', function () {
 				$('.popover').remove();
 				taro.client.myPlayer.control.updatePlayerInputStatus();
 			});
+
 			// purchase purchasable
 			$(document).on('click', '.btn-purchase-purchasable', function () {
 				if ($(this).hasClass('disabled')) return;
@@ -231,7 +233,7 @@ var ShopComponent = TaroEntity.extend({
 				var button = $(this);
 
 				$.ajax({
-					url: `/api/user/equip/${taro.game.data.defaultData.parentGame || taro.client.server.gameId}/${button.attr('id')}`,
+					url: `/api/user/equip/${taro.game.data.defaultData.parentGame || taro.client.server.gameId}/${button.attr('skinId')}`,
 					dataType: 'html',
 					type: 'POST',
 					success: function (data) {
@@ -303,7 +305,7 @@ var ShopComponent = TaroEntity.extend({
 						purchasableItems.forEach(function (purchasable, index) {
 							let html = `<div id="${purchasable._id}-locked" class="border rounded bg-light p-2 mx-2 ${index < 2 ? 'mb-3' : ''} col-5 d-flex flex-column justify-content-between">` +
 								'  <div class="my-2 text-center">' +
-								`	<img src=" ${purchasable.image} " style="height: 45px; width: 45px;" />` +
+								`	<img id="${purchasable._id}_image" src=" ${purchasable.image} " style="height: 45px; width: 45px;" />` +
 								'	 </div>' +
 								'	 <div class="d-flex justify-content-center action-button-container">';
 							if (purchasable.soldForSocialShare) {
@@ -390,7 +392,7 @@ var ShopComponent = TaroEntity.extend({
 					purchasableItems.forEach(function (purchasable, index) {
 						let html = `<div id="skin-list-${purchasable._id}" class="border rounded bg-light p-2 mx-2 ${index < 2 ? 'mb-3' : ''} col-5 d-flex flex-column justify-content-between">` +
 							'  <div class="my-2 text-center">' +
-							`	<img src=" ${purchasable.image} " style="height: 45px; width: 45px;" />` +
+							`	<img id="${purchasable._id}_image" src=" ${purchasable.image} " style="height: 45px; width: 45px;" />` +
 							'	 </div>' +
 							'	 <div class="d-flex justify-content-center action-button-container">';
 						if (purchasable.soldForSocialShare) {
@@ -487,7 +489,7 @@ var ShopComponent = TaroEntity.extend({
 					if (purchasableInfo && purchasableInfo.html) {
 						details.removeClass('btn-purchase-purchasable');
 						purchasableInfo.html('<span class=\'fas fa-check text-success\'></span>');
-					}					
+					}
 
 					window.purchased({
 						type: "ingame-skin",
@@ -694,10 +696,10 @@ var ShopComponent = TaroEntity.extend({
 						self.shopKey = key;
 					}
 
-					if(key == 'Purchased'){
+					if (key == 'Purchased') {
 						keyDiv = $('<li/>', {
-							class: `list-group-item list-group-item-action cursor-pointer ${(key == self.shopKey) ? 'active' : ''}`,
-							text: `Purchased (${self.userSkinCount})`,
+							class: `owned-skins cursor-pointer p-2 ${(key == self.shopKey) ? 'active' : ''}`,
+							html: `<strong> Owned Skins </strong> (${self.userSkinCount})`,
 							name: key
 						}).on('click', function () {
 							self.shopKey = $(this).attr('name');
@@ -709,13 +711,13 @@ var ShopComponent = TaroEntity.extend({
 							self.updateModdShop();
 						});
 
-						keyList.append(keyDiv);	
+						keyList.append(keyDiv);
 						continue;
 					}
 
 					keyDiv = $('<li/>', {
-						class: `list-group-item list-group-item-action cursor-pointer ${(key == self.shopKey) ? 'active' : ''}`,
-						text: `${taro.game.data.unitTypes[key].name} (${self.unitSkinCount[key]})`,
+						class: `other-lists cursor-pointer mt-1 p-2 ${(key == self.shopKey) ? 'active' : ''}`,
+						html: `<strong>${taro.game.data.unitTypes[key].name}</strong> (${self.unitSkinCount[key]})`,
 						name: key
 					}).on('click', function () {
 						self.shopKey = $(this).attr('name');
@@ -773,7 +775,7 @@ var ShopComponent = TaroEntity.extend({
 		{
 
 			// Adding all Purchased skins tab
-			if(self.shopKey == 'Purchased'){
+			if (self.shopKey == 'Purchased') {
 				self.skinItems = self.userSkinPurchases;
 				self.currentPagination = 1;
 				self.paginationForSkins();
@@ -872,7 +874,7 @@ var ShopComponent = TaroEntity.extend({
 	},
 	getItemPopoverHtml: function (item, shopItem) {
 		var self = this;
-		var html = '';
+		var html = '<div class="modal-bg-color text-white">';
 		var ownerPlayer = taro.client.myPlayer;
 		var ownerUnit = taro.$(ownerPlayer._stats.selectedUnitId);
 		if (item.description) {
@@ -901,7 +903,7 @@ var ShopComponent = TaroEntity.extend({
 				requirements += `<p  class="mb-2 ml-2 no-selection ${requirementsSatisfied}">${taro.checkAndGetNumber(requiredQty || '')} ${taro.clientSanitizer(item.name)}</p>`;
 			}
 			if (requirements) {
-				html += '<div class=\'mb-2\'>';
+				html += '<div class=\'mb-2 \'>';
 				html += '<p class=\'font-weight-bold mb-2\'>Requirements:</p>';
 				html += requirements;
 				html += '</div>';
@@ -933,7 +935,7 @@ var ShopComponent = TaroEntity.extend({
 			}
 
 			if (shopItem.price.coins) {
-				prices += `<p><span><img src="${assetsProvider}/assets/images/coin.svg" style="height:20px"/></span>${shopItem.price.coins}</p>`;
+				prices += `<p><span><img src="${assetsProvider}/assets/images/coin_white.svg" style="height:20px"/></span>${shopItem.price.coins}</p>`;
 			}
 			html += '<p class=\'font-weight-bold mb-2\'>Price:</p>';
 			if (prices) {
@@ -1000,20 +1002,21 @@ var ShopComponent = TaroEntity.extend({
 		// display units tab iff there's item to be sold
 		if (shopUnitsKeys.length > 0) {
 			$('[id=unit]').show();
-			if (!selectedTab) // if default selectedTab wasn't assigned, assign it as items
-			{
+			if (!selectedTab) {
 				selectedTab = 'units';
 			}
 		} else {
 			$('[id=unit]').hide();
 		}
 
-		if (shopItemsKeys.length === 0 || shopUnitsKeys.length === 0) {
+		if (shopItemsKeys.length > 0 && shopUnitsKeys.length > 0) {
+			$('.item-shop-navbar').show();
+		} else {
 			$('.item-shop-navbar').hide();
 		}
 
 		var modalBody = $('<div/>', {
-			class: 'row text-center'
+			class: 'row text-center shop-grid-container'
 		});
 
 		var ownerPlayer = taro.client.myPlayer;
@@ -1060,8 +1063,11 @@ var ShopComponent = TaroEntity.extend({
 					var itemImage = $('<div/>', {
 						id: shopItemsKeys[i],
 						isadblockenabled: isAdBlockEnabled,
-						class: 'col-sm-2-5 rounded align-bottom btn-purchase-item item-shop-button',
-						style: 'position: relative;',
+						class: `rounded align-bottom btn-purchase-item item-shop-button grey-bordered ${isItemAffordable && isItemCoinsAffordable && requirementsSatisfied ? 'item-bg-style-2' : 'item-bg-style-1'} `,
+						style: 'position: relative; width: 100%;',
+						'data-toggle': 'popover',
+						'data-placement': 'top',
+						'data-content': itemDetail.prop('outerHTML'),
 						name: item.name,
 						requirementsSatisfied: !!requirementsSatisfied,
 						isItemAffordable: !!isItemAffordable,
@@ -1079,34 +1085,31 @@ var ShopComponent = TaroEntity.extend({
 						var img = $('<div/>').html(`img_index_${imgArray.length}`);
 						imgArray.push({
 							wrapper: img,
-							value: `<img src='${item.inventoryImage || item.cellSheet.url}' style='width: auto; height: auto; max-width: 55px; max-height: 55px'>`
+							value: `<img src='${item.inventoryImage || item.cellSheet.url}' style='width: 75px; height: 75px; background-color : #6b7280; padding : 8px; margin-top : 6px;  border-radius : 4px; object-fit:contain;'>`
 						});
 
 						if (shopItem.price.coins) {
 							var itemImageElement = $('<img/>', {
-								src: `${assetsProvider}/assets/images/coin.svg`,
-								style: 'width: 20px; height: 20px; position: absolute; top: 10px; right: 15px;'
+								src: `${assetsProvider}/assets/images/coin_white.svg`,
+								style: 'width: 20px; height: 20px; position: absolute; top: 6px; right: 6px;'
 							});
 							itemImage.append(itemImageElement);
 						}
 
-						var itemName = '<div class=\'mx-2 mt-2 mb-0 no-selection\' style=\'line-height:0.7  !important; overflow-wrap: break-word;\'><small>';
+						var itemName = '<div class=\'page-link no-selection\' style=\'line-height:1 !important; font-size: 12px; font-weight : 600; overflow-wrap: break-word;\'>';
 						if (itemQuantity > 1) {
-							itemName += `${itemQuantity}x `;
+							itemName += `${itemQuantity} x `;
 						}
 						itemName += taro.clientSanitizer(item.name);
-						itemName += '</small></div>';
-
+						itemName += '</div>';
 						var combine = $('<div/>', {
-							class: `mx-2 p-3 mb-3 rounded item-shop-button-div d-flex flex-column justify-content-end align-items-center ${bgColor}`,
-							style: 'min-height:110px;max-height:110px;position:relative;',
-							'data-toggle': 'popover',
-							'data-placement': 'top',
-							'data-content': itemDetail.prop('outerHTML')
+							class: `rounded item-shop-button-div d-flex flex-column justify-content-end align-items-center`,
+							style: 'min-height:110px;position:relative;',
 						}).append(img).append(itemName);
 
-						combine.popover({
+						itemImage.popover({
 							html: true,
+							style: 'background-color: #272e37e5; color: white;',
 							trigger: 'manual'
 						})
 							.on("mouseenter", function () {
@@ -1206,7 +1209,7 @@ var ShopComponent = TaroEntity.extend({
 		}
 
 		if (modalBody.html() == '') {
-			modalBody.append('<div class=\'col text-center\'>There\'s nothing to be displayed here</div>');
+			modalBody.append('<div style="margin-top : -15px; position: absolute;" class=\'col text-center \'>There\'s nothing to be displayed here</div>');
 		}
 		var modalUpdated = false;
 		if (self.oldModalHTMLBody != modalBody.html()) {
@@ -1334,12 +1337,11 @@ var ShopComponent = TaroEntity.extend({
 		var self = this;
 
 		var modalBody = $('<div/>', {
-			class: 'row text-center'
+			class: 'row text-center shop-grid-container'
 		});
 
 		for (let i = 0; i < items.length; i++) {
 			var item = items[i];
-			// console.log(item)
 
 			if (item.status == 'not_purchased') {
 
@@ -1349,67 +1351,90 @@ var ShopComponent = TaroEntity.extend({
 
 				if (item.soldForSocialShare) {
 					var button = self.buttonForSocialShare(item);
+
 				} else {
 					var button = $('<button/>', {
 						type: 'button',
-						class: 'btn btn-outline-secondary align-middle btn-purchase-purchasable',
+						class: 'btn align-middle modd-coin-bg',
 						id: item._id,
+						style: "padding: 3px 6px;",
+						style: "padding: 3px 6px;",
+
+						style: "padding: 3px 6px;",
+
 						'data-purchasable': item.title || item.name,
 						'data-price': item.price
 					}).append(
 						$('<div/>', {
-							class: 'd-flex align-items-center'
+							class: 'd-flex align-items-center text-white bold'
 						}).append(
 							$('<img/>', {
-								src: `${assetsProvider}/assets/images/coin.svg`,
+								src: `${assetsProvider}/assets/images/coin_white.svg`,
 								class: 'mr-1',
 								style: 'height: 20px'
 							})
-						).append(item.price)
-					);
+						).append(
+							$('<div>', {
+								type: 'div',
+								html: `<b>${item.price}</b>`
+							})
+						)
+					)
 				}
 			} else if (item.status == 'purchased') {
-				var button = $('<button/>', {
-					type: 'button',
-					class: 'btn btn-outline-success align-middle btn-equip',
-					id: item._id,
-					name: item.title || item.name,
-					owner: item.owner || ""
-				}).append('Equip');
+				var button = $('<div/>', {
+					type: 'div',
+				});
 			} else if (item.status == 'equipped') {
-				var button = $('<button/>', {
-					type: 'button',
-					class: 'btn btn-success align-middle btn-unequip',
+				var button = $("<button/>", {
+					type: "button",
+					class: "btn text-white align-middle btn-unequip modd-coin-bg",
 					id: item._id,
+					style: "padding: 3px 6px;",
+					style: "padding: 3px 6px;",
+
+					style: "padding: 3px 6px;",
+
 					name: item.name || item.title,
-					owner: item.owner || ""
-				}).append('Equipped');
-			} else if(self.shopKey === "Purchased"){
-				var button = $('<button/>', {
-					type: 'button',
-					class: 'btn btn-outline-success align-middle btn-equip',
-					id: item._id,
-					name: item.title || item.name,
 					owner: item.owner || "",
-					disabled: true
-				}).append('Purchased');
+				}).append("Equipped").hover(function () {
+					$(this).css({
+						"background-color": "red",
+					}).text("Unequip")
+				}, function () {
+					$(this).css({
+						"background-color": "",
+					}).text('Equipped')
+				})
+
+			} else if (self.shopKey === "Purchased") {
+
+				var button = $('<div/>', {
+					type: 'div',
+				});
+
 			} else if (item.status == undefined) {
 				if (item.soldForSocialShare) {
 					var button = self.buttonForSocialShare(item, true);
 				} else {
 					var button = $('<button/>', {
 						type: 'button',
-						class: 'btn btn-danger align-middle btn-purchase-purchasable',
+						class: 'btn btn-danger align-middle btn-purchase-purchasable modd-coin-bg',
 						id: item._id,
+						style: "padding: 3px 6px;",
+						style: "padding: 3px 6px;",
+
+						style: "padding: 3px 6px;",
+
 						'data-purchasable': item.name || item.title,
 						'data-price': item.price,
 						'data-unauthenticated': 'true'
 					}).append(
 						$('<div/>', {
-							class: 'd-flex align-items-center'
+							class: 'd-flex align-items-center text-white bold modd-coin-bg'
 						}).append(
 							$('<img/>', {
-								src: `${assetsProvider}/assets/images/coin.svg`,
+								src: `${assetsProvider}/assets/images/coin_white.svg`,
 								class: 'mr-1',
 								style: 'height: 20px'
 							})
@@ -1423,17 +1448,51 @@ var ShopComponent = TaroEntity.extend({
 			let itemDetails = null;
 
 			modalBody.append(
-				$('<div/>', {
-					class: 'col-sm-3 py-3 d-flex flex-column justify-content-end align-items-center'
+				$("<div/>", {
+					class: `shop-grid-items blue-hover ${item.status != 'not_purchased' ? " blue-border justify-center" : " justify-end btn-purchase-purchasable"}`,
+					id: item._id,
+					'data-purchasable': item.title || item.name,
+					'data-price': item.price
 				})
-					.append($('<div/>')
-						.append($('<div/>', {
-							id: `${item._id}_image`,
-							style: clipping,
-							class: 'is-mobile'
-						})))
-					.append('<br/>')
-					.append(button)
+					.append(
+						$("<div/>").append(
+							$("<div/>", {
+								id: `${item._id}_image`,
+								style: clipping,
+								class: "is-mobile",
+							})
+						)
+					).append( item.status === "not_purchased" ? "<br/>" : "")
+					.append(button).hover(
+						function () {
+							// On hover
+							if (items[i].status == "not_purchased" || items[i].status == "equipped") {
+								return;
+							}
+
+							var floatingButton = $("<button/>", {
+								type: "button",
+								class:'btn btn-equip',
+								id:'floating-button-equip',
+								name: items[i].title || items[i].name,
+								skinId : items[i]._id,
+								owner: items[i].owner || "",
+								style: "position: absolute; background-color: #254EDB;color: white; border: none;",
+							}).text("Equip");
+
+							$(this).append(floatingButton);
+						},
+						function () {
+
+							if (items[i].status == 'not_purchased' || items[i].status == "equipped") {
+								return;
+							}
+							// On hover out
+							// Remove the floating button when hover out
+							$('#floating-button-equip').remove();
+						}
+					)
+
 			);
 
 			if (item.target && item.target.entityType == 'unit') {
@@ -1473,8 +1532,9 @@ var ShopComponent = TaroEntity.extend({
 					img.style.backgroundRepeat = 'no-repeat';
 					img.style.backgroundPosition = 'center center';
 					img.style.backgroundSize = 'contain';
-					img.style.maxHeight = '64px';
-					img.style.maxWidth = '64px';
+
+					img.style.height = '64px';
+					img.style.width = '64px';
 				}
 			};
 		}
@@ -1483,6 +1543,12 @@ var ShopComponent = TaroEntity.extend({
 		var self = this;
 
 		var totalPages = Math.ceil(self.skinItems.length / self.perPageItems);
+
+		if (totalPages == 0) {
+			$('#mod-shop-pagination').html('');
+			return;
+		}
+
 		var maxPageNumber = Math.min(11, totalPages);
 		if (taro.isMobile) {
 			maxPageNumber = Math.min(3, totalPages);
@@ -1493,12 +1559,11 @@ var ShopComponent = TaroEntity.extend({
 		self.renderSkinsButtons(items);
 
 		var html = '<nav aria-label="Page navigation">';
-		html += '<ul class="pagination m-0">';
-		html += '<li class="page-item skin-pagination" data-text="previous"><span class="page-link">Previous</span></li>';
+		html += '<ul class="pagination m-2">';
 		for (var i = Math.max(1, currentPage); i < Math.min(totalPages + 1, currentPage + maxPageNumber + 1); i++) {
-			html += `<li class="page-item  skin-pagination ${self.currentPagination == i ? 'active' : ''}" data-text="${i}"><span class="page-link">${i}</span></li>`;
+			html += `<li class="page-item  skin-pagination ${self.currentPagination == i ? 'active' : ''}" data-text="${i}"><span class="page-link"><b>${i}</b></span></li>`;
 		}
-		html += '<li class="page-item  skin-pagination" data-text="next"><span class="page-link">Next</span></li>';
+		html += '<li class="page-item  skin-pagination" data-text="next"><span class="page-link"><b>&gt;</b></span></li>';
 		html += '</ul>';
 		html += '</nav>';
 
@@ -1781,4 +1846,6 @@ var ShopComponent = TaroEntity.extend({
 if (typeof (module) !== 'undefined' && typeof (module.exports) !== 'undefined') {
 	module.exports = ShopComponent;
 }
+
+
 

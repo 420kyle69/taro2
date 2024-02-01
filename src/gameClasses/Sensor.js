@@ -38,7 +38,8 @@ var Sensor = TaroEntityPhysics.extend({
 					}],
 					collidesWith: {
 						units: true,
-						items: true
+						items: true,
+						projectiles: true
 					}
 				}
 			};
