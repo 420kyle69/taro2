@@ -138,10 +138,12 @@ class ThreeRenderer {
 
 		taro.game.data.map.tilesets.forEach((tileset) => {
 			const tex = ThreeTextureManager.instance().textureMap.get(tileset.image);
+			const cols = Math.floor(tex.image.width / tileset.tilewidth);
+
 			tex.image = resizeImageToPowerOf2(tex.image);
 			tex.generateMipmaps = false;
 
-			this.voxelMap = new ThreeVoxelMap(tex, tileset.columns);
+			this.voxelMap = new ThreeVoxelMap(tex, tileset.tilewidth, tileset.tileheight, cols);
 			this.scene.add(this.voxelMap);
 
 			taro.game.data.map.layers.forEach((layer) => {

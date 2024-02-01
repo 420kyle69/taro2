@@ -1,8 +1,10 @@
 class ThreeVoxelMap extends THREE.Group {
-    constructor(tileset, columns) {
+    constructor(tileset, tileWidth, tileHeight, tilesetCols) {
         super();
         this.tileset = tileset;
-        this.columns = columns;
+        this.tileWidth = tileWidth;
+        this.tileHeight = tileHeight;
+        this.tilesetCols = tilesetCols;
         this.cells = new Map();
         this.geometry = new THREE.BufferGeometry();
         const mat = new THREE.MeshBasicMaterial({ transparent: true, map: tileset, side: THREE.DoubleSide });
@@ -24,16 +26,12 @@ class ThreeVoxelMap extends THREE.Group {
                 });
             }
         }
-        const tileSize = 64;
         const texWidth = this.tileset.image.width;
         const texHeight = this.tileset.image.height;
-        // const tilesInRow = texWidth / tileSize;
-        const tilesInRow = this.columns;
-        const xStep = tileSize / texWidth;
-        const yStep = tileSize / texHeight;
-        console.log(xStep, yStep);
+        const xStep = this.tileWidth / texWidth;
+        const yStep = this.tileHeight / texHeight;
         const prunedVoxels = pruneCells(this.cells);
-        const voxelData = buildMeshDataFromCells(prunedVoxels, tilesInRow, xStep, yStep);
+        const voxelData = buildMeshDataFromCells(prunedVoxels, this.tilesetCols, xStep, yStep, this.tileWidth, this.tileWidth);
         this.geometry.setIndex(voxelData.indices);
         this.geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(voxelData.positions), 3));
         this.geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(voxelData.uvs), 2));
@@ -68,7 +66,7 @@ function pruneCells(cells) {
     }
     return prunedVoxels;
 }
-function buildMeshDataFromCells(cells, tilesInRow, xStep, yStep) {
+function buildMeshDataFromCells(cells, tilesetCols, xStep, yStep, tileWidth, tileHeight) {
     const pxGeometry = new THREE.PlaneGeometry(1, 1);
     pxGeometry.rotateY(Math.PI / 2);
     pxGeometry.translate(0.5, 0, 0);
@@ -114,21 +112,20 @@ function buildMeshDataFromCells(cells, tilesInRow, xStep, yStep) {
                 }
             }
             targetData.positions.push(...localPositions);
-            const tileSize = 64;
-            const xIdx = (curCell.type % tilesInRow) - 1;
-            const yIdx = Math.floor(curCell.type / tilesInRow);
-            const singlePixelOffset = xStep / tileSize;
-            const halfPixelOffset = singlePixelOffset / 2;
-            const xOffset = xStep * xIdx + halfPixelOffset;
-            const yOffset = 1 - yStep * yIdx - yStep - halfPixelOffset;
+            const xIdx = (curCell.type % tilesetCols) - 1;
+            const yIdx = Math.floor(curCell.type / tilesetCols);
+            const singlePixelOffset = { x: xStep / tileWidth, y: yStep / tileHeight };
+            const halfPixelOffset = { x: singlePixelOffset.x / 2, y: singlePixelOffset.y / 2 };
+            const xOffset = xStep * xIdx + halfPixelOffset.x;
+            const yOffset = 1 - yStep * yIdx - yStep - halfPixelOffset.y;
             geometries[i].attributes.uv.array[0] = xOffset;
             geometries[i].attributes.uv.array[1] = yOffset + yStep;
-            geometries[i].attributes.uv.array[2] = xOffset + xStep - singlePixelOffset;
+            geometries[i].attributes.uv.array[2] = xOffset + xStep - singlePixelOffset.x;
             geometries[i].attributes.uv.array[3] = yOffset + yStep;
             geometries[i].attributes.uv.array[4] = xOffset;
-            geometries[i].attributes.uv.array[5] = yOffset + singlePixelOffset;
-            geometries[i].attributes.uv.array[6] = xOffset + xStep - singlePixelOffset;
-            geometries[i].attributes.uv.array[7] = yOffset + singlePixelOffset;
+            geometries[i].attributes.uv.array[5] = yOffset + singlePixelOffset.y;
+            geometries[i].attributes.uv.array[6] = xOffset + xStep - singlePixelOffset.x;
+            geometries[i].attributes.uv.array[7] = yOffset + singlePixelOffset.y;
             targetData.uvs.push(...geometries[i].attributes.uv.array);
             targetData.normals.push(...geometries[i].attributes.normal.array);
             const localIndices = [...geometries[i].index.array];
