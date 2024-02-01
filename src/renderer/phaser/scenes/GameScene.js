@@ -62,7 +62,17 @@ var GameScene = /** @class */ (function (_super) {
         if (this.trackingDelay > 60) {
             this.trackingDelay = 60;
         }
+        var resized = false;
         this.scale.on(Phaser.Scale.Events.RESIZE, function () {
+            console.log('resize');
+            if (resized) {
+                resized = false;
+            }
+            else {
+                resized = true;
+                _this.game.scale.setGameSize(window.outerWidth * window.devicePixelRatio, window.outerHeight * window.devicePixelRatio);
+                //window.dispatchEvent(new Event('resize'));
+            }
             if (_this.zoomSize) {
                 camera.zoom = _this.calculateZoom();
                 taro.client.emit('scale', { ratio: camera.zoom * _this.resolutionCoef });

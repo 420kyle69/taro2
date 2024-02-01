@@ -305,7 +305,7 @@ var ShopComponent = TaroEntity.extend({
 						purchasableItems.forEach(function (purchasable, index) {
 							let html = `<div id="${purchasable._id}-locked" class="border rounded bg-light p-2 mx-2 ${index < 2 ? 'mb-3' : ''} col-5 d-flex flex-column justify-content-between">` +
 								'  <div class="my-2 text-center">' +
-								`	<img src=" ${purchasable.image} " style="height: 45px; width: 45px;" />` +
+								`	<img id="${purchasable._id}_image" src=" ${purchasable.image} " style="height: 45px; width: 45px;" />` +
 								'	 </div>' +
 								'	 <div class="d-flex justify-content-center action-button-container">';
 							if (purchasable.soldForSocialShare) {
@@ -392,7 +392,7 @@ var ShopComponent = TaroEntity.extend({
 					purchasableItems.forEach(function (purchasable, index) {
 						let html = `<div id="skin-list-${purchasable._id}" class="border rounded bg-light p-2 mx-2 ${index < 2 ? 'mb-3' : ''} col-5 d-flex flex-column justify-content-between">` +
 							'  <div class="my-2 text-center">' +
-							`	<img src=" ${purchasable.image} " style="height: 45px; width: 45px;" />` +
+							`	<img id="${purchasable._id}_image" src=" ${purchasable.image} " style="height: 45px; width: 45px;" />` +
 							'	 </div>' +
 							'	 <div class="d-flex justify-content-center action-button-container">';
 						if (purchasable.soldForSocialShare) {
@@ -1209,7 +1209,7 @@ var ShopComponent = TaroEntity.extend({
 		}
 
 		if (modalBody.html() == '') {
-			modalBody.append('<div class=\'col text-center\'>There\'s nothing to be displayed here</div>');
+			modalBody.append('<div style="margin-top : -15px; position: absolute;" class=\'col text-center \'>There\'s nothing to be displayed here</div>');
 		}
 		var modalUpdated = false;
 		if (self.oldModalHTMLBody != modalBody.html()) {
@@ -1342,7 +1342,6 @@ var ShopComponent = TaroEntity.extend({
 
 		for (let i = 0; i < items.length; i++) {
 			var item = items[i];
-			// console.log(item)
 
 			if (item.status == 'not_purchased') {
 
@@ -1463,22 +1462,21 @@ var ShopComponent = TaroEntity.extend({
 								class: "is-mobile",
 							})
 						)
-					).append(item.status == "not_purchased" ? "<br/>" : "")
+					).append( item.status === "not_purchased" ? "<br/>" : "")
 					.append(button).hover(
 						function () {
 							// On hover
-
-							if (item.status == "not_purchased" || items[i].status == "equipped") {
+							if (items[i].status == "not_purchased" || items[i].status == "equipped") {
 								return;
 							}
 
 							var floatingButton = $("<button/>", {
 								type: "button",
-								class: 'btn btn-equip',
-								id: 'floating-button-equip',
-								name: item.title || item.name,
-								skinId: item._id,
-								owner: item.owner || "",
+								class:'btn btn-equip',
+								id:'floating-button-equip',
+								name: items[i].title || items[i].name,
+								skinId : items[i]._id,
+								owner: items[i].owner || "",
 								style: "position: absolute; background-color: #254EDB;color: white; border: none;",
 							}).text("Equip");
 
@@ -1486,7 +1484,7 @@ var ShopComponent = TaroEntity.extend({
 						},
 						function () {
 
-							if (item.status == 'not_purchased' || item.status == "equipped") {
+							if (items[i].status == 'not_purchased' || items[i].status == "equipped") {
 								return;
 							}
 							// On hover out

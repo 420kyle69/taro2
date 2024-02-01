@@ -57,7 +57,17 @@ class GameScene extends PhaserScene {
 			this.trackingDelay = 60;
 		}
 
+		let resized = false;
+
 		this.scale.on(Phaser.Scale.Events.RESIZE, () => {
+			console.log('resize')
+			if (resized) {
+				resized = false;
+			} else {
+				resized = true;
+				this.game.scale.setGameSize(window.outerWidth * window.devicePixelRatio, window.outerHeight * window.devicePixelRatio);
+				//window.dispatchEvent(new Event('resize'));
+			}
 			if (this.zoomSize) {
 				camera.zoom = this.calculateZoom();
 				taro.client.emit('scale', { ratio: camera.zoom * this.resolutionCoef });

@@ -611,62 +611,27 @@ NetIo.Server = NetIo.EventingClass.extend({
 		}
 
 		// http - local, standalone, standalone-remote env
-
 		this._httpServer = this._http.createServer(function (request, response) {
-			// if (request.url === '/heapdump') {
-			// 	// Handle heapdump request
-			// 	if (request.method === 'GET') {
-			// 		const fs = require('fs');
-			// 		const path = require('path');
-			// 		const heapdump = require('heapdump');
-			//
-			// 		// Generate a unique filename for the heap dump
-			// 		const _filename = `worker_heapdump_${Date.now()}.heapsnapshot`;
-			//
-			// 		// Start recording the heap dump
-			// 		heapdump.writeSnapshot(path.join(__dirname, _filename), (err, filename) => {
-			// 			if (err) {
-			// 				console.error('Error while generating heap dump:', err);
-			// 				response.writeHead(500);
-			// 				response.end('Error while generating heap dump');
-			// 			} else {
-			// 				// Send the heap dump file as a response
-			// 				response.setHeader('Content-disposition', `attachment; filename=${_filename}`);
-			// 				response.setHeader('Content-type', 'application/octet-stream');
-			// 				const fileStream = fs.createReadStream(filename);
-			//
-			// 				fileStream.on('end', () => {
-			// 					// Delete the heap dump file after it's downloaded
-			// 					fs.unlink(filename, (err) => {
-			// 						if (err) {
-			// 							console.error('Error while deleting heap dump:', err);
-			// 						}
-			// 					});
-			// 				});
-			//
-			// 				fileStream.pipe(response);
-			// 			}
-			// 		});
-			// 	} else {
-			// 		response.writeHead(405);
-			// 		response.end('Method Not Allowed');
-			// 	}
-			// } else {
-			// 	response.writeHead(404);
-			// 	response.end();
-			// }
 			response.writeHead(404);
 			response.end();
 		});
+		
 		this._socketServerHttp = new this._websocket.Server({
 			server: this._httpServer,
 			maxPayload: 200 * 1024, // 100 KB - The maximum allowed message size
+			verifyClient: function(info, done) {
+				console.log('verifyClient event');
+
+				// Custom logic to determine whether to accept or reject the connection
+				const acceptConnection = taro.clusterClient ? taro.clusterClient.verifyConnectionRequest(info) : true;
+				
+				done(acceptConnection, acceptConnection ? 200 : 403, acceptConnection ? '' : 'Connection not accepted');
+			},
 		});
-		// this._socketServerHttp = new this._websocket.WebSocketServer({
-		// 	server: this._httpServer
-		// });
+
 		// Setup listener
 		this._socketServerHttp.on('connection', function (ws, request) {
+			console.log('connection event');
 			self.socketConnection(ws, request);
 		});
 
@@ -800,23 +765,14 @@ NetIo.Server = NetIo.EventingClass.extend({
 	socketConnection: function (ws, request) {
 		var self = this;
 		var jwt = require('jsonwebtoken');
-		const PING_SERVICE_HEADER = 'x-ping-service';
 		
 		var socket = new NetIo.Socket(ws);
 		// Give the socket encode/decode methods
 		socket._encode = self._encode;
 		socket._decode = self._decode;
 		socket._remoteAddress = (request.headers['x-forwarded-for'] && request.headers['x-forwarded-for'].split(',').shift()) || ws._socket.remoteAddress;
-		socket._fromPingService = request.headers[PING_SERVICE_HEADER] && request.headers[PING_SERVICE_HEADER] === process.env.PING_SERVICE_HEADER_SECRET;
 		console.log('Client connecting from', request.headers['x-forwarded-for'], socket._remoteAddress);
 		
-		// if token does not exist in request close the socket.
-		if (request.url.indexOf('/?token=') === -1) {
-			socket.close('Security token could not be validated, please refresh the page.');
-			console.log('Unauthorized request', request.url);
-			return;
-		}
-
 		const reqUrl = new URL(`https://www.modd.io${request.url}`);
 		const searchParams = reqUrl.searchParams;
 		const token = searchParams.get('token');

@@ -2030,7 +2030,7 @@ var Unit = TaroEntityPhysics.extend({
 						taro.client.sendNextPingAt = taro.now + 1500; 
 					}
 				}
-
+				
 				if (
 					( // either unit is AI unit that is currently moving
 						self._stats.aiEnabled && self.isMoving
@@ -2038,7 +2038,7 @@ var Unit = TaroEntityPhysics.extend({
 					( // or human player's unit that's "following cursor"
 						!self._stats.aiEnabled &&
 						self._stats.controls && self._stats.controls.movementControlScheme == 'followCursor' &&
-						self.distanceToTarget > this.width() // if mouse cursor is close to the unit, then don't move
+						self.distanceToTarget > this.width()/3 // if mouse cursor is close to the unit, then don't move
 					)
 				) {
 					if (self.angleToTarget != undefined && !isNaN(self.angleToTarget)) {
