@@ -229,7 +229,7 @@ class ThreeRenderer {
 			const transformEvtListener = entity.on(
 				'transform',
 				(data: { x: number; y: number; rotation: number }) => {
-					ent.position.set(data.x / 64 - 0.5, 0, data.y / 64 - 0.5);
+					ent.position.set(data.x / 64 - 0.5, 2, data.y / 64 - 0.5);
 					ent.setRotationY(-data.rotation);
 				},
 				this

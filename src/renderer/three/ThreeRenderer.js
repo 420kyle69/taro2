@@ -180,7 +180,7 @@ class ThreeRenderer {
             layers.entities.add(ent);
             this.entities.push(ent);
             const transformEvtListener = entity.on('transform', (data) => {
-                ent.position.set(data.x / 64 - 0.5, 0, data.y / 64 - 0.5);
+                ent.position.set(data.x / 64 - 0.5, 2, data.y / 64 - 0.5);
                 ent.setRotationY(-data.rotation);
             }, this);
             const sizeEvtListener = entity.on('size', (data) => {
