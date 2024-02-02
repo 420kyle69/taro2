@@ -112,7 +112,7 @@ class ThreeRenderer {
             this.scene.add(this.voxelMap);
             taro.game.data.map.layers.forEach((layer) => {
                 if (['floor'].includes(layer.name)) {
-                    this.voxelMap.addLayer(layer, 0);
+                    this.voxelMap.addLayer(layer, 0, false);
                 }
                 if (['floor2'].includes(layer.name)) {
                     this.voxelMap.addLayer(layer, 1);

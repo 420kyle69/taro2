@@ -5,19 +5,15 @@ class ThreeVoxelMap extends THREE.Group {
         this.tileWidth = tileWidth;
         this.tileHeight = tileHeight;
         this.tilesetCols = tilesetCols;
-        this.cells = new Map();
-        this.geometry = new THREE.BufferGeometry();
-        const mat = new THREE.MeshBasicMaterial({ transparent: true, map: tileset, side: THREE.DoubleSide });
-        const mesh = new THREE.Mesh(this.geometry, mat);
-        this.add(mesh);
     }
-    addLayer(data, id) {
+    addLayer(data, id, transparent = true) {
+        const voxels = new Map();
         for (let z = 0; z < data.height; z++) {
             for (let x = 0; x < data.width; x++) {
                 const tileId = data.data[z * data.width + x];
                 if (tileId <= 0)
                     continue;
-                this.cells.set(getKeyFromPos(x, id, z), {
+                voxels.set(getKeyFromPos(x, id, z), {
                     position: [x, id, z],
                     type: data.data[z * data.width + x],
                     visible: true,
@@ -30,12 +26,16 @@ class ThreeVoxelMap extends THREE.Group {
         const texHeight = this.tileset.image.height;
         const xStep = this.tileWidth / texWidth;
         const yStep = this.tileHeight / texHeight;
-        const prunedVoxels = pruneCells(this.cells);
+        const prunedVoxels = pruneCells(voxels);
         const voxelData = buildMeshDataFromCells(prunedVoxels, this.tilesetCols, xStep, yStep, this.tileWidth, this.tileWidth);
-        this.geometry.setIndex(voxelData.indices);
-        this.geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(voxelData.positions), 3));
-        this.geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(voxelData.uvs), 2));
-        this.geometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(voxelData.normals), 3));
+        const geometry = new THREE.BufferGeometry();
+        geometry.setIndex(voxelData.indices);
+        geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(voxelData.positions), 3));
+        geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(voxelData.uvs), 2));
+        geometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(voxelData.normals), 3));
+        const mat = new THREE.MeshBasicMaterial({ transparent, map: this.tileset, side: THREE.DoubleSide });
+        const mesh = new THREE.Mesh(geometry, mat);
+        this.add(mesh);
     }
 }
 function getKeyFromPos(x, y, z) {
