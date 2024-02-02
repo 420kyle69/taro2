@@ -48,6 +48,9 @@ class ThreeVoxelMap extends THREE.Group {
 		geometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(voxelData.normals), 3));
 
 		const mat = new THREE.MeshBasicMaterial({ transparent, map: this.tileset, side: THREE.DoubleSide });
+		mat.polygonOffset = true;
+		mat.polygonOffsetFactor = -height;
+
 		const mesh = new THREE.Mesh(geometry, mat);
 		this.add(mesh);
 	}
