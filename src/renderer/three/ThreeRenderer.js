@@ -118,10 +118,10 @@ class ThreeRenderer {
                     this.voxelMap.addLayer(layer, 1);
                 }
                 if (['walls'].includes(layer.name)) {
-                    this.voxelMap.addLayer(layer, 2);
+                    this.voxelMap.addLayer(layer, 1);
                 }
                 if (['trees'].includes(layer.name)) {
-                    this.voxelMap.addLayer(layer, 4);
+                    this.voxelMap.addLayer(layer, 3);
                 }
             });
         });
@@ -180,7 +180,7 @@ class ThreeRenderer {
             layers.entities.add(ent);
             this.entities.push(ent);
             const transformEvtListener = entity.on('transform', (data) => {
-                ent.position.set(data.x / 64 - 0.5, 2, data.y / 64 - 0.5);
+                ent.position.set(data.x / 64 - 0.5, 1, data.y / 64 - 0.5);
                 ent.setRotationY(-data.rotation);
             }, this);
             const sizeEvtListener = entity.on('size', (data) => {

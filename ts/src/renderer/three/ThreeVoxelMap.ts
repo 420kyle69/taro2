@@ -8,7 +8,7 @@ class ThreeVoxelMap extends THREE.Group {
 		super();
 	}
 
-	addLayer(data: LayerData, id: number, transparent = true) {
+	addLayer(data: LayerData, height: number, transparent = true) {
 		const voxels = new Map<string, VoxelCell>();
 
 		for (let z = 0; z < data.height; z++) {
@@ -16,8 +16,8 @@ class ThreeVoxelMap extends THREE.Group {
 				const tileId = data.data[z * data.width + x];
 				if (tileId <= 0) continue;
 
-				voxels.set(getKeyFromPos(x, id, z), {
-					position: [x, id, z],
+				voxels.set(getKeyFromPos(x, height, z), {
+					position: [x, height, z],
 					type: data.data[z * data.width + x],
 					visible: true,
 					// hiddenFaces: 0x000000,
