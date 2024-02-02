@@ -1,6 +1,9 @@
 class ThreeSprite extends THREE.Group {
 	sprite: THREE.Mesh;
 
+	private layer = 3; // Create enum
+	private depth = 1;
+
 	constructor(tex: THREE.Texture) {
 		super();
 
@@ -17,5 +20,19 @@ class ThreeSprite extends THREE.Group {
 
 	setRotationY(rad: number) {
 		this.sprite.rotation.y = rad;
+	}
+
+	setLayer(layer: number) {
+		this.layer = layer;
+		this.calcRenderOrder();
+	}
+
+	setDepth(depth: number) {
+		this.depth = depth;
+		this.calcRenderOrder();
+	}
+
+	private calcRenderOrder() {
+		this.sprite.renderOrder = this.layer * 100 + this.depth;
 	}
 }

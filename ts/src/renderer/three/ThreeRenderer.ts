@@ -149,20 +149,42 @@ class ThreeRenderer {
 			this.scene.add(this.voxelMap);
 
 			taro.game.data.map.layers.forEach((layer) => {
+				// layer.id doesn't match modd.io UI. Check to see if this changes
+				// once i've merged the main branch. For now this is necessary. It's
+				// also what is done in the PhaserRenderer.
+				let layerId = 0;
+				switch (layer.name) {
+					case 'floor':
+						layerId = 1;
+						break;
+					case 'floor2':
+						layerId = 2;
+						break;
+					case 'walls':
+						layerId = 3;
+						break;
+					case 'trees':
+						// 5 so it's always rendered on top.
+						// label/bars are rendered at renderOrder 499
+						layerId = 5;
+						break;
+				}
+
 				if (['floor'].includes(layer.name)) {
-					this.voxelMap.addLayer(layer, 0, false);
+					this.voxelMap.addLayer(layer, 0, false, false, layerId * 100);
 				}
 
 				if (['floor2'].includes(layer.name)) {
-					this.voxelMap.addLayer(layer, 1, true, true);
+					this.voxelMap.addLayer(layer, 1, true, true, layerId * 100);
 				}
 
 				if (['walls'].includes(layer.name)) {
-					this.voxelMap.addLayer(layer, 1);
+					this.voxelMap.addLayer(layer, 1, true, false, layerId * 100);
 				}
 
 				if (['trees'].includes(layer.name)) {
-					this.voxelMap.addLayer(layer, 3, true, true, 40);
+					console.log(layer);
+					this.voxelMap.addLayer(layer, 3, true, true, layerId * 100);
 				}
 			});
 		});
@@ -211,21 +233,11 @@ class ThreeRenderer {
 			const createEntity = () => {
 				const e = new ThreeUnit(tex.clone());
 				this.animatedSprites.push(e);
-
-				if (entity instanceof Item) {
-					// e.sprite.renderOrder = 20;
-				} else if (entity instanceof Unit) {
-					// e.sprite.renderOrder = 21;
-				} else {
-					e.sprite.renderOrder = 22;
-				}
-
 				return e;
 			};
 
 			const ent = createEntity();
 			layers.entities.add(ent);
-			layers.entities.renderOrder = 60;
 			this.entities.push(ent);
 
 			const transformEvtListener = entity.on(
@@ -312,12 +324,12 @@ class ThreeRenderer {
 				}
 			});
 
-			entity.on('layer', (data) => {
-				// console.log('layer: ', data);
+			entity.on('layer', (layer) => {
+				ent.setLayer(layer);
 			});
 
-			entity.on('depth', (data) => {
-				// console.log('depth: ', data);
+			entity.on('depth', (depth) => {
+				ent.setDepth(depth);
 			});
 
 			entity.on('dynamic', (data) => {
