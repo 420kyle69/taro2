@@ -209,23 +209,23 @@ class ThreeRenderer {
 			const tex = ThreeTextureManager.instance().textureMap.get(entity._stats.cellSheet.url);
 
 			const createEntity = () => {
-				// TODO: Make all entities sprites, not a 3D mesh. Only the map is 3D?
-				// Uhm what about furniture? They need to be 3D but we don't have proper
-				// models for them yet.
-				if (entity instanceof Unit) {
-					const e = new ThreeUnit(tex.clone());
-					this.animatedSprites.push(e);
-					return e;
-				} else if (entity instanceof Projectile) {
-					const e = new ThreeUnit(tex.clone());
-					this.animatedSprites.push(e);
-					return e;
+				const e = new ThreeUnit(tex.clone());
+				this.animatedSprites.push(e);
+
+				if (entity instanceof Item) {
+					// e.sprite.renderOrder = 20;
+				} else if (entity instanceof Unit) {
+					// e.sprite.renderOrder = 21;
+				} else {
+					e.sprite.renderOrder = 22;
 				}
-				return new ThreeSprite(tex);
+
+				return e;
 			};
 
 			const ent = createEntity();
 			layers.entities.add(ent);
+			layers.entities.renderOrder = 60;
 			this.entities.push(ent);
 
 			const transformEvtListener = entity.on(
