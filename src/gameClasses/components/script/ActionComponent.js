@@ -537,7 +537,7 @@ var ActionComponent = TaroEntity.extend({
 							var data = unit.getPersistentData('unit');
 							taro.clusterClient.saveUserData(userId, data, 'unit');
 						} else {
-							if (!unit.persistentDataLoaded) {
+							if (unit && !unit.persistentDataLoaded) {
 								throw new Error('Fail saving unit data bcz persisted data not set correctly');
 							} else {
 								throw new Error('Fail saving unit data');
@@ -559,7 +559,7 @@ var ActionComponent = TaroEntity.extend({
 								var data = unit.getPersistentData('unit');
 								taro.clusterClient.saveUserData(userId, data, 'unit');
 							} else {
-								if (!unit.persistentDataLoaded) {
+								if (unit && !unit.persistentDataLoaded) {
 									throw new Error('Fail saving unit data bcz persisted data not loaded correctly');
 								} else {
 									throw new Error('Fail saving unit data');
