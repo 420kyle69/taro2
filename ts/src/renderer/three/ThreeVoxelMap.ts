@@ -8,7 +8,7 @@ class ThreeVoxelMap extends THREE.Group {
 		super();
 	}
 
-	addLayer(data: LayerData, height: number, transparent = true) {
+	addLayer(data: LayerData, height: number, transparent = true, flat = false) {
 		const voxels = new Map<string, VoxelCell>();
 
 		for (let z = 0; z < data.height; z++) {
@@ -21,7 +21,7 @@ class ThreeVoxelMap extends THREE.Group {
 					type: data.data[z * data.width + x],
 					visible: true,
 					// hiddenFaces: 0x000000,
-					hiddenFaces: [false, false, false, false, false, false],
+					hiddenFaces: [flat, flat, flat, !flat, flat, flat],
 				});
 			}
 		}
@@ -73,7 +73,7 @@ function pruneCells(cells) {
 		let visible = false;
 		for (let i = 0; i < 6; ++i) {
 			const faceHidden = cells.has(keys[i]);
-			curCell.hiddenFaces[i] = faceHidden;
+			if (faceHidden) curCell.hiddenFaces[i] = faceHidden;
 
 			if (!faceHidden) {
 				visible = true;
@@ -125,7 +125,7 @@ function buildMeshDataFromCells(cells, tilesetCols, xStep, yStep, tileWidth, til
 	for (let c of cells.keys()) {
 		const curCell = cells.get(c);
 
-		for (let i = 0; i < 6; ++i) {
+		for (let i = 0; i < geometries.length; ++i) {
 			if (curCell.hiddenFaces[i]) {
 				continue;
 			}

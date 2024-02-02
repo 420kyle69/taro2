@@ -115,13 +115,13 @@ class ThreeRenderer {
                     this.voxelMap.addLayer(layer, 0, false);
                 }
                 if (['floor2'].includes(layer.name)) {
-                    this.voxelMap.addLayer(layer, 1);
+                    this.voxelMap.addLayer(layer, 1, true, true);
                 }
                 if (['walls'].includes(layer.name)) {
                     this.voxelMap.addLayer(layer, 1);
                 }
                 if (['trees'].includes(layer.name)) {
-                    this.voxelMap.addLayer(layer, 3);
+                    this.voxelMap.addLayer(layer, 3, true, true);
                 }
             });
         });
