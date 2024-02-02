@@ -23,6 +23,8 @@ class ThreeRenderer {
 	private renderer: THREE.WebGLRenderer;
 	private camera: THREE.Camera;
 	private controls: OrbitControls;
+
+	// Create 3 scenes: Bottom Layer, Middle Layer, Top Layer. So I can render sprites in between the Bottom and Top Layer.
 	private scene: THREE.Scene;
 
 	private animations: Map<string, { frames: number[]; fps: number; repeat: number }> = new Map();
