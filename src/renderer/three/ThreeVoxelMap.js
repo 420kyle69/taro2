@@ -6,7 +6,7 @@ class ThreeVoxelMap extends THREE.Group {
         this.tileHeight = tileHeight;
         this.tilesetCols = tilesetCols;
     }
-    addLayer(data, height, transparent = true, flat = false) {
+    addLayer(data, height, transparent = true, flat = false, renderOrder = 0) {
         const voxels = new Map();
         for (let z = 0; z < data.height; z++) {
             for (let x = 0; x < data.width; x++) {
@@ -37,6 +37,7 @@ class ThreeVoxelMap extends THREE.Group {
         mat.polygonOffset = true;
         mat.polygonOffsetFactor = -height;
         const mesh = new THREE.Mesh(geometry, mat);
+        mesh.renderOrder = renderOrder;
         this.add(mesh);
     }
 }

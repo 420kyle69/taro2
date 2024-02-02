@@ -162,7 +162,7 @@ class ThreeRenderer {
 				}
 
 				if (['trees'].includes(layer.name)) {
-					this.voxelMap.addLayer(layer, 3, true, true);
+					this.voxelMap.addLayer(layer, 3, true, true, 10000);
 				}
 			});
 		});
