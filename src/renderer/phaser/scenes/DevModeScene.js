@@ -48,6 +48,10 @@ var DevModeScene = /** @class */ (function (_super) {
         taro.client.on('leaveMapTab', function () {
             _this.leaveMapTab();
         });
+        taro.client.on('enterEntitiesTab', function () {
+        });
+        taro.client.on('leaveEntitiesTab', function () {
+        });
         taro.client.on('editTile', function (data) {
             _this.tileEditor.edit(data);
         });

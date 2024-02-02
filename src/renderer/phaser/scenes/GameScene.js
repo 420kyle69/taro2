@@ -226,6 +226,7 @@ var GameScene = /** @class */ (function (_super) {
         //to be sure every layer of map have correct number of tiles
         var tilesPerLayer = data.map.height * data.map.width;
         data.map.layers.forEach(function (layer) {
+            console.log('layer', layer.name);
             if (layer.name !== 'debris') {
                 var length_1 = layer.data.length;
                 layer.width = data.map.width;

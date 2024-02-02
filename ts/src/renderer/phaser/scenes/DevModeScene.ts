@@ -55,6 +55,14 @@ class DevModeScene extends PhaserScene {
 			this.leaveMapTab();
 		});
 
+		taro.client.on('enterEntitiesTab', () => {
+
+		});
+
+		taro.client.on('leaveEntitiesTab', () => {
+
+		});
+
 		taro.client.on('editTile', (data: TileData<MapEditToolEnum>) => {
 			this.tileEditor.edit(data);
 		});

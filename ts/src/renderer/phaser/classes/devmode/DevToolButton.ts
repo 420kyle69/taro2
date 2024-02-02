@@ -27,7 +27,8 @@ class DevToolButton {
 		this.hoverChildren = hoverChildren;
 		const h = devModeTools.BUTTON_HEIGHT;
 		const scene = devModeTools.scene;
-		const button = this.button = scene.add.rectangle(x + w / 2, y + h / 2, w, h, devModeTools.COLOR_WHITE);
+		// @ts-ignore
+		const button = this.button = scene.add.rexRoundRectangle(x + w / 2, y + h / 2, w, h, 5, devModeTools.COLOR_WHITE);
 		button.setInteractive();
 		button.setVisible(defaultVisible);
 		container.add(button);

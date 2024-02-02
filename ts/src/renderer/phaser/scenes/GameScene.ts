@@ -267,6 +267,7 @@ class GameScene extends PhaserScene {
 		//to be sure every layer of map have correct number of tiles
 		const tilesPerLayer = data.map.height * data.map.width;
 		data.map.layers.forEach(layer => {
+			console.log('layer', layer.name)
 			if (layer.name !== 'debris') {
 				const length = layer.data.length;
 				layer.width = data.map.width;
