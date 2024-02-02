@@ -3175,10 +3175,10 @@ var ActionComponent = TaroEntity.extend({
 						break;
 
 					case 'setUIElementHtml':
-						var elementId = self._script.variable.getValue(action.elementId, vars);
+						var elementId = self._script.param.getValue(action.elementId, vars);
 						const sanitizerFunction = taro.isClient ? taro.clientSanitizer : taro.sanitizer;
-						var htmlStr = sanitizerFunction(self._script.variable.getValue(action.htmlStr, vars));
-						var player = self._script.variable.getValue(action.player, vars);
+						var htmlStr = sanitizerFunction(self._script.param.getValue(action.htmlStr, vars));
+						var player = self._script.param.getValue(action.player, vars);
 
 						if (elementId && player && player._stats && player._stats.clientId) {
 							const data = {
