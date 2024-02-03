@@ -11,7 +11,6 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	cursorButton: DevToolButton;
 	paletteButton: DevToolButton;
 	layerButtonSection: DevButtonSection;
-	layerButtonsContainer: Phaser.GameObjects.Container;
 	layerButtons: DevToolButton[];
 	layerHideButtons: DevToolButton[];
 	toolButtonSection: DevButtonSection;
@@ -62,14 +61,20 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.COLOR_WHITE = palette.COLOR_WHITE;
 		this.COLOR_GRAY = palette.COLOR_GRAY;
 
-		this.toolButtonSection = new DevButtonSection(this, 'Tools');
-
 		const h = this.BUTTON_HEIGHT;
 		const w = this.BUTTON_WIDTH;
 		const s = this.BUTTON_INTERSPACE;
 
+		const toolButtonsContainer = this.toolButtonsContainer = new Phaser.GameObjects.Container(this.scene);
+		scene.add.existing(toolButtonsContainer);
+		const toolButtonSection = this.toolButtonSection = new DevButtonSection(this, 'Tools', 0, (h + s) * 5 - s);
+		const brushSizeSection = new DevButtonSection(this, 'Brush Size', toolButtonSection.height, (h + s) * 2 - s * 4);
+		const layersCount = scene.gameScene.tilemapLayers.length;
+		if (layersCount > 0) this.layerButtonSection = new DevButtonSection(this, 'Layers', toolButtonSection.height + brushSizeSection.height, (h * 0.75 + s) * layersCount + s * 3);
+		const paletteButtonSection = new DevButtonSection(this, '', toolButtonSection.height + brushSizeSection.height + this.layerButtonSection?.height || 0, h);
+
 		this.scene.scale.on(Phaser.Scale.Events.RESIZE, () => {
-			toolButtonsContainer.height = (h + s) * 10;
+			toolButtonsContainer.height = s + toolButtonSection.height + brushSizeSection.height + paletteButtonSection.height + this.layerButtonSection?.height || 0;
 			/*if (toolButtonsContainer.height > window.innerHeight * 0.5) {
 				toolButtonsContainer.scale = (window.innerHeight * 0.5) / toolButtonsContainer.height;
 			}*/
@@ -80,14 +85,12 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		new DevToolButton(this, '+', '+', 'Zoom in (+)', null, 0, -(h + s), h, h, palette.scrollBarContainer, palette.zoom.bind(palette), -1);
 		new DevToolButton(this, '-', '-', 'Zoom out (-)', null, h + s, -(h + s), h, h, palette.scrollBarContainer, palette.zoom.bind(palette), 1);
 
-		const toolButtonsContainer = this.toolButtonsContainer = this.toolButtonSection.container;
-		toolButtonsContainer.height = (h + s) * 10;
+		toolButtonsContainer.height = s + toolButtonSection.height + brushSizeSection.height + paletteButtonSection.height + this.layerButtonSection?.height || 0 ;
 		/*if (toolButtonsContainer.height > window.innerHeight * 0.5) {
 			toolButtonsContainer.scale = (window.innerHeight * 0.5) / toolButtonsContainer.height;
 		}*/
 		toolButtonsContainer.x = palette.camera.x + palette.paletteWidth - ((h * 4) * toolButtonsContainer.scale) + 22;
 		toolButtonsContainer.y = palette.camera.y - (toolButtonsContainer.height * toolButtonsContainer.scale);
-		//scene.add.existing(toolButtonsContainer);
 
 		this.brushButtons = {
 			'rectangle': new DevToolButton(this, 'rectangle', 'rectangle', 'changes the brush shape to rectangle', null, -(h * 4 + 1.5 * s), (h + s) * 1, h * 4 - s, h, toolButtonsContainer, this.changeShape.bind(this), 'rectangle', [], false),
@@ -96,59 +99,41 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		};
 		this.brushButtons['rectangle'].highlight('active');
 
-		this.modeButtons = this.toolButtonSection.buttons;
-		this.toolButtonSection.addButton(new DevToolButton(this, '', 'Cursor Tool (C)', 'interact with regions and entities', 'cursor', 0, h + s, w, h, toolButtonsContainer, this.cursor.bind(this)));
-		this.toolButtonSection.addButton(new DevToolButton(this, '', 'Region Tool (R)', 'draw new region', 'region', w + s, h + s, w, h, toolButtonsContainer, this.drawRegion.bind(this)));
-		this.toolButtonSection.addButton(new DevToolButton(this, '', 'Stamp Brush (B)', 'LMB: place selected tiles. RMB: copy tiles', 'stamp', 0, 0, w, h, toolButtonsContainer, this.brush.bind(this)/*, undefined, Object.values(this.brushButtons))*/));
-		this.toolButtonSection.addButton(new DevToolButton(this, '', 'Eraser (E)', 'delete tiles from selected layer', 'eraser', w + s, 0, w, h, toolButtonsContainer, this.emptyTile.bind(this)));
-		this.toolButtonSection.addButton(new DevToolButton(this, '', 'Bucket Fill (F)', 'fill an area with the selected tile', 'fill', (w + s) * 2, 0, w, h, toolButtonsContainer, this.fill.bind(this)));
-		this.toolButtonSection.addButton(new DevToolButton(this, '', 'Clear Layer (L)', 'clear selected layer', 'clear', 0, (h + s) * 2, w, h, toolButtonsContainer, this.clear.bind(this)));
-		this.toolButtonSection.addButton(new DevToolButton(this, '', 'Save Map (S)', 'save all changes', 'save', (w + s) * 2, (h + s) * 2, w, h, toolButtonsContainer, this.save.bind(this)));
-		this.toolButtonSection.addButton(new DevToolButton(this, '', 'Entities Tool (A)', 'LMB: Place selected Entity on the Map', 'entity', (w + s) * 2, h + s, w, h, toolButtonsContainer, this.addEntities.bind(this)));
-		this.toolButtonSection.addButton(new DevToolButton(this, '', 'Undo (ctrl-z)', 'undo', 'undo', 0, (h + s) * 3 + s, w * 1.5, h, toolButtonsContainer, this.commandController.undo.bind(this.commandController)));
-		this.toolButtonSection.addButton(new DevToolButton(this, '', 'Redo (ctrl-shift-z | ctrl-y)', 'redo', 'redo', w * 1.5 + s * 2, (h + s) * 3 + s, w * 1.5, h, toolButtonsContainer, this.commandController.redo.bind(this.commandController)));
+		this.modeButtons = toolButtonSection.buttons;
+		toolButtonSection.addButton(new DevToolButton(this, '', 'Cursor Tool (C)', 'interact with regions and entities', 'cursor', 0, h + s, w, h, toolButtonsContainer, this.cursor.bind(this)));
+		toolButtonSection.addButton(new DevToolButton(this, '', 'Region Tool (R)', 'draw new region', 'region', w + s, h + s, w, h, toolButtonsContainer, this.drawRegion.bind(this)));
+		toolButtonSection.addButton(new DevToolButton(this, '', 'Stamp Brush (B)', 'LMB: place selected tiles. RMB: copy tiles', 'stamp', 0, 0, w, h, toolButtonsContainer, this.brush.bind(this)/*, undefined, Object.values(this.brushButtons))*/));
+		toolButtonSection.addButton(new DevToolButton(this, '', 'Eraser (E)', 'delete tiles from selected layer', 'eraser', w + s, 0, w, h, toolButtonsContainer, this.emptyTile.bind(this)));
+		toolButtonSection.addButton(new DevToolButton(this, '', 'Bucket Fill (F)', 'fill an area with the selected tile', 'fill', (w + s) * 2, 0, w, h, toolButtonsContainer, this.fill.bind(this)));
+		toolButtonSection.addButton(new DevToolButton(this, '', 'Clear Layer (L)', 'clear selected layer', 'clear', 0, (h + s) * 2, w, h, toolButtonsContainer, this.clear.bind(this)));
+		toolButtonSection.addButton(new DevToolButton(this, '', 'Save Map (S)', 'save all changes', 'save', (w + s) * 2, (h + s) * 2, w, h, toolButtonsContainer, this.save.bind(this)));
+		toolButtonSection.addButton(new DevToolButton(this, '', 'Entities Tool (A)', 'LMB: Place selected Entity on the Map', 'entity', (w + s) * 2, h + s, w, h, toolButtonsContainer, this.addEntities.bind(this)));
+		toolButtonSection.addButton(new DevToolButton(this, '', 'Undo (ctrl-z)', 'undo', 'undo', 0, (h + s) * 3 + s, w * 1.5, h, toolButtonsContainer, this.commandController.undo.bind(this.commandController)));
+		toolButtonSection.addButton(new DevToolButton(this, '', 'Redo (ctrl-shift-z | ctrl-y)', 'redo', 'redo', w * 1.5 + s * 2, (h + s) * 3 + s, w * 1.5, h, toolButtonsContainer, this.commandController.redo.bind(this.commandController)));
 
-		/*this.modeButtons = [];
-		this.modeButtons.push(
-			new DevToolButton(this, '', 'Cursor Tool (C)', 'interact with regions and entities', 'cursor', 0, 0, h * 2 - s, toolButtonsContainer, this.cursor.bind(this)),
-			new DevToolButton(this, '', 'Region Tool (R)', 'draw new region', 'region', 0, (h + s) * 3, h * 2 - s, toolButtonsContainer, this.drawRegion.bind(this)),
-			new DevToolButton(this, '', 'Stamp Brush (B)', 'LMB: place selected tiles. RMB: copy tiles', 'stamp', 0, h + s, h * 2 - s, toolButtonsContainer, this.brush.bind(this)/*, undefined, Object.values(this.brushButtons)*///),
-			/*new DevToolButton(this, '', 'Eraser (E)', 'delete tiles from selected layer', 'eraser', h * 2, h + s, h * 2 - s, toolButtonsContainer, this.emptyTile.bind(this)),
-			new DevToolButton(this, '', 'Bucket Fill (F)', 'fill an area with the selected tile', 'fill', 0, (h + s) * 2, h * 2 - s, toolButtonsContainer, this.fill.bind(this)),
-			new DevToolButton(this, '', 'Clear Layer (L)', 'clear selected layer', 'clear', h * 2, (h + s) * 2, h * 2 - s, toolButtonsContainer, this.clear.bind(this)),
-			new DevToolButton(this, '', 'Save Map (S)', 'save all changes', 'save', h * 2, (h + s) * 3, h * 2 - s, toolButtonsContainer, this.save.bind(this)),
-			new DevToolButton(this, '', 'Entities Tool (A)', 'LMB: Place selected Entity on the Map', 'entity', h * 2, 0, h * 2 - s, toolButtonsContainer, this.addEntities.bind(this))
-		);*/
 		this.cursorButton = this.modeButtons[0];
 		this.highlightModeButton(0);
 
+		brushSizeSection.addButton(new DevToolButton(this, '-', '-', 'decrease brush size', null, 0, 0, w, h, toolButtonsContainer, this.cursor.bind(this)));
+		brushSizeSection.addButton(new DevToolButton(this, '1', '1', 'current brush size', null, w + s, 0, w, h, toolButtonsContainer, this.cursor.bind(this)));
+		brushSizeSection.addButton(new DevToolButton(this, '+', '+', 'increase brush size', null, (w + s) * 2, 0, w, h, toolButtonsContainer, this.cursor.bind(this)));
+
 		this.layerButtons = [];
-		this.layerButtons.push(
-			new DevToolButton(this, 'floor', 'Layer (1)', 'select the Floor layer', null, h + s, (h + s) * 5 + (h * 0.75 + s) * 3, h * 2 + 25, h * 0.75, toolButtonsContainer, this.switchLayer.bind(this), 0),
-			new DevToolButton(this, 'floor2', 'Layer (2)', 'select the Floor 2 layer', null, h + s, (h + s) * 5 + (h * 0.75 + s) * 2, h * 2 + 25, h * 0.75, toolButtonsContainer, this.switchLayer.bind(this), 1),
-			new DevToolButton(this, 'walls', 'Layer (3)', 'select the Walls layer', null, h + s, (h + s) * 5 + h * 0.75 + s, h * 2 + 25, h * 0.75, toolButtonsContainer, this.switchLayer.bind(this), 2),
-			new DevToolButton(this, 'trees', 'Layer (4)', 'select the Trees layer', null, h + s, (h + s) * 5, h * 2 + 25, h * 0.75, toolButtonsContainer, this.switchLayer.bind(this), 3)
-		);
+		this.layerHideButtons = [];
+		
+		scene.gameScene.tilemapLayers.forEach((layer, index) => {
+			this.layerButtonSection.addButton(new DevToolButton(this, layer.name, `Layer (${index + 1})`, `select the ${layer.name} layer`, null, h + s, /*(h + s) * 5 +*/ (h * 0.75 + s) * (layersCount - 1 - index), h * 2 + 25, h * 0.75, toolButtonsContainer, this.switchLayer.bind(this), index), this.layerButtons);
+			this.layerButtonSection.addButton(new DevToolButton(this, '', `Layer visibility (shift-${index + 1})`, `show/hide ${layer.name} layer`, 'eyeopen', 0, /*(h + s) * 5*/ + (h * 0.75 + s) * (layersCount - 1 - index), h * 2 - 25, h * 0.75, toolButtonsContainer, this.hideLayer.bind(this), index), this.layerHideButtons);
+		});
+
 		this.layerButtons[0].highlight('active');
 		this.layerButtons[0].increaseSize(true);
-		this.layerHideButtons = [];
-		this.layerHideButtons.push(
-			new DevToolButton(this, '', 'Layer visibility (shift-1)', 'show/hide floor layer', 'eyeopen', 0, (h + s) * 5 + (h * 0.75 + s) * 3, h * 2 - 25, h * 0.75, toolButtonsContainer, this.hideLayer.bind(this), 0),
-			new DevToolButton(this, '', 'Layer visibility (shift-2)', 'show/hide floor 2 layer', 'eyeopen', 0, (h + s) * 5 + (h * 0.75 + s) * 2, h * 2 - 25, h * 0.75, toolButtonsContainer, this.hideLayer.bind(this), 1),
-			new DevToolButton(this, '', 'Layer visibility (shift-3)', 'show/hide walls layer', 'eyeopen', 0, (h + s) * 5 + h * 0.75 + s, h * 2 - 25, h * 0.75, toolButtonsContainer, this.hideLayer.bind(this), 2),
-			new DevToolButton(this, '', 'Layer visibility (shift-4)', 'show/hide trees layer', 'eyeopen', 0, (h + s) * 5, h * 2 - 25, h * 0.75, toolButtonsContainer, this.hideLayer.bind(this), 3)
-		);
 		this.layerHideButtons[0].highlight('active');
 		this.layerHideButtons[0].increaseSize(true);
 
-
-		/*const toolButton = [];
-		toolButton.push(
-			new DevToolButton(this, 'undo', 'undo', 'undo(ctrl-z)', 'undo', 0, (h + s) * 5, h * 2 - s, toolButtonsContainer, this.commandController.undo.bind(this.commandController)),
-			new DevToolButton(this, 'redo', 'redo', 'redo(ctrl-shift-z | ctrl-y', 'redo', h * 2, (h + s) * 5, h * 2 - s, toolButtonsContainer, this.commandController.redo.bind(this.commandController))
-		);*/
-
-		this.paletteButton = new DevToolButton(this, 'palette', 'Palette', 'show/hide palette', null, 0, (h + s) * 9, h * 4, h, toolButtonsContainer, palette.toggle.bind(palette));
+		paletteButtonSection.addButton(new DevToolButton(this, 'palette', 'Palette', 'show/hide palette', null, 0, 0, w * 2 + s * 2, h, toolButtonsContainer, palette.toggle.bind(palette)));
+		paletteButtonSection.addButton(new DevToolButton(this, 'X', 'Settings', 'open settings', null, w * 2 + s * 3, 0, w, h, toolButtonsContainer, palette.toggle.bind(palette)));
+		this.paletteButton = paletteButtonSection.buttons[0];
 
 		this.tooltip = new DevTooltip(this.scene);
         this.scene.cameras.getCamera('palette').ignore([this.tooltip, this.toolButtonsContainer]);
