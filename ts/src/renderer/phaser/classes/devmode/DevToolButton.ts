@@ -17,6 +17,7 @@ class DevToolButton {
 		x: number,
 		y: number,
 		w: number,
+		h: number,
 		container: Phaser.GameObjects.Container,
 		func: (...args: any[]) => void,
 		value?: number | string,
@@ -25,20 +26,21 @@ class DevToolButton {
 	) {
 		this.name = text;
 		this.hoverChildren = hoverChildren;
-		const h = devModeTools.BUTTON_HEIGHT;
+		//const h = devModeTools.BUTTON_HEIGHT;
 		const scene = devModeTools.scene;
 		// @ts-ignore
 		const button = this.button = scene.add.rexRoundRectangle(x + w / 2, y + h / 2, w, h, 5, devModeTools.COLOR_WHITE);
+		button.setStrokeStyle(1, 0x000000, 1);
 		button.setInteractive();
 		button.setVisible(defaultVisible);
 		container.add(button);
 		if (texture) {
-			const image = this.image = scene.add.image(x + w / 4 + h * 0.1, y + h * 0.1, texture)
+			const image = this.image = scene.add.image(x + w / 2 - h * 0.4, y + h * 0.1, texture)
 				.setDisplaySize(h * 0.8, h * 0.8)
 				.setOrigin(0);
 			container.add(image);
 		} else {
-			const label = scene.add.bitmapText(
+			const label = this.label = scene.add.bitmapText(
 				x + w / 2, y + h / 2,
 				BitmapFontManager.font(scene,
 					'Verdana', false, false, '#000000'
@@ -50,7 +52,6 @@ class DevToolButton {
 			label.letterSpacing = 1.3;
             label.setVisible(defaultVisible);
 			container.add(label);
-			this.label = label;
 			/*if (scene.renderer.type === Phaser.CANVAS) {
 				const rt = scene.add.renderTexture(
 					label.x, label.y,

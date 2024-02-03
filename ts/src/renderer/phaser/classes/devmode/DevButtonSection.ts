@@ -14,7 +14,6 @@ class DevButtonSection {
 	timer: number | NodeJS.Timeout;
 	hoverChildren?: DevToolButton[];*/
 	constructor(
-		//scene: DevModeScene,
 		devModeTools: DevModeTools,
 		name: string,
 	) {
@@ -23,12 +22,14 @@ class DevButtonSection {
 		const scene = devModeTools.scene;
 		const container = this.container = new Phaser.GameObjects.Container(scene);
 		scene.add.existing(container);
+		const w = devModeTools.SECTION_WIDTH;
+		const h = devModeTools.BUTTON_HEIGHT;
 		// @ts-ignore
-		const header = this.header = scene.add.rexRoundRectangle(devModeTools.SECTION_WIDTH/2, -devModeTools.BUTTON_HEIGHT/2, devModeTools.SECTION_WIDTH, devModeTools.BUTTON_HEIGHT/2, 5, devModeTools.COLOR_GRAY);
+		const header = this.header = scene.add.rexRoundRectangle(w/2, -h/3, w, h/2, 5, devModeTools.COLOR_GRAY);
 		container.add(header);
 
 		const label = this.label = scene.add.bitmapText(
-			devModeTools.SECTION_WIDTH/2, -devModeTools.BUTTON_HEIGHT/2,
+			w/2, -h/3,
 			BitmapFontManager.font(scene,
 				'Verdana', true, false, '#000000'
 			),
@@ -37,15 +38,11 @@ class DevButtonSection {
 		);
 		label.setOrigin(0.5);
 		label.letterSpacing = 1.3;
-		//label.setVisible(defaultVisible);
 		container.add(label);
-
-		console.log('header position', header.x, header.y);
     }
 
 	addButton(button: DevToolButton) {
 		this.buttons.push(button);
-		console.log('button position', button.button.x, button.button.y);
 	}
 
 }

@@ -7,27 +7,24 @@ var DevButtonSection = /** @class */ (function () {
     label: Phaser.GameObjects.BitmapText;
     timer: number | NodeJS.Timeout;
     hoverChildren?: DevToolButton[];*/
-    function DevButtonSection(
-    //scene: DevModeScene,
-    devModeTools, name) {
+    function DevButtonSection(devModeTools, name) {
         this.name = name;
         this.buttons = [];
         var scene = devModeTools.scene;
         var container = this.container = new Phaser.GameObjects.Container(scene);
         scene.add.existing(container);
+        var w = devModeTools.SECTION_WIDTH;
+        var h = devModeTools.BUTTON_HEIGHT;
         // @ts-ignore
-        var header = this.header = scene.add.rexRoundRectangle(devModeTools.SECTION_WIDTH / 2, -devModeTools.BUTTON_HEIGHT / 2, devModeTools.SECTION_WIDTH, devModeTools.BUTTON_HEIGHT / 2, 5, devModeTools.COLOR_GRAY);
+        var header = this.header = scene.add.rexRoundRectangle(w / 2, -h / 3, w, h / 2, 5, devModeTools.COLOR_GRAY);
         container.add(header);
-        var label = this.label = scene.add.bitmapText(devModeTools.SECTION_WIDTH / 2, -devModeTools.BUTTON_HEIGHT / 2, BitmapFontManager.font(scene, 'Verdana', true, false, '#000000'), this.name, 14);
+        var label = this.label = scene.add.bitmapText(w / 2, -h / 3, BitmapFontManager.font(scene, 'Verdana', true, false, '#000000'), this.name, 14);
         label.setOrigin(0.5);
         label.letterSpacing = 1.3;
-        //label.setVisible(defaultVisible);
         container.add(label);
-        console.log('header position', header.x, header.y);
     }
     DevButtonSection.prototype.addButton = function (button) {
         this.buttons.push(button);
-        console.log('button position', button.button.x, button.button.y);
     };
     return DevButtonSection;
 }());

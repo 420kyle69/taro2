@@ -1,5 +1,5 @@
 var DevToolButton = /** @class */ (function () {
-    function DevToolButton(devModeTools, text, tooltipLabel, tooltipText, texture, x, y, w, container, func, value, hoverChildren, defaultVisible) {
+    function DevToolButton(devModeTools, text, tooltipLabel, tooltipText, texture, x, y, w, h, container, func, value, hoverChildren, defaultVisible) {
         if (defaultVisible === void 0) { defaultVisible = true; }
         var _this = this;
         var _a;
@@ -7,26 +7,26 @@ var DevToolButton = /** @class */ (function () {
         this.isHover = false;
         this.name = text;
         this.hoverChildren = hoverChildren;
-        var h = devModeTools.BUTTON_HEIGHT;
+        //const h = devModeTools.BUTTON_HEIGHT;
         var scene = devModeTools.scene;
         // @ts-ignore
         var button = this.button = scene.add.rexRoundRectangle(x + w / 2, y + h / 2, w, h, 5, devModeTools.COLOR_WHITE);
+        button.setStrokeStyle(1, 0x000000, 1);
         button.setInteractive();
         button.setVisible(defaultVisible);
         container.add(button);
         if (texture) {
-            var image = this.image = scene.add.image(x + w / 4 + h * 0.1, y + h * 0.1, texture)
+            var image = this.image = scene.add.image(x + w / 2 - h * 0.4, y + h * 0.1, texture)
                 .setDisplaySize(h * 0.8, h * 0.8)
                 .setOrigin(0);
             container.add(image);
         }
         else {
-            var label = scene.add.bitmapText(x + w / 2, y + h / 2, BitmapFontManager.font(scene, 'Verdana', false, false, '#000000'), text, 22);
+            var label = this.label = scene.add.bitmapText(x + w / 2, y + h / 2, BitmapFontManager.font(scene, 'Verdana', false, false, '#000000'), text, 22);
             label.setOrigin(0.5);
             label.letterSpacing = 1.3;
             label.setVisible(defaultVisible);
             container.add(label);
-            this.label = label;
             /*if (scene.renderer.type === Phaser.CANVAS) {
                 const rt = scene.add.renderTexture(
                     label.x, label.y,
