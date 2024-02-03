@@ -41,9 +41,11 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.commandController = new CommandController({
 			'increaseBrushSize': () => {
 				this.brushSize = Math.min(this.brushSize + 1, 50);
+				brushSizeSection.buttons[1].label.setText(this.brushSize.toString());
 				this.updateBrushArea();
 			}, 'decreaseBrushSize': () => {
 				this.brushSize = Math.max(this.brushSize - 1, 1);
+				brushSizeSection.buttons[1].label.setText(this.brushSize.toString());
 				this.updateBrushArea();
 			}
 		}, this.scene.gameScene.tilemap);
@@ -114,9 +116,9 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.cursorButton = this.modeButtons[0];
 		this.highlightModeButton(0);
 
-		brushSizeSection.addButton(new DevToolButton(this, '-', '-', 'decrease brush size', null, 0, 0, w, h, toolButtonsContainer, this.cursor.bind(this)));
-		brushSizeSection.addButton(new DevToolButton(this, '1', '1', 'current brush size', null, w + s, 0, w, h, toolButtonsContainer, this.cursor.bind(this)));
-		brushSizeSection.addButton(new DevToolButton(this, '+', '+', 'increase brush size', null, (w + s) * 2, 0, w, h, toolButtonsContainer, this.cursor.bind(this)));
+		brushSizeSection.addButton(new DevToolButton(this, '-', '-', 'decrease brush size', null, 0, 0, w, h, toolButtonsContainer, this.commandController.defaultCommands.decreaseBrushSize.bind(this)));
+		brushSizeSection.addButton(new DevToolButton(this, '1', '1', 'current brush size', null, w + s, 0, w, h, toolButtonsContainer, () => {}));
+		brushSizeSection.addButton(new DevToolButton(this, '+', '+', 'increase brush size', null, (w + s) * 2, 0, w, h, toolButtonsContainer, this.commandController.defaultCommands.increaseBrushSize.bind(this)));
 
 		this.layerButtons = [];
 		this.layerHideButtons = [];

@@ -28,9 +28,11 @@ var DevModeTools = /** @class */ (function (_super) {
         _this.commandController = new CommandController({
             'increaseBrushSize': function () {
                 _this.brushSize = Math.min(_this.brushSize + 1, 50);
+                brushSizeSection.buttons[1].label.setText(_this.brushSize.toString());
                 _this.updateBrushArea();
             }, 'decreaseBrushSize': function () {
                 _this.brushSize = Math.max(_this.brushSize - 1, 1);
+                brushSizeSection.buttons[1].label.setText(_this.brushSize.toString());
                 _this.updateBrushArea();
             }
         }, _this.scene.gameScene.tilemap);
@@ -91,9 +93,9 @@ var DevModeTools = /** @class */ (function (_super) {
         toolButtonSection.addButton(new DevToolButton(_this, '', 'Redo (ctrl-shift-z | ctrl-y)', 'redo', 'redo', w * 1.5 + s * 2, (h + s) * 3 + s, w * 1.5, h, toolButtonsContainer, _this.commandController.redo.bind(_this.commandController)));
         _this.cursorButton = _this.modeButtons[0];
         _this.highlightModeButton(0);
-        brushSizeSection.addButton(new DevToolButton(_this, '-', '-', 'decrease brush size', null, 0, 0, w, h, toolButtonsContainer, _this.cursor.bind(_this)));
-        brushSizeSection.addButton(new DevToolButton(_this, '1', '1', 'current brush size', null, w + s, 0, w, h, toolButtonsContainer, _this.cursor.bind(_this)));
-        brushSizeSection.addButton(new DevToolButton(_this, '+', '+', 'increase brush size', null, (w + s) * 2, 0, w, h, toolButtonsContainer, _this.cursor.bind(_this)));
+        brushSizeSection.addButton(new DevToolButton(_this, '-', '-', 'decrease brush size', null, 0, 0, w, h, toolButtonsContainer, _this.commandController.defaultCommands.decreaseBrushSize.bind(_this)));
+        brushSizeSection.addButton(new DevToolButton(_this, '1', '1', 'current brush size', null, w + s, 0, w, h, toolButtonsContainer, function () { }));
+        brushSizeSection.addButton(new DevToolButton(_this, '+', '+', 'increase brush size', null, (w + s) * 2, 0, w, h, toolButtonsContainer, _this.commandController.defaultCommands.increaseBrushSize.bind(_this)));
         _this.layerButtons = [];
         _this.layerHideButtons = [];
         scene.gameScene.tilemapLayers.forEach(function (layer, index) {

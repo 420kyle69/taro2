@@ -29,7 +29,7 @@ class TilePalette extends Phaser.GameObjects.Container {
 		public scene: DevModeScene,
 		private tileset: Phaser.Tilemaps.Tileset,
 		rexUI: any,
-		private commandController: CommandController
+		public commandController: CommandController
 	) {
 		super(scene);
 		this.devModeScene = scene;
