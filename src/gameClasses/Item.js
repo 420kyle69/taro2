@@ -59,7 +59,7 @@ var Item = TaroEntityPhysics.extend({
 		self.addComponent(VariableComponent);
 
 		self.addComponent(ScriptComponent); // entity-scripting
-		self.script.load(data.scripts);
+		self.script.load(self._stats.scripts);
 
 		taro.game.lastCreatedItemId = entityIdFromServer || this.id();
 
