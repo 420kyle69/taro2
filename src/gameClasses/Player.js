@@ -330,6 +330,26 @@ var Player = TaroEntity.extend({
 	updatePlayerType: function (data) {
 		var self = this;
 
+		if (taro.isServer) {
+			// update all units that are targeting this player's unit to act appropriately based on new relationship dynamics
+			// for example, this player's unit may not be the enemy anymore and 
+			// if AI unit was attacking his player's unit, then it should stop.
+
+			// iterate through all units owned by this player
+			self._stats.unitIds.forEach(function (unitId) {
+				var unit = taro.$(unitId);
+				// iterate through all units in the game that's currently targeting this unit, and update their behaviour accordingly
+				// based on new relationship dynamics
+				taro.$$('unit').forEach(function (unit) {
+					if (unit._stats.ownerId != self.id() && unit.ai.targetUnitId == unitId) {
+						if (self.isHostileTo(unit.getOwner()) == false) {
+							unit.ai.targetUnitId = undefined;
+						}
+					}
+				});
+			});
+		}
+
 		// pass old attributes' values to new attributes (given that attributes have same ID)
 		if (self._stats.attributes != undefined) {
 			var oldAttributes = rfdc()(self._stats.attributes);
