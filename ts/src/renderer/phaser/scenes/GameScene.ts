@@ -60,13 +60,13 @@ class GameScene extends PhaserScene {
 		let resized = false;
 
 		this.scale.on(Phaser.Scale.Events.RESIZE, () => {
-			console.log('resize')
-			if (resized) {
-				resized = false;
-			} else {
-				resized = true;
-				this.game.scale.setGameSize(window.outerWidth * window.devicePixelRatio, window.outerHeight * window.devicePixelRatio);
-				//window.dispatchEvent(new Event('resize'));
+			if (!taro.isMobile) {
+				if (resized) {
+					resized = false;
+				} else {
+					resized = true;
+					this.game.scale.setGameSize(window.innerWidth, window.innerHeight);
+				}
 			}
 			if (this.zoomSize) {
 				camera.zoom = this.calculateZoom();
@@ -267,7 +267,6 @@ class GameScene extends PhaserScene {
 		//to be sure every layer of map have correct number of tiles
 		const tilesPerLayer = data.map.height * data.map.width;
 		data.map.layers.forEach(layer => {
-			console.log('layer', layer.name)
 			if (layer.name !== 'debris') {
 				const length = layer.data.length;
 				layer.width = data.map.width;

@@ -64,14 +64,14 @@ var GameScene = /** @class */ (function (_super) {
         }
         var resized = false;
         this.scale.on(Phaser.Scale.Events.RESIZE, function () {
-            console.log('resize');
-            if (resized) {
-                resized = false;
-            }
-            else {
-                resized = true;
-                _this.game.scale.setGameSize(window.outerWidth * window.devicePixelRatio, window.outerHeight * window.devicePixelRatio);
-                //window.dispatchEvent(new Event('resize'));
+            if (!taro.isMobile) {
+                if (resized) {
+                    resized = false;
+                }
+                else {
+                    resized = true;
+                    _this.game.scale.setGameSize(window.innerWidth, window.innerHeight);
+                }
             }
             if (_this.zoomSize) {
                 camera.zoom = _this.calculateZoom();
@@ -226,7 +226,6 @@ var GameScene = /** @class */ (function (_super) {
         //to be sure every layer of map have correct number of tiles
         var tilesPerLayer = data.map.height * data.map.width;
         data.map.layers.forEach(function (layer) {
-            console.log('layer', layer.name);
             if (layer.name !== 'debris') {
                 var length_1 = layer.data.length;
                 layer.width = data.map.width;

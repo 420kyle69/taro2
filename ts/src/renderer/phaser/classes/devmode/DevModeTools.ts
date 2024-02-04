@@ -25,10 +25,10 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	COLOR_PRIMARY: number;
 	COLOR_GRAY: number;
 
-	SECTION_WIDTH: number = 125;
-	BUTTON_HEIGHT: number = 33;
-	BUTTON_WIDTH: number = 39;
-	BUTTON_INTERSPACE: number = 4;
+	SECTION_WIDTH: number = 90;
+	BUTTON_HEIGHT: number = 25;
+	BUTTON_WIDTH: number = 28;
+	BUTTON_INTERSPACE: number = 3;
 
 	altKey: Phaser.Input.Keyboard.Key;
 	shiftKey: Phaser.Input.Keyboard.Key;
@@ -80,7 +80,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 			/*if (toolButtonsContainer.height > window.innerHeight * 0.5) {
 				toolButtonsContainer.scale = (window.innerHeight * 0.5) / toolButtonsContainer.height;
 			}*/
-			toolButtonsContainer.x = palette.camera.x + palette.paletteWidth - ((h * 4) * toolButtonsContainer.scale) + 22;
+			toolButtonsContainer.x = palette.camera.x + palette.paletteWidth - (this.SECTION_WIDTH * toolButtonsContainer.scale) + 22;
 			toolButtonsContainer.y = palette.camera.y - (toolButtonsContainer.height * toolButtonsContainer.scale);
 		});
 
@@ -91,7 +91,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		/*if (toolButtonsContainer.height > window.innerHeight * 0.5) {
 			toolButtonsContainer.scale = (window.innerHeight * 0.5) / toolButtonsContainer.height;
 		}*/
-		toolButtonsContainer.x = palette.camera.x + palette.paletteWidth - ((h * 4) * toolButtonsContainer.scale) + 22;
+		toolButtonsContainer.x = palette.camera.x + palette.paletteWidth - (this.SECTION_WIDTH * toolButtonsContainer.scale) + 22;
 		toolButtonsContainer.y = palette.camera.y - (toolButtonsContainer.height * toolButtonsContainer.scale);
 
 		this.brushButtons = {
@@ -124,8 +124,8 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.layerHideButtons = [];
 		
 		scene.gameScene.tilemapLayers.forEach((layer, index) => {
-			this.layerButtonSection.addButton(new DevToolButton(this, layer.name, `Layer (${index + 1})`, `select the ${layer.name} layer`, null, h + s, /*(h + s) * 5 +*/ (h * 0.75 + s) * (layersCount - 1 - index), h * 2 + 25, h * 0.75, toolButtonsContainer, this.switchLayer.bind(this), index), this.layerButtons);
-			this.layerButtonSection.addButton(new DevToolButton(this, '', `Layer visibility (shift-${index + 1})`, `show/hide ${layer.name} layer`, 'eyeopen', 0, /*(h + s) * 5*/ + (h * 0.75 + s) * (layersCount - 1 - index), h * 2 - 25, h * 0.75, toolButtonsContainer, this.hideLayer.bind(this), index), this.layerHideButtons);
+			this.layerButtonSection.addButton(new DevToolButton(this, layer.name, `Layer (${index + 1})`, `select the ${layer.name} layer`, null, w * 0.7, (h * 0.75 + s) * (layersCount - 1 - index), w * 2.5, h * 0.75, toolButtonsContainer, this.switchLayer.bind(this), index), this.layerButtons);
+			this.layerButtonSection.addButton(new DevToolButton(this, '', `Layer visibility (shift-${index + 1})`, `show/hide ${layer.name} layer`, 'eyeopen', 0, (h * 0.75 + s) * (layersCount - 1 - index), w, h * 0.75, toolButtonsContainer, this.hideLayer.bind(this), index), this.layerHideButtons);
 		});
 
 		this.layerButtons[0].highlight('active');

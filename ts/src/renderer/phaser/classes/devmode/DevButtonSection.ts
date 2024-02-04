@@ -31,8 +31,9 @@ class DevButtonSection {
 					'Verdana', true, false, '#000000'
 				),
 				this.name,
-				14
+				16
 			);
+			label.scale = 0.8;
 			label.setOrigin(0.5);
 			label.letterSpacing = 1.3;
 			devModeTools.toolButtonsContainer.add(label);

@@ -21,10 +21,10 @@ var DevModeTools = /** @class */ (function (_super) {
         _this = _super.call(this, scene) || this;
         _this.scene = scene;
         _this.brushSize = 1;
-        _this.SECTION_WIDTH = 125;
-        _this.BUTTON_HEIGHT = 33;
-        _this.BUTTON_WIDTH = 39;
-        _this.BUTTON_INTERSPACE = 4;
+        _this.SECTION_WIDTH = 90;
+        _this.BUTTON_HEIGHT = 25;
+        _this.BUTTON_WIDTH = 28;
+        _this.BUTTON_INTERSPACE = 3;
         _this.commandController = new CommandController({
             'increaseBrushSize': function () {
                 _this.brushSize = Math.min(_this.brushSize + 1, 50);
@@ -63,7 +63,7 @@ var DevModeTools = /** @class */ (function (_super) {
             /*if (toolButtonsContainer.height > window.innerHeight * 0.5) {
                 toolButtonsContainer.scale = (window.innerHeight * 0.5) / toolButtonsContainer.height;
             }*/
-            toolButtonsContainer.x = palette.camera.x + palette.paletteWidth - ((h * 4) * toolButtonsContainer.scale) + 22;
+            toolButtonsContainer.x = palette.camera.x + palette.paletteWidth - (_this.SECTION_WIDTH * toolButtonsContainer.scale) + 22;
             toolButtonsContainer.y = palette.camera.y - (toolButtonsContainer.height * toolButtonsContainer.scale);
         });
         new DevToolButton(_this, '+', '+', 'Zoom in (+)', null, 0, -(h + s), h, h, palette.scrollBarContainer, palette.zoom.bind(palette), -1);
@@ -72,7 +72,7 @@ var DevModeTools = /** @class */ (function (_super) {
         /*if (toolButtonsContainer.height > window.innerHeight * 0.5) {
             toolButtonsContainer.scale = (window.innerHeight * 0.5) / toolButtonsContainer.height;
         }*/
-        toolButtonsContainer.x = palette.camera.x + palette.paletteWidth - ((h * 4) * toolButtonsContainer.scale) + 22;
+        toolButtonsContainer.x = palette.camera.x + palette.paletteWidth - (_this.SECTION_WIDTH * toolButtonsContainer.scale) + 22;
         toolButtonsContainer.y = palette.camera.y - (toolButtonsContainer.height * toolButtonsContainer.scale);
         _this.brushButtons = {
             'rectangle': new DevToolButton(_this, 'rectangle', 'rectangle', 'changes the brush shape to rectangle', null, -(h * 4 + 1.5 * s), (h + s) * 1, h * 4 - s, h, toolButtonsContainer, _this.changeShape.bind(_this), 'rectangle', [], false),
@@ -99,8 +99,8 @@ var DevModeTools = /** @class */ (function (_super) {
         _this.layerButtons = [];
         _this.layerHideButtons = [];
         scene.gameScene.tilemapLayers.forEach(function (layer, index) {
-            _this.layerButtonSection.addButton(new DevToolButton(_this, layer.name, "Layer (".concat(index + 1, ")"), "select the ".concat(layer.name, " layer"), null, h + s, /*(h + s) * 5 +*/ (h * 0.75 + s) * (layersCount - 1 - index), h * 2 + 25, h * 0.75, toolButtonsContainer, _this.switchLayer.bind(_this), index), _this.layerButtons);
-            _this.layerButtonSection.addButton(new DevToolButton(_this, '', "Layer visibility (shift-".concat(index + 1, ")"), "show/hide ".concat(layer.name, " layer"), 'eyeopen', 0, /*(h + s) * 5*/ +(h * 0.75 + s) * (layersCount - 1 - index), h * 2 - 25, h * 0.75, toolButtonsContainer, _this.hideLayer.bind(_this), index), _this.layerHideButtons);
+            _this.layerButtonSection.addButton(new DevToolButton(_this, layer.name, "Layer (".concat(index + 1, ")"), "select the ".concat(layer.name, " layer"), null, w * 0.7, (h * 0.75 + s) * (layersCount - 1 - index), w * 2.5, h * 0.75, toolButtonsContainer, _this.switchLayer.bind(_this), index), _this.layerButtons);
+            _this.layerButtonSection.addButton(new DevToolButton(_this, '', "Layer visibility (shift-".concat(index + 1, ")"), "show/hide ".concat(layer.name, " layer"), 'eyeopen', 0, (h * 0.75 + s) * (layersCount - 1 - index), w, h * 0.75, toolButtonsContainer, _this.hideLayer.bind(_this), index), _this.layerHideButtons);
         });
         _this.layerButtons[0].highlight('active');
         _this.layerButtons[0].increaseSize(true);

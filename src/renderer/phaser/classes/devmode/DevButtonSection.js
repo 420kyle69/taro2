@@ -11,7 +11,8 @@ var DevButtonSection = /** @class */ (function () {
             // @ts-ignore
             var header = this.header = scene.add.rexRoundRectangle(w / 2, y - h / 3, w, h / 2, 5, devModeTools.COLOR_GRAY);
             devModeTools.toolButtonsContainer.add(header);
-            var label = this.label = scene.add.bitmapText(w / 2, y - h / 3, BitmapFontManager.font(scene, 'Verdana', true, false, '#000000'), this.name, 14);
+            var label = this.label = scene.add.bitmapText(w / 2, y - h / 3, BitmapFontManager.font(scene, 'Verdana', true, false, '#000000'), this.name, 16);
+            label.scale = 0.8;
             label.setOrigin(0.5);
             label.letterSpacing = 1.3;
             devModeTools.toolButtonsContainer.add(label);

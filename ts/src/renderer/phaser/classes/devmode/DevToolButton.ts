@@ -26,7 +26,6 @@ class DevToolButton {
 	) {
 		this.name = text;
 		this.hoverChildren = hoverChildren;
-		//const h = devModeTools.BUTTON_HEIGHT;
 		const scene = devModeTools.scene;
 		// @ts-ignore
 		const button = this.button = scene.add.rexRoundRectangle(x + w / 2, y + h / 2, w, h, 5, devModeTools.COLOR_WHITE);
@@ -46,7 +45,7 @@ class DevToolButton {
 					'Verdana', false, false, '#000000'
 				),
 				text,
-				22
+				16
 			);
 			label.setOrigin(0.5);
 			label.letterSpacing = 1.3;

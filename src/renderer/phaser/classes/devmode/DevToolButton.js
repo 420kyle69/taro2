@@ -7,7 +7,6 @@ var DevToolButton = /** @class */ (function () {
         this.isHover = false;
         this.name = text;
         this.hoverChildren = hoverChildren;
-        //const h = devModeTools.BUTTON_HEIGHT;
         var scene = devModeTools.scene;
         // @ts-ignore
         var button = this.button = scene.add.rexRoundRectangle(x + w / 2, y + h / 2, w, h, 5, devModeTools.COLOR_WHITE);
@@ -22,7 +21,7 @@ var DevToolButton = /** @class */ (function () {
             container.add(image);
         }
         else {
-            var label = this.label = scene.add.bitmapText(x + w / 2, y + h / 2, BitmapFontManager.font(scene, 'Verdana', false, false, '#000000'), text, 22);
+            var label = this.label = scene.add.bitmapText(x + w / 2, y + h / 2, BitmapFontManager.font(scene, 'Verdana', false, false, '#000000'), text, 16);
             label.setOrigin(0.5);
             label.letterSpacing = 1.3;
             label.setVisible(defaultVisible);
