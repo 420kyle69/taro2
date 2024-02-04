@@ -876,9 +876,12 @@ var Unit = TaroEntityPhysics.extend({
 		}
 
 		if (taro.isServer) {
+
+			// change player's selected inventory slot to 0
+			self._stats.currentItemIndex = 0;
+				
 			//only give default items if this is a new unit
 			if (isUnitCreation) {
-				self._stats.currentItemIndex = 0;
 				self._stats.currentItemId = null;
 
 				// give default items to the unit
@@ -893,9 +896,9 @@ var Unit = TaroEntityPhysics.extend({
 						}
 					}
 				}
-
-				self.changeItem(self._stats.currentItemIndex); // this will call change item on client for all units
 			}
+			
+			self.changeItem(self._stats.currentItemIndex); // this will call change item on client for all units
 		} else if (taro.isClient) {
 			var zIndex = self._stats.currentBody && self._stats.currentBody['z-index'] || { layer: 3, depth: 3 };
 
@@ -1169,7 +1172,6 @@ var Unit = TaroEntityPhysics.extend({
 					]);
 
 					self.inventory.insertItem(item, availableSlot - 1);
-
 					if (slotIndex == self._stats.currentItemIndex) {
 						item.setState('selected');
 					} else {
