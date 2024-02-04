@@ -2227,6 +2227,21 @@ var ActionComponent = TaroEntity.extend({
 
 						break;
 
+					case 'playMusicForPlayerAtTime':
+						var music = taro.game.data.music[action.music];
+						var time = self._script.param.getValue(action.time, vars);
+						var player = self._script.param.getValue(action.player, vars);
+
+						if (music && player && time && player._stats.clientId) {
+							taro.network.send('sound', {
+								cmd: 'playMusicForPlayerAtTime',
+								music: action.music,
+								time: action.time
+							}, player._stats.clientId);
+						}
+
+						break;
+
 					case 'playMusicForPlayerRepeatedly':
 						var music = taro.game.data.music[action.music];
 						var player = self._script.param.getValue(action.player, vars);
