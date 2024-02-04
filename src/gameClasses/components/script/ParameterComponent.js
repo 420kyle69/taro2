@@ -1263,6 +1263,17 @@ var ParameterComponent = TaroEntity.extend({
 						}
 						break;
 
+					case 'mathRound':
+						var value = self.getValue(text.value, vars);
+						if (!isNaN(value)) {
+							if (value - Math.floor(value) < .5) {
+								returnValue = Math.floor(value);
+							} else {
+								returnValue = Math.ceil(value);
+							}
+						}
+						break;
+
 					case 'log10':
 						var value = self.getValue(text.value, vars);
 
