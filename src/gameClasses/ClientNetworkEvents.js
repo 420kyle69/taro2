@@ -760,7 +760,8 @@ var ClientNetworkEvents = {
 					break;
 				case "playMusicForPlayerAtTime":
 					var music = taro.game.data.music[data.music];
-					var time = taro.game.data.music[data.time];
+					var time = data.time;
+
 					if (music && time) {
 						taro.sound.playMusic(music, time, undefined, data.music);
 					}

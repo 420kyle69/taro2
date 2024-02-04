@@ -197,6 +197,7 @@ var SoundComponent = TaroEntity.extend({
 	},
 
 	playMusic: function (music, startAt, shouldRepeat, key) {
+		var startAt = startAt/1000;
 		var self = this;
 		var playMusic;
 		if (taro.isClient) {
