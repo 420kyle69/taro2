@@ -660,8 +660,8 @@ var ActionComponent = TaroEntity.extend({
 					case 'appendRealtimeCSSForPlayer':
 						var player = self._script.param.getValue(action.player, vars);
 						var text = self._script.param.getValue(action.value, vars);
-						if (player && player._stats && player._stats.controlledBy == 'human') {
-							taro.network.send('updateUiRealtimeCSS', { action: 'append', style: text });
+						if (player && player._stats && player._stats.controlledBy == 'human' && player._stats.clientId) {
+							taro.network.send('updateUiRealtimeCSS', { action: 'append', style: text }, player._stats.clientId);
 							player.realtimeCSS += '\n' + text;
 						}
 						break;
@@ -669,8 +669,8 @@ var ActionComponent = TaroEntity.extend({
 					case 'updateRealtimeCSSForPlayer':
 						var player = self._script.param.getValue(action.player, vars);
 						var text = self._script.param.getValue(action.value, vars);
-						if (player && player._stats && player._stats.controlledBy == 'human') {
-							taro.network.send('updateUiRealtimeCSS', { action: 'update', style: text });
+						if (player && player._stats && player._stats.controlledBy == 'human' && player._stats.clientId) {
+							taro.network.send('updateUiRealtimeCSS', { action: 'update', style: text }, player._stats.clientId);
 							player.realtimeCSS = text;
 						}
 						break;
