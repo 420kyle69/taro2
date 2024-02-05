@@ -30,7 +30,7 @@ class ThreeCamera {
 
 		this.controls = new OrbitControls(this.instance, canvas);
 		this.controls.enableRotate = false;
-		this.controls.mouseButtons = { LEFT: THREE.MOUSE.ROTATE, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: '' };
+		this.controls.mouseButtons = { LEFT: '', MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.ROTATE };
 		this.controls.update();
 
 		this.orthographicState = {
