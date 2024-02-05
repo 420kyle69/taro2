@@ -106,12 +106,6 @@ var DevToolButton = /** @class */ (function () {
     };
     DevToolButton.prototype.increaseSize = function (value) {
         this.button.setScale(1 + (Number(value) * 0.1), 1 + (Number(value) * 0.05));
-        /*if (value) {
-            this.button.setStrokeStyle(2, 0x000000, 1);
-        }
-        else {
-            this.button.setStrokeStyle();
-        }*/
     };
     return DevToolButton;
 }());

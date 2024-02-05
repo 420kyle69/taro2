@@ -134,7 +134,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.layerHideButtons[0].increaseSize(true);
 
 		paletteButtonSection.addButton(new DevToolButton(this, 'palette', 'Palette', 'show/hide palette', null, 0, 0, w * 2 + s * 2, h, toolButtonsContainer, palette.toggle.bind(palette)));
-		paletteButtonSection.addButton(new DevToolButton(this, 'X', 'Settings', 'open settings', null, w * 2 + s * 3, 0, w, h, toolButtonsContainer, palette.toggle.bind(palette)));
+		paletteButtonSection.addButton(new DevToolButton(this, '', 'Settings', 'open map settings', 'settings', w * 2 + s * 3, 0, w, h, toolButtonsContainer, this.settings.bind(this)));
 		this.paletteButton = paletteButtonSection.buttons[0];
 
 		this.tooltip = new DevTooltip(this.scene);
@@ -428,6 +428,10 @@ class DevModeTools extends Phaser.GameObjects.Container {
 
 	save(): void {
 		inGameEditor.saveMap();
+	}
+
+	settings(): void {
+		InGameEditor.openMapConfiguration();
 	}
 
 	highlightModeButton(n: number): void {

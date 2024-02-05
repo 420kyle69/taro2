@@ -9,6 +9,7 @@ declare class InGameEditor extends TaroClass {
 	mapWasEdited(): void
 	showClearLayerConfirmation(data: TileData<'clear'>): void
 	saveMap(): void
+	static openMapConfiguration(): void
 	showRegionList(data: RegionData[]): void
 	showRepublishToInitEntitiesWarning(): void
 	toggleEntityPlacementWindow(boolean): void

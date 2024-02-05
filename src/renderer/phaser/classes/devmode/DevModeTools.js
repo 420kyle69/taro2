@@ -107,7 +107,7 @@ var DevModeTools = /** @class */ (function (_super) {
         _this.layerHideButtons[0].highlight('active');
         _this.layerHideButtons[0].increaseSize(true);
         paletteButtonSection.addButton(new DevToolButton(_this, 'palette', 'Palette', 'show/hide palette', null, 0, 0, w * 2 + s * 2, h, toolButtonsContainer, palette.toggle.bind(palette)));
-        paletteButtonSection.addButton(new DevToolButton(_this, 'X', 'Settings', 'open settings', null, w * 2 + s * 3, 0, w, h, toolButtonsContainer, palette.toggle.bind(palette)));
+        paletteButtonSection.addButton(new DevToolButton(_this, '', 'Settings', 'open map settings', 'settings', w * 2 + s * 3, 0, w, h, toolButtonsContainer, _this.settings.bind(_this)));
         _this.paletteButton = paletteButtonSection.buttons[0];
         _this.tooltip = new DevTooltip(_this.scene);
         _this.scene.cameras.getCamera('palette').ignore([_this.tooltip, _this.toolButtonsContainer]);
@@ -386,6 +386,9 @@ var DevModeTools = /** @class */ (function (_super) {
     };
     DevModeTools.prototype.save = function () {
         inGameEditor.saveMap();
+    };
+    DevModeTools.prototype.settings = function () {
+        InGameEditor.openMapConfiguration();
     };
     DevModeTools.prototype.highlightModeButton = function (n) {
         this.modeButtons.forEach(function (button, index) {
