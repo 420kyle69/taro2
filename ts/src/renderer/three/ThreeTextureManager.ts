@@ -9,10 +9,12 @@ class ThreeTextureManager {
 
 	private loader = new THREE.TextureLoader();
 
-	loadFromUrl(key: string, url: string) {
+	// eslint-disable-next-line @typescript-eslint/no-empty-function
+	loadFromUrl(key: string, url: string, cb = (tex: THREE.Texture) => {}) {
 		this.loader.load(url, (tex) => {
 			tex.colorSpace = THREE.SRGBColorSpace;
 			this.textureMap.set(key, tex);
+			cb(tex);
 		});
 	}
 }

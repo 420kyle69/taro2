@@ -6,10 +6,12 @@ class ThreeTextureManager {
     static instance() {
         return this._instance || (this._instance = new this());
     }
-    loadFromUrl(key, url) {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    loadFromUrl(key, url, cb = (tex) => { }) {
         this.loader.load(url, (tex) => {
             tex.colorSpace = THREE.SRGBColorSpace;
             this.textureMap.set(key, tex);
+            cb(tex);
         });
     }
 }

@@ -218,24 +218,53 @@ class ThreeRenderer {
             });
             const updateTextureEvtListener = entity.on('update-texture', (data) => {
                 const textureManager = ThreeTextureManager.instance();
-                if (data === 'basic_texture_change') {
-                    //
-                }
-                else if (data === 'using_skin') {
-                    //
+                const key = entity._stats.cellSheet.url;
+                const tex = textureManager.textureMap.get(key);
+                if (tex) {
+                    ent.setTexture(tex);
+                    const bounds = entity._bounds2d;
+                    ent.setScale(bounds.x / 64, bounds.y / 64);
                 }
                 else {
-                    const key = entity._stats.cellSheet.url;
-                    const tex = textureManager.textureMap.get(key);
-                    if (tex) {
+                    textureManager.loadFromUrl(key, Utils.patchAssetUrl(key), (tex) => {
                         ent.setTexture(tex);
                         const bounds = entity._bounds2d;
                         ent.setScale(bounds.x / 64, bounds.y / 64);
-                    }
-                    else {
-                        console.error('tex not found: ', key);
-                    }
+                    });
                 }
+                // TODO: Look into rework the animation code / make it more robust so I
+                // can use it here as well. See original Phaser code below:
+                // if (data === 'basic_texture_change') {
+                // 	//
+                // } else if (data === 'using_skin') {
+                // 	const key = entity._stats.cellSheet.url;
+                // 	const tex = textureManager.textureMap.get(key);
+                // 	if (tex) {
+                // 		ent.setTexture(tex);
+                // 		const bounds = entity._bounds2d;
+                // 		ent.setScale(bounds.x / 64, bounds.y / 64);
+                // 	} else {
+                // 		textureManager.loadFromUrl(key, Utils.patchAssetUrl(key), (tex) => {
+                // 			ent.setTexture(tex);
+                // 			const bounds = entity._bounds2d;
+                // 			ent.setScale(bounds.x / 64, bounds.y / 64);
+                // 		});
+                // 	}
+                // } else {
+                // 	const key = entity._stats.cellSheet.url;
+                // 	const tex = textureManager.textureMap.get(key);
+                // 	if (tex) {
+                // 		ent.setTexture(tex);
+                // 		const bounds = entity._bounds2d;
+                // 		ent.setScale(bounds.x / 64, bounds.y / 64);
+                // 	} else {
+                // 		textureManager.loadFromUrl(key, Utils.patchAssetUrl(key), (tex) => {
+                // 			ent.setTexture(tex);
+                // 			const bounds = entity._bounds2d;
+                // 			ent.setScale(bounds.x / 64, bounds.y / 64);
+                // 		});
+                // 	}
+                // }
                 if (data === 'basic_texture_change') {
                     // this.sprite.anims.stop();
                     // this.key = `unit/${this.entity._stats.cellSheet.url}`;
