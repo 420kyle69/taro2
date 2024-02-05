@@ -75,11 +75,14 @@ class ThreeCamera {
 
 	setPosition2D(x: number, z: number) {
 		const oldTarget = this.controls.target.clone();
-		this.controls.target.set(x, this.controls.target.y, z);
-		const diff = this.controls.target.clone().sub(oldTarget);
+		const target = new THREE.Vector3(x, this.controls.target.y, z);
+		const diff = target.clone().sub(oldTarget);
 
-		this.orthographicCamera.position.add(diff);
-		this.perspectiveCamera.position.add(diff);
+		const t = (taro?.game?.data?.settings?.camera?.trackingDelay || 3) / taro.fps();
+
+		this.controls.target.lerp(this.controls.target.clone().add(diff), t);
+		this.orthographicCamera.position.lerp(this.orthographicCamera.position.clone().add(diff), t);
+		this.perspectiveCamera.position.lerp(this.perspectiveCamera.position.clone().add(diff), t);
 	}
 
 	private switchToOrthographicCamera() {
