@@ -77,9 +77,14 @@ class DevModeTools extends Phaser.GameObjects.Container {
 
 		this.scene.scale.on(Phaser.Scale.Events.RESIZE, () => {
 			toolButtonsContainer.height = s + toolButtonSection.height + brushSizeSection.height + paletteButtonSection.height + this.layerButtonSection?.height || 0;
-			/*if (toolButtonsContainer.height > window.innerHeight * 0.5) {
-				toolButtonsContainer.scale = (window.innerHeight * 0.5) / toolButtonsContainer.height;
-			}*/
+			console.log(window.innerHeight);
+			if (window.innerHeight > 900) {
+				toolButtonsContainer.scale = 1.25;
+			} else if (window.innerHeight > 1200) {
+				toolButtonsContainer.scale = 1.5;
+			} else {
+				toolButtonsContainer.scale = 1;
+			}
 			toolButtonsContainer.x = palette.camera.x + palette.paletteWidth - (this.SECTION_WIDTH * toolButtonsContainer.scale) + 22;
 			toolButtonsContainer.y = palette.camera.y - (toolButtonsContainer.height * toolButtonsContainer.scale);
 		});
@@ -88,9 +93,13 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		new DevToolButton(this, '-', '-', 'Zoom out (-)', null, h + s, -(h + s), h, h, palette.scrollBarContainer, palette.zoom.bind(palette), 1);
 
 		toolButtonsContainer.height = s + toolButtonSection.height + brushSizeSection.height + paletteButtonSection.height + this.layerButtonSection?.height || 0 ;
-		/*if (toolButtonsContainer.height > window.innerHeight * 0.5) {
-			toolButtonsContainer.scale = (window.innerHeight * 0.5) / toolButtonsContainer.height;
-		}*/
+		if (window.innerHeight > 900) {
+			toolButtonsContainer.scale = 1.25;
+		} else if (window.innerHeight > 1200) {
+			toolButtonsContainer.scale = 1.5;
+		} else {
+			toolButtonsContainer.scale = 1;
+		}
 		toolButtonsContainer.x = palette.camera.x + palette.paletteWidth - (this.SECTION_WIDTH * toolButtonsContainer.scale) + 22;
 		toolButtonsContainer.y = palette.camera.y - (toolButtonsContainer.height * toolButtonsContainer.scale);
 

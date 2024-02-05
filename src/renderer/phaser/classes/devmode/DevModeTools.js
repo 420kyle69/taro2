@@ -60,18 +60,31 @@ var DevModeTools = /** @class */ (function (_super) {
         _this.scene.scale.on(Phaser.Scale.Events.RESIZE, function () {
             var _a;
             toolButtonsContainer.height = s + toolButtonSection.height + brushSizeSection.height + paletteButtonSection.height + ((_a = _this.layerButtonSection) === null || _a === void 0 ? void 0 : _a.height) || 0;
-            /*if (toolButtonsContainer.height > window.innerHeight * 0.5) {
-                toolButtonsContainer.scale = (window.innerHeight * 0.5) / toolButtonsContainer.height;
-            }*/
+            console.log(window.innerHeight);
+            if (window.innerHeight > 900) {
+                toolButtonsContainer.scale = 1.25;
+            }
+            else if (window.innerHeight > 1200) {
+                toolButtonsContainer.scale = 1.5;
+            }
+            else {
+                toolButtonsContainer.scale = 1;
+            }
             toolButtonsContainer.x = palette.camera.x + palette.paletteWidth - (_this.SECTION_WIDTH * toolButtonsContainer.scale) + 22;
             toolButtonsContainer.y = palette.camera.y - (toolButtonsContainer.height * toolButtonsContainer.scale);
         });
         new DevToolButton(_this, '+', '+', 'Zoom in (+)', null, 0, -(h + s), h, h, palette.scrollBarContainer, palette.zoom.bind(palette), -1);
         new DevToolButton(_this, '-', '-', 'Zoom out (-)', null, h + s, -(h + s), h, h, palette.scrollBarContainer, palette.zoom.bind(palette), 1);
         toolButtonsContainer.height = s + toolButtonSection.height + brushSizeSection.height + paletteButtonSection.height + ((_b = _this.layerButtonSection) === null || _b === void 0 ? void 0 : _b.height) || 0;
-        /*if (toolButtonsContainer.height > window.innerHeight * 0.5) {
-            toolButtonsContainer.scale = (window.innerHeight * 0.5) / toolButtonsContainer.height;
-        }*/
+        if (window.innerHeight > 900) {
+            toolButtonsContainer.scale = 1.25;
+        }
+        else if (window.innerHeight > 1200) {
+            toolButtonsContainer.scale = 1.5;
+        }
+        else {
+            toolButtonsContainer.scale = 1;
+        }
         toolButtonsContainer.x = palette.camera.x + palette.paletteWidth - (_this.SECTION_WIDTH * toolButtonsContainer.scale) + 22;
         toolButtonsContainer.y = palette.camera.y - (toolButtonsContainer.height * toolButtonsContainer.scale);
         _this.brushButtons = {
