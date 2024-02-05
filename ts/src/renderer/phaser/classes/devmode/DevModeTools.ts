@@ -431,7 +431,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	}
 
 	settings(): void {
-		InGameEditor.openMapConfiguration();
+		inGameEditor.openMapConfiguration();
 	}
 
 	highlightModeButton(n: number): void {

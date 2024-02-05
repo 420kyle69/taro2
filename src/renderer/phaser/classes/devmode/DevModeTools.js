@@ -388,7 +388,7 @@ var DevModeTools = /** @class */ (function (_super) {
         inGameEditor.saveMap();
     };
     DevModeTools.prototype.settings = function () {
-        InGameEditor.openMapConfiguration();
+        inGameEditor.openMapConfiguration();
     };
     DevModeTools.prototype.highlightModeButton = function (n) {
         this.modeButtons.forEach(function (button, index) {
