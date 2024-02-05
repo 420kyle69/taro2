@@ -8,13 +8,14 @@ class ThreeVoxelMap extends THREE.Group {
     }
     addLayer(data, height, transparent = true, flat = false, renderOrder = 0) {
         const voxels = new Map();
+        const flatOffset = flat ? 0.001 : 0;
         for (let z = 0; z < data.height; z++) {
             for (let x = 0; x < data.width; x++) {
                 const tileId = data.data[z * data.width + x];
                 if (tileId <= 0)
                     continue;
                 voxels.set(getKeyFromPos(x, height, z), {
-                    position: [x, height, z],
+                    position: [x, height + flatOffset, z],
                     type: data.data[z * data.width + x],
                     visible: true,
                     // hiddenFaces: 0x000000,
@@ -34,8 +35,6 @@ class ThreeVoxelMap extends THREE.Group {
         geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(voxelData.uvs), 2));
         geometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(voxelData.normals), 3));
         const mat = new THREE.MeshBasicMaterial({ transparent, map: this.tileset, side: THREE.DoubleSide });
-        mat.polygonOffset = true;
-        mat.polygonOffsetFactor = -height;
         const mesh = new THREE.Mesh(geometry, mat);
         mesh.renderOrder = renderOrder;
         this.add(mesh);
