@@ -89,6 +89,26 @@ class ThreeCamera {
 		this.target = null;
 	}
 
+	getWorldPoint(p: THREE.Vector3) {
+		let targetY = 0;
+		if (this.target) {
+			const targetWorldPos = new THREE.Vector3();
+			this.target.getWorldPosition(targetWorldPos);
+			targetY = targetWorldPos.y;
+		}
+
+		const point = p.clone();
+		point.unproject(this.instance);
+
+		if (!this.isPerspective) {
+			return point;
+		}
+
+		point.sub(this.instance.position).normalize();
+		var dist = (targetY - this.instance.position.y) / point.y;
+		return this.instance.position.clone().add(point.multiplyScalar(dist));
+	}
+
 	setPosition2D(x: number, z: number) {
 		const oldTarget = this.controls.target.clone();
 		const target = new THREE.Vector3(x, this.controls.target.y, z);

@@ -521,13 +521,9 @@ class ThreeRenderer {
 
 		if (this.camera.target) {
 			const pointer = new THREE.Vector3(this.pointer.x, this.pointer.y, 0.5);
-			pointer.unproject(this.camera.instance);
-			taro.input.emit('pointermove', [
-				{
-					x: (pointer.x + taro.game.data.map.width / 2 + 0.5) * 64,
-					y: (pointer.z + taro.game.data.map.height / 2 + 0.5) * 64,
-				},
-			]);
+			const worldPos = this.camera.getWorldPoint(pointer);
+			const center = { x: taro.game.data.map.width / 2 + 0.5, z: taro.game.data.map.height / 2 + 0.5 };
+			taro.input.emit('pointermove', [{ x: (worldPos.x + center.x) * 64, y: (worldPos.z + center.z) * 64 }]);
 		}
 
 		for (const sprite of this.animatedSprites) {
