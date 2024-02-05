@@ -114,6 +114,7 @@ var taroClientConfig = {
 		'renderer/three/ThreeTextureManager.js',
 		'renderer/three/ThreeVoxelMap.js',
 		'renderer/three/ThreeRenderer.js',
+		'renderer/three/ThreeCamera.js',
 		'renderer/three/ThreeSprite.js',
 		'renderer/three/ThreeBoxMesh.js',
 		'renderer/three/label.js',

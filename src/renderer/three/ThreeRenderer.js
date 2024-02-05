@@ -23,32 +23,13 @@ class ThreeRenderer {
         this.pointer = new THREE.Vector2();
         this.followedEntity = null;
         this.animatedSprites = [];
-        this.topDownCamera = true;
         const renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         (_a = document.querySelector('#game-div')) === null || _a === void 0 ? void 0 : _a.appendChild(renderer.domElement);
         this.renderer = renderer;
         const width = window.innerWidth;
         const height = window.innerHeight;
-        const orthoCamera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 1, 1000);
-        // const persCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        // persCamera.position.y = 20;
-        this.camera = orthoCamera;
-        this.camera.position.y = 20;
-        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-        this.controls.enableDamping = true;
-        this.controls.enableRotate = false;
-        window.addEventListener('keypress', (evt) => {
-            if (evt.key === 'c') {
-                this.topDownCamera = !this.topDownCamera;
-                if (this.topDownCamera) {
-                    this.controls.enableRotate = false;
-                }
-                else {
-                    this.controls.enableRotate = true;
-                }
-            }
-        });
+        this.camera = new ThreeCamera(width, height, this.renderer.domElement);
         this.scene = new THREE.Scene();
         this.scene.translateX(-taro.game.data.map.width / 2);
         this.scene.translateZ(-taro.game.data.map.height / 2);
@@ -141,7 +122,6 @@ class ThreeRenderer {
                     this.voxelMap.addLayer(layer, 1, true, false, layerId * 100);
                 }
                 if (['trees'].includes(layer.name)) {
-                    console.log(layer);
                     this.voxelMap.addLayer(layer, 3, true, true, layerId * 100);
                 }
             });
@@ -304,25 +284,22 @@ class ThreeRenderer {
         taro.client.emit('tick');
         if (this.followedEntity) {
             const pointer = new THREE.Vector3(this.pointer.x, this.pointer.y, 0.5);
-            pointer.unproject(this.camera);
+            pointer.unproject(this.camera.instance);
             taro.input.emit('pointermove', [
                 {
                     x: (pointer.x + taro.game.data.map.width / 2 + 0.5) * 64,
                     y: (pointer.z + taro.game.data.map.height / 2 + 0.5) * 64,
                 },
             ]);
-            if (this.topDownCamera) {
-                const followedEntityWorldPos = new THREE.Vector3();
-                this.followedEntity.getWorldPosition(followedEntityWorldPos);
-                this.camera.position.set(followedEntityWorldPos.x, this.camera.position.y, followedEntityWorldPos.z);
-                this.controls.target.set(followedEntityWorldPos.x, this.controls.target.y, followedEntityWorldPos.z);
-            }
+            const followedEntityWorldPos = new THREE.Vector3();
+            this.followedEntity.getWorldPosition(followedEntityWorldPos);
+            this.camera.setPosition2D(followedEntityWorldPos.x, followedEntityWorldPos.z);
         }
         for (const sprite of this.animatedSprites) {
             sprite.update(1 / 60);
         }
-        this.controls.update();
-        this.renderer.render(this.scene, this.camera);
+        this.camera.update();
+        this.renderer.render(this.scene, this.camera.instance);
     }
 }
 function resizeImageToPowerOf2(image) {
