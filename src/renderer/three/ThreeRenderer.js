@@ -76,6 +76,7 @@ class ThreeRenderer {
         ctx.fillText('text', 0, 8);
     }
     init() {
+        taro.client.on('stop-follow', () => this.camera.stopFollow());
         const layers = {
             entities: new THREE.Group(),
         };
@@ -173,7 +174,7 @@ class ThreeRenderer {
                 ent.setRotationY(-data.rotation);
             }, this);
             const sizeEvtListener = entity.on('size', (data) => {
-                ent.setScale(data.width / 64, data.height / 64, data.height / 64);
+                ent.setScale(data.width / 64, data.height / 64);
             }, this);
             const scaleEvtListener = entity.on('scale', (data) => {
                 ent.scale.set(data.x, 1, data.y);
@@ -215,6 +216,111 @@ class ThreeRenderer {
                     ent.loop(animation.frames, animation.fps, animation.repeat);
                 }
             });
+            const updateTextureEvtListener = entity.on('update-texture', (data) => {
+                const textureManager = ThreeTextureManager.instance();
+                if (data === 'basic_texture_change') {
+                    //
+                }
+                else if (data === 'using_skin') {
+                    //
+                }
+                else {
+                    const key = entity._stats.cellSheet.url;
+                    const tex = textureManager.textureMap.get(key);
+                    if (tex) {
+                        ent.setTexture(tex);
+                        const bounds = entity._bounds2d;
+                        ent.setScale(bounds.x / 64, bounds.y / 64);
+                    }
+                    else {
+                        console.error('tex not found: ', key);
+                    }
+                }
+                if (data === 'basic_texture_change') {
+                    // this.sprite.anims.stop();
+                    // this.key = `unit/${this.entity._stats.cellSheet.url}`;
+                    // if (!this.scene.textures.exists(this.key)) {
+                    // 	this.scene.loadEntity(this.key, this.entity._stats);
+                    // 	this.scene.load.on(
+                    // 		`filecomplete-image-${this.key}`,
+                    // 		function cnsl() {
+                    // 			if (this && this.sprite) {
+                    // 				this.setTexture(this.key);
+                    // 				this.sprite.texture.setFilter(this.scene.filter);
+                    // 				const bounds = this.entity._bounds2d;
+                    // 				this.sprite.setDisplaySize(bounds.x, bounds.y);
+                    // 			}
+                    // 		},
+                    // 		this
+                    // 	);
+                    // 	this.scene.load.start();
+                    // } else {
+                    // 	this.setTexture(this.key);
+                    // 	const bounds = this.entity._bounds2d;
+                    // 	this.sprite.setDisplaySize(bounds.x, bounds.y);
+                    // }
+                    // // GameScene's load entity doesn't create sprite sheets so we have horrible
+                    // // errors when we try to create animations
+                    // if (this.sprite.texture.frameTotal === 1 || this.sprite.texture.key === 'pack-result') {
+                    // 	return;
+                    // }
+                    // for (let animationsKey in this.entity._stats.animations) {
+                    // 	const animation = this.entity._stats.animations[animationsKey];
+                    // 	const frames = animation.frames;
+                    // 	const animationFrames: number[] = [];
+                    // 	for (let i = 0; i < frames.length; i++) {
+                    // 		// correction for 0-based indexing
+                    // 		animationFrames.push(frames[i] - 1);
+                    // 	}
+                    // 	if (animationFrames.length === 0) {
+                    // 		// avoid crash by giving it frame 0 if no frame data provided
+                    // 		animationFrames.push(0);
+                    // 	}
+                    // 	const anims = this.scene.anims;
+                    // 	if (anims.exists(`${this.key}/${animationsKey}`)) {
+                    // 		anims.remove(`${this.key}/${animationsKey}`);
+                    // 	}
+                    // 	anims.create({
+                    // 		key: `${this.key}/${animationsKey}`,
+                    // 		frames: anims.generateFrameNumbers(this.key, {
+                    // 			frames: animationFrames,
+                    // 		}),
+                    // 		frameRate: animation.framesPerSecond || 15,
+                    // 		repeat: animation.loopCount - 1, // correction for loop/repeat values
+                    // 	});
+                    // }
+                }
+                else if (data === 'using_skin') {
+                    // this.sprite.anims.stop();
+                    // this.key = `unit/${this.entity._stats.cellSheet.url}`;
+                    // if (!this.scene.textures.exists(this.key)) {
+                    // 	this.scene.loadEntity(this.key, this.entity._stats);
+                    // 	this.scene.load.on(
+                    // 		`filecomplete-image-${this.key}`,
+                    // 		function cnsl() {
+                    // 			if (this && this.sprite) {
+                    // 				this.setTexture(this.key);
+                    // 				this.sprite.texture.setFilter(this.scene.filter);
+                    // 				const bounds = this.entity._bounds2d;
+                    // 				this.sprite.setDisplaySize(bounds.x, bounds.y);
+                    // 			}
+                    // 		},
+                    // 		this
+                    // 	);
+                    // 	this.scene.load.start();
+                    // } else {
+                    // 	this.setTexture(this.key);
+                    // 	const bounds = this.entity._bounds2d;
+                    // 	this.sprite.setDisplaySize(bounds.x, bounds.y);
+                    // }
+                }
+                else {
+                    // this.key = `unit/${this.entity._stats.cellSheet.url}`;
+                    // this.setTexture(this.key);
+                    // const bounds = this.entity._bounds2d;
+                    // this.sprite.setDisplaySize(bounds.x, bounds.y);
+                }
+            });
             entity.on('layer', (layer) => {
                 ent.setLayer(layer);
             });
@@ -252,6 +358,7 @@ class ThreeRenderer {
                     entity.off('update-attribute', updateAttributeEvtListener);
                     entity.off('render-chat-bubble', renderChatBubbleEvtListener);
                     entity.off('play-animation', playAnimationEvtListener);
+                    entity.off('update-texture', updateTextureEvtListener);
                 }
             }, this);
         };

@@ -9,8 +9,8 @@ class ThreeSprite extends THREE.Group {
         this.sprite = new THREE.Mesh(geometry, material);
         this.add(this.sprite);
     }
-    setScale(sx, sy, sz = 1) {
-        this.sprite.scale.set(sx, sy, sz);
+    setScale(sx, sy) {
+        this.sprite.scale.set(sx, 1, sy);
     }
     setRotationY(rad) {
         this.sprite.rotation.y = rad;
@@ -22,6 +22,9 @@ class ThreeSprite extends THREE.Group {
     setDepth(depth) {
         this.depth = depth;
         this.calcRenderOrder();
+    }
+    setTexture(tex) {
+        this.sprite.material.map = tex;
     }
     calcRenderOrder() {
         this.sprite.renderOrder = this.layer * 100 + this.depth;

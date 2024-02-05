@@ -14,8 +14,8 @@ class ThreeSprite extends THREE.Group {
 		this.add(this.sprite);
 	}
 
-	setScale(sx: number, sy: number, sz = 1) {
-		this.sprite.scale.set(sx, sy, sz);
+	setScale(sx: number, sy: number) {
+		this.sprite.scale.set(sx, 1, sy);
 	}
 
 	setRotationY(rad: number) {
@@ -30,6 +30,10 @@ class ThreeSprite extends THREE.Group {
 	setDepth(depth: number) {
 		this.depth = depth;
 		this.calcRenderOrder();
+	}
+
+	setTexture(tex: THREE.Texture) {
+		(this.sprite.material as THREE.MeshBasicMaterial).map = tex;
 	}
 
 	private calcRenderOrder() {
