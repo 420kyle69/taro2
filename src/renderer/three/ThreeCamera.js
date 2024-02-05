@@ -2,6 +2,7 @@ class ThreeCamera {
     constructor(viewportWidth, viewportHeight, canvas) {
         this.viewportWidth = viewportWidth;
         this.viewportHeight = viewportHeight;
+        this.target = null;
         this.isPerspective = false;
         const persCamera = new THREE.PerspectiveCamera(75, viewportWidth / viewportHeight, 0.1, 1000);
         persCamera.position.y = 20;
@@ -41,6 +42,11 @@ class ThreeCamera {
         if (this.controls.enableRotate) {
             this.controls.update();
         }
+        if (this.target) {
+            const targetWorldPos = new THREE.Vector3();
+            this.target.getWorldPosition(targetWorldPos);
+            this.setPosition2D(targetWorldPos.x, targetWorldPos.z);
+        }
     }
     resize() {
         if (this.instance instanceof THREE.PerspectiveCamera) {
@@ -54,6 +60,12 @@ class ThreeCamera {
             this.instance.bottom = this.viewportHeight / -2;
             this.instance.updateProjectionMatrix();
         }
+    }
+    startFollow(target) {
+        this.target = target;
+    }
+    stopFollow() {
+        this.target = null;
     }
     setPosition2D(x, z) {
         var _a, _b, _c, _d;

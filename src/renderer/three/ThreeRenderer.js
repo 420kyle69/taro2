@@ -21,7 +21,6 @@ class ThreeRenderer {
         this.animations = new Map();
         this.entities = [];
         this.pointer = new THREE.Vector2();
-        this.followedEntity = null;
         this.animatedSprites = [];
         const renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -186,7 +185,7 @@ class ThreeRenderer {
                 ent.visible = false;
             }, this);
             const followEvtListener = entity.on('follow', () => {
-                this.followedEntity = ent;
+                this.camera.startFollow(ent);
             }, this);
             // Label
             const updateLabelEvtListener = entity.on('update-label', (data) => {
@@ -282,7 +281,7 @@ class ThreeRenderer {
     render() {
         requestAnimationFrame(this.render.bind(this));
         taro.client.emit('tick');
-        if (this.followedEntity) {
+        if (this.camera.target) {
             const pointer = new THREE.Vector3(this.pointer.x, this.pointer.y, 0.5);
             pointer.unproject(this.camera.instance);
             taro.input.emit('pointermove', [
@@ -291,9 +290,6 @@ class ThreeRenderer {
                     y: (pointer.z + taro.game.data.map.height / 2 + 0.5) * 64,
                 },
             ]);
-            const followedEntityWorldPos = new THREE.Vector3();
-            this.followedEntity.getWorldPosition(followedEntityWorldPos);
-            this.camera.setPosition2D(followedEntityWorldPos.x, followedEntityWorldPos.z);
         }
         for (const sprite of this.animatedSprites) {
             sprite.update(1 / 60);

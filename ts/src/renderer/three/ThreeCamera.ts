@@ -1,6 +1,6 @@
 class ThreeCamera {
 	instance: THREE.Camera;
-	isPerspective = false;
+	target: THREE.Object3D | null = null;
 
 	private orthographicCamera: THREE.OrthographicCamera;
 	private perspectiveCamera: THREE.PerspectiveCamera;
@@ -8,6 +8,8 @@ class ThreeCamera {
 
 	private orthographicState: { target: THREE.Vector3; position: THREE.Vector3 };
 	private perspectiveState: { target: THREE.Vector3; position: THREE.Vector3; zoom: number };
+
+	private isPerspective = false;
 
 	constructor(
 		private viewportWidth: number,
@@ -58,6 +60,12 @@ class ThreeCamera {
 		if (this.controls.enableRotate) {
 			this.controls.update();
 		}
+
+		if (this.target) {
+			const targetWorldPos = new THREE.Vector3();
+			this.target.getWorldPosition(targetWorldPos);
+			this.setPosition2D(targetWorldPos.x, targetWorldPos.z);
+		}
 	}
 
 	resize() {
@@ -71,6 +79,14 @@ class ThreeCamera {
 			this.instance.bottom = this.viewportHeight / -2;
 			this.instance.updateProjectionMatrix();
 		}
+	}
+
+	startFollow(target: THREE.Object3D) {
+		this.target = target;
+	}
+
+	stopFollow() {
+		this.target = null;
 	}
 
 	setPosition2D(x: number, z: number) {

@@ -25,14 +25,9 @@ class ThreeRenderer {
 	private scene: THREE.Scene;
 
 	private animations: Map<string, { frames: number[]; fps: number; repeat: number }> = new Map();
-
 	private entities: ThreeSprite[] = [];
-
 	private pointer = new THREE.Vector2();
-	private followedEntity: ThreeSprite | null = null;
-
 	private animatedSprites: ThreeAnimatedSprite[] = [];
-
 	private voxelMap: ThreeVoxelMap;
 
 	constructor() {
@@ -257,7 +252,7 @@ class ThreeRenderer {
 			const followEvtListener = entity.on(
 				'follow',
 				() => {
-					this.followedEntity = ent;
+					this.camera.startFollow(ent);
 				},
 				this
 			);
@@ -385,7 +380,7 @@ class ThreeRenderer {
 		requestAnimationFrame(this.render.bind(this));
 		taro.client.emit('tick');
 
-		if (this.followedEntity) {
+		if (this.camera.target) {
 			const pointer = new THREE.Vector3(this.pointer.x, this.pointer.y, 0.5);
 			pointer.unproject(this.camera.instance);
 			taro.input.emit('pointermove', [
@@ -394,10 +389,6 @@ class ThreeRenderer {
 					y: (pointer.z + taro.game.data.map.height / 2 + 0.5) * 64,
 				},
 			]);
-
-			const followedEntityWorldPos = new THREE.Vector3();
-			this.followedEntity.getWorldPosition(followedEntityWorldPos);
-			this.camera.setPosition2D(followedEntityWorldPos.x, followedEntityWorldPos.z);
 		}
 
 		for (const sprite of this.animatedSprites) {
