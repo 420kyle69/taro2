@@ -60,13 +60,13 @@ class GameScene extends PhaserScene {
 		let resized = false;
 
 		this.scale.on(Phaser.Scale.Events.RESIZE, () => {
-			console.log('resize')
-			if (resized) {
-				resized = false;
-			} else {
-				resized = true;
-				this.game.scale.setGameSize(window.outerWidth * window.devicePixelRatio, window.outerHeight * window.devicePixelRatio);
-				//window.dispatchEvent(new Event('resize'));
+			if (!taro.isMobile) {
+				if (resized) {
+					resized = false;
+				} else {
+					resized = true;
+					this.game.scale.setGameSize(window.innerWidth, window.innerHeight);
+				}
 			}
 			if (this.zoomSize) {
 				camera.zoom = this.calculateZoom();
@@ -390,6 +390,7 @@ class GameScene extends PhaserScene {
 
 			if (layer.type === 'tilelayer') {
 				const tileLayer = map.createLayer(layer.name, map.tilesets, 0, 0);
+				tileLayer.name = layer.name;
 				tileLayer.setScale(scaleFactor.x, scaleFactor.y);
 				this.tilemapLayers.push(tileLayer);
 			}

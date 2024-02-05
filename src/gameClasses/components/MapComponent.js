@@ -15,7 +15,7 @@ var MapComponent = TaroEntity.extend({
 			taro.addComponent(TaroTiledComponent)
 				.tiled.loadJson(data, function (layerArray, layersById) {
 
-					taro.physics.staticsFromMap(layersById.walls);
+					if(layersById.walls) taro.physics.staticsFromMap(layersById.walls);
 
 					self.createRegions();
 				});
@@ -25,7 +25,7 @@ var MapComponent = TaroEntity.extend({
 				taro.addComponent(TaroTiledComponent)
 					.tiled.loadJson(data, function (TaroLayerArray, TaroLayersById) {
 
-						if (taro.physics) {
+						if (taro.physics && TaroLayersById.walls) {
 							taro.physics.staticsFromMap(TaroLayersById.walls);
 						}
 

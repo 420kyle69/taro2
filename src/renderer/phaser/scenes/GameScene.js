@@ -64,14 +64,14 @@ var GameScene = /** @class */ (function (_super) {
         }
         var resized = false;
         this.scale.on(Phaser.Scale.Events.RESIZE, function () {
-            console.log('resize');
-            if (resized) {
-                resized = false;
-            }
-            else {
-                resized = true;
-                _this.game.scale.setGameSize(window.outerWidth * window.devicePixelRatio, window.outerHeight * window.devicePixelRatio);
-                //window.dispatchEvent(new Event('resize'));
+            if (!taro.isMobile) {
+                if (resized) {
+                    resized = false;
+                }
+                else {
+                    resized = true;
+                    _this.game.scale.setGameSize(window.innerWidth, window.innerHeight);
+                }
             }
             if (_this.zoomSize) {
                 camera.zoom = _this.calculateZoom();
@@ -323,6 +323,7 @@ var GameScene = /** @class */ (function (_super) {
         data.map.layers.forEach(function (layer) {
             if (layer.type === 'tilelayer') {
                 var tileLayer = map.createLayer(layer.name, map.tilesets, 0, 0);
+                tileLayer.name = layer.name;
                 tileLayer.setScale(scaleFactor.x, scaleFactor.y);
                 _this.tilemapLayers.push(tileLayer);
             }

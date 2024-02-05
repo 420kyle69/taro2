@@ -253,6 +253,11 @@ class DeveloperMode {
 		} else if (this.activeTab === 'play') {
 			taro.client.emit('unlockCamera');
 		}
+		if (tab === 'entities') {
+			taro.client.emit('enterEntitiesTab');
+		} else {
+			taro.client.emit('leaveEntitiesTab');
+		}
 		this.activeTab = tab;
 	}
 
