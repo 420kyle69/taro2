@@ -363,20 +363,28 @@ var Player = TaroEntity.extend({
 
 		self._stats.attributes = data.attributes;
 
+		
+		// update variables and pass old variables' values to new variables (given that variables have same ID)
+		self.variables = {}		
 		if (data.variables) {
-			var variables = {};
-			for (var key in data.variables) {
-				if (self.variables && self.variables[key]) {
-					variables[key] = self.variables[key] == undefined ? data.variables[key] : self.variables[key];
+			var oldVariables = rfdc()(self.variables);
+			Object.keys(data.variables).forEach(function(variableId) {
+				if (!self.variables[variableId]) {
+					self.variables[variableId] = data.variables[variableId];
 				} else {
-					variables[key] = data.variables[key];
+					// If the variable already exists, update its value with the old one
+					if (oldVariables[variableId] !== undefined) {
+						self.variables[variableId].value = oldVariables[variableId].value;
+					}
 				}
-			}
-			self.variables = variables;
+
+				// if the value is undefined, update it with the default value
+				if (self.variables[variableId].value === undefined) {
+					self.variables[variableId].value = self.variables[variableId].default;
+				}
+			});
 		}
-		if (self._stats.variables) {
-			delete self._stats.variables;
-		}
+		
 
 		if (taro.isClient) {
 			var isMyPlayerUpdated = self._stats.clientId == taro.network.id();
