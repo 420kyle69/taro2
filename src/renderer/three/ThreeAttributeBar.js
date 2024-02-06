@@ -65,6 +65,7 @@ class ThreeAttributeBar extends THREE.Group {
         spriteMap.magFilter = ThreeTextureManager.instance().filter;
         spriteMap.generateMipmaps = false;
         spriteMap.needsUpdate = true;
+        spriteMap.colorSpace = THREE.SRGBColorSpace;
         const spriteMaterial = new THREE.SpriteMaterial({ map: spriteMap });
         const sprite = new THREE.Sprite(spriteMaterial);
         sprite.renderOrder = 499;

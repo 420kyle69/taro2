@@ -65,6 +65,7 @@ class ThreeChatBubble extends THREE.Group {
         spriteMap.magFilter = ThreeTextureManager.instance().filter;
         spriteMap.generateMipmaps = false;
         spriteMap.needsUpdate = true;
+        spriteMap.colorSpace = THREE.SRGBColorSpace;
         const spriteMaterial = new THREE.SpriteMaterial({ map: spriteMap });
         spriteMaterial.depthTest = false;
         const sprite = new THREE.Sprite(spriteMaterial);
