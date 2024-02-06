@@ -51,20 +51,20 @@ if (process.env.ENV != 'dev' && process.env.ENV != 'standalone') {
 	console.log = function () {
 
 		const log = [];
-	
+
 		log.push(new Date());
 		log.push(cluster.isMaster ? 'master' : 'worker');
-	
+
 		if (taro?.server?.httpsPort) {
 			log.push(taro?.server?.httpsPort);
 		}
-	
+
 		if (taro?.game?.data?.defaultData?.gameSlug) {
 			log.push(taro?.game?.data?.defaultData?.gameSlug);
 		}
-	
+
 		log.push(...arguments);
-	
+
 		console.basicLog(...log);
 	};
 }
@@ -125,7 +125,7 @@ if (process.env.ENV == 'production') {
 			global.lastRollbarUuid = payload.uuid;
 		}
 	});
-	
+
 	global.rollbar.configure({
 		payload: {
 			containerName: process.env.CONTAINER_NAME,
@@ -278,7 +278,7 @@ var Server = TaroClass.extend({
 				if (process.env.LOAD_CC === 'true') {
 					taro.addComponent(ClusterClientComponent); // backend component will retrieve "start" command from BE
 				}
-				
+
 				self.ip = '127.0.0.1';
 				self.startWebServer();
 				self.start();
@@ -292,7 +292,7 @@ var Server = TaroClass.extend({
 			}
 		} else {
 			if (typeof ClusterClientComponent != 'undefined') {
-				
+
 				taro.addComponent(ClusterClientComponent); // backend component will retrieve "start" command from BE
 			}
 
@@ -666,7 +666,7 @@ var Server = TaroClass.extend({
 								taro.map.load(map);
 
 								taro.game.start();
-								
+
 								// send dev logs to developer every second
 								var logInterval = setInterval(function () {
 									// send only if developer client is connect
@@ -688,7 +688,6 @@ var Server = TaroClass.extend({
 												}
 
 											});
-
 										if (sendErrors) {
 											taro.script.errorLogs = {};
 										}
