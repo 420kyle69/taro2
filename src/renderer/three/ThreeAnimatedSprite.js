@@ -47,5 +47,16 @@ class ThreeAnimatedSprite extends ThreeSprite {
             this.tex.offset.set(offsetX, offsetY);
         }
     }
+    setTexture(tex) {
+        super.setTexture(tex);
+        if (tex.userData.numColumns && tex.userData.numRows) {
+            this.tileH = tex.userData.numColumns;
+            this.tileV = tex.userData.numRows;
+        }
+        tex.repeat.set(1 / this.tileH, 1 / this.tileV);
+        const offsetX = (this.currentTile % this.tileH) / this.tileH;
+        const offsetY = 1 - 1 / this.tileV - (Math.floor(this.currentTile / this.tileH) % this.tileV) / this.tileV;
+        tex.offset.set(offsetX, offsetY);
+    }
 }
 //# sourceMappingURL=ThreeAnimatedSprite.js.map

@@ -78,7 +78,9 @@ class ThreeRenderer {
 			const cellSheet = type.cellSheet;
 			if (!cellSheet) continue;
 			const key = cellSheet.url;
-			ThreeTextureManager.instance().loadFromUrl(key, Utils.patchAssetUrl(key));
+			ThreeTextureManager.instance().loadFromUrl(key, Utils.patchAssetUrl(key), () => {
+				this.createAnimations(type);
+			});
 		}
 
 		for (const type of Object.values(data.particleTypes)) {
@@ -158,44 +160,6 @@ class ThreeRenderer {
 				}
 			});
 		});
-
-		for (let type in taro.game.data.projectileTypes) {
-			const cellSheet = taro.game.data.projectileTypes[type].cellSheet;
-			if (!cellSheet) continue;
-			const key = cellSheet.url;
-			const tex = ThreeTextureManager.instance().textureMap.get(key);
-			tex.userData.numColumns = cellSheet.columnCount || 1;
-			tex.userData.numRows = cellSheet.rowCount || 1;
-			tex.userData.key = key;
-
-			// Add animations
-			for (let animationsKey in taro.game.data.projectileTypes[type].animations) {
-				console.log(key);
-				const animation = taro.game.data.projectileTypes[type].animations[animationsKey];
-				const frames = animation.frames;
-				const animationFrames: number[] = [];
-
-				// Correction for 0-based indexing
-				for (let i = 0; i < frames.length; i++) {
-					animationFrames.push(frames[i] - 1);
-				}
-
-				// Avoid crash by giving it frame 0 if no frame data provided
-				if (animationFrames.length === 0) {
-					animationFrames.push(0);
-				}
-
-				if (this.animations.has(`${key}/${animationsKey}`)) {
-					this.animations.delete(`${key}/${animationsKey}`);
-				}
-
-				this.animations.set(`${key}/${animationsKey}`, {
-					frames: animationFrames,
-					fps: animation.framesPerSecond || 15,
-					repeat: animation.loopCount - 1, // correction for loop/repeat values
-				});
-			}
-		}
 
 		const createEntity = (entity: Unit | Item | Projectile) => {
 			const tex = ThreeTextureManager.instance().textureMap.get(entity._stats.cellSheet.url);
@@ -296,137 +260,20 @@ class ThreeRenderer {
 
 			const updateTextureEvtListener = entity.on('update-texture', (data) => {
 				const textureManager = ThreeTextureManager.instance();
-
 				const key = entity._stats.cellSheet.url;
-				const tex = textureManager.textureMap.get(key);
+				const tex = textureManager.textureMap.get(key).clone();
 				if (tex) {
+					this.createAnimations(entity._stats);
 					ent.setTexture(tex);
 					const bounds = entity._bounds2d;
 					ent.setScale(bounds.x / 64, bounds.y / 64);
 				} else {
 					textureManager.loadFromUrl(key, Utils.patchAssetUrl(key), (tex) => {
+						this.createAnimations(entity._stats);
 						ent.setTexture(tex);
 						const bounds = entity._bounds2d;
 						ent.setScale(bounds.x / 64, bounds.y / 64);
 					});
-				}
-
-				// TODO: Look into rework the animation code / make it more robust so I
-				// can use it here as well. See original Phaser code below:
-
-				// if (data === 'basic_texture_change') {
-				// 	//
-				// } else if (data === 'using_skin') {
-				// 	const key = entity._stats.cellSheet.url;
-				// 	const tex = textureManager.textureMap.get(key);
-				// 	if (tex) {
-				// 		ent.setTexture(tex);
-				// 		const bounds = entity._bounds2d;
-				// 		ent.setScale(bounds.x / 64, bounds.y / 64);
-				// 	} else {
-				// 		textureManager.loadFromUrl(key, Utils.patchAssetUrl(key), (tex) => {
-				// 			ent.setTexture(tex);
-				// 			const bounds = entity._bounds2d;
-				// 			ent.setScale(bounds.x / 64, bounds.y / 64);
-				// 		});
-				// 	}
-				// } else {
-				// 	const key = entity._stats.cellSheet.url;
-				// 	const tex = textureManager.textureMap.get(key);
-				// 	if (tex) {
-				// 		ent.setTexture(tex);
-				// 		const bounds = entity._bounds2d;
-				// 		ent.setScale(bounds.x / 64, bounds.y / 64);
-				// 	} else {
-				// 		textureManager.loadFromUrl(key, Utils.patchAssetUrl(key), (tex) => {
-				// 			ent.setTexture(tex);
-				// 			const bounds = entity._bounds2d;
-				// 			ent.setScale(bounds.x / 64, bounds.y / 64);
-				// 		});
-				// 	}
-				// }
-
-				if (data === 'basic_texture_change') {
-					// this.sprite.anims.stop();
-					// this.key = `unit/${this.entity._stats.cellSheet.url}`;
-					// if (!this.scene.textures.exists(this.key)) {
-					// 	this.scene.loadEntity(this.key, this.entity._stats);
-					// 	this.scene.load.on(
-					// 		`filecomplete-image-${this.key}`,
-					// 		function cnsl() {
-					// 			if (this && this.sprite) {
-					// 				this.setTexture(this.key);
-					// 				this.sprite.texture.setFilter(this.scene.filter);
-					// 				const bounds = this.entity._bounds2d;
-					// 				this.sprite.setDisplaySize(bounds.x, bounds.y);
-					// 			}
-					// 		},
-					// 		this
-					// 	);
-					// 	this.scene.load.start();
-					// } else {
-					// 	this.setTexture(this.key);
-					// 	const bounds = this.entity._bounds2d;
-					// 	this.sprite.setDisplaySize(bounds.x, bounds.y);
-					// }
-					// // GameScene's load entity doesn't create sprite sheets so we have horrible
-					// // errors when we try to create animations
-					// if (this.sprite.texture.frameTotal === 1 || this.sprite.texture.key === 'pack-result') {
-					// 	return;
-					// }
-					// for (let animationsKey in this.entity._stats.animations) {
-					// 	const animation = this.entity._stats.animations[animationsKey];
-					// 	const frames = animation.frames;
-					// 	const animationFrames: number[] = [];
-					// 	for (let i = 0; i < frames.length; i++) {
-					// 		// correction for 0-based indexing
-					// 		animationFrames.push(frames[i] - 1);
-					// 	}
-					// 	if (animationFrames.length === 0) {
-					// 		// avoid crash by giving it frame 0 if no frame data provided
-					// 		animationFrames.push(0);
-					// 	}
-					// 	const anims = this.scene.anims;
-					// 	if (anims.exists(`${this.key}/${animationsKey}`)) {
-					// 		anims.remove(`${this.key}/${animationsKey}`);
-					// 	}
-					// 	anims.create({
-					// 		key: `${this.key}/${animationsKey}`,
-					// 		frames: anims.generateFrameNumbers(this.key, {
-					// 			frames: animationFrames,
-					// 		}),
-					// 		frameRate: animation.framesPerSecond || 15,
-					// 		repeat: animation.loopCount - 1, // correction for loop/repeat values
-					// 	});
-					// }
-				} else if (data === 'using_skin') {
-					// this.sprite.anims.stop();
-					// this.key = `unit/${this.entity._stats.cellSheet.url}`;
-					// if (!this.scene.textures.exists(this.key)) {
-					// 	this.scene.loadEntity(this.key, this.entity._stats);
-					// 	this.scene.load.on(
-					// 		`filecomplete-image-${this.key}`,
-					// 		function cnsl() {
-					// 			if (this && this.sprite) {
-					// 				this.setTexture(this.key);
-					// 				this.sprite.texture.setFilter(this.scene.filter);
-					// 				const bounds = this.entity._bounds2d;
-					// 				this.sprite.setDisplaySize(bounds.x, bounds.y);
-					// 			}
-					// 		},
-					// 		this
-					// 	);
-					// 	this.scene.load.start();
-					// } else {
-					// 	this.setTexture(this.key);
-					// 	const bounds = this.entity._bounds2d;
-					// 	this.sprite.setDisplaySize(bounds.x, bounds.y);
-					// }
-				} else {
-					// this.key = `unit/${this.entity._stats.cellSheet.url}`;
-					// this.setTexture(this.key);
-					// const bounds = this.entity._bounds2d;
-					// this.sprite.setDisplaySize(bounds.x, bounds.y);
 				}
 			});
 
@@ -532,6 +379,43 @@ class ThreeRenderer {
 
 		this.camera.update();
 		this.renderer.render(this.scene, this.camera.instance);
+	}
+
+	createAnimations(entity: EntityData) {
+		const cellSheet = entity.cellSheet;
+		if (!cellSheet) return;
+		const key = cellSheet.url;
+		const tex = ThreeTextureManager.instance().textureMap.get(key);
+		tex.userData.numColumns = cellSheet.columnCount || 1;
+		tex.userData.numRows = cellSheet.rowCount || 1;
+		tex.userData.key = key;
+
+		// Add animations
+		for (let animationsKey in entity.animations) {
+			const animation = entity.animations[animationsKey];
+			const frames = animation.frames;
+			const animationFrames: number[] = [];
+
+			// Correction for 0-based indexing
+			for (let i = 0; i < frames.length; i++) {
+				animationFrames.push(frames[i] - 1);
+			}
+
+			// Avoid crash by giving it frame 0 if no frame data provided
+			if (animationFrames.length === 0) {
+				animationFrames.push(0);
+			}
+
+			if (this.animations.has(`${key}/${animationsKey}`)) {
+				this.animations.delete(`${key}/${animationsKey}`);
+			}
+
+			this.animations.set(`${key}/${animationsKey}`, {
+				frames: animationFrames,
+				fps: animation.framesPerSecond || 15,
+				repeat: animation.loopCount - 1, // correction for loop/repeat values
+			});
+		}
 	}
 }
 
