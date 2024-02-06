@@ -11,6 +11,16 @@ var MenuUiComponent = TaroEntity.extend({
 		// adding event for taro engine button
 		var playButtonClick = document.querySelector('#play-game-button');
 
+		var customUiListeners = function () {
+			$('#open-inventory-button').on('click', function () {
+				if ($('#backpack').is(':visible')) {
+					$('#backpack').hide();
+				} else {
+					$('#backpack').show();
+				}
+			});
+		}
+
 		if (taro.isClient) {
 			//console.log('initializing UI elements...');
 			self.shopType = '';
@@ -128,19 +138,11 @@ var MenuUiComponent = TaroEntity.extend({
 				}
 			});
 
-			$('#open-inventory-button').on('click', function () {
-				if ($('#backpack').is(':visible')) {
-					$('#backpack').hide();
-				} else {
-					$('#backpack').show();
-				}
-			});
-
 			$('#toggle-dev-panels').on('click', function () {
 				if (!taro.game.data.isGameDeveloper && !window.isStandalone) {
 					return;
 				}
-				if((['1', '4', '5'].includes(window.gameDetails?.tier)) || window.isStandalone) {
+				if ((['1', '4', '5'].includes(window.gameDetails?.tier)) || window.isStandalone) {
 					// console.log("taro developermode: ", taro.developerMode);
 					taro.developerMode.enter();
 
@@ -307,6 +309,20 @@ var MenuUiComponent = TaroEntity.extend({
 			$('#help-button').on('click', function () {
 				$('#help-modal').modal('show');
 			});
+
+			if (document.getElementById('open-inventory-button')) {
+				console.log('custom ui listeners');
+				customUiListeners();
+			}else{
+				let checkForCustomUi = setInterval(() => {
+					console.log('checking for custom ui');
+					if (document.getElementById('open-inventory-button')) {
+						console.log('custom ui listeners');
+						clearInterval(checkForCustomUi);
+						customUiListeners();
+					}
+				}, 1000);
+			}
 		}
 	},
 
@@ -424,7 +440,7 @@ var MenuUiComponent = TaroEntity.extend({
 				}, 1500);
 			}
 		}
-		
+
 		taro.client.joinGame(wasGamePaused);
 
 		if (!window.isStandalone) {
@@ -435,7 +451,7 @@ var MenuUiComponent = TaroEntity.extend({
 	kickPlayerFromGame: function (excludeEntity) {
 		var self = this;
 		var players = taro.$$('player').filter(function (player) {
-			if (player && player._stats && player._stats.controlledBy === 'human' && player._alive && player.id() !== excludeEntity) 
+			if (player && player._stats && player._stats.controlledBy === 'human' && player._alive && player.id() !== excludeEntity)
 				return true;
 		});
 		var html = '<table class="table table-hover">';
@@ -503,7 +519,7 @@ var MenuUiComponent = TaroEntity.extend({
 						var serversList = '';
 						var index = 0;
 
-						function separate (str) {
+						function separate(str) {
 							var alphabets = '';
 							var numbers = '';
 							var chars = str.split('');
@@ -545,8 +561,7 @@ var MenuUiComponent = TaroEntity.extend({
 									` data-server-id="${server.id}"` +
 									` data-url="${dataUrl}"` +
 									` value="${server.id}"` +
-									`>${optionText} (${server.playerCount} / ${server.maxPlayers})${
-									 acceptingPlayers}</option>`;
+									`>${optionText} (${server.playerCount} / ${server.maxPlayers})${acceptingPlayers}</option>`;
 							}
 
 							// select best server in avail servers
@@ -621,7 +636,7 @@ var MenuUiComponent = TaroEntity.extend({
 	},
 
 	getPing: function (serverOption, duration) {
-		return new Promise(function promiseFunction (resolve, reject) {
+		return new Promise(function promiseFunction(resolve, reject) {
 			var data = $(serverOption).data();
 			var socket = new WebSocket(`${data.url}/?token=`);
 			var ping = Number.MAX_VALUE;
@@ -646,7 +661,7 @@ var MenuUiComponent = TaroEntity.extend({
 			};
 
 			socket.onmessage = function (event) {
-				var jsonString = LZUTF8.decompress(data.data, {inputEncoding: "StorageBinaryString"});
+				var jsonString = LZUTF8.decompress(data.data, { inputEncoding: "StorageBinaryString" });
 				var json = JSON.parse(jsonString);
 
 				if (json.type === 'pong') {
@@ -801,7 +816,7 @@ var MenuUiComponent = TaroEntity.extend({
 	onDisconnectFromServer: function (src, message) {
 		console.log('modal shown from', src, message);
 
-		if('Guest players not allowed to join this game.' === message) {
+		if ('Guest players not allowed to join this game.' === message) {
 			window.setShowRegister(true);
 			return;
 		}
@@ -810,17 +825,17 @@ var MenuUiComponent = TaroEntity.extend({
 
 		taro.client.disconnected = true;
 		var defaultContent = 'Lost connection to the game server. Please refresh this page or visit our homepage.';
-		
+
 		if (window.selfRepublishing && message.includes('Game has been republished')) {
 			return;
 		}
-		
+
 		$('#server-disconnect-modal .modal-body').html(message || defaultContent);
 		$('#return-to-homepage-server').show();
 		$('#join-another-server').hide();
-		
+
 		$('#server-disconnect-modal').modal('show');
-		
+
 		// user is disconnected and we no longer trying to reconnect them silently
 		// let's reload the page and try autojoining them instead
 		if (!window.reconnectInProgress) {
@@ -838,7 +853,7 @@ var MenuUiComponent = TaroEntity.extend({
 				'Your IP has been banned for command spamming',
 				'Your IP has been blacklisted',
 			];
-			
+
 			if (whitelistedReasons.findIndex((m) => m.includes(reason)) === -1) {
 				const autojoinAttempted = window.sessionStorage.getItem('autojoinAttempted');
 				const isTabActive = !document.hidden;
@@ -851,27 +866,27 @@ var MenuUiComponent = TaroEntity.extend({
 					}
 					// store in sessionStorage
 					window.sessionStorage.setItem('autojoinAttempted', Date.now());
-					
+
 					// autojoin in 5 seconds
 					this.refreshIn("connection-lost-refresh", 5);
 				}
 			}
 		}
 	},
-	
+
 	refreshIn: function (id, seconds) {
 		let second = seconds;
-		
+
 		$('.return-to-homepage-cta').remove();
 		$('.refresh-page-cta').removeClass('col-md-6');
-		
+
 		$('#' + id).text(" Reconnecting in " + second + "...");
-		
+
 		const interval = setInterval(() => {
 			second--;
 			if (second <= 0) {
 				$('#' + id).text(" Reconnecting...");
-				
+
 				clearInterval(interval);
 				let currentUrl = window.location.href;
 				currentUrl = currentUrl.endsWith('#') ? currentUrl.slice(0, -1) : currentUrl;
@@ -882,7 +897,7 @@ var MenuUiComponent = TaroEntity.extend({
 			}
 		}, 1000);
 	},
-	
+
 	setResolution: function () {
 		if (taro.isMobile) return;
 		var self = this;
@@ -918,7 +933,7 @@ var MenuUiComponent = TaroEntity.extend({
 
 		self.setItem('forceCanvas', forceCanvas);
 	},
-	getForceCanvas: function() {
+	getForceCanvas: function () {
 		var self = this;
 		const forceCanvas = self.getItem('forceCanvas') || {};
 		return forceCanvas[0];
