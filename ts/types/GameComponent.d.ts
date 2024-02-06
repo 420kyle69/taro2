@@ -82,6 +82,8 @@ interface MapData {
 	haveUnsavedChanges: boolean;
 	tilewidth: number;
 	tileheight: number;
+	originalTileWidth: number;
+	originalTileHeight: number;
 	width: number;
 	height: number;
 	tilesets: {
@@ -119,8 +121,9 @@ declare class GameComponent extends TaroEntity {
 		itemTypes: Record<string, EntityData>;
 		particleTypes: Record<string, ParticleData>;
 		abilities: Record<string, UnitAbility>;
-		// TODO: add type of value for shop Record.
+		// TODO: add type of value for shop & dialogue Record.
 		shops: Record<string, any>;
+		dialogues: Record<string, any>;
 		settings: {
 			addStrokeToNameAndAttributes: boolean;
 			camera: {

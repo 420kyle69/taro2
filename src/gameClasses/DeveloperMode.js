@@ -165,6 +165,10 @@ function recalcWallsPhysics(gameMap, forPathFinding) {
     let map = taro.scaleMap(rfdc()(gameMap));
     taro.tiled.loadJson(map, function (layerArray, layersById) {
         taro.physics.staticsFromMap(layersById.walls);
+        if (taro.isClient) {
+            // visibility mask
+            taro.client.emit('update-walls');
+        }
     });
     if (forPathFinding) {
         taro.map.updateWallMapData(); // for A* pathfinding
@@ -235,6 +239,12 @@ class DeveloperMode {
         }
         else if (this.activeTab === 'play') {
             taro.client.emit('unlockCamera');
+        }
+        if (tab === 'entities') {
+            taro.client.emit('enterEntitiesTab');
+        }
+        else {
+            taro.client.emit('leaveEntitiesTab');
         }
         this.activeTab = tab;
     }
@@ -796,6 +806,17 @@ class DeveloperMode {
             taro.network.send('updateShop', data);
         }
     }
+    updateDialogue(data) {
+        if (data.typeId && data.newData) {
+            if (!taro.game.data.dialogues) {
+                taro.game.data.dialogues = {};
+            }
+            taro.game.data.dialogues[data.typeId] = data.newData;
+        }
+        if (taro.isServer) {
+            taro.network.send('updateDialogue', data);
+        }
+    }
     editEntity(data, clientId) {
         if (taro.isClient) {
             taro.network.send('editEntity', data);
@@ -860,6 +881,15 @@ class DeveloperMode {
                             break;
                     }
                 }
+                else if (data.entityType === 'dialogue') {
+                    switch (data.action) {
+                        case 'update':
+                            this.updateDialogue(data);
+                            break;
+                        default:
+                            break;
+                    }
+                }
             }
         }
     }
@@ -875,6 +905,7 @@ class DeveloperMode {
                 let map = taro.scaleMap(rfdc()(taro.game.data.map));
                 taro.tiled.loadJson(map, function (layerArray, TaroLayersById) {
                     taro.physics.staticsFromMap(TaroLayersById.walls);
+                    taro.client.emit('update-walls');
                 });
             }
             taro.client.emit('updateMap');

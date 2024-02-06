@@ -20,7 +20,8 @@ class PhaserRegion extends PhaserEntity {
         this.gameObject = gameObject;
         this.gameObject.phaserRegion = this;
         //scene.renderedEntities.push(this.gameObject);
-        scene.entityLayers[EntityLayer.TREES].add(this.gameObject);
+        if (scene.entityLayers[EntityLayer.TREES])
+            scene.entityLayers[EntityLayer.TREES].add(this.gameObject);
         this.name = this.entity._stats.id;
         if (!stats.inside) {
             this.devModeOnly = true;

@@ -15,13 +15,13 @@ class Raycaster {
         // reverse
         const raycast = this.multiple;
         raycast.reset();
-        let pEnd = new taro.physics.box2D.b2Vec2(end.x, end.y);
-        let pStart = new taro.physics.box2D.b2Vec2(start.x, start.y);
-        this.world.rayCast(taro.physics.box2D ? pEnd : end, taro.physics.box2D ? pStart : start, raycast.callback);
+        const pStart = taro.physics.box2D ? new taro.physics.box2D.b2Vec2(start.x, start.y) : start;
+        const pEnd = taro.physics.box2D ? new taro.physics.box2D.b2Vec2(end.x, end.y) : end;
+        this.world.rayCast(pEnd, pStart, raycast.callback);
         taro.game.entitiesCollidingWithLastRaycast = _.clone(raycast.entities);
         // forward
         raycast.reset();
-        this.world.rayCast(taro.physics.box2D ? pStart : start, taro.physics.box2D ? pEnd : end, raycast.callback);
+        this.world.rayCast(pStart, pEnd, raycast.callback);
         const missedEntities = _.difference(taro.game.entitiesCollidingWithLastRaycast, raycast.entities);
         missedEntities.forEach(x => x.raycastFraction = 1 - x.raycastFraction);
         taro.game.entitiesCollidingWithLastRaycast = [...raycast.entities, ...missedEntities];
@@ -36,19 +36,19 @@ class Raycaster {
         // forward
         const forwardRaycast = this.closest;
         forwardRaycast.reset();
-        const pStart = new taro.physics.box2D.b2Vec2(start.x, start.y);
-        const pEnd = new taro.physics.box2D.b2Vec2(end.x, end.y);
-        this.world.rayCast(taro.physics.box2D ? pStart : start, taro.physics.box2D ? pEnd : end, forwardRaycast.callback // though it is currently hard-coded for 'Closest'
+        const pStart = taro.physics.box2D ? new taro.physics.box2D.b2Vec2(start.x, start.y) : start;
+        const pEnd = taro.physics.box2D ? new taro.physics.box2D.b2Vec2(end.x, end.y) : end;
+        this.world.rayCast(pStart, pEnd, forwardRaycast.callback // though it is currently hard-coded for 'Closest'
         );
         taro.game.entitiesCollidingWithLastRaycast = forwardRaycast.entity ? [forwardRaycast.entity] : [];
         this.forwardHit = true;
         const point = (_a = forwardRaycast.point) !== null && _a !== void 0 ? _a : end;
-        const pPoint = new taro.physics.box2D.b2Vec2(point.x, point.y);
+        const pPoint = taro.physics.box2D ? new taro.physics.box2D.b2Vec2(point.x, point.y) : point;
         const fraction = forwardRaycast.fraction;
         // reverse
         const reverseRaycast = this.any;
         reverseRaycast.reset();
-        this.world.rayCast(taro.physics.box2D ? pPoint : point, taro.physics.box2D ? pStart : start, reverseRaycast.callback);
+        this.world.rayCast(pPoint, pStart, reverseRaycast.callback);
         if (reverseRaycast.hit) {
             // we were obstructed when shooting
             this.reverseHit = true;
@@ -88,13 +88,11 @@ const RayCastClosest = (function () {
     let def;
     def = {};
     def.reset = function () {
-        var _a, _b;
         def.hit = false;
         def.point = null;
         def.normal = null;
         def.entity = null;
         def.fraction = 1;
-        (_b = (_a = taro.physics).destroyB2dObj) === null || _b === void 0 ? void 0 : _b.call(_a, def.callback);
     };
     switch (taro.physics.engine) {
         case 'BOX2DWASM':
@@ -112,7 +110,8 @@ const RayCastClosest = (function () {
                     const fixture = taro.physics.recordLeak(wrapPointer(fixture_p, b2Fixture));
                     const point = taro.physics.recordLeak(wrapPointer(point_p, b2Vec2));
                     const normal = taro.physics.recordLeak(wrapPointer(normal_p, b2Vec2));
-                    const taroId = taro.physics.metaData[taro.physics.getPointer(fixture.GetBody())].taroId;
+                    const body = taro.physics.recordLeak(fixture.GetBody());
+                    const taroId = taro.physics.metaData[taro.physics.getPointer(body)].taroId;
                     const entity = taro.$(taroId);
                     if (entity &&
                         (entity._category === 'unit' ||
@@ -175,11 +174,9 @@ const RayCastMultiple = (function () {
     def.normals = [];
     def.entities = [];
     def.reset = function () {
-        var _a, _b;
         def.points = [];
         def.normals = [];
         def.entities = [];
-        (_b = (_a = taro.physics).destroyB2dObj) === null || _b === void 0 ? void 0 : _b.call(_a, def.callback);
     };
     switch (taro.physics.engine) {
         case 'BOX2DWASM':
@@ -197,7 +194,8 @@ const RayCastMultiple = (function () {
                     const fixture = taro.physics.recordLeak(wrapPointer(fixture_p, b2Fixture));
                     const point = taro.physics.recordLeak(wrapPointer(point_p, b2Vec2));
                     const normal = taro.physics.recordLeak(wrapPointer(normal_p, b2Vec2));
-                    const taroId = taro.physics.metaData[taro.physics.getPointer(fixture.GetBody())].taroId;
+                    const body = taro.physics.recordLeak(fixture.GetBody());
+                    const taroId = taro.physics.metaData[taro.physics.getPointer(body)].taroId;
                     const entity = taro.$(taroId);
                     if (entity &&
                         (entity._category === 'unit' ||
@@ -245,11 +243,9 @@ const RaycastAny = (function () {
     let def;
     def = {};
     def.reset = function () {
-        var _a, _b;
         def.hit = false;
         def.point = null;
         def.normal = null;
-        (_b = (_a = taro.physics).destroyB2dObj) === null || _b === void 0 ? void 0 : _b.call(_a, def.callback);
     };
     switch (taro.physics.engine) {
         case 'BOX2DWASM':
@@ -267,7 +263,8 @@ const RaycastAny = (function () {
                     const fixture = taro.physics.recordLeak(wrapPointer(fixture_p, b2Fixture));
                     const point = taro.physics.recordLeak(wrapPointer(point_p, b2Vec2));
                     const normal = taro.physics.recordLeak(wrapPointer(normal_p, b2Vec2));
-                    const taroId = taro.physics.metaData[taro.physics.getPointer(fixture.GetBody())].taroId;
+                    const body = taro.physics.recordLeak(fixture.GetBody());
+                    const taroId = taro.physics.metaData[taro.physics.getPointer(body)].taroId;
                     const entity = taro.$(taroId);
                     if (entity &&
                         (entity._category === 'unit' ||

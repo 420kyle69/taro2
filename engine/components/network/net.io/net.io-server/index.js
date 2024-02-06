@@ -611,62 +611,27 @@ NetIo.Server = NetIo.EventingClass.extend({
 		}
 
 		// http - local, standalone, standalone-remote env
-
 		this._httpServer = this._http.createServer(function (request, response) {
-			// if (request.url === '/heapdump') {
-			// 	// Handle heapdump request
-			// 	if (request.method === 'GET') {
-			// 		const fs = require('fs');
-			// 		const path = require('path');
-			// 		const heapdump = require('heapdump');
-			//
-			// 		// Generate a unique filename for the heap dump
-			// 		const _filename = `worker_heapdump_${Date.now()}.heapsnapshot`;
-			//
-			// 		// Start recording the heap dump
-			// 		heapdump.writeSnapshot(path.join(__dirname, _filename), (err, filename) => {
-			// 			if (err) {
-			// 				console.error('Error while generating heap dump:', err);
-			// 				response.writeHead(500);
-			// 				response.end('Error while generating heap dump');
-			// 			} else {
-			// 				// Send the heap dump file as a response
-			// 				response.setHeader('Content-disposition', `attachment; filename=${_filename}`);
-			// 				response.setHeader('Content-type', 'application/octet-stream');
-			// 				const fileStream = fs.createReadStream(filename);
-			//
-			// 				fileStream.on('end', () => {
-			// 					// Delete the heap dump file after it's downloaded
-			// 					fs.unlink(filename, (err) => {
-			// 						if (err) {
-			// 							console.error('Error while deleting heap dump:', err);
-			// 						}
-			// 					});
-			// 				});
-			//
-			// 				fileStream.pipe(response);
-			// 			}
-			// 		});
-			// 	} else {
-			// 		response.writeHead(405);
-			// 		response.end('Method Not Allowed');
-			// 	}
-			// } else {
-			// 	response.writeHead(404);
-			// 	response.end();
-			// }
 			response.writeHead(404);
 			response.end();
 		});
+		
 		this._socketServerHttp = new this._websocket.Server({
 			server: this._httpServer,
 			maxPayload: 200 * 1024, // 100 KB - The maximum allowed message size
+			verifyClient: function(info, done) {
+				console.log('verifyClient event');
+
+				// Custom logic to determine whether to accept or reject the connection
+				const acceptConnection = taro.clusterClient ? taro.clusterClient.verifyConnectionRequest(info) : true;
+				
+				done(acceptConnection, acceptConnection ? 200 : 403, acceptConnection ? '' : 'Connection not accepted');
+			},
 		});
-		// this._socketServerHttp = new this._websocket.WebSocketServer({
-		// 	server: this._httpServer
-		// });
+
 		// Setup listener
 		this._socketServerHttp.on('connection', function (ws, request) {
+			console.log('connection event');
 			self.socketConnection(ws, request);
 		});
 
@@ -800,59 +765,51 @@ NetIo.Server = NetIo.EventingClass.extend({
 	socketConnection: function (ws, request) {
 		var self = this;
 		var jwt = require('jsonwebtoken');
-		const PING_SERVICE_HEADER = 'x-ping-service';
-		console.log('Client connecting...');
+		
 		var socket = new NetIo.Socket(ws);
 		// Give the socket encode/decode methods
 		socket._encode = self._encode;
 		socket._decode = self._decode;
 		socket._remoteAddress = (request.headers['x-forwarded-for'] && request.headers['x-forwarded-for'].split(',').shift()) || ws._socket.remoteAddress;
-		socket._fromPingService = request.headers[PING_SERVICE_HEADER] && request.headers[PING_SERVICE_HEADER] === process.env.PING_SERVICE_HEADER_SECRET;
-		console.log('x-forwarded-for', request.headers['x-forwarded-for'], socket._remoteAddress);
-		if (!socket._fromPingService) {
-			// if token does not exist in request close the socket.
-			if (request.url.indexOf('/?token=') === -1) {
-				socket.close('Security token could not be validated, please refresh the page.');
-				console.log('Unauthorized request', request.url);
-				return;
-			}
+		console.log('Client connecting from', request.headers['x-forwarded-for'], socket._remoteAddress);
+		
+		const reqUrl = new URL(`https://www.modd.io${request.url}`);
+		const searchParams = reqUrl.searchParams;
+		const token = searchParams.get('token');
 
-			const reqUrl = new URL(`https://www.modd.io${request.url}`);
-			const searchParams = reqUrl.searchParams;
-			const token = searchParams.get('token');
-
-			try {
-				let decodedToken;
-				
-				if (process.env.ENV === 'standalone') {
-					// no token validation required for standalone server
-					decodedToken = {
-						userId: '',
-						sessionId: '',
-						createdAt: Date.now(),
-						gameSlug: taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.gameSlug
-					}
-				} else {
-					decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
+		try {
+			let decodedToken;
+			
+			if (process.env.ENV === 'standalone') {
+				// no token validation required for standalone server
+				decodedToken = {
+					userId: '',
+					sessionId: '',
+					createdAt: Date.now(),
+					gameSlug: taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.gameSlug
 				}
-				
-				// extracting user from token and adding it in _token.
-				socket._token = {
-					userId: decodedToken.userId,
-					sessionId: decodedToken.sessionId,
-					distinctId : searchParams.get('distinctId'),
-					posthogDistinctId : searchParams.get('posthogDistinctId'),
-					token,
-					tokenCreatedAt: decodedToken.createdAt
-				};
+			} else {
+				decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
+			}
+			
+			// extracting user from token and adding it in _token.
+			socket._token = {
+				userId: decodedToken.userId,
+				sessionId: decodedToken.sessionId,
+				distinctId : searchParams.get('distinctId'),
+				posthogDistinctId : searchParams.get('posthogDistinctId'),
+				token,
+				tokenCreatedAt: decodedToken.createdAt
+			};
 
-				// make socket id assignment a variable
-				let assignedId = self.newIdHex();
+			// make socket id assignment a variable
+			let assignedId = self.newIdHex();
 
-				// if the token has been used already, close the connection.
-				const isUsedToken = taro.server.usedConnectionJwts[token];
+			// if the token has been used already, close the connection.
+			const isUsedToken = taro.server.usedConnectionJwts[token];
 
-				if (isUsedToken && request.headers['sec-websocket-protocol'].split(', ')[1] == 'reconnect') {
+			if (isUsedToken) {
+				if (request.headers['sec-websocket-protocol'].split(', ')[1] == 'reconnect') {
 					// TODO: this will match sockets for users that are still in the game
 					let matchedTokens = Object.entries(this._socketsById).filter(([id, oldSocket]) => {
 						// TODO: check whether _sockets still has a reference? It should not because of the disconnect listener just below
@@ -877,147 +834,89 @@ NetIo.Server = NetIo.EventingClass.extend({
 					
 					// persist original start time, so we can track correct session duration
 					socket.start = oldSocket.start || socket.start;
+					
+				} else {
+					// A token is required to connect with socket server
+					socket.close('Security token could not be validated, please refresh the page.');
+					console.log('Used token', token);
+					return;
 				}
-
-				// store token for current client
-				taro.server.usedConnectionJwts[token] = socket._token.tokenCreatedAt;
-
-				// remove expired tokens
-				const filteredUsedConnectionJwts = {};
-				const usedTokenEntries = Object.entries(taro.server.usedConnectionJwts).filter(([token, tokenCreatedAt]) => (Date.now() - tokenCreatedAt) < taro.server.CONNECTION_JWT_EXPIRES_IN);
-				for (const [key, value] of usedTokenEntries) {
-					if (typeof value === 'number') {
-						filteredUsedConnectionJwts[key] = value;
-					}
-				}
-
-				taro.server.usedConnectionJwts = filteredUsedConnectionJwts;
-
-				// Give the socket a unique ID
-				socket.id = assignedId;
-				// Add the socket to the internal lookups
-				self._sockets.push(socket);
-
-				self._socketsById[socket.id] = socket;
-
-				// store socket.id as clientId in _token data to validate socket messages later
-				socket._token.clientId = socket.id;
-
-			} catch (e) {
-				// A token is required to connect with socket server
-				socket.close('Security token could not be validated, please refresh the page.');
-				console.log('Unauthorized request', e.message, token);
-				return;
 			}
 
-			console.log('1. Client ', socket.id,' connected (net.io-server index.js)');
-			// Register a listener so that if the socket disconnects,
-			// we can remove it from the active socket lookups
-			socket.on('disconnect', function (data) {
-				
-				var index = self._sockets.indexOf(socket);
-				if (index > -1) {
-					// Remove the socket from the array
-					self._sockets.splice(index, 1);
-				}
+			// store token for current client
+			taro.server.usedConnectionJwts[token] = socket._token.tokenCreatedAt;
 
-				if (self._socketsById[socket.id]) {
-					if (!!socket._disconnect?.reason) {
-						// if a disconnect reason is provided, disconnect socket immediately as no reconnects are expected
+			// remove expired tokens
+			const filteredUsedConnectionJwts = {};
+			const usedTokenEntries = Object.entries(taro.server.usedConnectionJwts).filter(([token, tokenCreatedAt]) => (Date.now() - tokenCreatedAt) < taro.server.CONNECTION_JWT_EXPIRES_IN);
+			for (const [key, value] of usedTokenEntries) {
+				if (typeof value === 'number') {
+					filteredUsedConnectionJwts[key] = value;
+				}
+			}
+
+			taro.server.usedConnectionJwts = filteredUsedConnectionJwts;
+
+			// Give the socket a unique ID
+			socket.id = assignedId;
+			// Add the socket to the internal lookups
+			self._sockets.push(socket);
+
+			self._socketsById[socket.id] = socket;
+
+			// store socket.id as clientId in _token data to validate socket messages later
+			socket._token.clientId = socket.id;
+
+		} catch (e) {
+			// A token is required to connect with socket server
+			socket.close('Security token could not be validated, please refresh the page.');
+			console.log('Unauthorized request', e.message, token);
+			return;
+		}
+
+		console.log('Client ', socket.id,' connected');
+		// Register a listener so that if the socket disconnects,
+		// we can remove it from the active socket lookups
+		socket.on('disconnect', function (data) {
+			
+			var index = self._sockets.indexOf(socket);
+			if (index > -1) {
+				// Remove the socket from the array
+				self._sockets.splice(index, 1);
+			}
+
+			if (self._socketsById[socket.id]) {
+				if (!!socket._disconnect?.reason) {
+					// if a disconnect reason is provided, disconnect socket immediately as no reconnects are expected
+					delete self._socketsById[socket.id];
+					
+					// moved from .on('disconnect') in TaroNetIoServer.js:~588
+					// data contains {WebSocket socket, <Buffer > reason, Number code}
+					taro.network._onSocketDisconnect(data, socket);
+				} else {
+					self._socketsById[socket.id].gracePeriod = setTimeout(() => {
 						delete self._socketsById[socket.id];
 						
 						// moved from .on('disconnect') in TaroNetIoServer.js:~588
 						// data contains {WebSocket socket, <Buffer > reason, Number code}
 						taro.network._onSocketDisconnect(data, socket);
-					} else {
-						self._socketsById[socket.id].gracePeriod = setTimeout(() => {
-							delete self._socketsById[socket.id];
-							
-							// moved from .on('disconnect') in TaroNetIoServer.js:~588
-							// data contains {WebSocket socket, <Buffer > reason, Number code}
-							taro.network._onSocketDisconnect(data, socket);
-						}, 5000);
-					}
+					}, 5000);
 				}
+			}
+		});
+		// Tell the client their new ID - triggers this._io.on('connect', ...) on client
+		try {
+			socket.send({
+				_netioCmd: 'id',
+				data: socket.id
 			});
-			// Tell the client their new ID - triggers this._io.on('connect', ...) on client
-			try {
-				socket.send({
-					_netioCmd: 'id',
-					data: socket.id
-				});
-			} catch (err) {
-				console.log('err while sending client its socket.id!');
-			}
-
-			// add socket message listeners, send 'init' message to client
-			self.emit('connection', [socket, request]);
-			
-		} else {
-			// PING service only
-			// Tell the client their new ID
-			try {
-				let assignedId = self.newIdHex();
-				socket.id = assignedId;
-
-				socket.send({
-					_netioCmd: 'id',
-					data: socket.id
-				});
-
-				// add socket message listeners, send 'init' message to client
-				self.emit('connection', [socket, request]);
-
-				socket._token = {
-					userId: '',
-					sessionId: '',
-					distinctId: '',
-					posthogDistinctId: '',
-					token: '',
-					tokenCreatedAt: Date.now()
-				};
-
-				self._socketsById[socket.id] = socket;
-
-				// store socket.id as clientId in _token data to validate socket messages later
-				socket._token.clientId = socket.id;
-
-				// trigger joinGame command as part of socket connection, no need for client to send joinGame anymore
-				// joinGame takes care of disconnecting unauthenticated users, banned ips, duplicate IPs, creates a new player and request user data from gs manager and make sure the user exists on moddio
-				const joinGameData = {
-					number: (Math.floor(Math.random() * 999) + 100),
-					_id: socket._token.userId,
-					sessionId: socket._token.sessionId,
-					isAdBlockEnabled: false
-				};
-				const isMobile = !!request.headers['user-agent']?.match(/Android|BlackBerry|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop|moddioapp/i);
-				joinGameData.isMobile = isMobile;
-
-				const clientId = socket.id;
-
-				taro.server._onJoinGame(joinGameData, clientId);
-
-				socket.on('disconnect', function (data) {
-					var index = self._sockets.indexOf(socket);
-					if (index > -1) {
-						// Remove the socket from the array
-						self._sockets.splice(index, 1);
-					}
-
-					if (self._socketsById[socket.id]) {
-						self._socketsById[socket.id].gracePeriod = setTimeout(() => {
-							delete self._socketsById[socket.id];
-
-							// moved from .on('disconnect') in TaroNetIoServer.js:~588
-							// data contains {WebSocket socket, <Buffer > reason, Number code}
-							taro.network._onSocketDisconnect(data, socket);
-						}, 5000);
-					}
-				});
-			} catch (err) {
-				console.log('err while sending client its socket.id!');
-			}
+		} catch (err) {
+			console.log('err while sending client its socket.id!');
 		}
+
+		// add socket message listeners, send 'init' message to client
+		self.emit('connection', [socket, request]);
+		
 	},
 	
 	/**

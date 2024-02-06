@@ -26,7 +26,8 @@ class PhaserEntity {
     layer(value) {
         // use index - 1 because taro layers are indexed at 1
         const scene = this.gameObject.scene;
-        scene.entityLayers[value - 1].add(this.gameObject);
+        if (scene.entityLayers[value - 1])
+            scene.entityLayers[value - 1].add(this.gameObject);
     }
     depth(value) {
         const scene = this.gameObject.scene;

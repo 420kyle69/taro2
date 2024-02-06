@@ -328,7 +328,6 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 												0
 											);
 											self.destroyB2dObj(pos);
-
 											break;
 									}
 									if (tempShape && fixtureDef.filter) {

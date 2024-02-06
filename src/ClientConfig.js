@@ -41,14 +41,16 @@ var taroClientConfig = {
 		'/gameClasses/components/ui/VideoChatComponent.js',
 		'/gameClasses/components/ui/TradeUiComponent.js',
 
-		'/gameClasses/components/script/ScriptComponent.js',
-		'/gameClasses/components/script/VariableComponent.js',
+		'/gameClasses/components/script/ScriptComponent.js',		
 		'/gameClasses/components/script/ActionComponent.js',
+		'/gameClasses/components/script/ParameterComponent.js',
 		'/gameClasses/components/script/ConditionComponent.js',
 
 		'/gameClasses/components/unit/AIComponent.js',
 		'/gameClasses/components/unit/AbilityComponent.js',
-		'/gameClasses/components/unit/AttributeComponent.js',
+
+		'/gameClasses/components/entity/AttributeComponent.js',
+		'/gameClasses/components/entity/VariableComponent.js',
 
 		/* Standard game scripts */
 		'/gameClasses/DeveloperMode.js',
@@ -72,6 +74,7 @@ var taroClientConfig = {
 		// '../node_modules/phaser3-rex-plugins/dist/rexvirtualjoystickplugin.min.js',
 		//'../node_modules/phaser3-rex-plugins/templates/ui/ui-components.js',
 		'utils/visibility-polygon.js',
+		'utils/functionalTryCatch.js',
 		'renderer/phaser/enums/FlipMode.js',
 		'renderer/phaser/enums/TileLayer.js',
 		'renderer/phaser/enums/EntityLayer.js',
@@ -96,6 +99,7 @@ var taroClientConfig = {
 		'renderer/phaser/classes/Ui/PhaserButtonBar.js',
 		'renderer/phaser/classes/Ui/PhaserButton.js',
 		'renderer/phaser/classes/devmode/DevModeTools.js',
+		'renderer/phaser/classes/devmode/DevButtonSection.js',
 		'renderer/phaser/classes/devmode/DevToolButton.js',
 		'renderer/phaser/classes/devmode/DevTooltip.js',
 		'renderer/phaser/classes/devmode/RegionEditor.js',

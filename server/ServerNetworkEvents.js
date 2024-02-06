@@ -33,7 +33,7 @@ var ServerNetworkEvents = {
 			// socket already disconnected, why sending clientDisconnect command then?
 			taro.network.send('clientDisconnect', { reason: 'Player disconnected', clientId: clientId }, clientId);
 		}
-		
+
 		// remove client from streamData
 		for (entityId in taro.network.stream._streamClientCreated) {
 			delete taro.network.stream._streamClientCreated[entityId][clientId];
@@ -63,7 +63,7 @@ var ServerNetworkEvents = {
 	_onJoinGame: function (data, clientId) {
 		if (taro.clusterClient) { // this is used for hosted version of moddio
 			let clientData = taro.clusterClient.authenticateClient(data, clientId) // will return data if user is authenticated. otherwise, will return undefined
-			
+
 			if (clientData) {
 				let playerId = clientData?._id;
 				if (clientData && playerId) { // authenticate logged-in player
@@ -448,23 +448,23 @@ var ServerNetworkEvents = {
 	_onRunProfiler: function ({ run }, modClientId) {
 		var modPlayer = taro.game.getPlayerByClientId(modClientId);
 
-		if (modPlayer && modPlayer.isDeveloper()) {			
+		if (modPlayer && modPlayer.isDeveloper()) {
 			if (run) {
 				taro.profiler.start();
 			} else {
 				taro.profiler.stop();
 			}
-			
-		}		
+
+		}
 	},
 
 	_onKick: function (kickedClientId, modClientId) {
 		var modPlayer = taro.game.getPlayerByClientId(modClientId);
 		var kickedPlayer = taro.game.getPlayerByClientId(kickedClientId);
 
-		if (modPlayer && modPlayer.isDeveloper() && kickedPlayer) {			
+		if (modPlayer && modPlayer.isDeveloper() && kickedPlayer) {
 			taro.game.kickPlayer(kickedPlayer.id(), 'You were kicked by ' + modPlayer._stats?.name);
-		}		
+		}
 	},
 
 	_onBanUser: function ({ userId, kickuserId }, clientId) {

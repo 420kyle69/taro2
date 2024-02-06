@@ -103,7 +103,7 @@ const Client = TaroEventingClass.extend({
 		this.extrapolation = false; //old comment => 'disabling due to item bug'
 		this.resolution = 0; //old comment => 'autosize'
 		this.scaleMode = 0; //old comment => 'none'
-		this.renderBuffer = 100; // this is later updated again in gameComponent.js
+		this.renderBuffer = 66; // this is later updated again in gameComponent.js
 		this.isActiveTab = true;
 		this.sendNextPingAt = 0;
 
@@ -685,6 +685,7 @@ const Client = TaroEventingClass.extend({
 		taro.network.define('updateItem', this._onUpdateItem);
 		taro.network.define('updateProjectile', this._onUpdateProjectile);
 		taro.network.define('updateShop', this._onUpdateShop);
+		taro.network.define('updateDialogue', this._onUpdateDialogue);
 
 		taro.network.define('renderSocketLogs', this._onRenderSocketLogs);
 	},

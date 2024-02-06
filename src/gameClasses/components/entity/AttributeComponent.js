@@ -203,7 +203,7 @@ var AttributeComponent = TaroEntity.extend({
 			var attribute = attributes[attributeTypeId];
 
 			if (attribute) {
-				attribute.type = attributeTypeId; // tracking what "triggering attributeType" is in variableComponent.
+				attribute.type = attributeTypeId; // tracking what "triggering attributeType" is in ParameterComponent.
 
 				// obj to collect changes for streaming
 				let attrData = { attributes: {
