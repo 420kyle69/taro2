@@ -42,7 +42,7 @@ class PhaserEntity {
 	protected layer (value: number): void {
 		// use index - 1 because taro layers are indexed at 1
 		const scene = this.gameObject.scene as GameScene;
-		scene.entityLayers[value - 1].add(this.gameObject);
+		if (scene.entityLayers[value - 1]) scene.entityLayers[value - 1].add(this.gameObject);
 	}
 
 	protected depth (value: number): void {

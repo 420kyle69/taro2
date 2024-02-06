@@ -13,6 +13,7 @@ var Player = TaroEntity.extend({
 
 		// dont save variables in _stats as _stats is stringified and synced
 		// and some variables of type unit, item, projectile may contain circular json objects
+		self.variables = {}
 		if (self._stats.variables) {
 			self.variables = self._stats.variables;
 			delete self._stats.variables;
@@ -29,7 +30,8 @@ var Player = TaroEntity.extend({
 		this.mount(taro.$('baseScene'));
 
 		self.addComponent(AttributeComponent);
-
+		self.addComponent(VariableComponent);
+		
 		if (taro.isServer) {
 			this.streamMode(2);
 			// self._stats.unitId = self.getCurrentUnit().id()
@@ -328,6 +330,26 @@ var Player = TaroEntity.extend({
 	updatePlayerType: function (data) {
 		var self = this;
 
+		if (taro.isServer) {
+			// update all units that are targeting this player's unit to act appropriately based on new relationship dynamics
+			// for example, this player's unit may not be the enemy anymore and 
+			// if AI unit was attacking his player's unit, then it should stop.
+
+			// iterate through all units owned by this player
+			self._stats.unitIds.forEach(function (unitId) {
+				var unit = taro.$(unitId);
+				// iterate through all units in the game that's currently targeting this unit, and update their behaviour accordingly
+				// based on new relationship dynamics
+				taro.$$('unit').forEach(function (unit) {
+					if (unit._stats.ownerId != self.id() && unit.ai.targetUnitId == unitId) {
+						if (self.isHostileTo(unit.getOwner()) == false) {
+							unit.ai.targetUnitId = undefined;
+						}
+					}
+				});
+			});
+		}
+
 		// pass old attributes' values to new attributes (given that attributes have same ID)
 		if (self._stats.attributes != undefined) {
 			var oldAttributes = rfdc()(self._stats.attributes);
@@ -341,20 +363,28 @@ var Player = TaroEntity.extend({
 
 		self._stats.attributes = data.attributes;
 
+		
+		// update variables and pass old variables' values to new variables (given that variables have same ID)
+		self.variables = {}		
 		if (data.variables) {
-			var variables = {};
-			for (var key in data.variables) {
-				if (self.variables && self.variables[key]) {
-					variables[key] = self.variables[key] == undefined ? data.variables[key] : self.variables[key];
+			var oldVariables = rfdc()(self.variables);
+			Object.keys(data.variables).forEach(function(variableId) {
+				if (!self.variables[variableId]) {
+					self.variables[variableId] = data.variables[variableId];
 				} else {
-					variables[key] = data.variables[key];
+					// If the variable already exists, update its value with the old one
+					if (oldVariables[variableId] !== undefined) {
+						self.variables[variableId].value = oldVariables[variableId].value;
+					}
 				}
-			}
-			self.variables = variables;
+
+				// if the value is undefined, update it with the default value
+				if (self.variables[variableId].value === undefined) {
+					self.variables[variableId].value = self.variables[variableId].default;
+				}
+			});
 		}
-		if (self._stats.variables) {
-			delete self._stats.variables;
-		}
+		
 
 		if (taro.isClient) {
 			var isMyPlayerUpdated = self._stats.clientId == taro.network.id();

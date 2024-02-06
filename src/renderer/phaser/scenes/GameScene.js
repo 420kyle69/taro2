@@ -62,7 +62,17 @@ var GameScene = /** @class */ (function (_super) {
         if (this.trackingDelay > 60) {
             this.trackingDelay = 60;
         }
+        var resized = false;
         this.scale.on(Phaser.Scale.Events.RESIZE, function () {
+            if (!taro.isMobile) {
+                if (resized) {
+                    resized = false;
+                }
+                else {
+                    resized = true;
+                    _this.game.scale.setGameSize(window.innerWidth, window.innerHeight);
+                }
+            }
             if (_this.zoomSize) {
                 camera.zoom = _this.calculateZoom();
                 taro.client.emit('scale', { ratio: camera.zoom * _this.resolutionCoef });
@@ -112,9 +122,11 @@ var GameScene = /** @class */ (function (_super) {
             camera.stopFollow();
         });
         taro.client.on('position-camera', function (x, y) {
-            x -= camera.width / 2;
-            y -= camera.height / 2;
-            camera.setScroll(x, y);
+            if (!taro.developerMode.active || taro.developerMode.activeTab === 'play') {
+                x -= camera.width / 2;
+                y -= camera.height / 2;
+                camera.setScroll(x, y);
+            }
         });
         taro.client.on('deadzone-camera', function (width, heigth) {
             camera.setDeadzone(width, heigth);
@@ -311,6 +323,7 @@ var GameScene = /** @class */ (function (_super) {
         data.map.layers.forEach(function (layer) {
             if (layer.type === 'tilelayer') {
                 var tileLayer = map.createLayer(layer.name, map.tilesets, 0, 0);
+                tileLayer.name = layer.name;
                 tileLayer.setScale(scaleFactor.x, scaleFactor.y);
                 _this.tilemapLayers.push(tileLayer);
             }

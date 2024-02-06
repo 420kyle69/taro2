@@ -611,6 +611,10 @@ var ClientNetworkEvents = {
 	},
 
 	_onProfile: function (data) {
+
+		// sends data to profiler
+		window.reactApp.profiler(data);
+
 		const runAction = functionalTryCatch(() => {
 			taro.game.updateDevConsole(data);
 		}
@@ -721,6 +725,10 @@ var ClientNetworkEvents = {
 
 	_onUpdateShop: function (data) {
 		taro.developerMode.updateShop(data);
+	},
+
+	_onUpdateDialogue: function (data) {
+		taro.developerMode.updateDialogue(data);
 	},
 
 	_onErrorLogs: function (logs) {

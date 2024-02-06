@@ -19,8 +19,8 @@ var ConditionComponent = TaroEntity.extend({
 
 		var op = opObj.operator;
 
-		var leftVar = self._script.variable.getValue(left, vars);
-		var rightVar = self._script.variable.getValue(right, vars);
+		var leftVar = self._script.param.getValue(left, vars);
+		var rightVar = self._script.param.getValue(right, vars);
 
 		// if the operands are taroEntities, then compare their id's
 		if (leftVar && leftVar._id != undefined && rightVar && rightVar._id != undefined) {

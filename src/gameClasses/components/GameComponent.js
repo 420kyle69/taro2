@@ -479,8 +479,8 @@ var GameComponent = TaroEntity.extend({
 
 					'</table>';
 
-				taro.script.variable.prevServerTime = data.status.currentTime;
-				taro.script.variable.prevClientTime = Math.floor(taro._currentTime);
+				taro.script.param.prevServerTime = data.status.currentTime;
+				taro.script.param.prevClientTime = Math.floor(taro._currentTime);
 
 				$(taro.client.getCachedElementById('dev-status-content')).html(innerHtml);
 				self.secondCount++;

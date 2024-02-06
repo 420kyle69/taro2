@@ -1,6 +1,6 @@
-var VariableComponent = TaroEntity.extend({
-	classId: 'VariableComponent',
-	componentId: 'variable',
+var ParameterComponent = TaroEntity.extend({
+	classId: 'ParameterComponent',
+	componentId: 'param',
 
 	init: function (scriptComponent, entity) {
 		var self = this;
@@ -408,8 +408,8 @@ var VariableComponent = TaroEntity.extend({
 						break;
 
 					case 'roleExistsForPlayer':
-						var name = self._script.variable.getValue(text.name, vars);
-						var player = self._script.variable.getValue(text.player, vars);
+						var name = self.getValue(text.name, vars);
+						var player = self.getValue(text.player, vars);
 
 						var role = (taro.game.data.roles || []).find(role => role.name === name);
 						var roleId = role && role._id;
@@ -462,31 +462,6 @@ var VariableComponent = TaroEntity.extend({
 					case 'getPlayerName':
 						if (entity && entity._category == 'player') {
 							returnValue = entity._stats.name;
-						}
-
-						break;
-
-					case 'getPlayerVariable':
-						returnValue = text.variable;
-
-						break;
-
-					case 'getValueOfPlayerVariable':
-						var variableData = self.getValue(text.variable, vars);
-						var player = self.getValue(text.player, vars);
-
-						if (player && variableData) {
-							var playerVariable = player.variables &&
-								player.variables[variableData.key] &&
-								player.variables[variableData.key];
-
-							if (playerVariable) {
-								returnValue = playerVariable.value;
-
-								if (returnValue === null || returnValue == undefined) {
-									returnValue = playerVariable.default;
-								}
-							}
 						}
 
 						break;
@@ -665,11 +640,19 @@ var VariableComponent = TaroEntity.extend({
 						}
 
 						break;
-
-					case 'unitsFacingAngle':
-						var unit = self.getValue(text.unit, vars);
-						if (unit && unit._category == 'unit') {
-							returnValue = unit._rotate && unit._rotate.z;
+					
+					case 'unitsFacingAngle': // to be deprecated soon
+						var unit = self.getValue(text.unit, vars);					
+					case 'entityFacingAngle':						
+						// if unit is defined, use unit's facing angle
+						if (unit) {
+							var entity = unit;
+						} else {
+							var entity = self.getValue(text.entity, vars);
+						}
+							
+						if (entity) {
+							returnValue = entity._rotate && entity._rotate.z;
 							returnValue = (returnValue != undefined) ? self.roundOff(returnValue, 3) : undefined;
 						}
 
@@ -1063,7 +1046,6 @@ var VariableComponent = TaroEntity.extend({
 						});
 
 						returnValue = players.length;
-
 						break;
 
 					case 'getMapHeight':
@@ -1591,7 +1573,7 @@ var VariableComponent = TaroEntity.extend({
 
 					case 'getRandomItemTypeFromItemTypeGroup':
 						if (text.itemTypeGroup) {
-							var variableObj = self.getValue(text.itemTypeGroup);
+							var variableObj = self.getValue(text.itemTypeGroup, vars);
 
 							if (variableObj) {
 								var itemTypes = _.map(variableObj, (itemTypeInfo, itemType) => {
@@ -1702,7 +1684,7 @@ var VariableComponent = TaroEntity.extend({
 						if (region) {
 							returnValue = region._stats.default.x;
 						} else {
-							VariableComponent.prototype.log('getXCoordinateOfRegion: region not defined');
+							ParameterComponent.prototype.log('getXCoordinateOfRegion: region not defined');
 						}
 
 						break;
@@ -1713,7 +1695,7 @@ var VariableComponent = TaroEntity.extend({
 						if (region && region._stats && region._stats.default) {
 							returnValue = region._stats.default.y;
 						} else {
-							VariableComponent.prototype.log('getYCoordinateOfRegion: region not defined');
+							ParameterComponent.prototype.log('getYCoordinateOfRegion: region not defined');
 						}
 
 						break;
@@ -1724,7 +1706,7 @@ var VariableComponent = TaroEntity.extend({
 						if (region) {
 							returnValue = region._stats.default.width;
 						} else {
-							VariableComponent.prototype.log('getWidthOfRegion: region not defined');
+							ParameterComponent.prototype.log('getWidthOfRegion: region not defined');
 						}
 
 						break;
@@ -1735,7 +1717,7 @@ var VariableComponent = TaroEntity.extend({
 						if (region) {
 							returnValue = region._stats.default.height;
 						} else {
-							VariableComponent.prototype.log('getHeightOfRegion: region not defined');
+							ParameterComponent.prototype.log('getHeightOfRegion: region not defined');
 						}
 
 						break;
@@ -1749,7 +1731,7 @@ var VariableComponent = TaroEntity.extend({
 						if (entity && self._entity.script.action.entityCategories.indexOf(entity._category) > -1) {
 							returnValue = entity._stats.stateId;
 						} else {
-							VariableComponent.prototype.log('getEntityState: entity not defined');
+							ParameterComponent.prototype.log('getEntityState: entity not defined');
 						}
 
 						break;
@@ -2107,6 +2089,15 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
+					case 'playersOfPlayerType': 
+						var playerType = self.getValue(text.playerType, vars);
+						var players = taro.$$('player').filter((player) => {
+							return player._stats.playerTypeId === playerType;
+						});
+
+						returnValue = players;
+						break;
+
 
 					case 'allItems':
 						returnValue = taro.$$('item');
@@ -2419,6 +2410,7 @@ var VariableComponent = TaroEntity.extend({
 				var variableData = self.getValue(text.variable, vars);
 				var entity = self.getValue(text.entity, vars);
 
+<<<<<<< HEAD:src/gameClasses/components/script/VariableComponent.js
 				if (entity && variableData) {
 					var entityVariable = entity.variables &&
 						entity.variables[variableData.key] &&
@@ -2437,8 +2429,24 @@ var VariableComponent = TaroEntity.extend({
 						console.log({ returnValue });
 						return returnValue;
 					}
+=======
+				if (entity && variableData?.key) {
+					return entity.variable.getValue(variableData.key);	
+>>>>>>> master:src/gameClasses/components/script/ParameterComponent.js
 				}
+			},
 
+			'getPlayerVariable': function(text, vars) {
+				return text.variable;
+			},
+
+			'getValueOfPlayerVariable': function(text, vars) {
+				var variableData = self.getValue(text.variable, vars);
+				var player = self.getValue(text.player, vars);
+				
+				if (player && variableData?.key) {		
+					return player.variable.getValue(variableData.key);	
+				}
 			},
 
 			'entityBounds': function (text, vars) {
@@ -2472,7 +2480,7 @@ var VariableComponent = TaroEntity.extend({
 					// if unitTypeOfUnit is key of unit
 					return unit;
 				} else {
-					VariableComponent.prototype.log('getUnitTypeOfUnit: entity not defined');
+					ParameterComponent.prototype.log('getUnitTypeOfUnit: entity not defined');
 				}
 			},
 
@@ -2608,7 +2616,7 @@ var VariableComponent = TaroEntity.extend({
 				if (entity && entity._category == 'projectile') {
 					return entity._stats.type;
 				} else {
-					VariableComponent.prototype.log('entity not defined');
+					ParameterComponent.prototype.log('entity not defined');
 				}
 
 			},
@@ -2797,4 +2805,4 @@ var VariableComponent = TaroEntity.extend({
 	}
 });
 
-if (typeof (module) !== 'undefined' && typeof (module.exports) !== 'undefined') { module.exports = VariableComponent; }
+if (typeof (module) !== 'undefined' && typeof (module.exports) !== 'undefined') { module.exports = ParameterComponent; }

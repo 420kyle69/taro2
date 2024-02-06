@@ -17,7 +17,7 @@ var defaultConfig = [
 
 	{ name: 'ConditionComponent', path: '../src/gameClasses/components/script/ConditionComponent' },
 	{ name: 'ActionComponent', path: '../src/gameClasses/components/script/ActionComponent' },
-	{ name: 'VariableComponent', path: '../src/gameClasses/components/script/VariableComponent' },
+	{ name: 'ParameterComponent', path: '../src/gameClasses/components/script/ParameterComponent' },
 
 	{ name: 'Player', path: '../src/gameClasses/Player' },
 	{ name: 'Unit', path: '../src/gameClasses/Unit' },
@@ -38,8 +38,10 @@ var defaultConfig = [
 	{ name: 'SoundComponent', path: '../src/gameClasses/components/SoundComponent' },
 
 	{ name: 'AbilityComponent', path: '../src/gameClasses/components/unit/AbilityComponent' },
-	{ name: 'AttributeComponent', path: '../src/gameClasses/components/unit/AttributeComponent' },
 	{ name: 'AIComponent', path: '../src/gameClasses/components/unit/AIComponent' },
+
+	{ name: 'AttributeComponent', path: '../src/gameClasses/components/entity/AttributeComponent' },
+	{ name: 'VariableComponent', path: '../src/gameClasses/components/entity/VariableComponent' },	
 
 	// Raycasting
 	{ name: 'Raycaster', path: '../src/gameClasses/Raycaster' },

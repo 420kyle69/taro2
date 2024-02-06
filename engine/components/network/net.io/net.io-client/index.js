@@ -154,6 +154,7 @@ NetIo.Client = NetIo.EventingClass.extend({
 			
 			// Setup event listeners
 			this._socket.onopen = function () {
+				console.warn('...reconnected at ' + new Date().toISOString().slice(0, 19).replace(/-/g, "/").replace("T", " "));
 				self._onOpen.apply(self, arguments);
 				
 				// resolve if connection is open for about a second
@@ -360,6 +361,7 @@ NetIo.Client = NetIo.EventingClass.extend({
 		var reason = this._disconnectReason || event.reason;
 		var code = event.code;
 		
+		console.warn('disconnected at ' + new Date().toISOString().slice(0, 19).replace(/-/g, "/").replace("T", " ") + ' with code', code, this._state, 'and start reconnecting...');
 		console.log('close event', event, { _disconnectReason: this._disconnectReason, state: this._state, reason });
 		
 		const disconnectData = {
@@ -433,7 +435,22 @@ NetIo.Client = NetIo.EventingClass.extend({
 		// If we were trying to connect...
 		if (this._state === 1) {
 			this._state = 0;
-			taro.menuUi.onDisconnectFromServer('netio-client index:446','Error trying to contact server. Please refresh this page or visit our homepage.');
+			
+			function parseJwt (token) {
+				var base64Url = token.split('.')[1];
+				var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+				var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+					return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+				}).join(''));
+				
+				return JSON.parse(jsonPayload);
+			}
+			
+			const decodedToken = parseJwt(window.gsAuthToken);
+			const bannedReason = 'Restricted IP detected. If you think you were wrongfully banned, please contact a staff member in our Discord: <a href="https://discord.gg/XRe8T7K">https://discord.gg/XRe8T7K</a>.';
+			
+			const disconnectReason = decodedToken.isBanned ? bannedReason : 'Error trying to contact server. Please refresh this page or visit our homepage.';
+			taro.menuUi.onDisconnectFromServer('netio-client index:446', disconnectReason);
 			this.emit('error', { reason: 'Cannot establish connection, is server running?' });
 		}
 

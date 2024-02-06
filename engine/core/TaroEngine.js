@@ -1454,13 +1454,12 @@ var TaroEngine = TaroEntity.extend({
 
 		if (this._lastTimeStamp != undefined) {
 			let timeElapsed = timeStamp - this._lastTimeStamp;
-			
 			if (!this._pause) {			
 				this._currentTime = (this._currentTime + timeElapsed) * this._timeScale;			
 			}
 		}
 		
-		this._lastTimeStamp = timeStamp;
+		this._lastTimeStamp = timeStamp;		
 		return this._currentTime;
 	},
 
