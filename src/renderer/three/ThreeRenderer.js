@@ -131,7 +131,7 @@ class ThreeRenderer {
             });
         });
         const createEntity = (entity) => {
-            const tex = ThreeTextureManager.instance().textureMap.get(entity._stats.cellSheet.url);
+            let tex = ThreeTextureManager.instance().textureMap.get(entity._stats.cellSheet.url);
             const createEntity = () => {
                 const e = new ThreeUnit(tex.clone());
                 this.animatedSprites.push(e);
@@ -184,33 +184,29 @@ class ThreeRenderer {
             const playAnimationEvtListener = entity.on('play-animation', (id) => {
                 const animation = this.animations.get(`${tex.userData.key}/${id}`);
                 if (animation) {
-                    if (`${tex.userData.key}/${id}`.includes('Character')) {
-                        console.log(animation);
-                        ent.name = 'char';
-                    }
                     ent.loop(animation.frames, animation.fps, animation.repeat);
-                }
-                else {
-                    console.log(`${tex.userData.key}/${id}`);
                 }
             });
             const updateTextureEvtListener = entity.on('update-texture', (data) => {
-                // const textureManager = ThreeTextureManager.instance();
-                // const key = entity._stats.cellSheet.url;
-                // const tex = textureManager.textureMap.get(key).clone();
-                // if (tex) {
-                // 	this.createAnimations(entity._stats);
-                // 	ent.setTexture(tex);
-                // 	const bounds = entity._bounds2d;
-                // 	ent.setScale(bounds.x / 64, bounds.y / 64);
-                // } else {
-                // 	textureManager.loadFromUrl(key, Utils.patchAssetUrl(key), (tex) => {
-                // 		this.createAnimations(entity._stats);
-                // 		ent.setTexture(tex);
-                // 		const bounds = entity._bounds2d;
-                // 		ent.setScale(bounds.x / 64, bounds.y / 64);
-                // 	});
-                // }
+                const textureManager = ThreeTextureManager.instance();
+                const key = entity._stats.cellSheet.url;
+                const tex2 = textureManager.textureMap.get(key);
+                if (tex2) {
+                    this.createAnimations(entity._stats);
+                    tex = tex2.clone();
+                    ent.setTexture(tex);
+                    const bounds = entity._bounds2d;
+                    ent.setScale(bounds.x / 64, bounds.y / 64);
+                }
+                else {
+                    textureManager.loadFromUrl(key, Utils.patchAssetUrl(key), (tex2) => {
+                        this.createAnimations(entity._stats);
+                        tex = tex2.clone();
+                        ent.setTexture(tex);
+                        const bounds = entity._bounds2d;
+                        ent.setScale(bounds.x / 64, bounds.y / 64);
+                    });
+                }
             });
             entity.on('layer', (layer) => {
                 ent.setLayer(layer);
@@ -286,9 +282,6 @@ class ThreeRenderer {
             taro.input.emit('pointermove', [{ x: (worldPos.x + center.x) * 64, y: (worldPos.z + center.z) * 64 }]);
         }
         for (const sprite of this.animatedSprites) {
-            if (sprite.name === 'char') {
-                console.log(sprite.tex.offset);
-            }
             sprite.update(1 / 60);
         }
         this.camera.update();

@@ -53,6 +53,7 @@ class ThreeAnimatedSprite extends ThreeSprite {
     }
     setTexture(tex) {
         super.setTexture(tex);
+        this.tex = tex;
         if (tex.userData.numColumns && tex.userData.numRows) {
             this.tileH = tex.userData.numColumns;
             this.tileV = tex.userData.numRows;
