@@ -311,13 +311,10 @@ var MenuUiComponent = TaroEntity.extend({
 			});
 
 			if (document.getElementById('open-inventory-button')) {
-				console.log('custom ui listeners');
 				customUiListeners();
 			}else{
 				let checkForCustomUi = setInterval(() => {
-					console.log('checking for custom ui');
 					if (document.getElementById('open-inventory-button')) {
-						console.log('custom ui listeners');
 						clearInterval(checkForCustomUi);
 						customUiListeners();
 					}
