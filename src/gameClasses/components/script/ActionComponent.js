@@ -25,6 +25,7 @@ var ActionComponent = TaroEntity.extend({
 				(taro.isServer && action.runMode == 1) || // don't run on server if runMode is 'client only'
 				(taro.isClient && (!action.runOnClient && !action.runMode)) // backward compatibility for older versions
 			) {
+				self._script.currentActionBlockId += 1
 				continue;
 			}
 
