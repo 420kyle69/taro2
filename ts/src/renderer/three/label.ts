@@ -65,8 +65,7 @@ class Label extends THREE.Group {
 		ctx.fillText(text, padding / 2, textHeight + padding / 2);
 
 		const spriteMap = new THREE.Texture(ctx.getImageData(0, 0, textCanvas.width, textCanvas.height));
-		spriteMap.minFilter = THREE.LinearFilter;
-		spriteMap.magFilter = THREE.NearestFilter;
+		spriteMap.magFilter = ThreeTextureManager.instance().filter;
 		spriteMap.generateMipmaps = false;
 		spriteMap.needsUpdate = true;
 

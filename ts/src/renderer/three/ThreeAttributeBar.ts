@@ -103,8 +103,7 @@ class ThreeAttributeBar extends THREE.Group {
 		}
 
 		const spriteMap = new THREE.Texture(ctx.getImageData(0, 0, textCanvas.width, textCanvas.height));
-		spriteMap.minFilter = THREE.LinearFilter;
-		spriteMap.magFilter = THREE.NearestFilter;
+		spriteMap.magFilter = ThreeTextureManager.instance().filter;
 		spriteMap.generateMipmaps = false;
 		spriteMap.needsUpdate = true;
 

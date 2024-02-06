@@ -98,8 +98,7 @@ class ThreeChatBubble extends THREE.Group {
 		ctx.fillText(text, x + halfSizeX - textWidth / 2, y + halfSizeY + textHeight / 2 - 3);
 
 		const spriteMap = new THREE.Texture(ctx.getImageData(0, 0, textCanvas.width, textCanvas.height));
-		spriteMap.minFilter = THREE.LinearFilter;
-		spriteMap.magFilter = THREE.NearestFilter;
+		spriteMap.magFilter = ThreeTextureManager.instance().filter;
 		spriteMap.generateMipmaps = false;
 		spriteMap.needsUpdate = true;
 

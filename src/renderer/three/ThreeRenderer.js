@@ -45,10 +45,12 @@ class ThreeRenderer {
         this.loadTextures();
     }
     loadTextures() {
+        const textureManager = ThreeTextureManager.instance();
+        textureManager.setFilter(taro.game.data.defaultData.renderingFilter);
         const data = taro.game.data;
         data.map.tilesets.forEach((tileset) => {
             const key = tileset.image;
-            ThreeTextureManager.instance().loadFromUrl(key, Utils.patchAssetUrl(key));
+            textureManager.loadFromUrl(key, Utils.patchAssetUrl(key));
         });
         const entityTypes = [
             ...Object.values(data.unitTypes),
@@ -60,13 +62,13 @@ class ThreeRenderer {
             if (!cellSheet)
                 continue;
             const key = cellSheet.url;
-            ThreeTextureManager.instance().loadFromUrl(key, Utils.patchAssetUrl(key), () => {
+            textureManager.loadFromUrl(key, Utils.patchAssetUrl(key), () => {
                 this.createAnimations(type);
             });
         }
         for (const type of Object.values(data.particleTypes)) {
             const key = type.url;
-            ThreeTextureManager.instance().loadFromUrl(key, Utils.patchAssetUrl(key));
+            textureManager.loadFromUrl(key, Utils.patchAssetUrl(key));
         }
     }
     forceLoadUnusedCSSFonts() {
@@ -299,7 +301,7 @@ class ThreeRenderer {
             const animationFrames = [];
             // Correction for 0-based indexing
             for (let i = 0; i < frames.length; i++) {
-                animationFrames.push(frames[i] - 1);
+                animationFrames.push(+frames[i] - 1);
             }
             // Avoid crash by giving it frame 0 if no frame data provided
             if (animationFrames.length === 0) {
@@ -310,8 +312,8 @@ class ThreeRenderer {
             }
             this.animations.set(`${key}/${animationsKey}`, {
                 frames: animationFrames,
-                fps: animation.framesPerSecond || 15,
-                repeat: animation.loopCount - 1, // correction for loop/repeat values
+                fps: +animation.framesPerSecond || 15,
+                repeat: +animation.loopCount - 1, // correction for loop/repeat values
             });
         }
     }
