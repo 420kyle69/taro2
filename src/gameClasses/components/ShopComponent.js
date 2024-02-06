@@ -27,6 +27,14 @@ var ShopComponent = TaroEntity.extend({
 			self.userSkinCount = 0;
 			self.userSkinPurchases = [];
 
+
+
+
+			let initSkinShopListeners  = function(){
+
+
+
+
 			// if (!taro.isMobile) {
 			$('.open-modd-shop-button').on('click', function () {
 				self.openModdShop();
@@ -129,7 +137,8 @@ var ShopComponent = TaroEntity.extend({
 				}
 			});
 
-			$(document).on('click', '.btn-purchase-unit', function () {
+
+		$(document).on('click', '.btn-purchase-unit', function () {
 				$('#modd-item-shop-modal').modal('hide');
 				self.purchaseUnit($(this).attr('id'));
 				// self.confirmPurchase($(this).attr("id"))
@@ -246,7 +255,6 @@ var ShopComponent = TaroEntity.extend({
 							// taro.client.myPlayer._stats.purchasables.push(equipedPurchasable);
 							var myUnit = taro.$(taro.client.myPlayer._stats.selectedUnitId);
 							taro.network.send('equipSkin', equipedPurchasable);
-							// myUnit.equipSkin();
 						} else if (response.status == 'error') {
 							if (!response.message.includes('No matching document found')) {
 								alert(response.message);
@@ -278,8 +286,28 @@ var ShopComponent = TaroEntity.extend({
 					}
 				});
 			});
+	
+			}
+
+		if(document.getElementById('modd-shop-modal')){
+			console.log('modd shop found');
+			initSkinShopListeners();
+		}else{
+
+		let checkForModdShop = setInterval(() => {
+			console.log('interval called')
+			if(document.getElementById('modd-shop-modal')){
+				console.log('loaded from interval');
+				clearInterval(checkForModdShop);
+				initSkinShopListeners();
+			}
+		}, 1000);
 		}
+	}
 	},
+
+	
+	
 	loadShopItems: function () {
 		let self = this;
 		$.ajax({
