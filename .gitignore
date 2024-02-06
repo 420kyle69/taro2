@@ -10,6 +10,7 @@ commands
 deployment/
 sslcert/
 src/game.json
+src/game_old.json
 
 # Logs
 logs
