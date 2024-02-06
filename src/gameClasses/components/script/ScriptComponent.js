@@ -69,7 +69,7 @@ var ScriptComponent = TaroEntity.extend({
 
 			if (actions) {
 				var path = this._entity._id + "/" + scriptId;
-				var cmd = self.action.run(actions, params, path, 1); // path is passed for profiling purpose
+				var cmd = self.action.run(actions, params, path, 0); // path is passed for profiling purpose
 				if (cmd == 'return') {
 					taro.log('script return called');
 					return;
@@ -196,10 +196,10 @@ var ScriptComponent = TaroEntity.extend({
 		}
 		path += `/${this.currentActionBlockId}`;
 		if (this.scripts) {
-			if (this.errorLogs[path] == undefined) {
-				this.errorLogs[path] = { message, count: 1 };
+			if (taro.script.errorLogs[path] == undefined) {
+				taro.script.errorLogs[path] = { message, count: 1 };
 			} else {
-				this.errorLogs[path].count++;
+				taro.script.errorLogs[path].count++;
 			}
 
 			if (taro.env === 'standalone')
@@ -207,7 +207,7 @@ var ScriptComponent = TaroEntity.extend({
 			// taro.devLog('errorLog', message);
 			// ScriptComponent.prototype.log(log);
 		}
-
+		console.log(path, this._entity._id, this.scripts === undefined)
 		if (taro.isServer && taro.server.unpublishQueued) {
 			taro.server.unpublish(message + " " + path);
 		}

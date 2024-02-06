@@ -12,8 +12,9 @@ var ActionComponent = TaroEntity.extend({
 	// entity can be either trigger entity, or entity in loop
 	run: function (actionList, vars, path, actionBlockId) {
 		var self = this;
-
+		//TODO: handle runScript
 		self._script.currentActionBlockId = actionBlockId;
+
 		if (actionList == undefined || actionList.length <= 0)
 			return;
 
@@ -2684,6 +2685,7 @@ var ActionComponent = TaroEntity.extend({
 						if (entity && self.entityCategories.indexOf(entity._category) > -1) {
 							entity.remove();
 						} else {
+							self._script.errorLog(`invalid unit, ${JSON.stringify(action.entity)}`);
 							throw new Error('invalid unit');
 						}
 
@@ -2696,6 +2698,7 @@ var ActionComponent = TaroEntity.extend({
 							else if (entity._category === 'item') entity.resetItemType();
 							else if (entity._category === 'projectile') entity.resetProjectileType();
 						} else {
+							self._script.errorLog(`invalid unit, ${JSON.stringify(action.entity)}`);
 							throw new Error('invalid unit');
 						}
 
@@ -2852,6 +2855,7 @@ var ActionComponent = TaroEntity.extend({
 								throw new Error(action.type + " - invalid position")
 							}
 						} else {
+							self._script.errorLog(`invalid unit, ${action.type}`, path);
 							throw new Error(action.type + " - invalid unit")
 						}
 						break;

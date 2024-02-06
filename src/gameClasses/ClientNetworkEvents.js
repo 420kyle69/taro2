@@ -725,6 +725,7 @@ var ClientNetworkEvents = {
 
 	_onErrorLogs: function (logs) {
 		var element = document.getElementById("error-log-content");
+		console.log(logs)
 		for (actionName in logs) {
 			var log = logs[actionName];
 			element.innerHTML += `<li style='font-size:12px;'>${log}</li>`;

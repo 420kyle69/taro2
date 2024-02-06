@@ -122,7 +122,7 @@ var VariableComponent = TaroEntity.extend({
 
 		if (isNaN(result)) {
 			//Wooden Wall2::UnitDeath::block#11::CalcError,  owner(thisEntity).$BuildCap  is undefined
-			taro.script.errorLog(`Calculate error: ${left} ${op.operator} ${right} => NaN. ${JSON.stringify(items[1])} Returning undefined`);
+			taro.script.errorLog(`Calculate error: ${left} ${op.operator} ${right} => NaN. ${left === undefined ? `${JSON.stringify(items[1])} Returning undefined` : ''} ${right === undefined ? `, ${JSON.stringify(items[3])} Returning undefined` : ''}`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}`);
 			return undefined;
 		}
 
@@ -515,15 +515,15 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
-				case 'realtimeCSSOfPlayer':
-					var player = self.getValue(text.player, vars);
-					if (player && player._category == 'player') {
-						returnValue = player.realtimeCSS;
-					}
-					break;
+					case 'realtimeCSSOfPlayer':
+						var player = self.getValue(text.player, vars);
+						if (player && player._category == 'player') {
+							returnValue = player.realtimeCSS;
+						}
+						break;
 
-				case 'entityExists':
-					returnValue = !!(entity && entity._id && taro.$(entity._id));
+					case 'entityExists':
+						returnValue = !!(entity && entity._id && taro.$(entity._id));
 
 						break;
 
@@ -1487,7 +1487,7 @@ var VariableComponent = TaroEntity.extend({
 							};
 						}
 
-					break;
+						break;
 
 					case 'xyCoordinate':
 						var x = self.getValue(text.x, vars);
@@ -2186,40 +2186,40 @@ var VariableComponent = TaroEntity.extend({
 
 						break;
 
-						case 'regionInFrontOfEntityAtDistance':
-							var entity = self.getValue(text.entity, vars);
-							var distance = self.getValue(text.distance, vars);
-							var width = self.getValue(text.width, vars);
-							var height = self.getValue(text.height, vars);
+					case 'regionInFrontOfEntityAtDistance':
+						var entity = self.getValue(text.entity, vars);
+						var distance = self.getValue(text.distance, vars);
+						var width = self.getValue(text.width, vars);
+						var height = self.getValue(text.height, vars);
 
-							if (
-								entity != undefined &&
-								self._entity.script.action.entityCategories.indexOf(entity._category) > -1 &&
-								height != undefined &&
-								width != undefined &&
-								distance != undefined
-							) {
-								// console.log(entity._translate.x, distance * Math.cos(entity._rotate.z + Math.radians(-90)));
-								// console.log(entity._translate.y, distance * Math.sin(entity._rotate.z + Math.radians(-90)));
-								var region = {
-									x: entity._translate.x + (distance * Math.cos(entity._rotate.z + Math.radians(-90))),
-									y: entity._translate.y + (distance * Math.sin(entity._rotate.z + Math.radians(-90))),
-									width: width,
-									height: height
-								};
+						if (
+							entity != undefined &&
+							self._entity.script.action.entityCategories.indexOf(entity._category) > -1 &&
+							height != undefined &&
+							width != undefined &&
+							distance != undefined
+						) {
+							// console.log(entity._translate.x, distance * Math.cos(entity._rotate.z + Math.radians(-90)));
+							// console.log(entity._translate.y, distance * Math.sin(entity._rotate.z + Math.radians(-90)));
+							var region = {
+								x: entity._translate.x + (distance * Math.cos(entity._rotate.z + Math.radians(-90))),
+								y: entity._translate.y + (distance * Math.sin(entity._rotate.z + Math.radians(-90))),
+								width: width,
+								height: height
+							};
 
-								region.x -= region.width / 2;
-								region.y -= region.height / 2;
+							region.x -= region.width / 2;
+							region.y -= region.height / 2;
 
-								if (region.x && !isNaN(region.x) && region.y && !isNaN(region.y) && region.width && !isNaN(region.width) && region.height && !isNaN(region.height)) {
-									returnValue = region
-								} else {
-									taro.script.errorLog(`region ${JSON.stringify(region)} is not a valid region`);
-									returnValue = undefined;
-								}
+							if (region.x && !isNaN(region.x) && region.y && !isNaN(region.y) && region.width && !isNaN(region.width) && region.height && !isNaN(region.height)) {
+								returnValue = region
+							} else {
+								taro.script.errorLog(`region ${JSON.stringify(region)} is not a valid region`);
+								returnValue = undefined;
 							}
+						}
 
-							break;
+						break;
 
 					case 'entitiesInRegion':
 						var region = self.getValue(text.region, vars);
@@ -2277,7 +2277,7 @@ var VariableComponent = TaroEntity.extend({
 					case 'emptyObject':
 						returnValue = {};
 
-					break;
+						break;
 
 					default:
 						if (text.function) {
@@ -2308,6 +2308,9 @@ var VariableComponent = TaroEntity.extend({
 			}
 		}
 
+		if (returnValue === undefined && text !== undefined) {
+			self._script.errorLog(`${typeof text === 'object' && !Array.isArray(text) ? JSON.stringify(text) : text} is undefined`)
+		}
 		return returnValue;
 	},
 
@@ -2401,7 +2404,7 @@ var VariableComponent = TaroEntity.extend({
 				return player && player._stats.controlledBy == 'human';
 			},
 
-			'isPlayerOnMobile': function(text, vars) {
+			'isPlayerOnMobile': function (text, vars) {
 				var player = self.getValue(text.player, vars);
 				return !!(player && player._stats.isMobile);
 			},
@@ -2431,7 +2434,7 @@ var VariableComponent = TaroEntity.extend({
 						if (variableData.dataType === 'region') {
 							returnValue.key = variableData.key;
 						}
-
+						console.log({ returnValue });
 						return returnValue;
 					}
 				}
