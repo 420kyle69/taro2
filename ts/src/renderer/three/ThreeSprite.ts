@@ -4,6 +4,10 @@ class ThreeSprite extends THREE.Group {
 	private layer = 3; // Create enum
 	private depth = 1;
 
+	private scaleUnflipped = new THREE.Vector2();
+	private flipX = 1;
+	private flipY = 1;
+
 	constructor(tex: THREE.Texture) {
 		super();
 
@@ -15,7 +19,8 @@ class ThreeSprite extends THREE.Group {
 	}
 
 	setScale(sx: number, sy: number) {
-		this.sprite.scale.set(sx, 1, sy);
+		this.scaleUnflipped.set(sx, sy);
+		this.sprite.scale.set(this.scaleUnflipped.x * this.flipX, 1, this.scaleUnflipped.y * this.flipY);
 	}
 
 	setRotationY(rad: number) {
@@ -34,6 +39,12 @@ class ThreeSprite extends THREE.Group {
 
 	setTexture(tex: THREE.Texture) {
 		(this.sprite.material as THREE.MeshBasicMaterial).map = tex;
+	}
+
+	setFlip(x: boolean, y: boolean) {
+		this.flipX = x ? -1 : 1;
+		this.flipY = y ? -1 : 1;
+		this.setScale(this.scaleUnflipped.x, this.scaleUnflipped.y);
 	}
 
 	private calcRenderOrder() {

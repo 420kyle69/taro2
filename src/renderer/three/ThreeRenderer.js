@@ -217,8 +217,8 @@ class ThreeRenderer {
             entity.on('dynamic', (data) => {
                 // console.log('dynamic');
             });
-            entity.on('flip', (data) => {
-                // console.log('flip');
+            entity.on('flip', (flip) => {
+                ent.setFlip(flip % 2 === 1, flip > 1);
             });
             const destroyEvtListener = entity.on('destroy', () => {
                 const idx = this.entities.indexOf(ent, 0);
