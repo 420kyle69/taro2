@@ -640,17 +640,17 @@ var ParameterComponent = TaroEntity.extend({
 						}
 
 						break;
-					
+
 					case 'unitsFacingAngle': // to be deprecated soon
-						var unit = self.getValue(text.unit, vars);					
-					case 'entityFacingAngle':						
+						var unit = self.getValue(text.unit, vars);
+					case 'entityFacingAngle':
 						// if unit is defined, use unit's facing angle
 						if (unit) {
 							var entity = unit;
 						} else {
 							var entity = self.getValue(text.entity, vars);
 						}
-							
+
 						if (entity) {
 							returnValue = entity._rotate && entity._rotate.z;
 							returnValue = (returnValue != undefined) ? self.roundOff(returnValue, 3) : undefined;
@@ -2089,7 +2089,7 @@ var ParameterComponent = TaroEntity.extend({
 
 						break;
 
-					case 'playersOfPlayerType': 
+					case 'playersOfPlayerType':
 						var playerType = self.getValue(text.playerType, vars);
 						var players = taro.$$('player').filter((player) => {
 							return player._stats.playerTypeId === playerType;
@@ -2299,7 +2299,7 @@ var ParameterComponent = TaroEntity.extend({
 			}
 		}
 
-		if (returnValue === undefined && text !== undefined) {
+		if (returnValue === undefined && text !== undefined && (typeof text === 'object' && text.function !== 'undefinedValue')) {
 			self._script.errorLog(`${typeof text === 'object' && !Array.isArray(text) ? JSON.stringify(text) : text} is undefined`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionBlockIdx}`, true)
 		}
 		return returnValue;
@@ -2410,42 +2410,21 @@ var ParameterComponent = TaroEntity.extend({
 				var variableData = self.getValue(text.variable, vars);
 				var entity = self.getValue(text.entity, vars);
 
-<<<<<<< HEAD:src/gameClasses/components/script/VariableComponent.js
-				if (entity && variableData) {
-					var entityVariable = entity.variables &&
-						entity.variables[variableData.key] &&
-						entity.variables[variableData.key];
-
-					if (entityVariable) {
-						returnValue = entityVariable.value;
-
-						if (returnValue === null || returnValue == undefined) {
-							returnValue = entityVariable.default;
-						}
-
-						if (variableData.dataType === 'region') {
-							returnValue.key = variableData.key;
-						}
-						console.log({ returnValue });
-						return returnValue;
-					}
-=======
 				if (entity && variableData?.key) {
-					return entity.variable.getValue(variableData.key);	
->>>>>>> master:src/gameClasses/components/script/ParameterComponent.js
+					return entity.variable.getValue(variableData.key);
 				}
 			},
 
-			'getPlayerVariable': function(text, vars) {
+			'getPlayerVariable': function (text, vars) {
 				return text.variable;
 			},
 
-			'getValueOfPlayerVariable': function(text, vars) {
+			'getValueOfPlayerVariable': function (text, vars) {
 				var variableData = self.getValue(text.variable, vars);
 				var player = self.getValue(text.player, vars);
-				
-				if (player && variableData?.key) {		
-					return player.variable.getValue(variableData.key);	
+
+				if (player && variableData?.key) {
+					return player.variable.getValue(variableData.key);
 				}
 			},
 
