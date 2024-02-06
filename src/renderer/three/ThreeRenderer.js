@@ -180,8 +180,8 @@ class ThreeRenderer {
             });
             // Animation
             const playAnimationEvtListener = entity.on('play-animation', (id) => {
-                if (entity instanceof Projectile) {
-                    const animation = this.animations.get(`${tex.userData.key}/${id}`);
+                const animation = this.animations.get(`${tex.userData.key}/${id}`);
+                if (animation) {
                     ent.loop(animation.frames, animation.fps, animation.repeat);
                 }
             });
