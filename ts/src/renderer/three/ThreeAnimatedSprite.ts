@@ -30,6 +30,10 @@ class ThreeAnimatedSprite extends ThreeSprite {
 		this.maxDisplayTime = 1 / fps;
 		this.repeat = repeat;
 		this.cycle = 0;
+		this.elapsedTime = 0;
+		const offsetX = (this.currentTile % this.tileH) / this.tileH;
+		const offsetY = 1 - 1 / this.tileV - (Math.floor(this.currentTile / this.tileH) % this.tileV) / this.tileV;
+		this.tex.offset.set(offsetX, offsetY);
 	}
 
 	update(dt: number) {
