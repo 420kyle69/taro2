@@ -20,6 +20,8 @@
 //  BoxMesh
 
 class ThreeRenderer {
+	private static instance: ThreeRenderer;
+
 	private renderer: THREE.WebGLRenderer;
 	private camera: ThreeCamera;
 	private scene: THREE.Scene;
@@ -33,7 +35,14 @@ class ThreeRenderer {
 	private resolutionCoef = 1;
 	private zoomSize = undefined;
 
-	constructor() {
+	private constructor() {
+		// For JS interop; in case someone uses new ThreeRenderer()
+		if (!ThreeRenderer.instance) {
+			ThreeRenderer.instance = this;
+		} else {
+			return ThreeRenderer.instance;
+		}
+
 		const renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true });
 		renderer.setSize(window.innerWidth, window.innerHeight);
 		document.querySelector('#game-div')?.appendChild(renderer.domElement);
@@ -75,6 +84,14 @@ class ThreeRenderer {
 		};
 
 		this.loadTextures();
+	}
+
+	static getInstance() {
+		if (!this.instance) {
+			this.instance = new ThreeRenderer();
+		}
+
+		return this.instance;
 	}
 
 	private loadTextures() {

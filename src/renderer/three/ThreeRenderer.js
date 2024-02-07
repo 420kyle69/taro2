@@ -24,6 +24,13 @@ class ThreeRenderer {
         this.animatedSprites = [];
         this.resolutionCoef = 1;
         this.zoomSize = undefined;
+        // For JS interop; in case someone uses new ThreeRenderer()
+        if (!ThreeRenderer.instance) {
+            ThreeRenderer.instance = this;
+        }
+        else {
+            return ThreeRenderer.instance;
+        }
         const renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         (_a = document.querySelector('#game-div')) === null || _a === void 0 ? void 0 : _a.appendChild(renderer.domElement);
@@ -57,6 +64,12 @@ class ThreeRenderer {
             requestAnimationFrame(this.render.bind(this));
         };
         this.loadTextures();
+    }
+    static getInstance() {
+        if (!this.instance) {
+            this.instance = new ThreeRenderer();
+        }
+        return this.instance;
     }
     loadTextures() {
         const textureManager = ThreeTextureManager.instance();
