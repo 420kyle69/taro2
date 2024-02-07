@@ -27,7 +27,7 @@ class ThreeRenderer {
 	private scene: THREE.Scene;
 
 	private animations: Map<string, { frames: number[]; fps: number; repeat: number }> = new Map();
-	private entities: ThreeSprite[] = [];
+	private entities: ThreeUnit[] = [];
 	private pointer = new THREE.Vector2();
 	private animatedSprites: ThreeAnimatedSprite[] = [];
 	private voxelMap: ThreeVoxelMap;
@@ -68,6 +68,10 @@ class ThreeRenderer {
 				this.camera.zoom(ratio);
 				taro.client.emit('scale', { ratio: ratio * this.resolutionCoef });
 				taro.client.emit('update-abilities-position');
+
+				for (const entity of this.entities) {
+					entity.setScaleChildren(1 / ratio);
+				}
 			}
 		});
 

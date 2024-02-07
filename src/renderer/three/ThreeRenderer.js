@@ -51,6 +51,9 @@ class ThreeRenderer {
                 this.camera.zoom(ratio);
                 taro.client.emit('scale', { ratio: ratio * this.resolutionCoef });
                 taro.client.emit('update-abilities-position');
+                for (const entity of this.entities) {
+                    entity.setScaleChildren(1 / ratio);
+                }
             }
         });
         THREE.DefaultLoadingManager.onStart = () => {

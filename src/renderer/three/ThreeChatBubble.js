@@ -5,6 +5,7 @@ class ThreeChatBubble extends THREE.Group {
         this.height = 16;
         this.radius = 7;
         this.scaleScalar = 1;
+        this.size = new THREE.Vector2();
         this.center = new THREE.Vector2(0.5, 0.5);
         this.offset = new THREE.Vector2();
         this.sprite = this.createBubble(text);
@@ -17,6 +18,7 @@ class ThreeChatBubble extends THREE.Group {
         this.remove(this.sprite);
         this.sprite = this.createBubble(text);
         this.add(this.sprite);
+        this.setScale(this.scaleScalar);
         this.visible = true;
         if (this.timeout) {
             clearTimeout(this.timeout);
@@ -37,7 +39,9 @@ class ThreeChatBubble extends THREE.Group {
     }
     setScale(scale) {
         this.scaleScalar = scale;
-        this.sprite.scale.setScalar(scale);
+        this.sprite.center.set(this.center.x + this.offset.x / (this.size.x * scale), this.center.y + this.offset.y / (this.size.y * scale));
+        this.sprite.scale.set(this.scaleScalar * Utils.pixelToWorld(this.size.x), this.scaleScalar * Utils.pixelToWorld(this.size.y), 1);
+        this.sprite.center.set(this.center.x - this.offset.x / (this.size.x * scale), this.center.y - this.offset.y / (this.size.y * scale));
     }
     createBubble(text, color = '#000000') {
         const textCanvas = document.createElement('canvas');
@@ -54,6 +58,7 @@ class ThreeChatBubble extends THREE.Group {
         const height = textHeight + 10;
         textCanvas.width = width + padding;
         textCanvas.height = height + padding + 7;
+        this.size.set(textCanvas.width, textCanvas.height);
         const halfSizeX = width / 2;
         const halfSizeY = height / 2;
         Utils.fillRoundedRect(ctx, x, y, width, height, 5, color, 0.5);

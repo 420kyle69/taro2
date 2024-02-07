@@ -2,6 +2,7 @@ class Label extends THREE.Group {
 	private sprite;
 	private scaleScalar = 1;
 
+	private size = new THREE.Vector2();
 	private center = new THREE.Vector2(0.5, 0.5);
 	private offset = new THREE.Vector2();
 
@@ -32,7 +33,22 @@ class Label extends THREE.Group {
 
 	setScale(scale: number) {
 		this.scaleScalar = scale;
-		this.sprite.scale.setScalar(scale);
+
+		this.sprite.center.set(
+			this.center.x + this.offset.x / (this.size.x * scale),
+			this.center.y + this.offset.y / (this.size.y * scale)
+		);
+
+		this.sprite.scale.set(
+			this.scaleScalar * Utils.pixelToWorld(this.size.x),
+			this.scaleScalar * Utils.pixelToWorld(this.size.y),
+			1
+		);
+
+		this.sprite.center.set(
+			this.center.x - this.offset.x / (this.size.x * scale),
+			this.center.y - this.offset.y / (this.size.y * scale)
+		);
 	}
 
 	private createLabel(text: string, color = 'white', bold = false) {
@@ -49,6 +65,7 @@ class Label extends THREE.Group {
 		const textHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
 		textCanvas.width = Math.ceil(metrics.width) + padding;
 		textCanvas.height = Math.ceil(textHeight) + padding;
+		this.size.set(textCanvas.width, textCanvas.height);
 
 		if (taro.game.data.settings.addStrokeToNameAndAttributes) {
 			ctx.font = font;

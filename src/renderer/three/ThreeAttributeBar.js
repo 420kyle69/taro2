@@ -5,6 +5,7 @@ class ThreeAttributeBar extends THREE.Group {
         this.height = height;
         this.radius = radius;
         this.scaleScalar = 1;
+        this.size = new THREE.Vector2();
         this.center = new THREE.Vector2(0.5, 0.5);
         this.offset = new THREE.Vector2();
         this.sprite = this.createBar(this.width, this.height, this.radius, 'yellow', 100, 100);
@@ -38,7 +39,9 @@ class ThreeAttributeBar extends THREE.Group {
     }
     setScale(scale) {
         this.scaleScalar = scale;
-        this.sprite.scale.setScalar(scale);
+        this.sprite.center.set(this.center.x + this.offset.x / (this.size.x * scale), this.center.y + this.offset.y / (this.size.y * scale));
+        this.sprite.scale.set(this.scaleScalar * Utils.pixelToWorld(this.size.x), this.scaleScalar * Utils.pixelToWorld(this.size.y), 1);
+        this.sprite.center.set(this.center.x - this.offset.x / (this.size.x * scale), this.center.y - this.offset.y / (this.size.y * scale));
     }
     createBar(width, height, radius, color, value, max, displayValue = true) {
         const textCanvas = document.createElement('canvas');
@@ -54,6 +57,7 @@ class ThreeAttributeBar extends THREE.Group {
         const textHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
         textCanvas.width = width + padding;
         textCanvas.height = height + padding;
+        this.size.set(textCanvas.width, textCanvas.height);
         Utils.fillRoundedRect(ctx, x, y, Math.max((width * value) / max, radius * 1.5), height, radius, color);
         Utils.strokeRoundedRect(ctx, x, y, width, height, radius, '#000000');
         if (displayValue) {

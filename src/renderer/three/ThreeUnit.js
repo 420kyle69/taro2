@@ -63,5 +63,12 @@ class ThreeUnit extends ThreeAnimatedSprite {
             this.attributeBars.add(bar);
         }
     }
+    setScaleChildren(scale) {
+        this.label.setScale(scale);
+        this.attributeBars.scale.setScalar(scale);
+        if (this.chat) {
+            this.chat.setScale(scale);
+        }
+    }
 }
 //# sourceMappingURL=ThreeUnit.js.map
