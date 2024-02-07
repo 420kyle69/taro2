@@ -86,5 +86,9 @@ var Utils;
         ctx.fill();
     }
     Utils.fillTriangle = fillTriangle;
+    function pixelToWorld(numPixels) {
+        return numPixels / 64;
+    }
+    Utils.pixelToWorld = pixelToWorld;
 })(Utils || (Utils = {}));
 //# sourceMappingURL=utils.js.map

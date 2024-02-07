@@ -209,7 +209,7 @@ class ThreeRenderer {
 			const transformEvtListener = entity.on(
 				'transform',
 				(data: { x: number; y: number; rotation: number }) => {
-					ent.position.set(data.x / 64 - 0.5, 1, data.y / 64 - 0.5);
+					ent.position.set(Utils.pixelToWorld(data.x) - 0.5, 1, Utils.pixelToWorld(data.y) - 0.5);
 					ent.setRotationY(-data.rotation);
 				},
 				this
@@ -218,7 +218,7 @@ class ThreeRenderer {
 			const sizeEvtListener = entity.on(
 				'size',
 				(data: { width: number; height: number }) => {
-					ent.setScale(data.width / 64, data.height / 64);
+					ent.setScale(Utils.pixelToWorld(data.width), Utils.pixelToWorld(data.height));
 				},
 				this
 			);
@@ -299,14 +299,14 @@ class ThreeRenderer {
 					tex = tex2.clone();
 					ent.setTexture(tex);
 					const bounds = entity._bounds2d;
-					ent.setScale(bounds.x / 64, bounds.y / 64);
+					ent.setScale(Utils.pixelToWorld(bounds.x), Utils.pixelToWorld(bounds.y));
 				} else {
 					textureManager.loadFromUrl(key, Utils.patchAssetUrl(key), (tex2) => {
 						this.createAnimations(entity._stats);
 						tex = tex2.clone();
 						ent.setTexture(tex);
 						const bounds = entity._bounds2d;
-						ent.setScale(bounds.x / 64, bounds.y / 64);
+						ent.setScale(Utils.pixelToWorld(bounds.x), Utils.pixelToWorld(bounds.y));
 					});
 				}
 			});

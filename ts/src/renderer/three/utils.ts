@@ -118,4 +118,8 @@ namespace Utils {
 		ctx.closePath();
 		ctx.fill();
 	}
+
+	export function pixelToWorld(numPixels: number) {
+		return numPixels / 64;
+	}
 }

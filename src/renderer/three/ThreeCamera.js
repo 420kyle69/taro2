@@ -9,8 +9,8 @@ class ThreeCamera {
         this.viewportHeightInitial = viewportHeight;
         // const halfWidth = frustumWidthAtDistance(this.perspectiveCamera, persCamera.position.y) / 2;
         // const halfHeight = frustumHeightAtDistance(this.perspectiveCamera, persCamera.position.y) / 2;
-        const halfWidth = viewportWidth / 2 / 64;
-        const halfHeight = viewportHeight / 2 / 64;
+        const halfWidth = Utils.pixelToWorld(viewportWidth / 2);
+        const halfHeight = Utils.pixelToWorld(viewportHeight / 2);
         const orthoCamera = new THREE.OrthographicCamera(-halfWidth, halfWidth, halfHeight, -halfHeight, 0.1, 1000);
         orthoCamera.position.y = 20;
         this.orthographicCamera = orthoCamera;
@@ -57,8 +57,8 @@ class ThreeCamera {
             this.instance.updateProjectionMatrix();
         }
         else if (this.instance instanceof THREE.OrthographicCamera) {
-            const halfWidth = width / 2 / 64;
-            const halfHeight = height / 2 / 64;
+            const halfWidth = Utils.pixelToWorld(width / 2);
+            const halfHeight = Utils.pixelToWorld(height / 2);
             this.instance.left = -halfWidth;
             this.instance.right = halfWidth;
             this.instance.top = halfHeight;

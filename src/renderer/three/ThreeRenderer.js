@@ -164,11 +164,11 @@ class ThreeRenderer {
             layers.entities.add(ent);
             this.entities.push(ent);
             const transformEvtListener = entity.on('transform', (data) => {
-                ent.position.set(data.x / 64 - 0.5, 1, data.y / 64 - 0.5);
+                ent.position.set(Utils.pixelToWorld(data.x) - 0.5, 1, Utils.pixelToWorld(data.y) - 0.5);
                 ent.setRotationY(-data.rotation);
             }, this);
             const sizeEvtListener = entity.on('size', (data) => {
-                ent.setScale(data.width / 64, data.height / 64);
+                ent.setScale(Utils.pixelToWorld(data.width), Utils.pixelToWorld(data.height));
             }, this);
             const scaleEvtListener = entity.on('scale', (data) => {
                 ent.scale.set(data.x, 1, data.y);
@@ -219,7 +219,7 @@ class ThreeRenderer {
                     tex = tex2.clone();
                     ent.setTexture(tex);
                     const bounds = entity._bounds2d;
-                    ent.setScale(bounds.x / 64, bounds.y / 64);
+                    ent.setScale(Utils.pixelToWorld(bounds.x), Utils.pixelToWorld(bounds.y));
                 }
                 else {
                     textureManager.loadFromUrl(key, Utils.patchAssetUrl(key), (tex2) => {
@@ -227,7 +227,7 @@ class ThreeRenderer {
                         tex = tex2.clone();
                         ent.setTexture(tex);
                         const bounds = entity._bounds2d;
-                        ent.setScale(bounds.x / 64, bounds.y / 64);
+                        ent.setScale(Utils.pixelToWorld(bounds.x), Utils.pixelToWorld(bounds.y));
                     });
                 }
             });

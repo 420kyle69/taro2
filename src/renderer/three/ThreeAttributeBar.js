@@ -69,7 +69,7 @@ class ThreeAttributeBar extends THREE.Group {
         const spriteMaterial = new THREE.SpriteMaterial({ map: spriteMap });
         const sprite = new THREE.Sprite(spriteMaterial);
         sprite.renderOrder = 499;
-        sprite.scale.set(this.scaleScalar * (textCanvas.width / 64), this.scaleScalar * (textCanvas.height / 64), 1);
+        sprite.scale.set(this.scaleScalar * Utils.pixelToWorld(textCanvas.width), this.scaleScalar * Utils.pixelToWorld(textCanvas.height), 1);
         sprite.center.set(this.center.x - this.offset.x / textCanvas.width, this.center.y - this.offset.y / textCanvas.height);
         return sprite;
     }
