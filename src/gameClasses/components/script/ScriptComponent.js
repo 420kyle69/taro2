@@ -209,7 +209,6 @@ var ScriptComponent = TaroEntity.extend({
 			// taro.devLog('errorLog', message);
 			// ScriptComponent.prototype.log(log);
 		}
-		console.log(path, this._entity._id, this.scripts === undefined)
 		if (taro.isServer && taro.server.unpublishQueued) {
 			taro.server.unpublish(message + " " + path);
 		}
