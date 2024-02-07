@@ -45,8 +45,8 @@ var ActionComponent = TaroEntity.extend({
 
 				// prevent recursive/infinite action calls consuming CPU
 				if (engineTickDelta > 1000 && !taro.engineLagReported) {
-					if (taro.clusterClient) {
-						taro.clusterClient.logEngineFreeze({
+					if (taro.workerComponent) {
+						taro.workerComponent.logEngineFreeze({
 							query: 'engineFreeze',
 							engineTickDelta: engineTickDelta,
 							masterServer: global.myIp,
@@ -522,11 +522,11 @@ var ActionComponent = TaroEntity.extend({
 						break;
 
 					case 'startAcceptingPlayers':
-						taro.clusterClient.setAcceptingPlayerStatus(true);
+						taro.workerComponent.setAcceptingPlayerStatus(true);
 						break;
 
 					case 'stopAcceptingPlayers':
-						taro.clusterClient.setAcceptingPlayerStatus(false);
+						taro.workerComponent.setAcceptingPlayerStatus(false);
 						break;
 					case 'saveUnitData':
 						var unit = self._script.param.getValue(action.unit, vars);
@@ -535,7 +535,7 @@ var ActionComponent = TaroEntity.extend({
 
 						if (unit && ownerPlayer && userId && ownerPlayer.persistentDataLoaded) {
 							var data = unit.getPersistentData('unit');
-							taro.clusterClient.saveUserData(userId, data, 'unit');
+							taro.workerComponent.saveUserData(userId, data, 'unit');
 						} else {
 							if (unit && !unit.persistentDataLoaded) {
 								throw new Error('Fail saving unit data bcz persisted data not set correctly');
@@ -550,14 +550,14 @@ var ActionComponent = TaroEntity.extend({
 
 						if (player && userId && player.persistentDataLoaded) {
 							var data = player.getPersistentData('player');
-							taro.clusterClient.saveUserData(userId, data, 'player');
+							taro.workerComponent.saveUserData(userId, data, 'player');
 
 							var unit = player.getSelectedUnit();
 							var userId = player._stats.userId;
 
 							if (unit && player && userId && unit.persistentDataLoaded) {
 								var data = unit.getPersistentData('unit');
-								taro.clusterClient.saveUserData(userId, data, 'unit');
+								taro.workerComponent.saveUserData(userId, data, 'unit');
 							} else {
 								if (unit && !unit.persistentDataLoaded) {
 									throw new Error('Fail saving unit data bcz persisted data not loaded correctly');

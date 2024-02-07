@@ -97,7 +97,7 @@ var Player = TaroEntity.extend({
 
 			// notify GS manager that a user has joined, do not notify if player joins again after pausing the game
 			if (self._stats.userId) {
-				taro.clusterClient.userJoined(self._stats.userId);
+				taro.workerComponent.userJoined(self._stats.userId);
 			}
 
 			if (taro.script) // do not send trigger for neutral player
@@ -141,7 +141,7 @@ var Player = TaroEntity.extend({
 			}
 
 			if (self._stats.userId) {
-				taro.clusterClient && taro.clusterClient.playerJoined(self._stats.userId);
+				taro.workerComponent && taro.workerComponent.playerJoined(self._stats.userId);
 			}
 		} else {
 			console.log(`player joined again (menu closed?) ${self._stats.clientId} (${self._stats.name})`);
@@ -488,7 +488,7 @@ var Player = TaroEntity.extend({
 			taro.script.trigger('playerLeavesGame', { playerId: this.id() });
 			// session is in second
 			if (this.variables && this.variables.progression != undefined && this.variables.progression.value != undefined) {
-				taro.clusterClient && taro.clusterClient.emit('log-progression', this.variables.progression.value);
+				taro.workerComponent && taro.workerComponent.emit('log-progression', this.variables.progression.value);
 			}
 			this.streamDestroy();
 			this.destroy();
@@ -781,7 +781,7 @@ var Player = TaroEntity.extend({
 
 				if (score > self._stats.highscore) {
 					// highscore updated
-					taro.clusterClient && taro.clusterClient.updatePlayerHighscore({
+					taro.workerComponent && taro.workerComponent.updatePlayerHighscore({
 						userId: self._stats.userId,
 						gameId: taro.game.data.defaultData._id,
 						highscore: score,
