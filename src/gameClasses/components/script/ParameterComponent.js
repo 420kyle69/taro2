@@ -2300,7 +2300,8 @@ var ParameterComponent = TaroEntity.extend({
 		}
 
 		if (returnValue === undefined && text !== undefined && (typeof text === 'object' && text.function !== 'undefinedValue')) {
-			self._script.errorLog(`${typeof text === 'object' && !Array.isArray(text) ? JSON.stringify(text) : text} is undefined`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionBlockIdx}`, true)
+			// TODO: improve the error report, for performance, remove it for now
+			// self._script.errorLog(`${typeof text === 'object' && !Array.isArray(text) ? JSON.stringify(text) : text} is undefined`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionBlockIdx}`, true)
 		}
 		return returnValue;
 	},
