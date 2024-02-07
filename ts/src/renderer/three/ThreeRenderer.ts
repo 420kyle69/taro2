@@ -45,6 +45,14 @@ class ThreeRenderer {
 		this.scene.translateX(-taro.game.data.map.width / 2);
 		this.scene.translateZ(-taro.game.data.map.height / 2);
 
+		window.addEventListener('resize', () => {
+			console.log('resize');
+			this.camera.resize(window.innerWidth, window.innerHeight);
+			renderer.setSize(window.innerWidth, window.innerHeight);
+			renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+			renderer.render(this.scene, this.camera.instance);
+		});
+
 		THREE.DefaultLoadingManager.onStart = () => {
 			this.forceLoadUnusedCSSFonts();
 		};

@@ -7,10 +7,15 @@ class ThreeCamera {
         const persCamera = new THREE.PerspectiveCamera(75, viewportWidth / viewportHeight, 0.1, 1000);
         persCamera.position.y = 20;
         this.perspectiveCamera = persCamera;
-        const halfWidth = frustumWidthAtDistance(this.perspectiveCamera, persCamera.position.y) / 2;
-        const halfHeight = frustumHeightAtDistance(this.perspectiveCamera, persCamera.position.y) / 2;
+        this.fovInitial = Math.tan(((Math.PI / 180) * this.perspectiveCamera.fov) / 2);
+        this.viewportHeightInitial = viewportHeight;
+        // const halfWidth = frustumWidthAtDistance(this.perspectiveCamera, persCamera.position.y) / 2;
+        // const halfHeight = frustumHeightAtDistance(this.perspectiveCamera, persCamera.position.y) / 2;
+        const halfWidth = viewportWidth / 2;
+        const halfHeight = viewportHeight / 2;
         const orthoCamera = new THREE.OrthographicCamera(-halfWidth, halfWidth, halfHeight, -halfHeight, 0.1, 1000);
         orthoCamera.position.y = 20;
+        orthoCamera.zoom = 20;
         this.orthographicCamera = orthoCamera;
         this.instance = orthoCamera;
         this.controls = new OrbitControls(this.instance, canvas);
@@ -48,16 +53,20 @@ class ThreeCamera {
             this.setPosition2D(targetWorldPos.x, targetWorldPos.z);
         }
     }
-    resize() {
+    resize(width, height) {
         if (this.instance instanceof THREE.PerspectiveCamera) {
-            this.instance.aspect = this.viewportWidth / this.viewportHeight;
+            this.instance.aspect = width / height;
+            this.instance.fov = (360 / Math.PI) * Math.atan(this.fovInitial * (height / this.viewportHeightInitial));
             this.instance.updateProjectionMatrix();
         }
         else if (this.instance instanceof THREE.OrthographicCamera) {
-            this.instance.left = this.viewportWidth / -2;
-            this.instance.right = this.viewportWidth / 2;
-            this.instance.top = this.viewportHeight / 2;
-            this.instance.bottom = this.viewportHeight / -2;
+            const halfWidth = width / 2;
+            const halfHeight = height / 2;
+            this.instance.left = -halfWidth;
+            this.instance.right = halfWidth;
+            this.instance.top = halfHeight;
+            this.instance.bottom = -halfHeight;
+            this.instance.zoom = 20;
             this.instance.updateProjectionMatrix();
         }
     }
