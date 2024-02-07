@@ -13,11 +13,7 @@ class ThreeCamera {
 	private fovInitial: number;
 	private viewportHeightInitial: number;
 
-	constructor(
-		private viewportWidth: number,
-		private viewportHeight: number,
-		canvas: HTMLCanvasElement
-	) {
+	constructor(viewportWidth: number, viewportHeight: number, canvas: HTMLCanvasElement) {
 		const persCamera = new THREE.PerspectiveCamera(75, viewportWidth / viewportHeight, 0.1, 1000);
 		persCamera.position.y = 20;
 		this.perspectiveCamera = persCamera;
@@ -26,11 +22,10 @@ class ThreeCamera {
 
 		// const halfWidth = frustumWidthAtDistance(this.perspectiveCamera, persCamera.position.y) / 2;
 		// const halfHeight = frustumHeightAtDistance(this.perspectiveCamera, persCamera.position.y) / 2;
-		const halfWidth = viewportWidth / 2;
-		const halfHeight = viewportHeight / 2;
+		const halfWidth = viewportWidth / 2 / 64;
+		const halfHeight = viewportHeight / 2 / 64;
 		const orthoCamera = new THREE.OrthographicCamera(-halfWidth, halfWidth, halfHeight, -halfHeight, 0.1, 1000);
 		orthoCamera.position.y = 20;
-		orthoCamera.zoom = 20;
 		this.orthographicCamera = orthoCamera;
 
 		this.instance = orthoCamera;
@@ -81,13 +76,22 @@ class ThreeCamera {
 			this.instance.fov = (360 / Math.PI) * Math.atan(this.fovInitial * (height / this.viewportHeightInitial));
 			this.instance.updateProjectionMatrix();
 		} else if (this.instance instanceof THREE.OrthographicCamera) {
-			const halfWidth = width / 2;
-			const halfHeight = height / 2;
+			const halfWidth = width / 2 / 64;
+			const halfHeight = height / 2 / 64;
 			this.instance.left = -halfWidth;
 			this.instance.right = halfWidth;
 			this.instance.top = halfHeight;
 			this.instance.bottom = -halfHeight;
 			this.instance.zoom = 20;
+			this.instance.updateProjectionMatrix();
+		}
+	}
+
+	zoom(ratio: number) {
+		if (this.instance instanceof THREE.PerspectiveCamera) {
+			//
+		} else if (this.instance instanceof THREE.OrthographicCamera) {
+			this.instance.zoom = ratio;
 			this.instance.updateProjectionMatrix();
 		}
 	}

@@ -22,6 +22,8 @@ class ThreeRenderer {
         this.entities = [];
         this.pointer = new THREE.Vector2();
         this.animatedSprites = [];
+        this.resolutionCoef = 1;
+        this.zoomSize = undefined;
         const renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         (_a = document.querySelector('#game-div')) === null || _a === void 0 ? void 0 : _a.appendChild(renderer.domElement);
@@ -33,11 +35,16 @@ class ThreeRenderer {
         this.scene.translateX(-taro.game.data.map.width / 2);
         this.scene.translateZ(-taro.game.data.map.height / 2);
         window.addEventListener('resize', () => {
-            console.log('resize');
             this.camera.resize(window.innerWidth, window.innerHeight);
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             renderer.render(this.scene, this.camera.instance);
+            if (this.zoomSize) {
+                const ratio = Math.max(window.innerWidth, window.innerHeight) / this.zoomSize;
+                this.camera.zoom(ratio);
+                taro.client.emit('scale', { ratio: ratio * this.resolutionCoef });
+                taro.client.emit('update-abilities-position');
+            }
         });
         THREE.DefaultLoadingManager.onStart = () => {
             this.forceLoadUnusedCSSFonts();
@@ -87,6 +94,15 @@ class ThreeRenderer {
         ctx.fillText('text', 0, 8);
     }
     init() {
+        taro.client.on('zoom', (height) => {
+            if (this.zoomSize === height * 2.15)
+                return;
+            this.zoomSize = height * 2.15;
+            const ratio = Math.max(window.innerWidth, window.innerHeight) / this.zoomSize;
+            // TODO: Quadratic zoomTo over 1 second
+            this.camera.zoom(ratio);
+            taro.client.emit('scale', { ratio: ratio * this.resolutionCoef });
+        });
         taro.client.on('stop-follow', () => this.camera.stopFollow());
         const layers = {
             entities: new THREE.Group(),

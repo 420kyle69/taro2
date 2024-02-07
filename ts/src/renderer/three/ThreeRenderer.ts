@@ -30,6 +30,9 @@ class ThreeRenderer {
 	private animatedSprites: ThreeAnimatedSprite[] = [];
 	private voxelMap: ThreeVoxelMap;
 
+	private resolutionCoef = 1;
+	private zoomSize = undefined;
+
 	constructor() {
 		const renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true });
 		renderer.setSize(window.innerWidth, window.innerHeight);
@@ -46,11 +49,17 @@ class ThreeRenderer {
 		this.scene.translateZ(-taro.game.data.map.height / 2);
 
 		window.addEventListener('resize', () => {
-			console.log('resize');
 			this.camera.resize(window.innerWidth, window.innerHeight);
 			renderer.setSize(window.innerWidth, window.innerHeight);
 			renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 			renderer.render(this.scene, this.camera.instance);
+
+			if (this.zoomSize) {
+				const ratio = Math.max(window.innerWidth, window.innerHeight) / this.zoomSize;
+				this.camera.zoom(ratio);
+				taro.client.emit('scale', { ratio: ratio * this.resolutionCoef });
+				taro.client.emit('update-abilities-position');
+			}
 		});
 
 		THREE.DefaultLoadingManager.onStart = () => {
@@ -110,6 +119,18 @@ class ThreeRenderer {
 	}
 
 	private init() {
+		taro.client.on('zoom', (height: number) => {
+			if (this.zoomSize === height * 2.15) return;
+
+			this.zoomSize = height * 2.15;
+			const ratio = Math.max(window.innerWidth, window.innerHeight) / this.zoomSize;
+
+			// TODO: Quadratic zoomTo over 1 second
+			this.camera.zoom(ratio);
+
+			taro.client.emit('scale', { ratio: ratio * this.resolutionCoef });
+		});
+
 		taro.client.on('stop-follow', () => this.camera.stopFollow());
 
 		const layers = {

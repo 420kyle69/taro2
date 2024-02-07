@@ -1,7 +1,5 @@
 class ThreeCamera {
     constructor(viewportWidth, viewportHeight, canvas) {
-        this.viewportWidth = viewportWidth;
-        this.viewportHeight = viewportHeight;
         this.target = null;
         this.isPerspective = false;
         const persCamera = new THREE.PerspectiveCamera(75, viewportWidth / viewportHeight, 0.1, 1000);
@@ -11,11 +9,10 @@ class ThreeCamera {
         this.viewportHeightInitial = viewportHeight;
         // const halfWidth = frustumWidthAtDistance(this.perspectiveCamera, persCamera.position.y) / 2;
         // const halfHeight = frustumHeightAtDistance(this.perspectiveCamera, persCamera.position.y) / 2;
-        const halfWidth = viewportWidth / 2;
-        const halfHeight = viewportHeight / 2;
+        const halfWidth = viewportWidth / 2 / 64;
+        const halfHeight = viewportHeight / 2 / 64;
         const orthoCamera = new THREE.OrthographicCamera(-halfWidth, halfWidth, halfHeight, -halfHeight, 0.1, 1000);
         orthoCamera.position.y = 20;
-        orthoCamera.zoom = 20;
         this.orthographicCamera = orthoCamera;
         this.instance = orthoCamera;
         this.controls = new OrbitControls(this.instance, canvas);
@@ -60,13 +57,22 @@ class ThreeCamera {
             this.instance.updateProjectionMatrix();
         }
         else if (this.instance instanceof THREE.OrthographicCamera) {
-            const halfWidth = width / 2;
-            const halfHeight = height / 2;
+            const halfWidth = width / 2 / 64;
+            const halfHeight = height / 2 / 64;
             this.instance.left = -halfWidth;
             this.instance.right = halfWidth;
             this.instance.top = halfHeight;
             this.instance.bottom = -halfHeight;
             this.instance.zoom = 20;
+            this.instance.updateProjectionMatrix();
+        }
+    }
+    zoom(ratio) {
+        if (this.instance instanceof THREE.PerspectiveCamera) {
+            //
+        }
+        else if (this.instance instanceof THREE.OrthographicCamera) {
+            this.instance.zoom = ratio;
             this.instance.updateProjectionMatrix();
         }
     }
