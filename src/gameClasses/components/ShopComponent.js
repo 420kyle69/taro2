@@ -27,259 +27,277 @@ var ShopComponent = TaroEntity.extend({
 			self.userSkinCount = 0;
 			self.userSkinPurchases = [];
 
-			// if (!taro.isMobile) {
-			$('.open-modd-shop-button').on('click', function () {
-				self.openModdShop();
-			});
-			// }
+			let initSkinShopListeners = function () {
 
-			$('.open-coin-shop-button').show().on('click', function () {
-				self.openCoinShop();
-			});
-
-			$('.shop-navbar .nav-item').on('click', function () {
-				$('.shop-navbar .nav-link').each(function () {
-					$(this).removeClass('active');
+				// if (!taro.isMobile) {
+				$('.open-modd-shop-button').on('click', function () {
+					self.openModdShop();
 				});
-				self.shopType = $(this).find('.nav-link').attr('name');
-				self.shopKey = '';
-				$('#modd-shop-modal .shop-items').html('');
-				$(this).find('.nav-link').addClass('active');
-				self.updateModdShop();
-			});
+				// }
 
-			$('.item-shop-navbar .nav-item').on('click', function () {
-				if (!$(this.firstElementChild).hasClass('active')) {
+				$('.open-coin-shop-button').show().on('click', function () {
+					self.openCoinShop();
+				});
+
+				$('.shop-navbar .nav-item').on('click', function () {
 					$('.shop-navbar .nav-link').each(function () {
 						$(this).removeClass('active');
 					});
-					var selected = $(this).find('.nav-link').attr('name');
-
-					$('#modd-item-shop-modal .items-shop').html('');
+					self.shopType = $(this).find('.nav-link').attr('name');
+					self.shopKey = '';
+					$('#modd-shop-modal .shop-items').html('');
 					$(this).find('.nav-link').addClass('active');
-					self.openItemShop(self.currentType, selected);
-				}
-			});
+					self.updateModdShop();
+				});
 
-			$('#mod-shop-pagination').on('click', '.skin-pagination', function () {
-				var itemDom = $(this);
-				var buttonPressed = itemDom[0].dataset.text;
-				var totalPages = Math.ceil(self.skinItems.length / self.perPageItems);
-				if (buttonPressed === 'next') {
-					if (self.currentPagination < totalPages) {
-						self.currentPagination++;
+				$('.item-shop-navbar .nav-item').on('click', function () {
+					if (!$(this.firstElementChild).hasClass('active')) {
+						$('.shop-navbar .nav-link').each(function () {
+							$(this).removeClass('active');
+						});
+						var selected = $(this).find('.nav-link').attr('name');
+
+						$('#modd-item-shop-modal .items-shop').html('');
+						$(this).find('.nav-link').addClass('active');
+						self.openItemShop(self.currentType, selected);
 					}
-				} else if (buttonPressed === 'previous') {
-					if (self.currentPagination > 1) {
-						self.currentPagination--;
+				});
+
+				$('#mod-shop-pagination').on('click', '.skin-pagination', function () {
+					var itemDom = $(this);
+					var buttonPressed = itemDom[0].dataset.text;
+					var totalPages = Math.ceil(self.skinItems.length / self.perPageItems);
+					if (buttonPressed === 'next') {
+						if (self.currentPagination < totalPages) {
+							self.currentPagination++;
+						}
+					} else if (buttonPressed === 'previous') {
+						if (self.currentPagination > 1) {
+							self.currentPagination--;
+						}
+					} else {
+						self.currentPagination = parseInt(buttonPressed);
 					}
-				} else {
-					self.currentPagination = parseInt(buttonPressed);
-				}
-				self.paginationForSkins();
-			});
+					self.paginationForSkins();
+				});
 
-			// purchase items
-			$(document).on('click', '.btn-purchase-item', function () {
-				// if ($(this).attr("isadblockenabled") === "true") {
-				// 	Swal({
-				// 		html: "<div class='swal2-title text-warning'><i class='fas fa-sad-tear fa-2x'></i></div><div class='swal2-title'>First, please disable your Adblock</div><div class='swal2-text'>Please support us. Our servers cost money.</div>",
-				// 		button: "close",
-				// 	});
-				// }
-				// else {
-				var isItemRequirementSatisfied = $(this).attr('requirementsSatisfied') == 'true';
-				var isItemAffordable = $(this).attr('isItemAffordable') == 'true';
-				var isCoinTxRequired = $(this).attr('isCoinTxRequired') == 'true';
-				var itemPrice = $(this).attr('itemPrice');
-				var itemQuantity = $(this).attr('itemQuantity');
-				var name = $(this).attr('name');
-				if (!isItemRequirementSatisfied) {
-					self.purchaseWarning('requirement', name);
-					return;
-				}
-				if (!isItemAffordable) {
-					self.purchaseWarning('price', name);
-					return;
-				}
-
-				if (itemPrice && (parseFloat(itemPrice) > 0) && window.userId && window.userId.toString() !== window.gameJson?.data?.defaultData?.owner?.toString()) {
-					window.userId && window.trackEvent && window.trackEvent('Coin Purchase', {
-						coins: parseFloat(itemPrice),
-						distinct_id: window.userId.toString(),
-						type: "ingame-item",
-						// purchaseId: purchasableId,
-						gameId: window.gameId?.toString(),
-						status: "initiated",
-						isPINsetupCompleted: window.isPinExists
-					});
-				}
-
-				if (isCoinTxRequired) {
-					if (taro.game.data.defaultData.tier === '1') {
-						self.purchaseWarning('advanced-tier', name);
+				// purchase items
+				$(document).on('click', '.btn-purchase-item', function () {
+					// if ($(this).attr("isadblockenabled") === "true") {
+					// 	Swal({
+					// 		html: "<div class='swal2-title text-warning'><i class='fas fa-sad-tear fa-2x'></i></div><div class='swal2-title'>First, please disable your Adblock</div><div class='swal2-text'>Please support us. Our servers cost money.</div>",
+					// 		button: "close",
+					// 	});
+					// }
+					// else {
+					var isItemRequirementSatisfied = $(this).attr('requirementsSatisfied') == 'true';
+					var isItemAffordable = $(this).attr('isItemAffordable') == 'true';
+					var isCoinTxRequired = $(this).attr('isCoinTxRequired') == 'true';
+					var itemPrice = $(this).attr('itemPrice');
+					var itemQuantity = $(this).attr('itemQuantity');
+					var name = $(this).attr('name');
+					if (!isItemRequirementSatisfied) {
+						self.purchaseWarning('requirement', name);
+						return;
+					}
+					if (!isItemAffordable) {
+						self.purchaseWarning('price', name);
 						return;
 					}
 
-					self.openItemPurchaseModal({ itemId: $(this).attr('id'), itemPrice, itemQuantity });
+					if (itemPrice && (parseFloat(itemPrice) > 0) && window.userId && window.userId.toString() !== window.gameJson?.data?.defaultData?.owner?.toString()) {
+						window.userId && window.trackEvent && window.trackEvent('Coin Purchase', {
+							coins: parseFloat(itemPrice),
+							distinct_id: window.userId.toString(),
+							type: "ingame-item",
+							// purchaseId: purchasableId,
+							gameId: window.gameId?.toString(),
+							status: "initiated",
+							isPINsetupCompleted: window.isPinExists
+						});
+					}
 
-					// self.verifyUserPinForPurchase($(this).attr('id'));
-				} else {
-					self.purchase($(this).attr('id'));
-				}
-			});
+					if (isCoinTxRequired) {
+						if (taro.game.data.defaultData.tier === '1') {
+							self.purchaseWarning('advanced-tier', name);
+							return;
+						}
 
-			$(document).on('click', '.btn-purchase-unit', function () {
-				$('#modd-item-shop-modal').modal('hide');
-				self.purchaseUnit($(this).attr('id'));
-				// self.confirmPurchase($(this).attr("id"))
-			});
+						self.openItemPurchaseModal({ itemId: $(this).attr('id'), itemPrice, itemQuantity });
 
-			// listen for item modal close.
-			$(document).on("hidden.bs.modal", "#modd-item-shop-modal", function () {
-				$('.popover').remove();
-				taro.client.myPlayer.control.updatePlayerInputStatus();
-			});
+						// self.verifyUserPinForPurchase($(this).attr('id'));
+					} else {
+						self.purchase($(this).attr('id'));
+					}
+				});
 
-			// purchase purchasable
-			$(document).on('click', '.btn-purchase-purchasable', function () {
-				if ($(this).hasClass('disabled')) return;
-				var itemDom = $(this);
-				var name = itemDom[0].dataset.purchasable;
-				var price = isNaN(parseFloat(itemDom[0].dataset.price)) ? itemDom[0].dataset.price : parseFloat(itemDom[0].dataset.price);
-				var isUnauthenticated = itemDom[0].dataset.unauthenticated;
+				$(document).on('click', '.btn-purchase-unit', function () {
+					$('#modd-item-shop-modal').modal('hide');
+					self.purchaseUnit($(this).attr('id'));
+					// self.confirmPurchase($(this).attr("id"))
+				});
 
-				if (isUnauthenticated === 'true' && !(price === 'facebook' || price === 'twitter')) {
-					// alert('You should be logged in to purchase the item.');
-					window.openLoginOptionFrameModal();
-					return;
-				}
-				var hasSharedDefer = $.Deferred();
+				// listen for item modal close.
+				$(document).on("hidden.bs.modal", "#modd-item-shop-modal", function () {
+					$('.popover').remove();
+					taro.client.myPlayer.control.updatePlayerInputStatus();
+				});
 
-				// if (price <= 0) {
-				// 	promise = $.ajax({
-				// 		url: `/api/user/has-shared/${taro.game.data.defaultData.parentGame || taro.client.server.gameId}`,
-				// 		dataType: 'html',
-				// 		type: 'GET',
-				// 		success: function (data) {
-				// 			var response = JSON.parse(data);
+				// purchase purchasable
+				$(document).on('click', '.btn-purchase-purchasable', function () {
+					if ($(this).hasClass('disabled')) return;
+					var itemDom = $(this);
+					var name = itemDom[0].dataset.purchasable;
+					var price = isNaN(parseFloat(itemDom[0].dataset.price)) ? itemDom[0].dataset.price : parseFloat(itemDom[0].dataset.price);
+					var isUnauthenticated = itemDom[0].dataset.unauthenticated;
 
-				// 			if (response.status === 'success') {
-				// 				hasSharedDefer.resolve(response.message);
-				// 			} else {
-				// 				hasSharedDefer.reject(response.message);
-				// 			}
-				// 		},
-				// 		error: function (req, status, err) {
-				// 			hasSharedDefer.reject(err);
-				// 		}
-				// 	});
-				// } else {
-				// hasSharedDefer.resolve(true);
-				// }
+					if (isUnauthenticated === 'true' && !(price === 'facebook' || price === 'twitter')) {
+						// alert('You should be logged in to purchase the item.');
+						window.openLoginOptionFrameModal();
+						return;
+					}
+					var hasSharedDefer = $.Deferred();
 
-				hasSharedDefer.resolve(true);
-				hasSharedDefer.promise()
-					.then(function (hasShared) {
-						if (hasShared) {
-							var itemId = itemDom.attr('id');
-							var gameData = taro.game.data.defaultData;
+					// if (price <= 0) {
+					// 	promise = $.ajax({
+					// 		url: `/api/user/has-shared/${taro.game.data.defaultData.parentGame || taro.client.server.gameId}`,
+					// 		dataType: 'html',
+					// 		type: 'GET',
+					// 		success: function (data) {
+					// 			var response = JSON.parse(data);
 
-							if (price === 'facebook' || price === 'twitter') {
-								var item = { value: gameData._id, type: 'game' };
-								var from = 'shopModal';
+					// 			if (response.status === 'success') {
+					// 				hasSharedDefer.resolve(response.message);
+					// 			} else {
+					// 				hasSharedDefer.reject(response.message);
+					// 			}
+					// 		},
+					// 		error: function (req, status, err) {
+					// 			hasSharedDefer.reject(err);
+					// 		}
+					// 	});
+					// } else {
+					// hasSharedDefer.resolve(true);
+					// }
 
-								if (price === 'facebook') {
-									var config = {
-										url: location.href,
-										caption: `Join me at ${gameData.title}`,
-										// fb does not allow whitespaces in image url
-										image: gameData.cover ? gameData.cover.replace(' ', '%20') : undefined
-									};
+					hasSharedDefer.resolve(true);
+					hasSharedDefer.promise()
+						.then(function (hasShared) {
+							if (hasShared) {
+								var itemId = itemDom.attr('id');
+								var gameData = taro.game.data.defaultData;
 
-									shareOnFacebook(item, from, config, function (response) {
-										if (response) {
-											$(`[id=${itemId}][data-price=facebook]`).addClass('disabled');
-											// if (isUnauthenticated === "true") {
-											// 	$('#login-modal').modal('show');
-											// } else {
-											self.buySkin(itemId, 'facebook');
-											// }
-										}
-									});
-								} else if (price === 'twitter') {
-									// this event is handled by template.js twitter.bind('tweet') listener
+								if (price === 'facebook' || price === 'twitter') {
+									var item = { value: gameData._id, type: 'game' };
+									var from = 'shopModal';
+
+									if (price === 'facebook') {
+										var config = {
+											url: location.href,
+											caption: `Join me at ${gameData.title}`,
+											// fb does not allow whitespaces in image url
+											image: gameData.cover ? gameData.cover.replace(' ', '%20') : undefined
+										};
+
+										shareOnFacebook(item, from, config, function (response) {
+											if (response) {
+												$(`[id=${itemId}][data-price=facebook]`).addClass('disabled');
+												// if (isUnauthenticated === "true") {
+												// 	$('#login-modal').modal('show');
+												// } else {
+												self.buySkin(itemId, 'facebook');
+												// }
+											}
+										});
+									} else if (price === 'twitter') {
+										// this event is handled by template.js twitter.bind('tweet') listener
+									}
+								} else {
+									$('#purchasable-purchase-modal').removeData();
+									$('#purchasable-purchase-modal').data('purchasable', itemId);
+									$('#purchasable-purchase-modal').data('price', price);
+									$('#purchasable-purchase-modal').modal('show');
+									// if (confirm("Are you sure you want to purchase " + name + " ?")) {
+									// 	self.buySkin(itemId);
+									// }
 								}
 							} else {
-								$('#purchasable-purchase-modal').removeData();
-								$('#purchasable-purchase-modal').data('purchasable', itemId);
-								$('#purchasable-purchase-modal').data('price', price);
-								$('#purchasable-purchase-modal').modal('show');
-								// if (confirm("Are you sure you want to purchase " + name + " ?")) {
-								// 	self.buySkin(itemId);
-								// }
+								$('.share-modal').modal('show');
 							}
-						} else {
-							$('.share-modal').modal('show');
+						})
+						.catch(function (err) {
+							console.error(err);
+						});
+				});
+
+				// equip purchasable
+				$(document).on('click', 'button.btn-equip', function () {
+					var button = $(this);
+
+					$.ajax({
+						url: `/api/user/equip/${taro.game.data.defaultData.parentGame || taro.client.server.gameId}/${button.attr('skinId')}`,
+						dataType: 'html',
+						type: 'POST',
+						success: function (data) {
+							var response = JSON.parse(data);
+
+							if (response.status == 'success') {
+								self.updateModdShop();
+								if (!taro.client.myPlayer._stats.purchasables || !(taro.client.myPlayer._stats.purchasables instanceof Array)) taro.client.myPlayer._stats.purchasables = [];
+								var equipedPurchasable = response.message;
+								// taro.client.myPlayer._stats.purchasables.push(equipedPurchasable);
+								var myUnit = taro.$(taro.client.myPlayer._stats.selectedUnitId);
+								taro.network.send('equipSkin', equipedPurchasable);
+							} else if (response.status == 'error') {
+								if (!response.message.includes('No matching document found')) {
+									alert(response.message);
+								}
+							}
 						}
-					})
-					.catch(function (err) {
-						console.error(err);
 					});
-			});
+				});
 
-			// equip purchasable
-			$(document).on('click', 'button.btn-equip', function () {
-				var button = $(this);
+				// unequip purchasable
+				$(document).on('click', 'button.btn-unequip', function () {
+					var button = $(this);
+					var unEquipedId = button.attr('id');
+					$.ajax({
+						url: `/api/user/unequip/${taro.game.data.defaultData.parentGame || taro.client.server.gameId}/${unEquipedId}`,
+						dataType: 'html',
+						type: 'POST',
+						success: function (data) {
+							var response = JSON.parse(data);
 
-				$.ajax({
-					url: `/api/user/equip/${taro.game.data.defaultData.parentGame || taro.client.server.gameId}/${button.attr('skinId')}`,
-					dataType: 'html',
-					type: 'POST',
-					success: function (data) {
-						var response = JSON.parse(data);
-
-						if (response.status == 'success') {
-							self.updateModdShop();
-							if (!taro.client.myPlayer._stats.purchasables || !(taro.client.myPlayer._stats.purchasables instanceof Array)) taro.client.myPlayer._stats.purchasables = [];
-							var equipedPurchasable = response.message;
-							// taro.client.myPlayer._stats.purchasables.push(equipedPurchasable);
-							var myUnit = taro.$(taro.client.myPlayer._stats.selectedUnitId);
-							taro.network.send('equipSkin', equipedPurchasable);
-							// myUnit.equipSkin();
-						} else if (response.status == 'error') {
-							if (!response.message.includes('No matching document found')) {
+							if (response.status == 'success') {
+								var myUnit = taro.$(taro.client.myPlayer._stats.selectedUnitId);
+								// myUnit.unEquipSkin(unEquipedId);
+								taro.network.send('unEquipSkin', unEquipedId);
+								self.updateModdShop();
+							} else if (response.status == 'error') {
 								alert(response.message);
 							}
 						}
-					}
+					});
 				});
-			});
 
-			// unequip purchasable
-			$(document).on('click', 'button.btn-unequip', function () {
-				var button = $(this);
-				var unEquipedId = button.attr('id');
-				$.ajax({
-					url: `/api/user/unequip/${taro.game.data.defaultData.parentGame || taro.client.server.gameId}/${unEquipedId}`,
-					dataType: 'html',
-					type: 'POST',
-					success: function (data) {
-						var response = JSON.parse(data);
+			}
 
-						if (response.status == 'success') {
-							var myUnit = taro.$(taro.client.myPlayer._stats.selectedUnitId);
-							// myUnit.unEquipSkin(unEquipedId);
-							taro.network.send('unEquipSkin', unEquipedId);
-							self.updateModdShop();
-						} else if (response.status == 'error') {
-							alert(response.message);
-						}
+			if (document.getElementById('modd-shop-modal')) {
+				initSkinShopListeners();
+			} else {
+
+				let checkForModdShop = setInterval(() => {
+					if (document.getElementById('modd-shop-modal')) {
+						clearInterval(checkForModdShop);
+						initSkinShopListeners();
 					}
-				});
-			});
+				}, 1000);
+			}
 		}
 	},
+
+
+
 	loadShopItems: function () {
 		let self = this;
 		$.ajax({
@@ -1462,7 +1480,7 @@ var ShopComponent = TaroEntity.extend({
 								class: "is-mobile",
 							})
 						)
-					).append( item.status === "not_purchased" ? "<br/>" : "")
+					).append(item.status === "not_purchased" ? "<br/>" : "")
 					.append(button).hover(
 						function () {
 							// On hover
@@ -1472,10 +1490,10 @@ var ShopComponent = TaroEntity.extend({
 
 							var floatingButton = $("<button/>", {
 								type: "button",
-								class:'btn btn-equip',
-								id:'floating-button-equip',
+								class: 'btn btn-equip',
+								id: 'floating-button-equip',
 								name: items[i].title || items[i].name,
-								skinId : items[i]._id,
+								skinId: items[i]._id,
 								owner: items[i].owner || "",
 								style: "position: absolute; background-color: #254EDB;color: white; border: none;",
 							}).text("Equip");
