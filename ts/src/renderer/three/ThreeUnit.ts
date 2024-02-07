@@ -79,7 +79,10 @@ class ThreeUnit extends ThreeAnimatedSprite {
 
 	setScaleChildren(scale: number) {
 		this.label.setScale(scale);
-		this.attributeBars.scale.setScalar(scale);
+
+		for (const bar of this.attributeBars.children) {
+			(bar as ThreeAttributeBar).setScale(scale);
+		}
 
 		if (this.chat) {
 			this.chat.setScale(scale);

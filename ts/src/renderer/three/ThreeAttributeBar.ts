@@ -1,6 +1,7 @@
 class ThreeAttributeBar extends THREE.Group {
+	scaleScalar = 1;
+
 	private sprite;
-	private scaleScalar = 1;
 
 	private size = new THREE.Vector2();
 	private center = new THREE.Vector2(0.5, 0.5);
@@ -14,6 +15,10 @@ class ThreeAttributeBar extends THREE.Group {
 		public radius = 7
 	) {
 		super();
+
+		const threeRenderer = ThreeRenderer.getInstance();
+		const zoomScale = 1 / threeRenderer.camera.zoomLevel;
+		this.scaleScalar = zoomScale;
 
 		this.sprite = this.createBar(this.width, this.height, this.radius, 'yellow', 100, 100);
 		this.add(this.sprite);
@@ -55,19 +60,14 @@ class ThreeAttributeBar extends THREE.Group {
 		this.offset.copy(offset);
 
 		if (this.sprite) {
-			const width = this.sprite.material.map.image.width;
-			const height = this.sprite.material.map.image.height;
-			this.sprite.center.set(center.x - offset.x / width, center.y - offset.y / height);
+			this.sprite.center.set(center.x - offset.x / this.size.x, center.y - offset.y / this.size.y);
 		}
 	}
 
 	setScale(scale: number) {
 		this.scaleScalar = scale;
 
-		this.sprite.center.set(
-			this.center.x + this.offset.x / (this.size.x * scale),
-			this.center.y + this.offset.y / (this.size.y * scale)
-		);
+		this.sprite.center.set(this.center.x + this.offset.x / this.size.x, this.center.y + this.offset.y / this.size.y);
 
 		this.sprite.scale.set(
 			this.scaleScalar * Utils.pixelToWorld(this.size.x),
@@ -75,10 +75,7 @@ class ThreeAttributeBar extends THREE.Group {
 			1
 		);
 
-		this.sprite.center.set(
-			this.center.x - this.offset.x / (this.size.x * scale),
-			this.center.y - this.offset.y / (this.size.y * scale)
-		);
+		this.sprite.center.set(this.center.x - this.offset.x / this.size.x, this.center.y - this.offset.y / this.size.y);
 	}
 
 	private createBar(
@@ -135,8 +132,8 @@ class ThreeAttributeBar extends THREE.Group {
 		);
 
 		sprite.center.set(
-			this.center.x - this.offset.x / textCanvas.width,
-			this.center.y - this.offset.y / textCanvas.height
+			this.center.x - this.offset.x / (this.size.x * this.scaleScalar),
+			this.center.y - this.offset.y / (this.size.y * this.scaleScalar)
 		);
 
 		return sprite;

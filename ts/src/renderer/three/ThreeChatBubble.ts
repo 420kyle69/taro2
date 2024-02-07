@@ -15,6 +15,11 @@ class ThreeChatBubble extends THREE.Group {
 	constructor(text: string) {
 		super();
 
+		const threeRenderer = ThreeRenderer.getInstance();
+		const zoomScale = 1 / threeRenderer.camera.zoomLevel;
+		this.scaleScalar = zoomScale;
+		console.log(this.scaleScalar);
+
 		this.sprite = this.createBubble(text);
 		this.add(this.sprite);
 
@@ -27,8 +32,6 @@ class ThreeChatBubble extends THREE.Group {
 		this.remove(this.sprite);
 		this.sprite = this.createBubble(text);
 		this.add(this.sprite);
-
-		this.setScale(this.scaleScalar);
 
 		this.visible = true;
 
@@ -47,9 +50,10 @@ class ThreeChatBubble extends THREE.Group {
 		this.offset.copy(offset);
 
 		if (this.sprite) {
-			const width = this.sprite.material.map.image.width;
-			const height = this.sprite.material.map.image.height;
-			this.sprite.center.set(center.x - offset.x / width, center.y - offset.y / height);
+			this.sprite.center.set(
+				center.x - offset.x / (this.size.x * this.scaleScalar),
+				center.y - offset.y / (this.size.y * this.scaleScalar)
+			);
 		}
 	}
 
@@ -134,8 +138,8 @@ class ThreeChatBubble extends THREE.Group {
 		);
 
 		sprite.center.set(
-			this.center.x - this.offset.x / textCanvas.width,
-			this.center.y - this.offset.y / textCanvas.height
+			this.center.x - this.offset.x / (this.size.x * this.scaleScalar),
+			this.center.y - this.offset.y / (this.size.y * this.scaleScalar)
 		);
 
 		return sprite;

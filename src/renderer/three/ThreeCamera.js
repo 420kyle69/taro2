@@ -1,6 +1,7 @@
 class ThreeCamera {
     constructor(viewportWidth, viewportHeight, canvas) {
         this.target = null;
+        this.zoomLevel = 1;
         this.isPerspective = false;
         const persCamera = new THREE.PerspectiveCamera(75, viewportWidth / viewportHeight, 0.1, 1000);
         persCamera.position.y = 20;
@@ -68,6 +69,7 @@ class ThreeCamera {
         }
     }
     zoom(ratio) {
+        this.zoomLevel = ratio;
         if (this.instance instanceof THREE.PerspectiveCamera) {
             //
         }

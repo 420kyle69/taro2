@@ -8,6 +8,9 @@ class ThreeAttributeBar extends THREE.Group {
         this.size = new THREE.Vector2();
         this.center = new THREE.Vector2(0.5, 0.5);
         this.offset = new THREE.Vector2();
+        const threeRenderer = ThreeRenderer.getInstance();
+        const zoomScale = 1 / threeRenderer.camera.zoomLevel;
+        this.scaleScalar = zoomScale;
         this.sprite = this.createBar(this.width, this.height, this.radius, 'yellow', 100, 100);
         this.add(this.sprite);
     }
@@ -32,16 +35,14 @@ class ThreeAttributeBar extends THREE.Group {
         this.center.copy(center);
         this.offset.copy(offset);
         if (this.sprite) {
-            const width = this.sprite.material.map.image.width;
-            const height = this.sprite.material.map.image.height;
-            this.sprite.center.set(center.x - offset.x / width, center.y - offset.y / height);
+            this.sprite.center.set(center.x - offset.x / this.size.x, center.y - offset.y / this.size.y);
         }
     }
     setScale(scale) {
         this.scaleScalar = scale;
-        this.sprite.center.set(this.center.x + this.offset.x / (this.size.x * scale), this.center.y + this.offset.y / (this.size.y * scale));
+        this.sprite.center.set(this.center.x + this.offset.x / this.size.x, this.center.y + this.offset.y / this.size.y);
         this.sprite.scale.set(this.scaleScalar * Utils.pixelToWorld(this.size.x), this.scaleScalar * Utils.pixelToWorld(this.size.y), 1);
-        this.sprite.center.set(this.center.x - this.offset.x / (this.size.x * scale), this.center.y - this.offset.y / (this.size.y * scale));
+        this.sprite.center.set(this.center.x - this.offset.x / this.size.x, this.center.y - this.offset.y / this.size.y);
     }
     createBar(width, height, radius, color, value, max, displayValue = true) {
         const textCanvas = document.createElement('canvas');
@@ -74,7 +75,7 @@ class ThreeAttributeBar extends THREE.Group {
         const sprite = new THREE.Sprite(spriteMaterial);
         sprite.renderOrder = 499;
         sprite.scale.set(this.scaleScalar * Utils.pixelToWorld(textCanvas.width), this.scaleScalar * Utils.pixelToWorld(textCanvas.height), 1);
-        sprite.center.set(this.center.x - this.offset.x / textCanvas.width, this.center.y - this.offset.y / textCanvas.height);
+        sprite.center.set(this.center.x - this.offset.x / (this.size.x * this.scaleScalar), this.center.y - this.offset.y / (this.size.y * this.scaleScalar));
         return sprite;
     }
 }

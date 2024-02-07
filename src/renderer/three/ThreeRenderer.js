@@ -118,6 +118,9 @@ class ThreeRenderer {
             // TODO: Quadratic zoomTo over 1 second
             this.camera.zoom(ratio);
             taro.client.emit('scale', { ratio: ratio * this.resolutionCoef });
+            for (const entity of this.entities) {
+                entity.setScaleChildren(1 / ratio);
+            }
         });
         taro.client.on('stop-follow', () => this.camera.stopFollow());
         const layers = {

@@ -22,9 +22,9 @@
 class ThreeRenderer {
 	private static instance: ThreeRenderer;
 
-	private renderer: THREE.WebGLRenderer;
-	private camera: ThreeCamera;
-	private scene: THREE.Scene;
+	renderer: THREE.WebGLRenderer;
+	camera: ThreeCamera;
+	scene: THREE.Scene;
 
 	private animations: Map<string, { frames: number[]; fps: number; repeat: number }> = new Map();
 	private entities: ThreeUnit[] = [];
@@ -150,6 +150,10 @@ class ThreeRenderer {
 			this.camera.zoom(ratio);
 
 			taro.client.emit('scale', { ratio: ratio * this.resolutionCoef });
+
+			for (const entity of this.entities) {
+				entity.setScaleChildren(1 / ratio);
+			}
 		});
 
 		taro.client.on('stop-follow', () => this.camera.stopFollow());

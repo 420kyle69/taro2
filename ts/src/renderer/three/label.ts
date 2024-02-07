@@ -9,6 +9,10 @@ class Label extends THREE.Group {
 	constructor(text = 'cccccc') {
 		super();
 
+		const threeRenderer = ThreeRenderer.getInstance();
+		const zoomScale = 1 / threeRenderer.camera.zoomLevel;
+		this.scaleScalar = zoomScale;
+
 		this.sprite = this.createLabel(text);
 		this.add(this.sprite);
 
@@ -26,9 +30,10 @@ class Label extends THREE.Group {
 	setOffset(offset: THREE.Vector2, center = new THREE.Vector2(0.5, 0.5)) {
 		this.center.copy(center);
 		this.offset.copy(offset);
-		const width = this.sprite.material.map.image.width;
-		const height = this.sprite.material.map.image.height;
-		this.sprite.center.set(center.x - offset.x / width, center.y - offset.y / height);
+		this.sprite.center.set(
+			center.x - offset.x / (this.size.x * this.scaleScalar),
+			center.y - offset.y / (this.size.y * this.scaleScalar)
+		);
 	}
 
 	setScale(scale: number) {
@@ -98,8 +103,8 @@ class Label extends THREE.Group {
 		);
 
 		sprite.center.set(
-			this.center.x - this.offset.x / textCanvas.width,
-			this.center.y - this.offset.y / textCanvas.height
+			this.center.x - this.offset.x / (this.size.x * this.scaleScalar),
+			this.center.y - this.offset.y / (this.size.y * this.scaleScalar)
 		);
 
 		return sprite;

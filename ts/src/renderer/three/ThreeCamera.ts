@@ -1,6 +1,7 @@
 class ThreeCamera {
 	instance: THREE.Camera;
 	target: THREE.Object3D | null = null;
+	zoomLevel = 1;
 
 	private orthographicCamera: THREE.OrthographicCamera;
 	private perspectiveCamera: THREE.PerspectiveCamera;
@@ -88,6 +89,8 @@ class ThreeCamera {
 	}
 
 	zoom(ratio: number) {
+		this.zoomLevel = ratio;
+
 		if (this.instance instanceof THREE.PerspectiveCamera) {
 			//
 		} else if (this.instance instanceof THREE.OrthographicCamera) {
