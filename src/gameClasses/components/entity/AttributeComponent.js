@@ -198,9 +198,9 @@ var AttributeComponent = TaroEntity.extend({
 			return;
 		}
 
-		var attributes = rfdc()(self._entity._stats.attributes); // clone units existing attribute values
-		if (attributes) {
-			var attribute = attributes[attributeTypeId];
+		if (self._entity._stats.attributes) {
+			// clone units existing attribute value
+			var attribute = rfdc()(self._entity._stats.attributes[attributeTypeId]);
 
 			if (attribute) {
 				attribute.type = attributeTypeId; // tracking what "triggering attributeType" is in ParameterComponent.
