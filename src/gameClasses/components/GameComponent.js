@@ -121,7 +121,7 @@ var GameComponent = TaroEntity.extend({
 			taro.gameText.sendLatestText(data.clientId);
 			// taro.shopkeeper.updateShopInventory(taro.shopkeeper.inventory, data.clientId) // send latest ui information to the client
 			
-			const {isOwner, isInvitedUser, isUserMod, isUserAdmin, isModerationAllowed} = taro.workerComponent ? taro.workerComponent.getUserPermissions(data) : {};
+			const {isOwner, isInvitedUser, isUserMod, isUserAdmin, isModerationAllowed} = taro.workerComponent ? taro.workerComponent.getUserPermissions(data) : {isOwner: true};
 
 			player._stats.isUserAdmin = isUserAdmin;
 			player._stats.isUserMod = isUserMod;
