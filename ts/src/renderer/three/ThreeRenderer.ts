@@ -1,24 +1,5 @@
 /// <reference types="@types/google.analytics" />
 
-// Isn't it better for the renderer to have no concept of units, projectiles, etc?
-// The renderer only needs to know about things like map, sprites, labels, bars, models
-// in some hierarchical manner so labels stick to certain sprites.
-// And in the case of projectiles, those are just sprites with a lifetime.
-
-// And on the server side, they shouldn't send events on the entities themselves.
-// Instead send an entity ID on creation and refer to it in other events that
-// require certain entities (e.g. for updating them). This allows for a more
-// flat code architecture and makes it more flexible. For instance if you want
-// to delete 100 entites, you now need to send 100 destroy messages to those
-// entities. Instead you can send one message with 100 entity ID's. (a lot of
-// assumtions here, figure out how it actually works).
-
-// I want to spawn:
-// Sprite
-// Animated Sprite (in my case the texture is animated via offsets... Animated Texture?)
-// Mesh
-//  BoxMesh
-
 class ThreeRenderer {
 	private static instance: ThreeRenderer;
 
@@ -179,9 +160,6 @@ class ThreeRenderer {
 			this.scene.add(this.voxelMap);
 
 			taro.game.data.map.layers.forEach((layer) => {
-				// layer.id doesn't match modd.io UI. Check to see if this changes
-				// once i've merged the main branch. For now this is necessary. It's
-				// also what is done in the PhaserRenderer.
 				let layerId = 0;
 				switch (layer.name) {
 					case 'floor':
@@ -359,8 +337,6 @@ class ThreeRenderer {
 							this.animatedSprites.splice(animIdx, 1);
 						}
 
-						// Why do I have to call this on the client on destroy?
-						// Does the server not auto cleanup event emitters?
 						entity.off('transform', transformEvtListener);
 						entity.off('size', sizeEvtListener);
 						entity.off('scale', scaleEvtListener);
@@ -396,22 +372,18 @@ class ThreeRenderer {
 	}
 
 	private setupInputListeners(): void {
-		// Ask the input component to set up any listeners it has
 		taro.input.setupListeners(this.renderer.domElement);
 	}
 
 	getViewportBounds() {
-		// return this.scene.getScene('Game').cameras.main.worldView;
 		return { x: 0, y: 0, width: window.innerWidth, height: window.innerHeight };
 	}
 
 	getCameraWidth(): number {
-		// return this.scene.getScene('Game').cameras.main.displayWidth;
 		return window.innerWidth;
 	}
 
 	getCameraHeight(): number {
-		// return this.scene.getScene('Game').cameras.main.displayHeight;
 		return window.innerHeight;
 	}
 

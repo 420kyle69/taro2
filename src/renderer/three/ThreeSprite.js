@@ -1,7 +1,7 @@
 class ThreeSprite extends THREE.Group {
     constructor(tex) {
         super();
-        this.layer = 3; // Create enum
+        this.layer = 3;
         this.depth = 1;
         this.scaleUnflipped = new THREE.Vector2();
         this.flipX = 1;

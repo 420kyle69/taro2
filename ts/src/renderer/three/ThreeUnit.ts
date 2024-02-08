@@ -1,5 +1,4 @@
 class ThreeUnit extends ThreeAnimatedSprite {
-	// Why does every unit have a label?
 	label = new ThreeLabel();
 
 	private attributeBars = new THREE.Group();

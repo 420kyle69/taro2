@@ -1,7 +1,6 @@
 class ThreeUnit extends ThreeAnimatedSprite {
     constructor(tex) {
         super(tex);
-        // Why does every unit have a label?
         this.label = new ThreeLabel();
         this.attributeBars = new THREE.Group();
         this.label.setOffset(new THREE.Vector2(0, 0.75 * 64), new THREE.Vector2(0.5, 0));

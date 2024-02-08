@@ -1,7 +1,7 @@
 class ThreeSprite extends THREE.Group {
 	sprite: THREE.Mesh;
 
-	private layer = 3; // Create enum
+	private layer = 3;
 	private depth = 1;
 
 	private scaleUnflipped = new THREE.Vector2();
