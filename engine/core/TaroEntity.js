@@ -71,7 +71,7 @@ var TaroEntity = TaroObject.extend({
 		this.lastTransformedAt = 0;
 		this.latestTimeStamp = 0;
 		this.isTeleporting = false;
-        this.teleportCamera = false;
+		this.teleportCamera = false;
 		this.teleportDestination = this.nextKeyFrame[1];
 
 		this.queuedTriggers = [];
@@ -1907,7 +1907,7 @@ var TaroEntity = TaroObject.extend({
 					}
 				}
 			}
-		
+
 			// Check for cached version
 			if (this._cache || this._compositeCache) {
 				// Caching is enabled
@@ -1942,12 +1942,12 @@ var TaroEntity = TaroObject.extend({
 				this._renderEntity(ctx, dontTransform);
 			}
 
-			if (Math.round(this._translate.x) != Math.round(this._oldTranform[0]) || 
-                Math.round(this._translate.y) != Math.round(this._oldTranform[1]) || 
-                parseFloat(this._rotate.z).toFixed(3) != parseFloat(this._oldTranform[2]).toFixed(3)) {
-                this._hasMoved = true;
-                this._oldTranform = [this._translate.x, this._translate.y, this._rotate.z];
-            }
+			if (Math.round(this._translate.x) != Math.round(this._oldTranform[0]) ||
+				Math.round(this._translate.y) != Math.round(this._oldTranform[1]) ||
+				parseFloat(this._rotate.z).toFixed(3) != parseFloat(this._oldTranform[2]).toFixed(3)) {
+				this._hasMoved = true;
+				this._oldTranform = [this._translate.x, this._translate.y, this._rotate.z];
+			}
 
 			// Process any automatic-mode stream updating required
 			if (this._streamMode === 1 || this._streamMode === 2) {
@@ -2026,7 +2026,7 @@ var TaroEntity = TaroObject.extend({
 						var position = taro.game.lastProjectileHitPosition ||
 							// (this.body && taro.physics.engine === 'BOX2DWASM' ? taro.physics.recordLeak(this.body.getPosition()) : this.body.getPosition()) || // this was causing client to crash
 							this._translate;
-						
+
 						projectile.defaultData = {
 							//type: effect.projectileType,
 							translate: {
@@ -3141,7 +3141,7 @@ var TaroEntity = TaroObject.extend({
 		// console.log("teleportTo", x, y, rotate, this._stats.type)
 		this.isTeleporting = true;
 		this.nextKeyFrame[1] = [x, y, rotate];
-        this.teleportCamera = teleportCamera;
+		this.teleportCamera = teleportCamera;
 		this.teleportDestination = [x, y, rotate]
 		this.reconRemaining = undefined; // when a unit is teleported, end reconciliation
 		// this.setLinearVelocityLT(0, 0);
@@ -3159,10 +3159,10 @@ var TaroEntity = TaroObject.extend({
 			}
 		} else if (taro.isClient) {
 			this.isTransforming(true);
-            //instantly move to camera the new position
-            if (teleportCamera && taro.client.myPlayer?._stats.cameraTrackedUnitId === this.id()) {
-                taro.client.emit('instant-move-camera', [x, y]);
-            }
+			//instantly move to camera the new position
+			if (teleportCamera && taro.client.myPlayer?._stats.cameraTrackedUnitId === this.id()) {
+				taro.client.emit('instant-move-camera', [x, y]);
+			}
 		}
 
 		if (this._category == 'unit') {
@@ -3938,7 +3938,6 @@ var TaroEntity = TaroObject.extend({
 					if (selectedAttribute && bonus) {
 						var currentAttributeValue = parseFloat(selectedAttribute.value) || 1;
 						var maxValue = parseFloat(selectedAttribute.max);
-
 						if (currentAttributeValue != undefined) {
 							if (removeAttributes) {
 								if (bonus.type === 'percentage') {
@@ -3961,8 +3960,8 @@ var TaroEntity = TaroObject.extend({
 							// this._stats.attributes[attrId].max = newMax;
 							// updatedAttributes[attrId] = newValue;
 							// updatedAttributes[attrId] = newMax;
+							this.attribute.update(attrId, newValue, null, newMax);
 							this.attribute.setMax(attrId, newMax);
-							this.attribute.update(attrId, newValue);
 						}
 					}
 				}
@@ -4058,7 +4057,6 @@ var TaroEntity = TaroObject.extend({
 	// },
 
 	streamUpdateData: function (queuedData, clientId) {
-
 		if (queuedData != undefined) {
 			for (var i = 0; i < queuedData.length; i++) {
 				var data = queuedData[i];
@@ -4109,16 +4107,16 @@ var TaroEntity = TaroObject.extend({
 
 											// pass OR null in cases where max value is updated twice in succession
 											// without this, client update call passes undefined as value
-											let value = (data.attributes[attributeTypeId].value || data.attributes [attributeTypeId].value === 0)
+											let value = (data.attributes[attributeTypeId].value || data.attributes[attributeTypeId].value === 0)
 												? data.attributes[attributeTypeId].value
 												: null;
-
 											this.attribute.update(attributeTypeId, value, min, max);
-
+											this.unitUi && this.unitUi.updateAttributeBar(attributeTypeId);
 										}
 										// update attribute if entity has such attribute
 									}
 								}
+
 							}
 							// else if (taro.isServer) {
 							// 	for (var attributeTypeId in data.attributes) {
@@ -4189,7 +4187,7 @@ var TaroEntity = TaroObject.extend({
 							if (taro.isClient) {
 								var variablesObject = rfdc()(this.variables);
 								if (variablesObject) {
-									for (var variableId in data.variables) {			
+									for (var variableId in data.variables) {
 										var variableData = variablesObject[variableId];
 										// streamMode 4 ignores
 										if (this._category == 'unit') {
@@ -4210,7 +4208,7 @@ var TaroEntity = TaroObject.extend({
 								}
 							}
 							break;
-	
+
 
 
 						case 'depth':
@@ -4470,9 +4468,9 @@ var TaroEntity = TaroObject.extend({
 
 						if (this.isTeleporting) {
 							buffArr.push(Number(this.isTeleporting));
-                            buffArr.push(Number(this.teleportCamera));
+							buffArr.push(Number(this.teleportCamera));
 							this.isTeleporting = false;
-                            this.teleportCamera = false;
+							this.teleportCamera = false;
 						}
 
 						// TaroEntity.prototype.log(this._size, this._translate, this._rotate)

@@ -31,7 +31,7 @@ var Player = TaroEntity.extend({
 
 		self.addComponent(AttributeComponent);
 		self.addComponent(VariableComponent);
-		
+
 		if (taro.isServer) {
 			this.streamMode(2);
 			// self._stats.unitId = self.getCurrentUnit().id()
@@ -55,7 +55,7 @@ var Player = TaroEntity.extend({
 				}
 
 				self.redrawUnits(['nameLabel']);
-					
+
 				self.addComponent(ControlComponent);
 
 				// mouse move listener
@@ -332,7 +332,7 @@ var Player = TaroEntity.extend({
 
 		if (taro.isServer) {
 			// update all units that are targeting this player's unit to act appropriately based on new relationship dynamics
-			// for example, this player's unit may not be the enemy anymore and 
+			// for example, this player's unit may not be the enemy anymore and
 			// if AI unit was attacking his player's unit, then it should stop.
 
 			// iterate through all units owned by this player
@@ -363,9 +363,9 @@ var Player = TaroEntity.extend({
 
 		self._stats.attributes = data.attributes;
 
-		
+
 		// update variables and pass old variables' values to new variables (given that variables have same ID)
-		self.variables = {}		
+		self.variables = {}
 		if (data.variables) {
 			var oldVariables = rfdc()(self.variables);
 			Object.keys(data.variables).forEach(function(variableId) {
@@ -384,7 +384,7 @@ var Player = TaroEntity.extend({
 				}
 			});
 		}
-		
+
 
 		if (taro.isClient) {
 			var isMyPlayerUpdated = self._stats.clientId == taro.network.id();
@@ -817,7 +817,7 @@ var Player = TaroEntity.extend({
 
 					processedUpdates.push({ [key]: value });
 					delete taro.client.entityUpdateQueue[this.id()][key]
-					
+
 					// remove queue object for this entity is there's no queue remaining in order to prevent memory leak
 					if (Object.keys(taro.client.entityUpdateQueue[this.id()]).length == 0) {
 						delete taro.client.entityUpdateQueue[this.id()];
