@@ -282,17 +282,11 @@ class ThreeRenderer {
 
 			// Label
 			const updateLabelEvtListener = entity.on('update-label', (data) => {
-				(ent as ThreeUnit).showLabel();
-				(ent as ThreeUnit).updateLabel(data);
+				ent.label.visible = true;
+				ent.label.update(data.text, data.color, data.bold);
 			});
-
-			const showLabelEvtListener = entity.on('show-label', () => {
-				(ent as ThreeUnit).showLabel();
-			});
-
-			const hideLabelEvtListener = entity.on('hide-label', () => {
-				(ent as ThreeUnit).hideLabel();
-			});
+			const showLabelEvtListener = entity.on('show-label', () => (ent.label.visible = true));
+			const hideLabelEvtListener = entity.on('hide-label', () => (ent.label.visible = false));
 
 			// Attributes
 			const renderAttributesEvtListener = entity.on('render-attributes', (data) => {

@@ -8,15 +8,6 @@ class ThreeUnit extends ThreeAnimatedSprite {
         this.add(this.label);
         this.add(this.attributeBars);
     }
-    updateLabel(data) {
-        this.label.update(data.text, data.color, data.bold);
-    }
-    showLabel() {
-        this.label.visible = true;
-    }
-    hideLabel() {
-        this.label.visible = false;
-    }
     renderChat(text) {
         if (this.chat) {
             this.chat.update(text);

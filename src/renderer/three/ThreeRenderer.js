@@ -203,15 +203,11 @@ class ThreeRenderer {
             }, this);
             // Label
             const updateLabelEvtListener = entity.on('update-label', (data) => {
-                ent.showLabel();
-                ent.updateLabel(data);
+                ent.label.visible = true;
+                ent.label.update(data.text, data.color, data.bold);
             });
-            const showLabelEvtListener = entity.on('show-label', () => {
-                ent.showLabel();
-            });
-            const hideLabelEvtListener = entity.on('hide-label', () => {
-                ent.hideLabel();
-            });
+            const showLabelEvtListener = entity.on('show-label', () => (ent.label.visible = true));
+            const hideLabelEvtListener = entity.on('hide-label', () => (ent.label.visible = false));
             // Attributes
             const renderAttributesEvtListener = entity.on('render-attributes', (data) => {
                 ent.renderAttributes(data);

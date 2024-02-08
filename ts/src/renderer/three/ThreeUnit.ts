@@ -1,6 +1,7 @@
 class ThreeUnit extends ThreeAnimatedSprite {
 	// Why does every unit have a label?
-	private label = new ThreeLabel();
+	label = new ThreeLabel();
+
 	private attributeBars = new THREE.Group();
 	private chat: ThreeChatBubble;
 
@@ -11,18 +12,6 @@ class ThreeUnit extends ThreeAnimatedSprite {
 		this.add(this.label);
 
 		this.add(this.attributeBars);
-	}
-
-	updateLabel(data: { text?: string; bold?: boolean; color?: string }) {
-		this.label.update(data.text, data.color, data.bold);
-	}
-
-	showLabel() {
-		this.label.visible = true;
-	}
-
-	hideLabel() {
-		this.label.visible = false;
 	}
 
 	renderChat(text: string): void {
