@@ -1,4 +1,4 @@
-class Label extends THREE.Group {
+class ThreeLabel extends THREE.Group {
 	private sprite;
 	private scaleScalar = 1;
 

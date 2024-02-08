@@ -41,7 +41,7 @@ var taroClientConfig = {
 		'/gameClasses/components/ui/VideoChatComponent.js',
 		'/gameClasses/components/ui/TradeUiComponent.js',
 
-		'/gameClasses/components/script/ScriptComponent.js',		
+		'/gameClasses/components/script/ScriptComponent.js',
 		'/gameClasses/components/script/ActionComponent.js',
 		'/gameClasses/components/script/ParameterComponent.js',
 		'/gameClasses/components/script/ConditionComponent.js',
@@ -68,9 +68,6 @@ var taroClientConfig = {
 		'renderer/phaser/phaser.min.js',
 		'renderer/phaser/rexuiplugin.min.js',
 		'renderer/phaser/rexvirtualjoystickplugin.min.js',
-		/* Three.js */
-		'renderer/three/three.min.js',
-		'renderer/three/OrbitControls.js',
 		// '../node_modules/phaser3-rex-plugins/dist/rexvirtualjoystickplugin.min.js',
 		//'../node_modules/phaser3-rex-plugins/templates/ui/ui-components.js',
 		'utils/visibility-polygon.js',
@@ -114,6 +111,8 @@ var taroClientConfig = {
 		'renderer/phaser/PhaserRenderer.js',
 
 		// Three.js Renderer
+		'renderer/three/three.min.js',
+		'renderer/three/OrbitControls.js',
 		'renderer/three/utils.js',
 		'renderer/three/ThreeTextureManager.js',
 		'renderer/three/ThreeVoxelMap.js',
@@ -121,7 +120,7 @@ var taroClientConfig = {
 		'renderer/three/ThreeCamera.js',
 		'renderer/three/ThreeSprite.js',
 		'renderer/three/ThreeBoxMesh.js',
-		'renderer/three/label.js',
+		'renderer/three/ThreeLabel.js',
 		'renderer/three/ThreeAnimatedSprite.js',
 		'renderer/three/ThreeUnit.js',
 		'renderer/three/ThreeAttributeBar.js',
