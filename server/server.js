@@ -267,8 +267,8 @@ var Server = TaroClass.extend({
 
 		app.get('/', (req, res) => {
 			
-			const token = ''
-
+			const token = Math.random().toString(36).substring(2, 14); // random token for standalone
+			
 			const videoChatEnabled = taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.enableVideoChat ? taro.game.data.defaultData.enableVideoChat : false;
 			const game = {
 				_id: global.standaloneGame.defaultData._id,
