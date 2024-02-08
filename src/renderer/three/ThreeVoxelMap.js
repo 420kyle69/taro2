@@ -8,6 +8,9 @@ class ThreeVoxelMap extends THREE.Group {
     }
     addLayer(data, height, transparent = true, flat = false, renderOrder = 0) {
         const voxels = new Map();
+        const allFacesVisible = [false, false, false, false, false, false];
+        const onlyBottomFaceVisible = [true, true, true, false, true, true];
+        const hiddenFaces = flat ? onlyBottomFaceVisible : allFacesVisible;
         const flatOffset = flat ? 0.001 : 0;
         for (let z = 0; z < data.height; z++) {
             for (let x = 0; x < data.width; x++) {
@@ -15,11 +18,11 @@ class ThreeVoxelMap extends THREE.Group {
                 if (tileId <= 0)
                     continue;
                 voxels.set(getKeyFromPos(x, height, z), {
-                    position: [x, height + flatOffset, z],
+                    position: [x + x, height + height + flatOffset, z + z],
                     type: data.data[z * data.width + x],
                     visible: true,
                     // hiddenFaces: 0x000000,
-                    hiddenFaces: [flat, flat, flat, !flat, flat, flat],
+                    hiddenFaces,
                 });
             }
         }
