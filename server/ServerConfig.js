@@ -1,12 +1,13 @@
 var moddioConfig =
 	process.env.ENV === 'standalone'
-		? process.env.LOAD_CC === 'true' ? [{ name: 'ClusterClientComponent', path: '../../ClusterClientComponent' }]:[]
+		? process.env.LOAD_CC === 'true' ? [{ name: 'WorkerComponent', path: '../../components/WorkerComponent' }]:[]
 		: [
-			{ name: 'ClusterClientComponent', path: '../../ClusterClientComponent' },
-			{ name: 'ClusterServerComponent', path: '../../ClusterServerComponent' },
-			{ name: 'HttpComponent', path: '../../HttpComponent' },
-			{ name: 'ProxyComponent', path: '../../ProxyComponent' },
-			{ name: 'betterFilter', path: '../../moderation/betterFilter' }
+			{ name: 'WorkerComponent', path: '../../components/WorkerComponent' },
+			{ name: 'MasterServerComponent', path: '../../components/MasterServerComponent' },
+			{ name: 'MasterComponent', path: '../../components/MasterComponent' },
+			{ name: 'HttpComponent', path: '../../components/HttpComponent' },
+			{ name: 'ProxyComponent', path: '../../components/ProxyComponent' },
+			{ name: 'betterFilter', path: '../../utils/betterFilter' }
 		];
 
 
