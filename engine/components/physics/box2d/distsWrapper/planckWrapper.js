@@ -1,5 +1,5 @@
 // FIXME: add more types to the physics part of taro2
-var planckWrapper = {
+const planckWrapper = {
     init: function (component) {
         // component.b2Color = planck.Common.b2Color;
         component.b2Vec2 = planck.Vec2;
@@ -49,7 +49,7 @@ var planckWrapper = {
         self.world().queryAABB(aabb, callback);
     },
     createBody: function (self, entity, body, isLossTolerant) {
-        PhysicsComponent.prototype.log("createBody of ".concat(entity._stats.name));
+        PhysicsComponent.prototype.log(`createBody of ${entity._stats.name}`);
         // immediately destroy body if entity already has box2dBody
         if (!entity) {
             PhysicsComponent.prototype.log('warning: creating body for non-existent entity');
@@ -188,7 +188,7 @@ var planckWrapper = {
         entity.gravitic(!!body.affectedByGravity);
         // rotate body to its previous value
         entity.rotateTo(0, 0, entity._rotate.z);
-        PhysicsComponent.prototype.log("successfully created body for ".concat(entity.id(), " ").concat(entity._category, " ").concat(entity._stats.name, " ").concat(entity._stats.type));
+        PhysicsComponent.prototype.log(`successfully created body for ${entity.id()} ${entity._category} ${entity._stats.name} ${entity._stats.type}`);
         return tempBod;
     },
     createJoint: function (self, entityA, entityB, anchorA, anchorB) {

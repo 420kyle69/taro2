@@ -1,7 +1,5 @@
-var TileShape = /** @class */ (function () {
-    function TileShape(size, shape) {
-        if (size === void 0) { size = { x: 1, y: 1 }; }
-        if (shape === void 0) { shape = 'rectangle'; }
+class TileShape {
+    constructor(size = { x: 1, y: 1 }, shape = 'rectangle') {
         this.sample = {};
         this.shape = shape;
         this.size = size;
@@ -13,17 +11,16 @@ var TileShape = /** @class */ (function () {
      * @param temp if true, it won't change this.sample, but only return it instead.
      * @returns sample to print
      */
-    TileShape.prototype.calcSample = function (selectedTileArea, size, shape, temp) {
-        if (temp === void 0) { temp = false; }
-        var xArray = Object.keys(selectedTileArea);
-        var yArray = Object.values(selectedTileArea).map(function (object) { return Object.keys(object); }).flat().sort(function (a, b) { return parseInt(a) - parseInt(b); });
-        var minX = parseInt(xArray[0]);
-        var minY = parseInt(yArray[0]);
-        var maxX = parseInt(xArray[xArray.length - 1]);
-        var maxY = parseInt(yArray[yArray.length - 1]);
-        var xLength = maxX - minX + 1;
-        var yLength = maxY - minY + 1;
-        var tempSample = {};
+    calcSample(selectedTileArea, size, shape, temp = false) {
+        const xArray = Object.keys(selectedTileArea);
+        const yArray = Object.values(selectedTileArea).map((object) => Object.keys(object)).flat().sort((a, b) => parseInt(a) - parseInt(b));
+        const minX = parseInt(xArray[0]);
+        const minY = parseInt(yArray[0]);
+        const maxX = parseInt(xArray[xArray.length - 1]);
+        const maxY = parseInt(yArray[yArray.length - 1]);
+        const xLength = maxX - minX + 1;
+        const yLength = maxY - minY + 1;
+        let tempSample = {};
         if (size === 'fitContent') {
             size = {
                 x: xLength,
@@ -47,18 +44,18 @@ var TileShape = /** @class */ (function () {
         if (!temp) {
             this.sample = tempSample;
         }
-        return { sample: tempSample, xLength: xLength, yLength: yLength, minX: minX, minY: minY };
-    };
-    TileShape.calcCircle = function (minX, xLength, minY, yLength, selectedTileArea, size) {
-        var circleGenerator = Combinator.circle(Math.floor(Math.max(size.x, size.y) / 2) + 1);
-        var maxLoop = Constants.MAX_LOOP;
-        var newSample = {};
+        return { sample: tempSample, xLength, yLength, minX, minY };
+    }
+    static calcCircle(minX, xLength, minY, yLength, selectedTileArea, size) {
+        const circleGenerator = Combinator.circle(Math.floor(Math.max(size.x, size.y) / 2) + 1);
+        let maxLoop = Constants.MAX_LOOP;
+        const newSample = {};
         while (maxLoop > 0) {
-            var circleValue = circleGenerator.next();
+            const circleValue = circleGenerator.next();
             if (circleValue.done) {
                 break;
             }
-            var vec2d = circleValue.value;
+            const vec2d = circleValue.value;
             if (selectedTileArea[minX + vec2d.x % xLength] && selectedTileArea[minX + vec2d.x % xLength][minY + vec2d.y % yLength] !== undefined) {
                 if (!newSample[vec2d.x]) {
                     newSample[vec2d.x] = {};
@@ -68,17 +65,17 @@ var TileShape = /** @class */ (function () {
             maxLoop -= 1;
         }
         return newSample;
-    };
-    TileShape.calcDiamond = function (minX, xLength, minY, yLength, selectedTileArea, size) {
-        var diamondGenerator = Combinator.diamond(Math.floor(Math.max(size.x, size.y) / 2) + 1);
-        var maxLoop = Constants.MAX_LOOP;
-        var newSample = {};
+    }
+    static calcDiamond(minX, xLength, minY, yLength, selectedTileArea, size) {
+        const diamondGenerator = Combinator.diamond(Math.floor(Math.max(size.x, size.y) / 2) + 1);
+        let maxLoop = Constants.MAX_LOOP;
+        const newSample = {};
         while (maxLoop > 0) {
-            var diamondValue = diamondGenerator.next();
+            const diamondValue = diamondGenerator.next();
             if (diamondValue.done) {
                 break;
             }
-            var vec2d = diamondValue.value;
+            const vec2d = diamondValue.value;
             if (selectedTileArea[minX + vec2d.x % xLength] && selectedTileArea[minX + vec2d.x % xLength][minY + vec2d.y % yLength] !== undefined) {
                 if (!newSample[vec2d.x]) {
                     newSample[vec2d.x] = {};
@@ -88,17 +85,17 @@ var TileShape = /** @class */ (function () {
             maxLoop -= 1;
         }
         return newSample;
-    };
-    TileShape.calcRect = function (minX, xLength, minY, yLength, selectedTileArea, size) {
-        var rectGenerator = Combinator.rect(size.x, size.y);
-        var maxLoop = Constants.MAX_LOOP;
-        var newSample = {};
+    }
+    static calcRect(minX, xLength, minY, yLength, selectedTileArea, size) {
+        const rectGenerator = Combinator.rect(size.x, size.y);
+        let maxLoop = Constants.MAX_LOOP;
+        const newSample = {};
         while (maxLoop > 0) {
-            var rectValue = rectGenerator.next();
+            const rectValue = rectGenerator.next();
             if (rectValue.done) {
                 break;
             }
-            var vec2d = rectValue.value;
+            const vec2d = rectValue.value;
             if (selectedTileArea[minX + vec2d.x % xLength] && selectedTileArea[minX + vec2d.x % xLength][minY + vec2d.y % yLength] !== undefined) {
                 if (!newSample[vec2d.x]) {
                     newSample[vec2d.x] = {};
@@ -108,9 +105,8 @@ var TileShape = /** @class */ (function () {
             maxLoop -= 1;
         }
         return newSample;
-    };
-    return TileShape;
-}());
+    }
+}
 if (typeof (module) !== 'undefined' && typeof (module.exports) !== 'undefined') {
     module.exports = TileShape;
 }

@@ -1,27 +1,25 @@
-var DevToolButton = /** @class */ (function () {
-    function DevToolButton(devModeTools, text, tooltipLabel, tooltipText, texture, x, y, w, h, container, func, value, hoverChildren, defaultVisible) {
-        if (defaultVisible === void 0) { defaultVisible = true; }
-        var _this = this;
+class DevToolButton {
+    constructor(devModeTools, text, tooltipLabel, tooltipText, texture, x, y, w, h, container, func, value, hoverChildren, defaultVisible = true) {
         var _a;
         this.devModeTools = devModeTools;
         this.isHover = false;
         this.name = text;
         this.hoverChildren = hoverChildren;
-        var scene = devModeTools.scene;
+        const scene = devModeTools.scene;
         // @ts-ignore
-        var button = this.button = scene.add.rexRoundRectangle(x + w / 2, y + h / 2, w, h, 5, devModeTools.COLOR_WHITE);
+        const button = this.button = scene.add.rexRoundRectangle(x + w / 2, y + h / 2, w, h, 5, devModeTools.COLOR_WHITE);
         button.setStrokeStyle(1, 0x000000, 1);
         button.setInteractive();
         button.setVisible(defaultVisible);
         container.add(button);
         if (texture) {
-            var image = this.image = scene.add.image(x + w / 2 - h * 0.4, y + h * 0.1, texture)
+            const image = this.image = scene.add.image(x + w / 2 - h * 0.4, y + h * 0.1, texture)
                 .setDisplaySize(h * 0.8, h * 0.8)
                 .setOrigin(0);
             container.add(image);
         }
         else {
-            var label = this.label = scene.add.bitmapText(x + w / 2, y + h / 2, BitmapFontManager.font(scene, 'Verdana', false, false, '#000000'), text, 16);
+            const label = this.label = scene.add.bitmapText(x + w / 2, y + h / 2, BitmapFontManager.font(scene, 'Verdana', false, false, '#000000'), text, 16);
             label.setOrigin(0.5);
             label.letterSpacing = 1.3;
             label.setVisible(defaultVisible);
@@ -38,34 +36,34 @@ var DevToolButton = /** @class */ (function () {
                 label.visible = false;
             }*/
         }
-        button.on('pointerdown', function () {
+        button.on('pointerdown', () => {
             if (value || value === 0)
                 func(value);
             else
                 func();
         });
-        button.on('pointerover', function () {
+        button.on('pointerover', () => {
             var _a;
             scene.gameScene.input.setTopOnly(true);
             scene.pointerInsideButtons = true;
             devModeTools.tooltip.showMessage(tooltipLabel, tooltipText);
-            _this.isHover = true;
-            (_a = _this.hoverChildren) === null || _a === void 0 ? void 0 : _a.map(function (btn) {
+            this.isHover = true;
+            (_a = this.hoverChildren) === null || _a === void 0 ? void 0 : _a.map((btn) => {
                 btn.button.setVisible(true);
                 btn.label.setVisible(true);
             });
-            clearTimeout(_this.timer);
+            clearTimeout(this.timer);
         });
-        button.on('pointerout', function () {
+        button.on('pointerout', () => {
             //this.hideHoverChildren(350);
             scene.pointerInsideButtons = false;
             devModeTools.tooltip.fadeOut();
         });
-        (_a = this.hoverChildren) === null || _a === void 0 ? void 0 : _a.map(function (btn) {
-            btn.button.on('pointerout', function () {
+        (_a = this.hoverChildren) === null || _a === void 0 ? void 0 : _a.map((btn) => {
+            btn.button.on('pointerout', () => {
                 //this.hideHoverChildren(350);
             });
-            btn.button.on('pointerdown', function () {
+            btn.button.on('pointerdown', () => {
                 //this.hideHoverChildren(0);
             });
         });
@@ -84,7 +82,7 @@ var DevToolButton = /** @class */ (function () {
             }
         }, delay);
     }*/
-    DevToolButton.prototype.highlight = function (mode) {
+    highlight(mode) {
         switch (mode) {
             case 'hidden':
                 this.hidden = true;
@@ -103,10 +101,9 @@ var DevToolButton = /** @class */ (function () {
                 }
                 break;
         }
-    };
-    DevToolButton.prototype.increaseSize = function (value) {
+    }
+    increaseSize(value) {
         this.button.setScale(1 + (Number(value) * 0.1), 1 + (Number(value) * 0.05));
-    };
-    return DevToolButton;
-}());
+    }
+}
 //# sourceMappingURL=DevToolButton.js.map

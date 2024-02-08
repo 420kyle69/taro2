@@ -41,7 +41,7 @@ var taroClientConfig = {
 		'/gameClasses/components/ui/VideoChatComponent.js',
 		'/gameClasses/components/ui/TradeUiComponent.js',
 
-		'/gameClasses/components/script/ScriptComponent.js',		
+		'/gameClasses/components/script/ScriptComponent.js',
 		'/gameClasses/components/script/ActionComponent.js',
 		'/gameClasses/components/script/ParameterComponent.js',
 		'/gameClasses/components/script/ConditionComponent.js',
@@ -109,11 +109,28 @@ var taroClientConfig = {
 		'renderer/phaser/classes/devmode/Constants.js',
 		'renderer/phaser/classes/devmode/EntityImage.js',
 		'renderer/phaser/PhaserRenderer.js',
+
+		// Three.js Renderer
+		'renderer/three/three.min.js',
+		'renderer/three/OrbitControls.js',
+		'renderer/three/utils.js',
+		'renderer/three/ThreeTextureManager.js',
+		'renderer/three/ThreeVoxelMap.js',
+		'renderer/three/ThreeRenderer.js',
+		'renderer/three/ThreeCamera.js',
+		'renderer/three/ThreeSprite.js',
+		'renderer/three/ThreeBoxMesh.js',
+		'renderer/three/ThreeLabel.js',
+		'renderer/three/ThreeAnimatedSprite.js',
+		'renderer/three/ThreeUnit.js',
+		'renderer/three/ThreeAttributeBar.js',
+		'renderer/three/ThreeChatBubble.js',
+
 		'/client.js',
-		'/index.js'
-	]
+		'/index.js',
+	],
 };
 
-if (typeof (module) !== 'undefined' && typeof (module.exports) !== 'undefined') {
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
 	module.exports = taroClientConfig;
 }
