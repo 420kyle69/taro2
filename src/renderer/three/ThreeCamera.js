@@ -8,8 +8,6 @@ class ThreeCamera {
         this.perspectiveCamera = persCamera;
         this.fovInitial = Math.tan(((Math.PI / 180) * this.perspectiveCamera.fov) / 2);
         this.viewportHeightInitial = viewportHeight;
-        // const halfWidth = frustumWidthAtDistance(this.perspectiveCamera, persCamera.position.y) / 2;
-        // const halfHeight = frustumHeightAtDistance(this.perspectiveCamera, persCamera.position.y) / 2;
         const halfWidth = Utils.pixelToWorld(viewportWidth / 2);
         const halfHeight = Utils.pixelToWorld(viewportHeight / 2);
         const orthoCamera = new THREE.OrthographicCamera(-halfWidth, halfWidth, halfHeight, -halfHeight, 0.1, 1000);
@@ -18,6 +16,7 @@ class ThreeCamera {
         this.instance = orthoCamera;
         this.controls = new OrbitControls(this.instance, canvas);
         this.controls.enableRotate = false;
+        this.controls.enableZoom = false;
         this.controls.mouseButtons = { LEFT: '', MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.ROTATE };
         this.controls.update();
         this.orthographicState = {
@@ -33,9 +32,13 @@ class ThreeCamera {
             if (evt.key === 'v') {
                 this.isPerspective = !this.isPerspective;
                 if (this.isPerspective) {
+                    this.controls.enableRotate = true;
+                    this.controls.enableZoom = true;
                     this.switchToPerspectiveCamera();
                 }
                 else {
+                    this.controls.enableRotate = false;
+                    this.controls.enableZoom = false;
                     this.switchToOrthographicCamera();
                 }
             }
@@ -111,7 +114,6 @@ class ThreeCamera {
         this.perspectiveCamera.position.lerp(this.perspectiveCamera.position.clone().add(diff), t);
     }
     switchToOrthographicCamera() {
-        this.controls.enableRotate = false;
         this.perspectiveState.target.copy(this.controls.target);
         this.perspectiveState.position.copy(this.controls.object.position);
         this.perspectiveState.zoom = this.controls.object.zoom;
@@ -134,7 +136,6 @@ class ThreeCamera {
         }
     }
     switchToPerspectiveCamera() {
-        this.controls.enableRotate = true;
         this.orthographicState.target.copy(this.controls.target);
         this.orthographicState.position.copy(this.controls.object.position);
         this.perspectiveCamera.updateProjectionMatrix();
