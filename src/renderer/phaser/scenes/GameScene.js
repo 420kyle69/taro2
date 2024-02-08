@@ -321,9 +321,8 @@ var GameScene = /** @class */ (function (_super) {
         var entityLayers = this.entityLayers;
         this.tilemapLayers = [];
         data.map.layers.forEach(function (layer) {
-            if (layer.type === 'tilelayer') {
+            if (layer.type === 'tilelayer' && layer.data) {
                 var tileLayer = map.createLayer(layer.name, map.tilesets, 0, 0);
-                console.log('tileLayer', tileLayer);
                 tileLayer.name = layer.name;
                 tileLayer.setScale(scaleFactor.x, scaleFactor.y);
                 _this.tilemapLayers.push(tileLayer);

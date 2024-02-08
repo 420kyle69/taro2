@@ -159,7 +159,7 @@ var TileEditor = /** @class */ (function () {
             case 'fill': {
                 var nowValue = dataValue;
                 var oldTile = map.layers[tempLayer].data[nowValue.y * width + nowValue.x];
-                if (taro.game.data.map[nowValue.layer].data)
+                if (taro.game.data.map.layers[nowValue.layer].type === 'tilelayer' && taro.game.data.map.layers[nowValue.layer].data)
                     this.floodFill(nowValue.layer, oldTile, nowValue.gid, nowValue.x, nowValue.y, true, nowValue.limits);
                 break;
             }
@@ -167,14 +167,14 @@ var TileEditor = /** @class */ (function () {
                 //save tile change to taro.game.data.map and taro.map.data
                 var nowValue_1 = dataValue;
                 nowValue_1.selectedTiles.map(function (v, idx) {
-                    if (taro.game.data.map[nowValue_1.layer[idx]].data)
+                    if (taro.game.data.map.layers[nowValue_1.layer[idx]].type === 'tilelayer' && taro.game.data.map.layers[nowValue_1.layer[idx]].data)
                         _this.putTiles(nowValue_1.x, nowValue_1.y, v, nowValue_1.size, nowValue_1.shape, nowValue_1.layer[idx], true);
                 });
                 break;
             }
             case 'clear': {
                 var nowValue = dataValue;
-                if (taro.game.data.map[nowValue.layer].data)
+                if (taro.game.data.map.layers[nowValue.layer].type === 'tilelayer' && taro.game.data.map.layers[nowValue.layer].data)
                     this.clearLayer(nowValue.layer);
             }
         }
@@ -398,24 +398,27 @@ var TileEditor = /** @class */ (function () {
                             var sample = JSON.parse(JSON.stringify(this.brushArea.sample));
                             var selectedTiles_1 = JSON.parse(JSON.stringify(this.selectedTileArea));
                             var nowLayer_1 = map_1.currentLayerIndex;
-                            Object.entries(sample).map(function (_a) {
-                                var x = _a[0], obj = _a[1];
-                                Object.entries(obj).map(function (_a) {
-                                    var y = _a[0], value = _a[1];
-                                    if (!originTileArea_1[x]) {
-                                        originTileArea_1[x] = {};
-                                    }
-                                    originTileArea_1[x][y] = _this.getTile(pointerTileX_1 + parseInt(x), pointerTileY_1 + parseInt(y), map_1);
+                            console.log('pu tile at layer', taro.game.data.map.layers[nowLayer_1].name);
+                            if (taro.game.data.map.layers[nowLayer_1].type === 'tilelayer' && taro.game.data.map.layers[nowLayer_1].data) {
+                                Object.entries(sample).map(function (_a) {
+                                    var x = _a[0], obj = _a[1];
+                                    Object.entries(obj).map(function (_a) {
+                                        var y = _a[0], value = _a[1];
+                                        if (!originTileArea_1[x]) {
+                                            originTileArea_1[x] = {};
+                                        }
+                                        originTileArea_1[x][y] = _this.getTile(pointerTileX_1 + parseInt(x), pointerTileY_1 + parseInt(y), map_1);
+                                    });
                                 });
-                            });
-                            this.commandController.addCommand({
-                                func: function () {
-                                    _this.putTiles(pointerTileX_1, pointerTileY_1, selectedTiles_1, nowBrushSize_1, nowBrushShape_1, nowLayer_1, false);
-                                },
-                                undo: function () {
-                                    _this.putTiles(pointerTileX_1, pointerTileY_1, originTileArea_1, nowBrushSize_1, nowBrushShape_1, nowLayer_1, false);
-                                },
-                            });
+                                this.commandController.addCommand({
+                                    func: function () {
+                                        _this.putTiles(pointerTileX_1, pointerTileY_1, selectedTiles_1, nowBrushSize_1, nowBrushShape_1, nowLayer_1, false);
+                                    },
+                                    undo: function () {
+                                        _this.putTiles(pointerTileX_1, pointerTileY_1, originTileArea_1, nowBrushSize_1, nowBrushShape_1, nowLayer_1, false);
+                                    },
+                                });
+                            }
                         }
                         else if (this.devModeTools.modeButtons[4].active) {
                             var targetTile_1 = this.getTile(pointerTileX_1, pointerTileY_1, map_1);
@@ -432,25 +435,27 @@ var TileEditor = /** @class */ (function () {
                                     }, 0);
                                 };
                                 var nowLayer_2 = map_1.currentLayerIndex;
-                                this.commandController.addCommand({
-                                    func: function () {
-                                        _this.floodFill(nowLayer_2, targetTile_1, selectedTile_1, pointerTileX_1, pointerTileY_1, false, {}, addToLimits_1);
-                                        taro.network.send('editTile', {
-                                            fill: {
-                                                gid: selectedTile_1, layer: nowLayer_2, x: pointerTileX_1, y: pointerTileY_1
-                                            }
-                                        });
-                                    },
-                                    undo: function () {
-                                        _this.floodFill(nowLayer_2, selectedTile_1, targetTile_1, pointerTileX_1, pointerTileY_1, false, _this.commandController.commands[nowCommandCount_1 - _this.commandController.offset].cache);
-                                        taro.network.send('editTile', {
-                                            fill: {
-                                                gid: targetTile_1, layer: nowLayer_2, x: pointerTileX_1, y: pointerTileY_1, limits: _this.commandController.commands[nowCommandCount_1 - _this.commandController.offset].cache
-                                            }
-                                        });
-                                    },
-                                    cache: {},
-                                }, true);
+                                if (taro.game.data.map.layers[nowLayer_2].type === 'tilelayer' && taro.game.data.map.layers[nowLayer_2].data) {
+                                    this.commandController.addCommand({
+                                        func: function () {
+                                            _this.floodFill(nowLayer_2, targetTile_1, selectedTile_1, pointerTileX_1, pointerTileY_1, false, {}, addToLimits_1);
+                                            taro.network.send('editTile', {
+                                                fill: {
+                                                    gid: selectedTile_1, layer: nowLayer_2, x: pointerTileX_1, y: pointerTileY_1
+                                                }
+                                            });
+                                        },
+                                        undo: function () {
+                                            _this.floodFill(nowLayer_2, selectedTile_1, targetTile_1, pointerTileX_1, pointerTileY_1, false, _this.commandController.commands[nowCommandCount_1 - _this.commandController.offset].cache);
+                                            taro.network.send('editTile', {
+                                                fill: {
+                                                    gid: targetTile_1, layer: nowLayer_2, x: pointerTileX_1, y: pointerTileY_1, limits: _this.commandController.commands[nowCommandCount_1 - _this.commandController.offset].cache
+                                                }
+                                            });
+                                        },
+                                        cache: {},
+                                    }, true);
+                                }
                             }
                         }
                     }

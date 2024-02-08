@@ -388,9 +388,8 @@ class GameScene extends PhaserScene {
 		this.tilemapLayers = [];
 		data.map.layers.forEach((layer) => {
 
-			if (layer.type === 'tilelayer') {
+			if (layer.type === 'tilelayer' && layer.data) {
 				const tileLayer = map.createLayer(layer.name, map.tilesets, 0, 0);
-				console.log('tileLayer', tileLayer);
 				tileLayer.name = layer.name;
 				tileLayer.setScale(scaleFactor.x, scaleFactor.y);
 				this.tilemapLayers.push(tileLayer);

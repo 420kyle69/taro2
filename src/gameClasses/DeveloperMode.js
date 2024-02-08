@@ -260,10 +260,10 @@ var DeveloperMode = /** @class */ (function () {
     DeveloperMode.prototype.editTile = function (data, clientId) {
         var _this = this;
         var _a, _b;
-        console.log('editTile 1', data);
+        //@ts-ignore
+        console.log('edit layer', (_a = taro.game.data.map.layers[data.edit.layer[0]]) === null || _a === void 0 ? void 0 : _a.name);
         // only allow developers to modify the tiles
         if (taro.server.developerClientIds.includes(clientId) || clientId === 'server') {
-            console.log('editTile 2', data);
             if (JSON.stringify(data) === '{}') {
                 throw 'receive: {}';
             }
@@ -309,7 +309,6 @@ var DeveloperMode = /** @class */ (function () {
                     this.clearLayer(nowValue.layer);
                 }
             }
-            console.log('serverData', serverData, (_a = gameMap.layers[serverData.layer]) === null || _a === void 0 ? void 0 : _a.name);
             if (((_b = gameMap.layers[serverData.layer]) === null || _b === void 0 ? void 0 : _b.name) === 'walls') {
                 console.log('recalc physics');
                 //if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap

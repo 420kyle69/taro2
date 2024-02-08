@@ -53,7 +53,8 @@ var DevModeTools = /** @class */ (function (_super) {
         scene.add.existing(toolButtonsContainer);
         var toolButtonSection = _this.toolButtonSection = new DevButtonSection(_this, 'Tools', 0, (h + s) * 5 - s);
         var brushSizeSection = new DevButtonSection(_this, 'Brush Size', toolButtonSection.height, (h + s) * 2 - s * 4);
-        var layersCount = scene.gameScene.tilemapLayers.length;
+        //const layersCount = scene.gameScene.tilemapLayers.length;
+        var layersCount = taro.game.data.map.layers.filter(function (layer) { return layer.type === 'tilelayer'; }).length;
         if (layersCount > 0)
             _this.layerButtonSection = new DevButtonSection(_this, 'Layers', toolButtonSection.height + brushSizeSection.height, (h * 0.75 + s) * layersCount + s * 3);
         var paletteButtonSection = new DevButtonSection(_this, '', toolButtonSection.height + brushSizeSection.height + ((_a = _this.layerButtonSection) === null || _a === void 0 ? void 0 : _a.height) || 0, h);
@@ -110,9 +111,17 @@ var DevModeTools = /** @class */ (function (_super) {
         brushSizeSection.addButton(new DevToolButton(_this, '+', '+', 'increase brush size', null, (w + s) * 2, 0, w, h, toolButtonsContainer, _this.commandController.defaultCommands.increaseBrushSize.bind(_this)));
         _this.layerButtons = [];
         _this.layerHideButtons = [];
+        var layerIndex = 0;
         scene.gameScene.tilemapLayers.forEach(function (layer, index) {
-            _this.layerButtonSection.addButton(new DevToolButton(_this, layer.name, "Layer (".concat(index + 1, ")"), "select the ".concat(layer.name, " layer"), null, w * 0.7, (h * 0.75 + s) * (layersCount - 1 - index), w * 2.5, h * 0.75, toolButtonsContainer, _this.switchLayer.bind(_this), index), _this.layerButtons);
-            _this.layerButtonSection.addButton(new DevToolButton(_this, '', "Layer visibility (shift-".concat(index + 1, ")"), "show/hide ".concat(layer.name, " layer"), 'eyeopen', 0, (h * 0.75 + s) * (layersCount - 1 - index), w, h * 0.75, toolButtonsContainer, _this.hideLayer.bind(_this), index), _this.layerHideButtons);
+            if (taro.game.data.map.layers[index].type === 'tilelayer' && taro.game.data.map.layers[index].data) {
+                _this.layerButtonSection.addButton(new DevToolButton(_this, layer.name, "Layer (".concat(layerIndex, ")"), "select the ".concat(layer.name, " layer"), null, w * 0.7, (h * 0.75 + s) * (layersCount - 1 - layerIndex), w * 2.5, h * 0.75, toolButtonsContainer, _this.switchLayer.bind(_this), index), _this.layerButtons);
+                _this.layerButtonSection.addButton(new DevToolButton(_this, '', "Layer visibility (shift-".concat(layerIndex, ")"), "show/hide ".concat(layer.name, " layer"), 'eyeopen', 0, (h * 0.75 + s) * (layersCount - 1 - layerIndex), w, h * 0.75, toolButtonsContainer, _this.hideLayer.bind(_this), index), _this.layerHideButtons);
+                layerIndex++;
+            }
+            else {
+                _this.layerButtons.push(null);
+                _this.layerHideButtons.push(null);
+            }
         });
         _this.layerButtons[0].highlight('active');
         _this.layerButtons[0].increaseSize(true);
@@ -387,7 +396,6 @@ var DevModeTools = /** @class */ (function (_super) {
     };
     DevModeTools.prototype.clear = function () {
         var gameMap = this.scene.gameScene.tilemap;
-        //this.tileEditor.clearLayer(gameMap.currentLayerIndex, false);
         var data = {
             clear: {
                 layer: gameMap.currentLayerIndex,
@@ -428,12 +436,12 @@ var DevModeTools = /** @class */ (function (_super) {
             return;
         gameMap.currentLayerIndex = value;
         this.layerButtons.forEach(function (button) {
-            button.highlight('no');
-            button.increaseSize(false);
+            button === null || button === void 0 ? void 0 : button.highlight('no');
+            button === null || button === void 0 ? void 0 : button.increaseSize(false);
         });
         this.layerHideButtons.forEach(function (button) {
-            button.highlight('no');
-            button.increaseSize(false);
+            button === null || button === void 0 ? void 0 : button.highlight('no');
+            button === null || button === void 0 ? void 0 : button.increaseSize(false);
         });
         if (this.layerButtons[value] && this.layerHideButtons[value]) {
             this.layerHideButtons[value].image.setTexture('eyeopen');

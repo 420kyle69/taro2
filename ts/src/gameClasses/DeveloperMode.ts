@@ -267,10 +267,10 @@ class DeveloperMode {
 
 
 	editTile<T extends MapEditToolEnum>(data: TileData<T>, clientId: string): void {
-		console.log('editTile 1', data);
+		//@ts-ignore
+		console.log('edit layer', taro.game.data.map.layers[data.edit.layer[0]]?.name);
 		// only allow developers to modify the tiles
 		if (taro.server.developerClientIds.includes(clientId) || clientId === 'server') {
-			console.log('editTile 2', data);
 			if (JSON.stringify(data) === '{}') {
 				throw 'receive: {}';
 			}
@@ -314,7 +314,6 @@ class DeveloperMode {
 				}
 			}
 
-			console.log('serverData', serverData, gameMap.layers[serverData.layer]?.name);
 			if (gameMap.layers[serverData.layer]?.name === 'walls') {
 				console.log('recalc physics')
 				//if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap

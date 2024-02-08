@@ -71,7 +71,8 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		scene.add.existing(toolButtonsContainer);
 		const toolButtonSection = this.toolButtonSection = new DevButtonSection(this, 'Tools', 0, (h + s) * 5 - s);
 		const brushSizeSection = new DevButtonSection(this, 'Brush Size', toolButtonSection.height, (h + s) * 2 - s * 4);
-		const layersCount = scene.gameScene.tilemapLayers.length;
+		//const layersCount = scene.gameScene.tilemapLayers.length;
+		const layersCount = taro.game.data.map.layers.filter(layer => layer.type === 'tilelayer').length;
 		if (layersCount > 0) this.layerButtonSection = new DevButtonSection(this, 'Layers', toolButtonSection.height + brushSizeSection.height, (h * 0.75 + s) * layersCount + s * 3);
 		const paletteButtonSection = new DevButtonSection(this, '', toolButtonSection.height + brushSizeSection.height + this.layerButtonSection?.height || 0, h);
 
@@ -132,9 +133,16 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.layerButtons = [];
 		this.layerHideButtons = [];
 		
+		let layerIndex = 0;
 		scene.gameScene.tilemapLayers.forEach((layer, index) => {
-			this.layerButtonSection.addButton(new DevToolButton(this, layer.name, `Layer (${index + 1})`, `select the ${layer.name} layer`, null, w * 0.7, (h * 0.75 + s) * (layersCount - 1 - index), w * 2.5, h * 0.75, toolButtonsContainer, this.switchLayer.bind(this), index), this.layerButtons);
-			this.layerButtonSection.addButton(new DevToolButton(this, '', `Layer visibility (shift-${index + 1})`, `show/hide ${layer.name} layer`, 'eyeopen', 0, (h * 0.75 + s) * (layersCount - 1 - index), w, h * 0.75, toolButtonsContainer, this.hideLayer.bind(this), index), this.layerHideButtons);
+			if (taro.game.data.map.layers[index].type === 'tilelayer' && taro.game.data.map.layers[index].data) {
+				this.layerButtonSection.addButton(new DevToolButton(this, layer.name, `Layer (${layerIndex})`, `select the ${layer.name} layer`, null, w * 0.7, (h * 0.75 + s) * (layersCount - 1 - layerIndex), w * 2.5, h * 0.75, toolButtonsContainer, this.switchLayer.bind(this), index), this.layerButtons);
+				this.layerButtonSection.addButton(new DevToolButton(this, '', `Layer visibility (shift-${layerIndex})`, `show/hide ${layer.name} layer`, 'eyeopen', 0, (h * 0.75 + s) * (layersCount - 1 - layerIndex), w, h * 0.75, toolButtonsContainer, this.hideLayer.bind(this), index), this.layerHideButtons);
+				layerIndex++;
+			} else {
+				this.layerButtons.push(null);
+				this.layerHideButtons.push(null);
+			}
 		});
 
 		this.layerButtons[0].highlight('active');
@@ -425,7 +433,6 @@ class DevModeTools extends Phaser.GameObjects.Container {
 
 	clear(): void {
 		const gameMap = this.scene.gameScene.tilemap;
-		//this.tileEditor.clearLayer(gameMap.currentLayerIndex, false);
 		const data: TileData<'clear'> = {
 			clear: {
 				layer: gameMap.currentLayerIndex,
@@ -468,12 +475,12 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		if (!scene.gameScene.tilemapLayers[value]) return;
 		gameMap.currentLayerIndex = value;
 		this.layerButtons.forEach(button => {
-			button.highlight('no');
-			button.increaseSize(false);
+			button?.highlight('no');
+			button?.increaseSize(false);
 		});
 		this.layerHideButtons.forEach(button => {
-			button.highlight('no');
-			button.increaseSize(false);
+			button?.highlight('no');
+			button?.increaseSize(false);
 		});
 		if (this.layerButtons[value] && this.layerHideButtons[value]) {
 			this.layerHideButtons[value].image.setTexture('eyeopen');
