@@ -11,18 +11,19 @@ class ThreeVoxelMap extends THREE.Group {
         const allFacesVisible = [false, false, false, false, false, false];
         const onlyBottomFaceVisible = [true, true, true, false, true, true];
         const hiddenFaces = flat ? onlyBottomFaceVisible : allFacesVisible;
-        const flatOffset = flat ? 0.001 : 0;
+        const yOffset = 0.001;
         for (let z = 0; z < data.height; z++) {
             for (let x = 0; x < data.width; x++) {
                 const tileId = data.data[z * data.width + x];
                 if (tileId <= 0)
                     continue;
-                voxels.set(getKeyFromPos(x, height, z), {
-                    position: [x + x, height + height + flatOffset, z + z],
+                const pos = { x, y: height + yOffset * height, z };
+                voxels.set(getKeyFromPos(pos.x, pos.y, pos.z), {
+                    position: [pos.x, pos.y, pos.z],
                     type: data.data[z * data.width + x],
                     visible: true,
                     // hiddenFaces: 0x000000,
-                    hiddenFaces,
+                    hiddenFaces: [...hiddenFaces],
                 });
             }
         }
@@ -56,13 +57,14 @@ function pruneCells(cells) {
         const k4 = getKeyFromPos(curCell.position[0], curCell.position[1] - 1, curCell.position[2]);
         const k5 = getKeyFromPos(curCell.position[0], curCell.position[1], curCell.position[2] + 1);
         const k6 = getKeyFromPos(curCell.position[0], curCell.position[1], curCell.position[2] - 1);
-        const keys = [k1, k2, k3, k4, k5, k6];
+        const neighborKeys = [k1, k2, k3, k4, k5, k6];
         let visible = false;
         for (let i = 0; i < 6; ++i) {
-            const faceHidden = cells.has(keys[i]);
-            if (faceHidden)
-                curCell.hiddenFaces[i] = faceHidden;
-            if (!faceHidden) {
+            const hasNeighbor = cells.has(neighborKeys[i]);
+            if (hasNeighbor) {
+                curCell.hiddenFaces[i] = true;
+            }
+            if (!hasNeighbor) {
                 visible = true;
             }
         }
