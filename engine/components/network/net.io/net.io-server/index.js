@@ -451,7 +451,7 @@ NetIo.Socket = NetIo.EventingClass.extend({
 		this._socket.on('message', function (message) {
 			self.emit('message', [self._decode(message)]);
 		});
-		
+
 		this._socket.on('close', function (code, reason) {
 			// first step in the propagation of the disconnect event.
 			// store socket's disconnect reason, if not set already
@@ -462,7 +462,7 @@ NetIo.Socket = NetIo.EventingClass.extend({
 				at: self._disconnect?.at || new Date(),
 				source: self._disconnect?.source || 'closeEvent',
 			};
-			
+
 			self.emit('disconnect', {
 				socket: self._socket,
 				reason,
@@ -505,7 +505,7 @@ NetIo.Socket = NetIo.EventingClass.extend({
 			console.log('err occured in netio-server/index.js _send()');
 		}
 	},
-	
+
 	getReasonCode: function (reason) {
 		let reasonCode = reason;
 		if (reason) {
@@ -534,16 +534,16 @@ NetIo.Socket = NetIo.EventingClass.extend({
 	 * @param terminateInstantly
 	 */
 	close: function (reason, code, terminateInstantly = false) {
-		
+
 		this.send({
 			_netioCmd: 'close',
 			data: reason
 		});
-		
+
 		if (terminateInstantly) {
 			this._socket.terminate();
 		}
-		
+
 		// to trace unexpected close events.
 		// console.trace();
 		console.log('socket.close (code:', code, '):', reason);
@@ -553,7 +553,7 @@ NetIo.Socket = NetIo.EventingClass.extend({
 		if (!isNaN(parseInt(reason)) && !code) {
 			code = reason;
 		}
-		
+
 		// store socket's disconnect reason, if not set already
 		this._disconnect = {
 			reasonCode: this._disconnect?.reasonCode || this.getReasonCode(reason),
@@ -562,7 +562,7 @@ NetIo.Socket = NetIo.EventingClass.extend({
 			at: this._disconnect?.at || new Date(),
 			source: this._disconnect?.source || 'closeFn',
 		};
-		
+
 		this._socket.close(code);
 	}
 });
@@ -573,9 +573,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 	init: function (port, callback) {
 		this._idCounter = 0;
 
-		// this._websocket = require('@clusterws/cws');
 		this._websocket = require('ws');
-		// this._websocket = require('websocket');
 		this._fs = require('fs');
 		this._http = require('http');
 		this._https = require('https');
@@ -615,16 +613,14 @@ NetIo.Server = NetIo.EventingClass.extend({
 			response.writeHead(404);
 			response.end();
 		});
-		
+
 		this._socketServerHttp = new this._websocket.Server({
 			server: this._httpServer,
 			maxPayload: 200 * 1024, // 100 KB - The maximum allowed message size
-			verifyClient: function(info, done) {
+			verifyClient: async function (info, done) {
 				console.log('verifyClient event');
-
 				// Custom logic to determine whether to accept or reject the connection
-				const acceptConnection = taro.clusterClient ? taro.clusterClient.verifyConnectionRequest(info) : true;
-				
+				const acceptConnection = taro.workerComponent ? await taro.workerComponent.verifyConnectionRequest(info) : true;
 				done(acceptConnection, acceptConnection ? 200 : 403, acceptConnection ? '' : 'Connection not accepted');
 			},
 		});
@@ -729,7 +725,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 			this._httpsServer.on('error', function (err) {
 				var message = '';
 
-				global.rollbar.error(`NETIO error: ${error.code}`, {
+				global.trackServerError(`NETIO error: ${error.code}`, {
 					error: err
 				});
 
@@ -762,25 +758,24 @@ NetIo.Server = NetIo.EventingClass.extend({
 		}
 	},
 
-	socketConnection: function (ws, request) {
+	socketConnection: async function (ws, request) {
 		var self = this;
-		var jwt = require('jsonwebtoken');
-		
 		var socket = new NetIo.Socket(ws);
 		// Give the socket encode/decode methods
 		socket._encode = self._encode;
 		socket._decode = self._decode;
 		socket._remoteAddress = (request.headers['x-forwarded-for'] && request.headers['x-forwarded-for'].split(',').shift()) || ws._socket.remoteAddress;
 		console.log('Client connecting from', request.headers['x-forwarded-for'], socket._remoteAddress);
-		
+
 		const reqUrl = new URL(`https://www.modd.io${request.url}`);
 		const searchParams = reqUrl.searchParams;
 		const token = searchParams.get('token');
-
+		
 		try {
 			let decodedToken;
-			
-			if (process.env.ENV === 'standalone') {
+			if (process.env.ENV !== 'standalone' && taro.workerComponent) {
+				decodedToken = taro.workerComponent ? await taro.workerComponent.verifyToken(token) : {};
+			} else {
 				// no token validation required for standalone server
 				decodedToken = {
 					userId: '',
@@ -788,26 +783,24 @@ NetIo.Server = NetIo.EventingClass.extend({
 					createdAt: Date.now(),
 					gameSlug: taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.gameSlug
 				}
-			} else {
-				decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
 			}
-			
+
 			// extracting user from token and adding it in _token.
 			socket._token = {
 				userId: decodedToken.userId,
 				sessionId: decodedToken.sessionId,
-				distinctId : searchParams.get('distinctId'),
-				posthogDistinctId : searchParams.get('posthogDistinctId'),
+				distinctId: searchParams.get('distinctId'),
+				posthogDistinctId: searchParams.get('posthogDistinctId'),
 				token,
 				tokenCreatedAt: decodedToken.createdAt
 			};
-
+			
 			// make socket id assignment a variable
 			let assignedId = self.newIdHex();
-
+			
 			// if the token has been used already, close the connection.
 			const isUsedToken = taro.server.usedConnectionJwts[token];
-
+			
 			if (isUsedToken) {
 				if (request.headers['sec-websocket-protocol'].split(', ')[1] == 'reconnect') {
 					// TODO: this will match sockets for users that are still in the game
@@ -815,7 +808,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 						// TODO: check whether _sockets still has a reference? It should not because of the disconnect listener just below
 						return oldSocket._token.token == socket._token.token;
 					});
-					
+
 					if (matchedTokens.length === 0) {
 						console.log('Reconnect failed, grace period over', token);
 						socket.close('Lost connection to the server, and grace period for reconnect is over.<br/>Please refresh your browser to join again');
@@ -827,14 +820,14 @@ NetIo.Server = NetIo.EventingClass.extend({
 					clearTimeout(oldSocket.gracePeriod);
 					console.log('grace period cancelled');
 					matchedTokens = [];
-					
+
 					// store previous disconnects and send to MP for analytics
 					socket._previousDisconnects = oldSocket._previousDisconnects || [];
 					socket._previousDisconnects.push(oldSocket._disconnect);
-					
+
 					// persist original start time, so we can track correct session duration
 					socket.start = oldSocket.start || socket.start;
-					
+
 				} else {
 					// A token is required to connect with socket server
 					socket.close('Security token could not be validated, please refresh the page.');
@@ -842,10 +835,10 @@ NetIo.Server = NetIo.EventingClass.extend({
 					return;
 				}
 			}
-
+			
 			// store token for current client
 			taro.server.usedConnectionJwts[token] = socket._token.tokenCreatedAt;
-
+			
 			// remove expired tokens
 			const filteredUsedConnectionJwts = {};
 			const usedTokenEntries = Object.entries(taro.server.usedConnectionJwts).filter(([token, tokenCreatedAt]) => (Date.now() - tokenCreatedAt) < taro.server.CONNECTION_JWT_EXPIRES_IN);
@@ -854,49 +847,49 @@ NetIo.Server = NetIo.EventingClass.extend({
 					filteredUsedConnectionJwts[key] = value;
 				}
 			}
-
+			
 			taro.server.usedConnectionJwts = filteredUsedConnectionJwts;
-
+			
 			// Give the socket a unique ID
 			socket.id = assignedId;
 			// Add the socket to the internal lookups
 			self._sockets.push(socket);
-
+			
 			self._socketsById[socket.id] = socket;
-
+			
 			// store socket.id as clientId in _token data to validate socket messages later
 			socket._token.clientId = socket.id;
-
+			
 		} catch (e) {
 			// A token is required to connect with socket server
 			socket.close('Security token could not be validated, please refresh the page.');
 			console.log('Unauthorized request', e.message, token);
 			return;
 		}
-
-		console.log('Client ', socket.id,' connected');
+		
+		console.log('Client ', socket.id, ' connected');
 		// Register a listener so that if the socket disconnects,
 		// we can remove it from the active socket lookups
 		socket.on('disconnect', function (data) {
-			
+
 			var index = self._sockets.indexOf(socket);
 			if (index > -1) {
 				// Remove the socket from the array
 				self._sockets.splice(index, 1);
 			}
-
+			
 			if (self._socketsById[socket.id]) {
 				if (!!socket._disconnect?.reason) {
 					// if a disconnect reason is provided, disconnect socket immediately as no reconnects are expected
 					delete self._socketsById[socket.id];
-					
+
 					// moved from .on('disconnect') in TaroNetIoServer.js:~588
 					// data contains {WebSocket socket, <Buffer > reason, Number code}
 					taro.network._onSocketDisconnect(data, socket);
 				} else {
 					self._socketsById[socket.id].gracePeriod = setTimeout(() => {
 						delete self._socketsById[socket.id];
-						
+
 						// moved from .on('disconnect') in TaroNetIoServer.js:~588
 						// data contains {WebSocket socket, <Buffer > reason, Number code}
 						taro.network._onSocketDisconnect(data, socket);
@@ -913,12 +906,12 @@ NetIo.Server = NetIo.EventingClass.extend({
 		} catch (err) {
 			console.log('err while sending client its socket.id!');
 		}
-
+		
 		// add socket message listeners, send 'init' message to client
 		self.emit('connection', [socket, request]);
-		
+
 	},
-	
+
 	/**
      * Sends a message. If the client id is not specified
      * the message will be sent to all connected clients.
@@ -1015,7 +1008,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 			// }
 
 			json = taro.network._io._compress(json, {outputEncoding: "StorageBinaryString"});
-			
+
 			// NOTE: make sure than COMPRESSION_THRESHOLD is same on both client and server
 			// LOGIC:
 			//     1. if json string has less than COMPRESSION_THRESHOLD chars (e.g. 9999)
