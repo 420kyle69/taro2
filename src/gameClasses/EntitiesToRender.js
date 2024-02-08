@@ -77,8 +77,8 @@ class EntitiesToRender {
                 // Removed the phaser condition so that it works with ThreeRenderer.
                 // Probably should look into this, how rewrite this so that it works
                 // for both renderers.
-                // if (entity.tween?.isTweening && phaserGameObject?.visible) {
-                if ((_g = entity.tween) === null || _g === void 0 ? void 0 : _g.isTweening) {
+                if (((_g = entity.tween) === null || _g === void 0 ? void 0 : _g.isTweening) && (phaserGameObject === null || phaserGameObject === void 0 ? void 0 : phaserGameObject.visible)) {
+                    // if (entity.tween?.isTweening) { // TODO: enable when 3D renderer is selected
                     entity.tween.update();
                     x += entity.tween.offset.x;
                     y += entity.tween.offset.y;
@@ -91,7 +91,10 @@ class EntitiesToRender {
                     // var timeStart = performance.now();
                     entity.transformTexture(x, y, rotate);
                     // entity isn't moving anymore. prevent rendering to conserve cpu
-                    if (entity.isTransforming() && (entity.nextKeyFrame[1][0] == x && entity.nextKeyFrame[1][1] == y && entity.nextKeyFrame[1][2] == rotate)) {
+                    if (entity.isTransforming() &&
+                        entity.nextKeyFrame[1][0] == x &&
+                        entity.nextKeyFrame[1][1] == y &&
+                        entity.nextKeyFrame[1][2] == rotate) {
                         // if (entity != taro.client.selectedUnit) console.log(entity._category, "not moving)")
                         entity.isTransforming(false);
                     }
