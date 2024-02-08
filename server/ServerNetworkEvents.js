@@ -50,7 +50,7 @@ var ServerNetworkEvents = {
 				player.updatePlayerHighscore();
 
 				if (player._stats.userId) {
-					taro.clusterClient.saveLastPlayedTime(player._stats.userId);
+					taro.workerComponent.saveLastPlayedTime(player._stats.userId);
 				}
 			}
 		}
@@ -61,15 +61,15 @@ var ServerNetworkEvents = {
 	},
 
 	_onJoinGame: function (data, clientId) {
-		if (taro.clusterClient) { // this is used for hosted version of moddio
-			let clientData = taro.clusterClient.authenticateClient(data, clientId) // will return data if user is authenticated. otherwise, will return undefined
+		if (taro.workerComponent) { // this is used for hosted version of moddio
+			let clientData = taro.workerComponent.authenticateClient(data, clientId) // will return data if user is authenticated. otherwise, will return undefined
 
 			if (clientData) {
 				let playerId = clientData?._id;
 				if (clientData && playerId) { // authenticate logged-in player
-					taro.clusterClient.authenticatePlayer(playerId, clientId, data)
+					taro.workerComponent.authenticatePlayer(playerId, clientId, data)
 				} else { // authenticate guest player
-					taro.clusterClient.authenticateGuest(clientId, data)
+					taro.workerComponent.authenticateGuest(clientId, data)
 				}
 			} else {
 				// client authentication failed
@@ -481,7 +481,7 @@ var ServerNetworkEvents = {
 				if (player._stats && player._stats.clientId === kickuserId) return true;
 			});
 			kickedPlayer.streamUpdateData([{ playerJoined: false }]);
-			taro.clusterClient.banUser({
+			taro.workerComponent.banUser({
 				userId: userId
 			});
 		}
@@ -511,7 +511,7 @@ var ServerNetworkEvents = {
 			kickedPlayer.streamUpdateData([{ playerJoined: false }]);
 
 			if (ipaddress) {
-				taro.clusterClient.banIp({
+				taro.workerComponent.banIp({
 					ipaddress: ipaddress,
 					gameId: gameId,
 					userId: userId
@@ -534,7 +534,7 @@ var ServerNetworkEvents = {
 			});
 			// kickedPlayer.streamUpdateData([{ playerJoined: false }]);
 
-			taro.clusterClient.banChat({
+			taro.workerComponent.banChat({
 				userId: banPlayer._stats.userId,
 				gameId: gameId,
 				status: !banPlayer._stats.banChat
@@ -665,8 +665,8 @@ var ServerNetworkEvents = {
 			return;
 		}
 
-		if (taro.clusterClient) {
-			taro.clusterClient.recordLogs(data);
+		if (taro.workerComponent) {
+			taro.workerComponent.recordLogs(data);
 		}
 	},
 
@@ -679,8 +679,8 @@ var ServerNetworkEvents = {
 
 		data = {...data, requester: clientId };
 
-		if (taro.clusterClient) {
-			taro.clusterClient.sendLogs(data);
+		if (taro.workerComponent) {
+			taro.workerComponent.sendLogs(data);
 		}
 	},
 
@@ -691,8 +691,8 @@ var ServerNetworkEvents = {
 			return;
 		}
 
-		if (taro.clusterClient) {
-			taro.clusterClient.stopRecordLogs(data);
+		if (taro.workerComponent) {
+			taro.workerComponent.stopRecordLogs(data);
 		}
 	},
 

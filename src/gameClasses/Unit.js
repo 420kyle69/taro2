@@ -389,7 +389,7 @@ var Unit = TaroEntityPhysics.extend({
 		return true;
 	},
 
-	buyItem: function (itemTypeId, token) {
+	buyItem: async function (itemTypeId, token) {
 		var self = this;
 		var ownerPlayer = self.getOwner();
 		// buyItem only runs on server.
@@ -398,28 +398,28 @@ var Unit = TaroEntityPhysics.extend({
 		// || ownerPlayer._stats.isAdBlockEnabled
 		if (!taro.isServer || !ownerPlayer)
 			return;
-
+		
 		var lastOpenedShop = ownerPlayer._stats.lastOpenedShop;
 		var shopItems = taro.game.data.shops[lastOpenedShop] ? taro.game.data.shops[lastOpenedShop].itemTypes : [];
 		var itemData = taro.shop.getItemById(itemTypeId);
-
+		
 		// return if:
 		// itemType of given itemTypeId doesn't exist
 		// itemType is not assigned to any shops
 		if (!itemData || !shopItems[itemTypeId])
 			return;
-
+		
 		var shopData = shopItems[itemTypeId];
-
+		
 		// quantity will be Default Quantity by default
 		if (parseFloat(shopData.quantity) >= 0) {
 			itemData.quantity = parseFloat(shopData.quantity);
 		}
-
+		
 		// checking for requirements
 		var requirementsSatisfied = true;
 		var requiredItemTypeIds = Object.keys(shopData.requirement.requiredItemTypes || {});
-
+		
 		if (typeof shopData.requirement === 'object') {
 			// checking for attributes requirements;
 			for (var priceAttr in shopData.requirement.playerAttributes) {
@@ -448,10 +448,10 @@ var Unit = TaroEntityPhysics.extend({
 					}
 				}
 			}
-
+			
 			// return if requirement not met
 			if (!requirementsSatisfied) return;
-
+			
 			// checking for item requirements
 			for (var j = 0; j < requiredItemTypeIds.length; j++) {
 				var reqItemTypeId = requiredItemTypeIds[j];
@@ -464,27 +464,27 @@ var Unit = TaroEntityPhysics.extend({
 			// return if requirement not met
 			if (!requirementsSatisfied) return;
 		}
-
+		
 		if (self.canAffordItem(itemTypeId) && self.canCarryItem(itemData)) {
 			// console.log("buyItem - getFirstAvailableSlotForItem", self.inventory.getFirstAvailableSlotForItem(itemData), "replaceItemInTargetSlot", shopData.replaceItemInTargetSlot)
-
+			
 			if (itemData.isUsedOnPickup || self.inventory.getFirstAvailableSlotForItem(itemData) > -1 || shopData.replaceItemInTargetSlot) {
-				var attrData = { attributes: {} };
-
+				var attrData = {attributes: {}};
+				
 				// pay attributes
 				for (var attributeTypeId in shopData.price.playerAttributes) {
 					var newValue = ownerPlayer.attribute.getValue(attributeTypeId) - shopData.price.playerAttributes[attributeTypeId];
 					attrData.attributes[attributeTypeId] = ownerPlayer.attribute.update(attributeTypeId, newValue); // pay the price
 					ownerPlayer.attribute.update(attributeTypeId, attrData.attributes[attributeTypeId]);
 				}
-
+				
 				// pay recipes
 				var requiredItemTypeIds = Object.keys(shopData.price.requiredItemTypes || {});
 				var totalInventorySize = self.inventory.getTotalInventorySize();
 				for (var i = 0; i < requiredItemTypeIds.length; i++) {
 					var reqItemTypeId = requiredItemTypeIds[i];
 					var balanceOwed = shopData.price.requiredItemTypes[reqItemTypeId];
-
+					
 					if (!isNaN(parseFloat(balanceOwed))) {
 						var j = 0;
 						// traverse through all items in the inventory, find matching item that needs to be consumed, and consume required qty
@@ -495,7 +495,7 @@ var Unit = TaroEntityPhysics.extend({
 								if (itemToBeConsumed._stats.quantity != undefined && itemToBeConsumed._stats.quantity != null && itemToBeConsumed._stats.quantity >= balanceOwed) {
 									itemToBeConsumed._stats.quantity -= balanceOwed;
 									balanceOwed = 0;
-									itemToBeConsumed.streamUpdateData([{ quantity: itemToBeConsumed._stats.quantity }]);
+									itemToBeConsumed.streamUpdateData([{quantity: itemToBeConsumed._stats.quantity}]);
 								} else if (itemToBeConsumed._stats.quantity > 0) { // what does this do Parth?
 									var lowerQty = Math.min(itemToBeConsumed._stats.quantity, balanceOwed);
 									balanceOwed -= lowerQty;
@@ -504,7 +504,7 @@ var Unit = TaroEntityPhysics.extend({
 								if (itemToBeConsumed._stats.quantity == undefined) { // if item has infinite quantity, then give it all.
 									balanceOwed = 0;
 								}
-
+								
 								if (itemToBeConsumed._stats.quantity == 0 && itemToBeConsumed._stats.removeWhenEmpty === true) {
 									self.dropItem(itemToBeConsumed._stats.slotIndex);
 									itemToBeConsumed.remove();
@@ -517,7 +517,7 @@ var Unit = TaroEntityPhysics.extend({
 						itemToBeConsumed.remove();
 					}
 				}
-
+				
 				// pay coins
 				if (shopData.price.coins && ownerPlayer._stats.coins >= shopData.price.coins) {
 					// disable coin consuming due to some bug wrt coins
@@ -531,15 +531,13 @@ var Unit = TaroEntityPhysics.extend({
 								// if token is not provided then check for last verification if done in 30mins. if yes, allow transaction
 								
 							} else {
-								const jwt = require("jsonwebtoken");
-								
 								const isUsedToken = taro.server.usedCoinJwts[token];
 								if (isUsedToken) {
 									console.log('Token has been used already', token);
 									return;
 								}
 								
-								const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
+								const decodedToken = taro.workerComponent ? await taro.workerComponent.verifyToken(token) : {};
 								const {type, userId, purchasableId, createdAt} = decodedToken;
 								
 								if (type === 'pinValidationToken' && userId && purchasableId && ownerPlayer._stats.userId === userId && purchasableId === itemTypeId) {
@@ -567,15 +565,15 @@ var Unit = TaroEntityPhysics.extend({
 							console.log('invalid pinValidationToken', e.message, token);
 							return;
 						}
-
+						
 						taro.server.consumeCoinFromUser(ownerPlayer, shopData.price.coins, itemTypeId);
-
+						
 						ownerPlayer.streamUpdateData([{
 							coins: global.coinHelper.subtract(ownerPlayer._stats.coins, shopData.price.coins)
 						}]);
 					}
 				}
-
+				
 				// remove the first item matching targetSlots if replaceItemInTargetSlot is set as true
 				var targetSlots = (itemData.controls && Array.isArray(itemData.controls.permittedInventorySlots)) ? itemData.controls.permittedInventorySlots : undefined;
 				if (targetSlots != undefined && targetSlots[0] > 0) {
@@ -584,13 +582,13 @@ var Unit = TaroEntityPhysics.extend({
 						existingItem.remove();
 					}
 				}
-
+				
 				itemData.itemTypeId = itemTypeId;
-				taro.network.send('ui', { command: 'shopResponse', type: 'purchase' }, self._stats.clientId);
+				taro.network.send('ui', {command: 'shopResponse', type: 'purchase'}, self._stats.clientId);
 				// item purchased and pickup
 				self.pickUpItem(itemData, shopData.replaceItemInTargetSlot);
 			} else {
-				taro.network.send('ui', { command: 'shopResponse', type: 'inventory_full' }, self._stats.clientId);
+				taro.network.send('ui', {command: 'shopResponse', type: 'inventory_full'}, self._stats.clientId);
 			}
 		}
 	},

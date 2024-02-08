@@ -1,14 +1,4 @@
-const Q = require('q');
-const _ = require('lodash');
-const publicIp = require('public-ip');
-const OS = require('os');
-const http = require('http');
 const cluster = require('cluster');
-
-// var oldLogFunction = console.log;
-// console.log = function(args) {
-// 	oldLogFunction(new Date().toLocaleDateString("en-US", { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' }), args)
-// }
 
 console.log('########################################################');
 console.log('########################################################\n');
@@ -73,15 +63,13 @@ if (process.env.ENV == 'dev') {
 	TaroNode = require('./TaroNode');
 	var taroNode = new TaroNode();
 
-	if (cluster.isMaster) // master cluster!
-	{
+	if (cluster.isPrimary) {// master cluster!
 		// Fork workers.
 		var debug = process.execArgv.indexOf('--debug') !== -1;
 		cluster.setupMaster({
 			execArgv: process.execArgv.filter(function (s) { return s !== '--debug'; })
 		});
-	} else // slave workers! ;-;
-	{
+	} else {
 		// Workers can share any TCP connection
 		// In this case it is an HTTP server
 		// Include the control class
