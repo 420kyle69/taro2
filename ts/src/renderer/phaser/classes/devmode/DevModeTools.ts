@@ -77,7 +77,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 
 		this.scene.scale.on(Phaser.Scale.Events.RESIZE, () => {
 			toolButtonsContainer.height = s + toolButtonSection.height + brushSizeSection.height + paletteButtonSection.height + this.layerButtonSection?.height || 0;
-			console.log(window.innerHeight);
+
 			if (window.innerHeight > 900) {
 				toolButtonsContainer.scale = 1.25;
 			} else if (window.innerHeight > 1200) {

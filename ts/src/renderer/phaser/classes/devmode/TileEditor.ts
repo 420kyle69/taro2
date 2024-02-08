@@ -181,29 +181,29 @@ class TileEditor {
 			return { dataType, dataValue };
 		})[0];
 		let tempLayer = dataType === 'edit' ? dataValue.layer[0] : dataValue.layer;
-		if (map.layers.length > 4 && tempLayer >= 2) {
+		/*if (map.layers.length > 4 && tempLayer >= 2) {
 			tempLayer++;
-		}
+		}*/
 
 		switch (dataType) {
 			case 'fill': {
 				const nowValue = dataValue as TileData<'fill'>['fill'];
 				const oldTile = map.layers[tempLayer].data[nowValue.y * width + nowValue.x];
-				this.floodFill(nowValue.layer, oldTile, nowValue.gid, nowValue.x, nowValue.y, true, nowValue.limits);
+				if (taro.game.data.map[nowValue.layer].data) this.floodFill(nowValue.layer, oldTile, nowValue.gid, nowValue.x, nowValue.y, true, nowValue.limits);
 				break;
 			}
 			case 'edit': {
 				//save tile change to taro.game.data.map and taro.map.data
 				const nowValue = dataValue as TileData<'edit'>['edit'];
 				nowValue.selectedTiles.map((v, idx) => {
-					this.putTiles(nowValue.x, nowValue.y, v, nowValue.size, nowValue.shape, nowValue.layer[idx], true);
+					if (taro.game.data.map[nowValue.layer[idx]].data) this.putTiles(nowValue.x, nowValue.y, v, nowValue.size, nowValue.shape, nowValue.layer[idx], true);
 				});
 
 				break;
 			}
 			case 'clear': {
 				const nowValue = dataValue as TileData<'clear'>['clear'];
-				this.clearLayer(nowValue.layer);
+				if (taro.game.data.map[nowValue.layer].data) this.clearLayer(nowValue.layer);
 			}
 		}
 		if (taro.physics && map.layers[tempLayer].name === 'walls') {
@@ -234,12 +234,12 @@ class TileEditor {
 		const taroMap = taro.game.data.map;
 		const width = taroMap.width;
 		let tempLayer = layer;
-		if (taroMap.layers.length > 4 && layer >= 2) {
+		/*if (taroMap.layers.length > 4 && layer >= 2) {
 			tempLayer++;
-		}
+		}*/
 		tileX = brushSize === 'fitContent' ? calcData.minX : tileX;
 		tileY = brushSize === 'fitContent' ? calcData.minY : tileY;
-		if (this.gameScene.tilemapLayers[layer].visible && selectedTiles) {
+		if (taroMap.layers[tempLayer].data && this.gameScene.tilemapLayers[layer].visible && selectedTiles) {
 			for (let x = 0; x < size.x; x++) {
 				for (let y = 0; y < size.y; y++) {
 					if (sample[x] && sample[x][y] !== undefined && DevModeScene.pointerInsideMap(tileX + x, tileY + y, map)) {
@@ -250,6 +250,7 @@ class TileEditor {
 							map.putTileAt(index, tileX + x, tileY + y, false, layer);
 							map.getTileAt(tileX + x, tileY + y, true, layer).tint = 0xffffff;
 							if (index === -1) index = 0;
+							console.log('putTiles at layer', tempLayer);
 							taroMap.layers[tempLayer].data[(tileY + y) * width + tileX + x] = index;
 						}
 					}
@@ -311,9 +312,9 @@ class TileEditor {
 				const width = map.width;
 				//fix for debris layer
 				let tempLayer = layer;
-				if (map.layers.length > 4 && layer >= 2) {
+				/*if (map.layers.length > 4 && layer >= 2) {
 					tempLayer++;
-				}
+				}*/
 				if (limits?.[nowPos.x]?.[nowPos.y]) {
 					continue;
 				}
@@ -365,9 +366,9 @@ class TileEditor {
 		const width = map.width;
 		//fix for debris layer
 		let tempLayer = layer;
-		if (map.layers.length > 4 && layer >= 2) {
+		/*if (map.layers.length > 4 && layer >= 2) {
 			tempLayer++;
-		}
+		}*/
 		for (let i = 0; i < map.width; i++) {
 			for (let j = 0; j < map.height; j++) {
 				if (map.layers[tempLayer].data[j * width + i] !== 0) {

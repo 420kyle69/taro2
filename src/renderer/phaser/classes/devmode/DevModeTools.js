@@ -60,7 +60,6 @@ var DevModeTools = /** @class */ (function (_super) {
         _this.scene.scale.on(Phaser.Scale.Events.RESIZE, function () {
             var _a;
             toolButtonsContainer.height = s + toolButtonSection.height + brushSizeSection.height + paletteButtonSection.height + ((_a = _this.layerButtonSection) === null || _a === void 0 ? void 0 : _a.height) || 0;
-            console.log(window.innerHeight);
             if (window.innerHeight > 900) {
                 toolButtonsContainer.scale = 1.25;
             }

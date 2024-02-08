@@ -152,27 +152,30 @@ var TileEditor = /** @class */ (function () {
             return { dataType: dataType, dataValue: dataValue };
         })[0], dataType = _a.dataType, dataValue = _a.dataValue;
         var tempLayer = dataType === 'edit' ? dataValue.layer[0] : dataValue.layer;
-        if (map.layers.length > 4 && tempLayer >= 2) {
+        /*if (map.layers.length > 4 && tempLayer >= 2) {
             tempLayer++;
-        }
+        }*/
         switch (dataType) {
             case 'fill': {
                 var nowValue = dataValue;
                 var oldTile = map.layers[tempLayer].data[nowValue.y * width + nowValue.x];
-                this.floodFill(nowValue.layer, oldTile, nowValue.gid, nowValue.x, nowValue.y, true, nowValue.limits);
+                if (taro.game.data.map[nowValue.layer].data)
+                    this.floodFill(nowValue.layer, oldTile, nowValue.gid, nowValue.x, nowValue.y, true, nowValue.limits);
                 break;
             }
             case 'edit': {
                 //save tile change to taro.game.data.map and taro.map.data
                 var nowValue_1 = dataValue;
                 nowValue_1.selectedTiles.map(function (v, idx) {
-                    _this.putTiles(nowValue_1.x, nowValue_1.y, v, nowValue_1.size, nowValue_1.shape, nowValue_1.layer[idx], true);
+                    if (taro.game.data.map[nowValue_1.layer[idx]].data)
+                        _this.putTiles(nowValue_1.x, nowValue_1.y, v, nowValue_1.size, nowValue_1.shape, nowValue_1.layer[idx], true);
                 });
                 break;
             }
             case 'clear': {
                 var nowValue = dataValue;
-                this.clearLayer(nowValue.layer);
+                if (taro.game.data.map[nowValue.layer].data)
+                    this.clearLayer(nowValue.layer);
             }
         }
         if (taro.physics && map.layers[tempLayer].name === 'walls') {
@@ -202,12 +205,12 @@ var TileEditor = /** @class */ (function () {
         var taroMap = taro.game.data.map;
         var width = taroMap.width;
         var tempLayer = layer;
-        if (taroMap.layers.length > 4 && layer >= 2) {
+        /*if (taroMap.layers.length > 4 && layer >= 2) {
             tempLayer++;
-        }
+        }*/
         tileX = brushSize === 'fitContent' ? calcData.minX : tileX;
         tileY = brushSize === 'fitContent' ? calcData.minY : tileY;
-        if (this.gameScene.tilemapLayers[layer].visible && selectedTiles) {
+        if (taroMap.layers[tempLayer].data && this.gameScene.tilemapLayers[layer].visible && selectedTiles) {
             for (var x = 0; x < size.x; x++) {
                 for (var y = 0; y < size.y; y++) {
                     if (sample[x] && sample[x][y] !== undefined && DevModeScene.pointerInsideMap(tileX + x, tileY + y, map)) {
@@ -220,6 +223,7 @@ var TileEditor = /** @class */ (function () {
                             map.getTileAt(tileX + x, tileY + y, true, layer).tint = 0xffffff;
                             if (index === -1)
                                 index = 0;
+                            console.log('putTiles at layer', tempLayer);
                             taroMap.layers[tempLayer].data[(tileY + y) * width + tileX + x] = index;
                         }
                     }
@@ -278,9 +282,9 @@ var TileEditor = /** @class */ (function () {
                 var width = map.width;
                 //fix for debris layer
                 var tempLayer = layer;
-                if (map.layers.length > 4 && layer >= 2) {
+                /*if (map.layers.length > 4 && layer >= 2) {
                     tempLayer++;
-                }
+                }*/
                 if ((_b = limits === null || limits === void 0 ? void 0 : limits[nowPos.x]) === null || _b === void 0 ? void 0 : _b[nowPos.y]) {
                     continue;
                 }
@@ -328,9 +332,9 @@ var TileEditor = /** @class */ (function () {
         var width = map.width;
         //fix for debris layer
         var tempLayer = layer;
-        if (map.layers.length > 4 && layer >= 2) {
+        /*if (map.layers.length > 4 && layer >= 2) {
             tempLayer++;
-        }
+        }*/
         for (var i = 0; i < map.width; i++) {
             for (var j = 0; j < map.height; j++) {
                 if (map.layers[tempLayer].data[j * width + i] !== 0) {

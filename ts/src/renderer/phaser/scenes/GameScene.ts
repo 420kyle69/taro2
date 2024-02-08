@@ -267,7 +267,7 @@ class GameScene extends PhaserScene {
 		//to be sure every layer of map have correct number of tiles
 		const tilesPerLayer = data.map.height * data.map.width;
 		data.map.layers.forEach(layer => {
-			if (layer.name !== 'debris') {
+			if (layer.data/*layer.name !== 'debris'*/) {
 				const length = layer.data.length;
 				layer.width = data.map.width;
 				layer.height = data.map.height;
@@ -390,6 +390,13 @@ class GameScene extends PhaserScene {
 
 			if (layer.type === 'tilelayer') {
 				const tileLayer = map.createLayer(layer.name, map.tilesets, 0, 0);
+				console.log('tileLayer', tileLayer);
+				tileLayer.name = layer.name;
+				tileLayer.setScale(scaleFactor.x, scaleFactor.y);
+				this.tilemapLayers.push(tileLayer);
+			} else {
+				const tileLayer = map.createBlankLayer(layer.name, map.tilesets, 0, 0, map.width, map.height);
+				console.log('blank tileLayer', tileLayer);
 				tileLayer.name = layer.name;
 				tileLayer.setScale(scaleFactor.x, scaleFactor.y);
 				this.tilemapLayers.push(tileLayer);
@@ -398,7 +405,7 @@ class GameScene extends PhaserScene {
 			entityLayers.push(this.add.layer());
 		});
 
-		if (data.map.layers.find(layer => layer.name === 'debris')) {
+		/*if (data.map.layers.find(layer => layer.name === 'debris')) {
 			// taro expects 'debris' entity layer to be in front of 'walls'
 			// entity layer, so we need to swap them for backwards compatibility
 			const debrisLayer = entityLayers[TileLayer.DEBRIS];
@@ -415,7 +422,7 @@ class GameScene extends PhaserScene {
 				0,
 				this.add.layer()
 			);
-		}
+		}*/
 
 		const camera = this.cameras.main;
 		camera.centerOn(
@@ -457,8 +464,9 @@ class GameScene extends PhaserScene {
 		const map = this.tilemap;
 		const data = taro.game.data;
 
-		data.map.layers.forEach((layer) => {
-			if (layer.type === 'tilelayer') {
+		data.map.layers.forEach((layer, index) => {
+
+			/*if (layer.type === 'tilelayer') {
 				let layerId;
 				switch (layer.name) {
 					case 'floor':
@@ -473,14 +481,14 @@ class GameScene extends PhaserScene {
 					case 'trees':
 						layerId = 3;
 						break;
-				}
+				}*/
 				layer.data.forEach((tile, index) => {
 					const x = index % layer.width;
 					const y = Math.floor(index/layer.width);
 					if (tile === 0 || tile === null) tile = -1;
-					map.putTileAt(tile, x, y, false, layerId);
+					map.putTileAt(tile, x, y, false, index);
 				});
-			}
+			//}
 		});
 	}
 
