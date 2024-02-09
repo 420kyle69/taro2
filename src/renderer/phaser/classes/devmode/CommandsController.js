@@ -1,6 +1,5 @@
-var CommandController = /** @class */ (function () {
-    function CommandController(defaultCommands, map, maxCommands) {
-        if (maxCommands === void 0) { maxCommands = 200; }
+class CommandController {
+    constructor(defaultCommands, map, maxCommands = 200) {
         this.commands = [];
         this.nowInsertIndex = 0;
         /**
@@ -20,12 +19,9 @@ var CommandController = /** @class */ (function () {
      * @param mapEdit this command is for map editing? if so, it will check if the map changed after
      * command exec, if no change happened, it will not go into the history.
      */
-    CommandController.prototype.addCommand = function (command, forceToHistory, history, mapEdit) {
-        if (forceToHistory === void 0) { forceToHistory = false; }
-        if (history === void 0) { history = true; }
-        if (mapEdit === void 0) { mapEdit = true; }
-        var mapBeforeCommand = this.getAllTiles();
-        var oldTaroMap = JSON.stringify(taro.game.data.map.layers);
+    addCommand(command, forceToHistory = false, history = true, mapEdit = true) {
+        const mapBeforeCommand = this.getAllTiles();
+        const oldTaroMap = JSON.stringify(taro.game.data.map.layers);
         command.func();
         if (history || forceToHistory) {
             if (mapEdit && !forceToHistory) {
@@ -50,31 +46,28 @@ var CommandController = /** @class */ (function () {
                 this.commands.push(command);
             }
         }
-    };
-    CommandController.prototype.undo = function () {
+    }
+    undo() {
         if (this.commands[this.nowInsertIndex - 1]) {
             this.nowInsertIndex -= 1;
             this.commands[this.nowInsertIndex].undo();
         }
-    };
-    CommandController.prototype.redo = function () {
+    }
+    redo() {
         if (this.commands[this.nowInsertIndex]) {
             this.commands[this.nowInsertIndex].func();
             this.nowInsertIndex += 1;
         }
-    };
-    CommandController.prototype.getAllTiles = function () {
-        var nowTiles = {};
-        Object.entries(this.map.layer.data).map(function (_a) {
-            var x = _a[0], obj = _a[1];
+    }
+    getAllTiles() {
+        const nowTiles = {};
+        Object.entries(this.map.layer.data).map(([x, obj]) => {
             nowTiles[x] = {};
-            Object.entries(obj).map(function (_a) {
-                var y = _a[0], tile = _a[1];
+            Object.entries(obj).map(([y, tile]) => {
                 nowTiles[x][y] = tile.index;
             });
         });
         return nowTiles;
-    };
-    return CommandController;
-}());
+    }
+}
 //# sourceMappingURL=CommandsController.js.map

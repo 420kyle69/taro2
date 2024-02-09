@@ -1,5 +1,5 @@
-var PhaserRay = /** @class */ (function () {
-    function PhaserRay(scene, start, end, config) {
+class PhaserRay {
+    constructor(scene, start, end, config) {
         /* Debug draw ray */
         // small vector math tweaks to get the line positions right
         // const v1 = new Phaser.Math.Vector2(start.x, start.y);
@@ -12,7 +12,6 @@ var PhaserRay = /** @class */ (function () {
         // 	lineEnd.x, lineEnd.y,
         // 	config.color,
         // );
-        var _this = this;
         // this.line.setOrigin(0,0);
         // this.line.setAlpha(0.70);
         // scene.tweens.add({
@@ -29,7 +28,7 @@ var PhaserRay = /** @class */ (function () {
         // console.log(this.line);
         /* End of Debug draw ray */
         if (config.projType) {
-            this.sprite = scene.add.sprite(start.x, start.y, "projectile/".concat(config.projType));
+            this.sprite = scene.add.sprite(start.x, start.y, `projectile/${config.projType}`);
             this.sprite.setAngle(config.rotation * 180 / Math.PI);
             this.sprite.setDisplaySize(config.dimensions.width, config.dimensions.height);
             scene.tweens.add({
@@ -39,15 +38,14 @@ var PhaserRay = /** @class */ (function () {
                     x: end.x,
                     y: end.y
                 },
-                onComplete: function () {
-                    setTimeout(function () {
-                        _this.sprite.destroy();
-                        _this.sprite = null;
+                onComplete: () => {
+                    setTimeout(() => {
+                        this.sprite.destroy();
+                        this.sprite = null;
                     }, 50);
                 }
             });
         }
     }
-    return PhaserRay;
-}());
+}
 //# sourceMappingURL=PhaserRay.js.map
