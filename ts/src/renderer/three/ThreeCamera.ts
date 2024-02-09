@@ -16,6 +16,8 @@ class ThreeCamera {
 	private fovInitial: number;
 	private viewportHeightInitial: number;
 
+	private debugInfo: HTMLDivElement;
+
 	constructor(viewportWidth: number, viewportHeight: number, canvas: HTMLCanvasElement) {
 		const persCamera = new THREE.PerspectiveCamera(75, viewportWidth / viewportHeight, 0.1, 1000);
 		persCamera.position.y = this.height;
@@ -77,11 +79,31 @@ class ThreeCamera {
 				this.controls.enableZoom = !this.controls.enableZoom;
 			}
 		});
+
+		const info = document.createElement('div');
+		canvas.parentElement.appendChild(info);
+		info.style.position = 'absolute';
+		info.style.zIndex = '999';
+		info.style.left = '0';
+		info.style.top = '0';
+		info.style.padding = '10px';
+		info.style.margin = '5px';
+		info.style.color = 'white';
+		info.style.background = 'black';
+		info.style.opacity = '0.75';
+		this.debugInfo = info;
 	}
 
 	update() {
 		if (this.controls.enableRotate) {
 			this.controls.update();
+		}
+
+		if (this.controls.enableRotate) {
+			this.debugInfo.style.display = 'block';
+			this.debugInfo.innerHTML = `lookYaw: ${this.instance.rotation.y.toFixed(4)} </br> lookPitch: ${this.instance.rotation.x.toFixed(4)}`;
+		} else if (this.debugInfo.style.display !== 'none') {
+			this.debugInfo.style.display = 'none';
 		}
 
 		if (this.target) {
