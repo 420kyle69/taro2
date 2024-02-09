@@ -1,46 +1,30 @@
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        if (typeof b !== "function" && b !== null)
-            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-var PhaserChatBubble = /** @class */ (function (_super) {
-    __extends(PhaserChatBubble, _super);
-    function PhaserChatBubble(scene, chatText, unit) {
-        var _this = _super.call(this, scene) || this;
-        _this.unit = unit;
-        var bubble = _this.bubble = scene.add.graphics();
-        _this.add(bubble);
+class PhaserChatBubble extends Phaser.GameObjects.Container {
+    constructor(scene, chatText, unit) {
+        super(scene);
+        this.unit = unit;
+        const bubble = this.bubble = scene.add.graphics();
+        this.add(bubble);
         /*const text = this.bitmapText = scene.add.bitmapText(
             0, 0,
             BitmapFontManager.font(scene, 'Arial', true, false, '#FFFFFF')
         );*/
-        var text = _this.textObject = scene.add.text(0, 0, _this.trimText(chatText), {
+        const text = this.textObject = scene.add.text(0, 0, this.trimText(chatText), {
             font: '600 24px Arial',
             color: '#ffffff',
             align: 'center'
         });
         text.setOrigin(0.5);
         text.depth = 1;
-        if (_this.scene.renderer.type !== Phaser.CANVAS)
+        if (this.scene.renderer.type !== Phaser.CANVAS)
             text.setResolution(2);
         //this.textObject.setScale(0.5);
         // needs to be created with the correct scale of the client
-        _this.setScale(1 / _this.scene.cameras.main.zoom);
+        this.setScale(1 / this.scene.cameras.main.zoom);
         text.setFontSize(12);
         //text.setCenterAlign();
         text.setOrigin(0.5);
         //text.letterSpacing = -0.6;
-        _this.add(text);
+        this.add(text);
         if (scene.renderer.type === Phaser.CANVAS) {
             //text.visible = false;
             /*const rt = this.rtText = scene.add.renderTexture(0, 0);
@@ -48,16 +32,15 @@ var PhaserChatBubble = /** @class */ (function (_super) {
 
             this.add(rt);*/
         }
-        scene.add.existing(_this);
-        _this.showMessage(chatText);
-        return _this;
+        scene.add.existing(this);
+        this.showMessage(chatText);
     }
-    PhaserChatBubble.prototype.showMessage = function (chatText) {
+    showMessage(chatText) {
         //const text = this.bitmapText;
         /*text.setText(BitmapFontManager.sanitize(
             text.fontData, this.trimText(chatText)
         ));*/
-        var text = this.textObject;
+        const text = this.textObject;
         text.setText(this.trimText(chatText));
         /*const rt = this.rtText;
         if (rt) {
@@ -69,10 +52,9 @@ var PhaserChatBubble = /** @class */ (function (_super) {
         this.updateScale();
         this.updateOffset();
         this.fadeOut();
-    };
-    PhaserChatBubble.prototype.fadeOut = function () {
-        var _this = this;
-        var scene = this.scene;
+    }
+    fadeOut() {
+        const scene = this.scene;
         // reset fade timer and tween
         if (this.fadeTimerEvent) {
             scene.time.removeEvent(this.fadeTimerEvent);
@@ -84,55 +66,54 @@ var PhaserChatBubble = /** @class */ (function (_super) {
         }
         this.visible = true;
         this.alpha = 1;
-        this.fadeTimerEvent = scene.time.delayedCall(3000, function () {
-            _this.fadeTimerEvent = null;
-            _this.fadeTween = scene.tweens.add({
-                targets: _this,
+        this.fadeTimerEvent = scene.time.delayedCall(3000, () => {
+            this.fadeTimerEvent = null;
+            this.fadeTween = scene.tweens.add({
+                targets: this,
                 alpha: 0,
                 duration: 500,
-                onComplete: function () {
-                    _this.fadeTween = null;
-                    _this.visible = false;
+                onComplete: () => {
+                    this.fadeTween = null;
+                    this.visible = false;
                 }
             });
         });
-    };
-    PhaserChatBubble.prototype.updateScale = function () {
+    }
+    updateScale() {
         this.setScale(1 / this.scene.cameras.main.zoom);
-    };
-    PhaserChatBubble.prototype.trimText = function (chatText) {
+    }
+    trimText(chatText) {
         if (chatText.length > 43) {
             chatText = chatText.substring(0, 40);
             chatText += '...';
         }
         return chatText;
-    };
-    PhaserChatBubble.prototype.drawBubble = function () {
-        var bubble = this.bubble;
+    }
+    drawBubble() {
+        const bubble = this.bubble;
         //const text = this.rtText || this.bitmapText;
-        var text = this.textObject;
-        var width = text.width + 20;
-        var height = text.height + 10;
+        const text = this.textObject;
+        const width = text.width + 20;
+        const height = text.height + 10;
         bubble.clear();
         bubble.fillStyle(0x000000, 0.5);
         bubble.fillRoundedRect(-width / 2, -height / 2, width, height, 5);
         bubble.fillTriangle(0, height / 2 + 7, 7, height / 2, -7, height / 2);
-    };
-    PhaserChatBubble.prototype.updateOffset = function () {
-        var _a = this.unit, sprite = _a.sprite, label = _a.label, gameObject = _a.gameObject;
-        var displayHeight = sprite.displayHeight, displayWidth = sprite.displayWidth;
-        var labelHeight = label.getBounds().height;
+    }
+    updateOffset() {
+        const { sprite, label, gameObject } = this.unit;
+        const { displayHeight, displayWidth } = sprite;
+        const labelHeight = label.getBounds().height;
         this.offset = displayHeight / 2 + labelHeight * 4;
         /*this.offset =  25 +
             (sprite.displayHeight + sprite.displayWidth) / 4 +
             label.height * 2;*/
         this.y = gameObject.y - this.offset;
-    };
-    PhaserChatBubble.prototype.updatePosition = function () {
-        var _a = this.unit.gameObject, x = _a.x, y = _a.y;
+    }
+    updatePosition() {
+        const { x, y } = this.unit.gameObject;
         this.x = x;
         this.y = y - this.offset;
-    };
-    return PhaserChatBubble;
-}(Phaser.GameObjects.Container));
+    }
+}
 //# sourceMappingURL=PhaserChatBubble.js.map

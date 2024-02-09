@@ -1,52 +1,51 @@
-var EntityImage = /** @class */ (function () {
-    function EntityImage(scene, devModeTools, entityImages, action, type) {
-        var _this = this;
+class EntityImage {
+    constructor(scene, devModeTools, entityImages, action, type) {
         var _a, _b, _c, _d, _e, _f;
         this.scene = scene;
         this.devModeTools = devModeTools;
-        var entityEditor = this.entityEditor = devModeTools.entityEditor;
+        const entityEditor = this.entityEditor = devModeTools.entityEditor;
         this.action = action;
-        var key;
-        var entityTypeData;
+        let key;
+        let entityTypeData;
         if (action.entityType === 'unitTypes') {
             entityTypeData = taro.game.data[action.entityType] && taro.game.data[action.entityType][action.entity];
             if (!entityTypeData)
                 return;
-            key = "unit/".concat(entityTypeData.cellSheet.url);
+            key = `unit/${entityTypeData.cellSheet.url}`;
         }
         else if (type === 'unit') {
             entityTypeData = taro.game.data['unitTypes'] && taro.game.data['unitTypes'][action.unitType];
             if (!entityTypeData)
                 return;
-            key = "unit/".concat(entityTypeData.cellSheet.url);
+            key = `unit/${entityTypeData.cellSheet.url}`;
         }
         else if (action.entityType === 'itemTypes') {
             entityTypeData = taro.game.data[action.entityType] && taro.game.data[action.entityType][action.entity];
             if (!entityTypeData)
                 return;
-            key = "item/".concat(entityTypeData.cellSheet.url);
+            key = `item/${entityTypeData.cellSheet.url}`;
         }
         else if (type === 'item') {
             entityTypeData = taro.game.data['itemTypes'] && taro.game.data['itemTypes'][action.itemType];
             if (!entityTypeData)
                 return;
-            key = "item/".concat(entityTypeData.cellSheet.url);
+            key = `item/${entityTypeData.cellSheet.url}`;
         }
         else if (action.entityType === 'projectileTypes') {
             entityTypeData = taro.game.data[action.entityType] && taro.game.data[action.entityType][action.entity];
             if (!entityTypeData)
                 return;
-            key = "projectile/".concat(entityTypeData.cellSheet.url);
+            key = `projectile/${entityTypeData.cellSheet.url}`;
         }
         else if (type === 'projectile') {
             entityTypeData = taro.game.data['projectileTypes'] && taro.game.data['projectileTypes'][action.projectileType];
             if (!entityTypeData)
                 return;
-            key = "projectile/".concat(entityTypeData.cellSheet.url);
+            key = `projectile/${entityTypeData.cellSheet.url}`;
         }
         this.defaultWidth = (_b = (_a = entityTypeData.bodies) === null || _a === void 0 ? void 0 : _a.default) === null || _b === void 0 ? void 0 : _b.width;
         this.defaultHeight = (_d = (_c = entityTypeData.bodies) === null || _c === void 0 ? void 0 : _c.default) === null || _d === void 0 ? void 0 : _d.height;
-        var image = this.image = scene.add.image((_e = action.position) === null || _e === void 0 ? void 0 : _e.x, (_f = action.position) === null || _f === void 0 ? void 0 : _f.y, key);
+        const image = this.image = scene.add.image((_e = action.position) === null || _e === void 0 ? void 0 : _e.x, (_f = action.position) === null || _f === void 0 ? void 0 : _f.y, key);
         if (!isNaN(action.angle))
             image.angle = action.angle;
         if (!isNaN(action.width) && !isNaN(action.height))
@@ -60,75 +59,75 @@ var EntityImage = /** @class */ (function () {
         image.setInteractive({ draggable: true });
         image.entity = this;
         entityImages.push(image);
-        var lastTime = 0;
-        var editedAction = this.editedAction = { actionId: action.actionId };
-        image.on('pointerdown', function () {
+        let lastTime = 0;
+        let editedAction = this.editedAction = { actionId: action.actionId };
+        image.on('pointerdown', () => {
             if (!devModeTools.cursorButton.active)
                 return;
-            if (entityEditor.selectedEntityImage !== _this) {
-                entityEditor.selectEntityImage(_this);
+            if (entityEditor.selectedEntityImage !== this) {
+                entityEditor.selectEntityImage(this);
             }
             //double click
-            var clickDelay = taro._currentTime - lastTime;
+            let clickDelay = taro._currentTime - lastTime;
             lastTime = taro._currentTime;
             if (clickDelay < 350) {
                 if (inGameEditor && inGameEditor.showScriptForEntity) {
                     inGameEditor.showScriptForEntity(action.actionId);
                 }
             }
-            _this.startDragX = image.x;
-            _this.startDragY = image.y;
-            _this.scale = image.scale;
+            this.startDragX = image.x;
+            this.startDragY = image.y;
+            this.scale = image.scale;
             if (!devModeTools.altKey.isDown && !devModeTools.shiftKey.isDown) {
-                _this.dragMode = 'position';
+                this.dragMode = 'position';
             }
             else if (devModeTools.altKey.isDown) {
-                _this.dragMode = 'angle';
+                this.dragMode = 'angle';
                 image.rotation = 0;
                 editedAction.angle = image.angle;
             }
             else if (devModeTools.shiftKey.isDown) {
-                _this.dragMode = 'scale';
-                if (!isNaN(_this.defaultWidth) && !isNaN(_this.defaultHeight)) {
-                    image.setDisplaySize(_this.defaultWidth, _this.defaultHeight);
-                    editedAction.width = _this.defaultWidth;
-                    editedAction.height = _this.defaultHeight;
+                this.dragMode = 'scale';
+                if (!isNaN(this.defaultWidth) && !isNaN(this.defaultHeight)) {
+                    image.setDisplaySize(this.defaultWidth, this.defaultHeight);
+                    editedAction.width = this.defaultWidth;
+                    editedAction.height = this.defaultHeight;
                 }
             }
-            _this.updateOutline();
+            this.updateOutline();
         });
-        var outlineHover = entityEditor.outlineHover;
-        image.on('pointerover', function () {
+        const outlineHover = entityEditor.outlineHover;
+        image.on('pointerover', () => {
             scene.input.setTopOnly(true);
             if (!devModeTools.cursorButton.active || entityEditor.activeHandler)
                 return;
-            _this.updateOutline();
+            this.updateOutline();
         });
-        image.on('pointerout', function () {
-            if (entityEditor.selectedEntityImage === _this)
+        image.on('pointerout', () => {
+            if (entityEditor.selectedEntityImage === this)
                 return;
             outlineHover.clear();
         });
     }
-    EntityImage.prototype.edit = function (action) {
+    edit(action) {
         if (!this.action.wasEdited || !action.wasEdited) {
             this.action.wasEdited = true;
             action.wasEdited = true;
         }
         taro.network.send('editInitEntity', action);
-    };
-    EntityImage.prototype.updateOutline = function (hide) {
-        var outline = this.entityEditor.outline;
-        var outlineHover = this.entityEditor.outlineHover;
-        var selectionContainer = this.entityEditor.selectionContainer;
+    }
+    updateOutline(hide) {
+        const outline = this.entityEditor.outline;
+        const outlineHover = this.entityEditor.outlineHover;
+        const selectionContainer = this.entityEditor.selectionContainer;
         if (hide) {
             outline.clear();
             outlineHover.clear();
             selectionContainer.setVisible(false);
             return;
         }
-        var handlers = this.entityEditor.handlers;
-        var image = this.image;
+        const handlers = this.entityEditor.handlers;
+        const image = this.image;
         if (this.devModeTools.entityEditor.selectedEntityImage === this) {
             outline.clear();
             outlineHover.clear();
@@ -137,8 +136,8 @@ var EntityImage = /** @class */ (function () {
             selectionContainer.x = image.x;
             selectionContainer.y = image.y;
             selectionContainer.angle = image.angle;
-            var smallDistance = 20 / this.scene.cameras.main.zoom;
-            var largeDistance = 25 / this.scene.cameras.main.zoom;
+            const smallDistance = 20 / this.scene.cameras.main.zoom;
+            const largeDistance = 25 / this.scene.cameras.main.zoom;
             handlers.topLeft.setPosition(-image.displayWidth / 2 - smallDistance, -image.displayHeight / 2 - smallDistance);
             handlers.topLeftRotate.setPosition(-image.displayWidth / 2 - largeDistance, -image.displayHeight / 2 - largeDistance);
             handlers.top.setPosition(0, -image.displayHeight / 2 - smallDistance);
@@ -164,8 +163,8 @@ var EntityImage = /** @class */ (function () {
             outlineHover.y = image.y;
             outlineHover.angle = image.angle;
         }
-    };
-    EntityImage.prototype.update = function (action) {
+    }
+    update(action) {
         //update action in editor
         if (inGameEditor && inGameEditor.updateAction) {
             inGameEditor.updateAction(action);
@@ -196,17 +195,16 @@ var EntityImage = /** @class */ (function () {
         }
         if (this === this.entityEditor.selectedEntityImage)
             this.updateOutline();
-    };
-    EntityImage.prototype.hide = function () {
+    }
+    hide() {
         this.image.alpha = 0;
         this.image.setInteractive(false);
         this.updateOutline(true);
-    };
-    EntityImage.prototype.delete = function () {
+    }
+    delete() {
         this.hide();
-        var editedAction = { actionId: this.action.actionId, wasDeleted: true };
+        let editedAction = { actionId: this.action.actionId, wasDeleted: true };
         this.edit(editedAction);
-    };
-    return EntityImage;
-}());
+    }
+}
 //# sourceMappingURL=EntityImage.js.map
