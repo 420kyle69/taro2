@@ -169,6 +169,7 @@ class TileEditor {
 	}
 
 	edit<T extends MapEditToolEnum>(data: TileData<T>): void {
+		console.log('edit', data);
 		if (JSON.stringify(data) === '{}') {
 			throw 'receive: {}';
 		}

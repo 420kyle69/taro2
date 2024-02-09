@@ -137,6 +137,7 @@ class TileEditor {
         });
     }
     edit(data) {
+        console.log('edit', data);
         if (JSON.stringify(data) === '{}') {
             throw 'receive: {}';
         }

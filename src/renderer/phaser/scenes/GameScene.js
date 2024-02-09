@@ -305,6 +305,8 @@ class GameScene extends PhaserScene {
             }
             entityLayers.push(this.add.layer());
         });
+        const layerNames = data.map.layers.map(layer => layer.name);
+        map.layers.sort((a, b) => layerNames.indexOf(a.name) - layerNames.indexOf(b.name));
         const camera = this.cameras.main;
         camera.centerOn(map.width * map.tileWidth / 2 * scaleFactor.x, map.height * map.tileHeight / 2 * scaleFactor.y);
         if (data.defaultData.heightBasedZIndex) {
