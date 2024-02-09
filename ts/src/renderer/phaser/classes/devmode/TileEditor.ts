@@ -428,7 +428,6 @@ class TileEditor {
 							const sample = JSON.parse(JSON.stringify(this.brushArea.sample));
 							const selectedTiles = JSON.parse(JSON.stringify(this.selectedTileArea));
 							const nowLayer = map.currentLayerIndex;
-							console.log('pu tile at layer', taro.game.data.map.layers[nowLayer].name);
 							if (taro.game.data.map.layers[nowLayer].type === 'tilelayer' && taro.game.data.map.layers[nowLayer].data) {
 								Object.entries(sample).map(([x, obj]) => {
 									Object.entries(obj).map(([y, value]) => {
