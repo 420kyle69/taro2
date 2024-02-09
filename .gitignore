@@ -144,19 +144,7 @@ src/gameClasses/TileShape.js.map
 src/gameClasses/VisibilityMask.js
 src/gameClasses/VisibilityMask.js.map
 
-src/renderer/phaser/PhaserRenderer.js
-src/renderer/phaser/PhaserRenderer.js.map
-src/renderer/phaser/*/*.js
-src/renderer/phaser/*/*.js.map
-src/renderer/phaser/*/*.js
-src/renderer/phaser/classes
-src/renderer/phaser/enums
-src/renderer/phaser/scenes
-
-src/renderer/three/Three*.js
-src/renderer/three/Three*.js.map
-src/renderer/three/utils.js
-src/renderer/three/utils.js.map
+src/renderer
 
 src/utils/Colors.js
 src/utils/Colors.js.map
