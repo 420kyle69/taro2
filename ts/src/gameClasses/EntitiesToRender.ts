@@ -94,11 +94,8 @@ class EntitiesToRender {
 					//if (entity._stats.name === 'potato gun small') console.log('owner unit translate',ownerUnit._translate.x, ownerUnit._translate.y, '\nphaser unit pos', ownerUnit.phaserEntity.gameObject.x, ownerUnit.phaserEntity.gameObject.y, '\nitem translate', x, y, '\nphaser item pos', entity.phaserEntity.gameObject.x, entity.phaserEntity.gameObject.y)
 				}
 
-				// Removed the phaser condition so that it works with ThreeRenderer.
-				// Probably should look into this, how rewrite this so that it works
-				// for both renderers.
-				if (entity.tween?.isTweening && phaserGameObject?.visible) {
-					// if (entity.tween?.isTweening) { // TODO: enable when 3D renderer is selected
+				const is3D = taro.game.data.defaultData.defaultRenderer === '3d';
+				if ((!is3D && entity.tween?.isTweening && phaserGameObject?.visible) || (is3D && entity.tween?.isTweening)) {
 					entity.tween.update();
 					x += entity.tween.offset.x;
 					y += entity.tween.offset.y;

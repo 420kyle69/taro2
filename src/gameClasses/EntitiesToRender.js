@@ -4,7 +4,7 @@ class EntitiesToRender {
         taro.client.on('tick', this.frameTick, this);
     }
     updateAllEntities( /*timeStamp*/) {
-        var _a, _b, _c, _d, _e, _f, _g, _h;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j;
         for (var entityId in this.trackEntityById) {
             // var timeStart = performance.now();
             // var entity = taro.$(entityId);
@@ -74,17 +74,14 @@ class EntitiesToRender {
                     }
                     //if (entity._stats.name === 'potato gun small') console.log('owner unit translate',ownerUnit._translate.x, ownerUnit._translate.y, '\nphaser unit pos', ownerUnit.phaserEntity.gameObject.x, ownerUnit.phaserEntity.gameObject.y, '\nitem translate', x, y, '\nphaser item pos', entity.phaserEntity.gameObject.x, entity.phaserEntity.gameObject.y)
                 }
-                // Removed the phaser condition so that it works with ThreeRenderer.
-                // Probably should look into this, how rewrite this so that it works
-                // for both renderers.
-                if (((_g = entity.tween) === null || _g === void 0 ? void 0 : _g.isTweening) && (phaserGameObject === null || phaserGameObject === void 0 ? void 0 : phaserGameObject.visible)) {
-                    // if (entity.tween?.isTweening) { // TODO: enable when 3D renderer is selected
+                const is3D = taro.game.data.defaultData.defaultRenderer === '3d';
+                if ((!is3D && ((_g = entity.tween) === null || _g === void 0 ? void 0 : _g.isTweening) && (phaserGameObject === null || phaserGameObject === void 0 ? void 0 : phaserGameObject.visible)) || (is3D && ((_h = entity.tween) === null || _h === void 0 ? void 0 : _h.isTweening))) {
                     entity.tween.update();
                     x += entity.tween.offset.x;
                     y += entity.tween.offset.y;
                     rotate += entity.tween.offset.rotate;
                 }
-                if (((_h = entity.tween) === null || _h === void 0 ? void 0 : _h.isTweening) ||
+                if (((_j = entity.tween) === null || _j === void 0 ? void 0 : _j.isTweening) ||
                     entity.isTransforming() ||
                     entity == taro.client.selectedUnit ||
                     entity._category == 'item') {

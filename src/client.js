@@ -208,8 +208,13 @@ const Client = TaroEventingClass.extend({
 				taro.addComponent(TaroInputComponent);
 
 				taro.entitiesToRender = new EntitiesToRender();
-				taro.renderer = new PhaserRenderer();
-				// taro.renderer = ThreeRenderer.getInstance();
+
+				if (taro.game.data.defaultData.defaultRenderer === '3d') {
+					taro.renderer = ThreeRenderer.getInstance();
+				} else {
+					taro.renderer = new PhaserRenderer();
+				}
+
 				taro.developerMode = new DeveloperMode();
 
 				if (!window.isStandalone) {
