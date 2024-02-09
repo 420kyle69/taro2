@@ -418,6 +418,52 @@ var ActionComponent = TaroEntity.extend({
 						})(varName);
 
 						break;
+					
+					case 'sendSecurePostRequest':
+						var data = self._script.variable.getValue(action.data, vars) || {};
+						var apiCreds = self._script.variable.getValue(action.apiCreds, vars);
+						var varName = self._script.variable.getValue(action.varName, vars);
+						
+						console.log("sendSecurePostRequest data", data, apiCreds);
+						
+						// use closure to store globalVariableName
+						(function (targetVarName) {
+							taro.workerComponent.sendSecurePostRequest({apiCreds, data})
+								.then(function optionalCallback(err, httpResponse, body) {
+									// try+catch must be redeclared inside callback otherwise an error will crash the process
+									try {
+										
+										// console.log("body", body)
+										if (err) {
+											// don't throw new Error here, because it's inside callback and it won't get caught
+											self._script.errorLog(err, path);
+										}
+										
+										if (taro.game.data.variables.hasOwnProperty(targetVarName)) {
+											taro.game.data.variables[targetVarName].value = body;
+										}
+										
+										taro.game.lastReceivedPostResponse = body;
+										taro.game.lastUpdatedVariableName = targetVarName;
+										
+										// if sendPostRequest was called from a unit/item/projectile, then pass the triggering entity's id onPostResponse
+										var vars = {};
+										if (['unit', 'item', 'projectile'].includes(self._entity._category)) {
+											var key = `${self._entity._category  }Id`;
+											vars = { [key]: self._entity.id() };
+										}
+										
+										
+										// self._entity.script.trigger('onPostResponse', vars);
+										
+									} catch (e) {
+										// don't throw new Error here, because it's inside callback and it won't get caught
+										self._script.errorLog(e, path);
+									}
+								});
+						})(varName);
+						
+						break;
 
 						/* Player */
 
