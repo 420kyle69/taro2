@@ -118,44 +118,45 @@ dist
 
 .Ds_Store
 
-videoChatConfig.js
-assets/js/videoChatConfig.js
-
 .idea/
 
 
 # TypeScript generated files
 engine/components/physics/box2d/debugDrawWrapper/*.js
-engine/components/physics/box2d/debugDrawWrapper/*.map
+engine/components/physics/box2d/debugDrawWrapper/*.js.map
 engine/components/physics/box2d/distsWrapper/*.js
-engine/components/physics/box2d/distsWrapper/*.map
+engine/components/physics/box2d/distsWrapper/*.js.map
 engine/components/physics/box2d/dists.js
-engine/components/physics/box2d/dists.map
+engine/components/physics/box2d/dists.js.map
 
 src/gameClasses/Combinator.js
-src/gameClasses/Combinator.map
+src/gameClasses/Combinator.js.map
 src/gameClasses/DeveloperMode.js
-src/gameClasses/DeveloperMode.map
+src/gameClasses/DeveloperMode.js.map
 src/gameClasses/EntitiesToRender.js
-src/gameClasses/EntitiesToRender.map
+src/gameClasses/EntitiesToRender.js.map
 src/gameClasses/HeightRenderComponent.js
-src/gameClasses/HeightRenderComponent.map
+src/gameClasses/HeightRenderComponent.js.map
 src/gameClasses/Raycaster.js
-src/gameClasses/Raycaster.map
+src/gameClasses/Raycaster.js.map
 src/gameClasses/TileShape.js
-src/gameClasses/TileShape.map
+src/gameClasses/TileShape.js.map
 src/gameClasses/VisibilityMask.js
-src/gameClasses/VisibilityMask.map
+src/gameClasses/VisibilityMask.js.map
 
 src/renderer/phaser/PhaserRenderer.js
-src/renderer/phaser/PhaserRenderer.map
-src/renderer/phaser/**/*.js
-src/renderer/phaser/**/*.map
+src/renderer/phaser/PhaserRenderer.js.map
+src/renderer/phaser/*/*.js
+src/renderer/phaser/*/*.js.map
+src/renderer/phaser/*/*.js
+src/renderer/phaser/classes
+src/renderer/phaser/enums
+src/renderer/phaser/scenes
 
 src/renderer/three/Three*.js
-src/renderer/three/Three*.map
+src/renderer/three/Three*.js.map
 src/renderer/three/utils.js
-src/renderer/three/utils.map
+src/renderer/three/utils.js.map
 
 src/utils/Colors.js
-src/utils/Colors.map
+src/utils/Colors.js.map
