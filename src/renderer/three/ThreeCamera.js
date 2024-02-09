@@ -71,6 +71,7 @@ class ThreeCamera {
         info.style.color = 'white';
         info.style.background = 'black';
         info.style.opacity = '0.75';
+        info.style.marginTop = '40px';
         this.debugInfo = info;
     }
     update() {
