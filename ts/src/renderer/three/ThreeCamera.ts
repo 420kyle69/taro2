@@ -46,7 +46,23 @@ class ThreeCamera {
 		};
 
 		window.addEventListener('keypress', (evt) => {
-			if (evt.key === '.') {
+			if (evt.key === ',') {
+				this.controls.enableRotate = false;
+				this.controls.enableZoom = false;
+
+				const halfWidth = Utils.pixelToWorld(viewportWidth / 2);
+				const halfHeight = Utils.pixelToWorld(viewportHeight / 2);
+				this.orthographicCamera.top = halfHeight;
+				this.orthographicCamera.bottom = -halfHeight;
+				this.orthographicCamera.left = -halfWidth;
+				this.orthographicCamera.right = halfWidth;
+				this.orthographicCamera.zoom = this.zoomLevel;
+				this.orthographicCamera.lookAt(this.controls.target);
+				this.orthographicCamera.updateProjectionMatrix();
+				this.orthographicCamera.position.copy(this.controls.target);
+				this.orthographicCamera.position.y = 20;
+				this.controls.update();
+			} else if (evt.key === '.') {
 				this.isPerspective = !this.isPerspective;
 
 				if (this.isPerspective) {
