@@ -420,9 +420,10 @@ var ActionComponent = TaroEntity.extend({
 						break;
 					
 					case 'sendSecurePostRequest':
-						var data = self._script.variable.getValue(action.data, vars) || {};
-						var apiCreds = self._script.variable.getValue(action.apiCreds, vars);
-						var varName = self._script.variable.getValue(action.varName, vars);
+						
+						var data = self._script.param.getValue(action.data, vars) || {};
+						var apiCreds = self._script.param.getValue(action.apiCreds, vars);
+						var varName = self._script.param.getValue(action.varName, vars);
 						
 						console.log("sendSecurePostRequest data", data, apiCreds);
 						
