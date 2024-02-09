@@ -3,20 +3,24 @@ class ThreeCamera {
 	target: THREE.Object3D | null = null;
 	zoomLevel = 1;
 
+	private height = 6;
+
 	private orthographicCamera: THREE.OrthographicCamera;
 	private perspectiveCamera: THREE.PerspectiveCamera;
 	private controls: OrbitControls;
 
-	private orthographicState: { target: THREE.Vector3; position: THREE.Vector3 };
-	private perspectiveState: { target: THREE.Vector3; position: THREE.Vector3; zoom: number };
+	orthographicState: { target: THREE.Vector3; position: THREE.Vector3 };
+	perspectiveState: { target: THREE.Vector3; position: THREE.Vector3; zoom: number };
 
 	private isPerspective = false;
 	private fovInitial: number;
 	private viewportHeightInitial: number;
 
+	private debugInfo: HTMLDivElement;
+
 	constructor(viewportWidth: number, viewportHeight: number, canvas: HTMLCanvasElement) {
 		const persCamera = new THREE.PerspectiveCamera(75, viewportWidth / viewportHeight, 0.1, 1000);
-		persCamera.position.y = 20;
+		persCamera.position.y = this.height;
 		this.perspectiveCamera = persCamera;
 		this.fovInitial = Math.tan(((Math.PI / 180) * this.perspectiveCamera.fov) / 2);
 		this.viewportHeightInitial = viewportHeight;
@@ -24,7 +28,7 @@ class ThreeCamera {
 		const halfWidth = Utils.pixelToWorld(viewportWidth / 2);
 		const halfHeight = Utils.pixelToWorld(viewportHeight / 2);
 		const orthoCamera = new THREE.OrthographicCamera(-halfWidth, halfWidth, halfHeight, -halfHeight, 0.1, 1000);
-		orthoCamera.position.y = 20;
+		orthoCamera.position.y = this.height;
 		this.orthographicCamera = orthoCamera;
 
 		this.instance = orthoCamera;
@@ -46,20 +50,48 @@ class ThreeCamera {
 		};
 
 		window.addEventListener('keypress', (evt) => {
-			if (evt.key === 'v') {
+			if (evt.key === ',') {
+				this.instance = this.orthographicCamera;
+				this.controls.object = this.orthographicCamera;
+
+				const halfWidth = Utils.pixelToWorld(viewportWidth / 2);
+				const halfHeight = Utils.pixelToWorld(viewportHeight / 2);
+				this.orthographicCamera.top = halfHeight;
+				this.orthographicCamera.bottom = -halfHeight;
+				this.orthographicCamera.left = -halfWidth;
+				this.orthographicCamera.right = halfWidth;
+				this.orthographicCamera.zoom = this.zoomLevel;
+				this.orthographicCamera.lookAt(this.controls.target);
+				this.orthographicCamera.updateProjectionMatrix();
+				this.orthographicCamera.position.copy(this.controls.target);
+				this.orthographicCamera.position.y = this.height;
+				this.controls.update();
+			} else if (evt.key === '.') {
 				this.isPerspective = !this.isPerspective;
 
 				if (this.isPerspective) {
-					this.controls.enableRotate = true;
-					this.controls.enableZoom = true;
 					this.switchToPerspectiveCamera();
 				} else {
-					this.controls.enableRotate = false;
-					this.controls.enableZoom = false;
 					this.switchToOrthographicCamera();
 				}
+			} else if (evt.key === '/') {
+				this.controls.enableRotate = !this.controls.enableRotate;
+				this.controls.enableZoom = !this.controls.enableZoom;
 			}
 		});
+
+		const info = document.createElement('div');
+		canvas.parentElement.appendChild(info);
+		info.style.position = 'absolute';
+		info.style.zIndex = '999';
+		info.style.left = '0';
+		info.style.top = '0';
+		info.style.padding = '10px';
+		info.style.margin = '5px';
+		info.style.color = 'white';
+		info.style.background = 'black';
+		info.style.opacity = '0.75';
+		this.debugInfo = info;
 	}
 
 	update() {
@@ -67,10 +99,17 @@ class ThreeCamera {
 			this.controls.update();
 		}
 
+		if (this.controls.enableRotate) {
+			this.debugInfo.style.display = 'block';
+			this.debugInfo.innerHTML = `lookYaw: ${this.instance.rotation.y.toFixed(4)} </br> lookPitch: ${this.instance.rotation.x.toFixed(4)}`;
+		} else if (this.debugInfo.style.display !== 'none') {
+			this.debugInfo.style.display = 'none';
+		}
+
 		if (this.target) {
 			const targetWorldPos = new THREE.Vector3();
 			this.target.getWorldPosition(targetWorldPos);
-			this.setPosition2D(targetWorldPos.x, targetWorldPos.z);
+			this.setPosition(targetWorldPos);
 		}
 	}
 
@@ -86,7 +125,7 @@ class ThreeCamera {
 			this.instance.right = halfWidth;
 			this.instance.top = halfHeight;
 			this.instance.bottom = -halfHeight;
-			this.instance.zoom = 20;
+			this.instance.zoom = this.height;
 			this.instance.updateProjectionMatrix();
 		}
 	}
@@ -110,42 +149,52 @@ class ThreeCamera {
 		this.target = null;
 	}
 
-	getWorldPoint(p: THREE.Vector3) {
-		let targetY = 0;
+	getWorldPoint(p: THREE.Vector2) {
+		let target = this.controls.target;
 		if (this.target) {
 			const targetWorldPos = new THREE.Vector3();
 			this.target.getWorldPosition(targetWorldPos);
-			targetY = targetWorldPos.y;
+			target = targetWorldPos;
 		}
 
-		const point = p.clone();
-		point.unproject(this.instance);
-
-		if (!this.isPerspective) {
-			return point;
+		// Mouse to world pos code from:
+		// https://github.com/WestLangley/three.js/blob/e3cd05d80baf7b1594352a1d7e464c6d188b0080/examples/jsm/controls/OrbitControls.js
+		if (this.isPerspective) {
+			const pointer = new THREE.Vector3(p.x, p.y, 0.5);
+			pointer.unproject(this.instance);
+			pointer.sub(this.instance.position).normalize();
+			const dist =
+				target.clone().sub(this.perspectiveCamera.position).dot(this.perspectiveCamera.up) /
+				pointer.dot(this.perspectiveCamera.up);
+			return this.instance.position.clone().add(pointer.multiplyScalar(dist));
+		} else {
+			const pointer = new THREE.Vector3(
+				p.x,
+				p.y,
+				(this.orthographicCamera.near + this.orthographicCamera.far) /
+					(this.orthographicCamera.near - this.orthographicCamera.far)
+			);
+			pointer.unproject(this.orthographicCamera);
+			pointer.y -= target.y;
+			const v = new THREE.Vector3(0, 0, -1).applyQuaternion(this.orthographicCamera.quaternion);
+			const dist = -pointer.dot(this.orthographicCamera.up) / v.dot(this.orthographicCamera.up);
+			const result = pointer.clone().add(v.multiplyScalar(dist));
+			return result;
 		}
-
-		point.sub(this.instance.position).normalize();
-		var dist = (targetY - this.instance.position.y) / point.y;
-		return this.instance.position.clone().add(point.multiplyScalar(dist));
 	}
 
-	setPosition2D(x: number, z: number) {
+	setPosition(target: THREE.Vector3) {
 		const oldTarget = this.controls.target.clone();
-		const target = new THREE.Vector3(x, this.controls.target.y, z);
 		const diff = target.clone().sub(oldTarget);
-
 		const t = (taro?.game?.data?.settings?.camera?.trackingDelay || 3) / taro.fps();
-
 		this.controls.target.lerp(this.controls.target.clone().add(diff), t);
 		this.orthographicCamera.position.lerp(this.orthographicCamera.position.clone().add(diff), t);
 		this.perspectiveCamera.position.lerp(this.perspectiveCamera.position.clone().add(diff), t);
 	}
 
 	private switchToOrthographicCamera() {
-		this.perspectiveState.target.copy(this.controls.target);
-		this.perspectiveState.position.copy(this.controls.object.position);
-		this.perspectiveState.zoom = this.controls.object.zoom;
+		this.orthographicCamera.position.copy(this.perspectiveCamera.position);
+		this.orthographicCamera.quaternion.copy(this.perspectiveCamera.quaternion);
 
 		const distance = this.perspectiveCamera.position.distanceTo(this.controls.target);
 		const halfWidth = frustumWidthAtDistance(this.perspectiveCamera, distance) / 2;
@@ -159,28 +208,19 @@ class ThreeCamera {
 		this.orthographicCamera.updateProjectionMatrix();
 		this.instance = this.orthographicCamera;
 		this.controls.object = this.orthographicCamera;
-
-		if (this.orthographicState.target && this.orthographicState.position) {
-			this.controls.target.copy(this.orthographicState.target);
-			this.controls.object.position.copy(this.orthographicState.position).divideScalar(this.orthographicCamera.zoom);
-			this.controls.update();
-		}
+		this.instance.lookAt(this.controls.target);
+		this.controls.update();
 	}
 
 	private switchToPerspectiveCamera() {
-		this.orthographicState.target.copy(this.controls.target);
-		this.orthographicState.position.copy(this.controls.object.position);
+		this.perspectiveCamera.position.copy(this.orthographicCamera.position);
+		this.perspectiveCamera.quaternion.copy(this.orthographicCamera.quaternion);
 
 		this.perspectiveCamera.updateProjectionMatrix();
 		this.instance = this.perspectiveCamera;
 		this.controls.object = this.perspectiveCamera;
-
-		if (this.perspectiveState.target && this.perspectiveState.position && this.perspectiveState.zoom) {
-			this.controls.target.copy(this.perspectiveState.target);
-			this.controls.object.position.copy(this.perspectiveState.position).divideScalar(this.orthographicCamera.zoom);
-			this.controls.object.zoom = this.perspectiveState.zoom;
-			this.controls.update();
-		}
+		this.instance.lookAt(this.controls.target);
+		this.controls.update();
 	}
 }
 
