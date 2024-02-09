@@ -71,14 +71,12 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		scene.add.existing(toolButtonsContainer);
 		const toolButtonSection = this.toolButtonSection = new DevButtonSection(this, 'Tools', 0, (h + s) * 5 - s);
 		const brushSizeSection = new DevButtonSection(this, 'Brush Size', toolButtonSection.height, (h + s) * 2 - s * 4);
-		//const layersCount = scene.gameScene.tilemapLayers.length;
 		const layersCount = taro.game.data.map.layers.filter(layer => layer.type === 'tilelayer').length;
 		if (layersCount > 0) this.layerButtonSection = new DevButtonSection(this, 'Layers', toolButtonSection.height + brushSizeSection.height, (h * 0.75 + s) * layersCount + s * 3);
 		const paletteButtonSection = new DevButtonSection(this, '', toolButtonSection.height + brushSizeSection.height + this.layerButtonSection?.height || 0, h);
 
 		this.scene.scale.on(Phaser.Scale.Events.RESIZE, () => {
 			toolButtonsContainer.height = s + toolButtonSection.height + brushSizeSection.height + paletteButtonSection.height + this.layerButtonSection?.height || 0;
-
 			if (window.innerHeight > 900) {
 				toolButtonsContainer.scale = 1.25;
 			} else if (window.innerHeight > 1200) {

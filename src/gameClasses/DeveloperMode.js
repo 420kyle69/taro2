@@ -259,20 +259,18 @@ var DeveloperMode = /** @class */ (function () {
     };
     DeveloperMode.prototype.editTile = function (data, clientId) {
         var _this = this;
-        var _a, _b;
-        //@ts-ignore
-        console.log('edit layer', (_a = taro.game.data.map.layers[data.edit.layer[0]]) === null || _a === void 0 ? void 0 : _a.name);
+        var _a;
         // only allow developers to modify the tiles
         if (taro.server.developerClientIds.includes(clientId) || clientId === 'server') {
             if (JSON.stringify(data) === '{}') {
                 throw 'receive: {}';
             }
             var gameMap = taro.game.data.map;
-            var _c = Object.entries(data).map(function (_a) {
+            var _b = Object.entries(data).map(function (_a) {
                 var k = _a[0], dataValue = _a[1];
                 var dataType = k;
                 return { dataType: dataType, dataValue: dataValue };
-            })[0], dataType = _c.dataType, dataValue = _c.dataValue;
+            })[0], dataType = _b.dataType, dataValue = _b.dataValue;
             var serverData = rfdc()(dataValue);
             if (dataType === 'edit' && !serverData.noMerge) {
                 debounceSetWasEdited(gameMap);
@@ -287,7 +285,6 @@ var DeveloperMode = /** @class */ (function () {
                 gameMap.wasEdited = true;
                 taro.network.send('editTile', data);
             }
-            //if (gameMap.layers.length > 4 && serverData.layer >= 2) serverData.layer++;
             var width = gameMap.width;
             switch (dataType) {
                 case 'fill': {
@@ -309,8 +306,7 @@ var DeveloperMode = /** @class */ (function () {
                     this.clearLayer(nowValue.layer);
                 }
             }
-            if (((_b = gameMap.layers[serverData.layer]) === null || _b === void 0 ? void 0 : _b.name) === 'walls') {
-                console.log('recalc physics');
+            if (((_a = gameMap.layers[serverData.layer]) === null || _a === void 0 ? void 0 : _a.name) === 'walls') {
                 //if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
                 if (serverData.noMerge) {
                     recalcWallsPhysics(gameMap, true);

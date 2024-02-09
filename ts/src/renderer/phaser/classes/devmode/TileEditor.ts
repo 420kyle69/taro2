@@ -181,9 +181,6 @@ class TileEditor {
 			return { dataType, dataValue };
 		})[0];
 		let tempLayer = dataType === 'edit' ? dataValue.layer[0] : dataValue.layer;
-		/*if (map.layers.length > 4 && tempLayer >= 2) {
-			tempLayer++;
-		}*/
 
 		switch (dataType) {
 			case 'fill': {
@@ -233,13 +230,9 @@ class TileEditor {
 		const size = brushSize === 'fitContent' ? { x: calcData.xLength, y: calcData.yLength } : brushSize;
 		const taroMap = taro.game.data.map;
 		const width = taroMap.width;
-		let tempLayer = layer;
-		/*if (taroMap.layers.length > 4 && layer >= 2) {
-			tempLayer++;
-		}*/
 		tileX = brushSize === 'fitContent' ? calcData.minX : tileX;
 		tileY = brushSize === 'fitContent' ? calcData.minY : tileY;
-		if (taroMap.layers[tempLayer].data && this.gameScene.tilemapLayers[layer].visible && selectedTiles) {
+		if (taroMap.layers[layer].data && this.gameScene.tilemapLayers[layer].visible && selectedTiles) {
 			for (let x = 0; x < size.x; x++) {
 				for (let y = 0; y < size.y; y++) {
 					if (sample[x] && sample[x][y] !== undefined && DevModeScene.pointerInsideMap(tileX + x, tileY + y, map)) {
@@ -250,8 +243,7 @@ class TileEditor {
 							map.putTileAt(index, tileX + x, tileY + y, false, layer);
 							map.getTileAt(tileX + x, tileY + y, true, layer).tint = 0xffffff;
 							if (index === -1) index = 0;
-							console.log('putTiles at layer', tempLayer);
-							taroMap.layers[tempLayer].data[(tileY + y) * width + tileX + x] = index;
+							taroMap.layers[layer].data[(tileY + y) * width + tileX + x] = index;
 						}
 					}
 				}
@@ -310,15 +302,10 @@ class TileEditor {
 				inGameEditor.mapWasEdited && inGameEditor.mapWasEdited();
 				const tileMap = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
 				const width = map.width;
-				//fix for debris layer
-				let tempLayer = layer;
-				/*if (map.layers.length > 4 && layer >= 2) {
-					tempLayer++;
-				}*/
 				if (limits?.[nowPos.x]?.[nowPos.y]) {
 					continue;
 				}
-				if (map.layers[tempLayer].data[nowPos.y * width + nowPos.x] !== oldTile) {
+				if (map.layers[layer].data[nowPos.y * width + nowPos.x] !== oldTile) {
 					addToLimits?.({ x: nowPos.x, y: nowPos.y });
 					continue;
 				}
@@ -327,7 +314,7 @@ class TileEditor {
 				if (newTile === -1) {
 					newTile = 0;
 				}
-				map.layers[tempLayer].data[nowPos.y * width + nowPos.x] = newTile;
+				map.layers[layer].data[nowPos.y * width + nowPos.x] = newTile;
 			} else {
 				map = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
 				const nowTile = map.getTileAt(nowPos.x, nowPos.y, true, layer);
@@ -364,17 +351,12 @@ class TileEditor {
 		inGameEditor.mapWasEdited && inGameEditor.mapWasEdited();
 		const tileMap = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
 		const width = map.width;
-		//fix for debris layer
-		let tempLayer = layer;
-		/*if (map.layers.length > 4 && layer >= 2) {
-			tempLayer++;
-		}*/
 		for (let i = 0; i < map.width; i++) {
 			for (let j = 0; j < map.height; j++) {
-				if (map.layers[tempLayer].data[j * width + i] !== 0) {
+				if (map.layers[layer].data[j * width + i] !== 0) {
 					tileMap.putTileAt(-1, i, j, false, layer);
 					//save tile change to taro.game.map.data
-					map.layers[tempLayer].data[j * width + i] = 0;
+					map.layers[layer].data[j * width + i] = 0;
 				}
 			}
 		}

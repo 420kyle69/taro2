@@ -226,7 +226,7 @@ var GameScene = /** @class */ (function (_super) {
         //to be sure every layer of map have correct number of tiles
         var tilesPerLayer = data.map.height * data.map.width;
         data.map.layers.forEach(function (layer) {
-            if (layer.data /*layer.name !== 'debris'*/) {
+            if (layer.data) {
                 var length_1 = layer.data.length;
                 layer.width = data.map.width;
                 layer.height = data.map.height;
@@ -329,31 +329,12 @@ var GameScene = /** @class */ (function (_super) {
             }
             else {
                 var tileLayer = map.createBlankLayer(layer.name, map.tilesets, 0, 0, map.width, map.height);
-                console.log('blank tileLayer', tileLayer);
                 tileLayer.name = layer.name;
                 tileLayer.setScale(scaleFactor.x, scaleFactor.y);
                 _this.tilemapLayers.push(tileLayer);
             }
             entityLayers.push(_this.add.layer());
         });
-        /*if (data.map.layers.find(layer => layer.name === 'debris')) {
-            // taro expects 'debris' entity layer to be in front of 'walls'
-            // entity layer, so we need to swap them for backwards compatibility
-            const debrisLayer = entityLayers[TileLayer.DEBRIS];
-            const wallsLayer = entityLayers[TileLayer.WALLS];
-            entityLayers[EntityLayer.DEBRIS] = debrisLayer;
-            entityLayers[EntityLayer.WALLS] = wallsLayer;
-            this.children.moveAbove(<any>debrisLayer, <any>wallsLayer);
-
-        } else {
-            // this condition exists to insert the debris layer if it has been
-            // excluded from the map json
-            entityLayers.splice(
-                EntityLayer.DEBRIS,
-                0,
-                this.add.layer()
-            );
-        }*/
         var camera = this.cameras.main;
         camera.centerOn(map.width * map.tileWidth / 2 * scaleFactor.x, map.height * map.tileHeight / 2 * scaleFactor.y);
         if (data.defaultData.heightBasedZIndex) {
@@ -387,22 +368,6 @@ var GameScene = /** @class */ (function (_super) {
         var map = this.tilemap;
         var data = taro.game.data;
         data.map.layers.forEach(function (layer, index) {
-            /*if (layer.type === 'tilelayer') {
-                let layerId;
-                switch (layer.name) {
-                    case 'floor':
-                        layerId = 0;
-                        break;
-                    case 'floor2':
-                        layerId = 1;
-                        break;
-                    case 'walls':
-                        layerId = 2;
-                        break;
-                    case 'trees':
-                        layerId = 3;
-                        break;
-                }*/
             layer.data.forEach(function (tile, index) {
                 var x = index % layer.width;
                 var y = Math.floor(index / layer.width);
@@ -410,7 +375,6 @@ var GameScene = /** @class */ (function (_super) {
                     tile = -1;
                 map.putTileAt(tile, x, y, false, index);
             });
-            //}
         });
     };
     GameScene.prototype.patchMapData = function (map) {

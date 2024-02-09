@@ -152,9 +152,6 @@ var TileEditor = /** @class */ (function () {
             return { dataType: dataType, dataValue: dataValue };
         })[0], dataType = _a.dataType, dataValue = _a.dataValue;
         var tempLayer = dataType === 'edit' ? dataValue.layer[0] : dataValue.layer;
-        /*if (map.layers.length > 4 && tempLayer >= 2) {
-            tempLayer++;
-        }*/
         switch (dataType) {
             case 'fill': {
                 var nowValue = dataValue;
@@ -204,13 +201,9 @@ var TileEditor = /** @class */ (function () {
         var size = brushSize === 'fitContent' ? { x: calcData.xLength, y: calcData.yLength } : brushSize;
         var taroMap = taro.game.data.map;
         var width = taroMap.width;
-        var tempLayer = layer;
-        /*if (taroMap.layers.length > 4 && layer >= 2) {
-            tempLayer++;
-        }*/
         tileX = brushSize === 'fitContent' ? calcData.minX : tileX;
         tileY = brushSize === 'fitContent' ? calcData.minY : tileY;
-        if (taroMap.layers[tempLayer].data && this.gameScene.tilemapLayers[layer].visible && selectedTiles) {
+        if (taroMap.layers[layer].data && this.gameScene.tilemapLayers[layer].visible && selectedTiles) {
             for (var x = 0; x < size.x; x++) {
                 for (var y = 0; y < size.y; y++) {
                     if (sample[x] && sample[x][y] !== undefined && DevModeScene.pointerInsideMap(tileX + x, tileY + y, map)) {
@@ -223,8 +216,7 @@ var TileEditor = /** @class */ (function () {
                             map.getTileAt(tileX + x, tileY + y, true, layer).tint = 0xffffff;
                             if (index === -1)
                                 index = 0;
-                            console.log('putTiles at layer', tempLayer);
-                            taroMap.layers[tempLayer].data[(tileY + y) * width + tileX + x] = index;
+                            taroMap.layers[layer].data[(tileY + y) * width + tileX + x] = index;
                         }
                     }
                 }
@@ -280,15 +272,10 @@ var TileEditor = /** @class */ (function () {
                 inGameEditor.mapWasEdited && inGameEditor.mapWasEdited();
                 var tileMap = this.gameScene.tilemap;
                 var width = map.width;
-                //fix for debris layer
-                var tempLayer = layer;
-                /*if (map.layers.length > 4 && layer >= 2) {
-                    tempLayer++;
-                }*/
                 if ((_b = limits === null || limits === void 0 ? void 0 : limits[nowPos.x]) === null || _b === void 0 ? void 0 : _b[nowPos.y]) {
                     continue;
                 }
-                if (map.layers[tempLayer].data[nowPos.y * width + nowPos.x] !== oldTile) {
+                if (map.layers[layer].data[nowPos.y * width + nowPos.x] !== oldTile) {
                     addToLimits === null || addToLimits === void 0 ? void 0 : addToLimits({ x: nowPos.x, y: nowPos.y });
                     continue;
                 }
@@ -297,7 +284,7 @@ var TileEditor = /** @class */ (function () {
                 if (newTile === -1) {
                     newTile = 0;
                 }
-                map.layers[tempLayer].data[nowPos.y * width + nowPos.x] = newTile;
+                map.layers[layer].data[nowPos.y * width + nowPos.x] = newTile;
             }
             else {
                 map = this.gameScene.tilemap;
@@ -330,17 +317,12 @@ var TileEditor = /** @class */ (function () {
         inGameEditor.mapWasEdited && inGameEditor.mapWasEdited();
         var tileMap = this.gameScene.tilemap;
         var width = map.width;
-        //fix for debris layer
-        var tempLayer = layer;
-        /*if (map.layers.length > 4 && layer >= 2) {
-            tempLayer++;
-        }*/
         for (var i = 0; i < map.width; i++) {
             for (var j = 0; j < map.height; j++) {
-                if (map.layers[tempLayer].data[j * width + i] !== 0) {
+                if (map.layers[layer].data[j * width + i] !== 0) {
                     tileMap.putTileAt(-1, i, j, false, layer);
                     //save tile change to taro.game.map.data
-                    map.layers[tempLayer].data[j * width + i] = 0;
+                    map.layers[layer].data[j * width + i] = 0;
                 }
             }
         }

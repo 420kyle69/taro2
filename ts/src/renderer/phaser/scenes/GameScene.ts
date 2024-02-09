@@ -267,7 +267,7 @@ class GameScene extends PhaserScene {
 		//to be sure every layer of map have correct number of tiles
 		const tilesPerLayer = data.map.height * data.map.width;
 		data.map.layers.forEach(layer => {
-			if (layer.data/*layer.name !== 'debris'*/) {
+			if (layer.data) {
 				const length = layer.data.length;
 				layer.width = data.map.width;
 				layer.height = data.map.height;
@@ -395,7 +395,6 @@ class GameScene extends PhaserScene {
 				this.tilemapLayers.push(tileLayer);
 			} else {
 				const tileLayer = map.createBlankLayer(layer.name, map.tilesets, 0, 0, map.width, map.height);
-				console.log('blank tileLayer', tileLayer);
 				tileLayer.name = layer.name;
 				tileLayer.setScale(scaleFactor.x, scaleFactor.y);
 				this.tilemapLayers.push(tileLayer);
@@ -403,25 +402,6 @@ class GameScene extends PhaserScene {
 
 			entityLayers.push(this.add.layer());
 		});
-
-		/*if (data.map.layers.find(layer => layer.name === 'debris')) {
-			// taro expects 'debris' entity layer to be in front of 'walls'
-			// entity layer, so we need to swap them for backwards compatibility
-			const debrisLayer = entityLayers[TileLayer.DEBRIS];
-			const wallsLayer = entityLayers[TileLayer.WALLS];
-			entityLayers[EntityLayer.DEBRIS] = debrisLayer;
-			entityLayers[EntityLayer.WALLS] = wallsLayer;
-			this.children.moveAbove(<any>debrisLayer, <any>wallsLayer);
-
-		} else {
-			// this condition exists to insert the debris layer if it has been
-			// excluded from the map json
-			entityLayers.splice(
-				EntityLayer.DEBRIS,
-				0,
-				this.add.layer()
-			);
-		}*/
 
 		const camera = this.cameras.main;
 		camera.centerOn(
@@ -464,30 +444,12 @@ class GameScene extends PhaserScene {
 		const data = taro.game.data;
 
 		data.map.layers.forEach((layer, index) => {
-
-			/*if (layer.type === 'tilelayer') {
-				let layerId;
-				switch (layer.name) {
-					case 'floor':
-						layerId = 0;
-						break;
-					case 'floor2':
-						layerId = 1;
-						break;
-					case 'walls':
-						layerId = 2;
-						break;
-					case 'trees':
-						layerId = 3;
-						break;
-				}*/
-				layer.data.forEach((tile, index) => {
-					const x = index % layer.width;
-					const y = Math.floor(index/layer.width);
-					if (tile === 0 || tile === null) tile = -1;
-					map.putTileAt(tile, x, y, false, index);
-				});
-			//}
+			layer.data.forEach((tile, index) => {
+				const x = index % layer.width;
+				const y = Math.floor(index/layer.width);
+				if (tile === 0 || tile === null) tile = -1;
+				map.putTileAt(tile, x, y, false, index);
+			});
 		});
 	}
 

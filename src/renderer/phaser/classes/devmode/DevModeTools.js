@@ -53,7 +53,6 @@ var DevModeTools = /** @class */ (function (_super) {
         scene.add.existing(toolButtonsContainer);
         var toolButtonSection = _this.toolButtonSection = new DevButtonSection(_this, 'Tools', 0, (h + s) * 5 - s);
         var brushSizeSection = new DevButtonSection(_this, 'Brush Size', toolButtonSection.height, (h + s) * 2 - s * 4);
-        //const layersCount = scene.gameScene.tilemapLayers.length;
         var layersCount = taro.game.data.map.layers.filter(function (layer) { return layer.type === 'tilelayer'; }).length;
         if (layersCount > 0)
             _this.layerButtonSection = new DevButtonSection(_this, 'Layers', toolButtonSection.height + brushSizeSection.height, (h * 0.75 + s) * layersCount + s * 3);
