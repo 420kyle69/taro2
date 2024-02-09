@@ -199,6 +199,11 @@ const Client = TaroEventingClass.extend({
 		promise
 			.then(async (game) => {
 				taro.game.data = game.data;
+
+				if (!taro.game.data.defaultData.defaultRenderer) {
+					taro.game.data.defaultData.defaultRenderer = '2d';
+				}
+
 				await this.configureEngine();
 				taro.addComponent(TaroInputComponent);
 
