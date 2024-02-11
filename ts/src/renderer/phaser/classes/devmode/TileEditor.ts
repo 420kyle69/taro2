@@ -186,21 +186,27 @@ class TileEditor {
 			case 'fill': {
 				const nowValue = dataValue as TileData<'fill'>['fill'];
 				const oldTile = map.layers[tempLayer].data[nowValue.y * width + nowValue.x];
-				if (taro.game.data.map.layers[nowValue.layer].type === 'tilelayer' && taro.game.data.map.layers[nowValue.layer].data) this.floodFill(nowValue.layer, oldTile, nowValue.gid, nowValue.x, nowValue.y, true, nowValue.limits);
+				if (taro.game.data.map.layers[nowValue.layer].type === 'tilelayer' && taro.game.data.map.layers[nowValue.layer].data) {
+					this.floodFill(nowValue.layer, oldTile, nowValue.gid, nowValue.x, nowValue.y, true, nowValue.limits);
+				}
 				break;
 			}
 			case 'edit': {
 				//save tile change to taro.game.data.map and taro.map.data
 				const nowValue = dataValue as TileData<'edit'>['edit'];
-				nowValue.selectedTiles.map((v, idx) => {
-					if (taro.game.data.map.layers[nowValue.layer[idx]].type === 'tilelayer' && taro.game.data.map.layers[nowValue.layer[idx]].data) this.putTiles(nowValue.x, nowValue.y, v, nowValue.size, nowValue.shape, nowValue.layer[idx], true);
+				nowValue.selectedTiles.forEach((v, idx) => {
+					if (taro.game.data.map.layers[nowValue.layer[idx]].type === 'tilelayer' && taro.game.data.map.layers[nowValue.layer[idx]].data) {
+						this.putTiles(nowValue.x, nowValue.y, v, nowValue.size, nowValue.shape, nowValue.layer[idx], true);
+					}
 				});
 
 				break;
 			}
 			case 'clear': {
 				const nowValue = dataValue as TileData<'clear'>['clear'];
-				if (taro.game.data.map.layers[nowValue.layer].type === 'tilelayer' && taro.game.data.map.layers[nowValue.layer].data) this.clearLayer(nowValue.layer);
+				if (taro.game.data.map.layers[nowValue.layer].type === 'tilelayer' && taro.game.data.map.layers[nowValue.layer].data) {
+					this.clearLayer(nowValue.layer)
+				};
 			}
 		}
 		if (taro.physics && map.layers[tempLayer].name === 'walls') {
