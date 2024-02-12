@@ -1358,7 +1358,7 @@ var ShopComponent = TaroEntity.extend({
 			class: 'row text-center shop-grid-container'
 		});
 
-		if(items.length >= 0){
+		if(items.length <= 0){
 				// if no skins, show a message
 				let errMsg = $('<div>', {
 					class: '',
