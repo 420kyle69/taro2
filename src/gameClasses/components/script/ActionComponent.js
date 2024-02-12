@@ -418,6 +418,62 @@ var ActionComponent = TaroEntity.extend({
 						})(varName);
 
 						break;
+					
+					case 'sendSecurePostRequest':
+						var data = self._script.param.getValue(action.data, vars) || {};
+						var apiCreds = self._script.param.getValue(action.apiCreds, vars);
+						var varName = self._script.param.getValue(action.varName, vars);
+						
+						// use closure to store globalVariableName
+						(function (targetVarName, actionsOnSuccess, actionsOnFailure, currentScriptId) {
+							taro.workerComponent.sendSecurePostRequest({apiCreds, data})
+								.then((data, err) => {
+									// try+catch must be redeclared inside callback otherwise an error will crash the process
+									try {
+										
+										if (data && !err) {
+											// onSuccess callback
+											if (taro.game.data.variables.hasOwnProperty(targetVarName)) {
+												taro.game.data.variables[targetVarName].value = data;
+											}
+											
+											taro.game.lastReceivedPostResponse = data;
+											taro.game.lastUpdatedVariableName = targetVarName;
+											
+											let previousScriptId = self._script.currentScriptId;
+											let previousAcionBlockIdx = self._script.currentActionBlockIdx;
+											self._script.currentScriptId = currentScriptId;
+											self.run(actionsOnSuccess, vars, actionPath, self._script.currentActionBlockIdx);
+											self._script.currentScriptId = previousScriptId;
+											self._script.currentActionBlockIdx = previousAcionBlockIdx;
+										} else {
+											// onFailure callback
+											// don't throw new Error here, because it's inside callback and it won't get caught
+											self._script.errorLog(err, path);
+											
+											let previousScriptId = self._script.currentScriptId;
+											let previousAcionBlockIdx = self._script.currentActionBlockIdx;
+											self._script.currentScriptId = currentScriptId;
+											self.run(actionsOnFailure, vars, actionPath, self._script.currentActionBlockIdx);
+											self._script.currentScriptId = previousScriptId;
+											self._script.currentActionBlockIdx = previousAcionBlockIdx;
+										}
+									} catch (e) {
+										// onFailure callback
+										// don't throw new Error here, because it's inside callback and it won't get caught
+										self._script.errorLog(e, path);
+										
+										let previousScriptId = self._script.currentScriptId;
+										let previousAcionBlockIdx = self._script.currentActionBlockIdx;
+										self._script.currentScriptId = currentScriptId;
+										self.run(actionsOnFailure, vars, actionPath, self._script.currentActionBlockIdx);
+										self._script.currentScriptId = previousScriptId;
+										self._script.currentActionBlockIdx = previousAcionBlockIdx;
+									}
+								});
+						})(varName, action.onSuccess, action.onFailure, self._script.currentScriptId);
+						
+						break;
 
 						/* Player */
 
