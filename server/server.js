@@ -524,6 +524,8 @@ var Server = TaroClass.extend({
 												}
 
 											});
+
+											console.log('devLogs sent to developer');
 										if (sendErrors) {
 											taro.script.errorLogs = {};
 										}
