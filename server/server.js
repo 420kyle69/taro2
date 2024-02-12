@@ -403,7 +403,6 @@ var Server = TaroClass.extend({
 
 				taro.defaultVariables = rfdc()(game.data.variables);
 				taro.game.data = game.data;
-				taro.game.data.map.layers = taro.game.data.map.layers.slice().filter(layer => layer.data !== undefined)
 
 				if (additionalData) {
 					taro.game.data = {

@@ -199,7 +199,6 @@ const Client = TaroEventingClass.extend({
 		promise
 			.then(async (game) => {
 				taro.game.data = game.data;
-				taro.game.data.map.layers = taro.game.data.map.layers.slice().filter(layer => layer.data !== undefined)
 				await this.configureEngine();
 				taro.addComponent(TaroInputComponent);
 
