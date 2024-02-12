@@ -16,6 +16,8 @@ class ThreeRenderer {
 	private resolutionCoef = 1;
 	private zoomSize = undefined;
 
+	private skybox: ThreeSkybox;
+
 	private constructor() {
 		// For JS interop; in case someone uses new ThreeRenderer()
 		if (!ThreeRenderer.instance) {
@@ -110,12 +112,12 @@ class ThreeRenderer {
 			textureManager.loadFromUrl(key, Utils.patchAssetUrl(key));
 		}
 
-		textureManager.loadFromFile('left', '/assets/skybox/left.jpg');
-		textureManager.loadFromFile('right', '/assets/skybox/right.jpg');
-		textureManager.loadFromFile('top', '/assets/skybox/top.jpg');
-		textureManager.loadFromFile('bottom', '/assets/skybox/bottom.jpg');
-		textureManager.loadFromFile('front', '/assets/skybox/front.jpg');
-		textureManager.loadFromFile('back', '/assets/skybox/back.jpg');
+		textureManager.loadFromFile('left', '/assets/skybox/noon/left.jpg');
+		textureManager.loadFromFile('right', '/assets/skybox/noon/right.jpg');
+		textureManager.loadFromFile('top', '/assets/skybox/noon/top.jpg');
+		textureManager.loadFromFile('bottom', '/assets/skybox/noon/bottom.jpg');
+		textureManager.loadFromFile('front', '/assets/skybox/noon/front.jpg');
+		textureManager.loadFromFile('back', '/assets/skybox/noon/back.jpg');
 	}
 
 	private forceLoadUnusedCSSFonts() {
@@ -132,6 +134,7 @@ class ThreeRenderer {
 		skybox.scene.translateX(taro.game.data.map.width / 2);
 		skybox.scene.translateZ(taro.game.data.map.height / 2);
 		this.scene.add(skybox.scene);
+		this.skybox = skybox;
 
 		taro.client.on('zoom', (height: number) => {
 			if (this.zoomSize === height * 2.15) return;
@@ -149,7 +152,10 @@ class ThreeRenderer {
 			}
 		});
 
-		taro.client.on('stop-follow', () => this.camera.stopFollow());
+		taro.client.on('stop-follow', () => {
+			this.camera.stopFollow();
+			this.scene.attach(this.skybox.scene);
+		});
 
 		const layers = {
 			entities: new THREE.Group(),
@@ -266,6 +272,8 @@ class ThreeRenderer {
 				'follow',
 				() => {
 					this.camera.startFollow(ent);
+					this.skybox.scene.position.copy(ent.position);
+					ent.attach(this.skybox.scene);
 				},
 				this
 			);
