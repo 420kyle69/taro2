@@ -97,6 +97,9 @@ interface MapData {
 		columns: number;
 	}[];
 	layers: {
+		y: number;
+		x: number;
+		opacity: number;
 		data: number[];
 		name: string;
 		width: number;
