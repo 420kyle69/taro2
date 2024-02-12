@@ -421,13 +421,13 @@ var ActionComponent = TaroEntity.extend({
 					
 					case 'sendSecurePostRequest':
 						var data = self._script.param.getValue(action.data, vars) || {};
-						var apiCreds = self._script.param.getValue(action.apiCreds, vars);
+						var apiCredentials = self._script.param.getValue(action.apiCredentials, vars);
 						var varName = self._script.param.getValue(action.varName, vars);
 						
 						// use closure to store globalVariableName
 						(function (targetVarName, actionsOnSuccess, actionsOnFailure, currentScriptId) {
-							taro.workerComponent.sendSecurePostRequest({apiCreds, data})
-								.then((data, err) => {
+							taro.workerComponent.sendSecurePostRequest({apiCredentials, data})
+								.then(({data, err}) => {
 									// try+catch must be redeclared inside callback otherwise an error will crash the process
 									try {
 										
