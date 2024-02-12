@@ -2,7 +2,7 @@ class ThreeSkybox {
 	scene: THREE.Object3D;
 
 	constructor() {
-		const geo = new THREE.BoxGeometry(100, 100, 100);
+		const geo = new THREE.BoxGeometry(10000, 10000, 10000);
 		const material = this.createMaterialArray();
 		console.log(material);
 		const skybox = new THREE.Mesh(geo, material);
