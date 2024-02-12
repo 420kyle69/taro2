@@ -109,6 +109,13 @@ class ThreeRenderer {
 			const key = type.url;
 			textureManager.loadFromUrl(key, Utils.patchAssetUrl(key));
 		}
+
+		textureManager.loadFromFile('left', '/assets/skybox/left.jpg');
+		textureManager.loadFromFile('right', '/assets/skybox/right.jpg');
+		textureManager.loadFromFile('top', '/assets/skybox/top.jpg');
+		textureManager.loadFromFile('bottom', '/assets/skybox/bottom.jpg');
+		textureManager.loadFromFile('front', '/assets/skybox/front.jpg');
+		textureManager.loadFromFile('back', '/assets/skybox/back.jpg');
 	}
 
 	private forceLoadUnusedCSSFonts() {
@@ -121,6 +128,9 @@ class ThreeRenderer {
 	}
 
 	private init() {
+		const skybox = new ThreeSkybox();
+		this.scene.add(skybox.scene);
+
 		taro.client.on('zoom', (height: number) => {
 			if (this.zoomSize === height * 2.15) return;
 
