@@ -129,6 +129,8 @@ class ThreeRenderer {
 
 	private init() {
 		const skybox = new ThreeSkybox();
+		skybox.scene.translateX(taro.game.data.map.width / 2);
+		skybox.scene.translateZ(taro.game.data.map.height / 2);
 		this.scene.add(skybox.scene);
 
 		taro.client.on('zoom', (height: number) => {
