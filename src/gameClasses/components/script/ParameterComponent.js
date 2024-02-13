@@ -122,7 +122,7 @@ var ParameterComponent = TaroEntity.extend({
 
 		if (isNaN(result)) {
 			//Wooden Wall2::UnitDeath::block#11::CalcError,  owner(thisEntity).$BuildCap  is undefined
-			taro.script.errorLog(`Calculate error: ${left} ${op.operator} ${right} => NaN. ${left === undefined ? `${JSON.stringify(items[1])} Returning undefined` : ''} ${right === undefined ? `, ${JSON.stringify(items[3])} Returning undefined` : ''}`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionBlockIdx}`, true);
+			taro.script.errorLog(`Calculate error: ${left} ${op.operator} ${right} => NaN. ${left === undefined ? `${JSON.stringify(items[1])} Returning undefined` : ''} ${right === undefined ? `, ${JSON.stringify(items[3])} Returning undefined` : ''}`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
 			return undefined;
 		}
 
@@ -1074,13 +1074,13 @@ var ParameterComponent = TaroEntity.extend({
 						var layer = self.getValue(text.layer, vars);
 						if (map && Number.isInteger(layer) && Number.isInteger(tileX) && Number.isInteger(tileY)) {
 							if (layer > 3 || layer < 0) {
-								taro.script.errorLog(`Invalid Layer`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionBlockIdx}`, true);
+								taro.script.errorLog(`Invalid Layer`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
 								break;
 							} else if (tileX < 0 || tileX >= taro.game.data.map.width) {
-								taro.script.errorLog(`invalid x position`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionBlockIdx}`, true);
+								taro.script.errorLog(`invalid x position`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
 								break;
 							} else if (tileY < 0 || tileY >= taro.game.data.map.height) {
-								taro.script.errorLog(`invalid y position`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionBlockIdx}`, true);
+								taro.script.errorLog(`invalid y position`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
 								break;
 							} else {
 								returnValue = map.layers[layer].data[tileX + tileY * map.width];
@@ -1242,7 +1242,7 @@ var ParameterComponent = TaroEntity.extend({
 							}
 
 							if (!returnValue) {
-								taro.script.errorLog(`could not find valid position even after${attempts} attempts`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionBlockIdx}`, true);
+								taro.script.errorLog(`could not find valid position even after${attempts} attempts`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
 							}
 						}
 
@@ -1822,7 +1822,7 @@ var ParameterComponent = TaroEntity.extend({
 								}
 							} catch (err) {
 								if (err instanceof SyntaxError) {
-									self._script.errorLog(`error parsing JSON within getStringArrayLength:  ${typeof string} ${string} is not a valid JSON string`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionBlockIdx}`, true);
+									self._script.errorLog(`error parsing JSON within getStringArrayLength:  ${typeof string} ${string} is not a valid JSON string`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
 								}
 							}
 						}
@@ -1841,7 +1841,7 @@ var ParameterComponent = TaroEntity.extend({
 
 							} catch (err) {
 								if (err instanceof SyntaxError) {
-									self._script.errorLog(`error parsing JSON within getStringArrayElement:  ${typeof string} ${string} is not a valid JSON string`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionBlockIdx}`, true);
+									self._script.errorLog(`error parsing JSON within getStringArrayElement:  ${typeof string} ${string} is not a valid JSON string`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
 								}
 							}
 						}
@@ -1863,9 +1863,9 @@ var ParameterComponent = TaroEntity.extend({
 								}
 							} catch (err) {
 								if (err instanceof SyntaxError) {
-									self._script.errorLog(`error parsing JSON within insertStringArrayElement:  ${typeof string} ${string} is not a valid JSON string`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionBlockIdx}`, true);
+									self._script.errorLog(`error parsing JSON within insertStringArrayElement:  ${typeof string} ${string} is not a valid JSON string`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
 								} else {
-									self._script.errorLog('error modifying array within insertStringArrayElement', `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionBlockIdx}`, true);
+									self._script.errorLog('error modifying array within insertStringArrayElement', `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
 								}
 							}
 						}
@@ -1888,9 +1888,9 @@ var ParameterComponent = TaroEntity.extend({
 								}
 							} catch (err) {
 								if (err instanceof SyntaxError) {
-									self._script.errorLog(`error parsing JSON within updateStringArrayElement:  ${typeof string} ${string} is not a valid JSON string`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionBlockIdx}`, true);
+									self._script.errorLog(`error parsing JSON within updateStringArrayElement:  ${typeof string} ${string} is not a valid JSON string`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
 								} else {
-									self._script.errorLog('error modifying array within updateStringArrayElement', `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionBlockIdx}`, true);
+									self._script.errorLog('error modifying array within updateStringArrayElement', `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
 								}
 							}
 						}
@@ -1912,9 +1912,9 @@ var ParameterComponent = TaroEntity.extend({
 								}
 							} catch (err) {
 								if (err instanceof SyntaxError) {
-									self._script.errorLog(`error parsing JSON within removeStringArrayElement:  ${typeof string} ${string} is not a valid JSON string`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionBlockIdx}`, true);
+									self._script.errorLog(`error parsing JSON within removeStringArrayElement:  ${typeof string} ${string} is not a valid JSON string`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
 								} else {
-									self._script.errorLog('error modifying array within removeStringArrayElement', `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionBlockIdx}`, true);
+									self._script.errorLog('error modifying array within removeStringArrayElement', `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
 								}
 							}
 						}
@@ -2170,7 +2170,7 @@ var ParameterComponent = TaroEntity.extend({
 									return self._entity.script.action.entityCategories.includes(_category) || !_category;
 								});
 							} else {
-								taro.script.errorLog(`region ${JSON.stringify(region)} is not a valid region`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionBlockIdx}`, true);
+								taro.script.errorLog(`region ${JSON.stringify(region)} is not a valid region`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
 								returnValue = [];
 							}
 						}
@@ -2205,7 +2205,7 @@ var ParameterComponent = TaroEntity.extend({
 							if (region.x && !isNaN(region.x) && region.y && !isNaN(region.y) && region.width && !isNaN(region.width) && region.height && !isNaN(region.height)) {
 								returnValue = region
 							} else {
-								taro.script.errorLog(`region ${JSON.stringify(region)} is not a valid region`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionBlockIdx}`, true);
+								taro.script.errorLog(`region ${JSON.stringify(region)} is not a valid region`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
 								returnValue = undefined;
 							}
 						}
@@ -2230,7 +2230,7 @@ var ParameterComponent = TaroEntity.extend({
 									});
 							}
 						} else {
-							taro.script.errorLog('region is not a valid region', `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionBlockIdx}`, true);
+							taro.script.errorLog('region is not a valid region', `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
 							returnValue = [];
 						}
 
@@ -2272,7 +2272,7 @@ var ParameterComponent = TaroEntity.extend({
 
 					default:
 						if (text.function) {
-							taro.script.errorLog(`warning: function '${text.function}' not found`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionBlockIdx}`, true);
+							taro.script.errorLog(`warning: function '${text.function}' not found`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
 						} else {
 							returnValue = text;
 						}
@@ -2301,7 +2301,7 @@ var ParameterComponent = TaroEntity.extend({
 
 		if (returnValue === undefined && text !== undefined && (typeof text === 'object' && text.function !== 'undefinedValue')) {
 			// TODO: improve the error report, for performance, remove it for now
-			// self._script.errorLog(`${typeof text === 'object' && !Array.isArray(text) ? JSON.stringify(text) : text} is undefined`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionBlockIdx}`, true)
+			// self._script.errorLog(`${typeof text === 'object' && !Array.isArray(text) ? JSON.stringify(text) : text} is undefined`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true)
 		}
 		return returnValue;
 	},
@@ -2775,7 +2775,7 @@ var ParameterComponent = TaroEntity.extend({
 						return JSON.parse(string);
 					} catch (err) {
 						if (err instanceof SyntaxError) {
-							self._script.errorLog(`error parsing JSON within stringToObject:  ${typeof string} ${string} is not a valid JSON string`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionBlockIdx}`, true);
+							self._script.errorLog(`error parsing JSON within stringToObject:  ${typeof string} ${string} is not a valid JSON string`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
 						}
 					}
 				}
