@@ -1,5 +1,6 @@
 class ThreeSprite extends THREE.Group {
 	sprite: THREE.Mesh;
+	billboard = false;
 
 	private layer = 3;
 	private depth = 1;
@@ -16,6 +17,15 @@ class ThreeSprite extends THREE.Group {
 		const material = new THREE.MeshBasicMaterial({ map: tex, transparent: true });
 		this.sprite = new THREE.Mesh(geometry, material);
 		this.add(this.sprite);
+
+		// Too much coupling?
+		const renderer = ThreeRenderer.getInstance();
+		renderer.camera.onChange(() => {
+			if (this.billboard) {
+				this.rotation.setFromRotationMatrix(renderer.camera.instance.matrix);
+				this.rotateX(Math.PI / 2);
+			}
+		});
 	}
 
 	setScale(sx: number, sy: number) {
