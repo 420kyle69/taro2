@@ -369,7 +369,7 @@ const box2dninjaWrapper: PhysicsDistProps = {
 
 			var joint = self._world.CreateJoint(joint_def); // joint between two pieces
 
-			// var serverStats = taro.server.getStatus()
+			// var serverStats = taro.status.getSummary()
 			PhysicsComponent.prototype.log('joint created ', aBody.jointType);
 
 			entityA.jointsAttached[entityB.id()] = joint;

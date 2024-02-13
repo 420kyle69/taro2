@@ -5,6 +5,11 @@ var taroClientConfig = {
 		'/lib/msgpack.min.js',
 		'/lib/rfdc.min.js',
 		'/lib/lzutf8.min.js',
+		'/lib/phaser.min.js',
+		'/lib/rexuiplugin.min.js',
+		'/lib/rexvirtualjoystickplugin.min.js',
+		'/lib/three.min.js',
+		'/lib/OrbitControls.js',
 
 		'/gameClasses/Player.js',
 		'/gameClasses/Unit.js',
@@ -65,9 +70,6 @@ var taroClientConfig = {
 		'/gameClasses/Combinator.js',
 		'/gameClasses/TileShape.js',
 		/* Phaser */
-		'renderer/phaser/phaser.min.js',
-		'renderer/phaser/rexuiplugin.min.js',
-		'renderer/phaser/rexvirtualjoystickplugin.min.js',
 		// '../node_modules/phaser3-rex-plugins/dist/rexvirtualjoystickplugin.min.js',
 		//'../node_modules/phaser3-rex-plugins/templates/ui/ui-components.js',
 		'utils/visibility-polygon.js',
@@ -111,8 +113,6 @@ var taroClientConfig = {
 		'renderer/phaser/PhaserRenderer.js',
 
 		// Three.js Renderer
-		'renderer/three/three.min.js',
-		'renderer/three/OrbitControls.js',
 		'renderer/three/utils.js',
 		'renderer/three/ThreeTextureManager.js',
 		'renderer/three/ThreeVoxelMap.js',

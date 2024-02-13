@@ -191,8 +191,6 @@ var TaroEngine = TaroEntity.extend({
 		this.lastTrigger = undefined;
 		this.triggerProfiler = {};
 		this.actionProfiler = {};
-		this.lastAction = undefined;
-		this.lastActionRanAt = 0;
 		this.lastTriggerRanAt = 0;
 
 		this.gameInfo = {};
@@ -1642,6 +1640,7 @@ var TaroEngine = TaroEntity.extend({
 				self._tickDelta = self._tickStart - self.lastTick;
 				// console.log("wtf tick", self._tickStart, self.lastTick, self._tickDelta)
 			}
+
 			taro.now = Date.now();
 			timeElapsed = taro.now - taro._lastGameLoopTickAt;
 			if (timeElapsed >= (1000 / taro._gameLoopTickRate) - taro._gameLoopTickRemainder) {

@@ -399,6 +399,7 @@ var Server = TaroClass.extend({
 				taro.addComponent(GameTextComponent);
 				taro.addComponent(GameComponent);
 				taro.addComponent(ProfilerComponent);
+				
 				self.gameStartedAt = new Date();
 
 				taro.defaultVariables = rfdc()(game.data.variables);
@@ -442,6 +443,8 @@ var Server = TaroClass.extend({
 
 				taro.addComponent(PhysicsComponent);
 
+				// we're using setInterval because we need to wait for the physics to be loaded
+				// this is a hacky temporary solution and needs to be fixed
 				const loadedInterval = setInterval(() => {
 					if (taro.physics.gravity) {
 						taro.physics.sleep(true);
@@ -494,6 +497,8 @@ var Server = TaroClass.extend({
 								taro.addComponent(SoundComponent);
 								taro.addComponent(RegionManager);
 
+								taro.addComponent(StatusComponent);
+			
 								if (taro.game.data.defaultData.enableVideoChat) {
 									taro.addComponent(VideoChatComponent);
 								}
@@ -502,34 +507,6 @@ var Server = TaroClass.extend({
 								taro.map.load(map);
 
 								taro.game.start();
-
-								// send dev logs to developer every second
-								var logInterval = setInterval(function () {
-									// send only if developer client is connect
-
-									if (taro.isServer && self.developerClientIds.length) {
-										taro.game.devLogs.status = taro.server.getStatus();
-
-										const sendErrors = Object.keys(taro.script.errorLogs).length;
-										self.developerClientIds.forEach(
-											id => {
-												taro.network.send('devLogs', taro.game.devLogs, id);
-
-												if (taro.profiler.isEnabled) {
-													taro.network.send('profile', taro.profiler.getProfile(), id);
-												}
-
-												if (sendErrors) {
-													taro.network.send('errorLogs', taro.script.errorLogs, id);
-												}
-
-											});
-										if (sendErrors) {
-											taro.script.errorLogs = {};
-										}
-									}
-									taro.physicsTickCount = 0;
-								}, 1000);
 
 								setInterval(function () {
 									var copyCount = Object.assign({}, self.socketConnectionCount);
@@ -546,7 +523,7 @@ var Server = TaroClass.extend({
 						clearInterval(loadedInterval);
 					}
 
-				}, 50);
+				}, 200);
 
 			})
 				.catch((err) => {
@@ -889,125 +866,6 @@ var Server = TaroClass.extend({
 			type,
 			reason
 		});
-	},
-
-	getStatus: function () {
-		var self = this;
-
-		var cpuDelta = null;
-		if (taro._lastCpuUsage) {
-			// console.log('before',taro._lastCpuUsage);
-			cpuDelta = process.cpuUsage(taro._lastCpuUsage);
-			taro._lastCpuUsage = process.cpuUsage();
-		} else {
-			taro._lastCpuUsage = cpuDelta = process.cpuUsage();
-		}
-
-		if (taro.physics && taro.physics.engine != 'CRASH') {
-			// console.log('taro stream',taro.stream);
-
-			var jointCount = 0;
-			var jointList = taro.physics._world && taro.physics._world.getJointList();
-			let getPointer = taro.physics.getPointer;
-			while (jointList && (!getPointer || getPointer(jointList) !== getPointer(taro.physics.nullPtr))) {
-				jointCount++;
-				jointList = jointList.getNext();
-			}
-			var returnData = {
-				clientCount: Object.keys(taro.network._socketById).length,
-				entityCount: {
-					player: taro.$$('player').filter(function (player) {
-						return player._stats.controlledBy == 'human';
-					}).length,
-					unit: taro.$$('unit').length,
-					item: taro.$$('item').length,
-					projectile: taro.$$('projectile').length,
-					sensor: taro.$$('sensor').length,
-					region: taro.$$('region').length
-				},
-				bandwidth: self.bandwidthUsage,
-				heapUsed: process.memoryUsage().heapUsed / 1024 / 1024,
-				currentTime: taro._currentTime,
-				physics: {
-					engine: taro.physics.engine,
-					bodyCount: taro.physics._world?.m_bodyCount || taro.physics._world?.GetBodyCount?.() || 0,
-					contactCount: taro.physics._world?.m_contactCount || taro.physics._world?.GetContactCount?.() || 0,
-					jointCount: taro.physics._world?.m_jointCount || taro.physics._world?.GetJointCount?.() || 0,
-					stepDuration: taro.physics.avgPhysicsTickDuration.toFixed(2),
-					stepsPerSecond: taro._physicsFPS,
-					totalBodiesCreated: taro.physics.totalBodiesCreated
-				},
-				etc: {
-					totalPlayersCreated: taro.server.totalPlayersCreated,
-					totalUnitsCreated: taro.server.totalUnitsCreated,
-					totalItemsCreated: taro.server.totalItemsCreated,
-					totalProjectilesCreated: taro.server.totalProjectilesCreated,
-					totalWallsCreated: taro.server.totalWallsCreated
-				},
-				cpu: cpuDelta,
-				lastSnapshotLength: JSON.stringify(taro.server.lastSnapshot).length
-			};
-
-			self.bandwidthUsage = {
-				unit: 0,
-				item: 0,
-				player: 0,
-				projectile: 0,
-				region: 0,
-				sensor: 0
-			};
-
-			return returnData;
-		}
-		//temprorary for testing crash engine
-		// else {
-		// 	taro.physics.getInfo();
-		// 	var returnData = {
-		// 		clientCount: Object.keys(taro.network._socketById).length,
-		// 		entityCount: {
-		// 			player: taro.$$('player').filter(function (player) {
-		// 				return player._stats.controlledBy == 'human';
-		// 			}).length,
-		// 			unit: taro.$$('unit').length,
-		// 			item: taro.$$('item').length,
-		// 			projectile: taro.$$('projectile').length,
-		// 			sensor: taro.$$('sensor').length,
-		// 			region: taro.$$('region').length
-		// 		},
-		// 		bandwidth: self.bandwidthUsage,
-		// 		heapUsed: process.memoryUsage().heapUsed / 1024 / 1024,
-		// 		currentTime: taro._currentTime,
-		// 		physics: {
-		// 			engine: taro.physics.engine,
-		// 			bodyCount: taro.physics._world.m_bodyCount,
-		// 			contactCount: taro.physics._world.m_contactCount,
-		// 			jointCount: taro.physics._world.m_jointCount,
-		// 			stepDuration: taro.physics.avgPhysicsTickDuration.toFixed(2),
-		// 			stepsPerSecond: taro._physicsFPS,
-		// 			totalBodiesCreated: taro.physics.totalBodiesCreated
-		// 		},
-		// 		etc: {
-		// 			totalPlayersCreated: taro.server.totalPlayersCreated,
-		// 			totalUnitsCreated: taro.server.totalUnitsCreated,
-		// 			totalItemsCreated: taro.server.totalItemsCreated,
-		// 			totalProjectilesCreated: taro.server.totalProjectilesCreated,
-		// 			totalWallsCreated: taro.server.totalWallsCreated
-		// 		},
-		// 		cpu: cpuDelta,
-		// 		lastSnapshotLength: JSON.stringify(taro.server.lastSnapshot).length
-		// 	};
-
-		// 	self.bandwidthUsage = {
-		// 		unit: 0,
-		// 		item: 0,
-		// 		player: 0,
-		// 		projectile: 0,
-		// 		region: 0,
-		// 		sensor: 0
-		// 	};
-
-		// 	return returnData;
-		// }
 	}
 });
 

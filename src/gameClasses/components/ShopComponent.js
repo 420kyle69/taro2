@@ -145,6 +145,13 @@ var ShopComponent = TaroEntity.extend({
 
 				// purchase purchasable
 				$(document).on('click', '.btn-purchase-purchasable', function () {
+
+					if(!isLoggedIn){
+						window.openLoginOptionFrameModal();
+						return;
+					}
+
+
 					if ($(this).hasClass('disabled')) return;
 					var itemDom = $(this);
 					var name = itemDom[0].dataset.purchasable;
@@ -710,7 +717,7 @@ var ShopComponent = TaroEntity.extend({
 				$('#modd-shop-modal .shop-items').html('');
 				if (self.unitSkinCount[key] > 0 || key == 'Purchased') {
 					// select first key by default
-					if (!self.shopKey && isFirstKey) {
+					if (!self.shopKey && isFirstKey && key != 'Purchased') {
 						self.shopKey = key;
 					}
 
@@ -1358,8 +1365,24 @@ var ShopComponent = TaroEntity.extend({
 			class: 'row text-center shop-grid-container'
 		});
 
+		if(items.length <= 0){
+				// if no skins, show a message
+				let errMsg = $('<div>', {
+					class: '',
+					style: 'display: flex; justify-content: center; margin-top: 25px;',
+					html: '<strong>No skins found</strong>',
+					name:'error-message-skins'
+				})
+				$('#modd-shop-modal .shop-items').html(errMsg)
+				return;
+		}
+
 		for (let i = 0; i < items.length; i++) {
 			var item = items[i];
+
+			if (!isLoggedIn) {
+				item.status = 'not_purchased';
+			}
 
 			if (item.status == 'not_purchased') {	
 
@@ -1557,9 +1580,9 @@ var ShopComponent = TaroEntity.extend({
 		var self = this;
 
 		var totalPages = Math.ceil(self.skinItems.length / self.perPageItems);
-
 		if (totalPages == 0) {
-			$('#mod-shop-pagination').html('');
+			$('#mod-shop-pagination').html('');	
+			self.renderSkinsButtons([]);
 			return;
 		}
 

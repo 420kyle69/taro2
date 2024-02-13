@@ -9,9 +9,9 @@
 		"server:cc": "cross-env ENV=standalone LOAD_CC=true JWT_SECRET_KEY='change-this' node --inspect server/taro.js -g ./src",
 		"tsc": "tsc",
 		"tsc-watch": "tsc -w",
-		"build": "node server/taro.js -deploy ./src -to ./src",
+		"build": "tsc && node server/taro.js -deploy ./src -to ./src",
 		"build:gs": "cross-env TEST=true node server/taro.js -deploy ./src -to ../../be/assets",
-		"build:git": "cross-env TEST=true node server/taro.js -deploy ./src -to ./build",
+		"build:git": "tsc && cross-env TEST=true node server/taro.js -deploy ./src -to ./build",
 		"debug": "cross-env ENV=standalone JWT_SECRET_KEY='change-this' node --inspect server/taro.js -g ./src",
 		"dev:lint": "eslint . --fix"
 	},

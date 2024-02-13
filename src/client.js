@@ -199,12 +199,22 @@ const Client = TaroEventingClass.extend({
 		promise
 			.then(async (game) => {
 				taro.game.data = game.data;
+
+				if (!taro.game.data.defaultData.defaultRenderer) {
+					taro.game.data.defaultData.defaultRenderer = '2d';
+				}
+
 				await this.configureEngine();
 				taro.addComponent(TaroInputComponent);
 
 				taro.entitiesToRender = new EntitiesToRender();
-				taro.renderer = new PhaserRenderer();
-				// taro.renderer = ThreeRenderer.getInstance();
+
+				if (taro.game.data.defaultData.defaultRenderer === '3d') {
+					taro.renderer = ThreeRenderer.getInstance();
+				} else {
+					taro.renderer = new PhaserRenderer();
+				}
+
 				taro.developerMode = new DeveloperMode();
 
 				if (!window.isStandalone) {

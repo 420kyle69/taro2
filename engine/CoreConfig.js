@@ -68,6 +68,7 @@ var taroCoreConfig = {
 		['csap', 'TaroArray', 'core/TaroArray.js'],
 		/* Engine Actual */
 		['csap', 'TaroEngine', 'core/TaroEngine.js'],
+
 		/* Physics Libraries */
 		['csap', 'PhysicsComponent', './components/physics/box2d/Box2dComponent.js'],
 		['csap', 'TaroEntityPhysics', './components/physics/box2d/TaroEntityPhysics.js'],

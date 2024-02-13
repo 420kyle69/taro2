@@ -270,7 +270,6 @@ const TaroEntityPhysics = TaroEntity.extend({
 
 	setLinearVelocity: function (x, y, z, isLossTolerant) {
 		if ((this.body != undefined)) {
-			taro.physicsTickCount++;
 			if (!isNaN(x) && !isNaN(y) && isFinite(x) && isFinite(y)) {
 				// client side's predicted physics is weaker than the server's, so buff it up!
 				// if (taro.isClient && this == taro.client.selectedUnit) {
