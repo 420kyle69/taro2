@@ -125,7 +125,6 @@ var DevConsoleComponent = TaroEntity.extend({
 				statsPanels.tarodpf._tarodpfPanel.update(taro._dpf, 1000);
 				statsPanels.tarout._taroutPanel.update(taro._updateTime, 100);
 				statsPanels.tarott._tarottPanel.update(taro._tickTime, 100);
-				taro.physicsTickCount = 0;
 			}, 1000);
 
 			graphsDiv.append(connectionDiv);

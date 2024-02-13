@@ -54,10 +54,12 @@ var ActionComponent = TaroEntity.extend({
 				continue;
 			}
 
+			var actionPath = `${path}/${i}`;
+
 			if (taro.profiler.isEnabled) {
 				var startTime = performance.now();
 				// var actionPath = path + "/" + i + "("+action.type+")";
-				var actionPath = `${path}/${i}`;
+				
 			}
 
 			// assign runMode engine-widely, so functions like item.use() can reference to what the current runMode is
@@ -67,7 +69,6 @@ var ActionComponent = TaroEntity.extend({
 			if (taro.isServer) {
 
 				var now = Date.now();
-				var lastActionRunTime = now - taro.lastActionRanAt;
 				var engineTickDelta = now - taro.now;
 
 				// prevent recursive/infinite action calls consuming CPU
@@ -78,8 +79,6 @@ var ActionComponent = TaroEntity.extend({
 							engineTickDelta: engineTickDelta,
 							masterServer: global.myIp,
 							gameInfo: taro.gameInfo,
-							// lastAction: action.type,
-							// actionProfiler: taro.actionProfiler,
 							// triggerProfiler: taro.triggerProfiler
 						});
 					}
@@ -88,19 +87,9 @@ var ActionComponent = TaroEntity.extend({
 					// taro.server.unpublish(errorMsg); // not publishing yet cuz TwoHouses will get unpub. loggin instead.
 				}
 
-				if (taro.lastAction) {
-					if (taro.actionProfiler[taro.lastAction]) {
-						var count = taro.actionProfiler[taro.lastAction].count;
-						taro.actionProfiler[taro.lastAction].count++;
-						taro.actionProfiler[taro.lastAction].avgTime = ((taro.actionProfiler[taro.lastAction].avgTime * count) + lastActionRunTime) / (count + 1);
-						taro.actionProfiler[taro.lastAction].totalTime += lastActionRunTime;
-					} else {
-						taro.actionProfiler[taro.lastAction] = { count: 1, avgTime: lastActionRunTime, totalTime: lastActionRunTime };
-					}
+				if (taro.status) {
+					taro.status.logAction(actionPath)
 				}
-
-				taro.lastAction = action.type;
-				taro.lastActionRanAt = now;
 			}
 
 			var params = {};
