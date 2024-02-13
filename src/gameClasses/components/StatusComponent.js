@@ -16,13 +16,10 @@ var StatusComponent = TaroEntity.extend({
 	},
 
 	getTop10Actions: function () {
-		var self = this;
-		var top10 = Object.keys(self.actionCounter).sort(function (a, b) {
-			return self.actionCounter[b] - self.actionCounter[a];
-		}).slice(0, 10);
-		return top10.map(function (path) {
-			return { path: path, count: self.actionCounter[path] };
-		});
+		return Object.entries(this.actionCounter)
+			.sort(([, countA], [, countB]) => countB - countA)
+			.slice(0, 10)
+			.map(([path, count]) => ({ path, count }));
 	},
 	
     getSummary: function () {
