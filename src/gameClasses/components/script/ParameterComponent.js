@@ -1072,11 +1072,12 @@ var ParameterComponent = TaroEntity.extend({
 						var tileX = self.getValue(text.x, vars);
 						var tileY = self.getValue(text.y, vars);
 						var layer = self.getValue(text.layer, vars);
+						console.log(layer, taro.game.data.map.layers[layer])
 						if (map && Number.isInteger(layer) && Number.isInteger(tileX) && Number.isInteger(tileY)) {
 							if (layer > taro.game.data.map.layers.length || layer < 0) {
 								taro.script.errorLog(`Invalid Layer`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionBlockIdx}`, true);
 								break;
-							} else if (tileLayer.type !== 'tileLayer') {
+							} else if (taro.game.data.map.layers[layer].type !== 'tilelayer') {
 								taro.script.errorLog(`Invalid Layer`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionBlockIdx}`, true);
 								break;
 							} else if (tileX < 0 || tileX >= taro.game.data.map.width) {

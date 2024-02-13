@@ -447,6 +447,9 @@ class GameScene extends PhaserScene {
 		const data = taro.game.data;
 
 		data.map.layers.forEach((layer, index) => {
+			if (layer.type !== 'tilelayer') {
+				return;
+			}
 			layer.data.forEach((tile, index) => {
 				const x = index % layer.width;
 				const y = Math.floor(index/layer.width);

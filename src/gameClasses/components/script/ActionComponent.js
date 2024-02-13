@@ -3100,7 +3100,7 @@ var ActionComponent = TaroEntity.extend({
 						if (Number.isInteger(tileGid) && Number.isInteger(tileLayer) && Number.isInteger(tileX) && Number.isInteger(tileY)) {
 							if (tileGid < 0 || tileGid > taro.game.data.map.tilesets[0].tilecount) {
 								break;
-							} else if (tileLayer.type !== 'tileLayer') {
+							} else if (taro.game.data.map.layers[tileLayer].type !== 'tilelayer') {
 								break;
 							} else if (tileLayer > taro.game.data.map.layers.length || tileLayer < 0) {
 								break;
@@ -3144,7 +3144,7 @@ var ActionComponent = TaroEntity.extend({
 						) {
 							if (tileGid < 0 || tileGid > taro.game.data.map.tilesets[0].tilecount) {
 								break;
-							} else if (tileLayer.type !== 'tileLayer') {
+							} else if (taro.game.data.map.layers[tileLayer].type !== 'tilelayer') {
 								break;
 							} else if (tileLayer > taro.game.data.map.layers.length || tileLayer < 0) {
 								break;
