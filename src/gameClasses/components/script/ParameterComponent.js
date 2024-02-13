@@ -1076,6 +1076,9 @@ var ParameterComponent = TaroEntity.extend({
 							if (layer > taro.game.data.map.layers.length || layer < 0) {
 								taro.script.errorLog(`Invalid Layer`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionBlockIdx}`, true);
 								break;
+							} else if (tileLayer > taro.game.data.map.layers.length || tileLayer < 0) {
+								taro.script.errorLog(`Invalid Layer`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionBlockIdx}`, true);
+								break;
 							} else if (tileX < 0 || tileX >= taro.game.data.map.width) {
 								taro.script.errorLog(`invalid x position`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionBlockIdx}`, true);
 								break;

@@ -96,8 +96,8 @@ class DevModeTools extends Phaser.GameObjects.Container {
         let layerIndex = 0;
         scene.gameScene.tilemapLayers.forEach((layer, index) => {
             if (taro.game.data.map.layers[index].type === 'tilelayer' && taro.game.data.map.layers[index].data) {
-                this.layerButtonSection.addButton(new DevToolButton(this, layer.name, `Layer (${layerIndex})`, `select the ${layer.name} layer`, null, w * 0.7, (h * 0.75 + s) * (layersCount - 1 - layerIndex), w * 2.5, h * 0.75, toolButtonsContainer, this.switchLayer.bind(this), index), this.layerButtons);
-                this.layerButtonSection.addButton(new DevToolButton(this, '', `Layer visibility (shift-${layerIndex})`, `show/hide ${layer.name} layer`, 'eyeopen', 0, (h * 0.75 + s) * (layersCount - 1 - layerIndex), w, h * 0.75, toolButtonsContainer, this.hideLayer.bind(this), index), this.layerHideButtons);
+                this.layerButtonSection.addButton(new DevToolButton(this, layer.name, `Layer (${index})`, `select the ${layer.name} layer`, null, w * 0.7, (h * 0.75 + s) * (layersCount - 1 - layerIndex), w * 2.5, h * 0.75, toolButtonsContainer, this.switchLayer.bind(this), index), this.layerButtons);
+                this.layerButtonSection.addButton(new DevToolButton(this, '', `Layer visibility (shift-${index})`, `show/hide ${layer.name} layer`, 'eyeopen', 0, (h * 0.75 + s) * (layersCount - 1 - layerIndex), w, h * 0.75, toolButtonsContainer, this.hideLayer.bind(this), index), this.layerHideButtons);
                 layerIndex++;
             }
             else {
