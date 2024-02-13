@@ -35,6 +35,15 @@ var ActionComponent = TaroEntity.extend({
 	},
 
 	// entity can be either trigger entity, or entity in loop
+	// add actionLineNumber to track the action call stack for error report
+	/**
+	 *
+	 * @param {*} actionList
+	 * @param {*} vars
+	 * @param {*} path
+	 * @param {number} actionLineNumber action line number which showed in the ScriptModal's actions' left, include the disabled action
+	 * @returns
+	 */
 	run: function (actionList, vars, path, actionLineNumber) {
 		var self = this;
 
