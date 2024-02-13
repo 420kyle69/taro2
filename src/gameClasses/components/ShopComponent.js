@@ -717,7 +717,7 @@ var ShopComponent = TaroEntity.extend({
 				$('#modd-shop-modal .shop-items').html('');
 				if (self.unitSkinCount[key] > 0 || key == 'Purchased') {
 					// select first key by default
-					if (!self.shopKey && isFirstKey) {
+					if (!self.shopKey && isFirstKey && key != 'Purchased') {
 						self.shopKey = key;
 					}
 
