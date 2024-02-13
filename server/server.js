@@ -118,7 +118,7 @@ var Server = TaroClass.extend({
 		self.userAdStats = {};
 
 		taro.env = process.env.ENV || 'production';
-		
+
 		self.tier = (cluster.isPrimary ? process.env.TIER : (process.env.WORKER_TIER || process.env.TIER)) || 2;
 
 		self.region = process.env.REGION || 'apocalypse';
@@ -220,7 +220,7 @@ var Server = TaroClass.extend({
 		this.implement(ServerNetworkEvents);
 		taro.addComponent(TaroNetIoComponent);
 	},
-	
+
 	startWebServer: function () {
 		const app = express();
 		const port = 80;
@@ -266,9 +266,9 @@ var Server = TaroClass.extend({
 		}
 
 		app.get('/', (req, res) => {
-			
+
 			const token = Math.random().toString(36).substring(2, 14); // random token for standalone
-			
+
 			const videoChatEnabled = taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.enableVideoChat ? taro.game.data.defaultData.enableVideoChat : false;
 			const game = {
 				_id: global.standaloneGame.defaultData._id,
@@ -353,7 +353,7 @@ var Server = TaroClass.extend({
 
 		this.socket = {};
 		var port = process.env.PORT || 2001;
-		
+
 		this.duplicateIpCount = {};
 
 		self.maxPlayers = self.maxPlayers || 32;
@@ -368,7 +368,7 @@ var Server = TaroClass.extend({
 		taro.network.debug(self.isDebugging);
 		// Start the network server
 		taro.network.start(self.port, function (data) {
-			
+
 			var promise;
 
 			if (gameJson) {
