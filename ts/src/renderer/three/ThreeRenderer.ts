@@ -202,6 +202,7 @@ class ThreeRenderer {
 			const createEntity = () => {
 				const e = new ThreeUnit(tex.clone());
 				this.animatedSprites.push(e);
+				e.billboard = false;
 				return e;
 			};
 
@@ -213,7 +214,13 @@ class ThreeRenderer {
 				'transform',
 				(data: { x: number; y: number; rotation: number }) => {
 					ent.position.set(Utils.pixelToWorld(data.x) - 0.5, 1, Utils.pixelToWorld(data.y) - 0.5);
-					ent.setRotationY(-data.rotation);
+
+					let angle = -data.rotation;
+					if (ent.billboard && (entity instanceof Item || entity instanceof Projectile)) {
+						// Might be able to delete this once units rotate with camera yaw.
+						angle -= this.camera.controls.getAzimuthalAngle();
+					}
+					ent.setRotationY(angle);
 				},
 				this
 			);
