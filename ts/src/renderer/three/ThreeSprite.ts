@@ -23,7 +23,7 @@ class ThreeSprite extends THREE.Group {
 		renderer.camera.onChange(() => {
 			if (this.billboard) {
 				this.rotation.setFromRotationMatrix(renderer.camera.instance.matrix);
-				this.rotateX(Math.PI / 2);
+				this.rotateX(Math.PI * 0.5);
 			}
 		});
 	}
