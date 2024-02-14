@@ -627,7 +627,7 @@ var ActionComponent = TaroEntity.extend({
 
 						if (unit && ownerPlayer && userId && ownerPlayer.persistentDataLoaded) {
 							var data = unit.getPersistentData('unit');
-							taro.workerComponent.saveUserData(userId, data, 'unit');
+							taro.workerComponent.saveUserData(userId, data, 'unit', 'saveUnitData');
 						} else {
 							if (unit && !unit.persistentDataLoaded) {
 								throw new Error('Fail saving unit data bcz persisted data not set correctly');
@@ -642,15 +642,22 @@ var ActionComponent = TaroEntity.extend({
 
 						if (player && userId && player.persistentDataLoaded) {
 							var data = player.getPersistentData('player');
-							taro.workerComponent.saveUserData(userId, data, 'player');
-
+							
+							const persistedData = {player: data};
+							
 							var unit = player.getSelectedUnit();
-							var userId = player._stats.userId;
 
 							if (unit && player && userId && unit.persistentDataLoaded) {
 								var data = unit.getPersistentData('unit');
-								taro.workerComponent.saveUserData(userId, data, 'unit');
+								persistedData.unit = data;
+								
+								// save unit and player data both
+								taro.workerComponent.saveUserData(userId, persistedData, null, 'savePlayerData');
+								
 							} else {
+								// save player data only
+								taro.workerComponent.saveUserData(userId, persistedData.player, 'player', 'savePlayerData');
+								
 								if (unit && !unit.persistentDataLoaded) {
 									throw new Error('Fail saving unit data bcz persisted data not loaded correctly');
 								} else {
