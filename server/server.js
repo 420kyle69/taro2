@@ -81,6 +81,7 @@ global.coinHelper = {
 
 process.on('exit', function () {
 	console.log('process exit called.');
+	taro.workerComponent && taro.workerComponent.preKillServerHandler('crashed', 'crash');
 	taro.workerComponent && taro.workerComponent.sendRollbarCrashData(global.lastRollbarUuid);
 	console.trace();
 });
