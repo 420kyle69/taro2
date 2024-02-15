@@ -1,10 +1,5 @@
 class ThreeVoxelMap extends THREE.Group {
-	constructor(
-		private tileset: THREE.Texture,
-		private tileWidth: number,
-		private tileHeight: number,
-		private tilesetCols: number
-	) {
+	constructor(private tileset: ThreeTileset) {
 		super();
 	}
 
@@ -33,28 +28,16 @@ class ThreeVoxelMap extends THREE.Group {
 			}
 		}
 
-		const texWidth = this.tileset.image.width;
-		const texHeight = this.tileset.image.height;
-		const xStep = this.tileWidth / texWidth;
-		const yStep = this.tileHeight / texHeight;
-
 		const prunedVoxels = pruneCells(voxels);
-		const voxelData = buildMeshDataFromCells(
-			prunedVoxels,
-			this.tilesetCols,
-			xStep,
-			yStep,
-			this.tileWidth,
-			this.tileWidth
-		);
+		const voxelData = buildMeshDataFromCells(prunedVoxels, this.tileset);
 
 		const geometry = new THREE.BufferGeometry();
 		geometry.setIndex([...voxelData.otherIndices, ...voxelData.topIndices]);
 		geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(voxelData.positions), 3));
 		geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(voxelData.uvs), 2));
 		geometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(voxelData.normals), 3));
-		const mat1 = new THREE.MeshBasicMaterial({ transparent, map: this.tileset, side: THREE.DoubleSide });
-		const mat2 = new THREE.MeshBasicMaterial({ transparent, map: this.tileset, side: THREE.DoubleSide });
+		const mat1 = new THREE.MeshBasicMaterial({ transparent, map: this.tileset.texture, side: THREE.DoubleSide });
+		const mat2 = new THREE.MeshBasicMaterial({ transparent, map: this.tileset.texture, side: THREE.DoubleSide });
 		const mesh = new THREE.Mesh(geometry, [mat1, mat2]);
 
 		geometry.addGroup(0, voxelData.otherIndices.length, 0);
@@ -103,7 +86,10 @@ function pruneCells(cells) {
 	return prunedVoxels;
 }
 
-function buildMeshDataFromCells(cells, tilesetCols, xStep, yStep, tileWidth, tileHeight) {
+function buildMeshDataFromCells(cells, tileset: ThreeTileset) {
+	const xStep = tileset.tileWidth / tileset.width;
+	const yStep = tileset.tileHeight / tileset.height;
+
 	const pxGeometry = new THREE.PlaneGeometry(1, 1);
 	pxGeometry.rotateY(Math.PI / 2);
 	pxGeometry.translate(0.5, 0, 0);
@@ -158,10 +144,10 @@ function buildMeshDataFromCells(cells, tilesetCols, xStep, yStep, tileWidth, til
 			}
 			targetData.positions.push(...localPositions);
 
-			const xIdx = (curCell.type % tilesetCols) - 1;
-			const yIdx = Math.floor(curCell.type / tilesetCols);
+			const xIdx = (curCell.type % tileset.columns) - 1;
+			const yIdx = Math.floor(curCell.type / tileset.columns);
 
-			const singlePixelOffset = { x: xStep / tileWidth, y: yStep / tileHeight };
+			const singlePixelOffset = { x: xStep / tileset.tileWidth, y: yStep / tileset.tileHeight };
 			const halfPixelOffset = { x: singlePixelOffset.x / 2, y: singlePixelOffset.y / 2 };
 
 			const xOffset = xStep * xIdx + halfPixelOffset.x;
