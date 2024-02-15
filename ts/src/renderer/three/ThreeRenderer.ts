@@ -201,7 +201,7 @@ class ThreeRenderer {
 			}
 
 			if (['floor2'].includes(layer.name)) {
-				this.voxelMap.addLayer(layer, 1, true, true, layerId * 100);
+				this.voxelMap.addLayer(layer, 1, true, false, layerId * 100);
 			}
 
 			if (['walls'].includes(layer.name)) {
@@ -209,7 +209,7 @@ class ThreeRenderer {
 			}
 
 			if (['trees'].includes(layer.name)) {
-				this.voxelMap.addLayer(layer, 3, true, true, layerId * 100);
+				this.voxelMap.addLayer(layer, 3, true, false, layerId * 100);
 			}
 		});
 
