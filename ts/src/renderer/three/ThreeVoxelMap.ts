@@ -191,8 +191,8 @@ function buildMeshDataFromCells(cells, tileset: ThreeTileset) {
 				localIndices[j] += bi;
 			}
 
-			// top face (positive-y)
-			if (i === 2) {
+			// top and bottom face
+			if (i === 2 || i === 3) {
 				targetData.topIndices.push(...localIndices);
 			} else {
 				targetData.sidesIndices.push(...localIndices);
