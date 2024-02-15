@@ -28,7 +28,6 @@ class ThreeVoxelMap extends THREE.Group {
 					position: [pos.x, pos.y, pos.z],
 					type: data.data[z * data.width + x],
 					visible: true,
-					// hiddenFaces: 0x000000,
 					hiddenFaces: [...hiddenFaces],
 				});
 			}
@@ -50,12 +49,17 @@ class ThreeVoxelMap extends THREE.Group {
 		);
 
 		const geometry = new THREE.BufferGeometry();
-		geometry.setIndex(voxelData.indices);
+		geometry.setIndex([...voxelData.otherIndices, ...voxelData.topIndices]);
 		geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(voxelData.positions), 3));
 		geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(voxelData.uvs), 2));
 		geometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(voxelData.normals), 3));
-		const mat = new THREE.MeshBasicMaterial({ transparent, map: this.tileset, side: THREE.DoubleSide });
-		const mesh = new THREE.Mesh(geometry, mat);
+		const mat1 = new THREE.MeshBasicMaterial({ transparent, map: this.tileset, side: THREE.DoubleSide });
+		const mat2 = new THREE.MeshBasicMaterial({ transparent, map: this.tileset, side: THREE.DoubleSide });
+		const mesh = new THREE.Mesh(geometry, [mat1, mat2]);
+
+		geometry.addGroup(0, voxelData.otherIndices.length, 0);
+		geometry.addGroup(voxelData.otherIndices.length, voxelData.topIndices.length, 1);
+
 		mesh.renderOrder = renderOrder;
 
 		this.add(mesh);
@@ -131,7 +135,8 @@ function buildMeshDataFromCells(cells, tilesetCols, xStep, yStep, tileWidth, til
 		positions: [],
 		uvs: [],
 		normals: [],
-		indices: [],
+		topIndices: [],
+		otherIndices: [],
 	};
 
 	for (let c of cells.keys()) {
@@ -195,7 +200,13 @@ function buildMeshDataFromCells(cells, tilesetCols, xStep, yStep, tileWidth, til
 			for (let j = 0; j < localIndices.length; ++j) {
 				localIndices[j] += bi;
 			}
-			targetData.indices.push(...localIndices);
+
+			// top face (positive-y)
+			if (i === 2) {
+				targetData.topIndices.push(...localIndices);
+			} else {
+				targetData.otherIndices.push(...localIndices);
+			}
 		}
 	}
 
@@ -215,6 +226,5 @@ type VoxelCell = {
 	position: number[];
 	type: number;
 	visible: boolean;
-	// hiddenFaces: number;
 	hiddenFaces: boolean[];
 };
