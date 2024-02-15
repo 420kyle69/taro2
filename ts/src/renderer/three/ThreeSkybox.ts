@@ -4,15 +4,12 @@ class ThreeSkybox {
 	constructor() {
 		const geo = new THREE.BoxGeometry(10000, 10000, 10000);
 		const material = this.createMaterialArray();
-		console.log(material);
 		const skybox = new THREE.Mesh(geo, material);
 		this.scene = skybox;
 	}
 
 	private createMaterialArray() {
 		const textureManager = ThreeTextureManager.instance();
-
-		console.log(textureManager.textureMap);
 
 		const left = textureManager.textureMap.get('left');
 		const right = textureManager.textureMap.get('right');

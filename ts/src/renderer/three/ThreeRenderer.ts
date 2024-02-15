@@ -111,12 +111,13 @@ class ThreeRenderer {
 			textureManager.loadFromUrl(key, Utils.patchAssetUrl(key));
 		}
 
-		textureManager.loadFromFile('left', '/assets/skybox/noon/left.jpg');
-		textureManager.loadFromFile('right', '/assets/skybox/noon/right.jpg');
-		textureManager.loadFromFile('top', '/assets/skybox/noon/top.jpg');
-		textureManager.loadFromFile('bottom', '/assets/skybox/noon/bottom.jpg');
-		textureManager.loadFromFile('front', '/assets/skybox/noon/front.jpg');
-		textureManager.loadFromFile('back', '/assets/skybox/noon/back.jpg');
+		const skyboxUrls = taro.game.data.settings.skybox;
+		textureManager.loadFromFile('left', skyboxUrls.left);
+		textureManager.loadFromFile('right', skyboxUrls.right);
+		textureManager.loadFromFile('top', skyboxUrls.top);
+		textureManager.loadFromFile('bottom', skyboxUrls.bottom);
+		textureManager.loadFromFile('front', skyboxUrls.front);
+		textureManager.loadFromFile('back', skyboxUrls.back);
 	}
 
 	private forceLoadUnusedCSSFonts() {
