@@ -200,9 +200,7 @@ const Client = TaroEventingClass.extend({
 			.then(async (game) => {
 				taro.game.data = game.data;
 
-				if (!taro.game.data.defaultData.defaultRenderer) {
-					taro.game.data.defaultData.defaultRenderer = '2d';
-				}
+				this.initializeConfigurationFields();
 
 				await this.configureEngine();
 				taro.addComponent(TaroInputComponent);
@@ -290,6 +288,35 @@ const Client = TaroEventingClass.extend({
 				// console.log(`best server selected: ${this.server, this.server.id}`);
 			});
 		}
+	},
+
+	initializeConfigurationFields: function () {
+		if (!taro.game.data.defaultData.defaultRenderer) {
+			taro.game.data.defaultData.defaultRenderer = '2d';
+		}
+
+		const skyboxDefaultUrls = {
+			left: 'https://cache.modd.io/asset/spriteImage/1708009182743_left.png',
+			right: 'https://cache.modd.io/asset/spriteImage/1708009210421_right.png',
+			bottom: 'https://cache.modd.io/asset/spriteImage/1708007218891_bottom.png',
+			top: 'https://cache.modd.io/asset/spriteImage/1708009237292_top.png',
+			front: 'https://cache.modd.io/asset/spriteImage/1708009150127_front.png',
+			back: 'https://cache.modd.io/asset/spriteImage/1708007016275_back.png',
+		};
+
+		if (!taro.game.data.settings.skybox) {
+			taro.game.data.settings.skybox = {};
+		}
+
+		if (!taro.game.data.settings.camera.projectionMode) {
+			taro.game.data.settings.camera.projectionMode = 'perspective';
+		}
+
+		Object.keys(skyboxDefaultUrls).forEach((key) => {
+			if (taro.game.data.settings.skybox[key] === undefined) {
+				taro.game.data.settings.skybox[key] = skyboxDefaultUrls[key];
+			} 
+		});
 	},
 
 	loadPhysics: function () {
