@@ -151,7 +151,10 @@ class ThreeRenderer {
 		taro.game.data.map.tilesets.forEach((tileset) => {
 			// TODO: Add tilesets to resource manager (rename texture manager to resource manager)
 			const tex = ThreeTextureManager.instance().textureMap.get(tileset.image);
-			this.voxelMap = new ThreeVoxelMap(new ThreeTileset(tex, tileset.tilewidth, tileset.tilewidth));
+			// TODO: The sides tileset will be different, waiting on m0dE
+			const topTileset = new ThreeTileset(tex, tileset.tilewidth, tileset.tilewidth);
+			const sidesTileset = new ThreeTileset(tex, tileset.tilewidth, tileset.tilewidth);
+			this.voxelMap = new ThreeVoxelMap(topTileset, sidesTileset);
 			this.scene.add(this.voxelMap);
 		});
 

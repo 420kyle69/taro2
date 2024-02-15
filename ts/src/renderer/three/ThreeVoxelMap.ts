@@ -1,5 +1,8 @@
 class ThreeVoxelMap extends THREE.Group {
-	constructor(private tileset: ThreeTileset) {
+	constructor(
+		private topTileset: ThreeTileset,
+		private sidesTileset: ThreeTileset
+	) {
 		super();
 	}
 
@@ -29,20 +32,21 @@ class ThreeVoxelMap extends THREE.Group {
 		}
 
 		const prunedVoxels = pruneCells(voxels);
-		const voxelData = buildMeshDataFromCells(prunedVoxels, this.tileset);
+		const voxelData = buildMeshDataFromCells(prunedVoxels, this.topTileset);
 
 		const geometry = new THREE.BufferGeometry();
-		geometry.setIndex([...voxelData.otherIndices, ...voxelData.topIndices]);
+		geometry.setIndex([...voxelData.sidesIndices, ...voxelData.topIndices]);
 		geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(voxelData.positions), 3));
 		geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(voxelData.uvs), 2));
 		geometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(voxelData.normals), 3));
-		const mat1 = new THREE.MeshBasicMaterial({ transparent, map: this.tileset.texture, side: THREE.DoubleSide });
-		const mat2 = new THREE.MeshBasicMaterial({ transparent, map: this.tileset.texture, side: THREE.DoubleSide });
+
+		const mat1 = new THREE.MeshBasicMaterial({ transparent, map: this.sidesTileset.texture, side: THREE.DoubleSide });
+		const mat2 = new THREE.MeshBasicMaterial({ transparent, map: this.topTileset.texture, side: THREE.DoubleSide });
+
+		geometry.addGroup(0, voxelData.sidesIndices.length, 0);
+		geometry.addGroup(voxelData.sidesIndices.length, voxelData.topIndices.length, 1);
+
 		const mesh = new THREE.Mesh(geometry, [mat1, mat2]);
-
-		geometry.addGroup(0, voxelData.otherIndices.length, 0);
-		geometry.addGroup(voxelData.otherIndices.length, voxelData.topIndices.length, 1);
-
 		mesh.renderOrder = renderOrder;
 
 		this.add(mesh);
@@ -122,7 +126,7 @@ function buildMeshDataFromCells(cells, tileset: ThreeTileset) {
 		uvs: [],
 		normals: [],
 		topIndices: [],
-		otherIndices: [],
+		sidesIndices: [],
 	};
 
 	for (let c of cells.keys()) {
@@ -191,7 +195,7 @@ function buildMeshDataFromCells(cells, tileset: ThreeTileset) {
 			if (i === 2) {
 				targetData.topIndices.push(...localIndices);
 			} else {
-				targetData.otherIndices.push(...localIndices);
+				targetData.sidesIndices.push(...localIndices);
 			}
 		}
 	}
