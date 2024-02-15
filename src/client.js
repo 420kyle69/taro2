@@ -309,7 +309,7 @@ const Client = TaroEventingClass.extend({
 		}
 
 		if (!taro.game.data.settings.camera.projectionMode) {
-			taro.game.data.settings.camera.projectionMode = 'perspective';
+			taro.game.data.settings.camera.projectionMode = 'orthographic';
 		}
 
 		Object.keys(skyboxDefaultUrls).forEach((key) => {
