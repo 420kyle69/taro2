@@ -14,7 +14,7 @@ class ThreeSprite extends THREE.Group {
 
 		const geometry = new THREE.PlaneGeometry(1, 1);
 		geometry.rotateX(-Math.PI / 2);
-		const material = new THREE.MeshBasicMaterial({ map: tex, transparent: true });
+		const material = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false });
 		this.sprite = new THREE.Mesh(geometry, material);
 		this.add(this.sprite);
 

@@ -161,7 +161,7 @@ class ThreeRenderer {
 			entities: new THREE.Group(),
 		};
 
-		layers.entities.position.y = 1;
+		layers.entities.position.y = 0.51;
 
 		for (const layer of Object.values(layers)) {
 			this.scene.add(layer);
@@ -201,7 +201,7 @@ class ThreeRenderer {
 			}
 
 			if (['floor2'].includes(layer.name)) {
-				this.voxelMap.addLayer(layer, 1, true, true, layerId * 100);
+				this.voxelMap.addLayer(layer, 1, true, false, layerId * 100);
 			}
 
 			if (['walls'].includes(layer.name)) {
@@ -209,7 +209,7 @@ class ThreeRenderer {
 			}
 
 			if (['trees'].includes(layer.name)) {
-				this.voxelMap.addLayer(layer, 3, true, true, layerId * 100);
+				this.voxelMap.addLayer(layer, 2, true, false, layerId * 100);
 			}
 		});
 
@@ -230,7 +230,7 @@ class ThreeRenderer {
 			const transformEvtListener = entity.on(
 				'transform',
 				(data: { x: number; y: number; rotation: number }) => {
-					ent.position.set(Utils.pixelToWorld(data.x) - 0.5, 1, Utils.pixelToWorld(data.y) - 0.5);
+					ent.position.set(Utils.pixelToWorld(data.x) - 0.5, 0, Utils.pixelToWorld(data.y) - 0.5);
 
 					let angle = -data.rotation;
 					if (ent.billboard && (entity instanceof Item || entity instanceof Projectile)) {
