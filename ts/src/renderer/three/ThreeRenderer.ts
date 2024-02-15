@@ -61,7 +61,6 @@ class ThreeRenderer {
 		};
 
 		THREE.DefaultLoadingManager.onLoad = () => {
-			console.log(ThreeTextureManager.instance().textureMap);
 			this.init();
 			this.setupInputListeners();
 			taro.client.rendererLoaded.resolve();
@@ -150,50 +149,49 @@ class ThreeRenderer {
 		}
 
 		taro.game.data.map.tilesets.forEach((tileset) => {
+			// TODO: Add tilesets to resource manager (rename texture manager to resource manager)
 			const tex = ThreeTextureManager.instance().textureMap.get(tileset.image);
-			const cols = Math.floor(tex.image.width / tileset.tilewidth);
-
-			tex.image = resizeImageToPowerOf2(tex.image);
-			tex.generateMipmaps = false;
-
-			this.voxelMap = new ThreeVoxelMap(tex, tileset.tilewidth, tileset.tileheight, cols);
+			// TODO: The sides tileset will be different, waiting on m0dE
+			const topTileset = new ThreeTileset(tex, tileset.tilewidth, tileset.tilewidth);
+			const sidesTileset = new ThreeTileset(tex, tileset.tilewidth, tileset.tilewidth);
+			this.voxelMap = new ThreeVoxelMap(topTileset, sidesTileset);
 			this.scene.add(this.voxelMap);
+		});
 
-			taro.game.data.map.layers.forEach((layer) => {
-				let layerId = 0;
-				switch (layer.name) {
-					case 'floor':
-						layerId = 1;
-						break;
-					case 'floor2':
-						layerId = 2;
-						break;
-					case 'walls':
-						layerId = 3;
-						break;
-					case 'trees':
-						// 5 so it's always rendered on top.
-						// label/bars are rendered at renderOrder 499
-						layerId = 5;
-						break;
-				}
+		taro.game.data.map.layers.forEach((layer) => {
+			let layerId = 0;
+			switch (layer.name) {
+				case 'floor':
+					layerId = 1;
+					break;
+				case 'floor2':
+					layerId = 2;
+					break;
+				case 'walls':
+					layerId = 3;
+					break;
+				case 'trees':
+					// 5 so it's always rendered on top.
+					// label/bars are rendered at renderOrder 499
+					layerId = 5;
+					break;
+			}
 
-				if (['floor'].includes(layer.name)) {
-					this.voxelMap.addLayer(layer, 0, false, false, layerId * 100);
-				}
+			if (['floor'].includes(layer.name)) {
+				this.voxelMap.addLayer(layer, 0, false, false, layerId * 100);
+			}
 
-				if (['floor2'].includes(layer.name)) {
-					this.voxelMap.addLayer(layer, 1, true, true, layerId * 100);
-				}
+			if (['floor2'].includes(layer.name)) {
+				this.voxelMap.addLayer(layer, 1, true, true, layerId * 100);
+			}
 
-				if (['walls'].includes(layer.name)) {
-					this.voxelMap.addLayer(layer, 1, true, false, layerId * 100);
-				}
+			if (['walls'].includes(layer.name)) {
+				this.voxelMap.addLayer(layer, 1, true, false, layerId * 100);
+			}
 
-				if (['trees'].includes(layer.name)) {
-					this.voxelMap.addLayer(layer, 3, true, true, layerId * 100);
-				}
-			});
+			if (['trees'].includes(layer.name)) {
+				this.voxelMap.addLayer(layer, 3, true, true, layerId * 100);
+			}
 		});
 
 		const createEntity = (entity: Unit | Item | Projectile) => {
@@ -202,6 +200,7 @@ class ThreeRenderer {
 			const createEntity = () => {
 				const e = new ThreeUnit(tex.clone());
 				this.animatedSprites.push(e);
+				e.billboard = false;
 				return e;
 			};
 
@@ -213,7 +212,13 @@ class ThreeRenderer {
 				'transform',
 				(data: { x: number; y: number; rotation: number }) => {
 					ent.position.set(Utils.pixelToWorld(data.x) - 0.5, 1, Utils.pixelToWorld(data.y) - 0.5);
-					ent.setRotationY(-data.rotation);
+
+					let angle = -data.rotation;
+					if (ent.billboard && (entity instanceof Item || entity instanceof Projectile)) {
+						// Might be able to delete this once units rotate with camera yaw.
+						angle -= this.camera.controls.getAzimuthalAngle();
+					}
+					ent.setRotationY(angle);
 				},
 				this
 			);
@@ -441,21 +446,4 @@ class ThreeRenderer {
 			});
 		}
 	}
-}
-
-function resizeImageToPowerOf2(image) {
-	const ceil = THREE.MathUtils.ceilPowerOfTwo;
-
-	const width = ceil(image.width);
-	const height = ceil(image.height);
-
-	const canvas = document.createElement('canvas');
-
-	canvas.width = width;
-	canvas.height = height;
-
-	const context = canvas.getContext('2d');
-	context.drawImage(image, 0, 0, width, height, 0, 0, width, height);
-
-	return canvas;
 }

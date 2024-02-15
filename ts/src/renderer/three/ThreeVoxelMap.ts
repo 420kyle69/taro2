@@ -1,9 +1,7 @@
 class ThreeVoxelMap extends THREE.Group {
 	constructor(
-		private tileset: THREE.Texture,
-		private tileWidth: number,
-		private tileHeight: number,
-		private tilesetCols: number
+		private topTileset: ThreeTileset,
+		private sidesTileset: ThreeTileset
 	) {
 		super();
 	}
@@ -28,34 +26,27 @@ class ThreeVoxelMap extends THREE.Group {
 					position: [pos.x, pos.y, pos.z],
 					type: data.data[z * data.width + x],
 					visible: true,
-					// hiddenFaces: 0x000000,
 					hiddenFaces: [...hiddenFaces],
 				});
 			}
 		}
 
-		const texWidth = this.tileset.image.width;
-		const texHeight = this.tileset.image.height;
-		const xStep = this.tileWidth / texWidth;
-		const yStep = this.tileHeight / texHeight;
-
 		const prunedVoxels = pruneCells(voxels);
-		const voxelData = buildMeshDataFromCells(
-			prunedVoxels,
-			this.tilesetCols,
-			xStep,
-			yStep,
-			this.tileWidth,
-			this.tileWidth
-		);
+		const voxelData = buildMeshDataFromCells(prunedVoxels, this.topTileset);
 
 		const geometry = new THREE.BufferGeometry();
-		geometry.setIndex(voxelData.indices);
+		geometry.setIndex([...voxelData.sidesIndices, ...voxelData.topIndices]);
 		geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(voxelData.positions), 3));
 		geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(voxelData.uvs), 2));
 		geometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(voxelData.normals), 3));
-		const mat = new THREE.MeshBasicMaterial({ transparent, map: this.tileset, side: THREE.DoubleSide });
-		const mesh = new THREE.Mesh(geometry, mat);
+
+		const mat1 = new THREE.MeshBasicMaterial({ transparent, map: this.sidesTileset.texture, side: THREE.DoubleSide });
+		const mat2 = new THREE.MeshBasicMaterial({ transparent, map: this.topTileset.texture, side: THREE.DoubleSide });
+
+		geometry.addGroup(0, voxelData.sidesIndices.length, 0);
+		geometry.addGroup(voxelData.sidesIndices.length, voxelData.topIndices.length, 1);
+
+		const mesh = new THREE.Mesh(geometry, [mat1, mat2]);
 		mesh.renderOrder = renderOrder;
 
 		this.add(mesh);
@@ -99,7 +90,10 @@ function pruneCells(cells) {
 	return prunedVoxels;
 }
 
-function buildMeshDataFromCells(cells, tilesetCols, xStep, yStep, tileWidth, tileHeight) {
+function buildMeshDataFromCells(cells, tileset: ThreeTileset) {
+	const xStep = tileset.tileWidth / tileset.width;
+	const yStep = tileset.tileHeight / tileset.height;
+
 	const pxGeometry = new THREE.PlaneGeometry(1, 1);
 	pxGeometry.rotateY(Math.PI / 2);
 	pxGeometry.translate(0.5, 0, 0);
@@ -131,7 +125,8 @@ function buildMeshDataFromCells(cells, tilesetCols, xStep, yStep, tileWidth, til
 		positions: [],
 		uvs: [],
 		normals: [],
-		indices: [],
+		topIndices: [],
+		sidesIndices: [],
 	};
 
 	for (let c of cells.keys()) {
@@ -153,10 +148,10 @@ function buildMeshDataFromCells(cells, tilesetCols, xStep, yStep, tileWidth, til
 			}
 			targetData.positions.push(...localPositions);
 
-			const xIdx = (curCell.type % tilesetCols) - 1;
-			const yIdx = Math.floor(curCell.type / tilesetCols);
+			const xIdx = (curCell.type % tileset.columns) - 1;
+			const yIdx = Math.floor(curCell.type / tileset.columns);
 
-			const singlePixelOffset = { x: xStep / tileWidth, y: yStep / tileHeight };
+			const singlePixelOffset = { x: xStep / tileset.tileWidth, y: yStep / tileset.tileHeight };
 			const halfPixelOffset = { x: singlePixelOffset.x / 2, y: singlePixelOffset.y / 2 };
 
 			const xOffset = xStep * xIdx + halfPixelOffset.x;
@@ -195,7 +190,13 @@ function buildMeshDataFromCells(cells, tilesetCols, xStep, yStep, tileWidth, til
 			for (let j = 0; j < localIndices.length; ++j) {
 				localIndices[j] += bi;
 			}
-			targetData.indices.push(...localIndices);
+
+			// top and bottom face
+			if (i === 2 || i === 3) {
+				targetData.topIndices.push(...localIndices);
+			} else {
+				targetData.sidesIndices.push(...localIndices);
+			}
 		}
 	}
 
@@ -215,6 +216,5 @@ type VoxelCell = {
 	position: number[];
 	type: number;
 	visible: boolean;
-	// hiddenFaces: number;
 	hiddenFaces: boolean[];
 };

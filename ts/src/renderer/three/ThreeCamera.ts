@@ -7,7 +7,7 @@ class ThreeCamera {
 
 	private orthographicCamera: THREE.OrthographicCamera;
 	private perspectiveCamera: THREE.PerspectiveCamera;
-	private controls: OrbitControls;
+	controls: OrbitControls;
 
 	orthographicState: { target: THREE.Vector3; position: THREE.Vector3 };
 	perspectiveState: { target: THREE.Vector3; position: THREE.Vector3; zoom: number };
@@ -17,6 +17,8 @@ class ThreeCamera {
 	private viewportHeightInitial: number;
 
 	private debugInfo: HTMLDivElement;
+
+	private onChangeCbs = [];
 
 	constructor(viewportWidth: number, viewportHeight: number, canvas: HTMLCanvasElement) {
 		const persCamera = new THREE.PerspectiveCamera(75, viewportWidth / viewportHeight, 0.1, 1000);
@@ -38,6 +40,12 @@ class ThreeCamera {
 		this.controls.enableZoom = false;
 		this.controls.mouseButtons = { LEFT: '', MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.ROTATE };
 		this.controls.update();
+
+		this.controls.addEventListener('change', () => {
+			for (const cb of this.onChangeCbs) {
+				cb();
+			}
+		});
 
 		this.orthographicState = {
 			target: new THREE.Vector3(),
@@ -191,6 +199,10 @@ class ThreeCamera {
 		this.controls.target.lerp(this.controls.target.clone().add(diff), t);
 		this.orthographicCamera.position.lerp(this.orthographicCamera.position.clone().add(diff), t);
 		this.perspectiveCamera.position.lerp(this.perspectiveCamera.position.clone().add(diff), t);
+	}
+
+	onChange(cb: () => void) {
+		this.onChangeCbs.push(cb);
 	}
 
 	private switchToOrthographicCamera() {

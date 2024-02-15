@@ -94,7 +94,6 @@ interface MapData {
 		tilecount: number;
 		tileheight: number;
 		tilewidth: number;
-		columns: number;
 	}[];
 	layers: {
 		y: number;
