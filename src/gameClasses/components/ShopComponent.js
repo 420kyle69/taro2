@@ -417,7 +417,7 @@ var ShopComponent = TaroEntity.extend({
 					purchasableItems.forEach(function (purchasable, index) {
 						let html = `<div id="skin-list-${purchasable._id}" class="border rounded bg-light p-2 mx-2 ${index < 2 ? 'mb-3' : ''} col-5 d-flex flex-column justify-content-between">` +
 							'  <div class="my-2 text-center">' +
-							`	<img id="${purchasable._id}_image" src=" ${purchasable.image} " style="height: 45px; width: 45px;" />` +
+							`	<img name="${purchasable._id}_image" alt="${purchasable.name}" src=" ${purchasable.image} " style="height: 45px; width: 45px;" />` +
 							'	 </div>' +
 							'	 <div class="d-flex justify-content-center action-button-container">';
 						if (purchasable.soldForSocialShare) {
@@ -482,7 +482,7 @@ var ShopComponent = TaroEntity.extend({
 			}, 800);
 		}
 	},
-	buySkin: function (itemId, sharedOn = '', token = '') {
+	buySkin: function (itemId, sharedOn = '', token = '',) {
 		var self = this;
 		$.ajax({
 			url: `/api/user/purchase/${taro.game.data.defaultData.parentGame || taro.client.server.gameId}/${itemId}?sharedOn=${sharedOn}`,
@@ -503,8 +503,16 @@ var ShopComponent = TaroEntity.extend({
 
 					$('#purchasable-purchase-modal').modal('hide');
 
-					let backgroundImage = document.getElementById(itemId + "_image")?.style?.backgroundImage;
-					let link = backgroundImage?.slice(4, backgroundImage.length - 1);
+					let imageUrl = '';
+					let name = '';
+					if(document.getElementsByName(itemId + "_image")[0]){
+						imageUrl = document.getElementsByName(itemId + "_image")[0].src;
+						name = document.getElementsByName(itemId + "_image")[0].alt;
+					}else{
+						let imageElement = document.getElementById(itemId + "_image")?.style?.backgroundImage;
+						imageUrl = imageElement?.slice(4, imageUrl.length - 1);
+						name = document.getElementById(itemId + "_image")?.name;
+					}
 
 					self.updateModdShop();
 					self.updateSkinList(itemId);
@@ -520,8 +528,8 @@ var ShopComponent = TaroEntity.extend({
 						type: "ingame-skin",
 						value: itemId,
 						status: "success",
-						backgroundImage: link,
-						...purchasableInfo,
+						backgroundImage: imageUrl,
+						name: name,
 					});
 
 				} else if (response.status == 'error') {
@@ -1557,7 +1565,9 @@ var ShopComponent = TaroEntity.extend({
 				let img = document.getElementById(`${itemId}_${selector}`);
 				let originalHeight = `${image.height / itemDetails.cellSheet.rowCount}px`;
 				let originalWidth = `${image.width / itemDetails.cellSheet.columnCount}px`;
-				// clipping = "height:" + originalHeight + "px;width:" + originalWidth + "px;background:url('" + item.image + "') 0px 0px no-repeat;";
+
+				img.name = item.name || item.title;
+					// clipping = "height:" + originalHeight + "px;width:" + originalWidth + "px;background:url('" + item.image + "') 0px 0px no-repeat;";
 
 				img.style = `height:${originalHeight};width:${originalWidth};background:url('${image.src}');src:'';`;
 				// img.style.height = originalHeight;
