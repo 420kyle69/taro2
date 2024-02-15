@@ -1265,7 +1265,9 @@ var ParameterComponent = TaroEntity.extend({
 
 					case 'mathRound':
 						var value = self.getValue(text.value, vars);
-						returnValue = Math.round(value);
+						if (!isNaN(value)) {
+							returnValue = Math.round(value);
+						}
 						break;
 
 					case 'log10':
