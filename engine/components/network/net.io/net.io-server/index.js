@@ -618,9 +618,9 @@ NetIo.Server = NetIo.EventingClass.extend({
 			server: this._httpServer,
 			maxPayload: 200 * 1024, // 100 KB - The maximum allowed message size
 			verifyClient: async function (info, done) {
-				console.log('verifyClient event');
+				
 				// Custom logic to determine whether to accept or reject the connection
-				const acceptConnection = taro.workerComponent ? await taro.workerComponent.verifyConnectionRequest(info) : true;
+				const acceptConnection = (taro.workerComponent && process.env.ENV != 'standalone') ? await taro.workerComponent.verifyConnectionRequest(info) : true;
 				done(acceptConnection, acceptConnection ? 200 : 403, acceptConnection ? '' : 'Connection not accepted');
 			},
 		});

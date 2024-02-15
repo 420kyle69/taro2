@@ -35,17 +35,26 @@ var ActionComponent = TaroEntity.extend({
 	},
 
 	// entity can be either trigger entity, or entity in loop
-	run: function (actionList, vars, path, actionBlockIdx) {
+	// add actionLineNumber to track the action call stack for error report
+	/**
+	 *
+	 * @param {*} actionList
+	 * @param {*} vars
+	 * @param {*} path
+	 * @param {number} actionLineNumber action line number which showed in the ScriptModal's actions' left, include the disabled action
+	 * @returns
+	 */
+	run: function (actionList, vars, path, actionLineNumber) {
 		var self = this;
 
-		self._script.currentActionBlockIdx = actionBlockIdx;
+		self._script.currentActionLineNumber = actionLineNumber;
 
 		if (actionList == undefined || actionList.length <= 0)
 			return;
 
 		for (var i = 0; i < actionList.length; i++) {
 			var action = actionList[i];
-			self._script.currentActionBlockIdx++;
+			self._script.currentActionLineNumber++;
 			if (!action || action.disabled == true || // if action is disabled or
 				(taro.isClient && action.runMode == 0) || // don't run on client if runMode is 'server authoritative'
 				(taro.isServer && action.runMode == 1) || // don't run on server if runMode is 'client only'
@@ -54,10 +63,12 @@ var ActionComponent = TaroEntity.extend({
 				continue;
 			}
 
+			var actionPath = `${path}/${i}`;
+
 			if (taro.profiler.isEnabled) {
 				var startTime = performance.now();
 				// var actionPath = path + "/" + i + "("+action.type+")";
-				var actionPath = `${path}/${i}`;
+
 			}
 
 			// assign runMode engine-widely, so functions like item.use() can reference to what the current runMode is
@@ -67,7 +78,6 @@ var ActionComponent = TaroEntity.extend({
 			if (taro.isServer) {
 
 				var now = Date.now();
-				var lastActionRunTime = now - taro.lastActionRanAt;
 				var engineTickDelta = now - taro.now;
 
 				// prevent recursive/infinite action calls consuming CPU
@@ -78,8 +88,6 @@ var ActionComponent = TaroEntity.extend({
 							engineTickDelta: engineTickDelta,
 							masterServer: global.myIp,
 							gameInfo: taro.gameInfo,
-							// lastAction: action.type,
-							// actionProfiler: taro.actionProfiler,
 							// triggerProfiler: taro.triggerProfiler
 						});
 					}
@@ -88,19 +96,9 @@ var ActionComponent = TaroEntity.extend({
 					// taro.server.unpublish(errorMsg); // not publishing yet cuz TwoHouses will get unpub. loggin instead.
 				}
 
-				if (taro.lastAction) {
-					if (taro.actionProfiler[taro.lastAction]) {
-						var count = taro.actionProfiler[taro.lastAction].count;
-						taro.actionProfiler[taro.lastAction].count++;
-						taro.actionProfiler[taro.lastAction].avgTime = ((taro.actionProfiler[taro.lastAction].avgTime * count) + lastActionRunTime) / (count + 1);
-						taro.actionProfiler[taro.lastAction].totalTime += lastActionRunTime;
-					} else {
-						taro.actionProfiler[taro.lastAction] = { count: 1, avgTime: lastActionRunTime, totalTime: lastActionRunTime };
-					}
+				if (taro.status) {
+					taro.status.logAction(actionPath)
 				}
-
-				taro.lastAction = action.type;
-				taro.lastActionRanAt = now;
 			}
 
 			var params = {};
@@ -156,11 +154,11 @@ var ActionComponent = TaroEntity.extend({
 						var duration = self._script.param.getValue(action.duration, vars);
 						setTimeout(function (actions, currentScriptId) {
 							let previousScriptId = currentScriptId;
-							let previousAcionBlockIdx = self._script.currentActionBlockIdx;
+							let previousAcionBlockIdx = self._script.currentActionLineNumber;
 							self._script.currentScriptId = currentScriptId;
-							self.run(actions, vars, actionPath, self._script.currentActionBlockIdx);
+							self.run(actions, vars, actionPath, self._script.currentActionLineNumber);
 							self._script.currentScriptId = previousScriptId;
-							self._script.currentActionBlockIdx = previousAcionBlockIdx;
+							self._script.currentActionLineNumber = previousAcionBlockIdx;
 						}, duration, setTimeOutActions, self._script.currentScriptId);
 						break;
 
@@ -171,9 +169,9 @@ var ActionComponent = TaroEntity.extend({
 
 						if (!isNaN(count) && count > 0) {
 							for (let i = 0; i < count; i++) {
-								let previousAcionBlockIdx = self._script.currentActionBlockIdx;
-								returnValue = self.run(repeatActions, vars, actionPath, self._script.currentActionBlockIdx);
-								self._script.currentActionBlockIdx = previousAcionBlockIdx + self.getNestedActionsLength(repeatActions, 0, self);
+								let previousAcionBlockIdx = self._script.currentActionLineNumber;
+								returnValue = self.run(repeatActions, vars, actionPath, self._script.currentActionLineNumber);
+								self._script.currentActionLineNumber = previousAcionBlockIdx + self.getNestedActionsLength(repeatActions, 0, self);
 								if (returnValue == 'break' || vars.break) {
 									// we dont have to return a value in case of break otherwise
 									// control will exit from for loop of actions as well
@@ -195,9 +193,9 @@ var ActionComponent = TaroEntity.extend({
 						var delay = self._script.param.getValue(action.number, vars);
 
 						const runWithDelay = (i) => {
-							let previousAcionBlockIdx = self._script.currentActionBlockIdx;
-							returnValue = self.run(repeatActions, vars, actionPath, self._script.currentActionBlockIdx);
-							self._script.currentActionBlockIdx = previousAcionBlockIdx + self.getNestedActionsLength(repeatActions, 0, self);
+							let previousAcionBlockIdx = self._script.currentActionLineNumber;
+							returnValue = self.run(repeatActions, vars, actionPath, self._script.currentActionLineNumber);
+							self._script.currentActionLineNumber = previousAcionBlockIdx + self.getNestedActionsLength(repeatActions, 0, self);
 
 							if (returnValue == 'break' || vars.break) {
 								vars.break = false;
@@ -222,21 +220,21 @@ var ActionComponent = TaroEntity.extend({
 
 					case 'runScript':
 						let previousScriptId = self._script.currentScriptId;
-						let previousAcionBlockIdx = self._script.currentActionBlockIdx;
+						let previousAcionBlockIdx = self._script.currentActionLineNumber;
 						self._script.runScript(action.scriptName, vars);
 						self._script.currentScriptId = previousScriptId;
-						self._script.currentActionBlockIdx = previousAcionBlockIdx;
+						self._script.currentActionLineNumber = previousAcionBlockIdx;
 						break;
 
 					case 'condition':
 						if (self._script.condition.run(action.conditions, vars, `${actionPath  }/condition`)) {
-							let previousAcionBlockIdx = self._script.currentActionBlockIdx;
-							var brk = self.run(action.then, vars, `${actionPath  }/then`, self._script.currentActionBlockIdx);
-							self._script.currentActionBlockIdx = previousAcionBlockIdx + self.getNestedActionsLength(action, 0, self);
+							let previousAcionBlockIdx = self._script.currentActionLineNumber;
+							var brk = self.run(action.then, vars, `${actionPath  }/then`, self._script.currentActionLineNumber);
+							self._script.currentActionLineNumber = previousAcionBlockIdx + self.getNestedActionsLength(action, 0, self);
 						} else {
-							let previousAcionBlockIdx = self._script.currentActionBlockIdx;
-							var brk = self.run(action.else, vars, `${actionPath  }/else`, self._script.currentActionBlockIdx + self.getNestedActionsLength(action, 0, self, 1));
-							self._script.currentActionBlockIdx = previousAcionBlockIdx + self.getNestedActionsLength(action, 0, self);
+							let previousAcionBlockIdx = self._script.currentActionLineNumber;
+							var brk = self.run(action.else, vars, `${actionPath  }/else`, self._script.currentActionLineNumber + self.getNestedActionsLength(action, 0, self, 1));
+							self._script.currentActionLineNumber = previousAcionBlockIdx + self.getNestedActionsLength(action, 0, self);
 						}
 
 						if (brk == 'break') {
@@ -419,6 +417,62 @@ var ActionComponent = TaroEntity.extend({
 
 						break;
 
+					case 'sendSecurePostRequest':
+						var data = self._script.param.getValue(action.data, vars) || {};
+						var apiCredentials = self._script.param.getValue(action.apiCredentials, vars);
+						var varName = self._script.param.getValue(action.varName, vars);
+
+						// use closure to store globalVariableName
+						(function (targetVarName, actionsOnSuccess, actionsOnFailure, currentScriptId) {
+							taro.workerComponent.sendSecurePostRequest({apiCredentials, data})
+								.then(({data, err}) => {
+									// try+catch must be redeclared inside callback otherwise an error will crash the process
+									try {
+
+										if (data && !err) {
+											// onSuccess callback
+											if (taro.game.data.variables.hasOwnProperty(targetVarName)) {
+												taro.game.data.variables[targetVarName].value = data;
+											}
+
+											taro.game.lastReceivedPostResponse = data;
+											taro.game.lastUpdatedVariableName = targetVarName;
+
+											let previousScriptId = self._script.currentScriptId;
+											let previousAcionBlockIdx = self._script.currentActionLineNumber;
+											self._script.currentScriptId = currentScriptId;
+											self.run(actionsOnSuccess, vars, actionPath, self._script.currentActionLineNumber);
+											self._script.currentScriptId = previousScriptId;
+											self._script.currentActionLineNumber = previousAcionBlockIdx;
+										} else {
+											// onFailure callback
+											// don't throw new Error here, because it's inside callback and it won't get caught
+											self._script.errorLog(err, path);
+
+											let previousScriptId = self._script.currentScriptId;
+											let previousAcionBlockIdx = self._script.currentActionLineNumber;
+											self._script.currentScriptId = currentScriptId;
+											self.run(actionsOnFailure, vars, actionPath, self._script.currentActionLineNumber);
+											self._script.currentScriptId = previousScriptId;
+											self._script.currentActionLineNumber = previousAcionBlockIdx;
+										}
+									} catch (e) {
+										// onFailure callback
+										// don't throw new Error here, because it's inside callback and it won't get caught
+										self._script.errorLog(e, path);
+
+										let previousScriptId = self._script.currentScriptId;
+										let previousAcionBlockIdx = self._script.currentActionLineNumber;
+										self._script.currentScriptId = currentScriptId;
+										self.run(actionsOnFailure, vars, actionPath, self._script.currentActionLineNumber);
+										self._script.currentScriptId = previousScriptId;
+										self._script.currentActionLineNumber = previousAcionBlockIdx;
+									}
+								});
+						})(varName, action.onSuccess, action.onFailure, self._script.currentScriptId);
+
+						break;
+
 						/* Player */
 
 					case 'kickPlayer':
@@ -573,7 +627,7 @@ var ActionComponent = TaroEntity.extend({
 
 						if (unit && ownerPlayer && userId && ownerPlayer.persistentDataLoaded) {
 							var data = unit.getPersistentData('unit');
-							taro.workerComponent.saveUserData(userId, data, 'unit');
+							taro.workerComponent.saveUserData(userId, data, 'unit', 'saveUnitData');
 						} else {
 							if (unit && !unit.persistentDataLoaded) {
 								throw new Error('Fail saving unit data bcz persisted data not set correctly');
@@ -588,15 +642,22 @@ var ActionComponent = TaroEntity.extend({
 
 						if (player && userId && player.persistentDataLoaded) {
 							var data = player.getPersistentData('player');
-							taro.workerComponent.saveUserData(userId, data, 'player');
-
+							
+							const persistedData = {player: data};
+							
 							var unit = player.getSelectedUnit();
-							var userId = player._stats.userId;
 
 							if (unit && player && userId && unit.persistentDataLoaded) {
 								var data = unit.getPersistentData('unit');
-								taro.workerComponent.saveUserData(userId, data, 'unit');
+								persistedData.unit = data;
+								
+								// save unit and player data both
+								taro.workerComponent.saveUserData(userId, persistedData, null, 'savePlayerData');
+								
 							} else {
+								// save player data only
+								taro.workerComponent.saveUserData(userId, persistedData.player, 'player', 'savePlayerData');
+								
 								if (unit && !unit.persistentDataLoaded) {
 									throw new Error('Fail saving unit data bcz persisted data not loaded correctly');
 								} else {
@@ -931,9 +992,9 @@ var ActionComponent = TaroEntity.extend({
 							var units = self._script.param.getValue(action.unitGroup, vars) || [];
 							for (var l = 0; l < units.length; l++) {
 								var unit = units[l];
-								let previousAcionBlockIdx = self._script.currentActionBlockIdx;
-								var brk = self.run(action.actions, Object.assign(vars, { selectedUnit: unit }), actionPath, self._script.currentActionBlockIdx);
-								self._script.currentActionBlockIdx = previousAcionBlockIdx + self.getNestedActionsLength(action.actions, 0, self);
+								let previousAcionBlockIdx = self._script.currentActionLineNumber;
+								var brk = self.run(action.actions, Object.assign(vars, { selectedUnit: unit }), actionPath, self._script.currentActionLineNumber);
+								self._script.currentActionLineNumber = previousAcionBlockIdx + self.getNestedActionsLength(action.actions, 0, self);
 
 								if (brk == 'break' || vars.break) {
 									vars.break = false;
@@ -955,9 +1016,9 @@ var ActionComponent = TaroEntity.extend({
 							var players = self._script.param.getValue(action.playerGroup, vars) || [];
 							for (var l = 0; l < players.length; l++) {
 								var player = players[l];
-								let previousAcionBlockIdx = self._script.currentActionBlockIdx;
-								var brk = self.run(action.actions, Object.assign(vars, { selectedPlayer: player }), actionPath, self._script.currentActionBlockIdx);
-								self._script.currentActionBlockIdx = previousAcionBlockIdx + self.getNestedActionsLength(action.actions, 0, self);
+								let previousAcionBlockIdx = self._script.currentActionLineNumber;
+								var brk = self.run(action.actions, Object.assign(vars, { selectedPlayer: player }), actionPath, self._script.currentActionLineNumber);
+								self._script.currentActionLineNumber = previousAcionBlockIdx + self.getNestedActionsLength(action.actions, 0, self);
 
 								if (brk == 'break' || vars.break) {
 									vars.break = false;
@@ -979,9 +1040,9 @@ var ActionComponent = TaroEntity.extend({
 							var items = self._script.param.getValue(action.itemGroup, vars) || [];
 							for (var l = 0; l < items.length; l++) {
 								var item = items[l];
-								let previousAcionBlockIdx = self._script.currentActionBlockIdx;
-								var brk = self.run(action.actions, Object.assign(vars, { selectedItem: item }), actionPath, self._script.currentActionBlockIdx);
-								self._script.currentActionBlockIdx = previousAcionBlockIdx + self.getNestedActionsLength(action.actions, 0, self);
+								let previousAcionBlockIdx = self._script.currentActionLineNumber;
+								var brk = self.run(action.actions, Object.assign(vars, { selectedItem: item }), actionPath, self._script.currentActionLineNumber);
+								self._script.currentActionLineNumber = previousAcionBlockIdx + self.getNestedActionsLength(action.actions, 0, self);
 
 								if (brk == 'break' || vars.break) {
 									vars.break = false;
@@ -1003,9 +1064,9 @@ var ActionComponent = TaroEntity.extend({
 							var projectiles = self._script.param.getValue(action.projectileGroup, vars) || [];
 							for (var l = 0; l < projectiles.length; l++) {
 								var projectile = projectiles[l];
-								let previousAcionBlockIdx = self._script.currentActionBlockIdx;
-								var brk = self.run(action.actions, Object.assign(vars, { selectedProjectile: projectile }), actionPath, self._script.currentActionBlockIdx);
-								self._script.currentActionBlockIdx = previousAcionBlockIdx + self.getNestedActionsLength(action.actions, 0, self);
+								let previousAcionBlockIdx = self._script.currentActionLineNumber;
+								var brk = self.run(action.actions, Object.assign(vars, { selectedProjectile: projectile }), actionPath, self._script.currentActionLineNumber);
+								self._script.currentActionLineNumber = previousAcionBlockIdx + self.getNestedActionsLength(action.actions, 0, self);
 
 								if (brk == 'break' || vars.break) {
 									vars.break = false;
@@ -1029,9 +1090,9 @@ var ActionComponent = TaroEntity.extend({
 								var entity = entities[l];
 								// if (['unit', 'item', 'projectile', 'wall'].includes(entity._category)) {
 								if (self.entityCategories.indexOf(entity._category) > -1) {
-									let previousAcionBlockIdx = self._script.currentActionBlockIdx;
-									var brk = self.run(action.actions, Object.assign(vars, { selectedEntity: entity }), actionPath, self._script.currentActionBlockIdx);
-									self._script.currentActionBlockIdx = previousAcionBlockIdx + self.getNestedActionsLength(action.actions, 0, self);
+									let previousAcionBlockIdx = self._script.currentActionLineNumber;
+									var brk = self.run(action.actions, Object.assign(vars, { selectedEntity: entity }), actionPath, self._script.currentActionLineNumber);
+									self._script.currentActionLineNumber = previousAcionBlockIdx + self.getNestedActionsLength(action.actions, 0, self);
 
 									if (brk == 'break' || vars.break) {
 										vars.break = false;
@@ -1054,9 +1115,9 @@ var ActionComponent = TaroEntity.extend({
 							var regions = self._script.param.getValue(action.regionGroup, vars) || [];
 							for (var l = 0; l < regions.length; l++) {
 								var region = regions[l];
-								let previousAcionBlockIdx = self._script.currentActionBlockIdx;
-								var brk = self.run(action.actions, Object.assign(vars, { selectedRegion: region }), actionPath, self._script.currentActionBlockIdx);
-								self._script.currentActionBlockIdx = previousAcionBlockIdx + self.getNestedActionsLength(action.actions, 0, self);
+								let previousAcionBlockIdx = self._script.currentActionLineNumber;
+								var brk = self.run(action.actions, Object.assign(vars, { selectedRegion: region }), actionPath, self._script.currentActionLineNumber);
+								self._script.currentActionLineNumber = previousAcionBlockIdx + self.getNestedActionsLength(action.actions, 0, self);
 
 								if (brk == 'break' || vars.break) {
 									vars.break = false;
@@ -1081,9 +1142,9 @@ var ActionComponent = TaroEntity.extend({
 							var unitTypes = self._script.param.getValue(action.unitTypeGroup, vars) || {};
 
 							for (var unitTypeKey in unitTypes) {
-								let previousAcionBlockIdx = self._script.currentActionBlockIdx;
-								var brk = self.run(action.actions, Object.assign(vars, { selectedUnitType: unitTypeKey }), actionPath, self._script.currentActionBlockIdx);
-								self._script.currentActionBlockIdx = previousAcionBlockIdx + self.getNestedActionsLength(action.actions, 0, self);
+								let previousAcionBlockIdx = self._script.currentActionLineNumber;
+								var brk = self.run(action.actions, Object.assign(vars, { selectedUnitType: unitTypeKey }), actionPath, self._script.currentActionLineNumber);
+								self._script.currentActionLineNumber = previousAcionBlockIdx + self.getNestedActionsLength(action.actions, 0, self);
 
 								if (brk == 'break' || vars.break) {
 									vars.break = false;
@@ -1125,9 +1186,9 @@ var ActionComponent = TaroEntity.extend({
 							for (let i = 0; i < sortedItems.length; i++) {
 								if (sortedItems[i]) {
 									var itemTypeKey = sortedItems[i].itemId;
-									let previousAcionBlockIdx = self._script.currentActionBlockIdx;
-									var brk = self.run(action.actions, Object.assign(vars, { selectedItemType: itemTypeKey }), actionPath, self._script.currentActionBlockIdx);
-									self._script.currentActionBlockIdx = previousAcionBlockIdx + self.getNestedActionsLength(action.actions, 0, self);
+									let previousAcionBlockIdx = self._script.currentActionLineNumber;
+									var brk = self.run(action.actions, Object.assign(vars, { selectedItemType: itemTypeKey }), actionPath, self._script.currentActionLineNumber);
+									self._script.currentActionLineNumber = previousAcionBlockIdx + self.getNestedActionsLength(action.actions, 0, self);
 
 									if (brk == 'break' || vars.break) {
 										vars.break = false;
@@ -1146,9 +1207,9 @@ var ActionComponent = TaroEntity.extend({
 						var loopCounter = 0;
 
 						while (self._script.condition.run(action.conditions, vars, actionPath)) {
-							let previousAcionBlockIdx = self._script.currentActionBlockIdx;
-							var brk = self.run(action.actions, vars, actionPath, self._script.currentActionBlockIdx);
-							self._script.currentActionBlockIdx = previousAcionBlockIdx + self.getNestedActionsLength(action.actions, 0, self);
+							let previousAcionBlockIdx = self._script.currentActionLineNumber;
+							var brk = self.run(action.actions, vars, actionPath, self._script.currentActionLineNumber);
+							self._script.currentActionLineNumber = previousAcionBlockIdx + self.getNestedActionsLength(action.actions, 0, self);
 							if (brk == 'break' || vars.break) {
 								// we dont have to return a value in case of break otherwise
 								// control will exit from for loop of actions as well
@@ -1195,9 +1256,9 @@ var ActionComponent = TaroEntity.extend({
 								variables[variableName].value <= stop;
 								variables[variableName].value += 1 // post iteration operation
 							) {
-								let previousAcionBlockIdx = self._script.currentActionBlockIdx;
-								var brk = self.run(action.actions, vars, actionPath, self._script.currentActionBlockIdx);
-								self._script.currentActionBlockIdx = previousAcionBlockIdx + self.getNestedActionsLength(action.actions, 0, self);
+								let previousAcionBlockIdx = self._script.currentActionLineNumber;
+								var brk = self.run(action.actions, vars, actionPath, self._script.currentActionLineNumber);
+								self._script.currentActionLineNumber = previousAcionBlockIdx + self.getNestedActionsLength(action.actions, 0, self);
 
 								if (brk == 'break' || vars.break) {
 									// we dont have to return a value in case of break otherwise
@@ -1232,9 +1293,9 @@ var ActionComponent = TaroEntity.extend({
 							}
 
 							for (variables[variableNameMain].value in variableValue) {
-								let previousAcionBlockIdx = self._script.currentActionBlockIdx;
-								var brk = self.run(action.actions, vars, actionPath, self._script.currentActionBlockIdx);
-								self._script.currentActionBlockIdx = previousAcionBlockIdx + self.getNestedActionsLength(action.actions, 0, self);
+								let previousAcionBlockIdx = self._script.currentActionLineNumber;
+								var brk = self.run(action.actions, vars, actionPath, self._script.currentActionLineNumber);
+								self._script.currentActionLineNumber = previousAcionBlockIdx + self.getNestedActionsLength(action.actions, 0, self);
 
 								if (brk == 'break' || vars.break) {
 									vars.break = false;
@@ -3046,7 +3107,9 @@ var ActionComponent = TaroEntity.extend({
 						if (Number.isInteger(tileGid) && Number.isInteger(tileLayer) && Number.isInteger(tileX) && Number.isInteger(tileY)) {
 							if (tileGid < 0 || tileGid > taro.game.data.map.tilesets[0].tilecount) {
 								break;
-							} else if (tileLayer > 3 || tileLayer < 0) {
+							} else if (taro.game.data.map.layers[tileLayer].type !== 'tilelayer') {
+								break;
+							} else if (tileLayer > taro.game.data.map.layers.length || tileLayer < 0) {
 								break;
 							} else if (tileX < 0 || tileX >= taro.game.data.map.width) {
 								break;
@@ -3088,7 +3151,9 @@ var ActionComponent = TaroEntity.extend({
 						) {
 							if (tileGid < 0 || tileGid > taro.game.data.map.tilesets[0].tilecount) {
 								break;
-							} else if (tileLayer > 3 || tileLayer < 0) {
+							} else if (taro.game.data.map.layers[tileLayer].type !== 'tilelayer') {
+								break;
+							} else if (tileLayer > taro.game.data.map.layers.length || tileLayer < 0) {
 								break;
 							} else if (tileX < 0 || tileX >= taro.game.data.map.width) {
 								break;

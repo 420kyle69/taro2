@@ -56,6 +56,8 @@ var defaultConfig = [
 	{ name: 'TileShape', path: '../src/gameClasses/TileShape' },
 	{ name: 'Constants', path: '../src/renderer/phaser/classes/devmode/Constants' },
 
+	{ name: 'StatusComponent', path: '../src/gameClasses/components/StatusComponent' },
+
 	{ name: 'DeveloperMode', path: '../src/gameClasses/DeveloperMode' },
 	// Color support
 	{ name: 'Colors', path: '../src/utils/Colors' }

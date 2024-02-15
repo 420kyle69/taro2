@@ -12,7 +12,7 @@ var ScriptComponent = TaroEntity.extend({
 		self.showLog = false;
 		self.errorLogs = {};
 		self.currentActionName = '';
-		self.currentActionBlockIdx = 0;
+		self.currentActionLineNumber = 0;
 		self.scriptCache = {};
 		self.scriptTime = {};
 		self.scriptRuns = {};
@@ -195,7 +195,7 @@ var ScriptComponent = TaroEntity.extend({
 			path = `${this._entity._id}/${this.currentScriptId}/${this.currentActionName}`
 		}
 		if (withActionBlockIdx !== true) {
-			path += `/${this.currentActionBlockIdx}`;
+			path += `/${this.currentActionLineNumber}`;
 		}
 		if (this.scripts) {
 			if (taro.script.errorLogs[path] == undefined) {

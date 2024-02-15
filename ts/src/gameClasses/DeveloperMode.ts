@@ -289,7 +289,6 @@ class DeveloperMode {
 				gameMap.wasEdited = true;
 				taro.network.send('editTile', data);
 			}
-			if (gameMap.layers.length > 4 && serverData.layer >= 2) serverData.layer++;
 			const width = gameMap.width;
 			switch (dataType) {
 				case 'fill': {

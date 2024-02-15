@@ -33,10 +33,5 @@ jobs:
             -H "Authorization: token ${{ secrets.MODDIO2_DISPATCH_TOKEN }}" \
             --request POST \
             --data '{"event_type": "moddio2_post_release", "client_payload": { "version": "${{ steps.version.outputs.VERSION }}", "gsBranch": "master", "editorBranch": "master", "regenerateApiFrom": "" }}' https://api.github.com/repos/moddio/be/dispatches
-          
-            curl -H "Accept: application/vnd.github.everest-preview+json" \
-            -H "Authorization: token ${{ secrets.MODDIO2_DISPATCH_TOKEN }}" \
-            --request POST \
-            --data '{"event_type": "moddio2_staging_post_release", "client_payload": { "version": "${{ steps.version.outputs.VERSION }}", "gsBranch": "master", "editorBranch": "master", "regenerateApiFrom": "" }}' https://api.github.com/repos/moddio/be/dispatches
           fi
           
