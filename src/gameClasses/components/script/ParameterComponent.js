@@ -1268,7 +1268,7 @@ var ParameterComponent = TaroEntity.extend({
 						if (!isNaN(value)) {
 							if (value > 0) {
 								returnValue = 1;
-							} else if (value > 0) {
+							} else if (value < 0) {
 								returnValue = -1;
 							} else {
 								returnValue = 0;
