@@ -122,4 +122,21 @@ namespace Utils {
 	export function pixelToWorld(numPixels: number) {
 		return numPixels / 64;
 	}
+
+	export function resizeImageToPowerOf2(image) {
+		const ceil = THREE.MathUtils.ceilPowerOfTwo;
+
+		const width = ceil(image.width);
+		const height = ceil(image.height);
+
+		const canvas = document.createElement('canvas');
+
+		canvas.width = width;
+		canvas.height = height;
+
+		const context = canvas.getContext('2d');
+		context.drawImage(image, 0, 0, width, height, 0, 0, width, height);
+
+		return canvas;
+	}
 }
