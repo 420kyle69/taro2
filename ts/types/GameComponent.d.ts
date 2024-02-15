@@ -139,6 +139,14 @@ declare class GameComponent extends TaroEntity {
 					height: number;
 				};
 			};
+			skybox: {
+				left: string;
+				right: string;
+				top: string;
+				bottom: string;
+				front: string;
+				back: string;
+			};
 		};
 		heightBasedZIndex: boolean;
 		texturePack: any;

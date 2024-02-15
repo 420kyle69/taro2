@@ -16,6 +16,8 @@ class ThreeRenderer {
 	private resolutionCoef = 1;
 	private zoomSize = undefined;
 
+	private skybox: ThreeSkybox;
+
 	private constructor() {
 		// For JS interop; in case someone uses new ThreeRenderer()
 		if (!ThreeRenderer.instance) {
@@ -108,6 +110,14 @@ class ThreeRenderer {
 			const key = type.url;
 			textureManager.loadFromUrl(key, Utils.patchAssetUrl(key));
 		}
+
+		const skyboxUrls = taro.game.data.settings.skybox;
+		textureManager.loadFromFile('left', skyboxUrls.left);
+		textureManager.loadFromFile('right', skyboxUrls.right);
+		textureManager.loadFromFile('top', skyboxUrls.top);
+		textureManager.loadFromFile('bottom', skyboxUrls.bottom);
+		textureManager.loadFromFile('front', skyboxUrls.front);
+		textureManager.loadFromFile('back', skyboxUrls.back);
 	}
 
 	private forceLoadUnusedCSSFonts() {
@@ -120,6 +130,12 @@ class ThreeRenderer {
 	}
 
 	private init() {
+		const skybox = new ThreeSkybox();
+		skybox.scene.translateX(taro.game.data.map.width / 2);
+		skybox.scene.translateZ(taro.game.data.map.height / 2);
+		this.scene.add(skybox.scene);
+		this.skybox = skybox;
+
 		taro.client.on('zoom', (height: number) => {
 			if (this.zoomSize === height * 2.15) return;
 
@@ -136,7 +152,10 @@ class ThreeRenderer {
 			}
 		});
 
-		taro.client.on('stop-follow', () => this.camera.stopFollow());
+		taro.client.on('stop-follow', () => {
+			this.camera.stopFollow();
+			this.scene.attach(this.skybox.scene);
+		});
 
 		const layers = {
 			entities: new THREE.Group(),
@@ -259,6 +278,8 @@ class ThreeRenderer {
 				'follow',
 				() => {
 					this.camera.startFollow(ent);
+					this.skybox.scene.position.copy(ent.position);
+					ent.attach(this.skybox.scene);
 				},
 				this
 			);
