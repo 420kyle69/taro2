@@ -219,7 +219,7 @@ class ThreeRenderer {
 			const createEntity = () => {
 				const e = new ThreeUnit(tex.clone());
 				this.animatedSprites.push(e);
-				e.billboard = false;
+				e.billboard = !!entity._stats.isBillboard;
 				return e;
 			};
 
