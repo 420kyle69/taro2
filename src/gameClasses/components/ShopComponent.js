@@ -146,7 +146,7 @@ var ShopComponent = TaroEntity.extend({
 				// purchase purchasable
 				$(document).on('click', '.btn-purchase-purchasable', function () {
 
-					if(!isLoggedIn){
+					if (!isLoggedIn) {
 						window.openLoginOptionFrameModal();
 						return;
 					}
@@ -505,10 +505,10 @@ var ShopComponent = TaroEntity.extend({
 
 					let imageUrl = '';
 					let name = '';
-					if(document.getElementsByName(itemId + "_image")[0]){
+					if (document.getElementsByName(itemId + "_image")[0]) {
 						imageUrl = document.getElementsByName(itemId + "_image")[0].src;
 						name = document.getElementsByName(itemId + "_image")[0].alt;
-					}else{
+					} else {
 						let imageElement = document.getElementById(itemId + "_image")?.style?.backgroundImage;
 						imageUrl = imageElement?.slice(4, imageUrl.length - 1);
 						name = document.getElementById(itemId + "_image")?.name;
@@ -1373,16 +1373,16 @@ var ShopComponent = TaroEntity.extend({
 			class: 'row text-center shop-grid-container'
 		});
 
-		if(items.length <= 0){
-				// if no skins, show a message
-				let errMsg = $('<div>', {
-					class: '',
-					style: 'display: flex; justify-content: center; margin-top: 25px;',
-					html: '<strong>No skins found</strong>',
-					name:'error-message-skins'
-				})
-				$('#modd-shop-modal .shop-items').html(errMsg)
-				return;
+		if (items.length <= 0) {
+			// if no skins, show a message
+			let errMsg = $('<div>', {
+				class: '',
+				style: 'display: flex; justify-content: center; margin-top: 25px;',
+				html: '<strong>No skins found</strong>',
+				name: 'error-message-skins'
+			})
+			$('#modd-shop-modal .shop-items').html(errMsg)
+			return;
 		}
 
 		for (let i = 0; i < items.length; i++) {
@@ -1392,7 +1392,7 @@ var ShopComponent = TaroEntity.extend({
 				item.status = 'not_purchased';
 			}
 
-			if (item.status == 'not_purchased') {	
+			if (item.status == 'not_purchased') {
 
 				if (item.soldForSocialShare) {
 					var button = self.buttonForSocialShare(item);
@@ -1567,7 +1567,7 @@ var ShopComponent = TaroEntity.extend({
 				let originalWidth = `${image.width / itemDetails.cellSheet.columnCount}px`;
 
 				img.name = item.name || item.title;
-					// clipping = "height:" + originalHeight + "px;width:" + originalWidth + "px;background:url('" + item.image + "') 0px 0px no-repeat;";
+				// clipping = "height:" + originalHeight + "px;width:" + originalWidth + "px;background:url('" + item.image + "') 0px 0px no-repeat;";
 
 				img.style = `height:${originalHeight};width:${originalWidth};background:url('${image.src}');src:'';`;
 				// img.style.height = originalHeight;
@@ -1591,7 +1591,7 @@ var ShopComponent = TaroEntity.extend({
 
 		var totalPages = Math.ceil(self.skinItems.length / self.perPageItems);
 		if (totalPages == 0) {
-			$('#mod-shop-pagination').html('');	
+			$('#mod-shop-pagination').html('');
 			self.renderSkinsButtons([]);
 			return;
 		}
@@ -1887,6 +1887,25 @@ var ShopComponent = TaroEntity.extend({
 		}
 
 		return true;
+	},
+	skinShop: function (data) {
+		switch (data.action) {
+			case 'openSkinShop': {
+				this.openModdShop();
+				break;
+			}
+			case 'openSkinSubmissionPage': {
+				if (window.gameSlug) {
+					setTimeout(() => {
+						window.open(
+							`/skin-submission/${window.gameSlug}?new=true`,
+							'_blank'
+						);
+					}, 50);
+				}
+				break;
+			}
+		}
 	}
 });
 

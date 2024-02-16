@@ -3378,6 +3378,26 @@ var ActionComponent = TaroEntity.extend({
 							}, player._stats.clientId);
 						}
 						break;
+					
+					case 'openSkinShop':
+						var player = self._script.param.getValue(action.player, vars);
+						if (player && taro.game.data.defaultData.tier >= '2') {
+							taro.network.send('ui', {
+								command: 'skinShop',
+								action: 'openSkinShop'
+							}, player._stats.clientId);
+						}
+						break;
+
+					case 'openSkinSubmissionPage':
+						var player = self._script.param.getValue(action.player, vars);
+						if (player && taro.game.data.defaultData.tier >= '2') {
+							taro.network.send('ui', {
+								command: 'skinShop',
+								action: 'openSkinSubmissionPage'
+							}, player._stats.clientId);
+						}
+						break;
 
 					case 'comment':
 						break;
