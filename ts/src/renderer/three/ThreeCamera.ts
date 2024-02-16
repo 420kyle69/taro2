@@ -21,7 +21,7 @@ class ThreeCamera {
 	private onChangeCbs = [];
 
 	constructor(viewportWidth: number, viewportHeight: number, canvas: HTMLCanvasElement) {
-		const persCamera = new THREE.PerspectiveCamera(75, viewportWidth / viewportHeight, 0.1, 1000);
+		const persCamera = new THREE.PerspectiveCamera(75, viewportWidth / viewportHeight, 0.1, 15000);
 		persCamera.position.y = this.height;
 		this.perspectiveCamera = persCamera;
 		this.fovInitial = Math.tan(((Math.PI / 180) * this.perspectiveCamera.fov) / 2);
@@ -29,7 +29,7 @@ class ThreeCamera {
 
 		const halfWidth = Utils.pixelToWorld(viewportWidth / 2);
 		const halfHeight = Utils.pixelToWorld(viewportHeight / 2);
-		const orthoCamera = new THREE.OrthographicCamera(-halfWidth, halfWidth, halfHeight, -halfHeight, 0.1, 1000);
+		const orthoCamera = new THREE.OrthographicCamera(-halfWidth, halfWidth, halfHeight, -halfHeight, -2000, 15000);
 		orthoCamera.position.y = this.height;
 		this.orthographicCamera = orthoCamera;
 
@@ -39,6 +39,8 @@ class ThreeCamera {
 		this.controls.enableRotate = false;
 		this.controls.enableZoom = false;
 		this.controls.mouseButtons = { LEFT: '', MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.ROTATE };
+		this.controls.minDistance = 0.01;
+		this.controls.maxDistance = 1000;
 		this.controls.update();
 
 		this.controls.addEventListener('change', () => {

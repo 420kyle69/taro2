@@ -20,6 +20,15 @@ class ThreeTextureManager {
 		});
 	}
 
+	loadFromFile(key: string, url: string, cb?: (tex: THREE.Texture) => void) {
+		this.loader.load(url, (tex) => {
+			tex.colorSpace = THREE.SRGBColorSpace;
+			tex.magFilter = this.filter;
+			this.textureMap.set(key, tex);
+			if (cb) cb(tex);
+		});
+	}
+
 	setFilter(filter: renderingFilter) {
 		this.filter = filter === 'pixelArt' ? THREE.NearestFilter : THREE.LinearFilter;
 	}
