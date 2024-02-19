@@ -360,6 +360,10 @@ var AttributeComponent = TaroEntity.extend({
 								var item = self._entity;
 								unit = item.getOwnerUnit();
 
+								var owner = item.getOwnerUnit();
+								if (taro.client.selectedUnit == owner) {
+									taro.itemUi.updateItemDescription(item);
+								}
 								// if (unit && taro.client.myPlayer._stats.selectedUnitId == unit.id()) {
 								// 	item.updateAttributeBar(attribute);
 								// 	if (attribute && attribute.isVisible && attribute.isVisible.includes('itemDescription')) {
