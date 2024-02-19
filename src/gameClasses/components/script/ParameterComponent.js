@@ -2273,7 +2273,9 @@ var ParameterComponent = TaroEntity.extend({
 						returnValue = {};
 
 						break;
-
+					case 'notValue':
+						returnValue = !self.getValue(text.boolean, vars);
+						break;
 					default:
 						if (text.function) {
 							taro.script.errorLog(`warning: function '${text.function}' not found`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);

@@ -3,7 +3,6 @@ class PhaserProjectile extends PhaserAnimatedEntity {
 
 	constructor(scene: GameScene, entity: Projectile) {
 		super(scene, entity, `projectile/${entity._stats.cellSheet.url}`);
-
 		this.sprite.visible = false;
 		this.scene.renderedEntities.push(this.sprite);
 		this.gameObject = this.sprite;

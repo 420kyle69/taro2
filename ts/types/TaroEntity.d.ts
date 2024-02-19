@@ -18,7 +18,7 @@ declare class TaroEntity extends TaroObject {
 	_depth: number;
 	_layer: number;
 	_id: string;
-
+	_bornTime: number;
 	angleToTarget: number;
 	tween: TweenComponent;
 
