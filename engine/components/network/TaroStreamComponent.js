@@ -45,7 +45,7 @@ var TaroStreamComponent = TaroEventingClass.extend({
 			this._entity.define('_taroStreamCreateSnapshot', function () { self._onStreamCreateSnapshot.apply(self, arguments); });
 		}
 	},
-	
+
 	/* CEXCLUDE */
 	/**
 	 * Starts the stream of world updates to connected clients.
@@ -194,7 +194,7 @@ var TaroStreamComponent = TaroEventingClass.extend({
 						},
 						rotate: ntransdata[2]
 					};
-					
+
 					entity = new classConstructor(createData, entityId);
 
 					entity.bypassSmoothing = true;

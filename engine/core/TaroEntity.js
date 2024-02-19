@@ -1814,7 +1814,6 @@ var TaroEntity = TaroObject.extend({
 		// if (taro.physics.engine === 'CRASH' && this.body) {
 		// 	this._behaviourCrash();
 		// }
-
 		if (this._deathTime !== undefined && this._deathTime <= taro._tickStart) {
 			// Check if the deathCallBack was set
 			if (this._deathCallBack) {
@@ -3916,9 +3915,9 @@ var TaroEntity = TaroObject.extend({
 		var currentType = this._category === 'unit' ? 'unitTypes' : 'playerTypes';
 		var bonusType = this._category === 'unit' ? 'unitAttribute' : 'playerAttribute';
 		var currentEntityTypeId = this._category === 'unit' ? 'type' : 'playerTypeId';
-		
+
 		var baseEntityStats = taro.game.getAsset(currentType, this._stats[currentEntityTypeId]);
-		
+
 		if (!baseEntityStats) {
 			return;
 		}
