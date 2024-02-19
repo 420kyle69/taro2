@@ -254,6 +254,10 @@ var TaroEntity = TaroObject.extend({
 			}
 			self.layer(body['z-index'].layer) // above "floor 2 layer", but under "trees layer"
 				.depth(body['z-index'].depth);
+
+			if (isNaN(body['z-index'].offset)) {
+				self.zOffset(body['z-index'].offset);
+			}
 		}
 	},
 
