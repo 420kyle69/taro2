@@ -56,7 +56,7 @@ jobs:
             curl -H "Accept: application/vnd.github.everest-preview+json" \
             -H "Authorization: token ${{ secrets.MODDIO2_DISPATCH_TOKEN }}" \
             --request POST \
-            --data '{"event_type": "moddio2_post_release", "client_payload": { "version": "${{ steps.version.outputs.VERSION }}", "gsBranch": "${{ steps.version.outputs.GS_BRANCH }}", "editorBranch": "${{ steps.version.outputs.EDITOR_BRANCH }}", "regenerateApiFrom": "${{ steps.version.outputs.REGENERATE_API_FROM }}" }}' https://api.github.com/repos/moddio/gs/dispatches
+            --data '{"event_type": "moddio2_post_release", "client_payload": { "ref": "${{ steps.version.outputs.GS_BRANCH }}", "version": "${{ steps.version.outputs.VERSION }}", "gsBranch": "${{ steps.version.outputs.GS_BRANCH }}", "editorBranch": "${{ steps.version.outputs.EDITOR_BRANCH }}", "regenerateApiFrom": "${{ steps.version.outputs.REGENERATE_API_FROM }}" }}' https://api.github.com/repos/moddio/gs/dispatches
       - name: Dispatch to moddio/be
         run: |
           if [[ "${{ steps.version.outputs.VERSION }}" == *"-staging" ]]; then
@@ -69,10 +69,5 @@ jobs:
             -H "Authorization: token ${{ secrets.MODDIO2_DISPATCH_TOKEN }}" \
             --request POST \
             --data '{"event_type": "moddio2_post_release", "client_payload": { "version": "${{ steps.version.outputs.VERSION }}", "gsBranch": "${{ steps.version.outputs.GS_BRANCH }}", "editorBranch": "${{ steps.version.outputs.EDITOR_BRANCH }}", "regenerateApiFrom": "${{ steps.version.outputs.REGENERATE_API_FROM }}" }}' https://api.github.com/repos/moddio/be/dispatches
-          
-            curl -H "Accept: application/vnd.github.everest-preview+json" \
-            -H "Authorization: token ${{ secrets.MODDIO2_DISPATCH_TOKEN }}" \
-            --request POST \
-            --data '{"event_type": "moddio2_staging_post_release", "client_payload": { "version": "${{ steps.version.outputs.VERSION }}", "gsBranch": "${{ steps.version.outputs.GS_BRANCH }}", "editorBranch": "${{ steps.version.outputs.EDITOR_BRANCH }}", "regenerateApiFrom": "${{ steps.version.outputs.REGENERATE_API_FROM }}" }}' https://api.github.com/repos/moddio/be/dispatches
           fi
           

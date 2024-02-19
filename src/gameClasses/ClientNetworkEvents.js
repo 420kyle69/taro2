@@ -378,6 +378,12 @@ var ClientNetworkEvents = {
 				case 'shopPurchase':
 					taro.shop.openEntityPurchaseModal(data);
 					break;
+
+				case 'skinShop': {
+					taro.shop.skinShop(data);
+					break;
+				}
+					
 			}
 		}
 		);

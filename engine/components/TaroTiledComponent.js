@@ -76,37 +76,41 @@ var TaroTiledComponent = TaroClass.extend({
 		// Define the function to call when all tilesets have finished loading
 		tilesetsLoadedFunc = function () {
 			// Create a map for each layer
+			let idx = 0;
 			for (i = 0; i < layerCount; i++) {
 				layer = layerArray[i];
+				if (layer.data === undefined) {
+					continue;
+				}
 				layerType = layer.type;
-
+				idx++;
 				// Check if the layer is a tile layer or an object layer
 				if (layerType === 'tilelayer') {
 					layerData = layer.data;
 
-					TaroTiledComponent.prototype.log(`setting ${layer.name} to depth ${i}`);
+					TaroTiledComponent.prototype.log(`setting ${layer.name} to depth ${idx}`);
 
-					maps[i] = new mapClass(data.tilewidth, data.tileheight);
+					maps[idx] = new mapClass(data.tilewidth, data.tileheight);
 
-					if (typeof maps[i].tileWidth == 'function') {
-						maps[i].tileWidth(data.tilewidth)
+					if (typeof maps[idx].tileWidth == 'function') {
+						maps[idx].tileWidth(data.tilewidth)
 							.tileHeight(data.tilewidth)
-							.depth(i);
+							.depth(idx);
 					} else {
 						TaroTiledComponent.prototype.log('ERROR while loading map. Chris might have fixed this');
 						taro.server.unpublish('TaroTiledComponent#109');
 						return;
 					}
 
-					maps[i].type = layerType;
-					maps[i].name = layer.name;
+					maps[idx].type = layerType;
+					maps[idx].name = layer.name;
 
 					// Check if the layer should be isometric mounts enabled
 					if (data.orientation === 'isometric') {
-						maps[i].isometricMounts(true);
+						maps[idx].isometricMounts(true);
 					}
 
-					layersById[layer.name] = maps[i];
+					layersById[layer.name] = maps[idx];
 					tileSetCount = tileSetArray.length;
 
 					// Loop through the layer data and paint the tiles
@@ -117,15 +121,15 @@ var TaroTiledComponent = TaroClass.extend({
 							z = x + (y * mapWidth);
 
 							if (layerData[z] > 0 && layerData[z] !== 2147483712) {
-								maps[i].occupyTile(x, y, 1, 1, layerData[z]);
+								maps[idx].occupyTile(x, y, 1, 1, layerData[z]);
 							}
 						}
 					}
 				}
 
 				if (layerType === 'objectgroup') {
-					maps[i] = layer;
-					layersById[layer.name] = maps[i];
+					maps[idx] = layer;
+					layersById[layer.name] = maps[idx];
 				}
 			}
 

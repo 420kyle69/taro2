@@ -5,6 +5,11 @@ var taroClientConfig = {
 		'/lib/msgpack.min.js',
 		'/lib/rfdc.min.js',
 		'/lib/lzutf8.min.js',
+		'/lib/phaser.min.js',
+		'/lib/rexuiplugin.min.js',
+		'/lib/rexvirtualjoystickplugin.min.js',
+		'/lib/three.min.js',
+		'/lib/OrbitControls.js',
 
 		'/gameClasses/Player.js',
 		'/gameClasses/Unit.js',
@@ -41,7 +46,7 @@ var taroClientConfig = {
 		'/gameClasses/components/ui/VideoChatComponent.js',
 		'/gameClasses/components/ui/TradeUiComponent.js',
 
-		'/gameClasses/components/script/ScriptComponent.js',		
+		'/gameClasses/components/script/ScriptComponent.js',
 		'/gameClasses/components/script/ActionComponent.js',
 		'/gameClasses/components/script/ParameterComponent.js',
 		'/gameClasses/components/script/ConditionComponent.js',
@@ -65,9 +70,6 @@ var taroClientConfig = {
 		'/gameClasses/Combinator.js',
 		'/gameClasses/TileShape.js',
 		/* Phaser */
-		'renderer/phaser/phaser.min.js',
-		'renderer/phaser/rexuiplugin.min.js',
-		'renderer/phaser/rexvirtualjoystickplugin.min.js',
 		// '../node_modules/phaser3-rex-plugins/dist/rexvirtualjoystickplugin.min.js',
 		//'../node_modules/phaser3-rex-plugins/templates/ui/ui-components.js',
 		'utils/visibility-polygon.js',
@@ -109,11 +111,28 @@ var taroClientConfig = {
 		'renderer/phaser/classes/devmode/Constants.js',
 		'renderer/phaser/classes/devmode/EntityImage.js',
 		'renderer/phaser/PhaserRenderer.js',
+
+		// Three.js Renderer
+		'renderer/three/utils.js',
+		'renderer/three/ThreeTextureManager.js',
+		'renderer/three/ThreeVoxelMap.js',
+		'renderer/three/ThreeRenderer.js',
+		'renderer/three/ThreeCamera.js',
+		'renderer/three/ThreeSprite.js',
+		'renderer/three/ThreeBoxMesh.js',
+		'renderer/three/ThreeLabel.js',
+		'renderer/three/ThreeAnimatedSprite.js',
+		'renderer/three/ThreeUnit.js',
+		'renderer/three/ThreeAttributeBar.js',
+		'renderer/three/ThreeChatBubble.js',
+		'renderer/three/ThreeSkybox.js',
+		'renderer/three/ThreeTileset.js',
+
 		'/client.js',
-		'/index.js'
-	]
+		'/index.js',
+	],
 };
 
-if (typeof (module) !== 'undefined' && typeof (module.exports) !== 'undefined') {
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
 	module.exports = taroClientConfig;
 }

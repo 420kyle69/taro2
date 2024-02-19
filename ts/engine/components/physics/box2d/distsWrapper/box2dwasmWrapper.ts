@@ -436,7 +436,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 			var joint = self._world.CreateJoint(joint_def); // joint between two pieces
 			self.destroyB2dObj(joint_def);
 			self.freeLeaked();
-			// var serverStats = taro.server.getStatus()
+			// var serverStats = taro.status.getSummary()
 			PhysicsComponent.prototype.log('joint created ', aBody.jointType);
 
 			entityA.jointsAttached[entityB.id()] = joint;

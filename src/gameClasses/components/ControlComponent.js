@@ -11,7 +11,6 @@ var ControlComponent = TaroEntity.extend({
 
 		// Store any options that were passed to us
 		this._options = options;
-		this.lastActionAt = Date.now();
 		this.lastMousePosition = [undefined, undefined];
 		this.mouseLocked = false;
 
@@ -102,8 +101,6 @@ var ControlComponent = TaroEntity.extend({
 		if(taro.developerMode.shouldPreventKeybindings() || (taro.isClient && this._entity._stats.clientId === taro.network.id() && taro.client.isPressingPhaserButton)) {
 			return;
 		}
-
-		this.lastActionAt = Date.now();
 
 		if (this.input[device]) {
 			if ((taro.isClient && !this._isPlayerInputingText) || taro.isServer) {
@@ -198,8 +195,6 @@ var ControlComponent = TaroEntity.extend({
 	},
 
 	keyUp: function (device, key) {
-		this.lastActionAt = Date.now();
-
 		var player = this._entity;
 		if (!player) return;
 

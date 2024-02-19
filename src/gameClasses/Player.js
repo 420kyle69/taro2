@@ -475,7 +475,7 @@ var Player = TaroEntity.extend({
 		return isModerator;
 	},
 
-	remove: function () {
+	remove: function (autoSavePlayerData = true) {
 		// AI players cannot be removed
 		if (this._stats.controlledBy == 'human') // do not send trigger for neutral player
 		{
@@ -484,8 +484,14 @@ var Player = TaroEntity.extend({
 				const i = taro.server.developerClientIds.indexOf(this._stats.clientId);
 				if (i != -1) taro.server.developerClientIds.splice(i, 1);
 			}
-
+			
+			if (autoSavePlayerData && taro.workerComponent && this._stats.userId) {
+				// auto save player data
+				taro.workerComponent.savePlayerData(this._stats.userId, null, 'playerLeavesGame');
+			}
+			
 			taro.script.trigger('playerLeavesGame', { playerId: this.id() });
+			
 			// session is in second
 			if (this.variables && this.variables.progression != undefined && this.variables.progression.value != undefined) {
 				taro.workerComponent && taro.workerComponent.emit('log-progression', this.variables.progression.value);
@@ -493,7 +499,6 @@ var Player = TaroEntity.extend({
 			this.streamDestroy();
 			this.destroy();
 		}
-
 	},
 
 	updateVisibility: function (playerId) {
