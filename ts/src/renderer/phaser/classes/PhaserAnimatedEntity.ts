@@ -15,8 +15,10 @@ class PhaserAnimatedEntity extends PhaserEntity {
 		this.sprite.setDisplaySize(bounds.x, bounds.y);
 		this.sprite.rotation = entity._rotate.z;
 		// Listen for the animationcomplete event
-		this.sprite.on('animationcomplete', () => {
-			this.sprite.play(`${this.key}/default`);
+		this.sprite.on('animationcomplete', (animation) => {
+			if (!(animation.key as string).endsWith('default')) {
+				this.sprite.play(`${this.key}/default`);
+			}
 		}, this);
 		Object.assign(this.evtListeners, {
 			'play-animation': entity.on('play-animation', this.playAnimation, this),
