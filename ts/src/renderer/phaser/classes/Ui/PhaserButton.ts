@@ -49,7 +49,7 @@ class PhaserButton extends Phaser.GameObjects.Container {
             this.fx = this.image.preFX.addBloom(0xffffff, 1, 1, 2, 1.2).setActive(false);
 		}
         // label
-        if (key && key.length < 2) {
+        if (!texture && key && key.length < 2) {
             const label = this.label = scene.add.bitmapText(
                 - size / 10 + size / 2, + size / 10 - size / 2,
                 BitmapFontManager.font(scene, 'Verdana', true, false, '#FFFFFF'),
