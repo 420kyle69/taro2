@@ -17,6 +17,7 @@ class ThreeRenderer {
 	private zoomSize = undefined;
 
 	private skybox: ThreeSkybox;
+	private particleSystem: ThreeParticleSystem;
 
 	private constructor() {
 		// For JS interop; in case someone uses new ThreeRenderer()
@@ -26,7 +27,7 @@ class ThreeRenderer {
 			return ThreeRenderer.instance;
 		}
 
-		const renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true });
+		const renderer = new THREE.WebGLRenderer();
 		renderer.setSize(window.innerWidth, window.innerHeight);
 		document.querySelector('#game-div')?.appendChild(renderer.domElement);
 		this.renderer = renderer;
@@ -395,6 +396,11 @@ class ThreeRenderer {
 		this.renderer.domElement.addEventListener('mousemove', (evt: MouseEvent) => {
 			this.pointer.set((evt.clientX / window.innerWidth) * 2 - 1, -(evt.clientY / window.innerHeight) * 2 + 1);
 		});
+
+		this.particleSystem = new ThreeParticleSystem();
+		this.particleSystem.node.position.y += 2;
+		this.particleSystem.node.renderOrder = 1200;
+		this.scene.add(this.particleSystem.node);
 	}
 
 	private setupInputListeners(): void {
@@ -428,6 +434,10 @@ class ThreeRenderer {
 		}
 
 		this.camera.update();
+
+		// TODO: Get deltaTime
+		this.particleSystem.update(1 / 60, this.camera.instance);
+
 		this.renderer.render(this.scene, this.camera.instance);
 	}
 
