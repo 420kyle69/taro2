@@ -255,7 +255,7 @@ var TaroEntity = TaroObject.extend({
 			self.layer(body['z-index'].layer) // above "floor 2 layer", but under "trees layer"
 				.depth(body['z-index'].depth);
 
-			if (isNaN(body['z-index'].offset)) {
+      if (!isNaN(body['z-index'].offset)) {
 				self.zOffset(body['z-index'].offset);
 			}
 		}
@@ -1911,7 +1911,7 @@ var TaroEntity = TaroObject.extend({
 					}
 				}
 			}
-		
+
 			// Check for cached version
 			if (this._cache || this._compositeCache) {
 				// Caching is enabled
@@ -1946,8 +1946,8 @@ var TaroEntity = TaroObject.extend({
 				this._renderEntity(ctx, dontTransform);
 			}
 
-			if (Math.round(this._translate.x) != Math.round(this._oldTranform[0]) || 
-                Math.round(this._translate.y) != Math.round(this._oldTranform[1]) || 
+			if (Math.round(this._translate.x) != Math.round(this._oldTranform[0]) ||
+                Math.round(this._translate.y) != Math.round(this._oldTranform[1]) ||
                 parseFloat(this._rotate.z).toFixed(3) != parseFloat(this._oldTranform[2]).toFixed(3)) {
                 this._hasMoved = true;
                 this._oldTranform = [this._translate.x, this._translate.y, this._rotate.z];
@@ -2030,7 +2030,7 @@ var TaroEntity = TaroObject.extend({
 						var position = taro.game.lastProjectileHitPosition ||
 							// (this.body && taro.physics.engine === 'BOX2DWASM' ? taro.physics.recordLeak(this.body.getPosition()) : this.body.getPosition()) || // this was causing client to crash
 							this._translate;
-						
+
 						projectile.defaultData = {
 							//type: effect.projectileType,
 							translate: {
@@ -3920,9 +3920,9 @@ var TaroEntity = TaroObject.extend({
 		var currentType = this._category === 'unit' ? 'unitTypes' : 'playerTypes';
 		var bonusType = this._category === 'unit' ? 'unitAttribute' : 'playerAttribute';
 		var currentEntityTypeId = this._category === 'unit' ? 'type' : 'playerTypeId';
-		
+
 		var baseEntityStats = taro.game.getAsset(currentType, this._stats[currentEntityTypeId]);
-		
+
 		if (!baseEntityStats) {
 			return;
 		}
@@ -4194,7 +4194,7 @@ var TaroEntity = TaroObject.extend({
 							if (taro.isClient) {
 								var variablesObject = rfdc()(this.variables);
 								if (variablesObject) {
-									for (var variableId in data.variables) {			
+									for (var variableId in data.variables) {
 										var variableData = variablesObject[variableId];
 										// streamMode 4 ignores
 										if (this._category == 'unit') {
@@ -4215,7 +4215,7 @@ var TaroEntity = TaroObject.extend({
 								}
 							}
 							break;
-	
+
 
 
 						case 'depth':
