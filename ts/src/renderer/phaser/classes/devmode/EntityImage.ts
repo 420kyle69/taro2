@@ -145,7 +145,7 @@ class EntityImage {
         if (this.devModeTools.entityEditor.selectedEntityImage === this) {
             outline.clear();
             outlineHover.clear();
-            outline.lineStyle(6, 0x036ffc, 1);
+            outline.lineStyle(6, 0x036ffc, 0.3);
             selectionContainer.setVisible(true);
             selectionContainer.x = image.x;
             selectionContainer.y = image.y;

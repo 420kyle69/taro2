@@ -8,7 +8,7 @@ var AttributeComponent = TaroEntity.extend({
 
 		self.now = Date.now();
 		self.lastRegenerated = self.now;
-		
+
 		// attributes is an object
 		if (entity._stats.attributes) {
 			const attributes = entity._stats.attributes;
@@ -206,9 +206,11 @@ var AttributeComponent = TaroEntity.extend({
 				attribute.type = attributeTypeId; // tracking what "triggering attributeType" is in ParameterComponent.
 
 				// obj to collect changes for streaming
-				let attrData = { attributes: {
-					[attributeTypeId]: {}
-				} };
+				let attrData = {
+					attributes: {
+						[attributeTypeId]: {}
+					}
+				};
 
 				/**
 				 * MIN
@@ -351,13 +353,17 @@ var AttributeComponent = TaroEntity.extend({
 								// or other variations of this
 
 								// need to patch in `type` so that other clients know which attribute bar and don't create an additional, new one
-								self._entity.updateAttributeBar({...self._entity._stats.attributes[attributeTypeId], type: attributeTypeId, hasChanged: attribute.hasChanged });
+								self._entity.updateAttributeBar({ ...self._entity._stats.attributes[attributeTypeId], type: attributeTypeId, hasChanged: attribute.hasChanged });
 								break;
 							}
 							case 'item': {
 								var item = self._entity;
 								unit = item.getOwnerUnit();
 
+								var owner = item.getOwnerUnit();
+								if (taro.client.selectedUnit == owner) {
+									taro.itemUi.updateItemDescription(item);
+								}
 								// if (unit && taro.client.myPlayer._stats.selectedUnitId == unit.id()) {
 								// 	item.updateAttributeBar(attribute);
 								// 	if (attribute && attribute.isVisible && attribute.isVisible.includes('itemDescription')) {
@@ -410,7 +416,6 @@ var AttributeComponent = TaroEntity.extend({
 					attribute.attributesMax[attrId] = value;
 
 					// console.log("update Attribute Max")
-
 					this._entity.streamUpdateData([attribute]);
 					// taro.network.send('updateEntityAttribute', {
 					// 	"e": this._entity._id,
