@@ -1731,7 +1731,7 @@ var ActionComponent = TaroEntity.extend({
 						var unit = self._script.param.getValue(action.entity);
 						var ability = self._script.param.getValue(action.ability);
 
-						unit.ability.startCasting('ability');
+						unit.ability.startCasting(ability);
 
 						break;
 
