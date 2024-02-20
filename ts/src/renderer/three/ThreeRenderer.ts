@@ -219,7 +219,7 @@ class ThreeRenderer {
 			const createEntity = () => {
 				const e = new ThreeUnit(tex.clone());
 				this.animatedSprites.push(e);
-				e.billboard = false;
+				e.billboard = !!entity._stats.isBillboard;
 				return e;
 			};
 
@@ -227,17 +227,18 @@ class ThreeRenderer {
 			layers.entities.add(ent);
 			this.entities.push(ent);
 
+			let heightOffset = 0;
 			const transformEvtListener = entity.on(
 				'transform',
 				(data: { x: number; y: number; rotation: number }) => {
-					ent.position.set(Utils.pixelToWorld(data.x) - 0.5, 0, Utils.pixelToWorld(data.y) - 0.5);
+					ent.position.set(Utils.pixelToWorld(data.x) - 0.5, heightOffset, Utils.pixelToWorld(data.y) - 0.5);
 
-					let angle = -data.rotation;
-					if (ent.billboard && (entity instanceof Item || entity instanceof Projectile)) {
-						// Might be able to delete this once units rotate with camera yaw.
-						angle -= this.camera.controls.getAzimuthalAngle();
-					}
-					ent.setRotationY(angle);
+					// let angle = -data.rotation;
+					// if (ent.billboard && (entity instanceof Item || entity instanceof Projectile)) {
+					// 	// Might be able to delete this once units rotate with camera yaw.
+					// 	angle -= this.camera.controls.getAzimuthalAngle();
+					// }
+					ent.setRotationY(-data.rotation);
 				},
 				this
 			);
@@ -342,6 +343,11 @@ class ThreeRenderer {
 				ent.setDepth(depth);
 			});
 
+			const zOffsetEvtListener = entity.on('z-offset', (offset) => {
+				heightOffset = Utils.pixelToWorld(offset);
+				ent.position.y = heightOffset;
+			});
+
 			entity.on('dynamic', (data) => {
 				// console.log('dynamic');
 			});
@@ -382,6 +388,8 @@ class ThreeRenderer {
 
 						entity.off('play-animation', playAnimationEvtListener);
 						entity.off('update-texture', updateTextureEvtListener);
+
+						entity.off('z-offset', zOffsetEvtListener);
 					}
 				},
 				this

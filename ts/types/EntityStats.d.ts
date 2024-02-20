@@ -6,6 +6,7 @@ declare interface EntityStats {
 	userId: string;
 	defaultData: any;
 	isMobile: boolean;
+	isBillboard?: boolean;
 
 	name: string;
 	nameLabelColor?: string;
@@ -13,30 +14,36 @@ declare interface EntityStats {
 		jointType: string;
 		width: number;
 		height: number;
-	}
+	};
 	cellSheet: {
 		columnCount: number;
 		rowCount: number;
 		url: string;
-	}
+	};
 	stateId: string;
-	states: Record<string, {
-		animation: string;
-	}>;
-	animations: Record<string, {
-		frames: number[];
-		framesPerSecond: number;
-		loopCount: number;
-		name: string;
-	}>;
+	states: Record<
+		string,
+		{
+			animation: string;
+		}
+	>;
+	animations: Record<
+		string,
+		{
+			frames: number[];
+			framesPerSecond: number;
+			loopCount: number;
+			name: string;
+		}
+	>;
 	default?: {
-		x: number,
-		y: number,
-		width: number,
-		height: number,
-		inside?: string,
-		alpha?: number,
-	}
+		x: number;
+		y: number;
+		width: number;
+		height: number;
+		inside?: string;
+		alpha?: number;
+	};
 	type: string;
 	id: string;
 	itemTypeId?: string;
@@ -44,7 +51,7 @@ declare interface EntityStats {
 	controls: {
 		mouseBehaviour: any;
 		abilities: Record<string, ControlAbility>;
-        unitAbilities: Record<string, UnitAbility>;
-	}
+		unitAbilities: Record<string, UnitAbility>;
+	};
 	ownerUnitId: string;
 }

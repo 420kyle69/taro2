@@ -1262,6 +1262,20 @@ var TaroObject = TaroEventingClass.extend({
 		return this._depth;
 	},
 
+	zOffset: function (val) {
+		if (val !== undefined) {
+			this._zOffset = val;
+
+			if (taro.isClient) {
+				this.emit('z-offset', [ val ]);
+			}
+
+			return this;
+		}
+
+		return this._zOffset;
+	},
+
 	/**
 	 * Loops through all child objects of this object and destroys them
 	 * by calling each child's destroy() method then clears the object's
