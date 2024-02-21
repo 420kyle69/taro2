@@ -107,6 +107,8 @@ class ThreeCamera {
 		const rad = deg * (Math.PI / 180);
 		spherical.phi = Math.PI * 0.5 - rad;
 
+		spherical.makeSafe();
+
 		this.perspectiveCamera.position.setFromSpherical(spherical).add(this.controls.target);
 		this.orthographicCamera.position.setFromSpherical(spherical).add(this.controls.target);
 
