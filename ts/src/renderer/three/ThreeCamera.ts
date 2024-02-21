@@ -62,8 +62,8 @@ class ThreeCamera {
 				this.instance = this.orthographicCamera;
 				this.controls.object = this.orthographicCamera;
 
-				this.controls.update();
 				this.setElevationAngle(90);
+				this.setAzimuthAngle(0);
 
 				const yFovDeg = this.perspectiveCamera.fov * (Math.PI / 180);
 				const distance = this.orthographicCamera.top / Math.tan(yFovDeg * 0.5);
@@ -98,8 +98,6 @@ class ThreeCamera {
 	}
 
 	setElevationAngle(deg: number) {
-		this.controls.update();
-
 		const spherical = new THREE.Spherical();
 		spherical.radius = this.controls.getDistance();
 		spherical.theta = this.controls.getAzimuthalAngle();
@@ -115,7 +113,24 @@ class ThreeCamera {
 		this.controls.update();
 	}
 
+	setAzimuthAngle(deg: number) {
+		const spherical = new THREE.Spherical();
+		spherical.radius = this.controls.getDistance();
+		spherical.phi = this.controls.getPolarAngle();
+
+		const rad = deg * (Math.PI / 180);
+		spherical.theta = rad;
+
+		this.perspectiveCamera.position.setFromSpherical(spherical).add(this.controls.target);
+		this.orthographicCamera.position.setFromSpherical(spherical).add(this.controls.target);
+
+		this.controls.update();
+	}
+
 	setDistance(distance: number) {
+		// Make sure the target is up to date
+		this.controls.update();
+
 		const newPos = new THREE.Vector3()
 			.subVectors(this.controls.object.position, this.controls.target)
 			.normalize()
