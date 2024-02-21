@@ -35,6 +35,7 @@ class ThreeRenderer {
 		const height = window.innerHeight;
 
 		this.camera = new ThreeCamera(width, height, this.renderer.domElement);
+		this.camera.setElevationAngle(90);
 
 		this.scene = new THREE.Scene();
 		this.scene.translateX(-taro.game.data.map.width / 2);

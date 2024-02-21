@@ -105,6 +105,18 @@ class ThreeCamera {
 		this.debugInfo = info;
 	}
 
+	setElevationAngle(deg: number) {
+		var spherical = new THREE.Spherical();
+		spherical.radius = this.controls.getDistance();
+		spherical.theta = this.controls.getAzimuthalAngle();
+
+		const rad = deg * (Math.PI / 180);
+		spherical.phi = Math.PI * 0.5 - rad;
+
+		this.controls.object.position.setFromSpherical(spherical);
+		this.controls.update();
+	}
+
 	update() {
 		if (this.controls.enableRotate) {
 			this.controls.update();
