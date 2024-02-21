@@ -111,8 +111,10 @@ class ThreeCamera {
 		}
 
 		if (this.controls.enableRotate) {
+			const azimuthAngle = this.controls.getAzimuthalAngle() * (180 / Math.PI);
+			const elevationAngle = (Math.PI / 2 - this.controls.getPolarAngle()) * (180 / Math.PI);
 			this.debugInfo.style.display = 'block';
-			this.debugInfo.innerHTML = `lookYaw: ${this.instance.rotation.y.toFixed(4)} </br> lookPitch: ${this.instance.rotation.x.toFixed(4)}`;
+			this.debugInfo.innerHTML = `lookYaw: ${Utils.round(azimuthAngle, 2)} </br> lookPitch: ${Utils.round(elevationAngle, 2)}`;
 		} else if (this.debugInfo.style.display !== 'none') {
 			this.debugInfo.style.display = 'none';
 		}
