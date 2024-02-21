@@ -57,7 +57,7 @@ class RegionEditor {
 			if (this.regionTool && this.regionDrawStart && this.regionDrawStart.x !== worldPoint.x && this.regionDrawStart.y !== worldPoint.y) {
 				graphics.clear();
 				this.regionTool = false;
-				this.devModeTools.highlightModeButton(0);
+				this.devModeTools.highlightModeButton(0);	//need to add this logic on html buttons
 				let x = this.regionDrawStart.x;
 				let y = this.regionDrawStart.y;
 				if (width < 0) {
@@ -99,7 +99,7 @@ class RegionEditor {
 		if (this.regionTool) {
 			this.regionDrawGraphics.clear();
 			this.regionTool = false;
-			this.devModeTools.highlightModeButton(0);
+			this.devModeTools.highlightModeButton(0);	//need to add this logic on html buttons-+
 			this.regionDrawStart = null;
 		}
 	}

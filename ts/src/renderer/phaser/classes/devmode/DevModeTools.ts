@@ -67,16 +67,16 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		const w = this.BUTTON_WIDTH;
 		const s = this.BUTTON_INTERSPACE;
 
-		const toolButtonsContainer = this.toolButtonsContainer = new Phaser.GameObjects.Container(this.scene);
+		const toolButtonsContainer = this.toolButtonsContainer = new Phaser.GameObjects.Container(this.scene); //need to add this logic on html buttons
 		scene.add.existing(toolButtonsContainer);
-		const toolButtonSection = this.toolButtonSection = new DevButtonSection(this, 'Tools', 0, (h + s) * 5 - s);
-		const brushSizeSection = new DevButtonSection(this, 'Brush Size', toolButtonSection.height, (h + s) * 2 - s * 4);
+		const toolButtonSection = this.toolButtonSection = new DevButtonSection(this, 'Tools', 0, (h + s) * 5 - s); //need to add this logic on html buttons
+		const brushSizeSection = new DevButtonSection(this, 'Brush Size', toolButtonSection.height, (h + s) * 2 - s * 4); //need to add this logic on html buttons
 		const layersCount = taro.game.data.map.layers.filter(layer => layer.type === 'tilelayer').length;
 		if (layersCount > 0) this.layerButtonSection = new DevButtonSection(this, 'Layers', toolButtonSection.height + brushSizeSection.height, (h * 0.75 + s) * layersCount + s * 3);
-		const paletteButtonSection = new DevButtonSection(this, '', toolButtonSection.height + brushSizeSection.height + this.layerButtonSection?.height || 0, h);
+		const paletteButtonSection = new DevButtonSection(this, '', toolButtonSection.height + brushSizeSection.height + this.layerButtonSection?.height || 0, h); //need to add this logic on html buttons
 
 		this.scene.scale.on(Phaser.Scale.Events.RESIZE, () => {
-			toolButtonsContainer.height = s + toolButtonSection.height + brushSizeSection.height + paletteButtonSection.height + this.layerButtonSection?.height || 0;
+			toolButtonsContainer.height = s + toolButtonSection.height + brushSizeSection.height + paletteButtonSection.height + this.layerButtonSection?.height || 0; //need to add this logic on html buttons
 			if (window.innerHeight > 900) {
 				toolButtonsContainer.scale = 1.25;
 			} else if (window.innerHeight > 1200) {
@@ -91,7 +91,11 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		new DevToolButton(this, '+', '+', 'Zoom in (+)', null, 0, -(h + s), h, h, palette.scrollBarContainer, palette.zoom.bind(palette), -1);
 		new DevToolButton(this, '-', '-', 'Zoom out (-)', null, h + s, -(h + s), h, h, palette.scrollBarContainer, palette.zoom.bind(palette), 1);
 
-		toolButtonsContainer.height = s + toolButtonSection.height + brushSizeSection.height + paletteButtonSection.height + this.layerButtonSection?.height || 0 ;
+		taro.client.on('palette-zoom', (value) => {
+			palette.zoom(value);
+		});
+
+		toolButtonsContainer.height = s + toolButtonSection.height + brushSizeSection.height + paletteButtonSection.height + this.layerButtonSection?.height || 0 ; //need to add this logic on html buttons
 		if (window.innerHeight > 900) {
 			toolButtonsContainer.scale = 1.25;
 		} else if (window.innerHeight > 1200) {
@@ -107,7 +111,10 @@ class DevModeTools extends Phaser.GameObjects.Container {
 			'diamond': new DevToolButton(this, 'diamond', 'diamond', 'changes the brush shape to diamond', null, -(h * 4 + 1.5 * s), (h + s) * 2, h * 4 - s, h, toolButtonsContainer, this.changeShape.bind(this), 'diamond', [], false),
 			'circle': new DevToolButton(this, 'circle', 'circle', 'changes the brush shape to circle', null, -(h * 4 + 1.5 * s), (h + s) * 3, h * 4 - s, h, toolButtonsContainer, this.changeShape.bind(this), 'circle', [], false),
 		};
-		this.brushButtons['rectangle'].highlight('active');
+		taro.client.on('change-shape', (value) => {
+			this.changeShape(value);
+		});
+		this.brushButtons['rectangle'].highlight('active');	//need to add this logic on html buttons
 
 		this.modeButtons = toolButtonSection.buttons;
 		toolButtonSection.addButton(new DevToolButton(this, '', 'Cursor Tool (C)', 'interact with regions and entities', 'cursor', 0, h + s, w, h, toolButtonsContainer, this.cursor.bind(this)));
@@ -121,12 +128,53 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		toolButtonSection.addButton(new DevToolButton(this, '', 'Undo (ctrl-z)', 'undo', 'undo', 0, (h + s) * 3 + s, w * 1.5, h, toolButtonsContainer, this.commandController.undo.bind(this.commandController)));
 		toolButtonSection.addButton(new DevToolButton(this, '', 'Redo (ctrl-shift-z | ctrl-y)', 'redo', 'redo', w * 1.5 + s * 2, (h + s) * 3 + s, w * 1.5, h, toolButtonsContainer, this.commandController.redo.bind(this.commandController)));
 
+		taro.client.on('cursor', () => {
+			this.cursor();
+		});
+		taro.client.on('draw-region', () => {
+			this.drawRegion();
+		});
+		taro.client.on('brush', () => {
+			this.brush();
+		});
+		taro.client.on('empty-tile', () => {
+			this.emptyTile();
+		});
+		taro.client.on('fill', () => {
+			this.fill();
+		});
+		taro.client.on('clear', () => {
+			this.clear();
+		});
+		taro.client.on('save', () => {
+			this.save();
+		});
+		taro.client.on('add-entities', () => {
+			this.addEntities();
+		});
+		taro.client.on('undo', () => {
+			this.commandController.undo();
+		});
+		taro.client.on('redo', () => {
+			this.commandController.redo();
+		});
+
 		this.cursorButton = this.modeButtons[0];
-		this.highlightModeButton(0);
+		this.highlightModeButton(0); 	//need to add this logic on html buttons
 
 		brushSizeSection.addButton(new DevToolButton(this, '-', '-', 'decrease brush size', null, 0, 0, w, h, toolButtonsContainer, this.commandController.defaultCommands.decreaseBrushSize.bind(this)));
 		brushSizeSection.addButton(new DevToolButton(this, '1', '1', 'current brush size', null, w + s, 0, w, h, toolButtonsContainer, () => {}));
 		brushSizeSection.addButton(new DevToolButton(this, '+', '+', 'increase brush size', null, (w + s) * 2, 0, w, h, toolButtonsContainer, this.commandController.defaultCommands.increaseBrushSize.bind(this)));
+
+		taro.client.on('decrease-brush-size', () => {
+			this.commandController.defaultCommands.decreaseBrushSize();
+		});
+		taro.client.on('current-brush-size', () => {
+
+		});
+		taro.client.on('increase-brush-size', () => {
+			this.commandController.defaultCommands.increaseBrushSize();
+		});
 
 		this.layerButtons = [];
 		this.layerHideButtons = [];
@@ -142,15 +190,28 @@ class DevModeTools extends Phaser.GameObjects.Container {
 				this.layerHideButtons.push(null);
 			}
 		});
+		taro.client.on('switch-layer', (value) => {
+			this.switchLayer(value);
+		});
+		taro.client.on('hide-layer', (value) => {
+			this.hideLayer(value);
+		});
 
-		this.layerButtons[0].highlight('active');
-		this.layerButtons[0].increaseSize(true);
-		this.layerHideButtons[0].highlight('active');
-		this.layerHideButtons[0].increaseSize(true);
+		this.layerButtons[0].highlight('active');	//need to add this logic on html buttons
+		this.layerButtons[0].increaseSize(true);	//need to add this logic on html buttons
+		this.layerHideButtons[0].highlight('active');	//need to add this logic on html buttons
+		this.layerHideButtons[0].increaseSize(true);	//need to add this logic on html buttons
 
 		paletteButtonSection.addButton(new DevToolButton(this, 'palette', 'Palette', 'show/hide palette', null, 0, 0, w * 2 + s * 2, h, toolButtonsContainer, palette.toggle.bind(palette)));
 		paletteButtonSection.addButton(new DevToolButton(this, '', 'Settings', 'open map settings', 'settings', w * 2 + s * 3, 0, w, h, toolButtonsContainer, this.settings.bind(this)));
 		this.paletteButton = paletteButtonSection.buttons[0];
+
+		taro.client.on('palette-toggle', () => {
+			palette.toggle();
+		});
+		taro.client.on('setting', () => {
+			this.settings();
+		});
 
 		this.tooltip = new DevTooltip(this.scene);
         this.scene.cameras.getCamera('palette').ignore([this.tooltip, this.toolButtonsContainer]);
@@ -372,14 +433,14 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	}
 
 	cursor(): void {
-		this.highlightModeButton(0);
+		this.highlightModeButton(0);	//need to add this logic on html buttons
 		this.scene.regionEditor.regionTool = false;
 		this.tileEditor.activateMarkers(false);
 		this.entityEditor.activatePlacement(false);
 	}
 
 	addEntities(): void {
-		this.highlightModeButton(7);
+		this.highlightModeButton(7);	//need to add this logic on html buttons
 		this.scene.regionEditor.regionTool = false;
 		this.tileEditor.activateMarkers(false);
 		this.entityEditor.activatePlacement(true);
@@ -388,7 +449,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	drawRegion(): void {
 		this.tileEditor.activateMarkers(false);
 		this.entityEditor.activatePlacement(false);
-		this.highlightModeButton(1);
+		this.highlightModeButton(1);	//need to add this logic on html buttons
 		this.scene.regionEditor.regionTool = true;
 	}
 
@@ -402,7 +463,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.tileEditor.activateMarkers(true);
 		this.entityEditor.activatePlacement(false);
 		this.scene.regionEditor.regionTool = false;
-		this.highlightModeButton(2);
+		this.highlightModeButton(2);	//need to add this logic on html buttons
 		this.tileEditor.marker.changePreview();
 	}
 
@@ -413,7 +474,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 			this.tileEditor.activateMarkers(true);
 			this.entityEditor.activatePlacement(false);
 			this.scene.regionEditor.regionTool = false;
-			this.highlightModeButton(3);
+			this.highlightModeButton(3);	//need to add this logic on html buttons
 			this.tileEditor.marker.changePreview();
 		}
 	}
@@ -425,7 +486,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.tileEditor.activateMarkers(true);
 		this.entityEditor.activatePlacement(false);
 		this.scene.regionEditor.regionTool = false;
-		this.highlightModeButton(4);
+		this.highlightModeButton(4);	//need to add this logic on html buttons
 		this.tileEditor.marker.changePreview();
 	}
 
@@ -448,10 +509,11 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		inGameEditor.openMapConfiguration();
 	}
 
+	//need to add this logic on html buttons
 	highlightModeButton(n: number): void {
 		this.modeButtons.forEach((button, index) => {
-			if (index === n) button.highlight('active');
-			else button.highlight('no');
+			if (index === n) button.highlight('active');	//need to add this logic on html buttons-+
+			else button.highlight('no');	//need to add this logic on html buttons-+
 		});
 	}
 
@@ -462,9 +524,9 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.tileEditor.brushArea.shape = shape;
 		this.updateBrushArea();
 		Object.values(this.brushButtons).map((btn) => {
-			btn.highlight('no');
+			btn.highlight('no');	//need to add this logic on html buttons-+
 		});
-		this.brushButtons[shape].highlight('active');
+		this.brushButtons[shape].highlight('active');	//need to add this logic on html buttons-+
 	}
 
 	switchLayer(value: number): void {
@@ -472,14 +534,17 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		const gameMap = scene.gameScene.tilemap;
 		if (!scene.gameScene.tilemapLayers[value]) return;
 		gameMap.currentLayerIndex = value;
+		//need to add this logic on html buttons
 		this.layerButtons.forEach(button => {
-			button?.highlight('no');
+			button?.highlight('no');	
 			button?.increaseSize(false);
 		});
+		//need to add this logic on html buttons
 		this.layerHideButtons.forEach(button => {
-			button?.highlight('no');
+			button?.highlight('no');	
 			button?.increaseSize(false);
 		});
+		//need to add this logic on html buttons
 		if (this.layerButtons[value] && this.layerHideButtons[value]) {
 			this.layerHideButtons[value].image.setTexture('eyeopen');
 			this.layerButtons[value].highlight('no');
@@ -501,9 +566,10 @@ class DevModeTools extends Phaser.GameObjects.Container {
 			this.tileEditor.marker.graphics.setVisible(false);
 		}
 		const tilemapLayers = scene.gameScene.tilemapLayers;
+		//need to add this logic on html buttons
 		if (this.layerHideButtons[value].image.texture.key === 'eyeopen') {
 			this.layerHideButtons[value].image.setTexture('eyeclosed');
-			this.layerButtons[value].highlight('hidden');
+			this.layerButtons[value].highlight('hidden');	
 			this.layerHideButtons[value].highlight('hidden');
 			tilemapLayers[value].setVisible(false);
 		} else {
