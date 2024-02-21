@@ -413,6 +413,8 @@ class ThreeRenderer {
 		taro.client.on('create-item', (i: Item) => createEntity(i), this);
 		taro.client.on('create-projectile', (p: Projectile) => createEntity(p), this);
 
+		taro.client.on('camera-pitch', (deg: number) => this.camera.setElevationAngle(deg));
+
 		this.renderer.domElement.addEventListener('mousemove', (evt: MouseEvent) => {
 			this.pointer.set((evt.clientX / window.innerWidth) * 2 - 1, -(evt.clientY / window.innerHeight) * 2 + 1);
 		});
