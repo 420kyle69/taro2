@@ -213,13 +213,18 @@ class ThreeCamera {
 		this.orthographicCamera.position.copy(this.perspectiveCamera.position);
 		this.orthographicCamera.quaternion.copy(this.perspectiveCamera.quaternion);
 
+		const aspect = this.perspectiveCamera.aspect;
+		const fovY = this.perspectiveCamera.fov;
 		const distance = this.perspectiveCamera.position.distanceTo(this.controls.target);
-		const halfWidth = frustumWidthAtDistance(this.perspectiveCamera, distance) / 2;
-		const halfHeight = frustumHeightAtDistance(this.perspectiveCamera, distance) / 2;
-		this.orthographicCamera.top = halfHeight;
-		this.orthographicCamera.bottom = -halfHeight;
+
+		const halfHeight = Math.tan(fovY * (Math.PI / 180) * 0.5) * distance;
+		const halfWidth = halfHeight * aspect;
+
 		this.orthographicCamera.left = -halfWidth;
 		this.orthographicCamera.right = halfWidth;
+		this.orthographicCamera.top = halfHeight;
+		this.orthographicCamera.bottom = -halfHeight;
+
 		this.orthographicCamera.zoom = 1; // don't touch. makes sure camera seamless transition between pers/ortho when zoomed.
 		this.orthographicCamera.lookAt(this.controls.target);
 		this.orthographicCamera.updateProjectionMatrix();
@@ -239,14 +244,4 @@ class ThreeCamera {
 		this.instance.lookAt(this.controls.target);
 		this.controls.update();
 	}
-}
-
-function frustumHeightAtDistance(camera: THREE.PerspectiveCamera, distance: number) {
-	// Fov formula: http://www.artdecocameras.com/resources/angle-of-view/
-	const angle = (camera.fov * Math.PI) / 180; // camera.fov is vertical fov.
-	return Math.tan(angle / 2) * distance * 2;
-}
-
-function frustumWidthAtDistance(camera: THREE.PerspectiveCamera, distance: number) {
-	return frustumHeightAtDistance(camera, distance) * camera.aspect;
 }
