@@ -370,11 +370,12 @@ var Player = TaroEntity.extend({
 		self.variables = {}
 		if (data.variables) {
 			Object.keys(data.variables).forEach(function(variableId) {
-				if (!self.variables[variableId]) {
+				if (!self.variables[variableId] && !oldVariables[variableId]) {
 					self.variables[variableId] = data.variables[variableId];
 				} else {
 					// If the variable already exists, update its value with the old one
 					if (oldVariables[variableId] !== undefined) {
+						self.variables[variableId] = oldVariables[variableId];
 						self.variables[variableId].value = oldVariables[variableId].value;
 					}
 				}
