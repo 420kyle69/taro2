@@ -262,6 +262,16 @@ var Player = TaroEntity.extend({
 		}
 	},
 
+	cameraPitch: function (angle) {
+		if (taro.isServer) {
+			if (this._stats.clientId) {
+				this.streamUpdateData([{ cameraPitch: angle }], this._stats.clientId);
+			}
+		} else if (taro.isClient) {
+			taro.client.emit('camera-pitch', [angle]);
+		}	
+	},
+
 	cameraStopTracking: function () {
 		this._stats.cameraTrackedUnitId = undefined;
 		if (taro.isServer) {
@@ -631,6 +641,11 @@ var Player = TaroEntity.extend({
 									self.cameraTrackUnit(newValue);
 								}
 								break;
+
+							case 'cameraPitch':
+								self.cameraPitch(newValue);
+								break;
+	
 
 							case 'scriptData':
 								taro.developerMode.serverScriptData = newValue;

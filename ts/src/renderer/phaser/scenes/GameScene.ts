@@ -144,7 +144,7 @@ class GameScene extends PhaserScene {
 			camera.stopFollow();
 		});
 
-		taro.client.on('position-camera', (x: number, y: number) => {
+		taro.client.on('camera-position', (x: number, y: number) => {
 			if (!taro.developerMode.active || taro.developerMode.activeTab === 'play') {
 				x -= camera.width / 2;
 				y -= camera.height / 2;
@@ -152,11 +152,11 @@ class GameScene extends PhaserScene {
 			}
 		});
 
-		taro.client.on('deadzone-camera', (width: number, heigth: number) => {
+		taro.client.on('camera-deadzone', (width: number, heigth: number) => {
 			camera.setDeadzone(width, heigth);
 		});
 
-		taro.client.on('instant-move-camera', (x: number, y: number) => {
+		taro.client.on('camera-instant-move', (x: number, y: number) => {
 			if (!taro.developerMode.active || taro.developerMode.activeTab === 'play') {
 			    camera.centerOn(x, y);
 			}

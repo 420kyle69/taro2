@@ -2051,6 +2051,14 @@ var ActionComponent = TaroEntity.extend({
 						}
 						break;
 
+					case 'playerCameraSetPitch':
+						var player = self._script.param.getValue(action.player, vars);
+						var angle = self._script.param.getValue(action.angle, vars);
+						if (unit && player && player._stats.clientId) {
+							player.setCameraPitch(angle);
+						}
+						break;
+
 					case 'playerCameraStopTracking':
 						var player = self._script.param.getValue(action.player, vars);
 						if (player && player._stats.clientId) {
@@ -2076,7 +2084,7 @@ var ActionComponent = TaroEntity.extend({
 								taro.network.send('camera', { cmd: 'positionCamera', position: position }, player._stats.clientId);
 							} else if (player._stats.clientId === taro.network.id()) {
 								taro.client.emit('stop-follow');
-								taro.client.emit('position-camera', [position.x, position.y]);
+								taro.client.emit('camera-position', [position.x, position.y]);
 							}
 						}
 						break;
@@ -2086,7 +2094,7 @@ var ActionComponent = TaroEntity.extend({
 						var height = self._script.param.getValue(action.height, vars);
 
 						if (taro.isClient && !isNaN(width) && !isNaN(height)) {
-							taro.client.emit('deadzone-camera', [width, height]);
+							taro.client.emit('camera-deadzone', [width, height]);
 						}
 						break;
 

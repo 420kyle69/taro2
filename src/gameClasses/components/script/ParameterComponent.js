@@ -2632,6 +2632,13 @@ var ParameterComponent = TaroEntity.extend({
 				}
 			},
 
+			'getRegionByName': function (text, vars) {
+				var regionName = self.getValue(text.name, vars);
+				if (regionName) {
+					return taro.regionManager.getRegionById(regionName);
+				}				
+			},		
+
 			'regionOverlapsWithRegion': function (text, vars) {
 				var regionA = self.getValue(text.regionA, vars);
 				var regionB = self.getValue(text.regionB, vars);
