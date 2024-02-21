@@ -713,6 +713,7 @@ const Client = TaroEventingClass.extend({
 		taro.network.define('trade', this._onTrade);
 
 		taro.network.define('editTile', this._onEditTile);
+		taro.network.define('changeLayerOpacity', this._onChangeLayerOpacity);
 		taro.network.define('editRegion', this._onEditRegion);
 		taro.network.define('editVariable', this._onEditVariable);
 		taro.network.define('editInitEntity', this._onEditInitEntity);

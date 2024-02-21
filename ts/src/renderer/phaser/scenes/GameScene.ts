@@ -450,6 +450,7 @@ class GameScene extends PhaserScene {
 			if (layer.type !== 'tilelayer') {
 				return;
 			}
+			this.tilemapLayers[index].alpha = layer.opacity;
 			layer.data.forEach((tile, index) => {
 				const x = index % layer.width;
 				const y = Math.floor(index/layer.width);

@@ -368,6 +368,17 @@ class TileEditor {
 		}
 	}
 
+	changeLayerOpacity(layer: number, opacity: number): void {
+		const map = taro.game.data.map;
+		if (map.layers[layer]) {
+			map.layers[layer].opacity = opacity;
+			const tileMapLayer = this.gameScene.tilemapLayers[layer];
+			if (tileMapLayer) {
+				tileMapLayer.alpha = opacity;
+			}
+		}
+	}
+
 	update(): void {
 		if (taro.developerMode.active && taro.developerMode.activeTab === 'map') {
 			const devModeScene = this.devModeTools.scene;
