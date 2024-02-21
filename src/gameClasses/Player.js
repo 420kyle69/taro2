@@ -373,17 +373,19 @@ var Player = TaroEntity.extend({
 
 		self._stats.attributes = data.attributes;
 
-
+		if (data.variables) {
+			var oldVariables = rfdc()(self.variables);
+		}
 		// update variables and pass old variables' values to new variables (given that variables have same ID)
 		self.variables = {}
 		if (data.variables) {
-			var oldVariables = rfdc()(self.variables);
 			Object.keys(data.variables).forEach(function(variableId) {
-				if (!self.variables[variableId]) {
+				if (!self.variables[variableId] && !oldVariables[variableId]) {
 					self.variables[variableId] = data.variables[variableId];
 				} else {
 					// If the variable already exists, update its value with the old one
 					if (oldVariables[variableId] !== undefined) {
+						self.variables[variableId] = oldVariables[variableId];
 						self.variables[variableId].value = oldVariables[variableId].value;
 					}
 				}

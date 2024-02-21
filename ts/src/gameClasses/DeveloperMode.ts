@@ -454,6 +454,17 @@ class DeveloperMode {
 		}
 	}
 
+	changeLayerOpacity(data: {layer: number, opacity: number}, clientId: string): void {
+		if (taro.server.developerClientIds.includes(clientId) || clientId === 'server') {
+			const map = taro.game.data.map;
+			if (map.layers[data.layer]) {
+				map.layers[data.layer].opacity = data.opacity;
+				map.wasEdited = true;
+				taro.network.send('changeLayerOpacity', data as any);
+			}
+		}
+	}
+
 	editRegion(data: RegionData, clientId: string): void {
 		// only allow developers to modify regions
 		if (taro.server.developerClientIds.includes(clientId)) {

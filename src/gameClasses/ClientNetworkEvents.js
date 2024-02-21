@@ -688,6 +688,11 @@ var ClientNetworkEvents = {
 		taro.client.emit("editTile", data);
 	},
 
+	// when other players' update layer opacity, apply the change to my local
+	_onChangeLayerOpacity: function (data) {
+		taro.client.emit("changeLayerOpacity", data);
+	},
+
 	// when other players' update regions, apply the change to my local
 	_onEditRegion: function (data) {
 		taro.client.emit("editRegion", data);

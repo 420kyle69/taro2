@@ -618,6 +618,7 @@ var Server = TaroClass.extend({
 
 		taro.network.define('trade', self._onTrade);
 		taro.network.define('editTile', self._onEditTile);
+		taro.network.define('changeLayerOpacity', self._onChangeLayerOpacity);
 		taro.network.define('editRegion', self._onEditRegion);
 		taro.network.define('editVariable', self._onEditVariable);
 		taro.network.define('editInitEntity', self._onEditInitEntity);

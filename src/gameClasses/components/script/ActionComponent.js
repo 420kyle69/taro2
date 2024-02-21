@@ -3107,6 +3107,21 @@ var ActionComponent = TaroEntity.extend({
 						}
 						break;
 
+					case 'changeLayerOpacity':
+						var tileLayer = self._script.param.getValue(action.layer, vars);
+						var opacity = self._script.param.getValue(action.opacity, vars);
+
+						if (taro.game.data.map.layers[tileLayer].type !== 'tilelayer') {
+							break;
+						} else if (tileLayer > taro.game.data.map.layers.length || tileLayer < 0) {
+							break;
+						} else {
+							taro.developerMode.changeLayerOpacity({
+								layer: tileLayer,
+								opacity: opacity
+							}, 'server');
+						}
+
 					case 'editMapTile':
 						var tileGid = self._script.param.getValue(action.gid, vars);
 						var tileLayer = self._script.param.getValue(action.layer, vars);
