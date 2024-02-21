@@ -714,38 +714,14 @@ var ShopComponent = TaroEntity.extend({
 			var unitKeys = Object.keys(taro.game.data.unitTypes);
 			unitKeys = unitKeys.sort();
 
-			// If logged in, add purchased skins to user skin count
-			if (isLoggedIn) {
-				unitKeys = ['Purchased', ...unitKeys]
-			}
-
 			// generating li column for unit type selection
 			for (var p = 0; p < unitKeys.length; p++) {
 				var key = unitKeys[p];
 				$('#modd-shop-modal .shop-items').html('');
-				if (self.unitSkinCount[key] > 0 || key == 'Purchased') {
+				if (self.unitSkinCount[key] > 0) {
 					// select first key by default
-					if (!self.shopKey && isFirstKey && key != 'Purchased') {
+					if (!self.shopKey && isFirstKey) {
 						self.shopKey = key;
-					}
-
-					if (key == 'Purchased') {
-						keyDiv = $('<li/>', {
-							class: `owned-skins cursor-pointer p-2 ${(key == self.shopKey) ? 'active' : ''}`,
-							html: `<strong> Owned Skins </strong> (${self.userSkinCount})`,
-							name: key
-						}).on('click', function () {
-							self.shopKey = $(this).attr('name');
-							$('#modd-shop-modal .shop-items').html('');
-							$('.list-group.item').each(function () {
-								$(this).removeClass('active');
-							});
-							$(this).addClass('active');
-							self.updateModdShop();
-						});
-
-						keyList.append(keyDiv);
-						continue;
 					}
 
 					keyDiv = $('<li/>', {
