@@ -238,6 +238,15 @@ class ThreeCamera {
 		this.perspectiveCamera.position.copy(this.orthographicCamera.position);
 		this.perspectiveCamera.quaternion.copy(this.orthographicCamera.quaternion);
 
+		const yFovDeg = this.perspectiveCamera.fov * (Math.PI / 180);
+		const distance = this.orthographicCamera.top / Math.tan(yFovDeg * 0.5) / this.orthographicCamera.zoom;
+		const newPos = new THREE.Vector3()
+			.subVectors(this.perspectiveCamera.position, this.controls.target)
+			.normalize()
+			.multiplyScalar(distance)
+			.add(this.controls.target);
+
+		this.perspectiveCamera.position.copy(newPos);
 		this.perspectiveCamera.updateProjectionMatrix();
 		this.instance = this.perspectiveCamera;
 		this.controls.object = this.perspectiveCamera;
