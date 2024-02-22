@@ -177,11 +177,11 @@ var AIComponent = TaroEntity.extend({
 
 	getDistanceToClosestAStarNode: function () {
 		let distance = 0;
-		let mapData = taro.map.data;
+		const tileWidth = taro.scaleMapDetails.tileWidth;
 		let unit = this._entity;
 		if (this.path.length > 0) { // closestAStarNode exist
-			let a = this.path[this.path.length - 1].x * mapData.tilewidth + mapData.tilewidth / 2 - unit._translate.x;
-			let b = this.path[this.path.length - 1].y * mapData.tilewidth + mapData.tilewidth / 2 - unit._translate.y;
+			let a = this.path[this.path.length - 1].x * tileWidth + tileWidth / 2 - unit._translate.x;
+			let b = this.path[this.path.length - 1].y * tileWidth + tileWidth / 2 - unit._translate.y;
 			distance = Math.sqrt(a * a + b * b);
 		}
 		return distance;
@@ -317,12 +317,13 @@ var AIComponent = TaroEntity.extend({
 		let returnValue = { path: [], ok: false };
 		let unit = this._entity;
 
-		let mapData = taro.map.data; // cache the map data for rapid use
+		const mapData = taro.map.data; // cache the map data for rapid use
+		const tileWidth = taro.scaleMapDetails.tileWidth;
 
-		let unitTilePosition = {x: Math.floor(unit._translate.x / mapData.tilewidth), y: Math.floor(unit._translate.y / mapData.tilewidth)};
+		let unitTilePosition = {x: Math.floor(unit._translate.x / tileWidth), y: Math.floor(unit._translate.y / tileWidth)};
 		unitTilePosition.x = Math.min(Math.max(0, unitTilePosition.x), mapData.width - 1); // confine with map boundary
 		unitTilePosition.y = Math.min(Math.max(0, unitTilePosition.y), mapData.height - 1);
-		let targetTilePosition = {x: Math.floor(x / mapData.tilewidth), y: Math.floor(y / mapData.tilewidth)};
+		let targetTilePosition = {x: Math.floor(x / tileWidth), y: Math.floor(y / tileWidth)};
 		targetTilePosition.x = Math.min(Math.max(0, targetTilePosition.x), mapData.width - 1); // confine with map boundary
 		targetTilePosition.y = Math.min(Math.max(0, targetTilePosition.y), mapData.height - 1);
 		
@@ -332,7 +333,7 @@ var AIComponent = TaroEntity.extend({
 			return returnValue;
 		}
 
-		let wallMap = taro.map.wallMap; // wall layer cached
+		const wallMap = taro.map.wallMap; // wall layer cached
 		let openList = []; // store grid nodes that is under evaluation
 		let closeList = []; // store grid nodes that finished evaluation
 		let tempPath = []; // store path to return (smaller index: closer to target, larger index: closer to start)
@@ -483,8 +484,8 @@ var AIComponent = TaroEntity.extend({
 	},
 
 	aStarPathIsBlocked: function() {
-		let mapData = taro.map.data;
-		let wallMap = taro.map.wallMap;
+		const mapData = taro.map.data;
+		const wallMap = taro.map.wallMap;
 		let result = false;
 
 		for (let i = 0; i < this.path.length; i++) {
@@ -498,14 +499,14 @@ var AIComponent = TaroEntity.extend({
 	},
 
 	aStarTargetIsCloser: function (unit, targetUnit) {
-		let mapData = taro.map.data;
+		const tileWidth = taro.scaleMapDetails.tileWidth;
 
 		let a = targetUnit._translate.x - unit._translate.x;
 		let b = targetUnit._translate.y - unit._translate.y;
 		let distanceToTarget = Math.sqrt(a * a + b * b);
 		
-		let c = this.path[0].x * mapData.tilewidth + mapData.tilewidth / 2 - unit._translate.x;
-		let d = this.path[0].y * mapData.tilewidth + mapData.tilewidth / 2 - unit._translate.y;
+		let c = this.path[0].x * tileWidth + tileWidth / 2 - unit._translate.x;
+		let d = this.path[0].y * tileWidth + tileWidth / 2 - unit._translate.y;
 		let distanceToEndPath = Math.sqrt(c * c + d * d);
 
 		return distanceToTarget < distanceToEndPath;
@@ -548,7 +549,7 @@ var AIComponent = TaroEntity.extend({
 		if (!unit._stats.aiEnabled)
 			return;
 
-		let mapData = taro.map.data; // both pathfinding method need it to check
+		const tileWidth = taro.scaleMapDetails.tileWidth; // both pathfinding method need it to check
 		
 		var targetUnit = this.getTargetUnit();
 
@@ -584,17 +585,17 @@ var AIComponent = TaroEntity.extend({
 			case 'move':
 				switch (this.pathFindingMethod) {
 					case 'simple':
-						if (this.getDistanceToTarget() < mapData.tilewidth / 2) { // map with smaller tile size requires a more precise stop, vice versa
+						if (this.getDistanceToTarget() < tileWidth / 2) { // map with smaller tile size requires a more precise stop, vice versa
 							self.goIdle();
 						}
 						break;
 					case 'a*':
-						if (this.getDistanceToClosestAStarNode() < mapData.tilewidth / 2) { // reduced chances of shaky move
+						if (this.getDistanceToClosestAStarNode() < tileWidth / 2) { // reduced chances of shaky move
 							this.path.pop(); // after moved to the closest A* node, pop the array and let ai move to next A* node
 						}
 						if (this.path.length > 0) { // Move to the highest index of path saved (closest node to start node)
 							if (!this.aStarPathIsBlocked()) { // only keep going if the path is still non blocked
-								this.setTargetPosition(this.path[this.path.length - 1].x * mapData.tilewidth + mapData.tilewidth / 2, this.path[this.path.length - 1].y * mapData.tilewidth + mapData.tilewidth / 2);
+								this.setTargetPosition(this.path[this.path.length - 1].x * tileWidth + tileWidth / 2, this.path[this.path.length - 1].y * tileWidth + tileWidth / 2);
 							} else { 
 								let aStarResult = this.getAStarPath(this.path[0].x, this.path[0].y); // recalculate whole path once the next move is blocked
 								this.path = aStarResult.path;
@@ -661,13 +662,13 @@ var AIComponent = TaroEntity.extend({
 										this.onAStarFailedTrigger();
 										break;
 									}
-								} else if (this.getDistanceToClosestAStarNode() < mapData.tilewidth / 2) { // Euclidean distance is smaller than half of the tile
+								} else if (this.getDistanceToClosestAStarNode() < tileWidth / 2) { // Euclidean distance is smaller than half of the tile
 									this.path.pop();
 								}
 								// After the above decision, choose whether directly move to targetUnit or according to path
 								if (this.path.length > 0) { // select next node to go
 									if (!this.aStarPathIsBlocked() && !this.aStarTargetIsCloser(unit, targetUnit)) { // keep going if the path is still non blocked OR target is actually closer than end node
-										this.setTargetPosition(this.path[this.path.length - 1].x * mapData.tilewidth + mapData.tilewidth / 2, this.path[this.path.length - 1].y * mapData.tilewidth + mapData.tilewidth / 2);
+										this.setTargetPosition(this.path[this.path.length - 1].x * tileWidth + tileWidth / 2, this.path[this.path.length - 1].y * tileWidth + tileWidth / 2);
 									} else { 
 										let aStarResult = this.getAStarPath(targetUnit._translate.x, targetUnit._translate.y); // recalculate whole path once the next move is blocked
 										this.path = aStarResult.path;
