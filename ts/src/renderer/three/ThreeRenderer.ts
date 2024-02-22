@@ -35,6 +35,19 @@ class ThreeRenderer {
 		const height = window.innerHeight;
 
 		this.camera = new ThreeCamera(width, height, this.renderer.domElement);
+		this.camera.setElevationAngle(90);
+
+		// camera.setTarget(object3d | null, moveInstantOrNot)
+		// camera.setPerspective()
+		// camera.setOrthographic()
+		// camera.setPointerLock()
+		// camera.setElevationAngle()
+		// camera.setAzimuthAngle()
+		// camera.setPitchRange()
+		// camera.setScreenOffset()
+		// camera.setZoom()
+		// camera.setFollowSpeed()
+		// camera.update(dt)
 
 		this.scene = new THREE.Scene();
 		this.scene.translateX(-taro.game.data.map.width / 2);
@@ -399,6 +412,8 @@ class ThreeRenderer {
 		taro.client.on('create-unit', (u: Unit) => createEntity(u), this);
 		taro.client.on('create-item', (i: Item) => createEntity(i), this);
 		taro.client.on('create-projectile', (p: Projectile) => createEntity(p), this);
+
+		taro.client.on('camera-pitch', (deg: number) => this.camera.setElevationAngle(deg));
 
 		this.renderer.domElement.addEventListener('mousemove', (evt: MouseEvent) => {
 			this.pointer.set((evt.clientX / window.innerWidth) * 2 - 1, -(evt.clientY / window.innerHeight) * 2 + 1);

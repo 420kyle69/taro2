@@ -2414,10 +2414,10 @@ var ParameterComponent = TaroEntity.extend({
 
 			'getValueOfEntityVariable': function (text, vars) {
 				var variableData = self.getValue(text.variable, vars);
-				var entity = self.getValue(text.entity, vars);
-
-				if (entity && variableData?.key) {
-					return entity.variable.getValue(variableData.key);
+				var entity = self.getValue(text.entity, vars);				
+				if (entity?.variable && variableData?.key) {
+					var value = entity.variable.getValue(variableData.key);
+					return value
 				}
 			},
 
@@ -2631,6 +2631,13 @@ var ParameterComponent = TaroEntity.extend({
 					return vars.triggeredBy.region;
 				}
 			},
+
+			'getRegionByName': function (text, vars) {
+				var regionName = self.getValue(text.name, vars);
+				if (regionName) {
+					return taro.regionManager.getRegionById(regionName);
+				}				
+			},		
 
 			'regionOverlapsWithRegion': function (text, vars) {
 				var regionA = self.getValue(text.regionA, vars);
