@@ -305,6 +305,11 @@ class ThreeRenderer {
 
 					const offset = ent.cameraConfig.offset;
 					this.camera.setOffset(offset.x, offset.y, offset.z);
+
+					if (ent.cameraConfig.pointerLock) {
+						const { min, max } = ent.cameraConfig.pitchRange;
+						this.camera.setElevationRange(min, max);
+					}
 				},
 				this
 			);

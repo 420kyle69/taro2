@@ -28,11 +28,11 @@ class ThreeCamera {
 		// camera.setElevationAngle(number)
 		// camera.setAzimuthAngle(number)
 		// camera.setOffset(x, y, z)
+		// camera.setElevationRange(min, max)
 
 		// TODO
 		// camera.setTarget(object3d | null, moveInstantOrLerp)
 		// camera.setPointerLock(bool)
-		// camera.setPitchRange(min, max)
 		// camera.setZoom(number)
 		// camera.setFollowSpeed(number)
 		// camera.update(dt <--)
@@ -193,6 +193,14 @@ class ThreeCamera {
 
 	setOffset(x: number, y: number, z: number) {
 		this.offset.set(x, y, z);
+	}
+
+	setElevationRange(min: number, max: number) {
+		const minRad = min * (Math.PI / 180);
+		const maxRad = max * (Math.PI / 180);
+		this.controls.maxPolarAngle = Math.PI * 0.5 - minRad;
+		this.controls.minPolarAngle = Math.PI * 0.5 - maxRad;
+		this.controls.update();
 	}
 
 	update() {
