@@ -41,6 +41,39 @@ class TileEditor {
 		if (taro.game.data.defaultData.dontResize) {
 			this.tileSize = gameMap.tileWidth;
 		}
+		taro.clearLayer = (payload: TileData<'clear'>) => {
+			const map = taro.game.data.map;
+			const tileMap = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
+			const nowLayerData = {}
+			for (let x = 0; x < taro.map.data.width; x++) {
+				for (let y = 0; y < taro.map.data.height; y++) {
+					if (nowLayerData[x] === undefined) {
+						nowLayerData[x] = {}
+					}
+					nowLayerData[x][y] = map.layers[payload.clear.layer].data[x + y * taro.map.data.width]
+				}
+			}
+			const nowTileMapLayerData = tileMap.getLayer(payload.clear.layer).data
+			commandController.addCommand({
+				func: () => {
+					taro.network.send<'clear'>('editTile', payload);
+				},
+				undo: () => {
+					taro.network.send<'edit'>('editTile',
+						{
+							edit: {
+								selectedTiles: [nowLayerData],
+								size: 'fitContent',
+								shape: 'rectangle',
+								layer: [payload.clear.layer],
+								x: 0,
+								y: 0,
+							}
+						},
+					);
+				}
+			}, true)
+		}
 
 		gameScene.input.on('pointerdown', (p) => {
 			/*if (!devModeScene.pointerInsideButtons) {
@@ -194,6 +227,7 @@ class TileEditor {
 			case 'edit': {
 				//save tile change to taro.game.data.map and taro.map.data
 				const nowValue = dataValue as TileData<'edit'>['edit'];
+				console.log(nowValue)
 				nowValue.selectedTiles.forEach((v, idx) => {
 					if (taro.game.data.map.layers[nowValue.layer[idx]].type === 'tilelayer' && taro.game.data.map.layers[nowValue.layer[idx]].data) {
 						this.putTiles(nowValue.x, nowValue.y, v, nowValue.size, nowValue.shape, nowValue.layer[idx], true);
@@ -205,7 +239,7 @@ class TileEditor {
 			case 'clear': {
 				const nowValue = dataValue as TileData<'clear'>['clear'];
 				if (taro.game.data.map.layers[nowValue.layer].type === 'tilelayer' && taro.game.data.map.layers[nowValue.layer].data) {
-					this.clearLayer(nowValue.layer)
+					this.clearLayer(nowValue.layer);
 				};
 			}
 		}
