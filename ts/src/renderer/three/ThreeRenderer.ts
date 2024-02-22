@@ -37,17 +37,9 @@ class ThreeRenderer {
 		this.camera = new ThreeCamera(width, height, this.renderer.domElement);
 		this.camera.setElevationAngle(90);
 
-		// camera.setTarget(object3d | null, moveInstantOrNot)
-		// camera.setPerspective()
-		// camera.setOrthographic()
-		// camera.setPointerLock()
-		// camera.setElevationAngle()
-		// camera.setAzimuthAngle()
-		// camera.setPitchRange()
-		// camera.setScreenOffset()
-		// camera.setZoom()
-		// camera.setFollowSpeed()
-		// camera.update(dt)
+		if (taro.game.data.settings.camera.projectionMode !== 'orthographic') {
+			this.camera.setProjection(taro.game.data.settings.camera.projectionMode);
+		}
 
 		this.scene = new THREE.Scene();
 		this.scene.translateX(-taro.game.data.map.width / 2);
@@ -233,6 +225,22 @@ class ThreeRenderer {
 				const e = new ThreeUnit(tex.clone());
 				this.animatedSprites.push(e);
 				e.billboard = !!entity._stats.isBillboard;
+
+				if (entity._stats.cameraPointerLock) {
+					e.cameraConfig.pointerLock = entity._stats.cameraPointerLock;
+				}
+
+				if (entity._stats.cameraPitchRange) {
+					e.cameraConfig.pitchRange = entity._stats.cameraPitchRange;
+				}
+
+				if (entity._stats.cameraOffset) {
+					// From editor XZY to Three.js XYZ
+					e.cameraConfig.offset.x = entity._stats.cameraOffset.x;
+					e.cameraConfig.offset.y = entity._stats.cameraOffset.z;
+					e.cameraConfig.offset.z = entity._stats.cameraOffset.y;
+				}
+
 				return e;
 			};
 
@@ -294,6 +302,14 @@ class ThreeRenderer {
 					this.camera.startFollow(ent);
 					this.skybox.scene.position.copy(ent.position);
 					ent.attach(this.skybox.scene);
+
+					const offset = ent.cameraConfig.offset;
+					this.camera.setOffset(offset.x, offset.y, offset.z);
+
+					if (ent.cameraConfig.pointerLock) {
+						const { min, max } = ent.cameraConfig.pitchRange;
+						this.camera.setElevationRange(min, max);
+					}
 				},
 				this
 			);
