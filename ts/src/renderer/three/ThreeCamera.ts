@@ -306,6 +306,7 @@ class ThreeCamera {
 	}
 
 	private switchToOrthographicCamera() {
+		this.isPerspective = false;
 		this.orthographicCamera.position.copy(this.perspectiveCamera.position).add(this.offset);
 		this.orthographicCamera.quaternion.copy(this.perspectiveCamera.quaternion);
 
@@ -331,6 +332,7 @@ class ThreeCamera {
 	}
 
 	private switchToPerspectiveCamera() {
+		this.isPerspective = true;
 		this.perspectiveCamera.position.copy(this.orthographicCamera.position).add(this.offset);
 		this.perspectiveCamera.quaternion.copy(this.orthographicCamera.quaternion);
 
