@@ -392,18 +392,32 @@ var AIComponent = TaroEntity.extend({
 				}
 								
 				if (wallMap[newPosition.x + newPosition.y * mapData.width] != 0) continue;// node inside wall, discard				
-				let shouldPrune = false;
-				for (let i = 1; i <= averageTileShift; i++) {
-					// check 8 direction of average tile shift to see will unit overlap with wall at that node
-					shouldPrune = (
-						wallMap[newPosition.x + i + newPosition.y * mapData.width] != 0 || wallMap[newPosition.x - i + newPosition.y * mapData.width] != 0 ||
-						wallMap[newPosition.x + (newPosition.y + i) * mapData.width] != 0 || wallMap[newPosition.x + (newPosition.y - i) * mapData.width] != 0 || 
-						wallMap[newPosition.x + i + (newPosition.y + i) * mapData.width] != 0 || wallMap[newPosition.x - i + (newPosition.y - i) * mapData.width] != 0 ||
-						wallMap[newPosition.x - i + (newPosition.y + i) * mapData.width] != 0 || wallMap[newPosition.x + i + (newPosition.y - i) * mapData.width]
-					);
-					if (shouldPrune) break;
-				}
-				if (shouldPrune) continue;
+				// if new position is not goal, prune it if wall overlaps
+					let shouldPrune = false;
+					for (let i = 1; i <= averageTileShift; i++) {
+						// check 8 direction of average tile shift to see will unit overlap with wall at that node
+						
+						let cornersHaveWallCurrent = (
+							wallMap[minNode.current.x + i + minNode.current.y * mapData.width] != 0 || wallMap[minNode.current.x - i + minNode.current.y * mapData.width] != 0 ||
+							wallMap[minNode.current.x + (minNode.current.y + i) * mapData.width] != 0 || wallMap[minNode.current.x + (minNode.current.y - i) * mapData.width] != 0
+						);
+						let sidesHaveWallCurrent = (
+							wallMap[minNode.current.x + i + (minNode.current.y + i) * mapData.width] != 0 || wallMap[minNode.current.x - i + (minNode.current.y - i) * mapData.width] != 0 ||
+							wallMap[minNode.current.x - i + (minNode.current.y + i) * mapData.width] != 0 || wallMap[minNode.current.x + i + (minNode.current.y - i) * mapData.width]
+						);
+						let cornersHaveWallNew = (
+							wallMap[newPosition.x + i + newPosition.y * mapData.width] != 0 || wallMap[newPosition.x - i + newPosition.y * mapData.width] != 0 ||
+							wallMap[newPosition.x + (newPosition.y + i) * mapData.width] != 0 || wallMap[newPosition.x + (newPosition.y - i) * mapData.width] != 0
+						);
+						let sidesHaveWallNew = (
+							wallMap[newPosition.x + i + (newPosition.y + i) * mapData.width] != 0 || wallMap[newPosition.x - i + (newPosition.y - i) * mapData.width] != 0 ||
+							wallMap[newPosition.x - i + (newPosition.y + i) * mapData.width] != 0 || wallMap[newPosition.x + i + (newPosition.y - i) * mapData.width]
+						);
+						// Idea: avoid hitting outer corners of wall(dodge by going outer), and allow unit to walk next to walls
+						shouldPrune = (cornersHaveWallNew || sidesHaveWallNew) && (cornersHaveWallCurrent || sidesHaveWallCurrent) && !(cornersHaveWallNew && sidesHaveWallNew && cornersHaveWallCurrent && sidesHaveWallCurrent);
+						if (shouldPrune) break;
+					}
+					if (shouldPrune) continue;
 
 				if (!isNaN(parseInt(this.maxTravelDistance))) {
 					// new Position is way too far from current position (> maxTravelDistance * 5 of unit, total diameter: 10 maxTravelDistance), hence A Star skip this possible node
@@ -485,6 +499,7 @@ var AIComponent = TaroEntity.extend({
 
 	aStarIsPositionBlocked: function (targetX, targetY) {
 		let unit = this._entity;
+		const tileWidth = taro.scaleMapDetails.tileWidth;
 		const xTune = [0, -1, 1, -1, 1];
 		const yTune = [0, -1, -1, 1, 1];
 		// center, top-left, top-right, bottom-left, bottom-right
@@ -494,7 +509,7 @@ var AIComponent = TaroEntity.extend({
 		for (let i = 0; i < 5; i++) {
 			taro.raycaster.raycastLine(
 				{ x: (unit._translate.x + maxBodySizeShift * xTune[i]) / taro.physics._scaleRatio, y: (unit._translate.y + maxBodySizeShift * yTune[i]) / taro.physics._scaleRatio },
-				{ x: targetX / taro.physics._scaleRatio, y: targetY / taro.physics._scaleRatio },
+				{ x: (targetX + tileWidth / 2 * Math.sqrt(2) * xTune[i]) / taro.physics._scaleRatio, y: (targetY + tileWidth / 2 * Math.sqrt(2) * yTune[i]) / taro.physics._scaleRatio },
 			)
 			for (let i = 0; i < taro.game.entitiesCollidingWithLastRaycast.length; i++) {
 				if (taro.game.entitiesCollidingWithLastRaycast[i]._category && taro.game.entitiesCollidingWithLastRaycast[i]._category == 'wall') {
