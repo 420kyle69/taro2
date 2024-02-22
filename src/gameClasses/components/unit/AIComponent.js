@@ -392,50 +392,51 @@ var AIComponent = TaroEntity.extend({
 						continue;
 					}
 				}
+				console.log(unit.getBounds().width, unit.getBounds().height);
 
-				if (wallMap[newPosition.x + newPosition.y * mapData.width] == 0) {
-					// 10 to 1 A* heuristic for node with distance that closer to the goal
-					let heuristic = 10;
-					let nodeFound = false; // initialize nodeFound for looping (checking the existance of a node)
-					// cached distance values for calculating the euclidean distance
-					let a = newPosition.x - targetTilePosition.x;
-					let b = newPosition.y - targetTilePosition.y;
-					let c = minNode.current.x - targetTilePosition.x;
-					let d = minNode.current.y - targetTilePosition.y;
-					// In case the euclidean distance to targetTilePosition from the newPosition is smaller than the minNodePosition, reduce the heuristic value (so it tend to choose this node)
-					if (Math.sqrt(a * a + b * b) < Math.sqrt(c * c + d * d)) {
-						heuristic = 1;
-					}
-					for (let k = 0; k < 3; k++) {
-						if (!nodeFound) { // Idea: In open list already ? Update it : In close list already ? Neglect, already reviewed : put it inside openList for evaluation 
-							switch (k) {
-								case 0: // first check if the node exist in open list (if true, update it)
-									for (let j = 0; j < openList.length; j++)
-									{
-										if (newPosition.x == openList[j].current.x && newPosition.y == openList[j].current.y) {
-											if (minNode.totalHeuristic + heuristic < openList[j].totalHeuristic) {
-												openList[j] = rfdc()({current: newPosition, parent: minNode.current, totalHeuristic: minNode.totalHeuristic + heuristic});
-											}
-											nodeFound = true;
-											break;
+				if (wallMap[newPosition.x + newPosition.y * mapData.width] != 0) continue;// node inside wall, discard				
+
+				// 10 to 1 A* heuristic for node with distance that closer to the goal
+				let heuristic = 10;
+				let nodeFound = false; // initialize nodeFound for looping (checking the existance of a node)
+				// cached distance values for calculating the euclidean distance
+				let a = newPosition.x - targetTilePosition.x;
+				let b = newPosition.y - targetTilePosition.y;
+				let c = minNode.current.x - targetTilePosition.x;
+				let d = minNode.current.y - targetTilePosition.y;
+				// In case the euclidean distance to targetTilePosition from the newPosition is smaller than the minNodePosition, reduce the heuristic value (so it tend to choose this node)
+				if (Math.sqrt(a * a + b * b) < Math.sqrt(c * c + d * d)) {
+					heuristic = 1;
+				}
+				for (let k = 0; k < 3; k++) {
+					if (!nodeFound) { // Idea: In open list already ? Update it : In close list already ? Neglect, already reviewed : put it inside openList for evaluation 
+						switch (k) {
+							case 0: // first check if the node exist in open list (if true, update it)
+								for (let j = 0; j < openList.length; j++)
+								{
+									if (newPosition.x == openList[j].current.x && newPosition.y == openList[j].current.y) {
+										if (minNode.totalHeuristic + heuristic < openList[j].totalHeuristic) {
+											openList[j] = rfdc()({current: newPosition, parent: minNode.current, totalHeuristic: minNode.totalHeuristic + heuristic});
 										}
+										nodeFound = true;
+										break;
 									}
-									break;
-								case 1: // then check if the node exist in the close list (if true, neglect)
-									for (let j = 0; j < closeList.length; j++)
-									{
-										if (newPosition.x == closeList[j].current.x && newPosition.y == closeList[j].current.y) {
-											nodeFound = true;
-											break;
-										}
+								}
+								break;
+							case 1: // then check if the node exist in the close list (if true, neglect)
+								for (let j = 0; j < closeList.length; j++)
+								{
+									if (newPosition.x == closeList[j].current.x && newPosition.y == closeList[j].current.y) {
+										nodeFound = true;
+										break;
 									}
-									break;
-								case 2: // finally push it to open list if it does not exist
-									openList.push(rfdc()({current: newPosition, parent: minNode.current, totalHeuristic: minNode.totalHeuristic + heuristic}));
-									break;
-							}
-						} else break;
-					}
+								}
+								break;
+							case 2: // finally push it to open list if it does not exist
+								openList.push(rfdc()({current: newPosition, parent: minNode.current, totalHeuristic: minNode.totalHeuristic + heuristic}));
+								break;
+						}
+					} else break;
 				}
 			}
 		}
@@ -463,16 +464,17 @@ var AIComponent = TaroEntity.extend({
 		this._entity.script.trigger('entityAStarPathFindingFailed', triggerParam);
 	},
 
-	aStarIsPositionBlocked: function (x, y) {
+	aStarIsPositionBlocked: function (targetX, targetY) {
 		let unit = this._entity;
-		let xTune = [0, -1, 1, 0, 0];
-		let yTune = [0, 0, 0, -1, 1];
+		let xTune = [0, -1, 1, -1, 1];
+		let yTune = [0, -1, -1, 1, 1];
 		// center, left, right, up, down
-		let maxBodySizeShift = Math.max(unit.getBounds().width, unit.getBounds().height);
+		const unitWidth = unit.getBounds().width;
+		const unitHeight = unit.getBounds().height;
 		for (let i = 0; i < 5; i++) {
 			taro.raycaster.raycastLine(
-				{ x: (unit._translate.x + maxBodySizeShift * xTune[i]) / taro.physics._scaleRatio, y: (unit._translate.y + maxBodySizeShift * yTune[i]) / taro.physics._scaleRatio },
-				{ x: x / taro.physics._scaleRatio, y: y / taro.physics._scaleRatio },
+				{ x: (unit._translate.x + unitWidth / 2 * xTune[i]) / taro.physics._scaleRatio, y: (unit._translate.y + unitHeight / 2 * yTune[i]) / taro.physics._scaleRatio },
+				{ x: targetX / taro.physics._scaleRatio, y: targetY / taro.physics._scaleRatio },
 			)
 			for (let i = 0; i < taro.game.entitiesCollidingWithLastRaycast.length; i++) {
 				if (taro.game.entitiesCollidingWithLastRaycast[i]._category && taro.game.entitiesCollidingWithLastRaycast[i]._category == 'wall') {
