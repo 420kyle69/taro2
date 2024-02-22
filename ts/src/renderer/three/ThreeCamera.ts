@@ -19,8 +19,23 @@ class ThreeCamera {
 	private onChangeCbs = [];
 
 	constructor(viewportWidth: number, viewportHeight: number, canvas: HTMLCanvasElement) {
+		// Public API
+
+		// DONE
+		// camera.setProjection(string)
+		// camera.setElevationAngle(number)
+		// camera.setAzimuthAngle(number)
+
+		// TODO
+		// camera.setTarget(object3d | null, moveInstantOrLerp)
+		// camera.setPointerLock(bool)
+		// camera.setPitchRange(min, max)
+		// camera.setScreenOffset(x, y)
+		// camera.setZoom(number)
+		// camera.setFollowSpeed(number)
+		// camera.update(dt <--)
+
 		const persCamera = new THREE.PerspectiveCamera(75, viewportWidth / viewportHeight, 0.1, 15000);
-		persCamera.position.y = 1;
 		this.perspectiveCamera = persCamera;
 		this.fovInitial = Math.tan(((Math.PI / 180) * this.perspectiveCamera.fov) / 2);
 		this.viewportHeightInitial = viewportHeight;
@@ -28,8 +43,13 @@ class ThreeCamera {
 		const halfWidth = Utils.pixelToWorld(viewportWidth / 2);
 		const halfHeight = Utils.pixelToWorld(viewportHeight / 2);
 		const orthoCamera = new THREE.OrthographicCamera(-halfWidth, halfWidth, halfHeight, -halfHeight, -2000, 15000);
-		orthoCamera.position.y = 1;
 		this.orthographicCamera = orthoCamera;
+
+		const yFovDeg = this.perspectiveCamera.fov * (Math.PI / 180);
+		const distance =
+			this.orthographicCamera.top / Math.tan(yFovDeg * 0.5) / (this.orthographicCamera.zoom / this.zoomLevel);
+		this.perspectiveCamera.position.y = distance;
+		this.orthographicCamera.position.y = distance;
 
 		this.instance = orthoCamera;
 
@@ -95,6 +115,11 @@ class ThreeCamera {
 		info.style.opacity = '0.75';
 		info.style.marginTop = '40px';
 		this.debugInfo = info;
+	}
+
+	setProjection(projection: typeof taro.game.data.settings.camera.projectionMode) {
+		if (projection === 'orthographic') this.switchToOrthographicCamera();
+		else if (projection === 'perspective') this.switchToPerspectiveCamera();
 	}
 
 	setElevationAngle(deg: number) {

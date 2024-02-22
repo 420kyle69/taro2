@@ -37,17 +37,9 @@ class ThreeRenderer {
 		this.camera = new ThreeCamera(width, height, this.renderer.domElement);
 		this.camera.setElevationAngle(90);
 
-		// camera.setTarget(object3d | null, moveInstantOrNot)
-		// camera.setPerspective()
-		// camera.setOrthographic()
-		// camera.setPointerLock()
-		// camera.setElevationAngle()
-		// camera.setAzimuthAngle()
-		// camera.setPitchRange()
-		// camera.setScreenOffset()
-		// camera.setZoom()
-		// camera.setFollowSpeed()
-		// camera.update(dt)
+		if (taro.game.data.settings.camera.projectionMode !== 'orthographic') {
+			this.camera.setProjection(taro.game.data.settings.camera.projectionMode);
+		}
 
 		this.scene = new THREE.Scene();
 		this.scene.translateX(-taro.game.data.map.width / 2);
