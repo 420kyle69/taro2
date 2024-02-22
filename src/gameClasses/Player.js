@@ -262,13 +262,13 @@ var Player = TaroEntity.extend({
 		}
 	},
 
-	cameraPitch: function (angle) {
+	setCameraPitch: function (angle) {
 		if (taro.isServer) {
 			if (this._stats.clientId) {
 				this.streamUpdateData([{ cameraPitch: angle }], this._stats.clientId);
 			}
 		} else if (taro.isClient) {
-			taro.client.emit('camera-pitch', [angle]);
+			taro.client.emit('camera-pitch', angle);
 		}	
 	},
 
@@ -645,9 +645,8 @@ var Player = TaroEntity.extend({
 								break;
 
 							case 'cameraPitch':
-								self.cameraPitch(newValue);
+								self.setCameraPitch(newValue);
 								break;
-	
 
 							case 'scriptData':
 								taro.developerMode.serverScriptData = newValue;

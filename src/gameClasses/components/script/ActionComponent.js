@@ -152,6 +152,7 @@ var ActionComponent = TaroEntity.extend({
 						const setTimeOutActions = rfdc()(action.actions);
 						// const setTimeoutVars = rfdc()(vars);
 						var duration = self._script.param.getValue(action.duration, vars);
+						
 						setTimeout(function (actions, currentScriptId) {
 							let previousScriptId = currentScriptId;
 							let previousAcionBlockIdx = self._script.currentActionLineNumber;
@@ -2054,7 +2055,7 @@ var ActionComponent = TaroEntity.extend({
 					case 'playerCameraSetPitch':
 						var player = self._script.param.getValue(action.player, vars);
 						var angle = self._script.param.getValue(action.angle, vars);
-						if (unit && player && player._stats.clientId) {
+						if (player && player._stats.clientId) {
 							player.setCameraPitch(angle);
 						}
 						break;
