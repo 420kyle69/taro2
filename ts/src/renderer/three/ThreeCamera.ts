@@ -205,10 +205,6 @@ class ThreeCamera {
 
 	update() {
 		if (this.controls.enableRotate) {
-			this.controls.update();
-		}
-
-		if (this.controls.enableRotate) {
 			const azimuthAngle = this.controls.getAzimuthalAngle() * (180 / Math.PI);
 			const elevationAngle = (Math.PI / 2 - this.controls.getPolarAngle()) * (180 / Math.PI);
 			this.debugInfo.style.display = 'block';
@@ -222,6 +218,8 @@ class ThreeCamera {
 			this.target.getWorldPosition(targetWorldPos);
 			this.setPosition(targetWorldPos);
 		}
+
+		this.controls.update();
 	}
 
 	resize(width: number, height: number) {
