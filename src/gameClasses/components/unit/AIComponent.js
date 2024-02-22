@@ -393,31 +393,31 @@ var AIComponent = TaroEntity.extend({
 								
 				if (wallMap[newPosition.x + newPosition.y * mapData.width] != 0) continue;// node inside wall, discard				
 				// if new position is not goal, prune it if wall overlaps
-					let shouldPrune = false;
-					for (let i = 1; i <= averageTileShift; i++) {
-						// check 8 direction of average tile shift to see will unit overlap with wall at that node
-						
-						let cornersHaveWallCurrent = (
-							wallMap[minNode.current.x + i + minNode.current.y * mapData.width] != 0 || wallMap[minNode.current.x - i + minNode.current.y * mapData.width] != 0 ||
-							wallMap[minNode.current.x + (minNode.current.y + i) * mapData.width] != 0 || wallMap[minNode.current.x + (minNode.current.y - i) * mapData.width] != 0
-						);
-						let sidesHaveWallCurrent = (
-							wallMap[minNode.current.x + i + (minNode.current.y + i) * mapData.width] != 0 || wallMap[minNode.current.x - i + (minNode.current.y - i) * mapData.width] != 0 ||
-							wallMap[minNode.current.x - i + (minNode.current.y + i) * mapData.width] != 0 || wallMap[minNode.current.x + i + (minNode.current.y - i) * mapData.width]
-						);
-						let cornersHaveWallNew = (
-							wallMap[newPosition.x + i + newPosition.y * mapData.width] != 0 || wallMap[newPosition.x - i + newPosition.y * mapData.width] != 0 ||
-							wallMap[newPosition.x + (newPosition.y + i) * mapData.width] != 0 || wallMap[newPosition.x + (newPosition.y - i) * mapData.width] != 0
-						);
-						let sidesHaveWallNew = (
-							wallMap[newPosition.x + i + (newPosition.y + i) * mapData.width] != 0 || wallMap[newPosition.x - i + (newPosition.y - i) * mapData.width] != 0 ||
-							wallMap[newPosition.x - i + (newPosition.y + i) * mapData.width] != 0 || wallMap[newPosition.x + i + (newPosition.y - i) * mapData.width]
-						);
-						// Idea: avoid hitting outer corners of wall(dodge by going outer), and allow unit to walk next to walls
-						shouldPrune = (cornersHaveWallNew || sidesHaveWallNew) && (cornersHaveWallCurrent || sidesHaveWallCurrent) && !(cornersHaveWallNew && sidesHaveWallNew && cornersHaveWallCurrent && sidesHaveWallCurrent);
-						if (shouldPrune) break;
-					}
-					if (shouldPrune) continue;
+				let shouldPrune = false;
+				for (let i = 1; i <= averageTileShift; i++) {
+					// check 8 direction of average tile shift to see will unit overlap with wall at that node					
+					let cornersHaveWallCurrent = (
+						wallMap[minNode.current.x + i + minNode.current.y * mapData.width] != 0 || wallMap[minNode.current.x - i + minNode.current.y * mapData.width] != 0 ||
+						wallMap[minNode.current.x + (minNode.current.y + i) * mapData.width] != 0 || wallMap[minNode.current.x + (minNode.current.y - i) * mapData.width] != 0
+					);
+					let sidesHaveWallCurrent = (
+						wallMap[minNode.current.x + i + (minNode.current.y + i) * mapData.width] != 0 || wallMap[minNode.current.x - i + (minNode.current.y - i) * mapData.width] != 0 ||
+						wallMap[minNode.current.x - i + (minNode.current.y + i) * mapData.width] != 0 || wallMap[minNode.current.x + i + (minNode.current.y - i) * mapData.width]
+					);
+					let cornersHaveWallNew = (
+						wallMap[newPosition.x + i + newPosition.y * mapData.width] != 0 || wallMap[newPosition.x - i + newPosition.y * mapData.width] != 0 ||
+						wallMap[newPosition.x + (newPosition.y + i) * mapData.width] != 0 || wallMap[newPosition.x + (newPosition.y - i) * mapData.width] != 0
+					);
+					let sidesHaveWallNew = (
+						wallMap[newPosition.x + i + (newPosition.y + i) * mapData.width] != 0 || wallMap[newPosition.x - i + (newPosition.y - i) * mapData.width] != 0 ||
+						wallMap[newPosition.x - i + (newPosition.y + i) * mapData.width] != 0 || wallMap[newPosition.x + i + (newPosition.y - i) * mapData.width]
+					);
+
+					// Idea: avoid hitting outer corners of wall(dodge by going outer), and allow unit to walk next to walls
+					shouldPrune = (cornersHaveWallNew || sidesHaveWallNew) && (cornersHaveWallCurrent || sidesHaveWallCurrent) && !(cornersHaveWallNew && sidesHaveWallNew && cornersHaveWallCurrent && sidesHaveWallCurrent);
+					if (shouldPrune) break;
+				}
+				if (shouldPrune) continue;
 
 				if (!isNaN(parseInt(this.maxTravelDistance))) {
 					// new Position is way too far from current position (> maxTravelDistance * 5 of unit, total diameter: 10 maxTravelDistance), hence A Star skip this possible node
