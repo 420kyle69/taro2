@@ -18,14 +18,18 @@ class ThreeSprite extends THREE.Group {
 		this.sprite = new THREE.Mesh(geometry, material);
 		this.add(this.sprite);
 
-		// Too much coupling?
-		const renderer = ThreeRenderer.getInstance();
-		renderer.camera.onChange(() => {
+		const faceCamera = () => {
 			if (this.billboard) {
 				this.rotation.setFromRotationMatrix(renderer.camera.instance.matrix);
 				this.rotateX(Math.PI * 0.5);
 			}
-		});
+		};
+
+		faceCamera();
+
+		// Too much coupling?
+		const renderer = ThreeRenderer.getInstance();
+		renderer.camera.onChange(() => faceCamera());
 	}
 
 	setScale(sx: number, sy: number) {
