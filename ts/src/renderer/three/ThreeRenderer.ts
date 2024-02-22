@@ -223,7 +223,7 @@ class ThreeRenderer {
 			const createEntity = () => {
 				const e = new ThreeUnit(tex.clone());
 				this.animatedSprites.push(e);
-				e.billboard = !!entity._stats.isBillboard;
+				e.setBillboard(!!entity._stats.isBillboard, this.camera);
 
 				if (entity._stats.cameraPointerLock) {
 					e.cameraConfig.pointerLock = entity._stats.cameraPointerLock;
