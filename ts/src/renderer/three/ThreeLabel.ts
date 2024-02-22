@@ -9,9 +9,7 @@ class ThreeLabel extends THREE.Group {
 	constructor(text = 'cccccc') {
 		super();
 
-		const threeRenderer = ThreeRenderer.getInstance();
-		const zoomScale = 1 / threeRenderer.camera.zoomLevel;
-		this.scaleScalar = zoomScale;
+		this.scaleScalar = 1;
 
 		this.sprite = this.createLabel(text);
 		this.add(this.sprite);
