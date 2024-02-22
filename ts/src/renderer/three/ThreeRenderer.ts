@@ -159,7 +159,6 @@ class ThreeRenderer {
 
 		taro.client.on('stop-follow', () => {
 			this.camera.stopFollow();
-			this.scene.attach(this.skybox.scene);
 		});
 
 		const layers = {
@@ -300,8 +299,6 @@ class ThreeRenderer {
 				'follow',
 				() => {
 					this.camera.startFollow(ent);
-					this.skybox.scene.position.copy(ent.position);
-					ent.attach(this.skybox.scene);
 
 					const offset = ent.cameraConfig.offset;
 					this.camera.setOffset(offset.x, offset.y, offset.z);
@@ -467,6 +464,11 @@ class ThreeRenderer {
 		}
 
 		this.camera.update();
+
+		if (this.camera.target) {
+			this.skybox.scene.position.copy(this.camera.target.position);
+		}
+
 		this.renderer.render(this.scene, this.camera.instance);
 	}
 
