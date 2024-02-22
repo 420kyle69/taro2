@@ -440,6 +440,7 @@ var TaroNetIoClient = {
 	 */
 	_onConnectToServer: function () {
 		this.log('Connected to server!');
+		// there is `.on()` for this event
 		this.emit('connected');
 	},
 

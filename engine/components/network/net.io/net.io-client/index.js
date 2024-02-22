@@ -112,7 +112,7 @@ NetIo.Client = NetIo.EventingClass.extend({
 		var distinctId = window.distinctId || '';
 		var posthogDistinctId = window.posthogDistinctId || (window.posthog && window.posthog.get_distinct_id ? window.posthog.get_distinct_id() : '');	
 		const workerPortQuery = (new URL(window.location.href).searchParams.get('proxy') === 'master') ? '' : `&cfwp=${(parseInt(taro.client.server?.name?.split('.')[1] || 0) + 2000)}`;
-		
+
 		this.wsUrl = `${url}?token=${gsAuthToken}&sid=${taro.client.server.id}${workerPortQuery}&distinctId=${distinctId}&posthogDistinctId=${posthogDistinctId}&ws_port=${taro.client.server.wsPort}`;
 		this.wsStartTime = Date.now();
 		this.startTimeSinceLoad = performance.now();
@@ -330,6 +330,7 @@ NetIo.Client = NetIo.EventingClass.extend({
 		}
 
 		if (packet._netioCmd) {
+			console.log(packet, data);
 			// The packet is a netio command
 			switch (packet._netioCmd) {
 				case 'id':
@@ -341,6 +342,7 @@ NetIo.Client = NetIo.EventingClass.extend({
 
 					// Emit the connect event
 					this.emit('connect', this.id);
+					console.log('received id packet');
 					break;
 
 				case 'close':

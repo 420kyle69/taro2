@@ -4962,7 +4962,7 @@ var TaroEntity = TaroObject.extend({
 				taro.network.stream._streamClientCreated[thisId] = {};
 			}
 
-			if (!taro.network.stream._streamClientCreated[thisId][clientId]) {
+			if (!taro.network.stream._streamClientCreated[thisId][clientId] || true) {
 				createResult = this.streamCreate(clientId);
 				this._hasMoved = true;
 			}

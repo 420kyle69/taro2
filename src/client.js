@@ -628,6 +628,7 @@ const Client = TaroEventingClass.extend({
 
 			taro.game.start();
 			taro.menuUi.playGame();
+			console.log('did we get here?');
 
 			if (params.guestmode == 'on') {
 				// i removed 'this params.joinGame == 'true' || ' from the condition

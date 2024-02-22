@@ -46,6 +46,7 @@ var Player = TaroEntity.extend({
 					taro._currentTime - taro.client.playerJoinedAt,
 					'My player created'
 				]);
+				console.log('MY PLAYER CREATED');
 				// old comment => 'declare my player'
 				taro.client.myPlayer = self;
 
@@ -91,16 +92,17 @@ var Player = TaroEntity.extend({
 	},
 
 	// move to UI
-	joinGame: function () {
+	joinGame: function (idle = false) {
+
 		var self = this;
-		if (self._stats.playerJoined != true) {
+		if (self._stats.playerJoined != true || true /*idle mode */) {
 
 			// notify GS manager that a user has joined, do not notify if player joins again after pausing the game
 			if (self._stats.userId) {
 				taro.workerComponent.userJoined(self._stats.userId);
 			}
 
-			if (taro.script) // do not send trigger for neutral player
+			if (taro.script && !idle /* idle mode */) // do not send trigger for neutral player
 			{
 				taro.script.trigger('playerJoinsGame', { playerId: self.id() });
 			}
@@ -541,6 +543,7 @@ var Player = TaroEntity.extend({
 
 	// update player's stats in the server side first, then update client side as well.
 	streamUpdateData: function (queuedData, clientId) {
+		if (taro.isClient) console.log('Player.streamUpdateData(): \n', queuedData);
 		var self = this;
 		var oldStatsName = self._stats.name;
 		TaroEntity.prototype.streamUpdateData.call(this, queuedData, clientId);
