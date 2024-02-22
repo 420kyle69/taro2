@@ -341,6 +341,12 @@ var AIComponent = TaroEntity.extend({
 			return returnValue;
 		}
 		openList.push(rfdc()({current: unitTilePosition, parent: {x: -1, y: -1}, totalHeuristic: 0})); // push start node to open List
+
+		// for dropping nodes that overlap with unit body at that new position
+		const unitTileWidthShift = Math.max(0, Math.floor((unit.getBounds().width + tileWidth) / 2 / tileWidth));
+		const unitTileHeightShift = Math.max(0, Math.floor((unit.getBounds().height + tileWidth) / 2 / tileWidth));
+		const averageTileShift = Math.sqrt(unitTileWidthShift * unitTileWidthShift + unitTileHeightShift * unitTileHeightShift);
+
 		while (openList.length > 0) {
 			let minNode = rfdc()(openList[0]); // initialize for iteration
 			let minNodeIndex = 0;
@@ -384,6 +390,20 @@ var AIComponent = TaroEntity.extend({
 						}
 						break;
 				}
+								
+				if (wallMap[newPosition.x + newPosition.y * mapData.width] != 0) continue;// node inside wall, discard				
+				let shouldPrune = false;
+				for (let i = 1; i <= averageTileShift; i++) {
+					// check 8 direction of average tile shift to see will unit overlap with wall at that node
+					shouldPrune = (
+						wallMap[newPosition.x + i + newPosition.y * mapData.width] != 0 || wallMap[newPosition.x - i + newPosition.y * mapData.width] != 0 ||
+						wallMap[newPosition.x + (newPosition.y + i) * mapData.width] != 0 || wallMap[newPosition.x + (newPosition.y - i) * mapData.width] != 0 || 
+						wallMap[newPosition.x + i + (newPosition.y + i) * mapData.width] != 0 || wallMap[newPosition.x - i + (newPosition.y - i) * mapData.width] != 0 ||
+						wallMap[newPosition.x - i + (newPosition.y + i) * mapData.width] != 0 || wallMap[newPosition.x + i + (newPosition.y - i) * mapData.width]
+					);
+					if (shouldPrune) break;
+				}
+				if (shouldPrune) continue;
 
 				if (!isNaN(parseInt(this.maxTravelDistance))) {
 					// new Position is way too far from current position (> maxTravelDistance * 5 of unit, total diameter: 10 maxTravelDistance), hence A Star skip this possible node
@@ -392,9 +412,8 @@ var AIComponent = TaroEntity.extend({
 						continue;
 					}
 				}
-				console.log(unit.getBounds().width, unit.getBounds().height);
 
-				if (wallMap[newPosition.x + newPosition.y * mapData.width] != 0) continue;// node inside wall, discard				
+				// valid node, continue operation!!!
 
 				// 10 to 1 A* heuristic for node with distance that closer to the goal
 				let heuristic = 10;
@@ -466,14 +485,15 @@ var AIComponent = TaroEntity.extend({
 
 	aStarIsPositionBlocked: function (targetX, targetY) {
 		let unit = this._entity;
-		let xTune = [0, -1, 1, -1, 1];
-		let yTune = [0, -1, -1, 1, 1];
-		// center, left, right, up, down
+		const xTune = [0, -1, 1, -1, 1];
+		const yTune = [0, -1, -1, 1, 1];
+		// center, top-left, top-right, bottom-left, bottom-right
 		const unitWidth = unit.getBounds().width;
 		const unitHeight = unit.getBounds().height;
+		const maxBodySizeShift = Math.sqrt(unitWidth / 2 * unitWidth / 2 + unitHeight / 2 * unitHeight / 2);
 		for (let i = 0; i < 5; i++) {
 			taro.raycaster.raycastLine(
-				{ x: (unit._translate.x + unitWidth / 2 * xTune[i]) / taro.physics._scaleRatio, y: (unit._translate.y + unitHeight / 2 * yTune[i]) / taro.physics._scaleRatio },
+				{ x: (unit._translate.x + maxBodySizeShift * xTune[i]) / taro.physics._scaleRatio, y: (unit._translate.y + maxBodySizeShift * yTune[i]) / taro.physics._scaleRatio },
 				{ x: targetX / taro.physics._scaleRatio, y: targetY / taro.physics._scaleRatio },
 			)
 			for (let i = 0; i < taro.game.entitiesCollidingWithLastRaycast.length; i++) {
