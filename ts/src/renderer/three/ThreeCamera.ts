@@ -240,7 +240,7 @@ class ThreeCamera {
 	}
 
 	setZoom(ratio: number) {
-		this.setDistance(this.originalDistance * ratio);
+		this.setDistance(this.originalDistance / ratio);
 	}
 
 	startFollow(target: THREE.Object3D) {
