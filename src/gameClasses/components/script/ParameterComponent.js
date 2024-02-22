@@ -2414,10 +2414,11 @@ var ParameterComponent = TaroEntity.extend({
 
 			'getValueOfEntityVariable': function (text, vars) {
 				var variableData = self.getValue(text.variable, vars);
-				var entity = self.getValue(text.entity, vars);
-
-				if (entity && variableData?.key) {
-					return entity.variable.getValue(variableData.key);
+				var entity = self.getValue(text.entity, vars);				
+				if (entity?.variable && variableData?.key) {
+					var value = entity.variable.getValue(variableData.key);
+					console.log(variableData.key, value)
+					return value
 				}
 			},
 

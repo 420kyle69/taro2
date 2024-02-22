@@ -2802,8 +2802,7 @@ var ActionComponent = TaroEntity.extend({
 						var entity = self._script.param.getValue(action.entity, vars);
 						var variable = self._script.param.getValue(action.variable, vars);
 						var value = self._script.param.getValue(action.value, vars);
-
-						if (entity && variable && entity.variables) {
+						if (variable && entity?.variables) {
 							var variableId = variable.key;
 							entity.variable.update(variableId, value);
 						}
