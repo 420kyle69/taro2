@@ -2417,7 +2417,6 @@ var ParameterComponent = TaroEntity.extend({
 				var entity = self.getValue(text.entity, vars);				
 				if (entity?.variable && variableData?.key) {
 					var value = entity.variable.getValue(variableData.key);
-					console.log(variableData.key, value)
 					return value
 				}
 			},
