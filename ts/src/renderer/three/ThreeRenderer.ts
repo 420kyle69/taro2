@@ -225,6 +225,19 @@ class ThreeRenderer {
 				const e = new ThreeUnit(tex.clone());
 				this.animatedSprites.push(e);
 				e.billboard = !!entity._stats.isBillboard;
+
+				if (entity._stats.cameraPointerLock) {
+					e.cameraConfig.pointerLock = entity._stats.cameraPointerLock;
+				}
+
+				if (entity._stats.cameraPitchRange) {
+					e.cameraConfig.pitchRange = entity._stats.cameraPitchRange;
+				}
+
+				if (entity._stats.cameraOffset) {
+					e.cameraConfig.offset = entity._stats.cameraOffset;
+				}
+
 				return e;
 			};
 

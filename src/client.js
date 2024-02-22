@@ -315,7 +315,7 @@ const Client = TaroEventingClass.extend({
 		Object.keys(skyboxDefaultUrls).forEach((key) => {
 			if (taro.game.data.settings.skybox[key] === undefined) {
 				taro.game.data.settings.skybox[key] = skyboxDefaultUrls[key];
-			} 
+			}
 		});
 	},
 
