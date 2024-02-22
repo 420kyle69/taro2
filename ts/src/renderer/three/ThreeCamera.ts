@@ -18,6 +18,8 @@ class ThreeCamera {
 
 	private onChangeCbs = [];
 
+	private offset = new THREE.Vector3();
+
 	constructor(viewportWidth: number, viewportHeight: number, canvas: HTMLCanvasElement) {
 		// Public API
 
@@ -25,12 +27,12 @@ class ThreeCamera {
 		// camera.setProjection(string)
 		// camera.setElevationAngle(number)
 		// camera.setAzimuthAngle(number)
+		// camera.setOffset(x, y, z)
 
 		// TODO
 		// camera.setTarget(object3d | null, moveInstantOrLerp)
 		// camera.setPointerLock(bool)
 		// camera.setPitchRange(min, max)
-		// camera.setScreenOffset(x, y)
 		// camera.setZoom(number)
 		// camera.setFollowSpeed(number)
 		// camera.update(dt <--)
@@ -50,6 +52,9 @@ class ThreeCamera {
 			this.orthographicCamera.top / Math.tan(yFovDeg * 0.5) / (this.orthographicCamera.zoom / this.zoomLevel);
 		this.perspectiveCamera.position.y = distance;
 		this.orthographicCamera.position.y = distance;
+
+		this.perspectiveCamera.position.add(this.offset);
+		this.orthographicCamera.position.add(this.offset);
 
 		this.instance = orthoCamera;
 
@@ -132,8 +137,8 @@ class ThreeCamera {
 
 		spherical.makeSafe();
 
-		this.perspectiveCamera.position.setFromSpherical(spherical).add(this.controls.target);
-		this.orthographicCamera.position.setFromSpherical(spherical).add(this.controls.target);
+		this.perspectiveCamera.position.setFromSpherical(spherical).add(this.controls.target).add(this.offset);
+		this.orthographicCamera.position.setFromSpherical(spherical).add(this.controls.target).add(this.offset);
 
 		this.controls.update();
 	}
@@ -146,8 +151,8 @@ class ThreeCamera {
 		const rad = deg * (Math.PI / 180);
 		spherical.theta = rad;
 
-		this.perspectiveCamera.position.setFromSpherical(spherical).add(this.controls.target);
-		this.orthographicCamera.position.setFromSpherical(spherical).add(this.controls.target);
+		this.perspectiveCamera.position.setFromSpherical(spherical).add(this.controls.target).add(this.offset);
+		this.orthographicCamera.position.setFromSpherical(spherical).add(this.controls.target).add(this.offset);
 
 		this.controls.update();
 	}
@@ -162,8 +167,8 @@ class ThreeCamera {
 			.multiplyScalar(distance)
 			.add(this.controls.target);
 
-		this.perspectiveCamera.position.copy(newPos);
-		this.orthographicCamera.position.copy(newPos);
+		this.perspectiveCamera.position.copy(newPos).add(this.offset);
+		this.orthographicCamera.position.copy(newPos).add(this.offset);
 
 		if (this.instance instanceof THREE.OrthographicCamera) {
 			// TODO: Extract into separate function
@@ -184,6 +189,10 @@ class ThreeCamera {
 		}
 
 		this.controls.update();
+	}
+
+	setOffset(x: number, y: number, z: number) {
+		this.offset.set(x, y, z);
 	}
 
 	update() {
@@ -279,9 +288,9 @@ class ThreeCamera {
 		const oldTarget = this.controls.target.clone();
 		const diff = target.clone().sub(oldTarget);
 		const t = (taro?.game?.data?.settings?.camera?.trackingDelay || 3) / taro.fps();
-		this.controls.target.lerp(this.controls.target.clone().add(diff), t);
-		this.orthographicCamera.position.lerp(this.orthographicCamera.position.clone().add(diff), t);
-		this.perspectiveCamera.position.lerp(this.perspectiveCamera.position.clone().add(diff), t);
+		this.controls.target.lerp(this.controls.target.clone().add(this.offset).add(diff), t);
+		this.orthographicCamera.position.lerp(this.orthographicCamera.position.clone().add(this.offset).add(diff), t);
+		this.perspectiveCamera.position.lerp(this.perspectiveCamera.position.clone().add(this.offset).add(diff), t);
 	}
 
 	onChange(cb: () => void) {
@@ -289,7 +298,7 @@ class ThreeCamera {
 	}
 
 	private switchToOrthographicCamera() {
-		this.orthographicCamera.position.copy(this.perspectiveCamera.position);
+		this.orthographicCamera.position.copy(this.perspectiveCamera.position).add(this.offset);
 		this.orthographicCamera.quaternion.copy(this.perspectiveCamera.quaternion);
 
 		const aspect = this.perspectiveCamera.aspect;
@@ -314,7 +323,7 @@ class ThreeCamera {
 	}
 
 	private switchToPerspectiveCamera() {
-		this.perspectiveCamera.position.copy(this.orthographicCamera.position);
+		this.perspectiveCamera.position.copy(this.orthographicCamera.position).add(this.offset);
 		this.perspectiveCamera.quaternion.copy(this.orthographicCamera.quaternion);
 
 		const yFovDeg = this.perspectiveCamera.fov * (Math.PI / 180);

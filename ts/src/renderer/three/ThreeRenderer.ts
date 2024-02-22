@@ -235,7 +235,10 @@ class ThreeRenderer {
 				}
 
 				if (entity._stats.cameraOffset) {
-					e.cameraConfig.offset = entity._stats.cameraOffset;
+					// From editor XZY to Three.js XYZ
+					e.cameraConfig.offset.x = entity._stats.cameraOffset.x;
+					e.cameraConfig.offset.y = entity._stats.cameraOffset.z;
+					e.cameraConfig.offset.z = entity._stats.cameraOffset.y;
 				}
 
 				return e;
@@ -299,6 +302,9 @@ class ThreeRenderer {
 					this.camera.startFollow(ent);
 					this.skybox.scene.position.copy(ent.position);
 					ent.attach(this.skybox.scene);
+
+					const offset = ent.cameraConfig.offset;
+					this.camera.setOffset(offset.x, offset.y, offset.z);
 				},
 				this
 			);
