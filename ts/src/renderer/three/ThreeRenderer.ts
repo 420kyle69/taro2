@@ -53,7 +53,7 @@ class ThreeRenderer {
 
 			if (this.zoomSize) {
 				const ratio = Math.max(window.innerWidth, window.innerHeight) / this.zoomSize;
-				this.camera.zoom(ratio);
+				this.camera.setZoom(ratio);
 				taro.client.emit('scale', { ratio: ratio * this.resolutionCoef });
 				taro.client.emit('update-abilities-position');
 
@@ -148,7 +148,7 @@ class ThreeRenderer {
 			const ratio = Math.max(window.innerWidth, window.innerHeight) / this.zoomSize;
 
 			// TODO: Quadratic zoomTo over 1 second
-			this.camera.zoom(ratio);
+			this.camera.setZoom(ratio);
 
 			taro.client.emit('scale', { ratio: ratio * this.resolutionCoef });
 
