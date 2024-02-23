@@ -69,6 +69,7 @@ var TaroTiledComponent = TaroClass.extend({
 		var image;
 		var tilesetsLoadedFunc;
 		var i; var k; var x; var y; var z;
+		var maxTilesheetsToLoad = 2;
 
 		taro.layersById = layersById;
 
@@ -136,7 +137,7 @@ var TaroTiledComponent = TaroClass.extend({
 			callback(maps, layersById);
 		};
 
-		if (taro.isClient && !self.cs) {
+		if (taro.isClient) {
 			onLoadFunc = function (tileSetCount, tileSetItem) {
 				return function () {
 
@@ -148,14 +149,11 @@ var TaroTiledComponent = TaroClass.extend({
 						tileSetItem.tileheight = taro.scaleMapDetails.originalTileHeight;
 					}
 
-					if (!self.cs) {
-						self.cs = true;
-						tileSetsLoaded++;
+					tileSetsLoaded++;
 
-						if (tileSetsLoaded === tileSetsTotal) {
-							// All tilesets loaded, fire processing function
-							tilesetsLoadedFunc();
-						}
+					if (tileSetsLoaded === tileSetsTotal && tileSetsLoaded <= maxTilesheetsToLoad) {
+						// All tilesets loaded, fire processing function
+						tilesetsLoadedFunc();
 					}
 				};
 			};
