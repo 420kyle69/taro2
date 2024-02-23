@@ -177,11 +177,11 @@ var AIComponent = TaroEntity.extend({
 
 	getDistanceToClosestAStarNode: function () {
 		let distance = 0;
-		let mapData = taro.map.data;
+		const tileWidth = taro.scaleMapDetails.tileWidth;
 		let unit = this._entity;
 		if (this.path.length > 0) { // closestAStarNode exist
-			let a = this.path[this.path.length - 1].x * mapData.tilewidth + mapData.tilewidth / 2 - unit._translate.x;
-			let b = this.path[this.path.length - 1].y * mapData.tilewidth + mapData.tilewidth / 2 - unit._translate.y;
+			let a = this.path[this.path.length - 1].x * tileWidth + tileWidth / 2 - unit._translate.x;
+			let b = this.path[this.path.length - 1].y * tileWidth + tileWidth / 2 - unit._translate.y;
 			distance = Math.sqrt(a * a + b * b);
 		}
 		return distance;
@@ -317,12 +317,13 @@ var AIComponent = TaroEntity.extend({
 		let returnValue = { path: [], ok: false };
 		let unit = this._entity;
 
-		let mapData = taro.map.data; // cache the map data for rapid use
+		const mapData = taro.map.data; // cache the map data for rapid use
+		const tileWidth = taro.scaleMapDetails.tileWidth;
 
-		let unitTilePosition = {x: Math.floor(unit._translate.x / mapData.tilewidth), y: Math.floor(unit._translate.y / mapData.tilewidth)};
+		let unitTilePosition = {x: Math.floor(unit._translate.x / tileWidth), y: Math.floor(unit._translate.y / tileWidth)};
 		unitTilePosition.x = Math.min(Math.max(0, unitTilePosition.x), mapData.width - 1); // confine with map boundary
 		unitTilePosition.y = Math.min(Math.max(0, unitTilePosition.y), mapData.height - 1);
-		let targetTilePosition = {x: Math.floor(x / mapData.tilewidth), y: Math.floor(y / mapData.tilewidth)};
+		let targetTilePosition = {x: Math.floor(x / tileWidth), y: Math.floor(y / tileWidth)};
 		targetTilePosition.x = Math.min(Math.max(0, targetTilePosition.x), mapData.width - 1); // confine with map boundary
 		targetTilePosition.y = Math.min(Math.max(0, targetTilePosition.y), mapData.height - 1);
 		
@@ -332,7 +333,7 @@ var AIComponent = TaroEntity.extend({
 			return returnValue;
 		}
 
-		let wallMap = taro.map.wallMap; // wall layer cached
+		const wallMap = taro.map.wallMap; // wall layer cached
 		let openList = []; // store grid nodes that is under evaluation
 		let closeList = []; // store grid nodes that finished evaluation
 		let tempPath = []; // store path to return (smaller index: closer to target, larger index: closer to start)
@@ -340,6 +341,12 @@ var AIComponent = TaroEntity.extend({
 			return returnValue;
 		}
 		openList.push(rfdc()({current: unitTilePosition, parent: {x: -1, y: -1}, totalHeuristic: 0})); // push start node to open List
+
+		// for dropping nodes that overlap with unit body at that new position
+		const unitTileWidthShift = Math.max(0, Math.floor((unit.getBounds().width + tileWidth) / 2 / tileWidth));
+		const unitTileHeightShift = Math.max(0, Math.floor((unit.getBounds().height + tileWidth) / 2 / tileWidth));
+		const averageTileShift = Math.sqrt(unitTileWidthShift * unitTileWidthShift + unitTileHeightShift * unitTileHeightShift);
+
 		while (openList.length > 0) {
 			let minNode = rfdc()(openList[0]); // initialize for iteration
 			let minNodeIndex = 0;
@@ -383,6 +390,34 @@ var AIComponent = TaroEntity.extend({
 						}
 						break;
 				}
+								
+				if (wallMap[newPosition.x + newPosition.y * mapData.width] != 0) continue;// node inside wall, discard				
+				// if new position is not goal, prune it if wall overlaps
+				let shouldPrune = false;
+				for (let i = 1; i <= averageTileShift; i++) {
+					// check 8 direction of average tile shift to see will unit overlap with wall at that node					
+					let cornersHaveWallCurrent = (
+						wallMap[minNode.current.x + i + minNode.current.y * mapData.width] != 0 || wallMap[minNode.current.x - i + minNode.current.y * mapData.width] != 0 ||
+						wallMap[minNode.current.x + (minNode.current.y + i) * mapData.width] != 0 || wallMap[minNode.current.x + (minNode.current.y - i) * mapData.width] != 0
+					);
+					let sidesHaveWallCurrent = (
+						wallMap[minNode.current.x + i + (minNode.current.y + i) * mapData.width] != 0 || wallMap[minNode.current.x - i + (minNode.current.y - i) * mapData.width] != 0 ||
+						wallMap[minNode.current.x - i + (minNode.current.y + i) * mapData.width] != 0 || wallMap[minNode.current.x + i + (minNode.current.y - i) * mapData.width]
+					);
+					let cornersHaveWallNew = (
+						wallMap[newPosition.x + i + newPosition.y * mapData.width] != 0 || wallMap[newPosition.x - i + newPosition.y * mapData.width] != 0 ||
+						wallMap[newPosition.x + (newPosition.y + i) * mapData.width] != 0 || wallMap[newPosition.x + (newPosition.y - i) * mapData.width] != 0
+					);
+					let sidesHaveWallNew = (
+						wallMap[newPosition.x + i + (newPosition.y + i) * mapData.width] != 0 || wallMap[newPosition.x - i + (newPosition.y - i) * mapData.width] != 0 ||
+						wallMap[newPosition.x - i + (newPosition.y + i) * mapData.width] != 0 || wallMap[newPosition.x + i + (newPosition.y - i) * mapData.width]
+					);
+
+					// Idea: avoid hitting outer corners of wall(dodge by going outer), and allow unit to walk next to walls
+					shouldPrune = (cornersHaveWallNew || sidesHaveWallNew) && (cornersHaveWallCurrent || sidesHaveWallCurrent) && !(cornersHaveWallNew && sidesHaveWallNew && cornersHaveWallCurrent && sidesHaveWallCurrent);
+					if (shouldPrune) break;
+				}
+				if (shouldPrune) continue;
 
 				if (!isNaN(parseInt(this.maxTravelDistance))) {
 					// new Position is way too far from current position (> maxTravelDistance * 5 of unit, total diameter: 10 maxTravelDistance), hence A Star skip this possible node
@@ -392,49 +427,49 @@ var AIComponent = TaroEntity.extend({
 					}
 				}
 
-				if (wallMap[newPosition.x + newPosition.y * mapData.width] == 0) {
-					// 10 to 1 A* heuristic for node with distance that closer to the goal
-					let heuristic = 10;
-					let nodeFound = false; // initialize nodeFound for looping (checking the existance of a node)
-					// cached distance values for calculating the euclidean distance
-					let a = newPosition.x - targetTilePosition.x;
-					let b = newPosition.y - targetTilePosition.y;
-					let c = minNode.current.x - targetTilePosition.x;
-					let d = minNode.current.y - targetTilePosition.y;
-					// In case the euclidean distance to targetTilePosition from the newPosition is smaller than the minNodePosition, reduce the heuristic value (so it tend to choose this node)
-					if (Math.sqrt(a * a + b * b) < Math.sqrt(c * c + d * d)) {
-						heuristic = 1;
-					}
-					for (let k = 0; k < 3; k++) {
-						if (!nodeFound) { // Idea: In open list already ? Update it : In close list already ? Neglect, already reviewed : put it inside openList for evaluation 
-							switch (k) {
-								case 0: // first check if the node exist in open list (if true, update it)
-									for (let j = 0; j < openList.length; j++)
-									{
-										if (newPosition.x == openList[j].current.x && newPosition.y == openList[j].current.y) {
-											if (minNode.totalHeuristic + heuristic < openList[j].totalHeuristic) {
-												openList[j] = rfdc()({current: newPosition, parent: minNode.current, totalHeuristic: minNode.totalHeuristic + heuristic});
-											}
-											nodeFound = true;
-											break;
+				// valid node, continue operation!!!
+
+				// 10 to 1 A* heuristic for node with distance that closer to the goal
+				let heuristic = 10;
+				let nodeFound = false; // initialize nodeFound for looping (checking the existance of a node)
+				// cached distance values for calculating the euclidean distance
+				let a = newPosition.x - targetTilePosition.x;
+				let b = newPosition.y - targetTilePosition.y;
+				let c = minNode.current.x - targetTilePosition.x;
+				let d = minNode.current.y - targetTilePosition.y;
+				// In case the euclidean distance to targetTilePosition from the newPosition is smaller than the minNodePosition, reduce the heuristic value (so it tend to choose this node)
+				if (Math.sqrt(a * a + b * b) < Math.sqrt(c * c + d * d)) {
+					heuristic = 1;
+				}
+				for (let k = 0; k < 3; k++) {
+					if (!nodeFound) { // Idea: In open list already ? Update it : In close list already ? Neglect, already reviewed : put it inside openList for evaluation 
+						switch (k) {
+							case 0: // first check if the node exist in open list (if true, update it)
+								for (let j = 0; j < openList.length; j++)
+								{
+									if (newPosition.x == openList[j].current.x && newPosition.y == openList[j].current.y) {
+										if (minNode.totalHeuristic + heuristic < openList[j].totalHeuristic) {
+											openList[j] = rfdc()({current: newPosition, parent: minNode.current, totalHeuristic: minNode.totalHeuristic + heuristic});
 										}
+										nodeFound = true;
+										break;
 									}
-									break;
-								case 1: // then check if the node exist in the close list (if true, neglect)
-									for (let j = 0; j < closeList.length; j++)
-									{
-										if (newPosition.x == closeList[j].current.x && newPosition.y == closeList[j].current.y) {
-											nodeFound = true;
-											break;
-										}
+								}
+								break;
+							case 1: // then check if the node exist in the close list (if true, neglect)
+								for (let j = 0; j < closeList.length; j++)
+								{
+									if (newPosition.x == closeList[j].current.x && newPosition.y == closeList[j].current.y) {
+										nodeFound = true;
+										break;
 									}
-									break;
-								case 2: // finally push it to open list if it does not exist
-									openList.push(rfdc()({current: newPosition, parent: minNode.current, totalHeuristic: minNode.totalHeuristic + heuristic}));
-									break;
-							}
-						} else break;
-					}
+								}
+								break;
+							case 2: // finally push it to open list if it does not exist
+								openList.push(rfdc()({current: newPosition, parent: minNode.current, totalHeuristic: minNode.totalHeuristic + heuristic}));
+								break;
+						}
+					} else break;
 				}
 			}
 		}
@@ -462,16 +497,19 @@ var AIComponent = TaroEntity.extend({
 		this._entity.script.trigger('entityAStarPathFindingFailed', triggerParam);
 	},
 
-	aStarIsPositionBlocked: function (x, y) {
+	aStarIsPositionBlocked: function (targetX, targetY) {
 		let unit = this._entity;
-		let xTune = [0, -1, 1, 0, 0];
-		let yTune = [0, 0, 0, -1, 1];
-		// center, left, right, up, down
-		let maxBodySizeShift = Math.max(unit.getBounds().width, unit.getBounds().height);
+		const tileWidth = taro.scaleMapDetails.tileWidth;
+		const xTune = [0, -1, 1, -1, 1];
+		const yTune = [0, -1, -1, 1, 1];
+		// center, top-left, top-right, bottom-left, bottom-right
+		const unitWidth = unit.getBounds().width;
+		const unitHeight = unit.getBounds().height;
+		const maxBodySizeShift = Math.sqrt(unitWidth / 2 * unitWidth / 2 + unitHeight / 2 * unitHeight / 2);
 		for (let i = 0; i < 5; i++) {
 			taro.raycaster.raycastLine(
 				{ x: (unit._translate.x + maxBodySizeShift * xTune[i]) / taro.physics._scaleRatio, y: (unit._translate.y + maxBodySizeShift * yTune[i]) / taro.physics._scaleRatio },
-				{ x: x / taro.physics._scaleRatio, y: y / taro.physics._scaleRatio },
+				{ x: (targetX + tileWidth / 2 * Math.sqrt(2) * xTune[i]) / taro.physics._scaleRatio, y: (targetY + tileWidth / 2 * Math.sqrt(2) * yTune[i]) / taro.physics._scaleRatio },
 			)
 			for (let i = 0; i < taro.game.entitiesCollidingWithLastRaycast.length; i++) {
 				if (taro.game.entitiesCollidingWithLastRaycast[i]._category && taro.game.entitiesCollidingWithLastRaycast[i]._category == 'wall') {
@@ -483,8 +521,8 @@ var AIComponent = TaroEntity.extend({
 	},
 
 	aStarPathIsBlocked: function() {
-		let mapData = taro.map.data;
-		let wallMap = taro.map.wallMap;
+		const mapData = taro.map.data;
+		const wallMap = taro.map.wallMap;
 		let result = false;
 
 		for (let i = 0; i < this.path.length; i++) {
@@ -498,14 +536,14 @@ var AIComponent = TaroEntity.extend({
 	},
 
 	aStarTargetIsCloser: function (unit, targetUnit) {
-		let mapData = taro.map.data;
+		const tileWidth = taro.scaleMapDetails.tileWidth;
 
 		let a = targetUnit._translate.x - unit._translate.x;
 		let b = targetUnit._translate.y - unit._translate.y;
 		let distanceToTarget = Math.sqrt(a * a + b * b);
 		
-		let c = this.path[0].x * mapData.tilewidth + mapData.tilewidth / 2 - unit._translate.x;
-		let d = this.path[0].y * mapData.tilewidth + mapData.tilewidth / 2 - unit._translate.y;
+		let c = this.path[0].x * tileWidth + tileWidth / 2 - unit._translate.x;
+		let d = this.path[0].y * tileWidth + tileWidth / 2 - unit._translate.y;
 		let distanceToEndPath = Math.sqrt(c * c + d * d);
 
 		return distanceToTarget < distanceToEndPath;
@@ -548,7 +586,7 @@ var AIComponent = TaroEntity.extend({
 		if (!unit._stats.aiEnabled)
 			return;
 
-		let mapData = taro.map.data; // both pathfinding method need it to check
+		const tileWidth = taro.scaleMapDetails.tileWidth; // both pathfinding method need it to check
 		
 		var targetUnit = this.getTargetUnit();
 
@@ -584,17 +622,17 @@ var AIComponent = TaroEntity.extend({
 			case 'move':
 				switch (this.pathFindingMethod) {
 					case 'simple':
-						if (this.getDistanceToTarget() < mapData.tilewidth / 2) { // map with smaller tile size requires a more precise stop, vice versa
+						if (this.getDistanceToTarget() < tileWidth / 2) { // map with smaller tile size requires a more precise stop, vice versa
 							self.goIdle();
 						}
 						break;
 					case 'a*':
-						if (this.getDistanceToClosestAStarNode() < mapData.tilewidth / 2) { // reduced chances of shaky move
+						if (this.getDistanceToClosestAStarNode() < tileWidth / 2) { // reduced chances of shaky move
 							this.path.pop(); // after moved to the closest A* node, pop the array and let ai move to next A* node
 						}
 						if (this.path.length > 0) { // Move to the highest index of path saved (closest node to start node)
 							if (!this.aStarPathIsBlocked()) { // only keep going if the path is still non blocked
-								this.setTargetPosition(this.path[this.path.length - 1].x * mapData.tilewidth + mapData.tilewidth / 2, this.path[this.path.length - 1].y * mapData.tilewidth + mapData.tilewidth / 2);
+								this.setTargetPosition(this.path[this.path.length - 1].x * tileWidth + tileWidth / 2, this.path[this.path.length - 1].y * tileWidth + tileWidth / 2);
 							} else { 
 								let aStarResult = this.getAStarPath(this.path[0].x, this.path[0].y); // recalculate whole path once the next move is blocked
 								this.path = aStarResult.path;
@@ -661,13 +699,13 @@ var AIComponent = TaroEntity.extend({
 										this.onAStarFailedTrigger();
 										break;
 									}
-								} else if (this.getDistanceToClosestAStarNode() < mapData.tilewidth / 2) { // Euclidean distance is smaller than half of the tile
+								} else if (this.getDistanceToClosestAStarNode() < tileWidth / 2) { // Euclidean distance is smaller than half of the tile
 									this.path.pop();
 								}
 								// After the above decision, choose whether directly move to targetUnit or according to path
 								if (this.path.length > 0) { // select next node to go
 									if (!this.aStarPathIsBlocked() && !this.aStarTargetIsCloser(unit, targetUnit)) { // keep going if the path is still non blocked OR target is actually closer than end node
-										this.setTargetPosition(this.path[this.path.length - 1].x * mapData.tilewidth + mapData.tilewidth / 2, this.path[this.path.length - 1].y * mapData.tilewidth + mapData.tilewidth / 2);
+										this.setTargetPosition(this.path[this.path.length - 1].x * tileWidth + tileWidth / 2, this.path[this.path.length - 1].y * tileWidth + tileWidth / 2);
 									} else { 
 										let aStarResult = this.getAStarPath(targetUnit._translate.x, targetUnit._translate.y); // recalculate whole path once the next move is blocked
 										this.path = aStarResult.path;
