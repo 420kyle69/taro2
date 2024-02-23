@@ -53,7 +53,7 @@ class ThreeParticleSystem {
 		console.log(window.innerHeight / window.innerWidth);
 	}
 
-	update(dt: number, camera: THREE.Camera) {
+	update(dt: number, time: number, camera: THREE.Camera) {
 		//
 	}
 }

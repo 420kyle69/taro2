@@ -19,6 +19,8 @@ class ThreeRenderer {
 	private skybox: ThreeSkybox;
 	private particleSystem: ThreeParticleSystem;
 
+	private clock = new THREE.Clock();
+
 	private constructor() {
 		// For JS interop; in case someone uses new ThreeRenderer()
 		if (!ThreeRenderer.instance) {
@@ -433,10 +435,15 @@ class ThreeRenderer {
 			sprite.update(1 / 60);
 		}
 
-		this.camera.update();
+		// TODO: Is this the proper way to get deltaTime or should I get it from the
+		// engine somewhere? Also it feels a little weird that the renderer triggers
+		// the engine update. It should be the other way around.
+		const dt = this.clock.getDelta();
+		const time = this.clock.elapsedTime;
 
-		// TODO: Get deltaTime
-		this.particleSystem.update(1 / 60, this.camera.instance);
+		this.particleSystem.update(dt, time, this.camera.instance);
+
+		this.camera.update();
 
 		this.renderer.render(this.scene, this.camera.instance);
 	}
