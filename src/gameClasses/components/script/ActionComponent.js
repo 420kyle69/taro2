@@ -16,8 +16,8 @@ var ActionComponent = TaroEntity.extend({
 				length += 1;
 				length = self.getNestedActionsLength(obj.actions[i], length, self);
 			}
-		} else if (obj.then !== undefined) {
-			if (mode === 1 || mode === 3) {
+		} else {
+			if (obj.then !== undefined && (mode === 1 || mode === 3)) {
 				for (let i = 0; i < obj.then.length; i++) {
 					length += 1;
 					length = self.getNestedActionsLength(obj.then, length, self);
