@@ -315,7 +315,7 @@ const Client = TaroEventingClass.extend({
 		Object.keys(skyboxDefaultUrls).forEach((key) => {
 			if (taro.game.data.settings.skybox[key] === undefined) {
 				taro.game.data.settings.skybox[key] = skyboxDefaultUrls[key];
-			} 
+			}
 		});
 	},
 
@@ -858,7 +858,7 @@ const Client = TaroEventingClass.extend({
 	positionCamera: function (x, y) {
 		if (x != undefined && y != undefined) {
 			this.emit('stop-follow');
-			this.emit('position-camera', [x, y]);
+			this.emit('camera-position', [x, y]);
 		}
 	},
 

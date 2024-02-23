@@ -3164,7 +3164,7 @@ var TaroEntity = TaroObject.extend({
 			this.isTransforming(true);
 			//instantly move to camera the new position
 			if (teleportCamera && taro.client.myPlayer?._stats.cameraTrackedUnitId === this.id()) {
-				taro.client.emit('instant-move-camera', [x, y]);
+				taro.client.emit('camera-instant-move', [x, y]);
 			}
 		}
 
