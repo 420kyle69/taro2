@@ -715,17 +715,14 @@ var ShopComponent = TaroEntity.extend({
 			unitKeys = unitKeys.sort();
 
 			// If logged in, add purchased skins to user skin count
-			if (isLoggedIn) {
-				unitKeys = ['Purchased', ...unitKeys]
-			}
 
 			// generating li column for unit type selection
 			for (var p = 0; p < unitKeys.length; p++) {
 				var key = unitKeys[p];
 				$('#modd-shop-modal .shop-items').html('');
-				if (self.unitSkinCount[key] > 0 || key == 'Purchased') {
+				if (self.unitSkinCount[key] > 0) {
 					// select first key by default
-					if (!self.shopKey && isFirstKey && key != 'Purchased') {
+					if (!self.shopKey && isFirstKey) {
 						self.shopKey = key;
 					}
 
@@ -750,7 +747,7 @@ var ShopComponent = TaroEntity.extend({
 
 					keyDiv = $('<li/>', {
 						class: `other-lists cursor-pointer mt-1 p-2 ${(key == self.shopKey) ? 'active' : ''}`,
-						html: `<strong>${taro.game.data.unitTypes[key].name}</strong> (${self.unitSkinCount[key]})`,
+						html: `<strong>${taro.game.data.unitTypes[key].name}</strong> [${self.unitSkinCount[key]}]`,
 						name: key
 					}).on('click', function () {
 						self.shopKey = $(this).attr('name');
@@ -1579,7 +1576,7 @@ var ShopComponent = TaroEntity.extend({
 					img.style.backgroundRepeat = 'no-repeat';
 					img.style.backgroundPosition = 'center center';
 					img.style.backgroundSize = 'contain';
-
+					img.style.marginBottom = '8px';
 					img.style.height = '64px';
 					img.style.width = '64px';
 				}
