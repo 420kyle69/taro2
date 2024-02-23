@@ -463,7 +463,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		this.tileEditor.activateMarkers(true);
 		this.entityEditor.activatePlacement(false);
 		this.scene.regionEditor.regionTool = false;
-		this.highlightModeButton(2);	//need to add this logic on html buttons
+		this.highlightModeButton(2); //need to add this logic on html buttons
 		this.tileEditor.marker.changePreview();
 	}
 
@@ -474,7 +474,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 			this.tileEditor.activateMarkers(true);
 			this.entityEditor.activatePlacement(false);
 			this.scene.regionEditor.regionTool = false;
-			this.highlightModeButton(3);	//need to add this logic on html buttons
+			this.highlightModeButton(3); //need to add this logic on html buttons
 			this.tileEditor.marker.changePreview();
 		}
 	}

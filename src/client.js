@@ -214,6 +214,7 @@ const Client = TaroEventingClass.extend({
 				}
 
 				taro.developerMode = new DeveloperMode();
+				taro.mapEditorUI = new MapEditorUI();
 
 				if (!window.isStandalone) {
 					this.servers = this.getServersArray();

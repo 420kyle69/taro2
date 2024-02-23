@@ -58,6 +58,7 @@ class RegionEditor {
 				graphics.clear();
 				this.regionTool = false;
 				this.devModeTools.highlightModeButton(0);	//need to add this logic on html buttons
+				taro.mapEditorUI.highlightModeButton('cursor');
 				let x = this.regionDrawStart.x;
 				let y = this.regionDrawStart.y;
 				if (width < 0) {
@@ -99,7 +100,8 @@ class RegionEditor {
 		if (this.regionTool) {
 			this.regionDrawGraphics.clear();
 			this.regionTool = false;
-			this.devModeTools.highlightModeButton(0);	//need to add this logic on html buttons-+
+			this.devModeTools.highlightModeButton(0); //need to add this logic on html buttons-+
+			taro.mapEditorUI.highlightModeButton('cursor');
 			this.regionDrawStart = null;
 		}
 	}
