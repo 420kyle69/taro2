@@ -36,7 +36,7 @@ class AStarPathfindingComponent extends TaroEntity {
 		targetTilePosition.y = Math.min(Math.max(0, targetTilePosition.y), mapData.height - 1);
 		
 		if (!this.aStarIsPositionBlocked(x, y)) { // if there is no blocked, directly set the target to the end position
-			returnValue.path.push(rfdc()(targetTilePosition));
+			returnValue.path.push({...targetTilePosition});
 			returnValue.ok = true;
 			return returnValue;
 		}
@@ -48,7 +48,7 @@ class AStarPathfindingComponent extends TaroEntity {
 		if (wallMap[targetTilePosition.x + targetTilePosition.y * mapData.width] == 1) { // teminate if the target position is wall
 			return returnValue;
 		}
-		openList.push(rfdc()({current: unitTilePosition, parent: {x: -1, y: -1}, totalHeuristic: 0})); // push start node to open List
+		openList.push({current: {...unitTilePosition}, parent: {x: -1, y: -1}, totalHeuristic: 0}); // push start node to open List
 
 		// for dropping nodes that overlap with unit body at that new position
 		const unitTileWidthShift = Math.max(0, Math.floor((unit.getBounds().width + tileWidth) / 2 / tileWidth));
@@ -56,22 +56,22 @@ class AStarPathfindingComponent extends TaroEntity {
 		const averageTileShift = Math.sqrt(unitTileWidthShift * unitTileWidthShift + unitTileHeightShift * unitTileHeightShift);
 
 		while (openList.length > 0) {
-			let minNode = rfdc()(openList[0]); // initialize for iteration
+			let minNode = {...openList[0]}; // initialize for iteration
 			let minNodeIndex = 0;
 			for (let i = 1; i < openList.length; i++) {
 				if (openList[i].totalHeuristic < minNode.totalHeuristic) { // only update the minNode if the totalHeuristic is smaller
 					minNodeIndex = i;
-					minNode = rfdc()(openList[i]);
+					minNode = {...openList[i]};
 				}
 			}
 			openList.splice(minNodeIndex, 1); // remove node with smallest distance from openList and add it to close list
-			closeList.push(rfdc()(minNode));
+			closeList.push({...minNode});
 			if (minNode.current.x == targetTilePosition.x && minNode.current.y == targetTilePosition.y) { // break when the goal is found, push it to tempPath for return
-				tempPath.push(rfdc()(targetTilePosition));
+				tempPath.push({...targetTilePosition});
 				break;
 			}
 			for (let i = 0; i < 4; i++) {
-				let newPosition = rfdc()(minNode.current);
+				let newPosition = {...minNode.current};
 				switch (i) {
 					case 0: // right
 						newPosition.x += 1;
@@ -157,7 +157,7 @@ class AStarPathfindingComponent extends TaroEntity {
 								{
 									if (newPosition.x == openList[j].current.x && newPosition.y == openList[j].current.y) {
 										if (minNode.totalHeuristic + heuristic < openList[j].totalHeuristic) {
-											openList[j] = rfdc()({current: newPosition, parent: minNode.current, totalHeuristic: minNode.totalHeuristic + heuristic});
+											openList[j] = {current: {...newPosition}, parent: {...minNode.current}, totalHeuristic: minNode.totalHeuristic + heuristic};
 										}
 										nodeFound = true;
 										break;
@@ -174,7 +174,7 @@ class AStarPathfindingComponent extends TaroEntity {
 								}
 								break;
 							case 2: // finally push it to open list if it does not exist
-								openList.push(rfdc()({current: newPosition, parent: minNode.current, totalHeuristic: minNode.totalHeuristic + heuristic}));
+								openList.push({current: {...newPosition}, parent: {...minNode.current}, totalHeuristic: minNode.totalHeuristic + heuristic});
 								break;
 						}
 					} else break;
@@ -187,7 +187,7 @@ class AStarPathfindingComponent extends TaroEntity {
 			while (tempPath[tempPath.length - 1].x != unitTilePosition.x || tempPath[tempPath.length - 1].y != unitTilePosition.y) { // retrieve the path
 				for (let i = 0; i < closeList.length; i++) {
 					if (tempPath[tempPath.length - 1].x == closeList[i].current.x && tempPath[tempPath.length - 1].y == closeList[i].current.y) {
-						tempPath.push(rfdc()(closeList[i].parent)); // keep pushing the parent node of the node, until it reach the start node from goal node
+						tempPath.push({...closeList[i].parent}); // keep pushing the parent node of the node, until it reach the start node from goal node
 						break;
 					}
 				}
