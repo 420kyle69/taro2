@@ -5,15 +5,26 @@ class MapEditorUI {
 	tooltipLabelNode = null;
 	tooltipTextNode = null;
 	isHoveringOverMapButton = false;
+	layers = new Map();
 
 	constructor() {
 		taro.client.on('enterMapTab', () => {
-			console.log('enterMapTab is called');
 			this.showMapEditor();
 		});
 
 		taro.client.on('leaveMapTab', () => {
 			this.hideMapEditor();
+		});
+
+		taro.client.on('update-tooltip', ({ label, text }) => {
+			if (!this.isHoveringOverMapButton) {
+				const element = taro.client.getCachedElementById('map-buttons-tooltip');
+				if (element) {
+					element.style.display = 'flex';
+					this.tooltipLabelNode.innerText = label;
+					this.tooltipTextNode.innerText = text;
+				}
+			}
 		});
 	}
 
@@ -90,7 +101,7 @@ class MapEditorUI {
 		return titleDiv;
 	}
 
-	createLayerButton({ layer, index, layers, layerIndex }) {
+	createLayerButton({ layer, index, layerIndex }) {
 		const layerDiv = document.createElement('div');
 		layerDiv.className = 'layer-button-div visible';
 
@@ -128,8 +139,8 @@ class MapEditorUI {
 			}
 		};
 
-		const highlightLayer = () => {
-			layers.forEach(({ layerDiv: layer }) => {
+		const switchLayer = () => {
+			this.layers.forEach(({ layerDiv: layer }) => {
 				if (layer.classList.contains('active')) {
 					// const isVisible
 					layer.classList.remove('active');
@@ -151,7 +162,7 @@ class MapEditorUI {
 		};
 
 		layerText.onmousedown = () => {
-			highlightLayer();
+			switchLayer();
 			// switch layer
 			taro.client.emit('switch-layer', index);
 		};
@@ -159,7 +170,7 @@ class MapEditorUI {
 		layerDiv.appendChild(layerEyeButton);
 		layerDiv.appendChild(layerText);
 
-		return { layerDiv, highlightLayer, toggleLayerVisibility, index };
+		return { layerDiv, switchLayer, toggleLayerVisibility, index };
 	}
 
 	showMapEditor() {
@@ -333,14 +344,7 @@ class MapEditorUI {
 						tooltipText: 'decrease brush size',
 						text: '-',
 						onClick: () => {
-							this.brushSize = Math.max(this.brushSize - 1, 1);
-							const currentBrushSize = document.querySelector(
-								'.current-brush-size > .map-editor-button-text'
-							) as HTMLDivElement;
-							if (currentBrushSize) {
-								currentBrushSize.innerText = this.brushSize.toString();
-							}
-							this.taroEmit('decrease-brush-size');
+							this.decreaseBrushSize();
 						},
 					})
 				);
@@ -358,14 +362,7 @@ class MapEditorUI {
 						tooltipText: 'increase brush size',
 						text: '+',
 						onClick: () => {
-							this.brushSize = Math.min(this.brushSize + 1, 50);
-							const currentBrushSize = document.querySelector(
-								'.current-brush-size > .map-editor-button-text'
-							) as HTMLDivElement;
-							if (currentBrushSize) {
-								currentBrushSize.innerText = this.brushSize.toString();
-							}
-							this.taroEmit('increase-brush-size');
+							this.increaseBrushSize();
 						},
 					})
 				);
@@ -391,36 +388,168 @@ class MapEditorUI {
 
 				// taro.renderer.scene.scenes[0].tilemapLayers
 				if (taro.game.data.map.layers?.length) {
-					const layers = [];
 					let layerIndex = 0;
+					let lastKey = -1;
 
 					for (let i = taro.game.data.map.layers.length - 1; i >= 0; i--) {
 						const layer = taro.game.data.map.layers[i];
 						if (layer.type === 'tilelayer' && layer.data) {
 							// layersSectionDiv.appendChild(this.createLayerButton({ layer, index: i }));
-							layers.push(this.createLayerButton({ layer, index: i, layers, layerIndex }));
+							this.layers.set(i, this.createLayerButton({ layer, index: i, layerIndex }));
 							layerIndex++;
+							lastKey = i;
 						}
 					}
 
-					layers.forEach((layer) => {
+					this.layers.forEach((layer) => {
 						const { layerDiv } = layer;
 						layersSectionDiv.appendChild(layerDiv);
 					});
 
-					const lastLayer = layers.at(-1);
+					const lastLayer = this.layers.get(lastKey);
 					if (lastLayer) {
-						lastLayer.highlightLayer();
+						lastLayer.switchLayer();
 					}
 				}
 
 				mapEditorButtonsDiv.appendChild(layersSectionDiv);
 
+				const switchDiv = document.createElement('div');
+				switchDiv.className = 'map-switch-div';
+				switchDiv.style.marginTop = '8px';
+
+				switchDiv.appendChild(
+					this.createMapButton({
+						tooltipLabel: 'Palette',
+						tooltipText: 'show/hide palette',
+						text: 'palette',
+						onClick: () => taro.client.emit('palette-toggle'),
+						width: 60,
+					})
+				);
+
+				switchDiv.appendChild(
+					this.createMapButton({
+						tooltipLabel: 'Settings',
+						tooltipText: 'open map settings',
+						image: 'settings',
+						onClick: () => taro.client.emit('setting'),
+					})
+				);
+
+				mapEditorButtonsDiv.appendChild(switchDiv);
+
 				mapEditorButtonsContainer.appendChild(mapEditorButtonsDiv);
 
 				gameDiv.appendChild(mapEditorButtonsContainer);
+
+				this.addKeyBindings();
 			}
 		}
+	}
+
+	decreaseBrushSize = () => {
+		this.brushSize = Math.max(this.brushSize - 1, 1);
+		const currentBrushSize = document.querySelector('.current-brush-size > .map-editor-button-text') as HTMLDivElement;
+		if (currentBrushSize) {
+			currentBrushSize.innerText = this.brushSize.toString();
+		}
+		this.taroEmit('decrease-brush-size');
+	};
+
+	increaseBrushSize = () => {
+		this.brushSize = Math.min(this.brushSize + 1, 50);
+		const currentBrushSize = document.querySelector('.current-brush-size > .map-editor-button-text') as HTMLDivElement;
+		if (currentBrushSize) {
+			currentBrushSize.innerText = this.brushSize.toString();
+		}
+		this.taroEmit('increase-brush-size');
+	};
+
+	addKeyBindings() {
+		window.addEventListener('keydown', (event) => {
+			if (taro.developerMode.active && taro.developerMode.activeTab === 'map') {
+				if (event.key === 'Tab') {
+					const isInputModalPresent = taro.developerMode.checkIfInputModalPresent();
+					if (!isInputModalPresent) {
+						event.preventDefault();
+						this.taroEmit('palette-toggle');
+					}
+				}
+				if (event.key === '+') {
+					if (!taro.developerMode.checkIfInputModalPresent()) {
+						this.increaseBrushSize();
+					}
+				}
+				if (event.key === '-') {
+					if (!taro.developerMode.checkIfInputModalPresent()) {
+						this.decreaseBrushSize();
+					}
+				}
+				if (event.key === 'c') {
+					if (!taro.developerMode.checkIfInputModalPresent()) {
+						this.highlightToolsButton('cursor', 'cursor');
+					}
+				}
+				if (event.key === 'r') {
+					if (!taro.developerMode.checkIfInputModalPresent()) {
+						this.highlightToolsButton('region', 'draw-region');
+					}
+				}
+				if (event.key === 'b') {
+					if (!taro.developerMode.checkIfInputModalPresent()) {
+						this.highlightToolsButton('stamp', 'brush');
+					}
+				}
+				if (event.key === 'e') {
+					if (!taro.developerMode.checkIfInputModalPresent()) {
+						this.highlightToolsButton('eraser', 'empty-tile');
+					}
+				}
+				if (event.key === 'f') {
+					if (!taro.developerMode.checkIfInputModalPresent()) {
+						this.highlightToolsButton('fill', 'fill');
+					}
+				}
+				if (event.key === 'l') {
+					if (!taro.developerMode.checkIfInputModalPresent()) {
+						this.taroEmit('clear');
+					}
+				}
+				if (event.key === 's') {
+					if (!taro.developerMode.checkIfInputModalPresent()) {
+						this.taroEmit('save');
+					}
+				}
+				if (event.key === 'a') {
+					if (!taro.developerMode.checkIfInputModalPresent()) {
+						this.highlightToolsButton('entity', 'add-entities');
+					}
+				}
+				['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'].forEach((value) => {
+					if (event.key === value) {
+						if (!taro.developerMode.checkIfInputModalPresent()) {
+							const layer = this.layers.get(parseInt(value));
+							if (layer) {
+								layer.switchLayer();
+								taro.client.emit('switch-layer', parseInt(value));
+							}
+						}
+					}
+				});
+
+				if (event.key === 'z' && event.ctrlKey) {
+					if (!taro.developerMode.checkIfInputModalPresent()) {
+						this.taroEmit('undo');
+					}
+				}
+				if ((event.key === 'z' && event.ctrlKey && event.shiftKey) || (event.key === 'y' && event.ctrlKey)) {
+					if (!taro.developerMode.checkIfInputModalPresent()) {
+						this.taroEmit('redo');
+					}
+				}
+			}
+		});
 	}
 
 	taroEmit(name) {
@@ -472,13 +601,17 @@ class MapEditorUI {
 			right: 150px;
 		  	font-family: 'Rubik';
 		}
+
+		@media (min-height: 901px) {
+			.map-buttons-div {
+				transform: scale(1.25) translateY(-35px);
+			}
+		}
 		.map-buttons-div {
-			position: absolute;
-			top: 145px;
-			// right: 20px;
-			right: 150px;	
+			position: fixed;
+			bottom: calc(25vh + 50px);
+			right: 150px;
 			width: 90px;
-			height: 100%;
 		}
 		.map-buttons-title {
 			color: black;
@@ -503,7 +636,7 @@ class MapEditorUI {
 			object-fit: contain;
 		}
 	
-		.tools-button-div, .brush-size-div {
+		.tools-button-div, .brush-size-div, .map-switch-div {
 			display: flex;
 			flex-wrap: wrap;
 			gap: 2px;
@@ -560,6 +693,7 @@ class MapEditorUI {
 			font-weight: 500;
 			border-width: 0px;
 			background: inherit;
+
 		}
 
 		#map-buttons-tooltip {
@@ -575,8 +709,11 @@ class MapEditorUI {
 			width: max-content;
 			height: max-content;
 
-			background: white;
-			color: black;
+			background: rgba(30, 41, 59, 0.88);
+			color: white;
+			border: 1px solid white;
+			backdrop-filter: blur(4px);
+			border-radius: 4px;
 			padding: 15px 14px;
 		}
 
@@ -587,6 +724,7 @@ class MapEditorUI {
 
 		.tooltip-text {
 			font-size: 14px;
+			text-align: center;
 		}
 	`;
 }

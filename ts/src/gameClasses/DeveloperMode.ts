@@ -225,6 +225,23 @@ class DeveloperMode {
 		});
 	}
 
+	checkIfInputModalPresent(): boolean {
+		const customModals: any = document.querySelectorAll('.winbox, .modal, .custom-editor-modal, #chat-message-input');
+		for (const customModal of customModals) {
+			if (customModal.style.display === 'none') {
+				continue;
+			}
+			const inputs = customModal.querySelectorAll('input, select, textarea, button');
+			for (let i = 0; i < inputs.length; i++) {
+				if (inputs[i] === document.activeElement) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
 	requestInitEntities(): void {
 		if (this.initEntities) {
 			taro.network.send<any>('updateClientInitEntities', this.initEntities);

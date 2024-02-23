@@ -258,23 +258,6 @@ class DevModeTools extends Phaser.GameObjects.Container {
 			.map((widget: HTMLElement) => widget.getBoundingClientRect());
 	}
 
-	checkIfInputModalPresent(): boolean {
-		const customModals: any = document.querySelectorAll('.winbox, .modal, .custom-editor-modal, #chat-message-input');
-		for (const customModal of customModals) {
-			if (customModal.style.display === 'none') {
-				continue;
-			}
-			const inputs = customModal.querySelectorAll('input, select, textarea, button');
-			for (let i = 0; i < inputs.length; i++) {
-				if (inputs[i] === document.activeElement) {
-					return true;
-				}
-			}
-		}
-
-		return false;
-	}
-
 	isForceTo1x1(): boolean {
 		if (this.modeButtons[4].active) {
 			return true;
@@ -288,139 +271,139 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		const altKey = this.altKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ALT, true);
 		const shiftKey = this.shiftKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT, false);
 		const tabKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB, false);
-		tabKey.on('down', (key) => {
-			const isInputModalPresent = this.checkIfInputModalPresent();
-			if (!isInputModalPresent) {
-				key.originalEvent.preventDefault();
-			}
+		// tabKey.on('down', (key) => {
+		// 	const isInputModalPresent = this.checkIfInputModalPresent();
+		// 	if (!isInputModalPresent) {
+		// 		key.originalEvent.preventDefault();
+		// 	}
 
-			if (!isInputModalPresent && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
-				if (this.palette.visible) {
-					this.palette.hide();
-				} else {
-					this.palette.show();
-				}
-			}
-		});
-		const plusKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.PLUS, false);
-		plusKey.on('down', () => {
-			if (!this.checkIfInputModalPresent()) {
-                this.tileEditor.tilePalette.changeBrushSize(-1);
-			}
-		});
-		const minusKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.MINUS, false);
-		minusKey.on('down', () => {
-			if (!this.checkIfInputModalPresent()) {
-                this.tileEditor.tilePalette.changeBrushSize(1);
-			}
-		});
-		const cKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C, false);
-		cKey.on('down', () => {
-			if (!this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
-				this.cursor();
-			}
-		});
-		const rKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R, false);
-		rKey.on('down', () => {
-			if (!this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
-				this.drawRegion();
-			}
-		});
-		const bKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.B, false);
-		bKey.on('down', (key) => {
-			if (!this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
-				this.brush();
-			}
-		});
-		const eKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E, false);
-		eKey.on('down', () => {
-			if (!this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
-				this.emptyTile();
-			}
-		});
-		const fKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F, false);
-		fKey.on('down', () => {
-			if (!this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
-				this.fill();
-			}
-		});
-		const lKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.L, false);
-		lKey.on('down', () => {
-			if (!this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
-				this.clear();
-			}
-		});
-		const sKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S, false);
-		sKey.on('down', () => {
-			if (!this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
-				this.save();
-			}
-		});
-        const aKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A, false);
-		aKey.on('down', () => {
-			if (!this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
-				this.addEntities();
-			}
-		});
-		const oneKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE, false);
-		oneKey.on('down', () => {
-			if (!this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map' && !altKey.isDown) {
-				if (shiftKey.isDown) {
-					this.hideLayer(0);
-				} else {
-					this.switchLayer(0);
-				}
-			}
-		});
-		const twoKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO, false);
-		twoKey.on('down', () => {
-			if (!this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map' && !altKey.isDown) {
-				if (shiftKey.isDown) {
-					this.hideLayer(1);
-				} else {
-					this.switchLayer(1);
-				}
-			}
-		});
-		const threeKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE, false);
-		threeKey.on('down', () => {
-			if (!this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map' && !altKey.isDown) {
-				if (shiftKey.isDown) {
-					this.hideLayer(2);
-				} else {
-					this.switchLayer(2);
-				}
-			}
-		});
-		const fourKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.FOUR, false);
-		fourKey.on('down', () => {
-			if (!this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map' && !altKey.isDown) {
-				if (shiftKey.isDown) {
-					this.hideLayer(3);
-				} else {
-					this.switchLayer(3);
-				}
-			}
-		});
-		const undoKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z, false, true);
-		undoKey.on('down', (event) => {
-			if (event.ctrlKey) {
-				if (event.shiftKey) {
-					this.commandController.redo();
-				} else {
-					this.commandController.undo();
-				}
-			}
-		});
-		const redoKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Y, false, true);
-		redoKey.on('down', (event) => {
-			if (event.ctrlKey) {
-				this.commandController.redo();
-			}
-		});
+		// 	if (!isInputModalPresent && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
+		// 		if (this.palette.visible) {
+		// 			this.palette.hide();
+		// 		} else {
+		// 			this.palette.show();
+		// 		}
+		// 	}
+		// });
+		// const plusKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.PLUS, false);
+		// plusKey.on('down', () => {
+		// 	if (!this.checkIfInputModalPresent()) {
+        //         this.tileEditor.tilePalette.changeBrushSize(-1);
+		// 	}
+		// });
+		// const minusKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.MINUS, false);
+		// minusKey.on('down', () => {
+		// 	if (!this.checkIfInputModalPresent()) {
+        //         this.tileEditor.tilePalette.changeBrushSize(1);
+		// 	}
+		// });
+		// const cKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C, false);
+		// cKey.on('down', () => {
+		// 	if (!this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
+		// 		this.cursor();
+		// 	}
+		// });
+		// const rKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R, false);
+		// rKey.on('down', () => {
+		// 	if (!this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
+		// 		this.drawRegion();
+		// 	}
+		// });
+		// const bKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.B, false);
+		// bKey.on('down', (key) => {
+		// 	if (!this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
+		// 		this.brush();
+		// 	}
+		// });
+		// const eKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E, false);
+		// eKey.on('down', () => {
+		// 	if (!this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
+		// 		this.emptyTile();
+		// 	}
+		// });
+		// const fKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F, false);
+		// fKey.on('down', () => {
+		// 	if (!this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
+		// 		this.fill();
+		// 	}
+		// });
+		// const lKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.L, false);
+		// lKey.on('down', () => {
+		// 	if (!this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
+		// 		this.clear();
+		// 	}
+		// });
+		// const sKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S, false);
+		// sKey.on('down', () => {
+		// 	if (!this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
+		// 		this.save();
+		// 	}
+		// });
+        // const aKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A, false);
+		// aKey.on('down', () => {
+		// 	if (!this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
+		// 		this.addEntities();
+		// 	}
+		// });
+		// const oneKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE, false);
+		// oneKey.on('down', () => {
+		// 	if (!this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map' && !altKey.isDown) {
+		// 		if (shiftKey.isDown) {
+		// 			this.hideLayer(0);
+		// 		} else {
+		// 			this.switchLayer(0);
+		// 		}
+		// 	}
+		// });
+		// const twoKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO, false);
+		// twoKey.on('down', () => {
+		// 	if (!this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map' && !altKey.isDown) {
+		// 		if (shiftKey.isDown) {
+		// 			this.hideLayer(1);
+		// 		} else {
+		// 			this.switchLayer(1);
+		// 		}
+		// 	}
+		// });
+		// const threeKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE, false);
+		// threeKey.on('down', () => {
+		// 	if (!this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map' && !altKey.isDown) {
+		// 		if (shiftKey.isDown) {
+		// 			this.hideLayer(2);
+		// 		} else {
+		// 			this.switchLayer(2);
+		// 		}
+		// 	}
+		// });
+		// const fourKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.FOUR, false);
+		// fourKey.on('down', () => {
+		// 	if (!this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map' && !altKey.isDown) {
+		// 		if (shiftKey.isDown) {
+		// 			this.hideLayer(3);
+		// 		} else {
+		// 			this.switchLayer(3);
+		// 		}
+		// 	}
+		// });
+		// const undoKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z, false, true);
+		// undoKey.on('down', (event) => {
+		// 	if (event.ctrlKey) {
+		// 		if (event.shiftKey) {
+		// 			this.commandController.redo();
+		// 		} else {
+		// 			this.commandController.undo();
+		// 		}
+		// 	}
+		// });
+		// const redoKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Y, false, true);
+		// redoKey.on('down', (event) => {
+		// 	if (event.ctrlKey) {
+		// 		this.commandController.redo();
+		// 	}
+		// });
 
 		const deleteEntity = (event) => {
-			if (!this.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
+			if (!taro.developerMode.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
                 this.entityEditor.deleteInitEntity();
             }
 		}
