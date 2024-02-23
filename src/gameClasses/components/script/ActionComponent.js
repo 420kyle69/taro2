@@ -10,17 +10,30 @@ var ActionComponent = TaroEntity.extend({
 	},
 
 	/**
-	 *	just count the total number of actions for error report (includes the disabled action)
-	 *  e.g.
-	 * {actions: [{
-	 * 		actions: [{function: "sendChatMessage", message: "hello"}, {function: "sendChatMessage", message: "world"}]
-	 * }]}
-	 * will be counted as 3
-	 * @param {object} obj action object
-	 * @param {number} _length now counted as total length of actions
-	 * @param {*} self
-	 * @param {*} mode in if, 1: only count then, 2: only count else, 3: count then and else
-	 * @returns
+	 * Calculates the total number of actions within a nested action object, including disabled actions.
+
+	 * This function is recursive and will traverse through all nested 'actions', 'then', and 'else' fields
+
+	 * to count the total number of actions. The count includes the top-level action object itself.
+	 *
+	 * Example:
+	 * {
+	 *   actions: [{
+	 *     actions: [{function: "sendChatMessage", message: "hello"}, {function: "sendChatMessage", message: "world"}]
+	 *   }]
+	 * }
+	 * In the above example, the total count would be 3 (1 for the top-level 'actions' array and 1 for each 'sendChatMessage' action).
+	 *
+	 * @param {object} obj - The action object to count actions within.
+	 * @param {number} _length - The initial count of actions. Typically starts at 0 when called externally.
+	 * @param {*} self - Reference to the instance of the class containing this method. Used for recursive calls.
+	 * @param {number} mode - Determines which parts of the action object to count:
+	 *                    1: Only count actions within 'then' fields.
+	 *                    2: Only count actions within 'else' fields.
+	 *                    3: Count actions within both 'then' and 'else' fields.
+
+	 * @returns {number} The total count of actions within the provided action object.
+
 	 */
 	getNestedActionsLength: (obj, _length, self, mode = 3) => {
 		let length = _length;
