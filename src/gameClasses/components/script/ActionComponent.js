@@ -1695,7 +1695,7 @@ var ActionComponent = TaroEntity.extend({
 						var item = self._script.param.getValue(action.entity, vars);
 						var quantity = self._script.param.getValue(action.quantity, vars);
 						if (item && item._category == 'item') {
-							item.streamUpdateData([{ quantity: quantity }]);
+							item.updateQuantity(quantity);
 						}
 						break;
 
