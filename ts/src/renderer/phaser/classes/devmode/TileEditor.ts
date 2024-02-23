@@ -412,6 +412,11 @@ class TileEditor {
 					`X: ${Math.floor(worldPoint.x).toString()}, Y: ${Math.floor(worldPoint.y).toString()}  |  `
 					+ `Tile X: ${Math.floor(worldPoint.x / taro.scaleMapDetails.tileWidth).toString()}, Tile Y: ${Math.floor(worldPoint.y / taro.scaleMapDetails.tileHeight).toString()}`
 				);
+				taro.client.emit('update-tooltip', {
+					label: 'Position',
+					text: `X: ${Math.floor(worldPoint.x).toString()}, Y: ${Math.floor(worldPoint.y).toString()}  |  `
+					+ `Tile X: ${Math.floor(worldPoint.x / taro.scaleMapDetails.tileWidth).toString()}, Tile Y: ${Math.floor(worldPoint.y / taro.scaleMapDetails.tileHeight).toString()}`
+				});
 
 				if (marker.active) {
 					paletteMarker.graphics.setVisible(false);
@@ -435,6 +440,12 @@ class TileEditor {
 							+ `Tile X: ${Math.floor(worldPoint.x / taro.scaleMapDetails.tileWidth).toString()}, Tile Y: ${Math.floor(worldPoint.y / taro.scaleMapDetails.tileHeight).toString()}  |  `
 							+ `Tile id: ${map.getTileAt(pointerTileX, pointerTileY).index}`
 						);
+						taro.client.emit('update-tooltip', {
+							label: 'Position',
+							text: `X: ${Math.floor(worldPoint.x).toString()}, Y: ${Math.floor(worldPoint.y).toString()}  |  `
+							+ `Tile X: ${Math.floor(worldPoint.x / taro.scaleMapDetails.tileWidth).toString()}, Tile Y: ${Math.floor(worldPoint.y / taro.scaleMapDetails.tileHeight).toString()}  |  `
+							+ `Tile id: ${map.getTileAt(pointerTileX, pointerTileY).index}`
+						});
 					}
 
 					if (devModeScene.input.manager.activePointer.leftButtonDown()) {
@@ -512,6 +523,10 @@ class TileEditor {
 						'Entity Position',
 						`X: ${this.devModeTools.entityEditor.selectedEntityImage.image.x.toString()}, Y: ${this.devModeTools.entityEditor.selectedEntityImage.image.y.toString()}`
 					);
+					taro.client.emit('update-tooltip', {
+						label: 'Entity Position',
+						text: `X: ${this.devModeTools.entityEditor.selectedEntityImage.image.x.toString()}, Y: ${this.devModeTools.entityEditor.selectedEntityImage.image.y.toString()}`
+					});
 				}
 			} else {
 				this.showMarkers(false);
