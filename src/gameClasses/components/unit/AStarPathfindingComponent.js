@@ -1,17 +1,17 @@
 class AStarPathfindingComponent extends TaroEntity {
 	classId = 'AStarPathfindingComponent';
 	componentId = 'aStar';
-    constructor(unit) {
-        super();
+	constructor(unit) {
+		super();
 		this._entity = unit._entity;
 
 		// A* algorithm variables
 		this.path = []; // AI unit will keep going to highest index until there is no more node to go
 		// everytime when path generate failure, path should set to empty array (this.path = aStarResult.path automatically done for it)
 		this.previousTargetPosition = undefined;
-    }
+	}
 	/*
-    * @param x
+	* @param x
 	* @param y
 	* @return .path = {Array}, .ok = {bool}
 	* Use .path to get return array with x and y coordinates of the path (Start node exclusive) 
@@ -29,15 +29,15 @@ class AStarPathfindingComponent extends TaroEntity {
 		const mapData = taro.map.data; // cache the map data for rapid use
 		const tileWidth = taro.scaleMapDetails.tileWidth;
 
-		const unitTilePosition = {x: Math.floor(unit._translate.x / tileWidth), y: Math.floor(unit._translate.y / tileWidth)};
+		const unitTilePosition = { x: Math.floor(unit._translate.x / tileWidth), y: Math.floor(unit._translate.y / tileWidth) };
 		unitTilePosition.x = Math.clamp(unitTilePosition.x, 0, mapData.width - 1); // confine with map boundary
 		unitTilePosition.y = Math.clamp(unitTilePosition.y, 0, mapData.height - 1);
-		const targetTilePosition = {x: Math.floor(x / tileWidth), y: Math.floor(y / tileWidth)};
+		const targetTilePosition = { x: Math.floor(x / tileWidth), y: Math.floor(y / tileWidth) };
 		targetTilePosition.x = Math.clamp(targetTilePosition.x, 0, mapData.width - 1); // confine with map boundary
 		targetTilePosition.y = Math.clamp(targetTilePosition.y, 0, mapData.height - 1);
-		
+
 		if (!this.aStarIsPositionBlocked(x, y)) { // if there is no blocked, directly set the target to the end position
-			returnValue.path.push({...targetTilePosition});
+			returnValue.path.push({ ...targetTilePosition });
 			returnValue.ok = true;
 			return returnValue;
 		}
@@ -48,7 +48,7 @@ class AStarPathfindingComponent extends TaroEntity {
 		if (taro.map.tileIsWall(targetTilePosition.x, targetTilePosition.y)) { // teminate if the target position is wall
 			return returnValue;
 		}
-		openList.push({current: {...unitTilePosition}, parent: {x: -1, y: -1}, totalHeuristic: 0}); // push start node to open List
+		openList.push({ current: { ...unitTilePosition }, parent: { x: -1, y: -1 }, totalHeuristic: 0 }); // push start node to open List
 
 		// for dropping nodes that overlap with unit body at that new position
 		const unitTileWidthShift = Math.max(0, Math.floor((unit.getBounds().width + tileWidth) / 2 / tileWidth));
@@ -56,22 +56,22 @@ class AStarPathfindingComponent extends TaroEntity {
 		const averageTileShift = Math.sqrt(unitTileWidthShift * unitTileWidthShift + unitTileHeightShift * unitTileHeightShift);
 
 		while (openList.length > 0) {
-			let minNode = {...openList[0]}; // initialize for iteration
+			let minNode = { ...openList[0] }; // initialize for iteration
 			let minNodeIndex = 0;
 			for (let i = 1; i < openList.length; i++) {
 				if (openList[i].totalHeuristic < minNode.totalHeuristic) { // only update the minNode if the totalHeuristic is smaller
 					minNodeIndex = i;
-					minNode = {...openList[i]};
+					minNode = { ...openList[i] };
 				}
 			}
 			openList.splice(minNodeIndex, 1); // remove node with smallest distance from openList and add it to close list
-			closeList.push({...minNode});
+			closeList.push({ ...minNode });
 			if (minNode.current.x == targetTilePosition.x && minNode.current.y == targetTilePosition.y) { // break when the goal is found, push it to tempPath for return
-				tempPath.push({...targetTilePosition});
+				tempPath.push({ ...targetTilePosition });
 				break;
 			}
 			for (let i = 0; i < 4; i++) {
-				let newPosition = {...minNode.current};
+				let newPosition = { ...minNode.current };
 				switch (i) {
 					case 0: // right
 						newPosition.x += 1;
@@ -98,7 +98,7 @@ class AStarPathfindingComponent extends TaroEntity {
 						}
 						break;
 				}
-								
+
 				if (taro.map.tileIsWall(newPosition.x, newPosition.y)) continue;// node inside wall, discard				
 				// if new position is not goal, prune it if wall overlaps
 				let shouldPrune = false;
@@ -139,21 +139,20 @@ class AStarPathfindingComponent extends TaroEntity {
 
 				// 10 to 1 A* heuristic for node with distance that closer to the goal
 				const distToTargetFromNewPosition = Math.distance(newPosition.x, newPosition.y, targetTilePosition.x, targetTilePosition.y);
-				const distToTargetFromCurrentPosition =  Math.distance(minNode.current.x, minNode.current.y, targetTilePosition.x, targetTilePosition.y);
-				const heuristic = (distToTargetFromNewPosition < distToTargetFromCurrentPosition) 
+				const distToTargetFromCurrentPosition = Math.distance(minNode.current.x, minNode.current.y, targetTilePosition.x, targetTilePosition.y);
+				const heuristic = (distToTargetFromNewPosition < distToTargetFromCurrentPosition)
 					? 1 // euclidean distance to targetTilePosition from the newPosition is smaller than the minNodePosition, reduce the heuristic value (so it tend to choose this node)
 					: 10; // euclidean distance to targetTilePosition from the newPosition is larger than the minNodePosition, increase the heuristic value (so it tend not to choose this node)
 				let nodeFound = false; // initialize nodeFound for looping (checking the existance of a node)
-				
+
 				for (let k = 0; k < 3; k++) {
 					if (!nodeFound) { // Idea: In open list already ? Update it : In close list already ? Neglect, already reviewed : put it inside openList for evaluation 
 						switch (k) {
 							case 0: // first check if the node exist in open list (if true, update it)
-								for (let j = 0; j < openList.length; j++)
-								{
+								for (let j = 0; j < openList.length; j++) {
 									if (newPosition.x == openList[j].current.x && newPosition.y == openList[j].current.y) {
 										if (minNode.totalHeuristic + heuristic < openList[j].totalHeuristic) {
-											openList[j] = {current: {...newPosition}, parent: {...minNode.current}, totalHeuristic: minNode.totalHeuristic + heuristic};
+											openList[j] = { current: { ...newPosition }, parent: { ...minNode.current }, totalHeuristic: minNode.totalHeuristic + heuristic };
 										}
 										nodeFound = true;
 										break;
@@ -161,8 +160,7 @@ class AStarPathfindingComponent extends TaroEntity {
 								}
 								break;
 							case 1: // then check if the node exist in the close list (if true, neglect)
-								for (let j = 0; j < closeList.length; j++)
-								{
+								for (let j = 0; j < closeList.length; j++) {
 									if (newPosition.x == closeList[j].current.x && newPosition.y == closeList[j].current.y) {
 										nodeFound = true;
 										break;
@@ -170,7 +168,7 @@ class AStarPathfindingComponent extends TaroEntity {
 								}
 								break;
 							case 2: // finally push it to open list if it does not exist
-								openList.push({current: {...newPosition}, parent: {...minNode.current}, totalHeuristic: minNode.totalHeuristic + heuristic});
+								openList.push({ current: { ...newPosition }, parent: { ...minNode.current }, totalHeuristic: minNode.totalHeuristic + heuristic });
 								break;
 						}
 					} else break;
@@ -183,7 +181,7 @@ class AStarPathfindingComponent extends TaroEntity {
 			while (tempPath[tempPath.length - 1].x != unitTilePosition.x || tempPath[tempPath.length - 1].y != unitTilePosition.y) { // retrieve the path
 				for (let i = 0; i < closeList.length; i++) {
 					if (tempPath[tempPath.length - 1].x == closeList[i].current.x && tempPath[tempPath.length - 1].y == closeList[i].current.y) {
-						tempPath.push({...closeList[i].parent}); // keep pushing the parent node of the node, until it reach the start node from goal node
+						tempPath.push({ ...closeList[i].parent }); // keep pushing the parent node of the node, until it reach the start node from goal node
 						break;
 					}
 				}
@@ -194,7 +192,7 @@ class AStarPathfindingComponent extends TaroEntity {
 			return returnValue;
 		}
 	}
-	
+
 	onAStarFailedTrigger() {
 		const triggerParam = { unitId: this._entity.id() };
 		taro.script.trigger('unitAStarPathFindingFailed', triggerParam);
@@ -241,7 +239,7 @@ class AStarPathfindingComponent extends TaroEntity {
 		const targetUnit = this._entity.ai.getTargetUnit();
 		const tileWidth = taro.scaleMapDetails.tileWidth;
 		const targetMovedDistance = Math.distance(
-			targetUnit._translate.x, targetUnit._translate.y, 
+			targetUnit._translate.x, targetUnit._translate.y,
 			this.previousTargetPosition.x, this.previousTargetPosition.y
 		);
 		if (targetMovedDistance > tileWidth / 2) {
@@ -259,7 +257,7 @@ class AStarPathfindingComponent extends TaroEntity {
 			if (this.path.length > 0) {
 				const tileWidth = taro.scaleMapDetails.tileWidth;
 				this._entity.ai.setTargetPosition(
-					(this.path[this.path.length - 1].x + 0.5) * tileWidth, 
+					(this.path[this.path.length - 1].x + 0.5) * tileWidth,
 					(this.path[this.path.length - 1].y + 0.5) * tileWidth
 				);
 			}

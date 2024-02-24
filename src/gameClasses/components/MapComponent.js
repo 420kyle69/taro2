@@ -15,7 +15,7 @@ var MapComponent = TaroEntity.extend({
 			taro.addComponent(TaroTiledComponent)
 				.tiled.loadJson(data, function (layerArray, layersById) {
 
-					if(layersById.walls) taro.physics.staticsFromMap(layersById.walls);
+					if (layersById.walls) taro.physics.staticsFromMap(layersById.walls);
 
 					self.createRegions();
 				});
@@ -55,7 +55,7 @@ var MapComponent = TaroEntity.extend({
 		}
 	},
 
-	updateWallMapData: function() { // call this after in-game map tile editing
+	updateWallMapData: function () { // call this after in-game map tile editing
 		var self = this;
 
 		let wallLayer = self.data.layers?.find(layerObject => {
@@ -66,7 +66,7 @@ var MapComponent = TaroEntity.extend({
 		this.wallMap?.map(value => value != 0);
 	},
 
-	tileIsWall: function(x, y) {
+	tileIsWall: function (x, y) {
 		return this.wallMap[y * this.data.width + x];
 	},
 

@@ -19,7 +19,7 @@ var AIComponent = TaroEntity.extend({
 
 			if (unit._stats.ai.sensorRadius > 0 && unit.sensor == undefined) {
 				unit.sensor = new Sensor(unit, unit._stats.ai.sensorRadius);
-		   	}
+			}
 
 			unit._stats.aiEnabled = unit._stats.ai.enabled;
 			if (unit._stats.aiEnabled) {
@@ -28,12 +28,12 @@ var AIComponent = TaroEntity.extend({
 		}
 	},
 
-	enable: function() {
+	enable: function () {
 		var self = this;
 		var unit = self._entity;
 		unit._stats.aiEnabled = true;
 		if (taro.isServer) {
-			unit.streamUpdateData([{aiEnabled: true }]);
+			unit.streamUpdateData([{ aiEnabled: true }]);
 		}
 
 		self.pathFindingMethod = unit._stats.ai.pathFindingMethod; // options: simple/a*
@@ -52,12 +52,12 @@ var AIComponent = TaroEntity.extend({
 		// }
 	},
 
-	disable: function() {
+	disable: function () {
 		var unit = this._entity;
 		unit._stats.aiEnabled = false;
 
 		if (taro.isServer) {
-			unit.streamUpdateData([{aiEnabled: false }]);
+			unit.streamUpdateData([{ aiEnabled: false }]);
 		}
 
 		if (unit.sensor) {
@@ -231,7 +231,7 @@ var AIComponent = TaroEntity.extend({
 				break;
 			case 'a*':
 				this.aStar.setTargetPosition(
-					this._entity._translate.x - (unit._translate.x - this._entity._translate.x), 
+					this._entity._translate.x - (unit._translate.x - this._entity._translate.x),
 					this._entity._translate.y - (unit._translate.y - this._entity._translate.y)
 				);
 				break;
@@ -322,7 +322,7 @@ var AIComponent = TaroEntity.extend({
 			return;
 
 		const tileWidth = taro.scaleMapDetails.tileWidth; // both pathfinding method need it to check
-		
+
 		var targetUnit = this.getTargetUnit();
 
 		// update unit's direction toward its target
@@ -362,10 +362,10 @@ var AIComponent = TaroEntity.extend({
 						if (this.aStar.path.length > 0) { // Move to the highest index of path saved (closest node to start node)
 							if (!this.aStar.aStarPathIsBlocked()) { // only keep going if the path is still non blocked
 								this.setTargetPosition(
-									(this.aStar.path[this.aStar.path.length - 1].x + 0.5) * tileWidth, 
+									(this.aStar.path[this.aStar.path.length - 1].x + 0.5) * tileWidth,
 									(this.aStar.path[this.aStar.path.length - 1].y + 0.5) * tileWidth
 								);
-							} else { 
+							} else {
 								this.aStar.setTargetPosition(this.aStar.path[0].x, this.aStar.path[0].y); // recalculate whole path once the next move is blocked
 							}
 						} else {
@@ -381,7 +381,7 @@ var AIComponent = TaroEntity.extend({
 					if (!isNaN(parseInt(self.maxTravelDistance)) && distanceTravelled > self.maxTravelDistance) {
 						// we've chased far enough. stop fighting and return to where i was before
 						self.moveToTargetPosition(self.previousPosition.x, self.previousPosition.y);
-					} else if (!isNaN(parseInt(self.letGoDistance)) && this.getDistanceToTarget() > self.letGoDistance) { 
+					} else if (!isNaN(parseInt(self.letGoDistance)) && this.getDistanceToTarget() > self.letGoDistance) {
 						// if the target is far away from the unit, stop the chase
 						self.goIdle();
 					} else {
@@ -407,16 +407,16 @@ var AIComponent = TaroEntity.extend({
 								if (this.getDistanceToClosestAStarNode() < tileWidth / 2) { // reduced chances of shaky move
 									this.aStar.path.pop(); // after moved to the closest A* node, pop the array and let ai move to next A* node
 								}
-								if (this.aStar.path.length > 0 && !this.aStar.aStarPathIsBlocked() && !this.aStar.aStarTargetUnitMoved()) { 
+								if (this.aStar.path.length > 0 && !this.aStar.aStarPathIsBlocked() && !this.aStar.aStarTargetUnitMoved()) {
 									// Move to the highest index of path saved (closest node to start node) 
 									// only keep follow the old path if the path is still non blocked AND targetUnit is not closer than end node of the path
 									this.setTargetPosition(
-										(this.aStar.path[this.aStar.path.length - 1].x + 0.5) * tileWidth, 
+										(this.aStar.path[this.aStar.path.length - 1].x + 0.5) * tileWidth,
 										(this.aStar.path[this.aStar.path.length - 1].y + 0.5) * tileWidth
 									);
-								} else { 
+								} else {
 									// recalculate whole path
-									this.aStar.setTargetPosition(targetUnit._translate.x, targetUnit._translate.y); 
+									this.aStar.setTargetPosition(targetUnit._translate.x, targetUnit._translate.y);
 								}
 							}
 						}
@@ -436,7 +436,7 @@ var AIComponent = TaroEntity.extend({
 				if (unit.angleToTarget && this.pathFindingMethod == "simple") unit.angleToTarget += Math.PI;
 				if (targetUnit) {
 					var distanceTravelled = Math.distance(
-						self.previousPosition.x, self.previousPosition.y, 
+						self.previousPosition.x, self.previousPosition.y,
 						targetUnit._translate.x, targetUnit._translate.y
 					);
 					if (this.pathFindingMethod == "a*") {
@@ -445,14 +445,14 @@ var AIComponent = TaroEntity.extend({
 						}
 						if (this.aStar.path.length > 0 && !this.aStar.aStarPathIsBlocked() && !this.aStar.aStarTargetUnitMoved()) { // Move to the highest index of path saved (closest node to start node)
 							this.setTargetPosition( // only keep going if the path is still non blocked
-								(this.aStar.path[this.aStar.path.length - 1].x + 0.5) * tileWidth, 
+								(this.aStar.path[this.aStar.path.length - 1].x + 0.5) * tileWidth,
 								(this.aStar.path[this.aStar.path.length - 1].y + 0.5) * tileWidth
 							);
 						} else {
 							this.aStar.setTargetPosition(
-								this._entity._translate.x - (targetUnit._translate.x - this._entity._translate.x), 
+								this._entity._translate.x - (targetUnit._translate.x - this._entity._translate.x),
 								this._entity._translate.y - (targetUnit._translate.y - this._entity._translate.y)
-							); 
+							);
 						}
 					}
 					// we've ran far enough OR we've been running for long enough (5-10s) let's stop running
