@@ -8,6 +8,7 @@ class AStarPathfindingComponent extends TaroEntity {
 		// A* algorithm variables
 		this.path = []; // AI unit will keep going to highest index until there is no more node to go
 		// everytime when path generate failure, path should set to empty array (this.path = aStarResult.path automatically done for it)
+		this.previousTargetPosition = undefined;
     }
 	/*
     * @param x
@@ -22,8 +23,6 @@ class AStarPathfindingComponent extends TaroEntity {
 	* if there is no wall between the start position and the end position, it will return the end position in .path, and return tru in .ok
 	*/
 	getAStarPath(x, y) {
-		let uniqueId = Math.random();
-		console.time(`Time For Get A* Path ${this._entity._stats.cellSheet.url} ${uniqueId}`);
 		let returnValue = { path: [], ok: false };
 		let unit = this._entity;
 
@@ -179,7 +178,6 @@ class AStarPathfindingComponent extends TaroEntity {
 			}
 		}
 		if (tempPath.length == 0) { // goal is unreachable
-			console.timeEnd(`Time For Get A* Path ${this._entity._stats.cellSheet.url} ${uniqueId}`);
 			return returnValue;
 		} else {
 			while (tempPath[tempPath.length - 1].x != unitTilePosition.x || tempPath[tempPath.length - 1].y != unitTilePosition.y) { // retrieve the path
@@ -193,8 +191,6 @@ class AStarPathfindingComponent extends TaroEntity {
 			tempPath.pop(); // omit start tile, no need to step on it again as we are on it already
 			returnValue.path = tempPath;
 			returnValue.ok = true;
-			console.timeEnd(`Time For Get A* Path ${this._entity._stats.cellSheet.url} ${uniqueId}`);
-			console.log(closeList.length);
 			return returnValue;
 		}
 	}
@@ -241,18 +237,19 @@ class AStarPathfindingComponent extends TaroEntity {
 		return result;
 	}
 
-	aStarTargetIsCloser(unit, targetUnit) {
+	aStarTargetUnitMoved() {
+		const targetUnit = this._entity.ai.getTargetUnit();
 		const tileWidth = taro.scaleMapDetails.tileWidth;
-		const distanceToTarget = Math.distance(
+		const targetMovedDistance = Math.distance(
 			targetUnit._translate.x, targetUnit._translate.y, 
-			unit._translate.x, unit._translate.y
+			this.previousTargetPosition.x, this.previousTargetPosition.y
 		);
-		const distanceToEndPath = Math.distance(
-			(this.path[0].x + 0.5) * tileWidth, (this.path[0].y + 0.5) * tileWidth,
-			unit._translate.x, unit._translate.y
-		);
-
-		return distanceToTarget < distanceToEndPath;
+		if (targetMovedDistance > tileWidth / 2) {
+			// update previous target position after unit is treated as moved
+			this.previousTargetPosition = { x: targetUnit._translate.x, y: targetUnit._translate.y };
+			return true;
+		}
+		return false;
 	}
 
 	setTargetPosition(x, y) {
@@ -267,6 +264,7 @@ class AStarPathfindingComponent extends TaroEntity {
 				);
 			}
 		} else {
+			this._entity.ai.setTargetPosition(x, y);
 			this.onAStarFailedTrigger();
 		}
 		return aStarResult.ok;
