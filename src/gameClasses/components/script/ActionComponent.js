@@ -1230,6 +1230,29 @@ var ActionComponent = TaroEntity.extend({
 						}
 						break;
 
+					case 'forAllElementsInObject':
+						if (action.object) {
+							if (!vars) {
+								vars = {};
+							}
+							var object = self._script.param.getValue(action.object, vars) || {};
+							for (var key in object) {
+								let previousAcionBlockIdx = self._script.currentActionLineNumber;
+								var brk = self.run(action.actions, Object.assign(vars, { selectedElement: object[key] }), actionPath, self._script.currentActionLineNumber);
+								self._script.currentActionLineNumber = previousAcionBlockIdx + self.getNestedActionsLength(action.actions, 0, self);
+
+								if (brk == 'break' || vars.break) {
+									vars.break = false;
+									break;
+								} else if (brk == 'continue') {
+									continue;
+								} else if (brk == 'return') {
+									return 'return';
+								}
+							}
+						}
+						break;
+
 					case 'while':
 						var loopCounter = 0;
 
@@ -1672,7 +1695,7 @@ var ActionComponent = TaroEntity.extend({
 						var item = self._script.param.getValue(action.entity, vars);
 						var quantity = self._script.param.getValue(action.quantity, vars);
 						if (item && item._category == 'item') {
-							item.streamUpdateData([{ quantity: quantity }]);
+							item.updateQuantity(quantity);
 						}
 						break;
 
