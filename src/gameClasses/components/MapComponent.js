@@ -62,13 +62,20 @@ var MapComponent = TaroEntity.extend({
 			return layerObject.name === 'walls';
 		});
 
-		self.wallMap = rfdc()(wallLayer?.data); // cache a copy of wall layer's data
-
-		for (let i = 0; i < self.wallMap?.length; i++) { // convert all non zero number to 1 (the index does not matter as long as it is not 0)
-			if (self.wallMap[i] != 0) {
-				self.wallMap[i] = 1;
+		this.wallMap1d = rfdc()(wallLayer?.data); // cache a copy of wall layer's data
+		this.wallMap2d = [];
+		if (this.wallMap1d) {
+			for (let j = 0; j < this.wallMap1d.length / this.data.width; j++) {
+				this.wallMap2d[j] = [];
+				for (let i = 0; i < this.data.width; i++) {
+					this.wallMap2d[j][i] = (this.wallMap1d[j * this.data.width + i] != 0); // convert all non zero number to 1 (the index does not matter as long as it is not 0)
+				}
 			}
 		}
+	},
+
+	tileIsWall: function(x, y) {
+		return this.wallMap1d[y * this.data.width + x];
 	},
 
 	getDimensions: function () {

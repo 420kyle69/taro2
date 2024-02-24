@@ -251,7 +251,7 @@ var AIComponent = TaroEntity.extend({
 			this.previousPosition = { x: this._entity._translate.x, y: this._entity._translate.y };
 		}
 		if (this.pathFindingMethod == 'a*') {
-			let aStarResult = this.aStar.getAStarPath(unit._translate.x, unit._translate.y);
+			const aStarResult = this.aStar.getAStarPath(unit._translate.x, unit._translate.y);
 			this.aStar.path = aStarResult.path;
 			if (aStarResult.ok) {
 				if (this.aStar.path.length > 0) {
@@ -279,7 +279,7 @@ var AIComponent = TaroEntity.extend({
 				this.setTargetPosition(x, y);
 				break;
 			case 'a*':
-				let aStarResult = this.aStar.getAStarPath(x, y);
+				const aStarResult = this.aStar.getAStarPath(x, y);
 				this.aStar.path = aStarResult.path;
 				if (aStarResult.ok) {
 					if (this.aStar.path.length > 0) {
@@ -383,7 +383,7 @@ var AIComponent = TaroEntity.extend({
 							if (!this.aStar.aStarPathIsBlocked()) { // only keep going if the path is still non blocked
 								this.setTargetPosition(this.aStar.path[this.aStar.path.length - 1].x * tileWidth + tileWidth / 2, this.aStar.path[this.aStar.path.length - 1].y * tileWidth + tileWidth / 2);
 							} else { 
-								let aStarResult = this.aStar.getAStarPath(this.aStar.path[0].x, this.aStar.path[0].y); // recalculate whole path once the next move is blocked
+								const aStarResult = this.aStar.getAStarPath(this.aStar.path[0].x, this.aStar.path[0].y); // recalculate whole path once the next move is blocked
 								this.aStar.path = aStarResult.path;
 								if (aStarResult.ok) {
 									if (this.aStar.path.length > 0) {
@@ -424,7 +424,7 @@ var AIComponent = TaroEntity.extend({
 							unit.ability.stopUsingItem();
 							unit.startMoving();
 							if (this.pathFindingMethod == 'a*') {
-								let aStarResult = this.aStar.getAStarPath(targetUnit._translate.x, targetUnit._translate.y); // recalculate the moving path to chase
+								const aStarResult = this.aStar.getAStarPath(targetUnit._translate.x, targetUnit._translate.y); // recalculate the moving path to chase
 								this.aStar.path = aStarResult.path;
 								if (aStarResult.ok) {
 									if (this.aStar.path.length > 0) {
@@ -441,7 +441,7 @@ var AIComponent = TaroEntity.extend({
 						} else {
 							if (this.pathFindingMethod == 'a*') {
 								if (this.aStar.path.length == 0) { // A* path is updated once in attackUnit
-									let aStarResult = this.aStar.getAStarPath(targetUnit._translate.x, targetUnit._translate.y);
+									const aStarResult = this.aStar.getAStarPath(targetUnit._translate.x, targetUnit._translate.y);
 									this.aStar.path = aStarResult.path; // try to create a new path if the path is empty (Arrived / old path outdated)
 									if (!aStarResult.ok) {
 										self.moveToTargetPosition(self.previousPosition.x, self.previousPosition.y);
@@ -456,7 +456,7 @@ var AIComponent = TaroEntity.extend({
 									if (!this.aStar.aStarPathIsBlocked() && !this.aStar.aStarTargetIsCloser(unit, targetUnit)) { // keep going if the path is still non blocked OR target is actually closer than end node
 										this.setTargetPosition(this.aStar.path[this.aStar.path.length - 1].x * tileWidth + tileWidth / 2, this.aStar.path[this.aStar.path.length - 1].y * tileWidth + tileWidth / 2);
 									} else { 
-										let aStarResult = this.aStar.getAStarPath(targetUnit._translate.x, targetUnit._translate.y); // recalculate whole path once the next move is blocked
+										const aStarResult = this.aStar.getAStarPath(targetUnit._translate.x, targetUnit._translate.y); // recalculate whole path once the next move is blocked
 										this.aStar.path = aStarResult.path;
 										if (aStarResult.ok) {
 											if (this.aStar.path.length > 0) {
