@@ -194,6 +194,7 @@ class AStarPathfindingComponent extends TaroEntity {
 			returnValue.path = tempPath;
 			returnValue.ok = true;
 			console.timeEnd(`Time For Get A* Path ${this._entity._stats.cellSheet.url} ${uniqueId}`);
+			console.log(closeList.length);
 			return returnValue;
 		}
 	}
@@ -247,11 +248,28 @@ class AStarPathfindingComponent extends TaroEntity {
 			unit._translate.x, unit._translate.y
 		);
 		const distanceToEndPath = Math.distance(
-			this.path[0].x * tileWidth + tileWidth / 2, this.path[0].y * tileWidth + tileWidth / 2,
+			(this.path[0].x + 0.5) * tileWidth, (this.path[0].y + 0.5) * tileWidth,
 			unit._translate.x, unit._translate.y
 		);
 
 		return distanceToTarget < distanceToEndPath;
+	}
+
+	setTargetPosition(x, y) {
+		const aStarResult = this.getAStarPath(x, y);
+		this.path = aStarResult.path;
+		if (aStarResult.ok) {
+			if (this.path.length > 0) {
+				const tileWidth = taro.scaleMapDetails.tileWidth;
+				this._entity.ai.setTargetPosition(
+					(this.path[this.path.length - 1].x + 0.5) * tileWidth, 
+					(this.path[this.path.length - 1].y + 0.5) * tileWidth
+				);
+			}
+		} else {
+			this.onAStarFailedTrigger();
+		}
+		return aStarResult.ok;
 	}
 }
 
