@@ -63,7 +63,7 @@ var MapComponent = TaroEntity.extend({
 		});
 
 		this.wallMap = rfdc()(wallLayer?.data); // cache a copy of wall layer's data
-		this.wallMap?.map(value => value != 0);
+		this.wallMap = this.wallMap?.map(value => value != 0);
 	},
 
 	tileIsWall: function (x, y) {
