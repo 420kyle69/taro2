@@ -14,19 +14,20 @@ class AStarPathfindingComponent extends TaroEntity {
 	* @param x
 	* @param y
 	* @return .path = {Array}, .ok = {bool}
-	* Use .path to get return array with x and y coordinates of the path (Start node exclusive) 
+	* Use .path to get return array with tiled x and y coordinates of the path (Start node exclusive) 
+	* if target position is not reachable (no road to go / inside wall) path will include tiled x and y passed only
 	* if the unit already at the target location, .path return empty array
 	* 
 	* Use .ok to check if path correctly generated 
 	* .ok return true if .path is found or the unit already at the target location
 	* .ok return false if the target location is inside a wall, not reachable
-	* if there is no wall between the start position and the end position, it will return the end position in .path, and return tru in .ok
+	* if there is no wall between the start position and the end position, it will return the end position in .path, and return true in .ok
 	*/
 	getAStarPath(x, y) {
-		let returnValue = { path: [], ok: false };
-		let unit = this._entity;
+		const unit = this._entity;
 
-		const mapData = taro.map.data; // cache the map data for rapid use
+		const map = taro.map; // cache the map data for rapid use
+		const mapData = map.data;
 		const tileWidth = taro.scaleMapDetails.tileWidth;
 
 		const unitTilePosition = { x: Math.floor(unit._translate.x / tileWidth), y: Math.floor(unit._translate.y / tileWidth) };
@@ -35,19 +36,21 @@ class AStarPathfindingComponent extends TaroEntity {
 		const targetTilePosition = { x: Math.floor(x / tileWidth), y: Math.floor(y / tileWidth) };
 		targetTilePosition.x = Math.clamp(targetTilePosition.x, 0, mapData.width - 1); // confine with map boundary
 		targetTilePosition.y = Math.clamp(targetTilePosition.y, 0, mapData.height - 1);
+		
+		let returnValue = { path: [{ ...targetTilePosition }], ok: false };
 
 		if (!this.aStarIsPositionBlocked(x, y)) { // if there is no blocked, directly set the target to the end position
-			returnValue.path.push({ ...targetTilePosition });
 			returnValue.ok = true;
+			return returnValue;
+		}
+
+		if (map.tileIsWall(targetTilePosition.x, targetTilePosition.y)) { // teminate if the target position is wall
 			return returnValue;
 		}
 
 		let openList = []; // store grid nodes that is under evaluation
 		let closeList = []; // store grid nodes that finished evaluation
 		let tempPath = []; // store path to return (smaller index: closer to target, larger index: closer to start)
-		if (taro.map.tileIsWall(targetTilePosition.x, targetTilePosition.y)) { // teminate if the target position is wall
-			return returnValue;
-		}
 		openList.push({ current: { ...unitTilePosition }, parent: { x: -1, y: -1 }, totalHeuristic: 0 }); // push start node to open List
 
 		// for dropping nodes that overlap with unit body at that new position
@@ -99,26 +102,26 @@ class AStarPathfindingComponent extends TaroEntity {
 						break;
 				}
 
-				if (taro.map.tileIsWall(newPosition.x, newPosition.y)) continue;// node inside wall, discard				
+				if (map.tileIsWall(newPosition.x, newPosition.y)) continue;// node inside wall, discard				
 				// if new position is not goal, prune it if wall overlaps
 				let shouldPrune = false;
 				for (let i = 1; i <= averageTileShift; i++) {
 					// check 8 direction of average tile shift to see will unit overlap with wall at that node					
 					let cornersHaveWallCurrent = (
-						taro.map.tileIsWall(minNode.current.x + i, minNode.current.y) || taro.map.tileIsWall(minNode.current.x - i, minNode.current.y) ||
-						taro.map.tileIsWall(minNode.current.x, minNode.current.y + i) || taro.map.tileIsWall(minNode.current.x, minNode.current.y - i)
+						map.tileIsWall(minNode.current.x + i, minNode.current.y) || map.tileIsWall(minNode.current.x - i, minNode.current.y) ||
+						map.tileIsWall(minNode.current.x, minNode.current.y + i) || map.tileIsWall(minNode.current.x, minNode.current.y - i)
 					);
 					let sidesHaveWallCurrent = (
-						taro.map.tileIsWall(minNode.current.x + i, minNode.current.y + i) || taro.map.tileIsWall(minNode.current.x - i, minNode.current.y - i) ||
-						taro.map.tileIsWall(minNode.current.x - i, minNode.current.y + i) || taro.map.tileIsWall(minNode.current.x + i, minNode.current.y - i)
+						map.tileIsWall(minNode.current.x + i, minNode.current.y + i) || map.tileIsWall(minNode.current.x - i, minNode.current.y - i) ||
+						map.tileIsWall(minNode.current.x - i, minNode.current.y + i) || map.tileIsWall(minNode.current.x + i, minNode.current.y - i)
 					);
 					let cornersHaveWallNew = (
-						taro.map.tileIsWall(newPosition.x + i, newPosition.y) || taro.map.tileIsWall(newPosition.x - i, newPosition.y) ||
-						taro.map.tileIsWall(newPosition.x, newPosition.y + i) || taro.map.tileIsWall(newPosition.x, newPosition.y - i)
+						map.tileIsWall(newPosition.x + i, newPosition.y) || map.tileIsWall(newPosition.x - i, newPosition.y) ||
+						map.tileIsWall(newPosition.x, newPosition.y + i) || map.tileIsWall(newPosition.x, newPosition.y - i)
 					);
 					let sidesHaveWallNew = (
-						taro.map.tileIsWall(newPosition.x + i, newPosition.y + i) || taro.map.tileIsWall(newPosition.x - i, newPosition.y - i) ||
-						taro.map.tileIsWall(newPosition.x - i, newPosition.y + i) || taro.map.tileIsWall(newPosition.x + i, newPosition.y - i)
+						map.tileIsWall(newPosition.x + i, newPosition.y + i) || map.tileIsWall(newPosition.x - i, newPosition.y - i) ||
+						map.tileIsWall(newPosition.x - i, newPosition.y + i) || map.tileIsWall(newPosition.x + i, newPosition.y - i)
 					);
 
 					// Idea: avoid hitting outer corners of wall(dodge by going outer), and allow unit to walk next to walls
@@ -129,7 +132,7 @@ class AStarPathfindingComponent extends TaroEntity {
 
 				if (!isNaN(parseInt(this.maxTravelDistance))) {
 					// new Position is way too far from current position (> maxTravelDistance * 5 of unit, total diameter: 10 maxTravelDistance), hence A Star skip this possible node
-					let distanceFromUnitToTarget = Math.sqrt((unit._translate.x - newPosition.x) * (unit._translate.x - newPosition.x) + (unit._translate.y - newPosition.y) * (unit._translate.y - newPosition.y));
+					let distanceFromUnitToTarget = Math.distance(unit._translate.x, unit._translate.y, newPosition.x, newPosition.y);
 					if (distanceFromUnitToTarget > this.maxTravelDistance * 5) {
 						continue;
 					}
@@ -223,16 +226,31 @@ class AStarPathfindingComponent extends TaroEntity {
 	}
 
 	aStarPathIsBlocked() {
-		let result = false;
-
 		for (let i = 0; i < this.path.length; i++) {
 			if (taro.map.tileIsWall(this.path[i].x, this.path[i].y)) {
-				result = true;
-				break;
+				return true;
 			}
 		}
 
-		return result;
+		return false;
+	}
+
+	getClosestAStarNode() {
+		return this.path[this.path.length - 1];
+	}
+
+	getDistanceToClosestAStarNode() {
+		let distance = 0;
+		const tileWidth = taro.scaleMapDetails.tileWidth;
+		const unit = this._entity;
+		const closestNode = this.getClosestAStarNode();
+		if (closestNode) { // closestAStarNode exist
+			distance = Math.distance(
+				(closestNode.x + 0.5) * tileWidth, (closestNode.y + 0.5) * tileWidth,
+				unit._translate.x, unit._translate.y
+			);
+		}
+		return distance;
 	}
 
 	aStarTargetUnitMoved() {
@@ -253,19 +271,17 @@ class AStarPathfindingComponent extends TaroEntity {
 	setTargetPosition(x, y) {
 		const aStarResult = this.getAStarPath(x, y);
 		this.path = aStarResult.path;
-		if (aStarResult.ok) {
-			if (this.path.length > 0) {
-				const tileWidth = taro.scaleMapDetails.tileWidth;
-				this._entity.ai.setTargetPosition(
-					(this.path[this.path.length - 1].x + 0.5) * tileWidth,
-					(this.path[this.path.length - 1].y + 0.5) * tileWidth
-				);
-			}
-		} else {
-			this._entity.ai.setTargetPosition(x, y);
+		const closestNode = this.getClosestAStarNode();
+		if (closestNode) { // assign target position to ai no matter aStar failed or not as long as something inside path
+			const tileWidth = taro.scaleMapDetails.tileWidth;
+			this._entity.ai.setTargetPosition(
+				(closestNode.x + 0.5) * tileWidth,
+				(closestNode.y + 0.5) * tileWidth
+			);
+		}
+		if (!aStarResult.ok) {
 			this.onAStarFailedTrigger();
 		}
-		return aStarResult.ok;
 	}
 }
 

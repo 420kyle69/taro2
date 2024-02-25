@@ -170,19 +170,6 @@ var AIComponent = TaroEntity.extend({
 		return distance;
 	},
 
-	getDistanceToClosestAStarNode: function () {
-		let distance = 0;
-		const tileWidth = taro.scaleMapDetails.tileWidth;
-		let unit = this._entity;
-		if (this.aStar.path.length > 0) { // closestAStarNode exist
-			distance = Math.distance(
-				(this.aStar.path[this.aStar.path.length - 1].x + 0.5) * tileWidth, (this.aStar.path[this.aStar.path.length - 1].y + 0.5) * tileWidth,
-				unit._translate.x, unit._translate.y
-			);
-		}
-		return distance;
-	},
-
 	// return distance with consideration of both units body radius
 	getDistanceToUnit: function (targetUnit) {
 		var myUnit = this._entity;
@@ -337,7 +324,7 @@ var AIComponent = TaroEntity.extend({
 				// wandering unit will repeat between moving to a random position every 2~4 seconds, then stop for 2~4 seconds
 				if (self.idleBehaviour == 'wander' && taro._currentTime > self.nextMoveAt) {
 					// assign a random destination within 25px radius
-					if (unit.isMoving == false) {
+					if (!unit.isMoving) {
 						unit.angleToTarget = Math.random() * Math.PI * 2;
 						unit.startMoving();
 						self.nextMoveAt = taro._currentTime + 1500 + Math.floor(Math.random() * 1500);
@@ -356,17 +343,21 @@ var AIComponent = TaroEntity.extend({
 						}
 						break;
 					case 'a*':
-						if (this.getDistanceToClosestAStarNode() < tileWidth / 2) { // reduced chances of shaky move
+						if (this.aStar.getDistanceToClosestAStarNode() < tileWidth / 2) { // reduced chances of shaky move
 							this.aStar.path.pop(); // after moved to the closest A* node, pop the array and let ai move to next A* node
 						}
-						if (this.aStar.path.length > 0) { // Move to the highest index of path saved (closest node to start node)
+						const closestNode = this.aStar.getClosestAStarNode();
+						if (closestNode) { // Move to the highest index of path saved (closest node to start node)
 							if (!this.aStar.aStarPathIsBlocked()) { // only keep going if the path is still non blocked
 								this.setTargetPosition(
-									(this.aStar.path[this.aStar.path.length - 1].x + 0.5) * tileWidth,
-									(this.aStar.path[this.aStar.path.length - 1].y + 0.5) * tileWidth
+									(closestNode.x + 0.5) * tileWidth,
+									(closestNode.y + 0.5) * tileWidth
 								);
 							} else {
-								this.aStar.setTargetPosition(this.aStar.path[0].x, this.aStar.path[0].y); // recalculate whole path once the next move is blocked
+								this.aStar.setTargetPosition( // recalculate whole path once the next move is blocked
+									(this.aStar.path[0].x + 0.5) * tileWidth, 
+									(this.aStar.path[0].y + 0.5) * tileWidth
+								);
 							}
 						} else {
 							self.goIdle();
@@ -404,15 +395,16 @@ var AIComponent = TaroEntity.extend({
 							}
 						} else {
 							if (this.pathFindingMethod == 'a*') {
-								if (this.getDistanceToClosestAStarNode() < tileWidth / 2) { // reduced chances of shaky move
+								if (this.aStar.getDistanceToClosestAStarNode() < tileWidth / 2) { // reduced chances of shaky move
 									this.aStar.path.pop(); // after moved to the closest A* node, pop the array and let ai move to next A* node
 								}
-								if (this.aStar.path.length > 0 && !this.aStar.aStarPathIsBlocked() && !this.aStar.aStarTargetUnitMoved()) {
+								const closestNode = this.aStar.getClosestAStarNode();
+								if (closestNode && !this.aStar.aStarPathIsBlocked() && !this.aStar.aStarTargetUnitMoved()) {
 									// Move to the highest index of path saved (closest node to start node) 
 									// only keep follow the old path if the path is still non blocked AND targetUnit is not closer than end node of the path
 									this.setTargetPosition(
-										(this.aStar.path[this.aStar.path.length - 1].x + 0.5) * tileWidth,
-										(this.aStar.path[this.aStar.path.length - 1].y + 0.5) * tileWidth
+										(closestNode.x + 0.5) * tileWidth,
+										(closestNode.y + 0.5) * tileWidth
 									);
 								} else {
 									// recalculate whole path
@@ -440,16 +432,17 @@ var AIComponent = TaroEntity.extend({
 						targetUnit._translate.x, targetUnit._translate.y
 					);
 					if (this.pathFindingMethod == "a*") {
-						if (this.getDistanceToClosestAStarNode() < tileWidth / 2) { // reduced chances of shaky move
+						if (this.aStar.getDistanceToClosestAStarNode() < tileWidth / 2) { // reduced chances of shaky move
 							this.aStar.path.pop(); // after moved to the closest A* node, pop the array and let ai move to next A* node
 						}
-						if (this.aStar.path.length > 0 && !this.aStar.aStarPathIsBlocked() && !this.aStar.aStarTargetUnitMoved()) { // Move to the highest index of path saved (closest node to start node)
+						const closestNode = this.aStar.getClosestAStarNode();
+						if (closestNode && !this.aStar.aStarPathIsBlocked() && !this.aStar.aStarTargetUnitMoved()) { // Move to the highest index of path saved (closest node to start node)
 							this.setTargetPosition( // only keep going if the path is still non blocked
-								(this.aStar.path[this.aStar.path.length - 1].x + 0.5) * tileWidth,
-								(this.aStar.path[this.aStar.path.length - 1].y + 0.5) * tileWidth
+								(closestNode.x + 0.5) * tileWidth,
+								(closestNode.y + 0.5) * tileWidth
 							);
 						} else {
-							this.aStar.setTargetPosition(
+							this.aStar.setTargetPosition( // recalculate flee path
 								this._entity._translate.x - (targetUnit._translate.x - this._entity._translate.x),
 								this._entity._translate.y - (targetUnit._translate.y - this._entity._translate.y)
 							);
