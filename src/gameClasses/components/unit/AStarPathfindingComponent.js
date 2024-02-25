@@ -36,7 +36,7 @@ class AStarPathfindingComponent extends TaroEntity {
 		const targetTilePosition = { x: Math.floor(x / tileWidth), y: Math.floor(y / tileWidth) };
 		targetTilePosition.x = Math.clamp(targetTilePosition.x, 0, mapData.width - 1); // confine with map boundary
 		targetTilePosition.y = Math.clamp(targetTilePosition.y, 0, mapData.height - 1);
-		
+
 		let returnValue = { path: [{ ...targetTilePosition }], ok: false };
 
 		if (!this.aStarIsPositionBlocked(x, y)) { // if there is no blocked, directly set the target to the end position

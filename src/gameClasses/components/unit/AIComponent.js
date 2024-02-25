@@ -355,7 +355,7 @@ var AIComponent = TaroEntity.extend({
 								);
 							} else {
 								this.aStar.setTargetPosition( // recalculate whole path once the next move is blocked
-									(this.aStar.path[0].x + 0.5) * tileWidth, 
+									(this.aStar.path[0].x + 0.5) * tileWidth,
 									(this.aStar.path[0].y + 0.5) * tileWidth
 								);
 							}
