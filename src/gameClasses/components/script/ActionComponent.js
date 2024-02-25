@@ -1238,7 +1238,7 @@ var ActionComponent = TaroEntity.extend({
 							var object = self._script.param.getValue(action.object, vars) || {};
 							for (var key in object) {
 								let previousAcionBlockIdx = self._script.currentActionLineNumber;
-								var brk = self.run(action.actions, Object.assign(vars, { selectedElement: object[key] }), actionPath, self._script.currentActionLineNumber);
+								var brk = self.run(action.actions, Object.assign(vars, { selectedElement: object[key], selectedElementsKey: key}), actionPath, self._script.currentActionLineNumber);
 								self._script.currentActionLineNumber = previousAcionBlockIdx + self.getNestedActionsLength(action.actions, 0, self);
 
 								if (brk == 'break' || vars.break) {
