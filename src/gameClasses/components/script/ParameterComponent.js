@@ -122,7 +122,7 @@ var ParameterComponent = TaroEntity.extend({
 
 		if (isNaN(result)) {
 			//Wooden Wall2::UnitDeath::block#11::CalcError,  owner(thisEntity).$BuildCap  is undefined
-			taro.script.errorLog(`Calculate error: ${left} ${op.operator} ${right} => NaN. ${left === undefined ? `${JSON.stringify(items[1])} Returning undefined` : ''} ${right === undefined ? `, ${JSON.stringify(items[3])} Returning undefined` : ''}`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
+			taro.script.errorLog(`Calculate error: ${left} ${op.operator} ${right} => NaN. ${left === undefined ? `${JSON.stringify(items[1])} Returning undefined` : ''} ${right === undefined ? `, ${JSON.stringify(items[2])} Returning undefined` : ''}`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
 			return undefined;
 		}
 
@@ -2414,7 +2414,7 @@ var ParameterComponent = TaroEntity.extend({
 
 			'getValueOfEntityVariable': function (text, vars) {
 				var variableData = self.getValue(text.variable, vars);
-				var entity = self.getValue(text.entity, vars);				
+				var entity = self.getValue(text.entity, vars);
 				if (entity?.variable && variableData?.key) {
 					var value = entity.variable.getValue(variableData.key);
 					return value
@@ -2636,8 +2636,8 @@ var ParameterComponent = TaroEntity.extend({
 				var regionName = self.getValue(text.name, vars);
 				if (regionName) {
 					return taro.regionManager.getRegionById(regionName);
-				}				
-			},		
+				}
+			},
 
 			'regionOverlapsWithRegion': function (text, vars) {
 				var regionA = self.getValue(text.regionA, vars);
