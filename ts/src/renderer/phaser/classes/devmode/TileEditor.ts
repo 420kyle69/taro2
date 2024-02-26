@@ -72,7 +72,10 @@ class TileEditor {
 				this.startDragIn = 'palette';
 				pointerPosition.x = devModeScene.input.activePointer.x;
 				pointerPosition.y = devModeScene.input.activePointer.y;
-				if (devModeTools.activeButton !== 'fill') this.devModeTools.brush();
+				if (devModeTools.activeButton !== 'fill') {
+					this.devModeTools.brush();
+					taro.mapEditorUI.highlightModeButton('stamp');
+				}
 				if (this.devModeTools.shiftKey.isDown) {
 					//pass
 				} else {
