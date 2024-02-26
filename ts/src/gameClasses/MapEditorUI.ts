@@ -448,6 +448,29 @@ class MapEditorUI {
 
 				mapEditorButtonsContainer.appendChild(mapEditorButtonsDiv);
 
+				const changePaletteDiv = document.createElement('div');
+				changePaletteDiv.className = 'change-palette-div';
+
+				changePaletteDiv.appendChild(
+					this.createMapButton({
+						tooltipLabel: '+',
+						tooltipText: 'zoom in (+)',
+						text: '+',
+						onClick: () => taro.client.emit('palette-zoom', -1),
+					})
+				);
+
+				changePaletteDiv.appendChild(
+					this.createMapButton({
+						tooltipLabel: '-',
+						tooltipText: 'zoom out (-)',
+						text: '-',
+						onClick: () => taro.client.emit('palette-zoom', +1),
+					})
+				);
+
+				mapEditorButtonsContainer.appendChild(changePaletteDiv);
+
 				gameDiv.appendChild(mapEditorButtonsContainer);
 
 				this.addKeyBindings();
@@ -609,21 +632,36 @@ class MapEditorUI {
 		#map-buttons-container {
 			position: fixed;
 			top: 0px;
-			right: 150px;
+			right: 0px;
+			bottom: 0px;
+			left: 0px;
 		  	font-family: 'Rubik';
 		}
 
 		@media (min-height: 901px) {
 			.map-buttons-div {
-				transform: scale(1.25) translateY(-35px);
+				transform: scale(1.25) translateY(-35px) translateX(-8px);
 			}
 		}
 		.map-buttons-div {
-			position: fixed;
+			position: absolute;
 			bottom: calc(25vh + 50px);
-			right: 150px;
+			right: 20px;
 			width: 90px;
 		}
+		
+		.change-palette-div {
+			position: absolute;
+			display: flex;
+			right: calc(25vw - 20px);
+			bottom: calc(25vh + 50px);
+			gap: 5px;	
+		}
+
+		.change-palette-div button {
+			font-weight: 500;
+		}
+		
 		.map-buttons-title {
 			color: black;
 			background-color: #bababa;
@@ -710,7 +748,7 @@ class MapEditorUI {
 		#map-buttons-tooltip {
 			position: absolute;
 			top: 37px;
-			right: 160px;
+			right: 20px;
 
 			display: none;
 			flex-direction: column;
