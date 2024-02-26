@@ -777,6 +777,14 @@ var ClientNetworkEvents = {
 						taro.sound.playMusic(music, undefined, undefined, data.music);
 					}
 					break;
+				case "playMusicForPlayerAtTime":
+					var music = taro.game.data.music[data.music];
+					var time = data.time;
+
+					if (music && time) {
+						taro.sound.playMusic(music, time, undefined, data.music);
+					}
+					break;
 				case "playMusicForPlayerRepeatedly":
 					var music = taro.game.data.music[data.music];
 
