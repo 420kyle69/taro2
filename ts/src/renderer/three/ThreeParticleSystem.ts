@@ -7,14 +7,12 @@ class ThreeParticleSystem {
 	constructor() {
 		const maxParticles = 10000;
 
-		const uniforms = {
-			diffuseTextures: {
-				value: ThreeTextureManager.instance().getTexturesWithKeyContains('particle'),
-			},
-		};
+		const particleTextures = ThreeTextureManager.instance().getTexturesWithKeyContains('particle');
 
+		// TODO: Add multiple shaders and geometry groups if texture count > 16
+		// Add floor(numTextures / 16) total shaders.
 		const material = new THREE.ShaderMaterial({
-			uniforms,
+			uniforms: { textures: { value: particleTextures } },
 			vertexShader: vs,
 			fragmentShader: fs,
 			transparent: true,
@@ -67,10 +65,10 @@ class ThreeParticleSystem {
 			radius_1: 0.02,
 			radius_2: 1,
 			radius_height: 5,
-			add_time: 0.1,
+			add_time: 0.01,
 			elapsed: 0,
-			live_time_from: 7,
-			live_time_to: 7.5,
+			live_time_from: 1,
+			live_time_to: 1.5,
 			opacity_decrease: 0.008,
 			rotation_from: 0.5,
 			rotation_to: 1,
@@ -80,13 +78,13 @@ class ThreeParticleSystem {
 			scale_increase: 0.004,
 			color_from: [2, 2, 2],
 			color_to: [0, 0, 0],
-			color_speed_from: 0.4,
-			color_speed_to: 0.4,
+			color_speed_from: 1,
+			color_speed_to: 1,
 			brightness_from: 1,
 			brightness_to: 1,
 			opacity: 1,
 			blend: 0.8,
-			texture: 0,
+			texture: 1,
 		});
 	}
 
@@ -267,7 +265,7 @@ const vs = `
 `;
 
 const fs = `
-  uniform sampler2D diffuseTextures[16];
+  uniform sampler2D textures[16];
 
   varying vec2 vUv;
   varying vec4 vColor;
@@ -275,8 +273,24 @@ const fs = `
   varying float vTexture;
 
   void main() {
-    if (vTexture == 0.0) gl_FragColor = texture2D(diffuseTextures[0], vUv) * vColor;
+    if (vTexture == 0.0) gl_FragColor = texture2D(textures[0], vUv) * vColor;
+    else if (vTexture == 1.0) gl_FragColor = texture2D(textures[1], vUv) * vColor;
+    else if (vTexture == 2.0) gl_FragColor = texture2D(textures[2], vUv) * vColor;
+    else if (vTexture == 3.0) gl_FragColor = texture2D(textures[3], vUv) * vColor;
+    else if (vTexture == 4.0) gl_FragColor = texture2D(textures[4], vUv) * vColor;
+    else if (vTexture == 5.0) gl_FragColor = texture2D(textures[5], vUv) * vColor;
+    else if (vTexture == 6.0) gl_FragColor = texture2D(textures[6], vUv) * vColor;
+    else if (vTexture == 7.0) gl_FragColor = texture2D(textures[7], vUv) * vColor;
+    else if (vTexture == 8.0) gl_FragColor = texture2D(textures[8], vUv) * vColor;
+    else if (vTexture == 9.0) gl_FragColor = texture2D(textures[9], vUv) * vColor;
+    else if (vTexture == 10.0) gl_FragColor = texture2D(textures[10], vUv) * vColor;
+    else if (vTexture == 11.0) gl_FragColor = texture2D(textures[11], vUv) * vColor;
+    else if (vTexture == 12.0) gl_FragColor = texture2D(textures[12], vUv) * vColor;
+    else if (vTexture == 13.0) gl_FragColor = texture2D(textures[13], vUv) * vColor;
+    else if (vTexture == 14.0) gl_FragColor = texture2D(textures[14], vUv) * vColor;
+    else if (vTexture == 15.0) gl_FragColor = texture2D(textures[15], vUv) * vColor;
 
+    gl_FragColor.rgb *= gl_FragColor.a;
     gl_FragColor.a *= vBlend;
   }
 `;
