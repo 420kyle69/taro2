@@ -1,5 +1,4 @@
 class UiScene extends PhaserScene {
-	tooltip: DevTooltip;
 	phaserButtonBar: PhaserButtonBar;
 	constructor() {
 		super({ key: 'Ui', active: true });

@@ -412,11 +412,6 @@ class TileEditor {
 			} else if ((!devModeScene.pointerInsidePalette() || !palette.visible) &&
 				!devModeScene.pointerInsideButtons && !devModeScene.pointerInsideWidgets() && map.currentLayerIndex >= 0) {
 
-				/*this.devModeTools.tooltip.showMessage(
-					'Position',
-					`X: ${Math.floor(worldPoint.x).toString()}, Y: ${Math.floor(worldPoint.y).toString()}  |  `
-					+ `Tile X: ${Math.floor(worldPoint.x / taro.scaleMapDetails.tileWidth).toString()}, Tile Y: ${Math.floor(worldPoint.y / taro.scaleMapDetails.tileHeight).toString()}`
-				);*/
 				taro.client.emit('update-tooltip', {
 					label: 'Position',
 					text: `X: ${Math.floor(worldPoint.x).toString()}, Y: ${Math.floor(worldPoint.y).toString()}  \n`
@@ -439,12 +434,6 @@ class TileEditor {
 					marker.preview.y = map.tileToWorldY(pointerTileY);
 
 					if (map?.getTileAt(pointerTileX, pointerTileY)?.index && map?.getTileAt(pointerTileX, pointerTileY)?.index !== -1 && map?.getTileAt(pointerTileX, pointerTileY)?.index !== 0) {
-						/*this.devModeTools.tooltip.showMessage(
-							'Position',
-							`X: ${Math.floor(worldPoint.x).toString()}, Y: ${Math.floor(worldPoint.y).toString()}  |  `
-							+ `Tile X: ${Math.floor(worldPoint.x / taro.scaleMapDetails.tileWidth).toString()}, Tile Y: ${Math.floor(worldPoint.y / taro.scaleMapDetails.tileHeight).toString()}  |  `
-							+ `Tile id: ${map.getTileAt(pointerTileX, pointerTileY).index}`
-						);*/
 						taro.client.emit('update-tooltip', {
 							label: 'Position',
 							text: `X: ${Math.floor(worldPoint.x).toString()}, Y: ${Math.floor(worldPoint.y).toString()}  \n`
@@ -524,10 +513,6 @@ class TileEditor {
 						}
 					}
 				} else if (this.devModeTools.entityEditor.selectedEntityImage) {
-					/*this.devModeTools.tooltip.showMessage(
-						'Entity Position',
-						`X: ${this.devModeTools.entityEditor.selectedEntityImage.image.x.toString()}, Y: ${this.devModeTools.entityEditor.selectedEntityImage.image.y.toString()}`
-					);*/
 					taro.client.emit('update-tooltip', {
 						label: 'Entity Position',
 						text: `X: ${this.devModeTools.entityEditor.selectedEntityImage.image.x.toString()}, Y: ${this.devModeTools.entityEditor.selectedEntityImage.image.y.toString()}`
