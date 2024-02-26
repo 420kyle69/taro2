@@ -44,6 +44,10 @@ class ThreeParticleSystem {
 			'scale',
 			new THREE.InstancedBufferAttribute(new Float32Array(maxParticles * 2), 2).setUsage(THREE.DynamicDrawUsage)
 		);
+		this.geometry.setAttribute(
+			'color',
+			new THREE.InstancedBufferAttribute(new Float32Array(maxParticles * 4), 4).setUsage(THREE.DynamicDrawUsage)
+		);
 
 		const points = new THREE.Mesh(this.geometry, material);
 		points.frustumCulled = false;
@@ -77,8 +81,6 @@ class ThreeParticleSystem {
 			opacity: 1,
 			blend: 0.8,
 			texture: 0,
-
-			color: [0, 0, 0],
 		});
 	}
 
@@ -97,6 +99,7 @@ class ThreeParticleSystem {
 
 		const offsetAttribute = this.geometry.attributes.offset.array;
 		const scaleAttribute = this.geometry.attributes.scale.array;
+		const colorAttribute = this.geometry.attributes.color.array;
 
 		for (var n = 0; n < count; n++) {
 			const particle = this.particles[n];
@@ -106,10 +109,16 @@ class ThreeParticleSystem {
 
 			scaleAttribute[n * 2 + 0] = particle.scale[0];
 			scaleAttribute[n * 2 + 1] = particle.scale[1];
+
+			colorAttribute[n * 4 + 0] = particle.color[0];
+			colorAttribute[n * 4 + 1] = particle.color[1];
+			colorAttribute[n * 4 + 2] = particle.color[2];
+			colorAttribute[n * 4 + 3] = particle.color[3];
 		}
 
 		this.geometry.attributes.offset.needsUpdate = true;
 		this.geometry.attributes.scale.needsUpdate = true;
+		this.geometry.attributes.color.needsUpdate = true;
 
 		this.geometry.instanceCount = count;
 	}
@@ -136,6 +145,18 @@ class ThreeParticleSystem {
 
 			if (particle.live > 0) {
 				particle.live -= delta;
+
+				if (particle.color_t < 1) {
+					const p = particle;
+					particle.color[0] = p.color_from[0] + (p.color_to[0] - p.color_from[0]) * p.color_t;
+					particle.color[1] = p.color_from[1] + (p.color_to[0] - p.color_from[1]) * p.color_t;
+					particle.color[2] = p.color_from[1] + (p.color_to[0] - p.color_from[2]) * p.color_t;
+					particle.color_t += delta * particle.color_speed;
+				} else {
+					particle.color[0] = particle.color_to[0];
+					particle.color[1] = particle.color_to[1];
+					particle.color[2] = particle.color_to[2];
+				}
 
 				particle.offset[0] += particle.quaternion[0];
 				particle.offset[1] += particle.quaternion[1];
@@ -176,12 +197,23 @@ class ThreeParticleSystem {
 		direction_y *= divide;
 		direction_z *= divide;
 
+		const brightness = Math.random() * (emitter.brightness_to - emitter.brightness_from) + emitter.brightness_from;
+
 		this.particles.push({
 			offset: [x_1, emitter.position.y, z_1],
 			quaternion: [direction_x, direction_y, direction_z, 3],
 			live: Math.random() * (emitter.live_time_to - emitter.live_time_from) + emitter.live_time_from,
 			scale: [emitter.scale_from, emitter.scale_from],
 			scale_increase: emitter.scale_increase,
+			color: [1, 1, 1, emitter.opacity],
+			color_from: [
+				emitter.color_from[0] * brightness,
+				emitter.color_from[1] * brightness,
+				emitter.color_from[2] * brightness,
+			],
+			color_to: [emitter.color_to[0] * brightness, emitter.color_to[1] * brightness, emitter.color_to[2] * brightness],
+			color_speed: Math.random() * (emitter.color_speed_to - emitter.color_speed_from) + emitter.color_speed_from,
+			color_t: 0,
 		});
 	}
 }
@@ -189,12 +221,14 @@ class ThreeParticleSystem {
 const vs = `
   attribute vec3 offset;
   attribute vec2 scale;
+  attribute vec4 color;
 
   varying vec2 vUv;
-  vec3 localUpVector=vec3(0.0,1.0,0.0);
+  varying vec4 vColor;
 
   void main() {
     vUv = uv;
+    vColor = color;
 
     // https://www.opengl-tutorial.org/intermediate-tutorials/billboards-particles/billboards/
     vec3 cameraRight = vec3(viewMatrix[0][0], viewMatrix[1][0], viewMatrix[2][0]);
@@ -208,8 +242,9 @@ const vs = `
 const fs = `
   uniform sampler2D diffuseTexture;
   varying vec2 vUv;
+  varying vec4 vColor;
 
   void main() {
-    gl_FragColor = texture2D(diffuseTexture, vUv);
+    gl_FragColor = texture2D(diffuseTexture, vUv) * vColor;
   }
 `;
