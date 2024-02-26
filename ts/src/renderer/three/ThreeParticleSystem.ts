@@ -40,6 +40,10 @@ class ThreeParticleSystem {
 			'offset',
 			new THREE.InstancedBufferAttribute(new Float32Array(maxParticles * 3), 3).setUsage(THREE.DynamicDrawUsage)
 		);
+		this.geometry.setAttribute(
+			'scale',
+			new THREE.InstancedBufferAttribute(new Float32Array(maxParticles * 2), 2).setUsage(THREE.DynamicDrawUsage)
+		);
 
 		const points = new THREE.Mesh(this.geometry, material);
 		points.frustumCulled = false;
@@ -92,13 +96,20 @@ class ThreeParticleSystem {
 		this.particles.sort((a, b) => b.dSq - a.dSq);
 
 		const offsetAttribute = this.geometry.attributes.offset.array;
+		const scaleAttribute = this.geometry.attributes.scale.array;
+
 		for (var n = 0; n < count; n++) {
 			const particle = this.particles[n];
 			offsetAttribute[n * 3 + 0] = particle.offset[0];
 			offsetAttribute[n * 3 + 1] = particle.offset[1];
 			offsetAttribute[n * 3 + 2] = particle.offset[2];
+
+			scaleAttribute[n * 2 + 0] = particle.scale[0];
+			scaleAttribute[n * 2 + 1] = particle.scale[1];
 		}
+
 		this.geometry.attributes.offset.needsUpdate = true;
+		this.geometry.attributes.scale.needsUpdate = true;
 
 		this.geometry.instanceCount = count;
 	}
@@ -126,10 +137,14 @@ class ThreeParticleSystem {
 			if (particle.live > 0) {
 				particle.live -= delta;
 
+				particle.offset[0] += particle.quaternion[0];
+				particle.offset[1] += particle.quaternion[1];
+				particle.offset[2] += particle.quaternion[2];
+
+				particle.scale[0] += particle.scale_increase;
+				particle.scale[1] += particle.scale_increase;
+
 				this.particles[i] = particle;
-				this.particles[i].offset[0] = particle.offset[0] + particle.quaternion[0];
-				this.particles[i].offset[1] = particle.offset[1] + particle.quaternion[1];
-				this.particles[i].offset[2] = particle.offset[2] + particle.quaternion[2];
 
 				i++;
 			}
@@ -165,17 +180,18 @@ class ThreeParticleSystem {
 			offset: [x_1, emitter.position.y, z_1],
 			quaternion: [direction_x, direction_y, direction_z, 3],
 			live: Math.random() * (emitter.live_time_to - emitter.live_time_from) + emitter.live_time_from,
+			scale: [emitter.scale_from, emitter.scale_from],
+			scale_increase: emitter.scale_increase,
 		});
 	}
 }
 
 const vs = `
   attribute vec3 offset;
+  attribute vec2 scale;
 
   varying vec2 vUv;
   vec3 localUpVector=vec3(0.0,1.0,0.0);
-
-  vec2 scale = vec2(1.0, 1.0);
 
   void main() {
     vUv = uv;
