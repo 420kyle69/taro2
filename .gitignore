@@ -144,6 +144,9 @@ src/gameClasses/TileShape.js.map
 src/gameClasses/VisibilityMask.js
 src/gameClasses/VisibilityMask.js.map
 
+src/gameClasses/MapEditorUI.js
+src/gameClasses/MapEditorUI.js.map
+
 src/renderer
 
 src/utils/Colors.js
