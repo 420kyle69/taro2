@@ -125,30 +125,23 @@ class ThreeParticleSystem {
 			}
 		}
 
-		const alive = new Array(this.particles.length);
 		let i = 0;
-
 		for (let n = 0; n < this.particles.length; n++) {
 			const particle = this.particles[n];
-
-			const wind_x = 0;
-			const wind_y = 0;
-			const wind_z = 0;
-
-			particle.offset[0] += particle.quaternion[0] + wind_x;
-			particle.offset[1] += particle.quaternion[1] + wind_y;
-			particle.offset[2] += particle.quaternion[2] + wind_z;
 
 			if (particle.live > 0) {
 				particle.live -= delta;
 
-				alive[i] = particle;
+				this.particles[i] = particle;
+				this.particles[i].offset[0] = particle.offset[0] + particle.quaternion[0];
+				this.particles[i].offset[1] = particle.offset[1] + particle.quaternion[1];
+				this.particles[i].offset[2] = particle.offset[2] + particle.quaternion[2];
+
 				i++;
 			}
 		}
 
-		alive.length = i;
-		this.particles = alive;
+		this.particles.length = i;
 	}
 
 	particleEmitterEmit(emitter) {
