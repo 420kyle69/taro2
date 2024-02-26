@@ -13,7 +13,7 @@ class ThreeParticleSystem {
 		// TODO: Add multiple shaders and geometry groups if texture count > 16
 		// Add floor(numTextures / 16) total shaders.
 		const material = new THREE.ShaderMaterial({
-			uniforms: { textures: { value: particleTextures } },
+			uniforms: { textures: { value: particleTextures }, time: { value: 0 } },
 			vertexShader: vs,
 			fragmentShader: fs,
 			transparent: true,
@@ -40,6 +40,10 @@ class ThreeParticleSystem {
 		this.geometry.setAttribute(
 			'scale',
 			new THREE.InstancedBufferAttribute(new Float32Array(maxParticles * 2), 2).setUsage(THREE.DynamicDrawUsage)
+		);
+		this.geometry.setAttribute(
+			'rotation',
+			new THREE.InstancedBufferAttribute(new Float32Array(maxParticles), 1).setUsage(THREE.DynamicDrawUsage)
 		);
 		this.geometry.setAttribute(
 			'color',
@@ -109,6 +113,7 @@ class ThreeParticleSystem {
 
 		const offsetAttribute = this.geometry.attributes.offset.array;
 		const scaleAttribute = this.geometry.attributes.scale.array;
+		const rotationAttribute = this.geometry.attributes.rotation.array;
 		const colorAttribute = this.geometry.attributes.color.array;
 		const blendAttribute = this.geometry.attributes.blend.array;
 		const textureAttribute = this.geometry.attributes.texture.array;
@@ -122,6 +127,8 @@ class ThreeParticleSystem {
 			scaleAttribute[n * 2 + 0] = particle.scale[0];
 			scaleAttribute[n * 2 + 1] = particle.scale[1];
 
+			rotationAttribute[n] = particle.rotation;
+
 			colorAttribute[n * 4 + 0] = particle.color[0];
 			colorAttribute[n * 4 + 1] = particle.color[1];
 			colorAttribute[n * 4 + 2] = particle.color[2];
@@ -134,11 +141,14 @@ class ThreeParticleSystem {
 
 		this.geometry.attributes.offset.needsUpdate = true;
 		this.geometry.attributes.scale.needsUpdate = true;
+		this.geometry.attributes.rotation.needsUpdate = true;
 		this.geometry.attributes.color.needsUpdate = true;
 		this.geometry.attributes.blend.needsUpdate = true;
 		this.geometry.attributes.texture.needsUpdate = true;
 
 		this.geometry.instanceCount = count;
+
+		((this.node as THREE.Mesh).material as THREE.ShaderMaterial).uniforms.time.value = time;
 	}
 
 	particleEmittersUpdate(delta) {
@@ -227,6 +237,7 @@ class ThreeParticleSystem {
 			live: Math.random() * (emitter.live_time_to - emitter.live_time_from) + emitter.live_time_from,
 			scale: [emitter.scale_from, emitter.scale_from],
 			scale_increase: emitter.scale_increase,
+			rotation: Math.random() * (emitter.rotation_to - emitter.rotation_from) + emitter.rotation_from,
 			color: [1, 1, 1, emitter.opacity],
 			color_from: [
 				emitter.color_from[0] * brightness,
@@ -246,9 +257,12 @@ class ThreeParticleSystem {
 const vs = `
   attribute vec3 offset;
   attribute vec2 scale;
+  attribute float rotation;
   attribute vec4 color;
   attribute float blend;
   attribute float texture;
+
+  uniform float time;
 
   varying vec2 vUv;
   varying vec4 vColor;
@@ -261,10 +275,13 @@ const vs = `
     vBlend = blend;
     vTexture = texture;
 
+    float angle = time * rotation;
+    vec2 vRotated = vec2(position.x * cos(angle) - position.y * sin(angle), position.y * cos(angle) + position.x * sin(angle));
+
     // https://www.opengl-tutorial.org/intermediate-tutorials/billboards-particles/billboards/
     vec3 cameraRight = vec3(viewMatrix[0][0], viewMatrix[1][0], viewMatrix[2][0]);
     vec3 cameraUp = vec3(viewMatrix[0][1], viewMatrix[1][1], viewMatrix[2][1]);
-    vec3 pos = offset + cameraRight * position.x * scale.x + cameraUp * position.y * scale.y;
+    vec3 pos = offset + cameraRight * vRotated.x * scale.x + cameraUp * vRotated.y * scale.y;
 
     gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
   }
