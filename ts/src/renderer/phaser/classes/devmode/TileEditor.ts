@@ -76,13 +76,9 @@ class TileEditor {
 					this.devModeTools.brush();
 					taro.mapEditorUI.highlightModeButton('stamp');
 				}
-				if (this.devModeTools.shiftKey.isDown) {
-					//pass
-				} else {
-					if (p.button === 0) {
-						this.selectedTileArea = {};
-						this.clearTint();
-					}
+				if (p.button === 0) {
+					this.selectedTileArea = {};
+					this.clearTint();
 				}
 			}
 		});
