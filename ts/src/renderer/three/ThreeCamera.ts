@@ -1,7 +1,6 @@
 class ThreeCamera {
 	instance: THREE.Camera;
 	target: THREE.Object3D | null = null;
-	zoomLevel = 1;
 
 	private orthographicCamera: THREE.OrthographicCamera;
 	private perspectiveCamera: THREE.PerspectiveCamera;
@@ -19,6 +18,7 @@ class ThreeCamera {
 	private onChangeCbs = [];
 
 	private offset = new THREE.Vector3();
+	private originalDistance = 1;
 
 	constructor(viewportWidth: number, viewportHeight: number, canvas: HTMLCanvasElement) {
 		// Public API
@@ -29,11 +29,11 @@ class ThreeCamera {
 		// camera.setAzimuthAngle(number)
 		// camera.setOffset(x, y, z)
 		// camera.setElevationRange(min, max)
+		// camera.setZoom(number)
 
 		// TODO
 		// camera.setTarget(object3d | null, moveInstantOrLerp)
 		// camera.setPointerLock(bool)
-		// camera.setZoom(number)
 		// camera.setFollowSpeed(number)
 		// camera.update(dt <--)
 
@@ -48,10 +48,10 @@ class ThreeCamera {
 		this.orthographicCamera = orthoCamera;
 
 		const yFovDeg = this.perspectiveCamera.fov * (Math.PI / 180);
-		const distance =
-			this.orthographicCamera.top / Math.tan(yFovDeg * 0.5) / (this.orthographicCamera.zoom / this.zoomLevel);
+		const distance = this.orthographicCamera.top / Math.tan(yFovDeg * 0.5) / this.orthographicCamera.zoom;
 		this.perspectiveCamera.position.y = distance;
 		this.orthographicCamera.position.y = distance;
+		this.originalDistance = distance;
 
 		this.perspectiveCamera.position.add(this.offset);
 		this.orthographicCamera.position.add(this.offset);
@@ -182,7 +182,7 @@ class ThreeCamera {
 			this.orthographicCamera.right = halfWidth;
 			this.orthographicCamera.top = halfHeight;
 			this.orthographicCamera.bottom = -halfHeight;
-			this.orthographicCamera.zoom = this.zoomLevel;
+			this.orthographicCamera.zoom = 1;
 
 			this.orthographicCamera.lookAt(this.controls.target);
 			this.orthographicCamera.updateProjectionMatrix();
@@ -205,10 +205,6 @@ class ThreeCamera {
 
 	update() {
 		if (this.controls.enableRotate) {
-			this.controls.update();
-		}
-
-		if (this.controls.enableRotate) {
 			const azimuthAngle = this.controls.getAzimuthalAngle() * (180 / Math.PI);
 			const elevationAngle = (Math.PI / 2 - this.controls.getPolarAngle()) * (180 / Math.PI);
 			this.debugInfo.style.display = 'block';
@@ -222,6 +218,8 @@ class ThreeCamera {
 			this.target.getWorldPosition(targetWorldPos);
 			this.setPosition(targetWorldPos);
 		}
+
+		this.controls.update();
 	}
 
 	resize(width: number, height: number) {
@@ -235,19 +233,12 @@ class ThreeCamera {
 		this.orthographicCamera.right = halfWidth;
 		this.orthographicCamera.top = halfHeight;
 		this.orthographicCamera.bottom = -halfHeight;
-		this.orthographicCamera.zoom = this.zoomLevel;
+		this.orthographicCamera.zoom = 1;
 		this.orthographicCamera.updateProjectionMatrix();
 	}
 
-	zoom(ratio: number) {
-		this.zoomLevel = ratio;
-
-		if (this.instance instanceof THREE.PerspectiveCamera) {
-			//
-		} else if (this.instance instanceof THREE.OrthographicCamera) {
-			this.instance.zoom = ratio;
-			this.instance.updateProjectionMatrix();
-		}
+	setZoom(ratio: number) {
+		this.setDistance(this.originalDistance / ratio);
 	}
 
 	startFollow(target: THREE.Object3D) {
@@ -322,7 +313,7 @@ class ThreeCamera {
 		this.orthographicCamera.top = halfHeight;
 		this.orthographicCamera.bottom = -halfHeight;
 
-		this.orthographicCamera.zoom = this.zoomLevel;
+		this.orthographicCamera.zoom = 1;
 		this.orthographicCamera.lookAt(this.controls.target);
 		this.orthographicCamera.updateProjectionMatrix();
 		this.instance = this.orthographicCamera;
@@ -337,8 +328,7 @@ class ThreeCamera {
 		this.perspectiveCamera.quaternion.copy(this.orthographicCamera.quaternion);
 
 		const yFovDeg = this.perspectiveCamera.fov * (Math.PI / 180);
-		const distance =
-			this.orthographicCamera.top / Math.tan(yFovDeg * 0.5) / (this.orthographicCamera.zoom / this.zoomLevel);
+		const distance = this.orthographicCamera.top / Math.tan(yFovDeg * 0.5) / this.orthographicCamera.zoom;
 		const newPos = new THREE.Vector3()
 			.subVectors(this.perspectiveCamera.position, this.controls.target)
 			.normalize()

@@ -53,7 +53,7 @@ class ThreeRenderer {
 
 			if (this.zoomSize) {
 				const ratio = Math.max(window.innerWidth, window.innerHeight) / this.zoomSize;
-				this.camera.zoom(ratio);
+				this.camera.setZoom(ratio);
 				taro.client.emit('scale', { ratio: ratio * this.resolutionCoef });
 				taro.client.emit('update-abilities-position');
 
@@ -148,7 +148,7 @@ class ThreeRenderer {
 			const ratio = Math.max(window.innerWidth, window.innerHeight) / this.zoomSize;
 
 			// TODO: Quadratic zoomTo over 1 second
-			this.camera.zoom(ratio);
+			this.camera.setZoom(ratio);
 
 			taro.client.emit('scale', { ratio: ratio * this.resolutionCoef });
 
@@ -159,7 +159,6 @@ class ThreeRenderer {
 
 		taro.client.on('stop-follow', () => {
 			this.camera.stopFollow();
-			this.scene.attach(this.skybox.scene);
 		});
 
 		const layers = {
@@ -224,7 +223,7 @@ class ThreeRenderer {
 			const createEntity = () => {
 				const e = new ThreeUnit(tex.clone());
 				this.animatedSprites.push(e);
-				e.billboard = !!entity._stats.isBillboard;
+				e.setBillboard(!!entity._stats.isBillboard, this.camera);
 
 				if (entity._stats.cameraPointerLock) {
 					e.cameraConfig.pointerLock = entity._stats.cameraPointerLock;
@@ -300,8 +299,6 @@ class ThreeRenderer {
 				'follow',
 				() => {
 					this.camera.startFollow(ent);
-					this.skybox.scene.position.copy(ent.position);
-					ent.attach(this.skybox.scene);
 
 					const offset = ent.cameraConfig.offset;
 					this.camera.setOffset(offset.x, offset.y, offset.z);
@@ -467,6 +464,11 @@ class ThreeRenderer {
 		}
 
 		this.camera.update();
+
+		if (this.camera.target) {
+			this.skybox.scene.position.copy(this.camera.target.position);
+		}
+
 		this.renderer.render(this.scene, this.camera.instance);
 	}
 

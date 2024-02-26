@@ -501,8 +501,13 @@ var ParameterComponent = TaroEntity.extend({
 						returnValue = !!(entity && entity._id && taro.$(entity._id));
 
 						break;
+					
+					case 'objectContainsElement':
+						var object = self.getValue(text.object, vars);
+						var key = self.getValue(text.key, vars);
+						returnValue = object && object[key] !== undefined;
 
-
+						break;
 
 					case 'thisEntity':
 						returnValue = self._entity;
@@ -2766,6 +2771,12 @@ var ParameterComponent = TaroEntity.extend({
 					return vars.selectedUnitType;
 				}
 
+			},
+
+			'selectedElement': function (text, vars, entity) {
+				if (vars && vars.selectedElement) {
+					return vars.selectedElement;
+				}
 			},
 
 			/* object */

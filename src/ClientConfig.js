@@ -52,6 +52,7 @@ var taroClientConfig = {
 		'/gameClasses/components/script/ConditionComponent.js',
 
 		'/gameClasses/components/unit/AIComponent.js',
+		'/gameClasses/components/unit/AStarPathfindingComponent.js',
 		'/gameClasses/components/unit/AbilityComponent.js',
 
 		'/gameClasses/components/entity/AttributeComponent.js',

@@ -9,6 +9,32 @@ var ActionComponent = TaroEntity.extend({
 		this.lastProgressTrackedValue = null;
 	},
 
+	/**
+	 * Calculates the total number of actions within a nested action object, including disabled actions.
+
+	 * This function is recursive and will traverse through all nested 'actions', 'then', and 'else' fields
+
+	 * to count the total number of actions. The count includes the top-level action object itself.
+	 *
+	 * Example:
+	 * {
+	 *   actions: [{
+	 *     actions: [{function: "sendChatMessage", message: "hello"}, {function: "sendChatMessage", message: "world"}]
+	 *   }]
+	 * }
+	 * In the above example, the total count would be 3 (1 for the top-level 'actions' array and 1 for each 'sendChatMessage' action).
+	 *
+	 * @param {object} obj - The action object to count actions within.
+	 * @param {number} _length - The initial count of actions. Typically starts at 0 when called externally.
+	 * @param {*} self - Reference to the instance of the class containing this method. Used for recursive calls.
+	 * @param {number} mode - Determines which parts of the action object to count:
+	 *                    1: Only count actions within 'then' fields.
+	 *                    2: Only count actions within 'else' fields.
+	 *                    3: Count actions within both 'then' and 'else' fields.
+
+	 * @returns {number} The total count of actions within the provided action object.
+
+	 */
 	getNestedActionsLength: (obj, _length, self, mode = 3) => {
 		let length = _length;
 		if (obj.actions !== undefined) {
@@ -16,15 +42,15 @@ var ActionComponent = TaroEntity.extend({
 				length += 1;
 				length = self.getNestedActionsLength(obj.actions[i], length, self);
 			}
-		} else if (obj.then !== undefined) {
-			if (mode === 1 || mode === 3) {
+		} else {
+			if (obj.then !== undefined && (mode === 1 || mode === 3)) {
 				for (let i = 0; i < obj.then.length; i++) {
 					length += 1;
 					length = self.getNestedActionsLength(obj.then, length, self);
 				}
 			}
 
-			if (mode === 2 || mode === 3) {
+			if (obj.else !== undefined && (mode === 2 || mode === 3)) {
 				for (let i = 0; i < obj.else.length; i++) {
 					length += 1;
 					length = self.getNestedActionsLength(obj.else, length, self);
@@ -152,7 +178,7 @@ var ActionComponent = TaroEntity.extend({
 						const setTimeOutActions = rfdc()(action.actions);
 						// const setTimeoutVars = rfdc()(vars);
 						var duration = self._script.param.getValue(action.duration, vars);
-						
+
 						setTimeout(function (actions, currentScriptId) {
 							let previousScriptId = currentScriptId;
 							let previousAcionBlockIdx = self._script.currentActionLineNumber;
@@ -164,59 +190,59 @@ var ActionComponent = TaroEntity.extend({
 						break;
 
 					case 'repeat':
-					{
-						var count = self._script.param.getValue(action.count, vars);
-						var repeatActions = self._script.param.getValue(action.actions, vars);
+						{
+							var count = self._script.param.getValue(action.count, vars);
+							var repeatActions = self._script.param.getValue(action.actions, vars);
 
-						if (!isNaN(count) && count > 0) {
-							for (let i = 0; i < count; i++) {
+							if (!isNaN(count) && count > 0) {
+								for (let i = 0; i < count; i++) {
+									let previousAcionBlockIdx = self._script.currentActionLineNumber;
+									returnValue = self.run(repeatActions, vars, actionPath, self._script.currentActionLineNumber);
+									self._script.currentActionLineNumber = previousAcionBlockIdx + self.getNestedActionsLength(repeatActions, 0, self);
+									if (returnValue == 'break' || vars.break) {
+										// we dont have to return a value in case of break otherwise
+										// control will exit from for loop of actions as well
+										// throw BreakException;
+										vars.break = false;
+										break;
+									} else if (returnValue == 'return') {
+										throw new Error('return without executing script');
+									}
+								}
+							}
+							break;
+						}
+
+					case 'repeatWithDelay':
+						{
+							var count = self._script.param.getValue(action.count, vars);
+							var repeatActions = self._script.param.getValue(action.actions, vars);
+							var delay = self._script.param.getValue(action.number, vars);
+
+							const runWithDelay = (i) => {
 								let previousAcionBlockIdx = self._script.currentActionLineNumber;
 								returnValue = self.run(repeatActions, vars, actionPath, self._script.currentActionLineNumber);
 								self._script.currentActionLineNumber = previousAcionBlockIdx + self.getNestedActionsLength(repeatActions, 0, self);
+
 								if (returnValue == 'break' || vars.break) {
-									// we dont have to return a value in case of break otherwise
-									// control will exit from for loop of actions as well
-									// throw BreakException;
 									vars.break = false;
-									break;
 								} else if (returnValue == 'return') {
 									throw new Error('return without executing script');
 								}
+
+								// Continue to the next iteration if not reached the count
+								if (i < count - 1) {
+									setTimeout(() => runWithDelay(i + 1), delay);
+								}
+							};
+
+							if (!isNaN(count) && count > 0) {
+								// Start the loop immediately with the first iteration
+								runWithDelay(0);
 							}
+
+							break;
 						}
-						break;
-					}
-
-					case 'repeatWithDelay':
-					{
-						var count = self._script.param.getValue(action.count, vars);
-						var repeatActions = self._script.param.getValue(action.actions, vars);
-						var delay = self._script.param.getValue(action.number, vars);
-
-						const runWithDelay = (i) => {
-							let previousAcionBlockIdx = self._script.currentActionLineNumber;
-							returnValue = self.run(repeatActions, vars, actionPath, self._script.currentActionLineNumber);
-							self._script.currentActionLineNumber = previousAcionBlockIdx + self.getNestedActionsLength(repeatActions, 0, self);
-
-							if (returnValue == 'break' || vars.break) {
-								vars.break = false;
-							} else if (returnValue == 'return') {
-								throw new Error('return without executing script');
-							}
-
-							// Continue to the next iteration if not reached the count
-							if (i < count - 1) {
-								setTimeout(() => runWithDelay(i + 1), delay);
-							}
-						};
-
-						if (!isNaN(count) && count > 0) {
-							// Start the loop immediately with the first iteration
-							runWithDelay(0);
-						}
-
-						break;
-					}
 
 
 					case 'runScript':
@@ -228,13 +254,13 @@ var ActionComponent = TaroEntity.extend({
 						break;
 
 					case 'condition':
-						if (self._script.condition.run(action.conditions, vars, `${actionPath  }/condition`)) {
+						if (self._script.condition.run(action.conditions, vars, `${actionPath}/condition`)) {
 							let previousAcionBlockIdx = self._script.currentActionLineNumber;
-							var brk = self.run(action.then, vars, `${actionPath  }/then`, self._script.currentActionLineNumber);
+							var brk = self.run(action.then, vars, `${actionPath}/then`, self._script.currentActionLineNumber);
 							self._script.currentActionLineNumber = previousAcionBlockIdx + self.getNestedActionsLength(action, 0, self);
 						} else {
 							let previousAcionBlockIdx = self._script.currentActionLineNumber;
-							var brk = self.run(action.else, vars, `${actionPath  }/else`, self._script.currentActionLineNumber + self.getNestedActionsLength(action, 0, self, 1));
+							var brk = self.run(action.else, vars, `${actionPath}/else`, self._script.currentActionLineNumber + self.getNestedActionsLength(action, 0, self, 1));
 							self._script.currentActionLineNumber = previousAcionBlockIdx + self.getNestedActionsLength(action, 0, self);
 						}
 
@@ -403,7 +429,7 @@ var ActionComponent = TaroEntity.extend({
 									// if sendPostRequest was called from a unit/item/projectile, then pass the triggering entity's id onPostResponse
 									var vars = {};
 									if (['unit', 'item', 'projectile'].includes(self._entity._category)) {
-										var key = `${self._entity._category  }Id`;
+										var key = `${self._entity._category}Id`;
 										vars = { [key]: self._entity.id() };
 									}
 
@@ -425,8 +451,8 @@ var ActionComponent = TaroEntity.extend({
 
 						// use closure to store globalVariableName
 						(function (targetVarName, actionsOnSuccess, actionsOnFailure, currentScriptId) {
-							taro.workerComponent.sendSecurePostRequest({apiCredentials, data})
-								.then(({data, err}) => {
+							taro.workerComponent.sendSecurePostRequest({ apiCredentials, data })
+								.then(({ data, err }) => {
 									// try+catch must be redeclared inside callback otherwise an error will crash the process
 									try {
 
@@ -474,7 +500,7 @@ var ActionComponent = TaroEntity.extend({
 
 						break;
 
-						/* Player */
+					/* Player */
 
 					case 'kickPlayer':
 						var player = self._script.param.getValue(action.entity, vars);
@@ -643,22 +669,22 @@ var ActionComponent = TaroEntity.extend({
 
 						if (player && userId && player.persistentDataLoaded) {
 							var data = player.getPersistentData('player');
-							
-							const persistedData = {player: data};
-							
+
+							const persistedData = { player: data };
+
 							var unit = player.getSelectedUnit();
 
 							if (unit && player && userId && unit.persistentDataLoaded) {
 								var data = unit.getPersistentData('unit');
 								persistedData.unit = data;
-								
+
 								// save unit and player data both
 								taro.workerComponent.saveUserData(userId, persistedData, null, 'savePlayerData');
-								
+
 							} else {
 								// save player data only
 								taro.workerComponent.saveUserData(userId, persistedData.player, 'player', 'savePlayerData');
-								
+
 								if (unit && !unit.persistentDataLoaded) {
 									throw new Error('Fail saving unit data bcz persisted data not loaded correctly');
 								} else {
@@ -762,7 +788,7 @@ var ActionComponent = TaroEntity.extend({
 						var text = self._script.param.getValue(action.value, vars);
 						if (player && player._stats && player._stats.controlledBy == 'human' && player._stats.clientId) {
 							taro.network.send('updateUiRealtimeCSS', { action: 'append', style: text }, player._stats.clientId);
-							player.realtimeCSS += `\n${  text}`;
+							player.realtimeCSS += `\n${text}`;
 						}
 						break;
 
@@ -1204,6 +1230,29 @@ var ActionComponent = TaroEntity.extend({
 						}
 						break;
 
+					case 'forAllElementsInObject':
+						if (action.object) {
+							if (!vars) {
+								vars = {};
+							}
+							var object = self._script.param.getValue(action.object, vars) || {};
+							for (var key in object) {
+								let previousAcionBlockIdx = self._script.currentActionLineNumber;
+								var brk = self.run(action.actions, Object.assign(vars, { selectedElement: object[key], selectedElementsKey: key}), actionPath, self._script.currentActionLineNumber);
+								self._script.currentActionLineNumber = previousAcionBlockIdx + self.getNestedActionsLength(action.actions, 0, self);
+
+								if (brk == 'break' || vars.break) {
+									vars.break = false;
+									break;
+								} else if (brk == 'continue') {
+									continue;
+								} else if (brk == 'return') {
+									return 'return';
+								}
+							}
+						}
+						break;
+
 					case 'while':
 						var loopCounter = 0;
 
@@ -1327,7 +1376,7 @@ var ActionComponent = TaroEntity.extend({
 						taro.server.kill('end game called');
 						break;
 
-						/* Unit */
+					/* Unit */
 
 					case 'startMovingUnitUp':
 						if (entity && entity._category === 'unit' && entity.ability) {
@@ -1532,27 +1581,27 @@ var ActionComponent = TaroEntity.extend({
 
 						break;
 
-						// PAUSED
+					// PAUSED
 
-						// case 'setUnitNameLabelColor':
-						// 	var unit = self._script.param.getValue(action.unit, vars);
-						// 	var color = self._script.param.getValue(action.color, vars);
+					// case 'setUnitNameLabelColor':
+					// 	var unit = self._script.param.getValue(action.unit, vars);
+					// 	var color = self._script.param.getValue(action.color, vars);
 
-						// 	try {
-						// 		if (
-						// 			unit &&
-						// 			typeof color === 'string' &&
-						// 			Colors.isValidColor(color)
-						// 		) {
-						// 			unit.setNameLabelColor(color);
-						// 		} else {
-						// 			throw new Error(`Is '${color}' a valid hex code or extended color string? Correct unit?`);
-						// 		}
-						// 	} catch (err) {
-						// 		self._script.errorLog(err, path);
-						// 	}
+					// 	try {
+					// 		if (
+					// 			unit &&
+					// 			typeof color === 'string' &&
+					// 			Colors.isValidColor(color)
+					// 		) {
+					// 			unit.setNameLabelColor(color);
+					// 		} else {
+					// 			throw new Error(`Is '${color}' a valid hex code or extended color string? Correct unit?`);
+					// 		}
+					// 	} catch (err) {
+					// 		self._script.errorLog(err, path);
+					// 	}
 
-						// 	break;
+					// 	break;
 
 					case 'setUnitNameLabelColorForPlayer':
 						var unit = self._script.param.getValue(action.unit, vars);
@@ -1619,7 +1668,7 @@ var ActionComponent = TaroEntity.extend({
 						}
 						break;
 
-						/* Item */
+					/* Item */
 
 					case 'startUsingItem':
 						if (entity && entity._category == 'item') {
@@ -1646,7 +1695,7 @@ var ActionComponent = TaroEntity.extend({
 						var item = self._script.param.getValue(action.entity, vars);
 						var quantity = self._script.param.getValue(action.quantity, vars);
 						if (item && item._category == 'item') {
-							item.streamUpdateData([{ quantity: quantity }]);
+							item.updateQuantity(quantity);
 						}
 						break;
 
@@ -1830,7 +1879,7 @@ var ActionComponent = TaroEntity.extend({
 						}
 						break;
 
-						/* particles */
+					/* particles */
 
 					case 'emitParticlesAtPosition':
 						var position = self._script.param.getValue(action.position, vars);
@@ -2266,7 +2315,7 @@ var ActionComponent = TaroEntity.extend({
 
 						break;
 
-						/* Ads */
+					/* Ads */
 
 					case 'playAdForEveryone':
 						if (taro.game.data.defaultData.tier && parseInt(taro.game.data.defaultData.tier) !== 1) {
@@ -2315,7 +2364,7 @@ var ActionComponent = TaroEntity.extend({
 						}
 						break;
 
-						/* Music */
+					/* Music */
 
 					case 'playMusic':
 						var music = taro.game.data.music[action.music];
@@ -2403,7 +2452,7 @@ var ActionComponent = TaroEntity.extend({
 						}
 						break;
 
-						/* Entity */
+					/* Entity */
 
 					case 'flipEntitySprite':
 
@@ -2903,15 +2952,15 @@ var ActionComponent = TaroEntity.extend({
 								entity.applyTorque(torque);
 								// entity.body.applyTorque(torque);
 							} else {
-								throw new Error(`${action.type  } - invalid position`);
+								throw new Error(`${action.type} - invalid position`);
 							}
 						} else {
 							self._script.errorLog(`invalid unit, ${action.type}`, path);
-							throw new Error(`${action.type  } - invalid unit`);
+							throw new Error(`${action.type} - invalid unit`);
 						}
 						break;
 
-						/* AI */
+					/* AI */
 
 					case 'addBotPlayer':
 						var name = self._script.param.getValue(action.name, vars) || '';
@@ -3401,7 +3450,7 @@ var ActionComponent = TaroEntity.extend({
 							}, player._stats.clientId);
 						}
 						break;
-					
+
 					case 'openSkinShop':
 						var player = self._script.param.getValue(action.player, vars);
 						if (player && taro.game.data.defaultData.tier >= '2') {
