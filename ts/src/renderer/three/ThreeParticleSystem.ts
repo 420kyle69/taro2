@@ -153,7 +153,11 @@ class ThreeParticleSystem {
 
 			if (particle.live > 0) {
 				particle.live -= delta;
+			} else {
+				particle.color[3] -= particle.opacity_decrease;
+			}
 
+			if (particle.color[3] > 0) {
 				if (particle.color_t < 1) {
 					const p = particle;
 					particle.color[0] = p.color_from[0] + (p.color_to[0] - p.color_from[0]) * p.color_t;
@@ -223,6 +227,7 @@ class ThreeParticleSystem {
 			color_speed: Math.random() * (emitter.color_speed_to - emitter.color_speed_from) + emitter.color_speed_from,
 			color_t: 0,
 			blend: emitter.blend,
+			opacity_decrease: emitter.opacity_decrease,
 		});
 	}
 }
