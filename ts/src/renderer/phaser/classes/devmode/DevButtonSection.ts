@@ -1,4 +1,4 @@
-class DevButtonSection {
+/*class DevButtonSection {
 	name: string;
     container: Phaser.GameObjects.Container;
 	header: Phaser.GameObjects.Rectangle;
@@ -47,4 +47,4 @@ class DevButtonSection {
 		array.push(button);
 	}
 
-}
+}*/

@@ -24,7 +24,7 @@ class RegionEditor {
 					x: worldPoint.x,
 					y: worldPoint.y,
 				};
-			} else if (taro.developerMode.active && taro.developerMode.activeTab === 'map' && this.devModeScene.devModeTools.cursorButton.active && pointer.leftButtonDown()) {
+			} else if (taro.developerMode.active && taro.developerMode.activeTab === 'map' && this.devModeScene.devModeTools.activeButton === 'cursor' && pointer.leftButtonDown()) {
                 gameObjects = gameObjects.filter(gameObject => gameObject.phaserRegion);
                 gameObjects.forEach(gameObject => {
                     this.devModeScene.regionEditor.addClickedList({name: gameObject.phaserRegion.entity._stats.id, x: gameObject.phaserRegion.stats.x, y: gameObject.phaserRegion.stats.y, width: gameObject.phaserRegion.stats.width, height: gameObject.phaserRegion.stats.height, alpha: gameObject.phaserRegion.stats.alpha, inside: gameObject.phaserRegion.stats.inside});
@@ -57,7 +57,7 @@ class RegionEditor {
 			if (this.regionTool && this.regionDrawStart && this.regionDrawStart.x !== worldPoint.x && this.regionDrawStart.y !== worldPoint.y) {
 				graphics.clear();
 				this.regionTool = false;
-				this.devModeTools.highlightModeButton(0);	//need to add this logic on html buttons
+				//this.devModeTools.highlightModeButton(0);	//need to add this logic on html buttons
 				taro.mapEditorUI.highlightModeButton('cursor');
 				let x = this.regionDrawStart.x;
 				let y = this.regionDrawStart.y;
@@ -100,7 +100,7 @@ class RegionEditor {
 		if (this.regionTool) {
 			this.regionDrawGraphics.clear();
 			this.regionTool = false;
-			this.devModeTools.highlightModeButton(0); //need to add this logic on html buttons-+
+			//this.devModeTools.highlightModeButton(0); //need to add this logic on html buttons-+
 			taro.mapEditorUI.highlightModeButton('cursor');
 			this.regionDrawStart = null;
 		}

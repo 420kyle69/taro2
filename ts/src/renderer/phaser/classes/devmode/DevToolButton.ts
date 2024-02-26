@@ -1,4 +1,4 @@
-class DevToolButton {
+/*class DevToolButton {
 	name: string;
 	button: Phaser.GameObjects.Rectangle;
 	active: boolean;
@@ -62,7 +62,7 @@ class DevToolButton {
 
 				label.visible = false;
 			}*/
-		}
+		/*}
 		button.on('pointerdown', () => {
 			if (value || value === 0) func(value);
 			else func();
@@ -109,7 +109,7 @@ class DevToolButton {
 		}, delay);
 	}*/
 
-	highlight(mode: 'no' | 'active' | 'hidden'): void {
+	/*highlight(mode: 'no' | 'active' | 'hidden'): void {
 		switch (mode) {
 			case 'hidden':
 				this.hidden = true;
@@ -135,4 +135,4 @@ class DevToolButton {
 	increaseSize(value: boolean): void {
 		this.button.setScale(1 + (Number(value) * 0.1), 1 + (Number(value) * 0.05));
 	}
-}
+}*/
