@@ -390,6 +390,8 @@ class TileEditor {
 			const marker = this.marker;
 			const paletteMarker = this.paletteMarker;
 			paletteMarker.graphics.setVisible(true);
+			marker.graphics.setVisible(false);
+			marker.showPreview(false);
 
 			// Rounds down to nearest tile
 			const palettePointerTileX = paletteMap.worldToTileX(palettePoint.x);
