@@ -636,6 +636,8 @@ class MapEditorUI {
 			bottom: 0px;
 			left: 0px;
 		  	font-family: 'Rubik';
+			pointer-events: none;
+			z-index: 1000;
 		}
 
 		@media (min-height: 901px) {
@@ -648,6 +650,7 @@ class MapEditorUI {
 			bottom: calc(25vh + 50px);
 			right: 20px;
 			width: 90px;
+			pointer-events: auto;
 		}
 		
 		.change-palette-div {
@@ -656,6 +659,7 @@ class MapEditorUI {
 			right: calc(25vw - 20px);
 			bottom: calc(25vh + 50px);
 			gap: 5px;	
+			pointer-events: auto;
 		}
 
 		.change-palette-div button {
