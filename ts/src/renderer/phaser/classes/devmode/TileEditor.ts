@@ -74,6 +74,7 @@ class TileEditor {
 				pointerPosition.y = devModeScene.input.activePointer.y;
 				if (devModeTools.activeButton !== 'fill') {
 					this.devModeTools.brush();
+					this.devModeTools.activeButton = 'brush';
 					taro.mapEditorUI.highlightModeButton('stamp');
 				}
 				if (p.button === 0) {
