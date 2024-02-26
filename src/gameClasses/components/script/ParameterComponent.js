@@ -1281,6 +1281,20 @@ var ParameterComponent = TaroEntity.extend({
 
 						break;
 
+					case 'getServerAge':
+						const timestampStr = taro.server.started_at;
+						const timestamp = new Date(timestampStr);
+						const millisecondsSinceEpoch = timestamp.getTime();
+						
+						returnValue = Date.now() - millisecondsSinceEpoch;
+
+						break;
+
+					case 'getServerStartTime':
+						returnValue = new Date(taro.server.started_at);
+							
+						break;
+
 					case 'getEntireMapRegion':
 						var region = {
 							x: 0,
