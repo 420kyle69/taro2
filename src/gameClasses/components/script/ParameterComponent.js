@@ -1272,10 +1272,10 @@ var ParameterComponent = TaroEntity.extend({
 
 						break;
 
-					case 'getServerLifetime':
-						var timestampStr = taro.server.started_at;
-						var timestamp = new Date(timestampStr);
-						var millisecondsSinceEpoch = timestamp.getTime();
+					case 'getServerAge':
+						const timestampStr = taro.server.started_at;
+						const timestamp = new Date(timestampStr);
+						const millisecondsSinceEpoch = timestamp.getTime();
 						
 						returnValue = Date.now() - millisecondsSinceEpoch;
 
