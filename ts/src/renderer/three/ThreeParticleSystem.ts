@@ -8,10 +8,8 @@ class ThreeParticleSystem {
 		const maxParticles = 10000;
 
 		const uniforms = {
-			diffuseTexture: {
-				value: ThreeTextureManager.instance().textureMap.get(
-					'https://cache.modd.io/asset/spriteImage/1706669285561_Tree_(1)_(2).png'
-				),
+			diffuseTextures: {
+				value: ThreeTextureManager.instance().getTexturesWithKeyContains('particle'),
 			},
 		};
 
@@ -50,6 +48,10 @@ class ThreeParticleSystem {
 		);
 		this.geometry.setAttribute(
 			'blend',
+			new THREE.InstancedBufferAttribute(new Float32Array(maxParticles), 1).setUsage(THREE.DynamicDrawUsage)
+		);
+		this.geometry.setAttribute(
+			'texture',
 			new THREE.InstancedBufferAttribute(new Float32Array(maxParticles), 1).setUsage(THREE.DynamicDrawUsage)
 		);
 
@@ -105,6 +107,7 @@ class ThreeParticleSystem {
 		const scaleAttribute = this.geometry.attributes.scale.array;
 		const colorAttribute = this.geometry.attributes.color.array;
 		const blendAttribute = this.geometry.attributes.blend.array;
+		const textureAttribute = this.geometry.attributes.texture.array;
 
 		for (var n = 0; n < count; n++) {
 			const particle = this.particles[n];
@@ -121,12 +124,15 @@ class ThreeParticleSystem {
 			colorAttribute[n * 4 + 3] = particle.color[3];
 
 			blendAttribute[n] = particle.blend;
+
+			textureAttribute[n] = particle.texture;
 		}
 
 		this.geometry.attributes.offset.needsUpdate = true;
 		this.geometry.attributes.scale.needsUpdate = true;
 		this.geometry.attributes.color.needsUpdate = true;
 		this.geometry.attributes.blend.needsUpdate = true;
+		this.geometry.attributes.texture.needsUpdate = true;
 
 		this.geometry.instanceCount = count;
 	}
@@ -228,6 +234,7 @@ class ThreeParticleSystem {
 			color_t: 0,
 			blend: emitter.blend,
 			opacity_decrease: emitter.opacity_decrease,
+			texture: emitter.texture,
 		});
 	}
 }
@@ -237,15 +244,18 @@ const vs = `
   attribute vec2 scale;
   attribute vec4 color;
   attribute float blend;
+  attribute float texture;
 
   varying vec2 vUv;
   varying vec4 vColor;
   varying float vBlend;
+  varying float vTexture;
 
   void main() {
     vUv = uv;
     vColor = color;
     vBlend = blend;
+    vTexture = texture;
 
     // https://www.opengl-tutorial.org/intermediate-tutorials/billboards-particles/billboards/
     vec3 cameraRight = vec3(viewMatrix[0][0], viewMatrix[1][0], viewMatrix[2][0]);
@@ -257,14 +267,16 @@ const vs = `
 `;
 
 const fs = `
-  uniform sampler2D diffuseTexture;
+  uniform sampler2D diffuseTextures[16];
 
   varying vec2 vUv;
   varying vec4 vColor;
   varying float vBlend;
+  varying float vTexture;
 
   void main() {
-    gl_FragColor = texture2D(diffuseTexture, vUv) * vColor;
+    if (vTexture == 0.0) gl_FragColor = texture2D(diffuseTextures[0], vUv) * vColor;
+
     gl_FragColor.a *= vBlend;
   }
 `;

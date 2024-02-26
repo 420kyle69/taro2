@@ -111,7 +111,7 @@ class ThreeRenderer {
 
 		for (const type of Object.values(data.particleTypes)) {
 			const key = type.url;
-			textureManager.loadFromUrl(key, Utils.patchAssetUrl(key));
+			textureManager.loadFromUrl(`particle/${key}`, Utils.patchAssetUrl(key));
 		}
 
 		const skyboxUrls = taro.game.data.settings.skybox;

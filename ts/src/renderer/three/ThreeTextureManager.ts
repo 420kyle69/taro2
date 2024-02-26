@@ -32,4 +32,9 @@ class ThreeTextureManager {
 	setFilter(filter: renderingFilter) {
 		this.filter = filter === 'pixelArt' ? THREE.NearestFilter : THREE.LinearFilter;
 	}
+
+	getTexturesWithKeyContains(str: string) {
+		const keys = [...this.textureMap.keys()].filter((k) => k.includes(str));
+		return keys.map((k) => this.textureMap.get(k));
+	}
 }
