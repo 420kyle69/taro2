@@ -48,6 +48,10 @@ class ThreeParticleSystem {
 			'color',
 			new THREE.InstancedBufferAttribute(new Float32Array(maxParticles * 4), 4).setUsage(THREE.DynamicDrawUsage)
 		);
+		this.geometry.setAttribute(
+			'blend',
+			new THREE.InstancedBufferAttribute(new Float32Array(maxParticles), 1).setUsage(THREE.DynamicDrawUsage)
+		);
 
 		const points = new THREE.Mesh(this.geometry, material);
 		points.frustumCulled = false;
@@ -100,6 +104,7 @@ class ThreeParticleSystem {
 		const offsetAttribute = this.geometry.attributes.offset.array;
 		const scaleAttribute = this.geometry.attributes.scale.array;
 		const colorAttribute = this.geometry.attributes.color.array;
+		const blendAttribute = this.geometry.attributes.blend.array;
 
 		for (var n = 0; n < count; n++) {
 			const particle = this.particles[n];
@@ -114,11 +119,14 @@ class ThreeParticleSystem {
 			colorAttribute[n * 4 + 1] = particle.color[1];
 			colorAttribute[n * 4 + 2] = particle.color[2];
 			colorAttribute[n * 4 + 3] = particle.color[3];
+
+			blendAttribute[n] = particle.blend;
 		}
 
 		this.geometry.attributes.offset.needsUpdate = true;
 		this.geometry.attributes.scale.needsUpdate = true;
 		this.geometry.attributes.color.needsUpdate = true;
+		this.geometry.attributes.blend.needsUpdate = true;
 
 		this.geometry.instanceCount = count;
 	}
@@ -214,6 +222,7 @@ class ThreeParticleSystem {
 			color_to: [emitter.color_to[0] * brightness, emitter.color_to[1] * brightness, emitter.color_to[2] * brightness],
 			color_speed: Math.random() * (emitter.color_speed_to - emitter.color_speed_from) + emitter.color_speed_from,
 			color_t: 0,
+			blend: emitter.blend,
 		});
 	}
 }
@@ -222,13 +231,16 @@ const vs = `
   attribute vec3 offset;
   attribute vec2 scale;
   attribute vec4 color;
+  attribute float blend;
 
   varying vec2 vUv;
   varying vec4 vColor;
+  varying float vBlend;
 
   void main() {
     vUv = uv;
     vColor = color;
+    vBlend = blend;
 
     // https://www.opengl-tutorial.org/intermediate-tutorials/billboards-particles/billboards/
     vec3 cameraRight = vec3(viewMatrix[0][0], viewMatrix[1][0], viewMatrix[2][0]);
@@ -241,10 +253,13 @@ const vs = `
 
 const fs = `
   uniform sampler2D diffuseTexture;
+
   varying vec2 vUv;
   varying vec4 vColor;
+  varying float vBlend;
 
   void main() {
     gl_FragColor = texture2D(diffuseTexture, vUv) * vColor;
+    gl_FragColor.a *= vBlend;
   }
 `;
