@@ -163,7 +163,8 @@ class DevModeTools extends Phaser.GameObjects.Container {
 
 	keyBindings(): void {
 		const keyboard = this.scene.input.keyboard;
-
+		const altKey = this.altKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ALT, true);
+		const shiftKey = this.shiftKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT, false);
 		const deleteEntity = (event) => {
 			if (!taro.developerMode.checkIfInputModalPresent() && taro.developerMode.active && taro.developerMode.activeTab === 'map') {
                 this.entityEditor.deleteInitEntity();
