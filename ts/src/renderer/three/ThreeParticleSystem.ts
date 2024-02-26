@@ -5,6 +5,8 @@ class ThreeParticleSystem {
 	particleEmitters = [];
 
 	constructor() {
+		const maxParticles = 10000;
+
 		const uniforms = {
 			diffuseTexture: {
 				value: ThreeTextureManager.instance().textureMap.get(
@@ -23,6 +25,7 @@ class ThreeParticleSystem {
 			blendEquation: THREE.AddEquation,
 			blendSrc: THREE.OneFactor,
 			blendDst: THREE.OneMinusSrcAlphaFactor,
+			forceSinglePass: true,
 		});
 
 		this.geometry.setAttribute(
@@ -33,7 +36,10 @@ class ThreeParticleSystem {
 			)
 		);
 		this.geometry.setAttribute('uv', new THREE.Float32BufferAttribute([0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0], 2));
-		this.geometry.setAttribute('offset', new THREE.InstancedBufferAttribute(new Float32Array(), 3));
+		this.geometry.setAttribute(
+			'offset',
+			new THREE.InstancedBufferAttribute(new Float32Array(maxParticles * 3), 3).setUsage(THREE.DynamicDrawUsage)
+		);
 
 		const points = new THREE.Mesh(this.geometry, material);
 		points.frustumCulled = false;
@@ -75,10 +81,10 @@ class ThreeParticleSystem {
 	update(dt: number, time: number, camera: THREE.Camera) {
 		this.particleEmittersUpdate(dt);
 
-		var count = this.particles.length;
-		var x = camera.position.x;
-		var y = camera.position.y;
-		var z = camera.position.z;
+		const count = this.particles.length;
+		const x = camera.position.x;
+		const y = camera.position.y;
+		const z = camera.position.z;
 
 		for (var n = 0; n < count; n++) {
 			const offset = this.particles[n].offset;
@@ -89,25 +95,18 @@ class ThreeParticleSystem {
 
 		this.particles.sort((a, b) => b.d - a.d);
 
-		const offset = new Float32Array(count * 3);
+		const offsetAttribute = this.geometry.attributes.offset.array;
 
 		for (var n = 0; n < count; n++) {
 			const particle = this.particles[n];
-
-			let p = n * 3;
-			let one = p + 1;
-			let two = p + 2;
-			const i_offset = particle.offset;
-			offset[p] = i_offset[0];
-			offset[one] = i_offset[1];
-			offset[two] = i_offset[2];
+			offsetAttribute[n * 3 + 0] = particle.offset[0];
+			offsetAttribute[n * 3 + 1] = particle.offset[1];
+			offsetAttribute[n * 3 + 2] = particle.offset[2];
 		}
 
-		const attributes = this.geometry.attributes;
-		attributes.offset = new THREE.InstancedBufferAttribute(offset, 3).setUsage(THREE.DynamicDrawUsage);
+		this.geometry.attributes.offset.needsUpdate = true;
 
-		// Why doesn instanceCount not work? Look into InstancedMesh
-		this.geometry._maxInstanceCount = count;
+		this.geometry.instanceCount = count;
 	}
 
 	particleEmittersUpdate(delta) {
