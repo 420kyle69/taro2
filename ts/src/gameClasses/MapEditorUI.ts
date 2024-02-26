@@ -101,6 +101,12 @@ class MapEditorUI {
 		return titleDiv;
 	}
 
+	showLayer(layerDiv, layerEyeImg) {
+		layerDiv.classList.remove('hidden-layer');
+		layerDiv.classList.add('visible');
+		layerEyeImg.src = this.imageMap['eyeopen'];
+	}
+
 	createLayerButton({ layer, index, layerIndex }) {
 		const layerDiv = document.createElement('div');
 		layerDiv.className = 'layer-button-div visible';
@@ -135,11 +141,10 @@ class MapEditorUI {
 				layerEyeImg.src = this.imageMap['eyeclosed'];
 				state = true;
 			} else {
-				layerDiv.classList.remove('hidden-layer');
-				layerDiv.classList.add('visible');
-				layerEyeImg.src = this.imageMap['eyeopen'];
+				this.showLayer(layerDiv, layerEyeImg);
 				state = false;
 			}
+
 			taro.client.emit('hide-layer', { index, state });
 		};
 
@@ -172,7 +177,7 @@ class MapEditorUI {
 		layerDiv.appendChild(layerEyeButton);
 		layerDiv.appendChild(layerText);
 
-		return { layerDiv, switchLayer, toggleLayerVisibility, index };
+		return { layerDiv, layerEyeImg, switchLayer, toggleLayerVisibility, index };
 	}
 
 	showMapEditor() {
@@ -565,6 +570,10 @@ class MapEditorUI {
 		if (mapEditorButtonsContainer) {
 			mapEditorButtonsContainer.style.display = 'none';
 		}
+
+		this.layers.forEach(({ layerDiv, layerEyeImg }) => {
+			this.showLayer(layerDiv, layerEyeImg);
+		});
 	}
 
 	highlightToolsButton = (key, eventName) => {
