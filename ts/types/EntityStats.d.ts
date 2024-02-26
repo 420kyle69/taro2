@@ -54,4 +54,7 @@ declare interface EntityStats {
 		unitAbilities: Record<string, UnitAbility>;
 	};
 	ownerUnitId: string;
+	cameraPointerLock?: boolean;
+	cameraPitchRange?: { min: number; max: number };
+	cameraOffset?: { x: number; y: number; z: number };
 }

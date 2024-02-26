@@ -138,6 +138,7 @@ declare class GameComponent extends TaroEntity {
 					width: number;
 					height: number;
 				};
+				projectionMode: 'orthographic' | 'perspective';
 			};
 			skybox: {
 				left: string;

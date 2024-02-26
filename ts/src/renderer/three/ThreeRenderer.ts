@@ -35,6 +35,11 @@ class ThreeRenderer {
 		const height = window.innerHeight;
 
 		this.camera = new ThreeCamera(width, height, this.renderer.domElement);
+		this.camera.setElevationAngle(90);
+
+		if (taro.game.data.settings.camera.projectionMode !== 'orthographic') {
+			this.camera.setProjection(taro.game.data.settings.camera.projectionMode);
+		}
 
 		this.scene = new THREE.Scene();
 		this.scene.translateX(-taro.game.data.map.width / 2);
@@ -48,7 +53,7 @@ class ThreeRenderer {
 
 			if (this.zoomSize) {
 				const ratio = Math.max(window.innerWidth, window.innerHeight) / this.zoomSize;
-				this.camera.zoom(ratio);
+				this.camera.setZoom(ratio);
 				taro.client.emit('scale', { ratio: ratio * this.resolutionCoef });
 				taro.client.emit('update-abilities-position');
 
@@ -143,7 +148,7 @@ class ThreeRenderer {
 			const ratio = Math.max(window.innerWidth, window.innerHeight) / this.zoomSize;
 
 			// TODO: Quadratic zoomTo over 1 second
-			this.camera.zoom(ratio);
+			this.camera.setZoom(ratio);
 
 			taro.client.emit('scale', { ratio: ratio * this.resolutionCoef });
 
@@ -154,7 +159,6 @@ class ThreeRenderer {
 
 		taro.client.on('stop-follow', () => {
 			this.camera.stopFollow();
-			this.scene.attach(this.skybox.scene);
 		});
 
 		const layers = {
@@ -219,7 +223,23 @@ class ThreeRenderer {
 			const createEntity = () => {
 				const e = new ThreeUnit(tex.clone());
 				this.animatedSprites.push(e);
-				e.billboard = !!entity._stats.isBillboard;
+				e.setBillboard(!!entity._stats.isBillboard, this.camera);
+
+				if (entity._stats.cameraPointerLock) {
+					e.cameraConfig.pointerLock = entity._stats.cameraPointerLock;
+				}
+
+				if (entity._stats.cameraPitchRange) {
+					e.cameraConfig.pitchRange = entity._stats.cameraPitchRange;
+				}
+
+				if (entity._stats.cameraOffset) {
+					// From editor XZY to Three.js XYZ
+					e.cameraConfig.offset.x = entity._stats.cameraOffset.x;
+					e.cameraConfig.offset.y = entity._stats.cameraOffset.z;
+					e.cameraConfig.offset.z = entity._stats.cameraOffset.y;
+				}
+
 				return e;
 			};
 
@@ -279,8 +299,14 @@ class ThreeRenderer {
 				'follow',
 				() => {
 					this.camera.startFollow(ent);
-					this.skybox.scene.position.copy(ent.position);
-					ent.attach(this.skybox.scene);
+
+					const offset = ent.cameraConfig.offset;
+					this.camera.setOffset(offset.x, offset.y, offset.z);
+
+					if (ent.cameraConfig.pointerLock) {
+						const { min, max } = ent.cameraConfig.pitchRange;
+						this.camera.setElevationRange(min, max);
+					}
 				},
 				this
 			);
@@ -400,6 +426,8 @@ class ThreeRenderer {
 		taro.client.on('create-item', (i: Item) => createEntity(i), this);
 		taro.client.on('create-projectile', (p: Projectile) => createEntity(p), this);
 
+		taro.client.on('camera-pitch', (deg: number) => this.camera.setElevationAngle(deg));
+
 		this.renderer.domElement.addEventListener('mousemove', (evt: MouseEvent) => {
 			this.pointer.set((evt.clientX / window.innerWidth) * 2 - 1, -(evt.clientY / window.innerHeight) * 2 + 1);
 		});
@@ -436,6 +464,11 @@ class ThreeRenderer {
 		}
 
 		this.camera.update();
+
+		if (this.camera.target) {
+			this.skybox.scene.position.copy(this.camera.target.position);
+		}
+
 		this.renderer.render(this.scene, this.camera.instance);
 	}
 

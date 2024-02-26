@@ -16,9 +16,7 @@ class ThreeAttributeBar extends THREE.Group {
 	) {
 		super();
 
-		const threeRenderer = ThreeRenderer.getInstance();
-		const zoomScale = 1 / threeRenderer.camera.zoomLevel;
-		this.scaleScalar = zoomScale;
+		this.scaleScalar = 1;
 
 		this.sprite = this.createBar(this.width, this.height, this.radius, 'yellow', 100, 100);
 		this.add(this.sprite);

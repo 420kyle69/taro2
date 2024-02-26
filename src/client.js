@@ -309,6 +309,14 @@ const Client = TaroEventingClass.extend({
 			taro.game.data.settings.skybox = {};
 		}
 
+		if (!taro.game.data.settings.camera) {
+			taro.game.data.settings.camera = {};
+		}
+
+		if (taro.game.data.settings.camera.defaultPitch === undefined) {
+			taro.game.data.settings.camera.defaultPitch = 0;
+		}
+
 		if (!taro.game.data.settings.camera.projectionMode) {
 			taro.game.data.settings.camera.projectionMode = 'orthographic';
 		}
@@ -316,7 +324,7 @@ const Client = TaroEventingClass.extend({
 		Object.keys(skyboxDefaultUrls).forEach((key) => {
 			if (taro.game.data.settings.skybox[key] === undefined) {
 				taro.game.data.settings.skybox[key] = skyboxDefaultUrls[key];
-			} 
+			}
 		});
 	},
 
@@ -859,7 +867,7 @@ const Client = TaroEventingClass.extend({
 	positionCamera: function (x, y) {
 		if (x != undefined && y != undefined) {
 			this.emit('stop-follow');
-			this.emit('position-camera', [x, y]);
+			this.emit('camera-position', [x, y]);
 		}
 	},
 
