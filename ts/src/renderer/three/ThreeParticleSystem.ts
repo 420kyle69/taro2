@@ -85,25 +85,19 @@ class ThreeParticleSystem {
 		const x = camera.position.x;
 		const y = camera.position.y;
 		const z = camera.position.z;
-
 		for (var n = 0; n < count; n++) {
 			const offset = this.particles[n].offset;
-			this.particles[n].d = Math.sqrt(
-				Math.pow(x - offset[0], 2) + Math.pow(y - offset[1], 2) + Math.pow(z - offset[2], 2)
-			);
+			this.particles[n].dSq = Math.pow(x - offset[0], 2) + Math.pow(y - offset[1], 2) + Math.pow(z - offset[2], 2);
 		}
-
-		this.particles.sort((a, b) => b.d - a.d);
+		this.particles.sort((a, b) => b.dSq - a.dSq);
 
 		const offsetAttribute = this.geometry.attributes.offset.array;
-
 		for (var n = 0; n < count; n++) {
 			const particle = this.particles[n];
 			offsetAttribute[n * 3 + 0] = particle.offset[0];
 			offsetAttribute[n * 3 + 1] = particle.offset[1];
 			offsetAttribute[n * 3 + 2] = particle.offset[2];
 		}
-
 		this.geometry.attributes.offset.needsUpdate = true;
 
 		this.geometry.instanceCount = count;
