@@ -141,11 +141,11 @@ class TilePalette extends Phaser.GameObjects.Container {
         const commandController = this.commandController;
         if (taro.developerMode.active && taro.developerMode.activeTab !== 'play') {
             if (this.devModeScene.devModeTools.altKey.isDown && !this.devModeScene.devModeTools.isForceTo1x1()) {
-                if (deltaY > 0) {
-                    commandController.defaultCommands.decreaseBrushSize();
-                } else if (deltaY < 0) {
-                    commandController.defaultCommands.increaseBrushSize();
-                }
+                // if (deltaY > 0) {
+                //     commandController.defaultCommands.decreaseBrushSize();
+                // } else if (deltaY < 0) {
+                //     commandController.defaultCommands.increaseBrushSize();
+                // }
             } else {
                 if (this.visible && this.pointerover) {
                     this.zoom(deltaY);
