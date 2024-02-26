@@ -3,6 +3,7 @@ class ThreeParticleSystem {
 	particles = [];
 	geometry = new THREE.InstancedBufferGeometry();
 	particleEmitters = [];
+	offset = { x: -15.828125, y: 2.0, z: -59.484375 };
 
 	constructor() {
 		const maxParticles = 10000;
@@ -61,7 +62,7 @@ class ThreeParticleSystem {
 		this.node = points;
 
 		this.particleEmitters.push({
-			position: { x: -15.828125, y: 2.0, z: -59.484375 },
+			position: { x: 0, y: 0, z: 0 },
 			radius_1: 0.02,
 			radius_2: 1,
 			radius_height: 5,
@@ -89,6 +90,11 @@ class ThreeParticleSystem {
 	}
 
 	update(dt: number, time: number, camera: THREE.Camera) {
+		const item = this.particleEmitters[0].position;
+		item.x = Math.sin(time / 1) * 4 + this.offset.x;
+		item.z = Math.cos(time / 1) * 4 + this.offset.z;
+		item.y = this.offset.y;
+
 		this.particleEmittersUpdate(dt);
 
 		const count = this.particles.length;
