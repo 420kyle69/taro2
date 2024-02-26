@@ -383,7 +383,7 @@ var ClientNetworkEvents = {
 					taro.shop.skinShop(data);
 					break;
 				}
-					
+
 			}
 		}
 		);
@@ -746,7 +746,7 @@ var ClientNetworkEvents = {
 		var element = document.getElementById("error-log-content");
 		for (actionName in logs) {
 			var log = logs[actionName];
-			element.innerHTML += `<li style='font-size:12px;'>${log}</li>`;
+			// element.innerHTML += `<li style='font-size:12px;'>${log}</li>`;
 			taro.client.errorLogs.push({ ...log, path: actionName });
 			$("#dev-error-button").text(`Errors (${taro.client.errorLogs.length})`);
 
