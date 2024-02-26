@@ -125,6 +125,7 @@ class MapEditorUI {
 		});
 
 		const toggleLayerVisibility = () => {
+			let state = false;
 			const isVisible = layerDiv.classList.contains('visible');
 			const isActive = layerDiv.classList.contains('active');
 			if (isVisible || isActive) {
@@ -132,11 +133,14 @@ class MapEditorUI {
 				layerDiv.classList.remove('active');
 				layerDiv.classList.add('hidden-layer');
 				layerEyeImg.src = this.imageMap['eyeclosed'];
+				state = true;
 			} else {
 				layerDiv.classList.remove('hidden-layer');
 				layerDiv.classList.add('visible');
 				layerEyeImg.src = this.imageMap['eyeopen'];
+				state = false;
 			}
+			taro.client.emit('hide-layer', { index, state });
 		};
 
 		const switchLayer = () => {
@@ -157,8 +161,6 @@ class MapEditorUI {
 
 		layerEyeButton.onmousedown = () => {
 			toggleLayerVisibility();
-			// toggle layer visibility
-			taro.client.emit('hide-layer', index);
 		};
 
 		layerText.onmousedown = () => {
