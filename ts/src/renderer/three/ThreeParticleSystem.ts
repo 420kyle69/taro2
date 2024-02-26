@@ -64,40 +64,14 @@ class ThreeParticleSystem {
 		// eslint-disable-next-line @typescript-eslint/no-empty-function
 		points.updateMatrixWorld = function () {};
 		this.node = points;
-
-		this.particleEmitters.push({
-			position: { x: 0, y: 0, z: 0 },
-			radius_1: 0.02,
-			radius_2: 1,
-			radius_height: 5,
-			add_time: 0.01,
-			elapsed: 0,
-			live_time_from: 1,
-			live_time_to: 1.5,
-			opacity_decrease: 0.008,
-			rotation_from: 0.5,
-			rotation_to: 1,
-			speed_from: 0.005,
-			speed_to: 0.01,
-			scale_from: 0.2,
-			scale_increase: 0.004,
-			color_from: [2, 2, 2],
-			color_to: [0, 0, 0],
-			color_speed_from: 1,
-			color_speed_to: 1,
-			brightness_from: 1,
-			brightness_to: 1,
-			opacity: 1,
-			blend: 0.8,
-			texture: 1,
-		});
 	}
 
 	update(dt: number, time: number, camera: THREE.Camera) {
-		const item = this.particleEmitters[0].position;
-		item.x = Math.sin(time / 1) * 4 + this.offset.x;
-		item.z = Math.cos(time / 1) * 4 + this.offset.z;
-		item.y = this.offset.y;
+		for (let i = 0; i < this.particleEmitters.length; i++) {
+			const emitter = this.particleEmitters[i].position;
+			emitter.x = Math.sin(time / 1) * 4 + this.offset.x;
+			emitter.z = Math.cos(time / 1) * 4 + this.offset.z;
+		}
 
 		this.particleEmittersUpdate(dt);
 

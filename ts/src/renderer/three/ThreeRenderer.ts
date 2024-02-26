@@ -403,6 +403,60 @@ class ThreeRenderer {
 		this.particleSystem.node.position.y += 2;
 		this.particleSystem.node.renderOrder = 1200;
 		this.scene.add(this.particleSystem.node);
+
+		this.particleSystem.particleEmitters.push({
+			position: { x: 0, y: 1.5, z: 0 },
+			radius_1: 0.02,
+			radius_2: 1,
+			radius_height: 5,
+			add_time: 0.01,
+			elapsed: 0,
+			live_time_from: 1,
+			live_time_to: 1.5,
+			opacity_decrease: 0.008,
+			rotation_from: 0.5,
+			rotation_to: 1,
+			speed_from: 0.005,
+			speed_to: 0.01,
+			scale_from: 0.2,
+			scale_increase: 0.004,
+			color_from: [2, 2, 2],
+			color_to: [0, 0, 0],
+			color_speed_from: 1,
+			color_speed_to: 1,
+			brightness_from: 1,
+			brightness_to: 1,
+			opacity: 1,
+			blend: 0.8,
+			texture: 1,
+		});
+
+		this.particleSystem.particleEmitters.push({
+			position: { x: 0, y: 0.5, z: 0 },
+			radius_1: 20,
+			radius_2: 20,
+			radius_height: 10,
+			add_time: 0.005,
+			elapsed: 0,
+			live_time_from: 3,
+			live_time_to: 4,
+			opacity_decrease: 0.008,
+			rotation_from: 0.5,
+			rotation_to: 1,
+			speed_from: 0.005,
+			speed_to: 0.01,
+			scale_from: 0.02,
+			scale_increase: 0.00001,
+			color_from: [1, 1, 1],
+			color_to: [1, 1, 1],
+			color_speed_from: 1,
+			color_speed_to: 1,
+			brightness_from: 1,
+			brightness_to: 1,
+			opacity: 1,
+			blend: 1,
+			texture: 4,
+		});
 	}
 
 	private setupInputListeners(): void {
