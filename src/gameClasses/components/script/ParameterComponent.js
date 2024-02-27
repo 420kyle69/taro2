@@ -2002,9 +2002,11 @@ var ParameterComponent = TaroEntity.extend({
 						var sourceString = self.getValue(text.sourceString, vars);
 						var matchString = self.getValue(text.matchString, vars);
 						var newString = self.getValue(text.newString, vars);
-
+						
 						if (typeof sourceString == 'string' && typeof matchString == 'string' && typeof newString == 'string') {
-							returnValue = sourceString.split(matchString).join(newString);
+							// returnValue = sourceString.split(matchString).join(newString);
+							var regex = new RegExp(matchString, 'g');
+							returnValue = sourceString.replace(regex, newString);
 						}
 
 						break;
