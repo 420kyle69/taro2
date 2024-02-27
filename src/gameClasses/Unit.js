@@ -968,14 +968,16 @@ var Unit = TaroEntityPhysics.extend({
 		self._stats.currentItemId = null;
 
 		// give default items to the unit
-		if (data.defaultItems) {
-			for (var i = 0; i < data.defaultItems.length; i++) {
-				var item = data.defaultItems[i];
+		if (taro.isServer) {
+			if (data.defaultItems) {
+				for (var i = 0; i < data.defaultItems.length; i++) {
+					var item = data.defaultItems[i];
 
-				var itemData = taro.game.cloneAsset('itemTypes', item.key);
-				if (itemData) {
-					itemData.itemTypeId = item.key;
-					self.pickUpItem(itemData);
+					var itemData = taro.game.cloneAsset('itemTypes', item.key);
+					if (itemData) {
+						itemData.itemTypeId = item.key;
+						self.pickUpItem(itemData);
+					}
 				}
 			}
 		}
