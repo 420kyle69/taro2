@@ -1266,13 +1266,7 @@ var ParameterComponent = TaroEntity.extend({
 					case 'mathSign':
 						var value = self.getValue(text.value, vars);
 						if (!isNaN(value)) {
-							if (value > 0) {
-								returnValue = 1;
-							} else if (value < 0) {
-								returnValue = -1;
-							} else {
-								returnValue = 0;
-							}
+							returnValue =  Math.sign(value);
 						}
 						break;
 
