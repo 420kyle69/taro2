@@ -5,6 +5,13 @@ class ThreeParticleSystem {
 	particleEmitters = [];
 	offset = { x: -15.828125, y: 2.0, z: -59.484375 };
 
+	// Used during particle creation; avoid instantiating temp objects
+	private forward = new THREE.Vector3();
+	private right = new THREE.Vector3();
+	private up = new THREE.Vector3();
+	private basis = new THREE.Matrix4();
+	private direction = new THREE.Vector3();
+
 	constructor() {
 		const maxParticles = 10000;
 
@@ -181,33 +188,30 @@ class ThreeParticleSystem {
 	}
 
 	particleEmitterEmit(emitter) {
-		const radius_1 = emitter.radius_1 * Math.sqrt(Math.random());
-		let theta = 2 * Math.PI * Math.random();
-		const x_1 = emitter.position.x + radius_1 * Math.cos(theta);
-		const z_1 = emitter.position.z + radius_1 * Math.sin(theta);
+		this.forward.set(emitter.direction.x, emitter.direction.y, emitter.direction.z).normalize();
+		this.right.crossVectors({ x: 0, y: 1, z: 0 } as THREE.Vector3, this.forward).normalize();
+		if (this.forward.x <= Number.EPSILON && this.forward.z <= Number.EPSILON) {
+			this.right.set(0, 0, 1);
+		}
+		this.up.crossVectors(this.forward, this.right).normalize();
+		this.basis.makeBasis(this.right, this.up, this.forward);
 
-		const radius_2 = emitter.radius_2 * Math.sqrt(Math.random());
-		theta = 2 * Math.PI * Math.random();
-		const x_2 = x_1 + radius_2 * Math.cos(theta);
-		const z_2 = z_1 + radius_2 * Math.sin(theta);
-
-		let direction_x = x_2 - x_1;
-		let direction_y = emitter.radius_height;
-		let direction_z = z_2 - z_1;
-
+		const randAzimuth = Math.random() * (emitter.azimuth.max - emitter.azimuth.min) + emitter.azimuth.min;
+		const randElevation = Math.random() * (emitter.elevation.max - emitter.elevation.min) + emitter.elevation.min;
+		const angleOffset = Math.PI * 0.5;
 		const speed = Math.random() * (emitter.speed_to - emitter.speed_from) + emitter.speed_from;
 
-		const divide =
-			(1 / Math.sqrt(direction_x * direction_x + direction_y * direction_y + direction_z * direction_z)) * speed;
-		direction_x *= divide;
-		direction_y *= divide;
-		direction_z *= divide;
+		this.direction
+			.set(Math.cos(randAzimuth + angleOffset), Math.sin(randElevation), Math.sin(randAzimuth + angleOffset))
+			.normalize()
+			.applyMatrix4(this.basis)
+			.multiplyScalar(speed);
 
 		const brightness = Math.random() * (emitter.brightness_to - emitter.brightness_from) + emitter.brightness_from;
 
 		this.particles.push({
-			offset: [x_1, emitter.position.y, z_1],
-			quaternion: [direction_x, direction_y, direction_z, 3],
+			offset: [emitter.position.x, emitter.position.y, emitter.position.z],
+			quaternion: [this.direction.x, this.direction.y, this.direction.z, 3],
 			live: Math.random() * (emitter.live_time_to - emitter.live_time_from) + emitter.live_time_from,
 			scale: [emitter.scale_from, emitter.scale_from],
 			scale_increase: emitter.scale_increase,
