@@ -76,8 +76,8 @@ class ThreeParticleSystem {
 	update(dt: number, time: number, camera: THREE.Camera) {
 		for (let i = 0; i < this.particleEmitters.length; i++) {
 			const emitter = this.particleEmitters[i].position;
-			emitter.x = Math.sin(time / 1) * 4 + this.offset.x;
-			emitter.z = Math.cos(time / 1) * 4 + this.offset.z;
+			emitter.x = Math.sin(time / 1) * 4;
+			emitter.z = Math.cos(time / 1) * 4;
 		}
 
 		this.particleEmittersUpdate(dt);
@@ -162,8 +162,8 @@ class ThreeParticleSystem {
 				if (particle.color_t < 1) {
 					const p = particle;
 					particle.color[0] = p.color_from[0] + (p.color_to[0] - p.color_from[0]) * p.color_t;
-					particle.color[1] = p.color_from[1] + (p.color_to[0] - p.color_from[1]) * p.color_t;
-					particle.color[2] = p.color_from[1] + (p.color_to[0] - p.color_from[2]) * p.color_t;
+					particle.color[1] = p.color_from[1] + (p.color_to[1] - p.color_from[1]) * p.color_t;
+					particle.color[2] = p.color_from[2] + (p.color_to[2] - p.color_from[2]) * p.color_t;
 					particle.color_t += delta * particle.color_speed;
 				} else {
 					particle.color[0] = particle.color_to[0];
