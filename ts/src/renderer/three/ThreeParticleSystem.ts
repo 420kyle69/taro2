@@ -74,12 +74,6 @@ class ThreeParticleSystem {
 	}
 
 	update(dt: number, time: number, camera: THREE.Camera) {
-		for (let i = 0; i < this.particleEmitters.length; i++) {
-			const emitter = this.particleEmitters[i].position;
-			emitter.x = Math.sin(time / 1) * 4;
-			emitter.z = Math.cos(time / 1) * 4;
-		}
-
 		this.particleEmittersUpdate(dt);
 
 		const count = this.particles.length;

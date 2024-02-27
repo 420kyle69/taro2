@@ -433,20 +433,20 @@ class ThreeRenderer {
 		});
 
 		this.particleSystem.particleEmitters.push({
-			position: { x: this.particleSystem.offset.x, y: 0.5 + 2.5, z: this.particleSystem.offset.z },
-			direction: { x: 0, y: 1, z: 0 },
+			position: { x: 0, y: 0.5 + 2.5, z: 0 },
+			direction: { x: 1, y: 0, z: 0 },
 			azimuth: { min: -Math.PI, max: Math.PI },
-			elevation: { min: -Math.PI * 0.5, max: Math.PI * 0.5 },
+			elevation: { min: 0, max: Math.PI * 0.5 },
 			shape: { width: 16, height: 5, depth: 16 },
 			add_time: 0.005,
 			elapsed: 0,
-			live_time_from: 3,
-			live_time_to: 4,
+			live_time_from: 1,
+			live_time_to: 2,
 			opacity_decrease: 0.008,
 			rotation_from: 0.5,
 			rotation_to: 1,
-			speed_from: 0.005,
-			speed_to: 0.01,
+			speed_from: 0.002,
+			speed_to: 0.004,
 			scale_from: 0.02,
 			scale_increase: 0.00001,
 			color_from: [1, 1, 1],
@@ -456,7 +456,7 @@ class ThreeRenderer {
 			brightness_from: 1,
 			brightness_to: 1,
 			opacity: 1,
-			blend: 1,
+			blend: 0.8,
 			texture: 4,
 		});
 	}
@@ -496,6 +496,10 @@ class ThreeRenderer {
 		// the engine update. It should be the other way around.
 		const dt = this.clock.getDelta();
 		const time = this.clock.elapsedTime;
+
+		const emitter = this.particleSystem.particleEmitters[0].position;
+		emitter.x = Math.sin(time / 1) * 4;
+		emitter.z = Math.cos(time / 1) * 4;
 
 		this.particleSystem.update(dt, time, this.camera.instance);
 
