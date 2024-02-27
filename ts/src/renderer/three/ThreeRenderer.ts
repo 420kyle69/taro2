@@ -405,7 +405,7 @@ class ThreeRenderer {
 		this.scene.add(this.particleSystem.node);
 
 		this.particleSystem.particleEmitters.push({
-			position: { x: this.particleSystem.offset.x, y: 2, z: this.particleSystem.offset.z },
+			position: { x: this.particleSystem.offset.x, y: 1, z: this.particleSystem.offset.z },
 			direction: { x: 0, y: 1, z: 0 },
 			azimuth: { min: 0, max: 0 },
 			elevation: { min: 0, max: 0 },
@@ -420,19 +420,19 @@ class ThreeRenderer {
 			speed_to: 0.01,
 			scale_from: 0.2,
 			scale_increase: 0.004,
-			color_from: [2, 2, 2],
+			color_from: [4, 4, 4],
 			color_to: [0, 0, 0],
 			color_speed_from: 1,
 			color_speed_to: 1,
 			brightness_from: 1,
-			brightness_to: 1,
+			brightness_to: 1.2,
 			opacity: 1,
-			blend: 0.8,
+			blend: 1,
 			texture: 1,
 		});
 
 		this.particleSystem.particleEmitters.push({
-			position: { x: this.particleSystem.offset.x, y: 3, z: this.particleSystem.offset.z },
+			position: { x: this.particleSystem.offset.x, y: 1, z: this.particleSystem.offset.z },
 			direction: { x: 0, y: 1, z: 0 },
 			azimuth: { min: -Math.PI, max: Math.PI },
 			elevation: { min: -Math.PI * 0.5, max: Math.PI * 0.5 },
