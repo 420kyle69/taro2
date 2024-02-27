@@ -209,8 +209,15 @@ class ThreeParticleSystem {
 
 		const brightness = Math.random() * (emitter.brightness_to - emitter.brightness_from) + emitter.brightness_from;
 
+		const position = {
+			x: emitter.position.x + (emitter.shape.width * Math.random() - emitter.shape.width * 0.5),
+			y: emitter.position.y + (emitter.shape.height * Math.random() - emitter.shape.height * 0.5),
+			z: emitter.position.z + (emitter.shape.depth * Math.random() - emitter.shape.depth * 0.5),
+		};
+
 		this.particles.push({
-			offset: [emitter.position.x, emitter.position.y, emitter.position.z],
+			offset: [position.x, position.y, position.z],
+			// TODO: rename quaternion to velocity
 			quaternion: [this.direction.x, this.direction.y, this.direction.z, 3],
 			live: Math.random() * (emitter.live_time_to - emitter.live_time_from) + emitter.live_time_from,
 			scale: [emitter.scale_from, emitter.scale_from],

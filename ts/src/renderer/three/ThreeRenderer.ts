@@ -409,6 +409,7 @@ class ThreeRenderer {
 			direction: { x: 0, y: 1, z: 0 },
 			azimuth: { min: 0, max: 0 },
 			elevation: { min: 0, max: 0 },
+			shape: { width: 0, height: 0, depth: 0 },
 			add_time: 0.01,
 			elapsed: 0,
 			live_time_from: 1,
@@ -432,10 +433,11 @@ class ThreeRenderer {
 		});
 
 		this.particleSystem.particleEmitters.push({
-			position: { x: this.particleSystem.offset.x, y: 1, z: this.particleSystem.offset.z },
+			position: { x: this.particleSystem.offset.x, y: 0.5 + 2.5, z: this.particleSystem.offset.z },
 			direction: { x: 0, y: 1, z: 0 },
 			azimuth: { min: -Math.PI, max: Math.PI },
 			elevation: { min: -Math.PI * 0.5, max: Math.PI * 0.5 },
+			shape: { width: 16, height: 5, depth: 16 },
 			add_time: 0.005,
 			elapsed: 0,
 			live_time_from: 3,
