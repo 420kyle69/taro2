@@ -1093,7 +1093,7 @@ var ShopComponent = TaroEntity.extend({
 					var itemImage = $('<div/>', {
 						id: shopItemsKeys[i],
 						isadblockenabled: isAdBlockEnabled,
-						class: `rounded align-bottom btn-purchase-item item-shop-button grey-bordered ${isItemAffordable && isItemCoinsAffordable && requirementsSatisfied ? 'item-bg-style-2' : 'item-bg-style-1'} `,
+						class: `rounded align-bottom btn-purchase-item item-shop-button grey-bordered ${isItemAffordable && isItemCoinsAffordable && requirementsSatisfied ? 'can-purchase-item' : 'unpurchasble-item'} `,
 						style: 'position: relative; width: 100%;',
 						'data-toggle': 'popover',
 						'data-placement': 'top',
@@ -1115,7 +1115,7 @@ var ShopComponent = TaroEntity.extend({
 						var img = $('<div/>').html(`img_index_${imgArray.length}`);
 						imgArray.push({
 							wrapper: img,
-							value: `<img src='${item.inventoryImage || item.cellSheet.url}' style='width: 75px; height: 75px; background-color : #6b7280; padding : 8px; margin-top : 6px;  border-radius : 4px; object-fit:contain;'>`
+						value: `<img src='${item.inventoryImage || item.cellSheet.url}' style='width: 75px; height: 75px; background-color : #4B5563; padding : 8px; margin-top : 6px;  border-radius : 4px; object-fit:contain; '>`
 						});
 
 						if (shopItem.price.coins) {
@@ -1126,7 +1126,7 @@ var ShopComponent = TaroEntity.extend({
 							itemImage.append(itemImageElement);
 						}
 
-						var itemName = '<div class=\'page-link no-selection\' style=\'line-height:1 !important; font-size: 12px; font-weight : 600; overflow-wrap: break-word;\'>';
+						var itemName = `<div class=\'page-link no-selection\' style=\'line-height:1 !important; font-size: 12px; font-weight : 600; overflow-wrap: break-word; ${isItemAffordable && isItemCoinsAffordable && requirementsSatisfied ? 'color : var(--purchable-text-color)' : 'color : var(--unpurchable-text-color)'} \'>`;
 						if (itemQuantity > 1) {
 							itemName += `${itemQuantity} x `;
 						}
