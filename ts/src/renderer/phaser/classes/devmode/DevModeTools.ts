@@ -62,6 +62,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		});
 		taro.client.on('draw-region', () => {
 			this.drawRegion();
+			this.activeButton = 'draw-region';
 		});
 		taro.client.on('brush', () => {
 			this.brush();
@@ -83,6 +84,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 		});
 		taro.client.on('add-entities', () => {
 			this.addEntities();
+			this.activeButton = 'add-entities';
 		});
 		taro.client.on('undo', () => {
 			this.commandController.undo();
