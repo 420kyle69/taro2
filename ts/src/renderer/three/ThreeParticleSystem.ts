@@ -6,6 +6,7 @@ class ThreeParticleSystem {
 	offset = { x: -15.828125, y: 2.0, z: -59.484375 };
 
 	// Used during particle creation; avoid instantiating temp objects
+	private worldPos = new THREE.Vector3();
 	private forward = new THREE.Vector3();
 	private right = new THREE.Vector3();
 	private up = new THREE.Vector3();
@@ -74,6 +75,15 @@ class ThreeParticleSystem {
 	}
 
 	update(dt: number, time: number, camera: THREE.Camera) {
+		for (const emitter of this.particleEmitters) {
+			if (emitter.target) {
+				emitter.target.getWorldPosition(this.worldPos);
+				emitter.position.x = this.worldPos.x;
+				emitter.position.y = this.worldPos.y;
+				emitter.position.z = this.worldPos.z;
+			}
+		}
+
 		this.particleEmittersUpdate(dt);
 
 		const count = this.particles.length;

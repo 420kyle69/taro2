@@ -283,6 +283,8 @@ class ThreeRenderer {
 					this.camera.startFollow(ent);
 					this.skybox.scene.position.copy(ent.position);
 					ent.attach(this.skybox.scene);
+
+					this.particleSystem.particleEmitters[0].target = ent;
 				},
 				this
 			);
@@ -496,11 +498,6 @@ class ThreeRenderer {
 		// the engine update. It should be the other way around.
 		const dt = this.clock.getDelta();
 		const time = this.clock.elapsedTime;
-
-		const emitter = this.particleSystem.particleEmitters[0].position;
-		emitter.x = Math.sin(time / 1) * 4;
-		emitter.z = Math.cos(time / 1) * 4;
-
 		this.particleSystem.update(dt, time, this.camera.instance);
 
 		this.camera.update();
