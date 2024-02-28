@@ -135,6 +135,8 @@ class ThreeRenderer {
 	}
 
 	private init() {
+		const textureManager = ThreeTextureManager.instance();
+
 		const skybox = new ThreeSkybox();
 		skybox.scene.translateX(taro.game.data.map.width / 2);
 		skybox.scene.translateZ(taro.game.data.map.height / 2);
@@ -171,15 +173,18 @@ class ThreeRenderer {
 			this.scene.add(layer);
 		}
 
-		taro.game.data.map.tilesets.forEach((tileset) => {
-			// TODO: Add tilesets to resource manager (rename texture manager to resource manager)
-			const tex = ThreeTextureManager.instance().textureMap.get(tileset.image);
-			// TODO: The sides tileset will be different, waiting on m0dE
-			const topTileset = new ThreeTileset(tex, tileset.tilewidth, tileset.tilewidth);
-			const sidesTileset = new ThreeTileset(tex, tileset.tilewidth, tileset.tilewidth);
-			this.voxelMap = new ThreeVoxelMap(topTileset, sidesTileset);
-			this.scene.add(this.voxelMap);
-		});
+		const tilesetMain = this.getTilesetFromType('top');
+		let tilesetSide = this.getTilesetFromType('side');
+		if (!tilesetSide) tilesetSide = tilesetMain;
+
+		const texMain = textureManager.textureMap.get(tilesetMain.image);
+		const texSide = textureManager.textureMap.get(tilesetSide.image);
+
+		const topTileset = new ThreeTileset(texMain, tilesetMain.tilewidth, tilesetMain.tilewidth);
+		const sidesTileset = new ThreeTileset(texSide, tilesetSide.tilewidth, tilesetSide.tilewidth);
+
+		this.voxelMap = new ThreeVoxelMap(topTileset, sidesTileset);
+		this.scene.add(this.voxelMap);
 
 		taro.game.data.map.layers.forEach((layer) => {
 			let layerId = 0;
@@ -507,5 +512,26 @@ class ThreeRenderer {
 				repeat: +animation.loopCount - 1, // correction for loop/repeat values
 			});
 		}
+	}
+
+	// NOTE(nick): this feels hacky, why don't all tilesets have a type? Part
+	// of a bigger problem regarding game.json parsing and presenting it in a
+	// valid state for the rest of the application?
+	getTilesetFromType(type: 'top' | 'side') {
+		let index = -1;
+		if (type === 'top') {
+			index = taro.game.data.map.tilesets.findIndex((tilesheet) => {
+				return (
+					(tilesheet.name === 'tilesheet_complete' || tilesheet.name === 'tilesheet') &&
+					(tilesheet.type === undefined || tilesheet.type === 'top')
+				);
+			});
+		} else {
+			index = taro.game.data.map.tilesets.findIndex((tilesheet) => {
+				return tilesheet.type === type;
+			});
+		}
+
+		return index > -1 ? taro.game.data.map.tilesets[index] : null;
 	}
 }
