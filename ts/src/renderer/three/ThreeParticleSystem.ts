@@ -75,13 +75,29 @@ class ThreeParticleSystem {
 	}
 
 	update(dt: number, time: number, camera: THREE.Camera) {
-		for (const emitter of this.particleEmitters) {
+		const emittersIndicesMarkedForDestroy = [];
+
+		for (let i = 0; i < this.particleEmitters.length; i++) {
+			const emitter = this.particleEmitters[i];
+
+			emitter.elapsed += dt;
+
+			if (emitter.duration > 0 && emitter.elapsed >= emitter.duration) {
+				emittersIndicesMarkedForDestroy.push(i);
+				continue;
+			}
+
 			if (emitter.target) {
 				emitter.target.getWorldPosition(this.worldPos);
 				emitter.position.x = this.worldPos.x;
 				emitter.position.y = this.worldPos.y;
 				emitter.position.z = this.worldPos.z;
 			}
+		}
+
+		// TODO: fix death time, now it extends the lifetime which is no good
+		for (const idx of emittersIndicesMarkedForDestroy) {
+			this.particleEmitters.splice(idx, 1);
 		}
 
 		this.particleEmittersUpdate(dt);
@@ -139,11 +155,11 @@ class ThreeParticleSystem {
 	particleEmittersUpdate(delta) {
 		for (let n = 0; n < this.particleEmitters.length; n++) {
 			const emitter = this.particleEmitters[n];
-			emitter.elapsed += delta;
-			let add = Math.floor(emitter.elapsed / emitter.add_time);
-			emitter.elapsed -= add * emitter.add_time;
-			if (add > (0.016 / emitter.add_time) * 60 * 1) {
-				emitter.elapsed = 0;
+			emitter.accumulator += delta;
+			let add = Math.floor(emitter.accumulator / emitter.add_time);
+			emitter.accumulator -= add * emitter.add_time;
+			if (add > (0.016 / emitter.add_time) * 60) {
+				emitter.accumulator = 0;
 				add = 0;
 			}
 

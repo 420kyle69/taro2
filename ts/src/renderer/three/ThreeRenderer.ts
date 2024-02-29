@@ -406,6 +406,56 @@ class ThreeRenderer {
 		this.particleSystem.node.renderOrder = 1200;
 		this.scene.add(this.particleSystem.node);
 
+		taro.client.on('create-particle', (particle: Particle) => {
+			const particleData = taro.game.data.particleTypes[particle.particleId];
+			const tex = ThreeTextureManager.instance().textureMap.get(`particle/${particleData.url}`);
+
+			// Direction from
+			const angle = particle.angle;
+
+			// Azimuth from
+			const angleMin = particleData.angle.min;
+			const angleMax = particleData.angle.max;
+
+			// No elevation
+			// Shape point
+
+			// Pixels per second I believe; convert to tiles per second?
+			const speedMin = particleData.speed.min;
+			const speedMax = particleData.speed.max;
+
+			// MS; convert to seconds
+			const lifetimeFrom = particleData.lifeBase;
+			const lifetimeTo = particleData.lifeBase;
+
+			// How does phaser determine how long the death animation should take?
+			// I think the default value is 1 second... so right now people can't set
+			// the time it takes to fadeout... weird.
+			// Edit: tested it, duration is equal to the lifetime (lol?)
+			const opacityFrom = 1;
+			const opacityTo = particleData.deathOpacityBase;
+
+			// Duration in MS; 0 means forever; TODO: implement this in my particle emitter
+			const duration = particleData.duration;
+
+			// time interval between 'flow' cycles in MS. 0 means one particle flow
+			// cycle for each logic update (maximum). -1 means explode.
+			const frequency = particleData.emitFrequency;
+
+			// width and height in pixels; convert to world units. Use this to calc
+			// the correct particle scale
+			const width = particleData.dimensions.width;
+			const height = particleData.dimensions.height;
+
+			if (particleData.emitZone && particleData.emitZone.x && particleData.emitZone.y) {
+				// Set the emit shape if present
+				// Allow them to be set separately though, so people can create a line emitter.
+				// So change the if statement above.
+				const emitWidth = particleData.emitZone.x;
+				const emitDepth = particleData.emitZone.y;
+			}
+		});
+
 		this.particleSystem.particleEmitters.push({
 			position: { x: this.particleSystem.offset.x, y: 1, z: this.particleSystem.offset.z },
 			direction: { x: 0, y: 1, z: 0 },
@@ -432,6 +482,8 @@ class ThreeRenderer {
 			opacity: 1,
 			blend: 1,
 			texture: 1,
+			duration: 0,
+			accumulator: 0,
 		});
 
 		this.particleSystem.particleEmitters.push({
@@ -460,6 +512,8 @@ class ThreeRenderer {
 			opacity: 1,
 			blend: 0.8,
 			texture: 4,
+			duration: 1,
+			accumulator: 0,
 		});
 	}
 
