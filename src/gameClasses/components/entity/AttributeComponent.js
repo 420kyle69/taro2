@@ -269,9 +269,7 @@ var AttributeComponent = TaroEntity.extend({
 				newValue = Math.max(min, Math.min(max, newValue));
 
 				self._entity._stats.attributes[attributeTypeId].value = newValue;
-				if (fromLoadData) {
-					console.log(attributeTypeId, oldValue, newValue, newMin, newMax);
-				}
+
 				if (taro.isServer) {
 					if (
 						newValue != oldValue ||
