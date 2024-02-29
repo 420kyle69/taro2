@@ -17,7 +17,7 @@ class ThreeParticleSystem {
 	constructor() {
 		const maxParticles = 50000;
 
-		// TODO: Add multiple shaders and geometry groups if texture count > 16
+		// TODO(nick): Add multiple shaders and geometry groups if texture count > 16
 		// Add floor(numTextures / 16) total shaders.
 		const material = new THREE.ShaderMaterial({
 			uniforms: { textures: { value: this.textures }, time: { value: 0 } },
@@ -236,10 +236,10 @@ class ThreeParticleSystem {
 		this.up.crossVectors(this.forward, this.right).normalize();
 		this.basis.makeBasis(this.right, this.up, this.forward);
 
-		const randAzimuth = Math.random() * (emitter.azimuth.max - emitter.azimuth.min) + emitter.azimuth.min;
-		const randElevation = Math.random() * (emitter.elevation.max - emitter.elevation.min) + emitter.elevation.min;
+		const randAzimuth = Utils.lerp(emitter.azimuth.min, emitter.azimuth.max, Math.random());
+		const randElevation = Utils.lerp(emitter.elevation.min, emitter.elevation.max, Math.random());
 		const angleOffset = Math.PI * 0.5;
-		const speed = (Math.random() * (emitter.speed.max - emitter.speed.min) + emitter.speed.min) * dt;
+		const speed = Utils.lerp(emitter.speed.min, emitter.speed.max, Math.random()) * dt;
 
 		this.velocity
 			.set(Math.cos(randAzimuth + angleOffset), Math.sin(randElevation), Math.sin(randAzimuth + angleOffset))
@@ -247,7 +247,7 @@ class ThreeParticleSystem {
 			.applyMatrix4(this.basis)
 			.multiplyScalar(speed);
 
-		const brightness = Math.random() * (emitter.brightness.max - emitter.brightness.min) + emitter.brightness.min;
+		const brightness = Utils.lerp(emitter.brightness.min, emitter.brightness.max, Math.random());
 
 		const position = {
 			x: emitter.position.x + (emitter.shape.width * Math.random() - emitter.shape.width * 0.5),
@@ -255,7 +255,7 @@ class ThreeParticleSystem {
 			z: emitter.position.z + (emitter.shape.depth * Math.random() - emitter.shape.depth * 0.5),
 		};
 
-		const lifetime = Math.random() * (emitter.lifetime.max - emitter.lifetime.min) + emitter.lifetime.min;
+		const lifetime = Utils.lerp(emitter.lifetime.min, emitter.lifetime.max, Math.random());
 
 		this.particles.push({
 			offset: [position.x, position.y, position.z],
@@ -264,7 +264,7 @@ class ThreeParticleSystem {
 			live: lifetime,
 			scale: [emitter.scale.x * emitter.scale.start, emitter.scale.y * emitter.scale.start],
 			scale_increase: emitter.scale.step,
-			rotation: Math.random() * (emitter.rotation.max - emitter.rotation.min) + emitter.rotation.min,
+			rotation: Utils.lerp(emitter.rotation.min, emitter.rotation.max, Math.random()),
 			color: [1, 1, 1, emitter.opacity.start],
 			color_from: [
 				emitter.color.start[0] * brightness,
@@ -276,7 +276,7 @@ class ThreeParticleSystem {
 				emitter.color.end[1] * brightness,
 				emitter.color.end[2] * brightness,
 			],
-			color_speed: Math.random() * (emitter.color_speed.max - emitter.color_speed.min) + emitter.color_speed.min,
+			color_speed: Utils.lerp(emitter.color_speed.min, emitter.color_speed.max, Math.random()),
 			color_t: 0,
 			blend: emitter.blend,
 			texture: emitter.texture,
