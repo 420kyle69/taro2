@@ -174,11 +174,16 @@ class ThreeParticleSystem {
 
 			if (particle.live > 0) {
 				particle.live -= delta;
-			} else {
-				particle.color[3] -= particle.opacity_decrease;
-			}
 
-			if (particle.color[3] > 0) {
+				// NOTE(nick): Decrease opacity during particle's lifetime, this is how
+				// it currently works in the Phaser renderer. We might want to add more
+				// control to this in the future and give users more emitter settings to
+				// play with in the editor.
+				let opacity = particle.live / particle.lifetime;
+				if (opacity < 0) opacity = 0;
+
+				particle.color[3] = opacity;
+
 				if (particle.color_t < 1) {
 					const p = particle;
 					particle.color[0] = p.color_from[0] + (p.color_to[0] - p.color_from[0]) * p.color_t;
@@ -235,11 +240,14 @@ class ThreeParticleSystem {
 			z: emitter.position.z + (emitter.shape.depth * Math.random() - emitter.shape.depth * 0.5),
 		};
 
+		const lifetime = Math.random() * (emitter.live_time_to - emitter.live_time_from) + emitter.live_time_from;
+
 		this.particles.push({
 			offset: [position.x, position.y, position.z],
 			// TODO: rename quaternion to velocity
 			quaternion: [this.direction.x, this.direction.y, this.direction.z, 3],
-			live: Math.random() * (emitter.live_time_to - emitter.live_time_from) + emitter.live_time_from,
+			lifetime: lifetime,
+			live: lifetime,
 			scale: [emitter.scale_from, emitter.scale_from],
 			scale_increase: emitter.scale_increase,
 			rotation: Math.random() * (emitter.rotation_to - emitter.rotation_from) + emitter.rotation_from,
@@ -253,7 +261,6 @@ class ThreeParticleSystem {
 			color_speed: Math.random() * (emitter.color_speed_to - emitter.color_speed_from) + emitter.color_speed_from,
 			color_t: 0,
 			blend: emitter.blend,
-			opacity_decrease: emitter.opacity_decrease,
 			texture: emitter.texture,
 		});
 	}
