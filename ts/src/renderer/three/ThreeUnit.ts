@@ -4,7 +4,10 @@ class ThreeUnit extends ThreeAnimatedSprite {
 	private attributeBars = new THREE.Group();
 	private chat: ThreeChatBubble;
 
-	constructor(tex: THREE.Texture) {
+	constructor(
+		public taroId: string,
+		tex: THREE.Texture
+	) {
 		super(tex);
 
 		this.label.setOffset(new THREE.Vector2(0, 0.75 * 64), new THREE.Vector2(0.5, 0));

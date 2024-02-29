@@ -220,7 +220,7 @@ class ThreeRenderer {
 			let tex = ThreeTextureManager.instance().textureMap.get(entity._stats.cellSheet.url);
 
 			const createEntity = () => {
-				const e = new ThreeUnit(tex.clone());
+				const e = new ThreeUnit(entity._id, tex.clone());
 				this.animatedSprites.push(e);
 				e.billboard = false;
 				return e;
@@ -410,23 +410,35 @@ class ThreeRenderer {
 			const particleData = taro.game.data.particleTypes[particle.particleId];
 			const tex = ThreeTextureManager.instance().textureMap.get(`particle/${particleData.url}`);
 
-			// Direction from
-			const angle = particle.angle;
+			// Bug particles not attached to iceballs always, check in modd.io editor when it should spawn first
+			// to try and see why it happens. What is the result when rendered 2d?
+			let target = null;
+			if (particle.entityId) {
+				const entity = this.entities.find((entity) => entity.taroId == particle.entityId);
+				if (entity) {
+					target = entity;
+				}
+			}
+
+			// Direction from deg -> rad
+			const angle = particleData.fixedRotation ? 0 : particle.angle * (Math.PI / 180);
+			const direction = { x: 0, y: 0, z: 1 }; // Phaser particle system starts in this direction
+			const cos = Math.cos(angle);
+			const sin = Math.sin(angle);
+			direction.x = direction.x * cos - direction.z * sin;
+			direction.z = direction.x * sin + direction.z * cos;
 
 			// Azimuth from
-			const angleMin = particleData.angle.min;
-			const angleMax = particleData.angle.max;
-
-			// No elevation
-			// Shape point
+			const angleMin = (particleData.angle.min - 180) * (Math.PI / 180);
+			const angleMax = (particleData.angle.max - 180) * (Math.PI / 180);
 
 			// Pixels per second I believe; convert to tiles per second?
-			const speedMin = particleData.speed.min;
-			const speedMax = particleData.speed.max;
+			const speedMin = Utils.pixelToWorld(particleData.speed.min);
+			const speedMax = Utils.pixelToWorld(particleData.speed.max);
 
 			// MS; convert to seconds
-			const lifetimeFrom = particleData.lifeBase;
-			const lifetimeTo = particleData.lifeBase;
+			const lifetimeFrom = particleData.lifeBase * 0.001;
+			const lifetimeTo = particleData.lifeBase * 0.001;
 
 			// How does phaser determine how long the death animation should take?
 			// I think the default value is 1 second... so right now people can't set
@@ -435,85 +447,60 @@ class ThreeRenderer {
 			const opacityFrom = 1;
 			const opacityTo = particleData.deathOpacityBase;
 
-			// Duration in MS; 0 means forever; TODO: implement this in my particle emitter
-			const duration = particleData.duration;
+			// Duration in MS -> S; 0 means forever; TODO: implement this in my particle emitter
+			const duration = particleData.duration * 0.001;
 
 			// time interval between 'flow' cycles in MS. 0 means one particle flow
 			// cycle for each logic update (maximum). -1 means explode.
-			const frequency = particleData.emitFrequency;
+			// Converted to S
+			const frequency = particleData.emitFrequency * 0.001;
 
 			// width and height in pixels; convert to world units. Use this to calc
 			// the correct particle scale
-			const width = particleData.dimensions.width;
-			const height = particleData.dimensions.height;
+			const width = Utils.pixelToWorld(particleData.dimensions.width);
+			const height = Utils.pixelToWorld(particleData.dimensions.height);
 
-			if (particleData.emitZone && particleData.emitZone.x && particleData.emitZone.y) {
-				// Set the emit shape if present
-				// Allow them to be set separately though, so people can create a line emitter.
-				// So change the if statement above.
-				const emitWidth = particleData.emitZone.x;
-				const emitDepth = particleData.emitZone.y;
+			let emitWidth = 0;
+			let emitDepth = 0;
+			if (particleData.emitZone) {
+				if (particleData.emitZone.x) emitWidth = Utils.pixelToWorld(particleData.emitZone.x);
+				if (particleData.emitZone.y) emitDepth = Utils.pixelToWorld(particleData.emitZone.y);
 			}
-		});
 
-		const particleTextures = ThreeTextureManager.instance().getTexturesWithKeyContains('particle');
+			this.particleSystem.particleEmitters.push({
+				position: { x: particle.position.x, y: 0.5, z: particle.position.y },
+				target: target,
+				direction: direction,
+				azimuth: { min: angleMin, max: angleMax },
+				elevation: { min: 0, max: 0 },
+				shape: { width: emitWidth, height: 0, depth: emitDepth },
+				add_time: frequency,
+				live_time_from: lifetimeFrom,
+				live_time_to: lifetimeTo,
+				rotation_from: 0.5,
+				rotation_to: 1,
+				speed_from: speedMin,
+				speed_to: speedMax,
+				scale_x: width,
+				scale_y: height,
+				scale_from: 1,
+				scale_increase: 0,
+				color_from: [1, 1, 1],
+				color_to: [1, 1, 1],
+				color_speed_from: 1,
+				color_speed_to: 1,
+				brightness_from: 1,
+				brightness_to: 1,
+				opacity_from: opacityFrom,
+				opacity_to: opacityTo,
+				blend: 1,
+				texture: tex,
+				duration: duration,
 
-		this.particleSystem.particleEmitters.push({
-			position: { x: this.particleSystem.offset.x, y: 1, z: this.particleSystem.offset.z },
-			direction: { x: 0, y: 1, z: 0 },
-			azimuth: { min: 0, max: 0 },
-			elevation: { min: 0, max: 0 },
-			shape: { width: 0, height: 0, depth: 0 },
-			add_time: 0.01,
-			elapsed: 0,
-			live_time_from: 1,
-			live_time_to: 1.5,
-			rotation_from: 0.5,
-			rotation_to: 1,
-			speed_from: 0.005,
-			speed_to: 0.01,
-			scale_from: 0.2,
-			scale_increase: 0.004,
-			color_from: [4, 4, 4],
-			color_to: [0, 0, 0],
-			color_speed_from: 1,
-			color_speed_to: 1,
-			brightness_from: 1,
-			brightness_to: 1.2,
-			opacity: 1,
-			blend: 1,
-			texture: particleTextures[1],
-			duration: 0,
-			accumulator: 0,
-		});
-
-		this.particleSystem.particleEmitters.push({
-			position: { x: 0, y: 0.5 + 2.5, z: 0 },
-			direction: { x: 1, y: 0, z: 0 },
-			azimuth: { min: -Math.PI, max: Math.PI },
-			elevation: { min: 0, max: Math.PI * 0.5 },
-			shape: { width: 16, height: 5, depth: 16 },
-			add_time: 0.005,
-			elapsed: 0,
-			live_time_from: 1,
-			live_time_to: 1,
-			rotation_from: 0.5,
-			rotation_to: 1,
-			speed_from: 0.002,
-			speed_to: 0.004,
-			scale_from: 0.02,
-			scale_increase: 0.00001,
-			color_from: [1, 1, 1],
-			color_to: [1, 1, 1],
-			color_speed_from: 1,
-			color_speed_to: 1,
-			brightness_from: 1,
-			brightness_to: 1,
-			opacity: 1,
-			blend: 0.8,
-			texture: particleTextures[4],
-			duration: 1,
-			accumulator: 0,
+				// TODO(nick): Internal usage; don't expose
+				elapsed: 0,
+				accumulator: 0,
+			});
 		});
 	}
 

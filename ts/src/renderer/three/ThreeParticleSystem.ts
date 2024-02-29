@@ -252,7 +252,7 @@ class ThreeParticleSystem {
 			quaternion: [this.direction.x, this.direction.y, this.direction.z, 3],
 			lifetime: lifetime,
 			live: lifetime,
-			scale: [emitter.scale_from, emitter.scale_from],
+			scale: [emitter.scale_x * emitter.scale_from, emitter.scale_y * emitter.scale_from],
 			scale_increase: emitter.scale_increase,
 			rotation: Math.random() * (emitter.rotation_to - emitter.rotation_from) + emitter.rotation_from,
 			color: [1, 1, 1, emitter.opacity_from],
