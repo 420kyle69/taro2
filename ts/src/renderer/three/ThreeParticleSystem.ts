@@ -11,7 +11,7 @@ class ThreeParticleSystem {
 	private right = new THREE.Vector3();
 	private up = new THREE.Vector3();
 	private basis = new THREE.Matrix4();
-	private direction = new THREE.Vector3();
+	private velocity = new THREE.Vector3();
 	private textures = ThreeTextureManager.instance().getTexturesWithKeyContains('particle');
 
 	constructor() {
@@ -212,9 +212,9 @@ class ThreeParticleSystem {
 					particle.color[2] = particle.color_to[2];
 				}
 
-				particle.offset[0] += particle.quaternion[0];
-				particle.offset[1] += particle.quaternion[1];
-				particle.offset[2] += particle.quaternion[2];
+				particle.offset[0] += particle.velocity[0];
+				particle.offset[1] += particle.velocity[1];
+				particle.offset[2] += particle.velocity[2];
 
 				particle.scale[0] += particle.scale_increase;
 				particle.scale[1] += particle.scale_increase;
@@ -242,7 +242,7 @@ class ThreeParticleSystem {
 		const angleOffset = Math.PI * 0.5;
 		const speed = (Math.random() * (emitter.speed_to - emitter.speed_from) + emitter.speed_from) * dt;
 
-		this.direction
+		this.velocity
 			.set(Math.cos(randAzimuth + angleOffset), Math.sin(randElevation), Math.sin(randAzimuth + angleOffset))
 			.normalize()
 			.applyMatrix4(this.basis)
@@ -260,8 +260,7 @@ class ThreeParticleSystem {
 
 		this.particles.push({
 			offset: [position.x, position.y, position.z],
-			// TODO: rename quaternion to velocity
-			quaternion: [this.direction.x, this.direction.y, this.direction.z, 3],
+			velocity: [this.velocity.x, this.velocity.y, this.velocity.z],
 			lifetime: lifetime,
 			live: lifetime,
 			scale: [emitter.scale_x * emitter.scale_from, emitter.scale_y * emitter.scale_from],
