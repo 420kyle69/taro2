@@ -52,6 +52,7 @@ var taroClientConfig = {
 		'/gameClasses/components/script/ConditionComponent.js',
 
 		'/gameClasses/components/unit/AIComponent.js',
+		'/gameClasses/components/unit/AStarPathfindingComponent.js',
 		'/gameClasses/components/unit/AbilityComponent.js',
 
 		'/gameClasses/components/entity/AttributeComponent.js',
@@ -61,6 +62,7 @@ var taroClientConfig = {
 		'/gameClasses/DeveloperMode.js',
 		'/gameClasses/EntitiesToRender.js',
 		'/gameClasses/Raycaster.js',
+		'/gameClasses/MapEditorUI.js',
 		'/gameClasses/HeightRenderComponent.js',
 		'/gameClasses/VisibilityMask.js',
 		/* color helpers */
@@ -98,9 +100,6 @@ var taroClientConfig = {
 		'renderer/phaser/classes/Ui/PhaserButtonBar.js',
 		'renderer/phaser/classes/Ui/PhaserButton.js',
 		'renderer/phaser/classes/devmode/DevModeTools.js',
-		'renderer/phaser/classes/devmode/DevButtonSection.js',
-		'renderer/phaser/classes/devmode/DevToolButton.js',
-		'renderer/phaser/classes/devmode/DevTooltip.js',
 		'renderer/phaser/classes/devmode/RegionEditor.js',
 		'renderer/phaser/classes/devmode/TileEditor.js',
 		'renderer/phaser/classes/devmode/EntityEditor.js',

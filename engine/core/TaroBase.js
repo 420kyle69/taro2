@@ -390,6 +390,26 @@ Math.distance = function (x1, y1, x2, y2) {
 	return Math.sqrt(((x1 - x2) * (x1 - x2)) + ((y1 - y2) * (y1 - y2)));
 };
 
+/**
+ * Make property non-enumerable.
+ */
+Object.defineProperty(Math, 'clamp', {
+	enumerable: false,
+	writable: true,
+	configurable: true
+});
+
+/**
+ * Clamps the value to within the min and max.
+ * @param value
+ * @param min
+ * @param max
+ * @return {Number}
+ */
+Math.clamp = function (value, min, max) {
+	return Math.min(Math.max(min, value), max);
+};
+
 if (typeof (CanvasRenderingContext2D) !== 'undefined') {
 	// Extend the canvas context to add some helper methods
 	/**

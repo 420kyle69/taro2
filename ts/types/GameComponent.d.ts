@@ -29,6 +29,7 @@ interface UnitAbility {
 		unitAttributes: Record<string, number>;
 		playerAttributes: Record<string, number>;
 	};
+	visibility: 'always' | 'mobile' | 'desktop' | 'none';
 	iconUrl: string;
 }
 
@@ -94,6 +95,7 @@ interface MapData {
 		tilecount: number;
 		tileheight: number;
 		tilewidth: number;
+		type?: 'top' | 'side';
 	}[];
 	layers: {
 		y: number;
@@ -138,6 +140,7 @@ declare class GameComponent extends TaroEntity {
 					width: number;
 					height: number;
 				};
+				projectionMode: 'orthographic' | 'perspective';
 			};
 			skybox: {
 				left: string;

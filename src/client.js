@@ -214,6 +214,7 @@ const Client = TaroEventingClass.extend({
 				}
 
 				taro.developerMode = new DeveloperMode();
+				taro.mapEditorUI = new MapEditorUI();
 
 				if (!window.isStandalone) {
 					this.servers = this.getServersArray();
@@ -308,6 +309,14 @@ const Client = TaroEventingClass.extend({
 			taro.game.data.settings.skybox = {};
 		}
 
+		if (!taro.game.data.settings.camera) {
+			taro.game.data.settings.camera = {};
+		}
+
+		if (taro.game.data.settings.camera.defaultPitch === undefined) {
+			taro.game.data.settings.camera.defaultPitch = 0;
+		}
+
 		if (!taro.game.data.settings.camera.projectionMode) {
 			taro.game.data.settings.camera.projectionMode = 'orthographic';
 		}
@@ -315,7 +324,7 @@ const Client = TaroEventingClass.extend({
 		Object.keys(skyboxDefaultUrls).forEach((key) => {
 			if (taro.game.data.settings.skybox[key] === undefined) {
 				taro.game.data.settings.skybox[key] = skyboxDefaultUrls[key];
-			} 
+			}
 		});
 	},
 

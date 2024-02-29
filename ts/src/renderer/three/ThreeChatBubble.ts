@@ -15,9 +15,7 @@ class ThreeChatBubble extends THREE.Group {
 	constructor(text: string) {
 		super();
 
-		const threeRenderer = ThreeRenderer.getInstance();
-		const zoomScale = 1 / threeRenderer.camera.zoomLevel;
-		this.scaleScalar = zoomScale;
+		this.scaleScalar = 1;
 		console.log(this.scaleScalar);
 
 		this.sprite = this.createBubble(text);

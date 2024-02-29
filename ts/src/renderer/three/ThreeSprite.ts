@@ -28,6 +28,15 @@ class ThreeSprite extends THREE.Group {
 		});
 	}
 
+	setBillboard(billboard: boolean, camera: ThreeCamera) {
+		this.billboard = billboard;
+
+		if (this.billboard) {
+			this.rotation.setFromRotationMatrix(camera.instance.matrix);
+			this.rotateX(Math.PI * 0.5);
+		}
+	}
+
 	setScale(sx: number, sy: number) {
 		this.scaleUnflipped.set(sx, sy);
 		this.sprite.scale.set(this.scaleUnflipped.x * this.flipX, 1, this.scaleUnflipped.y * this.flipY);

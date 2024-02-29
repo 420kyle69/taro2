@@ -37,17 +37,9 @@ class ThreeRenderer {
 		this.camera = new ThreeCamera(width, height, this.renderer.domElement);
 		this.camera.setElevationAngle(90);
 
-		// camera.setTarget(object3d | null, moveInstantOrNot)
-		// camera.setPerspective()
-		// camera.setOrthographic()
-		// camera.setPointerLock()
-		// camera.setElevationAngle()
-		// camera.setAzimuthAngle()
-		// camera.setPitchRange()
-		// camera.setScreenOffset()
-		// camera.setZoom()
-		// camera.setFollowSpeed()
-		// camera.update(dt)
+		if (taro.game.data.settings.camera.projectionMode !== 'orthographic') {
+			this.camera.setProjection(taro.game.data.settings.camera.projectionMode);
+		}
 
 		this.scene = new THREE.Scene();
 		this.scene.translateX(-taro.game.data.map.width / 2);
@@ -61,7 +53,7 @@ class ThreeRenderer {
 
 			if (this.zoomSize) {
 				const ratio = Math.max(window.innerWidth, window.innerHeight) / this.zoomSize;
-				this.camera.zoom(ratio);
+				this.camera.setZoom(ratio);
 				taro.client.emit('scale', { ratio: ratio * this.resolutionCoef });
 				taro.client.emit('update-abilities-position');
 
@@ -143,6 +135,8 @@ class ThreeRenderer {
 	}
 
 	private init() {
+		const textureManager = ThreeTextureManager.instance();
+
 		const skybox = new ThreeSkybox();
 		skybox.scene.translateX(taro.game.data.map.width / 2);
 		skybox.scene.translateZ(taro.game.data.map.height / 2);
@@ -156,7 +150,7 @@ class ThreeRenderer {
 			const ratio = Math.max(window.innerWidth, window.innerHeight) / this.zoomSize;
 
 			// TODO: Quadratic zoomTo over 1 second
-			this.camera.zoom(ratio);
+			this.camera.setZoom(ratio);
 
 			taro.client.emit('scale', { ratio: ratio * this.resolutionCoef });
 
@@ -167,7 +161,6 @@ class ThreeRenderer {
 
 		taro.client.on('stop-follow', () => {
 			this.camera.stopFollow();
-			this.scene.attach(this.skybox.scene);
 		});
 
 		const layers = {
@@ -180,15 +173,18 @@ class ThreeRenderer {
 			this.scene.add(layer);
 		}
 
-		taro.game.data.map.tilesets.forEach((tileset) => {
-			// TODO: Add tilesets to resource manager (rename texture manager to resource manager)
-			const tex = ThreeTextureManager.instance().textureMap.get(tileset.image);
-			// TODO: The sides tileset will be different, waiting on m0dE
-			const topTileset = new ThreeTileset(tex, tileset.tilewidth, tileset.tilewidth);
-			const sidesTileset = new ThreeTileset(tex, tileset.tilewidth, tileset.tilewidth);
-			this.voxelMap = new ThreeVoxelMap(topTileset, sidesTileset);
-			this.scene.add(this.voxelMap);
-		});
+		const tilesetMain = this.getTilesetFromType('top');
+		let tilesetSide = this.getTilesetFromType('side');
+		if (!tilesetSide) tilesetSide = tilesetMain;
+
+		const texMain = textureManager.textureMap.get(tilesetMain.image);
+		const texSide = textureManager.textureMap.get(tilesetSide.image);
+
+		const topTileset = new ThreeTileset(texMain, tilesetMain.tilewidth, tilesetMain.tilewidth);
+		const sidesTileset = new ThreeTileset(texSide, tilesetSide.tilewidth, tilesetSide.tilewidth);
+
+		this.voxelMap = new ThreeVoxelMap(topTileset, sidesTileset);
+		this.scene.add(this.voxelMap);
 
 		taro.game.data.map.layers.forEach((layer) => {
 			let layerId = 0;
@@ -232,7 +228,23 @@ class ThreeRenderer {
 			const createEntity = () => {
 				const e = new ThreeUnit(tex.clone());
 				this.animatedSprites.push(e);
-				e.billboard = !!entity._stats.isBillboard;
+				e.setBillboard(!!entity._stats.isBillboard, this.camera);
+
+				if (entity._stats.cameraPointerLock) {
+					e.cameraConfig.pointerLock = entity._stats.cameraPointerLock;
+				}
+
+				if (entity._stats.cameraPitchRange) {
+					e.cameraConfig.pitchRange = entity._stats.cameraPitchRange;
+				}
+
+				if (entity._stats.cameraOffset) {
+					// From editor XZY to Three.js XYZ
+					e.cameraConfig.offset.x = entity._stats.cameraOffset.x;
+					e.cameraConfig.offset.y = entity._stats.cameraOffset.z;
+					e.cameraConfig.offset.z = entity._stats.cameraOffset.y;
+				}
+
 				return e;
 			};
 
@@ -292,8 +304,14 @@ class ThreeRenderer {
 				'follow',
 				() => {
 					this.camera.startFollow(ent);
-					this.skybox.scene.position.copy(ent.position);
-					ent.attach(this.skybox.scene);
+
+					const offset = ent.cameraConfig.offset;
+					this.camera.setOffset(offset.x, offset.y, offset.z);
+
+					if (ent.cameraConfig.pointerLock) {
+						const { min, max } = ent.cameraConfig.pitchRange;
+						this.camera.setElevationRange(min, max);
+					}
 				},
 				this
 			);
@@ -451,6 +469,11 @@ class ThreeRenderer {
 		}
 
 		this.camera.update();
+
+		if (this.camera.target) {
+			this.skybox.scene.position.copy(this.camera.target.position);
+		}
+
 		this.renderer.render(this.scene, this.camera.instance);
 	}
 
@@ -489,5 +512,26 @@ class ThreeRenderer {
 				repeat: +animation.loopCount - 1, // correction for loop/repeat values
 			});
 		}
+	}
+
+	// NOTE(nick): this feels hacky, why don't all tilesets have a type? Part
+	// of a bigger problem regarding game.json parsing and presenting it in a
+	// valid state for the rest of the application?
+	getTilesetFromType(type: 'top' | 'side') {
+		let index = -1;
+		if (type === 'top') {
+			index = taro.game.data.map.tilesets.findIndex((tilesheet) => {
+				return (
+					(tilesheet.name === 'tilesheet_complete' || tilesheet.name === 'tilesheet') &&
+					(tilesheet.type === undefined || tilesheet.type === 'top')
+				);
+			});
+		} else {
+			index = taro.game.data.map.tilesets.findIndex((tilesheet) => {
+				return tilesheet.type === type;
+			});
+		}
+
+		return index > -1 ? taro.game.data.map.tilesets[index] : null;
 	}
 }

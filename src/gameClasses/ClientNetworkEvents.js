@@ -383,7 +383,7 @@ var ClientNetworkEvents = {
 					taro.shop.skinShop(data);
 					break;
 				}
-					
+
 			}
 		}
 		);
@@ -746,7 +746,7 @@ var ClientNetworkEvents = {
 		var element = document.getElementById("error-log-content");
 		for (actionName in logs) {
 			var log = logs[actionName];
-			element.innerHTML += `<li style='font-size:12px;'>${log}</li>`;
+			// element.innerHTML += `<li style='font-size:12px;'>${log}</li>`;
 			taro.client.errorLogs.push({ ...log, path: actionName });
 			$("#dev-error-button").text(`Errors (${taro.client.errorLogs.length})`);
 
@@ -775,6 +775,14 @@ var ClientNetworkEvents = {
 					var music = taro.game.data.music[data.music];
 					if (music) {
 						taro.sound.playMusic(music, undefined, undefined, data.music);
+					}
+					break;
+				case "playMusicForPlayerAtTime":
+					var music = taro.game.data.music[data.music];
+					var time = data.time;
+
+					if (music && time) {
+						taro.sound.playMusic(music, time, undefined, data.music);
 					}
 					break;
 				case "playMusicForPlayerRepeatedly":

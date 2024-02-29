@@ -122,7 +122,7 @@ var ParameterComponent = TaroEntity.extend({
 
 		if (isNaN(result)) {
 			//Wooden Wall2::UnitDeath::block#11::CalcError,  owner(thisEntity).$BuildCap  is undefined
-			taro.script.errorLog(`Calculate error: ${left} ${op.operator} ${right} => NaN. ${left === undefined ? `${JSON.stringify(items[1])} Returning undefined` : ''} ${right === undefined ? `, ${JSON.stringify(items[3])} Returning undefined` : ''}`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
+			taro.script.errorLog(`Calculate error: ${left} ${op.operator} ${right} => NaN. ${left === undefined ? `${JSON.stringify(items[1])} Returning undefined` : ''} ${right === undefined ? `, ${JSON.stringify(items[2])} Returning undefined` : ''}`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
 			return undefined;
 		}
 
@@ -501,8 +501,13 @@ var ParameterComponent = TaroEntity.extend({
 						returnValue = !!(entity && entity._id && taro.$(entity._id));
 
 						break;
+					
+					case 'objectContainsElement':
+						var object = self.getValue(text.object, vars);
+						var key = self.getValue(text.key, vars);
+						returnValue = object && object[key] !== undefined;
 
-
+						break;
 
 					case 'thisEntity':
 						returnValue = self._entity;
@@ -1267,6 +1272,13 @@ var ParameterComponent = TaroEntity.extend({
 						}
 						break;
 
+					case 'mathRound':
+						var value = self.getValue(text.value, vars);
+						if (!isNaN(value)) {
+							returnValue = Math.round(value);
+						}
+						break;
+
 					case 'log10':
 						var value = self.getValue(text.value, vars);
 
@@ -1274,6 +1286,20 @@ var ParameterComponent = TaroEntity.extend({
 							returnValue = Math.log10(value);
 						}
 
+						break;
+
+					case 'getServerAge':
+						const timestampStr = taro.server.started_at;
+						const timestamp = new Date(timestampStr);
+						const millisecondsSinceEpoch = timestamp.getTime();
+						
+						returnValue = Date.now() - millisecondsSinceEpoch;
+
+						break;
+
+					case 'getServerStartTime':
+						returnValue = new Date(taro.server.started_at);
+							
 						break;
 
 					case 'getEntireMapRegion':
@@ -1983,9 +2009,11 @@ var ParameterComponent = TaroEntity.extend({
 						var sourceString = self.getValue(text.sourceString, vars);
 						var matchString = self.getValue(text.matchString, vars);
 						var newString = self.getValue(text.newString, vars);
-
+						
 						if (typeof sourceString == 'string' && typeof matchString == 'string' && typeof newString == 'string') {
-							returnValue = sourceString.split(matchString).join(newString);
+							// returnValue = sourceString.split(matchString).join(newString);
+							var regex = new RegExp(matchString, 'g');
+							returnValue = sourceString.replace(regex, newString);
 						}
 
 						break;
@@ -2414,7 +2442,7 @@ var ParameterComponent = TaroEntity.extend({
 
 			'getValueOfEntityVariable': function (text, vars) {
 				var variableData = self.getValue(text.variable, vars);
-				var entity = self.getValue(text.entity, vars);				
+				var entity = self.getValue(text.entity, vars);
 				if (entity?.variable && variableData?.key) {
 					var value = entity.variable.getValue(variableData.key);
 					return value
@@ -2636,8 +2664,8 @@ var ParameterComponent = TaroEntity.extend({
 				var regionName = self.getValue(text.name, vars);
 				if (regionName) {
 					return taro.regionManager.getRegionById(regionName);
-				}				
-			},		
+				}
+			},
 
 			'regionOverlapsWithRegion': function (text, vars) {
 				var regionA = self.getValue(text.regionA, vars);
@@ -2766,6 +2794,12 @@ var ParameterComponent = TaroEntity.extend({
 					return vars.selectedUnitType;
 				}
 
+			},
+
+			'selectedElement': function (text, vars, entity) {
+				if (vars && vars.selectedElement) {
+					return vars.selectedElement;
+				}
 			},
 
 			/* object */

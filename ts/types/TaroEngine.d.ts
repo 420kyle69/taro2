@@ -1,6 +1,8 @@
 declare class TaroEngine extends TaroClass {
 	profiler: any;
 	script: any;
+	clearLayer: (payload: TileData<"clear">) => void;
+
 	newIdHex(): any;
 	tiled: any;
 	regionManager: any;
@@ -40,6 +42,7 @@ declare class TaroEngine extends TaroClass {
 	renderer: PhaserRenderer;
 
 	developerMode: DeveloperMode;
+	mapEditorUI: MapEditorUI;
 
 	scaleMapDetails: {
 		scaleFactor: {
