@@ -49,7 +49,7 @@ class PhaserButton extends Phaser.GameObjects.Container {
             this.fx = this.image.preFX.addBloom(0xffffff, 1, 1, 2, 1.2).setActive(false);
 		}
         // label
-        if (!texture && key && key.length < 2) {
+        if (key && key.length < 2) {
             const label = this.label = scene.add.bitmapText(
                 - size / 10 + size / 2, + size / 10 - size / 2,
                 BitmapFontManager.font(scene, 'Verdana', true, false, '#FFFFFF'),
@@ -75,7 +75,7 @@ class PhaserButton extends Phaser.GameObjects.Container {
 
         if (taro.isMobile) {
             //hide key on mobile
-            //if (this.image) label.visible = false;
+            if (this.image) this.label.visible = false;
             const mobileControlScene = taro.renderer.scene.getScene('MobileControls') as MobileControlsScene;
             let clicked = false;
             button.on('pointerdown', () => {
