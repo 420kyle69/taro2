@@ -12,16 +12,15 @@ class ThreeParticleSystem {
 	private up = new THREE.Vector3();
 	private basis = new THREE.Matrix4();
 	private direction = new THREE.Vector3();
+	private textures = ThreeTextureManager.instance().getTexturesWithKeyContains('particle');
 
 	constructor() {
 		const maxParticles = 50000;
 
-		const particleTextures = ThreeTextureManager.instance().getTexturesWithKeyContains('particle');
-
 		// TODO: Add multiple shaders and geometry groups if texture count > 16
 		// Add floor(numTextures / 16) total shaders.
 		const material = new THREE.ShaderMaterial({
-			uniforms: { textures: { value: particleTextures }, time: { value: 0 } },
+			uniforms: { textures: { value: this.textures }, time: { value: 0 } },
 			vertexShader: vs,
 			fragmentShader: fs,
 			transparent: true,
@@ -137,7 +136,9 @@ class ThreeParticleSystem {
 
 			blendAttribute[n] = particle.blend;
 
-			textureAttribute[n] = particle.texture;
+			let idx = this.textures.findIndex((tex) => tex === particle.texture);
+			if (idx === -1) idx = 0;
+			textureAttribute[n] = idx;
 		}
 
 		this.geometry.attributes.offset.needsUpdate = true;

@@ -456,6 +456,8 @@ class ThreeRenderer {
 			}
 		});
 
+		const particleTextures = ThreeTextureManager.instance().getTexturesWithKeyContains('particle');
+
 		this.particleSystem.particleEmitters.push({
 			position: { x: this.particleSystem.offset.x, y: 1, z: this.particleSystem.offset.z },
 			direction: { x: 0, y: 1, z: 0 },
@@ -480,7 +482,7 @@ class ThreeRenderer {
 			brightness_to: 1.2,
 			opacity: 1,
 			blend: 1,
-			texture: 1,
+			texture: particleTextures[1],
 			duration: 0,
 			accumulator: 0,
 		});
@@ -509,7 +511,7 @@ class ThreeRenderer {
 			brightness_to: 1,
 			opacity: 1,
 			blend: 0.8,
-			texture: 4,
+			texture: particleTextures[4],
 			duration: 1,
 			accumulator: 0,
 		});

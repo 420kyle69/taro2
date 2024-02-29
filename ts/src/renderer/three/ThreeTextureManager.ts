@@ -34,7 +34,12 @@ class ThreeTextureManager {
 	}
 
 	getTexturesWithKeyContains(str: string) {
-		const keys = [...this.textureMap.keys()].filter((k) => k.includes(str));
-		return keys.map((k) => this.textureMap.get(k));
+		const textures = [];
+		for (const [key, tex] of this.textureMap.entries()) {
+			if (key.includes(str)) {
+				textures.push(tex);
+			}
+		}
+		return textures;
 	}
 }
