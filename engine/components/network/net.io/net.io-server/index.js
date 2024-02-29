@@ -856,6 +856,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 				if (self._userIds[decodedToken.userId]) {
 					assignedId = self._userIds[decodedToken.userId];
 					clearTimeout(self._idleTimeoutsByUserId[socket._token.userId]);
+					taro.server.rejoiningIdleClients.push(assignedId);
 					// leave this log for now
 					console.log('[net.io-server/index.js] idle game reconnect | client: ', assignedId);
 					delete taro.server.clients[assignedId];
