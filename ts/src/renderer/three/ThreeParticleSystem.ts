@@ -73,7 +73,7 @@ class ThreeParticleSystem {
 		this.node = points;
 	}
 
-	emit(emitterConfig) {
+	emit(emitterConfig: ThreeEmitterConfig) {
 		const internalConfig = {
 			elapsed: 0,
 			accumulator: 0,
@@ -346,3 +346,34 @@ const fs = `
     gl_FragColor.a *= vBlend;
   }
 `;
+
+type ThreeEmitterConfig = {
+	position: { x: number; y: number; z: number };
+	target: ThreeUnit | undefined;
+	direction: { x: number; y: number; z: number };
+	azimuth: { min: number; max: number };
+	elevation: { min: 0; max: 0 };
+	shape: { width: number; height: number; depth: number };
+	add_time: number;
+	live_time_from: number;
+	live_time_to: number;
+	rotation_from: number;
+	rotation_to: number;
+	speed_from: number;
+	speed_to: number;
+	scale_x: number;
+	scale_y: number;
+	scale_from: number;
+	scale_increase: number;
+	color_from: [number, number, number];
+	color_to: [number, number, number];
+	color_speed_from: number;
+	color_speed_to: number;
+	brightness_from: number;
+	brightness_to: number;
+	opacity_from: number;
+	opacity_to: number;
+	blend: number;
+	texture: THREE.Texture;
+	duration: number;
+};
