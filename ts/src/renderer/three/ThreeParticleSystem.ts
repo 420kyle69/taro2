@@ -4,6 +4,8 @@ class ThreeParticleSystem {
 	geometry = new THREE.InstancedBufferGeometry();
 	emitters: ThreeEmitter[] = [];
 
+	private textures = ThreeTextureManager.instance().getTexturesWithKeyContains('particle');
+
 	// Used during particle creation; avoid instantiating temp objects
 	private worldPos = new THREE.Vector3();
 	private forward = new THREE.Vector3();
@@ -11,7 +13,6 @@ class ThreeParticleSystem {
 	private up = new THREE.Vector3();
 	private basis = new THREE.Matrix4();
 	private velocity = new THREE.Vector3();
-	private textures = ThreeTextureManager.instance().getTexturesWithKeyContains('particle');
 
 	constructor() {
 		const maxParticles = 50000;
@@ -105,7 +106,6 @@ class ThreeParticleSystem {
 			}
 		}
 
-		// TODO: fix death time, now it extends the lifetime which is no good
 		for (const idx of emittersIndicesMarkedForDestroy) {
 			this.emitters.splice(idx, 1);
 		}
@@ -171,7 +171,7 @@ class ThreeParticleSystem {
 			emitter.accumulator += delta;
 
 			if (emitter.addInterval > 0) {
-				// NOTE(nick): Avoid spawning to many particles; it has to be seen
+				// NOTE(nick): Avoids spawning to many particles; it has to be seen
 				// depending on user feedback if this is an acceptable limit.
 				const addInterval = emitter.addInterval < 0.0001 ? 0.0001 : emitter.addInterval;
 				while (emitter.accumulator >= addInterval) {

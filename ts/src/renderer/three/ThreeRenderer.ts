@@ -414,8 +414,6 @@ class ThreeRenderer {
 			const particleData = taro.game.data.particleTypes[particle.particleId];
 			const tex = ThreeTextureManager.instance().textureMap.get(`particle/${particleData.url}`);
 
-			// Bug particles not attached to iceballs always, check in modd.io editor when it should spawn first
-			// to try and see why it happens. What is the result when rendered 2d?
 			let target = null;
 			if (particle.entityId) {
 				const entity = this.entities.find((entity) => entity.taroId == particle.entityId);
@@ -424,7 +422,6 @@ class ThreeRenderer {
 				}
 			}
 
-			// Direction from deg -> rad
 			const angle = particleData.fixedRotation ? 0 : particle.angle * (Math.PI / 180);
 			const direction = { x: 0, y: 0, z: 1 }; // Phaser particle system starts in this direction
 			const cos = Math.cos(angle);
@@ -432,35 +429,22 @@ class ThreeRenderer {
 			direction.x = direction.x * cos - direction.z * sin;
 			direction.z = direction.x * sin + direction.z * cos;
 
-			// Azimuth from
 			const angleMin = (particleData.angle.min - 180) * (Math.PI / 180);
 			const angleMax = (particleData.angle.max - 180) * (Math.PI / 180);
 
-			// Pixels per second I believe; convert to tiles per second?
 			const speedMin = Utils.pixelToWorld(particleData.speed.min);
 			const speedMax = Utils.pixelToWorld(particleData.speed.max);
 
-			// MS; convert to seconds
 			const lifetimeFrom = particleData.lifeBase * 0.001;
 			const lifetimeTo = particleData.lifeBase * 0.001;
 
-			// How does phaser determine how long the death animation should take?
-			// I think the default value is 1 second... so right now people can't set
-			// the time it takes to fadeout... weird.
-			// Edit: tested it, duration is equal to the lifetime (lol?)
 			const opacityFrom = 1;
 			const opacityTo = particleData.deathOpacityBase;
 
-			// Duration in MS -> S; 0 means forever; TODO: implement this in my particle emitter
 			const duration = particleData.duration * 0.001;
 
-			// time interval between 'flow' cycles in MS. 0 means one particle flow
-			// cycle for each logic update (maximum). -1 means explode.
-			// Converted to S
 			const frequency = particleData.emitFrequency * 0.001;
 
-			// width and height in pixels; convert to world units. Use this to calc
-			// the correct particle scale
 			const width = Utils.pixelToWorld(particleData.dimensions.width);
 			const height = Utils.pixelToWorld(particleData.dimensions.height);
 
