@@ -127,6 +127,8 @@ var Server = TaroClass.extend({
 		self.gameLoaded = false;
 		self.coinUpdate = {};
 
+		self.rejoiningIdleClients = [];
+
 		self.socketConnectionCount = {
 			connected: 0,
 			disconnected: 0,
