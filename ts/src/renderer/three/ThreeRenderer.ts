@@ -494,7 +494,7 @@ class ThreeRenderer {
 			add_time: 0.005,
 			elapsed: 0,
 			live_time_from: 1,
-			live_time_to: 2,
+			live_time_to: 1,
 			rotation_from: 0.5,
 			rotation_to: 1,
 			speed_from: 0.002,
@@ -548,8 +548,12 @@ class ThreeRenderer {
 		// TODO: Is this the proper way to get deltaTime or should I get it from the
 		// engine somewhere? Also it feels a little weird that the renderer triggers
 		// the engine update. It should be the other way around.
-		const dt = this.clock.getDelta();
+		let dt = this.clock.getDelta();
 		const time = this.clock.elapsedTime;
+
+		if (dt <= 0) dt = 1 / 60;
+		else if (dt >= 0.25) dt = 0.25;
+
 		this.particleSystem.update(dt, time, this.camera.instance);
 
 		this.camera.update();

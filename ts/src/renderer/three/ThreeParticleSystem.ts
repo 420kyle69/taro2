@@ -14,7 +14,7 @@ class ThreeParticleSystem {
 	private direction = new THREE.Vector3();
 
 	constructor() {
-		const maxParticles = 10000;
+		const maxParticles = 50000;
 
 		const particleTextures = ThreeTextureManager.instance().getTexturesWithKeyContains('particle');
 
@@ -152,18 +152,21 @@ class ThreeParticleSystem {
 		((this.node as THREE.Mesh).material as THREE.ShaderMaterial).uniforms.time.value = time;
 	}
 
-	particleEmittersUpdate(delta) {
+	particleEmittersUpdate(delta: number) {
 		for (let n = 0; n < this.particleEmitters.length; n++) {
 			const emitter = this.particleEmitters[n];
-			emitter.accumulator += delta;
-			let add = Math.floor(emitter.accumulator / emitter.add_time);
-			emitter.accumulator -= add * emitter.add_time;
-			if (add > (0.016 / emitter.add_time) * 60) {
-				emitter.accumulator = 0;
-				add = 0;
-			}
 
-			while (add--) {
+			emitter.accumulator += delta;
+
+			if (emitter.add_time > 0) {
+				// NOTE(nick): Avoid spawning to many particles; it has to be seen
+				// depending on user feedback if this is an acceptable limit.
+				const add_time = emitter.add_time < 0.0001 ? 0.0001 : emitter.add_time;
+				while (emitter.accumulator >= add_time) {
+					emitter.accumulator -= add_time;
+					this.particleEmitterEmit(emitter);
+				}
+			} else {
 				this.particleEmitterEmit(emitter);
 			}
 		}
