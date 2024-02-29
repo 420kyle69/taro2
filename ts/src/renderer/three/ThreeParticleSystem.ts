@@ -2,7 +2,7 @@ class ThreeParticleSystem {
 	node: THREE.Object3D;
 	particles = [];
 	geometry = new THREE.InstancedBufferGeometry();
-	particleEmitters = [];
+	emitters: ThreeEmitter[] = [];
 
 	// Used during particle creation; avoid instantiating temp objects
 	private worldPos = new THREE.Vector3();
@@ -72,21 +72,21 @@ class ThreeParticleSystem {
 		this.node = points;
 	}
 
-	emit(emitterConfig: ThreeEmitterConfig) {
+	emit(emitterConfig: ThreeEmitter) {
 		const internalConfig = {
 			elapsed: 0,
 			accumulator: 0,
 			hasTarget: !!emitterConfig.target,
 		};
 
-		this.particleEmitters.push({ ...internalConfig, ...emitterConfig });
+		this.emitters.push({ ...internalConfig, ...emitterConfig });
 	}
 
 	update(dt: number, time: number, camera: THREE.Camera) {
 		const emittersIndicesMarkedForDestroy = [];
 
-		for (let i = 0; i < this.particleEmitters.length; i++) {
-			const emitter = this.particleEmitters[i];
+		for (let i = 0; i < this.emitters.length; i++) {
+			const emitter = this.emitters[i] as ThreeEmitterInternal;
 
 			emitter.elapsed += dt;
 
@@ -107,10 +107,10 @@ class ThreeParticleSystem {
 
 		// TODO: fix death time, now it extends the lifetime which is no good
 		for (const idx of emittersIndicesMarkedForDestroy) {
-			this.particleEmitters.splice(idx, 1);
+			this.emitters.splice(idx, 1);
 		}
 
-		this.particleEmittersUpdate(dt);
+		this.updateEmitters(dt);
 
 		const count = this.particles.length;
 		const x = camera.position.x;
@@ -164,9 +164,9 @@ class ThreeParticleSystem {
 		((this.node as THREE.Mesh).material as THREE.ShaderMaterial).uniforms.time.value = time;
 	}
 
-	particleEmittersUpdate(delta: number) {
-		for (let n = 0; n < this.particleEmitters.length; n++) {
-			const emitter = this.particleEmitters[n];
+	updateEmitters(delta: number) {
+		for (let n = 0; n < this.emitters.length; n++) {
+			const emitter = this.emitters[n] as ThreeEmitterInternal;
 
 			emitter.accumulator += delta;
 
@@ -176,10 +176,10 @@ class ThreeParticleSystem {
 				const addInterval = emitter.addInterval < 0.0001 ? 0.0001 : emitter.addInterval;
 				while (emitter.accumulator >= addInterval) {
 					emitter.accumulator -= addInterval;
-					this.particleEmitterEmit(emitter, delta);
+					this.emitterEmit(emitter, delta);
 				}
 			} else {
-				this.particleEmitterEmit(emitter, delta);
+				this.emitterEmit(emitter, delta);
 			}
 		}
 
@@ -227,7 +227,7 @@ class ThreeParticleSystem {
 		this.particles.length = i;
 	}
 
-	particleEmitterEmit(emitter: ThreeEmitterConfig, dt: number) {
+	emitterEmit(emitter: ThreeEmitter, dt: number) {
 		this.forward.set(emitter.direction.x, emitter.direction.y, emitter.direction.z).normalize();
 		this.right.crossVectors({ x: 0, y: 1, z: 0 } as THREE.Vector3, this.forward).normalize();
 		if (this.forward.x <= Number.EPSILON && this.forward.z <= Number.EPSILON) {
@@ -350,12 +350,12 @@ const fs = `
   }
 `;
 
-type ThreeEmitterConfig = {
+type ThreeEmitter = {
 	position: { x: number; y: number; z: number };
 	target: ThreeUnit | undefined;
 	direction: { x: number; y: number; z: number };
 	azimuth: { min: number; max: number };
-	elevation: { min: 0; max: 0 };
+	elevation: { min: number; max: number };
 	shape: { width: number; height: number; depth: number };
 	addInterval: number;
 	lifetime: { min: number; max: number };
@@ -370,3 +370,9 @@ type ThreeEmitterConfig = {
 	texture: THREE.Texture;
 	duration: number;
 };
+
+type ThreeEmitterInternal = {
+	elapsed: number;
+	accumulator: number;
+	hasTarget: boolean;
+} & ThreeEmitter;

@@ -283,8 +283,6 @@ class ThreeRenderer {
 					this.camera.startFollow(ent);
 					this.skybox.scene.position.copy(ent.position);
 					ent.attach(this.skybox.scene);
-
-					this.particleSystem.particleEmitters[0].target = ent;
 				},
 				this
 			);
@@ -363,7 +361,7 @@ class ThreeRenderer {
 						layers.entities.remove(ent);
 						this.entities.splice(idx, 1);
 
-						for (const emitter of this.particleSystem.particleEmitters) {
+						for (const emitter of this.particleSystem.emitters) {
 							if (emitter.target === ent) {
 								emitter.target = null;
 							}
