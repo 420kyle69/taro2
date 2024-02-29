@@ -4010,7 +4010,7 @@ var TaroEntity = TaroObject.extend({
 								break;
 							case 'value':
 								var newValue = Math.max(playerAttribute.min, Math.min(persistAttribute[key], playerAttribute.max));
-								self.attribute.update(attrKey, newValue);
+								self.attribute.update(attrKey, newValue, null, null, true);
 								break;
 						}
 					}
