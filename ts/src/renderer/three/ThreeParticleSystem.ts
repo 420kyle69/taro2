@@ -171,12 +171,12 @@ class ThreeParticleSystem {
 
 			emitter.accumulator += delta;
 
-			if (emitter.add_time > 0) {
+			if (emitter.addInterval > 0) {
 				// NOTE(nick): Avoid spawning to many particles; it has to be seen
 				// depending on user feedback if this is an acceptable limit.
-				const add_time = emitter.add_time < 0.0001 ? 0.0001 : emitter.add_time;
-				while (emitter.accumulator >= add_time) {
-					emitter.accumulator -= add_time;
+				const addInterval = emitter.addInterval < 0.0001 ? 0.0001 : emitter.addInterval;
+				while (emitter.accumulator >= addInterval) {
+					emitter.accumulator -= addInterval;
 					this.particleEmitterEmit(emitter, delta);
 				}
 			} else {
@@ -228,7 +228,7 @@ class ThreeParticleSystem {
 		this.particles.length = i;
 	}
 
-	particleEmitterEmit(emitter, dt: number) {
+	particleEmitterEmit(emitter: ThreeEmitterConfig, dt: number) {
 		this.forward.set(emitter.direction.x, emitter.direction.y, emitter.direction.z).normalize();
 		this.right.crossVectors({ x: 0, y: 1, z: 0 } as THREE.Vector3, this.forward).normalize();
 		if (this.forward.x <= Number.EPSILON && this.forward.z <= Number.EPSILON) {
@@ -240,7 +240,7 @@ class ThreeParticleSystem {
 		const randAzimuth = Math.random() * (emitter.azimuth.max - emitter.azimuth.min) + emitter.azimuth.min;
 		const randElevation = Math.random() * (emitter.elevation.max - emitter.elevation.min) + emitter.elevation.min;
 		const angleOffset = Math.PI * 0.5;
-		const speed = (Math.random() * (emitter.speed_to - emitter.speed_from) + emitter.speed_from) * dt;
+		const speed = (Math.random() * (emitter.speed.max - emitter.speed.min) + emitter.speed.min) * dt;
 
 		this.velocity
 			.set(Math.cos(randAzimuth + angleOffset), Math.sin(randElevation), Math.sin(randAzimuth + angleOffset))
@@ -248,7 +248,7 @@ class ThreeParticleSystem {
 			.applyMatrix4(this.basis)
 			.multiplyScalar(speed);
 
-		const brightness = Math.random() * (emitter.brightness_to - emitter.brightness_from) + emitter.brightness_from;
+		const brightness = Math.random() * (emitter.brightness.max - emitter.brightness.min) + emitter.brightness.min;
 
 		const position = {
 			x: emitter.position.x + (emitter.shape.width * Math.random() - emitter.shape.width * 0.5),
@@ -256,29 +256,33 @@ class ThreeParticleSystem {
 			z: emitter.position.z + (emitter.shape.depth * Math.random() - emitter.shape.depth * 0.5),
 		};
 
-		const lifetime = Math.random() * (emitter.live_time_to - emitter.live_time_from) + emitter.live_time_from;
+		const lifetime = Math.random() * (emitter.lifetime.max - emitter.lifetime.min) + emitter.lifetime.min;
 
 		this.particles.push({
 			offset: [position.x, position.y, position.z],
 			velocity: [this.velocity.x, this.velocity.y, this.velocity.z],
 			lifetime: lifetime,
 			live: lifetime,
-			scale: [emitter.scale_x * emitter.scale_from, emitter.scale_y * emitter.scale_from],
-			scale_increase: emitter.scale_increase,
-			rotation: Math.random() * (emitter.rotation_to - emitter.rotation_from) + emitter.rotation_from,
-			color: [1, 1, 1, emitter.opacity_from],
+			scale: [emitter.scale.x * emitter.scale.start, emitter.scale.y * emitter.scale.start],
+			scale_increase: emitter.scale.step,
+			rotation: Math.random() * (emitter.rotation.max - emitter.rotation.min) + emitter.rotation.min,
+			color: [1, 1, 1, emitter.opacity.start],
 			color_from: [
-				emitter.color_from[0] * brightness,
-				emitter.color_from[1] * brightness,
-				emitter.color_from[2] * brightness,
+				emitter.color.start[0] * brightness,
+				emitter.color.start[1] * brightness,
+				emitter.color.start[2] * brightness,
 			],
-			color_to: [emitter.color_to[0] * brightness, emitter.color_to[1] * brightness, emitter.color_to[2] * brightness],
-			color_speed: Math.random() * (emitter.color_speed_to - emitter.color_speed_from) + emitter.color_speed_from,
+			color_to: [
+				emitter.color.end[0] * brightness,
+				emitter.color.end[1] * brightness,
+				emitter.color.end[2] * brightness,
+			],
+			color_speed: Math.random() * (emitter.color_speed.max - emitter.color_speed.min) + emitter.color_speed.min,
 			color_t: 0,
 			blend: emitter.blend,
 			texture: emitter.texture,
-			opacity_from: emitter.opacity_from,
-			opacity_to: emitter.opacity_to,
+			opacity_from: emitter.opacity.start,
+			opacity_to: emitter.opacity.end,
 		});
 	}
 }
@@ -354,25 +358,15 @@ type ThreeEmitterConfig = {
 	azimuth: { min: number; max: number };
 	elevation: { min: 0; max: 0 };
 	shape: { width: number; height: number; depth: number };
-	add_time: number;
-	live_time_from: number;
-	live_time_to: number;
-	rotation_from: number;
-	rotation_to: number;
-	speed_from: number;
-	speed_to: number;
-	scale_x: number;
-	scale_y: number;
-	scale_from: number;
-	scale_increase: number;
-	color_from: [number, number, number];
-	color_to: [number, number, number];
-	color_speed_from: number;
-	color_speed_to: number;
-	brightness_from: number;
-	brightness_to: number;
-	opacity_from: number;
-	opacity_to: number;
+	addInterval: number;
+	lifetime: { min: number; max: number };
+	rotation: { min: number; max: number };
+	speed: { min: number; max: number };
+	scale: { x: number; y: number; start: number; step: number };
+	color: { start: [number, number, number]; end: [number, number, number] };
+	color_speed: { min: number; max: number };
+	brightness: { min: number; max: number };
+	opacity: { start: number; end: number };
 	blend: number;
 	texture: THREE.Texture;
 	duration: number;
