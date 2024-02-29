@@ -500,12 +500,10 @@ var TaroNetIoServer = {
 					`Accepted connection with socket id ${socket.id
 					} ip ${remoteAddress}`
 				);
-				
-				console.log('onClientConnect(): \n')
+
 				taro.network.clientIds.push(socket.id);
-				console.log(taro.network.clientIds);				
 				taro.server.socketConnectionCount.connected++;
-				
+
 				// Store a rooms array for this client
 				taro.network._clientRooms[socket.id] = taro.network._clientRooms[socket.id] || [];
 

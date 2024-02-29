@@ -46,7 +46,7 @@ var Player = TaroEntity.extend({
 					taro._currentTime - taro.client.playerJoinedAt,
 					'My player created'
 				]);
-				console.log('MY PLAYER CREATED');
+
 				// old comment => 'declare my player'
 				taro.client.myPlayer = self;
 
@@ -549,7 +549,6 @@ var Player = TaroEntity.extend({
 
 	// update player's stats in the server side first, then update client side as well.
 	streamUpdateData: function (queuedData, clientId) {
-		if (taro.isClient) console.log('Player.streamUpdateData(): \n', queuedData);
 		var self = this;
 		var oldStatsName = self._stats.name;
 		TaroEntity.prototype.streamUpdateData.call(this, queuedData, clientId);

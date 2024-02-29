@@ -330,7 +330,6 @@ NetIo.Client = NetIo.EventingClass.extend({
 		}
 
 		if (packet._netioCmd) {
-			console.log(packet, data);
 			// The packet is a netio command
 			switch (packet._netioCmd) {
 				case 'id':
@@ -342,7 +341,6 @@ NetIo.Client = NetIo.EventingClass.extend({
 
 					// Emit the connect event
 					this.emit('connect', this.id);
-					console.log('received id packet');
 					break;
 
 				case 'close':
