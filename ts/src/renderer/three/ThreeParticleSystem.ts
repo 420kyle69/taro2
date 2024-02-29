@@ -73,6 +73,15 @@ class ThreeParticleSystem {
 		this.node = points;
 	}
 
+	emit(emitterConfig) {
+		const internalConfig = {
+			elapsed: 0,
+			accumulator: 0,
+		};
+
+		this.particleEmitters.push({ ...internalConfig, ...emitterConfig });
+	}
+
 	update(dt: number, time: number, camera: THREE.Camera) {
 		const emittersIndicesMarkedForDestroy = [];
 

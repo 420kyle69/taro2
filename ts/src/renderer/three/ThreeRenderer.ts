@@ -467,7 +467,7 @@ class ThreeRenderer {
 				if (particleData.emitZone.y) emitDepth = Utils.pixelToWorld(particleData.emitZone.y);
 			}
 
-			this.particleSystem.particleEmitters.push({
+			this.particleSystem.emit({
 				position: { x: particle.position.x, y: 0.5, z: particle.position.y },
 				target: target,
 				direction: direction,
@@ -496,10 +496,6 @@ class ThreeRenderer {
 				blend: 1,
 				texture: tex,
 				duration: duration,
-
-				// TODO(nick): Internal usage; don't expose
-				elapsed: 0,
-				accumulator: 0,
 			});
 		});
 	}
