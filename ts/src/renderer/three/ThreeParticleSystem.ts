@@ -183,10 +183,10 @@ class ThreeParticleSystem {
 				// it currently works in the Phaser renderer. We might want to add more
 				// control to this in the future and give users more emitter settings to
 				// play with in the editor.
-				let opacity = particle.live / particle.lifetime;
-				if (opacity < 0) opacity = 0;
-
-				particle.color[3] = opacity;
+				let t = 1 - particle.live / particle.lifetime;
+				if (t < 0) t = 0;
+				else if (t > 1) t = 1;
+				particle.color[3] = Utils.lerp(particle.opacity_from, particle.opacity_to, t);
 
 				if (particle.color_t < 1) {
 					const p = particle;
@@ -255,7 +255,7 @@ class ThreeParticleSystem {
 			scale: [emitter.scale_from, emitter.scale_from],
 			scale_increase: emitter.scale_increase,
 			rotation: Math.random() * (emitter.rotation_to - emitter.rotation_from) + emitter.rotation_from,
-			color: [1, 1, 1, emitter.opacity],
+			color: [1, 1, 1, emitter.opacity_from],
 			color_from: [
 				emitter.color_from[0] * brightness,
 				emitter.color_from[1] * brightness,
@@ -266,6 +266,8 @@ class ThreeParticleSystem {
 			color_t: 0,
 			blend: emitter.blend,
 			texture: emitter.texture,
+			opacity_from: emitter.opacity_from,
+			opacity_to: emitter.opacity_to,
 		});
 	}
 }
