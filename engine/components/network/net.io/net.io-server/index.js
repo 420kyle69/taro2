@@ -852,15 +852,17 @@ NetIo.Server = NetIo.EventingClass.extend({
 			}
 
 			// if idle game && we have this userId stored already
-			if (true && self._userIds[decodedToken.userId]) {
-				assignedId = self._userIds[decodedToken.userId];
-				clearTimeout(self._idleTimeoutsByUserId[socket._token.userId]);
-				// leave this log for now
-				console.log('[net.io-server/index.js] idle game reconnect | client: ', assignedId);
-				delete taro.server.clients[assignedId];
-			// if idle game but new userId
-			} else if (true) {
-				self._userIds[decodedToken.userId] = assignedId;
+			if (taro.game.data.settings.isIdleGame) {
+				if (self._userIds[decodedToken.userId]) {
+					assignedId = self._userIds[decodedToken.userId];
+					clearTimeout(self._idleTimeoutsByUserId[socket._token.userId]);
+					// leave this log for now
+					console.log('[net.io-server/index.js] idle game reconnect | client: ', assignedId);
+					delete taro.server.clients[assignedId];
+				// if idle game but new userId
+				} else {
+					self._userIds[decodedToken.userId] = assignedId;
+				}
 			}
 
 			taro.server.usedConnectionJwts = filteredUsedConnectionJwts;
@@ -902,14 +904,14 @@ NetIo.Server = NetIo.EventingClass.extend({
 					// data contains {WebSocket socket, <Buffer > reason, Number code}
 					taro.network._onSocketDisconnect(data, socket);
 				// idle game
-				} else if (true) {
+				} else if (taro.game.data.settings.isIdleGame) {
 					delete self._socketsById[socket.id];
 					// leave this log for now
 					console.log('[net.io-server/index.js] idle game disconnect | client: ', socket.id);
 					// replace hard number with `taro.game.data.settings.idleGameTimeout`
 					self._idleTimeoutsByUserId[socket._token.userId] = setTimeout(() => {
 						taro.network._onSocketDisconnect(data, socket);
-					}, 10000);
+					}, taro.game.data.settings.idleGameTimeLimit);
 				} else {
 					self._socketsById[socket.id].gracePeriod = setTimeout(() => {
 						delete self._socketsById[socket.id];

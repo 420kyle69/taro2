@@ -92,17 +92,19 @@ var Player = TaroEntity.extend({
 	},
 
 	// move to UI
+	// idle boolean is passed from worker
 	joinGame: function (idle = false) {
 
 		var self = this;
-		if (self._stats.playerJoined != true || true /*idle mode */) {
+
+		if (self._stats.playerJoined != true || idle) {
 
 			// notify GS manager that a user has joined, do not notify if player joins again after pausing the game
 			if (self._stats.userId) {
 				taro.workerComponent.userJoined(self._stats.userId);
 			}
 
-			if (taro.script && !idle /* idle mode */) // do not send trigger for neutral player
+			if (taro.script && !idle) // do not send trigger for neutral player
 			{
 				taro.script.trigger('playerJoinsGame', { playerId: self.id() });
 			}

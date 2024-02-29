@@ -4962,6 +4962,8 @@ var TaroEntity = TaroObject.extend({
 				taro.network.stream._streamClientCreated[thisId] = {};
 			}
 
+			// IDLE MODE
+			// need to replace `true` with condition that evaluates only for clientIds that *need* the forced sync
 			if (!taro.network.stream._streamClientCreated[thisId][clientId] || true) {
 				createResult = this.streamCreate(clientId);
 				this._hasMoved = true;
