@@ -3,7 +3,6 @@ class ThreeParticleSystem {
 	particles = [];
 	geometry = new THREE.InstancedBufferGeometry();
 	particleEmitters = [];
-	offset = { x: -15.828125, y: 2.0, z: -59.484375 };
 
 	// Used during particle creation; avoid instantiating temp objects
 	private worldPos = new THREE.Vector3();
