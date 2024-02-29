@@ -32,7 +32,7 @@ class PhaserButton extends Phaser.GameObjects.Container {
         this.x = x;
         this.y = y;
         // @ts-ignore
-        const button = this.button = scene.add.rexRoundRectangle(0, 0, size, size, radius, backgroundColor, 0.7);
+        const button = this.button = scene.add.rexRoundRectangle(0, 0, size, size, radius, backgroundColor, 0);
 		button.setInteractive();
         this.add(button);
 
@@ -75,7 +75,10 @@ class PhaserButton extends Phaser.GameObjects.Container {
 
         if (taro.isMobile) {
             //hide key on mobile
-            if (this.image) this.label.visible = false;
+            if (this.image) {
+                this.label.visible = false;
+            }
+            button.setFillStyle(backgroundColor, 0.7);
             const mobileControlScene = taro.renderer.scene.getScene('MobileControls') as MobileControlsScene;
             let clicked = false;
             button.on('pointerdown', () => {
@@ -136,7 +139,11 @@ class PhaserButton extends Phaser.GameObjects.Container {
         if (bool) {
             this.button.setFillStyle(this.activeColor, 1);
         } else {
-            this.button.setFillStyle(this.backgroundColor, 0.7);
+            if (taro.isMobile) {
+                this.button.setFillStyle(this.backgroundColor, 0.7);
+            } else {
+                this.button.setFillStyle(this.backgroundColor, 0);
+            }
         }
     }
 
