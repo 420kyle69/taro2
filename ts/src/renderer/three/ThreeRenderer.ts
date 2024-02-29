@@ -363,6 +363,12 @@ class ThreeRenderer {
 						layers.entities.remove(ent);
 						this.entities.splice(idx, 1);
 
+						for (const emitter of this.particleSystem.particleEmitters) {
+							if (emitter.target === ent) {
+								emitter.target = null;
+							}
+						}
+
 						const animIdx = this.animatedSprites.indexOf(ent as ThreeAnimatedSprite, 0);
 						if (animIdx > -1) {
 							this.animatedSprites.splice(animIdx, 1);

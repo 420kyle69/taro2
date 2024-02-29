@@ -77,6 +77,7 @@ class ThreeParticleSystem {
 		const internalConfig = {
 			elapsed: 0,
 			accumulator: 0,
+			hasTarget: !!emitterConfig.target,
 		};
 
 		this.particleEmitters.push({ ...internalConfig, ...emitterConfig });
@@ -90,7 +91,9 @@ class ThreeParticleSystem {
 
 			emitter.elapsed += dt;
 
-			if (emitter.duration > 0 && emitter.elapsed >= emitter.duration) {
+			const isTimeUp = emitter.duration > 0 && emitter.elapsed >= emitter.duration;
+			const isOrphan = emitter.hasTarget && !emitter.target;
+			if (isTimeUp || isOrphan) {
 				emittersIndicesMarkedForDestroy.push(i);
 				continue;
 			}
