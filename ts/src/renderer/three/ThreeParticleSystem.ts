@@ -165,10 +165,10 @@ class ThreeParticleSystem {
 				const add_time = emitter.add_time < 0.0001 ? 0.0001 : emitter.add_time;
 				while (emitter.accumulator >= add_time) {
 					emitter.accumulator -= add_time;
-					this.particleEmitterEmit(emitter);
+					this.particleEmitterEmit(emitter, delta);
 				}
 			} else {
-				this.particleEmitterEmit(emitter);
+				this.particleEmitterEmit(emitter, delta);
 			}
 		}
 
@@ -216,7 +216,7 @@ class ThreeParticleSystem {
 		this.particles.length = i;
 	}
 
-	particleEmitterEmit(emitter) {
+	particleEmitterEmit(emitter, dt: number) {
 		this.forward.set(emitter.direction.x, emitter.direction.y, emitter.direction.z).normalize();
 		this.right.crossVectors({ x: 0, y: 1, z: 0 } as THREE.Vector3, this.forward).normalize();
 		if (this.forward.x <= Number.EPSILON && this.forward.z <= Number.EPSILON) {
@@ -228,7 +228,7 @@ class ThreeParticleSystem {
 		const randAzimuth = Math.random() * (emitter.azimuth.max - emitter.azimuth.min) + emitter.azimuth.min;
 		const randElevation = Math.random() * (emitter.elevation.max - emitter.elevation.min) + emitter.elevation.min;
 		const angleOffset = Math.PI * 0.5;
-		const speed = Math.random() * (emitter.speed_to - emitter.speed_from) + emitter.speed_from;
+		const speed = (Math.random() * (emitter.speed_to - emitter.speed_from) + emitter.speed_from) * dt;
 
 		this.direction
 			.set(Math.cos(randAzimuth + angleOffset), Math.sin(randElevation), Math.sin(randAzimuth + angleOffset))
