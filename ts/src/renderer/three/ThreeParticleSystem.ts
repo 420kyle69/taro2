@@ -1,9 +1,9 @@
 class ThreeParticleSystem {
 	node: THREE.Object3D;
-	particles = [];
-	geometry = new THREE.InstancedBufferGeometry();
 	emitters: ThreeEmitter[] = [];
 
+	private particles = [];
+	private geometry = new THREE.InstancedBufferGeometry();
 	private textures = ThreeTextureManager.instance().getTexturesWithKeyContains('particle');
 
 	// Used during particle creation; avoid instantiating temp objects
