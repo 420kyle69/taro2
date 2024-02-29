@@ -199,6 +199,12 @@ const Client = TaroEventingClass.extend({
 		promise
 			.then(async (game) => {
 				taro.game.data = game.data;
+				if (window.isStandalone) {
+					if (!window.gameJson) {
+						window.gameJson = { data: taro.game.data };
+					}
+				}
+
 
 				this.initializeConfigurationFields();
 
@@ -214,7 +220,6 @@ const Client = TaroEventingClass.extend({
 				}
 
 				taro.developerMode = new DeveloperMode();
-				taro.mapEditorUI = new MapEditorUI();
 
 				if (!window.isStandalone) {
 					this.servers = this.getServersArray();

@@ -42,7 +42,6 @@ declare class TaroEngine extends TaroClass {
 	renderer: PhaserRenderer;
 
 	developerMode: DeveloperMode;
-	mapEditorUI: MapEditorUI;
 
 	scaleMapDetails: {
 		scaleFactor: {
