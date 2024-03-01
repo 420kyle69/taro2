@@ -576,6 +576,19 @@ var ParameterComponent = TaroEntity.extend({
 
 						break;
 
+					case 'getDefaultAttributeValueOfUnitType':
+						var attributeTypeId = self.getValue(text.attribute, vars);
+						var unitTypeId = self.getValue(text.unitType, vars);
+
+						if (unitType && attributeTypeId) {
+							var unitType = taro.game.cloneAsset('unitTypes', unitTypeId);
+							if (unitType && unitType.attributes && unitType.attributes[attributeTypeId]) {
+								returnValue = unitType.attributes[attributeTypeId].value;
+							}
+						}
+
+						break;
+
 					case 'getItemQuantity':
 						var item = self.getValue(text.item, vars);
 						if (item && item._category == 'item') {
