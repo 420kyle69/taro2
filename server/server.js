@@ -130,6 +130,7 @@ var Server = TaroClass.extend({
 		self.coinUpdate = {};
 
 		self.rejoiningIdleClients = [];
+		self._idleDisconnectedClientIds = {};
 
 		self.socketConnectionCount = {
 			connected: 0,

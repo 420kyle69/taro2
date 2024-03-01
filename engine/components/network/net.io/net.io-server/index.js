@@ -857,6 +857,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 					assignedId = self._userIds[decodedToken.userId];
 					clearTimeout(self._idleTimeoutsByUserId[socket._token.userId]);
 					taro.server.rejoiningIdleClients.push(assignedId);
+					delete taro.server._idleDisconnectedClientIds[assignedId];
 					// leave this log for now
 					console.log('[net.io-server/index.js] idle game reconnect | client: ', assignedId);
 					delete taro.server.clients[assignedId];
@@ -906,15 +907,21 @@ NetIo.Server = NetIo.EventingClass.extend({
 					taro.network._onSocketDisconnect(data, socket);
 				// idle game; not guest
 				} else if (
-					self._socketsById[socket.id]._token.userId !== '' &&
+					socket._token.userId !== '' &&
 					taro.game.data.settings.isIdleGame
 				) {
 					delete self._socketsById[socket.id];
 					// leave this log for now
 					console.log('[net.io-server/index.js] idle game disconnect | client: ', socket.id);
+					// store disconnected clients
+					taro.server._idleDisconnectedClientIds[socket.id] = socket._token.userId;
 					// replace hard number with `taro.game.data.settings.idleGameTimeout`
 					self._idleTimeoutsByUserId[socket._token.userId] = setTimeout(() => {
+						// let disconnect logic continue
 						taro.network._onSocketDisconnect(data, socket);
+						delete taro.server._idleDisconnectedClientIds[socket.id];
+						// remove this user from idle userIds object
+						delete self._userIds[socket._token.userId]
 					}, taro.game.data.settings.idleGameTimeLimit);
 				} else {
 					self._socketsById[socket.id].gracePeriod = setTimeout(() => {
