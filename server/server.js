@@ -10,6 +10,8 @@ const currency = require("currency.js");
 // global imports
 _ = require('lodash');
 rfdc = require('rfdc');
+jsonrepair = require("jsonrepair");
+
 
 const Console = console.constructor;
 // redirect global console object to log file

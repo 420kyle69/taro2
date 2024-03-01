@@ -2818,11 +2818,11 @@ var ParameterComponent = TaroEntity.extend({
 
 				if (string) {
 					try {
-						return JSON.parse(string);
+						const repairedString = jsonrepair?.jsonrepair(string);
+						return JSON.parse(repairedString);
 					} catch (err) {
-						if (err instanceof SyntaxError) {
-							self._script.errorLog(`error parsing JSON within stringToObject:  ${typeof string} ${string} is not a valid JSON string`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
-						}
+						console.log('stringToObject err', err.message);
+						self._script.errorLog(`error parsing JSON within stringToObject:  ${typeof string} ${string} is not a valid JSON string`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
 					}
 				}
 			},
