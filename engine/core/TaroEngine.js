@@ -2174,6 +2174,7 @@ var TaroEngine = TaroEntity.extend({
 
 	getPlayerCount: function () {
 		return taro.$$('player').filter(function (player) {
+			console.log(taro.server._idleDisconnectedClientIds);
 			return player._stats.controlledBy == 'human';
 		}).length;
 	},
