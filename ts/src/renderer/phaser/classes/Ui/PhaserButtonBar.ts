@@ -8,9 +8,9 @@ class PhaserButtonBar extends Phaser.GameObjects.Container{
     constructor(public scene: UiScene) {
 		super(scene);
         if (taro.isMobile) {
-            this.buttonSize = 50;
-            this.buttonInterval = 6;
-            this.buttonRadius = 25;
+            this.buttonSize = 50 * window.devicePixelRatio;
+            this.buttonInterval = 6 * window.devicePixelRatio;
+            this.buttonRadius = 25 * window.devicePixelRatio;
         }
         this.updatePosition();
         scene.add.existing(this);
@@ -21,7 +21,7 @@ class PhaserButtonBar extends Phaser.GameObjects.Container{
 	}
 
     addButton(abilityId: string, ability: UnitAbility, key: string) {
-        const button = new PhaserButton(this.scene, ability, abilityId, key, 'description', ability?.iconUrl, Object.values(this.buttons).length * (this.buttonSize + this.buttonInterval), 0, this.buttonSize * window.devicePixelRatio, this.buttonRadius * window.devicePixelRatio);
+        const button = new PhaserButton(this.scene, ability, abilityId, key, 'description', ability?.iconUrl, Object.values(this.buttons).length * (this.buttonSize + this.buttonInterval), 0, this.buttonSize, this.buttonRadius);
         this.buttons[key] = button;
         this.add(button);
         this.updatePosition();

@@ -53,7 +53,7 @@ class PhaserButton extends Phaser.GameObjects.Container {
             const label = this.label = scene.add.bitmapText(
                 - size / 10 + size / 2, + size / 10 - size / 2,
                 BitmapFontManager.font(scene, 'Verdana', true, false, '#FFFFFF'),
-                key.toUpperCase(), 14 * window.devicePixelRatio
+                key.toUpperCase(), 14 * (taro.isMobile ? window.devicePixelRatio : 1)
             );
             label.setOrigin(0.5);
             label.letterSpacing = 1.3;
@@ -64,7 +64,7 @@ class PhaserButton extends Phaser.GameObjects.Container {
             const cooldownLabel = this.cooldownLabel = scene.add.bitmapText(
                 0, 0,
                 BitmapFontManager.font(scene, 'Verdana', false, true, '#FFFF00'),
-                '', 24 * window.devicePixelRatio
+                '', 24 * (taro.isMobile ? window.devicePixelRatio : 1)
             );
             cooldownLabel.setOrigin(0.5);
 			cooldownLabel.letterSpacing = 1.3;
