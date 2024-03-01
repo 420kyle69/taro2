@@ -919,6 +919,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 					self._idleTimeoutsByUserId[socket._token.userId] = setTimeout(() => {
 						// let disconnect logic continue
 						taro.network._onSocketDisconnect(data, socket);
+						delete taro.server._idleDisconnectedClientIds[socket.id];
 						// remove this user from idle userIds object
 						delete self._userIds[socket._token.userId]
 					}, taro.game.data.settings.idleGameTimeLimit);
