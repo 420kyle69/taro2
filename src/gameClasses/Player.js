@@ -46,6 +46,7 @@ var Player = TaroEntity.extend({
 					taro._currentTime - taro.client.playerJoinedAt,
 					'My player created'
 				]);
+
 				// old comment => 'declare my player'
 				taro.client.myPlayer = self;
 
@@ -91,16 +92,19 @@ var Player = TaroEntity.extend({
 	},
 
 	// move to UI
-	joinGame: function () {
+	// idle boolean is passed from worker
+	joinGame: function (idle = false) {
+
 		var self = this;
-		if (self._stats.playerJoined != true) {
+
+		if (self._stats.playerJoined != true || idle) {
 
 			// notify GS manager that a user has joined, do not notify if player joins again after pausing the game
 			if (self._stats.userId) {
 				taro.workerComponent.userJoined(self._stats.userId);
 			}
 
-			if (taro.script) // do not send trigger for neutral player
+			if (taro.script && !idle) // do not send trigger for neutral player
 			{
 				taro.script.trigger('playerJoinsGame', { playerId: self.id() });
 			}
@@ -226,6 +230,12 @@ var Player = TaroEntity.extend({
 				}
 				if (unit.unitUi) {
 					unit.unitUi.updateAllAttributeBars();
+				}
+
+				// abilities
+				if (!taro.isMobile) {
+					const abilitiesData = taro.game.data.unitTypes[unit._stats.type].controls.unitAbilities;
+					taro.client.emit('create-ability-bar', { keybindings: taro.game.data.unitTypes[unit._stats.type].controls.abilities, abilities: abilitiesData });
 				}
 
 				unit.renderMobileControl();

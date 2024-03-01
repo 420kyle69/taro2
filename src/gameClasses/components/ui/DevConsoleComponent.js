@@ -132,10 +132,10 @@ var DevConsoleComponent = TaroEntity.extend({
 			devDiv.append(graphsDiv);
 
 			// tuning div accordion handle
-			devDiv.append('<div class="col-sm-12 my-2"><div id="tuning-div-accordion" class="px-2 py-1">Tuning</div></div>');
+			// devDiv.append('<div class="col-sm-12 my-2"><div id="tuning-div-accordion" class="px-2 py-1">Tuning</div></div>');
 
 			// Tuning Div
-			var tuningDiv = $('<div id="tuning-div" class="col-sm-12 mb-4"></div>');
+			// var tuningDiv = $('<div id="tuning-div" class="col-sm-12 mb-4"></div>');
 
 			taro.client.inputDelay = 0;
 			// taro.client.streamSendInterval = 15;
@@ -191,9 +191,9 @@ var DevConsoleComponent = TaroEntity.extend({
 
 			var controllerViewportClippingEnabled = f1.add(taro.client, 'viewportClippingEnabled');
 
-			tuningDiv.append(gui.domElement);
+			// tuningDiv.append(gui.domElement);
 
-			devDiv.append(tuningDiv);
+			// devDiv.append(tuningDiv);
 
 			devDiv.append('<div class="col-sm-12 my-2"><div id="variables-div-accordion" class="px-2 py-1">Variables</div></div>');
 			devDiv.append('<div id="variables-div"></div>');

@@ -191,7 +191,7 @@ var AttributeComponent = TaroEntity.extend({
 
 	// change attribute's value manually
 	// adding params newMin/Max to combine update value with min/max
-	update: function (attributeTypeId, newValue, newMin = null, newMax = null) {
+	update: function (attributeTypeId, newValue, newMin = null, newMax = null, fromLoadData = false) {
 		var self = this;
 
 		if (!self._entity._stats || !self._entity._stats.attributes) {
@@ -311,22 +311,25 @@ var AttributeComponent = TaroEntity.extend({
 						}
 					}
 				}
-				var triggeredBy = { attribute: attribute };
-				triggeredBy[`${this._entity._category}Id`] = this._entity.id();
+				if (!fromLoadData) {
+					var triggeredBy = { attribute: attribute };
+					triggeredBy[`${this._entity._category}Id`] = this._entity.id();
 
-				if (newValue <= 0 && oldValue > 0) { // when attribute becomes zero, trigger attributeBecomesZero event
-					// necessary as self._entity can be 'player' which doesn't have scriptComponent
-					if (self._entity._category == 'unit' || self._entity._category == 'item' || self._entity._category == 'projectile') {
-						self._entity.script.trigger('entityAttributeBecomesZero', triggeredBy);
+					if (newValue <= 0 && oldValue > 0) { // when attribute becomes zero, trigger attributeBecomesZero event
+						// necessary as self._entity can be 'player' which doesn't have scriptComponent
+						if (self._entity._category == 'unit' || self._entity._category == 'item' || self._entity._category == 'projectile') {
+							self._entity.script.trigger('entityAttributeBecomesZero', triggeredBy);
+						}
+						taro.queueTrigger(`${this._entity._category}AttributeBecomesZero`, triggeredBy);
+					} else if (newValue >= attribute.max) { // when attribute becomes full, trigger attributeBecomesFull event
+						// necessary as self._entity can be 'player' which doesn't have scriptComponent
+						if (self._entity._category == 'unit' || self._entity._category == 'item' || self._entity._category == 'projectile') {
+							self._entity.script.trigger('entityAttributeBecomesFull', triggeredBy);
+						}
+						taro.queueTrigger(`${this._entity._category}AttributeBecomesFull`, triggeredBy);
 					}
-					taro.queueTrigger(`${this._entity._category}AttributeBecomesZero`, triggeredBy);
-				} else if (newValue >= attribute.max) { // when attribute becomes full, trigger attributeBecomesFull event
-					// necessary as self._entity can be 'player' which doesn't have scriptComponent
-					if (self._entity._category == 'unit' || self._entity._category == 'item' || self._entity._category == 'projectile') {
-						self._entity.script.trigger('entityAttributeBecomesFull', triggeredBy);
-					}
-					taro.queueTrigger(`${this._entity._category}AttributeBecomesFull`, triggeredBy);
 				}
+
 				if (taro.isClient) {
 
 					// scoreboard attribute has been changed. queue update.

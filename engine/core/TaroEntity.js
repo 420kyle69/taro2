@@ -4010,7 +4010,7 @@ var TaroEntity = TaroObject.extend({
 								break;
 							case 'value':
 								var newValue = Math.max(playerAttribute.min, Math.min(persistAttribute[key], playerAttribute.max));
-								self.attribute.update(attrKey, newValue);
+								self.attribute.update(attrKey, newValue, null, null, true);
 								break;
 						}
 					}
@@ -4962,7 +4962,12 @@ var TaroEntity = TaroObject.extend({
 				taro.network.stream._streamClientCreated[thisId] = {};
 			}
 
-			if (!taro.network.stream._streamClientCreated[thisId][clientId]) {
+			// IDLE MODE
+			// need condition that evaluates only for clientIds that *need* the forced sync
+			if (
+				!taro.network.stream._streamClientCreated[thisId][clientId] ||
+				taro.server.rejoiningIdleClients.indexOf(clientId) !== -1
+			) {
 				createResult = this.streamCreate(clientId);
 				this._hasMoved = true;
 			}
