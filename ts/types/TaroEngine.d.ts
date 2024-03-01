@@ -84,4 +84,6 @@ declare class TaroEngine extends TaroClass {
 	$$(item: number | string | object): any;
 
 	menuUi: MenuUiComponent;
+
+	mapEditorUI: any;
 }
