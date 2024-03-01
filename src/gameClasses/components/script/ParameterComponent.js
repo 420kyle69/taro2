@@ -579,8 +579,7 @@ var ParameterComponent = TaroEntity.extend({
 					case 'getDefaultAttributeValueOfUnitType':
 						var attributeTypeId = self.getValue(text.attribute, vars);
 						var unitTypeId = self.getValue(text.unitType, vars);
-
-						if (unitType && attributeTypeId) {
+						if (unitTypeId && attributeTypeId) {
 							var unitType = taro.game.cloneAsset('unitTypes', unitTypeId);
 							if (unitType && unitType.attributes && unitType.attributes[attributeTypeId]) {
 								returnValue = unitType.attributes[attributeTypeId].value;
