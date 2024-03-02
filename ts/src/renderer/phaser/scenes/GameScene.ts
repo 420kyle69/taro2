@@ -446,16 +446,16 @@ class GameScene extends PhaserScene {
 		const map = this.tilemap;
 		const data = taro.game.data;
 
-		data.map.layers.forEach((layer, index) => {
+		data.map.layers.forEach((layer, layerIdx) => {
 			if (layer.type !== 'tilelayer') {
 				return;
 			}
-			this.tilemapLayers[index].alpha = layer.opacity;
+			this.tilemapLayers[layerIdx].alpha = layer.opacity;
 			layer.data.forEach((tile, index) => {
 				const x = index % layer.width;
 				const y = Math.floor(index/layer.width);
 				if (tile === 0 || tile === null) tile = -1;
-				map.putTileAt(tile, x, y, false, index);
+				map.putTileAt(tile, x, y, false, layerIdx);
 			});
 		});
 	}
