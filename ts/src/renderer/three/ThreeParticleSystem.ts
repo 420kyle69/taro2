@@ -1,10 +1,19 @@
 class ThreeParticleSystem {
-	node: THREE.Object3D;
+	node: THREE.Object3D = new THREE.Group();
 	emitters: ThreeEmitter[] = [];
 
 	private particles = [];
-	private geometry = new THREE.InstancedBufferGeometry();
+
 	private textures = ThreeTextureManager.instance().getTexturesWithKeyContains('particle');
+
+	// NOTE(nick): Use groups/buckets to get around the max 16 textures shader
+	// limit. There are others way to do this but because textures can have a
+	// variaty of sizes this seemed like the easier solution. I tried addGroup()
+	// on the InstancedBufferGeometry before but that didn't seem to work :(
+	private materials: THREE.ShaderMaterial[] = [];
+	private geometries: THREE.InstancedBufferGeometry[] = [];
+	private maxTexturesPerGroup = 16;
+	private numTextureGroups;
 
 	// Used during particle creation; avoid instantiating temp objects
 	private worldPos = new THREE.Vector3();
@@ -15,62 +24,67 @@ class ThreeParticleSystem {
 	private velocity = new THREE.Vector3();
 
 	constructor() {
-		const maxParticles = 50000;
+		const maxParticlesPerGroup = 50000;
 
-		// TODO(nick): Add multiple shaders and geometry groups if texture count > 16
-		// Add floor(numTextures / 16) total shaders.
-		const material = new THREE.ShaderMaterial({
-			uniforms: { textures: { value: this.textures }, time: { value: 0 } },
-			vertexShader: vs,
-			fragmentShader: fs,
-			transparent: true,
-			depthWrite: false,
-			blending: THREE.CustomBlending,
-			blendEquation: THREE.AddEquation,
-			blendSrc: THREE.OneFactor,
-			blendDst: THREE.OneMinusSrcAlphaFactor,
-			forceSinglePass: true,
-		});
+		this.numTextureGroups = Math.floor(this.textures.length / this.maxTexturesPerGroup);
+		if (this.numTextureGroups === 0) this.numTextureGroups = 1;
 
-		this.geometry.setAttribute(
-			'position',
-			new THREE.Float32BufferAttribute(
-				[-0.5, 0.5, 0, -0.5, -0.5, 0, 0.5, 0.5, 0, 0.5, -0.5, 0, 0.5, 0.5, 0, -0.5, -0.5, 0],
-				3
-			)
-		);
-		this.geometry.setAttribute('uv', new THREE.Float32BufferAttribute([0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0], 2));
-		this.geometry.setAttribute(
-			'offset',
-			new THREE.InstancedBufferAttribute(new Float32Array(maxParticles * 3), 3).setUsage(THREE.DynamicDrawUsage)
-		);
-		this.geometry.setAttribute(
-			'scale',
-			new THREE.InstancedBufferAttribute(new Float32Array(maxParticles * 2), 2).setUsage(THREE.DynamicDrawUsage)
-		);
-		this.geometry.setAttribute(
-			'rotation',
-			new THREE.InstancedBufferAttribute(new Float32Array(maxParticles), 1).setUsage(THREE.DynamicDrawUsage)
-		);
-		this.geometry.setAttribute(
-			'color',
-			new THREE.InstancedBufferAttribute(new Float32Array(maxParticles * 4), 4).setUsage(THREE.DynamicDrawUsage)
-		);
-		this.geometry.setAttribute(
-			'blend',
-			new THREE.InstancedBufferAttribute(new Float32Array(maxParticles), 1).setUsage(THREE.DynamicDrawUsage)
-		);
-		this.geometry.setAttribute(
-			'texture',
-			new THREE.InstancedBufferAttribute(new Float32Array(maxParticles), 1).setUsage(THREE.DynamicDrawUsage)
-		);
+		for (let i = 0; i < this.numTextureGroups; i++) {
+			const material = new THREE.ShaderMaterial({
+				uniforms: {
+					textures: {
+						value: this.textures.slice(
+							i * this.maxTexturesPerGroup,
+							i * this.maxTexturesPerGroup + this.maxTexturesPerGroup
+						),
+					},
+					time: { value: 0 },
+				},
+				vertexShader: vs,
+				fragmentShader: fs,
+				transparent: true,
+				depthWrite: false,
+				blending: THREE.CustomBlending,
+				blendEquation: THREE.AddEquation,
+				blendSrc: THREE.OneFactor,
+				blendDst: THREE.OneMinusSrcAlphaFactor,
+				forceSinglePass: true,
+			});
 
-		const points = new THREE.Mesh(this.geometry, material);
-		points.frustumCulled = false;
-		points.matrixAutoUpdate = false;
-		// eslint-disable-next-line @typescript-eslint/no-empty-function
-		points.updateMatrixWorld = function () {};
-		this.node = points;
+			this.materials.push(material);
+
+			const geometry = new THREE.InstancedBufferGeometry();
+
+			geometry.setAttribute(
+				'position',
+				new THREE.Float32BufferAttribute(
+					[-0.5, 0.5, 0, -0.5, -0.5, 0, 0.5, 0.5, 0, 0.5, -0.5, 0, 0.5, 0.5, 0, -0.5, -0.5, 0],
+					3
+				)
+			);
+			geometry.setAttribute('uv', new THREE.Float32BufferAttribute([0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0], 2));
+
+			const createInstancedAttribute = (size: number, step: number) => {
+				return new THREE.InstancedBufferAttribute(new Float32Array(size * step), step).setUsage(THREE.DynamicDrawUsage);
+			};
+
+			geometry.setAttribute('offset', createInstancedAttribute(maxParticlesPerGroup, 3));
+			geometry.setAttribute('scale', createInstancedAttribute(maxParticlesPerGroup, 2));
+			geometry.setAttribute('rotation', createInstancedAttribute(maxParticlesPerGroup, 1));
+			geometry.setAttribute('color', createInstancedAttribute(maxParticlesPerGroup, 4));
+			geometry.setAttribute('blend', createInstancedAttribute(maxParticlesPerGroup, 1));
+			geometry.setAttribute('texture', createInstancedAttribute(maxParticlesPerGroup, 1));
+
+			this.geometries.push(geometry);
+
+			const points = new THREE.Mesh(geometry, material);
+			points.frustumCulled = false;
+			points.matrixAutoUpdate = false;
+			// eslint-disable-next-line @typescript-eslint/no-empty-function
+			points.updateMatrixWorld = function () {};
+
+			this.node.add(points);
+		}
 	}
 
 	emit(emitterConfig: ThreeEmitter) {
@@ -122,46 +136,64 @@ class ThreeParticleSystem {
 		}
 		this.particles.sort((a, b) => b.dSq - a.dSq);
 
-		const offsetAttribute = this.geometry.attributes.offset.array;
-		const scaleAttribute = this.geometry.attributes.scale.array;
-		const rotationAttribute = this.geometry.attributes.rotation.array;
-		const colorAttribute = this.geometry.attributes.color.array;
-		const blendAttribute = this.geometry.attributes.blend.array;
-		const textureAttribute = this.geometry.attributes.texture.array;
+		const texGroups = [];
+		for (let i = 0; i < this.numTextureGroups; i++) {
+			texGroups.push([]);
+		}
 
 		for (var n = 0; n < count; n++) {
 			const particle = this.particles[n];
-			offsetAttribute[n * 3 + 0] = particle.offset[0];
-			offsetAttribute[n * 3 + 1] = particle.offset[1];
-			offsetAttribute[n * 3 + 2] = particle.offset[2];
-
-			scaleAttribute[n * 2 + 0] = particle.scale[0];
-			scaleAttribute[n * 2 + 1] = particle.scale[1];
-
-			rotationAttribute[n] = particle.rotation;
-
-			colorAttribute[n * 4 + 0] = particle.color[0];
-			colorAttribute[n * 4 + 1] = particle.color[1];
-			colorAttribute[n * 4 + 2] = particle.color[2];
-			colorAttribute[n * 4 + 3] = particle.color[3];
-
-			blendAttribute[n] = particle.blend;
-
-			let idx = this.textures.findIndex((tex) => tex === particle.texture);
-			if (idx === -1) idx = 0;
-			textureAttribute[n] = idx;
+			let texIdx = this.textures.findIndex((tex) => tex === particle.texture);
+			if (texIdx === -1) texIdx = 0;
+			particle.texIdx = texIdx % this.maxTexturesPerGroup;
+			texGroups[Math.floor(texIdx / this.maxTexturesPerGroup)].push(particle);
 		}
 
-		this.geometry.attributes.offset.needsUpdate = true;
-		this.geometry.attributes.scale.needsUpdate = true;
-		this.geometry.attributes.rotation.needsUpdate = true;
-		this.geometry.attributes.color.needsUpdate = true;
-		this.geometry.attributes.blend.needsUpdate = true;
-		this.geometry.attributes.texture.needsUpdate = true;
+		for (let i = 0; i < this.numTextureGroups; i++) {
+			const texGroup = texGroups[i];
+			if (texGroup.length === 0) continue;
 
-		this.geometry.instanceCount = count;
+			const offsetAttribute = this.geometries[i].attributes.offset.array;
+			const scaleAttribute = this.geometries[i].attributes.scale.array;
+			const rotationAttribute = this.geometries[i].attributes.rotation.array;
+			const colorAttribute = this.geometries[i].attributes.color.array;
+			const blendAttribute = this.geometries[i].attributes.blend.array;
+			const textureAttribute = this.geometries[i].attributes.texture.array;
 
-		((this.node as THREE.Mesh).material as THREE.ShaderMaterial).uniforms.time.value = time;
+			for (let j = 0; j < texGroup.length; j++) {
+				const particle = texGroup[j];
+				offsetAttribute[j * 3 + 0] = particle.offset[0];
+				offsetAttribute[j * 3 + 1] = particle.offset[1];
+				offsetAttribute[j * 3 + 2] = particle.offset[2];
+
+				scaleAttribute[j * 2 + 0] = particle.scale[0];
+				scaleAttribute[j * 2 + 1] = particle.scale[1];
+
+				rotationAttribute[j] = particle.rotation;
+
+				colorAttribute[j * 4 + 0] = particle.color[0];
+				colorAttribute[j * 4 + 1] = particle.color[1];
+				colorAttribute[j * 4 + 2] = particle.color[2];
+				colorAttribute[j * 4 + 3] = particle.color[3];
+
+				blendAttribute[j] = particle.blend;
+
+				textureAttribute[j] = particle.texIdx;
+			}
+
+			this.geometries[i].attributes.offset.needsUpdate = true;
+			this.geometries[i].attributes.scale.needsUpdate = true;
+			this.geometries[i].attributes.rotation.needsUpdate = true;
+			this.geometries[i].attributes.color.needsUpdate = true;
+			this.geometries[i].attributes.blend.needsUpdate = true;
+			this.geometries[i].attributes.texture.needsUpdate = true;
+
+			this.geometries[i].instanceCount = texGroup.length;
+		}
+
+		for (const material of this.materials) {
+			material.uniforms.time.value = time;
+		}
 	}
 
 	updateEmitters(delta: number) {
@@ -171,7 +203,7 @@ class ThreeParticleSystem {
 			emitter.accumulator += delta;
 
 			if (emitter.addInterval > 0) {
-				// NOTE(nick): Avoids spawning to many particles; it has to be seen
+				// NOTE(nick): Avoids spawning to particles too fast; it has to be seen
 				// depending on user feedback if this is an acceptable limit.
 				const addInterval = emitter.addInterval < 0.0001 ? 0.0001 : emitter.addInterval;
 				while (emitter.accumulator >= addInterval) {
@@ -190,7 +222,7 @@ class ThreeParticleSystem {
 			if (particle.live > 0) {
 				particle.live -= delta;
 
-				// NOTE(nick): Decrease opacity during particle's lifetime, this is how
+				// NOTE(nick): Decreases opacity during particle's lifetime, this is how
 				// it currently works in the Phaser renderer. We might want to add more
 				// control to this in the future and give users more emitter settings to
 				// play with in the editor.
