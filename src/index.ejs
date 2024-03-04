@@ -108,7 +108,7 @@
             if (initEditor) {
                 return;
             }
-            if (true) {
+            if (false) {
                 const scriptEl = document.createElement('script');
                 scriptEl.src = `http://localhost:3001/bundle.js`;
                 scriptEl.id = 'editor-script';
@@ -118,23 +118,22 @@
             }
 
             const rootUrl = 'https://www.modd.io';
-            const engineVersion = '2.1.5.71';
             // const rootUrl = 'http://localhost:3000';
             // const engineVersion = '2.0.0';
 
-            axios.get(`${rootUrl}/client/${engineVersion}`)
+            axios.get(`${rootUrl}/client/latest/`)
                 .then((res) => {
-                    const { styles, scripts } = res.data;
+                    const { styles, scripts, version } = res.data;
 
                     styles.forEach((style) => {
                         const linkEl = window.document.createElement('link');
                         linkEl.rel = 'stylesheet';
-                        linkEl.href = `${rootUrl}/${engineVersion}/static/css/` + style;
+                        linkEl.href = `${rootUrl}/${version}/static/css/` + style;
                         window.document.head.appendChild(linkEl);
                     });
                     scripts.forEach((script) => {
                         const scriptEl = window.document.createElement('script');
-                        scriptEl.src = `${rootUrl}/${engineVersion}/static/js/` + script;
+                        scriptEl.src = `${rootUrl}/${version}/static/js/` + script;
                         window.document.body.appendChild(scriptEl);
                     });
                     window.initEditor = true;
