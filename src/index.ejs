@@ -55,6 +55,10 @@
         var userId = '';
         var sessionId = '';
         var isLoggedIn = false;
+        var gameDetails = {
+            gameSlug,
+            gameId,
+        };
         window.joinGameSent = {};
         //
         var playGameBtn;
@@ -104,19 +108,21 @@
             if (initEditor) {
                 return;
             }
-            // if (true) {
-            //     const scriptEl = document.createElement('script');
-            //     scriptEl.src = `http://localhost:3001/bundle.js`;
-            //     scriptEl.id = 'editor-script';
-            //     document.body.appendChild(scriptEl);
-            //     initEditor = true;
-            //     return;
-            // }
+            if (true) {
+                const scriptEl = document.createElement('script');
+                scriptEl.src = `http://localhost:3001/bundle.js`;
+                scriptEl.id = 'editor-script';
+                document.body.appendChild(scriptEl);
+                initEditor = true;
+                return;
+            }
 
             const rootUrl = 'https://www.modd.io';
-            const engineVersion = '2.0.11';
+            const engineVersion = '2.1.5.71';
+            // const rootUrl = 'http://localhost:3000';
+            // const engineVersion = '2.0.0';
 
-            axios.get(`${rootUrl}/client/${engineVersion}?loadAll=true`)
+            axios.get(`${rootUrl}/client/${engineVersion}`)
                 .then((res) => {
                     const { styles, scripts } = res.data;
 

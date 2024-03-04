@@ -42,7 +42,6 @@ declare class TaroEngine extends TaroClass {
 	renderer: PhaserRenderer;
 
 	developerMode: DeveloperMode;
-	mapEditorUI: MapEditorUI;
 
 	scaleMapDetails: {
 		scaleFactor: {
@@ -85,4 +84,6 @@ declare class TaroEngine extends TaroClass {
 	$$(item: number | string | object): any;
 
 	menuUi: MenuUiComponent;
+
+	mapEditorUI: any;
 }
