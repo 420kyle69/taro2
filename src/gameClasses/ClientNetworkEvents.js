@@ -558,53 +558,45 @@ var ClientNetworkEvents = {
 		}
 	},
 
-	// _onTradeRequest: function (data) {
-	// 	$("#trader-name").html(data.name)
-
-	// 	if (data.initatedByMe) {
-	// 		$("#trade-request-message").html("requesting " + data.name + " to trade")
-	// 		$("#accept-trade-request-button").hide()
-	// 	}
-	// 	else {
-	// 		$("#trade-request-message").html(data.name + " wants to trade")
-	// 		$("#accept-trade-request-button").show()
-	// 	}
-
-	// 	$("#trade-request-div").show();
-	// },
-
-	// _onTrade: function (data) {
-	// 	$("#trade-message").html("");
-
-	// 	if (data.cmd == 'start') {
-	// 		$("#trade-request-div").hide();
-	// 		$("#trade-div").show();
-	// 	}
-	// 	else if (data.cmd == 'offer') {
-	// 		if (parseInt(data.originSlotNumber) > 12) {
-	// 			taro.client.tradeOffers[parseInt(data.originSlotNumber) - 12] = data.originSlotItem
-	// 		}
-
-	// 		if (parseInt(data.destinationSlotNumber) > 12) {
-	// 			taro.client.tradeOffers[parseInt(data.destinationSlotNumber) - 12] = data.destinationSlotItem
-	// 		}
-
-	// 		$("#trade-message").html($("#trader-name").html() + " changed item")
-
-	// 		taro.client.updateTradeOffer()
-
-	// 	}
-	// 	else if (data.cmd == 'noRoom') {
-	// 		$("#trade-message").html("No room in inventory")
-	// 	}
-	// 	else if (data.cmd == 'accept') {
-	// 		$("#trade-message").html($("#trader-name").html() + " accepted")
-	// 	}
-	// 	else if (data.cmd == 'close') // cancels both trade & trade-request
-	// 	{
-	// 		taro.game.closeTrade()
-	// 	}
-	// },
+	_onTradeRequest: function (data) {
+	 	$("#trader-name").html(data.name)
+ 		if (data.initatedByMe) {
+		 		$("#trade-request-message").html("requesting " + data.name + " to trade")
+		 		$("#accept-trade-request-button").hide()
+		 	}
+		 	else {
+		 		$("#trade-request-message").html(data.name + " wants to trade")
+		 		$("#accept-trade-request-button").show()
+		 	}
+ 		$("#trade-request-div").show();
+	},
+	_onTrade: function (data) {
+	 	$("#trade-message").html("");
+ 		if (data.cmd == 'start') {
+		 		$("#trade-request-div").hide();
+		 		$("#trade-div").show();
+		 	}
+		else if (data.cmd == 'offer') {
+			if (parseInt(data.originSlotNumber) > 12) {
+				taro.client.tradeOffers[parseInt(data.originSlotNumber) - 12] = data.originSlotItem
+			}
+ 		if (parseInt(data.destinationSlotNumber) > 12) {
+				taro.client.tradeOffers[parseInt(data.destinationSlotNumber) - 12] = data.destinationSlotItem
+			}
+ 		$("#trade-message").html($("#trader-name").html() + " changed item")
+ 		taro.client.updateTradeOffer()
+ 		}
+	 	else if (data.cmd == 'noRoom') {
+	 		$("#trade-message").html("No room in inventory")
+	 	}
+	 	else if (data.cmd == 'accept') {
+	 		$("#trade-message").html($("#trader-name").html() + " accepted")
+	 	}
+	 	else if (data.cmd == 'close') // cancels both trade & trade-request
+	 	{
+	 		taro.game.closeTrade()
+	 	}
+	},
 
 	_onDevLogs: function (data) {
 		const runAction = functionalTryCatch(() => {
