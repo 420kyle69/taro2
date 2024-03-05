@@ -233,6 +233,12 @@ class ThreeRenderer {
 				this.animatedSprites.push(e);
 				e.setBillboard(!!entity._stats.isBillboard, this.camera);
 
+				if (this.zoomSize) {
+					// TODO(nick): Refactor to get zoom value from camera?
+					const ratio = Math.max(window.innerWidth, window.innerHeight) / this.zoomSize;
+					e.setScaleChildren(1 / ratio);
+				}
+
 				if (entity._stats.cameraPointerLock) {
 					e.cameraConfig.pointerLock = entity._stats.cameraPointerLock;
 				}
