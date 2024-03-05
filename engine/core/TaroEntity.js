@@ -254,6 +254,10 @@ var TaroEntity = TaroObject.extend({
 			}
 			self.layer(body['z-index'].layer) // above "floor 2 layer", but under "trees layer"
 				.depth(body['z-index'].depth);
+
+      if (!isNaN(body['z-index'].offset)) {
+				self.zOffset(body['z-index'].offset);
+			}
 		}
 	},
 
@@ -3160,7 +3164,7 @@ var TaroEntity = TaroObject.extend({
 			this.isTransforming(true);
 			//instantly move to camera the new position
 			if (teleportCamera && taro.client.myPlayer?._stats.cameraTrackedUnitId === this.id()) {
-				taro.client.emit('instant-move-camera', [x, y]);
+				taro.client.emit('camera-instant-move', [x, y]);
 			}
 		}
 
@@ -4006,7 +4010,7 @@ var TaroEntity = TaroObject.extend({
 								break;
 							case 'value':
 								var newValue = Math.max(playerAttribute.min, Math.min(persistAttribute[key], playerAttribute.max));
-								self.attribute.update(attrKey, newValue);
+								self.attribute.update(attrKey, newValue, null, null, true);
 								break;
 						}
 					}
@@ -4958,7 +4962,12 @@ var TaroEntity = TaroObject.extend({
 				taro.network.stream._streamClientCreated[thisId] = {};
 			}
 
-			if (!taro.network.stream._streamClientCreated[thisId][clientId]) {
+			// IDLE MODE
+			// need condition that evaluates only for clientIds that *need* the forced sync
+			if (
+				!taro.network.stream._streamClientCreated[thisId][clientId] ||
+				taro.server.rejoiningIdleClients.indexOf(clientId) !== -1
+			) {
 				createResult = this.streamCreate(clientId);
 				this._hasMoved = true;
 			}

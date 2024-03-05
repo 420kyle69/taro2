@@ -58,7 +58,7 @@ class EntityEditor {
             Object.values(this.handlers).forEach(handler => {
                 const worldPoint = this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
                 const selectedEntityImage = this.selectedEntityImage;
-                if (!devModeTools.cursorButton.active || gameObject !== handler || !selectedEntityImage) return;
+                if (devModeTools.activeButton !== 'cursor' || gameObject !== handler || !selectedEntityImage) return;
                 const action = selectedEntityImage.action;
                 const editedAction = selectedEntityImage.editedAction;
                 
@@ -119,7 +119,7 @@ class EntityEditor {
             });
 
             devModeScene.entityImages.forEach((entityImage: Phaser.GameObjects.Image & {entity: EntityImage}) => {
-                if (!devModeTools.cursorButton.active || gameObject !== entityImage) return;
+                if (devModeTools.activeButton !== 'cursor' || gameObject !== entityImage) return;
                 const entity = entityImage.entity;
                 if (entity.dragMode === 'position') {
                     const x = Math.floor(dragX);
@@ -182,7 +182,7 @@ class EntityEditor {
 
             handler.on('pointerdown', (pointer) => {
                 const selectedEntityImage = this.selectedEntityImage;
-                if (!devModeTools.cursorButton.active || !selectedEntityImage) return;
+                if (devModeTools.activeButton !== 'cursor' || !selectedEntityImage) return;
 
                 this.activeHandler = true;
                 const worldPoint = this.gameScene.cameras.main.getWorldPoint(pointer.x, pointer.y);
@@ -307,17 +307,17 @@ class EntityEditor {
             this.activeEntityPlacement = true;
 			inGameEditor.toggleEntityPlacementWindow && inGameEditor.toggleEntityPlacementWindow(true);
 
-            if (!this.devModeTools.paletteButton.hidden) {
+            /*if (!this.devModeTools.paletteButton.hidden) {
                 this.devModeTools.palette.toggle();
-            }
+            }*/
         } else {
             //hide entities list
             this.activeEntityPlacement = false;
 			inGameEditor.toggleEntityPlacementWindow && inGameEditor.toggleEntityPlacementWindow(false);
 
-            if (this.devModeTools.paletteButton.hidden) {
+            /*if (this.devModeTools.paletteButton.hidden) {
                 this.devModeTools.palette.toggle();
-            }
+            }*/
         }
     }
 

@@ -588,6 +588,10 @@ NetIo.Server = NetIo.EventingClass.extend({
 		this._sockets = [];
 		this._socketsById = {};
 
+		// idle game
+		this._userIds = {};
+		this._idleTimeoutsByUserId = {};
+
 		if (port !== undefined) {
 			this.start(port, callback);
 		}
@@ -618,7 +622,6 @@ NetIo.Server = NetIo.EventingClass.extend({
 			server: this._httpServer,
 			maxPayload: 200 * 1024, // 100 KB - The maximum allowed message size
 			verifyClient: async function (info, done) {
-				
 				// Custom logic to determine whether to accept or reject the connection
 				const acceptConnection = (taro.workerComponent && process.env.ENV != 'standalone') ? await taro.workerComponent.verifyConnectionRequest(info) : true;
 				done(acceptConnection, acceptConnection ? 200 : 403, acceptConnection ? '' : 'Connection not accepted');
@@ -770,7 +773,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 		const reqUrl = new URL(`https://www.modd.io${request.url}`);
 		const searchParams = reqUrl.searchParams;
 		const token = searchParams.get('token');
-		
+
 		try {
 			let decodedToken;
 			if (process.env.ENV !== 'standalone' && taro.workerComponent) {
@@ -794,13 +797,13 @@ NetIo.Server = NetIo.EventingClass.extend({
 				token,
 				tokenCreatedAt: decodedToken.createdAt
 			};
-			
+
 			// make socket id assignment a variable
 			let assignedId = self.newIdHex();
-			
+
 			// if the token has been used already, close the connection.
 			const isUsedToken = taro.server.usedConnectionJwts[token];
-			
+
 			if (isUsedToken) {
 				if (request.headers['sec-websocket-protocol'].split(', ')[1] == 'reconnect') {
 					// TODO: this will match sockets for users that are still in the game
@@ -835,10 +838,10 @@ NetIo.Server = NetIo.EventingClass.extend({
 					return;
 				}
 			}
-			
+
 			// store token for current client
 			taro.server.usedConnectionJwts[token] = socket._token.tokenCreatedAt;
-			
+
 			// remove expired tokens
 			const filteredUsedConnectionJwts = {};
 			const usedTokenEntries = Object.entries(taro.server.usedConnectionJwts).filter(([token, tokenCreatedAt]) => (Date.now() - tokenCreatedAt) < taro.server.CONNECTION_JWT_EXPIRES_IN);
@@ -847,26 +850,42 @@ NetIo.Server = NetIo.EventingClass.extend({
 					filteredUsedConnectionJwts[key] = value;
 				}
 			}
-			
+
+			// if not guest user && idle game && we have this userId stored already
+			if (decodedToken.userId !== '' && taro.game.data.settings.isIdleGame) {
+				if (self._userIds[decodedToken.userId]) {
+					assignedId = self._userIds[decodedToken.userId];
+					clearTimeout(self._idleTimeoutsByUserId[socket._token.userId]);
+					taro.server.rejoiningIdleClients.push(assignedId);
+					delete taro.server._idleDisconnectedClientIds[assignedId];
+					// leave this log for now
+					console.log('[net.io-server/index.js] idle game reconnect | client: ', assignedId);
+					delete taro.server.clients[assignedId];
+				// if idle game but new userId
+				} else {
+					self._userIds[decodedToken.userId] = assignedId;
+				}
+			}
+
 			taro.server.usedConnectionJwts = filteredUsedConnectionJwts;
-			
+
 			// Give the socket a unique ID
 			socket.id = assignedId;
 			// Add the socket to the internal lookups
 			self._sockets.push(socket);
-			
+
 			self._socketsById[socket.id] = socket;
-			
+
 			// store socket.id as clientId in _token data to validate socket messages later
 			socket._token.clientId = socket.id;
-			
+
 		} catch (e) {
 			// A token is required to connect with socket server
 			socket.close('Security token could not be validated, please refresh the page.');
 			console.log('Unauthorized request', e.message, token);
 			return;
 		}
-		
+
 		console.log('Client ', socket.id, ' connected');
 		// Register a listener so that if the socket disconnects,
 		// we can remove it from the active socket lookups
@@ -877,7 +896,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 				// Remove the socket from the array
 				self._sockets.splice(index, 1);
 			}
-			
+
 			if (self._socketsById[socket.id]) {
 				if (!!socket._disconnect?.reason) {
 					// if a disconnect reason is provided, disconnect socket immediately as no reconnects are expected
@@ -886,6 +905,24 @@ NetIo.Server = NetIo.EventingClass.extend({
 					// moved from .on('disconnect') in TaroNetIoServer.js:~588
 					// data contains {WebSocket socket, <Buffer > reason, Number code}
 					taro.network._onSocketDisconnect(data, socket);
+				// idle game; not guest
+				} else if (
+					socket._token.userId !== '' &&
+					taro.game.data.settings.isIdleGame
+				) {
+					delete self._socketsById[socket.id];
+					// leave this log for now
+					console.log('[net.io-server/index.js] idle game disconnect | client: ', socket.id);
+					// store disconnected clients
+					taro.server._idleDisconnectedClientIds[socket.id] = socket._token.userId;
+					// replace hard number with `taro.game.data.settings.idleGameTimeout`
+					self._idleTimeoutsByUserId[socket._token.userId] = setTimeout(() => {
+						// let disconnect logic continue
+						taro.network._onSocketDisconnect(data, socket);
+						delete taro.server._idleDisconnectedClientIds[socket.id];
+						// remove this user from idle userIds object
+						delete self._userIds[socket._token.userId]
+					}, taro.game.data.settings.idleGameTimeLimit);
 				} else {
 					self._socketsById[socket.id].gracePeriod = setTimeout(() => {
 						delete self._socketsById[socket.id];
@@ -906,7 +943,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 		} catch (err) {
 			console.log('err while sending client its socket.id!');
 		}
-		
+
 		// add socket message listeners, send 'init' message to client
 		self.emit('connection', [socket, request]);
 

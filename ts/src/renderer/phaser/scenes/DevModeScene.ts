@@ -67,6 +67,10 @@ class DevModeScene extends PhaserScene {
 			this.tileEditor.edit(data);
 		});
 
+		taro.client.on('changeLayerOpacity', (data: {layer: number, opacity: number}) => {
+			this.tileEditor.changeLayerOpacity(data.layer, data.opacity);
+		});
+
 		taro.client.on('editRegion', (data: RegionData) => {
 			this.regionEditor.edit(data);
 		});

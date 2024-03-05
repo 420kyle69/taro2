@@ -1,6 +1,12 @@
 class ThreeUnit extends ThreeAnimatedSprite {
 	label = new ThreeLabel();
 
+	cameraConfig = {
+		pointerLock: false,
+		pitchRange: { min: -90, max: 90 },
+		offset: { x: 0, y: 0, z: 0 },
+	};
+
 	private attributeBars = new THREE.Group();
 	private chat: ThreeChatBubble;
 

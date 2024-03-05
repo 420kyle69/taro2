@@ -144,7 +144,7 @@ class GameScene extends PhaserScene {
 			camera.stopFollow();
 		});
 
-		taro.client.on('position-camera', (x: number, y: number) => {
+		taro.client.on('camera-position', (x: number, y: number) => {
 			if (!taro.developerMode.active || taro.developerMode.activeTab === 'play') {
 				x -= camera.width / 2;
 				y -= camera.height / 2;
@@ -152,11 +152,11 @@ class GameScene extends PhaserScene {
 			}
 		});
 
-		taro.client.on('deadzone-camera', (width: number, heigth: number) => {
+		taro.client.on('camera-deadzone', (width: number, heigth: number) => {
 			camera.setDeadzone(width, heigth);
 		});
 
-		taro.client.on('instant-move-camera', (x: number, y: number) => {
+		taro.client.on('camera-instant-move', (x: number, y: number) => {
 			if (!taro.developerMode.active || taro.developerMode.activeTab === 'play') {
 			    camera.centerOn(x, y);
 			}
@@ -446,15 +446,16 @@ class GameScene extends PhaserScene {
 		const map = this.tilemap;
 		const data = taro.game.data;
 
-		data.map.layers.forEach((layer, index) => {
+		data.map.layers.forEach((layer, layerIdx) => {
 			if (layer.type !== 'tilelayer') {
 				return;
 			}
+			this.tilemapLayers[layerIdx].alpha = layer.opacity;
 			layer.data.forEach((tile, index) => {
 				const x = index % layer.width;
 				const y = Math.floor(index/layer.width);
 				if (tile === 0 || tile === null) tile = -1;
-				map.putTileAt(tile, x, y, false, index);
+				map.putTileAt(tile, x, y, false, layerIdx);
 			});
 		});
 	}

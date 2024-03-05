@@ -85,7 +85,7 @@ var ServerNetworkEvents = {
 				isMobile: data.isMobile
 			});
 
-			player.joinGame(data);
+			player.joinGame();
 		}
 	},
 

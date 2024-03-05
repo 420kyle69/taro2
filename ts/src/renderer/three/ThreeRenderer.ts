@@ -38,6 +38,11 @@ class ThreeRenderer {
 		const height = window.innerHeight;
 
 		this.camera = new ThreeCamera(width, height, this.renderer.domElement);
+		this.camera.setElevationAngle(90);
+
+		if (taro.game.data.settings.camera.projectionMode !== 'orthographic') {
+			this.camera.setProjection(taro.game.data.settings.camera.projectionMode);
+		}
 
 		this.scene = new THREE.Scene();
 		this.scene.translateX(-taro.game.data.map.width / 2);
@@ -51,7 +56,7 @@ class ThreeRenderer {
 
 			if (this.zoomSize) {
 				const ratio = Math.max(window.innerWidth, window.innerHeight) / this.zoomSize;
-				this.camera.zoom(ratio);
+				this.camera.setZoom(ratio);
 				taro.client.emit('scale', { ratio: ratio * this.resolutionCoef });
 				taro.client.emit('update-abilities-position');
 
@@ -133,6 +138,8 @@ class ThreeRenderer {
 	}
 
 	private init() {
+		const textureManager = ThreeTextureManager.instance();
+
 		const skybox = new ThreeSkybox();
 		skybox.scene.translateX(taro.game.data.map.width / 2);
 		skybox.scene.translateZ(taro.game.data.map.height / 2);
@@ -146,7 +153,7 @@ class ThreeRenderer {
 			const ratio = Math.max(window.innerWidth, window.innerHeight) / this.zoomSize;
 
 			// TODO: Quadratic zoomTo over 1 second
-			this.camera.zoom(ratio);
+			this.camera.setZoom(ratio);
 
 			taro.client.emit('scale', { ratio: ratio * this.resolutionCoef });
 
@@ -157,7 +164,6 @@ class ThreeRenderer {
 
 		taro.client.on('stop-follow', () => {
 			this.camera.stopFollow();
-			this.scene.attach(this.skybox.scene);
 		});
 
 		const layers = {
@@ -170,15 +176,18 @@ class ThreeRenderer {
 			this.scene.add(layer);
 		}
 
-		taro.game.data.map.tilesets.forEach((tileset) => {
-			// TODO: Add tilesets to resource manager (rename texture manager to resource manager)
-			const tex = ThreeTextureManager.instance().textureMap.get(tileset.image);
-			// TODO: The sides tileset will be different, waiting on m0dE
-			const topTileset = new ThreeTileset(tex, tileset.tilewidth, tileset.tilewidth);
-			const sidesTileset = new ThreeTileset(tex, tileset.tilewidth, tileset.tilewidth);
-			this.voxelMap = new ThreeVoxelMap(topTileset, sidesTileset);
-			this.scene.add(this.voxelMap);
-		});
+		const tilesetMain = this.getTilesetFromType('top');
+		let tilesetSide = this.getTilesetFromType('side');
+		if (!tilesetSide) tilesetSide = tilesetMain;
+
+		const texMain = textureManager.textureMap.get(tilesetMain.image);
+		const texSide = textureManager.textureMap.get(tilesetSide.image);
+
+		const topTileset = new ThreeTileset(texMain, tilesetMain.tilewidth, tilesetMain.tilewidth);
+		const sidesTileset = new ThreeTileset(texSide, tilesetSide.tilewidth, tilesetSide.tilewidth);
+
+		this.voxelMap = new ThreeVoxelMap(topTileset, sidesTileset);
+		this.scene.add(this.voxelMap);
 
 		taro.game.data.map.layers.forEach((layer) => {
 			let layerId = 0;
@@ -222,7 +231,23 @@ class ThreeRenderer {
 			const createEntity = () => {
 				const e = new ThreeUnit(entity._id, tex.clone());
 				this.animatedSprites.push(e);
-				e.billboard = false;
+				e.setBillboard(!!entity._stats.isBillboard, this.camera);
+
+				if (entity._stats.cameraPointerLock) {
+					e.cameraConfig.pointerLock = entity._stats.cameraPointerLock;
+				}
+
+				if (entity._stats.cameraPitchRange) {
+					e.cameraConfig.pitchRange = entity._stats.cameraPitchRange;
+				}
+
+				if (entity._stats.cameraOffset) {
+					// From editor XZY to Three.js XYZ
+					e.cameraConfig.offset.x = entity._stats.cameraOffset.x;
+					e.cameraConfig.offset.y = entity._stats.cameraOffset.z;
+					e.cameraConfig.offset.z = entity._stats.cameraOffset.y;
+				}
+
 				return e;
 			};
 
@@ -230,17 +255,18 @@ class ThreeRenderer {
 			layers.entities.add(ent);
 			this.entities.push(ent);
 
+			let heightOffset = 0;
 			const transformEvtListener = entity.on(
 				'transform',
 				(data: { x: number; y: number; rotation: number }) => {
-					ent.position.set(Utils.pixelToWorld(data.x) - 0.5, 0, Utils.pixelToWorld(data.y) - 0.5);
+					ent.position.set(Utils.pixelToWorld(data.x) - 0.5, heightOffset, Utils.pixelToWorld(data.y) - 0.5);
 
-					let angle = -data.rotation;
-					if (ent.billboard && (entity instanceof Item || entity instanceof Projectile)) {
-						// Might be able to delete this once units rotate with camera yaw.
-						angle -= this.camera.controls.getAzimuthalAngle();
-					}
-					ent.setRotationY(angle);
+					// let angle = -data.rotation;
+					// if (ent.billboard && (entity instanceof Item || entity instanceof Projectile)) {
+					// 	// Might be able to delete this once units rotate with camera yaw.
+					// 	angle -= this.camera.controls.getAzimuthalAngle();
+					// }
+					ent.setRotationY(-data.rotation);
 				},
 				this
 			);
@@ -281,8 +307,14 @@ class ThreeRenderer {
 				'follow',
 				() => {
 					this.camera.startFollow(ent);
-					this.skybox.scene.position.copy(ent.position);
-					ent.attach(this.skybox.scene);
+
+					const offset = ent.cameraConfig.offset;
+					this.camera.setOffset(offset.x, offset.y, offset.z);
+
+					if (ent.cameraConfig.pointerLock) {
+						const { min, max } = ent.cameraConfig.pitchRange;
+						this.camera.setElevationRange(min, max);
+					}
 				},
 				this
 			);
@@ -345,6 +377,11 @@ class ThreeRenderer {
 				ent.setDepth(depth);
 			});
 
+			const zOffsetEvtListener = entity.on('z-offset', (offset) => {
+				heightOffset = Utils.pixelToWorld(offset);
+				ent.position.y = heightOffset;
+			});
+
 			entity.on('dynamic', (data) => {
 				// console.log('dynamic');
 			});
@@ -391,6 +428,8 @@ class ThreeRenderer {
 
 						entity.off('play-animation', playAnimationEvtListener);
 						entity.off('update-texture', updateTextureEvtListener);
+
+						entity.off('z-offset', zOffsetEvtListener);
 					}
 				},
 				this
@@ -400,6 +439,8 @@ class ThreeRenderer {
 		taro.client.on('create-unit', (u: Unit) => createEntity(u), this);
 		taro.client.on('create-item', (i: Item) => createEntity(i), this);
 		taro.client.on('create-projectile', (p: Projectile) => createEntity(p), this);
+
+		taro.client.on('camera-pitch', (deg: number) => this.camera.setElevationAngle(deg));
 
 		this.renderer.domElement.addEventListener('mousemove', (evt: MouseEvent) => {
 			this.pointer.set((evt.clientX / window.innerWidth) * 2 - 1, -(evt.clientY / window.innerHeight) * 2 + 1);
@@ -521,6 +562,10 @@ class ThreeRenderer {
 
 		this.camera.update();
 
+		if (this.camera.target) {
+			this.skybox.scene.position.copy(this.camera.target.position);
+		}
+
 		this.renderer.render(this.scene, this.camera.instance);
 	}
 
@@ -559,5 +604,26 @@ class ThreeRenderer {
 				repeat: +animation.loopCount - 1, // correction for loop/repeat values
 			});
 		}
+	}
+
+	// NOTE(nick): this feels hacky, why don't all tilesets have a type? Part
+	// of a bigger problem regarding game.json parsing and presenting it in a
+	// valid state for the rest of the application?
+	getTilesetFromType(type: 'top' | 'side') {
+		let index = -1;
+		if (type === 'top') {
+			index = taro.game.data.map.tilesets.findIndex((tilesheet) => {
+				return (
+					(tilesheet.name === 'tilesheet_complete' || tilesheet.name === 'tilesheet') &&
+					(tilesheet.type === undefined || tilesheet.type === 'top')
+				);
+			});
+		} else {
+			index = taro.game.data.map.tilesets.findIndex((tilesheet) => {
+				return tilesheet.type === type;
+			});
+		}
+
+		return index > -1 ? taro.game.data.map.tilesets[index] : null;
 	}
 }

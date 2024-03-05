@@ -10,6 +10,8 @@ const currency = require("currency.js");
 // global imports
 _ = require('lodash');
 rfdc = require('rfdc');
+jsonrepair = require("jsonrepair");
+
 
 const Console = console.constructor;
 // redirect global console object to log file
@@ -126,6 +128,9 @@ var Server = TaroClass.extend({
 		self.isScriptLogOn = process.env.SCRIPTLOG == 'on';
 		self.gameLoaded = false;
 		self.coinUpdate = {};
+
+		self.rejoiningIdleClients = [];
+		self._idleDisconnectedClientIds = {};
 
 		self.socketConnectionCount = {
 			connected: 0,
@@ -618,6 +623,7 @@ var Server = TaroClass.extend({
 
 		taro.network.define('trade', self._onTrade);
 		taro.network.define('editTile', self._onEditTile);
+		taro.network.define('changeLayerOpacity', self._onChangeLayerOpacity);
 		taro.network.define('editRegion', self._onEditRegion);
 		taro.network.define('editVariable', self._onEditVariable);
 		taro.network.define('editInitEntity', self._onEditInitEntity);

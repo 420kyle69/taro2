@@ -377,18 +377,29 @@ var ItemUiComponent = TaroEntity.extend({
 		for (var atributeId in stats.attributes) {
 			var attribute = stats.attributes[atributeId];
 
-			if (attribute && attribute.isVisible && attribute.isVisible.includes('itemDescription')) {
-				info += '<p class="mb-1">';
-				var value = null;
-				if (attribute.dataType === 'time') {
-					value = taro.game.secondsToHms(attribute.value);
-				} else {
-					var decimalPlace = parseInt(attribute.decimalPlaces) || 0;
-					value = parseFloat(attribute.value).toFixed(decimalPlace);
+			if (attribute) {
+				let shouldRender = true;
+				if (shouldRender) {
+					var showOnlyWhenIsGreaterThanMin = attribute.showWhen == 'whenIsGreaterThanMin';
+					shouldRender = showOnlyWhenIsGreaterThanMin ? attribute.value > attribute.min : true;
 				}
-				info += `<b>${attribute.name}: </b>${value || 0}`;
-				info += '</p>';
-			}
+				if (shouldRender) {
+					var showOnlyWhenIsLessThanMax = attribute.showWhen == 'whenIsLessThanMax';
+					shouldRender = showOnlyWhenIsLessThanMax ? attribute.value < attribute.max : true;
+				}
+				if (shouldRender && attribute.isVisible && attribute.isVisible.includes('itemDescription')) {
+					info += '<p class="mb-1">';
+					var value = null;
+					if (attribute.dataType === 'time') {
+						value = taro.game.secondsToHms(attribute.value);
+					} else {
+						var decimalPlace = parseInt(attribute.decimalPlaces) || 0;
+						value = parseFloat(attribute.value).toFixed(decimalPlace);
+					}
+					info += `<b>${attribute.name}: </b>${value || 0}`;
+					info += '</p>';
+				}
+			}	
 		}
 
 		if (stats && stats.cost) {

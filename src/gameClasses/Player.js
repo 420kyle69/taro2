@@ -46,6 +46,7 @@ var Player = TaroEntity.extend({
 					taro._currentTime - taro.client.playerJoinedAt,
 					'My player created'
 				]);
+
 				// old comment => 'declare my player'
 				taro.client.myPlayer = self;
 
@@ -91,16 +92,20 @@ var Player = TaroEntity.extend({
 	},
 
 	// move to UI
-	joinGame: function () {
-		var self = this;
-		if (self._stats.playerJoined != true) {
+	// idle boolean is passed from worker
+	joinGame: function (idle = false) {
 
+		var self = this;
+		if (self._stats.playerJoined != true || idle) {
 			// notify GS manager that a user has joined, do not notify if player joins again after pausing the game
 			if (self._stats.userId) {
 				taro.workerComponent.userJoined(self._stats.userId);
 			}
 
-			if (taro.script) // do not send trigger for neutral player
+			// do not send trigger for neutral player (old comment)
+			// idle added for idle mode
+			// checking if taro.script exists because AI players are created right before ScriptComponent init
+			if (taro.script && !idle)
 			{
 				taro.script.trigger('playerJoinsGame', { playerId: self.id() });
 			}
@@ -228,6 +233,12 @@ var Player = TaroEntity.extend({
 					unit.unitUi.updateAllAttributeBars();
 				}
 
+				// abilities
+				if (!taro.isMobile) {
+					const abilitiesData = taro.game.data.unitTypes[unit._stats.type].controls.unitAbilities;
+					taro.client.emit('create-ability-bar', { keybindings: taro.game.data.unitTypes[unit._stats.type].controls.abilities, abilities: abilitiesData });
+				}
+
 				unit.renderMobileControl();
 
 
@@ -260,6 +271,16 @@ var Player = TaroEntity.extend({
 				unit.emit('follow');
 			}
 		}
+	},
+
+	setCameraPitch: function (angle) {
+		if (taro.isServer) {
+			if (this._stats.clientId) {
+				this.streamUpdateData([{ cameraPitch: angle }], this._stats.clientId);
+			}
+		} else if (taro.isClient) {
+			taro.client.emit('camera-pitch', angle);
+		}	
 	},
 
 	cameraStopTracking: function () {
@@ -363,17 +384,19 @@ var Player = TaroEntity.extend({
 
 		self._stats.attributes = data.attributes;
 
-
+		if (data.variables) {
+			var oldVariables = rfdc()(self.variables);
+		}
 		// update variables and pass old variables' values to new variables (given that variables have same ID)
 		self.variables = {}
 		if (data.variables) {
-			var oldVariables = rfdc()(self.variables);
 			Object.keys(data.variables).forEach(function(variableId) {
-				if (!self.variables[variableId]) {
+				if (!self.variables[variableId] && !oldVariables[variableId]) {
 					self.variables[variableId] = data.variables[variableId];
 				} else {
 					// If the variable already exists, update its value with the old one
 					if (oldVariables[variableId] !== undefined) {
+						self.variables[variableId] = oldVariables[variableId];
 						self.variables[variableId].value = oldVariables[variableId].value;
 					}
 				}
@@ -630,6 +653,10 @@ var Player = TaroEntity.extend({
 									// this unit was queued to be tracked by a player's camera
 									self.cameraTrackUnit(newValue);
 								}
+								break;
+
+							case 'cameraPitch':
+								self.setCameraPitch(newValue);
 								break;
 
 							case 'scriptData':

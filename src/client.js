@@ -199,6 +199,12 @@ const Client = TaroEventingClass.extend({
 		promise
 			.then(async (game) => {
 				taro.game.data = game.data;
+				if (window.isStandalone) {
+					if (!window.gameJson) {
+						window.gameJson = { data: taro.game.data };
+					}
+				}
+
 
 				this.initializeConfigurationFields();
 
@@ -308,6 +314,14 @@ const Client = TaroEventingClass.extend({
 			taro.game.data.settings.skybox = {};
 		}
 
+		if (!taro.game.data.settings.camera) {
+			taro.game.data.settings.camera = {};
+		}
+
+		if (taro.game.data.settings.camera.defaultPitch === undefined) {
+			taro.game.data.settings.camera.defaultPitch = 0;
+		}
+
 		if (!taro.game.data.settings.camera.projectionMode) {
 			taro.game.data.settings.camera.projectionMode = 'orthographic';
 		}
@@ -315,7 +329,7 @@ const Client = TaroEventingClass.extend({
 		Object.keys(skyboxDefaultUrls).forEach((key) => {
 			if (taro.game.data.settings.skybox[key] === undefined) {
 				taro.game.data.settings.skybox[key] = skyboxDefaultUrls[key];
-			} 
+			}
 		});
 	},
 
@@ -713,6 +727,7 @@ const Client = TaroEventingClass.extend({
 		taro.network.define('trade', this._onTrade);
 
 		taro.network.define('editTile', this._onEditTile);
+		taro.network.define('changeLayerOpacity', this._onChangeLayerOpacity);
 		taro.network.define('editRegion', this._onEditRegion);
 		taro.network.define('editVariable', this._onEditVariable);
 		taro.network.define('editInitEntity', this._onEditInitEntity);
@@ -857,7 +872,7 @@ const Client = TaroEventingClass.extend({
 	positionCamera: function (x, y) {
 		if (x != undefined && y != undefined) {
 			this.emit('stop-follow');
-			this.emit('position-camera', [x, y]);
+			this.emit('camera-position', [x, y]);
 		}
 	},
 

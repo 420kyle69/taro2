@@ -40,6 +40,7 @@ var defaultConfig = [
 
 	{ name: 'AbilityComponent', path: '../src/gameClasses/components/unit/AbilityComponent' },
 	{ name: 'AIComponent', path: '../src/gameClasses/components/unit/AIComponent' },
+	{ name: 'AStarPathfindingComponent', path: '../src/gameClasses/components/unit/AStarPathfindingComponent' },
 
 	{ name: 'AttributeComponent', path: '../src/gameClasses/components/entity/AttributeComponent' },
 	{ name: 'VariableComponent', path: '../src/gameClasses/components/entity/VariableComponent' },	

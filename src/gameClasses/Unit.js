@@ -344,6 +344,9 @@ var Unit = TaroEntityPhysics.extend({
 					if (self.unitUi) {
 						self.unitUi.updateAllAttributeBars();
 					}
+					if (!taro.isMobile && self._stats.clientId === taro.network.id() && self._stats.controls.unitAbilities) {
+						taro.client.emit('create-ability-bar', {keybindings: self._stats.controls.abilities, abilities: self._stats.controls.unitAbilities});
+					}
 
 					// visibility mask
 					this.updateVisibilityMask();
@@ -939,6 +942,9 @@ var Unit = TaroEntityPhysics.extend({
 				self.unitUi.updateAllAttributeBars();
 			}
 			self.inventory.update();
+			if (!taro.isMobile && self._stats.clientId === taro.network.id() && data.controls.unitAbilities) {
+				taro.client.emit('create-ability-bar', {keybindings: data.controls.abilities, abilities: data.controls.unitAbilities});
+			}
 			// if mobile controls are in use configure for this unit
 			self.renderMobileControl();
 		}
@@ -968,14 +974,16 @@ var Unit = TaroEntityPhysics.extend({
 		self._stats.currentItemId = null;
 
 		// give default items to the unit
-		if (data.defaultItems) {
-			for (var i = 0; i < data.defaultItems.length; i++) {
-				var item = data.defaultItems[i];
+		if (taro.isServer) {
+			if (data.defaultItems) {
+				for (var i = 0; i < data.defaultItems.length; i++) {
+					var item = data.defaultItems[i];
 
-				var itemData = taro.game.cloneAsset('itemTypes', item.key);
-				if (itemData) {
-					itemData.itemTypeId = item.key;
-					self.pickUpItem(itemData);
+					var itemData = taro.game.cloneAsset('itemTypes', item.key);
+					if (itemData) {
+						itemData.itemTypeId = item.key;
+						self.pickUpItem(itemData);
+					}
 				}
 			}
 		}

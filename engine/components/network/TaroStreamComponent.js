@@ -83,6 +83,9 @@ var TaroStreamComponent = TaroEventingClass.extend({
 			taro.network.send('streamUpdateData', data);
 		}
 
+		// we don't want to keep force-syncing entity streams to rejoined clients
+		taro.server.rejoiningIdleClients = [];
+
 		data = null;
 		entity = null;
 		entities = null;
