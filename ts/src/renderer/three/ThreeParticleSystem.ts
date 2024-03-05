@@ -379,6 +379,9 @@ const fs = `
 
     gl_FragColor.rgb *= gl_FragColor.a;
     gl_FragColor.a *= vBlend;
+
+    #include <tonemapping_fragment>
+    #include <encodings_fragment>
   }
 `;
 
