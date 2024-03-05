@@ -161,7 +161,9 @@ const Client = TaroEventingClass.extend({
 		// we're going to try and insert the fetch here
 		let promise = new Promise((resolve, reject) => {
 			// if the gameJson is available as a global object, use it instead of sending another ajax request
-			if (window.gameJson) {
+			if (window.gameDetails.isWorld && window.gameDetails.currentMapId && window.mapJson) {
+				resolve(window.mapJson);
+			} else if (window.gameJson) {
 				resolve(window.gameJson);
 			} else if (gameId && !window.isStandalone) {
 				$.ajax({
