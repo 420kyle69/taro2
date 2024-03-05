@@ -140,6 +140,10 @@ namespace Utils {
 		return canvas;
 	}
 
+	export function lerp(a: number, b: number, t: number) {
+		return a + (b - a) * t;
+	}
+
 	export function round(num: number, decimalPlaces = 0) {
 		var p = Math.pow(10, decimalPlaces || 0);
 		var n = num * p * (1 + Number.EPSILON);

@@ -17,6 +17,9 @@ class ThreeRenderer {
 	private zoomSize = undefined;
 
 	private skybox: ThreeSkybox;
+	private particleSystem: ThreeParticleSystem;
+
+	private clock = new THREE.Clock();
 
 	private constructor() {
 		// For JS interop; in case someone uses new ThreeRenderer()
@@ -26,7 +29,7 @@ class ThreeRenderer {
 			return ThreeRenderer.instance;
 		}
 
-		const renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true });
+		const renderer = new THREE.WebGLRenderer();
 		renderer.setSize(window.innerWidth, window.innerHeight);
 		document.querySelector('#game-div')?.appendChild(renderer.domElement);
 		this.renderer = renderer;
@@ -113,7 +116,7 @@ class ThreeRenderer {
 
 		for (const type of Object.values(data.particleTypes)) {
 			const key = type.url;
-			textureManager.loadFromUrl(key, Utils.patchAssetUrl(key));
+			textureManager.loadFromUrl(`particle/${key}`, Utils.patchAssetUrl(key));
 		}
 
 		const skyboxUrls = taro.game.data.settings.skybox;
@@ -226,7 +229,7 @@ class ThreeRenderer {
 			let tex = ThreeTextureManager.instance().textureMap.get(entity._stats.cellSheet.url);
 
 			const createEntity = () => {
-				const e = new ThreeUnit(tex.clone());
+				const e = new ThreeUnit(entity._id, tex.clone());
 				this.animatedSprites.push(e);
 				e.setBillboard(!!entity._stats.isBillboard, this.camera);
 
@@ -395,6 +398,12 @@ class ThreeRenderer {
 						layers.entities.remove(ent);
 						this.entities.splice(idx, 1);
 
+						for (const emitter of this.particleSystem.emitters) {
+							if (emitter.target === ent) {
+								emitter.target = null;
+							}
+						}
+
 						const animIdx = this.animatedSprites.indexOf(ent as ThreeAnimatedSprite, 0);
 						if (animIdx > -1) {
 							this.animatedSprites.splice(animIdx, 1);
@@ -436,6 +445,78 @@ class ThreeRenderer {
 		this.renderer.domElement.addEventListener('mousemove', (evt: MouseEvent) => {
 			this.pointer.set((evt.clientX / window.innerWidth) * 2 - 1, -(evt.clientY / window.innerHeight) * 2 + 1);
 		});
+
+		this.particleSystem = new ThreeParticleSystem();
+		this.particleSystem.node.position.y += 2;
+		this.particleSystem.node.renderOrder = 1200;
+		this.scene.add(this.particleSystem.node);
+
+		taro.client.on('create-particle', (particle: Particle) => {
+			const particleData = taro.game.data.particleTypes[particle.particleId];
+			const tex = ThreeTextureManager.instance().textureMap.get(`particle/${particleData.url}`);
+
+			let target = null;
+			if (particle.entityId) {
+				const entity = this.entities.find((entity) => entity.taroId == particle.entityId);
+				if (entity) {
+					target = entity;
+				}
+			}
+
+			const angle = particleData.fixedRotation ? 0 : particle.angle * (Math.PI / 180);
+			const direction = { x: 0, y: 0, z: 1 }; // Phaser particle system starts in this direction
+			const cos = Math.cos(angle);
+			const sin = Math.sin(angle);
+			direction.x = direction.x * cos - direction.z * sin;
+			direction.z = direction.x * sin + direction.z * cos;
+
+			const angleMin = (particleData.angle.min - 180) * (Math.PI / 180);
+			const angleMax = (particleData.angle.max - 180) * (Math.PI / 180);
+
+			const speedMin = Utils.pixelToWorld(particleData.speed.min);
+			const speedMax = Utils.pixelToWorld(particleData.speed.max);
+
+			const lifetimeFrom = particleData.lifeBase * 0.001;
+			const lifetimeTo = particleData.lifeBase * 0.001;
+
+			const opacityFrom = 1;
+			const opacityTo = particleData.deathOpacityBase;
+
+			const duration = particleData.duration * 0.001;
+
+			const frequency = particleData.emitFrequency * 0.001;
+
+			const width = Utils.pixelToWorld(particleData.dimensions.width);
+			const height = Utils.pixelToWorld(particleData.dimensions.height);
+
+			let emitWidth = 0;
+			let emitDepth = 0;
+			if (particleData.emitZone) {
+				if (particleData.emitZone.x) emitWidth = Utils.pixelToWorld(particleData.emitZone.x);
+				if (particleData.emitZone.y) emitDepth = Utils.pixelToWorld(particleData.emitZone.y);
+			}
+
+			this.particleSystem.emit({
+				position: { x: particle.position.x, y: 0.5, z: particle.position.y },
+				target: target,
+				direction: direction,
+				azimuth: { min: angleMin, max: angleMax },
+				elevation: { min: 0, max: 0 },
+				shape: { width: emitWidth, height: 0, depth: emitDepth },
+				addInterval: frequency,
+				lifetime: { min: lifetimeFrom, max: lifetimeTo },
+				rotation: { min: 0.5, max: 1 },
+				speed: { min: speedMin, max: speedMax },
+				scale: { x: width, y: height, start: 1, step: 0 },
+				color: { start: [1, 1, 1], end: [1, 1, 1] },
+				color_speed: { min: 1, max: 1 },
+				brightness: { min: 1, max: 1 },
+				opacity: { start: opacityFrom, end: opacityTo },
+				blend: 1,
+				texture: tex,
+				duration: duration,
+			});
+		});
 	}
 
 	private setupInputListeners(): void {
@@ -467,6 +548,17 @@ class ThreeRenderer {
 		for (const sprite of this.animatedSprites) {
 			sprite.update(1 / 60);
 		}
+
+		// TODO: Is this the proper way to get deltaTime or should I get it from the
+		// engine somewhere? Also it feels a little weird that the renderer triggers
+		// the engine update. It should be the other way around.
+		let dt = this.clock.getDelta();
+		const time = this.clock.elapsedTime;
+
+		if (dt <= 0) dt = 1 / 60;
+		else if (dt >= 0.25) dt = 0.25;
+
+		this.particleSystem.update(dt, time, this.camera.instance);
 
 		this.camera.update();
 
