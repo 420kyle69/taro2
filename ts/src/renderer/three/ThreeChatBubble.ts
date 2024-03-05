@@ -16,7 +16,6 @@ class ThreeChatBubble extends THREE.Group {
 		super();
 
 		this.scaleScalar = 1;
-		console.log(this.scaleScalar);
 
 		this.sprite = this.createBubble(text);
 		this.add(this.sprite);
@@ -73,6 +72,10 @@ class ThreeChatBubble extends THREE.Group {
 			this.center.x - this.offset.x / (this.size.x * scale),
 			this.center.y - this.offset.y / (this.size.y * scale)
 		);
+	}
+
+	getSizeInPixels() {
+		return { width: this.size.x * this.scaleScalar, height: this.size.y * this.scaleScalar };
 	}
 
 	private createBubble(text: string, color = '#000000') {

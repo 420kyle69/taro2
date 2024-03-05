@@ -123,6 +123,10 @@ namespace Utils {
 		return numPixels / 64;
 	}
 
+	export function worldToPixel(units: number) {
+		return units * 64;
+	}
+
 	export function resizeImageToPowerOf2(image) {
 		const ceil = THREE.MathUtils.ceilPowerOfTwo;
 
