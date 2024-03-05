@@ -61,7 +61,7 @@ class ThreeRenderer {
 				taro.client.emit('update-abilities-position');
 
 				for (const entity of this.entities) {
-					entity.setScaleChildren(1 / ratio);
+					entity.setGuiScale(1 / ratio);
 				}
 			}
 		});
@@ -158,7 +158,7 @@ class ThreeRenderer {
 			taro.client.emit('scale', { ratio: ratio * this.resolutionCoef });
 
 			for (const entity of this.entities) {
-				entity.setScaleChildren(1 / ratio);
+				entity.setGuiScale(1 / ratio);
 			}
 		});
 
@@ -236,7 +236,7 @@ class ThreeRenderer {
 				if (this.zoomSize) {
 					// TODO(nick): Refactor to get zoom value from camera?
 					const ratio = Math.max(window.innerWidth, window.innerHeight) / this.zoomSize;
-					e.setScaleChildren(1 / ratio);
+					e.setGuiScale(1 / ratio);
 				}
 
 				if (entity._stats.cameraPointerLock) {
