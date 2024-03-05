@@ -136,7 +136,6 @@ var ServerNetworkEvents = {
 				var from = taro.$(msg.from);
 				var to = taro.$(msg.to);
 				if (from && to && from._category === 'player' && from._category === 'player' && from.tradingWith === to.id()) {
-					console.log('trade offer', msg.tradeItems);
 					taro.network.send('trade', {
 						type: 'offer',
 						from: msg.from,
@@ -158,21 +157,17 @@ var ServerNetworkEvents = {
 						acceptedBy.acceptTrading = true;
 					}
 					if (acceptedBy.acceptTrading && acceptedFor.acceptTrading) {
-						console.log('trade accepted');
 						var unitA = acceptedBy.getSelectedUnit();
 						var unitB = acceptedFor.getSelectedUnit();
 						var unitAInventorySize = unitA.inventory.getTotalInventorySize();
 						var unitBInventorySize = unitB.inventory.getTotalInventorySize();
-						console.log(unitA._stats.itemIds, unitB._stats.itemIds);
 						var unitAItems = unitA._stats.itemIds.slice(unitAInventorySize, unitAInventorySize + 5);
 						var unitBItems = unitB._stats.itemIds.slice(unitBInventorySize, unitBInventorySize + 5);
 						var isTradingSuccessful = false;
 
-						console.log('unitAItems', unitAItems);
 						for (var i = 0; i < unitAItems.length; i++) {
 							if (unitAItems[i]) {
 								var item = taro.$(unitAItems[i]);
-								console.log('traded item', item);
 								unitA.dropItem(item._stats.slotIndex);
 								isTradingSuccessful = unitB.pickUpItem(item);
 
@@ -183,12 +178,10 @@ var ServerNetworkEvents = {
 							}
 						}
 
-						console.log('unitBItems', unitBItems);
 						for (var i = 0; i < unitBItems.length; i++) {
 							if (unitBItems[i]) {
 								var item = taro.$(unitBItems[i]);
 								unitB.dropItem(item._stats.slotIndex);
-								console.log('traded item', item);
 								isTradingSuccessful = unitA.pickUpItem(item);
 
 								if (!isTradingSuccessful) {
@@ -203,7 +196,6 @@ var ServerNetworkEvents = {
 						};
 
 						if (!isTradingSuccessful) {
-							console.log('send trade error');
 							taro.network.send('trade', { type: 'error', between: tradeBetween }, acceptedFor._stats.clientId);
 
 							taro.network.send('trade', { type: 'error', between: tradeBetween }, acceptedBy._stats.clientId);
@@ -214,7 +206,6 @@ var ServerNetworkEvents = {
 						unitB.streamUpdateData([{ itemIds: unitB._stats.itemIds }]);
 
 
-						console.log('send trade successful');
 						taro.network.send('trade', { type: 'success', between: tradeBetween }, acceptedFor._stats.clientId);
 
 						taro.network.send('trade', { type: 'success', between: tradeBetween }, acceptedBy._stats.clientId);
