@@ -1,11 +1,11 @@
 class ThreeSprite extends THREE.Group {
 	sprite: THREE.Mesh;
 	billboard = false;
+	scaleUnflipped = new THREE.Vector2();
 
 	private layer = 3;
 	private depth = 1;
 
-	private scaleUnflipped = new THREE.Vector2();
 	private flipX = 1;
 	private flipY = 1;
 

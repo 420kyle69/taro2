@@ -66,8 +66,21 @@ class ThreeUnit extends ThreeAnimatedSprite {
 	setScale(sx: number, sy: number) {
 		super.setScale(sx, sy);
 
-		// NOTE(nick): Place label at the top of sprite + spacing equal to label height
+		// NOTE(nick): Place label at the top of sprite + spacing equal to label height.
 		this.label.setOffset(new THREE.Vector2(0, Utils.worldToPixel(sy * 0.5)), new THREE.Vector2(0.5, -1));
+
+		for (const [idx, bar] of this.attributeBars.children.entries()) {
+			const height = (bar as ThreeAttributeBar).height;
+			const yOffset = idx * height * 1.1;
+			(bar as ThreeAttributeBar).setOffset(
+				new THREE.Vector2(
+					0,
+					// NOTE(nick): Mostly taken from the Phaser renderer and trial and error.
+					-(Utils.worldToPixel(this.scaleUnflipped.y * 0.5) + height * (1 / 1.1) + 16 * this.guiScale + yOffset)
+				)
+			),
+				new THREE.Vector2(0.5, 1);
+		}
 	}
 
 	setGuiScale(scale: number) {
@@ -88,7 +101,15 @@ class ThreeUnit extends ThreeAnimatedSprite {
 		const bar = new ThreeAttributeBar();
 		bar.update(data);
 		const yOffset = (data.index - 1) * bar.height * 1.1;
-		bar.setOffset(new THREE.Vector2(0, -0.75 * 64 - yOffset), new THREE.Vector2(0.5, 1));
+
+		bar.setOffset(
+			new THREE.Vector2(
+				0,
+				-(Utils.worldToPixel(this.scaleUnflipped.y * 0.5) + bar.height * (1 / 1.1) + 16 * this.guiScale + yOffset)
+			)
+		),
+			new THREE.Vector2(0.5, 1);
+
 		bar.setScale(this.guiScale);
 		return bar;
 	}
