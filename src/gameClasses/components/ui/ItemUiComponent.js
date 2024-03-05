@@ -203,9 +203,10 @@ var ItemUiComponent = TaroEntity.extend({
 					var draggable = ui.draggable; var droppable = $(this);
 					var dragPos = draggable.position(); var dropPos = droppable.position();
 					var fromIndex = parseFloat(ui.draggable[0].parentElement.id.replace('item-', ''));
-					var isTradingItemDragged = ui.draggable[0].parentElement.name.include('trade');
+					//var isTradingItemDragged = ui.draggable[0].parentElement.name.include('trade');
 					var toIndex = parseFloat(droppable[0].parentElement.id.replace('item-', ''));
-					var isItemDroppedOnTradeSlot = droppable[0].parentElement.name.include('trade');
+					console.log('fromIndex', fromIndex, 'toIndex', toIndex);
+					//var isItemDroppedOnTradeSlot = droppable[0].parentElement.name.include('trade');
 					draggable.css({
 						// left: dropPos.left + 'px',
 						// top: dropPos.top + 'px'

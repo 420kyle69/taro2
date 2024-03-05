@@ -22,12 +22,12 @@ var TradeUiComponent = TaroEntity.extend({
 		});
 
 		$('.cancel-trade-request-button').on('click', function () {
-			// taro.network.send('trade', { type: 'cancel' });
+			taro.network.send('trade', { type: 'cancel' });
 			taro.tradeUi.closeTradeRequest();
 		});
 
 		$('.cancel-trade-button').on('click', function () {
-			// taro.network.send('trade', { type: 'cancel' });
+			taro.network.send('trade', { type: 'cancel' });
 			taro.tradeUi.closeTrading();
 		});
 	},
