@@ -16,7 +16,6 @@ class ThreeUnit extends ThreeAnimatedSprite {
 	) {
 		super(tex);
 
-		this.label.setOffset(new THREE.Vector2(0, 0.75 * 64), new THREE.Vector2(0.5, 0));
 		this.add(this.label);
 
 		this.add(this.attributeBars);
@@ -72,6 +71,13 @@ class ThreeUnit extends ThreeAnimatedSprite {
 			bar.setOffset(new THREE.Vector2(0, -0.75 * 64 - yOffset), new THREE.Vector2(0.5, 1));
 			this.attributeBars.add(bar);
 		}
+	}
+
+	setScale(sx: number, sy: number) {
+		super.setScale(sx, sy);
+
+		// NOTE(nick): Place label at the top of sprite + spacing equal to label height
+		this.label.setOffset(new THREE.Vector2(0, Utils.worldToPixel(sy * 0.5)), new THREE.Vector2(0.5, -1));
 	}
 
 	setScaleChildren(scale: number) {
