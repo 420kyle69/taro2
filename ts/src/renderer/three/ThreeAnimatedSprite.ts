@@ -9,7 +9,7 @@ class ThreeAnimatedSprite extends ThreeSprite {
 	private repeat = 0;
 	private cycle = 0;
 
-	constructor(private tex: THREE.Texture) {
+	constructor(tex: THREE.Texture) {
 		super(tex);
 
 		if (tex.userData.numColumns && tex.userData.numRows) {

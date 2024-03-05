@@ -27,7 +27,11 @@ class ThreeUnit extends ThreeAnimatedSprite {
 			this.chat.update(text);
 		} else {
 			this.chat = new ThreeChatBubble(text);
-			this.chat.setOffset(new THREE.Vector2(0, 1.5 * 64), new THREE.Vector2(0.5, 0));
+			this.chat.setScale(this.guiScale);
+			this.chat.setOffset(
+				new THREE.Vector2(0, this.getSizeInPixels().height * 0.5 + this.chat.getSizeInPixels().height * 4),
+				new THREE.Vector2(0.5, 0)
+			);
 			this.add(this.chat);
 		}
 	}
@@ -66,8 +70,10 @@ class ThreeUnit extends ThreeAnimatedSprite {
 	setScale(sx: number, sy: number) {
 		super.setScale(sx, sy);
 
-		// NOTE(nick): Place label at the top of sprite + spacing equal to label height.
-		this.label.setOffset(new THREE.Vector2(0, Utils.worldToPixel(sy * 0.5)), new THREE.Vector2(0.5, -1));
+		const size = this.getSizeInPixels();
+		const halfHeight = size.height * 0.5;
+
+		this.label.setOffset(new THREE.Vector2(0, halfHeight), new THREE.Vector2(0.5, -1));
 
 		for (const [idx, bar] of this.attributeBars.children.entries()) {
 			const height = (bar as ThreeAttributeBar).height;
@@ -76,7 +82,7 @@ class ThreeUnit extends ThreeAnimatedSprite {
 				new THREE.Vector2(
 					0,
 					// NOTE(nick): Mostly taken from the Phaser renderer and trial and error.
-					-(Utils.worldToPixel(this.scaleUnflipped.y * 0.5) + height * (1 / 1.1) + 16 * this.guiScale + yOffset)
+					-(halfHeight + height * (1 / 1.1) + 16 * this.guiScale + yOffset)
 				)
 			),
 				new THREE.Vector2(0.5, 1);

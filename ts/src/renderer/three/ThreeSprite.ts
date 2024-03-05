@@ -1,7 +1,7 @@
 class ThreeSprite extends THREE.Group {
 	sprite: THREE.Mesh;
 	billboard = false;
-	scaleUnflipped = new THREE.Vector2();
+	scaleUnflipped = new THREE.Vector2(1, 1);
 
 	private layer = 3;
 	private depth = 1;
@@ -9,7 +9,7 @@ class ThreeSprite extends THREE.Group {
 	private flipX = 1;
 	private flipY = 1;
 
-	constructor(tex: THREE.Texture) {
+	constructor(protected tex: THREE.Texture) {
 		super();
 
 		const geometry = new THREE.PlaneGeometry(1, 1);
@@ -64,6 +64,10 @@ class ThreeSprite extends THREE.Group {
 		this.flipX = x ? -1 : 1;
 		this.flipY = y ? -1 : 1;
 		this.setScale(this.scaleUnflipped.x, this.scaleUnflipped.y);
+	}
+
+	getSizeInPixels() {
+		return { width: Utils.worldToPixel(this.scaleUnflipped.x), height: Utils.worldToPixel(this.scaleUnflipped.y) };
 	}
 
 	private calcRenderOrder() {
