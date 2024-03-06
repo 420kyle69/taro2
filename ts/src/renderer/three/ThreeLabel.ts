@@ -15,6 +15,12 @@ class ThreeLabel extends THREE.Group {
 		this.add(this.sprite);
 	}
 
+	destroy() {
+		this.sprite.material.map.dispose();
+		this.sprite.material.dispose();
+		this.removeFromParent();
+	}
+
 	update(text: string, color = 'white', bold = false) {
 		this.remove(this.sprite);
 		this.sprite = this.createLabel(text, color, bold);

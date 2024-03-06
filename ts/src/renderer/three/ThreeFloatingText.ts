@@ -13,7 +13,7 @@ class ThreeFloatingText {
 				this.node.setOffset(new THREE.Vector2(0, offsetInPixels));
 				this.node.setOpacity(opacity);
 			})
-			.onComplete(() => this.node.removeFromParent())
+			.onComplete(() => this.node.destroy())
 			.start();
 	}
 }
