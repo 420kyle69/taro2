@@ -125,6 +125,7 @@ var ServerNetworkEvents = {
 				if (requestedBy && acceptedBy && requestedBy._category === 'player' && acceptedBy._category === 'player') {
 					var tradeBetween = { playerA: requestedBy.id(), playerB: acceptedBy.id() };
 					taro.network.send('trade', { type: 'start', between: tradeBetween }, requestedBy._stats.clientId);
+					taro.network.send('trade', { type: 'start', between: tradeBetween }, acceptedBy._stats.clientId);
 					requestedBy.tradingWith = acceptedBy.id();
 					requestedBy.isTrading = true;
 					acceptedBy.tradingWith = requestedBy.id();
@@ -225,10 +226,8 @@ var ServerNetworkEvents = {
 				break;
 			}
 			case 'cancel': {
-				//console.log('cancel trade', msg.cancleBy, msg.cancleTo);
 				var playerA = taro.$(msg.cancleBy);
 				var playerB = taro.$(msg.cancleTo);
-				console.log('cancel trade', playerA, playerB);
 				if (playerA) {
 					delete playerA.isTrading;
 					delete playerA.tradingWith;

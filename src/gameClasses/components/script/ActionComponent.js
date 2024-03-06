@@ -3047,11 +3047,13 @@ var ActionComponent = TaroEntity.extend({
 						var playerA = self._script.param.getValue(action.playerA, vars);
 						var playerB = self._script.param.getValue(action.playerB, vars);
 						if (playerA && playerB && playerA._category === 'player' && playerB._category === 'player') {
-							if (!playerB.isTrading) {
-								taro.network.send('trade', { type: 'init', from: playerA.id() }, playerB._stats.clientId);
-							} else {
-								var message = `${playerB._stats.name}is busy`;
-								taro.chat.sendToRoom('1', message, playerA._stats.clientId, undefined);
+							if (!playerA.isTrading && playerA.id() !== playerB.id()) { 
+								if (!playerB.isTrading) {
+									taro.network.send('trade', { type: 'init', from: playerA.id() }, playerB._stats.clientId);
+								} else {
+									var message = `${playerB._stats.name}is busy`;
+									taro.chat.sendToRoom('1', message, playerA._stats.clientId, undefined);
+								}
 							}
 						}
 						break;
