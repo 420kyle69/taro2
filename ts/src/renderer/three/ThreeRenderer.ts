@@ -523,6 +523,10 @@ class ThreeRenderer {
 				duration: duration,
 			});
 		});
+
+		taro.client.on('floating-text', (data: { text: string; x: number; y: number; color: string }) => {
+			console.log(data);
+		});
 	}
 
 	private setupInputListeners(): void {
