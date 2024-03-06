@@ -62,7 +62,7 @@ class ThreeLabel extends THREE.Group {
 		const textCanvas = document.createElement('canvas');
 		textCanvas.height = 10;
 
-		const padding = 4;
+		const padding = 8;
 
 		const ctx = textCanvas.getContext('2d');
 		const font = `${bold ? 'bold' : 'normal'} 16px Verdana`;
