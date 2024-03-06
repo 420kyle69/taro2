@@ -225,8 +225,10 @@ var ServerNetworkEvents = {
 				break;
 			}
 			case 'cancel': {
+				//console.log('cancel trade', msg.cancleBy, msg.cancleTo);
 				var playerA = taro.$(msg.cancleBy);
 				var playerB = taro.$(msg.cancleTo);
+				console.log('cancel trade', playerA, playerB);
 				if (playerA) {
 					delete playerA.isTrading;
 					delete playerA.tradingWith;
@@ -239,8 +241,10 @@ var ServerNetworkEvents = {
 				}
 
 				var tradeBetween = { playerA: msg.cancleBy, playerB: msg.cancleTo };
-				taro.network.send('trade', { type: 'cancel', between: tradeBetween }, playerB._stats.clientId);
-				taro.chat.sendToRoom('1', 'Trading has been cancel by ' + playerA._stats.name, playerB._stats.clientId);
+				if (playerB) {
+					taro.network.send('trade', { type: 'cancel', between: tradeBetween }, playerB._stats.clientId);
+					taro.chat.sendToRoom('1', 'Trading has been cancel by ' + playerA._stats.name, playerB._stats.clientId);
+				}
 
 				var unitA = playerA.getSelectedUnit();
 				if (unitA) {
@@ -258,7 +262,7 @@ var ServerNetworkEvents = {
 					unitA.streamUpdateData([{ itemIds: unitA._stats.itemIds }]);
 				}
 
-				var unitB = playerB.getSelectedUnit();
+				var unitB = playerB?.getSelectedUnit();
 				if (unitB) {
 					var unitBInventorySize = unitB.inventory.getTotalInventorySize();
 					for (var i = unitBInventorySize; i < unitBInventorySize + 5; i++) {
@@ -374,8 +378,7 @@ var ServerNetworkEvents = {
 							fromItem._stats.controls.permittedInventorySlots == undefined ||
 							fromItem._stats.controls.permittedInventorySlots.length == 0 ||
 							fromItem._stats.controls.permittedInventorySlots.includes(data.to + 1) ||
-							(data.to + 1 > unit._stats.inventorySize && (fromItem._stats.controls.backpackAllowed == true || fromItem._stats.controls.backpackAllowed == undefined || fromItem._stats.controls.backpackAllowed == null)) || // any item can be moved into backpack slots if the backpackAllowed property is true
-							(data.to + 1 >= unit.inventory.getTotalInventorySize() && !fromItem._stats.controls.undroppable) //check if try to trade undroppable item
+							(data.to + 1 > unit._stats.inventorySize && (fromItem._stats.controls.backpackAllowed == true || fromItem._stats.controls.backpackAllowed == undefined || fromItem._stats.controls.backpackAllowed == null)) // any item can be moved into backpack slots if the backpackAllowed property is true
 						) &&
 						(
 							toItem._stats.controls == undefined ||
@@ -416,7 +419,7 @@ var ServerNetworkEvents = {
 				if (
 					fromItem != undefined &&
 					toItem == undefined &&
-					(data.to < unit.inventory.getTotalInventorySize() || (data.to >= unit.inventory.getTotalInventorySize() && !fromItem._stats.controls.undroppable)) //check if try to trade undroppable item
+					(data.to < unit.inventory.getTotalInventorySize() || (data.to >= unit.inventory.getTotalInventorySize() && !fromItem._stats.controls.undroppable)) && //check if try to trade undroppable item
 					(
 						fromItem._stats.controls == undefined ||
 						fromItem._stats.controls.permittedInventorySlots == undefined ||
