@@ -15,9 +15,12 @@ class ThreeFloatingText {
 		this.label.update(text, color);
 		this.node.add(this.label);
 
-		new TWEEN.Tween({ offsetInPixels: 0 })
-			.to({ offsetInPixels: 40 }, 2500)
-			.onUpdate(({ offsetInPixels }) => this.label.setOffset(new THREE.Vector2(0, offsetInPixels)))
+		new TWEEN.Tween({ offsetInPixels: 0, opacity: 1 })
+			.to({ offsetInPixels: 40, opacity: 0.5 }, 2500)
+			.onUpdate(({ offsetInPixels, opacity }) => {
+				this.label.setOffset(new THREE.Vector2(0, offsetInPixels));
+				this.label.setOpacity(opacity);
+			})
 			.onComplete(() => this.node.removeFromParent())
 			.start();
 	}

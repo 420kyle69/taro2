@@ -1,5 +1,5 @@
 class ThreeLabel extends THREE.Group {
-	private sprite;
+	private sprite: THREE.Sprite;
 	private scaleScalar = 1;
 
 	private size = new THREE.Vector2();
@@ -52,6 +52,10 @@ class ThreeLabel extends THREE.Group {
 			this.center.x - this.offset.x / (this.size.x * scale),
 			this.center.y - this.offset.y / (this.size.y * scale)
 		);
+	}
+
+	setOpacity(opacity: number) {
+		this.sprite.material.opacity = opacity;
 	}
 
 	private createLabel(text: string, color = 'white', bold = false) {
