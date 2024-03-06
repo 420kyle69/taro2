@@ -396,6 +396,10 @@ class ThreeRenderer {
 				ent.setFlip(flip % 2 === 1, flip > 1);
 			});
 
+			const fadingTextEvtListener = entity.on('fading-text', (data: { text: string; color?: string }) => {
+				console.log(data);
+			});
+
 			const destroyEvtListener = entity.on(
 				'destroy',
 				() => {
@@ -436,6 +440,8 @@ class ThreeRenderer {
 						entity.off('update-texture', updateTextureEvtListener);
 
 						entity.off('z-offset', zOffsetEvtListener);
+
+						entity.off('fading-text', fadingTextEvtListener);
 					}
 				},
 				this
