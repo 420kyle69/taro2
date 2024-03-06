@@ -6,12 +6,12 @@ class ThreeLabel extends THREE.Group {
 	private center = new THREE.Vector2(0.5, 0.5);
 	private offset = new THREE.Vector2();
 
-	constructor(text = 'cccccc') {
+	constructor(text = 'cccccc', color = 'white', bold = false) {
 		super();
 
 		this.scaleScalar = 1;
 
-		this.sprite = this.createLabel(text);
+		this.sprite = this.createLabel(text, color, bold);
 		this.add(this.sprite);
 
 		this.visible = false;
