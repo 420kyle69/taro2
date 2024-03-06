@@ -525,7 +525,7 @@ class ThreeRenderer {
 		});
 
 		taro.client.on('floating-text', (data: { text: string; x: number; y: number; color: string }) => {
-			console.log(data);
+			new ThreeFloatingText(data.x, data.y, 0, data.text, data.color);
 		});
 	}
 
@@ -575,6 +575,8 @@ class ThreeRenderer {
 		if (this.camera.target) {
 			this.skybox.scene.position.copy(this.camera.target.position);
 		}
+
+		TWEEN.update();
 
 		this.renderer.render(this.scene, this.camera.instance);
 	}
