@@ -875,6 +875,16 @@ var ClientNetworkEvents = {
 	_onRenderSocketLogs: function (data) {
 		console.warn(data);
 	},
+	
+	_onReloadGame: function (data) {
+		console.log('_onReloadGame', data);
+		if (data && data.type == "movePlayerToMap") {
+			let currentUrl = window.location.href;
+			currentUrl = currentUrl.endsWith('#') ? currentUrl.slice(0, -1) : currentUrl;
+			window.history.pushState({}, '', currentUrl + '?autojoin=true');
+			window.location.reload();
+		}
+	}
 };
 
 if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
