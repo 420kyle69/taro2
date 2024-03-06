@@ -525,7 +525,14 @@ class ThreeRenderer {
 		});
 
 		taro.client.on('floating-text', (data: { text: string; x: number; y: number; color: string }) => {
-			new ThreeFloatingText(data.x, data.y, 0, data.text, data.color);
+			const text = new ThreeFloatingText(
+				Utils.pixelToWorld(data.x) - 0.5,
+				2, // At what height to render floating text?
+				Utils.pixelToWorld(data.y) - 0.5,
+				data.text,
+				data.color
+			);
+			this.scene.add(text.node);
 		});
 	}
 
