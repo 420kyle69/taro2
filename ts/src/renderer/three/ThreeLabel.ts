@@ -70,7 +70,8 @@ class ThreeLabel extends THREE.Group {
 		textCanvas.height = Math.ceil(textHeight) + padding;
 		this.size.set(textCanvas.width, textCanvas.height);
 
-		if (taro.game.data.settings.addStrokeToNameAndAttributes) {
+		const isStroke = taro.game.data.settings.addStrokeToNameAndAttributes;
+		if (isStroke === undefined || isStroke) {
 			ctx.font = font;
 			ctx.strokeStyle = '#000';
 			ctx.lineWidth = 4;

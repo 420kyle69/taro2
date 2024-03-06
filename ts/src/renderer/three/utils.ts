@@ -123,6 +123,10 @@ namespace Utils {
 		return numPixels / 64;
 	}
 
+	export function worldToPixel(units: number) {
+		return units * 64;
+	}
+
 	export function resizeImageToPowerOf2(image) {
 		const ceil = THREE.MathUtils.ceilPowerOfTwo;
 
@@ -138,6 +142,10 @@ namespace Utils {
 		context.drawImage(image, 0, 0, width, height, 0, 0, width, height);
 
 		return canvas;
+	}
+
+	export function lerp(a: number, b: number, t: number) {
+		return a + (b - a) * t;
 	}
 
 	export function round(num: number, decimalPlaces = 0) {
