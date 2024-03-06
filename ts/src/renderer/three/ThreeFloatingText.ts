@@ -8,7 +8,7 @@ class ThreeFloatingText {
 		// TODO(nick): Dispose label texture properly, should I add destroy flag
 		// to nodes and destroy them all in one go?
 		// TODO(nick): Improve font crispness / bitmap font
-		this.label = new ThreeLabel(text, color);
+		this.label = new ThreeLabel(text, color, true);
 		// TODO(nick): Don't hide label by default
 		this.label.visible = true;
 		this.node.add(this.label);
