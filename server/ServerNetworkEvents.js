@@ -365,15 +365,17 @@ var ServerNetworkEvents = {
 					// 	}
 					// 	return;
 					// }
-
+					
 					// swap
 					if (
+						(data.to < unit.inventory.getTotalInventorySize() || (data.to >= unit.inventory.getTotalInventorySize() && !fromItem._stats.controls.undroppable)) && //check if try to trade undroppable item
 						(
 							fromItem._stats.controls == undefined ||
 							fromItem._stats.controls.permittedInventorySlots == undefined ||
 							fromItem._stats.controls.permittedInventorySlots.length == 0 ||
 							fromItem._stats.controls.permittedInventorySlots.includes(data.to + 1) ||
-							(data.to + 1 > unit._stats.inventorySize && (fromItem._stats.controls.backpackAllowed == true || fromItem._stats.controls.backpackAllowed == undefined || fromItem._stats.controls.backpackAllowed == null)) // any item can be moved into backpack slots if the backpackAllowed property is true
+							(data.to + 1 > unit._stats.inventorySize && (fromItem._stats.controls.backpackAllowed == true || fromItem._stats.controls.backpackAllowed == undefined || fromItem._stats.controls.backpackAllowed == null)) || // any item can be moved into backpack slots if the backpackAllowed property is true
+							(data.to + 1 >= unit.inventory.getTotalInventorySize() && !fromItem._stats.controls.undroppable) //check if try to trade undroppable item
 						) &&
 						(
 							toItem._stats.controls == undefined ||
@@ -414,13 +416,14 @@ var ServerNetworkEvents = {
 				if (
 					fromItem != undefined &&
 					toItem == undefined &&
-					/*data.to < unit.inventory.getTotalInventorySize() &&*/
+					(data.to < unit.inventory.getTotalInventorySize() || (data.to >= unit.inventory.getTotalInventorySize() && !fromItem._stats.controls.undroppable)) //check if try to trade undroppable item
 					(
 						fromItem._stats.controls == undefined ||
 						fromItem._stats.controls.permittedInventorySlots == undefined ||
 						fromItem._stats.controls.permittedInventorySlots.length == 0 ||
 						fromItem._stats.controls.permittedInventorySlots.includes(data.to + 1) ||
 						(data.to + 1 > unit._stats.inventorySize && (fromItem._stats.controls.backpackAllowed == true || fromItem._stats.controls.backpackAllowed == undefined || fromItem._stats.controls.backpackAllowed == null)) // any item can be moved into backpack slots if the backpackAllowed property is true
+						
 					)
 				) {
 					fromItem.streamUpdateData([{ slotIndex: parseInt(data.to) }]);

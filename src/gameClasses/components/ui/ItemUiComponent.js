@@ -231,15 +231,16 @@ var ItemUiComponent = TaroEntity.extend({
 						toItem.stopUsing();
 					}
 
-					taro.network.send('swapInventory', { from: fromIndex, to: toIndex });
-
-					var tempItem = items[fromIndex];
-					items[fromIndex] = items[toIndex];
-					items[toIndex] = tempItem;
-
-					var totalInventorySlot = selectedUnit._stats.inventorySize;
-					if (taro.client.myPlayer.isTrading && (fromIndex >= totalInventorySlot || toIndex >= totalInventorySlot)) {
-						taro.tradeUi.sendOfferingItems();
+					var totalInventorySlot = selectedUnit.inventory.getTotalInventorySize();
+					if (toIndex < totalInventorySlot || (toIndex >= totalInventorySlot && !fromItem._stats.controls.undroppable)) { //check if try to trade undroppable item
+						taro.network.send('swapInventory', { from: fromIndex, to: toIndex });
+						var tempItem = items[fromIndex];
+						items[fromIndex] = items[toIndex];
+						items[toIndex] = tempItem;
+						
+						if (taro.client.myPlayer.isTrading && (fromIndex >= totalInventorySlot || toIndex >= totalInventorySlot)) {
+							taro.tradeUi.sendOfferingItems();
+						}
 					}
 				}
 			});
