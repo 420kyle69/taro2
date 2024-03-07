@@ -223,7 +223,9 @@ class ThreeRenderer {
 			}
 
 			if (['trees'].includes(layer.name)) {
-				this.voxelMap.addLayer(layer, renderHeight, true, false, layerId * 100);
+				// Render at a higher renderOrder because there is a debris layer
+				// in the editor settings.
+				this.voxelMap.addLayer(layer, renderHeight, true, false, (layerId + 1) * 100);
 			}
 		});
 
@@ -463,13 +465,16 @@ class ThreeRenderer {
 		});
 
 		this.particleSystem = new ThreeParticleSystem();
-		this.particleSystem.node.position.y += 2;
-		this.particleSystem.node.renderOrder = 1200;
 		this.scene.add(this.particleSystem.node);
 
 		taro.client.on('create-particle', (particle: Particle) => {
 			const particleData = taro.game.data.particleTypes[particle.particleId];
 			const tex = ThreeTextureManager.instance().textureMap.get(`particle/${particleData.url}`);
+
+			let zPosition = layers.entities.position.y;
+			if (particleData['z-index'].layer) zPosition += Utils.getLayerZOffset(particleData['z-index'].layer);
+			if (particleData['z-index'].depth) zPosition += Utils.getDepthZOffset(particleData['z-index'].depth);
+			if (particleData['z-index'].offset) zPosition += Utils.pixelToWorld(particleData['z-index'].offset);
 
 			let target = null;
 			if (particle.entityId) {
@@ -513,7 +518,7 @@ class ThreeRenderer {
 			}
 
 			this.particleSystem.emit({
-				position: { x: particle.position.x, y: 0.5, z: particle.position.y },
+				position: { x: particle.position.x, y: zPosition, z: particle.position.y },
 				target: target,
 				direction: direction,
 				azimuth: { min: angleMin, max: angleMax },
