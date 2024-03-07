@@ -2710,6 +2710,7 @@ var ActionComponent = TaroEntity.extend({
 						var attrId = self._script.param.getValue(action.attribute, vars);
 						var value = self._script.param.getValue(action.value, vars);
 						var entity = self._script.param.getValue(action.entity, vars);
+							
 						if (entity && self.entityCategories.indexOf(entity._category) > -1 && entity._stats.attributes && entity._stats.attributes[attrId] != undefined && value != undefined) {
 
 							// not sure we need this code
