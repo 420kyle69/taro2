@@ -8,7 +8,7 @@ var AttributeComponent = TaroEntity.extend({
 
 		self.now = Date.now();
 		self.lastRegenerated = self.now;
-		
+
 		// attributes is an object
 		if (entity._stats.attributes) {
 			const attributes = entity._stats.attributes;
@@ -191,24 +191,26 @@ var AttributeComponent = TaroEntity.extend({
 
 	// change attribute's value manually
 	// adding params newMin/Max to combine update value with min/max
-	update: function (attributeTypeId, newValue, newMin = null, newMax = null) {
+	update: function (attributeTypeId, newValue, newMin = null, newMax = null, fromLoadData = false) {
 		var self = this;
 
 		if (!self._entity._stats || !self._entity._stats.attributes) {
 			return;
 		}
 
-		var attributes = rfdc()(self._entity._stats.attributes); // clone units existing attribute values
-		if (attributes) {
-			var attribute = attributes[attributeTypeId];
+		if (self._entity._stats.attributes) {
+			// clone units existing attribute value
+			var attribute = rfdc()(self._entity._stats.attributes[attributeTypeId]);
 
 			if (attribute) {
 				attribute.type = attributeTypeId; // tracking what "triggering attributeType" is in ParameterComponent.
 
 				// obj to collect changes for streaming
-				let attrData = { attributes: {
-					[attributeTypeId]: {}
-				} };
+				let attrData = {
+					attributes: {
+						[attributeTypeId]: {}
+					}
+				};
 
 				/**
 				 * MIN
@@ -309,22 +311,25 @@ var AttributeComponent = TaroEntity.extend({
 						}
 					}
 				}
-				var triggeredBy = { attribute: attribute };
-				triggeredBy[`${this._entity._category}Id`] = this._entity.id();
+				if (!fromLoadData) {
+					var triggeredBy = { attribute: attribute };
+					triggeredBy[`${this._entity._category}Id`] = this._entity.id();
 
-				if (newValue <= 0 && oldValue > 0) { // when attribute becomes zero, trigger attributeBecomesZero event
-					// necessary as self._entity can be 'player' which doesn't have scriptComponent
-					if (self._entity._category == 'unit' || self._entity._category == 'item' || self._entity._category == 'projectile') {
-						self._entity.script.trigger('entityAttributeBecomesZero', triggeredBy);
+					if (newValue <= 0 && oldValue > 0) { // when attribute becomes zero, trigger attributeBecomesZero event
+						// necessary as self._entity can be 'player' which doesn't have scriptComponent
+						if (self._entity._category == 'unit' || self._entity._category == 'item' || self._entity._category == 'projectile') {
+							self._entity.script.trigger('entityAttributeBecomesZero', triggeredBy);
+						}
+						taro.queueTrigger(`${this._entity._category}AttributeBecomesZero`, triggeredBy);
+					} else if (newValue >= attribute.max) { // when attribute becomes full, trigger attributeBecomesFull event
+						// necessary as self._entity can be 'player' which doesn't have scriptComponent
+						if (self._entity._category == 'unit' || self._entity._category == 'item' || self._entity._category == 'projectile') {
+							self._entity.script.trigger('entityAttributeBecomesFull', triggeredBy);
+						}
+						taro.queueTrigger(`${this._entity._category}AttributeBecomesFull`, triggeredBy);
 					}
-					taro.queueTrigger(`${this._entity._category}AttributeBecomesZero`, triggeredBy);
-				} else if (newValue >= attribute.max) { // when attribute becomes full, trigger attributeBecomesFull event
-					// necessary as self._entity can be 'player' which doesn't have scriptComponent
-					if (self._entity._category == 'unit' || self._entity._category == 'item' || self._entity._category == 'projectile') {
-						self._entity.script.trigger('entityAttributeBecomesFull', triggeredBy);
-					}
-					taro.queueTrigger(`${this._entity._category}AttributeBecomesFull`, triggeredBy);
 				}
+
 				if (taro.isClient) {
 
 					// scoreboard attribute has been changed. queue update.
@@ -351,13 +356,17 @@ var AttributeComponent = TaroEntity.extend({
 								// or other variations of this
 
 								// need to patch in `type` so that other clients know which attribute bar and don't create an additional, new one
-								self._entity.updateAttributeBar({...self._entity._stats.attributes[attributeTypeId], type: attributeTypeId, hasChanged: attribute.hasChanged });
+								self._entity.updateAttributeBar({ ...self._entity._stats.attributes[attributeTypeId], type: attributeTypeId, hasChanged: attribute.hasChanged });
 								break;
 							}
 							case 'item': {
 								var item = self._entity;
 								unit = item.getOwnerUnit();
 
+								var owner = item.getOwnerUnit();
+								if (taro.client.selectedUnit == owner) {
+									taro.itemUi.updateItemDescription(item);
+								}
 								// if (unit && taro.client.myPlayer._stats.selectedUnitId == unit.id()) {
 								// 	item.updateAttributeBar(attribute);
 								// 	if (attribute && attribute.isVisible && attribute.isVisible.includes('itemDescription')) {
@@ -410,7 +419,6 @@ var AttributeComponent = TaroEntity.extend({
 					attribute.attributesMax[attrId] = value;
 
 					// console.log("update Attribute Max")
-
 					this._entity.streamUpdateData([attribute]);
 					// taro.network.send('updateEntityAttribute', {
 					// 	"e": this._entity._id,

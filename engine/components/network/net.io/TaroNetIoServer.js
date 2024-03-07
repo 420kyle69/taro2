@@ -489,8 +489,8 @@ var TaroNetIoServer = {
 		taro.network._socketByIp[socket._remoteAddress] = socket;
 		taro.network._socketById[socket.id].start = socket.start || Date.now();
 		
-		if (taro.clusterClient) {
-			clientRejectReason = taro.clusterClient.validateClientConnection(socket, request);
+		if (taro.workerComponent) {
+			clientRejectReason = taro.workerComponent.validateClientConnection(socket, request);
 		}
 				
 		if (clientRejectReason === null) {
@@ -500,15 +500,15 @@ var TaroNetIoServer = {
 					`Accepted connection with socket id ${socket.id
 					} ip ${remoteAddress}`
 				);
-				
-				taro.network.clientIds.push(socket.id);				
+
+				taro.network.clientIds.push(socket.id);
 				taro.server.socketConnectionCount.connected++;
-				
+
 				// Store a rooms array for this client
 				taro.network._clientRooms[socket.id] = taro.network._clientRooms[socket.id] || [];
 
-				if (taro.clusterClient)
-					taro.clusterClient.logClientConnect(socket.id);				
+				if (taro.workerComponent)
+					taro.workerComponent.logClientConnect(socket.id);				
 				
 				// trigger joinGame command as part of socket connection, no need for client to send joinGame anymore
 				// joinGame takes care of disconnecting unauthenticated users, banned ips, duplicate IPs, creates a new player and request user data from gs manager and make sure the user exists on moddio
@@ -530,8 +530,8 @@ var TaroNetIoServer = {
 			}
 		
 			socket.on('message', function (data) {
-				if (taro.clusterClient) {
-					const isCommandValid = taro.clusterClient.validateCommand(socket.id, data);
+				if (taro.workerComponent) {
+					const isCommandValid = taro.workerComponent.validateCommand(socket.id, data);
 					if (!isCommandValid) {
 						return;
 					}
@@ -574,13 +574,13 @@ var TaroNetIoServer = {
 	_onClientMessage: function (data, clientId) {
 		var self = this;
 
-		if (this.socket(clientId)?.markedForTracking && taro.clusterClient) {
+		if (this.socket(clientId)?.markedForTracking && taro.workerComponent) {
 			var ciDecoded = data[0].charCodeAt(0);
 			var commandName = this._networkCommandsIndex[ciDecoded];
 			let decoded = _.clone(data);
 			decoded[0] = commandName;
 
-			taro.clusterClient.socketMessages[clientId] += JSON.stringify(decoded);
+			taro.workerComponent.socketMessages[clientId] += JSON.stringify(decoded);
 		}
 
 		var socket = taro.network._socketById[clientId];
@@ -721,10 +721,9 @@ var TaroNetIoServer = {
 		
 		var end = Date.now();
 		
-		if (self._socketById[socket.id]?._token?.distinctId) {
-			/** additional part to send some info for marketing purposes */
-			global.mixpanel.track('Game Session Duration', {
-				'distinct_id': self._socketById[socket.id]._token.distinctId,
+		global.trackServerEvent && global.trackServerEvent({
+			eventName: 'Game Session Duration',
+			properties: {
 				'$ip': socket._remoteAddress,
 				'gameSlug': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.gameSlug,
 				'gameId': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData._id,
@@ -737,29 +736,8 @@ var TaroNetIoServer = {
 				'previousDisconnects': socket._previousDisconnects || [],
 				'reconnectCount': socket._previousDisconnects?.length || 0,
 				'source': source,
-			});
-		}
-
-		if (self._socketById[socket.id]?._token?.posthogDistinctId) {
-			global.posthog.capture({
-				distinctId: self._socketById[socket.id]._token.posthogDistinctId,
-				'event': 'Game Session Duration',
-				properties: {
-					'$ip': socket._remoteAddress,
-					'gameSlug': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.gameSlug,
-					'gameId': taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData._id,
-					'playTime': end - self._socketById[socket.id].start,
-					'code': code,
-					'reason': reason,
-					'reasonCode': reasonCode,
-					'server': process.env.IP,
-					'tier': process.env.WORKER_TIER || process.env.TIER,
-					'previousDisconnects': socket._previousDisconnects || [],
-					'reconnectCount': socket._previousDisconnects?.length || 0,
-					'source': source,
-				}
-			});
-		}
+			}
+		}, socket);
 		
 		// triggers _onClientDisconnect in ServerNetworkEvents.js
 		this.emit('disconnect', {

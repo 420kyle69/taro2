@@ -58,10 +58,22 @@ var PlayerUiComponent = TaroEntity.extend({
 			taro.client.myPlayer.control.updatePlayerInputStatus();
 		});
 
-		$('button#player-input-submit').on('click', function () {
+		const submitInputModal = () => {
 			self.lastInputValue = $('#player-input-field').val();
 			self.pressedButton = true;
 			$('#player-input-modal').modal('hide');
+		};
+
+		$('#player-input-field').on('keydown', function (e) {
+			if (e.key === 'Enter') {
+				e.stopPropagation();
+				e.preventDefault();
+				submitInputModal();
+			}
+		});
+
+		$('button#player-input-submit').on('click', () => {
+			submitInputModal();
 		});
 
 		$('button#player-input-cancel').on('click', function () {

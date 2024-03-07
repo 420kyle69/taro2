@@ -60,7 +60,7 @@ var GameComponent = TaroEntity.extend({
 			console.log('renderBuffer', taro.client.renderBuffer);
 		} else if (taro.isServer) {
 			if (process.env.ENV !== 'standalone') {
-				taro.clusterClient && taro.clusterClient.gameStarted();
+				taro.workerComponent && taro.workerComponent.gameStarted();
 			}
 		}
 
@@ -120,24 +120,13 @@ var GameComponent = TaroEntity.extend({
 			// send latest ui information to the client
 			taro.gameText.sendLatestText(data.clientId);
 			// taro.shopkeeper.updateShopInventory(taro.shopkeeper.inventory, data.clientId) // send latest ui information to the client
-
-			var isOwner = taro.server.owner == data._id && data.controlledBy == 'human';
-
-			var isUserAdmin = false;
-			var isUserMod = false;
-			if (data.permissions) {
-				isUserAdmin = data.permissions.includes('admin');
-				isUserMod = data.permissions.includes('mod');
-			}
-
-			const roles = taro.game.data.roles || [];
+			
+			const {isOwner, isInvitedUser, isUserMod, isUserAdmin, isModerationAllowed} = taro.workerComponent ? taro.workerComponent.getUserPermissions(data) : {isOwner: true};
 
 			player._stats.isUserAdmin = isUserAdmin;
 			player._stats.isUserMod = isUserMod;
-			player._stats.isModerationAllowed = isOwner || isUserAdmin || isUserMod || (data.roleIds && roles.find(role => role?.permissions?.moderator && data.roleIds.includes(role._id.toString())));
-
-			var isInvitedUser = (data.roleIds && roles.find(role => role?.permissions?.contributor && data.roleIds.includes(role._id.toString())));
-
+			player._stats.isModerationAllowed = isModerationAllowed;
+			
 			// if User/Admin has access to game then show developer logs
 			if (isOwner || isInvitedUser || isUserAdmin) {
 				GameComponent.prototype.log(`owner/admin/mod connected. _id: ${data._id}`);

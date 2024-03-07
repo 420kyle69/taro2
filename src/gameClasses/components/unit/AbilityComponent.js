@@ -78,9 +78,9 @@ var AbilityComponent = TaroEntity.extend({
 	},
 
 	queueCast: function (abilityId, key) {
-		if (taro.isServer && taro.clusterClient) {
+		if (taro.isServer && taro.workerComponent) {
 			var socketId = this._entity.getOwner()?._stats.clientId;
-			const isCommandValid = taro.clusterClient.validateCommand(socketId, null, 'queueCast');
+			const isCommandValid = taro.workerComponent.validateCommand(socketId, null, 'queueCast');
 			if (!isCommandValid) {
 				return;
 			}

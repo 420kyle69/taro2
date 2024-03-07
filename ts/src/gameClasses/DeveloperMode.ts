@@ -225,6 +225,23 @@ class DeveloperMode {
 		});
 	}
 
+	checkIfInputModalPresent(): boolean {
+		const customModals: any = document.querySelectorAll('.winbox, .modal, .custom-editor-modal, #chat-message-input');
+		for (const customModal of customModals) {
+			if (customModal.style.display === 'none') {
+				continue;
+			}
+			const inputs = customModal.querySelectorAll('input, select, textarea, button');
+			for (let i = 0; i < inputs.length; i++) {
+				if (inputs[i] === document.activeElement) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
 	requestInitEntities(): void {
 		if (this.initEntities) {
 			taro.network.send<any>('updateClientInitEntities', this.initEntities);
@@ -252,6 +269,11 @@ class DeveloperMode {
 			taro.client.emit('lockCamera');
 		} else if (this.activeTab === 'play') {
 			taro.client.emit('unlockCamera');
+		}
+		if (tab === 'entities') {
+			taro.client.emit('enterEntitiesTab');
+		} else {
+			taro.client.emit('leaveEntitiesTab');
 		}
 		this.activeTab = tab;
 	}
@@ -284,7 +306,6 @@ class DeveloperMode {
 				gameMap.wasEdited = true;
 				taro.network.send('editTile', data);
 			}
-			if (gameMap.layers.length > 4 && serverData.layer >= 2) serverData.layer++;
 			const width = gameMap.width;
 			switch (dataType) {
 				case 'fill': {
@@ -446,6 +467,17 @@ class DeveloperMode {
 					//save tile change to taro.game.map.data
 					map.layers[layer].data[j * width + i] = 0;
 				}
+			}
+		}
+	}
+
+	changeLayerOpacity(data: {layer: number, opacity: number}, clientId: string): void {
+		if (taro.server.developerClientIds.includes(clientId) || clientId === 'server') {
+			const map = taro.game.data.map;
+			if (map.layers[data.layer]) {
+				map.layers[data.layer].opacity = data.opacity;
+				map.wasEdited = true;
+				taro.network.send('changeLayerOpacity', data as any);
 			}
 		}
 	}

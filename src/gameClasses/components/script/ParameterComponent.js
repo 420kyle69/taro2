@@ -121,7 +121,8 @@ var ParameterComponent = TaroEntity.extend({
 		}
 
 		if (isNaN(result)) {
-			taro.script.errorLog(`Calculate error: ${left} ${op.operator} ${right} => NaN. Returning undefined`);
+			//Wooden Wall2::UnitDeath::block#11::CalcError,  owner(thisEntity).$BuildCap  is undefined
+			taro.script.errorLog(`Calculate error: ${left} ${op.operator} ${right} => NaN. ${left === undefined ? `${JSON.stringify(items[1])} Returning undefined` : ''} ${right === undefined ? `, ${JSON.stringify(items[2])} Returning undefined` : ''}`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
 			return undefined;
 		}
 
@@ -489,19 +490,24 @@ var ParameterComponent = TaroEntity.extend({
 
 						break;
 
-				case 'realtimeCSSOfPlayer':
-					var player = self.getValue(text.player, vars);
-					if (player && player._category == 'player') {
-						returnValue = player.realtimeCSS;
-					}
-					break;
-
-				case 'entityExists':
-					returnValue = !!(entity && entity._id && taro.$(entity._id));
-
+					case 'realtimeCSSOfPlayer':
+						var player = self.getValue(text.player, vars);
+						if (player && player._category == 'player') {
+							returnValue = player.realtimeCSS;
+						}
 						break;
 
+					case 'entityExists':
+						returnValue = !!(entity && entity._id && taro.$(entity._id));
 
+						break;
+					
+					case 'objectContainsElement':
+						var object = self.getValue(text.object, vars);
+						var key = self.getValue(text.key, vars);
+						returnValue = object && object[key] !== undefined;
+
+						break;
 
 					case 'thisEntity':
 						returnValue = self._entity;
@@ -565,6 +571,18 @@ var ParameterComponent = TaroEntity.extend({
 							var attributeType = entity._stats.attributes[attributeTypeId];
 							if (attributeType) {
 								returnValue = attributeType.min;
+							}
+						}
+
+						break;
+
+					case 'getDefaultAttributeValueOfUnitType':
+						var attributeTypeId = self.getValue(text.attribute, vars);
+						var unitTypeId = self.getValue(text.unitType, vars);
+						if (unitTypeId && attributeTypeId) {
+							var unitType = taro.game.cloneAsset('unitTypes', unitTypeId);
+							if (unitType && unitType.attributes && unitType.attributes[attributeTypeId]) {
+								returnValue = unitType.attributes[attributeTypeId].value;
 							}
 						}
 
@@ -639,17 +657,17 @@ var ParameterComponent = TaroEntity.extend({
 						}
 
 						break;
-					
+
 					case 'unitsFacingAngle': // to be deprecated soon
-						var unit = self.getValue(text.unit, vars);					
-					case 'entityFacingAngle':						
+						var unit = self.getValue(text.unit, vars);
+					case 'entityFacingAngle':
 						// if unit is defined, use unit's facing angle
 						if (unit) {
 							var entity = unit;
 						} else {
 							var entity = self.getValue(text.entity, vars);
 						}
-							
+
 						if (entity) {
 							returnValue = entity._rotate && entity._rotate.z;
 							returnValue = (returnValue != undefined) ? self.roundOff(returnValue, 3) : undefined;
@@ -1072,14 +1090,17 @@ var ParameterComponent = TaroEntity.extend({
 						var tileY = self.getValue(text.y, vars);
 						var layer = self.getValue(text.layer, vars);
 						if (map && Number.isInteger(layer) && Number.isInteger(tileX) && Number.isInteger(tileY)) {
-							if (layer > 3 || layer < 0) {
-								taro.script.errorLog(`Invalid Layer`);
+							if (layer > taro.game.data.map.layers.length || layer < 0) {
+								taro.script.errorLog(`Invalid Layer`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionBlockIdx}`, true);
+								break;
+							} else if (taro.game.data.map.layers[layer].type !== 'tilelayer') {
+								taro.script.errorLog(`Invalid Layer`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionBlockIdx}`, true);
 								break;
 							} else if (tileX < 0 || tileX >= taro.game.data.map.width) {
-								taro.script.errorLog(`invalid x position`);
+								taro.script.errorLog(`invalid x position`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
 								break;
 							} else if (tileY < 0 || tileY >= taro.game.data.map.height) {
-								taro.script.errorLog(`invalid y position`);
+								taro.script.errorLog(`invalid y position`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
 								break;
 							} else {
 								returnValue = map.layers[layer].data[tileX + tileY * map.width];
@@ -1241,7 +1262,7 @@ var ParameterComponent = TaroEntity.extend({
 							}
 
 							if (!returnValue) {
-								taro.script.errorLog(`could not find valid position even after${attempts} attempts`);
+								taro.script.errorLog(`could not find valid position even after${attempts} attempts`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
 							}
 						}
 
@@ -1261,13 +1282,23 @@ var ParameterComponent = TaroEntity.extend({
 						if (!isNaN(value)) {
 							returnValue = Math.ceil(value);
 						}
+            
 						break;
 
 					case 'mathSign':
 						var value = self.getValue(text.value, vars);
 						if (!isNaN(value)) {
 							returnValue =  Math.sign(value);
+            }
+            
+						break;
+            
+					case 'mathRound':
+						var value = self.getValue(text.value, vars);
+						if (!isNaN(value)) {
+							returnValue = Math.round(value);
 						}
+            
 						break;
 
 					case 'log10':
@@ -1277,6 +1308,20 @@ var ParameterComponent = TaroEntity.extend({
 							returnValue = Math.log10(value);
 						}
 
+						break;
+
+					case 'getServerAge':
+						const timestampStr = taro.server.started_at;
+						const timestamp = new Date(timestampStr);
+						const millisecondsSinceEpoch = timestamp.getTime();
+						
+						returnValue = Date.now() - millisecondsSinceEpoch;
+
+						break;
+
+					case 'getServerStartTime':
+						returnValue = new Date(taro.server.started_at);
+							
 						break;
 
 					case 'getEntireMapRegion':
@@ -1474,8 +1519,8 @@ var ParameterComponent = TaroEntity.extend({
 								y: parseInt(taro.mobileControls.secondaryTouchPosition.y)
 							};
 						}
-					
-					break;
+
+						break;
 
 					case 'xyCoordinate':
 						var x = self.getValue(text.x, vars);
@@ -1786,7 +1831,7 @@ var ParameterComponent = TaroEntity.extend({
 
 						returnValue = player._stats.highscore;
 
-						break;	
+						break;
 
 					case 'getUnitId':
 						var unit = self.getValue(text.unit, vars);
@@ -1828,7 +1873,7 @@ var ParameterComponent = TaroEntity.extend({
 								}
 							} catch (err) {
 								if (err instanceof SyntaxError) {
-									self._script.errorLog(`error parsing JSON within getStringArrayLength:  ${typeof string} ${string} is not a valid JSON string`);
+									self._script.errorLog(`error parsing JSON within getStringArrayLength:  ${typeof string} ${string} is not a valid JSON string`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
 								}
 							}
 						}
@@ -1847,7 +1892,7 @@ var ParameterComponent = TaroEntity.extend({
 
 							} catch (err) {
 								if (err instanceof SyntaxError) {
-									self._script.errorLog(`error parsing JSON within getStringArrayElement:  ${typeof string} ${string} is not a valid JSON string`);
+									self._script.errorLog(`error parsing JSON within getStringArrayElement:  ${typeof string} ${string} is not a valid JSON string`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
 								}
 							}
 						}
@@ -1869,9 +1914,9 @@ var ParameterComponent = TaroEntity.extend({
 								}
 							} catch (err) {
 								if (err instanceof SyntaxError) {
-									self._script.errorLog(`error parsing JSON within insertStringArrayElement:  ${typeof string} ${string} is not a valid JSON string`);
+									self._script.errorLog(`error parsing JSON within insertStringArrayElement:  ${typeof string} ${string} is not a valid JSON string`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
 								} else {
-									self._script.errorLog('error modifying array within insertStringArrayElement');
+									self._script.errorLog('error modifying array within insertStringArrayElement', `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
 								}
 							}
 						}
@@ -1894,9 +1939,9 @@ var ParameterComponent = TaroEntity.extend({
 								}
 							} catch (err) {
 								if (err instanceof SyntaxError) {
-									self._script.errorLog(`error parsing JSON within updateStringArrayElement:  ${typeof string} ${string} is not a valid JSON string`);
+									self._script.errorLog(`error parsing JSON within updateStringArrayElement:  ${typeof string} ${string} is not a valid JSON string`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
 								} else {
-									self._script.errorLog('error modifying array within updateStringArrayElement');
+									self._script.errorLog('error modifying array within updateStringArrayElement', `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
 								}
 							}
 						}
@@ -1918,9 +1963,9 @@ var ParameterComponent = TaroEntity.extend({
 								}
 							} catch (err) {
 								if (err instanceof SyntaxError) {
-									self._script.errorLog(`error parsing JSON within removeStringArrayElement:  ${typeof string} ${string} is not a valid JSON string`);
+									self._script.errorLog(`error parsing JSON within removeStringArrayElement:  ${typeof string} ${string} is not a valid JSON string`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
 								} else {
-									self._script.errorLog('error modifying array within removeStringArrayElement');
+									self._script.errorLog('error modifying array within removeStringArrayElement', `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
 								}
 							}
 						}
@@ -1943,7 +1988,7 @@ var ParameterComponent = TaroEntity.extend({
 							returnValue = string.toUpperCase();
 						}
 
-						break;	
+						break;
 
 					case 'substringOf':
 						var string = self.getValue(text.string, vars);
@@ -1986,9 +2031,11 @@ var ParameterComponent = TaroEntity.extend({
 						var sourceString = self.getValue(text.sourceString, vars);
 						var matchString = self.getValue(text.matchString, vars);
 						var newString = self.getValue(text.newString, vars);
-
+						
 						if (typeof sourceString == 'string' && typeof matchString == 'string' && typeof newString == 'string') {
-							returnValue = sourceString.split(matchString).join(newString);
+							// returnValue = sourceString.split(matchString).join(newString);
+							var regex = new RegExp(matchString, 'g');
+							returnValue = sourceString.replace(regex, newString);
 						}
 
 						break;
@@ -2095,7 +2142,7 @@ var ParameterComponent = TaroEntity.extend({
 
 						break;
 
-					case 'playersOfPlayerType': 
+					case 'playersOfPlayerType':
 						var playerType = self.getValue(text.playerType, vars);
 						var players = taro.$$('player').filter((player) => {
 							return player._stats.playerTypeId === playerType;
@@ -2112,7 +2159,7 @@ var ParameterComponent = TaroEntity.extend({
 
 					case 'allItemsOfItemType':
 						var type = self.getValue(text.itemType, vars);
-						
+
 						returnValue = _.filter(taro.$$('item'), (item) => {
 							return item._stats.itemTypeId == type;
 						});
@@ -2176,47 +2223,47 @@ var ParameterComponent = TaroEntity.extend({
 									return self._entity.script.action.entityCategories.includes(_category) || !_category;
 								});
 							} else {
-								taro.script.errorLog(`region ${JSON.stringify(region)} is not a valid region`);
+								taro.script.errorLog(`region ${JSON.stringify(region)} is not a valid region`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
 								returnValue = [];
 							}
 						}
 
 						break;
 
-						case 'regionInFrontOfEntityAtDistance':
-							var entity = self.getValue(text.entity, vars);
-							var distance = self.getValue(text.distance, vars);
-							var width = self.getValue(text.width, vars);
-							var height = self.getValue(text.height, vars);
+					case 'regionInFrontOfEntityAtDistance':
+						var entity = self.getValue(text.entity, vars);
+						var distance = self.getValue(text.distance, vars);
+						var width = self.getValue(text.width, vars);
+						var height = self.getValue(text.height, vars);
 
-							if (
-								entity != undefined &&
-								self._entity.script.action.entityCategories.indexOf(entity._category) > -1 &&
-								height != undefined &&
-								width != undefined &&
-								distance != undefined
-							) {
-								// console.log(entity._translate.x, distance * Math.cos(entity._rotate.z + Math.radians(-90)));
-								// console.log(entity._translate.y, distance * Math.sin(entity._rotate.z + Math.radians(-90)));
-								var region = {
-									x: entity._translate.x + (distance * Math.cos(entity._rotate.z + Math.radians(-90))),
-									y: entity._translate.y + (distance * Math.sin(entity._rotate.z + Math.radians(-90))),
-									width: width,
-									height: height
-								};
+						if (
+							entity != undefined &&
+							self._entity.script.action.entityCategories.indexOf(entity._category) > -1 &&
+							height != undefined &&
+							width != undefined &&
+							distance != undefined
+						) {
+							// console.log(entity._translate.x, distance * Math.cos(entity._rotate.z + Math.radians(-90)));
+							// console.log(entity._translate.y, distance * Math.sin(entity._rotate.z + Math.radians(-90)));
+							var region = {
+								x: entity._translate.x + (distance * Math.cos(entity._rotate.z + Math.radians(-90))),
+								y: entity._translate.y + (distance * Math.sin(entity._rotate.z + Math.radians(-90))),
+								width: width,
+								height: height
+							};
 
-								region.x -= region.width / 2;
-								region.y -= region.height / 2;
+							region.x -= region.width / 2;
+							region.y -= region.height / 2;
 
-								if (region.x && !isNaN(region.x) && region.y && !isNaN(region.y) && region.width && !isNaN(region.width) && region.height && !isNaN(region.height)) {
-									returnValue = region
-								} else {
-									taro.script.errorLog(`region ${JSON.stringify(region)} is not a valid region`);
-									returnValue = undefined;
-								}
+							if (region.x && !isNaN(region.x) && region.y && !isNaN(region.y) && region.width && !isNaN(region.width) && region.height && !isNaN(region.height)) {
+								returnValue = region
+							} else {
+								taro.script.errorLog(`region ${JSON.stringify(region)} is not a valid region`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
+								returnValue = undefined;
 							}
+						}
 
-							break;
+						break;
 
 					case 'entitiesInRegion':
 						var region = self.getValue(text.region, vars);
@@ -2236,7 +2283,7 @@ var ParameterComponent = TaroEntity.extend({
 									});
 							}
 						} else {
-							taro.script.errorLog('region is not a valid region');
+							taro.script.errorLog('region is not a valid region', `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
 							returnValue = [];
 						}
 
@@ -2274,11 +2321,13 @@ var ParameterComponent = TaroEntity.extend({
 					case 'emptyObject':
 						returnValue = {};
 
-					break;
-
+						break;
+					case 'notValue':
+						returnValue = !self.getValue(text.boolean, vars);
+						break;
 					default:
 						if (text.function) {
-							taro.script.errorLog(`warning: function '${text.function}' not found`);
+							taro.script.errorLog(`warning: function '${text.function}' not found`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
 						} else {
 							returnValue = text;
 						}
@@ -2305,6 +2354,10 @@ var ParameterComponent = TaroEntity.extend({
 			}
 		}
 
+		if (returnValue === undefined && text !== undefined && (typeof text === 'object' && text.function !== 'undefinedValue')) {
+			// TODO: improve the error report, for performance, remove it for now
+			// self._script.errorLog(`${typeof text === 'object' && !Array.isArray(text) ? JSON.stringify(text) : text} is undefined`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true)
+		}
 		return returnValue;
 	},
 
@@ -2398,7 +2451,7 @@ var ParameterComponent = TaroEntity.extend({
 				return player && player._stats.controlledBy == 'human';
 			},
 
-			'isPlayerOnMobile': function(text, vars) {
+			'isPlayerOnMobile': function (text, vars) {
 				var player = self.getValue(text.player, vars);
 				return !!(player && player._stats.isMobile);
 			},
@@ -2412,22 +2465,22 @@ var ParameterComponent = TaroEntity.extend({
 			'getValueOfEntityVariable': function (text, vars) {
 				var variableData = self.getValue(text.variable, vars);
 				var entity = self.getValue(text.entity, vars);
-
-				if (entity && variableData?.key) {
-					return entity.variable.getValue(variableData.key);	
+				if (entity?.variable && variableData?.key) {
+					var value = entity.variable.getValue(variableData.key);
+					return value
 				}
 			},
 
-			'getPlayerVariable': function(text, vars) {
+			'getPlayerVariable': function (text, vars) {
 				return text.variable;
 			},
 
-			'getValueOfPlayerVariable': function(text, vars) {
+			'getValueOfPlayerVariable': function (text, vars) {
 				var variableData = self.getValue(text.variable, vars);
 				var player = self.getValue(text.player, vars);
-				
-				if (player && variableData?.key) {		
-					return player.variable.getValue(variableData.key);	
+
+				if (player && variableData?.key) {
+					return player.variable.getValue(variableData.key);
 				}
 			},
 
@@ -2629,6 +2682,13 @@ var ParameterComponent = TaroEntity.extend({
 				}
 			},
 
+			'getRegionByName': function (text, vars) {
+				var regionName = self.getValue(text.name, vars);
+				if (regionName) {
+					return taro.regionManager.getRegionById(regionName);
+				}
+			},
+
 			'regionOverlapsWithRegion': function (text, vars) {
 				var regionA = self.getValue(text.regionA, vars);
 				var regionB = self.getValue(text.regionB, vars);
@@ -2758,6 +2818,18 @@ var ParameterComponent = TaroEntity.extend({
 
 			},
 
+			'selectedElement': function (text, vars, entity) {
+				if (vars && vars.selectedElement) {
+					return vars.selectedElement;
+				}
+			},
+
+			'selectedElementsKey': function (text, vars, entity) {
+				if (vars && vars.selectedElementsKey) {
+					return vars.selectedElementsKey;
+				}
+			},
+
 			/* object */
 
 			'elementFromObject': function (text, vars) {
@@ -2774,11 +2846,11 @@ var ParameterComponent = TaroEntity.extend({
 
 				if (string) {
 					try {
-						return JSON.parse(string);
+						const repairedString = jsonrepair?.jsonrepair(string);
+						return JSON.parse(repairedString);
 					} catch (err) {
-						if (err instanceof SyntaxError) {
-							self._script.errorLog(`error parsing JSON within stringToObject:  ${typeof string} ${string} is not a valid JSON string`);
-						}
+						console.log('stringToObject err', err.message);
+						self._script.errorLog(`error parsing JSON within stringToObject:  ${typeof string} ${string} is not a valid JSON string`, `${self._script._entity._id}/${self._script.currentScriptId}/${self._script.currentActionName}/${self._script.currentActionLineNumber}`, true);
 					}
 				}
 			},

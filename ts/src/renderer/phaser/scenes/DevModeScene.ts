@@ -55,8 +55,20 @@ class DevModeScene extends PhaserScene {
 			this.leaveMapTab();
 		});
 
+		taro.client.on('enterEntitiesTab', () => {
+
+		});
+
+		taro.client.on('leaveEntitiesTab', () => {
+
+		});
+
 		taro.client.on('editTile', (data: TileData<MapEditToolEnum>) => {
 			this.tileEditor.edit(data);
+		});
+
+		taro.client.on('changeLayerOpacity', (data: {layer: number, opacity: number}) => {
+			this.tileEditor.changeLayerOpacity(data.layer, data.opacity);
 		});
 
 		taro.client.on('editRegion', (data: RegionData) => {
@@ -180,6 +192,7 @@ class DevModeScene extends PhaserScene {
 		this.load.image('save', this.patchAssetUrl('https://cache.modd.io/asset/spriteImage/1681916834218_saveIcon.png'));
 		this.load.image('redo', this.patchAssetUrl('https://cache.modd.io/asset/spriteImage/1686899810953_redo.png'));
 		this.load.image('undo', this.patchAssetUrl('https://cache.modd.io/asset/spriteImage/1686899853748_undo.png'));
+		this.load.image('settings', this.patchAssetUrl('https://cache.modd.io/asset/spriteImage/1707131801364_download.png'));
 
 		this.load.scenePlugin(
 			'rexuiplugin',

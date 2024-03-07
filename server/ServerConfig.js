@@ -1,12 +1,13 @@
 var moddioConfig =
 	process.env.ENV === 'standalone'
-		? process.env.LOAD_CC === 'true' ? [{ name: 'ClusterClientComponent', path: '../../ClusterClientComponent' }]:[]
+		? process.env.LOAD_CC === 'true' ? [{ name: 'WorkerComponent', path: '../../components/WorkerComponent' }]:[]
 		: [
-			{ name: 'ClusterClientComponent', path: '../../ClusterClientComponent' },
-			{ name: 'ClusterServerComponent', path: '../../ClusterServerComponent' },
-			{ name: 'HttpComponent', path: '../../HttpComponent' },
-			{ name: 'ProxyComponent', path: '../../ProxyComponent' },
-			{ name: 'betterFilter', path: '../../moderation/betterFilter' }
+			{ name: 'WorkerComponent', path: '../../components/WorkerComponent' },
+			{ name: 'MasterServerComponent', path: '../../components/MasterServerComponent' },
+			{ name: 'MasterComponent', path: '../../components/MasterComponent' },
+			{ name: 'HttpComponent', path: '../../components/HttpComponent' },
+			{ name: 'ProxyComponent', path: '../../components/ProxyComponent' },
+			{ name: 'betterFilter', path: '../../utils/betterFilter' }
 		];
 
 
@@ -39,6 +40,7 @@ var defaultConfig = [
 
 	{ name: 'AbilityComponent', path: '../src/gameClasses/components/unit/AbilityComponent' },
 	{ name: 'AIComponent', path: '../src/gameClasses/components/unit/AIComponent' },
+	{ name: 'AStarPathfindingComponent', path: '../src/gameClasses/components/unit/AStarPathfindingComponent' },
 
 	{ name: 'AttributeComponent', path: '../src/gameClasses/components/entity/AttributeComponent' },
 	{ name: 'VariableComponent', path: '../src/gameClasses/components/entity/VariableComponent' },	
@@ -54,6 +56,8 @@ var defaultConfig = [
 	{ name: 'Combinator', path: '../src/gameClasses/Combinator' },
 	{ name: 'TileShape', path: '../src/gameClasses/TileShape' },
 	{ name: 'Constants', path: '../src/renderer/phaser/classes/devmode/Constants' },
+
+	{ name: 'StatusComponent', path: '../src/gameClasses/components/StatusComponent' },
 
 	{ name: 'DeveloperMode', path: '../src/gameClasses/DeveloperMode' },
 	// Color support

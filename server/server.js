@@ -1,6 +1,3 @@
-// var appInsights = require("applicationinsights");
-// appInsights.setup("db8b2d10-212b-4e60-8af0-2482871ccf1d").start();
-const publicIp = require('public-ip');
 const express = require('express');
 const helmet = require('helmet');
 const path = require('path');
@@ -10,10 +7,12 @@ const cluster = require('cluster');
 const { RateLimiterMemory } = require('rate-limiter-flexible');
 const currency = require("currency.js");
 
+// global imports
 _ = require('lodash');
-rfdc = require('rfdc')
+rfdc = require('rfdc');
+jsonrepair = require("jsonrepair");
 
-const config = require('../config');
+
 const Console = console.constructor;
 // redirect global console object to log file
 
@@ -30,41 +29,26 @@ module.exports = logfile;
 
 Error.stackTraceLimit = Infinity; // debug console.trace() to infinite lines
 
-global.rollbar = {
-	log: function () {
-		// do nothing in non prod env
-	},
-	error: function () {
-		// do nothing in non prod env
-	},
-	configure: function () {
-		// do nothing in non prod env
-	},
-	lastError: function () {
-		// do nothing in non prod env
-	},
-};
-
 // override console.log and error to print additional data
 console.basicLog = console.log;
 if (process.env.ENV != 'dev' && process.env.ENV != 'standalone') {
 	console.log = function () {
 
 		const log = [];
-	
+
 		log.push(new Date());
-		log.push(cluster.isMaster ? 'master' : 'worker');
-	
+		log.push(cluster.isPrimary ? 'master' : 'worker');
+
 		if (taro?.server?.httpsPort) {
 			log.push(taro?.server?.httpsPort);
 		}
-	
+
 		if (taro?.game?.data?.defaultData?.gameSlug) {
 			log.push(taro?.game?.data?.defaultData?.gameSlug);
 		}
-	
+
 		log.push(...arguments);
-	
+
 		console.basicLog(...log);
 	};
 }
@@ -74,7 +58,7 @@ console.error = function () {
 	const log = [];
 
 	log.push(new Date());
-	log.push(cluster.isMaster ? 'master' : 'worker');
+	log.push(cluster.isPrimary ? 'master' : 'worker');
 
 	if (taro?.server?.httpsPort) {
 		log.push(taro?.server?.httpsPort);
@@ -97,75 +81,10 @@ global.coinHelper = {
 	divide: (x, y) => currency(x).divide(y).value,
 };
 
-global.lastRollbarUuid = null;
-
-global.mixpanel = {
-	track: function () {
-		// do nothing
-	},
-};
-
-global.posthog = {
-	capture: function () {
-		// do nothing
-	},
-}
-
-console.log("process.env.ENV = ", process.env.ENV)
-if (process.env.ENV == 'production') {
-	var Rollbar = require('rollbar');
-	global.rollbar = new Rollbar({
-		accessToken: process.env.ROLLBAR_ACCESS_TOKEN,
-		environment: process.env.ENV,
-		captureUncaught: true,
-		captureUnhandledRejections: true,
-		exitOnUncaughtException: true,
-		onSendCallback: (isUncaught, args, payload) => {
-			console.error(`server.js error: ${payload.uuid}\ntimestamp: ${payload.timestamp}\nisUncaught: ${isUncaught}\nstack: ${payload.notifier.diagnostic['raw_error'].stack}`);
-			global.lastRollbarUuid = payload.uuid;
-		}
-	});
-	
-	global.rollbar.configure({
-		payload: {
-			containerName: process.env.CONTAINER_NAME,
-		}
-	});
-}
-
-// initialize mixpanel.
-var Mixpanel = require('mixpanel');
-var { PostHog } = require('posthog-node')
-// create an instance of the mixpanel client
-if (process.env.MIXPANEL_TOKEN) {
-	global.mixpanel = Mixpanel.init(process.env.MIXPANEL_TOKEN);
-}
-
-if (process.env.POSTHOG_TOKEN) {
-	global.posthog = new PostHog(process.env.POSTHOG_TOKEN, { host: 'https://app.posthog.com' });
-}
-
-global.trackServerEvent = function ({ eventName, properties, target = "all" }, socket) {
-	var posthogDistinctId = socket?._token.posthogDistinctId;
-	var mixpanelDistinctId = socket?._token?.distinctId;
-	if (global.mixpanel && mixpanelDistinctId && (target === "all" || target === "mixpanel")) {
-		global.mixpanel.track(eventName, {
-			'distinct_id': mixpanelDistinctId,
-			...properties
-		});
-	}
-	if (global.posthog && posthogDistinctId && (target === "all" || target === "posthog")) {
-		global.posthog.capture({
-			distinctId: posthogDistinctId,
-			'event': eventName,
-			properties: properties
-		});
-	}
-}
-
 process.on('exit', function () {
 	console.log('process exit called.');
-	taro.clusterClient && taro.clusterClient.sendRollbarCrashData(global.lastRollbarUuid);
+	taro.workerComponent && taro.workerComponent.preKillServerHandler('crashed', 'crash');
+	taro.workerComponent && taro.workerComponent.sendRollbarCrashData(global.lastRollbarUuid);
 	console.trace();
 });
 
@@ -185,8 +104,6 @@ var Server = TaroClass.extend({
 		self.totalItemsCreated = 0;
 		self.totalPlayersCreated = 0;
 		self.totalProjectilesCreated = 0;
-		self.retryCount = 0;
-		self.maxRetryCount = 3;
 		self.postReqTimestamps = [];
 		self.saveDataTimestamps = [];
 		self.started_at = new Date();
@@ -204,18 +121,16 @@ var Server = TaroClass.extend({
 		self.userAdStats = {};
 
 		taro.env = process.env.ENV || 'production';
-		self.config = config[taro.env];
 
-		if (!self.config) {
-			self.config = config.default;
-		}
-
-		self.tier = (cluster.isMaster ? process.env.TIER : (process.env.WORKER_TIER || process.env.TIER)) || 2;
+		self.tier = (cluster.isPrimary ? process.env.TIER : (process.env.WORKER_TIER || process.env.TIER)) || 2;
 
 		self.region = process.env.REGION || 'apocalypse';
 		self.isScriptLogOn = process.env.SCRIPTLOG == 'on';
 		self.gameLoaded = false;
 		self.coinUpdate = {};
+
+		self.rejoiningIdleClients = [];
+		self._idleDisconnectedClientIds = {};
 
 		self.socketConnectionCount = {
 			connected: 0,
@@ -237,9 +152,8 @@ var Server = TaroClass.extend({
 		self.serverStartTime = new Date();// record start time
 		global.isDev = taro.env == 'dev' || taro.env == 'local' || taro.env === 'standalone' || taro.env === 'standalone-remote';
 		global.myIp = process.env.IP;
-		global.beUrl = process.env.BE_URL || self.config.BE_URL;
 
-		console.log('environment', taro.env, self.config);
+		console.log('environment', taro.env);
 		console.log('isDev =', global.isDev);
 
 		self.internalPingCount = 0;
@@ -273,53 +187,35 @@ var Server = TaroClass.extend({
 		if (typeof HttpComponent != 'undefined') {
 			taro.addComponent(HttpComponent);
 		}
-		if (cluster.isMaster) {
+		if (cluster.isPrimary) {
 			if (process.env.ENV === 'standalone') {
 				if (process.env.LOAD_CC === 'true') {
-					taro.addComponent(ClusterClientComponent); // backend component will retrieve "start" command from BE
+					taro.addComponent(WorkerComponent); // backend component will retrieve "start" command from BE
 				}
-				
+
 				self.ip = '127.0.0.1';
 				self.startWebServer();
 				self.start();
 				self.startGame();
-			} else if (typeof ClusterServerComponent != 'undefined') {
-				taro.addComponent(ClusterServerComponent);
+			} else if (typeof MasterComponent != 'undefined') {
+				taro.addComponent(MasterServerComponent);
+				taro.addComponent(MasterComponent);
 			}
 			// Include ProxyComponent to master cluster
 			if (typeof ProxyComponent !== 'undefined') {
 				taro.addComponent(ProxyComponent);
 			}
 		} else {
-			if (typeof ClusterClientComponent != 'undefined') {
-				
-				taro.addComponent(ClusterClientComponent); // backend component will retrieve "start" command from BE
+			if (typeof WorkerComponent != 'undefined') {
+				taro.addComponent(WorkerComponent); // backend component will retrieve "start" command from BE
 			}
-
-			// if production, then get ip first, and then start
-			if (['production', 'staging', 'standalone-remote'].includes(taro.env)) {
-				console.log('getting IP address', process.env.IP, process.env.IPV4);
-				if (process.env.IPV4) {
-					self.ip = process.env.IPV4;
-					self.start();
-				} else {
-					publicIp.v4().then(ip => { // get public ip of server
-						self.ip = ip;
-						self.start();
-					});
-				}
-			} else // use 127.0.0.1 if dev env
-			{
-				self.ip = '127.0.0.1';
-				self.start();
-			}
+			self.start();
 		}
 	},
 
 	// start server
 	start: function () {
 		var self = this;
-		console.log('ip', self.ip);
 
 		if (self.gameLoaded) {
 			console.log('Warning: Game already loaded in this server!!');
@@ -331,48 +227,6 @@ var Server = TaroClass.extend({
 		taro.addComponent(TaroNetIoComponent);
 	},
 
-	loadGameJSON: function (gameUrl) {
-		var self = this;
-		console.log('loading game JSON');
-		return new Promise((resolve, reject) => {
-			setTimeout(() => {
-				self.retryCount++;
-
-				if (self.retryCount > self.maxRetryCount) {
-					return reject(new Error('Could not load game'));
-				}
-
-				this.request({
-					uri: `${gameUrl}?num=${self.retryCount}`,
-					method: 'GET',
-					headers: {
-						gs_authorization: process.env.BE_AUTH_SECRET
-					},
-					json: true
-				}, (error, response, body) => {
-					if (error) {
-						console.log('LOADING GAME-JSON ERROR', gameUrl);
-						console.log('retry #', self.retryCount);
-						console.log('error', error);
-						return self.loadGameJSON(gameUrl)
-							.then((data) => resolve(data))
-							.catch((err) => reject(err));
-					}
-
-					if (response.statusCode == 200) {
-						return resolve(body);
-					} else {
-						console.log('LOADING GAME-JSON ERROR', gameUrl);
-						console.log('retry #', self.retryCount);
-						console.log('response', response.statusCode, body);
-						return self.loadGameJSON(gameUrl)
-							.then((data) => resolve(data))
-							.catch((err) => reject(err));
-					}
-				});
-			}, self.retryCount * 5000);
-		});
-	},
 	startWebServer: function () {
 		const app = express();
 		const port = 80;
@@ -419,11 +273,7 @@ var Server = TaroClass.extend({
 
 		app.get('/', (req, res) => {
 
-			const jwt = require('jsonwebtoken');
-
-			const token = jwt.sign({ userId: '', sessionId: '', createdAt: Date.now(), gameSlug: global.standaloneGame.defaultData.gameSlug }, process.env.JWT_SECRET_KEY, {
-				expiresIn: taro.server.CONNECTION_JWT_EXPIRES_IN.toString(),
-			});
+			const token = Math.random().toString(36).substring(2, 14); // random token for standalone
 
 			const videoChatEnabled = taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.enableVideoChat ? taro.game.data.defaultData.enableVideoChat : false;
 			const game = {
@@ -510,8 +360,6 @@ var Server = TaroClass.extend({
 		this.socket = {};
 		var port = process.env.PORT || 2001;
 
-		self.url = `http://${self.ip}:${port}`;
-
 		this.duplicateIpCount = {};
 
 		self.maxPlayers = self.maxPlayers || 32;
@@ -527,18 +375,12 @@ var Server = TaroClass.extend({
 		// Start the network server
 		taro.network.start(self.port, function (data) {
 
-			var domain = global.beUrl;
-
-			console.log('connecting to BE:', global.beUrl);
-
 			var promise;
 
 			if (gameJson) {
 				promise = Promise.resolve(gameJson);
-			} else if (taro.server.gameId && taro.env !== 'standalone') {
-				var gameUrl = `${domain}/api/game-client/${taro.server.gameId}`;
-				console.log('gameUrl', gameUrl);
-				promise = self.loadGameJSON(gameUrl);
+			} else if (taro.server.gameId && taro.env !== 'standalone' && taro.workerComponent) {
+				promise = taro.workerComponent.loadGameJSON();
 			} else {
 				promise = new Promise(function (resolve, reject) {
 					console.log('gameUrl', `${__dirname}/../src/game.json`);
@@ -563,6 +405,7 @@ var Server = TaroClass.extend({
 				taro.addComponent(GameTextComponent);
 				taro.addComponent(GameComponent);
 				taro.addComponent(ProfilerComponent);
+				
 				self.gameStartedAt = new Date();
 
 				taro.defaultVariables = rfdc()(game.data.variables);
@@ -606,6 +449,8 @@ var Server = TaroClass.extend({
 
 				taro.addComponent(PhysicsComponent);
 
+				// we're using setInterval because we need to wait for the physics to be loaded
+				// this is a hacky temporary solution and needs to be fixed
 				const loadedInterval = setInterval(() => {
 					if (taro.physics.gravity) {
 						taro.physics.sleep(true);
@@ -658,6 +503,8 @@ var Server = TaroClass.extend({
 								taro.addComponent(SoundComponent);
 								taro.addComponent(RegionManager);
 
+								taro.addComponent(StatusComponent);
+			
 								if (taro.game.data.defaultData.enableVideoChat) {
 									taro.addComponent(VideoChatComponent);
 								}
@@ -666,35 +513,6 @@ var Server = TaroClass.extend({
 								taro.map.load(map);
 
 								taro.game.start();
-								
-								// send dev logs to developer every second
-								var logInterval = setInterval(function () {
-									// send only if developer client is connect
-
-									if (taro.isServer && self.developerClientIds.length) {
-										taro.game.devLogs.status = taro.server.getStatus();
-
-										const sendErrors = Object.keys(taro.script.errorLogs).length;
-										self.developerClientIds.forEach(
-											id => {
-												taro.network.send('devLogs', taro.game.devLogs, id);
-
-												if (taro.profiler.isEnabled) {
-													taro.network.send('profile', taro.profiler.getProfile(), id);
-												}
-
-												if (sendErrors) {
-													taro.network.send('errorLogs', taro.script.errorLogs, id);
-												}
-
-											});
-
-										if (sendErrors) {
-											taro.script.errorLogs = {};
-										}
-									}
-									taro.physicsTickCount = 0;
-								}, 1000);
 
 								setInterval(function () {
 									var copyCount = Object.assign({}, self.socketConnectionCount);
@@ -704,19 +522,19 @@ var Server = TaroClass.extend({
 										immediatelyDisconnected: 0
 									};
 
-									taro.clusterClient && taro.clusterClient.recordSocketConnections(copyCount);
+									taro.workerComponent && taro.workerComponent.recordSocketConnections(copyCount);
 								}, 900000);
 							}
 						});
 						clearInterval(loadedInterval);
 					}
 
-				}, 50);
+				}, 200);
 
 			})
 				.catch((err) => {
 					console.log('got error while loading game json', err);
-					taro.clusterClient && taro.clusterClient.kill('got error while loading game json');
+					taro.workerComponent && taro.workerComponent.kill('got error while loading game json');
 				});
 		});
 	},
@@ -805,6 +623,7 @@ var Server = TaroClass.extend({
 
 		taro.network.define('trade', self._onTrade);
 		taro.network.define('editTile', self._onEditTile);
+		taro.network.define('changeLayerOpacity', self._onChangeLayerOpacity);
 		taro.network.define('editRegion', self._onEditRegion);
 		taro.network.define('editVariable', self._onEditVariable);
 		taro.network.define('editInitEntity', self._onEditInitEntity);
@@ -825,8 +644,8 @@ var Server = TaroClass.extend({
 
 	unpublish: function (msg) {
 		console.log('unpublishing...');
-		if (taro.clusterClient) {
-			taro.clusterClient.unpublish(msg);
+		if (taro.workerComponent) {
+			taro.workerComponent.unpublish(msg);
 		}
 
 		process.exit(0);
@@ -837,7 +656,7 @@ var Server = TaroClass.extend({
 	},
 
 	kill: function (log) {
-		if (taro.clusterClient && taro.clusterClient.markedAsKilled) {
+		if (taro.workerComponent && taro.workerComponent.markedAsKilled) {
 			return;
 		}
 
@@ -845,9 +664,9 @@ var Server = TaroClass.extend({
 		if (taro.env != 'dev' && process && process.send) {
 			process.send({ chat: 'kill server called' });
 		}
-		// taro.clusterClient.disconnect();
+		// taro.workerComponent.disconnect();
 
-		taro.clusterClient && taro.clusterClient.kill(log);
+		taro.workerComponent && taro.workerComponent.kill(log);
 	},
 
 	// get client with _id from BE
@@ -864,7 +683,7 @@ var Server = TaroClass.extend({
 	sendCoinsToPlayer: function (userId, coins, deductFeeFromOwnerBalance = false) {
 		coins = Math.floor(coins);
 		if (userId && coins) {
-			taro.clusterClient && taro.clusterClient.sendCoinsToPlayer({
+			taro.workerComponent && taro.workerComponent.sendCoinsToPlayer({
 				creatorId: taro.game.data.defaultData.owner,
 				userId,
 				coins,
@@ -969,7 +788,7 @@ var Server = TaroClass.extend({
 		}
 
 		if (Object.keys(self.coinUpdate || {}).length > 0) {
-			taro.clusterClient && taro.clusterClient.consumeCoinFromUser(self.coinUpdate);
+			taro.workerComponent && taro.workerComponent.consumeCoinFromUser(self.coinUpdate);
 			self.coinUpdate = {};
 		}
 	},
@@ -1000,7 +819,7 @@ var Server = TaroClass.extend({
 			try {
 				var player = taro.game.getPlayerByClientId(clientId);
 
-				taro.clusterClient && taro.clusterClient.creditAdRewardToOwner({
+				taro.workerComponent && taro.workerComponent.creditAdRewardToOwner({
 					creatorId: taro.game.data.defaultData.owner,
 					game: taro.game.data.defaultData._id,
 					userId: player._stats.userId,
@@ -1040,8 +859,8 @@ var Server = TaroClass.extend({
 		if (player && player._stats.banChat !== banChat) {
 			player.streamUpdateData([{ banChat: banChat }]);
 
-			if (player._stats.userId && taro.clusterClient) {
-				taro.clusterClient.updateTempMute({
+			if (player._stats.userId && taro.workerComponent) {
+				taro.workerComponent.updateTempMute({
 					banChat: banChat,
 					userId: player._stats.userId,
 				});
@@ -1050,129 +869,10 @@ var Server = TaroClass.extend({
 	},
 
 	addServerLog: function (type, reason) {
-		taro.clusterClient && taro.clusterClient.addServerLog({
+		taro.workerComponent && taro.workerComponent.addServerLog({
 			type,
 			reason
 		});
-	},
-
-	getStatus: function () {
-		var self = this;
-
-		var cpuDelta = null;
-		if (taro._lastCpuUsage) {
-			// console.log('before',taro._lastCpuUsage);
-			cpuDelta = process.cpuUsage(taro._lastCpuUsage);
-			taro._lastCpuUsage = process.cpuUsage();
-		} else {
-			taro._lastCpuUsage = cpuDelta = process.cpuUsage();
-		}
-
-		if (taro.physics && taro.physics.engine != 'CRASH') {
-			// console.log('taro stream',taro.stream);
-
-			var jointCount = 0;
-			var jointList = taro.physics._world && taro.physics._world.getJointList();
-			let getPointer = taro.physics.getPointer;
-			while (jointList && (!getPointer || getPointer(jointList) !== getPointer(taro.physics.nullPtr))) {
-				jointCount++;
-				jointList = jointList.getNext();
-			}
-			var returnData = {
-				clientCount: Object.keys(taro.network._socketById).length,
-				entityCount: {
-					player: taro.$$('player').filter(function (player) {
-						return player._stats.controlledBy == 'human';
-					}).length,
-					unit: taro.$$('unit').length,
-					item: taro.$$('item').length,
-					projectile: taro.$$('projectile').length,
-					sensor: taro.$$('sensor').length,
-					region: taro.$$('region').length
-				},
-				bandwidth: self.bandwidthUsage,
-				heapUsed: process.memoryUsage().heapUsed / 1024 / 1024,
-				currentTime: taro._currentTime,
-				physics: {
-					engine: taro.physics.engine,
-					bodyCount: taro.physics._world?.m_bodyCount || taro.physics._world?.GetBodyCount?.() || 0,
-					contactCount: taro.physics._world?.m_contactCount || taro.physics._world?.GetContactCount?.() || 0,
-					jointCount: taro.physics._world?.m_jointCount || taro.physics._world?.GetJointCount?.() || 0,
-					stepDuration: taro.physics.avgPhysicsTickDuration.toFixed(2),
-					stepsPerSecond: taro._physicsFPS,
-					totalBodiesCreated: taro.physics.totalBodiesCreated
-				},
-				etc: {
-					totalPlayersCreated: taro.server.totalPlayersCreated,
-					totalUnitsCreated: taro.server.totalUnitsCreated,
-					totalItemsCreated: taro.server.totalItemsCreated,
-					totalProjectilesCreated: taro.server.totalProjectilesCreated,
-					totalWallsCreated: taro.server.totalWallsCreated
-				},
-				cpu: cpuDelta,
-				lastSnapshotLength: JSON.stringify(taro.server.lastSnapshot).length
-			};
-
-			self.bandwidthUsage = {
-				unit: 0,
-				item: 0,
-				player: 0,
-				projectile: 0,
-				region: 0,
-				sensor: 0
-			};
-
-			return returnData;
-		}
-		//temprorary for testing crash engine
-		// else {
-		// 	taro.physics.getInfo();
-		// 	var returnData = {
-		// 		clientCount: Object.keys(taro.network._socketById).length,
-		// 		entityCount: {
-		// 			player: taro.$$('player').filter(function (player) {
-		// 				return player._stats.controlledBy == 'human';
-		// 			}).length,
-		// 			unit: taro.$$('unit').length,
-		// 			item: taro.$$('item').length,
-		// 			projectile: taro.$$('projectile').length,
-		// 			sensor: taro.$$('sensor').length,
-		// 			region: taro.$$('region').length
-		// 		},
-		// 		bandwidth: self.bandwidthUsage,
-		// 		heapUsed: process.memoryUsage().heapUsed / 1024 / 1024,
-		// 		currentTime: taro._currentTime,
-		// 		physics: {
-		// 			engine: taro.physics.engine,
-		// 			bodyCount: taro.physics._world.m_bodyCount,
-		// 			contactCount: taro.physics._world.m_contactCount,
-		// 			jointCount: taro.physics._world.m_jointCount,
-		// 			stepDuration: taro.physics.avgPhysicsTickDuration.toFixed(2),
-		// 			stepsPerSecond: taro._physicsFPS,
-		// 			totalBodiesCreated: taro.physics.totalBodiesCreated
-		// 		},
-		// 		etc: {
-		// 			totalPlayersCreated: taro.server.totalPlayersCreated,
-		// 			totalUnitsCreated: taro.server.totalUnitsCreated,
-		// 			totalItemsCreated: taro.server.totalItemsCreated,
-		// 			totalProjectilesCreated: taro.server.totalProjectilesCreated,
-		// 			totalWallsCreated: taro.server.totalWallsCreated
-		// 		},
-		// 		cpu: cpuDelta,
-		// 		lastSnapshotLength: JSON.stringify(taro.server.lastSnapshot).length
-		// 	};
-
-		// 	self.bandwidthUsage = {
-		// 		unit: 0,
-		// 		item: 0,
-		// 		player: 0,
-		// 		projectile: 0,
-		// 		region: 0,
-		// 		sensor: 0
-		// 	};
-
-		// 	return returnData;
-		// }
 	}
 });
 

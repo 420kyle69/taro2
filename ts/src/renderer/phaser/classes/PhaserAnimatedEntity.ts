@@ -3,7 +3,7 @@ class PhaserAnimatedEntity extends PhaserEntity {
 	protected sprite: Phaser.GameObjects.Sprite & IRenderProps;
 	public attachedParticles: PhaserParticle[] = [];
 
-	protected constructor (
+	protected constructor(
 		public scene: GameScene,
 		entity: TaroEntity,
 		protected key: string
@@ -14,7 +14,12 @@ class PhaserAnimatedEntity extends PhaserEntity {
 		this.sprite = this.addSprite(key) as Phaser.GameObjects.Sprite & IRenderProps;
 		this.sprite.setDisplaySize(bounds.x, bounds.y);
 		this.sprite.rotation = entity._rotate.z;
-
+		// Listen for the animationcomplete event
+		this.sprite.on('animationcomplete', (animation) => {
+			if (!(animation.key as string).endsWith('default')) {
+				this.sprite.play(`${this.key}/default`);
+			}
+		}, this);
 		Object.assign(this.evtListeners, {
 			'play-animation': entity.on('play-animation', this.playAnimation, this),
 			size: entity.on('size', this.size, this),
@@ -23,7 +28,7 @@ class PhaserAnimatedEntity extends PhaserEntity {
 		});
 	}
 
-	protected playAnimation (animationId: string): void {
+	protected playAnimation(animationId: string): void {
 		if (this.scene.anims.exists(`${this.key}/${animationId}`)) {
 			this.sprite.play(`${this.key}/${animationId}`);
 		}
@@ -32,7 +37,7 @@ class PhaserAnimatedEntity extends PhaserEntity {
 		}
 	}
 
-	protected transform (data: {
+	protected transform(data: {
 		x: number;
 		y: number;
 		rotation: number
@@ -42,7 +47,7 @@ class PhaserAnimatedEntity extends PhaserEntity {
 		this.flip(this.entity._stats.flip);
 	}
 
-	protected size (
+	protected size(
 		data: {
 			width: number,
 			height: number
@@ -52,18 +57,18 @@ class PhaserAnimatedEntity extends PhaserEntity {
 		this.sprite.setDisplaySize(data.width, data.height);
 	}
 
-	protected scale (data: {
+	protected scale(data: {
 		x: number;
 		y: number
 	}): void {
 		this.sprite.setScale(data.x, data.y);
 	}
 
-	protected flip (flip: FlipMode): void {
+	protected flip(flip: FlipMode): void {
 		this.sprite.setFlip(flip % 2 === 1, flip > 1);
 	}
 
-	protected destroy (): void {
+	protected destroy(): void {
 
 		this.sprite = null;
 		this.attachedParticles.forEach(particle => particle.stop());

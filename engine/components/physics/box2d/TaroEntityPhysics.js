@@ -404,7 +404,6 @@ var TaroEntityPhysics = TaroEntity.extend({
 
 	setLinearVelocityLT: function (x, y) {
 		try {
-			taro.physicsTickCount++;
 			if (!isNaN(x) && !isNaN(y) && isFinite(x) && isFinite(y)) {
 				if (taro.physics.engine === 'BOX2DWASM') {
 					let v = new taro.physics.b2Vec2(x, y);

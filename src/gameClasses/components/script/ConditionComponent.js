@@ -8,9 +8,9 @@ var ConditionComponent = TaroEntity.extend({
 		self._entity = entity;
 	},
 
-	run: function (items, vars) {
+	run: function (items, vars, actionBlockId) {
 		var self = this;
-		
+
 		if (items == undefined || items.length <= 0) {
 			return true;
 		}
@@ -32,9 +32,9 @@ var ConditionComponent = TaroEntity.extend({
 		// taro.script.scriptLog("condition comparing: "+ leftVar+" "+ op +" " + rightVar+'\n')
 
 		if (op == 'AND') {
-			return this.run(left, vars) && this.run(right, vars);
+			return this.run(left, vars, actionBlockId) && this.run(right, vars, actionBlockId);
 		} else if (op == 'OR') {
-			return this.run(left, vars) || this.run(right, vars);
+			return this.run(left, vars, actionBlockId) || this.run(right, vars, actionBlockId);
 		} else if (op == '==') {
 			if (rightVar == undefined) {
 				rightVar = !!rightVar;

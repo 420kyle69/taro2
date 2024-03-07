@@ -191,8 +191,6 @@ var TaroEngine = TaroEntity.extend({
 		this.lastTrigger = undefined;
 		this.triggerProfiler = {};
 		this.actionProfiler = {};
-		this.lastAction = undefined;
-		this.lastActionRanAt = 0;
 		this.lastTriggerRanAt = 0;
 
 		this.gameInfo = {};
@@ -1642,6 +1640,7 @@ var TaroEngine = TaroEntity.extend({
 				self._tickDelta = self._tickStart - self.lastTick;
 				// console.log("wtf tick", self._tickStart, self.lastTick, self._tickDelta)
 			}
+
 			taro.now = Date.now();
 			timeElapsed = taro.now - taro._lastGameLoopTickAt;
 			if (timeElapsed >= (1000 / taro._gameLoopTickRate) - taro._gameLoopTickRemainder) {
@@ -1696,25 +1695,8 @@ var TaroEngine = TaroEntity.extend({
 				// kill tier 1 servers that has been empty for over 15 minutes
 				var playerCount = self.getPlayerCount();
 				self.lastCheckedAt = taro.now;
-
-				if (taro.isClient) {
-					// if I'm the only player in the game, suggest me a different game to play
-					// wait at least 5s, because playerCount is not accurate at the beginning
-					if (playerCount == 1 && !taro.client.myPlayer?.isDeveloper() && taro._currentTime - taro.client.playerJoinedAt > 5000) {
-						// log the event to posthog for AB testing players who join a game with 1 player
-						if (window.posthog) {
-							if (window.posthogEventCaptured === undefined) {
-								window.posthogEventCaptured = true;
-								console.log('player is alone ;-;');
-								window.posthog.capture('player is alone in the game');
-							}
-						}
-
-						if (typeof window.raidAlert === 'function') {
-							window.raidAlert();
-						}
-					}
-				} else if (taro.isServer) {
+				
+				if (taro.isServer) {
 					if (playerCount <= 0) {
 						if (!self.serverEmptySince) {
 							self.serverEmptySince = taro.now;
