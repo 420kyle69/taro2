@@ -160,6 +160,11 @@ var ServerNetworkEvents = {
 					if (acceptedBy.acceptTrading && acceptedFor.acceptTrading) {
 						var unitA = acceptedBy.getSelectedUnit();
 						var unitB = acceptedFor.getSelectedUnit();
+						if (!unitA || !unitB || !unitA.inventory || !unitB.inventory) {
+							taro.network.send('trade', { type: 'error', between: tradeBetween }, acceptedFor._stats.clientId);
+							taro.network.send('trade', { type: 'error', between: tradeBetween }, acceptedBy._stats.clientId);
+							return;
+						}
 						var unitAInventorySize = unitA.inventory.getTotalInventorySize();
 						var unitBInventorySize = unitB.inventory.getTotalInventorySize();
 						var unitAItems = unitA._stats.itemIds.slice(unitAInventorySize, unitAInventorySize + 5);
