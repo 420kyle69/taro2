@@ -204,24 +204,26 @@ class ThreeRenderer {
 				case 'trees':
 					// 5 so it's always rendered on top.
 					// label/bars are rendered at renderOrder 499
-					layerId = 5;
+					layerId = 4;
 					break;
 			}
 
+			const renderHeight = layerId - 1;
+
 			if (['floor'].includes(layer.name)) {
-				this.voxelMap.addLayer(layer, 0, false, false, layerId * 100);
+				this.voxelMap.addLayer(layer, renderHeight, false, false, layerId * 100);
 			}
 
 			if (['floor2'].includes(layer.name)) {
-				this.voxelMap.addLayer(layer, 1, true, false, layerId * 100);
+				this.voxelMap.addLayer(layer, renderHeight, true, false, layerId * 100);
 			}
 
 			if (['walls'].includes(layer.name)) {
-				this.voxelMap.addLayer(layer, 1, true, false, layerId * 100);
+				this.voxelMap.addLayer(layer, renderHeight, true, false, layerId * 100);
 			}
 
 			if (['trees'].includes(layer.name)) {
-				this.voxelMap.addLayer(layer, 2, true, false, layerId * 100);
+				this.voxelMap.addLayer(layer, renderHeight, true, false, layerId * 100);
 			}
 		});
 
