@@ -399,14 +399,8 @@ class ThreeRenderer {
 
 			const fadingTextEvtListener = entity.on('fading-text', (data: { text: string; color?: string }) => {
 				const size = ent.getSizeInPixels();
-				const offset = -25 - size.height * 0.5;
-				const text = new ThreeFloatingText(
-					Utils.pixelToWorld(0),
-					2, // At what height to render fading text?
-					Utils.pixelToWorld(offset),
-					data.text || '',
-					data.color || '#ffffff'
-				);
+				const offsetInPixels = -25 - size.height * 0.5;
+				const text = new ThreeFloatingText(0, 0, 0, data.text || '', data.color || '#ffffff', 0, -offsetInPixels);
 				ent.add(text.node);
 			});
 
