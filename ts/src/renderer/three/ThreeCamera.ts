@@ -19,6 +19,9 @@ class ThreeCamera {
 
 	private offset = new THREE.Vector3();
 	private originalDistance = 1;
+	private originalHalfWidth;
+
+	private zoom = 1;
 
 	constructor(viewportWidth: number, viewportHeight: number, canvas: HTMLCanvasElement) {
 		// Public API
@@ -44,6 +47,7 @@ class ThreeCamera {
 
 		const halfWidth = Utils.pixelToWorld(viewportWidth / 2);
 		const halfHeight = Utils.pixelToWorld(viewportHeight / 2);
+		this.originalHalfWidth = halfWidth;
 		const orthoCamera = new THREE.OrthographicCamera(-halfWidth, halfWidth, halfHeight, -halfHeight, -2000, 15000);
 		this.orthographicCamera = orthoCamera;
 
@@ -84,6 +88,7 @@ class ThreeCamera {
 
 		window.addEventListener('keypress', (evt) => {
 			if (evt.key === ',') {
+				this.isPerspective = false;
 				this.instance = this.orthographicCamera;
 				this.controls.object = this.orthographicCamera;
 
@@ -208,9 +213,18 @@ class ThreeCamera {
 			const azimuthAngle = this.controls.getAzimuthalAngle() * (180 / Math.PI);
 			const elevationAngle = (Math.PI / 2 - this.controls.getPolarAngle()) * (180 / Math.PI);
 			this.debugInfo.style.display = 'block';
-			this.debugInfo.innerHTML = `lookYaw: ${Utils.round(azimuthAngle, 2)} </br> lookPitch: ${Utils.round(elevationAngle, 2)}`;
+			this.debugInfo.innerHTML = `lookYaw: ${Utils.round(azimuthAngle, 2)} </br>lookPitch: ${Utils.round(elevationAngle, 2)}</br>`;
 		} else if (this.debugInfo.style.display !== 'none') {
 			this.debugInfo.style.display = 'none';
+		}
+
+		if (this.controls.enableZoom) {
+			const distance = this.controls.getDistance();
+			this.zoom = this.isPerspective
+				? this.originalDistance / distance
+				: Math.abs(this.originalHalfWidth / this.orthographicCamera.left) * this.orthographicCamera.zoom;
+			const editorZoom = Utils.round(Math.max(window.innerWidth, window.innerHeight) / this.zoom / 2.15, 2);
+			this.debugInfo.innerHTML += `zoom: ${editorZoom}</br>`;
 		}
 
 		if (this.target) {
@@ -238,6 +252,7 @@ class ThreeCamera {
 	}
 
 	setZoom(ratio: number) {
+		this.zoom = ratio;
 		this.setDistance(this.originalDistance / ratio);
 	}
 
