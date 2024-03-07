@@ -1282,13 +1282,23 @@ var ParameterComponent = TaroEntity.extend({
 						if (!isNaN(value)) {
 							returnValue = Math.ceil(value);
 						}
+            
 						break;
 
+					case 'mathSign':
+						var value = self.getValue(text.value, vars);
+						if (!isNaN(value)) {
+							returnValue =  Math.sign(value);
+            }
+            
+						break;
+            
 					case 'mathRound':
 						var value = self.getValue(text.value, vars);
 						if (!isNaN(value)) {
 							returnValue = Math.round(value);
 						}
+            
 						break;
 
 					case 'log10':
