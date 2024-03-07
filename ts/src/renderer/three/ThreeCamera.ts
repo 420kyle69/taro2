@@ -69,6 +69,8 @@ class ThreeCamera {
 		this.controls.mouseButtons = { LEFT: '', MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.ROTATE };
 		this.controls.minDistance = 0.01;
 		this.controls.maxDistance = 1000;
+		this.controls.minZoom = 1 / (1000 / distance);
+		this.controls.maxZoom = 1 / (0.01 / distance);
 		this.controls.update();
 
 		this.controls.addEventListener('change', () => {
