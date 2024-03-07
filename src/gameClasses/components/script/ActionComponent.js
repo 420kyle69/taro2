@@ -3300,6 +3300,17 @@ var ActionComponent = TaroEntity.extend({
 
 						break;
 
+					case 'addNumberElement':
+						var key = self._script.variable.getValue(action.key, vars);
+						var value = self._script.variable.getValue(action.value, vars);
+						var object = self._script.variable.getValue(action.object, vars);
+
+						if (object && key && value) {
+							object[key] = parseFloat(value);
+						}
+
+						break;
+
 					case 'addObjectElement':
 						var key = self._script.param.getValue(action.key, vars);
 						var value = self._script.param.getValue(action.value, vars);
