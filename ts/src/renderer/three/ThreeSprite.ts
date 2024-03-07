@@ -51,11 +51,15 @@ class ThreeSprite extends THREE.Group {
 	setLayer(layer: number) {
 		this.layer = layer;
 		this.calcRenderOrder();
-		this.position.y = layer - 1 + this.zOffset;
 	}
 
 	setDepth(depth: number) {
 		this.depth = depth;
+		this.calcRenderOrder();
+	}
+
+	setZOffset(offset: number) {
+		this.zOffset = offset;
 		this.calcRenderOrder();
 	}
 
@@ -69,16 +73,12 @@ class ThreeSprite extends THREE.Group {
 		this.setScale(this.scaleUnflipped.x, this.scaleUnflipped.y);
 	}
 
-	setZOffset(offset: number) {
-		this.zOffset = offset;
-		this.position.y = this.layer - 1 + offset;
-	}
-
 	getSizeInPixels() {
 		return { width: Utils.worldToPixel(this.scaleUnflipped.x), height: Utils.worldToPixel(this.scaleUnflipped.y) };
 	}
 
 	private calcRenderOrder() {
 		this.sprite.renderOrder = this.layer * 100 + this.depth;
+		this.position.y = Utils.getLayerZOffset(this.layer) + Utils.getDepthZOffset(this.depth) + this.zOffset;
 	}
 }
