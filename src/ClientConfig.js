@@ -10,6 +10,7 @@ var taroClientConfig = {
 		'/lib/rexvirtualjoystickplugin.min.js',
 		'/lib/three.min.js',
 		'/lib/OrbitControls.js',
+    '/lib/tween.umd.js',
 
 		'/gameClasses/Player.js',
 		'/gameClasses/Unit.js',
@@ -126,6 +127,7 @@ var taroClientConfig = {
 		'renderer/three/ThreeSkybox.js',
 		'renderer/three/ThreeTileset.js',
 		'renderer/three/ThreeParticleSystem.js',
+    'renderer/three/ThreeFloatingText.js',
 
 		'/client.js',
 		'/index.js',

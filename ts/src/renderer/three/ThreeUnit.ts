@@ -17,6 +17,7 @@ class ThreeUnit extends ThreeAnimatedSprite {
 	) {
 		super(tex);
 
+		this.label.visible = false;
 		this.add(this.label);
 
 		this.add(this.attributeBars);

@@ -319,7 +319,7 @@ const Client = TaroEventingClass.extend({
 		}
 
 		if (taro.game.data.settings.camera.defaultPitch === undefined) {
-			taro.game.data.settings.camera.defaultPitch = 0;
+			taro.game.data.settings.camera.defaultPitch = 90;
 		}
 
 		if (!taro.game.data.settings.camera.projectionMode) {

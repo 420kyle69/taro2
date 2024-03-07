@@ -113,36 +113,40 @@ var Player = TaroEntity.extend({
 			if (self._stats.controlledBy == 'human' && !self._stats.isBot) {
 				var clientId = self._stats.clientId;
 				var client = taro.server.clients[clientId];
-				var receivedJoinGame = client.receivedJoinGame;
-				var processedJoinGame = Date.now() - receivedJoinGame;
-				var dataLoadTime = self._stats.totalTime;
-				client.lastEventAt = Date.now();
 
-				if (taro.game.data.map.wasEdited) {
-					var playerJoinStreamData = [
-						{ streamedOn: Date.now() },
-						{ playerJoined: true },
-						{ dataLoadTime: dataLoadTime },
-						{ processedJoinGame: processedJoinGame },
-						{ receivedJoinGame: receivedJoinGame },
-						{ mapData: taro.game.data.map }
-					];
-				} else {
-					var playerJoinStreamData = [
-						{ streamedOn: Date.now() },
-						{ playerJoined: true },
-						{ dataLoadTime: dataLoadTime },
-						{ processedJoinGame: processedJoinGame },
-						{ receivedJoinGame: receivedJoinGame }
-					];
+				if (client) {
+					var receivedJoinGame = client.receivedJoinGame;
+					var processedJoinGame = Date.now() - receivedJoinGame;
+					var dataLoadTime = self._stats.totalTime;
+					client.lastEventAt = Date.now();
+
+					if (taro.game.data.map.wasEdited) {
+						var playerJoinStreamData = [
+							{ streamedOn: Date.now() },
+							{ playerJoined: true },
+							{ dataLoadTime: dataLoadTime },
+							{ processedJoinGame: processedJoinGame },
+							{ receivedJoinGame: receivedJoinGame },
+							{ mapData: taro.game.data.map }
+						];
+					} else {
+						var playerJoinStreamData = [
+							{ streamedOn: Date.now() },
+							{ playerJoined: true },
+							{ dataLoadTime: dataLoadTime },
+							{ processedJoinGame: processedJoinGame },
+							{ receivedJoinGame: receivedJoinGame }
+						];
+					}
+
+					if (taro.server.developerClientIds.includes(clientId)) {
+						playerJoinStreamData.push({ scriptData: taro.game.data.scripts });
+						playerJoinStreamData.push({ variableData: taro.defaultVariables });
+					}
+
+					self.streamUpdateData(playerJoinStreamData);
 				}
-
-				if (taro.server.developerClientIds.includes(clientId)) {
-					playerJoinStreamData.push({ scriptData: taro.game.data.scripts });
-					playerJoinStreamData.push({ variableData: taro.defaultVariables });
-				}
-
-				self.streamUpdateData(playerJoinStreamData);
+				
 			}
 
 			if (self._stats.userId) {

@@ -396,6 +396,19 @@ class ThreeRenderer {
 				ent.setFlip(flip % 2 === 1, flip > 1);
 			});
 
+			const fadingTextEvtListener = entity.on('fading-text', (data: { text: string; color?: string }) => {
+				const size = ent.getSizeInPixels();
+				const offset = -25 - size.height * 0.5;
+				const text = new ThreeFloatingText(
+					Utils.pixelToWorld(0),
+					2, // At what height to render fading text?
+					Utils.pixelToWorld(offset),
+					data.text || '',
+					data.color || '#ffffff'
+				);
+				ent.add(text.node);
+			});
+
 			const destroyEvtListener = entity.on(
 				'destroy',
 				() => {
@@ -436,6 +449,8 @@ class ThreeRenderer {
 						entity.off('update-texture', updateTextureEvtListener);
 
 						entity.off('z-offset', zOffsetEvtListener);
+
+						entity.off('fading-text', fadingTextEvtListener);
 					}
 				},
 				this
@@ -523,6 +538,17 @@ class ThreeRenderer {
 				duration: duration,
 			});
 		});
+
+		taro.client.on('floating-text', (data: { text: string; x: number; y: number; color: string }) => {
+			const text = new ThreeFloatingText(
+				Utils.pixelToWorld(data.x) - 0.5,
+				2, // At what height to render floating text?
+				Utils.pixelToWorld(data.y) - 0.5,
+				data.text,
+				data.color
+			);
+			this.scene.add(text.node);
+		});
 	}
 
 	private setupInputListeners(): void {
@@ -571,6 +597,8 @@ class ThreeRenderer {
 		if (this.camera.target) {
 			this.skybox.scene.position.copy(this.camera.target.position);
 		}
+
+		TWEEN.update();
 
 		this.renderer.render(this.scene, this.camera.instance);
 	}
