@@ -9,6 +9,8 @@ class ThreeSprite extends THREE.Group {
 	private flipX = 1;
 	private flipY = 1;
 
+	private zOffset = 0;
+
 	constructor(protected tex: THREE.Texture) {
 		super();
 
@@ -49,6 +51,7 @@ class ThreeSprite extends THREE.Group {
 	setLayer(layer: number) {
 		this.layer = layer;
 		this.calcRenderOrder();
+		this.position.y = layer - 1 + this.zOffset;
 	}
 
 	setDepth(depth: number) {
@@ -64,6 +67,11 @@ class ThreeSprite extends THREE.Group {
 		this.flipX = x ? -1 : 1;
 		this.flipY = y ? -1 : 1;
 		this.setScale(this.scaleUnflipped.x, this.scaleUnflipped.y);
+	}
+
+	setZOffset(offset: number) {
+		this.zOffset = offset;
+		this.position.y = this.layer - 1 + offset;
 	}
 
 	getSizeInPixels() {

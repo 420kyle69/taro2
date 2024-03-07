@@ -261,11 +261,11 @@ class ThreeRenderer {
 			layers.entities.add(ent);
 			this.entities.push(ent);
 
-			let heightOffset = 0;
 			const transformEvtListener = entity.on(
 				'transform',
 				(data: { x: number; y: number; rotation: number }) => {
-					ent.position.set(Utils.pixelToWorld(data.x) - 0.5, heightOffset, Utils.pixelToWorld(data.y) - 0.5);
+					ent.position.x = Utils.pixelToWorld(data.x) - 0.5;
+					ent.position.z = Utils.pixelToWorld(data.y) - 0.5;
 
 					// let angle = -data.rotation;
 					// if (ent.billboard && (entity instanceof Item || entity instanceof Projectile)) {
@@ -384,8 +384,7 @@ class ThreeRenderer {
 			});
 
 			const zOffsetEvtListener = entity.on('z-offset', (offset) => {
-				heightOffset = Utils.pixelToWorld(offset);
-				ent.position.y = heightOffset;
+				ent.setZOffset(Utils.pixelToWorld(offset));
 			});
 
 			entity.on('dynamic', (data) => {
