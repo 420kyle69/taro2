@@ -22,6 +22,7 @@ class ThreeCamera {
 	private originalHalfWidth;
 
 	private zoom = 1;
+	private originalZoom = 1;
 
 	constructor(viewportWidth: number, viewportHeight: number, canvas: HTMLCanvasElement) {
 		// Public API
@@ -91,6 +92,7 @@ class ThreeCamera {
 				this.isPerspective = false;
 				this.instance = this.orthographicCamera;
 				this.controls.object = this.orthographicCamera;
+				this.zoom = this.originalZoom;
 
 				this.setElevationAngle(90);
 				this.setAzimuthAngle(0);
@@ -176,19 +178,7 @@ class ThreeCamera {
 		this.orthographicCamera.position.copy(newPos).add(this.offset);
 
 		if (this.instance instanceof THREE.OrthographicCamera) {
-			// TODO: Extract into separate function
-			const aspect = this.perspectiveCamera.aspect;
-			const fovY = this.perspectiveCamera.fov;
-
-			const halfHeight = Math.tan(fovY * (Math.PI / 180) * 0.5) * distance;
-			const halfWidth = halfHeight * aspect;
-
-			this.orthographicCamera.left = -halfWidth;
-			this.orthographicCamera.right = halfWidth;
-			this.orthographicCamera.top = halfHeight;
-			this.orthographicCamera.bottom = -halfHeight;
-			this.orthographicCamera.zoom = 1;
-
+			this.orthographicCamera.zoom = this.zoom;
 			this.orthographicCamera.lookAt(this.controls.target);
 			this.orthographicCamera.updateProjectionMatrix();
 		}
@@ -241,18 +231,13 @@ class ThreeCamera {
 		this.perspectiveCamera.fov = (360 / Math.PI) * Math.atan(this.fovInitial * (height / this.viewportHeightInitial));
 		this.perspectiveCamera.updateProjectionMatrix();
 
-		const halfWidth = Utils.pixelToWorld(width / 2);
-		const halfHeight = Utils.pixelToWorld(height / 2);
-		this.orthographicCamera.left = -halfWidth;
-		this.orthographicCamera.right = halfWidth;
-		this.orthographicCamera.top = halfHeight;
-		this.orthographicCamera.bottom = -halfHeight;
-		this.orthographicCamera.zoom = 1;
+		this.orthographicCamera.zoom = this.zoom;
 		this.orthographicCamera.updateProjectionMatrix();
 	}
 
 	setZoom(ratio: number) {
 		this.zoom = ratio;
+		this.originalZoom = ratio;
 		this.setDistance(this.originalDistance / ratio);
 	}
 
@@ -316,19 +301,7 @@ class ThreeCamera {
 		this.orthographicCamera.position.copy(this.perspectiveCamera.position).add(this.offset);
 		this.orthographicCamera.quaternion.copy(this.perspectiveCamera.quaternion);
 
-		const aspect = this.perspectiveCamera.aspect;
-		const fovY = this.perspectiveCamera.fov;
-		const distance = this.perspectiveCamera.position.distanceTo(this.controls.target);
-
-		const halfHeight = Math.tan(fovY * (Math.PI / 180) * 0.5) * distance;
-		const halfWidth = halfHeight * aspect;
-
-		this.orthographicCamera.left = -halfWidth;
-		this.orthographicCamera.right = halfWidth;
-		this.orthographicCamera.top = halfHeight;
-		this.orthographicCamera.bottom = -halfHeight;
-
-		this.orthographicCamera.zoom = 1;
+		this.orthographicCamera.zoom = this.zoom;
 		this.orthographicCamera.lookAt(this.controls.target);
 		this.orthographicCamera.updateProjectionMatrix();
 		this.instance = this.orthographicCamera;
