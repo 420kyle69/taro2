@@ -233,7 +233,13 @@ class ThreeCamera {
 		this.perspectiveCamera.fov = (360 / Math.PI) * Math.atan(this.fovInitial * (height / this.viewportHeightInitial));
 		this.perspectiveCamera.updateProjectionMatrix();
 
-		this.orthographicCamera.zoom = this.zoom;
+		const halfWidth = Utils.pixelToWorld(width / 2);
+		const halfHeight = Utils.pixelToWorld(height / 2);
+		this.originalHalfWidth = halfWidth;
+		this.orthographicCamera.left = -halfWidth;
+		this.orthographicCamera.right = halfWidth;
+		this.orthographicCamera.top = halfHeight;
+		this.orthographicCamera.bottom = -halfHeight;
 		this.orthographicCamera.updateProjectionMatrix();
 	}
 
