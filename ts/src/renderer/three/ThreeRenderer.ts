@@ -204,24 +204,28 @@ class ThreeRenderer {
 				case 'trees':
 					// 5 so it's always rendered on top.
 					// label/bars are rendered at renderOrder 499
-					layerId = 5;
+					layerId = 4;
 					break;
 			}
 
+			const renderHeight = layerId - 1;
+
 			if (['floor'].includes(layer.name)) {
-				this.voxelMap.addLayer(layer, 0, false, false, layerId * 100);
+				this.voxelMap.addLayer(layer, renderHeight, false, false, layerId * 100);
 			}
 
 			if (['floor2'].includes(layer.name)) {
-				this.voxelMap.addLayer(layer, 1, true, false, layerId * 100);
+				this.voxelMap.addLayer(layer, renderHeight, true, false, layerId * 100);
 			}
 
 			if (['walls'].includes(layer.name)) {
-				this.voxelMap.addLayer(layer, 1, true, false, layerId * 100);
+				this.voxelMap.addLayer(layer, renderHeight, true, false, layerId * 100);
 			}
 
 			if (['trees'].includes(layer.name)) {
-				this.voxelMap.addLayer(layer, 2, true, false, layerId * 100);
+				// Render at a higher renderOrder because there is a debris layer
+				// in the editor settings.
+				this.voxelMap.addLayer(layer, renderHeight, true, false, (layerId + 1) * 100);
 			}
 		});
 
@@ -261,11 +265,11 @@ class ThreeRenderer {
 			layers.entities.add(ent);
 			this.entities.push(ent);
 
-			let heightOffset = 0;
 			const transformEvtListener = entity.on(
 				'transform',
 				(data: { x: number; y: number; rotation: number }) => {
-					ent.position.set(Utils.pixelToWorld(data.x) - 0.5, heightOffset, Utils.pixelToWorld(data.y) - 0.5);
+					ent.position.x = Utils.pixelToWorld(data.x) - 0.5;
+					ent.position.z = Utils.pixelToWorld(data.y) - 0.5;
 
 					// let angle = -data.rotation;
 					// if (ent.billboard && (entity instanceof Item || entity instanceof Projectile)) {
@@ -384,8 +388,7 @@ class ThreeRenderer {
 			});
 
 			const zOffsetEvtListener = entity.on('z-offset', (offset) => {
-				heightOffset = Utils.pixelToWorld(offset);
-				ent.position.y = heightOffset;
+				ent.setZOffset(Utils.pixelToWorld(offset));
 			});
 
 			entity.on('dynamic', (data) => {
@@ -398,14 +401,8 @@ class ThreeRenderer {
 
 			const fadingTextEvtListener = entity.on('fading-text', (data: { text: string; color?: string }) => {
 				const size = ent.getSizeInPixels();
-				const offset = -25 - size.height * 0.5;
-				const text = new ThreeFloatingText(
-					Utils.pixelToWorld(0),
-					2, // At what height to render fading text?
-					Utils.pixelToWorld(offset),
-					data.text || '',
-					data.color || '#ffffff'
-				);
+				const offsetInPixels = -25 - size.height * 0.5;
+				const text = new ThreeFloatingText(0, 0, 0, data.text || '', data.color || '#ffffff', 0, -offsetInPixels);
 				ent.add(text.node);
 			});
 
@@ -468,13 +465,16 @@ class ThreeRenderer {
 		});
 
 		this.particleSystem = new ThreeParticleSystem();
-		this.particleSystem.node.position.y += 2;
-		this.particleSystem.node.renderOrder = 1200;
 		this.scene.add(this.particleSystem.node);
 
 		taro.client.on('create-particle', (particle: Particle) => {
 			const particleData = taro.game.data.particleTypes[particle.particleId];
 			const tex = ThreeTextureManager.instance().textureMap.get(`particle/${particleData.url}`);
+
+			let zPosition = layers.entities.position.y;
+			if (particleData['z-index'].layer) zPosition += Utils.getLayerZOffset(particleData['z-index'].layer);
+			if (particleData['z-index'].depth) zPosition += Utils.getDepthZOffset(particleData['z-index'].depth);
+			if (particleData['z-index'].offset) zPosition += Utils.pixelToWorld(particleData['z-index'].offset);
 
 			let target = null;
 			if (particle.entityId) {
@@ -518,7 +518,7 @@ class ThreeRenderer {
 			}
 
 			this.particleSystem.emit({
-				position: { x: particle.position.x, y: 0.5, z: particle.position.y },
+				position: { x: particle.position.x, y: zPosition, z: particle.position.y },
 				target: target,
 				direction: direction,
 				azimuth: { min: angleMin, max: angleMax },
@@ -542,7 +542,9 @@ class ThreeRenderer {
 		taro.client.on('floating-text', (data: { text: string; x: number; y: number; color: string }) => {
 			const text = new ThreeFloatingText(
 				Utils.pixelToWorld(data.x) - 0.5,
-				2, // At what height to render floating text?
+				// Will only look good top down orthographic currently; Need to get
+				// correct height from engine when the engine uses 3D coords.
+				1500,
 				Utils.pixelToWorld(data.y) - 0.5,
 				data.text,
 				data.color

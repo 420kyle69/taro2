@@ -9,6 +9,8 @@ class ThreeSprite extends THREE.Group {
 	private flipX = 1;
 	private flipY = 1;
 
+	private zOffset = 0;
+
 	constructor(protected tex: THREE.Texture) {
 		super();
 
@@ -56,6 +58,11 @@ class ThreeSprite extends THREE.Group {
 		this.calcRenderOrder();
 	}
 
+	setZOffset(offset: number) {
+		this.zOffset = offset;
+		this.calcRenderOrder();
+	}
+
 	setTexture(tex: THREE.Texture) {
 		(this.sprite.material as THREE.MeshBasicMaterial).map = tex;
 	}
@@ -72,5 +79,6 @@ class ThreeSprite extends THREE.Group {
 
 	private calcRenderOrder() {
 		this.sprite.renderOrder = this.layer * 100 + this.depth;
+		this.position.y = Utils.getLayerZOffset(this.layer) + Utils.getDepthZOffset(this.depth) + this.zOffset;
 	}
 }

@@ -1,12 +1,13 @@
 class ThreeFloatingText {
 	node: ThreeLabel;
 
-	constructor(x: number, y: number, z: number, text: string, color: string) {
+	constructor(x: number, y: number, z: number, text: string, color: string, offsetX = 0, offsetY = 0) {
 		this.node = new ThreeLabel(text, color, true);
 		this.node.position.set(x, y, z);
+		this.node.setOffset(new THREE.Vector2(offsetX, offsetY));
 
-		new TWEEN.Tween({ offsetInPixels: 0, opacity: 1 })
-			.to({ offsetInPixels: 40, opacity: 0.5 }, 2500)
+		new TWEEN.Tween({ offsetInPixels: this.node.offset.y, opacity: 1 })
+			.to({ offsetInPixels: this.node.offset.y + 40, opacity: 0.5 }, 2500)
 			.onUpdate(({ offsetInPixels, opacity }) => {
 				this.node.setOffset(new THREE.Vector2(0, offsetInPixels));
 				this.node.setOpacity(opacity);

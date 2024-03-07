@@ -153,4 +153,12 @@ namespace Utils {
 		var n = num * p * (1 + Number.EPSILON);
 		return Math.round(n) / p;
 	}
+
+	export function getLayerZOffset(layer: number) {
+		return layer - 1;
+	}
+
+	export function getDepthZOffset(depth: number) {
+		return depth * 0.001;
+	}
 }

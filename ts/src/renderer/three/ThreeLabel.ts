@@ -1,10 +1,11 @@
 class ThreeLabel extends THREE.Group {
+	offset = new THREE.Vector2();
+
 	private sprite: THREE.Sprite;
 	private scaleScalar = 1;
 
 	private size = new THREE.Vector2();
 	private center = new THREE.Vector2(0.5, 0.5);
-	private offset = new THREE.Vector2();
 
 	constructor(text = 'cccccc', color = 'white', bold = false) {
 		super();

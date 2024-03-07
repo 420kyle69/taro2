@@ -43,7 +43,6 @@ class ThreeParticleSystem {
 				vertexShader: vs,
 				fragmentShader: fs,
 				transparent: true,
-				depthWrite: false,
 				blending: THREE.CustomBlending,
 				blendEquation: THREE.AddEquation,
 				blendSrc: THREE.OneFactor,
@@ -115,7 +114,6 @@ class ThreeParticleSystem {
 			if (emitter.target) {
 				emitter.target.getWorldPosition(this.worldPos);
 				emitter.position.x = this.worldPos.x;
-				emitter.position.y = this.worldPos.y;
 				emitter.position.z = this.worldPos.z;
 			}
 		}
