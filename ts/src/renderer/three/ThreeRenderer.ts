@@ -537,7 +537,9 @@ class ThreeRenderer {
 		taro.client.on('floating-text', (data: { text: string; x: number; y: number; color: string }) => {
 			const text = new ThreeFloatingText(
 				Utils.pixelToWorld(data.x) - 0.5,
-				2, // At what height to render floating text?
+				// Will only look good top down orthographic currently; Need to get
+				// correct height from engine when the engine uses 3D coords.
+				1500,
 				Utils.pixelToWorld(data.y) - 0.5,
 				data.text,
 				data.color
