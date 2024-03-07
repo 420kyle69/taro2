@@ -1126,7 +1126,7 @@ var ShopComponent = TaroEntity.extend({
 							itemImage.append(itemImageElement);
 						}
 
-						var itemName = `<div class=\'page-link no-selection\' style=\'line-height:1 !important; font-size: 12px; font-weight : 600; overflow-wrap: break-word; ${isItemAffordable && isItemCoinsAffordable && requirementsSatisfied ? 'color : var(--purchable-text-color)' : 'color : var(--unpurchable-text-color)'} \'>`;
+						var itemName = `<div class=\'page-link no-selection\' style=\'line-height:1 !important; font-size: 12px; font-weight : 600; overflow-wrap: break-word; ${isItemAffordable && isItemCoinsAffordable && requirementsSatisfied ? 'color : var(--purchasable-text-color)' : 'color : var(--unpurchasable-text-color)'} \'>`;
 						if (itemQuantity > 1) {
 							itemName += `${itemQuantity} x `;
 						}
