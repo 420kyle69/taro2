@@ -136,6 +136,8 @@ var ServerNetworkEvents = {
 			case 'offer': {
 				var from = taro.$(msg.from);
 				var to = taro.$(msg.to);
+				from.acceptTrading = false;
+				to.acceptTrading = false;
 				if (from && to && from._category === 'player' && from._category === 'player' && from.tradingWith === to.id()) {
 					taro.network.send('trade', {
 						type: 'offer',
@@ -203,7 +205,6 @@ var ServerNetworkEvents = {
 
 						if (!isTradingSuccessful) {
 							taro.network.send('trade', { type: 'error', between: tradeBetween }, acceptedFor._stats.clientId);
-
 							taro.network.send('trade', { type: 'error', between: tradeBetween }, acceptedBy._stats.clientId);
 							return;
 						}
