@@ -316,6 +316,10 @@ var ServerNetworkEvents = {
 			var unit = player.getSelectedUnit();
 			if (unit) {
 				unit.buyItem(id, token);
+				taro.script.trigger('playerPurchasesItem', {
+					itemId: id,
+					playerId: player.id()
+				})
 			}
 		}
 	},
