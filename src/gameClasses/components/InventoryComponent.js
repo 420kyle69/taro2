@@ -46,7 +46,7 @@ var InventoryComponent = TaroEntity.extend({
 			}
 
 			this.createBackpack();
-			// this.createTradingSlots();
+			this.createTradingSlots();
 		}
 		this.update();
 	},
