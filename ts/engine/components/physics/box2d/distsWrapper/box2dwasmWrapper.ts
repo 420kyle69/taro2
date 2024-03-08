@@ -211,7 +211,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 		var tempFilterData;
 		var i;
 		var finalX; var finalY;
-		var finalWidth; var finalHeight;
+		var finalHWidth; var finalHHeight;
 		// Process body definition and create a box2d body for it
 		switch (body.type) {
 			case 'static':
@@ -311,19 +311,21 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 											if (fixtureDef.shape.data) {
 												finalX = fixtureDef.shape.data.x ?? 0;
 												finalY = fixtureDef.shape.data.y ?? 0;
-												finalWidth = fixtureDef.shape.data.width ?? (entity._bounds2d.x / 2);
-												finalHeight = fixtureDef.shape.data.height ?? (entity._bounds2d.y / 2);
+												finalHWidth = fixtureDef.shape.data.width ?? entity._bounds2d.x;
+												finalHHeight = fixtureDef.shape.data.height ?? entity._bounds2d.y;
 											} else {
 												finalX = 0;
 												finalY = 0;
-												finalWidth = (entity._bounds2d.x / 2);
-												finalHeight = (entity._bounds2d.y / 2);
+												finalHWidth = entity._bounds2d.x;
+												finalHHeight = entity._bounds2d.y;
 											}
+											finalHWidth /= 2;
+											finalHHeight /= 2;
 											const pos = self.recordLeak(new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio));
 											// Set the polygon as a box
 											(tempShape as Box2D.b2PolygonShape).SetAsBox(
-												(finalWidth / self._scaleRatio),
-												(finalHeight / self._scaleRatio),
+												finalHWidth / self._scaleRatio,
+												finalHHeight / self._scaleRatio,
 												pos,
 												0
 											);
