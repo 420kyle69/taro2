@@ -249,8 +249,14 @@ class ThreeCamera {
 		this.setDistance(this.originalDistance / ratio);
 	}
 
-	startFollow(target: THREE.Object3D) {
+	startFollow(target: THREE.Object3D, moveInstant = true) {
 		this.target = target;
+
+		if (moveInstant) {
+			const targetWorldPos = new THREE.Vector3();
+			target.getWorldPosition(targetWorldPos);
+			this.setPosition(targetWorldPos.x, targetWorldPos.y, targetWorldPos.z);
+		}
 	}
 
 	stopFollow() {
