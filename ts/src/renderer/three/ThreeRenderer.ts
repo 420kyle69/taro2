@@ -460,6 +460,16 @@ class ThreeRenderer {
 
 		taro.client.on('camera-pitch', (deg: number) => this.camera.setElevationAngle(deg));
 
+		taro.client.on('camera-position', (x: number, y: number) => {
+			if (!taro.developerMode.active || taro.developerMode.activeTab === 'play') {
+				this.camera.setPosition2D(
+					this.scene.position.x + Utils.pixelToWorld(x),
+					this.scene.position.z + Utils.pixelToWorld(y),
+					true
+				);
+			}
+		});
+
 		taro.client.on('camera-instant-move', (x: number, y: number) => {
 			if (!taro.developerMode.active || taro.developerMode.activeTab === 'play') {
 				this.camera.setPosition2D(
