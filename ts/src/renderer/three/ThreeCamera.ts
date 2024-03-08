@@ -222,7 +222,7 @@ class ThreeCamera {
 		if (this.target) {
 			const targetWorldPos = new THREE.Vector3();
 			this.target.getWorldPosition(targetWorldPos);
-			this.setPosition(targetWorldPos);
+			this.setPosition(targetWorldPos.x, targetWorldPos.y, targetWorldPos.z, true);
 		}
 
 		this.controls.update();
@@ -291,10 +291,19 @@ class ThreeCamera {
 		}
 	}
 
-	setPosition(target: THREE.Vector3) {
+	setPosition(x: number, y: number, z: number, lerp = false) {
 		const oldTarget = this.controls.target.clone();
-		const diff = target.clone().sub(oldTarget);
-		const t = (taro?.game?.data?.settings?.camera?.trackingDelay || 3) / taro.fps();
+		const diff = new THREE.Vector3(x, y, z).sub(oldTarget);
+		const t = lerp ? (taro?.game?.data?.settings?.camera?.trackingDelay || 3) / taro.fps() : 1;
+		this.controls.target.lerp(this.controls.target.clone().add(this.offset).add(diff), t);
+		this.orthographicCamera.position.lerp(this.orthographicCamera.position.clone().add(this.offset).add(diff), t);
+		this.perspectiveCamera.position.lerp(this.perspectiveCamera.position.clone().add(this.offset).add(diff), t);
+	}
+
+	setPosition2D(x: number, z: number, lerp = false) {
+		const oldTarget = this.controls.target.clone();
+		const diff = new THREE.Vector3(x, oldTarget.y, z).sub(oldTarget);
+		const t = lerp ? (taro?.game?.data?.settings?.camera?.trackingDelay || 3) / taro.fps() : 1;
 		this.controls.target.lerp(this.controls.target.clone().add(this.offset).add(diff), t);
 		this.orthographicCamera.position.lerp(this.orthographicCamera.position.clone().add(this.offset).add(diff), t);
 		this.perspectiveCamera.position.lerp(this.perspectiveCamera.position.clone().add(this.offset).add(diff), t);
