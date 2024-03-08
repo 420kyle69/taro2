@@ -219,10 +219,15 @@ var Item = TaroEntityPhysics.extend({
 
 			if (
 				taro.isClient &&
-				newOwner == taro.client.selectedUnit &&
-				newOwner._stats.currentItemIndex !== this._stats.slotIndex
+				newOwner == taro.client.selectedUnit
 			) {
-				this.setState('unselected');
+				if (newOwner._stats.currentItemIndex !== this._stats.slotIndex) {
+					this.setState('unselected');
+				}
+
+				if (newOwner.inventory) {
+					newOwner.inventory.isDirty = true;
+				}
 			}
 
 			if (taro.isServer) {
@@ -1068,6 +1073,7 @@ var Item = TaroEntityPhysics.extend({
 					case 'description':
 						this._stats[attrName] = newValue;
 						var owner = self.getOwnerUnit();
+						// doesn't work on creation of item (no owner yet)
 						if (taro.isClient && taro.client.selectedUnit == owner) {
 							taro.itemUi.updateItemDescription(this);
 						}
