@@ -13,6 +13,7 @@ class ThreeUnit extends ThreeAnimatedSprite {
 
 	constructor(
 		public taroId: string,
+		public ownerId: string,
 		tex: THREE.Texture
 	) {
 		super(tex);
