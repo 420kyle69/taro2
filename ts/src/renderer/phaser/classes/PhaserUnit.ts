@@ -59,7 +59,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 				const ownerPlayer = taro.$(this.entity._stats.ownerId);
 				if (ownerPlayer._stats.controlledBy === 'human') {
 					if (typeof showUserDropdown !== 'undefined') {
-						showUserDropdown({ ownerId: this.entity._stats.ownerId, pointer: p });
+						showUserDropdown({ ownerId: this.entity._stats.ownerId, unitId: this.entity.id(), pointer: p });
 					}
 				}
 			}

@@ -109,6 +109,13 @@ var TradeUiComponent = TaroEntity.extend({
 		delete playerA.isTrading;
 		delete playerB.isTrading;
 		$('#trade-div').hide();
+	},
+
+	tradeOptionClicked: function ({ clientId, unitId }) {
+		taro.network.send('playerClickTradeOption', {
+			tradeWithClientId: clientId,
+			tradeWithUnitId: unitId
+		});
 	}
 });
 

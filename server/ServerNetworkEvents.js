@@ -635,6 +635,13 @@ var ServerNetworkEvents = {
 		}
 	},
 
+	_onPlayerClickTradeOption: function (data, clientId) {
+		var player = taro.game.getPlayerByClientId(clientId);
+		if (player) {
+			taro.script.trigger('whenPlayerClickTradeOption', { playerId: player.id(), unitId: data.tradeWithUnitId });
+		}
+	},
+
 	_onPlayerKeyDown: function (data, clientId) {
 		var player = taro.game.getPlayerByClientId(clientId);
 		if (player != undefined) {
