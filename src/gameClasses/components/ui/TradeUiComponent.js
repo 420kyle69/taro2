@@ -103,11 +103,11 @@ var TradeUiComponent = TaroEntity.extend({
 	closeTrading: function () {
 		var playerA = taro.client.myPlayer;
 		var playerB = taro.$(taro.client.myPlayer.tradingWith);
-		taro.network.send('trade', { type: 'cancel', cancleBy: playerA.id(), cancleTo: playerB.id() });
+		taro.network.send('trade', { type: 'cancel', cancleBy: playerA.id(), cancleTo: playerB?.id() });
 		delete playerA.tradingWith;
-		delete playerB.tradingWith;
+		delete playerB?.tradingWith;
 		delete playerA.isTrading;
-		delete playerB.isTrading;
+		delete playerB?.isTrading;
 		$('#trade-div').hide();
 	},
 

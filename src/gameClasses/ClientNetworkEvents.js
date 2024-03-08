@@ -573,9 +573,9 @@ var ClientNetworkEvents = {
 	_onTrade: function (data) {
 	 	$("#trade-message").html("");
  		if (data.cmd == 'start') {
-		 		$("#trade-request-div").hide();
-		 		$("#trade-div").show();
-		 	}
+		 	$("#trade-request-div").hide();
+		 	$("#trade-div").show();
+		}
 		else if (data.cmd == 'offer') {
 			if (parseInt(data.originSlotNumber) > 12) {
 				taro.client.tradeOffers[parseInt(data.originSlotNumber) - 12] = data.originSlotItem
@@ -636,6 +636,7 @@ var ClientNetworkEvents = {
 				var playerA = taro.$(msg.between.playerA);
 				var playerB = taro.$(msg.between.playerB);
 				if (playerA && playerA._category === "player" && playerB && playerB._category === "player") {
+					taro.tradeUi.closeTradeRequest();
 					taro.tradeUi.startTrading(playerA, playerB);
 				}
 				break;

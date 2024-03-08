@@ -2814,6 +2814,12 @@ var ParameterComponent = TaroEntity.extend({
 				}
 			},
 
+			'selectedElementsKey': function (text, vars, entity) {
+				if (vars && vars.selectedElementsKey) {
+					return vars.selectedElementsKey;
+				}
+			},
+
 			/* object */
 
 			'elementFromObject': function (text, vars) {

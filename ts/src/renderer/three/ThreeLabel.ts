@@ -1,28 +1,30 @@
 class ThreeLabel extends THREE.Group {
-	private sprite;
+	private sprite: THREE.Sprite;
 	private scaleScalar = 1;
 
 	private size = new THREE.Vector2();
 	private center = new THREE.Vector2(0.5, 0.5);
 	private offset = new THREE.Vector2();
 
-	constructor(text = 'cccccc') {
+	constructor(text = 'cccccc', color = 'white', bold = false) {
 		super();
 
 		this.scaleScalar = 1;
 
-		this.sprite = this.createLabel(text);
+		this.sprite = this.createLabel(text, color, bold);
 		this.add(this.sprite);
+	}
 
-		this.visible = false;
+	destroy() {
+		this.sprite.material.map.dispose();
+		this.sprite.material.dispose();
+		this.removeFromParent();
 	}
 
 	update(text: string, color = 'white', bold = false) {
 		this.remove(this.sprite);
 		this.sprite = this.createLabel(text, color, bold);
 		this.add(this.sprite);
-
-		this.visible = true;
 	}
 
 	setOffset(offset: THREE.Vector2, center = new THREE.Vector2(0.5, 0.5)) {
@@ -54,11 +56,15 @@ class ThreeLabel extends THREE.Group {
 		);
 	}
 
+	setOpacity(opacity: number) {
+		this.sprite.material.opacity = opacity;
+	}
+
 	private createLabel(text: string, color = 'white', bold = false) {
 		const textCanvas = document.createElement('canvas');
 		textCanvas.height = 10;
 
-		const padding = 4;
+		const padding = 8;
 
 		const ctx = textCanvas.getContext('2d');
 		const font = `${bold ? 'bold' : 'normal'} 16px Verdana`;

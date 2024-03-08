@@ -2710,6 +2710,7 @@ var ActionComponent = TaroEntity.extend({
 						var attrId = self._script.param.getValue(action.attribute, vars);
 						var value = self._script.param.getValue(action.value, vars);
 						var entity = self._script.param.getValue(action.entity, vars);
+							
 						if (entity && self.entityCategories.indexOf(entity._category) > -1 && entity._stats.attributes && entity._stats.attributes[attrId] != undefined && value != undefined) {
 
 							// not sure we need this code
@@ -3047,11 +3048,13 @@ var ActionComponent = TaroEntity.extend({
 						var playerA = self._script.param.getValue(action.playerA, vars);
 						var playerB = self._script.param.getValue(action.playerB, vars);
 						if (playerA && playerB && playerA._category === 'player' && playerB._category === 'player') {
-							if (!playerB.isTrading) {
-								taro.network.send('trade', { type: 'init', from: playerA.id() }, playerB._stats.clientId);
-							} else {
-								var message = `${playerB._stats.name}is busy`;
-								taro.chat.sendToRoom('1', message, playerA._stats.clientId, undefined);
+							if (!playerA.isTrading && playerA.id() !== playerB.id()) { 
+								if (!playerB.isTrading) {
+									taro.network.send('trade', { type: 'init', from: playerA.id() }, playerB._stats.clientId);
+								} else {
+									var message = `${playerB._stats.name}is busy`;
+									taro.chat.sendToRoom('1', message, playerA._stats.clientId, undefined);
+								}
 							}
 						}
 						break;
