@@ -17,14 +17,16 @@ class ThreeVoxelMap extends THREE.Group {
 
 		for (let z = 0; z < data.height; z++) {
 			for (let x = 0; x < data.width; x++) {
-				const tileId = data.data[z * data.width + x];
+				let tileId = data.data[z * data.width + x];
 				if (tileId <= 0) continue;
+
+				tileId -= 1;
 
 				const pos = { x, y: height + yOffset * height, z };
 
 				voxels.set(getKeyFromPos(pos.x, pos.y, pos.z), {
 					position: [pos.x, pos.y, pos.z],
-					type: data.data[z * data.width + x],
+					type: tileId,
 					visible: true,
 					hiddenFaces: [...hiddenFaces],
 				});
@@ -148,7 +150,7 @@ function buildMeshDataFromCells(cells, tileset: ThreeTileset) {
 			}
 			targetData.positions.push(...localPositions);
 
-			const xIdx = (curCell.type % tileset.columns) - 1;
+			const xIdx = curCell.type % tileset.columns;
 			const yIdx = Math.floor(curCell.type / tileset.columns);
 
 			const singlePixelOffset = { x: xStep / tileset.tileWidth, y: yStep / tileset.tileHeight };
