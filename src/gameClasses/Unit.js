@@ -1588,6 +1588,8 @@ var Unit = TaroEntityPhysics.extend({
 						self._stats[attrName] = newValue;
 						// update shop as player points are changed and when shop modal is open
 						if (taro.isClient && this.inventory) {
+							// changed from direct inventory.update() call
+							this.inventory.isDirty = true;
 
 							if ($('#modd-item-shop-modal').hasClass('show')) {
 								taro.shop.openItemShop();
