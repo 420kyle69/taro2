@@ -233,7 +233,7 @@ class ThreeRenderer {
 			let tex = ThreeTextureManager.instance().textureMap.get(entity._stats.cellSheet.url);
 
 			const createEntity = () => {
-				const e = new ThreeUnit(entity._id, tex.clone());
+				const e = new ThreeUnit(entity._id, entity._stats.ownerId, tex.clone());
 				this.animatedSprites.push(e);
 				e.setBillboard(!!entity._stats.isBillboard, this.camera);
 
@@ -481,6 +481,28 @@ class ThreeRenderer {
 
 		this.renderer.domElement.addEventListener('mousemove', (evt: MouseEvent) => {
 			this.pointer.set((evt.clientX / window.innerWidth) * 2 - 1, -(evt.clientY / window.innerHeight) * 2 + 1);
+		});
+
+		window.addEventListener('mousedown', (event: MouseEvent) => {
+			if (Utils.isRightButton(event.buttons)) {
+				const raycaster = new THREE.Raycaster();
+				raycaster.setFromCamera(this.pointer, this.camera.instance);
+
+				const intersects = raycaster.intersectObjects(this.entities);
+				if (intersects.length > 0) {
+					const closest = intersects[0].object as THREE.Mesh;
+					const unit = this.entities.find((e) => e.sprite === closest);
+
+					if (unit) {
+						const ownerPlayer = taro.$(unit.ownerId);
+						if (ownerPlayer?._stats?.controlledBy === 'human') {
+							if (typeof showUserDropdown !== 'undefined') {
+								showUserDropdown({ ownerId: unit.ownerId, unitId: unit.taroId, pointer: { event } });
+							}
+						}
+					}
+				}
+			}
 		});
 
 		this.particleSystem = new ThreeParticleSystem();

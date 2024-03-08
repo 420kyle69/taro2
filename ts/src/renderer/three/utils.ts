@@ -161,4 +161,8 @@ namespace Utils {
 	export function getDepthZOffset(depth: number) {
 		return depth * 0.001;
 	}
+
+	export function isRightButton(buttons: number) {
+		return !!(buttons & 2);
+	}
 }
