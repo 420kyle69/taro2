@@ -1,6 +1,7 @@
 class ThreeCamera {
 	instance: THREE.Camera;
 	target: THREE.Object3D | null = null;
+	zoom = 1;
 
 	private orthographicCamera: THREE.OrthographicCamera;
 	private perspectiveCamera: THREE.PerspectiveCamera;
@@ -21,7 +22,6 @@ class ThreeCamera {
 	private originalDistance = 1;
 	private originalHalfWidth;
 
-	private zoom = 1;
 	private originalZoom = 1;
 
 	constructor(viewportWidth: number, viewportHeight: number, canvas: HTMLCanvasElement) {

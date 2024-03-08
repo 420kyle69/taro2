@@ -599,7 +599,15 @@ class ThreeRenderer {
 	}
 
 	getViewportBounds() {
-		return { x: 0, y: 0, width: window.innerWidth, height: window.innerHeight };
+		const halfWidth = (window.innerWidth * 0.5) / this.camera.zoom;
+		const halfHeight = (window.innerHeight * 0.5) / this.camera.zoom;
+		const p = this.camera.target.position;
+		return {
+			x: Utils.worldToPixel(p.x) - halfWidth,
+			y: Utils.worldToPixel(p.z) - halfHeight,
+			width: halfWidth * 2,
+			height: halfHeight * 2,
+		};
 	}
 
 	getCameraWidth(): number {
