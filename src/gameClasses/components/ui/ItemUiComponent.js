@@ -309,7 +309,8 @@ var ItemUiComponent = TaroEntity.extend({
 	},
 
 	updateItemDescription: function (item) {
-		var inventorySlotIfPresent = item._stats.slotIndex;
+		var inventorySlotIfPresent = item._stats.slotIndex
+
 		if (item && item._stats && (inventorySlotIfPresent === 0 || inventorySlotIfPresent)) {
 			var popoverContent = $('<div/>', {
 				style: 'font-size: 16px; width: 250px;',

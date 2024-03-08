@@ -1588,7 +1588,6 @@ var Unit = TaroEntityPhysics.extend({
 						self._stats[attrName] = newValue;
 						// update shop as player points are changed and when shop modal is open
 						if (taro.isClient && this.inventory) {
-							this.inventory.update();
 
 							if ($('#modd-item-shop-modal').hasClass('show')) {
 								taro.shop.openItemShop();
@@ -2162,6 +2161,12 @@ var Unit = TaroEntityPhysics.extend({
 				}
 			}
 
+			// check if we need to update inventory component
+			// usually required if changes are made to new items before they have
+			// this entity registered as ownerUnit
+			if (this.inventory.isDirty) {
+				this.inventory.update();
+			}
 			// probably don't need to emit this every tick
 			taro.client.emit('unit-position', [this._translate.x, this._translate.y]);
 		}

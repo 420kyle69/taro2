@@ -8,6 +8,7 @@ var InventoryComponent = TaroEntity.extend({
 		this._entity = entity;
 		// Store any options that were passed to us
 		this._options = options;
+		this.isDirty = false;
 	},
 
 	createInventorySlots: function () {
@@ -380,12 +381,14 @@ var InventoryComponent = TaroEntity.extend({
 				for (var slotIndex = 0; slotIndex < totalInventorySize + 5; slotIndex++) { // +5 for trade slots?
 					var itemId = this._entity._stats.itemIds[slotIndex];
 					var item = taro.$(itemId);
-					
+
 					taro.itemUi.updateItemSlot(item, slotIndex);
 				}
 
 				// this.updateBackpackButton()
 			}
+
+			this.isDirty = false;
 		}
 	},
 
