@@ -77,7 +77,7 @@ namespace Renderer {
 
 				THREE.DefaultLoadingManager.onLoad = () => {
 					this.init();
-					this.setupInputListeners();
+					taro.input.setupListeners(this.renderer.domElement);
 					taro.client.rendererLoaded.resolve();
 					requestAnimationFrame(this.render.bind(this));
 				};
@@ -597,10 +597,6 @@ namespace Renderer {
 					);
 					this.scene.add(text.node);
 				});
-			}
-
-			private setupInputListeners(): void {
-				taro.input.setupListeners(this.renderer.domElement);
 			}
 
 			private render() {
