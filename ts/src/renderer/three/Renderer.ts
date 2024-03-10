@@ -17,11 +17,11 @@ namespace Renderer {
 			private entities: Unit[] = [];
 			private pointer = new THREE.Vector2();
 			private animatedSprites: AnimatedSprite[] = [];
-			private voxelMap: VoxelMap;
 
 			private zoomSize = undefined;
 
 			private sky: Sky;
+			private voxels: Voxels;
 			private particles: Particles;
 
 			private clock = new THREE.Clock();
@@ -191,8 +191,8 @@ namespace Renderer {
 				const topTileset = new Tileset(texMain, tilesetMain.tilewidth, tilesetMain.tilewidth);
 				const sidesTileset = new Tileset(texSide, tilesetSide.tilewidth, tilesetSide.tilewidth);
 
-				this.voxelMap = new VoxelMap(topTileset, sidesTileset);
-				this.scene.add(this.voxelMap);
+				this.voxels = new Voxels(topTileset, sidesTileset);
+				this.scene.add(this.voxels);
 
 				taro.game.data.map.layers.forEach((layer) => {
 					let layerId = 0;
@@ -216,21 +216,21 @@ namespace Renderer {
 					const renderHeight = layerId - 1;
 
 					if (['floor'].includes(layer.name)) {
-						this.voxelMap.addLayer(layer, renderHeight, false, false, layerId * 100);
+						this.voxels.addLayer(layer, renderHeight, false, false, layerId * 100);
 					}
 
 					if (['floor2'].includes(layer.name)) {
-						this.voxelMap.addLayer(layer, renderHeight, true, false, layerId * 100);
+						this.voxels.addLayer(layer, renderHeight, true, false, layerId * 100);
 					}
 
 					if (['walls'].includes(layer.name)) {
-						this.voxelMap.addLayer(layer, renderHeight, true, false, layerId * 100);
+						this.voxels.addLayer(layer, renderHeight, true, false, layerId * 100);
 					}
 
 					if (['trees'].includes(layer.name)) {
 						// Render at a higher renderOrder because there is a debris layer
 						// in the editor settings.
-						this.voxelMap.addLayer(layer, renderHeight, true, false, (layerId + 1) * 100);
+						this.voxels.addLayer(layer, renderHeight, true, false, (layerId + 1) * 100);
 					}
 				});
 
