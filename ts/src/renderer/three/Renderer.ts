@@ -191,15 +191,9 @@ namespace Renderer {
 				this.particles = new Particles();
 				this.scene.add(this.particles.node);
 
-				const layers = {
-					entities: new THREE.Group(),
-				};
-
-				layers.entities.position.y = 0.51;
-
-				for (const layer of Object.values(layers)) {
-					this.scene.add(layer);
-				}
+				const entities = new THREE.Group();
+				entities.position.y = 0.51;
+				this.scene.add(entities);
 
 				taro.game.data.map.layers.forEach((layer) => {
 					let layerId = 0;
@@ -274,7 +268,7 @@ namespace Renderer {
 					};
 
 					const ent = createEntity();
-					layers.entities.add(ent);
+					entities.add(ent);
 					this.entities.push(ent);
 
 					const transformEvtListener = entity.on(
@@ -423,7 +417,7 @@ namespace Renderer {
 						() => {
 							const idx = this.entities.indexOf(ent, 0);
 							if (idx > -1) {
-								layers.entities.remove(ent);
+								entities.remove(ent);
 								this.entities.splice(idx, 1);
 
 								for (const emitter of this.particles.emitters) {
@@ -515,7 +509,7 @@ namespace Renderer {
 					const particleData = taro.game.data.particleTypes[particle.particleId];
 					const tex = TextureManager.instance().textureMap.get(`particle/${particleData.url}`);
 
-					let zPosition = layers.entities.position.y;
+					let zPosition = entities.position.y;
 					if (particleData['z-index'].layer) zPosition += Utils.getLayerZOffset(particleData['z-index'].layer);
 					if (particleData['z-index'].depth) zPosition += Utils.getDepthZOffset(particleData['z-index'].depth);
 					if (particleData['z-index'].offset) zPosition += Utils.pixelToWorld(particleData['z-index'].offset);
