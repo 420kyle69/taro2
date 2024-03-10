@@ -214,7 +214,7 @@ const Client = TaroEventingClass.extend({
 				taro.entitiesToRender = new EntitiesToRender();
 
 				if (taro.game.data.defaultData.defaultRenderer === '3d') {
-					taro.renderer = Renderer.Three.getInstance();
+					taro.renderer = Renderer.Three.instance();
 				} else {
 					taro.renderer = new PhaserRenderer();
 				}
