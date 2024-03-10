@@ -21,7 +21,7 @@ class ThreeSprite extends THREE.Group {
 		this.add(this.sprite);
 
 		// Too much coupling?
-		const renderer = ThreeRenderer.getInstance();
+		const renderer = Renderer.Three.getInstance();
 		renderer.camera.onChange(() => {
 			if (this.billboard) {
 				this.rotation.setFromRotationMatrix(renderer.camera.instance.matrix);
