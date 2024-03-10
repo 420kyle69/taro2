@@ -124,7 +124,7 @@ var taroClientConfig = {
 		'renderer/three/Unit.js',
 		'renderer/three/AttributeBar.js',
 		'renderer/three/ChatBubble.js',
-		'renderer/three/Skybox.js',
+		'renderer/three/Sky.js',
 		'renderer/three/Tileset.js',
 		'renderer/three/Particles.js',
     'renderer/three/FloatingText.js',

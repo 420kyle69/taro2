@@ -22,7 +22,7 @@ namespace Renderer {
 			private resolutionCoef = 1;
 			private zoomSize = undefined;
 
-			private skybox: Skybox;
+			private sky: Sky;
 			private particles: Particles;
 
 			private clock = new THREE.Clock();
@@ -125,13 +125,13 @@ namespace Renderer {
 					textureManager.loadFromUrl(`particle/${key}`, Utils.patchAssetUrl(key));
 				}
 
-				const skyboxUrls = taro.game.data.settings.skybox;
-				textureManager.loadFromFile('left', skyboxUrls.left);
-				textureManager.loadFromFile('right', skyboxUrls.right);
-				textureManager.loadFromFile('top', skyboxUrls.top);
-				textureManager.loadFromFile('bottom', skyboxUrls.bottom);
-				textureManager.loadFromFile('front', skyboxUrls.front);
-				textureManager.loadFromFile('back', skyboxUrls.back);
+				const urls = taro.game.data.settings.skybox;
+				textureManager.loadFromFile('left', urls.left);
+				textureManager.loadFromFile('right', urls.right);
+				textureManager.loadFromFile('top', urls.top);
+				textureManager.loadFromFile('bottom', urls.bottom);
+				textureManager.loadFromFile('front', urls.front);
+				textureManager.loadFromFile('back', urls.back);
 			}
 
 			private forceLoadUnusedCSSFonts() {
@@ -146,11 +146,11 @@ namespace Renderer {
 			private init() {
 				const textureManager = TextureManager.instance();
 
-				const skybox = new Skybox();
-				skybox.scene.translateX(taro.game.data.map.width / 2);
-				skybox.scene.translateZ(taro.game.data.map.height / 2);
-				this.scene.add(skybox.scene);
-				this.skybox = skybox;
+				const sky = new Sky();
+				sky.scene.translateX(taro.game.data.map.width / 2);
+				sky.scene.translateZ(taro.game.data.map.height / 2);
+				this.scene.add(sky.scene);
+				this.sky = sky;
 
 				taro.client.on('zoom', (height: number) => {
 					if (this.zoomSize === height * 2.15) return;
@@ -632,7 +632,7 @@ namespace Renderer {
 				this.camera.update();
 
 				if (this.camera.target) {
-					this.skybox.scene.position.copy(this.camera.target.position);
+					this.sky.scene.position.copy(this.camera.target.position);
 				}
 
 				TWEEN.update();

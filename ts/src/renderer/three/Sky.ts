@@ -1,6 +1,6 @@
 namespace Renderer {
 	export namespace Three {
-		export class Skybox {
+		export class Sky {
 			scene: THREE.Object3D;
 
 			constructor() {
