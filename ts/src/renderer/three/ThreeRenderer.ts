@@ -1,6 +1,12 @@
 /// <reference types="@types/google.analytics" />
 
-class ThreeRenderer {
+interface Renderer {
+	getViewportBounds(): void;
+	getCameraWidth(): number;
+	getCameraHeight(): number;
+}
+
+class ThreeRenderer implements Renderer {
 	private static instance: ThreeRenderer;
 
 	renderer: THREE.WebGLRenderer;
@@ -598,27 +604,7 @@ class ThreeRenderer {
 		taro.input.setupListeners(this.renderer.domElement);
 	}
 
-	getViewportBounds() {
-		const halfWidth = (window.innerWidth * 0.5) / this.camera.zoom;
-		const halfHeight = (window.innerHeight * 0.5) / this.camera.zoom;
-		const p = this.camera.target.position;
-		return {
-			x: Utils.worldToPixel(p.x) - halfWidth,
-			y: Utils.worldToPixel(p.z) - halfHeight,
-			width: halfWidth * 2,
-			height: halfHeight * 2,
-		};
-	}
-
-	getCameraWidth(): number {
-		return window.innerWidth;
-	}
-
-	getCameraHeight(): number {
-		return window.innerHeight;
-	}
-
-	render() {
+	private render() {
 		requestAnimationFrame(this.render.bind(this));
 		taro.client.emit('tick');
 
@@ -654,7 +640,7 @@ class ThreeRenderer {
 		this.renderer.render(this.scene, this.camera.instance);
 	}
 
-	createAnimations(entity: EntityData) {
+	private createAnimations(entity: EntityData) {
 		const cellSheet = entity.cellSheet;
 		if (!cellSheet) return;
 		const key = cellSheet.url;
@@ -694,7 +680,7 @@ class ThreeRenderer {
 	// NOTE(nick): this feels hacky, why don't all tilesets have a type? Part
 	// of a bigger problem regarding game.json parsing and presenting it in a
 	// valid state for the rest of the application?
-	getTilesetFromType(type: 'top' | 'side') {
+	private getTilesetFromType(type: 'top' | 'side') {
 		let index = -1;
 		if (type === 'top') {
 			index = taro.game.data.map.tilesets.findIndex((tilesheet) => {
@@ -710,5 +696,25 @@ class ThreeRenderer {
 		}
 
 		return index > -1 ? taro.game.data.map.tilesets[index] : null;
+	}
+
+	getViewportBounds() {
+		const halfWidth = (window.innerWidth * 0.5) / this.camera.zoom;
+		const halfHeight = (window.innerHeight * 0.5) / this.camera.zoom;
+		const p = this.camera.target.position;
+		return {
+			x: Utils.worldToPixel(p.x) - halfWidth,
+			y: Utils.worldToPixel(p.z) - halfHeight,
+			width: halfWidth * 2,
+			height: halfHeight * 2,
+		};
+	}
+
+	getCameraWidth(): number {
+		return window.innerWidth;
+	}
+
+	getCameraHeight(): number {
+		return window.innerHeight;
 	}
 }
