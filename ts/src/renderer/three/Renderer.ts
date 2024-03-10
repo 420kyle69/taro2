@@ -67,6 +67,32 @@ namespace Renderer {
 					}
 				});
 
+				window.addEventListener('mousemove', (evt: MouseEvent) => {
+					this.pointer.set((evt.clientX / window.innerWidth) * 2 - 1, -(evt.clientY / window.innerHeight) * 2 + 1);
+				});
+
+				window.addEventListener('mousedown', (event: MouseEvent) => {
+					if (Utils.isRightButton(event.buttons)) {
+						const raycaster = new THREE.Raycaster();
+						raycaster.setFromCamera(this.pointer, this.camera.instance);
+
+						const intersects = raycaster.intersectObjects(this.entities);
+						if (intersects.length > 0) {
+							const closest = intersects[0].object as THREE.Mesh;
+							const unit = this.entities.find((e) => e.sprite === closest);
+
+							if (unit) {
+								const ownerPlayer = taro.$(unit.ownerId);
+								if (ownerPlayer?._stats?.controlledBy === 'human') {
+									if (typeof showUserDropdown !== 'undefined') {
+										showUserDropdown({ ownerId: unit.ownerId, unitId: unit.taroId, pointer: { event } });
+									}
+								}
+							}
+						}
+					}
+				});
+
 				THREE.DefaultLoadingManager.onStart = () => {
 					this.forceLoadUnusedCSSFonts();
 				};
@@ -139,44 +165,15 @@ namespace Renderer {
 			}
 
 			private init() {
-				const textureManager = TextureManager.instance();
-
+				// Sky
 				const sky = new Sky();
 				sky.scene.translateX(taro.game.data.map.width / 2);
 				sky.scene.translateZ(taro.game.data.map.height / 2);
 				this.scene.add(sky.scene);
 				this.sky = sky;
 
-				taro.client.on('zoom', (height: number) => {
-					if (this.zoomSize === height * 2.15) return;
-
-					this.zoomSize = height * 2.15;
-					const ratio = Math.max(window.innerWidth, window.innerHeight) / this.zoomSize;
-
-					// TODO: Quadratic zoomTo over 1 second
-					this.camera.setZoom(ratio);
-
-					taro.client.emit('scale', { ratio });
-
-					for (const entity of this.entities) {
-						entity.setGuiScale(1 / ratio);
-					}
-				});
-
-				taro.client.on('stop-follow', () => {
-					this.camera.stopFollow();
-				});
-
-				const layers = {
-					entities: new THREE.Group(),
-				};
-
-				layers.entities.position.y = 0.51;
-
-				for (const layer of Object.values(layers)) {
-					this.scene.add(layer);
-				}
-
+				// Voxels
+				const textureManager = TextureManager.instance();
 				const tilesetMain = this.getTilesetFromType('top');
 				let tilesetSide = this.getTilesetFromType('side');
 				if (!tilesetSide) tilesetSide = tilesetMain;
@@ -189,6 +186,20 @@ namespace Renderer {
 
 				this.voxels = new Voxels(topTileset, sidesTileset);
 				this.scene.add(this.voxels);
+
+				// Particles
+				this.particles = new Particles();
+				this.scene.add(this.particles.node);
+
+				const layers = {
+					entities: new THREE.Group(),
+				};
+
+				layers.entities.position.y = 0.51;
+
+				for (const layer of Object.values(layers)) {
+					this.scene.add(layer);
+				}
 
 				taro.game.data.map.layers.forEach((layer) => {
 					let layerId = 0;
@@ -459,6 +470,26 @@ namespace Renderer {
 				taro.client.on('create-item', (i: TaroEntityPhysics) => createEntity(i), this);
 				taro.client.on('create-projectile', (p: TaroEntityPhysics) => createEntity(p), this);
 
+				taro.client.on('zoom', (height: number) => {
+					if (this.zoomSize === height * 2.15) return;
+
+					this.zoomSize = height * 2.15;
+					const ratio = Math.max(window.innerWidth, window.innerHeight) / this.zoomSize;
+
+					// TODO: Quadratic zoomTo over 1 second
+					this.camera.setZoom(ratio);
+
+					taro.client.emit('scale', { ratio });
+
+					for (const entity of this.entities) {
+						entity.setGuiScale(1 / ratio);
+					}
+				});
+
+				taro.client.on('stop-follow', () => {
+					this.camera.stopFollow();
+				});
+
 				taro.client.on('camera-pitch', (deg: number) => this.camera.setElevationAngle(deg));
 
 				taro.client.on('camera-position', (x: number, y: number) => {
@@ -479,35 +510,6 @@ namespace Renderer {
 						);
 					}
 				});
-
-				this.renderer.domElement.addEventListener('mousemove', (evt: MouseEvent) => {
-					this.pointer.set((evt.clientX / window.innerWidth) * 2 - 1, -(evt.clientY / window.innerHeight) * 2 + 1);
-				});
-
-				window.addEventListener('mousedown', (event: MouseEvent) => {
-					if (Utils.isRightButton(event.buttons)) {
-						const raycaster = new THREE.Raycaster();
-						raycaster.setFromCamera(this.pointer, this.camera.instance);
-
-						const intersects = raycaster.intersectObjects(this.entities);
-						if (intersects.length > 0) {
-							const closest = intersects[0].object as THREE.Mesh;
-							const unit = this.entities.find((e) => e.sprite === closest);
-
-							if (unit) {
-								const ownerPlayer = taro.$(unit.ownerId);
-								if (ownerPlayer?._stats?.controlledBy === 'human') {
-									if (typeof showUserDropdown !== 'undefined') {
-										showUserDropdown({ ownerId: unit.ownerId, unitId: unit.taroId, pointer: { event } });
-									}
-								}
-							}
-						}
-					}
-				});
-
-				this.particles = new Particles();
-				this.scene.add(this.particles.node);
 
 				taro.client.on('create-particle', (particle: Particle) => {
 					const particleData = taro.game.data.particleTypes[particle.particleId];
