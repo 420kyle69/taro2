@@ -19,7 +19,6 @@ namespace Renderer {
 			private animatedSprites: AnimatedSprite[] = [];
 			private voxelMap: VoxelMap;
 
-			private resolutionCoef = 1;
 			private zoomSize = undefined;
 
 			private sky: Sky;
@@ -63,7 +62,7 @@ namespace Renderer {
 					if (this.zoomSize) {
 						const ratio = Math.max(window.innerWidth, window.innerHeight) / this.zoomSize;
 						this.camera.setZoom(ratio);
-						taro.client.emit('scale', { ratio: ratio * this.resolutionCoef });
+						taro.client.emit('scale', { ratio });
 						taro.client.emit('update-abilities-position');
 
 						for (const entity of this.entities) {
@@ -161,7 +160,7 @@ namespace Renderer {
 					// TODO: Quadratic zoomTo over 1 second
 					this.camera.setZoom(ratio);
 
-					taro.client.emit('scale', { ratio: ratio * this.resolutionCoef });
+					taro.client.emit('scale', { ratio });
 
 					for (const entity of this.entities) {
 						entity.setGuiScale(1 / ratio);
