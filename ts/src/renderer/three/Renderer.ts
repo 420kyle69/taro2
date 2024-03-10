@@ -23,7 +23,7 @@ namespace Renderer {
 			private zoomSize = undefined;
 
 			private skybox: Skybox;
-			private particleSystem: ParticleSystem;
+			private particles: Particles;
 
 			private clock = new THREE.Clock();
 
@@ -420,7 +420,7 @@ namespace Renderer {
 								layers.entities.remove(ent);
 								this.entities.splice(idx, 1);
 
-								for (const emitter of this.particleSystem.emitters) {
+								for (const emitter of this.particles.emitters) {
 									if (emitter.target === ent) {
 										emitter.target = null;
 									}
@@ -511,8 +511,8 @@ namespace Renderer {
 					}
 				});
 
-				this.particleSystem = new ParticleSystem();
-				this.scene.add(this.particleSystem.node);
+				this.particles = new Particles();
+				this.scene.add(this.particles.node);
 
 				taro.client.on('create-particle', (particle: Particle) => {
 					const particleData = taro.game.data.particleTypes[particle.particleId];
@@ -564,7 +564,7 @@ namespace Renderer {
 						if (particleData.emitZone.y) emitDepth = Utils.pixelToWorld(particleData.emitZone.y);
 					}
 
-					this.particleSystem.emit({
+					this.particles.emit({
 						position: { x: particle.position.x, y: zPosition, z: particle.position.y },
 						target: target,
 						direction: direction,
@@ -627,7 +627,7 @@ namespace Renderer {
 				if (dt <= 0) dt = 1 / 60;
 				else if (dt >= 0.25) dt = 0.25;
 
-				this.particleSystem.update(dt, time, this.camera.instance);
+				this.particles.update(dt, time, this.camera.instance);
 
 				this.camera.update();
 

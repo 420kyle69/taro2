@@ -1,6 +1,6 @@
 namespace Renderer {
 	export namespace Three {
-		export class ParticleSystem {
+		export class Particles {
 			node: THREE.Object3D = new THREE.Group();
 			emitters: Emitter[] = [];
 
