@@ -121,12 +121,12 @@ namespace Renderer {
 				}
 
 				const urls = taro.game.data.settings.skybox;
-				textureManager.loadFromFile('left', urls.left);
-				textureManager.loadFromFile('right', urls.right);
-				textureManager.loadFromFile('top', urls.top);
-				textureManager.loadFromFile('bottom', urls.bottom);
-				textureManager.loadFromFile('front', urls.front);
-				textureManager.loadFromFile('back', urls.back);
+				textureManager.loadFromUrl('left', urls.left);
+				textureManager.loadFromUrl('right', urls.right);
+				textureManager.loadFromUrl('top', urls.top);
+				textureManager.loadFromUrl('bottom', urls.bottom);
+				textureManager.loadFromUrl('front', urls.front);
+				textureManager.loadFromUrl('back', urls.back);
 			}
 
 			private forceLoadUnusedCSSFonts() {

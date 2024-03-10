@@ -12,17 +12,7 @@ namespace Renderer {
 
 			private loader = new THREE.TextureLoader();
 
-			// eslint-disable-next-line @typescript-eslint/no-empty-function
-			loadFromUrl(key: string, url: string, cb = (tex: THREE.Texture) => {}) {
-				this.loader.load(url, (tex) => {
-					tex.colorSpace = THREE.SRGBColorSpace;
-					tex.magFilter = this.filter;
-					this.textureMap.set(key, tex);
-					cb(tex);
-				});
-			}
-
-			loadFromFile(key: string, url: string, cb?: (tex: THREE.Texture) => void) {
+			loadFromUrl(key: string, url: string, cb?: (tex: THREE.Texture) => void) {
 				this.loader.load(url, (tex) => {
 					tex.colorSpace = THREE.SRGBColorSpace;
 					tex.magFilter = this.filter;
