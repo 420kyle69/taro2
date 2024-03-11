@@ -1046,7 +1046,7 @@ var ShopComponent = TaroEntity.extend({
 		}
 
 		var modalBody = $('<div/>', {
-			class: 'row text-center shop-grid-container'
+			class: 'text-center shop-grid-container bottom-radius'
 		});
 
 		var ownerPlayer = taro.client.myPlayer;
@@ -1115,7 +1115,7 @@ var ShopComponent = TaroEntity.extend({
 						var img = $('<div/>').html(`img_index_${imgArray.length}`);
 						imgArray.push({
 							wrapper: img,
-						value: `<img src='${item.inventoryImage || item.cellSheet.url}' style='width: 75px; height: 75px; background-color : #4B5563; padding : 8px; margin-top : 6px;  border-radius : 4px; object-fit:contain; '>`
+						value: `<img src='${item.inventoryImage || item.cellSheet.url}' class='${isItemAffordable && isItemCoinsAffordable && requirementsSatisfied ? " " : " lowered-visibility "}' style='width: 75px; height: 75px; background-color : #4B5563; padding : 8px; margin-top : 6px;  border-radius : 4px; object-fit:contain; '>`
 						});
 
 						if (shopItem.price.coins) {
@@ -1126,7 +1126,7 @@ var ShopComponent = TaroEntity.extend({
 							itemImage.append(itemImageElement);
 						}
 
-						var itemName = `<div class=\'page-link no-selection\' style=\'line-height:1 !important; font-size: 12px; font-weight : 600; overflow-wrap: break-word; ${isItemAffordable && isItemCoinsAffordable && requirementsSatisfied ? 'color : var(--purchasable-text-color)' : 'color : var(--unpurchasable-text-color)'} \'>`;
+						var itemName = `<div class=\'p-2 no-selection\' style=\'line-height:1 !important; font-size: 12px; font-weight : 600; overflow-wrap: break-word;\'>`;
 						if (itemQuantity > 1) {
 							itemName += `${itemQuantity} x `;
 						}
@@ -1367,7 +1367,7 @@ var ShopComponent = TaroEntity.extend({
 		var self = this;
 
 		var modalBody = $('<div/>', {
-			class: 'row text-center shop-grid-container'
+			class: 'text-center shop-grid-container'
 		});
 
 		if (items.length <= 0) {
@@ -1605,9 +1605,9 @@ var ShopComponent = TaroEntity.extend({
 		var html = '<nav aria-label="Page navigation">';
 		html += '<ul class="pagination m-2">';
 		for (var i = Math.max(1, currentPage); i < Math.min(totalPages + 1, currentPage + maxPageNumber + 1); i++) {
-			html += `<li class="page-item  skin-pagination ${self.currentPagination == i ? 'active' : ''}" data-text="${i}"><span class="page-link"><b>${i}</b></span></li>`;
+			html += `<li class="page-item  skin-pagination ${self.currentPagination == i ? 'active' : ''}" data-text="${i}"><span class="page-link pagination-text"><b>${i}</b></span></li>`;
 		}
-		html += '<li class="page-item  skin-pagination" data-text="next"><span class="page-link"><b>&gt;</b></span></li>';
+		html += '<li class="page-item  skin-pagination" data-text="next"><span class="page-link pagination-text"><b>&gt;</b></span></li>';
 		html += '</ul>';
 		html += '</nav>';
 
