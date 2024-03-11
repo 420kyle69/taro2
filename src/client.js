@@ -302,12 +302,12 @@ const Client = TaroEventingClass.extend({
 		}
 
 		const skyboxDefaultUrls = {
-			left: 'https://cache.modd.io/asset/spriteImage/1708009182743_left.png',
-			right: 'https://cache.modd.io/asset/spriteImage/1708009210421_right.png',
-			bottom: 'https://cache.modd.io/asset/spriteImage/1708007218891_bottom.png',
-			top: 'https://cache.modd.io/asset/spriteImage/1708009237292_top.png',
-			front: 'https://cache.modd.io/asset/spriteImage/1708009150127_front.png',
-			back: 'https://cache.modd.io/asset/spriteImage/1708007016275_back.png',
+			left: "",
+			right: "",
+			bottom: "",
+			top: "",
+			front: "",
+			back: ""
 		};
 
 		if (!taro.game.data.settings.skybox) {
