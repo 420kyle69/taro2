@@ -124,7 +124,7 @@ namespace Renderer {
 				ctx.fillText(text, x + halfSizeX - textWidth / 2, y + halfSizeY + textHeight / 2 - 3);
 
 				const spriteMap = new THREE.Texture(ctx.getImageData(0, 0, textCanvas.width, textCanvas.height));
-				spriteMap.magFilter = TextureManager.instance().filter;
+				spriteMap.magFilter = TextureRepository.instance().filter;
 				spriteMap.generateMipmaps = false;
 				spriteMap.needsUpdate = true;
 				spriteMap.colorSpace = THREE.SRGBColorSpace;

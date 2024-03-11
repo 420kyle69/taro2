@@ -10,14 +10,13 @@ namespace Renderer {
 			}
 
 			private createMaterialArray() {
-				const textureManager = TextureManager.instance();
-
-				const left = textureManager.textureMap.get('left');
-				const right = textureManager.textureMap.get('right');
-				const top = textureManager.textureMap.get('top');
-				const bottom = textureManager.textureMap.get('bottom');
-				const front = textureManager.textureMap.get('front');
-				const back = textureManager.textureMap.get('back');
+				const textureRepository = TextureRepository.instance();
+				const left = textureRepository.get('left');
+				const right = textureRepository.get('right');
+				const top = textureRepository.get('top');
+				const bottom = textureRepository.get('bottom');
+				const front = textureRepository.get('front');
+				const back = textureRepository.get('back');
 
 				if (!(left && right && top && bottom && front && back)) {
 					return [];

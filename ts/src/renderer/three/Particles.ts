@@ -5,7 +5,7 @@ namespace Renderer {
 
 			private particles = [];
 
-			private textures = TextureManager.instance().getTexturesWithKeyContains('particle');
+			private textures = TextureRepository.instance().getTexturesWithKeyContains('particle');
 
 			// NOTE(nick): Use groups/buckets to get around the max 16 textures shader
 			// limit. There are others way to do this but because textures can have a

@@ -116,14 +116,14 @@ namespace Renderer {
 			}
 
 			private loadTextures() {
-				const textureManager = TextureManager.instance();
-				textureManager.setFilter(taro.game.data.defaultData.renderingFilter);
+				const textureRepository = TextureRepository.instance();
+				textureRepository.setFilter(taro.game.data.defaultData.renderingFilter);
 
 				const data = taro.game.data;
 
 				data.map.tilesets.forEach((tileset) => {
 					const key = tileset.image;
-					textureManager.loadFromUrl(key, Utils.patchAssetUrl(key));
+					textureRepository.loadFromUrl(key, Utils.patchAssetUrl(key));
 				});
 
 				const entityTypes = [
@@ -136,23 +136,23 @@ namespace Renderer {
 					const cellSheet = type.cellSheet;
 					if (!cellSheet) continue;
 					const key = cellSheet.url;
-					textureManager.loadFromUrl(key, Utils.patchAssetUrl(key), () => {
+					textureRepository.loadFromUrl(key, Utils.patchAssetUrl(key), () => {
 						this.createAnimations(type);
 					});
 				}
 
 				for (const type of Object.values(data.particleTypes)) {
 					const key = type.url;
-					textureManager.loadFromUrl(`particle/${key}`, Utils.patchAssetUrl(key));
+					textureRepository.loadFromUrl(`particle/${key}`, Utils.patchAssetUrl(key));
 				}
 
 				const urls = taro.game.data.settings.skybox;
-				textureManager.loadFromUrl('left', urls.left);
-				textureManager.loadFromUrl('right', urls.right);
-				textureManager.loadFromUrl('top', urls.top);
-				textureManager.loadFromUrl('bottom', urls.bottom);
-				textureManager.loadFromUrl('front', urls.front);
-				textureManager.loadFromUrl('back', urls.back);
+				textureRepository.loadFromUrl('left', urls.left);
+				textureRepository.loadFromUrl('right', urls.right);
+				textureRepository.loadFromUrl('top', urls.top);
+				textureRepository.loadFromUrl('bottom', urls.bottom);
+				textureRepository.loadFromUrl('front', urls.front);
+				textureRepository.loadFromUrl('back', urls.back);
 			}
 
 			private forceLoadUnusedCSSFonts() {
@@ -173,13 +173,13 @@ namespace Renderer {
 				this.sky = sky;
 
 				// Voxels
-				const textureManager = TextureManager.instance();
+				const textureRepository = TextureRepository.instance();
 				const tilesetMain = this.getTilesetFromType('top');
 				let tilesetSide = this.getTilesetFromType('side');
 				if (!tilesetSide) tilesetSide = tilesetMain;
 
-				const texMain = textureManager.textureMap.get(tilesetMain.image);
-				const texSide = textureManager.textureMap.get(tilesetSide.image);
+				const texMain = textureRepository.get(tilesetMain.image);
+				const texSide = textureRepository.get(tilesetSide.image);
 
 				const topTileset = new Tileset(texMain, tilesetMain.tilewidth, tilesetMain.tilewidth);
 				const sidesTileset = new Tileset(texSide, tilesetSide.tilewidth, tilesetSide.tilewidth);
@@ -236,7 +236,7 @@ namespace Renderer {
 				});
 
 				const createEntity = (entity: TaroEntityPhysics) => {
-					let tex = textureManager.textureMap.get(entity._stats.cellSheet.url);
+					let tex = textureRepository.get(entity._stats.cellSheet.url);
 					const ent = new Unit(entity._id, entity._stats.ownerId, tex.clone());
 					ent.setBillboard(!!entity._stats.isBillboard, this.camera);
 
@@ -331,9 +331,9 @@ namespace Renderer {
 					});
 
 					entity.on('update-texture', (data) => {
-						const textureManager = TextureManager.instance();
+						const textureRepository = TextureRepository.instance();
 						const key = entity._stats.cellSheet.url;
-						const tex2 = textureManager.textureMap.get(key);
+						const tex2 = textureRepository.get(key);
 						if (tex2) {
 							this.createAnimations(entity._stats);
 							tex = tex2.clone();
@@ -341,7 +341,7 @@ namespace Renderer {
 							const bounds = entity._bounds2d;
 							ent.setScale(Utils.pixelToWorld(bounds.x), Utils.pixelToWorld(bounds.y));
 						} else {
-							textureManager.loadFromUrl(key, Utils.patchAssetUrl(key), (tex2) => {
+							textureRepository.loadFromUrl(key, Utils.patchAssetUrl(key), (tex2) => {
 								this.createAnimations(entity._stats);
 								tex = tex2.clone();
 								ent.setTexture(tex);
@@ -430,7 +430,7 @@ namespace Renderer {
 
 				taro.client.on('create-particle', (particle: Particle) => {
 					const particleData = taro.game.data.particleTypes[particle.particleId];
-					const tex = TextureManager.instance().textureMap.get(`particle/${particleData.url}`);
+					const tex = TextureRepository.instance().get(`particle/${particleData.url}`);
 
 					let zPosition = entities.position.y;
 					if (particleData['z-index'].layer) zPosition += Utils.getLayerZOffset(particleData['z-index'].layer);
@@ -554,7 +554,7 @@ namespace Renderer {
 				const cellSheet = entity.cellSheet;
 				if (!cellSheet) return;
 				const key = cellSheet.url;
-				const tex = TextureManager.instance().textureMap.get(key);
+				const tex = TextureRepository.instance().get(key);
 				tex.userData.numColumns = cellSheet.columnCount || 1;
 				tex.userData.numRows = cellSheet.rowCount || 1;
 				tex.userData.key = key;
