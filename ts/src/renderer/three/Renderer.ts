@@ -167,9 +167,9 @@ namespace Renderer {
 			private init() {
 				// Sky
 				const sky = new Sky();
-				sky.scene.translateX(taro.game.data.map.width / 2);
-				sky.scene.translateZ(taro.game.data.map.height / 2);
-				this.scene.add(sky.scene);
+				sky.translateX(taro.game.data.map.width / 2);
+				sky.translateZ(taro.game.data.map.height / 2);
+				this.scene.add(sky);
 				this.sky = sky;
 
 				// Voxels
@@ -542,7 +542,7 @@ namespace Renderer {
 				this.camera.update();
 
 				if (this.camera.target) {
-					this.sky.scene.position.copy(this.camera.target.position);
+					this.sky.position.copy(this.camera.target.position);
 				}
 
 				TWEEN.update();

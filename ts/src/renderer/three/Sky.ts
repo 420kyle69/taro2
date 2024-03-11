@@ -1,13 +1,12 @@
 namespace Renderer {
 	export namespace Three {
-		export class Sky {
-			scene: THREE.Object3D;
-
+		export class Sky extends Node {
 			constructor() {
+				super();
+
 				const geo = new THREE.BoxGeometry(10000, 10000, 10000);
 				const material = this.createMaterialArray();
-				const skybox = new THREE.Mesh(geo, material);
-				this.scene = skybox;
+				this.add(new THREE.Mesh(geo, material));
 			}
 
 			private createMaterialArray() {
