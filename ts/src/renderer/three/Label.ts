@@ -18,10 +18,9 @@ namespace Renderer {
 				this.add(this.sprite);
 			}
 
-			destroy() {
+			onDestroy() {
 				this.sprite.material.map.dispose();
 				this.sprite.material.dispose();
-				this.removeFromParent();
 			}
 
 			update(text: string, color = 'white', bold = false) {

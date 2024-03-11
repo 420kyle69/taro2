@@ -15,10 +15,7 @@ namespace Renderer {
 						label.setOffset(new THREE.Vector2(0, offsetInPixels));
 						label.setOpacity(opacity);
 					})
-					.onComplete(() => {
-						label.destroy();
-						this.removeFromParent();
-					})
+					.onComplete(() => this.destroy())
 					.start();
 			}
 		}

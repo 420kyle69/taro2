@@ -4,6 +4,16 @@ namespace Renderer {
 			constructor() {
 				super();
 			}
+
+			destroy() {
+				for (const node of this.children) {
+					if (node instanceof Node) node.destroy();
+				}
+				this.onDestroy();
+				this.removeFromParent();
+			}
+
+			onDestroy() {}
 		}
 	}
 }
