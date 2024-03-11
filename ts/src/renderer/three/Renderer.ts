@@ -187,6 +187,14 @@ namespace Renderer {
 				this.voxels = new Voxels(topTileset, sidesTileset);
 				this.scene.add(this.voxels);
 
+				let numTileLayers = 0;
+				for (const [idx, layer] of taro.game.data.map.layers.entries()) {
+					if (layer.type === 'tilelayer' && layer.data) {
+						this.voxels.addLayer(layer, numTileLayers, true, false, (idx + 1) * 100);
+						numTileLayers++;
+					}
+				}
+
 				// Particles
 				this.particles = new Particles();
 				this.scene.add(this.particles);
@@ -194,46 +202,6 @@ namespace Renderer {
 				const entities = new THREE.Group();
 				entities.position.y = 0.51;
 				this.scene.add(entities);
-
-				taro.game.data.map.layers.forEach((layer) => {
-					let layerId = 0;
-					switch (layer.name) {
-						case 'floor':
-							layerId = 1;
-							break;
-						case 'floor2':
-							layerId = 2;
-							break;
-						case 'walls':
-							layerId = 3;
-							break;
-						case 'trees':
-							// 5 so it's always rendered on top.
-							// label/bars are rendered at renderOrder 499
-							layerId = 4;
-							break;
-					}
-
-					const renderHeight = layerId - 1;
-
-					if (['floor'].includes(layer.name)) {
-						this.voxels.addLayer(layer, renderHeight, false, false, layerId * 100);
-					}
-
-					if (['floor2'].includes(layer.name)) {
-						this.voxels.addLayer(layer, renderHeight, true, false, layerId * 100);
-					}
-
-					if (['walls'].includes(layer.name)) {
-						this.voxels.addLayer(layer, renderHeight, true, false, layerId * 100);
-					}
-
-					if (['trees'].includes(layer.name)) {
-						// Render at a higher renderOrder because there is a debris layer
-						// in the editor settings.
-						this.voxels.addLayer(layer, renderHeight, true, false, (layerId + 1) * 100);
-					}
-				});
 
 				const createEntity = (entity: TaroEntityPhysics) => {
 					let tex = textureRepository.get(entity._stats.cellSheet.url);
