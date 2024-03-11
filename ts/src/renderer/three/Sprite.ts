@@ -1,6 +1,6 @@
 namespace Renderer {
 	export namespace Three {
-		export class Sprite extends THREE.Group {
+		export class Sprite extends Node {
 			sprite: THREE.Mesh;
 			billboard = false;
 			scaleUnflipped = new THREE.Vector2(1, 1);
