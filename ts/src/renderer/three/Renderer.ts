@@ -3,35 +3,35 @@
 namespace Renderer {
 	export namespace Three {
 		export function instance() {
-			return Renderer.getInstance();
+			return Renderer.instance();
 		}
 
 		class Renderer {
-			private static instance: Renderer;
-
 			renderer: THREE.WebGLRenderer;
 			camera: Camera;
 			scene: THREE.Scene;
 
-			private animations: Map<string, { frames: number[]; fps: number; repeat: number }> = new Map();
-			private entities: Unit[] = [];
-			private pointer = new THREE.Vector2();
-			private animatedSprites: AnimatedSprite[] = [];
+			private static _instance: Renderer;
+
+			private clock = new THREE.Clock();
 
 			private zoomSize = undefined;
+			private pointer = new THREE.Vector2();
 
 			private sky: Sky;
 			private voxels: Voxels;
 			private particles: Particles;
 
-			private clock = new THREE.Clock();
+			private animations: Map<string, { frames: number[]; fps: number; repeat: number }> = new Map();
+			private entities: Unit[] = [];
+			private animatedSprites: AnimatedSprite[] = [];
 
 			private constructor() {
 				// For JS interop; in case someone uses new Renderer.ThreeRenderer()
-				if (!Renderer.instance) {
-					Renderer.instance = this;
+				if (!Renderer._instance) {
+					Renderer._instance = this;
 				} else {
-					return Renderer.instance;
+					return Renderer._instance;
 				}
 
 				const renderer = new THREE.WebGLRenderer();
@@ -107,12 +107,12 @@ namespace Renderer {
 				this.loadTextures();
 			}
 
-			static getInstance() {
-				if (!this.instance) {
-					this.instance = new Renderer();
+			static instance() {
+				if (!this._instance) {
+					this._instance = new Renderer();
 				}
 
-				return this.instance;
+				return this._instance;
 			}
 
 			private loadTextures() {
