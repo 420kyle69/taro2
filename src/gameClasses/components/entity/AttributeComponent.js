@@ -283,7 +283,22 @@ var AttributeComponent = TaroEntity.extend({
 							attrData.attributes[attributeTypeId].value = newValue;
 
 						}
-
+						
+						let clientId = null;
+						switch (this._entity._category) {
+							case 'unit':
+								clientId = this._entity?.getOwner()?._stats?.clientId
+								break;
+							
+							case 'player':
+								clientId = this._entity?._stats?.clientId
+								break;
+							
+							case 'item':
+								clientId = this._entity?.getOwnerUnit()?.getOwner()?._stats?.clientId
+								break;
+						}
+						
 						if (
 							attribute.streamMode == null || attribute.streamMode == 1 ||  // don't stream if streamMode isn't sync'ed (1). Also added != null for legacy support.
 							attribute.streamMode == 4 || // streamMode 4 also sends to everyone. the ignoring part is done on client-side.
@@ -292,7 +307,7 @@ var AttributeComponent = TaroEntity.extend({
 						) {
 							self._entity.streamUpdateData([attrData]);
 						} else if (attribute.streamMode == 3) {
-							self._entity.streamUpdateData([attrData], this._entity?.getOwner()?._stats?.clientId);
+							self._entity.streamUpdateData([attrData], clientId);
 						}
 
 						if (newValue <= 0 && oldValue > 0) { // when attribute becomes zero, trigger attributeBecomesZero event
@@ -304,7 +319,7 @@ var AttributeComponent = TaroEntity.extend({
 						// check if user breaks his highscore then assign it to new highscore
 						if ((attributeTypeId == taro.game.data.settings?.persistentScoreAttributeId) && self._entity._stats.highscore < newValue) {
 							if (!self._entity._stats.newHighscore) {
-								taro.gameText.alertHighscore(self._entity._stats.clientId);
+								taro.gameText.alertHighscore(clientId);
 							}
 
 							self._entity._stats.newHighscore = newValue;
