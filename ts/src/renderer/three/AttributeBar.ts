@@ -1,6 +1,6 @@
 namespace Renderer {
 	export namespace Three {
-		export class AttributeBar extends THREE.Group {
+		export class AttributeBar extends Node {
 			scaleScalar = 1;
 
 			private sprite;
