@@ -301,6 +301,10 @@ const Client = TaroEventingClass.extend({
 			taro.game.data.defaultData.defaultRenderer = '2d';
 		}
 
+    if (!taro.game.data.defaultData.mapBackgroundColor) {
+      taro.game.data.defaultData.mapBackgroundColor = '#000000';
+    }
+
 		const skyboxDefaultUrls = {
 			left: "",
 			right: "",
