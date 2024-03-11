@@ -189,7 +189,7 @@ namespace Renderer {
 
 				// Particles
 				this.particles = new Particles();
-				this.scene.add(this.particles.node);
+				this.scene.add(this.particles);
 
 				const entities = new THREE.Group();
 				entities.position.y = 0.51;

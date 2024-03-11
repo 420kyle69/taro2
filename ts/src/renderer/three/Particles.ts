@@ -1,7 +1,6 @@
 namespace Renderer {
 	export namespace Three {
-		export class Particles {
-			node: THREE.Object3D = new THREE.Group();
+		export class Particles extends Node {
 			emitters: Emitter[] = [];
 
 			private particles = [];
@@ -21,11 +20,13 @@ namespace Renderer {
 			private worldPos = new THREE.Vector3();
 			private forward = new THREE.Vector3();
 			private right = new THREE.Vector3();
-			private up = new THREE.Vector3();
+			private _up = new THREE.Vector3();
 			private basis = new THREE.Matrix4();
 			private velocity = new THREE.Vector3();
 
 			constructor() {
+				super();
+
 				const maxParticlesPerGroup = 50000;
 
 				this.numTextureGroups = Math.floor(this.textures.length / this.maxTexturesPerGroup);
@@ -86,7 +87,7 @@ namespace Renderer {
 					// eslint-disable-next-line @typescript-eslint/no-empty-function
 					points.updateMatrixWorld = function () {};
 
-					this.node.add(points);
+					this.add(points);
 				}
 			}
 
@@ -267,8 +268,8 @@ namespace Renderer {
 				if (this.forward.x <= Number.EPSILON && this.forward.z <= Number.EPSILON) {
 					this.right.set(0, 0, 1);
 				}
-				this.up.crossVectors(this.forward, this.right).normalize();
-				this.basis.makeBasis(this.right, this.up, this.forward);
+				this._up.crossVectors(this.forward, this.right).normalize();
+				this.basis.makeBasis(this.right, this._up, this.forward);
 
 				const randAzimuth = Utils.lerp(emitter.azimuth.min, emitter.azimuth.max, Math.random());
 				const randElevation = Utils.lerp(emitter.elevation.min, emitter.elevation.max, Math.random());
