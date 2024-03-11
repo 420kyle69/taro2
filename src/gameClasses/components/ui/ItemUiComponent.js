@@ -22,6 +22,27 @@ var ItemUiComponent = TaroEntity.extend({
 		$('canvas').on('mouseenter', function () {
 			$('.popover').popover('hide');
 		});
+
+		$('#game-div canvas').droppable({
+			drop: function (event, ui) {
+				var fromIndex = parseFloat(ui.draggable[0].parentElement.id.replace('item-', ''));
+
+				var selectedUnit = taro.client.myPlayer.getSelectedUnit();
+				var items = selectedUnit._stats.itemIds;
+				ui.draggable.css({
+					left: 0, top: 0
+				});
+
+				const itemId = items[fromIndex];
+
+				if (itemId) {
+					taro.network.send('dropItemToCanvas', {
+						itemId: itemId
+					});
+				}
+			}
+		});
+
 		jQuery.fn.swap = function (b) {
 			// method from: http://blog.pengoworks.com/index.cfm/2008/9/24/A-quick-and-dirty-swap-method-for-jQuery
 			b = jQuery(b)[0];

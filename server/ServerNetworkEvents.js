@@ -657,6 +657,13 @@ var ServerNetworkEvents = {
 		}
 	},
 
+	_onDropItemToCanvas: function(data, clientId) {
+		var player = taro.game.getPlayerByClientId(clientId);
+		if (player) {
+			taro.script.trigger('whenPlayerDropsItemToCanvas', { playerId: player.id(), itemId: data.itemId });
+		}
+	},
+
 	_onPlayerKeyDown: function (data, clientId) {
 		var player = taro.game.getPlayerByClientId(clientId);
 		if (player != undefined) {

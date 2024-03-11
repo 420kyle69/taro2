@@ -555,7 +555,8 @@ var Server = TaroClass.extend({
 		taro.network.define('playerAbsoluteAngle', self._onPlayerAbsoluteAngle);
 		taro.network.define('playerDialogueSubmit', self._onPlayerDialogueSubmit);
 		taro.network.define('htmlUiClick', self._onHtmlUiClick);
-		taro.network.define('playerClickTradeOption', self._onPlayerClickTradeOption)
+		taro.network.define('playerClickTradeOption', self._onPlayerClickTradeOption);
+		taro.network.define('dropItemToCanvas', self._onDropItemToCanvas);
 
 		taro.network.define('buyItem', self._onBuyItem);
 		taro.network.define('buyUnit', self._onBuyUnit);
