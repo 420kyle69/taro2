@@ -1,6 +1,6 @@
 namespace Renderer {
 	export namespace Three {
-		export class Voxels extends THREE.Group {
+		export class Voxels extends Node {
 			constructor(
 				private topTileset: Tileset,
 				private sidesTileset: Tileset
