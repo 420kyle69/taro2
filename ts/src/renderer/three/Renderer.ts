@@ -236,40 +236,34 @@ namespace Renderer {
 				});
 
 				const createEntity = (entity: TaroEntityPhysics) => {
-					let tex = TextureManager.instance().textureMap.get(entity._stats.cellSheet.url);
+					let tex = textureManager.textureMap.get(entity._stats.cellSheet.url);
+					const ent = new Unit(entity._id, entity._stats.ownerId, tex.clone());
+					ent.setBillboard(!!entity._stats.isBillboard, this.camera);
 
-					const createEntity = () => {
-						const e = new Unit(entity._id, entity._stats.ownerId, tex.clone());
-						this.animatedSprites.push(e);
-						e.setBillboard(!!entity._stats.isBillboard, this.camera);
+					if (this.zoomSize) {
+						// TODO(nick): Refactor to get zoom value from camera?
+						const ratio = Math.max(window.innerWidth, window.innerHeight) / this.zoomSize;
+						ent.setGuiScale(1 / ratio);
+					}
 
-						if (this.zoomSize) {
-							// TODO(nick): Refactor to get zoom value from camera?
-							const ratio = Math.max(window.innerWidth, window.innerHeight) / this.zoomSize;
-							e.setGuiScale(1 / ratio);
-						}
+					if (entity._stats.cameraPointerLock) {
+						ent.cameraConfig.pointerLock = entity._stats.cameraPointerLock;
+					}
 
-						if (entity._stats.cameraPointerLock) {
-							e.cameraConfig.pointerLock = entity._stats.cameraPointerLock;
-						}
+					if (entity._stats.cameraPitchRange) {
+						ent.cameraConfig.pitchRange = entity._stats.cameraPitchRange;
+					}
 
-						if (entity._stats.cameraPitchRange) {
-							e.cameraConfig.pitchRange = entity._stats.cameraPitchRange;
-						}
+					if (entity._stats.cameraOffset) {
+						// From editor XZY to Three.js XYZ
+						ent.cameraConfig.offset.x = entity._stats.cameraOffset.x;
+						ent.cameraConfig.offset.y = entity._stats.cameraOffset.z;
+						ent.cameraConfig.offset.z = entity._stats.cameraOffset.y;
+					}
 
-						if (entity._stats.cameraOffset) {
-							// From editor XZY to Three.js XYZ
-							e.cameraConfig.offset.x = entity._stats.cameraOffset.x;
-							e.cameraConfig.offset.y = entity._stats.cameraOffset.z;
-							e.cameraConfig.offset.z = entity._stats.cameraOffset.y;
-						}
-
-						return e;
-					};
-
-					const ent = createEntity();
 					entities.add(ent);
 					this.entities.push(ent);
+					this.animatedSprites.push(ent);
 
 					entity.on('scale', (data: { x: number; y: number }) => ent.scale.set(data.x, 1, data.y), this);
 					entity.on('show', () => (ent.visible = true), this);
