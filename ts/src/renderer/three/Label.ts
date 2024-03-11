@@ -1,6 +1,6 @@
 namespace Renderer {
 	export namespace Three {
-		export class Label extends THREE.Group {
+		export class Label extends Node {
 			offset = new THREE.Vector2();
 
 			private sprite: THREE.Sprite;

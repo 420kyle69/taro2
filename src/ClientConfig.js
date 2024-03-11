@@ -114,6 +114,7 @@ var taroClientConfig = {
 		// Three.js Renderer
 		'renderer/three/Utils.js',
 		'renderer/three/TextureManager.js',
+    'renderer/three/Node.js',
 		'renderer/three/Voxels.js',
 		'renderer/three/Renderer.js',
 		'renderer/three/Camera.js',
