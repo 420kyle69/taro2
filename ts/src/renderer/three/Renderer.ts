@@ -271,7 +271,20 @@ namespace Renderer {
 					entities.add(ent);
 					this.entities.push(ent);
 
-					const transformEvtListener = entity.on(
+					entity.on('scale', (data: { x: number; y: number }) => ent.scale.set(data.x, 1, data.y), this);
+					entity.on('show', () => (ent.visible = true), this);
+					entity.on('hide', () => (ent.visible = false), this);
+					entity.on('show-label', () => (ent.label.visible = true));
+					entity.on('hide-label', () => (ent.label.visible = false));
+					entity.on('render-attributes', (data) => (ent as Unit).renderAttributes(data));
+					entity.on('update-attribute', (data) => (ent as Unit).updateAttribute(data));
+					entity.on('render-chat-bubble', (text) => (ent as Unit).renderChat(text));
+					entity.on('layer', (layer) => ent.setLayer(layer));
+					entity.on('depth', (depth) => ent.setDepth(depth));
+					entity.on('z-offset', (offset) => ent.setZOffset(Utils.pixelToWorld(offset)));
+					entity.on('flip', (flip) => ent.setFlip(flip % 2 === 1, flip > 1));
+
+					entity.on(
 						'transform',
 						(data: { x: number; y: number; rotation: number }) => {
 							ent.position.x = Utils.pixelToWorld(data.x) - 0.5;
@@ -287,7 +300,7 @@ namespace Renderer {
 						this
 					);
 
-					const sizeEvtListener = entity.on(
+					entity.on(
 						'size',
 						(data: { width: number; height: number }) => {
 							ent.setScale(Utils.pixelToWorld(data.width), Utils.pixelToWorld(data.height));
@@ -295,31 +308,7 @@ namespace Renderer {
 						this
 					);
 
-					const scaleEvtListener = entity.on(
-						'scale',
-						(data: { x: number; y: number }) => {
-							ent.scale.set(data.x, 1, data.y);
-						},
-						this
-					);
-
-					const showEvtListener = entity.on(
-						'show',
-						() => {
-							ent.visible = true;
-						},
-						this
-					);
-
-					const hideEvtListener = entity.on(
-						'hide',
-						() => {
-							ent.visible = false;
-						},
-						this
-					);
-
-					const followEvtListener = entity.on(
+					entity.on(
 						'follow',
 						() => {
 							this.camera.startFollow(ent);
@@ -335,36 +324,19 @@ namespace Renderer {
 						this
 					);
 
-					// Label
-					const updateLabelEvtListener = entity.on('update-label', (data) => {
+					entity.on('update-label', (data) => {
 						ent.label.visible = true;
 						ent.label.update(data.text, data.color, data.bold);
 					});
-					const showLabelEvtListener = entity.on('show-label', () => (ent.label.visible = true));
-					const hideLabelEvtListener = entity.on('hide-label', () => (ent.label.visible = false));
 
-					// Attributes
-					const renderAttributesEvtListener = entity.on('render-attributes', (data) => {
-						(ent as Unit).renderAttributes(data);
-					});
-
-					const updateAttributeEvtListener = entity.on('update-attribute', (data) => {
-						(ent as Unit).updateAttribute(data);
-					});
-
-					const renderChatBubbleEvtListener = entity.on('render-chat-bubble', (text) => {
-						(ent as Unit).renderChat(text);
-					});
-
-					// Animation
-					const playAnimationEvtListener = entity.on('play-animation', (id) => {
+					entity.on('play-animation', (id) => {
 						const animation = this.animations.get(`${tex.userData.key}/${id}`);
 						if (animation) {
 							ent.loop(animation.frames, animation.fps, animation.repeat);
 						}
 					});
 
-					const updateTextureEvtListener = entity.on('update-texture', (data) => {
+					entity.on('update-texture', (data) => {
 						const textureManager = TextureManager.instance();
 						const key = entity._stats.cellSheet.url;
 						const tex2 = textureManager.textureMap.get(key);
@@ -385,34 +357,14 @@ namespace Renderer {
 						}
 					});
 
-					entity.on('layer', (layer) => {
-						ent.setLayer(layer);
-					});
-
-					entity.on('depth', (depth) => {
-						ent.setDepth(depth);
-					});
-
-					const zOffsetEvtListener = entity.on('z-offset', (offset) => {
-						ent.setZOffset(Utils.pixelToWorld(offset));
-					});
-
-					entity.on('dynamic', (data) => {
-						// console.log('dynamic');
-					});
-
-					entity.on('flip', (flip) => {
-						ent.setFlip(flip % 2 === 1, flip > 1);
-					});
-
-					const fadingTextEvtListener = entity.on('fading-text', (data: { text: string; color?: string }) => {
+					entity.on('fading-text', (data: { text: string; color?: string }) => {
 						const size = ent.getSizeInPixels();
 						const offsetInPixels = -25 - size.height * 0.5;
 						const text = new FloatingText(0, 0, 0, data.text || '', data.color || '#ffffff', 0, -offsetInPixels);
 						ent.add(text.node);
 					});
 
-					const destroyEvtListener = entity.on(
+					entity.on(
 						'destroy',
 						() => {
 							const idx = this.entities.indexOf(ent, 0);
@@ -431,29 +383,9 @@ namespace Renderer {
 									this.animatedSprites.splice(animIdx, 1);
 								}
 
-								entity.off('transform', transformEvtListener);
-								entity.off('size', sizeEvtListener);
-								entity.off('scale', scaleEvtListener);
-								entity.off('show', showEvtListener);
-								entity.off('hide', hideEvtListener);
-								entity.off('follow', followEvtListener);
-								entity.off('destroy', destroyEvtListener);
-
-								entity.off('update-label', updateLabelEvtListener);
-								entity.off('show-label', showLabelEvtListener);
-								entity.off('hide-label', hideLabelEvtListener);
-
-								entity.off('render-attributes', renderAttributesEvtListener);
-								entity.off('update-attribute', updateAttributeEvtListener);
-
-								entity.off('render-chat-bubble', renderChatBubbleEvtListener);
-
-								entity.off('play-animation', playAnimationEvtListener);
-								entity.off('update-texture', updateTextureEvtListener);
-
-								entity.off('z-offset', zOffsetEvtListener);
-
-								entity.off('fading-text', fadingTextEvtListener);
+								for (const [key, listener] of Object.entries(entity.eventList())) {
+									entity.off(key, listener);
+								}
 							}
 						},
 						this
@@ -480,10 +412,7 @@ namespace Renderer {
 					}
 				});
 
-				taro.client.on('stop-follow', () => {
-					this.camera.stopFollow();
-				});
-
+				taro.client.on('stop-follow', () => this.camera.stopFollow());
 				taro.client.on('camera-pitch', (deg: number) => this.camera.setElevationAngle(deg));
 
 				taro.client.on('camera-position', (x: number, y: number) => {
