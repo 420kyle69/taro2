@@ -1058,7 +1058,7 @@ var ShopComponent = TaroEntity.extend({
 			$('[id=item]').hide();
 		}
 
-		// display units tab iff there's item to be sold
+		// diff there's item to be sold
 		if (shopUnitsKeys.length > 0) {
 			$('[id=unit]').show();
 			if (!selectedTab) {
@@ -1075,11 +1075,7 @@ var ShopComponent = TaroEntity.extend({
 		}
 
 		var modalBody = $('<div/>', {
-<<<<<<< HEAD
 			class: 'text-center shop-grid-container bottom-radius'
-=======
-			class: 'text-center shop-grid-container',
->>>>>>> b6d077d26e9793c6021363aed8574b2943253fb0
 		});
 
 		var ownerPlayer = taro.client.myPlayer;
@@ -1158,11 +1154,7 @@ var ShopComponent = TaroEntity.extend({
 						var img = $('<div/>').html(`img_index_${imgArray.length}`);
 						imgArray.push({
 							wrapper: img,
-<<<<<<< HEAD
 						value: `<img src='${item.inventoryImage || item.cellSheet.url}' class='${isItemAffordable && isItemCoinsAffordable && requirementsSatisfied ? " " : " lowered-visibility "}' style='width: 75px; height: 75px; background-color : #4B5563; padding : 8px; margin-top : 6px;  border-radius : 4px; object-fit:contain; '>`
-=======
-							value: `<img src='${item.inventoryImage || item.cellSheet.url}' class='  ${isItemAffordable && isItemCoinsAffordable && requirementsSatisfied ? ' ' : ' lowered-visibility '} ' style='width: 75px; height: 75px; background-color : #4B5563; padding : 8px; margin-top : 6px;  border-radius : 4px; object-fit:contain; '>`,
->>>>>>> b6d077d26e9793c6021363aed8574b2943253fb0
 						});
 
 						if (shopItem.price.coins) {
@@ -1433,11 +1425,7 @@ var ShopComponent = TaroEntity.extend({
 		var self = this;
 
 		var modalBody = $('<div/>', {
-<<<<<<< HEAD
 			class: 'text-center shop-grid-container'
-=======
-			class: 'text-center shop-grid-container',
->>>>>>> b6d077d26e9793c6021363aed8574b2943253fb0
 		});
 
 		if (items.length <= 0) {
