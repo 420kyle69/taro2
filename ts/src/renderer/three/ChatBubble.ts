@@ -1,6 +1,6 @@
 namespace Renderer {
 	export namespace Three {
-		export class ChatBubble extends THREE.Group {
+		export class ChatBubble extends Node {
 			width = 97;
 			height = 16;
 			radius = 7;
