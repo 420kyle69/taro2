@@ -355,7 +355,7 @@ namespace Renderer {
 						const size = ent.getSizeInPixels();
 						const offsetInPixels = -25 - size.height * 0.5;
 						const text = new FloatingText(0, 0, 0, data.text || '', data.color || '#ffffff', 0, -offsetInPixels);
-						ent.add(text.node);
+						ent.add(text);
 					});
 
 					entity.on(
@@ -510,7 +510,7 @@ namespace Renderer {
 						data.text,
 						data.color
 					);
-					this.scene.add(text.node);
+					this.scene.add(text);
 				});
 			}
 
