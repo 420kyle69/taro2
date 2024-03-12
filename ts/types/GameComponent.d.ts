@@ -19,6 +19,7 @@ interface EntityData {
 		abilities: Record<string, ControlAbility>;
 		unitAbilities: Record<string, UnitAbility>;
 	};
+	id: string;
 }
 
 interface UnitAbility {

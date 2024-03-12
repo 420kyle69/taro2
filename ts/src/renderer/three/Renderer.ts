@@ -292,7 +292,7 @@ namespace Renderer {
 					});
 
 					entity.on('play-animation', (id) => {
-						const animation = this.animations.get(`${tex.userData.key}/${id}`);
+						const animation = this.animations.get(`${tex.userData.key}/${id}/${entity._stats.id}`);
 						if (animation) {
 							ent.loop(animation.frames, animation.fps, animation.repeat);
 						}
@@ -543,11 +543,10 @@ namespace Renderer {
 						animationFrames.push(0);
 					}
 
-					if (this.animations.has(`${key}/${animationsKey}`)) {
-						this.animations.delete(`${key}/${animationsKey}`);
+					if (this.animations.has(`${key}/${animationsKey}/${entity.id}`)) {
+						this.animations.delete(`${key}/${animationsKey}/${entity.id}`);
 					}
-
-					this.animations.set(`${key}/${animationsKey}`, {
+					this.animations.set(`${key}/${animationsKey}/${entity.id}`, {
 						frames: animationFrames,
 						fps: +animation.framesPerSecond || 15,
 						repeat: +animation.loopCount - 1, // correction for loop/repeat values
