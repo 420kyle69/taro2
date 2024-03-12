@@ -9,7 +9,6 @@ class PhaserAnimatedEntity extends PhaserEntity {
 	) {
 		super(entity);
 		const bounds = entity._bounds2d;
-
 		this.sprite = this.addSprite(key) as Phaser.GameObjects.Sprite & IRenderProps;
 		this.sprite.setDisplaySize(bounds.x, bounds.y);
 		this.sprite.rotation = entity._rotate.z;
@@ -18,7 +17,7 @@ class PhaserAnimatedEntity extends PhaserEntity {
 			'animationcomplete',
 			(animation: { key: string }) => {
 				if (!(animation.key as string).endsWith('default')) {
-					this.sprite.play(`${this.key}/default`);
+					this.sprite.play(`${this.key}/default/${this.entity._stats.id}`);
 				}
 			},
 			this
@@ -32,8 +31,8 @@ class PhaserAnimatedEntity extends PhaserEntity {
 	}
 
 	protected playAnimation(animationId: string): void {
-		if (this.scene.anims.exists(`${this.key}/${animationId}`)) {
-			this.sprite.play(`${this.key}/${animationId}`);
+		if (this.scene.anims.exists(`${this.key}/${animationId}/${this.entity._stats.id}`)) {
+			this.sprite.play(`${this.key}/${animationId}/${this.entity._stats.id}`);
 		} else {
 			this.sprite.anims.stop();
 		}
