@@ -25,14 +25,39 @@ var ItemUiComponent = TaroEntity.extend({
 
 		$('#game-div canvas').droppable({
 			drop: function (event, ui) {
-				var fromIndex = parseFloat(ui.draggable[0].parentElement.id.replace('item-', ''));
+				const checkIsElementInside = ({ element, event }) => {
+					// Get element's boundaries
+					const rect = element.getBoundingClientRect();
+					const chatEleX = rect.left;
+					const chatEleY = rect.top;
+					const chatEleX2 = rect.right;
+					const chatEleY2 = rect.bottom;
+				
+					// Check if the pointer is within boundaries
+					return event.clientX > chatEleX &&
+						   event.clientX < chatEleX2 &&
+						   event.clientY > chatEleY &&
+						   event.clientY < chatEleY2;
+				}
 
-				var selectedUnit = taro.client.myPlayer.getSelectedUnit();
-				var items = selectedUnit._stats.itemIds;
+				let isElementInside = false;
+				document.querySelectorAll('#inventory-slots, #backpack, #trade-div').forEach((element) => {
+					isElementInside = isElementInside || checkIsElementInside({ element, event });
+				});
+
 				ui.draggable.css({
 					left: 0, top: 0
 				});
 
+				if (isElementInside) {
+					return;
+				}
+
+				var fromIndex = parseFloat(ui.draggable[0].parentElement.id.replace('item-', ''));
+
+				var selectedUnit = taro.client.myPlayer.getSelectedUnit();
+				var items = selectedUnit._stats.itemIds;
+		
 				const itemId = items[fromIndex];
 
 				if (itemId) {
@@ -90,10 +115,10 @@ var ItemUiComponent = TaroEntity.extend({
 		// update item info on bottom-right corner if it's currently selected item
 
 		if (item && item._stats && item._stats.inventorySlotColor) {
-			var color = `background-image: radial-gradient(rgba(0, 0, 0, 0),${  item._stats.inventorySlotColor  })`;
+			var color = `background-image: radial-gradient(rgba(0, 0, 0, 0),${item._stats.inventorySlotColor})`;
 		} else {
 			var color = 'background-image: none';
-		}		
+		}
 
 		var element = $(taro.client.getCachedElementById(`item-${slotIndex}`));
 		// var element = $(`#item-${slotIndex}`);
@@ -125,7 +150,7 @@ var ItemUiComponent = TaroEntity.extend({
 
 		var itemSlot = $(taro.client.getCachedElementById(`slotindex-${item._stats.slotIndex}`));
 		// var itemSlot = $(`#slotindex-${item._stats.slotIndex}`);
-		
+
 		quantitySpan = itemSlot.find('small');
 		if (quantitySpan) {
 			var qty = item._stats.quantity;
@@ -258,7 +283,7 @@ var ItemUiComponent = TaroEntity.extend({
 						var tempItem = items[fromIndex];
 						items[fromIndex] = items[toIndex];
 						items[toIndex] = tempItem;
-						
+
 						if (taro.client.myPlayer.isTrading && (fromIndex >= totalInventorySlot || toIndex >= totalInventorySlot)) {
 							taro.tradeUi.sendOfferingItems();
 						}
@@ -422,7 +447,7 @@ var ItemUiComponent = TaroEntity.extend({
 					info += `<b>${attribute.name}: </b>${value || 0}`;
 					info += '</p>';
 				}
-			}	
+			}
 		}
 
 		if (stats && stats.cost) {
