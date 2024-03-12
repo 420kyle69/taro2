@@ -24,7 +24,7 @@ class GameScene extends PhaserScene {
 		super({ key: 'Game' });
 	}
 
-	init (): void {
+	init(): void {
 
 		if (taro.isMobile) {
 			this.scene.launch('MobileControls');
@@ -97,7 +97,7 @@ class GameScene extends PhaserScene {
 			this.setResolution(resolution, true);
 		});
 
-		taro.client.on('change-filter', (data: {filter: renderingFilter}) => {
+		taro.client.on('change-filter', (data: { filter: renderingFilter }) => {
 			this.changeTextureFilter(data.filter);
 		});
 
@@ -158,7 +158,7 @@ class GameScene extends PhaserScene {
 
 		taro.client.on('camera-instant-move', (x: number, y: number) => {
 			if (!taro.developerMode.active || taro.developerMode.activeTab === 'play') {
-			    camera.centerOn(x, y);
+				camera.centerOn(x, y);
 			}
 		});
 
@@ -184,7 +184,7 @@ class GameScene extends PhaserScene {
 		});
 	}
 
-	preload (): void {
+	preload(): void {
 
 		const data = taro.game.data;
 
@@ -226,19 +226,19 @@ class GameScene extends PhaserScene {
 					this.textures.addCanvas(`extruded-${key}`, canvas);
 				} else {
 
-					if(window.toastErrorMessage){
+					if (window.toastErrorMessage) {
 						window.toastErrorMessage(`Tileset "${tileset.name}" image doesn't match the specified parameters. ` +
-						'Double check your margin, spacing, tilewidth and tileheight.');
-					}else{
+							'Double check your margin, spacing, tilewidth and tileheight.');
+					} else {
 						// WAITING TILL EDITOR IS LOADED
 						setTimeout(() => {
-							if(window.toastErrorMessage){
+							if (window.toastErrorMessage) {
 								window.toastErrorMessage(`Tileset "${tileset.name}" image doesn't match the specified parameters. ` +
-								'Double check your margin, spacing, tilewidth and tileheight.');
-							}else{
+									'Double check your margin, spacing, tilewidth and tileheight.');
+							} else {
 								// IF editor is not loaded, show alert
 								alert(`Tileset "${tileset.name}" image doesn't match the specified parameters. ` +
-								'Double check your margin, spacing, tilewidth and tileheight.');
+									'Double check your margin, spacing, tilewidth and tileheight.');
 							}
 						}, 5000);
 					}
@@ -294,7 +294,7 @@ class GameScene extends PhaserScene {
 		BitmapFontManager.preload(this);
 	}
 
-	loadEntity (key: string, data: EntityData): void {
+	loadEntity(key: string, data: EntityData): void {
 
 		const cellSheet = data.cellSheet;
 
@@ -335,12 +335,11 @@ class GameScene extends PhaserScene {
 						animationFrames.push(0);
 					}
 
-					if (this.anims.exists(`${key}/${animationsKey}`)) {
-						this.anims.remove(`${key}/${animationsKey}`);
+					if (this.anims.exists(`${key}/${animationsKey}/${data.id}`)) {
+						this.anims.remove(`${key}/${animationsKey}/${data.id}`);
 					}
-
 					this.anims.create({
-						key: `${key}/${animationsKey}`,
+						key: `${key}/${animationsKey}/${data.id}`,
 						frames: this.anims.generateFrameNumbers(key, {
 							frames: animationFrames
 						}),
@@ -354,7 +353,7 @@ class GameScene extends PhaserScene {
 		this.load.image(key, this.patchAssetUrl(cellSheet.url));
 	}
 
-	create (): void {
+	create(): void {
 		this.events.once('render', () => {
 			this.scene.launch('DevMode');
 			taro.client.rendererLoaded.resolve();
@@ -420,7 +419,7 @@ class GameScene extends PhaserScene {
 		this.changeTextureFilter(taro.game.data.defaultData.renderingFilter);
 	}
 
-	private changeTextureFilter (filter: renderingFilter) {
+	private changeTextureFilter(filter: renderingFilter) {
 		if (filter === 'pixelArt') {
 			this.filter = Phaser.Textures.FilterMode.NEAREST;
 		} else {
@@ -432,7 +431,7 @@ class GameScene extends PhaserScene {
 		});
 	}
 
-	private setZoomSize (height: number): void {
+	private setZoomSize(height: number): void {
 		// backward compatible game scaling on average 16:9 screen
 		this.zoomSize = height * 2.15;
 	}
@@ -453,14 +452,14 @@ class GameScene extends PhaserScene {
 			this.tilemapLayers[layerIdx].alpha = layer.opacity;
 			layer.data.forEach((tile, index) => {
 				const x = index % layer.width;
-				const y = Math.floor(index/layer.width);
+				const y = Math.floor(index / layer.width);
 				if (tile === 0 || tile === null) tile = -1;
 				map.putTileAt(tile, x, y, false, layerIdx);
 			});
 		});
 	}
 
-	private patchMapData (map: GameComponent['data']['map']): typeof map {
+	private patchMapData(map: GameComponent['data']['map']): typeof map {
 
 		/**
 		 * map data gets patched in place
@@ -481,13 +480,10 @@ class GameScene extends PhaserScene {
 
 				if (value > tilecount) {
 
-					console.warn(`map data error: layer[${
-						layer.name
-					}], index[${
-						i
-					}], value[${
-						value
-					}].`);
+					console.warn(`map data error: layer[${layer.name
+						}], index[${i
+						}], value[${value
+						}].`);
 
 					layer.data[i] = 0;
 				}
@@ -497,7 +493,7 @@ class GameScene extends PhaserScene {
 		return map;
 	}
 
-	private extrude (
+	private extrude(
 		tileset: ArrayElement<GameComponent['data']['map']['tilesets']>,
 		sourceImage: HTMLImageElement,
 		extrusion = 2,
@@ -634,7 +630,7 @@ class GameScene extends PhaserScene {
 		);
 	}
 
-	findEntity (entityId: string): PhaserUnit | PhaserProjectile | PhaserItem {
+	findEntity(entityId: string): PhaserUnit | PhaserProjectile | PhaserItem {
 		return [...this.unitsList, ...this.itemList, ...this.projectilesList].find(
 			(entity) => {
 				return entity.entity._id === entityId;
@@ -642,7 +638,7 @@ class GameScene extends PhaserScene {
 		);
 	}
 
-	setResolution (resolution: number, setResolutionCoef: boolean): void {
+	setResolution(resolution: number, setResolutionCoef: boolean): void {
 		if (setResolutionCoef) {
 			this.resolutionCoef = resolution;
 		}
@@ -651,11 +647,11 @@ class GameScene extends PhaserScene {
 		const height = !taro.isMobile ? window.innerHeight : window.outerHeight * window.devicePixelRatio;
 
 		if (taro.developerMode.activeTab !== 'map') {
-			this.scale.setGameSize(width/resolution, height/resolution);
+			this.scale.setGameSize(width / resolution, height / resolution);
 		}
 	}
 
-	update (): void {
+	update(): void {
 
 		this.visibility?.update();
 
@@ -680,7 +676,7 @@ class GameScene extends PhaserScene {
 				if (!element.hidden) {
 					element.setVisible(true);
 
-					if(element.dynamic) {
+					if (element.dynamic) {
 						// dynamic is only assigned through an hbz-index-only event
 						this.heightRenderer.adjustDepth(element as TGameObject & Phaser.GameObjects.Components.Size);
 					}
