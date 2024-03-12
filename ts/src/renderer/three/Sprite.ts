@@ -58,8 +58,9 @@ namespace Renderer {
 			}
 
 			setZOffset(offset: number) {
-				this.zOffset = offset + this.angleOffset;
+				this.zOffset = offset;
 				this.calcRenderOrder();
+				this.correctZOffsetBasedOnCameraAngle();
 			}
 
 			setTexture(tex: THREE.Texture) {
