@@ -97,7 +97,7 @@ var InventoryComponent = TaroEntity.extend({
 					$('<div/>', {
 						id: `item-${i}`,
 						name: i,
-						class: `btn btn-light inventory-item-button ${mobileClass}`,
+						class: `btn btn-light trade-slot inventory-item-button ${mobileClass}`,
 						role: 'button'
 					})
 				);

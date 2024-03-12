@@ -44,7 +44,7 @@ var TradeUiComponent = TaroEntity.extend({
 			offerSlots.append(
 				$('<div/>', {
 					id: `offer-${i}`,
-					class: 'btn btn-light trade-offer-slot'
+					class: 'btn btn-light trade-offer-slot trade-slot'
 				})
 			);
 			i++;
