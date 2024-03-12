@@ -46,6 +46,7 @@ namespace Renderer {
 				}
 
 				this.scene = new THREE.Scene();
+				this.scene.background = new THREE.Color(taro.game.data.defaultData.mapBackgroundColor);
 				this.scene.translateX(-taro.game.data.map.width / 2);
 				this.scene.translateZ(-taro.game.data.map.height / 2);
 

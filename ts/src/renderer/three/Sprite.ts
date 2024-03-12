@@ -7,11 +7,10 @@ namespace Renderer {
 
 			private layer = 3;
 			private depth = 1;
-
 			private flipX = 1;
 			private flipY = 1;
-
 			private zOffset = 0;
+			private angleOffset = 0;
 
 			constructor(protected tex: THREE.Texture) {
 				super();
@@ -22,22 +21,20 @@ namespace Renderer {
 				this.sprite = new THREE.Mesh(geometry, material);
 				this.add(this.sprite);
 
-				// Too much coupling?
 				const renderer = Renderer.Three.instance();
 				renderer.camera.onChange(() => {
 					if (this.billboard) {
-						this.rotation.setFromRotationMatrix(renderer.camera.instance.matrix);
-						this.rotateX(Math.PI * 0.5);
+						this.faceCamera(renderer.camera);
+						this.correctZOffsetBasedOnCameraAngle();
 					}
 				});
 			}
 
 			setBillboard(billboard: boolean, camera: Camera) {
 				this.billboard = billboard;
-
 				if (this.billboard) {
-					this.rotation.setFromRotationMatrix(camera.instance.matrix);
-					this.rotateX(Math.PI * 0.5);
+					this.faceCamera(camera);
+					this.correctZOffsetBasedOnCameraAngle();
 				}
 			}
 
@@ -63,6 +60,7 @@ namespace Renderer {
 			setZOffset(offset: number) {
 				this.zOffset = offset;
 				this.calcRenderOrder();
+				this.correctZOffsetBasedOnCameraAngle();
 			}
 
 			setTexture(tex: THREE.Texture) {
@@ -82,6 +80,21 @@ namespace Renderer {
 			private calcRenderOrder() {
 				this.sprite.renderOrder = this.layer * 100 + this.depth;
 				this.position.y = Utils.getLayerZOffset(this.layer) + Utils.getDepthZOffset(this.depth) + this.zOffset;
+			}
+
+			private faceCamera(camera: Camera) {
+				this.rotation.setFromRotationMatrix(camera.instance.matrix);
+				this.rotateX(Math.PI * 0.5);
+			}
+
+			private correctZOffsetBasedOnCameraAngle() {
+				let angle = Math.abs(Renderer.Three.instance().camera.getElevationAngle() * (Math.PI / 180));
+				angle = Math.PI * 0.5 - angle;
+				let halfHeight = this.scaleUnflipped.y * 0.5;
+				const adj = Math.cos(angle) * halfHeight;
+				this.angleOffset = Math.tan(angle) * adj;
+				const offset = this.zOffset + this.angleOffset;
+				this.position.y = Utils.getLayerZOffset(this.layer) + Utils.getDepthZOffset(this.depth) + offset;
 			}
 		}
 	}

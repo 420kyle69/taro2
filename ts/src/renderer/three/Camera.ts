@@ -32,6 +32,7 @@ namespace Renderer {
 				// DONE
 				// camera.setProjection(string)
 				// camera.setElevationAngle(number)
+				// camera.getElevationAngle()
 				// camera.setAzimuthAngle(number)
 				// camera.setOffset(x, y, z)
 				// camera.setElevationRange(min, max)
@@ -152,6 +153,10 @@ namespace Renderer {
 				this.orthographicCamera.position.setFromSpherical(spherical).add(this.controls.target).add(this.offset);
 
 				this.controls.update();
+			}
+
+			getElevationAngle() {
+				return (Math.PI / 2 - this.controls.getPolarAngle()) * (180 / Math.PI);
 			}
 
 			setAzimuthAngle(deg: number) {

@@ -382,6 +382,11 @@ var ParameterComponent = TaroEntity.extend({
 						}
 
 						break;
+					
+					case 'itemFiresProjectiles':
+						var item = self.getValue(text.item, vars);
+						returnValue = item && item._stats.isGun && item._stats.bulletType !== 'raycast';
+						break;
 
 					case 'isComputerPlayer':
 						var player = self.getValue(text.player, vars);
