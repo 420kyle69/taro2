@@ -15,16 +15,13 @@ namespace Renderer {
 			zoomSize = undefined;
 
 			private clock = new THREE.Clock();
-			private initLoadingManager = new THREE.LoadingManager();
-
 			private pointer = new THREE.Vector2();
+			private initLoadingManager = new THREE.LoadingManager();
+			private entityManager = new EntityManager();
 
 			private sky: Sky;
 			private voxels: Voxels;
 			private particles: Particles;
-
-			private entities: Unit[] = [];
-			private animatedSprites: AnimatedSprite[] = [];
 
 			private constructor() {
 				// For JS interop; in case someone uses new Renderer.ThreeRenderer()
@@ -61,10 +58,7 @@ namespace Renderer {
 						this.camera.setZoom(ratio);
 						taro.client.emit('scale', { ratio });
 						taro.client.emit('update-abilities-position');
-
-						for (const entity of this.entities) {
-							entity.setGuiScale(1 / ratio);
-						}
+						this.entityManager.scaleGui(1 / ratio);
 					}
 				});
 
@@ -77,10 +71,10 @@ namespace Renderer {
 						const raycaster = new THREE.Raycaster();
 						raycaster.setFromCamera(this.pointer, this.camera.instance);
 
-						const intersects = raycaster.intersectObjects(this.entities);
+						const intersects = raycaster.intersectObjects(this.entityManager.entities);
 						if (intersects.length > 0) {
 							const closest = intersects[0].object as THREE.Mesh;
-							const unit = this.entities.find((e) => e.sprite === closest);
+							const unit = this.entityManager.entities.find((e) => e.sprite === closest);
 
 							if (unit) {
 								const ownerPlayer = taro.$(unit.ownerId);
@@ -203,45 +197,21 @@ namespace Renderer {
 				this.scene.add(entities);
 
 				const createEntity = (taroEntity: TaroEntityPhysics) => {
-					const entity = Unit.create(taroEntity);
-
+					const entity = this.entityManager.create(taroEntity);
 					entities.add(entity);
-					this.entities.push(entity);
-					this.animatedSprites.push(entity);
+					taroEntity.on('destroy', () => this.entityManager.destroy(entity));
 
-					taroEntity.on(
-						'destroy',
-						() => {
-							entity.destroy();
+					taroEntity.on('follow', () => {
+						this.camera.startFollow(entity);
 
-							const idx = this.entities.indexOf(entity, 0);
-							if (idx === -1) return;
+						const offset = entity.cameraConfig.offset;
+						this.camera.setOffset(offset.x, offset.y, offset.z);
 
-							this.entities.splice(idx, 1);
-							this.animatedSprites.splice(this.animatedSprites.indexOf(entity as AnimatedSprite, 0), 1);
-
-							for (const emitter of this.particles.emitters) {
-								if (emitter.target === entity) emitter.target = null;
-							}
-						},
-						this
-					);
-
-					taroEntity.on(
-						'follow',
-						() => {
-							this.camera.startFollow(entity);
-
-							const offset = entity.cameraConfig.offset;
-							this.camera.setOffset(offset.x, offset.y, offset.z);
-
-							if (entity.cameraConfig.pointerLock) {
-								const { min, max } = entity.cameraConfig.pitchRange;
-								this.camera.setElevationRange(min, max);
-							}
-						},
-						this
-					);
+						if (entity.cameraConfig.pointerLock) {
+							const { min, max } = entity.cameraConfig.pitchRange;
+							this.camera.setElevationRange(min, max);
+						}
+					});
 				};
 
 				taro.client.on('create-unit', (u: TaroEntityPhysics) => createEntity(u), this);
@@ -253,15 +223,9 @@ namespace Renderer {
 
 					this.zoomSize = height * 2.15;
 					const ratio = Math.max(window.innerWidth, window.innerHeight) / this.zoomSize;
-
-					// TODO: Quadratic zoomTo over 1 second
 					this.camera.setZoom(ratio);
-
 					taro.client.emit('scale', { ratio });
-
-					for (const entity of this.entities) {
-						entity.setGuiScale(1 / ratio);
-					}
+					this.entityManager.scaleGui(1 / ratio);
 				});
 
 				taro.client.on('stop-follow', () => this.camera.stopFollow());
@@ -291,7 +255,7 @@ namespace Renderer {
 					emitter.position.y += entities.position.y;
 
 					if (particle.entityId) {
-						const entity = this.entities.find((entity) => entity.taroId == particle.entityId);
+						const entity = this.entityManager.entities.find((entity) => entity.taroId == particle.entityId);
 						if (entity) {
 							emitter.target = entity;
 						}
@@ -313,21 +277,16 @@ namespace Renderer {
 					taro.input.emit('pointermove', [{ x: (worldPos.x + center.x) * 64, y: (worldPos.z + center.z) * 64 }]);
 				}
 
-				for (const sprite of this.animatedSprites) {
-					sprite.update(1 / 60);
-				}
-
 				// TODO: Is this the proper way to get deltaTime or should I get it from the
 				// engine somewhere? Also it feels a little weird that the renderer triggers
 				// the engine update. It should be the other way around.
 				let dt = this.clock.getDelta();
 				const time = this.clock.elapsedTime;
-
 				if (dt <= 0) dt = 1 / 60;
 				else if (dt >= 0.25) dt = 0.25;
 
+				this.entityManager.update(dt);
 				this.particles.update(dt, time, this.camera.instance);
-
 				this.camera.update();
 
 				if (this.camera.target) {
@@ -335,7 +294,6 @@ namespace Renderer {
 				}
 
 				TWEEN.update();
-
 				this.renderer.render(this.scene, this.camera.instance);
 			}
 		}
