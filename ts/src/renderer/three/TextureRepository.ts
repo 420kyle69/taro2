@@ -33,6 +33,10 @@ namespace Renderer {
 				this.filter = filter === 'pixelArt' ? THREE.NearestFilter : THREE.LinearFilter;
 			}
 
+			setLoadingManager(manager: THREE.LoadingManager) {
+				this.loader.manager = manager;
+			}
+
 			getTexturesWithKeyContains(str: string) {
 				const textures = [];
 				for (const [key, tex] of this.textures.entries()) {
