@@ -1,6 +1,8 @@
 namespace Renderer {
 	export namespace Three {
 		export class AnimatedSprite extends Sprite {
+			protected static animations: Map<string, { frames: number[]; fps: number; repeat: number }> = new Map();
+
 			private playSpriteIndices: number[] = [];
 			private runningTileArrayIndex = 0;
 			private maxDisplayTime = 0;

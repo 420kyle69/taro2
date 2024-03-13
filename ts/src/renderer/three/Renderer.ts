@@ -12,18 +12,17 @@ namespace Renderer {
 			renderer: THREE.WebGLRenderer;
 			camera: Camera;
 			scene: THREE.Scene;
+			zoomSize = undefined;
 
 			private clock = new THREE.Clock();
 			private initLoadingManager = new THREE.LoadingManager();
 
-			private zoomSize = undefined;
 			private pointer = new THREE.Vector2();
 
 			private sky: Sky;
 			private voxels: Voxels;
 			private particles: Particles;
 
-			private animations: Map<string, { frames: number[]; fps: number; repeat: number }> = new Map();
 			private entities: Unit[] = [];
 			private animatedSprites: AnimatedSprite[] = [];
 
@@ -204,152 +203,51 @@ namespace Renderer {
 				entities.position.y = 0.51;
 				this.scene.add(entities);
 
-				const textureRepository = TextureRepository.instance();
-				const createEntity = (entity: TaroEntityPhysics) => {
-					let tex = textureRepository.get(entity._stats.cellSheet.url);
-					const ent = new Unit(entity._id, entity._stats.ownerId, tex.clone());
-					ent.setBillboard(!!entity._stats.isBillboard, this.camera);
+				const createEntity = (taroEntity: TaroEntityPhysics) => {
+					const entity = Unit.create(taroEntity);
 
-					if (this.zoomSize) {
-						// TODO(nick): Refactor to get zoom value from camera?
-						const ratio = Math.max(window.innerWidth, window.innerHeight) / this.zoomSize;
-						ent.setGuiScale(1 / ratio);
-					}
+					entities.add(entity);
+					this.entities.push(entity);
+					this.animatedSprites.push(entity);
 
-					if (entity._stats.cameraPointerLock) {
-						ent.cameraConfig.pointerLock = entity._stats.cameraPointerLock;
-					}
-
-					if (entity._stats.cameraPitchRange) {
-						ent.cameraConfig.pitchRange = entity._stats.cameraPitchRange;
-					}
-
-					if (entity._stats.cameraOffset) {
-						// From editor XZY to Three.js XYZ
-						ent.cameraConfig.offset.x = entity._stats.cameraOffset.x;
-						ent.cameraConfig.offset.y = entity._stats.cameraOffset.z;
-						ent.cameraConfig.offset.z = entity._stats.cameraOffset.y;
-					}
-
-					entities.add(ent);
-					this.entities.push(ent);
-					this.animatedSprites.push(ent);
-
-					entity.on('scale', (data: { x: number; y: number }) => ent.scale.set(data.x, 1, data.y), this);
-					entity.on('show', () => (ent.visible = true), this);
-					entity.on('hide', () => (ent.visible = false), this);
-					entity.on('show-label', () => (ent.label.visible = true));
-					entity.on('hide-label', () => (ent.label.visible = false));
-					entity.on('render-attributes', (data) => (ent as Unit).renderAttributes(data));
-					entity.on('update-attribute', (data) => (ent as Unit).updateAttribute(data));
-					entity.on('render-chat-bubble', (text) => (ent as Unit).renderChat(text));
-					entity.on('layer', (layer) => ent.setLayer(layer));
-					entity.on('depth', (depth) => ent.setDepth(depth));
-					entity.on('z-offset', (offset) => ent.setZOffset(Utils.pixelToWorld(offset)));
-					entity.on('flip', (flip) => ent.setFlip(flip % 2 === 1, flip > 1));
-
-					entity.on(
-						'transform',
-						(data: { x: number; y: number; rotation: number }) => {
-							ent.position.x = Utils.pixelToWorld(data.x) - 0.5;
-							ent.position.z = Utils.pixelToWorld(data.y) - 0.5;
-
-							// let angle = -data.rotation;
-							// if (ent.billboard && (entity instanceof Item || entity instanceof Projectile)) {
-							// 	// Might be able to delete this once units rotate with camera yaw.
-							// 	angle -= this.camera.controls.getAzimuthalAngle();
-							// }
-							ent.setRotationY(-data.rotation);
-						},
-						this
-					);
-
-					entity.on(
-						'size',
-						(data: { width: number; height: number }) => {
-							ent.setScale(Utils.pixelToWorld(data.width), Utils.pixelToWorld(data.height));
-						},
-						this
-					);
-
-					entity.on(
-						'follow',
+					taroEntity.on(
+						'destroy',
 						() => {
-							this.camera.startFollow(ent);
+							const idx = this.entities.indexOf(entity, 0);
+							if (idx > -1) {
+								entities.remove(entity);
+								this.entities.splice(idx, 1);
 
-							const offset = ent.cameraConfig.offset;
-							this.camera.setOffset(offset.x, offset.y, offset.z);
+								for (const emitter of this.particles.emitters) {
+									if (emitter.target === entity) {
+										emitter.target = null;
+									}
+								}
 
-							if (ent.cameraConfig.pointerLock) {
-								const { min, max } = ent.cameraConfig.pitchRange;
-								this.camera.setElevationRange(min, max);
+								const animIdx = this.animatedSprites.indexOf(entity as AnimatedSprite, 0);
+								if (animIdx > -1) {
+									this.animatedSprites.splice(animIdx, 1);
+								}
+
+								for (const [key, listener] of Object.entries(taroEntity.eventList())) {
+									taroEntity.off(key, listener);
+								}
 							}
 						},
 						this
 					);
 
-					entity.on('update-label', (data) => {
-						ent.label.visible = true;
-						ent.label.update(data.text, data.color, data.bold);
-					});
-
-					entity.on('play-animation', (id) => {
-						const animation = this.animations.get(`${tex.userData.key}/${id}/${entity._stats.id}`);
-						if (animation) {
-							ent.loop(animation.frames, animation.fps, animation.repeat);
-						}
-					});
-
-					entity.on('update-texture', (data) => {
-						const textureRepository = TextureRepository.instance();
-						const key = entity._stats.cellSheet.url;
-						const tex2 = textureRepository.get(key);
-						if (tex2) {
-							this.createAnimations(entity._stats);
-							tex = tex2.clone();
-							ent.setTexture(tex);
-							const bounds = entity._bounds2d;
-							ent.setScale(Utils.pixelToWorld(bounds.x), Utils.pixelToWorld(bounds.y));
-						} else {
-							textureRepository.loadFromUrl(key, Utils.patchAssetUrl(key), (tex2) => {
-								this.createAnimations(entity._stats);
-								tex = tex2.clone();
-								ent.setTexture(tex);
-								const bounds = entity._bounds2d;
-								ent.setScale(Utils.pixelToWorld(bounds.x), Utils.pixelToWorld(bounds.y));
-							});
-						}
-					});
-
-					entity.on('fading-text', (data: { text: string; color?: string }) => {
-						const size = ent.getSizeInPixels();
-						const offsetInPixels = -25 - size.height * 0.5;
-						const text = new FloatingText(0, 0, 0, data.text || '', data.color || '#ffffff', 0, -offsetInPixels);
-						ent.add(text);
-					});
-
-					entity.on(
-						'destroy',
+					taroEntity.on(
+						'follow',
 						() => {
-							const idx = this.entities.indexOf(ent, 0);
-							if (idx > -1) {
-								entities.remove(ent);
-								this.entities.splice(idx, 1);
+							this.camera.startFollow(entity);
 
-								for (const emitter of this.particles.emitters) {
-									if (emitter.target === ent) {
-										emitter.target = null;
-									}
-								}
+							const offset = entity.cameraConfig.offset;
+							this.camera.setOffset(offset.x, offset.y, offset.z);
 
-								const animIdx = this.animatedSprites.indexOf(ent as AnimatedSprite, 0);
-								if (animIdx > -1) {
-									this.animatedSprites.splice(animIdx, 1);
-								}
-
-								for (const [key, listener] of Object.entries(entity.eventList())) {
-									entity.off(key, listener);
-								}
+							if (entity.cameraConfig.pointerLock) {
+								const { min, max } = entity.cameraConfig.pitchRange;
+								this.camera.setElevationRange(min, max);
 							}
 						},
 						this
@@ -460,42 +358,6 @@ namespace Renderer {
 				TWEEN.update();
 
 				this.renderer.render(this.scene, this.camera.instance);
-			}
-
-			private createAnimations(entity: EntityData) {
-				const cellSheet = entity.cellSheet;
-				if (!cellSheet) return;
-				const key = cellSheet.url;
-				const tex = TextureRepository.instance().get(key);
-				tex.userData.numColumns = cellSheet.columnCount || 1;
-				tex.userData.numRows = cellSheet.rowCount || 1;
-				tex.userData.key = key;
-
-				// Add animations
-				for (let animationsKey in entity.animations) {
-					const animation = entity.animations[animationsKey];
-					const frames = animation.frames;
-					const animationFrames: number[] = [];
-
-					// Correction for 0-based indexing
-					for (let i = 0; i < frames.length; i++) {
-						animationFrames.push(+frames[i] - 1);
-					}
-
-					// Avoid crash by giving it frame 0 if no frame data provided
-					if (animationFrames.length === 0) {
-						animationFrames.push(0);
-					}
-
-					if (this.animations.has(`${key}/${animationsKey}/${entity.id}`)) {
-						this.animations.delete(`${key}/${animationsKey}/${entity.id}`);
-					}
-					this.animations.set(`${key}/${animationsKey}/${entity.id}`, {
-						frames: animationFrames,
-						fps: +animation.framesPerSecond || 15,
-						repeat: +animation.loopCount - 1, // correction for loop/repeat values
-					});
-				}
 			}
 		}
 	}
