@@ -3,15 +3,14 @@ namespace Renderer {
 		export class Camera {
 			instance: THREE.Camera;
 			target: THREE.Object3D | null = null;
-			zoom = 1;
-
-			private orthographicCamera: THREE.OrthographicCamera;
-			private perspectiveCamera: THREE.PerspectiveCamera;
 			controls: OrbitControls;
+			zoom = 1;
 
 			orthographicState: { target: THREE.Vector3; position: THREE.Vector3 };
 			perspectiveState: { target: THREE.Vector3; position: THREE.Vector3; zoom: number };
 
+			private orthographicCamera: THREE.OrthographicCamera;
+			private perspectiveCamera: THREE.PerspectiveCamera;
 			private isPerspective = false;
 			private fovInitial: number;
 			private viewportHeightInitial: number;
