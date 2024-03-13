@@ -3,14 +3,14 @@ namespace Renderer {
 		export class TextureRepository {
 			private static _instance: TextureRepository;
 
-			static instance() {
-				return this._instance || (this._instance = new this());
-			}
-
 			filter: typeof THREE.LinearFilter | typeof THREE.NearestFilter = THREE.LinearFilter;
 
 			private textures = new Map<string, THREE.Texture>();
 			private loader = new THREE.TextureLoader();
+
+			static instance() {
+				return this._instance || (this._instance = new this());
+			}
 
 			get(key: string) {
 				return this.textures.get(key);

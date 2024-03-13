@@ -7,11 +7,11 @@ namespace Renderer {
 		}
 
 		class Renderer {
+			private static _instance: Renderer;
+
 			renderer: THREE.WebGLRenderer;
 			camera: Camera;
 			scene: THREE.Scene;
-
-			private static _instance: Renderer;
 
 			private clock = new THREE.Clock();
 			private initLoadingManager = new THREE.LoadingManager();
@@ -113,6 +113,26 @@ namespace Renderer {
 				}
 
 				return this._instance;
+			}
+
+			getViewportBounds() {
+				const halfWidth = (window.innerWidth * 0.5) / this.camera.zoom;
+				const halfHeight = (window.innerHeight * 0.5) / this.camera.zoom;
+				const p = this.camera.target.position;
+				return {
+					x: Utils.worldToPixel(p.x) - halfWidth,
+					y: Utils.worldToPixel(p.z) - halfHeight,
+					width: halfWidth * 2,
+					height: halfHeight * 2,
+				};
+			}
+
+			getCameraWidth(): number {
+				return window.innerWidth;
+			}
+
+			getCameraHeight(): number {
+				return window.innerHeight;
 			}
 
 			private loadTextures() {
@@ -576,26 +596,6 @@ namespace Renderer {
 				}
 
 				return index > -1 ? taro.game.data.map.tilesets[index] : null;
-			}
-
-			getViewportBounds() {
-				const halfWidth = (window.innerWidth * 0.5) / this.camera.zoom;
-				const halfHeight = (window.innerHeight * 0.5) / this.camera.zoom;
-				const p = this.camera.target.position;
-				return {
-					x: Utils.worldToPixel(p.x) - halfWidth,
-					y: Utils.worldToPixel(p.z) - halfHeight,
-					width: halfWidth * 2,
-					height: halfHeight * 2,
-				};
-			}
-
-			getCameraWidth(): number {
-				return window.innerWidth;
-			}
-
-			getCameraHeight(): number {
-				return window.innerHeight;
 			}
 		}
 	}
