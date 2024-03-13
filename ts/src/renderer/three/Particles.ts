@@ -91,6 +91,70 @@ namespace Renderer {
 				}
 			}
 
+			createEmitter(config: Particle) {
+				const particleData = taro.game.data.particleTypes[config.particleId];
+				const tex = TextureRepository.instance().get(`particle/${particleData.url}`);
+
+				let zPosition = 0;
+				if (particleData['z-index'].layer) zPosition += Utils.getLayerZOffset(particleData['z-index'].layer);
+				if (particleData['z-index'].depth) zPosition += Utils.getDepthZOffset(particleData['z-index'].depth);
+				if (particleData['z-index'].offset) zPosition += Utils.pixelToWorld(particleData['z-index'].offset);
+
+				const angle = particleData.fixedRotation ? 0 : config.angle * (Math.PI / 180);
+				const direction = { x: 0, y: 0, z: 1 }; // Phaser particle system starts in this direction
+				const cos = Math.cos(angle);
+				const sin = Math.sin(angle);
+				direction.x = direction.x * cos - direction.z * sin;
+				direction.z = direction.x * sin + direction.z * cos;
+
+				const angleMin = (particleData.angle.min - 180) * (Math.PI / 180);
+				const angleMax = (particleData.angle.max - 180) * (Math.PI / 180);
+
+				const speedMin = Utils.pixelToWorld(particleData.speed.min);
+				const speedMax = Utils.pixelToWorld(particleData.speed.max);
+
+				const lifetimeFrom = particleData.lifeBase * 0.001;
+				const lifetimeTo = particleData.lifeBase * 0.001;
+
+				const opacityFrom = 1;
+				const opacityTo = particleData.deathOpacityBase;
+
+				const duration = particleData.duration * 0.001;
+
+				const frequency = particleData.emitFrequency * 0.001;
+
+				const width = Utils.pixelToWorld(particleData.dimensions.width);
+				const height = Utils.pixelToWorld(particleData.dimensions.height);
+
+				let emitWidth = 0;
+				let emitDepth = 0;
+				if (particleData.emitZone) {
+					if (particleData.emitZone.x) emitWidth = Utils.pixelToWorld(particleData.emitZone.x);
+					if (particleData.emitZone.y) emitDepth = Utils.pixelToWorld(particleData.emitZone.y);
+				}
+
+				return {
+					position: { x: config.position.x, y: zPosition, z: config.position.y },
+					target: undefined,
+					direction: direction,
+					azimuth: { min: angleMin, max: angleMax },
+					elevation: { min: 0, max: 0 },
+					shape: { width: emitWidth, height: 0, depth: emitDepth },
+					addInterval: frequency,
+					lifetime: { min: lifetimeFrom, max: lifetimeTo },
+					rotation: { min: 0.5, max: 1 },
+					speed: { min: speedMin, max: speedMax },
+					scale: { x: width, y: height, start: 1, step: 0 },
+					color: { start: [1, 1, 1], end: [1, 1, 1] },
+					color_speed: { min: 1, max: 1 },
+					brightness: { min: 1, max: 1 },
+					opacity: { start: opacityFrom, end: opacityTo },
+					blend: 1,
+					texture: tex,
+					duration: duration,
+				};
+			}
+
 			emit(emitterConfig: Emitter) {
 				const internalConfig = {
 					elapsed: 0,
@@ -400,7 +464,7 @@ namespace Renderer {
 			rotation: { min: number; max: number };
 			speed: { min: number; max: number };
 			scale: { x: number; y: number; start: number; step: number };
-			color: { start: [number, number, number]; end: [number, number, number] };
+			color: { start: number[]; end: number[] };
 			color_speed: { min: number; max: number };
 			brightness: { min: number; max: number };
 			opacity: { start: number; end: number };

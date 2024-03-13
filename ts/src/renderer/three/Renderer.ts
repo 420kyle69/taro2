@@ -399,75 +399,17 @@ namespace Renderer {
 				});
 
 				taro.client.on('create-particle', (particle: Particle) => {
-					const particleData = taro.game.data.particleTypes[particle.particleId];
-					const tex = TextureRepository.instance().get(`particle/${particleData.url}`);
+					const emitter = this.particles.createEmitter(particle);
+					emitter.position.y += entities.position.y;
 
-					let zPosition = entities.position.y;
-					if (particleData['z-index'].layer) zPosition += Utils.getLayerZOffset(particleData['z-index'].layer);
-					if (particleData['z-index'].depth) zPosition += Utils.getDepthZOffset(particleData['z-index'].depth);
-					if (particleData['z-index'].offset) zPosition += Utils.pixelToWorld(particleData['z-index'].offset);
-
-					let target = null;
 					if (particle.entityId) {
 						const entity = this.entities.find((entity) => entity.taroId == particle.entityId);
 						if (entity) {
-							target = entity;
+							emitter.target = entity;
 						}
 					}
 
-					const angle = particleData.fixedRotation ? 0 : particle.angle * (Math.PI / 180);
-					const direction = { x: 0, y: 0, z: 1 }; // Phaser particle system starts in this direction
-					const cos = Math.cos(angle);
-					const sin = Math.sin(angle);
-					direction.x = direction.x * cos - direction.z * sin;
-					direction.z = direction.x * sin + direction.z * cos;
-
-					const angleMin = (particleData.angle.min - 180) * (Math.PI / 180);
-					const angleMax = (particleData.angle.max - 180) * (Math.PI / 180);
-
-					const speedMin = Utils.pixelToWorld(particleData.speed.min);
-					const speedMax = Utils.pixelToWorld(particleData.speed.max);
-
-					const lifetimeFrom = particleData.lifeBase * 0.001;
-					const lifetimeTo = particleData.lifeBase * 0.001;
-
-					const opacityFrom = 1;
-					const opacityTo = particleData.deathOpacityBase;
-
-					const duration = particleData.duration * 0.001;
-
-					const frequency = particleData.emitFrequency * 0.001;
-
-					const width = Utils.pixelToWorld(particleData.dimensions.width);
-					const height = Utils.pixelToWorld(particleData.dimensions.height);
-
-					let emitWidth = 0;
-					let emitDepth = 0;
-					if (particleData.emitZone) {
-						if (particleData.emitZone.x) emitWidth = Utils.pixelToWorld(particleData.emitZone.x);
-						if (particleData.emitZone.y) emitDepth = Utils.pixelToWorld(particleData.emitZone.y);
-					}
-
-					this.particles.emit({
-						position: { x: particle.position.x, y: zPosition, z: particle.position.y },
-						target: target,
-						direction: direction,
-						azimuth: { min: angleMin, max: angleMax },
-						elevation: { min: 0, max: 0 },
-						shape: { width: emitWidth, height: 0, depth: emitDepth },
-						addInterval: frequency,
-						lifetime: { min: lifetimeFrom, max: lifetimeTo },
-						rotation: { min: 0.5, max: 1 },
-						speed: { min: speedMin, max: speedMax },
-						scale: { x: width, y: height, start: 1, step: 0 },
-						color: { start: [1, 1, 1], end: [1, 1, 1] },
-						color_speed: { min: 1, max: 1 },
-						brightness: { min: 1, max: 1 },
-						opacity: { start: opacityFrom, end: opacityTo },
-						blend: 1,
-						texture: tex,
-						duration: duration,
-					});
+					this.particles.emit(emitter);
 				});
 
 				taro.client.on('floating-text', (data: { text: string; x: number; y: number; color: string }) => {
