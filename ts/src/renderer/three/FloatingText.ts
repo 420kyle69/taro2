@@ -18,6 +18,20 @@ namespace Renderer {
 					.onComplete(() => this.destroy())
 					.start();
 			}
+
+			static create(config: FloatingTextConfig) {
+				return new FloatingText(
+					Utils.pixelToWorld(config.x) - 0.5,
+					// Will only look good top down orthographic currently; Need to get
+					// correct height from engine when the engine uses 3D coords.
+					1500,
+					Utils.pixelToWorld(config.y) - 0.5,
+					config.text,
+					config.color
+				);
+			}
 		}
+
+		export type FloatingTextConfig = { text: string; x: number; y: number; color: string };
 	}
 }
