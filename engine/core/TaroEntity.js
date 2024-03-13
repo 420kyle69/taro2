@@ -143,7 +143,7 @@ var TaroEntity = TaroObject.extend({
 
 	// update item's body & texture based on stateId given
 	setState: function (stateId, defaultData) {
-		// console.log("setState", stateId, defaultData)
+		console.log("setState", stateId, defaultData);
 		var self = this;
 
 		// if invalid stateId is given, set state to default state
@@ -160,6 +160,7 @@ var TaroEntity = TaroObject.extend({
 
 			*/
 			self._stats.currentBody = self._stats.bodies[newState.body];
+			console.log(self._stats.currentBody);
 		}
 
 		if (taro.isServer) {

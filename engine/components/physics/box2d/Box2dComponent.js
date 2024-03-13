@@ -177,7 +177,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 	 */
 	createBody: function (entity, body, isLossTolerant) {
 		this.totalBodiesCreated++;
-
 		return dists[this.engine].createBody(this, entity, body, isLossTolerant);
 	},
 

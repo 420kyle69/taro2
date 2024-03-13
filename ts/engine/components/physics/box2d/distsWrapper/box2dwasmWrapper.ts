@@ -290,7 +290,7 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 									switch (fixtureDef.shape.type) {
 										case 'circle':
 											tempShape = self.recordLeak(new self.b2CircleShape());
-											if (fixtureDef.shape.data && typeof (fixtureDef.shape.data.radius) !== 'undefined') {
+											if (fixtureDef.shape.data && typeof fixtureDef.shape.data.radius !== 'undefined') {
 												tempShape.set_m_radius(fixtureDef.shape.data.radius / self._scaleRatio);
 											} else {
 												tempShape.set_m_radius(entity._bounds2d.x / self._scaleRatio / 2);
@@ -311,16 +311,15 @@ const box2dwasmWrapper: PhysicsDistProps = { // added by Moe'Thun for fixing mem
 											if (fixtureDef.shape.data) {
 												finalX = fixtureDef.shape.data.x ?? 0;
 												finalY = fixtureDef.shape.data.y ?? 0;
-												finalHWidth = fixtureDef.shape.data.width ?? entity._bounds2d.x;
-												finalHHeight = fixtureDef.shape.data.height ?? entity._bounds2d.y;
+												finalHWidth = fixtureDef.shape.data.halfWidth ?? entity._bounds2d.x / 2;
+												finalHHeight = fixtureDef.shape.data.halfHeight ?? entity._bounds2d.y / 2;
 											} else {
 												finalX = 0;
 												finalY = 0;
-												finalHWidth = entity._bounds2d.x;
-												finalHHeight = entity._bounds2d.y;
+												finalHWidth = entity._bounds2d.x / 2;
+												finalHHeight = entity._bounds2d.y / 2;
 											}
-											finalHWidth /= 2;
-											finalHHeight /= 2;
+
 											const pos = self.recordLeak(new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio));
 											// Set the polygon as a box
 											(tempShape as Box2D.b2PolygonShape).SetAsBox(
