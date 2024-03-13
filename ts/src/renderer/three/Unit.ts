@@ -32,8 +32,9 @@ namespace Renderer {
 				} else {
 					this.chat = new ChatBubble(text);
 					this.chat.setScale(this.guiScale);
+					const textHeight = this.label.getTextSizeInPixels().height;
 					this.chat.setOffset(
-						new THREE.Vector2(0, this.getSizeInPixels().height * 0.5 + this.chat.getSizeInPixels().height * 4),
+						new THREE.Vector2(0, this.getSizeInPixels().height * 0.5 + textHeight * 4),
 						new THREE.Vector2(0.5, 0)
 					);
 					this.add(this.chat);
