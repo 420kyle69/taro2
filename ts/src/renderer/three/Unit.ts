@@ -34,13 +34,7 @@ namespace Renderer {
 				let tex = textureRepository.get(taroEntity._stats.cellSheet.url);
 				const entity = new Unit(taroEntity._id, taroEntity._stats.ownerId, tex.clone(), taroEntity);
 				entity.setBillboard(!!taroEntity._stats.isBillboard, renderer.camera);
-
-				// TODO(nick): Move zoomSize to camera?
-				if (renderer.zoomSize) {
-					// TODO(nick): Refactor to get zoom value from camera?
-					const ratio = Math.max(window.innerWidth, window.innerHeight) / renderer.zoomSize;
-					entity.setGuiScale(1 / ratio);
-				}
+				entity.setGuiScale(1 / renderer.camera.zoom);
 
 				if (taroEntity._stats.cameraPointerLock) {
 					entity.cameraConfig.pointerLock = taroEntity._stats.cameraPointerLock;

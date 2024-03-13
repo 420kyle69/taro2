@@ -12,7 +12,6 @@ namespace Renderer {
 			renderer: THREE.WebGLRenderer;
 			camera: Camera;
 			scene: THREE.Scene;
-			zoomSize = undefined;
 
 			private clock = new THREE.Clock();
 			private pointer = new THREE.Vector2();
@@ -53,13 +52,9 @@ namespace Renderer {
 					renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 					renderer.render(this.scene, this.camera.instance);
 
-					if (this.zoomSize) {
-						const ratio = Math.max(window.innerWidth, window.innerHeight) / this.zoomSize;
-						this.camera.setZoom(ratio);
-						taro.client.emit('scale', { ratio });
-						taro.client.emit('update-abilities-position');
-						this.entityManager.scaleGui(1 / ratio);
-					}
+					taro.client.emit('scale', { ratio: this.camera.zoom });
+					taro.client.emit('update-abilities-position');
+					this.entityManager.scaleGui(1 / this.camera.zoom);
 				});
 
 				window.addEventListener('mousemove', (evt: MouseEvent) => {
@@ -219,13 +214,10 @@ namespace Renderer {
 				taro.client.on('create-projectile', (p: TaroEntityPhysics) => createEntity(p), this);
 
 				taro.client.on('zoom', (height: number) => {
-					if (this.zoomSize === height * 2.15) return;
-
-					this.zoomSize = height * 2.15;
-					const ratio = Math.max(window.innerWidth, window.innerHeight) / this.zoomSize;
-					this.camera.setZoom(ratio);
-					taro.client.emit('scale', { ratio });
-					this.entityManager.scaleGui(1 / ratio);
+					if (this.camera.zoomHeight === height * 2.15) return;
+					this.camera.setZoomByHeight(height * 2.15);
+					taro.client.emit('scale', { ratio: this.camera.zoom });
+					this.entityManager.scaleGui(1 / this.camera.zoom);
 				});
 
 				taro.client.on('stop-follow', () => this.camera.unfollow());
