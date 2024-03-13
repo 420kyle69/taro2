@@ -148,8 +148,10 @@ const box2dwebWrapper: PhysicsDistProps = {
 		var tempShape;
 		var tempFilterData;
 		var i;
-		var finalX; var finalY;
-		var finalWidth; var finalHeight;
+		var finalX;
+		var finalY;
+		var finalHWidth;
+		var finalHHeight;
 
 		// Process body definition and create a box2d body for it
 		switch (body.type) {
@@ -225,15 +227,15 @@ const box2dwebWrapper: PhysicsDistProps = {
 									switch (fixtureDef.shape.type) {
 										case 'circle':
 											tempShape = new self.b2CircleShape();
-											if (fixtureDef.shape.data && typeof (fixtureDef.shape.data.radius) !== 'undefined') {
+											if (fixtureDef.shape.data && typeof fixtureDef.shape.data.radius !== 'undefined') {
 												tempShape.SetRadius(fixtureDef.shape.data.radius / self._scaleRatio);
 											} else {
-												tempShape.SetRadius((entity._bounds2d.x / self._scaleRatio) / 2);
+												tempShape.SetRadius(entity._bounds2d.x / self._scaleRatio / 2);
 											}
 
 											if (fixtureDef.shape.data) {
-												finalX = fixtureDef.shape.data.x !== undefined ? fixtureDef.shape.data.x : 0;
-												finalY = fixtureDef.shape.data.y !== undefined ? fixtureDef.shape.data.y : 0;
+												finalX = fixtureDef.shape.data.x ?? 0;
+												finalY = fixtureDef.shape.data.y ?? 0;
 
 												tempShape.SetLocalPosition(new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio));
 											}
@@ -248,21 +250,21 @@ const box2dwebWrapper: PhysicsDistProps = {
 											tempShape = new self.b2PolygonShape();
 
 											if (fixtureDef.shape.data) {
-												finalX = fixtureDef.shape.data.x !== undefined ? fixtureDef.shape.data.x : 0;
-												finalY = fixtureDef.shape.data.y !== undefined ? fixtureDef.shape.data.y : 0;
-												finalWidth = fixtureDef.shape.data.width !== undefined ? fixtureDef.shape.data.width : (entity._bounds2d.x / 2);
-												finalHeight = fixtureDef.shape.data.height !== undefined ? fixtureDef.shape.data.height : (entity._bounds2d.y / 2);
+												finalX = fixtureDef.shape.data.x ?? 0;
+												finalY = fixtureDef.shape.data.y ?? 0;
+												finalHWidth = fixtureDef.shape.data.halfWidth ?? entity._bounds2d.x / 2;
+												finalHHeight = fixtureDef.shape.data.halfHeight ?? entity._bounds2d.y / 2;
 											} else {
 												finalX = 0;
 												finalY = 0;
-												finalWidth = (entity._bounds2d.x / 2);
-												finalHeight = (entity._bounds2d.y / 2);
+												finalHWidth = entity._bounds2d.x / 2;
+												finalHHeight = entity._bounds2d.y / 2;
 											}
 
 											// Set the polygon as a box
 											tempShape.SetAsOrientedBox(
-												(finalWidth / self._scaleRatio),
-												(finalHeight / self._scaleRatio),
+												finalHWidth / self._scaleRatio,
+												finalHHeight / self._scaleRatio,
 												new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio),
 												0
 											);

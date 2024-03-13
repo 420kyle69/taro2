@@ -82,10 +82,10 @@ var TaroEntityPhysics = TaroEntity.extend({
 				shapeData = {};
 			}
 			if (sizeX) {
-				shapeData.width = sizeX;
+				shapeData.halfWidth = sizeX / 2;
 			}
 			if (sizeY) {
-				shapeData.height = sizeY;
+				shapeData.halfHeight = sizeY / 2;
 			}
 			if (offsetX) {
 				shapeData.x = offsetX;
