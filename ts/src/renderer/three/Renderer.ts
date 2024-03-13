@@ -202,7 +202,7 @@ namespace Renderer {
 					taroEntity.on('destroy', () => this.entityManager.destroy(entity));
 
 					taroEntity.on('follow', () => {
-						this.camera.startFollow(entity);
+						this.camera.follow(entity);
 
 						const offset = entity.cameraConfig.offset;
 						this.camera.setOffset(offset.x, offset.y, offset.z);
@@ -228,7 +228,7 @@ namespace Renderer {
 					this.entityManager.scaleGui(1 / ratio);
 				});
 
-				taro.client.on('stop-follow', () => this.camera.stopFollow());
+				taro.client.on('stop-follow', () => this.camera.unfollow());
 				taro.client.on('camera-pitch', (deg: number) => this.camera.setElevationAngle(deg));
 
 				taro.client.on('camera-position', (x: number, y: number) => {

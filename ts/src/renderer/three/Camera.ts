@@ -256,7 +256,7 @@ namespace Renderer {
 				this.setDistance(this.originalDistance / ratio);
 			}
 
-			startFollow(target: THREE.Object3D, moveInstant = true) {
+			follow(target: THREE.Object3D, moveInstant = true) {
 				this.target = target;
 
 				if (moveInstant) {
@@ -266,7 +266,7 @@ namespace Renderer {
 				}
 			}
 
-			stopFollow() {
+			unfollow() {
 				this.target = null;
 			}
 
