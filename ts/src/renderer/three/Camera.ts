@@ -3,15 +3,15 @@ namespace Renderer {
 		export class Camera {
 			instance: THREE.Camera;
 			target: THREE.Object3D | null = null;
-			zoom = 1;
-
-			private orthographicCamera: THREE.OrthographicCamera;
-			private perspectiveCamera: THREE.PerspectiveCamera;
 			controls: OrbitControls;
+			zoom = 1;
+			zoomHeight = 700;
 
 			orthographicState: { target: THREE.Vector3; position: THREE.Vector3 };
 			perspectiveState: { target: THREE.Vector3; position: THREE.Vector3; zoom: number };
 
+			private orthographicCamera: THREE.OrthographicCamera;
+			private perspectiveCamera: THREE.PerspectiveCamera;
 			private isPerspective = false;
 			private fovInitial: number;
 			private viewportHeightInitial: number;
@@ -26,7 +26,11 @@ namespace Renderer {
 
 			private originalZoom = 1;
 
-			constructor(viewportWidth: number, viewportHeight: number, canvas: HTMLCanvasElement) {
+			constructor(
+				private viewportWidth: number,
+				private viewportHeight: number,
+				canvas: HTMLCanvasElement
+			) {
 				// Public API
 
 				// DONE
@@ -236,6 +240,9 @@ namespace Renderer {
 			}
 
 			resize(width: number, height: number) {
+				this.viewportWidth = width;
+				this.viewportHeight = height;
+
 				this.perspectiveCamera.aspect = width / height;
 				this.perspectiveCamera.fov =
 					(360 / Math.PI) * Math.atan(this.fovInitial * (height / this.viewportHeightInitial));
@@ -249,6 +256,8 @@ namespace Renderer {
 				this.orthographicCamera.top = halfHeight;
 				this.orthographicCamera.bottom = -halfHeight;
 				this.orthographicCamera.updateProjectionMatrix();
+
+				this.setZoom(Math.max(this.viewportWidth, this.viewportHeight) / this.zoomHeight);
 			}
 
 			setZoom(ratio: number) {
@@ -257,7 +266,12 @@ namespace Renderer {
 				this.setDistance(this.originalDistance / ratio);
 			}
 
-			startFollow(target: THREE.Object3D, moveInstant = true) {
+			setZoomByHeight(height: number) {
+				this.zoomHeight = height;
+				this.setZoom(Math.max(this.viewportWidth, this.viewportHeight) / height);
+			}
+
+			follow(target: THREE.Object3D, moveInstant = true) {
 				this.target = target;
 
 				if (moveInstant) {
@@ -267,7 +281,7 @@ namespace Renderer {
 				}
 			}
 
-			stopFollow() {
+			unfollow() {
 				this.target = null;
 			}
 

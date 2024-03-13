@@ -8,6 +8,51 @@ namespace Renderer {
 				super();
 			}
 
+			static create(config?: MapData['layers']) {
+				const getTilesetFromType = (type: 'top' | 'side') => {
+					let index = -1;
+					if (type === 'top') {
+						index = taro.game.data.map.tilesets.findIndex((tilesheet) => {
+							return (
+								(tilesheet.name === 'tilesheet_complete' || tilesheet.name === 'tilesheet') &&
+								(tilesheet.type === undefined || tilesheet.type === 'top')
+							);
+						});
+					} else {
+						index = taro.game.data.map.tilesets.findIndex((tilesheet) => {
+							return tilesheet.type === type;
+						});
+					}
+
+					return index > -1 ? taro.game.data.map.tilesets[index] : null;
+				};
+
+				const textureRepository = TextureRepository.instance();
+				const tilesetMain = getTilesetFromType('top');
+				let tilesetSide = getTilesetFromType('side');
+				if (!tilesetSide) tilesetSide = tilesetMain;
+
+				const texMain = textureRepository.get(tilesetMain.image);
+				const texSide = textureRepository.get(tilesetSide.image);
+
+				const topTileset = new Tileset(texMain, tilesetMain.tilewidth, tilesetMain.tilewidth);
+				const sidesTileset = new Tileset(texSide, tilesetSide.tilewidth, tilesetSide.tilewidth);
+
+				const voxels = new Voxels(topTileset, sidesTileset);
+
+				if (config) {
+					let numTileLayers = 0;
+					for (const [idx, layer] of config.entries()) {
+						if (layer.type === 'tilelayer' && layer.data) {
+							voxels.addLayer(layer, numTileLayers, true, false, (idx + 1) * 100);
+							numTileLayers++;
+						}
+					}
+				}
+
+				return voxels;
+			}
+
 			addLayer(data: LayerData, height: number, transparent = true, flat = false, renderOrder = 0) {
 				const voxels = new Map<string, VoxelCell>();
 

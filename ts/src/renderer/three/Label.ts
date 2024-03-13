@@ -63,6 +63,10 @@ namespace Renderer {
 				this.sprite.material.opacity = opacity;
 			}
 
+			getTextSizeInPixels() {
+				return { width: this.textSize.x * this.scaleScalar, height: this.textSize.y * this.scaleScalar };
+			}
+
 			private createLabel(text: string, color = 'white', bold = false) {
 				const textCanvas = document.createElement('canvas');
 				textCanvas.height = 10;
@@ -119,10 +123,6 @@ namespace Renderer {
 				);
 
 				return sprite;
-			}
-
-			getTextSizeInPixels() {
-				return { width: this.textSize.x * this.scaleScalar, height: this.textSize.y * this.scaleScalar };
 			}
 		}
 	}
