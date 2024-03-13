@@ -14,6 +14,7 @@ namespace Renderer {
 			private static _instance: Renderer;
 
 			private clock = new THREE.Clock();
+			private initLoadingManager = new THREE.LoadingManager();
 
 			private zoomSize = undefined;
 			private pointer = new THREE.Vector2();
@@ -94,11 +95,9 @@ namespace Renderer {
 					}
 				});
 
-				THREE.DefaultLoadingManager.onStart = () => {
-					this.forceLoadUnusedCSSFonts();
-				};
+				this.forceLoadUnusedCSSFonts();
 
-				THREE.DefaultLoadingManager.onLoad = () => {
+				this.initLoadingManager.onLoad = () => {
 					this.init();
 					taro.input.setupListeners(this.renderer.domElement);
 					taro.client.rendererLoaded.resolve();
@@ -119,6 +118,7 @@ namespace Renderer {
 			private loadTextures() {
 				const textureRepository = TextureRepository.instance();
 				textureRepository.setFilter(taro.game.data.defaultData.renderingFilter);
+				textureRepository.setLoadingManager(this.initLoadingManager);
 
 				const data = taro.game.data;
 
@@ -154,6 +154,8 @@ namespace Renderer {
 				textureRepository.loadFromUrl('bottom', urls.bottom);
 				textureRepository.loadFromUrl('front', urls.front);
 				textureRepository.loadFromUrl('back', urls.back);
+
+				textureRepository.setLoadingManager(THREE.DefaultLoadingManager);
 			}
 
 			private forceLoadUnusedCSSFonts() {
