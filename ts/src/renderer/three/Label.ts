@@ -7,6 +7,7 @@ namespace Renderer {
 			private scaleScalar = 1;
 
 			private size = new THREE.Vector2();
+			private textSize = new THREE.Vector2();
 			private center = new THREE.Vector2(0.5, 0.5);
 
 			constructor(text = 'cccccc', color = 'white', bold = false) {
@@ -66,16 +67,18 @@ namespace Renderer {
 				const textCanvas = document.createElement('canvas');
 				textCanvas.height = 10;
 
-				const padding = 8;
-
 				const ctx = textCanvas.getContext('2d');
 				const font = `${bold ? 'bold' : 'normal'} 16px Verdana`;
-
 				ctx.font = font;
 				const metrics = ctx.measureText(text);
-				const textHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
-				textCanvas.width = Math.ceil(metrics.width) + padding;
-				textCanvas.height = Math.ceil(textHeight) + padding;
+
+				const textWidth = Math.ceil(metrics.width);
+				const textHeight = Math.ceil(metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent);
+				this.textSize.set(textWidth, textHeight);
+
+				const padding = 8;
+				textCanvas.width = textWidth + padding;
+				textCanvas.height = textHeight + padding;
 				this.size.set(textCanvas.width, textCanvas.height);
 
 				const isStroke = taro.game.data.settings.addStrokeToNameAndAttributes;
@@ -86,6 +89,7 @@ namespace Renderer {
 					ctx.lineJoin = 'miter';
 					ctx.miterLimit = 3;
 					ctx.strokeText(text, padding / 2, textHeight + padding / 2);
+					this.textSize.addScalar(2);
 				}
 
 				ctx.fillStyle = color;
@@ -115,6 +119,10 @@ namespace Renderer {
 				);
 
 				return sprite;
+			}
+
+			getTextSizeInPixels() {
+				return { width: this.textSize.x * this.scaleScalar, height: this.textSize.y * this.scaleScalar };
 			}
 		}
 	}
