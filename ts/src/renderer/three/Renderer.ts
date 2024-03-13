@@ -188,37 +188,15 @@ namespace Renderer {
 			}
 
 			private init() {
-				// Sky
 				const sky = new Sky();
 				sky.translateX(taro.game.data.map.width / 2);
 				sky.translateZ(taro.game.data.map.height / 2);
 				this.scene.add(sky);
 				this.sky = sky;
 
-				// Voxels
-				const textureRepository = TextureRepository.instance();
-				const tilesetMain = this.getTilesetFromType('top');
-				let tilesetSide = this.getTilesetFromType('side');
-				if (!tilesetSide) tilesetSide = tilesetMain;
-
-				const texMain = textureRepository.get(tilesetMain.image);
-				const texSide = textureRepository.get(tilesetSide.image);
-
-				const topTileset = new Tileset(texMain, tilesetMain.tilewidth, tilesetMain.tilewidth);
-				const sidesTileset = new Tileset(texSide, tilesetSide.tilewidth, tilesetSide.tilewidth);
-
-				this.voxels = new Voxels(topTileset, sidesTileset);
+				this.voxels = Voxels.create(taro.game.data.map.layers);
 				this.scene.add(this.voxels);
 
-				let numTileLayers = 0;
-				for (const [idx, layer] of taro.game.data.map.layers.entries()) {
-					if (layer.type === 'tilelayer' && layer.data) {
-						this.voxels.addLayer(layer, numTileLayers, true, false, (idx + 1) * 100);
-						numTileLayers++;
-					}
-				}
-
-				// Particles
 				this.particles = new Particles();
 				this.scene.add(this.particles);
 
@@ -226,6 +204,7 @@ namespace Renderer {
 				entities.position.y = 0.51;
 				this.scene.add(entities);
 
+				const textureRepository = TextureRepository.instance();
 				const createEntity = (entity: TaroEntityPhysics) => {
 					let tex = textureRepository.get(entity._stats.cellSheet.url);
 					const ent = new Unit(entity._id, entity._stats.ownerId, tex.clone());
@@ -575,27 +554,6 @@ namespace Renderer {
 						repeat: +animation.loopCount - 1, // correction for loop/repeat values
 					});
 				}
-			}
-
-			// NOTE(nick): this feels hacky, why don't all tilesets have a type? Part
-			// of a bigger problem regarding game.json parsing and presenting it in a
-			// valid state for the rest of the application?
-			private getTilesetFromType(type: 'top' | 'side') {
-				let index = -1;
-				if (type === 'top') {
-					index = taro.game.data.map.tilesets.findIndex((tilesheet) => {
-						return (
-							(tilesheet.name === 'tilesheet_complete' || tilesheet.name === 'tilesheet') &&
-							(tilesheet.type === undefined || tilesheet.type === 'top')
-						);
-					});
-				} else {
-					index = taro.game.data.map.tilesets.findIndex((tilesheet) => {
-						return tilesheet.type === type;
-					});
-				}
-
-				return index > -1 ? taro.game.data.map.tilesets[index] : null;
 			}
 		}
 	}
