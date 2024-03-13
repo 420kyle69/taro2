@@ -43,8 +43,6 @@ namespace Renderer {
 
 				this.scene = new THREE.Scene();
 				this.scene.background = new THREE.Color(taro.game.data.defaultData.mapBackgroundColor);
-				this.scene.translateX(-taro.game.data.map.width / 2);
-				this.scene.translateZ(-taro.game.data.map.height / 2);
 
 				window.addEventListener('resize', () => {
 					this.camera.resize(window.innerWidth, window.innerHeight);
@@ -177,8 +175,6 @@ namespace Renderer {
 
 			private init() {
 				this.sky = new Sky();
-				this.sky.translateX(taro.game.data.map.width / 2);
-				this.sky.translateZ(taro.game.data.map.height / 2);
 				this.scene.add(this.sky);
 
 				this.voxels = Voxels.create(taro.game.data.map.layers);
@@ -225,20 +221,13 @@ namespace Renderer {
 
 				taro.client.on('camera-position', (x: number, y: number) => {
 					if (!taro.developerMode.active || taro.developerMode.activeTab === 'play') {
-						this.camera.setPosition2D(
-							this.scene.position.x + Utils.pixelToWorld(x),
-							this.scene.position.z + Utils.pixelToWorld(y),
-							true
-						);
+						this.camera.setPosition2D(Utils.pixelToWorld(x), Utils.pixelToWorld(y), true);
 					}
 				});
 
 				taro.client.on('camera-instant-move', (x: number, y: number) => {
 					if (!taro.developerMode.active || taro.developerMode.activeTab === 'play') {
-						this.camera.setPosition2D(
-							this.scene.position.x + Utils.pixelToWorld(x),
-							this.scene.position.z + Utils.pixelToWorld(y)
-						);
+						this.camera.setPosition2D(Utils.pixelToWorld(x), Utils.pixelToWorld(y));
 					}
 				});
 
@@ -265,8 +254,9 @@ namespace Renderer {
 
 				if (this.camera.target) {
 					const worldPos = this.camera.getWorldPoint(this.pointer);
-					const center = { x: taro.game.data.map.width / 2 + 0.5, z: taro.game.data.map.height / 2 + 0.5 };
-					taro.input.emit('pointermove', [{ x: (worldPos.x + center.x) * 64, y: (worldPos.z + center.z) * 64 }]);
+					taro.input.emit('pointermove', [
+						{ x: Utils.worldToPixel(worldPos.x + 0.5), y: Utils.worldToPixel(worldPos.z + 0.5) },
+					]);
 				}
 
 				// TODO: Is this the proper way to get deltaTime or should I get it from the
