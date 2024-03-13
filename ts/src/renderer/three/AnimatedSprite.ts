@@ -27,6 +27,43 @@ namespace Renderer {
 				tex.offset.set(offsetX, offsetY);
 			}
 
+			static createAnimations(entity: EntityData) {
+				const cellSheet = entity.cellSheet;
+				if (!cellSheet) return;
+				const key = cellSheet.url;
+				const tex = TextureRepository.instance().get(key);
+				tex.userData.numColumns = cellSheet.columnCount || 1;
+				tex.userData.numRows = cellSheet.rowCount || 1;
+				tex.userData.key = key;
+
+				// Add animations
+				for (let animationsKey in entity.animations) {
+					const animation = entity.animations[animationsKey];
+					const frames = animation.frames;
+					const animationFrames: number[] = [];
+
+					// Correction for 0-based indexing
+					for (let i = 0; i < frames.length; i++) {
+						animationFrames.push(+frames[i] - 1);
+					}
+
+					// Avoid crash by giving it frame 0 if no frame data provided
+					if (animationFrames.length === 0) {
+						animationFrames.push(0);
+					}
+
+					if (this.animations.has(`${key}/${animationsKey}/${entity.id}`)) {
+						this.animations.delete(`${key}/${animationsKey}/${entity.id}`);
+					}
+
+					this.animations.set(`${key}/${animationsKey}/${entity.id}`, {
+						frames: animationFrames,
+						fps: +animation.framesPerSecond || 15,
+						repeat: +animation.loopCount - 1, // correction for loop/repeat values
+					});
+				}
+			}
+
 			loop(playSpriteIndices: number[], fps: number, repeat = 0) {
 				this.playSpriteIndices = playSpriteIndices;
 				this.runningTileArrayIndex = 0;

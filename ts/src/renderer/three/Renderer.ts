@@ -157,7 +157,7 @@ namespace Renderer {
 					if (!cellSheet) continue;
 					const key = cellSheet.url;
 					textureRepository.loadFromUrl(key, Utils.patchAssetUrl(key), () => {
-						this.createAnimations(type);
+						AnimatedSprite.createAnimations(type);
 					});
 				}
 
@@ -187,11 +187,10 @@ namespace Renderer {
 			}
 
 			private init() {
-				const sky = new Sky();
-				sky.translateX(taro.game.data.map.width / 2);
-				sky.translateZ(taro.game.data.map.height / 2);
-				this.scene.add(sky);
-				this.sky = sky;
+				this.sky = new Sky();
+				this.sky.translateX(taro.game.data.map.width / 2);
+				this.sky.translateZ(taro.game.data.map.height / 2);
+				this.scene.add(this.sky);
 
 				this.voxels = Voxels.create(taro.game.data.map.layers);
 				this.scene.add(this.voxels);
@@ -213,25 +212,16 @@ namespace Renderer {
 					taroEntity.on(
 						'destroy',
 						() => {
+							entity.destroy();
+
 							const idx = this.entities.indexOf(entity, 0);
-							if (idx > -1) {
-								entities.remove(entity);
-								this.entities.splice(idx, 1);
+							if (idx === -1) return;
 
-								for (const emitter of this.particles.emitters) {
-									if (emitter.target === entity) {
-										emitter.target = null;
-									}
-								}
+							this.entities.splice(idx, 1);
+							this.animatedSprites.splice(this.animatedSprites.indexOf(entity as AnimatedSprite, 0), 1);
 
-								const animIdx = this.animatedSprites.indexOf(entity as AnimatedSprite, 0);
-								if (animIdx > -1) {
-									this.animatedSprites.splice(animIdx, 1);
-								}
-
-								for (const [key, listener] of Object.entries(taroEntity.eventList())) {
-									taroEntity.off(key, listener);
-								}
+							for (const emitter of this.particles.emitters) {
+								if (emitter.target === entity) emitter.target = null;
 							}
 						},
 						this

@@ -16,7 +16,8 @@ namespace Renderer {
 			constructor(
 				public taroId: string,
 				public ownerId: string,
-				tex: THREE.Texture
+				tex: THREE.Texture,
+				private taroEntity?: TaroEntityPhysics
 			) {
 				super(tex);
 
@@ -31,7 +32,7 @@ namespace Renderer {
 				const renderer = Three.instance();
 
 				let tex = textureRepository.get(taroEntity._stats.cellSheet.url);
-				const entity = new Unit(taroEntity._id, taroEntity._stats.ownerId, tex.clone());
+				const entity = new Unit(taroEntity._id, taroEntity._stats.ownerId, tex.clone(), taroEntity);
 				entity.setBillboard(!!taroEntity._stats.isBillboard, renderer.camera);
 
 				// TODO(nick): Move zoomSize to camera?
@@ -105,56 +106,19 @@ namespace Renderer {
 					}
 				});
 
-				const createAnimations = (entity: EntityData) => {
-					const cellSheet = entity.cellSheet;
-					if (!cellSheet) return;
-					const key = cellSheet.url;
-					const tex = TextureRepository.instance().get(key);
-					tex.userData.numColumns = cellSheet.columnCount || 1;
-					tex.userData.numRows = cellSheet.rowCount || 1;
-					tex.userData.key = key;
-
-					// Add animations
-					for (let animationsKey in entity.animations) {
-						const animation = entity.animations[animationsKey];
-						const frames = animation.frames;
-						const animationFrames: number[] = [];
-
-						// Correction for 0-based indexing
-						for (let i = 0; i < frames.length; i++) {
-							animationFrames.push(+frames[i] - 1);
-						}
-
-						// Avoid crash by giving it frame 0 if no frame data provided
-						if (animationFrames.length === 0) {
-							animationFrames.push(0);
-						}
-
-						if (Unit.animations.has(`${key}/${animationsKey}/${entity.id}`)) {
-							Unit.animations.delete(`${key}/${animationsKey}/${entity.id}`);
-						}
-
-						Unit.animations.set(`${key}/${animationsKey}/${entity.id}`, {
-							frames: animationFrames,
-							fps: +animation.framesPerSecond || 15,
-							repeat: +animation.loopCount - 1, // correction for loop/repeat values
-						});
-					}
-				};
-
 				taroEntity.on('update-texture', (data) => {
 					const textureRepository = TextureRepository.instance();
 					const key = taroEntity._stats.cellSheet.url;
 					const tex2 = textureRepository.get(key);
 					if (tex2) {
-						createAnimations(taroEntity._stats);
+						this.createAnimations(taroEntity._stats);
 						tex = tex2.clone();
 						entity.setTexture(tex);
 						const bounds = taroEntity._bounds2d;
 						entity.setScale(Utils.pixelToWorld(bounds.x), Utils.pixelToWorld(bounds.y));
 					} else {
 						textureRepository.loadFromUrl(key, Utils.patchAssetUrl(key), (tex2) => {
-							createAnimations(taroEntity._stats);
+							this.createAnimations(taroEntity._stats);
 							tex = tex2.clone();
 							entity.setTexture(tex);
 							const bounds = taroEntity._bounds2d;
@@ -171,6 +135,14 @@ namespace Renderer {
 				});
 
 				return entity;
+			}
+
+			onDestroy(): void {
+				if (this.taroEntity) {
+					for (const [key, listener] of Object.entries(this.taroEntity.eventList())) {
+						this.taroEntity.off(key, listener);
+					}
+				}
 			}
 
 			renderChat(text: string): void {
