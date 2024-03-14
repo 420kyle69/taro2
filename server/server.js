@@ -229,7 +229,7 @@ var Server = TaroClass.extend({
 
 	startWebServer: function () {
 		const app = express();
-		const port = 80;
+		const port = process.env.PORT || 80;
 
 		app.use(bodyParser.urlencoded({ extended: false }));
 		// parse application/json
@@ -358,7 +358,6 @@ var Server = TaroClass.extend({
 		}
 
 		this.socket = {};
-		var port = process.env.PORT || 2001;
 
 		this.duplicateIpCount = {};
 
