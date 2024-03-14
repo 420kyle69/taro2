@@ -169,7 +169,7 @@ var TaroClass = (function () {
 			this._components = this._components || [];
 			this._components.push(newComponent);
 		} catch (err) {
-			console.log(`failed to add component: ${newComponent.componentId}`);
+			console.log(`failed to add component: ${newComponent?.componentId}`, component);
 			console.error(err);
 		}
 		return this;

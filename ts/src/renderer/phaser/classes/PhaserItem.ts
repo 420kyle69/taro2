@@ -1,14 +1,10 @@
 class PhaserItem extends PhaserAnimatedEntity {
-
 	public gameObject: Phaser.GameObjects.Sprite & IRenderProps;
 	public entity: TaroEntity;
 
 	ownerUnitId?: string;
 
-	constructor (
-		scene: GameScene,
-		entity: Item
-	) {
+	constructor(scene: GameScene, entity: Item) {
 		super(scene, entity, `item/${entity._stats.cellSheet.url}`);
 
 		this.sprite.visible = false;
@@ -18,11 +14,10 @@ class PhaserItem extends PhaserAnimatedEntity {
 		const { x, y } = entity._translate;
 		this.gameObject.setPosition(x, y);
 
-
 		Object.assign(this.evtListeners, {
 			// this event is only emitted by height-based-zindex games
-			setOwnerUnit: entity.on('setOwnerUnit', this.setOwnerUnit, this),
-			'update-texture': entity.on('update-texture', this.updateTexture, this),
+			setOwnerUnit: entity.on("setOwnerUnit", this.setOwnerUnit, this),
+			"update-texture": entity.on("update-texture", this.updateTexture, this),
 		});
 
 		if (scene.heightRenderer) {
@@ -41,21 +36,25 @@ class PhaserItem extends PhaserAnimatedEntity {
 		this.scene.renderedEntities.push(this.sprite);
 	}
 
-	protected updateTexture (data) {
-		if (data === 'basic_texture_change') {
+	protected updateTexture(data) {
+		if (data === "basic_texture_change") {
 			this.sprite.anims.stop();
 			this.key = `item/${this.entity._stats.cellSheet.url}`;
 			if (!this.scene.textures.exists(this.key)) {
 				this.scene.loadEntity(this.key, this.entity._stats);
-				this.scene.load.on(`filecomplete-image-${this.key}`, function cnsl() {
-					if (this && this.sprite) {
-						this.sprite.setTexture(this.key);
-						this.sprite.texture.setFilter(this.scene.filter);
-						const bounds = this.entity._bounds2d;
-						this.sprite.setDisplaySize(bounds.x, bounds.y);
-					}
-				}, this);
-			this.scene.load.start();
+				this.scene.load.on(
+					`filecomplete-image-${this.key}`,
+					function cnsl() {
+						if (this && this.sprite) {
+							this.sprite.setTexture(this.key);
+							this.sprite.texture.setFilter(this.scene.filter);
+							const bounds = this.entity._bounds2d;
+							this.sprite.setDisplaySize(bounds.x, bounds.y);
+						}
+					},
+					this
+				);
+				this.scene.load.start();
 			} else {
 				this.sprite.setTexture(this.key);
 				const bounds = this.entity._bounds2d;
@@ -64,7 +63,7 @@ class PhaserItem extends PhaserAnimatedEntity {
 		}
 	}
 
-	protected depth (value: number): void {
+	protected depth(value: number): void {
 		const scene = this.gameObject.scene as GameScene;
 		this.gameObject.taroDepth = value;
 
@@ -75,18 +74,14 @@ class PhaserItem extends PhaserAnimatedEntity {
 		}
 	}
 
-	protected setOwnerUnit (unitId: string): void {
-
+	protected setOwnerUnit(unitId: string): void {
 		this.ownerUnitId = unitId;
 		const phaserUnit = unitId ? this.scene.findUnit(unitId) : null;
 
 		this.gameObject.owner = phaserUnit ? phaserUnit : null;
 	}
 
-	protected size (data: {
-		width: number,
-		height: number
-	}): void {
+	protected size(data: { width: number; height: number }): void {
 		super.size(data);
 
 		if (data.height && this.scene.heightRenderer) {
@@ -94,10 +89,11 @@ class PhaserItem extends PhaserAnimatedEntity {
 		}
 	}
 
-	protected destroy (): void {
-		this.scene.renderedEntities = this.scene.renderedEntities.filter(item => item !== this.sprite);
-		this.scene.itemList = this.scene.itemList.filter(item => item.entity.id() !== this.entity.id());
+	protected destroy(): void {
+		this.scene.renderedEntities = this.scene.renderedEntities.filter((item) => item !== this.sprite);
+		this.scene.itemList = this.scene.itemList.filter((item) => item.entity.id() !== this.entity.id());
 		this.ownerUnitId = null;
 		super.destroy();
 	}
 }
+

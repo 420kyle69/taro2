@@ -72,13 +72,18 @@ var TaroEngine = TaroEntity.extend({
 		// Set the initial id as the current time in milliseconds. This ensures that under successive
 		// restarts of the engine, new ids will still always be created compared to earlier runs -
 		// which is important when storing persistent data with ids etc
-		this._idCounter = new Date().getTime();
+		this._idCounter = Date.now();
 		this.lastCheckedAt = Date.now();
 
 		// use small numbers on the serverside for ids
 		if (this.isServer) {
 			// this._idCounter = 0
-			this.sanitizer = require('sanitizer').sanitize;
+			this.sanitizer = function (str) {
+				return require("isomorphic-dompurify").sanitize(str, {
+				  FORCE_BODY: true
+				});
+			};
+
 			this.emptyTimeLimit = 10 * 60 * 1000; // in ms - kill t1/t2 if empty for 10 mins
 		}
 
@@ -118,15 +123,19 @@ var TaroEngine = TaroEntity.extend({
 		this._updateTime = 'NA'; // The time the tick update section took to process
 
 		this._tickDelta = 0; // The time between the last tick and the current one
-		this._lastTimeStamp = new Date().getTime();
+		this._lastTimeStamp = undefined;
 
 		this._fpsRate = 60; // Sets the frames per second to execute engine tick's at
-		this._gameLoopTickRate = 20; // "frameTick", input, and streaming
-
+		
+		this._gameLoopTickRate = 60; // gameLoop tick rate is hard-coded at 20
 		this._lastGameLoopTickAt = 0;
 		this._gameLoopTickRemainder = 0;
 		this.gameLoopTickHasExecuted = true;
 
+		this._physicsTickRate = 60; // physics tick rate is updated inside gameComponent.js
+		this._lastphysicsTickAt = 0;
+		this._physicsTickRemainder = 0;
+		
 		this._aSecondAgo = 0;
 
 		this._state = 0; // Currently stopped
@@ -141,7 +150,7 @@ var TaroEngine = TaroEntity.extend({
 		this._mousePos = new TaroPoint3d(0, 0, 0);
 		this._currentViewport = null; // Set in TaroViewport.js tick(), holds the current rendering viewport
 		this._currentCamera = null; // Set in TaroViewport.js tick(), holds the current rendering viewport's camera
-		this._currentTime = Date.now(); // The current engine time
+		this._currentTime = 0; // The current engine time
 		this._globalSmoothing = false; // Determines the default smoothing setting for new textures
 		this._register = {
 			taro: this
@@ -169,7 +178,7 @@ var TaroEngine = TaroEntity.extend({
 		this.entityCreateSnapshot = {};
 		this.tempSnapshot = [0, {}];
 		this.nextSnapshot = [0, {}];
-		this.renderTime = 0;
+		
 		this._renderFPS = 60;
 		this._renderFrames = 0;
 		this.remainderFromLastStep = 0;
@@ -182,10 +191,9 @@ var TaroEngine = TaroEntity.extend({
 		this.lastTrigger = undefined;
 		this.triggerProfiler = {};
 		this.actionProfiler = {};
-		this.lastAction = undefined;
-		this.lastActionRanAt = 0;
 		this.lastTriggerRanAt = 0;
 
+		this.gameInfo = {};
 	},
 
 	getLifeSpan: function () {
@@ -683,7 +691,7 @@ var TaroEngine = TaroEntity.extend({
 				// Server-side implementation
 				requestAnimFrame = function (callback, element) {
 					setTimeout(function () {
-						callback(new Date().getTime());
+						callback(Date.now());
 					}, 1000 / fpsRate);
 				};
 			} else {
@@ -691,7 +699,7 @@ var TaroEngine = TaroEntity.extend({
 				window.requestAnimFrame = function (callback, element) {
 
 					setTimeout(function () {
-						callback(new Date().getTime());
+						callback(Date.now());
 					}, 1000 / fpsRate); // client will always run at 60 fps.
 				};
 			}
@@ -877,6 +885,37 @@ var TaroEngine = TaroEntity.extend({
 
 				if (taro.isServer) {
 					this.emptyTimeLimit = this.getIdleTimeoutMs();
+					// Server requestAnimationFrame method.
+					// Reference: https://github.com/nodejs/help/issues/2483
+					const fps = 60;
+					const callbackFunctions = [];
+					const skipSymbol = Symbol('skip');
+					const startTime = Date.now();
+					let currentTime = startTime;
+
+					const executeAnimationFrame = () => {
+						const currentFunctions = callbackFunctions.slice();
+						callbackFunctions.length = 0;
+
+						const now = Date.now();
+						const deltaTime = now - startTime;
+						const frameTime = 1000 / fps;
+
+						for(const func of currentFunctions)
+							if(func !== skipSymbol) func(deltaTime);
+
+						while(currentTime <= now + frameTime / 4) {
+							currentTime += frameTime;
+						}
+						setTimeout(executeAnimationFrame, currentTime - now);
+					};
+
+					requestAnimFrame = callback => {
+						callbackFunctions.push(callback);
+						return callbackFunctions.length - 1;
+					};
+
+					executeAnimationFrame();
 					requestAnimFrame(taro.engineStep);
 				}
 
@@ -888,7 +927,7 @@ var TaroEngine = TaroEntity.extend({
 				}
 			} else {
 				// Get the current timestamp
-				var curTime = new Date().getTime();
+				var curTime = Date.now();
 
 				// Record when we first started checking for dependencies
 				if (!taro._dependencyCheckStart) {
@@ -1346,6 +1385,8 @@ var TaroEngine = TaroEntity.extend({
 	_secondTick: function () {
 		var self = taro;
 
+		taro.queueTrigger('secondTick');
+		
 		// Store frames per second
 		self._renderFPS = Math.min(240, Math.max(5, self._renderFrames));
 		self._physicsFPS = self._physicsFrames;
@@ -1353,8 +1394,11 @@ var TaroEngine = TaroEntity.extend({
 		// Store draws per second
 		self._dps = self._dpf * self._renderFPS;
 
-
 		if (taro.isClient) {
+			if (taro.scoreboard?.isUpdateQueued) {
+				taro.scoreboard.update();
+			}
+			
 			if (!self.fpsStatsElement) {
 				self.fpsStatsElement = document.getElementById('updatefps');
 			}
@@ -1363,7 +1407,6 @@ var TaroEngine = TaroEntity.extend({
 				self.fpsStatsElement.innerHTML = self._renderFPS;
 			}
 			window.updateNextStatsEverySecond && window.updateNextStatsEverySecond({ fps: self._renderFPS });
-
 		}
 
 		// Zero out counters
@@ -1390,27 +1433,32 @@ var TaroEngine = TaroEntity.extend({
 		return this._timeScale;
 	},
 
-	/**
-	 * Increments the engine's interal time by the passed number of milliseconds.
-	 * @param {Number} val The number of milliseconds to increment time by.
-	 * @param {Number=} lastVal The last internal time value, used to calculate
-	 * delta internally in the method.
-	 * @returns {Number}
-	 */
-	incrementTime: function (val, lastVal) {
-		if (!this._pause) {
-			if (!lastVal) { lastVal = val; }
-			this._currentTime += ((val - lastVal) * this._timeScale);
-		}
-		return this._currentTime;
-	},
-
 	checkAndGetNumber: function (num, defaultReturnValue = '') {
 		if(!isNaN(parseFloat(num)) && !isNaN(num - 0)) {
 			return num;
 		} else {
 			defaultReturnValue;
 		}
+	},
+
+	/**
+	 * Increments the engine's internal time by the passed number of milliseconds.
+	 * @param {Number} val The number of milliseconds to increment time by.
+	 * @param {Number=} lastVal The last internal time value, used to calculate
+	 * delta internally in the method.
+	 * @returns {Number}
+	 */
+	incrementTime: function (timeStamp) {
+
+		if (this._lastTimeStamp != undefined) {
+			let timeElapsed = timeStamp - this._lastTimeStamp;
+			if (!this._pause) {			
+				this._currentTime = (this._currentTime + timeElapsed) * this._timeScale;			
+			}
+		}
+		
+		this._lastTimeStamp = timeStamp;		
+		return this._currentTime;
 	},
 
 	/**
@@ -1536,6 +1584,7 @@ var TaroEngine = TaroEntity.extend({
 				statsPanels.fps.begin();
 			}
 		}
+
 		/* TODO:
 			Make the scenegraph process simplified. Walk the scenegraph once and grab the order in a flat array
 			then process updates and ticks. This will also allow a layered rendering system that can render the
@@ -1549,13 +1598,10 @@ var TaroEngine = TaroEntity.extend({
 		var unbornIndex;
 		var unbornEntity;
 
-		self.incrementTime(timeStamp, self._timeScaleLastTimestamp);
-		self._timeScaleLastTimestamp = timeStamp;
-		timeStamp = Math.floor(self._currentTime);
-
+		self.incrementTime(timeStamp);
+		
 		if (timeStamp - self.lastSecond >= 1000) {
 			self._secondTick();
-			taro.queueTrigger('secondTick');
 			self.lastSecond = timeStamp;
 		}
 
@@ -1582,7 +1628,7 @@ var TaroEngine = TaroEntity.extend({
 			}
 
 			// Get the current time in milliseconds
-			self._tickStart = timeStamp;
+			self._tickStart = taro._currentTime;			
 
 			if (!self.lastTick) {
 				// This is the first time we've run so set some
@@ -1594,47 +1640,52 @@ var TaroEngine = TaroEntity.extend({
 				self._tickDelta = self._tickStart - self.lastTick;
 				// console.log("wtf tick", self._tickStart, self.lastTick, self._tickDelta)
 			}
+
 			taro.now = Date.now();
 			timeElapsed = taro.now - taro._lastGameLoopTickAt;
 			if (timeElapsed >= (1000 / taro._gameLoopTickRate) - taro._gameLoopTickRemainder) {
 				taro._lastGameLoopTickAt = taro.now;
 				taro._gameLoopTickRemainder = Math.min(timeElapsed - ((1000 / taro._gameLoopTickRate) - taro._gameLoopTickRemainder), (1000 / taro._gameLoopTickRate));
 				taro.gameLoopTickHasExecuted = true;
-				if (taro.physics) {
+				taro.queueTrigger('frameTick');
+			}
+
+			// Update the scenegraph - this is where entity _behaviour() is called which dictates things like attr regen speed also this cache-busts streamDataCache.
+			self.updateSceneGraph(ctx);
+
+			if (taro.physics) {
+
+				taro.tickCount = 0;
+				taro.updateTransform = 0;
+				taro.inViewCount = 0;
+				taro.totalChildren = 0;
+				taro.totalOrphans = 0;
+
+				taro.now = Date.now();
+				timeElapsed = taro.now - taro._lastphysicsTickAt;
+				if (timeElapsed >= (1000 / taro._physicsTickRate) - taro._physicsTickRemainder) {
+					
+					taro._lastphysicsTickAt = taro.now;
+					taro._physicsTickRemainder = Math.min(timeElapsed - ((1000 / taro._physicsTickRate) - taro._physicsTickRemainder), (1000 / taro._physicsTickRate));
+
+					// log how long it took to update physics world step
 					if (taro.profiler.isEnabled) {
 						var startTime = performance.now();
 					}
-
+					
 					taro.physics.update(timeElapsed);
-
+					taro.physicsTimeElapsed = timeElapsed;
+					taro.physicsLoopTickHasExecuted = true;
+				
 					// log how long it took to update physics world step
 					if (taro.profiler.isEnabled) {
 						taro.profiler.logTimeElapsed("physicsStep", startTime);
 					}
+
 				}
 			}
-
-			taro.tickCount = 0;
-			taro.updateTransform = 0;
-			taro.inViewCount = 0;
-			taro.totalChildren = 0;
-			taro.totalOrphans = 0;
-
-			// Update the scenegraph - this is where entity _behaviour() is called
-			if (self._enableUpdates) {
-				// taro.updateCount = {}
-				// taro.tickCount = {}
-
-				if (taroConfig.debug._timing) {
-					updateStart = Date.now();
-					self.updateSceneGraph(ctx);
-					taro._updateTime = Date.now() - updateStart;
-				} else {
-					self.updateSceneGraph(ctx);
-				}
-			}
-
-
+			
+			
 			taro.engineLagReported = false;
 			taro.actionProfiler = {};
 			taro.triggerProfiler = {};
@@ -1644,25 +1695,8 @@ var TaroEngine = TaroEntity.extend({
 				// kill tier 1 servers that has been empty for over 15 minutes
 				var playerCount = self.getPlayerCount();
 				self.lastCheckedAt = taro.now;
-
-				if (taro.isClient) {
-					// if I'm the only player in the game, suggest me a different game to play
-					// wait at least 5s, because playerCount is not accurate at the beginning
-					if (playerCount == 1 && !taro.client.myPlayer?.isDeveloper() && taro._currentTime - taro.client.playerJoinedAt > 5000) {
-						// log the event to posthog for AB testing players who join a game with 1 player
-						if (window.posthog) {
-							if (window.posthogEventCaptured === undefined) {
-								window.posthogEventCaptured = true;
-								console.log('player is alone ;-;');
-								window.posthog.capture('player is alone in the game');
-							}
-						}
-
-						if (typeof window.raidAlert === 'function') {
-							window.raidAlert();
-						}
-					}
-				} else if (taro.isServer) {
+				
+				if (taro.isServer) {
 					if (playerCount <= 0) {
 						if (!self.serverEmptySince) {
 							self.serverEmptySince = taro.now;
@@ -1698,16 +1732,6 @@ var TaroEngine = TaroEntity.extend({
 					}
 				}
 			}
-			
-			// triggersQueued is executed in the entities first (entity-script) then it runs for the world
-			while (taro.script && taro.triggersQueued.length > 0) {
-				const trigger = taro.triggersQueued.shift();
-				taro.script.trigger(trigger.name, trigger.params);
-			}
-
-			if (taro.gameLoopTickHasExecuted) {
-				taro.queueTrigger('frameTick');
-			}
 
 			if (taro.isClient) {
 				if (taro.client.myPlayer) {
@@ -1715,11 +1739,6 @@ var TaroEngine = TaroEntity.extend({
 				}
 				return;
 			}
-			
-			if (!taro.gameLoopTickHasExecuted) {
-				return;
-			}
-
 			// Check for unborn entities that should be born now
 			unbornQueue = taro._spawnQueue;
 			unbornCount = unbornQueue.length;
@@ -1733,54 +1752,48 @@ var TaroEngine = TaroEntity.extend({
 				}
 			}
 
-			// Render the scenegraph
-			if (self._enableRenders) {
-				if (!self._useManualRender) {
-					if (taroConfig.debug._timing) {
-						self.renderSceneGraph(ctx);
-					} else {
-						self.renderSceneGraph(ctx);
-					}
-				} else {
-					if (self._manualRender) {
-						if (taroConfig.debug._timing) {
-							self.renderSceneGraph(ctx);
-						} else {
-							self.renderSceneGraph(ctx);
-						}
-						self._manualRender = false;
-					}
-				}
-			}
-
-
-
-
 			// Record the lastTick value so we can
 			// calculate delta on the next tick
 			self.lastTick = self._tickStart;
 			self._dpf = self._drawCount;
-			self._drawCount = 0;
+			self._drawCount = 0;	
+			if (taro.physicsLoopTickHasExecuted) {
+				if (taro.isServer) {
 
-			// log how long it took to update physics world step
-			if (taro.profiler.isEnabled) {
-				var startTime = performance.now();
-			}
+					// executes entities' tick() which queues transform streamData to the clients
+					self.renderSceneGraph(ctx);
 
-			taro.network.stream._sendQueue(timeStamp);
-			taro.network.stream._sendQueuedStreamData();
-
-			// log how long it took to update physics world step
-			if (taro.profiler.isEnabled) {
-				taro.profiler.logTimeElapsed("networkStep", startTime);
-			
-				taro.profiler.logTick(50);
+					if (taro.profiler.isEnabled) {
+						var startTime = performance.now();
+					}
+					
+					taro.network.stream._sendQueue(timeStamp);
+					taro.network.stream._sendQueuedStreamData();
+		
+					// log how long it took to update physics world step
+					if (taro.profiler.isEnabled) {
+						taro.profiler.logTimeElapsed("networkStep", startTime);
+					
+						taro.profiler.logTick(50);
+					}
+				}		
 			}
 		}
 
-		taro.gameLoopTickHasExecuted = false;
+		
+		if (taro.gameLoopTickHasExecuted) {
+			// triggersQueued is executed in the entities first (entity-script) then it runs for the world
+			while (taro.script && taro.triggersQueued.length > 0) {
+				const trigger = taro.triggersQueued.shift();
+				taro.script.trigger(trigger.name, trigger.params);
+			}
+			
+		}
 
-		et = new Date().getTime();
+		taro.gameLoopTickHasExecuted = false;
+		taro.physicsLoopTickHasExecuted = false;
+
+		et = Date.now();
 		taro._tickTime = et - taro.now;
 
 		// slow engineTick restart only works on two houses (Braains.io)
@@ -1818,31 +1831,8 @@ var TaroEngine = TaroEntity.extend({
 
 		if (arr) {
 			arrCount = arr.length;
-
-			// Loop our viewports and call their update methods
-			if (taroConfig.debug._timing) {
-				while (arrCount--) {
-					us = new Date().getTime();
-					arr[arrCount].update(ctx, tickDelta);
-					ud = new Date().getTime() - us;
-
-					if (arr[arrCount]) {
-						if (!taro._timeSpentInUpdate[arr[arrCount].id()]) {
-							taro._timeSpentInUpdate[arr[arrCount].id()] = 0;
-						}
-
-						if (!taro._timeSpentLastUpdate[arr[arrCount].id()]) {
-							taro._timeSpentLastUpdate[arr[arrCount].id()] = {};
-						}
-
-						taro._timeSpentInUpdate[arr[arrCount].id()] += ud;
-						taro._timeSpentLastUpdate[arr[arrCount].id()].ms = ud;
-					}
-				}
-			} else {
-				while (arrCount--) {
-					arr[arrCount].update(ctx, tickDelta);
-				}
+			while (arrCount--) {
+				arr[arrCount].update(ctx, tickDelta);
 			}
 		}
 	},
@@ -1855,9 +1845,9 @@ var TaroEngine = TaroEntity.extend({
 		if (taro.isServer) {
 			if (this._viewportDepth) {
 				if (taroConfig.debug._timing) {
-					ts = new Date().getTime();
+					ts = Date.now();
 					this.depthSortChildren();
-					td = new Date().getTime() - ts;
+					td = Date.now() - ts;
 
 					if (!taro._timeSpentLastTick[this.id()]) {
 						taro._timeSpentLastTick[this.id()] = {};
@@ -1876,16 +1866,16 @@ var TaroEngine = TaroEntity.extend({
 			// Process the current engine tick for all child objects
 			var arr = this._children;
 			var arrCount;
-
+			
 			if (arr) {
 				arrCount = arr.length;
 				// Loop our viewports and call their tick methods
 				if (taroConfig.debug._timing) {
 					while (arrCount--) {
 						ctx.save();
-						ts = new Date().getTime();
+						ts = Date.now();
 						arr[arrCount].tick(ctx);
-						td = new Date().getTime() - ts;
+						td = Date.now() - ts;
 						if (arr[arrCount]) {
 							if (!taro._timeSpentInTick[arr[arrCount].id()]) {
 								taro._timeSpentInTick[arr[arrCount].id()] = 0;

@@ -53,7 +53,7 @@ var TaroChatServer = {
 	 * @param {String=} to The id of the user to send the message to.
 	 * @param {String} from The id of the user that sent the message.
 	 */
-	sendToRoom: function (roomId, message, to, from) {
+	sendToRoom: function (roomId, message, to, from, additionalOpts = {}) {
 		if (!to && !from) {
 			taro.devLog('sending chatt message inside sendChatRoom', message);
 		}
@@ -67,25 +67,23 @@ var TaroChatServer = {
 			roomId: roomId,
 			text: message,
 			from: from,
-			to: to
+			to: to,
+			bmToAll: additionalOpts?.isBroadcastMessageToAllGames
 		};
 
 		// send the system message (from the action 'sendChatMessage')
 		if (sender == undefined) {
 			taro.network.send('taroChatMsg', msg, to);
 			return;
-		}
-		else if (sender && sender._stats) {
-
+		} else if (sender && sender._stats) {
 			// prevent sending messages from banned/unverified users
-			if (!global.isDev && sender._stats.banChat) {
+			if (!global.isDev && ((sender._stats.banChat) || !sender._stats.userId)) {
 				return;
-			}
-			else if (this.isSpamming(from, message)) { // mute spammers
+			} else if (this.isSpamming(from, message)) { // mute spammers
 				sender._stats.banChat = true;
 				msg.text = 'You have been muted for spamming.',
 				taro.network.send('taroChatMsg', msg);
-				taro.clusterClient.banChat({
+				taro.workerComponent.banChat({
 					gameId: gameData._id,
 					userId: sender._stats.userId
 				});
@@ -119,6 +117,7 @@ var TaroChatServer = {
 					// Send message to individual user
 					if (room.users.indexOf(to) > -1) {
 						taro.network.send('taroChatMsg', msg, to);
+						
 						// console.log('Sending to one user...', msg, to);
 					} else {
 						self.log(`Cannot send to user because specified user is not in room: ${to}`);

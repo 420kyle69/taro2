@@ -172,8 +172,10 @@ const box2dtsWrapper: PhysicsDistProps = {
 		var tempShape;
 		var tempFilterData;
 		var i;
-		var finalX; var finalY;
-		var finalWidth; var finalHeight;
+		var finalX;
+		var finalY;
+		var finalHWidth;
+		var finalHHeight;
 
 		// Process body definition and create a box2d body for it
 		switch (body.type) {
@@ -265,7 +267,7 @@ const box2dtsWrapper: PhysicsDistProps = {
 												}
 												*/
 
-											if (fixtureDef.shape.data && typeof (fixtureDef.shape.data.radius) !== 'undefined') {
+											if (fixtureDef.shape.data && typeof fixtureDef.shape.data.radius !== 'undefined') {
 												// tempShape.SetRadius(fixtureDef.shape.data.radius / self._scaleRatio);
 												var p = new self.b2Vec2(finalX / self._scaleRatio, finalY / self._scaleRatio);
 												var r = fixtureDef.shape.data.radius / self._scaleRatio;
@@ -285,15 +287,15 @@ const box2dtsWrapper: PhysicsDistProps = {
 											tempShape = new self.b2PolygonShape();
 
 											if (fixtureDef.shape.data) {
-												finalX = fixtureDef.shape.data.x !== undefined ? fixtureDef.shape.data.x : 0;
-												finalY = fixtureDef.shape.data.y !== undefined ? fixtureDef.shape.data.y : 0;
-												finalWidth = fixtureDef.shape.data.width !== undefined ? fixtureDef.shape.data.width : (entity._bounds2d.x / 2);
-												finalHeight = fixtureDef.shape.data.height !== undefined ? fixtureDef.shape.data.height : (entity._bounds2d.y / 2);
+												finalX = fixtureDef.shape.data.x ?? 0;
+												finalY = fixtureDef.shape.data.y ?? 0;
+												finalHWidth = fixtureDef.shape.data.halfWidth ?? entity._bounds2d.x / 2;
+												finalHHeight = fixtureDef.shape.data.halfHeight ?? entity._bounds2d.y / 2;
 											} else {
 												finalX = 0;
 												finalY = 0;
-												finalWidth = (entity._bounds2d.x / 2);
-												finalHeight = (entity._bounds2d.y / 2);
+												finalHWidth = entity._bounds2d.x / 2;
+												finalHHeight = entity._bounds2d.y / 2;
 											}
 
 											// Set the polygon as a box
@@ -309,8 +311,8 @@ const box2dtsWrapper: PhysicsDistProps = {
 											// review:
 
 											tempShape.SetAsBox(
-												(finalWidth / self._scaleRatio),
-												(finalHeight / self._scaleRatio)
+												finalHWidth / self._scaleRatio,
+												finalHHeight / self._scaleRatio
 											);
 											break;
 									}
@@ -417,7 +419,7 @@ const box2dtsWrapper: PhysicsDistProps = {
 
 			var joint = self._world.CreateJoint(joint_def); // joint between two pieces
 
-			// var serverStats = taro.server.getStatus()
+			// var serverStats = taro.status.getSummary()
 			PhysicsComponent.prototype.log('joint created ', aBody.jointType);
 
 			entityA.jointsAttached[entityB.id()] = joint;

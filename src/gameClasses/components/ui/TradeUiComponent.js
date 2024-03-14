@@ -22,12 +22,10 @@ var TradeUiComponent = TaroEntity.extend({
 		});
 
 		$('.cancel-trade-request-button').on('click', function () {
-			// taro.network.send('trade', { type: 'cancel' });
 			taro.tradeUi.closeTradeRequest();
 		});
 
 		$('.cancel-trade-button').on('click', function () {
-			// taro.network.send('trade', { type: 'cancel' });
 			taro.tradeUi.closeTrading();
 		});
 	},
@@ -46,7 +44,7 @@ var TradeUiComponent = TaroEntity.extend({
 			offerSlots.append(
 				$('<div/>', {
 					id: `offer-${i}`,
-					class: 'btn btn-light trade-offer-slot'
+					class: 'btn btn-light trade-offer-slot trade-slot'
 				})
 			);
 			i++;
@@ -105,12 +103,19 @@ var TradeUiComponent = TaroEntity.extend({
 	closeTrading: function () {
 		var playerA = taro.client.myPlayer;
 		var playerB = taro.$(taro.client.myPlayer.tradingWith);
-		taro.network.send('trade', { type: 'cancel', cancleBy: playerA.id(), cancleTo: playerB.id() });
+		taro.network.send('trade', { type: 'cancel', cancleBy: playerA.id(), cancleTo: playerB?.id() });
 		delete playerA.tradingWith;
-		delete playerB.tradingWith;
+		delete playerB?.tradingWith;
 		delete playerA.isTrading;
-		delete playerB.isTrading;
+		delete playerB?.isTrading;
 		$('#trade-div').hide();
+	},
+
+	tradeOptionClicked: function ({ clientId, unitId }) {
+		taro.network.send('playerClickTradeOption', {
+			tradeWithClientId: clientId,
+			tradeWithUnitId: unitId
+		});
 	}
 });
 

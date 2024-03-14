@@ -1,13 +1,16 @@
 var moddioConfig =
 	process.env.ENV === 'standalone'
-		? []
+		? process.env.LOAD_CC === 'true' ? [{ name: 'WorkerComponent', path: '../../components/WorkerComponent' }]:[]
 		: [
-			{ name: 'ClusterClientComponent', path: '../../ClusterClientComponent' },
-			{ name: 'ClusterServerComponent', path: '../../ClusterServerComponent' },
-			{ name: 'HttpComponent', path: '../../HttpComponent' },
-			{ name: 'ProxyComponent', path: '../../ProxyComponent' },
-			{ name: 'betterFilter', path: '../../moderation/betterFilter' }
+			{ name: 'WorkerComponent', path: '../../components/WorkerComponent' },
+			{ name: 'MasterServerComponent', path: '../../components/MasterServerComponent' },
+			{ name: 'MasterComponent', path: '../../components/MasterComponent' },
+			{ name: 'HttpComponent', path: '../../components/HttpComponent' },
+			{ name: 'ProxyComponent', path: '../../components/ProxyComponent' },
+			{ name: 'betterFilter', path: '../../utils/betterFilter' }
 		];
+
+
 var defaultConfig = [
 	{ name: 'ServerNetworkEvents', path: '../server/ServerNetworkEvents' },
 
@@ -15,7 +18,7 @@ var defaultConfig = [
 
 	{ name: 'ConditionComponent', path: '../src/gameClasses/components/script/ConditionComponent' },
 	{ name: 'ActionComponent', path: '../src/gameClasses/components/script/ActionComponent' },
-	{ name: 'VariableComponent', path: '../src/gameClasses/components/script/VariableComponent' },
+	{ name: 'ParameterComponent', path: '../src/gameClasses/components/script/ParameterComponent' },
 
 	{ name: 'Player', path: '../src/gameClasses/Player' },
 	{ name: 'Unit', path: '../src/gameClasses/Unit' },
@@ -36,8 +39,11 @@ var defaultConfig = [
 	{ name: 'SoundComponent', path: '../src/gameClasses/components/SoundComponent' },
 
 	{ name: 'AbilityComponent', path: '../src/gameClasses/components/unit/AbilityComponent' },
-	{ name: 'AttributeComponent', path: '../src/gameClasses/components/unit/AttributeComponent' },
 	{ name: 'AIComponent', path: '../src/gameClasses/components/unit/AIComponent' },
+	{ name: 'AStarPathfindingComponent', path: '../src/gameClasses/components/unit/AStarPathfindingComponent' },
+
+	{ name: 'AttributeComponent', path: '../src/gameClasses/components/entity/AttributeComponent' },
+	{ name: 'VariableComponent', path: '../src/gameClasses/components/entity/VariableComponent' },	
 
 	// Raycasting
 	{ name: 'Raycaster', path: '../src/gameClasses/Raycaster' },
@@ -51,7 +57,11 @@ var defaultConfig = [
 	{ name: 'TileShape', path: '../src/gameClasses/TileShape' },
 	{ name: 'Constants', path: '../src/renderer/phaser/classes/devmode/Constants' },
 
-	{ name: 'DeveloperMode', path: '../src/gameClasses/DeveloperMode' }
+	{ name: 'StatusComponent', path: '../src/gameClasses/components/StatusComponent' },
+
+	{ name: 'DeveloperMode', path: '../src/gameClasses/DeveloperMode' },
+	// Color support
+	{ name: 'Colors', path: '../src/utils/Colors' }
 ];
 
 var config = {

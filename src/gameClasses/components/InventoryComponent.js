@@ -8,6 +8,7 @@ var InventoryComponent = TaroEntity.extend({
 		this._entity = entity;
 		// Store any options that were passed to us
 		this._options = options;
+		this.isDirty = false;
 	},
 
 	createInventorySlots: function () {
@@ -46,7 +47,7 @@ var InventoryComponent = TaroEntity.extend({
 			}
 
 			this.createBackpack();
-			// this.createTradingSlots();
+			this.createTradingSlots();
 		}
 		this.update();
 	},
@@ -96,7 +97,7 @@ var InventoryComponent = TaroEntity.extend({
 					$('<div/>', {
 						id: `item-${i}`,
 						name: i,
-						class: `btn btn-light inventory-item-button ${mobileClass}`,
+						class: `btn btn-light trade-slot inventory-item-button ${mobileClass}`,
 						role: 'button'
 					})
 				);
@@ -286,11 +287,11 @@ var InventoryComponent = TaroEntity.extend({
 					}
 				}
 			}
-
-			taro.queueTrigger('unitPickedAnItem', {
-				unitId: unit.id(),
-				itemId: item.id()
-			});
+			const triggerParams = { unitId: unit.id(), itemId: item.id() };
+			//we cant use queueTrigger here because it will be called after entity scripts and item or unit probably no longer exists
+			item.script.trigger('thisItemIsPickedUp', triggerParams); // this entity (item)
+			unit.script.trigger('thisUnitPickedUpAnItem', triggerParams); // this entity (unit)
+			taro.script.trigger('unitPickedAnItem', triggerParams); // unit picked item (need to rename rename 'unitPickedAnItem' -> 'unitPickedUpAnItem')
 		}
 
 		return slotIndex;
@@ -380,12 +381,14 @@ var InventoryComponent = TaroEntity.extend({
 				for (var slotIndex = 0; slotIndex < totalInventorySize + 5; slotIndex++) { // +5 for trade slots?
 					var itemId = this._entity._stats.itemIds[slotIndex];
 					var item = taro.$(itemId);
-					
+
 					taro.itemUi.updateItemSlot(item, slotIndex);
 				}
 
 				// this.updateBackpackButton()
 			}
+
+			this.isDirty = false;
 		}
 	},
 

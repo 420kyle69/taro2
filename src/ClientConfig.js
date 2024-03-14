@@ -4,6 +4,13 @@ var taroClientConfig = {
 		'/lib/dat.gui.min.js',
 		'/lib/msgpack.min.js',
 		'/lib/rfdc.min.js',
+		'/lib/lzutf8.min.js',
+		'/lib/phaser.min.js',
+		'/lib/rexuiplugin.min.js',
+		'/lib/rexvirtualjoystickplugin.min.js',
+		'/lib/three.min.js',
+		'/lib/OrbitControls.js',
+    '/lib/tween.umd.js',
 
 		'/gameClasses/Player.js',
 		'/gameClasses/Unit.js',
@@ -41,28 +48,34 @@ var taroClientConfig = {
 		'/gameClasses/components/ui/TradeUiComponent.js',
 
 		'/gameClasses/components/script/ScriptComponent.js',
-		'/gameClasses/components/script/VariableComponent.js',
 		'/gameClasses/components/script/ActionComponent.js',
+		'/gameClasses/components/script/ParameterComponent.js',
 		'/gameClasses/components/script/ConditionComponent.js',
 
 		'/gameClasses/components/unit/AIComponent.js',
+		'/gameClasses/components/unit/AStarPathfindingComponent.js',
 		'/gameClasses/components/unit/AbilityComponent.js',
-		'/gameClasses/components/unit/AttributeComponent.js',
+
+		'/gameClasses/components/entity/AttributeComponent.js',
+		'/gameClasses/components/entity/VariableComponent.js',
 
 		/* Standard game scripts */
 		'/gameClasses/DeveloperMode.js',
 		'/gameClasses/EntitiesToRender.js',
 		'/gameClasses/Raycaster.js',
 		'/gameClasses/HeightRenderComponent.js',
+		'/gameClasses/VisibilityMask.js',
+		/* color helpers */
+		'utils/Colors.js',
 
 		/* tile calc */
 		'/gameClasses/Combinator.js',
 		'/gameClasses/TileShape.js',
 		/* Phaser */
-		'renderer/phaser/phaser.min.js',
-		'renderer/phaser/rexuiplugin.min.js',
-		'../node_modules/phaser3-rex-plugins/dist/rexvirtualjoystickplugin.min.js',
+		// '../node_modules/phaser3-rex-plugins/dist/rexvirtualjoystickplugin.min.js',
 		//'../node_modules/phaser3-rex-plugins/templates/ui/ui-components.js',
+		'utils/visibility-polygon.js',
+		'utils/functionalTryCatch.js',
 		'renderer/phaser/enums/FlipMode.js',
 		'renderer/phaser/enums/TileLayer.js',
 		'renderer/phaser/enums/EntityLayer.js',
@@ -82,28 +95,46 @@ var taroClientConfig = {
 		'renderer/phaser/scenes/GameScene.js',
 		'renderer/phaser/classes/PhaserJoystick.js',
 		'renderer/phaser/scenes/MobileControlsScene.js',
-        'renderer/phaser/scenes/UiScene.js',
+		'renderer/phaser/scenes/UiScene.js',
 		'renderer/phaser/scenes/DevModeScene.js',
-        'renderer/phaser/classes/Ui/AbilityBar.js',
-        'renderer/phaser/classes/Ui/AbilityButton.js',
+		'renderer/phaser/classes/Ui/PhaserButtonBar.js',
+		'renderer/phaser/classes/Ui/PhaserButton.js',
 		'renderer/phaser/classes/devmode/DevModeTools.js',
-		'renderer/phaser/classes/devmode/DevToolButton.js',
-		'renderer/phaser/classes/devmode/DevTooltip.js',
 		'renderer/phaser/classes/devmode/RegionEditor.js',
 		'renderer/phaser/classes/devmode/TileEditor.js',
-        'renderer/phaser/classes/devmode/EntityEditor.js',
+		'renderer/phaser/classes/devmode/EntityEditor.js',
 		'renderer/phaser/classes/devmode/TilePalette.js',
 		'renderer/phaser/classes/devmode/TileMarker.js',
-        'renderer/phaser/classes/devmode/MarkerGraphics.js',
+		'renderer/phaser/classes/devmode/MarkerGraphics.js',
 		'renderer/phaser/classes/devmode/CommandsController.js',
 		'renderer/phaser/classes/devmode/Constants.js',
 		'renderer/phaser/classes/devmode/EntityImage.js',
 		'renderer/phaser/PhaserRenderer.js',
+
+		// Three.js Renderer
+		'renderer/three/Utils.js',
+    'renderer/three/EntityManager.js',
+		'renderer/three/TextureRepository.js',
+    'renderer/three/Node.js',
+		'renderer/three/Voxels.js',
+		'renderer/three/Renderer.js',
+		'renderer/three/Camera.js',
+		'renderer/three/Sprite.js',
+		'renderer/three/Label.js',
+		'renderer/three/AnimatedSprite.js',
+		'renderer/three/Unit.js',
+		'renderer/three/AttributeBar.js',
+		'renderer/three/ChatBubble.js',
+		'renderer/three/Sky.js',
+		'renderer/three/Tileset.js',
+		'renderer/three/Particles.js',
+    'renderer/three/FloatingText.js',
+
 		'/client.js',
-		'/index.js'
-	]
+		'/index.js',
+	],
 };
 
-if (typeof (module) !== 'undefined' && typeof (module.exports) !== 'undefined') {
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
 	module.exports = taroClientConfig;
 }

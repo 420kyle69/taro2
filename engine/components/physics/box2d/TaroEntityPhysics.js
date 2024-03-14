@@ -50,6 +50,7 @@ var TaroEntityPhysics = TaroEntity.extend({
 		}
 
 		this._actionQueue = [];
+		this.posHistory = [];
 	},
 
 	updateBody: function (defaultData, isLossTolerant) {
@@ -57,12 +58,10 @@ var TaroEntityPhysics = TaroEntity.extend({
 
 		// console.log("updatebody", this._stats.name, defaultData, this._stats.currentBody.type)
 		// console.trace()
-
 		body = this._stats.currentBody;
 		if (!body) {
 			return;
 		}
-
 		if (body.type === 'none' || body.type === 'spriteOnly') {
 			self.destroyBody();
 			return;
@@ -83,10 +82,10 @@ var TaroEntityPhysics = TaroEntity.extend({
 				shapeData = {};
 			}
 			if (sizeX) {
-				shapeData.width = sizeX;
+				shapeData.halfWidth = sizeX / 2;
 			}
 			if (sizeY) {
-				shapeData.height = sizeY;
+				shapeData.halfHeight = sizeY / 2;
 			}
 			if (offsetX) {
 				shapeData.x = offsetX;
@@ -132,7 +131,7 @@ var TaroEntityPhysics = TaroEntity.extend({
 						((collidesWith.items) ? 0x0008 : 0) |
 						((collidesWith.projectiles) ? 0x0010 : 0) |
 						((this._category != 'sensor') ? 0x0020 : 0) | // all entities aside from sensor will collide with regions
-						((this._category == 'unit' || this._category == 'item') ? 0x0040 : 0) // units & items will collide with sensors
+						((this._category == 'unit' || this._category == 'item' || this._category == 'projectile') ? 0x0040 : 0) // units/items/projectile will collide with sensors
 
 				},
 				shape: {
@@ -143,7 +142,6 @@ var TaroEntityPhysics = TaroEntity.extend({
 			}]
 		};
 		// console.log("collidesWith", this._category, filterCategoryBits, collidesWith, body)
-
 		this.physicsBody(body, isLossTolerant);
 		// if (this._category === 'item') {
 		//     this.previousState = this._stats && this._stats.states && this._stats.states[this._stats.stateId] || {};
@@ -406,16 +404,9 @@ var TaroEntityPhysics = TaroEntity.extend({
 
 	setLinearVelocityLT: function (x, y) {
 		try {
-			taro.physicsTickCount++;
 			if (!isNaN(x) && !isNaN(y) && isFinite(x) && isFinite(y)) {
-				// client side's predicted physics is weaker than the server's, so buff it up!
-				// if (taro.isClient && this == taro.client.selectedUnit) {
-				//     x *= 1.2737
-				//     y *= 1.2737
-				// }
 				if (taro.physics.engine === 'BOX2DWASM') {
-					const scale = taro.physics._scaleRatioToBox2dWeb;
-					let v = new taro.physics.b2Vec2(x / scale, y / scale);
+					let v = new taro.physics.b2Vec2(x, y);
 					this.body.setLinearVelocity(v);
 					taro.physics.destroyB2dObj(v);
 				} else {
@@ -450,9 +441,11 @@ var TaroEntityPhysics = TaroEntity.extend({
 
 		try {
 			if (!isNaN(x) && !isNaN(y) && isFinite(x) && isFinite(y)) {
-				const scale = taro.physics.engine !== 'BOX2DWASM' ? 1 : taro.physics._scaleRatioToBox2dWeb ** 3;
-				var thrustVector = new taro.physics.b2Vec2(x / scale, y / scale);
+				var thrustVector = new taro.physics.b2Vec2(x, y);
 				this.body.applyForce(thrustVector, this.body.getWorldCenter());
+				if (taro.physics.engine === 'BOX2DWASM') {
+					taro.physics.destroyB2dObj(thrustVector);
+				}
 			}
 		} catch (e) {
 			console.log(e);
@@ -480,9 +473,11 @@ var TaroEntityPhysics = TaroEntity.extend({
 		// taro.devLog("applyForce", x, y)
 		try {
 			if (!isNaN(x) && !isNaN(y) && isFinite(x) && isFinite(y)) {
-				const scale = taro.physics.engine !== 'BOX2DWASM' ? 1 : taro.physics._scaleRatioToBox2dWeb ** 3 - 2;
-				var thrustVector = new taro.physics.b2Vec2(x / scale, y / scale);
+				var thrustVector = new taro.physics.b2Vec2(x, y);
 				this.body.applyLinearImpulse(thrustVector, this.body.getWorldCenter());
+				if (taro.physics.engine === 'BOX2DWASM') {
+					taro.physics.destroyB2dObj(thrustVector);
+				}
 			}
 		} catch (e) {
 			console.log(e);
@@ -493,8 +488,7 @@ var TaroEntityPhysics = TaroEntity.extend({
 	applyTorqueLT: function (torque) {
 		try {
 			if (!isNaN(torque)) {
-				const scale = taro.physics._scaleRatioToBox2dWeb;
-				this.body.applyTorque(torque / scale);
+				this.body.applyTorque(torque);
 			}
 		} catch (e) {
 			TaroEntityPhysics.prototype.log(`taroEntityBox2d.js: applyTorque ${e}`);
