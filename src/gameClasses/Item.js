@@ -919,7 +919,11 @@ var Item = TaroEntityPhysics.extend({
 		if (data.attributes) {
 			for (var attrId in data.attributes) {
 				if (data.attributes[attrId]) {
-					var attributeValue = data.attributes[attrId].value; // default attribute value from new unit type
+					var attributeValue = data.attributes[attrId].value; // default attribute value from new item type
+					// if old item type had a same attribute, then take the value from it.
+					if (self._stats.attributes && self._stats.attributes[attrId]) {
+						attributeValue = self._stats.attributes[attrId].value;
+					}
 					if (this._stats.attributes[attrId]) {
 						this._stats.attributes[attrId].value = Math.max(data.attributes[attrId].min, Math.min(data.attributes[attrId].max, parseFloat(attributeValue)));
 					}
