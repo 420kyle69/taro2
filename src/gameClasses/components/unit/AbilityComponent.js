@@ -12,6 +12,18 @@ var AbilityComponent = TaroEntity.extend({
 		this._abilityQueue = [];
 	},
 
+  move(left, right, up, down) {
+    if (this._entity.direction) {
+      this._entity.direction.x = 0;
+      this._entity.direction.y = 0;
+
+      if (left) this._entity.direction.x -= 1;
+      if (right) this._entity.direction.x += 1;
+      if (up) this._entity.direction.y -= 1;
+      if (down) this._entity.direction.y += 1;
+		}
+  },
+
 	moveUp: function () {
 		if (this._entity.direction) {
 			this._entity.direction.y = -1;
@@ -85,7 +97,7 @@ var AbilityComponent = TaroEntity.extend({
 				return;
 			}
 		}
-		this._abilityQueue.push({ abilityId: abilityId, key: key });		
+		this._abilityQueue.push({ abilityId: abilityId, key: key });
 	},
 
 	cast: function (handle, key) {
@@ -256,11 +268,11 @@ var AbilityComponent = TaroEntity.extend({
 		if (taro.isClient && this._entity._stats.clientId === taro.network.id()) {
 			taro.client.emit('start-casting', key);
 		}
-		
+
 	},
 
 	stopCasting: function (abilityId, key) {
-		
+
 		if (!this.activeAbilities[abilityId]) {
 			return;
 		}
@@ -309,14 +321,14 @@ var AbilityComponent = TaroEntity.extend({
 
 	_behaviour: function (ctx) {
 		var self = this;
-		
+
 		self._abilityQueue = self.makeArrayUnique(self._abilityQueue); // remove duplicates ability casts
-		
-		while (self._abilityQueue.length > 0) {	
+
+		while (self._abilityQueue.length > 0) {
 			const ability = self._abilityQueue.shift();
 			self.cast(ability.abilityId, ability.key);
 		}
-		
+
 		if (Object.keys(this.abilityDurations).length > 0) {
 			for (let id in this.abilityDurations) {
 
