@@ -88,19 +88,24 @@ var ControlComponent = TaroEntity.extend({
 				if (unitAbility) this.keyDownAbility(unit, unitAbility.keyDown, data.key);
 				taro.network.send('playerKeyDown', { device: data.device, key: data.key });
 			});
-			taro.client.on('key-up', (data) => { 
+			taro.client.on('key-up', (data) => {
 				const unit = this._entity.getSelectedUnit();
 				const unitAbility = unit._stats.controls.abilities[data.key];
 				this.keyUpAbility(unit, unitAbility, data.key);
 				taro.network.send('playerKeyUp', { device: data.device, key: data.key });
 			});
 		}
-	},  
+	},
 
 	keyDown: function (device, key) {
 		if(taro.developerMode.shouldPreventKeybindings() || (taro.isClient && this._entity._stats.clientId === taro.network.id() && taro.client.isPressingPhaserButton)) {
 			return;
 		}
+
+    const lastLeft  = this.input.key.a || this.input.key.left;
+    const lastRight = this.input.key.d || this.input.key.right;
+    const lastUp    = this.input.key.w || this.input.key.up;
+    const lastDown  = this.input.key.s || this.input.key.down;
 
 		if (this.input[device]) {
 			if ((taro.isClient && !this._isPlayerInputingText) || taro.isServer) {
@@ -118,44 +123,21 @@ var ControlComponent = TaroEntity.extend({
 		if (unit && unit._category == 'unit') {
 			if (taro.isServer || (taro.isClient && !this._isPlayerInputingText)) {
 				var unitAbility = null;
-				// execute movement command is AI is disabled
-				if (unit._stats.controls && !unit._stats.aiEnabled){
-					if (unit._stats.controls.movementControlScheme == 'wasd') {
-						switch (key) {
-							case 'w':
-							case 'up':
-								unit.ability.moveUp();
-								// taro.inputReceived = Date.now();
-								break;
+				// execute movement command if AI is disabled
+				if (unit._stats.controls && !unit._stats.aiEnabled) {
+          const canMoveVertical = unit._stats.controls.movementControlScheme == 'wasd';
+          const left  = this.input.key.a || this.input.key.left;
+          const right = this.input.key.d || this.input.key.right;
+          const up    = canMoveVertical && (this.input.key.w || this.input.key.up);
+          const down  = canMoveVertical && (this.input.key.s || this.input.key.down);
 
-							case 'a':
-							case 'left':
-								unit.ability.moveLeft();
-								break;
+          unit.ability.move(left, right, up, down);
 
-							case 's':
-							case 'down':
-								unit.ability.moveDown();
-								break;
+          if (left && right && !lastLeft) unit.ability.moveLeft();
+          else if (left && right && !lastRight) unit.ability.moveRight();
 
-							case 'd':
-							case 'right':
-								unit.ability.moveRight();
-								break;
-						}
-					} else if (unit._stats.controls.movementControlScheme == 'ad') {
-						switch (key) {
-							case 'a':
-							case 'left':
-								unit.ability.moveLeft();
-								break;
-
-							case 'd':
-							case 'right':
-								unit.ability.moveRight();
-								break;
-						}
-					}
+          if (up && down && !lastUp) unit.ability.moveUp();
+          else if (up && down && !lastDown) unit.ability.moveDown();
 				}
 
 				if (!unitAbility && unit._stats.controls && unit._stats.controls.abilities) {
@@ -199,35 +181,9 @@ var ControlComponent = TaroEntity.extend({
 		if (!player) return;
 
 		var unit = player.getSelectedUnit();
-		// for (i in units) {
-		// 	var unit = units[i]
 		if (unit) {
 			// traverse through abilities, and see if any of them is being casted by the owner
 			switch (key) {
-				case 'w':
-				case 'up':
-					if (unit.direction.y == -1)
-						unit.ability.stopMovingY();
-					break;
-
-				case 'a':
-				case 'left':
-					if (unit.direction.x == -1)
-						unit.ability.stopMovingX();
-					break;
-
-				case 's':
-				case 'down':
-					if (unit.direction.y == 1)
-						unit.ability.stopMovingY();
-					break;
-
-				case 'd':
-				case 'right':
-					if (unit.direction.x == 1)
-						unit.ability.stopMovingX();
-					break;
-
 				case 'button1':
 					if (unit.ability != undefined) {
 						unit.ability.stopUsingItem();
@@ -256,6 +212,15 @@ var ControlComponent = TaroEntity.extend({
 		if (this.input[device]) {
 			this.input[device][key] = false;
 		}
+
+    if (unit) {
+      const canMoveVertical = unit._stats.controls.movementControlScheme == 'wasd';
+      const left  = this.input.key.a || this.input.key.left;
+      const right = this.input.key.d || this.input.key.right;
+      const up    = canMoveVertical && (this.input.key.w || this.input.key.up);
+      const down  = canMoveVertical && (this.input.key.s || this.input.key.down);
+      unit.ability.move(left, right, up, down);
+    }
 	},
 
 	keyDownAbility: function (unit, keyDown, key) {
