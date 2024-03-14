@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const fs = require('fs');
 const cluster = require('cluster');
 const { RateLimiterMemory } = require('rate-limiter-flexible');
-const currency = require("currency.js");
+const currency = require('currency.js');
 
 // global imports
 _ = require('lodash');
@@ -248,6 +248,9 @@ var Server = TaroClass.extend({
 			'msgpack.min.js'
 		];
 		const SECONDS_IN_A_WEEK = 7 * 24 * 60 * 60;
+		app.get('/src/game.json', (req, res, next)=> {
+			res.send(global.gameJson);
+		});
 		app.use('/src', express.static(path.resolve('./src/'), {
 			setHeaders: (res, path, stat) => {
 				let shouldCache = FILES_TO_CACHE.some((filename) => path.endsWith(filename));
@@ -381,22 +384,54 @@ var Server = TaroClass.extend({
 			} else if (taro.server.gameId && taro.env !== 'standalone' && taro.workerComponent) {
 				promise = taro.workerComponent.loadGameJSON();
 			} else {
+				const inquirer = require('inquirer');
+				const jsonPath = `${__dirname}/../src/`;
 				promise = new Promise(function (resolve, reject) {
-					console.log('gameUrl', `${__dirname}/../src/game.json`);
-					var game = fs.readFileSync(`${__dirname}/../src/game.json`);
-					game = JSON.parse(game);
-					game.defaultData = game;
-					var data = { data: {} };
-					for (let [key, value] of Object.entries(game)) {
-						data.data[key] = value;
-					}
-					for (let [key, value] of Object.entries(game.data)) {
-						data.data[key] = value;
-					}
-					if (game && game.data && game.data.defaultData && game.data.defaultData._id) {
-						self.gameId = game.data.defaultData._id;
-					}
-					resolve(data);
+					fs.readdir(jsonPath, async (err, files) => {
+						if (err) {
+							console.error('Error reading directory:', err);
+							return;
+						}
+
+						const jsonFiles = files.filter(file => file.endsWith('.json'));
+						var game = await new Promise((resolveGame) => {
+							if (jsonFiles.length === 1) {
+								taro.gameName = jsonFiles[0];
+								resolveGame(fs.readFileSync(jsonPath + jsonFiles[0]));
+							} else {
+								const choices = jsonFiles.map(file => ({
+									name: file,
+									value: file
+								}));
+								inquirer
+									.prompt([
+										{
+											type: 'list',
+											name: 'selectedFile',
+											message: 'Select a JSON file:',
+											choices: choices
+										}
+									]).then((answers) => {
+										taro.gameName = answers.selectedFile;
+										resolveGame(fs.readFileSync(jsonPath + answers.selectedFile));
+									});
+							}
+						});
+						global.gameJson = game;
+						game = JSON.parse(game);
+						game.defaultData = game;
+						var data = { data: {} };
+						for (let [key, value] of Object.entries(game)) {
+							data.data[key] = value;
+						}
+						for (let [key, value] of Object.entries(game.data)) {
+							data.data[key] = value;
+						}
+						if (game && game.data && game.data.defaultData && game.data.defaultData._id) {
+							self.gameId = game.data.defaultData._id;
+						}
+						resolve(data);
+					});
 				});
 			}
 
@@ -404,7 +439,7 @@ var Server = TaroClass.extend({
 				taro.addComponent(GameTextComponent);
 				taro.addComponent(GameComponent);
 				taro.addComponent(ProfilerComponent);
-				
+
 				self.gameStartedAt = new Date();
 
 				taro.defaultVariables = rfdc()(game.data.variables);
@@ -503,7 +538,7 @@ var Server = TaroClass.extend({
 								taro.addComponent(RegionManager);
 
 								taro.addComponent(StatusComponent);
-			
+
 								if (taro.game.data.defaultData.enableVideoChat) {
 									taro.addComponent(VideoChatComponent);
 								}
@@ -725,7 +760,7 @@ var Server = TaroClass.extend({
 				}
 			}
 			if (body.status === 'error') {
-				console.log('error in sending coins')
+				console.log('error in sending coins');
 
 				if (!body.reason || !body.message) {
 					return;
@@ -810,7 +845,7 @@ var Server = TaroClass.extend({
 				}
 			}
 			if (body.status === 'error') {
-				console.log('error in buying item')
+				console.log('error in buying item');
 			}
 		}
 	},
@@ -851,7 +886,7 @@ var Server = TaroClass.extend({
 				}
 			}
 			if (body.status === 'error') {
-				console.log('error in crediting ad-reward coins')
+				console.log('error in crediting ad-reward coins');
 			}
 		}
 	},
