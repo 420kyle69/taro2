@@ -895,7 +895,7 @@ var Item = TaroEntityPhysics.extend({
 		self._stats.itemTypeId = type;
 
 		for (var i in data) {
-			if (i == 'name') { // don't overwrite item's name with item type name
+			if (i === 'name' || i === 'attributes' || i === 'variables') { // don't overwrite item's name with item type name
 				continue;
 			}
 			self._stats[i] = data[i];
@@ -968,7 +968,7 @@ var Item = TaroEntityPhysics.extend({
 		if (taro.isServer) {
 			if (ownerUnit) {
 				var index = ownerUnit._stats.currentItemIndex;
-				ownerUnit.changeItem(index); // this will call change item on client for all units*/
+				ownerUnit.changeItem(index); // this will call change item on client for all units
 			}
 		} else if (taro.isClient) {
 			var zIndex = self._stats.currentBody && self._stats.currentBody['z-index'] || { layer: 3, depth: 3 };
