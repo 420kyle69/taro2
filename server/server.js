@@ -248,7 +248,7 @@ var Server = TaroClass.extend({
 			'msgpack.min.js'
 		];
 		const SECONDS_IN_A_WEEK = 7 * 24 * 60 * 60;
-		app.get('/src/game.json', (req, res, next)=> {
+		app.get('/src/game.json', (req, res, next) => {
 			res.send(global.gameJson);
 		});
 		app.use('/src', express.static(path.resolve('./src/'), {
@@ -480,12 +480,8 @@ var Server = TaroClass.extend({
 				//  * Significant changes above
 				// */
 				// Add physics and setup physics world
-
-				taro.addComponent(PhysicsComponent);
-
-				// we're using setInterval because we need to wait for the physics to be loaded
-				// this is a hacky temporary solution and needs to be fixed
-				const loadedInterval = setInterval(() => {
+				// use callback here is bc the box2dwasm needs time to init
+				const loadRest = () => {
 					if (taro.physics.gravity) {
 						taro.physics.sleep(true);
 						taro.physics.tilesizeRatio(tilesizeRatio);
@@ -560,16 +556,15 @@ var Server = TaroClass.extend({
 								}, 900000);
 							}
 						});
-						clearInterval(loadedInterval);
 					}
 
-				}, 200);
+				}
 
-			})
-				.catch((err) => {
-					console.log('got error while loading game json', err);
-					taro.workerComponent && taro.workerComponent.kill('got error while loading game json');
-				});
+				taro.addComponent(PhysicsComponent, undefined, loadRest);
+			}).catch((err) => {
+				console.log('got error while loading game json', err);
+				taro.workerComponent && taro.workerComponent.kill('got error while loading game json');
+			});
 		});
 	},
 
