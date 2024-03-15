@@ -301,9 +301,9 @@ const Client = TaroEventingClass.extend({
 			taro.game.data.defaultData.defaultRenderer = '2d';
 		}
 
-    if (!taro.game.data.defaultData.mapBackgroundColor) {
-      taro.game.data.defaultData.mapBackgroundColor = '#000000';
-    }
+		if (!taro.game.data.defaultData.mapBackgroundColor) {
+			taro.game.data.defaultData.mapBackgroundColor = '#000000';
+		}
 
 		const skyboxDefaultUrls = {
 			left: "",
@@ -342,19 +342,11 @@ const Client = TaroEventingClass.extend({
 
 		const clientPhysicsEngine = taro.game.data.defaultData.clientPhysicsEngine;
 		const serverPhysicsEngine = taro.game.data.defaultData.physicsEngine;
-
+		const resolveFunc = this.physicsConfigLoaded.resolve.bind(this)
 		if (clientPhysicsEngine) {
-			taro.addComponent(PhysicsComponent).physics.sleep(true);
-		}
-		if (clientPhysicsEngine.toUpperCase() === 'BOX2DWASM') {
-			const loadedInterval = setInterval(() => {
-				if (taro.physics.gravity) {
-					clearInterval(loadedInterval);
-					this.physicsConfigLoaded.resolve();
-				}
-			}, 50);
+			taro.addComponent(PhysicsComponent, undefined, resolveFunc).physics.sleep(true);
 		} else {
-			this.physicsConfigLoaded.resolve();
+			resolveFunc();
 		}
 	},
 
