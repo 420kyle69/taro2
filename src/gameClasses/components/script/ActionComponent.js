@@ -3268,14 +3268,16 @@ var ActionComponent = TaroEntity.extend({
 					case 'loadMapFromString':
 						//WON'T CHANGE CONNECTED PLAYERS MAP
 						//needs to be run before players join
-						var data = self._script.variable.getValue(action.string, vars);
-						var humanPlayers = taro.$$('player').filter(player => player._stats.controlledBy === 'human')
+						var data = self._script.param.getValue(action.string, vars);
+						var players = taro.$$('player').filter((player) => {
+							return player._stats.playerTypeId !== undefined;
+						});
 						try {
 							JSON.parse(data);
 						} catch (e) {
 							break;
 						}
-						if (data && humanPlayers.length <= 0) {
+						if (data && players.length <= 0) {
 							taro.map.data = JSON.parse(data);
 							taro.game.data.map = JSON.parse(data);
 							var gameMap = taro.game.data.map;
