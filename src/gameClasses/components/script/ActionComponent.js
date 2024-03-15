@@ -149,14 +149,14 @@ var ActionComponent = TaroEntity.extend({
 						if (taro.isServer) {
 							var player = self._script.param.getValue(action.player, vars);
 							var gameId = self._script.param.getValue(action.gameId, vars);
-							console.log('movePlayerToMap', player._stats.userId, gameId);
+							
 							if (player && player._stats && player._stats.clientId && player._stats.userId) {
 								taro.workerComponent.movePlayerToMap(player._stats.userId, gameId)
 									.then((res) => {
 										console.log('user switched map', res);
 										if (res) {
 											// ask client to reload game
-											taro.network.send('reloadGame', { type: 'movePlayerToMap' }, player._stats.clientId);
+											taro.network.send('movePlayerToMap', { type: 'movePlayerToMap', gameSlug: res.gameSlug }, player._stats.clientId);
 											console.log('map reload', res);
 										}
 									})

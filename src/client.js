@@ -33,6 +33,61 @@ storage = {
 
 const statsPanels = {}; // will we need this?
 
+const mergeableKeys = {
+	data: {
+		entityTypeVariables: true,
+		shops: true,
+		animationTypes: true,
+		states: true,
+		map: false,
+		buffTypes: true,
+		projectileTypes: true,
+		itemTypes: true,
+		music: true,
+		sound: true,
+		scripts: true,
+		unitTypes: true,
+		abilities: true,
+		variables: true,
+		attributeTypes: true,
+		settings: false,
+		images: true,
+		tilesets: false,
+		factions: true,
+		playerTypes: true,
+		particles: true,
+		particleTypes: true,
+		bodyTypes: true,
+		playerTypeVariables: true,
+		ui: false,
+		folders: false,
+		title: false,
+		isDeveloper: false,
+		releaseId: false,
+		roles: false,
+		defaultData: false,
+	}
+};
+
+function mergeGameJson(obj1, obj2, mergeableKeys) {
+	for (let key in obj2) {
+		if (obj2.hasOwnProperty(key)) {
+			if (obj1.hasOwnProperty(key) && typeof obj1[key] === 'object' && typeof obj2[key] === 'object') { // Merge objects
+				if (mergeableKeys === true || mergeableKeys[key]) {
+					obj1[key] = mergeGameJson(obj1[key], obj2[key], mergeableKeys === true ? true : mergeableKeys[key]);
+				} else {
+					obj1[key] = obj2[key]; // Keep value from gameJson
+				}
+			} else if (Array.isArray(obj1[key]) && Array.isArray(obj2[key])) {
+				obj1[key] = obj1[key].concat(obj2[key]); // Merge arrays
+			} else {
+				obj1[key] = obj1.hasOwnProperty(key) ? obj1[key] : obj2[key]; // Merge other types
+			}
+		}
+	}
+	return obj1;
+}
+
 const Client = TaroEventingClass.extend({
 	classId: 'Client',
 
@@ -161,8 +216,11 @@ const Client = TaroEventingClass.extend({
 		// we're going to try and insert the fetch here
 		let promise = new Promise((resolve, reject) => {
 			// if the gameJson is available as a global object, use it instead of sending another ajax request
-			if (window.gameDetails.isWorld && window.gameDetails.currentMapId && window.mapJson) {
-				resolve(window.mapJson);
+			if (window.gameDetails.worldId && window.worldJson) {
+				
+				const gameJson = mergeGameJson(window?.worldJson, window?.gameJson, mergeableKeys);
+
+				resolve(gameJson);
 			} else if (window.gameJson) {
 				resolve(window.gameJson);
 			} else if (gameId && !window.isStandalone) {
@@ -679,7 +737,7 @@ const Client = TaroEventingClass.extend({
 	// not much here except definitions
 	defineNetworkEvents: function () {
 		taro.network.define('ping', this._onPing);
-		taro.network.define('reloadGame', this._onReloadGame);
+		taro.network.define('movePlayerToMap', this._onMovePlayerToMap);
 
 		taro.network.define('makePlayerSelectUnit', this._onMakePlayerSelectUnit);
 		taro.network.define('makePlayerCameraTrackUnit', this._onMakePlayerCameraTrackUnit);

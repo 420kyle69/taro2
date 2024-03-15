@@ -12,6 +12,60 @@ _ = require('lodash');
 rfdc = require('rfdc');
 jsonrepair = require("jsonrepair");
 
+const mergeableKeys = {
+	data: {
+		entityTypeVariables: true,
+		shops: true,
+		animationTypes: true,
+		states: true,
+		map: false,
+		buffTypes: true,
+		projectileTypes: true,
+		itemTypes: true,
+		music: true,
+		sound: true,
+		scripts: true,
+		unitTypes: true,
+		abilities: true,
+		variables: true,
+		attributeTypes: true,
+		settings: false,
+		images: true,
+		tilesets: false,
+		factions: true,
+		playerTypes: true,
+		particles: true,
+		particleTypes: true,
+		bodyTypes: true,
+		playerTypeVariables: true,
+		ui: false,
+		folders: false,
+		title: false,
+		isDeveloper: false,
+		releaseId: false,
+		roles: false,
+		defaultData: false,
+	}
+};
+
+function mergeGameJson(obj1, obj2, mergeableKeys) {
+	for (let key in obj2) {
+		if (obj2.hasOwnProperty(key)) {
+			if (obj1.hasOwnProperty(key) && typeof obj1[key] === 'object' && typeof obj2[key] === 'object') { // Merge objects
+				if (mergeableKeys === true || mergeableKeys[key]) {
+					obj1[key] = mergeGameJson(obj1[key], obj2[key], mergeableKeys === true ? true : mergeableKeys[key]);
+				} else {
+					obj1[key] = obj2[key]; // Keep value from gameJson
+				}
+			} else if (Array.isArray(obj1[key]) && Array.isArray(obj2[key])) {
+				obj1[key] = obj1[key].concat(obj2[key]); // Merge arrays
+			} else {
+				obj1[key] = obj1.hasOwnProperty(key) ? obj1[key] : obj2[key]; // Merge other types
+			}
+		}
+	}
+	return obj1;
+}
 
 const Console = console.constructor;
 // redirect global console object to log file
@@ -402,6 +456,13 @@ var Server = TaroClass.extend({
 			}
 
 			promise.then((game) => {
+				
+				if (game?.gameJson && game?.worldJson) {
+					game = mergeGameJson(game?.worldJson, game?.gameJson, mergeableKeys);
+				} else {
+					game = game?.gameJson ? game.gameJson : game;
+				}
+				
 				taro.addComponent(GameTextComponent);
 				taro.addComponent(GameComponent);
 				taro.addComponent(ProfilerComponent);
@@ -546,7 +607,7 @@ var Server = TaroClass.extend({
 		taro.network.define('joinGame', self._onJoinGame);
 		taro.network.define('gameOver', self._onGameOver);
 		taro.network.define('ping', self._onPing);
-		taro.network.define('reloadGame', self._onSomeBullshit);
+		taro.network.define('movePlayerToMap', self._onSomeBullshit);
 
 		taro.network.define('playerUnitMoved', self._onPlayerUnitMoved);
 		taro.network.define('playerKeyDown', self._onPlayerKeyDown);
