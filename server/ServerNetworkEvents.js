@@ -62,6 +62,18 @@ var ServerNetworkEvents = {
 
 	_onJoinGame: function (data, clientId) {
 		if (taro.workerComponent) { // this is used for hosted version of moddio
+			// Step 1: Filter out players controlled by humans and extract their usernames
+			var humanPlayers = taro.$$('player').filter(player => player._stats.controlledBy === 'human');
+			var existingNames = humanPlayers.map(player => player._stats.username.substring('user'.length));
+
+			// Step 2: Check if the generated number is already in use
+			if (existingNames.includes("user" + String(data.number))) {
+				// Step 3: Generate a unique number if the current one is already in use
+				do {
+					data.number = (Math.floor(Math.random() * 999) + 100);
+				} while (existingNames.includes(data.number)); // Step 4: Repeat until a unique number is found
+			}
+
 			let clientData = taro.workerComponent.authenticateClient(data, clientId) // will return data if user is authenticated. otherwise, will return undefined
 
 			if (clientData) {
