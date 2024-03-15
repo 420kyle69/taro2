@@ -10,7 +10,7 @@ interface MobileControlSettings {
 
 class PhaserJoystick {
 
-	private readonly virtualJoystick: {
+	public readonly virtualJoystick: {
 		scene: MobileControlsScene,
 		radius: number;
 		base: Phaser.GameObjects.Graphics;
@@ -28,7 +28,7 @@ class PhaserJoystick {
 		scene: MobileControlsScene,
 		private x: number,
 		private y: number,
-		settings: MobileControlSettings
+		public settings: MobileControlSettings
 	) {
 		const radius = this.radius = scene.cameras.main.displayWidth * 0.05;
 
@@ -72,6 +72,7 @@ class PhaserJoystick {
 				settings.onEnd && settings.onEnd();
 			}
 		});
+		
 
 		scene.joysticks.push(this);
 
@@ -83,7 +84,13 @@ class PhaserJoystick {
 				scene.joysticks[0].side = 'right';
 				scene.joysticks[1].side = 'left';
 			}
-		}
+		} else if (scene.joysticks.length === 1) {
+            if (scene.joysticks[0].x > scene.cameras.main.displayWidth/2) {
+                scene.joysticks[0].side = 'right';
+            } else {
+                scene.joysticks[0].side = 'left';
+            }
+        }
 	}
 
 	show (): void {

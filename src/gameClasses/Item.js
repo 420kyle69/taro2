@@ -2,10 +2,12 @@ var Item = TaroEntityPhysics.extend({
 	classId: 'Item',
 
 	init: function (data, entityIdFromServer) {
+		var self = this;
+		self.category('item'); // necessary for box2d contact listener (it only cares about 'unit' categories touching)
+		
 		TaroEntityPhysics.prototype.init.call(this, data.defaultData);
 		this.id(entityIdFromServer); // ensure that entityId is consistent between server & client
 
-		var self = this;
 		self._stats = {};
 		self.anchorOffset = { x: 0, y: 0, rotate: 0 };
 		var itemData = {};
@@ -40,6 +42,7 @@ var Item = TaroEntityPhysics.extend({
 		self.raycastTargets = [];
 		// dont save variables in _stats as _stats is stringified and synced
 		// and some variables of type unit, item, projectile may contain circular json objects
+		self.variables = {}		
 		if (self._stats.variables) {
 			self.variables = self._stats.variables;
 			delete self._stats.variables;
@@ -49,14 +52,14 @@ var Item = TaroEntityPhysics.extend({
 		// self._stats.handle = data.type
 		self._stats.lastUsed = 0;
 		self.anchoredOffset = { x: 0, y: 0, rotate: 0 };
-
-		self.category('item'); // necessary for box2d contact listener (it only cares about 'unit' categories touching)
+		
 		// convert numbers stored as string in database to int
 		self.parseEntityObject(self._stats);
 		self.addComponent(AttributeComponent); // every item gets one
+		self.addComponent(VariableComponent);
 
 		self.addComponent(ScriptComponent); // entity-scripting
-		self.script.load(data.scripts);
+		self.script.load(self._stats.scripts);
 
 		taro.game.lastCreatedItemId = entityIdFromServer || this.id();
 
@@ -70,7 +73,7 @@ var Item = TaroEntityPhysics.extend({
 		if (taro.isServer) {
 			if (self._stats.streamMode == 1 || self._stats.streamMode == undefined) {
 				this.streamMode(1);
-				// self.streamCreate(); // do we need this?
+				self.streamCreate(); // without this, newly purchased item wont' show on unit
 			} else {
 				this.streamMode(self._stats.streamMode);				
 			}
@@ -216,10 +219,15 @@ var Item = TaroEntityPhysics.extend({
 
 			if (
 				taro.isClient &&
-				newOwner == taro.client.selectedUnit &&
-				newOwner._stats.currentItemIndex !== this._stats.slotIndex
+				newOwner == taro.client.selectedUnit
 			) {
-				this.setState('unselected');
+				if (newOwner._stats.currentItemIndex !== this._stats.slotIndex) {
+					this.setState('unselected');
+				}
+
+				if (newOwner.inventory) {
+					newOwner.inventory.isDirty = true;
+				}
 			}
 
 			if (taro.isServer) {
@@ -245,10 +253,10 @@ var Item = TaroEntityPhysics.extend({
 
 			if (taro.isServer) {
 				this.streamUpdateData([{ ownerUnitId: 0 }]);
-				if (self._stats.streamMode == 1 || self._stats.streamMode == undefined) {
+				if (this._stats.streamMode == 1 || this._stats.streamMode == undefined) {
 					this.streamMode(1);
 				} else {
-					this.streamMode(self._stats.streamMode);				
+					this.streamMode(this._stats.streamMode);				
 				}
 			}
 		}
@@ -271,7 +279,6 @@ var Item = TaroEntityPhysics.extend({
 	// when player presses Mouse1
 	use: function () {
 		var self = this;
-		var now = taro.now;
 		var owner = self.getOwnerUnit();
 		var ownerId = (owner) ? owner.id() : undefined;
 		var player = owner && owner.getOwner();
@@ -288,7 +295,7 @@ var Item = TaroEntityPhysics.extend({
 		if (self.hasQuantityRemaining()) {
 			taro.game.lastUsedItemId = self.id();
 
-			if ((self._stats.lastUsed + self._stats.fireRate < now) || self._stats.type == 'consumable') {
+			if ((self._stats.lastUsed + self._stats.fireRate < taro.now) || self._stats.type == 'consumable') {
 				if (!self.canAffordItemCost()) {
 					taro.devLog('cannot afford item cost');
 					return;
@@ -305,14 +312,17 @@ var Item = TaroEntityPhysics.extend({
 
 				let triggerParams = { unitId: ownerId, itemId: self.id() };
 
-				self.script.trigger('itemIsUsed', triggerParams);
-				taro.script.trigger('unitUsesItem', triggerParams);
+				//we cant use queueTrigger here because it will be called after entity scripts and item or unit probably no longer exists
+				self.script.trigger('itemIsUsed', triggerParams); // this entity (item) (need to rename rename 'itemIsUsed' -> 'thisItemIsUsed')
+                owner.script.trigger('thisUnitUsesItem', triggerParams); // this entity (unit)
+                taro.script.trigger('unitUsesItem', triggerParams); // unit uses item
 
 				if (taro.physics && self._stats.type == 'weapon') {
 					if (self._stats.isGun) {
 						if (self._stats.bulletStartPosition) {
 							var rotate = this._rotate.z;
 							let bulletY = self._stats.bulletStartPosition.y || 0;
+							let bulletX = (owner._stats.flip === 1 ? -1 : 1);
 							
 							if (owner && self._stats.currentBody && self._stats.currentBody.jointType == 'weldJoint') {
 								rotate = owner._rotate.z;
@@ -327,10 +337,9 @@ var Item = TaroEntityPhysics.extend({
 
 							// item is flipped, then mirror the rotation
 
-
 							var bulletStartPosition = {
-								x: (owner._translate.x + self.anchoredOffset.x) + (self._stats.bulletStartPosition.x * Math.cos(rotate)) + (bulletY * Math.sin(rotate)),
-								y: (owner._translate.y + self.anchoredOffset.y) + (self._stats.bulletStartPosition.x * Math.sin(rotate)) - (bulletY * Math.cos(rotate))
+								x: (owner._translate.x + self.anchoredOffset.x) + (self._stats.bulletStartPosition.x * bulletX * Math.cos(rotate)) + (bulletY * Math.sin(rotate)),
+								y: (owner._translate.y + self.anchoredOffset.y) + ((self._stats.bulletStartPosition.x * bulletX * Math.sin(rotate)) - (bulletY * Math.cos(rotate))) //* bulletX
 							};
 
 							if (
@@ -350,7 +359,6 @@ var Item = TaroEntityPhysics.extend({
 										x: Math.cos(rotate + Math.radians(-90)) * self._stats.bulletForce,
 										y: Math.sin(rotate + Math.radians(-90)) * self._stats.bulletForce,
 									};
-
 									// we don't create a Projectile entity for raycasts
 									if (this._stats.bulletType !== 'raycast') {
 										self.projectileData = taro.game.cloneAsset('projectileTypes', self._stats.projectileType);
@@ -369,7 +377,7 @@ var Item = TaroEntityPhysics.extend({
 													unitAttributes: this._stats.damage.unitAttributes,
 													playerAttributes: this._stats.damage.playerAttributes
 												},
-												streamMode: this._stats.projectileStreamMode
+												streamMode: this._stats.projectileStreamMode || 0 // editor incorrectly sets streamMode to undefined when item CSP is on
 											});
 										var projectile = new Projectile(projectileData);
 										projectile.script.trigger('entityCreated');
@@ -557,8 +565,8 @@ var Item = TaroEntityPhysics.extend({
 						var unitAttributeBonuses = self._stats.bonus.consume.unitAttribute;
 						if (unitAttributeBonuses) {
 							for (var attrId in unitAttributeBonuses) {
-								var newValue = owner.attribute.getValue(attrId) + parseFloat(unitAttributeBonuses[attrId]);
-								attrData.attributes[attrId] = owner.attribute.update(attrId, newValue, true);
+								var newValue = parseFloat(owner.attribute.getValue(attrId)) + parseFloat(unitAttributeBonuses[attrId]);
+								attrData.attributes[attrId] = owner.attribute.update(attrId, newValue);
 							}
 						}
 
@@ -568,7 +576,7 @@ var Item = TaroEntityPhysics.extend({
 							if (playerAttributeBonuses) {
 								for (attrId in playerAttributeBonuses) {
 									var newValue = player.attribute.getValue(attrId) + parseFloat(playerAttributeBonuses[attrId]);
-									attrData.attributes[attrId] = player.attribute.update(attrId, newValue, true);
+									attrData.attributes[attrId] = player.attribute.update(attrId, newValue);
 								}
 							}
 
@@ -612,8 +620,8 @@ var Item = TaroEntityPhysics.extend({
 		if (taro.isServer) {
 			// if server authoritative mode is enabled, then stream item quantity to the item's owner player only
 			if (taro.runMode == 0) {
-				var playerId = this.getOwnerUnit()?.getOwner()?._id;
-				this.streamUpdateData([{ quantity: qty }], playerId);
+				var clientId = this.getOwnerUnit()?.getOwner()?._stats.clientId;
+				this.streamUpdateData([{ quantity: qty }], clientId);
 			}
 
 			// item's set to be removed when empty
@@ -671,7 +679,7 @@ var Item = TaroEntityPhysics.extend({
 					if (owner._stats.attributes[attrName]) {
 						var newValue = owner._stats.attributes[attrName].value - ability.cost.unitAttributes[attrName];
 						// owner._stats.attributes[attrName].value -= ability.cost.unitAttributes[attrName];
-						owner.attribute.update(attrName, newValue, true);
+						owner.attribute.update(attrName, newValue);
 						unitAttributeChanged = true;
 					}
 				}
@@ -679,7 +687,7 @@ var Item = TaroEntityPhysics.extend({
 					if (player._stats.attributes[attrName]) {
 						var newValue = player._stats.attributes[attrName].value - ability.cost.playerAttributes[attrName];
 						// player._stats.attributes[attrName].value -= ability.cost.playerAttributes[attrName];
-						player.attribute.update(attrName, newValue, true);
+						player.attribute.update(attrName, newValue);
 						playerAttributeChanged = true;
 					}
 				}
@@ -740,17 +748,19 @@ var Item = TaroEntityPhysics.extend({
 			return;
 
 		self._stats.isBeingUsed = true;
+		self._stats.useQueued = true; // ensures that use() is executed at least once
 		var owner = this.getOwnerUnit();
 		if (taro.isServer) {
 			this.quantityAtStartusing = this._stats.quantity;
 			this.streamUpdateData([{ isBeingUsed: true }]);
 		}
 
-		if (owner && taro.trigger) {
-			taro.queueTrigger('unitStartsUsingAnItem', {
-				unitId: owner.id(),
-				itemId: this.id()
-			});
+		if (owner) {
+			const triggerParams = { unitId: owner.id(), itemId: this.id() };
+			//we cant use queueTrigger here because it will be called after entity scripts and item or unit probably no longer exists
+			this.script.trigger('thisItemStartsBeingUsed', triggerParams); // this entity (item)
+			owner.script.trigger('thisUnitStartsUsingAnItem', triggerParams); // this entity (unit)
+			taro.script.trigger('unitStartsUsingAnItem', triggerParams); // unit starts using item
 		}
 	},
 
@@ -763,11 +773,12 @@ var Item = TaroEntityPhysics.extend({
 		self._stats.isBeingUsed = false;
 		var owner = self.getOwnerUnit();
 
-		if (owner && taro.trigger) {
-			taro.queueTrigger('unitStopsUsingAnItem', {
-				unitId: owner.id(),
-				itemId: self.id()
-			});
+		if (owner) {
+			const triggerParams = { unitId: owner.id(), itemId: self.id() };
+			//we cant use queueTrigger here because it will be called after entity scripts and item or unit probably no longer exists
+			self.script.trigger('thisItemStopsBeingUsed', triggerParams); // this entity (item)
+			owner.script.trigger('thisUnitStopsUsingAnItem', triggerParams); // this entity (unit)
+			taro.script.trigger('unitStopsUsingAnItem', triggerParams); // unit stops using item
 		}
 
 		if (taro.isClient) {
@@ -879,10 +890,12 @@ var Item = TaroEntityPhysics.extend({
 		}
 
 		self.script.load(data.scripts);
+		self.script.scriptCache = {};
+		
 		self._stats.itemTypeId = type;
 
 		for (var i in data) {
-			if (i == 'name') { // don't overwrite item's name with item type name
+			if (i === 'name' || i === 'attributes' || i === 'variables') { // don't overwrite item's name with item type name
 				continue;
 			}
 			self._stats[i] = data[i];
@@ -906,15 +919,17 @@ var Item = TaroEntityPhysics.extend({
 		if (data.attributes) {
 			for (var attrId in data.attributes) {
 				if (data.attributes[attrId]) {
-					var attributeValue = data.attributes[attrId].value; // default attribute value from new unit type
+					var attributeValue = data.attributes[attrId].value; // default attribute value from new item type
+					// if old item type had a same attribute, then take the value from it.
+					if (self._stats.attributes && self._stats.attributes[attrId]) {
+						attributeValue = self._stats.attributes[attrId].value;
+					}
 					if (this._stats.attributes[attrId]) {
 						this._stats.attributes[attrId].value = Math.max(data.attributes[attrId].min, Math.min(data.attributes[attrId].max, parseFloat(attributeValue)));
 					}
 				}
 			}
-		}
-
-		self.setState(this._stats.stateId, defaultData);
+		}	
 
 		if (taro.isClient) {
 			self.updateTexture();
@@ -948,11 +963,12 @@ var Item = TaroEntityPhysics.extend({
 			}
 		}
 
+		self.setState(this._stats.stateId, defaultData);
+
 		if (taro.isServer) {
 			if (ownerUnit) {
 				var index = ownerUnit._stats.currentItemIndex;
-				//ownerUnit.changeItem(1);
-				ownerUnit.changeItem(index); // this will call change item on client for all units*/
+				ownerUnit.changeItem(index); // this will call change item on client for all units
 			}
 		} else if (taro.isClient) {
 			var zIndex = self._stats.currentBody && self._stats.currentBody['z-index'] || { layer: 3, depth: 3 };
@@ -963,11 +979,6 @@ var Item = TaroEntityPhysics.extend({
 			}
 
 			self.updateLayer();
-
-			/*var ownerPlayer = self.getOwner();
-			if (ownerPlayer && ownerPlayer._stats.selectedUnitId == self.id() && this._stats.clientId == taro.network.id()) {
-				self.inventory.createInventorySlots();
-			}*/
 
 			// destroy existing particle emitters first
 			for (var particleId in self.particleEmitters) {
@@ -981,14 +992,24 @@ var Item = TaroEntityPhysics.extend({
 				ownerUnit.inventory.update();
 			}
 		}
-
-		//ownerUnit.changeUnitType(ownerUnit._stats.type);
 	},
 
-	streamUpdateData: function (queuedData) {
+	resetItemType: function () {
+		const data = taro.game.cloneAsset('itemTypes', this._stats.itemTypeId);
+
+		//reset attributes
+		for (var attrId in this._stats.attributes) {
+			if (this._stats.attributes[attrId]) {
+				var attributeValue = data.attributes[attrId].value; // default attribute value from new unit type
+				this._stats.attributes[attrId].value = Math.max(data.attributes[attrId].min, Math.min(data.attributes[attrId].max, parseFloat(attributeValue)));
+			}
+		}
+	},
+
+	streamUpdateData: function (queuedData, clientId) {
 		var self = this;
 
-		TaroEntity.prototype.streamUpdateData.call(this, queuedData);
+		TaroEntity.prototype.streamUpdateData.call(this, queuedData, clientId);
 		// taro.devLog("Item streamUpdateData ", data)
 		for (var i = 0; i < queuedData.length; i++) {
 			var data = queuedData[i];
@@ -1056,6 +1077,7 @@ var Item = TaroEntityPhysics.extend({
 					case 'description':
 						this._stats[attrName] = newValue;
 						var owner = self.getOwnerUnit();
+						// doesn't work on creation of item (no owner yet)
 						if (taro.isClient && taro.client.selectedUnit == owner) {
 							taro.itemUi.updateItemDescription(this);
 						}
@@ -1094,12 +1116,19 @@ var Item = TaroEntityPhysics.extend({
 						this._stats[attrName] = newValue;
 						break;
 
+					case 'useQueued':
+						// use item once
+						if (taro.isClient) {
+							this._stats.useQueued = newValue;
+						}
+						break;
+
 					case 'isBeingUsed':
 						var owner = self.getOwnerUnit();
 						// if the item's CSP is enabled, ignore server-stream so my item use won't fire two bullets
 						if (taro.isClient) {
 							// ignore server-stream if client isn't running physics or if projectileStreamMode is 0 (client-side projectile)
-							if (owner == taro.client.selectedUnit && taro.physics && this._stats.projectileStreamMode == 0) {
+							if (owner == taro.client.selectedUnit && taro.physics && !this._stats.projectileStreamMode) {
 								break;
 							}
 							this._stats.isBeingUsed = newValue;
@@ -1124,6 +1153,9 @@ var Item = TaroEntityPhysics.extend({
 	_behaviour: function (ctx) {
 		var self = this;
 
+		if (!taro.gameLoopTickHasExecuted) {
+			return;
+		}
 		_.forEach(taro.triggersQueued, function (trigger) {
 			trigger.params['thisEntityId'] = self.id();
 			self.script.trigger(trigger.name, trigger.params);
@@ -1169,8 +1201,9 @@ var Item = TaroEntityPhysics.extend({
 
 		}
 
-		if (this._stats.isBeingUsed) {
+		if (this._stats.isBeingUsed || this._stats.useQueued) {
 			this.use();
+			this._stats.useQueued = false;
 		}
 
 		// if entity (unit/item/player/projectile) has attribute, run regenerate
@@ -1200,6 +1233,11 @@ var Item = TaroEntityPhysics.extend({
 					} else {
 						processedUpdates.push({[key]: value});
 						delete taro.client.entityUpdateQueue[self.id()][key]
+						
+						// remove queue object for this entity is there's no queue remaining in order to prevent memory leak
+						if (Object.keys(taro.client.entityUpdateQueue[this.id()]).length == 0) {
+							delete taro.client.entityUpdateQueue[this.id()];
+						}
 					}
 				}
 
@@ -1259,6 +1297,7 @@ var Item = TaroEntityPhysics.extend({
 	},
 
 	destroy: function () {
+		this.script.trigger('initEntityDestroy');
 		this.playEffect('destroy');
 		TaroEntityPhysics.prototype.destroy.call(this);
 	}

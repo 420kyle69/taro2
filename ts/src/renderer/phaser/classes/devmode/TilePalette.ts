@@ -29,7 +29,7 @@ class TilePalette extends Phaser.GameObjects.Container {
 		public scene: DevModeScene,
 		private tileset: Phaser.Tilemaps.Tileset,
 		rexUI: any,
-		private commandController: CommandController
+		public commandController: CommandController
 	) {
 		super(scene);
 		this.devModeScene = scene;
@@ -46,7 +46,7 @@ class TilePalette extends Phaser.GameObjects.Container {
 		// When loading from an array, make sure to specify the tileWidth and tileHeight
 		const map = this.map = this.scene.make.tilemap({ key: 'palette', data: paletteMap, tileWidth: tileset.tileWidth, tileHeight: tileset.tileHeight});
 		const texturesLayer = this.texturesLayer = map.createLayer(0, tileset, 0, 0).setOrigin(0, 0).setInteractive();
-		this.x = -texturesLayer.width;
+		this.x = -(texturesLayer.width * 5);
 		this.y = 0;
 		texturesLayer.setPosition(this.x, this.y);
 		scene.add.existing(texturesLayer);
@@ -141,11 +141,11 @@ class TilePalette extends Phaser.GameObjects.Container {
         const commandController = this.commandController;
         if (taro.developerMode.active && taro.developerMode.activeTab !== 'play') {
             if (this.devModeScene.devModeTools.altKey.isDown && !this.devModeScene.devModeTools.isForceTo1x1()) {
-                if (deltaY > 0) {
-                    commandController.defaultCommands.decreaseBrushSize();
-                } else if (deltaY < 0) {
-                    commandController.defaultCommands.increaseBrushSize();
-                }
+                // if (deltaY > 0) {
+                //     commandController.defaultCommands.decreaseBrushSize();
+                // } else if (deltaY < 0) {
+                //     commandController.defaultCommands.increaseBrushSize();
+                // }
             } else {
                 if (this.visible && this.pointerover) {
                     this.zoom(deltaY);
@@ -162,11 +162,11 @@ class TilePalette extends Phaser.GameObjects.Container {
 
 	toggle(): void {
 		if (this.visible) {
-			this.scene.devModeTools.paletteButton.highlight('hidden');
+			//this.scene.devModeTools.paletteButton.highlight('hidden');
 			this.hide();
 		} else {
-			this.scene.devModeTools.paletteButton.hidden = false;
-			this.scene.devModeTools.paletteButton.highlight('no');
+			/*this.scene.devModeTools.paletteButton.hidden = false;
+			this.scene.devModeTools.paletteButton.highlight('no');*/
 			this.show();
 		}
 	}

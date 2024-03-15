@@ -1,5 +1,5 @@
 class TileMarker {
-    graphics: MarkerGraphics;
+	graphics: MarkerGraphics;
 	preview: Phaser.GameObjects.Container;
 	images: Record<number, Record<number, Phaser.GameObjects.Image>>;
 	commandController: CommandController;
@@ -16,7 +16,7 @@ class TileMarker {
 	) {
 		this.active = true;
 		this.commandController = commandController;
-        this.graphics = new MarkerGraphics(scene, map, w, palette);
+		this.graphics = new MarkerGraphics(scene, map, w, palette);
 
 		if (!palette) {
 			this.preview = scene.add.container();
@@ -58,13 +58,13 @@ class TileMarker {
 	changePreview(): void {
 		if (!this.palette) {
 			const { x, y } = this.devModeScene.devModeTools.isForceTo1x1() ? { x: 1, y: 1 } : this.devModeScene.tileEditor.brushArea.size;
-            this.graphics.scaleSides(x, y);
+			this.graphics.scaleSides(x, y);
 			this.hideImages();
 			const previewTarget = this.devModeScene.tileEditor.selectedTileArea;
-			const sample = this.devModeScene.tileEditor.brushArea.calcSample(previewTarget, { x, y });
+			const sample = this.devModeScene.tileEditor.brushArea.calcSample(previewTarget, { x, y }).sample;
 			for (let i = 0; i < x; i++) {
 				for (let j = 0; j < y; j++) {
-					if (sample[i] && sample[i][j]) {
+					if (sample[i] && sample[i][j] !== undefined) {
 						this.changeImage(sample[i][j], i, j);
 					}
 				}
