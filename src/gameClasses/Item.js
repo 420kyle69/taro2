@@ -936,6 +936,8 @@ var Item = TaroEntityPhysics.extend({
 			self._scaleTexture();
 		}
 
+		//self.setState(this._stats.stateId, defaultData);
+
 		if (ownerUnit) {
 			this._stats.ownerUnitId = ownerUnit.id();
 
@@ -947,7 +949,7 @@ var Item = TaroEntityPhysics.extend({
 					if (ownerUnit._stats.currentItemIndex === self._stats.slotIndex) {
 						self.setState('selected');
 					} else {
-						self.setState('unselected');
+						//self.setState('unselected');
 					}
 				}
 			} else {
@@ -961,15 +963,15 @@ var Item = TaroEntityPhysics.extend({
 			} else {
 				ownerUnit.updateStats(self.id());
 			}
+		} else {
+			self.setState('dropped');
 		}
 
-		self.setState(this._stats.stateId, defaultData);
-
 		if (taro.isServer) {
-			if (ownerUnit) {
+			/*if (ownerUnit) {
 				var index = ownerUnit._stats.currentItemIndex;
 				ownerUnit.changeItem(index); // this will call change item on client for all units
-			}
+			}*/
 		} else if (taro.isClient) {
 			var zIndex = self._stats.currentBody && self._stats.currentBody['z-index'] || { layer: 3, depth: 3 };
 
