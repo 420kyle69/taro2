@@ -11,7 +11,9 @@ declare const box2dninja: any;
 declare const PhysicsComponent: any;
 declare const UIPlugin: any;
 declare const rexvirtualjoystickplugin: any;
-interface Window { taro: TaroEngine }
+declare const RoundRectanglePlugin: any;
+
+interface Window { taro: TaroEngine , toastErrorMessage : Function}
 type ArrayElement<ArrayType extends readonly unknown[]> =
 	ArrayType extends readonly (infer ElementType)[] ? ElementType : never;
 

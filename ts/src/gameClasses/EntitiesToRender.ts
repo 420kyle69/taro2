@@ -1,5 +1,5 @@
 class EntitiesToRender {
-	trackEntityById: {[key: string]: TaroEntity};
+	trackEntityById: { [key: string]: TaroEntity };
 	timeStamp: number;
 
 	constructor() {
@@ -7,17 +7,21 @@ class EntitiesToRender {
 		taro.client.on('tick', this.frameTick, this);
 	}
 
-	updateAllEntities (/*timeStamp*/): void {
+	updateAllEntities(/*timeStamp*/): void {
 		for (var entityId in this.trackEntityById) {
 			// var timeStart = performance.now();
 
-			// var entity = taro.$(entityId);	
+			// var entity = taro.$(entityId);
 			var entity = this.trackEntityById[entityId];
 
 			// taro.profiler.logTimeElapsed('findEntity', timeStart);
 			if (entity) {
+				entity.script?.trigger('renderTick');
+
 				// handle entity behaviour and transformation offsets
 				// var timeStart = performance.now();
+
+				var phaserGameObject = entity.phaserEntity?.gameObject;
 
 				if (taro.gameLoopTickHasExecuted) {
 					if (entity._deathTime !== undefined && entity._deathTime <= taro._tickStart) {
@@ -30,102 +34,94 @@ class EntitiesToRender {
 						entity.destroy();
 					}
 
-					if (entity._behaviour && !entity.isHidden()) {
-						entity._behaviour();
-					}
-
-					// handle streamUpdateData
-					if (taro.client.myPlayer) {
-						var updateQueue = taro.client.entityUpdateQueue[entityId];
-						var processedUpdates = [];
-
-						while (updateQueue && updateQueue.length > 0) {
-							var nextUpdate = updateQueue[0];
-
-							if (
-                                // Don't run if we're updating item's state/owner unit, but its owner doesn't exist yet
-                                entity._category == 'item' &&
-                                (   // updating item's owner unit, but the owner hasn't been created yet
-                                    (nextUpdate.ownerUnitId && taro.$(nextUpdate.ownerUnitId) == undefined) || 
-                                    (   // changing item's state to selected/unselected, but owner doesn't exist yet
-                                        (nextUpdate.stateId == 'selected' || nextUpdate.stateId == 'unselected') &&
-                                        entity.getOwnerUnit() == undefined
-                                    )
-                                )
-                            ) {
-                                break;
-                            }
-                            else {
-                                processedUpdates.push(taro.client.entityUpdateQueue[entityId].shift());
-                            }
-						}
-
-						if (processedUpdates.length > 0) {
-							entity.streamUpdateData(processedUpdates);
-							// processedUpdates.forEach((value) => {
-							// 	console.log(value);
-							// });
-						}
-					}
+					// if (typeof entity._behaviour == 'function')
+					entity._behaviour();
 				}
 
-				// taro.profiler.logTimeElapsed('entity._behaviour()', timeStart);
+				var ownerUnit = undefined;
+				if (entity._category == 'item') {
+					ownerUnit = entity.getOwnerUnit();
+				}
 
-			
-				// update transformation using incoming network stream
-				// var timeStart = performance.now();
-				if (entity.isTransforming() || entity == taro.client.selectedUnit) {
+				if (entity.isTransforming()) {
 					entity._processTransform();
 				}
-				
-				// taro.profiler.logTimeElapsed('first _processTransform', timeStart);
-			
-				if (entity._translate && !entity.isHidden()) {
-					
+				// sometimes, entities' _translate & _rotate aren't updated, because processTransform doesn't run when tab isn't focused
+				// hence, we're forcing the update here
+				else if (entity != taro.client.selectedUnit) {
+					entity._translate.x = entity.nextKeyFrame[1][0];
+					entity._translate.y = entity.nextKeyFrame[1][1];
+					entity._rotate.z = entity.nextKeyFrame[1][2];
+				}
+
+				if (entity._translate) {
 					var x = entity._translate.x;
 					var y = entity._translate.y;
 					var rotate = entity._rotate.z;
-
-					if (entity._category == 'item') {
-						var ownerUnit = entity.getOwnerUnit();
-
-						if (ownerUnit) {
-							// var timeStart = performance.now();
-							// if ownerUnit's transformation hasn't been processed yet, then it'll cause item to drag behind. so we're running it now
-							ownerUnit._processTransform();
-
-							// rotate weldjoint items to the owner unit's rotation
-							if (entity._stats.currentBody && entity._stats.currentBody.jointType == 'weldJoint') {
-								rotate = ownerUnit._rotate.z;
-							// immediately rotate my unit's items to the angleToTarget
-							} else if (ownerUnit == taro.client.selectedUnit && entity._stats.controls?.mouseBehaviour?.rotateToFaceMouseCursor) {
-								rotate = ownerUnit.angleToTarget; // angleToTarget is updated at 60fps								
-							}
-							entity._rotate.z = rotate // update the item's rotation immediately for more accurate aiming (instead of 20fps)
-
-							entity.anchoredOffset = entity.getAnchoredOffset(rotate);
-
-							if (entity.anchoredOffset) {
-								x = ownerUnit._translate.x + entity.anchoredOffset.x;
-								y = ownerUnit._translate.y + entity.anchoredOffset.y;
-								rotate = entity.anchoredOffset.rotate;
-							}
-							// taro.profiler.logTimeElapsed('second _processTransform', timeStart);
-					
-						}
-					}
 				}
 
-				if (entity.tween?.isTweening) {
+				// if item is being carried by a unit
+				if (ownerUnit) {
+					// if the ownerUnit is not visible, then hide the item
+					if (ownerUnit.phaserEntity?.gameObject?.visible == false) {
+						phaserGameObject.setVisible(false);
+						continue;
+					}
+
+					// update ownerUnit's transform, so the item can be positioned relative to the ownerUnit's transform
+					ownerUnit._processTransform();
+
+					// var timeStart = performance.now();
+					// rotate weldjoint items to the owner unit's rotation
+					if (entity._stats.currentBody && entity._stats.currentBody.jointType == 'weldJoint') {
+						rotate = ownerUnit._rotate.z;
+						// immediately rotate my unit's items to the angleToTarget
+					} else if (
+						ownerUnit == taro.client.selectedUnit &&
+						entity._stats.controls?.mouseBehaviour?.rotateToFaceMouseCursor
+					) {
+						rotate = ownerUnit.angleToTarget; // angleToTarget is updated at 60fps
+					}
+					entity._rotate.z = rotate; // update the item's rotation immediately for more accurate aiming (instead of 20fps)
+
+					entity.anchoredOffset = entity.getAnchoredOffset(rotate);
+
+					if (entity.anchoredOffset) {
+						x = ownerUnit._translate.x + entity.anchoredOffset.x;
+						y = ownerUnit._translate.y + entity.anchoredOffset.y;
+						rotate = entity.anchoredOffset.rotate;
+					}
+					//if (entity._stats.name === 'potato gun small') console.log('owner unit translate',ownerUnit._translate.x, ownerUnit._translate.y, '\nphaser unit pos', ownerUnit.phaserEntity.gameObject.x, ownerUnit.phaserEntity.gameObject.y, '\nitem translate', x, y, '\nphaser item pos', entity.phaserEntity.gameObject.x, entity.phaserEntity.gameObject.y)
+				}
+
+				const is3D = taro.game.data.defaultData.defaultRenderer === '3d';
+				if ((!is3D && entity.tween?.isTweening && phaserGameObject?.visible) || (is3D && entity.tween?.isTweening)) {
 					entity.tween.update();
 					x += entity.tween.offset.x;
 					y += entity.tween.offset.y;
 					rotate += entity.tween.offset.rotate;
 				}
 
-				if (entity.tween?.isTweening || entity.isTransforming()) {
+				if (
+					entity.tween?.isTweening ||
+					entity.isTransforming() ||
+					entity == taro.client.selectedUnit ||
+					entity._category == 'item'
+				) {
 					// var timeStart = performance.now();
 					entity.transformTexture(x, y, rotate);
+
+					// entity isn't moving anymore. prevent rendering to conserve cpu
+					if (
+						entity.isTransforming() &&
+						entity.nextKeyFrame[1][0] == x &&
+						entity.nextKeyFrame[1][1] == y &&
+						entity.nextKeyFrame[1][2] == rotate
+					) {
+						// if (entity != taro.client.selectedUnit) console.log(entity._category, "not moving)")
+						entity.isTransforming(false);
+					}
+
 					// taro.profiler.logTimeElapsed('transformTexture', timeStart);
 				}
 			}
@@ -134,17 +130,25 @@ class EntitiesToRender {
 		// taro.triggersQueued = [];
 		if (taro.gameLoopTickHasExecuted) {
 			taro.gameLoopTickHasExecuted = false;
+
+			// triggersQueued must run for entity-scripts first then run for the world script.
+			// hence, this runs after the above's entity._behaviour() is executed.
+			// this is for client-only. for server, it runs in taroEngine.engineStep
+			// because we run entity._behaviour in EntitiesToRender.ts for client, and taroEngine for server.
+			while (taro.script && taro.triggersQueued.length > 0) {
+				const trigger = taro.triggersQueued.shift();
+				taro.script.trigger(trigger.name, trigger.params);
+			}
 		}
 	}
 
 	frameTick(): void {
-		taro.engineStep(Date.now(), 1000/60);
+		taro.script?.trigger('renderTick');
 		taro.input.processInputOnEveryFps();
 
+		taro.engineStep(Date.now(), 1000 / 60);
 		taro._renderFrames++;
 
 		this.updateAllEntities();
-
-			
 	}
 }

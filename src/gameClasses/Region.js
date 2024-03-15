@@ -89,8 +89,8 @@ var Region = TaroEntityPhysics.extend({
 		}
 	},
 
-	streamUpdateData: function (queuedData) {
-		TaroEntity.prototype.streamUpdateData.call(this, queuedData);
+	streamUpdateData: function (queuedData, clientId) {
+		TaroEntity.prototype.streamUpdateData.call(this, queuedData, clientId);
 
 		for (var i = 0; i < queuedData.length; i++) {
 			var data = queuedData[i];
@@ -109,6 +109,30 @@ var Region = TaroEntityPhysics.extend({
 			this.destroy();
 		}
 
+		if (taro.isClient) {
+			var processedUpdates = [];
+			var updateQueue = taro.client.entityUpdateQueue[this.id()];
+			
+			if (updateQueue) {
+				for (var key in updateQueue) {
+					var value = updateQueue[key];
+					// ignore update if the value hasn't changed since the last update. this is to prevent unnecessary updates
+					if (this.lastUpdatedData[key] == value) {
+						// console.log("ignoring update", this._stats.name, {[key]: value})										
+						delete taro.client.entityUpdateQueue[this.id()][key]
+						continue;
+					}
+				
+					processedUpdates.push({[key]: value});
+					delete taro.client.entityUpdateQueue[this.id()][key]
+				}
+
+				if (processedUpdates.length > 0) {
+					this.streamUpdateData(processedUpdates);
+				}
+			}
+		}
+		
 		this.processBox2dQueue();
 	}
 });

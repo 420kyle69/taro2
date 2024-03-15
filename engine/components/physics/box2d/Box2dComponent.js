@@ -17,7 +17,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 		this._options = options;
 		this._mode = 0;
 		this._actionQueue = [];
-		this._scaleRatio = 30;
 		this.physicsTickDuration = 0;
 		this.avgPhysicsTickDuration = 0;
 		this.totalBodiesCreated = 0;
@@ -26,7 +25,8 @@ var PhysicsComponent = TaroEventingClass.extend({
 		this.totalTimeElapsed = 0;
 		this.exponent = 2;
 		this.divisor = 80;
-
+		this.metaData = {};
+		this.tryRecordLeak = (p) => p;
 		this.walls = [];
 		this.nullPtr = undefined;
 		this.getPointer = undefined;
@@ -42,7 +42,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 		}
 
 		this.engine = this.engine.toUpperCase();
-
+		this._scaleRatio = 30;
 		// this.engine = 'crash';
 		console.log('Physics engine: ', this.engine);
 
@@ -50,7 +50,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 			try {
 				dists[this.engine].init(this);
 			} catch (err) {
-				console.log(err, "error: ")
+				console.log(err, 'error: ');
 			}
 
 		} else {
@@ -145,11 +145,22 @@ var PhysicsComponent = TaroEventingClass.extend({
 	createFixture: function (params) {
 		var tempDef = new this.b2FixtureDef();
 		var param;
-
 		for (param in params) {
 			if (params.hasOwnProperty(param)) {
 				if (param !== 'shape' && param !== 'filter') {
-					tempDef[param] = params[param];
+					if (taro.physics.engine !== 'BOX2DWASM') {
+						tempDef[param] = params[param];
+					} else {
+						if (tempDef[`set_${param}`]) {
+							// call the setter, so it will update the box2d wasm runtime
+							tempDef[`set_${param}`](params[param]);
+						} else {
+							// this for something like taroId (which is only useful in js, and won't do anything in box2d)
+							// tempDef[param] = params[param];
+						}
+
+					}
+
 				}
 			}
 		}
@@ -166,7 +177,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 	 */
 	createBody: function (entity, body, isLossTolerant) {
 		this.totalBodiesCreated++;
-
 		return dists[this.engine].createBody(this, entity, body, isLossTolerant);
 	},
 
@@ -174,9 +184,18 @@ var PhysicsComponent = TaroEventingClass.extend({
 		// immediately destroy body if entity already has box2dBody
 		if (body || (entity && entity.body)) {
 			body = body || entity.body;
+			if (this.engine === 'BOX2DWASM') {
+				var fixture = taro.physics.recordLeak(body.GetFixtureList());
+				while (fixture !== undefined && taro.physics.getPointer(fixture) !== taro.physics.getPointer(taro.physics.nullPtr)) {
+					body.DestroyFixture(fixture)
+					var fixture = taro.physics.recordLeak(fixture.GetNext());
+				}
+
+			}
 			destroyBody = this._world.destroyBody;
 			var isBodyDestroyed = destroyBody.apply(this._world, [body]);
 			if (this.engine === 'BOX2DWASM') {
+				delete this.metaData[this.getPointer(body)];
 				this.freeFromCache(body);
 			}
 			// clear references to prevent memory leak
@@ -224,6 +243,9 @@ var PhysicsComponent = TaroEventingClass.extend({
 			var joint = entityA.jointsAttached[entityB.id()];
 			if (joint) {
 				this._world.destroyJoint(joint);
+				if (this.engine === 'BOX2DWASM') {
+					this.freeFromCache(joint);
+				}
 				// console.log("joint destroyed")
 				delete entityA.jointsAttached[entityB.id()];
 				delete entityB.jointsAttached[entityA.id()];
@@ -248,11 +270,11 @@ var PhysicsComponent = TaroEventingClass.extend({
 
 			var entities = [];
 			if (self.engine === 'BOX2DWASM') {
-
 				const callback = Object.assign(new self.JSQueryCallback(), {
 					ReportFixture: (fixture_p) => {
-						const fixture = self.wrapPointer(fixture_p, self.b2Fixture);
-						entityId = fixture.GetBody().GetFixtureList().taroId;
+						const fixture = self.recordLeak(self.wrapPointer(fixture_p, self.b2Fixture));
+						const body = self.recordLeak(fixture.GetBody());
+						entityId = self.metaData[self.getPointer(body)].taroId;
 						var entity = taro.$(entityId);
 						if (entity) {
 							// taro.devLog("found", entity._category, entity._translate.x, entity._translate.y)
@@ -351,7 +373,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 					angularDamping: 0,
 					allowSleep: true,
 					fixtures: [{
-						friction: 0,
+						friction: 0.1,
 						restitution: 0,
 						shape: {
 							type: 'rectangle'
@@ -375,7 +397,9 @@ var PhysicsComponent = TaroEventingClass.extend({
 	destroyWalls: function () {
 		this.walls.forEach(wall => {
 			this.destroyBody(wall);
+			wall.destroy();
 		});
+		this.walls = [];
 	},
 
 	/**
@@ -557,6 +581,11 @@ var PhysicsComponent = TaroEventingClass.extend({
 					switch (action.type) {
 						case 'createBody':
 							self.createBody(action.entity, action.def);
+
+							// emit events for updating visibility mask
+							if (taro.isClient && action.entity._category === 'unit' && action.def.type === 'static') {
+								taro.client.emit('update-static-units');
+							}
 							break;
 
 						case 'destroyBody':
@@ -580,25 +609,36 @@ var PhysicsComponent = TaroEventingClass.extend({
 			if (self.engine == 'crash') { // crash's engine step happens in dist.js
 				self._world.step(timeElapsedSinceLastStep);
 			} else {
-				self._world.step(timeElapsedSinceLastStep / 1000, 8, 3); // Call the world step; frame-rate, velocity iterations, position iterations
-				if (self.ctx) {
-					self.ctx.clear();
-					self._world.DebugDraw();
-				}
-				var tempBod = self._world.getBodyList();
+
+				var tempBod = this.engine === 'BOX2DWASM' ? self.recordLeak(self._world.getBodyList()) : self._world.getBodyList();
 
 				// iterate through every physics body
 				while (tempBod && typeof tempBod.getNext === 'function' && (!self.getPointer || self.getPointer(tempBod) !== self.getPointer(self.nullPtr))) {
 					// Check if the body is awake && not static
 					if (tempBod.m_type !== 'static' && tempBod.isAwake() && (!tempBod.GetType || tempBod.GetType() !== 0)) {
-						entity = tempBod._entity;
-
+						entity = self.getPointer !== undefined ? self.metaData[self.getPointer(tempBod)]._entity : tempBod._entity;
 						if (entity) {
+							// apply movement if it's either human-controlled unit, or ai unit that's currently moving
+							if (entity.body && entity.vector && (entity.vector.x != 0 || entity.vector.y != 0)) {
 
-							var mxfp = dists[taro.physics.engine].getmxfp(tempBod);
+								if (entity._stats.controls) {
+									switch (entity._stats.controls.movementMethod) { // velocity-based movement
+										case 'velocity':
+											entity.setLinearVelocity(entity.vector.x, entity.vector.y);
+											break;
+										case 'force':
+											entity.applyForce(entity.vector.x, entity.vector.y);
+											break;
+										case 'impulse':
+											entity.applyImpulse(entity.vector.x, entity.vector.y);
+											break;
+									}
+								}
+							}
+
+							var mxfp = dists[taro.physics.engine].getmxfp(tempBod, self);
 							var x = mxfp.x * taro.physics._scaleRatio;
 							var y = mxfp.y * taro.physics._scaleRatio;
-
 							// make projectile auto-rotate toward its path. ideal for arrows or rockets that should point toward its direction
 							// if (entity._category == 'projectile' &&
 							// 	entity._stats.currentBody && !entity._stats.currentBody.fixedRotation &&
@@ -606,7 +646,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 							// ) {
 							// 	var angle = Math.atan2(tempBod.m_linearVelocity.y, tempBod.m_linearVelocity.x) + Math.PI / 2;
 							// } else {
-							var angle = tempBod.getAngle();
+							var angle = this.engine === 'BOX2DWASM' ? self.recordLeak(tempBod.getAngle()) : tempBod.getAngle();
 							// }
 
 							var tileWidth = taro.scaleMapDetails.tileWidth;
@@ -652,7 +692,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 
 							// entity just has teleported
 
-							if (entity.teleportDestination != undefined && entity.teleported) {
+							if (entity.teleportDestination != undefined && entity.isTeleporting) {
 								entity.nextKeyFrame[1] = entity.teleportDestination;
 								x = entity.teleportDestination[0];
 								y = entity.teleportDestination[1];
@@ -660,43 +700,84 @@ var PhysicsComponent = TaroEventingClass.extend({
 								entity.teleportDestination = undefined;
 							} else {
 								if (taro.isServer) {
-									/* server-side reconciliation */
-									// hard-correct client entity's position (teleport) if the distance between server & client is greater than 100px
-									// continuously for 10 frames in a row
-									if (taro.game.cspEnabled && !entity._stats.aiEnabled && entity.clientStreamedPosition) {
-										var targetX = parseInt(entity.clientStreamedPosition[0]);
-										var targetY = parseInt(entity.clientStreamedPosition[1]);
-										var xDiff = targetX - x;
-										var yDiff = targetY - y;
-										x += xDiff / 2;
-										y += yDiff / 2;
-									}
-
 									entity.translateTo(x, y, 0);
 									entity.rotateTo(0, 0, angle);
 
-									this.lastX = x;
-								} else if (taro.isClient) {
+									// if (entity._category == 'unit') {
+									// 	console.log (taro._currentTime, parseFloat(x - entity.lastX).toFixed(2), "/", timeElapsedSinceLastStep, "speed", parseFloat((x - entity.lastX)/timeElapsedSinceLastStep).toFixed(2),
+									// 				x, entity.lastX, taro._currentTime, taro._currentTime - timeElapsedSinceLastStep)
+									// }
 
+									entity.lastX = x;
+								} else if (taro.isClient) {
 									// if CSP is enabled, client-side physics will dictate:
 									// my unit's position and projectiles that are NOT server-streamed.
 									if (
-										(taro.game.cspEnabled && entity == taro.client.selectedUnit) || 
+										(entity == taro.client.selectedUnit && entity._stats.controls?.clientPredictedMovement) ||
 										(entity._category == 'projectile' && !entity._stats.streamMode)
 									) {
-										// if (entity._category == 'projectile') console.log(x, y, angle)
+										// CSP reconciliation
+										if (entity == taro.client.selectedUnit && (
+											!entity.isTeleporting &&
+											entity.reconRemaining &&
+											!isNaN(entity.reconRemaining.x) &&
+											!isNaN(entity.reconRemaining.y)
+										)
+										) {
+											// if the current reconcilie distance is greater than my unit's body dimention,
+
+											// instantly move unit (teleport) to the last streamed position. Otherwise, gradually reconcile
+											if (Math.abs(entity.reconRemaining.x) > entity._stats.currentBody.width * 1.5 ||
+												Math.abs(entity.reconRemaining.y) > entity._stats.currentBody.height * 1.5
+											) {
+												x = taro.client.myUnitStreamedPosition.x;
+												y = taro.client.myUnitStreamedPosition.y;
+
+												// x += xRemaining;
+												// y += yRemaining;
+												entity.reconRemaining = undefined;
+											} else {
+
+												entity.reconRemaining.x /= 5;
+												entity.reconRemaining.y /= 5;
+
+												x += entity.reconRemaining.x;
+												y += entity.reconRemaining.y;
+											}
+										}
+
+										entity.prevKeyFrame = entity.nextKeyFrame;
 										entity.nextKeyFrame = [taro._currentTime + taro.client.renderBuffer, [x, y, angle]];
+
+										// keep track of units' position history for CSP reconciliation
+										if (entity == taro.client.selectedUnit) {
+											entity.posHistory.push([taro._currentTime, [x, y, angle]]);
+											if (entity.posHistory.length > taro._physicsTickRate) {
+												entity.posHistory.shift();
+											}
+										}
+
 									} else { // update server-streamed entities' body position
 										x = entity.nextKeyFrame[1][0];
 										y = entity.nextKeyFrame[1][1];
 										angle = entity.nextKeyFrame[1][2];
 									}
-									entity.isTransforming(true);
+
+
+									if (entity.prevKeyFrame && entity.nextKeyFrame &&
+										entity.prevKeyFrame[1] && entity.nextKeyFrame[1] && (
+											parseFloat(entity.prevKeyFrame[1][0]).toFixed(1) != parseFloat(entity.nextKeyFrame[1][0]).toFixed(1) ||
+											parseFloat(entity.prevKeyFrame[1][1]).toFixed(1) != parseFloat(entity.nextKeyFrame[1][1]).toFixed(1) ||
+											parseFloat(entity.prevKeyFrame[1][2]).toFixed(2) != parseFloat(entity.nextKeyFrame[1][2]).toFixed(2)
+										)
+									) {
+										// console.log("is moving", entity.prevKeyFrame[1][0], entity.nextKeyFrame[1][0], entity.prevKeyFrame[1][1], entity.nextKeyFrame[1][1], entity.prevKeyFrame[1][2], entity.nextKeyFrame[1][2])
+										entity.isTransforming(true);
+									}
 								}
 							}
 
 							if (!isNaN(x) && !isNaN(y)) {
-
 								entity.body.setPosition({ x: x / entity._b2dRef._scaleRatio, y: y / entity._b2dRef._scaleRatio });
 								entity.body.setAngle(angle);
 							}
@@ -715,18 +796,27 @@ var PhysicsComponent = TaroEventingClass.extend({
 						}
 					}
 
-					tempBod = tempBod.getNext();
+					tempBod = this.engine === 'BOX2DWASM' ? self.recordLeak(tempBod.getNext()) : tempBod.getNext();
 				}
 
+				// Call the world step; frame-rate, velocity iterations, position iterations
+				self._world.step(timeElapsedSinceLastStep / 1000, 8, 3);
+
+				if (self.ctx) {
+					self.ctx.clear();
+					self._world.DebugDraw();
+				}
 
 				taro._physicsFrames++;
-
 				// Clear forces because we have ended our physics simulation frame
 				self._world.clearForces();
 
 				// get stats for dev panel
 				var timeEnd = Date.now();
 				self.physicsTickDuration += timeEnd - timeStart;
+				if (self.engine === 'BOX2DWASM') {
+					self.freeLeaked();
+				}
 				if (timeEnd - self.lastSecondAt > 1000) {
 					self.lastSecondAt = timeEnd;
 					self.avgPhysicsTickDuration = self.physicsTickDuration / taro._fpsRate;
@@ -752,12 +842,11 @@ var PhysicsComponent = TaroEventingClass.extend({
 	},
 
 	_triggerContactEvent: function (entityA, entityB) {
-		var triggeredBy = {}
+		var triggeredBy = {};
 
 		if (!['unit', 'projectile', 'item'].includes(entityA._category)) {
 			return;
 		}
-
 		switch (entityA._category) {
 			case 'unit':
 				triggeredBy.unitId = entityA.id();
@@ -774,16 +863,17 @@ var PhysicsComponent = TaroEventingClass.extend({
 		switch (entityB._category) {
 			case 'unit':
 				taro.game.lastTouchedUnitId = entityB.id();
-				taro.script.trigger(entityA._category + 'TouchesUnit', triggeredBy); // handle unitA touching unitB
+				taro.script.trigger(`${entityA._category}TouchesUnit`, triggeredBy); // handle unitA touching unitB
 				triggeredBy.unitId = entityB.id();
-				entityA.script.trigger("entityTouchesUnit", triggeredBy);
+				entityA.script.trigger('entityTouchesUnit', triggeredBy);
 				break;
 
 			case 'item':
 				triggeredBy.itemId = triggeredBy.itemId || entityB.id();
-				taro.script.trigger(entityA._category + 'TouchesItem', triggeredBy);
+				taro.script.trigger(`${entityA._category}TouchesItem`, triggeredBy);
 				triggeredBy.itemId = entityB.id();
-				entityA.script.trigger("entityTouchesItem", triggeredBy);
+				taro.game.lastTouchedItemId = entityB.id();
+				entityA.script.trigger('entityTouchesItem', triggeredBy);
 				break;
 			case 'projectile':
 				triggeredBy.projectileId = triggeredBy.projectileId || entityB.id();
@@ -794,29 +884,29 @@ var PhysicsComponent = TaroEventingClass.extend({
 				if (entityA._category == 'unit') {
 					entityA.inflictDamage(entityB._stats.damageData);
 				}
-
-				taro.script.trigger(entityA._category + 'TouchesProjectile', triggeredBy);
+				taro.script.trigger(`${entityA._category}TouchesProjectile`, triggeredBy);
 				triggeredBy.projectileId = entityB.id();
-				entityA.script.trigger("entityTouchesProjectile", triggeredBy);
+				entityA.script.trigger('entityTouchesProjectile', triggeredBy);
 				break;
 
 			case 'region':
-				var region = taro.script.variable.getValue({
+				var region = taro.script.param.getValue({
 					function: 'getVariable',
 					variableName: entityB._stats.id
 				});
 				triggeredBy.region = region;
-				entityA.script.trigger("entityEntersRegion", triggeredBy);
-				taro.script.trigger(entityA._category + 'EntersRegion', triggeredBy);
+				entityA.script.trigger('entityEntersRegion', triggeredBy);
+				taro.script.trigger(`${entityA._category}EntersRegion`, triggeredBy);
 				break;
 
 			case 'sensor':
 				triggeredBy.sensorId = entityB.id();
 				var sensoringUnit = entityB.getOwnerUnit();
+				
 				if (sensoringUnit && sensoringUnit.script) {
-					sensoringUnit.script.trigger(entityA._category + 'EntersSensor', triggeredBy);
+					sensoringUnit.script.trigger(`${entityA._category}EntersSensor`, triggeredBy);
 
-					if (entityA._category == 'unit') {
+					if (entityA._category == 'unit' && sensoringUnit.ai) {
 						sensoringUnit.ai.registerSensorDetection(entityA);
 					}
 				}
@@ -825,8 +915,8 @@ var PhysicsComponent = TaroEventingClass.extend({
 
 			case undefined:
 			case 'wall':
-				taro.script.trigger(entityA._category + 'TouchesWall', triggeredBy);
-				entityA.script.trigger("entityTouchesWall");
+				taro.script.trigger(`${entityA._category}TouchesWall`, triggeredBy);
+				entityA.script.trigger('entityTouchesWall');
 				break;
 		}
 	},
@@ -836,7 +926,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 
 		if (!['unit', 'projectile', 'item'].includes(entityA._category)) {
 			return;
-		};
+		}
 
 		switch (entityA._category) {
 			case 'unit':
@@ -848,40 +938,45 @@ var PhysicsComponent = TaroEventingClass.extend({
 			case 'projectile':
 				triggeredBy.projectileId = entityA.id();
 				break;
-		};
+		}
 
 		switch (entityB._category) {
 			case 'region':
-				var region = taro.script.variable.getValue({
+				var region = taro.script.param.getValue({
 					function: 'getVariable',
 					variableName: entityB._stats.id
 				});
 				triggeredBy.region = region;
-				entityA.script.trigger("entityLeavesRegion", triggeredBy);
-				taro.script.trigger(entityA._category + 'LeavesRegion', triggeredBy);
+				entityA.script.trigger('entityLeavesRegion', triggeredBy);
+				taro.script.trigger(`${entityA._category}LeavesRegion`, triggeredBy);
 				break;
 
 			case 'sensor':
 				triggeredBy.sensorId = entityB.id();
 				var sensoringUnit = entityB.getOwnerUnit();
 				if (sensoringUnit && sensoringUnit.script) {
-					sensoringUnit.script.trigger(entityA._category + 'LeavesSensor', triggeredBy);
-				};
+					sensoringUnit.script.trigger(`${entityA._category}LeavesSensor`, triggeredBy);
+				}
 				break;
 
 			case undefined:
-		};
+		}
 	},
 
 	// Listen for when contact's begin
 	_beginContactCallback: function (contact) {
 		if (taro.physics.engine === 'BOX2DWASM') {
-			const nowContact = taro.physics.wrapPointer(contact, taro.physics.b2Contact);
-			var entityA = nowContact.GetFixtureA().GetBody()._entity;
-			var entityB = nowContact.GetFixtureB().GetBody()._entity;
+			const nowContact = taro.physics.recordLeak(taro.physics.wrapPointer(contact, taro.physics.b2Contact));
+			const fixtureA = taro.physics.recordLeak(nowContact.GetFixtureA());
+			const bodyA = taro.physics.recordLeak(fixtureA.GetBody());
+			const fixtureB = taro.physics.recordLeak(nowContact.GetFixtureB());
+			const bodyB = taro.physics.recordLeak(fixtureB.GetBody());
+			var entityA = taro.physics.metaData[taro.physics.getPointer(bodyA)]._entity;
+			var entityB = taro.physics.metaData[taro.physics.getPointer(bodyB)]._entity;
 			if (!entityA || !entityB)
 				return;
 
+			taro.physics.freeFromCache(contact);
 			taro.physics._triggerContactEvent(entityA, entityB);
 			taro.physics._triggerContactEvent(entityB, entityA);
 		} else {
@@ -899,13 +994,17 @@ var PhysicsComponent = TaroEventingClass.extend({
 
 	_endContactCallback: function (contact) {
 		if (taro.physics.engine === 'BOX2DWASM') {
-			const nowContact = taro.physics.wrapPointer(contact, taro.physics.b2Contact);
-			var entityA = nowContact.GetFixtureA().GetBody()._entity;
-			var entityB = nowContact.GetFixtureB().GetBody()._entity;
+			const nowContact = taro.physics.recordLeak(taro.physics.wrapPointer(contact, taro.physics.b2Contact));
+			const fixtureA = taro.physics.recordLeak(nowContact.GetFixtureA());
+			const bodyA = taro.physics.recordLeak(fixtureA.GetBody());
+			const fixtureB = taro.physics.recordLeak(nowContact.GetFixtureB());
+			const bodyB = taro.physics.recordLeak(fixtureB.GetBody());
+			var entityA = taro.physics.metaData[taro.physics.getPointer(bodyA)]._entity;
+			var entityB = taro.physics.metaData[taro.physics.getPointer(bodyB)]._entity;
 
 			if (!entityA || !entityB)
 				return;
-
+			taro.physics.freeFromCache(contact);
 			taro.physics._triggerLeaveEvent(entityA, entityB);
 			taro.physics._triggerLeaveEvent(entityB, entityA);
 		} else {
@@ -927,4 +1026,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 	}
 });
 
-if (typeof (module) !== 'undefined' && typeof (module.exports) !== 'undefined') { module.exports = PhysicsComponent; }
+if (typeof (module) !== 'undefined' && typeof (module.exports) !== 'undefined') {
+	module.exports = PhysicsComponent;
+}

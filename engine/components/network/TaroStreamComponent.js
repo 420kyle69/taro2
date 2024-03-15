@@ -45,7 +45,7 @@ var TaroStreamComponent = TaroEventingClass.extend({
 			this._entity.define('_taroStreamCreateSnapshot', function () { self._onStreamCreateSnapshot.apply(self, arguments); });
 		}
 	},
-	
+
 	/* CEXCLUDE */
 	/**
 	 * Starts the stream of world updates to connected clients.
@@ -58,7 +58,7 @@ var TaroStreamComponent = TaroEventingClass.extend({
 	/**
 	 * update entity-attributes (unit, player, and projectiles)
 	 */
-	updateEntityAttributes: function () {
+	_sendQueuedStreamData: function () {
 		var data = {};
 		var entities = taro.$('baseScene')._children;
 
@@ -74,14 +74,17 @@ var TaroStreamComponent = TaroEventingClass.extend({
 
 			if (entity && Object.keys(queuedStreamData).length > 0) {
 				data[entity.id()] = queuedStreamData;
-				entity._streamDataQueued = [];
+				entity._streamDataQueued = {};
 				sendData = true;
 			}
 		}
 
 		if (sendData) {
-			taro.network.send('updateAllEntities', data);
+			taro.network.send('streamUpdateData', data);
 		}
+
+		// we don't want to keep force-syncing entity streams to rejoined clients
+		taro.server.rejoiningIdleClients = [];
 
 		data = null;
 		entity = null;
@@ -115,7 +118,9 @@ var TaroStreamComponent = TaroEventingClass.extend({
 		// the reason is because teleportation data consists a byte the tells client to stop smooth animation
 		// if that data gets overwritten by some other data that client will see a smooth transition from
 		// entity's current location to final location
-		this._entity.add('_taroStreamData', data);
+		// if (this._entity._streamMode == 1 || this._entity._streamMode == undefined) {
+			this._entity.add('_taroStreamData', data);
+		// }
 		// if (!this._queuedData[id] || this._queuedData[id][0].length <= 20) {
 		// }
 		return this._entity;
@@ -192,7 +197,7 @@ var TaroStreamComponent = TaroEventingClass.extend({
 						},
 						rotate: ntransdata[2]
 					};
-					
+
 					entity = new classConstructor(createData, entityId);
 
 					entity.bypassSmoothing = true;

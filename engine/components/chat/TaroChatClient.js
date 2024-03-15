@@ -26,7 +26,6 @@ var TaroChatClient = {
 	_onMessageFromServer: function (data) {
 		var self = taro.chat;
 
-		
 		// message from a player
 		if (data && data.from) { 
 			var player = taro.game.getPlayerByClientId(data.from);

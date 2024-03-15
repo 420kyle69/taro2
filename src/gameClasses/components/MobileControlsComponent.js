@@ -16,10 +16,22 @@ var MobileControlsComponent = TaroEntity.extend({
 
 		this.controls = {};
 
+		this.secondaryTouchPosition = {x: NaN, y: NaN};
+
+        var self = this;
+
 		// mouse move listener
 		taro.input.on('touchpointermove', function (point) {
-			taro.client.myPlayer.control.newMousePosition[0] = point.x;
-			taro.client.myPlayer.control.newMousePosition[1] = point.y;
+            taro.client.myPlayer.control.newMousePosition = [
+                point.x.toFixed(0),
+                point.y.toFixed(0)
+            ];
+            taro.client.myPlayer.control.lastMousePosition = taro.client.myPlayer.control.newMousePosition;
+		});
+
+		// second touch listener
+		taro.input.on('secondarytouchpointermove', function (point) {
+			self.secondaryTouchPosition = {x: point.x.toFixed(0), y: point.y.toFixed(0)};
 		});
 
 		$(window).on('orientationchange load resize', function () {
@@ -28,10 +40,10 @@ var MobileControlsComponent = TaroEntity.extend({
 				if (taro.client && taro.client.myPlayer && taro.network.id() == taro.client.myPlayer._stats.clientId) {
 					var unit = taro.$(taro.client.myPlayer._stats.selectedUnitId);
 					if (unit && unit._stats.controls) {
-						var unitAbilities = unit._stats.controls.abilities;
-						if (unitAbilities) {
+                        self.emit('orientationchange', screen.orientation.type);
+						if (unit._stats.controls.abilities) {
 							// update mobile controls
-							taro.mobileControls.configure(unitAbilities);
+							taro.mobileControls.configure(unit._stats.controls);
 						}
 					}
 				}
@@ -44,16 +56,32 @@ var MobileControlsComponent = TaroEntity.extend({
 	},
 
 	clearControls: function () {
-
 		for (var key in this.controls) {
 			delete this.controls[key];
 		}
-
 		this.emit('clear-controls');
 	},
 
-	configure: function (abilities) {
-		if (!taro.isMobile || !abilities) return;
+	updateButtonPos: function () {
+		if (taro.mobileControls) {
+			// and this unit is our player
+			if (taro.client && taro.client.myPlayer && taro.network.id() == taro.client.myPlayer._stats.clientId) {
+				var unit = taro.$(taro.client.myPlayer._stats.selectedUnitId);
+				if (unit && unit._stats.controls) {
+					if (unit._stats.controls.keybindings) {
+						// update mobile controls
+						taro.mobileControls.configure(unit._stats.controls);
+					}
+				}
+			}
+		}
+	},
+
+	configure: function (controls) {
+		const keybindings = controls.abilities;
+		if (!taro.isMobile || !keybindings) return;
+
+		const abilities = controls.unitAbilities;
 
 		// $("#show-chat").show();
 		$('#show-chat').hide(); // completely disable chat on mobile (app review)
@@ -72,16 +100,16 @@ var MobileControlsComponent = TaroEntity.extend({
 
 		this.clearControls();
 
-		Object.keys(abilities).forEach(function (key) {
-			var ability = abilities[key];
+		Object.keys(keybindings).forEach(function (key) {
+			var keybinding = keybindings[key];
 
-			if (ability.mobilePosition && !self.controls[key]) {
+			if (keybinding.mobilePosition && !self.controls[key]) {
 				// mobile control layout editor is 480x270
 				// rescale to 960x540
-				var x = ability.mobilePosition.x * 2;
-				var y = ability.mobilePosition.y * 2;
+				var x = keybinding.mobilePosition.x * 2;
+				var y = keybinding.mobilePosition.y * 2;
 
-				self.addControl(key, x, y, 75, 64, ability);
+				self.addControl(key, x, y, keybinding, abilities);
 			}
 		});
 	},
@@ -159,9 +187,7 @@ var MobileControlsComponent = TaroEntity.extend({
 	},
 
 	// add a button or stick to the virtual controller
-	addControl: function (key, x, y, w, h, ability) {
-		w = w || 128;
-		h = h || 128;
+	addControl: function (key, x, y, keybinding, abilities) {
 
 		var self = this;
 
@@ -327,9 +353,14 @@ var MobileControlsComponent = TaroEntity.extend({
 				break;
 		}
 
-		this.emit('add-control', [
-			key, x, y, w, h, settings
-		]);
+		const abilityId = keybinding.keyDown?.abilityId || keybinding.keyUp?.abilityId;
+		let ability = null;
+		if (abilityId) {
+			ability = abilities[abilityId];
+			this.emit('add-control', [ key, x, y, settings, abilityId, ability ]);
+		} else {
+			this.emit('add-control', [ key, x, y, settings ]);
+		}
 	},
 
 	setVisible: function (value) {
@@ -354,10 +385,18 @@ var MobileControlsComponent = TaroEntity.extend({
             taro.client.myPlayer.control.input.mouse.y = my;
 
             taro.client.myPlayer.absoluteAngle = compassAngle;
-            taro.network.send('playerMouseMoved', [mx, my]);
-            taro.network.send('playerAbsoluteAngle', compassAngle);
+			taro.client.myPlayer.control.newMousePosition = [
+				mx.toFixed(0),
+				my.toFixed(0)
+			];
         }
-    }
+    },
+
+	_behaviour: function () {
+		// necessary to prevent the game from crashing when EntitiesToRender.updateAllEntities() tries to call ._behaviour() for all entities that are rendered
+	}
+
+
 
 });
 

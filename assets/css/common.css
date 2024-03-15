@@ -1,4 +1,6 @@
 @import url('https://fonts.googleapis.com/css?family=Cabin');
+@import url('https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
 html {
     -webkit-user-select: none;
 }
@@ -9,6 +11,24 @@ body {
 @font-face {
     font-family: 'arcade';
     src: url('/assets/fonts/arcade.ttf');
+}
+
+@font-face {
+  font-family: 'Verdana';
+  src: url('/assets/fonts/verdana.ttf');
+}
+
+@font-face {
+  font-family: 'Verdana';
+  src: url('/assets/fonts/verdana-bold.ttf');
+  font-weight: bold;
+}
+
+@font-face {
+  font-family: 'Verdana';
+  src: url('/assets/fonts/verdana-bold-italic.ttf');
+  font-weight: bold;
+  font-style: italic;
 }
 
 .d-none-important {
@@ -102,11 +122,15 @@ body {
     border: 2px solid white;
 }
 
-.inventory-slot-mobile,
-.trade-offer-slot {
+.inventory-slot-mobile {
     width: 35px;
     height: 35px;
 }
+
+.cancel-trade-button {
+    margin-left: 8px; 
+}
+
 .popover {
     z-index: 10000;
 }

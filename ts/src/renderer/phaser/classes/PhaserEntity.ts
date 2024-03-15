@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function,@typescript-eslint/no-unused-vars */
 class PhaserEntity {
 
-	protected gameObject: TGameObject;
+	public gameObject: TGameObject;
 	protected evtListeners: Record<string, EvtListener> = {};
 
 	protected constructor (
@@ -17,6 +17,7 @@ class PhaserEntity {
 			dynamic: entity.on('dynamic', this.setDynamic, this),
 			destroy: entity.on('destroy', this.destroy, this)
 		});
+        entity.phaserEntity = this;
 	}
 
 	protected transform (data: {
@@ -41,7 +42,7 @@ class PhaserEntity {
 	protected layer (value: number): void {
 		// use index - 1 because taro layers are indexed at 1
 		const scene = this.gameObject.scene as GameScene;
-		scene.entityLayers[value - 1].add(this.gameObject);
+		if (scene.entityLayers[value - 1]) scene.entityLayers[value - 1].add(this.gameObject);
 	}
 
 	protected depth (value: number): void {

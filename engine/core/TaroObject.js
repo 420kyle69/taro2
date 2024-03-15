@@ -1262,6 +1262,20 @@ var TaroObject = TaroEventingClass.extend({
 		return this._depth;
 	},
 
+	zOffset: function (val) {
+		if (val !== undefined) {
+			this._zOffset = val;
+
+			if (taro.isClient) {
+				this.emit('z-offset', [ val ]);
+			}
+
+			return this;
+		}
+
+		return this._zOffset;
+	},
+
 	/**
 	 * Loops through all child objects of this object and destroys them
 	 * by calling each child's destroy() method then clears the object's
@@ -1555,30 +1569,10 @@ var TaroObject = TaroEventingClass.extend({
 
 			if (arr) {
 				arrCount = arr.length;
-
-				// Loop our children and call their update methods
-				if (taroConfig.debug._timing) {
-					while (arrCount--) {
-						ts = new Date().getTime();
-						arr[arrCount].update(ctx, tickDelta);
-						td = new Date().getTime() - ts;
-						if (arr[arrCount]) {
-							if (!taro._timeSpentInTick[arr[arrCount].id()]) {
-								taro._timeSpentInTick[arr[arrCount].id()] = 0;
-							}
-
-							if (!taro._timeSpentLastTick[arr[arrCount].id()]) {
-								taro._timeSpentLastTick[arr[arrCount].id()] = {};
-							}
-
-							taro._timeSpentInTick[arr[arrCount].id()] += td;
-							taro._timeSpentLastTick[arr[arrCount].id()].tick = td;
-						}
-					}
-				} else {
-					while (arrCount--) {
-						arr[arrCount]?.update(ctx, tickDelta);
-					}
+				while (arrCount--) {
+					var obj = arr[arrCount];
+					if (obj)
+						obj.update(ctx, tickDelta);
 				}
 			}
 		}

@@ -105,7 +105,8 @@ class PhaserAttributeBar extends Phaser.GameObjects.Container {
 			.HexStringToColor(color)
 			.color);
 
-		if (value !== 0) {
+		// add max as a patch to renderer freezing when max is 0
+		if (value !== 0 && max !== 0) {
 			bar.fillRoundedRect(
 				-w / 2,
 				-h / 2,
