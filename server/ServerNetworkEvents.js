@@ -71,7 +71,7 @@ var ServerNetworkEvents = {
 				// Step 3: Generate a unique number if the current one is already in use
 				do {
 					data.number = (Math.floor(Math.random() * 999) + 100);
-				} while (existingNames.includes(data.number)); // Step 4: Repeat until a unique number is found
+				} while (existingNames.includes("user" + String(data.number))); // Step 4: Repeat until a unique number is found
 			}
 
 			let clientData = taro.workerComponent.authenticateClient(data, clientId) // will return data if user is authenticated. otherwise, will return undefined
