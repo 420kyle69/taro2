@@ -259,7 +259,7 @@ var ServerNetworkEvents = {
 						var item = offeringItemId && taro.$(offeringItemId);
 						if (item && item._category === 'item') {
 							var availSlot = unitA.inventory.getFirstAvailableSlotForItem(item);
-							unitA._stats.itemIds[availSlot] = unitA._stats.itemIds[i];
+							unitA._stats.itemIds[availSlot - 1] = unitA._stats.itemIds[i];
 							unitA._stats.itemIds[i] = undefined;
 						}
 					}
@@ -275,7 +275,7 @@ var ServerNetworkEvents = {
 						var item = offeringItemId && taro.$(offeringItemId);
 						if (item && item._category === 'item') {
 							var availSlot = unitB.inventory.getFirstAvailableSlotForItem(item);
-							unitB._stats.itemIds[availSlot] = unitB._stats.itemIds[i];
+							unitB._stats.itemIds[availSlot - 1] = unitB._stats.itemIds[i];
 							unitB._stats.itemIds[i] = undefined;
 						}
 					}
