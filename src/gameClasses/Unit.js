@@ -906,9 +906,7 @@ var Unit = TaroEntityPhysics.extend({
 			}
 
 			self.changeItem(self._stats.currentItemIndex); // this will call change item on client for all units
-			self.streamUpdateData([{
-				attributes: self._stats.attributes
-			}]);
+
 		} else if (taro.isClient) {
 			var zIndex = self._stats.currentBody && self._stats.currentBody['z-index'] || { layer: 3, depth: 3 };
 
