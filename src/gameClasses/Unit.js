@@ -1089,7 +1089,7 @@ var Unit = TaroEntityPhysics.extend({
 		@param slotIndex force-assign item into this inventory slot. usually assigned from when buying a shop item with replaceItemInTargetSlot (optional)
 		@return {boolean} return true if unit was able to pickup/use item. return false otherwise.
 	 */
-	pickUpItem: function (item) {
+	pickUpItem: function (item, persistedItem = false) {
 		var self = this;
 		// all Server only
 		// console.log(`running Unit.pickUpItem() on ${taro.isClient ? 'Client' : 'Server'}`);
@@ -1104,7 +1104,7 @@ var Unit = TaroEntityPhysics.extend({
 			if (itemData.isUsedOnPickup && self.canUseItem(itemData)) {
 				if (!isItemInstance) {
 					item = new Item(itemData);
-					item.script.trigger('entityCreated');
+					if (!persistedItem) item.script.trigger('entityCreated');
 				}
 				taro.devLog('using item immediately');
 				item.setOwnerUnit(self);
@@ -1830,10 +1830,11 @@ var Unit = TaroEntityPhysics.extend({
 					if (itemData) {
 						itemData.quantity = persistedItem.quantity;
 						itemData.itemTypeId = persistedItem.itemTypeId;
-						if (self.pickUpItem(itemData)) {
+						if (self.pickUpItem(itemData, true)) {
 							var givenItem = taro.$(taro.game.lastCreatedItemId);
 							if (givenItem && givenItem.getOwnerUnit() == this) {
 								givenItem.loadPersistentData(persistedItem);
+								givenItem.script.trigger('entityCreated');
 							}
 						}
 					}
