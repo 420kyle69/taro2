@@ -4009,13 +4009,13 @@ var TaroEntity = TaroObject.extend({
 								break;
 							case 'value':
 								var newValue = Math.max(playerAttribute.min, Math.min(persistAttribute[key], playerAttribute.max));
-								self.attribute.update(attrKey, newValue, null, null, true);
+								self.attribute.update(attrKey, newValue, playerAttribute.min, playerAttribute.max, true);
 								break;
 						}
 					}
 				}
 			}
-			self.streamUpdateData([{ attributesMax: max }, { attributesMin: min }, { attributesRegenerateRate: regSpeed }]);
+			self.streamUpdateData([{ attributesRegenerateRate: regSpeed }]);
 
 			var variables = persistData.variables;
 			for (var variableKey in variables) {
