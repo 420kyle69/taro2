@@ -16,6 +16,8 @@ var ControlComponent = TaroEntity.extend({
 
 		// this.lastCommandSentAt = undefined;
 		this._isPlayerInputingText = false;
+    // TODO(nick): We probably want to use the data in TaroInputComponent at
+    // some point, a lot of code is duplicated here.
 		this.input = {
 			mouse: {
 				button1: false,
@@ -94,8 +96,23 @@ var ControlComponent = TaroEntity.extend({
 				this.keyUpAbility(unit, unitAbility, data.key);
 				taro.network.send('playerKeyUp', { device: data.device, key: data.key });
 			});
+
+      window.addEventListener('blur', this.onInactiveTab.bind(this));
 		}
 	},
+
+  onInactiveTab: function () {
+    this.releaseAllKeys();
+
+    const player = this._entity;
+    if (!player) return;
+
+    const unit = player.getSelectedUnit();
+    if (!unit) return;
+
+    unit.ability.stopMovingX();
+    unit.ability.stopMovingY();
+  },
 
 	keyDown: function (device, key) {
 		if(taro.developerMode.shouldPreventKeybindings() || (taro.isClient && this._entity._stats.clientId === taro.network.id() && taro.client.isPressingPhaserButton)) {
@@ -119,7 +136,6 @@ var ControlComponent = TaroEntity.extend({
 		}
 
 		var unit = player.getSelectedUnit();
-
 		if (unit && unit._category == 'unit') {
 			if (taro.isServer || (taro.isClient && !this._isPlayerInputingText)) {
 				var unitAbility = null;
@@ -213,6 +229,7 @@ var ControlComponent = TaroEntity.extend({
 			this.input[device][key] = false;
 		}
 
+
     if (unit) {
       const canMoveVertical = unit._stats.controls.movementControlScheme == 'wasd';
       const left  = this.input.key.a || this.input.key.left;
@@ -256,8 +273,14 @@ var ControlComponent = TaroEntity.extend({
 	releaseAllKeys: function () {
 		const pressedKeys = Object.entries(this.input.key).filter((element) => element[1] === true);
 		const pressedMouseButtons = Object.entries(this.input.mouse).filter((element) => element[1] === true);
-		pressedKeys.forEach((key) => this.keyUp('key', key[0]));
-		pressedMouseButtons.forEach((key) => this.keyUp('mouse', key[0]));
+		pressedKeys.forEach((key) => {
+      this.keyUp('key', key[0]);
+      if (taro.input) taro.input.releaseKey(key[0]);
+    });
+		pressedMouseButtons.forEach((key) => {
+      this.keyUp('mouse', key[0]);
+      if (taro.input) taro.input.releaseMouseButton(key[0]);
+    });
 	},
 
 	// check for input modal is open
