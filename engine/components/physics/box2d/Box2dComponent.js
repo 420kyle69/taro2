@@ -725,6 +725,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 											!isNaN(entity.reconRemaining.y)
 										)
 										) {
+											this.justTeleported = false;
 											// if the current reconcilie distance is greater than my unit's body dimention,
 
 											// instantly move unit (teleport) to the last streamed position. Otherwise, gradually reconcile

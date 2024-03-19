@@ -5265,7 +5265,7 @@ var TaroEntity = TaroObject.extend({
 		this._rotate.z = rotate;
 
 		if (taro.isClient && this.isTeleporting && this.justTeleported) {
-			this.justTeleported = false;
+			//this.justTeleported = false;
 		} else {
 			this.isTeleporting = false;
 		}
