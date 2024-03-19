@@ -275,11 +275,11 @@ var ControlComponent = TaroEntity.extend({
 		const pressedMouseButtons = Object.entries(this.input.mouse).filter((element) => element[1] === true);
 		pressedKeys.forEach((key) => {
       this.keyUp('key', key[0]);
-      taro.input.releaseKey(key[0]);
+      if (taro.input) taro.input.releaseKey(key[0]);
     });
 		pressedMouseButtons.forEach((key) => {
       this.keyUp('mouse', key[0]);
-      taro.input.releaseMouseButton(key[0]);
+      if (taro.input) taro.input.releaseMouseButton(key[0]);
     });
 	},
 
