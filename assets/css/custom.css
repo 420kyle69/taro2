@@ -942,3 +942,7 @@ div#dev-console-table {
 :where(#custom-ingame-ui-container) > * {
   pointer-events: auto;
 }
+
+.ui-draggable-dragging {
+  transform: scale(1.8);
+}

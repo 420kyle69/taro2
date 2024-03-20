@@ -155,6 +155,7 @@ var ServerNetworkEvents = {
 				if (acceptedBy && acceptedFor) {
 					if (!acceptedBy.acceptTrading) {
 						taro.chat.sendToRoom('1', 'Trading has been accepted by ' + acceptedBy._stats.name, acceptedFor._stats.clientId);
+						taro.network.send('trade', { type: 'accept', between: tradeBetween }, acceptedFor._stats.clientId);
 					}
 					if (acceptedBy.tradingWith === acceptedFor.id()) {
 						acceptedBy.acceptTrading = true;
