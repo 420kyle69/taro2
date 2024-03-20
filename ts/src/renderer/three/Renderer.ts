@@ -99,12 +99,16 @@ namespace Renderer {
 				this.loadTextures();
 
 				taro.client.on('enterMapTab', () => {
-					this.mode = Mode.Development;
-					this.onDevelopmentMode();
+					if (this.mode == Mode.Normal) {
+						this.mode = Mode.Development;
+						this.onDevelopmentMode();
+					}
 				});
 				taro.client.on('leaveMapTab', () => {
-					this.mode = Mode.Normal;
-					this.onNormalMode();
+					if (this.mode == Mode.Development) {
+						this.mode = Mode.Normal;
+						this.onNormalMode();
+					}
 				});
 			}
 
@@ -137,10 +141,12 @@ namespace Renderer {
 			}
 
 			private onDevelopmentMode() {
-				console.log('Development mode');
+				this.camera.setDevelopmentMode(true);
 			}
 
-			private onNormalMode() {}
+			private onNormalMode() {
+				this.camera.setDevelopmentMode(false);
+			}
 
 			private loadTextures() {
 				const textureRepository = TextureRepository.instance();
