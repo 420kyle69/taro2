@@ -652,6 +652,21 @@ var ClientNetworkEvents = {
 				break;
 			}
 
+			case "accept": {
+				console.log("accept ", msg, clientId);
+				$("#trader-accept").addClass('active');
+
+				for (let i = 1; i <= 5; i++) {
+					const offerDiv = $(`#offer-${i}`);
+					if (offerDiv.hasClass('trade-item-added')) {
+						offerDiv.addClass('trade-item-success');
+					}
+				}
+
+				$("#accept-trade-text").text('Complete');
+				break;
+			}
+
 			case "success": {
 				var playerA = taro.$(msg.between.playerA);
 				var playerB = taro.$(msg.between.playerB);

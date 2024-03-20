@@ -19,12 +19,12 @@ namespace Renderer {
 					.start();
 			}
 
-			static create(config: FloatingTextConfig) {
+			static create(config: FloatingTextConfig, zOffset = 0) {
 				return new FloatingText(
 					Utils.pixelToWorld(config.x) - 0.5,
 					// Will only look good top down orthographic currently; Need to get
 					// correct height from engine when the engine uses 3D coords.
-					1500,
+					zOffset,
 					Utils.pixelToWorld(config.y) - 0.5,
 					config.text,
 					config.color
