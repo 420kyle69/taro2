@@ -82,6 +82,7 @@ namespace Renderer {
 				this.controls.maxDistance = 1000;
 				this.controls.minZoom = 1 / (1000 / distance);
 				this.controls.maxZoom = 1 / (0.01 / distance);
+				this.controls.enablePan = false;
 				this.controls.screenSpacePanning = false;
 				this.controls.update();
 
