@@ -190,7 +190,10 @@ namespace Renderer {
 				const createEntity = (taroEntity: TaroEntityPhysics) => {
 					const entity = this.entityManager.create(taroEntity);
 					entitiesLayer.add(entity);
-					taroEntity.on('destroy', () => this.entityManager.destroy(entity));
+					taroEntity.on('destroy', () => {
+						this.entityManager.destroy(entity);
+						this.particles.destroyEmittersWithTarget(entity);
+					});
 
 					taroEntity.on('follow', () => {
 						this.camera.follow(entity);

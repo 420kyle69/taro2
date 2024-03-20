@@ -383,6 +383,20 @@ namespace Renderer {
 					opacity_to: emitter.opacity.end,
 				});
 			}
+
+			destroyEmittersWithTarget(target: Unit) {
+				const emitterIndicesMarkedForDestroy = [];
+
+				for (let i = 0; i < this.emitters.length; i++) {
+					if (this.emitters[i].target === target) {
+						emitterIndicesMarkedForDestroy.push(i);
+					}
+				}
+
+				for (const idx of emitterIndicesMarkedForDestroy) {
+					this.emitters.splice(idx, 1);
+				}
+			}
 		}
 
 		const vs = `
