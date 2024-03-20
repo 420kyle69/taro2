@@ -372,6 +372,12 @@ namespace Renderer {
 					this.setElevationAngle(this.elevationAngle);
 					this.setAzimuthAngle(this.azimuthAngle);
 					this.setZoom(this.originalZoom);
+
+					if (this.target) {
+						const targetWorldPos = new THREE.Vector3();
+						this.target.getWorldPosition(targetWorldPos);
+						this.setPosition(targetWorldPos.x, targetWorldPos.y, targetWorldPos.z);
+					}
 				}
 			}
 
