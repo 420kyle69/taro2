@@ -711,6 +711,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 
 									entity.lastX = x;
 								} else if (taro.isClient) {
+									entity.justTeleported = false;
 									// if CSP is enabled, client-side physics will dictate:
 									// my unit's position and projectiles that are NOT server-streamed.
 									if (
@@ -725,7 +726,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 											!isNaN(entity.reconRemaining.y)
 										)
 										) {
-											//this.justTeleported = false;
 											// if the current reconcilie distance is greater than my unit's body dimention,
 
 											// instantly move unit (teleport) to the last streamed position. Otherwise, gradually reconcile
