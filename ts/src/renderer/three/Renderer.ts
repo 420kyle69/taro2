@@ -1,6 +1,11 @@
 /// <reference types="@types/google.analytics" />
 
 namespace Renderer {
+	export enum Mode {
+		Normal,
+		Development,
+	}
+
 	export namespace Three {
 		export function instance() {
 			return Renderer.instance();
@@ -12,6 +17,7 @@ namespace Renderer {
 			renderer: THREE.WebGLRenderer;
 			camera: Camera;
 			scene: THREE.Scene;
+			mode = Mode.Normal;
 
 			private clock = new THREE.Clock();
 			private pointer = new THREE.Vector2();
@@ -91,6 +97,15 @@ namespace Renderer {
 				};
 
 				this.loadTextures();
+
+				taro.client.on('enterMapTab', () => {
+					this.mode = Mode.Development;
+					this.onDevelopmentMode();
+				});
+				taro.client.on('leaveMapTab', () => {
+					this.mode = Mode.Normal;
+					this.onNormalMode();
+				});
 			}
 
 			static instance() {
@@ -120,6 +135,12 @@ namespace Renderer {
 			getCameraHeight(): number {
 				return window.innerHeight;
 			}
+
+			private onDevelopmentMode() {
+				console.log('Development mode');
+			}
+
+			private onNormalMode() {}
 
 			private loadTextures() {
 				const textureRepository = TextureRepository.instance();
