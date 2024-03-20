@@ -1354,7 +1354,7 @@ var Unit = TaroEntityPhysics.extend({
 		if (item) {
 
 			// check if item's undroppable
-			if (item._stats && item._stats.controls && item._stats.controls.undroppable) {
+			if (item._stats && item._stats.controls && (item._stats.controls.undroppable)) {
 				return;
 			}
 

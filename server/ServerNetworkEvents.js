@@ -382,7 +382,7 @@ var ServerNetworkEvents = {
 					
 					// swap
 					if (
-						(data.to < unit.inventory.getTotalInventorySize() || (data.to >= unit.inventory.getTotalInventorySize() && !fromItem._stats.controls.undroppable)) && //check if try to trade undroppable item
+						(data.to < unit.inventory.getTotalInventorySize() || (data.to >= unit.inventory.getTotalInventorySize() && !fromItem._stats.controls.undroppable && !fromItem._stats.controls.untradable)) && //check if try to trade undroppable item
 						(
 							fromItem._stats.controls == undefined ||
 							fromItem._stats.controls.permittedInventorySlots == undefined ||
@@ -429,7 +429,7 @@ var ServerNetworkEvents = {
 				if (
 					fromItem != undefined &&
 					toItem == undefined &&
-					(data.to < unit.inventory.getTotalInventorySize() || (data.to >= unit.inventory.getTotalInventorySize() && !fromItem._stats.controls.undroppable)) && //check if try to trade undroppable item
+					(data.to < unit.inventory.getTotalInventorySize() || (data.to >= unit.inventory.getTotalInventorySize() && !fromItem._stats.controls.undroppable && !fromItem._stats.controls.untradable)) && //check if try to trade undroppable item
 					(
 						fromItem._stats.controls == undefined ||
 						fromItem._stats.controls.permittedInventorySlots == undefined ||

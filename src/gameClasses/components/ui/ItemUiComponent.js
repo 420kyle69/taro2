@@ -298,6 +298,10 @@ var ItemUiComponent = TaroEntity.extend({
 						items[toIndex] = tempItem;
 
 						if (taro.client.myPlayer.isTrading && (fromIndex >= totalInventorySlot || toIndex >= totalInventorySlot)) {
+							if (fromItem._stats.controls.untradable) {
+								window.setToastMessage('this item cannot be traded', 'error');
+								return;
+							}
 							// visual css stuff
 							if (isTradingItemDragged) {
 								if (!toItem) {
