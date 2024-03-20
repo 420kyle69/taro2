@@ -694,6 +694,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 							// entity just has teleported
 
 							if (entity.teleportDestination != undefined && entity.isTeleporting) {
+								entity.justTeleported = false;
 								entity.nextKeyFrame[1] = entity.teleportDestination;
 								x = entity.teleportDestination[0];
 								y = entity.teleportDestination[1];
@@ -711,7 +712,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 
 									entity.lastX = x;
 								} else if (taro.isClient) {
-									entity.justTeleported = false;
 									// if CSP is enabled, client-side physics will dictate:
 									// my unit's position and projectiles that are NOT server-streamed.
 									if (
