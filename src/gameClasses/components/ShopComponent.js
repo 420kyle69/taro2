@@ -1413,9 +1413,6 @@ var ShopComponent = TaroEntity.extend({
 			class: 'text-center shop-grid-container'
 		});
 
-		console.log("lenght " , items.length);
-		console.log("items " , items)
-
 		if (items.length <= 0) {
 			// if no skins, show a message
 			let errMsg = $('<div>', {
@@ -1644,11 +1641,9 @@ var ShopComponent = TaroEntity.extend({
 
 		var totalPages = Math.ceil(self.skinItems.length / self.perPageItems);
 	
-		console.log("totalPages", totalPages)
 
 		if (totalPages == 0) {
 
-			console.log("totalPages", totalPages)
 
 			$('#mod-shop-pagination').html('');
 			self.renderSkinsButtons([]);
