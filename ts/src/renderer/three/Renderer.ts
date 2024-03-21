@@ -140,12 +140,21 @@ namespace Renderer {
 				return window.innerHeight;
 			}
 
+			setVisible(visible: boolean) {
+				this.particles.visible = visible;
+				this.entityManager.entities.forEach((e) => {
+					e.visible = visible;
+				});
+			}
+
 			private onDevelopmentMode() {
 				this.camera.setDevelopmentMode(true);
+				this.setVisible(false);
 			}
 
 			private onNormalMode() {
 				this.camera.setDevelopmentMode(false);
+				this.setVisible(true);
 			}
 
 			private loadTextures() {
