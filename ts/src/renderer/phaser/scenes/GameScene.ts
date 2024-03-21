@@ -127,7 +127,7 @@ class GameScene extends PhaserScene {
 
 
 		taro.client.on('create-particle', (particle: Particle) => {
-			new PhaserParticle(this, particle);
+			this.renderedEntities.push(new PhaserParticle(this, particle))
 		});
 
 
