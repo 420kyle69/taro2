@@ -141,12 +141,12 @@ var ControlComponent = TaroEntity.extend({
 				var unitAbility = null;
 				// execute movement command if AI is disabled
 				if (unit._stats.controls && !unit._stats.aiEnabled) {
-          const canMoveVertical = unit._stats.controls.movementControlScheme == 'wasd';
-          const left  = this.input.key.a || this.input.key.left;
-          const right = this.input.key.d || this.input.key.right;
+          const canMoveHorizontal = ['wasd', 'ad'].includes(unit._stats.controls.movementControlScheme);
+          const canMoveVertical = ['wasd', 'wasdRelativeToUnit'].includes(unit._stats.controls.movementControlScheme);
+          const left  = canMoveHorizontal && this.input.key.a || this.input.key.left;
+          const right = canMoveHorizontal && this.input.key.d || this.input.key.right;
           const up    = canMoveVertical && (this.input.key.w || this.input.key.up);
           const down  = canMoveVertical && (this.input.key.s || this.input.key.down);
-
           unit.ability.move(left, right, up, down);
 
           if (left && right && !lastLeft) unit.ability.moveLeft();
@@ -231,9 +231,10 @@ var ControlComponent = TaroEntity.extend({
 
 
     if (unit) {
-      const canMoveVertical = unit._stats.controls.movementControlScheme == 'wasd';
-      const left  = this.input.key.a || this.input.key.left;
-      const right = this.input.key.d || this.input.key.right;
+      const canMoveHorizontal = ['wasd', 'ad'].includes(unit._stats.controls.movementControlScheme);
+      const canMoveVertical = ['wasd', 'wasdRelativeToUnit'].includes(unit._stats.controls.movementControlScheme);
+      const left  = canMoveHorizontal && this.input.key.a || this.input.key.left;
+      const right = canMoveHorizontal && this.input.key.d || this.input.key.right;
       const up    = canMoveVertical && (this.input.key.w || this.input.key.up);
       const down  = canMoveVertical && (this.input.key.s || this.input.key.down);
       unit.ability.move(left, right, up, down);
