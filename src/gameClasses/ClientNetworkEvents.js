@@ -396,7 +396,7 @@ var ClientNetworkEvents = {
 	_onPing: function(data) {
 		const self = this;
 		const now = taro._currentTime;
-		const latency = now - data.sentAt;
+		const latency = performance.now() - data.sentAt;
 		// console.log("onPing", taro._currentTime, data.sentAt, latency);
 		// start reconciliation based on discrepancy between
 		// where my unit when ping was sent and where unit is when ping is received
@@ -446,11 +446,9 @@ var ClientNetworkEvents = {
 			}
 		}
 
-		taro.client.sendNextPingAt = taro.now;
-
 		taro.pingElement = taro.pingElement || document.getElementById('updateping');
 		taro.pingElement.innerHTML = Math.floor(latency);
-
+		taro.pingLatency = Math.floor(latency);
 	},
 
 	_onPlayAd: function (data) {
