@@ -6,6 +6,7 @@ namespace Renderer {
 			controls: OrbitControls;
 			zoom = 1;
 			zoomHeight = 700;
+			isPerspective = false;
 
 			orthographicState: { target: THREE.Vector3; position: THREE.Vector3 };
 			perspectiveState: { target: THREE.Vector3; position: THREE.Vector3; zoom: number };
@@ -14,7 +15,6 @@ namespace Renderer {
 
 			private orthographicCamera: THREE.OrthographicCamera;
 			private perspectiveCamera: THREE.PerspectiveCamera;
-			private isPerspective = false;
 			private fovInitial: number;
 			private viewportHeightInitial: number;
 
