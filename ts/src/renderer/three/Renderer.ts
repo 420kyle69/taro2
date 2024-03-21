@@ -214,8 +214,8 @@ namespace Renderer {
 				entitiesLayer.position.y = 0.51;
 				this.scene.add(entitiesLayer);
 
-				const createEntity = (taroEntity: TaroEntityPhysics) => {
-					const entity = this.entityManager.create(taroEntity);
+				const createEntity = (taroEntity: TaroEntityPhysics, type: 'unit' | 'item' | 'projectile') => {
+					const entity = this.entityManager.create(taroEntity, type);
 					entitiesLayer.add(entity);
 					taroEntity.on('destroy', () => {
 						this.entityManager.destroy(entity);
@@ -235,9 +235,9 @@ namespace Renderer {
 					});
 				};
 
-				taro.client.on('create-unit', (u: TaroEntityPhysics) => createEntity(u), this);
-				taro.client.on('create-item', (i: TaroEntityPhysics) => createEntity(i), this);
-				taro.client.on('create-projectile', (p: TaroEntityPhysics) => createEntity(p), this);
+				taro.client.on('create-unit', (u: TaroEntityPhysics) => createEntity(u, 'unit'), this);
+				taro.client.on('create-item', (i: TaroEntityPhysics) => createEntity(i, 'item'), this);
+				taro.client.on('create-projectile', (p: TaroEntityPhysics) => createEntity(p, 'projectile'), this);
 
 				taro.client.on('zoom', (height: number) => {
 					if (this.camera.zoomHeight === height * 2.15) return;
@@ -308,7 +308,7 @@ namespace Renderer {
 					this.sky.position.copy(this.camera.target.position);
 				}
 
-				for (const entity of this.entityManager.entities) {
+				for (const entity of this.entityManager.units) {
 					const worldPos = new THREE.Vector3();
 					entity.getWorldPosition(worldPos);
 
