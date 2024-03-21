@@ -1,7 +1,7 @@
 namespace Renderer {
 	export namespace Three {
 		export class Camera {
-			instance: THREE.Camera;
+			instance: THREE.PerspectiveCamera | THREE.OrthographicCamera;
 			target: THREE.Object3D | null = null;
 			controls: OrbitControls;
 			zoom = 1;

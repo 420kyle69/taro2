@@ -317,15 +317,11 @@ namespace Renderer {
 					point.x = entityScreenPosition.x;
 					point.y = entityScreenPosition.y;
 
-					const dir = worldPos.sub(this.camera.instance.position);
-					let dist = dir.length();
-					if (!this.camera.isPerspective) {
-						dist = -dir.y;
-					}
-
+					const dist = worldPos.distanceTo(this.camera.instance.position);
 					const raycaster = new THREE.Raycaster();
 					raycaster.setFromCamera(point, this.camera.instance);
 					raycaster.far = dist;
+					raycaster.near = this.camera.instance.near;
 
 					const intersects = raycaster.intersectObject(this.voxels);
 					entity.setHidden(intersects.length !== 0);
