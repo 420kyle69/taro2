@@ -241,7 +241,7 @@ NetIo.Client = NetIo.EventingClass.extend({
 		// track latency every 30 seconds
 		taro.trackLatencyInterval = setInterval(function () {
 			// track only if document is in focus to avoid tracking inaccurate latencies
-			if (window.newrelic && window.pingLatency && document.hasFocus()) {
+			if (window.newrelic && taro.pingLatency && document.hasFocus()) {
 				window.newrelic.addPageAction('gsPing', {
 					user: window.username,
 					game: window.gameSlug,
