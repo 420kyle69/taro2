@@ -303,11 +303,13 @@ var ShopComponent = TaroEntity.extend({
 
 			if (document.getElementById('modd-shop-modal')) {
 				initSkinShopListeners();
+				self.paginationForSkins();
 			} else {
 				let checkForModdShop = setInterval(() => {
 					if (document.getElementById('modd-shop-modal')) {
 						clearInterval(checkForModdShop);
 						initSkinShopListeners();
+						self.paginationForSkins();
 					}
 				}, 1000);
 			}
@@ -1411,15 +1413,30 @@ var ShopComponent = TaroEntity.extend({
 			class: 'text-center shop-grid-container'
 		});
 
+		console.log("lenght " , items.length);
+		console.log("items " , items)
+
 		if (items.length <= 0) {
 			// if no skins, show a message
 			let errMsg = $('<div>', {
 				class: '',
-				style: 'display: flex; justify-content: center; margin-top: 25px;',
+				style: 'display: flex; justify-content: center; padding-top: 205px;',
 				html: '<strong>No skins found</strong>',
 				name: 'error-message-skins',
 			});
-			$('#modd-shop-modal .shop-items').html(errMsg);
+
+			
+			let addSkinButton = $('<button>', {
+				class: 'btn',
+				style: 'margin-top: 10px; color: #fff; background-color: #046C4E; padding-left: 25px; padding-right: 25px;',
+				html: 'Add New Skins',
+				name: 'add-skins-button',
+			}).on('click', function () {
+				// open a link inn new tab
+				window.open(`/skin-submission/${window.gameSlug}/?new=true`, '_blank');
+			});
+
+			$('#modd-shop-modal .shop-items').html( [errMsg, addSkinButton] );
 			return;
 		}
 
@@ -1626,7 +1643,13 @@ var ShopComponent = TaroEntity.extend({
 		var self = this;
 
 		var totalPages = Math.ceil(self.skinItems.length / self.perPageItems);
+	
+		console.log("totalPages", totalPages)
+
 		if (totalPages == 0) {
+
+			console.log("totalPages", totalPages)
+
 			$('#mod-shop-pagination').html('');
 			self.renderSkinsButtons([]);
 			return;
