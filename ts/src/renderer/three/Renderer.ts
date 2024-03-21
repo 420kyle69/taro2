@@ -318,7 +318,11 @@ namespace Renderer {
 				}
 
 				for (const unit of this.entityManager.units) {
-					unit.setHidden(!this.camera.isVisible(unit, this.voxels));
+					// TODO(nick): Need a way to to identify avatar units. It is slow to
+					// raycast every unit on every frame
+					if (unit.hasLabel() || unit.hasAttributes()) {
+						unit.setHidden(!this.camera.isVisible(unit, this.voxels));
+					}
 				}
 
 				TWEEN.update();

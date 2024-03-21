@@ -10,7 +10,7 @@ namespace Renderer {
 			private center = new THREE.Vector2(0.5, 0.5);
 
 			constructor(
-				text = 'cccccc',
+				public text = '',
 				color = 'white',
 				bold = false,
 				private renderOnTop = false
@@ -29,6 +29,7 @@ namespace Renderer {
 			}
 
 			update(text: string, color = 'white', bold = false) {
+				this.text = text;
 				this.remove(this.sprite);
 				this.sprite = this.createLabel(text, color, bold);
 				this.add(this.sprite);
