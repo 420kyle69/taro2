@@ -2,15 +2,31 @@ namespace Renderer {
 	export namespace Three {
 		export class EntityManager {
 			entities: Unit[] = [];
+			units: Unit[] = [];
+			items: Unit[] = [];
+			projectiles: Unit[] = [];
 
 			private animatedSprites: AnimatedSprite[] = [];
 
 			constructor() {}
 
-			create(taroEntity: TaroEntityPhysics) {
+			create(taroEntity: TaroEntityPhysics, type: 'unit' | 'item' | 'projectile') {
 				const entity = Unit.create(taroEntity);
 				this.entities.push(entity);
 				this.animatedSprites.push(entity);
+
+				switch (type) {
+					case 'unit':
+						this.units.push(entity);
+						break;
+					case 'item':
+						this.items.push(entity);
+						break;
+					case 'projectile':
+						this.projectiles.push(entity);
+						break;
+				}
+
 				return entity;
 			}
 

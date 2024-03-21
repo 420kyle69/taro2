@@ -1,11 +1,12 @@
 namespace Renderer {
 	export namespace Three {
 		export class Camera {
-			instance: THREE.Camera;
+			instance: THREE.PerspectiveCamera | THREE.OrthographicCamera;
 			target: THREE.Object3D | null = null;
 			controls: OrbitControls;
 			zoom = 1;
 			zoomHeight = 700;
+			isPerspective = false;
 
 			orthographicState: { target: THREE.Vector3; position: THREE.Vector3 };
 			perspectiveState: { target: THREE.Vector3; position: THREE.Vector3; zoom: number };
@@ -14,7 +15,6 @@ namespace Renderer {
 
 			private orthographicCamera: THREE.OrthographicCamera;
 			private perspectiveCamera: THREE.PerspectiveCamera;
-			private isPerspective = false;
 			private fovInitial: number;
 			private viewportHeightInitial: number;
 
@@ -379,6 +379,25 @@ namespace Renderer {
 						this.setPosition(targetWorldPos.x, targetWorldPos.y, targetWorldPos.z);
 					}
 				}
+			}
+
+			isVisible(unit: Unit, objects: THREE.Object3D) {
+				const worldPos = new THREE.Vector3();
+				unit.getWorldPosition(worldPos);
+
+				const point = new THREE.Vector2();
+				const entityScreenPosition = worldPos.clone().project(this.instance);
+				point.x = entityScreenPosition.x;
+				point.y = entityScreenPosition.y;
+
+				const dist = worldPos.distanceTo(this.instance.position);
+				const raycaster = new THREE.Raycaster();
+				raycaster.setFromCamera(point, this.instance);
+				raycaster.far = dist;
+				raycaster.near = this.instance.near;
+
+				const intersects = raycaster.intersectObject(objects);
+				return intersects.length === 0;
 			}
 
 			private switchToOrthographicCamera() {

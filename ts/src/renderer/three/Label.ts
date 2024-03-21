@@ -5,12 +5,16 @@ namespace Renderer {
 
 			private sprite: THREE.Sprite;
 			private scaleScalar = 1;
-
 			private size = new THREE.Vector2();
 			private textSize = new THREE.Vector2();
 			private center = new THREE.Vector2(0.5, 0.5);
 
-			constructor(text = 'cccccc', color = 'white', bold = false) {
+			constructor(
+				text = 'cccccc',
+				color = 'white',
+				bold = false,
+				private renderOnTop = false
+			) {
 				super();
 
 				this.scaleScalar = 1;
@@ -108,9 +112,13 @@ namespace Renderer {
 				spriteMap.colorSpace = THREE.SRGBColorSpace;
 
 				const spriteMaterial = new THREE.SpriteMaterial({ map: spriteMap });
+				if (this.renderOnTop) {
+					spriteMaterial.depthTest = false;
+					spriteMaterial.depthWrite = false;
+				}
 
 				const sprite = new THREE.Sprite(spriteMaterial);
-				sprite.renderOrder = 499;
+				sprite.renderOrder = this.renderOnTop ? 999 : 499;
 				sprite.scale.set(
 					this.scaleScalar * Utils.pixelToWorld(textCanvas.width),
 					this.scaleScalar * Utils.pixelToWorld(textCanvas.height),

@@ -1,17 +1,18 @@
 namespace Renderer {
 	export namespace Three {
 		export class Unit extends AnimatedSprite {
-			label = new Label();
-
+			label = new Label('', 'white', false, true);
 			cameraConfig = {
 				pointerLock: false,
 				pitchRange: { min: -90, max: 90 },
 				offset: { x: 0, y: 0, z: 0 },
 			};
+			hidden = false;
 
 			private guiScale = 1;
 			private attributeBars = new THREE.Group();
 			private chat: ChatBubble;
+			private hasVisibleLabel;
 
 			constructor(
 				public taroId: string,
@@ -22,6 +23,7 @@ namespace Renderer {
 				super(tex);
 
 				this.label.visible = false;
+				this.hasVisibleLabel = this.label.visible;
 				this.add(this.label);
 
 				this.add(this.attributeBars);
@@ -54,8 +56,8 @@ namespace Renderer {
 				taroEntity.on('scale', (data: { x: number; y: number }) => entity.scale.set(data.x, 1, data.y), this);
 				taroEntity.on('show', () => (entity.visible = true), this);
 				taroEntity.on('hide', () => (entity.visible = false), this);
-				taroEntity.on('show-label', () => (entity.label.visible = true));
-				taroEntity.on('hide-label', () => (entity.label.visible = false));
+				taroEntity.on('show-label', () => (entity.hasVisibleLabel = entity.label.visible = true));
+				taroEntity.on('hide-label', () => (entity.hasVisibleLabel = entity.label.visible = false));
 				taroEntity.on('render-attributes', (data) => (entity as Unit).renderAttributes(data));
 				taroEntity.on('update-attribute', (data) => (entity as Unit).updateAttribute(data));
 				taroEntity.on('render-chat-bubble', (text) => (entity as Unit).renderChat(text));
@@ -92,6 +94,7 @@ namespace Renderer {
 
 				taroEntity.on('update-label', (data) => {
 					entity.label.visible = true;
+					entity.hasVisibleLabel = true;
 					entity.label.update(data.text, data.color, data.bold);
 				});
 
@@ -139,6 +142,36 @@ namespace Renderer {
 						this.taroEntity.off(key, listener);
 					}
 				}
+			}
+
+			setHidden(hidden: boolean) {
+				if (this.hidden != hidden) {
+					const fadeAnimation = (from: number, to: number, onComplete = () => {}) => {
+						new TWEEN.Tween({ opacity: from })
+							.to({ opacity: to }, 100)
+							.onUpdate(({ opacity }) => {
+								this.label.setOpacity(opacity);
+								for (const bar of this.attributeBars.children) {
+									(bar as AttributeBar).setOpacity(opacity);
+								}
+							})
+							.onComplete(onComplete)
+							.start();
+					};
+
+					if (hidden) {
+						fadeAnimation(1, 0, () => {
+							this.label.visible = false;
+							this.attributeBars.visible = false;
+						});
+					} else {
+						this.label.visible = this.hasVisibleLabel;
+						this.attributeBars.visible = true;
+						fadeAnimation(0, 1);
+					}
+				}
+
+				this.hidden = hidden;
 			}
 
 			renderChat(text: string): void {
