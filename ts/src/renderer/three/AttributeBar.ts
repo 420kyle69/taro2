@@ -128,9 +128,9 @@ namespace Renderer {
 				spriteMap.needsUpdate = true;
 				spriteMap.colorSpace = THREE.SRGBColorSpace;
 
-				const spriteMaterial = new THREE.SpriteMaterial({ map: spriteMap });
+				const spriteMaterial = new THREE.SpriteMaterial({ map: spriteMap, depthTest: false, depthWrite: false });
 				const sprite = new THREE.Sprite(spriteMaterial);
-				sprite.renderOrder = 499;
+				sprite.renderOrder = 999;
 				sprite.scale.set(
 					this.scaleScalar * Utils.pixelToWorld(textCanvas.width),
 					this.scaleScalar * Utils.pixelToWorld(textCanvas.height),
