@@ -79,7 +79,7 @@ namespace Renderer {
 						// }
 						entity.setRotationY(-data.rotation);
 						const flip = taroEntity._stats.flip;
-                        entity.setFlip(flip % 2 === 1, flip > 1);
+						entity.setFlip(flip % 2 === 1, flip > 1);
 					},
 					this
 				);
@@ -142,6 +142,14 @@ namespace Renderer {
 						this.taroEntity.off(key, listener);
 					}
 				}
+			}
+
+			hasLabel() {
+				return this.label.text.length > 0;
+			}
+
+			hasAttributes() {
+				return this.attributeBars.children.length > 0;
 			}
 
 			setHidden(hidden: boolean) {
