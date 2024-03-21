@@ -10,6 +10,8 @@ namespace Renderer {
 			orthographicState: { target: THREE.Vector3; position: THREE.Vector3 };
 			perspectiveState: { target: THREE.Vector3; position: THREE.Vector3; zoom: number };
 
+			isDevelopmentMode = false;
+
 			private orthographicCamera: THREE.OrthographicCamera;
 			private perspectiveCamera: THREE.PerspectiveCamera;
 			private isPerspective = false;
@@ -25,6 +27,8 @@ namespace Renderer {
 			private originalHalfWidth;
 
 			private originalZoom = 1;
+			private elevationAngle = 0;
+			private azimuthAngle = 0;
 
 			constructor(
 				private viewportWidth: number,
@@ -78,7 +82,15 @@ namespace Renderer {
 				this.controls.maxDistance = 1000;
 				this.controls.minZoom = 1 / (1000 / distance);
 				this.controls.maxZoom = 1 / (0.01 / distance);
+				this.controls.enablePan = false;
+				this.controls.screenSpacePanning = false;
 				this.controls.update();
+
+				this.controls.mouseButtons = {
+					LEFT: THREE.MOUSE.PAN,
+					MIDDLE: THREE.MOUSE.DOLLY,
+					RIGHT: THREE.MOUSE.ROTATE,
+				};
 
 				this.controls.addEventListener('change', () => {
 					for (const cb of this.onChangeCbs) {
@@ -144,6 +156,8 @@ namespace Renderer {
 			}
 
 			setElevationAngle(deg: number) {
+				this.elevationAngle = deg;
+
 				const spherical = new THREE.Spherical();
 				spherical.radius = this.controls.getDistance();
 				spherical.theta = this.controls.getAzimuthalAngle();
@@ -164,6 +178,8 @@ namespace Renderer {
 			}
 
 			setAzimuthAngle(deg: number) {
+				this.azimuthAngle = deg;
+
 				const spherical = new THREE.Spherical();
 				spherical.radius = this.controls.getDistance();
 				spherical.phi = this.controls.getPolarAngle();
@@ -230,7 +246,7 @@ namespace Renderer {
 					this.debugInfo.innerHTML += `zoom: ${editorZoom}</br>`;
 				}
 
-				if (this.target) {
+				if (this.target && !this.isDevelopmentMode) {
 					const targetWorldPos = new THREE.Vector3();
 					this.target.getWorldPosition(targetWorldPos);
 					this.setPosition(targetWorldPos.x, targetWorldPos.y, targetWorldPos.z, true);
@@ -339,6 +355,30 @@ namespace Renderer {
 
 			onChange(cb: () => void) {
 				this.onChangeCbs.push(cb);
+			}
+
+			setDevelopmentMode(state: boolean) {
+				this.isDevelopmentMode = state;
+
+				if (this.isDevelopmentMode) {
+					this.controls.enablePan = true;
+					this.controls.enableRotate = true;
+					this.controls.enableZoom = true;
+				} else {
+					this.controls.enablePan = false;
+					this.controls.enableRotate = false;
+					this.controls.enableZoom = false;
+
+					this.setElevationAngle(this.elevationAngle);
+					this.setAzimuthAngle(this.azimuthAngle);
+					this.setZoom(this.originalZoom);
+
+					if (this.target) {
+						const targetWorldPos = new THREE.Vector3();
+						this.target.getWorldPosition(targetWorldPos);
+						this.setPosition(targetWorldPos.x, targetWorldPos.y, targetWorldPos.z);
+					}
+				}
 			}
 
 			private switchToOrthographicCamera() {

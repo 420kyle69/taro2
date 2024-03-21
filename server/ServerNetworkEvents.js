@@ -90,7 +90,7 @@ var ServerNetworkEvents = {
 	},
 
 	_onPing: function(data, clientId) {
-		taro.network.send('ping', data, clientId)
+		taro.network.send('ping', data, clientId, true)
 	},
 
 	_onBuySkin: function (skinHandle, clientId) {
@@ -155,6 +155,7 @@ var ServerNetworkEvents = {
 				if (acceptedBy && acceptedFor) {
 					if (!acceptedBy.acceptTrading) {
 						taro.chat.sendToRoom('1', 'Trading has been accepted by ' + acceptedBy._stats.name, acceptedFor._stats.clientId);
+						taro.network.send('trade', { type: 'accept', between: tradeBetween }, acceptedFor._stats.clientId);
 					}
 					if (acceptedBy.tradingWith === acceptedFor.id()) {
 						acceptedBy.acceptTrading = true;
@@ -381,7 +382,7 @@ var ServerNetworkEvents = {
 					
 					// swap
 					if (
-						(data.to < unit.inventory.getTotalInventorySize() || (data.to >= unit.inventory.getTotalInventorySize() && !fromItem._stats.controls.undroppable)) && //check if try to trade undroppable item
+						(data.to < unit.inventory.getTotalInventorySize() || (data.to >= unit.inventory.getTotalInventorySize() && !fromItem._stats.controls.undroppable && !fromItem._stats.controls.untradable)) && //check if try to trade undroppable item
 						(
 							fromItem._stats.controls == undefined ||
 							fromItem._stats.controls.permittedInventorySlots == undefined ||
@@ -428,7 +429,7 @@ var ServerNetworkEvents = {
 				if (
 					fromItem != undefined &&
 					toItem == undefined &&
-					(data.to < unit.inventory.getTotalInventorySize() || (data.to >= unit.inventory.getTotalInventorySize() && !fromItem._stats.controls.undroppable)) && //check if try to trade undroppable item
+					(data.to < unit.inventory.getTotalInventorySize() || (data.to >= unit.inventory.getTotalInventorySize() && !fromItem._stats.controls.undroppable && !fromItem._stats.controls.untradable)) && //check if try to trade undroppable item
 					(
 						fromItem._stats.controls == undefined ||
 						fromItem._stats.controls.permittedInventorySlots == undefined ||

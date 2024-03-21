@@ -305,6 +305,18 @@ var TaroEngine = TaroEntity.extend({
 		return this;
 	},
 
+	getSortedKeys: function (data, key = 'order') {
+		if (!data) {
+			return [];
+		}
+		return Object.keys(data).sort(function (a, b) {
+			if (data[a][key] === undefined && data[b][key] === undefined) return 0;
+			if (data[a][key] === undefined) return 1;
+			if (data[b][key] === undefined) return -1;
+			return data[a][key] - data[b][key];
+		});
+	},
+
 	/**
 	 * Register an object with the engine category register. The
 	 * register allows you to access an object by it's category with

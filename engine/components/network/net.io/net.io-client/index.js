@@ -236,49 +236,21 @@ NetIo.Client = NetIo.EventingClass.extend({
 		}
 	},
 
-	trackLatency: function (actionName, actionEvent, data) {
-		var self = this;
-
-		if (actionName === 'gs-websocket-ping') {
-			const endTime = Date.now();
-			if (window.newrelic) {
-				// track only if document is in focus to avoid tracking inaccurate latencies
-				if (document.hasFocus()) {
-					window.newrelic.addPageAction(actionName, {
-						wsUrl: this.wsUrl,
-						wsAction: actionEvent,
-						wsState: this._socket.readyState,
-						wsUserId: userId,
-						wsGameSlug: gameSlug,
-						wsServerName: taro.client.server.name,
-						wsServerUrl: taro.client.server.url,
-						wsLatency: endTime - data.clientSentAt,
-						wsStartTime: data.clientSentAt,
-						wsEndTime: endTime,
-					});
-				}
-			}
-		} else {
-			const endTimeSinceLoad = performance.now();
-			if (window.newrelic) {
-				window.newrelic.addPageAction(actionName, {
-					wsUrl: this.wsUrl,
-					wsAction: actionEvent,
-					wsState: this._socket.readyState,
-					wsUserId: userId,
-					wsGameSlug: gameSlug,
-					wsServerName: taro.client.server.name,
-					wsServerUrl: taro.client.server.url,
-					wsLatency: endTimeSinceLoad - this.startTimeSinceLoad,
-					wsStartTimeSinceLoad: this.startTimeSinceLoad,
-					wsEndTimeSinceLoad: endTimeSinceLoad,
-					wsStartTime: this.wsStartTime,
-					wsEndTime: Date.now(),
-					reconnectedAt: this.reconnectedAt,
-					wsReason: data?.reason,
+	trackLatency: function () {
+		clearInterval(taro.trackLatencyInterval);
+		// track latency every 30 seconds
+		taro.trackLatencyInterval = setInterval(function () {
+			// track only if document is in focus to avoid tracking inaccurate latencies
+			if (window.newrelic && taro.pingLatency && document.hasFocus()) {
+				window.newrelic.addPageAction('gsPing', {
+					user: window.username,
+					game: window.gameSlug,
+					container: taro.client.server.name,
+					server: taro.client.server.url,
+					latency: taro.pingLatency,
 				});
 			}
-		}
+		}, 30 * 1000);
 	},
 
 	_onOpen: function (event) {
@@ -287,6 +259,8 @@ NetIo.Client = NetIo.EventingClass.extend({
 		var serverDomain = urlWithoutProtocol.split('/')[0];
 		var serverName = serverDomain.split(':')[0];
 		this._state = 2;
+
+		this.trackLatency();
 	},
 
 	_onData: function (data) {
@@ -456,6 +430,8 @@ NetIo.Client = NetIo.EventingClass.extend({
 
 		// Remove the last disconnect reason
 		delete this._disconnectReason;
+
+		clearInterval(taro.trackLatencyInterval);
 	},
 
 	_onError: function () {

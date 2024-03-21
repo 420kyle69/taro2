@@ -3160,7 +3160,13 @@ var TaroEntity = TaroObject.extend({
 				this.translateColliderTo(x, y);
 			}
 		} else if (taro.isClient) {
-			this.justTeleported = true;
+			if (this === taro.client.selectedUnit && taro.physics && this._stats.controls?.clientPredictedMovement) {
+				taro.client.myUnitStreamedPosition = {
+					x: x,
+					y: y,
+					rotation: rotate,
+				}
+			}
 			this.isTransforming(true);
 			//instantly move to camera the new position
 			if (teleportCamera && taro.client.myPlayer?._stats.cameraTrackedUnitId === this.id()) {
@@ -5264,11 +5270,8 @@ var TaroEntity = TaroObject.extend({
 		this._translate.y = y;
 		this._rotate.z = rotate;
 
-		if (taro.isClient && this.isTeleporting && this.justTeleported) {
-			//this.justTeleported = false;
-		} else {
-			this.isTeleporting = false;
-		}
+		this.isTeleporting = false;
+
 		this.lastTransformedAt = taro._currentTime;
 	},
 
