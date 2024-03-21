@@ -5,6 +5,7 @@ class GameScene extends PhaserScene {
 
 	entityLayers: Phaser.GameObjects.Layer[] = [];
 	renderedEntities: TGameObject[] = [];
+	particles: Phaser.GameObjects.Particles.ParticleEmitter[] = []
 	unitsList: PhaserUnit[] = [];
 	projectilesList: PhaserProjectile[] = [];
 	itemList: PhaserItem[] = [];
@@ -127,7 +128,7 @@ class GameScene extends PhaserScene {
 
 
 		taro.client.on('create-particle', (particle: Particle) => {
-			this.renderedEntities.push(new PhaserParticle(this, particle))
+			this.particles.push(new PhaserParticle(this, particle));
 		});
 
 
@@ -669,9 +670,15 @@ class GameScene extends PhaserScene {
 		this.renderedEntities.forEach(element => {
 			element.setVisible(false);
 		});
+		this.particles.forEach(particle => {
+			particle.setVisible(false);
+		})
 
 		if (!taro.developerMode.active || (taro.developerMode.active && taro.developerMode.activeTab !== 'map')) {
 			var visibleEntities = this.cameras.main.cull(this.renderedEntities);
+			this.particles.forEach(particle => {
+				particle.setVisible(true);
+			})
 			visibleEntities.forEach(element => {
 				if (!element.hidden) {
 					element.setVisible(true);
