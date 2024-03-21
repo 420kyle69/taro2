@@ -997,23 +997,6 @@ var ShopComponent = TaroEntity.extend({
 		}
 		return html;
 	},
-	getSortedShopItems: function ({ data, key }) {
-		if (!data || !key || !data[key]) return [];
-		var resultKeys = Object.keys(data[key]);
-
-		// resultKeys = resultKeys.sort();
-
-		resultKeys = resultKeys.sort(function (a, b) {
-			const aOrder = data[key][a].order;
-			const bOrder = data[key][b].order;
-			if (aOrder === undefined && bOrder === undefined) return 0;
-			if (aOrder === undefined) return 1;
-			if (bOrder === undefined) return -1;
-			return aOrder - bOrder;
-		});
-
-		return resultKeys;
-	},
 	openItemShop: function (type, selectedTab) {
 		var self = this;
 		if (!taro.game.data.shops) return;
@@ -1022,8 +1005,8 @@ var ShopComponent = TaroEntity.extend({
 
 		var shopItems = {};
 
-		var shopItemsKeys = self.getSortedShopItems({ data: taro.game?.data?.shops[self.currentType], key: 'itemTypes' });
-		var shopUnitsKeys = self.getSortedShopItems({ data: taro.game?.data?.shops[self.currentType], key: 'unitTypes' });
+		var shopItemsKeys = taro.getSortedKeys(taro.game?.data?.shops[self.currentType]?.itemTypes);
+		var shopUnitsKeys = taro.getSortedKeys(taro.game?.data?.shops[self.currentType]?.unitTypes);
 
 		var shopItems = taro.game.data.shops[self.currentType]
 			? rfdc()(taro.game.data.shops[self.currentType].itemTypes)
