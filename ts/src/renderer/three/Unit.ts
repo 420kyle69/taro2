@@ -143,14 +143,33 @@ namespace Renderer {
 			}
 
 			setHidden(hidden: boolean) {
-				this.hidden = hidden;
-				if (hidden) {
-					this.label.visible = false;
-					this.attributeBars.visible = false;
-				} else {
-					this.label.visible = this.hasVisibleLabel;
-					this.attributeBars.visible = true;
+				if (this.hidden != hidden) {
+					const fadeAnimation = (from: number, to: number, onComplete = () => {}) => {
+						new TWEEN.Tween({ opacity: from })
+							.to({ opacity: to }, 100)
+							.onUpdate(({ opacity }) => {
+								this.label.setOpacity(opacity);
+								for (const bar of this.attributeBars.children) {
+									(bar as AttributeBar).setOpacity(opacity);
+								}
+							})
+							.onComplete(onComplete)
+							.start();
+					};
+
+					if (hidden) {
+						fadeAnimation(1, 0, () => {
+							this.label.visible = false;
+							this.attributeBars.visible = false;
+						});
+					} else {
+						this.label.visible = this.hasVisibleLabel;
+						this.attributeBars.visible = true;
+						fadeAnimation(0, 1);
+					}
 				}
+
+				this.hidden = hidden;
 			}
 
 			renderChat(text: string): void {

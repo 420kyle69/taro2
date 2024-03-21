@@ -64,6 +64,10 @@ namespace Renderer {
 				}
 			}
 
+			setOpacity(opacity: number) {
+				this.sprite.material.opacity = opacity;
+			}
+
 			setScale(scale: number) {
 				this.scaleScalar = scale;
 
