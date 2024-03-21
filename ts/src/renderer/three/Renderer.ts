@@ -308,23 +308,8 @@ namespace Renderer {
 					this.sky.position.copy(this.camera.target.position);
 				}
 
-				for (const entity of this.entityManager.units) {
-					const worldPos = new THREE.Vector3();
-					entity.getWorldPosition(worldPos);
-
-					const point = new THREE.Vector2();
-					const entityScreenPosition = worldPos.clone().project(this.camera.instance);
-					point.x = entityScreenPosition.x;
-					point.y = entityScreenPosition.y;
-
-					const dist = worldPos.distanceTo(this.camera.instance.position);
-					const raycaster = new THREE.Raycaster();
-					raycaster.setFromCamera(point, this.camera.instance);
-					raycaster.far = dist;
-					raycaster.near = this.camera.instance.near;
-
-					const intersects = raycaster.intersectObject(this.voxels);
-					entity.setHidden(intersects.length !== 0);
+				for (const unit of this.entityManager.units) {
+					unit.setHidden(!this.camera.isVisible(unit, this.voxels));
 				}
 
 				TWEEN.update();

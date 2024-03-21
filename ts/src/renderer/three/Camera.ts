@@ -381,6 +381,25 @@ namespace Renderer {
 				}
 			}
 
+			isVisible(unit: Unit, objects: THREE.Object3D) {
+				const worldPos = new THREE.Vector3();
+				unit.getWorldPosition(worldPos);
+
+				const point = new THREE.Vector2();
+				const entityScreenPosition = worldPos.clone().project(this.instance);
+				point.x = entityScreenPosition.x;
+				point.y = entityScreenPosition.y;
+
+				const dist = worldPos.distanceTo(this.instance.position);
+				const raycaster = new THREE.Raycaster();
+				raycaster.setFromCamera(point, this.instance);
+				raycaster.far = dist;
+				raycaster.near = this.instance.near;
+
+				const intersects = raycaster.intersectObject(objects);
+				return intersects.length === 0;
+			}
+
 			private switchToOrthographicCamera() {
 				this.isPerspective = false;
 				this.orthographicCamera.position.copy(this.perspectiveCamera.position).add(this.offset);
