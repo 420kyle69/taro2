@@ -464,6 +464,17 @@ var ParameterComponent = TaroEntity.extend({
 
 						break;
 
+					case 'playerAttributeRegen':
+						var attributeTypeId = self.getValue(text.attribute, vars);
+						if (entity && attributeTypeId) {
+							var attributeType = entity._stats.attributes[attributeTypeId];
+							if (attributeType) {
+								returnValue = attributeType.regenerateSpeed;
+							}
+						}
+
+						break;
+
 					case 'getPlayerName':
 						if (entity && entity._category == 'player') {
 							returnValue = entity._stats.name;
@@ -576,6 +587,17 @@ var ParameterComponent = TaroEntity.extend({
 							var attributeType = entity._stats.attributes[attributeTypeId];
 							if (attributeType) {
 								returnValue = attributeType.min;
+							}
+						}
+
+						break;
+
+					case 'entityAttributeRegen':
+						var attributeTypeId = self.getValue(text.attribute, vars);
+						if (entity && entity._stats.attributes && self._entity.script.action.entityCategories.indexOf(entity._category) > -1 && attributeTypeId) {
+							var attributeType = entity._stats.attributes[attributeTypeId];
+							if (attributeType) {
+								returnValue = attributeType.regenerateSpeed;
 							}
 						}
 
