@@ -76,6 +76,8 @@ namespace Renderer {
 						// 	angle -= this.camera.controls.getAzimuthalAngle();
 						// }
 						entity.setRotationY(-data.rotation);
+						const flip = taroEntity._stats.flip;
+                        entity.setFlip(flip % 2 === 1, flip > 1);
 					},
 					this
 				);
