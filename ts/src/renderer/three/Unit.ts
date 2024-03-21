@@ -1,18 +1,17 @@
 namespace Renderer {
 	export namespace Three {
 		export class Unit extends AnimatedSprite {
-			label = new Label();
-
+			label = new Label('', 'white', false, true);
 			cameraConfig = {
 				pointerLock: false,
 				pitchRange: { min: -90, max: 90 },
 				offset: { x: 0, y: 0, z: 0 },
 			};
+			hidden = false;
 
 			private guiScale = 1;
 			private attributeBars = new THREE.Group();
 			private chat: ChatBubble;
-			private hidden = false;
 			private hasVisibleLabel;
 
 			constructor(
