@@ -236,20 +236,41 @@ NetIo.Client = NetIo.EventingClass.extend({
 		}
 	},
 
+	averageLatency99thPercentile: function (pingLatency) {
+		// Sort the array in ascending order
+		pingLatency.sort((a, b) => a - b);
+
+		// Calculate the index for the 99th percentile
+		const index99Percentile = Math.floor((pingLatency.length - 1) * 0.99);
+
+		// Take the sum of elements up to the 99th percentile index
+		let sum99Percentile = 0;
+		for (let i = 0; i <= index99Percentile; i++) {
+			sum99Percentile += pingLatency[i];
+		}
+
+		// Calculate the average of the 99th percentile sum
+		const average99thPercentile = sum99Percentile / (index99Percentile + 1);
+
+		return Math.floor(average99thPercentile);
+	},
+
 	trackLatency: function () {
+		var self = this;
 		clearInterval(taro.trackLatencyInterval);
 		// track latency every 30 seconds
 		taro.trackLatencyInterval = setInterval(function () {
 			// track only if document is in focus to avoid tracking inaccurate latencies
-			if (window.newrelic && taro.pingLatency && document.hasFocus()) {
+			if (window.newrelic && taro.pingLatency?.length && document.hasFocus()) {
 				window.newrelic.addPageAction('gsPing', {
 					user: window.username,
 					game: window.gameSlug,
 					container: taro.client.server.name,
 					server: taro.client.server.url,
-					latency: taro.pingLatency,
+					latency: self.averageLatency99thPercentile(taro.pingLatency),
 				});
 			}
+			taro.pingLatency = [];
 		}, 30 * 1000);
 	},
 
