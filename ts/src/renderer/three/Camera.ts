@@ -152,6 +152,9 @@ namespace Renderer {
 				info.style.opacity = '0.75';
 				info.style.marginTop = '40px';
 				this.debugInfo = info;
+
+				//@ts-ignore
+				this.raycaster.firstHitOnly = true;
 			}
 
 			setProjection(projection: typeof taro.game.data.settings.camera.projectionMode) {

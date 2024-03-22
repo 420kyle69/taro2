@@ -36,6 +36,14 @@ namespace Renderer {
 					return Renderer._instance;
 				}
 
+				const { computeBoundsTree, disposeBoundsTree, acceleratedRaycast } = window.MeshBVHLib;
+
+				//@ts-ignore
+				THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
+				//@ts-ignore
+				THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
+				THREE.Mesh.prototype.raycast = acceleratedRaycast;
+
 				const renderer = new THREE.WebGLRenderer();
 				renderer.setSize(window.innerWidth, window.innerHeight);
 				document.querySelector('#game-div')?.appendChild(renderer.domElement);
