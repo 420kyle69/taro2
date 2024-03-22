@@ -446,9 +446,11 @@ var ClientNetworkEvents = {
 			}
 		}
 		taro.client.sendNextPingAt = taro.now;
+
 		taro.pingElement = taro.pingElement || document.getElementById('updateping');
 		taro.pingElement.innerHTML = Math.floor(latency);
-		taro.pingLatency = Math.floor(latency);
+		taro.pingLatency = taro.pingLatency || [];
+		taro.pingLatency.push(Math.floor(latency));
 	},
 
 	_onPlayAd: function (data) {

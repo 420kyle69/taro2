@@ -241,15 +241,16 @@ NetIo.Client = NetIo.EventingClass.extend({
 		// track latency every 30 seconds
 		taro.trackLatencyInterval = setInterval(function () {
 			// track only if document is in focus to avoid tracking inaccurate latencies
-			if (window.newrelic && taro.pingLatency && document.hasFocus()) {
+			if (window.newrelic && taro.pingLatency?.length && document.hasFocus()) {
 				window.newrelic.addPageAction('gsPing', {
 					user: window.username,
 					game: window.gameSlug,
 					container: taro.client.server.name,
 					server: taro.client.server.url,
-					latency: taro.pingLatency,
+					latency: Math.floor(taro.pingLatency.reduce((acc, curr) => acc + curr, 0) / taro.pingLatency.length),
 				});
 			}
+			taro.pingLatency = [];
 		}, 30 * 1000);
 	},
 
