@@ -12,7 +12,7 @@ namespace Renderer {
 			private guiScale = 1;
 			private attributeBars = new THREE.Group();
 			private chat: ChatBubble;
-			private hasVisibleLabel;
+			private labelVisible;
 
 			constructor(
 				public taroId: string,
@@ -23,7 +23,7 @@ namespace Renderer {
 				super(tex);
 
 				this.label.visible = false;
-				this.hasVisibleLabel = this.label.visible;
+				this.labelVisible = this.label.visible;
 				this.add(this.label);
 
 				this.add(this.attributeBars);
@@ -56,8 +56,8 @@ namespace Renderer {
 				taroEntity.on('scale', (data: { x: number; y: number }) => entity.scale.set(data.x, 1, data.y), this);
 				taroEntity.on('show', () => (entity.visible = true), this);
 				taroEntity.on('hide', () => (entity.visible = false), this);
-				taroEntity.on('show-label', () => (entity.hasVisibleLabel = entity.label.visible = true));
-				taroEntity.on('hide-label', () => (entity.hasVisibleLabel = entity.label.visible = false));
+				taroEntity.on('show-label', () => (entity.labelVisible = entity.label.visible = true));
+				taroEntity.on('hide-label', () => (entity.labelVisible = entity.label.visible = false));
 				taroEntity.on('render-attributes', (data) => (entity as Unit).renderAttributes(data));
 				taroEntity.on('update-attribute', (data) => (entity as Unit).updateAttribute(data));
 				taroEntity.on('render-chat-bubble', (text) => (entity as Unit).renderChat(text));
@@ -94,7 +94,7 @@ namespace Renderer {
 
 				taroEntity.on('update-label', (data) => {
 					entity.label.visible = true;
-					entity.hasVisibleLabel = true;
+					entity.labelVisible = true;
 					entity.label.update(data.text, data.color, data.bold);
 				});
 
@@ -144,12 +144,8 @@ namespace Renderer {
 				}
 			}
 
-			hasLabel() {
-				return this.label.text.length > 0;
-			}
-
-			hasAttributes() {
-				return this.attributeBars.children.length > 0;
+			hasVisibleLabel() {
+				return this.labelVisible && this.label.text.length > 0;
 			}
 
 			setHidden(hidden: boolean) {
@@ -173,7 +169,7 @@ namespace Renderer {
 							this.attributeBars.visible = false;
 						});
 					} else {
-						this.label.visible = this.hasVisibleLabel;
+						this.label.visible = this.labelVisible;
 						this.attributeBars.visible = true;
 						fadeAnimation(0, 1);
 					}

@@ -28,6 +28,9 @@ namespace Renderer {
 			private voxels: Voxels;
 			private particles: Particles;
 
+			private raycastIntervalSeconds = 0.1;
+			private timeSinceLastRaycast = 0;
+
 			private constructor() {
 				// For JS interop; in case someone uses new Renderer.ThreeRenderer()
 				if (!Renderer._instance) {
@@ -35,6 +38,14 @@ namespace Renderer {
 				} else {
 					return Renderer._instance;
 				}
+
+				const { computeBoundsTree, disposeBoundsTree, acceleratedRaycast } = window.MeshBVHLib;
+
+				//@ts-ignore
+				THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
+				//@ts-ignore
+				THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
+				THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
 				const renderer = new THREE.WebGLRenderer();
 				renderer.setSize(window.innerWidth, window.innerHeight);
@@ -317,16 +328,23 @@ namespace Renderer {
 					this.sky.position.copy(this.camera.target.position);
 				}
 
-				for (const unit of this.entityManager.units) {
-					// TODO(nick): Need a way to to identify avatar units. It is slow to
-					// raycast every unit on every frame
-					if (unit.hasLabel() || unit.hasAttributes()) {
-						unit.setHidden(!this.camera.isVisible(unit, this.voxels));
-					}
+				this.timeSinceLastRaycast += dt;
+				if (this.timeSinceLastRaycast > this.raycastIntervalSeconds) {
+					this.timeSinceLastRaycast = 0;
+					this.checkForHiddenEntities();
 				}
 
 				TWEEN.update();
 				this.renderer.render(this.scene, this.camera.instance);
+			}
+
+			private checkForHiddenEntities() {
+				for (const unit of this.entityManager.units) {
+					// TODO(nick): Need a way to to identify avatar units from NPC's
+					if (unit.hasVisibleLabel()) {
+						unit.setHidden(!this.camera.isVisible(unit, this.voxels));
+					}
+				}
 			}
 		}
 	}
