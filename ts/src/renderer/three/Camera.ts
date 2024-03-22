@@ -30,6 +30,10 @@ namespace Renderer {
 			private elevationAngle = 0;
 			private azimuthAngle = 0;
 
+			private tempVec3 = new THREE.Vector3();
+			private tempVec2 = new THREE.Vector2();
+			private raycaster = new THREE.Raycaster();
+
 			constructor(
 				private viewportWidth: number,
 				private viewportHeight: number,
@@ -382,21 +386,18 @@ namespace Renderer {
 			}
 
 			isVisible(unit: Unit, objects: THREE.Object3D) {
-				const worldPos = new THREE.Vector3();
-				unit.getWorldPosition(worldPos);
+				unit.getWorldPosition(this.tempVec3);
 
-				const point = new THREE.Vector2();
-				const entityScreenPosition = worldPos.clone().project(this.instance);
-				point.x = entityScreenPosition.x;
-				point.y = entityScreenPosition.y;
+				const entityScreenPosition = this.tempVec3.clone().project(this.instance);
+				this.tempVec2.x = entityScreenPosition.x;
+				this.tempVec2.y = entityScreenPosition.y;
 
-				const dist = worldPos.distanceTo(this.instance.position);
-				const raycaster = new THREE.Raycaster();
-				raycaster.setFromCamera(point, this.instance);
-				raycaster.far = dist;
-				raycaster.near = this.instance.near;
+				const dist = this.tempVec3.distanceTo(this.instance.position);
+				this.raycaster.setFromCamera(this.tempVec2, this.instance);
+				this.raycaster.far = dist;
+				this.raycaster.near = this.instance.near;
 
-				const intersects = raycaster.intersectObject(objects);
+				const intersects = this.raycaster.intersectObject(objects);
 				return intersects.length === 0;
 			}
 
