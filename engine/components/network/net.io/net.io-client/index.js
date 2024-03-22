@@ -236,7 +236,27 @@ NetIo.Client = NetIo.EventingClass.extend({
 		}
 	},
 
+	averageLatency99thPercentile: function (pingLatency) {
+		// Sort the array in ascending order
+		pingLatency.sort((a, b) => a - b);
+
+		// Calculate the index for the 99th percentile
+		const index99Percentile = Math.floor((pingLatency.length - 1) * 0.99);
+
+		// Take the sum of elements up to the 99th percentile index
+		let sum99Percentile = 0;
+		for (let i = 0; i <= index99Percentile; i++) {
+			sum99Percentile += pingLatency[i];
+		}
+
+		// Calculate the average of the 99th percentile sum
+		const average99thPercentile = sum99Percentile / (index99Percentile + 1);
+
+		return Math.floor(average99thPercentile);
+	},
+
 	trackLatency: function () {
+		var self = this;
 		clearInterval(taro.trackLatencyInterval);
 		// track latency every 30 seconds
 		taro.trackLatencyInterval = setInterval(function () {
@@ -247,7 +267,7 @@ NetIo.Client = NetIo.EventingClass.extend({
 					game: window.gameSlug,
 					container: taro.client.server.name,
 					server: taro.client.server.url,
-					latency: Math.floor(taro.pingLatency.reduce((acc, curr) => acc + curr, 0) / taro.pingLatency.length),
+					latency: self.averageLatency99thPercentile(taro.pingLatency),
 				});
 			}
 			taro.pingLatency = [];
