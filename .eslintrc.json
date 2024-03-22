@@ -101,6 +101,7 @@
         "@typescript-eslint/no-unused-vars": "off",
         "@typescript-eslint/no-empty-function": "off",
         "@typescript-eslint/member-ordering": "error",
+        "@typescript-eslint/ban-ts-comment": "off",
         "no-inner-declarations": "off"
     }
 }
