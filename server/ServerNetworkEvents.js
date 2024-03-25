@@ -62,6 +62,20 @@ var ServerNetworkEvents = {
 
 	_onJoinGame: function (data, clientId) {
 		if (taro.workerComponent) { // this is used for hosted version of moddio
+			// Step 1: Filter out players controlled by humans and extract their usernames
+			var humanPlayers = taro.$$('player').filter(player => player._stats.controlledBy === 'human');
+			var existingNames = humanPlayers.map(player => player._stats.username.substring('user'.length));
+
+			if (humanPlayers.length < 1000) {
+				// Step 2: Check if the generated number is already in use
+				if (existingNames.includes("user" + String(data.number))) {
+					// Step 3: Generate a unique number if the current one is already in use
+					do {
+						data.number = (Math.floor(Math.random() * 999) + 100);
+					} while (existingNames.includes("user" + String(data.number))); // Step 4: Repeat until a unique number is found
+				}
+			}
+
 			let clientData = taro.workerComponent.authenticateClient(data, clientId) // will return data if user is authenticated. otherwise, will return undefined
 
 			if (clientData) {
@@ -90,7 +104,7 @@ var ServerNetworkEvents = {
 	},
 
 	_onPing: function(data, clientId) {
-		taro.network.send('ping', data, clientId)
+		taro.network.send('ping', data, clientId, true)
 	},
 
 	_onBuySkin: function (skinHandle, clientId) {
@@ -155,6 +169,7 @@ var ServerNetworkEvents = {
 				if (acceptedBy && acceptedFor) {
 					if (!acceptedBy.acceptTrading) {
 						taro.chat.sendToRoom('1', 'Trading has been accepted by ' + acceptedBy._stats.name, acceptedFor._stats.clientId);
+						taro.network.send('trade', { type: 'accept', between: tradeBetween }, acceptedFor._stats.clientId);
 					}
 					if (acceptedBy.tradingWith === acceptedFor.id()) {
 						acceptedBy.acceptTrading = true;
@@ -259,7 +274,7 @@ var ServerNetworkEvents = {
 						var item = offeringItemId && taro.$(offeringItemId);
 						if (item && item._category === 'item') {
 							var availSlot = unitA.inventory.getFirstAvailableSlotForItem(item);
-							unitA._stats.itemIds[availSlot] = unitA._stats.itemIds[i];
+							unitA._stats.itemIds[availSlot - 1] = unitA._stats.itemIds[i];
 							unitA._stats.itemIds[i] = undefined;
 						}
 					}
@@ -275,7 +290,7 @@ var ServerNetworkEvents = {
 						var item = offeringItemId && taro.$(offeringItemId);
 						if (item && item._category === 'item') {
 							var availSlot = unitB.inventory.getFirstAvailableSlotForItem(item);
-							unitB._stats.itemIds[availSlot] = unitB._stats.itemIds[i];
+							unitB._stats.itemIds[availSlot - 1] = unitB._stats.itemIds[i];
 							unitB._stats.itemIds[i] = undefined;
 						}
 					}
@@ -381,7 +396,7 @@ var ServerNetworkEvents = {
 					
 					// swap
 					if (
-						(data.to < unit.inventory.getTotalInventorySize() || (data.to >= unit.inventory.getTotalInventorySize() && !fromItem._stats.controls.undroppable)) && //check if try to trade undroppable item
+						(data.to < unit.inventory.getTotalInventorySize() || (data.to >= unit.inventory.getTotalInventorySize() && !fromItem._stats.controls.undroppable && !fromItem._stats.controls.untradable)) && //check if try to trade undroppable item
 						(
 							fromItem._stats.controls == undefined ||
 							fromItem._stats.controls.permittedInventorySlots == undefined ||
@@ -428,7 +443,7 @@ var ServerNetworkEvents = {
 				if (
 					fromItem != undefined &&
 					toItem == undefined &&
-					(data.to < unit.inventory.getTotalInventorySize() || (data.to >= unit.inventory.getTotalInventorySize() && !fromItem._stats.controls.undroppable)) && //check if try to trade undroppable item
+					(data.to < unit.inventory.getTotalInventorySize() || (data.to >= unit.inventory.getTotalInventorySize() && !fromItem._stats.controls.undroppable && !fromItem._stats.controls.untradable)) && //check if try to trade undroppable item
 					(
 						fromItem._stats.controls == undefined ||
 						fromItem._stats.controls.permittedInventorySlots == undefined ||

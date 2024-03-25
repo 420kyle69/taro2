@@ -101,6 +101,8 @@ namespace Renderer {
 
 				const mesh = new THREE.Mesh(geometry, [mat1, mat2]);
 				mesh.renderOrder = renderOrder;
+				//@ts-ignore
+				geometry.computeBoundsTree();
 
 				this.add(mesh);
 			}

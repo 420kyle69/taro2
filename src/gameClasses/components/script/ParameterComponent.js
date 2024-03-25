@@ -464,6 +464,17 @@ var ParameterComponent = TaroEntity.extend({
 
 						break;
 
+					case 'playerAttributeRegen':
+						var attributeTypeId = self.getValue(text.attribute, vars);
+						if (entity && attributeTypeId) {
+							var attributeType = entity._stats.attributes[attributeTypeId];
+							if (attributeType) {
+								returnValue = attributeType.regenerateSpeed;
+							}
+						}
+
+						break;
+
 					case 'getPlayerName':
 						if (entity && entity._category == 'player') {
 							returnValue = entity._stats.name;
@@ -576,6 +587,17 @@ var ParameterComponent = TaroEntity.extend({
 							var attributeType = entity._stats.attributes[attributeTypeId];
 							if (attributeType) {
 								returnValue = attributeType.min;
+							}
+						}
+
+						break;
+
+					case 'entityAttributeRegen':
+						var attributeTypeId = self.getValue(text.attribute, vars);
+						if (entity && entity._stats.attributes && self._entity.script.action.entityCategories.indexOf(entity._category) > -1 && attributeTypeId) {
+							var attributeType = entity._stats.attributes[attributeTypeId];
+							if (attributeType) {
+								returnValue = attributeType.regenerateSpeed;
 							}
 						}
 
@@ -1353,6 +1375,31 @@ var ParameterComponent = TaroEntity.extend({
 
 						break;
 
+					case 'lerp':
+						var valueA = self.getValue(text.valueA, vars);
+						var valueB = self.getValue(text.valueB, vars);
+						var alpha = self.getValue(text.alpha, vars);
+
+						if (!isNaN(valueA) && !isNaN(valueB) && !isNaN(alpha)) {
+							returnValue = (valueB - valueA) * alpha + valueA;
+						}
+						
+						break;
+
+					case 'getLerpPosition':
+						var positionA = self.getValue(text.positionA, vars);
+						var positionB = self.getValue(text.positionB, vars);
+						var alpha = self.getValue(text.alpha, vars);
+
+						if (positionA && positionB && !isNaN(positionA.x) && !isNaN(positionA.y) && !isNaN(positionB.x) && !isNaN(positionB.y) && !isNaN(alpha)) {
+							returnValue = {
+								x: (positionB.x - positionA.x) * alpha + positionA.x,
+								y: (positionB.y - positionA.y) * alpha + positionA.y
+							}
+						}
+
+						break;
+
 					case 'getEntityPosition':
 						entity = self.getValue(text.entity, vars);
 
@@ -1543,6 +1590,7 @@ var ParameterComponent = TaroEntity.extend({
 						var angle = self.getValue(text.angle, vars);
 
 						if (position && !isNaN(distance) && !isNaN(angle)) {
+							angle -= Math.PI / 2;
 							returnValue = {
 								x: distance * Math.cos(angle) + position.x,
 								y: distance * Math.sin(angle) + position.y

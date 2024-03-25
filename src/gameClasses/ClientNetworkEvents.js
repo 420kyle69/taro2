@@ -396,7 +396,7 @@ var ClientNetworkEvents = {
 	_onPing: function(data) {
 		const self = this;
 		const now = taro._currentTime;
-		const latency = now - data.sentAt;
+		const latency = performance.now() - data.sentAt;
 		// console.log("onPing", taro._currentTime, data.sentAt, latency);
 		// start reconciliation based on discrepancy between
 		// where my unit when ping was sent and where unit is when ping is received
@@ -445,12 +445,12 @@ var ClientNetworkEvents = {
 				}
 			}
 		}
-
 		taro.client.sendNextPingAt = taro.now;
 
 		taro.pingElement = taro.pingElement || document.getElementById('updateping');
 		taro.pingElement.innerHTML = Math.floor(latency);
-
+		taro.pingLatency = taro.pingLatency || [];
+		taro.pingLatency.push(Math.floor(latency));
 	},
 
 	_onPlayAd: function (data) {
@@ -649,6 +649,21 @@ var ClientNetworkEvents = {
 				if (from && to && from.tradingWith === to.id()) {
 					taro.tradeUi.receiveOfferingItems(msg.tradeItems);
 				}
+				break;
+			}
+
+			case "accept": {
+				console.log("accept ", msg, clientId);
+				$("#trader-accept").addClass('active');
+
+				for (let i = 1; i <= 5; i++) {
+					const offerDiv = $(`#offer-${i}`);
+					if (offerDiv.hasClass('trade-item-added')) {
+						offerDiv.addClass('trade-item-success');
+					}
+				}
+
+				$("#accept-trade-text").text('Complete');
 				break;
 			}
 

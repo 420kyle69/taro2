@@ -222,7 +222,8 @@ var ScoreboardComponent = TaroEntity.extend({
 
 						$(scoreboardElement).append(
 							$('<div/>', {
-								class: `cursor-pointer scoreboard-user-entry scoreboard-player-rank-${i} ${playerIsSelf}`,
+								id: `scoreboard-player-rank-${i}`,
+								class: `cursor-pointer scoreboard-user-entry ${playerIsSelf}`,
 								style: `color: ${color};font-weight:${defaultFontWeight}`,
 								onContextMenu: `window.showUserDropdown({ event, userId: '${player._stats.userId}' })`
 							}).append(

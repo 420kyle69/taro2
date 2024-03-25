@@ -906,9 +906,7 @@ var Unit = TaroEntityPhysics.extend({
 			}
 
 			self.changeItem(self._stats.currentItemIndex); // this will call change item on client for all units
-			self.streamUpdateData([{
-				attributes: self._stats.attributes
-			}]);
+
 		} else if (taro.isClient) {
 			var zIndex = self._stats.currentBody && self._stats.currentBody['z-index'] || { layer: 3, depth: 3 };
 
@@ -1089,7 +1087,7 @@ var Unit = TaroEntityPhysics.extend({
 		@param slotIndex force-assign item into this inventory slot. usually assigned from when buying a shop item with replaceItemInTargetSlot (optional)
 		@return {boolean} return true if unit was able to pickup/use item. return false otherwise.
 	 */
-	pickUpItem: function (item) {
+	pickUpItem: function (item, persistedItem = false) {
 		var self = this;
 		// all Server only
 		// console.log(`running Unit.pickUpItem() on ${taro.isClient ? 'Client' : 'Server'}`);
@@ -1104,7 +1102,7 @@ var Unit = TaroEntityPhysics.extend({
 			if (itemData.isUsedOnPickup && self.canUseItem(itemData)) {
 				if (!isItemInstance) {
 					item = new Item(itemData);
-					item.script.trigger('entityCreated');
+					if (!persistedItem) item.script.trigger('entityCreated');
 				}
 				taro.devLog('using item immediately');
 				item.setOwnerUnit(self);
@@ -1354,7 +1352,7 @@ var Unit = TaroEntityPhysics.extend({
 		if (item) {
 
 			// check if item's undroppable
-			if (item._stats && item._stats.controls && item._stats.controls.undroppable) {
+			if (item._stats && item._stats.controls && (item._stats.controls.undroppable)) {
 				return;
 			}
 
@@ -1830,10 +1828,11 @@ var Unit = TaroEntityPhysics.extend({
 					if (itemData) {
 						itemData.quantity = persistedItem.quantity;
 						itemData.itemTypeId = persistedItem.itemTypeId;
-						if (self.pickUpItem(itemData)) {
+						if (self.pickUpItem(itemData, true)) {
 							var givenItem = taro.$(taro.game.lastCreatedItemId);
 							if (givenItem && givenItem.getOwnerUnit() == this) {
 								givenItem.loadPersistentData(persistedItem);
+								givenItem.script.trigger('entityCreated');
 							}
 						}
 					}
@@ -2040,7 +2039,8 @@ var Unit = TaroEntityPhysics.extend({
 
 					// send ping for CSP reconciliation purpose
 					if (taro.now > taro.client.sendNextPingAt) {
-						taro.network.send('ping', { sentAt: taro._currentTime });
+						// using performance.now instead of taro._currentTime as _currentTime updates every frame and ping may respond within a frame
+						taro.network.send('ping', { sentAt: performance.now() });
 
 						// allow up to a 1.5 second before sending another ping. generally we'll not wait 1.5s before sending another ping
 						// because we'll be sending ping immediately after receiving pong from server. this is just a safety measure

@@ -2531,6 +2531,22 @@ var ActionComponent = TaroEntity.extend({
 
 						break;
 
+					case 'applyImpulseOnEntityAngle':
+
+						var entity = self._script.param.getValue(action.entity, vars);
+						var angle = self._script.param.getValue(action.angle, vars);
+						var impulse = self._script.param.getValue(action.impulse, vars);
+						var radians = angle - Math.radians(90); // entity's facing angle
+						if (!isNaN(radians) && !isNaN(impulse) && entity && self.entityCategories.indexOf(entity._category) > -1) {
+							impulse = {
+								x: Math.cos(radians) * impulse,
+								y: Math.sin(radians) * impulse
+							};
+							entity.applyImpulse(impulse.x, impulse.y);
+						}
+
+						break;
+
 					case 'applyForceOnEntityXYRelative':
 
 						var entity = self._script.param.getValue(action.entity, vars);
@@ -3303,9 +3319,9 @@ var ActionComponent = TaroEntity.extend({
 						break;
 
 					case 'addNumberElement':
-						var key = self._script.variable.getValue(action.key, vars);
-						var value = self._script.variable.getValue(action.value, vars);
-						var object = self._script.variable.getValue(action.object, vars);
+						var key = self._script.param.getValue(action.key, vars);
+						var value = self._script.param.getValue(action.value, vars);
+						var object = self._script.param.getValue(action.object, vars);
 
 						if (object && key && value) {
 							object[key] = parseFloat(value);

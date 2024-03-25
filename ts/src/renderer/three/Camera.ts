@@ -1,18 +1,20 @@
 namespace Renderer {
 	export namespace Three {
 		export class Camera {
-			instance: THREE.Camera;
+			instance: THREE.PerspectiveCamera | THREE.OrthographicCamera;
 			target: THREE.Object3D | null = null;
 			controls: OrbitControls;
 			zoom = 1;
 			zoomHeight = 700;
+			isPerspective = false;
 
 			orthographicState: { target: THREE.Vector3; position: THREE.Vector3 };
 			perspectiveState: { target: THREE.Vector3; position: THREE.Vector3; zoom: number };
 
+			isDevelopmentMode = false;
+
 			private orthographicCamera: THREE.OrthographicCamera;
 			private perspectiveCamera: THREE.PerspectiveCamera;
-			private isPerspective = false;
 			private fovInitial: number;
 			private viewportHeightInitial: number;
 
@@ -25,6 +27,12 @@ namespace Renderer {
 			private originalHalfWidth;
 
 			private originalZoom = 1;
+			private elevationAngle = 0;
+			private azimuthAngle = 0;
+
+			private tempVec3 = new THREE.Vector3();
+			private tempVec2 = new THREE.Vector2();
+			private raycaster = new THREE.Raycaster();
 
 			constructor(
 				private viewportWidth: number,
@@ -78,7 +86,15 @@ namespace Renderer {
 				this.controls.maxDistance = 1000;
 				this.controls.minZoom = 1 / (1000 / distance);
 				this.controls.maxZoom = 1 / (0.01 / distance);
+				this.controls.enablePan = false;
+				this.controls.screenSpacePanning = false;
 				this.controls.update();
+
+				this.controls.mouseButtons = {
+					LEFT: THREE.MOUSE.PAN,
+					MIDDLE: THREE.MOUSE.DOLLY,
+					RIGHT: THREE.MOUSE.ROTATE,
+				};
 
 				this.controls.addEventListener('change', () => {
 					for (const cb of this.onChangeCbs) {
@@ -136,6 +152,9 @@ namespace Renderer {
 				info.style.opacity = '0.75';
 				info.style.marginTop = '40px';
 				this.debugInfo = info;
+
+				//@ts-ignore
+				this.raycaster.firstHitOnly = true;
 			}
 
 			setProjection(projection: typeof taro.game.data.settings.camera.projectionMode) {
@@ -144,6 +163,8 @@ namespace Renderer {
 			}
 
 			setElevationAngle(deg: number) {
+				this.elevationAngle = deg;
+
 				const spherical = new THREE.Spherical();
 				spherical.radius = this.controls.getDistance();
 				spherical.theta = this.controls.getAzimuthalAngle();
@@ -164,6 +185,8 @@ namespace Renderer {
 			}
 
 			setAzimuthAngle(deg: number) {
+				this.azimuthAngle = deg;
+
 				const spherical = new THREE.Spherical();
 				spherical.radius = this.controls.getDistance();
 				spherical.phi = this.controls.getPolarAngle();
@@ -230,7 +253,7 @@ namespace Renderer {
 					this.debugInfo.innerHTML += `zoom: ${editorZoom}</br>`;
 				}
 
-				if (this.target) {
+				if (this.target && !this.isDevelopmentMode) {
 					const targetWorldPos = new THREE.Vector3();
 					this.target.getWorldPosition(targetWorldPos);
 					this.setPosition(targetWorldPos.x, targetWorldPos.y, targetWorldPos.z, true);
@@ -339,6 +362,46 @@ namespace Renderer {
 
 			onChange(cb: () => void) {
 				this.onChangeCbs.push(cb);
+			}
+
+			setDevelopmentMode(state: boolean) {
+				this.isDevelopmentMode = state;
+
+				if (this.isDevelopmentMode) {
+					this.controls.enablePan = true;
+					this.controls.enableRotate = true;
+					this.controls.enableZoom = true;
+				} else {
+					this.controls.enablePan = false;
+					this.controls.enableRotate = false;
+					this.controls.enableZoom = false;
+
+					this.setElevationAngle(this.elevationAngle);
+					this.setAzimuthAngle(this.azimuthAngle);
+					this.setZoom(this.originalZoom);
+
+					if (this.target) {
+						const targetWorldPos = new THREE.Vector3();
+						this.target.getWorldPosition(targetWorldPos);
+						this.setPosition(targetWorldPos.x, targetWorldPos.y, targetWorldPos.z);
+					}
+				}
+			}
+
+			isVisible(unit: Unit, objects: THREE.Object3D) {
+				unit.getWorldPosition(this.tempVec3);
+
+				const entityScreenPosition = this.tempVec3.clone().project(this.instance);
+				this.tempVec2.x = entityScreenPosition.x;
+				this.tempVec2.y = entityScreenPosition.y;
+
+				const dist = this.tempVec3.distanceTo(this.instance.position);
+				this.raycaster.setFromCamera(this.tempVec2, this.instance);
+				this.raycaster.far = dist;
+				this.raycaster.near = this.instance.near;
+
+				const intersects = this.raycaster.intersectObject(objects);
+				return intersects.length === 0;
 			}
 
 			private switchToOrthographicCamera() {

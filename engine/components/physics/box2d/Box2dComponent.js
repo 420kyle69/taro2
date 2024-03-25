@@ -6,7 +6,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 	classId: 'PhysicsComponent',
 	componentId: 'physics',
 
-	init: async function (entity, options) {
+	init: async function (entity, options, callback) {
 		// Check that the engine has not already started
 		// as this will mess everything up if it has
 		if (taro._state != 0) {
@@ -48,7 +48,8 @@ var PhysicsComponent = TaroEventingClass.extend({
 
 		if (this.engine) {
 			try {
-				dists[this.engine].init(this);
+				await dists[this.engine].init(this);
+				callback();
 			} catch (err) {
 				console.log(err, 'error: ');
 			}
@@ -902,7 +903,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 			case 'sensor':
 				triggeredBy.sensorId = entityB.id();
 				var sensoringUnit = entityB.getOwnerUnit();
-				
+
 				if (sensoringUnit && sensoringUnit.script) {
 					sensoringUnit.script.trigger(`${entityA._category}EntersSensor`, triggeredBy);
 

@@ -1,6 +1,11 @@
 /// <reference types="@types/google.analytics" />
 
 namespace Renderer {
+	export enum Mode {
+		Normal,
+		Development,
+	}
+
 	export namespace Three {
 		export function instance() {
 			return Renderer.instance();
@@ -12,6 +17,7 @@ namespace Renderer {
 			renderer: THREE.WebGLRenderer;
 			camera: Camera;
 			scene: THREE.Scene;
+			mode = Mode.Normal;
 
 			private clock = new THREE.Clock();
 			private pointer = new THREE.Vector2();
@@ -22,6 +28,9 @@ namespace Renderer {
 			private voxels: Voxels;
 			private particles: Particles;
 
+			private raycastIntervalSeconds = 0.1;
+			private timeSinceLastRaycast = 0;
+
 			private constructor() {
 				// For JS interop; in case someone uses new Renderer.ThreeRenderer()
 				if (!Renderer._instance) {
@@ -29,6 +38,14 @@ namespace Renderer {
 				} else {
 					return Renderer._instance;
 				}
+
+				const { computeBoundsTree, disposeBoundsTree, acceleratedRaycast } = window.MeshBVHLib;
+
+				//@ts-ignore
+				THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
+				//@ts-ignore
+				THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
+				THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
 				const renderer = new THREE.WebGLRenderer();
 				renderer.setSize(window.innerWidth, window.innerHeight);
@@ -91,6 +108,19 @@ namespace Renderer {
 				};
 
 				this.loadTextures();
+
+				taro.client.on('enterMapTab', () => {
+					if (this.mode == Mode.Normal) {
+						this.mode = Mode.Development;
+						this.onDevelopmentMode();
+					}
+				});
+				taro.client.on('leaveMapTab', () => {
+					if (this.mode == Mode.Development) {
+						this.mode = Mode.Normal;
+						this.onNormalMode();
+					}
+				});
 			}
 
 			static instance() {
@@ -119,6 +149,23 @@ namespace Renderer {
 
 			getCameraHeight(): number {
 				return window.innerHeight;
+			}
+
+			setVisible(visible: boolean) {
+				this.particles.visible = visible;
+				this.entityManager.entities.forEach((e) => {
+					e.visible = visible;
+				});
+			}
+
+			private onDevelopmentMode() {
+				this.camera.setDevelopmentMode(true);
+				this.setVisible(false);
+			}
+
+			private onNormalMode() {
+				this.camera.setDevelopmentMode(false);
+				this.setVisible(true);
 			}
 
 			private loadTextures() {
@@ -183,14 +230,17 @@ namespace Renderer {
 				this.particles = new Particles();
 				this.scene.add(this.particles);
 
-				const entities = new THREE.Group();
-				entities.position.y = 0.51;
-				this.scene.add(entities);
+				const entitiesLayer = new THREE.Group();
+				entitiesLayer.position.y = 0.51;
+				this.scene.add(entitiesLayer);
 
-				const createEntity = (taroEntity: TaroEntityPhysics) => {
-					const entity = this.entityManager.create(taroEntity);
-					entities.add(entity);
-					taroEntity.on('destroy', () => this.entityManager.destroy(entity));
+				const createEntity = (taroEntity: TaroEntityPhysics, type: 'unit' | 'item' | 'projectile') => {
+					const entity = this.entityManager.create(taroEntity, type);
+					entitiesLayer.add(entity);
+					taroEntity.on('destroy', () => {
+						this.entityManager.destroy(entity);
+						this.particles.destroyEmittersWithTarget(entity);
+					});
 
 					taroEntity.on('follow', () => {
 						this.camera.follow(entity);
@@ -205,9 +255,9 @@ namespace Renderer {
 					});
 				};
 
-				taro.client.on('create-unit', (u: TaroEntityPhysics) => createEntity(u), this);
-				taro.client.on('create-item', (i: TaroEntityPhysics) => createEntity(i), this);
-				taro.client.on('create-projectile', (p: TaroEntityPhysics) => createEntity(p), this);
+				taro.client.on('create-unit', (u: TaroEntityPhysics) => createEntity(u, 'unit'), this);
+				taro.client.on('create-item', (i: TaroEntityPhysics) => createEntity(i, 'item'), this);
+				taro.client.on('create-projectile', (p: TaroEntityPhysics) => createEntity(p, 'projectile'), this);
 
 				taro.client.on('zoom', (height: number) => {
 					if (this.camera.zoomHeight === height * 2.15) return;
@@ -233,7 +283,7 @@ namespace Renderer {
 
 				taro.client.on('create-particle', (particle: Particle) => {
 					const emitter = this.particles.createEmitter(particle);
-					emitter.position.y += entities.position.y;
+					emitter.position.y += entitiesLayer.position.y;
 
 					if (particle.entityId) {
 						const entity = this.entityManager.entities.find((entity) => entity.taroId == particle.entityId);
@@ -245,7 +295,10 @@ namespace Renderer {
 					this.particles.emit(emitter);
 				});
 
-				taro.client.on('floating-text', (config: FloatingTextConfig) => this.scene.add(FloatingText.create(config)));
+				taro.client.on('floating-text', (config: FloatingTextConfig) => {
+					const zOffset = this.camera.target ? this.camera.target.position.y : 0;
+					entitiesLayer.add(FloatingText.create(config, zOffset));
+				});
 			}
 
 			private render() {
@@ -275,8 +328,23 @@ namespace Renderer {
 					this.sky.position.copy(this.camera.target.position);
 				}
 
+				this.timeSinceLastRaycast += dt;
+				if (this.timeSinceLastRaycast > this.raycastIntervalSeconds) {
+					this.timeSinceLastRaycast = 0;
+					this.checkForHiddenEntities();
+				}
+
 				TWEEN.update();
 				this.renderer.render(this.scene, this.camera.instance);
+			}
+
+			private checkForHiddenEntities() {
+				for (const unit of this.entityManager.units) {
+					// TODO(nick): Need a way to to identify avatar units from NPC's
+					if (unit.hasVisibleLabel()) {
+						unit.setHidden(!this.camera.isVisible(unit, this.voxels));
+					}
+				}
 			}
 		}
 	}
