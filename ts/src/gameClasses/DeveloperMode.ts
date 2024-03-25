@@ -318,8 +318,12 @@ class DeveloperMode {
 		}
 		if (tab === 'play') {
 			taro.client.emit('lockCamera');
-		} else if (this.activeTab === 'play') {
-			taro.client.emit('unlockCamera');
+			taro.menuUi.toggleCustomIngameUi(true);
+		} else {
+			taro.menuUi.toggleCustomIngameUi(false);
+			if (this.activeTab === 'play') {
+				taro.client.emit('unlockCamera');
+			}
 		}
 		if (tab === 'entities') {
 			taro.client.emit('enterEntitiesTab');
