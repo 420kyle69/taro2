@@ -541,6 +541,8 @@ const Client = TaroEventingClass.extend({
 	setZoom: function (zoom) {
 		this.zoom = zoom;
 		if (taro.developerMode.active && taro.developerMode.activeTab !== 'play') {
+		} else if (taro.isMobile) {
+			this.emit('zoom', zoom * 0.75);
 		} else {
 			this.emit('zoom', zoom);
 		}
