@@ -402,7 +402,7 @@ var ItemUiComponent = TaroEntity.extend({
 	getItemPopOverContent: function (stats) {
 		var info = '<div>';
 		if (stats.description) {
-			info += `<p class="mb-1"><b>Description: </b><span class="item-description">${taro.clientSanitizer(stats.description)} </span></p>`;
+			info += `<p class="mb-1"><span class="item-description">${taro.clientSanitizer(stats.description)} </span></p>`;
 		}
 		if (stats && stats.bonus) {
 			if (stats.bonus.consume && Object.keys(stats.bonus.consume).length > 0) {
