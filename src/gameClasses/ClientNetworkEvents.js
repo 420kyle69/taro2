@@ -207,31 +207,6 @@ var ClientNetworkEvents = {
 	},
 
 	_onUpdateUiTextForTime: function (data) {
-		// const runAction = functionalTryCatch(() => {
-		// 	$(`.ui-text-${data.target}`).show();
-		// 	$(`.ui-text-${data.target}`).html(taro.clientSanitizer(data.value));
-
-		// 	if (data.time && data.time > 0) {
-		// 		if (this.textTimer) {
-		// 			clearTimeout(this.textTimer);
-		// 		}
-
-		// 		var that = this;
-		// 		this.textTimerData = {
-		// 			target: data.target,
-		// 		};
-
-		// 		this.textTimer = setTimeout(function () {
-		// 			$(`.ui-text-${that.textTimerData.target}`).hide();
-		// 		}, data.time);
-		// 	}
-		// }
-		// );
-		// if (runAction[0] !== null) {
-		// 	// console.error(runAction[0]);
-		// }
-
-		/// new
 		$(`.ui-text-${data.target}`).show();
 		$(`.ui-text-${data.target}`).html(taro.clientSanitizer(data.value));
 
