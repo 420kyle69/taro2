@@ -185,7 +185,7 @@ var TaroEntity = TaroObject.extend({
 		}
 
 		self.previousState = newState;
-		if (defaultData) self.updateBody(defaultData);
+		self.updateBody(defaultData);
 	},
 
 	/**
