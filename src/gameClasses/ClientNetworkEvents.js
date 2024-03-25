@@ -207,28 +207,52 @@ var ClientNetworkEvents = {
 	},
 
 	_onUpdateUiTextForTime: function (data) {
-		const runAction = functionalTryCatch(() => {
-			$(`.ui-text-${data.target}`).show();
-			$(`.ui-text-${data.target}`).html(taro.clientSanitizer(data.value));
+		// const runAction = functionalTryCatch(() => {
+		// 	$(`.ui-text-${data.target}`).show();
+		// 	$(`.ui-text-${data.target}`).html(taro.clientSanitizer(data.value));
 
-			if (data.time && data.time > 0) {
-				if (this.textTimer) {
-					clearTimeout(this.textTimer);
-				}
+		// 	if (data.time && data.time > 0) {
+		// 		if (this.textTimer) {
+		// 			clearTimeout(this.textTimer);
+		// 		}
 
-				var that = this;
-				this.textTimerData = {
-					target: data.target,
-				};
+		// 		var that = this;
+		// 		this.textTimerData = {
+		// 			target: data.target,
+		// 		};
 
-				this.textTimer = setTimeout(function () {
-					$(`.ui-text-${that.textTimerData.target}`).hide();
-				}, data.time);
-			}
+		// 		this.textTimer = setTimeout(function () {
+		// 			$(`.ui-text-${that.textTimerData.target}`).hide();
+		// 		}, data.time);
+		// 	}
+		// }
+		// );
+		// if (runAction[0] !== null) {
+		// 	// console.error(runAction[0]);
+		// }
+
+		/// new
+		$(`.ui-text-${data.target}`).show();
+		$(`.ui-text-${data.target}`).html(taro.clientSanitizer(data.value));
+
+		if (!this.textTimerData) {
+			this.textTimerData = {};
 		}
-		);
-		if (runAction[0] !== null) {
-			// console.error(runAction[0]);
+
+		// stop the timeout and remove old textTimerData
+		if (this.textTimerData[data.target]?.textTimer) {
+			clearTimeout(this.textTimerData[data.target].textTimer);
+			delete this.textTimerData[data.target];
+		}
+
+		if (data.time && data.time > 0) {
+			this.textTimerData[data.target] = {
+				target: data.target,
+				textTimer: setTimeout(() => {
+					$(`.ui-text-${this.textTimerData[data.target].target}`).hide();
+					delete this.textTimerData[data.target];
+				}, data.time)
+			};
 		}
 	},
 
