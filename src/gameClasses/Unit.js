@@ -2,10 +2,12 @@ var Unit = TaroEntityPhysics.extend({
 	classId: 'Unit',
 
 	init: function (data, entityIdFromServer) {
-		TaroEntityPhysics.prototype.init.call(this, data.defaultData);
-
-		this.id(entityIdFromServer);
 		var self = this;
+		this.category('unit');
+
+		TaroEntityPhysics.prototype.init.call(this, data.defaultData);
+		this.id(entityIdFromServer);
+
 		self.dob = Date.now();
 
 		self.direction = {
@@ -15,7 +17,6 @@ var Unit = TaroEntityPhysics.extend({
 
 		self.isMoving = false;
 		self.angleToTarget = undefined;
-		this.category('unit');
 
 		// merge various data into one _stats variable
 		var unitData = {};
@@ -30,6 +31,7 @@ var Unit = TaroEntityPhysics.extend({
 
 		// dont save variables in _stats as _stats is stringified and synced
 		// and some variables of type unit, item, projectile may contain circular json objects
+		self.variables = {}
 		if (self._stats.variables) {
 			self.variables = self._stats.variables;
 			delete self._stats.variables;
@@ -39,11 +41,13 @@ var Unit = TaroEntityPhysics.extend({
 		self.parseEntityObject(self._stats);
 		self.addComponent(InventoryComponent)
 			.addComponent(AbilityComponent)
-			.addComponent(AttributeComponent); // every units gets one
+			.addComponent(AttributeComponent) // every units gets one
+			.addComponent(VariableComponent);
 
 		self.addComponent(ScriptComponent); // entity-requireScriptLoading
+
 		if (unitData && unitData) {
-			self.script.load(unitData.scripts);
+			self.script.load(self._stats.scripts);
 		}
 
 		self.addComponent(AIComponent);
@@ -90,7 +94,7 @@ var Unit = TaroEntityPhysics.extend({
 			if (self._stats.streamMode == 1 || self._stats.streamMode == undefined) {
 				this.streamMode(1);
 			} else {
-				this.streamMode(self._stats.streamMode);				
+				this.streamMode(self._stats.streamMode);
 			}
 
 			taro.server.totalUnitsCreated++;
@@ -104,6 +108,11 @@ var Unit = TaroEntityPhysics.extend({
 				if (ownerPlayer) {
 					this.setOwnerPlayer(this._stats.ownerId);
 					this.equipSkin();
+
+					// player was already set to camera-track this unit
+					if (ownerPlayer._stats.cameraTrackedUnitId == this.id()) {
+						this.emit('follow');
+					}
 				}
 			}
 
@@ -127,8 +136,6 @@ var Unit = TaroEntityPhysics.extend({
 
 			self._scaleTexture();
 
-			var polygon = new TaroPoly2d();
-			self.triggerPolygon(polygon);
 			self.flip(self._stats.flip);
 
 		}
@@ -296,7 +303,7 @@ var Unit = TaroEntityPhysics.extend({
 		var previousOwnerPlayer = self.getOwner();
 		self.ownerPlayer = undefined;
 		if (previousOwnerPlayer && previousOwnerPlayer.id() !== newOwnerPlayerId) {
-			previousOwnerPlayer.disownUnit(self);
+			previousOwnerPlayer.disownUnit(self, true);
 		}
 		// add this unit to the new owner
 		var newOwnerPlayer = newOwnerPlayerId ? taro.$(newOwnerPlayerId) : undefined;
@@ -310,8 +317,8 @@ var Unit = TaroEntityPhysics.extend({
 			self._stats.clientId = newOwnerPlayer && newOwnerPlayer._stats ? newOwnerPlayer._stats.clientId : undefined;
 			if (taro.isServer) {
 				self.streamUpdateData([{ ownerPlayerId: newOwnerPlayerId }]);
-				newOwnerPlayer.ownUnit(self);
 			}
+			newOwnerPlayer.ownUnit(self);
 		}
 
 		if (taro.isClient) {
@@ -326,7 +333,7 @@ var Unit = TaroEntityPhysics.extend({
 				}
 
 				if (taro.scoreboard && newOwnerPlayer._stats.clientId == taro.network.id()) {
-					taro.scoreboard.update();
+					taro.scoreboard.queueUpdate();
 				}
 
 				// execute only for myplayer
@@ -337,6 +344,12 @@ var Unit = TaroEntityPhysics.extend({
 					if (self.unitUi) {
 						self.unitUi.updateAllAttributeBars();
 					}
+					if (!taro.isMobile && self._stats.clientId === taro.network.id() && self._stats.controls.unitAbilities) {
+						taro.client.emit('create-ability-bar', {keybindings: self._stats.controls.abilities, abilities: self._stats.controls.unitAbilities});
+					}
+
+					// visibility mask
+					this.updateVisibilityMask();
 				}
 			}
 		}
@@ -379,7 +392,7 @@ var Unit = TaroEntityPhysics.extend({
 		return true;
 	},
 
-	buyItem: function (itemTypeId, token) {
+	buyItem: async function (itemTypeId, token) {
 		var self = this;
 		var ownerPlayer = self.getOwner();
 		// buyItem only runs on server.
@@ -464,8 +477,8 @@ var Unit = TaroEntityPhysics.extend({
 				// pay attributes
 				for (var attributeTypeId in shopData.price.playerAttributes) {
 					var newValue = ownerPlayer.attribute.getValue(attributeTypeId) - shopData.price.playerAttributes[attributeTypeId];
-					attrData.attributes[attributeTypeId] = ownerPlayer.attribute.update(attributeTypeId, newValue, true); // pay the price
-					ownerPlayer.attribute.update(attributeTypeId, attrData.attributes[attributeTypeId], true);
+					attrData.attributes[attributeTypeId] = ownerPlayer.attribute.update(attributeTypeId, newValue); // pay the price
+					ownerPlayer.attribute.update(attributeTypeId, attrData.attributes[attributeTypeId]);
 				}
 
 				// pay recipes
@@ -513,37 +526,43 @@ var Unit = TaroEntityPhysics.extend({
 					// disable coin consuming due to some bug wrt coins
 					// add coin consuming code
 					if (taro.game.data.defaultData.tier >= 2) {
-
 						try {
-							const jwt = require("jsonwebtoken");
+							var socket = taro.network._socketById[ownerPlayer._stats.clientId];
+							const VERIFICATION_UNLOCKED_FOR = 35 * 60 * 1000; // 35 mins - 5 mins more than what is configured on client side to avoid race conditions
+							if (!token && socket?._token?.pinVerifiedAt && socket?._token?.pinVerifiedAt + VERIFICATION_UNLOCKED_FOR > Date.now()) {
 
-							const isUsedToken = taro.server.usedCoinJwts[token];
-							if (isUsedToken) {
-								console.log('Token has been used already', token);
-								return;
-							}
-
-							const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
-							const {type, userId, purchasableId, createdAt} = decodedToken;
-
-							if (type === 'pinValidationToken' && userId && purchasableId && ownerPlayer._stats.userId === userId && purchasableId === itemTypeId) {
-								// allow coin transaction since token has been verified
-
-								// store token for current client
-								taro.server.usedCoinJwts[token] = createdAt;
-
-								// remove expired tokens
-								const filteredUsedCoinJwts = {};
-								const usedTokenEntries = Object.entries(taro.server.usedCoinJwts).filter(([token, tokenCreatedAt]) => (Date.now() - tokenCreatedAt) < taro.server.COIN_JWT_EXPIRES_IN);
-								for (const [key, value] of usedTokenEntries) {
-									if (typeof value === 'number') {
-										filteredUsedCoinJwts[key] = value;
-									}
-								}
-								taro.server.usedCoinJwts = filteredUsedCoinJwts;
+								// if token is not provided then check for last verification if done in 30mins. if yes, allow transaction
 
 							} else {
-								return;
+								const isUsedToken = taro.server.usedCoinJwts[token];
+								if (isUsedToken) {
+									console.log('Token has been used already', token);
+									return;
+								}
+
+								const decodedToken = taro.workerComponent ? await taro.workerComponent.verifyToken(token) : {};
+								const { type, userId, purchasableId, createdAt } = decodedToken;
+
+								if (type === 'pinValidationToken' && userId && purchasableId && ownerPlayer._stats.userId === userId && purchasableId === itemTypeId) {
+									// allow coin transaction since token has been verified
+
+									// store token for current client
+									taro.server.usedCoinJwts[token] = createdAt;
+									socket._token.pinVerifiedAt = Date.now();
+
+									// remove expired tokens
+									const filteredUsedCoinJwts = {};
+									const usedTokenEntries = Object.entries(taro.server.usedCoinJwts).filter(([token, tokenCreatedAt]) => (Date.now() - tokenCreatedAt) < taro.server.COIN_JWT_EXPIRES_IN);
+									for (const [key, value] of usedTokenEntries) {
+										if (typeof value === 'number') {
+											filteredUsedCoinJwts[key] = value;
+										}
+									}
+									taro.server.usedCoinJwts = filteredUsedCoinJwts;
+
+								} else {
+									return;
+								}
 							}
 						} catch (e) {
 							console.log('invalid pinValidationToken', e.message, token);
@@ -553,8 +572,8 @@ var Unit = TaroEntityPhysics.extend({
 						taro.server.consumeCoinFromUser(ownerPlayer, shopData.price.coins, itemTypeId);
 
 						ownerPlayer.streamUpdateData([{
-								coins: global.coinHelper.subtract(ownerPlayer._stats.coins, shopData.price.coins)
-						}])
+							coins: global.coinHelper.subtract(ownerPlayer._stats.coins, shopData.price.coins)
+						}]);
 					}
 				}
 
@@ -633,7 +652,7 @@ var Unit = TaroEntityPhysics.extend({
 							for (var attributeTypeId in selectedUnitShop.price.playerAttributes) {
 								var unitPrice = selectedUnitShop.price.playerAttributes[attributeTypeId];
 								attributes[attributeTypeId] = ownerPlayer._stats.attributes[attributeTypeId].value - unitPrice;
-								ownerPlayer.attribute.update(attributeTypeId, attributes[attributeTypeId], true);
+								ownerPlayer.attribute.update(attributeTypeId, attributes[attributeTypeId]);
 							}
 						}
 						// self.streamUpdateData([{
@@ -700,7 +719,10 @@ var Unit = TaroEntityPhysics.extend({
 				itemId: newItem.id(),
 				unitId: this.id()
 			};
-			taro.queueTrigger('unitSelectsItem', triggeredBy);
+			//we cant use queueTrigger here because it will be called after entity scripts and item or unit probably no longer exists
+			newItem.script.trigger('thisItemIsSelected', triggeredBy); // this entity (item)
+			this.script.trigger('thisUnitSelectsItem', triggeredBy); // this entity (unit)
+			taro.script.trigger('unitSelectsItem', triggeredBy); // unit selects item
 
 			// whip-out the new item using tween
 			if (taro.isClient) {
@@ -743,7 +765,7 @@ var Unit = TaroEntityPhysics.extend({
 		self.previousState = null;
 
 		var data = taro.game.cloneAsset('unitTypes', type);
-		
+
 		delete data.type; // hotfix for dealing with corrupted game json that has unitData.type = "unitType". This is caused by bug in the game editor.
 
 		if (data == undefined) {
@@ -752,19 +774,20 @@ var Unit = TaroEntityPhysics.extend({
 		}
 
 		self.script.load(data.scripts);
+		self.script.scriptCache = {};
 
+		let exceededValue = {};
 		self._stats.type = type;
-
 		if (!isUnitCreation) {
 			// adding this flag so that clients receiving entity data from onStreamCreate don't overwrite values with default data
 			// when they are created by a client that has just joined.
 			var oldAttributes = self._stats.attributes;
-
 			for (var i in data) {
-				if (i == 'name') { // don't overwrite unit's name with unit type name
+				// don't overwrite unit's name with unit type name
+				// and for attributes, it's from the server, so just skip it
+				if (i == 'name' || (taro.isClient && i == 'attributes')) {
 					continue;
 				}
-
 				self._stats[i] = data[i];
 			}
 
@@ -781,6 +804,9 @@ var Unit = TaroEntityPhysics.extend({
 				self.variables = variables;
 			}
 
+			// re-initialize unit's variables
+			self.variable.init(self);
+
 			// deleting variables from stats bcz it causes json.stringify error due to variable of type unit,item,etc.
 			if (self._stats.variables) {
 				delete self._stats.variables;
@@ -794,7 +820,9 @@ var Unit = TaroEntityPhysics.extend({
 						if (oldAttributes && oldAttributes[attrId]) {
 							attributeValue = oldAttributes[attrId].value;
 						}
-
+						if (data.attributes[attrId].max < parseFloat(attributeValue)) {
+							exceededValue[attrId] = parseFloat(attributeValue) - data.attributes[attrId].max;
+						}
 						if (this._stats.attributes[attrId]) {
 							this._stats.attributes[attrId].value = Math.max(data.attributes[attrId].min, Math.min(data.attributes[attrId].max, parseFloat(attributeValue)));
 						}
@@ -816,13 +844,14 @@ var Unit = TaroEntityPhysics.extend({
 			var item = taro.$(itemId);
 			if (item) {
 				// removing passive attributes
-				if (item._stats.bonus && item._stats.bonus.passive) {
-					if (item._stats.slotIndex < this._stats.inventorySize || item._stats.bonus.passive.isDisabledInBackpack != true) {
-						self.updateStats(itemId, true);
-					}
-				} else {
-					self.updateStats(itemId, true);
-				}
+				// no need to remove them now, we use a new unit attrs as template, it doesnt be affected by those items
+				// if (item._stats.bonus && item._stats.bonus.passive) {
+				// 	if (item._stats.slotIndex < this._stats.inventorySize || item._stats.bonus.passive.isDisabledInBackpack != true) {
+				// 		self.updateStats(itemId, true);
+				// 	}
+				// } else {
+				// 	self.updateStats(itemId, true);
+				// }
 
 				// if the new unit type cannot carry the item, then remove it.
 				if (self.canCarryItem(item._stats) == false) {
@@ -839,7 +868,6 @@ var Unit = TaroEntityPhysics.extend({
 					item.setState('unselected');
 				}
 
-				// adding back passive attributes
 				if (item._stats.bonus && item._stats.bonus.passive) {
 					if (item._stats.slotIndex < this._stats.inventorySize || item._stats.bonus.passive.isDisabledInBackpack != true) {
 						self.updateStats(itemId);
@@ -850,24 +878,35 @@ var Unit = TaroEntityPhysics.extend({
 			}
 		}
 
+		Object.keys(exceededValue).forEach((k) => {
+			this._stats.attributes[k].value += exceededValue[k];
+		});
+
 		if (taro.isServer) {
+
+			// change player's selected inventory slot to 0
 			self._stats.currentItemIndex = 0;
-			self._stats.currentItemId = null;
 
-			// give default items to the unit
-			if (data.defaultItems) {
-				for (var i = 0; i < data.defaultItems.length; i++) {
-					var item = data.defaultItems[i];
+			//only give default items if this is a new unit
+			if (isUnitCreation) {
+				self._stats.currentItemId = null;
 
-					var itemData = taro.game.cloneAsset('itemTypes', item.key);
-					if (itemData) {
-						itemData.itemTypeId = item.key;
-						self.pickUpItem(itemData);
+				// give default items to the unit
+				if (data.defaultItems) {
+					for (var i = 0; i < data.defaultItems.length; i++) {
+						var item = data.defaultItems[i];
+
+						var itemData = taro.game.cloneAsset('itemTypes', item.key);
+						if (itemData) {
+							itemData.itemTypeId = item.key;
+							self.pickUpItem(itemData);
+						}
 					}
 				}
 			}
 
 			self.changeItem(self._stats.currentItemIndex); // this will call change item on client for all units
+
 		} else if (taro.isClient) {
 			var zIndex = self._stats.currentBody && self._stats.currentBody['z-index'] || { layer: 3, depth: 3 };
 
@@ -881,6 +920,7 @@ var Unit = TaroEntityPhysics.extend({
 			var ownerPlayer = self.getOwner();
 			if (ownerPlayer && ownerPlayer._stats.selectedUnitId == self.id() && this._stats.clientId == taro.network.id()) {
 				self.inventory.createInventorySlots();
+				this.updateVisibilityMask();
 			}
 
 			// destroy existing particle emitters first
@@ -895,13 +935,16 @@ var Unit = TaroEntityPhysics.extend({
 			// redraw for units which are not having attributebars too
 			self.redrawAttributeBars();
 			self.equipSkin(undefined);
-			// if mobile controls are in use configure for this unit
-			self.renderMobileControl();
 
 			if (self.unitUi) {
 				self.unitUi.updateAllAttributeBars();
 			}
 			self.inventory.update();
+			if (!taro.isMobile && self._stats.clientId === taro.network.id() && data.controls.unitAbilities) {
+				taro.client.emit('create-ability-bar', {keybindings: data.controls.abilities, abilities: data.controls.unitAbilities});
+			}
+			// if mobile controls are in use configure for this unit
+			self.renderMobileControl();
 		}
 
 		if (self.ai && self._stats.ai) {
@@ -909,6 +952,47 @@ var Unit = TaroEntityPhysics.extend({
 				self.ai.enable();
 			} else {
 				self.ai.disable();
+			}
+		}
+	},
+
+	resetUnitType: function () {
+		const self = this;
+		const data = taro.game.cloneAsset('unitTypes', self._stats.type);
+		//removing all items from unit
+		for (let i = 0; i < this._stats.itemIds.length; i++) {
+			var itemId = this._stats.itemIds[i];
+			var item = taro.$(itemId);
+			if (item) {
+				item.remove();
+			}
+		}
+
+		self._stats.currentItemIndex = 0;
+		self._stats.currentItemId = null;
+
+		// give default items to the unit
+		if (taro.isServer) {
+			if (data.defaultItems) {
+				for (var i = 0; i < data.defaultItems.length; i++) {
+					var item = data.defaultItems[i];
+
+					var itemData = taro.game.cloneAsset('itemTypes', item.key);
+					if (itemData) {
+						itemData.itemTypeId = item.key;
+						self.pickUpItem(itemData);
+					}
+				}
+			}
+		}
+
+		self.changeItem(self._stats.currentItemIndex); // this will call change item on client for all units
+
+		//reset unit attributes
+		for (var attrId in this._stats.attributes) {
+			if (this._stats.attributes[attrId]) {
+				var attributeValue = data.attributes[attrId].value; // default attribute value from new unit type
+				this._stats.attributes[attrId].value = Math.max(data.attributes[attrId].min, Math.min(data.attributes[attrId].max, parseFloat(attributeValue)));
 			}
 		}
 	},
@@ -947,8 +1031,8 @@ var Unit = TaroEntityPhysics.extend({
 						this._stats.buffs.push({ attrId: attributeId, value: value, timeLimit: timeLimit, percentage: percentage });
 					}
 
+					this.attribute.update(attributeId, newValue);
 					this.attribute.setMax(attributeId, newMax);
-					this.attribute.update(attributeId, newValue, true);
 				}
 			}
 		}
@@ -976,8 +1060,8 @@ var Unit = TaroEntityPhysics.extend({
 					var newMax = maxValue - parseFloat(value);
 					var newValue = Math.min(newMax, Math.max(selectedAttribute.min, currentAttributeValue));
 
+					this.attribute.update(attributeId, newValue);
 					this.attribute.setMax(attributeId, newMax);
-					this.attribute.update(attributeId, newValue, true);
 					this._stats.buffs.splice(index, 1);
 				}
 			}
@@ -993,17 +1077,17 @@ var Unit = TaroEntityPhysics.extend({
 			taro.client.myPlayer &&
 			taro.client.myPlayer._stats.selectedUnitId == this.id() &&
 			this._stats.controls) {
-			taro.mobileControls.configure(this._stats.controls.abilities);
+			taro.mobileControls.configure(this._stats.controls);
 		}
 	},
 
 	/**
-        give an item to a unit whether it's an existing item instance (item object) or a new item to be created from itemData (json).
-        @param item can be both item instance or itemData json. This is to handle both new items being created from itemData, or when unit picks up an existing item instance.
-        @param slotIndex force-assign item into this inventory slot. usually assigned from when buying a shop item with replaceItemInTargetSlot (optional)
-        @return {boolean} return true if unit was able to pickup/use item. return false otherwise.
+		give an item to a unit whether it's an existing item instance (item object) or a new item to be created from itemData (json).
+		@param item can be both item instance or itemData json. This is to handle both new items being created from itemData, or when unit picks up an existing item instance.
+		@param slotIndex force-assign item into this inventory slot. usually assigned from when buying a shop item with replaceItemInTargetSlot (optional)
+		@return {boolean} return true if unit was able to pickup/use item. return false otherwise.
 	 */
-	pickUpItem: function (item) {
+	pickUpItem: function (item, persistedItem = false) {
 		var self = this;
 		// all Server only
 		// console.log(`running Unit.pickUpItem() on ${taro.isClient ? 'Client' : 'Server'}`);
@@ -1018,7 +1102,7 @@ var Unit = TaroEntityPhysics.extend({
 			if (itemData.isUsedOnPickup && self.canUseItem(itemData)) {
 				if (!isItemInstance) {
 					item = new Item(itemData);
-					item.script.trigger('entityCreated');
+					if (!persistedItem) item.script.trigger('entityCreated');
 				}
 				taro.devLog('using item immediately');
 				item.setOwnerUnit(self);
@@ -1043,9 +1127,9 @@ var Unit = TaroEntityPhysics.extend({
 							if (currentItem && currentItem._stats.itemTypeId == itemTypeId) {
 								var matchingItem = currentItem;
 
-								// lastCreatedItem is used to track the last item created by the server. 
+								// lastCreatedItem is used to track the last item created by the server.
 								// This is necessary in case item isn't a new instance, but an existing item getting quantity updated
-								taro.game.lastCreatedItemId = matchingItem.id(); 
+								taro.game.lastCreatedItemId = matchingItem.id();
 
 								// matching item has infinite quantity. merge item unless new item is also infinite
 								if (matchingItem._stats.quantity == undefined && itemData.quantity != undefined) {
@@ -1097,11 +1181,10 @@ var Unit = TaroEntityPhysics.extend({
 					item.streamUpdateData([
 						{ ownerUnitId: self.id() },
 						{ slotIndex: slotIndex }, // slotIndex must come before quantity (next line), otherwise, quantity won't update properly as itemUiComponent won't know which slot to apply quantity to
-						{ quantity: itemData.quantity }						
+						{ quantity: itemData.quantity }
 					]);
 
 					self.inventory.insertItem(item, availableSlot - 1);
-
 					if (slotIndex == self._stats.currentItemIndex) {
 						item.setState('selected');
 					} else {
@@ -1161,22 +1244,22 @@ var Unit = TaroEntityPhysics.extend({
 			ownerPlayer.isHostileTo(taro.client.myPlayer) &&
 			self._stats.isNameLabelHidden
 		) || (
-			ownerPlayer &&
-			ownerPlayer.isFriendlyTo(taro.client.myPlayer) &&
-			self._stats.isNameLabelHiddenToFriendly
-		) || (
-			ownerPlayer &&
-			ownerPlayer.isNeutralTo(taro.client.myPlayer) &&
-			self._stats.isNameLabelHiddenToNeutral
-		) || (
-			// for AI x players we ont have playerTypeData as they dont have playerTypeId fields
-			playerTypeData
-				? playerTypeData.showNameLabel === false
-				: true
-		) || (
-			!taro.client.myPlayer ||
-			taro.client.myPlayer._stats.playerJoined === false
-		);
+				ownerPlayer &&
+				ownerPlayer.isFriendlyTo(taro.client.myPlayer) &&
+				self._stats.isNameLabelHiddenToFriendly
+			) || (
+				ownerPlayer &&
+				ownerPlayer.isNeutralTo(taro.client.myPlayer) &&
+				self._stats.isNameLabelHiddenToNeutral
+			) || (
+				// for AI x players we ont have playerTypeData as they dont have playerTypeId fields
+				playerTypeData
+					? playerTypeData.showNameLabel === false
+					: true
+			) || (
+				!taro.client.myPlayer ||
+				taro.client.myPlayer._stats.playerJoined === false
+			);
 
 		if (hideLabel) {
 			this.emit('hide-label');
@@ -1186,7 +1269,9 @@ var Unit = TaroEntityPhysics.extend({
 		var color = '#FFFFFF';
 		var isMyUnit = taro.network.id() == self._stats.clientId;
 
-		if (ownerPlayer) {
+		if (this._stats.nameLabelColor) {
+			color = this._stats.nameLabelColor;
+		} else if (ownerPlayer) {
 			color = playerTypeData && playerTypeData.color;
 		}
 		// if (isMyUnit) {
@@ -1213,17 +1298,17 @@ var Unit = TaroEntityPhysics.extend({
 			ownerPlayer.isHostileTo(taro.client.myPlayer) &&
 			self._stats.isNameLabelHidden
 		) || (
-			ownerPlayer &&
-			ownerPlayer.isFriendlyTo(taro.client.myPlayer) &&
-			self._stats.isNameLabelHiddenToFriendly
-		) || (
-			ownerPlayer &&
-			ownerPlayer.isNeutralTo(taro.client.myPlayer) &&
-			self._stats.isNameLabelHiddenToNeutral
-		) || (
-			!taro.client.myPlayer ||
-			taro.client.myPlayer._stats.playerJoined === false
-		);
+				ownerPlayer &&
+				ownerPlayer.isFriendlyTo(taro.client.myPlayer) &&
+				self._stats.isNameLabelHiddenToFriendly
+			) || (
+				ownerPlayer &&
+				ownerPlayer.isNeutralTo(taro.client.myPlayer) &&
+				self._stats.isNameLabelHiddenToNeutral
+			) || (
+				!taro.client.myPlayer ||
+				taro.client.myPlayer._stats.playerJoined === false
+			);
 
 		if (hideLabel) {
 			return;
@@ -1259,7 +1344,7 @@ var Unit = TaroEntityPhysics.extend({
 		}
 	},
 
-	dropItem: function (itemIndex) {
+	dropItem: function (itemIndex, position) {
 		// Unit.prototype.log("dropItem " + itemIndex)
 		// console.log(`running Unit.dropItem(${itemIndex}) on ${taro.isClient ? 'Client' : 'Server'}`);
 		var self = this;
@@ -1267,7 +1352,7 @@ var Unit = TaroEntityPhysics.extend({
 		if (item) {
 
 			// check if item's undroppable
-			if (item._stats && item._stats.controls && item._stats.controls.undroppable) {
+			if (item._stats && item._stats.controls && (item._stats.controls.undroppable)) {
 				return;
 			}
 
@@ -1299,6 +1384,11 @@ var Unit = TaroEntityPhysics.extend({
 				item.setOwnerUnit(undefined);
 				item.setState('dropped', defaultData);
 
+				// Move item if dropping item at a position
+				if (position) {
+					item.teleportTo(position.x, position.y, item._rotate.z);
+				}
+
 				if (item._stats.hidden) {
 					item.streamUpdateData([{ hidden: false }]);
 				}
@@ -1317,10 +1407,11 @@ var Unit = TaroEntityPhysics.extend({
 
 				self.detachEntity(item.id()); // taroEntityPhysics comment: not working right now
 
-				taro.queueTrigger('unitDroppedAnItem', {
-					itemId: item.id(),
-					unitId: self.id()
-				});
+				const triggerParams = { itemId: item.id(), unitId: self.id() };
+				//we cant use queueTrigger here because it will be called after entity scripts and item or unit probably no longer exists
+				item.script.trigger('thisItemIsDropped', triggerParams); // this entity (item)
+				self.script.trigger('thisUnitDroppedAnItem', triggerParams); // this entity (unit)
+				taro.script.trigger('unitDroppedAnItem', triggerParams); // unit dropped item
 			}
 		}
 
@@ -1366,7 +1457,7 @@ var Unit = TaroEntityPhysics.extend({
 				if (taro.isClient) {
 					return true;
 				}
-				this.playEffect('attacked', {attackerId: damageData.sourceUnitId});
+				this.playEffect('attacked', { attackerId: damageData.sourceUnitId });
 
 				var triggeredBy = {
 					unitId: taro.game.lastAttackingUnitId,
@@ -1390,7 +1481,7 @@ var Unit = TaroEntityPhysics.extend({
 							}
 							damageValue *= 1 - damageReduction;
 							var newValue = (attribute.value || 0) - (damageValue || 0);
-							self.attribute.update(damageAttrKey, newValue, true);
+							self.attribute.update(damageAttrKey, newValue);
 						}
 					});
 				}
@@ -1402,7 +1493,7 @@ var Unit = TaroEntityPhysics.extend({
 						if (attribute) {
 							damageValue *= 1 - damageReduction;
 							var newValue = (attribute.value || 0) - (damageValue || 0);
-							targetPlayer.attribute.update(damageAttrKey, newValue, true);
+							targetPlayer.attribute.update(damageAttrKey, newValue);
 						}
 					});
 				}
@@ -1425,13 +1516,13 @@ var Unit = TaroEntityPhysics.extend({
 
 		// remove this unit from its owner player's unitIds
 		if (ownerPlayer) {
-			ownerPlayer.disownUnit(self);
+			ownerPlayer.disownUnit(self, true);
 		}
 
 		if (taro.isClient) {
 
-			if (taro.client.cameraTrackUnitId == self.id()) {
-				taro.client.cameraTrackUnitId = undefined;
+			if (taro.client.myPlayer?._stats?.cameraTrackedUnitId == self.id()) {
+				taro.client.myPlayer._stats.cameraTrackedUnitId = undefined;
 			}
 
 			if (self.minimapUnit) {
@@ -1457,18 +1548,17 @@ var Unit = TaroEntityPhysics.extend({
 		TaroEntityPhysics.prototype.remove.call(this);
 	},
 
-	queueStreamData: function(streamData) {
+	queueStreamData: function (streamData) {
 		if (taro.isServer) {
 			TaroEntity.prototype.queueStreamData.call(this, streamData);
 		}
 	},
 
 	// update unit's stats in the server side first, then update client side as well.
-	streamUpdateData: function (queuedData) {
+	streamUpdateData: function (queuedData, clientId) {
 		var self = this;
 		// Unit.prototype.log("unit streamUpdateData", data)
-		
-		TaroEntity.prototype.streamUpdateData.call(this, queuedData);
+		TaroEntity.prototype.streamUpdateData.call(this, queuedData, clientId);
 
 		for (var i = 0; i < queuedData.length; i++) {
 			var data = queuedData[i];
@@ -1496,7 +1586,8 @@ var Unit = TaroEntityPhysics.extend({
 						self._stats[attrName] = newValue;
 						// update shop as player points are changed and when shop modal is open
 						if (taro.isClient && this.inventory) {
-							this.inventory.update();
+							// changed from direct inventory.update() call
+							this.inventory.isDirty = true;
 
 							if ($('#modd-item-shop-modal').hasClass('show')) {
 								taro.shop.openItemShop();
@@ -1507,20 +1598,20 @@ var Unit = TaroEntityPhysics.extend({
 						}
 						break;
 
-                        case 'currentItemIndex':
-                            self._stats[attrName] = newValue;
-                            // for tracking selected index of other units
-                            if (taro.isClient) {
-                                if (this !== taro.client.selectedUnit) {
-                                    // console.log('Unit.streamUpdateData(\'currentItemIndex\') on the client', newValue);
-                                    this.setCurrentItem(newValue);
-                                } else if (this.inventory) {
-                                    this.inventory.highlightSlot(newValue + 1);
-                                    var item = this.inventory.getItemBySlotNumber(newValue + 1);
-                                    taro.itemUi.updateItemInfo(item);
-                                }
-                            }
-                            break;
+					case 'currentItemIndex':
+						self._stats[attrName] = newValue;
+						// for tracking selected index of other units
+						if (taro.isClient) {
+							if (this !== taro.client.selectedUnit) {
+								// console.log('Unit.streamUpdateData(\'currentItemIndex\') on the client', newValue);
+								this.setCurrentItem(newValue);
+							} else {
+								this.inventory.highlightSlot(newValue + 1);
+								var item = this.inventory.getItemBySlotNumber(newValue + 1);
+								taro.itemUi.updateItemInfo(item);
+							}
+						}
+						break;
 
 					case 'skin':
 					case 'isInvisible':
@@ -1592,13 +1683,24 @@ var Unit = TaroEntityPhysics.extend({
 						break;
 					case 'ownerPlayerId':
 						self._stats[attrName] = newValue;
-						if (taro.isClient) {
+						if (taro.isClient && taro.client.myPlayer?.id() !== newValue) {
 							self.setOwnerPlayer(newValue);
 						}
 						break;
+
+					case 'nameLabelColor':
+						if (taro.isClient) {
+							this._stats.nameLabelColor = newValue;
+							this.emit(
+								'update-label',
+								{
+									text: this._stats.name,
+									bold: (this == taro.client.selectedUnit),
+									color: newValue,
+								}
+							);
+						}
 				}
-
-
 			}
 		}
 	},
@@ -1726,10 +1828,11 @@ var Unit = TaroEntityPhysics.extend({
 					if (itemData) {
 						itemData.quantity = persistedItem.quantity;
 						itemData.itemTypeId = persistedItem.itemTypeId;
-						if (self.pickUpItem(itemData)) {
+						if (self.pickUpItem(itemData, true)) {
 							var givenItem = taro.$(taro.game.lastCreatedItemId);
 							if (givenItem && givenItem.getOwnerUnit() == this) {
 								givenItem.loadPersistentData(persistedItem);
+								givenItem.script.trigger('entityCreated');
 							}
 						}
 					}
@@ -1809,11 +1912,39 @@ var Unit = TaroEntityPhysics.extend({
 		// );
 	},
 
+	setNameLabelColor: function (color, player) {
+		if (taro.isClient) {
+			this.emit(
+				'update-label',
+				{
+					text: unit._stats.name,
+					bold: (unit == taro.client.selectedUnit),
+					color: color,
+				}
+			);
+
+		} else if (taro.isServer) {
+			if (player) {
+				const clientId = player._stats.clientId;
+
+				this.streamUpdateData([{ nameLabelColor: color }], clientId);
+
+				return;
+			}
+
+			this.streamUpdateData([{ nameLabelColor: color }]);
+		}
+	},
+
 	startMoving: function () {
 		if (!this.isMoving) {
 			this.playEffect('move');
 			this.isMoving = true;
+			var triggeredBy = {
+				unitId: this.id()
+			};
 
+			this.script.trigger('unitStartsMoving', triggeredBy);
 		}
 	},
 
@@ -1821,13 +1952,18 @@ var Unit = TaroEntityPhysics.extend({
 		if (this.isMoving) {
 			this.playEffect('idle');
 			this.isMoving = false;
+			var triggeredBy = {
+				unitId: this.id()
+			};
+
+			this.script.trigger('unitStopsMoving', triggeredBy);
 		}
 
 		// this.direction.x = 0;
 		// this.direction.y = 0;
 	},
 
-	updateAngleToTarget: function() {
+	updateAngleToTarget: function () {
 
 		var ownerPlayer = this.getOwner();
 		if (ownerPlayer) {
@@ -1837,7 +1973,7 @@ var Unit = TaroEntityPhysics.extend({
 				if (taro.isMobile) this.angleToTarget = ownerPlayer.absoluteAngle * 0.017453;
 				else this.angleToTarget = ownerPlayer.absoluteAngle;
 
-			// desktop control: if this unit's not under a command, rotate to mouse xy coordinate
+				// desktop control: if this unit's not under a command, rotate to mouse xy coordinate
 			} else {
 				var mouse = ownerPlayer.control?.input?.mouse;
 				if (mouse) {
@@ -1850,6 +1986,13 @@ var Unit = TaroEntityPhysics.extend({
 		}
 	},
 
+	updateVisibilityMask: function () {
+		taro.client.emit('update-visibility-mask', {
+			enabled: !!this._stats.visibilityMask?.enabled,
+			range: this._stats.visibilityMask?.range || 700,
+		});
+	},
+
 	/**
 	 * Called every frame by the engine when this entity is mounted to the
 	 * scenegraph.
@@ -1857,17 +2000,23 @@ var Unit = TaroEntityPhysics.extend({
 	 */
 	_behaviour: function (ctx) {
 		var self = this;
-		
+
+		if (!taro.gameLoopTickHasExecuted) {
+			return;
+		}
+
 		_.forEach(taro.triggersQueued, function (trigger) {
 			trigger.params['thisEntityId'] = self.id();
 			self.script.trigger(trigger.name, trigger.params);
 		});
 
 		if (taro.isServer || (taro.isClient && taro.client.selectedUnit == this)) {
+			// ability component behaviour method call
+			this.ability._behaviour();
 
 			// translate unit
 			var speed = (this._stats.attributes && this._stats.attributes.speed && this._stats.attributes.speed.value) || 0;
-			var vector = {x: 0, y: 0};
+			self.vector = { x: 0, y: 0 };
 
 			// update rotation on server
 			var ownerPlayer = self.getOwner();
@@ -1875,7 +2024,6 @@ var Unit = TaroEntityPhysics.extend({
 
 				// server-side unit rotation update
 				if (taro.isServer) {
-
 					if (!self._stats.aiEnabled && ownerPlayer._stats.controlledBy == 'human' && ownerPlayer.getSelectedUnit() == this) {
 						self.updateAngleToTarget();
 					}
@@ -1887,6 +2035,17 @@ var Unit = TaroEntityPhysics.extend({
 					) {
 						self.rotateTo(0, 0, self.angleToTarget);
 					}
+				} else if (taro.isClient) {
+
+					// send ping for CSP reconciliation purpose
+					if (taro.now > taro.client.sendNextPingAt) {
+						// using performance.now instead of taro._currentTime as _currentTime updates every frame and ping may respond within a frame
+						taro.network.send('ping', { sentAt: performance.now() });
+
+						// allow up to a 1.5 second before sending another ping. generally we'll not wait 1.5s before sending another ping
+						// because we'll be sending ping immediately after receiving pong from server. this is just a safety measure
+						taro.client.sendNextPingAt = taro.now + 1500;
+					}
 				}
 
 				if (
@@ -1896,11 +2055,11 @@ var Unit = TaroEntityPhysics.extend({
 					( // or human player's unit that's "following cursor"
 						!self._stats.aiEnabled &&
 						self._stats.controls && self._stats.controls.movementControlScheme == 'followCursor' &&
-						self.distanceToTarget > this.width() // if mouse cursor is close to the unit, then don't move
+						self.distanceToTarget > this.width() / 3 // if mouse cursor is close to the unit, then don't move
 					)
 				) {
 					if (self.angleToTarget != undefined && !isNaN(self.angleToTarget)) {
-						vector = {
+						self.vector = {
 							x: (speed * Math.sin(self.angleToTarget)),
 							y: -(speed * Math.cos(self.angleToTarget))
 						};
@@ -1915,10 +2074,11 @@ var Unit = TaroEntityPhysics.extend({
 						speed = speed / 1.41421356237;
 					}
 
-					vector = {
+					self.vector = {
 						x: self.direction.x * speed,
 						y: self.direction.y * speed
 					};
+
 				}
 
 				// update AI
@@ -1931,28 +2091,9 @@ var Unit = TaroEntityPhysics.extend({
 					// toggle effects when unit starts/stops moving
 					if (!this.isMoving && (self.direction.x != 0 || self.direction.y != 0)) {
 						this.startMoving();
-					} else if (this.isMoving && self.direction.x === 0 && self.direction.y ===0) {
+
+					} else if (this.isMoving && self.direction.x === 0 && self.direction.y === 0) {
 						this.stopMoving();
-					}
-				}
-
-				taro.unitBehaviourCount++; // for debugging
-				// apply movement if it's either human-controlled unit, or ai unit that's currently moving
-				if (self.body && vector && (vector.x != 0 || vector.y != 0)) {
-
-					// console.log('unit movement 2', vector, self._stats.controls.movementMethod);
-					if (self._stats.controls) {
-						switch (self._stats.controls.movementMethod) { // velocity-based movement
-							case 'velocity':
-								self.setLinearVelocity(vector.x, vector.y);
-								break;
-							case 'force':
-								self.applyForce(vector.x, vector.y);
-								break;
-							case 'impulse':
-								self.applyImpulse(vector.x, vector.y);
-								break;
-						}
 					}
 				}
 			}
@@ -1976,15 +2117,20 @@ var Unit = TaroEntityPhysics.extend({
 			if (this.isPlayingSound) {
 				this.isPlayingSound.volume = taro.sound.getVolume(this._translate, this.isPlayingSound.effect.volume);
 			}
-			
+
 			var processedUpdates = [];
-			var updateQueue = taro.client.entityUpdateQueue[this.id()];			
+			var updateQueue = taro.client.entityUpdateQueue[this.id()];
 			if (updateQueue) {
 				for (var key in updateQueue) {
 					var value = updateQueue[key];
 
-					processedUpdates.push({[key]: value});
-					delete taro.client.entityUpdateQueue[this.id()][key]
+					processedUpdates.push({ [key]: value });
+					delete taro.client.entityUpdateQueue[this.id()][key];
+
+					// remove queue object for this entity is there's no queue remaining in order to prevent memory leak
+					if (Object.keys(taro.client.entityUpdateQueue[this.id()]).length == 0) {
+						delete taro.client.entityUpdateQueue[this.id()];
+					}
 				}
 
 				if (processedUpdates.length > 0) {
@@ -1994,7 +2140,7 @@ var Unit = TaroEntityPhysics.extend({
 		}
 
 		// if entity (unit/item/player/projectile) has attribute, run regenerate
-		if (taro.isServer || (taro.physics && taro.isClient && taro.client.selectedUnit == this && taro.game.cspEnabled)) {
+		if (taro.isServer || (taro.physics && taro.isClient && taro.client.selectedUnit == this && this._stats.controls?.clientPredictedMovement)) {
 			if (this._stats.buffs && this._stats.buffs.length > 0) {
 				for (let i = 0; i < this._stats.buffs.length; i++) {
 					var buff = this._stats.buffs[i];
@@ -2004,8 +2150,27 @@ var Unit = TaroEntityPhysics.extend({
 				}
 			}
 			if (this.attribute) {
-				this.attribute.regenerate();
+				this.attribute._behaviour();
 			}
+		}
+
+		if (taro.isClient && taro.client.selectedUnit == this) { // never run on server, pure UI
+			for (let i = 0; i < self._stats.itemIds.length; i++) {
+				var itemId = self._stats.itemIds[i];
+				var item = taro.$(itemId);
+				if (item && item._stats.showCDOverlay) {
+					taro.itemUi.updateItemCooldownOverlay(item);
+				}
+			}
+
+			// check if we need to update inventory component
+			// usually required if changes are made to new items before they have
+			// this entity registered as ownerUnit
+			if (this.inventory.isDirty) {
+				this.inventory.update();
+			}
+			// probably don't need to emit this every tick
+			taro.client.emit('unit-position', [this._translate.x, this._translate.y]);
 		}
 
 		if (taro.physics && taro.physics.engine != 'CRASH') {
@@ -2023,6 +2188,7 @@ var Unit = TaroEntityPhysics.extend({
 			this.attributeBars.length = 0;
 			this.attributeBars = null;
 		}
+		this.script.trigger('initEntityDestroy');
 		this.playEffect('destroy');
 		TaroEntityPhysics.prototype.destroy.call(this);
 	}

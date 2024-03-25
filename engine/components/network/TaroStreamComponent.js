@@ -45,7 +45,7 @@ var TaroStreamComponent = TaroEventingClass.extend({
 			this._entity.define('_taroStreamCreateSnapshot', function () { self._onStreamCreateSnapshot.apply(self, arguments); });
 		}
 	},
-	
+
 	/* CEXCLUDE */
 	/**
 	 * Starts the stream of world updates to connected clients.
@@ -58,7 +58,7 @@ var TaroStreamComponent = TaroEventingClass.extend({
 	/**
 	 * update entity-attributes (unit, player, and projectiles)
 	 */
-	updateEntityAttributes: function () {
+	_sendQueuedStreamData: function () {
 		var data = {};
 		var entities = taro.$('baseScene')._children;
 
@@ -80,8 +80,11 @@ var TaroStreamComponent = TaroEventingClass.extend({
 		}
 
 		if (sendData) {
-			taro.network.send('updateAllEntities', data);
+			taro.network.send('streamUpdateData', data);
 		}
+
+		// we don't want to keep force-syncing entity streams to rejoined clients
+		taro.server.rejoiningIdleClients = [];
 
 		data = null;
 		entity = null;
@@ -194,7 +197,7 @@ var TaroStreamComponent = TaroEventingClass.extend({
 						},
 						rotate: ntransdata[2]
 					};
-					
+
 					entity = new classConstructor(createData, entityId);
 
 					entity.bypassSmoothing = true;

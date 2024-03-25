@@ -34,7 +34,7 @@ var TaroNetIoClient = {
 			}
 		} else {
 
-			this._discrepancySamples = [];
+			this._diffSamples = [];
 			var self = this;
 
 			self._startCallback = callback;
@@ -192,7 +192,7 @@ var TaroNetIoClient = {
 					// Setup default commands
 					self.define('_taroRequest', function () { self._onRequest.apply(self, arguments); });
 					self.define('_taroResponse', function () { self._onResponse.apply(self, arguments); });
-					self.define('_taroNetTimeSync', function () { self._onTimeSync.apply(self, arguments); });
+					// self.define('_taroNetTimeSync', function () { self._onTimeSync.apply(self, arguments); });
 
 					self.log(`Received network command list with count: ${commandCount}`);
 
@@ -211,7 +211,7 @@ var TaroNetIoClient = {
 							self._onMessageFromServer.apply(self, self.dataB4Init[i]);
 						}
 					}
-					self.timeSyncStart();
+					// self.timeSyncStart();
 
 					// setTimeout(function () {
 					// 	if (location.protocol === 'http:' && location.search.indexOf('redirected=true') > -1) {
@@ -451,20 +451,23 @@ var TaroNetIoClient = {
 	_onMessageFromServer: function (data) {
 		var ciDecoded = data[0].charCodeAt(0);
 		var commandName = this._networkCommandsIndex[ciDecoded];
-		var now = taro._currentTime
+		var now = taro._currentTime;
 		
+		// commandName is ALWAYS snapshot, because we're using snapshot compression. we may remove this if condition eventually
 		if (commandName === '_snapshot') {
-			var snapshot = rfdc()(data)[1];
-			var newSnapshotTimestamp = snapshot[snapshot.length - 1][1];
-			// see how far apart the newly received snapshot is from currentTime
+			var snapshot = rfdc()(data)[1];			
 			if (snapshot.length) {
+
+				var newSnapshotTimestamp = snapshot[snapshot.length - 1][1];
+
 				var obj = {};
 				// iterate through each entities
 				for (var i = 0; i < snapshot.length; i++) {
 					var ciDecoded = snapshot[i][0].charCodeAt(0);
 					var commandName = this._networkCommandsIndex[ciDecoded];
+					// console.log("command2", commandName)
 					var entityData = snapshot[i][1];
-					// console.log("sub", commandName, data);
+
 					switch (commandName) {
 						case '_taroStreamData':
 							var entityData = snapshot[i].slice(1).split('&');
@@ -477,44 +480,86 @@ var TaroNetIoClient = {
 							var isTeleportingCamera = Boolean(parseInt(entityData[4], 16)); // teleportedCamera boolean
 
 							var newPosition = [x, y, rotate];
-							
+
 							// update each entities' final position, so player knows where everything are when returning from a different browser tab
 							// we are not executing this in taroEngine or taroEntity, becuase they don't execute when browser tab is inactive
-							var entity = taro.$(entityId);							
+							var entity = taro.$(entityId);
 
 							// console.log(entity != undefined, isTeleporting)
 							if (entity) {
 								if (isTeleporting) {
 									// console.log("wtf")
 									entity.teleportTo(x, y, rotate, isTeleportingCamera);
-								} else if (
-									// if csp movement is enabled, don't use server-streamed position for my unit. (it's updated in box2dcomponent.js)
-									!(taro.physics && taro.game.cspEnabled && entity == taro.client.selectedUnit) 
-								) {
+								} else if (entity == taro.client.selectedUnit && taro.physics && entity._stats.controls?.clientPredictedMovement) {
+									if (taro.env === 'local' || taro.debugCSP) {
+										// emit position for entity debug image
+										entity.emit('transform-debug', {
+											debug: 'green-square',
+											x: x,
+											y: y,
+											rotation: rotate,
+										});
+									}
+									
+									taro.client.myUnitStreamedPosition = {
+										x: x,
+										y: y,
+										rotation: rotate,
+									}									
+								
+								} else {
 									// console.log(entity._category, newPosition)
 									// extra 20ms of buffer removes jitter
 									if (newSnapshotTimestamp > this.lastSnapshotTimestamp) {
-										entity.nextKeyFrame = [now + taro.client.renderBuffer, newPosition];
+										entity.prevKeyFrame = entity.nextKeyFrame;
+										entity.nextKeyFrame = [newSnapshotTimestamp + taro.client.renderBuffer, newPosition];
+										// console.log(entity._category, entity._stats.name, newPosition)
 										entity.isTransforming(true);
-									}									
+									}
 								}
 							}
-							
+
 							break;
 
-						default: 
+						default:
 							this._networkCommands[commandName](entityData);
 							break;
 					}
 				}
 
-				if (!isNaN(newSnapshotTimestamp))
-				{ 
+				// see how far apart the newly received snapshot is from currentTime
+				if (!isNaN(newSnapshotTimestamp)) {
 					this.lastSnapshotTimestamp = newSnapshotTimestamp;
+
+					// synchronize client's time with server's time
+					// find a median of the difference between server's time and client's time and rubberband client's time to that
+					let diff = newSnapshotTimestamp - now;
+					this._diffSamples.push(diff);
+					if (this._diffSamples.length >= 5) {
+						// this._diffSamples.shift();
+						let medianDiff = this.getMedian(this._diffSamples);
+						if (-300 < diff && diff < 300) {
+							taro._currentTime += medianDiff/4;
+						} else {
+							taro._currentTime = newSnapshotTimestamp;
+						}
+						
+						// console.log(medianDiff, now, newSnapshotTimestamp, this._diffSamples)
+
+						this._diffSamples = [];
+
+						
+					}
 				}
 			}
+			
+		} else if (commandName === 'ping') {
+			if (this._networkCommands[commandName]) {
+				this._networkCommands[commandName](data[1]);
+			}
 		} else {
-			console.log("commandName wasn't _snapshot!", commandName, data);		
+			// so yeah, we should never reach to this point, but if we do, let's debug then
+			console.log("commandName wasn't _snapshot!", commandName, data);
 			if (this._networkCommands[commandName]) {
 				if (this.debug()) {
 					console.log(`Received "${commandName}" (index ${ciDecoded}) with data:`, data[1]);
@@ -529,18 +574,19 @@ var TaroNetIoClient = {
 	},
 
 	getMedian: function (values) {
-	  if(values.length ===0) throw new Error('No inputs');
+		if(values.length === 0) throw new Error('No inputs');
 
-	  values.sort(function(a,b){
-	    return a-b;
-	  });
+		// Create a copy of the array before sorting
+		var sortedValues = values.slice().sort(function(a, b) {
+			return a - b;
+		});
 
-	  var half = Math.floor(values.length / 2);
+		var half = Math.floor(sortedValues.length / 2);
 
-	  if (values.length % 2)
-	    return values[half];
+		if (sortedValues.length % 2)
+			return sortedValues[half];
 
-	  return (values[half - 1] + values[half]) / 2.0;
+		return (sortedValues[half - 1] + sortedValues[half]) / 2.0;
 	},
 
 	/**

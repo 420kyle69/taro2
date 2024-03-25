@@ -124,11 +124,7 @@ var DevConsoleComponent = TaroEntity.extend({
 				statsPanels.tarofps._tarofpsPanel.update(taro._renderFPS, 60);
 				statsPanels.tarodpf._tarodpfPanel.update(taro._dpf, 1000);
 				statsPanels.tarout._taroutPanel.update(taro._updateTime, 100);
-				statsPanels.tarort._tarortPanel.update(taro.renderTime, 100);
 				statsPanels.tarott._tarottPanel.update(taro._tickTime, 100);
-
-				taro.physicsTickCount = 0;
-				taro.unitBehaviourCount = 0;
 			}, 1000);
 
 			graphsDiv.append(connectionDiv);
@@ -136,10 +132,10 @@ var DevConsoleComponent = TaroEntity.extend({
 			devDiv.append(graphsDiv);
 
 			// tuning div accordion handle
-			devDiv.append('<div class="col-sm-12 my-2"><div id="tuning-div-accordion" class="px-2 py-1">Tuning</div></div>');
+			// devDiv.append('<div class="col-sm-12 my-2"><div id="tuning-div-accordion" class="px-2 py-1">Tuning</div></div>');
 
 			// Tuning Div
-			var tuningDiv = $('<div id="tuning-div" class="col-sm-12 mb-4"></div>');
+			// var tuningDiv = $('<div id="tuning-div" class="col-sm-12 mb-4"></div>');
 
 			taro.client.inputDelay = 0;
 			// taro.client.streamSendInterval = 15;
@@ -195,9 +191,9 @@ var DevConsoleComponent = TaroEntity.extend({
 
 			var controllerViewportClippingEnabled = f1.add(taro.client, 'viewportClippingEnabled');
 
-			tuningDiv.append(gui.domElement);
+			// tuningDiv.append(gui.domElement);
 
-			devDiv.append(tuningDiv);
+			// devDiv.append(tuningDiv);
 
 			devDiv.append('<div class="col-sm-12 my-2"><div id="variables-div-accordion" class="px-2 py-1">Variables</div></div>');
 			devDiv.append('<div id="variables-div"></div>');

@@ -1,6 +1,6 @@
 var Game = TaroClass.extend({
     classId: 'Game',
-    init: function (App, options) {
+    init(App, options) {
         // Create the engine
         taro = new TaroEngine(options);
         console.log('taro initialized', taro.isClient, taro.isServer);

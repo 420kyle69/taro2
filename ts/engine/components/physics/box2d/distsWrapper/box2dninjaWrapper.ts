@@ -5,6 +5,12 @@ const box2dninjaWrapper: PhysicsDistProps = {
 		component.b2AABB = box2dninja.Collision.b2AABB; // added by Jaeyun for world collision detection for raycast bullets
 		component.b2Color = box2dninja.Common.b2Color;
 		component.b2Vec2 = box2dninja.Common.Math.b2Vec2;
+		component.b2Vec2.prototype.get_x = function () {
+			return this.x;
+		};
+		component.b2Vec2.prototype.get_y = function () {
+			return this.y;
+		};
 		component.b2Math = box2dninja.Common.Math.b2Math;
 		component.b2Shape = box2dninja.Collision.Shapes.b2Shape;
 		component.b2BodyDef = box2dninja.Dynamics.b2BodyDef;
@@ -363,7 +369,7 @@ const box2dninjaWrapper: PhysicsDistProps = {
 
 			var joint = self._world.CreateJoint(joint_def); // joint between two pieces
 
-			// var serverStats = taro.server.getStatus()
+			// var serverStats = taro.status.getSummary()
 			PhysicsComponent.prototype.log('joint created ', aBody.jointType);
 
 			entityA.jointsAttached[entityB.id()] = joint;

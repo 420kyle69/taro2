@@ -12,20 +12,31 @@ var ScriptComponent = TaroEntity.extend({
 		self.showLog = false;
 		self.errorLogs = {};
 		self.currentActionName = '';
+		self.currentActionLineNumber = 0;
 		self.scriptCache = {};
 		self.scriptTime = {};
 		self.scriptRuns = {};
 		self.last50Actions = [];
 
-		self.addComponent(VariableComponent, entity);
+		self.addComponent(ParameterComponent, entity);
 		self.addComponent(ActionComponent, entity);
 		self.addComponent(ConditionComponent, entity);
 
 		ScriptComponent.prototype.log('initializing Script Component');
 	},
 
-	load: function(scripts) {
-		this.scripts = scripts;
+	load: function (scripts, modify = false) {
+		if (modify) {
+			Object.entries(scripts).forEach(([scriptId, script]) => {
+				if (!script.deleted) {
+					this.scripts[scriptId] = script;
+				} else {
+					delete this.scripts[scriptId];
+				}
+			});
+		} else {
+			this.scripts = scripts;
+		}
 		// map trigger events, so we don't have to iterate through all scripts to find corresponding scripts
 		this.triggeredScripts = {};
 		for (var scriptId in this.scripts) {
@@ -52,20 +63,22 @@ var ScriptComponent = TaroEntity.extend({
 		self.currentScriptId = scriptId;
 		if (this.scripts && this.scripts[scriptId]) {
 			var actions = self.getScriptActions(scriptId);
-			
+
 			// console.log(scriptId, ': ', actions, params);
-			
+
+
 			if (actions) {
-				var cmd = self.action.run(actions, params);
+				var path = this._entity._id + "/" + scriptId;
+				var cmd = self.action.run(actions, params, path, 0); // path is passed for profiling purpose
 				if (cmd == 'return') {
 					taro.log('script return called');
 					return;
 				}
 			}
-		// check if we are trying to run a global script from inside entity scripts
+			// check if we are trying to run a global script from inside entity scripts
 
-		// if we are running from entity script and the script was not found
-		// then check for the script on the global script component
+			// if we are running from entity script and the script was not found
+			// then check for the script on the global script component
 		} else if (
 			this._entity &&
 			this._entity._id &&
@@ -73,6 +86,8 @@ var ScriptComponent = TaroEntity.extend({
 		) {
 			taro.script.runScript(scriptId, params);
 		}
+
+
 	},
 
 	getScriptActions: function (scriptId) {
@@ -92,7 +107,6 @@ var ScriptComponent = TaroEntity.extend({
 
 	/* trigger and run all of the corresponding script(s) */
 	trigger: function (triggerName, triggeredBy) {
-
 		if (taro.isServer) {
 			var now = Date.now();
 			var lastTriggerRunTime = now - taro.lastTriggerRanAt;
@@ -101,10 +115,10 @@ var ScriptComponent = TaroEntity.extend({
 				if (taro.triggerProfiler[taro.lastTrigger]) {
 					var count = taro.triggerProfiler[taro.lastTrigger].count;
 					taro.triggerProfiler[taro.lastTrigger].count++;
-					taro.triggerProfiler[taro.lastTrigger].avgTime = ((taro.triggerProfiler[taro.lastTrigger].avgTime * count) + lastTriggerRunTime ) / (count + 1);
+					taro.triggerProfiler[taro.lastTrigger].avgTime = ((taro.triggerProfiler[taro.lastTrigger].avgTime * count) + lastTriggerRunTime) / (count + 1);
 					taro.triggerProfiler[taro.lastTrigger].totalTime += lastTriggerRunTime;
 				} else {
-					taro.triggerProfiler[taro.lastTrigger] = {count: 1, avgTime: lastTriggerRunTime, totalTime: lastTriggerRunTime};
+					taro.triggerProfiler[taro.lastTrigger] = { count: 1, avgTime: lastTriggerRunTime, totalTime: lastTriggerRunTime };
 				}
 			}
 
@@ -113,7 +127,7 @@ var ScriptComponent = TaroEntity.extend({
 		}
 
 		let scriptIds = this.triggeredScripts[triggerName];
-		
+
 		for (var i in scriptIds) {
 			let scriptId = scriptIds[i];
 			this.scriptLog(`\ntrigger: ${triggerName}`);
@@ -176,16 +190,27 @@ var ScriptComponent = TaroEntity.extend({
 		self.last50Actions.push(record);
 	},
 
-	errorLog: function (message) {
+	errorLog: function (message, path, withActionBlockIdx) {
+		if (path == undefined) {
+			path = `${this._entity._id}/${this.currentScriptId}/${this.currentActionName}`
+		}
+		if (withActionBlockIdx !== true) {
+			path += `/${this.currentActionLineNumber}`;
+		}
 		if (this.scripts) {
-			var script = this.scripts[this.currentScriptId];
-			var log = `${this.currentScriptId} : Script error '${(script) ? script.name : ''}' in Action '${this.currentActionName}' : ${message}`;
+			if (taro.script.errorLogs[path] == undefined) {
+				taro.script.errorLogs[path] = { message, count: 1 };
+			} else {
+				taro.script.errorLogs[path].count++;
+			}
 
-			this.errorLogs[this.currentActionName] = log;
-			taro.devLog('script errorLog', log, message);
-			ScriptComponent.prototype.log(log);
-
-			return log;
+			if (taro.env === 'standalone')
+				console.log('errorLog', path, message);
+			// taro.devLog('errorLog', message);
+			// ScriptComponent.prototype.log(log);
+		}
+		if (taro.isServer && taro.server.unpublishQueued) {
+			taro.server.unpublish(message + " " + path);
 		}
 	}
 

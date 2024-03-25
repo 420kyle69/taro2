@@ -5,6 +5,7 @@ class GameScene extends PhaserScene {
 
 	entityLayers: Phaser.GameObjects.Layer[] = [];
 	renderedEntities: TGameObject[] = [];
+	particles: Phaser.GameObjects.Particles.ParticleEmitter[] = []
 	unitsList: PhaserUnit[] = [];
 	projectilesList: PhaserProjectile[] = [];
 	itemList: PhaserItem[] = [];
@@ -14,31 +15,65 @@ class GameScene extends PhaserScene {
 	tileset: Phaser.Tilemaps.Tileset;
 	cameraTarget: Phaser.GameObjects.Container & IRenderProps;
 	filter: Phaser.Textures.FilterMode;
-    resolutionCoef: number;
+	resolutionCoef: number;
 	trackingDelay: number;
+	useBounds: boolean;
+	cameraDeadzone: { width: number; height: number; };
+	visibility: VisibilityMask;
 
 	constructor() {
 		super({ key: 'Game' });
 	}
 
-	init (): void {
+	init(): void {
 
 		if (taro.isMobile) {
 			this.scene.launch('MobileControls');
 		}
 
+		this.resolutionCoef = 1;
+		this.useBounds = taro?.game?.data?.settings?.camera?.useBounds;
+		this.cameraDeadzone = taro?.game?.data?.settings?.camera?.deadzone;
+
 		const camera = this.cameras.main;
 		camera.setBackgroundColor(taro.game.data.defaultData.mapBackgroundColor);
 
-        this.resolutionCoef = 1;
+		// set camera bounds
+		if (this.useBounds) {
+			if (taro.game.data.defaultData.dontResize) {
+				camera.setBounds(0, 0, taro.game.data.map.width * taro.game.data.map.tilewidth, taro.game.data.map.height * taro.game.data.map.tileheight, true);
+			} else {
+				camera.setBounds(0, 0, taro.game.data.map.width * 64, taro.game.data.map.height * 64, true);
+			}
+		}
 
+		//set camera deadzone
+		if (this.cameraDeadzone) {
+			camera.setDeadzone(this.cameraDeadzone.width, this.cameraDeadzone.height);
+		}
+
+		// set camera tracking delay
 		this.trackingDelay = taro?.game?.data?.settings?.camera?.trackingDelay || 3;
+		if (this.trackingDelay > 60) {
+			this.trackingDelay = 60;
+		}
+
+		let resized = false;
 
 		this.scale.on(Phaser.Scale.Events.RESIZE, () => {
+			if (!taro.isMobile) {
+				if (resized) {
+					resized = false;
+				} else {
+					resized = true;
+					this.game.scale.setGameSize(window.innerWidth, window.innerHeight);
+				}
+			}
 			if (this.zoomSize) {
 				camera.zoom = this.calculateZoom();
 				taro.client.emit('scale', { ratio: camera.zoom * this.resolutionCoef });
 			}
+			taro.client.emit('update-abilities-position');
 		});
 
 		taro.client.on('zoom', (height: number) => {
@@ -59,11 +94,11 @@ class GameScene extends PhaserScene {
 			taro.client.emit('scale', { ratio: ratio * this.resolutionCoef });
 		});
 
-        taro.client.on('set-resolution', (resolution) => {
-            this.setResolution(resolution, true);
+		taro.client.on('set-resolution', (resolution) => {
+			this.setResolution(resolution, true);
 		});
 
-		taro.client.on('change-filter', (data: {filter: renderingFilter}) => {
+		taro.client.on('change-filter', (data: { filter: renderingFilter }) => {
 			this.changeTextureFilter(data.filter);
 		});
 
@@ -93,7 +128,7 @@ class GameScene extends PhaserScene {
 
 
 		taro.client.on('create-particle', (particle: Particle) => {
-			new PhaserParticle(this, particle);
+			this.particles.push(new PhaserParticle(this, particle));
 		});
 
 
@@ -110,22 +145,47 @@ class GameScene extends PhaserScene {
 			camera.stopFollow();
 		});
 
-		taro.client.on('position-camera', (x: number, y: number) => {
-			x -= camera.width / 2;
-			y -= camera.height / 2;
-			camera.setScroll(x, y);
-		});
-
-		taro.client.on('instant-move-camera', (x: number, y: number) => {
+		taro.client.on('camera-position', (x: number, y: number) => {
 			if (!taro.developerMode.active || taro.developerMode.activeTab === 'play') {
-			    camera.centerOn(x, y);
+				x -= camera.width / 2;
+				y -= camera.height / 2;
+				camera.setScroll(x, y);
 			}
 		});
 
-		
+		taro.client.on('camera-deadzone', (width: number, heigth: number) => {
+			camera.setDeadzone(width, heigth);
+		});
+
+		taro.client.on('camera-instant-move', (x: number, y: number) => {
+			if (!taro.developerMode.active || taro.developerMode.activeTab === 'play') {
+				camera.centerOn(x, y);
+			}
+		});
+
+		// visibility mask graphics update
+		taro.client.on('update-visibility-mask', (data: {
+			enabled: boolean,
+			range: number,
+		}) => {
+			if (!this.visibility && data.enabled) {
+				this.visibility = new VisibilityMask(this);
+				this.visibility.generateFieldOfView(data.range);
+			} else if (data.enabled) {
+				this.visibility.generateFieldOfView(data.range);
+			} else if (this.visibility && !data.enabled) {
+				this.visibility.destroyVisibilityMask();
+				delete this.visibility;
+			}
+		});
+
+		// visibility mask position update
+		taro.client.on('unit-position', (x: number, y: number) => {
+			this.visibility?.moveCenter(x, y);
+		});
 	}
 
-	preload (): void {
+	preload(): void {
 
 		const data = taro.game.data;
 
@@ -165,6 +225,30 @@ class GameScene extends PhaserScene {
 				if (canvas) {
 					this.textures.remove(texture);
 					this.textures.addCanvas(`extruded-${key}`, canvas);
+				} else {
+
+					if (window.toastErrorMessage) {
+						window.toastErrorMessage(`Tileset "${tileset.name}" image doesn't match the specified parameters. ` +
+							'Double check your margin, spacing, tilewidth and tileheight.');
+					} else {
+						// WAITING TILL EDITOR IS LOADED
+						setTimeout(() => {
+							if (window.toastErrorMessage) {
+								window.toastErrorMessage(`Tileset "${tileset.name}" image doesn't match the specified parameters. ` +
+									'Double check your margin, spacing, tilewidth and tileheight.');
+							} else {
+								// IF editor is not loaded, show alert
+								alert(`Tileset "${tileset.name}" image doesn't match the specified parameters. ` +
+									'Double check your margin, spacing, tilewidth and tileheight.');
+							}
+						}, 5000);
+					}
+
+
+					console.warn(`Tileset "${tileset.name}" image doesn't match the specified parameters. ` +
+						'Double check your margin, spacing, tilewidth and tileheight.');
+					this.scene.stop();
+					return;
 				}
 				const extrudedTexture = this.textures.get(`extruded-${key}`);
 				Phaser.Textures.Parsers.SpriteSheet(
@@ -184,7 +268,7 @@ class GameScene extends PhaserScene {
 		//to be sure every layer of map have correct number of tiles
 		const tilesPerLayer = data.map.height * data.map.width;
 		data.map.layers.forEach(layer => {
-			if (layer.name !== 'debris') {
+			if (layer.data) {
 				const length = layer.data.length;
 				layer.width = data.map.width;
 				layer.height = data.map.height;
@@ -211,7 +295,7 @@ class GameScene extends PhaserScene {
 		BitmapFontManager.preload(this);
 	}
 
-	loadEntity (key: string, data: EntityData): void {
+	loadEntity(key: string, data: EntityData): void {
 
 		const cellSheet = data.cellSheet;
 
@@ -252,8 +336,11 @@ class GameScene extends PhaserScene {
 						animationFrames.push(0);
 					}
 
+					if (this.anims.exists(`${key}/${animationsKey}/${data.id}`)) {
+						this.anims.remove(`${key}/${animationsKey}/${data.id}`);
+					}
 					this.anims.create({
-						key: `${key}/${animationsKey}`,
+						key: `${key}/${animationsKey}/${data.id}`,
 						frames: this.anims.generateFrameNumbers(key, {
 							frames: animationFrames
 						}),
@@ -267,7 +354,7 @@ class GameScene extends PhaserScene {
 		this.load.image(key, this.patchAssetUrl(cellSheet.url));
 	}
 
-	create (): void {
+	create(): void {
 		this.events.once('render', () => {
 			this.scene.launch('DevMode');
 			taro.client.rendererLoaded.resolve();
@@ -280,8 +367,6 @@ class GameScene extends PhaserScene {
 
 		const data = taro.game.data;
 		const scaleFactor = taro.scaleMapDetails.scaleFactor;
-
-		console.log('map data', data.map);
 
 		data.map.tilesets.forEach((tileset) => {
 			const key = `tiles/${tileset.name}`;
@@ -303,43 +388,29 @@ class GameScene extends PhaserScene {
 		this.tilemapLayers = [];
 		data.map.layers.forEach((layer) => {
 
-			if (layer.type === 'tilelayer') {
-				const tileLayer = map.createLayer(layer.name, map.tilesets, 0, 0);
+			if (layer.type === 'tilelayer' && layer.data) {
+				const tileLayer = map.createLayer(layer.name, map.tilesets, layer.x, layer.y);
+				tileLayer.name = layer.name;
+				tileLayer.setScale(scaleFactor.x, scaleFactor.y);
+				tileLayer.alpha = layer.opacity;
+				this.tilemapLayers.push(tileLayer);
+			} else {
+				const tileLayer = map.createBlankLayer(layer.name, map.tilesets, 0, 0, map.width, map.height);
+				tileLayer.name = layer.name;
 				tileLayer.setScale(scaleFactor.x, scaleFactor.y);
 				this.tilemapLayers.push(tileLayer);
 			}
 
 			entityLayers.push(this.add.layer());
 		});
-
-		if (data.map.layers.find(layer => layer.name === 'debris')) {
-			// taro expects 'debris' entity layer to be in front of 'walls'
-			// entity layer, so we need to swap them for backwards compatibility
-			const debrisLayer = entityLayers[TileLayer.DEBRIS];
-			const wallsLayer = entityLayers[TileLayer.WALLS];
-			entityLayers[EntityLayer.DEBRIS] = debrisLayer;
-			entityLayers[EntityLayer.WALLS] = wallsLayer;
-			this.children.moveAbove(<any>debrisLayer, <any>wallsLayer);
-
-		} else {
-			// this condition exists to insert the debris layer if it has been
-			// excluded from the map json
-			entityLayers.splice(
-				EntityLayer.DEBRIS,
-				0,
-				this.add.layer()
-			);
-		}
+		const layerNames = data.map.layers.map(layer => layer.name);
+		map.layers.sort((a, b) => layerNames.indexOf(a.name) - layerNames.indexOf(b.name));
 
 		const camera = this.cameras.main;
 		camera.centerOn(
 			map.width * map.tileWidth / 2 * scaleFactor.x,
 			map.height * map.tileHeight / 2 * scaleFactor.y
 		);
-
-		this.events.on('update', () => {
-			taro.client.emit('tick');
-		});
 
 		if (data.defaultData.heightBasedZIndex) {
 			this.heightRenderer = new HeightRenderComponent(this, map.height * map.tileHeight);
@@ -349,7 +420,7 @@ class GameScene extends PhaserScene {
 		this.changeTextureFilter(taro.game.data.defaultData.renderingFilter);
 	}
 
-	private changeTextureFilter (filter: renderingFilter) {
+	private changeTextureFilter(filter: renderingFilter) {
 		if (filter === 'pixelArt') {
 			this.filter = Phaser.Textures.FilterMode.NEAREST;
 		} else {
@@ -361,7 +432,7 @@ class GameScene extends PhaserScene {
 		});
 	}
 
-	private setZoomSize (height: number): void {
+	private setZoomSize(height: number): void {
 		// backward compatible game scaling on average 16:9 screen
 		this.zoomSize = height * 2.15;
 	}
@@ -375,34 +446,21 @@ class GameScene extends PhaserScene {
 		const map = this.tilemap;
 		const data = taro.game.data;
 
-		data.map.layers.forEach((layer) => {
-			if (layer.type === 'tilelayer') {
-				let layerId;
-				switch (layer.name) {
-					case 'floor':
-						layerId = 0;
-						break;
-					case 'floor2':
-						layerId = 1;
-						break;
-					case 'walls':
-						layerId = 2;
-						break;
-					case 'trees':
-						layerId = 3;
-						break;
-				}
-				layer.data.forEach((tile, index) => {
-					const x = index % layer.width;
-					const y = Math.floor(index/layer.width);
-					if (tile === 0 || tile === null) tile = -1;
-					map.putTileAt(tile, x, y, false, layerId);
-				});
+		data.map.layers.forEach((layer, layerIdx) => {
+			if (layer.type !== 'tilelayer') {
+				return;
 			}
+			this.tilemapLayers[layerIdx].alpha = layer.opacity;
+			layer.data.forEach((tile, index) => {
+				const x = index % layer.width;
+				const y = Math.floor(index / layer.width);
+				if (tile === 0 || tile === null) tile = -1;
+				map.putTileAt(tile, x, y, false, layerIdx);
+			});
 		});
 	}
 
-	private patchMapData (map: GameComponent['data']['map']): typeof map {
+	private patchMapData(map: GameComponent['data']['map']): typeof map {
 
 		/**
 		 * map data gets patched in place
@@ -423,13 +481,10 @@ class GameScene extends PhaserScene {
 
 				if (value > tilecount) {
 
-					console.warn(`map data error: layer[${
-						layer.name
-					}], index[${
-						i
-					}], value[${
-						value
-					}].`);
+					console.warn(`map data error: layer[${layer.name
+						}], index[${i
+						}], value[${value
+						}].`);
 
 					layer.data[i] = 0;
 				}
@@ -439,7 +494,7 @@ class GameScene extends PhaserScene {
 		return map;
 	}
 
-	private extrude (
+	private extrude(
 		tileset: ArrayElement<GameComponent['data']['map']['tilesets']>,
 		sourceImage: HTMLImageElement,
 		extrusion = 2,
@@ -576,7 +631,7 @@ class GameScene extends PhaserScene {
 		);
 	}
 
-	findEntity (entityId: string): PhaserUnit | PhaserProjectile | PhaserItem {
+	findEntity(entityId: string): PhaserUnit | PhaserProjectile | PhaserItem {
 		return [...this.unitsList, ...this.itemList, ...this.projectilesList].find(
 			(entity) => {
 				return entity.entity._id === entityId;
@@ -584,45 +639,64 @@ class GameScene extends PhaserScene {
 		);
 	}
 
-    setResolution (resolution: number, setResolutionCoef: boolean): void {
-        if (setResolutionCoef) {
-            this.resolutionCoef = resolution;
-        }
-        if (taro.developerMode.activeTab !== 'map') {
-            this.scale.setGameSize(window.innerWidth/resolution, window.innerHeight/resolution);
-        }
-    }
+	setResolution(resolution: number, setResolutionCoef: boolean): void {
+		if (setResolutionCoef) {
+			this.resolutionCoef = resolution;
+		}
 
-	update (): void {
+		const width = !taro.isMobile ? window.innerWidth : window.outerWidth * window.devicePixelRatio;
+		const height = !taro.isMobile ? window.innerHeight : window.outerHeight * window.devicePixelRatio;
 
-		let trackingDelay = this.trackingDelay / taro.fps();
-		this.cameras.main.setLerp(trackingDelay, trackingDelay);
+		if (taro.developerMode.activeTab !== 'map') {
+			this.scale.setGameSize(width / resolution, height / resolution);
+		}
+	}
 
+	update(): void {
+
+		this.visibility?.update();
+
+		//cause black screen and camera jittering when change tab
+		/*let trackingDelay = this.trackingDelay / taro.fps();
+		this.cameras.main.setLerp(trackingDelay, trackingDelay);*/
 		const worldPoint = this.cameras.main.getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
-
-		taro.input.emit('pointermove', [{
-			x: worldPoint.x,
-			y: worldPoint.y,
-		}]);
+		if (!taro.isMobile) {
+			taro.input.emit('pointermove', [{
+				x: worldPoint.x,
+				y: worldPoint.y,
+			}]);
+		}
 
 		this.renderedEntities.forEach(element => {
 			element.setVisible(false);
 		});
-		
+		this.particles.forEach(particle => {
+			particle.setVisible(false);
+		})
+
 		if (!taro.developerMode.active || (taro.developerMode.active && taro.developerMode.activeTab !== 'map')) {
 			var visibleEntities = this.cameras.main.cull(this.renderedEntities);
+			this.particles.forEach(particle => {
+				particle.setVisible(true);
+			})
 			visibleEntities.forEach(element => {
 				if (!element.hidden) {
-					element.setVisible(true);					
+					element.setVisible(true);
 
-					if(element.dynamic) {
+					if (element.dynamic) {
 						// dynamic is only assigned through an hbz-index-only event
 						this.heightRenderer.adjustDepth(element as TGameObject & Phaser.GameObjects.Components.Size);
 					}
 				}
 			});
 		}
+
+		taro.client.emit('tick');
 	}
 }
 
 type renderingFilter = 'pixelArt' | 'smooth';
+
+if (typeof (module) !== 'undefined' && typeof (module.exports) !== 'undefined') {
+	module.exports = GameScene;
+}

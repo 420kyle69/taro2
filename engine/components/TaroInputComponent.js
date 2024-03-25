@@ -268,11 +268,11 @@ var TaroInputComponent = TaroEventingClass.extend({
 		};
 
 		// Listen for mouse events
-		window.addEventListener('mousedown', this._evRef.mousedown, false);
+		canvas.addEventListener('mousedown', this._evRef.mousedown, false);
 		window.addEventListener('mouseup', this._evRef.mouseup, false);
 
 		canvas.addEventListener('mousemove', this._evRef.mousemove, false);
-		canvas.addEventListener('mousewheel', this._evRef.mousewheel, false);
+		canvas.addEventListener('wheel', this._evRef.mousewheel, false);
 
 		// Touch events
 		canvas.addEventListener('touchmove', this._evRef.touchmove, false);
@@ -297,7 +297,7 @@ var TaroInputComponent = TaroEventingClass.extend({
 		canvas.removeEventListener('mousedown', this._evRef.mousedown, false);
 		canvas.removeEventListener('mouseup', this._evRef.mouseup, false);
 		canvas.removeEventListener('mousemove', this._evRef.mousemove, false);
-		canvas.removeEventListener('mousewheel', this._evRef.mousewheel, false);
+		canvas.removeEventListener('wheel', this._evRef.mousewheel, false);
 
 		// Touch events
 		canvas.removeEventListener('touchmove', this._evRef.touchmove, false);
@@ -597,7 +597,7 @@ var TaroInputComponent = TaroEventingClass.extend({
 	_keyDown: function (event) {
 		var self = this;
 		this._updateMouseData(event);
-		if(!this.shouldPreventChat()) {
+		if (!this.shouldPreventChat()) {
 			this._chatHandler(event);
 		}
 		if (this._state[event.keyCode] == false) {
@@ -750,6 +750,14 @@ var TaroInputComponent = TaroEventingClass.extend({
 		return this._state[this._controlMap[actionName]];
 	},
 
+  /**
+   * Set the passed action's input state value.
+   * @param actionName
+   */
+  setActionVal: function (actionName, val) {
+    this._state[this._controlMap[actionName]] = val;
+  },
+
 	/**
 	 * Returns true if the passed action's input is pressed or it's state
 	 * is not zero.
@@ -801,6 +809,26 @@ var TaroInputComponent = TaroEventingClass.extend({
 
 		return this;
 	},
+
+   /**
+   * Release key by key string.
+   * @param key 'a', 'b', 'c' etc...
+   */
+   releaseKey: function (key) {
+    this.setActionVal(key, false);
+  },
+
+  /**
+   * Release mouse button by button string.
+   * @param button 'button1', 'button2' or 'button3"
+   */
+  releaseMouseButton: function (button) {
+    switch (button) {
+      case 'button1': this.setActionVal(this.mouse.button1, false); break;
+      case 'button2': this.setActionVal(this.mouse.button1, false); break;
+      case 'button3': this.setActionVal(this.mouse.button1, false); break;
+    }
+  },
 
 	/**
 	 * Called by the engine after ALL other tick methods have processed.

@@ -10,7 +10,7 @@ var UnitUiComponent = TaroEntity.extend({
 	updateAllAttributeBars: function () {
 		var self = this;
 
-		var attributes = self._entity._stats.attributes; // get unit's attribute types
+		var attributes = this._entity._stats.attributes; // get unit's attribute types
 		// assign "type" variable to attributes
 		for (var attributeId in attributes) {
 			attributes[attributeId].type = attributeId;
@@ -72,6 +72,7 @@ var UnitUiComponent = TaroEntity.extend({
 					minWidth: '200px'
 				});
 			}
+			taro.client.emit('update-abilities-position');
 		}
 	},
 	removeAllAttributeBars: function () {
@@ -81,20 +82,21 @@ var UnitUiComponent = TaroEntity.extend({
 		}
 	},
 	// update one attribute bar
-	updateAttributeBar: function (attr) {
+	updateAttributeBar: function (attributeTypeId) {
 		var self = this;
 
 		// only update attributes for this unit
 		if (self._entity && self._entity._stats.clientId != taro.network.id()) {
 			return;
 		}
+		attr = this._entity._stats.attributes[attributeTypeId];
 		var attributeTypes = taro.game.data.attributeTypes;
 		if (attributeTypes == undefined || attr == undefined)
 			return;
 
 		var name = attributeTypes[attr.type] ? attributeTypes[attr.type].name : attr.name;
 
-		// self._entity.updateAttributeBar(attr); // updating UnitBars from HTML Bar???
+		self._entity.updateAttributeBar(attr); // updating UnitBars from HTML Bar???
 
 		if (
 			attr.isVisible && (
@@ -124,7 +126,21 @@ var UnitUiComponent = TaroEntity.extend({
 				value = attr.value;
 			}
 
-			$(taro.client.getCachedElementById(`player-${attr.type}`)).text(attr.displayValue ? `${name}: ${value}/${parseFloat(attr.max).toFixed(0)}` : name);
+			let displayText;
+			if (attr.displayValue) {
+				displayText = `
+					<span class='unit-attribute-name'>${name}: </span>
+					<span class='unit-attribute-value'>
+						<span class='unit-attribute-current'>${value}</span><span class='unit-attribute-divisor-sign'> / </span><span class='unit-attribute-max'>${parseFloat(attr.max).toFixed(0)}</span>
+					</span>
+				`;
+			} else {
+				displayText = `
+					<span class='unit-attribute-name'>${name}</span>
+				`;
+			}
+			$(taro.client.getCachedElementById(`player-${attr.type}`)).html(displayText);
+
 			var widthInPercent = (attr.value / attr.max) * 100;
 
 			$(taro.client.getCachedElementById(`player-max-${attr.type}`)).stop().css({

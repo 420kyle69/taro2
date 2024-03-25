@@ -73,7 +73,7 @@ class EntityImage {
         let lastTime = 0;
         let editedAction: ActionData = this.editedAction = {actionId: action.actionId};
         image.on('pointerdown', () => {
-            if (!devModeTools.cursorButton.active) return;
+            if (this.devModeTools.activeButton !== 'cursor') return;
             if (entityEditor.selectedEntityImage !== this) {
                 entityEditor.selectEntityImage(this);
             }
@@ -111,7 +111,7 @@ class EntityImage {
 
         image.on('pointerover', () => {
             scene.input.setTopOnly(true);
-            if (!devModeTools.cursorButton.active || entityEditor.activeHandler) return;
+            if (this.devModeTools.activeButton !== 'cursor' || entityEditor.activeHandler) return;
             this.updateOutline();
         });
 
@@ -145,7 +145,7 @@ class EntityImage {
         if (this.devModeTools.entityEditor.selectedEntityImage === this) {
             outline.clear();
             outlineHover.clear();
-            outline.lineStyle(6, 0x036ffc, 1);
+            outline.lineStyle(6, 0x036ffc, 0.3);
             selectionContainer.setVisible(true);
             selectionContainer.x = image.x;
             selectionContainer.y = image.y;

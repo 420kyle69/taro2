@@ -18,6 +18,9 @@ var PlayerUiComponent = TaroEntity.extend({
 		self.playerAttributeDivElement = null;
 
 		self.moddItemShopModalElement = null;
+
+		$("#custom-ingame-ui-container").hide();
+		window.renderHBSTemplate && window.renderHBSTemplate({}, taro.game.data?.ui?.inGameUiFull?.htmlData, "custom-ingame-ui-container");
 	},
 
 	setupListeners: function () {
@@ -55,16 +58,35 @@ var PlayerUiComponent = TaroEntity.extend({
 			taro.client.myPlayer.control.updatePlayerInputStatus();
 		});
 
-		$('button#player-input-submit').on('click', function () {
+		const submitInputModal = () => {
 			self.lastInputValue = $('#player-input-field').val();
 			self.pressedButton = true;
 			$('#player-input-modal').modal('hide');
+		};
+
+		$('#player-input-field').on('keydown', function (e) {
+			if (e.key === 'Enter') {
+				e.stopPropagation();
+				e.preventDefault();
+				submitInputModal();
+			}
+		});
+
+		$('button#player-input-submit').on('click', () => {
+			submitInputModal();
 		});
 
 		$('button#player-input-cancel').on('click', function () {
 			self.pressedButton = false;
 			taro.network.send('playerCustomInput', { status: 'cancelled' });
 			$('#player-input-modal').modal('hide');
+		});
+
+		$(document).on('click', '.trigger', function () {
+			taro.network.send('htmlUiClick', { id: $(this).attr('id') });
+			//support for local htmlUiClick trigger
+			taro.client.myPlayer.lastHtmlUiClickData = { id: $(this).attr('id') };
+			taro.script.trigger('htmlUiClick', { playerId: taro.client.myPlayer.id() });	
 		});
 	},
 
@@ -80,20 +102,34 @@ var PlayerUiComponent = TaroEntity.extend({
 
 		var attributeTypes = taro.game.data.attributeTypes;
 
-		if (attributeTypes == undefined)
+		const myScoreDiv = taro.client.getCachedElementById('my-score-div');
+		if (myScoreDiv) {
+			// no attributes to show
+			if (Object.keys(attributes).length === 0) {
+				if (!myScoreDiv.classList.contains('no-padding')) {
+					// display none for my-score-div
+					myScoreDiv.classList.add('no-padding');
+				}
+			} else if (myScoreDiv.classList.contains('no-padding')) {
+				myScoreDiv.classList.remove('no-padding');
+			}
+		};
+
+		if (attributeTypes == undefined) {
 			return;
+		}
 
 		for (var attrKey in attributes) {
 			var attr = attributes[attrKey];
-			
+
 			if (attr) {
-				if (!attr.isVisible) continue;
+				if (!this.shouldRenderAttribute(attr)) continue;
 
 				var attributeType = attributeTypes[attrKey];
-				
+
 				$(self.playerAttributeDivElement).append(
 					$('<span/>', {
-						text: attributeType ? attributeType.name + ": ": attr.name,
+						text: attributeType ? attributeType.name + ": " : attr.name,
 						id: `pt-attribute-${attrKey}`
 					})
 				).append(
@@ -104,7 +140,7 @@ var PlayerUiComponent = TaroEntity.extend({
 			}
 		}
 
-		self.updatePlayerAttributeValues(attributes);
+		self.updatePlayerAttributeValues(attributes, true);
 
 		// update shop as player points are changed and when shop modal is open
 
@@ -114,12 +150,17 @@ var PlayerUiComponent = TaroEntity.extend({
 		}
 	},
 
-	updatePlayerAttributeValues: function (attributes) {
+	updatePlayerAttributeValues: function (attributes, isUpdatedDiv = false) {
+		let needUpdateDiv = false;
 		for (var attrKey in attributes) {
 			var attr = attributes[attrKey];
-			
+
 			if (attr) {
-				if (!attr.isVisible) continue;
+				if (!this.shouldRenderAttribute(attr)) {
+					// remove the attribute from the div
+					if (!isUpdatedDiv) needUpdateDiv = true;
+					continue;
+				}
 
 				// if attr value is int, then do not show decimal points. otherwise, show up to 2 decimal points
 				if (attr.value % 1 === 0) {
@@ -139,17 +180,48 @@ var PlayerUiComponent = TaroEntity.extend({
 
 				// var value = attr.value && attr.value.toLocaleString('en-US') || 0; // commented out because toLocaleString is costly
 				var value = attr.value || 0;
-				
+
 				var selector = taro.client.getCachedElementById(`pt-attribute-value-${attrKey}`);
 				$(selector).text(attr.value)
 			}
 		}
+		if (needUpdateDiv) {
+			this.updatePlayerAttributesDiv(attributes);
+		}
+	},
+
+	shouldRenderAttribute: function (attribute) {
+		if (attribute.isVisible === undefined || attribute.isVisible === false) {
+			return false;
+		}
+
+		let shouldRender = true;
+
+		if (shouldRender) {
+			var showOnlyWhenIsGreaterThanMin = attribute.showWhen == 'whenIsGreaterThanMin';
+			shouldRender = showOnlyWhenIsGreaterThanMin ? attribute.value > attribute.min : true;
+		}
+		if (shouldRender) {
+			var showOnlyWhenIsLessThanMax = attribute.showWhen == 'whenIsLessThanMax';
+			shouldRender = showOnlyWhenIsLessThanMax ? attribute.value < attribute.max : true;
+		}
+
+		return shouldRender;
 	},
 
 	updatePlayerCoin: function (newValue) {
 		var coin = parseFloat($('.player-coins').html());
 		if (coin != NaN) {
 			$('.player-coins').html(parseFloat(newValue));
+		}
+
+		if (typeof updateCoins === 'function') {
+			updateCoins(newValue);
+		}
+
+		if ($('#modd-item-shop-modal').hasClass('show') && $('[id=item]').hasClass('active')) {
+			// update the shop based on the new coin value
+			taro.shop.openItemShop(taro.shop.currentType, 'items');
 		}
 	},
 
@@ -225,7 +297,7 @@ var PlayerUiComponent = TaroEntity.extend({
 		var self = this;
 
 		config.isDismissible = config.isDismissible === undefined ? true : !!(config.isDismissible);
-		function openTab(){
+		function openTab() {
 			var newWin = window.open(config.url);
 			if (!newWin || newWin.closed || typeof newWin.closed == 'undefined') {
 				swal({
@@ -237,8 +309,8 @@ var PlayerUiComponent = TaroEntity.extend({
 				});
 			}
 		}
-		var isExternal = !(new URL(config.url)).hostname.includes('modd.io'); 
-		if(isExternal){
+		var isExternal = !(new URL(config.url)).hostname.includes('modd.io');
+		if (isExternal) {
 			swal({
 				html: `You are being redirected to ${config.url}.<br>Are you sure you want to visit this external site?`,
 				type: 'warning',
@@ -249,7 +321,7 @@ var PlayerUiComponent = TaroEntity.extend({
 					openTab();
 				}
 			})
-		}else{
+		} else {
 			openTab();
 		}
 	},
@@ -277,7 +349,7 @@ var PlayerUiComponent = TaroEntity.extend({
 
 	openDialogueModal: function (dialogueId, extraData) {
 		let dialogueTemplate = extraData.dialogueTemplate || window.defaultUI.dialogueview;
-		window.handleOptionClick = function (e, index){
+		window.handleOptionClick = function (e, index) {
 			e.preventDefault();
 			e.stopPropagation();
 			const optionId = index.toString()
@@ -288,7 +360,7 @@ var PlayerUiComponent = TaroEntity.extend({
 
 		var self = this;
 
-		function getDialogueInstance (dialogue) {
+		function getDialogueInstance(dialogue) {
 			var playerName = extraData && extraData.playerName;
 			dialogue = rfdc()(dialogue);
 
@@ -329,7 +401,7 @@ var PlayerUiComponent = TaroEntity.extend({
 			return dialogue;
 		}
 
-		function initModal () {
+		function initModal() {
 			window.renderHBSTemplate({
 				dialogue: {
 					...dialogue,
@@ -347,7 +419,7 @@ var PlayerUiComponent = TaroEntity.extend({
 			$(document).on('click.modd-dialogue', skipText);
 		}
 
-		function showOptions () {
+		function showOptions() {
 
 			dialogue.areOptionsRendered = true;
 
@@ -359,7 +431,7 @@ var PlayerUiComponent = TaroEntity.extend({
 			}, dialogueTemplate);
 		}
 
-		function showNextMessage () {
+		function showNextMessage() {
 			if (dialogue.areAllMessagesPrinted()) {
 				if (dialogue.hasOptions() && !dialogue.areOptionsRendered) {
 					showOptions();
@@ -386,22 +458,21 @@ var PlayerUiComponent = TaroEntity.extend({
 			}
 		}
 
-		function skipText () {
+		function skipText() {
 			if (window.dialogueMessagePrinter) {
 				clearInterval(window.dialogueMessagePrinter);
-				$('#modd-dialogue-message').html(window.DOMPurify.sanitize(self.dialogue.message, {FORCE_BODY: true}));
+				$('#modd-dialogue-message').html(window.DOMPurify.sanitize(self.dialogue.message, { FORCE_BODY: true }));
 				window.dialogueMessagePrinter = null;
 				$('.dialogue-option') && $('.dialogue-option').removeClass('d-none');
 				return;
 			}
-			if(!(dialogue.hasOptions() && dialogue.areOptionsRendered)){
+			if (!(dialogue.hasOptions() && dialogue.areOptionsRendered)) {
 				showNextMessage();
 			}
 		}
 
-		function keyboardListener (e) {
+		function keyboardListener(e) {
 			if (e.keyCode === 32) {
-				e.stopPropagation();
 				skipText();
 			}
 		}
@@ -426,6 +497,7 @@ var PlayerUiComponent = TaroEntity.extend({
 	clearListeners: function () {
 		console.log('clearing all keydown listeners on document');
 		$(document).off('click.modd-dialogue keydown.modd-dialogue');
+		taro.client.myPlayer.control.updatePlayerInputStatus();
 	},
 
 	submitDialogueModal: function (dialogueId, optionId) {
@@ -446,11 +518,82 @@ var PlayerUiComponent = TaroEntity.extend({
 		}
 
 		if (dialogueId && optionId) {
-			taro.network.send('playerDialogueSubmit', {
+			const data = {
 				status: 'submitted',
 				dialogue: dialogueId,
 				option: optionId
-			});
+			}
+			taro.network.send('playerDialogueSubmit', data);
+
+			var player = taro.client.myPlayer;
+
+			if (player) {
+				var selectedOption = null;
+
+				for (var dialogId in taro.game.data.dialogues) {
+					var dialog = taro.game.data.dialogues[dialogId];
+
+					if (dialogId === data.dialogue) {
+						for (var optionId in dialog.options) {
+							var option = dialog.options[optionId];
+
+							if (optionId === data.option) {
+								selectedOption = option;
+								break;
+							}
+						}
+					}
+				}
+
+				if (selectedOption) {
+					if (selectedOption.scriptName) {
+						taro.script.runScript(selectedOption.scriptName, {});
+					}
+				}
+			}
+		}
+	},
+
+	updateBackpack: function (data) {
+		try {
+			switch (data.action) {
+				case 'open':
+					$(taro.client.getCachedElementById('backpack')).show();
+					break;
+				case 'close':
+					$(taro.client.getCachedElementById('backpack')).hide();
+					break;
+				default:
+					break;
+			}
+		} catch (err) {
+			console.log("playerUi - updateBackpack error: ", err);
+		}
+	},
+
+	updateUiElement: function (data) {
+		try {
+			switch (data.action) {
+				case 'show':
+					$(`#${data.elementId}`).show();
+					break;
+				case 'hide':
+					$(`#${data.elementId}`).hide();
+					break;
+				case 'setHtml':
+					$(`#${data.elementId}`).html(data.htmlStr);
+					break;
+				case 'addClass':
+					document.getElementById(data.elementId).classList.add(data.className);
+					break;
+				case 'removeClass':
+					document.getElementById(data.elementId).classList.remove(data.className);
+					break;
+				default:
+					break;
+			}
+		} catch (err) {
+			console.log("playerUi - updateUiElement error: ", err);
 		}
 	}
 });

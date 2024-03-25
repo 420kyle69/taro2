@@ -252,11 +252,22 @@ canvas {
   display: inline-block;
 }
 
-.inventory-slot, .trade-offer-slot {
+.inventory-slot {
   width: 45px;
   height: 45px;
   margin: 0px 2px 0px 2px;
   background-color: rgba(0, 0, 0, 0.5);
+}
+
+.trade-slot {
+  width: 45px !important;
+  height: 45px !important;
+  margin: 0px 2px 0px 2px;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+#accept-trade-request-button {
+  margin-right: 8px;
 }
 
 .inventory-slot.active {
@@ -947,4 +958,12 @@ div#dev-console-table {
 #game-div > #stats {
   right: 15px !important;
   top: 10px;
+}
+
+:where(#custom-ingame-ui-container) > * {
+  pointer-events: auto;
+}
+
+.ui-draggable-dragging {
+  transform: scale(1.8);
 }

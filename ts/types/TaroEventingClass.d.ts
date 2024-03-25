@@ -18,7 +18,7 @@ declare class TaroEventingClass extends TaroClass {
 
 	emit (
 		eventName: string,
-		args?: Array<any> | object | number
+		args?: Array<any> | object | number | string | boolean
 	): number;
 
 }

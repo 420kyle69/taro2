@@ -1,8 +1,9 @@
 declare class TaroEntity extends TaroObject {
-	isTransforming: () => boolean;
+	isTransforming (bool?: boolean): boolean;
     phaserEntity: PhaserEntity;
     nextKeyFrame: {x: number, y: number, rotation: number};
 	lastUpdatedData: any;
+	script: any;
 	getAnchoredOffset(rotate: number): any;
 
 	_alive: boolean;
@@ -17,7 +18,7 @@ declare class TaroEntity extends TaroObject {
 	_depth: number;
 	_layer: number;
 	_id: string;
-
+	_bornTime: number;
 	angleToTarget: number;
 	tween: TweenComponent;
 

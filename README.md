@@ -1,97 +1,81 @@
 <div align="center">
-  <a href="https://modd.io">
-    <img src="./assets/images/logo.png" width="400" alt="Taro Engine logo">
-  </a>
+  <h2><a href="https://modd.io">Moddio Game Engine 2</a></h2>
+  <p>Moddio is a Multiplayer-First Game Engine. It has a built-in server-authoritative netcode, including snapshot interpolation and client-side reconciliation. It can support 50+ concurrent players or 300+ moving entities hosted on a $5/month VM. Join us on <a href="https://discord.gg/XRe8T7K">Discord</a>
 </div>
 
 <div align="center">
-  <h2>HTML5 Game Engine</h2>
-  <p>Taro is a multiplayer game engine. It can support up to 64 concurrent players hosted on a $5 / month VM while running Box2D physics. Join us on <a href="https://discord.gg/XRe8T7K">Discord</a> or support us on <a href="https://www.patreon.com/moddio">Patreon</a>.
+  <img src="https://img.shields.io/github/contributors/moddio/moddio2?style=for-the-badge&color=f01313">
+  <img src="https://img.shields.io/github/last-commit/moddio/moddio2?style=for-the-badge&color=f01313">
+  <img src="https://img.shields.io/github/languages/code-size/moddio/moddio2?style=for-the-badge&color=f01313">
 </div>
-
-<div align="center">
-  <img src="https://img.shields.io/github/contributors/moddio/taro2?style=for-the-badge&color=f01313">
-  <img src="https://img.shields.io/github/last-commit/moddio/taro2?style=for-the-badge&color=f01313">
-  <img src="https://img.shields.io/github/languages/code-size/moddio/taro2?style=for-the-badge&color=f01313">
-</div>
-
 
 <h3><a href="http://modd.io/play/two-houses">Demo</a></h3>
 <br>
 
 ## What's included in the box.
+
 - Box2D Physics
-- Netcode using UWS and LZ-string compression
-- Inventory & item system
-- Unit attributes (HP, Energy, etc)
-- Weapon system (melee & projectile)
-- Dialogues
-- Shops
+- Server-authoritative netcode using Websocket, Snapshot interpolation, Client-side reconciliation, and LZ-string compression
+- Inventory & Item system
+- Built-in Attributes (e.g. HP, Energy, etc) with regeneration rates
+- Built-in Item system (melee & projectile)
+- Dialogues (ideal for visual novel-style games)
+- Shops (for selling items)
 - Unit control (top-down WASD or platformer)
 - Client-side predicted projectile + unit movement (optional)
-- Unit AI including A* pathfinding
+- Unit AI including A\* pathfinding
 - Mobile controls
 - and more!
 
-## Node Version
-Node Versions below [14](https://nodejs.org) are not supported due to package incompatibility and degraded performance.
+## Running the game
 
-## Running a game server
-Taro engine will run games made using [modd.io](https://www.modd.io).
+Make sure you have [Node 16](https://nodejs.org) or later.
+First, setup the repo
 
-To run the game server, execute the following command:
+```
+git clone https://github.com/moddio/moddio2.git
+cd moddio2
+npm install
+npm run tsc
+```
+
+Then, go to /src directory, and rename game-sample.json to game.json.
+Go back to the root directory and run the command below:
+
 ```
 npm run server
 ```
-*The engine will use game.json stored in `/src` directory.
 
-You can download Game JSON from your modd.io's game's in-game editor. Go to `Editor` -> Click `Export JSON`.
+You can now play the game at http://localhost:80
+
+## How do I create a new game from scratch?
+
+Moddio games are created & edited using Moddio Game Editor available at [https://www.modd.io](https://www.modd.io).
+To learn how to use the game editor, visit [https://learn.modd.io](https://learn.modd.io).
+
+Once you create the game, you can export the game.json which you can use in your local installation.
+Inside the Moddio Game Editor, Go to `Menu` -> Click `Export Game`.
 
 <img src="./assets/images/gamejson2.png" width="600" alt="How to get game json in game's in-game editor">
-
-Alternatively, you can download Game JSON from your modd.io's game's sandbox. ([example](https://modd.io/edit/two-houses)). Go to `Menu` -> Click `Export JSON`.
-
-<img src="./assets/images/gamejson.png" width="600" alt="How to get game json in game's sandbox">
-
 Next, rename the downloaded Game JSON as `game.json` and move it to the `./src` directory.
 
-## Quick start example - Run "Two Houses" locally
+## How to contribute
 
-Install [Node 14](https://nodejs.org) or later and then...
+Moddio is completely free and open source under the MIT license, and we are always looking for more contributors.
+To learn about how to become a contributor, please visit [how to contribute page](https://docs.modd.io/how-to-contribute)
 
-```
-git clone https://github.com/moddio/taro2.git
-cd taro2
-npm install
-npm run server
-```
+## Credits
 
-## Connecting to the game server
-Visit http://localhost:80 to start testing game.
+[Isogenic Game Engine](https://www.isogenicengine.com/)
 
-## Compiling game.js for faster loading
-Once you  make changes, run 
-```
-npm run build
-```
-and edit /src/index.ejs file, and comment
-```
-<script type="text/javascript" src="/engine/loader.js"></script>
-```
-and uncomment
-```
-<script type="text/javascript" src="./game.js"></script>
-```
+[Phaser](https://phaser.io/)
 
-## How to customize game client UI
-Game client's user interface is rendered by [/src/index.ejs](https://github.com/moddio/taro2/blob/master/src/index.ejs) file and the theme files in [/src/templates/](https://github.com/moddio/taro2/tree/master/src/templates)
+[PlanckJS](https://github.com/piqnt/planck.js)
 
-## How to make games on modd.io
-Please visit https://www.modd.io/tutorials for more information.
+[uWebsocket](https://github.com/uNetworking/uWebSockets)
 
-## We need contributors, and we are also hiring
-Performance optimization is a hard problem that takes aeons to solve. We are always looking for more developers to help us. To be a contributor, please contact m0dE in our [Discord](https://discord.gg/XRe8T7K) If you find yourself enjoying working with us, then we should seriously consider working together.
+[Box2D](https://github.com/erincatto/box2d)
 
-Taro is completely free and open source under the MIT license.
+[Kenney Assets](https://www.kenney.nl/)
 
-Taro Engine was originally forked from [Isogenic Game Engine](https://www.isogenicengine.com/) back in 2016.
+[Hero Icons](https://github.com/tailwindlabs/heroicons)

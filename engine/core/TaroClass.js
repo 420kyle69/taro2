@@ -160,16 +160,16 @@ var TaroClass = (function () {
 		 *     // "byAngleAndPower" method of the velocity component:
 		 *     entity.velocity.byAngleAndPower(Math.radians(20), 0.1);
 		 */
-	var addComponent = function (component, options) {
+	var addComponent = function (component, options, callback) {
 		try {
-			var newComponent = new component(this, options);
+			var newComponent = new component(this, options, callback);
 			this[newComponent.componentId] = newComponent;
 
 			// Add the component reference to the class component array
 			this._components = this._components || [];
 			this._components.push(newComponent);
 		} catch (err) {
-			console.log(`failed to add component: ${newComponent.componentId}`);
+			console.log(`failed to add component: ${newComponent?.componentId}`, component);
 			console.error(err);
 		}
 		return this;

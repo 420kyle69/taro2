@@ -20,10 +20,10 @@ class TileShape {
 	 * calc the sample to print
 	 * @param selectedTileArea selectedTiles
 	 * @param size brush's size
-	 * @param temp if true, it won't change this.sample, but return it instead.
+	 * @param temp if true, it won't change this.sample, but only return it instead.
 	 * @returns sample to print
 	 */
-	calcSample(selectedTileArea: Record<number, Record<number, number>>, size: Vector2D, shape?: Shape, temp = false): Record<number, Record<number, number>> {
+	calcSample(selectedTileArea: Record<number, Record<number, number>>, size: Vector2D | 'fitContent', shape?: Shape, temp = false): { sample: Record<number, Record<number, number>>, xLength: number, yLength: number, minX: number, minY: number } {
 		const xArray = Object.keys(selectedTileArea);
 		const yArray = Object.values(selectedTileArea).map((object) => Object.keys(object)).flat().sort((a, b) => parseInt(a) - parseInt(b));
 		const minX = parseInt(xArray[0]);
@@ -33,6 +33,12 @@ class TileShape {
 		const xLength = maxX - minX + 1;
 		const yLength = maxY - minY + 1;
 		let tempSample: Record<number, Record<number, number>> = {};
+		if (size === 'fitContent') {
+			size = {
+				x: xLength,
+				y: yLength
+			};
+		}
 		switch (shape || this.shape) {
 			case 'rectangle': {
 				tempSample = TileShape.calcRect(minX, xLength, minY, yLength, selectedTileArea, size);
@@ -50,7 +56,7 @@ class TileShape {
 		if (!temp) {
 			this.sample = tempSample;
 		}
-		return tempSample;
+		return { sample: tempSample, xLength, yLength, minX, minY };
 	}
 
 	static calcCircle(minX: number, xLength: number, minY: number, yLength: number, selectedTileArea: Record<number, Record<number, number>>, size: Vector2D) {
