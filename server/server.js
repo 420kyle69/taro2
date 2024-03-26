@@ -198,7 +198,7 @@ var Server = TaroClass.extend({
 				taro.addComponent(MasterServerComponent);
 				taro.addComponent(MasterComponent);
 			}
-			
+
 			// Include ProxyComponent to master cluster
 			if (typeof ProxyComponent !== 'undefined') {
 				taro.addComponent(ProxyComponent);
@@ -641,6 +641,7 @@ var Server = TaroClass.extend({
 		taro.network.define('minimap', self._onSomeBullshit);
 
 		taro.network.define('createFloatingText', self._onSomeBullshit);
+    taro.network.define('createDynamicFloatingText', self._onSomeBullshit);
 
 		taro.network.define('openShop', self._onSomeBullshit);
 		taro.network.define('openDialogue', self._onSomeBullshit);

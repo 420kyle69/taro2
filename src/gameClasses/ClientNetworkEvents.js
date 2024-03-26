@@ -154,12 +154,26 @@ var ClientNetworkEvents = {
 			// console.error(runAction[0]);
 		}
 	},
+
 	_onCreateFloatingText: function (data) {
 		const runAction = functionalTryCatch(() => taro.client.emit("floating-text", {
 			text: data.text,
 			x: data.position.x,
 			y: data.position.y,
 			color: data.color || "white",
+		}));
+		if (runAction[0] !== null) {
+			// console.error(runAction[0]);
+		}
+	},
+
+  _onCreateDynamicFloatingText: function (data) {
+		const runAction = functionalTryCatch(() => taro.client.emit("dynamic-floating-text", {
+			text: data.text,
+			x: data.position.x,
+			y: data.position.y,
+			color: data.color || "white",
+      duration: data.duration,
 		}));
 		if (runAction[0] !== null) {
 			// console.error(runAction[0]);

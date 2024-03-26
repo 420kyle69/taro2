@@ -1668,6 +1668,29 @@ var ActionComponent = TaroEntity.extend({
 						}
 						break;
 
+          case 'createDynamicFloatingText':
+            var position = self._script.param.getValue(action.position, vars);
+            var text = self._script.param.getValue(action.text, vars);
+            var color = self._script.param.getValue(action.color, vars);
+            var duration = self._script.param.getValue(action.duration, vars) || 0;
+
+            if (text == undefined) {
+              text = 'undefined';
+            }
+
+            if (taro.isServer) {
+              taro.network.send('createDynamicFloatingText', { position, text, color, duration });
+            } else if (taro.isClient) {
+              taro.client.emit('dynamic-floating-text', {
+                text,
+                x: position.x,
+                y: position.y,
+                color: color || 'white',
+                duration,
+              });
+            }
+            break;
+
 					/* Item */
 
 					case 'startUsingItem':
@@ -2726,7 +2749,7 @@ var ActionComponent = TaroEntity.extend({
 						var attrId = self._script.param.getValue(action.attribute, vars);
 						var value = self._script.param.getValue(action.value, vars);
 						var entity = self._script.param.getValue(action.entity, vars);
-							
+
 						if (entity && self.entityCategories.indexOf(entity._category) > -1 && entity._stats.attributes && entity._stats.attributes[attrId] != undefined && value != undefined) {
 
 							// not sure we need this code
@@ -3064,7 +3087,7 @@ var ActionComponent = TaroEntity.extend({
 						var playerA = self._script.param.getValue(action.playerA, vars);
 						var playerB = self._script.param.getValue(action.playerB, vars);
 						if (playerA && playerB && playerA._category === 'player' && playerB._category === 'player') {
-							if (!playerA.isTrading && playerA.id() !== playerB.id()) { 
+							if (!playerA.isTrading && playerA.id() !== playerB.id()) {
 								if (!playerB.isTrading) {
 									taro.network.send('trade', { type: 'init', from: playerA.id() }, playerB._stats.clientId);
 								} else {
