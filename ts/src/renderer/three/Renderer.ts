@@ -297,7 +297,76 @@ namespace Renderer {
 
 				taro.client.on('floating-text', (config: FloatingTextConfig) => {
 					const zOffset = this.camera.target ? this.camera.target.position.y : 0;
-					entitiesLayer.add(FloatingText.create(config, zOffset));
+					// entitiesLayer.add(FloatingText.create(config, zOffset));
+
+					// Spawn dynanmic floating text here for test purposes, then see
+					// if I can enchance the floating text class to allow for optional
+					// parameters to re-use it for dynamic floating text. What kind of
+					// effects do I want?
+
+					// I think it boils down to:
+					// X tween
+					// Y tween
+					// Opacity tween
+					// Scale tween
+					// Color tween
+					// And by default it can use a linear tweening function
+					// Lifetime?
+
+					// And a random value so every instance behaves differently
+
+					const randIntBetween = (min: number, max: number) => {
+						return Math.floor(Math.random() * (max - min + 1) + min);
+					};
+
+					const randFloatBetween = (min, max) => {
+						return Math.random() * (max - min) + min;
+					};
+
+					const originY = 0;
+
+					// config.color = '#ff0000';
+					config.text = randIntBetween(10, 100).toString();
+
+					const dynamicText = DynamicFloatingText.create(config, zOffset);
+
+					const xMin = 2;
+					const xMax = 2;
+					const leftOrRight = Math.random() < 0.5 ? -1 : 1;
+					const xOffset = randFloatBetween(xMin, xMax) * leftOrRight;
+
+					new TWEEN.Tween({ xOffset: 0 })
+						.to({ xOffset: xOffset }, 2500)
+						// .easing(TWEEN.Easing.Linear.Out)
+						.onUpdate(({ xOffset }) => {
+							dynamicText.label.setOffsetX(Utils.worldToPixel(xOffset));
+						})
+						.start();
+
+					const yMin = 1;
+					const yMax = 2;
+					// const upOrDown = Math.random() < 0.5 ? -1 : 1;
+					const upOrDown = 1;
+					const yOffset = randFloatBetween(yMin, yMax) * upOrDown;
+
+					new TWEEN.Tween({ yOffset: 0 })
+						.to({ yOffset: yOffset }, 750)
+						.easing(TWEEN.Easing.Quintic.Out)
+						.onUpdate(({ yOffset }) => {
+							dynamicText.label.setOffsetY(Utils.worldToPixel(originY) + Utils.worldToPixel(yOffset));
+						})
+						.onComplete(() => {
+							new TWEEN.Tween({ yOffset: yOffset })
+								.to({ yOffset: 0 }, 1750)
+								.easing(TWEEN.Easing.Quadratic.In)
+								.onUpdate(({ yOffset }) => {
+									dynamicText.label.setOffsetY(Utils.worldToPixel(originY) + Utils.worldToPixel(yOffset));
+								})
+								.start();
+						})
+						.start();
+
+					entitiesLayer.add(dynamicText);
 				});
 			}
 

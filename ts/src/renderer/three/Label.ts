@@ -44,6 +44,18 @@ namespace Renderer {
 				);
 			}
 
+			setOffsetX(x: number, center = new THREE.Vector2(0.5, 0.5)) {
+				this.center.copy(center);
+				this.offset.x = x;
+				this.sprite.center.x = center.x - x / (this.size.x * this.scaleScalar);
+			}
+
+			setOffsetY(y: number, center = new THREE.Vector2(0.5, 0.5)) {
+				this.center.copy(center);
+				this.offset.y = y;
+				this.sprite.center.y = center.y - y / (this.size.y * this.scaleScalar);
+			}
+
 			setScale(scale: number) {
 				this.scaleScalar = scale;
 
