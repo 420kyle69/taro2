@@ -715,6 +715,7 @@ const Client = TaroEventingClass.extend({
 		taro.network.define('gameSuggestion', this._onGameSuggestion);
 
 		taro.network.define('createFloatingText', this._onCreateFloatingText);
+    taro.network.define('createDynamicFloatingText', this._onCreateDynamicFloatingText);
 
 		taro.network.define('openShop', this._onOpenShop);
 		taro.network.define('openDialogue', this._onOpenDialogue);

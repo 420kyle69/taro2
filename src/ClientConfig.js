@@ -130,6 +130,7 @@ var taroClientConfig = {
 		'renderer/three/Tileset.js',
 		'renderer/three/Particles.js',
     'renderer/three/FloatingText.js',
+    'renderer/three/DynamicFloatingText.js',
 
 		'/client.js',
 		'/index.js',

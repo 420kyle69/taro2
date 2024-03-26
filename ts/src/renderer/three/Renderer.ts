@@ -299,6 +299,12 @@ namespace Renderer {
 					const zOffset = this.camera.target ? this.camera.target.position.y : 0;
 					entitiesLayer.add(FloatingText.create(config, zOffset));
 				});
+
+				taro.client.on('dynamic-floating-text', (config: DynamicFloatingTextConfig) => {
+					const zOffset = this.camera.target ? this.camera.target.position.y : 0;
+					const dynamicText = DynamicFloatingText.create(config, zOffset);
+					entitiesLayer.add(dynamicText);
+				});
 			}
 
 			private render() {
