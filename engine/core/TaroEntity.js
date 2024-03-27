@@ -4809,7 +4809,7 @@ var TaroEntity = TaroObject.extend({
 
 				case 'item':
 					// TODO: we shouldn't have to send currentBody. for some reason, all items have 'dropped' stateId
-					keys = ['itemTypeId', 'anim', 'stateId', 'ownerUnitId', 'quantity', 'currentBody', 'flip', 'isBeingUsed', 'width', 'height', 'scaleDimensions'];
+					keys = ['itemTypeId', 'anim', 'stateId', 'ownerUnitId', 'quantity', 'currentBody', 'flip', 'isBeingUsed', 'width', 'height', 'scaleDimensions', 'description'];
 					data = {
 						attributes: {},
 						// variables: {}

@@ -5,22 +5,36 @@ var ItemUiComponent = TaroEntity.extend({
 	dragOverTimeout: null,
 
 	init: function () {
-		$('#backpack-items-div').on('mouseenter', '.inventory-item-button.inventory-slot>.item-div.draggable-item', function () {
-			$('.popover').popover('hide');
-			$(this).popover('show');
-		});
-		$('#trade-div').on('mouseenter', '.inventory-item-button.inventory-slot>.item-div.draggable-item', function () {
-			$('.popover').popover('hide');
-			$(this).popover('show');
-		});
-		$('#trade-div').on('mouseenter', '.trade-offer-slot>.item-div.draggable-item', function () {
-			$('.popover').popover('hide');
-			$(this).popover('show');
-		});
-		$('#inventory-slots').on('mouseenter', '.inventory-item-button.inventory-slot>.item-div.draggable-item', function () {
-			$('.popover').popover('hide');
-			$(this).popover('show');
-		});
+		const addPopoverListener = () => {
+			$('#backpack-items-div').on('mouseenter', '.inventory-item-button.inventory-slot>.item-div.draggable-item', function () {
+				$('.popover').popover('hide');
+				$(this).popover('show');
+			});
+			$('#trade-div').on('mouseenter', '.inventory-item-button.inventory-slot>.item-div.draggable-item', function () {
+				$('.popover').popover('hide');
+				$(this).popover('show');
+			});
+			$('#trade-div').on('mouseenter', '.trade-offer-slot>.item-div.draggable-item', function () {
+				$('.popover').popover('hide');
+				$(this).popover('show');
+			});
+			$('#inventory-slots').on('mouseenter', '.inventory-item-button.inventory-slot>.item-div.draggable-item', function () {
+				$('.popover').popover('hide');
+				$(this).popover('show');
+			});
+		};
+
+		if (document.getElementById('backpack-items-div')) {
+			addPopoverListener();
+		} else {
+			const timer = setInterval(() => {
+				if (document.getElementById('backpack-items-div')) {
+					clearInterval(timer);
+					addPopoverListener();
+				}
+			}, 1000);
+		}
+
 		$('canvas').on('mouseenter', function () {
 			$('.popover').popover('hide');
 		});
