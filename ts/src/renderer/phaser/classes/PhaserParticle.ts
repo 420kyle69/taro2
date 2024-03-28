@@ -1,11 +1,9 @@
 class PhaserParticle extends Phaser.GameObjects.Particles.ParticleEmitter {
 	target: string;
 	particleId: string;
+	scene: GameScene;
 
-	constructor (
-		scene: GameScene,
-		particle: Particle
-	) {
+	constructor(scene: GameScene, particle: Particle) {
 		let particleData = taro.game.data.particleTypes[particle.particleId];
 		//@ts-ignore //there seems to be an issue with phaser's type def for particleEmitter
 		super(scene, particle.position.x, particle.position.y, `particle/${particleData.url}`, PhaserParticle.createConfig(scene, particleData, particle.angle));
@@ -19,13 +17,18 @@ class PhaserParticle extends Phaser.GameObjects.Particles.ParticleEmitter {
 			}
 		}
 
+		this.scene = scene;
 		this.particleId = particle.particleId;
 
-		this.setDepth(particleData["z-index"].depth);
-		scene.entityLayers[particleData["z-index"].layer - 1].add(this);
+		this.setDepth(particleData['z-index'].depth);
+		scene.entityLayers[particleData['z-index'].layer - 1].add(this);
 	}
 
-	static createConfig (scene: GameScene, data: ParticleData, angle: number): Phaser.Types.GameObjects.Particles.ParticleEmitterConfig {
+	static createConfig(
+		scene: GameScene,
+		data: ParticleData,
+		angle: number
+	): Phaser.Types.GameObjects.Particles.ParticleEmitterConfig {
 		if (data) {
 			let frame = scene.textures.getFrame(`particle/${data.url}`);
 			let config: Phaser.Types.GameObjects.Particles.ParticleEmitterConfig = {
@@ -47,9 +50,13 @@ class PhaserParticle extends Phaser.GameObjects.Particles.ParticleEmitter {
 				scaleY: data.dimensions.height / frame.height,
 				emitting: false,
 			};
+
 			if (data.emitZone && data.emitZone.x && data.emitZone.y) {
-				config.emitZone = new Phaser.GameObjects.Particles.Zones.RandomZone(new Phaser.Geom.Rectangle(-data.emitZone.x / 2, -data.emitZone.y / 2, data.emitZone.x, data.emitZone.y));
-			};
+				config.emitZone = new Phaser.GameObjects.Particles.Zones.RandomZone(
+					new Phaser.Geom.Rectangle(-data.emitZone.x / 2, -data.emitZone.y / 2, data.emitZone.x, data.emitZone.y)
+				);
+			}
+
 			return config;
 		}
 	}
