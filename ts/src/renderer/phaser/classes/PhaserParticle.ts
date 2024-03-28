@@ -44,7 +44,7 @@ class PhaserParticle extends Phaser.GameObjects.Particles.ParticleEmitter {
 				lifespan: data.lifeBase,
 				alpha: { start: 1, end: data.deathOpacityBase },
 				name: data.name,
-				duration: 0,
+				duration: data.duration,
 				frequency: data.emitFrequency,
 				scaleX: data.dimensions.width / frame.width,
 				scaleY: data.dimensions.height / frame.height,
