@@ -4362,9 +4362,6 @@ var TaroEntity = TaroObject.extend({
 							case 'showNameLabel':
 								this.emit('show-label');
 								break;
-							case 'particle':
-								taro.client.emit('create-particle', newValue);
-								break;
 						}
 
 						this.lastUpdatedData[attrName] = rfdc()(newValue);
@@ -5297,6 +5294,12 @@ var TaroEntity = TaroObject.extend({
 		}
 
 		return null;
+	},
+
+	createParticleEmitters: function () {
+		this._stats?.particleEmitters?.forEach((particleType) => {
+			taro.client.emit('create-particle', { particleId: particleType, position: { x: 0, y: 0 }, angle: 0, entityId: this.id() });
+		});
 	}
 });
 

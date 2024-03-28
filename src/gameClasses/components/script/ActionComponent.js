@@ -1879,7 +1879,10 @@ var ActionComponent = TaroEntity.extend({
 						}
 						break;
 
-					/* particles */
+					/* particles
+					*
+					* these actions should only run on local machine
+					*/
 
 					case 'emitParticlesAtPosition':
 						var position = self._script.param.getValue(action.position, vars);
@@ -1895,7 +1898,29 @@ var ActionComponent = TaroEntity.extend({
 						var angle = self._script.param.getValue(action.angle, vars);
 						var entity = self._script.param.getValue(action.entity, vars);
 						if (particleTypeId && entity) {
-							taro.network.send('particle', { particleId: particleTypeId, position: { x: 0, y: 0 }, angle: angle || 0, entityId: entity.id() });
+							taro.client.emit('particle', { particleId: particleTypeId, position: { x: 0, y: 0 }, angle: angle || 0, entityId: entity.id() });
+						}
+						break;
+
+					case 'startEmittingParticles':
+						if (taro.isClient) {
+							var particleTypeId = self._script.param.getValue(action.particleType, vars);
+							var entity = self._script.param.getValue(action.entity, vars);
+
+							if (particleTypeId && entity) {
+								taro.client.emit('start-particle', { particleTypeId, entityId: entity.id() });
+							}
+						}
+						break;
+
+					case 'stopEmittingParticles':
+						if (taro.isClient) {
+							var particleTypeId = self._script.param.getValue(action.particleType, vars);
+							var entity = self._script.param.getValue(action.entity, vars);
+
+							if (particleTypeId && entity) {
+								taro.client.emit('stop-particle', { particleTypeId, entityId: entity.id() });
+							}
 						}
 						break;
 

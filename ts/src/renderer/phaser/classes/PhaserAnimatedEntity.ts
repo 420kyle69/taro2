@@ -1,6 +1,6 @@
 class PhaserAnimatedEntity extends PhaserEntity {
-	protected sprite: Phaser.GameObjects.Sprite & IRenderProps;
 	public attachedParticles: PhaserParticle[] = [];
+	protected sprite: Phaser.GameObjects.Sprite & IRenderProps;
 
 	protected constructor(
 		public scene: GameScene,
