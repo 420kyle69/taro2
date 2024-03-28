@@ -896,6 +896,13 @@ var ClientNetworkEvents = {
 	_onRenderSocketLogs: function (data) {
 		console.warn(data);
 	},
+	
+	_onMovePlayerToMap: function (data) {
+		if (data && data.type == "movePlayerToMap") {
+			const mapUrl = `${window.location.origin}/play/${data.gameSlug}?autojoin=true`;
+			window.location.href = mapUrl;
+		}
+	}
 };
 
 if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
