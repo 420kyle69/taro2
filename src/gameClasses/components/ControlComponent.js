@@ -141,7 +141,16 @@ var ControlComponent = TaroEntity.extend({
 				var unitAbility = null;
 				// execute movement command if AI is disabled
 				if (unit._stats.controls && !unit._stats.aiEnabled) {
-          const canMoveHorizontal = ['wasd', 'ad'].includes(unit._stats.controls.movementControlScheme);
+          // Note(nick): Where is the best place to set this? Not on keydown
+          // as we can have rotated the character with the mouse and thus should
+          // move relative to a different angle.
+          const isRelativeMovement = ['wasdRelativeToUnit'].includes(unit._stats.controls.movementControlScheme);
+          if (isRelativeMovement) {
+            const someAngleFromClient = 0;
+            unit.ability.moveRelativeToAngle(someAngleFromClient);
+          }
+
+          const canMoveHorizontal = ['wasd', 'ad', 'wasdRelativeToUnit'].includes(unit._stats.controls.movementControlScheme);
           const canMoveVertical = ['wasd', 'wasdRelativeToUnit'].includes(unit._stats.controls.movementControlScheme);
           const left  = canMoveHorizontal && this.input.key.a || this.input.key.left;
           const right = canMoveHorizontal && this.input.key.d || this.input.key.right;
@@ -231,7 +240,7 @@ var ControlComponent = TaroEntity.extend({
 
 
     if (unit) {
-      const canMoveHorizontal = ['wasd', 'ad'].includes(unit._stats.controls.movementControlScheme);
+      const canMoveHorizontal = ['wasd', 'ad', 'wasdRelativeToUnit'].includes(unit._stats.controls.movementControlScheme);
       const canMoveVertical = ['wasd', 'wasdRelativeToUnit'].includes(unit._stats.controls.movementControlScheme);
       const left  = canMoveHorizontal && this.input.key.a || this.input.key.left;
       const right = canMoveHorizontal && this.input.key.d || this.input.key.right;

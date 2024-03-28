@@ -10,69 +10,78 @@ var AbilityComponent = TaroEntity.extend({
 		this.abilityDurations = {};
 		this.abilityCooldowns = {};
 		this._abilityQueue = [];
+    this.angle = 0;
+    this.input = { x: 0, y: 0 };
 	},
 
-  move(left, right, up, down) {
-    if (this._entity.direction) {
-      this._entity.direction.x = 0;
-      this._entity.direction.y = 0;
+  moveRelativeToAngle(angle) {
+    this.angle = Math.PI * -0.5 + angle;
+  },
 
-      if (left) this._entity.direction.x -= 1;
-      if (right) this._entity.direction.x += 1;
-      if (up) this._entity.direction.y -= 1;
-      if (down) this._entity.direction.y += 1;
-		}
+  move(left, right, up, down) {
+    this.input.x = (right ? 1 : 0) - (left ? 1 : 0);
+    this.input.y = (up ? 1 : 0) - (down ? 1 : 0);
+    this.applyInput();
   },
 
 	moveUp: function () {
-		if (this._entity.direction) {
-			this._entity.direction.y = -1;
-			// entity.body.setLinearVelocity(new TaroPoint3d(velocityX, velocityY, 0));
-		}
+    this.input.y = 1;
+    this.applyInput();
 	},
 
 	moveLeft: function () {
-		if (this._entity.direction) {
-			this._entity.direction.x = -1;
-			// this._entity.body.setLinearVelocity(new TaroPoint3d(velocityX, velocityY, 0));
-		}
+    this.input.x = -1;
+    this.applyInput();
 	},
 
 	moveDown: function () {
-		if (this._entity.direction) {
-			this._entity.direction.y = 1;
-			// this._entity.body.setLinearVelocity(new TaroPoint3d(velocityX, velocityY, 0));
-		}
+    this.input.y = -1;
+    this.applyInput();
 	},
 
 	moveRight: function () {
-		if (this._entity.direction) {
-			this._entity.direction.x = 1;
-			// this._entity.body.setLinearVelocity(new TaroPoint3d(velocityX, velocityY, 0));
-		}
+    this.input.x = 1;
+    this.applyInput();
 	},
 
 	stopMovingY: function () {
-		if (this._entity.direction) {
-			this._entity.direction.y = 0;
-
-			// only velocity-based units will stop immediately
-			// if (this._entity._stats.controls.movementMethod == 'velocity') {
-			// 	this._entity.body.setLinearVelocity(new TaroPoint3d(this._entity.body.getLinearVelocity().x, 0, 0));
-			// }
-		}
+    this.input.y = 0;
+    this.applyInput();
 	},
 
 	stopMovingX: function () {
-		if (this._entity.direction) {
-			this._entity.direction.x = 0;
-
-			// only velocity-based units will stop immediately
-			// if (this._entity._stats.controls.movementMethod == 'velocity') {
-			// 	this._entity.body.setLinearVelocity(new TaroPoint3d(0, this._entity.body.getLinearVelocity().y, 0));
-			// }
-		}
+    this.input.x = 0;
+    this.applyInput();
 	},
+
+  applyInput() {
+    if (!this._entity.direction) return;
+
+    const direction = this.getCurrentDirection();
+    this._entity.direction.x = direction.x;
+    this._entity.direction.y = direction.y;
+  },
+
+  getCurrentDirection() {
+    const direction = { x: 0, y: 0 };
+    const angle = this.angle;
+
+    // No need to perform expensive cos/sin calculations
+    if (angle == 0) {
+      direction.x = this.input.x;
+      direction.y = -this.input.y;
+      return direction;
+    }
+
+    // Can be made faster with pre-computed cos/sin values for each degree if needed
+    const deg90 = Math.PI * 0.5;
+    if (this.input.x < 0) { direction.x += Math.cos(angle - deg90); direction.y += Math.sin(angle - deg90); }
+    if (this.input.x > 0) { direction.x += Math.cos(angle + deg90); direction.y += Math.sin(angle + deg90); }
+    if (this.input.y > 0) { direction.x += Math.cos(angle); direction.y += Math.sin(angle); }
+    if (this.input.y < 0) { direction.x += Math.cos(angle + deg90*2); direction.y += Math.sin(angle + deg90*2); }
+
+    return direction;
+  },
 
 	// this is used by AI. It should be deprecated though
 	startUsingItem: function () {
