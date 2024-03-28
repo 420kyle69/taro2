@@ -40,6 +40,7 @@ const box2dwasmWrapper: PhysicsDistProps = {
 		component.b2CircleShape = box2D.b2CircleShape;
 		component.b2DebugDraw = box2D.b2Draw;
 		component.b2ContactListener = box2D.JSContactListener;
+		component.b2ContactFilter = box2D.JSContactFilter;
 		component.b2RevoluteJointDef = box2D.b2RevoluteJointDef;
 		component.b2WeldJointDef = box2D.b2WeldJointDef;
 		component.b2Contact = box2D.b2Contact;
@@ -169,15 +170,39 @@ const box2dwasmWrapper: PhysicsDistProps = {
 		if (preSolve !== undefined) {
 			contactListener.PreSolve = preSolve;
 		} else {
-			contactListener.PreSolve = () => {};
+			contactListener.PreSolve = () => { };
 		}
 
 		if (postSolve !== undefined) {
 			contactListener.PostSolve = postSolve;
 		} else {
-			contactListener.PostSolve = () => {};
+			contactListener.PostSolve = () => { };
 		}
 		self._world.SetContactListener(contactListener);
+
+		let contactFilter: any = new self.b2ContactFilter();
+		contactFilter.ShouldCollide = (fixtureA: Box2D.b2Fixture | number, fixtureB: Box2D.b2Fixture | number) => {
+			let fA: Box2D.b2Fixture = fixtureA as Box2D.b2Fixture;
+			let fB: Box2D.b2Fixture = fixtureB as Box2D.b2Fixture;
+			if (typeof fixtureA === 'number') {
+				fA = taro.physics.wrapPointer(fixtureA, taro.physics.b2Fixture) as Box2D.b2Fixture;
+			}
+			if (typeof fixtureB === 'number') {
+				fB = taro.physics.wrapPointer(fixtureB, taro.physics.b2Fixture) as Box2D.b2Fixture;
+			}
+			const bodyA = taro.physics.recordLeak(fA.GetBody());
+			const bodyB = taro.physics.recordLeak(fB.GetBody());
+			var entityA = taro.physics.metaData[taro.physics.getPointer(bodyA)]._entity;
+			var entityB = taro.physics.metaData[taro.physics.getPointer(bodyB)]._entity;
+			if (!entityA || !entityB) {
+				return;
+			}
+			if (entityA.variables?.floor === undefined || entityB.variables?.floor === undefined) {
+				return true;
+			}
+			return entityA.variables.floor.value === entityB.variables?.floor.value;
+		};
+		self._world.SetContactFilter(contactFilter);
 	},
 
 	getmxfp: function (body: Box2D.b2Body, self: any) {
