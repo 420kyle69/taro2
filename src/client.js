@@ -34,59 +34,69 @@ storage = {
 const statsPanels = {}; // will we need this?
 
 const mergeableKeys = {
-	data: {
-		entityTypeVariables: true,
-		shops: true,
-		animationTypes: true,
-		states: true,
-		map: false,
-		buffTypes: true,
-		projectileTypes: true,
-		itemTypes: true,
-		music: true,
-		sound: true,
-		scripts: true,
-		unitTypes: true,
-		abilities: true,
-		variables: true,
-		attributeTypes: true,
-		settings: false,
-		images: true,
-		tilesets: false,
-		factions: true,
-		playerTypes: true,
-		particles: true,
-		particleTypes: true,
-		bodyTypes: true,
-		playerTypeVariables: true,
-		ui: false,
-		folders: false,
-		title: false,
-		isDeveloper: false,
-		releaseId: false,
-		roles: false,
-		defaultData: false,
-	}
+	entityTypeVariables: true,
+	shops: true,
+	animationTypes: true,
+	states: true,
+	map: false,
+	buffTypes: true,
+	projectileTypes: true,
+	itemTypes: true,
+	music: true,
+	sound: true,
+	scripts: true,
+	unitTypes: true,
+	abilities: true,
+	variables: true,
+	attributeTypes: true,
+	settings: false,
+	images: true,
+	tilesets: false,
+	factions: true,
+	playerTypes: true,
+	particles: true,
+	particleTypes: true,
+	bodyTypes: true,
+	playerTypeVariables: true,
+	ui: false,
+	folders: false,
+	title: false,
+	isDeveloper: false,
+	releaseId: false,
+	roles: false,
+	defaultData: false,
 };
 
-function mergeGameJson(obj1, obj2, mergeableKeys) {
-	for (let key in obj2) {
-		if (obj2.hasOwnProperty(key)) {
-			if (obj1.hasOwnProperty(key) && typeof obj1[key] === 'object' && typeof obj2[key] === 'object') { // Merge objects
-				if (mergeableKeys === true || mergeableKeys[key]) {
-					obj1[key] = mergeGameJson(obj1[key], obj2[key], mergeableKeys === true ? true : mergeableKeys[key]);
+function mergeGameJson(worldJson, gameJson, mergeableKeys) {
+	Object.keys(mergeableKeys).forEach((mergeableKey) => {
+		if (mergeableKeys[mergeableKey]) {
+			if (worldJson.data[mergeableKey]) {
+				if (typeof worldJson.data[mergeableKey] === 'object') {
+					for (let key in worldJson.data[mergeableKey]) {
+						if (worldJson.data[mergeableKey].hasOwnProperty(key) && worldJson.data[mergeableKey][key] && typeof worldJson.data[mergeableKey][key] === 'object') {
+							if (!gameJson.data[mergeableKey]) {
+								gameJson.data[mergeableKey] = {};
+							}
+
+							gameJson.data[mergeableKey][key] = worldJson.data[mergeableKey][key];
+							gameJson.data[mergeableKey][key].isWorld = true;
+						}
+					}
+				} else if (typeof worldJson.data[mergeableKey] === 'array') {
+					// merge/concat all elements of the array
+					gameJson.data[mergeableKey] = worldJson.data[mergeableKey].concat(gameJson.data[mergeableKey] || []);
 				} else {
-					obj1[key] = obj2[key]; // Keep value from gameJson
+					// world takes precedence in merging strings/boolean/numbers
+					gameJson.data[mergeableKey] = worldJson.data[mergeableKey];
 				}
-			} else if (Array.isArray(obj1[key]) && Array.isArray(obj2[key])) {
-				obj1[key] = obj1[key].concat(obj2[key]); // Merge arrays
-			} else {
-				obj1[key] = obj1.hasOwnProperty(key) ? obj1[key] : obj2[key]; // Merge other types
 			}
 		}
-	}
-	return obj1;
-}
+	});
+
+
+	return gameJson;
+};
+
 
 const Client = TaroEventingClass.extend({
 	classId: 'Client',
