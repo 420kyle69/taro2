@@ -50,7 +50,20 @@ function mergeGameJson(worldJson, gameJson, mergeableKeys) {
 	Object.keys(mergeableKeys).forEach((mergeableKey) => {
 		if (mergeableKeys[mergeableKey]) {
 			if (worldJson.data[mergeableKey]) {
-				if (typeof worldJson.data[mergeableKey] === 'object') {
+
+				// cleanup all isWorld properties from gameJson (ideally there won't be any but just in case)
+				if (typeof gameJson.data[mergeableKey] === 'object') {
+					Object.keys(gameJson.data[mergeableKey]).forEach((key) => {
+						if (gameJson.data[mergeableKey][key]?.isWorld) {
+							delete gameJson.data[mergeableKey][key]?.isWorld;
+						}
+					});
+				}
+
+				if (typeof worldJson.data[mergeableKey] === 'object' && Array.isArray(worldJson.data[mergeableKey])) {
+					// merge/concat all elements of the array
+					gameJson.data[mergeableKey] = worldJson.data[mergeableKey].concat(gameJson.data[mergeableKey] || []);
+				} else if (typeof worldJson.data[mergeableKey] === 'object') {
 					for (let key in worldJson.data[mergeableKey]) {
 						if (worldJson.data[mergeableKey].hasOwnProperty(key) && worldJson.data[mergeableKey][key] && typeof worldJson.data[mergeableKey][key] === 'object') {
 							if (!gameJson.data[mergeableKey]) {
@@ -61,9 +74,6 @@ function mergeGameJson(worldJson, gameJson, mergeableKeys) {
 							gameJson.data[mergeableKey][key].isWorld = true;
 						}
 					}
-				} else if (typeof worldJson.data[mergeableKey] === 'array') {
-					// merge/concat all elements of the array
-					gameJson.data[mergeableKey] = worldJson.data[mergeableKey].concat(gameJson.data[mergeableKey] || []);
 				} else {
 					// world takes precedence in merging strings/boolean/numbers
 					gameJson.data[mergeableKey] = worldJson.data[mergeableKey];
