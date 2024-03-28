@@ -1884,24 +1884,6 @@ var ActionComponent = TaroEntity.extend({
 					* these actions should only run on local machine
 					*/
 
-					case 'emitParticlesAtPosition':
-						var position = self._script.param.getValue(action.position, vars);
-						var particleTypeId = self._script.param.getValue(action.particleType, vars);
-						var angle = self._script.param.getValue(action.angle, vars);
-						if (particleTypeId && position) {
-							taro.network.send('particle', { particleId: particleTypeId, position: position, angle: angle || 0 });
-						}
-						break;
-
-					case 'emitParticlesFromEntity':
-						var particleTypeId = self._script.param.getValue(action.particleType, vars);
-						var angle = self._script.param.getValue(action.angle, vars);
-						var entity = self._script.param.getValue(action.entity, vars);
-						if (particleTypeId && entity) {
-							taro.client.emit('particle', { particleId: particleTypeId, position: { x: 0, y: 0 }, angle: angle || 0, entityId: entity.id() });
-						}
-						break;
-
 					case 'startEmittingParticles':
 						if (taro.isClient) {
 							var particleTypeId = self._script.param.getValue(action.particleType, vars);

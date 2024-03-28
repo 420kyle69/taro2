@@ -265,7 +265,6 @@ namespace Renderer {
 					this.geometries[i].instanceCount = texGroup.length;
 				}
 
-
 				for (const material of this.materials) {
 					material.uniforms.time.value = time;
 				}

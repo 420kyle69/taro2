@@ -4,7 +4,7 @@ var Item = TaroEntityPhysics.extend({
 	init: function (data, entityIdFromServer) {
 		var self = this;
 		self.category('item'); // necessary for box2d contact listener (it only cares about 'unit' categories touching)
-		
+
 		TaroEntityPhysics.prototype.init.call(this, data.defaultData);
 		this.id(entityIdFromServer); // ensure that entityId is consistent between server & client
 
@@ -42,7 +42,7 @@ var Item = TaroEntityPhysics.extend({
 		self.raycastTargets = [];
 		// dont save variables in _stats as _stats is stringified and synced
 		// and some variables of type unit, item, projectile may contain circular json objects
-		self.variables = {}		
+		self.variables = {};
 		if (self._stats.variables) {
 			self.variables = self._stats.variables;
 			delete self._stats.variables;
@@ -52,7 +52,7 @@ var Item = TaroEntityPhysics.extend({
 		// self._stats.handle = data.type
 		self._stats.lastUsed = 0;
 		self.anchoredOffset = { x: 0, y: 0, rotate: 0 };
-		
+
 		// convert numbers stored as string in database to int
 		self.parseEntityObject(self._stats);
 		self.addComponent(AttributeComponent); // every item gets one
@@ -75,7 +75,7 @@ var Item = TaroEntityPhysics.extend({
 				this.streamMode(1);
 				self.streamCreate(); // without this, newly purchased item wont' show on unit
 			} else {
-				this.streamMode(self._stats.streamMode);				
+				this.streamMode(self._stats.streamMode);
 			}
 
 			taro.server.totalItemsCreated++;
@@ -94,6 +94,8 @@ var Item = TaroEntityPhysics.extend({
 			}
 			self.addToRenderer();
 			self.drawBounds(false);
+
+			this.createParticleEmitters();
 		}
 		self.playEffect('create');
 		// self.addComponent(EffectComponent);
