@@ -252,11 +252,22 @@ canvas {
   display: inline-block;
 }
 
-.inventory-slot, .trade-offer-slot {
+.inventory-slot {
   width: 45px;
   height: 45px;
   margin: 0px 2px 0px 2px;
   background-color: rgba(0, 0, 0, 0.5);
+}
+
+.trade-slot {
+  width: 45px !important;
+  height: 45px !important;
+  margin: 0px 2px 0px 2px;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+#accept-trade-request-button {
+  margin-right: 8px;
 }
 
 .inventory-slot.active {
@@ -326,6 +337,27 @@ canvas {
   -ms-transform: translate(-50%, -50%);
   -o-transform: translate(-50%, -50%);
   color: white;
+}
+
+.ui-text-scoreboard {
+  display: none;
+}
+
+.ui-text-top-left {
+  font-size: 1.75rem;
+  z-index: 1000;
+  display: none;
+  position: absolute;
+  top: 30px;
+  left: 0;
+  color: white;
+  padding: 10px;
+}
+
+.ui-text-inventory {
+  font-size: larger;
+  margin: 0 0 0.5rem;
+  display: none;
 }
 
 #headerTopPartner {
@@ -930,4 +962,8 @@ div#dev-console-table {
 
 :where(#custom-ingame-ui-container) > * {
   pointer-events: auto;
+}
+
+.ui-draggable-dragging {
+  transform: scale(1.8);
 }

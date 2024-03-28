@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const fs = require('fs');
 const cluster = require('cluster');
 const { RateLimiterMemory } = require('rate-limiter-flexible');
-const currency = require("currency.js");
+const currency = require('currency.js');
 
 // global imports
 _ = require('lodash');
@@ -238,9 +238,6 @@ var Server = TaroClass.extend({
 		// for debugging reasons
 		global.isServer = taro.isServer;
 
-		if (typeof HttpComponent != 'undefined') {
-			taro.addComponent(HttpComponent);
-		}
 		if (cluster.isPrimary) {
 			if (process.env.ENV === 'standalone') {
 				if (process.env.LOAD_CC === 'true') {
@@ -255,9 +252,13 @@ var Server = TaroClass.extend({
 				taro.addComponent(MasterServerComponent);
 				taro.addComponent(MasterComponent);
 			}
+
 			// Include ProxyComponent to master cluster
 			if (typeof ProxyComponent !== 'undefined') {
 				taro.addComponent(ProxyComponent);
+			}
+			if (typeof HttpComponent != 'undefined') {
+				taro.addComponent(HttpComponent);
 			}
 		} else {
 			if (typeof WorkerComponent != 'undefined') {
@@ -283,7 +284,7 @@ var Server = TaroClass.extend({
 
 	startWebServer: function () {
 		const app = express();
-		const port = 80;
+		const port = process.env.PORT || 80;
 
 		app.use(bodyParser.urlencoded({ extended: false }));
 		// parse application/json
@@ -302,6 +303,9 @@ var Server = TaroClass.extend({
 			'msgpack.min.js'
 		];
 		const SECONDS_IN_A_WEEK = 7 * 24 * 60 * 60;
+		app.get('/src/game.json', (req, res, next) => {
+			res.send(global.gameJson);
+		});
 		app.use('/src', express.static(path.resolve('./src/'), {
 			setHeaders: (res, path, stat) => {
 				let shouldCache = FILES_TO_CACHE.some((filename) => path.endsWith(filename));
@@ -412,7 +416,6 @@ var Server = TaroClass.extend({
 		}
 
 		this.socket = {};
-		var port = process.env.PORT || 2001;
 
 		this.duplicateIpCount = {};
 
@@ -436,22 +439,54 @@ var Server = TaroClass.extend({
 			} else if (taro.server.gameId && taro.env !== 'standalone' && taro.workerComponent) {
 				promise = taro.workerComponent.loadGameJSON();
 			} else {
+				const inquirer = require('inquirer');
+				const jsonPath = `${__dirname}/../src/`;
 				promise = new Promise(function (resolve, reject) {
-					console.log('gameUrl', `${__dirname}/../src/game.json`);
-					var game = fs.readFileSync(`${__dirname}/../src/game.json`);
-					game = JSON.parse(game);
-					game.defaultData = game;
-					var data = { data: {} };
-					for (let [key, value] of Object.entries(game)) {
-						data.data[key] = value;
-					}
-					for (let [key, value] of Object.entries(game.data)) {
-						data.data[key] = value;
-					}
-					if (game && game.data && game.data.defaultData && game.data.defaultData._id) {
-						self.gameId = game.data.defaultData._id;
-					}
-					resolve(data);
+					fs.readdir(jsonPath, async (err, files) => {
+						if (err) {
+							console.error('Error reading directory:', err);
+							return;
+						}
+
+						const jsonFiles = files.filter(file => file.endsWith('.json'));
+						var game = await new Promise((resolveGame) => {
+							if (jsonFiles.length === 1) {
+								taro.gameName = jsonFiles[0];
+								resolveGame(fs.readFileSync(jsonPath + jsonFiles[0]));
+							} else {
+								const choices = jsonFiles.map(file => ({
+									name: file,
+									value: file
+								}));
+								inquirer
+									.prompt([
+										{
+											type: 'list',
+											name: 'selectedFile',
+											message: 'Select a JSON file:',
+											choices: choices
+										}
+									]).then((answers) => {
+										taro.gameName = answers.selectedFile;
+										resolveGame(fs.readFileSync(jsonPath + answers.selectedFile));
+									});
+							}
+						});
+						global.gameJson = game;
+						game = JSON.parse(game);
+						game.defaultData = game;
+						var data = { data: {} };
+						for (let [key, value] of Object.entries(game)) {
+							data.data[key] = value;
+						}
+						for (let [key, value] of Object.entries(game.data)) {
+							data.data[key] = value;
+						}
+						if (game && game.data && game.data.defaultData && game.data.defaultData._id) {
+							self.gameId = game.data.defaultData._id;
+						}
+						resolve(data);
+					});
 				});
 			}
 
@@ -466,7 +501,7 @@ var Server = TaroClass.extend({
 				taro.addComponent(GameTextComponent);
 				taro.addComponent(GameComponent);
 				taro.addComponent(ProfilerComponent);
-				
+
 				self.gameStartedAt = new Date();
 
 				taro.defaultVariables = rfdc()(game.data.variables);
@@ -507,12 +542,8 @@ var Server = TaroClass.extend({
 				//  * Significant changes above
 				// */
 				// Add physics and setup physics world
-
-				taro.addComponent(PhysicsComponent);
-
-				// we're using setInterval because we need to wait for the physics to be loaded
-				// this is a hacky temporary solution and needs to be fixed
-				const loadedInterval = setInterval(() => {
+				// use callback here is bc the box2dwasm needs time to init
+				const loadRest = () => {
 					if (taro.physics.gravity) {
 						taro.physics.sleep(true);
 						taro.physics.tilesizeRatio(tilesizeRatio);
@@ -565,7 +596,7 @@ var Server = TaroClass.extend({
 								taro.addComponent(RegionManager);
 
 								taro.addComponent(StatusComponent);
-			
+
 								if (taro.game.data.defaultData.enableVideoChat) {
 									taro.addComponent(VideoChatComponent);
 								}
@@ -587,16 +618,15 @@ var Server = TaroClass.extend({
 								}, 900000);
 							}
 						});
-						clearInterval(loadedInterval);
 					}
 
-				}, 200);
+				}
 
-			})
-				.catch((err) => {
-					console.log('got error while loading game json', err);
-					taro.workerComponent && taro.workerComponent.kill('got error while loading game json');
-				});
+				taro.addComponent(PhysicsComponent, undefined, loadRest);
+			}).catch((err) => {
+				console.log('got error while loading game json', err);
+				taro.workerComponent && taro.workerComponent.kill('got error while loading game json');
+			});
 		});
 	},
 
@@ -617,6 +647,8 @@ var Server = TaroClass.extend({
 		taro.network.define('playerAbsoluteAngle', self._onPlayerAbsoluteAngle);
 		taro.network.define('playerDialogueSubmit', self._onPlayerDialogueSubmit);
 		taro.network.define('htmlUiClick', self._onHtmlUiClick);
+		taro.network.define('playerClickTradeOption', self._onPlayerClickTradeOption);
+		taro.network.define('dropItemToCanvas', self._onDropItemToCanvas);
 
 		taro.network.define('buyItem', self._onBuyItem);
 		taro.network.define('buyUnit', self._onBuyUnit);
@@ -671,6 +703,7 @@ var Server = TaroClass.extend({
 		taro.network.define('minimap', self._onSomeBullshit);
 
 		taro.network.define('createFloatingText', self._onSomeBullshit);
+    taro.network.define('createDynamicFloatingText', self._onSomeBullshit);
 
 		taro.network.define('openShop', self._onSomeBullshit);
 		taro.network.define('openDialogue', self._onSomeBullshit);
@@ -786,7 +819,7 @@ var Server = TaroClass.extend({
 				}
 			}
 			if (body.status === 'error') {
-				console.log('error in sending coins')
+				console.log('error in sending coins');
 
 				if (!body.reason || !body.message) {
 					return;
@@ -871,7 +904,7 @@ var Server = TaroClass.extend({
 				}
 			}
 			if (body.status === 'error') {
-				console.log('error in buying item')
+				console.log('error in buying item');
 			}
 		}
 	},
@@ -912,7 +945,7 @@ var Server = TaroClass.extend({
 				}
 			}
 			if (body.status === 'error') {
-				console.log('error in crediting ad-reward coins')
+				console.log('error in crediting ad-reward coins');
 			}
 		}
 	},

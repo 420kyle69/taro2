@@ -382,6 +382,11 @@ var ParameterComponent = TaroEntity.extend({
 						}
 
 						break;
+					
+					case 'itemFiresProjectiles':
+						var item = self.getValue(text.item, vars);
+						returnValue = item && item._stats.isGun && item._stats.bulletType !== 'raycast';
+						break;
 
 					case 'isComputerPlayer':
 						var player = self.getValue(text.player, vars);
@@ -454,6 +459,17 @@ var ParameterComponent = TaroEntity.extend({
 							var attributeType = entity._stats.attributes[attributeTypeId];
 							if (attributeType) {
 								returnValue = attributeType.min;
+							}
+						}
+
+						break;
+
+					case 'playerAttributeRegen':
+						var attributeTypeId = self.getValue(text.attribute, vars);
+						if (entity && attributeTypeId) {
+							var attributeType = entity._stats.attributes[attributeTypeId];
+							if (attributeType) {
+								returnValue = attributeType.regenerateSpeed;
 							}
 						}
 
@@ -571,6 +587,17 @@ var ParameterComponent = TaroEntity.extend({
 							var attributeType = entity._stats.attributes[attributeTypeId];
 							if (attributeType) {
 								returnValue = attributeType.min;
+							}
+						}
+
+						break;
+
+					case 'entityAttributeRegen':
+						var attributeTypeId = self.getValue(text.attribute, vars);
+						if (entity && entity._stats.attributes && self._entity.script.action.entityCategories.indexOf(entity._category) > -1 && attributeTypeId) {
+							var attributeType = entity._stats.attributes[attributeTypeId];
+							if (attributeType) {
+								returnValue = attributeType.regenerateSpeed;
 							}
 						}
 
@@ -1282,13 +1309,23 @@ var ParameterComponent = TaroEntity.extend({
 						if (!isNaN(value)) {
 							returnValue = Math.ceil(value);
 						}
+            
 						break;
 
+					case 'mathSign':
+						var value = self.getValue(text.value, vars);
+						if (!isNaN(value)) {
+							returnValue =  Math.sign(value);
+            }
+            
+						break;
+            
 					case 'mathRound':
 						var value = self.getValue(text.value, vars);
 						if (!isNaN(value)) {
 							returnValue = Math.round(value);
 						}
+            
 						break;
 
 					case 'log10':
@@ -1335,6 +1372,31 @@ var ParameterComponent = TaroEntity.extend({
 						}
 
 						returnValue = false;
+
+						break;
+
+					case 'lerp':
+						var valueA = self.getValue(text.valueA, vars);
+						var valueB = self.getValue(text.valueB, vars);
+						var alpha = self.getValue(text.alpha, vars);
+
+						if (!isNaN(valueA) && !isNaN(valueB) && !isNaN(alpha)) {
+							returnValue = (valueB - valueA) * alpha + valueA;
+						}
+						
+						break;
+
+					case 'getLerpPosition':
+						var positionA = self.getValue(text.positionA, vars);
+						var positionB = self.getValue(text.positionB, vars);
+						var alpha = self.getValue(text.alpha, vars);
+
+						if (positionA && positionB && !isNaN(positionA.x) && !isNaN(positionA.y) && !isNaN(positionB.x) && !isNaN(positionB.y) && !isNaN(alpha)) {
+							returnValue = {
+								x: (positionB.x - positionA.x) * alpha + positionA.x,
+								y: (positionB.y - positionA.y) * alpha + positionA.y
+							}
+						}
 
 						break;
 
@@ -1528,6 +1590,7 @@ var ParameterComponent = TaroEntity.extend({
 						var angle = self.getValue(text.angle, vars);
 
 						if (position && !isNaN(distance) && !isNaN(angle)) {
+							angle -= Math.PI / 2;
 							returnValue = {
 								x: distance * Math.cos(angle) + position.x,
 								y: distance * Math.sin(angle) + position.y
@@ -2811,6 +2874,12 @@ var ParameterComponent = TaroEntity.extend({
 			'selectedElement': function (text, vars, entity) {
 				if (vars && vars.selectedElement) {
 					return vars.selectedElement;
+				}
+			},
+
+			'selectedElementsKey': function (text, vars, entity) {
+				if (vars && vars.selectedElementsKey) {
+					return vars.selectedElementsKey;
 				}
 			},
 

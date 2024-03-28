@@ -219,10 +219,15 @@ var Item = TaroEntityPhysics.extend({
 
 			if (
 				taro.isClient &&
-				newOwner == taro.client.selectedUnit &&
-				newOwner._stats.currentItemIndex !== this._stats.slotIndex
+				newOwner == taro.client.selectedUnit
 			) {
-				this.setState('unselected');
+				if (newOwner._stats.currentItemIndex !== this._stats.slotIndex) {
+					this.setState('unselected');
+				}
+
+				if (newOwner.inventory) {
+					newOwner.inventory.isDirty = true;
+				}
 			}
 
 			if (taro.isServer) {
@@ -890,7 +895,7 @@ var Item = TaroEntityPhysics.extend({
 		self._stats.itemTypeId = type;
 
 		for (var i in data) {
-			if (i == 'name') { // don't overwrite item's name with item type name
+			if (i === 'name' || i === 'attributes' || i === 'variables') { // don't overwrite item's name with item type name
 				continue;
 			}
 			self._stats[i] = data[i];
@@ -914,7 +919,11 @@ var Item = TaroEntityPhysics.extend({
 		if (data.attributes) {
 			for (var attrId in data.attributes) {
 				if (data.attributes[attrId]) {
-					var attributeValue = data.attributes[attrId].value; // default attribute value from new unit type
+					var attributeValue = data.attributes[attrId].value; // default attribute value from new item type
+					// if old item type had a same attribute, then take the value from it.
+					if (self._stats.attributes && self._stats.attributes[attrId]) {
+						attributeValue = self._stats.attributes[attrId].value;
+					}
 					if (this._stats.attributes[attrId]) {
 						this._stats.attributes[attrId].value = Math.max(data.attributes[attrId].min, Math.min(data.attributes[attrId].max, parseFloat(attributeValue)));
 					}
@@ -927,6 +936,8 @@ var Item = TaroEntityPhysics.extend({
 			self._scaleTexture();
 		}
 
+		//self.setState(this._stats.stateId, defaultData);
+
 		if (ownerUnit) {
 			this._stats.ownerUnitId = ownerUnit.id();
 
@@ -938,7 +949,7 @@ var Item = TaroEntityPhysics.extend({
 					if (ownerUnit._stats.currentItemIndex === self._stats.slotIndex) {
 						self.setState('selected');
 					} else {
-						self.setState('unselected');
+						//self.setState('unselected');
 					}
 				}
 			} else {
@@ -952,15 +963,15 @@ var Item = TaroEntityPhysics.extend({
 			} else {
 				ownerUnit.updateStats(self.id());
 			}
+		} else {
+			self.setState('dropped');
 		}
 
-		self.setState(this._stats.stateId, defaultData);
-
 		if (taro.isServer) {
-			if (ownerUnit) {
+			/*if (ownerUnit) {
 				var index = ownerUnit._stats.currentItemIndex;
-				ownerUnit.changeItem(index); // this will call change item on client for all units*/
-			}
+				ownerUnit.changeItem(index); // this will call change item on client for all units
+			}*/
 		} else if (taro.isClient) {
 			var zIndex = self._stats.currentBody && self._stats.currentBody['z-index'] || { layer: 3, depth: 3 };
 
@@ -1068,6 +1079,7 @@ var Item = TaroEntityPhysics.extend({
 					case 'description':
 						this._stats[attrName] = newValue;
 						var owner = self.getOwnerUnit();
+						// doesn't work on creation of item (no owner yet)
 						if (taro.isClient && taro.client.selectedUnit == owner) {
 							taro.itemUi.updateItemDescription(this);
 						}

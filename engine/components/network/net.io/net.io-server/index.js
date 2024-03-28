@@ -95,8 +95,8 @@ NetIo.Class = typeof (TaroClass) !== 'undefined' ? TaroClass : (function () {
          * a property name that is defined in the component class as
          * "componentId".
          */
-	var addComponent = function (component, options) {
-		var newComponent = new component(this, options);
+	var addComponent = function (component, options, callback) {
+		var newComponent = new component(this, options, callback);
 		this[newComponent.componentId] = newComponent;
 		return this;
 	};

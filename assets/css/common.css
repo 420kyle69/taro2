@@ -122,11 +122,15 @@ body {
     border: 2px solid white;
 }
 
-.inventory-slot-mobile,
-.trade-offer-slot {
+.inventory-slot-mobile {
     width: 35px;
     height: 35px;
 }
+
+.cancel-trade-button {
+    margin-left: 8px; 
+}
+
 .popover {
     z-index: 10000;
 }

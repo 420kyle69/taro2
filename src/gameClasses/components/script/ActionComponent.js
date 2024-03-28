@@ -1688,6 +1688,29 @@ var ActionComponent = TaroEntity.extend({
 						}
 						break;
 
+          case 'createDynamicFloatingText':
+            var position = self._script.param.getValue(action.position, vars);
+            var text = self._script.param.getValue(action.text, vars);
+            var color = self._script.param.getValue(action.color, vars);
+            var duration = self._script.param.getValue(action.duration, vars) || 0;
+
+            if (text == undefined) {
+              text = 'undefined';
+            }
+
+            if (taro.isServer) {
+              taro.network.send('createDynamicFloatingText', { position, text, color, duration });
+            } else if (taro.isClient) {
+              taro.client.emit('dynamic-floating-text', {
+                text,
+                x: position.x,
+                y: position.y,
+                color: color || 'white',
+                duration,
+              });
+            }
+            break;
+
 					/* Item */
 
 					case 'startUsingItem':
@@ -2551,6 +2574,22 @@ var ActionComponent = TaroEntity.extend({
 
 						break;
 
+					case 'applyImpulseOnEntityAngle':
+
+						var entity = self._script.param.getValue(action.entity, vars);
+						var angle = self._script.param.getValue(action.angle, vars);
+						var impulse = self._script.param.getValue(action.impulse, vars);
+						var radians = angle - Math.radians(90); // entity's facing angle
+						if (!isNaN(radians) && !isNaN(impulse) && entity && self.entityCategories.indexOf(entity._category) > -1) {
+							impulse = {
+								x: Math.cos(radians) * impulse,
+								y: Math.sin(radians) * impulse
+							};
+							entity.applyImpulse(impulse.x, impulse.y);
+						}
+
+						break;
+
 					case 'applyForceOnEntityXYRelative':
 
 						var entity = self._script.param.getValue(action.entity, vars);
@@ -2730,6 +2769,7 @@ var ActionComponent = TaroEntity.extend({
 						var attrId = self._script.param.getValue(action.attribute, vars);
 						var value = self._script.param.getValue(action.value, vars);
 						var entity = self._script.param.getValue(action.entity, vars);
+
 						if (entity && self.entityCategories.indexOf(entity._category) > -1 && entity._stats.attributes && entity._stats.attributes[attrId] != undefined && value != undefined) {
 
 							// not sure we need this code
@@ -3067,11 +3107,13 @@ var ActionComponent = TaroEntity.extend({
 						var playerA = self._script.param.getValue(action.playerA, vars);
 						var playerB = self._script.param.getValue(action.playerB, vars);
 						if (playerA && playerB && playerA._category === 'player' && playerB._category === 'player') {
-							if (!playerB.isTrading) {
-								taro.network.send('trade', { type: 'init', from: playerA.id() }, playerB._stats.clientId);
-							} else {
-								var message = `${playerB._stats.name}is busy`;
-								taro.chat.sendToRoom('1', message, playerA._stats.clientId, undefined);
+							if (!playerA.isTrading && playerA.id() !== playerB.id()) {
+								if (!playerB.isTrading) {
+									taro.network.send('trade', { type: 'init', from: playerA.id() }, playerB._stats.clientId);
+								} else {
+									var message = `${playerB._stats.name}is busy`;
+									taro.chat.sendToRoom('1', message, playerA._stats.clientId, undefined);
+								}
 							}
 						}
 						break;
@@ -3315,6 +3357,17 @@ var ActionComponent = TaroEntity.extend({
 
 						if (object && key && value) {
 							object[key] = value;
+						}
+
+						break;
+
+					case 'addNumberElement':
+						var key = self._script.param.getValue(action.key, vars);
+						var value = self._script.param.getValue(action.value, vars);
+						var object = self._script.param.getValue(action.object, vars);
+
+						if (object && key && value) {
+							object[key] = parseFloat(value);
 						}
 
 						break;

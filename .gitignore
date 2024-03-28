@@ -9,7 +9,8 @@ commands
 .circleci/
 deployment/
 sslcert/
-src/game.json
+src/*.json
+!src/game-sample.json
 
 # Logs
 logs

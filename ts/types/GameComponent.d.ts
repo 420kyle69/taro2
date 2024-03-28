@@ -19,6 +19,7 @@ interface EntityData {
 		abilities: Record<string, ControlAbility>;
 		unitAbilities: Record<string, UnitAbility>;
 	};
+	id: string;
 }
 
 interface UnitAbility {
@@ -141,6 +142,7 @@ declare class GameComponent extends TaroEntity {
 					height: number;
 				};
 				projectionMode: 'orthographic' | 'perspective';
+				defaultPitch: number;
 			};
 			skybox: {
 				left: string;

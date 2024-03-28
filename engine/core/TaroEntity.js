@@ -143,7 +143,6 @@ var TaroEntity = TaroObject.extend({
 
 	// update item's body & texture based on stateId given
 	setState: function (stateId, defaultData) {
-		// console.log("setState", stateId, defaultData)
 		var self = this;
 
 		// if invalid stateId is given, set state to default state
@@ -240,7 +239,6 @@ var TaroEntity = TaroObject.extend({
 		}
 
 		var body = self._stats.currentBody;
-
 		if (body) {
 			if (!body['z-index']) {
 				body['z-index'] = defaultLayer;
@@ -255,8 +253,8 @@ var TaroEntity = TaroObject.extend({
 			self.layer(body['z-index'].layer) // above "floor 2 layer", but under "trees layer"
 				.depth(body['z-index'].depth);
 
-      if (!isNaN(body['z-index'].offset)) {
-				self.zOffset(body['z-index'].offset);
+			if (!isNaN(body['z-index'].offset) || body['z-index'].offset === undefined) {
+				self.zOffset(body['z-index'].offset ?? 0);
 			}
 		}
 	},
@@ -3161,6 +3159,13 @@ var TaroEntity = TaroObject.extend({
 				this.translateColliderTo(x, y);
 			}
 		} else if (taro.isClient) {
+			if (this === taro.client.selectedUnit && taro.physics && this._stats.controls?.clientPredictedMovement) {
+				taro.client.myUnitStreamedPosition = {
+					x: x,
+					y: y,
+					rotation: rotate,
+				}
+			}
 			this.isTransforming(true);
 			//instantly move to camera the new position
 			if (teleportCamera && taro.client.myPlayer?._stats.cameraTrackedUnitId === this.id()) {
@@ -4010,13 +4015,13 @@ var TaroEntity = TaroObject.extend({
 								break;
 							case 'value':
 								var newValue = Math.max(playerAttribute.min, Math.min(persistAttribute[key], playerAttribute.max));
-								self.attribute.update(attrKey, newValue, null, null, true);
+								self.attribute.update(attrKey, newValue, playerAttribute.min, playerAttribute.max, true);
 								break;
 						}
 					}
 				}
 			}
-			self.streamUpdateData([{ attributesMax: max }, { attributesMin: min }, { attributesRegenerateRate: regSpeed }]);
+			self.streamUpdateData([{ attributesRegenerateRate: regSpeed }]);
 
 			var variables = persistData.variables;
 			for (var variableKey in variables) {
@@ -4804,7 +4809,7 @@ var TaroEntity = TaroObject.extend({
 
 				case 'item':
 					// TODO: we shouldn't have to send currentBody. for some reason, all items have 'dropped' stateId
-					keys = ['itemTypeId', 'anim', 'stateId', 'ownerUnitId', 'quantity', 'currentBody', 'flip', 'isBeingUsed', 'width', 'height', 'scaleDimensions'];
+					keys = ['itemTypeId', 'anim', 'stateId', 'ownerUnitId', 'quantity', 'currentBody', 'flip', 'isBeingUsed', 'width', 'height', 'scaleDimensions', 'description'];
 					data = {
 						attributes: {},
 						// variables: {}
@@ -5265,6 +5270,7 @@ var TaroEntity = TaroObject.extend({
 		this._rotate.z = rotate;
 
 		this.isTeleporting = false;
+
 		this.lastTransformedAt = taro._currentTime;
 	},
 

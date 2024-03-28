@@ -16,6 +16,8 @@ var ControlComponent = TaroEntity.extend({
 
 		// this.lastCommandSentAt = undefined;
 		this._isPlayerInputingText = false;
+    // TODO(nick): We probably want to use the data in TaroInputComponent at
+    // some point, a lot of code is duplicated here.
 		this.input = {
 			mouse: {
 				button1: false,
@@ -88,19 +90,39 @@ var ControlComponent = TaroEntity.extend({
 				if (unitAbility) this.keyDownAbility(unit, unitAbility.keyDown, data.key);
 				taro.network.send('playerKeyDown', { device: data.device, key: data.key });
 			});
-			taro.client.on('key-up', (data) => { 
+			taro.client.on('key-up', (data) => {
 				const unit = this._entity.getSelectedUnit();
 				const unitAbility = unit._stats.controls.abilities[data.key];
 				this.keyUpAbility(unit, unitAbility, data.key);
 				taro.network.send('playerKeyUp', { device: data.device, key: data.key });
 			});
+
+      window.addEventListener('blur', this.onInactiveTab.bind(this));
 		}
-	},  
+	},
+
+  onInactiveTab: function () {
+    this.releaseAllKeys();
+
+    const player = this._entity;
+    if (!player) return;
+
+    const unit = player.getSelectedUnit();
+    if (!unit) return;
+
+    unit.ability.stopMovingX();
+    unit.ability.stopMovingY();
+  },
 
 	keyDown: function (device, key) {
 		if(taro.developerMode.shouldPreventKeybindings() || (taro.isClient && this._entity._stats.clientId === taro.network.id() && taro.client.isPressingPhaserButton)) {
 			return;
 		}
+
+    const lastLeft  = this.input.key.a || this.input.key.left;
+    const lastRight = this.input.key.d || this.input.key.right;
+    const lastUp    = this.input.key.w || this.input.key.up;
+    const lastDown  = this.input.key.s || this.input.key.down;
 
 		if (this.input[device]) {
 			if ((taro.isClient && !this._isPlayerInputingText) || taro.isServer) {
@@ -114,48 +136,24 @@ var ControlComponent = TaroEntity.extend({
 		}
 
 		var unit = player.getSelectedUnit();
-
 		if (unit && unit._category == 'unit') {
 			if (taro.isServer || (taro.isClient && !this._isPlayerInputingText)) {
 				var unitAbility = null;
-				// execute movement command is AI is disabled
-				if (unit._stats.controls && !unit._stats.aiEnabled){
-					if (unit._stats.controls.movementControlScheme == 'wasd') {
-						switch (key) {
-							case 'w':
-							case 'up':
-								unit.ability.moveUp();
-								// taro.inputReceived = Date.now();
-								break;
+				// execute movement command if AI is disabled
+				if (unit._stats.controls && !unit._stats.aiEnabled) {
+          const canMoveHorizontal = ['wasd', 'ad'].includes(unit._stats.controls.movementControlScheme);
+          const canMoveVertical = ['wasd', 'wasdRelativeToUnit'].includes(unit._stats.controls.movementControlScheme);
+          const left  = canMoveHorizontal && this.input.key.a || this.input.key.left;
+          const right = canMoveHorizontal && this.input.key.d || this.input.key.right;
+          const up    = canMoveVertical && (this.input.key.w || this.input.key.up);
+          const down  = canMoveVertical && (this.input.key.s || this.input.key.down);
+          unit.ability.move(left, right, up, down);
 
-							case 'a':
-							case 'left':
-								unit.ability.moveLeft();
-								break;
+          if (left && right && !lastLeft) unit.ability.moveLeft();
+          else if (left && right && !lastRight) unit.ability.moveRight();
 
-							case 's':
-							case 'down':
-								unit.ability.moveDown();
-								break;
-
-							case 'd':
-							case 'right':
-								unit.ability.moveRight();
-								break;
-						}
-					} else if (unit._stats.controls.movementControlScheme == 'ad') {
-						switch (key) {
-							case 'a':
-							case 'left':
-								unit.ability.moveLeft();
-								break;
-
-							case 'd':
-							case 'right':
-								unit.ability.moveRight();
-								break;
-						}
-					}
+          if (up && down && !lastUp) unit.ability.moveUp();
+          else if (up && down && !lastDown) unit.ability.moveDown();
 				}
 
 				if (!unitAbility && unit._stats.controls && unit._stats.controls.abilities) {
@@ -199,35 +197,9 @@ var ControlComponent = TaroEntity.extend({
 		if (!player) return;
 
 		var unit = player.getSelectedUnit();
-		// for (i in units) {
-		// 	var unit = units[i]
 		if (unit) {
 			// traverse through abilities, and see if any of them is being casted by the owner
 			switch (key) {
-				case 'w':
-				case 'up':
-					if (unit.direction.y == -1)
-						unit.ability.stopMovingY();
-					break;
-
-				case 'a':
-				case 'left':
-					if (unit.direction.x == -1)
-						unit.ability.stopMovingX();
-					break;
-
-				case 's':
-				case 'down':
-					if (unit.direction.y == 1)
-						unit.ability.stopMovingY();
-					break;
-
-				case 'd':
-				case 'right':
-					if (unit.direction.x == 1)
-						unit.ability.stopMovingX();
-					break;
-
 				case 'button1':
 					if (unit.ability != undefined) {
 						unit.ability.stopUsingItem();
@@ -256,6 +228,17 @@ var ControlComponent = TaroEntity.extend({
 		if (this.input[device]) {
 			this.input[device][key] = false;
 		}
+
+
+    if (unit) {
+      const canMoveHorizontal = ['wasd', 'ad'].includes(unit._stats.controls.movementControlScheme);
+      const canMoveVertical = ['wasd', 'wasdRelativeToUnit'].includes(unit._stats.controls.movementControlScheme);
+      const left  = canMoveHorizontal && this.input.key.a || this.input.key.left;
+      const right = canMoveHorizontal && this.input.key.d || this.input.key.right;
+      const up    = canMoveVertical && (this.input.key.w || this.input.key.up);
+      const down  = canMoveVertical && (this.input.key.s || this.input.key.down);
+      unit.ability.move(left, right, up, down);
+    }
 	},
 
 	keyDownAbility: function (unit, keyDown, key) {
@@ -291,8 +274,14 @@ var ControlComponent = TaroEntity.extend({
 	releaseAllKeys: function () {
 		const pressedKeys = Object.entries(this.input.key).filter((element) => element[1] === true);
 		const pressedMouseButtons = Object.entries(this.input.mouse).filter((element) => element[1] === true);
-		pressedKeys.forEach((key) => this.keyUp('key', key[0]));
-		pressedMouseButtons.forEach((key) => this.keyUp('mouse', key[0]));
+		pressedKeys.forEach((key) => {
+      this.keyUp('key', key[0]);
+      if (taro.input) taro.input.releaseKey(key[0]);
+    });
+		pressedMouseButtons.forEach((key) => {
+      this.keyUp('mouse', key[0]);
+      if (taro.input) taro.input.releaseMouseButton(key[0]);
+    });
 	},
 
 	// check for input modal is open

@@ -154,12 +154,26 @@ var ClientNetworkEvents = {
 			// console.error(runAction[0]);
 		}
 	},
+
 	_onCreateFloatingText: function (data) {
 		const runAction = functionalTryCatch(() => taro.client.emit("floating-text", {
 			text: data.text,
 			x: data.position.x,
 			y: data.position.y,
 			color: data.color || "white",
+		}));
+		if (runAction[0] !== null) {
+			// console.error(runAction[0]);
+		}
+	},
+
+  _onCreateDynamicFloatingText: function (data) {
+		const runAction = functionalTryCatch(() => taro.client.emit("dynamic-floating-text", {
+			text: data.text,
+			x: data.position.x,
+			y: data.position.y,
+			color: data.color || "white",
+      duration: data.duration,
 		}));
 		if (runAction[0] !== null) {
 			// console.error(runAction[0]);
@@ -207,28 +221,27 @@ var ClientNetworkEvents = {
 	},
 
 	_onUpdateUiTextForTime: function (data) {
-		const runAction = functionalTryCatch(() => {
-			$(`.ui-text-${data.target}`).show();
-			$(`.ui-text-${data.target}`).html(taro.clientSanitizer(data.value));
+		$(`.ui-text-${data.target}`).show();
+		$(`.ui-text-${data.target}`).html(taro.clientSanitizer(data.value));
 
-			if (data.time && data.time > 0) {
-				if (this.textTimer) {
-					clearTimeout(this.textTimer);
-				}
-
-				var that = this;
-				this.textTimerData = {
-					target: data.target,
-				};
-
-				this.textTimer = setTimeout(function () {
-					$(`.ui-text-${that.textTimerData.target}`).hide();
-				}, data.time);
-			}
+		if (!this.textTimerData) {
+			this.textTimerData = {};
 		}
-		);
-		if (runAction[0] !== null) {
-			// console.error(runAction[0]);
+
+		// stop the timeout and remove old textTimerData
+		if (this.textTimerData[data.target]?.textTimer) {
+			clearTimeout(this.textTimerData[data.target].textTimer);
+			delete this.textTimerData[data.target];
+		}
+
+		if (data.time && data.time > 0) {
+			this.textTimerData[data.target] = {
+				target: data.target,
+				textTimer: setTimeout(() => {
+					$(`.ui-text-${this.textTimerData[data.target].target}`).hide();
+					delete this.textTimerData[data.target];
+				}, data.time)
+			};
 		}
 	},
 
@@ -396,7 +409,7 @@ var ClientNetworkEvents = {
 	_onPing: function(data) {
 		const self = this;
 		const now = taro._currentTime;
-		const latency = now - data.sentAt;
+		const latency = performance.now() - data.sentAt;
 		// console.log("onPing", taro._currentTime, data.sentAt, latency);
 		// start reconciliation based on discrepancy between
 		// where my unit when ping was sent and where unit is when ping is received
@@ -445,12 +458,12 @@ var ClientNetworkEvents = {
 				}
 			}
 		}
-
 		taro.client.sendNextPingAt = taro.now;
 
 		taro.pingElement = taro.pingElement || document.getElementById('updateping');
 		taro.pingElement.innerHTML = Math.floor(latency);
-
+		taro.pingLatency = taro.pingLatency || [];
+		taro.pingLatency.push(Math.floor(latency));
 	},
 
 	_onPlayAd: function (data) {
@@ -558,53 +571,45 @@ var ClientNetworkEvents = {
 		}
 	},
 
-	// _onTradeRequest: function (data) {
-	// 	$("#trader-name").html(data.name)
-
-	// 	if (data.initatedByMe) {
-	// 		$("#trade-request-message").html("requesting " + data.name + " to trade")
-	// 		$("#accept-trade-request-button").hide()
-	// 	}
-	// 	else {
-	// 		$("#trade-request-message").html(data.name + " wants to trade")
-	// 		$("#accept-trade-request-button").show()
-	// 	}
-
-	// 	$("#trade-request-div").show();
-	// },
-
-	// _onTrade: function (data) {
-	// 	$("#trade-message").html("");
-
-	// 	if (data.cmd == 'start') {
-	// 		$("#trade-request-div").hide();
-	// 		$("#trade-div").show();
-	// 	}
-	// 	else if (data.cmd == 'offer') {
-	// 		if (parseInt(data.originSlotNumber) > 12) {
-	// 			taro.client.tradeOffers[parseInt(data.originSlotNumber) - 12] = data.originSlotItem
-	// 		}
-
-	// 		if (parseInt(data.destinationSlotNumber) > 12) {
-	// 			taro.client.tradeOffers[parseInt(data.destinationSlotNumber) - 12] = data.destinationSlotItem
-	// 		}
-
-	// 		$("#trade-message").html($("#trader-name").html() + " changed item")
-
-	// 		taro.client.updateTradeOffer()
-
-	// 	}
-	// 	else if (data.cmd == 'noRoom') {
-	// 		$("#trade-message").html("No room in inventory")
-	// 	}
-	// 	else if (data.cmd == 'accept') {
-	// 		$("#trade-message").html($("#trader-name").html() + " accepted")
-	// 	}
-	// 	else if (data.cmd == 'close') // cancels both trade & trade-request
-	// 	{
-	// 		taro.game.closeTrade()
-	// 	}
-	// },
+	_onTradeRequest: function (data) {
+	 	$("#trader-name").html(data.name)
+ 		if (data.initatedByMe) {
+		 		$("#trade-request-message").html("requesting " + data.name + " to trade")
+		 		$("#accept-trade-request-button").hide()
+		 	}
+		 	else {
+		 		$("#trade-request-message").html(data.name + " wants to trade")
+		 		$("#accept-trade-request-button").show()
+		 	}
+ 		$("#trade-request-div").show();
+	},
+	_onTrade: function (data) {
+	 	$("#trade-message").html("");
+ 		if (data.cmd == 'start') {
+		 	$("#trade-request-div").hide();
+		 	$("#trade-div").show();
+		}
+		else if (data.cmd == 'offer') {
+			if (parseInt(data.originSlotNumber) > 12) {
+				taro.client.tradeOffers[parseInt(data.originSlotNumber) - 12] = data.originSlotItem
+			}
+ 		if (parseInt(data.destinationSlotNumber) > 12) {
+				taro.client.tradeOffers[parseInt(data.destinationSlotNumber) - 12] = data.destinationSlotItem
+			}
+ 		$("#trade-message").html($("#trader-name").html() + " changed item")
+ 		taro.client.updateTradeOffer()
+ 		}
+	 	else if (data.cmd == 'noRoom') {
+	 		$("#trade-message").html("No room in inventory")
+	 	}
+	 	else if (data.cmd == 'accept') {
+	 		$("#trade-message").html($("#trader-name").html() + " accepted")
+	 	}
+	 	else if (data.cmd == 'close') // cancels both trade & trade-request
+	 	{
+	 		taro.game.closeTrade()
+	 	}
+	},
 
 	_onDevLogs: function (data) {
 		const runAction = functionalTryCatch(() => {
@@ -644,6 +649,7 @@ var ClientNetworkEvents = {
 				var playerA = taro.$(msg.between.playerA);
 				var playerB = taro.$(msg.between.playerB);
 				if (playerA && playerA._category === "player" && playerB && playerB._category === "player") {
+					taro.tradeUi.closeTradeRequest();
 					taro.tradeUi.startTrading(playerA, playerB);
 				}
 				break;
@@ -656,6 +662,21 @@ var ClientNetworkEvents = {
 				if (from && to && from.tradingWith === to.id()) {
 					taro.tradeUi.receiveOfferingItems(msg.tradeItems);
 				}
+				break;
+			}
+
+			case "accept": {
+				console.log("accept ", msg, clientId);
+				$("#trader-accept").addClass('active');
+
+				for (let i = 1; i <= 5; i++) {
+					const offerDiv = $(`#offer-${i}`);
+					if (offerDiv.hasClass('trade-item-added')) {
+						offerDiv.addClass('trade-item-success');
+					}
+				}
+
+				$("#accept-trade-text").text('Complete');
 				break;
 			}
 

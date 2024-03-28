@@ -2,26 +2,88 @@ var ItemUiComponent = TaroEntity.extend({
 	classId: 'ItemUiComponent',
 	componentId: 'itemUi',
 
+	dragOverTimeout: null,
+
 	init: function () {
-		$('#backpack-items-div').on('mouseenter', '.inventory-item-button.inventory-slot>.item-div.draggable-item', function () {
-			$('.popover').popover('hide');
-			$(this).popover('show');
-		});
-		$('#trade-div').on('mouseenter', '.inventory-item-button.inventory-slot>.item-div.draggable-item', function () {
-			$('.popover').popover('hide');
-			$(this).popover('show');
-		});
-		$('#trade-div').on('mouseenter', '.trade-offer-slot>.item-div.draggable-item', function () {
-			$('.popover').popover('hide');
-			$(this).popover('show');
-		});
-		$('#inventory-slots').on('mouseenter', '.inventory-item-button.inventory-slot>.item-div.draggable-item', function () {
-			$('.popover').popover('hide');
-			$(this).popover('show');
-		});
+		const addPopoverListener = () => {
+			$('#backpack-items-div').on('mouseenter', '.inventory-item-button.inventory-slot>.item-div.draggable-item', function () {
+				$('.popover').popover('hide');
+				$(this).popover('show');
+			});
+			$('#trade-div').on('mouseenter', '.inventory-item-button.inventory-slot>.item-div.draggable-item', function () {
+				$('.popover').popover('hide');
+				$(this).popover('show');
+			});
+			$('#trade-div').on('mouseenter', '.trade-offer-slot>.item-div.draggable-item', function () {
+				$('.popover').popover('hide');
+				$(this).popover('show');
+			});
+			$('#inventory-slots').on('mouseenter', '.inventory-item-button.inventory-slot>.item-div.draggable-item', function () {
+				$('.popover').popover('hide');
+				$(this).popover('show');
+			});
+		};
+
+		if (document.getElementById('backpack-items-div')) {
+			addPopoverListener();
+		} else {
+			const timer = setInterval(() => {
+				if (document.getElementById('backpack-items-div')) {
+					clearInterval(timer);
+					addPopoverListener();
+				}
+			}, 1000);
+		}
+
 		$('canvas').on('mouseenter', function () {
 			$('.popover').popover('hide');
 		});
+
+		$('#game-div canvas').droppable({
+			drop: function (event, ui) {
+				const checkIsElementInside = ({ element, event }) => {
+					// Get element's boundaries
+					const rect = element.getBoundingClientRect();
+					const chatEleX = rect.left;
+					const chatEleY = rect.top;
+					const chatEleX2 = rect.right;
+					const chatEleY2 = rect.bottom;
+
+					// Check if the pointer is within boundaries
+					return event.clientX > chatEleX &&
+						event.clientX < chatEleX2 &&
+						event.clientY > chatEleY &&
+						event.clientY < chatEleY2;
+				}
+
+				let isElementInside = false;
+				document.querySelectorAll('#inventory-slots, #backpack, #trade-div').forEach((element) => {
+					isElementInside = isElementInside || checkIsElementInside({ element, event });
+				});
+
+				ui.draggable.css({
+					left: 0, top: 0
+				});
+
+				if (isElementInside) {
+					return;
+				}
+
+				var fromIndex = parseFloat(ui.draggable[0].parentElement.id.replace('item-', ''));
+
+				var selectedUnit = taro.client.myPlayer.getSelectedUnit();
+				var items = selectedUnit._stats.itemIds;
+
+				const itemId = items[fromIndex];
+
+				if (itemId) {
+					taro.network.send('dropItemToCanvas', {
+						itemId: itemId
+					});
+				}
+			}
+		});
+
 		jQuery.fn.swap = function (b) {
 			// method from: http://blog.pengoworks.com/index.cfm/2008/9/24/A-quick-and-dirty-swap-method-for-jQuery
 			b = jQuery(b)[0];
@@ -69,10 +131,10 @@ var ItemUiComponent = TaroEntity.extend({
 		// update item info on bottom-right corner if it's currently selected item
 
 		if (item && item._stats && item._stats.inventorySlotColor) {
-			var color = `background-image: radial-gradient(rgba(0, 0, 0, 0),${  item._stats.inventorySlotColor  })`;
+			var color = `background-image: radial-gradient(rgba(0, 0, 0, 0),${item._stats.inventorySlotColor})`;
 		} else {
 			var color = 'background-image: none';
-		}		
+		}
 
 		var element = $(taro.client.getCachedElementById(`item-${slotIndex}`));
 		// var element = $(`#item-${slotIndex}`);
@@ -104,7 +166,7 @@ var ItemUiComponent = TaroEntity.extend({
 
 		var itemSlot = $(taro.client.getCachedElementById(`slotindex-${item._stats.slotIndex}`));
 		// var itemSlot = $(`#slotindex-${item._stats.slotIndex}`);
-		
+
 		quantitySpan = itemSlot.find('small');
 		if (quantitySpan) {
 			var qty = item._stats.quantity;
@@ -195,17 +257,28 @@ var ItemUiComponent = TaroEntity.extend({
 				zIndex: 10000,
 				containment: 'window',
 				appendTo: 'body',
+				tolerance: "touch",
 				start: function (event, ui) { // when being dragged, disable popover. it doesn't need to be enabled later, because updateInventory overwrites popover div
 					$('.popover').popover('disable');
 				}
 			}).droppable({
+				// over: function (event, ui) {
+				// 	ui.draggable.addClass('item-dragged-over')
+				// },
+				// out: function (event, ui) {
+				// 	clearTimeout(this.dragOverTimeout);
+				// 	this.dragOverTimeout = setTimeout(() => {
+				// 		ui.draggable.removeClass('item-dragged-over');
+				// 	}, 100);
+				// },
 				drop: function (event, ui) {
 					var draggable = ui.draggable; var droppable = $(this);
 					var dragPos = draggable.position(); var dropPos = droppable.position();
 					var fromIndex = parseFloat(ui.draggable[0].parentElement.id.replace('item-', ''));
-					// var isTradingItemDragged = ui.draggable[0].parentElement.name.include('trade');
 					var toIndex = parseFloat(droppable[0].parentElement.id.replace('item-', ''));
-					// var isItemDroppedOnTradeSlot = droppable[0].parentElement.name.include('trade');
+
+					var isTradingItemDragged = ui.draggable[0].parentElement.classList.contains('trade-slot');
+					var isItemDroppedOnTradeSlot = droppable[0].parentElement.classList.contains('trade-slot');
 					draggable.css({
 						// left: dropPos.left + 'px',
 						// top: dropPos.top + 'px'
@@ -231,15 +304,36 @@ var ItemUiComponent = TaroEntity.extend({
 						toItem.stopUsing();
 					}
 
-					taro.network.send('swapInventory', { from: fromIndex, to: toIndex });
+					var totalInventorySlot = selectedUnit.inventory.getTotalInventorySize();
+					if (toIndex < totalInventorySlot || (toIndex >= totalInventorySlot && !fromItem._stats.controls.undroppable)) { //check if try to trade undroppable item
+						taro.network.send('swapInventory', { from: fromIndex, to: toIndex });
+						var tempItem = items[fromIndex];
+						items[fromIndex] = items[toIndex];
+						items[toIndex] = tempItem;
 
-					var tempItem = items[fromIndex];
-					items[fromIndex] = items[toIndex];
-					items[toIndex] = tempItem;
+						if (taro.client.myPlayer.isTrading && (fromIndex >= totalInventorySlot || toIndex >= totalInventorySlot)) {
+							if (fromItem._stats.controls.untradable) {
+								window.setToastMessage('this item cannot be traded', 'error');
+								return;
+							}
+							// visual css stuff
+							if (isTradingItemDragged) {
+								if (!toItem) {
+									ui.draggable[0].parentElement.classList.remove('trade-item-added');
+								}
+							}
+							if (isItemDroppedOnTradeSlot) {
+								droppable[0].parentElement.classList.add('trade-item-added');
+							}
 
-					var totalInventorySlot = selectedUnit._stats.inventorySize;
-					if (taro.client.myPlayer.isTrading && (fromIndex >= totalInventorySlot || toIndex >= totalInventorySlot)) {
-						taro.tradeUi.sendOfferingItems();
+							$('#you-accept').removeClass('active');
+							$('#trader-accept').removeClass('active');
+							$('#accept-trade-button').removeClass('disabled-trade-button');
+							$('#accept-trade-text').text('Accept');
+
+							// update other client.
+							taro.tradeUi.sendOfferingItems();
+						}
 					}
 				}
 			});
@@ -308,7 +402,8 @@ var ItemUiComponent = TaroEntity.extend({
 	},
 
 	updateItemDescription: function (item) {
-		var inventorySlotIfPresent = item._stats.slotIndex;
+		var inventorySlotIfPresent = item._stats.slotIndex
+
 		if (item && item._stats && (inventorySlotIfPresent === 0 || inventorySlotIfPresent)) {
 			var popoverContent = $('<div/>', {
 				style: 'font-size: 16px; width: 250px;',
@@ -321,7 +416,7 @@ var ItemUiComponent = TaroEntity.extend({
 	getItemPopOverContent: function (stats) {
 		var info = '<div>';
 		if (stats.description) {
-			info += `<p class="mb-1"><b>Description: </b><span class="item-description">${taro.clientSanitizer(stats.description)} </span></p>`;
+			info += `<p class="mb-1"><span class="item-description">${taro.clientSanitizer(stats.description)} </span></p>`;
 		}
 		if (stats && stats.bonus) {
 			if (stats.bonus.consume && Object.keys(stats.bonus.consume).length > 0) {
@@ -399,7 +494,7 @@ var ItemUiComponent = TaroEntity.extend({
 					info += `<b>${attribute.name}: </b>${value || 0}`;
 					info += '</p>';
 				}
-			}	
+			}
 		}
 
 		if (stats && stats.cost) {

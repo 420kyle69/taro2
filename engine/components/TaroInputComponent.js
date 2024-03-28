@@ -750,6 +750,14 @@ var TaroInputComponent = TaroEventingClass.extend({
 		return this._state[this._controlMap[actionName]];
 	},
 
+  /**
+   * Set the passed action's input state value.
+   * @param actionName
+   */
+  setActionVal: function (actionName, val) {
+    this._state[this._controlMap[actionName]] = val;
+  },
+
 	/**
 	 * Returns true if the passed action's input is pressed or it's state
 	 * is not zero.
@@ -801,6 +809,26 @@ var TaroInputComponent = TaroEventingClass.extend({
 
 		return this;
 	},
+
+   /**
+   * Release key by key string.
+   * @param key 'a', 'b', 'c' etc...
+   */
+   releaseKey: function (key) {
+    this.setActionVal(key, false);
+  },
+
+  /**
+   * Release mouse button by button string.
+   * @param button 'button1', 'button2' or 'button3"
+   */
+  releaseMouseButton: function (button) {
+    switch (button) {
+      case 'button1': this.setActionVal(this.mouse.button1, false); break;
+      case 'button2': this.setActionVal(this.mouse.button1, false); break;
+      case 'button3': this.setActionVal(this.mouse.button1, false); break;
+    }
+  },
 
 	/**
 	 * Called by the engine after ALL other tick methods have processed.

@@ -274,7 +274,7 @@ const Client = TaroEventingClass.extend({
 				taro.entitiesToRender = new EntitiesToRender();
 
 				if (taro.game.data.defaultData.defaultRenderer === '3d') {
-					taro.renderer = ThreeRenderer.getInstance();
+					taro.renderer = Renderer.Three.instance();
 				} else {
 					taro.renderer = new PhaserRenderer();
 				}
@@ -361,13 +361,17 @@ const Client = TaroEventingClass.extend({
 			taro.game.data.defaultData.defaultRenderer = '2d';
 		}
 
+		if (!taro.game.data.defaultData.mapBackgroundColor) {
+			taro.game.data.defaultData.mapBackgroundColor = '#000000';
+		}
+
 		const skyboxDefaultUrls = {
-			left: 'https://cache.modd.io/asset/spriteImage/1708009182743_left.png',
-			right: 'https://cache.modd.io/asset/spriteImage/1708009210421_right.png',
-			bottom: 'https://cache.modd.io/asset/spriteImage/1708007218891_bottom.png',
-			top: 'https://cache.modd.io/asset/spriteImage/1708009237292_top.png',
-			front: 'https://cache.modd.io/asset/spriteImage/1708009150127_front.png',
-			back: 'https://cache.modd.io/asset/spriteImage/1708007016275_back.png',
+			left: "",
+			right: "",
+			bottom: "",
+			top: "",
+			front: "",
+			back: ""
 		};
 
 		if (!taro.game.data.settings.skybox) {
@@ -379,7 +383,7 @@ const Client = TaroEventingClass.extend({
 		}
 
 		if (taro.game.data.settings.camera.defaultPitch === undefined) {
-			taro.game.data.settings.camera.defaultPitch = 0;
+			taro.game.data.settings.camera.defaultPitch = 90;
 		}
 
 		if (!taro.game.data.settings.camera.projectionMode) {
@@ -398,19 +402,11 @@ const Client = TaroEventingClass.extend({
 
 		const clientPhysicsEngine = taro.game.data.defaultData.clientPhysicsEngine;
 		const serverPhysicsEngine = taro.game.data.defaultData.physicsEngine;
-
+		const resolveFunc = this.physicsConfigLoaded.resolve.bind(this)
 		if (clientPhysicsEngine) {
-			taro.addComponent(PhysicsComponent).physics.sleep(true);
-		}
-		if (clientPhysicsEngine.toUpperCase() === 'BOX2DWASM') {
-			const loadedInterval = setInterval(() => {
-				if (taro.physics.gravity) {
-					clearInterval(loadedInterval);
-					this.physicsConfigLoaded.resolve();
-				}
-			}, 50);
+			taro.addComponent(PhysicsComponent, undefined, resolveFunc).physics.sleep(true);
 		} else {
-			this.physicsConfigLoaded.resolve();
+			resolveFunc();
 		}
 	},
 
@@ -605,6 +601,8 @@ const Client = TaroEventingClass.extend({
 	setZoom: function (zoom) {
 		this.zoom = zoom;
 		if (taro.developerMode.active && taro.developerMode.activeTab !== 'play') {
+		} else if (taro.isMobile) {
+			this.emit('zoom', zoom * 0.75);
 		} else {
 			this.emit('zoom', zoom);
 		}
@@ -778,6 +776,7 @@ const Client = TaroEventingClass.extend({
 		taro.network.define('gameSuggestion', this._onGameSuggestion);
 
 		taro.network.define('createFloatingText', this._onCreateFloatingText);
+    taro.network.define('createDynamicFloatingText', this._onCreateDynamicFloatingText);
 
 		taro.network.define('openShop', this._onOpenShop);
 		taro.network.define('openDialogue', this._onOpenDialogue);
