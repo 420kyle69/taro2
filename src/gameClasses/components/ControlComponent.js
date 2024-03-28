@@ -117,6 +117,26 @@ var ControlComponent = TaroEntity.extend({
     unit.ability.stopMovingY();
   },
 
+  mouseMove(x, y, yaw, pitch) {
+    // Same conditional logic as line 155
+    {
+      var player = this._entity;
+      if (!player) return;
+
+      var unit = player.getSelectedUnit();
+      if (unit && unit._category == 'unit') {
+        if (taro.isServer || (taro.isClient && !this._isPlayerInputingText)) {
+          if (unit._stats.controls && !unit._stats.aiEnabled) {
+            const isRelativeMovement = ['wasdRelativeToUnit'].includes(unit._stats.controls.movementControlScheme);
+            if (isRelativeMovement) {
+              unit.ability.moveRelativeToAngle(-yaw);
+            }
+          }
+        }
+      }
+    }
+  },
+
 	keyDown: function (device, key) {
 		if(taro.developerMode.shouldPreventKeybindings() || (taro.isClient && this._entity._stats.clientId === taro.network.id() && taro.client.isPressingPhaserButton)) {
 			return;
@@ -144,14 +164,6 @@ var ControlComponent = TaroEntity.extend({
 				var unitAbility = null;
 				// execute movement command if AI is disabled
 				if (unit._stats.controls && !unit._stats.aiEnabled) {
-          // Note(nick): Where is the best place to set this? Not on keydown
-          // as we can have rotated the character with the mouse and thus should
-          // move relative to a different angle.
-          const isRelativeMovement = ['wasdRelativeToUnit'].includes(unit._stats.controls.movementControlScheme);
-          if (isRelativeMovement) {
-            unit.ability.moveRelativeToAngle(-this.input.mouse.yaw);
-          }
-
           const canMoveHorizontal = ['wasd', 'ad', 'wasdRelativeToUnit'].includes(unit._stats.controls.movementControlScheme);
           const canMoveVertical = ['wasd', 'wasdRelativeToUnit'].includes(unit._stats.controls.movementControlScheme);
           const left  = canMoveHorizontal && this.input.key.a || this.input.key.left;
@@ -395,6 +407,8 @@ var ControlComponent = TaroEntity.extend({
 					}
 				}
 
+        self.mouseMove(self.newMouseState[0], self.newMouseState[1], self.newMouseState[2], self.newMouseState[3]);
+
 				self.sendMouseMovement = false;
 			}
 		}
@@ -404,7 +418,6 @@ var ControlComponent = TaroEntity.extend({
 			unit.updateAngleToTarget();
 		}
 	}
-
 });
 
 if (typeof (module) !== 'undefined' && typeof (module.exports) !== 'undefined') {

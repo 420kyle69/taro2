@@ -15,7 +15,8 @@ var AbilityComponent = TaroEntity.extend({
 	},
 
   moveRelativeToAngle(angle) {
-    this.angle = Math.PI * -0.5 + angle;
+    this.angle = -Math.PI * 0.5 + angle;
+    this.applyInput();
   },
 
   move(left, right, up, down) {
