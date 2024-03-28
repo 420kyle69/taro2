@@ -138,6 +138,7 @@ var Unit = TaroEntityPhysics.extend({
 
 			self.flip(self._stats.flip);
 
+			this.createParticleEmitters();
 		}
 		self.playEffect('create');
 		self.addBehaviour('unitBehaviour', self._behaviour);

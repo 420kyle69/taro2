@@ -54,7 +54,7 @@ var Projectile = TaroEntityPhysics.extend({
 				}
 			}
 		}
-		
+
 		self.addComponent(AttributeComponent); // every projectile gets one
 		self.addComponent(VariableComponent);
 
@@ -95,6 +95,7 @@ var Projectile = TaroEntityPhysics.extend({
 			self.updateLayer();
 			self.updateTexture();
 
+			this.createParticleEmitters();
 		}
 		this.playEffect('create');
 
