@@ -43,7 +43,9 @@ class MobileControlsScene extends PhaserScene {
 				case 'lookWheel':
 				case 'lookAndFireWheel':
 
-					new PhaserJoystick(this, x, y, settings);
+					// new PhaserJoystick(this, x, y, settings);
+					//  DISABLED FOR NOW
+					// GENERATING HTML JOYSTICKS INSTEAD
 
 					break;
 
