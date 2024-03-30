@@ -1981,6 +1981,8 @@ var Unit = TaroEntityPhysics.extend({
 					var b = this._translate.y - mouse.y;
 					this.distanceToTarget = Math.sqrt(a * a + b * b);
 					this.angleToTarget = Math.atan2(mouse.y - this._translate.y, mouse.x - this._translate.x) + Math.radians(90);
+          while (this.angleToTarget <= -Math.PI) this.angleToTarget += Math.PI * 2;
+          while (this.angleToTarget > Math.PI) this.angleToTarget -= Math.PI * 2;
 				}
 			}
 		}

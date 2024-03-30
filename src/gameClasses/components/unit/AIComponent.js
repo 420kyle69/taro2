@@ -145,7 +145,10 @@ var AIComponent = TaroEntity.extend({
 		var unit = this._entity;
 		var targetPosition = this.getTargetPosition();
 		if (targetPosition) {
-			return Math.atan2(targetPosition.y - unit._translate.y, targetPosition.x - unit._translate.x) + Math.radians(90);
+			let angle =  Math.atan2(targetPosition.y - unit._translate.y, targetPosition.x - unit._translate.x) + Math.radians(90);
+      while (angle <= -Math.PI) angle += Math.PI * 2;
+      while (angle > Math.PI) angle -= Math.PI * 2;
+      return angle;
 		}
 
 		return undefined;
@@ -326,6 +329,8 @@ var AIComponent = TaroEntity.extend({
 					// assign a random destination within 25px radius
 					if (!unit.isMoving) {
 						unit.angleToTarget = Math.random() * Math.PI * 2;
+            while (unit.angleToTarget <= -Math.PI) unit.angleToTarget += Math.PI * 2;
+            while (unit.angleToTarget > Math.PI) unit.angleToTarget -= Math.PI * 2;
 						unit.startMoving();
 						self.nextMoveAt = taro._currentTime + 1500 + Math.floor(Math.random() * 1500);
 					} else {
@@ -400,7 +405,7 @@ var AIComponent = TaroEntity.extend({
 								}
 								const closestNode = this.aStar.getClosestAStarNode();
 								if (closestNode && !this.aStar.aStarPathIsBlocked() && !this.aStar.aStarTargetUnitMoved()) {
-									// Move to the highest index of path saved (closest node to start node) 
+									// Move to the highest index of path saved (closest node to start node)
 									// only keep follow the old path if the path is still non blocked AND targetUnit is not closer than end node of the path
 									this.setTargetPosition(
 										(closestNode.x + 0.5) * tileWidth,
@@ -425,7 +430,11 @@ var AIComponent = TaroEntity.extend({
 
 			case 'flee':
 				// if fleeing, then move to opposite direction from its target
-				if (unit.angleToTarget && this.pathFindingMethod == "simple") unit.angleToTarget += Math.PI;
+				if (unit.angleToTarget && this.pathFindingMethod == "simple") {
+          unit.angleToTarget += Math.PI;
+          while (unit.angleToTarget <= -Math.PI) unit.angleToTarget += Math.PI * 2;
+          while (unit.angleToTarget > Math.PI) unit.angleToTarget -= Math.PI * 2;
+        }
 				if (targetUnit) {
 					var distanceTravelled = Math.distance(
 						self.previousPosition.x, self.previousPosition.y,
