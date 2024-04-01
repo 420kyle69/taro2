@@ -94,7 +94,7 @@ class PhaserJoystick {
 	}
 
 	show (): void {
-		this.virtualJoystick.setVisible(true);
+		// this.virtualJoystick.setVisible(true);
 	}
 
 	hide (): void {
