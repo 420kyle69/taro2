@@ -42,7 +42,9 @@ var Item = TaroEntityPhysics.extend({
 		self.raycastTargets = [];
 		// dont save variables in _stats as _stats is stringified and synced
 		// and some variables of type unit, item, projectile may contain circular json objects
-		self.variables = {}
+
+		self.variables = {};
+
 		if (self._stats.variables) {
 			self.variables = self._stats.variables;
 			delete self._stats.variables;
@@ -94,6 +96,8 @@ var Item = TaroEntityPhysics.extend({
 			}
 			self.addToRenderer();
 			self.drawBounds(false);
+
+			this.createParticleEmitters();
 		}
 		self.playEffect('create');
 		// self.addComponent(EffectComponent);

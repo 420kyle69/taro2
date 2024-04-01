@@ -5,7 +5,7 @@ class GameScene extends PhaserScene {
 
 	entityLayers: Phaser.GameObjects.Layer[] = [];
 	renderedEntities: TGameObject[] = [];
-	particles: Phaser.GameObjects.Particles.ParticleEmitter[] = []
+	particles: PhaserParticle[] = []
 	unitsList: PhaserUnit[] = [];
 	projectilesList: PhaserProjectile[] = [];
 	itemList: PhaserItem[] = [];
@@ -126,11 +126,25 @@ class GameScene extends PhaserScene {
 			new PhaserRay(this, data.start, data.end, data.config);
 		});
 
-
 		taro.client.on('create-particle', (particle: Particle) => {
 			this.particles.push(new PhaserParticle(this, particle));
 		});
 
+		taro.client.on('start-particle', ({ particleTypeId, entityId }) => {
+			const emitter = this.particles.find(({ particleId, target }) => {
+				return particleId === particleTypeId && target === entityId;
+			});
+
+			emitter.start();
+		});
+
+		taro.client.on('stop-particle', ({ particleTypeId, entityId }) => {
+			const emitter = this.particles.find(({ particleId, target }) => {
+				return particleId === particleTypeId && target === entityId;
+			});
+
+			emitter.stop();
+		});
 
 		taro.client.on('floating-text', (data: {
 			text: string,

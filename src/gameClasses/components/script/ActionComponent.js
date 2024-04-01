@@ -145,6 +145,26 @@ var ActionComponent = TaroEntity.extend({
 				switch (action.type) {
 					/* Global */
 
+					case 'movePlayerToMap':
+						if (taro.isServer) {
+							var player = self._script.param.getValue(action.player, vars);
+							var gameId = self._script.param.getValue(action.gameId, vars);
+							
+							if (player && player._stats && player._stats.clientId && player._stats.userId) {
+								taro.workerComponent.movePlayerToMap(player._stats.userId, gameId)
+									.then((res) => {
+										console.log('user switched map', res);
+										if (res) {
+											// ask client to reload game
+											taro.network.send('movePlayerToMap', { type: 'movePlayerToMap', gameSlug: res.gameSlug }, player._stats.clientId);
+											console.log('map reload', res);
+										}
+									})
+							}
+						}
+						
+						break;
+						
 					case 'setVariable': // store variables with formula processed
 						var newValue = self._script.param.getValue(action.value, vars);
 						params.newValue = newValue;
@@ -1902,23 +1922,30 @@ var ActionComponent = TaroEntity.extend({
 						}
 						break;
 
-					/* particles */
+					/* particles
+					*
+					* these actions should only run on local machine
+					*/
 
-					case 'emitParticlesAtPosition':
-						var position = self._script.param.getValue(action.position, vars);
-						var particleTypeId = self._script.param.getValue(action.particleType, vars);
-						var angle = self._script.param.getValue(action.angle, vars);
-						if (particleTypeId && position) {
-							taro.network.send('particle', { particleId: particleTypeId, position: position, angle: angle || 0 });
+					case 'startEmittingParticles':
+						if (taro.isClient) {
+							var particleTypeId = self._script.param.getValue(action.particleType, vars);
+							var entity = self._script.param.getValue(action.entity, vars);
+
+							if (particleTypeId && entity) {
+								taro.client.emit('start-particle', { particleTypeId, entityId: entity.id() });
+							}
 						}
 						break;
 
-					case 'emitParticlesFromEntity':
-						var particleTypeId = self._script.param.getValue(action.particleType, vars);
-						var angle = self._script.param.getValue(action.angle, vars);
-						var entity = self._script.param.getValue(action.entity, vars);
-						if (particleTypeId && entity) {
-							taro.network.send('particle', { particleId: particleTypeId, position: { x: 0, y: 0 }, angle: angle || 0, entityId: entity.id() });
+					case 'stopEmittingParticles':
+						if (taro.isClient) {
+							var particleTypeId = self._script.param.getValue(action.particleType, vars);
+							var entity = self._script.param.getValue(action.entity, vars);
+
+							if (particleTypeId && entity) {
+								taro.client.emit('stop-particle', { particleTypeId, entityId: entity.id() });
+							}
 						}
 						break;
 

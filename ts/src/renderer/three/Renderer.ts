@@ -295,6 +295,22 @@ namespace Renderer {
 					this.particles.emit(emitter);
 				});
 
+				taro.client.on('start-particle', (data: { particleTypeId: string; entityId: string }) => {
+					const emitter = this.particles.emitters.find(({ particleTypeId, target }) => {
+						return particleTypeId === data.particleTypeId && target.taroId === data.entityId;
+					});
+
+					this.particles.startEmitter(emitter);
+				});
+
+				taro.client.on('stop-particle', (data: { particleTypeId: string; entityId: string }) => {
+					const emitter = this.particles.emitters.find(({ particleTypeId, target }) => {
+						return particleTypeId === data.particleTypeId && target.taroId === data.entityId;
+					});
+
+					this.particles.stopEmitter(emitter);
+				});
+
 				taro.client.on('floating-text', (config: FloatingTextConfig) => {
 					const zOffset = this.camera.target ? this.camera.target.position.y : 0;
 					entitiesLayer.add(FloatingText.create(config, zOffset));

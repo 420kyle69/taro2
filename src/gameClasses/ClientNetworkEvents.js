@@ -834,27 +834,6 @@ var ClientNetworkEvents = {
 		}
 	},
 
-	_onParticle: function (data) {
-		const runAction = functionalTryCatch(() => {
-			if (taro.client.isActiveTab) {
-				var particleData = taro.game.data.particleTypes[data.particleId];
-				if (particleData) {
-
-					if (data.entityId) {
-						var entity = taro.$(data.entityId)
-						taro.client.queueStreamUpdateData(data.entityId, "particle", data)
-					} else {
-						taro.client.emit("create-particle", data);
-					}
-				}
-			}
-		}
-		);
-		if (runAction[0] !== null) {
-			// console.error(runAction[0]);
-		}
-	},
-
 	_onCamera: function (data) {
 		const runAction = functionalTryCatch(() => {
 			// camera zoom change
@@ -896,6 +875,13 @@ var ClientNetworkEvents = {
 	_onRenderSocketLogs: function (data) {
 		console.warn(data);
 	},
+	
+	_onMovePlayerToMap: function (data) {
+		if (data && data.type == "movePlayerToMap") {
+			const mapUrl = `${window.location.origin}/play/${data.gameSlug}?autojoin=true`;
+			window.location.href = mapUrl;
+		}
+	}
 };
 
 if (typeof module !== "undefined" && typeof module.exports !== "undefined") {

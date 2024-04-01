@@ -12,6 +12,79 @@ _ = require('lodash');
 rfdc = require('rfdc');
 jsonrepair = require("jsonrepair");
 
+const mergeableKeys = {
+	entityTypeVariables: true,
+	shops: true,
+	animationTypes: true,
+	states: true,
+	map: false,
+	buffTypes: true,
+	projectileTypes: true,
+	itemTypes: true,
+	music: true,
+	sound: true,
+	scripts: true,
+	unitTypes: true,
+	abilities: true,
+	variables: true,
+	attributeTypes: true,
+	settings: false,
+	images: true,
+	tilesets: false,
+	factions: true,
+	playerTypes: true,
+	particles: true,
+	particleTypes: true,
+	bodyTypes: true,
+	playerTypeVariables: true,
+	ui: false,
+	folders: false,
+	title: false,
+	isDeveloper: false,
+	releaseId: false,
+	roles: false,
+	defaultData: false,
+};
+
+function mergeGameJson(worldJson, gameJson, mergeableKeys) {
+	Object.keys(mergeableKeys).forEach((mergeableKey) => {
+		if (mergeableKeys[mergeableKey]) {
+			if (worldJson.data[mergeableKey]) {
+
+				// cleanup all isWorld properties from gameJson (ideally there won't be any but just in case)
+				if (typeof gameJson.data[mergeableKey] === 'object') {
+					Object.keys(gameJson.data[mergeableKey]).forEach((key) => {
+						if (gameJson.data[mergeableKey][key]?.isWorld) {
+							delete gameJson.data[mergeableKey][key]?.isWorld;
+						}
+					});
+				}
+
+				if (typeof worldJson.data[mergeableKey] === 'object' && Array.isArray(worldJson.data[mergeableKey])) {
+					// merge/concat all elements of the array
+					gameJson.data[mergeableKey] = worldJson.data[mergeableKey].concat(gameJson.data[mergeableKey] || []);
+				} else if (typeof worldJson.data[mergeableKey] === 'object') {
+					for (let key in worldJson.data[mergeableKey]) {
+						if (worldJson.data[mergeableKey].hasOwnProperty(key) && worldJson.data[mergeableKey][key] && typeof worldJson.data[mergeableKey][key] === 'object') {
+							if (!gameJson.data[mergeableKey]) {
+								gameJson.data[mergeableKey] = {};
+							}
+
+							gameJson.data[mergeableKey][key] = worldJson.data[mergeableKey][key];
+							gameJson.data[mergeableKey][key].isWorld = true;
+						}
+					}
+				} else {
+					// world takes precedence in merging strings/boolean/numbers
+					gameJson.data[mergeableKey] = worldJson.data[mergeableKey];
+				}
+			}
+		}
+	});
+
+
+	return gameJson;
+};
 
 const Console = console.constructor;
 // redirect global console object to log file
@@ -437,6 +510,13 @@ var Server = TaroClass.extend({
 			}
 
 			promise.then((game) => {
+				
+				if (game?.gameJson && game?.worldJson) {
+					game = mergeGameJson(game?.worldJson, game?.gameJson, mergeableKeys);
+				} else {
+					game = game?.gameJson ? game.gameJson : game;
+				}
+				
 				taro.addComponent(GameTextComponent);
 				taro.addComponent(GameComponent);
 				taro.addComponent(ProfilerComponent);
@@ -576,6 +656,7 @@ var Server = TaroClass.extend({
 		taro.network.define('joinGame', self._onJoinGame);
 		taro.network.define('gameOver', self._onGameOver);
 		taro.network.define('ping', self._onPing);
+		taro.network.define('movePlayerToMap', self._onSomeBullshit);
 
 		taro.network.define('playerUnitMoved', self._onPlayerUnitMoved);
 		taro.network.define('playerKeyDown', self._onPlayerKeyDown);
