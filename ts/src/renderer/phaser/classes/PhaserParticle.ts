@@ -6,7 +6,17 @@ class PhaserParticle extends Phaser.GameObjects.Particles.ParticleEmitter {
 	constructor(scene: GameScene, particle: Particle) {
 		let particleData = taro.game.data.particleTypes[particle.particleId];
 		//@ts-ignore //there seems to be an issue with phaser's type def for particleEmitter
-		super(scene, particle.position.x, particle.position.y, `particle/${particleData.url}`, PhaserParticle.createConfig(scene, particleData, particle.angle));
+		super(
+			scene,
+			//@ts-ignore
+			particle.position.x,
+			//@ts-ignore
+			particle.position.y,
+			//@ts-ignore
+			`particle/${particleData.url}`,
+			//@ts-ignore
+			PhaserParticle.createConfig(scene, particleData, particle.angle)
+		);
 
 		if (particle.entityId) {
 			let entity = scene.findEntity(particle.entityId);

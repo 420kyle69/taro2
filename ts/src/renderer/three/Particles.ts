@@ -85,7 +85,7 @@ namespace Renderer {
 					points.frustumCulled = false;
 					points.matrixAutoUpdate = false;
 					// eslint-disable-next-line @typescript-eslint/no-empty-function
-					points.updateMatrixWorld = function () { };
+					points.updateMatrixWorld = function () {};
 
 					this.add(points);
 				}

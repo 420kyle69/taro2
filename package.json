@@ -13,7 +13,7 @@
 		"build:gs": "cross-env TEST=true node server/taro.js -deploy ./src -to ../../be/assets",
 		"build:git": "tsc && cross-env TEST=true node server/taro.js -deploy ./src -to ./build",
 		"debug": "cross-env ENV=standalone JWT_SECRET_KEY='change-this' node --inspect server/taro.js -g ./src",
-		"dev:lint": "eslint . --fix"
+		"dev:lint": "eslint --fix --ext .js,.ts ."
 	},
 	"repository": {
 		"type": "git",

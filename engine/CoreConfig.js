@@ -1,12 +1,26 @@
-var includeFolders = [{
-	flags: 'csap',
-	folderPath: './components/physics/box2d/distsWrapper/',
-	filesName: ['planckWrapper', 'box2dwasmWrapper', 'box2dtsWrapper', 'box2dninjaWrapper', 'box2dwebWrapper', 'nativeWrapper', 'box2dWrapper']
-}];
+var includeFolders = [
+	{
+		flags: 'csap',
+		folderPath: './components/physics/box2d/distsWrapper/',
+		filesName: [
+			'planckWrapper',
+			'box2dwasmWrapper',
+			'box2dtsWrapper',
+			'box2dninjaWrapper',
+			'box2dwebWrapper',
+			'nativeWrapper',
+			'box2dWrapper',
+		],
+	},
+];
 
-const arrays = includeFolders.map((v) => v.filesName.map(fileName => {
-	return [v.flags, fileName, `${v.folderPath + fileName}.js`];
-})).flat();
+const arrays = includeFolders
+	.map((v) =>
+		v.filesName.map((fileName) => {
+			return [v.flags, fileName, `${v.folderPath + fileName}.js`];
+		})
+	)
+	.flat();
 
 var taroCoreConfig = {
 	/* Includes for the main taro loader. Flags are indicated as:
@@ -81,10 +95,10 @@ var taroCoreConfig = {
 		['csap', 'box2dweb', './components/physics/box2d/dists/box2dweb/lib_box2d.js', 'box2dweb'],
 		['csap', 'box2dninja', './components/physics/box2d/dists/box2dweb/box2d_ninja.js', 'box2dninja'],
 		['csap', 'box2dts', './components/physics/box2d/dists/flyoverbox2dts/bundle.js'],
-		['casp', 'box2dwasm', './components/physics/box2d/dists/box2dwasm/Box2D.simd.js', 'box2dwasm']
-	]
+		['casp', 'box2dwasm', './components/physics/box2d/dists/box2dwasm/Box2D.simd.js', 'box2dwasm'],
+	],
 };
 
-if (typeof (module) !== 'undefined' && typeof (module.exports) !== 'undefined') {
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
 	module.exports = taroCoreConfig;
 }
