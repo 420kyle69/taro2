@@ -1512,15 +1512,12 @@ var ActionComponent = TaroEntity.extend({
 						if (!vars) vars = {};
 						vars.break = true;
 						return 'break';
-						break;
 
 					case 'continue':
 						return 'continue';
-						break;
 
 					case 'return':
 						return 'return';
-						break;
 
 					case 'endGame':
 						taro.server.kill('end game called');
@@ -2122,7 +2119,6 @@ var ActionComponent = TaroEntity.extend({
 							entity.streamUpdateData([{ isInvisibleToFriendly: true }, { isNameLabelHiddenToFriendly: true }]);
 						}
 						break;
-						'';
 					case 'makeUnitVisibleToFriendlyPlayers':
 						if (entity && entity._category == 'unit') {
 							entity.streamUpdateData([{ isInvisibleToFriendly: false }, { isNameLabelHiddenToFriendly: false }]);
