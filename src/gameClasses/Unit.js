@@ -17,6 +17,7 @@ var Unit = TaroEntityPhysics.extend({
 
 		self.isMoving = false;
 		self.angleToTarget = undefined;
+    self.angleToTargetRelative = 0;
 
 		// merge various data into one _stats variable
 		var unitData = {};
@@ -1980,9 +1981,14 @@ var Unit = TaroEntityPhysics.extend({
 					var a = this._translate.x - mouse.x;
 					var b = this._translate.y - mouse.y;
 					this.distanceToTarget = Math.sqrt(a * a + b * b);
-					this.angleToTarget = Math.atan2(mouse.y - this._translate.y, mouse.x - this._translate.x) + Math.radians(90) + mouse.yaw;
+
+					this.angleToTarget = Math.atan2(mouse.y - this._translate.y, mouse.x - this._translate.x) + Math.radians(90);
           while (this.angleToTarget <= -Math.PI) this.angleToTarget += Math.PI * 2;
           while (this.angleToTarget > Math.PI) this.angleToTarget -= Math.PI * 2;
+
+          this.angleToTargetRelative = this.angleToTarget + mouse.yaw;
+          while (this.angleToTargetRelative <= -Math.PI) this.angleToTargetRelative += Math.PI * 2;
+          while (this.angleToTargetRelative > Math.PI) this.angleToTargetRelative -= Math.PI * 2;
 				}
 			}
 		}
@@ -2101,8 +2107,8 @@ var Unit = TaroEntityPhysics.extend({
 			}
 
 			// flip unit
-			if (this._stats.controls && this._stats.controls.mouseBehaviour.flipSpriteHorizontallyWRTMouse && self.angleToTarget) {
-				if (self.angleToTarget > 0 && self.angleToTarget < Math.PI) {
+			if (this._stats.controls && this._stats.controls.mouseBehaviour.flipSpriteHorizontallyWRTMouse && self.angleToTargetRelative) {
+				if (self.angleToTargetRelative > 0 && self.angleToTargetRelative < Math.PI) {
 					self.flip(0);
 				} else {
 					self.flip(1);
