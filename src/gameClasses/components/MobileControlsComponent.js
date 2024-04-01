@@ -205,6 +205,18 @@ var MobileControlsComponent = TaroEntity.extend({
 					// building joystick zone
 					let joystickZone = document.createElement('div');
 					joystickZone.id = 'movementWheel_joystick';
+					joystickZone.style.width = '50vw';
+					joystickZone.style.height = '50vw';
+					joystickZone.style.position = 'fixed';
+
+					// if x is more than 450, then place the joystick on the right side of the screen
+					if (x > 450) {
+						joystickZone.style.right = '0';
+						joystickZone.style.top = '0';
+					} else {
+						joystickZone.style.left = '0';
+						joystickZone.style.top = '0';
+					}
 					document.body.appendChild(joystickZone);
 
 					// calculate joystick position based on x and y coordinates
@@ -216,7 +228,7 @@ var MobileControlsComponent = TaroEntity.extend({
 					// assign joystick to the zone
 					var manager = window.nipplejs.create({
 						zone: joystickZone,
-						mode: 'static',
+						mode: 'dynamic',
 						position: { left: xPercentage + '%', top: yPercentage + '%' },
 						color: 'black',
 					});
@@ -314,6 +326,18 @@ var MobileControlsComponent = TaroEntity.extend({
 					// building joystick zone
 					let joystickZone = document.createElement('div');
 					joystickZone.id = 'lookWheel_joystick';
+					joystickZone.style.width = '50vw';
+					joystickZone.style.height = '50vw';
+					joystickZone.style.position = 'fixed';
+
+					// if x is more than 450, then place the joystick on the right side of the screen
+					if (x > 450) {
+						joystickZone.style.right = '0';
+						joystickZone.style.top = '0';
+					} else {
+						joystickZone.style.left = '0';
+						joystickZone.style.top = '0';
+					}
 					document.body.appendChild(joystickZone);
 
 					// calculate joystick position based on x and y coordinates
@@ -325,7 +349,7 @@ var MobileControlsComponent = TaroEntity.extend({
 					// assign joystick to the zone
 					var manager = window.nipplejs.create({
 						zone: joystickZone,
-						mode: 'static',
+						mode: 'dynamic',
 						position: { left: xPercentage + '%', top: yPercentage + '%' },
 						color: 'black',
 					});
@@ -354,8 +378,19 @@ var MobileControlsComponent = TaroEntity.extend({
 					// building joystick zone
 					let joystickZone = document.createElement('div');
 					joystickZone.id = 'lookAndFireWheel_joystick';
-					document.body.appendChild(joystickZone);
+					joystickZone.style.width = '50vw';
+					joystickZone.style.height = '50vw';
+					joystickZone.style.position = 'fixed';
 
+					// if x is more than 450, then place the joystick on the right side of the screen
+					if (x > 450) {
+						joystickZone.style.right = '0';
+						joystickZone.style.top = '0';
+					} else {
+						joystickZone.style.left = '0';
+						joystickZone.style.top = '0';
+					}
+					document.body.appendChild(joystickZone);
 					// calculate joystick position based on x and y coordinates
 					const [xPercentage, yPercentage] = [
 						((x / window.innerWidth) * 100).toFixed(2),
@@ -365,7 +400,7 @@ var MobileControlsComponent = TaroEntity.extend({
 					// assign joystick to the zone
 					var manager = window.nipplejs.create({
 						zone: joystickZone,
-						mode: 'static',
+						mode: 'dynamic',
 						position: { left: xPercentage + '%', top: yPercentage + '%' },
 						color: 'black',
 					});
