@@ -608,14 +608,22 @@ var ServerNetworkEvents = {
 		}
 	},
 
-	_onPlayerMouseMoved: function (position, clientId) {
+	_onPlayerMouseMoved: function (state, clientId) {
 		var player = taro.game.getPlayerByClientId(clientId);
 		if (player) {
+			// NOTE(nick): Asked sloont why this check is here, apparantly it's to
+			// prevent sending mouse data to the server when we are dead/spectating.
+			// Should probably have that kind of logic elsewhere, like closer to
+			// where we are actually sending it.
 			var unit = player.getSelectedUnit();
 			if (unit) {
-				player.control.input.mouse.x = position[0];
-				player.control.input.mouse.y = position[1];
+				player.control.input.mouse.x = state[0];
+				player.control.input.mouse.y = state[1];
+				player.control.input.mouse.yaw = state[2];
+				player.control.input.mouse.pitch = state[3];
 			}
+
+			player.control.mouseMove(state[0], state[1], state[2], state[3]);
 		}
 	},
 

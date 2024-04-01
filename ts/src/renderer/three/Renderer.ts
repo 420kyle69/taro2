@@ -329,9 +329,11 @@ namespace Renderer {
 
 				if (this.camera.target) {
 					const worldPos = this.camera.getWorldPoint(this.pointer);
-					taro.input.emit('pointermove', [
-						{ x: Utils.worldToPixel(worldPos.x + 0.5), y: Utils.worldToPixel(worldPos.z + 0.5) },
-					]);
+					const x = Utils.worldToPixel(worldPos.x + 0.5);
+					const y = Utils.worldToPixel(worldPos.z + 0.5);
+					const yaw = this.camera.getAzimuthAngle();
+					const pitch = this.camera.getElevationAngle();
+					taro.input.emit('pointermove', [{ x, y, yaw, pitch }]);
 				}
 
 				// TODO: Is this the proper way to get deltaTime or should I get it from the

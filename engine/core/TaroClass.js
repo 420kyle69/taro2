@@ -70,63 +70,63 @@ var TaroClass = (function () {
             if (this._classId == 'TaroEntity') return;
             */
 
-		if (taroConfig.debug._enabled) {
-			var indent = '';
-			var stack;
-			var thisId;
+		// if (taroConfig.debug._enabled) {
+		// 	var indent = '';
+		// 	var stack;
+		// 	var thisId;
 
-			if (typeof this._id !== 'undefined') {
-				thisId = `:${this._id}`;
-			} else {
-				thisId = '';
-			}
+		// 	if (typeof this._id !== 'undefined') {
+		// 		thisId = `:${this._id}`;
+		// 	} else {
+		// 		thisId = '';
+		// 	}
 
-			type = type || 'log';
+		// 	type = type || 'log';
 
-			if (obj !== undefined) {
-				console.warn(obj);
-			}
+		// 	if (obj !== undefined) {
+		// 		console.warn(obj);
+		// 	}
 
-			if (type === 'warning' || type === 'error') {
-				if (taroConfig.debug._stacks) {
-					if (taroConfig.debug._node) {
-						if (console.trace) {
-							Error.stackTraceLimit = Infinity;
-							// console.log("ERROR: ip/port is already being used by other server")
-							console.log('ERROR: ', text);
-							taro.server.kill('ERROR: ip/port is already being used by other server');
-							console.trace();
-						} else {
-							stack = new Error().stack;
-							console.log(color.magenta('Stack:'), color.red(stack));
-							console.log('Stack:', stack);
-						}
-					} else {
-						if (typeof printStackTrace === 'function') {
-							console.log('Stack:', printStackTrace().join('\n ---- '));
-						}
-					}
-				}
-			}
+		// 	if (type === 'warning' || type === 'error') {
+		// 		if (taroConfig.debug._stacks) {
+		// 			if (taroConfig.debug._node) {
+		// 				if (console.trace) {
+		// 					Error.stackTraceLimit = Infinity;
+		// 					// console.log("ERROR: ip/port is already being used by other server")
+		// 					console.log('ERROR: ', text);
+		// 					taro.server.kill('ERROR: ip/port is already being used by other server');
+		// 					console.trace();
+		// 				} else {
+		// 					stack = new Error().stack;
+		// 					console.log(color.magenta('Stack:'), color.red(stack));
+		// 					console.log('Stack:', stack);
+		// 				}
+		// 			} else {
+		// 				if (typeof printStackTrace === 'function') {
+		// 					console.log('Stack:', printStackTrace().join('\n ---- '));
+		// 				}
+		// 			}
+		// 		}
+		// 	}
 
-			if (type === 'error') {
-				if (typeof taro !== 'undefined') {
-					console.log(
-						`${indent}taro *${type}* [${this._classId || this.prototype._classId}${thisId}] : ` +
-							'Error encountered, stopping engine to prevent console spamming...'
-					);
-					taro.stop();
-				}
+		// 	if (type === 'error') {
+		// 		if (typeof taro !== 'undefined') {
+		// 			console.log(
+		// 				`${indent}taro *${type}* [${this._classId || this.prototype._classId}${thisId}] : ` +
+		// 					'Error encountered, stopping engine to prevent console spamming...'
+		// 			);
+		// 			taro.stop();
+		// 		}
 
-				if (taroConfig.debug._throwErrors) {
-					throw `${indent}taro *${type}* [${this._classId || this.prototype._classId}${thisId}] : ${text}`;
-				} else {
-					console.log(`${indent}taro *${type}* [${this._classId || this.prototype._classId}${thisId}] : ${text}`);
-				}
-			} else {
-				console.log(`${indent}taro *${type}* [${this._classId || this.prototype._classId}${thisId}] : ${text}`);
-			}
-		}
+		// 		if (taroConfig.debug._throwErrors) {
+		// 			throw `${indent}taro *${type}* [${this._classId || this.prototype._classId}${thisId}] : ${text}`;
+		// 		} else {
+		// 			console.log(`${indent}taro *${type}* [${this._classId || this.prototype._classId}${thisId}] : ${text}`);
+		// 		}
+		// 	} else {
+		// 		console.log(`${indent}taro *${type}* [${this._classId || this.prototype._classId}${thisId}] : ${text}`);
+		// 	}
+		// }
 
 		return this;
 	};

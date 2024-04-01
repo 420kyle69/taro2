@@ -42,7 +42,9 @@ var Item = TaroEntityPhysics.extend({
 		self.raycastTargets = [];
 		// dont save variables in _stats as _stats is stringified and synced
 		// and some variables of type unit, item, projectile may contain circular json objects
+
 		self.variables = {};
+
 		if (self._stats.variables) {
 			self.variables = self._stats.variables;
 			delete self._stats.variables;
@@ -835,6 +837,14 @@ var Item = TaroEntityPhysics.extend({
 			if (self._stats.currentBody) {
 				var unitRotate = ownerUnit._rotate.z;
 
+				// Keep the items anchored in the correct place even when the
+				// camera is rotated. The camera's yaw is present in the
+				// angleToTargetRelative variable.
+				if (ownerUnit.angleToTarget && ownerUnit.angleToTargetRelative) {
+					const yaw = ownerUnit.angleToTarget - ownerUnit.angleToTargetRelative;
+					unitRotate += yaw;
+				}
+
 				if (self._stats.currentBody.fixedRotation) {
 					rotate = unitRotate;
 				}
@@ -1229,7 +1239,7 @@ var Item = TaroEntityPhysics.extend({
 					self._stats.controls.mouseBehaviour &&
 					self._stats.controls.mouseBehaviour.flipSpriteHorizontallyWRTMouse
 				) {
-					if (ownerUnit.angleToTarget > 0 && ownerUnit.angleToTarget < Math.PI) {
+					if (ownerUnit.angleToTargetRelative > 0 && ownerUnit.angleToTargetRelative < Math.PI) {
 						self.flip(0);
 					} else {
 						self.flip(1);

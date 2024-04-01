@@ -57,9 +57,17 @@ var Player = TaroEntity.extend({
 				// mouse move listener
 				taro.input.on('pointermove', function (point) {
 					if (taro.client.myPlayer) {
-						self.control.newMousePosition = [point.x.toFixed(0), point.y.toFixed(0)];
 						self.control.input.mouse.x = point.x.toFixed(0);
 						self.control.input.mouse.y = point.y.toFixed(0);
+
+						// Check if it exists, only three.js renderer sends this currently
+						self.control.input.mouse.yaw = point.yaw ?? 0;
+						self.control.input.mouse.pitch = point.pitch ?? Math.PI * 0.5;
+
+						self.control.newMouseState[0] = point.x.toFixed(0);
+						self.control.newMouseState[1] = point.y.toFixed(0);
+						self.control.newMouseState[2] = self.control.input.mouse.yaw;
+						self.control.newMouseState[3] = self.control.input.mouse.pitch;
 					}
 				});
 
