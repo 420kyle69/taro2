@@ -98,6 +98,7 @@
         "no-fallthrough": "off",
         "no-inner-declarations": "off",
         "no-constant-condition": ["error", {"checkLoops": false}],
+        "no-debugger": "off",
 
         "@typescript-eslint/no-namespace": "off",
         "@typescript-eslint/no-empty-function": "off",
