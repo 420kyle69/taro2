@@ -12,17 +12,17 @@ var AbilityComponent = TaroEntity.extend({
 		this._abilityQueue = [];
 	},
 
-  move(left, right, up, down) {
-    if (this._entity.direction) {
-      this._entity.direction.x = 0;
-      this._entity.direction.y = 0;
+	move(left, right, up, down) {
+		if (this._entity.direction) {
+			this._entity.direction.x = 0;
+			this._entity.direction.y = 0;
 
-      if (left) this._entity.direction.x -= 1;
-      if (right) this._entity.direction.x += 1;
-      if (up) this._entity.direction.y -= 1;
-      if (down) this._entity.direction.y += 1;
+			if (left) this._entity.direction.x -= 1;
+			if (right) this._entity.direction.x += 1;
+			if (up) this._entity.direction.y -= 1;
+			if (down) this._entity.direction.y += 1;
 		}
-  },
+	},
 
 	moveUp: function () {
 		if (this._entity.direction) {
@@ -103,8 +103,7 @@ var AbilityComponent = TaroEntity.extend({
 	cast: function (handle, key) {
 		var self = this;
 
-		if (handle == undefined)
-			return;
+		if (handle == undefined) return;
 
 		var ability = null;
 
@@ -135,16 +134,16 @@ var AbilityComponent = TaroEntity.extend({
 				// moved attribute cost processing to its own method
 				this.payCost(ability, player);
 
-				if (taro.isServer || taro.isClient && taro.physics) {
-
+				if (taro.isServer || (taro.isClient && taro.physics)) {
 					if (ability.scriptName && ability.scriptName != '') {
 						if (taro.game.data.scripts[ability.scriptName]) {
-							AbilityComponent.prototype.log(`ability cast: running script ${taro.game.data.scripts[ability.scriptName].name} ${ability.scriptName}`);
+							AbilityComponent.prototype.log(
+								`ability cast: running script ${taro.game.data.scripts[ability.scriptName].name} ${ability.scriptName}`
+							);
 						}
 
 						// not actually sending data within unitAttr or playerAttr. looks like this is just forcing update
 						if (taro.isServer) {
-
 							var playerAttr = { attributes: {} };
 							var unitAttr = { attributes: {} };
 							// calling stream for unit because there is delay in transferring attributes data
@@ -159,18 +158,18 @@ var AbilityComponent = TaroEntity.extend({
 
 						taro.game.lastCastingUnitId = self._entity.id();
 						// now both entity and global scripts (removed if/else)
-						self._entity.script.runScript(ability.scriptName, { triggeredBy: { unitId: self._entity.id()} });
+						self._entity.script.runScript(ability.scriptName, { triggeredBy: { unitId: self._entity.id() } });
 					}
 				}
 			} else {
-				AbilityComponent.prototype.log('can\'t afford cost');
+				AbilityComponent.prototype.log("can't afford cost");
 			}
 		} else {
 			AbilityComponent.prototype.log(`undefined ability ${handle}`);
 		}
 	},
 
-	canAffordCost: function(ability, player) {
+	canAffordCost: function (ability, player) {
 		let canAffordCost = true;
 
 		if (ability.cost && ability.cost.unitAttributes) {
@@ -178,7 +177,11 @@ var AbilityComponent = TaroEntity.extend({
 			for (attrName in ability.cost.unitAttributes) {
 				const cost = ability.cost.unitAttributes[attrName];
 
-				if (cost && (this._entity._stats.attributes[attrName] == undefined || this._entity._stats.attributes[attrName].value < cost)) {
+				if (
+					cost &&
+					(this._entity._stats.attributes[attrName] == undefined ||
+						this._entity._stats.attributes[attrName].value < cost)
+				) {
 					canAffordCost = false;
 					break;
 				}
@@ -189,8 +192,9 @@ var AbilityComponent = TaroEntity.extend({
 			for (attrName in ability.cost.playerAttributes) {
 				const cost = ability.cost.playerAttributes[attrName];
 				// AbilityComponent.prototype.log("attribute value", attrName, this._entity._stats.attributes[attrName])
-				if (cost && (player._stats.attributes[attrName] == undefined ||
-					player._stats.attributes[attrName].value < cost)
+				if (
+					cost &&
+					(player._stats.attributes[attrName] == undefined || player._stats.attributes[attrName].value < cost)
 				) {
 					canAffordCost = false;
 					break;
@@ -201,7 +205,7 @@ var AbilityComponent = TaroEntity.extend({
 		return canAffordCost;
 	},
 
-	payCost: function(ability, player) {
+	payCost: function (ability, player) {
 		// process cost
 		if (ability.cost && ability.cost.unitAttributes) {
 			for (attrName in ability.cost.unitAttributes) {
@@ -223,10 +227,7 @@ var AbilityComponent = TaroEntity.extend({
 	},
 
 	startCasting: function (abilityId, key) {
-		if (
-			this.activeAbilities[abilityId]
-			|| this.abilityCooldowns[abilityId]
-		) {
+		if (this.activeAbilities[abilityId] || this.abilityCooldowns[abilityId]) {
 			return;
 		}
 
@@ -247,10 +248,7 @@ var AbilityComponent = TaroEntity.extend({
 		taro.game.lastCastingUnitId = this._entity.id();
 
 		// run script associated with this ability
-		this._entity.script.runScript(
-			ability.eventScripts.startCasting,
-			{ triggeredBy: { unitId: this._entity.id()} }
-		);
+		this._entity.script.runScript(ability.eventScripts.startCasting, { triggeredBy: { unitId: this._entity.id() } });
 
 		this.activeAbilities[abilityId] = true;
 
@@ -262,17 +260,15 @@ var AbilityComponent = TaroEntity.extend({
 		}
 
 		if (!(ability.castDuration === null || ability.castDuration === undefined || isNaN(ability.castDuration))) {
-			this.abilityDurations[abilityId] = {time: Date.now() + ability.castDuration, key: key};
+			this.abilityDurations[abilityId] = { time: Date.now() + ability.castDuration, key: key };
 		}
 
 		if (taro.isClient && this._entity._stats.clientId === taro.network.id()) {
 			taro.client.emit('start-casting', key);
 		}
-
 	},
 
 	stopCasting: function (abilityId, key) {
-
 		if (!this.activeAbilities[abilityId]) {
 			return;
 		}
@@ -287,10 +283,7 @@ var AbilityComponent = TaroEntity.extend({
 		this.activeAbilities[abilityId] = false;
 
 		// run script associated with this ability
-		this._entity.script.runScript(
-			ability.eventScripts.stopCasting,
-			{ triggeredBy: { unitId: this._entity.id()} }
-		);
+		this._entity.script.runScript(ability.eventScripts.stopCasting, { triggeredBy: { unitId: this._entity.id() } });
 
 		if (taro.isClient && this._entity._stats.clientId === taro.network.id()) {
 			// find key if not provided
@@ -310,9 +303,9 @@ var AbilityComponent = TaroEntity.extend({
 	// This function makes an array unique by removing duplicate elements
 	makeArrayUnique: function (array) {
 		var uniqueArray = [];
-		array.forEach(function(item) {
+		array.forEach(function (item) {
 			// Perform deep comparison to check if item already exists in uniqueArray
-			if (!uniqueArray.some(existingItem => JSON.stringify(existingItem) === JSON.stringify(item))) {
+			if (!uniqueArray.some((existingItem) => JSON.stringify(existingItem) === JSON.stringify(item))) {
 				uniqueArray.push(item);
 			}
 		});
@@ -331,7 +324,6 @@ var AbilityComponent = TaroEntity.extend({
 
 		if (Object.keys(this.abilityDurations).length > 0) {
 			for (let id in this.abilityDurations) {
-
 				if (this.abilityDurations[id].time <= Date.now()) {
 					this.stopCasting(id, this.abilityDurations[id].key);
 					delete this.abilityDurations[id];
@@ -342,7 +334,6 @@ var AbilityComponent = TaroEntity.extend({
 		if (Object.keys(this.abilityCooldowns).length > 0) {
 			for (let id in this.abilityCooldowns) {
 				if (this.abilityCooldowns[id].time <= Date.now()) {
-
 					if (taro.isClient && this._entity._stats.clientId === taro.network.id()) {
 						taro.client.emit('stop-ability-cooldown', this.abilityCooldowns[id].key);
 					}
@@ -351,7 +342,9 @@ var AbilityComponent = TaroEntity.extend({
 				}
 			}
 		}
-	}
+	},
 });
 
-if (typeof (module) !== 'undefined' && typeof (module.exports) !== 'undefined') { module.exports = AbilityComponent; }
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+	module.exports = AbilityComponent;
+}

@@ -229,7 +229,7 @@ var MobileControlsComponent = TaroEntity.extend({
 					var manager = window.nipplejs.create({
 						zone: joystickZone,
 						mode: 'dynamic',
-						position: { left: xPercentage + '%', top: yPercentage + '%' },
+						position: { left: `${xPercentage}%`, top: `${yPercentage}%` },
 						color: 'black',
 					});
 
@@ -350,7 +350,7 @@ var MobileControlsComponent = TaroEntity.extend({
 					var manager = window.nipplejs.create({
 						zone: joystickZone,
 						mode: 'dynamic',
-						position: { left: xPercentage + '%', top: yPercentage + '%' },
+						position: { left: `${xPercentage}%`, top: `${yPercentage}%` },
 						color: 'black',
 					});
 
@@ -401,7 +401,7 @@ var MobileControlsComponent = TaroEntity.extend({
 					var manager = window.nipplejs.create({
 						zone: joystickZone,
 						mode: 'dynamic',
-						position: { left: xPercentage + '%', top: yPercentage + '%' },
+						position: { left: `${xPercentage}%`, top: `${yPercentage}%` },
 						color: 'black',
 					});
 
