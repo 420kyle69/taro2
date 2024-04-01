@@ -3823,7 +3823,7 @@ var TaroEntity = TaroObject.extend({
 				console.log('localMatrix translate error: ', this._category, this._translate);
 				if (taro.chat)
 					taro.chat.postMessage({
-						text: `localMatrix translate error: ${this._category}${this._stats}` ? this._stats.name : '',
+						text: `localMatrix translate error: ${this._category}${this._stats}`,
 					});
 			}
 		}

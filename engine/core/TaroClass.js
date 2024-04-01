@@ -70,7 +70,7 @@ var TaroClass = (function () {
             if (this._classId == 'TaroEntity') return;
             */
 
-		if (false && taroConfig.debug._enabled) {
+		if (taroConfig.debug._enabled) {
 			var indent = '';
 			var stack;
 			var thisId;
