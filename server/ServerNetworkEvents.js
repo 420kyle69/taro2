@@ -393,7 +393,7 @@ var ServerNetworkEvents = {
 					// 	}
 					// 	return;
 					// }
-					
+
 					// swap
 					if (
 						(data.to < unit.inventory.getTotalInventorySize() || (data.to >= unit.inventory.getTotalInventorySize() && !fromItem._stats.controls.undroppable && !fromItem._stats.controls.untradable)) && //check if try to trade undroppable item
@@ -450,7 +450,7 @@ var ServerNetworkEvents = {
 						fromItem._stats.controls.permittedInventorySlots.length == 0 ||
 						fromItem._stats.controls.permittedInventorySlots.includes(data.to + 1) ||
 						(data.to + 1 > unit._stats.inventorySize && (fromItem._stats.controls.backpackAllowed == true || fromItem._stats.controls.backpackAllowed == undefined || fromItem._stats.controls.backpackAllowed == null)) // any item can be moved into backpack slots if the backpackAllowed property is true
-						
+
 					)
 				) {
 					fromItem.streamUpdateData([{ slotIndex: parseInt(data.to) }]);
@@ -585,14 +585,22 @@ var ServerNetworkEvents = {
 		}
 	},
 
-	_onPlayerMouseMoved: function (position, clientId) {
+	_onPlayerMouseMoved: function (state, clientId) {
 		var player = taro.game.getPlayerByClientId(clientId);
 		if (player) {
+      // NOTE(nick): Asked sloont why this check is here, apparantly it's to
+      // prevent sending mouse data to the server when we are dead/spectating.
+      // Should probably have that kind of logic elsewhere, like closer to
+      // where we are actually sending it.
 			var unit = player.getSelectedUnit();
 			if (unit) {
-				player.control.input.mouse.x = position[0];
-				player.control.input.mouse.y = position[1];
+				player.control.input.mouse.x = state[0];
+				player.control.input.mouse.y = state[1];
+        player.control.input.mouse.yaw = state[2];
+        player.control.input.mouse.pitch = state[3];
 			}
+
+      player.control.mouseMove(state[0], state[1], state[2], state[3]);
 		}
 	},
 

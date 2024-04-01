@@ -62,12 +62,17 @@ var Player = TaroEntity.extend({
 				// mouse move listener
 				taro.input.on('pointermove', function (point) {
 					if (taro.client.myPlayer) {
-						self.control.newMousePosition = [
-							point.x.toFixed(0),
-							point.y.toFixed(0)
-						];
 						self.control.input.mouse.x = point.x.toFixed(0);
-            			self.control.input.mouse.y = point.y.toFixed(0);
+            self.control.input.mouse.y = point.y.toFixed(0);
+
+            // Check if it exists, only three.js renderer sends this currently
+            self.control.input.mouse.yaw = point.yaw ?? 0;
+            self.control.input.mouse.pitch = point.pitch ?? Math.PI * 0.5;
+
+            self.control.newMouseState[0] = point.x.toFixed(0);
+            self.control.newMouseState[1] = point.y.toFixed(0);
+            self.control.newMouseState[2] = self.control.input.mouse.yaw;
+            self.control.newMouseState[3] = self.control.input.mouse.pitch;
 					}
 				});
 
@@ -146,7 +151,7 @@ var Player = TaroEntity.extend({
 
 					self.streamUpdateData(playerJoinStreamData);
 				}
-				
+
 			}
 
 			if (self._stats.userId) {
@@ -284,7 +289,7 @@ var Player = TaroEntity.extend({
 			}
 		} else if (taro.isClient) {
 			taro.client.emit('camera-pitch', angle);
-		}	
+		}
 	},
 
 	cameraStopTracking: function () {
@@ -511,14 +516,14 @@ var Player = TaroEntity.extend({
 				const i = taro.server.developerClientIds.indexOf(this._stats.clientId);
 				if (i != -1) taro.server.developerClientIds.splice(i, 1);
 			}
-			
+
 			if (autoSavePlayerData && taro.workerComponent && this._stats.userId) {
 				// auto save player data
 				taro.workerComponent.savePlayerData(this._stats.userId, null, 'playerLeavesGame');
 			}
-			
+
 			taro.script.trigger('playerLeavesGame', { playerId: this.id() });
-			
+
 			// session is in second
 			if (this.variables && this.variables.progression != undefined && this.variables.progression.value != undefined) {
 				taro.workerComponent && taro.workerComponent.emit('log-progression', this.variables.progression.value);

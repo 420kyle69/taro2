@@ -23,8 +23,12 @@ var MobileControlsComponent = TaroEntity.extend({
 
 		// mouse move listener
 		taro.input.on('touchpointermove', function (point) {
-			taro.client.myPlayer.control.newMousePosition = [point.x.toFixed(0), point.y.toFixed(0)];
-			taro.client.myPlayer.control.lastMousePosition = taro.client.myPlayer.control.newMousePosition;
+      taro.client.myPlayer.control.newMouseState[0] = point.x.toFixed(0);
+      taro.client.myPlayer.control.newMouseState[1] = point.y.toFixed(0);
+
+      for (let i = 0; i < taro.client.myPlayer.control.newMouseState.length; i++) {
+        taro.client.myPlayer.control.lastMouseState[i] = taro.client.myPlayer.control.newMouseState[i];
+      }
 		});
 
 		// second touch listener
@@ -502,7 +506,9 @@ var MobileControlsComponent = TaroEntity.extend({
 			taro.client.myPlayer.control.input.mouse.y = my;
 
 			taro.client.myPlayer.absoluteAngle = compassAngle;
-			taro.client.myPlayer.control.newMousePosition = [mx.toFixed(0), my.toFixed(0)];
+
+      taro.client.myPlayer.control.newMouseState[0] = mx.toFixed(0);
+      taro.client.myPlayer.control.newMouseState[1] = my.toFixed(0);
 		}
 	},
 
