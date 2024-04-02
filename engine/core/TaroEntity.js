@@ -181,6 +181,8 @@ var TaroEntity = TaroObject.extend({
 			}
 		}
 
+		this.script?.trigger('entityStateChanged');
+
 		self.previousState = newState;
 		self.updateBody(defaultData);
 	},
