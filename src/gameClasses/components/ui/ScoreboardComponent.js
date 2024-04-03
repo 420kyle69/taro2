@@ -113,26 +113,36 @@ var ScoreboardComponent = TaroEntity.extend({
 		this.isUpdateQueued = true;
 	},
 
-	convertNumbersToKMB: function (labelValue) {
-		if (taro.game.data.settings.prettifyingScoreboard) {
-			// Nine Zeroes for Billions
-			return Math.abs(Number(labelValue)) >= 1.0e+9
+	convertNumbersToKMB: function (value) {
+		const suffixes = [
+			'', 'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'De', 'Un', 'Do', 'Tr', 'Qad', 'Qid', 'Sxd', 'Spd', 'Od', 'Nd', 'Vi'
+		];
 
-				? `${(Math.abs(Number(labelValue)) / 1.0e+9).toFixed(2)}B`
-				// Six Zeroes for Millions
-				: Math.abs(Number(labelValue)) >= 1.0e+6
+		// Convert the value to a number and take its absolute value
+		let absValue = Math.abs(Number(value));
+		// Initialize the returnValue with the original value
+		let returnValue = value;
 
-					? `${(Math.abs(Number(labelValue)) / 1.0e+6).toFixed(2)}M`
-					// Three Zeroes for Thousands
-					: Math.abs(Number(labelValue)) >= 1.0e+3
+		// Check if the absolute value is greater than or equal to 1000
+		if (absValue >= 1000) {
+			// Calculate the index for suffix selection
+			const index = Math.max(0, Math.floor(Math.log10(absValue) / 3));
 
-						? `${(Math.abs(Number(labelValue)) / 1.0e+3).toFixed(2)}K`
-
-						: Math.abs(Number(labelValue));
-		} else {
-			return labelValue;
+			// Ensure the index is within the range of suffixes
+			if (index <= suffixes.length - 1) {
+				// Select the appropriate suffix based on the index
+				const suffix = suffixes[index];
+				// Calculate the adjusted value and concatenate it with the suffix
+				returnValue = `${(absValue / Math.pow(10, 3 * index)).toFixed(2)}${suffix}`;
+			} else {
+				// Number is too large, return in scientific notation
+				returnValue = absValue.toExponential(2);
+			}
 		}
+
+		return returnValue;
 	},
+	
 	update: function () {
 		var self = this;
 		var DEFAULT_COLOR = 'white';
