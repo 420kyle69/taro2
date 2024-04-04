@@ -18,9 +18,7 @@ var ScoreboardComponent = TaroEntity.extend({
 		} else {
 			$('#scoreboard-header').addClass('h5');
 			$('#scoreboard').addClass('h6');
-			$('#leaderboard')
-				.addClass('h3')
-				.removeClass('d-none');
+			$('#leaderboard').addClass('h3').removeClass('d-none');
 		}
 
 		// due to rendering order, on standalone, leaderboard is rendered behind
@@ -109,7 +107,7 @@ var ScoreboardComponent = TaroEntity.extend({
 		// });
 	},
 
-	queueUpdate: function() {
+	queueUpdate: function () {
 		this.isUpdateQueued = true;
 	},
 
@@ -150,22 +148,18 @@ var ScoreboardComponent = TaroEntity.extend({
 		var scoreboardElement = taro.client.getCachedElementById('scoreboard');
 		var leaderboardToggleElement = taro.client.getCachedElementById('leaderboard-toggle');
 
-
 		if (taro.isClient && scoreboardElement && leaderboardToggleElement) {
-
-			scoreboardElement.innerHTML = ''
+			scoreboardElement.innerHTML = '';
 
 			if (self._hidden) {
 				if (leaderboardToggleElement) {
-					leaderboardToggleElement.innerHTML = 
-					`<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="leaderboard-arrow">
+					leaderboardToggleElement.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="leaderboard-arrow">
 						<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
 				 	</svg>`;
 				}
 			} else {
 				if (leaderboardToggleElement) {
-					leaderboardToggleElement.innerHTML =
-					`<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="leaderboard-arrow">>
+					leaderboardToggleElement.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="leaderboard-arrow">>
 						<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
 					</svg>`;
 				}
@@ -174,10 +168,10 @@ var ScoreboardComponent = TaroEntity.extend({
 				var players = taro.$$('player');
 
 				players.forEach(function (player) {
-					if (player._stats && (
+					if (
+						player._stats &&
 						// only display human players on scoreboard
 						player._stats.controlledBy == 'human'
-					)
 					) {
 						var playerId = player.id();
 						var score = 0;
@@ -190,7 +184,7 @@ var ScoreboardComponent = TaroEntity.extend({
 
 						sortedScores.push({
 							key: playerId,
-							value: score
+							value: score,
 						});
 					}
 				});
@@ -235,18 +229,20 @@ var ScoreboardComponent = TaroEntity.extend({
 								id: `scoreboard-player-rank-${i}`,
 								class: `cursor-pointer scoreboard-user-entry ${playerIsSelf}`,
 								style: `color: ${color};font-weight:${defaultFontWeight}`,
-								onContextMenu: `window.showUserDropdown({ event, userId: '${player._stats.userId}' })`
-							}).append(
-								$('<span/>', {
-									class: 'scoreboard-player-name',
-									html: `${readableName}`
-								})
-							).append(
-								$('<small/>', {
-									class: 'scoreboard-player-score',
-									html: `<span> ${self.convertNumbersToKMB(sortedScores[i].value)}</span>`
-								})
-							)
+								onContextMenu: `window.showUserDropdown({ event, userId: '${player._stats.userId}' })`,
+							})
+								.append(
+									$('<span/>', {
+										class: 'scoreboard-player-name',
+										html: `${readableName}`,
+									})
+								)
+								.append(
+									$('<small/>', {
+										class: 'scoreboard-player-score',
+										html: `<span> ${self.convertNumbersToKMB(sortedScores[i].value)}</span>`,
+									})
+								)
 						);
 					}
 				}
@@ -267,10 +263,9 @@ var ScoreboardComponent = TaroEntity.extend({
 	toggleScores: function () {
 		this._hidden = !this._hidden;
 		this.update();
-	}
-
+	},
 });
 
-if (typeof (module) !== 'undefined' && typeof (module.exports) !== 'undefined') {
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
 	module.exports = ScoreboardComponent;
 }
