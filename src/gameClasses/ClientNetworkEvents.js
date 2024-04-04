@@ -404,7 +404,8 @@ var ClientNetworkEvents = {
 			while (history.length > 0) {
 				var historyFrame = history.shift();
 				// console.log(history.length, "history historyFrame", parseFloat(historyFrame[0]).toFixed(0), "sentAt", parseFloat(data.sentAt).toFixed(0), "diff", parseFloat(data.sentAt - historyFrame[0]).toFixed(0))
-				if (historyFrame[0] > data.sentAt - (latency/2)) {
+				if (data.sentAt - historyFrame[0] <= 0) {
+					// console.log("found it!")
 					taro.client.myUnitPositionWhenPingSent = {
 						x: historyFrame[1][0],
 						y: historyFrame[1][1]
@@ -437,7 +438,7 @@ var ClientNetworkEvents = {
 						});
 					}
 
-					taro.client.sendNextPingAt = taro.now;
+					taro.client.sendNextPingAt = taro.now + 100;
 					break;
 
 				}
