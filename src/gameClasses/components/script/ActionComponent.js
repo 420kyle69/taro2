@@ -2050,7 +2050,7 @@ var ActionComponent = TaroEntity.extend({
 							var entity = self._script.param.getValue(action.entity, vars);
 
 							if (particleTypeId && entity) {
-								taro.client.emit('start-particle', { particleTypeId, entityId: entity.id() });
+								taro.client.emit('start-emitting-particles', { particleTypeId, entityId: entity.id() });
 							}
 						}
 						break;
@@ -2061,7 +2061,7 @@ var ActionComponent = TaroEntity.extend({
 							var entity = self._script.param.getValue(action.entity, vars);
 
 							if (particleTypeId && entity) {
-								taro.client.emit('stop-particle', { particleTypeId, entityId: entity.id() });
+								taro.client.emit('stop-emitting-particles', { particleTypeId, entityId: entity.id() });
 							}
 						}
 						break;
