@@ -19,6 +19,7 @@ namespace Renderer {
 			private viewportHeightInitial: number;
 
 			private debugInfo: HTMLDivElement;
+			private isDebug = false;
 
 			private onChangeCbs = [];
 
@@ -86,7 +87,7 @@ namespace Renderer {
 				this.instance = orthoCamera;
 
 				this.controls = new OrbitControls(this.instance, canvas);
-				this.controls.enableRotate = false;
+				this.controls.enableRotate = true;
 				this.controls.enableZoom = false;
 				this.controls.mouseButtons = { LEFT: '', MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.ROTATE };
 				this.controls.minDistance = 0.01;
@@ -145,6 +146,7 @@ namespace Renderer {
 					} else if (evt.key === '/') {
 						this.controls.enableRotate = !this.controls.enableRotate;
 						this.controls.enableZoom = !this.controls.enableZoom;
+						this.isDebug = !this.isDebug;
 					}
 				});
 
@@ -271,7 +273,7 @@ namespace Renderer {
 			}
 
 			update() {
-				if (this.controls.enableRotate) {
+				if (this.isDebug) {
 					const azimuthAngle = this.controls.getAzimuthalAngle() * (180 / Math.PI);
 					const elevationAngle = this.getElevationAngle() * (180 / Math.PI);
 					this.debugInfo.style.display = 'block';
@@ -491,11 +493,6 @@ namespace Renderer {
 
 				this.euler.y = -movementX * 0.2 * this.pointerlockSpeed;
 				this.euler.x = movementY * 0.2 * this.pointerlockSpeed;
-
-				this.euler.x = Math.max(
-					Math.PI * 0.5 - this.controls.maxPolarAngle,
-					Math.min(Math.PI * 0.5 - this.controls.minPolarAngle, this.euler.x)
-				);
 
 				this.setElevationAngle(this.elevationAngle + this.euler.x);
 				this.setAzimuthAngle(this.azimuthAngle + this.euler.y);
