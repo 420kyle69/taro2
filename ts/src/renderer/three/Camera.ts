@@ -166,6 +166,7 @@ namespace Renderer {
 				this.raycaster.firstHitOnly = true;
 
 				// Pointerlock
+				canvas.addEventListener('mousedown', this.onMouseDown.bind(this));
 				canvas.ownerDocument.addEventListener('mousemove', this.onMouseMove.bind(this));
 				canvas.ownerDocument.addEventListener('pointerlockchange', this.onPointerlockChange.bind(this));
 				canvas.ownerDocument.addEventListener('pointerlockerror', this.onPointerlockError.bind(this));
@@ -474,6 +475,12 @@ namespace Renderer {
 				this.controls.object = this.perspectiveCamera;
 				this.instance.lookAt(this.controls.target);
 				this.controls.update();
+			}
+
+			private onMouseDown(event: MouseEvent) {
+				if (!this.isLocked && (this.target as Unit)?.cameraConfig?.pointerLock) {
+					this.lock();
+				}
 			}
 
 			private onMouseMove(event: MouseEvent) {
