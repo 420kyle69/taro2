@@ -67,36 +67,6 @@ var ParameterComponent = TaroEntity.extend({
 		return !!(wallLayer && wallLayer.data[tileIndex]);
 	},
 
-	convertNumberToLargeNotation: function (value) {
-		const suffixes = [
-			'', 'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'De', 'Un', 'Do', 'Tr', 'Qad', 'Qid', 'Sxd', 'Spd', 'Od', 'Nd', 'Vi'
-		];
-
-		// Convert the value to a number and take its absolute value
-		let absValue = Math.abs(Number(value));
-		// Initialize the returnValue with the original value
-		let returnValue = value;
-
-		// Check if the absolute value is greater than or equal to 1000
-		if (absValue >= 1000) {
-			// Calculate the index for suffix selection
-			const index = Math.max(0, Math.floor(Math.log10(absValue) / 3));
-
-			// Ensure the index is within the range of suffixes
-			if (index <= suffixes.length - 1) {
-				// Select the appropriate suffix based on the index
-				const suffix = suffixes[index];
-				// Calculate the adjusted value and concatenate it with the suffix
-				returnValue = `${(absValue / Math.pow(10, 3 * index)).toFixed(2)}${suffix}`;
-			} else {
-				// Number is too large, return in scientific notation
-				returnValue = absValue.toExponential(2);
-			}
-		}
-
-		return returnValue;
-	},
-
 	isPositionInEntity: function (position) {
 		var entityCategory = ['unit'];
 		var defaultArea = {
@@ -835,6 +805,57 @@ var ParameterComponent = TaroEntity.extend({
 					case 'numberToString':
 						var value = self.getValue(text.value, vars);
 						returnValue = String(value);
+
+						break;
+
+					case 'convertNumberToLargeNotation':
+						var value = self.getValue(text.value, vars);
+						const suffixes = [
+							'',
+							'K',
+							'M',
+							'B',
+							'T',
+							'Qa',
+							'Qi',
+							'Sx',
+							'Sp',
+							'Oc',
+							'No',
+							'De',
+							'Un',
+							'Do',
+							'Tr',
+							'Qad',
+							'Qid',
+							'Sxd',
+							'Spd',
+							'Od',
+							'Nd',
+							'Vi',
+						];
+
+						// Convert the value to a number and take its absolute value
+						let absValue = Math.abs(Number(value));
+						// Initialize the returnValue with the original value
+						returnValue = value;
+
+						// Check if the absolute value is greater than or equal to 1000
+						if (absValue >= 1000) {
+							// Calculate the index for suffix selection
+							const index = Math.max(0, Math.floor(Math.log10(absValue) / 3));
+
+							// Ensure the index is within the range of suffixes
+							if (index <= suffixes.length - 1) {
+								// Select the appropriate suffix based on the index
+								const suffix = suffixes[index];
+								// Calculate the adjusted value and concatenate it with the suffix
+								returnValue = `${(absValue / Math.pow(10, 3 * index)).toFixed(2)}${suffix}`;
+							} else {
+								// Number is too large, return in scientific notation
+								returnValue = absValue.toExponential(2);
+							}
+						}
 
 						break;
 
