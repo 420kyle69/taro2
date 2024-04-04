@@ -4335,6 +4335,10 @@ var TaroEntity = TaroObject.extend({
 											!(ownerPlayer?._stats?.clientId == taro.network.id() && variableData.streamMode == 4)
 										) {
 											this.variable.update(variableId, data.variables[variableId]);
+
+											if (variableData.dataType === 'particleEmitter' && !this._stats.particleEmitters[variableId]) {
+												this.createParticleEmitter(data.variables[variableId]);
+											}
 										}
 										// update attribute if entity has such attribute
 									}
@@ -5505,11 +5509,13 @@ var TaroEntity = TaroObject.extend({
 		return null;
 	},
 
-	createParticleEmitter: function () {
+	createParticleEmitter: function (particleTypeId) {
 		if (!taro.isClient) return;
 
 		taro.client.emit('create-particle-emitter', {
-			particleId: particleType,
+			particleId: particleTypeId,
+			position: { x: 0, y: 0 },
+			angle: 0,
 			entityId: this.id(),
 		});
 	},
