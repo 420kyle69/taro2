@@ -248,8 +248,10 @@ namespace Renderer {
 						const offset = entity.cameraConfig.offset;
 						this.camera.setOffset(offset.x, offset.y, offset.z);
 
-						const { min, max } = entity.cameraConfig.pitchRange;
-						this.camera.setElevationRange(min, max);
+						if (entity.cameraConfig.pointerLock) {
+							const { min, max } = entity.cameraConfig.pitchRange;
+							this.camera.setElevationRange(min, max);
+						}
 
 						this.camera.setPointerLock(entity.cameraConfig.pointerLock);
 					});
