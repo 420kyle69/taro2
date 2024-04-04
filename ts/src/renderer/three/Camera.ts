@@ -192,8 +192,9 @@ namespace Renderer {
 			}
 
 			setElevationAngle(deg: number) {
-				const degRad = deg * (Math.PI / 180);
-				if (degRad < this.minElevationAngle || degRad > this.maxElevationAngle) return;
+				let degRad = deg * (Math.PI / 180);
+				if (degRad < this.minElevationAngle) degRad = this.minElevationAngle;
+				else if (degRad > this.maxElevationAngle) degRad = this.maxElevationAngle;
 
 				this.elevationAngle = deg;
 
