@@ -5505,15 +5505,12 @@ var TaroEntity = TaroObject.extend({
 		return null;
 	},
 
-	createParticleEmitters: function () {
+	createParticleEmitter: function () {
 		if (!taro.isClient) return;
-		this._stats?.particleEmitters?.forEach((particleType) => {
-			taro.client.emit('create-particle-emitter', {
-				particleId: particleType,
-				position: { x: 0, y: 0 },
-				angle: 0,
-				entityId: this.id(),
-			});
+
+		taro.client.emit('create-particle-emitter', {
+			particleId: particleType,
+			entityId: this.id(),
 		});
 	},
 });

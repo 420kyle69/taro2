@@ -95,8 +95,6 @@ var Projectile = TaroEntityPhysics.extend({
 
 			self.updateLayer();
 			self.updateTexture();
-
-			this.createParticleEmitters();
 		}
 		this.playEffect('create');
 

@@ -94,8 +94,6 @@ var Item = TaroEntityPhysics.extend({
 			}
 			self.addToRenderer();
 			self.drawBounds(false);
-
-			this.createParticleEmitters();
 		}
 		self.playEffect('create');
 		// self.addComponent(EffectComponent);
