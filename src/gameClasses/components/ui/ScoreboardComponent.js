@@ -112,6 +112,10 @@ var ScoreboardComponent = TaroEntity.extend({
 	},
 
 	convertNumbersToKMB: function (value) {
+		if (!taro.game.data.settings.prettifyingScoreboard) {
+			return value // do not convert if scoreboard is not prettified
+		}
+
 		const suffixes = [
 			'', 'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'De', 'Un', 'Do', 'Tr', 'Qad', 'Qid', 'Sxd', 'Spd', 'Od', 'Nd', 'Vi'
 		];
