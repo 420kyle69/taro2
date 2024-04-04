@@ -2019,13 +2019,19 @@ var Unit = TaroEntityPhysics.extend({
 					var b = this._translate.y - mouse.y;
 					this.distanceToTarget = Math.sqrt(a * a + b * b);
 
-					this.angleToTarget = Math.atan2(mouse.y - this._translate.y, mouse.x - this._translate.x) + Math.radians(90);
-					while (this.angleToTarget <= -Math.PI) this.angleToTarget += Math.PI * 2;
-					while (this.angleToTarget > Math.PI) this.angleToTarget -= Math.PI * 2;
+					if (!this._stats.cameraPointerLock) {
+						this.angleToTarget =
+							Math.atan2(mouse.y - this._translate.y, mouse.x - this._translate.x) + Math.radians(90);
+						while (this.angleToTarget <= -Math.PI) this.angleToTarget += Math.PI * 2;
+						while (this.angleToTarget > Math.PI) this.angleToTarget -= Math.PI * 2;
 
-					this.angleToTargetRelative = this.angleToTarget + mouse.yaw;
-					while (this.angleToTargetRelative <= -Math.PI) this.angleToTargetRelative += Math.PI * 2;
-					while (this.angleToTargetRelative > Math.PI) this.angleToTargetRelative -= Math.PI * 2;
+						this.angleToTargetRelative = this.angleToTarget + mouse.yaw;
+						while (this.angleToTargetRelative <= -Math.PI) this.angleToTargetRelative += Math.PI * 2;
+						while (this.angleToTargetRelative > Math.PI) this.angleToTargetRelative -= Math.PI * 2;
+					} else {
+						this.angleToTarget = -mouse.yaw;
+						this.angleToTargetRelative = 0;
+					}
 				}
 			}
 		}
