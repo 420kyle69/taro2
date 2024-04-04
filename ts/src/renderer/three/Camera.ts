@@ -177,11 +177,11 @@ namespace Renderer {
 			}
 
 			lock() {
-				document.body.requestPointerLock();
+				this.canvas.requestPointerLock();
 			}
 
 			unlock() {
-				document.body.ownerDocument.exitPointerLock();
+				this.canvas.ownerDocument.exitPointerLock();
 			}
 
 			setProjection(projection: typeof taro.game.data.settings.camera.projectionMode) {
@@ -502,8 +502,7 @@ namespace Renderer {
 			}
 
 			private onPointerlockChange() {
-				// TODO: Configurable pointerlock domElement
-				this.isLocked = document.body.ownerDocument.pointerLockElement === document.body;
+				this.isLocked = this.canvas.ownerDocument.pointerLockElement === this.canvas;
 			}
 
 			private onPointerlockError() {
