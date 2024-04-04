@@ -5,15 +5,22 @@ namespace Renderer {
 			units: Unit[] = [];
 			items: Unit[] = [];
 			projectiles: Unit[] = [];
+			regions: Region[] = [];
 
 			private animatedSprites: AnimatedSprite[] = [];
 
 			constructor() {}
 
-			create(taroEntity: TaroEntityPhysics, type: 'unit' | 'item' | 'projectile') {
-				const entity = Unit.create(taroEntity);
+			create(taroEntity: TaroEntityPhysics, type: 'unit' | 'item' | 'projectile' | 'region') {
+				let entity;
+				if (type !== 'region') {
+					entity = Unit.create(taroEntity);
+					this.animatedSprites.push(entity);
+				} else {
+					entity = new Region(taroEntity._id, taroEntity._stats.ownerId, taroEntity);
+				}
+				//const entity = Unit.create(taroEntity);
 				this.entities.push(entity);
-				this.animatedSprites.push(entity);
 
 				switch (type) {
 					case 'unit':
@@ -24,6 +31,9 @@ namespace Renderer {
 						break;
 					case 'projectile':
 						this.projectiles.push(entity);
+						break;
+					case 'region':
+						this.regions.push(entity);
 						break;
 				}
 

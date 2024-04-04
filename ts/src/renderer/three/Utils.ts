@@ -26,7 +26,7 @@ namespace Renderer {
 				width: number,
 				height: number,
 				radius: number,
-				color: string,
+				color: string | number,
 				opacity = 1
 			) {
 				var tl = radius;

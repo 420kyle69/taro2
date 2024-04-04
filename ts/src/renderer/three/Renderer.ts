@@ -234,7 +234,7 @@ namespace Renderer {
 				entitiesLayer.position.y = 0.51;
 				this.scene.add(entitiesLayer);
 
-				const createEntity = (taroEntity: TaroEntityPhysics, type: 'unit' | 'item' | 'projectile') => {
+				const createEntity = (taroEntity: TaroEntityPhysics, type: 'unit' | 'item' | 'projectile' | 'region') => {
 					const entity = this.entityManager.create(taroEntity, type);
 					entitiesLayer.add(entity);
 					taroEntity.on('destroy', () => {
@@ -258,6 +258,7 @@ namespace Renderer {
 				taro.client.on('create-unit', (u: TaroEntityPhysics) => createEntity(u, 'unit'), this);
 				taro.client.on('create-item', (i: TaroEntityPhysics) => createEntity(i, 'item'), this);
 				taro.client.on('create-projectile', (p: TaroEntityPhysics) => createEntity(p, 'projectile'), this);
+				taro.client.on('create-region', (r: TaroEntityPhysics) => createEntity(r, 'region'), this);
 
 				taro.client.on('zoom', (height: number) => {
 					if (this.camera.zoomHeight === height * 2.15) return;
