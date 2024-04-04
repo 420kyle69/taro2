@@ -252,6 +252,8 @@ namespace Renderer {
 							const { min, max } = entity.cameraConfig.pitchRange;
 							this.camera.setElevationRange(min, max);
 						}
+
+						this.camera.setPointerLock(entity.cameraConfig.pointerLock);
 					});
 				};
 
