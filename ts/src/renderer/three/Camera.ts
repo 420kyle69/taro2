@@ -241,6 +241,8 @@ namespace Renderer {
 				// Make sure the target is up to date
 				this.controls.update();
 
+				if (distance === 0) distance = Number.EPSILON;
+
 				const newPos = new THREE.Vector3()
 					.subVectors(this.controls.object.position, this.controls.target)
 					.normalize()
