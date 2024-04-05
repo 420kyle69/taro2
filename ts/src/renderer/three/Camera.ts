@@ -85,7 +85,7 @@ namespace Renderer {
 				this.instance = orthoCamera;
 
 				this.controls = new OrbitControls(this.instance, canvas);
-				this.controls.enableRotate = true;
+				this.controls.enableRotate = false;
 				this.controls.enableZoom = false;
 				this.controls.mouseButtons = { LEFT: '', MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.ROTATE };
 				this.controls.minDistance = 0.01;
