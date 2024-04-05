@@ -62,6 +62,7 @@ namespace Renderer {
 				height: number,
 				radius: number,
 				color: string,
+				strokeThickness: number,
 				opacity = 1
 			) {
 				var tl = radius;
@@ -69,14 +70,13 @@ namespace Renderer {
 				var bl = radius;
 				var br = radius;
 
-				const lineWidth = 2;
 				const lineColor = new THREE.Color(color).getHex();
 				const lineAlpha = opacity;
 				const red = (lineColor & 0xff0000) >>> 16;
 				const green = (lineColor & 0xff00) >>> 8;
 				const blue = lineColor & 0xff;
 				ctx.strokeStyle = `rgba(${red},${green},${blue},${lineAlpha})`;
-				ctx.lineWidth = lineWidth;
+				ctx.lineWidth = strokeThickness;
 
 				ctx.beginPath();
 				ctx.moveTo(x + tl, y);

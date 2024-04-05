@@ -37,7 +37,8 @@ namespace Renderer {
 					color,
 					+(+value).toFixed(decimalPlaces),
 					max,
-					displayValue
+					displayValue,
+					data
 				);
 				this.add(this.sprite);
 
@@ -95,8 +96,11 @@ namespace Renderer {
 				color: string,
 				value: number,
 				max: number,
-				displayValue = true
+				displayValue = true,
+				def = {} as any
 			) {
+				const strokeThickness = def?.strokeThickness ?? 2;
+
 				const textCanvas = document.createElement('canvas');
 
 				const ctx = textCanvas.getContext('2d');
@@ -118,7 +122,7 @@ namespace Renderer {
 				this.size.set(textCanvas.width, textCanvas.height);
 
 				Utils.fillRoundedRect(ctx, x, y, Math.max((width * value) / max, radius * 1.5), height, radius, color);
-				Utils.strokeRoundedRect(ctx, x, y, width, height, radius, '#000000');
+				Utils.strokeRoundedRect(ctx, x, y, width, height, radius, '#000000', strokeThickness);
 
 				if (displayValue) {
 					ctx.font = font;
