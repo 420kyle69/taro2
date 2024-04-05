@@ -19,8 +19,6 @@ namespace Renderer {
 			private viewportHeightInitial: number;
 
 			private debugInfo: HTMLDivElement;
-			private isDebug = false;
-
 			private onChangeCbs = [];
 
 			private offset = new THREE.Vector3();
@@ -121,6 +119,8 @@ namespace Renderer {
 				};
 
 				window.addEventListener('keypress', (evt) => {
+					if (!this.isDevelopmentMode) return;
+
 					if (evt.key === 'l') {
 						this.isLocked ? this.unlock() : this.lock();
 					} else if (evt.key === ',') {
@@ -143,10 +143,6 @@ namespace Renderer {
 						} else {
 							this.switchToOrthographicCamera();
 						}
-					} else if (evt.key === '/') {
-						this.controls.enableRotate = !this.controls.enableRotate;
-						this.controls.enableZoom = !this.controls.enableZoom;
-						this.isDebug = !this.isDebug;
 					}
 				});
 
@@ -276,7 +272,7 @@ namespace Renderer {
 			}
 
 			update() {
-				if (this.isDebug) {
+				if (this.isDevelopmentMode) {
 					const azimuthAngle = this.controls.getAzimuthalAngle() * (180 / Math.PI);
 					const elevationAngle = this.getElevationAngle() * (180 / Math.PI);
 					this.debugInfo.style.display = 'block';
