@@ -4336,7 +4336,12 @@ var TaroEntity = TaroObject.extend({
 										) {
 											this.variable.update(variableId, data.variables[variableId]);
 
-											if (variableData.dataType === 'particleEmitter' && !this._stats.particleEmitters[variableId]) {
+											if (
+												variableData.dataType === 'particleEmitter' &&
+												!this._stats.particleEmitters[variableId] &&
+												!data.variables[variableId].function
+											) {
+												console.log(data.variables[variableId]);
 												this._stats.particleEmitters[variableId] = data.variables[variableId];
 												this.createParticleEmitter(data.variables[variableId]);
 											}
