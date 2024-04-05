@@ -17,7 +17,6 @@ var Item = TaroEntityPhysics.extend({
 		}
 
 		self._stats = _.merge(itemData, data);
-		self._stats.particleEmitters = {};
 
 		if (self._stats.projectileType) {
 			self.projectileData = taro.game.cloneAsset('projectileTypes', self._stats.projectileType);
