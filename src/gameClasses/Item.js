@@ -917,7 +917,7 @@ var Item = TaroEntityPhysics.extend({
 			}
 		}
 
-		self.previousState = null;
+		//self.previousState = this._stats.stateId;
 
 		var data = taro.game.cloneAsset('itemTypes', type);
 		delete data.type; // hotfix for dealing with corrupted game json that has unitData.type = "unitType". This is caused by bug in the game editor.
@@ -933,7 +933,7 @@ var Item = TaroEntityPhysics.extend({
 		self._stats.itemTypeId = type;
 
 		for (var i in data) {
-			if (i === 'name' || i === 'attributes' || i === 'variables') {
+			if (i === 'name' || i === 'attributes' || i === 'variables' || i === 'stateId') {
 				// don't overwrite item's name with item type name
 				continue;
 			}
@@ -978,7 +978,7 @@ var Item = TaroEntityPhysics.extend({
 			self._scaleTexture();
 		}
 
-		//self.setState(this._stats.stateId, defaultData);
+		//if (self.previousState) self.setState(self.previousState, defaultData);
 
 		if (ownerUnit) {
 			this._stats.ownerUnitId = ownerUnit.id();
