@@ -29,6 +29,7 @@ var Unit = TaroEntityPhysics.extend({
 		self._stats = _.merge(unitData, data);
 
 		self.entityId = entityIdFromServer;
+		self._stats.particleEmitters = {};
 
 		// dont save variables in _stats as _stats is stringified and synced
 		// and some variables of type unit, item, projectile may contain circular json objects
@@ -83,7 +84,6 @@ var Unit = TaroEntityPhysics.extend({
 			}
 		}
 		self._stats.fadingTextQueue = [];
-		self.particleEmitters = {};
 
 		self._stats.buffs = [];
 
@@ -139,8 +139,6 @@ var Unit = TaroEntityPhysics.extend({
 			self._scaleTexture();
 
 			self.flip(self._stats.flip);
-
-			this.createParticleEmitters();
 		}
 		self.playEffect('create');
 		self.addBehaviour('unitBehaviour', self._behaviour);
