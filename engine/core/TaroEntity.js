@@ -4520,7 +4520,8 @@ var TaroEntity = TaroObject.extend({
 		for (key in data) {
 			value = data[key];
 
-			if (['attributes', 'attributesMin', 'attributesMax', 'attributesRegenerateRate'].includes(key)) {
+			// need to include variables here, otherwise only the latest variable is sent to client streamUpdateData
+			if (['attributes', 'attributesMin', 'attributesMax', 'attributesRegenerateRate', 'variables'].includes(key)) {
 				// some data need to merge instead of overwriting they key. otherwise, we'll only be able to send the last attribute added.
 				// for example, if server calls queueStreamData for Speed and HP attributes, HP will overwrite Speed as they share same key ("attributes")
 				// this._streamDataQueued[key] = {...this._streamDataQueued[key], ...value};
