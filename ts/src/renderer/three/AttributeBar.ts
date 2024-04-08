@@ -37,7 +37,8 @@ namespace Renderer {
 					color,
 					+(+value).toFixed(decimalPlaces),
 					max,
-					displayValue
+					displayValue,
+					data
 				);
 				this.add(this.sprite);
 
@@ -89,26 +90,57 @@ namespace Renderer {
 			}
 
 			private createBar(
-				width: number,
-				height: number,
+				_width: number,
+				_height: number,
 				radius: number,
 				color: string,
 				value: number,
 				max: number,
-				displayValue = true
+				displayValue = true,
+				def = {} as any
 			) {
-				const textCanvas = document.createElement('canvas');
+				const strokeColor = def.strokeColor ?? '#000000';
+				const strokeThickness = def.strokeThickness ?? 2;
+				const roundness = def.cornerRounding ?? 7;
+				let bgColor = def.backgroundColor ?? '#ffffff';
+				let bgAlpha = 0;
+				let fgColor = def.color ?? '#ffff0f';
+				let fgAlpha = 1;
 
+				// The alpha can be set via the hex color in the editor. Three.js
+				// doesn't support this, so we extract the alpha from the hex here.
+				if (Utils.isHexColorWithAlpha(bgColor)) {
+					bgAlpha = Utils.getHexAlpha(bgColor);
+					bgColor = bgColor.slice(0, 7);
+				}
+
+				if (Utils.isHexColorWithAlpha(fgColor)) {
+					fgAlpha = Utils.getHexAlpha(fgColor);
+					fgColor = fgColor.slice(0, 7);
+				}
+
+				const fontSize = def.fontSize ?? 14;
+				let width = def.dimensions?.width ?? 97;
+				let height = def.dimensions?.height ?? 16;
+				const letterSpacing = def.letterSpacing ?? 0;
+				const barPadding = def.padding ?? 0;
+				const decimalPlaces = def.decimalPlaces ?? 0;
+				const trailingZeros = def.trailingZeros ?? false;
+
+				//
+
+				width += barPadding;
+				height += barPadding;
+
+				const textCanvas = document.createElement('canvas');
 				const ctx = textCanvas.getContext('2d');
-				const font = `bold 14px Verdana`;
 
 				const padding = 4;
-
 				var x = padding / 2;
 				var y = padding / 2;
 
-				const text = value.toString();
-
+				const text = Utils.formatNumber(value, decimalPlaces, trailingZeros);
+				const font = `bold ${fontSize}px Verdana`;
 				ctx.font = font;
 				const metrics = ctx.measureText(text);
 				const textWidth = metrics.width;
@@ -117,12 +149,26 @@ namespace Renderer {
 				textCanvas.height = height + padding;
 				this.size.set(textCanvas.width, textCanvas.height);
 
-				Utils.fillRoundedRect(ctx, x, y, Math.max((width * value) / max, radius * 1.5), height, radius, color);
-				Utils.strokeRoundedRect(ctx, x, y, width, height, radius, '#000000');
+				if (roundness > 0) {
+					Utils.fillRoundedRect(ctx, x, y, width, height, roundness, bgColor, bgAlpha);
+
+					const widthScaledByValue = Math.max((width * value) / max, roundness * 1.5);
+					Utils.fillRoundedRect(ctx, x, y, widthScaledByValue, height, roundness, fgColor, fgAlpha);
+
+					Utils.strokeRoundedRect(ctx, x, y, width, height, roundness, strokeColor, strokeThickness);
+				} else {
+					Utils.fillRect(ctx, x, y, width, height, bgColor, bgAlpha);
+
+					const widthScaledByValue = Math.max((width * value) / max, 1.5);
+					Utils.fillRect(ctx, x, y, widthScaledByValue, height, fgColor, fgAlpha);
+
+					Utils.strokeRect(ctx, x, y, width, height, strokeColor, strokeThickness / 2);
+				}
 
 				if (displayValue) {
 					ctx.font = font;
 					ctx.fillStyle = '#000';
+					ctx.letterSpacing = `${letterSpacing}px`;
 					ctx.fillText(text, textCanvas.width / 2 - textWidth / 2, textCanvas.height / 2 + textHeight / 2);
 				}
 
