@@ -99,7 +99,8 @@ namespace Renderer {
 				displayValue = true,
 				def = {} as any
 			) {
-				const strokeThickness = def?.strokeThickness ?? 2;
+				const strokeColor = def.strokeColor ?? '#000000';
+				const strokeThickness = def.strokeThickness ?? 2;
 
 				const textCanvas = document.createElement('canvas');
 
@@ -122,7 +123,7 @@ namespace Renderer {
 				this.size.set(textCanvas.width, textCanvas.height);
 
 				Utils.fillRoundedRect(ctx, x, y, Math.max((width * value) / max, radius * 1.5), height, radius, color);
-				Utils.strokeRoundedRect(ctx, x, y, width, height, radius, '#000000', strokeThickness);
+				Utils.strokeRoundedRect(ctx, x, y, width, height, radius, strokeColor, strokeThickness);
 
 				if (displayValue) {
 					ctx.font = font;
