@@ -101,6 +101,7 @@ namespace Renderer {
 			) {
 				const strokeColor = def.strokeColor ?? '#000000';
 				const strokeThickness = def.strokeThickness ?? 2;
+				const roundness = def.cornerRounding ?? 7;
 
 				const textCanvas = document.createElement('canvas');
 
@@ -122,8 +123,15 @@ namespace Renderer {
 				textCanvas.height = height + padding;
 				this.size.set(textCanvas.width, textCanvas.height);
 
-				Utils.fillRoundedRect(ctx, x, y, Math.max((width * value) / max, radius * 1.5), height, radius, color);
-				Utils.strokeRoundedRect(ctx, x, y, width, height, radius, strokeColor, strokeThickness);
+				if (roundness > 0) {
+					const w = Math.max((width * value) / max, roundness * 1.5);
+					Utils.fillRoundedRect(ctx, x, y, w, height, roundness, color);
+					Utils.strokeRoundedRect(ctx, x, y, w, height, roundness, strokeColor, strokeThickness);
+				} else {
+					const w = Math.max((width * value) / max, 1.5);
+					Utils.fillRect(ctx, x, y, w, height, color);
+					Utils.strokeRect(ctx, x, y, w, height, strokeColor, strokeThickness / 2);
+				}
 
 				if (displayValue) {
 					ctx.font = font;

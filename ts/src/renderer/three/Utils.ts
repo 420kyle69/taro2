@@ -121,6 +121,68 @@ namespace Renderer {
 				ctx.fill();
 			}
 
+			export function fillRect(
+				ctx: CanvasRenderingContext2D,
+				x: number,
+				y: number,
+				width: number,
+				height: number,
+				color: string,
+				opacity = 1
+			) {
+				const fillColor = new THREE.Color(color).getHex();
+				const fillAlpha = opacity;
+				const red = (fillColor & 0xff0000) >>> 16;
+				const green = (fillColor & 0xff00) >>> 8;
+				const blue = fillColor & 0xff;
+				ctx.fillStyle = `rgba(${red},${green},${blue},${fillAlpha})`;
+				ctx.fillRect(x, y, width, height);
+			}
+
+			export function strokeRect(
+				ctx: CanvasRenderingContext2D,
+				x: number,
+				y: number,
+				width: number,
+				height: number,
+				color: string,
+				lineWidth: number,
+				opacity = 1
+			) {
+				const fillColor = new THREE.Color(color).getHex();
+				const fillAlpha = opacity;
+				const red = (fillColor & 0xff0000) >>> 16;
+				const green = (fillColor & 0xff00) >>> 8;
+				const blue = fillColor & 0xff;
+				ctx.fillStyle = `rgba(${red},${green},${blue},${fillAlpha})`;
+
+				ctx.lineWidth = lineWidth;
+
+				const lineWidthHalf = lineWidth / 2;
+				const minx = x - lineWidthHalf;
+				const maxx = x + lineWidthHalf;
+
+				ctx.beginPath();
+				ctx.moveTo(x, y);
+				ctx.lineTo(x, y + height);
+				ctx.stroke();
+
+				ctx.beginPath();
+				ctx.moveTo(x + width, y);
+				ctx.lineTo(x + width, y + height);
+				ctx.stroke();
+
+				ctx.beginPath();
+				ctx.moveTo(minx, y);
+				ctx.lineTo(maxx + width, y);
+				ctx.stroke();
+
+				ctx.beginPath();
+				ctx.moveTo(minx, y + height);
+				ctx.lineTo(maxx + width, y + height);
+				ctx.stroke();
+			}
+
 			export function pixelToWorld(numPixels: number) {
 				return numPixels / 64;
 			}
