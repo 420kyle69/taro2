@@ -329,7 +329,7 @@ namespace Renderer {
 				requestAnimationFrame(this.render.bind(this));
 				taro.client.emit('tick');
 
-				if (this.camera.target) {
+				if (this.camera.target && !taro.isMobile) {
 					const worldPos = this.camera.getWorldPoint(this.pointer);
 					const x = Utils.worldToPixel(worldPos.x + 0.5);
 					const y = Utils.worldToPixel(worldPos.z + 0.5);
