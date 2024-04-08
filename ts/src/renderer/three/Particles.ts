@@ -135,8 +135,6 @@ namespace Renderer {
 					if (particleData.emitZone.y) emitDepth = Utils.pixelToWorld(particleData.emitZone.y);
 				}
 
-				console.log(config.position, zPosition);
-
 				return {
 					particleTypeId: config.particleId,
 					position: { x: config.position.x, y: zPosition, z: config.position.y },
