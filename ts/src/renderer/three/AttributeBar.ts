@@ -120,24 +120,25 @@ namespace Renderer {
 				}
 
 				const fontSize = def.fontSize ?? 14;
-				const width = def.dimensions?.width ?? 97;
-				const height = def.dimensions?.height ?? 16;
+				let width = def.dimensions?.width ?? 97;
+				let height = def.dimensions?.height ?? 16;
 				const letterSpacing = def.letterSpacing ?? 0;
+				const barPadding = def.padding ?? 0;
 
 				//
 
-				const textCanvas = document.createElement('canvas');
+				width += barPadding;
+				height += barPadding;
 
+				const textCanvas = document.createElement('canvas');
 				const ctx = textCanvas.getContext('2d');
-				const font = `bold ${fontSize}px Verdana`;
 
 				const padding = 4;
-
 				var x = padding / 2;
 				var y = padding / 2;
 
 				const text = value.toString();
-
+				const font = `bold ${fontSize}px Verdana`;
 				ctx.font = font;
 				const metrics = ctx.measureText(text);
 				const textWidth = metrics.width;
