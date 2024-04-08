@@ -106,6 +106,7 @@ namespace Renderer {
 				let bgAlpha = 0;
 				let fgColor = def.color ?? '#ffff0f';
 				let fgAlpha = 1;
+				const fontSize = def.fontSize ?? 14;
 
 				// The alpha can be set via the hex color in the editor. Three.js
 				// doesn't support this, so we extract the alpha from the hex here.
@@ -122,7 +123,7 @@ namespace Renderer {
 				const textCanvas = document.createElement('canvas');
 
 				const ctx = textCanvas.getContext('2d');
-				const font = `bold 14px Verdana`;
+				const font = `bold ${fontSize}px Verdana`;
 
 				const padding = 4;
 
