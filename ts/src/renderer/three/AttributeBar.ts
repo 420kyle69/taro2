@@ -122,6 +122,7 @@ namespace Renderer {
 				const fontSize = def.fontSize ?? 14;
 				const width = def.dimensions?.width ?? 97;
 				const height = def.dimensions?.height ?? 16;
+				const letterSpacing = def.letterSpacing ?? 0;
 
 				//
 
@@ -164,6 +165,7 @@ namespace Renderer {
 				if (displayValue) {
 					ctx.font = font;
 					ctx.fillStyle = '#000';
+					ctx.letterSpacing = `${letterSpacing}px`;
 					ctx.fillText(text, textCanvas.width / 2 - textWidth / 2, textCanvas.height / 2 + textHeight / 2);
 				}
 
