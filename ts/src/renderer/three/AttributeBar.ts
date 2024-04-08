@@ -90,8 +90,8 @@ namespace Renderer {
 			}
 
 			private createBar(
-				width: number,
-				height: number,
+				_width: number,
+				_height: number,
 				radius: number,
 				color: string,
 				value: number,
@@ -106,7 +106,6 @@ namespace Renderer {
 				let bgAlpha = 0;
 				let fgColor = def.color ?? '#ffff0f';
 				let fgAlpha = 1;
-				const fontSize = def.fontSize ?? 14;
 
 				// The alpha can be set via the hex color in the editor. Three.js
 				// doesn't support this, so we extract the alpha from the hex here.
@@ -119,6 +118,12 @@ namespace Renderer {
 					fgAlpha = Utils.getHexAlpha(fgColor);
 					fgColor = fgColor.slice(0, 7);
 				}
+
+				const fontSize = def.fontSize ?? 14;
+				const width = def.dimensions?.width ?? 97;
+				const height = def.dimensions?.height ?? 16;
+
+				//
 
 				const textCanvas = document.createElement('canvas');
 
