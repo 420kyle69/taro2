@@ -234,10 +234,16 @@ namespace Renderer {
 			}
 
 			export function getHexAlpha(hex: string) {
-				if (isHexColorWithAlpha(hex)) {
-					return parseInt(hex.slice(7), 16) / 255;
-				}
-				return 1;
+				return isHexColorWithAlpha(hex) ? parseInt(hex.slice(7), 16) / 255 : 1;
+			}
+
+			export function toFixedWithoutZeros(num: number, precision: number) {
+				return `${Number.parseFloat(num.toFixed(precision))}`;
+			}
+
+			export function formatNumber(value: number, decimalPlaces = 0, trailingZeros = false) {
+				if (value === undefined || value === null) return '';
+				return trailingZeros ? value.toFixed(decimalPlaces).toString() : toFixedWithoutZeros(value, decimalPlaces);
 			}
 		}
 	}

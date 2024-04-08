@@ -124,6 +124,8 @@ namespace Renderer {
 				let height = def.dimensions?.height ?? 16;
 				const letterSpacing = def.letterSpacing ?? 0;
 				const barPadding = def.padding ?? 0;
+				const decimalPlaces = def.decimalPlaces ?? 0;
+				const trailingZeros = def.trailingZeros ?? false;
 
 				//
 
@@ -137,7 +139,7 @@ namespace Renderer {
 				var x = padding / 2;
 				var y = padding / 2;
 
-				const text = value.toString();
+				const text = Utils.formatNumber(value, decimalPlaces, trailingZeros);
 				const font = `bold ${fontSize}px Verdana`;
 				ctx.font = font;
 				const metrics = ctx.measureText(text);
