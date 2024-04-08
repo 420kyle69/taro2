@@ -356,10 +356,21 @@ namespace Renderer {
 
 				const brightness = Utils.lerp(emitter.brightness.min, emitter.brightness.max, Math.random());
 
+				const offset = {
+					x: emitter.shape.width * Math.random() - emitter.shape.width * 0.5,
+					y: emitter.shape.height * Math.random() - emitter.shape.height * 0.5,
+					z: emitter.shape.depth * Math.random() - emitter.shape.depth * 0.5,
+				};
+
+				const targetAngle = emitter.target.sprite.rotation.y;
+				const tempX = offset.x;
+				offset.x = offset.x * Math.cos(targetAngle) - offset.z * Math.sin(targetAngle);
+				offset.z = tempX * Math.sin(targetAngle) + offset.z * Math.cos(targetAngle);
+
 				const position = {
-					x: emitter.position.x + (emitter.shape.width * Math.random() - emitter.shape.width * 0.5),
-					y: emitter.position.y + (emitter.shape.height * Math.random() - emitter.shape.height * 0.5),
-					z: emitter.position.z + (emitter.shape.depth * Math.random() - emitter.shape.depth * 0.5),
+					x: emitter.position.x + offset.x,
+					y: emitter.position.y + offset.y,
+					z: emitter.position.z + offset.z,
 				};
 
 				const lifetime = Utils.lerp(emitter.lifetime.min, emitter.lifetime.max, Math.random());
