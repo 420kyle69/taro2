@@ -19,6 +19,66 @@ namespace Renderer {
 				return `${url}?v=1`;
 			}
 
+			export function fillRect(
+				ctx: CanvasRenderingContext2D,
+				x: number,
+				y: number,
+				width: number,
+				height: number,
+				color: string,
+				alpha = 1
+			) {
+				const fillColor = new THREE.Color(color).getHex();
+				const red = (fillColor & 0xff0000) >>> 16;
+				const green = (fillColor & 0xff00) >>> 8;
+				const blue = fillColor & 0xff;
+				ctx.fillStyle = `rgba(${red},${green},${blue},${alpha})`;
+				ctx.fillRect(x, y, width, height);
+			}
+
+			export function strokeRect(
+				ctx: CanvasRenderingContext2D,
+				x: number,
+				y: number,
+				width: number,
+				height: number,
+				color: string,
+				lineWidth: number,
+				alpha = 1
+			) {
+				const fillColor = new THREE.Color(color).getHex();
+				const red = (fillColor & 0xff0000) >>> 16;
+				const green = (fillColor & 0xff00) >>> 8;
+				const blue = fillColor & 0xff;
+				ctx.fillStyle = `rgba(${red},${green},${blue},${alpha})`;
+
+				ctx.lineWidth = lineWidth;
+
+				const lineWidthHalf = lineWidth / 2;
+				const minx = x - lineWidthHalf;
+				const maxx = x + lineWidthHalf;
+
+				ctx.beginPath();
+				ctx.moveTo(x, y);
+				ctx.lineTo(x, y + height);
+				ctx.stroke();
+
+				ctx.beginPath();
+				ctx.moveTo(x + width, y);
+				ctx.lineTo(x + width, y + height);
+				ctx.stroke();
+
+				ctx.beginPath();
+				ctx.moveTo(minx, y);
+				ctx.lineTo(maxx + width, y);
+				ctx.stroke();
+
+				ctx.beginPath();
+				ctx.moveTo(minx, y + height);
+				ctx.lineTo(maxx + width, y + height);
+				ctx.stroke();
+			}
+
 			export function fillRoundedRect(
 				ctx: CanvasRenderingContext2D,
 				x: number,
@@ -27,7 +87,7 @@ namespace Renderer {
 				height: number,
 				radius: number,
 				color: string,
-				opacity = 1
+				alpha = 1
 			) {
 				var tl = radius;
 				var tr = radius;
@@ -35,11 +95,10 @@ namespace Renderer {
 				var br = radius;
 
 				const fillColor = new THREE.Color(color).getHex();
-				const fillAlpha = opacity;
 				const red = (fillColor & 0xff0000) >>> 16;
 				const green = (fillColor & 0xff00) >>> 8;
 				const blue = fillColor & 0xff;
-				ctx.fillStyle = `rgba(${red},${green},${blue},${fillAlpha})`;
+				ctx.fillStyle = `rgba(${red},${green},${blue},${alpha})`;
 
 				ctx.beginPath();
 				ctx.moveTo(x + tl, y);
@@ -63,7 +122,7 @@ namespace Renderer {
 				radius: number,
 				color: string,
 				strokeThickness: number,
-				opacity = 1
+				alpha = 1
 			) {
 				var tl = radius;
 				var tr = radius;
@@ -71,11 +130,10 @@ namespace Renderer {
 				var br = radius;
 
 				const lineColor = new THREE.Color(color).getHex();
-				const lineAlpha = opacity;
 				const red = (lineColor & 0xff0000) >>> 16;
 				const green = (lineColor & 0xff00) >>> 8;
 				const blue = lineColor & 0xff;
-				ctx.strokeStyle = `rgba(${red},${green},${blue},${lineAlpha})`;
+				ctx.strokeStyle = `rgba(${red},${green},${blue},${alpha})`;
 				ctx.lineWidth = strokeThickness;
 
 				ctx.beginPath();
@@ -104,14 +162,13 @@ namespace Renderer {
 				x2: number,
 				y2: number,
 				color: string,
-				opacity = 1
+				alpha = 1
 			) {
 				const fillColor = new THREE.Color(color).getHex();
-				const fillAlpha = opacity;
 				const red = (fillColor & 0xff0000) >>> 16;
 				const green = (fillColor & 0xff00) >>> 8;
 				const blue = fillColor & 0xff;
-				ctx.fillStyle = `rgba(${red},${green},${blue},${fillAlpha})`;
+				ctx.fillStyle = `rgba(${red},${green},${blue},${alpha})`;
 
 				ctx.beginPath();
 				ctx.moveTo(x0, y0);
@@ -119,68 +176,6 @@ namespace Renderer {
 				ctx.lineTo(x2, y2);
 				ctx.closePath();
 				ctx.fill();
-			}
-
-			export function fillRect(
-				ctx: CanvasRenderingContext2D,
-				x: number,
-				y: number,
-				width: number,
-				height: number,
-				color: string,
-				opacity = 1
-			) {
-				const fillColor = new THREE.Color(color).getHex();
-				const fillAlpha = opacity;
-				const red = (fillColor & 0xff0000) >>> 16;
-				const green = (fillColor & 0xff00) >>> 8;
-				const blue = fillColor & 0xff;
-				ctx.fillStyle = `rgba(${red},${green},${blue},${fillAlpha})`;
-				ctx.fillRect(x, y, width, height);
-			}
-
-			export function strokeRect(
-				ctx: CanvasRenderingContext2D,
-				x: number,
-				y: number,
-				width: number,
-				height: number,
-				color: string,
-				lineWidth: number,
-				opacity = 1
-			) {
-				const fillColor = new THREE.Color(color).getHex();
-				const fillAlpha = opacity;
-				const red = (fillColor & 0xff0000) >>> 16;
-				const green = (fillColor & 0xff00) >>> 8;
-				const blue = fillColor & 0xff;
-				ctx.fillStyle = `rgba(${red},${green},${blue},${fillAlpha})`;
-
-				ctx.lineWidth = lineWidth;
-
-				const lineWidthHalf = lineWidth / 2;
-				const minx = x - lineWidthHalf;
-				const maxx = x + lineWidthHalf;
-
-				ctx.beginPath();
-				ctx.moveTo(x, y);
-				ctx.lineTo(x, y + height);
-				ctx.stroke();
-
-				ctx.beginPath();
-				ctx.moveTo(x + width, y);
-				ctx.lineTo(x + width, y + height);
-				ctx.stroke();
-
-				ctx.beginPath();
-				ctx.moveTo(minx, y);
-				ctx.lineTo(maxx + width, y);
-				ctx.stroke();
-
-				ctx.beginPath();
-				ctx.moveTo(minx, y + height);
-				ctx.lineTo(maxx + width, y + height);
-				ctx.stroke();
 			}
 
 			export function pixelToWorld(numPixels: number) {
@@ -228,6 +223,21 @@ namespace Renderer {
 
 			export function isRightButton(buttons: number) {
 				return !!(buttons & 2);
+			}
+
+			export function isHexColor(str: string) {
+				return /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3}|[A-Fa-f0-9]{8})$/.test(str);
+			}
+
+			export function isHexColorWithAlpha(str: string) {
+				return /^#([A-Fa-f0-9]{8})$/.test(str);
+			}
+
+			export function getHexAlpha(hex: string) {
+				if (isHexColorWithAlpha(hex)) {
+					return parseInt(hex.slice(7), 16) / 255;
+				}
+				return 1;
 			}
 		}
 	}

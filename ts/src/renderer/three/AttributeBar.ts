@@ -102,6 +102,15 @@ namespace Renderer {
 				const strokeColor = def.strokeColor ?? '#000000';
 				const strokeThickness = def.strokeThickness ?? 2;
 				const roundness = def.cornerRounding ?? 7;
+				let bgColor = def.backgroundColor ?? '#ffffff';
+				let bgAlpha = def.bgAlpha ?? 0;
+
+				// The alpha can be set via the hex color in the editor. Three.js
+				// doesn't support this, so we extract the alpha from the hex here.
+				if (Utils.isHexColorWithAlpha(bgColor)) {
+					bgAlpha = Utils.getHexAlpha(bgColor);
+					bgColor = bgColor.slice(0, 7);
+				}
 
 				const textCanvas = document.createElement('canvas');
 
@@ -124,13 +133,19 @@ namespace Renderer {
 				this.size.set(textCanvas.width, textCanvas.height);
 
 				if (roundness > 0) {
-					const w = Math.max((width * value) / max, roundness * 1.5);
-					Utils.fillRoundedRect(ctx, x, y, w, height, roundness, color);
-					Utils.strokeRoundedRect(ctx, x, y, w, height, roundness, strokeColor, strokeThickness);
+					Utils.fillRoundedRect(ctx, x, y, width, height, roundness, bgColor, bgAlpha);
+
+					const widthScaledByValue = Math.max((width * value) / max, roundness * 1.5);
+					Utils.fillRoundedRect(ctx, x, y, widthScaledByValue, height, roundness, color);
+
+					Utils.strokeRoundedRect(ctx, x, y, width, height, roundness, strokeColor, strokeThickness);
 				} else {
-					const w = Math.max((width * value) / max, 1.5);
-					Utils.fillRect(ctx, x, y, w, height, color);
-					Utils.strokeRect(ctx, x, y, w, height, strokeColor, strokeThickness / 2);
+					Utils.fillRect(ctx, x, y, width, height, bgColor, bgAlpha);
+
+					const widthScaledByValue = Math.max((width * value) / max, 1.5);
+					Utils.fillRect(ctx, x, y, widthScaledByValue, height, color);
+
+					Utils.strokeRect(ctx, x, y, width, height, strokeColor, strokeThickness / 2);
 				}
 
 				if (displayValue) {
