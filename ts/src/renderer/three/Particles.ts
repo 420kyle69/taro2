@@ -135,6 +135,8 @@ namespace Renderer {
 					if (particleData.emitZone.y) emitDepth = Utils.pixelToWorld(particleData.emitZone.y);
 				}
 
+				console.log(config.position, zPosition);
+
 				return {
 					particleTypeId: config.particleId,
 					position: { x: config.position.x, y: zPosition, z: config.position.y },
@@ -361,10 +363,6 @@ namespace Renderer {
 					y: emitter.position.y + (emitter.shape.height * Math.random() - emitter.shape.height * 0.5),
 					z: emitter.position.z + (emitter.shape.depth * Math.random() - emitter.shape.depth * 0.5),
 				};
-
-				const angleYAxis = Math.PI * 0.5;
-				position.x = position.x * Math.cos(angleYAxis) - position.y * Math.sin(angleYAxis);
-				position.z = position.z * Math.sin(angleYAxis) + position.z * Math.cos(angleYAxis);
 
 				const lifetime = Utils.lerp(emitter.lifetime.min, emitter.lifetime.max, Math.random());
 
