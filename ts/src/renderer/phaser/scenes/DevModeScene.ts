@@ -169,7 +169,7 @@ class DevModeScene extends PhaserScene {
 		const data = taro.game.data;
 		const map = (this.tilemap = this.make.tilemap({ key: 'map' }));
 
-		const tileset = taro.getTilesetFromType({ tilesets: data.map.tilesets, type: 'side' });
+		const tileset = taro.getTilesetFromType({ tilesets: data.map.tilesets, type: 'top' });
 		const key = `tiles/${tileset.name}`;
 		const extrudedKey = `extruded-${key}`;
 		if (this.textures.exists(extrudedKey)) {
