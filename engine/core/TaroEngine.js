@@ -2221,6 +2221,28 @@ var TaroEngine = TaroEntity.extend({
 		TaroEntity.prototype._childMounted.call(this, child);
 	},
 
+	// NOTE(nick): this feels hacky, why don't all tilesets have a type? Part
+    // of a bigger problem regarding game.json parsing and presenting it in a
+    // valid state for the rest of the application?
+	getTilesetFromType: ({ tilesets, type, onlyIndex = false }) => {
+		let index = -1;
+		if (type === 'top') {
+			index = tilesets.findIndex((tilesheet) => {
+				return (tilesheet.name === 'tilesheet_complete' || tilesheet.name === 'tilesheet') && (tilesheet.type === undefined || tilesheet.type === 'top')
+			});
+		} else {
+			index = tilesets.findIndex((tilesheet) => {
+				return tilesheet.type === type;
+			});
+		}
+	
+		if (onlyIndex) {
+			return index;
+		} else {
+			return index > -1 ? tilesets[index] : null;
+		}
+	},
+
 	destroy: function () {
 		// Stop the engine and kill any timers
 		this.stop();

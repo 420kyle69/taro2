@@ -55,9 +55,9 @@ class DevModeScene extends PhaserScene {
 			this.leaveMapTab();
 		});
 
-		taro.client.on('enterEntitiesTab', () => {});
+		taro.client.on('enterEntitiesTab', () => { });
 
-		taro.client.on('leaveEntitiesTab', () => {});
+		taro.client.on('leaveEntitiesTab', () => { });
 
 		taro.client.on('editTile', (data: TileData<MapEditToolEnum>) => {
 			this.tileEditor.edit(data);
@@ -169,22 +169,21 @@ class DevModeScene extends PhaserScene {
 		const data = taro.game.data;
 		const map = (this.tilemap = this.make.tilemap({ key: 'map' }));
 
-		data.map.tilesets.forEach((tileset) => {
-			const key = `tiles/${tileset.name}`;
-			const extrudedKey = `extruded-${key}`;
-			if (this.textures.exists(extrudedKey)) {
-				this.tileset = map.addTilesetImage(
-					tileset.name,
-					extrudedKey,
-					tileset.tilewidth,
-					tileset.tileheight,
-					(tileset.margin || 0) + 2,
-					(tileset.spacing || 0) + 4
-				);
-			} else {
-				this.tileset = map.addTilesetImage(tileset.name, key);
-			}
-		});
+		const tileset = taro.getTilesetFromType({ tilesets: data.map.tilesets, type: 'side' });
+		const key = `tiles/${tileset.name}`;
+		const extrudedKey = `extruded-${key}`;
+		if (this.textures.exists(extrudedKey)) {
+			this.tileset = map.addTilesetImage(
+				tileset.name,
+				extrudedKey,
+				tileset.tilewidth,
+				tileset.tileheight,
+				(tileset.margin || 0) + 2,
+				(tileset.spacing || 0) + 4
+			);
+		} else {
+			this.tileset = map.addTilesetImage(tileset.name, key);
+		}
 
 		const gameMap = this.gameScene.tilemap;
 		gameMap.currentLayerIndex = 0;
