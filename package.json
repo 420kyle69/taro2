@@ -4,16 +4,18 @@
 	"description": "An HTML5 multiplayer game engine, enabling anyone to make games at modd.io.",
 	"main": "server/taro.js",
 	"scripts": {
-		"server": "cross-env PORT=8080 ENV=standalone JWT_SECRET_KEY='change-this' node server/taro.js -g ./src",
+		"server": "cross-env PORT=8080 GAME=$npm_config_game ENV=standalone JWT_SECRET_KEY='change-this' node server/taro.js -g ./src",
 		"server:prod": "node server/taro.js -g ./src",
 		"server:cc": "cross-env ENV=standalone LOAD_CC=true JWT_SECRET_KEY='change-this' node --inspect server/taro.js -g ./src",
 		"tsc": "tsc",
 		"tsc-watch": "tsc -w",
+		"dev": "concurrently --kill-others-on-fail \"npm run server --game=$npm_config_game\" \"npm run tsc-watch\"",
 		"build": "tsc && node server/taro.js -deploy ./src -to ./src",
 		"build:gs": "cross-env TEST=true node server/taro.js -deploy ./src -to ../../be/assets",
 		"build:git": "tsc && cross-env TEST=true node server/taro.js -deploy ./src -to ./build",
 		"debug": "cross-env ENV=standalone JWT_SECRET_KEY='change-this' node --inspect server/taro.js -g ./src",
-		"dev:lint": "eslint --fix --ext .js,.ts ."
+		"dev:lint": "eslint --fix --ext .js,.ts .",
+		"cpd": "jscpd --min-tokens 50 --min-lines 5 --min-tokens 100 ./src ./ts ./engine"
 	},
 	"repository": {
 		"type": "git",
@@ -66,6 +68,7 @@
 		"@typescript-eslint/parser": "^5.59.0",
 		"babel-plugin-transform-remove-console": "^6.9.4",
 		"bufferutil": "^4.0.8",
+		"concurrently": "^8.2.2",
 		"cross-env": "^7.0.3",
 		"encoding": "^0.1.13",
 		"eslint": "^8.38.0",
@@ -77,6 +80,7 @@
 		"eslint-plugin-prettier": "^5.1.3",
 		"eslint-plugin-promise": "^6.0.0",
 		"inquirer": "^8.2.6",
+		"jscpd": "^3.5.10",
 		"node-arguments": "^0.0.1",
 		"prettier": "^3.2.4",
 		"prettier-plugin-sort-members": "^0.1.1",

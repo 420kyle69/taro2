@@ -411,7 +411,6 @@ var MobileControlsComponent = TaroEntity.extend({
 						joystickZone.style.top = '0';
 					}
 
-
 					// append joystick to the gamediv element
 					let gameDiv = document.getElementById('default-ingame-ui-container');
 					// make first child of gameDiv
@@ -477,14 +476,19 @@ var MobileControlsComponent = TaroEntity.extend({
 					if (document.getElementById(key + '_button')) {
 						break;
 					}
+
+					// buttons position
+					const [xOnClientScreen, yOnClientScreen] = [(x * window.innerWidth) / 960, (y * window.innerHeight) / 540];
+
 					// create a new button using html
 					const htmlButton = document.createElement('button');
 					htmlButton.id = key + '_button';
 					htmlButton.style.position = 'absolute';
-					htmlButton.style.left = `${x}px`;
-					htmlButton.style.top = `${y}px`;
-					htmlButton.style.width = '64px';
-					htmlButton.style.height = '64px';
+					htmlButton.style.left = `${xOnClientScreen}px`;
+					htmlButton.style.top = `${yOnClientScreen}px`;
+					htmlButton.style.transform = `translate(-50%, -50%)`;
+					htmlButton.style.width = '44px';
+					htmlButton.style.height = '44px';
 					htmlButton.style.fontSize = '16px';
 					htmlButton.style.color = '#fff';
 
@@ -501,8 +505,8 @@ var MobileControlsComponent = TaroEntity.extend({
 						htmlButton.innerHTML = key;
 					}
 
-					htmlButton.style.background = 'transparent';
-					htmlButton.style.border = '2px solid #fff';
+					htmlButton.style.backgroundColor = '#00000080';
+					htmlButton.style.border = '4px solid #fff';
 					htmlButton.style.borderRadius = '50%';
 					htmlButton.style.zIndex = '1000';
 					htmlButton.style.cursor = 'pointer';
@@ -525,25 +529,6 @@ var MobileControlsComponent = TaroEntity.extend({
 								key: key.toLowerCase(),
 							});
 						}
-					});
-
-					Object.assign(settings, {
-						onStart: () => {
-							if (key) {
-								taro.network.send('playerKeyDown', {
-									device: 'key',
-									key: key.toLowerCase(),
-								});
-							}
-						},
-						onEnd: () => {
-							if (key) {
-								taro.network.send('playerKeyUp', {
-									device: 'key',
-									key: key.toLowerCase(),
-								});
-							}
-						},
 					});
 				}
 				break;

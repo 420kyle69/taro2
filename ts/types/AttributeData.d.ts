@@ -14,4 +14,6 @@ interface AttributeData {
 	key: string;
 	value: number;
 	showWhen?: string[] | string;
+
+	strokeThickness?: number;
 }
