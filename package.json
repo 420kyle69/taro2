@@ -4,7 +4,7 @@
 	"description": "An HTML5 multiplayer game engine, enabling anyone to make games at modd.io.",
 	"main": "server/taro.js",
 	"scripts": {
-		"server": "cross-env PORT=8080 ENV=standalone JWT_SECRET_KEY='change-this' node server/taro.js -g ./src",
+		"server": "cross-env PORT=8080 GAME=$npm_config_game ENV=standalone JWT_SECRET_KEY='change-this' node server/taro.js -g ./src",
 		"server:prod": "node server/taro.js -g ./src",
 		"server:cc": "cross-env ENV=standalone LOAD_CC=true JWT_SECRET_KEY='change-this' node --inspect server/taro.js -g ./src",
 		"tsc": "tsc",
