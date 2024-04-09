@@ -528,15 +528,32 @@ var Server = TaroClass.extend({
 						}
 
 						const jsonFiles = files.filter((file) => file.endsWith('.json'));
-						var game = await new Promise((resolveGame) => {
-							if (jsonFiles.length === 1) {
-								taro.gameName = jsonFiles[0];
-								resolveGame(fs.readFileSync(jsonPath + jsonFiles[0]));
-							} else {
-								const choices = jsonFiles.map((file) => ({
-									name: file,
-									value: file,
-								}));
+
+						const readGameFileSync = (fileName) => {
+							taro.gameName = fileName;
+							return fs.readFileSync(jsonPath + fileName);
+						};
+
+						const loadGameFile = async () => {
+							return new Promise((resolveGame) => {
+								let envGameFile = process.env.GAME ?? '';
+
+								if (!envGameFile.includes('.json')) {
+									envGameFile += '.json';
+								}
+
+								if (jsonFiles.includes(envGameFile)) {
+									resolveGame(readGameFileSync(envGameFile));
+									return 'test';
+								}
+
+								if (jsonFiles.length === 1) {
+									const fileName = jsonFiles[0];
+									resolveGame(readGameFileSync(fileName));
+									return;
+								}
+
+								const choices = jsonFiles.map((file) => ({ name: file, value: file }));
 								inquirer
 									.prompt([
 										{
@@ -547,11 +564,12 @@ var Server = TaroClass.extend({
 										},
 									])
 									.then((answers) => {
-										taro.gameName = answers.selectedFile;
-										resolveGame(fs.readFileSync(jsonPath + answers.selectedFile));
+										resolveGame(readGameFileSync(answers.selectedFile));
 									});
-							}
-						});
+							});
+						};
+
+						var game = await loadGameFile();
 						global.gameJson = game;
 						game = JSON.parse(game);
 						game.defaultData = game;
