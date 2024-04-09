@@ -39,25 +39,36 @@ npm install
 npm run tsc
 ```
 
-Then, go to /src directory, and rename game-sample.json to game.json.
-Go back to the root directory and run the command below:
+Then, to start the server run:
 
 ```
 npm run server
 ```
 
-You can now play the game at http://localhost:80
+You can now play the game at http://localhost:8080
 
 ## How do I create a new game from scratch?
 
 Moddio games are created & edited using Moddio Game Editor available at [https://www.modd.io](https://www.modd.io).
 To learn how to use the game editor, visit [https://learn.modd.io](https://learn.modd.io).
 
-Once you create the game, you can export the game.json which you can use in your local installation.
-Inside the Moddio Game Editor, Go to `Menu` -> Click `Export Game`.
+After creating your game, you can export the `game.json` file for use in your local installation. To do this, navigate to `Menu` in the Moddio Game Editor and click `Export Game`.
 
 <img src="./assets/images/gamejson2.png" width="600" alt="How to get game json in game's in-game editor">
-Next, rename the downloaded Game JSON as `game.json` and move it to the `./src` directory.
+
+Next, rename the downloaded Game JSON file to `game.json` and move it into the `src` directory.
+
+To load your game file, simply start the server by running:
+
+```bash
+npm run server
+```
+
+You will be presented with a dropdown menu, where you can use the arrow keys to select your game file. Alternatively, you can pre-select your game file by running:
+
+```bash
+npm run server --game=game.json
+```
 
 ## How to contribute
 
