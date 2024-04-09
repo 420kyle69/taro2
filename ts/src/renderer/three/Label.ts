@@ -96,7 +96,7 @@ namespace Renderer {
 
 				const textWidth = Math.ceil(metrics.width);
 				const textHeight = Math.ceil(metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent);
-				this.textSize.set(textWidth, textHeight);
+				this.textSize.set(textWidth / this.upscaleFactor, textHeight / this.upscaleFactor);
 
 				const padding = 10 * this.upscaleFactor;
 				textCanvas.width = textWidth + padding;
