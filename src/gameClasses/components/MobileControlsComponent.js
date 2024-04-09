@@ -196,8 +196,6 @@ var MobileControlsComponent = TaroEntity.extend({
 
 		this.controls[key] = settings;
 
-		console.log(key, 'adding this button now!!!');
-
 		switch (key) {
 			case 'movementWheel':
 				{
@@ -475,8 +473,6 @@ var MobileControlsComponent = TaroEntity.extend({
 
 			default:
 				{
-					console.log('drawing button ', key);
-
 					if (document.getElementById(key + '_button')) {
 						break;
 					}
@@ -533,25 +529,6 @@ var MobileControlsComponent = TaroEntity.extend({
 								key: key.toLowerCase(),
 							});
 						}
-					});
-
-					Object.assign(settings, {
-						onStart: () => {
-							if (key) {
-								taro.network.send('playerKeyDown', {
-									device: 'key',
-									key: key.toLowerCase(),
-								});
-							}
-						},
-						onEnd: () => {
-							if (key) {
-								taro.network.send('playerKeyUp', {
-									device: 'key',
-									key: key.toLowerCase(),
-								});
-							}
-						},
 					});
 				}
 				break;
