@@ -5,7 +5,7 @@ namespace Renderer {
 
 			private sprite: THREE.Sprite;
 			private scaleScalar = 1;
-			private size = new THREE.Vector2();
+			public size = new THREE.Vector2();
 			private textSize = new THREE.Vector2();
 			private center = new THREE.Vector2(0.5, 0.5);
 			private upscaleFactor = 10; // Makes the text more crisp when zoomed in

@@ -1,7 +1,7 @@
 namespace Renderer {
 	export namespace Three {
 		export class EntityManager {
-			entities: Unit[] = [];
+			entities: (Unit | Region)[] = [];
 			units: Unit[] = [];
 			items: Unit[] = [];
 			projectiles: Unit[] = [];

@@ -84,7 +84,7 @@ namespace Renderer {
 						const intersects = raycaster.intersectObjects(this.entityManager.entities);
 						if (intersects.length > 0) {
 							const closest = intersects[0].object as THREE.Mesh;
-							const unit = this.entityManager.entities.find((e) => e.sprite === closest);
+							const unit = this.entityManager.entities.find((e) => e instanceof Unit && e.sprite === closest);
 
 							if (unit) {
 								const ownerPlayer = taro.$(unit.ownerId);
@@ -154,7 +154,14 @@ namespace Renderer {
 			setVisible(visible: boolean) {
 				this.particles.visible = visible;
 				this.entityManager.entities.forEach((e) => {
-					e.visible = visible;
+					if (e instanceof Region) {
+						e.label.visible = !visible;
+						if (e.devModeOnly) {
+							e.gameObject.visible = !visible;
+						}
+					} else {
+						e.visible = visible;
+					}
 				});
 			}
 

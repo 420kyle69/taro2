@@ -1,17 +1,27 @@
 namespace Renderer {
 	export namespace Three {
 		export class Region extends Node {
-			devModeOnly: boolean;
 			gameObject: THREE.Object3D;
+			devModeOnly: boolean;
+			label = new Label('', 'white', false, true);
+			private labelVisible;
+			private guiScale = 1;
+
 			constructor(
 				public taroId: string,
 				public ownerId: string,
 				private taroEntity?: TaroEntityPhysics
 			) {
 				super();
-				//const textCanvas = document.createElement('canvas');
+				const label = this.label;
+				label.visible = false;
+				this.labelVisible = label.visible;
+				label.update(taroEntity._stats.id);
+				this.add(label);
 
-				//const ctx = textCanvas.getContext('2d');
+				const renderer = Three.instance();
+				this.setGuiScale(1 / renderer.camera.zoom);
+
 				const stats = taroEntity._stats.default;
 				const color = stats.inside ? Number(`0x${stats.inside.substring(1)}`) : 0x000000;
 
@@ -20,6 +30,7 @@ namespace Renderer {
 				const width = Utils.pixelToWorld(stats.width);
 				const height = Utils.pixelToWorld(stats.height);
 
+				label.position.set(x + Utils.pixelToWorld(label.size.x) / 2, 3, y + Utils.pixelToWorld(label.size.y / 2));
 				const geometry = new THREE.BoxGeometry(width, 3, height);
 
 				if (stats.inside) {
@@ -41,6 +52,7 @@ namespace Renderer {
 					line.position.set(x + width / 2, 1.5, y + height / 2);
 					this.add(line);
 					this.gameObject = line;
+					this.gameObject.visible = false;
 				}
 
 				const gameObject = this.gameObject;
@@ -53,6 +65,12 @@ namespace Renderer {
 					},
 					this
 				);
+
+				taroEntity.on('update-label', (data) => {
+					label.visible = true;
+					this.labelVisible = true;
+					label.update(data.text, data.color, data.bold);
+				});
 			}
 
 			show() {
@@ -77,6 +95,11 @@ namespace Renderer {
 			}
 
 			transform() {}
+
+			setGuiScale(scale: number) {
+				this.guiScale = scale;
+				this.label.setScale(scale);
+			}
 		}
 	}
 }
