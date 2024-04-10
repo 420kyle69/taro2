@@ -134,7 +134,7 @@ namespace Renderer {
 			getViewportBounds() {
 				const halfWidth = (window.innerWidth * 0.5) / this.camera.zoom;
 				const halfHeight = (window.innerHeight * 0.5) / this.camera.zoom;
-				const p = this.camera.target.position;
+				const p = this.camera.instance.position;
 				return {
 					x: Utils.worldToPixel(p.x) - halfWidth,
 					y: Utils.worldToPixel(p.z) - halfHeight,
