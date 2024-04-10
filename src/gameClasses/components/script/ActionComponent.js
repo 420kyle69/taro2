@@ -2138,20 +2138,35 @@ var ActionComponent = TaroEntity.extend({
 							taro.network.send('showUnitNameLabelFromPlayer', { unitId: unit.id() }, player._stats.clientId);
 						}
 						break;
-					case 'hideUnitFromPlayer':
+					case 'hideUnitFromPlayer': // deprecated
 						var unit = self._script.param.getValue(action.entity, vars);
 						var player = self._script.param.getValue(action.player, vars);
 						if (unit && player && player._stats && unit._stats) {
 							taro.network.send('hideUnitFromPlayer', { unitId: unit.id() }, player._stats.clientId);
 						}
 						break;
-					case 'showUnitToPlayer':
+					case 'showUnitToPlayer': // deprecated
 						var unit = self._script.param.getValue(action.entity, vars);
 						var player = self._script.param.getValue(action.player, vars);
 						if (unit && player && player._stats && unit._stats) {
 							taro.network.send('showUnitFromPlayer', { unitId: unit.id() }, player._stats.clientId);
 						}
 						break;
+
+					case 'hideEntity':
+						var entity = self._script.param.getValue(action.entity, vars);
+						if (entity && entity._stats) {
+							entity.hide();
+						}
+						break;
+
+					case 'showEntity':
+						var entity = self._script.param.getValue(action.entity, vars);
+						if (entity && entity._stats) {
+							entity.show();
+						}
+						break;
+					
 					case 'makeUnitInvisibleToNeutralPlayers':
 						if (entity && entity._category == 'unit') {
 							entity.streamUpdateData([{ isInvisibleToNeutral: true }, { isNameLabelHiddenToNeutral: true }]);
@@ -3768,7 +3783,7 @@ var ActionComponent = TaroEntity.extend({
 					taro.profiler.logTimeElapsed(actionPath, startTime);
 				}
 			} catch (e) {
-				console.log(e);
+				// console.log(e);
 				self._script.errorLog(e, path); // send error msg to client
 			}
 		}

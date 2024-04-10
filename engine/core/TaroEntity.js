@@ -99,23 +99,23 @@ var TaroEntity = TaroObject.extend({
 	},
 
 	/**
-	 * Sets the entity as visible and able to be interacted with.
+	 * Sets the entity as visible and able to be interacted with. Note that streaming of visibility state changes is not handled here. 
+	 * This is because the streaming is managed by the specific entity type (unit/item/projectile) classes themselves to save bandwidth. 
+	 * For instance, when a unit goes into hiding, all of its items will also hide. To avoid unnecessary streaming of each item's visibility 
+	 * state to clients, we can assume that all items of a hiding unit will also be hidden.
 	 * @example #Show a hidden entity
 	 *     entity.show();
 	 * @return {*} The object this method was called from to allow
 	 * method chaining.
 	 */
-	show: function () {
-		if (taro.isServer) {
-			// this._hidden = false; // never hide it, because it'll stop processing stream queue
-			this.streamUpdateData([{ isHidden: false }]);
-		} else if (taro.isClient) {
-			// this.disableInterpolation(false)
-			// add a little bit of delay before showing the item, so we don't see item translating from old location to new location
-			this._hidden = false;
-			this.emit('show');
-		}
+	_show: function () {
 
+		if (this._hidden) {
+			this._hidden = false;
+			if (taro.isClient) {
+				this.emit('show');
+			}
+		}
 		return this;
 	},
 
@@ -126,16 +126,14 @@ var TaroEntity = TaroObject.extend({
 	 * @return {*} The object this method was called from to allow
 	 * method chaining.
 	 */
-	hide: function () {
-		if (taro.isServer) {
-			// self._hidden = true; // never hide it, because it'll stop processing stream queue
-			this.streamUpdateData([{ isHidden: true }]);
-		} else if (taro.isClient) {
-			// this.disableInterpolation(true)
-			this._hidden = true;
-			this.emit('hide');
+	_hide: function () {
 
-			this.texture('');
+		if (!this._hidden) {
+			this._hidden = true;			
+			if (taro.isClient) {
+				this.emit('hide');
+				this.texture('');
+			}
 		}
 		return this;
 	},
@@ -185,14 +183,6 @@ var TaroEntity = TaroObject.extend({
 
 		self.previousState = newState;
 		self.updateBody(defaultData);
-	},
-
-	/**
-	 * Checks if the entity is hidden.
-	 * @returns {boolean} True if the entity is hidden.
-	 */
-	isHidden: function () {
-		return this._hidden === true;
 	},
 
 	/* Checks if entity should be invisible depending on diplomacy status of the owner player of this entity */
@@ -1956,7 +1946,7 @@ var TaroEntity = TaroObject.extend({
 	 */
 	tick: function (ctx, dontTransform) {
 		if (this._inView) taro.inViewCount++;
-		if ((!this._hidden && this._inView && (!this._parent || this._parent._inView)) || mode != 'play') {
+		if (this._inView && (!this._parent || this._parent._inView)) {
 			// var category = this._category || 'etc';
 			// if (taro.tickCount[category] == undefined)
 			// 	taro.tickCount[category] = 0;
@@ -4400,7 +4390,7 @@ var TaroEntity = TaroObject.extend({
 								'setFadingText',
 								'playerJoinedAgain',
 								'useQueued',
-								'hidden',
+								'isHidden',
 								'cameraTrackedUnitId',
 							];
 							var dataIsAttributeRelated = [
@@ -4494,16 +4484,20 @@ var TaroEntity = TaroObject.extend({
 									(this == taro.client.selectedUnit ||
 										(this._category == 'item' && this.getOwnerUnit() == taro.client.selectedUnit))
 								) {
-									return;
+									continue;
 								}
 								this.playEffect(newValue.type, newValue.data ? newValue.data : {});
 								break;
-							case 'hideUnit':
-								this.hide();
+		
+							case 'isHidden':
+								if (newValue == true) {
+									this.hide();
+								} else {
+									this.show();
+								}
+								
 								break;
-							case 'showUnit':
-								this.show();
-								break;
+							
 							case 'hideNameLabel':
 								this.emit('hide-label');
 								break;
@@ -4694,7 +4688,7 @@ var TaroEntity = TaroObject.extend({
 						}
 					}
 				} else {
-					return String(this.isHidden());
+					return String(this._hidden);
 				}
 				break;
 

@@ -83,7 +83,6 @@ var Item = TaroEntityPhysics.extend({
 
 			taro.server.totalItemsCreated++;
 		} else if (taro.isClient) {
-			self._hidden = self._stats.isHidden;
 			if (self._stats.currentBody == undefined || self._stats.currentBody.type == 'none' || self._hidden) {
 				self.hide();
 				this.emit('hide');
@@ -259,6 +258,24 @@ var Item = TaroEntityPhysics.extend({
 		if (taro.isClient && taro.game.data.defaultData.heightBasedZIndex) {
 			this.emit('setOwnerUnit', this._stats.ownerUnitId);
 		}
+	},
+
+	hide: function() {
+		if (taro.isServer) {
+			this.streamUpdateData([{ isHidden: true }]);
+		}
+		
+		TaroEntityPhysics.prototype.destroyBody.call(this);				
+		TaroEntity.prototype._hide.call(this);
+	},
+
+	show: function() {
+		if (taro.isServer) {
+			this.streamUpdateData([{ isHidden: false }]);
+		}
+
+		TaroEntityPhysics.prototype.updateBody.call(this);
+		TaroEntity.prototype._show.call(this);
 	},
 
 	hasQuantityRemaining: function () {
@@ -1098,19 +1115,6 @@ var Item = TaroEntityPhysics.extend({
 							}
 							// attaching entities
 							self._scaleBox2dBody(newValue);
-						}
-						break;
-
-					case 'hidden':
-						this._stats[attrName] = newValue;
-						if (taro.isClient) {
-							if (newValue) {
-								self.hide();
-								this.emit('hide');
-							} else {
-								self.show();
-								this.emit('show');
-							}
 						}
 						break;
 

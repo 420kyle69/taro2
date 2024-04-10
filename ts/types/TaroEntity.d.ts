@@ -28,7 +28,6 @@ declare class TaroEntity extends TaroObject {
 
 	_processTransform(): void;
 
-	isHidden(): boolean;
 	getOwnerUnit(): TaroEntity | undefined;
 	streamUpdateData(queuedData: UpdateData[]);
 	transformTexture(x: number, y: number, z: number, type?: boolean);

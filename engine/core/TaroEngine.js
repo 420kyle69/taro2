@@ -1685,7 +1685,6 @@ var TaroEngine = TaroEntity.extend({
 			} else {
 				// Calculate the frame delta
 				self._tickDelta = self._tickStart - self.lastTick;
-				// console.log("wtf tick", self._tickStart, self.lastTick, self._tickDelta)
 			}
 
 			taro.now = Date.now();

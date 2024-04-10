@@ -598,7 +598,6 @@ if (typeof window !== 'undefined') {
 			function (callback, element) {
 				setTimeout(function () {
 					callback(new Date.now());
-					console.log('wtf', new Date.now());
 				}, 1000 / 60);
 			}
 		);

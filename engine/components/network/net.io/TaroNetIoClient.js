@@ -495,7 +495,6 @@ var TaroNetIoClient = {
 							// console.log(entity != undefined, isTeleporting)
 							if (entity) {
 								if (isTeleporting) {
-									// console.log("wtf")
 									entity.teleportTo(x, y, rotate, isTeleportingCamera);
 								} else if (
 									entity == taro.client.selectedUnit &&
