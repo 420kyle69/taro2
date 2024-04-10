@@ -313,22 +313,22 @@ var MobileControlsComponent = TaroEntity.extend({
 					});
 
 					manager.on('end', function (evt, data) {
-						if (moveStick._isUp) {
-							self.upReleased();
-						}
-						if (moveStick._isLeft) {
-							self.leftReleased();
-						}
-						if (moveStick._isDown) {
-							self.downReleased();
-						}
-						if (moveStick._isRight) {
-							self.rightReleased();
-						}
-						moveStick._isUp = false;
-						moveStick._isDown = false;
-						moveStick._isLeft = false;
-						moveStick._isRight = false;
+						// if (moveStick._isUp) {
+						// 	self.upReleased();
+						// }
+						// if (moveStick._isLeft) {
+						// 	self.leftReleased();
+						// }
+						// if (moveStick._isDown) {
+						// 	self.downReleased();
+						// }
+						// if (moveStick._isRight) {
+						// 	self.rightReleased();
+						// }
+						// moveStick._isUp = false;
+						// moveStick._isDown = false;
+						// moveStick._isLeft = false;
+						// moveStick._isRight = false;
 					});
 				}
 				break;
@@ -430,6 +430,9 @@ var MobileControlsComponent = TaroEntity.extend({
 						color: 'black',
 					});
 
+					let usingMouseKeyDown = false;
+					let usingMouseKeyUp = false;
+
 					// handle look wheel inputs and fire
 					const handleShoot = (data) => {
 						let joystickData = {
@@ -440,10 +443,14 @@ var MobileControlsComponent = TaroEntity.extend({
 							this.mouseMovement(joystickData.power, joystickData.angle);
 
 							// when fire stick is moved to the red ring...
-							if (joystickData.power > 1) {
+							if (joystickData.power > 1 && !usingMouseKeyDown) {
 								// start firing
+								usingKeyDown = true;
+								usingKeyUp = false;
 								taro.client.myPlayer.control.keyDown('mouse', 'button1');
-							} else {
+							} else if (!usingMouseKeyUp && !usingMouseKeyDown) {
+								usingKeyUp = true;
+								usingKeyDown = false;
 								// otherwise stop firing
 								taro.client.myPlayer.control.keyUp('mouse', 'button1');
 							}
@@ -453,6 +460,8 @@ var MobileControlsComponent = TaroEntity.extend({
 					// handle end of shooting
 					const endShoot = () => {
 						if (taro.client.myPlayer) {
+							usingMouseKeyUp = true;
+							usingMouseKeyDown = false;
 							taro.client.myPlayer.control.keyUp('mouse', 'button1');
 						}
 					};
