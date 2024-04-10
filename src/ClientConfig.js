@@ -132,6 +132,9 @@ var taroClientConfig = {
 		'renderer/three/FloatingText.js',
 		'renderer/three/DynamicFloatingText.js',
 
+		'renderer/three/hud/Element.js',
+		'renderer/three/hud/ProgressBar.js',
+
 		'/client.js',
 		'/index.js',
 	],
