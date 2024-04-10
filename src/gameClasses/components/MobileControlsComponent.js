@@ -313,22 +313,22 @@ var MobileControlsComponent = TaroEntity.extend({
 					});
 
 					manager.on('end', function (evt, data) {
-						// if (moveStick._isUp) {
-						// 	self.upReleased();
-						// }
-						// if (moveStick._isLeft) {
-						// 	self.leftReleased();
-						// }
-						// if (moveStick._isDown) {
-						// 	self.downReleased();
-						// }
-						// if (moveStick._isRight) {
-						// 	self.rightReleased();
-						// }
-						// moveStick._isUp = false;
-						// moveStick._isDown = false;
-						// moveStick._isLeft = false;
-						// moveStick._isRight = false;
+						if (moveStick._isUp) {
+							self.upReleased();
+						}
+						if (moveStick._isLeft) {
+							self.leftReleased();
+						}
+						if (moveStick._isDown) {
+							self.downReleased();
+						}
+						if (moveStick._isRight) {
+							self.rightReleased();
+						}
+						moveStick._isUp = false;
+						moveStick._isDown = false;
+						moveStick._isLeft = false;
+						moveStick._isRight = false;
 					});
 				}
 				break;
