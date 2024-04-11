@@ -99,9 +99,9 @@ var TaroEntity = TaroObject.extend({
 	},
 
 	/**
-	 * Sets the entity as visible and able to be interacted with. Note that streaming of visibility state changes is not handled here. 
-	 * This is because the streaming is managed by the specific entity type (unit/item/projectile) classes themselves to save bandwidth. 
-	 * For instance, when a unit goes into hiding, all of its items will also hide. To avoid unnecessary streaming of each item's visibility 
+	 * Sets the entity as visible and able to be interacted with. Note that streaming of visibility state changes is not handled here.
+	 * This is because the streaming is managed by the specific entity type (unit/item/projectile) classes themselves to save bandwidth.
+	 * For instance, when a unit goes into hiding, all of its items will also hide. To avoid unnecessary streaming of each item's visibility
 	 * state to clients, we can assume that all items of a hiding unit will also be hidden.
 	 * @example #Show a hidden entity
 	 *     entity.show();
@@ -109,7 +109,6 @@ var TaroEntity = TaroObject.extend({
 	 * method chaining.
 	 */
 	_show: function () {
-
 		if (this._hidden) {
 			this._hidden = false;
 			if (taro.isClient) {
@@ -127,9 +126,8 @@ var TaroEntity = TaroObject.extend({
 	 * method chaining.
 	 */
 	_hide: function () {
-
 		if (!this._hidden) {
-			this._hidden = true;			
+			this._hidden = true;
 			if (taro.isClient) {
 				this.emit('hide');
 				this.texture('');
@@ -4488,16 +4486,16 @@ var TaroEntity = TaroObject.extend({
 								}
 								this.playEffect(newValue.type, newValue.data ? newValue.data : {});
 								break;
-		
+
 							case 'isHidden':
 								if (newValue == true) {
 									this.hide();
 								} else {
 									this.show();
 								}
-								
+
 								break;
-							
+
 							case 'hideNameLabel':
 								this.emit('hide-label');
 								break;
@@ -4958,7 +4956,7 @@ var TaroEntity = TaroObject.extend({
 					];
 					data = {
 						attributes: {},
-						// variables: {}
+						variables: {},
 					};
 					break;
 
@@ -4980,7 +4978,7 @@ var TaroEntity = TaroObject.extend({
 					];
 					data = {
 						attributes: {},
-						// variables: {}
+						variables: {},
 					};
 					break;
 
@@ -4998,7 +4996,7 @@ var TaroEntity = TaroObject.extend({
 					];
 					data = {
 						attributes: {},
-						// variables: {}
+						variables: {},
 					};
 					break;
 
@@ -5022,7 +5020,7 @@ var TaroEntity = TaroObject.extend({
 					];
 					data = {
 						attributes: {},
-						// variables: {}
+						variables: {},
 					};
 
 					// send sensitive information to the target clients only
@@ -5062,13 +5060,11 @@ var TaroEntity = TaroObject.extend({
 				}
 			}
 
-			// commented out variables as it's causing circular JSON error
-			// when a unit variable is set as a unit. we need to use unitId going fwd. not the actual unit.
-			// if (data.variables != undefined) {
-			// 	for (key in this.variables) {
-			// 		data.variables[key] = {value: this.variables[key].value};
-			// 	}
-			// }
+			if (data.variables != undefined) {
+				for (key in this.variables) {
+					data.variables[key] = { value: this.variables[key].value };
+				}
+			}
 
 			return data;
 		}
