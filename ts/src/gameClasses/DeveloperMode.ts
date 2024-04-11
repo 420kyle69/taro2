@@ -198,6 +198,8 @@ class DeveloperMode {
 	serverScriptData: Record<string, ScriptData>;
 	serverVariableData: Record<string, VariableData>;
 
+	regionTool: boolean;
+
 	constructor() {
 		if (taro.isClient) {
 			this.active = false;
@@ -260,6 +262,7 @@ class DeveloperMode {
 		taro.client.on('draw-region', () => {
 			//this.drawRegion();
 			this.activeButton = 'draw-region';
+			this.regionTool = true;
 		});
 		taro.client.on('brush', () => {
 			//this.brush();

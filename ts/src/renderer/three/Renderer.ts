@@ -31,6 +31,9 @@ namespace Renderer {
 			private raycastIntervalSeconds = 0.1;
 			private timeSinceLastRaycast = 0;
 
+			//private regionTool = false;
+			private regionDrawStart: { x: number; y: number } = { x: 0, y: 0 };
+
 			private constructor() {
 				// For JS interop; in case someone uses new Renderer.ThreeRenderer()
 				if (!Renderer._instance) {
@@ -72,12 +75,46 @@ namespace Renderer {
 					this.entityManager.scaleGui(1 / this.camera.zoom);
 				});
 
+				let line: THREE.LineSegments;
+				let width;
+				let height;
+
 				window.addEventListener('mousemove', (evt: MouseEvent) => {
 					this.pointer.set((evt.clientX / window.innerWidth) * 2 - 1, -(evt.clientY / window.innerHeight) * 2 + 1);
+					if (!Utils.isLeftButton(evt.buttons)) return;
+					if (taro.developerMode.regionTool) {
+						const worldPoint = this.camera.getWorldPoint(this.pointer);
+						console.log('worldPoint', Utils.worldToPixel(worldPoint.x), Utils.worldToPixel(worldPoint.z));
+						width = /*Utils.worldToPixel(*/ worldPoint.x /*)*/ - this.regionDrawStart.x;
+						height = /*Utils.worldToPixel(*/ worldPoint.z /*)*/ - this.regionDrawStart.y;
+
+						line?.geometry.dispose();
+						//line?.material.dispose();
+						this.scene.remove(line);
+
+						const geometry = new THREE.BoxGeometry(width, 3, height);
+						const edges = new THREE.EdgesGeometry(geometry);
+						line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x036ffc }));
+						line.position.set(this.regionDrawStart.x + width / 2, 2, this.regionDrawStart.y + height / 2);
+						line.visible = true;
+						this.scene.add(line);
+						//this.gameObject = line;
+						//this.gameObject.visible = false;
+						/*graphics.clear();
+						graphics.lineStyle(2, 0x036ffc, 1);
+						graphics.strokeRect(this.regionDrawStart.x, this.regionDrawStart.y, width, height);*/
+					}
 				});
 
 				window.addEventListener('mousedown', (event: MouseEvent) => {
-					if (
+					if (taro.developerMode.regionTool) {
+						const worldPoint = this.camera.getWorldPoint(this.pointer);
+						this.regionDrawStart = {
+							x: /*Utils.worldToPixel(*/ worldPoint.x /*)*/,
+							y: /*Utils.worldToPixel(*/ worldPoint.z /*)*/,
+						};
+						console.log('regionDrawStart', this.regionDrawStart.x, this.regionDrawStart.y);
+					} else if (
 						taro.developerMode.active &&
 						taro.developerMode.activeTab === 'map' &&
 						taro.developerMode.activeButton === 'cursor' &&
@@ -135,6 +172,40 @@ namespace Renderer {
 								}
 							}
 						}
+					}
+				});
+
+				window.addEventListener('mouseup', () => {
+					if (taro.developerMode.regionTool) {
+						taro.developerMode.regionTool = false;
+						this.camera.controls.enablePan = true;
+						this.camera.controls.enableRotate = true;
+						this.camera.controls.enableZoom = true;
+						line?.geometry.dispose();
+						line = null;
+
+						taro.mapEditorUI.highlightToolsButton('cursor');
+						let x = this.regionDrawStart.x;
+						let y = this.regionDrawStart.y;
+						if (width < 0) {
+							x = this.regionDrawStart.x + width;
+							width *= -1;
+						}
+						if (height < 0) {
+							y = this.regionDrawStart.y + height;
+							height *= -1;
+						}
+
+						inGameEditor.addNewRegion &&
+							inGameEditor.addNewRegion({
+								name: '',
+								x: Math.trunc(x),
+								y: Math.trunc(y),
+								width: Math.trunc(width),
+								height: Math.trunc(height),
+							});
+
+						this.regionDrawStart = null;
 					}
 				});
 
