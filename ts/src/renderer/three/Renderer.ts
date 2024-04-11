@@ -96,11 +96,6 @@ namespace Renderer {
 						line.position.set(this.regionDrawStart.x + width / 2, 2, this.regionDrawStart.y + height / 2);
 						line.visible = true;
 						this.scene.add(line);
-						//this.gameObject = line;
-						//this.gameObject.visible = false;
-						/*graphics.clear();
-						graphics.lineStyle(2, 0x036ffc, 1);
-						graphics.strokeRect(this.regionDrawStart.x, this.regionDrawStart.y, width, height);*/
 					}
 				});
 
