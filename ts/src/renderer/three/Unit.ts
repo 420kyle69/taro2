@@ -1,7 +1,10 @@
 namespace Renderer {
 	export namespace Three {
 		export class Unit extends AnimatedSprite {
-			label = new Label('', 'white', false, true);
+			// TODO: Create separate class for units and items/projectiles. Only
+			// units need labels.
+			label = new Label({ text: '', color: 'white', bold: false, renderOnTop: true });
+
 			cameraConfig = {
 				pointerLock: false,
 				pitchRange: { min: -90, max: 90 },
@@ -92,7 +95,7 @@ namespace Renderer {
 				taroEntity.on('update-label', (data) => {
 					entity.label.visible = true;
 					entity.labelVisible = true;
-					entity.label.update(data.text, data.color, data.bold);
+					entity.label.update({ text: data.text, color: data.color, bold: data.bold });
 				});
 
 				taroEntity.on('play-animation', (id) => {
@@ -178,11 +181,10 @@ namespace Renderer {
 					this.chat.update(text);
 				} else {
 					this.chat = new ChatBubble(text);
-					// TODO(nick): Refactor this after I move labels to the new
-					// architecture. And use the proper offsets then.
-					const textHeight = this.label.getTextSizeInPixels().height;
-					const y = this.label.offset.y + textHeight * 6;
-					this.chat.setOffset(new THREE.Vector2(0, y), new THREE.Vector2(0.5, 0));
+					const labelCenter = this.label.getCenter();
+					const labelOffset = this.label.height * labelCenter.y;
+					const chatOffset = labelOffset + this.label.height;
+					this.chat.setOffset(new THREE.Vector2(0, chatOffset), new THREE.Vector2(0.5, 0));
 					this.hud.add(this.chat);
 				}
 			}
@@ -203,7 +205,8 @@ namespace Renderer {
 				super.setScale(sx, sy);
 
 				const size = this.getSizeInPixels();
-				this.label.setOffset(new THREE.Vector2(0, size.height), new THREE.Vector2(0.5, -1));
+				const unitHeightInLabelHeightUnits = size.height / this.label.height;
+				this.label.setCenter(0.5, 2 + unitHeightInLabelHeightUnits);
 			}
 
 			setGuiScale(scale: number) {

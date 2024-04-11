@@ -1,5 +1,7 @@
 namespace Renderer {
 	export namespace Three {
+		// TODO: Now some HUD nodes inherit from Node and others from Element.
+		// Streamline this to use only one base class.
 		export abstract class Element extends THREE.Object3D {
 			unscaledWidth: number;
 			unscaledHeight: number;
@@ -8,7 +10,7 @@ namespace Renderer {
 
 			protected sprite: THREE.Sprite;
 			protected canvas = document.createElement('canvas');
-			protected ctx = this.canvas.getContext('2d');
+			protected ctx = this.canvas.getContext('2d', { willReadFrequently: true });
 
 			constructor(x: number, y: number, z: number, width = 0, height = 0) {
 				super();
@@ -20,7 +22,6 @@ namespace Renderer {
 				const texture = new THREE.Texture();
 				texture.magFilter = TextureRepository.instance().filter;
 				texture.generateMipmaps = false;
-				texture.needsUpdate = true;
 				texture.colorSpace = THREE.SRGBColorSpace;
 				const material = new THREE.SpriteMaterial({
 					map: texture,
@@ -29,7 +30,7 @@ namespace Renderer {
 					depthTest: true,
 				});
 				this.sprite = new THREE.Sprite(material);
-				this.sprite.renderOrder = 999;
+				this.sprite.renderOrder = 499;
 
 				this.sprite.scale.x = Utils.pixelToWorld(width) * this.scale.x;
 				this.sprite.scale.y = Utils.pixelToWorld(height) * this.scale.y;
@@ -84,15 +85,29 @@ namespace Renderer {
 			}
 
 			set width(width: number) {
+				this.unscaledWidth = width;
 				this.sprite.scale.x = Utils.pixelToWorld(width) * this.scale.x;
 			}
 
 			set height(height: number) {
+				this.unscaledHeight = height;
 				this.sprite.scale.y = Utils.pixelToWorld(height) * this.scale.y;
 			}
 
 			setCenter(x: number, y: number) {
-				this.sprite.center.set(x, 1.0 - y);
+				this.sprite.center.set(x, 1 - y);
+			}
+
+			setCenterX(x: number) {
+				this.sprite.center.x = x;
+			}
+
+			setCenterY(y: number) {
+				this.sprite.center.y = 1 - y;
+			}
+
+			getCenter() {
+				return { x: this.sprite.center.x, y: 1 - this.sprite.center.y };
 			}
 
 			setScale(scale: number) {
@@ -112,12 +127,22 @@ namespace Renderer {
 				this.sprite.material.map.needsUpdate = true;
 			}
 
+			renderOnTopOfEverything() {
+				this.sprite.material.depthTest = false;
+				this.sprite.material.depthWrite = false;
+				this.sprite.renderOrder = 999;
+			}
+
 			protected createUpscaledTextureImage(
 				draw: (upscaledWidth: number, upscaledHeight: number, upscaleFactor: number) => void,
 				upscaleFactor = 8
 			) {
 				const w = this.width * upscaleFactor;
 				const h = this.height * upscaleFactor;
+
+				if (w < 1 || h < 1) {
+					console.error('Element.createUpscaledTextureImage: Invalid width or height');
+				}
 
 				this.canvas.width = w;
 				this.canvas.height = h;

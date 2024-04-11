@@ -119,7 +119,7 @@ namespace Renderer {
 				};
 
 				window.addEventListener('keypress', (evt) => {
-					if (!this.isDevelopmentMode) return;
+					// if (!this.isDevelopmentMode) return;
 
 					if (evt.key === 'l') {
 						this.isLocked ? this.unlock() : this.lock();
