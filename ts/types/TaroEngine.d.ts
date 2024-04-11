@@ -87,5 +87,13 @@ declare class TaroEngine extends TaroClass {
 
 	mapEditorUI: any;
 
-	getTilesetFromType: ({ tilesets, type, onlyIndex }: { tilesets: Array<any>, type: 'top' | 'side', onlyIndex?: boolean }) => any;
+	getTilesetFromType: ({
+		tilesets,
+		type,
+		onlyIndex,
+	}: {
+		tilesets: Array<any>;
+		type: 'top' | 'side';
+		onlyIndex?: boolean;
+	}) => any;
 }
