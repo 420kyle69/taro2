@@ -6,7 +6,7 @@ namespace Renderer {
 			z: 0,
 			width: 96,
 			height: 16,
-			radius: 0,
+			radius: 7,
 			bgColor: '#000',
 			bgAlpha: 0,
 			fgColor: '#fff',
@@ -19,10 +19,10 @@ namespace Renderer {
 			decimalPlaces: 0,
 			trailingZeros: false,
 			fontSize: 14,
-			letterSpacing: 0,
+			letterSpacing: -0.8,
 		};
 
-		type Params = Partial<typeof defaultConfig>;
+		export type ProgressBarParams = Partial<typeof defaultConfig>;
 
 		export class ProgressBar extends Element {
 			radius: number;
@@ -40,14 +40,14 @@ namespace Renderer {
 			fontSize: number;
 			letterSpacing: number;
 
-			constructor(params: Params) {
+			constructor(params: ProgressBarParams) {
 				const config = { ...defaultConfig, ...params };
 				super(config.x, config.y, config.z, config.width, config.height);
 
 				this.update(config);
 			}
 
-			update(params: Params) {
+			update(params: ProgressBarParams) {
 				Object.assign(this, params);
 
 				// The alpha can be set via the hex color in the editor. Three.js

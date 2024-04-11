@@ -103,6 +103,10 @@ namespace Renderer {
 				this.sprite.material.rotation = rad;
 			}
 
+			setOpacity(opacity: number) {
+				this.sprite.material.opacity = opacity;
+			}
+
 			setTextureImage(image: ImageData) {
 				this.sprite.material.map.image = image;
 				this.sprite.material.map.needsUpdate = true;

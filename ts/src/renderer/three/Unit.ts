@@ -14,6 +14,8 @@ namespace Renderer {
 			private chat: ChatBubble;
 			private labelVisible;
 
+			private hud = new THREE.Group();
+
 			constructor(
 				public taroId: string,
 				public ownerId: string,
@@ -24,9 +26,10 @@ namespace Renderer {
 
 				this.label.visible = false;
 				this.labelVisible = this.label.visible;
-				this.add(this.label);
 
-				this.add(this.attributeBars);
+				this.add(this.hud);
+				this.hud.add(this.label);
+				this.hud.add(this.attributeBars);
 			}
 
 			static create(taroEntity: TaroEntityPhysics) {
@@ -72,11 +75,6 @@ namespace Renderer {
 						entity.position.x = Utils.pixelToWorld(data.x) - 0.5;
 						entity.position.z = Utils.pixelToWorld(data.y) - 0.5;
 
-						// let angle = -data.rotation;
-						// if (ent.billboard && (entity instanceof Item || entity instanceof Projectile)) {
-						// 	// Might be able to delete this once units rotate with camera yaw.
-						// 	angle -= this.camera.controls.getAzimuthalAngle();
-						// }
 						entity.setRotationY(-data.rotation);
 						const flip = taroEntity._stats.flip;
 						entity.setFlip(flip % 2 === 1, flip > 1);
@@ -155,8 +153,8 @@ namespace Renderer {
 							.to({ opacity: to }, 100)
 							.onUpdate(({ opacity }) => {
 								this.label.setOpacity(opacity);
-								for (const bar of this.attributeBars.children) {
-									(bar as AttributeBar).setOpacity(opacity);
+								for (const bar of this.attributeBars.children as ProgressBar[]) {
+									bar.setOpacity(opacity);
 								}
 							})
 							.onComplete(onComplete)
@@ -183,98 +181,76 @@ namespace Renderer {
 					this.chat.update(text);
 				} else {
 					this.chat = new ChatBubble(text);
-					this.chat.setScale(this.guiScale);
+					// TODO(nick): Refactor this after I move labels to the new
+					// architecture. And use the proper offsets then.
 					const textHeight = this.label.getTextSizeInPixels().height;
-					this.chat.setOffset(
-						new THREE.Vector2(0, this.getSizeInPixels().height * 0.5 + textHeight * 4),
-						new THREE.Vector2(0.5, 0)
-					);
-					this.add(this.chat);
+					const y = this.label.offset.y + textHeight * 6;
+					this.chat.setOffset(new THREE.Vector2(0, y), new THREE.Vector2(0.5, 0));
+					this.hud.add(this.chat);
 				}
 			}
 
 			renderAttributes(data) {
-				this.attributeBars.remove(...this.attributeBars.children);
-				data.attrs.forEach((attributeData) => this.attributeBars.add(this.createAttributeBar(attributeData)));
+				for (const child of this.attributeBars.children) {
+					(child as Element).destroy();
+				}
+
+				this.attributeBars.clear();
+
+				for (const attr of data.attrs as AttributeData[]) {
+					const config = Mapper.ProgressBar(attr);
+					const bar = new ProgressBar(config);
+					bar.name = data.type || data.key;
+					this.attributeBars.add(bar);
+				}
+
+				const emptyRows = 2; // For spacing
+				for (const [idx, bar] of (this.attributeBars.children as ProgressBar[]).entries()) {
+					bar.setCenter(0.5, (idx + 1 + emptyRows) * -1);
+				}
+
+				const size = this.getSizeInPixels();
+				const halfHeight = size.height * 0.5;
+				this.attributeBars.position.z = Utils.pixelToWorld(halfHeight);
 			}
 
 			updateAttribute(data: { attr: AttributeData; shouldRender: boolean }) {
-				let barToUpdate: AttributeBar;
+				let barToUpdate: ProgressBar;
 
-				// Refactor attributeBars into map (name -> bar)
-				for (const bar of this.attributeBars.children) {
+				for (const bar of this.attributeBars.children as ProgressBar[]) {
 					if (bar.name === data.attr.type) {
-						barToUpdate = bar as AttributeBar;
+						barToUpdate = bar;
 						break;
 					}
 				}
 
-				if (!data.shouldRender) {
-					if (barToUpdate) {
-						barToUpdate.visible = data.shouldRender;
-					}
+				const config = Mapper.ProgressBar(data.attr);
 
+				if (!barToUpdate) {
+					const bar = new ProgressBar(config);
+					bar.name = data.attr.type || data.attr.key;
+					this.attributeBars.add(bar);
 					return;
 				}
 
-				if (barToUpdate) {
-					barToUpdate.update(data.attr);
-				} else {
-					this.attributeBars.add(this.createAttributeBar(data.attr));
+				if (!data.shouldRender) {
+					barToUpdate.visible = data.shouldRender;
+					return;
 				}
+
+				barToUpdate.update(config);
 			}
 
 			setScale(sx: number, sy: number) {
 				super.setScale(sx, sy);
 
 				const size = this.getSizeInPixels();
-				const halfHeight = size.height * 0.5;
-
-				this.label.setOffset(new THREE.Vector2(0, halfHeight), new THREE.Vector2(0.5, -1));
-
-				for (const [idx, bar] of this.attributeBars.children.entries()) {
-					const height = (bar as AttributeBar).height;
-					const yOffset = idx * height * 1.1;
-					(bar as AttributeBar).setOffset(
-						new THREE.Vector2(
-							0,
-							// NOTE(nick): Mostly taken from the Phaser renderer and trial and error.
-							-(halfHeight + height * (1 / 1.1) + 16 * this.guiScale + yOffset)
-						)
-					),
-						new THREE.Vector2(0.5, 1);
-				}
+				this.label.setOffset(new THREE.Vector2(0, size.height), new THREE.Vector2(0.5, -1));
 			}
 
 			setGuiScale(scale: number) {
 				this.guiScale = scale;
-
-				this.label.setScale(scale);
-
-				for (const bar of this.attributeBars.children) {
-					(bar as AttributeBar).setScale(scale);
-				}
-
-				if (this.chat) {
-					this.chat.setScale(scale);
-				}
-			}
-
-			private createAttributeBar(data) {
-				const bar = new AttributeBar();
-				bar.update(data);
-				const yOffset = (data.index - 1) * bar.height * 1.1;
-
-				bar.setOffset(
-					new THREE.Vector2(
-						0,
-						-(Utils.worldToPixel(this.scaleUnflipped.y * 0.5) + bar.height * (1 / 1.1) + 16 * this.guiScale + yOffset)
-					)
-				),
-					new THREE.Vector2(0.5, 1);
-
-				bar.setScale(this.guiScale);
-				return bar;
+				this.hud.scale.setScalar(this.guiScale);
 			}
 		}
 	}
