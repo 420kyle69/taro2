@@ -84,12 +84,10 @@ namespace Renderer {
 					if (!Utils.isLeftButton(evt.buttons)) return;
 					if (taro.developerMode.regionTool) {
 						const worldPoint = this.camera.getWorldPoint(this.pointer);
-						console.log('worldPoint', Utils.worldToPixel(worldPoint.x), Utils.worldToPixel(worldPoint.z));
-						width = /*Utils.worldToPixel(*/ worldPoint.x /*)*/ - this.regionDrawStart.x;
-						height = /*Utils.worldToPixel(*/ worldPoint.z /*)*/ - this.regionDrawStart.y;
+						width = worldPoint.x - this.regionDrawStart.x;
+						height = worldPoint.z - this.regionDrawStart.y;
 
 						line?.geometry.dispose();
-						//line?.material.dispose();
 						this.scene.remove(line);
 
 						const geometry = new THREE.BoxGeometry(width, 3, height);
@@ -107,17 +105,17 @@ namespace Renderer {
 				});
 
 				window.addEventListener('mousedown', (event: MouseEvent) => {
-					if (taro.developerMode.regionTool) {
+					const developerMode = taro.developerMode;
+					if (developerMode.regionTool) {
 						const worldPoint = this.camera.getWorldPoint(this.pointer);
 						this.regionDrawStart = {
-							x: /*Utils.worldToPixel(*/ worldPoint.x /*)*/,
-							y: /*Utils.worldToPixel(*/ worldPoint.z /*)*/,
+							x: worldPoint.x,
+							y: worldPoint.z,
 						};
-						console.log('regionDrawStart', this.regionDrawStart.x, this.regionDrawStart.y);
 					} else if (
-						taro.developerMode.active &&
-						taro.developerMode.activeTab === 'map' &&
-						taro.developerMode.activeButton === 'cursor' &&
+						developerMode.active &&
+						developerMode.activeTab === 'map' &&
+						developerMode.activeButton === 'cursor' &&
 						Utils.isLeftButton(event.buttons)
 					) {
 						const raycaster = new THREE.Raycaster();
