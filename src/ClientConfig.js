@@ -135,6 +135,7 @@ var taroClientConfig = {
 		'renderer/three/Mapper.js',
 		'renderer/three/hud/Element.js',
 		'renderer/three/hud/ProgressBar.js',
+		'renderer/three/hud/Attributes.js',
 
 		'/client.js',
 		'/index.js',

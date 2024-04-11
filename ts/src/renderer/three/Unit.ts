@@ -9,12 +9,11 @@ namespace Renderer {
 			};
 			hidden = false;
 
+			private hud = new THREE.Group();
+			private attributes = new Attributes();
 			private guiScale = 1;
-			private attributeBars = new THREE.Group();
 			private chat: ChatBubble;
 			private labelVisible;
-
-			private hud = new THREE.Group();
 
 			constructor(
 				public taroId: string,
@@ -29,7 +28,7 @@ namespace Renderer {
 
 				this.add(this.hud);
 				this.hud.add(this.label);
-				this.hud.add(this.attributeBars);
+				this.hud.add(this.attributes);
 			}
 
 			static create(taroEntity: TaroEntityPhysics) {
@@ -62,7 +61,7 @@ namespace Renderer {
 				taroEntity.on('show-label', () => (entity.labelVisible = entity.label.visible = true));
 				taroEntity.on('hide-label', () => (entity.labelVisible = entity.label.visible = false));
 				taroEntity.on('render-attributes', (data) => (entity as Unit).renderAttributes(data));
-				taroEntity.on('update-attribute', (data) => (entity as Unit).updateAttribute(data));
+				taroEntity.on('update-attribute', (data) => (entity as Unit).attributes.update(data));
 				taroEntity.on('render-chat-bubble', (text) => (entity as Unit).renderChat(text));
 				taroEntity.on('layer', (layer) => entity.setLayer(layer));
 				taroEntity.on('depth', (depth) => entity.setDepth(depth));
@@ -153,9 +152,7 @@ namespace Renderer {
 							.to({ opacity: to }, 100)
 							.onUpdate(({ opacity }) => {
 								this.label.setOpacity(opacity);
-								for (const bar of this.attributeBars.children as ProgressBar[]) {
-									bar.setOpacity(opacity);
-								}
+								this.attributes.setOpacity(opacity);
 							})
 							.onComplete(onComplete)
 							.start();
@@ -164,11 +161,11 @@ namespace Renderer {
 					if (hidden) {
 						fadeAnimation(1, 0, () => {
 							this.label.visible = false;
-							this.attributeBars.visible = false;
+							this.attributes.visible = false;
 						});
 					} else {
 						this.label.visible = this.labelVisible;
-						this.attributeBars.visible = true;
+						this.attributes.visible = true;
 						fadeAnimation(0, 1);
 					}
 				}
@@ -190,55 +187,16 @@ namespace Renderer {
 				}
 			}
 
+			// NOTE: This whole function seems off to me. What should it being
+			// exactly? Clearly it's not a render function. Dive a little deeper
+			// into this when you have time.
 			renderAttributes(data) {
-				for (const child of this.attributeBars.children) {
-					(child as Element).destroy();
-				}
-
-				this.attributeBars.clear();
-
-				for (const attr of data.attrs as AttributeData[]) {
-					const config = Mapper.ProgressBar(attr);
-					const bar = new ProgressBar(config);
-					bar.name = data.type || data.key;
-					this.attributeBars.add(bar);
-				}
-
-				const emptyRows = 2; // For spacing
-				for (const [idx, bar] of (this.attributeBars.children as ProgressBar[]).entries()) {
-					bar.setCenter(0.5, (idx + 1 + emptyRows) * -1);
-				}
+				this.attributes.clear();
+				this.attributes.addAttributes(data);
 
 				const size = this.getSizeInPixels();
 				const halfHeight = size.height * 0.5;
-				this.attributeBars.position.z = Utils.pixelToWorld(halfHeight);
-			}
-
-			updateAttribute(data: { attr: AttributeData; shouldRender: boolean }) {
-				let barToUpdate: ProgressBar;
-
-				for (const bar of this.attributeBars.children as ProgressBar[]) {
-					if (bar.name === data.attr.type) {
-						barToUpdate = bar;
-						break;
-					}
-				}
-
-				const config = Mapper.ProgressBar(data.attr);
-
-				if (!barToUpdate) {
-					const bar = new ProgressBar(config);
-					bar.name = data.attr.type || data.attr.key;
-					this.attributeBars.add(bar);
-					return;
-				}
-
-				if (!data.shouldRender) {
-					barToUpdate.visible = data.shouldRender;
-					return;
-				}
-
-				barToUpdate.update(config);
+				this.attributes.position.z = Utils.pixelToWorld(halfHeight);
 			}
 
 			setScale(sx: number, sy: number) {
