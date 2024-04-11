@@ -191,6 +191,7 @@ const debounceRecalcPhysics = debounce(recalcWallsPhysics, 0);
 class DeveloperMode {
 	active: boolean;
 	activeTab: devModeTab;
+	activeButton: string;
 
 	initEntities: ActionData[];
 
@@ -249,6 +250,24 @@ class DeveloperMode {
 					};
 				}
 			});
+		});
+
+		this.activeButton = 'cursor';
+		taro.client.on('cursor', () => {
+			//this.cursor();
+			this.activeButton = 'cursor';
+		});
+		taro.client.on('draw-region', () => {
+			//this.drawRegion();
+			this.activeButton = 'draw-region';
+		});
+		taro.client.on('brush', () => {
+			//this.brush();
+			this.activeButton = 'brush';
+		});
+		taro.client.on('empty-tile', () => {
+			//this.emptyTile();
+			this.activeButton = 'eraser';
 		});
 	}
 

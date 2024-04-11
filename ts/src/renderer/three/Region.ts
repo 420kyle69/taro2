@@ -62,6 +62,7 @@ namespace Renderer {
 					() => {
 						gameObject.position.x = Utils.pixelToWorld(stats.x) + width / 2;
 						gameObject.position.z = Utils.pixelToWorld(stats.y) + height / 2;
+						label.position.set(x + Utils.pixelToWorld(label.size.x) / 2, 3, y + Utils.pixelToWorld(label.size.y / 2));
 					},
 					this
 				);
