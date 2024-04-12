@@ -24,7 +24,6 @@ namespace Renderer {
 				const renderer = Three.instance();
 				this.setGuiScale(1 / renderer.camera.zoom);
 
-				//const stats = taroEntity._stats.default;
 				const color = stats.inside ? Number(`0x${stats.inside.substring(1)}`) : 0x000000;
 
 				const x = Utils.pixelToWorld(stats.x);
@@ -77,12 +76,6 @@ namespace Renderer {
 					},
 					this
 				);
-
-				taroEntity.on('update-label', (data) => {
-					label.visible = true;
-					this.labelVisible = true;
-					label.update(data.text, data.color, data.bold);
-				});
 			}
 
 			show() {
@@ -108,8 +101,6 @@ namespace Renderer {
 
 			updateLabel(name: string) {
 				const label = this.label;
-				//label.visible = true;
-				//this.labelVisible = true;
 				label.update(name);
 			}
 
