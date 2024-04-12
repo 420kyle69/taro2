@@ -34,6 +34,7 @@ namespace Renderer {
 
 				label.position.set(x + Utils.pixelToWorld(label.size.x) / 2, 3, y + Utils.pixelToWorld(label.size.y / 2));
 				const geometry = new THREE.BoxGeometry(1, 3, 1);
+				let gameObject = this.gameObject;
 
 				if (stats.inside) {
 					this.devModeOnly = false;
@@ -43,33 +44,35 @@ namespace Renderer {
 						transparent: true,
 					});
 					const mesh = new THREE.Mesh(geometry, material);
-					mesh.renderOrder = 997;
-					mesh.position.set(x + width / 2, 1.5, y + height / 2);
-					mesh.scale.set(width, 1, height);
-					this.add(mesh);
-					this.gameObject = mesh;
+					gameObject = this.gameObject = mesh;
 				} else {
 					this.devModeOnly = true;
 					const edges = new THREE.EdgesGeometry(geometry);
 					const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x11fa05 }));
-					line.position.set(x + width / 2, 1.5, y + height / 2);
-					line.scale.set(width, 1, height);
-					this.add(line);
-					this.gameObject = line;
-					this.gameObject.visible = false;
+					gameObject = this.gameObject = line;
 				}
 
-				const gameObject = this.gameObject;
+				gameObject.position.set(x + width / 2, 1.5, y + height / 2);
+				gameObject.scale.set(width, 1, height);
+				this.add(gameObject);
+
+				if ((taro.developerMode.activeTab === 'map' && this.devModeOnly) || !this.devModeOnly) {
+					gameObject.visible = true;
+					label.visible = true;
+					this.labelVisible = true;
+				} else {
+					gameObject.visible = false;
+				}
 
 				taroEntity.on(
 					'transform',
 					() => {
 						gameObject.position.set(
-							Utils.pixelToWorld(stats.x) + width / 2,
+							Utils.pixelToWorld(stats.x) + Utils.pixelToWorld(stats.width) / 2,
 							1.5,
-							Utils.pixelToWorld(stats.y) + height / 2
+							Utils.pixelToWorld(stats.y) + Utils.pixelToWorld(stats.height) / 2
 						);
-						gameObject.scale.set(width, 1, height);
+						gameObject.scale.set(Utils.pixelToWorld(stats.width), 1, Utils.pixelToWorld(stats.height));
 						label.position.set(x + Utils.pixelToWorld(label.size.x) / 2, 3, y + Utils.pixelToWorld(label.size.y / 2));
 					},
 					this
@@ -101,6 +104,13 @@ namespace Renderer {
 		
 				label && (label.visible = false);
 				rt && (rt.visible = false);*/
+			}
+
+			updateLabel(name: string) {
+				const label = this.label;
+				//label.visible = true;
+				//this.labelVisible = true;
+				label.update(name);
 			}
 
 			transform() {}
