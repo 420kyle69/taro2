@@ -156,10 +156,9 @@ var ActionComponent = TaroEntity.extend({
 										// ask client to reload game
 										taro.network.send(
 											'movePlayerToMap',
-											{ type: 'movePlayerToMap', gameSlug: res.gameSlug },
+											{ type: 'movePlayerToMap', gameSlug: res.gameSlug, autoJoinToken: res.autoJoinToken },
 											player._stats.clientId
 										);
-										console.log('map reload', res);
 									}
 								});
 							}
