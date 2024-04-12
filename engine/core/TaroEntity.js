@@ -4136,15 +4136,18 @@ var TaroEntity = TaroObject.extend({
 			self.streamUpdateData([{ attributesRegenerateRate: regSpeed }]);
 
 			var variables = persistData.variables;
+
 			for (var variableKey in variables) {
 				var persistVariable = variables[variableKey];
 
 				if (self && self.variables && self.variables[variableKey]) {
-					self.variables[variableKey] = persistVariable;
+					// self.variables[variableKey] = persistVariable;
+					// use variable update method instead of directly writing to variables
+					self.variable.update(variableKey, persistVariable.value);
 				}
 			}
 
-			self.variable.init(self);
+			// self.variable.init(self);
 		}
 	},
 
