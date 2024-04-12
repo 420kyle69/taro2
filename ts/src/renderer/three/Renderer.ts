@@ -86,16 +86,8 @@ namespace Renderer {
 						const worldPoint = this.camera.getWorldPoint(this.pointer);
 						width = worldPoint.x - this.regionDrawStart.x;
 						height = worldPoint.z - this.regionDrawStart.y;
-
-						line?.geometry.dispose();
-						this.scene.remove(line);
-
-						const geometry = new THREE.BoxGeometry(width, 3, height);
-						const edges = new THREE.EdgesGeometry(geometry);
-						line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x036ffc }));
 						line.position.set(this.regionDrawStart.x + width / 2, 2, this.regionDrawStart.y + height / 2);
-						line.visible = true;
-						this.scene.add(line);
+						line.scale.set(width, 1, height);
 					}
 				});
 
@@ -107,6 +99,14 @@ namespace Renderer {
 							x: worldPoint.x,
 							y: worldPoint.z,
 						};
+
+						const geometry = new THREE.BoxGeometry(1, 3, 1);
+						const edges = new THREE.EdgesGeometry(geometry);
+						line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x036ffc }));
+						line.position.set(this.regionDrawStart.x + width / 2, 2, this.regionDrawStart.y + height / 2);
+						line.scale.set(width, 1, height);
+						line.visible = true;
+						this.scene.add(line);
 					} else if (
 						developerMode.active &&
 						developerMode.activeTab === 'map' &&
