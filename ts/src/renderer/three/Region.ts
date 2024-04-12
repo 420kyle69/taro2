@@ -20,7 +20,7 @@ namespace Renderer {
 				this.labelVisible = label.visible;
 				label.update(taroEntity._stats.id);
 				this.add(label);
-
+				this.name = this.taroEntity._stats.id;
 				const renderer = Three.instance();
 				this.setGuiScale(1 / renderer.camera.zoom);
 
