@@ -149,7 +149,7 @@ var ActionComponent = TaroEntity.extend({
 							var player = self._script.param.getValue(action.player, vars);
 							var gameId = self._script.param.getValue(action.gameId, vars);
 
-							if (player && player._stats && player._stats.clientId && player._stats.userId) {
+							if (player && player._stats && player._stats.clientId) {
 								taro.workerComponent.movePlayerToMap(player._stats.userId, gameId).then((res) => {
 									console.log('user switched map', res);
 									if (res && res.gameSlug) {
