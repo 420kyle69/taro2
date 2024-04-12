@@ -152,7 +152,7 @@ var ActionComponent = TaroEntity.extend({
 							if (player && player._stats && player._stats.clientId && player._stats.userId) {
 								taro.workerComponent.movePlayerToMap(player._stats.userId, gameId).then((res) => {
 									console.log('user switched map', res);
-									if (res) {
+									if (res && res.gameSlug) {
 										// ask client to reload game
 										taro.network.send(
 											'movePlayerToMap',
