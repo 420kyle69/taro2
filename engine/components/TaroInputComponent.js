@@ -268,11 +268,14 @@ var TaroInputComponent = TaroEventingClass.extend({
 		};
 
 		// Listen for mouse events
-		canvas.addEventListener('mousedown', this._evRef.mousedown, false);
-		window.addEventListener('mouseup', this._evRef.mouseup, false);
+		// Ignore Mouse Events when on Mobile
+		if (!taro.isMobile) {
+			canvas.addEventListener('mousedown', this._evRef.mousedown, false);
+			window.addEventListener('mouseup', this._evRef.mouseup, false);
 
-		canvas.addEventListener('mousemove', this._evRef.mousemove, false);
-		canvas.addEventListener('wheel', this._evRef.mousewheel, false);
+			canvas.addEventListener('mousemove', this._evRef.mousemove, false);
+			canvas.addEventListener('wheel', this._evRef.mousewheel, false);
+		}
 
 		// Touch events
 		canvas.addEventListener('touchmove', this._evRef.touchmove, false);

@@ -120,6 +120,10 @@ var ControlComponent = TaroEntity.extend({
 	mouseMove(x, y, yaw, pitch) {
 		// Same conditional logic as line 155
 		{
+			if (taro.isMobile) {
+				return;
+			}
+
 			var player = this._entity;
 			if (!player) return;
 
