@@ -62,8 +62,38 @@ namespace Renderer {
 				taroEntity.on(
 					'transform',
 					() => {
-						gameObject.position.x = Utils.pixelToWorld(stats.x) + width / 2;
-						gameObject.position.z = Utils.pixelToWorld(stats.y) + height / 2;
+						if (this.devModeOnly) {
+							const line = this.gameObject as THREE.LineSegments;
+							line?.geometry.dispose();
+						} else {
+							const mesh = this.gameObject as THREE.Mesh;
+							mesh?.geometry.dispose();
+						}
+						this.remove(gameObject);
+
+						const geometry = new THREE.BoxGeometry(width, 3, height);
+
+						if (stats.inside) {
+							this.devModeOnly = false;
+							const material = new THREE.MeshBasicMaterial({
+								color: color,
+								opacity: stats.alpha,
+								transparent: true,
+							});
+							const mesh = new THREE.Mesh(geometry, material);
+							mesh.renderOrder = 997;
+							mesh.position.set(x + width / 2, 1.5, y + height / 2);
+							this.add(mesh);
+							this.gameObject = mesh;
+						} else {
+							this.devModeOnly = true;
+							const edges = new THREE.EdgesGeometry(geometry);
+							const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x11fa05 }));
+							line.position.set(x + width / 2, 1.5, y + height / 2);
+							this.add(line);
+							this.gameObject = line;
+							this.gameObject.visible = false;
+						}
 						label.position.set(x + Utils.pixelToWorld(label.size.x) / 2, 3, y + Utils.pixelToWorld(label.size.y / 2));
 					},
 					this

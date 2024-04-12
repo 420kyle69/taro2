@@ -187,6 +187,7 @@ namespace Renderer {
 						this.camera.controls.enableRotate = true;
 						this.camera.controls.enableZoom = true;
 						line?.geometry.dispose();
+						this.scene.remove(line);
 						line = null;
 
 						taro.mapEditorUI.highlightToolsButton('cursor');
