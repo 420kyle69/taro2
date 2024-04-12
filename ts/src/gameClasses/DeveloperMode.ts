@@ -254,6 +254,10 @@ class DeveloperMode {
 			});
 		});
 
+		taro.client.on('editRegion', (data: RegionData) => {
+			this.updateRegion(data);
+		});
+
 		this.activeButton = 'cursor';
 		taro.client.on('cursor', () => {
 			//this.cursor();
@@ -672,6 +676,28 @@ class DeveloperMode {
 			// broadcast region change to all clients
 			taro.network.send<any>('editRegion', data);
 		}
+	}
+
+	updateRegion(data: RegionData): void {
+		if (data.newKey && data.name !== data.newKey) {
+			const region = taro.regionManager.getRegionById(data.name);
+			if (region) region._stats.id = data.newKey;
+			taro.client.emit('update-region-name', { name: data.name, newName: data.newKey });
+		} else if (data.showModal) {
+			inGameEditor.addNewRegion &&
+				inGameEditor.addNewRegion({
+					name: data.name,
+					x: data.x,
+					y: data.y,
+					width: data.width,
+					height: data.height,
+					userId: data.userId,
+					alpha: data.alpha,
+					inside: data.inside,
+				});
+		}
+
+		inGameEditor.updateRegionInReact && inGameEditor.updateRegionInReact(data);
 	}
 
 	editVariable(data: Record<string, VariableData>, clientId: string): void {

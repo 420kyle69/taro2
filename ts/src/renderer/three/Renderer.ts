@@ -225,6 +225,13 @@ namespace Renderer {
 						this.onNormalMode();
 					}
 				});
+				taro.client.on('update-region-name', (data: { name: string; newName: string }) => {
+					const region = this.entityManager.entities.find((e) => e instanceof Region && e.name === data.name);
+					if (region) {
+						region.name = data.newName;
+						region.label.update(data.newName);
+					}
+				});
 			}
 
 			static instance() {
