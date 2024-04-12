@@ -120,7 +120,9 @@ namespace Renderer {
 						console.log('intersects', intersects);
 						if (intersects?.length > 0) {
 							const closest = intersects[0].object as THREE.Mesh;
-							const region = this.entityManager.entities.find((e) => e instanceof Region && e.gameObject === closest);
+							const region = this.entityManager.entities.find(
+								(e) => e instanceof Region && e.gameObject === closest
+							) as Region;
 							if (region) {
 								console.log('clicked region', region);
 								/*const ownerPlayer = taro.$(unit.ownerId);
@@ -129,6 +131,16 @@ namespace Renderer {
 										showUserDropdown({ ownerId: unit.ownerId, unitId: unit.taroId, pointer: { event } });
 									}
 								}*/
+								const regionData = {
+									name: region.taroEntity._stats.id,
+									x: region.stats.x,
+									y: region.stats.y,
+									width: region.stats.width,
+									height: region.stats.height,
+									alpha: region.stats.alpha,
+									inside: region.stats.inside,
+								};
+								inGameEditor.addNewRegion && inGameEditor.addNewRegion(regionData);
 							}
 						}
 						/*gameObjects = gameObjects.filter((gameObject) => gameObject.phaserRegion);

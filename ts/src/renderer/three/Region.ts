@@ -2,6 +2,7 @@ namespace Renderer {
 	export namespace Three {
 		export class Region extends Node {
 			gameObject: THREE.Object3D;
+			stats: { x: number; y: number; width: number; height: number; inside?: string; alpha?: number };
 			devModeOnly: boolean;
 			label = new Label('', 'white', false, true);
 			private labelVisible;
@@ -10,9 +11,10 @@ namespace Renderer {
 			constructor(
 				public taroId: string,
 				public ownerId: string,
-				private taroEntity?: TaroEntityPhysics
+				public taroEntity?: TaroEntityPhysics
 			) {
 				super();
+				const stats = (this.stats = taroEntity._stats.default);
 				const label = this.label;
 				label.visible = false;
 				this.labelVisible = label.visible;
@@ -22,7 +24,7 @@ namespace Renderer {
 				const renderer = Three.instance();
 				this.setGuiScale(1 / renderer.camera.zoom);
 
-				const stats = taroEntity._stats.default;
+				//const stats = taroEntity._stats.default;
 				const color = stats.inside ? Number(`0x${stats.inside.substring(1)}`) : 0x000000;
 
 				const x = Utils.pixelToWorld(stats.x);
