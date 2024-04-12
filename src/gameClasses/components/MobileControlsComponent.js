@@ -416,12 +416,18 @@ var MobileControlsComponent = TaroEntity.extend({
 								usingMouseKeyDown = true;
 								usingMouseKeyUp = false;
 
+								document.getElementsByClassName('back')[0].style.backgroundColor = 'red';
+								document.getElementsByClassName('front')[0].style.backgroundColor = 'red';
+
 								// calling mouse up to trigger end of click
 								taro.client.myPlayer.control.keyDown('mouse', 'button1');
-							} else if (!usingMouseKeyUp && !usingMouseKeyDown) {
+							} else if (!usingMouseKeyUp && usingMouseKeyDown && joystickData.power < 1) {
 								usingMouseKeyUp = true;
 								usingMouseKeyDown = false;
 								// otherwise stop firing
+
+								document.getElementsByClassName('back')[0].style.backgroundColor = 'black';
+								document.getElementsByClassName('front')[0].style.backgroundColor = 'black';
 
 								// calling mouse up to trigger end of click
 								taro.client.myPlayer.control.keyUp('mouse', 'button1');
@@ -434,6 +440,9 @@ var MobileControlsComponent = TaroEntity.extend({
 						if (taro.client.myPlayer) {
 							usingMouseKeyUp = true;
 							usingMouseKeyDown = false;
+
+							document.getElementsByClassName('back')[0].style.backgroundColor = 'black';
+							document.getElementsByClassName('front')[0].style.backgroundColor = 'black';
 
 							// calling mouse up to trigger end of click
 							taro.client.myPlayer.control.keyUp('mouse', 'button1');
