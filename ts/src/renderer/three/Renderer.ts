@@ -192,10 +192,10 @@ namespace Renderer {
 						inGameEditor.addNewRegion &&
 							inGameEditor.addNewRegion({
 								name: '',
-								x: Math.trunc(x),
-								y: Math.trunc(y),
-								width: Math.trunc(width),
-								height: Math.trunc(height),
+								x: Math.trunc(Utils.worldToPixel(x)),
+								y: Math.trunc(Utils.worldToPixel(y)),
+								width: Math.trunc(Utils.worldToPixel(width)),
+								height: Math.trunc(Utils.worldToPixel(height)),
 							});
 
 						this.regionDrawStart = null;
