@@ -33,7 +33,7 @@ namespace Renderer {
 				const height = Utils.pixelToWorld(stats.height);
 
 				label.position.set(x + Utils.pixelToWorld(label.size.x) / 2, 3, y + Utils.pixelToWorld(label.size.y / 2));
-				const geometry = new THREE.BoxGeometry(width, 3, height);
+				const geometry = new THREE.BoxGeometry(1, 3, 1);
 
 				if (stats.inside) {
 					this.devModeOnly = false;
@@ -45,6 +45,7 @@ namespace Renderer {
 					const mesh = new THREE.Mesh(geometry, material);
 					mesh.renderOrder = 997;
 					mesh.position.set(x + width / 2, 1.5, y + height / 2);
+					mesh.scale.set(width, 1, height);
 					this.add(mesh);
 					this.gameObject = mesh;
 				} else {
@@ -52,6 +53,7 @@ namespace Renderer {
 					const edges = new THREE.EdgesGeometry(geometry);
 					const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x11fa05 }));
 					line.position.set(x + width / 2, 1.5, y + height / 2);
+					line.scale.set(width, 1, height);
 					this.add(line);
 					this.gameObject = line;
 					this.gameObject.visible = false;
@@ -62,38 +64,12 @@ namespace Renderer {
 				taroEntity.on(
 					'transform',
 					() => {
-						if (this.devModeOnly) {
-							const line = this.gameObject as THREE.LineSegments;
-							line?.geometry.dispose();
-						} else {
-							const mesh = this.gameObject as THREE.Mesh;
-							mesh?.geometry.dispose();
-						}
-						this.remove(gameObject);
-
-						const geometry = new THREE.BoxGeometry(width, 3, height);
-
-						if (stats.inside) {
-							this.devModeOnly = false;
-							const material = new THREE.MeshBasicMaterial({
-								color: color,
-								opacity: stats.alpha,
-								transparent: true,
-							});
-							const mesh = new THREE.Mesh(geometry, material);
-							mesh.renderOrder = 997;
-							mesh.position.set(x + width / 2, 1.5, y + height / 2);
-							this.add(mesh);
-							this.gameObject = mesh;
-						} else {
-							this.devModeOnly = true;
-							const edges = new THREE.EdgesGeometry(geometry);
-							const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x11fa05 }));
-							line.position.set(x + width / 2, 1.5, y + height / 2);
-							this.add(line);
-							this.gameObject = line;
-							this.gameObject.visible = false;
-						}
+						gameObject.position.set(
+							Utils.pixelToWorld(stats.x) + width / 2,
+							1.5,
+							Utils.pixelToWorld(stats.y) + height / 2
+						);
+						gameObject.scale.set(width, 1, height);
 						label.position.set(x + Utils.pixelToWorld(label.size.x) / 2, 3, y + Utils.pixelToWorld(label.size.y / 2));
 					},
 					this
