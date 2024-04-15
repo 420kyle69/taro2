@@ -357,6 +357,53 @@ var Unit = TaroEntityPhysics.extend({
 		}
 	},
 
+	hide: function() {	
+		if (!this._hidden) {
+			this.stopMoving();
+			
+			// hide all items carried by this unit
+			this._stats.itemIds.forEach(itemId => {
+				const item = taro.$(itemId);
+				if (itemId != undefined && item) {
+					item._hide(); // don't use .hide() to avoid unnecessary streaming. we know that hiding unit's items will also hide.
+				}
+			});
+
+			if (this._stats.aiEnabled) {
+				this.ai.disable();
+			}
+
+			if (taro.isServer) {
+				this.streamUpdateData([{ isHidden: true }]);
+			}
+			TaroEntityPhysics.prototype.destroyBody.call(this);		
+			TaroEntity.prototype._hide.call(this);
+		}
+	},
+
+	show: function() {
+		
+		if (this._hidden) {
+			if (this._stats.aiEnabled) {
+				this.ai.enable();
+			}
+	
+			// update visibility of all items based on their current state
+			this._stats.itemIds.forEach(itemId => {
+				const item = taro.$(itemId);
+				if (itemId != undefined && item) {
+					item._show(); // don't use .show() to avoid unnecessary streaming. we know that showing unit's items will also show.
+				}
+			});
+			
+			if (taro.isServer) {
+				this.streamUpdateData([{ isHidden: false }]);
+			}
+			TaroEntityPhysics.prototype.updateBody.call(this);
+			TaroEntity.prototype._show.call(this);
+		}
+	},
+
 	canAffordItem: function (itemTypeId) {
 		var self = this;
 		var ownerPlayer = self.getOwner();
@@ -1598,7 +1645,7 @@ var Unit = TaroEntityPhysics.extend({
 	// update unit's stats in the server side first, then update client side as well.
 	streamUpdateData: function (queuedData, clientId) {
 		var self = this;
-		// Unit.prototype.log("unit streamUpdateData", data)
+		// console.log("unit streamUpdateData", queuedData)
 		TaroEntity.prototype.streamUpdateData.call(this, queuedData, clientId);
 
 		for (var i = 0; i < queuedData.length; i++) {
@@ -1702,16 +1749,6 @@ var Unit = TaroEntityPhysics.extend({
 							self.updateNameLabel();
 						}
 
-						break;
-					case 'isHidden':
-						self._stats[attrName] = newValue;
-						if (taro.isClient) {
-							if (newValue == true) {
-								self.hide();
-							} else {
-								self.show();
-							}
-						}
 						break;
 
 					case 'setFadingText':
@@ -2049,8 +2086,38 @@ var Unit = TaroEntityPhysics.extend({
 	 */
 	_behaviour: function (ctx) {
 		var self = this;
-
+		
 		if (!taro.gameLoopTickHasExecuted) {
+			return;
+		}
+
+		if (taro.isClient) {
+			
+			var processedUpdates = [];
+			var updateQueue = taro.client.entityUpdateQueue[this.id()];
+
+			if (updateQueue) {
+				for (var key in updateQueue) {
+					var value = updateQueue[key];
+
+					processedUpdates.push({ [key]: value });
+					delete taro.client.entityUpdateQueue[this.id()][key];
+
+					// remove queue object for this entity is there's no queue remaining in order to prevent memory leak
+					if (Object.keys(taro.client.entityUpdateQueue[this.id()]).length == 0) {
+						delete taro.client.entityUpdateQueue[this.id()];
+					}
+				}
+
+				if (processedUpdates.length > 0) {
+					this.streamUpdateData(processedUpdates);
+				}
+			}
+		}
+
+		// ignore unit movement or controls if hidden
+		// make sure that this executes after this._streamUpdateData because we still need to fetch isHidden updates from the server
+		if (this._hidden) {
 			return;
 		}
 
@@ -2162,37 +2229,6 @@ var Unit = TaroEntityPhysics.extend({
 			}
 		}
 
-		if (taro.isClient) {
-			// make minimap unit follow the unit
-			if (self.minimapUnit) {
-				self.minimapUnit.translateTo(self._translate.x, self._translate.y, 0);
-			}
-
-			if (this.isPlayingSound) {
-				this.isPlayingSound.volume = taro.sound.getVolume(this._translate, this.isPlayingSound.effect.volume);
-			}
-
-			var processedUpdates = [];
-			var updateQueue = taro.client.entityUpdateQueue[this.id()];
-			if (updateQueue) {
-				for (var key in updateQueue) {
-					var value = updateQueue[key];
-
-					processedUpdates.push({ [key]: value });
-					delete taro.client.entityUpdateQueue[this.id()][key];
-
-					// remove queue object for this entity is there's no queue remaining in order to prevent memory leak
-					if (Object.keys(taro.client.entityUpdateQueue[this.id()]).length == 0) {
-						delete taro.client.entityUpdateQueue[this.id()];
-					}
-				}
-
-				if (processedUpdates.length > 0) {
-					this.streamUpdateData(processedUpdates);
-				}
-			}
-		}
-
 		// if entity (unit/item/player/projectile) has attribute, run regenerate
 		if (
 			taro.isServer ||
@@ -2213,8 +2249,22 @@ var Unit = TaroEntityPhysics.extend({
 				this.attribute._behaviour();
 			}
 		}
+		
+		if (this.isClient) {
+			if (taro.isClient) {
+				// make minimap unit follow the unit
+				if (self.minimapUnit) {
+					self.minimapUnit.translateTo(self._translate.x, self._translate.y, 0);
+				}
+
+				if (this.isPlayingSound) {
+					this.isPlayingSound.volume = taro.sound.getVolume(this._translate, this.isPlayingSound.effect.volume);
+				}
+			}
+		}
 
 		if (taro.isClient && taro.client.selectedUnit == this) {
+			
 			// never run on server, pure UI
 			for (let i = 0; i < self._stats.itemIds.length; i++) {
 				var itemId = self._stats.itemIds[i];

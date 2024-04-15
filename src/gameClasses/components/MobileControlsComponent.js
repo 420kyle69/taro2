@@ -118,74 +118,42 @@ var MobileControlsComponent = TaroEntity.extend({
 
 	upPressed: function () {
 		if (this.debug) console.log('UP PRESSED');
-		var unit = taro.client.myPlayer.getSelectedUnit();
-		if (unit) unit.ability.moveUp();
-		if (taro.isClient) {
-			taro.network.send('playerKeyDown', { device: 'key', key: 'w' });
-		}
+		taro.client.myPlayer.control.keyDown('key', 'w');
 	},
 
 	downPressed: function () {
 		if (this.debug) console.log('DOWN PRESSED');
-		var unit = taro.client.myPlayer.getSelectedUnit();
-		if (unit) unit.ability.moveDown();
-		if (taro.isClient) {
-			taro.network.send('playerKeyDown', { device: 'key', key: 's' });
-		}
+		taro.client.myPlayer.control.keyDown('key', 's');
 	},
 
 	leftPressed: function () {
 		if (this.debug) console.log('LEFT PRESSED');
-		var unit = taro.client.myPlayer.getSelectedUnit();
-		if (unit) unit.ability.moveLeft();
-		if (taro.isClient) {
-			taro.network.send('playerKeyDown', { device: 'key', key: 'a' });
-		}
+		taro.client.myPlayer.control.keyDown('key', 'a');
 	},
 
 	rightPressed: function () {
 		if (self.debug) console.log('RIGHT PRESSED');
-		var unit = taro.client.myPlayer.getSelectedUnit();
-		if (unit) unit.ability.moveRight();
-		if (taro.isClient) {
-			taro.network.send('playerKeyDown', { device: 'key', key: 'd' });
-		}
+		taro.client.myPlayer.control.keyDown('key', 'd');
 	},
 
 	upReleased: function () {
 		if (this.debug) console.log('UP RELEASED');
-		var unit = taro.client.myPlayer.getSelectedUnit();
-		if (unit && unit.direction.y == -1) unit.ability.stopMovingY();
-		if (taro.isClient) {
-			taro.network.send('playerKeyUp', { device: 'key', key: 'w' });
-		}
+		taro.client.myPlayer.control.keyUp('key', 'w');
 	},
 
 	downReleased: function () {
 		if (this.debug) console.log('DOWN RELEASED');
-		var unit = taro.client.myPlayer.getSelectedUnit();
-		if (unit && unit.direction.y == 1) unit.ability.stopMovingY();
-		if (taro.isClient) {
-			taro.network.send('playerKeyUp', { device: 'key', key: 's' });
-		}
+		taro.client.myPlayer.control.keyUp('key', 's');
 	},
 
 	leftReleased: function () {
 		if (this.debug) console.log('LEFT RELEASED');
-		var unit = taro.client.myPlayer.getSelectedUnit();
-		if (unit && unit.direction.x == -1) unit.ability.stopMovingX();
-		if (taro.isClient) {
-			taro.network.send('playerKeyUp', { device: 'key', key: 'a' });
-		}
+		taro.client.myPlayer.control.keyUp('key', 'a');
 	},
 
 	rightReleased: function () {
 		if (this.debug) console.log('RIGHT RELEASED');
-		var unit = taro.client.myPlayer.getSelectedUnit();
-		if (unit && unit.direction.x == 1) unit.ability.stopMovingX();
-		if (taro.isClient) {
-			taro.network.send('playerKeyUp', { device: 'key', key: 'd' });
-		}
+		taro.client.myPlayer.control.keyUp('key', 'd');
 	},
 
 	// add a button or stick to the virtual controller
@@ -430,6 +398,9 @@ var MobileControlsComponent = TaroEntity.extend({
 						color: 'black',
 					});
 
+					let usingMouseKeyDown = false;
+					let usingMouseKeyUp = false;
+
 					// handle look wheel inputs and fire
 					const handleShoot = (data) => {
 						let joystickData = {
@@ -440,11 +411,25 @@ var MobileControlsComponent = TaroEntity.extend({
 							this.mouseMovement(joystickData.power, joystickData.angle);
 
 							// when fire stick is moved to the red ring...
-							if (joystickData.power > 1) {
+							if (joystickData.power > 1 && !usingMouseKeyDown) {
 								// start firing
+								usingMouseKeyDown = true;
+								usingMouseKeyUp = false;
+
+								document.getElementsByClassName('back')[0].style.backgroundColor = 'red';
+								document.getElementsByClassName('front')[0].style.backgroundColor = 'red';
+
+								// calling mouse up to trigger end of click
 								taro.client.myPlayer.control.keyDown('mouse', 'button1');
-							} else {
+							} else if (!usingMouseKeyUp && usingMouseKeyDown && joystickData.power < 1) {
+								usingMouseKeyUp = true;
+								usingMouseKeyDown = false;
 								// otherwise stop firing
+
+								document.getElementsByClassName('back')[0].style.backgroundColor = 'black';
+								document.getElementsByClassName('front')[0].style.backgroundColor = 'black';
+
+								// calling mouse up to trigger end of click
 								taro.client.myPlayer.control.keyUp('mouse', 'button1');
 							}
 						}
@@ -453,6 +438,13 @@ var MobileControlsComponent = TaroEntity.extend({
 					// handle end of shooting
 					const endShoot = () => {
 						if (taro.client.myPlayer) {
+							usingMouseKeyUp = true;
+							usingMouseKeyDown = false;
+
+							document.getElementsByClassName('back')[0].style.backgroundColor = 'black';
+							document.getElementsByClassName('front')[0].style.backgroundColor = 'black';
+
+							// calling mouse up to trigger end of click
 							taro.client.myPlayer.control.keyUp('mouse', 'button1');
 						}
 					};

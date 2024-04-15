@@ -164,10 +164,13 @@ namespace Renderer {
 				this.raycaster.firstHitOnly = true;
 
 				// Pointerlock
-				canvas.addEventListener('mousedown', this.onMouseDown.bind(this));
-				canvas.ownerDocument.addEventListener('mousemove', this.onMouseMove.bind(this));
-				canvas.ownerDocument.addEventListener('pointerlockchange', this.onPointerlockChange.bind(this));
-				canvas.ownerDocument.addEventListener('pointerlockerror', this.onPointerlockError.bind(this));
+				// but only on desktop
+				if (!taro.isMobile) {
+					canvas.addEventListener('mousedown', this.onMouseDown.bind(this));
+					canvas.ownerDocument.addEventListener('mousemove', this.onMouseMove.bind(this));
+					canvas.ownerDocument.addEventListener('pointerlockchange', this.onPointerlockChange.bind(this));
+					canvas.ownerDocument.addEventListener('pointerlockerror', this.onPointerlockError.bind(this));
+				}
 			}
 
 			setPointerLock(lock: boolean) {
@@ -175,11 +178,15 @@ namespace Renderer {
 			}
 
 			lock() {
-				this.canvas.requestPointerLock();
+				if (!taro.isMobile) {
+					this.canvas.requestPointerLock();
+				}
 			}
 
 			unlock() {
-				this.canvas.ownerDocument.exitPointerLock();
+				if (!taro.isMobile) {
+					this.canvas.ownerDocument.exitPointerLock();
+				}
 			}
 
 			setProjection(projection: typeof taro.game.data.settings.camera.projectionMode) {
@@ -479,7 +486,12 @@ namespace Renderer {
 			}
 
 			private onMouseDown(event: MouseEvent) {
-				if (!this.isLocked && (this.target as Unit)?.cameraConfig?.pointerLock) {
+				//A camera should not have knowledge of "tools", but rather outside code
+				if (taro.developerMode.regionTool) {
+					this.controls.enablePan = false;
+					this.controls.enableRotate = false;
+					this.controls.enableZoom = false;
+				} else if (!this.isLocked && (this.target as Unit)?.cameraConfig?.pointerLock) {
 					this.lock();
 				}
 			}

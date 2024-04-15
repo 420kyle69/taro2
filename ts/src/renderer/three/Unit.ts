@@ -74,8 +74,8 @@ namespace Renderer {
 				taroEntity.on(
 					'transform',
 					(data: { x: number; y: number; rotation: number }) => {
-						entity.position.x = Utils.pixelToWorld(data.x) - 0.5;
-						entity.position.z = Utils.pixelToWorld(data.y) - 0.5;
+						entity.position.x = Utils.pixelToWorld(data.x);
+						entity.position.z = Utils.pixelToWorld(data.y);
 
 						entity.setRotationY(-data.rotation);
 						const flip = taroEntity._stats.flip;

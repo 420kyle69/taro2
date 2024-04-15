@@ -144,22 +144,74 @@ var ActionComponent = TaroEntity.extend({
 				switch (action.type) {
 					/* Global */
 
-					case 'movePlayerToMap':
+					case 'sendPlayerToMap':
 						if (taro.isServer) {
 							var player = self._script.param.getValue(action.player, vars);
 							var gameId = self._script.param.getValue(action.gameId, vars);
 
-							if (player && player._stats && player._stats.clientId && player._stats.userId) {
-								taro.workerComponent.movePlayerToMap(player._stats.userId, gameId).then((res) => {
+							if (player && player._stats && player._stats.clientId) {
+								taro.workerComponent.sendPlayerToMap(gameId, [player._stats.userId || 'guest']).then((res) => {
 									console.log('user switched map', res);
-									if (res) {
+									if (res && res.gameSlug) {
 										// ask client to reload game
 										taro.network.send(
-											'movePlayerToMap',
-											{ type: 'movePlayerToMap', gameSlug: res.gameSlug },
+											'sendPlayerToMap',
+											{ type: 'sendPlayerToMap', gameSlug: res.gameSlug, autoJoinToken: res.autoJoinTokens[player._stats.userId || 'guest'] },
 											player._stats.clientId
 										);
-										console.log('map reload', res);
+									}
+								});
+							}
+						}
+
+						break;
+
+					case 'sendPlayerGroupToMap':
+						if (taro.isServer) {
+							var gameId = self._script.param.getValue(action.gameId, vars);
+							var players = self._script.param.getValue(action.playerGroup, vars) || [];
+							console.log('players', players);
+							let userIds = [];
+							for (var l = 0; l < players.length; l++) {
+								var player = players[l];
+								console.log('player', player._stats.clientId, player._stats.userId );
+								if (player && player._stats && player._stats.clientId) {
+									userIds.push(player._stats.userId || 'guest');
+								}
+							}
+
+							taro.workerComponent.sendPlayerToMap(gameId, userIds).then((res) => {
+								console.log('user switched map', userIds, res);
+								if (res && res.gameSlug) {
+									for (var l = 0; l < players.length; l++) {
+										var player = players[l];
+										// ask client to reload game
+										taro.network.send(
+											'sendPlayerToMap',
+											{ type: 'sendPlayerToMap', gameSlug: res.gameSlug, autoJoinToken: res.autoJoinTokens[player._stats.userId || 'guest'] },
+											player._stats.clientId
+										);
+									}
+								}
+							});
+						}
+
+						break;
+					
+					case 'sendPlayerToSpawningMap':
+						if (taro.isServer) {
+							var player = self._script.param.getValue(action.player, vars);
+
+							if (player && player._stats && player._stats.clientId) {
+								taro.workerComponent.sendPlayerToMap('lastSpawned', [player._stats.userId || 'guest']).then((res) => {
+									console.log('user switched spawning map', res);
+									if (res && res.gameSlug) {
+										// ask client to reload game
+										taro.network.send(
+											'sendPlayerToMap',
+											{ type: 'sendPlayerToMap', gameSlug: res.gameSlug, autoJoinToken: res.autoJoinTokens[player._stats.userId || 'guest'] },
+											player._stats.clientId
+										);
 									}
 								});
 							}
@@ -2138,20 +2190,35 @@ var ActionComponent = TaroEntity.extend({
 							taro.network.send('showUnitNameLabelFromPlayer', { unitId: unit.id() }, player._stats.clientId);
 						}
 						break;
-					case 'hideUnitFromPlayer':
+					case 'hideUnitFromPlayer': // deprecated
 						var unit = self._script.param.getValue(action.entity, vars);
 						var player = self._script.param.getValue(action.player, vars);
 						if (unit && player && player._stats && unit._stats) {
 							taro.network.send('hideUnitFromPlayer', { unitId: unit.id() }, player._stats.clientId);
 						}
 						break;
-					case 'showUnitToPlayer':
+					case 'showUnitToPlayer': // deprecated
 						var unit = self._script.param.getValue(action.entity, vars);
 						var player = self._script.param.getValue(action.player, vars);
 						if (unit && player && player._stats && unit._stats) {
 							taro.network.send('showUnitFromPlayer', { unitId: unit.id() }, player._stats.clientId);
 						}
 						break;
+
+					case 'hideEntity':
+						var entity = self._script.param.getValue(action.entity, vars);
+						if (entity && entity._stats) {
+							entity.hide();
+						}
+						break;
+
+					case 'showEntity':
+						var entity = self._script.param.getValue(action.entity, vars);
+						if (entity && entity._stats) {
+							entity.show();
+						}
+						break;
+					
 					case 'makeUnitInvisibleToNeutralPlayers':
 						if (entity && entity._category == 'unit') {
 							entity.streamUpdateData([{ isInvisibleToNeutral: true }, { isNameLabelHiddenToNeutral: true }]);
@@ -3768,7 +3835,7 @@ var ActionComponent = TaroEntity.extend({
 					taro.profiler.logTimeElapsed(actionPath, startTime);
 				}
 			} catch (e) {
-				console.log(e);
+				// console.log(e);
 				self._script.errorLog(e, path); // send error msg to client
 			}
 		}

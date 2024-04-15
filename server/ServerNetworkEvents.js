@@ -95,7 +95,7 @@ var ServerNetworkEvents = {
 			}
 		} else {
 			// this is for the standalone version of moddio
-			var player = taro.game.createPlayer({
+			var player = taro.game?.createPlayer({
 				controlledBy: 'human',
 				name: `user${data.number}`,
 				coins: 0,
@@ -104,8 +104,10 @@ var ServerNetworkEvents = {
 				isAdBlockEnabled: data.isAdBlockEnabled,
 				isMobile: data.isMobile,
 			});
-
-			player.joinGame();
+			
+			if (player) {
+				player.joinGame();
+			}
 		}
 	},
 

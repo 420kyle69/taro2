@@ -37,6 +37,7 @@ declare interface EntityStats {
 		}
 	>;
 	default?: {
+		id: string;
 		x: number;
 		y: number;
 		width: number;

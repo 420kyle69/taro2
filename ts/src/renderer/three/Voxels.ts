@@ -9,27 +9,10 @@ namespace Renderer {
 			}
 
 			static create(config?: MapData['layers']) {
-				const getTilesetFromType = (type: 'top' | 'side') => {
-					let index = -1;
-					if (type === 'top') {
-						index = taro.game.data.map.tilesets.findIndex((tilesheet) => {
-							return (
-								(tilesheet.name === 'tilesheet_complete' || tilesheet.name === 'tilesheet') &&
-								(tilesheet.type === undefined || tilesheet.type === 'top')
-							);
-						});
-					} else {
-						index = taro.game.data.map.tilesets.findIndex((tilesheet) => {
-							return tilesheet.type === type;
-						});
-					}
-
-					return index > -1 ? taro.game.data.map.tilesets[index] : null;
-				};
 
 				const textureRepository = TextureRepository.instance();
-				const tilesetMain = getTilesetFromType('top');
-				let tilesetSide = getTilesetFromType('side');
+				const tilesetMain = taro.getTilesetFromType({ tilesets: taro.game.data.map.tilesets, type: 'top' });
+				let tilesetSide = taro.getTilesetFromType({ tilesets: taro.game.data.map.tilesets, type: 'side' });
 				if (!tilesetSide) tilesetSide = tilesetMain;
 
 				const texMain = textureRepository.get(tilesetMain.image);
@@ -69,7 +52,7 @@ namespace Renderer {
 
 						tileId -= 1;
 
-						const pos = { x, y: height + yOffset * height, z };
+						const pos = { x: x + 0.5, y: height + yOffset * height, z: z + 0.5 };
 
 						voxels.set(getKeyFromPos(pos.x, pos.y, pos.z), {
 							position: [pos.x, pos.y, pos.z],
